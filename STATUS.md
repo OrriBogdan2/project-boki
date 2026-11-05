@@ -751,3 +751,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Gaps: two small fixes unbuilt (hair needle dark, thigh pokes a scarf tail in draw); weak hair volume and fine stitching at 15k; 3 anim sheets not viewed on the final build; draw not tested in game with 55b.
 - Owner Qs: closed neckline OK vs the sheet's cut-out? Hand-on-hip idle vs the sheet's held arrow?
 - decimate_warden.py isn't on main/Kael/Motley (S1's branch), so lanes cut by build targets. S1: please land it or say.
+
+## 2026-11-05 S2: ART-1 Pip built: ext/art1-pip 4305e790 (about 75%, not 90%; carries art1-kael f4464f72)
+- 12,944 tris, 7 slots, 38 clips, lantern skinned on its hang chain, heal glow scripts/heroes/pip_stars.gd. 0 credits. warden-model height_3d 0.73 -> 0.66 for review.
+- **Fidelity (yes unless noted):** small upright fairy-fox medic, wings (narrower from the front), goggles with flowers, bandaged ear, leaf cape, apron (cross less clear), star lantern (no trailing motes: S3/S4), constellations brighten on heal, reads as a Hunter. Proofs: ext/hero-shots-s2 e20023a9 art1/pip/.
+- Checks: 71 flags on 2e2e403e rc=0 (warden-glb spring settle fixed); 8 rerun on the tip pass; health --strict OK one commit earlier; bare --check timed out, no result.
+- Sheets predate the last tweak. Open: rounder eyes, lower tail, simple pouch, lantern doesn't dim when downed.
+- Owner Qs: 0.66x height right? Wings tilted for the match camera at the cost of a narrower front view?
