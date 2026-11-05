@@ -947,6 +947,7 @@ class Springs:
 	var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}
 	var fold := 0.0             # 0..1: how far the wing chains are folded (WING_FOLD)
 	var wind_t := 0.0
+	var calm := false           # no ripple (a check measuring how a chain settles)
 
 	func setup(skeleton: Skeleton3D) -> void:
 		skel = skeleton
@@ -1004,7 +1005,7 @@ class Springs:
 				rest.append(r)
 				want.append(xf * r.origin)
 			var n := want.size()
-			if ch["wind"]:
+			if ch["wind"] and not calm:
 				# (a long cloth tail never hangs dead: a slow travelling ripple, stronger toward its tip)
 				for i in range(1, n):
 					var u := float(i) / float(n - 1)

@@ -217,7 +217,7 @@ def scarf_tail(side):
     wd = (0.058 + 0.052 * smooth(0.0, 0.25, k)) * (1 - 0.35 * smooth(0.8, 1.0, k))
     wd = wd + 0.009 * np.sin(k * 23 + s) * smooth(0.45, 0.8, k)
     sec = [(-1, 0.05), (-0.34, 0.09), (0.34, 0.09), (1, 0.05), (1, -0.05), (0.34, -0.09), (-0.34, -0.09), (-1, -0.05)]
-    p = sweep("stail" + side, "cloth-kael", path, sec, wd, side_hint=np.array([1.0, 0, 0]), room=0.0, depth=np.full(n, 0.07))
+    p = sweep("stail" + side, "cloth-kael", path, sec, wd, side_hint=np.array([0, 0.8, -0.6]), room=0.0, depth=np.full(n, 0.07))
     # the torn end: the last rings split round the ribbon's middle, a long tip and a short one
     m = len(sec)
     for i in range(n - 4, n):
@@ -514,8 +514,8 @@ def hair_cap():
         c = v[q].mean(0)
         if not (c[1] > 0.02 and c[2] < 1.495):
             keep.append(q)
-    uv = [[(0.5 * ((j % 4) / 4), 0.02), (0.5 * ((j % 4) / 4) + .125, .02), (0.5 * ((j % 4) / 4) + .125, .2),
-           (0.5 * ((j % 4) / 4), .2)] for j in range(len(keep))]
+    uv = [[(0.5 * ((j % 4) / 4), 0.35), (0.5 * ((j % 4) / 4) + .125, .35), (0.5 * ((j % 4) / 4) + .125, .55),
+           (0.5 * ((j % 4) / 4), .55)] for j in range(len(keep))]
     p = Piece("cap", "hair-mane", v, keep, uv, room=0.0).rigid("head")
     p.group = None
     p.t = None
@@ -562,6 +562,7 @@ def mane_chains(locks):
 GRIP_DIR = norm(np.array([0.0, 0.76, -0.65]))    # the blade from the fist, rest pose (he faces +Y)
 _a = norm(np.array([0, 0, -1.0]) - GRIP_DIR * np.dot(np.array([0, 0, -1.0]), GRIP_DIR))
 GRIP_AT = np.array([SH, 0.0, HAND_Z + 0.012]) + _a * 0.094 + np.array([-0.03, 0.0, 0.0])    # inside the closed fist
+L_MID = 0.5
 GUARD_OFF = 0.085                                # fist to guard: a short grip, as the master sheet
 BLADE_LEN, BLADE_W = 0.98, 0.112                 # guard to tip; half width: shoulder to ankle on him
 
@@ -636,6 +637,17 @@ def blade():
         for t in tri:
             q = [loop[t[0]], loop[t[1]], loop[t[2]]]
             faces.append(q if sgn < 0 else q[::-1])
+    # (each face out of the blade: its flat side or its edge)
+    v_ = np.array(v)
+    mid = guard_at + b * L_MID
+    for i, q in enumerate(faces):
+        pts = v_[q]
+        nrm = np.cross(pts[1] - pts[0], pts[2] - pts[0])
+        c_ = pts.mean(0) - mid
+        h_ = np.dot(c_, n)
+        out = n * np.sign(h_ if abs(h_) > 1e-4 else 1.0) + (e * np.dot(c_, e) + b * np.dot(c_, b)) * 2.0
+        if np.dot(nrm, out) < 0:
+            faces[i] = q[::-1]
     plate = Piece("blade", "metal-blade", v, faces).rigid("hand.R")
     plate.ol = ol
     plate.guard_at, plate.frame = guard_at, (b, e, n)

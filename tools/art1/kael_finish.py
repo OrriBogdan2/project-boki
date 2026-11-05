@@ -67,7 +67,7 @@ for p_ in pieces:
 # ---- the hair's depth: root shade and layers, in the vertex colour (warden_look hair: vertex_ao)
 for p_ in locks:
     if getattr(p_, "t", None) is None:
-        p_.shade = np.full(len(p_.v), 0.6)
+        p_.shade = np.full(len(p_.v), 0.85)
         continue
     layer = 0.8 if p_.name.startswith("back") else (0.9 if p_.name.startswith(("side", "temple")) else 1.0)
     p_.shade = np.ones(len(p_.v)) if p_.name.startswith("sweep") else layer * (0.72 + 0.28 * smooth(0.0, 0.22, p_.t))
@@ -518,7 +518,7 @@ skinny = (sk_[:, 0] > sk_[:, 1] * 1.25) & (sk_.mean(1) < 0.5)
 yy, xx = yy[skinny], xx[skinny]
 ck = P.cracks(POS[yy, xx], canvas, K.SH)
 core = M.smooth(0.42, 0.62, ck)[:, None]
-rim = M.smooth(0.05, 0.42, ck)[:, None]
+rim = M.smooth(0.22, 0.5, ck)[:, None]
 c = np.minimum(OUTC[yy, xx], 0.4)
 c = c * (1 - rim * 0.8) + P.HOT_RIM * rim * 0.8
 c = c * (1 - core) + P.HOT * core
