@@ -330,10 +330,16 @@ fc = np.array([np.mean([verts[v] for v in faces_v[i]], axis=0) for i in low_face
 fcol = sample_scan(fc)
 L_ = fcol.mean(1)
 sat = (fcol.max(1) - fcol.min(1)) / np.maximum(fcol.max(1), 0.01)
+# a face with any skin at its corners is skin (the leather slot's hot key would light warm skin up)
+cs_ = [sample_scan(np.array([verts[faces_v[i][q_ % len(faces_v[i])]] for i in low_faces])) for q_ in (0, 1, 2)]
+skinny = np.any([(c_x[:, 0] > c_x[:, 1] * 1.1) & (c_x[:, 0] < c_x[:, 1] * 1.6) & (c_x.mean(1) > 0.36) for c_x in cs_], axis=0)
 for k_, i in enumerate(low_faces):
     r_, g_, b_ = fcol[k_]
     z = fc[k_][2]
     green = g_ > r_ * 1.08 and g_ > b_ * 1.2
+    if skinny[k_] and sat[k_] > 0.05:
+        me.polygons[i].material_index = mat_i["skin-vex"]
+        continue
     if green and z > Z_BELT and L_[k_] > 0.28 and sat[k_] < 0.8:
         m = "cloth-vex"
     elif green:
@@ -364,6 +370,11 @@ SKIN_C = np.array([0.86, 0.62, 0.60])
 back_cut = (pp[:, 1] < -0.03) & (pp[:, 2] > Z_BELT + 0.03) & (pp[:, 2] < VC.J("upper_arm.R")[2] - 0.03) & (np.abs(pp[:, 0]) < 0.082 + 0.05 * smooth(0, 1, (Z_BELT + 0.2 - pp[:, 2]) / 0.2)) & (col.max(1) < 0.4)
 OUTC[ys[back_cut], xs[back_cut]] = SKIN_C * (0.72 + 0.28 * np.clip(AO[ys[back_cut], xs[back_cut]], 0, 1))[:, None]
 
+# (a back-cut face is skin whatever the scan's black said)
+for k_, i in enumerate(low_faces):
+    q_ = fc[k_]
+    if q_[1] < -0.03 and Z_BELT + 0.03 < q_[2] < VC.J("upper_arm.R")[2] - 0.03 and abs(q_[0]) < 0.11 and L_[k_] < 0.4:
+        me.polygons[i].material_index = mat_i["skin-vex"]
 # the green lines key the glow
 c_ = OUTC[ys, xs]
 hotk = (c_[:, 1] > c_[:, 0] * 1.45) & (c_[:, 1] > c_[:, 2] * 1.35) & (c_[:, 1] > 0.5)
@@ -459,6 +470,8 @@ for t in me.loop_triangles:
         fmap[yy[m_], xx[m_]] = 1 if q == mat_i["leather-vex-hot"] else 2
 kk = hotk & (fmap[ys, xs] == 1)
 OUTC[ys[kk], xs[kk]] = KEEP
+warm = (c_[:, 0] > 0.42) & (c_[:, 0] - c_[:, 2] > 0.14) & ~hotk & (fmap[ys, xs] == 1)
+OUTC[ys[warm], xs[warm]] = (0.17, 0.17, 0.18)       # (seam texels of skin on a leather face: not hot)
 k2 = hotk & (fmap[ys, xs] == 2)
 OUTC[ys[k2], xs[k2]] = np.array(P.CIRCUIT, np.float32)      # the skin slot's paint_glow colour (warden_look)
 print("hot texels", int(kk.sum()), int(k2.sum()))

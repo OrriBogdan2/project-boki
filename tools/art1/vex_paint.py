@@ -121,7 +121,7 @@ def belt_tile(h, w):
     v, u = np.mgrid[0:h, 0:w]
     u, v = (u + .5) / w, (v + .5) / h
     across = np.abs(v * 2 - 1)
-    shade = 0.55 + 0.5 * np.sin(u * np.pi)
+    shade = 0.12 + 1.0 * np.sin(u * np.pi) ** 0.7
     c = ramp(np.clip(shade * 0.85, 0, 1), BRASS)
     c = np.where((v > 0.76)[..., None], ramp(np.clip(shade, 0, 1), [hexc("#3a1f0d"), hexc("#73401c"), hexc("#a96533"), hexc("#d49358"), hexc("#f0c79a")]), c)
     c = np.where((np.abs(v - 0.12) < 0.11)[..., None], ramp(np.clip(shade * .7, 0, 1), BLACKM), c)
