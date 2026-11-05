@@ -14,6 +14,7 @@ import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
+HEAD_GLB = os.path.expanduser("~/meshy/kael_h/bake/low.glb")
 ART_PATH = os.path.expanduser("~/art1kael/ref2/kael_art_fb.png")
 ATLAS = 2048
 UNIQ_W = 0.755                       # the unique islands' share of the atlas width; the tiles sit to its right
@@ -24,9 +25,9 @@ EYE_R = (UNIQ_W + 0.005, 0.20, 0.875, 0.295)
 EYE2_R = (UNIQ_W + 0.005, 0.10, 0.875, 0.195)
 GLOW_R = (0.88, 0.20, 1.0, 0.295)
 HALO_R = (0.88, 0.10, 1.0, 0.195)
-MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "metal-kael", "hair-mane", "eyes-glow-hot", "glow-sword"]
-SCALE = {"face": 4.0, "lidU": 2.6, "lidD": 2.6, "mask": 1.2, "cowl": 2.0, "cowlcore": 0.2, "stail": 1.3, "palm": 2.0, "finger": 1.8,
-         "thumb": 1.8, "skull": 0.4, "blade": 1.5, "guard": 1.4, "grip": 1.6, "pommel": 1.6, "Low": 1.15}
+MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "metal-kael", "hair-mane", "skin-head-hot", "glow-sword"]
+SCALE = {"face": 4.0, "lidU": 2.6, "lidD": 2.6, "mask": 1.2, "cowl": 2.0, "cowlcore": 0.2, "stail": 0.7, "palm": 2.0, "finger": 1.8,
+         "thumb": 1.8, "skull": 0.4, "blade": 0.75, "guard": 1.4, "grip": 1.6, "pommel": 1.6, "Low": 2.4}
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
@@ -49,15 +50,11 @@ def tile_uv(r, uv):
 
 hair_tile_uv = (0, 0, 1, 1)
 tails = [K.scarf_tail("R"), K.scarf_tail("L")]
-cowl_ps = K.cowl()
-pieces = [K.face_patch(), K.skull(), K.mask()] + cowl_ps + tails
-for s in (1.0, -1.0):
-    pieces.append(K.eyeball(s))
-    pieces += K.lids(s)
-    pieces += K.brows(s)
+pieces = list(tails)
 pieces += K.hand("R", K.GRIP_DIR, (1.25, 1.35, 0.9), 0.0)
 pieces += K.hand("L", (0.0, 1.0, -0.15), (0.55, 0.75, 0.5), 0.05)
-locks = K.mane()
+locks = K.mane()[1:]         # (no cap: the head scan has the crown)
+locks = [l_ for l_ in locks if l_.name.startswith(("back", "over"))]
 chains = K.mane_chains(locks)
 pieces += locks
 pieces.append(K.wrist_chain((0, 0, 1, 1)))
@@ -69,20 +66,13 @@ pieces += [hang, hook] + K.blade() + K.hilt((0, 0, 1, 1))
 HEAD_C = tuple(K.C)
 for p_ in pieces:
     n_ = p_.name
-    if n_ in ("face", "skull", "mask", "cap") or n_.startswith(("eye", "lid")):
-        p_.orient(HEAD_C if not n_.startswith(("eye", "lid")) else tuple(K.hl(K.EYE * [1 if n_.endswith("R") else -1, 1, 1])))
-    elif n_.startswith("cowl"):
-        p_.orient((0, 0.01, K.C[2] - 0.13))
-    elif n_.startswith("stail"):
+    if n_.startswith("stail"):
         pass        # (two sheets back to back, wound as built)
     else:
         p_.orient()
 
 # ---- the hair's depth: root shade and layers, in the vertex colour (warden_look hair: vertex_ao)
 for p_ in locks:
-    if getattr(p_, "t", None) is None:
-        p_.shade = np.full(len(p_.v), 0.85)
-        continue
     layer = 0.86 if p_.name.startswith("back") else 1.0
     p_.shade = np.ones(len(p_.v)) if p_.name.startswith("sweep") else layer * (0.72 + 0.28 * smooth(0.0, 0.22, p_.t))
 
@@ -120,6 +110,32 @@ for p_ in tails:
         w_[names_[b_]][i] += u * (1 - q)
         w_[names_[min(b_ + 1, TAIL_N - 2)]][i] += u * q
     p_.w = w_
+
+# ---- the head: its own Meshy run from the sculpt sheet, baked to a dense low mesh with its own texture (tools/art1/kael_head_bake.json)
+bpy.ops.import_scene.gltf(filepath=HEAD_GLB)
+head_ob = next(o for o in bpy.context.selected_objects if o.type == "MESH")
+head_img = None
+for nd in head_ob.data.materials[0].node_tree.nodes:
+    if nd.type == "TEX_IMAGE":
+        head_img = nd.image
+h_mw = head_ob.matrix_world.copy()
+hv = np.array([h_mw @ v.co for v in head_ob.data.vertices])
+hv = np.stack([-hv[:, 0], -hv[:, 1], hv[:, 2]], 1) * K.HEAD_S + np.array(K.HEAD_AT)    # (Meshy frame: faces -Y)
+hf = [list(p.vertices) for p in head_ob.data.polygons]
+hu = head_ob.data.uv_layers[0].data
+huv = [[tuple(hu[li].uv) for li in p.loop_indices] for p in head_ob.data.polygons]
+hk = 1.0 - smooth(K.NECK_Z - 0.09, K.NECK_Z + 0.03, hv[:, 2])         # (0 on the head, 1 down on the shoulders)
+hw = {"head": 1 - hk, "hips": hk}
+for sd_, sg_ in (("R", 1.0), ("L", -1.0)):
+    c_ = K.hl(np.array([sg_ * 0.04, 0.09, 0.043]))
+    hw["brow." + sd_] = (1 - smooth(0.012, 0.03, np.linalg.norm(hv - c_, axis=1))) * (hv[:, 1] > 0.05)
+    hw["head"] = hw["head"] - hw["brow." + sd_] * hw["head"]
+head_pc = M.Piece("headscan", "skin-head-hot", hv, hf, huv, weights=hw, room=0.5)
+pieces.append(head_pc)
+head_tex = np.zeros(head_img.size[0] * head_img.size[1] * head_img.channels, np.float32)
+head_img.pixels.foreach_get(head_tex)
+head_tex = head_tex.reshape(head_img.size[1], head_img.size[0], head_img.channels)[..., :3]
+bpy.data.objects.remove(head_ob)
 
 # ---- one mesh: the scan first, then the pieces
 faces_v, faces_pid, faces_uv, verts, vw, rooms, shades = [], [], [], [], [], [], []
@@ -183,7 +199,7 @@ def base_name(n):
 
 
 def is_tile(n):
-    return n == "cap" or n.startswith(("sweep", "fore", "back", "over", "brow", "chain_", "hook", "eye", "core"))
+    return n == "headscan" or n.startswith(("sweep", "fore", "back", "over", "brow", "chain_", "hook", "eye", "core"))
 
 
 # material per face
@@ -317,6 +333,10 @@ for p in me.polygons:
         loop_uv[ls, 0] *= UNIQ_W
         continue
     fu = faces_uv[i]
+    if n == "headscan":
+        for l, (x, y) in zip(ls, fu):
+            loop_uv[l] = (x, y)
+        continue
     if n.startswith(("chain_", "wrap")):
         r = CHAIN_R
     elif n.startswith("hook"):
@@ -556,7 +576,15 @@ OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 OUTC[ys, xs] = col
 ART_DONE = True
 # a little of the shared light's occlusion on the scan too
-OUTC[ys, xs] *= (0.62 + 0.38 * np.clip(AO[ys, xs], 0, 1))[:, None]
+OUTC[ys, xs] *= (0.88 + 0.12 * np.clip(AO[ys, xs], 0, 1))[:, None]
+# levels for the toon light: silver up (the metal surface darkens it), near-black cloth to charcoal, the art's skin kept warm
+c_ = OUTC[ys, xs]
+s_t = (c_.max(1) - c_.min(1)) / np.maximum(c_.max(1), 0.01)
+silver = (s_t < 0.18) & (c_.mean(1) > 0.38)
+c_[silver] = np.clip(c_[silver] * 1.28 + 0.04, 0, 1)
+dark = c_.max(1) < 0.3
+c_[dark] = c_[dark] * 1.3 + np.array([0.075, 0.075, 0.09])
+OUTC[ys, xs] = c_
 
 # the art's fissures to the keyed hot colour, so they glow
 hotm = (PID == low_pid) & (OUTC[..., 0] > 0.8) & (OUTC[..., 1] > 0.6) & (OUTC[..., 2] < 0.72) & (POS[..., 0] > 0.1)
@@ -573,15 +601,6 @@ def paint(names_pred, fn):
         OUTC[ys, xs] = fn(POS[ys, xs].astype(np.float64), NOR[ys, xs].astype(np.float64), AO[ys, xs].astype(np.float64))
 
 
-paint(lambda n: n == "face", lambda p, n, ao: P.face(p, ao))
-paint(lambda n: n == "skull", P.skin)
-for sd_, sg_ in (("R", 1.0), ("L", -1.0)):
-    paint(lambda n, q="lidU" + sd_: n == q, lambda p, n, ao, sg=sg_: P.lid(p, n, ao, sg, True))
-    paint(lambda n, q="lidD" + sd_: n == q, lambda p, n, ao, sg=sg_: P.lid(p, n, ao, sg, False))
-paint(lambda n: n == "mask", P.mask_cloth)
-for pc_ in cowl_ps[:-1]:
-    paint(lambda n, q=pc_.name: n == q, lambda p, n, ao, sp=pc_.burns: P.burnt(P.wrap_cloth(p, n, ao), p, sp))
-paint(lambda n: n == "cowlcore", lambda p, n, ao: np.broadcast_to(P.hexc("#120508"), p.shape).copy())
 paint(lambda n: n.startswith(("palm", "finger", "thumb")) and n.endswith("L"), P.skin)
 
 
@@ -634,12 +653,6 @@ x0, y0, x1, y1 = rect(CHAIN_R)
 OUTC[y0:y1, x0:x1] = P.chain_tile(y1 - y0, x1 - x0)
 x0, y0, x1, y1 = rect(HOOK_R)
 OUTC[y0:y1, x0:x1] = P.hook_tile(y1 - y0, x1 - x0)
-x0, y0, x1, y1 = rect(EYE_R)
-v_, u_ = np.mgrid[0:y1 - y0, 0:x1 - x0]
-OUTC[y0:y1, x0:x1] = P.eye((u_ + 0.5) / (x1 - x0) * 2 - 1, ((v_ + 0.5) / (y1 - y0) - 0.5) * 1.5)
-x0, y0, x1, y1 = rect(EYE2_R)
-v_, u_ = np.mgrid[0:y1 - y0, 0:x1 - x0]
-OUTC[y0:y1, x0:x1] = P.eye_glow((u_ + 0.5) / (x1 - x0) * 2 - 1, ((v_ + 0.5) / (y1 - y0) - 0.5) * 1.5)
 x0, y0, x1, y1 = rect(GLOW_R)
 OUTC[y0:y1, x0:x1] = (1.0, 0.98, 0.93)
 
@@ -662,7 +675,7 @@ for mt in me.materials:
         if nd.type == "TEX_IMAGE":
             nt.nodes.remove(nd)
     t = nt.nodes.new("ShaderNodeTexImage")
-    t.image = atlas
+    t.image = head_img if mt.name == "skin-head-hot" else atlas
     pb = nt.nodes["Principled BSDF"]
     nt.links.new(t.outputs[0], pb.inputs[0])
     pb.inputs["Roughness"].default_value = 0.7
@@ -737,9 +750,23 @@ A = {"anchor_head_top": ("head", (0, 0.0, K.C[2] + 0.12)), "anchor_chest": ("hip
      "weapon_muzzle": ("hand.R", tuple(g + b_ * K.BLADE_LEN)), "anchor_blade_root": ("hand.R", tuple(g + b_ * 0.05)),
      "anchor_blade_mid": ("hand.R", tuple(g + b_ * K.BLADE_LEN * 0.55)),
      "anchor_hook_mouth": (HANG[-2], tuple(np.array(hang_pts[0]) + [0, 0.10, -0.5]))}
-for i_, b_u in enumerate([b_ for pc_ in cowl_ps[:-1] for b_ in pc_.burns][:5]):
-    A["anchor_ember_%d" % i_] = ("hips" if b_u[2] < K.NECK_Z else "head", tuple(b_u[:3]))
-A["anchor_eye_glow"] = ("head", tuple(K.hl(K.EYE * [1 if K.GLOW_EYE == "R" else -1, 1, 1]) + np.array([0, 0.02, 0])))
+# the embers and eyes, found on the head's own paint: the hottest spots, kept apart
+vi_ = np.array([faces_v[i_][j_] for i_ in range(nf) if names[faces_pid[i_]] == "headscan" for j_ in range(len(faces_v[i_]))])
+uu_ = np.array([u_ for i_ in range(nf) if names[faces_pid[i_]] == "headscan" for u_ in faces_uv[i_]])
+hh_, hw_ = head_tex.shape[:2]
+cc_ = head_tex[np.clip((uu_[:, 1] * hh_).astype(int), 0, hh_ - 1), np.clip((uu_[:, 0] * hw_).astype(int), 0, hw_ - 1)]
+hot_ = (cc_[:, 0] - cc_[:, 2]).argsort()[::-1]
+picks_ = []
+for i_ in hot_[:600]:
+    p_ = vco[vi_[i_]]
+    if all(np.linalg.norm(p_ - q_) > 0.06 for q_ in picks_):
+        picks_.append(p_)
+    if len(picks_) >= 5:
+        break
+for i_, p_ in enumerate(picks_):
+    A["anchor_ember_%d" % i_] = ("hips" if p_[2] < K.NECK_Z else "head", tuple(p_))
+A["anchor_eye_glow"] = ("head", tuple(K.hl(K.EYE * [1, 1, 1]) + np.array([0, 0.02, 0])))
+A["anchor_eye_glow_l"] = ("head", tuple(K.hl(K.EYE * [-1, 1, 1]) + np.array([0, 0.02, 0])))
 for nm, (bn, at) in A.items():
     e = bpy.data.objects.new(nm, None)
     bpy.context.scene.collection.objects.link(e)

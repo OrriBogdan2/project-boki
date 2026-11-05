@@ -1,0 +1,24 @@
+{
+ "high": "~/meshy/kael_h/runH/glb.glb",
+ "out": "~/meshy/kael_h/bake/low.glb",
+ "blend": "~/meshy/kael_h/bake/bake.blend",
+ "tris": 5000,
+ "tex": 1024,
+ "head": {
+  "centre": [
+   0,
+   0,
+   0
+  ],
+  "r": 0.01
+ },
+ "head_uv": 1.0,
+ "head_tris": 0,
+ "uv_smooth": 12,
+ "uv_angle": 66,
+ "uv_margin": 0.002,
+ "cage": 0.008,
+ "ray": 0.03,
+ "margin_px": 6,
+ "floater_verts": 400
+}

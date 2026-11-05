@@ -14,6 +14,7 @@ C = np.array([0.0, 0.012, 1.482])             # the head's centre
 EYE = np.array([0.036, 0.0625, 0.008])        # head-local; x mirrored
 EYE_R = 0.0215
 SCAR_SIDE = -1.0                              # -1: his left, as the brief; 1: his right, as the sheet and splash draw it
+HEAD_S, HEAD_AT = 1.0, (0.0, 0.0, 0.0)         # the head scan onto the rig, measured
 GLOW_EYE = "L"                                # the eye that glows
 
 
