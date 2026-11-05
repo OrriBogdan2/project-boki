@@ -18,6 +18,7 @@ SCAR_SIDE = -1.0                              # -1: his left, as the brief; 1: h
 SCAN_EYE_X, SCAN_EYE_Z, SCAN_EYE_GAP = 0.015, 0.23, 0.35
 EYE_GAP, EYE_Z, NOSE_Y, NOSE_DEPTH = 0.064, 1.49, 0.112, 0.055
 CHIN_DROP, SCARF_WIDEN = 0.05, 0.75
+SHEET_FRONT = (563.0, 611.0, 657.0)                          # the sheet's main view: px of the eyes' middle, eye line, px per scan unit
 SHEET_CX, SHEET_EYE_Y, SHEET_K = 566.0, 613.0, 3531.0       # the sculpt sheet's main view: px at his centre, eye line, px per m
 GLOW_EYE = "L"                                # the eye that glows
 
@@ -575,12 +576,12 @@ def mane():
             wide=True, tile=tile(0), soft=0.3)
     # the fall: big clumps down the back, drifting to his left, ends lifting out
     z = top - .06
-    for i, (x, low, w, drift, g) in enumerate(((.04, .96, .085, .0, "r"), (.0, .88, .1, -.03, "c"), (-.04, .9, .095, -.05, "l"), (-.07, .98, .075, -.08, "l"), (.07, 1.08, .065, .0, "r"))):
+    for i, (x, low, w, drift, g) in enumerate(((.05, 1.0, .062, .012, "r"), (.0, .92, .07, -.02, "c"), (-.05, .96, .066, -.05, "l"))):
         add("back%d" % i, [(x * .6, -.09, z + .04), (x * 1.0, -.15, z - .08), (x * 1.15 + drift * .25, -.18, z - .24), (x * 1.2 + drift * .6, -.19, 1.2), (x * 1.2 + drift, -.19, 1.06),
-                           (x * 1.15 + drift * 1.6, -.21, low)], w, rings=8, wide=True, peak=.45, tile=tile(i), group=g, hint=np.array([0, -1.0, 0.1]), soft=0.12)
-    for i, (x, low, w, drift, g) in enumerate(((.02, .96, .065, -.02, "c"), (-.03, 1.0, .065, -.05, "l"), (.055, 1.06, .055, .0, "r"))):
+                           (x * 1.15 + drift * 1.6, -.21, low)], w, rings=8, wide=True, peak=.45, tile=tile(i), group=g, hint=np.array([0, -1.0, 0.1]), soft=0.0)
+    for i, (x, low, w, drift, g) in enumerate(((.025, 1.03, .042, .02, "c"), (-.03, .99, .044, -.04, "l"), (.085, 1.12, .036, .01, "r"), (-.085, 1.08, .04, -.07, "l"))):
         add("over%d" % i, [(x * .6, -.12, z + .02), (x * 1.0, -.19, z - .08), (x * 1.2, -.215, z - .24), (x * 1.25 + drift * .6, -.22, 1.2), (x * 1.3 + drift * 1.5, -.215, low)], w, rings=7, wide=True,
-            peak=.4, tile=tile(i + 1), group=g, hint=np.array([0, -1.0, 0.1]), soft=0.12)
+            peak=.4, tile=tile(i + 1), group=g, hint=np.array([0, -1.0, 0.1]), soft=0.0)
     cap = hair_cap()
     return [cap] + locks
 
@@ -782,7 +783,16 @@ def blade():
                 d = np.cross(np.array(vv[f[1]]) - vv[f[0]], np.array(vv[f[2]]) - vv[f[0]])
                 ff.append(f if np.dot(d, n * sgn) > 0 else f[::-1])
         halos.append(Piece("coreh%d" % k, "metal-kael", vv, ff, room=0.0).rigid("hand.R"))
-    return [plate] + cores + halos
+    # a hot seam along the broken edges: from the side, where the core can't show, the blade still reads as burning
+    edge = ol[2:-2]
+    ve, fe = [], []
+    for a_, c_ in edge:
+        ve.append(guard_at + b * a_ + e * c_ * 1.016 + n * 0.0075)
+        ve.append(guard_at + b * a_ + e * c_ * 1.016 - n * 0.0075)
+    for i in range(len(edge) - 1):
+        fe.append([i * 2, i * 2 + 1, i * 2 + 3, i * 2 + 2])
+    seam = Piece("coreseam", "glow-sword", ve, fe, room=0.0).rigid("hand.R")
+    return [plate] + cores + halos + [seam]
 
 
 def hilt(uv_chain):

@@ -120,6 +120,10 @@ for nd in head_ob.data.materials[0].node_tree.nodes:
         head_img = nd.image
 h_mw = head_ob.matrix_world.copy()
 hv = np.array([h_mw @ v.co for v in head_ob.data.vertices])
+# (glTF splits a vertex at every UV seam: welded here, or each island shades as a hard shard)
+_, h_first, h_map = np.unique(np.round(hv, 5), axis=0, return_index=True, return_inverse=True)
+hv = hv[h_first]
+hv_m = hv.copy()                                                  # (the scan's own frame: the sheet projects in it)
 hv = np.stack([-hv[:, 0], -hv[:, 1], hv[:, 2]], 1)                # (Meshy frame faces -Y: to +Y)
 band = (hv[:, 2] > K.SCAN_EYE_Z - 0.3) & (hv[:, 2] < K.SCAN_EYE_Z + 0.1) & (np.abs(hv[:, 0]) < 0.3)
 nose_y = hv[band, 1].max()
@@ -133,7 +137,7 @@ hv[:, 0] *= 1 + K.SCARF_WIDEN * kd
 hv[:, 1] = (hv[:, 1] + K.NOSE_DEPTH) * (1 + K.SCARF_WIDEN * 0.7 * kd) - K.NOSE_DEPTH
 hv[:, 2] -= np.maximum(drop, 0.0) * 0.45
 hv = hv + np.array([0.0, K.NOSE_Y, K.EYE_Z])
-hf = [list(p.vertices) for p in head_ob.data.polygons]
+hf = [[int(h_map[i_]) for i_ in p.vertices] for p in head_ob.data.polygons]
 hu = head_ob.data.uv_layers[0].data
 huv = [[tuple(hu[li].uv) for li in p.loop_indices] for p in head_ob.data.polygons]
 hk = 1.0 - smooth(K.NECK_Z - 0.09, K.NECK_Z + 0.03, hv[:, 2])         # (0 on the head, 1 down on the shoulders)
@@ -150,17 +154,52 @@ pieces.append(head_pc)
 head_tex = np.zeros(head_img.size[0] * head_img.size[1] * head_img.channels, np.float32)
 head_img.pixels.foreach_get(head_tex)
 head_tex = head_tex.reshape(head_img.size[1], head_img.size[0], head_img.channels)
-# the sculpt's darks up for the toon light: skin to a warm brown, the crimson out of black; hair and embers keep their values
+# the sculpt sheet's main view projected on the front of the head (scar, brows, stubble, fissures come from the art), then graded
+# by class to flat ramps the toon light keeps dark and clean
+SHEET = load_rgb(os.path.expanduser("~/art1kael/ref2/kael_head.png"))
+H_, W_ = head_tex.shape[:2]
+hvn = np.zeros_like(hv_m)
+for f_ in hf:
+    p0_ = hv_m[f_[0]]
+    n_ = np.cross(hv_m[f_[1]] - p0_, hv_m[f_[2]] - p0_)
+    hvn[f_] += n_
+hvn = M.norm(hvn)
+HP = np.zeros((H_, W_, 3), np.float32)
+HN = np.zeros((H_, W_, 3), np.float32)
+HM = np.zeros((H_, W_), bool)
+for f_, u_ in zip(hf, huv):
+    for k_ in range(1, len(f_) - 1):
+        ids_ = [f_[0], f_[k_], f_[k_ + 1]]
+        q_ = np.array([u_[0], u_[k_], u_[k_ + 1]]) * [W_, H_] - 0.5
+        x0_, y0_ = np.maximum(np.floor(q_.min(0)).astype(int) - 1, 0)
+        x1_, y1_ = np.ceil(q_.max(0)).astype(int) + 1
+        x1_, y1_ = min(x1_, W_ - 1), min(y1_, H_ - 1)
+        if x1_ < x0_ or y1_ < y0_:
+            continue
+        yy_, xx_ = np.mgrid[y0_:y1_ + 1, x0_:x1_ + 1]
+        d_ = (q_[1, 1] - q_[2, 1]) * (q_[0, 0] - q_[2, 0]) + (q_[2, 0] - q_[1, 0]) * (q_[0, 1] - q_[2, 1])
+        if abs(d_) < 1e-9:
+            continue
+        l0_ = ((q_[1, 1] - q_[2, 1]) * (xx_ - q_[2, 0]) + (q_[2, 0] - q_[1, 0]) * (yy_ - q_[2, 1])) / d_
+        l1_ = ((q_[2, 1] - q_[0, 1]) * (xx_ - q_[2, 0]) + (q_[0, 0] - q_[2, 0]) * (yy_ - q_[2, 1])) / d_
+        l2_ = 1 - l0_ - l1_
+        m_ = (l0_ >= -0.03) & (l1_ >= -0.03) & (l2_ >= -0.03)
+        w_ = np.stack([l0_[m_], l1_[m_], l2_[m_]], -1)
+        HP[yy_[m_], xx_[m_]] = w_ @ hv_m[ids_]
+        HN[yy_[m_], xx_[m_]] = w_ @ hvn[ids_]
+        HM[yy_[m_], xx_[m_]] = True
+ys_, xs_ = np.nonzero(HM)
+px_ = np.clip((K.SHEET_FRONT[0] + (HP[ys_, xs_, 0] + K.SCAN_EYE_X) * K.SHEET_FRONT[2]).astype(int), 0, SHEET.shape[1] - 1)
+py_ = np.clip((K.SHEET_FRONT[1] - (HP[ys_, xs_, 2] - K.SCAN_EYE_Z) * K.SHEET_FRONT[2]).astype(int), 0, SHEET.shape[0] - 1)
+art_ = SHEET[py_, px_]
 ch_ = head_tex[..., :3]
-lum_ = ch_.mean(2, keepdims=True)
-ember = (ch_[..., 0] > 0.55) & (ch_[..., 1] > 0.22) & (ch_[..., 2] < 0.62) & (ch_[..., 0] > ch_[..., 2] * 1.35)
-red = ((ch_[..., 0] > ch_[..., 1] * 2.1) & (ch_[..., 0] > 0.17))[..., None]
-k_ = 1 - smooth(0.3, 0.55, lum_)
-skin_up = np.power(np.maximum(ch_, 1e-4), 0.62) * 1.32 + np.array([0.04, 0.02, 0.012])
-red_up = np.minimum(np.power(np.maximum(ch_, 1e-4), 0.86) * 1.3, np.array([0.4, 0.2, 0.2]))    # (under the shader's heat key)
-ch_ = ch_ * (1 - k_) + np.where(red, red_up, skin_up) * k_
-ch_[ember] = P.HOT
-head_tex[..., :3] = np.clip(ch_, 0, 1)
+sc_ = ch_[ys_, xs_]
+hair_ = lambda c_: ((c_.max(1) - c_.min(1)) < 0.14) & (c_.mean(1) > 0.42)
+facing_ = -M.norm(HN[ys_, xs_])[:, 1]
+k_ = smooth(0.3, 0.6, facing_) * (~hair_(art_)) * (~hair_(sc_))
+ch_[ys_, xs_] = sc_ * (1 - k_[:, None]) + art_ * k_[:, None]
+ch_[...] = P.grade_head(ch_)
+head_tex[..., :3] = ch_
 # (a new image: the exporter writes an imported image's packed original, whatever its pixels say)
 head_new = bpy.data.images.new("kael_head", head_img.size[0], head_img.size[1])
 head_new.pixels.foreach_set(head_tex.ravel())
@@ -611,15 +650,26 @@ OUTC[ys, xs] = col
 ART_DONE = True
 # a little of the shared light's occlusion on the scan too
 OUTC[ys, xs] *= (0.88 + 0.12 * np.clip(AO[ys, xs], 0, 1))[:, None]
-# levels for the toon light: silver up (the metal surface darkens it), near-black cloth to charcoal, the art's skin kept warm
-c_ = OUTC[ys, xs]
-s_t = (c_.max(1) - c_.min(1)) / np.maximum(c_.max(1), 0.01)
-silver = (s_t < 0.18) & (c_.mean(1) > 0.38)
-c_[silver] = np.clip(c_[silver] * 1.04, 0, 1)
-dark = c_.max(1) < 0.3
-c_[dark] = c_[dark] * 1.3 + np.array([0.075, 0.075, 0.09])
-OUTC[ys, xs] = c_
 
+# flat class ramps for the match camera: each class keeps its forms (a band of its own light) and dark line work, the mottling goes
+lumi = OUTC.mean(2)
+r_, g_, b_ = OUTC[..., 0], OUTC[..., 1], OUTC[..., 2]
+hi_ = OUTC.max(2)
+sat_t = (hi_ - OUTC.min(2)) / np.maximum(hi_, 0.01)
+isbody = PID == low_pid
+hotish = (r_ > 0.72) & (g_ > 0.48) & (b_ < 0.75) & (sat_t > 0.2)
+red_t = isbody & (r_ > g_ * 2.0) & (r_ > b_ * 1.6) & ~hotish
+silver_t = isbody & (sat_t < 0.2) & (lumi > 0.36) & ~hotish
+dark_t = isbody & (sat_t < 0.34) & (lumi <= 0.36)
+skin_t = isbody & (r_ > g_ * 1.1) & ~hotish & ~red_t & ~silver_t & ~dark_t
+for cls_, ramp_, base_, gain_ in ((skin_t, P.SKIN2, 0.42, 3.0), (silver_t, P.SILVER, 0.62, 3.0), (dark_t, P.DARK, 0.34, 2.2), (red_t, P.RED, 0.45, 2.2)):
+    fm_ = cls_.astype(np.float32)
+    l1_ = blur(lumi, fm_, 2)
+    l2_ = blur(lumi, fm_, 18)
+    mean_ = float(np.sum(lumi * fm_) / max(fm_.sum(), 1.0))
+    t_ = np.clip(base_ + (l1_ - l2_) * gain_ + (l2_ - mean_) * 0.7, 0, 1)
+    new_ = P.ramp(t_, ramp_) + np.minimum(lumi - l1_, 0.0)[..., None] * 0.8
+    OUTC = np.where(cls_[..., None], np.clip(new_, 0, 1).astype(np.float32), OUTC)
 # the art's fissures to the keyed hot colour, so they glow
 hotm = (PID == low_pid) & (OUTC[..., 0] > 0.8) & (OUTC[..., 1] > 0.6) & (OUTC[..., 2] < 0.72) & (POS[..., 0] > 0.1)
 OUTC[hotm] = P.HOT
@@ -635,15 +685,11 @@ def paint(names_pred, fn):
         OUTC[ys, xs] = fn(POS[ys, xs].astype(np.float64), NOR[ys, xs].astype(np.float64), AO[ys, xs].astype(np.float64))
 
 
-SHEET = load_rgb(os.path.expanduser("~/art1kael/ref2/kael_head.png"))
-
-
 def mask_art(p, n, ao):
     """The band over the mouth from the sculpt sheet's own scarf, front view: his right is image left."""
     px = np.clip((K.SHEET_CX - p[:, 0] * K.SHEET_K).astype(int), 0, SHEET.shape[1] - 1)
     py = np.clip((K.SHEET_EYE_Y + (K.EYE_Z - p[:, 2]) * K.SHEET_K).astype(int), 0, SHEET.shape[0] - 1)
-    c = SHEET[py, px]
-    return np.clip(np.power(np.maximum(c, 1e-4), 0.72) * 1.2, 0, 1)
+    return P.grade_head(SHEET[py, px][None, :, :])[0]
 
 
 paint(lambda n: n == "maskfit", mask_art)

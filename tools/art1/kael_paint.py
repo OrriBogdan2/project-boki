@@ -173,7 +173,7 @@ def burnt(c, p, spots):
     return mix(mix(c, hexc("#0d0406"), k), EMBER, h)
 
 
-SILVER = [hexc("#30323a"), hexc("#5e626c"), hexc("#8f94a0"), hexc("#bfc4cc"), hexc("#e8ebef")]
+SILVER = [hexc("#3c4250"), hexc("#6c7586"), hexc("#a0aabb"), hexc("#ccd4e0"), hexc("#f0f4fa")]
 
 
 def wrap_cloth(p, n, ao):
@@ -186,6 +186,28 @@ def mask_fold(p, n, ao):
     """The band over the mouth: the head sculpt's crimson, one soft fold under the nose."""
     t = lit(n, 1.0) * 0.86 - 0.16 * np.exp(-((p[..., 2] - (K.EYE_Z - 0.095)) / 0.012) ** 2)
     return ramp(np.clip(t, 0, 1), [hexc("#2a0c12"), hexc("#4c141c"), hexc("#6d1f27"), hexc("#8a2e33"), hexc("#a4444a")])
+
+
+SKIN2 = [hexc("#1c0f0d"), hexc("#311d18"), hexc("#482b22"), hexc("#64402f"), hexc("#865a42")]
+SILVER_C = None
+DARK = [hexc("#14151a"), hexc("#21232a"), hexc("#30333c"), hexc("#434752"), hexc("#5c616e")]
+RED = [hexc("#22090e"), hexc("#3a0e16"), hexc("#54141e"), hexc("#681b26"), hexc("#6e2029")]
+
+
+def grade_head(c):
+    """The sculpt's paint to clean ramps: hair and eyes keep their values, the embers stay above the shader's heat key, the crimson under
+    it, the skin to a deep brown."""
+    lum = c.mean(-1)
+    hi = c.max(-1)
+    sat = (hi - c.min(-1)) / np.maximum(hi, 0.01)
+    hair = (hi - c.min(-1) < 0.14) & (lum > 0.42)
+    ember = (c[..., 0] > 0.6) & (c[..., 1] > 0.22) & (c[..., 2] < 0.45)
+    red = (c[..., 0] > c[..., 1] * 1.9) & ~ember
+    skin = ~hair & ~ember & ~red
+    out = c.copy()
+    out[red] = ramp(np.clip(lum[red] / 0.3, 0, 1), RED)
+    out[skin] = ramp(np.clip((lum[skin] / 0.34) ** 0.75, 0, 1), SKIN2)
+    return out
 
 
 def cowl_cloth(p, n, ao):
