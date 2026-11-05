@@ -212,8 +212,11 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
   flat flame skull with long ember tails on the ram and ember-puff after-images, the jagged 14-ray sunburst and cracked scorch of
   the cloak, the deep orange two-ring fire shield, the molten carpet with charred edges, and the flame pips over burning foes.
 - Weapon: `HeroGearPair.flamer`: ribbed brass barrel, flared bell nozzle with a pilot cage, fuel canister, hose to the pack.
-- Sounds (tools/sfx_linwick_dredge.py): `lw_pilot`, `lw_roar`, `lw_bolt`, `lw_bolt_hit`, `lw_bash`, `lw_bash_hit`, `lw_shield`,
-  `lw_blaze`, `lw_trail`, `lw_hop`, `lw_jet` (lift-off whoomp and jet roar), `lw_jet_land` (plus the older `as_ignite`).
+- Sounds (`tools/gen_sfx_cinder.py`, set `content/sfx/ashwick.json`, docs/AUDIO.md): the lance's pilot and roar (`lw_pilot`,
+  `lw_roar`, three takes, one every 0.4 s while held), the tank hiss on release (`ashwick_tank_hiss`), `lw_bolt`/`lw_bolt_hit`,
+  `as_ignite` (Ablaze), `lw_blaze` (Flashover), `lw_bash`/`lw_bash_hit`, the bellows poof `lw_hop`, `lw_shield` and
+  `ashwick_cloak_hit` (Furnace Cloak), `lw_jet`/`lw_jet_land`/`lw_trail` (Flue Flight), and her own dash, footsteps
+  (a light patter, the pack clinking every other step) and wordless voice (`ashwick_hurt`, `_down`, `_death`).
 - Flue Flight (`scripts/arch/kits/ashwick_jet.gd`): the ember ring, scorch and sunburst at lift-off, a hot core and embers blown
   out of the bellows while flying, and the carpet as pooled LDFx lava strips drawn with their own alpha-blended shader
   (`shaders/ld_lava.gdshader`), so the charred rim stays dark on bright ground.
