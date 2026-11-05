@@ -83,7 +83,7 @@
 			],
 			"title": "Give your Boki a job",
 			"hints": {
-				"go": "Click {boki}, or press {details} next to it, to open its page. Or click Boki on the bar below.",
+				"go": "Click {boki}, or press {details} next to it, to open its page. Or press 2 (Boki on the bar below) for all your Boki.",
 				"page": "Pick a job here: try '{job}'. Or assign it at a work station."
 			},
 			"world": {

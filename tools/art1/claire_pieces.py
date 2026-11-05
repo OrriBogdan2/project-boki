@@ -195,15 +195,15 @@ def wing(s):
                 a = base + j * len(spine) + i
                 q = [a, a + 1, a + 1 + len(spine), a + len(spine)]
                 f.append(q if lay == 0 else q[::-1])
-    p = Piece("wing" + side, "ice-horn", np.array(v), f)
+    p = Piece("wing" + side, "ice-wing", np.array(v), f)
     if s < 0:
         p.f = [q[::-1] for q in p.f]
     p.spine, p.tips, p.wrist = spine, tips, wrist
-    rod = sweep("wingarm" + side, "ice-horn", spine, SEC6, 0.0125 * (1 - np.linspace(0, 1, 9)) ** 0.5 + 0.003, side_hint=np.array([0, 1.0, 0]))
+    rod = sweep("wingarm" + side, "ice-wing", spine, SEC6, 0.0125 * (1 - np.linspace(0, 1, 9)) ** 0.5 + 0.003, side_hint=np.array([0, 1.0, 0]))
     rods = [rod]
     for i, t_ in enumerate(tips[1:4]):
         path = catmull([wrist, (wrist + t_) / 2 + [0, 0, 0.012], t_], 4)
-        rods.append(sweep("wingrod%d%s" % (i, side), "ice-horn", path, SEC6[::2], np.array([0.006, 0.005, 0.004, 0.0015]), side_hint=np.array([0, 1.0, 0])))
+        rods.append(sweep("wingrod%d%s" % (i, side), "ice-wing", path, SEC6[::2], np.array([0.006, 0.005, 0.004, 0.0015]), side_hint=np.array([0, 1.0, 0])))
     return p, rods
 
 

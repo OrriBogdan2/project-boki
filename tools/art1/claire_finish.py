@@ -16,7 +16,7 @@ import warden_kit as WK
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
 ATLAS = 2048
-MATS = ["skin-face", "skin-body", "cloth-dress", "fur-trim", "hair-fringe", "ice-horn", "ice-bright"]
+MATS = ["skin-face", "skin-body", "cloth-dress", "fur-trim", "hair-fringe", "ice-horn", "ice-wing", "ice-bright"]
 SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "ear": 0.7, "horn": 0.9, "tail": 0.7, "wing": 0.55, "wingarm": 0.5, "wingrod": 0.4, "bowknot": 0.6, "bowloop": 0.6, "ribbon": 0.5,
          "blade": 0.5, "shaft": 1.1, "head": 0.6, "butt": 0.5, "heart": 0.7, "heartcore": 0.6, "prong": 0.4, "collarA": 0.3, "collarB": 0.3, "Low": 1.0, "tailheart": 0.7}
 FACE_K = 3.4                # texel density on the face against the body
@@ -462,6 +462,13 @@ col = col * (1 - shorts[:, None]) + np.array([0.2, 0.36, 0.66]) * shorts[:, None
 mx_ = col.max(1)
 lt = smooth(0.5, 0.8, mx_) * (1 - bl) * (pp[:, 2] < K.NECK_Z + 0.12) + smooth(0.5, 0.8, mx_) * (1 - bl) * (pp[:, 1] < 0.0) * (pp[:, 2] >= K.NECK_Z + 0.12)
 col = col * (1 - lt[:, None]) + col * np.array([0.8, 0.87, 0.97]) * lt[:, None]
+# the sheet's pale skin and icy hair: the scan runs tan and slate once it is toon shaded
+head_ = smooth(K.NECK_Z + 0.06, K.NECK_Z + 0.1, pp[:, 2]) * (pp[:, 1] > 0.02)
+skin_ = smooth(0.03, 0.1, col[:, 0] - col[:, 2]) * head_
+pale_ = np.clip(col * np.array([1.08, 1.1, 1.14]) + 0.05, 0, 1)
+col = col * (1 - skin_[:, None]) + pale_ * skin_[:, None]
+hair_ = (1 - smooth(0.0, 0.05, col[:, 0] - col[:, 2])) * smooth(0.25, 0.4, mx_) * smooth(0.82, 0.68, mx_) * head_ * (np.abs(pp[:, 0]) < 0.085) * smooth(K.NECK_Z + 0.2, K.NECK_Z + 0.235, pp[:, 2])
+col = col * (1 - hair_[:, None]) + np.clip(col * 0.55 + np.array([0.46, 0.56, 0.62]), 0, 1) * hair_[:, None]
 OUTC[ys, xs] = col
 # the iris: glowing, with the slit pupil
 HOT_K = np.zeros(len(ys))

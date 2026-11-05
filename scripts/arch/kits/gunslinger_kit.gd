@@ -3,9 +3,9 @@ extends ArchKit
 ## Vex (archetype id "gunslinger", medium): the ember-rifle skirmisher. docs/heroes/gunslinger.md
 ## has the per-slot table, the assumptions and the research notes (briefs/hero-ref/venator.md, owner notes).
 ##
-## Loop: hold RMB for the Burr Charge's lane, let go to throw. A direct hit on a foe damages and Dazes
-## it ("rat" Rattled in code) on the spot. Otherwise it flies the lane and sticks where it meets a wall
-## or the ground at the lane's end: a cone shows back toward you for its fuse, then blasts, shoving
+## Loop: tap RMB and the Burr Charge goes along the aim. A direct hit on a foe damages and Dazes
+## it ("rat" Rattled in code) on the spot. Otherwise it flies its 10.5 m and sticks where it meets a wall
+## or the ground at the end: a cone shows back toward you for its fuse, then blasts, shoving
 ## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +90% to a Dazed foe, in big
 ## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
 ## shooting. Longneedle: stand still while the line narrows, then a long beam through walls. A knock
@@ -40,16 +40,15 @@ var rattles := 0               # Burr Charges that blew (tests)
 var dazed_hits := 0            # rifle rounds on a Dazed foe (tests)
 var skewers := 0               # Longneedle payoffs
 var needle_hits := 0
+var needle_dir := Vector2.ZERO # tests: the line the last Longneedle fired along
 var wall_slams := 0
 var last_dash_kind := ""
 var last_cone := {}            # tests: {at, dir, wall}
 var last_shot := 0
-var aim_marks := 0             # tests: foes marked inside the held lane
 var echo_t := 0.0
 var refill_part := 0.0         # rounds the resting drum has part-refilled
 var dry := false               # the drum ran dry: no round until it is full again
 var round_at := -9.0           # match time of her last rifle round (the firing brackets)
-var grenade: Node3D = null     # the Burr Charge held low in her left hand while RMB is held
 var ult: GunslingerUlt         # Cinderfall, her ultimate on X
 
 func _setup() -> void:
@@ -92,10 +91,7 @@ func _tick(dt: float) -> void:
 	_tick_mag(dt)
 	_tick_brackets()
 	_tick_echo(dt)
-	_tick_grenade()
 	_tick_trail()
-	if rmb_down:
-		_tick_aim()
 	self_pips(int(res_def()["max"]), int(floor(res + 0.01)), false, dt, PIP_LIFT, 0.65)
 
 func own_dash_trail() -> bool:
@@ -355,50 +351,7 @@ func _tick_slide(dt: float) -> void:
 	h.inv_t = 0.0
 
 # ------------------------------------------------------------------ RMB: Burr Charge
-func rmb_charge_full() -> float:
-	return 0.0                              # a held aim, not a charge
-
-func rmb_auto_t() -> float:
-	return float(rmb_def().get("auto", 4.0))
-
-func rmb_hold_tick(t: float) -> void:
-	if t <= 0.02 and anim_id != "gunslinger_rmb_hold":
-		play("gunslinger_rmb_hold")
-		m.sfx("vn_cock", h.pos, -4.0)
-
-## While held: the fixed lane with an arrow tip out past the cursor; foes inside it are marked.
-func _tick_aim() -> void:
-	var bd := rmb_def()["burr"] as Dictionary
-	var d := h.aim_dir()
-	var reach := float(bd["range"])
-	var lane_w := float(bd["lane_w"])
-	AimKit.lane(h, "rmb", {"len": reach, "width": lane_w, "tip": true, "col": Color(HOT, 0.85), "col2": EMBER})
-	for f in m.foes_of(h.team):
-		if f.hittable() and AimMode.in_lane(h.pos, d, reach, lane_w, f.pos, f.r):
-			aim_marks += 1
-			var mark := {"at": f.pos, "r": 0.75, "col": Color("ff4fb0"), "col2": HOT, "alpha": 1.2}
-			AimKit.circle(h, "mark%d" % f.get_instance_id(), mark)
-
-## The charge held low at her left hip while RMB is held (gone the moment it's thrown).
-func _tick_grenade() -> void:
-	var cocked := rmb_down and h.anim != null and h.anim.hand_l != null and not h.downed
-	if not cocked:
-		if grenade != null and is_instance_valid(grenade):
-			grenade.visible = false
-		return
-	if grenade == null or not is_instance_valid(grenade):
-		grenade = _burr_mesh()
-	grenade.visible = tells_visible()
-	var d := h.aim_dir()
-	var outward := Vector3(d.y, 0, -d.x) * -0.12           # off the hand's outer side, clear of the fist
-	grenade.global_position = h.anim.hand_l.global_position + Vector3(0, 0.12, 0) + outward
-	grenade.scale = Vector3.ONE * 1.25
-	grenade.rotation.y += 0.08
-	if int(m.time * 4.0) != int((m.time - 1.0 / 60.0) * 4.0):
-		fx().star(grenade.global_position, EMBER, HOT, 0.6, 0.1)      # an ember glint: it's live
-
 func fire_rmb(c: Dictionary) -> void:
-	AimKit.hide(h, "rmb")
 	last_variant = String(c["variant"])
 	if not spend_rmb():
 		return
@@ -415,9 +368,6 @@ func fire_rmb(c: Dictionary) -> void:
 	n.visible = true
 	n.scale = Vector3.ONE
 	var at := h.pos + Vector3(d.x * 0.6, TOSS_Y, d.y * 0.6)
-	if grenade != null and is_instance_valid(grenade) and grenade.visible:
-		at.y = grenade.global_position.y       # it leaves at the height of the hand, along the lane shown
-		grenade.visible = false
 	n.global_position = at
 	var burr := {"pos": at, "dir": d, "t": 0.0, "node": n, "wall": false, "fuse": -1.0, "fuse0": float(bd["fuse"])}
 	burr["range"] = float(bd["range"])
@@ -600,8 +550,7 @@ func cast_e() -> bool:
 	play("gunslinger_e")
 	return true
 
-## A Boki merge ends the Longneedle's charge with no shot, cuts a Slipstep short (no refund, no speed
-## buff) and drops a Burr Charge held in the hand (nothing thrown).
+## A Boki merge ends the Longneedle's charge with no shot and cuts a Slipstep short (no refund, no speed buff).
 func _drop_holds() -> void:
 	_end_needle()
 	if not slide.is_empty():
@@ -625,9 +574,12 @@ func _tick_needle(dt: float) -> void:
 		return
 	var k := clampf(float(needle["t"]) / float(ed["charge"]), 0.0, 1.0)
 	# a bright wide line drawn full length at once, narrowing to a thin core as the cast completes
-	var lane := {"len": float(ed["range"]), "width": 1.0, "width_to": 0.12, "k": k, "all": true}
+	var wide := beam_width()
+	var lane := {"len": float(ed["range"]), "width": wide, "width_to": wide * 0.12, "k": k, "all": true}
 	lane.merge({"col": EMBER, "col2": HOT})
 	AimKit.lane(h, "e", lane)
+	if h.is_local() and m.cam:
+		m.cam.cast_view(h.aim_dir(), float(ed["view_zoom"]), float(ed["range"]))     # (only the caster's camera)
 	AimKit.charge(h, k, {"col": EMBER, "col2": HOT})
 	# an ember orb swells at the muzzle through the cast
 	if int(m.time * 20.0) != int((m.time - dt) * 20.0):
@@ -639,6 +591,10 @@ func _tick_needle(dt: float) -> void:
 ## Where the Longneedle leaves the rifle: ahead of her at the barrel's height.
 func _muzzle(d: Vector2) -> Vector3:
 	return h.pos + Vector3(d.x * 0.9, 1.1, d.y * 0.9)
+
+## The beam's full width in m: what it hits, so the line, the beam and the hit all agree.
+func beam_width() -> float:
+	return float(e_def()["width"]) * 2.0
 
 func dash_charge() -> float:
 	return -1.0
@@ -654,8 +610,9 @@ func _fire_needle() -> void:
 	var a := _muzzle(d)
 	var L := float(ed["range"])
 	var b := a + Vector3(d.x, 0, d.y) * L
+	needle_dir = d
 	# an ember body, a hot core, a bronze shimmer down its edges; the ember muzzle orb and its flare
-	fx().beam(a, b, EMBER, HOT, 1.0, float(ed["linger"]), BRONZE)
+	fx().beam(a, b, EMBER, HOT, beam_width(), float(ed["linger"]), BRONZE)
 	fx().star(a, EMBER, HOT, 1.3, 0.16)
 	m.fx.flash(a, EMBER, 1.2, 0.08)
 	fx().pillar(ground(h.pos), SMOKE, EMBER, 1.6, 0.45, 0.4)   # recoil smoke puffs up round her (no ground ring)
@@ -714,7 +671,6 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		# throw it past them so the cone comes back over them
 		h.inp["aim"] = aimp
 		h.inp["sec"] = true
-		bot_hold["rmb"] = 0.3
 		return
 	if h.hp < h.max_hp * 0.4 and h.dashes >= 1.0 and randf() < 0.1:
 		h.inp["dash"] = true

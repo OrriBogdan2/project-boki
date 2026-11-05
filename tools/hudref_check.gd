@@ -183,7 +183,7 @@ func _check_keys(P: Hunter) -> void:
 		"throw": "throw", "base": "base", "gear0": "gear1", "gear1": "gear2"}
 	P.lvl = 1
 	HudSlot.shown_keys.clear()
-	await main.get_tree().process_frame
+	await hud.panels.draw      # the slots are drawn on HudPanels, REDRAW_HZ times a second
 	await main.get_tree().process_frame
 	var x_key := String(HudSlot.shown_keys.get("x", ""))
 	ok(bool(P.slot_info("x")["locked"]) and x_key == Settings.key_cap("hunter_ult"),
@@ -202,7 +202,7 @@ func _check_keys(P: Hunter) -> void:
 	ok(merge_slots.size() == 1, "one Merge slot only (the Boki box on the right)")
 	P.lvl = int(Hunter.ULT_AT[0])
 	P.ak.cd["x"] = 12.3
-	await main.get_tree().process_frame
+	await hud.panels.draw
 	await main.get_tree().process_frame
 	var xt := String(hud.slot_text.get("x", ""))
 	ok(not bool(P.slot_info("x")["locked"]) and xt == HudSlot.cd_text(float(P.ak.cd["x"])),
