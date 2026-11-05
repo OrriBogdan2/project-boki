@@ -352,5 +352,5 @@ CLIPS = {
     "pet": (2.2, True, pet), "chop": (1.1, True, chop), "mine": (1.0, True, mine), "carry": (0.8, True, carry),
     "tend": (1.3, True, tend),
 }
-# unused props tucked inside the chest (m from their rest place)
-HIDE_AT = {"prop_axe": (0, 0.17, 0.1), "prop_pick": (0, 0.17, 0.1), "prop_berry": (0, 0.14, 0.12)}
+# unused props tucked inside the right foreleg they ride (m from their rest place), so no pose shows their ink
+HIDE_AT = {"prop_axe": (0.079, 0.04, 0.05), "prop_pick": (0.079, 0.04, 0.05), "prop_berry": (0.079, 0.01, 0.08)}
