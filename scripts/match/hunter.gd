@@ -3240,6 +3240,8 @@ func _anim_state(stretch: float) -> void:
 		for e in m.truce.shown:
 			if e["h"] == self:
 				em = String(e["id"]); et = float(e["t"])
+	s["dead"] = out
+	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["emote"] = em
 	s["emote_t"] = et
 	if not grounded and not gliding and not downed:
@@ -3280,7 +3282,7 @@ func render(delta: float, alpha: float) -> void:
 	if absf(step_vis) > 0.001:
 		position.y += step_vis
 		step_vis = lerpf(step_vis, 0.0, 1.0 - exp(-16.0 * delta))
-	visible = not out and not extracted and not riding and not unseen
+	visible = (not out or WardenClips.dying(self)) and not extracted and not riding and not unseen
 	if not model:
 		return
 	if m.cam: model.basis = m.cam.char_basis(face, model.scale)     # leaned toward the camera (CamRig.char_lean)
