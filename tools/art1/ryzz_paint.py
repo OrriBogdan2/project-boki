@@ -10,7 +10,7 @@ def mix(a, b, t):
     return a * (1 - t) + b * t
 
 KEY = np.array([1.0, 0.16, 0.74])        # the neon: warden_look paint_glow lights texels of this colour on any surface
-SKIN = [hexc("#a8604f"), hexc("#d58a70"), hexc("#efb196"), hexc("#fbd2b8")]
+SKIN = [hexc("#b9735f"), hexc("#dd9c84"), hexc("#f2bda6"), hexc("#fcd8c4")]
 COPPER = [hexc("#5a2a16"), hexc("#a85a2e"), hexc("#d98a50"), hexc("#ffc998")]
 LEATHER_C = [hexc("#4a2413"), hexc("#7c4122"), hexc("#a8602f")]
 
@@ -72,17 +72,18 @@ def face(p, n, ao):
     return c
 
 
-def lid(p, n, ao, s, upper):
-    q = (p - K.C) / K.HS
-    x, z = q[..., 0], q[..., 2]
-    c = skin(p, n, np.maximum(ao, 0.6))
-    tint = hexc("#f03fa8") if s > 0 else hexc("#a56fd0")
-    c = mix(c, tint, 0.8 if s > 0 else 0.5)
+def lid(p, n, ao, s, c, ang, eye_z, eye_h):
+    """Painted as it lies closed: pink on the wink, a soft violet on the other, a dark lash line along the bottom; the bolt across the wink."""
+    ca, sa = np.cos(-ang), np.sin(-ang)
+    d = p - c
+    q = np.stack([d[..., 0], d[..., 1] * ca - d[..., 2] * sa, d[..., 1] * sa + d[..., 2] * ca], -1) + c
+    col = skin(p, n, np.maximum(ao, 0.7))
+    col = mix(col, hexc("#f03fa8") if s > 0 else hexc("#b98ad8"), 0.82 if s > 0 else 0.5)
+    t = (q[..., 2] - (eye_z - eye_h)) / (2 * eye_h)
+    col = mix(col, hexc("#1c1020"), smooth(0.2, 0.1, t)[..., None])
     if s > 0:
-        d = bolt_d(x, z)
-        c = mix(c, hexc("#ff2fa8"), smooth(0.0028, 0.0, d)[..., None])
-        c = mix(c, KEY, smooth(0.0006, -0.0004, d)[..., None])
-    return c
+        col = mix(col, KEY, smooth(0.0035, 0.0015, np.abs(q[..., 0] - 0.044 - 0.25 * (q[..., 2] - eye_z)))[..., None])
+    return col
 
 
 def eye(a, b):

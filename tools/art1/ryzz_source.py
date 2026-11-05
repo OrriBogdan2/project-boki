@@ -11,7 +11,8 @@ from meshkit import smooth
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, RIG, OUT = a[0], a[1], a[2]
-LOW_TRIS = 7200
+LOW_TRIS = 8500
+FACE_TRIS = 1500
 SOLE = -0.946
 K_ = 0.90
 ANKLE = 0.135
@@ -30,13 +31,13 @@ def r_j(b):
 
 
 T = {"pelvis": r_j("hips"), "neck": r_j("head")}
-T["crown"] = T["neck"] + np.array([0, 0, (1.894 - 1.596) * K_])
+T["crown"] = T["neck"] + np.array([0, 0, (1.894 - 1.596) * 0.95])     # the head a touch big for the match camera
 for sd in "RL":
     T["shoulder." + sd], T["elbow." + sd], T["wrist." + sd] = r_j("upper_arm." + sd), r_j("forearm." + sd), r_j("hand." + sd)
     T["hip." + sd], T["knee." + sd] = r_j("thigh." + sd), r_j("shin." + sd)
     T["ankle." + sd] = np.array([T["knee." + sd][0], 0, ANKLE])
     T["sole." + sd] = np.array([T["knee." + sd][0], 0, 0.0])
-SEG = [("torso", "pelvis", "neck", 0.15, 0.96), ("head", "neck", "crown", 0.14, 1.0)]
+SEG = [("torso", "pelvis", "neck", 0.15, 0.96), ("head", "neck", "crown", 0.14, 0.95)]
 for sd in "RL":
     SEG += [("upper_arm." + sd, "shoulder." + sd, "elbow." + sd, 0.055, 0.9), ("forearm." + sd, "elbow." + sd, "wrist." + sd, 0.042, 0.9),
             ("thigh." + sd, "hip." + sd, "knee." + sd, 0.09, 0.92), ("shin." + sd, "knee." + sd, "ankle." + sd, 0.06, 0.92),
@@ -175,20 +176,40 @@ hand_w = GROUP["hand.R"] + GROUP["hand.L"]
 bm = bmesh.new()
 bm.from_mesh(low.data)
 bm.faces.ensure_lookup_table()
-neck_z = T["neck"][2] + 0.052
-kill = [f for f in bm.faces if f.calc_center_median().z > neck_z or max(hand_w[v.index] for v in f.verts) > 0.5]
+kill = [f for f in bm.faces if max(hand_w[v.index] for v in f.verts) > 0.5]
 bmesh.ops.delete(bm, geom=kill, context="FACES")
 bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
 bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0006)
 bm.to_mesh(low.data)
 bm.free()
-now = sum(len(p.vertices) - 2 for p in low.data.polygons)
-m = low.modifiers.new("d", "DECIMATE")
-m.ratio = min(1.0, LOW_TRIS / max(now, 1))
-m.use_collapse_triangulate = True
 bpy.ops.object.select_all(action="DESELECT")
 low.select_set(True)
 bpy.context.view_layer.objects.active = low
-bpy.ops.object.modifier_apply(modifier=m.name)
+HN = T["neck"]
+
+
+def decimate(pick, target):
+    """Edit-mode decimate of the faces pick() marks: the selection's border stays, so the two regions keep meeting (claire_source)."""
+    bpy.ops.object.mode_set(mode="OBJECT")
+    co_ = np.zeros(len(low.data.vertices) * 3)
+    low.data.vertices.foreach_get("co", co_)
+    co_ = co_.reshape(-1, 3)
+    sel = pick(np.array([co_[list(p.vertices)].mean(0) for p in low.data.polygons]))
+    low.data.polygons.foreach_set("select", sel.tolist())
+    low.data.edges.foreach_set("select", [False] * len(low.data.edges))
+    low.data.vertices.foreach_set("select", [False] * len(low.data.vertices))
+    low.data.update()
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_mode(type="FACE")
+    bpy.ops.mesh.decimate(ratio=min(1.0, target / max(int(sel.sum()), 1)))
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+
+def is_face(c):
+    return (np.abs(c[:, 0]) < 0.1) & (c[:, 1] > 0.02) & (c[:, 2] > HN[2] + 0.03) & (c[:, 2] < HN[2] + 0.24)
+
+
+decimate(is_face, FACE_TRIS)
+decimate(lambda c: ~is_face(c), LOW_TRIS - FACE_TRIS)
 print("Low tris", sum(len(p.vertices) - 2 for p in low.data.polygons))
 bpy.ops.wm.save_as_mainfile(filepath=OUT)

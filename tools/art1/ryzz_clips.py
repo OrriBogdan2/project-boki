@@ -218,11 +218,10 @@ def extras(P):
     out = {}
     b, sm = P.get("brow", 0.0), P.get("smile", 0.5)
     for s, side in ((1.0, "R"), (-1.0, "L")):
-        out["brow." + side] = (Quaternion((0, 1, 0), -s * 0.18 * b), Vector((0, -0.005 * b, 0)))
+        out["brow." + side] = (None, Vector((0, 0, -0.004 * b)))
         l = P.get("lid" + side, 0.12)
-        out["lid." + side] = (Quaternion((1, 0, 0), 1.02 * l), None)
-        lf = 0.012 * sm
-        out["mouth." + side] = (None, Vector((s * 0.0035 * sm, lf * 0.1, lf)) if False else Vector((s * 0.0035 * sm, lf, 0.0)))
+        out["lid." + side] = (Quaternion((1, 0, 0), -0.82 * max(0.0, min(1.0, l))), None)
+        out["mouth." + side] = (None, Vector((s * 0.003 * (sm - 0.4), 0, 0.0065 * (sm - 0.4))))
         g = P.get("gun" + side, 0.0)
         c1 = 1.45 * g + 0.15
         c2 = 1.55 * g + 0.1

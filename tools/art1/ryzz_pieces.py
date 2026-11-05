@@ -164,9 +164,12 @@ def ear(s):
     return e.rigid("head")
 
 
+SURF = None        # set by ryzz_finish: the scan head's radius along head-local directions
+
+
 def part_r(D):
     """The hair's outer surface along directions D (head-local), a soft groove down the centre parting."""
-    r = ray_dir(D, c=(0, -0.01, 0.0), r0=0.16)
+    r = SURF(D) if SURF is not None else ray_dir(D, c=(0, -0.01, 0.0), r0=0.16)
     groove = np.exp(-(D[..., 0] / 0.09) ** 2) * smooth(-0.1, 0.5, D[..., 2]) * 0.0035
     return r + 0.0065 - groove
 
@@ -180,6 +183,7 @@ def hair_cap():
     A, E = np.meshgrid(az, el)
     D = np.stack([np.sin(A) * np.cos(E), np.cos(A) * np.cos(E), np.sin(E)], -1)
     P = D * part_r(D)[..., None] + np.array([0, -0.01, 0])
+    P[..., 2] = np.where(E < -0.2, P[..., 2], P[..., 2])
     # the hairline: drops from the parting to the temples, then behind the ears; the nape sits on the neck
     def inside(q):
         x, y, z = q
@@ -425,10 +429,9 @@ def wire(name, path, w=0.0048, mat="glow-ryzz", uv=GLOWW_R):
     return sweep(name, mat, path, TRI, np.full(len(path), w), side_hint=np.array([0.3, 0.5, 0.8]), uv_rect=uv, room=0.0)
 
 
-def gum():
+def gum(c, r=0.046):
     """The bubble: a closed sphere at the lips on its own bone."""
-    c = hl(np.array([-0.022, 0.150, -0.092]))
-    r = 0.046
+    c = np.asarray(c, float)
     rows, cols = 8, 12
     v = [c + np.array([0, 0, r])]
     for i in range(1, rows):
@@ -452,7 +455,6 @@ def gum():
     return p
 
 
-def nose_ring():
-    c = hl(np.array([0.0, 0.1035, -0.0475]))
-    ring = [c + np.array([0.0088 * np.cos(t), 0.003, 0.0088 * np.sin(t) * 0.9 - 0.004]) for t in np.linspace(-0.5, np.pi + 0.5, 6)]
+def nose_ring(c):
+    ring = [np.asarray(c) + np.array([0.0088 * np.cos(t), 0.003, 0.0088 * np.sin(t) * 0.9 - 0.004]) for t in np.linspace(-0.5, np.pi + 0.5, 6)]
     return sweep("nosering", "metal-ryzz", ring, TRI, np.full(6, 0.0016), side_hint=np.array([0, 1.0, 0]), uv_rect=COPPER_R, room=0.0).rigid("head")

@@ -18,9 +18,9 @@ SRC, RIG, OUT = a[0], a[1], a[2]
 ATLAS = 2048
 UNIQ_W = 0.755
 EYE_R = (0.76, 0.12, 0.875, 0.22)
-MATS = ["skin-ryzz", "cloth-ryzz", "leather-ryzz", "hair-ryzz", "metal-ryzz", "eyes-ryzz", "glow-ryzz", "cloth-gum"]
-SCALE = {"face": 3.4, "lidU": 2.0, "lidD": 2.0, "ear": 0.7, "skull": 0.3, "palm": 1.4, "finger": 1.5, "thumb": 1.5, "plate": 1.1, "strap": 0.7, "gum": 0.8, "Low": 1.0}
-TILE = ("cap", "fringe", "pig", "brow", "tie", "sock", "rod", "eye", "wire", "chain", "arrow", "nosering", "arc", "buckle")
+MATS = ["skin-ryzz", "cloth-ryzz", "leather-ryzz", "hair-ryzz", "metal-ryzz", "glow-ryzz", "cloth-gum"]
+SCALE = {"lid": 2.0, "palm": 1.4, "finger": 1.5, "thumb": 1.5, "plate": 1.1, "strap": 0.7, "gum": 0.8, "Low": 1.0}
+TILE = ("cap", "fringe", "pig", "tie", "sock", "rod", "wire", "chain", "arrow", "nosering", "arc", "buckle")
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
@@ -67,12 +67,69 @@ def back_y(x, z):
     return h[0].y if h[0] is not None else -0.11
 
 
-# ---- the head
-pieces = [K.face_patch(), K.skull(), K.hair_cap(), K.gum(), K.nose_ring()]
+# ---- the head is the scan's sculpt (it matches the sheet); hair, lids, gum and rings sit on it
+_co = np.array([v.co[:] for v in low.data.vertices])
+_h = _co[_co[:, 2] > K.NECK_Z + 0.06]
+_lo, _hi = _h.min(0), _h.max(0)
+K.C[:] = ((_lo[0] + _hi[0]) / 2, (_lo[1] + _hi[1]) / 2 + 0.012, (_lo[2] + _hi[2]) / 2 + 0.008)
+K.HS = (_hi[0] - _lo[0] - 0.024) / 0.170       # (without the ears)
+print("head", _lo.round(3), _hi.round(3), "C", K.C.round(3), "HS", round(K.HS, 3))
+
+
+def front_y(x, z):
+    h = bvh.ray_cast(Vector((x, 0.5, z)), Vector((0, -1, 0)), 1.0)
+    return h[0].y if h[0] is not None else 0.1
+
+
+def surf(D):
+    out = np.zeros(D.shape[:-1])
+    o_ = K.C + np.array([0, -0.01, 0]) * K.HS
+    for ix in np.ndindex(out.shape):
+        d = Vector(tuple(M.norm(D[ix])))
+        h = bvh.ray_cast(Vector(tuple(o_ + np.array(d) * 0.4)), -d, 0.4)
+        out[ix] = (0.4 - h[3]) / K.HS if h[0] is not None else 0.1
+    return out
+
+
+K.SURF = surf
+NZ = K.NECK_Z
+EYE_Z, MOUTH_Z, BROW_Z = NZ + 0.137, NZ + 0.061, NZ + 0.160
+EYE_X, EYE_W, EYE_H = 0.0475, 0.0285, 0.0205
+MOUTH_C = np.array([0.0, front_y(0.0, MOUTH_Z), MOUTH_Z])
+LID_A = 0.82
+
+
+def eye_c(s):
+    return np.array([s * EYE_X, front_y(s * EYE_X, EYE_Z) - 0.024, EYE_Z])
+
+
+def lid_piece(s):
+    """The upper lid: closed it lies on the eye, at rest it is turned up about the eyeball, under the brow's skin (claire_finish)."""
+    side = "R" if s > 0 else "L"
+    c = eye_c(s)
+    rows, cols = 5, 9
+    v = []
+    for j in range(rows):
+        t = j / (rows - 1)
+        for i in range(cols):
+            x = i / (cols - 1) * 2 - 1
+            z = 1.12 - 2.0 * t
+            q = (s * EYE_X + x * EYE_W, z * EYE_H * (1 - 0.32 * x * x) + EYE_Z)
+            v.append((q[0], front_y(q[0], q[1]) + 0.0016, q[1]))
+    v = np.array(v)
+    ca, sa = math.cos(LID_A), math.sin(LID_A)
+    d = v - c
+    v2 = np.stack([d[:, 0], d[:, 1] * ca - d[:, 2] * sa, d[:, 1] * sa + d[:, 2] * ca], 1) + c
+    f = [[j * cols + i, j * cols + i + 1, (j + 1) * cols + i + 1, (j + 1) * cols + i] for j in range(rows - 1) for i in range(cols - 1)]
+    p = Piece("lid" + side, "skin-ryzz", v2, f).rigid("lid." + side)
+    p.c = c
+    return p
+
+
+gum_c = MOUTH_C + np.array([-0.016, 0.052, -0.014])
+pieces = [K.hair_cap(), K.gum(gum_c), K.nose_ring((0.0, front_y(0.0, NZ + 0.09) + 0.002, NZ + 0.09))]
 for s in (1.0, -1.0):
-    pieces.append(K.eyeball(s))
-    pieces += K.lids(s)
-    pieces += [K.brow(s), K.ear(s)]
+    pieces.append(lid_piece(s))
     pieces += K.tie_band(s)
 pieces += K.fringe()
 CH = {}
@@ -205,6 +262,24 @@ for v in me_l.vertices:
     verts.append(tuple(v.co))
     vw.append({gn[g.group]: g.weight for g in v.groups if g.weight > 0.01})
     rooms.append(1.0)
+# the scan's forearms sit against the skirt in the rest pose: nothing on an arm follows the hips
+for d_ in vw:
+    if d_.get("forearm.R", 0) + d_.get("forearm.L", 0) + d_.get("hand.R", 0) + d_.get("hand.L", 0) > 0.15:
+        for b_ in ("root", "hips", "skirt", "thigh.R", "thigh.L"):
+            d_.pop(b_, None)
+# the face's own deformers, soft spots on the sculpt
+DEFORM = {}
+for s_, sd_ in ((1.0, "R"), (-1.0, "L")):
+    DEFORM["mouth." + sd_] = (np.array([s_ * 0.0285, front_y(s_ * 0.0285, MOUTH_Z), MOUTH_Z]), 0.02)
+    DEFORM["brow." + sd_] = (np.array([s_ * 0.052, front_y(s_ * 0.052, BROW_Z), BROW_Z]), 0.03)
+for i_, q_ in enumerate(verts):
+    q_ = np.array(q_)
+    if q_[2] < NZ + 0.04 or q_[1] < 0.02:
+        continue
+    for b_, (c_, r_) in DEFORM.items():
+        k_ = float(1 - smooth(r_ * 0.25, r_, np.linalg.norm(q_ - c_)))
+        if k_ > 0.01:
+            vw[i_] = {"head": 1 - k_, b_: k_}
 for pl in me_l.polygons:
     faces_v.append(list(pl.vertices))
     faces_pid.append(0)
@@ -280,7 +355,7 @@ bmesh.update_edit_mesh(me)
 bpy.ops.uv.smart_project(angle_limit=math.radians(66), island_margin=0.0, area_weight=0.0, scale_to_bounds=False)
 bm = bmesh.from_edit_mesh(me)
 bm.faces.ensure_lookup_table()
-PARTS = {"upper_arm.R": "armR", "forearm.R": "armR", "hand.R": "armR", "upper_arm.L": "armL", "forearm.L": "armL", "hand.L": "armL", "thigh.R": "legR", "shin.R": "legR",
+PARTS = {"head": "head", "mouth.R": "head", "mouth.L": "head", "brow.R": "head", "brow.L": "head", "upper_arm.R": "armR", "forearm.R": "armR", "hand.R": "armR", "upper_arm.L": "armL", "forearm.L": "armL", "hand.L": "armL", "thigh.R": "legR", "shin.R": "legR",
          "foot.R": "legR", "thigh.L": "legL", "shin.L": "legL", "foot.L": "legL"}
 region = {}
 for i in range(nf):
@@ -306,9 +381,7 @@ bm = bmesh.from_edit_mesh(me)
 bm.faces.ensure_lookup_table()
 uvl = bm.loops.layers.uv["UV"]
 for i in uniq:
-    if names[faces_pid[i]] == "face":
-        for l in bm.faces[i].loops:
-            l[uvl].uv = (l.vert.co.x + 4, l.vert.co.z - 1.4 + 6)
+    pass
 
 
 def base_name(n):
@@ -330,6 +403,7 @@ for i in uniq:
     n = names[faces_pid[i]]
     wgt = SCALE.get(base_name(n), 1.0)
     if i in region:
+        wgt = 2.6 if region[i][0] == "head" else 1.0
         n = n + region[i][0]
     s_ = wgt * math.sqrt(stats[n][0] / max(stats[n][1], 1e-12))
     for l in bm.faces[i].loops:
@@ -353,14 +427,6 @@ for pl in me.polygons:
     ls = list(pl.loop_indices)
     if not is_tile(n):
         loop_uv[ls, 0] *= UNIQ_W
-        continue
-    if n.startswith("eye"):
-        pc = PBY[n]
-        base = faces_v[i][0] - pc.f[i - faces_pid.index(faces_pid[i])][0]
-        coords = pc.eye_uv[np.array(pl.vertices) - base]
-        r = EYE_R
-        for l, (x, y) in zip(ls, coords):
-            loop_uv[l] = (r[0] + (r[2] - r[0]) * (x * 0.5 + 0.5), r[1] + (r[3] - r[1]) * (y / 1.5 + 0.5))
         continue
     fu = faces_uv[i]
     for l, xy in zip(ls, fu):
@@ -484,7 +550,9 @@ for k_, i in enumerate(low_faces):
     r_, g_, b_ = fcol[k_]
     L_ = fcol[k_].mean()
     z_ = fc[k_][2]
-    if r_ > g_ * 1.5 and b_ > g_ * 1.1 and fc[k_][1] < 0.03 and 1.0 < z_ < 1.15:
+    if z_ > K.NECK_Z + 0.03 and b_ > r_ * 1.1:
+        m = "hair-ryzz"
+    elif r_ > g_ * 1.5 and b_ > g_ * 1.1 and fc[k_][1] < 0.03 and 1.0 < z_ < 1.15:
         m = "skin-ryzz"            # the waist: the corset wraps the front only, bare back (master sheet)
     elif r_ > 0.55 and g_ > 0.3 and b_ > 0.2 and g_ > b_ * 1.05 and r_ < g_ * 1.9 and L_ > 0.4 and not (g_ > 0.6 and b_ < 0.25):
         m = "skin-ryzz"
@@ -506,8 +574,9 @@ ri, gi, bi = OUTC[..., 0], OUTC[..., 1], OUTC[..., 2]
 lumi = OUTC.mean(2)
 z_t = POS[..., 2]
 # near-black leather lifted to charcoal with a cool cast (the toon rim reads it as gloss otherwise)
+rawL = blur(lumi, mask.astype(np.float32), 5)
 dk_k = smooth(0.34, 0.12, blur(OUTC.max(2), mask.astype(np.float32), 2))[..., None] * mask[..., None]
-OUTC = OUTC * (1 - dk_k * 0.1) + np.array([0.15, 0.135, 0.175], dtype=np.float32) * dk_k
+OUTC = OUTC + np.array([0.2, 0.18, 0.235], dtype=np.float32) * dk_k
 # the neon: bright magenta line art, corset, chest bolt, forearm veins -> the glow key (the shader's model_glow colour)
 neon = mask & (ri > 0.86) & (bi > 0.62) & (gi < 0.6) & (ri > gi * 1.6) & (z_t > 0.95)
 n_b = blur(neon.astype(np.float32), mask.astype(np.float32), 1)
@@ -520,7 +589,7 @@ core &= ~bw
 # fishnets: from the top of the thigh band to the skirt's hem, repainted crisp
 yl = mask & (ri > 0.65) & (gi > 0.55) & (bi < 0.35) & (z_t < 0.8) & (z_t > 0.5) & (np.abs(POS[..., 0]) < 0.17)
 BAND = float(np.percentile(z_t[yl], 99)) if yl.any() else 0.68
-net = mask & (z_t > BAND + 0.004) & (z_t < 0.84) & (np.hypot(np.abs(POS[..., 0]) - 0.085, POS[..., 1]) < 0.094)
+net = mask & (z_t > BAND + 0.004) & (z_t < 0.84) & (np.hypot(np.abs(POS[..., 0]) - 0.085, POS[..., 1]) < 0.1) & (rawL > 0.2)
 print("thigh band top", round(BAND, 3), "net texels", int(net.sum()))
 skin_sm = blur(OUTC.mean(2), net.astype(np.float32), 9)
 base = P.skin(POS[net].astype(np.float64), NOR[net].astype(np.float64), AO[net].astype(np.float64))
@@ -536,11 +605,8 @@ def paint(pred, fn):
         OUTC[ys, xs] = fn(POS[ys, xs].astype(np.float64), NOR[ys, xs].astype(np.float64), AO[ys, xs].astype(np.float64))
 
 
-paint(lambda n: n == "face", P.face)
-paint(lambda n: n == "skull" or n.startswith("ear"), P.skin)
 for sd_, sg_ in (("R", 1.0), ("L", -1.0)):
-    paint(lambda n, q="lidU" + sd_: n == q, lambda p, n, ao, sg=sg_: P.lid(p, n, ao, sg, True))
-    paint(lambda n, q="lidD" + sd_: n == q, lambda p, n, ao, sg=sg_: P.lid(p, n, ao, sg, False))
+    paint(lambda n, q="lid" + sd_: n == q, lambda p, n, ao, sg=sg_, c=eye_c(sg_): P.lid(p, n, ao, sg, c, LID_A, EYE_Z, EYE_H))
 paint(lambda n: n.startswith("palm"), P.glove)
 for s in HANDS:
     for pc in HANDS[s]:
@@ -589,9 +655,6 @@ x0, y0, x1, y1 = rect(K.GLOWW_R)
 OUTC[y0:y1, x0:x1] = P.hexc("#ffb27e")
 x0, y0, x1, y1 = rect(K.BLACK_R)
 OUTC[y0:y1, x0:x1] = P.hexc("#2c2733")
-x0, y0, x1, y1 = rect(EYE_R)
-v_, u_ = np.mgrid[0:y1 - y0, 0:x1 - x0]
-OUTC[y0:y1, x0:x1] = P.eye((u_ + 0.5) / (x1 - x0) * 2 - 1, ((v_ + 0.5) / (y1 - y0) - 0.5) * 1.5)
 
 atlas = bpy.data.images.new("ryzz_atlas", ATLAS, ATLAS)
 px = np.ones((ATLAS, ATLAS, 4), np.float32)
@@ -635,11 +698,11 @@ def bone(name, parent, head, tail):
 
 
 for s, side in ((1.0, "R"), (-1.0, "L")):
-    c = K.hl(K.EYE * [s, 1, 1])
+    c = eye_c(s)
     bone("lid." + side, "head", c, c + np.array([0, 0.03, 0]))
-    b = K.hl(np.array([s * 0.042, 0.095, 0.05]))
+    b = DEFORM["brow." + side][0]
     bone("brow." + side, "head", b, b + np.array([0, 0.03, 0]))
-    m_ = K.hl(np.array([s * 0.0255, 0.082, -0.0665]))
+    m_ = DEFORM["mouth." + side][0]
     bone("mouth." + side, "head", m_, m_ + np.array([0, 0.02, 0]))
     ax = np.array([s * K.SH, 0.0, 0.0])
     hd = np.array([s * 0.085, 0.0, K.ANKLE_Z])
@@ -662,7 +725,7 @@ for s, side in ((1.0, "R"), (-1.0, "L")):
     for i, nm in enumerate(nms):
         bone(nm, prev, chain[i], chain[i + 1])
         prev = nm
-gc_ = K.hl(np.array([0.0, 0.098, -0.066]))
+gc_ = MOUTH_C + np.array([0, 0.008, 0])
 bone("gum", "head", gc_, gc_ + [0, 0.06, 0])
 for i, (ra, rb, rd) in enumerate(RODB):
     bone("rod.%d" % i, "hips", ra, rb)
@@ -682,7 +745,7 @@ for vi, d in enumerate(vw):
 
 # ---- anchors and FX points: empties on the bones. S3/S4 read these.
 A = {"anchor_head_top": ("head", (0, 0.0, K.C[2] + 0.12)), "anchor_chest": ("hips", (0, 0.13, K.SHOULDER_Z - 0.06)),
-     "anchor_harness": ("hips", (0, back_y(0, 1.28) - 0.03, 1.28)), "anchor_gum": ("gum", tuple(gc))}
+     "anchor_harness": ("hips", (0, back_y(0, 1.28) - 0.03, 1.28)), "anchor_gum": ("gum", tuple(gum_c))}
 for s, side in ((1.0, "R"), (-1.0, "L")):
     fs = HANDS[s]
     f0 = next(p for p in fs if p.name.startswith("finger0"))
