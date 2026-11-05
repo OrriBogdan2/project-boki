@@ -1553,11 +1553,14 @@ def face_marks(target, arm, spec):
     if not bld.v:
         return None
     ob = bld.object(spec.get("name", "marks").capitalize())
-    # (an open ribbon has no inside for recalc_face_normals to go by: turn every face toward the viewer, else the
-    # back-face cull hides half the marks)
-    for poly in ob.data.polygons:
-        if poly.normal.y < 0.0:
-            poly.flip()
+    # (an open ribbon has no inside for recalc_face_normals to go by, and turning every face one way hid them all
+    # in game (b13): make it two-sided, a reversed copy of every face, so the back-face cull keeps one of each)
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    dup = bmesh.ops.duplicate(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:])
+    bmesh.ops.reverse_faces(bm, faces=[g for g in dup["geom"] if isinstance(g, bmesh.types.BMFace)])
+    bm.to_mesh(ob.data)
+    bm.free()
     ob.data.update()
     img = bpy.data.images.new(spec.get("name", "marks") + "_atlas", 8, 8, alpha=False)
     px = np.ones((8, 8, 4), np.float32)
