@@ -44,7 +44,7 @@ var made := 0                  # nodes made so far (tests: it stops growing once
 var plays := {}                # (tests) move -> times played
 var _arcs := {}                # arc degrees -> arc mesh
 var _cyl: ArrayMesh
-var _anchors := {}             # "<hunter id>/<anchor>" -> the node found for it
+var _anchors := {}             # "<model id>/<anchor>" -> the node found for it (null: none)
 
 static func of(match_node: Node) -> HeroVfx:
 	if match_node.has_meta("hero_vfx"):
@@ -102,10 +102,11 @@ func anchor_pos(h: Hunter, anchor_name: String) -> Vector3:
 func _anchor_node(h: Hunter, anchor_name: String, a: Dictionary) -> Node3D:
 	if h.model == null or not h.model.is_inside_tree():
 		return null
-	var key := "%d/%s" % [h.get_instance_id(), anchor_name]
-	if _anchors.has(key) and is_instance_valid(_anchors[key]):
-		return _anchors[key]
-	_anchors.erase(key)
+	# looked up once per model (a miss too: today's models have none of these, and this runs every frame)
+	var key := "%d/%s" % [h.model.get_instance_id(), anchor_name]
+	if _anchors.has(key):
+		return _anchors[key] if is_instance_valid(_anchors[key]) else null
+	_anchors[key] = null
 	for n in a.get("nodes", []):
 		var an := WardenGlb.anchor(h.model, String(n))
 		if an != null:
@@ -239,6 +240,12 @@ func _drop_entry(node: Node3D) -> void:
 			live_n -= int(e["n"])
 			motes.erase(e)
 			return
+	for key: String in holds:
+		for lay: Dictionary in holds[key]["layers"]:
+			if lay["node"] == node:
+				live_n -= int(lay["n"])
+				(holds[key]["layers"] as Array).erase(lay)
+				return
 
 func _surface_node(kind: String) -> Node3D:
 	var mi := MeshInstance3D.new()

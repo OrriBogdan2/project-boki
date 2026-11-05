@@ -317,9 +317,9 @@ func _tick_pull(dt: float) -> void:
 	h.roll_dir = pull_dir
 	h.roll_speed = pull_speed
 	h.roll_t = maxf(h.roll_t, dt * 2.0)
+	HeroVfx.of(k.m).hold(h, "chain_drag")
 	var a := h.pos + Vector3(0, 1.0, 0)
 	k.fx().chain(_fx_id(), a, at + Vector3(0, 1.0 if target != null else 0.6, 0), 0.0, HOT, DARK, 0.16)
-	HeroVfx.of(k.m).hold(h, "chain_drag")
 
 func _anchor_now() -> Vector3:
 	return target.pos if target != null and is_instance_valid(target) else anchor
