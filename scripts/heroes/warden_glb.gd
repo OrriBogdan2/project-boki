@@ -108,6 +108,9 @@ const WING_FOLD := "wing_fold"
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
+## .glb path -> its scene, kept once read: a preview freed and built again (the Masks screens) would otherwise
+## read the file from disk again, 0.3-1.5 s a Warden
+static var _scenes := {}
 static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
 static var _gloss_m: ShaderMaterial
 static var _measuring := false  # building that neutral model: no .glb on it
@@ -187,7 +190,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	if _measuring or not uses_model(arch):
 		return
 	var rest := neutral_rest(arch)
-	var scene := load(path(arch)) as PackedScene
+	var scene := _scene(arch)
 	var glb: Node3D = scene.instantiate() as Node3D if scene else null
 	var skel := skeleton(glb)
 	var bad: Array = WardenSkeleton.mismatches(skel, rest, EXTRA.get(arch, {})) if skel else ["no armature"]
@@ -440,6 +443,32 @@ static func extra_skeleton(root: Node3D) -> Skeleton3D:
 	if root == null or not bool(root.get_meta("glb", false)):
 		return null
 	return skeleton(root.get_node_or_null("Warden"))
+
+## Starts reading a Warden's .glb on a loader thread, so the build that needs it later doesn't wait on the disk.
+static func fetch(arch: String) -> void:
+	var p := path(arch)
+	if not uses_model(arch) or _scenes.has(p):
+		return
+	if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+		ResourceLoader.load_threaded_request(p)
+
+## Whether a Warden's model can be built without waiting on the disk (fetch() starts the read when it hasn't).
+static func fetched(arch: String) -> bool:
+	fetch(arch)
+	var p := path(arch)
+	return not uses_model(arch) or _scenes.has(p) \
+			or ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_IN_PROGRESS
+
+## Whether the Warden's neutral rig rest is known yet (else the next build measures it first: a build of its own).
+static func has_rest(arch: String) -> bool:
+	return _neutral.has(arch) or not uses_model(arch)
+
+static func _scene(arch: String) -> PackedScene:
+	var p := path(arch)
+	if not _scenes.has(p):
+		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
+		_scenes[p] = ResourceLoader.load_threaded_get(p) if asked else load(p)
+	return _scenes[p] as PackedScene
 
 ## The rig rest of the Warden's model in the neutral look (built once a session).
 static func neutral_rest(arch: String) -> Dictionary:

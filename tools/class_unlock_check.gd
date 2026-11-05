@@ -582,7 +582,9 @@ func _viewer(tree: SceneTree) -> void:
 	layer.add_child(host)
 	var v := HunterViewer.make("juggernaut", Vector2(220, 300))
 	host.add_child(v)
-	for i in 4: await tree.process_frame
+	var t0 := Time.get_ticks_msec()
+	while v.model == null and Time.get_ticks_msec() - t0 < 8000:      # (built on its own frame: PreviewBuild)
+		await tree.process_frame
 	v.set_process(false)       # (stepped by hand below)
 	var want: Array = KitCard.slots_of("juggernaut").filter(func(x): return x != "r" and x != "x") + ["x", "r"]
 	ok(HunterViewer.slots_for("juggernaut") == want
@@ -613,6 +615,7 @@ func _viewer(tree: SceneTree) -> void:
 		if not row is AbilityClip: continue
 		var clip := row as AbilityClip
 		clip.set_process(false)
+		clip.build()
 		clip.t = 0.0
 		clip._hit_i = 0
 		clip.tick(AbilityClip.ACT_AT + 0.05)
@@ -624,6 +627,10 @@ func _viewer(tree: SceneTree) -> void:
 		if not clip._hits.is_empty() and clip._hit_i == 0:
 			hits_ok = false
 			print("  %s (%s) never hits the dummy" % [clip.slot, clip.fx])
+	var clip_rows: Array = v.rows.filter(func(r): return r is AbilityClip)
+	v.select(v.rows.find(clip_rows[2]))
+	ok(clip_rows[2].playing and clip_rows.filter(func(r): return r.playing).size() == 1,
+			"only the clip in focus plays; the others hold still")
 	ok(moves_ok, "each clip drives the Hunter with the kit's own move (KMOVES)")
 	ok(hits_ok, "and each one lands on the training dummy")
 	var long_lines: Array = []
