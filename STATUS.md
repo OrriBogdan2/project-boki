@@ -582,3 +582,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Shots: ext/hero-shots-s2 kits/ostra/.
 - Owner Qs: held fire plain, or main's +15% curve? x1.9 size with hit radius 0.53 m OK? Should placed walls and domes keep stopping orbs?
 - Slot: ART-1 Cinder started.
+
+## 2026-11-05 S2: Claire final design received
+- claire_FINAL_sheet, claire_turnaround_apose, claire_splash logged (gentle, sincere; adult; animations graceful, never seductive). ART-1 Claire joins the queue after ART-1 Grimble. ext/wip-claire (old look) is superseded for the model. Kit items 62+64+65 stay queued.
