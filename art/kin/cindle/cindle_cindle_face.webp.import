@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://satr8oq45yhs"
-path="res://.godot/imported/cindle_cindle_face.webp-b8955398dd51901cbaacd6abb22a34b6.ctex"
+path.bptc="res://.godot/imported/cindle_cindle_face.webp-b8955398dd51901cbaacd6abb22a34b6.bptc.ctex"
+path.astc="res://.godot/imported/cindle_cindle_face.webp-b8955398dd51901cbaacd6abb22a34b6.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c9c33e827f0d2f03dfa7236997724da7"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/cindle/cindle_cindle_face.webp"
-dest_files=["res://.godot/imported/cindle_cindle_face.webp-b8955398dd51901cbaacd6abb22a34b6.ctex"]
+dest_files=["res://.godot/imported/cindle_cindle_face.webp-b8955398dd51901cbaacd6abb22a34b6.bptc.ctex", "res://.godot/imported/cindle_cindle_face.webp-b8955398dd51901cbaacd6abb22a34b6.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
