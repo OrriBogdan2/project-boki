@@ -505,21 +505,19 @@ func _build_ui() -> void:
 	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	ver.offset_left = 28; ver.offset_top = -40; ver.offset_bottom = -18
 	root.add_child(ver)
-	# like a game client's login screen: a small news card in the corner, the playtest and how to join
-	var news := UI.glass(12, 12)
+	# a small playtest chip low in the corner, clear of the splash's hero: the build and the Discord link
+	var news := UI.glass(8, 6)
 	news.name = "News"
 	news.mouse_filter = Control.MOUSE_FILTER_STOP
-	news.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)       # up in the open sky, clear of the squad
+	news.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	news.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	news.offset_right = -28; news.offset_top = 28
-	var nv := UI.vbox(4); news.add_child(nv)
-	nv.add_child(UI.label("PLAYTEST  ·  BUILD %s" % Net.VERSION, 11, Color("e9b48a"), UI.caps))
-	nv.add_child(UI.label("Twelve Masks, one Boki each", UI.T_HEAD, UI.INK, UI.big))
-	var nl := UI.label("Bring your Boki on a run, bring it home. Tell us what broke.", 13, UI.MUTED)
-	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; nl.custom_minimum_size.x = 280
-	nv.add_child(nl)
-	var nb := UI.ghost("Join the playtest Discord", func(): OS.shell_open(DISCORD), 0, "bond")
-	nb.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	news.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	news.offset_right = -28; news.offset_bottom = -64
+	var nv := UI.hbox(10); news.add_child(nv)
+	var tag := UI.label("PLAYTEST  ·  %s" % Net.VERSION, 11, Color("e9b48a"), UI.caps)
+	tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	nv.add_child(tag)
+	var nb := UI.ghost("Join the Discord", func(): OS.shell_open(DISCORD), 0, "bond")
 	nb.focus_mode = Control.FOCUS_NONE
 	nv.add_child(nb)
 	root.add_child(news)
