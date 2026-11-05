@@ -893,3 +893,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Full suite before the last skin-tone commit: baseline reds; clip, rig-standard, warden-glb, warden-model, portrait 0 FAIL on the tip. Clips keyed on the scripted body: arm clipping on the scan unchecked. Owner Qs: closed smile per the head sheet? Stone eye tilt for the match camera?
 
 ## 2026-11-05 S2: READY ext/claire-62-65 c4cf394a (items 62, 64, 65); details in EXT_TO_MAIN. Owner Qs: Boki merge allowed out of Rimelock? 1.5 m/s sink after a skate jump, or normal fall?
+
+## 2026-11-05 S2: READY ext/art1-hem 8280e446 (replaces 36307ae4; contains kit-lisette-114)
+- Idle and stance upright, head 7 cm ahead of the feet centre; bow forward in heavy_wind; pin thread red; arrow stays in the spool during heavy_wind. Checks on this build, 0 FAIL: --check, clip, rig-standard, warden-stance, warden-glb 182, warden-model 157, archer-combo 153, health --strict. Full suite not rerun. PinNeedle + bow alignment by numbers, not seen together live. Sheets and GIFs predate this round.
