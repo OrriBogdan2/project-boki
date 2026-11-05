@@ -358,18 +358,7 @@ func _draw_all() -> void:
 
 func _draw_world_labels() -> void:
 	var cam := m.cam
-	# deathboxes and revive beacons
-	for b in m.boxes:
-		if cam.is_position_behind(b["pos"]):
-			continue
-		var o: Hunter = b["owner"]
-		var bp := cam.unproject_position(b["pos"] + Vector3(0, 1.9, 0))
-		var soul := Life.soul_here(m, b)
-		var ally: bool = m.player != null and o.team == m.player.team
-		if soul and ally and o != m.player:
-			_ctext(bp, "%s  ·  %ds" % [o.pname, int(ceil(float(b["soul_until"]) - m.time))], 13, Color("9ee2a0"), big)
-		elif not b["empty"] and m.player and m.player.flat_dist(b["pos"]) < 14.0:
-			_ctext(bp, "%s's box" % o.pname if o != m.player else "Your box", 12, Life.box_color(b), big)
+	ReviveHud.world_labels(self)       # deathboxes and revive beacons
 	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
 	if m.tut and m.tut.target != Vector3.INF and m.player and not m.player.out:
@@ -377,15 +366,6 @@ func _draw_world_labels() -> void:
 	_draw_exit_labels()
 	_draw_lair_labels()
 	_draw_truce_marks()
-	for bc in m.beacons:
-		if bc["used"] or cam.is_position_behind(bc["pos"]):
-			continue
-		if m.player and m.player.flat_dist(bc["pos"]) > 26.0 and float(bc["prog"]) <= 0.0:
-			continue
-		var bp := cam.unproject_position(bc["pos"] + Vector3(0, 3.2, 0))
-		_ctext(bp, "Revive beacon" + ("  ·  contested" if bc["contested"] else ""), 12, Color("8fffc0"), big)
-		if float(bc["prog"]) > 0.0:
-			_bar(Rect2(bp + Vector2(-40, 6), Vector2(80, 5)), float(bc["prog"]), Color("8fffc0"))
 	_draw_wisp_rings()
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not h.model.visible or h.unseen:
@@ -733,6 +713,7 @@ func _draw_minimap(sz: Vector2) -> void:
 			_draw_exit_icon(pv, x, 1.0 if not riding else 0.8)
 	if m.lairs:
 		_draw_map_lairs(inner, to_map, on_map, riding)
+	ReviveHud.minimap(self, inner, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
 		for cnd in m.spawn_plan.cands:
@@ -815,7 +796,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		if m.player == null or h.team != m.player.team:
 			continue
 		var mst := _mate_state(h) if h != m.player else ["ALIVE", INK, h.pos, ""]
-		if mst[2] == Vector3.INF or (h == m.player and (h.out or h.extracted)):
+		if mst[2] == Vector3.INF or h.out or (h == m.player and h.extracted):      # (a fallen mate: their box)
 			continue
 		var pv: Vector2 = to_map.call(mst[2])
 		var col: Color = INK if h == m.player else mst[1]
@@ -1974,7 +1955,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"revive": prog = it["ent"].revive
 			"finish": prog = p.finish_t / Life.R["stomp_commit"]
 			"stomping": prog = float(p.stomp.get("t", 0.0)) / Life.R["stomp_time"]
-			"boxrev": prog = p.box_t / Life.R["box_revive_time"]
+			"boxrev": prog = p.box_t / BoxRevive.time_for(it["box"]["owner"])
 			"loot": prog = p.box_t / Life.R["loot_time"]
 			"catch": prog = CaptureHud.progress(p)
 			"chest": prog = it["chest"]["prog"]
@@ -3068,16 +3049,7 @@ func _draw_wisp_rings() -> void:
 			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
 			_rounded(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 14, sz.y * 0.5 + 70), Vector2(w + 28, 28)), Color(0.12, 0.02, 0.02, 0.85), 8, Color(1, 0.3, 0.2, 0.7), 2)
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.5 + 89), s, 15, Color("ff8a7a"))
-	# deathbox revives in progress
-	for b in m.boxes:
-		if m.time - float(b.get("rev_at", -9.0)) > 0.15 or m.cam.is_position_behind(b["pos"]):
-			continue
-		var by = b.get("rev_by")
-		_ground_ring(b["pos"], 1.6, Color(GOOD, 0.3), 2.0)
-		_ground_ring(b["pos"], 1.6, Color(GOOD, 0.95), 5.0, float(b.get("rev_prog", 0.0)))
-		var bp := m.cam.unproject_position(b["pos"] + Vector3(0, 2.0, 0))
-		var o3: Hunter = b["owner"]
-		_ctext(bp, "%s bringing back %s  %d%%" % [(by as Hunter).pname if is_instance_valid(by) else "Someone", o3.pname, int(float(b.get("rev_prog", 0.0)) * 100.0)], 12, GOOD, big)
+	ReviveHud.revive_rings(self)       # deathbox revives in progress
 
 ## A soft coloured glow round the screen edges (danger to you).
 func _edge_pulse(sz: Vector2, col: Color, a: float) -> void:

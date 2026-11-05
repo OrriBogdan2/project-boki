@@ -183,6 +183,7 @@ func draw(sz: Vector2) -> void:
 					hud._ctext(pv + Vector2(0, 17.0 * ek), st, 10, Exits.color_of(x) if m.exits.live(x) else MUTED, hud.big)
 	hud.mm_circ = saved
 	_spawns(c, team, kk)
+	ReviveHud.full_map(self)
 	_lair_alerts(c)
 	_ship(c)
 	_wave_ships(c)

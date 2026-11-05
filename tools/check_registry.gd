@@ -80,6 +80,8 @@ const CHECKS := {
 	"--warden-stance-check": ["res://tools/warden_stance_check.gd", "warden_stance_check", null],
 	"--warden-stance-shots": ["res://tools/warden_stance_shots.gd", "warden_stance_shots", null],
 	"--mantle-look-check": ["res://tools/mantle_look_check.gd", "mantle_look_check", null],      # Mantle look, creator
+	"--revive-check": ["res://tools/revive_check.gd", "revive_check", null],      # box revive, beacons (0018)
+	"--revive-shots": ["res://tools/revive_shots.gd", "revive_shots", null],      # --shots-dir=<dir>
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

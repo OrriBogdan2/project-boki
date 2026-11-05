@@ -18,7 +18,7 @@ var mobs: Array = []
 var shots: Array = []
 var pickups: Array = []     # {pos, vel, kind:"gem"|"seed"|"tonic", v, key, node, t}
 var boxes: Array = []       # deathboxes, see Life
-var beacons: Array = []     # revive beacons, see Life
+var beacons: Array = []     # revive beacons, see Beacons
 var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
 var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (host / offline)
 var shrines: Array = []     # {pos, used, prog, node}
@@ -740,7 +740,7 @@ func _start(o: Dictionary) -> void:
 		add_child(skytrain)
 		skytrain.setup(self)
 	await _slice()
-	Life.place_beacons(self)
+	Beacons.place(self)
 	await _slice()
 	if not opts.get("arena", false):
 		await _spawn_breakables()
@@ -2939,6 +2939,7 @@ func _exit_tree() -> void:
 	for key in box_hums.keys():
 		Sfx.loop_stop(String(key))
 	box_hums.clear()
+	Beacons.stop_sounds(self)
 	if biomes: biomes.free_up()
 	if duel:
 		duel.teardown()
@@ -4294,8 +4295,8 @@ func step(dt: float) -> void:
 	Life.tick_wisps(self, dt)
 	Life.tick_stomps(self, dt)
 	_tick_chase()
+	Beacons.tick(self, dt)
 	if not net_on:
-		Life.tick_beacons(self, dt)
 		_watch_death()
 	_update_dex(dt)
 	_prof("life")
@@ -4601,7 +4602,7 @@ func _update_interact(dt: float) -> void:
 					continue
 				var o: Hunter = b["owner"]
 				if o.team == h.team and o != h and Life.soul_here(self, b) and not o.remote:
-					best = {"kind": "boxrev", "box": b, "label": ("Hold %s to bring %s back  ·  slow and loud: rivals nearby will hear it" % [Settings.key_cap("interact"), o.pname]) if not h.box_reviving() else "Bringing %s back  ·  let go to stop" % o.pname, "col": Color("9ee2a0")}
+					best = {"kind": "boxrev", "box": b, "label": BoxRevive.prompt(h, o), "col": Color("9ee2a0")}
 					break
 				if not b["empty"]:
 					var whose: String = "your box" if o == h else o.pname + "'s box"
@@ -4682,37 +4683,14 @@ func _update_interact(dt: float) -> void:
 						if b0["empty"] or got > 0: hud.close_loot()
 					else:
 						hud.open_loot(b0)
-			"boxrev", "loot":
-				var b: Dictionary = best["box"]
-				h.set_hold("revive" if best["kind"] == "boxrev" else "loot")
-				var rev: bool = best["kind"] == "boxrev"
-				# taking a hit breaks the channel (a revive has to be let go and started again)
-				if time - h.hurt_at < 0.1:
+			"boxrev":
+				BoxRevive.hold(self, h, best["box"], dt)
+			"loot":
+				h.set_hold("loot")
+				h.box_t = 0.0 if time - h.hurt_at < 0.1 else h.box_t + dt     # a hit starts the loot over
+				if h.box_t >= Life.R["loot_time"]:
 					h.box_t = 0.0
-					if rev: h.set_meta("box_broke", true)
-				if rev and h.get_meta("box_broke", false):
-					h.box_t = 0.0
-				else:
-					h.box_t += dt
-					var need: float = Life.R["box_revive_time"] if rev else Life.R["loot_time"]
-					if rev:
-						# everyone can see (and hear: _update_box_hums) a deathbox revive going up, and who's
-						# doing it; the reviver kneels over the box, locked in place
-						b["rev_prog"] = h.box_t / need
-						b["rev_by"] = h
-						b["rev_at"] = time
-						h.box_rev_at = time
-					if h.box_t >= need:
-						h.box_t = 0.0
-						if rev:
-							b["rev_at"] = -9.0
-							h.box_rev_at = -9.0
-							_box_hum_stop(b)
-							sfx("revive_done", b["pos"], 3.0)
-							fx.ring(b["pos"] + Vector3(0, 0.1, 0), 2.6, Color("bff5c0"), 0.5)
-							fx.burst(b["pos"] + Vector3(0, 1.0, 0), Color("bff5c0"), 26, 4.5, 0.7, -2.0, 1.2)
-							Life.box_revive(self, b, h)
-						else: Life.loot_box(self, h, b)
+					Life.loot_box(self, h, best["box"])
 			"catch":
 				Capture.hold(self, h, best["ent"], dt)
 			"chest":
@@ -5805,6 +5783,8 @@ func _net_ev(x, from: String) -> void:
 				_rev_out.erase(who.nid)
 		"xc":
 			if exits: exits.net_in(x)
+		"bcn":
+			Beacons.net_in(self, x)
 		"emo":
 			var eh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if truce and eh: truce.emote(eh, String(x[2]), true)
