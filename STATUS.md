@@ -657,3 +657,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Shots: ext/hero-shots-s2 kits/vex/. Not checked: live mouse play, cast view at real 60 fps, aim toward the bottom-left HUD, rifle pose in the air roll, aiming opposite the slide.
 - Owner Qs: is losing Vex's RMB aim preview OK, or a light always-on indicator? Should Lisette or Cinder also keep body on the cursor in the dash?
 - Slot: ART-1 Pip.
+
+## 2026-11-05 S2: all 12 Hunters have full art sets
+- Vex final logged (robotic LEFT arm, cyber-eye RIGHT, one braid; follow the master over the turnaround). IMG splash request closed. Portraits still to add: Tarek, Ryzz, Vex. ART-1 order after the running lanes: Sable, Ryzz, Vex.
