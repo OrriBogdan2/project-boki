@@ -496,9 +496,9 @@ def scan_reshape(ob):
     return W, ix
 
 
-SKIN_K = S.vec(0.68, 0.57, 0.51)
-ARM_L_GROW = 0.46
-ARM_R_SHRINK = 0.2
+NRM_K = 6.0                   # the atlas-light normal map's strength
+ARM_L_GROW = 0.72
+ARM_R_SHRINK = 0.3
 HAIR_FAT = 0.011              # m the scan's thin locs grow along their normals (tarek_head: thick ropes)
 
 
@@ -543,7 +543,17 @@ def scan_slots(ob):
     hi, lo = B.max(2), B.min(2)
     sat = (hi - lo) / np.maximum(hi, 1e-3)
     peach = S.sstep(0.2, 0.27, sat) * S.sstep(0.66, 0.56, sat) * S.sstep(0.4, 0.5, hi) * (B[:, :, 0] > B[:, :, 2])
-    A2 = A * (1.0 + peach[:, :, None] * (SKIN_K - 1.0))
+    # (to the head model's skin, the sheet's warm brown, by the scan's own mean skin)
+    pk = peach > 0.8
+    k_ = SKIN_TONE / np.maximum(A[pk].mean(0), 1e-3)
+    log("skin:", A[pk].mean(0), "->", SKIN_TONE)
+    A2 = A * (1.0 + peach[:, :, None] * (k_ - 1.0))
+    # the stone's relief as a normal map, from the atlas's light (tangent space follows the uv)
+    L = B.mean(2)
+    n = np.stack((-(np.roll(L, -1, 1) - np.roll(L, 1, 1)) * NRM_K, -(np.roll(L, -1, 0) - np.roll(L, 1, 0)) * NRM_K, np.ones_like(L)), 2)
+    n /= np.sqrt((n * n).sum(2))[:, :, None]
+    global SCAN_NRM
+    SCAN_NRM = n * 0.5 + 0.5
     full = np.ones((h, w, 4), np.float32)
     full[:, :, :3] = A2
     tex.pixels.foreach_set(full.ravel())
@@ -557,6 +567,15 @@ def scan_slots(ob):
     keyed = S.sstep(0.62, 0.8, A[:, :, 0]) * S.sstep(0.3, 0.5, A[:, :, 0] - A[:, :, 2]) * mask
     e = A * keyed[:, :, None]
     im = save_img(e[::2, ::2], "tarek_scan_emit")
+    SCAN_NRM[~mask] = (0.5, 0.5, 1.0)
+    nim = save_img(SCAN_NRM[::2, ::2], "tarek_scan_normal")
+    nim.colorspace_settings.name = "Non-Color"
+    nt = me.materials[lea].node_tree
+    nn = nt.nodes.new("ShaderNodeTexImage")
+    nn.image = nim
+    nm_ = nt.nodes.new("ShaderNodeNormalMap")
+    nt.links.new(nn.outputs[0], nm_.inputs["Color"])
+    nt.links.new(nm_.outputs[0], nt.nodes["Principled BSDF"].inputs["Normal"])
     for m in me.materials:
         if m.name in ("leather-body", "skin-body"):
             nt = m.node_tree
@@ -569,6 +588,106 @@ def scan_slots(ob):
     for i in reversed(range(len(me.materials))):
         if i not in used:
             me.materials.pop(index=i)
+    # (the body's slots in the far atlas stay few; the head brings its own one)
+
+
+HEAD_GLB = "~/meshy/tarek_m/head_bake/low.glb"     # the head from tarek_head.png, baked (tarek_head_bake.json)
+HEAD_TRIS = 3400
+CHIN_K = 0.686                # the chin's depth under the hair top, as a share of the head model's height (the sheet's front view)
+NECK_CUT = 0.075              # m under the chin: where the head's neck stops and the body's begins
+
+
+def scan_head(body, W, ix):
+    """A separate denser head with its own atlas: the body's head and all its hair go, the head model takes their place,
+    turned to face +Y, scaled chin-to-crown, and skinned from the body's nearest vertices."""
+    P0 = verts_np(body).copy()
+    top = float(P0[:, 2].max())
+    hairtop_scan, chin_scan, neck_scan = 0.946, 0.63, 0.567          # (scan frame, read off the turnaround run)
+    s = (top - float(R.neck[2])) / (hairtop_scan - neck_scan)
+    chin = top - (hairtop_scan - chin_scan) * s
+    log("head: top %.3f, chin %.3f" % (top, chin))
+    tree = mathutils.kdtree.KDTree(P0.shape[0])
+    for i, p in enumerate(P0):
+        tree.insert(p, i)
+    tree.balance()
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=os.path.expanduser(HEAD_GLB))
+    new = [o for o in bpy.data.objects if o not in before]
+    head = next(o for o in new if o.type == "MESH")
+    head.data.transform(head.matrix_world)
+    head.parent = None
+    head.matrix_world = Matrix.Identity
+    for o in new:
+        if o is not head:
+            bpy.data.objects.remove(o)
+    Q = verts_np(head).copy()
+    Q = Q * S.vec(-1, -1, 1)              # (Meshy faces -Y: a half turn to +Y)
+    H = float(Q[:, 2].max() - Q[:, 2].min())
+    k = (top - chin) / (CHIN_K * H)
+    mid = (Q[Q[:, 2] > Q[:, 2].max() - 0.3 * H]).mean(0)
+    Q = (Q - np.array((mid[0], mid[1], Q[:, 2].max()), np.float32)) * k + np.array((float(HC[0]), float(HC[1]), top), np.float32)
+    head.data.vertices.foreach_set("co", Q.ravel())
+    head.data.update()
+    # the bust goes: only hair stays under the neck cut
+    uv = head.data.uv_layers.active.data
+    tex = next(n.image for n in head.data.materials[0].node_tree.nodes if n.type == "TEX_IMAGE")
+    tw, th = tex.size
+    px = np.zeros(tw * th * 4, np.float32)
+    tex.pixels.foreach_get(px)
+    px = px.reshape(th, tw, 4)
+    vcol = np.zeros((len(head.data.vertices), 3), np.float32)
+    for l in head.data.loops:
+        u = uv[l.index].uv
+        vcol[l.vertex_index] = px[min(int(u[1] * th), th - 1), min(int(u[0] * tw), tw - 1), :3]
+    is_skin = (vcol[:, 0] > vcol[:, 2] * 1.25) & (vcol.max(1) > 0.25)
+    cut = chin - NECK_CUT
+    bm = bmesh.new()
+    bm.from_mesh(head.data)
+    bm.verts.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[bm.verts[i] for i in np.nonzero((Q[:, 2] < cut) & is_skin)[0]], context="VERTS")
+    bm.to_mesh(head.data)
+    bm.free()
+    # skin mean of the head model, for the body's skin (item: the sheet's warm brown)
+    keep = (Q[:, 2] > cut) & is_skin & (Q[:, 1] > float(HC[1]) + 0.02)
+    tone = vcol[keep].mean(0) if keep.any() else S.vec(0.6, 0.42, 0.3)
+    # the body's head and hair go
+    me = body.data
+    names = [m.name for m in me.materials]
+    hair = names.index("hair-body") if "hair-body" in names else -1
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index == hair or f.calc_center_median().z > cut], context="FACES")
+    bm.to_mesh(me)
+    bm.free()
+    # skin: each head vertex rides the head bone, its locs the body's chains by the nearest old vertex
+    names = [g.name for g in body.vertex_groups]
+    Qn = verts_np(head)
+    W2 = {}
+    for i, p in enumerate(Qn):
+        hit = tree.find_n(p, 6) if p[2] < cut + 0.25 else []
+        vals = np.zeros(len(names), np.float32)
+        for _, j, d in hit:
+            vals += W[j] / (0.01 + d)
+        if vals.sum() < 1e-6:
+            vals[names.index("head")] = 1.0
+        vals /= vals.sum()
+        W2[i] = vals
+    for j, nm in enumerate(names):
+        vg = head.vertex_groups.new(name=nm)
+        for i, vals in W2.items():
+            if vals[j] > 0.01:
+                vg.add([i], float(vals[j]), "REPLACE")
+    head.name = "tarek_head"
+    head.data.name = "tarek_head"
+    head.parent = bpy.data.objects["Armature"]
+    head.modifiers.new("Armature", "ARMATURE").object = bpy.data.objects["Armature"]
+    for pl in head.data.polygons:
+        pl.use_smooth = True
+    for m in head.data.materials:
+        m.name = "hair-head"
+    log("head: tris", len(head.data.polygons), "scale %.3f" % k, "tone", tone)
+    return head, tone
 
 
 def assemble_scan(objs, img, emit):
@@ -578,6 +697,10 @@ def assemble_scan(objs, img, emit):
     scan_bones(arm)
     W, ix = scan_reshape(body)
     scan_cut_hands(body, W, ix)
+    W = W[:]
+    head, tone = scan_head(body, W, ix)
+    global SKIN_TONE
+    SKIN_TONE = tone
     scan_slots(body)
     mats = {"leather": material("leather", img, emit)}
     fists = [o for o in objs if o.name.startswith("fist_")]
@@ -620,5 +743,5 @@ def assemble_scan(objs, img, emit):
     extras.append(K.anchor(arm, "hand.R", "anchor_wrist_R", R.wr))
     extras.append(K.anchor(arm, "hand.R", "weapon_muzzle", R.wr + S.vec(0, 0, -0.17)))
     extras += ground_rings(arm, glow_m, iris)
-    log("tris total", K.tris([body, fm]) + 3 * n_geo + 5 * n_shard, "materials", len(body.data.materials))
+    log("tris total", K.tris([body, fm, head]) + 3 * n_geo + 5 * n_shard, "materials", len(body.data.materials) + 3)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, "tarek.blend"))

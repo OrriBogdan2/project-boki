@@ -11,6 +11,7 @@ import time
 
 import bmesh
 import bpy
+import mathutils
 import numpy as np
 from mathutils import Matrix, Vector
 

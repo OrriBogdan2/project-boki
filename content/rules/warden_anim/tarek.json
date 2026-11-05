@@ -99,6 +99,13 @@
 		},
 		"mf_xform": {
 			"clip": "fuse"
+		},
+		"breah_hop": {
+			"clip": "dash_hop"
+		},
+		"breah_skate": {
+			"clip": "dash_skate",
+			"hold_from": 0.22
 		}
 	},
 	"states": {

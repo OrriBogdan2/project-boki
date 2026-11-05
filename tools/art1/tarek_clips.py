@@ -43,7 +43,7 @@ def hand(x, y, z):
 
 
 def lhand(x, y, z):
-    return (-SX - x - 0.07, y, SZ + z)
+    return (-SX - x - 0.15, y, SZ + z)     # (the huge stone arm stands well off his side)
 
 
 # his loose rest: the weight on the left leg, the right foot turned out, fists half shut and heavy, a little out from
@@ -277,13 +277,13 @@ C.bake("x_spine", 1.0, [(0, SPAIM), (0.05, m(REAR, pos=(0, 0, -0.12), hr=hand(0.
 SENSE = m(GATHER, pos=(0, 0.02, -0.5), hips=(-34, 0, 10), head=(14, 16, -24), hr=hand(-0.04, 0.5, -0.66), hl=lhand(0.0, 0.3, -0.16), er=(0.8, -0.4, 0.2), el=(-0.7, -0.3, -0.6), fing_r=0.0, thumb_r=0.0, wr=(-50, 0, 0), lip=0.5, jaw=0.05)
 C.bake("sense", 0.75, [(0, STANCE), (0.12, m(SENSE, e="out")), (0.45, SENSE), (0.75, STANCE)])
 
-# Rock Hop (item 111, a kit move still to come): one hop off a rock that rises under the foot, low and fast (0.34), and the
+# Rock Hop (item 111, breah_hop, breah_skate): one hop off a rock that rises under the foot, low and fast (0.28), and the
 # short skate on the rock as it rises, one foot forward, the stone arm out behind for balance (0.3)
 SKATE = m(STANCE, pos=(0, 0, -0.2), rot=(0, 0, 58), hips=(-16, 0, -12), head=(10, 0, -46), hr=hand(0.26, -0.3, -0.14), hl=lhand(0.24, 0.26, -0.26), jaw=0.2, lip=1.0,
           fr=(AX + 0.18, -0.2, AZ), fl=(-AX - 0.14, 0.26, AZ), fra=-8.0, fla=10.0, frt=0.0, flt=0.0)
 HOPUP = m(LEAP, pos=(0, 0.1, 0.1), hips=(-24, 0, 0), head=(16, 0, 0), hr=hand(0.14, -0.3, -0.3), hl=lhand(0.14, 0.2, -0.22), fr=(AX, -0.42, AZ + 0.18), fl=(-AX, 0.3, AZ + 0.34), fra=-46.0, fla=8.0, lip=1.0, jaw=0.3)
-C.bake("dash_hop", 0.34, [(0, m(GATHER, pos=(0, 0, -0.24))), (0.05, m(HOPUP, e="out")), (0.18, m(HOPUP, pos=(0, 0.04, 0.16), fr=(AX, 0.05, AZ + 0.4), fl=(-AX, 0.2, AZ + 0.3), fra=0.0)),
-                          (0.34, m(GATHER, pos=(0, 0.02, -0.22), hr=hand(0.14, 0.1, -0.34), hl=lhand(0.14, 0.2, -0.3)))])
+C.bake("dash_hop", 0.28, [(0, m(GATHER, pos=(0, 0, -0.24))), (0.06, m(HOPUP, e="out")), (0.16, m(HOPUP, pos=(0, 0.04, 0.16), fr=(AX, 0.05, AZ + 0.4), fl=(-AX, 0.2, AZ + 0.3), fra=0.0)),
+                          (0.28, m(GATHER, pos=(0, 0.02, -0.22), hr=hand(0.14, 0.1, -0.34), hl=lhand(0.14, 0.2, -0.3)))])
 C.bake("dash_skate", 0.3, [(0, m(GATHER, pos=(0, 0.02, -0.22))), (0.08, m(SKATE, e="out")), (0.22, m(SKATE, pos=(0, 0, -0.18))), (0.3, SKATE)])
 
 # ---------------------------------------------------------------------- emote, Fusion
