@@ -3,7 +3,7 @@
 The model is built by script: `~/meshy/sable_f/build.sh source` runs tools/art1/sable_source.py, sable_finish.py and sable_clips.py. Twin flintlocks skinned to hand.R / hand.L
 (item 76b), 40 hand-keyed clips (content/rules/warden_anim/sable.json), <=15k tris, 8 materials, one 2048 atlas. Scan: Meshy multi-image (40 credits) of the owner's A-pose turnaround, edited
 (4 x 9 credits) to take out the antennae, braid, wings, coat tails, pistols and hangers, which are rebuilt in sable_pieces.py. The scan's head came out turned about 30 degrees with a stray bun: sable_source.py turns it back
-and removes the bun. Everything below is the history of the crossbow model it replaces.
+and removes the bun. Fine-detail pass: the face from sable_head.png's front view, the wings cut to and projected from the turnaround's back view, the pistols from sable_weapons.png, a normal map baked from the 750k-tri scan; crops in ~/meshy/sable_f/proj. Everything below is the history of the crossbow model it replaces.
 
 # Sable (thief), stage 1: import note
 
