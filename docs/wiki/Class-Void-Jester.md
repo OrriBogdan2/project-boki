@@ -40,11 +40,11 @@ What the in-game kit card (K) says.
 | Loop | Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up. |
 | Passive: Swell | Swell: your hits fill Swell (much faster on hunters); full, you are Swollen for 9s and everything grows. You float, so ground hazards pass you by. |
 | Dash: Lantern Trade | Lantern Trade: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs. |
-| LMB | Tether Lantern: quick orbs to full range, through walls; the longer you wait between shots, the bigger and harder the next one, and a full one slows. |
+| LMB | Tether Lantern: quick orbs to full range through walls; the longer you wait between shots, the bigger and harder the next one, and a full orb slows. |
 | RMB: Shard Snap | Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew. |
 | E: Brimseed | Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew. |
 | Hunter ultimate: Nightwell | Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle. |
-| Weapon: Tether Lantern | Quick orbs to full range, through walls. Wait between shots and the next one grows bigger, brighter, harder and faster; full after 1.4s, it also slows. |
+| Weapon: Tether Lantern | Quick orbs to full range through walls; the longer you wait between shots (up to 1.4s) the bigger, faster and harder the next one, and a full orb slows. |
 
 ### Abilities in full
 

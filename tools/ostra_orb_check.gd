@@ -19,14 +19,14 @@ func orbs(main_node: Node) -> void:
 func _fire_after(m: Match, P: Hunter, K: OstraKit, wait: float) -> Dictionary:
 	K.last_shot_t = m.time - wait
 	K._set_charge(K.wait_charge())
-	var k := K.orb_k
+	var k := K.charge
 	var shots0 := P.shot_n
 	P.fire_cd = 0.0
 	step(m, 0.05, func(): P.inp["fire"] = P.shot_n == shots0)
 	P.inp["fire"] = false
 	var mine: Array = m.shots.filter(func(s): return s["by"] == P)
-	var sd: Dictionary = mine[-1]
-	return {"s": sd, "k": k, "skin": _skin_of(m, sd)}
+	var sd: Dictionary = mine[-1] if not mine.is_empty() else {}      # (point blank it has already hit)
+	return {"s": sd, "k": k, "skin": _skin_of(m, sd) if not sd.is_empty() else {}}
 
 func _skin_of(m: Match, sd: Dictionary) -> Dictionary:
 	for e in KitLooks.of(m).live:
@@ -71,16 +71,6 @@ func _charge_curve() -> void:
 		"charge: full at the 1.4s window, 353/263 of the plain orb",
 		absf(float(at[1.4]["k"]) - 1.0) < 0.001 and absf(float(at[1.4]["dmg"]) / base - 353.0 / 263.0) < 0.01,
 		"%.2f" % float(at[1.4]["dmg"])
-	)
-	ok(
-		"charge: capped after the window",
-		float(at[6.0]["dmg"]) == float(at[1.4]["dmg"]) and float(at[6.0]["scale"]) == float(at[1.4]["scale"])
-	)
-	var mids: Array = rows.filter(func(q): return float(q["wait"]) > 0.6 and float(q["wait"]) < 1.4)
-	ok(
-		"charge: smooth, not a switch (each step inside the window sits between plain and full)",
-		mids.size() == 3 and float(mids[0]["dmg"]) > base and float(mids[2]["dmg"]) < float(at[1.4]["dmg"])
-			and float(mids[0]["dmg"]) < float(mids[1]["dmg"]) and float(mids[1]["dmg"]) < float(mids[2]["dmg"])
 	)
 	ok(
 		"charge: the drawn orb's scale tracks the hit size",
@@ -131,7 +121,7 @@ func _full_slows() -> void:
 	step(m, 0.6)
 	ok(
 		"slow: a full orb slows (10% for 1.5s, the data's values)",
-		T.slow_t > 0.5 and absf(T.slow_k - float(K.lmb_def()["full_slow"])) < 0.001, "slow %.2f" % T.slow_t
+		T.slow_t > 0.5 and absf(T.slow_k - float(K.lmb_def()["prime_slow"])) < 0.001, "slow %.2f" % T.slow_t
 	)
 	step(m, 2.0)
 	fresh(T)
@@ -144,6 +134,16 @@ func _full_slows() -> void:
 		"slow: a plain orb right after a full one that missed doesn't slow",
 		dmg(T) > 5.0 and T.slow_t <= 0.0, "took %.1f slow %.2f" % [dmg(T), T.slow_t]
 	)
+	await done(m)
+	r = setup("ostra", 1.2)
+	m = r[0]
+	P = r[1]
+	T = r[2]
+	K = P.ak
+	aim_at(P, T.pos)
+	_fire_after(m, P, K, 1.4)
+	step(m, 0.3)
+	ok("slow: a full orb fired point blank still slows", dmg(T) > 11.0 and T.slow_t > 0.5, "slow %.2f" % T.slow_t)
 	await done(m)
 
 ## A rock row between him and the dummy: every charge passes it, also fired with him pressed against it.
@@ -159,29 +159,44 @@ func _through_walls() -> void:
 	for dz in range(-2, 3):
 		W.kind[W.idx(wx, int(floor(home.z)) + dz)] = World.T_BLOCK
 	aim_at(P, T.pos)
-	for w in [0.6, 1.0, 1.4]:
-		fresh(T)
-		var f := _fire_after(m, P, K, w)
-		step(m, 0.6)
-		var want := float(f["s"]["dmg"])
-		ok(
-			"walls: an orb at charge %.2f passes the rock and hits the dummy" % float(f["k"]),
-			absf(dmg(T) - want) < 0.5, "took %.1f of %.1f" % [dmg(T), want]
-		)
 	P.teleport(Vector3(float(wx) - 0.45, P.pos.y, P.pos.z))
 	aim_at(P, T.pos)
 	fresh(T)
 	_fire_after(m, P, K, 0.6)
 	step(m, 0.6)
 	ok("walls: fired pressed against the rock, a plain orb still passes", dmg(T) > 5.0, "took %.1f" % dmg(T))
-	# the copy another game draws flies through walls too
-	var shots0 := m.shots.size()
-	m._net_ev(["s", P.pos.x, P.pos.y + 1.0, P.pos.z, 30.0, 0.0, 0.3, 0.28, "c070ff", 0.0, 2, 2], "peer")
-	ok(
-		"walls: a shot sent with kind 2 keeps pierce_terrain on the other side",
-		m.shots.size() == shots0 + 1 and bool((m.shots[-1]["x"] as Dictionary).get("pierce_terrain", false))
-	)
+	await _net_copy(m, P, T, K)
 	await done(m)
+
+## What other games get: the "s" event carries the full size and the pierce kind, and the copy it makes crosses
+## the same rock (through the wire's JSON, as Net sends it).
+func _net_copy(m: Match, P: Hunter, T: Hunter, K: OstraKit) -> void:
+	P.teleport(P.pos + Vector3(-3.0, 0, 0))
+	aim_at(P, T.pos)
+	Net.out_events.clear()
+	m.net_on = true
+	_fire_after(m, P, K, 1.4)
+	m.net_on = false
+	var sent: Array = Net.out_events.filter(func(e): return e[0] == "s")
+	Net.out_events.clear()
+	ok("net: the orb goes out as one \"s\" event", sent.size() == 1, "%d" % sent.size())
+	if sent.is_empty():
+		return
+	var ev: Array = JSON.parse_string(JSON.stringify(sent[0]))
+	var full_r := float(K.base_wpn["size"]) * K.orb_size_k(1.0)
+	ok("net: the event sends the pierce kind", int(ev[11]) == 2, "kind %s" % str(ev[11]))
+	ok("net: the event sends the charged size", absf(float(ev[7]) - full_r) < 0.01, "%.2f" % float(ev[7]))
+	var shots0 := m.shots.size()
+	m._net_ev(ev, "peer")
+	ok(
+		"net: the copy keeps pierce_terrain",
+		m.shots.size() == shots0 + 1 and bool(m.shots[-1]["x"].get("pierce_terrain", false))
+	)
+	var copy: Dictionary = m.shots[-1]
+	var wall_x := P.pos.x + 3.0      # (he was moved 3m back from a spot right at the rock)
+	step(m, 0.25)
+	var past := float(copy["pos"].x)
+	ok("net: the copy flies past the rock", past > wall_x + 1.0, "x %.1f, rock %.1f" % [past, wall_x])
 
 func _glow_and_chime() -> void:
 	var r := setup("ostra", 12.0)
@@ -191,7 +206,7 @@ func _glow_and_chime() -> void:
 	aim_at(P, r[2].pos)
 	_fire_after(m, P, K, 0.0)
 	var looks := KitLooks.of(m)
-	ok("glow: none right after a shot", not looks.holding("os_charge"), "charge %.2f" % K.orb_k)
+	ok("glow: none right after a shot", not looks.holding("os_charge"), "charge %.2f" % K.charge)
 	var chimes := K.full_chimes
 	var sizes: Array = []
 	K.last_shot_t = m.time

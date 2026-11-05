@@ -81,7 +81,7 @@ const DEPLOY_H := 8.0         # the glider opens by itself this high above the g
 const ARMOR_DR := 0.2
 const ARMOR_DUR := 2.2        # durability as a multiple of max health
 const ARMOR_WAIT := 4.0
-const CONSUME_VULN := 1.2     # you take this much more damage while drinking or repairing
+const CONSUME_VULN := 1.2     # you take this much more damage while drinking, repairing or reviving a box
 
 var pname := "Hunter"
 var cls := "medium"
@@ -132,7 +132,7 @@ var sick_t := 0.0              # resurrection sickness after a beacon revive: -2
 var stolen_carry := false      # carrying someone else's kin: it struggles, slowing you a little
 var chase: Hunter = null       # whoever has your kin: you run faster toward them
 var box_t := 0.0               # holding interact at a deathbox
-var box_rev_at := -9.0         # last time we were channelling a deathbox revive (kneeling, locked in place)
+var box_rev_at := -9.0         # last time we were channelling a deathbox revive (BoxRevive)
 var hurt_at := -9.0            # last time a hit landed (channels like a box revive break on it)
 var hit_k := 1.0               # how hard the last hit was (Oomph): scales the flinch
 var hit_shake := 0.0           # the model's hit-shake left (Oomph.render_hit)
@@ -535,9 +535,9 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 			return 0.0
 	regen_wait = 5.0
 	armor_wait = ARMOR_WAIT
-	if drink_t > 0.0 or kit_t > 0.0:
+	if drink_t > 0.0 or kit_t > 0.0 or box_reviving():
 		d *= CONSUME_VULN
-		# drinking or repairing leaves you open: any real hit spills it (you keep the tonic or kit)
+		# drinking, repairing or reviving leaves you open: any real hit spills it (you keep the item)
 		if d >= 1.0 and opts.get("src", "") != "heat":
 			_interrupt_consume()
 	if armor > 0.0 and not shelled and opts.get("src", "") not in ["fall", "burn", "heat"]:
@@ -1037,7 +1037,7 @@ func start_base(to: Hunter) -> void:
 	base_to = to
 	_ab_feedback("base", "cast")
 	m.sfx("portal", pos, -6.0, 1.2)
-	if is_local() and m.hud: m.hud.toast_small("Basing to %s  ·  hold still" % to.pname, Color("8fe3c8"))
+	if is_local() and m.hud: m.hud.toast_small("Basing  ·  hold still", Color("8fe3c8"))
 
 func cancel_base(why := "") -> void:
 	if base_t <= 0.0:
@@ -1076,7 +1076,7 @@ func _tick_base(dt: float) -> void:
 		base_cd = BASE_CD
 		m.fx.ring(at, 1.8, Color("8fe3c8"), 0.45)
 		m.sfx("portal", at, -2.0, 1.5)
-		if is_local() and m.hud: m.hud.toast_small("Recall weakness: half damage and effects for 3s", Color("ffb36a"))
+		if is_local() and m.hud: m.hud.toast_small("Weakened 3s", Color("ffb36a"))
 var air_peak := 0.0              # the highest point of this time in the air (for skyfall landings)
 const SKYFALL_H := 8.0           # drop at least this far, fast, onto rivals and you land a skyfall
 
@@ -2061,13 +2061,9 @@ func sim(dt: float) -> void:
 		if down_hp <= 0.0:
 			m.eliminate(self, last_hit_by, "finished")
 			return
-	# bringing a teammate back at their deathbox: kneeling over it, locked in place (let go of
-	# interact to stop)
+	# bringing a teammate back at their deathbox: no attacks, and moving breaks it
 	if box_reviving():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
-				"gear1", "gear2", "fire", "throw", "kin_ab"]:
-			inp[kk] = false
-		inp["move"] = Vector2.ZERO
+		BoxRevive.guard_inputs(self)
 	# mid-stomp you're committed: none of your own buttons do anything until it ends
 	if not stomp.is_empty():
 		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
@@ -2416,7 +2412,7 @@ func _physics(dt: float) -> void:
 			var st := maxf(0.9, wallstun)
 			wallstun = 0.0
 			stun_t = maxf(stun_t, st)
-			m.on_wall_slam(self, st)
+			m.on_wall_slam(self)
 			hurt(10.0, last_hit_by, {"src": "wall"})
 	if grounded:
 		wall_moves.land()
@@ -2581,12 +2577,13 @@ func _fold_for_action() -> void:
 		glide_cd = maxf(glide_cd, 0.4)
 		_glider_sfx("close")
 
-## Knocked out of a drink or a repair: it spills (nothing is used up) and everyone sees it.
+## Knocked out of a drink, a repair or a box revive: it spills (nothing is used up) and everyone sees it.
 func _interrupt_consume() -> void:
-	if drink_t <= 0.0 and kit_t <= 0.0:
+	if drink_t <= 0.0 and kit_t <= 0.0 and not box_reviving():
 		return
 	drink_t = 0.0
 	kit_t = 0.0
+	BoxRevive.cancel(self)
 	m.fx.word(pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("ff8a5a"))
 	m.fx.burst(pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
 	m.sfx("crit", pos, -4.0, 0.7)
@@ -2941,6 +2938,7 @@ func gain_xp(x: float) -> void:
 			m.hud.level_up(lvl, wstep)
 			# the level-up chime: its own rising bell run over a warm swell (tools/gen_level_sfx.py)
 			m.sfx("level_up", null, -2.0, 1.0)
+			if kin is Kin: BokiChatter.say(m, kin, "level_up")
 			level_ups += 1
 	if not is_local():
 		_bot_spend()
@@ -3145,6 +3143,8 @@ func _on_ability_used(caster: Node, _id: String, slot: String) -> void:
 	if caster == self and slot != "dodge" and slot != "primary" and m:
 		cast_at = m.time
 		cast_slot = "ult" if slot in ["ult", "ultimate"] else slot
+	if slot in ["k1", "k2"] and kin is Kin and (caster == kin or caster == self) and is_local() and m:
+		BokiChatter.say(m, kin, "ability")      # its own ability, used by it or through you
 
 func _on_kin_thrown(_k: Node, owner: Node) -> void:
 	if owner == self and m:
@@ -3371,12 +3371,14 @@ func render(delta: float, alpha: float) -> void:
 		else:
 			see = int(m.time * 14.0) % 3 != 0
 	model.visible = see and not Hex.active(self)       # hexed: the critter stands in for the model
+	ShieldLook.tick(self)
+	SideRings.tick(self)
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
 	_render_balloon(delta)
 	Oomph.render_hit(self, delta)
 	Hex.tick(self, delta)
-	if (drink_t > 0.0 or kit_t > 0.0) and visible and see:
+	if (drink_t > 0.0 or kit_t > 0.0 or box_reviving()) and visible and see:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:
 			vuln_fx_t = 0.22

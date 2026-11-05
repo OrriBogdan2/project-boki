@@ -24,9 +24,11 @@ const GLOW_SIZE := Vector2(0.4, 1.25)      # the glow's scale (a mote is 0.4m wi
 var swollen_t := 0.0
 var last_shot_t := -99.0
 var shot_seen := 0
-var orb_k := 0.0               # the next orb's charge: 0 plain, 1 full; orb_wpn carries it
+var charge := 0.0              # 0..1: the next orb's build-up since the last shot; orb_wpn carries it
 var base_wpn: Dictionary = {}  # the weapon as loaded, the plain orb
 var orb_wpn: Dictionary = {}   # his live weapon: a copy of base_wpn with the charge written in
+var last_orb_c := 0.0          # (checks) the charge and hit radius of the last orb fired
+var last_orb_r := 0.0
 var seed: Dictionary = {}      # {pos, t, grow, rmax, sid, vis, burn, col}
 var sid_n := 0
 var swap: Dictionary = {}      # in flight: {t, T, land, cast, from (where he is now), hold (CastHold)}
@@ -36,7 +38,7 @@ var snap_rec := 0.0            # s of recovery left after a release (still slowe
 var well: OstraWell            # X: Nightwell
 # counters for the checks
 var swells := 0
-var full_orbs := 0
+var settled_shots := 0
 var full_chimes := 0
 var swaps := 0
 var swapped_foes := 0
@@ -172,11 +174,11 @@ func _tick_weapon() -> void:
 		shot_seen = h.shot_n
 		_orb_fired()
 	_set_charge(wait_charge())
-	if orb_k > 0.0 and not h.downed and snap.is_empty():
-		var col := GLOW_COL.lerp(GLOW_FULL_COL, orb_k)
+	if charge > 0.0 and not h.downed and snap.is_empty():
+		var col := GLOW_COL.lerp(GLOW_FULL_COL, charge)
 		# (on his actual hand, where the 3D model holds its orb: at a fixed point in front of him the match
 		# camera drew it as a disc at his feet)
-		KitLooks.of(m).hold_on("os_charge", "mote", h, hand_pos(true), lerpf(GLOW_SIZE.x, GLOW_SIZE.y, orb_k), col)
+		KitLooks.of(m).hold_on("os_charge", "mote", h, hand_pos(true), lerpf(GLOW_SIZE.x, GLOW_SIZE.y, charge), col)
 
 ## The next orb's charge from the time since the last shot: 0 until lmb.charge_from (the fire rate, so held
 ## fire stays plain orbs), then a straight build to 1 at lmb.idle.
@@ -191,37 +193,39 @@ func _set_charge(k: float) -> void:
 		base_wpn = h.wpn
 		orb_wpn = base_wpn.duplicate()
 		h.wpn = orb_wpn
-	elif k == orb_k:
+	elif k == charge:
 		return
 	var ld := lmb_def()
 	var shot_x: Dictionary = (base_wpn["shot_x"] as Dictionary).duplicate()
 	if k >= 1.0:
-		shot_x["slow"] = float(ld["full_slow_t"])
-		shot_x["slow_k"] = float(ld["full_slow"])
-		if orb_k < 1.0 and not h.downed:
+		shot_x["slow"] = float(ld["prime_slow_t"])
+		shot_x["slow_k"] = float(ld["prime_slow"])
+		if charge < 1.0 and not h.downed:
 			full_chimes += 1
 			m.sfx("os_prime", h.pos, -12.0, 1.0)      # the soft chime at full
 			m.fx.flash(hand_pos(true), GLOW_FULL_COL, 0.45, 0.08)
 	orb_wpn["shot_x"] = shot_x
-	orb_wpn["dmg"] = float(base_wpn["dmg"]) * (1.0 + float(ld["full_dmg"]) * k)
-	orb_wpn["speed"] = float(base_wpn["speed"]) * lerpf(1.0, float(ld["full_speed"]), k)
+	orb_wpn["dmg"] = float(base_wpn["dmg"]) * (1.0 + float(ld["prime_dmg"]) * k)
+	orb_wpn["speed"] = float(base_wpn["speed"]) * lerpf(1.0, float(ld["prime_speed"]), k)
 	orb_wpn["size"] = float(base_wpn["size"]) * orb_size_k(k)
 	orb_wpn["color"] = Color(base_wpn["color"]).lerp(ORB_FULL_COL, k)
-	orb_k = k
+	charge = k
 
 ## The orb's size at charge k, as a share of the plain orb's.
 func orb_size_k(k: float) -> float:
-	return lerpf(1.0, float(lmb_def()["full_size"]), k)
+	return 1.0 + float(lmb_def()["size_k"]) * k
 
 ## The orb just left at the charge it was fired with; a full one has its own flick, sound and flash.
 func _orb_fired() -> void:
 	last_shot_t = m.time
+	last_orb_c = charge
+	last_orb_r = float(h.wpn["size"])
 	KitLooks.of(m).release("os_charge")
-	KitLooks.of(m).skin_orb(h, orb_k, orb_size_k(orb_k))
-	var full := orb_k >= 1.0
+	KitLooks.of(m).skin_orb(h, charge, orb_size_k(charge))
+	var full := charge >= 1.0
 	play("ostra_orb_hot" if full else "ostra_orb")
 	if full:
-		full_orbs += 1
+		settled_shots += 1
 		m.sfx("os_orb_hot", h.pos, -4.0, 1.0)      # (the plain orb's sound is the weapon's own)
 		m.fx.burst(_hand(), Color(0.8, 0.6, 1.0, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
 

@@ -59,7 +59,7 @@ func _shot(wait: float, secs: float, marks: Array) -> void:
 
 func _quick_vs_full() -> void:
 	var file := "orb_quick_vs_full"
-	var cap := "The same moment after the shot: a quick orb (0.6s wait), halfway (1.0s), full (1.4s, x1.8 size)"
+	var cap := "The same moment after the shot: a quick orb (0.6s wait), halfway (1.0s), full (1.4s, x1.9 size)"
 	await _reset(11.0, 3.0)
 	_aim(home + Vector3(8.0, 0, 0))
 	for w in [0.6, 1.0, 1.4]:
