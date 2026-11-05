@@ -317,14 +317,14 @@ const MOVES := {
 			0.16,
 			{
 				"p": 0.1, "sq": 0.08, "legs": [1.1, -1.7, 0.7, -1.2], "lw": 1.0,
-				"fl": Vector3(-0.6, 0.25, 0.1), "hw": 1.0, "fr": Vector3(0.6, 0.25, 0.1), "rw": 1.0
+				"fl": Vector3(-0.38, 0.3, 0.1), "hw": 1.0, "fr": Vector3(0.38, 0.3, 0.1), "rw": 1.0
 			}
 		],
 		[
 			0.28,
 			{
 				"p": -0.12, "sq": -0.08, "legs": [0.5, -0.7, 0.3, -0.5], "lw": 1.0,
-				"fl": Vector3(-0.5, 0.1, 0.1), "hw": 1.0, "fr": Vector3(0.5, 0.1, 0.1), "rw": 1.0
+				"fl": Vector3(-0.36, 0.2, 0.1), "hw": 1.0, "fr": Vector3(0.36, 0.2, 0.1), "rw": 1.0
 			}
 		]]},
 	# Rock Hop's skid: a skater's low stance along the rock, front knee bent, back leg long, one arm out ahead and
@@ -335,14 +335,14 @@ const MOVES := {
 			0.08,
 			{
 				"p": -0.3, "sq": 0.26, "lift": -0.14, "legs": [1.0, -1.4, -0.4, -0.4], "lw": 1.0,
-				"fl": Vector3(-0.55, 0.05, 0.4), "hw": 1.0, "fr": Vector3(0.55, 0.15, -0.4), "rw": 1.0
+				"fl": Vector3(-0.36, 0.1, 0.34), "hw": 1.0, "fr": Vector3(0.36, 0.2, -0.34), "rw": 1.0
 			}
 		],
 		[
 			0.3,
 			{
 				"p": -0.26, "sq": 0.22, "lift": -0.1, "legs": [0.9, -1.3, -0.3, -0.4], "lw": 1.0,
-				"fl": Vector3(-0.55, 0.1, 0.4), "hw": 1.0, "fr": Vector3(0.55, 0.2, -0.4), "rw": 1.0
+				"fl": Vector3(-0.36, 0.15, 0.34), "hw": 1.0, "fr": Vector3(0.36, 0.22, -0.34), "rw": 1.0
 			}
 		]]},
 	# Rock Hop's crash: both fists smashed into the ground with a deep squash (0.05), held down through

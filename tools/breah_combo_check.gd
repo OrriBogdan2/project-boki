@@ -1278,7 +1278,8 @@ func _hop_terrain(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, res
 	_chain(m, P, K, [far, far, far])
 	ok(
 		"rough: a wall ahead: the hops pull back and he never lands inside it",
-		P.pos.x < home.x + 2.0 and P.pos.x > home.x + 0.5 and P.grounded and not K.hop.chaining(), "x %.2f hops %d" % [P.pos.x - home.x, K.hop.chain_hops]
+		P.pos.x < home.x + 2.0 and P.pos.x > home.x + 0.5 and P.grounded and not K.hop.chaining(),
+		"x %.2f hops %d" % [P.pos.x - home.x, K.hop.chain_hops]
 	)
 	restore.call()
 	# a foe where the rock would rise: no rock in a body

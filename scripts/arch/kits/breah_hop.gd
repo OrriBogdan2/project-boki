@@ -132,15 +132,15 @@ func _lands(p: Vector3, g: float) -> bool:
 func _clear(dir: Vector2, want: float) -> bool:
 	var asking := StoneStand.mover
 	StoneStand.mover = h
-	var free := true
+	var clear := true
 	var d := 0.25
-	while free and d < want:
+	while clear and d < want:
 		var q := h.pos + Vector3(dir.x, 0, dir.y) * d
 		var y := maxf(h.pos.y, m.world.ground_at(q.x, q.z))
-		free = m.world.occupy(q.x, q.z, 0.05, y, false) == 0.0
+		clear = m.world.occupy(q.x, q.z, 0.05, y, false) == 0.0
 		d += 0.25
 	StoneStand.mover = asking
-	return free
+	return clear
 
 ## Solid ground on the line from p, within `reach` metres and not out of a hop's rise?
 func _ground_ahead(p: Vector3, dir: Vector2, reach: float) -> bool:

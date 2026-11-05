@@ -149,7 +149,8 @@ func _build_rock(n: Node3D, kind: String) -> void:
 ## top so the match camera reads it under his feet, a hot underside.
 func _build_footrock(n: Node3D) -> void:
 	Models.part(n, Models.box(0.5, 0.14, 1.0), Models.toon(RockLook.STONE_HI, true, 0.6), Vector3(0, -0.07, 0))
-	Models.part(n, Models.box(0.42, 0.04, 0.86), Models.toon(RockLook.CAP, true, 0.6), Vector3(0, 0.01, 0))
+	var top := Models.toon(RockLook.STONE_HI.lerp(RockLook.CAP, 0.4), true, 0.6)
+	Models.part(n, Models.box(0.42, 0.04, 0.86), top, Vector3(0, 0.01, 0))
 	Models.part(n, Models.box(0.3, 0.12, 0.7), Models.glow_mat(Color("ff7a2a")), Vector3(0, -0.17, 0))
 
 ## Ostra's shots: dark violet glass with bright rims, each with its own length and tail (the tail points
