@@ -149,11 +149,6 @@ def p_head(p, n, c):
     col = mix(col, C("2f4a80"), (smooth(0.75, 1.0, wr) * smooth(1.53, 1.51, z) * smooth(1.488, 1.5, z) * (y > 0.05) * smooth(0.11, 0.05, ax)) * 0.5)
     crk = cracks(p, 9.0, 0.03) * smooth(1.45, 1.5, z)
     col = mix(col, C("2a4a7a"), crk * 0.85)
-    # the brows: thick red strokes
-    br0 = np.abs(z - (1.4835 - 0.42 * (ax - 0.058) ** 2 * 40 + 0.0)) - 0.0145
-    bm = smooth(0.006, -0.003, br0 + (vnoise(x * 3.2, y, z * 0.5, 240.0) - 0.5) * 0.012) * (ax < 0.118) * (ax > 0.012) * (y > 0.07)
-    hairs = 0.72 + 0.56 * vnoise(x * 1.0, y, z * 7.0, 170.0)
-    col = mix(col, C("bb4a2a") * hairs[:, None], bm)
     col = shade(col, ao, cv, n, 0.6, 0.42)
     # lips, gums, teeth, tusks, nose, inner ears, lids
     ones = np.ones((len(p), 1), np.float32)

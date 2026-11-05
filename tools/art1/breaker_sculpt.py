@@ -1,4 +1,4 @@
-"""Breaker's sculpt (ART-1): the shapes, as signed distance fields (tools/blender/sculpt_kit.py). Everything is built
+"""Breaker's sculpt (ART-1): the shapes, as signed distance fields (tools/art1/sculpt_kit.py). Everything is built
 from the rig's own joints (art/wardens/src/breaker_rig.json), so he stays on the contract armature.
 Art: docs/art/gen/wardens_r3/breaker_front / head_sheet / hammer_sheet / shield_sheet (ext/imagegen), BREAKER_KIT.md."""
 import json
@@ -551,3 +551,14 @@ def shield():
         l = float(rng.uniform(0.05, 0.1))
         I.add(icicle((xx, -0.03, 0.245), (xx, -0.04, 0.245 - l), 0.012), 0.003, 1, None)
     return W, M, I
+
+
+def brows(hd):
+    """The brows: fat red strokes on the ridge, on their own bones."""
+    f = Field((-0.15, 0.04, 1.44), (0.15, 0.19, 1.54), 0.0014)
+    streak = lambda x, y, z: (vnoise(x * 0.5, y, z * 3.2, 170.0) - 0.5) * 0.007
+    for s in (-1, 1):
+        pts = [(s * 0.016, 0.16, 1.469), (s * 0.045, 0.16, 1.487), (s * 0.075, 0.15, 1.493), (s * 0.1, 0.125, 1.482), (s * 0.116, 0.1, 1.462)]
+        pts = onsurf(hd, pts, 0.003)
+        f.add(path(pts, (0.0085, 0.0125, 0.0115, 0.009, 0.003)), 0.004, 1, None, streak)
+    return f

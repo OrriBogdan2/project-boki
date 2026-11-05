@@ -1,6 +1,6 @@
 """Breaker's clips (ART-1), keyed by hand on the contract armature and timed to his kit's real numbers
 (content/archetypes/bulwark.json, KMovesPinBjorn), then the .glb export:
-  blender -b WORK/breaker_art1.blend --python tools/blender/breaker_anims.py -- WORK/breaker_anims.blend OUT.glb
+  blender -b WORK/breaker_art1.blend --python tools/art1/breaker_anims.py -- WORK/breaker_anims.blend OUT.glb
 He is a huge, warm old ferryman: everything starts from the belly and the feet, the hammer's weight arrives late, and
 he grins through it all."""
 import json

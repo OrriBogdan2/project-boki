@@ -1,5 +1,5 @@
 """A clay contact sheet of a sculpt, for looking at shapes while they are made:
-  blender -b --factory-startup --python tools/blender/sculpt_preview.py -- OUT.png mesh.npz [mesh.npz ...] [--head]"""
+  blender -b --factory-startup --python tools/art1/sculpt_preview.py -- OUT.png mesh.npz [mesh.npz ...] [--head]"""
 import math
 import os
 import sys

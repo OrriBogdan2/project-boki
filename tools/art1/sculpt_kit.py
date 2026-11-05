@@ -1,6 +1,6 @@
 """A scripted sculpt for the ART-1 Hunters, in Blender's Python (numpy): signed distance fields on a voxel grid,
 smooth unions and carves, surface nets, a decimated game mesh, and a per-texel atlas painter that samples the
-sculpt (so the high detail survives in the paint). Nothing here is Hunter specific; tools/blender/<hero>_art1.py
+sculpt (so the high detail survives in the paint). Nothing here is Hunter specific; tools/art1/<hero>_art1.py
 holds the shapes.
 
 Space: Blender's, the Hunter facing +Y, its right +X, up +Z, metres at the class-neutral size (RIG_CONTRACT)."""

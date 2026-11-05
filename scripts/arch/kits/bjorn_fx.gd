@@ -94,6 +94,8 @@ var hot := false               # the perfect window is open: the glint burns whi
 var glint_k := -1.0            # the glint's size 0..1 while it shows (-1: not yet)
 var fx_clock := 0.0            # the match time effects last advanced to
 
+var own_piece: Node3D         # the model's own hammer, when it has a skinned one (WardenGlb.thrown_piece)
+
 func _init(hunter: Hunter) -> void:
 	h = hunter
 	top_level = true
@@ -105,9 +107,10 @@ func _ready() -> void:
 	hammer.visible = false
 	add_child(hammer)
 	# (the skinned hammer's own mesh on a 3D model, else the procedural one)
-	var own := WardenGlb.thrown_piece(h.model, "hammer") if h.model else null
-	if own:
-		hammer.add_child(own)
+	own_piece = WardenGlb.thrown_piece(h.model, "hammer") if h.model else null
+	if own_piece:
+		hammer.add_child(own_piece)
+		own_piece.scale = Vector3.ONE * h.model.scale.x
 	else:
 		PinBjornWeapons.hammer(hammer, 1.25)
 	hammer_glow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", Color(GOLD, 0.9), true))
@@ -203,10 +206,11 @@ func hammer_fly(p: Vector3, dir: Vector2, spin_rate: float) -> void:
 ## Planted: standing head-down in the ground, leaning back along its flight, the beacon over it.
 func hammer_plant(p: Vector3, yaw: float) -> void:
 	hammer.visible = true
-	hammer.scale = Vector3.ONE * PLANT_SCALE / 1.25
+	var plant_k := h.model.scale.x if own_piece else PLANT_SCALE
+	hammer.scale = Vector3.ONE if own_piece else Vector3.ONE * PLANT_SCALE / 1.25
 	# the head points down (-Z turned to -Y), leaning PLANT_LEAN off vertical
 	hammer.rotation = Vector3(-PI * 0.5 - PLANT_LEAN, yaw, 0.0)
-	var head_drop := 0.62 * PLANT_SCALE * cos(PLANT_LEAN)
+	var head_drop := 0.62 * plant_k * cos(PLANT_LEAN)
 	hammer.global_position = p + Vector3(0, head_drop - 0.2, 0)
 	hammer_glow.visible = false
 	trail.visible = false

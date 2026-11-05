@@ -1,6 +1,6 @@
 """Breaker (ART-1): the sculpt to a game mesh on the contract armature with a painted atlas, saved as a .blend for
-tools/blender/breaker_anims.py, which keys the clips and exports the .glb:
-  blender -b --factory-startup --python tools/blender/breaker_art1.py -- WORKDIR
+tools/art1/breaker_anims.py, which keys the clips and exports the .glb:
+  blender -b --factory-startup --python tools/art1/breaker_art1.py -- WORKDIR
 Shapes: breaker_sculpt.py; paint: breaker_paint.py. Budget: 20k triangles, weapon and shield included."""
 import math
 import os
@@ -15,6 +15,7 @@ from mathutils import Matrix, Vector
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
+sys.path.insert(0, os.path.join(HERE, "..", "blender"))
 import breaker_paint as P
 import breaker_sculpt as B
 import imgio
@@ -286,8 +287,8 @@ def main():
         return parts[-1]
 
     pb = part("skin_body", skin, 6000, "skin", "skin", 1.0)
-    ph = part("skin_head", hd, 3300, "skin", "head", 3.2)
-    pm = part("mantle", man, 1300, "cloth", "mantle", 0.9, fld2=skin, outer=skin)
+    ph = part("skin_head", hd, 3800, "skin", "head", 3.4)
+    pm = part("mantle", man, 1150, "cloth", "mantle", 0.9, fld2=skin, outer=skin)
     ps = part("shorts", sho, 500, "cloth", "shorts", 0.6, fld2=skin, outer=skin)
     prf = part("rag_front", rg["front"], 450, "cloth", "rag", 0.7)
     prb = part("rag_back", rg["back"], 400, "cloth", "rag", 0.5)
@@ -298,7 +299,7 @@ def main():
     td = B.teddy(t_at)
     ptd = part("teddy", td, 260, "leather", "teddy", 1.6)
     c_at = (-0.17, 0.0, 1.13)
-    c_at = B.onsurf(man, [(-0.2, 0.34, 1.1)], 0.012)[0]
+    c_at = B.onsurf(man, [(-0.27, 0.34, 1.08)], 0.012)[0]
     c_n = man.grad(np.array([c_at], np.float32))[0]
     cp = B.compass(c_at, c_n)
     pcp = part("compass", cp, 130, "brass", "compass", 2.0)
@@ -322,6 +323,8 @@ def main():
     for c, r in B.eyes(J):
         ef.add(S.ell(c, (r * 1.1, r * 0.95, r * 0.5), (0, 0.32 if c[0] < 0 else -0.32, 0)), 0.0, 1, "head")
     pey = part("eyes", ef, 90, "eyes", "eyes", 2.0)
+    bf = B.brows(hd)
+    pbw = part("brows", bf, 150, "hair", "beard", 2.2)
 
     # ropes, on the surfaces
     ropes = []
@@ -552,6 +555,8 @@ def main():
             W = {"hips": np.ones(len(vs), np.float32)}
         elif nm == "eyes":
             W = {"head": np.ones(len(vs), np.float32)}
+        elif nm == "brows":
+            W = {"x_brow.R": (vs[:, 0] > 0).astype(np.float32), "x_brow.L": (vs[:, 0] <= 0).astype(np.float32)}
         elif nm.startswith("loop"):
             W = {"spring_apronF_0": S.smooth(0.3, 0.6, vs[:, 2]), "spring_apronF_1": S.smooth(0.6, 0.3, vs[:, 2])}
         else:

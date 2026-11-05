@@ -1,6 +1,6 @@
 """Review renders of an ART-1 Hunter from its .blend (Cycles, CPU): a turntable and clip strips, lit softly like the toon shader.
-  blender -b FILE.blend --python tools/blender/art1_render.py -- OUTDIR turn [px]
-  blender -b FILE.blend --python tools/blender/art1_render.py -- OUTDIR clip <action> [frames] [px] [az] [gif]"""
+  blender -b FILE.blend --python tools/art1/art1_render.py -- OUTDIR turn [px]
+  blender -b FILE.blend --python tools/art1/art1_render.py -- OUTDIR clip <action> [frames] [px] [az] [gif]"""
 import math
 import os
 import subprocess
