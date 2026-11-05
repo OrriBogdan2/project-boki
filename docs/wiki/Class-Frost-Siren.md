@@ -55,7 +55,7 @@ R is your Boki's Merge.
 | Body | 124 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Hoar Fan (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them. |
-| Silhouette | the big furred collar and the long trailing scarf, on blade skates |
+| Silhouette | a bunny-eared fur hood with curled ice horns, a long candy-striped ice spear, on glowing blade skates |
 | Resource | Chill (max 8) |
 
 ### Kit card
