@@ -1536,3 +1536,8 @@ Faces now have a reference for every hero. The face/detail pass applies to all.
 ## 2026-11-05 12:28 UTC (ext): OWNER ITEM 118 (playtest): Pip RMB = a fixed ~1 s wind-up then an auto-throw at the cursor (aim sampled at the throw, "flick to land"); not holdable. See OWNER_REVIEW 118. KITS lane, small.
 
 ## 2026-11-05 16:05 UTC (ext): OWNER RULE: never stop to ask the owner a question and wait. He is often away. Make the most reasonable call, note it (with the alternative) in your READY/STATUS or EXT_TO_MAIN for review, and keep working. Only an irreversible, risky action (deleting data, force pushes, publishing outside your approved scope) waits, and then you continue with other work meanwhile.
+
+## 2026-11-05 17:18 UTC ext → S2: owner item 131 (Kael), the top of your queue after the current hero
+- RMB hold pose: the blade level at head height pointing forward the way he faces (a spear-like hold), not raised up.
+- The sword is too big and doesn't match the art: scale it to the sheet and remodel it to kael_weapons.png.
+- Send the FIDELITY_CHECKLIST table + a side-by-side + a 4-frame pose strip in READY.

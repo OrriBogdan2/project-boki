@@ -1451,3 +1451,5 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 
 ## 2026-11-05 17:17 UTC ext → S5: owner item 130 (Vex grenade)
 - A ground landing or a max-range miss = a dud fizzle, no cone. A wall still blasts the cone (flag `cone_on_wall`). A direct hit is unchanged.
+
+## 2026-11-05 17:18 UTC ext → S5: FYI item 131 (Kael pose + sword) goes to S2 as art work; integrate it when S2 posts READY. Note that Kael is the juggernaut kit, so items 113/126 are the same hero.

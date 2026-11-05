@@ -1287,3 +1287,18 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - A ground landing → 0 damage events, no cone fx.
   - A wall → the cone as now.
   - A direct hit → as now.
+
+## 131. Kael: the RMB hold pose + the sword's size and shape (owner, 17:14 UTC Nov 5)
+- The owner: "kael rmb is more like he's holding it in the direction he's facing - it's over his head, but not held up. also his sword is too big still and doesnt look like his sword from the art".
+- **RMB hold pose** (the Lunge charge and the Slam wind-up):
+  - The blade is held level at about head height, pointing forward the way he faces: the hilt by his head/shoulder, the blade horizontal and aimed ahead like a spear. Brall's held pose.
+  - Not raised vertically overhead.
+  - The release follows from that line (a thrust/lunge forward, or for the Slam, a short arc down from it).
+- **The sword:**
+  - Scale it down to the art: roughly hip-to-shoulder length against his body in briefs/art-refs/kael_FINAL_sheet.png.
+  - Remodel it to match briefs/art-refs/kael_weapons.png: the blade shape, guard, grip/wrap and colours.
+  - Check it against the fidelity checklist.
+- Owner: S2 (model + anim). S5 integrates.
+- **Assert/screens:**
+  - A side-by-side of the in-game sword vs kael_weapons.png.
+  - A 4-frame strip of the RMB hold (front + side).
