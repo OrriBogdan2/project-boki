@@ -78,6 +78,44 @@ func _look(home, target: Vector3, zoom: float) -> void:
 	home.cam.zoom = zoom
 	home.cam.snap(p)
 
+## The ground point under a screen position.
+func _ground_at(screen: Vector2) -> Vector3:
+	var cam: Camera3D = hm.cam
+	var from := cam.project_ray_origin(screen)
+	var dir := cam.project_ray_normal(screen)
+	return from + dir * (-from.y / dir.y)
+
+## Ghost, card and menu with the cursor at a screen position near an edge.
+func _edges(hb: HomeBuild, rug_e: Dictionary) -> void:
+	var vp := main.get_viewport().get_visible_rect().size
+	var spots := {"bottom": Vector2(vp.x * 0.45, vp.y - 175.0), "right": Vector2(vp.x - 60.0, vp.y * 0.45)}
+	for edge in spots:
+		var ground := _ground_at(spots[edge])
+		hb.take("rug_long")
+		await _settle()
+		var cs := _spot(hb, ground)
+		var cell := Vector2(cs[0].x + 1.5, cs[0].y + 1.0)
+		_hover(hb, cell)
+		main.get_viewport().warp_mouse(spots[edge])
+		await _shot("10_green_%s_edge" % edge, "Green ghost, cursor at the %s edge: the card flips clear" % edge)
+		hb._cancel_held()
+		var bc: Vector2i = HomeLayout.deco_cells(rug_e)[0]
+		var rug_at := Vector3(bc.x + 1.0, 0, bc.y + 1.0)
+		var shift := rug_at - _ground_at(spots[edge])
+		var centre := _ground_at(vp * 0.5)
+		_look(hm, centre + shift - Vector3(0, 0, 3.0) + Vector3(0, 0, 3.0), 1.0)
+		await _settle(4)
+		hb.take("rug")
+		await _settle()
+		_hover(hb, Vector2(rug_at.x, rug_at.z))
+		print("BUSHOT rug on screen %s want %s" % [hm.cam.unproject_position(rug_at), spots[edge]])
+		await _shot("11_red_%s_edge" % edge, "Blocked ghost on the rug at the %s edge" % edge)
+		hb._cancel_held()
+		_hover(hb, Vector2(rug_at.x, rug_at.z))
+		hb.open_menu("d:%d" % int(rug_e["u"]))
+		await _shot("12_menu_%s_edge" % edge, "Piece menu opened on the rug at the %s edge" % edge)
+		hb._close_menu()
+
 func _hover(hb: HomeBuild, cell: Vector2) -> void:
 	hb.debug_m = cell
 	hb.tick(0.05)
@@ -165,6 +203,7 @@ func _farm() -> void:
 	hb.open_menu("d:%d" % int(rug_e["u"]))
 	await _shot("04_context_menu", "Clicking a placed rug: Move, Rotate, Store and its colours")
 	hb._close_menu()
+	await _edges(hb, rug_e)
 	# 5. the rotate animation
 	hb.take("rug_long")
 	await _settle()

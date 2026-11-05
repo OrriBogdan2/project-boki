@@ -157,29 +157,42 @@ func _mage_merge(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 			"y +%.1f" % (P.pos.y - home.y))
 	KinMerge.end(P, "test")
 
-## The data's Thunderstorm: a struck foe spreads its Static to the foes near it (one outside the strike
-## picks up the struck one's count).
+## Item 72: the highest Static among the foes the strike hits goes to every foe it hits (then the ult's own
+## stack, capped at 4); a foe outside the strike gets nothing; no stacked foe, nothing spreads.
 func _mage_spread(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vector3) -> void:
-	var U := K.ult
+	var spot := home + Vector3(5, 0, 0)
+	var far := T2.pos
+	var got := _kitefall_with(m, P, T, T2, K, home, spot, 3, 0)
+	ok("Kitefall: stacks {3, 0} -> both at 4 (the highest, plus the ult's own, capped)",
+			got == [4, 4], str(got))
+	got = _kitefall_with(m, P, T, T2, K, home, spot, 1, 0)
+	ok("Kitefall: stacks {1, 0} -> both at 2", got == [2, 2], str(got))
+	got = _kitefall_with(m, P, T, T2, K, home, spot, 0, 0)
+	ok("Kitefall: no stacked foe -> nothing spreads, each gets only the ult's 1", got == [1, 1], str(got))
+	ac.fresh(T2)
+	T2.teleport(far)
+	K.sparks.clear()
+
+func _kitefall_with(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vector3, spot: Vector3,
+		a: int, b: int) -> Array:
 	var xd := K.x_def()
 	K.cd["x"] = 0.0
 	P.teleport(home)
-	var spot := home + Vector3(5, 0, 0)
 	ac.fresh(T)
 	ac.fresh(T2)
 	T.teleport(spot + Vector3(0.8, 0, 0))
-	T2.teleport(spot + Vector3(3.5, 0, 0))
+	T2.teleport(spot + Vector3(-0.8, 0, 0))
 	K.sparks.clear()
-	K.add_spark(T, 2)
+	if a > 0: K.add_spark(T, a)
+	if b > 0: K.add_spark(T2, b)
 	ac.aim_at(P, spot)
 	HunterKeys.ult_pressed(P)
 	ac.step(m, float(xd["windup"]) + float(xd["rise"]) + float(xd["min_air"]) + 0.05, func(): ac.aim_at(P, spot))
 	HunterKeys.ult_pressed(P)
 	ac.step(m, float(xd["drop"]) + 0.1)
-	ok("Kitefall (data): the struck foe's Static spreads to a foe 2.7m from it, outside the strike",
-			U.last.get("hits", 0) == 1 and K.spark_n(T) == 3 and K.spark_n(T2) == 3,
-			"hits %d static %d -> %d" % [int(U.last.get("hits", 0)), K.spark_n(T), K.spark_n(T2)])
+	var res := [K.spark_n(T), K.spark_n(T2)]
 	ac.step(m, 0.6)
+	return res
 
 ## Item 51: Shift in Kitefall's crouch charges the Wirerun at once; the crouch waits for the run, starts over
 ## where it ended, and she launches from there (the ring moves with her) and still comes down.

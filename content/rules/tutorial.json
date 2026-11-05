@@ -1,13 +1,13 @@
 {
- "doc": "The first-match tutorial (scripts/match/tutorial.gd). steps: [id, the one banner line]. %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step (the right click with a hold, the Boki starting out). labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down). need: how many times a step's action must land, shown as 1/3 on the pill.",
+ "doc": "The first-match tutorial (scripts/match/tutorial.gd). steps: [id, the one banner line]. detail: a plain-words second line under it (%X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step (the right click with a hold, the Boki starting out). labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down). need: how many times a step's action must land, shown as 1/3 on the pill.",
  "steps": [
   [
    "land",
-   "Steer to land on the meadow"
+   "Steer down to the meadow"
   ],
   [
    "move",
-   "Walk to the beam"
+   "Walk to the glowing beam"
   ],
   [
    "dash",
@@ -15,19 +15,27 @@
   ],
   [
    "exdash",
-   "Jump, then dash in the air"
+   "Jump, then dash in mid-air"
   ],
   [
    "glide",
-   "Jump, then hold to glide"
+   "Jump, then hold %G to glide"
   ],
   [
    "crouch",
-   "Climb up and hold to crouch"
+   "Climb up, then hold to crouch"
   ],
   [
    "pickup",
    "Pick up the item"
+  ],
+  [
+   "gkey",
+   "Send %s out"
+  ],
+  [
+   "rank",
+   "You levelled up!"
   ],
   [
    "shoot",
@@ -39,7 +47,7 @@
   ],
   [
    "utility",
-   "Tap to use %A"
+   "Use %A"
   ],
   [
    "throw",
@@ -47,19 +55,23 @@
   ],
   [
    "orders",
-   "Hold to give %s orders"
+   "Hold to give %s an order"
   ],
   [
    "kin1",
    "Watch %s use %A"
   ],
   [
+   "key",
+   "Grab the key"
+  ],
+  [
    "chest",
-   "Open the chest"
+   "Open the chest with the key"
   ],
   [
    "fight",
-   "Defeat the monsters"
+   "Beat all the monsters"
   ],
   [
    "goexit",
@@ -67,19 +79,28 @@
   ],
   [
    "uplink",
-   "Hold at the uplink mast"
+   "Capture the uplink mast"
   ],
   [
    "defend",
-   "Hold the outpost"
+   "Defend the outpost"
   ],
   [
    "extract",
    "Step into the light"
   ]
  ],
+ "detail": {
+  "gkey": "%T is your Boki button. Tap it to send %s at a monster. Tap again to call it back. Hold it to give orders.",
+  "rank": "Every level gives you a skill point (see the gold + by your level). Press %R to rank up %N. Your ultimate unlocks at level %U.",
+  "sig": "%X",
+  "key": "Chests are locked. Walk over the key to pick it up.",
+  "chest": "Chests need a key. Hold %F next to it to open it. This uses up the key.",
+  "uplink": "Stay inside the circle until it's yours. Step out and the capture slips back!",
+  "defend": "Stay inside the circle. Step out and the capture slips back!"
+ },
  "alt": {
-  "utility_hold": "Tap, then hold: %A",
+  "utility_hold": "Tap, then hold, to use %A",
   "throw_back": "Tap to call %s back",
   "throw_send": "Tap again to send %s at the monster"
  },
@@ -104,6 +125,7 @@
   "glide": "Glide here",
   "crouch": "Lookout",
   "pickup": "Item",
+  "key": "Key",
   "chest": "Chest",
   "goexit": "Outpost",
   "uplink": "Uplink",
