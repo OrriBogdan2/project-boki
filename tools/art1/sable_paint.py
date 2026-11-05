@@ -34,10 +34,10 @@ def scan_grade(col, p, ao):
     sat = (col.max(1) - col.min(1)) / np.maximum(col.max(1), 0.01)
     purple = smooth(0.25, 0.5, sat) * smooth(0.02, 0.08, col[:, 2] - col[:, 1]) * (p[:, 2] < K.NECK_Z)
     c = col.copy()
-    c = mix(c, np.clip((col - lum) * 1.9 + lum, 0, 1) * np.array([1.06, 0.92, 1.3]), purple)
+    c = mix(c, np.clip((col - lum) * 1.45 + lum, 0, 1) * np.array([1.04, 0.95, 1.2]), purple)
     # the coat a step up and toward plum, so its purple reads in the toon light
     body = smooth(K.NECK_Z - 0.02, K.NECK_Z - 0.06, p[:, 2]) * smooth(0.5, 0.36, lum[:, 0])
-    c = mix(c, c * np.array([1.3, 1.16, 1.42]) + np.array([0.035, 0.012, 0.055]), body)
+    c = mix(c, c * np.array([1.26, 1.14, 1.32]) + np.array([0.032, 0.014, 0.042]), body)
     # (the scan's near-black slivers at the shoulders and behind the ear: its unpainted seams)
     sliver = smooth(0.11, 0.06, lum[:, 0])
     c = mix(c, hexc("#2e2233"), sliver * (p[:, 2] < K.NECK_Z - 0.02))
@@ -191,10 +191,12 @@ def face_art(col, p, n):
     ref = (np.hypot(px - 401, py - 885) < 34) & (m > 0.8)              # the chin, to match the two skins
     if ref.sum() > 20:
         c = np.clip(c * (np.median(col[ref].mean(1)) / max(np.median(c[ref].mean(1)), 0.02)) ** 0.6, 0, 1)      # brightness only: the art keeps its cool lilac and grey irises
+    # (the toon light saturates lilac: the art a touch greyer, as on the sheet)
+    c = mix(c, c.mean(1, keepdims=True) * np.array([0.99, 0.98, 1.05]), 0.28)
     # the irises a step lighter and cooler: the sockets' toon shade darkens them
     for ex in (312.0, 490.0):
         e = smooth(1.0, 0.8, np.hypot((px - ex) / 44.0, (py - 695) / 24.0))
-        c = mix(c, np.clip(c * 1.3 + np.array([0.03, 0.03, 0.055]), 0, 1), e)
+        c = mix(c, np.clip(c * 1.3 + np.array([0.034, 0.036, 0.046]), 0, 1), e)
     return c, m
 
 
