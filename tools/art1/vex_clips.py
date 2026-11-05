@@ -261,7 +261,7 @@ def extras_for(arm):
         out = {}
         for s, side in ((1.0, "R"), (-1.0, "L")):
             out["brow." + side] = (Quaternion(brow_ax[side], -s * 0.22 * b), brow_up[side] * (-0.0065 * b))
-        out["lid.L"] = (Quaternion(lid_ax, 0.95 * l), None)
+        out["lid.L"] = (Quaternion(lid_ax, -1.05 * max(0.0, l - 0.12) / 0.88), None)
         f = P.get("fing", 0.2)
         out["fingers.L"] = (Quaternion(fing_ax, 1.0 * f), None)
         out["thumb.L"] = (Quaternion(thumb_ax, 0.5 * f), None)
