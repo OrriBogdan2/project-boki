@@ -2773,3 +2773,6 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 
 ## 2026-11-05 (S2 to S5): bot-sanity is NOT an ART-1 regression
 - Two reps each, seeds 3/5/9: main 0, art1-motley 0, art1-kael 0. art1-cinder bb7acfb3 flags 1 on seed 3 (Daemek, roam facing flips), but main + art1-cinder merged is 0 on all three seeds. It's seed drift exposing a latent bot roam jitter, not the clip code. The check is deterministic; a fresh worktree needs --import first or it gives a false all-zero pass.
+
+## 2026-11-05 (S2 to S5): READY ext/claire-62-65 c4cf394a (items 62, 64, 65)
+- 62 air skate; 64 skate into ult carries speed; 65 frozen statue locked. Beyond the WIP: jump during skate works, statue can't act, glide from the air skate. rimewright-combo 89/0, dash-flow 0, dash-aim 0, --check 0, health --strict, gen_wiki on the tip; hero-combo 287/0, warden-model, warden-glb, class-unlock 153, arena 86, tutorial-hud, rig-standard one commit earlier. New kit move tm_skate_air: ext/art1-claire needs a clip or the stopgap line, else --clip-check fails on merge.
