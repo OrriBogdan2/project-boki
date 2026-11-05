@@ -528,3 +528,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - ext/art1-ostra 3f00915a is superseded: restart as the jack-in-the-box Motley from ostra_FINAL_sheet, motley_turnaround, motley_splash when a slot frees (rig/clip groundwork reusable; the hover box changes the hitbox: box + spring column). All 8 slots are full.
 - Queue: ART-1 Motley, then the sweep on ext/rename-lisette (Motley "the Void Jester", he/him; Breaker "the Sunken Bulwark"), then Vex 68, gloves 69, glider 63, Claire 62+64+65.
 - ext/kit-ostra-60-75's hand glow and swap clip notes carry to Motley.
+
+## 2026-11-05 S2: Cinder redesign refs received
+- cinder_FINAL_sheet + cinder_turnaround logged. ART-1 Cinder joins the queue after ART-1 Motley; ext/wip-cinder (old look) is superseded for the model. Kit 66 continues.
