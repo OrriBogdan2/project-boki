@@ -819,3 +819,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Glider 63: opens at any heat (3 refusals removed in hunter.gd), deep lift softened (ABYSS_LIFT_CAP 26 -> 18.2), HUD text updated, new --glider-heat-check. Brake zone near the lip not halved. Glider not checked visually.
 - Gloves 69: arena two slots Q and V with pickers, duel bot V row, --glove=a,b. Rest of the game already two-glove (read, not played). arena-check 92/0.
 - Both trial-merge clean with a4b39fd7. Suite results land in /home/boki/suite-s2/s2-kit-{gloves,glider}/ with a DONE file; so far only baseline reds.
+
+## 2026-11-05 12:35 UTC S2: Meshy queue stalled
+- 8 multi-image tasks PENDING at 0% since 11:46 (Kael head, Vex, Breaker, Pip, Lisette head, Tarek, Sable, Ryzz runs); API responds, balance 2203, last success 08:14. Not a key or credit problem from here. Lanes told not to duplicate and to keep moving. **Owner: if it stays stuck, check the Meshy dashboard or plan's queue limit.**
+- Kael follows the art: both eyes white and glowing, scar on his RIGHT (image left).
