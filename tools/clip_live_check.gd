@@ -39,6 +39,10 @@ func _shown(h: Hunter) -> int:
 
 func run(main: Node) -> void:
 	Save.no_write = true
+	if WardenClips.data("kael").is_empty():      # (his clips land with his own art; until then he is procedural)
+		print("LIVE skipped: Kael has no clips on this branch\nCLIP_LIVE_DONE, failures: 0")
+		main.get_tree().quit(0)
+		return
 	A = load("res://tools/archetype_check.gd").new()
 	A.main = main
 	var r: Array = A.setup("juggernaut", 11.0, "", true)

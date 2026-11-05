@@ -9,7 +9,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 
 | Weapon | Carried by | Weight | Damage | Fire interval | Magazine | Reload | Range | Notes |
 |---|---|---|---|---|---|---|---|---|
-| Arc Bolts | Silver Thief | light | 13 | 0.45s | none | none | 12m | A spinning bolt from alternating hands every 0.45s. It flies to your cursor (12m at most) and fizzles there if it hits nothing. |
+| Arc Shots | Silver Thief | light | 13 | 0.45s | none | none | 12m | A spinning shot from alternating hands every 0.45s. It flies to your cursor (12m at most) and fizzles there if it hits nothing. |
 | Burst Rifle | none | medium | 7 | 0.45s | 27 | 1.5s | 10.5m | Three rounds per pull. Accurate at range. |
 | Coilcaster | Storm Chaser | light | 12 | 0.72s | none | none | 13m | No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range. |
 | Torch Lance | Mad Pyromancer | heavy | 2.7 | 0.1s | none | none | 7m | Hold to hose fire 7m ahead: the stream trails behind a sweep, narrow at the nozzle and billowing at the end. No fuel: it roars as long as you hold. It builds Char; at full Char the foe goes Ablaze. |
@@ -119,5 +119,5 @@ Every player and bot now plays a class, whose kit owns Shift and right click. A 
 | Rifle | Rail Charge | 8s | Hold to charge for up to 1s, let go to fire a rail that pierces everyone in its line: 10 to 34 damage, 9 to 17m, full charge stuns. |
 | SMG | Razor Disc | 7s | Throw a spinning disc 8m that cuts everything it passes, then flies back to you and cuts them again. |
 | Longsword | Riposte | 8s | Raise your blade for 0.7s: shots hitting your front fly back at the shooter (+30%), and a sword or claw that hits it is parried and stunned 1s. |
-| Arc Bolts, Twin Blades | Shadow Step | 8s | Throw a knife 9m. If it hits, you appear behind that foe and your next hits for 1.5s crit. |
+| Arc Shots, Twin Blades | Shadow Step | 8s | Throw a knife 9m. If it hits, you appear behind that foe and your next hits for 1.5s crit. |
 | Sniper | Tripwire Mine | 10s | Plant a mine up to 8m away (2 charges). The first rival to step on it is rooted 1.4s, revealed for 3s and takes 14. |

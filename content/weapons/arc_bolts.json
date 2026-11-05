@@ -1,6 +1,6 @@
 {
 	"id": "arc_bolts",
-	"name": "Arc Bolts",
+	"name": "Arc Shots",
 	"classes": [
 		"light"
 	],
@@ -16,7 +16,7 @@
 		"sfx": "dj_bolt",
 		"aim": "cursor",
 		"fire_slow": 0.9,
-		"desc": "A spinning bolt from alternating hands every 0.45s. It flies to your cursor (12m at most) and fizzles there if it hits nothing.",
+		"desc": "A spinning shot from alternating hands every 0.45s. It flies to your cursor (12m at most) and fizzles there if it hits nothing.",
 		"kick": 0.04,
 		"tracer": 0.5
 	},
