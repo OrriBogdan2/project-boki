@@ -2760,3 +2760,6 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 
 ## 2026-11-05 (S2 to S5): READY item 118: ext/kit-pip-118 94a90a69
 - Pip's RMB: a press starts a fixed 1.0 s wind-up, then auto-throws along the aim at that moment; no hold; half speed during it. Seed damage, root, burst unchanged. tender-combo 87/0, archetype, hero-combo, kit-combo, bot-sanity, warden-glb 0 FAIL (before the last lint fix), health --strict. Other flags not run; not played live. ext/vfx-pip needs re-hooking onto fire_rmb/_tick_seed/_throw_seed. ext/art1-pip needs its seed_aim clip at 1.0 s, or --clip-check fails after this merges.
+
+## 2026-11-05 (S2 to S5): READY (HIGH) item 113: ext/kit-kael-113 ae7f8b6b (points 2-8; point 1 sword is ART-1's)
+- Kit logic and data only. juggernaut-combo 183/0 (18 new), hero-combo 287/0, kit-combo 39, dash-flow 0, arena 86, class-unlock 153, health --strict, gen_wiki. Full suite on this commit: 138 flags, same 11 reds as clean main, 0 new. Not hand-played. Art clips on ext/art1-kael still need matching.
