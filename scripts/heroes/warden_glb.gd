@@ -799,6 +799,7 @@ class Sync extends Node:
 	var links: Array = []       # [bone index, rig node, node rest (model space) inverse, bone rest (skeleton space)]
 	var springs := Springs.new()  # the spring_ bone chains (braids) swinging on top
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
+	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
 	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
 	var blade_tip: Node3D
@@ -839,6 +840,7 @@ class Sync extends Node:
 		for b in dd.get("hide_while_chain", []):
 			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
+		sway = WardenSway.make(root, skel, dd.get("sway", {}))
 		if clips:
 			_look_pose()
 			root.set_meta(WardenClips.DEATH_T, float((dd.get("states", {}) as Dictionary).get("dead_t", 0.0)))
@@ -876,6 +878,8 @@ class Sync extends Node:
 		orbits.step(dt)
 		if mood:
 			mood.step(dt)
+		if sway:
+			sway.tumble(dt, orbits.pivots)
 		if bool(root.get_meta(CHAIN_OUT, false)):
 			for bi in hide_out:
 				skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
@@ -923,6 +927,8 @@ class Sync extends Node:
 						WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l), w))
 		for l in rig_root:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
+		if sway:
+			sway.step(dt)
 		if w < 1.0:
 			var inv := skel.global_transform
 			for h in hand_nodes:
@@ -937,7 +943,7 @@ class Sync extends Node:
 		var hand := skel.global_transform * skel.get_bone_global_pose(blade_bone)
 		var a := hand * blade_root.position
 		var b := hand * blade_tip.position
-		if a.distance_squared_to(b) < 0.0001:
+		if a.distance_squared_to(b) < 0.00000001:
 			return
 		var up := Vector3.UP if absf((b - a).normalized().y) < 0.95 else Vector3.RIGHT
 		gun.global_transform = Transform3D(Basis.looking_at(b - a, up), a)
@@ -1028,8 +1034,8 @@ class Springs:
 				# (a long cloth tail never hangs dead: a slow travelling ripple, stronger toward its tip)
 				for i in range(1, n):
 					var u := float(i) / float(n - 1)
-					var sway := Vector3(sin(wind_t * 1.9 - i * 0.7), 0.35 * sin(wind_t * 1.3 - i * 0.9), 0.0)
-					want[i] += xf.basis * sway * WIND * u * u
+					var ripple := Vector3(sin(wind_t * 1.9 - i * 0.7), 0.35 * sin(wind_t * 1.3 - i * 0.9), 0.0)
+					want[i] += xf.basis * ripple * WIND * u * u
 			if ch["hang"]:
 				for i in range(1, n):
 					var seg := (xf * (rest[i] as Transform3D).origin).distance_to(

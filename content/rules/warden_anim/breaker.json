@@ -193,5 +193,8 @@
 			"bul_break": "sad",
 			"bul_armed": "happy"
 		}
-	}
+	},
+	"offset_bones": [
+		"root"
+	]
 }
