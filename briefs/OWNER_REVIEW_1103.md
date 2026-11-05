@@ -2433,3 +2433,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - A Boki under the cursor gets a soft outline (item 166) so it's clear which one F will open.
 - In matches, nothing changes (F/C keep their match meanings) unless the bindings conflict; check the match bindings for C.
 - **Assert:** hover a Boki 15 m away + F → its sheet opens; C near a Boki → the pet reaction.
+
+## 172b. Placement spacing: a building can't sit where its interact zone overlaps another (owner, 18:20 UTC Nov 5)
+- The owner: "he put the trough next to his door - make sure there has to be a distance to avoid issues where you can't interact with the obvious one".
+- **Rule:**
+  - When placing any interactable building/station (trough, patch, pot, pen, workbench, …), the ghost is invalid (red) if its interact zone overlaps another interactable's zone or blocks a door/entrance.
+  - Doors get a keep-clear apron (~2 m in front).
+  - Minimum spacing between interactables ≈ interact radius × 2 (tune).
+  - The ghost shows faint interact-radius rings while placing, so the player sees why.
+  - A short tip on the ghost: "Too close to the door" / "Too close to the trough".
+- **Interaction priority as a safety net:** when two interactables are in range, F picks the one under the cursor first, else the one the player faces, else the nearest. The world prompt shows which one is active.
+- **Assert:**
+  - Placing a trough within the door apron → invalid.
+  - With two in range, the prompt matches the target picked.
