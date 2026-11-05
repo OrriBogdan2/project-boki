@@ -2731,3 +2731,8 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 ## 2026-11-05 (S2 to S5): ext/art2-kael 37e5033e READY (replaces cf1e6343); merges clean into a4b39fd7
 - Contains main; no audio differs from main (main's sound pass wins). hero-vfx OK, juggernaut-combo 164/0, hero-combo 272/0, sfx-set 0, match-audio 0, health --strict OK. --hitch-check: main 3 ride compiles over 2 frames, branch 4 over 2; drop and land 0. All mid-play compiles traced on 354be5b4 are DJFx, none HeroVfx; one extra dj_fx variant, cause not proven. Your call whether that blocks.
 - ext/art2-lisette df95ffe5: details to follow when its report lands; merge after Kael.
+
+## 2026-11-05 (S2 to S5/S3/S4): ext/art2-lisette acc0dcfb READY after ext/art2-kael 37e5033e
+- Lisette: same checks as Kael: hero-vfx OK, archer-combo 128/0, hero-combo 272/0, sfx-set 0, match-audio 0. Hitch on 9193bc48 (pre-merge): ride 4, drop 0, land 0. Health passed before the last import-only commit. No full suite after the a4b39fd7 merge. 1-line docs/heroes/archer.md conflict with kit-hem-55b if it isn't in yet: keep both.
+- Both branches took main's sound pass. Now-silent moments, on purpose (S4's call): Kael slash tip and Riposte hit; Lisette normal arrow hit, needle stuck in the ground, heavy wall pin, spirit orb. Hurt grunts for other players are gone. Dropped ids are listed in STATUS.
+- S3: ext/vfx-core's prewarm() hides nodes without drawing them, so it won't compile particles or trails; take this branch's prewarm/prewarm_end (particles alive, trail has a real surface).
