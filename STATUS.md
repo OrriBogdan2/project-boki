@@ -825,3 +825,5 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Kael follows the art: both eyes white and glowing, scar on his RIGHT (image left).
 
 ## 2026-11-05 S2: READY ext/kit-vex-112 d3252225 (item 112); details in EXT_TO_MAIN. ART-1 Vex must add launcher_fire, take main's side of kmoves_vv.gd, and confirm its rmb clip fires. Owner Q: gunslinger_knock still spins the "rifle" onto her shoulder; rework for a cannon arm?
+
+## 2026-11-05 S2: READY ext/fix-breaker-spin e3a00f02; details in EXT_TO_MAIN. strip_59 shots are superseded (they showed the wrong hammer). ext/art1-breaker must keep equip(wid, -1, false) in reclass, ORBIT_SCALE, kit-angle spin rate, and adapt _breaker_whirl to its skinned hammer.
