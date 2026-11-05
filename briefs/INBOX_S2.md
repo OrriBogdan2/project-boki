@@ -1100,3 +1100,10 @@ Items 98/99/101b/105 slot into KITS after the kits.
   - Push a little more red onto the shoulders/scarf so she reads from above against dark ground.
   - Keep the bow silhouette exact.
 - Her ART-1 slot moves up: right after Kael (the owner is actively iterating on her).
+
+## 2026-11-05 02:04 UTC (ext): Hem props sheet: `briefs/art-refs/hem_v4_props.png` (owner-generated)
+Use it with hem_v4_needlebow.png for the weapon/prop meshes:
+- **bow:** the left one, slotted needle eyes at both tips, red-wrapped grip, glowing thread string
+- **arrows:** the fletched needle arrow with red thread binding
+- **quiver:** the spool quiver
+- **mask, hairpin, scissors:** as drawn
