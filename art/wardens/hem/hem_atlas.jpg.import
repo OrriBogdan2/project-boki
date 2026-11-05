@@ -2,7 +2,7 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d1vujap0cvg1m"
+uid="uid://bhwcjttrow5tc"
 path.bptc="res://.godot/imported/hem_atlas.jpg-9244ee7d52d299e39e5156570a7ae71d.bptc.ctex"
 path.astc="res://.godot/imported/hem_atlas.jpg-9244ee7d52d299e39e5156570a7ae71d.astc.ctex"
 metadata={
@@ -10,7 +10,7 @@ metadata={
 "vram_texture": true
 }
 generator_parameters={
-"md5": "7d13b6bb0eec670c72fa4cf4ea77f069"
+"md5": "e7fd00604f9792f2675af75ed7a6fe5b"
 }
 
 [deps]
@@ -41,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
-detect_3d/compress_to=1
+process/size_limit=2048
+detect_3d/compress_to=0
