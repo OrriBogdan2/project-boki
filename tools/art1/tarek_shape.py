@@ -299,10 +299,6 @@ def trousers(P, R):
     shin = cone(Q, (x + 0.012, 0.012, kn[2] + 0.02), (x + 0.012, -0.004, 0.5), 0.118, 0.112)
     bag = ellipsoid(Q, (x + 0.012, 0.004, 0.495), (0.119, 0.122, 0.105))
     d = smin(d, smin(smin(thigh, shin, 0.05), bag, 0.05), 0.03)
-    # the legs part at the crotch, so a wide stance never webs them
-    crotch = hip[2] - 0.14
-    split = (0.009 - np.abs(P[..., 0]))
-    d = smax(d, np.minimum(split, crotch - P[..., 2]), 0.014)
     # the cuff gathered on the ankle
     cuff = cone(Q, (x + 0.008, -0.004, 0.46), (x + 0.004, -0.008, 0.385), 0.08, 0.072)
     d = smin(d, cuff, 0.02)
@@ -319,7 +315,9 @@ def trousers(P, R):
     gather = np.sin(w * 11.0 + n * 2.0)
     crot = sstep(0.18, 0.02, np.abs(z - (hip[2] - 0.22))) * sstep(0.2, 0.05, np.abs(Q[..., 0] - 0.04))
     d = d + 0.0085 * dia * (0.35 + 0.65 * knee) + 0.0055 * drape * (1 - cuffk) + 0.0075 * gather * cuffk + 0.006 * dia * crot
-    return d
+    # the legs part at the crotch, last, so no fold bridges the gap and a wide stance never webs them
+    split = 0.016 - np.abs(P[..., 0])
+    return smax(d, np.minimum(split, hip[2] - 0.15 - P[..., 2]), 0.012)
 
 
 def trouser_patch(P):
@@ -560,9 +558,11 @@ def frames(path):
 # ------------------------------------------------------------------------------------------------------ the paint
 def key_shade(N, k=0.5):
     """A painted key light (up, front, from his right), wrapped."""
-    L = vec(0.42, 0.5, 0.76)
+    L = vec(0.16, 0.46, 0.87)
     L = L / length(L)
-    return np.clip((N * L).sum(-1) * 0.5 + 0.5, 0.0, 1.0)
+    # (a key from above and in front, a soft fill on both flanks, so no side of him goes dark as he turns)
+    side = np.abs(N[..., 0]) * 0.16
+    return np.clip((N * L).sum(-1) * 0.5 + 0.5 + side, 0.0, 1.0)
 
 
 def strokes(P, scale=26.0, seed=1):

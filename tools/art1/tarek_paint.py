@@ -83,7 +83,7 @@ def p_rock(P, N, occ, cav, a, seeds):
     c = S.mix(c, S.hexc("1e1410")[None, :], crack)
     # only some seams burn, in long runs, as the art draws them
     run = S.sstep(-0.02, 0.2, S.fbm(P, 9.0, 21, 2))
-    burn = S.sstep(0.0115, 0.0045, gap) * run
+    burn = S.sstep(0.013, 0.0055, gap) * run
     spill = S.sstep(0.03, 0.008, gap) * run
     c = S.mix(c, S.hexc("c8501a")[None, :], spill * 0.55)
     c = S.mix(c, S.mix(AMBER[None, :], HOT[None, :], S.sstep(0.007, 0.002, gap)), burn)
@@ -138,7 +138,7 @@ def p_wrap(P, N, occ, cav, a):
 def p_trousers(P, N, occ, cav, a):
     v = lightness(T.key_shade(N), occ, cav * 1.2) + 0.035 * T.strokes(P, 26.0, 23)
     c = tones("54402a", "a48a5c", "d8c090", v)
-    dirt = S.sstep(0.62, 0.42, P[:, 2]) * 0.2 + 0.25 * S.sstep(0.1, 0.45, S.fbm(P, 11.0, 25, 3))
+    dirt = S.sstep(0.62, 0.42, P[:, 2]) * 0.15 + 0.14 * S.sstep(0.1, 0.45, S.fbm(P, 11.0, 25, 3))
     c = S.mix(c, c * S.hexc("c8a888"), dirt)
     # the knee patch and its big stitches
     pa = T.trouser_patch(P)

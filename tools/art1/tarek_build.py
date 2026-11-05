@@ -407,7 +407,7 @@ def geode_parts():
         ob = part_mesh(nm, PARTS[nm])
         decimate(ob, PARTS[nm]["tris"])
         if nm != "iris":
-            sharp_edges(ob, 32)
+            sharp_edges(ob, 62)
         out.append(ob)
     return out
 
@@ -545,8 +545,6 @@ def main():
     for nm, p in list(PARTS.items()):
         ob = part_mesh(nm, p)
         decimate(ob, p["tris"], PROTECT.get(nm))
-        if nm in ROCK:
-            sharp_edges(ob)
         objs.append(ob)
     swept = [b.ob() for b in locs_bag() + ribbons_bag()]
     props = geode_parts()

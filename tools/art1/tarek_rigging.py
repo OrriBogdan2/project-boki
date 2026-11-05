@@ -298,7 +298,7 @@ def assemble(objs, img, emit):
     K.export(os.path.join(OUT, "tarek.glb"), [arm, main_ob] + extras, image_format="JPEG")
 
 
-STONES = ({"angle": 300, "height": 0.12, "k": 1.0}, {"angle": 60, "height": 0.2, "k": 1.05}, {"angle": 180, "height": 0.08, "k": 0.92})
+STONES = ({"angle": 300, "height": 0.2, "k": 1.0}, {"angle": 60, "height": 0.27, "k": 1.05}, {"angle": 180, "height": 0.15, "k": 0.92})
 
 
 def orbits(arm, geo, shard):
@@ -319,7 +319,7 @@ def orbits(arm, geo, shard):
         o = bpy.data.objects.new("stone_%d" % i, geo.data)
         bpy.context.scene.collection.objects.link(o)
         o.parent = e
-        p = Vector(c) + d * 0.4 + Vector((0, 0, it["height"]))
+        p = Vector(c) + d * 0.45 + Vector((0, 0, it["height"]))
         # (its face out and tipped up toward the high match camera)
         M = Matrix.Rotation(-a, 4, "Z") if False else Matrix.Rotation(a, 4, "Z")
         M = M @ Matrix.Rotation(tilt, 4, "X")

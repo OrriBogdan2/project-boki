@@ -126,8 +126,8 @@ def gait(T, stride, lift, duty, dx, dy, lean, bob, armsw, base_y=0.0, back=0.0, 
         p["rot"] = (0, 0, turn * 0.4)
         # the arms pump against the legs, the heavy fists a beat late
         a1 = math.sin(ph * tau - 0.45)
-        p["hr"] = hand(0.11, 0.05 + base_y + armsw * -a1 * 0.5 + 0.02, -0.5 + 0.09 * max(0.0, -a1) * (armsw / 0.4))
-        p["hl"] = lhand(0.11, 0.05 + base_y + armsw * a1 * 0.5 + 0.02, -0.5 + 0.09 * max(0.0, a1) * (armsw / 0.4))
+        p["hr"] = hand(0.11, -0.05 + base_y + armsw * -a1 * 0.6, -0.5 + 0.1 * max(0.0, -a1) * (armsw / 0.4))
+        p["hl"] = lhand(0.11, -0.05 + base_y + armsw * a1 * 0.6, -0.5 + 0.1 * max(0.0, a1) * (armsw / 0.4))
         p["er"] = (0.75, -0.65, -0.1)
         p["el"] = (-0.75, -0.65, -0.1)
     return f
@@ -139,7 +139,7 @@ for nm, (dx, dy) in DIRS.items():
     C.bake("walk_" + nm, WALK_T, [(0, m(LOOSE, frt=0.0, flt=0.0, fing_r=0.5, fing_l=0.5)), (WALK_T, {})], loop=True,
            over=gait(WALK_T, 0.82 if dy else 0.5, 0.11, 0.6, dx, dy, -5.0 if dy >= 0 else 2.0, 0.02, 0.34, turn=-dx * 16.0))
     C.bake("run_" + nm, RUN_T, [(0, m(LOOSE, frt=0.0, flt=0.0, fing_r=0.9, fing_l=0.9, jaw=0.14, lip=0.5)), (RUN_T, {})], loop=True,
-           over=gait(RUN_T, 1.5 if dy else 0.85, 0.15, 0.36, dx, dy, -15.0 if dy >= 0 else 5.0, 0.03, 0.52, back=0.3 if dy >= 0 else 0.12, turn=-dx * 24.0))
+           over=gait(RUN_T, 1.5 if dy else 0.85, 0.15, 0.36, dx, dy, -19.0 if dy >= 0 else 5.0, 0.03, 0.56, back=0.3 if dy >= 0 else 0.12, turn=-dx * 24.0))
 
 # ---------------------------------------------------------------------- air
 # a jump: tucked, one knee up, fists out for balance; the fall: legs reaching, arms up and loose, locs flying
