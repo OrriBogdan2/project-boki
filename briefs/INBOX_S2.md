@@ -1267,3 +1267,10 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 ## 2026-11-05 04:07 UTC (ext): RENAME + REDESIGN Dredge → **Grimble, the Scrap King** (DECISIONS updated)
 - Add the name to the rename sweep. A new design is coming: a skinny greedy junk-hoarder (see DECISIONS).
 - **Stop any Dredge model work.** The master sheet is coming from the owner shortly.
+
+## 2026-11-05 04:08 UTC (ext): GRIMBLE MASTER SHEET: `briefs/art-refs/grimble_FINAL_sheet.png`
+- **Body:** wiry, long-limbed, hunched; grey stitched skin; a monocle green eye; a crooked grin.
+- **Hoard:** towering on his back (secondary motion: the bells and lanterns swing, coins spill on hits).
+- **Kit visuals:** a big gaff hook on a chain (right arm), a scrap fist (left), a blunderbuss at his hip.
+- **Poses:** the junk-ball roll for his dashes; rears up on one foot (an idle / emote).
+- Panel (b) is a second front view, not a back view; a turnaround will follow.
