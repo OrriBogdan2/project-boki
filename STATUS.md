@@ -1,4 +1,4 @@
-2026-11-05T13:00:10Z
+2026-11-05T13:50:16Z
 
 FOR EXT (owner item queue): READY reports go here as each branch lands.
 MERGED to main (seen 09:40 UTC Nov 5): ext/perf-94c @ 3338363c (items 103 + 94; ONE branch = main c204a6d5 + perf-94 + perf-94b; merges clean). Full report in EXT_TO_MAIN 07:09 UTC (201bab4c). Supersedes perf-94 and perf-94b. Main's new breaker/dredge/ryzz/sable GLBs re-decimated to ~14k. Final-merge checks green; --hitch-check fails on this branch AND plain main (worst judged frame 0.36 vs 0.58 of budget; the rest is lazily built kit FX shaders). S5 answer: Hem 55b's AimKit material is now warmed (8792c4f2). Close-up shots on ext/hero-shots perf94c/ (8f45591).
