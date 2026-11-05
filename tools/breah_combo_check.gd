@@ -219,14 +219,18 @@ func _breah() -> void:
 	var mid0 := K.rock_mid(w0)
 	ok(
 		"item 67: a rock's top is at least 1.6x the old 1.25m, taller than a hunter's head, and you can stand on it",
-		float(w0["top"]) >= 1.25 * 1.6 and float(w0["top"]) == HeroZones.ROCK_TOP and float(K.rock_def()["top"]) == HeroZones.ROCK_TOP,
+		float(w0["top"]) >= 1.25 * 1.6 and float(w0["top"]) == HeroZones.ROCK_TOP
+			and float(K.rock_def()["top"]) == HeroZones.ROCK_TOP,
 		"top %.2f" % float(w0["top"])
 	)
 	var tallest := 0.0
 	for c in (w0["node"] as Node3D).get_children():
 		if c.name.begins_with("Col"):
 			tallest = maxf(tallest, ((c as Node3D).get_child(0) as MeshInstance3D).mesh.get_aabb().end.y)
-	ok("item 67: the look reaches the top (tallest column at least the rock's top)", tallest >= float(w0["top"]), "%.2f" % tallest)
+	ok(
+		"item 67: the look reaches the top (tallest column at least the rock's top)", tallest >= float(w0["top"]),
+		"%.2f" % tallest
+	)
 	ok("item 67: every rock has a ground shadow", (w0["node"] as Node3D).get_node_or_null("Shadow") != null)
 	P.teleport(Vector3(mid0.x, top + 0.02, mid0.z))
 	P.grounded = false
@@ -322,7 +326,7 @@ func _breah() -> void:
 		"small: a second burst on the same foe inside 0.8s deals 30% less", k1 == 1.0 and absf(k2 - 0.7) < 0.01,
 		"%.2f %.2f" % [k1, k2]
 	)
-	# ---- RMB: the circle a hop ahead, everyone sees it, the sweet spot grows, the short hold (owner item 61)
+	# ---- RMB: the circle a hop ahead, everyone sees it, the sweet spot grows, the short hold
 	reset.call()
 	T.teleport(home + Vector3(2.5, 0, 0))
 	aim_at(P, T.pos)
@@ -343,7 +347,8 @@ func _breah() -> void:
 	var e2 := AimKit.entry(P, "rmb")
 	ok(
 		"rmb hold: circle and sweet spot grow through the short hold",
-		float(e2.get("r", 0.0)) > float(e1.get("r", 9.0)) + 0.3 and float(e2.get("core", 0.0)) > float(e1.get("core", 9.0)) + 0.4,
+		float(e2.get("r", 0.0)) > float(e1.get("r", 9.0)) + 0.3
+			and float(e2.get("core", 0.0)) > float(e1.get("core", 9.0)) + 0.4,
 		"core %.2f -> %.2f r %.2f -> %.2f" % [
 			float(e1.get("core", 0)), float(e2.get("core", 0)), float(e1.get("r", 0)), float(e2.get("r", 0))
 		]
@@ -365,8 +370,11 @@ func _breah() -> void:
 		cap_t >= 0.4 and cap_t <= 0.5 and longest[0] <= cap_t + DT * 1.5 and not K.rmb_down and K.slam.hops == 1,
 		"cap %.2f longest %.2f down %s hops %d" % [cap_t, longest[0], str(K.rmb_down), K.slam.hops]
 	)
-	ok("item 61: a slam at the cap is the full circle and centre", absf(K.slam.radius(K.dive_k) - 4.5) < 0.01 and absf(K.slam.core(K.dive_k) - 1.8) < 0.01,
-		"charge %.2f" % K.dive_k)
+	ok(
+		"item 61: a slam at the cap is the full circle and centre",
+		absf(K.slam.radius(K.dive_k) - 4.5) < 0.01 and absf(K.slam.core(K.dive_k) - 1.8) < 0.01,
+		"charge %.2f" % K.dive_k
+	)
 	P.inp["sec_hold"] = false
 	var hop := _hop(m, P, K)
 	var looks := KitLooks.of(m)

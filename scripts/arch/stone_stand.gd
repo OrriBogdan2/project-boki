@@ -16,7 +16,7 @@ extends RefCounted
 const CLIMB_MAX := 2.7         # m: how far below the top you can still climb it (a rock's height and a bit)
 const LAND_SLACK := 0.6        # m: a body this far under the top while falling still lands on it
 const FOOT_K := 0.55           # share of the body radius that must be over the rock to stand on it
-const RISE_V := 8.5            # m/s: the caster's lift up her own rock's face (owner item 67: no slower than before)
+const RISE_V := 8.5            # m/s: the caster's lift up her own rock's face
 const SETTLE := 0.85           # m under the top where the lift eases off, so it ends at the top instead of throwing you
 const SETTLE_OVER := 0.2       # m: how far past the top it carries you
 const CARRY_K := 0.9          # share of her run speed kept pressing into the face while she rises

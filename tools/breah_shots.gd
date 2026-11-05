@@ -74,7 +74,7 @@ func _save_strip(file: String) -> void:
 		out.blit_rect(fr, Rect2i(Vector2i.ZERO, fr.get_size()), at)
 	out.save_png(dir.path_join(file))
 
-## Quakefall (owner item 61): the short hold, then the hop and the two-fist smash on landing; the tap.
+## Quakefall: the short hold, then the hop and the two-fist smash on landing; the tap.
 func _breah_rmb() -> void:
 	await _reset(6.0)
 	_aim(home + Vector3(6.0, 0, 0))
@@ -102,7 +102,7 @@ func _breah_rmb() -> void:
 	tap_marks.append([0.08, "full", "rmb_tap", "Quakefall tap: the slam ahead of him, no hop"])
 	await _go(0.6, Callable(), tap_marks)
 
-## Stone Row at gameplay zoom (owner item 67), then the rocks crumbling.
+## Stone Row at gameplay zoom, then the rocks crumbling.
 func _breah_rocks() -> void:
 	await _reset(14.0)
 	_aim(home + Vector3(6.0, 0, 0))

@@ -132,7 +132,7 @@ func _build(kind: String) -> Node3D:
 func _build_rock(n: Node3D, kind: String) -> void:
 	var r := {"boulder": 0.3, "rock": 0.45, "dashrock": 0.5}[kind] as float
 	var heat := {"boulder": 0.8, "rock": 0.95, "dashrock": 0.75}[kind] as float
-	# (owner item 67) Rubble Leap's rock stands tall: a tumbling crag, not a ball
+	# Rubble Leap's rock stands tall: a tumbling crag, not a ball
 	var tall := Vector3(1.0, 1.8, 1.0) if kind == "dashrock" else Vector3.ONE
 	var body := Models.part(
 		n, lump(r), rock_mat(heat, vis_rng.randf() * 10.0), Vector3.ZERO, tall, Vector3(0.3, 0.5, 0.2)

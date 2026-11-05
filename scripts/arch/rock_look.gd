@@ -68,7 +68,8 @@ static func _crag(i: int) -> Array:
 		for s in SIDES:
 			var a := TAU * (float(s) + rng.randf_range(-0.2, 0.2)) / SIDES
 			var rr := r * float(tier[1]) * rng.randf_range(0.82, 1.16)
-			ring.append(Vector3(off.x + cos(a) * rr, hgt * float(tier[0]) * rng.randf_range(0.94, 1.04), off.y + sin(a) * rr))
+			var y := hgt * float(tier[0]) * rng.randf_range(0.94, 1.04)
+			ring.append(Vector3(off.x + cos(a) * rr, y, off.y + sin(a) * rr))
 		rings.append(ring)
 		off += Vector2(rng.randf_range(-0.05, 0.05), rng.randf_range(-0.05, 0.05))
 	var st := SurfaceTool.new()
@@ -150,6 +151,7 @@ static func crumble(m: Node, w: Dictionary) -> void:
 		if c.name.begins_with("Col"):
 			var col := c as Node3D
 			var out := Vector3(col.position.x, 0.0, col.position.z)
-			tw.tween_property(col, "position", col.position + out * 0.8 - Vector3(0, TOP, 0), CRUMBLE_T).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			var sunk := col.position + out * 0.8 - Vector3(0, TOP, 0)
+			tw.tween_property(col, "position", sunk, CRUMBLE_T).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 			tw.tween_property(col, "rotation:z", col.rotation.z + signf(out.x + 0.01) * -0.5, CRUMBLE_T)
 	tw.chain().tween_callback(n.queue_free)

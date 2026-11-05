@@ -15,8 +15,7 @@ extends RefCounted
 
 const ROCK_COL := Color("c98d4a")
 const ROCK_R := 0.5                  # a rock's footprint when it asks the world if it fits
-# m: a rock's top above its base (StoneStand: you stand on it). Taller than a hunter's head (owner item 67,
-# was 1.25); the same as dolm.json rock.top
+# m: a rock's top above its base (StoneStand: you stand on it), taller than a hunter's head; dolm.json rock.top
 const ROCK_TOP := 2.2
 const ROCK_TH := 0.42                # m: half its depth (wider than a barrier so a body fits on top)
 const STEP := 0.25                   # the walk along a cast, metres

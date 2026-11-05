@@ -688,7 +688,7 @@ func rmb_charge_full() -> float:
 	return float(rmb_def()["hold"]) + float(slam_def()["time"])
 
 func rmb_auto_t() -> float:
-	return rmb_charge_full()      # (owner item 61) past the short hold's cap it goes by itself
+	return rmb_charge_full()      # past the short hold's cap it goes by itself
 
 func rmb_hold_tick(t: float) -> void:
 	slam.hold_tick(t)
