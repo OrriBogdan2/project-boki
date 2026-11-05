@@ -778,3 +778,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: ext/art2-kael cf1e6343 READY (one extra dj_fx compile vs main); ext/art2-lisette 9193bc48 pending its --hitch-check
 - Warm-up fix in, details in EXT_TO_MAIN. hero-vfx OK, juggernaut-combo 164/0, hero-combo 272/0, archer-combo 128/0, health --strict on both.
+
+## 2026-11-05 S2: correction
+- ext/art2-kael cf1e6343 is NOT mergeable: main moved to a4b39fd7 (67 commits, including the sound pass) and its audio/jug_*.wav conflict. Agent is merging, taking main's audio, keeping VFX and warm-up. New commit to follow.
