@@ -272,7 +272,7 @@
 },
 "scripts/home/home_gather.gd": {
 "long_line": 9,
-"nested_ternary": 3,
+"nested_ternary": 2,
 "semicolon": 29
 },
 "scripts/home/home_hero.gd": {
@@ -1019,12 +1019,12 @@
 },
 "tools/farm_tutorial_check.gd": {
 "history_comment": 1,
-"long_line": 23,
+"long_line": 21,
 "semicolon": 2
 },
 "tools/farmbuild_check.gd": {
-"long_line": 27,
-"semicolon": 15
+"long_line": 25,
+"semicolon": 14
 },
 "tools/farmbuild_shots.gd": {
 "long_line": 6,
