@@ -158,17 +158,9 @@ const MOVES := {
 		[0.09, SHOULDER],
 		[0.3, SHOULDER],
 		[0.55, {}]]},
-	# Burr Charge held, the owner's side toss rather than an overhead throw: the charge drawn low beside the
-	# left hip and out wide (clear of her body from above), the torso turned a little away, a slight crouch;
-	# little wind-up, and walking the legs keep walking
-	"gunslinger_rmb_hold": {"hold": true, "stance": true, "keys": [
-		[0.00, {}],
-		[0.08, {"p": -0.05, "y": -0.25, "lift": -0.04, "sq": 0.1, "fl": Vector3(-0.58, -0.04, 0.04), "hw": 1.0,
-			"legs": TOSS_SET, "lw": 0.8}],
-		[0.6, {"p": -0.06, "y": -0.3, "lift": -0.05, "sq": 0.12, "fl": Vector3(-0.6, -0.06, 0.08), "hw": 1.0,
-			"legs": TOSS_SET, "lw": 0.8}]]},
-	# ... let go: a quick sidearm flick, the hand swept low and forward from the hip (the release at 0.05),
-	# across the body on the follow-through as the torso unwinds and she steps into it, back on the rifle by 0.5
+	# Burr Charge, the owner's side toss rather than an overhead throw: from low beside the left hip, a quick
+	# sidearm flick, the hand swept low and forward (the release at 0.05), across the body on the follow-through
+	# as the torso unwinds and she steps into it, back on the rifle by 0.5
 	"gunslinger_rmb": {"stance": true, "keys": [
 		[0.00, {"p": -0.06, "y": -0.3, "lift": -0.05, "sq": 0.12, "fl": Vector3(-0.6, -0.06, 0.08), "hw": 1.0,
 			"legs": TOSS_SET, "lw": 0.8}],
