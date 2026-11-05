@@ -811,3 +811,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: head sheets and owner notes taken (INBOX_S2 11:50-12:00)
 - Running lanes told. Breaker wider than tall; Tarek exactly 3 eye-stones; Ryzz's animated gum bubble (pop sound for S4). Cinder, Claire and Grimble head notes go with their second pass when slots free.
+
+## 2026-11-05 S2: playtest items 113-118 queued
+- Running now: Breaker hold-spin arena bug, Motley 117 (refreshing bfcf7393). Next as slots free: Kael 113 (Opus), Lisette 114, Ryzz 116 + 116b, Pip 118. gloves 69 and glider 63 told to wrap up to free a slot.
