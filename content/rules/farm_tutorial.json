@@ -4,6 +4,7 @@
 		"tracker_replaces_day1": true,
 		"player_swing": true,
 		"swing_cooldown_s": 2.0,
+		"crop_stage_s": 6,
 		"end_gems": 30,
 		"skippable": false,
 		"house_cost_in": "farm_build.json build.house (a little wood and 8 swings of labour)",
@@ -27,7 +28,7 @@
 			"needs": [],
 			"title": "Get an axe",
 			"hints": {
-				"go": "Here, take this axe. Trees are wood, and wood builds"
+				"go": "Here, take this axe. Trees give wood, and wood builds things."
 			},
 			"world": {
 				"go": ""
@@ -41,10 +42,10 @@
 			],
 			"title": "Chop a tree",
 			"hints": {
-				"go": "Swing it at a tree ({interact}). Wood lands in the bar up top, and building eats it"
+				"go": "Walk up to a tree and press {interact} to chop. The wood shows in the bar at the top."
 			},
 			"world": {
-				"go": "Chop me"
+				"go": "Chop a tree"
 			}
 		},
 		{
@@ -52,10 +53,10 @@
 			"needs": [
 				"chop"
 			],
-			"title": "Put your house down",
+			"title": "Place your house",
 			"hints": {
-				"place": "Now a house. Press {build}, pick House (a little wood), click the marked spot",
-				"wait": "Your Boki are on it. Press {interact} at the house to swing a hammer too"
+				"place": "Now for a house. Press {build}, choose House, then click the marked spot. It costs a little wood.",
+				"wait": "Your Boki are building it. Press {interact} at the house to help with a hammer."
 			},
 			"world": {
 				"place": "Your house goes here",
@@ -69,10 +70,10 @@
 			],
 			"title": "Swing a hammer",
 			"hints": {
-				"go": "Grab the hammer: press {interact} at the house and help them swing"
+				"go": "Press {interact} at the house to grab a hammer and help build."
 			},
 			"world": {
-				"go": "Swing a hammer"
+				"go": "Help build"
 			}
 		},
 		{
@@ -82,10 +83,11 @@
 			],
 			"title": "Give your Boki a job",
 			"hints": {
-				"go": "Idle hands, no wages. Open your Boki's page and pick it a job"
+				"go": "Click {boki}, or press {details} next to it, to open its page. Or click Boki on the bar below.",
+				"page": "Pick a job here: try '{job}'. Or assign it at a work station."
 			},
 			"world": {
-				"go": ""
+				"go": "Your Boki"
 			},
 			"after_built": true
 		},
@@ -96,10 +98,10 @@
 			],
 			"title": "Mine a rock",
 			"hints": {
-				"go": "Rocks are stone, for sturdier builds. Take this pickaxe and press {interact} on a rock"
+				"go": "Rocks give stone for sturdier builds. Take this pickaxe and press {interact} at a rock."
 			},
 			"world": {
-				"go": "Mine me"
+				"go": "Mine this rock"
 			},
 			"gives_tool": "pickaxe",
 			"gets": "stone"
@@ -111,8 +113,8 @@
 			],
 			"title": "Feed your Boki",
 			"hints": {
-				"place": "Hungry Boki are slow Boki. Press {build} and set the trough down",
-				"fill": "Fill the trough from your pantry ({interact})"
+				"place": "A hungry Boki is a slow Boki. Press {build} and set the trough down",
+				"fill": "Press {interact} at the trough to fill it from your pantry."
 			},
 			"world": {
 				"place": "",
@@ -124,17 +126,17 @@
 			"needs": [
 				"house"
 			],
-			"title": "Grow something",
+			"title": "Grow a crop",
 			"hints": {
-				"patch": "Crops come from patches. Press {build} and set one down by the water: it waters itself",
-				"patch_dry": "Crops come from patches. Press {build} and set one down (by water it would water itself)",
-				"plant": "Plant a seed in the patch ({interact})",
-				"water": "Not by the water? Then water it yourself ({interact})",
-				"grow": "Takes a moment. Carry on with the rest meanwhile",
-				"pick": "Ripe! Pick it ({interact})"
+				"patch": "Crops grow in patches. Press {build} and place a patch by the water. The water keeps it wet for you.",
+				"patch_dry": "Crops grow in patches. Press {build} and place one. Away from water, you water it yourself.",
+				"plant": "Press {interact} at the patch to plant a seed.",
+				"water": "Press {interact} at the patch to water it.",
+				"grow": "Your seed is growing. Ripe in {secs}s. Wait by the patch, then pick it ({interact}).",
+				"pick": "It's ripe! Press {interact} to pick it."
 			},
 			"world": {
-				"patch": "Put the patch by the water",
+				"patch": "Place the patch by the water",
 				"patch_dry": "",
 				"plant": "Plant a seed",
 				"water": "Water it",
@@ -152,8 +154,8 @@
 			],
 			"title": "Buy a seed",
 			"hints": {
-				"stall": "To the market stall ({interact}). Seeds tab, buy one",
-				"bar": "Open the Market on the bar below. Seeds tab, buy one"
+				"stall": "Go to the market stall and press {interact}. Open the Seeds tab and buy one seed.",
+				"bar": "Click Market on the bar below. Open the Seeds tab and buy one seed."
 			},
 			"world": {
 				"stall": "Market stall",
@@ -168,8 +170,8 @@
 			],
 			"title": "Sell a crop",
 			"hints": {
-				"stall": "Back at the stall ({interact}): Sell tab, sell a crop. Gems come from selling, expeditions and Goals",
-				"bar": "Open the Market, Sell tab: sell a crop. Gems come from selling, expeditions and Goals"
+				"stall": "Back at the stall, press {interact}. Open the Sell tab and sell your crop. Gems come from selling, expeditions and Goals.",
+				"bar": "Click Market on the bar below. Open the Sell tab and sell your crop. Gems come from selling, expeditions and Goals."
 			},
 			"world": {
 				"stall": "Sell here",
@@ -183,7 +185,7 @@
 			],
 			"title": "Meet the builder",
 			"hints": {
-				"go": "Come and have a word ({interact}). I draw up what you can build"
+				"go": "Come and say hello: press {interact}. I'll show you what you can build."
 			},
 			"world": {
 				"go": "Hob the builder"
@@ -194,7 +196,7 @@
 			"needs_all": true,
 			"title": "Head out",
 			"hints": {
-				"go": "This Mask holds a fallen Hunter. Put it on, and you become them. The portal ({interact}) takes you on your first expedition"
+				"go": "This Mask holds a fallen Hunter. Put it on and you become them. Press {interact} at the portal to start your first expedition."
 			},
 			"world": {
 				"go": "Portal"
@@ -216,10 +218,10 @@
 		"per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."
 	},
 	"tool_toasts": {
-		"axe": "Someone left a spare axe by the house",
-		"pickaxe": "And a pickaxe for the rocks"
+		"axe": "Someone left a spare axe by the house.",
+		"pickaxe": "And a pickaxe for the rocks, too."
 	},
-	"gems_toast": "Hob slips you %d gems for seeds",
+	"gems_toast": "Hob gives you %d gems to buy seeds",
 	"voice": "Hob",
 	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect)."
 }

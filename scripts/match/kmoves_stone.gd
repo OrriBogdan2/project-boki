@@ -174,11 +174,11 @@ const MOVES := {
 				"hw": 1.0, "fr": Vector3(0.16, 1.0, 0.12), "rw": 1.0
 			}
 		]]},
-	# Quakefall let go (the hop is a real 0.35s arc, the slam lands with her): from the gathered crouch she
-	# drives up off both legs with the fists swinging back (0.05), arches at the top with both fists high
-	# behind her head (0.16), whips them over and down as she drops (0.28), smashes them into the ground on
-	# landing (0.35: flat squash, knees wide), rebounds a little in the crater (0.45), stays low over her
-	# fists while the dust settles (0.7) and heaves herself up (0.95-1.2)
+	# Quakefall let go (the hop is a real 0.6s arc, the slam lands with him, owner item 61): from the gathered
+	# crouch he drives up off both legs with the fists swinging back (0.05), arches at the top with both fists
+	# high behind his head (0.3), whips them over and down as he drops (0.5), smashes them into the ground on
+	# landing (0.6: flat squash, knees wide), rebounds a little in the crater (0.7), stays low over his
+	# fists while the dust settles (0.88) and heaves himself up (1.12-1.36)
 	"breah_slam": {"keys": [
 		[
 			0.00,
@@ -195,48 +195,48 @@ const MOVES := {
 			}
 		],
 		[
-			0.20,
+			0.30,
 			{
 				"p": 0.4, "sq": -0.26, "lift": 0.1, "legs": [0.75, -1.35, 0.65, -1.2], "lw": 1.0,
 				"fl": Vector3(-0.2, 1.08, 0.24), "hw": 1.0, "fr": Vector3(0.2, 1.08, 0.24), "rw": 1.0
 			}
 		],
 		[
-			0.35,
+			0.50,
 			{
 				"p": -0.35, "sq": -0.12, "legs": [0.45, -0.7, 0.4, -0.65], "lw": 1.0,
 				"fl": Vector3(-0.18, 0.55, -0.45), "hw": 1.0, "fr": Vector3(0.18, 0.55, -0.45), "rw": 1.0
 			}
 		],
 		[
-			0.43,
+			0.60,
 			{
 				"p": -0.88, "lift": -0.16, "sq": 0.52, "legs": [0.95, -1.55, 0.85, -1.45], "lw": 1.0,
 				"fl": Vector3(-0.2, -0.72, -0.52), "hw": 1.0, "fr": Vector3(0.2, -0.72, -0.52), "rw": 1.0
 			}
 		],
 		[
-			0.53,
+			0.70,
 			{
 				"p": -0.74, "lift": -0.08, "sq": 0.3, "legs": [0.85, -1.4, 0.75, -1.3], "lw": 1.0,
 				"fl": Vector3(-0.2, -0.62, -0.5), "hw": 1.0, "fr": Vector3(0.2, -0.62, -0.5), "rw": 1.0
 			}
 		],
 		[
-			0.70,
+			0.88,
 			{
 				"p": -0.62, "lift": -0.1, "sq": 0.24, "legs": [0.8, -1.35, 0.7, -1.25], "lw": 1.0,
 				"fl": Vector3(-0.2, -0.6, -0.48), "hw": 1.0, "fr": Vector3(0.2, -0.6, -0.48), "rw": 1.0
 			}
 		],
 		[
-			0.95,
+			1.12,
 			{
 				"p": -0.22, "sq": 0.06, "fl": Vector3(-0.24, -0.2, -0.3), "hw": 0.6, "fr": Vector3(0.24, -0.2, -0.3),
 				"rw": 0.6
 			}
 		],
-		[1.20, {}]]},
+		[1.36, {}]]},
 	# the air Quakefall: fists high, pitched down over them as she falls
 	"breah_dive": {"hold": true, "keys": [
 		[0.00, {}],

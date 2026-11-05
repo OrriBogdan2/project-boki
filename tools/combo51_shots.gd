@@ -91,6 +91,52 @@ func _mage() -> void:
 	await _go(0.8, jump, jmarks)
 	await _go(2.2)
 
+## Ryzz items 71-73: the committed Skycall arrow, an orb pulled to her (the flash), Kitefall's Static arcs.
+func _mage_items() -> void:
+	var K: MageKit = P.ak
+	var at_t := func(): return T.position + Vector3(0, 0.9, 0)
+	await _reset(7.0)
+	_aim(T.pos)
+	P.inp["e_down"] = true
+	K.use_e()
+	var drag := func(t: float):
+		_aim(T.pos + Vector3(-2.2, 0, 2.6))
+		P.inp["e_down"] = t < 0.4
+	var caption := "Item 73: Skycall committed to a diagonal drag: the arrow in the circle is the exact push"
+	await _go(1.3, drag, [[0.9, "full", "items_skycall_arrow", caption, at_t]])
+	await _reset(25.0)
+	P.dashes = 0.0
+	var spot := home + Vector3(6, 0, 0)
+	K.motes.clear()
+	K.motes.append({"pos": spot, "t": 6.0, "node": K.own_node(), "owner": T})
+	_aim(spot)
+	P.inp["e_down"] = true
+	K.use_e()
+	var pull := func(t: float):
+		_aim(home + Vector3(2.0, 0, 0))
+		P.inp["e_down"] = t < 0.4
+	var pickup := "Item 71: the orb dragged toward her flew to her: the flash and chime, Wirerun back"
+	await _go(1.8, pull, [[1.5, "full", "items_orb_pulled", pickup, Callable()]])
+	await _reset(7.0)
+	var beside := T.pos + Vector3(1.4, 0, 1.0)
+	var T2b: Hunter = m.make_hunter("T2", 5, "medium", "Target2", "idle", {}, beside, {"arch": "none"})
+	T2b.max_hp = 10000.0
+	T2b.hp = T2b.max_hp
+	T2 = T2b
+	K.add_spark(T, 3)
+	K.cd["x"] = 0.0
+	P.lvl = 6
+	HunterKeys.ult_pressed(P)
+	var ult := func(t: float):
+		_aim(T.pos)
+		if t >= 0.9 and t < 0.9 + DT:
+			HunterKeys.ult_pressed(P)
+	var arcs := "Item 72: Kitefall on a foe with 3 Static: lightning arcs to the other, both raised to 4"
+	await _go(1.6, ult, [[1.13, "full", "items_ult_spread", arcs, at_t]])
+	T2 = null
+	T2b.queue_free()
+	m.hunters.erase(T2b)
+
 ## Breah: the Quake Fist held through a jump and her air dash, let go as the dash ends.
 func _dolm() -> void:
 	await _reset(9.0)
