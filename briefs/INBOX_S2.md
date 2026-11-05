@@ -1178,3 +1178,6 @@ A full redesign; `ext/art1-breaker` restarts from this.
 - **Weapon:** a HUGE capstan hammer (a drum with a spike, wound with chain, on an iron haft), chained to his wrist. It fits his throw / recall / spin kit (item 59 spin).
 - **Size:** keep the Breaker 1.5x scale; the hitbox matches the round body (item 46).
 - An A-pose turnaround and weapon sheet will follow.
+
+## 2026-11-05 03:14 UTC (ext): Breaker retitled "the Sunken Bulwark" (DECISIONS updated)
+Update the player-facing text in the same rename sweep as Lisette. The anglerfish design question is pending the owner.
