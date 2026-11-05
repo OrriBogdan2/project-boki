@@ -204,6 +204,7 @@ bpy.ops.object.modifier_apply(modifier=m.name)
 bm = bmesh.new()
 bm.from_mesh(low.data)
 bm.verts.ensure_lookup_table()
+dl = bm.verts.layers.deform.verify()
 seen, drop = set(), []
 for v in bm.verts:
     if v.index in seen:
@@ -218,7 +219,8 @@ for v in bm.verts:
             if o.index not in seen:
                 seen.add(o.index)
                 stack.append(o)
-    if len(part) < 70 and max(abs(q.co.x) for q in part) > 0.24 and max(q.co.z for q in part) < 0.74:
+    groups = {src.vertex_groups[g].name.split(".")[0] for q in part for g in q[dl].keys()}
+    if len(part) < 70 and groups & {"hand", "forearm"} and groups & {"thigh", "shin"}:
         drop += part
 print("scraps dropped", len(drop))
 bmesh.ops.delete(bm, geom=drop, context="VERTS")
