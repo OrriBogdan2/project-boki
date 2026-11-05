@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dnqgvdaim4k2t"
-path="res://.godot/imported/ostra_halo_atlas.jpg-cce8b501edb910fad7dd05f4775571fa.ctex"
+path.bptc="res://.godot/imported/ostra_halo_atlas.jpg-cce8b501edb910fad7dd05f4775571fa.bptc.ctex"
+path.astc="res://.godot/imported/ostra_halo_atlas.jpg-cce8b501edb910fad7dd05f4775571fa.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "433207ed9bbc8746c59df9bc977c66e9"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/ostra/ostra_halo_atlas.jpg"
-dest_files=["res://.godot/imported/ostra_halo_atlas.jpg-cce8b501edb910fad7dd05f4775571fa.ctex"]
+dest_files=["res://.godot/imported/ostra_halo_atlas.jpg-cce8b501edb910fad7dd05f4775571fa.bptc.ctex", "res://.godot/imported/ostra_halo_atlas.jpg-cce8b501edb910fad7dd05f4775571fa.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -39,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=2048
 detect_3d/compress_to=0

@@ -1,16 +1,18 @@
 extends RefCounted
 ## --empty-shots --shots-dir=<dir>: review screenshots of the Empty creator (Male / Female, three heights,
 ## builds, hollow styles), the Masks viewer and the first-Mask moment (xvfb with a renderer). Add
-## --only=creator|viewer|mask|second to take one group (second: the farm's second-Mask offer by the portal).
+## --only=creator|viewer|mask|second|shroud|feet|farm to take one group (second: the farm's second-Mask offer by
+## the portal; shroud: the creator from front, side and back, the aura levels and shroud styles; feet: the soles
+## at the shortest and tallest height, standing and walking; farm: the Empty at home from every side and above).
 
 const LOOKS := {
 	"creator_female": {"gender": 0},
 	"creator_male_short": {"height": 0}, "creator_male_tall": {"height": 2},
 	"creator_female_short": {"gender": 0, "height": 0}, "creator_female_tall": {"gender": 0, "height": 2},
 	"creator_slight": {"build": 0}, "creator_sturdy": {"build": 2},
-	"void_mask_ember": {"hollow": 1, "glow": 1, "ghost": 2, "motes": 2},
-	"void_torn_violet": {"gender": 0, "hollow": 2, "glow": 2, "ghost": 3, "colour": 4},
-	"void_crescent_gold": {"hollow": 3, "glow": 4, "ghost": 1, "colour": 8},
+	"void_mask_ember": {"hollow": 1, "glow": 1, "ghost": 2, "aura": 2},
+	"void_torn_violet": {"gender": 0, "hollow": 2, "glow": 2, "ghost": 3, "colour": 5},
+	"void_crescent_gold": {"hollow": 3, "glow": 4, "ghost": 1, "colour": 7},
 }
 
 var dir := ""
@@ -37,6 +39,12 @@ func run(main_node: Node) -> void:
 		await _mask(tree)
 	if only in ["", "second"]:
 		await _second(tree)
+	if only in ["", "shroud"]:
+		await _shroud(tree)
+	if only in ["", "feet"]:
+		await _feet(tree)
+	if only in ["", "farm"]:
+		await _farm(tree)
 	print("EMPTYSHOTS done in %s" % dir)
 	tree.quit(0)
 
@@ -142,6 +150,96 @@ func _second(tree: SceneTree) -> void:
 	await tree.process_frame
 	HomeClasses.open(hm, "ashwick")
 	await _shot(tree, "masks_screen", 1.5)
+	hm.queue_free()
+	await tree.process_frame
+
+## Creator views: the front, side and back of the void head and the shroud, the aura levels, the shroud styles.
+func _shroud(tree: SceneTree) -> void:
+	_fresh()
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	hx.edit_only = true
+	main.add_child(hx)
+	await _shot(tree, "creator_warmup", 2.5)
+	var views := {"front": PI, "side": PI * 0.5, "back": 0.0}
+	for view in views:
+		hx.look = Unmasked.default_look()
+		hx.look.merge({"hollow": 1, "glow": 2, "colour": 5, "aura": 1}, true)
+		hx._show_create()
+		hx.preview.rotation.y = views[view]
+		await _shot(tree, "creator_shroud_" + view, 0.8)
+	for level in Unmasked.AURA.size():
+		hx.look = Unmasked.default_look()
+		hx.look.merge({"aura": level, "glow": 0, "colour": 10}, true)
+		hx._show_create()
+		hx.preview.rotation.y = PI * 0.8
+		await _shot(tree, "creator_aura_%d_%s" % [level, String(Unmasked.AURA[level]).to_lower()], 2.5)
+	for style in Unmasked.SHROUDS.size():
+		hx.look = Unmasked.default_look()
+		hx.look.merge({"shroud": style, "gender": style % 2, "colour": 2 + style * 3}, true)
+		hx._show_create()
+		hx.preview.rotation.y = PI * 0.8
+		await _shot(tree, "creator_style_%s" % String(Unmasked.SHROUDS[style]).to_lower(), 0.8)
+	hx.queue_free()
+	await tree.process_frame
+
+## The soles on a floor at the shortest and tallest height, standing and mid-stride, close and low.
+func _feet(tree: SceneTree) -> void:
+	_fresh()
+	var stage := Node3D.new()
+	main.add_child(stage)
+	var floor_mesh := MeshInstance3D.new()
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(8, 8)
+	floor_mesh.mesh = plane
+	var floor_mat := StandardMaterial3D.new()
+	floor_mat.albedo_color = Color(0.35, 0.55, 0.3)
+	plane.material = floor_mat
+	stage.add_child(floor_mesh)
+	var sun := DirectionalLight3D.new()
+	sun.rotation_degrees = Vector3(-50, -30, 0)
+	stage.add_child(sun)
+	var cam := Camera3D.new()
+	cam.fov = 30.0
+	stage.add_child(cam)
+	cam.position = Vector3(0.3, 0.35, 3.2)
+	cam.look_at(Vector3(0.0, 0.25, 0.0))
+	cam.make_current()
+	var models := []
+	var anims := []
+	for h in [0, 2]:
+		var look := Unmasked.clean({"unmasked": true, "height": h, "build": h})
+		var m := Models.hunter("medium", Data.TEAM_COLORS[0], "", "", look)
+		m.get_node("Rig/Torso/Aim/Gun").free()
+		m.position = Vector3(-0.55 + 1.1 * (h / 2), 0, 0)
+		m.rotation.y = -PI * 0.5
+		stage.add_child(m)
+		models.append(m)
+		anims.append(HunterAnim.new(m))
+	for step in 2:
+		var vel := Vector3(0, 0, 0) if step == 0 else Vector3(3.5, 0, 0)
+		for i in 75:
+			for a in anims:
+				(a as HunterAnim).update(1.0 / 60.0, {"fired": 99.0, "face": -PI * 0.5, "vel": vel})
+			await tree.process_frame
+		await _shot(tree, "feet_%s_short_tall" % ("idle" if step == 0 else "walking"), 0.0)
+	stage.queue_free()
+	await tree.process_frame
+
+## The Empty at home: the farm's own camera, and the Empty turned to face every way.
+func _farm(tree: SceneTree) -> void:
+	_fresh()
+	var d := Save.d
+	d["roster"] = [Save.new_kin("cindle", "Ember")]
+	d["active"] = d["roster"][0]["uid"]
+	d["look"] = Unmasked.default_look()
+	d["look"].merge({"hollow": 1, "glow": 2, "colour": 5, "aura": 2}, true)
+	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true, "match": true}
+	var hm = await main._hb_home()
+	var views := {"topdown": PI, "front": PI, "side": PI * 0.5, "back": 0.0}
+	for view in views:
+		hm.pface = views[view]
+		hm.player.rotation.y = views[view]
+		await _shot(tree, "farm_" + view, 1.2)
 	hm.queue_free()
 	await tree.process_frame
 
