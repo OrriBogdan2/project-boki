@@ -110,6 +110,8 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 | Rimelock in the air: no glide; Shift out of it skates on at speed | "tm X: glide held while sealed ...", "tm X: Shift ends Rimelock and she skates straight out ..." |
 | Skate into Rimelock: the statue slides ~6m keeping >= 80% speed for 0.3s, facing locked while the cursor sweeps 360 deg, then rooted; a recast frees her | "tm X (item 64): ...", "tm X (item 65): ...", "tm X: then encased and rooted ...", "tm X: an early recast frees her ..." |
 | Skate only: no charge, no dash; a tap is a short skate; an air press skates at once (no buffer); plates form | the "tm Shift:" rows of `_skate_only` |
+| Air skate rules (item 62): a jump in the skate rises and the skate goes on, then sinks at `air_fall`; a press while gliding folds the glider; a jump press clear of the ground opens the glider with the speed kept; move id `tm_skate_air` | the rows of `_air_skate`, `_air_skate_rules` |
+| Statue (item 65): no dart, jump, glove or Boki C (`cast_locked`), recast and Shift only | `_statue_locks` |
 | Her dash moves are her skate only (`tm_skate_go`, `tm_skate`), used by no other hero and fitting the skate's length (owner item 35) | "tm Shift: her dash moves are her own skate ..." |
 | Ice Spear throw: drawn back, leaves her hand at 18 m/s, lands on arrival, detonates 1.8s after landing; the wall's 16.2m travel | "tm RMB: let go, she draws back first ...", "tm RMB: the throw ...", "tm RMB: it travels to the target ...", "tm E: it travels 16.2 m at most ..." |
 | A merge start ends Rimelock with no crash (`rime`) | "tm merge: drop_holds ends Rimelock with no crash and frees her" |
