@@ -390,3 +390,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 S2: queue updated for items 107 + 108
 - Next when a slot frees, in order: ART-1 Ostra, ART-1 Hem (108: more striking, tasteful), drop-107 (ext/drop-107), then the remaining kits; Pip 10-15% smaller with its hitbox (item 46) folds into the next kit slot.
 - Vex splash (108): requested from the IMG agent in briefs/INBOX_IMG.md.
+
+## 2026-11-05 S2: READY ext/kit-hem-55b 8b2c04f1 (item 55b; supersedes ext/hem-reticle)
+- Based on origin/main fe51b43b. scripts/arch/kits/pin_draw.gd: thin line to the cursor, red fill grows along it, one small circle at the perfect-timing point flashes gold; V, glints, stage bursts and cursor ring removed. Main's red Heavy Shot untouched.
+- Differs from the brief: one circle that moves from the Empowered point to the Supercharged point, so both perfect windows stay; own-draw wind-up ring and its rising ticks removed (enemies/online still see it); body flash, lime Supercharged target ring and net_ring kept.
+- Checks 0 failures: --check, hero-combo 278, archer-combo 143, warden-model, warden-glb, class-unlock 153, arena 86, tutorial-hud, rig-standard, aimkit 55, archetype 339, dash-flow, health --strict, gen_wiki 34 unchanged.
+- Shots: /home/boki/shots-s2/kits/hem/strip_55b.png, strip_close_55b.png. Not checked: live feel at real speed, sand/dark terrain.
+- Owner Qs: two perfect stages with one moving circle OK? Fine to lose the rising draw ticks?
