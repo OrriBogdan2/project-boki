@@ -1395,3 +1395,9 @@ Use them for shape and detail; **the master sheet wins on any difference.**
 - **Body:** the hair is unchanged (side-swept + braid). A glowing chrome cyber-spine down her bare back. Glowing circuit lines on her legs and stomach.
 - **WEAPON (owner):** ONE hybrid arm-cannon. Gatling barrels below + a grenade-launcher tube on top with a grenade drum. Her grenade ability fires from the top tube; the gatling is her primary fire. Fed from the gear backpack, with stickers + a "VEX" tag.
 - The punk version is moved to skins.
+
+## 2026-11-05 05:50 UTC (ext): VEX FINAL (owner): `vex_FINAL_sheet.png` replaced with the final pass
+- **Face and arms:** one brass cyber-eye (right, glowing) + one natural green eye with smoky winged liner (left); a robotic chrome-and-brass LEFT arm with green joints (she flips a gold coin with it).
+- **Back:** the glowing cyber-spine fully visible on her bare back (the jacket is cropped short).
+- **Outfit:** the light green racing jacket, a low-cut crop top, a studded "VEX" belt, bike shorts with an orange stripe, glowing thigh-highs with chrome knees.
+- **Weapon:** gatling barrels below + a MAKESHIFT grenade launcher on top (welded scrap pipe, a flared brass muzzle, a spoon sight, duct tape, hazard tape, a green skull, a grenade drum); the wanted poster + kill tallies on the gun.
