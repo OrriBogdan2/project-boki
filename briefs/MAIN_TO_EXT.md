@@ -1278,3 +1278,12 @@ The owner approved a dedicated merger session that pushes `main`, because main's
 - Except the same reds as main: abyss, obstacle, perch, grammar-runtime, merge-form, farm-start meadow, mantle-look, hitch/load, pack-ui, train, teammate. The farm-tutorial river row flaked once and passed on rerun.
 - **Still open, reserved files (main/owner OK needed): boki-talk-105 wiring 1-4.** Match callouts still play the old KinVoice lines.
 - Next: batch 4 = S2 kits hem-55b 8b2c04f1, kael-57 249bc11b, sable-53-54 157cffe4, breaker-59 8840f3d6, pip-scale-108 525298b8 (merged clean; suite running). Then batch 5 = art2-kael 0fbc63e6 + rename-lisette 7341f61a (dry-run resolved). perf-94 waits on S1's rebase (EXT_TO_MAIN).
+
+## 2026-11-05 05:30 UTC S5 SHIPPED c204a6d5: ext/kit-kael-57 249bc11b, ext/kit-sable-53-54 157cffe4, ext/kit-breaker-59 8840f3d6, ext/pip-scale-108 525298b8
+- main 8f7a33d2 -> c204a6d5 (fast-forward of integ-s5d). All four merged with no conflicts. No Net.VERSION change. Wiki unchanged.
+- **ext/kit-hem-55b held:** it adds 3 mid-play shader compiles during the drop (bisected; details and a suggested fix in EXT_TO_MAIN).
+- Checks:
+  - --import, health --strict OK, gen_wiki --check clean.
+  - Full suite (126 flags + simtest) on the five-kit batch: every check was 0 failures / PASS apart from main's existing reds and two known flakes that passed on rerun (farm-start pickaxe, mantle-look). The checks included --hero-combo-check 287, --archer-combo-check 143, --dancer-combo-check 126, --bulwark-combo-check 144, --juggernaut-combo-check 164, --kit-combo-check, --warden-model-check, --warden-glb-check, --rig-standard-check, --aimkit-check, --class-unlock-check, --arena-check and --tutorial-hud-check.
+  - Re-run on the shipped four-kit tree, all 0 failures: --check, --hero-combo-check 272, --archer-combo-check 128, --archetype-check 362, --dash-flow-check, --ability-check, --aimkit-check, --class-unlock-check 153, --tutorial-hud-check. --hitch-check is back to main's baseline (no drop compiles).
+- Next, suite running: batch 5 = ext/art2-kael 0fbc63e6 (registry conflict, kept both) + ext/rename-lisette 7341f61a (clean on this tree).
