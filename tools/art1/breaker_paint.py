@@ -1,5 +1,8 @@
 """Breaker's paint (ART-1): colour per texel on the sculpt's own surface. The toon shader adds soft light on top, so
 the sculpt's form, cavities and frost are painted in, the way the concept art is."""
+import os
+
+import imgio
 import numpy as np
 
 import breaker_sculpt as B
@@ -287,8 +290,124 @@ def p_rope(p, n, c):
     return col * (0.72 + 0.4 * (0.5 + 0.5 * np.sin(a[:, 1] * 6.283 + 1.0))[:, None])
 
 
-TABLE = {"hull": p_hull, "limb": p_limb, "mast": p_mast, "iron": p_iron, "brass": p_brass, "compass": p_compass, "moss": p_moss,
-         "sail": p_sail, "drum": p_drum, "door": p_door, "fish": p_fish, "lure": p_lure, "rope": p_rope}
+# ---- the art projected (FINE-DETAIL): model points -> pixels of the turnaround, the weapon and head sheets. Coordinates are read off
+# the 1500-wide view of breaker_turnaround (x, y), scaled at load.
+REFS = os.environ.get("BOKI_ART_REFS", "/home/boki/briefs-wt/briefs/art-refs")
+_art = {}
+
+
+def art(name):
+    if name not in _art:
+        _art[name] = imgio.load(os.path.join(REFS, name + ".png"))
+    return _art[name]
+
+
+def sample(name, px, py, w=1500.0):
+    """Bilinear, (px, py) in the sheet's coordinates when `w` px wide."""
+    im = art(name)
+    k = im.shape[1] / w
+    x = np.clip(px * k, 0, im.shape[1] - 1.001)
+    y = np.clip(py * k, 0, im.shape[0] - 1.001)
+    i, j = x.astype(int), y.astype(int)
+    u, v = (x - i)[:, None], (y - j)[:, None]
+    return (im[j, i] * (1 - u) + im[j, i + 1] * u) * (1 - v) + (im[j + 1, i] * (1 - u) + im[j + 1, i + 1] * u) * v
+
+
+def hot(col):
+    """The art's teal light becomes the toon shader's hot key."""
+    m = np.minimum(col[:, 1], col[:, 2]) - col[:, 0] * 1.05
+    return mix(col, KEY, smooth(0.2, 0.3, m) * smooth(0.45, 0.6, col[:, 2]))
+
+
+FC, BC = 258.0, 985.0       # the front and back views' centre x
+SOLE = 487.0
+HY, HH, HW = 295.0, 128.0, 134.0   # the hull in the art: centre y, half height, half width
+
+
+def p_hull(p, n, c):
+    Rx, Ry, Rz = B.HULL_R
+    u = p[:, 0] / Rx
+    v = (p[:, 2] - B.HULL_C[2]) / Rz
+    u = np.sign(u) * np.minimum(np.abs(u), 0.97)
+    f = sample("breaker_turnaround", FC - u * HW, HY - v * HH)
+    b = sample("breaker_turnaround", BC + u * HW, HY - v * HH)
+    w = smooth(-0.3, 0.3, n[:, 1])
+    return hot(mix(b, f, w))
+
+
+ARM = [(0.0, 105.0, 225.0), (0.45, 85.0, 330.0), (0.75, 60.0, 400.0), (1.0, 62.0, 462.0)]   # his right arm, front view: t, x, y
+
+
+def _arm_px(t):
+    tt = [a[0] for a in ARM]
+    return np.interp(t, tt, [a[1] for a in ARM]), np.interp(t, tt, [a[2] for a in ARM])
+
+
+def p_limb(p, n, c):
+    s = float(c["part"]["side"])
+    r = c["part"].get("r", 0.13)
+    z0, z1 = 0.75, 0.03
+    t = np.clip((p[:, 2] - z0) / (z1 - z0), 0, 1)
+    ax, ay = _arm_px(t)
+    lx = (np.abs(p[:, 0]) - 0.557) / r
+    ly = p[:, 1] / r
+    wide = 42.0
+    fx = FC + s * (ax - FC) * -1.0 if False else (ax - wide * lx * 0.95 if s > 0 else 2 * FC - ax + wide * lx * 0.95)
+    f = sample("breaker_turnaround", fx, ay)
+    bx = 2 * BC - ax + wide * lx * 0.95 if s > 0 else ax + (BC - FC) - wide * lx * 0.95
+    b = sample("breaker_turnaround", bx, ay)
+    # the outer face, from the side view (the arm stands clear there)
+    o = sample("breaker_turnaround", 610.0 + ly * wide * 1.05, ay)
+    w = np.maximum(n[:, 0] * s, 0.0) ** 2
+    out = mix(mix(b, f, smooth(-0.3, 0.3, n[:, 1])), o, smooth(0.45, 0.75, w))
+    return hot(out)
+
+
+def p_pauldron(p, n, c):
+    s = float(c["part"]["side"])
+    lx = (np.abs(p[:, 0]) - 0.557) / 0.0027 * 0.62
+    y = 228.0 - (p[:, 2] - 0.76) / 0.0027 * 0.9
+    f = sample("breaker_turnaround", 105.0 - lx if s > 0 else 412.0 + lx, y)
+    b = sample("breaker_turnaround", BC + 153.0 + lx if s > 0 else BC - 153.0 - lx, y)
+    return hot(mix(b, f, smooth(-0.3, 0.3, n[:, 1])))
+
+
+def p_leg(p, n, c):
+    s = float(c["part"]["side"])
+    lx = (np.abs(p[:, 0]) - 0.176) / 0.0027 * 0.9
+    y = np.minimum(SOLE - p[:, 2] / 0.0027 * 0.95, 484.0)
+    f = sample("breaker_turnaround", (FC - 50.0 - lx) if s > 0 else (FC + 50.0 + lx), y)
+    b = sample("breaker_turnaround", (BC + 50.0 + lx) if s > 0 else (BC - 50.0 - lx), y)
+    return mix(b, f, smooth(-0.3, 0.3, n[:, 1]))
+
+
+def p_helmet(p, n, c):
+    """breaker_head's bottom row (1000 wide): front at x 125, side at x 620, back at x 860; the helmet's middle at y 205."""
+    k = 100.0 / B.HELM_R
+    x = p[:, 0]
+    y = p[:, 1] - B.HELM_C[1]
+    z = p[:, 2] - B.HELM_C[2]
+    py = 205.0 - z * k
+    f = sample("breaker_head", 125.0 - x * k, py, 1000.0)
+    b = sample("breaker_head", 860.0 + x * k, py, 1000.0)
+    sd = sample("breaker_head", 620.0 + y * k * 0.9, py, 1000.0)
+    w = np.abs(n[:, 0]) ** 2
+    out = mix(mix(b, f, smooth(-0.25, 0.25, n[:, 1])), sd, smooth(0.5, 0.8, w))
+    # the collar's plate under the neck ring
+    return out
+
+
+def p_door_art(p, n, c):
+    """The hatch shield, front and back of breaker_weapons (1500 wide)."""
+    x = p[:, 0]
+    z = (p[:, 2] - 0.28) / 0.585
+    f = sample("breaker_weapons", 935.0 + x / 0.3 * 92.0, 615.0 - z * 180.0)
+    b = sample("breaker_weapons", 1340.0 - x / 0.3 * 92.0, 615.0 - z * 180.0)
+    return mix(b, f, smooth(0.3, -0.3, n[:, 1]))
+
+
+TABLE = {"hull": p_hull, "limb": p_limb, "pauldron": p_pauldron, "leg": p_leg, "helmet": p_helmet, "mast": p_mast, "iron": p_iron, "brass": p_brass, "compass": p_compass, "moss": p_moss,
+         "sail": p_sail, "drum": p_drum, "door": p_door_art, "fish": p_fish, "lure": p_lure, "rope": p_rope}
 
 
 def paint(name, p, n, ctx):

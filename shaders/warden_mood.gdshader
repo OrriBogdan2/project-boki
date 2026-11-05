@@ -7,7 +7,7 @@ uniform int to_mood = 0;
 uniform float k = 1.0;
 uniform float blink = 0.0;        // 0..1: the eyes shut to a line
 uniform vec3 glow = vec3(0.45, 1.0, 0.95);
-uniform vec3 glass = vec3(0.035, 0.07, 0.09);
+uniform vec3 glass = vec3(0.07, 0.2, 0.22);
 uniform float strength = 1.8;
 
 float seg(vec2 p, vec2 a, vec2 b) {
@@ -31,7 +31,7 @@ float face(vec2 p, int m) {
 	vec2 q = vec2(abs(p.x), p.y);
 	float d = 9.0;
 	if (m == 0) {
-		d = length((q - vec2(0.32, 0.02)) * vec2(1.0, 1.0 / max(1.0 - blink, 0.08))) - 0.17;
+		d = length((q - vec2(0.3, 0.02)) * vec2(1.0, 1.0 / max(1.0 - blink, 0.08))) - 0.2;
 	} else if (m == 1) {
 		float sm = length((p - vec2(0.0, -0.3)) * vec2(1.0, 1.7)) - 0.34;
 		d = min(arc(q, vec2(0.38, -0.02), 0.2, -1.3, 1.3) - 0.055, max(sm, p.y + 0.2));

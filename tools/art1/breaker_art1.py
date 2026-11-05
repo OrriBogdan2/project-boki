@@ -267,7 +267,7 @@ def rigid(n, bone):
 
 HOT = "leather-wood-hot"
 MATS = {"wood": HOT, "iron": "metal-atlas", "brass": "brass-atlas", "soft": "cloth-atlas", "face": "brass-compass-hot",
-        "lure": "glow-lure", "eyes": "eyes-mood", "moss": "cloth-moss"}
+        "lure": "glow-lure", "eyes": "eyes-mood", "moss": "cloth-moss", "scan": "leather-art-hot"}
 
 
 def main():
@@ -291,18 +291,12 @@ def main():
         return p
 
     hl = B.hull(J)
-    part("hull", hl, 1900, "wood", "hull", 1.25, blur=0.016)
-    st = B.straps(hl)
-    part("straps", st, 800, "iron", "iron", 1.1, blur=0.004)
+    part("hull", hl, 1500, "scan", "hull", 2.6)
     cp, c_at, c_n = B.compass_field(hl)
-    part("compass", cp, 200, "brass", "brass", 2.2)
-    fc = S.Field(c_at - 0.1, c_at + 0.1, 0.0018)
-    fc.add(S.cap(c_at - c_n * 0.012, c_at + c_n * 0.004, 0.074, 0.074), 0.0, 1)
-    part("compass_face", fc, 60, "face", "compass", 3.0, centre=c_at, normal=c_n)
     hm = B.helmet()
-    part("helmet", hm, 1300, "brass", "brass", 2.2, bone="head", blur=0.005)
+    part("helmet", hm, 2200, "brass", "helmet", 2.6, bone="head", blur=0.003)
     ms = B.moss(hl, None)
-    part("moss", ms, 1400, "moss", "moss", 1.0)
+    part("moss", ms, 500, "moss", "moss", 1.0)
     mt = B.masts()
     part("masts", mt, 450, "wood", "mast", 0.9)
     sl = B.sails()
@@ -310,14 +304,14 @@ def main():
     print("trunk", time.time() - t0, flush=True)
     for s, n in ((1, "R"), (-1, "L")):
         pd, up, fa, fi = B.arm(J, s)
-        part("pauldron" + n, pd, 170, "iron", "iron", 1.1, bone="pauldron." + n)
-        part("upper" + n, up, 180, "wood", "limb", 1.0, bone="upper_arm." + n, blur=0.008)
-        part("fore" + n, fa, 620, "wood", "limb", 1.1, bone="forearm." + n, blur=0.006)
-        pf = part("fist" + n, fi, 380, "wood", "limb", 1.2, bone=None, side=n)
+        part("pauldron" + n, pd, 300, "scan", "pauldron", 1.6, bone="pauldron." + n, side=s)
+        part("upper" + n, up, 240, "scan", "limb", 1.5, bone="upper_arm." + n, side=s, blur=0.008)
+        part("fore" + n, fa, 620, "scan", "limb", 1.5, bone="forearm." + n, side=s, blur=0.006)
+        pf = part("fist" + n, fi, 380, "scan", "limb", 1.6, bone=None, sd=n, side=s)
         th, sn, ft = B.leg(J, s)
-        part("thigh" + n, th, 90, "wood", "limb", 0.8, bone="thigh." + n)
-        part("shin" + n, sn, 150, "wood", "limb", 0.8, bone="shin." + n)
-        part("foot" + n, ft, 140, "wood", "limb", 0.9, bone="x_foot." + n)
+        part("thigh" + n, th, 90, "scan", "leg", 0.9, bone="thigh." + n, side=s)
+        part("shin" + n, sn, 150, "scan", "leg", 0.9, bone="shin." + n, side=s)
+        part("foot" + n, ft, 140, "scan", "leg", 0.9, bone="x_foot." + n, side=s)
     wc = B.wrist_chain(J)
     part("wristchain", wc, 240, "iron", "iron", 1.0, bone="forearm.R")
     print("limbs", time.time() - t0, flush=True)
@@ -332,7 +326,7 @@ def main():
     part("hammer_iron", hM, 480, "iron", "iron", 1.2, xf=H_M, group="hammer", bone="x_weapon")
     part("hammer_chain", hC, 620, "iron", "iron", 1.0, xf=H_M, group="hammer", bone="x_weapon")
     sW, sM = B.shield()
-    part("shield_wood", sW, 1250, "wood", "door", 1.25, xf=S_M, bone="x_shield", blur=0.005)
+    part("shield_wood", sW, 500, "scan", "door", 2.2, xf=S_M, bone="x_shield", blur=0.005)
     part("shield_iron", sM, 280, "iron", "iron", 1.1, xf=S_M, bone="x_shield")
     fs, lure_at = B.fish()
     part("fish", fs, 320, "soft", "fish", 2.0, bone="x_fish")
@@ -487,7 +481,7 @@ def main():
         vs = verts(ob)
         b = p["bone"]
         if p["name"].startswith("fist"):
-            sd = p["side"]
+            sd = p["sd"]
             W = {(k + "." + sd): v for k, v in p["f"].weights(vs, 0.004).items()}
         elif b == "chain":
             W = chain(js, ["spring_hangfish_%d" % i for i in range(3)], vs)
@@ -497,8 +491,8 @@ def main():
 
     # the porthole: its own disc and 0..1 UVs, drawn by shaders/warden_mood.gdshader
     n = 28
-    c = np.array((0, B.PORT_Y + 0.0, B.HELM_C[2]), np.float32)
-    r = 0.069
+    c = np.array((0, B.PORT_Y + 0.004, B.HELM_C[2]), np.float32)
+    r = B.HELM_R * 0.635
     v = [c + (0, 0.012, 0)]
     for i in range(n):
         a = i / n * math.tau
@@ -558,7 +552,7 @@ def main():
         md = o.modifiers.new("Armature", "ARMATURE")
         md.object = arm
     Hc = H_M(np.array([[0, 0, zc]], np.float32))[0]
-    K.anchor(arm, "head", "anchor_head_top", (0, 0.13, 1.05))
+    K.anchor(arm, "head", "anchor_head_top", (0, 0.09, 1.06))
     K.anchor(arm, "hips", "anchor_chest", tuple(c_at))
     K.anchor(arm, "x_weapon", "anchor_hammer_head", tuple(Hc))
     K.anchor(arm, "x_weapon", "anchor_weapon_tip", tuple(H_M(np.array([[0.385, 0, zc]], np.float32))[0]))

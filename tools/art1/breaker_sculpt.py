@@ -18,12 +18,12 @@ F = np.float32
 # labels
 WOOD, IRON, RIVET, BRASS, MOSS, BARN, GLASS = 1, 2, 3, 4, 5, 6, 7
 HULL_C = (0.0, 0.0, 0.5)
-HULL_R = (0.385, 0.385, 0.315)
-HELM_C = (0.0, 0.13, 0.905)
-HELM_R = 0.122
-PORT_Y = HELM_C[1] + HELM_R - 0.012          # the porthole's glass
-MAST_TIP = (0.64, -0.17, 1.3)                 # where the fish's line hangs from
-FISH_AT = (0.64, -0.17, 1.02)
+HULL_R = (0.475, 0.4, 0.34)
+HELM_C = (0.0, 0.09, 0.875)
+HELM_R = 0.155
+PORT_Y = HELM_C[1] + HELM_R - 0.008          # the porthole's glass
+MAST_TIP = (0.72, -0.17, 1.3)                 # where the fish's line hangs from
+FISH_AT = (0.72, -0.17, 1.02)
 
 
 def joints(rig_path):
@@ -64,21 +64,10 @@ def strake(x, y, z):
 
 
 def hull(J):
-    """The hull: an egg of timbers, full at the shoulders and drawn in to the keel, a keel beam under him."""
-    f = Field((-0.5, -0.46, 0.06), (0.5, 0.5, 1.0), 0.0045)
-    wob = lambda x, y, z: (fbm(x, y, z, 6.0, 2) - 0.5) * 0.012
-    f.add(ell((0, 0, 0.55), HULL_R), 0.0, WOOD, None, wob)
-    f.add(ell((0, 0, 0.36), (0.33, 0.33, 0.25)), 0.1, WOOD)
-    f.add(ell((0, 0, 0.2), (0.17, 0.2, 0.09)), 0.08, WOOD)
-    x, y, z = f.grid()
-    fr, bk, kk = strake(x, y, z)
-    # clinker: each strake laps the one below, a stepped edge you can see at the silhouette
-    q = fr % 1.0
-    lap = (1.0 - q) * 0.0075 * (1.0 - kk) * smooth(0.3, 0.42, z)
-    seam = smooth(0.14, 0.0, np.abs((bk + 0.5) % 1.0 - 0.5)) * 0.005 * kk
-    f.d = (f.d - lap + seam).astype(F)
-    # the stem down his front and the keel under him: heavy timbers
-    f.add(box((0, 0.0, 0.135), (0.035, 0.27, 0.04), 0.03), 0.02, WOOD)
+    """The hull: one wide egg, full at the shoulders; the turnaround is projected onto it, so it carries no carved detail."""
+    f = Field((-0.56, -0.46, 0.06), (0.56, 0.5, 1.0), 0.0045)
+    f.add(ell((0, 0, 0.53), HULL_R), 0.0, WOOD)
+    f.add(ell((0, 0, 0.32), (0.34, 0.3, 0.2)), 0.1, WOOD)
     return f
 
 
@@ -138,28 +127,24 @@ def compass_field(hl):
 
 
 def helmet():
-    """The small brass diving helmet: a dome, a thick collar of iron and rivets, the front porthole, side ports."""
-    f = Field((-0.2, -0.1, 0.74), (0.2, 0.32, 1.07), 0.002)
+    """The brass diving helmet (breaker_head): a big round dome, one huge front porthole in a thick riveted ring, a small port each
+    side, a band over the crown, a neck ring, and the wide brass collar plate lying on the hull."""
     c = np.array(HELM_C, F)
-    f.add(sph(HELM_C, HELM_R), 0.0, BRASS)
-    f.add(ell((0, c[1], c[2] - 0.075), (0.112, 0.112, 0.06)), 0.02, BRASS)
-    f.add(ell((0, c[1] - 0.005, 0.81), (0.17, 0.165, 0.032)), 0.012, IRON)                 # the collar
-    f.add(ell((0, c[1], c[2] + 0.1), (0.05, 0.05, 0.03)), 0.015, BRASS)
-    # the band over the dome
-    f.add(box((0, c[1], c[2] + 0.02), (0.014, 0.125, 0.11), 0.01), 0.004, BRASS)
-    f.d = np.maximum(f.d, -(f.grid()[2] - 0.775))
-    # the front porthole: a thick ring, the glass sunk in it
+    r = HELM_R
+    f = Field((-0.34, -0.26, 0.66), (0.34, 0.34, 1.09), 0.0022)
+    f.add(sph(HELM_C, r), 0.0, BRASS)
+    f.add(cyl((0, c[1] - 0.0, c[2] - r * 0.86), "z", r * 0.86, 0.02, 0.012), 0.012, IRON)     # the neck ring
+    # the collar: a low wide plate draped on the hull's shoulders
+    f.add(ell((0, c[1] - 0.09, 0.79), (0.26, 0.25, 0.05)), 0.02, BRASS)
+    f.sub(ell((0, c[1] - 0.09, 0.72), (0.27, 0.26, 0.05)), 0.01)
+    f.add(box((0, c[1], c[2] + 0.02), (0.012, r + 0.004, r - 0.02), 0.01), 0.004, BRASS)      # the band over the crown
     fy = PORT_Y
-    f.add(cap((0, fy - 0.03, c[2]), (0, fy + 0.018, c[2]), 0.088, 0.083), 0.006, BRASS)
-    f.sub(cap((0, fy + 0.002, c[2]), (0, fy + 0.05, c[2]), 0.067, 0.067), 0.004, BRASS)
-    for a in np.linspace(0, 6.28, 11)[:-1]:
-        rivets(f, [(0.078 * math.cos(a), fy + 0.016, c[2] + 0.078 * math.sin(a))], 0.006)
-    for s in (-1, 1):
-        q = c + np.array((s * 0.105, 0.03, 0.0), F)
-        f.add(cap(q - (s * 0.02, 0, 0), q + (s * 0.024, 0, 0), 0.043, 0.04), 0.004, BRASS)
-        f.sub(sph(tuple(q + (s * 0.04, 0, 0)), 0.03), 0.004, GLASS)
-    for a in np.linspace(0, 6.28, 17)[:-1]:
-        rivets(f, [(0.158 * math.cos(a), c[1] + 0.153 * math.sin(a), 0.828)], 0.0065)
+    f.add(cap((0, fy - 0.03, c[2]), (0, fy + 0.016, c[2]), r * 0.84, r * 0.8), 0.006, BRASS)
+    f.sub(cap((0, fy + 0.004, c[2]), (0, fy + 0.05, c[2]), r * 0.62, r * 0.62), 0.004, BRASS)
+    for sd in (-1, 1):
+        q = c + np.array((sd * (r - 0.012), -0.01, 0.01), F)
+        f.add(cap(q - (sd * 0.018, 0, 0), q + (sd * 0.02, 0, 0), 0.052, 0.047), 0.004, BRASS)
+        f.sub(sph(tuple(q + (sd * 0.038, 0, 0)), 0.034), 0.004, GLASS)
     return f
 
 
@@ -245,51 +230,30 @@ def leg(J, s):
 def moss(hl, pads):
     """Moss heaped on the shoulder edges and the hull's flanks, hanging down the hull in long dripping beards; from above
     the hull stays the big shape, so the heaps sit out by the shoulders."""
-    f = Field((-0.66, -0.5, 0.0), (0.66, 0.52, 1.0), 0.0042)
+    f = Field((-0.72, -0.34, 0.66), (0.72, 0.34, 0.92), 0.0042)
     lump = lambda x, y, z: (fbm(x, y, z, 13.0, 3) - 0.5) * 0.08
     fine = lambda x, y, z: (fbm(x, y, z, 26.0, 2) - 0.5) * 0.016
     for s in (-1, 1):
-        f.add(ell((s * 0.34, 0.03, 0.8), (0.12, 0.2, 0.05)), 0.05, MOSS, None, lump)
-        f.add(ell((s * 0.48, 0.0, 0.8), (0.09, 0.15, 0.05)), 0.05, MOSS, None, lump)
-        f.add(ell((s * 0.3, 0.2, 0.74), (0.11, 0.09, 0.07)), 0.05, MOSS, None, lump)
-        f.add(ell((s * 0.28, -0.2, 0.76), (0.1, 0.09, 0.05)), 0.05, MOSS, None, lump)
-    # (x, front?, top, bottom, width): the art's beards, front then back
-    beards = [(0.33, 1, 0.8, 0.5, 0.05), (0.26, 1, 0.8, 0.42, 0.055), (0.18, 1, 0.78, 0.6, 0.04), (0.38, 1, 0.74, 0.5, 0.04),
-              (-0.33, 1, 0.8, 0.46, 0.05), (-0.25, 1, 0.8, 0.54, 0.055), (-0.17, 1, 0.78, 0.62, 0.04), (-0.38, 1, 0.74, 0.54, 0.04),
-              (0.22, 1, 0.48, 0.16, 0.05), (0.27, 1, 0.42, 0.06, 0.04), (0.17, 1, 0.44, 0.24, 0.035),
-              (-0.24, 1, 0.5, 0.18, 0.05), (-0.29, 1, 0.42, 0.08, 0.04),
-              (0.3, 0, 0.78, 0.5, 0.05), (-0.3, 0, 0.78, 0.52, 0.05), (0.02, 0, 0.66, 0.4, 0.05), (-0.26, 0, 0.5, 0.12, 0.05),
-              (0.27, 0, 0.5, 0.16, 0.045)]
-    for i, (x0, fr, zt, zb, w) in enumerate(beards):
-        n = 9
-        ts = np.linspace(0, 1, n)
-        pts = [(x0 + 0.02 * math.sin(t * 8 + i) * t, 0.3 if fr else -0.3, zt + (zb - zt) * t) for t in ts]
-        pp = onsurf(hl, pts, 0.022)
-        f.add(path(pp, [w * (1 - 0.82 * t ** 1.4) for t in ts]), 0.014, MOSS, None, fine)
-        # two side tails on the wider ones
-        if w >= 0.05:
-            for sd in (-1, 1):
-                ts2 = np.linspace(0.2, 0.8, 5)
-                p2 = [(x0 + sd * 0.042 + 0.012 * math.sin(t * 9), 0.3 if fr else -0.3, zt + (zb - zt) * t) for t in ts2]
-                f.add(path(onsurf(hl, p2, 0.016), [0.02 * (1 - 0.8 * (t - 0.2) / 0.6) for t in ts2]), 0.012, MOSS, None, fine)
+        f.add(ell((s * 0.4, 0.02, 0.8), (0.14, 0.22, 0.05)), 0.05, MOSS, None, lump)
+        f.add(ell((s * 0.56, 0.0, 0.79), (0.1, 0.15, 0.05)), 0.05, MOSS, None, lump)
     return f
 
 
 def masts():
     """Two broken mast stumps from the shoulders, a yard and sail scraps on the taller, rope lashings."""
-    f = Field((-0.75, -0.42, 0.72), (0.8, 0.12, 1.42), 0.0036)
+    f = Field((-0.8, -0.42, 0.7), (0.9, 0.12, 1.42), 0.0036)
     split = lambda x, y, z: (vnoise(x * 4, y * 4, z * 0.8, 40.0) - 0.5) * 0.012
     # his right: the tall one with the fishing boom
-    f.add(path(((0.3, -0.13, 0.78), (0.43, -0.17, 1.14)), (0.042, 0.03)), 0.0, WOOD, None, split)
-    f.add(path(((0.43, -0.17, 1.14), (0.46, -0.17, 1.2), (0.43, -0.19, 1.22)), (0.03, 0.017, 0.004)), 0.0, WOOD, None, split)
-    f.add(path(((0.14, -0.15, 1.03), (0.42, -0.17, 1.09), (0.62, -0.17, 1.14)), (0.019, 0.022, 0.012)), 0.006, WOOD, None, split)     # the yard
-    f.add(path(((0.33, -0.17, 1.02), (0.46, -0.17, 1.2), (0.64, -0.17, 1.31)), (0.018, 0.016, 0.01)), 0.006, WOOD, None, split)         # the rod
+    f.add(path(((0.38, -0.13, 0.76), (0.5, -0.17, 1.14)), (0.042, 0.03)), 0.0, WOOD, None, split)
+    f.add(path(((0.5, -0.17, 1.14), (0.53, -0.17, 1.2), (0.5, -0.19, 1.22)), (0.03, 0.017, 0.004)), 0.0, WOOD, None, split)
+    f.add(path(((0.24, -0.15, 1.02), (0.5, -0.17, 1.09), (0.7, -0.17, 1.14)), (0.019, 0.022, 0.012)), 0.006, WOOD, None, split)     # the yard
+    f.add(path(((0.42, -0.17, 1.02), (0.55, -0.17, 1.2), (0.72, -0.17, 1.31)), (0.018, 0.016, 0.01)), 0.006, WOOD, None, split)         # the rod
     # his left: the short stump with a yard across
-    f.add(path(((-0.3, -0.13, 0.78), (-0.4, -0.16, 1.07)), (0.042, 0.03)), 0.0, WOOD, None, split)
-    f.add(path(((-0.4, -0.16, 1.07), (-0.415, -0.16, 1.12), (-0.39, -0.17, 1.15)), (0.03, 0.016, 0.004)), 0.0, WOOD, None, split)
-    f.add(path(((-0.54, -0.15, 0.93), (-0.38, -0.16, 1.0), (-0.28, -0.17, 1.05)), (0.016, 0.02, 0.012)), 0.006, WOOD, None, split)
+    f.add(path(((-0.38, -0.13, 0.76), (-0.47, -0.16, 1.07)), (0.042, 0.03)), 0.0, WOOD, None, split)
+    f.add(path(((-0.47, -0.16, 1.07), (-0.485, -0.16, 1.12), (-0.46, -0.17, 1.15)), (0.03, 0.016, 0.004)), 0.0, WOOD, None, split)
+    f.add(path(((-0.6, -0.15, 0.93), (-0.45, -0.16, 1.0), (-0.35, -0.17, 1.05)), (0.016, 0.02, 0.012)), 0.006, WOOD, None, split)
     # lashings
-    for c in ((0.41, -0.17, 1.085), (-0.385, -0.16, 0.985), (0.4, -0.17, 1.17)):
+    for c in ((0.49, -0.17, 1.085), (-0.455, -0.16, 0.985), (0.5, -0.17, 1.17)):
         for k in range(3):
             f.add(cyl((c[0], c[1], c[2] + (k - 1) * 0.014), "z", 0.036, 0.008, 0.006), 0.002, RIVET)
     return f
@@ -297,16 +261,16 @@ def masts():
 
 def sails():
     """Sail scraps torn on the yards: thin, one mesh each side."""
-    f = Field((-0.66, -0.2, 0.74), (0.74, -0.12, 1.12), 0.003)
+    f = Field((-0.72, -0.2, 0.74), (0.82, -0.12, 1.12), 0.003)
     x, y, z = f.grid()
     sh = np.abs(y + 0.165 + 0.012 * np.sin(x * 22.0)) - 0.0045
     tear = (fbm(x, np.zeros_like(x), z * 0.2, 20.0, 2) - 0.5) * 0.2
-    top_r = 1.03 + (x - 0.14) * 0.2
+    top_r = 1.02 + (x - 0.24) * 0.2
     mx = lambda a, b, c: np.maximum(np.maximum(a, b), c)
-    r = mx(z - top_r, 0.84 - z + tear, np.abs(x - 0.56) - 0.08)
-    r2 = mx(z - top_r, 0.88 - z + tear, np.abs(x - 0.26) - 0.05)
-    top_l = 0.95 + (x + 0.54) * 0.42
-    l = mx(z - top_l, 0.8 - z + tear * 0.8, np.abs(x + 0.47) - 0.055)
+    r = mx(z - top_r, 0.84 - z + tear, np.abs(x - 0.64) - 0.08)
+    r2 = mx(z - top_r, 0.88 - z + tear, np.abs(x - 0.34) - 0.05)
+    top_l = 0.95 + (x + 0.6) * 0.42
+    l = mx(z - top_l, 0.8 - z + tear * 0.8, np.abs(x + 0.53) - 0.055)
     f.d = np.maximum(sh, np.minimum(np.minimum(r, r2), l)).astype(F)
     f.lab[:] = 1
     return f
@@ -356,32 +320,6 @@ def shield():
     plate = np.abs(y + 0.0 - bow) - 0.03
     f.d = np.maximum(plate, outline(x, v)).astype(F)
     f.lab[:] = WOOD
-    # the panel sunk behind her, so she stands out of shadow
-    f.sub(box((0, -0.05, zc), (W - 0.055, 0.032, H - 0.06), 0.02), 0.012)
-    # (her own hard shape beside the door's, for the paint: a blend's skin carries no label)
-    fig = f.like()
-    f.fig = fig
-
-    def R(p, k=0.012):
-        f.add(p, k, 4)
-        fig.add(p, 0.0, 4)
-    Z = lambda a: zc + a
-    bow2 = -0.03
-    # the head, thrown a little back: a clean oval, a long neck
-    R(ell((0, bow2 - 0.03, Z(0.405)), (0.058, 0.032, 0.076)), 0.012)
-    R(path(((0, bow2 - 0.018, Z(0.34)), (0, bow2 - 0.018, Z(0.285))), (0.024, 0.03)), 0.012)
-    # hair: two heavy falls over the shoulders to the waist, parted at the crown
-    for s in (-1, 1):
-        R(path(((s * 0.03, bow2 - 0.018, Z(0.47)), (s * 0.078, bow2 - 0.02, Z(0.41)), (s * 0.09, bow2 - 0.018, Z(0.3)), (s * 0.075, bow2 - 0.02, Z(0.17)), (s * 0.1, bow2 - 0.018, Z(0.06))),
-               (0.03, 0.036, 0.036, 0.03, 0.008)), 0.014)
-        R(path(((s * 0.05, bow2 - 0.018, Z(0.27)), (s * 0.16, bow2 - 0.012, Z(0.25))), (0.036, 0.024)), 0.018)        # shoulders
-        R(path(((s * 0.16, bow2 - 0.012, Z(0.25)), (s * 0.15, bow2 - 0.008, Z(0.1)), (s * 0.07, bow2 - 0.012, Z(0.02))), (0.024, 0.02, 0.017)), 0.012)   # arms, the hands folded
-        R(ell((s * 0.05, bow2 - 0.036, Z(0.17)), (0.046, 0.032, 0.042)), 0.014)                                       # breast
-        # the swept wings of carving either side of her
-        R(path(((s * 0.15, bow2 - 0.006, Z(-0.02)), (s * 0.23, bow2 - 0.006, Z(0.02)), (s * 0.24, bow2 - 0.006, Z(0.16))), (0.022, 0.018, 0.004)), 0.012)
-    R(path(((0, bow2 - 0.02, Z(0.22)), (0, bow2 - 0.02, Z(0.07))), (0.075, 0.056)), 0.018)                            # the waist
-    R(path(((0, bow2 - 0.02, Z(0.05)), (0, bow2 - 0.022, Z(-0.08))), (0.06, 0.082)), 0.02)                            # the hips
-    R(path(((0, bow2 - 0.02, Z(-0.08)), (0.0, bow2 - 0.018, Z(-0.3)), (0, bow2 - 0.012, Z(-0.5))), (0.082, 0.055, 0.008)), 0.02)   # the gown, tapering
     M = f.like()
     frame = np.abs(outline(x, v) + 0.03) - 0.03
     M.d = np.maximum(frame, np.abs(y + 0.008 - bow) - 0.036).astype(F)

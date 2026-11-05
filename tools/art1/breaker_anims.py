@@ -23,7 +23,8 @@ AX = float(C.rig.P["x_foot.R"].x)      # the ankle's rest x
 AZ = float(C.rig.P["x_foot.R"].z)
 FR, FL = (AX, -0.02, AZ), (-AX, 0.04, AZ)
 tau = math.tau
-SZ = float(C.rig.P["upper_arm.R"].z)    # shoulder height, for reading the keys below
+SZ = float(C.rig.P["upper_arm.R"].z)    # shoulder height and width, for reading the keys below
+SHX = float(C.rig.P["upper_arm.R"].x)
 
 
 def merged(*ps, **kw):
@@ -40,12 +41,12 @@ def add(p, c, v):
 
 def sp(x, y, dz):
     """The right hand, from the right shoulder: out x, forward y, up dz."""
-    return (0.44 + x, y, SZ + dz)
+    return (SHX + x, y, SZ + dz)
 
 
 def sl(x, y, dz):
     """The left hand, from the left shoulder: out x (to his left), forward y, up dz."""
-    return (-0.44 - x, y, SZ + dz)
+    return (-SHX - x, y, SZ + dz)
 
 
 # He is a ball on two stubs. The legs can't lunge, so his weight moves by the whole hull tipping on its feet (`rot`), and his
@@ -142,7 +143,7 @@ def whirl_over(t, p):
     if t < 0.2:
         return
     a2 = (t - 0.2) / SPIN_T * tau
-    p["gr"] = (0.26 + 0.2 * math.cos(a2), 0.2 * math.sin(a2), 1.02)
+    p["gr"] = (0.38 + 0.2 * math.cos(a2), 0.2 * math.sin(a2), 1.02)
     p["gd"] = (math.cos(a2), math.sin(a2), 0.22)
     p["ga"] = (0, 0, 1)
     p["er"] = (0.6, -0.3, -0.6)
@@ -151,7 +152,7 @@ def whirl_over(t, p):
     add(p, "head", (0, 0, -14.0 * math.sin(a2 - 0.6)))
 
 
-C.bake("lmb_hold", 0.2 + SPIN_T, [(0, CARRY), (0.2, merged(WIND, gr=(0.46, 0.0, 1.02), gd=(1, 0, 0.22), ga=(0, 0, 1))), (0.2 + SPIN_T, {})], over=whirl_over)
+C.bake("lmb_hold", 0.2 + SPIN_T, [(0, CARRY), (0.2, merged(WIND, gr=(0.58, 0.0, 1.02), gd=(1, 0, 0.22), ga=(0, 0, 1))), (0.2 + SPIN_T, {})], over=whirl_over)
 # the release (0.5 s): up behind him, the impact at 0.08: the hull slams forward onto its toes, a shudder, then he hauls it up
 UP = merged(WIND, OVER, rot=(9, 0, -8))
 IMP = dict(pos=(0, 0.1, -0.05), rot=(-24, 3, 8), hips=(-6, 0, 6), head=(12, 0, -6), gr=sp(-0.1, 0.44, -0.3), gd=(-0.12, 0.8, -0.58), ga=(0.05, 0.58, 0.8), er=(0.9, 0.2, -0.3),
