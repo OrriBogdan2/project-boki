@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bvqm8tcacftpv"
-path="res://.godot/imported/dredge_atlas.jpg-0141224b726b74824b9c9e866399542b.ctex"
+path.bptc="res://.godot/imported/dredge_atlas.jpg-0141224b726b74824b9c9e866399542b.bptc.ctex"
+path.astc="res://.godot/imported/dredge_atlas.jpg-0141224b726b74824b9c9e866399542b.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "b4d31beb468f6b0bc4aa99c20cc5676f"
+"md5": "c8c3079c6e83466f9ed4ec43d77cb87b"
 }
 
 [deps]
 
 source_file="res://art/wardens/dredge/dredge_atlas.jpg"
-dest_files=["res://.godot/imported/dredge_atlas.jpg-0141224b726b74824b9c9e866399542b.ctex"]
+dest_files=["res://.godot/imported/dredge_atlas.jpg-0141224b726b74824b9c9e866399542b.bptc.ctex", "res://.godot/imported/dredge_atlas.jpg-0141224b726b74824b9c9e866399542b.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

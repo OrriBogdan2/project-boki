@@ -291,22 +291,22 @@ def main():
         return np.clip(np.maximum(1.1 - np.abs(m) / 0.018, 1.0 - d / 0.08), 0.03, 1)
 
     tr = G.figure(J)
-    part("skin_head", G.head(), 2300, "head", 2.4, None, "head", None, None, face_keep)
-    part("teeth", G.teeth(), 620, "tooth", 1.2, None, "head", "skin")
-    part("eye", G.eye(), 110, "eye", 2.6, None, "eye", "glow")
-    part("lid", G.lid(), 130, "skin", 1.4, None, "lid", "skin")
-    part("monocle", G.monocle(), 560, "gear", 2.2, None, "head", None)
-    part("body", tr, 4300, "skin", 1.0, None, "body", None)
-    part("belt", G.belt(), 380, "gear", 1.0, None, "root", None)
-    part("loin", G.loincloth(), 300, "loin", 0.9, None, "skirt", None)
-    part("straps", G.straps(), 260, "gear", 0.9, None, "hips", None)
-    part("cuffR", G.cuff(J, "R", 1), 240, "gear", 1.0, None, "forearm.R", None)
-    part("cuffL", G.cuff(J, "L", -1), 240, "gear", 1.0, None, "forearm.L", None)
+    part("skin_head", G.head(), 2050, "head", 2.4, None, "head", None, None, face_keep)
+    part("teeth", G.teeth(), 430, "tooth", 1.2, None, "head", "skin")
+    part("eye", G.eye(), 80, "eye", 2.6, None, "eye", "glow")
+    part("lid", G.lid(), 90, "skin", 1.4, None, "lid", "skin")
+    part("monocle", G.monocle(), 340, "gear", 2.2, None, "head", None)
+    part("body", tr, 3450, "skin", 1.0, None, "body", None)
+    part("belt", G.belt(), 230, "gear", 1.0, None, "root", None)
+    part("loin", G.loincloth(), 200, "loin", 0.9, None, "skirt", None)
+    part("straps", G.straps(), 130, "gear", 0.9, None, "hips", None)
+    part("cuffR", G.cuff(J, "R", 1), 150, "gear", 1.0, None, "forearm.R", None)
+    part("cuffL", G.cuff(J, "L", -1), 150, "gear", 1.0, None, "forearm.L", None)
     gt = G.gauntlet(J)
-    part("gauntlet", gt, 1150, "gear", 1.4, None, "gauntlet", None)
-    part("hook", G.hook(J), 520, "gear", 1.3, None, "hook", None)
-    part("gun", G.gun(), 420, "gear", 1.3, G.gun_xf, "gun", None)
-    part("hoard", G.hoard(), 4600, "hoard", 1.0, None, "hoard", None)
+    part("gauntlet", gt, 760, "gear", 1.4, None, "gauntlet", None)
+    part("hook", G.hook(J), 360, "gear", 1.3, None, "hook", None)
+    part("gun", G.gun(), 290, "gear", 1.3, G.gun_xf, "gun", None)
+    part("hoard", G.hoard(), 3550, "hoard", 1.0, None, "hoard", None)
     bl = G.bell()
     ln = G.lantern()
     TIP = {"R": np.array((0.475, -0.215, 1.640), F), "L": np.array((-0.475, -0.215, 1.640), F)}
@@ -318,21 +318,21 @@ def main():
         ends["bell" + n] = APEX[n] - (0, 0, BELL_LEN)
         tl = lambda p, c=ends["lamp" + n] + 0: np.asarray(p, F) + c
         tb = lambda p, c=ends["bell" + n] + 0: np.asarray(p, F) + c
-        part("lantern" + n, ln, 180, "gear", 1.2, tl, "lamp" + n, None)
-        part("bell" + n, bl, 170, "gear", 1.1, tb, "bell" + n, None)
-        part("lampchain" + n, None, 0, "iron", 0.5, None, "lamp" + n, "metal", ob=chain_links("lampchain" + n, [TIP[n], ends["lamp" + n]], 0.024, 0.012, 0.0042))
-    bf = G.ball()
-    part("ball", bf, 900, "hoard", 0.9, G.ball_xf, "ball", None)
+        part("lantern" + n, ln, 110, "gear", 1.2, tl, "lamp" + n, None)
+        part("bell" + n, bl, 100, "gear", 1.1, tb, "bell" + n, None)
+        part("lampchain" + n, None, 0, "iron", 0.5, None, "lamp" + n, "metal", ob=chain_links("lampchain" + n, [TIP[n], ends["lamp" + n]], 0.034, 0.015, 0.0050))
+    bf = G.ball()                # (the mesh from a coarse field, the paint from the fine one: decimating the fine one stalls)
+    part("ball", bf, 0, "hoard", 0.9, G.ball_xf, "ball", None, ob=lowpoly("ball", G.ball(0.064), 1300))
     # the chains on the weapon and the eyepiece
     x, wz = float(J["hand.R"][0]), float(J["hand.R"][2])
     k = G.HOOK_SCALE
     cur = G.hook_curve()
     heel = cur[7]
     pr = [(x - 0.068, 0.0, wz - 0.040), (x - 0.095, -0.05, wz - 0.20), (x - 0.075, -0.075, wz - 0.42), (x - 0.03, 0.0, wz - 0.53), (x, float(heel[0]) * 0.8, wz + float(heel[1]) + 0.03)]
-    part("hookchain", None, 0, "iron", 0.5, None, "hook", "metal", ob=chain_links("hookchain", spline(pr, 24), 0.030, 0.0165, 0.0058))
+    part("hookchain", None, 0, "iron", 0.5, None, "hook", "metal", ob=chain_links("hookchain", spline(pr, 24), 0.046, 0.021, 0.0066))
     MC = G.MONO_C + (G.MONO_R + 0.012, -0.004, -0.008)
     MJ = spline([MC, MC + (0.004, 0.0, -0.075), MC + (-0.002, -0.004, -0.14)], 4)
-    part("monochain", None, 0, "gold", 0.5, None, "monochain", "brass", ob=chain_links("monochain", spline(MJ, 12), 0.0105, 0.0058, 0.0020))
+    part("monochain", None, 0, "gold", 0.5, None, "monochain", "brass", ob=chain_links("monochain", spline(MJ, 12), 0.016, 0.0072, 0.0024))
 
     # ----------------------------------------------------- UVs
     bpy.ops.object.select_all(action="DESELECT")
@@ -537,10 +537,10 @@ def main():
             W = {"head": one}
         elif nm == "body":
             W = tr.weights(vs, 0.024, allow)
-            W = {k3: w3 for k3, w3 in W.items() if w3.max() > 1e-4}
+            W = {k3: w3 + 1e-7 * (k3 == "hips") for k3, w3 in W.items() if w3.max() > 1e-4}
         elif grp == "gauntlet":
             W = gt.weights(vs, 0.006)
-            W = {k3: w3 for k3, w3 in W.items() if w3.max() > 1e-4}
+            W = {k3: w3 + 1e-7 * (k3 == "hand.L") for k3, w3 in W.items() if w3.max() > 1e-4}      # (a far vert must still have a bone)
         elif grp == "skirt":
             W = {"skirt": S.smooth(0.70, 0.60, vs[:, 2]) + 1e-3, "root": S.smooth(0.60, 0.70, vs[:, 2])}
         elif grp in ("lampR", "lampL", "bellR", "bellL"):
@@ -618,6 +618,8 @@ def main():
     K.anchor(arm, "gun", "anchor_gun_root", tuple(G.gun_xf(np.array((0, 0.0, 0.012), F))))
     K.anchor(arm, "hook", "anchor_claw", tuple(G.hook_mouth(J)))
     K.anchor(arm, "hook", "anchor_hook_tip", tuple(G.hook_tip(J)))
+    K.anchor(arm, "fingers.L", "anchor_fist", tuple(g["knuckle"] + (0.02, 0, -0.03)))
+    K.anchor(arm, "ball", "anchor_ball", tuple(G.BALL_AT))
     K.anchor(arm, "hoard", "anchor_coins", (0.05, -0.14, 1.34))
     K.anchor(arm, "hoard", "anchor_hoard_top", (0.0, -0.32, 1.72))
     K.anchor(arm, "spring_hanglampR_2", "anchor_lamp_r", tuple(ends["lampR"] - (0, 0, 0.105)))

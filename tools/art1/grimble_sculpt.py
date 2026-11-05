@@ -181,6 +181,8 @@ def head(vox=0.0017):
     # the nose: no bridge, two slits
     for s in (1, -1):
         h.sub(ell(P(s * 0.012 - 0.002, 0.118, 0.0065), (0.0045, 0.012, 0.0030), (0, s * 0.5, 0)), 0.002, LIP)
+    # the other socket: empty, sunk, stitched shut (paint: grimble_paint.head)
+    h.sub(ell(P(-0.052, 0.112, 0.012), (0.026, 0.020, 0.012)), 0.012, SKIN)
     # the socket
     h.sub(sph(tuple(EYE_C), EYE_R + 0.0035), 0.004, DARK)
     # the mouth: a crescent carved in deep, walled in red
@@ -255,7 +257,7 @@ def lid(vox=0.0012):
 MONO_AX = np.array((0.04, 1.0, 0.06), F) / np.linalg.norm((0.04, 1.0, 0.06))
 MONO_C = EYE_C + MONO_AX * 0.040
 MONO_R = 0.0505
-LENS = (((-0.0655, 0.012, 0.054), 0.0205), ((-0.0655, 0.012, 0.000), 0.0165))       # the two small lenses, his left of the big one
+LENS = (((-0.058, 0.012, 0.070), 0.0205), ((-0.082, 0.012, 0.032), 0.0165))       # the two small lenses, his left of the big one
 
 
 def _ring(c, ax, r, t, wide=0.8):
@@ -707,7 +709,7 @@ def ball(vox=0.030):
     wid = _item("ballplate", (0, 0, 0), np.eye(3, dtype=F))
     wood = _item("ballwood", (0, 0, 0), np.eye(3, dtype=F))
     # plates laid on the sphere, on a fibonacci spiral, skipping the window
-    N = 26
+    N = 18
     for i in range(N):
         zz = 1 - 2 * (i + 0.5) / N
         r = math.sqrt(1 - zz * zz)
@@ -723,15 +725,9 @@ def ball(vox=0.030):
         tw = rng.uniform(0, 3.1)
         Rt = R @ rot(roll=tw)
         c = n * BALL_R * 0.97
-        hw, hh = rng.uniform(0.15, 0.24), rng.uniform(0.11, 0.19)
+        hw, hh = rng.uniform(0.20, 0.30), rng.uniform(0.15, 0.24)
         lab = wood if i % 4 == 2 else (RUST if i % 4 == 0 else wid)
         b.add(box(tuple(c), (hw, 0.030, hh), 0.012, Rt), 0.012, lab)
-    # chains round it
-    for tilt in (0.5, -0.8):
-        pts = []
-        for t in np.linspace(0, math.tau, 25):
-            pts.append((math.cos(t) * BALL_R * 1.045, math.sin(t) * math.sin(tilt) * BALL_R * 1.045, math.sin(t) * math.cos(tilt) * BALL_R * 1.045))
-        b.add(path(pts, [0.021] * len(pts)), 0.0, ROPE)
     # the window: a deep pocket for the head
     b.sub(ell((0, 0.46, 0.0), (0.27, 0.30, 0.27)), 0.02, DARK)
     return b

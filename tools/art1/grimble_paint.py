@@ -124,6 +124,8 @@ def head(p, n, lab, f):
     c = stitch(c, p, [tuple(G.HEAD_C + (-0.006, 0.070, 0.095)), tuple(G.HEAD_C + (0.004, 0.012, 0.117)), tuple(G.HEAD_C + (0.0, -0.06, 0.112))], 0.0024, 0.0145, 0.0078)
     c = stitch(c, p, [tuple(G.HEAD_C + (-0.052, 0.074, 0.083)), tuple(G.HEAD_C + (-0.018, 0.09, 0.094)), tuple(G.HEAD_C + (0.010, 0.082, 0.098))], 0.0022, 0.0145, 0.0065)
     c = stitch(c, p, [(-0.075, 0.10, 1.262), (0.0, 0.03, 1.24)], 0.0, 0.016, 0.0)
+    # the other socket, stitched shut: one dark seam, heavy cross stitches
+    c = stitch(c, p, [tuple(G.HEAD_C + (-0.074, 0.070, 0.016)), tuple(G.HEAD_C + (-0.052, 0.092, 0.010)), tuple(G.HEAD_C + (-0.030, 0.100, 0.014))], 0.0030, 0.0120, 0.0115)
     # the socket's shade, so the monocle sits in a pit
     d = np.linalg.norm(p - G.EYE_C, axis=1)
     c = c * (1 - 0.5 * smooth(0.062, 0.042, d))[:, None]
@@ -156,8 +158,8 @@ def eye(p, n):
     v = np.cross(ax, u)
     x, y = d @ u, d @ v
     r = np.sqrt(x * x + y * y)
-    c = mix(rgb("ccffbe"), rgb("37f07c"), smooth(0.004, 0.018, r))
-    c = mix(c, rgb("0b8a48"), smooth(0.018, 0.032, r))
+    c = mix(rgb("6fe88a"), rgb("14b858"), smooth(0.004, 0.018, r))
+    c = mix(c, rgb("076a36"), smooth(0.018, 0.032, r))
     c = mix(c, rgb("053a22"), smooth(0.030, 0.036, r))
     c = mix(c, rgb("05070a"), smooth(0.0044, 0.0028, np.abs(x)) * smooth(0.0225, 0.0185, np.abs(y)))
     c = mix(c, rgb("f4fff0"), smooth(0.0085, 0.0045, np.sqrt((x - 0.011) ** 2 + (y - 0.014) ** 2)))
