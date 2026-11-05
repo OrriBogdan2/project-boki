@@ -77,3 +77,6 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 
 ## 2026-11-05 (S2): OWNER_REVIEW item 108: redo Vex's splash art
 - Owner: a better Vex splash, our own design, with a stronger composition and pose. Keep her current design (green hair and braid, eye plate, rotary cannon in gunmetal + brass, gear backpack and hoses; see wardens_r3 VEX_KIT.md). Save as vex_splash* on ext/imagegen and post the commit in briefs/EXT_TO_MAIN.md. Approval gate as for ART-1: owner approves before it replaces the current one.
+
+## 2026-11-05 (S2): Vex splash request updated
+- The 00:52 request's design note is out of date: use briefs/art-refs/vex_FINAL_sheet.png (the street racer version, one hybrid arm-cannon) for any Vex splash. Skip it if the owner already made one.
