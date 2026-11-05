@@ -5,7 +5,7 @@ fade-in, a short fall) in C major pentatonic, low-passed to stay round, with a s
 Press = a short tap, hover = a tiny high tick, confirm = a rising pair, back = a falling pair, deny = a
 muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a wood tick.
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
-unlock, ping, level_up, warn); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
+unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
 """
 import numpy as np
 import sfx_lib as S
@@ -126,13 +126,6 @@ def ping(i):
                            0.4 * pluck(NOTE['A5'] * 1.5, 0.4, 0.1, 0.3)), 0.7), 4800)
 
 
-def warn(i):
-    """Two soft falling notes with a slow wobble: clear without being a buzzer."""
-    def note(f):
-        return pluck(f, 0.4, 0.15, 0.4) * (0.8 + 0.2 * np.sin(2 * np.pi * 6 * T(0.4)))
-    return finish(room(mix(note(NOTE['E5']), at(note(NOTE['C5'] * 0.94), 0.18)), 0.5), 2600)
-
-
 def charge(i):
     """A held-button swell that rises in pitch, soft; the caller pitch-scales it as the hold grows."""
     d = 0.5; n = N(d); u = np.arange(n) / n
@@ -156,7 +149,6 @@ def main():
     S.save_cat('unlock', unlock(0), 'ui')
     S.save_cat('level_up', level_up(0), 'ui')
     S.takes_cat('ping', ping, 2, 'ui')
-    S.save_cat('warn', warn(0), 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
 
 
