@@ -882,3 +882,5 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Fidelity:** cannon arm yes; gatling + launcher yes; robotic left arm partial (brass forearm panel missing); cyber-eye right, green eye left yes; cyber-spine yes (patchy back); one braid yes; VEX belt yes; jacket off shoulder yes; ammo belt partial (reads as a hose); fires freely while dashing yes; VFX tracers: S3's. Proofs: ext/hero-shots-s2 f6ac726e art1/vex/.
 - Checks by exit code on the final merge: clip, vex-clip-live, clip-live, rig-standard, warden-glb, warden-model, dash-aim; gunslinger-combo 98 PASS; health --strict. Full suite before the last two merges: baseline reds by name. vex_rig.json committed on purpose with the new body. Normal path exists on ext/art1-hem (use_nrm).
 - Owner Qs: normal maps vs painted cavity? Launcher swing-over the right read of the sheet?
+
+## 2026-11-05 S2: READY ext/kit-lisette-114 43ca4513 (item 114); details in EXT_TO_MAIN. ext/art1-hem still needs an upright idle/stance clip, arrow hidden during heavy_wind, bow forward. Owner Qs: needle glow strong enough? Loosed shot a silver needle too (ext/vfx-lisette)?
