@@ -715,3 +715,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: OOM correction
 - Two lanes caused the box OOM, not just Breaker: Ryzz's paint step (tools/art1/ryzz_paint.py) has the same class of NumPy broadcast bug and tried to allocate 4.10 TiB, and it likely made a 35 GB spike. Which process caused which kill isn't known. Both are fixed; Blender runs are now capped with ulimit -v.
+
+## 2026-11-05 S2: Breaker ability ids + FX points for S3/S4 (bulwark, ext/art1-breaker; rig stable)
+- LMB bul_throw, bul_recall, hold bul_smash_wind (K.spin), bul_smash, perfect bul_launch; RMB bul_guard, bul_break, bul_armed; Shift bul_whirl, bul_charge, bul_short, air bul_lumber, bul_slamshield; bul_crush; E bul_mend; X bul_ult_wind, bul_ult_slam; mf_xform.
+- Empties: anchor_hammer_head = weapon_muzzle, anchor_weapon_tip, anchor_hammer_grip, weapon_thrown, anchor_shield_face, anchor_chest (compass), anchor_head_top, anchor_lure. Glow: core #1fe0cc, edge #0f9a94, compass #ffb347, lure #8ff5e0.
+- Notes: while LMB is held use BjornFx._head_world() for whirl trails; while the hammer is thrown use BjornFx.hammer (the anchor rides a zero-scaled bone). Chain links and ult lure flare already exist in bjorn_fx.gd.
