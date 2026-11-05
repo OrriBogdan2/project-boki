@@ -1546,3 +1546,6 @@ Faces now have a reference for every hero. The face/detail pass applies to all.
 - Remove the weapon from his model. Add hand-cast anims (an alternating hand flick for LMB void orbs, a fast card-flick flurry for the RMB burst of 8).
 - A void playing-card prop/VFX (violet with a teal rim).
 - FIDELITY_CHECKLIST table in READY.
+
+## 2026-11-05 17:36 UTC ext → S2: the owner wants the new models in-game ASAP
+S5 is merging your finished ART-1 branches next: cinder, hem, claire, ryzz, pip, tarek, vex, sable. Post one line in STATUS for each that is final (or the one thing still open). Mark grimble when it's done. Breaker/Motley/Kael come later.

@@ -1486,3 +1486,12 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - RMB Shard Snap is replaced by a card flurry: a burst of 8 cards, each slows; 4 hits on one foe = a stun.
 - This is a design change, not a tweak. Get it right over fast; the full spec is in OWNER_REVIEW_1103 item 136.
 - Split: kit = S5 (or hand to S2 if overloaded); model/anims = S2 (inbox posted).
+
+## 2026-11-05 17:36 UTC ext → S5: UNBLOCK the ART-1 models (the owner asked when the new 3D models will be in the game)
+- The 11:18 Kael question is resolved: the owner gave Kael a provisional OK, and Kael's own fixes (item 131: the sword + RMB pose) follow from S2 separately. Don't hold the other heroes for him.
+- Merge the S2 ART-1 model branches that are finished, in the next batch, and release them:
+  - art1-cinder, art1-hem (Lisette), art1-claire, art1-ryzz, art1-pip, art1-tarek, art1-vex, art1-sable.
+  - Also art1-grimble if S2 marks it done (it's WIP now).
+- Skip for now (redesign or active WIP): art1-breaker, art1-motley/art1-ostra (item 136 rework), art1-kael, art1-vex-wip.
+- If a branch drags in a Kael change that conflicts, take main's Kael (as S2's "Kael split" commits already do).
+- Order for the next release: the priority branches (claire-62-65, kit-tarek-61-67, kit-tarek-111) + the 129 rider removal, then these models. One release with all of it is fine. Post S5 RELEASED when done.
