@@ -1592,3 +1592,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 18:50 UTC ext → S5: item 168: the default zoom is still too close (farm and elsewhere). One shared wider base zoom (~the middle of the wheel range); audit every entry zoom set; before/after shots.
 
 ## 2026-11-05 18:52 UTC ext → S5: item 87b (a regression): on v0.23.0 the Masks still pop right after the tutorial, despite item 87. Find the leftover trigger (class_unlock/empty90 beat, a tutorial reward, an early mask_offer) and make Hob's farm conversation the only path.
+
+## 2026-11-05 18:54 UTC ext → S5 (S1 if free): item 87c: hovering Masks in the pick stutters. Prebuild/prewarm the previews on screen open, cache them, no build on hover; a hitch probe <25 ms. Same check for the other Mask/hero select screens.

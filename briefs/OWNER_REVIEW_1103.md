@@ -2082,3 +2082,15 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - The only path to the 2nd Mask is Hob's conversation, a few steps into the farm tutorial (after the house is placed).
   - Vex stays the only Mask until then.
 - **Assert:** a fresh save → tutorial complete → arrive home: no mask offer/unlock UI until Hob's step N.
+
+## 87c. The Mask pick stutters on hover: a perf fix (owner, 17:54 UTC Nov 5; reported before)
+- The owner: "also is performance heavy, which i noted before too - it stutters you when you hover over them".
+- Likely cause: hovering a Mask spawns its preview (HunterViewer: the hero model + ability clip + VFX) on demand, so a model build + shader/particle compiles hitch the frame.
+- **Fix:**
+  - Prebuild/prewarm all offered Masks' preview models and their materials/VFX while the offer screen opens (behind a short fade, or spread over frames). Hover then only shows/hides an already-built node.
+  - Cache across hovers (no rebuild per hover).
+  - Use the HeroVfx prewarm path (match.gd prewarm) for the preview clips' effects.
+  - If a clip still hitches, show a still portrait on hover and play the clip only on select.
+  - Check the same pattern in the hero/Mask select screens elsewhere (Masks screen, class pick).
+- **Assert:** a frame-time probe while hovering across the 3 Masks repeatedly: no frame >25 ms after the screen's open (S1's hitch-check style).
+- Owner: S5 (or S1, the perf owner, if it's free).
