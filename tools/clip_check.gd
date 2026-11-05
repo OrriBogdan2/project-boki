@@ -160,8 +160,8 @@ func _sliders(id: String, sync: Node) -> void:
 	ok(not (clips.d.get("states", {}) as Dictionary).has("dead") or stays > 0.0,
 			"%s: a knocked-out Hero stays on screen for its death clip" % id)
 
-## Moves handed over as the game does, the state fed frame by frame: the hand's path has no one-frame spike (a step well over
-## the steps either side of it, what a pop is), measured against the Hero's height so a tall Hero's fast strike is no pop.
+## Moves handed over as the game does, the state fed frame by frame: the hand's path has no one-frame spike (a step well
+## over the steps either side of it, what a pop is), against the Hero's height, so a tall Hero's fast strike is no pop.
 func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
 	var moves: Array = (dd.get("kmoves", {}) as Dictionary).keys()
 	var s := {"vel": Vector3(0, 0, -4.0), "face": 0.0, "grounded": true}

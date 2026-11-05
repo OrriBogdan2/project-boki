@@ -313,8 +313,8 @@ func step(dt: float) -> void:
 	_turn_to_heading(s, bool(want.get("heading", false)), dt)
 	_out(dt)
 
-## A move keyed "heading" leans where he is going, not where he faces (the Warchain's curved haul): the root turns toward his
-## velocity on top of the clip, so the clip's lean follows it.
+## A move keyed "heading" leans where he is going, not where he faces (the Warchain's curved haul): the root turns toward
+## his velocity on top of the clip, so the clip's lean follows it.
 func _turn_to_heading(s: Dictionary, on: bool, dt: float) -> void:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var goal := 0.0

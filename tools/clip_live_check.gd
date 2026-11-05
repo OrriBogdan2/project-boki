@@ -1,6 +1,6 @@
 extends RefCounted
 ## --clip-live-check: Kael's clips through the real match code: a Match, its Hunters, the kit's own keys and the render
-## path (Hunter.render, HunterAnim, Sync). Re-equipping leaves one weapon drawn; the Warchain's throw and haul play their
+## path (Hunter.render, HunterAnim, Sync). Re-equipping leaves one weapon drawn; the Warchain's throw and haul play
 ## clips and the haul's lean goes where he is heading, not along the chain; a knock-out plays the death clip on screen,
 ## then he is gone.
 ## Never touches the save.
@@ -64,14 +64,15 @@ func run(main: Node) -> void:
 	var off_chain := 0.0
 	var reel_frames := 0
 	for f in 240:
-		if K.warchain.hooked() and K.warchain.state == "hooked" and f > 40:
+		if K.warchain.hooked() and f > 40:
 			A.aim_at(P, P.pos + Vector3(4.0, 0, 5.0))
 			P.inp["move"] = Vector2(0.6, 0.8)
 			K.warchain.press()
 		_frame(m, [P])
 		var c := _clips(P)
 		seen[c.cur] = true
-		if c.cur == "reel" and c.act_w >= 1.0 and K.warchain.pulling() and Vector2(P.vel.x, P.vel.z).length() > 4.0:
+		var fast := Vector2(P.vel.x, P.vel.z).length() > 4.0
+		if c.cur == "reel" and c.act_w >= 1.0 and K.warchain.pulling() and fast:
 			var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
 			var bi := sk.find_bone("hips")
 			var turn := sk.get_bone_global_pose(bi).basis * sk.get_bone_global_rest(bi).basis.inverse()

@@ -242,11 +242,7 @@
 		]
 	},
 	"hem": {
-		"weapon_offset": [
-			0.0,
-			0.0,
-			0.07
-		],
+		"weapon_offset": [0.0, 0.0, 0.07],
 		"painted": {
 			"rim_far": 0.28,
 			"rim_far_color": [
@@ -456,10 +452,7 @@
 		]
 	},
 	"breaker": {
-		"no_ink": [
-			"braid",
-			"stuck"
-		],
+		"no_ink": ["braid", "stuck"],
 		"weapon_scale": 0.75,
 		"painted": {
 			"far_lift": 0.2,
@@ -497,11 +490,7 @@
 				"fres": 0.5,
 				"fres_tint": 0.7
 			},
-			"leather-prow": {
-				"far_lift": 0.05,
-				"fres": 0.25,
-				"fres_tint": 0.4
-			},
+			"leather-prow": {"far_lift": 0.05, "fres": 0.25, "fres_tint": 0.4},
 			"metal": {
 				"fres": 0.3,
 				"fres_tint": 0.6,
