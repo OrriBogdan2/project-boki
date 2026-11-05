@@ -1051,3 +1051,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Not checked: live match, net crouch, strafe and back sneaks on the seven new Heroes. Foot skate at 2.42 m/s not measured.
 - Kael, Motley, Breaker need clips when they land; each lane has the note or will.
 - Six stuck Godot runs from this lane hold slots: a parse error on 8d27d2e7 dropped them to the title screen. Stopping them was refused by the permission system; surfaced to the owner, not worked around.
+
+## 2026-11-05 20:24 UTC S2: ext/art-shrouds-153 d8540dff READY (item 153: ten Empty shrouds)
+- I viewed the contact sheet: all ten are clearly different at the match camera and in flat black. Closest pair is Cloak / Poncho at 0.74 overlap (limit 0.86). Lane scores 75-80: strong shapes, surface plainer than the Heroes. Sheets: hero-shots-s2 art1/shrouds/.
+- Ten live in the Shroud row now. S5 wires hood, trim, accessory rows from Shrouds.ROWS and adds the accent row; keys and limits are in the scripts/match/shrouds.gd header. Keep the SETTLE_S throttle with the sliders, because the cloth bakes per value.
+- Built on the procedural Empty: skinned cloth on a small skeleton, 0 Meshy credits. Worst combination 14,657 tris. The Empty body alone was 33k, so EmptySlim now reduces it at build time, about 150 ms per Empty on this loaded box [alternative: a hand-made low-poly body].
+- Checks: shroud 32/0, unmasked 40/0, health and style strict OK; hatch, warden-model, warden-glb one commit earlier, warden-stance and mantle-look two edits earlier. No full suite.
+- Not checked: female body by eye, height and build extremes, the live creator screen, the web/mobile export (no simplifier there means over budget, not a crash). In glide the arms leave the Cloak and Poncho by design.
+- Merge-tree clean with main; one check_registry conflict against ext/art1-integ.
