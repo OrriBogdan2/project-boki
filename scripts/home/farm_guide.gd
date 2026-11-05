@@ -11,6 +11,7 @@ var hint_box: PanelContainer = null
 var hint_lbl: Label = null
 var skip_row: HBoxContainer = null
 var marker: Label3D = null
+var crop_lbl: Label3D = null
 var sig := ""
 var t := 0.0
 var detect_t := 0.0
@@ -53,6 +54,8 @@ func tick(dt: float) -> void:
 		detect_t = 0.5
 		_poll()
 	_update_marker()
+	var want_page: bool = FarmTutorial.current() == "task" and FarmTutorial.stage("task") == "go"
+	FarmTaskGuide.hub_hint(h, want_page and h.panel_open == "")
 
 func _poll() -> void:
 	var was_done := bool(FarmTutorial.state()["done"])
@@ -98,6 +101,12 @@ func _refresh_hint() -> void:
 	if id == "house" and FarmTutorial.stage(id) == "wait":
 		s = "%s (%s)" % [s, _site_progress()]
 	var voice := String(FarmTutorial.rules()["voice"])
+	var grow := FarmCropGuide.growing()
+	if not grow.is_empty() and id != "crop":
+		s += "  (Your seed is ripe in %ds)" % int(ceil(float(grow["left"])))
+	elif id == "crop" and not grow.is_empty():
+		s = s.replace("{secs}", str(int(ceil(float(grow["left"])))))
+	s = s.replace("{secs}", "a few")
 	hint_lbl.text = "%d/%d  %s: %s" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size(), voice, s]
 	# a long hint wraps at about 600 px (under the chips, clear of the Goals card) instead of running wide
 	var fw := hint_lbl.get_theme_font("font").get_string_size(hint_lbl.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 6.0
@@ -220,6 +229,9 @@ func _target(id: String) -> Vector3:
 				return _water_spot()      # the patch goes by the water
 			var planted: bool = not h.plots.is_empty() and FarmTutorial.stage(id) != "patch_dry"
 			return h.plots[0].position if planted else Vector3.INF
+		"task":
+			var ke: Dictionary = h._kin_entry(Save.active_kin())
+			return (ke["node"] as Node3D).position if not ke.is_empty() else Vector3.INF
 		"hob":
 			return h.hob.pos
 		"expedition":
@@ -250,7 +262,28 @@ func _nearest_wild(what: String) -> Vector3:
 			tree_at = at
 	return tree_at
 
+## A growth bar and countdown over the first patch while a seed grows, whatever step is showing.
+func _update_crop_label() -> void:
+	var g := FarmCropGuide.growing()
+	if g.is_empty() or not FarmTutorial.active() or h.plots.size() <= int(g["plot"]):
+		if is_instance_valid(crop_lbl):
+			crop_lbl.visible = false
+		return
+	if not is_instance_valid(crop_lbl):
+		crop_lbl = Label3D.new()
+		crop_lbl.font_size = 48
+		crop_lbl.pixel_size = 0.0095
+		crop_lbl.outline_size = 14
+		crop_lbl.modulate = Color("8fe0a0")
+		crop_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		crop_lbl.no_depth_test = true
+		h.add_child(crop_lbl)
+	crop_lbl.visible = true
+	crop_lbl.text = "Growing\n" + FarmCropGuide.bar_text(g)
+	crop_lbl.position = (h.plots[int(g["plot"])] as Node3D).position + Vector3(0, 2.2, 0)
+
 func _update_marker() -> void:
+	_update_crop_label()
 	var id := FarmTutorial.current()
 	var txt := FarmTutorial.world_text(id)
 	var at := _target(id) if id != "" and txt != "" else Vector3.INF
