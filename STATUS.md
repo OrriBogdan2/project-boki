@@ -671,3 +671,13 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Target 90%+ of the master sheets, gates relaxed, VFX + sound to S3/S4, push every 30 min. Godot queue already has 14 slots. Each rig landing here lists its ability ids + FX attach points.
 - Branches: ext/art1-kael, -tarek, -hem (Lisette), -breaker, -motley, -cinder, -grimble, -claire, -pip, plus new -sable, -ryzz, -vex.
 - Paused for slots: kits 111, 69, 63, Claire 62+64+65; portraits for Tarek, Ryzz, Vex. Boki stays at ext/boki-starter 27fab2ad.
+
+## 2026-11-05 S2: ART-1 Motley built: ext/art1-motley 9c2a74e1 (READY for owner review)
+- Jack-in-the-box per the master: 11,738 tris, 36 clips, hinged lid, brass spring, void tail, face plane, 8 card orbit, orb skinned; new WardenSway. Match-camera read is strong. 0 credits.
+- Checks 0 failures on the final code: clip, rig-standard, warden-glb, warden-model, ostra-combo, displace-net, dredge-combo, bot-sanity, health --strict. warden-stance last passed one commit earlier. Full suite 130: the same reds as main; **--teammate-check "leads you to the chest" failed 2 of 5 on the branch, passed 4 of 4 on the shared-layer commit: looks flaky, regression not ruled out.** Not tested in a live match.
+- warden-model targets changed: height 1.24, height_3d 1.26, width max 1.6. Footsteps removed for him in hunter.gd. HOVER_H 0.15.
+- Shots: ext/hero-shots-s2 art1/motley/.
+- Owner Qs: orb in his right hand mirrors the sheet (hand_pos), OK? Nightwell pull toward the box, or stay at the cursor? Height 1.26x OK now the hover is lower?
+
+## 2026-11-05 S2: budget correction
+- S1's perf rules: Hunter .glb <= 15k tris incl. weapon; Boki and props <= 5k; <= 8 materials. S2's briefs said 20k by mistake. All ART-1 lanes told. Over budget today: Tarek ~20k, Lisette ~19.5k, Breaker ~17.5k, Kael ~16.6k. **ext/boki-starter is over: Vespyx 11,962, Prismander 10,858, Mycroll 10,196 vs 5k: needs a decimation pass before wiring, or an owner/S1 decision.**
