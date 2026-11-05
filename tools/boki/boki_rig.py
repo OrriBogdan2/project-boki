@@ -120,7 +120,7 @@ def make_clips(arm, clips, fps=30):
                     b.keyframe_insert("location", frame=f + 1)
                     b.scale = (0.001, 0.001, 0.001)
                     b.keyframe_insert("scale", frame=f + 1)
-                if b.name in ("root", "hips") or hide:
+                if b.parent is None or b.name == "hips" or hide:
                     off = pose.get(b.name + "_at", (0, 0, 0))
                     if hide and pose.get(b.name) != "on":
                         off = hide
