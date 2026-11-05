@@ -871,6 +871,7 @@ class Sync extends Node:
 			apply_blade()
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
+		apply_blade()       # (again: a weapon that hangs on a chain, Pip's lantern, moved with the springs)
 		orbits.step(dt)
 		if bool(root.get_meta(CHAIN_OUT, false)):
 			for bi in hide_out:

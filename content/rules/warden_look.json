@@ -242,7 +242,11 @@
 		]
 	},
 	"hem": {
-		"weapon_offset": [0.0, 0.0, 0.07],
+		"weapon_offset": [
+			0.0,
+			0.0,
+			0.07
+		],
 		"painted": {
 			"rim_far": 0.28,
 			"rim_far_color": [
@@ -452,7 +456,10 @@
 		]
 	},
 	"breaker": {
-		"no_ink": ["braid", "stuck"],
+		"no_ink": [
+			"braid",
+			"stuck"
+		],
 		"weapon_scale": 0.75,
 		"painted": {
 			"far_lift": 0.2,
@@ -490,7 +497,11 @@
 				"fres": 0.5,
 				"fres_tint": 0.7
 			},
-			"leather-prow": {"far_lift": 0.05, "fres": 0.25, "fres_tint": 0.4},
+			"leather-prow": {
+				"far_lift": 0.05,
+				"fres": 0.25,
+				"fres_tint": 0.4
+			},
 			"metal": {
 				"fres": 0.3,
 				"fres_tint": 0.6,
@@ -1028,57 +1039,62 @@
 			"rim_far": 0.3,
 			"rim_far_color": [
 				1.0,
-				0.62,
-				0.74
-			]
+				0.72,
+				0.82
+			],
+			"emit": 1.1,
+			"emit_flicker": 0.0,
+			"far_emit": 0.5
 		},
 		"slots": {
 			"skin": {
-				"top_light": 0.35,
-				"fres": 0.3,
-				"far_lift": 0.2,
+				"top_light": 0.32,
+				"fres": 0.2,
+				"far_lift": 0.32,
 				"light_tint": [
 					1.0,
-					0.97,
+					0.98,
 					1.0
 				],
 				"shadow_tint": [
-					0.97,
-					0.9,
+					0.96,
+					0.86,
 					0.96
 				],
-				"light_neutral_warm": 0.6
+				"light_neutral_warm": 0.5
 			},
 			"cloth": {
-				"far_lift": 0.45,
-				"fres": 0.5
+				"far_lift": 0.4,
+				"fres": 0.28
 			},
 			"leather": {
-				"far_lift": 0.35
-			},
-			"metal": {
-				"fres": 0.5,
-				"fres_tint": 0.8,
 				"far_lift": 0.3
 			},
+			"brass": {
+				"fres": 0.5,
+				"fres_tint": 0.8,
+				"far_lift": 0.35
+			},
 			"glow": {
-				"glow": 2.4
+				"glow": 3.0
 			},
 			"card": {
-				"sheen": 0.8,
-				"glow": 1.6,
-				"irid": 0.15,
+				"sheen": 0.5,
+				"glow": 1.2,
+				"irid": 0.12,
 				"sheen_color": [
 					1.0,
-					0.75,
-					0.9
+					0.82,
+					0.7
 				],
 				"albedo": [
 					1.0,
-					0.8,
-					0.92
+					0.92,
+					0.9
 				],
-				"alpha_k": 1.3
+				"alpha_k": 1.25,
+				"far_alpha": 1.9,
+				"far_edge": 0.6
 			}
 		},
 		"lights": [
@@ -1086,11 +1102,11 @@
 				"anchor": "anchor_hang_lantern",
 				"colour": [
 					1.0,
-					0.72,
-					0.35
+					0.74,
+					0.36
 				],
-				"energy": 1.6,
-				"range": 0.9
+				"energy": 2.2,
+				"range": 1.6
 			}
 		],
 		"halos": [
@@ -1098,11 +1114,35 @@
 				"anchor": "anchor_hang_lantern",
 				"color": [
 					1.0,
-					0.78,
-					0.42
+					0.8,
+					0.44
 				],
-				"strength": 2.0,
-				"px": 4.0,
+				"strength": 2.4,
+				"px": 7.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_flower",
+				"color": [
+					1.0,
+					0.86,
+					0.6
+				],
+				"strength": 1.2,
+				"px": 3.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_tail_tip",
+				"color": [
+					1.0,
+					0.88,
+					0.6
+				],
+				"strength": 1.3,
+				"px": 3.5,
 				"near_d": 7.0,
 				"far_d": 14.0
 			}
@@ -1110,9 +1150,9 @@
 		"ink": {
 			"far_thin": 1.0,
 			"color": [
-				0.36,
-				0.17,
-				0.24
+				0.4,
+				0.18,
+				0.28
 			]
 		}
 	}
