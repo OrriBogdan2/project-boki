@@ -18,8 +18,10 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
+	var who := arch if arch != "" else "juggernaut"
+	# (the match keeps an arch only with its own weight class)
 	await m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-		"arch": arch if arch != "" else "juggernaut"})
+		"arch": who, "cls": Arch.weight(who), "weapon": Arch.signature(who)})
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null: await fade.reveal(0.01)
