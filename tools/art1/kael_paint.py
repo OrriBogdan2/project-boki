@@ -65,7 +65,7 @@ def ramp(t, cols):
     return c[i] * (1 - f) + c[i + 1] * f
 
 
-SKIN = [hexc("#33202a"), hexc("#553636"), hexc("#774f49"), hexc("#976c60"), hexc("#b78c78")]
+SKIN = [hexc("#2e1a1c"), hexc("#4f2e28"), hexc("#74463a"), hexc("#99654f"), hexc("#bf8a6a")]
 CLOTH = [hexc("#1c070d"), hexc("#340d16"), hexc("#4e1520"), hexc("#68202b"), hexc("#84333a")]
 GOLD = [hexc("#5c360c"), hexc("#99621a"), hexc("#c98a2a"), hexc("#e8b24c"), hexc("#ffe08c")]
 IRON = [hexc("#1e1b1f"), hexc("#3a363a"), hexc("#5b5659"), hexc("#7f7a7b"), hexc("#b0abaa")]
@@ -173,6 +173,15 @@ def burnt(c, p, spots):
     return mix(mix(c, hexc("#0d0406"), k), EMBER, h)
 
 
+SILVER = [hexc("#30323a"), hexc("#5e626c"), hexc("#8f94a0"), hexc("#bfc4cc"), hexc("#e8ebef")]
+
+
+def wrap_cloth(p, n, ao):
+    """A wrap of the scarf: its shape is real now, so the light and occlusion do the work; a little weave."""
+    t = (lit(n, ao) * 0.98) ** 1.6
+    return ramp(np.clip(t, 0, 1), CLOTH)
+
+
 def cowl_cloth(p, n, ao):
     """The rolled folds: deep arcs dipping at the front, the art's heavy drape, drawn as crease and lit lip."""
     a = np.arctan2(p[..., 0], p[..., 1] - 0.01)
@@ -249,12 +258,7 @@ def chain_tile(h, w):
 
 
 def hook_tile(h, w):
-    v, u = np.mgrid[0:h, 0:w]
-    v = (v + 0.5) / h
-    c = chain_tile(h, w)
-    # red-hot toward the tip: keyed as heat by the shader (white-hot glow)
-    k = smooth(0.62, 0.8, v)[..., None]
-    return c * (1 - k) + np.array([1.0, 0.76, 0.44]) * k
+    return chain_tile(h, w)
 
 
 # ---- the cracks: a net of cells round the sword arm (the master sheet's giraffe pattern), edges of a stretched Voronoi
@@ -276,7 +280,7 @@ def crack_map(z0, z1, W=1100, H=900, cells=46):
             d1 = np.minimum(d1, d)
     edge = (d2 - d1)
     fade = 0.55 + 0.45 * np.sin(u * 37 + v * 23)          # the width swells and pinches along a fissure
-    wd = 0.0052 * (0.55 + 0.45 * fade)
+    wd = 0.0066 * (0.55 + 0.45 * fade)
     return np.clip(1.25 - edge / wd, 0, 1), z0, z1
 
 
@@ -293,10 +297,9 @@ HOT_RIM = np.array([0.72, 0.42, 0.26])   # keyed partly: the edge colour
 
 
 def blade_paint(a, c, h, n, ao, ol_w):
-    """a along the blade from the guard, c across it: dark stone-iron facets, chipped pale edges, heat in the cracks."""
+    """Pale chipped stone in big facets, light on the chipped rims, warm toward the core: stone lit from inside, no stripes."""
     L, W = K.BLADE_LEN, K.BLADE_W
-    p = np.stack([a * 26, c * 26, h * 8 + 1.0], -1)
-    # facets: nearest of a jittered lattice
+    p = np.stack([a * 13, c * 13, h * 4 + 1.0], -1)
     cell = np.floor(p[..., :2])
     best, sec, bid = np.full(a.shape, 9.0), np.full(a.shape, 9.0), np.zeros(a.shape)
     for dx in (-1, 0, 1):
@@ -304,19 +307,13 @@ def blade_paint(a, c, h, n, ao, ol_w):
             gx, gy = cell[..., 0] + dx, cell[..., 1] + dy
             ix, iy = gx.astype(np.int64), gy.astype(np.int64)
             jx, jy = hash3(ix, iy, 3 + 0 * ix), hash3(ix, iy, 7 + 0 * ix)
-            d = np.hypot(gx + jx - p[..., 0], (gy + jy - p[..., 1]) * 0.55)
+            d = np.hypot(gx + jx - p[..., 0], gy + jy - p[..., 1])
             nb = d < best
             sec = np.where(nb, best, np.minimum(sec, d))
             bid = np.where(nb, jx, bid)
             best = np.where(nb, d, best)
-    t = lit(n, ao) * 0.92 + (bid - 0.5) * 0.22 + (fbm(p * 2.7) - 0.5) * 0.18
-    c0 = ramp(np.clip(t, 0, 1), [hexc("#2b2628"), hexc("#494243"), hexc("#6e6563"), hexc("#958a84"), hexc("#c4b8ac")])
-    seam = 1 - smooth(0.0, 0.1, sec - best)
-    c0 = mix(c0, hexc("#17120f"), seam * 0.7)
-    # heat in the stone: amber up against the core, keyed-hot seams running out of it
     u = np.abs(c) / W
-    heat = smooth(0.66, 0.36, u)
-    c0 = mix(c0, hexc("#a85a2c"), heat * 0.7)
-    seams = seam * smooth(0.95, 0.5, u) * smooth(0.3, 0.6, fbm(np.stack([a * 7, c * 7, a * 0], -1)))
-    c0 = mix(c0, np.array([1.0, 0.76, 0.44]), smooth(0.5, 0.8, seams))
-    return c0
+    t = 0.46 + (bid - 0.5) * 0.3 + (lit(n, ao) - 0.5) * 0.5 + 0.24 * smooth(0.72, 1.0, u)
+    c0 = ramp(np.clip(t, 0, 1), [hexc("#2e282a"), hexc("#544c4c"), hexc("#7a716e"), hexc("#a59b95"), hexc("#ddd4ca")])
+    c0 = mix(c0, hexc("#2a2224"), (1 - smooth(0.0, 0.07, sec - best)) * 0.65)
+    return mix(c0, hexc("#d98a4a"), smooth(0.62, 0.34, u) * 0.8 * smooth(0.86, 0.7, a / L))
