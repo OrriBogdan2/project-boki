@@ -603,3 +603,12 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 S2: Sable upgrade received
 - sable_FINAL_sheet, sable_turnaround_apose, sable_portrait, sable_splash logged: twin flintlock pistols replace her crossbows (visual, VFX and sound only; kit numbers unchanged).
 - Next small lane when a slot frees: on ext/rename-lisette, "crossbows" -> "pistols" in kit text; on ext/portraits-six, add Pip, Claire and Sable. ART-1 Sable queued after Pip.
+
+## 2026-11-05 S2: READY FOR WIRING: ext/boki-starter 27fab2ad (Vespyx approved + eye fix); Prismander, Mycroll and Fusions await owner review
+- Merges cleanly into main. Eye dome ~25% of head width (was ~34%). Farm: tend clip, Body level, one carried item. Added: Evo mutations as rig parts (15 per species), Fusions on a Hunter (Venom, Prism Shell, Spore), Prismander 10,858 tris and Mycroll 10,196 tris with 13 clips each, tools held in the mouth. Vespyx 11,962 tris. 36 credits (balance 3083).
+- **Wiring for ext (3 pieces, reserved files):** the two from the Vespyx entry, plus scripts/match/merge_parts.gd in build() after `var rec := _rec()`: `if BokiFusion.has(form):` / `BokiFusion.build(parent, form, base)` / `return rec`.
+- Checks wired on 36d26715: 18 checks 0 failures, boki-follow 85, boki-system 78, boki-rig 190, bot-sanity 0, simtest exit 0; merge-form 1, teammate 1, obstacle 1: each failed unwired earlier, not re-baselined on this merge. Health --strict OK at the tip; later commits are the Prism collar + docs.
+- Shots: ext/hero-shots-s2 5ce8f31b boki/. Fusions shot on Vex only. Prismander not yet seen in the real game. Farm camera eye size unconfirmed in the real game.
+- Open: no element VFX, Mutations.dress extras stick to Flex, accessories don't follow the head bone, no blend tree, no many-Boki perf number.
+- Owner Qs: palette (#7c4fa2 vs #4a2f5c); tail or pincer tools.
+- Slot: small sweep lane (Sable crossbows -> pistols; Pip, Claire, Sable portraits).
