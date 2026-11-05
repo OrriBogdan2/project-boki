@@ -1,0 +1,289 @@
+class_name BokiRig
+extends Node
+## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
+## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet already reads,
+## plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever the body does.
+## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
+
+const PATH := "res://art/kin/%s/%s.glb"
+## Where the eyes and the top of the head sit (m), per species: what KinModels.build returns for the accessories.
+const FRAME := {"cindle": {"head": Vector3(0, 0.45, -0.34), "top": 0.72}}
+const FADE := 0.14            # s between body clips
+const FACE_RATE := 14.0       # 1/s the expression eases at
+const WALK_SPEED := 0.5       # m/s: below this it stands
+const RUN_SPEED := 3.2        # m/s: from here it gallops
+const RUN_STRIDE := 2.9       # m/s the run clip covers at speed 1 (Vespyx: reach 1.3, pace 1.06)
+const WALK_STRIDE := 1.5
+const INK_WIDTH := 0.0011     # the outline per metre of camera distance
+const INK_FAR_THIN := 0.5
+## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
+const COAT_LOOK := {"far_lift": 0.12, "fres": 0.55, "top_light": 0.45, "rim_amount": 0.25}
+const EYE_VALUE := 0.96       # iris brightness: the eye is the first thing read on a small face
+const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry"]
+## Blend shapes each expression pushes.
+const FACES := {
+	"neutral": {},
+	"happy": {"happy": 1.0, "m_smile": 1.0},
+	"sad": {"sad": 1.0, "m_frown": 1.0},
+	"sleepy": {"sleepy": 1.0, "m_o": 0.3},
+	"angry": {"angry": 1.0, "m_snarl": 1.0},
+	"focus": {"angry": 0.45},
+	"cheer": {"m_smile": 0.8},
+	"bliss": {"closed": 1.0, "m_smile": 0.55},
+	"asleep": {"closed": 1.0, "m_o": 0.22},
+	"chew": {"m_chomp": 1.0},
+}
+## The clip's own expression, or a list of [from, expression] beats over its length (0..1).
+const CLIP_FACE := {
+	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
+	"chop": "focus", "mine": "focus", "carry": "cheer",
+	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
+}
+## Match body language (KinPuppet's "pose" meta) that shows on the face.
+const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
+
+static var enabled := true
+
+var species := ""
+var manual := false            # tools pose it by hand: set_clip, seek and set_face, nothing automatic
+var root: Node3D
+var flex: Node3D
+var model: Node3D
+var player: AnimationPlayer
+var face: MeshInstance3D
+var eye_mat: ShaderMaterial
+var clip := ""
+var _shapes := {}              # blend shape name -> index
+var _now := {}                 # blend shape name -> weight
+var _want := {}
+var _face_name := "neutral"
+var _flex_y := 0.0
+var _pos_prev := Vector3.ZERO
+var _speed := 0.0
+var _pulse := 0
+var _shot_left := 0.0
+var _shot := ""
+var _blink_t := 2.0
+var _blink := 0.0
+var _look_t := 1.0
+var _look := Vector2.ZERO
+var _look_to := Vector2.ZERO
+var _rng := RandomNumberGenerator.new()
+var _coat: ShaderMaterial
+
+## True when this species has a rigged model.
+static func has(kin_id: String) -> bool:
+	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
+
+## Adds the model and its driver under `flex`; `c` is KinModels' material set. Returns the head frame, as KinModels.build.
+static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array) -> Dictionary:
+	var model_root := (load(PATH % [kin_id, kin_id]) as PackedScene).instantiate() as Node3D
+	model_root.name = "Rig"
+	flex_node.add_child(model_root)
+	var rig := BokiRig.new()
+	rig.name = "BokiRig"
+	rig.species = kin_id
+	rig.model = model_root
+	rig._dress(c, mats)
+	flex_node.add_child(rig)
+	return FRAME[kin_id]
+
+func _ready() -> void:
+	process_priority = 10          # after KinPuppet: this rig poses Flex itself
+	flex = get_parent() as Node3D
+	root = flex.get_parent().get_parent() as Node3D
+	_flex_y = flex.position.y
+	_rng.seed = hash(get_instance_id())
+	_blink_t = _rng.randf_range(0.8, 3.5)
+	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	for n in LOOPED:
+		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
+	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
+	_copy_coat()
+	set_clip("idle")
+
+## The expression right now: one of FACES.
+func set_face(which: String) -> void:
+	_face_name = which
+	_want = FACES.get(which, {})
+
+## Plays a body clip by name, crossfading from the last one.
+func set_clip(which: String, fade := FADE) -> void:
+	if which == clip:
+		return
+	clip = which
+	player.play(which, fade)
+
+## Tools: holds the body at `at` (s) of the current clip and the face fully on its expression.
+func seek(at: float) -> void:
+	player.seek(at, true)
+	for s in _shapes:
+		_now[s] = float(_want.get(s, 0.0))
+		face.set_blend_shape_value(int(_shapes[s]), float(_now[s]))
+
+func _process(dt: float) -> void:
+	if manual or dt <= 0.0:
+		return
+	var seen := root.is_visible_in_tree()
+	player.active = seen
+	if not seen:
+		return
+	_keep_flex()
+	_track_speed(dt)
+	_pick_clip(dt)
+	_face_step(dt)
+
+## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll stays.
+func _keep_flex() -> void:
+	var girth := float(root.get_meta("girth", 1.0))
+	flex.rotation = Vector3.ZERO
+	flex.scale = Vector3(girth, 1.0, lerpf(1.0, girth, 0.5))
+	flex.position = Vector3(0, _flex_y, 0)
+
+func _track_speed(dt: float) -> void:
+	var gp := root.global_position
+	var v := (gp - _pos_prev).length() / dt
+	_pos_prev = gp
+	_speed = lerpf(_speed, v, 1.0 - exp(-10.0 * dt))
+
+func _pick_clip(dt: float) -> void:
+	var p: int = root.get_meta("pulse", 0)
+	if p != _pulse:
+		_pulse = p
+		_start_shot("ability")
+	if String(root.get_meta("kstate", "")) == "attack":
+		_start_shot("attack")
+	_shot_left -= dt
+	var want := _state_clip()
+	set_clip(want)
+	player.speed_scale = 1.0
+	if want == "run":
+		player.speed_scale = clampf(_speed / RUN_STRIDE, 0.7, 1.6)
+	elif want == "walk" or want == "carry":
+		player.speed_scale = clampf(_speed / WALK_STRIDE, 0.6, 1.6)
+
+func _start_shot(which: String) -> void:
+	_shot = which
+	_shot_left = player.get_animation(which).length
+
+func _state_clip() -> String:
+	if String(root.get_meta("kstate", "")) == "sleep":
+		return "sleep"
+	var work := String(root.get_meta("kwork", ""))
+	if work != "":
+		return work
+	var act := String(root.get_meta("kact", ""))
+	if act != "":
+		return act
+	if _shot_left > 0.0:
+		return _shot
+	if root.get_meta("happy", false):
+		return "hop"
+	if _speed >= RUN_SPEED:
+		return "run"
+	return "walk" if _speed >= WALK_SPEED else "idle"
+
+func _clip_face() -> String:
+	var over := String(root.get_meta("face", ""))
+	if over != "":
+		return over
+	if root.get_meta("dazed", false):
+		return "sad"
+	var cf: Variant = CLIP_FACE.get(clip, "")
+	if cf is Array:
+		var k := fposmod(player.current_animation_position, player.current_animation_length) / player.current_animation_length
+		var best := "neutral"
+		for beat in cf:
+			if float(beat[0]) <= k:
+				best = String(beat[1])
+		return best
+	if String(cf) != "":
+		return String(cf)
+	return String(POSE_FACE.get(String(root.get_meta("pose", "")), "neutral"))
+
+func _face_step(dt: float) -> void:
+	set_face(_clip_face())
+	_blink_t -= dt
+	if _blink_t <= 0.0:
+		_blink_t = _rng.randf_range(1.8, 4.6)
+		_blink = 1.0
+	_blink = maxf(0.0, _blink - dt * 7.0)
+	var k := 1.0 - exp(-FACE_RATE * dt)
+	var shut_already := _want.has("closed") or _want.has("happy")
+	for s in _shapes:
+		var goal := float(_want.get(s, 0.0))
+		if s == "blink" and not shut_already:
+			goal = sin(_blink * PI)
+		var w := lerpf(float(_now[s]), goal, k if s != "blink" else 1.0)
+		_now[s] = w
+		face.set_blend_shape_value(int(_shapes[s]), w)
+	_look_t -= dt
+	if _look_t <= 0.0:
+		_look_t = _rng.randf_range(1.2, 3.8)
+		_look_to = Vector2(_rng.randf_range(-0.09, 0.09), _rng.randf_range(-0.05, 0.05))
+	_look = _look.lerp(_look_to, 1.0 - exp(-12.0 * dt))
+	eye_mat.set_shader_parameter("look", _look)
+
+## Wears the game's materials: the painted atlas under the Boki toon light, the glow and the eye in its own colours.
+func _dress(c: Dictionary, mats: Array) -> void:
+	for mi in model.find_children("*", "MeshInstance3D", true, false):
+		var inst := mi as MeshInstance3D
+		inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		if inst.get_blend_shape_count() > 0 or inst.mesh.get_blend_shape_count() > 0:
+			face = inst
+			for i in inst.mesh.get_blend_shape_count():
+				var nm := String(inst.mesh.get_blend_shape_name(i))
+				_shapes[nm] = i
+				_now[nm] = 0.0
+		for si in inst.mesh.get_surface_count():
+			inst.set_surface_override_material(si, _material_for(inst.mesh.surface_get_material(si), c, mats))
+
+func _material_for(src: Material, c: Dictionary, mats: Array) -> Material:
+	var id := String(src.resource_name)
+	if id == "boki_glow":
+		return c["glow"]
+	if id == "boki_eye":
+		eye_mat = ShaderMaterial.new()
+		eye_mat.shader = preload("res://shaders/boki_eye.gdshader")
+		var iris := c["eye"].get_meta("iris", Color("9de23a")) as Color
+		eye_mat.set_shader_parameter("iris", Color.from_hsv(iris.h, minf(iris.s * 1.15, 1.0), EYE_VALUE))
+		return eye_mat
+	var m := Models.toon(Color.WHITE, false)
+	Models.hero_look(m)
+	m.set_shader_parameter("use_tex", true)
+	m.set_shader_parameter("albedo_tex", (src as BaseMaterial3D).albedo_texture)
+	for k in WardenGlb.PAINTED:
+		m.set_shader_parameter(k, WardenGlb.PAINTED[k])
+	for k in COAT_LOOK:
+		m.set_shader_parameter(k, COAT_LOOK[k])
+	m.set_shader_parameter("rim_color", (c["body"] as ShaderMaterial).get_shader_parameter("rim_color"))
+	if id == "boki_coat":
+		_coat = m
+		m.next_pass = _ink()
+	mats.append(m)
+	return m
+
+static func _ink() -> ShaderMaterial:
+	var ink := ShaderMaterial.new()
+	ink.shader = Models.OUTLINE
+	ink.set_shader_parameter("width", INK_WIDTH)
+	ink.set_shader_parameter("far_thin", INK_FAR_THIN)
+	return ink
+
+## Coat marks and the colour shift land on KinModels' body material (Unique.dress, after build): take them on.
+func _copy_coat() -> void:
+	var mats: Array = root.get_meta("mats", [])
+	if mats.is_empty() or _coat == null:
+		return
+	var body := mats[0] as ShaderMaterial
+	var base: Color = Data.KIN[species]["color"]
+	var now := body.get_shader_parameter("albedo") as Color
+	_coat.set_shader_parameter("albedo", Color(now.r / maxf(base.r, 0.01), now.g / maxf(base.g, 0.01), now.b / maxf(base.b, 0.01)))
+	if body.get_shader_parameter("mark_kind") == null:
+		return
+	var marks := ShaderMaterial.new()
+	marks.shader = preload("res://shaders/boki_marks.gdshader")
+	for k in ["mark_kind", "mark_color", "mark_seed", "mark_scale", "mark_amt", "mark_glow"]:
+		marks.set_shader_parameter(k, body.get_shader_parameter(k))
+	marks.next_pass = _coat.next_pass
+	_coat.next_pass = marks
