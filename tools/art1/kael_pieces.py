@@ -102,7 +102,7 @@ def eyeball(s):
             d = rot_about(d, (0, 0, 1), -s * 0.1)
             v.append(c + d * EYE_R)
             uv.append((a, b))
-    p = Piece("eye" + ("R" if s > 0 else "L"), "eyes-kael", hl(v), grid_faces(rows, cols)).rigid("head")
+    p = Piece("eye" + ("R" if s > 0 else "L"), "skin-kael", hl(v), grid_faces(rows, cols), room=0.0).rigid("head")
     p.eye_uv = np.array(uv)
     return p
 
@@ -188,7 +188,7 @@ def mask():
 def cowl():
     """The ENORMOUS scarf: one heavy funnel from under the eyes to a torn drape on the shoulders, its folds real relief: thick swags of cloth
     that hang across the front and lap the one below (each swells out, then undercuts), so it reads as a wrapped mass, not a sheet."""
-    cols, rows = 36, 26
+    cols, rows = 32, 20
     z = C[2]
     prof = [(0.018, 0.092, 0.1), (0.05, 0.116, 0.124), (0.1, 0.138, 0.14), (0.15, 0.168, 0.156), (0.19, 0.212, 0.166), (0.225, 0.262, 0.172), (0.252, 0.284, 0.174)]
     pz = np.array([q[0] for q in prof])
@@ -217,7 +217,7 @@ def cowl():
             r = bulge + lobes
             hem = 0.034 * jag[j] * k ** 14
             G[i, j] = (sx * (hw + r), 0.016 + cy * (hd + r), z - dz - 0.018 * front * k + hem)
-    holes = [(5.5, 31.5, 0.8, 1), (8.0, 4.0, 0.8, 2), (12.5, 33.0, 0.8, 3), (15.5, 29.0, 0.9, 4), (17.0, 6.0, 0.9, 5), (20.5, 2.0, 0.7, 6), (19.5, 31.0, 0.7, 7)]
+    holes = [(4.2, 28.0, 0.8, 1), (6.0, 3.5, 0.8, 2), (9.5, 29.3, 0.8, 3), (11.8, 25.8, 0.9, 4), (13.0, 5.3, 0.9, 5), (15.6, 1.8, 0.7, 6), (14.8, 27.5, 0.7, 7)]
     p = holed_sheet("cowl0", "cloth-kael", G, wrap=True, holes=holes)
     w = 1.0 - smooth(0.3, 0.72, p.rowf)
     p.w = {"head": w, "hips": 1 - w}
@@ -459,7 +459,7 @@ def wrist_chain(uv):
         z = HAND_Z + 0.075 - 0.075 * k + 0.008 * np.sin(a * 2.3)
         r = 0.05 - 0.008 * k
         pts.append([cx + np.cos(a) * r * 1.06, np.sin(a) * r, z])
-    p = chain_along("chain_wrap", pts, step=0.0345, uv=uv, ln=0.042, wid=0.023, th=0.0064)
+    p = chain_along("chain_wrap", pts, step=0.05, uv=uv, ln=0.058, wid=0.03, th=0.0072)
     return p.rigid("forearm.R")
 
 
@@ -746,7 +746,7 @@ def blade():
                 f = [o + t[0], o + t[1], o + t[2]]
                 d = np.cross(np.array(vv[f[1]]) - vv[f[0]], np.array(vv[f[2]]) - vv[f[0]])
                 ff.append(f if np.dot(d, n * sgn) > 0 else f[::-1])
-        halos.append(Piece("coreh%d" % k, "glow-sword_edge", vv, ff, room=0.0).rigid("hand.R"))
+        halos.append(Piece("coreh%d" % k, "metal-kael", vv, ff, room=0.0).rigid("hand.R"))
     return [plate] + cores + halos
 
 

@@ -5,7 +5,7 @@ extends RefCounted
 ## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop. Never
 ## touches the save.
 
-const TRI_BUDGET := 20000
+const TRI_BUDGET := 15000
 const DT := 1.0 / 30.0
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does

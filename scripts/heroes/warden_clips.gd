@@ -98,7 +98,9 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 		# (rotations only on the contract bones: their offsets and scale are the player's sliders, Sync._look_pose)
 		for i in range(a.get_track_count() - 1, -1, -1):
 			var bone_name := String(a.track_get_path(i).get_concatenated_subnames())
-			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract:
+			# (data "offset_bones": a bone the clips do move and scale: Motley's hips ride his spring)
+			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract \
+					and not bone_name in d.get("offset_bones", []):
 				a.remove_track(i)
 	tree = AnimationTree.new()
 	tree.name = "Clips"
