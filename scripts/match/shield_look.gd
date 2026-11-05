@@ -19,7 +19,7 @@ static func tick(h: Hunter) -> void:
 	var up := h.shield > 0.0 and not h.downed and not h.out
 	var col := SideColor.of(h.m, h).lerp(Color.WHITE, 0.25) if up else Color.BLACK
 	var shown_col: Color = h.get_meta(META, Color.BLACK)
-	var same_body := is_same(h.get_meta("shield_rim_mats", null), h.mats)
+	var same_body := is_same(_rim_mats(h), h.mats)
 	if up == h.has_meta(META) and (not up or (shown_col == col and same_body)):
 		return
 	if up:
@@ -82,9 +82,9 @@ static func _rim_off(h: Hunter) -> void:
 	for mt in saved:
 		if is_instance_valid(mt):
 			(mt as Material).next_pass = saved[mt]
-	h.remove_meta("shield_rim_saved")
-	h.remove_meta("shield_rim_mats")
-	h.remove_meta(META)
+	for key in ["shield_rim_saved", "shield_rim_mats", META]:
+		if h.has_meta(key):
+			h.remove_meta(key)
 
 ## The shield version of a model's ink outline: the side colour, wider, kept at every distance.
 static func _ink(own: ShaderMaterial, col: Color) -> ShaderMaterial:
@@ -98,6 +98,9 @@ static func _ink(own: ShaderMaterial, col: Color) -> ShaderMaterial:
 		ink.set_shader_parameter("far_thin", 0.0)
 		_inks[key] = ink
 	return _inks[key]
+
+static func _rim_mats(h: Hunter) -> Variant:
+	return h.get_meta("shield_rim_mats") if h.has_meta("shield_rim_mats") else null
 
 static func _pop(h: Hunter) -> void:
 	var col := SideColor.of(h.m, h).lerp(Color.WHITE, 0.5)

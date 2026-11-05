@@ -46,6 +46,10 @@ func run(main: Node) -> void:
 			ok(_same(SideRings.shown((h.kin as Kin).ring), want), "%s's Boki ring matches its Hunter" % h.pname)
 			ok(SideColor.of(m, h.kin) == want, "%s's Boki takes its Hunter's colour" % h.pname)
 	# ---------------------------------------------------------------- 2. the downed teammate
+	ally.teleport(P.pos + Vector3(8.0, 0, 0))        # nobody in reach to pick them up: the bleed-out runs
+	for f: Hunter in foes:
+		f.teleport(P.pos + Vector3(-12.0, 0, 0))
+	if ally.kin: (ally.kin as Kin).stow()
 	m.knock(ally, foes[0], {})
 	var f0 := DownedMarks.bleed_frac(ally)
 	_run(m, 1.0)
