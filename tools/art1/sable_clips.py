@@ -10,6 +10,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, eul, FPS, frame_of, lerp, ease
 import sable_pieces as K
+import crouchkit
+from crouchkit import off
 
 A_Z = K.ANKLE_Z
 FX = K.THIGH_X
@@ -232,8 +234,44 @@ def shot_r():
     return c, s, k, r
 
 
+# ---- the crouch (item 143): a stalking cat. Belly down, shoulders ahead of the hips, the head level and hunting; the right pistol out low, sighting along the ground, the left held wide for balance, like the second claw.
+PROWL = {
+    "pel": (0.03, -0.05, -0.37), "prt": (0.40, 0.16, -0.04), "tor": (0.52, -0.24, 0.05), "hed": (-0.82, 0.10, -0.04),
+    "G": (0.20, 0.66, 0.60), "BE": PR(-3, -4), "GL": (-0.40, 0.34, 0.50), "BL": PR(38, -12),
+    "FL": (-0.13, 0.26, A_Z + 0.03), "FR": (0.17, -0.25, A_Z + 0.06), "FLy": 0.22, "FRy": -0.5, "FLp": 0.25, "FRp": 0.55,
+    "brow": 0.25, "cock": 0.7, "lid": 0.2, "smile": 0.85,
+}
+SNEAK = {"ankle": A_Z, "foot": 0.11, "width": FX * 1.15, "stride": 0.34, "lift": 0.05, "toe": 0.28, "share": 0.6, "sway": 0.035, "bob": 0.014, "twist": 0.12, "T": 0.6, "toe_out": -0.22}
+
+
+def prowl(u):
+    """Held dead still but for the breath, the head swinging slowly over the ground ahead; the tail end of the scan, a sly look back at you."""
+    a, b = math.sin(u * TAU), math.cos(u * TAU)
+    p = dict(PROWL)
+    p["pel"] = (0.03 + 0.008 * a, -0.05, -0.37 - 0.008 * b)
+    p["tor"] = (0.52 + 0.012 * b, -0.24, 0.05)
+    p["hed"] = (-0.82, 0.10 + 0.34 * a, -0.04 - 0.05 * a)
+    p["G"] = (0.20 + 0.01 * a, 0.66, 0.60 + 0.006 * b)
+    p["GL"] = (-0.40, 0.34, 0.50 - 0.006 * b)
+    p["lid"] = 1.0 if 0.70 < u < 0.73 else 0.2
+    return p
+
+
+def prowl_upper(p, u, c1, s2, d):
+    """The pistols stay on their line as the body flows under them; the head stays on the prey."""
+    p["G"] = (0.20 + 0.03 * d.x, 0.66 * max(d.y, 0.55) - 0.02 * c1, 0.60 + 0.008 * s2)
+    p["GL"] = (-0.40 + 0.03 * d.x, 0.34 * max(d.y, 0.55) + 0.05 * c1, 0.50 - 0.008 * s2)
+    p["hed"] = (-0.82 * (0.55 + 0.45 * max(d.y, 0.0)), 0.10 - 0.06 * c1, -0.04)
+
+
+def crouch_set():
+    dip = off(PROWL, pel=(0.0, 0.02, -0.07), prt=(0.1, 0, 0), hed=(-0.08, 0, 0), G=(0.0, -0.08, -0.06), GL=(0.03, -0.06, -0.05))
+    return crouchkit.clips(C, END, PROWL, prowl, SNEAK, prowl_upper, dip, up=dict(READY, pel=(0.012, 0.0, 0.006)), dip_t=0.18)
+
+
 def clips():
     out = [FnClip("idle", 4.2, idle), FnClip("stance", 4.0, stance)]
+    out += crouch_set()
     for nm, sk, stride, lift, T in (("walk", 0.0, 0.42, 0.03, 0.95), ("run", 1.0, 0.86, 0.1, 0.62)):
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sk, hd, stride * (0.72 if tag in "lrb" else 1.0), lift)))

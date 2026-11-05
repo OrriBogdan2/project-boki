@@ -84,6 +84,10 @@ func _named(dd: Dictionary) -> Array:
 	out.append(lc.get("stance"))
 	out.append_array((lc.get("walk", {}) as Dictionary).values())
 	out.append_array((lc.get("run", {}) as Dictionary).values())
+	var cr: Dictionary = dd.get("crouch", {})
+	if not cr.is_empty():
+		out.append_array([cr["idle"], cr["in"], cr["out"]])
+		out.append_array((cr["walk"] as Dictionary).values())
 	out.append_array((dd.get("air", {}) as Dictionary).values())
 	for k in dd.get("states", {}):
 		var v = dd["states"][k]
