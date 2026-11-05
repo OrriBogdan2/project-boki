@@ -269,11 +269,15 @@ def p_cardburn(S, T):
     """a burnt card: charred from one corner, the edge of the burn still alight"""
     c = p_card(S, T)
     d = np.hypot(S - 1.0, T) + 0.14 * (fbm(S, T, 7, 7, 15, 3) - 0.5)
-    c = mix(c, hx("ff9a2a"), np.exp(-((d - 0.62) / 0.035) ** 2))
+    c = mix(c, hx("ffa030"), np.exp(-((d - 0.62) / 0.06) ** 2))
     return mix(c, hx("20100c"), M.sm(0.6, 0.52, d))
 
 
-PAINTERS = {"wall_s": wall("spade", SLATE, 11), "wall_d": wall("diamond", RED, 12), "wall_c": wall("club", SLATE, 13), "wall_h": wall("heart", RED, 14), "rail": p_rail,
+def p_flame(S, T):
+    return ramp(T, [hx("ff5a14"), hx("ff9a2a"), hx("ffe08a")])
+
+
+PAINTERS = {"flame": p_flame, "wall_s": wall("spade", SLATE, 11), "wall_d": wall("diamond", RED, 12), "wall_c": wall("club", SLATE, 13), "wall_h": wall("heart", RED, 14), "rail": p_rail,
             "lid": p_lid, "brass": p_brass, "knob": p_knob, "bell": p_bell, "torso": p_torso, "peplum": p_peplum, "lining": p_lining,
             "tail_v": tail_paint(False, 41), "tail_k": tail_paint(True, 43), "sleeve_k": sleeve_paint(True, 13), "sleeve_v": sleeve_paint(False, 15), "glove": p_glove,
             "hood": p_hood, "hornR": horn_paint(False), "hornL": horn_paint(True), "ruff": p_ruff, "collar_v": collar_paint(VIOLET, VIOLET_HI, 71), "collar_k": collar_paint(BLACK, PLUM, 73),

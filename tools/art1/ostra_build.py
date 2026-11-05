@@ -141,8 +141,8 @@ def add_cards(arm, at, mat):
     ostra.json "swirl" tumbles them (WardenSway)."""
     idx = 0
     for name, centre, r, items in (
-            ("orbit_cards", (0, 0, 1.32), 0.62, ((15, 0.1, "card"), (85, -0.14, "cardback"), (160, 0.2, "cardburn"), (235, -0.05, "card"), (305, 0.14, "cardback"))),
-            ("orbit_cardsb", (0, 0, 0.92), 0.5, ((50, 0.06, "cardburn"), (175, -0.08, "card"), (285, 0.02, "card")))):
+            ("orbit_cards", (0, 0, 1.32), 0.62, ((15, 0.1, "cardburn"), (85, -0.14, "cardback"), (160, 0.2, "cardburn"), (235, -0.05, "card"), (305, 0.14, "cardburn"))),
+            ("orbit_cardsb", (0, 0, 0.92), 0.5, ((50, 0.06, "cardburn"), (175, -0.08, "card"), (285, 0.02, "cardburn")))):
         orbit = bpy.data.objects.new(name, None)
         bpy.context.scene.collection.objects.link(orbit)
         orbit.parent = arm
@@ -164,12 +164,21 @@ def add_cards(arm, at, mat):
             if key == "cardburn":     # a corner burnt away
                 pts = [pts[0], pts[1], side * w + up * hh * 0.2, side * w * 0.1 + up * hh, pts[3]]
                 uv = [(0, 1), (1, 1), (1, 0.4), (0.55, 0), (0, 0)]
+                flame = [side * w * 1.0 + up * hh * 0.2, side * w * 1.45 + up * hh * 1.05, side * w * 0.95 + up * hh * 0.85, side * w * 0.72 + up * hh * 1.5, side * w * 0.42 + up * hh * 0.98, side * w * 0.1 + up * hh * 1.0]
             n = len(pts)
             me = bpy.data.meshes.new("card%d" % idx)
-            me.from_pydata([tuple(p) for p in pts], [], [tuple(range(n)), tuple(range(n - 1, -1, -1))])
-            uvl = me.uv_layers.new(name="UVMap")
+            faces = [tuple(range(n)), tuple(range(n - 1, -1, -1))]
             q = [at.uv(key, a, b) for a, b in uv]
-            uvl.data.foreach_set("uv", [c for p in q + q[::-1] for c in p])
+            corners = q + q[::-1]
+            if key == "cardburn":     # the flame licking off the burnt edge
+                m = len(flame)
+                pts = pts + flame
+                faces += [tuple(range(n, n + m)), tuple(range(n + m - 1, n - 1, -1))]
+                fl = [at.uv("flame", 0.5, 1.0 - 0.9 * i / max(m - 1, 1)) for i in range(m)]
+                corners += fl + fl[::-1]
+            me.from_pydata([tuple(p) for p in pts], [], faces)
+            uvl = me.uv_layers.new(name="UVMap")
+            uvl.data.foreach_set("uv", [c for p in corners for c in p])
             me.materials.append(mat)
             ob = bpy.data.objects.new("orbit_cards_%d" % idx, me)
             bpy.context.scene.collection.objects.link(ob)
@@ -253,7 +262,7 @@ def main():
 
     atlas = PT.Atlas(2048, 1536)
     aglow = PT.Atlas(512, 256)
-    for k, px in (("card", (96, 136)), ("cardback", (96, 136)), ("cardburn", (96, 136))):
+    for k, px in (("card", (96, 136)), ("cardback", (96, 136)), ("cardburn", (96, 136)), ("flame", (32, 64))):
         aglow.put(k, px)
     avoid = PT.Atlas(256, 128)
     awisp = PT.Atlas(256, 512)
@@ -294,7 +303,7 @@ def main():
         m = ob.modifiers.new("Armature", "ARMATURE")
         m.object = arm
     add_cards(arm, aglow, mats["glow-cards"])
-    tot = sum(sum(len(p.vertices) - 2 for p in ob.data.polygons) for ob in obs) + 8 * 6
+    tot = sum(sum(len(p.vertices) - 2 for p in ob.data.polygons) for ob in obs) + 8 * 6 + 5 * 8
     print("OSTRA tris", tot, {ob.name: sum(len(p.vertices) - 2 for p in ob.data.polygons) for ob in obs})
     def anchor(name, bone, at):
         e = bpy.data.objects.new(name, None)
