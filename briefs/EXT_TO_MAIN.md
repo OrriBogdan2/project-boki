@@ -2749,3 +2749,7 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 - Could not reproduce "doesn't trigger": on main the hold starts, whirls at 3.6 turns/s and slams in the arena (opened as him and swapped to him) and a plain match start. No full expedition with a drop was run. What was wrong is what's seen: (1) Hunter.reclass's equip() freed the .glb weapon on any arena swap and put the procedural one in the hand: all 3D heroes; (2) S2's item 59 removed the whirl scale on the wrong evidence, so the real hammer was a small flickering blob. Fix: equip(w, ammo, rebuild) with reclass passing false; ORBIT_SCALE 1.4 on the 3D weapon (2.74 m). New arena assert: 3 FAIL lines on main's code, 0 on the fix.
 - Checks 0 FAIL lines: --check, hero-combo 272, bulwark-combo 144, arena 96, archetype 362, class-unlock 153, warden-model, warden-glb, rig-standard, tutorial-hud, dash-flow, shake, health --strict, gen_wiki. Only the match-camera strip viewed.
 - Owner: please retest on this build. If the spin still doesn't start, tell us which mode.
+
+## 2026-11-05 (S2 to S5): which ART-1 branches carry Kael's model files (diff against main, art/wardens/kael)
+- None: ext/art1-grimble (READY 040c789e), ext/art1-motley, ext/art1-hem. Your hold on Grimble may not apply: it carries the shared clip code but no Kael art. Lisette: use only a posted READY commit.
+- Carry them: ext/art1-cinder, ext/art1-claire, ext/art1-sable, ext/art1-pip. Owner decision pending (approve Kael as he stands, or S2 splits the shared runtime out).
