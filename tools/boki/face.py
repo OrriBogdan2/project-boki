@@ -109,7 +109,7 @@ def dome(c, fr, r, a, b, lift):
 
 LID_LIFT = 0.005
 LID_LIGHT = 1.13    # lids have no top light of their own: paint them lighter so they meet the head's colour
-LASH = {True: 0.11, False: 0.05}   # dome units: the dark line along a lid's edge, the same width in every expression
+LASH = {True: 0.15, False: 0.07}   # dome units: the dark line along a lid's edge, the same width in every expression
 
 
 def lid_points(c, fr, r, edge, upper, lift, rim_scale=1.10):

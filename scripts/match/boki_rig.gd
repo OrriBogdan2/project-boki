@@ -120,6 +120,10 @@ func _ready() -> void:
 	_copy_coat()
 	set_clip("idle")
 
+## The model's skeleton.
+func skeleton() -> Skeleton3D:
+	return model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+
 ## The expression right now: one of FACES.
 func set_face(which: String) -> void:
 	_face_name = which
@@ -161,6 +165,9 @@ func _keep_flex() -> void:
 	if clip in OWN_BODY:
 		body.rotation = Vector3.ZERO          # home's work poses swing Body: here the clip does the swinging
 	model.position.y = -body.position.y if clip == "hop" else 0.0       # the clip does the hopping, not home
+	var cam := get_viewport().get_camera_3d() as CamRig
+	if cam:
+		model.global_basis = cam.char_lean() * flex.global_basis      # toward the camera, like the Hunters: faces read
 
 func _track_speed(dt: float) -> void:
 	var gp := root.global_position

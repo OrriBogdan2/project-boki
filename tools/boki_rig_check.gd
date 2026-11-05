@@ -100,6 +100,9 @@ func _own_look(main: Node) -> void:
 	rec["dna"] = Unique.roll(12345)
 	rec["dna"]["mark"] = "spots"
 	rec["dna"]["eye"] = "sky"
+	rec["dna"]["ears"] = "tufted"
+	rec["dna"]["tailv"] = "tufted"
+	rec["dna"]["birth"] = ["star", "chest"]
 	var k := Shots.rigged_kin(SPECIES, rec)
 	main.add_child(k)
 	await main.get_tree().process_frame
@@ -107,5 +110,7 @@ func _own_look(main: Node) -> void:
 	var marks := rig._coat.next_pass as ShaderMaterial
 	ok(marks != null and marks.shader.resource_path.ends_with("boki_marks.gdshader"), "its coat marks are on")
 	var iris := rig.eye_mat.get_shader_parameter("iris") as Color
+	for nm in ["Tuft", "TailTuft", "Birthmark"]:
+		ok(k.find_child(nm, true, false) != null, "%s is on the model" % nm)
 	ok(iris.b > iris.g * 0.8, "its own eye colour: %s" % iris.to_html())
 	k.queue_free()

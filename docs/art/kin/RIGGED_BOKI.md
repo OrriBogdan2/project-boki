@@ -16,6 +16,7 @@ a change to a shape, colour or clip is an edit and a rebuild:
 | `tools/boki/vespyx_anim.py` | The skeleton and the clips, as functions of time in the creature's own axes |
 | `tools/boki/boki_rig.py`, `build_boki.py` | Armature, weights from the primitives, sampling, .glb export |
 | `scripts/match/boki_rig.gd` | Loader and driver (`BokiRig`): clip from metas, face on top, marks and colours |
+| `scripts/match/boki_dna.gd` | Inborn proportions, ear and tail shapes, birthmark (`Unique.dress` calls it) |
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |
 
 Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry. Faces (`BokiRig.FACES`): neutral,

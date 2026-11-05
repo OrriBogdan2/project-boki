@@ -7,9 +7,11 @@ extends RefCounted
 const YAWS := 8
 const STRIP := 6
 const FACES := ["neutral", "happy", "sad", "sleepy", "angry", "bliss"]
-const COATS := [{"mark": "spots", "mark_col": "dark", "eye": "sky"},
-	{"mark": "stripes", "mark_col": "light", "eye": "amber"},
-	{"mark": "patches", "mark_col": "glow", "eye": "rose"}, {"mark": "plain", "eye": "classic"}]
+const COATS := [
+	{"mark": "spots", "mark_col": "dark", "eye": "sky", "ears": "tufted", "tailv": "bobbed", "birth": ["star", "chest"]},
+	{"mark": "stripes", "mark_col": "light", "eye": "amber", "ears": "folded", "tailv": "kinked", "limb": 1.09},
+	{"mark": "patches", "mark_col": "glow", "eye": "rose", "ears": "splayed", "tailv": "tufted", "ear": 1.1},
+	{"mark": "plain", "eye": "classic", "ears": "standard", "tailv": "standard"}]
 ## Far shots: [clip, at (s), face], left to right.
 const ACTION := [["idle", 0.5, "neutral"], ["run", 0.1, "cheer"], ["ability", 0.5, "angry"], ["hop", 0.45, "happy"]]
 const EMOTES := [["idle", 0.5, "happy"], ["idle", 0.5, "sad"], ["idle", 0.5, "sleepy"], ["idle", 0.5, "angry"]]
@@ -22,6 +24,7 @@ const FARM_BOKI_SCALE := 1.7        # Home's farm scale
 const FARM_DIST := 33.6             # 23 m x the farm's framing (1.216) x HOME_ZOOM (1.2)
 const FARM_CLOSE_DIST := 22.4       # the wheel all the way in (0.8)
 const ENLARGE := 4
+const LEAN := deg_to_rad(20.0)       # CamRig.char_lean, which BokiRig applies in the game: the top tips away
 
 var main: Node
 var out := ""
@@ -76,6 +79,7 @@ static func rigged_kin(id: String, rec := {}) -> Node3D:
 	var flex := k.get_node("Body/Flex") as Node3D
 	if flex.has_node("BokiRig"):
 		return k
+	var d := Unique.of(rec)
 	for ch in flex.get_children():
 		flex.remove_child(ch)
 		ch.free()
@@ -83,6 +87,8 @@ static func rigged_kin(id: String, rec := {}) -> Node3D:
 	var extra: Array = []
 	var c := {"body": mats[0], "belly": mats[1], "dark": mats[2], "glow": mats[3], "eye": mats[4]}
 	BokiRig.build(id, flex, c, extra)
+	if not d.is_empty():
+		BokiDna.wear(flex.get_node("BokiRig").skeleton(), flex, d, k.get_meta("mats"))
 	return k
 
 func _kin(vp: SubViewport) -> Array:
@@ -233,7 +239,7 @@ func _far(file: String, dist: float, boki_scale: float, picks: Array, yaw: float
 		var k := kr[0] as Node3D
 		k.scale = Vector3.ONE * boki_scale
 		k.position = Vector3((i - 1.5) * 1.5 * boki_scale, 0, 0)
-		k.rotation.y = yaw
+		k.basis = Basis(Vector3.RIGHT, -LEAN) * Basis(Vector3.UP, yaw) * Basis.from_scale(k.scale)
 		var rig := kr[1] as BokiRig
 		await RenderingServer.frame_post_draw
 		rig.set_clip(String(picks[i][0]), 0.0)
