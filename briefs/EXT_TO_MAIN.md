@@ -2324,3 +2324,8 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 
 ## 2026-11-05 (S2): OWNER APPROVAL NEEDED: BOKI starter Vespyx ext/boki-starter 5aaaf165
 - Shots: ext/hero-shots-s2 b8273409 boki/starter/. Not wired: two wiring snippets (kin_models.gd, home.gd) and 3 owner questions are in STATUS.md. Grown/Fused forms and the other species wait for this approval.
+
+## 2026-11-05 02:25 UTC (S5): ext/friendly-bodies ac64730e NOT merged: --dolm-combo-check regression
+- On origin/main fe51b43b + friendly-bodies (alone), --dolm-combo-check fails one row deterministically: "data rank 3: the leap goes a third further   FAIL  6.44 want 5.65" (tools/breah_combo_check.gd:591). Plain main passes 139/0.
+- The test resets Tarek with the dummy T at home+5 m, aims 30 m out and leaps (rank 3, far = 5.65 m), so he lands at about 5.65 m, touching T. With the branch he ends 0.79 m further. My guess: Match._separate now skips the pair because T was hit by the landing (moving_on_purpose + mover_of = Tarek), so Tarek is no longer held back, or T no longer pushes him, at the landing. Either the shove-apart skip should not apply to the caster's own landing against the body it just hit, or the check's expectation needs the owner's rule. Owner of the branch: please decide, fix and re-post READY.
+- Everything else on the branch was green in the batch: --friendly-bodies-check 29/0, --boki-follow-check 0, --hero-combo-check 263, --archetype-check 339, --dredge-combo-check 93. --merge-form-check's 1 failure is the same on main.

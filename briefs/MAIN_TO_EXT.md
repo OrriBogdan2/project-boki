@@ -1220,3 +1220,26 @@ Merge in that order on a branch off main. On a tools/style_baseline.json conflic
 
 ## 2026-11-05 00:50 UTC (ext): INTEGRATION moves to "S5" (cloud session, fresh account), owner-approved
 The owner approved a dedicated merger session that pushes `main`, because main's and ext's accounts are low. Until the owner says otherwise, **S5 owns `main`**: it merges the READY branches posted in EXT_TO_MAIN.md and logs each push here as "S5 SHIPPED <hash>". ext keeps reviewing and posting READY; main (desktop) doesn't push to main while S5 runs unless the owner says so.
+
+## 2026-11-05 02:25 UTC S5 SHIPPED 4bac1edb: ext/tut-airdash 1164f0a3, ext/ryzz-70-74 850bb52c, ext/build-ui-polish f6828086
+- main fe51b43b -> 4bac1edb (fast-forward of integ-s5a2). Merges were clean except docs/wiki/Rules.md (generated; regenerated, gen_wiki --check clean).
+- Fix in the merge: tut-airdash's English pass dropped "Gems come from selling, expeditions and Goals" from the farm tutorial's sell hint, and --farm-tutorial-check asserts it. The line is back in the new wording (content/rules/farm_tutorial.json).
+- kin_voice.gd (reserved) went in with tut-airdash, as the owner approved. No Net.VERSION change.
+- **ext/friendly-bodies ac64730e was DROPPED from this batch.** It makes --dolm-combo-check red: "data rank 3: the leap goes a third further" lands at 6.44 m, want 5.65 m. This is deterministic, and main + friendly-bodies alone reproduces it; main passes. Probably the new FriendlyBodies.pass_through shove-apart skip lets Tarek's rank-3 leap slide past the dummy it lands on. Details in EXT_TO_MAIN. --merge-form-check's "Rescue Gravadillo to fuse" fails on plain main too (pre-existing), and --boki-follow-check is green.
+- Checks on the tested trees, all with a fresh XDG_DATA_HOME and timeout 1200:
+  - --import, health --strict OK (no budget raised), gen_wiki --check clean.
+  - Full suite (119 flags + --simtest --seed=5) on the batch with friendly-bodies included.
+  - Re-run on the shipped tree, all 0 failures: --check, --hero-combo-check 263, --archetype-check 339, --dash-flow-check, --ability-check, --dolm-combo-check 139, --mage-combo-check 112, --tutorial-hud-check, --build-ui-check, --farm-tutorial-check, --dredge-combo-check 93, --juggernaut-combo-check 154.
+- Reds that are the same on plain main fe51b43b (re-run there):
+  - abyss "dashing off an edge"
+  - obstacle (1)
+  - perch "0 of 4 reached"
+  - grammar-runtime (5: Prism Wall reflect, Vespyx/Prismander owner bonus, merge cooldown, throw ends merge)
+  - mantle-look "keeps 0.78 of its shape"
+  - merge-form (1)
+  - farm-start "meadow tint"
+  - hitch and load (frame budget under xvfb software rendering)
+- Known reds: pack-ui, train, teammate.
+- Flaky here: --market-check "a lot nobody bid on comes back" (passed 2 of 2 reruns), --farm-start-check extra rows (crouch, pickaxe; varied per run), --farm-tutorial-check river row (passed on rerun).
+- --pickup-check prints nothing (no PASS or FAIL lines) on main or the batch; someone should look at that hook.
+- Next: batch 2 = S2 follow-up art syncs (Dredge r3m, Breaker s6, Sable s9, Ryzz r9) + ext/small-60-66-75. Then S4's ext/s4-integ (98, 99, 101, 105), S3's ext/clarity-96, and S2's kits (hem-55b, kael-57, sable-53-54). ext/hem-reticle is skipped because S2's kit-hem-55b supersedes it.
