@@ -264,6 +264,7 @@ def assemble(objs, img, emit):
     bpy.context.view_layer.objects.active = main_ob
     bpy.ops.object.join()
     main_ob.name = "tarek_body"
+    log("mesh fixed:", main_ob.data.validate(verbose=False))
     main_ob.data.name = "tarek_body"
     mod = main_ob.modifiers.new("Armature", "ARMATURE")
     mod.object = arm

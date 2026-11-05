@@ -93,8 +93,9 @@ class Rig:
             ax = Vector((0, 1, 0))
             G["fingers." + s] = G["hand." + s] @ Quaternion(ax, -sg * math.radians(78) * cu)
             G["fingers2." + s] = G["fingers." + s] @ Quaternion(ax, -sg * math.radians(84) * cu)
-            G["thumb." + s] = G["hand." + s] @ Quaternion(Vector((0, 0, 1)), sg * math.radians(34) * th)
-            G["thumb2." + s] = G["thumb." + s] @ Quaternion(ax, -sg * math.radians(36) * th)
+            # (the thumb folds across the curled fingers)
+            G["thumb." + s] = G["hand." + s] @ Quaternion(Vector((0, 0, 1)), sg * math.radians(66) * th)
+            G["thumb2." + s] = G["thumb." + s] @ Quaternion(Vector((0, 0, 1)), sg * math.radians(44) * th)
             hip = rootp + Gr @ self.P["thigh." + s]
             ank = Vector(k.get("f" + lo, tuple(self.P["foot." + s])))
             kp = Vector(k.get("k" + lo, (0.1 * sg, 1.0, 0.0)))

@@ -503,9 +503,9 @@ def geode(P, r=1.0, seed=3):
     of crystals, the eye domed in the pit."""
     Pn = P / r
     rock = ellipsoid(Pn, (0, -0.06, 0), (0.97, 0.78, 1.04))
-    rock = rock + 0.09 * fbm(Pn, 2.6, seed, 2) + 0.022 * fbm(Pn, 9.0, seed + 5, 2)
-    cut = Pn[..., 1] - 0.34 - 0.03 * noise(Pn, 8.0, seed + 2)
-    d = smax(rock, cut, 0.05)
+    rock = rock + 0.07 * fbm(Pn, 2.2, seed, 2) + 0.018 * fbm(Pn, 8.0, seed + 5, 2)
+    cut = Pn[..., 1] - 0.36 - 0.03 * noise(Pn, 8.0, seed + 2)
+    d = smax(rock, cut, 0.16)
     rad = np.sqrt(Pn[..., 0] ** 2 + Pn[..., 2] ** 2)
     az = np.arctan2(Pn[..., 2], Pn[..., 0])
     jag = 0.075 * np.abs(np.sin(az * 6.5 + 0.7)) + 0.03 * noise(Pn, 7.0, seed + 3)

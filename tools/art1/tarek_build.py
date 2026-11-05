@@ -79,7 +79,7 @@ PARTS = {
     "vest": dict(f=lambda P: T.vest(P, R), lo=S.vec(-0.3, -0.2, R.waist[2] + 0.08), hi=S.vec(0.3, 0.2, R.neck[2] + 0.04), h=0.0045, tris=900, col="5e6470"),
     "wrap": dict(f=lambda P: T.wrap_band(P, R), lo=S.vec(-0.22, -0.17, R.waist[2] + 0.04), hi=S.vec(0.22, 0.17, R.waist[2] + 0.2), h=0.006, tris=150, col="d8cfba"),
     "sash": dict(f=lambda P: T.sash(P, R), lo=S.vec(-0.25, -0.17, R.waist[2] - 0.06), hi=S.vec(0.25, 0.22, R.waist[2] + 0.16), h=0.0045, tris=550, col="b04a26"),
-    "trousers": dict(f=lambda P: T.trousers(P, R), lo=S.vec(-0.31, -0.18, 0.35), hi=S.vec(0.31, 0.18, R.hip[2] + 0.12), h=0.006, tris=1600, col="a88850"),
+    "trousers": dict(f=lambda P: T.trousers(P, R), lo=S.vec(-0.31, -0.18, 0.35), hi=S.vec(0.31, 0.18, R.hip[2] + 0.12), h=0.006, tris=1480, col="a88850"),
     "legs": dict(f=lambda P: T.shin_foot(P, R), lo=S.vec(-0.26, -0.14, -0.01), hi=S.vec(0.26, 0.26, 0.5), h=0.0045, tris=1000, col="8a5a3c"),
     "wraps": dict(f=lambda P: T.foot_wraps(P, R), lo=S.vec(-0.26, -0.14, -0.01), hi=S.vec(0.26, 0.26, 0.32), h=0.004, tris=400, col="c9b89a"),
     "harness": dict(f=lambda P: T.harness(P, R), lo=S.vec(-0.3, -0.2, R.hip[2] - 0.32), hi=S.vec(0.3, 0.2, R.hip[2] - 0.02), h=0.004, tris=450, col="33292a"),
@@ -396,7 +396,7 @@ def sharp_edges(ob, deg=38):
 
 def geode_parts():
     """The seeing-stone's rock and its iris, one mesh shared by the three stones (in its own space, the face to +Y)."""
-    rk = dict(f=lambda P: T.geode(P, GEO_R), lo=S.vec(-0.12, -0.11, -0.13), hi=S.vec(0.12, 0.09, 0.13), h=0.0035, tris=340)
+    rk = dict(f=lambda P: T.geode(P, GEO_R), lo=S.vec(-0.12, -0.11, -0.13), hi=S.vec(0.12, 0.09, 0.13), h=0.0035, tris=400)
     ir = dict(f=lambda P: T.geode_iris(P, GEO_R), lo=S.vec(-0.06, -0.01, -0.06), hi=S.vec(0.06, 0.05, 0.06), h=0.003, tris=80)
     shard = dict(f=lambda P: S.ellipsoid(P, (0, 0, 0), (0.03, 0.022, 0.04)) + 0.008 * S.fbm(P, 50.0, 4, 2), lo=S.vec(-0.05, -0.04, -0.06), hi=S.vec(0.05, 0.04, 0.06), h=0.004, tris=24)
     PARTS["geode"] = rk
@@ -406,8 +406,6 @@ def geode_parts():
     for nm in ("geode", "iris", "shard"):
         ob = part_mesh(nm, PARTS[nm])
         decimate(ob, PARTS[nm]["tris"])
-        if nm != "iris":
-            sharp_edges(ob, 62)
         out.append(ob)
     return out
 
