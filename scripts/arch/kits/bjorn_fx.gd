@@ -42,6 +42,9 @@ const WAKE_EVERY := 0.06
 const BASH_HALF := 0.6
 ## the whirled hammer: how far above the hand the circle runs (m), its tilt (rad, the head a little up) and the
 ## s it eases out of the hand into the circle
+const CHAIN_LINKS := 18
+const CHAIN_SAG := 0.5        # m at its deepest, once the hammer is far out
+const WRIST := "Rig/Torso/ArmRPivot/Elbow/Hand"
 const ORBIT_RISE := 0.45
 const WHIRL_HEAD_R := 0.89     # the skinned hammer's head from his axis in the hold clip (m, neutral; 1.78 in game)
 const ORBIT_TILT := 0.12
@@ -111,6 +114,7 @@ var glint_k := -1.0            # the glint's size 0..1 while it shows (-1: not y
 var fx_clock := 0.0            # the match time effects last advanced to
 
 var own_piece: Node3D         # the model's own hammer, when it has a skinned one (WardenGlb.thrown_piece)
+var chain: Array = []         # the links to the thrown hammer (_build_chain)
 
 func _init(hunter: Hunter) -> void:
 	h = hunter
@@ -127,6 +131,7 @@ func _ready() -> void:
 	if own_piece:
 		hammer.add_child(own_piece)
 		own_piece.scale = Vector3.ONE * h.model.scale.x
+		_build_chain()
 	else:
 		PinBjornWeapons.hammer(hammer, 1.25)
 	hammer_glow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", Color(GOLD, 0.9), true))
@@ -162,6 +167,43 @@ func _ready() -> void:
 	column.material_override.set_shader_parameter("speed", -1.2)
 	disc = KitMeshes.inst(self, KitMeshes.band(0.2, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GREEN))
 	disc.material_override.set_shader_parameter("color2", Color("e8fff0"))
+
+## The chain from his wrist to the thrown hammer: pooled iron links, shown only while it is out of the hand.
+func _build_chain() -> void:
+	var torus := TorusMesh.new()
+	torus.inner_radius = 0.09
+	torus.outer_radius = 0.17
+	torus.rings = 8
+	torus.ring_segments = 4
+	var iron := Models.toon(Color("4a4038"))
+	for i in CHAIN_LINKS:
+		var mi := MeshInstance3D.new()
+		mi.mesh = torus
+		mi.material_override = iron
+		mi.top_level = true
+		mi.visible = false
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)
+		chain.append(mi)
+
+func _tick_chain() -> void:
+	var wrist := h.model.get_node_or_null(WRIST) as Node3D if h.model else null
+	var on := hammer.visible and wrist != null and wrist.is_inside_tree()
+	for i in chain.size():
+		var mi: MeshInstance3D = chain[i]
+		mi.visible = on
+		if not on:
+			continue
+		var a := wrist.global_position
+		var b := hammer.global_position
+		var u := (i + 0.5) / chain.size()
+		var sag := Vector3.DOWN * CHAIN_SAG * minf(a.distance_to(b) * 0.1, 1.0) * sin(u * PI)
+		var at := a.lerp(b, u) + sag
+		var along := (b - a).normalized()
+		var up := Vector3.UP if absf(along.y) < 0.95 else Vector3.RIGHT
+		var fix := Basis.looking_at(along, up)
+		mi.global_transform = Transform3D(fix.rotated(along, PI * 0.5 * (i % 2)) * Basis(Vector3.RIGHT, PI * 0.5), at)
+		mi.scale = Vector3(1.0, 1.0, 1.0) * clampf(a.distance_to(b) / chain.size() * 2.2, 0.5, 1.6)
 
 ## The wall of forged plates, built once: two rows of riveted plates along the arc, ribs between them, a
 ## rim along the top and a round boss with the hammer's cross in the middle. Local space: the curve's
@@ -486,6 +528,8 @@ func _process(_delta: float) -> void:
 	var delta := clampf(float(h.m.time) - fx_clock, 0.0, 1.0 / 30.0)
 	fx_clock = float(h.m.time)
 	_tick_hold(delta)
+	if not chain.is_empty():
+		_tick_chain()
 	_tick_flare(delta)
 	_tick_slam(delta)
 	if aegis_hit > 0.0:
