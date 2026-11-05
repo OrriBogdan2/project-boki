@@ -190,32 +190,70 @@ const MOVES := {
 		[0.38, {"p": 0.06, "sq": 0.04, "lw": 0.5, "legs": [0.7, -0.95, -0.55, -0.7], "lift": -0.05}],
 		[0.55, {}]]},
 	# Vault, the ground Cartwheel (sheet: body 0176-0178, 0134-0137), inside the 0.48s dash: a 0.05s crouch with
-	# the arms swung up and the body leaning into the side, a push-off into a star (legs split, arms wide), one
-	# full turn over the top in the plane of travel, a low two-beat landing crouch at 0.36, upright by 0.48
-	# (a bolt thrown mid-flip whips both blades out in a V, swing step 2: footage 0193, the Cartwheel and the
-	# empowered shot on one frame with a blade flash at her hands)
+	# the arms swung up and the body leaning into the side, a push-off with the crossbows tucked to her chest and
+	# the wings flaring, one full aerial turn in the plane of travel, a low two-beat landing crouch at 0.36, upright
+	# by 0.48 (a bolt thrown mid-flip whips both blades out in a V, swing step 2: footage 0193, the Cartwheel and
+	# the empowered shot on one frame with a blade flash at her hands)
 	"thf_vault_r": {"swing": 2, "keys": [
 		[0.0, {}],
 		[0.05, {"sq": 0.24, "lift": -0.08, "p": 0.12, "r": 0.32, "lw": 1.0, "legs": [0.8, -1.3, 0.6, -1.1],
-				"fl": Vector3(-0.25, 0.6, 0.05), "hw": 1.0, "fr": Vector3(0.25, 0.6, 0.05), "rw": 1.0}],
-		[0.08, {"sq": -0.18, "lift": 0.16, "r": 0.2, "lw": 1.0, "legs": [1.2, -0.05, -1.2, -0.05],
-				"fl": Vector3(-0.55, 0.4, 0.0), "hw": 1.0, "fr": Vector3(0.55, 0.4, 0.0), "rw": 1.0}],
-		[0.3, {"fz": -6.283, "sq": -0.12, "lift": 0.2, "lw": 1.0, "legs": [1.2, -0.05, -1.2, -0.05],
-				"fl": Vector3(-0.55, 0.4, 0.0), "hw": 1.0, "fr": Vector3(0.55, 0.4, 0.0), "rw": 1.0}],
+				"fl": Vector3(-0.25, 0.6, 0.05), "hw": 1.0, "fr": Vector3(0.25, 0.6, 0.05), "rw": 1.0, "wg": 0.5}],
+		[0.1, {"fz": -0.6, "sq": -0.18, "lift": 0.34, "r": 0.2, "lw": 1.0, "legs": [1.2, -0.05, -1.2, -0.05],
+				"fl": Vector3(-0.16, 0.0, -0.2), "hw": 1.0, "fr": Vector3(0.16, 0.0, -0.2), "rw": 1.0, "wg": 1.0}],
+		[0.3, {"fz": -6.283, "sq": -0.12, "lift": 0.42, "lw": 1.0, "legs": [1.2, -0.05, -1.2, -0.05],
+				"fl": Vector3(-0.16, 0.0, -0.2), "hw": 1.0, "fr": Vector3(0.16, 0.0, -0.2), "rw": 1.0, "wg": 1.0}],
 		[0.36, {"fz": -6.283, "sq": 0.3, "lift": -0.1, "p": 0.18, "lw": 1.0, "legs": [0.9, -1.4, 0.5, -1.2],
-				"fl": Vector3(-0.5, 0.0, 0.15), "hw": 1.0, "fr": Vector3(0.5, 0.0, 0.15), "rw": 1.0}],
+				"fl": Vector3(-0.5, 0.0, 0.15), "hw": 1.0, "fr": Vector3(0.5, 0.0, 0.15), "rw": 1.0, "wg": 0.6}],
 		[0.48, {"fz": -6.283}]]},
 	"thf_vault_l": {"swing": 2, "keys": [
 		[0.0, {}],
 		[0.05, {"sq": 0.24, "lift": -0.08, "p": 0.12, "r": -0.32, "lw": 1.0, "legs": [0.8, -1.3, 0.6, -1.1],
-				"fl": Vector3(-0.25, 0.6, 0.05), "hw": 1.0, "fr": Vector3(0.25, 0.6, 0.05), "rw": 1.0}],
-		[0.08, {"sq": -0.18, "lift": 0.16, "r": -0.2, "lw": 1.0, "legs": [1.2, -0.05, -1.2, -0.05],
-				"fl": Vector3(-0.55, 0.4, 0.0), "hw": 1.0, "fr": Vector3(0.55, 0.4, 0.0), "rw": 1.0}],
-		[0.3, {"fz": 6.283, "sq": -0.12, "lift": 0.2, "lw": 1.0, "legs": [1.2, -0.05, -1.2, -0.05],
-				"fl": Vector3(-0.55, 0.4, 0.0), "hw": 1.0, "fr": Vector3(0.55, 0.4, 0.0), "rw": 1.0}],
+				"fl": Vector3(-0.25, 0.6, 0.05), "hw": 1.0, "fr": Vector3(0.25, 0.6, 0.05), "rw": 1.0, "wg": 0.5}],
+		[0.1, {"fz": 0.6, "sq": -0.18, "lift": 0.34, "r": -0.2, "lw": 1.0, "legs": [1.2, -0.05, -1.2, -0.05],
+				"fl": Vector3(-0.16, 0.0, -0.2), "hw": 1.0, "fr": Vector3(0.16, 0.0, -0.2), "rw": 1.0, "wg": 1.0}],
+		[0.3, {"fz": 6.283, "sq": -0.12, "lift": 0.42, "lw": 1.0, "legs": [1.2, -0.05, -1.2, -0.05],
+				"fl": Vector3(-0.16, 0.0, -0.2), "hw": 1.0, "fr": Vector3(0.16, 0.0, -0.2), "rw": 1.0, "wg": 1.0}],
 		[0.36, {"fz": 6.283, "sq": 0.3, "lift": -0.1, "p": 0.18, "lw": 1.0, "legs": [0.9, -1.4, 0.5, -1.2],
-				"fl": Vector3(-0.5, 0.0, 0.15), "hw": 1.0, "fr": Vector3(0.5, 0.0, 0.15), "rw": 1.0}],
+				"fl": Vector3(-0.5, 0.0, 0.15), "hw": 1.0, "fr": Vector3(0.5, 0.0, 0.15), "rw": 1.0, "wg": 0.6}],
 		[0.48, {"fz": 6.283}]]},
+	# ... the routine's second flip (ThiefChain): a tucked somersault the way she goes, knees to her chest, the same
+	# beats as the cartwheel so a chain keeps its rhythm
+	"thf_vault_f": {"swing": 2, "keys": [
+		[0.0, {}],
+		[0.05, {"sq": 0.28, "lift": -0.1, "p": -0.3, "lw": 1.0, "legs": [1.0, -1.5, 0.8, -1.3],
+				"fl": Vector3(-0.3, -0.1, 0.25), "hw": 1.0, "fr": Vector3(0.3, -0.1, 0.25), "rw": 1.0, "wg": 0.5}],
+		[0.1, {"fx": -0.7, "sq": -0.1, "lift": 0.4, "lw": 1.0, "legs": [1.35, -2.0, 1.25, -1.9],
+				"fl": Vector3(-0.16, -0.05, -0.2), "hw": 1.0, "fr": Vector3(0.16, -0.05, -0.2), "rw": 1.0, "wg": 1.0}],
+		[0.3, {"fx": -6.283, "sq": 0.1, "lift": 0.45, "lw": 1.0, "legs": [1.35, -2.0, 1.25, -1.9],
+				"fl": Vector3(-0.16, -0.05, -0.2), "hw": 1.0, "fr": Vector3(0.16, -0.05, -0.2), "rw": 1.0, "wg": 1.0}],
+		[0.36, {"fx": -6.283, "sq": 0.3, "lift": -0.1, "p": 0.18, "lw": 1.0, "legs": [0.9, -1.4, 0.5, -1.2],
+				"fl": Vector3(-0.5, 0.0, 0.15), "hw": 1.0, "fr": Vector3(0.5, 0.0, 0.15), "rw": 1.0, "wg": 0.6}],
+		[0.48, {"fx": -6.283}]]},
+	"thf_vault_b": {"swing": 2, "keys": [
+		[0.0, {}],
+		[0.05, {"sq": 0.28, "lift": -0.1, "p": 0.25, "lw": 1.0, "legs": [1.0, -1.5, 0.8, -1.3],
+				"fl": Vector3(-0.3, 0.5, 0.1), "hw": 1.0, "fr": Vector3(0.3, 0.5, 0.1), "rw": 1.0, "wg": 0.5}],
+		[0.1, {"fx": 0.7, "sq": -0.1, "lift": 0.4, "lw": 1.0, "legs": [1.35, -2.0, 1.25, -1.9],
+				"fl": Vector3(-0.16, -0.05, -0.2), "hw": 1.0, "fr": Vector3(0.16, -0.05, -0.2), "rw": 1.0, "wg": 1.0}],
+		[0.3, {"fx": 6.283, "sq": 0.1, "lift": 0.45, "lw": 1.0, "legs": [1.35, -2.0, 1.25, -1.9],
+				"fl": Vector3(-0.16, -0.05, -0.2), "hw": 1.0, "fr": Vector3(0.16, -0.05, -0.2), "rw": 1.0, "wg": 1.0}],
+		[0.36, {"fx": 6.283, "sq": 0.3, "lift": -0.1, "p": 0.18, "lw": 1.0, "legs": [0.9, -1.4, 0.5, -1.2],
+				"fl": Vector3(-0.5, 0.0, 0.15), "hw": 1.0, "fr": Vector3(0.5, 0.0, 0.15), "rw": 1.0, "wg": 0.6}],
+		[0.48, {"fx": 6.283}]]},
+	# ... and its third: a stretched corkscrew, the cartwheel's turn with a full spin wrapped round it, legs together
+	# and the crossbows drawn in tight
+	"thf_vault_twist": {"swing": 2, "keys": [
+		[0.0, {}],
+		[0.05, {"sq": 0.24, "lift": -0.08, "p": 0.1, "lw": 1.0, "legs": [0.8, -1.3, 0.6, -1.1],
+				"fl": Vector3(-0.25, 0.6, 0.05), "hw": 1.0, "fr": Vector3(0.25, 0.6, 0.05), "rw": 1.0, "wg": 0.5}],
+		[0.1, {"fz": -0.6, "fy": 0.6, "sq": -0.25, "lift": 0.34, "lw": 1.0, "legs": [0.15, -0.1, -0.15, -0.1],
+				"fl": Vector3(-0.14, 0.05, -0.16), "hw": 1.0, "fr": Vector3(0.14, 0.05, -0.16), "rw": 1.0, "wg": 1.0}],
+		[0.3, {"fz": -6.283, "fy": 6.283, "sq": -0.25, "lift": 0.45, "lw": 1.0, "legs": [0.15, -0.1, -0.15, -0.1],
+				"fl": Vector3(-0.14, 0.05, -0.16), "hw": 1.0, "fr": Vector3(0.14, 0.05, -0.16), "rw": 1.0, "wg": 1.0}],
+		[0.36, {"fz": -6.283, "fy": 6.283, "sq": 0.3, "lift": -0.1, "p": 0.18, "lw": 1.0,
+				"legs": [0.9, -1.4, 0.5, -1.2], "fl": Vector3(-0.5, 0.0, 0.15), "hw": 1.0,
+				"fr": Vector3(0.5, 0.0, 0.15), "rw": 1.0, "wg": 0.6}],
+		[0.48, {"fz": -6.283, "fy": 6.283}]]},
 	# the Bola (0100-0102): the right hand raised over the head and circled (three points every 0.13s)
 	# through the 0.4s lane, the weights whirling round it (DJFx), then slung with a long forward lunge; the
 	# legs are a stance, so walking through the wind-up she keeps walking
@@ -264,7 +302,7 @@ const MOVES := {
 		[0.3, {"lift": -0.1, "p": -0.35, "sq": 0.2, "lw": 1.0, "legs": [1.15, -1.8, -0.15, -1.4]}],
 		[0.6, {}]]},
 	# Encore (ult f27-f35): both blades raised as the ring grows (anticipation, a little squash), then a
-	# whole-body spin as it opens, done by 0.4s when the first volley's throw takes over (no leg keys: she walks)
+	# whole-body spin as it opens, done by 0.4s when the dance takes over (no leg keys: she walks)
 	"thf_encore": {"keys": [
 		[0.0, {}],
 		[0.08, {"fl": Vector3(-0.3, 0.55, 0.1), "hw": 1.0, "fr": Vector3(0.3, 0.55, 0.1), "rw": 1.0, "p": 0.18,
@@ -274,20 +312,44 @@ const MOVES := {
 		[0.38, {"fl": Vector3(-0.55, 0.35, 0.0), "hw": 1.0, "fr": Vector3(0.55, 0.35, 0.0), "rw": 1.0, "p": -0.1,
 				"sq": -0.2, "fy": 6.283}],
 		[0.55, {}]]},
-	# ... each volley (f33-f35): the torso snaps round as one arm flings a blade straight out to its side,
-	# the other trailing; the volleys alternate, so the arms snap out left, right, left
-	"thf_encore_throw_r": {"keys": [
-		[0.0, {"y": -0.40, "fr": Vector3(0.20, 0.35, 0.2), "rw": 1.0, "sq": 0.1}],
-		[0.06, {"y": 0.65, "fr": Vector3(0.62, 0.12, -0.2), "rw": 1.0, "fl": Vector3(-0.30, 0.2, 0.25),
-				"hw": 0.7, "sq": -0.12}],
-		[0.16, {"y": 0.50, "fr": Vector3(0.58, 0.1, -0.1), "rw": 1.0}],
-		[0.3, {}]]},
-	"thf_encore_throw_l": {"keys": [
-		[0.0, {"y": 0.40, "fl": Vector3(-0.20, 0.35, 0.2), "hw": 1.0, "sq": 0.1}],
-		[0.06, {"y": -0.65, "fl": Vector3(-0.62, 0.12, -0.2), "hw": 1.0, "fr": Vector3(0.30, 0.2, 0.25),
-				"rw": 0.7, "sq": -0.12}],
-		[0.16, {"y": -0.50, "fl": Vector3(-0.58, 0.1, -0.1), "hw": 1.0}],
-		[0.3, {}]]},
+	# ... the dance (our own choreography, on Encore's 0.2s beats; f33-f35 is the source's arm snap): eight beats
+	# that loop, one fling per beat, right on the even ones, left on the odd, so the blade leaves the hand that is
+	# out at that moment (ThiefUlt._volley). Two side flings, a pirouette with the arms wide and the wings open, two
+	# low sweeps, then the crossbows crossed overhead and a twirl back. Upper body and hips only: walking, the legs
+	# keep walking (the leg keys are a stance)
+	"thf_encore_dance": {"hold": true, "loop": 0.0, "stance": true, "keys": [
+		[0.0, {"y": 0.65, "fr": Vector3(0.62, 0.12, -0.2), "rw": 1.0, "fl": Vector3(-0.3, 0.2, 0.25), "hw": 0.7,
+				"sq": -0.12, "wg": 0.7, "lw": 0.7, "legs": [0.6, -0.9, -0.5, -0.6]}],
+		[0.12, {"y": 0.3, "fl": Vector3(-0.2, 0.35, 0.2), "hw": 1.0, "fr": Vector3(0.45, 0.2, 0.1), "rw": 0.8,
+				"sq": 0.1, "wg": 0.3, "lw": 0.6, "legs": [0.4, -1.0, -0.2, -0.8]}],
+		[0.2, {"y": -0.65, "fl": Vector3(-0.62, 0.12, -0.2), "hw": 1.0, "fr": Vector3(0.3, 0.2, 0.25), "rw": 0.7,
+				"sq": -0.12, "wg": 0.7, "lw": 0.7, "legs": [-0.5, -0.6, 0.6, -0.9]}],
+		[0.32, {"y": -0.2, "fl": Vector3(-0.5, 0.25, 0.05), "hw": 0.8, "fr": Vector3(0.45, 0.3, 0.1), "rw": 1.0,
+				"sq": 0.14, "lift": -0.05, "wg": 0.4, "lw": 0.6, "legs": [0.5, -1.1, 0.3, -1.0]}],
+		[0.4, {"fr": Vector3(0.64, 0.25, -0.05), "rw": 1.0, "fl": Vector3(-0.64, 0.25, -0.05), "hw": 1.0, "sq": -0.15,
+				"lift": 0.06, "wg": 1.0, "lw": 0.5, "legs": [0.2, -0.3, -0.2, -0.3]}],
+		[0.6, {"fy": 3.1416, "fr": Vector3(0.66, 0.3, 0.0), "rw": 1.0, "fl": Vector3(-0.66, 0.3, 0.0), "hw": 1.0,
+				"sq": -0.2, "lift": 0.1, "wg": 1.0, "lw": 0.5, "legs": [0.15, -0.2, -0.15, -0.2]}],
+		[0.8, {"fy": 6.283, "fr": Vector3(0.6, -0.12, -0.3), "rw": 1.0, "fl": Vector3(-0.3, 0.1, 0.25), "hw": 0.8,
+				"y": 0.5, "p": -0.3, "sq": 0.25, "lift": -0.1, "wg": 0.7, "lw": 0.8,
+				"legs": [0.95, -1.4, 0.3, -1.0]}],
+		[0.92, {"fy": 6.283, "y": 0.1, "p": -0.15, "sq": 0.15, "lift": -0.08,
+				"fl": Vector3(-0.3, 0.1, 0.2), "hw": 1.0, "fr": Vector3(0.4, 0.1, 0.1), "rw": 0.8, "wg": 0.3,
+				"lw": 0.8, "legs": [0.8, -1.4, 0.5, -1.2]}],
+		[1.0, {"fy": 6.283, "y": -0.5, "p": -0.25, "fl": Vector3(-0.6, -0.1, -0.3), "hw": 1.0, "sq": 0.18,
+				"lift": -0.06, "fr": Vector3(0.3, 0.1, 0.25), "rw": 0.8, "wg": 0.7, "lw": 0.8,
+				"legs": [0.3, -1.0, 0.95, -1.4]}],
+		[1.12, {"fy": 6.283, "y": -0.1, "fl": Vector3(-0.3, 0.5, 0.05), "hw": 1.0, "fr": Vector3(0.3, 0.5, 0.05),
+				"rw": 1.0, "sq": -0.05, "wg": 0.4, "lw": 0.5, "legs": [0.4, -0.7, 0.2, -0.6]}],
+		[1.2, {"fy": 6.283, "fr": Vector3(-0.12, 0.72, 0.0), "rw": 1.0, "fl": Vector3(0.12, 0.72, 0.0), "hw": 1.0,
+				"p": 0.15, "sq": -0.25, "lift": 0.08, "wg": 1.0, "lw": 0.4, "legs": [0.15, -0.2, -0.15, -0.2]}],
+		[1.4, {"fy": 3.1416, "fl": Vector3(-0.45, 0.6, 0.0), "hw": 1.0, "fr": Vector3(0.45, 0.6, 0.0), "rw": 1.0,
+				"p": 0.1, "sq": -0.18, "lift": 0.06, "wg": 1.0, "lw": 0.4,
+				"legs": [0.15, -0.2, -0.15, -0.2]}],
+		[1.52, {"fy": 1.0, "y": 0.3, "fr": Vector3(0.3, 0.3, 0.2), "rw": 1.0, "fl": Vector3(-0.45, 0.25, 0.1),
+				"hw": 0.8, "sq": 0.1, "wg": 0.4, "lw": 0.6, "legs": [-0.2, -0.8, 0.4, -1.0]}],
+		[1.6, {"y": 0.65, "fr": Vector3(0.62, 0.12, -0.2), "rw": 1.0, "fl": Vector3(-0.3, 0.2, 0.25), "hw": 0.7,
+				"sq": -0.12, "wg": 0.7, "lw": 0.7, "legs": [0.6, -0.9, -0.5, -0.6]}]]},
 	# ---------------------------------------------------------------- per-hero base dash (the long air dash)
 	# the air Cartwheel (sheet: 0129-0134, 303.8-304.5s): a tucked flick, the star turned over sideways (0.08 to
 	# 0.34), then carried flat and stretched on its speed, legs split and arms swept back, held until she lands

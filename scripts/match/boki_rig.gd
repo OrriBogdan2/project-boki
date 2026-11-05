@@ -8,6 +8,8 @@ extends Node
 
 const PATH := "res://art/kin/%s/%s.glb"
 ## Where the eyes and the top of the head sit (m), per species: what KinModels.build returns for the accessories.
+## "hip" is the height its legs hold it at, which the limb roll stretches: 0 for a Boki without legs. One that "hover"s
+## gets a soft shadow on the ground under it.
 const FRAME := {
 	"cindle": {"head": Vector3(0, 0.45, -0.34), "top": 0.72, "carry": Vector3(0, 0.3, -0.34),
 		"ear_tip": Vector3(0.218, 0.838, -0.081), "tail_tip": Vector3(0, 0.77, 0.10), "tip_bone": "tail7", "hip": 0.22,
@@ -35,6 +37,11 @@ const COAT_LOOK := {"far_lift": 0.12, "fres": 0.55, "top_light": 0.45, "rim_amou
 const EYE_VALUE := 0.86       # iris brightness: the eye is the first thing read on a small face
 ## Godot's LODs are cut from the rest pose, where the lids lie folded: they would drop the rows that cover the eye.
 const FACE_LOD_BIAS := 1000.0
+## The ground shadow of a Boki that hovers: its size (m, across and along it) and darkness, and how far off the
+## ground it lies (m) so it never fights the ground for depth.
+const SHADOW_SIZE := Vector2(0.5, 0.86)
+const SHADOW_ALPHA := 0.42
+const SHADOW_LIFT := 0.012
 const OWN_BODY := ["chop", "mine", "carry", "tend"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
@@ -89,6 +96,8 @@ var _look := Vector2.ZERO
 var _look_to := Vector2.ZERO
 var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
+var _shadow: MeshInstance3D
+static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
 static func has(kin_id: String) -> bool:
@@ -116,6 +125,8 @@ static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array)
 	rig.species = kin_id
 	rig.model = model_root
 	rig._dress(c, mats)
+	if FRAME[kin_id].get("hover", false):
+		rig._shadow = _ground_shadow(flex_node)
 	flex_node.add_child(rig)
 	return FRAME[kin_id]
 
@@ -182,6 +193,8 @@ func _keep_flex() -> void:
 		if held:
 			held.position = FRAME[species]["carry"]
 	model.position.y = -body.position.y if clip == "hop" else 0.0       # the clip does the hopping, not home
+	if _shadow:
+		_shadow.global_position.y = root.global_position.y + SHADOW_LIFT
 	var cam := get_viewport().get_camera_3d() as CamRig
 	if cam:
 		model.global_basis = cam.char_lean() * flex.global_basis      # toward the camera, like the Hunters: faces read
@@ -322,6 +335,28 @@ func _lit_material(src: Material, c: Dictionary) -> Material:
 	var now := (c["glow"] as ShaderMaterial).get_shader_parameter("albedo") as Color
 	m.set_shader_parameter("albedo", _tint(now, base))
 	return m
+
+## A soft dark oval on the ground under `flex`: what keeps a floating body reading as standing there.
+static func _ground_shadow(flex_node: Node3D) -> MeshInstance3D:
+	if _shadow_mat == null:
+		var grad := GradientTexture2D.new()
+		grad.fill = GradientTexture2D.FILL_RADIAL
+		grad.fill_from = Vector2(0.5, 0.5)
+		grad.fill_to = Vector2(1.0, 0.5)
+		grad.gradient = Gradient.new()
+		grad.gradient.set_color(0, Color(0, 0, 0, 1))
+		grad.gradient.set_color(1, Color(0, 0, 0, 0))
+		_shadow_mat = StandardMaterial3D.new()
+		_shadow_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_shadow_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_shadow_mat.albedo_texture = grad
+		_shadow_mat.albedo_color = Color(0, 0, 0, SHADOW_ALPHA)
+	var plane := PlaneMesh.new()
+	plane.size = SHADOW_SIZE
+	var shadow := Models.part(flex_node, plane, _shadow_mat, Vector3(0, SHADOW_LIFT, 0), Vector3.ONE, Vector3.ZERO,
+		"GroundShadow")
+	shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return shadow
 
 static func _ink() -> ShaderMaterial:
 	var ink := ShaderMaterial.new()

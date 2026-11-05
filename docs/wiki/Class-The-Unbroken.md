@@ -74,7 +74,7 @@ What the in-game kit card (K) says.
 | Passive: Rage | Damage fills Rage. Full, you're Enraged: more damage, faster dashes and cooldowns. Knocks heal you. |
 | Dash: Rampage | Two charges (a third at rank 2) of a short dash attack the way you face. Its tip hits twice as hard. |
 | RMB: Smash | Tap: a heavy slam, harder on the wounded; knock someone it hit and your ultimate is ready again. Hold as long as you like: charge, then fling yourself forward; let go as the raised blade flashes to fling further. In the air: slam down at your cursor. |
-| E: Warchain | Throw a chain at a foe or a wall. Press E again to be hauled to it; steer as you go. |
+| E: Warchain | Throw a chain at a foe or a wall. Press E again to be hauled to it; look aside to swing out that way. |
 | Hunter ultimate: Gilded Riposte | Guard for 0.65s, taking nothing, then lunge into a cleave that heals you; a knock with it resets it. |
 | Weapon: Greatsword | Wide slashes, harder at the tip. Hold to throw a Searing Wave: the longer you hold, the bigger, longer and harder it is. |
 
@@ -91,7 +91,7 @@ What the in-game kit card (K) says.
 - *In the air:* Meteor Drop: a disc shows under your cursor (5m at most). Press and you hang over it for a beat, the blade raised (everyone sees where you'll land), then dive onto it: a 2.6m burst, 18 and slow 40% for 1.5s; the inner ring (1.2m) takes +50% and is stunned 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back.
 - *During E:* With the Warchain: press while it pulls you, or as you arrive, for a Cinder Spin at once (2.6m, 18, blights 4s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); charge while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 
-**Warchain (E, 12.8s cooldown).** Throw a chain 13m: it hooks the first foe (8 damage) or bites a wall, and holds for 5s while you move, paying out up to 24m and holding taut there. Press E again to be hauled to it: hold a direction (or look aside) to curve in beside it, back away first to slingshot in faster, Shift or jump to break off (a jump keeps the speed), and you arrive still moving. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
+**Warchain (E, 12.8s cooldown).** Throw a chain 13m: it hooks the first foe (8 damage) or bites a wall, and holds for 5s while you move, paying out up to 24m and holding taut there. Press E again to be hauled to it: look aside (a held direction stacks) to swing out in an arc and land beside or past it, back away first to slingshot in faster, Shift or jump to break off (a jump keeps the speed), and you arrive still moving. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 
 **Gilded Riposte (hunter ultimate, from level 6, 36s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 43, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once.
 
