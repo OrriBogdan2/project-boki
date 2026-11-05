@@ -52,6 +52,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
   - Vex (was Venator): RMB is a side toss.
   - Hem: missed arrows linger.
   - Dredge: the Grapnel is renamed **Abyssal Hand** and goes through walls and cliffs (placed walls still stop it, per the data pass).
+- Cinder (owner, Nov 5): during her ult (Flue Flight) **only E works**. No LMB, no RMB (Cinder Shot), no other weapon or utility; E (Furnace Cloak) stays usable.
 
 ## Boki
 - Regen: 6%/s while carried, 1.5%/s out after 6 s without damage, none while downed.
@@ -95,6 +96,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 ## Practice and Arena
 - One connected space: the Training Room (left, practice stations) and a duel ring (right, spawn a bot or fight a player).
 - Arena mode: 4v4 rounds like the source's, each round a little different.
+- **Name (owner, Nov 5):** the current practice space players reach as "Arena" (Training Room + duel ring, `--arena`) is called the **Training Area** in all player text. "Arena" is kept for the future 4v4 mode above. Internal ids (`arena`, `--arena-check`) can stay.
 
 ## Agents and art
 - Agent models: the owner says the new model costs only about 15% of the usage, so **push most work onto the new low-usage model**. Use Opus only where the owner or DECISIONS asks for it (feel-critical parity, e.g. Kael item 22). Sonnet for small, clear fixes.

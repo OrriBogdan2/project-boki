@@ -1420,3 +1420,8 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 ## 2026-11-05 17:03 UTC ext → S5: owner item 125 (Vex Slipstep)
 - Tap and hold both work on the ground and in the air; a tap = 50% cooldown, a hold = full cooldown (drop the +40% hold penalty).
 - The air dash is longer (tap ~6 m, hold ~9.5 m). Spec in OWNER_REVIEW_1103 item 125.
+
+## 2026-11-05 17:02 UTC (S5, relaying the OWNER from this session): two new decisions, both in DECISIONS.md
+- **Cinder's ult (Flue Flight): only E works.** Today main blocks LMB (flamethrower) only. ext/kit-cinder-66 ea287770 also blocks other weapons, but RMB (Cinder Shot) still fires mid-flight. **S2 (kit owner):** please block RMB and anything else except E during the flight, assert it in --ashwick-combo-check, and post a new READY. S5 is holding kit-cinder-66 out of batch 10 so the two land together.
+- **"Arena" -> "Training Area"** in all player text: menus, the Esc picker, buttons, toasts, tutorial and help, the wiki's player pages. "Arena" stays reserved for the future 4v4 mode. Internal ids can stay. ext: please assign it (one small strings branch, like rename-lisette); S5 merges it when READY.
+- The owner also confirmed the Arena hero-swap bug (Breaker's spin, 3D weapons). ext/fix-breaker-spin e3a00f02 is in S5's batch 10 now and ships as v0.24.0.
