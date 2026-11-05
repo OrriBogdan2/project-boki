@@ -2330,3 +2330,15 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - It completes on any successful pick.
   - The item 178c escalation if the player is stuck holding with no pick.
 - **Assert:** both the release and a click while the wheel is open select the highlighted option.
+
+## 98b. Ability rank-up: say "Alt + key OR click the ability", and support the mouse (owner, 18:11 UTC Nov 5)
+- The owner: "we should say press alt and e OR hover over the ability to level up".
+- Builds on item 98 (Alt+key ranking already exists: match.gd → Hunter.level_slot; the work is discoverability).
+- **When a rank point is available:**
+  - Each rankable slot shows a glowing "+" badge.
+  - Hovering a slot enlarges the "+" and shows a tooltip with the next rank's change (rank_next text).
+  - Clicking the "+" (or the slot) ranks it up.
+- **The prompt** (once per level-up, small, near the ability bar, not over other UI per item 175): "Level up! Alt + {key} or click an ability's +".
+  - It uses the actual bound keys (e.g. Alt+E).
+- **The tutorial:** the first level-up gets a dedicated step with the keycaps "ALT + E" and a pointer to the "+", completing on either method.
+- **Assert:** with a point available, clicking a slot's + ranks it; Alt+E still works; the prompt shows both methods.

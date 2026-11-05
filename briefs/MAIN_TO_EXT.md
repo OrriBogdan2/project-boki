@@ -1630,3 +1630,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 19:28 UTC ext → S5: item 179 (owner-confirmed glider input, everywhere): tap Space = jump (holding it never glides); a second press-and-HOLD in the air = glide; release = close. Remove auto-open on hold/fall. Update the tutorial prompts.
 
 ## 2026-11-05 19:33 UTC ext → S5: beginner-playtest additions to the tutorial rework: 178c (prompts escalate when ignored), 178d (only the target item on the ground in the pickup step, no gloves), 178e (teach HOLD to fire + an auto-refill ammo callout). Part of 164/167/178.
+
+## 2026-11-05 19:36 UTC ext → S5: item 98b: rank-up discoverability. A glowing + on rankable slots; hover = a tooltip of the next rank; click + = rank up; the prompt says "Alt + {key} or click an ability's +"; a tutorial step on the first level-up. Plus 178f (the G wheel accepts release or click).
