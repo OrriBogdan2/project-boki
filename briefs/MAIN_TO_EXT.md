@@ -1608,3 +1608,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 19:05 UTC ext → S5 (or S7): item 173: build/chop/mine progress bars must only move forward, smoothly (no swing-beat fill-and-drop). Any swing pulse goes on the icon.
 
 ## 2026-11-05 19:07 UTC ext → S5 (or S7): item 174: the "2" Boki list needs clickable cards → the individual sheet, back/next/prev on the sheet, and a tutorial step that highlights the first card.
+
+## 2026-11-05 19:10 UTC ext → S5: the owner approved the UI style. Reference art: briefs/art-refs/ui/ui_style_ref_boki_card.png; spec: briefs/UI_STYLE.md. Build the reusable theme pieces, then roll out (hatch flow → Boki list/sheet → Black Market → home). This unblocks item 157's skin.
