@@ -2,24 +2,24 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b87rg3aowuubm"
-path="res://.godot/imported/ostra_wisp_atlas.jpg-eb29c22a60b29b8a5120232c9b045a11.ctex"
+uid="uid://f1mfh0ge7awe"
+path="res://.godot/imported/ostra_face.jpg-7cf14c9077355643535d69f42c8dfb0c.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "9e696d85abf111739633bd7d45d9dbe3"
+"md5": "54d31d006877d6294bfed5365d6ffb5e"
 }
 
 [deps]
 
-source_file="res://art/wardens/ostra/ostra_wisp_atlas.jpg"
-dest_files=["res://.godot/imported/ostra_wisp_atlas.jpg-eb29c22a60b29b8a5120232c9b045a11.ctex"]
+source_file="res://art/wardens/ostra/ostra_face.jpg"
+dest_files=["res://.godot/imported/ostra_face.jpg-7cf14c9077355643535d69f42c8dfb0c.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -40,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

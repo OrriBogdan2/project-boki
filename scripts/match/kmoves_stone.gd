@@ -754,11 +754,11 @@ const MOVES := {
 }
 
 # ---------------------------------------------------------------- locomotion (HunterAnim asks per frame)
-## m: Ostra floats this high over her ground point (visual only: her hitbox and ring stay on the ground)
-const HOVER_H := 0.3
-const HOVER_BOB := 0.03                # m, up and down
+## m (the model's, ~0.67 of a world metre: a hand's width): Motley's box floats this high over its ground point (visual only: her hitbox and ring stay on the ground)
+const HOVER_H := 0.15
+const HOVER_BOB := 0.015               # m, up and down
 const HOVER_HZ := 0.6                  # bobs a second
-const HOVER_GAIT := 0.1                # her legs barely walk; the hem trails instead
+const HOVER_GAIT := 0.1                # no legs walk: no footstep sounds (gait < 0.5 never steps)
 
 ## How much a hero's legs walk (1: a full step cycle).
 static func gait(arch: String) -> float:

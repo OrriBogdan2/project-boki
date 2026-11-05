@@ -1,0 +1,326 @@
+"""Motley's textures (ART-1), painted with numpy: wood, brass, cloth folds, card faces. All colours sRGB 0..1; images run top to bottom,
+t down. The face is ostra_mask.textures."""
+import numpy as np
+import ostra_mask as M
+
+
+def hx(s):
+    return np.array([int(s[i:i + 2], 16) / 255.0 for i in (0, 2, 4)], np.float32)
+
+
+BLACK, PLUM, DUSK, VIOLET, VIOLET_HI, TRIM, HOT = map(hx, ("150f1c", "261b30", "3d2650", "62308a", "8a46bc", "bb66f2", "e0aaff"))
+RUFF_D, RUFF_M, RUFF_L = map(hx, ("3e3a48", "7b7686", "b4afbb"))
+BLUE = hx("3a2f7c")
+
+
+def mix(a, b, k):
+    k = np.asarray(k)[..., None] if np.ndim(k) else k
+    return a * (1 - k) + b * k
+
+
+def ramp(x, cols, xs=None):
+    x = np.clip(x, 0, 1)
+    xs = np.linspace(0, 1, len(cols)) if xs is None else xs
+    return np.stack([np.interp(x, xs, [c[i] for c in cols]) for i in range(3)], axis=-1).astype(np.float32)
+
+
+def vnoise(S, T, cx, cy, seed):
+    """smooth value noise over (S, T) in 0..1, cx by cy cells, tiling in S"""
+    rng = np.random.RandomState(seed)
+    g = rng.rand(cy + 2, cx + 1)
+    g[:, -1] = g[:, 0]
+    x, y = S * cx, T * cy
+    xi = np.clip(x.astype(int), 0, cx - 1)
+    yi = np.clip(y.astype(int), 0, cy)
+    fx, fy = x - xi, y - yi
+    fx, fy = fx * fx * (3 - 2 * fx), fy * fy * (3 - 2 * fy)
+    a = g[yi, xi] * (1 - fx) + g[yi, xi + 1] * fx
+    b = g[yi + 1, xi] * (1 - fx) + g[yi + 1, xi + 1] * fx
+    return a * (1 - fy) + b * fy
+
+
+def fbm(S, T, cx, cy, seed, oct=4):
+    v, a, tot = 0, 1.0, 0
+    for i in range(oct):
+        v = v + a * vnoise(S, T, cx << i, cy << i, seed + i)
+        tot += a
+        a *= 0.5
+    return v / tot
+
+
+def folds(S, T, n, seed, sway=0.03):
+    """a shade -1..1 from long cloth folds running down the t axis"""
+    S2 = (S + sway * np.sin(T * 7 + seed)) % 1.0
+    f = fbm(S2, T * 0.3, n, 2, seed, 3)
+    d = np.gradient(f, axis=1) * S.shape[1] / n
+    return np.clip(d * 3.0 + (f - 0.5) * 1.1, -1, 1)
+
+
+def stars(S, T, seed, dens=0.0035, sz=1.2):
+    rng = np.random.RandomState(seed)
+    h, w = S.shape
+    out = np.zeros((h, w), np.float32)
+    n = int(h * w * dens * 0.05)
+    ys, xs, b = rng.randint(1, max(h - 1, 2), n), rng.randint(1, max(w - 1, 2), n), rng.rand(n)
+    out[ys, xs] = b
+    out[ys, np.minimum(xs + 1, w - 1)] = np.maximum(out[ys, np.minimum(xs + 1, w - 1)], b * 0.5)
+    out[np.minimum(ys + 1, h - 1), xs] = np.maximum(out[np.minimum(ys + 1, h - 1), xs], b * 0.5)
+    return out
+
+
+def galaxy(S, T, seed):
+    """the Void in the cloth: blue-violet nebula with stars"""
+    n = fbm(S, T, 6, 5, seed)
+    n2 = fbm(S, T, 9, 7, seed + 9)
+    c = ramp(n * 1.5 - 0.25, [hx("140a2a"), hx("2b1a63"), hx("4b2aa0"), hx("7a48c8")])
+    c = mix(c, hx("20368a"), np.clip(n2 * 2.0 - 1.0, 0, 1) * 0.7)
+    s = stars(S, T, seed)
+    return c + (hx("f0e6ff") - c) * s[..., None]
+
+
+def shade(c, f, k=0.5):
+    """darken/lighten paint by a fold field"""
+    return np.clip(c * (1 + f[..., None] * k), 0, 1)
+
+
+def edges(S, T, w=0.02):
+    return np.maximum(M.sm(w, 0, S), M.sm(1 - w, 1, S))
+
+
+# ---------------------------------------------------------------------------- pieces
+WOOD_D, WOOD_M, WOOD_L = map(hx, ("4a2d1e", "7c5235", "a9825a"))
+IRON = hx("3a2a2c")
+GOLD_D, GOLD_M, GOLD_L = map(hx, ("6e4a1e", "b5873a", "f0d48a"))
+RED, SLATE = hx("b23a34"), hx("3e4a78")
+WHITE_D, WHITE_M, WHITE_L = map(hx, ("9a93ad", "dcd8e6", "fbf9ff"))
+BLACK2 = hx("1c1524")
+
+
+def suit(kind, x, y):
+    """a card suit's mask at (x, y), centred, about 1 tall (y up)"""
+    x = np.abs(x) if kind in ("spade", "heart", "club") else x
+    if kind == "diamond":
+        return M.sm(1.0, 0.94, (np.abs(x) / 0.36 + np.abs(y) / 0.5))
+    if kind == "heart":
+        a = np.hypot(x - 0.2, y - 0.17) < 0.25
+        tri = (y < 0.2) & (y > -0.5) & (x < (y + 0.5) * 0.63)
+        return (a | tri).astype(np.float32)
+    if kind == "spade":
+        a = np.hypot(x - 0.19, y + 0.08) < 0.22
+        tri = (y > -0.14) & (y < 0.5) & (x < (0.5 - y) * 0.68)
+        stem = (y < 0.0) & (y > -0.5) & (x < 0.03 + (0.0 - y) * 0.2)
+        return (a | tri | stem).astype(np.float32)
+    a = np.hypot(x, y - 0.22) < 0.21
+    b = np.hypot(x - 0.22, y + 0.1) < 0.21
+    stem = (y < 0.0) & (y > -0.5) & (x < 0.03 + (0.0 - y) * 0.2)
+    return (a | b | stem).astype(np.float32)
+
+
+def wood(S, T, seed):
+    planks = (S * 4.0 + 0.1 * np.sin(T * 5 + seed)) % 1.0
+    grain = fbm(S * 0.6, T, 26, 3, seed, 3)
+    c = ramp(grain * 1.5 - 0.2, [WOOD_D, WOOD_M, WOOD_L])
+    c = c * (1 - 0.6 * np.exp(-(planks / 0.03) ** 2))[..., None]
+    return c
+
+
+def wall(kind, col, seed):
+    def fn(S, T):
+        c = wood(S, T, seed)
+        pan = M.sm(0.09, 0.12, S) * M.sm(0.91, 0.88, S) * M.sm(0.09, 0.12, T) * M.sm(0.91, 0.88, T)
+        c = c * (0.62 + 0.38 * (1 - pan))[..., None] + mix(c, hx("c7b48e"), 0.5) * 0.38 * pan[..., None]
+        sm_ = suit(kind, (S - 0.5) * 1.5, (0.5 - T) * 1.5)
+        wear = 0.82 + 0.18 * fbm(S, T, 18, 18, seed + 3, 3)
+        c = mix(c, col * wear[..., None], np.clip(sm_, 0, 1))
+        return c
+    return fn
+
+
+def p_rail(S, T):
+    return ramp(0.45 + 0.4 * np.cos(S * 6.283) + 0.2 * (fbm(S, T, 8, 8, 5) - 0.5), [hx("24181a"), IRON, hx("6a4a3a")])
+
+
+def p_lid(S, T):
+    c = wood(S, T, 91)
+    return c * (0.7 + 0.3 * M.sm(0.02, 0.12, T))[..., None]
+
+
+def p_brass(S, T):
+    return ramp(0.5 + 0.48 * np.cos(S * 6.283 * 2 + 0.6), [GOLD_D, GOLD_M, GOLD_L])
+
+
+def p_knob(S, T):
+    return ramp(T * 0.7 + 0.2, [hx("3a1e10"), hx("6e3a20"), hx("a06a3a")])
+
+
+def p_bell(S, T):
+    c = ramp(0.5 + 0.48 * np.cos(S * 6.283 + 0.9), [GOLD_D, GOLD_M, GOLD_L])
+    return mix(c * (0.75 + 0.35 * np.sin(np.clip(T, 0, 1) * 3.1))[..., None], hx("20140c"), M.sm(0.72, 0.76, T) * M.sm(0.92, 0.88, T))
+
+
+def harlequin(S, T, a, b, seed):
+    f = folds(S, T, 9, seed, 0.01)
+    return mix(shade(ramp(0.5 + f * 0.3, [DUSK, VIOLET, VIOLET_HI]), f, 0.25), shade(BLACK2 * np.ones(S.shape + (3,)), f, 0.5), np.clip(a, 0, 1))
+
+
+def p_torso(S, T):
+    # (s 0 at his right, 0.25 front, 0.5 his left, 0.75 back) front: his right black, his left violet; back: the other way round
+    q = (S % 1.0)
+    dark = ((q >= 0.0) & (q < 0.25)) | ((q >= 0.5) & (q < 0.75))
+    c = harlequin(S, T, dark.astype(np.float32), None, 3)
+    c = mix(c, hx("c79a4a") * 0.5, np.exp(-((np.abs(S - 0.25)) / 0.0035) ** 2) * 0.5)
+    belt = M.sm(0.74, 0.76, T) * M.sm(0.88, 0.86, T)
+    c = mix(c, BLACK2, belt * 0.8)
+    return c * (0.72 + 0.28 * M.sm(0.05, 0.3, T))[..., None]
+
+
+def p_peplum(S, T):
+    dark = (S >= 0.5).astype(np.float32)      # (s 0 his right front... round the back to his left front)
+    dark = 1.0 - dark
+    c = harlequin(S, T, dark, None, 7)
+    return mix(c, TRIM, edges(S, T, 0.012) * 0.8)
+
+
+def p_lining(S, T):
+    return ramp(fbm(S, T, 5, 5, 2), [hx("120830"), hx("2c1668"), hx("4a2a9a")])
+
+
+def tail_paint(dark, seed):
+    def fn(S, T):
+        f = folds(S, T, 3, seed, 0.02)
+        c = shade(ramp(0.55 + f * 0.3, [DUSK, VIOLET, VIOLET_HI]), f, 0.3) if not dark else shade(BLACK2 * np.ones(S.shape + (3,)), f, 0.6)
+        return mix(c, TRIM, edges(S, T, 0.05) * (0.9 if dark else 0.6))
+    return fn
+
+
+def sleeve_paint(dark, seed):
+    def fn(S, T):
+        f = folds(S, T, 6, seed)
+        c = shade(ramp(0.55 + f * 0.3, [DUSK, VIOLET, VIOLET_HI]), f, 0.25) if not dark else shade(BLACK2 * np.ones(S.shape + (3,)), f, 0.5)
+        return c * (0.75 + 0.25 * M.sm(0.0, 0.2, T))[..., None]
+    return fn
+
+
+def p_glove(S, T):
+    return ramp(0.62 + 0.3 * np.cos(S * 6.283) + 0.1 * (fbm(S, T, 5, 5, 8) - 0.5), [WHITE_D, WHITE_M, WHITE_L])
+
+
+def p_hood(S, T):
+    # (the loop starts at the brow and runs round his right: s < 0.5 is his right, violet)
+    f = folds(S, T, 8, 31, 0.0)
+    cv = shade(ramp(0.55 + f * 0.3, [DUSK, VIOLET, VIOLET_HI]), f, 0.25)
+    ck = shade(BLACK2 * np.ones_like(cv), f, 0.5)
+    c = mix(ck, cv, M.sm(0.0, 0.004, S) * M.sm(0.5, 0.496, S))
+    return c * (0.5 + 0.5 * M.sm(0.0, 0.12, T))[..., None]
+
+
+def horn_paint(dark):
+    def fn(S, T):
+        f = folds(S, T, 6, 37, 0.01)
+        c = shade(BLACK2 * np.ones(S.shape + (3,)), f, 0.6) if dark else shade(ramp(0.55 + f * 0.3, [DUSK, VIOLET, VIOLET_HI]), f, 0.3)
+        return mix(c, GOLD_M, M.sm(0.965, 0.99, T))
+    return fn
+
+
+def p_ruff(S, T):
+    ph = S * 17 * 6.283
+    q = 1 - np.abs(T * 2 - 1)
+    c = ramp((0.5 + 0.5 * np.cos(ph + 1.0)) * (0.5 + 0.5 * q) + 0.28, [WHITE_D, WHITE_M, WHITE_L], [0, 0.5, 1])
+    return c * (0.68 + 0.32 * M.sm(0.05, 0.3, T))[..., None]
+
+
+def collar_paint(col_a, col_b, seed):
+    def fn(S, T):
+        f = folds(S, T, 3, seed, 0.02)
+        c = shade(ramp(0.3 + 0.5 * T + f * 0.2, [col_a, col_b]), f, 0.35)
+        return mix(c, TRIM, np.maximum(edges(S, T, 0.07), M.sm(0.92, 1.0, T)) * 0.75)
+    return fn
+
+
+def p_orbcore(S, T):
+    return ramp(fbm(S, T, 4, 4, 9), [hx("04020a"), hx("120828"), hx("2a1460")])
+
+
+def p_swirl(S, T):
+    return ramp((1 - T) * (0.4 + 0.6 * (1 - np.abs(S - 0.5) * 2)), [hx("3a12a0"), hx("6a2ae0"), hx("a868ff"), hx("e8c8ff")], [0, 0.45, 0.8, 1])
+
+
+def p_wisp(S, T):
+    ang = (S + T * 1.7) % 1.0
+    st = fbm(ang, T * 0.2, 14, 2, 61, 3)
+    return ramp(0.25 + 0.4 * T + (st - 0.5) * 1.2, [hx("120826"), hx("2a1458"), hx("4e2a96"), hx("7a50c4")])
+
+
+def p_card(S, T):
+    """a card's face: pale, its pip violet, as the sheet's glowing cards"""
+    c = ramp(T, [hx("cdb4f4"), hx("b89ae8")])
+    c = mix(c, hx("5a18c8"), suit("diamond", (S - 0.5) * 2.0, (0.5 - T) * 2.0))
+    return mix(c, hx("b88cff"), np.maximum(edges(S, T, 0.05), np.maximum(M.sm(0.05, 0.0, T), M.sm(0.95, 1.0, T))))
+
+
+def p_cardback(S, T):
+    c = ramp(0.5 + 0.5 * np.sin((S + T) * 40) * np.sin((S - T) * 40), [hx("3a1a90"), hx("6a3ae0")])
+    d = np.abs(S - 0.5) * 1.5 + np.abs(T - 0.5)
+    c = mix(c, hx("c8a0ff"), np.exp(-((d - 0.3) / 0.015) ** 2))
+    return mix(c, hx("d8c0ff"), np.maximum(edges(S, T, 0.05), np.maximum(M.sm(0.04, 0.0, T), M.sm(0.96, 1.0, T))))
+
+
+def p_cardburn(S, T):
+    """a burnt card: charred from one corner, the edge of the burn still alight"""
+    c = p_card(S, T)
+    d = np.hypot(S - 1.0, T) + 0.14 * (fbm(S, T, 7, 7, 15, 3) - 0.5)
+    c = mix(c, hx("ff9a2a"), np.exp(-((d - 0.62) / 0.035) ** 2))
+    return mix(c, hx("20100c"), M.sm(0.6, 0.52, d))
+
+
+PAINTERS = {"wall_s": wall("spade", SLATE, 11), "wall_d": wall("diamond", RED, 12), "wall_c": wall("club", SLATE, 13), "wall_h": wall("heart", RED, 14), "rail": p_rail,
+            "lid": p_lid, "brass": p_brass, "knob": p_knob, "bell": p_bell, "torso": p_torso, "peplum": p_peplum, "lining": p_lining,
+            "tail_v": tail_paint(False, 41), "tail_k": tail_paint(True, 43), "sleeve_k": sleeve_paint(True, 13), "sleeve_v": sleeve_paint(False, 15), "glove": p_glove,
+            "hood": p_hood, "hornR": horn_paint(False), "hornL": horn_paint(True), "ruff": p_ruff, "collar_v": collar_paint(VIOLET, VIOLET_HI, 71), "collar_k": collar_paint(BLACK, PLUM, 73),
+            "orbcore": p_orbcore, "orbswirl": p_swirl, "wisp": p_wisp, "card": p_card, "cardback": p_cardback, "cardburn": p_cardburn}
+
+
+class Atlas:
+    """a shelf packer: key -> rect; paints each key once"""
+
+    def __init__(self, w, h):
+        self.w, self.h = w, h
+        self.img = np.zeros((h, w, 3), np.float32) + hx("1a1320")
+        self.x = self.y = 2
+        self.shelf = 0
+        self.rect = {}
+
+    def put(self, key, px):
+        if key in self.rect:
+            return self.rect[key]
+        w, h = px
+        if (w, h) == (self.w, self.h):          # (the whole image: the wisp's v is its fade in hero_void)
+            self.x = self.y = 0
+        elif self.x + w + 6 > self.w:
+            self.x = 2
+            self.y += self.shelf + 8
+            self.shelf = 0
+        if self.y + h + 2 > self.h and (w, h) != (self.w, self.h):
+            raise RuntimeError("atlas full at " + key)
+        x, y = self.x, self.y
+        self.x += w + 8
+        self.shelf = max(self.shelf, h)
+        ss, tt = np.meshgrid((np.arange(w) + 0.5) / w, (np.arange(h) + 0.5) / h)
+        c = PAINTERS[key](ss.astype(np.float32), tt.astype(np.float32))
+        self.img[y:y + h, x:x + w] = c
+        if (w, h) == (self.w, self.h):
+            self.rect[key] = (0, 0, w, h)
+            return self.rect[key]
+        # bleed the edges into the gutter
+        self.img[max(y - 3, 0):y, x:x + w] = c[0]
+        self.img[y + h:y + h + 3, x:x + w] = c[-1]
+        self.img[y - 3 if y >= 3 else 0:y + h + 3, max(x - 3, 0):x] = self.img[y - 3 if y >= 3 else 0:y + h + 3, x:x + 1]
+        self.img[y - 3 if y >= 3 else 0:y + h + 3, x + w:x + w + 3] = self.img[y - 3 if y >= 3 else 0:y + h + 3, x + w - 1:x + w]
+        self.rect[key] = (x, y, w, h)
+        return self.rect[key]
+
+    def uv(self, key, s, t):
+        x, y, w, h = self.rect[key]
+        return (x + 0.5 + s * (w - 1)) / self.w, 1.0 - (y + 0.5 + t * (h - 1)) / self.h
+
+

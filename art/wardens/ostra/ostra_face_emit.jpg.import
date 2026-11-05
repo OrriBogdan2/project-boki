@@ -2,24 +2,24 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ejrhbsg468fs"
-path="res://.godot/imported/ostra_orbit_cards_cells.jpg-739453782cf51dc1b490bd65e5780108.ctex"
+uid="uid://cuvaodrgliy8q"
+path="res://.godot/imported/ostra_face_emit.jpg-7c1919c1c78971f2cc85f0089b378da9.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "cfc4af8566ddf3c27592eb4c01cf65f7"
+"md5": "d267e560f89664497fb3c8962e4502ef"
 }
 
 [deps]
 
-source_file="res://art/wardens/ostra/ostra_orbit_cards_cells.jpg"
-dest_files=["res://.godot/imported/ostra_orbit_cards_cells.jpg-739453782cf51dc1b490bd65e5780108.ctex"]
+source_file="res://art/wardens/ostra/ostra_face_emit.jpg"
+dest_files=["res://.godot/imported/ostra_face_emit.jpg-7c1919c1c78971f2cc85f0089b378da9.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -40,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1
