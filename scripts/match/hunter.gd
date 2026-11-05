@@ -2145,7 +2145,7 @@ func sim(dt: float) -> void:
 	_physics(dt)
 	var ad := aim_dir()
 	var want := atan2(-ad.x, -ad.y)
-	if roll_t > 0.0:
+	if roll_t > 0.0 and not (ak and ak.aims_in_dash()):
 		want = atan2(-roll_dir.x, -roll_dir.y)
 	face = lerp_angle(face, want, minf(1.0, dt * 20.0))
 

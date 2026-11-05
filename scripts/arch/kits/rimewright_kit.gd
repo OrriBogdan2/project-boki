@@ -331,6 +331,10 @@ func dash_left() -> float:
 func fires_in_dash() -> bool:
 	return in_dash() and String(flow.row("lmb")["mode"]) == "fire"
 
+## She skates along her line and turns to the cursor only while the darts fly.
+func aims_in_dash() -> bool:
+	return fires_in_dash() and bool(h.inp.get("fire", false))
+
 ## No class long dash: Shift is only ever the skate (the HUD shows no long-dash segment for her).
 func has_long_dash() -> bool: return false
 
