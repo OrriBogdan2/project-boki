@@ -753,8 +753,6 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 	if current:
 		current.queue_free()
 		current = null
-	if screen != "match":
-		Sfx.reset_scene_audio()      # the match's score and beds don't follow you out of it (the old match is gone, so nothing re-creates them)
 	await get_tree().process_frame
 	if gen != _gen:
 		return    # another screen was asked for while this one was still on its way

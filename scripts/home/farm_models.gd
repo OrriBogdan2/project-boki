@@ -135,11 +135,40 @@ static func dress(n: Node3D, e: Dictionary) -> Node3D:
 	n.add_child(d)
 	return n
 
+## "Needs 2 more wood" over a site that is waiting for materials (hidden when it is not).
+static func set_need(n: Node3D, e: Dictionary) -> void:
+	var bar := n.get_node_or_null("Bar") as Sprite3D
+	if bar == null:
+		return
+	var text := FarmSites.need_text(e)
+	var tag := n.get_node_or_null("Need") as Label3D
+	if text == "":
+		if tag:
+			tag.visible = false
+		return
+	if tag == null:
+		tag = Label3D.new()
+		tag.name = "Need"
+		tag.font_size = 44
+		tag.pixel_size = 0.01
+		tag.outline_size = 14
+		tag.modulate = Color("ffd36a")
+		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		tag.no_depth_test = true
+		tag.render_priority = 3
+		tag.position = bar.position + Vector3(0, 0.38, 0)
+		n.add_child(tag)
+	tag.text = text
+	tag.visible = true
+
 ## Every frame at home: the bars on the sites follow the swings in progress (HomeWork.tick).
 static func tick_bars(hw) -> void:
 	if hw.h.hb == null:
 		return
 	var live := {}
+	var swing: Dictionary = hw.h.hob.live() if hw.h.hob else {}
+	if not swing.is_empty():
+		live[int(swing["u"])] = float(swing["k"])
 	for k in hw.h.kins:
 		if k.has("job") and String(k["job"].get("kind", "")) == "build" and String(k["job"].get("phase", "")) == "work":
 			var J: Dictionary = k["job"]
@@ -148,3 +177,4 @@ static func tick_bars(hw) -> void:
 		var n: Node3D = hw.h.hb.nodes.get(int(e["u"]))
 		if is_instance_valid(n):
 			set_bar(n, e, float(live.get(int(e["u"]), 0.0)))
+			set_need(n, e)

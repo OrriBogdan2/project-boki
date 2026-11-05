@@ -57,6 +57,7 @@ func push(text: String, col: Color, prio := NORMAL, life := 0.0) -> void:
 			return
 	var life_s := life if life > 0.0 else float(LIFE[prio])
 	_waiting.append({"text": text, "col": col, "prio": prio, "life": life_s, "n": 1, "t": 0.0, "wait": 0.0})
+	Sfx.play("ui_toast", null, -4.0, 0.03)
 	if _waiting.size() > WAIT_CAP:
 		_waiting.remove_at(_lowest())
 	if get_parent() is Control:

@@ -17,7 +17,7 @@ of on-screen text are ours, and nothing comes from another game's files (see
 | Gunslinger | No single source | | Six-chamber rhythm, ricochet trick shots and the Called Shot are our own design |
 | Bulwark | SUPERVIVE's **Oath** (shield tank) baseline | A raised shield with its own health, bash on release, shield-up dash variant | Guard, the Crushed wall/foe collision payoff, the thrown mace and Mending Ground are ours |
 | Tarek | SUPERVIVE's **Tetra**, ability by ability (docs/heroes/dolm.md) | Sneak-reveal passive, tap boulder / hold punch with wall stun, a charged slam with a jump-leap and an abyss dunk, a dash that leaves a launched rock, a three-rock wall you punch away | Rocks are real walls with placement rules; the ult is her own on R (Basalt Spine: a dragged ridge that is a walkway over the abyss); a slam that knocks resets itself; all names and numbers ours |
-| Ostra | SUPERVIVE's **Void** (docs/heroes/ostra.md) | Damage-built empowered state, a charged orb after a pause, a shard cluster whose stun grows with range, a lobbed teleport that trades places, a growing bomb you detonate | The pull-in ult is her own on R (Nightwell); Collapse payoff, footstep silence not built; names and numbers ours |
+| Motley | SUPERVIVE's **Void** (docs/heroes/ostra.md) | Damage-built empowered state, a charged orb after a pause, a shard cluster whose stun grows with range, a lobbed teleport that trades places, a growing bomb you detonate | The pull-in ult is her own on R (Nightwell); Collapse payoff, footstep silence not built; names and numbers ours |
 
 Shared kit conventions also follow SUPERVIVE: RMB variants by context (tap, hold, in the air, during
 another ability), run levels from 1 with the ultimate at level 6, readable build-up passives (their
