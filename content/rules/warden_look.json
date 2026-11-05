@@ -160,9 +160,9 @@
 			},
 			"cloth": {
 				"far_lift": 0.5,
-				"fres": 0.55,
+				"fres": 0.45,
 				"fres_tint": 0.9,
-				"top_light": 0.8,
+				"top_light": 0.6,
 				"light_neutral_warm": 0.8
 			},
 			"leather": {
@@ -230,8 +230,8 @@
 					0.12,
 					0.2
 				],
-				"strength": 2.2,
-				"px": 12.0,
+				"strength": 2.6,
+				"px": 4.5,
 				"near_d": 0.0,
 				"far_d": 3.0
 			}

@@ -1,0 +1,18 @@
+{
+ "doc": "Sable (thief): RECIPE_95 spec for the fit/shots/checks loop (docs/art/wardens/RECIPE_95.md). The Meshy body and bake are stage 1's (art/wardens/sable/IMPORT.md); python3 tools/meshy/recipe.py art/wardens/src/sable_recipe.json art fit shots checks",
+ "name": "sable",
+ "arch": "thief",
+ "tag": "s10",
+ "raw": "~/meshy/sable_r2/s10",
+ "art": {
+  "ref": "origin/ext/imagegen",
+  "turnaround": "docs/art/gen/wardens_r2/sable_turnaround.webp",
+  "side": "docs/art/gen/wardens_r2/sable_side.webp",
+  "portrait": "docs/art/gen/wardens_r2/sable_portrait.webp",
+  "face": "docs/art/gen/wardens_r2/sable_face.webp",
+  "head_sheet": "docs/art/gen/wardens_r2/sable_head_sheet.webp",
+  "crossbow_sheet": "docs/art/gen/wardens_r2/sable_crossbow_sheet.webp"
+ },
+ "fit": "art/wardens/src/sable_fit.json",
+ "combo_check": "--hero-combo-check"
+}
