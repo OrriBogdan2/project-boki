@@ -628,9 +628,23 @@ func _tick_holds() -> void:
 				motes.append({"node": node, "t": 0.0, "dur": node.lifetime * 1.1, "n": lay["n"]})
 			holds.erase(key)
 			continue
+		var hunter: Hunter = h
+		var aim := hunter.aim_dir()
 		for lay: Dictionary in e["layers"]:
-			var hunter: Hunter = h
-			(lay["node"] as Node3D).global_position = _where(lay["layer"], hunter, hunter.pos, hunter.aim_dir())
+			var node: GPUParticles3D = lay["node"]
+			node.global_position = _where(lay["layer"], hunter, hunter.pos, aim)
+			_reaim(node, lay["layer"], aim)
+
+## A hold's emitter turned to the aim now, so a stream along it follows a sweep (the particles already out keep
+## their own way, as a hose's fire does).
+func _reaim(p: GPUParticles3D, layer: Dictionary, aim: Vector2) -> void:
+	if String(layer.get("way", "up")) == "up":
+		return
+	var way := _way(layer, aim)
+	var pm: ShaderMaterial = p.process_material
+	pm.set_shader_parameter("span", way * _num(layer, "len", {}, 1.0))
+	if String(layer.get("shape", "ball")) != "line":
+		pm.set_shader_parameter("dir", way)
 
 # ------------------------------------------------------------------ the running looks
 func _process(delta: float) -> void:
@@ -671,6 +685,8 @@ func _tick_ribbon(e: Dictionary, delta: float) -> bool:
 		var gone: bool = not is_instance_valid(follow) or not (follow as Node3D).is_visible_in_tree()
 		if not gone and now <= float(e["dur"]):
 			pts.push_front([(follow as Node3D).global_position, now])
+			if pts.size() > RIBBON_SAMPLES:
+				pts.pop_back()
 		elif now <= float(e["dur"]):
 			e["dur"] = now          # the projectile ended: the tail runs out from here
 	elif now <= float(e["dur"]) and is_instance_valid(h):
