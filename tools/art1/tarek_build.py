@@ -52,10 +52,6 @@ def cap_f(P):
     return T.hair_cap(P - HC)
 
 
-def crown_f(P):
-    return T.crown_wrap(P - HC)
-
-
 def bracer_f(sx, seed):
     seeds = T.bracer_seeds(R, sx, seed)
     rs = np.random.RandomState(seed + 1)
@@ -63,7 +59,9 @@ def bracer_f(sx, seed):
     return (lambda P: T.bracer(P, R, sx, seeds, heights)), seeds
 
 
-BR_R, SEEDS_R = bracer_f(1.0, 11)
+SEEDS_A = T.stone_seeds(R)
+_rs = np.random.RandomState(41)
+H_A = np.asarray(_rs.uniform(0.018, 0.05, SEEDS_A.shape[0]), np.float32)
 BR_L, SEEDS_L = bracer_f(-1.0, 23)
 X = float(R.sh[0])
 GEO_R = 0.1
@@ -71,26 +69,21 @@ Z_S = float(R.sh[2])
 
 # name: field, bounds (lo, hi), low step, target tris, clay colour, slot
 PARTS = {
-    "head": dict(f=head_f, lo=HC + S.vec(-0.14, -0.17, -0.36), hi=HC + S.vec(0.14, 0.17, 0.17), h=0.0032, tris=2480, col="8a5a3c"),
+    "head": dict(f=head_f, lo=HC + S.vec(-0.14, -0.17, -0.3), hi=HC + S.vec(0.14, 0.17, 0.17), h=0.0032, tris=2400, col="8a5a3c"),
     "teeth": dict(f=teeth_f, lo=HC + S.vec(-0.07, 0.06, -0.11), hi=HC + S.vec(0.07, 0.13, -0.03), h=0.003, tris=100, col="f0ece0"),
-    "bandana": dict(f=bandana_f, lo=HC + S.vec(-0.14, -0.19, -0.06), hi=HC + S.vec(0.14, 0.17, 0.14), h=0.0035, tris=600, col="c9b89a"),
+    "bandana": dict(f=bandana_f, lo=HC + S.vec(-0.14, -0.19, -0.06), hi=HC + S.vec(0.14, 0.17, 0.14), h=0.0035, tris=650, col="c9b89a"),
     "cap": dict(f=cap_f, lo=HC + S.vec(-0.16, -0.19, -0.14), hi=HC + S.vec(0.16, 0.17, 0.2), h=0.0075, tris=800, col="1c1618"),
-    "crown": dict(f=crown_f, lo=HC + S.vec(-0.11, -0.15, 0.1), hi=HC + S.vec(0.11, 0.08, 0.26), h=0.004, tris=140, col="b04a26"),
-    "shoulders": dict(f=lambda P: T.shoulder_wraps(P, R), lo=S.vec(-0.43, -0.14, R.sh[2] - 0.2), hi=S.vec(0.43, 0.14, R.sh[2] + 0.13), h=0.0045, tris=260, col="b04a26"),
-    "torso": dict(f=lambda P: T.torso(P, R), lo=S.vec(-0.33, -0.2, R.waist[2] - 0.03), hi=S.vec(0.33, 0.2, R.neck[2] + 0.03), h=0.005, tris=1000, col="8a5a3c"),
-    "arms": dict(f=lambda P: T.arm(P, R), lo=S.vec(-0.43, -0.13, R.wr[2]), hi=S.vec(0.43, 0.13, Z_S + 0.11), h=0.005, tris=1000, col="8a5a3c"),
-    "hands": dict(f=lambda P: T.hand(P, R), lo=S.vec(-0.38, -0.12, R.wr[2] - 0.27), hi=S.vec(0.38, 0.16, R.wr[2] + 0.08), h=0.0028, tris=1600, col="8a5a3c"),
-    "bracer_R": dict(f=BR_R, lo=R.wr * S.vec(1, 1, 1) + S.vec(-0.18, -0.18, -0.08), hi=R.el + S.vec(0.18, 0.18, 0.04), h=0.0085, tris=800, col="8c7a62"),
-    "bracer_L": dict(f=BR_L, lo=R.wr * S.vec(-1, 1, 1) + S.vec(-0.18, -0.18, -0.08), hi=R.el * S.vec(-1, 1, 1) + S.vec(0.18, 0.18, 0.04), h=0.0085, tris=800, col="8c7a62"),
-    "vest": dict(f=lambda P: T.vest(P, R), lo=S.vec(-0.3, -0.2, R.waist[2] + 0.08), hi=S.vec(0.3, 0.2, R.neck[2] + 0.04), h=0.0045, tris=900, col="5e6470"),
-    "wrap": dict(f=lambda P: T.wrap_band(P, R), lo=S.vec(-0.22, -0.17, R.waist[2] + 0.04), hi=S.vec(0.22, 0.17, R.waist[2] + 0.2), h=0.006, tris=150, col="d8cfba"),
-    "sash": dict(f=lambda P: T.sash(P, R), lo=S.vec(-0.25, -0.17, R.waist[2] - 0.06), hi=S.vec(0.25, 0.22, R.waist[2] + 0.16), h=0.0045, tris=550, col="b04a26"),
-    "trousers": dict(f=lambda P: T.trousers(P, R), lo=S.vec(-0.31, -0.18, 0.35), hi=S.vec(0.31, 0.18, R.hip[2] + 0.12), h=0.006, tris=1480, col="a88850"),
-    "legs": dict(f=lambda P: T.shin_foot(P, R), lo=S.vec(-0.26, -0.14, -0.01), hi=S.vec(0.26, 0.26, 0.5), h=0.0045, tris=1000, col="8a5a3c"),
-    "wraps": dict(f=lambda P: T.foot_wraps(P, R), lo=S.vec(-0.26, -0.14, -0.01), hi=S.vec(0.26, 0.26, 0.32), h=0.004, tris=400, col="c9b89a"),
-    "harness": dict(f=lambda P: T.harness(P, R), lo=S.vec(-0.3, -0.2, R.hip[2] - 0.32), hi=S.vec(0.3, 0.2, R.hip[2] - 0.02), h=0.004, tris=450, col="33292a"),
-    "gear": dict(f=lambda P: T.gear_metal(P, R), lo=S.vec(-0.18, 0.08, R.hip[2] - 0.34), hi=S.vec(0.23, 0.2, R.hip[2] - 0.05), h=0.003, tris=300, col="9098a0"),
-    "pouch": dict(f=lambda P: T.pouch(P, R), lo=S.vec(-0.3, -0.03, R.hip[2] - 0.26), hi=S.vec(-0.15, 0.12, R.hip[2] - 0.07), h=0.0045, tris=180, col="a08a60"),
+    "torso": dict(f=lambda P: T.torso(P, R), lo=S.vec(-0.33, -0.2, R.waist[2] - 0.03), hi=S.vec(0.33, 0.2, R.neck[2] + 0.03), h=0.005, tris=1150, col="8a5a3c"),
+    "arms": dict(f=lambda P: T.arm(P, R), lo=S.vec(-0.43, -0.13, R.wr[2]), hi=S.vec(-0.14, 0.13, Z_S + 0.11), h=0.005, tris=680, col="8a5a3c"),
+    "hands": dict(f=lambda P: T.hand(P, R), lo=S.vec(-0.38, -0.12, R.wr[2] - 0.27), hi=S.vec(-0.14, 0.16, R.wr[2] + 0.08), h=0.0028, tris=800, col="8a5a3c"),
+    "stone": dict(f=lambda P: T.stone_arm(P, R, SEEDS_A, H_A), lo=S.vec(0.02, -0.26, R.wr[2] - 0.28), hi=S.vec(0.58, 0.26, Z_S + 0.24), h=0.0065, tris=2950, col="8c90a0"),
+    "bracer_L": dict(f=BR_L, lo=R.wr * S.vec(-1, 1, 1) + S.vec(-0.14, -0.14, -0.06), hi=R.el * S.vec(-1, 1, 1) + S.vec(0.14, 0.14, -0.1), h=0.005, tris=460, col="8c90a0"),
+    "wrap": dict(f=lambda P: T.wrap_band(P, R), lo=S.vec(-0.22, -0.17, R.waist[2] + 0.04), hi=S.vec(0.22, 0.17, R.waist[2] + 0.2), h=0.006, tris=240, col="d8cfba"),
+    "sash": dict(f=lambda P: T.sash(P, R), lo=S.vec(-0.27, -0.2, R.waist[2] - 0.06), hi=S.vec(0.27, 0.25, R.waist[2] + 0.18), h=0.0045, tris=560, col="b04a26"),
+    "skirt": dict(f=lambda P: T.skirt(P, R), lo=S.vec(-0.33, -0.27, R.waist[2] - 0.46), hi=S.vec(0.33, 0.27, R.waist[2] + 0.1), h=0.0055, tris=900, col="b04a26"),
+    "trousers": dict(f=lambda P: T.trousers(P, R), lo=S.vec(-0.31, -0.18, 0.35), hi=S.vec(0.31, 0.18, R.hip[2] + 0.12), h=0.006, tris=1320, col="4a3c34"),
+    "legs": dict(f=lambda P: T.shin_foot(P, R), lo=S.vec(-0.26, -0.14, -0.01), hi=S.vec(0.26, 0.26, 0.5), h=0.0045, tris=900, col="8a5a3c"),
+    "wraps": dict(f=lambda P: T.foot_wraps(P, R), lo=S.vec(-0.26, -0.14, -0.01), hi=S.vec(0.26, 0.26, 0.44), h=0.004, tris=720, col="8a7258"),
 }
 
 
@@ -229,10 +222,60 @@ def sweep(b, path, rads, sides, attr, wobble=0.0, flat=None, ofs=(0.0, 0.0)):
 CHAIN_NAMES = list(T.CHAINS)
 
 
+def lowball(b, c, r, attr, ofs):
+    """A small bead: 6 sides, 3 rows, about 24 tris."""
+    n0 = len(b.v)
+    rows = ((0.0, 0.0, 1.0), (0.87, 0.0, 0.5), (0.87, 0.0, -0.5), (0.0, 0.0, -1.0))
+    b.v.append(tuple(c + np.array((0, 0, r), np.float32)))
+    b.a.append(attr)
+    for rr, _, z in rows[1:3]:
+        for k in range(6):
+            a = 2 * math.pi * (k + 0.5 * (z < 0)) / 6
+            b.v.append(tuple(c + np.array((math.cos(a) * rr * r, math.sin(a) * rr * r, z * r), np.float32)))
+            b.a.append(attr)
+    b.v.append(tuple(c + np.array((0, 0, -r), np.float32)))
+    b.a.append(attr)
+    uv = lambda k, v: (ofs[0] + 0.02 * k, ofs[1] + 0.02 * v)
+    for k in range(6):
+        k2 = (k + 1) % 6
+        b.f.append((n0, n0 + 1 + k, n0 + 1 + k2))
+        b.uv.append((uv(k + 0.5, 3), uv(k, 2), uv(k + 1, 2)))
+        b.f.append((n0 + 1 + k, n0 + 7 + k, n0 + 7 + k2, n0 + 1 + k2))
+        b.uv.append((uv(k, 2), uv(k, 1), uv(k + 1, 1), uv(k + 1, 2)))
+        b.f.append((n0 + 13, n0 + 7 + k2, n0 + 7 + k))
+        b.uv.append((uv(k + 0.5, 0), uv(k + 1, 1), uv(k, 1)))
+
+
+def along(pts, step):
+    """Points every `step` m along a smooth path."""
+    p = T.smooth_path(np.array(pts, np.float32), 80)
+    d = np.concatenate(([0], np.cumsum(np.linalg.norm(np.diff(p, axis=0), axis=1))))
+    return [p[int(np.searchsorted(d, x))] for x in np.arange(0.0, d[-1], step)]
+
+
+def prayer_bag():
+    """His prayer beads: a long loop slung from the neck across the chest to the far hip, a strand down over the sash."""
+    b = Bag("prayer")
+    z0 = float(R.waist[2])
+    nz = float(R.neck[2])
+    front = [(-0.075, 0.075, nz - 0.03), (-0.03, 0.135, nz - 0.2), (0.05, 0.158, nz - 0.36), (0.12, 0.158, z0 + 0.25), (0.2, 0.1, z0 + 0.16), (0.215, 0.0, z0 + 0.15)]
+    back = [(0.215, 0.0, z0 + 0.15), (0.16, -0.135, z0 + 0.2), (0.04, -0.15, z0 + 0.4), (-0.05, -0.12, nz - 0.1), (-0.075, 0.075, nz - 0.03)]
+    i = 0
+    for c in along(front, 0.066) + along(back, 0.07):
+        lowball(b, c, 0.03, (0.0, 0.0, 12.0, float(i % 5 == 4)), (0.13 * (i % 7), 4.0 + 0.1 * (i // 7)))
+        i += 1
+    strand = [(0.03, 0.2, z0 + 0.03), (0.11, 0.215, z0 - 0.09), (0.2, 0.21, z0 - 0.19), (0.27, 0.16, z0 - 0.27)]
+    d = 0.0
+    for c in along(strand, 0.058):
+        lowball(b, c, 0.027, (d, 0.0, 11.0, float(i % 5 == 4)), (0.13 * (i % 7), 4.0 + 0.1 * (i // 7)))
+        i += 1
+        d += 0.058
+    return [b]
+
+
 def locs_bag():
     b = Bag("locs")
     jw = Bag("beads")
-    gl = Bag("crystals")
     for li, (ch, rad, pts) in enumerate(T.LOCS):
         P = np.array(pts, np.float32) + HC
         L = float(np.linalg.norm(np.diff(P, axis=0), axis=1).sum())
@@ -264,25 +307,7 @@ def locs_bag():
             sweep(jw, seg[:3], [r0 * 0.9, r0, r0 * 0.9], 6, lambda i_, k: (d, k / 6.0, ci, kid), ofs=(gi * 0.2, 2.0))
             # (the near end's cap)
             n0 = len(jw.v) - 7 * 4
-        if kind in ("crystal", "geode"):
-            # a small bipyramid standing on the loc, facing out
-            out = np.cross(tan, np.array((0.2, 1.0, 0.1), np.float32))
-            out = c - HC + 0.0 * out
-            out[2] = 0
-            out = out / max(float(np.linalg.norm(out)), 1e-6)
-            base = c + out * (R0 * (1.55 if kind == "geode" else 1.0))
-            w, hgt = 0.015, 0.03
-            side = np.cross(tan, out)
-            n0 = len(gl.v)
-            ring = [base + tan * hgt, base + side * w + out * 0.006, base - tan * hgt, base - side * w + out * 0.006]
-            gl.v += [tuple(p) for p in ring] + [tuple(base + out * 0.016), tuple(base - out * 0.01)]
-            gl.a += [(d, 0.0, ci, 0.0)] * 6
-            for a_, b_ in ((0, 1), (1, 2), (2, 3), (3, 0)):
-                gl.f.append((n0 + a_, n0 + b_, n0 + 4))
-                gl.uv.append(((gi * 0.1, 3.0), (gi * 0.1 + 0.03, 3.0), (gi * 0.1 + 0.015, 3.03)))
-                gl.f.append((n0 + b_, n0 + a_, n0 + 5))
-                gl.uv.append(((gi * 0.1, 3.1), (gi * 0.1 + 0.03, 3.1), (gi * 0.1 + 0.015, 3.13)))
-    return [b, jw, gl]
+    return [b, jw]
 
 
 SASH_TAILS = {"sa": [(-0.03, 0.2, 0.0), (-0.02, 0.215, -0.08), (-0.042, 0.212, -0.22), (-0.05, 0.215, -0.36), (-0.04, 0.215, -0.46)],
@@ -300,7 +325,7 @@ def ribbons_bag():
         n = 8 if nm == "sa" else 6
         path = T.smooth_path(P, n)
         d = np.concatenate(([0], np.cumsum(np.linalg.norm(np.diff(path, axis=0), axis=1))))
-        flat = [(0.026 + 0.02 * min(1.0, i / 2.0) * (1 - 0.32 * (i == n - 1)), 0.008) for i in range(n)]
+        flat = [(0.03 + 0.03 * min(1.0, i / 2.0) * (1 - 0.32 * (i == n - 1)), 0.008) for i in range(n)]
         sweep(sash, path, [0.03] * n, 6, lambda i, k: (d[i], k / 6.0, 7 + j, 0.0), flat=flat, ofs=(j * 0.3, 0.0))
     for j, (nm, pts) in enumerate(BAND_TAILS.items()):
         P = np.array(pts, np.float32) + HC
@@ -348,11 +373,26 @@ def drop_floaters(bm, keep=0.015):
     return len(isles)
 
 
+REMESH_FIRST = ("cap", "geode")
+
+
 def decimate(ob, target, protect=None):
     me = ob.data
     bm = bmesh.new()
     bm.from_mesh(me)
     isles = drop_floaters(bm)
+    if ob.name in REMESH_FIRST:
+        # (the slabs' jumps leave pinched sheets the collapse turns into duplicate faces, which validate then deletes as
+        # holes: a voxel remesh first makes the part manifold)
+        bm.to_mesh(me)
+        bm.free()
+        r = ob.modifiers.new("rem", "REMESH")
+        r.mode = "VOXEL"
+        r.voxel_size = 0.0042
+        bpy.context.view_layer.objects.active = ob
+        bpy.ops.object.modifier_apply(modifier=r.name)
+        bm = bmesh.new()
+        bm.from_mesh(me)
     bmesh.ops.triangulate(bm, faces=bm.faces)
     bm.to_mesh(me)
     bm.free()
@@ -387,7 +427,7 @@ def decimate(ob, target, protect=None):
         pl.use_smooth = True
 
 
-ROCK = ("bracer_R", "bracer_L", "geode", "shard")
+ROCK = ("geode", "shard")
 
 
 def sharp_edges(ob, deg=38):
@@ -402,7 +442,7 @@ def sharp_edges(ob, deg=38):
 
 def geode_parts():
     """The seeing-stone's rock and its iris, one mesh shared by the three stones (in its own space, the face to +Y)."""
-    rk = dict(f=lambda P: T.geode(P, GEO_R), lo=S.vec(-0.12, -0.11, -0.13), hi=S.vec(0.12, 0.09, 0.13), h=0.0035, tris=400)
+    rk = dict(f=lambda P: T.geode(P, GEO_R), lo=S.vec(-0.12, -0.11, -0.13), hi=S.vec(0.12, 0.09, 0.13), h=0.0035, tris=380)
     ir = dict(f=lambda P: T.geode_iris(P, GEO_R), lo=S.vec(-0.06, -0.01, -0.06), hi=S.vec(0.06, 0.05, 0.06), h=0.003, tris=80)
     shard = dict(f=lambda P: S.ellipsoid(P, (0, 0, 0), (0.03, 0.022, 0.04)) + 0.008 * S.fbm(P, 50.0, 4, 2), lo=S.vec(-0.05, -0.04, -0.06), hi=S.vec(0.05, 0.04, 0.06), h=0.004, tris=24)
     PARTS["geode"] = rk
@@ -417,8 +457,8 @@ def geode_parts():
 
 
 # ---------------------------------------------------------------------------------------------------------- uvs
-UV_K = {"head": 2.4, "teeth": 1.2, "bandana": 1.3, "hands": 1.5, "torso": 1.2, "geode": 2.2, "iris": 3.0, "locs": 0.7, "beads": 0.6,
-        "cap": 0.8, "crown": 0.8, "shoulders": 0.9, "crystals": 0.8, "shard": 8.0, "wraps": 1.1, "harness": 0.8, "gear": 1.0, "legs": 1.0}
+UV_K = {"head": 2.4, "teeth": 1.2, "bandana": 1.3, "hands": 1.4, "torso": 1.5, "stone": 1.4, "geode": 2.2, "iris": 3.0, "locs": 0.7, "beads": 0.6, "prayer": 0.5,
+        "cap": 0.8, "shard": 8.0, "wraps": 1.1, "legs": 1.0}
 
 
 def smoothed(ob, iters=30, k=0.8):
@@ -437,6 +477,108 @@ def smoothed(ob, iters=30, k=0.8):
     return V
 
 
+def islands(ob):
+    """UV islands of a mesh: lists of polygon indices, joined where polygons share a vertex at the same uv."""
+    me = ob.data
+    uv = me.uv_layers.active.data
+    parent = list(range(len(me.polygons)))
+
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    seen = {}
+    for pl in me.polygons:
+        for li in pl.loop_indices:
+            u = uv[li].uv
+            key = (me.loops[li].vertex_index, round(u[0], 5), round(u[1], 5))
+            if key in seen:
+                parent[find(pl.index)] = find(seen[key])
+            else:
+                seen[key] = pl.index
+    out = {}
+    for pl in me.polygons:
+        out.setdefault(find(pl.index), []).append(pl.index)
+    return list(out.values())
+
+
+def shelves(items, k, gap):
+    """Shelf layout of (w, h) at scale k in the unit square: [(x, y)] or None when it overflows."""
+    x = y = gap
+    row = 0.0
+    out = []
+    for w, h in items:
+        w, h = w * k, h * k
+        if x + w + gap > 1.0:
+            x = gap
+            y += row + gap
+            row = 0.0
+        if w + 2 * gap > 1.0 or y + h + gap > 1.0:
+            return None
+        out.append((x, y))
+        x += w + gap
+        row = max(row, h)
+    return out
+
+
+def pack(objs, gap=0.0016):
+    """A plain shelf pack (Blender's packer left most of the atlas empty here): islands stood on end, tallest first, at the
+    largest scale that fits."""
+    isl = []
+    for ob in objs:
+        lay = ob.data.uv_layers.active
+        u = np.zeros(len(lay.data) * 2, np.float32)
+        lay.data.foreach_get("uv", u)
+        u = u.reshape(-1, 2)
+        me = ob.data
+        tex = float(UV_K.get(ob.name, 1.0))
+        for polys in islands(ob):
+            loops = [li for pi in polys for li in me.polygons[pi].loop_indices]
+            q = u[loops].copy()
+            a3 = sum(me.polygons[pi].area for pi in polys)
+            a2 = 0.0
+            for pi in polys:
+                p = u[list(me.polygons[pi].loop_indices)]
+                a2 += 0.5 * abs(float(np.dot(p[:, 0], np.roll(p[:, 1], 1)) - np.dot(p[:, 1], np.roll(p[:, 0], 1))))
+            # (each island to metres, whatever the unwrap left it at; a collapsed one stays a speck)
+            if a2 < 1e-6:
+                # (collapsed on the smoothed copy: projected flat from the real shape instead, or its faces sample one texel)
+                co = np.array([me.vertices[me.loops[li].vertex_index].co[:] for li in loops], np.float32)
+                nr = np.sum([np.array(me.polygons[pi].normal[:]) * me.polygons[pi].area for pi in polys], axis=0)
+                keep_ax = [i for i in range(3) if i != int(np.argmax(np.abs(nr)))]
+                q = co[:, keep_ax] * tex
+            else:
+                q *= tex * math.sqrt(a3 / a2)
+            lo, hi = q.min(0), q.max(0)
+            size = np.minimum(hi - lo, 1.2) + 1e-4
+            q = np.minimum(q - lo, size) + lo
+            turn = size[0] > size[1]
+            isl.append((float(max(size)), float(min(size)), turn, lo, ob, loops, q))
+    isl.sort(key=lambda t: -t[0])
+    items = [(t[1], t[0]) for t in isl]
+    lo_k, hi_k = 0.0, 1e4
+    for _ in range(40):
+        k = 0.5 * (lo_k + hi_k)
+        if shelves(items, k, gap) is None:
+            hi_k = k
+        else:
+            lo_k = k
+    places = shelves(items, lo_k, gap)
+    data = {}
+    for (h, w, turn, lo, ob, loops, q), (x, y) in zip(isl, places):
+        p = (q - lo) * lo_k
+        if turn:
+            p = p[:, ::-1]
+        p = p + np.array((x, y), np.float32)
+        arr = data.setdefault(ob.name, np.zeros((len(ob.data.uv_layers.active.data), 2), np.float32))
+        arr[loops] = p
+    for ob in objs:
+        ob.data.uv_layers.active.data.foreach_set("uv", data[ob.name].ravel())
+    log("%d islands, scale %.3f" % (len(isl), lo_k))
+
+
 def unwrap(objs):
     sdf = [o for o in objs if not o.get("swept")]
     bpy.ops.object.select_all(action="DESELECT")
@@ -446,7 +588,7 @@ def unwrap(objs):
     for o in sdf:
         o.select_set(True)
         keep[o.name] = verts_np(o).copy()
-        o.data.vertices.foreach_set("co", smoothed(o).ravel())
+        o.data.vertices.foreach_set("co", smoothed(o, 6 if o.name == "stone" else 30).ravel())
         o.data.update()
     bpy.context.view_layer.objects.active = sdf[0]
     bpy.ops.object.mode_set(mode="EDIT")
@@ -456,35 +598,21 @@ def unwrap(objs):
     for o in sdf:
         o.data.vertices.foreach_set("co", keep[o.name].ravel())
         o.data.update()
-    for o in objs:
-        o.select_set(True)
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="SELECT")
-    bpy.context.scene.tool_settings.use_uv_select_sync = True
-    bpy.ops.uv.select_all(action="SELECT")
-    bpy.ops.uv.average_islands_scale()
-    bpy.ops.object.mode_set(mode="OBJECT")
-    for o in objs:
-        k = UV_K.get(o.name, 1.0)
-        lay = o.data.uv_layers.active
-        if lay is None:
-            continue
-        a = np.zeros(len(lay.data) * 2, np.float32)
-        lay.data.foreach_get("uv", a)
-        lay.data.foreach_set("uv", a * k)
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.select_all(action="SELECT")
     t0 = time.time()
-    bpy.ops.uv.pack_islands(rotate=True, scale=True, margin_method="FRACTION", margin=0.0035, shape_method="CONCAVE")
-    bpy.ops.object.mode_set(mode="OBJECT")
+    pack(objs)
     log("packed in %.1f s" % (time.time() - t0))
     for o in objs:
         lay = o.data.uv_layers.active
         u = np.zeros(len(lay.data) * 2, np.float32)
         lay.data.foreach_get("uv", u)
         u = u.reshape(-1, 2)
-        log("uv", o.name, u.min(0), u.max(0))
+        tr = u[:, 0]
+        o.data.calc_loop_triangles()
+        lt = np.zeros(len(o.data.loop_triangles) * 3, np.int32)
+        o.data.loop_triangles.foreach_get("loops", lt)
+        q = u[lt].reshape(-1, 3, 2)
+        area = np.abs((q[:, 1, 0] - q[:, 0, 0]) * (q[:, 2, 1] - q[:, 0, 1]) - (q[:, 2, 0] - q[:, 0, 0]) * (q[:, 1, 1] - q[:, 0, 1])).sum() / 2
+        log("uv", o.name, len(o.data.polygons), "area %.4f" % area)
 
 
 # -------------------------------------------------------------------------------------------- paint: fields
@@ -495,11 +623,11 @@ def world_grids():
     hi = np.array((0.5, 0.34, float(HC[2] + 0.24)), np.float32)
     n = np.ceil((hi - lo) / h).astype(int)
     pts = np.stack(np.meshgrid(*[lo[i] + np.arange(n[i]) * h for i in range(3)], indexing="ij"), -1).reshape(-1, 3).astype(np.float32)
-    arms = ("arms", "hands", "bracer_R", "bracer_L")
+    arms = ("arms", "hands", "stone", "bracer_L")
     b = np.full(pts.shape[0], 9.0, np.float32)
     a = b.copy()
     for nm, p in PARTS.items():
-        if nm in ("geode", "iris", "shard", "teeth", "gear"):
+        if nm in ("geode", "iris", "shard", "teeth"):
             continue
         m = ((pts >= p["lo"] - 0.1) & (pts <= p["hi"] + 0.1)).all(1)
         d = S.chunked(p["f"], pts[m])
@@ -550,13 +678,17 @@ def main():
         ob = part_mesh(nm, p)
         decimate(ob, p["tris"], PROTECT.get(nm))
         objs.append(ob)
-    swept = [b.ob() for b in locs_bag() + ribbons_bag()]
+    swept = [b.ob() for b in locs_bag() + ribbons_bag() + prayer_bag()]
     props = geode_parts()
     objs += swept + props
     log("tris", {o.name: len(o.data.polygons) for o in objs}, "total", K.tris(objs))
     unwrap(objs)
     log("unwrapped %.0f s" % (time.time() - t0))
     if MODE == "low":
+        for o in objs:
+            n = len(o.data.polygons)
+            ch = o.data.validate(verbose=False)
+            log("valid", o.name, n, "->", len(o.data.polygons), ch)
         return
     img, emit = paint_all(objs)
     assemble(objs, img, emit)

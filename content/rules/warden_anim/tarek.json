@@ -9,10 +9,6 @@
 		"fingers2.L": "fingers.L",
 		"thumb.L": "hand.L",
 		"thumb2.L": "thumb.L",
-		"fingers.R": "hand.R",
-		"fingers2.R": "fingers.R",
-		"thumb.R": "hand.R",
-		"thumb2.R": "thumb.R",
 		"jaw": "head",
 		"lip.L": "head",
 		"lip.R": "head"
@@ -142,10 +138,6 @@
 		"fingers2.L",
 		"thumb.L",
 		"thumb2.L",
-		"fingers.R",
-		"fingers2.R",
-		"thumb.R",
-		"thumb2.R",
 		"jaw",
 		"lip.L",
 		"lip.R"

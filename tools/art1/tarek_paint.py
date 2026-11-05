@@ -2,7 +2,7 @@
 # not a lit render: the toon shader adds only a soft light on top (WardenGlb.PAINTED).
 PX = 2048
 AMBER = S.hexc("ff9420")
-HOT = S.hexc("ffd870")
+HOT = S.hexc("ffb448")
 
 
 def lightness(key, occ, cav, a=0.74):
@@ -49,8 +49,32 @@ def p_teeth(P, N, occ, cav, a):
     return c, None
 
 
-def p_skin(P, N, occ, cav, a):
-    return skin(P, N, occ, cav), None
+def p_torso(P, N, occ, cav, a):
+    c = skin(P, N, occ, cav)
+    t = T.strata(P, R)
+    c = S.mix(c, tones("17141a", "2c2830", "4a4450", T.key_shade(N)), t * 0.92)
+    return c, None
+
+
+def p_arm(P, N, occ, cav, a):
+    c = skin(P, N, occ, cav)
+    return S.mix(c, S.hexc("1e1a20")[None, :], T.left_tattoos(P, R) * 0.92), None
+
+
+def p_stone(P, N, occ, cav, a):
+    idx, d1, gap = S.voronoi(P, SEEDS_A)
+    v = lightness(T.key_shade(N), occ, cav * 0.5, 0.74) + 0.05 * S.fbm(P, 24.0, 6, 3) + 0.05
+    tint = 0.94 + 0.09 * np.sin(idx * 2.7)
+    c = tones("3a3e4a", "6c7180", "a4aab8", v) * tint[:, None]
+    c = crease(c, np.maximum(cav, 0.0) * 0.7, "2a2c36", 0.75)
+    crack = S.sstep(0.017, 0.008, gap)
+    c = S.mix(c, S.hexc("7a2c10")[None, :], crack)
+    hot = S.sstep(0.0135, 0.0065, gap)
+    core = S.sstep(0.0075, 0.0025, gap)
+    col = S.mix(S.hexc("f06010")[None, :], S.hexc("ffa030")[None, :], core)
+    c = S.mix(c, col, hot)
+    c = S.mix(c, S.hexc("e8742a")[None, :], S.sstep(0.03, 0.012, gap) * (1 - hot) * 0.35)
+    return c, col * hot[:, None]
 
 
 def p_hands(P, N, occ, cav, a):
@@ -74,7 +98,7 @@ def p_rock(P, N, occ, cav, a, seeds):
     idx, d1, gap = S.voronoi(P, seeds)
     v = lightness(T.key_shade(N), occ, cav * 0.6, 0.7) + 0.08 * S.fbm(P, 30.0, 6, 3)
     tint = 0.92 + 0.14 * np.sin(idx * 2.7)
-    c = tones("7c6648", "c9b796", "f2e6cc", v + 0.06)
+    c = tones("3a3e4a", "6c7180", "a4aab8", v + 0.06)
     # chipped lighter edges, dark grit
     speck = S.fbm(P, 90.0, 12, 2)
     c = crease(c, np.maximum(cav, 0.0) * 0.8, "241a14", 0.8)
@@ -84,7 +108,7 @@ def p_rock(P, N, occ, cav, a, seeds):
     run = S.sstep(-0.2, 0.05, S.fbm(P, 7.0, 21, 2))
     burn = S.sstep(0.016, 0.007, gap) * run
     spill = S.sstep(0.04, 0.01, gap) * run
-    c = S.mix(c, S.hexc("c8501a")[None, :], spill * 0.55)
+    c = S.mix(c, S.hexc("c8501a")[None, :], spill * 0.4)
     c = S.mix(c, S.mix(AMBER[None, :], HOT[None, :], S.sstep(0.007, 0.002, gap)), burn)
     e = S.mix(S.hexc("ff8a1c")[None, :], HOT[None, :], S.sstep(0.007, 0.002, gap)) * burn[:, None]
     return c, e
@@ -95,18 +119,6 @@ def p_bandana(P, N, occ, cav, a):
     c = tones("80705a", "c4b296", "ece2cc", v)
     stain = S.sstep(0.05, 0.4, S.fbm(P, 18.0, 15, 3))
     return crease(S.mix(c, c * S.hexc("c8a888"), stain * 0.7), cav, "4e4032", 0.8), None
-
-
-def p_vest(P, N, occ, cav, a):
-    v = lightness(T.key_shade(N), occ, cav) + 0.035 * T.strokes(P, 32.0, 7)
-    c = tones("232c3c", "4a5c76", "8ca2bc", v)
-    trim = T.vest_trim(P, R)
-    c = S.mix(c, tones("34445a", "6f88a6", "a8bdd2", v), trim * 0.8)
-    wear = S.sstep(0.28, 0.5, S.fbm(P, 16.0, 17, 3))
-    c = S.mix(c, c * S.hexc("d8c8b0") * 1.15, wear * 0.45)
-    st = (np.sin(P[:, 2] * 420.0) > 0.2) * S.sstep(0.0035, 0.0015, np.abs(np.abs(P[:, 0]) - (0.066 + 0.1 * np.clip((float(R.waist[2]) + 0.6 - P[:, 2]) / 0.42, 0, 1)) - 0.024)) * (P[:, 1] > 0)
-    c = S.mix(c, S.hexc("c8c0b0")[None, :], st * 0.75)
-    return crease(c, cav, "16171c"), None
 
 
 def p_sash(P, N, occ, cav, a):
@@ -136,21 +148,15 @@ def p_wrap(P, N, occ, cav, a):
 
 def p_trousers(P, N, occ, cav, a):
     v = lightness(T.key_shade(N), occ, cav * 0.9) + 0.02 * T.strokes(P, 26.0, 23)
-    c = tones("46341c", "93733f", "c4a26a", v)
-    dirt = S.sstep(0.62, 0.42, P[:, 2]) * 0.12 + 0.08 * S.sstep(0.1, 0.45, S.fbm(P, 11.0, 25, 3))
-    c = S.mix(c, c * S.hexc("c8a888"), dirt)
-    # the knee patch and its big stitches
-    pa = T.trouser_patch(P)
-    m = S.sstep(-0.001, 0.002, pa)
-    c = S.mix(c, tones("3a2415", "7c5333", "a87a4e", v), m)
-    edge = S.sstep(0.012, 0.007, np.abs(pa - 0.002))
-    q = (P - S.vec(0.128, 0.115, 0.71))
-    st = S.sstep(0.0, 0.6, np.sin((q[:, 0] + q[:, 2]) * 190.0))
-    c = S.mix(c, S.hexc("e8d8b8")[None, :], edge * st * 0.8 * (P[:, 1] > 0.05))
-    # the inner faces where the legs part stay in shade
-    inner = S.sstep(0.03, 0.012, np.abs(P[:, 0])) * S.sstep(float(R.hip[2]) - 0.1, float(R.hip[2]) - 0.16, P[:, 2])
-    c = S.mix(c, S.hexc("4a3620")[None, :], inner)
-    return crease(c, cav, "2e2010", 0.55), None
+    c = tones("1e1816", "463830", "75604e", v)
+    # the tan piping down the outer seam
+    Q = T.fold_x(P)
+    az = np.arctan2(Q[:, 1], Q[:, 0] - float(R.hip[0]))
+    pipe = S.sstep(0.09, 0.05, np.abs(az)) * S.sstep(0.5, 0.48, np.abs(P[:, 2] - 0.8))
+    c = S.mix(c, tones("6e5230", "c29a5c", "e6c88c", v), pipe)
+    inner = S.sstep(0.03, 0.016, np.abs(P[:, 0])) * S.sstep(float(R.hip[2]) - 0.1, float(R.hip[2]) - 0.16, P[:, 2])
+    c = S.mix(c, S.hexc("120e0c")[None, :], inner)
+    return crease(c, cav, "0e0a08", 0.55), None
 
 
 def p_legs(P, N, occ, cav, a):
@@ -163,31 +169,13 @@ def p_legs(P, N, occ, cav, a):
 
 def p_wraps(P, N, occ, cav, a):
     v = lightness(T.key_shade(N), occ, cav * 1.3) + 0.05 * T.strokes(P, 40.0, 27)
-    return crease(tones("7e705c", "c8bca4", "ece4d0", v), cav, "4a3e30", 0.85), None
-
-
-def p_harness(P, N, occ, cav, a):
-    v = lightness(T.key_shade(N), occ, cav)
-    c = tones("1a1516", "3a3031", "6a5a58", v)
-    st = (np.sin((P[:, 0] + P[:, 1] + P[:, 2]) * 300.0) > 0.3) * S.sstep(0.0, 0.3, S.noise(P, 60.0, 3))
-    return S.mix(c, S.hexc("8a7a68")[None, :], st * 0.25), None
-
-
-def p_gear(P, N, occ, cav, a):
-    v = lightness(T.key_shade(N), occ, cav, 0.8)
-    v = v + 0.25 * S.sstep(0.65, 0.92, T.key_shade(N))
-    return tones("3e444c", "8a939c", "e8eef2", v), None
-
-
-def p_pouch(P, N, occ, cav, a):
-    v = lightness(T.key_shade(N), occ, cav)
-    return crease(tones("544228", "a08a5c", "d0bb8a", v), cav, "2e2414"), None
+    return crease(tones("2e2218", "6e5842", "a08a6c", v), cav, "4a3e30", 0.85), None
 
 
 def p_hair(P, N, occ, cav, a):
     key = T.key_shade(N)
     v = lightness(key, occ, cav, 0.75)
-    c = tones("160c0c", "38221f", "76503f", v + 0.1)
+    c = tones("08080c", "18181e", "40424e", v)
     c = crease(c, cav, "060405", 0.9)
     sheen = S.sstep(0.68, 0.9, key) * S.sstep(-0.1, 0.5, S.noise(P * S.vec(1, 1, 0.3), 46.0, 3))
     return S.mix(c, S.hexc("6e6a7e")[None, :], sheen * 0.3), None
@@ -198,9 +186,9 @@ def p_locs(P, N, occ, cav, a):
     ph = a[:, 1] * 6.283 * 2.0 + a[:, 0] * 86.0
     groove = 0.5 + 0.5 * np.sin(ph)
     v = (0.3 + 0.7 * key) * (0.4 + 0.6 * S.sstep(0.05, 0.55, groove)) * (0.55 + 0.45 * occ)
-    c = tones("160c0c", "38221f", "7a5244", v * 1.25)
+    c = tones("08080c", "16161c", "3c3e4c", v)
     sheen = S.sstep(0.74, 0.95, key) * S.sstep(0.45, 0.9, groove)
-    return S.mix(c, S.hexc("a87a58")[None, :], sheen * 0.45), None
+    return S.mix(c, S.hexc("6c7694")[None, :], sheen * 0.5), None
 
 
 def p_beads(P, N, occ, cav, a):
@@ -226,10 +214,10 @@ def p_geode(P, N, occ, cav, a):
     Pn = P / GEO_R
     rad = np.sqrt(Pn[:, 0] ** 2 + Pn[:, 2] ** 2)
     v = lightness(T.key_shade(N), occ, cav * 0.7, 0.65) + 0.08 * S.fbm(Pn, 5.0, 6, 3)
-    c = tones("6e5e4e", "bcab90", "efe4cc", v + 0.1)
+    c = tones("5c5448", "a09482", "d0c6b4", v + 0.05)
     # the pale banded rim, the crystals going warm toward the eye
     face = S.sstep(0.0, 0.3, Pn[:, 1])
-    rim = tones("8c7a68", "dccbb4", "fff4e4", v + 0.1)
+    rim = tones("7c7060", "c4b8a4", "ecE2d0", v + 0.05)
     c = S.mix(c, rim, face * S.sstep(0.98, 0.84, rad))
     band = S.sstep(0.03, 0.0, np.abs(rad - 0.82 - 0.02 * np.sin(np.arctan2(Pn[:, 2], Pn[:, 0]) * 6.0)))
     c = S.mix(c, S.hexc("a88a6c")[None, :], band * face * 0.8)
@@ -252,13 +240,19 @@ def p_iris(P, N, occ, cav, a):
     return c, c * 0.8
 
 
-P_FN = {"head": p_head, "teeth": p_teeth, "torso": p_skin, "arms": p_skin, "hands": p_hands, "legs": p_legs,
-        "bandana": p_bandana, "cap": p_hair, "crown": p_sash, "shoulders": p_sash, "vest": p_vest, "wrap": p_wrap, "sash": p_sash, "trousers": p_trousers,
-        "wraps": p_wraps, "harness": p_harness, "gear": p_gear, "pouch": p_pouch, "locs": p_locs, "beads": p_beads,
-        "crystals": p_crystals, "sash_tails": p_tails, "band_tails": p_band_tails, "geode": p_geode, "iris": p_iris,
+P_FN = {"head": p_head, "teeth": p_teeth, "torso": p_torso, "arms": p_arm, "hands": p_hands, "legs": p_legs,
+        "bandana": p_bandana, "cap": p_hair, "skirt": p_sash, "stone": p_stone, "prayer": lambda P, N, o, c, a: p_prayer(P, N, o, c, a), "wrap": p_wrap, "sash": p_sash, "trousers": p_trousers,
+        "wraps": p_wraps, "locs": p_locs, "beads": p_beads,
+        "sash_tails": p_tails, "band_tails": p_band_tails, "geode": p_geode, "iris": p_iris,
         "shard": lambda P, N, o, c, a: p_shard(P, N, o, c, a),
-        "bracer_R": lambda P, N, o, c, a: p_rock(P, N, o, c, a, SEEDS_R),
         "bracer_L": lambda P, N, o, c, a: p_rock(P, N, o, c, a, SEEDS_L)}
+
+
+def p_prayer(P, N, occ, cav, a):
+    v = T.key_shade(N) * (0.55 + 0.45 * occ)
+    pale = tones("6c6356", "bdb3a0", "ece6d8", v + 0.05)
+    dark = tones("3c2a20", "7a5a44", "b08e70", v)
+    return np.where((a[:, 3] > 0.5)[:, None], dark, pale), None
 
 
 def p_shard(P, N, occ, cav, a):
@@ -268,7 +262,7 @@ def p_shard(P, N, occ, cav, a):
 
 _rs = np.random.RandomState(7)
 HAND_SEEDS = np.stack((np.zeros(9), _rs.uniform(-0.08, 0.08, 9), _rs.uniform(-0.13, 0.04, 9)), 1).astype(np.float32)
-ARMS = ("arms", "hands", "bracer_R", "bracer_L")
+ARMS = ("arms", "hands", "stone", "bracer_L")
 
 
 def corners(ob):

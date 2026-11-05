@@ -1,9 +1,8 @@
 # Tarek's armature, weights and assembly (exec'd by tarek_build.py).
 SLOT = {"head": "skin", "teeth": "skin", "torso": "skin", "arms": "skin", "hands": "skin", "legs": "skin",
-        "bandana": "cloth", "band_tails": "cloth", "vest": "cloth", "wrap": "cloth", "sash": "cloth-accent",
-        "sash_tails": "cloth-accent", "crown": "cloth-accent", "shoulders": "cloth-accent",
-        "trousers": "cloth", "wraps": "cloth", "pouch": "cloth", "harness": "leather", "bracer_R": "leather",
-        "bracer_L": "leather", "gear": "metal", "beads": "metal", "cap": "hair", "locs": "hair-braid", "crystals": "glow"}
+        "bandana": "cloth", "band_tails": "cloth", "wrap": "cloth", "sash": "cloth-accent", "skirt": "cloth-accent",
+        "sash_tails": "cloth-accent", "trousers": "cloth", "wraps": "cloth", "stone": "leather", "bracer_L": "leather",
+        "prayer": "leather-beads", "beads": "metal", "cap": "hair", "locs": "hair-braid"}
 FX = float(R.kn[0])
 
 
@@ -29,12 +28,14 @@ def add_bones(arm):
         wr = R.wr * f
         K_ = S.vec(0, 0, T.KNUCKLE_Z)
         bone("foot." + sd, "shin." + sd, R.ankle * f, R.ankle * f + S.vec(0, 0.12, -0.04), (0, 0, 1))
+        bone("lip." + sd, "head", HC + S.vec(0.062 * sx, 0.1, -0.068), HC + S.vec(0.062 * sx, 0.125, -0.068), (0, 0, 1))
+        if sd == "R":
+            continue        # (his stone fist never opens)
         bone("fingers." + sd, "hand." + sd, wr + K_ * f, wr + (K_ + S.vec(-0.02, 0, -0.045)) * f, (sx, 0, 0))
         bone("fingers2." + sd, "fingers." + sd, wr + (K_ + S.vec(-0.02, 0, -0.045)) * f, wr + (K_ + S.vec(-0.06, 0, -0.09)) * f, (sx, 0, 0))
         th = T.THUMB
         bone("thumb." + sd, "hand." + sd, wr + th[0] * f, wr + th[1] * f, (sx, 0, 0))
         bone("thumb2." + sd, "thumb." + sd, wr + th[1] * f, wr + th[3] * f, (sx, 0, 0))
-        bone("lip." + sd, "head", HC + S.vec(0.062 * sx, 0.1, -0.068), HC + S.vec(0.062 * sx, 0.125, -0.068), (0, 0, 1))
     bone("jaw", "head", HC + S.vec(0, -0.02, -0.055), HC + S.vec(0, 0.09, -0.125), (0, 0, 1))
     for nm, pts in T.CHAINS.items():
         chain(bone, "spring_loc%s_" % nm, "head", np.array(pts, np.float32) + HC)
@@ -42,6 +43,8 @@ def add_bones(arm):
         chain(bone, "spring_%s_" % nm, "hips", T.smooth_path(np.array(pts, np.float32) + S.vec(0, 0, float(R.waist[2]) + 0.07), 4))
     for j, (nm, pts) in enumerate(BAND_TAILS.items()):
         chain(bone, "spring_%s_" % nm, "head", T.smooth_path(np.array(pts, np.float32) + HC, 3))
+    z0 = float(R.waist[2])
+    chain(bone, "spring_pb_", "hips", np.array(((0.03, 0.2, z0 + 0.03), (0.15, 0.22, z0 - 0.13), (0.27, 0.16, z0 - 0.27)), np.float32))
     bpy.ops.object.mode_set(mode="OBJECT")
 
 
@@ -68,6 +71,34 @@ def w_arm(P):
         out["forearm." + sd] = fore * m
         out["upper_arm." + sd] = (1 - fore) * (1 - hips) * m
     return out
+
+
+def w_stone(P):
+    """Each slab rides one bone whole: stone doesn't bend, the cracks open instead."""
+    idx, _, _ = S.voronoi(P, SEEDS_A)
+    sz = SEEDS_A[idx, 2]
+    sx = SEEDS_A[idx, 0]
+    chest = (sx < R.sh[0] - 0.05) & (sz > R.sh[2] - 0.22)
+    fore = sz <= R.el[2] + 0.03
+    hand_ = sz <= R.wr[2] - 0.02
+    return {"hips": chest * 1.0, "upper_arm.R": (~chest & ~fore) * 1.0, "forearm.R": (~chest & fore & ~hand_) * 1.0, "hand.R": (~chest & hand_) * 1.0}
+
+
+def w_skirt(P):
+    z = P[:, 2]
+    leg = smooth(R.waist[2] - 0.02, R.waist[2] - 0.32, z) * 0.75
+    out = {"root": 1 - leg}
+    for sd, m in sides(P):
+        out["thigh." + sd] = leg * m
+    return out
+
+
+def w_prayer(P, a):
+    strand = a[:, 2] == 11
+    d = a[:, 0]
+    u = np.clip(d / 0.34, 0.0, 1.0)
+    root = smooth(0.08, 0.0, d) * strand
+    return {"hips": ((~strand) * 1.0 + root).astype(np.float32), "spring_pb_0": (strand * (1 - root) * (1 - u)).astype(np.float32), "spring_pb_1": (strand * (1 - root) * u).astype(np.float32)}
 
 
 def w_hand(P):
@@ -199,16 +230,17 @@ def w_swept(nm, P, a):
 
 WEIGHT = {"head": w_head, "teeth": lambda P: {"head": np.ones(P.shape[0], np.float32)},
           "bandana": lambda P: {"head": np.ones(P.shape[0], np.float32)}, "cap": lambda P: {"head": np.ones(P.shape[0], np.float32)},
-          "crown": lambda P: {"head": np.ones(P.shape[0], np.float32)}, "shoulders": w_arm,
-          "torso": w_torso, "arms": w_arm, "hands": w_hand, "vest": w_hips, "wrap": w_hips, "sash": w_root, "trousers": w_legs,
-          "legs": w_legs, "wraps": w_legs, "harness": w_legs, "gear": w_root, "pouch": w_root,
-          "bracer_R": lambda P: {"forearm.R": np.ones(P.shape[0], np.float32)},
+          "stone": w_stone, "skirt": w_skirt,
+          "torso": w_torso, "arms": w_arm, "hands": w_hand, "wrap": w_hips, "sash": w_root, "trousers": w_legs,
+          "legs": w_legs, "wraps": w_legs,
           "bracer_L": lambda P: {"forearm.L": np.ones(P.shape[0], np.float32)}}
 
 
 def set_weights(ob):
     P = verts_np(ob)
-    if ob.get("swept"):
+    if ob.name == "prayer":
+        w = w_prayer(P, ATTR[ob.name])
+    elif ob.get("swept"):
         w = w_swept(ob.name, P, ATTR[ob.name])
     else:
         w = WEIGHT[ob.name](P)
@@ -270,8 +302,6 @@ def assemble(objs, img, emit):
     bpy.ops.object.select_all(action="DESELECT")
     for ob in small:
         ob.select_set(True)
-    bpy.context.view_layer.objects.active = small[0]
-    bpy.ops.object.join()
     beads = small[0]
     beads.name = "tarek_beads"
     beads.data.name = "tarek_beads"
@@ -320,9 +350,37 @@ def assemble(objs, img, emit):
     # (the Gun node, which kit FX read, rides the right fist: WardenClips "blade")
     extras.append(K.anchor(arm, "hand.R", "anchor_wrist_R", R.wr))
     extras.append(K.anchor(arm, "hand.R", "weapon_muzzle", R.wr + S.vec(0, 0, -0.17)))
+    extras.append(ground_rings(arm))
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, "tarek.blend"))
     log("tris total", K.tris([main_ob, beads]) + 3 * n_geo + 5 * n_shard)
     K.export(os.path.join(OUT, "tarek.glb"), [arm, main_ob, beads] + extras, image_format="JPEG")
+
+
+def ground_rings(arm):
+    """The glowing rings under his feet: two broken arcs on the ground (they travel with him)."""
+    bm = bmesh.new()
+    for rad, w, arcs in ((0.62, 0.016, ((0.1, 2.9), (3.4, 5.9))), (0.46, 0.013, ((1.2, 3.9), (4.5, 6.9)))):
+        for a0, a1 in arcs:
+            n = 12
+            vs = []
+            for i in range(n + 1):
+                a = a0 + (a1 - a0) * i / n
+                t = 1.0 - abs(2.0 * i / n - 1.0) ** 3
+                for r in (rad - w * t, rad + w * t):
+                    vs.append(bm.verts.new((r * math.cos(a), r * math.sin(a), 0.03)))
+            for i in range(n):
+                bm.faces.new((vs[i * 2], vs[i * 2 + 1], vs[i * 2 + 3], vs[i * 2 + 2]))
+    me = bpy.data.meshes.new("ground_rings")
+    bm.to_mesh(me)
+    bm.free()
+    m = bpy.data.materials.new("glow-rings")
+    m.use_nodes = True
+    m.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (1.0, 0.55, 0.16, 1)
+    me.materials.append(m)
+    ob = bpy.data.objects.new("ground_rings", me)
+    bpy.context.scene.collection.objects.link(ob)
+    ob.parent = arm
+    return ob
 
 
 STONES = ({"angle": 300, "height": 0.2, "k": 1.0}, {"angle": 60, "height": 0.27, "k": 1.05}, {"angle": 180, "height": 0.15, "k": 0.92})
@@ -361,9 +419,9 @@ def orbits(arm, geo, shard):
     bpy.context.scene.collection.objects.link(s)
     s.parent = arm
     s.parent_type = "BONE"
-    s.parent_bone = "hand.R"
+    s.parent_bone = "hand.L"
     bpy.context.view_layer.update()
-    cs = R.wr + S.vec(0, 0, -0.1)
+    cs = R.wr * S.vec(-1, 1, 1) + S.vec(0, 0, -0.1)
     s.matrix_world = Matrix.Translation(Vector(cs))
     out.append(s)
     for i in range(5):

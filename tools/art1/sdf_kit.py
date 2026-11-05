@@ -145,7 +145,7 @@ def fbm(P, scale=1.0, seed=0, octaves=3, gain=0.5):
 
 
 def voronoi(P, seeds):
-    """Nearest seed index, distance to it, and the gap to the second nearest (0 on a cell border), in chunks."""
+    """Nearest seed index, distance to it, and the distance to the cell border, in chunks."""
     n = P.shape[0]
     idx = np.zeros(n, np.int32)
     gap = np.zeros(n, np.float32)
@@ -159,9 +159,11 @@ def voronoi(P, seeds):
         a, b = d[r, o[:, 0]], d[r, o[:, 1]]
         sw = a > b
         o0 = np.where(sw, o[:, 1], o[:, 0])
+        o1 = np.where(sw, o[:, 0], o[:, 1])
         idx[s:s + 200000] = o0
         d1[s:s + 200000] = np.minimum(a, b)
-        gap[s:s + 200000] = np.abs(b - a)
+        # (the true distance to the cell's border, the bisector: a plain d2 - d1 smears wide where two seeds lie close)
+        gap[s:s + 200000] = np.abs(b * b - a * a) / np.maximum(2.0 * length(S[o0] - S[o1]), 1e-5)
     return idx, d1, gap
 
 

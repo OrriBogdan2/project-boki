@@ -343,7 +343,7 @@
 			],
 			"far_smooth": 1.0
 		},
-		"far_hide": ["tarek_beads", "shard_"],
+		"far_hide": ["tarek_beads", "shard_", "ground_rings"],
 		"slots": {
 			"skin": {
 				"top_light": 0.0,
@@ -368,8 +368,11 @@
 				"far_lift": 0.3,
 				"desat": 0.0
 			},
+			"leather-beads": {
+				"far_lift": 0.2
+			},
 			"leather": {
-				"emit": 5.0,
+				"emit": 2.6,
 				"far_lift": 0.2
 			},
 			"glow": {

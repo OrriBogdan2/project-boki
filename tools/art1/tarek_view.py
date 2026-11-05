@@ -23,6 +23,8 @@ for m in bpy.data.materials:
         continue
     b = m.node_tree.nodes.get("Principled BSDF")
     tex = [n for n in m.node_tree.nodes if n.type == "TEX_IMAGE"]
+    if not tex:
+        continue
     em = m.node_tree.nodes.new("ShaderNodeEmission")
     m.node_tree.links.new(tex[0].outputs[0], em.inputs[0])
     out = m.node_tree.nodes["Material Output"]

@@ -26,6 +26,8 @@ sc.world = w
 for m in bpy.data.materials:
     if m.use_nodes and "Principled BSDF" in m.node_tree.nodes:
         tex = [n for n in m.node_tree.nodes if n.type == "TEX_IMAGE"]
+        if not tex:
+            continue
         em = m.node_tree.nodes.new("ShaderNodeEmission")
         m.node_tree.links.new(tex[0].outputs[0], em.inputs[0])
         m.node_tree.links.new(em.outputs[0], m.node_tree.nodes["Material Output"].inputs[0])

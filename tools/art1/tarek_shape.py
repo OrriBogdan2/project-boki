@@ -236,41 +236,20 @@ def finger_pts(y, ln):
     return p
 
 
-def crown_wrap(q):
-    """A terracotta wrap tying the locs at the crown: from the match camera, the head's colour and shape."""
-    c = (0.0, -0.035, 0.172)
-    d = ellipsoid(q, c, (0.082, 0.094, 0.043))
-    d = smin(d, ellipsoid(q, (0.0, -0.035, 0.192), (0.056, 0.062, 0.024)), 0.02)
-    az = np.arctan2(q[..., 1] - c[1], q[..., 0])
-    return d + 0.004 * np.sin(az * 9.0 + 18.0 * q[..., 2]) + 0.002 * noise(q, 40.0, 3)
-
-
-def shoulder_wraps(P, R):
-    """Terracotta cloth wound over his deltoids: the shoulders' colour from above."""
-    Q = fold_x(P)
-    s = arm(P, R)
-    z = Q[..., 2] - float(R.sh[2])
-    turns = 0.0028 * np.sin((z + 0.35 * Q[..., 1]) * 110.0 + 2.0 * noise(P, 14.0, 5))
-    sheet = np.abs(s - 0.01 + turns) - 0.009
-    top = -0.15 + 0.015 * noise(P, 24.0, 7) - z         # the hem round the upper arm
-    inner = (float(R.sh[0]) - 0.085) - Q[..., 0]         # stops at the vest's armhole
-    return smax(smax(sheet, top, 0.006), inner, 0.012)
-
-
 def bracer_seeds(R, sx, seed):
     """The rock slabs' centres, round his forearm from the elbow to the wrist."""
     rs = np.random.RandomState(seed)
     el = R.el * vec(sx, 1, 1)
     wr = R.wr * vec(sx, 1, 1)
     pts = []
-    rows = 3
+    rows = 2
     for r in range(rows):
-        t = (r + 0.5) / rows
-        n = 3 if r in (0, rows - 1) else 4
+        t = 0.6 + 0.4 * (r + 0.5) / rows
+        n = 4
         for i in range(n):
             a = 2 * math.pi * (i + 0.5 * (r % 2)) / n + rs.uniform(-0.2, 0.2)
             c = mix(el, wr, t + rs.uniform(-0.03, 0.03))
-            pts.append(c + vec(math.cos(a), math.sin(a), 0) * 0.1)
+            pts.append(c + vec(math.cos(a), math.sin(a), 0) * 0.08)
     return np.array(pts, np.float32)
 
 
@@ -280,12 +259,94 @@ def bracer_axis(P, R, sx):
     return el, wr
 
 
+def stone_seeds(R, seed=31):
+    """The slabs of his stone arm: rings of them down the arm, more over the shoulder and onto the chest."""
+    rs = np.random.RandomState(seed)
+    sh, el, wr = R.sh, R.el, R.wr
+    fist = wr + vec(0, 0, -0.11)
+    path = ((sh + vec(0.03, 0, 0.1), 3, 0.1), (sh + vec(0.05, 0, -0.03), 4, 0.17), (sh + vec(0.02, 0, -0.16), 4, 0.13),
+            (mix(sh, el, 0.72), 4, 0.12), (el + vec(0, 0, -0.03), 4, 0.12), (mix(el, wr, 0.38), 4, 0.14), (mix(el, wr, 0.72), 4, 0.15),
+            (wr + vec(0, 0, 0.0), 4, 0.13), (fist, 4, 0.11))
+    pts = []
+    for ri, (c, n, r) in enumerate(path):
+        for i in range(n):
+            a = 2 * math.pi * (i + 0.5 * (ri % 2)) / n + rs.uniform(-0.22, 0.22)
+            pts.append(c + vec(math.cos(a) * r, math.sin(a) * r, rs.uniform(-0.03, 0.03)))
+    for d in ((-0.1, 0.09, -0.02), (-0.14, 0.06, -0.12), (-0.08, 0.1, -0.13), (-0.1, -0.07, -0.04)):
+        pts.append(sh + vec(*d))
+    return np.array(pts, np.float32)
+
+
+def stone_core(P, R):
+    sh, el, wr = R.sh, R.el, R.wr
+    d = ellipsoid(P, sh + vec(0.03, 0.0, 0.015), (0.155, 0.155, 0.145))              # the shoulder boulder
+    d = smin(d, ellipsoid(P, sh + vec(-0.085, 0.045, -0.08), (0.11, 0.085, 0.125), rot_y(-0.3)), 0.05)   # onto the chest
+    d = smin(d, cone(P, sh, el, 0.112, 0.098), 0.05)
+    d = smin(d, ellipsoid(P, mix(sh, el, 0.5), (0.122, 0.125, 0.15)), 0.04)
+    d = smin(d, cone(P, el, wr, 0.098, 0.118), 0.03)
+    d = smin(d, ellipsoid(P, mix(el, wr, 0.6), (0.132, 0.14, 0.2)), 0.04)
+    # the fist, closed for good: a block of stone with four knuckles and a thumb slab
+    f = wr + vec(0, 0.0, -0.115)
+    d = smin(d, ellipsoid(P, f, (0.1, 0.122, 0.112)), 0.03)
+    for y in (-0.075, -0.026, 0.026, 0.075):
+        d = smin(d, sphere(P, f + vec(0.03, y, -0.082), 0.042), 0.018)
+    return smin(d, ellipsoid(P, f + vec(-0.07, 0.07, 0.01), (0.04, 0.06, 0.08)), 0.02)
+
+
+def stone_arm(P, R, seeds, heights):
+    """One huge arm of stone: thick faceted slabs on the arm's mass, deep cracks between them."""
+    core = stone_core(P, R)
+    idx, d1, gap = voronoi(P, seeds)
+    q = P - seeds[idx]
+    tilt = (np.sin(idx * 2.3)[:, None] * vec(1, 0, 0) + np.cos(idx * 1.7)[:, None] * vec(0, 1, 0) +
+            np.sin(idx * 3.1)[:, None] * vec(0, 0, 1))
+    # (wide bevels, no groove: the cracks are painted and glow; deep thin grooves collapse into duplicate faces at this tri
+    # budget, and at the match camera only the slabs' big shapes count)
+    crack = sstep(0.0, 0.05, gap)
+    return core - heights[idx] * crack - (q * tilt).sum(-1) * 0.2 * crack + (1.0 - crack) * 0.006
+
+
+def strata(P, R):
+    """His strata tattoos on the stone side of the chest, ribs and back: 1 on a dark angular band, fading to his middle."""
+    x, y, z = P[..., 0], P[..., 1], P[..., 2]
+    z0 = float(R.waist[2])
+    band = np.sin((z - 0.75 * x + 0.05 * noise(P, 7.0, 3)) * 48.0 + 2.0 * noise(P, 5.0, 6))
+    m = sstep(-0.01, 0.07, x + 0.1 * (z - z0 - 0.3)) * sstep(z0 + 0.1, z0 + 0.22, z)
+    return sstep(0.1, 0.32, band) * m
+
+
+def left_tattoos(P, R):
+    """The crescent on his bare shoulder and the band round that forearm."""
+    Q = P - vec(-float(R.sh[0]) - 0.03, 0.0, float(R.sh[2]) - 0.06)
+    r = np.sqrt(Q[..., 2] ** 2 + Q[..., 1] ** 2)
+    moon = sstep(0.012, 0.004, np.abs(r - 0.05)) * sstep(0.03, -0.01, Q[..., 1] * 0.7 - Q[..., 2] * 0.7) * sstep(0.02, 0.05, -Q[..., 0] + 0.03)
+    bands = sstep(0.022, 0.012, np.abs(P[..., 2] - float(R.el[2]) - 0.1 - 0.15 * P[..., 1]))
+    return np.maximum(moon, bands)
+
+
+def skirt(P, R):
+    """The sash's cloth, falling over his hips and open down the front: the orange from above."""
+    z0 = float(R.waist[2])
+    z = P[..., 2]
+    t = np.clip((z0 + 0.06 - z) / 0.42, 0.0, 1.0)
+    rx, ry = 0.205 + 0.06 * t, 0.165 + 0.05 * t
+    rad = (np.sqrt((P[..., 0] / rx) ** 2 + (P[..., 1] / ry) ** 2) - 1.0) * rx
+    az = np.arctan2(P[..., 0], P[..., 1])
+    folds = 0.009 * t * np.sin(az * 9.0 + 3.0 * noise(P, 7.0, 11))
+    sheet = np.abs(rad + folds) - 0.008
+    d = smax(sheet, z - (z0 + 0.075), 0.01)
+    hem = z0 - 0.3 - 0.1 * sstep(0.9, 0.2, np.abs(az)) + 0.14 * sstep(1.2, 2.8, np.abs(az)) + 0.02 * noise(P, 22.0, 13)
+    d = smax(d, hem - z, 0.008)
+    open_ = (0.5 * t + 0.02 - np.abs(az)) * 0.2
+    return smax(d, open_, 0.01)
+
+
 def bracer(P, R, sx, seeds, heights):
     """Rock grown round the forearm: thick slabs, faceted and chipped, deep cracks between them."""
     el, wr = bracer_axis(P, R, sx)
     t = np.clip(seg_t(P, el, wr), -0.3, 1.3)
     bulge = np.maximum(np.sin(np.clip(t, 0, 1) * math.pi), 0.0) ** 0.8
-    core = cone(P, el, wr, 0.066, 0.058) - 0.034 * bulge
+    core = cone(P, el, wr, 0.05, 0.05) - 0.018 * bulge
     idx, d1, gap = voronoi(P, seeds)
     # (each slab its own height; its top is flat-faceted: a plane per slab tilts the facet)
     h = heights[idx]
@@ -293,12 +354,12 @@ def bracer(P, R, sx, seeds, heights):
     tilt = (np.sin(idx * 2.3)[:, None] * vec(1, 0, 0) + np.cos(idx * 1.7)[:, None] * vec(0, 1, 0) +
             np.sin(idx * 3.1)[:, None] * vec(0, 0, 1))
     facet = (q * tilt).sum(-1) * 0.22
-    crack = sstep(0.0, 0.016, gap)
-    d = core - h * crack - facet * crack + (1.0 - crack) * 0.012
+    crack = sstep(0.0, 0.04, gap)
+    d = core - h * crack - facet * crack + (1.0 - crack) * 0.006
     d = d + 0.0028 * fbm(P, 42.0, 8, 2)
     # (it ends in chipped rims at the elbow and the wrist)
     ln = float(length(wr - el))
-    d = smax(d, -t * ln - 0.012 + 0.012 * noise(P, 26.0, 9), 0.008)
+    d = smax(d, -(t - 0.46) * ln - 0.012 + 0.012 * noise(P, 26.0, 9), 0.008)
     return smax(d, (t - 1.0) * ln - 0.012 + 0.012 * noise(P, 26.0, 13), 0.008)
 
 
@@ -387,8 +448,8 @@ def foot_wraps(P, R):
     turns = np.sin((z - 0.5 * Q[..., 1]) * 92.0 + 2.0 * noise(P, 12.0, 9))
     sheet = s - 0.0045 - 0.0028 * turns
     y = Q[..., 1]
-    m = np.maximum(sstep(0.235, 0.215, z) * sstep(0.05, 0.075, z) * sstep(0.09, 0.05, y),
-                   sstep(0.135, 0.115, z) * sstep(0.12, 0.09, y) * sstep(0.02, 0.05, z))
+    m = np.maximum(sstep(0.42, 0.4, z) * sstep(0.05, 0.075, z) * sstep(0.09, 0.05, y),
+                   sstep(0.14, 0.12, z) * sstep(0.16, 0.13, y) * sstep(0.012, 0.03, z))
     return smax(sheet, (0.5 - m) * 0.03, 0.004)
 
 
@@ -622,13 +683,19 @@ LOCS = [
     ("bl", 0.021, ((-0.08, -0.03, 0.135), (-0.135, -0.095, 0.05), (-0.165, -0.125, -0.08), (-0.175, -0.13, -0.24), (-0.17, -0.14, -0.38), (-0.18, -0.15, -0.46))),
     ("bl", 0.02, ((-0.092, -0.01, 0.125), (-0.14, -0.05, 0.03), (-0.195, -0.08, -0.08), (-0.22, -0.085, -0.2), (-0.225, -0.095, -0.34))),
 ]
+def _shorter(pts):
+    """The master's locs end on the collar and chest: everything under the jaw line closes up."""
+    return tuple((x, y, z if z > -0.1 else -0.1 + (z + 0.1) * 0.66) for x, y, z in pts)
+
+
+LOCS = [(c, r * 1.22, _shorter(p)) for c, r, p in LOCS]
 # (loc index, how far along it 0..1, kind): copper rings, stone beads, amber crystals, as tarek_head_sheet draws them
-BEADS = [(0, 0.58, "copper"), (0, 0.72, "stone"), (0, 0.9, "copper"), (1, 0.5, "steel"), (1, 0.66, "geode"), (1, 0.8, "copper"),
-         (2, 0.62, "copper"), (2, 0.82, "crystal"), (3, 0.56, "copper"), (3, 0.7, "stone"), (3, 0.84, "copper"),
-         (4, 0.45, "crystal"), (4, 0.62, "stone"), (4, 0.82, "copper"), (5, 0.5, "steel"), (5, 0.76, "copper"),
-         (6, 0.62, "copper"), (7, 0.72, "steel"), (8, 0.6, "copper"), (9, 0.3, "copper"), (9, 0.55, "crystal"),
-         (10, 0.4, "copper"), (10, 0.72, "crystal"), (11, 0.6, "steel"), (12, 0.34, "crystal"), (12, 0.6, "copper"),
-         (13, 0.5, "copper"), (14, 0.42, "crystal"), (14, 0.7, "copper"), (15, 0.6, "steel"), (16, 0.55, "copper"),
+BEADS = [(0, 0.58, "copper"), (0, 0.72, "copper"), (0, 0.9, "copper"), (1, 0.5, "steel"), (1, 0.66, "copper"), (1, 0.8, "copper"),
+         (2, 0.62, "copper"), (2, 0.82, "copper"), (3, 0.56, "copper"), (3, 0.7, "copper"), (3, 0.84, "copper"),
+         (4, 0.45, "copper"), (4, 0.62, "copper"), (4, 0.82, "copper"), (5, 0.5, "steel"), (5, 0.76, "copper"),
+         (6, 0.62, "copper"), (7, 0.72, "steel"), (8, 0.6, "copper"), (9, 0.3, "copper"), (9, 0.55, "copper"),
+         (10, 0.4, "copper"), (10, 0.72, "copper"), (11, 0.6, "steel"), (12, 0.34, "copper"), (12, 0.6, "copper"),
+         (13, 0.5, "copper"), (14, 0.42, "copper"), (14, 0.7, "copper"), (15, 0.6, "steel"), (16, 0.55, "copper"),
          (1, 0.28, "copper"), (4, 0.28, "copper")]
 # The hair's spring chains (head space), one per bunch of locs: every loc rides the chain named above.
 CHAINS = {
