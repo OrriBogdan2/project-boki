@@ -2484,3 +2484,36 @@ Still to come: Cinder, Grimble, Pip, Breaker, Motley, Claire, then ext/sfx-clean
   - reveal_tip_bond.png: focus tip on the bond tile
   - page_training_tiles.png: the Boki page's Training tab
   - farm_hub.png: the Boki button on key 2
+
+## 2026-11-05 (S4): READY sound pass, 5 more Hunters (after ext/sfx-base af51093c; all 13 sound branches so far merge together with no conflicts, any order)
+Same rules as the first six: synthesised (tools/gen_sfx_<hero>.py), category loudness, wav + .import, no CC0, no reserved files, no wiring for main. Sheets: briefs/shots/s4/sfx/<hero>_*.jpg.
+
+### `ext/sfx-cinder` @ 48ea9a42 (ashwick): 94 files changed, 1243 insertions(+), 28 deletions(-)
+- Fire lw_roar (3, layered flame roar; still overlapping one-shots every 0.4 s, see "loops" below), lw_pilot (igniter tick + gas + catch); RMB lw_bolt / lw_bolt_hit; burns as_ignite / lw_blaze; Shift lw_bash / lw_bash_hit / lw_hop; E lw_shield + new ashwick_cloak_hit (first foe hit); X lw_jet / lw_jet_land / lw_trail (3); ashwick_dash (3); steps (light patter, pack clinks); hurt (3) / down (groan then a breathless laugh) / death (the tank vents).
+- **Signatures:** flame roar = lw_roar; ashwick_tank_hiss (3) when the lance is let go.
+- Also deletes scripts/arch/kits/ld_sfx.gd (LDSfx loaded one file per name, hiding takes; Sfx's lazy load covers it) and its 2 calls: the same commit on Cinder and Grimble, so they merge cleanly.
+- Replaces 13 lw_*/as_* files. Checks: --sfx-set-check 0, --ashwick-combo-check 97/0, --check 0, health OK.
+
+### `ext/sfx-grimble` @ 74b46846 (dredge): 103 files changed, 1392 insertions(+), 34 deletions(-)
+- Fire dr_shot (3, junk blunderbuss + scrap rattle); RMB dr_throw / dr_grab / dr_reel; E dr_anchor_wind / dr_anchor / air smash dr_dive / dr_quake; Shift dr_barge / dr_hop; X dr_blast_charge / dr_blast; dredge_dash (3); steps (skittery claw clicks, hoard jangle); hurt (3) / down (coins spill) / death (the hoard crashes), wheezy and creaturely.
+- **Signatures:** dredge_coin_jingle (each Salvage stack and the HAULED payoff; replaces pay_salvage), dredge_junk_clatter (every barge), dredge_pickup (coins pour in + wheezy chuckle when he picks up loot: 2 lines in scripts/match/pack.gd now use HeroSfx.of(h, "pickup", "pickup"); others keep the shared pickup; docs/AUDIO.md gets the "pickup" kind).
+- Replaces 12 dr_* files. Checks: --sfx-set-check 0, --dredge-combo-check 93/0, --check 0, --hero-combo-check 272/0, --backpack-check 0, health OK.
+
+### `ext/sfx-pip` @ 9b6f72e1 (tender): 94 files changed, 1271 insertions(+), 1 deletion(-)
+- Light, warm, cute, never fiery (air, glass, brass, warm chords, sparkle under ~7 kHz). Fire tend_ember (3) / tend_ember_emp; tend_kindled; RMB tend_seed_aim / tend_seed / tend_stick / tend_root; E tend_hearth / tend_toss / tend_land / tend_flare; Shift/Carrier tend_hop / tend_pickup; X tend_call (soft wordless choir + lantern) / tend_call_hum (3) / tend_arrive; tender_dash (3); steps (light pads, lantern handle tick); hurt (3, a small "eep") / down / death (the star dims).
+- **Signatures:** tender_lantern_chime (3) on the Hearthlight cast; tender_cheer when Hearth Call mends someone.
+- Replaces 16 tend_* files. Checks: --sfx-set-check 0, --tender-combo-check 82/0, --check 0, health OK.
+
+### `ext/sfx-breaker` @ e13745ea (bulwark): 103 files changed, 1466 insertions(+), 2 deletions(-)
+- Palette: wet old timber, barnacled iron, a ship's bell, sea swell and bubbles, 1.5x size (low bodies, sub under heavy hits); voice deep, warm male with a drowned gurgle; death ends with the hull sinking and a distant bell.
+- Fire bjorn_throw (3); LMB bjorn_recall / _catch / _plant / _spin (3) / _glint (ship's-bell ding) / _slam (3); RMB bjorn_shield_up / _block (3) / _break / _bash; Shift new bulwark_charge (replaces the shared shield) + bjorn_whirl; E bjorn_purify / _purify_burst; R bjorn_ult_wind / _slam / _rumble / _crackle; bulwark_dash; steps (heavy sea boot, iron band, shells).
+- **Signatures:** bulwark_hammer_clang (3) when the thrown hammer hits a foe; bulwark_hull_creak as the prow shield comes up.
+- Replaces 18 bjorn_* files. Checks: --sfx-set-check 0, --bulwark-combo-check 144/0, --check 0, health OK.
+
+### `ext/sfx-motley` @ 260c17a1 (ostra): 78 files changed, 1170 insertions(+), 1 deletion(-)
+- Palette: a worn music box (steel tines, an original tune), a coiled spring, cap bells on the swap, dark Void swells; voice hollow, behind the mask, with a giggle; death = a music box winding down. He floats: steps are hover pulses with a faint surface layer.
+- Fire os_orb (3) / os_orb_hot (3); os_prime; RMB os_snap_wind (crank ratchet) / os_snap / os_snap_hit; Shift os_swap_lob (slide whistle) / os_swap (bells); E os_seed / os_pop; os_empower; R os_well / os_well_hum; ostra_dash.
+- **Signatures:** ostra_music_box (~3 s original tune when Brimseed is nearly ripe; replaces os_full), ostra_spring_boing (with os_pop).
+- Replaces 13 os_* files. Checks: --sfx-set-check 0, --ostra-combo-check 137/0, --check 0, health OK.
+
+Still to come: Claire (agent running), then ext/sfx-cleanup (old generator functions, unused files: vn_stick, dj_bolt_emp, dj_cartwheel, jug_dash, os_full, pay_salvage, dr_haul?, tend_relay?; sfx_lib fixes reported by the agents: voice() tail release, chime() soft attack, shared helpers).
