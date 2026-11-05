@@ -2515,3 +2515,14 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - The only creatures are the ones a step needs (the taming step's friendly weakened Boki, 167; dummies for the attack steps).
   - Wild monsters appear only from the combat/test island on.
 - **Assert:** before the combat-test step, the count of hostile/wild mobs == 0.
+
+## 181. BUG: dashes look like an instant blink with no animation (Kael RMB Lunge, Sable dash) (owner's cousin playing, 21:09 UTC Nov 5)
+- The owner: "some edit made the dashing way too fast - noticing it with rmb on kael and dash on silver thief… there's no animation, it's like a blink".
+- **Ext checked v0.22.0 → v0.23.0:** no change to any dash distance/time/speed data or to thief_kit. juggernaut_kit only swapped its effects to HeroVfx (art2-kael). So the travel itself isn't faster in data.
+- **Suspects** (find which):
+  1. **Frame hitches during the dash:** a frame freeze (a shader/VFX first-use compile, the HeroVfx hold emitters, or perf) eats the dash's ~0.2-0.5 s, so the body appears at the end with no in-between. Check --hitch-check on Kael RMB + Sable dash.
+  2. **Animation not playing:** the dash/roll pose isn't triggered (an animation LOD/throttle from perf-94, or a HeroVfx change hiding the model like Ryzz's Wirerun `model.visible = false`), so only the after-images show.
+  3. **The cousin's PC frame rate:** at a low fps, a 0.2 s dash spans 2-3 frames. Ask the owner for the fps (Settings > Video > Frame rate overlay).
+- **Fix:** whatever the cause, every dash/lunge must show visible travel with its animation for its full duration at any frame rate (interpolated, not teleported), and no hitch on first use.
+- **Assert:** a frame capture of Sable's dash and Kael's Lunge shows ≥5 intermediate positions with the dash pose at 60 fps; no frame >33 ms during them.
+- Priority: high (a feel-breaking bug in the current release).
