@@ -135,7 +135,7 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 | Release Empowered right on its flash | No extra damage; the next draw reaches Empowered in about 0.38 s | `--archer-combo-check` |
 | Draw past Supercharged + 0.5 s | Overdrawn: half damage, the drooping release | same |
 | Empowered / tap with no target | Lands at the cursor; the spent arrow stays stuck there for 4 s | same |
-| Supercharged with a foe under the line | The foe ringed at its feet; a teal X-star on the hit | same |
+| Supercharged with a foe under the line | The foe ringed at its feet; a silver burst on the hit | same |
 | Heavy Shot into a wall | Wall hit, 1.2 s stun, PINNED, Focus filled | same |
 | Wall pin, then a shot | Deadeye (gold second hit, hitstop, `pin_deadeye`) | same |
 | Hail Wall arc | A foe on the arc burns; one inside the arc's radius does not | same |
@@ -173,6 +173,8 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>` (scripts/match/arena_demo.gd
 - Merge: `_drop_holds()` clears the draw (`h.draw_t`), the Heavy Shot hold (`rmb_down`, `pin_aim`), Spirit Walk (`h.spirit_t`), and Starpiercer (`PinUlt.left`, `PinUlt.nock_t`, `window`).
 - Ult on X: `scripts/arch/hero_ult.gd` (HeroUlt, the shared X base: main's `HunterKeys.ult_pressed` takes the `hunter_ult` press and the level gate, then `cast_ult` returns `HeroUlt.press(self, ult.cast)`: the cooldown in `ArchKit.cd["x"]`, the recast, a cast id), `scripts/arch/kits/pin_ult.gd` (PinUlt: the window, nock, beams, execute, pooled ribbons and pips). Data: `content/archetypes/archer.json` `x`. Sounds: `pin_ult_cast`, `pin_ult_nock`, `pin_ult_beam`, `pin_ult_final`. Bond: `HeroUlt.landed` sends `KinBond.from_ult(h, "hit" / "knock" / "kill", cast_id)`, the best event of a cast.
 - No Net shape change: remote players see the shots and the existing fx events (rings, bolts).
+
+- Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground.
 
 ## Payoff
 Deadeye: gold second hit with T4 hitstop and shake, its own sound, "DEADEYE" word and `pin_deadeye`. Pins say "PINNED"; knocks say "RUN DOWN".

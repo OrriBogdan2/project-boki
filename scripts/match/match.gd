@@ -266,6 +266,7 @@ func warm_up(progress := Callable()) -> void:
 		fx.spark(at + Vector3(0, 1, 0), Vector3.UP, Color.WHITE, 4)
 		fx.slash(at + Vector3(0, 0.8, 0), 0.0, 2.0, 1.6, Color.WHITE)
 		fx.beam(at + Vector3(0, 1, 0), at + Vector3(2, 1, 0), Color.WHITE)
+		HeroVfx.of(self).prewarm(at + Vector3(0, 1, 0))
 		var tg := fx.telegraph_circle(at, 1.5, Color(1, 0.3, 0.2))
 		# the muzzle flash light lights whatever stands near a shot: the lit variants compile now too
 		if muzzle_light:
@@ -282,6 +283,7 @@ func warm_up(progress := Callable()) -> void:
 		if not is_inside_tree():
 			return
 		if progress.is_valid(): progress.call(0.7 + 0.2 * (vi + 1) / views.size())
+	HeroVfx.of(self).prewarm_end()
 	# and the materials that only exist now (the effects just shown, the shots), the same way: a
 	# telegraph is held up for it (the views' own are gone by now)
 	var late_cb := func(f: float) -> void:
@@ -5778,6 +5780,7 @@ func _net_ev(x, from: String) -> void:
 				"ring": fx.ring(Vector3(x[2], x[3], x[4]), float(x[5]), Color.html(String(x[6])), 0.35)
 				"bolt": fx.bolt(Vector3(x[2], x[3], x[4]), Vector3(x[5], x[6], x[7]), Color.html(String(x[8])))
 				"cone": fx.cone(Vector3(x[2], x[3], x[4]), Vector2(x[5], x[6]), 5.0, Color.html(String(x[7])))
+				"hvfx": HeroVfx.of(self).net_in(x)
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.downed:
