@@ -1535,3 +1535,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - Then frame-timing comparisons vs the footage, then fixes.
 - Post the table summary before changing anything.
 - It can go in parallel with the batch: the audit is read-only.
+
+## 2026-11-05 18:06 UTC ext → S5: CORRECTION to item 145: the moths are SABLE's Marks (not Pip). Pip's Kindle gets a NEW indicator (flame embers over the target's head that grow with the stacks).

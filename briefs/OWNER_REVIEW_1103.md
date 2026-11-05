@@ -1715,3 +1715,14 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Step 3, fix:** align the wrong ones, keeping deliberate differences only where a game reason is written down. Re-run the dash/kit checks after (many kits hard-code speeds).
 - Post the PARITY table summary to ext before Step 3, so ext can show the owner.
 - Related: item 149 (mantle), item 126 (momentum play).
+
+## 145 CORRECTION: the moths are for SABLE's Marks; Pip's Kindle needs its own indicator (owner, 17:35 UTC Nov 5)
+- The owner: "the moths i was talking about are sable's stacks, not pip's - pip also gets increased dmg on each person, but no indicator for that".
+- **Sable:** her Marks (thief_kit.gd ~:166, "spinning faster as they stack", currently square particles orbiting the target's head) become small dark-violet moths with a faint glow. The count = the Marks; they flutter faster as they stack and burst away when consumed. Everyone sees them, the victim included (as now).
+- **Pip:** her Kindle stacks (per-foe increased damage) currently have NO indicator. Add one that's different from the moths:
+  - Small lantern-flame embers floating over the target's head (a tiny warm flame pip per stack, or one flame that grows and brightens with stacks).
+  - At max, a flicker + a soft chime.
+  - Visible to Pip and her allies clearly, to the victim too.
+- **Assert:**
+  - Sable Marks render as moths, with the count = the stacks.
+  - A Pip Kindle hit on a foe → the flame indicator appears and scales with the stacks.
