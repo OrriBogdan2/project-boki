@@ -51,8 +51,8 @@ Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (
 |---|---|---|---|---|
 | Passive | always | Focus (fills standing still or sneaking, from pins) + Hawk Sense (foes under half health show through cover within 22 m) (as for every hero, the takedown reset returns a dash charge; no kit knock heal) | Soul Hunter: injured hunters seen through fog; tall-ledge climb | Focus/Deadeye stays as our own loop for now (audit: an owner call); a full Focus no longer skips the draw. The ledge climb has no heightmap equivalent and is left out |
 | LMB | tap | Released before Empowered: 15 damage, lands at the cursor | Weak tap shot (not isolated) | Assumed to land at the cursor too |
-| LMB | hold | Empowered at 0.6 s (30, lands at the cursor up to 12 m); Supercharged at 1.15 s (60, flies past the cursor to 16 m). Feathered V reticle (barbs swept back to the bow) closing on the cursor, a leaf glint and a green fletch burst when a stage comes up, a body flash, a thick mint line past the cursor to 16 m and a target ring at Supercharged; the fletch glint at the bow hand only while a stage is ready | Same stages and reticle | Timings at the low end of the footage's ranges (ratio 1 : 1.9) |
-| LMB | perfect | Let go within 0.15 s of a stage coming up: no extra damage, the next draw runs 1.6x until Empowered; a brief gold fletch burst (her own motif: feathers radiating from a core, 1.1 m, 0.13 s) with a ring at the bow hand, a higher-pitched shing, the cursor star, `arc_perfect` | The next Empowered charge is faster; a gold star by the bow hand | The 1.6x is our pick (not measurable at 5 fps) |
+| LMB | hold | Empowered at 0.6 s (30, lands at the cursor up to 12 m); Supercharged at 1.15 s (60, flies past the cursor to 16 m). Feathered V reticle (barbs swept back to the bow) closing on the cursor, a leaf glint and the string's red threads drawn taut at the bow when a stage comes up, a body flash, a thick mint line past the cursor to 16 m and a target ring at Supercharged; red thread gathering at the nock through the draw; every needle pulls a fine red thread behind it, a hit stitches the target (a thread run through it, loose ends drifting down) and a missed needle stays in the ground with a little thread | Same stages and reticle | Timings at the low end of the footage's ranges (ratio 1 : 1.9) |
+| LMB | perfect | Let go within 0.15 s of a stage coming up: no extra damage, the next draw runs 1.6x until Empowered; a brief silver flash on the aim line at the bow with loose red threads, a higher-pitched shing, the cursor star, `arc_perfect` | The next Empowered charge is faster; a gold star by the bow hand | The 1.6x is our pick (not measurable at 5 fps) |
 | LMB | overdraw | Held 0.5 s past Supercharged: the line and the bow glint dim, the arm shakes (`arc_over`); the arrow does half | About 50% (263 vs 505) | Matches the ratio |
 | RMB | tap | Nothing: a tap before the draw starts looses no arrow and costs nothing (no snare, no Tripwire, no air Plunge) | Heartpiercer is hold only | Data: hold only |
 | RMB | hold | Heavy Shot (one charge, 16 s cooldown): the V tinted gold plus a gold bar from the bow that grows to 2 body heights with the charge; full at 1.1 s; pierces, knocks back; into a wall within 3 m: a wall hit and a 1.2 s stun (PINNED). An arrow 3.5 times a normal one (a bright core, a 6 m trail, violet fins); a release burst on the aim line at the bow, a screen kick and a deeper thump; a hit flash, a red-white burst, dust and a white ring on impact, and a wall pin leaves a stake in the wall for 7 s; a pink crescent at the feet on release | Same telegraph, arrow and impact | The 1.2 s wall stun stays from the earlier pass. Data: 16 s, 1 charge |
@@ -84,7 +84,7 @@ Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (
 ## Body and movement (hero sheet: Body, scale and movement feel)
 - Scale ~0.98 of a medium to the top of the head (`--warden-model-check`), slim build kept; hit radius 0.392 (`body.hit_r`, docs/HITBOX_SIZE.md). The Warden model (concept sheet, `scripts/heroes/warden_archer.gd`) is long-legged with a smaller head: `body.legs` 1.62, `body.head` 0.72, `body.neck` 0.03, so `body.size` is 1.05.
 - Quick, short steps: stride rate `spd*2.9` (HunterAnim.STRIDE); the tall run stays.
-- Her dash after-image is her own: three green fletch streaks at hip, chest and shoulder height (PinFx.afterimage), not the shared ghost.
+- Her dash after-image is her own: three red fletch streaks at hip, chest and shoulder height (PinFx.afterimage), not the shared ghost.
 - Nameplate height: the shared 2.35 m fits at the new scale (ArchKit.plate_height, read by the HUD branch).
 
 ## Small mechanics (fine print; source, footage, ours)
@@ -135,7 +135,7 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 | Release Empowered right on its flash | No extra damage; the next draw reaches Empowered in about 0.38 s | `--archer-combo-check` |
 | Draw past Supercharged + 0.5 s | Overdrawn: half damage, the drooping release | same |
 | Empowered / tap with no target | Lands at the cursor; the spent arrow stays stuck there for 4 s | same |
-| Supercharged with a foe under the line | The foe ringed at its feet; a teal X-star on the hit | same |
+| Supercharged with a foe under the line | The foe ringed at its feet; a red thread burst through the hit | same |
 | Heavy Shot into a wall | Wall hit, 1.2 s stun, PINNED, Focus filled | same |
 | Wall pin, then a shot | Deadeye (gold second hit, hitstop, `pin_deadeye`) | same |
 | Hail Wall arc | A foe on the arc burns; one inside the arc's radius does not | same |
@@ -176,3 +176,8 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>` (scripts/match/arena_demo.gd
 
 ## Payoff
 Deadeye: gold second hit with T4 hitstop and shake, its own sound, "DEADEYE" word and `pin_deadeye`. Pins say "PINNED"; knocks say "RUN DOWN".
+
+## Look
+
+Her moments are HeroVfx recipes in content/vfx/archer.json (docs/HERO_VFX.md): red thread and silver needles.
+PinFx keeps the solid things (the needles, the spent needles, the Heavy Shot's stake, the Hail Wall's panels).
