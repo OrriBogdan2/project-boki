@@ -364,7 +364,7 @@ def ground_rings(arm, mat, uv_from):
     return [e, ob]
 
 
-STONES = ({"angle": 300, "height": 0.2, "k": 1.0}, {"angle": 60, "height": 0.27, "k": 1.05}, {"angle": 180, "height": 0.15, "k": 0.92})
+STONES = ({"angle": 300, "height": 0.34, "k": 1.0}, {"angle": 60, "height": 0.42, "k": 1.05}, {"angle": 180, "height": 0.3, "k": 0.92})
 
 
 def orbits(arm, geo, shard):
@@ -378,7 +378,7 @@ def orbits(arm, geo, shard):
     e.matrix_world = Matrix.Translation(Vector(c))
     bpy.context.view_layer.update()
     out = [e]
-    tilt = math.radians(55)
+    tilt = math.radians(62)
     for i, it in enumerate(STONES):
         a = math.radians(it["angle"])
         d = Vector((-math.sin(a), math.cos(a), 0))
@@ -474,6 +474,18 @@ def scan_reshape(ob):
     c = along_bones(P, [R.el, R.wr])
     P = P + (P - c) * (wR * -ARM_R_SHRINK)[:, None]
     ob.data.vertices.foreach_set("co", P.ravel())
+    ob.data.update()
+    me = ob.data
+    hair = [i for i, m in enumerate(me.materials) if m.name.startswith("hair")]
+    vn = np.zeros(len(me.vertices) * 3, np.float32)
+    me.vertices.foreach_get("normal", vn)
+    vn = vn.reshape(-1, 3)
+    on = np.zeros(len(me.vertices), bool)
+    for pl in me.polygons:
+        if pl.material_index in hair:
+            on[list(pl.vertices)] = True
+    P = P + vn * (on * HAIR_FAT)[:, None]
+    ob.data.vertices.foreach_set("co", P.ravel())
     for sd in ("L", "R"):
         g = ob.vertex_groups.new(name="foot." + sd)
         sh = ob.vertex_groups["shin." + sd]
@@ -484,8 +496,9 @@ def scan_reshape(ob):
     return W, ix
 
 
-ARM_L_GROW = 0.32
-ARM_R_SHRINK = 0.14
+ARM_L_GROW = 0.46
+ARM_R_SHRINK = 0.2
+HAIR_FAT = 0.011              # m the scan's thin locs grow along their normals (tarek_head: thick ropes)
 
 
 def scan_cut_hands(ob, W, ix):

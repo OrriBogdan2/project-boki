@@ -131,7 +131,7 @@ def p_stone(P, N, occ, cav, a, seeds=None, left=False):
     idx, d1, gap = S.voronoi(mx(P) if seeds is None or left else P, SEEDS_A if seeds is None else seeds)
     v = lightness(T.key_shade(N), occ, cav * 0.5, 0.74) + 0.05 * S.fbm(P, 24.0, 6, 3) + 0.05
     tint = 0.94 + 0.09 * np.sin(idx * 2.7)
-    c = tones("5a5860", "9e9aa4", "cfccd4", v) * tint[:, None]
+    c = tones("4e4c54", "8a8690", "b6b3bc", v) * tint[:, None]
     c = crease(c, np.maximum(cav, 0.0) * 0.7, "2a2c36", 0.75)
     crack = S.sstep(0.0085, 0.0045, gap)
     c = S.mix(c, S.hexc("3a2c30")[None, :], crack)

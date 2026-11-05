@@ -355,14 +355,15 @@
 				"rim_amount": 0.15,
 				"far_lift": 0.1,
 				"sheen": 0.0,
-				"shade": 0.86,
-				"desat": 0.4,
+				"shade": 0.8,
+				"desat": 0.05,
+				"albedo": [0.66, 0.5, 0.42],
 				"light_neutral": 1.0,
 				"rim_far": 0.0
 			},
 			"hair": {
-				"far_lift": 0.1,
-				"fres": 0.55
+				"far_lift": 0.0,
+				"fres": 0.2
 			},
 			"cloth": {
 				"far_lift": 0.12,
@@ -376,6 +377,7 @@
 				"emit": 1.8,
 				"rim_far": 0.0,
 				"rim_amount": 0.2,
+				"albedo": [0.82, 0.84, 0.92],
 				"far_lift": 0.2
 			},
 			"glow": {
