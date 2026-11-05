@@ -1,7 +1,8 @@
 extends RefCounted
-## --clip-live-check: Kael's clips through the real match code: a Match, its Hunters, the kit's own keys and the render path
-## (Hunter.render, HunterAnim, Sync). Re-equipping leaves one weapon drawn; the Warchain's throw and haul play their clips and the
-## haul's lean goes where he is heading, not along the chain; a knock-out plays the death clip on screen, then he is gone.
+## --clip-live-check: Kael's clips through the real match code: a Match, its Hunters, the kit's own keys and the render
+## path (Hunter.render, HunterAnim, Sync). Re-equipping leaves one weapon drawn; the Warchain's throw and haul play their
+## clips and the haul's lean goes where he is heading, not along the chain; a knock-out plays the death clip on screen,
+## then he is gone.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -74,18 +75,19 @@ func run(main: Node) -> void:
 			var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
 			var bi := sk.find_bone("hips")
 			var turn := sk.get_bone_global_pose(bi).basis * sk.get_bone_global_rest(bi).basis.inverse()
-			var up := (sk.global_transform.basis * (turn * Vector3.UP)).normalized()
-			var lean := Vector2(up.x, up.z).normalized()
-			var head := Vector2(P.vel.x, P.vel.z).normalized()
-			var line := Vector2(T.pos.x - P.pos.x, T.pos.z - P.pos.z).normalized()
-			lean_worst = maxf(lean_worst, absf(lean.angle_to(head)))
-			off_chain = maxf(off_chain, absf(head.angle_to(line)))
+			# (in the model's own frame: the match camera leans every model toward itself)
+			var up := (turn * Vector3.UP).normalized()
+			var head := atan2(-P.vel.x, -P.vel.z)
+			var line := atan2(-(T.pos.x - P.pos.x), -(T.pos.z - P.pos.z))
+			lean_worst = maxf(lean_worst, absf(wrapf(atan2(-up.x, -up.z) + P.face - head, -PI, PI)))
+			off_chain = maxf(off_chain, absf(wrapf(head - line, -PI, PI)))
 			reel_frames += 1
 	print("LIVE clips seen: ", seen.keys())
 	ok(seen.has("chain"), "the throw plays the chain clip")
 	ok(seen.has("reel"), "the haul plays the reel clip")
-	ok(reel_frames > 0 and lean_worst <= LEAN_OFF, "the haul leans on his heading (worst %.2f rad off it, %d frames; heading up to %.2f rad off the chain)"
-			% [lean_worst, reel_frames, off_chain])
+	ok(reel_frames > 0 and lean_worst <= LEAN_OFF, "the haul leans on his heading (worst %.2f rad, %d frames)"
+			% [lean_worst, reel_frames])
+	print("LIVE heading up to %.2f rad off the chain" % off_chain)
 	# a knock-out
 	K.warchain.state = "ready"
 	P.lives = 1
