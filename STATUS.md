@@ -1034,3 +1034,12 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Sable, Kael, Pip before/after: hero-shots-s2 art1/anim143/ (strips, GIFs, game-size). Branches ext/anim-crouch-sable 40a69821, -kael fb042e89, -pip 7481b3c6.
 - I viewed Sable and Kael: a big step up, a low stalking crouch with weapons forward and a low two-handed guard. Flaws: Sable's coat hem reaches the floor; Kael's hook hangs to the floor; Pip's feet are hidden, so her sneak is the weakest. Lane scores 75, 75, 65. Not run in a live match or over the network.
 - Kael's branch inherits one --clip-check fail (jug_lunge_wind pop) and a health/style long line from art1-kael; his lane has both.
+
+## 2026-11-05 20:48 UTC S2: item 137 weapon audit done
+- Sheet: hero-shots-s2 art1/weapon_audit/weapon_audit_sheet.png. Weapon length over height at each branch tip; sheet ratios are read by eye (±5%). Idle clip only.
+- Within ±10%: Cinder +8%, Claire -7%, Sable, Lisette +5%, Pip, Tarek +8%. Ryzz has no weapon; Motley's orb is gone with item 136.
+- Over: Vex was +12%, fixed at 0.55 on ext/art1-weapon-scale 71531f17. Breaker +26%, his lane. Grimble gun +13%, hook -18%, a follow-up from main.
+- Short: Kael -20% on the tip measured, after his remodel. Owner said too big, so his lane stops at the sheet's size, not below it.
+- So most of "oversized" isn't borne out at the branch tips, but main's old models were not audited: the owner may have been judging those.
+- Shared fix: weapon_scale in warden_look does nothing on skinned weapons, and every ART-1 Hero is skinned. New key bone_scale in warden_anim/<art>.json, plus blade.root_bone so the muzzle rides the barrels. Breaker's 0.75 and Kael's 0.85 are dead values.
+- No gameplay reach changed. Kael's visible sword is now well short of his 3.1 m LMB reach [alternative: trim reach; kit call, for review].
