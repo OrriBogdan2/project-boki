@@ -2273,3 +2273,8 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 ## 2026-11-05 (S4): all four S4 branches READY (98, 99, 101+101b, 105)
 - Merge order suggestion: rank-ui-98, loot-full-99, revive-101, boki-talk-105. All four edit tools/check_registry.gd and tools/style_baseline.json (keep both sides; re-run style_lint --update only for merged lines). 99 and 101 both touch hud.gd and match.gd's interact path (99: the smart-loot toast; 101: the box revive moved out); expect a small conflict there.
 - DECISION? items for the owner: 98 tier IV / R III ranks (kit pass) and `bonus_point_at_max`; 101 the diminishing repeat-revive curve; 101 online deathboxes (follow-up item).
+
+## 2026-11-05 (S4): trial merge of all four: `ext/s4-integ` @ 244b216d (main fe51b43b + 98 + 99 + 101 + 105)
+- Real conflicts were only tools/style_baseline.json (101, 105; regenerated with style_lint --update after the merge) and docs/DEBT.md (105; both entries kept). hud.gd / match.gd merged cleanly (my earlier "expect a conflict" note was wrong).
+- On the combined tree, all 0 failures: --check, --rank-ui-check, --loot-full-check, --box-revive-check, --boki-lines-check (26), --revive-check PASS, --backpack-check; health --strict OK; gen_wiki --check unchanged. 62 files +4513/-382.
+- Main can fast-forward its integration from this branch, then do 105's reserved-file wiring. Not run here: the full suite.
