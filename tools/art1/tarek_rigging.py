@@ -353,7 +353,7 @@ def assemble(objs, img, emit):
     # (the Gun node, which kit FX read, rides the right fist: WardenClips "blade")
     extras.append(K.anchor(arm, "hand.R", "anchor_wrist_R", R.wr))
     extras.append(K.anchor(arm, "hand.R", "weapon_muzzle", R.wr + S.vec(0, 0, -0.17)))
-    extras.append(ground_rings(arm, glow_m, iris))
+    extras += ground_rings(arm, glow_m, iris)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, "tarek.blend"))
     log("tris total", K.tris([main_ob, beads]) + 3 * n_geo + 5 * n_shard)
     K.export(os.path.join(OUT, "tarek.glb"), [arm, main_ob, beads] + extras, image_format="JPEG")
@@ -380,10 +380,14 @@ def ground_rings(arm, mat, uv_from):
     lay = me.uv_layers.new(name="UVMap")
     for d in lay.data:
         d.uv = RING_UV       # (one amber texel of the iris)
+    # (on an orbit_ empty on the armature, not a bone: they keep to the ground and turn slowly, WardenGlb.Orbits)
+    e = bpy.data.objects.new("orbit_ground", None)
+    bpy.context.scene.collection.objects.link(e)
+    e.parent = arm
     ob = bpy.data.objects.new("ground_rings", me)
     bpy.context.scene.collection.objects.link(ob)
-    ob.parent = arm
-    return ob
+    ob.parent = e
+    return [e, ob]
 
 
 STONES = ({"angle": 300, "height": 0.2, "k": 1.0}, {"angle": 60, "height": 0.27, "k": 1.05}, {"angle": 180, "height": 0.15, "k": 0.92})

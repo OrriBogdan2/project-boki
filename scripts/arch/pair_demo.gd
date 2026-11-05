@@ -46,7 +46,7 @@ static func stage(m: Node, t: float) -> void:
 	if t > 0.1:
 		return
 	Record.set_level(maxi(Record.level, 1))
-	if m.hud: m.hud.toasts.clear()
+	if m.hud: m.hud.msgs.clear()
 	var z := 0.0
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--zoom="): z = float(String(a).substr(7))

@@ -10,7 +10,8 @@ extends Node3D
 ##                         "pip", "spiral", "pilot", "anchor", "glow", "hand" (the Abyssal Hand); stop calling
 ##                         and they hide
 ## - rope(id, a, b)        the Abyssal Hand's arm (twisting strands), drawn through walls
-## - one-shots: sunburst, scorch, crescent, wave, dot, lava, orb, anchor_drop, embers, puff, volley (a Broadside slug)
+## - one-shots: sunburst, scorch, crescent, wave, dot, lava, orb, anchor_drop, embers, puff, wisp, volley
+##   (a Broadside slug)
 ##
 ## Each look is two passes (shaders/ld_fx.gdshaderinc): an alpha-blended body, so colour and dark rims read
 ## on bright grass, and an additive glow chained on as next_pass for the hot cores. _param sets both.
@@ -33,6 +34,7 @@ const M_PIP := 9
 const M_SPIRAL := 10
 const M_WAVE := 11
 const M_DOT := 12
+const M_SMOKE := 13
 const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
 const KEEP := 0.1              # s an immediate-style look stays without a refresh
 const FLAME_CAP := 32          # hose puffs drawn at most (the kit keeps about 15)
@@ -414,6 +416,13 @@ func puff(at: Vector3, mode: int, col: Color, col2: Color, scl: float, dur: floa
 	n.global_position = at
 	var e := _play(n, kind, col, col2, dur, Vector3.ONE * scl, n.material_override)
 	e["grow"] = 0.6
+
+## A thin ribbon of smoke rising from `at` (camera-facing, `scl` m half-height, its foot on `at`): it wavers as it
+## climbs, breaks into streaks and fades (Dredge's stack); col its top, col2 its foot, col.a its cover.
+func wisp(at: Vector3, col: Color, col2: Color, scl: float, dur: float) -> void:
+	var n := _fx("wisp", M_SMOKE, _quad_mesh(), true)
+	n.global_position = at + Vector3(0, scl * 0.9, 0)
+	_play(n, "wisp", col, col2, dur, Vector3.ONE * scl, n.material_override)
 
 ## A molten strip from a to b on the ground (the rank-3 fire trail), lasting `dur`.
 func lava(a: Vector3, b: Vector3, width: float, dur: float) -> void:

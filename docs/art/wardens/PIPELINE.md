@@ -1,5 +1,9 @@
 # Warden 3D pipeline (Meshy image-to-3D -> bake -> Blender fit -> WardenSkeleton .glb)
 
+**Game budget (item 94, overrides the per-Warden IMPORT.md notes below):** every .glb at most 15k triangles
+(`tools/blender/decimate_warden.py` after the fit), imported with LODs; every texture VRAM-compressed, mipmapped,
+at most 2048². See RIG_CONTRACT.md "Budget and checks".
+
 **Start from docs/art/wardens/RECIPE_95.md** (2026-11-04: the golden recipe from Vex r3d, run by
 `tools/meshy/recipe.py` from a per-Hunter spec). The sections below are the history and the details it builds on.
 
@@ -495,6 +499,9 @@ No Meshy. The model's own rigid skin and extra bones are kept; the script rename
 | Dredge r3i | 2026-11-04 19:10 | none (credit-free) | - | ORCH's r3h review: a small orb in a wide brass ring, no flap shards, smoother pods, shoulder joints, the horn seated | 0 | Kept |
 | Dredge r3i + v2 | 2026-11-04 19:40 | none (credit-free) | - | the shared match-zoom fix v2 ported by hand (outline + hero_toon from the branch, FAR_LOOK and _far_look in the loader) | 0 | Kept |
 | Dredge r3j | 2026-11-04 20:30 | none (credit-free) | - | r3i limb loss fixed (per-part decimation budgets, `protect`), shards dropped, smaller pods, warm gold, darker pool | 0 | Kept |
+| Dredge r3k | 2026-11-04 21:30 | none (credit-free) | - | a bigger hook, deeper dents, knee joints and bent knees, shoulder smoke, brighter brass and lighter limbs | 0 | Kept |
+| Dredge r3l | 2026-11-04 23:30 | none (credit-free) | - | olive bronze hull, torn holes with peeled teeth breaking the outline, winch seated, a smoke ribbon off a stack, a cracked blue-grey porthole | 0 | Kept |
+| Dredge r3m | 2026-11-05 00:30 | none (credit-free) | - | heavy tar runs with drops, three bigger torn holes, smoke over both shoulders, a pink-red pupil with a white heart, the grille, a softer hull top | 0 | Kept |
 
 ## Blender-driven modelling (vs Meshy)
 The owner's friend made Dredge in Blender, probably by driving it through a Blender MCP server (an LLM sends bpy

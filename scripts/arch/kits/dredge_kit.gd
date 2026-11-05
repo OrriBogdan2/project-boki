@@ -34,6 +34,10 @@ const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const ARM_THICK := 0.5                 # m, the abyssal arm's girth (an arm, not a rope)
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the rope snaps taut on each
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
+const SMOKE_T := 0.22                  # s between the 3D model's smoke ribbons (from each source in turn)
+const SMOKE_AT := ["anchor_stack", "anchor_smoke_r", "anchor_smoke_l"]
+const SMOKE_COL := Color(0.7, 0.68, 0.66, 0.6)    # (the ribbon's top; its alpha the ribbon's cover)
+const SMOKE_CORE := Color(0.36, 0.34, 0.35, 1.0)  # (and its foot, darker by the stack's mouth)
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 
@@ -67,6 +71,8 @@ var stacks_lost := 0
 var volleys := 0
 var last_quake_k := 0.0         # (tests) the height bonus of the last air smash
 var winch_a := 0.0              # the 3D model's winch drum turn (rad)
+var smoke_t := 0.0              # the next smoke ribbon (3D model)
+var smoke_i := 0                # and the source it rises from (SMOKE_AT)
 var pool_k := 0.0               # the 3D model's tar pool at his feet (0 gone, 1 spread)
 var claw_k := 0.0               # the 3D model's grab-claw: 1 spread for the throw, -1 clenched on the rope, 0 rest
 var _down_seen := false
@@ -284,6 +290,15 @@ func _tick_model(dt: float) -> void:
 	claw_k = move_toward(claw_k, want, dt * 9.0)
 	WardenGlb.pose_extra(h.model, "winch", Quaternion(Vector3.RIGHT, wrapf(winch_a, -PI, PI)))
 	WardenGlb.pose_extra(h.model, "rope1", Quaternion.IDENTITY, Vector3.ONE * (0.001 if out else 1.0))
+	# thin streaks of smoke rising off his stack and both broken shoulders (the art's), a new ribbon each SMOKE_T
+	# from each in turn, so a few always overlap
+	smoke_t -= dt
+	if smoke_t <= 0.0 and tells_visible():
+		smoke_t = SMOKE_T * randf_range(0.8, 1.2)
+		smoke_i = (smoke_i + 1) % SMOKE_AT.size()
+		var src := WardenGlb.anchor(h.model, SMOKE_AT[smoke_i])
+		if src:
+			fx.wisp(src.global_position, SMOKE_COL, SMOKE_CORE, randf_range(0.32, 0.42), randf_range(1.3, 1.7))
 	# the tar pool spreads under him while he stands, and is gone the moment he moves or leaves the ground
 	var still := h.grounded and Vector2(h.vel.x, h.vel.z).length() < 0.6
 	if still:

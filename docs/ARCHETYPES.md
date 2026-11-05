@@ -132,7 +132,7 @@ makes it louder:
 |---|---|---|
 | level number | 19px in a 19px-radius badge at the portrait's corner | **26px bold in a 26px-radius badge**, overlapping the portrait's bottom-left corner. The XP ring is 4px gold, with a bright head dot at the fill point |
 | level-up | the ring fills; the "+" badge appears | a **0.35s badge pop** (scale 1 → 1.35 → 1), a gold ring burst around the portrait, a dedicated `level_up` chime (distinct from `unlock`), and a toast: "LEVEL 4 · +1 SKILL POINT". In the world, a gold ring pulse on your hunter that nearby players see too |
-| skill points | a "+" on the portrait badge; a "+" on rankable slots | the same, plus slot frames **glow gold** while a point is spendable and the key hint reads "ALT+E" on hover |
+| skill points | a "+" on the portrait badge; a "+" on rankable slots | the same, plus slot frames **glow gold** while a point is spendable and the key hint reads "ALT+E" for 5 s after a new point and on hover; the + is clickable (RankClick) |
 | R before 6 | padlock + small "LV 6" above | a **big "6" in the slot's centre** over the padlock. At level 5 the slot fills with progress to 6 (a vertical gold fill). At 6 it flashes and reads "UNLOCK" |
 | R at 6-8 | rank pips | rank pip 1/2 plus a small "9" corner tag for the next rank |
 | enemy level | — | a small level badge at the left end of every enemy nameplate (with a gold rim once they're 6+ and their R is unlocked) |
@@ -891,7 +891,7 @@ follow the same shape, through shared helpers in `ArchKit` (`armed_fx`, `payoff_
 - **Sounds:** `pay_deadeye`, `pay_flashpoint`, `pay_called`, `pay_slam`, synthesized by
   `tools/sfx_combat.py` (appended last, so no other sound changes).
 
-### Archer: Hem -> Focus -> Deadeye (on a Myth-style hunter-archer baseline)
+### Archer: Lisette -> Focus -> Deadeye (on a Myth-style hunter-archer baseline)
 
 Owner direction (Nov 1): a hold-to-charge bow with stages you feel, a wall of falling arrows on E,
 three empowered arrows on R. Mechanics only; names, numbers and art are ours.

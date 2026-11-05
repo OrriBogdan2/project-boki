@@ -252,7 +252,7 @@ static func level_badge(c: CanvasItem, corner: Vector2, lvl: int, role: Color, p
 	var k := 1.0 - pop
 	var sc := 1.0 + 0.45 * sin(k * PI) if pop > 0.0 else 1.0
 	var tab_h := 15.0 * sc
-	var w := maxf(tab_h, (HudStyle.BIG.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 7.0) * sc)
+	var w := maxf(tab_h, (TextCache.width(HudStyle.BIG, txt, 12) + 7.0) * sc)
 	var ctr := corner + Vector2(-w * 0.5 + 6.0, -2.0)
 	var r := Rect2(ctr - Vector2(w, tab_h) * 0.5, Vector2(w, tab_h))
 	var rim: Color = HudStyle.GOLD if ult_open else role

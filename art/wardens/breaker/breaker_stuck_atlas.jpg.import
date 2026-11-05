@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ddk5w17tbu15u"
-path="res://.godot/imported/breaker_stuck_atlas.jpg-fb39f1b2a217fdd5ba29fcbee8a81047.ctex"
+path.bptc="res://.godot/imported/breaker_stuck_atlas.jpg-fb39f1b2a217fdd5ba29fcbee8a81047.bptc.ctex"
+path.astc="res://.godot/imported/breaker_stuck_atlas.jpg-fb39f1b2a217fdd5ba29fcbee8a81047.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "88905a4305a78b79ba39b46cbc1eaa3a"
+"md5": "89a5f3e62b793b50aca56b18cb039576"
 }
 
 [deps]
 
 source_file="res://art/wardens/breaker/breaker_stuck_atlas.jpg"
-dest_files=["res://.godot/imported/breaker_stuck_atlas.jpg-fb39f1b2a217fdd5ba29fcbee8a81047.ctex"]
+dest_files=["res://.godot/imported/breaker_stuck_atlas.jpg-fb39f1b2a217fdd5ba29fcbee8a81047.bptc.ctex", "res://.godot/imported/breaker_stuck_atlas.jpg-fb39f1b2a217fdd5ba29fcbee8a81047.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -39,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
-detect_3d/compress_to=1
+process/size_limit=2048
+detect_3d/compress_to=0
