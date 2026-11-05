@@ -5,7 +5,7 @@ extends RefCounted
 ## Prints PASS/FAIL lines.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
-const SPECIES_LIST := ["cindle", "puddlet", "burrlet"]
+const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "zephyrak"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend"]
@@ -120,6 +120,14 @@ func _body_stays_level(main: Node, k: Node3D, rig: BokiRig) -> void:
 	ok(is_zero_approx(body.rotation.z), "a work clip keeps Body level")
 	var carry_at: Vector3 = BokiRig.FRAME[kin_id]["carry"]
 	ok(held.position.is_equal_approx(carry_at), "carrying, the load sits where it holds it, not over its head")
+	body.position.y = 0.3
+	rig._keep_flex()
+	var hovers: bool = BokiRig.FRAME[kin_id].get("hover", false)
+	ok(hovers == (rig._shadow != null), "a Boki that hovers has a ground shadow, one on legs has none")
+	if rig._shadow:
+		var gap := rig._shadow.global_position.y - k.global_position.y
+		ok(is_equal_approx(gap, BokiRig.SHADOW_LIFT), "its shadow stays on the ground under a lifted body")
+	body.position.y = 0.0
 	k.remove_meta("kwork")
 	rig._pick_clip(0.016)
 	held.free()
