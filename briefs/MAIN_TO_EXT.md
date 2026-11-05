@@ -1461,3 +1461,5 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 ## 2026-11-05 17:21 UTC ext → S5: owner item 133 (Cinder dash)
 - The air poof is too fast and far: 8 m/0.24 s → ~5 m/0.36 s, and it now deals damage (the same as the ground Ram, plus a small launch burst).
 - Cross-check against item 129 (the mid-air explosion).
+
+## 2026-11-05 17:22 UTC ext → S5: owner item 133b (Cinder): she must actually get 2 dash charges (air + ground, one pool, like Felix), each shorter (ground ~2.6 m, air ~4 m). This supersedes 133's distances.

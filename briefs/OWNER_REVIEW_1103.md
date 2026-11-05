@@ -1339,3 +1339,17 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Air dash distance ≤5.5 m and speed ≤15 m/s.
   - An air dash into a foe → a damage event + Char.
   - A ground dash is unchanged.
+
+## 133b. Cinder dash: 2 real charges like Felix, each one shorter (owner, 17:16 UTC Nov 5)
+- The owner: "she should have 2 charges of it like felix, but go less far".
+- The data desc already says "Two charges", but in play she doesn't get them (probably the air poof uses the class long dash ("ex") path with its own single cooldown, or max_dashes isn't 2 for her).
+- Make it 2 charges of the same dash on the ground AND in the air, sharing one pool, each recharging on cd 9 s (tune), like Felix's double hop.
+  - The HUD shows 2 pips.
+- Each one goes less far:
+  - Ground 3.4 → ~2.6 m.
+  - Air ~5 m (from item 133) → ~4 m.
+  - Two in a row then cover about what one long one did.
+- **Assert:**
+  - max_dashes == 2 for ashwick.
+  - Two back-to-back dashes go off on the ground and in the air.
+  - The distances are within tune.
