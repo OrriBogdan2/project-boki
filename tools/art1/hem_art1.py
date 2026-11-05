@@ -29,6 +29,7 @@ REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 _a = sys.argv[sys.argv.index("--") + 1:]
 WORK, SOURCE, SCAN_TEX, PLATE = _a[0], _a[1], _a[2], _a[3]
 ATLAS = 2048
+RELIEF = 2.6            # slope of the relief map per unit of painted height
 F = np.float32
 LSLOT = {H.SKIN: "skin", 0: "skin", H.LID: "skin", H.NAIL: "skin", H.LIP: "skin", H.EAR_IN: "skin", H.HAIR: "hair", H.NEEDLE: "metal",
          H.PORC: "leather", H.GOLD: "cloth", H.SCARF: "cloth", H.FEATHER: "leather", H.PAULDRON: "cloth", H.CORSET: "cloth", H.CORSET_SEAM: "cloth", H.TROUSER: "cloth", H.BOOT: "leather",
@@ -522,6 +523,7 @@ def main():
     # ----------------------------------------------------- paint
     atlas = np.zeros((ATLAS, ATLAS, 3), F)
     mask = np.zeros((ATLAS, ATLAS), bool)
+    relief = np.zeros((ATLAS, ATLAS), F)
     for p in parts:
         ob = p["ob"]
         me = ob.data
@@ -583,6 +585,8 @@ def main():
             rgb = P.string(pts, nn)
         atlas[idx] = rgb
         mask |= m
+        if p["paint"] in ("scan", "quiver"):
+            relief[idx] = 1.0
         if p["group"] == "scan":
             p["tri_slot"] = slot_of(sp.sample(vs[tri].mean(1)))
         if f is not None and not p["slot"]:
@@ -599,6 +603,17 @@ def main():
     so = next(p["ob"] for p in parts if p["name"] == "string")
     so.data.uv_layers.active.data.foreach_set("uv", np.tile(np.array(mid_uv, F), len(so.data.loops)))
     img = S.dilate(atlas, mask, 10)
+    # fine relief: a normal map from the paint, in atlas space (tangent +U, bitangent +V): red stitches stand up, dark seams sink
+    lum = img @ np.array((0.3, 0.55, 0.15), F)
+    red = np.clip((img[:, :, 0] - img[:, :, 1] * 1.6) * 3.0, 0, 1)
+    hgt = (lum * 0.55 + red * 0.9) * relief
+    hgt = (hgt + np.roll(hgt, 1, 0) + np.roll(hgt, -1, 0) + np.roll(hgt, 1, 1) + np.roll(hgt, -1, 1)) / 5.0
+    du = (np.roll(hgt, -1, 1) - np.roll(hgt, 1, 1)) * RELIEF
+    dv = (np.roll(hgt, -1, 0) - np.roll(hgt, 1, 0)) * RELIEF
+    nm = np.stack((-du, -dv, np.ones(du.shape, F)), 2)
+    nm /= np.linalg.norm(nm, axis=2, keepdims=True)
+    nrm_png = os.path.join(WORK, "normal.png")
+    imgio.save((nm * 0.5 + 0.5)[::-1], nrm_png)
     os.makedirs(WORK, exist_ok=True)
     png = os.path.join(WORK, "atlas.png")
     imgio.save(img[::-1], png)
@@ -716,6 +731,9 @@ def main():
     # ----------------------------------------------------- materials (one atlas), slots, join
     image = bpy.data.images.load(png)
     image.name = "atlas"
+    nimg = bpy.data.images.load(nrm_png)
+    nimg.name = "normal"
+    nimg.colorspace_settings.name = "Non-Color"
     mats = {}
 
     def mat(slot):
@@ -726,6 +744,11 @@ def main():
             t = m.node_tree.nodes.new("ShaderNodeTexImage")
             t.image = image
             m.node_tree.links.new(t.outputs[0], b.inputs[0])
+            tn = m.node_tree.nodes.new("ShaderNodeTexImage")
+            tn.image = nimg
+            nn = m.node_tree.nodes.new("ShaderNodeNormalMap")
+            m.node_tree.links.new(tn.outputs[0], nn.inputs["Color"])
+            m.node_tree.links.new(nn.outputs[0], b.inputs["Normal"])
             b.inputs["Roughness"].default_value = 0.8
             mats[slot] = m
         return mats[slot]

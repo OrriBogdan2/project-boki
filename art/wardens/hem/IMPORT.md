@@ -1,14 +1,14 @@
 # Hem (archer; was Pin): import note, ART-1 rebuild (2026-11-05, owner item 108 + 76b)
 
-`hem.glb` is built by script in Blender, no scan: an SDF sculpt on the rig's own joints, a per-texel paint from the sculpt, and
-41 clips keyed as targets. Budget: under 15k triangles with the bow (S1 perf). One 2048 atlas. Slots: skin, hair,
-cloth, leather, metal, brass, glow.
+`hem.glb`: a Meshy scan of the owner's turnaround for body and outfit, scripted geometry on top (head, hair, hands, scarf, bow, arrows, spool, scissors).
+Raw files in ~/meshy/lisette (never in git). 41 clips keyed as targets. Under 15k triangles with the bow (S1 perf), one 2048 atlas, one 2048 relief normal map. Slots: skin, hair, cloth, leather, metal, glow.
 
-    B=~/tools/blender-4.5.15-linux-x64/blender
-    $B -b --factory-startup --python tools/art1/hem_art1.py -- WORK        # shapes hem_sculpt.py (hem_sdf.py), paint hem_paint.py -> WORK/hem_art1.blend, atlas.png
-    $B -b --python tools/art1/hem_clips.py -- WORK/hem_art1.blend WORK/hem.glb     # the clips (posekit.py), exports
-    cp WORK/hem.glb art/wardens/hem/hem.glb
-    godot --headless --path . --import
+    ~/meshy/lisette/edit.sh                          # meshy edits: hair, scarf, mask, scissors out, corset closed high; a flat frontal face plate (edit_face)
+    python3 -I tools/meshy/meshy_task.py create ~/meshy/lisette/runA in/front.png in/left.png in/back.png in/right.png --texture-refs (the same)
+    B=~/tools/blender-4.5.15-linux-x64/blender; ulimit -v 12000000
+    $B -b --factory-startup --python tools/art1/hem_source.py -- runA/glb.glb art/wardens/src/hem_rig.json stage/source.blend    # the fit
+    $B -b --factory-startup --python tools/art1/hem_art1.py -- WORK stage/source.blend stage/scan_base.png edit_face/image0.png  # build, paint, relief map
+    $B -b --python tools/art1/hem_clips.py -- WORK/hem_art1.blend WORK/hem.glb                                                  # clips, export
 
 - **Design (owner, Nov 5; Lisette, the Red Stitch; id and files stay):** model briefs/art-refs/lisette_turnaround_apose.png, outfit and
   colour hem_FINAL_sheet.png (vivid green eyes, a darker warm tan, crisp reds, capris to mid-calf), weapons and props hem_v4_props.png:
