@@ -127,3 +127,8 @@ func _moods(model: Node3D, sync: Node, clips: WardenClips, out: String) -> void:
 		for k in 20:
 			sync.call("_process", 1.0 / 30.0)
 		await _grab(dir.path_join("%s.png" % nm))
+	model.set_meta(WardenMood.FLARE, true)
+	for k in 30:
+		sync.call("_process", 1.0 / 30.0)
+	await _grab(dir.path_join("flare.png"))
+	model.set_meta(WardenMood.FLARE, false)

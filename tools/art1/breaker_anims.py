@@ -228,13 +228,13 @@ GL = merged(CARRY, rot=(-12, 0, 0), head=(10, 0, 0), gr=sp(-0.04, -0.05, 0.36), 
 C.bake("glide", 1.2, [(0, GL), (0.6, dict(pos=(0, 0, 0.012), fr=(AX, -0.05, AZ + 0.07), fl=(-AX, -0.06, AZ + 0.05))), (1.2, dict(pos=(0, 0, -0.006), fr=(AX, -0.06, AZ + 0.05), fl=(-AX, -0.04, AZ + 0.07)))])
 C.bake("dive", 0.6, [(0, merged(CARRY, rot=(-58, 0, 0), head=(40, 0, 0), sh=sl(0.1, -0.1, -0.2), gr=sp(0.1, 0.1, -0.2), fr=(AX, -0.1, AZ + 0.08), fl=(-AX, -0.08, AZ + 0.08), fra=30.0, fla=30.0)), (0.6, {})])
 # downed: tipped over backwards onto the hull's round, feet up, drum and door dropped
-DOWN = merged(CARRY, pos=(0, -0.06, -0.09), rot=(38, 8, 6), hips=(0, 0, 4), head=(-14, 0, -6), gr=sp(0.08, 0.34, -0.42), gd=(0.3, 0.9, 0.1), ga=(0, -0.1, 1), sh=sl(0.06, 0.24, -0.42), sn=(0.1, 0.1, 1), su=(0, 1, 0),
+DOWN = merged(CARRY, pos=(0, -0.08, 0.05), rot=(38, 8, 6), hips=(0, 0, 4), head=(-14, 0, -6), gr=sp(0.08, 0.34, -0.42), gd=(0.3, 0.9, 0.1), ga=(0, -0.1, 1), sh=sl(0.06, 0.24, -0.42), sn=(0.1, 0.1, 1), su=(0, 1, 0),
               fr=(AX + 0.03, 0.12, AZ + 0.04), fl=(-AX - 0.03, 0.1, AZ + 0.06))
 C.bake("downed", 1.6, [(0, DOWN), (1.6, {})], over=breathe(1.6, 0.8))
 C.bake("stun", 0.9, [(0, merged(CARRY, rot=(-4, 5, 0), head=(-4, 0, 0))), (0.45, dict(rot=(-4, -5, 6), head=(-4, -10, -8))), (0.9, dict(rot=(-4, 5, 0), head=(-4, 0, 0)))])
 C.bake("revive", 1.0, [(0, merged(CARRY, pos=(0, 0.04, -0.07), rot=(-24, 0, 0), head=(14, 0, 0), sh=sl(-0.2, 0.42, -0.42), sn=(-0.5, 0.2, 0.7), su=(0.2, 0.9, 0), gr=sp(-0.1, 0.4, -0.4), gd=(0.3, 0.4, 0.8), fra=-14.0)), (0.5, dict(rot=(-27, 0, 0))), (1.0, dict(rot=(-24, 0, 0)))])
 C.bake("death", 1.3, [(0, CARRY), (0.2, dict(pos=(0, -0.03, -0.02), rot=(10, 0, 0), head=(-14, 0, 0))),
-                      (0.75, merged(DOWN, e="in")), (1.0, dict(pos=(0, -0.2, -0.16), rot=(84, 8, 8), e="snap")), (1.3, dict(pos=(0, -0.22, -0.18), rot=(90, 8, 10)))])
+                      (0.75, merged(DOWN, e="in")), (1.0, dict(pos=(0, -0.14, 0.3), rot=(80, 8, 8), e="snap")), (1.3, dict(pos=(0, -0.14, 0.34), rot=(86, 8, 10)))])
 
 # ---------------------------------------------------------------------- one-shots
 C.bake("land", 0.36, [(0, merged(CARRY, pos=(0, 0, -0.06), rot=(-12, 0, 0), head=(10, 0, 0), sh=sl(0.1, 0.12, -0.34), gr=sp(0.1, 0.2, -0.32), fr=(AX + 0.02, -0.02, AZ), fl=(-AX - 0.02, 0.04, AZ))), (0.36, CARRY)])
