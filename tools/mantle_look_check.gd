@@ -240,6 +240,8 @@ func _mask(tree: SceneTree, holder: Node3D, a: String, lk: Dictionary) -> Packed
 		var mi := nd as MeshInstance3D
 		if mi == null or mi.mesh == null or not mi.is_visible_in_tree():
 			continue
+		if mi.has_meta("halo") or mi.has_meta("glb_hidden"):
+			continue      # (tiny FX quads riding an orbit: where they are depends on frame time, not on the shape)
 		var xf := mi.global_transform
 		for p in mi.mesh.get_faces():
 			var w := xf * p
