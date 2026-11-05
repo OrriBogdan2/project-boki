@@ -116,7 +116,7 @@ def lid_piece(s):
 
 ant = [K.antenna(1.0), K.antenna(-1.0)]
 br = K.braid()
-ties = [K.braid_tie(br, 0.03, "tieA", 0.045), K.braid_tie(br, 0.965, "tieB", 0.036)]
+ties = [K.braid_tie(br, 0.085, "tieA", 0.047), K.braid_tie(br, 0.965, "tieB", 0.036)]
 tuft = K.braid_tuft(br)
 top_z, r0 = float(src.get("hem_z", 0.8)), (float(src.get("hem_rx", 0.165)), float(src.get("hem_ry", 0.128)))
 hip_cy = float(src.get("hem_cy", -0.012))
@@ -474,7 +474,10 @@ src.hide_render = True
 src.select_set(False)
 NM = np.array(nm_bake.pixels[:], dtype=np.float32).reshape(ATLAS, ATLAS, 4)
 flat_ = PID != 0
-NM[flat_, 0], NM[flat_, 1], NM[flat_, 2] = 0.5, 0.5, 1.0
+# (a steep texel is a ray that hit the wrong side: straps' undersides, the collar's inside)
+nk_ = smooth(0.62, 0.86, NM[..., 2] * 2.0 - 1.0)[..., None] * 0.75
+nk_[flat_] = 0.0
+NM[..., :3] = NM[..., :3] * nk_ + np.array([0.5, 0.5, 1.0], np.float32) * (1 - nk_)
 nm_img = bpy.data.images.new("sable_normal", ATLAS, ATLAS)         # a file like the atlas: the clips stage reopens the .blend
 nm_img.colorspace_settings.name = "Non-Color"
 nm_img.pixels.foreach_set(NM.ravel())
@@ -511,7 +514,8 @@ near = np.median(OUTC[ys, xs][(dm > 0.013) & (dm < 0.02)], axis=0)
 OUTC[ys[dm < 0.013], xs[dm < 0.013]] = near
 # the face pass: the master's close-up projected on the face, the coat's lacing on her back
 cc_ = OUTC[ys, xs].astype(np.float64)
-fa_, fm_ = P.face_art(cc_, pp, NOR[ys, xs].astype(np.float64))
+nn_ = NOR[ys, xs].astype(np.float64)
+fa_, fm_ = P.face_art(cc_, pp, nn_)
 cc_ = mix(cc_, fa_, fm_)
 cc_ = P.lacing(cc_, pp)
 OUTC[ys, xs] = cc_
@@ -529,7 +533,8 @@ def paint(pred, fn):
 free = lambda fn: (lambda p, n, ao: fn(p, n, np.minimum(1.0, ao + 0.65)))
 paint(lambda n: n.startswith("palm"), free(P.glove))
 paint(lambda n: n.startswith(("finger", "thumb")), free(P.skin))
-paint(lambda n: n.startswith("antenna"), lambda p, n, ao: P.feather(p, n, ao))
+for a_ in ant:
+    paint(lambda n, nm=a_.name: n == nm, lambda p, n, ao, q=a_: P.feather(p, n, ao, q.path))
 paint(lambda n: n == "braid", lambda p, n, ao: P.braid(p, n, ao, br.path))
 paint(lambda n: n in ("tuft", "nape"), P.tuft)
 paint(lambda n: n.startswith("tie"), P.silver)

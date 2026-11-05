@@ -8,7 +8,7 @@ import sable_pieces as K
 import imgio
 
 ART = os.path.expanduser("~/meshy/sable_f/proj/")      # crops of the owner's sheets
-WINGS, HEAD, GUN = imgio.load(ART + "wings.png"), imgio.load(ART + "head.png"), imgio.load(ART + "gun.png")
+WINGS, HEAD, GUN = imgio.load(ART + "wings.png"), imgio.load(ART + "head_sheet.png"), imgio.load(ART + "gun.png")
 
 LEATHER = [hexc("#1d1520"), hexc("#2c2130"), hexc("#3f2f45"), hexc("#5a4562"), hexc("#7d6a86")]
 LINING = [hexc("#2d1147"), hexc("#46196e"), hexc("#5f2595"), hexc("#7a35b5"), hexc("#9a55d2")]
@@ -37,6 +37,10 @@ def scan_grade(col, p, ao):
     c = mix(c, np.clip((col - lum) * 1.9 + lum, 0, 1) * np.array([1.06, 0.92, 1.3]), purple)
     dark = smooth(0.32, 0.16, lum[:, 0]) * (p[:, 2] < K.NECK_Z)
     c = c + dark[:, None] * np.array([0.02, 0.012, 0.03])
+    # (the scan's near-black slivers at the shoulders and behind the ear: its unpainted seams)
+    sliver = smooth(0.11, 0.06, lum[:, 0])
+    c = mix(c, hexc("#2e2233"), sliver * (p[:, 2] < K.NECK_Z - 0.02))
+    c = mix(c, hexc("#d9d6e0"), smooth(0.3, 0.2, lum[:, 0]) * smooth(K.NECK_Z + 0.03, K.NECK_Z + 0.07, p[:, 2]) * (p[:, 1] < 0.0))
     return np.clip(c, 0, 1)
 
 
@@ -91,13 +95,6 @@ def bola(p, n, ao):
     return ramp(np.clip(t - band * 0.28, 0, 1), SILVER)
 
 
-def feather(p, n, ao):
-    """White, a fine comb of barbs along the feather, a grey quill."""
-    x = p[:, 0] * 300.0 + p[:, 2] * 380.0
-    barbs = 0.5 + 0.5 * np.sin(x + 3.0 * fbm(p * 30.0, 2))
-    return ramp(np.clip(0.74 + lit(n, ao) * 0.26 + (barbs - 0.5) * 0.2, 0, 1), HAIR)
-
-
 def path_u(p, path):
     path = np.asarray(path)
     a, b = path[:-1], path[1:]
@@ -117,14 +114,24 @@ def path_u(p, path):
     return us, best, side
 
 
+def feather(p, n, ao, path):
+    """A quill along the top edge, barbs combed out from it and notched: soft shade between them."""
+    u, d, sd = path_u(p, path)
+    barbs = 0.5 + 0.5 * np.sin(u * 95.0 + d * 90.0)
+    quill = smooth(0.012, 0.005, d)
+    t = 0.66 + lit(n, ao) * 0.2 + (barbs - 0.5) * 0.26 * smooth(0.008, 0.02, d) + quill * 0.12
+    return ramp(np.clip(t, 0, 1), HAIR)
+
+
 def braid(p, n, ao, path):
-    """Three strands: diagonal gaps crossing the lobes, dark in the weave."""
+    """Fat crossing lobes as on sable_head.png: a dark crease between lobes, fine strands combed along each."""
     u, d, sd = path_u(p, path)
     k = u * 9.0
-    w = np.abs(((k + sd * 22.0) % 1.0) - 0.5) * 2
-    w2 = np.abs(((k - sd * 22.0) % 1.0) - 0.5) * 2
-    gap = smooth(0.18, 0.04, np.where(np.floor(k) % 2 == 0, w, w2))
-    return ramp(np.clip(lit(n, ao) * 0.85 + 0.24 - gap * 0.6, 0, 1), HAIR)
+    fr = k - np.floor(k)
+    flip = np.where(np.floor(k) % 2 == 0, 1.0, -1.0)
+    crease = smooth(0.17, 0.03, np.minimum(fr, 1 - fr))
+    strands = np.sin((fr * 2.2 + flip * sd * 24.0) * 9.0)
+    return ramp(np.clip(0.58 + lit(n, ao) * 0.42 - crease * 0.5 + strands * 0.05, 0, 1), HAIR)
 
 
 def tuft(p, n, ao):
@@ -176,11 +183,11 @@ def pistol_art(p, n, ao, fallback):
 
 
 def face_art(col, p, n):
-    """The master's head close-up on the face, front on, graded to the scan's skin. -> (colour, mask)."""
-    px, py = 193 - (p[:, 0] - K.FACE_X) * 1467.0, 252 + (K.EYE[2] - p[:, 2]) * 1338.0
+    """sable_head.png's front view on the face, graded to the scan's skin. -> (colour, mask)."""
+    px, py = 401 - (p[:, 0] - K.FACE_X) * 2144.0, 684 + (K.EYE[2] - p[:, 2]) * 2056.0
     c = sample(HEAD, px, py)
-    m = smooth(1.0, 0.8, np.hypot((px - 193) / 128.0, (py - 292) / 118.0)) * smooth(0.02, 0.05, p[:, 1]) * smooth(0.3, 0.6, n[:, 1])
-    ref = (np.hypot(px - 193, py - 372) < 26) & (m > 0.9)              # the chin, to match the two skins
+    m = smooth(1.0, 0.84, np.hypot((px - 401) / 192.0, (py - 738) / 196.0)) * smooth(0.02, 0.05, p[:, 1]) * smooth(0.3, 0.6, n[:, 1])
+    ref = (np.hypot(px - 401, py - 885) < 34) & (m > 0.8)              # the chin, to match the two skins
     if ref.sum() > 20:
         c = np.clip(c * (np.median(col[ref], 0) / np.maximum(np.median(c[ref], 0), 0.02)), 0, 1)
     return c, m

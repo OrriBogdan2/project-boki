@@ -194,7 +194,7 @@ ANT_N = 4
 def antenna(s):
     side = "R" if s > 0 else "L"
     top = hs([0, 0, 1.87])[2]
-    pts = np.array([(0.030, 0.036, top - 0.02), (0.046, 0.018, top + 0.055), (0.068, 0.0, top + 0.125), (0.125, -0.012, top + 0.195), (0.205, -0.018, top + 0.25), (0.285, -0.018, top + 0.335)]) * [s, 1, 1]
+    pts = np.array([(0.030, 0.036, top - 0.02), (0.05, 0.018, top + 0.05), (0.09, 0.0, top + 0.115), (0.15, -0.012, top + 0.16), (0.205, -0.018, top + 0.225), (0.232, -0.018, top + 0.335)]) * [s, 1, 1]
     n = 11
     path = catmull(pts, n)
     u = np.linspace(0, 1, n)
@@ -202,7 +202,7 @@ def antenna(s):
     side_v = norm(np.cross(t_, np.array([0, 1.0, 0])))                # in her front plane
     if side_v[n // 2, 2] > 0:
         side_v = -side_v                                               # the barbs point out and down
-    wd = 0.076 * smooth(0.16, 0.5, u) * smooth(1.0, 0.74, u) + 0.0055
+    wd = 0.082 * smooth(0.16, 0.5, u) * smooth(1.0, 0.7, u) + 0.0055
     up_w = 0.012 * smooth(0.25, 0.6, u) * smooth(1.0, 0.8, u) + 0.003
     v, f = [], []
     barb = np.array([1.0 if i % 2 == 0 else 0.76 for i in range(n)])     # the feather's notched edge
