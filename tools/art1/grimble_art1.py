@@ -355,7 +355,7 @@ def main():
     part("skin_head", None, 0, "scan_F", 2.3, None, "scan", None, ob=scan("F", "head"))
     part("eye", G.eye(), 80, "eye", 2.6, None, "eye", "glow")
     part("lid", G.lid(), 90, "skin", 1.4, None, "lid", "skin")
-    part("monocle", G.monocle(), 340, "gear", 2.2, None, "head", None)
+    part("monocle", G.monocle(), 460, "gear", 2.2, None, "head", None)
     part("body", None, 0, "scan_B", 1.0, None, "scan", None, ob=scan("B", "body"))
     part("straps", G.straps(), 130, "gear", 0.9, None, "hips", None)
     part("cuffR", G.cuff(J, "R", 1), 150, "gear", 1.0, None, "forearm.R", None)
@@ -478,6 +478,9 @@ def main():
         if nm.startswith("scan_"):
             rgb = scan_rgb(nm[-1], pts)
             rgb = np.clip(rgb * (0.86 + 0.40 * P.form(nn))[:, None] * 1.4, 0, 1)
+            if nm == "scan_F":      # (the collar is iron: the scan's paint leaves it skin-pale)
+                col = S.smooth(1.094, 1.080, pts[:, 2])[:, None]
+                rgb = rgb * (1 - col) + rgb * np.array((0.50, 0.54, 0.62), F) * col
             p["tri_slot"] = tri_slots(nm[-1], scan_rgb(nm[-1], vs[tri].mean(1).astype(F)), vs[tri].mean(1))
         elif nm == "skin":
             rgb = P.skin(pts, nn, lab, f)
