@@ -2283,3 +2283,15 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Holding Space from the ground for 3 s → no glider.
   - Tap, then hold → glider open; release → closed.
   - The same in tutorial/farm/match.
+
+## 178c. Tutorial instructions escalate when ignored (owner playtest with his dad, 18:08 UTC Nov 5)
+- The owner: "my dad keeps missing the instructions - maybe make it highlight or something if they ignore it too long".
+- **Placement:** the current instruction sits big and central, near the character (keycaps beside them, item 178), not in a corner.
+- **Escalation** when the step isn't done:
+  - After ~6 s: the prompt pulses (a scale 1.0 ↔ 1.08 + glow) and a soft chime plays.
+  - After ~12 s: a gentle screen-edge dim spotlights the prompt + character; the keycap animates "pressing" itself; Hob/a voice line or a short text nudge ("Try pressing W").
+  - After ~20 s: the camera eases toward the target/area (the item 166 mote trail) and the nudge repeats every ~10 s.
+- Escalation resets the moment the player makes any progress on the step.
+- Never block input; no harsh sounds.
+- The same escalation for the farm tutorial's Hob prompts.
+- **Assert:** idle 7 s → a pulse; 13 s → the spotlight; progress resets it.
