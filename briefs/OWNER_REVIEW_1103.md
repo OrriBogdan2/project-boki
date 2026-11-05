@@ -1061,3 +1061,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 5. **Sound:**
    - Much better lightning sounds: a crackling zap per finger-gun shot, a sizzling stack-apply tick, a big thunder crack on the ult.
    - A distinct "reset" sound (a bright electric chime/zing) when her dash (Wirerun) resets from the orb pull (item 71) (S4).
+
+## 116b. Ryzz's dash (Wirerun) on reset: ~1.5x further and a faster charge (owner, 12:23 UTC Nov 5). Reference: Joule's Surge (source)
+- Source (supervive_kits.md, Joule): **Surge (Shift)**:
+  - PRESS = dash forward, damaging enemies passed through; HOLD = charge a longer dash.
+  - Dashing through a 4-Static enemy = massive bonus damage + a cooldown reset.
+  - The Lightning Orb also resets it.
+- **Owner:** the reset dash should go **~1.5x further** than now, and **charge a bit faster** (the hold-to-charge ramps quicker, e.g. ~0.75x the current charge time).
+- **Match Joule's feel:**
+  - A quick press = a short zap-dash through enemies (damage on pass-through).
+  - A hold = a longer charged dash.
+  - Pass-through damage + the 4-stack bonus + the reset loop should flow into chained dashes.
+- Data-tuned; assert the reset distance ≈1.5x the base and that the charge-to-max time is reduced.
+- Pairs with 116.5 (the reset zing sound).
