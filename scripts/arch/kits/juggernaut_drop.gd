@@ -4,8 +4,9 @@ extends RefCounted
 ## slam, briefs/hero-ref/juggernaut.md "Air Slam" and "Jump and landing": ~0.85s airborne, ~0.5s recovery).
 ## Press in the air: a short hang at the top while he gathers (the blade hauled overhead, a tuck and a half
 ## flip) as he slides over a landing marker everyone sees at the clamped cursor, then a straight vertical slam
-## down onto it with flame streaks, a heavy landing (a crouch, a crack in the ground, a shock ring the size of the stun, dust and
-## debris, a shake and a deep boom), and a recovery rising from the crouch. Owned by JuggernautKit.
+## down onto it with flame streaks, a heavy landing (a crouch, a crack in the ground, a shock ring the size of
+## the stun, dust and debris, a shake and a deep boom), and a recovery rising from the crouch. Owned by
+## JuggernautKit.
 
 const PURPLE := Color("b06aff")       # the landing marker (the damage area)
 const CORE := Color("ff5ad8")         # its centre ring: the stun area, and the shock ring on impact
