@@ -6,7 +6,7 @@ uniform vec4 iris : source_color = vec4(0.62, 0.89, 0.23, 1.0);
 uniform vec2 look = vec2(0.0);
 uniform float size = 0.82;
 uniform float pupil = 0.40;
-uniform float night_glow = 0.28;
+uniform float night_glow = 0.1;
 
 void fragment() {
 	vec2 p = vec2(UV.x - 0.5, 0.5 - UV.y) * 2.0;

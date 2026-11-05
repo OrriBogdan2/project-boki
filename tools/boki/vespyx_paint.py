@@ -22,8 +22,6 @@ NOSE = hexc("2a1830")
 MOUTH_DARK = hexc("54172f")
 TONGUE = hexc("f0708a")
 WOOD = hexc("8a5a30")
-WOOD_DARK = hexc("54341a")
-WOOD_CUT = hexc("e0c08c")
 STEEL = hexc("aeb8c8")
 BERRY = hexc("e23a5a")
 
@@ -93,12 +91,3 @@ def paint_shell(p, n, nearest_gap, light=SHELL_LIGHT):
 def v3s(*a):
     return np.array(a, dtype=float)
 
-
-def paint_log(p):
-    """Bark in long stripes along x, pale sawn ends with a ring."""
-    grain = value_noise(p * v3s(9, 90, 90))
-    col = mixc(WOOD_DARK, WOOD, sat(grain * 1.8 - 0.3))
-    r = np.hypot(p[:, 1] - 0.305, p[:, 2] + 0.305)
-    rings = 0.5 + 0.5 * np.sin(r * 300)
-    end = edge(np.abs(p[:, 0]) - 0.262, 0.004)
-    return mixc(col, mixc(WOOD_CUT, WOOD, rings * 0.5), end)

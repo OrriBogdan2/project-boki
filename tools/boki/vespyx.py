@@ -12,8 +12,8 @@ SIDES = (("L", -1.0), ("R", 1.0))
 HEAD_C = v3(0, 0.47, -0.13)
 HEAD_R = v3(0.25, 0.208, 0.208)
 # the eye dome: centre and radii in the head's frame, set into the socket the head carves for it
-EYE_C = v3(0.120, 0.462, -0.272)
-EYE_R = v3(0.105, 0.124, 0.064)
+EYE_C = v3(0.116, 0.452, -0.283)
+EYE_R = v3(0.080, 0.096, 0.056)
 EYE_YAW = 0.42
 
 
@@ -178,8 +178,6 @@ def prop_parts():
         "pick_head": (Shape([Cone("a", "prop_pick", end, end + AX_UP * 0.17 + AXIS * -0.06, 0.034, 0.006, k=0.0),
                              Cone("b", "prop_pick", end, end - AX_UP * 0.17 + AXIS * -0.06, 0.034, 0.006, k=0.005)]),
                       0.003, 160),
-        "log": (Shape([Cone("l", "prop_log", v3(-0.23, 0.30, -0.30), v3(0.23, 0.31, -0.31), 0.062, 0.058, k=0)]),
-                0.004, 120),
         "berry": (Shape([Ellipsoid("b", "prop_berry", v3(0, 0.285, -0.365), v3(0.054, 0.052, 0.054), k=0)]), 0.003, 90),
     }
     return out

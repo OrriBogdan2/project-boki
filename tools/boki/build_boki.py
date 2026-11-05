@@ -154,7 +154,7 @@ def occlusion(pieces, p, n):
     def scene(q):
         d = None
         for pc in pieces:
-            if pc.name.split("_")[0] in ("axe", "pick", "log", "berry"):
+            if pc.name.split("_")[0] in ("axe", "pick", "berry"):
                 continue
             e = pc.shape.eval(q)
             d = e if d is None else np.minimum(d, e)
@@ -187,8 +187,6 @@ def paint_texels(pieces, piece_id, p, n, vao):
             c = np.tile(np.array([0.72, 1.0, 0.3]), (len(q), 1))
         elif pc.name.endswith("handle"):
             c = np.tile(paint.WOOD, (len(q), 1))
-        elif pc.name == "log":
-            c = paint.paint_log(q)
         elif pc.name == "berry":
             c = np.tile(paint.BERRY, (len(q), 1))
         else:

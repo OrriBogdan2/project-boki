@@ -41,7 +41,6 @@ def _bones():
     b["sting"] = (tuple(TAIL_PTS[7]), tuple(STING_C + (STING_C - TAIL_PTS[7])), "tail7")
     b["prop_axe"] = (tuple(STING_C), tuple(STING_C + vespyx.AXIS * 0.1), "sting")
     b["prop_pick"] = (tuple(STING_C), tuple(STING_C + vespyx.AXIS * 0.1), "sting")
-    b["prop_log"] = (p3(0, 0.30, -0.30), p3(0, 0.40, -0.30), "spine")
     b["prop_berry"] = (p3(0, 0.285, -0.365), p3(0, 0.385, -0.365), "spine")
     return b
 
@@ -343,14 +342,30 @@ def mine(t):
 
 
 def carry(t):
-    """Trots with a log hugged in both pincers, the head up and leaning back from the weight."""
+    """Trots with its load hugged in both pincers (home's own Held item, BokiRig.CARRY_AT), head up, leaning back."""
     p = trot(t, 0.42, 0.010, -0.14, -0.05)
     for sd, sx in SIDES:
         add(p, "arm." + sd, rx=0.6, rz=-sx * 0.08)
         add(p, "claw." + sd, rx=0.25, ry=sx * 0.25)
     add(p, "neck", rx=0.1)
     add(p, "head", rx=0.1)
-    p["prop_log"] = "on"
+    return p
+
+
+def tend(t):
+    """Any other farm job: head down over the work, pincers snipping in turn, the tail ticking along."""
+    p = {}
+    bob = s(t, 2)
+    add(p, "spine", rx=-0.14)
+    add(p, "neck", rx=-0.20 + bob * 0.04)
+    add(p, "head", rx=LOOK_UP * 0.5 + bob * 0.06, ry=s(t, 1) * 0.12)
+    p["root_at"] = (0, -0.02 + bob * 0.006, 0)
+    for sd, sx in SIDES:
+        ph = 0.0 if sd == "L" else 0.5
+        add(p, "arm." + sd, rx=-0.15 + 0.35 * max(0.0, s(t, 2, ph)), ry=sx * 0.2)
+        add(p, "nip." + sd, ry=sx * (0.25 + 0.25 * s(t, 4, ph)))
+    ear_pose(p, back=0.16)
+    tail_wave(p, t * 2, 0.03, roll=0.05)
     return p
 
 
@@ -367,4 +382,5 @@ CLIPS = {
     "chop": (1.1, True, chop),
     "mine": (1.0, True, mine),
     "carry": (0.8, True, carry),
+    "tend": (1.3, True, tend),
 }

@@ -6,7 +6,7 @@ import numpy as np
 
 KEEP_INFLUENCES = 4
 # where an unused prop sits (from its rest place), collapsed inside the body so its ink shell never shows
-HIDE_AT = {"prop_log": (0, -0.05, 0.30), "prop_berry": (0, -0.09, 0.40)}
+HIDE_AT = {"prop_berry": (0, -0.09, 0.40)}
 
 
 def armature(bones, bl):
@@ -52,7 +52,7 @@ def skin(body, face_obj, arm, pieces, piece_of, bl, sigma=0.012):
         bones = sorted({p.bone for p in prims})
         w = np.zeros((len(pc.v), len(bones)))
         hard = pc.name in ("tail", "collar", "sting") or pc.slot == 0 and pc.name.split("_")[0] in (
-            "axe", "pick", "log", "berry")
+            "axe", "pick", "berry")
         s = 0.002 if hard else sigma
         for j, b in enumerate(bones):
             sel = [i for i, p in enumerate(prims) if p.bone == b]

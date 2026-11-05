@@ -13,7 +13,7 @@ ffmpeg -y -loglevel error -framerate 8 -pattern_type glob -i "$dir/frames_turn_*
 	-loop 0 "$dir/turntable.gif"
 inputs=""
 n=0
-for strip in idle walk run attack ability hop sleep eat pet chop mine carry; do
+for strip in idle walk run attack ability hop sleep eat pet chop mine carry tend; do
 	inputs="$inputs -i $dir/anim_$strip.png"
 	n=$((n + 1))
 done
