@@ -19,6 +19,7 @@ func _init(check) -> void:
 func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
 	_rounds(m, P, home)
 	_tracking(m, P, home)
+	_dash_aim(m, P, K, home)
 	_drum(m, P, K, home)
 	_brackets(m, P, home)
 	_rifle_pose()
@@ -115,6 +116,63 @@ func _drum(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 			and float(t_full["at"]) > 0.0 and float(t_full["at"]) <= REFILL_BY,
 			"after 12: %d, after 0.25s rest: %d, full at %.2f s" % [after12, t_full["early"], t_full["at"]])
 	_dry(m, P, K, home)
+
+## Item 109: a dash east with the cursor north, LMB held from before it to after it. Every round leaves north, none
+## goes missing across the dash, and the body stays on the aim while the legs turn toward the dash.
+func _dash_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
+	for kind in ["tap", "held", "air"]:
+		C.ac.step(m, 0.5)
+		P.teleport(home)
+		C.ac.step(m, 0.1)
+		P.ammo = MAG
+		P.fire_cd = 0.0
+		P.dashes = P.max_dashes()
+		P.inp["move"] = Vector2.ZERO
+		if kind == "air":
+			P.do_jump()
+			C.ac.step(m, 0.15, func(): P.inp["aim"] = P.pos + Vector3(0, 0.9, -8.0))
+		var rec := {"t": 0.0, "n": P.shot_n, "at": [], "worst": 0.0, "face": 0.0, "legs": 0.0}
+		rec.merge({"steps": 0, "dash_rounds": 0})
+		var each := func():
+			P.inp["aim"] = P.pos + Vector3(0, 0.9, -8.0)
+			P.inp["fire"] = true
+			P.inp["dash_down"] = kind == "held" and float(rec["t"]) < 0.5
+			if P.shot_n > int(rec["n"]):
+				rec["n"] = P.shot_n
+				(rec["at"] as Array).append(rec["t"])
+				var sd: Dictionary = C._last_shot(m, P)
+				var off := absf(rad_to_deg((sd["vel"] as Vector2).angle_to(Vector2(0, -1))))
+				rec["worst"] = maxf(float(rec["worst"]), off)
+				if P.roll_t > 0.0: rec["dash_rounds"] = int(rec["dash_rounds"]) + 1
+			if P.roll_t > 0.0 and float(rec["t"]) > 0.15:
+				rec["steps"] = int(rec["steps"]) + 1
+				rec["face"] = maxf(float(rec["face"]), absf(rad_to_deg(wrapf(P.face, -PI, PI))))
+				P.render(C.DT, 1.0)          # (headless steps don't pose her)
+				if P.anim != null: rec["legs"] = maxf(float(rec["legs"]), absf(P.anim.legs_yaw))
+			rec["t"] = float(rec["t"]) + C.DT
+		P.inp["fire"] = true
+		P.inp["aim"] = P.pos + Vector3(0, 0.9, -8.0)
+		P.inp["move"] = Vector2(1, 0)
+		P.inp["dash_down"] = kind == "held"
+		P.do_dash()
+		C.ac.step(m, 0.9, each)
+		P.inp["fire"] = false
+		P.inp["move"] = Vector2.ZERO
+		P.inp["dash_down"] = false
+		var at: Array = rec["at"]
+		var gap := 0.0
+		for i in range(1, at.size()):
+			gap = maxf(gap, float(at[i]) - float(at[i - 1]))
+		C.ok("Vex item 109 (%s): dashing east at a north cursor, every round goes north (within 5 degrees)" % kind,
+				at.size() >= 6 and int(rec["dash_rounds"]) >= 2 and float(rec["worst"]) <= 5.0,
+				"%d rounds, %d in the dash, worst %.1f deg" % [at.size(), rec["dash_rounds"], rec["worst"]])
+		C.ok("Vex item 109 (%s): no gap in the rifle's cadence across the dash" % kind,
+				gap <= ROUND_GAP + C.DT * 1.5, "longest gap %.3f s" % gap)
+		C.ok("Vex item 109 (%s): the body stays on the aim through the dash, the legs follow it" % kind,
+				int(rec["steps"]) > 0 and float(rec["face"]) <= 5.0 and float(rec["legs"]) > 0.5,
+				"body %.1f deg off, legs turned %.2f rad, %d steps" % [rec["face"], rec["legs"], rec["steps"]])
+	P.anim = null                    # (the rest of the check runs unposed, as a headless step does)
+	C.ac.step(m, 0.5)
 
 ## Run dry with the trigger held: there is no reload (none starts, by hand or by itself), nothing fires while the
 ## drum refills, the count climbs back (the HUD shows it), and once full the held string picks up again.
