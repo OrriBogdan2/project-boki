@@ -331,13 +331,13 @@ func reclass(c: String, a: String, w := "") -> void:
 	wid = Arch.weapon_for(arch, cls, w)
 	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Unmasked.mask_look() if ctrl == "local" else bot_look, arch))
 	anim = null
-	equip(wid)
+	equip(wid, -1, false)      # (Models.hunter just built this weapon, a 3D Warden's own model included)
 	dashes = max_dashes(); ex_cd = 0.0
 	roll_t = 0.0; stun_t = 0.0; root_t = 0.0
 
 ## Puts a weapon in hand with this run's weapon upgrades on it (WeaponUps). A hunter has one
 ## signature weapon (Arch.signature), so this is only called to build it, or when practice swaps archetype.
-func equip(w: String, with_ammo := -1) -> void:
+func equip(w: String, with_ammo := -1, rebuild := true) -> void:
 	wid = w
 	wpn = Data.weapon_stats(w)
 	WeaponUps.apply(self)
@@ -345,7 +345,7 @@ func equip(w: String, with_ammo := -1) -> void:
 	wbloom = 0.0; warm_t = 0.0; spin = 0.0; spun_t = 0.0; sus_n = 0; mel_hold = 0.0; strike_at_end = {}
 	ammo = int(wpn["mag"]) if with_ammo < 0 else mini(with_ammo, int(wpn["mag"])); reload_t = 0.0; fire_cd = 0.25
 	if ammo <= 0 and not remote: start_reload()
-	var gun: Node3D = model.find_child("Gun", true, false) if model else null
+	var gun: Node3D = model.find_child("Gun", true, false) if model and rebuild else null
 	if gun:
 		for ch in gun.get_children():
 			if ch.name != "Muzzle":
@@ -1303,7 +1303,7 @@ func dash_with(e: Dictionary) -> void:
 	dodged = false
 	fly_t = 0.0
 	if wpn.get("bloom_dash_reset", false): wbloom = 0.0
-	m.sfx("dash", pos, -4.0, 0.8 if not shove.is_empty() else 1.0)
+	m.sfx(HeroSfx.of(self, "dash", "dash"), pos, -4.0, 0.8 if not shove.is_empty() else 1.0)
 	if not (ak and ak.own_dash_trail()):
 		m.fx.dash_trail(self)          # the shared puff and ring; a kit with its own trail draws no ring
 
@@ -2946,7 +2946,7 @@ func gain_xp(x: float) -> void:
 			m.fx.burst(pos + Vector3(0, 1.2, 0), Color("ffd27a"), 12, 2.5, 0.5, -2.0)
 		if is_local() and m and m.hud:
 			m.hud.level_up(lvl, wstep)
-			# the level-up chime: its own rising bell run over a warm swell (tools/gen_level_sfx.py)
+			# the level-up chime: its own rising bell run over a warm swell (tools/gen_sfx_ui.py)
 			m.sfx("level_up", null, -2.0, 1.0)
 			if kin is Kin: BokiChatter.say(m, kin, "level_up")
 			level_ups += 1

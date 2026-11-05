@@ -446,6 +446,18 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | beacon_hear_m | 120 |
 | _beacon_hear_m | how far the beacon's alarm loop carries; the notice itself reaches every player on the map |
 
+## sfx_levels (`content/rules/sfx_levels.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Loudness per sound category (docs/AUDIO.md): RMS in dBFS over the audible part (above 2% of the peak), peak ceiling and the check's tolerance. tools/sfx_lib.py levels every generated sound to these; --sfx-set-check measures the files. |
+| peak_db | -1 |
+| tolerance_db | 3 |
+| cats | {"fire": -17.0, "impact": -16.0, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
+| _cats | fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 

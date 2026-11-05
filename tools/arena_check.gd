@@ -22,12 +22,80 @@ func step(m: Match, secs: float) -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	await _arena()
+	await _breaker_whirl()
 	await _cards()
 	await _loadout()
 	printerr("ARENACHECK (training match next)")
 	await _training()
 	print("ARENACHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
+
+## Breaker's LMB hold in the Arena, both ways in (opened as him, swapped to him from the menu), with the effect
+## ticking on real frames: his own 3D hammer stays in the hand, it whirls at the data's rate and it is big enough
+## to read at the match camera. The release slams.
+func _breaker_whirl() -> void:
+	for start in ["bulwark", "thief"]:
+		var m := Match.new()
+		main.add_child(m)
+		await m.start(Match.arena_opts(start))
+		m.set_process(false)
+		var P: Hunter = m.player
+		if start != "bulwark":
+			m.arena.set_arch("bulwark")
+		await main.get_tree().process_frame
+		await main.get_tree().process_frame
+		var K: BulwarkKit = P.ak
+		var how := "opened as him" if start == "bulwark" else "swapped to him"
+		var pv: Node3D = K.fx._pivot()
+		var mesh := pv.get_node_or_null(WardenGlb.WEAPON) as MeshInstance3D
+		var skinned: bool = K.fx.own_piece != null
+		if skinned:      # (skinned in the .glb, item 76b: on its bone, the pivot stays as the reference)
+			mesh = P.model.get_node("Warden").find_child("hammer", true, false) as MeshInstance3D
+		ok("arena Breaker (%s): his 3D hammer is %s" % [how, "skinned on him" if skinned else "on the swing's pivot"],
+			mesh != null and mesh.is_visible_in_tree())
+		P.fire_cd = 0.0
+		var last := Vector3.ZERO
+		var turns := 0.0
+		var long_m := 0.0
+		for i in 90:
+			P.inp["fire"] = true
+			P.inp["aim"] = P.pos + Vector3(6, 0, 0)
+			m.step(DT)
+			await main.get_tree().process_frame
+			var v: Vector3 = K.fx._pivot().global_basis * Vector3.FORWARD
+			if i > 30 and last != Vector3.ZERO:
+				turns += absf(angle_difference(atan2(last.x, last.z), atan2(v.x, v.z)))
+			last = v
+			if mesh and is_instance_valid(mesh):
+				var box := mesh.get_aabb()
+				var k := mesh.global_basis.get_scale().x * float(P.model.get_meta(WardenClips.WEAPON_K, 1.0))
+				long_m = maxf(long_m, k * box.size[box.get_longest_axis_index()])
+		var rate := turns / TAU / (59.0 * DT)
+		ok("arena Breaker (%s): held, the hammer whirls at the data's rate" % how,
+			K.fx.held and K.anim_id == "bul_smash_wind" and rate >= float(K.lmb_def()["spin_turns"][0]) - 0.1,
+			"%.2f turns/s" % rate)
+		ok("arena Breaker (%s): the whirled hammer reads at the match camera (>= 2.5 m long)" % how,
+			long_m >= 2.5,
+			"%.2f m" % long_m)
+		var s0 := K.slams
+		P.inp["fire"] = false
+		m.step(DT)
+		ok("arena Breaker (%s): the release slams" % how, K.slams == s0 + 1 and not K.fx.held,
+			"slams +%d" % (K.slams - s0))
+		# the usual order in play: throw it, then press and keep holding: it comes back and he goes into the whirl
+		step(m, 1.0)
+		P.inp["fire"] = true
+		m.step(DT)
+		P.inp["fire"] = false
+		step(m, 0.8)
+		var out := not K.mace.is_empty()
+		P.inp["fire"] = true
+		step(m, 2.0)
+		ok("arena Breaker (%s): held through a recall, the catch goes into the whirl" % how,
+			out and K.mace.is_empty() and K.fx.held, "out %s back %s held %s" % [out, K.mace.is_empty(), K.fx.held])
+		P.inp["fire"] = false
+		m.queue_free()
+		await main.get_tree().process_frame
 
 func _arena() -> void:
 	var m := Match.new()
@@ -130,14 +198,14 @@ func _arena() -> void:
 	for a in Arch.ids():
 		# (the support pair's RMBs are taps)
 		if not (Arch.def(a)["rmb"].get("variants", {}) as Dictionary).has("hold"): continue
-		# a kit with no hold input (Ostra: her orb pauses, nothing is held)
+		# a kit with no hold input (Motley: his orb pauses, nothing is held)
 		if Arch.def(a).get("no_hold", false): continue
 		A.set_arch(a)
 		P.teleport(A.home); P.inp["aim"] = D.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = D.pos.y
 		P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = float(P.ak.rmb_charges()); P.fire_cd = 0.0
 		step(m, 0.1)
 		if float(P.ak.rmb_def().get("hold", 0.0)) <= 0.0:
-			continue      # no RMB hold variant (Dredge, Cinder: their hold is the lance, see --ashwick-combo-check)
+			continue      # no RMB hold variant (Grimble, Cinder: their hold is the lance, see --ashwick-combo-check)
 		var f0: int = P.ak.charge_fulls
 		var mid := -1.0
 		var ring_ok := false

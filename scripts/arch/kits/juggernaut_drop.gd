@@ -133,7 +133,7 @@ func _tick_hang(dt: float) -> void:
 		from = h.pos
 		var span := from.distance_to(land)
 		dive_t = clampf(span / float(dd["dive_speed"]), float(dd["dive_t"][0]), float(dd["dive_t"][1]))
-		k.m.sfx("jug_dash", h.pos, -3.0, 0.7)
+		k.m.sfx("juggernaut_dash", h.pos, -3.0, 0.7)
 
 ## The dive: down along a steepening curve onto the marker (seen all the way, not a teleport), flame streaks.
 func _tick_dive() -> void:

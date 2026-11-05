@@ -24,6 +24,7 @@ const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold m
 const HEADING_MIN := 2.0     # m/s: slower than this has no heading to lean into
 const HEADING_MAX := 1.4     # rad: the most the root turns off the facing
 const HEADING_RATE := 14.0   # 1/s: how fast it turns
+const WEAPON_K := "weapon_k"  # root meta: the skinned weapon's size over its rest (the whirl's read at the match camera)
 const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
@@ -131,7 +132,7 @@ func _setup_out() -> void:
 func _out(dt: float) -> void:
 	var out := bool(root.get_meta(WEAPON_OUT, false))
 	if weapon_bi >= 0:
-		skel.set_bone_pose_scale(weapon_bi, Vector3.ZERO if out else Vector3.ONE)
+		skel.set_bone_pose_scale(weapon_bi, Vector3.ZERO if out else Vector3.ONE * float(root.get_meta(WEAPON_K, 1.0)))
 	var busy := act_w > 0.5 or up_w > 0.5
 	out_w = move_toward(out_w, 1.0 if out and not busy else 0.0, OUT_RATE * dt)
 	if out_w > 0.0:

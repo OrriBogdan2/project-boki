@@ -40,13 +40,15 @@ const WAKE_POOL := 6
 const WAKE_EVERY := 0.06
 ## the Bash's gold fan: half its angle (rad) and its reach scale over the Bash's radius
 const BASH_HALF := 0.6
-## the whirled hammer: how far above the hand the circle runs (m), its tilt (rad, the head a little up) and the
-## s it eases out of the hand into the circle
 const CHAIN_LINKS := 18
 const CHAIN_SAG := 0.5        # m at its deepest, once the hammer is far out
 const WRIST := "Rig/Torso/ArmRPivot/Elbow/Hand"
+## the whirled hammer: the 3D model's size over the one in the hand (it reads at the match camera; the procedural
+## hammer is drawn big enough as it is), how far above the hand the circle runs (m), its tilt (rad, the head a
+## little up) and the s it eases out of the hand into the circle
+const ORBIT_SCALE := 1.4
 const ORBIT_RISE := 0.45
-const WHIRL_HEAD_R := 1.09     # the skinned hammer's head from his axis in the hold clip (m, neutral; 2.18 in game)
+const WHIRL_HEAD_R := 1.3      # the skinned hammer's head from his axis in the whirl, at ORBIT_SCALE (m, neutral)
 const ORBIT_TILT := 0.12
 const WHIRL_IN := 0.12
 ## the whirl's trail ribbon: inner and outer radius (m at scale 1), how far past the head's circle its outer
@@ -306,6 +308,7 @@ func hold_end() -> void:
 	held = false
 	if h.model:
 		h.model.remove_meta(WardenClips.PHASE)
+		h.model.remove_meta(WardenClips.WEAPON_K)
 	whirl_k = 0.0
 	hot = false
 	glint_k = -1.0
@@ -349,8 +352,12 @@ func in_hand(on: bool) -> void:
 ## the trail ribbon following the head.
 func _whirl(pv: Node3D, delta: float) -> void:
 	whirl_k = minf(1.0, whirl_k + delta / WHIRL_IN)
+	if own_piece:      # (the same read as the pinned hammer's ORBIT_SCALE: the skinned one grows on its bone)
+		h.model.set_meta(WardenClips.WEAPON_K, lerpf(1.0, ORBIT_SCALE, whirl_k))
 	var gun := pv.get_parent() as Node3D
 	var orbit_size := gun.global_basis.get_scale().x
+	if pv.has_node(WardenGlb.WEAPON):
+		orbit_size *= ORBIT_SCALE
 	var centre := gun.global_position + Vector3(0, ORBIT_RISE, 0)
 	if own_piece:      # (the head you see runs round his body, at its own height)
 		centre = Vector3(h.model.global_position.x, _head_world().y, h.model.global_position.z)

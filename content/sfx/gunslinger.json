@@ -1,0 +1,50 @@
+{
+ "group": "gunslinger",
+ "name": "Vex",
+ "script": "tools/gen_sfx_vex.py",
+ "sounds": {
+  "vn_rifle": "fire",
+  "gunslinger_spinup": "signature",
+  "gunslinger_grenade_thunk": "signature",
+  "vn_cock": "cast",
+  "vn_throw": "cast",
+  "vn_blast": "impact",
+  "vn_slide": "dash",
+  "gunslinger_dash": "dash",
+  "vn_stim": "cast",
+  "vn_ion_charge": "cast",
+  "vn_ion_fire": "impact",
+  "vn_nuke_fire": "cast",
+  "vn_nuke_fall": "cast",
+  "vn_nuke_boom": "impact",
+  "vn_nuke_burn": "loop",
+  "gunslinger_step_grass": "step",
+  "gunslinger_step_stone": "step",
+  "gunslinger_step_wood": "step",
+  "gunslinger_step_snow": "step",
+  "gunslinger_hurt": "grunt",
+  "gunslinger_down": "grunt",
+  "gunslinger_death": "grunt"
+ },
+ "signature": [
+  "gunslinger_spinup",
+  "gunslinger_grenade_thunk"
+ ],
+ "replaces": [
+  "vn_rifle",
+  "vn_cock",
+  "vn_throw",
+  "vn_blast",
+  "vn_slide",
+  "vn_stim",
+  "vn_ion_charge",
+  "vn_ion_fire",
+  "vn_nuke_fire",
+  "vn_nuke_fall",
+  "vn_nuke_boom",
+  "vn_nuke_burn"
+ ],
+ "kit_files": [
+  "gunslinger_ult.gd"
+ ]
+}
