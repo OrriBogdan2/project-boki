@@ -1,7 +1,7 @@
 extends RefCounted
 ## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]:
-## a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png..., and with
-## --turn a turntable in <dir>/turntable/. Needs a renderer. ffmpeg makes the GIFs and sheets.
+## a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png...,
+## and with --turn a turntable in <dir>/turntable/. Needs a renderer. ffmpeg makes the GIFs and sheets.
 
 var holder: Node3D
 var cam: Camera3D

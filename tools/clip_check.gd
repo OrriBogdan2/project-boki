@@ -1,8 +1,9 @@
 extends RefCounted
-## --clip-check: every Hero with hand-keyed clips (content/rules/warden_anim/<art>.json). Per Hero: the .glb stays in the
-## tri budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the timings
-## are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the Gun and
-## Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop. Never touches the save.
+## --clip-check: every Hero with hand-keyed clips (content/rules/warden_anim/<art>.json). Per Hero: the .glb stays in
+## the tri budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the
+## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
+## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop. Never
+## touches the save.
 
 const TRI_BUDGET := 20000
 const DT := 1.0 / 30.0
@@ -57,7 +58,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	for c in named:
 		if not clips.lib.has_animation(String(c)):
 			missing.append(c)
-	ok(missing.is_empty(), "%s: the file's %d clips are all in the .glb (missing %s)" % [id, named.size(), str(missing)])
+	ok(missing.is_empty(), "%s: the file's %d clips are in the .glb (missing %s)" % [id, named.size(), str(missing)])
 	_timings(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
 	var shown := 0
@@ -102,7 +103,7 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		if off > worst:
 			worst = off
 			where = "%s, clip %.3f s, keys %.3f s" % [km, length, end_t]
-	ok(worst <= 0.034, "%s: every clip lasts as long as its kit move, to a frame (worst %.3f s, %s)" % [id, worst, where])
+	ok(worst <= 0.034, "%s: every clip lasts as long as its kit move (worst %.3f s, %s)" % [id, worst, where])
 	var unmapped: Array = []
 	var pre: String = {"juggernaut": "jug_"}.get(id, "")
 	for km in KMovesDJ.MOVES:
