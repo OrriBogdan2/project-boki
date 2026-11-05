@@ -167,6 +167,7 @@ for pc in pieces:
 
 me = bpy.data.meshes.new("Body")
 me.from_pydata(verts, [], faces_v)
+me.polygons.foreach_set("use_smooth", [True] * len(me.polygons))
 me.update()
 ob = bpy.data.objects.new("Body", me)
 bpy.context.scene.collection.objects.link(ob)
@@ -417,6 +418,20 @@ bpy.context.view_layer.update()
 bpy.ops.object.bake(type="AO", use_clear=True, margin=6)
 AO = np.array(ao_img.pixels[:], dtype=np.float32).reshape(ATLAS, ATLAS, 4)[..., 0]
 
+
+def blur(a, m, r):
+    """Box blur of a over the mask m (normalised), radius r."""
+    def box(z):
+        c_ = np.cumsum(np.cumsum(z, 0), 1)
+        c_ = np.pad(c_, ((r + 1, r), (r + 1, r)), mode="edge")
+        c_[:r + 1, :] = 0
+        c_[:, :r + 1] = 0
+        return c_[2 * r + 1:, 2 * r + 1:] - c_[:-2 * r - 1, 2 * r + 1:] - c_[2 * r + 1:, :-2 * r - 1] + c_[:-2 * r - 1, :-2 * r - 1]
+    return box(a * m) / np.maximum(box(m), 1e-3)
+
+
+AO = blur(AO, (PID >= 0).astype(np.float32), 3)
+
 # ---- the scan's paint on the shipped body: nearest surface; the sword arm from the clean left arm
 sm = src.data
 sm.calc_loop_triangles()
@@ -473,25 +488,6 @@ col = SP[sy, sx]
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 col = np.power(np.clip(col, 0, 1), 0.86) * 1.2
 OUTC[ys, xs] = col
-# the scan's mottling off the skin: a band-stop on the brightness, inside the islands
-def blur(a, m, r):
-    """Box blur of a over the mask m (normalised), radius r."""
-    def box(z):
-        c_ = np.cumsum(np.cumsum(z, 0), 1)
-        c_ = np.pad(c_, ((r + 1, r), (r + 1, r)), mode="edge")
-        c_[:r + 1, :] = 0
-        c_[:, :r + 1] = 0
-        return c_[2 * r + 1:, 2 * r + 1:] - c_[:-2 * r - 1, 2 * r + 1:] - c_[2 * r + 1:, :-2 * r - 1] + c_[:-2 * r - 1, :-2 * r - 1]
-    return box(a * m) / np.maximum(box(m), 1e-3)
-
-
-lum = OUTC.mean(2)
-skin_t = (mask & (OUTC[..., 0] > OUTC[..., 2] * 1.04) & (OUTC[..., 0] < OUTC[..., 2] * 1.7) & (lum < 0.5)).astype(np.float32)
-a_ = blur(lum, skin_t, 7)
-b_ = blur(lum, skin_t, 34)
-flat = np.clip(b_ / np.maximum(a_, 0.03), 0.6, 1.5)
-k_ = 1 + (flat - 1) * 0.8 * skin_t
-OUTC *= k_[..., None]
 # a little of the shared light's occlusion on the scan too
 OUTC[ys, xs] *= (0.62 + 0.38 * np.clip(AO[ys, xs], 0, 1))[:, None]
 # the scan's old pale collar under the new one
