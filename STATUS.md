@@ -992,3 +992,12 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Round 2: real ammo belt, WANTED poster, chrome spine plate, clean circuits, baked normal map through use_nrm, cannon 57% of her height (sheet about 56%). 14,299 tris.
 - Targeted checks pass; no full suite this round, and it touches the shared shader and warden_glb.gd. The ext/art1-integ suite covers that.
 - Open: circuits blur into the skin at 3 m and beyond, some patchy skin. Shots: hero-shots-s2 art1/vex/.
+
+## 2026-11-05 19:15 UTC S2: ext/art1-ryzz-139 df406dce READY for review, folded into ext/art1-integ (item 139, model half of item 122)
+- Bigger hands, wires end at the wrist, LMB alternates L/R (asserted), bolts leave at the fingertip. Arcs pink and blue; no gold on the model. Contains art1-ryzz e968e9e2.
+- Calls (alternative in brackets): arm wires move to copper-orange because they read yellow at the match camera [blue]. Storm Rod stays in her hand while RMB is held [remove it, the last thing that can read as a weapon].
+- Not fully proven: no full suite on this branch (targeted set passes; --mage-combo failed once, 9 clean since, cause unknown). --teammate still unsettled. Her kit still fires teal/gold until ext/vfx-ryzz and S5's item 122 land. Finger guns only partly read at the match camera.
+- Shots: hero-shots-s2 art1/ryzz/.
+
+## 2026-11-05 19:15 UTC S2: Vex score correction
+- 19:02 carried the lane's 85. I viewed vs_art and put her nearer 70-75 at game scale: silhouette and signature items are right, skin is patchy, edges are rough. Fine for this merge; follow-up from main.
