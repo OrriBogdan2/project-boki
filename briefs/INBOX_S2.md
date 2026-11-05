@@ -1263,3 +1263,7 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 
 ## 2026-11-05 03:56 UTC (ext): Cinder A-pose REPLACED: `cinder_turnaround_apose.png` now has the fire hair, fangs and the nozzle flames. Use it for the model. The bust is slightly fuller per the master sheet.
 
+
+## 2026-11-05 04:07 UTC (ext): RENAME + REDESIGN Dredge → **Grimble, the Scrap King** (DECISIONS updated)
+- Add the name to the rename sweep. A new design is coming: a skinny greedy junk-hoarder (see DECISIONS).
+- **Stop any Dredge model work.** The master sheet is coming from the owner shortly.
