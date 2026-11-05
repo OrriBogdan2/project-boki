@@ -4,12 +4,13 @@ extends RefCounted
 ##   - whose box it is: a teammate's in their squad colour with their face and name, a rival's red
 ##     (Life.owner_col); your squad's boxes always show on the minimap and the full map, a rival's
 ##     only while it's within your sight;
-##   - a box revive's progress: a ring on the ground round the box and one over the reviver's head;
+##   - a box revive's progress: a ring on the ground round the box and one round the reviver;
 ##   - every beacon on the maps; a lit one (Beacons.lit) pulses there, with an arrow at the map's
 ##     edge and a marker in the world from anywhere, for every player whatever their team.
 
 const PORTRAIT_PX := 30.0        # the teammate's face over their box
-const HEAD_RING_PX := 15.0       # the progress ring over a reviver's head
+const HEAD_RING_PX := 34.0       # the progress ring round the reviver (clear of their health plate)
+const HEAD_RING_UP := 0.9        # metres up: round the reviver's body
 const USED_COL := Color(0.6, 0.66, 0.64, 0.6)
 const GOOD := Color("8fe0a0")     # the Hud's revive green
 
@@ -25,7 +26,7 @@ static func world_labels(hud) -> void:
 		if bc["used"]:
 			continue
 		if bc["lit"] and m.player:
-			hud._draw_waypoint(bc["pos"] + Vector3(0, 1.0, 0), "Revive beacon lit", Beacons.COL)
+			hud._draw_waypoint(bc["pos"] + Vector3(0, 1.0, 0), "Beacon", Beacons.COL)
 		if cam.is_position_behind(bc["pos"]):
 			continue
 		if m.player and m.player.flat_dist(bc["pos"]) > 26.0 and float(bc["prog"]) <= 0.0:
@@ -47,7 +48,7 @@ static func _box_label(hud, b: Dictionary, bp: Vector2) -> void:
 	elif not b["empty"] and m.player and m.player.flat_dist(b["pos"]) < 14.0:
 		hud._ctext(bp, "%s's box" % o.pname if o != m.player else "Your box", 12, col, hud.big)
 
-## Box revives in progress: a ring round the box and one over the reviver, with who and how far.
+## Box revives in progress: a ring round the box and one round the reviver, with who and how far.
 static func revive_rings(hud) -> void:
 	var m: Match = hud.m
 	for b in m.boxes:
@@ -69,11 +70,11 @@ static func _head_ring(hud, h: Hunter, prog: float) -> void:
 	var m: Match = hud.m
 	if m.cam.is_position_behind(h.pos):
 		return
-	var at := m.cam.unproject_position(h.pos + Vector3(0, 2.7, 0))
+	var at := m.cam.unproject_position(h.pos + Vector3(0, HEAD_RING_UP, 0))
 	var c: Control = hud.c
-	c.draw_circle(at, HEAD_RING_PX + 3.0, Color(0, 0, 0, 0.55))
-	c.draw_arc(at, HEAD_RING_PX, 0, TAU, 32, Color(GOOD, 0.3), 3.0, true)
-	c.draw_arc(at, HEAD_RING_PX, -PI * 0.5, -PI * 0.5 + TAU * prog, 32, GOOD, 4.0, true)
+	c.draw_arc(at, HEAD_RING_PX + 2.5, 0, TAU, 40, Color(0, 0, 0, 0.5), 3.0, true)
+	c.draw_arc(at, HEAD_RING_PX, 0, TAU, 40, Color(GOOD, 0.3), 3.0, true)
+	c.draw_arc(at, HEAD_RING_PX, -PI * 0.5, -PI * 0.5 + TAU * prog, 40, GOOD, 4.0, true)
 
 # ------------------------------------------------------------------ the maps
 ## Boxes and beacons on the minimap (inner: its rect; to_map: world -> map point; on_map: inside it).
@@ -82,7 +83,7 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 	for bc in m.beacons:
 		var pv: Vector2 = to_map.call(bc["pos"])
 		if on_map.call(pv, 4.0):
-			_beacon_glyph(hud.c, pv, 4.5, bc, m.time)
+			beacon_glyph(hud.c, pv, 4.5, bc, m.time)
 		elif bc["lit"] and not bc["used"]:
 			hud._edge_arrow(inner, inner.get_center(), pv, Beacons.COL)
 	for b in _known_boxes(m):
@@ -99,7 +100,9 @@ static func full_map(fm) -> void:
 	for bc in m.beacons:
 		var pv: Vector2 = fm.to_screen(bc["pos"])
 		if area.has_point(pv):
-			_beacon_glyph(fm.hud.c, pv, 7.0, bc, m.time)
+			beacon_glyph(fm.hud.c, pv, 7.0, bc, m.time)
+			if bc["lit"] and not bc["used"]:
+				fm.hud._ctext(pv + Vector2(0, 22), "Lit", 12, Beacons.COL, fm.hud.big)
 	for b in _known_boxes(m):
 		var pv: Vector2 = fm.to_screen(b["pos"])
 		if not area.has_point(pv):
@@ -128,10 +131,10 @@ static func box_glyph(c: Control, pv: Vector2, s: float, col: Color, soul: bool)
 	if soul:
 		c.draw_rect(body.grow(2.5), Color(1, 1, 1, 0.85), false, 1.0)
 
-## A beacon on a map: a mint diamond, grey once used; lit, it pulses with rings.
-static func _beacon_glyph(c: Control, pv: Vector2, s: float, bc: Dictionary, now: float) -> void:
-	var col: Color = USED_COL if bc["used"] else Beacons.COL
-	if bc["lit"] and not bc["used"]:
+## A beacon on a map (or the legend, with an empty bc): a mint diamond, grey once used; lit, it pulses.
+static func beacon_glyph(c: Control, pv: Vector2, s: float, bc: Dictionary, now: float) -> void:
+	var col: Color = USED_COL if bc.get("used", false) else Beacons.COL
+	if bc.get("lit", false) and not bc.get("used", false):
 		var ph := fmod(now * 1.2, 1.0)
 		c.draw_arc(pv, s + 2.0 + ph * s * 3.0, 0, TAU, 24, Color(col, 1.0 - ph), 2.0, true)
 	var pts := PackedVector2Array([pv + Vector2(0, -s * 1.4), pv + Vector2(s, 0),

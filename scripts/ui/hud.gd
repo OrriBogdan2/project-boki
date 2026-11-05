@@ -1686,7 +1686,7 @@ func _status_row(at: Vector2, e: Ent) -> void:
 		x += 16.0
 
 ## Teammates you can't see on screen get an arrow at the screen edge (with distance, coloured by
-## how they're doing); a dead teammate's deathbox gets a marker while their soul can still be saved.
+## how they're doing; a dead teammate's deathbox in their squad colour while their soul can still be saved).
 func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 	var cam := m.cam
 	var inner := Rect2(Vector2(70, 90), sz - Vector2(140, 220))
@@ -1703,11 +1703,9 @@ func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 		var behind := cam.is_position_behind(wp)
 		var sp := cam.unproject_position(wp)
 		if not behind and inner.has_point(sp):
-			if String(st[0]) == "DEATHBOX":
-				# the overhead label doesn't exist for the dead: mark the box
-				_ctext(sp + Vector2(0, -6), "%s  ·  %s" % [h.pname.substr(0, 12), st[3]], 14, col, big)
-				c.draw_circle(sp + Vector2(0, 8), 5.0, col)
-			continue
+			continue          # on screen: their own label (or their box's, ReviveHud) says it
+		if String(st[0]) == "DEATHBOX":
+			col = m.mate_col(h)
 		var ctr := sz * 0.5
 		var d := (sp - ctr) * (-1.0 if behind else 1.0)
 		if d.length() < 1.0: continue
