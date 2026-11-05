@@ -2682,3 +2682,34 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 - Both: all 13 clips, eyes about 19% of head width, --boki-rig-check 0 failures, health --strict OK. Base ext/boki-starter. Shared: `boki_tools.tools` takes an optional `side` (a tool swung forward leads with its edge), identical on both branches. Review sets: ext/boki-shots-s6 1f5b1cb2 boki/zapple/, f882ea3c boki/hivara/. No Fusion parts yet.
 - **Found: the face's brows don't show in-engine on any rigged Boki** (starter species too). Likely the brow polygons face inward in the export and get culled. S6 is fixing it in face.py on ext/boki-cindle (the starter's face) next.
 - Owner notes: Hivara's slashes and swarm read only moderately behind its big head; the swarm orbits at a fixed 0.33 m (rotation-only bones). Echolop's spread wings are modest.
+
+## 2026-11-05 09:05 UTC (S7): READY ext/s7-build-90-91 f08e6c04: items 90 and 91. Merges clean onto main 25e8ea8d.
+- **90, hold to build:**
+  - Marking out a site is free. The cost is paid in four quarters (FarmSites.STEPS) as the build goes up. Short of materials, the site pauses with "Needs 3 more wood and 2 more stone" over it and in the prompt, and carries on when you bring them.
+  - Upgrades pay as they go too. Taking a site down refunds only what was spent.
+  - Hold F to hammer, one swing per 0.8 s beat; one press is one swing. Release finishes the current swing.
+  - Your Boki within 14 m drop their job and help (the existing build job and animation, Craft makes them quicker), then go back when the site stands. Boki swing time 6 s -> 3 s.
+  - House: 10 wood + 6 stone, 12 swings. Tutorial order is now axe, chop to 10 wood, a new stone step (hands over the pickaxe) to 6 stone, house, hammer. Hints show the real cost ({house_cost}) and say "hold".
+  - **Save:** an old site with no `cost` loads as fully paid (FarmSites.clean). No Net change.
+- **91, tools:**
+  - New HunterTool and ToolWork: axe (two-handed overhead chop), pickaxe (two-handed strike), hammer (one-handed taps).
+  - Tools are drawn 1.4x so they read at the farm camera. Hits land at 78% of the swing with chips, leaves or sparks and a sound. Boulders show cracks; three hits fell a tile.
+  - The weapon is stowed while working, for all 12 Hunters and the Empty. At home it stays holstered (farm and house); it comes back in a match.
+  - home.gd lost the fake melee-arc fields (p_swing_n, p_fired).
+- **Checks:**
+  - --build-hold-check (new, 148+ rows) 0. It covers: hold N s = N taps; one Boki makes it faster; materials leave in quarters; the build stops without materials; tool shown and weapon hidden for 13 bodies x 3 tools, weapon back after.
+  - --farm-tutorial-check 0. The "two Boki ... no slower" and river rows flake on plain main too (S7 measured it 1 in 4 on main).
+  - --farmbuild, --build-ui-check, --market-check, --work-check, --unmasked-check, --rig-standard-check, --check: 0.
+  - --farm-start-check: 1, main's known meadow row.
+  - --simtest --seed=5: extracted (uplink).
+  - health --strict OK; gen_wiki --check OK.
+- **Diff:** 30 files, +1277/-173. home.gd 5392 -> 5390. New: scripts/match/hunter_tool.gd, scripts/home/tool_work.gd, tools/build_hold_check.gd, tools/build_hold_shots.gd. Docs: decisions/0004, DEBT.md, wiki Rules.md. No reserved files touched.
+- **Partial (DEBT):** wild trees are part of the ground mesh, so they can't sway or creak; they react with leaves, chips and sound. Hits reuse existing sounds; a creak and crack need gen_sfx.
+- **Owner defaults** (each a constant): house 12 swings, hammer beat 0.8 s, Boki swing 3 s, helpers called from 14 m, 2 crew slots.
+- **Merge note:** it rewrites farm_hob.gd's use/tick/hold and the farm-tutorial steps. The S7 Hob branch (ext/s7-mask-hob-83-89) is told to merge this branch before its READY, so merge 90-91 first.
+- **Shots:** briefs/shots/s7/build-90-91/
+  - 01 hammering with the Boki helping
+  - 02 the "needs materials" pause
+  - 03 chopping, axe mid-swing (the tree reads only as foliage)
+  - 04 mining, pickaxe and a cracked boulder
+  - 05 the default farm camera
