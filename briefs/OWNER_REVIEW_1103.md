@@ -1747,3 +1747,20 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - A probe walking a grid over the training area never gets stuck (no position unchanged >1 s with move input).
   - A count of colliding props shorter than mantle height but taller than the step height == 0.
+
+## 152. Prologue captions: never past the letterbox bar + a text rewrite (owner, 17:38 UTC Nov 5)
+- The owner: "the beginning text/animation should never have the text go over the black line - if so, cut it. also do a review of the text cuz it's not very good right now".
+- **Layout (scripts/ui/prologue.gd):**
+  - The caption must sit entirely inside the bottom letterbox bar (bar_bot, 128 px).
+  - Put the caption inside the bar with clip_contents on, so anything that would overflow is CUT, never drawn over the picture.
+  - Hard max 2 lines; font size chosen so 2 lines fit at 720p and up.
+  - The chapter label stays inside the top bar the same way.
+  - Assert: at 1280×720 and 1920×1080, the caption's rect ⊆ bar_bot's rect for all 5 shots.
+- **Text:** the current lines are long (3 lines), clunky and confusing ("He was the Wyrm in human shape", "skyfolk", "cursed fossils"). Ext's rewrite: the same lore beats, 2 lines max, ≤ ~52 chars per line. Use this unless the owner edits it:
+  1. BEFORE THE FALL: "The Skylands bowed to one ageless Tyrant,\nenthroned on the Crown for a thousand years."
+  2. THE WAKING: "But the Tyrant was a Wyrm in a man's shape.\nWhen a thief touched its heart, it woke."
+  3. THE SUNDERING: "It tore the land apart and drank our essence.\nOur children were born without faces: the Empty."
+  4. THE MASKS: "We had buried the old Hunters' Masks as cursed.\nNow they were the only faces left to wear."
+  5. THE RACE: "Wear a Mask. Bond a Boki. Find the Wyrmheart.\nOne wish remakes the world. The Wyrm wants it back."
+  - The title card stays "PROJECT BOKI" / "Every hunter's story starts with an egg."
+- Keep the typewriter reveal; make sure the reveal timing still fits each shot's camera time.

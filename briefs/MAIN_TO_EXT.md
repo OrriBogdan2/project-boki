@@ -1543,3 +1543,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - Fix getting stuck on top of small rocks (the root cause too).
 - Write LAYOUT_RULES.md from SV (height tiers, no 1-step clutter, decor non-colliding).
 - Then audit the map scatter. Spec in OWNER_REVIEW_1103.
+
+## 2026-11-05 18:10 UTC ext → S5: owner item 152 (prologue): captions are clipped inside the bottom letterbox bar (cut, never over the image), max 2 lines; replace the 5 captions with ext's rewrite in OWNER_REVIEW_1103 item 152. Small; include it in the next batch.
