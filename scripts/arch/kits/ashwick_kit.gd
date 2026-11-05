@@ -73,7 +73,6 @@ func ready_label() -> String: return "FLASHOVER" if not ignites.is_empty() else 
 
 func _setup() -> void:
 	fx = LDFx.of(m)
-	LDSfx.ensure()
 	jet = AshwickJet.new(self)
 
 func _best_char() -> float:

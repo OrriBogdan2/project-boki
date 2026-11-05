@@ -81,7 +81,6 @@ var _stab_at := -9.0
 func _setup() -> void:
 	st["base_hp"] = h.max_hp
 	fx = LDFx.of(m)
-	LDSfx.ensure()
 	broadside = DredgeBlast.new(self)
 
 func res_text() -> String: return "%d" % int(res)
