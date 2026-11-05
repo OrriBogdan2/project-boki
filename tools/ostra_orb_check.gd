@@ -1,5 +1,5 @@
 extends "res://tools/hero_pair_check.gd"
-## Ostra's charged orb (item 60, for --ostra-combo-check; docs/heroes/ostra.md): the wait between shots charges
+## Motley's charged orb (item 60, for --ostra-combo-check; docs/heroes/ostra.md): the wait between shots charges
 ## the next orb smoothly, its damage, speed, size and brightness follow the charge and cap at the window, a full
 ## orb slows, every orb passes walls and terrain at any charge, and the glow and chime show the build-up.
 
@@ -74,9 +74,13 @@ func _charge_curve() -> void:
 	)
 	ok(
 		"charge: the drawn orb's scale tracks the hit size",
-		rows.all(func(q): return absf(float(q["scale"]) - float(q["r"]) / float(rows[0]["r"])) < 0.001)
-			and float(at[1.4]["scale"]) >= 1.5,
+		rows.all(func(q): return absf(float(q["scale"]) - float(q["r"]) / float(rows[0]["r"])) < 0.001),
 		"x%.2f" % float(at[1.4]["scale"])
+	)
+	ok(
+		"item 117: a full orb is at least 1.6x a quick one, drawn and hit",
+		float(at[1.4]["scale"]) / float(rows[0]["scale"]) >= 1.6 and float(at[1.4]["r"]) / float(rows[0]["r"]) >= 1.6,
+		"x%.2f" % (float(at[1.4]["r"]) / float(rows[0]["r"]))
 	)
 	await done(m)
 

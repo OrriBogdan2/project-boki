@@ -1,6 +1,6 @@
 class_name OstraKit
 extends ArchKit
-## Ostra (medium): Swell, Tether Lantern (the wait between shots charges the next orb), Lantern Trade, Shard Snap,
+## Motley (medium): Swell, Tether Lantern (the wait between shots charges the next orb), Lantern Trade, Shard Snap,
 ## Brimseed, and Nightwell on X (ostra_well.gd). docs/heroes/ostra.md. The loop: hits (ten times as much on
 ## hunters) fill Swell; Swollen, the seed grows bigger and quicker, Trade lands sooner and Snap hits harder.
 ## Snap to stun at range, drop the seed on the stunned foe, let it grow, pop it; Trade puts you or the foe

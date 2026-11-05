@@ -10,7 +10,7 @@ extends Node3D
 ##   boulder    Tarek's tap throw: a lumpy molten rock tumbling end over end, ember trail
 ##   rock       a launched rock: bigger, hotter, flaming trail
 ##   dashrock   Rubble Leap's rock: rolls along the ground, dust and embers
-##   orb        Ostra's Gravity Orb: a violet glass teardrop with a magenta tail; skin_orb grows and
+##   orb        Motley's Gravity Orb: a violet glass teardrop with a magenta tail; skin_orb grows and
 ##              brightens it with its charge
 ##   spear      Shard Snap: a long bundle of dark violet crystal prisms with bright rims
 ## Lingering: aura (Ostra's Swollen sphere), crown (stun stars over a head), burst and crater (Tarek's slam:
@@ -333,7 +333,7 @@ func skin_last(by: Ent, kind: String) -> bool:
 			return true
 	return false
 
-## Dresses Ostra's last orb at charge k (0..1): `scl` times the plain orb, its glass and core brighter.
+## Dresses Motley's last orb at charge k (0..1): `scl` times the plain orb, its glass and core brighter.
 ## (Pooled, so a plain orb sets its looks back too.)
 func skin_orb(by: Ent, k: float, scl: float) -> void:
 	if not skin_last(by, "orb"):
@@ -376,10 +376,10 @@ func _impact(e: Dictionary, p: Vector3) -> void:
 	match String(e["kind"]):
 		"orb":
 			var k := float(e["k"])
-			fx.burst(p, Color(0.88, 0.3, 0.9, 0.85), 8 + roundi(k * 6.0), 3.0 + k, 0.25, 0.0, 1.0 + 0.2 * k)
-			fx.flash(p, Color("e070ff"), 0.4 + 0.25 * k, 0.06)
-			if k >= 1.0:
-				fx.ring(p, 0.8, Color("e070ff"), 0.22)
+			fx.burst(p, Color(0.88, 0.3, 0.9, 0.85), 8 + roundi(k * 14.0), 3.0 + k * 2.5, 0.25, 0.0, 1.0 + 0.7 * k)
+			fx.flash(p, Color("e070ff"), 0.4 + 0.7 * k, 0.06 + 0.05 * k)
+			if k > 0.0:
+				fx.ring(p, 0.4 + k, Color("e070ff"), 0.22 + 0.1 * k)
 		"boulder":
 			fx.dust(p, 6)
 

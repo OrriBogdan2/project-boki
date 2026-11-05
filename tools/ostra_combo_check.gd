@@ -12,6 +12,10 @@ func run(main_node: Node) -> void:
 	await orb_check.orbs(main)
 	n += orb_check.n
 	fails += orb_check.fails
+	var arena_check = load("res://tools/ostra_arena_check.gd").new()
+	await arena_check.arena(main)
+	n += arena_check.n
+	fails += arena_check.fails
 	var ult_check = load("res://tools/ostra_ult_check.gd").new()
 	await ult_check.ult(main)
 	n += ult_check.n
