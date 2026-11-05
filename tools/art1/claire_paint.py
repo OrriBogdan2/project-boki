@@ -38,7 +38,10 @@ def sample_sheet(a, x, y):
     # (the toon pass adds its own contrast and warmth on top of a painted sheet: lifted and calmed so her skin stays the sheet's pale)
     lum = c.mean(1, keepdims=True)
     c = lum + (c - lum) * 0.72
-    return np.clip(np.power(np.clip(c, 0, 1), 0.74) * np.array([0.99, 1.0, 1.04]), 0, 1)
+    c = np.clip(np.power(np.clip(c, 0, 1), 0.74) * np.array([0.99, 1.0, 1.04]), 0, 1)
+    # (white fur and pale hair sit on the skin slot here, and its warm light turns them cream: cooled ahead of it)
+    cool = smooth(0.62, 0.75, c.mean(1)) * smooth(0.06, 0.0, c[:, 0] - c[:, 2])
+    return c * (1 - cool[:, None]) + c * np.array([0.84, 0.93, 1.06]) * cool[:, None]
 
 
 def path_u(p, path):
