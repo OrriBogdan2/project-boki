@@ -392,46 +392,10 @@ def p_leg(p, n, c):
 SQ = "breaker_head_squat"
 
 
-SCAN = {}
-
-
-def load_scan(work):
-    from mathutils.bvhtree import BVHTree
-    d = np.load(os.path.join(work, "scan_src.npz"))
-    SCAN["v"], SCAN["tri"], SCAN["uv"] = d["v"], d["tri"], d["uv"]
-    SCAN["bvh"] = BVHTree.FromPolygons(d["v"].tolist(), d["tri"].tolist(), all_triangles=True)
-    SCAN["img"] = imgio.load(os.path.join(work, "scan_albedo.png"))
-
-
-def p_scanpaint(p, n, c):
-    """The clean game mesh takes the scan's paint at the nearest point of the fitted scan, and its relief as painted light: each
-    texel's dense normal against the game mesh's."""
-    bvh = SCAN["bvh"]
-    N = len(p)
-    loc, idx, hn = np.empty((N, 3), F32), np.empty(N, np.int64), np.empty((N, 3), F32)
-    for i, q in enumerate(p.tolist()):
-        l_, h_, t_, _ = bvh.find_nearest(q)
-        loc[i], idx[i], hn[i] = l_, t_, h_
-    tv = SCAN["v"][SCAN["tri"][idx]]
-    e0, e1, e2 = tv[:, 1] - tv[:, 0], tv[:, 2] - tv[:, 0], loc - tv[:, 0]
-    d00, d01, d11 = (e0 * e0).sum(1), (e0 * e1).sum(1), (e1 * e1).sum(1)
-    d20, d21 = (e2 * e0).sum(1), (e2 * e1).sum(1)
-    den = np.maximum(d00 * d11 - d01 * d01, 1e-12)
-    w1, w2 = (d11 * d20 - d01 * d21) / den, (d00 * d21 - d01 * d20) / den
-    tuv = SCAN["uv"][idx]
-    uv = tuv[:, 0] * (1 - w1 - w2)[:, None] + tuv[:, 1] * w1[:, None] + tuv[:, 2] * w2[:, None]
-    im = SCAN["img"]
-    h, w = im.shape[:2]
-    col = im[np.clip(((1 - uv[:, 1] % 1.0) * h).astype(int), 0, h - 1), np.clip((uv[:, 0] % 1.0 * w).astype(int), 0, w - 1)]
-    L = np.array((0.25, 0.55, 0.8), F32)
-    relief = (hn @ L) - (n @ L)
-    return key_scan(np.clip(col * 1.22, 0, 1) * (1.0 + np.clip(relief, -0.5, 0.5) * 0.7)[:, None])
-
-
 def p_dial(p, n, c):
     """The compass, round and on its own non-glowing brass surface; the rest of the hull is keyed."""
     q = p - c["part"]["centre"]
-    return sample("breaker_turnaround", FC - q[:, 0] / 0.125 * 44.0, 262.0 - q[:, 2] / 0.125 * 44.0)
+    return sample("breaker_turnaround", FC - q[:, 0] / 0.118 * 44.0, 262.0 - q[:, 2] / 0.118 * 44.0)
 
 
 def p_helmet(p, n, c):
@@ -468,7 +432,7 @@ def p_door_art(p, n, c):
     return mix(b, f, smooth(0.3, -0.3, n[:, 1]))
 
 
-TABLE = {"hull": p_hull, "limb": p_limb, "pauldron": p_pauldron, "leg": p_leg, "helmet": p_helmet, "collar": p_collar, "dial": p_dial, "scanpaint": p_scanpaint, "mast": p_mast, "iron": p_iron, "brass": p_brass, "compass": p_compass, "moss": p_moss,
+TABLE = {"hull": p_hull, "limb": p_limb, "pauldron": p_pauldron, "leg": p_leg, "helmet": p_helmet, "collar": p_collar, "dial": p_dial, "mast": p_mast, "iron": p_iron, "brass": p_brass, "compass": p_compass, "moss": p_moss,
          "sail": p_sail, "drum": p_drum, "door": p_door_art, "fish": p_fish, "lure": p_lure, "rope": p_rope}
 
 

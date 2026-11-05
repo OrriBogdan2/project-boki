@@ -294,7 +294,7 @@ def main():
     part("hull", hl, 2200, "scan", "scanpaint", 3.2)
     cp, c_at, c_n = B.compass_field(hl)
     dl = S.Field(c_at - 0.16, c_at + 0.16, 0.0022)
-    dl.add(S.cap(c_at - c_n * 0.03, c_at + c_n * 0.002, 0.13, 0.126), 0.0, 1)
+    dl.add(S.cap(c_at - c_n * 0.03, c_at + c_n * 0.006, 0.122, 0.118), 0.0, 1)
     part("compass_dial", dl, 120, "brass", "dial", 3.0, centre=c_at)
     hm, cl = B.helmet()
     part("helmet", hm, 1300, "brass", "helmet", 2.6, bone="head", blur=0.003)
@@ -317,18 +317,19 @@ def main():
         part("shin" + n, sn, 150, "scan", "leg", 0.9, bone="shin." + n, side=s)
         part("foot" + n, ft, 140, "scan", "leg", 0.9, bone="x_foot." + n, side=s)
     wc = B.wrist_chain(J)
-    part("wristchain", wc, 240, "iron", "iron", 1.0, bone="forearm.R")
+    part("wristchain", wc, 460, "iron", "iron", 1.0, bone="forearm.R")
     print("limbs", time.time() - t0, flush=True)
 
     # where the weapon and the shield rest
     G = np.array((sx, 0.0, 0.215), np.float32)
-    H_M = lambda p: (p @ np.array(((0, 0, 1), (1, 0, 0), (0, 1, 0)), np.float32)) + G
+    WK, SK = 0.83, 0.62      # the sheets' measure: hammer 0.79 of his height, shield 0.71 (breaker_FINAL_sheet front view)
+    H_M = lambda p: (p * WK) @ np.array(((0, 0, 1), (1, 0, 0), (0, 1, 0)), np.float32) + G
     Sh = np.array((-sx - 0.16, 0.0, 0.31), np.float32)
-    S_M = lambda p: np.stack((p[:, 1], -p[:, 0], p[:, 2]), 1) + Sh
+    S_M = lambda p: np.stack((p[:, 1], -p[:, 0], p[:, 2]), 1) * SK + Sh + (0, 0, -0.06)
     hW, hM, hC, zc = B.hammer()
     part("hammer_wood", hW, 380, "wood", "drum", 1.3, xf=H_M, group="hammer", bone="x_weapon", blur=0.008)
     part("hammer_iron", hM, 480, "iron", "iron", 1.2, xf=H_M, group="hammer", bone="x_weapon")
-    part("hammer_chain", hC, 620, "iron", "iron", 1.0, xf=H_M, group="hammer", bone="x_weapon")
+    part("hammer_chain", hC, 1000, "iron", "iron", 1.0, xf=H_M, group="hammer", bone="x_weapon")
     sW, sM = B.shield()
     part("shield_wood", sW, 500, "scan", "door", 2.2, xf=S_M, bone="x_shield", blur=0.005)
     part("shield_iron", sM, 280, "iron", "iron", 1.1, xf=S_M, bone="x_shield")
@@ -338,6 +339,13 @@ def main():
     lf.add(S.sph(tuple(lure_at), 0.0135), 0.0, 1)
     part("lure", lf, 40, "lure", "lure", 1.2, bone="x_fish")
     print("weapons", time.time() - t0, flush=True)
+
+    # the retopologised scan replaces the scripted hull, moss, arms and legs, with its own baked maps
+    scn = np.load(os.path.join(WORK, "scan_low.npz"))
+    drop = ("hull", "moss", "pauldron", "upper", "fore", "thigh", "shin", "foot")
+    for p in [q for q in parts if q["name"].startswith(drop)]:
+        bpy.data.objects.remove(p["ob"])
+        parts.remove(p)
 
     # ropes
     def rope(name, pts, r, bone, step=0.05):
@@ -412,7 +420,6 @@ def main():
     print("uvs", time.time() - t0, flush=True)
 
     # ----------------------------------------------------- paint, texel by texel
-    P.load_scan(WORK)
     atlas = np.zeros((ATLAS, ATLAS, 3), np.float32)
     mask = np.zeros((ATLAS, ATLAS), bool)
     for p in parts:
@@ -452,6 +459,8 @@ def main():
         p["nrm"] = nrm
         print("painted", p["name"], len(tri), int(m.sum()), round(time.time() - t0, 1), flush=True)
     img = S.dilate(atlas, mask, 10)
+    sa = imgio.load(os.path.join(WORK, "scan_albedo.png"))
+    imgio.save(P.key_scan(sa.reshape(-1, 3)).reshape(sa.shape), os.path.join(WORK, "scan_albedo_key.png"))
     os.makedirs(WORK, exist_ok=True)
     png = os.path.join(WORK, "breaker_atlas.png")
     imgio.save(img[::-1], png)
@@ -513,12 +522,39 @@ def main():
     add_weights(pe, rigid(len(v), "head"))
     parts.append({"ob": pe, "slot": "eyes", "group": "body", "nrm": np.tile((0, 1, 0), (len(v), 1)).astype(np.float32), "name": "eyes"})
 
+    so = ob_from("scanbody", scn["v"], scn["tri"])
+    so.data.uv_layers.new(name="UVMap").data.foreach_set("uv", scn["uv"].ravel())
+    add_weights(so, {str(b): scn["w"][:, i] for i, b in enumerate(scn["bones"])})
+    so.data.update()
+    sn = np.empty(len(scn["v"]) * 3, np.float32)
+    so.data.vertices.foreach_get("normal", sn)
+    parts.append({"ob": so, "slot": "body", "group": "body", "nrm": sn.reshape(-1, 3), "name": "scanbody"})
+
     # ----------------------------------------------------- materials (one atlas), join
     image = bpy.data.images.load(png)
     image.name = "breaker_atlas"
     mats = {}
 
+    def scan_mat():
+        m = bpy.data.materials.new("leather-scan-hot")
+        m.use_nodes = True
+        bs = m.node_tree.nodes["Principled BSDF"]
+        t = m.node_tree.nodes.new("ShaderNodeTexImage")
+        t.image = bpy.data.images.load(os.path.join(WORK, "scan_albedo_key.png"))
+        m.node_tree.links.new(t.outputs[0], bs.inputs[0])
+        tn = m.node_tree.nodes.new("ShaderNodeTexImage")
+        tn.image = bpy.data.images.load(os.path.join(WORK, "scan_normal.png"))
+        tn.image.colorspace_settings.name = "Non-Color"
+        nm = m.node_tree.nodes.new("ShaderNodeNormalMap")
+        m.node_tree.links.new(tn.outputs[0], nm.inputs["Color"])
+        m.node_tree.links.new(nm.outputs[0], bs.inputs["Normal"])
+        return m
+
     def mat(slot):
+        if slot == "body":
+            if slot not in mats:
+                mats[slot] = scan_mat()
+            return mats[slot]
         if slot not in mats:
             m = bpy.data.materials.new(MATS[slot])
             m.use_nodes = True
@@ -560,7 +596,7 @@ def main():
     K.anchor(arm, "head", "anchor_head_top", (0, 0.03, 1.05))
     K.anchor(arm, "hips", "anchor_chest", tuple(c_at))
     K.anchor(arm, "x_weapon", "anchor_hammer_head", tuple(Hc))
-    K.anchor(arm, "x_weapon", "anchor_weapon_tip", tuple(H_M(np.array([[0.385, 0, zc]], np.float32))[0]))
+    K.anchor(arm, "x_weapon", "anchor_weapon_tip", tuple(H_M(np.array([[0.295, 0, zc]], np.float32))[0]))
     K.anchor(arm, "x_weapon", "anchor_hammer_grip", tuple(G))
     K.anchor(arm, "x_weapon", "weapon_muzzle", tuple(Hc))
     K.anchor(arm, "x_weapon", "weapon_thrown", tuple(G))

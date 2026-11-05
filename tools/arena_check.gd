@@ -75,8 +75,10 @@ func _breaker_whirl() -> void:
 		ok("arena Breaker (%s): held, the hammer whirls at the data's rate" % how,
 			K.fx.held and K.anim_id == "bul_smash_wind" and rate >= float(K.lmb_def()["spin_turns"][0]) - 0.1,
 			"%.2f turns/s" % rate)
-		ok("arena Breaker (%s): the whirled hammer reads at the match camera (>= 2.5 m long)" % how,
-			long_m >= 2.5,
+		# (item 137: a skinned hammer is true to the sheet, 0.79 of his height; the pinned one is scaled up to read)
+		var want := 1.5 if skinned else 2.5
+		ok("arena Breaker (%s): the whirled hammer reads at the match camera (>= %.1f m long)" % [how, want],
+			long_m >= want,
 			"%.2f m" % long_m)
 		var s0 := K.slams
 		P.inp["fire"] = false

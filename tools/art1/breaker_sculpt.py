@@ -17,8 +17,8 @@ from sculpt_kit import Field, box, cap, cyl, ell, fbm, path, smooth, sph, vnoise
 F = np.float32
 # labels
 WOOD, IRON, RIVET, BRASS, MOSS, BARN, GLASS = 1, 2, 3, 4, 5, 6, 7
-HULL_C = (0.0, 0.0, 0.56)
-HULL_R = (0.475, 0.4, 0.27)
+HULL_C = (0.0, 0.0, 0.53)
+HULL_R = (0.41, 0.39, 0.37)      # a full round hull, 1.1 wide to tall as the master sheet
 HELM_C = (0.0, 0.03, 0.84)
 HELM_R = (0.235, 0.205, 0.185)     # squat, wider than tall, sunk in the hull (breaker_head_squat)
 PORT_C = (0.0, 0.875)
@@ -117,7 +117,7 @@ def straps(hl):
 
 
 def compass_field(hl):
-    c = onsurf(hl, [(0, 0.42, 0.6)], 0.02)[0]
+    c = onsurf(hl, [(0, 0.42, 0.646)], 0.0)[0]
     n = hl.grad(np.array([c], F))[0]
     f = Field(c - 0.12, c + 0.12, 0.0016)
     f.add(cap(c - n * 0.02, c + n * 0.016, 0.092, 0.09), 0.003, IRON)
@@ -148,10 +148,11 @@ def helmet():
     cl = Field((-0.56, -0.48, 0.64), (0.56, 0.48, 0.86), 0.0035)
     x, y, z = cl.grid()
     r = np.sqrt((x / 0.34) ** 2 + (y / 0.3) ** 2)
-    sag = 0.05 * np.clip(y / 0.3, 0, 1) ** 2          # it dips at the front, as the art
-    top = 0.815 - 0.075 * r ** 3 - sag * 0.3
-    d = np.maximum(np.maximum(z - top, top - 0.055 - z), r - 1.0)
-    cl.d = (d * 0.8).astype(F)
+    # it lies on the hull, a dipped plate round the helmet
+    hz = HULL_C[2] + HULL_R[2] * np.sqrt(np.maximum(1.0 - (x / HULL_R[0]) ** 2 - (y / HULL_R[1]) ** 2, 0.02))
+    top = hz + 0.022
+    d = np.maximum(np.maximum(z - top, top - 0.05 - z), r - 1.0)
+    cl.d = (d * 0.7).astype(F)
     cl.lab[:] = BRASS
     return f, cl
 
@@ -252,12 +253,12 @@ def masts():
     f = Field((-0.8, -0.42, 0.7), (0.9, 0.12, 1.42), 0.0036)
     split = lambda x, y, z: (vnoise(x * 4, y * 4, z * 0.8, 40.0) - 0.5) * 0.012
     # his right: the tall one with the fishing boom
-    f.add(path(((0.38, -0.13, 0.76), (0.5, -0.17, 1.14)), (0.042, 0.03)), 0.0, WOOD, None, split)
+    f.add(path(((0.33, -0.13, 0.76), (0.5, -0.17, 1.14)), (0.042, 0.03)), 0.0, WOOD, None, split)
     f.add(path(((0.5, -0.17, 1.14), (0.53, -0.17, 1.2), (0.5, -0.19, 1.22)), (0.03, 0.017, 0.004)), 0.0, WOOD, None, split)
     f.add(path(((0.24, -0.15, 1.02), (0.5, -0.17, 1.09), (0.7, -0.17, 1.14)), (0.019, 0.022, 0.012)), 0.006, WOOD, None, split)     # the yard
     f.add(path(((0.42, -0.17, 1.02), (0.55, -0.17, 1.2), (0.72, -0.17, 1.31)), (0.018, 0.016, 0.01)), 0.006, WOOD, None, split)         # the rod
     # his left: the short stump with a yard across
-    f.add(path(((-0.38, -0.13, 0.76), (-0.47, -0.16, 1.07)), (0.042, 0.03)), 0.0, WOOD, None, split)
+    f.add(path(((-0.33, -0.13, 0.76), (-0.47, -0.16, 1.07)), (0.042, 0.03)), 0.0, WOOD, None, split)
     f.add(path(((-0.47, -0.16, 1.07), (-0.485, -0.16, 1.12), (-0.46, -0.17, 1.15)), (0.03, 0.016, 0.004)), 0.0, WOOD, None, split)
     f.add(path(((-0.6, -0.15, 0.93), (-0.45, -0.16, 1.0), (-0.35, -0.17, 1.05)), (0.016, 0.02, 0.012)), 0.006, WOOD, None, split)
     # lashings
@@ -349,7 +350,7 @@ def hammer():
     of iron-bound staves across the haft's end, spikes on both ends, chain wound round its waist; an iron haft as long as
     his arm. Returns (wood field, iron field, chain field, ZC)."""
     ZC = 0.54
-    BL, BR, BW = 0.235, 0.205, 0.175      # half length, end radius, waist radius (a capstan)
+    BL, BR, BW = 0.215, 0.205, 0.175      # half length, end radius, waist radius (a capstan)
     lo, hi = (-0.42, -0.3, -0.3), (0.42, 0.3, 0.84)
     W = Field(lo, hi, 0.0036)
     x, y, z = W.grid()
@@ -362,9 +363,9 @@ def hammer():
     W.d = (W.d + smooth(0.08, 0.0, np.abs((ang + 0.5) % 1.0 - 0.5)) * 0.004).astype(F)
     M = W.like()
     for sd in (-1, 1):
-        q = sd * 0.205
+        q = sd * 0.19
         M.add(cyl((q, 0, ZC), "x", BR + 0.016, 0.034, 0.008), 0.0, IRON)
-        M.add(cap((sd * BL, 0, ZC), (sd * (BL + 0.115), 0, ZC), 0.07, 0.002), 0.0, IRON)
+        M.add(cap((sd * BL, 0, ZC), (sd * (BL + 0.08), 0, ZC), 0.06, 0.002), 0.0, IRON)
         for a in np.linspace(0, 6.28, 11)[:-1]:
             rivets(M, [(q, (BR + 0.016) * math.cos(a), ZC + (BR + 0.016) * math.sin(a))], 0.0095)
     M.add(cyl((0, 0, ZC - BW - 0.012), "z", 0.07, 0.03, 0.01), 0.0, IRON)      # the haft's socket

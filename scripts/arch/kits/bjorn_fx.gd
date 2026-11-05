@@ -48,7 +48,7 @@ const WRIST := "Rig/Torso/ArmRPivot/Elbow/Hand"
 ## little up) and the s it eases out of the hand into the circle
 const ORBIT_SCALE := 1.4
 const ORBIT_RISE := 0.45
-const WHIRL_HEAD_R := 1.3      # the skinned hammer's head from his axis in the whirl, at ORBIT_SCALE (m, neutral)
+const WHIRL_HEAD_R := 0.95     # the skinned hammer's head from his axis in the whirl (m, neutral)
 const ORBIT_TILT := 0.12
 const WHIRL_IN := 0.12
 ## the whirl's trail ribbon: inner and outer radius (m at scale 1), how far past the head's circle its outer
@@ -362,8 +362,6 @@ func in_hand(on: bool) -> void:
 ## the trail ribbon following the head.
 func _whirl(pv: Node3D, delta: float) -> void:
 	whirl_k = minf(1.0, whirl_k + delta / WHIRL_IN)
-	if own_piece:      # (the same read as the pinned hammer's ORBIT_SCALE: the skinned one grows on its bone)
-		h.model.set_meta(WardenClips.WEAPON_K, lerpf(1.0, ORBIT_SCALE, whirl_k))
 	var gun := pv.get_parent() as Node3D
 	var orbit_size := gun.global_basis.get_scale().x
 	if pv.has_node(WardenGlb.WEAPON):
