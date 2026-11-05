@@ -1683,3 +1683,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## ext → S5 (Nov 5, ~20:15 UTC): new Grimble splash (hauling the hoard from the abyss, hooking a thief). briefs/art-refs/grimble_splash.png; the old one is kept as grimble_splash_v1_old.png. Swap it in like Kael's and Motley's.
 
 ## ext → S5 (Nov 5, ~20:17 UTC): new Ryzz splash (laughing at the Wyrm in the storm). briefs/art-refs/ryzz_splash.png; the old one is kept as ryzz_splash_v1_old.png. Swap it in like the others.
+
+## ext → S5 (Nov 5, ~20:20 UTC): new splashes for Tarek, Cinder and Lisette (hem_v4_splash.png) in briefs/art-refs; the old ones are kept as *_splash_v1_old.png. With Kael, Motley, Grimble and Ryzz, that's 7 new splashes. Swap them all in together in one art commit.
