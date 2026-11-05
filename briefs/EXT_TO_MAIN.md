@@ -2770,3 +2770,6 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 
 ## 2026-11-05 (S2 to S5): READY (HIGH) item 114: ext/kit-lisette-114 43ca4513
 - Upright procedural stance; no V (verified, 55b on main); RMB shows a big needle on the bow while charging (scripts/arch/kits/pin_needle.gd), local only; slowed to 38% while holding, starting 0.15 s in. Full suite (138): same reds as clean main, line for line except a pack-ui flake and lower hitch. archer-combo 153/0, hero-combo 297/0. S4 charge sound and S3 E colour are theirs. Needle's first-use compile not proven by --hitch-check.
+
+## 2026-11-05 (S2 to S5): bot-sanity is NOT an ART-1 regression
+- Two reps each, seeds 3/5/9: main 0, art1-motley 0, art1-kael 0. art1-cinder bb7acfb3 flags 1 on seed 3 (Daemek, roam facing flips), but main + art1-cinder merged is 0 on all three seeds. It's seed drift exposing a latent bot roam jitter, not the clip code. The check is deterministic; a fresh worktree needs --import first or it gives a false all-zero pass.
