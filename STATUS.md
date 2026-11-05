@@ -1,4 +1,4 @@
-2026-11-05T00:50:24Z
+2026-11-05T01:10:15Z
 
 FOR EXT (owner item queue): READY reports go here as each branch lands.
 READY (owner review): rigfix @ 0fe7a84e (from origin/integ91; +360/-12, 10 files) - briefs/RIGFIX.md. Posted in EXT_TO_MAIN (32f62738), contact sheets in briefs/rigfix/<hunter>_before_after.jpg.
@@ -45,7 +45,7 @@ Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on o
 
 Running now: ONE agent (Opus 5.5 medium, since 00:20 UTC Nov 5): ext/perf-94 from origin/main: item 103 (match audio stops on extract/death/scene change + check) first, then item 94 (perf overlay, benchmark, then the biggest costs; before/after table; tri/particle budget for S2).
 Queued: none. Clarity (96/96b/97/100/102/106) moved to cloud session S3 (INBOX 00:40 UTC); S1 = perf only. Owner-PC GPU numbers will be used from briefs/perf/ when posted. rigfix 0fe7a84e awaits the owner's review.
-Last INBOX entry handled: 2026-11-05 00:47 UTC owner PC (real-GPU perf numbers, briefs/perf/). Passed to the perf agent with a ranking: HUD/canvas 6-16 ms/frame, shadows ~1240 of ~2000 fight draws, repeatable 182-222 ms hitch at fight t=22.4 s, script ms scales with hunters (7 -> 20 ms squad3), load build.hunters 3.6-8.6 s + textures 0.64-1.19 GB.
+Last INBOX entry handled: 2026-11-05 01:02 UTC owner PC (repeat GPU pass, briefs/perf/run2/: same commit, numbers within ~2-5% of 00:47, so noise is low; the fight t=22.4 s hitch repeats at 173-201 ms). The perf agent already has the 00:47 ranking; nothing new to change.
 Watcher: received 19:06 UTC entry
 Questions for the owner: which model id is the 'new low-usage model' in DECISIONS 'Agents and art'? This server can pick Fable 5.1 (claude-fable-5-1), Sonnet 5.5, Opus 5.5 or Haiku 5.5. S1 assumes Fable 5.1 unless told otherwise. Also see the ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
