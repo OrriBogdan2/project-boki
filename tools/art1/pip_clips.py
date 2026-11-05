@@ -16,6 +16,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, ang_dir as D, at, bake, eul, FPS
 import pip_sculpt as K
+import crouchkit
+from crouchkit import off
 
 A = K.ANKLE_Z
 SH = K.SH
@@ -156,11 +158,54 @@ def gait(k, heading):
     return fn
 
 
+# ---- the crouch (item 143): a small scared thing keeping out of sight. Knees in, toes in, up on her toes, curled round the lantern with both paws so it won't show; the ears flat, big eyes over her shoulder.
+HUDDLE = {
+    "pel": (0.0, -0.035, -0.135), "prt": (0.52, 0.0, 0.0), "tor": (0.38, 0.08, 0.0), "hed": (-0.74, -0.16, 0.05),
+    "G": (0.055, 0.38, 0.83), "BE": be((0.0, 0.12, -1.0)), "Lw": 0.0, "LP": (-0.115, 0.40, 0.82), "Lh": (-1.1, 0.9, 0.0),
+    "FL": (-0.085, 0.085, A + 0.03), "FR": (0.095, -0.075, A + 0.04), "FLy": -0.16, "FRy": 0.12, "FLp": 0.4, "FRp": 0.5,
+    "brow": -0.95, "lid": -0.1, "jaw": 0.0, "ear": 0.72, "earR": 0.0, "earL": 0.0, "fing": 0.85, "skirt": 0.05, "wing": -0.1, "wfl": 0.02, "wfq": 2.0, "wb": -0.75,
+}
+TIPTOE = {"ankle": A, "foot": 0.07, "width": 0.085, "stride": 0.16, "lift": 0.03, "toe": 0.4, "share": 0.6, "sway": 0.018, "bob": 0.009, "twist": 0.06, "T": 0.38, "toe_out": 0.12}
+
+
+def huddle(u):
+    """Shivering very slightly, darting looks: left, a long stare right, an ear flick at every noise, one quick blink."""
+    s = math.sin(u * 2 * math.pi)
+    p = dict(HUDDLE)
+    look = bump(u, 0.08, 0.30) - 1.0 * bump(u, 0.46, 0.82)
+    shiver = 0.0025 * math.sin(u * 2 * math.pi * 26)
+    p["pel"] = (shiver, -0.035, -0.135 - 0.004 * s)
+    p["tor"] = (0.38 + 0.022 * s, 0.08, 0.0)
+    p["hed"] = (-0.74, -0.16 + 0.75 * look, 0.05 - 0.1 * look)
+    p["earL"] = 0.3 * bump(u, 0.14, 0.2) - 0.22 * bump(u, 0.6, 0.66)
+    p["earR"] = 0.3 * bump(u, 0.52, 0.58)
+    p["G"] = (0.055 + shiver, 0.38, 0.83 + 0.004 * s)
+    p["LP"] = (-0.115, 0.40, 0.82 + 0.004 * s)
+    p["lid"] = 0.95 if 0.40 < u < 0.43 else -0.1
+    return p
+
+
+def huddle_upper(p, u, c1, s2, d):
+    """The lantern stays hugged, only trembling with her steps; she looks where she's going, never at it."""
+    k = max(d.y, 0.8)
+    p["G"] = (0.055, 0.38 * k, 0.83 + 0.007 * s2)
+    p["LP"] = (-0.115, 0.40 * k, 0.82 + 0.007 * s2)
+    p["hed"] = (-0.74 * (0.65 + 0.35 * max(d.y, 0.0)), -0.08 + 0.06 * c1 + 0.5 * d.x * -1, 0.03)
+    p["ear"] = 0.72 + 0.05 * s2
+    p["wfl"] = 0.02
+
+
+def crouch_set():
+    dip = off(HUDDLE, pel=(0.0, 0.0, -0.035), prt=(0.08, 0, 0), hed=(-0.06, 0, 0), G=(0.0, -0.03, -0.03), LP=(0.0, -0.03, -0.03))
+    return crouchkit.clips(C, END, HUDDLE, huddle, TIPTOE, huddle_upper, dip, up=dict(READY, pel=(0.0, 0.0, -0.005)), idle_t=4.0)
+
+
 LHAND_PUSH = (-1.45, 0.0, 0.0)     # fingers forward, the palm out
 
 
 def clips():
     out = [FnClip("idle", 4.2, idle), FnClip("stance", 5.0, stance)]
+    out += crouch_set()
     for nm, sp, T in (("walk", 0.45, 0.62), ("run", 1.0, 0.40)):
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sp, hd)))
