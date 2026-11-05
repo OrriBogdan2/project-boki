@@ -475,3 +475,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 S2: READY ext/rename-lisette 7341f61a (Hem -> Lisette, strings only)
 - 23 files from origin/main: archetype base_name, rules text, docs, wiki (gen_wiki + the hand-written Classes.md), check labels. Id `archer`, file names, art key "hem" and ~70 code comments unchanged, to avoid conflicts with ext/kit-hem-55b and ext/art1-hem. No reserved-file lines needed.
 - Checks 0 failures: --import, --check, portrait 107, archetype 339, class-unlock 153, tutorial-hud, health --strict, gen_wiki 34 unchanged. No in-game visual pass.
+
+## 2026-11-05 S2: Breaker final design received
+- ext/art1-breaker restarts from breaker_FINAL_sheet.png once the A-pose turnaround and weapon sheet land. Note for the rebuild: kit-59's whirl radius and 2.8 m slam reach must suit the huge capstan hammer.
