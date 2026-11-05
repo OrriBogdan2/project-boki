@@ -23,7 +23,8 @@ REPO = os.path.dirname(os.path.dirname(HERE))
 SPECIES = "cindle"
 # id -> (shapes module, paint module, skeleton and clips module)
 SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prismander", "prismander", "prismander_anim"),
-         "burrlet": ("mycroll", "mycroll", "mycroll_anim")}
+         "burrlet": ("mycroll", "mycroll", "mycroll_anim"),
+         "cairnback": ("cairnback", "cairnback", "cairnback_anim")}
 creature = paint = anim = None
 ATLAS_PX = 2048
 SCALE = 0.95             # the whole Boki, so its body sits near the other species' 0.8 m frame
