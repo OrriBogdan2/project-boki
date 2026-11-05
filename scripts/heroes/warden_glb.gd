@@ -95,19 +95,21 @@ const ANCHORS := ["anchor_head_top", "anchor_chest"]
 ## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model (or a design
 ## variant's name, art()).
 const SETTING := "warden_models"
+const FAR_HIDE_D := 13.0        # m from the camera: "far_hide" pieces stop being drawn
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
 const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
 const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (HunterAnim spins them while firing)
 ## the second weapon of a twin hold (Sable's left crossbow), a child of WEAPON placed so that HunterAnim's twin
 ## hold hands it to the left hand (its node x < -0.04: _setup_weapon moves it into the Offhand)
 const WEAPON_OFF := "weapon_offhand"
+const SHIELD_PATH := "Rig/Torso/ArmLPivot/Elbow/Hand/Shield"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
 ## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire).
 const WING_FOLD := "wing_fold"
+const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
 ## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's data
 ## lists in "hide_while_chain" shrink away (item 76b.4), so one chain shows, never two.
 const CHAIN_OUT := "chain_out"
-const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
@@ -209,6 +211,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
 	_lights(glb, look(art(arch)))
+	_far_hide(glb, look(art(arch)))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
 	var own := look(art(arch))
@@ -221,6 +224,14 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 	_smoke(root, look(art(arch)))
 	_bloom(root, glb, look(art(arch)))
+
+## Small pieces the match camera only sees as speckle (warden_look "far_hide": node names, Tarek's beads and fist
+## shards) are drawn only up to FAR_HIDE_D from the camera; close-ups keep them.
+static func _far_hide(glb: Node3D, own: Dictionary) -> void:
+	for nm in own.get("far_hide", []):
+		for n in glb.find_children(String(nm) + "*", "GeometryInstance3D", true, false):
+			(n as GeometryInstance3D).visibility_range_end = FAR_HIDE_D
+			(n as GeometryInstance3D).visibility_range_end_margin = 1.0
 
 ## A model's wisps of smoke off its held weapon (warden_look.json "smoke": colour [r, g, b, a], amount, life (s),
 ## size (m), rise (m/s); Kael's demon blade): dark soft puffs from along the weapon's length that drift up and
@@ -420,14 +431,21 @@ static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vect
 		mag.name = "Mag"
 		mag.set_meta("glb", true)          # (the .glb's own, not the procedural one: --warden-glb-check)
 
-## The .glb's shield (SHIELD, modelled in the Shield node's space) replaces the procedural one on the left hand.
-static func _hold_shield(root: Node3D, glb: Node3D) -> void:
-	var shield := glb.find_child(SHIELD, true, false) as Node3D
-	var holder := root.get_node_or_null("Rig/Torso/ArmLPivot/Elbow/Hand/Shield") as Node3D
-	if shield == null or holder == null:
+## The rig's procedural prow goes (the .glb draws its own).
+static func _hide_shield(root: Node3D) -> void:
+	var holder := root.get_node_or_null(SHIELD_PATH) as Node3D
+	if holder == null:
 		return
 	for mi in holder.find_children("*", "MeshInstance3D", true, false):
 		(mi as MeshInstance3D).visible = false
+
+## The .glb's shield (SHIELD, modelled in the Shield node's space) replaces the procedural one on the left hand.
+static func _hold_shield(root: Node3D, glb: Node3D) -> void:
+	var shield := glb.find_child(SHIELD, true, false) as Node3D
+	var holder := root.get_node_or_null(SHIELD_PATH) as Node3D
+	if shield == null or holder == null:
+		return
+	_hide_shield(root)
 	shield.get_parent().remove_child(shield)
 	shield.owner = null
 	holder.add_child(shield)
@@ -810,6 +828,7 @@ class Sync extends Node:
 	var gun: Node3D
 	var muzzle: Node3D
 	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
+	var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
 	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
@@ -856,7 +875,21 @@ class Sync extends Node:
 				if nd and bi >= 0:
 					hand_nodes.append([nd, bi])
 
+	## Hunter.equip rebuilds the rig's weapon and prow (a new match, a practice swap): on a skinned weapon those pieces
+	## must stay hidden, so one weapon is drawn in every mode (item 76b.5).
+	func _keep_one_weapon() -> void:
+		if gun == null:
+			return
+		var holder := root.get_node_or_null(SHIELD_PATH)
+		var last := gun.get_child(gun.get_child_count() - 1)
+		var now := [last.get_instance_id(), holder.get_instance_id() if holder else 0]
+		if now != built:
+			built = now
+			WardenGlb._skinned_weapon(root)
+			WardenGlb._hide_shield(root)
+
 	func _process(dt: float) -> void:
+		_keep_one_weapon()
 		if clips:
 			_play(dt)
 		else:
@@ -955,6 +988,7 @@ class Springs:
 	var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}
 	var fold := 0.0             # 0..1: how far the wing chains are folded (WING_FOLD)
 	var wind_t := 0.0
+	var calm := false           # no ripple (a check measuring how a chain settles)
 
 	func setup(skeleton: Skeleton3D) -> void:
 		skel = skeleton
@@ -1012,7 +1046,7 @@ class Springs:
 				rest.append(r)
 				want.append(xf * r.origin)
 			var n := want.size()
-			if ch["wind"]:
+			if ch["wind"] and not calm:
 				# (a long cloth tail never hangs dead: a slow travelling ripple, stronger toward its tip)
 				for i in range(1, n):
 					var u := float(i) / float(n - 1)

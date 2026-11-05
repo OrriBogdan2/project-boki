@@ -74,17 +74,16 @@ def p_rock(P, N, occ, cav, a, seeds):
     idx, d1, gap = S.voronoi(P, seeds)
     v = lightness(T.key_shade(N), occ, cav * 0.6, 0.7) + 0.08 * S.fbm(P, 30.0, 6, 3)
     tint = 0.92 + 0.14 * np.sin(idx * 2.7)
-    c = tones("43362c", "85725c", "c9b797", v) * tint[:, None]
+    c = tones("94805f", "e2d4b8", "fff8e8", v + 0.16)
     # chipped lighter edges, dark grit
     speck = S.fbm(P, 90.0, 12, 2)
-    c = S.mix(c, S.hexc("d9caa8")[None, :], S.sstep(0.012, 0.03, gap) * S.sstep(0.055, 0.03, gap) * 0.32 * S.sstep(-0.1, 0.3, speck))
-    c = crease(c, np.maximum(cav, 0.0) * 0.8, "241a14", 0.8)
-    crack = S.sstep(0.017, 0.006, gap)
-    c = S.mix(c, S.hexc("1e1410")[None, :], crack)
+        c = crease(c, np.maximum(cav, 0.0) * 0.8, "241a14", 0.8)
+    crack = S.sstep(0.012, 0.006, gap)
+    c = S.mix(c, S.hexc("8a3a14")[None, :], crack)
     # only some seams burn, in long runs, as the art draws them
-    run = S.sstep(-0.02, 0.2, S.fbm(P, 9.0, 21, 2))
-    burn = S.sstep(0.013, 0.0055, gap) * run
-    spill = S.sstep(0.03, 0.008, gap) * run
+    run = S.sstep(-0.2, 0.05, S.fbm(P, 7.0, 21, 2))
+    burn = S.sstep(0.016, 0.007, gap) * run
+    spill = S.sstep(0.04, 0.01, gap) * run
     c = S.mix(c, S.hexc("c8501a")[None, :], spill * 0.55)
     c = S.mix(c, S.mix(AMBER[None, :], HOT[None, :], S.sstep(0.007, 0.002, gap)), burn)
     e = S.mix(S.hexc("ff8a1c")[None, :], HOT[None, :], S.sstep(0.007, 0.002, gap)) * burn[:, None]
@@ -100,9 +99,9 @@ def p_bandana(P, N, occ, cav, a):
 
 def p_vest(P, N, occ, cav, a):
     v = lightness(T.key_shade(N), occ, cav) + 0.035 * T.strokes(P, 32.0, 7)
-    c = tones("2f323a", "59606c", "8d94a0", v)
+    c = tones("232c3c", "4a5c76", "8ca2bc", v)
     trim = T.vest_trim(P, R)
-    c = S.mix(c, tones("3e424c", "7a818d", "a8aeb8", v), trim * 0.8)
+    c = S.mix(c, tones("34445a", "6f88a6", "a8bdd2", v), trim * 0.8)
     wear = S.sstep(0.28, 0.5, S.fbm(P, 16.0, 17, 3))
     c = S.mix(c, c * S.hexc("d8c8b0") * 1.15, wear * 0.45)
     st = (np.sin(P[:, 2] * 420.0) > 0.2) * S.sstep(0.0035, 0.0015, np.abs(np.abs(P[:, 0]) - (0.066 + 0.1 * np.clip((float(R.waist[2]) + 0.6 - P[:, 2]) / 0.42, 0, 1)) - 0.024)) * (P[:, 1] > 0)
@@ -112,13 +111,13 @@ def p_vest(P, N, occ, cav, a):
 
 def p_sash(P, N, occ, cav, a):
     v = lightness(T.key_shade(N), occ, cav) + 0.04 * T.strokes(P, 34.0, 9)
-    return crease(tones("5e2616", "b0522e", "e08a56", v), cav, "34100a"), None
+    return crease(tones("7c2410", "d4501e", "fb9a52", v), cav, "34100a"), None
 
 
 def p_tails(P, N, occ, cav, a):
     v = lightness(T.key_shade(N), occ, 0.85, 0.7) + 0.05 * S.noise(P, 40.0, 3)
     s = a[:, 0]
-    c = tones("5e2616", "b0522e", "e08a56", v)
+    c = tones("7c2410", "d4501e", "fb9a52", v)
     streak = 0.5 + 0.5 * np.sin(a[:, 1] * 6.28 * 2 + s * 16.0)
     c = S.mix(c, c * 0.72, S.sstep(0.6, 0.95, streak))
     frayed = S.sstep(0.0, 0.1, s - np.maximum(0.0, (a[:, 0].max() - 0.12)))
@@ -136,8 +135,8 @@ def p_wrap(P, N, occ, cav, a):
 
 
 def p_trousers(P, N, occ, cav, a):
-    v = lightness(T.key_shade(N), occ, cav * 1.2) + 0.035 * T.strokes(P, 26.0, 23)
-    c = tones("54402a", "a48a5c", "d8c090", v)
+    v = lightness(T.key_shade(N), occ, cav * 0.9) + 0.02 * T.strokes(P, 26.0, 23)
+    c = tones("46341c", "93733f", "c4a26a", v)
     dirt = S.sstep(0.62, 0.42, P[:, 2]) * 0.12 + 0.08 * S.sstep(0.1, 0.45, S.fbm(P, 11.0, 25, 3))
     c = S.mix(c, c * S.hexc("c8a888"), dirt)
     # the knee patch and its big stitches
@@ -151,7 +150,7 @@ def p_trousers(P, N, occ, cav, a):
     # the inner faces where the legs part stay in shade
     inner = S.sstep(0.03, 0.012, np.abs(P[:, 0])) * S.sstep(float(R.hip[2]) - 0.1, float(R.hip[2]) - 0.16, P[:, 2])
     c = S.mix(c, S.hexc("4a3620")[None, :], inner)
-    return crease(c, cav, "2e2010", 0.8), None
+    return crease(c, cav, "2e2010", 0.55), None
 
 
 def p_legs(P, N, occ, cav, a):
@@ -188,7 +187,7 @@ def p_pouch(P, N, occ, cav, a):
 def p_hair(P, N, occ, cav, a):
     key = T.key_shade(N)
     v = lightness(key, occ, cav, 0.75)
-    c = tones("080607", "1a1518", "38303a", v)
+    c = tones("160c0c", "38221f", "76503f", v + 0.1)
     c = crease(c, cav, "060405", 0.9)
     sheen = S.sstep(0.68, 0.9, key) * S.sstep(-0.1, 0.5, S.noise(P * S.vec(1, 1, 0.3), 46.0, 3))
     return S.mix(c, S.hexc("6e6a7e")[None, :], sheen * 0.3), None
@@ -199,9 +198,9 @@ def p_locs(P, N, occ, cav, a):
     ph = a[:, 1] * 6.283 * 2.0 + a[:, 0] * 86.0
     groove = 0.5 + 0.5 * np.sin(ph)
     v = (0.3 + 0.7 * key) * (0.4 + 0.6 * S.sstep(0.05, 0.55, groove)) * (0.55 + 0.45 * occ)
-    c = tones("080607", "1c171b", "3c343e", v * 1.25)
+    c = tones("160c0c", "38221f", "7a5244", v * 1.25)
     sheen = S.sstep(0.74, 0.95, key) * S.sstep(0.45, 0.9, groove)
-    return S.mix(c, S.hexc("5e5a6c")[None, :], sheen * 0.35), None
+    return S.mix(c, S.hexc("a87a58")[None, :], sheen * 0.45), None
 
 
 def p_beads(P, N, occ, cav, a):
@@ -227,7 +226,7 @@ def p_geode(P, N, occ, cav, a):
     Pn = P / GEO_R
     rad = np.sqrt(Pn[:, 0] ** 2 + Pn[:, 2] ** 2)
     v = lightness(T.key_shade(N), occ, cav * 0.7, 0.65) + 0.08 * S.fbm(Pn, 5.0, 6, 3)
-    c = tones("4c3f35", "8e7c66", "c6b698", v)
+    c = tones("6e5e4e", "bcab90", "efe4cc", v + 0.1)
     # the pale banded rim, the crystals going warm toward the eye
     face = S.sstep(0.0, 0.3, Pn[:, 1])
     rim = tones("8c7a68", "dccbb4", "fff4e4", v + 0.1)
@@ -243,18 +242,18 @@ def p_geode(P, N, occ, cav, a):
 def p_iris(P, N, occ, cav, a):
     Pn = P / GEO_R
     x, z = Pn[:, 0], Pn[:, 2]
-    r = np.sqrt(x * x + z * z) / 0.37
+    r = np.sqrt(x * x + z * z) / 0.46
     az = np.arctan2(z, x)
     fib = 0.5 + 0.5 * np.sin(az * 34.0 + 3.0 * S.noise(Pn, 8.0, 2)) * (0.6 + 0.4 * np.sin(az * 13.0))
     c = S.ramp(np.clip(1.0 - r + 0.18 * (fib - 0.5), 0, 1), ("7a1e06", "e8560c", "ff9a1e", "ffd25e", "ffe88e"))
-    slit = (np.abs(x) / (0.05 * np.sqrt(np.clip(1.0 - (z / 0.29) ** 2, 0.0, 1.0)) + 0.002))
+    slit = (np.abs(x) / (0.06 * np.sqrt(np.clip(1.0 - (z / 0.36) ** 2, 0.0, 1.0)) + 0.002))
     c = S.mix(S.hexc("1a0704")[None, :], c, S.sstep(0.85, 1.15, slit))
     c = S.mix(c, S.hexc("fff4cc")[None, :], S.sstep(0.09, 0.05, S.length(np.stack((x + 0.13, z - 0.14), -1))))
     return c, c * 0.8
 
 
 P_FN = {"head": p_head, "teeth": p_teeth, "torso": p_skin, "arms": p_skin, "hands": p_hands, "legs": p_legs,
-        "bandana": p_bandana, "cap": p_hair, "vest": p_vest, "wrap": p_wrap, "sash": p_sash, "trousers": p_trousers,
+        "bandana": p_bandana, "cap": p_hair, "crown": p_sash, "shoulders": p_sash, "vest": p_vest, "wrap": p_wrap, "sash": p_sash, "trousers": p_trousers,
         "wraps": p_wraps, "harness": p_harness, "gear": p_gear, "pouch": p_pouch, "locs": p_locs, "beads": p_beads,
         "crystals": p_crystals, "sash_tails": p_tails, "band_tails": p_band_tails, "geode": p_geode, "iris": p_iris,
         "shard": lambda P, N, o, c, a: p_shard(P, N, o, c, a),

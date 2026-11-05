@@ -52,6 +52,10 @@ def cap_f(P):
     return T.hair_cap(P - HC)
 
 
+def crown_f(P):
+    return T.crown_wrap(P - HC)
+
+
 def bracer_f(sx, seed):
     seeds = T.bracer_seeds(R, sx, seed)
     rs = np.random.RandomState(seed + 1)
@@ -67,15 +71,17 @@ Z_S = float(R.sh[2])
 
 # name: field, bounds (lo, hi), low step, target tris, clay colour, slot
 PARTS = {
-    "head": dict(f=head_f, lo=HC + S.vec(-0.14, -0.17, -0.36), hi=HC + S.vec(0.14, 0.17, 0.17), h=0.0032, tris=2600, col="8a5a3c"),
+    "head": dict(f=head_f, lo=HC + S.vec(-0.14, -0.17, -0.36), hi=HC + S.vec(0.14, 0.17, 0.17), h=0.0032, tris=2480, col="8a5a3c"),
     "teeth": dict(f=teeth_f, lo=HC + S.vec(-0.07, 0.06, -0.11), hi=HC + S.vec(0.07, 0.13, -0.03), h=0.003, tris=100, col="f0ece0"),
     "bandana": dict(f=bandana_f, lo=HC + S.vec(-0.14, -0.19, -0.06), hi=HC + S.vec(0.14, 0.17, 0.14), h=0.0035, tris=600, col="c9b89a"),
     "cap": dict(f=cap_f, lo=HC + S.vec(-0.16, -0.19, -0.14), hi=HC + S.vec(0.16, 0.17, 0.2), h=0.0075, tris=800, col="1c1618"),
+    "crown": dict(f=crown_f, lo=HC + S.vec(-0.11, -0.15, 0.1), hi=HC + S.vec(0.11, 0.08, 0.26), h=0.004, tris=140, col="b04a26"),
+    "shoulders": dict(f=lambda P: T.shoulder_wraps(P, R), lo=S.vec(-0.43, -0.14, R.sh[2] - 0.2), hi=S.vec(0.43, 0.14, R.sh[2] + 0.13), h=0.0045, tris=260, col="b04a26"),
     "torso": dict(f=lambda P: T.torso(P, R), lo=S.vec(-0.33, -0.2, R.waist[2] - 0.03), hi=S.vec(0.33, 0.2, R.neck[2] + 0.03), h=0.005, tris=1000, col="8a5a3c"),
     "arms": dict(f=lambda P: T.arm(P, R), lo=S.vec(-0.43, -0.13, R.wr[2]), hi=S.vec(0.43, 0.13, Z_S + 0.11), h=0.005, tris=1000, col="8a5a3c"),
-    "hands": dict(f=lambda P: T.hand(P, R), lo=S.vec(-0.38, -0.12, R.wr[2] - 0.27), hi=S.vec(0.38, 0.16, R.wr[2] + 0.08), h=0.0028, tris=1700, col="8a5a3c"),
-    "bracer_R": dict(f=BR_R, lo=R.wr * S.vec(1, 1, 1) + S.vec(-0.18, -0.18, -0.08), hi=R.el + S.vec(0.18, 0.18, 0.04), h=0.0085, tris=900, col="8c7a62"),
-    "bracer_L": dict(f=BR_L, lo=R.wr * S.vec(-1, 1, 1) + S.vec(-0.18, -0.18, -0.08), hi=R.el * S.vec(-1, 1, 1) + S.vec(0.18, 0.18, 0.04), h=0.0085, tris=900, col="8c7a62"),
+    "hands": dict(f=lambda P: T.hand(P, R), lo=S.vec(-0.38, -0.12, R.wr[2] - 0.27), hi=S.vec(0.38, 0.16, R.wr[2] + 0.08), h=0.0028, tris=1600, col="8a5a3c"),
+    "bracer_R": dict(f=BR_R, lo=R.wr * S.vec(1, 1, 1) + S.vec(-0.18, -0.18, -0.08), hi=R.el + S.vec(0.18, 0.18, 0.04), h=0.0085, tris=800, col="8c7a62"),
+    "bracer_L": dict(f=BR_L, lo=R.wr * S.vec(-1, 1, 1) + S.vec(-0.18, -0.18, -0.08), hi=R.el * S.vec(-1, 1, 1) + S.vec(0.18, 0.18, 0.04), h=0.0085, tris=800, col="8c7a62"),
     "vest": dict(f=lambda P: T.vest(P, R), lo=S.vec(-0.3, -0.2, R.waist[2] + 0.08), hi=S.vec(0.3, 0.2, R.neck[2] + 0.04), h=0.0045, tris=900, col="5e6470"),
     "wrap": dict(f=lambda P: T.wrap_band(P, R), lo=S.vec(-0.22, -0.17, R.waist[2] + 0.04), hi=S.vec(0.22, 0.17, R.waist[2] + 0.2), h=0.006, tris=150, col="d8cfba"),
     "sash": dict(f=lambda P: T.sash(P, R), lo=S.vec(-0.25, -0.17, R.waist[2] - 0.06), hi=S.vec(0.25, 0.22, R.waist[2] + 0.16), h=0.0045, tris=550, col="b04a26"),
@@ -412,7 +418,7 @@ def geode_parts():
 
 # ---------------------------------------------------------------------------------------------------------- uvs
 UV_K = {"head": 2.4, "teeth": 1.2, "bandana": 1.3, "hands": 1.5, "torso": 1.2, "geode": 2.2, "iris": 3.0, "locs": 0.7, "beads": 0.6,
-        "cap": 0.8, "crystals": 0.8, "shard": 1.2, "wraps": 1.1, "harness": 0.8, "gear": 1.0, "legs": 1.0}
+        "cap": 0.8, "crown": 0.8, "shoulders": 0.9, "crystals": 0.8, "shard": 1.2, "wraps": 1.1, "harness": 0.8, "gear": 1.0, "legs": 1.0}
 
 
 def smoothed(ob, iters=30, k=0.8):

@@ -3,6 +3,7 @@ extends RefCounted
 ## a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png...,
 ## and with --turn a turntable in <dir>/turntable/. Needs a renderer. ffmpeg makes the GIFs and sheets.
 
+var ground_col := Color("4f7a3e")
 var holder: Node3D
 var cam: Camera3D
 var tree: SceneTree
@@ -17,6 +18,7 @@ func run(main: Node) -> void:
 	var yaw := 150.0
 	var turn := false
 	var game_cam := false
+	var true_cam := false
 	var dist := 5.2
 	var at_y := 0.82
 	for a in OS.get_cmdline_user_args():
@@ -30,6 +32,8 @@ func run(main: Node) -> void:
 		if a.begins_with("--at="): at_y = float(a.substr(5))
 		if a == "--turn": turn = true
 		if a == "--match": game_cam = true
+		if a == "--true-cam": true_cam = true      # (the game's own camera: 23 m out at 66 degrees, fov 32)
+		if a.begins_with("--ground="): ground_col = Color(a.substr(9))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -40,9 +44,13 @@ func run(main: Node) -> void:
 	holder.add_child(model)
 	model.rotation.y = deg_to_rad(yaw)
 	var ring := model.get_node_or_null("TeamRing") as Node3D
-	if ring and not game_cam:
+	if ring and not game_cam and not true_cam:
 		ring.visible = false
-	if game_cam:
+	if true_cam:
+		cam.fov = 32.0
+		cam.position = Vector3(0, 23.0 * sin(deg_to_rad(66.0)), 23.0 * cos(deg_to_rad(66.0)))
+		cam.look_at(Vector3(0, 0.8, 0))
+	elif game_cam:
 		cam.fov = 8.0
 		cam.position = Vector3(0, 21.0 * 1.0, 9.4)
 		cam.look_at(Vector3(0, 0.8, 0))
@@ -106,7 +114,7 @@ func _stage(main: Node) -> void:
 	var pm := PlaneMesh.new()
 	pm.size = Vector2(80, 60)
 	ground.mesh = pm
-	ground.material_override = Models.toon(Color("4f7a3e"), false)
+	ground.material_override = Models.toon(ground_col, false)
 	holder.add_child(ground)
 	cam = Camera3D.new()
 	holder.add_child(cam)

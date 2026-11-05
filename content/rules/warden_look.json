@@ -343,6 +343,7 @@
 			],
 			"far_smooth": 1.0
 		},
+		"far_hide": ["tarek_beads", "shard_"],
 		"slots": {
 			"skin": {
 				"top_light": 0.0,
@@ -360,8 +361,12 @@
 				"fres": 0.55
 			},
 			"cloth": {
-				"far_lift": 0.08,
-				"desat": 0.25
+				"far_lift": 0.12,
+				"desat": 0.2
+			},
+			"cloth-accent": {
+				"far_lift": 0.3,
+				"desat": 0.0
 			},
 			"leather": {
 				"emit": 5.0,
@@ -412,7 +417,7 @@
 				"far_d": 14.0
 			},
 			{
-				"anchor": "anchor_gauntlet_L",
+				"anchor": "anchor_fist_L",
 				"color": [
 					1.0,
 					0.62,
@@ -424,7 +429,7 @@
 				"far_d": 14.0
 			},
 			{
-				"anchor": "anchor_gauntlet_R",
+				"anchor": "anchor_fist_R",
 				"color": [
 					1.0,
 					0.62,

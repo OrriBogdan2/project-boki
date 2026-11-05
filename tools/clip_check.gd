@@ -188,7 +188,8 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 				where = "%s @%.2f" % [st[0], t]
 			last = p
 			t += DT
-	ok(worst <= POP, "%s: moves hand over without a pop (worst hand step %.3f m a frame, %s)" % [id, worst, where])
+	ok(worst <= POP * maxf(m.scale.x, 1.0), "%s: moves hand over without a pop (worst step %.3f m a frame, %s)"
+			% [id, worst, where])
 	ok(clips.proc_w <= 0.0, "%s: the clips own the body after the run" % id)
 	s["kmove"] = "no_such_move"
 	for k in 12:

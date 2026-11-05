@@ -20,6 +20,7 @@ const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
+const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
 const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
@@ -230,7 +231,10 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		var clip := String(mv["clip"])
 		var tt := float(s.get("kmove_t", 0.0))
 		var length := lib.get_animation(clip).length
-		if tt >= length:
+		if mv.has("hold_from") and root.has_meta(PHASE):
+			var start := float(mv["hold_from"])
+			tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
+		elif tt >= length:
 			if not mv.has("hold_from"):
 				return {}
 			var from := float(mv["hold_from"])

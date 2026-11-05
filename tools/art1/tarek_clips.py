@@ -229,21 +229,22 @@ C.bake("lmb_punch", 0.6, [(0, WIND), (0.05, m(PUNCH, e="lin")), (0.12, OVER), (0
 # RMB hold: a low gather, both fists drawn in at the hips
 GATHER = m(STANCE, pos=(0, -0.04, -0.34), rot=(0, 0, 0), hips=(-24, 0, 0), head=(18, 0, 0), hr=hand(0.0, 0.2, -0.52), hl=lhand(0.0, 0.2, -0.52), er=(0.9, -0.5, 0), el=(-0.9, -0.5, 0),
            fr=(AX + 0.16, -0.06, AZ), fl=(-AX - 0.16, 0.06, AZ), frt=-16.0, flt=16.0, fra=0.0, fla=0.0, kr=(0.6, 1, 0), kl=(-0.6, 1, 0), lip=-0.7, jaw=0.06)
-C.bake("rmb_gather", 0.62, [(0, STANCE), (0.08, m(GATHER, e="out")), (0.22, m(GATHER, pos=(0, -0.04, -0.38))), (0.42, m(GATHER, pos=(0, -0.04, -0.35))), (0.62, m(GATHER, pos=(0, -0.04, -0.38)))], over=tremble)
+C.bake("rmb_gather", 0.46, [(0, STANCE), (0.08, m(GATHER, e="out")), (0.16, m(GATHER, pos=(0, -0.04, -0.38))), (0.31, m(GATHER, pos=(0, -0.04, -0.35))), (0.46, m(GATHER, pos=(0, -0.04, -0.38)))], over=tremble)
 # jump while charging: tucked, fists rising overhead, leaning in
 LEAP = m(JUMP, pos=(0, 0.04, 0.16), hips=(-20, 0, 0), head=(14, 0, 0), hr=hand(0.0, 0.2, 0.3), hl=lhand(0.0, 0.2, 0.3), fr=(AX, 0.2, AZ + 0.46), fl=(-AX, 0.12, AZ + 0.4), lip=0.6, jaw=0.4, **FIGHT)
 C.bake("rmb_leap", 0.5, [(0, GATHER), (0.1, m(LEAP, pos=(0, 0.06, 0.1), e="out")), (0.3, LEAP), (0.5, m(LEAP, pos=(0, 0.04, 0.18)))])
-# RMB let go, Quakefall (1.2): up off both legs (0.05), arched at the top, fists behind the head (0.2), over and down
-# (0.28-0.35: the hit, knees wide), a rebound in the crater (0.43), low over the fists (0.7), heaved up (0.95-1.2)
+# RMB let go, Quakefall (1.36, the hop a real 0.6 s arc, ext/kit-tarek-61-67): up off both legs (0.05), arched at the top,
+# fists behind the head (0.3), over and down (0.5), the smash on landing (0.6, knees wide), a rebound in the crater (0.7),
+# low over the fists (0.88), heaved up (1.12-1.36)
 ARCH = m(LEAP, pos=(0, 0.0, 0.22), hips=(16, 0, 0), head=(-12, 0, 0), hr=hand(-0.06, -0.14, 0.58), hl=lhand(-0.06, -0.14, 0.58), er=(0.9, 0.2, 0.4), el=(-0.9, 0.2, 0.4), fr=(AX + 0.06, -0.14, AZ + 0.3), fl=(-AX - 0.06, -0.1, AZ + 0.34), jaw=0.5, lip=0.7)
 SMASH = m(GATHER, pos=(0, 0.1, -0.56), hips=(-52, 0, 0), head=(36, 0, 0), hr=hand(-0.14, 0.72, -0.72), hl=lhand(-0.14, 0.72, -0.72), er=(0.8, -0.2, 0.4), el=(-0.8, -0.2, 0.4), fr=(AX + 0.26, -0.14, AZ), fl=(-AX - 0.26, -0.14, AZ), fra=-16.0, fla=-16.0, jaw=0.85, lip=-0.2)
 REB = m(SMASH, pos=(0, 0.08, -0.5), hips=(-44, 0, 0), hr=hand(-0.12, 0.66, -0.6), hl=lhand(-0.12, 0.66, -0.6), jaw=0.3)
-C.bake("rmb_slam", 1.2, [(0, GATHER), (0.05, m(LEAP, pos=(0, 0.02, 0.1), hr=hand(0.02, -0.2, -0.3), hl=lhand(0.02, -0.2, -0.3), fr=(AX, -0.06, AZ + 0.1), fl=(-AX, -0.06, AZ + 0.1), e="out")),
-                         (0.2, ARCH), (0.28, m(ARCH, hips=(-14, 0, 0), hr=hand(-0.08, 0.44, 0.16), hl=lhand(-0.08, 0.44, 0.16), e="in")), (0.35, m(SMASH, e="snap")), (0.43, REB),
-                         (0.53, SMASH), (0.7, m(SMASH, pos=(0, 0.1, -0.53))), (0.95, m(GATHER, pos=(0, 0, -0.26))), (1.2, STANCE)])
+C.bake("rmb_slam", 1.36, [(0, GATHER), (0.05, m(LEAP, pos=(0, 0.02, 0.1), hr=hand(0.02, -0.2, -0.3), hl=lhand(0.02, -0.2, -0.3), fr=(AX, -0.06, AZ + 0.1), fl=(-AX, -0.06, AZ + 0.1), e="out")),
+                          (0.3, ARCH), (0.5, m(ARCH, hips=(-14, 0, 0), hr=hand(-0.08, 0.44, 0.16), hl=lhand(-0.08, 0.44, 0.16), e="in")), (0.6, m(SMASH, e="out")), (0.7, REB),
+                          (0.78, SMASH), (0.88, m(SMASH, pos=(0, 0.1, -0.53))), (1.12, m(GATHER, pos=(0, 0, -0.26))), (1.36, STANCE)])
 DIVEFIST = m(ARCH, pos=(0, 0.0, 0.1), hips=(-34, 0, 0), head=(24, 0, 0), hr=hand(-0.04, 0.3, 0.42), hl=lhand(-0.04, 0.3, 0.42), fr=(AX, -0.1, AZ + 0.26), fl=(-AX, -0.1, AZ + 0.2))
 C.bake("rmb_dive", 0.5, [(0, LEAP), (0.12, m(DIVEFIST, e="out")), (0.3, DIVEFIST), (0.5, m(DIVEFIST, hips=(-38, 0, 0)))])
-C.bake("rmb_land", 0.75, [(0, m(SMASH, e="snap")), (0.28, m(SMASH, pos=(0, 0.1, -0.5))), (0.75, STANCE)])
+C.bake("rmb_land", 0.75, [(0, SMASH), (0.1, m(REB, pos=(0, 0.1, -0.48))), (0.28, m(SMASH, pos=(0, 0.1, -0.5))), (0.75, STANCE)])
 # a punch out of the charge: both fists thrown long off the back foot (0.05-0.16), back into the gather
 LUNGE = m(PUNCH, pos=(0, 0.42, -0.2), rot=(0, 0, 0), hips=(-36, 0, 0), head=(26, 0, 0), hr=hand(-0.16, 0.74, -0.02), hl=lhand(-0.16, 0.74, -0.02), el=(-0.8, -0.5, 0.1), fr=(AX + 0.1, -0.56, AZ + 0.04), fl=(-AX - 0.08, 0.44, AZ), jaw=0.8)
 C.bake("rmb_lunge", 0.36, [(0, GATHER), (0.05, m(LUNGE, e="lin")), (0.16, m(LUNGE, pos=(0, 0.46, -0.22))), (0.36, GATHER)])

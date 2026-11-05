@@ -1,6 +1,7 @@
 # Tarek's armature, weights and assembly (exec'd by tarek_build.py).
 SLOT = {"head": "skin", "teeth": "skin", "torso": "skin", "arms": "skin", "hands": "skin", "legs": "skin",
-        "bandana": "cloth", "band_tails": "cloth", "vest": "cloth", "wrap": "cloth", "sash": "cloth", "sash_tails": "cloth",
+        "bandana": "cloth", "band_tails": "cloth", "vest": "cloth", "wrap": "cloth", "sash": "cloth-accent",
+        "sash_tails": "cloth-accent", "crown": "cloth-accent", "shoulders": "cloth-accent",
         "trousers": "cloth", "wraps": "cloth", "pouch": "cloth", "harness": "leather", "bracer_R": "leather",
         "bracer_L": "leather", "gear": "metal", "beads": "metal", "cap": "hair", "locs": "hair-braid", "crystals": "glow"}
 FX = float(R.kn[0])
@@ -198,6 +199,7 @@ def w_swept(nm, P, a):
 
 WEIGHT = {"head": w_head, "teeth": lambda P: {"head": np.ones(P.shape[0], np.float32)},
           "bandana": lambda P: {"head": np.ones(P.shape[0], np.float32)}, "cap": lambda P: {"head": np.ones(P.shape[0], np.float32)},
+          "crown": lambda P: {"head": np.ones(P.shape[0], np.float32)}, "shoulders": w_arm,
           "torso": w_torso, "arms": w_arm, "hands": w_hand, "vest": w_hips, "wrap": w_hips, "sash": w_root, "trousers": w_legs,
           "legs": w_legs, "wraps": w_legs, "harness": w_legs, "gear": w_root, "pouch": w_root,
           "bracer_R": lambda P: {"forearm.R": np.ones(P.shape[0], np.float32)},
@@ -247,7 +249,9 @@ def assemble(objs, img, emit):
     arm = K.build_armature(RIG)
     add_bones(arm)
     arm.name = "Armature"
-    body = [o for o in objs if o.name not in ("geode", "iris", "shard")]
+    # (beads and crystals are their own mesh: speckle at the match camera, drawn close up only, warden_look far_hide)
+    small = [o for o in objs if o.name in ("beads", "crystals")]
+    body = [o for o in objs if o.name not in ("geode", "iris", "shard", "beads", "crystals")]
     geo, iris, shard = [next(o for o in objs if o.name == n) for n in ("geode", "iris", "shard")]
     mats = {}
     for ob in body:
@@ -257,6 +261,23 @@ def assemble(objs, img, emit):
         ob.data.materials.append(mats[slot])
         set_weights(ob)
         ob.data.polygons.foreach_set("use_smooth", [True] * len(ob.data.polygons)) if ob.name not in ROCK else None
+    for ob in small:
+        slot = SLOT[ob.name]
+        if slot not in mats:
+            mats[slot] = material(slot, img, None)
+        ob.data.materials.append(mats[slot])
+        set_weights(ob)
+    bpy.ops.object.select_all(action="DESELECT")
+    for ob in small:
+        ob.select_set(True)
+    bpy.context.view_layer.objects.active = small[0]
+    bpy.ops.object.join()
+    beads = small[0]
+    beads.name = "tarek_beads"
+    beads.data.name = "tarek_beads"
+    log("beads mesh fixed:", beads.data.validate(verbose=True))
+    beads.modifiers.new("Armature", "ARMATURE").object = arm
+    beads.parent = arm
     bpy.ops.object.select_all(action="DESELECT")
     for ob in body:
         ob.select_set(True)
@@ -264,7 +285,7 @@ def assemble(objs, img, emit):
     bpy.context.view_layer.objects.active = main_ob
     bpy.ops.object.join()
     main_ob.name = "tarek_body"
-    log("mesh fixed:", main_ob.data.validate(verbose=False))
+    log("mesh fixed:", main_ob.data.validate(verbose=True))
     main_ob.data.name = "tarek_body"
     mod = main_ob.modifiers.new("Armature", "ARMATURE")
     mod.object = arm
@@ -282,6 +303,7 @@ def assemble(objs, img, emit):
     bpy.context.view_layer.objects.active = geo
     bpy.ops.object.join()
     shard.data.materials.append(rock_m)
+    log("stone mesh fixed:", geo.data.validate(verbose=True), shard.data.validate(verbose=True))
     n_geo, n_shard = K.tris([geo]), K.tris([shard])
     extras = orbits(arm, geo, shard)
     # anchors the kit's FX read (76b): the fists are the weapon, so the punches and throws leave them
@@ -295,8 +317,8 @@ def assemble(objs, img, emit):
     extras.append(K.anchor(arm, "hand.R", "anchor_wrist_R", R.wr))
     extras.append(K.anchor(arm, "hand.R", "weapon_muzzle", R.wr + S.vec(0, 0, -0.17)))
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, "tarek.blend"))
-    log("tris total", K.tris([main_ob]) + 3 * n_geo + 5 * n_shard)
-    K.export(os.path.join(OUT, "tarek.glb"), [arm, main_ob] + extras, image_format="JPEG")
+    log("tris total", K.tris([main_ob, beads]) + 3 * n_geo + 5 * n_shard)
+    K.export(os.path.join(OUT, "tarek.glb"), [arm, main_ob, beads] + extras, image_format="JPEG")
 
 
 STONES = ({"angle": 300, "height": 0.2, "k": 1.0}, {"angle": 60, "height": 0.27, "k": 1.05}, {"angle": 180, "height": 0.15, "k": 0.92})
@@ -313,7 +335,7 @@ def orbits(arm, geo, shard):
     e.matrix_world = Matrix.Translation(Vector(c))
     bpy.context.view_layer.update()
     out = [e]
-    tilt = math.radians(32)
+    tilt = math.radians(50)
     for i, it in enumerate(STONES):
         a = math.radians(it["angle"])
         d = Vector((-math.sin(a), math.cos(a), 0))

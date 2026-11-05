@@ -236,16 +236,37 @@ def finger_pts(y, ln):
     return p
 
 
+def crown_wrap(q):
+    """A terracotta wrap tying the locs at the crown: from the match camera, the head's colour and shape."""
+    c = (0.0, -0.035, 0.172)
+    d = ellipsoid(q, c, (0.082, 0.094, 0.043))
+    d = smin(d, ellipsoid(q, (0.0, -0.035, 0.2), (0.046, 0.052, 0.03)), 0.02)
+    az = np.arctan2(q[..., 1] - c[1], q[..., 0])
+    return d + 0.004 * np.sin(az * 9.0 + 18.0 * q[..., 2]) + 0.002 * noise(q, 40.0, 3)
+
+
+def shoulder_wraps(P, R):
+    """Terracotta cloth wound over his deltoids: the shoulders' colour from above."""
+    Q = fold_x(P)
+    s = arm(P, R)
+    z = Q[..., 2] - float(R.sh[2])
+    turns = 0.0028 * np.sin((z + 0.35 * Q[..., 1]) * 110.0 + 2.0 * noise(P, 14.0, 5))
+    sheet = np.abs(s - 0.01 + turns) - 0.009
+    top = -0.15 + 0.015 * noise(P, 24.0, 7) - z         # the hem round the upper arm
+    inner = (float(R.sh[0]) - 0.085) - Q[..., 0]         # stops at the vest's armhole
+    return smax(smax(sheet, top, 0.006), inner, 0.012)
+
+
 def bracer_seeds(R, sx, seed):
     """The rock slabs' centres, round his forearm from the elbow to the wrist."""
     rs = np.random.RandomState(seed)
     el = R.el * vec(sx, 1, 1)
     wr = R.wr * vec(sx, 1, 1)
     pts = []
-    rows = 5
+    rows = 3
     for r in range(rows):
         t = (r + 0.5) / rows
-        n = 4 if r in (0, rows - 1) else 5
+        n = 3 if r in (0, rows - 1) else 4
         for i in range(n):
             a = 2 * math.pi * (i + 0.5 * (r % 2)) / n + rs.uniform(-0.2, 0.2)
             c = mix(el, wr, t + rs.uniform(-0.03, 0.03))
@@ -407,11 +428,11 @@ def sash(P, R):
     z = P[..., 2]
     w = np.arctan2(P[..., 1], P[..., 0])
     n = noise(P, 14.0, 31)
-    base = ellipsoid(P, (0, 0.0, z0 + 0.09), (0.205, 0.156, 0.4))
+    base = ellipsoid(P, (0, 0.0, z0 + 0.09), (0.236, 0.182, 0.4))
     ridges = 0.005 * np.sin(z * 120.0 + w * 2.0 + n * 2.0)
-    d = smax(base - 0.006 + ridges, np.abs(z - (z0 + 0.082)) - 0.05 - 0.006 * n, 0.012)
+    d = smax(base - 0.006 + ridges, np.abs(z - (z0 + 0.09)) - 0.064 - 0.006 * n, 0.012)
     # the knot, front and a little to his left
-    k = vec(-0.012, 0.165, z0 + 0.07)
+    k = vec(-0.012, 0.192, z0 + 0.075)
     knot = ellipsoid(P, k, (0.05, 0.034, 0.042), rot_y(0.35))
     knot = smin(knot, ellipsoid(P, k + vec(0.05, -0.012, 0.01), (0.04, 0.022, 0.026), rot_y(-0.5)), 0.012)
     knot = smin(knot, ellipsoid(P, k + vec(-0.05, -0.012, -0.004), (0.04, 0.022, 0.026), rot_y(0.5)), 0.012)
@@ -509,7 +530,7 @@ def geode(P, r=1.0, seed=3):
     rad = np.sqrt(Pn[..., 0] ** 2 + Pn[..., 2] ** 2)
     az = np.arctan2(Pn[..., 2], Pn[..., 0])
     jag = 0.075 * np.abs(np.sin(az * 6.5 + 0.7)) + 0.03 * noise(Pn, 7.0, seed + 3)
-    pit_r = 0.66 - jag
+    pit_r = 0.74 - jag
     pit = np.sqrt(np.maximum(rad - pit_r * 0.3, 0.0) ** 2 + (Pn[..., 1] - 0.40) ** 2) - pit_r * 0.8
     d = smax(d, -pit, 0.015)
     # crystals lining the pit
@@ -520,7 +541,7 @@ def geode(P, r=1.0, seed=3):
 
 def geode_iris(P, r=1.0):
     Pn = P / r
-    return ellipsoid(Pn, (0, 0.12, 0), (0.37, 0.14, 0.37)) * r
+    return ellipsoid(Pn, (0, 0.14, 0), (0.46, 0.16, 0.46)) * r
 
 
 # ----------------------------------------------------------------------------------------------- swept tube helper
