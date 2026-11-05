@@ -1471,3 +1471,17 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **S2:** do a weapon-scale audit across all 12 (one contact sheet of each hero in-game vs its weapons ref) as part of the ART-1 merges.
   - Fix the oversized ones before or with the merge.
   - Kael is already item 131.
+
+## 138. Pip LMB embers: short and small when spammed; bigger and longer after a pause (owner, 17:24 UTC Nov 5)
+- The owner: "her base auto goes too far. if you shoot slower, it should be bigger and go farther (like void), by waiting a bit between shots. otherwise you can spam it and it's shorter and smaller".
+- Today (tender card): a hold pushes embers from alternating hands that fly PAST the cursor; each hit adds Kindle.
+- **New:** the same "wait = prime" model as Motley's LMB (ostra.json lmb: idle 1.4, prime_dmg/speed/size).
+  - **Spammed** (no gap): a short, small ember. Range cut to ~60% of today (e.g. it dies at/near ~8 m instead of flying past the cursor; tune), lower damage per hit, still adds Kindle.
+  - **Waited** (gap ≥ ~1.0 s, tune; the prime builds over the gap): a bigger, faster ember that flies to today's full range or a bit more, with more damage (+~35%) and +1 extra Kindle.
+  - Scale smoothly between the two by the gap length.
+  - A visible "primed" tell: her lantern hand glows brighter and the next ember swells in her hand. A distinct primed-shot sound.
+  - Shared code with Motley's prime if practical (one "prime by idle" helper), but Pip keeps her own look.
+- **Assert:**
+  - A spam ember range ≤ ~8 m.
+  - An ember after a 1.2 s idle: range ≥ today's, size and damage greater.
+  - Kindle +2 on a primed hit.

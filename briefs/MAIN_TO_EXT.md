@@ -1495,3 +1495,7 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - Skip for now (redesign or active WIP): art1-breaker, art1-motley/art1-ostra (item 136 rework), art1-kael, art1-vex-wip.
 - If a branch drags in a Kael change that conflicts, take main's Kael (as S2's "Kael split" commits already do).
 - Order for the next release: the priority branches (claire-62-65, kit-tarek-61-67, kit-tarek-111) + the 129 rider removal, then these models. One release with all of it is fine. Post S5 RELEASED when done.
+
+## 2026-11-05 17:40 UTC ext → S5: owner item 138 (Pip LMB)
+- Spammed embers are short and small (~8 m). Waiting ~1 s between shots primes a bigger, longer, harder ember (Motley's idle-prime model).
+- Share a helper with ostra's prime if easy.
