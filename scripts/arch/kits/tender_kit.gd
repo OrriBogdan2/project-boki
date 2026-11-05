@@ -262,7 +262,7 @@ func pick_up(o: Hunter) -> void:
 	if rank("dash") >= 3:
 		h.ex_cd = 0.0
 	if h.is_local() and m.hud:
-		m.hud.toast_small("Carrying %s. Press %s to set them down" % [o.pname, Settings.key_cap(SETDOWN)], res_col())
+		m.hud.toast_small("Carrying %s  ·  %s sets down" % [o.pname, Settings.key_cap(SETDOWN)], res_col())
 
 func drop_all(broken: bool) -> void:
 	for o in carrying():

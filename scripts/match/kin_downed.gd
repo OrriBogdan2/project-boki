@@ -166,7 +166,7 @@ static func stop(k: Kin, h: Hunter, why: String) -> void:
 	if why == "cc":
 		k.m.sfx("kin_unsure", k.pos, -6.0)
 		if h.is_local() and k.m.hud:
-			k.m.hud.toast_small("Dropped it: run into it to try again", Color("ffd89a"))
+			k.m.hud.toast_small("Dropped it", Color("ffd89a"))
 
 ## Speed factor while carrying a Boki (Hunter._physics).
 static func carry_speed(h: Hunter) -> float:

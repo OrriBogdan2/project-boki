@@ -57,7 +57,7 @@ func _ready() -> void:
 		p.local_coords = false
 		add_child(p)
 		bursts.append(p)
-	for i in 40:
+	for i in NUM_POOL:
 		var l := Label3D.new()
 		l.font = font
 		l.font_size = 52
@@ -277,7 +277,7 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 			_num_look(ln, bool(n.get("crit", false)))
 			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)))
 			ln.modulate.a = 1.0
-			ln.scale = Vector3.ONE * (CRIT_POP if crit else 1.45)
+			ln.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
 			return
 	var l: Label3D = num_pool.pop_front()
 	num_pool.append(l)
@@ -291,14 +291,16 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
 	l.visible = true
-	l.scale = Vector3.ONE * (CRIT_POP if crit else 1.5)
+	l.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
 	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit})
 
 ## How long a number keeps taking hits after the last one, and how long it lingers on the target.
 const MERGE_T := 0.45
 const STICK_T := 0.3
 
-const CRIT_POP := 2.2          # a crit lands this many times its size and settles (a normal hit: 1.5)
+const CRIT_POP := 1.7          # a crit lands this many times its size and settles
+const HIT_POP := 1.25          # ... and a normal hit this many
+const NUM_POOL := 24           # floating numbers and words on screen at once (the oldest is reused)
 const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)     # every number's dark outline ...
 const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)    # ... a crit's is a hot ember brown, and thicker
 
@@ -311,7 +313,7 @@ func _num_look(l: Label3D, crit: bool) -> void:
 ## Bigger totals and crits read bigger, within a small range so numbers never cover the fight.
 func _num_size(v: float, crit: bool) -> int:
 	var k := clampf(log(maxf(v, 1.0)) / log(10.0) - 1.0, 0.0, 1.0)     # 10 -> 0, 100 -> 1
-	return int(lerpf(46.0, 60.0, k)) + (12 if crit else 0)
+	return int(lerpf(36.0, 46.0, k)) + (8 if crit else 0)
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
@@ -323,10 +325,10 @@ func word(at: Vector3, txt: String, col: Color, big := false) -> void:
 	l.text = txt
 	l.modulate = col
 	_num_look(l, false)
-	l.font_size = 58 if big else 40
+	l.font_size = 46 if big else 34
 	l.global_position = _clear_spot(at)
 	l.visible = true
-	l.scale = Vector3.ONE * (1.5 if big else 1.1)
+	l.scale = Vector3.ONE * (1.25 if big else 1.0)
 	nums.append({"node": l, "t": 0.0, "vel": Vector3(0, 2.4, 0)})
 
 ## Where a new word goes so it doesn't print over a word or number still rising near `at`: stepped up

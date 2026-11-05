@@ -122,7 +122,7 @@ func _offer_target(h: Hunter) -> int:
 func _offer(h: Hunter) -> void:
 	var to := _offer_target(h)
 	if to < 0:
-		if h == m.player and m.hud: m.hud.toast_small("Nobody in sight to offer a truce to", Color("f4f1e6"))
+		if h == m.player and m.hud: m.hud.toast_small("No one to offer a truce", Color("f4f1e6"))
 		return
 	if allied(h.team, to):
 		return
