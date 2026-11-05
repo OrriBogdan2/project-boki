@@ -863,3 +863,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: READY ext/art1-pip b5f8469b (replaces f9185186; contains ext/kit-pip-118; carries Kael art)
 - seed_aim 1.0 s, softer shading, thinner ink. 9 checks 0 FAIL lines (clip, rig-standard, warden-glb, warden-model, warden-stance, pip-live, clip-live, tender-combo, mantle-look), health --strict. Other 127 flags not rerun. Still more saturated than pip_head.png.
+
+## 2026-11-05 S2: 5-hour limit again; lanes resume after 15:20 UTC
+- Work saved on ext/wip-art1-*, ext/wip-kit-*. READY: ext/kit-kael-113 ae7f8b6b (item 113 points 2-8); details in EXT_TO_MAIN. Differs: glider blocked 0.75 s then open 0.35 s (the ult is only 1.1 s); E pins a Slam to its start direction; guard can run ~1.1 s during a haul (small balance change). ART-1 Kael needs lunge_wind, wave_wind, wave, meteor, dash, guard clips matched.
+- Owner Qs: glide timing OK? RMB hold while chained: run the chain, or go to the cursor? Longer invulnerable guard during the haul OK?
