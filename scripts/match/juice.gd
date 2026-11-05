@@ -108,6 +108,7 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.ring(h.pos, 3.4, Color(tc, 0.9), 0.4)
 	m.fx.ring(h.pos, 1.8, Color(1, 1, 1, 0.8), 0.25)
 	m.fx.dust(h.pos, 14)
+	HeroVfx.of(m).play(h, "downed", h.pos, h.aim_dir())
 	if credit == m.player and h != m.player:
 		m.sfx("knock_confirm", null, -6.0)
 

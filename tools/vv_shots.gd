@@ -186,7 +186,8 @@ func _take(kind: String, file: String, caption: String, focus: Callable) -> void
 ## The region `px` round world point `at` on the image, scaled by `zoom`.
 func _crop(img: Image, at: Vector3, px: Vector2i, zoom: float) -> Image:
 	var cam := main.get_viewport().get_camera_3d()
-	var c := cam.unproject_position(at)
+	# (the camera projects into the viewport's own size; the captured image can be the larger window)
+	var c := cam.unproject_position(at) * Vector2(img.get_size()) / main.get_viewport().get_visible_rect().size
 	var corner := Vector2i(int(c.x) - px.x / 2, int(c.y) - px.y / 2)
 	var rg := Rect2i(corner, px).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 	var crop := img.get_region(rg)

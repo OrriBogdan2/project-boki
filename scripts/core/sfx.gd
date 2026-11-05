@@ -36,6 +36,7 @@ const BLAST_PEAK_DB := -6.0
 ## Distance falloff: full volume within NEAR metres, then a gentle roll-off; muffled beyond FAR.
 const NEAR := 3.5
 const FAR := 9.0
+var skip: Array = []      # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
 var last_take := {}
 var recent := {}          # sound -> start times (ms) still inside the stacking window
 
@@ -377,11 +378,11 @@ func _voice(pos) -> AudioStreamPlayer:
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter.
 func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> void:
-	if not streams.has(sname) and not _lazy(sname):
+	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
 		return
 	var now := Time.get_ticks_msec()
-	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, 30))
-	if sname.begins_with("step_"): gap = 25      # footsteps: several people can walk at once
+	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, SfxKits.MIN_GAP.get(sname, 30)))
+	if sname.contains("step_"): gap = 25         # footsteps: several people can walk at once
 	if now - int(last_played.get(sname, -1000)) < gap:
 		return
 	var v := vol_db + _distance_db(pos) + (BLAST_DB if sname in BLAST else 0.0)

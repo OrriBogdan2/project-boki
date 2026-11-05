@@ -118,9 +118,10 @@ func _mage() -> void:
 	ok("LMB: the bolt reaches 13m with the cursor at 2m",
 			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 13.0) < 0.5,
 			"%.1f m" % (float(sd.get("life0", 0.0)) * (sd.get("vel", Vector2.ZERO) as Vector2).length()))
-	ok("LMB: the round is a jagged bolt (a pooled rider)", VVFx.of(m).riders.size() >= 1)
+	ok("LMB: the round trails her hot-pink lightning (HeroVfx)", int(HeroVfx.of(m).plays.get("lmb_bolt", 0)) >= 1)
 	var a1 := K.anim_id
 	ac.step(m, 0.85)
+	ok("LMB: where the bolt ends, its path cracks back to her hand", int(HeroVfx.of(m).plays.get("lmb_end", 0)) >= 1)
 	_fire(m, P)
 	ac.step(m, 0.03)
 	ok("LMB: alternating hands (left, then right)",
