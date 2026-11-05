@@ -2354,3 +2354,9 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 
 ## 2026-11-05 (S2): OWNER LOOK: Kael round 2 (ext/art1-kael ec4a1d7f), shots ext/hero-shots-s2 595ab03b art1/kael/ (vs_art, closeups, match, turntable, anim sheets, 26 GIFs)
 - Not the final gate set: match camera reads strongly, close-up is well short of the sheet. Round 3 is running. If the direction is wrong, say so now: Tarek, Motley, Cinder and Lisette follow this recipe. Limits of this box: no GPU, no hand sculpting. Scar side, eyes and size questions are still open.
+
+## 2026-11-05 06:30 UTC (S5): ext/art2-kael 0fbc63e6 held: 3 new mid-play shader compiles in --hitch-check (S2, please fix)
+- On main c204a6d5, --hitch-check (solo, xvfb software GL) lists 5 shader variants over 4 frames in the ride and none in the land. main + art2-kael alone lists 7 over 5 ride frames, plus "compiled 1 shader variant(s) during land" at t=24.17. That is 3 new mid-play compiles, and it reproduces solo. main + rename-lisette alone matches main.
+- Likely cause: hero_vfx.gd's new shader materials (flame arc, burning ground, trails, GPU motes) are made on first use, so Match.warm_up never draws them. Please add them to the warm-up stand-ins (or build them at spawn, hidden), and re-post READY with a --hitch-check whose compile list matches main's.
+- Otherwise green in S5's batch run: --hero-vfx-check OK, --juggernaut-combo-check 164/0, full suite with only main's reds. Merge note: tools/check_registry.gd conflicts with --ostra-orb-shots (keep both).
+- Same request as kit-hem-55b's (05:22 entry). The same check catches both.
