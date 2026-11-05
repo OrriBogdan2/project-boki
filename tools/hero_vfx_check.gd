@@ -8,7 +8,12 @@ const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
 const KIT_CALLS := {"juggernaut": [
 	"res://scripts/arch/kits/juggernaut_kit.gd", "res://scripts/arch/kits/juggernaut_chain.gd",
-	"res://scripts/arch/kits/juggernaut_drop.gd", "res://scripts/arch/kits/juggernaut_ult.gd"]}
+	"res://scripts/arch/kits/juggernaut_drop.gd", "res://scripts/arch/kits/juggernaut_ult.gd"],
+	"archer": ["res://scripts/arch/kits/archer_kit.gd", "res://scripts/arch/kits/pin_spirit.gd",
+	"res://scripts/arch/kits/pin_ult.gd", "res://scripts/arch/kits/pin_fx.gd"]}
+## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
+const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
+	"fire_super", "fire_over", "fire_heavy"]
 
 var bad := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
@@ -34,6 +39,7 @@ func run(main: Node) -> void:
 	_view(m, V, P)
 	_kit(m, V, P)
 	_net(m, V, P)
+	await _lisette(main, V)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -43,15 +49,14 @@ func _recipes(arch: String) -> void:
 	var moves: Dictionary = d.get("moves", {})
 	ok(not moves.is_empty(), "%s has a recipe file" % arch)
 	var called := {}
-	var re := RegEx.create_from_string("(?:vfx\\(|hold\\(\\w+(?:\\.\\w+)?, )\"(\\w+)\"")
+	var re := RegEx.create_from_string("(?:vfx\\(|hold\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"")
 	for path: String in KIT_CALLS[arch]:
 		for hit in re.search_all(FileAccess.get_file_as_string(path)):
 			called[hit.get_string(1)] = true
-	var missing := called.keys().filter(func(k): return not moves.has(k))
-	ok(called.size() >= 30 and missing.is_empty(),
+	var missing := called.keys().filter(func(k): return not (moves.has(k) or String(k).ends_with("_")))
+	ok(called.size() >= 16 and missing.is_empty(),
 			"%s: all %d moves its kit calls have recipes %s" % [arch, called.size(), missing])
-	var own := ["hurt", "downed", "guard_shell"]
-	var unused := moves.keys().filter(func(k): return not called.has(k) and not k in own)
+	var unused := moves.keys().filter(func(k): return not called.has(k) and not k in CALLED_ELSEWHERE)
 	ok(unused.is_empty(), "%s: no recipe is left unused %s" % [arch, unused])
 	var pal: Dictionary = d["palette"]
 	var bad_sound: Array = []
@@ -67,9 +72,10 @@ func _recipes(arch: String) -> void:
 				if layer.has(key) and not pal.has(layer[key]):
 					bad_col.append(layer[key])
 			var flare_big: bool = layer["p"] == "flare" and float(layer.get("size", 0.0)) > MAX_FLARE
-			if float(layer.get("life", 0.0)) > MAX_LIFE or flare_big:
+			var lasts: bool = layer["p"] == "thread"      # (a needle's thread stays as long as the needle)
+			if (float(layer.get("life", 0.0)) > MAX_LIFE and not lasts) or flare_big:
 				over.append(mv)
-			if not (HeroVfx.MODES.has(layer["p"]) or HeroVfx.LOOKS.has(layer["p"])):
+			if not (HeroVfx.MODES.has(layer["p"]) or HeroVfx.LOOKS.has(layer["p"]) or layer["p"] == "string"):
 				flat_only.append(layer["p"])
 	ok(bad_sound.is_empty(), "%s: every sound in the data has a file %s" % [arch, bad_sound])
 	ok(bad_col.is_empty(), "%s: every colour is in the palette %s" % [arch, bad_col])
@@ -194,6 +200,28 @@ func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(int(V.plays.get("slam_hit", 0)) == 1, "the Finishing Slam plays its recipe")
 	ok(m.fx.rings.size() == rings0, "no shared ring under it")
 	ok(not m.fx.own_look and Sfx.skip.is_empty(), "the own-look scope closes")
+
+## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
+func _lisette(main: Node, V0: HeroVfx) -> void:
+	var m: Match = flow._match(main, "archer")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var V := HeroVfx.of(m)
+	ok(V != V0, "a new match has its own pools")
+	Sfx.listener = P.pos
+	var K: ArcherKit = P.ak
+	K.fx._plant(P.pos + Vector3(3, 0, 0), Vector2(1, 0), "arrow")
+	ok(int(V.plays.get("needle_stuck", 0)) == 1, "a missed needle leaves its thread")
+	var last: Dictionary = V.live.filter(func(e): return (e["node"] as Node3D).visible)[0]
+	ok(is_equal_approx(float(last["dur"]), PinFx.SPENT_T), "the thread lasts as long as the needle")
+	ok(is_equal_approx(PinFx.HEAVY_SCALE, 6.0), "the Heavy Shot stays big")
+	V.hold(P, "string_idle")
+	var key := "%d/string_idle" % P.get_instance_id()
+	var wanted: int = 0 if V._model_has(P, "halo_bow_mid") else 1
+	ok((V.holds[key]["layers"] as Array).size() == wanted, "the string shows unless the model brings its own")
+	var hip := V.anchor_pos(P, "nock")
+	ok(hip.distance_to(K.hand_pos(true)) < 0.001 or WardenGlb.anchor(P.model, "anchor_nock") != null,
+			"nock: the model's anchor, else the drawing hand")
 
 func _net(m: Match, V: HeroVfx, P: Hunter) -> void:
 	V.plays.clear()

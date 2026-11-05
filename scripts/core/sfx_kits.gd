@@ -17,6 +17,8 @@ const NAMES := [
 	"os_full", "os_pop", "os_empower", "br_spine", "os_well", "os_well_hum",
 	# Kael (juggernaut), several takes each: tools/gen_kael_sfx.py; his other sounds load lazily
 	"jug_slash", "jug_blade_hit", "jug_hurt", "jug_step_grass", "jug_step_stone", "jug_step_snow", "jug_step_wood",
+	# Lisette (archer), several takes each: tools/gen_lisette_sfx.py
+	"lis_needle_hit", "lis_hurt", "pin_patter", "lis_step_grass", "lis_step_stone", "lis_step_snow", "lis_step_wood",
 ]
 ## The shortest gap (ms) before one of these can play again, next to Sfx.MIN_GAP.
-const MIN_GAP := {"jug_hurt": 420, "jug_blade_hit": 60}
+const MIN_GAP := {"jug_hurt": 420, "jug_blade_hit": 60, "lis_hurt": 420, "lis_needle_hit": 60}

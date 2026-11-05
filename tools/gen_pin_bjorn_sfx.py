@@ -123,33 +123,6 @@ def thud(f0, f1, d, decay):
 def click(d=0.01, lo=2000, hi=9000):
     return mul(bp(noise(d), lo, hi), env(N(d), 0.0005, d * 0.3))
 
-# ------------------------------------------------------------------ Hem
-def pin():
-    save('pin_draw', mix(mul(creak(0.5, 180, 320, 55), swell(N(0.5), 0.35)), scale(mul(bp(noise(0.5), 2500, 7000), swell(N(0.5), 0.45)), 0.25)), -22)
-    save('pin_stage', mix(bell(2350, 0.35, 0.08), scale(at(bell(3520, 0.25, 0.05), 0.03), 0.5), scale(click(0.006, 4000, 11000), 0.6)), -20)
-    save('pin_super', mix(bell(1568, 0.6, 0.18), scale(at(bell(2349, 0.55, 0.16), 0.06), 0.7),
-                          scale(mul(tone(110, 160, 0.5, 0.2), mul(swell(N(0.5), 0.15), env(N(0.5), 0.001, 0.2))), 0.6)), -18)
-    save('pin_perfect', mix(scale(mul(hp(noise(0.4), 5000), env(N(0.4), 0.002, 0.06)), 0.8),
-                            bell(2960, 0.7, 0.22, (1.0, 1.5, 2.99), (1.0, 0.5, 0.3)), scale(at(mul(tone(1800, 4200, 0.25, 0.0), env(N(0.25), 0.01, 0.08)), 0.01), 0.35)), -16)
-    save('pin_overdraw', mul(creak(0.45, 260, 140, 25), env(N(0.45), 0.02, 0.2)), -24)
-    save('pin_loose', mix(twang(196, 0.35, 0.06), scale(mul(bp(noise(0.25), 1800, 6000), env(N(0.25), 0.001, 0.05)), 0.9), scale(click(0.008, 3000, 9000), 0.8)), -18)
-    save('pin_loose_super', mix(twang(147, 0.5, 0.09, 1.3), scale(whoosh(0.45, 600, 5200, 0.2), 1.2), scale(thud(140, 50, 0.3, 0.07), 0.9), scale(click(0.01, 2500, 10000), 1.0)), -15)
-    save('pin_super_hit', mix(scale(mul(hp(noise(0.3), 2500), env(N(0.3), 0.001, 0.04)), 1.3), bell(2637, 0.6, 0.15, (1.0, 2.0, 3.01), (0.8, 0.3, 0.2)), scale(thud(180, 60, 0.3, 0.06), 0.7)), -15)
-    save('pin_heavy_draw', mul(creak(0.8, 110, 210, 30), swell(N(0.8), 0.6)), -22)
-    save('pin_heavy', mix(twang(98, 0.6, 0.12, 0.9), scale(whoosh(0.5, 300, 2200, 0.25), 1.0), scale(thud(110, 45, 0.35, 0.08), 1.0)), -15)
-    save('pin_heavy_hit', mix(thud(160, 55, 0.4, 0.08), scale(mul(lp(noise(0.35), 1600), env(N(0.35), 0.002, 0.1)), 0.9), scale(click(0.01, 1500, 6000), 1.0)), -15)
-    vol = [0.0] * N(0.7)
-    for k in range(7):
-        sw = scale(mul(bp(noise(0.3), 1500 + 300 * k, 6000), env(N(0.3), 0.04, 0.08)), 0.6)
-        vol = mix(vol, at(sw, 0.04 * k))
-    save('pin_hail', mix(vol, scale(twang(220, 0.3, 0.05), 0.4)), -18)
-    save('pin_rain', mul(mix(bp(noise(1.0), 1500, 7000), scale(lp(noise(1.0), 600), 0.4)), mul(swell(N(1.0), 0.25), env(N(1.0), 0.001, 0.6))), -21)
-    save('pin_patter', mix(scale(click(0.012, 1200, 5000), 1.0), scale(thud(400, 200, 0.05, 0.015), 0.4)), -22)
-    save('pin_spirit', mix(scale(whoosh(0.3, 400, 3500, 0.3), 1.0),
-                           scale(at(mul(mix(tone(660, 990, 0.7, 0.0), scale(tone(990, 1480, 0.7, 0.0), 0.6)), mul(swell(N(0.7), 0.15), env(N(0.7), 0.001, 0.3))), 0.12), 0.4),
-                           scale(at(mul(bp(noise(0.7), 3000, 9000), env(N(0.7), 0.1, 0.25)), 0.12), 0.3)), -18)
-    save('pin_spirit_end', mix(bell(1320, 0.5, 0.14), scale(at(bell(990, 0.5, 0.14), 0.08), 0.7)), -22)
-
 # ------------------------------------------------------------------ Breaker
 def bjorn():
     whirr = [0.0] * N(0.5)
@@ -183,18 +156,6 @@ def bjorn():
 def ults():
     u = random.Random(6106)
     def unoise(d): return [u.gauss(0, 0.35) for _ in range(N(d))]
-    shimmer = mul(mix(tone(880, 1760, 0.8, 0.0), scale(tone(1320, 2640, 0.8, 0.0), 0.5), scale(hp(unoise(0.8), 5000), 0.2)),
-                  mul(swell(N(0.8), 0.25), env(N(0.8), 0.001, 0.35)))
-    save('pin_ult_cast', mix(shimmer, scale(mul(tone(98, 147, 0.8, 0.3), env(N(0.8), 0.05, 0.3)), 0.7),
-                             scale(at(bell(1175, 0.7, 0.25, (1.0, 1.5, 2.0), (0.8, 0.5, 0.3)), 0.12), 0.6)), -15)
-    save('pin_ult_nock', mul(mix(tone(300, 620, 0.3, 0.3), scale(creak(0.3, 200, 420, 70), 0.5)), swell(N(0.3), 0.25)), -21)
-    crack = mul(hp(unoise(0.25), 1800), env(N(0.25), 0.0005, 0.03))
-    boom = mix(thud(110, 38, 0.6, 0.14), scale(mul(lp(unoise(0.5), 500), env(N(0.5), 0.002, 0.12)), 1.0))
-    save('pin_ult_beam', mix(twang(82, 0.6, 0.12, 1.4), scale(crack, 1.4), scale(at(boom, 0.02), 1.0),
-                             scale(whoosh(0.3, 1500, 7000, 0.1), 0.6)), -13)
-    ring = bell(1568, 1.0, 0.35, (1.0, 2.0, 3.01), (0.6, 0.3, 0.2))
-    save('pin_ult_final', mix(twang(65, 0.8, 0.16, 1.5), scale(crack, 1.8), scale(at(boom, 0.02), 1.4),
-                              scale(at(ring, 0.04), 0.5), scale(whoosh(0.4, 1200, 7000, 0.1), 0.7)), -12)
     groan = mul(mix(tone(55, 90, 0.5, 0.5, 0.3), scale(creak(0.5, 70, 140, 20), 0.6)), swell(N(0.5), 0.4))
     save('bjorn_ult_wind', mix(groan, scale(mul(lp(unoise(0.5), 400), swell(N(0.5), 0.45)), 0.6)), -17)
     stone = mul(bp(unoise(0.3), 900, 5000), env(N(0.3), 0.0005, 0.05))
@@ -210,7 +171,6 @@ def ults():
     save('bjorn_ult_crackle', mix(crk, scale(mul(lp(unoise(0.7), 300), env(N(0.7), 0.1, 0.3)), 0.3)), -24)
 
 if __name__ == '__main__':
-    pin()
     bjorn()
     ults()
-    print('wrote pin_*, bjorn_* and the ult sounds')
+    print('wrote bjorn_* and the ult sounds')

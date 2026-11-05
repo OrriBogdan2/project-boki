@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://dbvyju18gctar"
-path="res://.godot/imported/pin_patter.wav-8938877fc8ad845ebf8cf862c5abfa2f.sample"
+uid="uid://bcl00skx13c1v"
+path="res://.godot/imported/pin_patter_1.wav-5a2d216fe36090bccf7d213280645502.sample"
 
 [deps]
 
-source_file="res://audio/pin_patter.wav"
-dest_files=["res://.godot/imported/pin_patter.wav-8938877fc8ad845ebf8cf862c5abfa2f.sample"]
+source_file="res://audio/pin_patter_1.wav"
+dest_files=["res://.godot/imported/pin_patter_1.wav-5a2d216fe36090bccf7d213280645502.sample"]
 
 [params]
 

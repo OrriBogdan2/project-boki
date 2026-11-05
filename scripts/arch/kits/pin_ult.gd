@@ -14,8 +14,8 @@ extends Node3D
 ## Bond: a beam that hits a hunter goes to HeroUlt.landed once the hit has landed (a hit, or the knock or
 ## kill it caused); a miss pays nothing.
 
-const TEAL := Color("5affd2")
-const CORE := Color("c8fff0")          # the beam's pale teal core
+const RED := Color("ff2a3a")           # her thread
+const CORE := Color("dfe6f0")          # the beam's silver core
 const GOLD := Color("ffe27a")
 const BEAM_T := 0.2            # s a beam ribbon stays up
 const BEAMS := 3               # pooled beam ribbons
@@ -40,16 +40,16 @@ func _init(kit: ArcherKit) -> void:
 
 func _ready() -> void:
 	for i in BEAMS:
-		var rib := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", TEAL, true))
+		var rib := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", RED, true))
 		var core := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", CORE, true))
 		KitShaders.param(rib, "tail", 0.0)
 		KitShaders.param(core, "tail", 0.0)
 		_beams.append({"node": rib, "core": core, "t": 0.0})
 	for i in 3:
-		var pip := KitMeshes.inst(self, KitMeshes.quad(0.7, 0.7), KitShaders.mat("star", TEAL, true))
+		var pip := KitMeshes.inst(self, KitMeshes.quad(0.7, 0.7), KitShaders.mat("star", RED, true))
 		KitShaders.param(pip, "power", 2.4)
 		_pips.append(pip)
-	_bow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", TEAL, true))
+	_bow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", RED, true))
 
 func xd() -> Dictionary:
 	return k.d.get("x", {})
@@ -66,12 +66,7 @@ func cast() -> bool:
 	recover = 0.0
 	h.draw_t = -1.0
 	k.draw.drop()
-	var chest := h.pos + Vector3(0, 1.1, 0)
-	k.m.fx.burst(chest, TEAL, 26, 7.0, 0.45, 1.0, 1.3)
-	k.m.fx.ring(h.pos, 1.8, TEAL, 0.3)
-	k.fx.star(chest, 2.4, TEAL, 0.18, 1.0)
-	k.m.sfx("pin_ult_cast", h.pos, -2.0 if h.is_local() else -6.0)
-	k.net_ring(h.pos, 1.8, TEAL)
+	k.vfx("ult_cast")
 	k.play("pin_ult_cast")
 	return true
 
@@ -89,7 +84,7 @@ func lmb(held: bool, dt: float) -> bool:
 	if held and recover <= 0.0 and h.can_fire():
 		nock_t = 0.0
 		k.play("pin_ult_nock")
-		k.m.sfx("pin_ult_nock", h.pos, -5.0 if h.is_local() else -9.0)
+		k.vfx("ult_nock")
 	return true
 
 ## Every step: the window, the telegraphs and the tells.
@@ -104,10 +99,10 @@ func tick(dt: float) -> void:
 	var x := xd()
 	var nk := clampf(nock_t / float(x.get("nock", 0.3)), 0.0, 1.0) if nock_t >= 0.0 else 0.0
 	AimKit.lane(h, "x", {"len": float(x.get("range", 18.0)), "width": float(x.get("width", 0.5)), "tip": true,
-		"col": TEAL, "col2": CORE, "k": nk, "fill": nk, "hot": nk})
-	AimKit.circle(h, "x_ring", {"self": true, "r": 0.9, "ticks": true, "star": true, "col": TEAL})
+		"col": RED, "col2": CORE, "k": nk, "fill": nk, "hot": nk})
+	AimKit.circle(h, "x_ring", {"self": true, "r": 0.9, "ticks": true, "star": true, "col": RED})
 	if nock_t >= 0.0:
-		AimKit.charge(h, nk, {"col": TEAL, "col2": CORE})
+		AimKit.charge(h, nk, {"col": RED, "col2": CORE})
 	_tells(true)
 
 ## Ends the empowered window (spent, timed out, or a merge): unused shots are lost.
@@ -141,14 +136,13 @@ func _loose() -> void:
 	var extra := {"src": "abil", "ab": "ultimate", "pierce": true, "hitset": {}, "kb": float(x.get("kb", 4.0)),
 		"tracer": 0.0,
 		"kx": func(_s: Dictionary, _at: Vector3, e: Ent, _why: String): _hit(e, beam)}
-	k.m.spawn_shot(h, start, dir * spd, dmg, rng / spd, 0.3, TEAL, extra)
-	_show_beam(start, dir, _beam_len(start, dir, rng), last)
-	var vol := -1.0 if h.is_local() else -5.0
-	k.m.sfx("pin_ult_final" if last else "pin_ult_beam", h.pos, vol)
+	k.m.spawn_shot(h, start, dir * spd, dmg, rng / spd, 0.3, RED, extra)
+	var length := _beam_len(start, dir, rng)
+	_show_beam(start, dir, length, last)
+	k.vfx("ult_beam", Vector3(start.x, h.pos.y, start.z), dir, {"len": length, "last": last})
 	k.play("pin_ult_final" if last else "pin_ult_loose")
 	h.vel.x -= dir.x * 2.5
 	h.vel.z -= dir.y * 2.5
-	k.net_bolt(start, start + Vector3(dir.x, 0, dir.y) * rng, TEAL)
 	if left <= 0:
 		end()
 
@@ -157,16 +151,12 @@ func _hit(e: Ent, beam: Dictionary) -> void:
 	if e == null or not is_instance_valid(e):
 		return
 	var x := xd()
-	var at := e.pos + Vector3(0, 1.0, 0)
 	if e is Hunter:
 		var foe := e as Hunter
 		foe.armor = maxf(0.0, foe.armor - float(x.get("shred", 10.0)))
 		k.m.later(0.05, func(): if is_instance_valid(foe): HeroUlt.landed(k, foe))
 	var big := bool(beam["last"])
-	var bits := 22 if big else 14
-	k.m.fx.burst(at, CORE, bits, 6.5, 0.45, 1.5, lerpf(1.1, 1.4, float(big)))
-	k.fx.star(at, 2.6 if big else 1.8, TEAL, 0.16, 1.0, PI * 0.25)
-	k.m.sfx("pin_super_hit", e.pos, -3.0)
+	k.vfx("ult_hit", e.pos, h.dir_to(e), {"last": big})
 	if big and e is Hunter:
 		var foe := e as Hunter
 		k.m.later(0.03, func(): _execute(foe))
@@ -181,7 +171,9 @@ func _execute(foe: Hunter) -> void:
 	var opts := {"src": "abil", "ab": "ultimate", "tags": ["ultimate", "execute"], "payoff": true}
 	foe.hurt(foe.hp * 4.0 + foe.armor * 4.0, h, opts)
 	HeroUlt.landed(k, foe)
+	k.m.fx.own_look = true
 	k.payoff_fx(foe.pos, "EXECUTED", GOLD, "pay_deadeye", h.dir_to(foe), foe)
+	k.m.fx.own_look = false
 
 ## How far the beam's ribbon reaches before a wall stops it (the shot itself stops there too).
 func _beam_len(start: Vector3, dir: Vector2, rng: float) -> float:
