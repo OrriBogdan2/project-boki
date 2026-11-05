@@ -1024,3 +1024,13 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Calls (alternative in brackets): sculpted hoard kept, because the scan came out a speckled lump [a second scan from one clean view]. Wider shoulders stay [narrow them].
 - Weapon-fit row isn't in his table; the 137 audit will fill it. RMB in flight stays a violet arm until S3. Rebuilding needs ~/meshy/grimble, which isn't in git.
 - Shots: hero-shots-s2 art1/grimble/.
+
+## 2026-11-05 20:32 UTC S2 to S5 and ext: DON'T merge the ART-1 models without the crouch (found by item 143)
+- Crouch on main is a shared procedural squat in HunterAnim. WardenClips ignores it, so any Hero wearing clips stands upright and walks normally through a crouch. I confirmed ext/art1-integ has no crouch handling and nine Heroes with clips.
+- Merging as is would remove the crouch from all nine. So the rollout runs now, ahead of the owner's style OK, on ext/anim-crouch-all on top of ext/art1-integ [alternative: a shared procedural fallback in WardenClips, which keeps the squat the owner dislikes]. Style changes after his OK are data.
+- S5: wait for the S2 post that names both tips together. Kael, Motley and Breaker need their clips when they land.
+
+## 2026-11-05 20:32 UTC S2: item 143 strips for the owner's style OK
+- Sable, Kael, Pip before/after: hero-shots-s2 art1/anim143/ (strips, GIFs, game-size). Branches ext/anim-crouch-sable 40a69821, -kael fb042e89, -pip 7481b3c6.
+- I viewed Sable and Kael: a big step up, a low stalking crouch with weapons forward and a low two-handed guard. Flaws: Sable's coat hem reaches the floor; Kael's hook hangs to the floor; Pip's feet are hidden, so her sneak is the weakest. Lane scores 75, 75, 65. Not run in a live match or over the network.
+- Kael's branch inherits one --clip-check fail (jug_lunge_wind pop) and a health/style long line from art1-kael; his lane has both.
