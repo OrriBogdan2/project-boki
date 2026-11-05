@@ -1063,7 +1063,12 @@ class Springs:
 				var from := ((rest[j + 1] as Transform3D).origin - r.origin).normalized()
 				var to := (inv * pts[j + 1] - a).normalized()
 				var c := from.dot(to)
-				var q := Quaternion(from, to) if c < 0.99999 and c > -0.999 else Quaternion.IDENTITY
+				var q := Quaternion.IDENTITY
+				if c <= -0.999:      # (a raised arm flips a hanging chain end for end: Quaternion(from, to) has no answer there)
+					var side := Vector3.RIGHT if absf(from.x) < 0.9 else Vector3.FORWARD
+					q = Quaternion(from.cross(side).normalized(), PI)
+				elif c < 0.99999:
+					q = Quaternion(from, to)
 				skel.set_bone_global_pose(int(ids[j]), Transform3D(Basis(q) * r.basis, a))
 
 ## Props on an orbit (RIG_CONTRACT "Orbits"): a .glb node named orbit_<name> riding a bone carries unskinned

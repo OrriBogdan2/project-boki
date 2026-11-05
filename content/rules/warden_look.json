@@ -849,6 +849,11 @@
 			},
 			"cloth-ember": {
 				"glow": 1.5
+			},
+			"metal-sword": {
+				"far_lift": 0.0,
+				"top_light": 0.1,
+				"fres": 0.1
 			}
 		},
 		"bloom": [

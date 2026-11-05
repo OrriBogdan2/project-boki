@@ -151,7 +151,7 @@ for sd_, sg_ in (("R", 1.0), ("L", -1.0)):
 head_bvh = BVHTree.FromPolygons([tuple(v_) for v_ in hv], [tuple(f_) for f_ in hf])
 mask_pc = K.mask_on(head_bvh)
 pieces.append(mask_pc)
-head_pc = M.Piece("headscan", "skin-head-hot", hv, hf, huv, weights=hw, room=0.5)
+head_pc = M.Piece("headscan", "skin-head-hot", hv, hf, huv, weights=hw, room=0.1)
 pieces.append(head_pc)
 head_tex = np.zeros(head_img.size[0] * head_img.size[1] * head_img.channels, np.float32)
 head_img.pixels.foreach_get(head_tex)
@@ -666,7 +666,7 @@ red_t = isbody & (r_ > g_ * 2.0) & (r_ > b_ * 1.6) & ~hotish
 silver_t = isbody & (sat_t < 0.2) & (lumi > 0.36) & ~hotish
 dark_t = isbody & (sat_t < 0.34) & (lumi <= 0.36) & (b_ >= r_ * 0.9)
 skin_t = isbody & (r_ > b_ * 1.02) & ~hotish & ~red_t & ~silver_t & ~dark_t
-for cls_, ramp_, base_, gain_, wide_ in ((skin_t, P.SKIN2, 0.4, 3.0, 0.7), (silver_t, P.SILVER, 0.56, 3.0, 1.6), (dark_t, P.DARK, 0.34, 2.2, 0.7), (red_t, P.RED, 0.45, 2.2, 0.7)):
+for cls_, ramp_, base_, gain_, wide_ in ((skin_t, P.SKIN2, 0.4, 3.0, 0.7), (silver_t, P.SILVER, 0.48, 3.4, 1.6), (dark_t, P.DARK, 0.34, 2.2, 0.7), (red_t, P.RED, 0.45, 2.2, 0.7)):
     fm_ = cls_.astype(np.float32)
     l1_ = blur(lumi, fm_, 2)
     l2_ = blur(lumi, fm_, 18)
@@ -752,7 +752,7 @@ ix_ = ((np.arange(x1 - x0) + 0.5) / (x1 - x0) * crop_.shape[1]).astype(int)
 tile_ = crop_[iy_][:, ix_].copy()
 lt_ = tile_.mean(2)
 stone_ = lt_ < 0.62
-tile_[stone_] *= 0.82
+tile_[stone_] *= 0.56
 tile_[lt_ > 0.8] = P.HOT
 OUTC[y0:y1, x0:x1] = tile_
 x0, y0, x1, y1 = rect(HALO_R)

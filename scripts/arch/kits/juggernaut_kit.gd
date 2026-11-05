@@ -788,7 +788,7 @@ func _tick_lunge() -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
 	var dv: Vector2 = lunge["dir"]
 	for f in m.foes_of(h.team):
-		if f.hittable() and h.flat_dist(f) < h.r + f.r + 0.6 and absf(f.pos.y - h.pos.y) < 1.6:
+		if f.hittable() and h.flat_dist(f) < h.r + f.r + float(ld["hit_r"]) and absf(f.pos.y - h.pos.y) < 1.6:
 			var k := float(lunge["k"])
 			var was_chain: bool = lunge.get("chain", false)
 			lunge = {}
