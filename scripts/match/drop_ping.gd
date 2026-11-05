@@ -1,6 +1,6 @@
 class_name DropPing
 extends RefCounted
-## Middle mouse in the sky (owner items 100, 107): riding in or falling, it pings the ground under the
+## Middle mouse in the sky: riding in or falling, it pings the ground under the
 ## cursor for your squad, where you mean to land. ext/clarity-96's PingInput is the same key everywhere
 ## once it lands (the "ping" action): then this stands aside and only in_sky stays in use.
 

@@ -1,6 +1,6 @@
 class_name DropBlasts
 extends MultiMeshInstance3D
-## The drop's two beats, the glider's snap and the landing's dust ring (owner item 107): a pool in one
+## The drop's two beats, the glider's snap and the landing's dust ring: a pool in one
 ## MultiMesh, so a whole lobby coming down is one draw call and no node churn. shaders/drop_blast.gdshader.
 
 const SIZE := 14                   # at most this many at once: the oldest gives way
@@ -64,6 +64,7 @@ func _process(delta: float) -> void:
 			multimesh.set_instance_transform(i, HIDDEN)
 			live.erase(b)
 		else:
-			multimesh.set_instance_custom_data(i, Color(float(b["t"]) / float(b["dur"]), float(b["kind"]), float(b["seed"]), 0.0))
+			var age := float(b["t"]) / float(b["dur"])
+			multimesh.set_instance_custom_data(i, Color(age, float(b["kind"]), float(b["seed"]), 0.0))
 	if live.is_empty():
 		visible = false

@@ -103,7 +103,7 @@ func _reticle() -> void:
 	var P := _arena(SkyFall.DEPLOY_H + 2.0)
 	P.diving = false
 	P.fall_dir = Vector2.ZERO
-	var keys := Vector2.ZERO                     # (any float would carry you off this small map: --drop-check has a long one)
+	var keys := Vector2.ZERO        # (a float would carry you off this small map: --drop-107-check has a long one)
 	P.inp["move"] = keys
 	var pr: Dictionary = DropReticle.project(P, P.inp["move"])
 	DropReticle.tick(P, 0.016)

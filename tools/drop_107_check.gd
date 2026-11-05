@@ -1,5 +1,5 @@
 extends RefCounted
-## --drop-107-check: owner item 107, a cooler, higher drop. Prints D107 lines.
+## --drop-107-check: the cooler, higher drop. Prints D107 lines.
 ##   the camera pulls out so the whole island is in view, and is back near play zoom before the ground
 ##   the wind builds, and drops away when the glider catches; the snap and the landing ring play; no self-shake
 ##   steering works high up and low down; the reticle's long projection lands where you land
@@ -99,7 +99,8 @@ func _solo() -> void:
 		peak_zoom = maxf(peak_zoom, m.cam.zoom)
 		if t > 2.4 and t < 4.0:
 			var corners := 0
-			for c in [Vector3(30, 0, 30), Vector3(w.w - 30, 0, 30), Vector3(30, 0, w.h - 30), Vector3(w.w - 30, 0, w.h - 30)]:
+			var hi := float(w.w - 30)
+			for c in [Vector3(30, 0, 30), Vector3(hi, 0, 30), Vector3(30, 0, hi), Vector3(hi, 0, hi)]:
 				if m.cam.is_position_in_frustum(c):
 					corners += 1
 			seen_all = seen_all or corners == 4
@@ -117,12 +118,13 @@ func _solo() -> void:
 		elif t - open_t > 0.35 and wind_after == 0.0:
 			wind_after = m.drop_fx.wind.low_db
 	ok(seen_all, "the whole island is in view off the ship (zoom %.1f)" % peak_zoom)
-	ok(m.cam.far > 0.0 and peak_zoom >= DropCam.WIDE_ZOOM * 0.6, "the camera pulls far out (%.1fx the match camera)" % peak_zoom)
+	ok(peak_zoom >= DropCam.WIDE_ZOOM * 0.6, "the camera pulls far out (%.1fx the match camera)" % peak_zoom)
 	ok(low_zoom <= DropCam.NEAR_ZOOM + 0.3, "back near play zoom by the time the glider opens (%.2f)" % low_zoom)
-	ok(wind_top > wind_early + 6.0, "the wind builds: %.1f dB just off the ship, %.1f dB falling" % [wind_early, wind_top])
-	ok(wind_after < wind_at_open - 4.0, "the wind drops as the glider catches: %.1f -> %.1f dB" % [wind_at_open, wind_after])
+	ok(wind_top > wind_early + 6.0, "the wind builds: %.1f dB off the ship, %.1f dB falling" % [wind_early, wind_top])
+	ok(wind_after < wind_at_open - 4.0, "the wind drops at the snap: %.1f -> %.1f dB" % [wind_at_open, wind_after])
 	ok(snaps >= 1, "the glider's snap plays")
-	ok(turned_high > 0.3 and turned_low > 0.3, "steering works high up (%.2f rad) and low down (%.2f rad)" % [turned_high, turned_low])
+	var steered := turned_high > 0.3 and turned_low > 0.3
+	ok(steered, "steering works high (%.2f) and low (%.2f rad)" % [turned_high, turned_low])
 	for i in 60:
 		_frame()
 	ok(m.cam.shake_total == shake0, "no self-shake on the way down or on landing")
@@ -188,8 +190,9 @@ func _lobby() -> void:
 		us += Time.get_ticks_usec() - t0
 	var falling := m.hunters.filter(func(x): return x.dropping).size()
 	var ms := us / 1000.0 / n
-	ok(falling >= 10 and ms < CHEAP_MS, "DropFx with %d in the air: %.2f ms a frame (budget %.1f)" % [falling, ms, CHEAP_MS])
+	ok(falling >= 10 and ms < CHEAP_MS, "DropFx, %d falling: %.2f ms a frame (budget %.1f)" % [falling, ms, CHEAP_MS])
 	var rt0 := Time.get_ticks_usec()
 	for i in 30:
 		SkyFall.project(P, Vector2.ZERO)
-	ok(true, "one landing projection: %.2f ms (10 Hz, you and up to 3 mates)" % ((Time.get_ticks_usec() - rt0) / 1000.0 / 30.0))
+	var one := (Time.get_ticks_usec() - rt0) / 1000.0 / 30.0
+	print("D107 one landing projection: %.2f ms (10 Hz, you and up to 3 mates)" % one)

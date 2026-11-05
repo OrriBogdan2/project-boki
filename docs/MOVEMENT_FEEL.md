@@ -160,8 +160,8 @@ Other checks:
   - Hunters' point of no return is `World.ABYSS_DEPTH` + 7m: about 13m under the lip (was 6m). Monsters and the home keep the old depth.
   - As you sink, the local player's screen drains of colour, darkens, goes deep crimson and closes in with a vignette that beats with a heartbeat (`scripts/match/abyss_fx.gd`, a screen shader under the HUD). The HUD adds a heartbeat and a low rumble, and near the end a pulsing "HOLD GLIDE TO LIFT" / "CLIMB OUT".
 - **Drop** (docs/decisions/0012, `SkyFall`):
-  - A freefall along a heading: forward dives (17 m/s down, 10 across), letting go floats (8 down, 8.5 across), back brakes. Both reached in about 0.3s.
-  - The glider opens itself 12m over the ground (or on Space): your fall checks to -1.6 m/s and the normal glide takes over, with the freefall's speed as a glide handoff. It comes with the glider sound and a small camera punch.
+  - A freefall along a heading: forward dives (26 m/s down, 11 across), letting go floats (12.5 down, 9 across); the numbers live in `content/rules/drop.json`, back brakes. Both reached in about 0.3s.
+  - The glider opens itself 14m over the ground (or on Space): your fall checks to -1.6 m/s and the normal glide takes over, with the freefall's speed as a glide handoff. It comes with the glider sound and a small camera punch.
 - **Landing:** every landing faster than 4 m/s gets a brief squash, a puff and a soft thud, with no lockout. Jump buffering is time-based (0.12s from the ground at your fall speed).
 - **Trees and rocks (`stuckfix`):**
   - Bodies collide with blocker tiles as true circles (`World.occupy`, `World.push_out_blocks`).

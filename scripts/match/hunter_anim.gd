@@ -182,7 +182,8 @@ var run_k := 0.0
 var air_k := 0.0
 var glide_k := 0.0
 var dive_k := 0.0
-var stoop_k := 0.0            # the freefall's dive: head down, arms swept back, legs together (dive_k is the spread float)
+## The freefall's dive: head down, arms swept back, legs together (dive_k is the spread float).
+var stoop_k := 0.0
 var crouch_k := 0.0
 var down_k := 0.0
 var ledge_k := 0.0

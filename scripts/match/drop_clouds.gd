@@ -1,6 +1,6 @@
 class_name DropClouds
 extends MultiMeshInstance3D
-## The clouds you fall past (owner item 107): soft puffs scattered through the sky over the island, a
+## The clouds you fall past: soft puffs scattered through the sky over the island, a
 ## static MultiMesh (one draw call, nothing to do per frame) that the camera falls through. The shader
 ## faces them to the camera and thins them as it arrives. The count follows the quality's fx.
 
@@ -32,7 +32,8 @@ func _init(m: Match) -> void:
 		var d := sqrt(rng.randf()) * m.world.w * SPREAD
 		var y := cloud_y * rng.randf_range(1.0 - BELOW, 1.0 + ABOVE)
 		var r := rng.randf_range(R_MIN, R_MAX)
-		mm.set_instance_transform(i, Transform3D(Basis().scaled(Vector3.ONE * r), mid + Vector3(cos(a) * d, y, sin(a) * d)))
+		var at := mid + Vector3(cos(a) * d, y, sin(a) * d)
+		mm.set_instance_transform(i, Transform3D(Basis().scaled(Vector3.ONE * r), at))
 		mm.set_instance_custom_data(i, Color(rng.randf(), rng.randf_range(0.5, 0.92), 0.0, 0.0))
 	multimesh = mm
 	var mat := ShaderMaterial.new()

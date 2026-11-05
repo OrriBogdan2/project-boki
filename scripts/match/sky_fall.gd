@@ -7,9 +7,11 @@ extends RefCounted
 ## float. The glider opens by itself DEPLOY_H over the ground below you (or on Space), and from then
 ## on it's the normal glide until you land (Hunter.deploy). The landing has its own kick (land).
 
-static var SKY_Y: float = DropData.rules["sky_y"]         # m: the skyship's height. Leaving it to landing takes ~24 s untouched (--drop-check)
+## m: the skyship's height. Leaving it to landing takes ~23 s untouched (--drop-check)
+static var SKY_Y: float = DropData.rules["sky_y"]
 static var FLOAT_FALL: float = DropData.rules["float_fall"]      # m/s down while floating (no keys)
-static var FLOAT_SPEED: float = DropData.rules["float_speed"]    # m/s across while floating: ~0.72 m of reach per metre of height: about as far as before the sky got higher
+## m/s across while floating: ~0.72 m of reach per metre of height
+static var FLOAT_SPEED: float = DropData.rules["float_speed"]
 static var DIVE_FALL: float = DropData.rules["dive_fall"]        # m/s down while diving (forward held)
 static var DIVE_SPEED: float = DropData.rules["dive_speed"]      # m/s across while diving: steep, ~0.42 m per metre
 const BRAKE_SPEED := 2.0      # m/s across while holding back: nearly straight down
@@ -18,7 +20,8 @@ const STEER_RATE := 10.0      # 1/s: the speed across reaches 90% of a new targe
 const VY_RATE := 7.0          # 1/s: the fall reaches 90% of a new speed in ~0.33 s
 const FORWARD_DOT := 0.5      # keys at least this far along your heading count as forward (dive)
 const BACK_DOT := -0.5        # ... and this far against it as back (a full brake; less brakes less)
-static var DEPLOY_H: float = DropData.rules["deploy_h"]          # m over the ground below you: the glider opens by itself
+## m over the ground below you: the glider opens by itself
+static var DEPLOY_H: float = DropData.rules["deploy_h"]
 const LOW_DEPLOY_H := 4.0     # m: the same for a short drop (a small map, a respawn): a plunge, over in a few seconds
 const VOID_DEPLOY_Y := 16.0   # m (world height): over the abyss it opens here, high enough to glide to land
 const DEPLOY_POP := -1.6      # m/s: the canopy catching checks your fall to this
@@ -70,7 +73,8 @@ static func step_across(hv: Vector2, dir: Vector2, mv: Vector2, dt: float) -> Ve
 	if dir == Vector2.ZERO:
 		return hv.lerp(Vector2.ZERO, 1.0 - exp(-STEER_RATE * dt))
 	var along := mv.dot(dir)
-	var speed := DIVE_SPEED if along > FORWARD_DOT else lerpf(FLOAT_SPEED, BRAKE_SPEED, clampf(along / BACK_DOT, 0.0, 1.0))
+	var float_at := lerpf(FLOAT_SPEED, BRAKE_SPEED, clampf(along / BACK_DOT, 0.0, 1.0))
+	var speed := DIVE_SPEED if along > FORWARD_DOT else float_at
 	return hv.lerp(dir * speed, 1.0 - exp(-STEER_RATE * dt))
 
 ## The freefall's vertical speed for this step.
@@ -127,30 +131,31 @@ static func project(h: Hunter, mv: Vector2) -> Dictionary:
 	var w: World = m.world
 	var comet: bool = m.skydrop != null and m.skydrop.comet.has(h)
 	var opens_at := DropComet.BURST_H if comet else float(h.get_meta("deploy_h", DEPLOY_H))
-	var free := h.dropping
+	var falling := h.dropping
 	var p := h.pos
 	var hv := Vector2(h.vel.x, h.vel.z)
 	var vy := h.vel.y
 	var dir := h.fall_dir
 	for i in PROJECT_STEPS:
-		var over_void := w.is_void(p.x, p.z)
-		var gy: float = World.VOID if over_void else w.ground_at(p.x, p.z)
-		if free and height_over(w, p) < opens_at:
+		var off := w.is_void(p.x, p.z)
+		var gy: float = World.VOID if off else w.ground_at(p.x, p.z)
+		if falling and height_over(w, p) < opens_at:
 			if comet:
-				return {"at": Vector3(p.x, 0.0 if over_void else gy, p.z), "void": over_void}
-			free = false
+				return {"at": Vector3(p.x, 0.0 if off else gy, p.z), "void": off}
+			falling = false
 			vy = maxf(vy, DEPLOY_POP)
-		if p.y <= (0.0 if over_void else gy):
-			return {"at": Vector3(p.x, 0.0 if over_void else gy, p.z), "void": over_void}
-		if free:
+		if p.y <= (0.0 if off else gy):
+			return {"at": Vector3(p.x, 0.0 if off else gy, p.z), "void": off}
+		if falling:
 			dir = turned(dir, hv, mv, PROJECT_STEP)
 			hv = step_across(hv, dir, mv, PROJECT_STEP)
 			var sink := DIVE_FALL if dir != Vector2.ZERO and mv.dot(dir) > FORWARD_DOT else FLOAT_FALL
 			vy = lerpf(vy, -sink, 1.0 - exp(-VY_RATE * PROJECT_STEP))
 		else:
 			hv = Hunter.glide_steer(hv, mv * Hunter.GLIDE_SPEED, Hunter.GLIDE_SPEED, PROJECT_STEP)
-			var pull := p.y - (0.0 if over_void else gy) > HunterMove.glide_height
-			vy = move_toward(vy, -(maxf(Hunter.GLIDE_SINK, HunterMove.glide_pull_vy) if pull else Hunter.GLIDE_SINK), Hunter.GLIDE_GRAV * PROJECT_STEP)
+			var pull := p.y - (0.0 if off else gy) > HunterMove.glide_height
+			var sink_at := maxf(Hunter.GLIDE_SINK, HunterMove.glide_pull_vy) if pull else Hunter.GLIDE_SINK
+			vy = move_toward(vy, -sink_at, Hunter.GLIDE_GRAV * PROJECT_STEP)
 		p += Vector3(hv.x, vy, hv.y) * PROJECT_STEP
 	return {"at": Vector3(p.x, 0.0, p.z), "void": true}
 

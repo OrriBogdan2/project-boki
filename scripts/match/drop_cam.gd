@@ -1,8 +1,8 @@
 class_name DropCam
 extends RefCounted
-## The drop's camera (owner item 107): off the ship it pulls far out, tilted over the whole island, and
+## The drop's camera: off the ship it pulls far out, tilted over the whole island, and
 ## turned with your heading so forward stays up the screen. It comes back as you fall and is near the
-## play zoom just before the ground. Numbers in content/rules/drop.json ("camera"). No shake (item 50).
+## play zoom just before the ground. Numbers in content/rules/drop.json ("camera"). No shake.
 
 static var cfg: Dictionary = DropData.rules["camera"]
 static var WIDE_ZOOM: float = cfg["wide_zoom"]

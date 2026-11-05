@@ -1,6 +1,6 @@
 class_name DropWind
 extends Node
-## The drop's wind (owner item 107): two looped layers of our own synthesis (tools/gen_drop_sfx.py), a
+## The drop's wind: two looped layers of our own synthesis (tools/gen_drop_sfx.py), a
 ## low body and a high tearing edge. It builds from a breath at the jump with how long and how fast you
 ## have been falling, drops away the instant the glider catches, and is gone when you land.
 

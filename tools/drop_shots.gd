@@ -32,7 +32,7 @@ const CAPTIONS := {
 		"Diving into the cloud layer: the clouds part round you so you're never hidden; punching through "
 		+ "flashes white with a whoosh",
 	"drop_glider.png":
-		"Floating down; the glider opens by itself 12 m over the ground; the landing kick (dust rings, squash); the "
+		"Floating down; the glider opens by itself low over the ground; the landing kick (dust rings, squash); the "
 		+ "Boki leaps off your back",
 }
 

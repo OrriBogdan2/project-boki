@@ -1,6 +1,6 @@
 class_name DropFx
 extends Node3D
-## How the opening drop looks and sounds (docs/decisions/0012, owner item 107): each squad's comet (a
+## How the opening drop looks and sounds (docs/decisions/0012): each squad's comet (a
 ## burning orb with a long glowing trail), a contrail behind every solo diver (everyone sees both, your
 ## squad's in its own colours with a name tag), a cloud deck and the clouds you fall past (DropClouds), for
 ## the local player the rush past the screen and the wind that builds (DropWind), and everyone's glider
@@ -155,7 +155,8 @@ func _local(delta: float) -> void:
 	_cloud_mat.set_shader_parameter("hole_xz", Vector2(p.pos.x, p.pos.z))
 	_cloud_mat.set_shader_parameter("hole_r", CLOUD_HOLE)
 	var fall := clampf(-p.vel.y, 0.0, SkyFall.DIVE_FALL)
-	var speed := clampf((fall - SkyFall.FLOAT_FALL) / (SkyFall.DIVE_FALL - SkyFall.FLOAT_FALL), 0.0, 1.0) if p.dropping else 0.0
+	var over := (fall - SkyFall.FLOAT_FALL) / (SkyFall.DIVE_FALL - SkyFall.FLOAT_FALL)
+	var speed := clampf(over, 0.0, 1.0) if p.dropping else 0.0
 	var above := p.pos.y > CLOUD_Y
 	if _was_above and not above and p.dropping:
 		_flash = 0.5
@@ -172,9 +173,10 @@ func _local(delta: float) -> void:
 		var sz := get_viewport().get_visible_rect().size
 		var ahead := p.render_pos(1.0) + p.vel * 2.0
 		if m.cam and not m.cam.is_position_behind(ahead) and sz.x > 0.0:
-			_rush_mat.set_shader_parameter("focus", (m.cam.unproject_position(ahead) / sz).clamp(Vector2(0.2, 0.2), Vector2(0.8, 0.8)))
-	var stage := 1 if p.dropping else (2 if p.drop_glide and not p.grounded else 0)
-	wind.tick(stage, speed, delta)
+			var at := (m.cam.unproject_position(ahead) / sz).clamp(Vector2(0.2, 0.2), Vector2(0.8, 0.8))
+			_rush_mat.set_shader_parameter("focus", at)
+	var glide_stage := 2 if p.drop_glide and not p.grounded else 0
+	wind.tick(1 if p.dropping else glide_stage, speed, delta)
 
 ## With the camera hundreds of metres out the match's distance fog would drown the island and the sun
 ## shafts (made for the low view) turn into flat slabs across the screen: both clear for the wide view.
@@ -298,7 +300,8 @@ func _draw_trails() -> void:
 		if pts.size() < 2:
 			continue
 		var comet: bool = tr["comet"]
-		var width := COMET_R * 1.5 if comet else (0.75 if bool(tr["near"]) else 0.45)
+		var diver_w := 0.75 if bool(tr["near"]) else 0.45
+		var width := COMET_R * 1.5 if comet else diver_w
 		var base: Color = tr["col"]
 		im.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 		for i in pts.size():

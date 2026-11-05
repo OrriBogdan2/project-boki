@@ -62,7 +62,10 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `drop_squad.gd` | Planning phase, drop leaders, passing the lead and breaking away |
 | `drop_comet.gd` | The squad comet: riders, break-aways, the burst landing |
 | `sky_fall.gd` | The freefall (dive, float, brake), the glider opening, the landing kick, bot and assist steering |
-| `drop_fx.gd` | The drop's look: comet orb and trails, contrails, cloud layer, speed lines, wind, the freefall camera |
+| `drop_fx.gd` | The drop's look: comet orb and trails, contrails, cloud deck, the rush, squad tags, the fog and shafts cleared for the wide view |
+| `drop_data.gd` | Reads `content/rules/drop.json`: the drop's numbers |
+| `drop_cam.gd` | The drop's camera: the pull-out over the whole island and the ease back to play zoom |
+| `drop_clouds.gd`, `drop_blasts.gd`, `drop_wind.gd`, `drop_ping.gd` | The clouds you fall past, the snap and landing ring (one pooled MultiMesh), the wind that builds, middle mouse in the sky |
 | `raid_look.gd` | Raid conditions: light, weather, sight |
 | `truce.gd` | Emotes and truces |
 | `pack.gd` | The backpack |

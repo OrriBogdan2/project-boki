@@ -10,7 +10,7 @@ const CHECKS := {
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--drop-check": ["res://tools/drop_check.gd", "drop_check", null],      # the opening drop and the squad comet
 	"--drop-shots": ["res://tools/drop_shots.gd", "drop_shots", null],      # its screenshots (xvfb)
-	"--drop-107-check": ["res://tools/drop_107_check.gd", "drop_107_check", null],      # owner item 107: the cooler, higher drop
+	"--drop-107-check": ["res://tools/drop_107_check.gd", "drop_107_check", null],      # the drop's look and sound
 	"--drop-reel": ["res://tools/drop_reel.gd", "drop_reel", null],      # its review video (the movie writer, xvfb)
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],      # backpack tiers, at risk

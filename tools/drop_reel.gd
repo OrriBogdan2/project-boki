@@ -1,10 +1,10 @@
 extends "res://tools/drop_shots.gd"
 ## --drop-reel --shots-dir=<dir> [--reel-only=solo|squad|comet] [--reel-stills]: the opening drop played live for
-## owner review (item 107). Run it under the movie writer so the looks run on the fixed step and the real mix is recorded:
+## owner review. Run it under the movie writer, so the looks run on the fixed step and the real mix is recorded:
 ##   xvfb-run -a -s "-screen 0 1280x720x24" godot --rendering-driver opengl3 --resolution 1280x720 --path . \
 ##       --fixed-fps 30 --write-movie <dir>/reel.avi -- --drop-reel --shots-dir=<dir>
-## REEL_MARK lines give the frame each take starts on and its beats (jump, ping, snap, land); a viewer cuts the load away
-## with them. --reel-stills instead saves a PNG every STILL_S of the take to <dir>/<take>_<n>.png.
+## REEL_MARK lines give the frame of each take's beats (start, jump, ping, snap, land), to cut the load away with.
+## --reel-stills instead saves a PNG every STILL_S of the take to <dir>/<take>_<n>.png.
 ##   solo    a lone diver: float, turn, dive, a middle-mouse ping, the snap, the landing
 ##   squad   a squad of three that breaks out of the comet: three contrails and name tags side by side
 ##   comet   a squad riding its comet down to the burst
