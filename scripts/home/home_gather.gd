@@ -363,15 +363,18 @@ func _demo_busy(land: Vector3) -> void:
 	h.player.position = h.ppos
 	var w: World = h.world
 	var tree := Vector3(ti % w.w + 0.5, 0, ti / w.w + 0.5)
-	for k in h.kins:
-		k["pos"] = tree + Vector3(0.6, 0, 0.8)
-		(k["node"] as Node3D).position = k["pos"]
-		k["t"] = 999.0
-		k["goal"] = k["pos"]
-		h._say(k, "Ooh, a tree! Swing at it and I'll carry the wood", 30.0)
 	h.cam.zoom_to = 0.8
 	h.cam.zoom = 0.8
 	h.cam.snap(st)
 	h.get_viewport().warp_mouse(Vector2(8.0, 540.0))      # (no hover card over the picture)
-	for txt in ["A Pebbit is ready to hatch!", "Not enough wood", "Not enough wood", "Hob has new blueprints"]:
-		h._toast(txt)
+	if h.kins.is_empty():
+		return
+	var talker: Dictionary = h.kins[0]
+	h._say(talker, "Ooh, a tree! Swing at it and I'll carry the wood", 60.0)
+	for i in 20:      # (the shot lands somewhere in here, however slow the frames)
+		talker["pos"] = tree + Vector3(0.6, 0, 0.8)
+		(talker["node"] as Node3D).position = talker["pos"]
+		talker["goal"] = talker["pos"]
+		for txt in ["A Pebbit is ready to hatch!", "Not enough wood", "Not enough wood", "Hob has new blueprints"]:
+			h._toast(txt)
+		await h.get_tree().create_timer(1.0).timeout
