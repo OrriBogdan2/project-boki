@@ -2416,3 +2416,8 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Other options are dimmed slightly.
   - The same for every menu-driven step (the trough Fill, the patch Plant, the Market Seeds tab / Buy / Sell tab, the Boki list card (174), a job assignment).
   - A generic "tutorial highlight" helper for Controls, in the item 166 gold language.
+- 171b addendum (owner, 18:18): Hob spawned among trees, hard to see, and the tutorial rock spawned where it wasn't visible either.
+  - Hob's camp spot and every tutorial target (the first tree, the rock, the trough site, the patch site) are placed in a clear, open, camera-visible area: no trees, rocks or props within ~3 m.
+  - Each target is in view from the landing camera, or the guide (178i) points to it.
+  - Enforce it in the farm generator: those spots are reserved clearings.
+  - Assert: a probe raycasts from the camera to Hob and to each tutorial target with no occluder hits, and none has a tree within 3 m.
