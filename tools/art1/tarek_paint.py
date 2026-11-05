@@ -258,7 +258,7 @@ def p_crystals(P, N, occ, cav, a):
 def p_geode(P, N, occ, cav, a):
     Pn = P / GEO_R
     v = lightness(T.key_shade(N), occ, cav * 0.7, 0.65) + 0.05 * S.fbm(Pn, 5.0, 6, 3) + 0.05
-    c = tones("4e443c", "8c8074", "c0b4a6", v)
+    c = tones("6e6256", "b0a494", "dcd2c4", v + 0.05)
     socket = S.sstep(0.95, 0.68, np.sqrt(Pn[:, 0] ** 2 + (Pn[:, 2] / 1.16) ** 2)) * S.sstep(0.0, 0.2, Pn[:, 1])
     c = S.mix(c, S.hexc("3a2a22")[None, :], socket * 0.8)
     return crease(c, cav, "2a221c", 0.6), None
@@ -277,13 +277,13 @@ def p_iris(P, N, occ, cav, a):
     return c, c * 0.8
 
 
-def proj(fn, P, N, occ, cav, a):
+def proj(fn, P, N, occ, cav, a, k=0.92):
     c, e = fn(P, N, occ, cav, a)
-    return p_proj(P, N, c), e
+    return p_proj(P, N, c, k), e
 
 
 P_FN = {"head": p_head, "teeth": p_teeth, "torso": lambda P, N, o, c, a: proj(p_torso, P, N, o, c, a), "arms": p_arm, "hands": p_hands, "legs": p_legs,
-        "bandana": p_bandana, "cap": p_hair, "skirt": lambda P, N, o, c, a: proj(p_sash, P, N, o, c, a), "stone": p_stone, "prayer": lambda P, N, o, c, a: p_prayer(P, N, o, c, a), "wrap": lambda P, N, o, c, a: proj(p_wrap, P, N, o, c, a), "sash": lambda P, N, o, c, a: proj(p_sash, P, N, o, c, a),
+        "bandana": p_bandana, "cap": p_hair, "skirt": lambda P, N, o, c, a: proj(p_sash, P, N, o, c, a, 0.5), "stone": p_stone, "prayer": lambda P, N, o, c, a: p_prayer(P, N, o, c, a), "wrap": lambda P, N, o, c, a: proj(p_wrap, P, N, o, c, a), "sash": lambda P, N, o, c, a: proj(p_sash, P, N, o, c, a, 0.5),
         "trousers": lambda P, N, o, c, a: proj(p_trousers, P, N, o, c, a),
         "wraps": p_wraps, "locs": p_locs, "beads": p_beads,
         "sash_tails": p_tails, "band_tails": p_band_tails, "geode": p_geode, "iris": p_iris,

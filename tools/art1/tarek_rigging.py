@@ -378,7 +378,7 @@ def orbits(arm, geo, shard):
     e.matrix_world = Matrix.Translation(Vector(c))
     bpy.context.view_layer.update()
     out = [e]
-    tilt = math.radians(38)
+    tilt = math.radians(55)
     for i, it in enumerate(STONES):
         a = math.radians(it["angle"])
         d = Vector((-math.sin(a), math.cos(a), 0))
