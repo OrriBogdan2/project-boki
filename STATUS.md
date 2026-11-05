@@ -666,3 +666,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: Tarek arm correction, Vex weapons, Breaker eyes
 - ART-1 Tarek has the correction: huge stone LEFT arm, right forearm gauntlet. vex_weapons.png logged for ART-1 Vex. Breaker's next round: default idle eyes are soft round dots (breaker_alt_round_eyes.png), bars are "determined"; breaker_turnaround.png is the cropped 4-view.
+
+## 2026-11-05 S2: switched to the 06:25 order: one agent per Hero, all 12 in parallel
+- Target 90%+ of the master sheets, gates relaxed, VFX + sound to S3/S4, push every 30 min. Godot queue already has 14 slots. Each rig landing here lists its ability ids + FX attach points.
+- Branches: ext/art1-kael, -tarek, -hem (Lisette), -breaker, -motley, -cinder, -grimble, -claire, -pip, plus new -sable, -ryzz, -vex.
+- Paused for slots: kits 111, 69, 63, Claire 62+64+65; portraits for Tarek, Ryzz, Vex. Boki stays at ext/boki-starter 27fab2ad.
