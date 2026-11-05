@@ -195,8 +195,8 @@
 				"light_neutral_warm": 0.8
 			},
 			"fur": {
-				"far_lift": 0.4,
-				"glow": 0.08,
+				"far_lift": 0.55,
+				"glow": 0.3,
 				"shadow_tint": [
 					0.86,
 					0.85,

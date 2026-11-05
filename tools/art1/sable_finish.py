@@ -16,7 +16,7 @@ import warden_kit as WK
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
 ATLAS = 2048
-MATS = ["skin-face", "cloth-coat", "leather-dark", "metal-silver", "hair-braid", "hair-feather", "card-wing", "glow-rune"]     # S1's limit: <= 8
+MATS = ["skin-face", "cloth-coat", "leather-dark", "metal-silver", "hair-braid", "fur-feather", "card-wing", "glow-rune"]     # S1's limit: <= 8
 SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "antenna": 0.9, "braid": 0.8, "tuft": 0.7, "tie": 0.5, "wing": 1.3, "tail": 0.7, "lining": 0.35,
          "barrel": 1.6, "stock": 1.1, "rod": 0.4, "cap": 0.6, "lock": 1.2, "cock": 0.8, "frizzen": 0.8, "guard": 0.5, "mouth": 1.0, "crystal": 0.8, "runeA": 5.0, "runeB": 5.0,
          "key": 0.8, "keyring": 0.6, "keyshaft": 0.8, "keybit": 0.6, "bolaA": 0.9, "bolaB": 0.9, "cordA": 0.3, "cordB": 0.3, "gemchain": 0.4, "gemframe": 0.8, "gemstone": 1.4, "Low": 1.0}
@@ -131,7 +131,8 @@ TOP_G = (-0.118, BY - 0.03, BZ - 0.005)
 ks = K.keys(TOP_K)
 bl = K.bola(TOP_B)
 gm, GEM_C = K.gem(TOP_G)
-pieces = ant + [br, tuft] + ties + [t for pr in tails for t in pr] + wings + lids + hR + hL + pR + pL + ks + bl + gm
+np_ = K.nape()
+pieces = ant + [br, tuft, np_] + ties + [t for pr in tails for t in pr] + wings + lids + hR + hL + pR + pL + ks + bl + gm
 
 def chain_w(p, pts, names, tip_free=True):
     """Weights along a polyline of chain joints, blended between neighbours; the last bone (the tip) has no skin."""
@@ -501,7 +502,7 @@ paint(lambda n: n.startswith("palm"), free(P.glove))
 paint(lambda n: n.startswith(("finger", "thumb")), free(P.skin))
 paint(lambda n: n.startswith("antenna"), lambda p, n, ao: P.feather(p, n, ao))
 paint(lambda n: n == "braid", lambda p, n, ao: P.braid(p, n, ao, br.path))
-paint(lambda n: n == "tuft", P.tuft)
+paint(lambda n: n in ("tuft", "nape"), P.tuft)
 paint(lambda n: n.startswith("tie"), P.silver)
 for q_ in tails:
     paint(lambda n, nm=q_[0].name: n == nm, lambda p, n, ao, g=q_[0].grid: P.coat_outer(p, n, ao, g))

@@ -135,7 +135,7 @@ def pistol(side):
     # the butt cap
     c = path[-1]
     d = norm(path[-1] - path[-2])
-    out.append(sweep("cap" + side, "metal-silver", [c - d * 0.016, c, c + d * 0.012, c + d * 0.024], SEC8, np.array([0.032, 0.036, 0.032, 0.012]), side_hint=x_))
+    out.append(sweep("cap" + side, "metal-silver", [c - d * 0.016, c, c + d * 0.012, c + d * 0.024], SEC8, np.array([0.028, 0.031, 0.027, 0.0008]), side_hint=x_))
     # lock plate, cock, frizzen: on her outer side, chunky so they read
     lock = sweep("lock" + side, "metal-silver", [p(-0.04, BV - 0.012, 0.024), p(0.0, BV - 0.012, 0.024), p(0.05, BV - 0.012, 0.024), p(0.07, BV - 0.012, 0.024)], SEC4, np.array([0.015, 0.02, 0.018, 0.008]), side_hint=x_ * 0 + U_REST, depth=np.full(4, 0.006))
     out.append(lock)
@@ -213,7 +213,7 @@ def antenna(s):
                 a = base + i * rows + r
                 q = [a, a + 1, a + rows + 1, a + rows]
                 f.append(q if lay == 0 else q[::-1])
-    p = Piece("antenna" + side, "hair-feather", np.array(v), f)
+    p = Piece("antenna" + side, "fur-feather", np.array(v), f)
     # the front sheet winds toward the front (+y), its twin away
     a_, b_, c_ = (p.v[f[len(f) // 8][i]] for i in (0, 1, 2))
     if np.cross(b_ - a_, c_ - a_)[1] < 0:
@@ -249,6 +249,13 @@ def braid():
     p = sweep("braid", "hair-braid", centre, SEC6, wd, side_hint=np.array([1.0, 0, 0]), depth=wd * 0.86)
     p.path, p.u = path, u
     return p
+
+
+def nape():
+    """Hair over the place the scan's bun was: the braid's root sits in it."""
+    n0 = NECK_Z
+    c = [np.array(q) for q in ((0.0, -0.062, n0 + 0.135), (0.0, -0.086, n0 + 0.105), (0.0, -0.1, n0 + 0.065), (0.0, -0.098, n0 + 0.03), (0.0, -0.088, n0 + 0.0))]
+    return sweep("nape", "hair-braid", c, SEC8, np.array([0.03, 0.062, 0.066, 0.05, 0.004]), side_hint=np.array([1.0, 0, 0]), depth=np.array([0.012, 0.03, 0.038, 0.032, 0.004])).rigid("head")
 
 
 def braid_tie(p, at_u, name, rad):

@@ -8,7 +8,7 @@ metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "14eb91405dabedf21c1b9dac83176a8c"
+"md5": "c940ddf11e932eb0f97b77d21371b3ff"
 }
 
 [deps]
@@ -18,8 +18,8 @@ dest_files=["res://.godot/imported/sable_atlas.jpg-83bc09335376c028eceafee3065d4
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
