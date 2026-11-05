@@ -369,7 +369,7 @@
 				"desat": 0.0
 			},
 			"leather": {
-				"emit": 2.6,
+				"emit": 1.8,
 				"far_lift": 0.2
 			},
 			"glow": {

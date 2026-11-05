@@ -68,13 +68,12 @@ def p_stone(P, N, occ, cav, a, seeds=None):
     c = tones("3a3e4a", "6c7180", "a4aab8", v) * tint[:, None]
     c = crease(c, np.maximum(cav, 0.0) * 0.7, "2a2c36", 0.75)
     crack = S.sstep(0.0085, 0.0045, gap)
-    c = S.mix(c, S.hexc("7a2c10")[None, :], crack)
+    c = S.mix(c, S.hexc("3a2c30")[None, :], crack)
     hot = S.sstep(0.0065, 0.003, gap)
     core = S.sstep(0.003, 0.001, gap)
     col = S.mix(S.hexc("f06010")[None, :], S.hexc("ffa030")[None, :], core)
     c = S.mix(c, col, hot)
-    c = S.mix(c, S.hexc("e8742a")[None, :], S.sstep(0.02, 0.007, gap) * (1 - hot) * 0.4)
-    return c, col * hot[:, None]
+        return c, col * hot[:, None]
 
 
 def p_hands(P, N, occ, cav, a):
