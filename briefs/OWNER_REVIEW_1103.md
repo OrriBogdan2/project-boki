@@ -1897,3 +1897,24 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - Keep a little of you visible after (Unmasked.blend marks), as the design says.
 - **Owners:** S5 the sequence/shader logic (a dissolve between the two models); S2 the pose/anim; S3 the VFX motes/seams when it's back; S4 a rising transformation sound into an impact.
 - **Assert:** both models are present during the blend, with no frame where neither is visible; the total length is within 2.5-3.5 s; skippable on repeats.
+
+## 159. Dash refresh on a knock or assist: a GLOBAL rule for every hero (owner, 17:43 UTC Nov 5)
+- The owner: "I'm fairly sure ALL hunters get dash back on knock or assist from their team - this should be the case. … they changed Ghost's shift too - look into it. it should be a global thing".
+- **SV research** (ext, supervive.wiki.gg):
+  - Patch "Saros arrives / leveling adjustments / Hunter balance": "Hunters with multiple dashes (dash charges) only get 1 charge of their dash back on Knock" (Brall, Bishop, Crysta, Myth, Beebo, Felix) and "Joule no longer receives Dash refresh on Knock". So knock refresh is the norm across hunters, multi-charge heroes get 1 charge, and Joule is the exception.
+  - Ghost's Combat Slide: "Knocks reset the cooldown"; press = a short slide, hold = further; released early on the ground → a reduced cooldown; minimum cd 3.5 s; patch 05.03.25 "can now be tapped in the air for 2/3 of the distance of the full hold".
+  - Assists aren't documented on the wiki. The owner wants assists to count, so we include them.
+- **Our rule** (DashReset, one place, not per kit):
+  - When an enemy hunter is knocked, every hero on the knocking team who dealt damage to that hunter (or applied CC to it) in the last ~4 s refreshes their dash. The knocker always does.
+  - Single-charge dashes: a full reset.
+  - Multi-charge (Kael's Rampage, Cinder 133b, Lisette 146, …): +1 charge.
+  - The existing reset cue (the chime + the Shift icon pop) for each recipient; an assist uses a softer version.
+  - Per-hero opt-out flag in data (default ON for all 12).
+    - SV removed it from Joule (= our Ryzz) because of her orb resets. Ext's call: keep Ryzz ON as well (owner said ALL), and flag it if it proves too strong with item 122's banking.
+  - Remove/merge the per-kit knock resets that duplicate this (Vex's Hot Streak "knocking a hunter down gives Slipstep back", etc.) into the global one, so nothing double-fires.
+- **Vex/Ghost:** our item 125 already matches SV's Combat Slide shape (tap/hold, early-release cd cut, air tap = 2/3). Add SV's "minimum cooldown 3.5 s" floor.
+- **Assert:**
+  - A knock with 2 assisters → 3 refreshes.
+  - A multi-charge hero gets exactly +1.
+  - A non-contributing teammate gets none.
+  - No double reset for Vex.
