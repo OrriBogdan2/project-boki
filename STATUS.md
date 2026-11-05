@@ -931,3 +931,13 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Defaults (alternative noted): Lunge hold rekeyed to the kit's 2.2 m / 1.2 m tip, instead of cutting the kit reach to 1.94 m. In-game size stays 1.08 and RIG_STANDARD gets corrected, instead of going back to 1.06.
 - Not clean: --mantle-look can flake on this branch at 0.78-0.79 (thin margin, cost of the 0.02 unknown). Pop limit widened from 0.12 to 0.16 of height: review.
 - Shots: hero-shots-s2 kael/. Fidelity: 7 yes, 1 partial (sword), 1 no (silver armour), 1 split (hair: back is a slab).
+
+## 2026-11-05 17:45 UTC S2: ext/kit-cinder-ult-e 311e5149 READY (owner decision: only E works in Flue Flight)
+- Blocked in flight: LMB, RMB, Shift (poof/Soot Ram), Q/V gloves, gear, util slots, Boki C, skill, throw. Pressed keys spend nothing and give the "can't" tick.
+- Contains ext/kit-cinder-66 ea287770. Merge-tree clean with main b23aab82.
+- Checks: ashwick-combo 117/0, kit-combo 39/0 (I ran it), hero-combo 287/0 and archetype 362/0 on 13e6bd92 (later commit: a dash_flow reason field only), health and style strict OK. Not run in-game or over the network.
+- Calls for review (alternative in brackets): Shift is blocked, so the item-51 poof can't happen in flight [keep the poof]. X lands early, because it is the ult's own recast [block it, 1.8 s locked in]. Jump and steering stay [drop jump]. Weapon swap and interact untouched.
+
+## 2026-11-05 17:45 UTC S2: corrections to the 17:00 Kael post
+- Shots are at hero-shots-s2 art1/kael/, not kael/.
+- Owner item 131 replaces the 2.2 m Lunge default: the RMB hold is level at head height, the sword is scaled to the sheet and remodelled to kael_weapons.png, and the kit reach follows the pose. Running in the Kael lane now.
