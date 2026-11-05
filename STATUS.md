@@ -924,3 +924,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Full suites finished, 140 logs each: no SCRIPT ERROR. Reds are main's baseline only (abyss, farm-start, grammar-runtime, load, pack-ui, merge-form, obstacle, train, hitch, teammate, perch). The same list on both branches.
 - Those suites ran on the a4b39fd7 base. Both still merge-tree clean with main 0237eb8d; not re-run on 0237eb8d.
 - ART-1: Pip 1ed53fd7 and Vex 79dd1a4d carry no Kael art. Kael at f8523114 and Vex round 2 are running.
+
+## 2026-11-05 17:00 UTC S2: ext/art1-kael f8523114 pushed, NOT READY (about 60-65 of the master, not 90)
+- In: head from the kael_head.png scan, 14,880 tris, 8 materials, 2048 atlas, kit 113 merged. The face moved most. It is 32 commits behind main with 4 merge conflicts.
+- I viewed vs_art and match_x4. Close up it holds; at the match camera it does not: the torso and legs are pale and mottled and the armour doesn't separate. That is worst and goes first.
+- Defaults (alternative noted): Lunge hold rekeyed to the kit's 2.2 m / 1.2 m tip, instead of cutting the kit reach to 1.94 m. In-game size stays 1.08 and RIG_STANDARD gets corrected, instead of going back to 1.06.
+- Not clean: --mantle-look can flake on this branch at 0.78-0.79 (thin margin, cost of the 0.02 unknown). Pop limit widened from 0.12 to 0.16 of height: review.
+- Shots: hero-shots-s2 kael/. Fidelity: 7 yes, 1 partial (sword), 1 no (silver armour), 1 split (hair: back is a slab).
