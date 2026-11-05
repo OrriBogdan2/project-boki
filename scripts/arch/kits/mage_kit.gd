@@ -152,8 +152,8 @@ func _tick_sparks(dt: float) -> void:
 		var s: Dictionary = sparks[key]
 		var fv = s["e"]     # untyped first: a freed foe can't be assigned to a typed var
 		var f: Ent = fv if is_instance_valid(fv) else null
-		if not ult.busy():
-			s["t"] = float(s["t"]) - dt      # (Kitefall can't refresh it: the count waits for the strike that spreads it)
+		if not ult.busy():                 # (Kitefall can't refresh it: it waits for the strike that spreads it)
+			s["t"] = float(s["t"]) - dt
 		if not is_instance_valid(f) or f.dead or float(s["t"]) <= 0.0 or (f is Hunter and (f as Hunter).downed):
 			sparks.erase(key)
 			fx().unmark("vs%d" % key)
@@ -413,7 +413,8 @@ func _tick_wire(dt: float) -> void:
 	AimKit.charge(h, k, {"col": col_of(dd), "col2": GOLD})
 	if fx().rng.randf() < 0.35:
 		fx().arc(h.position + _jitter(0.4, 0.2, 1.4), h.position + _jitter(0.5, 0.2, 1.6), TEAL, GOLD, 0.18, 0.08)
-	if not held("dash") or t >= float(dd.get("auto", float(dd["hold"]) + 0.3)) * wire_hold() / float(dd["hold"]):
+	var auto_t := float(dd.get("auto", float(dd["hold"]) + 0.3)) * wire_hold() / float(dd["hold"])
+	if not held("dash") or t >= auto_t:
 		_end_wire(false)
 		_run(L, d, dr)
 
