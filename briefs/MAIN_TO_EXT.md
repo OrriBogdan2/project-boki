@@ -1336,3 +1336,25 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 3. Tag `v<version>` on the current main and push the tag. Confirm the release has the game zips + the launcher assets.
 4. **Owner-approved standing rule:** cut a new release after each merge batch, so the launcher stays current.
 5. Post "S5 RELEASED v<x>" here when it's live.
+
+## 2026-11-05 12:42 UTC S5 SHIPPED a06099f3: ext/s7-dash-outpost-84-86 f1eac1a2, ext/s7-build-90-91 f08e6c04, ext/kit-hem-55b 8b2c04f1
+- main a4b39fd7 -> a06099f3 (fast-forward of integ-s5i). Conflicts:
+  - check_registry: --stamina-bar-check dropped (the dash branch deletes it), --sfx-set-check kept
+  - DEBT.md: both entries kept
+  - Rules.md: regenerated
+  - 55b vs rename and sound pass: 55b's draw text with "Lisette", the sound pass's sound line
+- **Save:** s7-build's sites without "cost" load as fully paid (FarmSites.clean). No Net change.
+- Fixes needed (S7 FYI):
+  - --dash-slot-check failed 5 rows: written before perf-94c, it read DashSlot.shown two frames after a change, but the match HUD panels redraw at 20 Hz. Its match rows now await hud.panels.draw. 0 failures, twice.
+  - --gear-check raised a SCRIPT ERROR at gear_check.gd:215. A boss drop can include a UtilityDrops item (here "smoke"), and the check looked every non-gear drop up in Data.PERKS; batch 8 shifts the RNG so one turned up. It now counts a Brand only on kind "tune". 87/0.
+- --hitch-check (S1 FYI, not blocking): after the RNG shift S7 described, the lazy DJFx and swoosh compile moves from ride to land, and an Fx.beam (light_shaft.gdshader) variant compiles at land. Bisected to s7-dash-outpost, but the outpost code uses neither (its lift column is the existing glow cylinder). These are existing lazily-built FX shaders, your "next perf step". 55b's AimKit compiles are gone with perf-94c.
+- Checks: --import, health --strict OK, gen_wiki --check clean. Full suite: 135 flags + simtest. 0 failures / PASS everywhere apart from main's existing reds, including:
+  - --dash-slot-check (after the fix), --outpost-look-check, --build-hold-check, --farmbuild
+  - --archer-combo-check 143, --aimkit-check, --extract-check, --rank-ui-check, --hudref-check
+  - --gear-check (after the fix)
+- Next, suite running: batch 9 = ext/art2-kael 37e5033e + ext/art2-lisette acc0dcfb (S2's call; owner gave Kael a provisional OK). Merge note: hero_vfx_reel.gd took Lisette's reel functions. S3: your vfx-core/vfx-kael now needs to build on this (S2's prewarm takes precedence, per S2's note).
+- Held:
+  - ART-1 models (art1-cinder, grimble, hem): they carry the unapproved Kael (question at 11:18)
+  - ext/boki-starter wiring: reserved kin_models.gd and home.gd, needs the owner's OK
+  - ext/friendly-bodies: the dolm leap row
+  - sfx-boki and boki-talk-105 wiring: reserved files
