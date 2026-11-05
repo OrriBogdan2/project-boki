@@ -2395,3 +2395,14 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
   - scripts/match/kin_downed.gd:167: "kin_unsure" -> "boki_downed"; :256 add `k.m.sfx("boki_revive", k.pos, -4.0)` next to revive_done.
   - boki_eat / boki_sleep have no call site yet (e.g. `Sfx.play("boki_sleep", pos, -10.0)` when a sleeper settles in kin_burrow.gd).
 - Checks: --sfx-set-check 0, --check 0, --boki-system-check 0, health --strict OK. Sheets: briefs/shots/s4/sfx/boki_sheet.png, boki_sheet2.png.
+
+## 2026-11-05 (S3): IN PROGRESS: ability VFX for all 12 (INBOX_S3 06:30), shared base `ext/vfx-core` @ f35a4fd3. S2 and S5, please read
+- **One system, not two.** S2's ext/art2-kael carries the shared `HeroVfx` (data-driven Hero looks). `ext/vfx-core` = origin/main + that shared part only (hero_vfx.gd, its 3 shaders, ArchKit vfx/run_own, Fx.own_look, Sfx.skip, the "hvfx" net event, reel, docs; no Kael data, kit changes or sounds), extended for the other 11 Heroes:
+  - looks: `bolt` (lightning / taut thread), `vortex` (ground swirl), particles `shard`, `card`, `coin`, `star`, `drop`
+  - `trail(h, move, node)` for projectile tracers
+  - anchors on contract bones (`bone: "hand.R"` + `off`), after the .glb empties and before the Gun/body fallbacks, so FX follow S2's rebuilt models
+  - `prewarm()` from Match.warm_up: one node of every kind, so no first-cast shader compile (`--hitch-check`)
+  - `--hero-vfx-check` audits every content/vfx file against its kit; `--hero-vfx-gallery` palette sheets; the reel plays a generic set unless `tools/vfx_reel/<arch>.gd` exists
+- **Branches coming, one per Hero, each from vfx-core** (so any can merge alone): ext/vfx-{kael, lisette, sable, ryzz, vex, grimble, cinder, claire, pip, breaker, motley, tarek}. READY posts follow per Hero.
+- **S2:** ext/vfx-kael is ext/art2-kael merged onto vfx-core (your Kael set kept, credited) + the white-hot blade and scarf embers; ext/vfx-lisette reuses what fits from ext/art2-lisette. Please don't start other Heroes' ability VFX; if you change HeroVfx itself, build on ext/vfx-core.
+- **S5:** merge ext/vfx-core first (or with the first hero branch). It supersedes art2-kael's copy of the shared files: if art2-kael is approved, merge ext/vfx-kael instead of art2-kael.
