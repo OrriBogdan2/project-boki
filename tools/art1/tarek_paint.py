@@ -5,8 +5,9 @@ AMBER = S.hexc("ff9420")
 HOT = S.hexc("ffd870")
 
 
-def lightness(key, occ, cav, a=0.55):
-    return np.clip((a * key + (1 - a) * 0.95) * (0.45 + 0.55 * occ) - 0.3 * np.maximum(cav, 0.0) + 0.14 * np.maximum(-cav, 0.0), 0.0, 1.0)
+def lightness(key, occ, cav, a=0.74):
+    k = S.sstep(0.2, 0.93, key)
+    return np.clip((0.15 + a * k) * (0.5 + 0.5 * occ) - 0.3 * np.maximum(cav, 0.0) + 0.14 * np.maximum(-cav, 0.0), 0.0, 1.0)
 
 
 def tones(dark, mid, lite, v):
@@ -19,7 +20,7 @@ def crease(col, cav, dark="1c100c", k=0.75):
 
 def skin(P, N, occ, cav):
     v = lightness(T.key_shade(N), occ, cav)
-    c = tones("42261c", "85533a", "c08a64", v + 0.03 * T.strokes(P, 30.0, 2))
+    c = tones("3a2017", "7a4930", "ba805a", v + 0.03 * T.strokes(P, 30.0, 2))
     warm = S.sstep(0.25, 0.5, v) * S.sstep(0.75, 0.5, v)
     c = S.mix(c, S.hexc("9c5a3c")[None, :], warm * 0.22)
     return crease(c, cav, "2a140e", 0.7)
@@ -147,6 +148,9 @@ def p_trousers(P, N, occ, cav, a):
     q = (P - S.vec(0.128, 0.115, 0.71))
     st = S.sstep(0.0, 0.6, np.sin((q[:, 0] + q[:, 2]) * 190.0))
     c = S.mix(c, S.hexc("e8d8b8")[None, :], edge * st * 0.8 * (P[:, 1] > 0.05))
+    # the inner faces where the legs part stay in shade
+    inner = S.sstep(0.03, 0.012, np.abs(P[:, 0])) * S.sstep(float(R.hip[2]) - 0.1, float(R.hip[2]) - 0.16, P[:, 2])
+    c = S.mix(c, S.hexc("4a3620")[None, :], inner)
     return crease(c, cav, "2e2010", 0.8), None
 
 
@@ -184,10 +188,10 @@ def p_pouch(P, N, occ, cav, a):
 def p_hair(P, N, occ, cav, a):
     key = T.key_shade(N)
     v = lightness(key, occ, cav, 0.75)
-    c = tones("0e0a0c", "221c20", "4a4250", v)
+    c = tones("080607", "1a1518", "38303a", v)
     c = crease(c, cav, "060405", 0.9)
     sheen = S.sstep(0.68, 0.9, key) * S.sstep(-0.1, 0.5, S.noise(P * S.vec(1, 1, 0.3), 46.0, 3))
-    return S.mix(c, S.hexc("6e6a7e")[None, :], sheen * 0.4), None
+    return S.mix(c, S.hexc("6e6a7e")[None, :], sheen * 0.3), None
 
 
 def p_locs(P, N, occ, cav, a):
@@ -195,9 +199,9 @@ def p_locs(P, N, occ, cav, a):
     ph = a[:, 1] * 6.283 * 2.0 + a[:, 0] * 86.0
     groove = 0.5 + 0.5 * np.sin(ph)
     v = (0.3 + 0.7 * key) * (0.4 + 0.6 * S.sstep(0.05, 0.55, groove)) * (0.55 + 0.45 * occ)
-    c = tones("0a0708", "2a2228", "5a505e", v * 1.25)
+    c = tones("080607", "1c171b", "3c343e", v * 1.25)
     sheen = S.sstep(0.74, 0.95, key) * S.sstep(0.45, 0.9, groove)
-    return S.mix(c, S.hexc("7a7488")[None, :], sheen * 0.4), None
+    return S.mix(c, S.hexc("5e5a6c")[None, :], sheen * 0.35), None
 
 
 def p_beads(P, N, occ, cav, a):
@@ -300,6 +304,8 @@ def paint_all(objs):
             attrs.append(ATTR[nm][vt])
         mask, out, _ = S.rasterize(uv, None, PX, attrs)
         idx = np.nonzero(mask)
+        if idx[0].size == 0:
+            continue
         P = out[0][idx]
         N = out[1][idx]
         N = N / np.maximum(S.length(N), 1e-6)[:, None]

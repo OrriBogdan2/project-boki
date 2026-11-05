@@ -1,6 +1,6 @@
 """Tarek's forms (ART-1), field by field: every part's signed distance field, its weights on the armature and its
 paint, in the Blender frame (facing +Y, his right hand at +X, soles on z = 0, metres, in the rig's own size). Pure numpy:
-tools/blender/tarek_build.py turns them into the .glb.
+tools/art1/tarek_build.py turns them into the .glb.
 
 References: docs/art/gen/wardens_r2 tarek_front, tarek_head_sheet, tarek_stone_sheet (ext/imagegen). Lean and
 long-legged, a normal head, huge rock bracers with amber cracks, a grin under the bandana.
@@ -264,7 +264,7 @@ def bracer(P, R, sx, seeds, heights):
     el, wr = bracer_axis(P, R, sx)
     t = np.clip(seg_t(P, el, wr), -0.3, 1.3)
     bulge = np.maximum(np.sin(np.clip(t, 0, 1) * math.pi), 0.0) ** 0.8
-    core = cone(P, el, wr, 0.056, 0.05) - 0.026 * bulge
+    core = cone(P, el, wr, 0.066, 0.058) - 0.034 * bulge
     idx, d1, gap = voronoi(P, seeds)
     # (each slab its own height; its top is flat-faceted: a plane per slab tilts the facet)
     h = heights[idx]
@@ -299,6 +299,10 @@ def trousers(P, R):
     shin = cone(Q, (x + 0.012, 0.012, kn[2] + 0.02), (x + 0.012, -0.004, 0.5), 0.118, 0.112)
     bag = ellipsoid(Q, (x + 0.012, 0.004, 0.495), (0.119, 0.122, 0.105))
     d = smin(d, smin(smin(thigh, shin, 0.05), bag, 0.05), 0.03)
+    # the legs part at the crotch, so a wide stance never webs them
+    crotch = hip[2] - 0.14
+    split = (0.009 - np.abs(P[..., 0]))
+    d = smax(d, np.minimum(split, crotch - P[..., 2]), 0.014)
     # the cuff gathered on the ankle
     cuff = cone(Q, (x + 0.008, -0.004, 0.46), (x + 0.004, -0.008, 0.385), 0.08, 0.072)
     d = smin(d, cuff, 0.02)

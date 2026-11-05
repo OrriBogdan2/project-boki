@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://p2ljjqb3uow0"
-path="res://.godot/imported/tarek_bracers_emit.jpg-5826ad597766f76809ea632e48605946.ctex"
+uid="uid://baiur65k8nr5w"
+path="res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "71bc7f3af69dd98490b701323d00b071"
+"md5": "1f6fa2fe69adc79d0adaf12b34db357e"
 }
 
 [deps]
 
-source_file="res://art/wardens/tarek/tarek_bracers_emit.jpg"
-dest_files=["res://.godot/imported/tarek_bracers_emit.jpg-5826ad597766f76809ea632e48605946.ctex"]
+source_file="res://art/wardens/tarek/tarek_tarek_emit.jpg"
+dest_files=["res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.ctex"]
 
 [params]
 

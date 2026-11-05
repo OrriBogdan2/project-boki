@@ -283,10 +283,6 @@ def assemble(objs, img, emit):
     shard.data.materials.append(rock_m)
     n_geo, n_shard = K.tris([geo]), K.tris([shard])
     extras = orbits(arm, geo, shard)
-    we = bpy.data.objects.new("weapon", None)
-    bpy.context.scene.collection.objects.link(we)
-    we.parent = arm
-    extras.append(we)
     # anchors the kit's FX read (76b): the fists are the weapon, so the punches and throws leave them
     extras.append(K.anchor(arm, "head", "anchor_head_top", HC + S.vec(0, 0, 0.2)))
     extras.append(K.anchor(arm, "hips", "anchor_chest", S.vec(0, 0.12, R.sh[2] - 0.06)))
@@ -294,6 +290,9 @@ def assemble(objs, img, emit):
         f = S.vec(sx, 1, 1)
         extras.append(K.anchor(arm, "forearm." + sd, "anchor_gauntlet_" + sd, ((R.el + R.wr) * 0.5) * f + S.vec(0.1 * sx, 0.0, 0.0)))
         extras.append(K.anchor(arm, "hand." + sd, "anchor_fist_" + sd, (R.wr + S.vec(0, 0, -0.13)) * f))
+    # (the Gun node, which kit FX read, rides the right fist: WardenClips "blade")
+    extras.append(K.anchor(arm, "hand.R", "anchor_wrist_R", R.wr))
+    extras.append(K.anchor(arm, "hand.R", "weapon_muzzle", R.wr + S.vec(0, 0, -0.17)))
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, "tarek.blend"))
     log("tris total", K.tris([main_ob]) + 3 * n_geo + 5 * n_shard)
     K.export(os.path.join(OUT, "tarek.glb"), [arm, main_ob] + extras, image_format="JPEG")

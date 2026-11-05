@@ -348,22 +348,11 @@
 				"top_light": 0.0,
 				"fres": 0.15,
 				"rim_amount": 0.15,
-				"far_lift": 0.05,
+				"far_lift": 0.1,
 				"sheen": 0.0,
-				"light_tint": [
-					0.9,
-					0.86,
-					0.86
-				],
+				"shade": 0.86,
+				"desat": 0.4,
 				"light_neutral": 1.0,
-				"shade": 0.78,
-				"albedo": [
-					0.95,
-					0.88,
-					0.86
-				],
-				"light_neutral_warm": 0.85,
-				"desat": 0.45,
 				"rim_far": 0.0
 			},
 			"hair": {

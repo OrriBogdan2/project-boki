@@ -1,4 +1,4 @@
-"""Painted previews of tarek.blend: blender -b <blend> --python tools/blender/tarek_view.py -- <out prefix> [body|head|both]"""
+"""Painted previews of tarek.blend: blender -b <blend> --python tools/art1/tarek_view.py -- <out prefix> [body|head|both]"""
 import math
 import sys
 

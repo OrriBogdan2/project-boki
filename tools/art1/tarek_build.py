@@ -1,5 +1,5 @@
-"""Tarek's ART-1 model: builds every part from its field (tools/blender/tarek_shape.py) on the contract armature.
-    blender -b --factory-startup --python tools/blender/tarek_build.py -- <rig.json> <out dir> [clay|low|full] [parts,...]
+"""Tarek's ART-1 model: builds every part from its field (tools/art1/tarek_shape.py) on the contract armature.
+    blender -b --factory-startup --python tools/art1/tarek_build.py -- <rig.json> <out dir> [clay|low|full] [parts,...]
 clay: dense meshes and a grey turnaround, to judge the forms. Outputs in <out dir>; `full` also writes tarek.blend.
 """
 import json
@@ -15,6 +15,7 @@ import numpy as np
 from mathutils import Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "blender"))
 import sdf_kit as S  # noqa: E402
 import tarek_shape as T  # noqa: E402
 import warden_kit as K  # noqa: E402
@@ -54,7 +55,7 @@ def cap_f(P):
 def bracer_f(sx, seed):
     seeds = T.bracer_seeds(R, sx, seed)
     rs = np.random.RandomState(seed + 1)
-    heights = np.asarray(rs.uniform(0.014, 0.05, seeds.shape[0]), np.float32)
+    heights = np.asarray(rs.uniform(0.016, 0.052, seeds.shape[0]), np.float32)
     return (lambda P: T.bracer(P, R, sx, seeds, heights)), seeds
 
 
@@ -66,23 +67,23 @@ Z_S = float(R.sh[2])
 
 # name: field, bounds (lo, hi), low step, target tris, clay colour, slot
 PARTS = {
-    "head": dict(f=head_f, lo=HC + S.vec(-0.14, -0.17, -0.36), hi=HC + S.vec(0.14, 0.17, 0.17), h=0.0032, tris=2800, col="8a5a3c"),
+    "head": dict(f=head_f, lo=HC + S.vec(-0.14, -0.17, -0.36), hi=HC + S.vec(0.14, 0.17, 0.17), h=0.0032, tris=2600, col="8a5a3c"),
     "teeth": dict(f=teeth_f, lo=HC + S.vec(-0.07, 0.06, -0.11), hi=HC + S.vec(0.07, 0.13, -0.03), h=0.003, tris=100, col="f0ece0"),
     "bandana": dict(f=bandana_f, lo=HC + S.vec(-0.14, -0.19, -0.06), hi=HC + S.vec(0.14, 0.17, 0.14), h=0.0035, tris=600, col="c9b89a"),
-    "cap": dict(f=cap_f, lo=HC + S.vec(-0.16, -0.19, -0.14), hi=HC + S.vec(0.16, 0.17, 0.2), h=0.0075, tris=900, col="1c1618"),
+    "cap": dict(f=cap_f, lo=HC + S.vec(-0.16, -0.19, -0.14), hi=HC + S.vec(0.16, 0.17, 0.2), h=0.0075, tris=800, col="1c1618"),
     "torso": dict(f=lambda P: T.torso(P, R), lo=S.vec(-0.33, -0.2, R.waist[2] - 0.03), hi=S.vec(0.33, 0.2, R.neck[2] + 0.03), h=0.005, tris=1000, col="8a5a3c"),
     "arms": dict(f=lambda P: T.arm(P, R), lo=S.vec(-0.43, -0.13, R.wr[2]), hi=S.vec(0.43, 0.13, Z_S + 0.11), h=0.005, tris=1000, col="8a5a3c"),
-    "hands": dict(f=lambda P: T.hand(P, R), lo=S.vec(-0.38, -0.12, R.wr[2] - 0.27), hi=S.vec(0.38, 0.16, R.wr[2] + 0.08), h=0.0028, tris=1900, col="8a5a3c"),
+    "hands": dict(f=lambda P: T.hand(P, R), lo=S.vec(-0.38, -0.12, R.wr[2] - 0.27), hi=S.vec(0.38, 0.16, R.wr[2] + 0.08), h=0.0028, tris=1700, col="8a5a3c"),
     "bracer_R": dict(f=BR_R, lo=R.wr * S.vec(1, 1, 1) + S.vec(-0.18, -0.18, -0.08), hi=R.el + S.vec(0.18, 0.18, 0.04), h=0.0085, tris=900, col="8c7a62"),
     "bracer_L": dict(f=BR_L, lo=R.wr * S.vec(-1, 1, 1) + S.vec(-0.18, -0.18, -0.08), hi=R.el * S.vec(-1, 1, 1) + S.vec(0.18, 0.18, 0.04), h=0.0085, tris=900, col="8c7a62"),
     "vest": dict(f=lambda P: T.vest(P, R), lo=S.vec(-0.3, -0.2, R.waist[2] + 0.08), hi=S.vec(0.3, 0.2, R.neck[2] + 0.04), h=0.0045, tris=900, col="5e6470"),
     "wrap": dict(f=lambda P: T.wrap_band(P, R), lo=S.vec(-0.22, -0.17, R.waist[2] + 0.04), hi=S.vec(0.22, 0.17, R.waist[2] + 0.2), h=0.006, tris=150, col="d8cfba"),
     "sash": dict(f=lambda P: T.sash(P, R), lo=S.vec(-0.25, -0.17, R.waist[2] - 0.06), hi=S.vec(0.25, 0.22, R.waist[2] + 0.16), h=0.0045, tris=550, col="b04a26"),
-    "trousers": dict(f=lambda P: T.trousers(P, R), lo=S.vec(-0.31, -0.18, 0.35), hi=S.vec(0.31, 0.18, R.hip[2] + 0.12), h=0.006, tris=1800, col="a88850"),
-    "legs": dict(f=lambda P: T.shin_foot(P, R), lo=S.vec(-0.26, -0.14, -0.01), hi=S.vec(0.26, 0.26, 0.5), h=0.0045, tris=1100, col="8a5a3c"),
+    "trousers": dict(f=lambda P: T.trousers(P, R), lo=S.vec(-0.31, -0.18, 0.35), hi=S.vec(0.31, 0.18, R.hip[2] + 0.12), h=0.006, tris=1600, col="a88850"),
+    "legs": dict(f=lambda P: T.shin_foot(P, R), lo=S.vec(-0.26, -0.14, -0.01), hi=S.vec(0.26, 0.26, 0.5), h=0.0045, tris=1000, col="8a5a3c"),
     "wraps": dict(f=lambda P: T.foot_wraps(P, R), lo=S.vec(-0.26, -0.14, -0.01), hi=S.vec(0.26, 0.26, 0.32), h=0.004, tris=400, col="c9b89a"),
-    "harness": dict(f=lambda P: T.harness(P, R), lo=S.vec(-0.3, -0.2, R.hip[2] - 0.32), hi=S.vec(0.3, 0.2, R.hip[2] - 0.02), h=0.004, tris=550, col="33292a"),
-    "gear": dict(f=lambda P: T.gear_metal(P, R), lo=S.vec(-0.18, 0.08, R.hip[2] - 0.34), hi=S.vec(0.23, 0.2, R.hip[2] - 0.05), h=0.003, tris=400, col="9098a0"),
+    "harness": dict(f=lambda P: T.harness(P, R), lo=S.vec(-0.3, -0.2, R.hip[2] - 0.32), hi=S.vec(0.3, 0.2, R.hip[2] - 0.02), h=0.004, tris=450, col="33292a"),
+    "gear": dict(f=lambda P: T.gear_metal(P, R), lo=S.vec(-0.18, 0.08, R.hip[2] - 0.34), hi=S.vec(0.23, 0.2, R.hip[2] - 0.05), h=0.003, tris=300, col="9098a0"),
     "pouch": dict(f=lambda P: T.pouch(P, R), lo=S.vec(-0.3, -0.03, R.hip[2] - 0.26), hi=S.vec(-0.15, 0.12, R.hip[2] - 0.07), h=0.0045, tris=180, col="a08a60"),
 }
 
@@ -252,9 +253,9 @@ def locs_bag():
             ln = {"copper": 0.0135, "steel": 0.015, "stone": 0.022, "geode": 0.03}[kind]
             fat = {"copper": 1.14, "steel": 1.13, "stone": 1.34, "geode": 1.65}[kind]
             r0 = R0 * fat
-            seg = T.smooth_path([c - tan * ln, c - tan * ln * 0.55, c + tan * ln * 0.55, c + tan * ln], 4)
+            seg = np.array((c - tan * ln, c, c + tan * ln), np.float32)
             kid = {"copper": 0.0, "steel": 1.0, "stone": 2.0, "geode": 3.0}[kind]
-            sweep(jw, seg, [r0 * 0.86, r0, r0, r0 * 0.86], 7, lambda i_, k: (d, k / 7.0, ci, kid), ofs=(gi * 0.2, 2.0))
+            sweep(jw, seg[:3], [r0 * 0.9, r0, r0 * 0.9], 6, lambda i_, k: (d, k / 6.0, ci, kid), ofs=(gi * 0.2, 2.0))
             # (the near end's cap)
             n0 = len(jw.v) - 7 * 4
         if kind in ("crystal", "geode"):
@@ -365,15 +366,14 @@ def decimate(ob, target, protect=None):
     if protect is not None:
         ob.vertex_groups.clear()
     if len(ob.data.polygons) > target * 1.08:
-        # (surface nets' pinched edges stop the collapse early: dissolve them and go again)
-        bm = bmesh.new()
-        bm.from_mesh(ob.data)
-        bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0008)
-        bm.to_mesh(ob.data)
-        bm.free()
+        # (surface nets' pinched edges stop the collapse early: a voxel remesh makes it manifold, then go again)
+        r = ob.modifiers.new("rem", "REMESH")
+        r.mode = "VOXEL"
+        r.voxel_size = 0.006
+        bpy.ops.object.modifier_apply(modifier=r.name)
         mod = ob.modifiers.new("dec2", "DECIMATE")
         mod.decimate_type = "COLLAPSE"
-        mod.ratio = target / len(ob.data.polygons)
+        mod.ratio = target / sum(len(q.vertices) - 2 for q in ob.data.polygons)
         mod.use_collapse_triangulate = True
         bpy.ops.object.modifier_apply(modifier=mod.name)
     log("%s: %d isles, %d tris" % (ob.name, isles, len(ob.data.polygons)))
@@ -396,7 +396,7 @@ def sharp_edges(ob, deg=38):
 
 def geode_parts():
     """The seeing-stone's rock and its iris, one mesh shared by the three stones (in its own space, the face to +Y)."""
-    rk = dict(f=lambda P: T.geode(P, GEO_R), lo=S.vec(-0.12, -0.11, -0.13), hi=S.vec(0.12, 0.09, 0.13), h=0.0045, tris=270)
+    rk = dict(f=lambda P: T.geode(P, GEO_R), lo=S.vec(-0.12, -0.11, -0.13), hi=S.vec(0.12, 0.09, 0.13), h=0.0035, tris=340)
     ir = dict(f=lambda P: T.geode_iris(P, GEO_R), lo=S.vec(-0.06, -0.01, -0.06), hi=S.vec(0.06, 0.05, 0.06), h=0.003, tris=80)
     shard = dict(f=lambda P: S.ellipsoid(P, (0, 0, 0), (0.03, 0.022, 0.04)) + 0.008 * S.fbm(P, 50.0, 4, 2), lo=S.vec(-0.05, -0.04, -0.06), hi=S.vec(0.05, 0.04, 0.06), h=0.004, tris=24)
     PARTS["geode"] = rk
@@ -414,7 +414,7 @@ def geode_parts():
 
 # ---------------------------------------------------------------------------------------------------------- uvs
 UV_K = {"head": 2.4, "teeth": 1.2, "bandana": 1.3, "hands": 1.5, "torso": 1.2, "geode": 2.2, "iris": 3.0, "locs": 0.7, "beads": 0.6,
-        "cap": 0.8, "crystals": 0.4, "shard": 0.3, "wraps": 1.1, "harness": 0.8, "gear": 1.0, "legs": 1.0}
+        "cap": 0.8, "crystals": 0.8, "shard": 1.2, "wraps": 1.1, "harness": 0.8, "gear": 1.0, "legs": 1.0}
 
 
 def smoothed(ob, iters=30, k=0.8):

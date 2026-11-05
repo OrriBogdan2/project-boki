@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c8uuo3vnpx3w7"
-path="res://.godot/imported/tarek_gauntlet_cells.jpg-37470cb73ab2e2ffecfb70b20c64a20d.ctex"
+uid="uid://cx8jg3c80f0wr"
+path="res://.godot/imported/tarek_tarek_atlas.jpg-418c78b60aace3c432b8ba8bc06e83ed.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "36690ed06753048c4715ee6938c6463b"
+"md5": "b7e3396b44107310e70a9aa14fefff84"
 }
 
 [deps]
 
-source_file="res://art/wardens/tarek/tarek_gauntlet_cells.jpg"
-dest_files=["res://.godot/imported/tarek_gauntlet_cells.jpg-37470cb73ab2e2ffecfb70b20c64a20d.ctex"]
+source_file="res://art/wardens/tarek/tarek_tarek_atlas.jpg"
+dest_files=["res://.godot/imported/tarek_tarek_atlas.jpg-418c78b60aace3c432b8ba8bc06e83ed.ctex"]
 
 [params]
 

@@ -768,7 +768,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	root.set_meta("arm_k", arm_k)
 	for sx in [-1.0, 1.0]:
 		var sd := "L" if sx < 0.0 else "R"
-		var piv := Node3D.new(); piv.name = "Arm%sPivot" % sd; piv.position = Vector3(0.215 * sx * chest_w, 0.5, 0.0)
+		var piv := Node3D.new(); piv.name = "Arm%sPivot" % sd; piv.position = Vector3(0.215 * sx * chest_w * float(Arch.body(arch).get("shoulder", 1.0)), 0.5, 0.0)
 		torso.add_child(piv)
 		part(piv, sphere(0.088, 16), m_body, Vector3(0, -0.005, 0), Vector3(1.0, 1.0, 1.0))
 		part(piv, limb(0.088, 0.064, 0.25, 0.16), m_body, Vector3(0, -0.1, 0))
