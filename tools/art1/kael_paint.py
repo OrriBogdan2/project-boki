@@ -96,7 +96,16 @@ def face(p, ao):
     for s in (-1.0, 1.0):
         r = np.linalg.norm((q - [s * 0.037, 0.08, 0.008]) / [0.03, 1, 0.024] * [1, 0, 1], axis=-1)
         t = t * (0.72 + 0.28 * smooth(0.65, 1.2, r))
-    return ramp(t * 0.78, SKIN)
+    c = ramp(t * 0.72, SKIN)
+    # the scar: a raking cut over the left eye, brow to cheek (his left, x < 0)
+    a0, b0 = np.array([-0.058, 0.082]), np.array([-0.018, -0.026])
+    ab = b0 - a0
+    pq = np.stack([q[..., 0], q[..., 2]], -1) - a0
+    h = np.clip(pq @ ab / (ab @ ab), 0, 1)
+    d = np.linalg.norm(pq - h[..., None] * ab, axis=-1)
+    c = mix(c, hexc("#1a0c10"), 1 - smooth(0.0022, 0.0042, d))
+    c = mix(c, hexc("#a56f64"), (1 - smooth(0.0, 0.0016, d)) * 0.8)
+    return c
 
 
 def eye(a, b):
@@ -128,6 +137,25 @@ def mask_cloth(p, n, ao):
     return cloth(p, n, np.maximum(ao, 0.8))
 
 
+def embers(p, spots):
+    """Burn holes: the charred lip round each spot, the keyed ember inside. spots: [(x, y, z, r)]."""
+    out_k, out_h = np.zeros(p.shape[:-1]), np.zeros(p.shape[:-1])
+    for x, y, z, r in spots:
+        d = np.linalg.norm((p - [x, y, z]) * [1, 1, 1.5], axis=-1) / r
+        w = d + (fbm(p * 90 + x * 9) - 0.5) * 0.9
+        out_k = np.maximum(out_k, 1 - smooth(1.0, 1.5, w))
+        out_h = np.maximum(out_h, 1 - smooth(0.62, 0.98, w))
+    return out_k, out_h
+
+
+EMBER = np.array([1.0, 0.76, 0.44])
+
+
+def burnt(c, p, spots):
+    k, h = embers(p, spots)
+    return mix(mix(c, hexc("#120608"), k), EMBER, h)
+
+
 def cowl_cloth(p, n, ao):
     """The rolled folds: deep arcs dipping at the front, the art's heavy drape, drawn as crease and lit lip."""
     a = np.arctan2(p[..., 0], p[..., 1] - 0.01)
@@ -135,12 +163,13 @@ def cowl_cloth(p, n, ao):
     wob = (fbm(p * [9, 9, 3]) - 0.5) * 0.03
     t = lit(n, np.maximum(ao, 0.7)) * 0.86
     a2 = np.sin(a * 3 + 1.0) * 0.012
-    for z0, dip, k in ((1.30, 0.03, 0.6), (1.272, 0.045, 0.7), (1.25, 0.06, 1.0), (1.226, 0.085, 0.8), (1.20, 0.1, 0.8)):
+    zc = K.C[2]
+    for z0, dip, k in ((zc - 0.066, 0.008, 0.8), (zc - 0.09, 0.012, 0.9), (zc - 0.124, 0.02, 1.0), (zc - 0.15, 0.036, 0.9), (zc - 0.185, 0.05, 0.7)):
         k = k * np.clip(1.5 * fbm(np.stack([a * 2.2, 0 * a + z0 * 9, 0 * a], -1)) - 0.15, 0, 1.2)
         d = p[..., 2] - (z0 - dip * fr + wob + a2)
         t = t - k * 0.42 * np.exp(-((d + 0.003) / 0.0042) ** 2) + k * 0.16 * np.exp(-((d - 0.008) / 0.009) ** 2)
     t = t + (fbm(p * 150, 3) - 0.5) * 0.05
-    return ramp(np.clip(t, 0, 1), CLOTH)
+    return burnt(ramp(np.clip(t, 0, 1), CLOTH), p, K.COWL_BURNS)
 
 
 def gold(p, n, ao):
@@ -160,6 +189,11 @@ def iron(p, n, ao, rusty=0.4):
 def leather(p, n, ao):
     t = lit(n, ao)
     return ramp(t * 0.9, [hexc("#150b0a"), hexc("#2e1a14"), hexc("#4b2e22"), hexc("#684434"), hexc("#886150")])
+
+
+def grip(p, n, ao):
+    """The maroon leather wrap: a diagonal band with dark seams."""
+    return leather(p, n, ao) * (0.78 + 0.22 * np.sign(np.sin((p[..., 0] + p[..., 1] * 1.5 + p[..., 2]) * 120)))[..., None] * [1.25, 0.8, 0.8]
 
 
 def bandage(p, n, ao, axis, along):
@@ -206,68 +240,33 @@ def hook_tile(h, w):
     return c * (1 - k) + np.array([1.0, 0.76, 0.44]) * k
 
 
-# ---- the cracks, drawn in (theta, z) round the sword arm
-def jitter_line(rng, pts, depth=4, amp=4.0):
-    pts = [np.array(p, dtype=float) for p in pts]
-    for d in range(depth):
-        out = [pts[0]]
-        for a, b in zip(pts, pts[1:]):
-            m = (a + b) / 2
-            dd = b - a
-            nrm = np.array([-dd[1] / 0.022, dd[0] * 0.022])
-            out.append(m + nrm * rng.uniform(-0.2, 0.2) * (amp / 4.0))
-            out.append(b)
-        pts = out
-    return np.array(pts)
+# ---- the cracks: a net of cells round the sword arm (the master sheet's giraffe pattern), edges of a stretched Voronoi
+def crack_map(z0, z1, W=1100, H=900, cells=46):
+    """canvas (rows z, cols theta): 1 on a fissure's heart, falling to 0 over its rim. Seeds on the arm's cylinder, finer toward the wrist."""
+    rng = np.random.RandomState(21)
+    seeds = rng.uniform(0, 1, (cells, 2))
+    seeds[:, 1] = seeds[:, 1] ** 1.15
+    ys, xs = np.mgrid[0:H, 0:W]
+    u, v = xs / W, ys / H
+    wob = (fbm(np.stack([u * 7, v * 7, u * 0 + 1], -1)) - 0.5) * 0.05
+    wob2 = (fbm(np.stack([u * 7, v * 7, u * 0 + 9], -1)) - 0.5) * 0.05
+    uu, vv = u + wob, v + wob2
+    d1, d2 = np.full(u.shape, 9.0), np.full(u.shape, 9.0)
+    for sx, sy in seeds:
+        for off in (-1, 0, 1):
+            d = np.hypot((uu - sx - off) * 1.0, (vv - sy) * 0.8)
+            d2 = np.where(d < d1, d1, np.minimum(d2, d))
+            d1 = np.minimum(d1, d)
+    edge = (d2 - d1)
+    fade = 0.55 + 0.45 * np.sin(u * 37 + v * 23)          # the width swells and pinches along a fissure
+    wd = 0.0052 * (0.55 + 0.45 * fade)
+    return np.clip(1.25 - edge / wd, 0, 1), z0, z1
 
 
-# theta in degrees round the arm: 0 out, 90 front, 180 in, 270 back; z in metres. (main, width)
-CRACKS = [
-    ([(100, 1.20), (70, 1.14), (88, 1.07), (60, 0.99), (84, 0.93), (70, 0.87), (92, 0.825)], 1.0),
-    ([(88, 1.07), (130, 1.03), (138, 0.97), (120, 0.92), (136, 0.86)], 0.8),
-    ([(70, 1.14), (20, 1.11), (-20, 1.13), (-55, 1.09)], 0.9),
-    ([(20, 1.11), (10, 1.03), (34, 0.97), (24, 0.90), (44, 0.83)], 0.85),
-    ([(-20, 1.13), (-34, 1.05), (-14, 0.98), (-40, 0.91), (-24, 0.84)], 0.75),
-    ([(60, 0.99), (34, 0.97)], 0.6),
-    ([(130, 1.03), (170, 1.08), (175, 1.15)], 0.55),
-    ([(84, 0.93), (120, 0.92)], 0.5),
-    ([(-55, 1.09), (-100, 1.05), (-130, 0.98)], 0.55),
-    ([(-14, 0.98), (24, 0.90)], 0.45),
-]
-
-
-def crack_map(W=1400, H=1000):
-    """canvas (rows z, cols theta): 1 on a crack's heart, falling to 0 over its rim."""
-    rng = np.random.RandomState(11)
-    cv = np.zeros((H, W))
-    z0, z1 = 0.80, 1.24
-    for pts, wd in CRACKS:
-        ln = jitter_line(rng, pts)
-        rows = (ln[:, 1] - z0) / (z1 - z0) * (H - 1)
-        cols = ((ln[:, 0] % 360) / 360.0) * W
-        for i in range(len(ln) - 1):
-            n = max(2, int(np.hypot(rows[i + 1] - rows[i], (cols[i + 1] - cols[i] + W / 2) % W - W / 2)))
-            k = i / (len(ln) - 1)
-            r = (4.5 + 6.5 * wd) * (1.0 - 0.45 * k)
-            for q in np.linspace(0, 1, n):
-                rr = rows[i] * (1 - q) + rows[i + 1] * q
-                dc = (cols[i + 1] - cols[i] + W / 2) % W - W / 2
-                cc = cols[i] + dc * q
-                ir, ic = int(rr), int(cc)
-                m = int(r) + 2
-                for y in range(max(0, ir - m), min(H, ir + m + 1)):
-                    xs = np.arange(ic - m, ic + m + 1)
-                    d = np.hypot(xs - cc, y - rr) / r
-                    val = np.clip(1.25 - d, 0, 1)
-                    idx = xs % W
-                    cv[y, idx] = np.maximum(cv[y, idx], val)
-    return cv, z0, z1
-
-
-def cracks(p, canvas):
+def cracks(p, canvas, cx):
     cv, z0, z1 = canvas
     H, W = cv.shape
-    th = (np.degrees(np.arctan2(p[..., 1], p[..., 0] - K.SH)) % 360) / 360.0
+    th = (np.degrees(np.arctan2(p[..., 1], p[..., 0] - cx)) % 360) / 360.0
     r = np.clip((p[..., 2] - z0) / (z1 - z0), 0, 1) * (H - 1)
     return cv[r.astype(int), (th * W).astype(int) % W]
 
@@ -294,7 +293,10 @@ def blade_paint(a, c, h, n, ao, ol_w):
             bid = np.where(nb, jx, bid)
             best = np.where(nb, d, best)
     t = lit(n, ao) * 0.92 + (bid - 0.5) * 0.22 + (fbm(p * 2.7) - 0.5) * 0.18
-    c0 = ramp(np.clip(t, 0, 1), [hexc("#2a272c"), hexc("#494549"), hexc("#6b6668"), hexc("#918c8b"), hexc("#c0bab6")])
+    c0 = ramp(np.clip(t, 0, 1), [hexc("#6e6461"), hexc("#938884"), hexc("#b5aaa3"), hexc("#d3cac1"), hexc("#f0e9de")])
     seam = 1 - smooth(0.0, 0.1, sec - best)
-    c0 = mix(c0, hexc("#100d10"), seam * 0.8)
+    c0 = mix(c0, hexc("#5c4a42"), seam * 0.55)
+    # a molten glow creeping in from the core
+    heat = smooth(0.62, 0.3, np.abs(c) / W)
+    c0 = mix(c0, hexc("#f4b27a"), heat * 0.55)
     return c0

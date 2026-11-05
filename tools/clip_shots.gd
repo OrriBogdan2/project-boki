@@ -6,7 +6,7 @@ extends RefCounted
 var holder: Node3D
 var cam: Camera3D
 var tree: SceneTree
-var px := 480
+var frame_px := 480
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -24,7 +24,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--warden="): id = a.substr(9)
 		if a.begins_with("--clips="): wanted = Array(a.substr(8).split(",", false))
 		if a.begins_with("--fps="): fps = float(a.substr(6))
-		if a.begins_with("--size="): px = int(a.substr(7))
+		if a.begins_with("--size="): frame_px = int(a.substr(7))
 		if a.begins_with("--yaw="): yaw = float(a.substr(6))
 		if a.begins_with("--dist="): dist = float(a.substr(7))
 		if a.begins_with("--at="): at_y = float(a.substr(5))
@@ -32,8 +32,8 @@ func run(main: Node) -> void:
 		if a == "--match": game_cam = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
-	main.get_window().size = Vector2i(px, px)
-	main.get_viewport().size = Vector2i(px, px)
+	main.get_window().size = Vector2i(frame_px, frame_px)
+	main.get_viewport().size = Vector2i(frame_px, frame_px)
 	_stage(main)
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	model.set_meta("anim_seed", 1)
@@ -55,6 +55,10 @@ func run(main: Node) -> void:
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
+	if OS.get_cmdline_user_args().has("--list-meshes"):
+		for mi in model.find_children("*", "MeshInstance3D", true, false):
+			if (mi as MeshInstance3D).is_visible_in_tree() and not String(model.get_path_to(mi)).begins_with("Warden"):
+				print("MESH ", model.get_path_to(mi), " ", (mi as Node3D).global_position)
 	if turn:
 		var dir := out.path_join("turntable")
 		DirAccess.make_dir_recursive_absolute(dir)
@@ -66,7 +70,6 @@ func run(main: Node) -> void:
 			clips.force = {"clip": "idle", "t": fmod(i / 15.0, 3.2)}
 			sync.call("_process", 1.0 / 15.0)
 			await _grab(dir.path_join("f%03d.png" % i))
-		model.rotation.y = deg_to_rad(yaw)
 	var names: Array = wanted if not wanted.is_empty() else Array(clips.lib.get_animation_list())
 	for nm in names:
 		var anim_name := String(nm)

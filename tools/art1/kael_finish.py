@@ -21,13 +21,12 @@ CHAIN_R = (UNIQ_W + 0.005, 0.30, 0.875, 0.395)
 HOOK_R = (0.88, 0.30, 1.0, 0.395)
 EYE_R = (UNIQ_W + 0.005, 0.20, 0.875, 0.295)
 GLOW_R = (0.88, 0.20, 1.0, 0.295)
-MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "leather-kael", "metal-kael", "metal-blade-hot", "brass-kael",
-        "hair-mane", "eyes-kael", "glow-sword"]
-SCALE = {"face": 3.0, "lidU": 2.6, "lidD": 2.6, "mask": 1.5, "cowl": 1.25, "tail": 1.6, "collar": 2.0, "palm": 2.0, "finger": 1.8,
-         "thumb": 1.8, "skull": 0.4, "thigh": 0.35, "blade": 1.5, "guard": 1.4, "grip": 1.6, "Low": 1.15, "Skirt": 1.25}
+MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "leather-kael", "metal-kael", "metal-blade-hot", "hair-mane", "eyes-kael", "glow-sword"]
+SCALE = {"face": 4.0, "lidU": 2.6, "lidD": 2.6, "mask": 1.5, "cowl": 1.5, "stail": 1.3, "palm": 2.0, "finger": 1.8,
+         "thumb": 1.8, "skull": 0.4, "blade": 1.5, "guard": 1.4, "grip": 1.6, "pommel": 1.6, "Low": 1.15}
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
-src, low, skirt = bpy.data.objects["Src"], bpy.data.objects["Low"], bpy.data.objects["Skirt"]
+src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
 depsgraph = bpy.context.evaluated_depsgraph_get()
 bvh_low = BVHTree.FromObject(low, depsgraph)
 
@@ -38,12 +37,12 @@ def tile_uv(r, uv):
 
 
 hair_tile_uv = (0, 0, 1, 1)
-pieces = [K.face_patch(), K.skull(), K.mask(), K.cowl(), K.tail(bvh_low)]
+tails = [K.scarf_tail("R"), K.scarf_tail("L")]
+pieces = [K.face_patch(), K.skull(), K.mask(), K.cowl()] + tails
 for s in (1.0, -1.0):
     pieces.append(K.eyeball(s))
     pieces += K.lids(s)
     pieces += K.brows(s)
-pieces += K.collar() + K.under_thighs()
 pieces += K.hand("R", K.GRIP_DIR, (1.25, 1.35, 0.9), 0.0)
 pieces += K.hand("L", (0.0, 1.0, -0.15), (0.55, 0.75, 0.5), 0.05)
 locks = K.mane()
@@ -51,8 +50,8 @@ chains = K.mane_chains(locks)
 pieces += locks
 pieces.append(K.wrist_chain((0, 0, 1, 1)))
 hang, hook, hang_pts = K.hanging_chain((0, 0, 1, 1))
-cuff, cuff_pts = K.cuff_chain((0, 0, 1, 1))
-pieces += [hang, hook, cuff] + K.blade() + K.hilt((0, 0, 1, 1))
+cuff, cuff_pts = None, None
+pieces += [hang, hook] + K.blade() + K.hilt((0, 0, 1, 1))
 
 # ---- faces wound outward (the game culls back faces)
 HEAD_C = tuple(K.C)
@@ -61,9 +60,7 @@ for p_ in pieces:
     if n_ in ("face", "skull", "mask", "cap") or n_.startswith(("eye", "lid")):
         p_.orient(HEAD_C if not n_.startswith(("eye", "lid")) else tuple(K.hl(K.EYE * [1 if n_.endswith("R") else -1, 1, 1])))
     elif n_ == "cowl":
-        p_.orient((0, 0.01, 1.2))
-    elif n_ == "tail":
-        p_.orient((-0.08, 0.0, 1.0))
+        p_.orient((0, 0.01, K.C[2] - 0.15))
     else:
         p_.orient()
 
@@ -73,9 +70,9 @@ for p_ in locks:
         p_.shade = np.full(len(p_.v), 0.6)
         continue
     layer = 0.8 if p_.name.startswith("back") else (0.9 if p_.name.startswith(("side", "temple")) else 1.0)
-    p_.shade = layer * (0.72 + 0.28 * smooth(0.0, 0.22, p_.t))
+    p_.shade = np.ones(len(p_.v)) if p_.name.startswith("sweep") else layer * (0.72 + 0.28 * smooth(0.0, 0.22, p_.t))
 
-# ---- weights of the spring-hung chains
+# ---- weights of the spring-hung pieces
 def along_chain(p, names, pts, top_bone):
     pts = np.asarray(pts)
     w = {n: np.zeros(len(p.v)) for n in names[:-1]}
@@ -88,28 +85,28 @@ def along_chain(p, names, pts, top_bone):
 
 
 HANG = ["spring_hangwarchain_%d" % i for i in range(len(hang_pts))]
-CUFF = ["spring_hangcuff_%d" % i for i in range(len(cuff_pts))]
 along_chain(hang, HANG, hang_pts, "hand.R")
 hook.w = {HANG[-2]: np.ones(len(hook.v))}
-along_chain(cuff, CUFF, cuff_pts, "hand.L")
-tail = next(p for p in pieces if p.name == "tail")
-TAIL = ["spring_scarf_%d" % i for i in range(4)]
-tail_pts = [tail.v[2] + [0, 0.012, 0], tail.v[17] + [0, 0.012, 0], tail.v[32] + [0, 0.012, 0], tail.v[42] + [0, 0.012, 0]]
-w = {n: np.zeros(len(tail.v)) for n in ["hips"] + TAIL[:-1]}
-for i, v in enumerate(tail.v):
-    k = (1.19 - v[2]) / 0.33
-    u = smooth(0.12, 0.34, k)
-    x = np.clip(k, 0, 0.999) * 3
-    b = int(x)
-    w["hips"][i] = 1 - u
-    w[TAIL[b]][i] = u
-tail.w = w
-
-# ---- the feet (below the ankle) off the shins; the skirt's plates ride the hips and follow each thigh
-def scan_weights(ob):
-    gn = {g.index: g.name for g in ob.vertex_groups}
-    return gn
-
+TAIL_N = 9
+TAILS = {}
+for p_ in tails:
+    g_ = p_.name[-1].lower()
+    names_ = ["spring_scarftail_%s_%d" % (g_, i) for i in range(TAIL_N)]
+    idx = np.linspace(0.04, 1.0, TAIL_N)
+    s_ = np.linspace(0, 1, len(p_.path))
+    TAILS[g_] = (names_, [tuple(np.interp(t_, s_, p_.path[:, i]) for i in range(3)) for t_ in idx])
+    w_ = {n: np.zeros(len(p_.v)) for n in names_[:-1]}
+    w_["hips"] = np.zeros(len(p_.v))
+    for i, t_ in enumerate(p_.t):
+        u = float(smooth(0.03, 0.1, t_))
+        x = np.clip((t_ - 0.04) / 0.96, 0, 0.9999) * (TAIL_N - 1)
+        b_ = int(x)
+        q = x - b_
+        w_["hips"][i] = 1 - u
+        w_[names_[b_]][i] += u * (1 - q)
+        w_[names_[min(b_ + 1, TAIL_N - 2)]][i] += u * q
+    p_.w = w_
+    p_.spots = [tuple(p_.path[int(len(p_.path) * k_)]) + (r_,) for k_, r_ in ((0.34, 0.024), (0.52, 0.018), (0.66, 0.026), (0.82, 0.02))]
 
 # ---- one mesh: the scan first, then the pieces
 faces_v, faces_pid, faces_uv, verts, vw, rooms, shades = [], [], [], [], [], [], []
@@ -125,18 +122,6 @@ def add_ob(ob, name, room):
     gn = {g.index: g.name for g in ob.vertex_groups}
     for v in me.vertices:
         d = {gn[g.group]: g.weight for g in v.groups if g.weight > 0.01}
-        x_, y_, z_ = v.co
-        if name == "Skirt":
-            sd = "R" if x_ > 0 else "L"
-            q = float(smooth(0.68, 0.46, z_)) * float(smooth(0.0, 0.08, abs(x_)))
-            d = {"hips": 1 - float(smooth(0.74, 0.62, z_)), "skirt": float(smooth(0.74, 0.62, z_)) * (1 - 0.75 * q),
-                 "thigh." + sd: float(smooth(0.74, 0.62, z_)) * 0.75 * q}
-        elif name == "Low" and abs(x_) > 0.212 and z_ < 0.85 and max(d, key=d.get, default="") in ("hips", "root"):
-            d = {"forearm." + ("R" if x_ > 0 else "L"): 1.0}      # (a3 left the wrist's end on the hips)
-        elif z_ < K.ANKLE_Z + 0.015:
-            sd = "R" if x_ > 0 else "L"
-            k = float(smooth(K.ANKLE_Z + 0.015, K.ANKLE_Z - 0.03, z_))
-            d = {"foot." + sd: k, "shin." + sd: 1 - k}
         vw.append(d)
     rooms.extend([room] * len(me.vertices))
     shades.extend([1.0] * len(me.vertices))
@@ -150,7 +135,6 @@ def add_ob(ob, name, room):
 
 low_mats, low_pid = add_ob(low, "Low", 1.0)
 low_poly_mat = [low_mats[p.material_index] for p in low.data.polygons]
-skirt_mats, skirt_pid = add_ob(skirt, "Skirt", 0.5)
 for pc in pieces:
     pid = len(names)
     names.append(pc.name)
@@ -186,7 +170,7 @@ def base_name(n):
 
 
 def is_tile(n):
-    return n == "cap" or n.startswith(("crown", "temple", "fore", "part", "side", "back", "over", "brow", "chain_", "wrap", "hook", "eye", "core"))
+    return n == "cap" or n.startswith(("sweep", "temple", "fore", "back", "over", "fly", "brow", "chain_", "hook", "eye", "core"))
 
 
 # material per face
@@ -196,16 +180,15 @@ for i, p in enumerate(me.polygons):
     n = names[faces_pid[i]]
     if n == "Low":
         m = low_poly_mat[i]
-        s = m.split("-")[0]
-        c = np.mean([verts[v] for v in faces_v[i]], axis=0)
-        hot = c[0] > 0.145 and c[2] > 0.825
-        m2 = "skin-kael-hot" if (s == "skin" and hot) else {"skin": "skin-kael", "cloth": "cloth-kael", "leather": "leather-kael", "metal": "metal-kael"}[s]
-    elif n == "Skirt":
-        m2 = "cloth-kael"
+        m2 = "skin-kael"          # (by the scan's paint, below)
     else:
         pm = PIECE_MAT[n]
         m2 = {"metal-chain": "metal-kael", "metal-hook": "metal-blade-hot", "metal-blade": "metal-blade-hot", "metal-guard": "metal-kael",
               "leather-grip": "leather-kael", "hair-brow": "hair-mane"}.get(pm, pm)
+        if n in ("cowl", "stailR", "stailL"):
+            m2 = "cloth-ember-hot"
+        if n == "eyeL":
+            m2 = "glow-sword"       # the left eye glows white under its scar
     p.material_index = mat_i[m2]
 
 # ---- unwrap the unique pieces
@@ -237,7 +220,7 @@ PARTS = {"upper_arm.R": "armR", "forearm.R": "armR", "pauldron.R": "armR", "hand
 region = {}
 for i in range(nf):
     n = names[faces_pid[i]]
-    if n not in ("Low", "Skirt"):
+    if n != "Low":
         continue
     tally = {}
     for vi in faces_v[i]:
@@ -246,8 +229,6 @@ for i in range(nf):
             tally[p_] = tally.get(p_, 0) + w_
     part = max(tally, key=tally.get) if tally else "torso"
     c = np.mean([verts[v] for v in faces_v[i]], axis=0)
-    if n == "Skirt":
-        part = "skirt"
     limb_x = {"armR": K.SH, "armL": -K.SH}.get(part)
     front = c[1] > 0.0
     region[i] = (part, front)
@@ -270,11 +251,11 @@ for i in uniq:
         for l in f.loops:
             l[uvl].uv = (l.vert.co.x * 1.0 + 4, l.vert.co.z - 1.4 + 6)
     elif n in ("mask", "cowl"):
-        off = 7 if n == "mask" else 10
-        cs = [(math.atan2(l.vert.co.x, l.vert.co.y)) for l in f.loops]
+        off = 7 if n == "mask" else 12
+        cs = [(math.atan2(l.vert.co.x, l.vert.co.y) * (0.75 if n == "mask" else 1.3)) for l in f.loops]
         # (the seam at the back: faces straddling it unroll on one side)
-        if max(cs) - min(cs) > 3.0:
-            cs = [c + 2 * math.pi if c < 0 else c for c in cs]
+        if max(cs) - min(cs) > 2.2:
+            cs = [c + 2 * math.pi * (0.75 if n == "mask" else 1.3) if c < 0 else c for c in cs]
         for l, c in zip(f.loops, cs):
             l[uvl].uv = (c * 0.14 + off, l.vert.co.z - 1.2 + 6)
 # scale each piece to its texel density
@@ -333,6 +314,10 @@ for p in me.polygons:
         r = GLOW_R
     else:
         r = HAIR_R
+    if n == "eyeL":
+        for l in ls:
+            loop_uv[l] = ((GLOW_R[0] + GLOW_R[2]) / 2, (GLOW_R[1] + GLOW_R[3]) / 2)
+        continue
     if n.startswith("eye"):
         pc = next(q for q in pieces if q.name == n)
         ev = np.array(p.vertices) - (faces_v[i][0] - pc.f[i - faces_pid.index(faces_pid[i])][0])
@@ -445,66 +430,97 @@ suv = np.zeros(len(sm.loops) * 2)
 sm.uv_layers.active.data.foreach_get("uv", suv)
 suv = suv.reshape(-1, 2)
 tree = BVHTree.FromPolygons([tuple(v) for v in svco], [tuple(t) for t in tri_v])
-imgs = {}
+im = None
 for mt in sm.materials:
-    for nd in mt.node_tree.nodes:
-        if nd.type == "TEX_IMAGE" and nd.image:
-            imgs[nd.image.size[0]] = nd.image
-im = imgs[max(imgs)]
+    pb_ = next(n_ for n_ in mt.node_tree.nodes if n_.type == "BSDF_PRINCIPLED")
+    lk = pb_.inputs[0].links
+    nd = lk[0].from_node if lk else None
+    while nd is not None and nd.type != "TEX_IMAGE":
+        nd = nd.inputs[0].links[0].from_node if nd.inputs and nd.inputs[0].links else None
+    if nd is not None:
+        im = nd.image
 sw, sh = im.size
-SP = np.array(im.pixels[:], dtype=np.float32).reshape(sh, sw, im.channels)[..., :3]
+SP = np.zeros(sw * sh * im.channels, np.float32)
+im.pixels.foreach_get(SP)
+SP = SP.reshape(sh, sw, im.channels)[..., :3]
 print("source atlas", im.name, sw, sh, SP.mean())
-mask = np.isin(PID, [low_pid, skirt_pid])
+
+
+def sample_scan(points):
+    """The scan's paint at the nearest surface to each point (display values)."""
+    hit_i = np.zeros(len(points), np.int64)
+    hit_p = np.zeros((len(points), 3))
+    for i, p in enumerate(points):
+        h = tree.find_nearest(Vector(p))
+        if h[2] is not None:
+            hit_i[i] = h[2]
+            hit_p[i] = h[0]
+    tv = svco[tri_v[hit_i]]
+    v0 = tv[:, 1] - tv[:, 0]
+    v1 = tv[:, 2] - tv[:, 0]
+    v2 = hit_p - tv[:, 0]
+    d00, d01, d11 = (v0 * v0).sum(1), (v0 * v1).sum(1), (v1 * v1).sum(1)
+    d20, d21 = (v2 * v0).sum(1), (v2 * v1).sum(1)
+    den = np.maximum(d00 * d11 - d01 * d01, 1e-14)
+    bv = (d11 * d20 - d01 * d21) / den
+    bw = (d00 * d21 - d01 * d20) / den
+    bu = 1 - bv - bw
+    luv = suv[tri_l[hit_i]]
+    uu = bu * luv[:, 0, 0] + bv * luv[:, 1, 0] + bw * luv[:, 2, 0]
+    vv = bu * luv[:, 0, 1] + bv * luv[:, 1, 1] + bw * luv[:, 2, 1]
+    sx = np.clip((uu % 1) * sw, 0, sw - 1).astype(int)
+    sy = np.clip((vv % 1) * sh, 0, sh - 1).astype(int)
+    return SP[sy, sx]
+
+
+# each scan face's slot, by its paint
+low_faces = [i for i in range(nf) if faces_pid[i] == low_pid]
+fc = np.array([np.mean([verts[v] for v in faces_v[i]], axis=0) for i in low_faces])
+fcol = sample_scan(fc)
+L_ = fcol.mean(1)
+sat = (fcol.max(1) - fcol.min(1)) / np.maximum(fcol.max(1), 0.01)
+for k_, i in enumerate(low_faces):
+    r_, g_, b_ = fcol[k_]
+    if sat[k_] < 0.14 and L_[k_] > 0.34:
+        m = "metal-kael"
+    elif sat[k_] < 0.24:
+        m = "cloth-kael"
+    elif L_[k_] > 0.5 or (r_ > g_ * 1.7 and b_ > g_ * 0.7):
+        m = "cloth-kael"      # the bandages, the scan's own scarf
+    elif region[i][0] in ("armR", "armL", "torso") and r_ > g_ * 1.25:
+        m = "skin-kael-hot" if region[i][0] == "armR" else "skin-kael"
+    else:
+        m = "leather-kael"
+    me.polygons[i].material_index = mat_i[m]
+
+mask = PID == low_pid
 ys, xs = np.nonzero(mask)
-pos = POS[ys, xs].copy()
-mirror = (pos[:, 0] > 0.145) & (pos[:, 2] > 0.84)
-pos[mirror, 0] *= -1
-# (the left arm's iron band is no skin: that stretch of the sword arm takes the muscle above it)
-band = mirror & (pos[:, 2] < 0.985)
-pos[band, 2] = 0.99 + (pos[band, 2] - 0.84) * 0.5
-hit_i = np.zeros(len(pos), np.int64)
-hit_p = np.zeros((len(pos), 3))
-for i, p in enumerate(pos):
-    h = tree.find_nearest(Vector(p))
-    if h[2] is not None:
-        hit_i[i] = h[2]
-        hit_p[i] = h[0]
-tv = svco[tri_v[hit_i]]
-v0 = tv[:, 1] - tv[:, 0]
-v1 = tv[:, 2] - tv[:, 0]
-v2 = hit_p - tv[:, 0]
-d00, d01, d11 = (v0 * v0).sum(1), (v0 * v1).sum(1), (v1 * v1).sum(1)
-d20, d21 = (v2 * v0).sum(1), (v2 * v1).sum(1)
-den = np.maximum(d00 * d11 - d01 * d01, 1e-14)
-bv = (d11 * d20 - d01 * d21) / den
-bw = (d00 * d21 - d01 * d20) / den
-bu = 1 - bv - bw
-luv = suv[tri_l[hit_i]]
-uu = bu * luv[:, 0, 0] + bv * luv[:, 1, 0] + bw * luv[:, 2, 0]
-vv = bu * luv[:, 0, 1] + bv * luv[:, 1, 1] + bw * luv[:, 2, 1]
-sx = np.clip((uu % 1) * sw, 0, sw - 1).astype(int)
-sy = np.clip((vv % 1) * sh, 0, sh - 1).astype(int)
-col = SP[sy, sx]
+col = sample_scan(POS[ys, xs])
+col = np.power(np.clip(col, 0, 1), 0.92) * 1.08
+# the near-black trousers up to a readable charcoal, a little cool
+dk = (col.max(1) < 0.2)[:, None]
+col = col * (1 - dk) + (col * 1.5 + np.array([0.075, 0.075, 0.09])) * dk
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
-col = np.power(np.clip(col, 0, 1), 0.86) * 1.2
 OUTC[ys, xs] = col
 # a little of the shared light's occlusion on the scan too
 OUTC[ys, xs] *= (0.62 + 0.38 * np.clip(AO[ys, xs], 0, 1))[:, None]
-# the scan's old pale collar under the new one
-pp_ = POS[ys, xs]
-pale = (pp_[:, 2] > 1.08) & (OUTC[ys, xs].mean(1) > 0.42)
-OUTC[ys[pale], xs[pale]] = (0.26, 0.17, 0.17)
 
-# the old cracks and warmth off the mirrored arm: nothing to do (clean paint); the new cracks on the sword arm
-canvas = P.crack_map()
-armm = (PID == low_pid) & (POS[..., 0] > 0.145) & (POS[..., 2] > 0.825)
+# the white-gold fissures on the sword arm, shoulder to the bandage
+canvas = P.crack_map(K.HAND_Z + 0.09, K.SHOULDER_Z + 0.09)
+rid = np.zeros(ATLAS * ATLAS, bool).reshape(ATLAS, ATLAS)
+hot_ids = np.zeros(len(me.polygons), bool)
+for i in low_faces:
+    hot_ids[i] = me.materials[me.polygons[i].material_index].name == "skin-kael-hot"
+armm = (PID == low_pid) & (POS[..., 0] > 0.13) & (POS[..., 2] > K.HAND_Z + 0.09)
 yy, xx = np.nonzero(armm)
-ck = P.cracks(POS[yy, xx], canvas)
+sk_ = OUTC[yy, xx]
+skinny = (sk_[:, 0] > sk_[:, 1] * 1.25) & (sk_.mean(1) < 0.5)
+yy, xx = yy[skinny], xx[skinny]
+ck = P.cracks(POS[yy, xx], canvas, K.SH)
 core = M.smooth(0.42, 0.62, ck)[:, None]
-rim = M.smooth(0.08, 0.42, ck)[:, None]
-c = OUTC[yy, xx]
-c = np.minimum(c, 0.4)
-c = c * (1 - rim * 0.75) + P.HOT_RIM * rim * 0.75
+rim = M.smooth(0.05, 0.42, ck)[:, None]
+c = np.minimum(OUTC[yy, xx], 0.4)
+c = c * (1 - rim * 0.8) + P.HOT_RIM * rim * 0.8
 c = c * (1 - core) + P.HOT * core
 OUTC[yy, xx] = c
 
@@ -520,11 +536,8 @@ def paint(names_pred, fn):
 paint(lambda n: n == "face", lambda p, n, ao: P.face(p, ao))
 paint(lambda n: n == "skull", P.skin)
 paint(lambda n: n.startswith("lid"), P.lid)
-paint(lambda n: n.startswith("thigh"), P.skin)
 paint(lambda n: n == "mask", P.mask_cloth)
 paint(lambda n: n == "cowl", P.cowl_cloth)
-paint(lambda n: n == "tail", P.cloth)
-paint(lambda n: n.startswith("collar"), P.gold)
 paint(lambda n: n.startswith(("palm", "finger", "thumb")) and n.endswith("L"), P.skin)
 
 
@@ -548,7 +561,10 @@ pp = POS[ys, xs].astype(np.float64) - pl.guard_at
 col = P.blade_paint(pp @ b_, pp @ e_, pp @ n_, NOR[ys, xs].astype(np.float64), AO[ys, xs].astype(np.float64), None)
 OUTC[ys, xs] = col
 paint(lambda n: n == "guard", lambda p, n, ao: P.iron(p, n, ao, 0.3))
-paint(lambda n: n == "grip", P.leather)
+paint(lambda n: n == "grip", P.grip)
+paint(lambda n: n == "pommel", lambda p, n, ao: P.iron(p, n, ao, 0.1))
+for p_ in tails:
+    paint(lambda n, q=p_.name: n == q, lambda p, n, ao, sp=p_.spots: P.burnt(P.cloth(p, n, np.maximum(ao, 0.75)), p, sp))
 
 # dilate past the island edges
 known = PID >= 0
@@ -650,8 +666,8 @@ bone("thumb.L", "hand.L", th, th + [0, 0.02, -0.05])
 for g, pts in chains.items():
     spring(["spring_mane_%s_%d" % (g, i) for i in range(K.CHAIN_BONES)], [tuple(p) for p in pts], "head")
 spring(HANG, [tuple(p) for p in hang_pts], "hand.R")
-spring(CUFF, [tuple(p) for p in cuff_pts], "hand.L")
-spring(TAIL, [tuple(p) for p in tail_pts], "hips")
+for g_, (nm_, pts_) in TAILS.items():
+    spring(nm_, pts_, "hips")
 bpy.ops.object.mode_set(mode="OBJECT")
 ob.parent = arm
 md = ob.modifiers.new("arm", "ARMATURE")
@@ -664,13 +680,13 @@ for vi, d in enumerate(vw):
 
 # ---- anchors and FX points: empties on the bones (RIG_CONTRACT, item 76b)
 b_, e_, n_ = K.sword_frame()
-g = K.GRIP_AT + b_ * 0.105
-A = {"anchor_head_top": ("head", (0, 0.0, 1.56)), "anchor_chest": ("hips", (0, 0.12, 1.08)),
-     "anchor_arm_up": ("upper_arm.R", (K.SH, 0.02, 1.08)), "anchor_arm_elbow": ("forearm.R", (K.SH, 0.03, 0.95)),
-     "anchor_arm_fore": ("forearm.R", (K.SH, 0.03, 0.86)), "anchor_chain": ("forearm.R", (K.SH + 0.05, 0.0, 0.72)),
+g = K.GRIP_AT + b_ * K.GUARD_OFF
+A = {"anchor_head_top": ("head", (0, 0.0, K.C[2] + 0.12)), "anchor_chest": ("hips", (0, 0.12, K.SHOULDER_Z - 0.09)),
+     "anchor_arm_up": ("upper_arm.R", (K.SH, 0.02, K.SHOULDER_Z - 0.07)), "anchor_arm_elbow": ("forearm.R", (K.SH, 0.03, K.ELBOW_Z + 0.01)),
+     "anchor_arm_fore": ("forearm.R", (K.SH, 0.03, K.ELBOW_Z - 0.09)), "anchor_chain": ("forearm.R", (K.SH + 0.05, 0.0, K.HAND_Z + 0.02)),
      "weapon_muzzle": ("hand.R", tuple(g + b_ * K.BLADE_LEN)), "anchor_blade_root": ("hand.R", tuple(g + b_ * 0.05)),
      "anchor_blade_mid": ("hand.R", tuple(g + b_ * K.BLADE_LEN * 0.55)),
-     "anchor_hook_mouth": (HANG[-2], tuple(np.array(hang_pts[0]) + [0, 0.10, -0.68]))}
+     "anchor_hook_mouth": (HANG[-2], tuple(np.array(hang_pts[0]) + [0, 0.10, -0.5]))}
 for nm, (bn, at) in A.items():
     e = bpy.data.objects.new(nm, None)
     bpy.context.scene.collection.objects.link(e)
@@ -686,7 +702,7 @@ me.update()
 bpy.ops.wm.save_as_mainfile(filepath=os.path.splitext(OUT)[0] + ".blend")
 objs = [arm, ob] + [o for o in bpy.data.objects if o.type == "EMPTY"]
 for o in list(bpy.data.objects):
-    if o.name in ("Src", "Low", "Skirt"):
+    if o.name in ("Src", "Low"):
         bpy.data.objects.remove(o)
 WK.export(OUT, objs, image_format="JPEG", colors=True)
 print("exported", OUT, os.path.getsize(OUT))

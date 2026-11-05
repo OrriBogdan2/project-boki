@@ -342,7 +342,7 @@ if __name__ == "__main__":
     bpy.ops.wm.open_mainfile(filepath=a[0])
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
     b_, e_, n_ = K.sword_frame()
-    rig = {"grip_rest": tuple(K.GRIP_AT), "blade_rest": tuple(b_), "edge_rest": tuple(e_), "pelvis": 0.66, "hilt_l": 0.09,
+    rig = {"grip_rest": tuple(K.GRIP_AT), "blade_rest": tuple(b_), "edge_rest": tuple(e_), "pelvis": K.NECK_Z - 0.46, "hilt_l": 0.078, "dz": K.SHOULDER_Z - 1.151, "leg_k": 1.3, "ankle_keys": K.ANKLE_Z, "ankle": K.ANKLE_Z,
            "lhand": {"k": (0, 1, -0.15), "o": (-1, 0, 0), "palm": (-K.SH + 0.006, 0.0, K.HAND_Z - 0.052)}}
     bpy.context.scene.render.fps = FPS
     sol = Solver(arm, rig)

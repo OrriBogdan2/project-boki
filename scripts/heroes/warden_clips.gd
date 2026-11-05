@@ -14,7 +14,7 @@ extends RefCounted
 
 const DIR := "res://content/rules/warden_anim/"
 const STATE := "anim_state"
-const DEATH_T := "clip_death_t"   # root meta: how long the death clip keeps a knocked-out Hero on screen (s, 0: not at all)
+const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
 const FADE := 0.1            # s: one clip into the next, and into or out of an action
 const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
@@ -93,8 +93,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 		a.loop_mode = Animation.LOOP_LINEAR if _is_loop(String(nm)) else Animation.LOOP_NONE
 		# (rotations only on the contract bones: their offsets and scale are the player's sliders, Sync._look_pose)
 		for i in range(a.get_track_count() - 1, -1, -1):
-			var kind := a.track_get_type(i)
-			if kind != Animation.TYPE_ROTATION_3D and String(a.track_get_path(i).get_concatenated_subnames()) in contract:
+			var bone_name := String(a.track_get_path(i).get_concatenated_subnames())
+			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract:
 				a.remove_track(i)
 	tree = AnimationTree.new()
 	tree.name = "Clips"
