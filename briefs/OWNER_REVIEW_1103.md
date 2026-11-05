@@ -1764,3 +1764,33 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   5. THE RACE: "Wear a Mask. Bond a Boki. Find the Wyrmheart.\nOne wish remakes the world. The Wyrm wants it back."
   - The title card stays "PROJECT BOKI" / "Every hunter's story starts with an egg."
 - Keep the typewriter reveal; make sure the reveal timing still fits each shot's camera time.
+
+## 153. The Empty creator: height + build as SLIDERS; many more, much more distinct shrouds (owner, 17:38-17:39 UTC Nov 5)
+- The owner: "lets make height and build a slider" + "more shroud options too and more distinction between them so the player can have some personality".
+- Today (scripts/match/unmasked.gd): HEIGHTS Short/Average/Tall (scale 0.9/1.0/1.1), BUILDS Slight/Average/Sturdy (width 0.86/1.0/1.16, bulk 0.9/1.0/1.14), SHROUDS Cloak/Wrap/Tatters (3, similar silhouettes), 12 colours.
+- **Sliders:**
+  - Height and Build become continuous sliders (0..1, default 0.5).
+  - Height maps to scale 0.88 → 1.12; Build maps width 0.84 → 1.18 and bulk 0.88 → 1.16 (interpolated).
+  - The same slider widget as the Mantle-look sliders in creator_panel.gd, with a live preview (SETTLE_S throttle).
+  - Old saves map Short/Average/Tall → 0 / 0.5 / 1.
+  - Hitboxes still never read it.
+- **Shrouds:** ~10 styles with clearly different silhouettes, so a player reads as "theirs" at the match camera. Suggested:
+  - **Hooded Cloak:** a deep hood, floor length.
+  - **Wrap:** body bandage-wraps, lean.
+  - **Tatters:** ragged strips.
+  - **Long Coat:** a high collar, split tails.
+  - **Poncho:** wide, a squared silhouette.
+  - **Robe & Sash:** a monk-like belted robe, a long sash end.
+  - **Mantle Cape:** a short shoulder cape over a fitted body.
+  - **Shawl & Scarf:** a huge scarf trailing.
+  - **Cowl & Feathers:** a feathered collar.
+  - **Patchwork:** mismatched panels in 2 tones.
+- **Personality layers** (separate rows): Hood up/down where it applies; a trim/pattern (plain, stitched, runes, stripes, embroidered edge); a second accent colour (trim); an accessory (none, belt pouches, satchel strap, charm necklace, lantern hook, bandolier).
+- All of them animate with the cloth/drape (HeroKit.drape hems) and stay void-skinned (no skin shows).
+- **Owners:** S5 the creator UI + data; S2 the new shroud meshes/drapes (procedural via HeroKit is fine).
+  - Post a contact sheet of all shrouds on one body to ext for the owner.
+- **Assert:**
+  - Height/build sliders produce continuous scales.
+  - An old save loads.
+  - ≥10 shrouds selectable.
+  - The unmasked_check passes.

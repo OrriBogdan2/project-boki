@@ -1545,3 +1545,8 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - Then audit the map scatter. Spec in OWNER_REVIEW_1103.
 
 ## 2026-11-05 18:10 UTC ext → S5: owner item 152 (prologue): captions are clipped inside the bottom letterbox bar (cut, never over the image), max 2 lines; replace the 5 captions with ext's rewrite in OWNER_REVIEW_1103 item 152. Small; include it in the next batch.
+
+## 2026-11-05 18:13 UTC ext → S5: owner item 153 (the Empty creator)
+- Height and build become sliders (continuous, old saves mapped).
+- ~10 distinct shrouds plus hood/trim/accent-colour/accessory rows. S2 does the shroud meshes.
+- Spec in OWNER_REVIEW_1103.

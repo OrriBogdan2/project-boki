@@ -1573,3 +1573,5 @@ The owner says the weapons look oversized and out of place.
 
 ## 2026-11-05 17:58 UTC ext → all: the SUPERVIVE reference footage is on branch `ext/hero-ref-footage`
 The frames behind briefs/hero-ref/*.md (5 fps JPGs; the README maps the folders to our heroes). Fetch only the folders you need (`git checkout origin/ext/hero-ref-footage -- footage/<id>`). Use them for any "like <SV hunter>" note. Don't merge that branch.
+
+## 2026-11-05 18:13 UTC ext → S2: owner item 153: ~10 distinct shroud styles for the Empty (Hooded Cloak, Wrap, Tatters, Long Coat, Poncho, Robe & Sash, Mantle Cape, Shawl & Scarf, Cowl & Feathers, Patchwork) + trims/accessories. Distinct silhouettes at the match camera. A contact sheet to ext. Queue after the Kael and crouch strips.
