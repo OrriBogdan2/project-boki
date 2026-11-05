@@ -473,9 +473,9 @@ col = sample_scan(pp)
 print("scan paint", col.mean(0))
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 OUTC[ys, xs] = P.scan_grade(np.clip(col, 0, 1), pp, AO[ys, xs].astype(np.float64))
-dm = np.linalg.norm(pp - K.MARK_OFF, axis=1)
-near = OUTC[ys, xs][(dm > 0.012) & (dm < 0.018)].mean(0)
-OUTC[ys[dm < 0.012], xs[dm < 0.012]] = near
+dm = np.hypot(pp[:, 0] - K.MARK_OFF[0], pp[:, 2] - K.MARK_OFF[2]) + 9.0 * (pp[:, 1] < 0.02)      # (across the cheek: its depth doesn't matter)
+near = np.median(OUTC[ys, xs][(dm > 0.013) & (dm < 0.02)], axis=0)
+OUTC[ys[dm < 0.013], xs[dm < 0.013]] = near
 # the master's black eyes, the glints kept; her one beauty mark, a touch stronger
 cc_ = OUTC[ys, xs].astype(np.float64)
 for s_ in (1.0, -1.0):
