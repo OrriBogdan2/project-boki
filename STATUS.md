@@ -886,3 +886,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 S2: READY ext/kit-lisette-114 43ca4513 (item 114); details in EXT_TO_MAIN. ext/art1-hem still needs an upright idle/stance clip, arrow hidden during heavy_wind, bow forward. Owner Qs: needle glow strong enough? Loosed shot a silver needle too (ext/vfx-lisette)?
 
 ## 2026-11-05 S2: bot-sanity closed: no ART-1 regression (table in EXT_TO_MAIN). Latent bot roam facing jitter remains, not traced. Hem and Tarek not tested.
+
+## 2026-11-05 S2: ART-1 Tarek scan: ext/art1-tarek e6c74fb0 (agent ~72%, not READY: Rock Hop row No, face pass not done)
+- Meshy scan beat the scripted body: 12,967 tris, 41 clips, closed stone fists, 3 eye-stones. normal_tex added to hero_toon (another normal path alongside use_nrm: merge needs one).
+- **Fidelity:** blindfold yes; 3 stones yes; stones turn yes (check only); huge left arm yes; right gauntlet yes; dreads yes, copper beads partial; prayer beads yes; sash yes; **Rock Hop no**. Proofs: ext/hero-shots-s2 e4a798b6 art1/tarek/.
+- Full suite before the last skin-tone commit: baseline reds; clip, rig-standard, warden-glb, warden-model, portrait 0 FAIL on the tip. Clips keyed on the scripted body: arm clipping on the scan unchecked. Owner Qs: closed smile per the head sheet? Stone eye tilt for the match camera?
