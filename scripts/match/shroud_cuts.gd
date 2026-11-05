@@ -328,8 +328,8 @@ static func _robe(t: ShroudTailor, hood_up: bool) -> void:
 	t.add("trim", _ribbon(t, "sashshort", short_end, 0.1, 0.11), {"legs": 0.8})
 	_hood_for(t, "robe", hood_up, 0.06)
 	for sg in [-1.0, 1.0]:
-		var lap := PackedVector3Array([Vector3(0.12 * sg, 0.62, -0.15), Vector3(0.06 * sg, 0.42, -0.25 * t.bw),
-			Vector3(-0.01 * sg, 0.2, -0.26 * t.bw)])
+		var lap := PackedVector3Array([Vector3(0.12 * sg, 0.62, -0.17), Vector3(0.06 * sg, 0.42, -0.3 * t.bw),
+			Vector3(-0.01 * sg, 0.2, -0.31 * t.bw)])
 		t.add("trim", _ribbon(t, "lapel%d" % int(sg), lap, 0.06, 0.06, Vector3.RIGHT, 5), {})
 
 # ----------------------------------------------------------------------------------------------- 6 Mantle Cape
