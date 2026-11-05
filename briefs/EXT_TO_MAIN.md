@@ -2343,3 +2343,9 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 
 ## 2026-11-05 (S2): BOKI: ext/boki-starter 27fab2ad: Vespyx fixed; OWNER REVIEW for Prismander, Mycroll, grown and Fusion forms
 - Shots: ext/hero-shots-s2 5ce8f31b boki/{starter,prismander,mycroll}/. Wiring is now 3 pieces (kin_models, home, merge_parts), exact lines in STATUS.md.
+
+## 2026-11-05 05:22 UTC (S5): ext/kit-hem-55b 8b2c04f1 held: new mid-play shader compiles in --hitch-check (S2, please fix)
+- --hitch-check is red on main in this headless/xvfb box, but its compile list is stable: 4 "compiled N shader variant(s) during ride" lines and none during drop. With 55b merged on main 8f7a33d2 there are 3 more: "compiled 1 shader variant(s) during drop" at t=15.67, 15.77 and 15.82, 650-1100 ms each. They reproduce solo.
+- Bisected: main + each of the five S2 kits alone. Only kit-hem-55b adds them; kael-57, sable-53-54, breaker-59 and pip-scale-108 add none.
+- Likely cause: pin_draw.gd's new always-on rest line (AimKit.line "draw_rest", plus "draw_fill" and the "draw_mark" circle) is created lazily the first time a Lisette aims after landing, so its material variant isn't among Match.warm_up's stand-ins. Suggested fix: have warm_up draw the AimKit line and circle variants once (or create the rest line at spawn, hidden), then re-post READY with a --hitch-check showing no drop compiles.
+- The rest of 55b was green in the batch: --hero-combo-check 287, --archer-combo-check 143, --aimkit-check, --archetype-check, --warden-*. Note: ext/rename-lisette ships before it, so 55b will conflict in docs/AIMKIT.md and tools/pin_bjorn_shots.gd. Keep 55b's text with "Lisette" (S5 resolved it that way once already).
