@@ -40,7 +40,6 @@
 		"heavy_hold": {"fx": [{"p": "ember", "at": "nock", "shape": "gather", "radius": 1.0, "n": 22, "speed": 3.0, "drag": 0.0, "curl": 0.2, "life": 0.34, "size": 0.05, "c": "thread", "c2": "silver"}]},
 		"heavy_go": {"sfx": [{"n": "pin_heavy", "db": -3.0, "pitch": 1.1, "pitch_k": -0.2}, {"n": "lis_heavy_thump", "db": -4.0}],
 			"fx": [{"p": "sweep", "at": "h", "y": 0.2, "size": 1.3, "arc": 110, "life": 0.22, "c": "thread", "c2": "silver"},
-				{"p": "flare", "at": "bow_root", "size": 2.0, "size_k": 0.5, "life": 0.16, "c": "thread", "c2": "silver"},
 				{"p": "scorch", "at": "h", "shape": "lane", "stitch": true, "len": "len", "w": 0.7, "life": 1.3, "c": "thread", "c2": "silver"},
 				{"p": "ember", "at": "bow_root", "way": "fwd", "n": 18, "speed": 11.0, "spread": 0.15, "grav": 3.0, "life": 0.3, "size": 0.05, "stretch": 0.05, "c": "silver", "c2": "white"}]},
 		"heavy_hit": {"sfx": [{"n": "pin_heavy_hit", "db": -2.0}],

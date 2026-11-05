@@ -502,6 +502,8 @@ func _pin(a: Vector3, k: float) -> void:
 					m.fx.dust(f.pos, 10))
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))
 	vfx("heavy_go", h.pos, dir, {"k": k, "len": reach * (1.0 + 0.2 * k)})
+	# the release burst sits on the aim line at the bow, bigger than any bow cue, and a screen kick along the shot
+	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, HEAVY_GOLD, 0.08, 0.14, 1.0, 5.0)
 	heavy_kicks += 1
 
 func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:
