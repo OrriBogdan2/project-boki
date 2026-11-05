@@ -328,3 +328,39 @@ class Atlas:
         return (x + 0.5 + s * (w - 1)) / self.w, 1.0 - (y + 0.5 + t * (h - 1)) / self.h
 
 
+def blur(a, r):
+    k = 2 * r + 1
+    for ax in (0, 1):
+        c = np.cumsum(a, axis=ax)
+        c = np.concatenate((np.zeros_like(np.take(c, [0], ax)), c), axis=ax)
+        n = a.shape[ax]
+        hi = np.take(c, np.minimum(np.arange(n) + r + 1, n), ax)
+        lo = np.take(c, np.maximum(np.arange(n) - r, 0), ax)
+        span = (np.minimum(np.arange(n) + r + 1, n) - np.maximum(np.arange(n) - r, 0)).astype(np.float32)
+        a = (hi - lo) / (span[:, None] if ax == 0 else span[None, :])
+    return a
+
+
+RELIEF = {"wall_s": 1.3, "wall_d": 1.3, "wall_c": 1.3, "wall_h": 1.3, "lid": 1.3, "rail": 1.0, "brass": 0.7, "bell": 0.7, "knob": 0.6, "torso": 0.8, "peplum": 0.9,
+          "tail_v": 0.9, "tail_k": 0.9, "sleeve_k": 0.8, "sleeve_v": 0.8, "glove": 0.5, "hood": 0.8, "hornR": 0.9, "hornL": 0.9, "ruff": 1.4, "collar_v": 0.9, "collar_k": 0.9}
+
+
+def normal_map(at):
+    """the atlas's relief as a tangent-space normal map (OpenGL green): each patch's own painted light and shade taken as height, so plank
+    gaps, grain, cloth folds and ruff pleats catch the real light in the close view"""
+    h, w = at.img.shape[:2]
+    out = np.zeros((h, w, 3), np.float32)
+    out[..., 0] = out[..., 1] = 0.5
+    out[..., 2] = 1.0
+    for key, (x, y, rw, rh) in at.rect.items():
+        k = RELIEF.get(key, 0.0)
+        if k <= 0.0:
+            continue
+        lum = at.img[y:y + rh, x:x + rw].mean(axis=2).astype(np.float32)
+        lum = lum - blur(lum, 18) * 0.6
+        dx = np.gradient(lum, axis=1) * 6.0 * k
+        dy = np.gradient(lum, axis=0) * 6.0 * k
+        n = np.dstack((-dx, dy, np.ones_like(dx)))
+        n /= np.linalg.norm(n, axis=2, keepdims=True)
+        out[y:y + rh, x:x + rw] = n * 0.5 + 0.5
+    return out

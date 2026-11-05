@@ -107,7 +107,7 @@ def image(name, arr, path, fmt="JPEG"):
     return im
 
 
-def material(name, img, emit_img=None):
+def material(name, img, emit_img=None, normal=None):
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     bs = m.node_tree.nodes["Principled BSDF"]
@@ -121,6 +121,12 @@ def material(name, img, emit_img=None):
         t.image = emit_img
         m.node_tree.links.new(t.outputs[0], bs.inputs["Emission Color"])
         bs.inputs["Emission Strength"].default_value = 1.0
+    if normal is not None:
+        t = m.node_tree.nodes.new("ShaderNodeTexImage")
+        t.image = normal
+        nm = m.node_tree.nodes.new("ShaderNodeNormalMap")
+        m.node_tree.links.new(t.outputs[0], nm.inputs["Color"])
+        m.node_tree.links.new(nm.outputs[0], bs.inputs["Normal"])
     return m
 
 
@@ -277,6 +283,8 @@ def main():
     alb, emit = M.textures(768)
     tex = OUT + "/tex/"
     im_main = image("atlas", atlas.img, tex + "atlas.png")
+    im_nrm = image("normal", PT.normal_map(atlas), tex + "normal.png")
+    im_nrm.colorspace_settings.name = "Non-Color"
     im_glow = image("glow", aglow.img, tex + "glow.png")
     im_void = image("void", avoid.img, tex + "void.png")
     im_wisp = image("wisp", awisp.img, tex + "wisp.png")
@@ -288,7 +296,7 @@ def main():
     mats = {}
     for g, ps, at in pending:
         nm, mn, im = names[g]
-        mats[g] = material(mn, im)
+        mats[g] = material(mn, im, normal=im_nrm if g in ("cloth", "metal") else None)
         obs.append(make_part_object(nm, ps, at, mats[g]))
     # the face: its corners are already the face texture's
     fp = groups["leather-face"][0]

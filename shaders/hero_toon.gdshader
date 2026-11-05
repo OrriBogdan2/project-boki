@@ -11,6 +11,9 @@ shader_type spatial;
 uniform vec4 albedo : source_color = vec4(1.0);
 // a Warden's 3D model (WardenGlb): its painted atlas, multiplied by albedo (the player's colour pick)
 uniform bool use_tex = false;
+uniform bool use_normal = false;   // a painted model's normal map (fine surface detail: planks, folds, rivets)
+uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap, repeat_disable;
+uniform float normal_k = 1.0;
 // how much the sun's shadow map darkens this surface (1: fully). A scanned 3D Warden's smooth-shaded low-poly
 // surface catches self-shadow acne in triangle-shaped patches; its painted atlas carries its own shade instead
 uniform float self_shadow = 1.0;
@@ -138,6 +141,10 @@ void vertex() {
 }
 
 void fragment() {
+	if (use_normal) {
+		NORMAL_MAP = texture(normal_tex, UV).rgb;
+		NORMAL_MAP_DEPTH = normal_k;
+	}
 	vec3 c = albedo.rgb;
 	float heat = 1.0;
 	float far_k = smoothstep(8.0, 18.0, length(VERTEX));
