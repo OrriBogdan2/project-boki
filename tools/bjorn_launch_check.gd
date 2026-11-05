@@ -494,7 +494,8 @@ func _hold_spin() -> void:
 	P.inp["move"] = Vector2.ZERO
 	_ready_swing(m, P, T, home)
 	step(m, float(md["tap"]) + 0.1, press_at.bind(P, at))
-	step(m, 0.1, func(): P.inp["move"] = Vector2(0, 1); press_at(P, at))
+	P.inp["move"] = Vector2(0, 1)
+	step(m, 0.1, press_at.bind(P, at))
 	var z0 := P.pos.z
 	var walked := await _spun(m, P, K, at, 0.5, func(): P.inp["move"] = Vector2(0, 1)) / 0.5
 	var speed := absf(P.pos.z - z0) / 0.5
