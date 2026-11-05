@@ -570,3 +570,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 S2: six owner portraits received
 - briefs/art-refs/<hero>_portrait.png for lisette, kael, motley, cinder, grimble, breaker (+ breaker alt_determined). Queued as ext/portraits-six from main (HUD, character select, kill feed via the portraits pipeline). Merge note: ext/art1-hem and ext/art1-kael already replaced archer.jpg and juggernaut.jpg with splash crops; the owner's portraits win on conflict.
 - Queue: portraits (small), ART-1 Cinder, ART-1 Grimble, then Vex 68, gloves 69, glider 63, Claire 62+64+65.
+
+## 2026-11-05 S2: READY ext/rename-lisette 1228b324 (replaces 7341f61a)
+- Strings only, origin/main merged: Lisette the Red Stitch, Motley the Void Jester (he/him), Breaker "the Sunken Bulwark", Grimble the Scrap King. Wiki pages renamed: Class-Sunken-Bulwark, Class-Scrap-King. Ids, file names, art keys and code comments unchanged. No reserved-file lines. Checks 0 failures: import, --check, portrait 107, archetype 339, class-unlock 153, tutorial-hud, hero-title, health --strict, gen_wiki 34 unchanged. No in-game visual pass.
+- Left for a Grimble rewrite: gender is still "robot", the personality text is the old one, and his ult is still "Brass Broadside".
