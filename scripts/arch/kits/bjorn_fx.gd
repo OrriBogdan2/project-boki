@@ -46,7 +46,7 @@ const CHAIN_LINKS := 18
 const CHAIN_SAG := 0.5        # m at its deepest, once the hammer is far out
 const WRIST := "Rig/Torso/ArmRPivot/Elbow/Hand"
 const ORBIT_RISE := 0.45
-const WHIRL_HEAD_R := 0.89     # the skinned hammer's head from his axis in the hold clip (m, neutral; 1.78 in game)
+const WHIRL_HEAD_R := 1.09     # the skinned hammer's head from his axis in the hold clip (m, neutral; 2.18 in game)
 const ORBIT_TILT := 0.12
 const WHIRL_IN := 0.12
 ## the whirl's trail ribbon: inner and outer radius (m at scale 1), how far past the head's circle its outer
