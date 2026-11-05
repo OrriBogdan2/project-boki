@@ -7,7 +7,7 @@ extends RefCounted
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
-const MAX_TRIS := 20000         # ART-1: weapon and shield included
+const MAX_TRIS := 15000         # S1: weapon and shield included
 const GRIP_TOL := 0.03          # m: the weapon's bone stays this close to where the hand holds it
 const PREFIX := {"breaker": ["bulwark", "bul_"]}
 const SKIP := ["bul_smash_late"]
