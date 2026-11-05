@@ -496,7 +496,7 @@ def scan_reshape(ob):
     return W, ix
 
 
-SKIN_K = S.vec(0.7, 0.58, 0.5)
+SKIN_K = S.vec(0.64, 0.5, 0.42)
 ARM_L_GROW = 0.46
 ARM_R_SHRINK = 0.2
 HAIR_FAT = 0.011              # m the scan's thin locs grow along their normals (tarek_head: thick ropes)
@@ -537,10 +537,12 @@ def scan_slots(ob):
     tex.pixels.foreach_get(A)
     A = A.reshape(h, w, 4)[:, :, :3]
     # (the scan's skin is paler than the art: the peach texels take the sheet's brown, cloth and beads stay)
-    hi, lo = A.max(2), A.min(2)
+    B = A.copy()
+    for _ in range(5):          # (soft: judged over a few texels, so the mask has no speckle)
+        B = (B + np.roll(B, 1, 0) + np.roll(B, -1, 0) + np.roll(B, 1, 1) + np.roll(B, -1, 1)) / 5.0
+    hi, lo = B.max(2), B.min(2)
     sat = (hi - lo) / np.maximum(hi, 1e-3)
-    hue_ok = (A[:, :, 0] >= A[:, :, 1]) & (A[:, :, 1] >= A[:, :, 2]) & ((A[:, :, 1] - A[:, :, 2]) / np.maximum(hi - lo, 1e-3) > 0.3)
-    peach = hue_ok * S.sstep(0.14, 0.24, sat) * S.sstep(0.62, 0.5, sat) * S.sstep(0.45, 0.6, hi)
+    peach = S.sstep(0.2, 0.27, sat) * S.sstep(0.66, 0.56, sat) * S.sstep(0.4, 0.5, hi) * (B[:, :, 0] > B[:, :, 2])
     A2 = A * (1.0 + peach[:, :, None] * (SKIN_K - 1.0))
     full = np.ones((h, w, 4), np.float32)
     full[:, :, :3] = A2

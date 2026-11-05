@@ -376,7 +376,7 @@
 				"emit": 1.8,
 				"rim_far": 0.0,
 				"rim_amount": 0.2,
-				"desat": 0.7,
+				"desat": 0.3,
 				"far_lift": 0.2
 			},
 			"glow": {
