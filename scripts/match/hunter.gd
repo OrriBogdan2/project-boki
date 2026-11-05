@@ -680,6 +680,17 @@ func _build_marker() -> void:
 	_mk_str = Models.part(balloon, Models.cyl(0.012, 0.012, 1.0, 4), _mk_string, Vector3.ZERO, Vector3.ONE, Vector3.ZERO, "String")
 	_mk_str.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
+## Builds the hit-marker balloon hidden, with its materials, under the loading screen (Match.warm_up): built
+## lazily, its first showing in a fight compiled its shaders mid-frame (item 94's repeatable hitch).
+func warm_marker() -> void:
+	if balloon == null:
+		_build_marker()
+	var mats := _marker_mats(_marker_col())
+	_mk_ring.material_override = mats["ring"]
+	_mk_ball.material_override = mats["ball"]
+	_mk_knot.material_override = mats["knot"]
+	balloon.visible = false
+
 func _render_balloon(delta: float) -> void:
 	_mk_flash = maxf(0.0, _mk_flash - delta)
 	var kind := hit_marker() if visible and model and model.visible else ""
