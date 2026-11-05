@@ -19,6 +19,7 @@ const COMET_R := 1.7           # m: the orb's radius (the squad rides inside)
 const FAR_REDRAW := 3          # frames: a trail that isn't your squad's is redrawn this rarely
 const MUSIC_DUCK_DB := -10.0   # the score under the fall
 const MUSIC_HOLD_S := 1.2      # s, renewed while you fall
+const SHADOW_K := 0.12         # DropCam.wide above this: no sun shadows
 const TAG_K := 0.15            # DropCam.wide above this: name tags over you and your squad
 const ORB := """
 shader_type spatial;
@@ -70,6 +71,8 @@ var _phase := {}               # hunter nid -> 1 falling, 2 under the glider or 
 var _tags := {}                # hunter nid -> Label3D
 var _frame := 0
 var _duck_t := 0.0
+var _shadows_on := true
+var _shadow_lights: Array = []
 var _fog_base := -1.0          # the look's fog density, held while the wide view clears it
 var _wide_on := false
 var rush_k := 0.0              # (read by the checks) the rush this frame
@@ -193,6 +196,7 @@ func _wide_view(k: float) -> void:
 	if on != _wide_on:
 		_wide_on = on
 		get_tree().set_group("sky_shaft", "visible", not on)
+	_shadows(k <= SHADOW_K)
 	var e: Environment = m.env.environment if m.env else null
 	if e == null:
 		return
@@ -203,6 +207,23 @@ func _wide_view(k: float) -> void:
 		if not on:
 			e.fog_density = _fog_base
 			_fog_base = -1.0
+
+## The whole island in the frustum at once is the wide view's cost, and from up there its sun shadows
+## are a few pixels: the sun casts none while the camera is out.
+func _shadows(on: bool) -> void:
+	if on == _shadows_on:
+		return
+	_shadows_on = on
+	if on:
+		for l in _shadow_lights:
+			if is_instance_valid(l):
+				(l as DirectionalLight3D).shadow_enabled = true
+		_shadow_lights.clear()
+		return
+	for n in m.get_children():
+		if n is DirectionalLight3D and (n as DirectionalLight3D).shadow_enabled:
+			_shadow_lights.append(n)
+			(n as DirectionalLight3D).shadow_enabled = false
 
 ## A name tag over each of your squad still in the sky (it reads when they're specks), and "You".
 func _tag_squad() -> void:
