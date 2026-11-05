@@ -318,6 +318,7 @@ func warm_up(progress := Callable()) -> void:
 	times.sort()
 	if not times.is_empty():
 		Settings.note_benchmark(float(times[times.size() / 2]))
+	await DashPace.rehearse(self)
 	PerfLog.skip()
 
 ## Stand-ins drawn in the first batch of warm_up; later batches grow while a batch's frames stay
@@ -3557,7 +3558,7 @@ func _process(delta: float) -> void:
 		hitstop -= delta
 		_gather_input()
 		return
-	var d := minf(delta, 0.1)
+	var d := DashPace.frame_dt(self, minf(delta, 0.1))
 	if slowmo > 0.0:
 		slowmo -= d
 		d *= slow_k
