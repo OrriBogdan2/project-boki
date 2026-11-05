@@ -1067,7 +1067,7 @@ func _tick_base(dt: float) -> void:
 		cancel_base("your teammate can't take you")
 		return
 	var mv: Vector2 = inp.get("move", Vector2.ZERO)
-	if mv.length() > 0.2 or inp.get("fire", false) or inp["dash"] or inp["jump"] or inp["sig"] or inp["sec"] or inp["ult"] or inp.get("gear1", false) or inp.get("throw", false):
+	if mv.length() > 0.2 or inp.get("fire", false) or inp["dash"] or inp["jump"] or inp["sig"] or inp["sec"] or inp["ult"] or inp.get("gear1", false) or inp.get("gear2", false) or inp.get("throw", false):
 		cancel_base("you moved")
 		return
 	base_t -= dt
