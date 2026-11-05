@@ -1070,3 +1070,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - I viewed the nine-Hero sheet: no white materials, lost heads or missing atlases; each matches its own lane. Not checked: a live match with all nine, a real GPU, clips in motion.
 - One data change to review: tender.json dash_flow gets a jump -> rmb buffer row, because Pip's 1 s wind-up outlasts her hop [alternative: release the seed in the air, a kit change].
 - Lanes still to land on top: Kael (his crouch is ready), Breaker, Motley. Sheet: hero-shots-s2 art1/integ/.
+
+## 2026-11-05 21:00 UTC S2: ext/art1-kael 66733c22 pushed, NOT READY (about 60-65)
+- In: deep skin, near-black trousers, cooler silver, head welded, sword remodelled to kael_weapons.png, RMB hold level at head height (the strip looks right), crouch, Lunge pop red cleared, RIG_STANDARD says 1.08. Item 131 strip: hero-shots-s2 art1/kael/rmb_hold_strip.png.
+- Going back: the sword is too big again. My error: I told the lane to stop at the audit's 0.82, but item 131 measures against the master figure in kael_FINAL_sheet.png, about 0.6 by my rough read. So the audit's Kael row is not reliable as a target, and the "short -20%" in my 20:48 post was wrong.
+- Also open: a dark sliver floating at waist height, lower-torso mottling at the match camera, ember spots instead of fissures. 12+ conflicts with ext/art1-integ.
+- For review once settled: Lunge contact margin is now data (rmb.lunge.hit_r), raised from 0.6 to follow the new pose. Shared spring_hang chains changed.
