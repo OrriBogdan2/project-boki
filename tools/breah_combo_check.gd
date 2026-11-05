@@ -696,7 +696,8 @@ func _breah() -> void:
 	# ---- every move, sound and look exists
 	var moves := [
 		"breah_throw", "breah_wind", "breah_punch", "breah_crouch", "breah_leap", "breah_slam", "breah_dive",
-		"breah_slam_land", "breah_lunge", "breah_hop", "breah_skate", "breah_leap_land", "breah_exdash", "breah_raise", "breah_sense"
+		"breah_slam_land", "breah_lunge", "breah_hop", "breah_skate", "breah_leap_land", "breah_exdash",
+		"breah_raise", "breah_sense"
 	]
 	ok(
 		"anim: every Tarek move is keyed (KMovesStone)",
