@@ -1257,3 +1257,6 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 - The hair here is flat orange: **build it as living fire** (a flame shader + spring, per the master sheet).
 - Her figure / bust follows the master sheet, which is fuller than here.
 - The flames on the tank nozzles and the gauge come from the master sheet.
+
+## 2026-11-05 03:55 UTC (ext): Cinder splash: `briefs/art-refs/cinder_splash.png` (the burning potion workshop)
+
