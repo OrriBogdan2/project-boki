@@ -141,7 +141,7 @@
 			"fx": [{"p": "ember", "at": "feet", "shape": "disc", "radius": 0.7, "way": "up", "n": 22, "speed": 4.0, "spread": 0.1, "grav": -2.0, "life": 0.6, "size": 0.05, "c": "heal", "c2": "gold_hot"}]},
 		"riposte_reset": {"sfx": [{"n": "jug_ting", "db": -4.0, "pitch": 0.75}, {"n": "unlock", "db": -6.0, "pitch": 1.4}]},
 		"enrage": {"sfx": [{"n": "jug_enrage", "db": -1.0}],
-			"fx": [{"p": "flare", "at": "chest", "size": 3.0, "life": 0.3, "c": "rage", "c2": "hot"},
+			"fx": [{"p": "flare", "at": "chest", "size": 2.0, "life": 0.24, "c": "rage", "c2": "hot"},
 				{"p": "ember", "at": "chest", "n": 30, "speed": 6.0, "spread": 0.9, "grav": -2.0, "life": 0.6, "size": 0.07, "radius": 0.4, "c": "rage", "c2": "hot", "c3": "crimson"},
 				{"p": "ember", "at": "scarf", "radius": 0.22, "way": "back", "lift": 0.7, "n": 20, "speed": 4.0, "spread": 0.45, "grav": -1.2, "curl": 1.6, "life": 0.8, "size": 0.035, "c": "crimson", "c2": "hot", "c3": "crimson", "burst": 0.8}]},
 		"enraged": {"fx": [{"p": "ember", "at": "chest", "radius": 0.55, "way": "up", "n": 26, "speed": 2.4, "spread": 0.3, "grav": -2.0, "life": 0.65, "size": 0.08, "c": "rage", "c2": "hot", "c3": "crimson"},
