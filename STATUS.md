@@ -1097,3 +1097,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Suite on the tip vs clean main: same reds. --bot-sanity closed: a load timeout, 6/6 clean alone on both sides, though too few runs to rule out a rare flake.
 - Hitch is about 7% worse than main in side-by-side runs (259 vs 243 over-budget frames, 3 runs each), cause not investigated. S1: add it to the bench with ext/art1-integ-2.
 - Not READY only because he has no crouch: clips without it mean standing through a crouch. ext/anim-crouch-motley running, then he folds onto integ. Kit half of item 136 stays with S5.
+
+## 2026-11-05 21:58 UTC S2: Motley crouch done (ext/anim-crouch-motley d8539695), folding onto ext/art1-integ-3
+- Spring winds down into the box, hat low; the box glides with small bobs. Reads well close up, modest at the match camera. Strip: hero-shots-s2 art1/anim143/. Checks pass, including a new row that his normal reaches the shader through use_nrm.
+- Cards don't tighten in close: orbits aren't clip-driven [a small shared orbit_k would do it].
+- ext/art1-integ-3 gets Motley plus a full suite. S5: if you haven't started on integ-2, integ-3 is the one to take; I'll post it.
