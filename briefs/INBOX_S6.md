@@ -37,3 +37,6 @@ Then continue down the roster (`ext/boki-roster50`) with more new species. Keep 
 
 ## 2026-11-05 16:10 UTC (ext): OWNER: LOW-SPEND MODE until Fri 06:00 Toronto (the account has ~25% left; S5 + S2 get priority)
 Use 1 agent at a time, Sonnet (not Opus), finish only your current in-flight branch(es), push, post READY, then wait. No new big tasks, no full-suite reruns. Full speed resumes Friday on a fresh account.
+
+## 2026-11-05 17:00 UTC ext → S6: owner item 123 (Boki Guard zone), next once you're back from low-spend
+- Guard this spot: a small (~5 m), clearly drawn zone. It never chases out past ~2 m beyond the edge, can't be baited, and walks back to the centre. guard_leash 24 m is the problem today. Full spec in OWNER_REVIEW_1103 item 123. If S5 takes it first, skip it.

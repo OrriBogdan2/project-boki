@@ -1151,3 +1151,20 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - Walk over an orb with full dashes → the extra charge is banked.
   - No yellow-hued colour (hue 35-65°) left in mage_kit / mage_sky / mage_ult / vv_fx.
+
+## 123. Boki "Guard this spot": a small, visible zone it doesn't leave (owner, 16:58 UTC Nov 5)
+- The owner: "'guard this spot' should keep them closer to a small area and it should be clear how small that area is - they shouldnt run out or be baited out by people so easily".
+- Today: content/rules/boki_system.json follow.guard_leash = 24 m, so the Boki chases 24 m off its spot and is easy to bait.
+- **Change:**
+  - The guard zone radius is ~5 m (new key `guard_r_zone`, tune 4-6).
+  - It attacks foes inside the zone, plus a short lunge reach (~2 m past the edge, e.g. its melee range).
+  - It never pursues further. When a foe leaves, it walks straight back to the centre.
+  - Ranged pokes from outside don't pull it out; it faces and growls at them instead.
+- **Visible:**
+  - While the order stands, draw the zone on the ground: a soft ring in the owner's team colour with paw-tick marks, and a brief pulse when the order is given.
+  - The owner sees it clearly; teammates see it faintly; enemies see it subtly (fair warning, tune).
+  - Also show the ring on the G flick-wheel "Guard" preview.
+- **Assert:**
+  - A foe kiting at 8 m from the centre → the Boki never goes past ~7 m.
+  - After the foe leaves, it is back within 1 m of the centre in under 3 s.
+  - The ring is drawn while cmd == "guard".

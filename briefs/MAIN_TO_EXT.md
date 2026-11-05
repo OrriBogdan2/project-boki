@@ -1407,3 +1407,7 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 - The orb can always be grabbed, by walking over it as well as by Wirerun; with full dashes it banks +1 charge (skill reward).
 - Her electricity goes blue + pink, no gold/yellow anywhere in her kit.
 - Batch with 119-121.
+
+## 2026-11-05 17:00 UTC ext → S5: owner item 123 (Boki Guard zone)
+- Guard this spot: a ~5 m drawn zone, no chasing out (today guard_leash = 24 m), can't be baited.
+- S6 is idle on low spend until Fri 6am, so take it in this batch if you can. It's mostly kin.gd + boki_system.json + a ground ring.
