@@ -18,8 +18,7 @@ under fire), with a faint servo under the bad moments.
   gunslinger_step_<surface>  boots with a bandolier's jingle (3 takes each)
   gunslinger_hurt/down/death wordless voice
 
-The vn_* files were first written by tools/gen_vv_sfx.py; this script replaces them (content/sfx/
-gunslinger.json lists them under "replaces"). Original synthesis, no samples.
+It also writes the kit's vn_* files (content/sfx/gunslinger.json lists them under "replaces"). Original synthesis, no samples.
 """
 import os, sys
 import numpy as np

@@ -21,8 +21,7 @@ cheeky rubbery pop. Her voice is a young woman's, bright and brash.
   mage_step_<surface>        light boots, bangles, a static tick (3 takes each)
   mage_hurt/down/death       wordless voice
 
-The vv_* files were first written by tools/gen_vv_sfx.py; this script replaces them (content/sfx/
-mage.json lists them under "replaces"). Original synthesis, no samples.
+It also writes the kit's vv_* files (content/sfx/mage.json lists them under "replaces"). Original synthesis, no samples.
 """
 import os, sys
 import numpy as np

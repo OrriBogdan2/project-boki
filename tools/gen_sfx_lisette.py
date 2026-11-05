@@ -23,8 +23,7 @@ hollow shimmer for the shadow. Her voice is an adult woman's, cool and quiet, mo
   archer_step_<surface>          soft boots, a cloak's brush, now and then a needle's tick (3 takes each)
   archer_hurt/down/death         wordless voice
 
-The pin_* files were first written by tools/gen_pin_bjorn_sfx.py; this script replaces them (content/
-sfx/archer.json lists them under "replaces"). Original synthesis, no samples.
+It also writes the kit's pin_* files (content/sfx/archer.json lists them under "replaces"). Original synthesis, no samples.
 """
 import os, sys
 import numpy as np

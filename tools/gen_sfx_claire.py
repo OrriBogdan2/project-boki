@@ -5,7 +5,7 @@
 Her palette: glass-clear ice (inharmonic crystal partials), the dispersive "pew" of a cracking ice sheet,
 a steel blade scraping and biting ice, frosty air, and a wordless woman's voice, airy and siren-like,
 with a cold edge on down and death. Bright layers stay mostly under 6 kHz so a dart storm never hisses.
-Rewrites the rime_* sounds her kit plays (listed under "replaces"); tools/gen_care_sfx.py stays as is.
+Writes the rime_* sounds her kit plays (listed under "replaces").
 Original synthesis, no samples.
 """
 import os, sys

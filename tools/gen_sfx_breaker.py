@@ -24,8 +24,7 @@ huge man's, deep and warm, with a wet gurgle under the bad moments (he went down
   bulwark_step_<surface>        heavy sea boots, iron bands and a rattle of shells (3 takes each)
   bulwark_hurt/down/death       wordless voice
 
-The bjorn_* files were first written by tools/gen_pin_bjorn_sfx.py; this script replaces them (content/sfx/
-bulwark.json lists them under "replaces"). Original synthesis, no samples.
+It also writes the kit's bjorn_* files (content/sfx/bulwark.json lists them under "replaces"). Original synthesis, no samples.
 """
 import os, sys
 import numpy as np
