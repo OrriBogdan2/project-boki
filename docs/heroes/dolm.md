@@ -22,7 +22,7 @@ ride her hands (HunterAnim's "fist" hold), so every move's arm reach shows. Body
 forearms and fists, a short wide read); the medium hitbox 0.40 is kept (the fists are not body). Palette ochre stone `#d9a35b`
 with molten orange `#ff7a2a`. Payoff word ROCKFALL. Kit: `scripts/arch/kits/dolm_kit.gd`, the slam in `breah_slam.gd`,
 looks in `kit_looks.gd`, standing on rocks in `scripts/arch/stone_stand.gd`, moves in `scripts/match/kmoves_stone.gd`,
-sounds from `tools/gen_stone_sfx.py` (names in `scripts/core/sfx_kits.gd`).
+sounds from `tools/gen_sfx_tarek.py` (names in `scripts/core/sfx_kits.gd`).
 
 ## Scaling used (ratios from the source)
 - Boulder 9 (source 169); a launched rock 14, about 1.5x the boulder (source 244 vs 169, 1.45x). Punch 12-24 (source 199).
