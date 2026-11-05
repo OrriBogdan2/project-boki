@@ -1045,7 +1045,7 @@ var dash_t := 0.0
 var dash_v := Vector2.ZERO
 var dash_charges := 2.0
 var ex_cd := 0.0               # the long dash (Shift in the air, or with the short ones spent), as in a match
-var dash_pips: Control = null  # the stamina pips over your head, as in a match
+var dash_slot: HomeDashSlot = null  # the dash slot on screen, the match bar's own (DashSlot)
 var safe_at := Vector3(38.0, 0, 34.5)
 var glider_node: MeshInstance3D = null
 const HOME_ZOOM := 1.2         # the camera on arriving home: midway between close (0.8) and the widest the wheel goes (1.6)
@@ -1143,29 +1143,6 @@ func try_dash(mv: Vector2, air: bool) -> bool:
 	pvy = maxf(pvy, 0.0)
 	return true
 
-## The stamina pips over your head: one per dash charge (the next filling as it recharges), and the
-## long dash last, like the match HUD's.
-func _draw_dash_pips() -> void:
-	if dash_pips == null or player == null or cam == null or panel_open != "":
-		return
-	var at := player.position + Vector3(0, 2.3, 0)
-	if cam.is_position_behind(at):
-		return
-	var sp := cam.unproject_position(at)
-	if not sp.is_finite():
-		return
-	var dg := _dodge()
-	var n := int(dg["charges"]) + 1
-	var col := Color("ffd66a")
-	for i in n:
-		var cpt := sp + Vector2(-(n - 1) * 6.5 + i * 13, 0)
-		var fill := clampf(dash_charges - i, 0.0, 1.0) if i < n - 1 else 1.0 - ex_cd / maxf(0.1, float(dg["ex_cd"]))
-		dash_pips.draw_colored_polygon(PackedVector2Array([cpt + Vector2(0, -5), cpt + Vector2(5, 0), cpt + Vector2(0, 5), cpt + Vector2(-5, 0)]), Color(0.04, 0.04, 0.06, 0.8))
-		if fill >= 1.0:
-			dash_pips.draw_colored_polygon(PackedVector2Array([cpt + Vector2(0, -3.5), cpt + Vector2(3.5, 0), cpt + Vector2(0, 3.5), cpt + Vector2(-3.5, 0)]), col)
-		elif fill > 0.0:
-			dash_pips.draw_arc(cpt, 3.0, -PI * 0.5, -PI * 0.5 + TAU * fill, 10, Color(col, 0.6), 2.0)
-
 func start_dash(dir: Vector2, speed: float, time: float) -> void:
 	if dir.length() < 0.1:
 		dir = Vector2(-sin(pface), -cos(pface))
@@ -1207,7 +1184,8 @@ func _move_player(d: float) -> void:
 	var crouching := crouch_on and not air and dash_t <= 0.0 and not gliding and wdep == 0
 	p_crouch_k = move_toward(p_crouch_k, 1.0 if crouching else 0.0, d * 8.0)
 	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0 and not water.swimming:
-		try_dash(mv, air)
+		if not try_dash(mv, air) and dash_slot:
+			dash_slot.deny()
 	_mv = mv
 	var hv := Vector2(pvel.x, pvel.z)
 	if dash_t > 0.0:
@@ -1318,17 +1296,11 @@ func _move_player(d: float) -> void:
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
 	p_anim.update(d, ps)
-	if (dash_pips == null or not is_instance_valid(dash_pips)) and ui:
-		dash_pips = Control.new(); dash_pips.name = "DashPips"
-		dash_pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		dash_pips.set_anchors_preset(Control.PRESET_FULL_RECT)
-		dash_pips.draw.connect(_draw_dash_pips)
-		ui.add_child(dash_pips)
-		ui.move_child(dash_pips, 0)
-	if is_instance_valid(dash_pips):
-		var dg0 := _dodge()
-		dash_pips.visible = dash_charges < float(dg0["charges"]) or ex_cd > 0.0
-		if dash_pips.visible: dash_pips.queue_redraw()
+	if dash_slot == null and ui:
+		dash_slot = HomeDashSlot.new()
+		dash_slot.home = self
+		ui.add_child(dash_slot)
+		ui.move_child(dash_slot, 0)
 	if p_anim.stepped:
 		Sfx.step(null, -20.0)
 
