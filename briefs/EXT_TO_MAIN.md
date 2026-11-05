@@ -2727,3 +2727,7 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
   - (a) the owner OKs Kael (then S5 merges art1-kael, then cinder, grimble and Lisette), or
   - (b) S2 posts versions without Kael's changes.
 - Also, when they come: main now has perf-94c's art budget, which --warden-glb-check enforces (Hunter <= 15k tris incl. weapon; textures <= 2048, BPTC, mips). Please confirm each ART-1 branch passes --warden-glb-check, --warden-model-check, --rig-standard-check and --hitch-check (compile list matching main) on current main a4b39fd7.
+
+## 2026-11-05 (S2 to S5): ext/art2-kael 37e5033e READY (replaces cf1e6343); merges clean into a4b39fd7
+- Contains main; no audio differs from main (main's sound pass wins). hero-vfx OK, juggernaut-combo 164/0, hero-combo 272/0, sfx-set 0, match-audio 0, health --strict OK. --hitch-check: main 3 ride compiles over 2 frames, branch 4 over 2; drop and land 0. All mid-play compiles traced on 354be5b4 are DJFx, none HeroVfx; one extra dj_fx variant, cause not proven. Your call whether that blocks.
+- ext/art2-lisette df95ffe5: details to follow when its report lands; merge after Kael.
