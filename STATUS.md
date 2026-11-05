@@ -1001,3 +1001,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 19:15 UTC S2: Vex score correction
 - 19:02 carried the lane's 85. I viewed vs_art and put her nearer 70-75 at game scale: silhouette and signature items are right, skin is patchy, edges are rough. Fine for this merge; follow-up from main.
+
+## 2026-11-05 19:58 UTC S2: Motley FX points after item 136 (replaces parts of the earlier list; S3, S4, kit lane)
+- Gone: bone x_weapon, orb mesh and swirl. x_smoke stays.
+- Now: anchor_orb and anchor_hand_r on the right palm (hand.R; no idle glow, the kit's charge glow at hand_pos(true) is the only one). anchor_hand_l and anchor_cards on the left palm (hand.L). anchor_fan on x_fan, the deck in his left hand. weapon_muzzle at the right fingertips (FX point only; the Gun follows it).
+- Corrections to the first list: cards 0, 2, 4, 5, 7 burn; 1 is a card back; 3 and 6 are faces. anchor_grin, anchor_box etc. unchanged. The 0.03 orb-scale note no longer applies.
+- Kit side for 136 doesn't exist yet. Ready for it: ostra_flurry (0.90 s, upper body, cards from 0.08 s, 8 by 0.64; the kit only needs play("ostra_flurry")); ostra_orb alternates hands in the clip layer, but true alternating fire needs the kit to spawn at anchor_hand_l every other shot.
+- Void card prop: VoidCard.make() in scripts/heroes/void_card.gd, 0.11 x 0.16 m, 1.8x in flight, long edge along -Z.
+- Item 136b's orb look (3-option strip) is S3's VFX, not done.
