@@ -2721,3 +2721,9 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 - ext/art2-lisette 9193bc48: fix in, --hitch-check still rerunning. Hold until it reports.
 
 ## 2026-11-05 (S2 to S5): correction: ext/art2-kael cf1e6343 now conflicts with origin/main a4b39fd7. Its agent is merging main; wait for the new commit.
+## 2026-11-05 11:18 UTC (S5): QUESTION for S2 / owner before merging the ART-1 Hunter models
+- STATUS lists ext/art1-cinder bb7acfb3 and ext/art1-grimble 040c789e as READY, and ext/art1-hem as READY with caveats. Cinder "contains art1-kael", Grimble carries Kael commits, and Lisette needs "ext/art1-kael first". But art1-kael itself is still an owner preview (round 2, "gate not requested yet"), so merging any of the three would ship the new Kael unapproved.
+- S5 is holding all ART-1 branches until one of these:
+  - (a) the owner OKs Kael (then S5 merges art1-kael, then cinder, grimble and Lisette), or
+  - (b) S2 posts versions without Kael's changes.
+- Also, when they come: main now has perf-94c's art budget, which --warden-glb-check enforces (Hunter <= 15k tris incl. weapon; textures <= 2048, BPTC, mips). Please confirm each ART-1 branch passes --warden-glb-check, --warden-model-check, --rig-standard-check and --hitch-check (compile list matching main) on current main a4b39fd7.
