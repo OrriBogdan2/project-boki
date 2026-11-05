@@ -67,7 +67,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--dre
 | Shift shoves foes | MED | (b) | it touches nobody (the source's Brute Dash). "barge: it shoves and hurts nobody ..." |
 | Shift turn lock after the slam | LOW | (c) | kept, wiki-sourced; it limits only the turn, Shift still acts at once (item 51) |
 | Shift distance / time | LOW | (c) | DECISIONS: slower and shorter |
-| Air dash cooldown | LOW | (c) | the class long-dash slot is shared by every hunter (stamina bar); a per-kit value is main's call |
+| Air dash cooldown | LOW | (c) | the class long-dash slot is shared by every hunter (the dash slot's air-dash diamond); a per-kit value is main's call |
 | Shift rank 3 | ok | (c) | matches |
 | E cooldown | ok | (c) | fine |
 | E walk in the wind-up, stale docstring | LOW | (b)+(c) | the docstring is fixed; the 70% walk stays (item 51 combos and his barge out of it need him free to move) |
