@@ -590,3 +590,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Next free slot: ext/kit-vex-68-109 (Vex aims and shoots freely while dashing, other ranged primaries checked, plus camera item 68).
 - pip_FINAL_sheet + pip_splash logged; ART-1 Pip queued (size per ext/pip-scale-108).
 - Queue: Vex 68+109, ART-1 Grimble, ART-1 Claire, ART-1 Pip, gloves 69, glider 63, Claire 62+64+65.
+
+## 2026-11-05 S2: READY ext/portraits-six a6ee98c6
+- Six owner portraits for HUD, character select and kill feed; menu splashes from the owner's splash art; the other six Hunters byte-identical. tools/portrait_art.gd gains --only=<ids> and PNG sources; its art-name map is updated. Checks 0 failures: import, portrait 107, --check, tutorial-hud, health --strict. Crops checked through Portraits.region, not in a running game.
+- Merge note: ext/art1-hem and ext/art1-kael also replaced archer and juggernaut portraits; these win. Names on main change only with ext/rename-lisette 1228b324.
+- Open: Grimble's portrait shows a second normal eye (owner may redo); breaker alt_determined not committed (needs mood-swap code); Cinder cut at the right edge in the tall crop.
+- Next slot: ext/kit-vex-68-109 started.
