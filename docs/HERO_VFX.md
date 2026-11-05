@@ -28,7 +28,7 @@ named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_
 | `skirt` | a wall of flame growing out | `size`, `from`, `tall`, `arc` (share of the circle) |
 | `flare` | a ragged burst facing the camera | `size`, `grow` |
 | `ribbon` | a mesh trail following an anchor | `at`, `life`, `tail` s, `size` width |
-| `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor), or the kit's `o.to` (a Vector3; local only, other games use `len`) |
+| `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor, or `here` / `h` raised by `to_y`: a strike out of the sky), or the kit's `o.to` (a Vector3; local only, other games use `len`) |
 | `vortex` | a ground disc spinning inward to a dark core (`c3`) | `size` radius, `spin` turns/s (negative: the other way), `grow` |
 | `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` | GPU particles: hot streaks, puffs, dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather, `burst` 1 all at once .. 0 over the life |
 
