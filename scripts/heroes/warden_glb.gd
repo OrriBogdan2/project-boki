@@ -674,6 +674,9 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 			if src and src.albedo_texture:
 				m.set_shader_parameter("albedo_tex", src.albedo_texture)
 				m.set_shader_parameter("use_tex", true)
+				if src.normal_enabled and src.normal_texture:
+					m.set_shader_parameter("nrm_tex", src.normal_texture)
+					m.set_shader_parameter("use_nrm", true)
 				m.set_shader_parameter("albedo", _tint(slot, lk, warden))
 				for k in PAINTED:
 					m.set_shader_parameter(k, PAINTED[k])

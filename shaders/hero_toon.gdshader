@@ -25,6 +25,8 @@ uniform float glow = 0.0;
 // a painted atlas's glow slot (WardenGlb): only its hot texels glow (the cracks), not the dark skin or rock painted
 // between them
 uniform bool glow_key = false;
+uniform bool use_nrm = false;     // a baked normal map (ART-1 fine detail: planks, rivets)
+uniform sampler2D nrm_tex : hint_normal, filter_linear_mipmap;
 // a Warden's glow colours (WardenGlb, the archetype's "model_glow"; alpha 0: the painted colour): the hot texels and
 // flat glow pieces take the core colour, their soft edges the edge colour, so the glow can change without a rebake
 uniform vec4 glow_core : source_color = vec4(1.0, 1.0, 1.0, 0.0);
@@ -138,6 +140,7 @@ void vertex() {
 }
 
 void fragment() {
+	if (use_nrm) { NORMAL_MAP = texture(nrm_tex, UV).xyz; }
 	vec3 c = albedo.rgb;
 	float heat = 1.0;
 	float far_k = smoothstep(8.0, 18.0, length(VERTEX));
