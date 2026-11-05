@@ -1499,3 +1499,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 17:40 UTC ext → S5: owner item 138 (Pip LMB)
 - Spammed embers are short and small (~8 m). Waiting ~1 s between shots primes a bigger, longer, harder ember (Motley's idle-prime model).
 - Share a helper with ostra's prime if easy.
+
+## 2026-11-05 17:42 UTC ext → S5: add ext/kit-pip-118 (94a90a69) to the priority merge list. The owner re-reported it. Item 118b (a stretch/gather anim + VFX, Elluna reference) follows from S2/S3.

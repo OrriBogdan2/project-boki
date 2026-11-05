@@ -1485,3 +1485,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - A spam ember range ≤ ~8 m.
   - An ember after a 1.2 s idle: range ≥ today's, size and damage greater.
   - Kindle +2 on a primed hit.
+
+## 118b. Pip RMB wind-up: a stretch-and-gather animation, Elluna as the reference (owner reiterates, 17:25 UTC Nov 5)
+- The owner: "rmb needs a windup time and shouldn't be holdable - like a 1s windup (maybe 1.5) where she does like a stretching motion to get the energy then shoots it at someone - look at elluna for reference".
+- The mechanics are already done on `ext/kit-pip-118` (94a90a69: a fixed 1 s wind-up, then an auto-throw on the aim at that moment). It is NOT merged, so S5 merges it with the priority branches.
+- **Add the animation and VFX** (S2 anim, S3 VFX):
+  - Over the wind-up (1.0 s; tune to 1.2 if 1.0 feels rushed, max 1.5) she stretches: arms sweep up and out, rising onto her toes, light motes drawn in from around her into her lantern/hands (a gather), a swelling glow.
+  - Then a snap forward release.
+  - Elluna-like: a graceful, readable channel that enemies can see coming.
+  - A rising gather sound into a bright release.
+- **Assert:**
+  - The anim length matches the wind-up.
+  - The gather VFX is visible to enemies.
+  - Hold or release timing doesn't change it.

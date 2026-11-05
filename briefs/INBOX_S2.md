@@ -1555,3 +1555,7 @@ The owner says the weapons look oversized and out of place.
 - Before or with the ART-1 merges, make one contact sheet with all 12 in-game weapons next to their `_weapons.png` refs, and fix the oversized ones.
 - The checklist now has a mandatory "Weapon scale + fit" row.
 - Grimble: build his weapon from the Grimble sheet, not Dredge's.
+
+## 2026-11-05 17:42 UTC ext → S2: item 118b (Pip RMB wind-up anim)
+- A 1.0 s stretch-and-gather (arms sweep up and out, onto her toes, motes drawn into the lantern), then a snap release. Elluna-style channel.
+- The mechanics are on ext/kit-pip-118. Small; slot it after Kael 131.
