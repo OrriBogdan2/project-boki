@@ -1,7 +1,8 @@
 extends RefCounted
-## --pip-live-check: Pip's clips through the real match code: a Match, her Hunter, the kit's own presses and the render path
-## (Hunter.render, HunterAnim, Sync). LMB and E play their clips, the lantern stays hanging under her right hand, and the
-## gold constellations brighten while she heals, then fall back. A knock-out plays the death clip on screen.
+## --pip-live-check: Pip's clips through the real match code: a Match, her Hunter, the kit's own
+## presses and the render path (Hunter.render, HunterAnim, Sync). E plays its clip, the lantern
+## hangs under her right hand, the gold constellations brighten while she heals and fall back.
+## A knock-out plays the death clip on screen.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -55,12 +56,14 @@ func run(main: Node) -> void:
 		peak = maxf(peak, _emit(P))
 		await main.get_tree().process_frame
 	ok(seen.has("hearth"), "Hearthlight plays its clip (%s)" % str(seen.keys()))
-	ok(rest > 0.0 and peak > rest * 1.5, "the constellations brighten while she heals (%.2f -> %.2f)" % [rest, peak])
+	ok(rest > 0.0 and peak > rest * 1.5,
+			"the constellations brighten while she heals (%.2f -> %.2f)" % [rest, peak])
 	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
 	var bi := sk.find_bone("spring_hanglantern_0")
 	var a := sk.get_bone_global_pose(bi).origin
 	var b := sk.get_bone_global_pose(sk.find_bone("spring_hanglantern_1")).origin
-	ok((b - a).normalized().dot(Vector3.DOWN) > 0.6, "the lantern hangs (%.2f of straight down)" % (b - a).normalized().dot(Vector3.DOWN))
+	var down := (b - a).normalized().dot(Vector3.DOWN)
+	ok(down > 0.6, "the lantern hangs (%.2f of straight down)" % down)
 	P.lives = 1
 	m.eliminate(P, T, "finished")
 	var dead_seen := false
