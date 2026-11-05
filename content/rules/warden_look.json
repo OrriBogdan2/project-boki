@@ -821,10 +821,11 @@
 				"far_lift": 0.3
 			},
 			"hair": {
-				"far_lift": 0.5,
-				"fres": 0.6,
-				"glow": 0.12,
-				"top_light": 0.4
+				"vertex_ao": true,
+				"far_lift": 0.2,
+				"fres": 0.25,
+				"glow": 0.0,
+				"top_light": 0.25
 			},
 			"metal": {
 				"top_light": 0.5,

@@ -65,8 +65,8 @@ def ramp(t, cols):
     return c[i] * (1 - f) + c[i + 1] * f
 
 
-SKIN = [hexc("#21131a"), hexc("#3a2428"), hexc("#573a39"), hexc("#775450"), hexc("#967267")]
-CLOTH = [hexc("#1f070e"), hexc("#3c0f19"), hexc("#5c1824"), hexc("#7a2430"), hexc("#963a40")]
+SKIN = [hexc("#2d1c22"), hexc("#4a2f31"), hexc("#694744"), hexc("#88625a"), hexc("#a98370")]
+CLOTH = [hexc("#1c070d"), hexc("#340d16"), hexc("#4e1520"), hexc("#68202b"), hexc("#84333a")]
 GOLD = [hexc("#6e4410"), hexc("#b57a1c"), hexc("#e6ab34"), hexc("#ffd468"), hexc("#fff0b0")]
 IRON = [hexc("#1e1b1f"), hexc("#3a363a"), hexc("#5b5659"), hexc("#7f7a7b"), hexc("#b0abaa")]
 RUST = hexc("#6a3a24")
@@ -91,13 +91,12 @@ def face(p, ao):
     avg = sum(K.head_sdf(q + np.array(o) * w) for o in ([1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1])) / 4 - d0
     cav = smooth(0.0, 0.0028, avg)
     ridge = smooth(0.0, 0.0022, -avg)
-    t = lit(n, ao) * (1 - 0.55 * cav) + 0.14 * ridge
+    t = (lit(n, np.maximum(ao, 0.9)) + 0.12) * (1 - 0.5 * cav) + 0.16 * ridge
     # the socket's deep shadow, and a scowl's line from the nose wing up to the brow
     for s in (-1.0, 1.0):
         r = np.linalg.norm((q - [s * 0.037, 0.08, 0.008]) / [0.03, 1, 0.024] * [1, 0, 1], axis=-1)
         t = t * (0.72 + 0.28 * smooth(0.65, 1.2, r))
-    c = ramp(t * 1.08, SKIN)
-    return c
+    return ramp(t * 0.78, SKIN)
 
 
 def eye(a, b):
@@ -115,7 +114,7 @@ def eye(a, b):
 
 
 def lid(p, n, ao):
-    return ramp(np.clip(lit(n, ao) * 0.72, 0, 1), SKIN)
+    return ramp(np.clip(lit(n, np.maximum(ao, 0.85)) * 0.85, 0, 1), SKIN)
 
 
 def cloth(p, n, ao, fold_axis=(0, 0, 1)):
@@ -182,7 +181,7 @@ def hair_tile(h, w, seed=3):
     warp = (fbm(np.stack([u * 5, v * 2.0, u * 0 + 2.0], -1)) - 0.5) * 0.09
     st = np.abs(np.sin((u + warp) * np.pi * 15))
     fine = np.abs(np.sin((u + warp * 1.4) * np.pi * 43))
-    t = 0.56 + 0.40 * smooth(0.05, 0.7, st) + 0.14 * (fine - 0.5)
+    t = 0.42 + 0.46 * smooth(0.05, 0.75, st) + 0.18 * (fine - 0.5)
     t -= 0.4 * (1 - smooth(0.0, 0.16, v))                  # the root in shadow
     t += 0.13 * np.exp(-((v - 0.42 - warp) / 0.11) ** 2)   # the band of light
     t *= 1 - 0.28 * (np.abs(((u * 4) % 1) * 2 - 1) ** 5)   # each sub-tile darkens to its long edges
@@ -249,7 +248,7 @@ def crack_map(W=1400, H=1000):
         for i in range(len(ln) - 1):
             n = max(2, int(np.hypot(rows[i + 1] - rows[i], (cols[i + 1] - cols[i] + W / 2) % W - W / 2)))
             k = i / (len(ln) - 1)
-            r = (9.0 + 13.0 * wd) * (1.0 - 0.45 * k)
+            r = (5.0 + 8.0 * wd) * (1.0 - 0.45 * k)
             for q in np.linspace(0, 1, n):
                 rr = rows[i] * (1 - q) + rows[i + 1] * q
                 dc = (cols[i + 1] - cols[i] + W / 2) % W - W / 2
@@ -295,7 +294,7 @@ def blade_paint(a, c, h, n, ao, ol_w):
             bid = np.where(nb, jx, bid)
             best = np.where(nb, d, best)
     t = lit(n, ao) * 0.92 + (bid - 0.5) * 0.22 + (fbm(p * 2.7) - 0.5) * 0.18
-    c0 = ramp(np.clip(t, 0, 1), [hexc("#17151a"), hexc("#322e33"), hexc("#555053"), hexc("#7f7a7a"), hexc("#b3adaa")])
+    c0 = ramp(np.clip(t, 0, 1), [hexc("#2a272c"), hexc("#494549"), hexc("#6b6668"), hexc("#918c8b"), hexc("#c0bab6")])
     seam = 1 - smooth(0.0, 0.1, sec - best)
     c0 = mix(c0, hexc("#100d10"), seam * 0.8)
     return c0

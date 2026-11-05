@@ -30,7 +30,7 @@ def head_sdf(p):
         d = smin(d, sd_ell(p, (s * 0.056, 0.058, -0.024), (0.022, 0.022, 0.014)), 0.014)     # cheekbone
         d = smax(d, -sd_ell(p, (s * 0.037, 0.095, 0.009), (0.023, 0.021, 0.0185)), 0.008)    # the socket
     d = smin(d, sd_cap(p, (0, 0.082, 0.016), (0, 0.104, -0.03), 0.0105), 0.012)              # the nose bridge
-    d = smax(d, -sd_cap(p, (0, 0.104, 0.048), (0, 0.104, 0.020), 0.0032), 0.004)             # the frown furrow
+    d = smax(d, -sd_cap(p, (0, 0.11, 0.04), (0, 0.11, 0.016), 0.0026), 0.005)             # the frown furrow
     return d
 
 
@@ -177,7 +177,7 @@ def cowl():
     """The scarf's cowl: rolled folds round the neck, then a torn drape over the chest and shoulders."""
     cols = 22
     # (z, half width, half depth, y): the profile from under the chin to the drape's hem
-    prof = [(1.335, 0.078, 0.082, 0.012), (1.305, 0.088, 0.090, 0.012), (1.280, 0.112, 0.112, 0.010),
+    prof = [(1.318, 0.074, 0.08, 0.012), (1.296, 0.084, 0.088, 0.012), (1.276, 0.108, 0.108, 0.010),
             (1.262, 0.128, 0.125, 0.008), (1.247, 0.128, 0.122, 0.010), (1.232, 0.142, 0.132, 0.014),
             (1.213, 0.170, 0.146, 0.012), (1.192, 0.196, 0.154, 0.010), (1.168, 0.205, 0.152, 0.006)]
     rows = len(prof)
@@ -463,12 +463,12 @@ def mane():
     tile = lambda i: (i * 0.25) % 1.0
     # the crown: swept up off a centre part, then back and out, tips flying past the silhouette
     for s in (1.0, -1.0):
-        add("crown_a%d" % s, [(s * .012, .094, 1.515), (s * .05, .095, 1.568), (s * .105, .065, 1.585), (s * .160, .010, 1.555),
+        add("crown_a%d" % s, [(s * .012, .094, 1.515), (s * .05, .095, 1.552), (s * .105, .065, 1.558), (s * .160, .010, 1.535),
                                (s * .212, -.02, 1.490)], .058, rings=7, wide=True, tile=tile(0), group=None)
-        add("crown_b%d" % s, [(s * .012, .070, 1.530), (s * .040, .050, 1.600), (s * .090, -.005, 1.618),
-                               (s * .150, -.070, 1.590), (s * .205, -.115, 1.555)], .060, rings=7, wide=True, tile=tile(1))
-        add("crown_c%d" % s, [(s * .010, .020, 1.545), (s * .022, -.030, 1.618), (s * .040, -.100, 1.622),
-                               (s * .066, -.165, 1.585), (s * .100, -.200, 1.60)], .056, rings=6, wide=True, tile=tile(2))
+        add("crown_b%d" % s, [(s * .012, .070, 1.530), (s * .040, .050, 1.561), (s * .090, -.005, 1.568),
+                               (s * .150, -.070, 1.55), (s * .205, -.115, 1.525)], .060, rings=7, wide=True, tile=tile(1))
+        add("crown_c%d" % s, [(s * .010, .020, 1.545), (s * .022, -.030, 1.568), (s * .040, -.100, 1.566),
+                               (s * .066, -.165, 1.54), (s * .100, -.205, 1.555)], .056, rings=6, wide=True, tile=tile(2))
         add("temple_a%d" % s, [(s * .070, .078, 1.505), (s * .118, .060, 1.500), (s * .150, .025, 1.455), (s * .168, -.005, 1.395),
                                (s * .205, -.015, 1.350)], .050, rings=6, wide=True, tile=tile(3), group=None)
         add("temple_b%d" % s, [(s * .085, .040, 1.530), (s * .145, .010, 1.530), (s * .195, -.030, 1.485), (s * .235, -.050, 1.445)],
@@ -501,9 +501,9 @@ def mane():
             group=g, hint=np.array([0, -1.0, 0.1]))
     # below the shoulders the whole mane gathers in behind the back (the turnaround's narrow fall)
     for p in locks:
-        k = 0.24 * smooth(1.36, 1.0, p.v[:, 2])
+        k = 0.34 * smooth(1.44, 1.12, p.v[:, 2])
         p.v[:, 0] *= 1 - k
-        p.path[:, 0] *= 1 - 0.24 * smooth(1.36, 1.0, p.path[:, 2])
+        p.path[:, 0] *= 1 - 0.34 * smooth(1.44, 1.12, p.path[:, 2])
     cap = hair_cap()
     return [cap] + locks
 

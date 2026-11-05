@@ -19,6 +19,40 @@ class Piece:
         self.w = {bone: np.ones(len(self.v))}
         return self
 
+    def orient(self, ref=None):
+        """Winds each connected part outward: from `ref` for an open sheet (a point inside the shape it lies on), from its
+        own centre for a closed part. Corner UVs turn with the faces."""
+        n = len(self.v)
+        par = list(range(n))
+
+        def find(a):
+            while par[a] != a:
+                par[a] = par[par[a]]
+                a = par[a]
+            return a
+        for q in self.f:
+            r = find(q[0])
+            for x in q[1:]:
+                par[find(x)] = r
+        comp = {}
+        for i, q in enumerate(self.f):
+            comp.setdefault(find(q[0]), []).append(i)
+        for ids in comp.values():
+            pts = self.v[sorted({x for i in ids for x in self.f[i]})]
+            c = pts.mean(0) if ref is None else np.asarray(ref, dtype=np.float64)
+            vol = 0.0
+            for i in ids:
+                q = self.f[i]
+                a = self.v[q[0]] - c
+                for k in range(1, len(q) - 1):
+                    vol += np.dot(a, np.cross(self.v[q[k]] - c, self.v[q[k + 1]] - c))
+            if vol < 0:
+                for i in ids:
+                    self.f[i] = self.f[i][::-1]
+                    if self.uv is not None:
+                        self.uv[i] = self.uv[i][::-1]
+        return self
+
     def tris(self):
         return sum(len(q) - 2 for q in self.f)
 

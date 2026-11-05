@@ -65,11 +65,13 @@ bm.faces.ensure_lookup_table()
 bm.verts.ensure_lookup_table()
 dl = bm.verts.layers.deform.verify()
 hid = [next(i for i, g in gid.items() if g == s) for s in ("hand.L", "hand.R")]
+hipg = next(i for i, g in gid.items() if g == "hips")
 kill, skirt = [], []
 for f in bm.faces:
     c = f.calc_center_median()
     hw = max(sum(v[dl].get(h, 0.0) for h in hid) for v in f.verts)
-    if c.z > 1.26 or hw > 0.5:
+    loose = abs(c.x) > 0.2 and c.z < 0.76 and all(v[dl].get(hipg, 0.0) > 0.5 for v in f.verts)  # (a3's cut-off hand)
+    if c.z > 1.26 or hw > 0.5 or loose or (abs(c.x) > 0.15 and 0.5 < c.z < 0.705):
         kill.append(f)
     elif "cloth" in mname[f.material_index] and c.z < 0.77:
         skirt.append(f)
@@ -89,6 +91,7 @@ for ob, keep in ((low, False), (sk, True)):
     drop = [f for f in bm.faces if (("cloth" in mname[f.material_index] and f.calc_center_median().z < 0.77) != keep)]
     bmesh.ops.delete(bm, geom=drop, context="FACES")
     bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0008)     # (the glTF split the scan at its UV seams)
     bm.to_mesh(ob.data)
     bm.free()
 
@@ -106,6 +109,21 @@ def decimate(ob, tris):
 
 decimate(low, LOW_TRIS)
 decimate(sk, SKIRT_TRIS)
+# the plates' faces all look out from the body (the game culls back faces)
+bm = bmesh.new()
+bm.from_mesh(sk.data)
+bm.faces.ensure_lookup_table()
+flip = 0
+for f in bm.faces:
+    c = f.calc_center_median()
+    c.z = 0
+    if f.normal.dot(c) < 0:
+        f.normal_flip()
+        flip += 1
+bm.normal_update()
+bm.to_mesh(sk.data)
+bm.free()
+print("skirt faces turned", flip)
 for o in (low, sk):
     print(o.name, "tris", sum(len(p.vertices) - 2 for p in o.data.polygons))
 bpy.ops.wm.save_as_mainfile(filepath=OUT)
