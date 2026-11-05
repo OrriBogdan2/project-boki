@@ -253,8 +253,8 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 218,
-"nested_ternary": 33,
+"long_line": 212,
+"nested_ternary": 29,
 "semicolon": 248,
 "shadow": 3
 },
@@ -265,7 +265,7 @@
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
-"long_line": 41,
+"long_line": 40,
 "nested_ternary": 5,
 "semicolon": 41,
 "shadow": 1
@@ -640,7 +640,7 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 230,
+"long_line": 229,
 "nested_ternary": 20,
 "semicolon": 146,
 "shadow": 9
@@ -1189,8 +1189,8 @@
 "semicolon": 11
 },
 "tools/teammate_check.gd": {
-"long_line": 30,
-"semicolon": 26
+"long_line": 29,
+"semicolon": 24
 },
 "tools/title_check.gd": {
 "long_line": 7,

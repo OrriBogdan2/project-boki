@@ -2073,17 +2073,17 @@ func my_ping() -> Dictionary:
 		if player and pg.get("by") == player: return pg
 	return {}
 
-func kin_bark(k: Kin, txt: String, cat: String, life := 2.6) -> void:
+func kin_bark(k: Kin, txt: String, cat: String, life := 0.0) -> void:
 	if tut and tut.card_up():
 		return        # (the tutorial banner has the floor)
 	for b in bubbles:
 		if b["ent"] == k:
 			bubbles.erase(b); break
-	bubbles.append({"ent": k, "text": txt, "t": 0.0, "cat": cat, "life": maxf(life, 2.6 + txt.length() * 0.02)})
+	bubbles.append({"ent": k, "text": txt, "t": 0.0, "cat": cat, "life": maxf(life, BokiLines.bubble_s())})
 	if k.owner_h == player:
 		var s := "kin_happy"
 		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore", "low_hp", "yelp", "comfort", "sniper"]: s = "kin_unsure"
-		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "cover"]: s = "kin_alert"
+		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm", "cover"]: s = "kin_alert"
 		sfx(s, null, -3.0, Unique.voice(k.rec))     # in its own voice, above the louder combat layer
 	elif player and k.owner_h and k.owner_h.team == player.team and cat in ["behind", "hunter", "sniper", "pack", "boss", "egg"]:
 		sfx("kin_alert", k.pos, -8.0, Unique.voice(k.rec))   # a squadmate's Boki calling something out
@@ -2211,7 +2211,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		if credit == player:
 			_reward_moment(h.pos)
 			if player.kin and player.kin.state != "downed":
-				player.kin.bark("kill")
+				BokiChatter.say(self, player.kin, "kill")
 	else:
 		add_feed("%s went down" % HeroTitle.of_hunter(h))
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
@@ -2224,7 +2224,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		h.kin.comp.on_owner_down()
 	if h == player:
 		if h.kin and h.kin.state != "downed":
-			h.kin.bark("owner_down")
+			BokiChatter.say(self, h.kin, "owner_down")
 	_check_team(h.team)
 
 func freeze_frame(t: float) -> void:
@@ -2608,7 +2608,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if mb.mkind in ["warden", "brute"] and credit is Hunter and not (credit as Hunter).remote and (mb.mkind == "warden" or rng.randf() < 0.5):
 		PerkOrbs.drop(self, "boss" if mb.mkind == "warden" else "brute", mb.pos, 0, credit as Hunter)      # the Warden: a fan of three
 	if credit == player and player.kin and randf() < 0.15:
-		player.kin.bark("kill")
+		BokiChatter.say(self, player.kin, "kill")
 
 func on_kin_down(k: Kin) -> void:
 	if k.owner_h == player:
@@ -4749,7 +4749,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 	if h == player:
 		add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN[k.species]["name"], h.caught.size(), Capture.box_cap()])
 		if player.kin and player.kin.state != "downed":
-			player.kin.bark("caught")
+			BokiChatter.say(self, player.kin, "caught")
 
 func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
 	if c["open"] or (not from_net and not KeyChest.spend(h, c)):
@@ -5274,7 +5274,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 		h.kin.visible = false
 	if h == player:
 		if h.kin and h.kin.state != "downed":
-			h.kin.bark("extract")
+			BokiChatter.say(self, h.kin, "extract")
 		result = {"extracted": true, "why": "extracted", "how": how, "where": where}
 		_end_soon(1.6)
 		if opts.get("tut_test", false):
@@ -5287,6 +5287,7 @@ func _update_rules(_dt: float) -> void:
 	if left < 30.0 and not collapse_warned:
 		collapse_warned = true
 		add_feed("The islands are falling! Get to an exit!")
+		if player and player.kin: BokiChatter.say(self, player.kin, "storm")
 		sfx("warn", null, 0.0)
 	if left <= 0.0:
 		for h in hunters:
@@ -5387,7 +5388,7 @@ func _finish() -> void:
 		if not result.get("extracted", false) and player.kin and player.kin.comp:
 			player.kin.comp.on_loss()
 		if player.kin:
-			r["kin_say"] = KinVoice.callout(player.kin, "comfort") if not result.get("extracted", false) else KinVoice.line(player.kin, "extract")
+			r["kin_say"] = BokiChatter.line(player.kin, "extract" if result.get("extracted", false) else "comfort")
 		# what each kin you brought did, for its memories and growth
 		r["kin_runs"] = []
 		for kk in [player.kin, player.kin2]:
