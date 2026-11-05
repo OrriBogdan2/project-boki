@@ -1506,3 +1506,7 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 
 ## 2026-11-05 17:46 UTC ext → S5: owner item 140 (Lisette RMB)
 - No arrow left on the ground; the needle is ~half its size; range 14 → 20 m; a smoother wind-up; a stronger slow while drawing (~40%); a loud Myth-like release sound.
+
+## 2026-11-05 17:48 UTC ext → S5: owner item 141
+- Every timing hero flashes white (a model rim glow) during its perfect window: one shared component with item 132.
+- Lisette LMB: perfect window 0.15 → ~0.22 s and a ~15% faster draw to it.

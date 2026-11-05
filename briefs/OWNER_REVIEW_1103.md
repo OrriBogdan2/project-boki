@@ -1533,3 +1533,18 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - range == 20.
   - Move speed while drawing is ≤0.45x.
   - The release sfx is at least +4 dB vs today.
+
+## 141. The perfect-timing window: the HERO lights up white (all timing heroes); Lisette's LMB window is a bit easier and quicker (owner, 17:27 UTC Nov 5)
+- The owner: "she should also light up white (as should all timing characters) when they are in the perfect hit window - i think hers is also a tad too short, make it slightly easier to hit (and slightly faster) for her lmb".
+- **The global rule** (extends item 132's shared timing-window component):
+  - While ANY held attack is inside its perfect window, the hero's whole model gets a bright white rim/flash glow (a fresnel overlay ~0.6 strength, on for exactly the window).
+  - Applies to Lisette LMB, Kael LMB/RMB holds, Breaker LMB spin, and any other kit with a "perfect" release.
+  - Visible to the player clearly; to others subtly (it's a skill tell).
+  - Plus the existing ping.
+- **Lisette LMB:**
+  - The perfect window is wider: perfect_t 0.15 → ~0.22 s (tune 0.2-0.25).
+  - The draw time to reach the window is ~15% faster.
+  - Both are data changes in archer.json + her timing code.
+- **Assert:**
+  - The white overlay is on iff in the window, for all timing kits.
+  - Lisette window ≈0.22 s, reached ~15% sooner than now.
