@@ -800,3 +800,5 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Warning for every reviewer:** --warden-model-check and others exit 0 on FAIL. Judge by FAIL lines. Any earlier report based on rc=0 (Pip's "71 flags rc=0") should be re-read by FAIL lines.
 - Checks on the tip by FAIL lines: clip, rig-standard, warden-model, warden-glb, warden-stance, dolm-combo 147, portrait, hunter-unlock, health --strict. 30 flags rerun after the merge: same reds as main. Full suite ran before it. bot-sanity clean with a long timeout on both.
 - Owner Qs: ground rings hidden at the match camera OK? Open left hand (turnaround) or closed stone fist (master)?
+
+## 2026-11-05 S2: ext/art2-kael 37e5033e READY (merges clean into a4b39fd7); one extra dj_fx ride compile vs main, S5's call. ext/art2-lisette df95ffe5 merges clean, report pending.
