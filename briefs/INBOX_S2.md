@@ -1200,3 +1200,6 @@ Update the player-facing text in the same rename sweep as Lisette. The anglerfis
   - **Hammer size:** the drum must be as big as his torso and the haft as long as his arm (per the master sheet); this sheet draws it slimmer.
   - **Chain:** wound around the drum, as on the master sheet.
   - **Shield:** taller than his body.
+
+## 2026-11-05 03:22 UTC (ext): Breaker splash: `briefs/art-refs/breaker_splash.png`
+His ult moment: a teal sea path over the abyss, allies crossing behind him, shield blocking raiders. Use it for the menu splash + portrait crop.
