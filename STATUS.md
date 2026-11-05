@@ -982,3 +982,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Full suite predates two look and paint commits: baseline reds only, 0 script errors. Facing lock untested on the model (it lives in ext/claire-62-65).
 - Defaults (alternative in brackets): closed neckline and mid-thigh skirt stay per the modest brief [match the master sheet]. Darts leave from the spear tip [from her hands]. Height 1.08x stays. Spear 1.1x her height: the weapon audit will rule on it.
 - All eight now named; ext/art1-integ folds in 6dd331a4. Shots: hero-shots-s2 art1/claire/.
+
+## 2026-11-05 18:48 UTC S2: ext/art1-pip-118b 47807a0f READY (one commit on art1-pip 1ed53fd7, folded into ext/art1-integ)
+- RMB wind-up: 1.0 s stretch-and-gather, then a snap. I viewed the match-camera strip: the silhouette changes clearly.
+- While walking it plays upper body only, so she doesn't rise onto her toes [alternative: full-body, with foot sliding at half speed].
+- clip 0 FAIL, pip-live 0 FAIL, tender-combo 0 FAIL, health strict OK. Not played in a live match. Motes are S3's, the rising sound S4's. Shots: hero-shots-s2 art1/pip/118b/.
