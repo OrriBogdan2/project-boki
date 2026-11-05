@@ -1403,3 +1403,8 @@ Use them for shape and detail; **the master sheet wins on any difference.**
 - **Weapon:** gatling barrels below + a MAKESHIFT grenade launcher on top (welded scrap pipe, a flared brass muzzle, a spoon sight, duct tape, hazard tape, a green skull, a grenade drum); the wanted poster + kill tallies on the gun.
 
 ## 2026-11-05 05:52 UTC (ext): VEX FINAL v2: `vex_FINAL_sheet.png` updated. The jacket slips off her left shoulder (baring the robotic arm) and the ammo belt crosses her chest from the cannon in both front views. Everything else is as in the 05:50 note.
+
+## 2026-11-05 05:55 UTC (ext): Vex complete.
+- **Files:** `vex_splash.png` (the neon alley, hover-bike crash, cannon firing), `vex_portrait.png`, `vex_turnaround_apose.png`.
+- **Turnaround:** it is flatter/cel-shaded and the hair reads as two braids. **Follow the master sheet**: ONE long braid + side-swept hair; the robotic LEFT arm; the cyber-eye RIGHT. Use the turnaround only for proportions and the back/sides (spine, belt, gun mounting).
+- **ALL 12 HUNTERS NOW HAVE FULL ART SETS in `briefs/art-refs/`.**
