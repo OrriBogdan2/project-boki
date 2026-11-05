@@ -381,7 +381,8 @@ def main():
             me.uv_layers.active.data.foreach_get("uv", cu)
             tq = cu.reshape(-1, 3, 2)
             e1, e2 = tq[:, 1] - tq[:, 0], tq[:, 2] - tq[:, 0]
-            if (np.abs(e1[:, 0] * e2[:, 1] - e1[:, 1] * e2[:, 0]) < 1e-10).mean() > 0.002:
+            # (the door's relief folds an angle-based chart over itself, and the fold paints wood onto her face)
+            if p["name"] == "shield_wood" or (np.abs(e1[:, 0] * e2[:, 1] - e1[:, 1] * e2[:, 0]) < 1e-10).mean() > 0.002:
                 print("smart project", p["name"], flush=True)
                 bpy.ops.object.mode_set(mode="EDIT")
                 bpy.ops.mesh.select_all(action="SELECT")
