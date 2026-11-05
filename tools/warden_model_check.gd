@@ -14,7 +14,7 @@ const EPS := 0.0005
 ## scale and movement feel"), its width against a medium (from, to), and the prefix of its keyed moves.
 ## height_3d: the 3D model's top where something stands over the head the procedural one doesn't have.
 const WARDENS := {
-	"bulwark": {"hit_r": 0.46, "height": 1.5, "width": [1.3, 2.4], "moves": "bul_"},     # (1.5x, owner; the prow is on the body)
+	"bulwark": {"hit_r": 0.46, "height": 1.5, "width": [1.3, 2.4], "moves": "bul_"},     # (1.5x, owner)
 	"archer": {"hit_r": 0.392, "height": 0.98, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
 	"gunslinger": {"hit_r": 0.416, "height": 1.04, "width": [0.7, 1.3], "moves": "gunslinger_"},   # (slim)
 	"mage": {"hit_r": 0.4, "height": 1.04, "width": [0.6, 1.3], "moves": "mage_"},     # (slim and long-legged)
@@ -27,7 +27,7 @@ const WARDENS := {
 	# (Cinder's fin-crest stands over her head)
 	"ashwick": {"hit_r": 0.376, "height": 1.02, "height_3d": 1.11, "width": [0.7, 1.5], "moves": "as_"},
 	# (Kael: body size 1.06, owner Nov 4: 9% bigger; juggernaut.md's 1.12x was at 1.0)
-	"juggernaut": {"hit_r": 0.428, "height": 1.26, "height_3d": 1.24, "width": [0.85, 2.0], "moves": "jug"},     # (the art's shoulders; the crown of the mane)
+	"juggernaut": {"hit_r": 0.428, "height": 1.26, "height_3d": 1.24, "width": [0.85, 2.0], "moves": "jug"},     # (the mane's crown)
 	"dredge": {"hit_r": 0.452, "height": 1.28, "width": [1.3, 2.4], "moves": "dr_"},     # (~2.25 m, very broad)
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
 	"tender": {"hit_r": 0.34, "height": 0.74, "height_3d": 0.84, "width": [0.5, 1.5], "moves": "mm_"},

@@ -216,7 +216,7 @@ func _want(dt: float) -> Vector2:
 ## Each step (before the hunter moves).
 func tick(dt: float) -> void:
 	if k.h.model:
-		k.h.model.set_meta(WardenGlb.CHAIN_OUT, state != "ready")      # (the chain on his arm is the one in the air: item 76b)
+		k.h.model.set_meta(WardenGlb.CHAIN_OUT, state != "ready")      # (his arm's chain is the one in the air)
 	match state:
 		"hooked": _tick_hooked(dt)
 		"pulling": _tick_pull(dt)
