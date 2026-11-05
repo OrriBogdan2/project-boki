@@ -323,9 +323,9 @@ def hot(col):
     return mix(col, KEY, smooth(0.2, 0.3, m) * smooth(0.45, 0.6, col[:, 2]))
 
 
-FC, BC = 258.0, 985.0       # the front and back views' centre x
+FC, BC = 242.0, 985.0       # the front and back views' centre x
 SOLE = 487.0
-HY, HH, HW = 295.0, 128.0, 134.0   # the hull in the art: centre y, half height, half width
+HY, HH, HW = 295.0, 128.0, 128.0   # the hull in the art: centre y, half height, half width
 
 
 def p_hull(p, n, c):
