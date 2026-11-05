@@ -10,18 +10,15 @@ extends Node3D
 ## standing on it. A stun during the wind-up interrupts it (the cooldown comes back to "refund" s); a merge
 ## drops the wind-up with no slam.
 ##
-## Look (pooled): gold light flooding the near cell on the slam, an ember streak racing down the lane,
-## a basalt slab with molten seams heaving up in each cell, then a flickering ember crack along the
-## centre line. Bond: every hunter it hits goes to HeroUlt.landed; the best event of the cast pays.
+## Look (content/vfx/bulwark.json): the path of the sea. His anglerfish lure flares as he plants, the slam floods
+## the lane with deep sea-green water racing to the far end, foam sprays up cell by cell as each erupts, a
+## churning vortex opens at the end, and wet foam stays along the scar while it lasts. Bond: every hunter it
+## hits goes to HeroUlt.landed; the best event of the cast pays.
 
 const EMBER := Color("ff9a3a")
 const GOLD := Color("ffd25a")
-const ROCK := Color("5a4a42")
-const MAX_CELLS := 6           # pooled slabs
-const SHARDS := 4              # basalt spikes per cell
-## Each spike's place in its cell (along, across as shares of the cell), its lean and its height.
-const SHARD_AT := [Vector4(-0.22, -0.28, 0.35, 1.5), Vector4(0.18, 0.22, -0.3, 1.9), Vector4(0.3, -0.1, 0.2, 1.2),
-	Vector4(-0.3, 0.3, -0.25, 1.1)]
+const MAX_CELLS := 6           # lane cells the telegraph can show
+const SCAR_LOOK_EVERY := 2.0   # s between the scar's wet foam looks (each lasts 2.2 s, so they overlap)
 
 var k: BulwarkKit
 var h: Hunter
@@ -37,34 +34,13 @@ var thrown := {}               # foe instance id -> true: thrown up by this cast
 var hunters := 0               # (checks) hunters thrown this cast, casts that slammed, interrupted
 var slams := 0
 var interrupts := 0
-var scar := {}                 # the scar: {t, a, len}
-var _slabs: Array = []         # one per cell: {shards (SHARDS basalt spikes), seam, t, at}
-var _streak: MeshInstance3D
-var _streak_t := 0.0
-var _flood: MeshInstance3D
-var _flood_t := 0.0
-var _scar: MeshInstance3D
+var scar := {}                 # the scar: {t, a, len, fx (s to the next crackle), look (s to the next foam)}
 
 func _init(kit: BulwarkKit) -> void:
 	k = kit
 	h = kit.h
 	top_level = true
 	name = "BjornUlt"
-
-func _ready() -> void:
-	var rock_mat := Models.toon(ROCK, true, 0.2)
-	for i in MAX_CELLS:
-		var shards: Array = []
-		for j in SHARDS:
-			shards.append(KitMeshes.inst(self, Models.crystal(0.55, 1.0, 5), rock_mat))
-		var seam := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", EMBER, true))
-		KitShaders.param(seam, "tail", 0.0)
-		_slabs.append({"shards": shards, "seam": seam, "t": 0.0})
-	var streak_mat := KitShaders.mat("streak", Color(1.0, 0.75, 0.35), true)
-	_streak = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), streak_mat)
-	_flood = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("panel", GOLD))
-	_scar = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", EMBER, true))
-	KitShaders.param(_scar, "tail", 0.0)
 
 func xd() -> Dictionary:
 	return k.d.get("x", {})
@@ -88,7 +64,7 @@ func cast() -> bool:
 	h.vel = Vector3(0, h.vel.y, 0)
 	k.play("bul_ult_wind")
 	k.m.sfx("bjorn_ult_wind", h.pos, -3.0 if h.is_local() else -7.0)
-	k.net_ring(origin + Vector3(dir.x, 0, dir.y) * cell_len() * 0.5, cell_len() * 0.5, EMBER)
+	k.vfx("ult_wind", origin, dir)
 	return true
 
 func cell_len() -> float:
@@ -147,8 +123,7 @@ func tick(dt: float) -> void:
 	if erupted >= cells.size() and t > float(x.get("lead", 0.2)) + float(x.get("cell_t", 0.15)) * cells.size():
 		phase = ""
 		var length := cell_len() * cells.size()
-		scar = {"t": float(x.get("scar_t", 10.0)), "a": origin, "len": length, "fx": 0.0}
-		_scar_show(length)
+		scar = {"t": float(x.get("scar_t", 10.0)), "a": origin, "len": length, "fx": 0.0, "look": 1.2}
 
 ## The lane everyone sees: one outlined cell per square, each filling as it erupts.
 func _telegraph() -> void:
@@ -178,7 +153,7 @@ func _hide_lane() -> void:
 	for i in MAX_CELLS:
 		AimKit.hide(h, "x%d" % i)
 
-## The slam: the near cell floods gold and the streak races off (striking cell by cell, see tick).
+## The slam: the lane floods with sea water racing off down it (striking cell by cell, see tick).
 func _slam() -> void:
 	var x := xd()
 	phase = "erupt"
@@ -189,13 +164,7 @@ func _slam() -> void:
 	k.m.sfx("bjorn_ult_rumble", origin + Vector3(dir.x, 0, dir.y) * cell_len() * cells.size() * 0.5, -3.0)
 	_strike(0)
 	struck = 1
-	var c0 := _cell_mid(0)
-	_flood_t = 0.3
-	_place_flat(_flood, c0 + Vector3(0, 0.08, 0), Vector2(cell_len(), float(x.get("width", 4.0))))
-	_streak_t = float(x.get("cell_t", 0.15)) * cells.size() + float(x.get("lead", 0.2))
-	k.m.fx.burst(c0 + Vector3(0, 0.4, 0), GOLD, 24, 7.0, 0.4, 3.0, 1.3)
-	k.m.fx.dust(c0, 14)
-	k.net_ring(c0, cell_len() * 0.6, GOLD)
+	k.vfx("ult_slam", Vector3(origin.x, _trail_y(origin), origin.z), dir, {"len": trail_len()})
 
 ## The racing fissure reaches cell `i`: each foe in it not struck yet takes the strike and the stun.
 func _strike(i: int) -> void:
@@ -210,15 +179,13 @@ func _strike(i: int) -> void:
 		if f is Hunter:
 			HeroUlt.landed(k, f)
 
-## One cell heaves up: a slab with molten seams, each foe on it thrown once.
+## One cell erupts in a fountain of foam, each foe on it thrown once; the last opens the churning vortex.
 func _erupt(i: int) -> void:
 	var x := xd()
 	var mid := _cell_mid(i)
-	var slab: Dictionary = _slabs[i % MAX_CELLS]
-	slab["t"] = 0.9
-	slab["at"] = mid
-	k.m.fx.dust(mid, 10)
-	k.m.fx.burst(mid + Vector3(0, 0.6, 0), EMBER, 12, 6.0, 0.4, 6.0, 1.1, Vector3.UP, 30.0)
+	k.vfx("ult_cell", mid, dir)
+	if i == cells.size() - 1:
+		k.vfx("ult_end", mid + Vector3(dir.x, 0, dir.y) * cell_len() * 0.25, dir)
 	k.m.sfx("bjorn_slam", mid, -8.0, 0.7 + 0.08 * i)
 	var dmg: float = float(x.get("dmg", 18.0)) * k.m.dmg_mult(h) * LevelGrowth.ap(h)
 	for f in _foes_in(i):
@@ -229,7 +196,7 @@ func _erupt(i: int) -> void:
 		f.hurt(dmg, h, {"src": "abil", "ab": "ultimate", "lift": float(x.get("lift", 7.0)),
 			"slow": float(x.get("slow_t", 1.5)), "slow_k": float(x.get("slow", 0.5)),
 			"dr": true, "tags": ["ultimate"]})
-		k.m.fx.burst(f.pos + Vector3(0, 1.0, 0), Color("ff5a3a"), 10, 5.0, 0.3, 2.0, 1.0)
+		k.vfx("ult_hit", f.pos, dir)
 		if f is Hunter:
 			hunters += 1
 			HeroUlt.landed(k, f)
@@ -249,12 +216,11 @@ func _foes_in(i: int) -> Array:
 			out.append(f)
 	return out
 
-## The scar: foes standing on it are slowed; it flickers out over its last second.
+## The scar: foes standing on it are slowed; wet foam stays along it, renewed every SCAR_LOOK_EVERY s.
 func _tick_scar(dt: float) -> void:
 	scar["t"] = float(scar["t"]) - dt
 	if float(scar["t"]) <= 0.0:
 		scar = {}
-		_scar.visible = false
 		return
 	var x := xd()
 	var a: Vector3 = scar["a"]
@@ -271,65 +237,7 @@ func _tick_scar(dt: float) -> void:
 		scar["fx"] = 0.7
 		var mid := a + Vector3(dir.x, 0, dir.y) * length * 0.5
 		k.m.sfx("bjorn_ult_crackle", mid, -16.0, randf_range(0.9, 1.1))
-
-func _scar_show(length: float) -> void:
-	var mid := origin + Vector3(dir.x, 0, dir.y) * length * 0.5
-	_place_flat(_scar, Vector3(mid.x, _trail_y(mid) + 0.06, mid.z), Vector2(length, 0.5))
-	_scar.visible = true
-
-## Lays a quad flat on the ground along the lane's direction, `size` = (along, across).
-func _place_flat(n: MeshInstance3D, at: Vector3, size2: Vector2) -> void:
-	n.visible = true
-	n.global_position = at
-	n.rotation = Vector3(-PI * 0.5, atan2(-dir.y, dir.x), 0.0)
-	n.scale = Vector3(size2.x, size2.y, 1.0)
-
-func _process(delta_in: float) -> void:
-	var delta := minf(delta_in, 1.0 / 30.0)
-	if not is_instance_valid(h):
-		return
-	_tick_slabs(delta)
-	if _flood_t > 0.0:
-		_flood_t -= delta
-		_flood.visible = _flood_t > 0.0
-		KitShaders.param(_flood, "power", 2.0 * clampf(_flood_t / 0.3, 0.0, 1.0))
-	if _streak_t > 0.0:
-		_streak_t -= delta
-		var total := maxf(0.05, float(xd().get("cell_t", 0.15)) * cells.size() + float(xd().get("lead", 0.2)))
-		var u := 1.0 - clampf(_streak_t / total, 0.0, 1.0)
-		var length := cell_len() * cells.size()
-		var head := origin + Vector3(dir.x, 0, dir.y) * length * u
-		_place_flat(_streak, Vector3(head.x, _trail_y(head) + 0.25, head.z), Vector2(2.4, 0.9))
-		_streak.visible = _streak_t > 0.0
-	if _scar.visible and not scar.is_empty():
-		var fade := clampf(float(scar["t"]), 0.0, 1.0)
-		KitShaders.param(_scar, "power", (1.0 + 0.35 * sin(Time.get_ticks_msec() * 0.012)) * fade)
-
-## Each cell's basalt spikes heave up out of the ground fast, hang, then sink back; the molten seam under
-## them glows then cools.
-func _tick_slabs(delta: float) -> void:
-	var w := float(xd().get("width", 4.0))
-	var along := Vector3(dir.x, 0, dir.y)
-	var across := Vector3(-dir.y, 0, dir.x)
-	for s in _slabs:
-		var seam: MeshInstance3D = s["seam"]
-		var live := float(s["t"]) > 0.0
-		seam.visible = live
-		for shard in s["shards"]:
-			(shard as MeshInstance3D).visible = live
-		if not live:
-			continue
-		s["t"] = float(s["t"]) - delta
-		var age := 0.9 - float(s["t"])
-		var rise := clampf(age / 0.12, 0.0, 1.0) * clampf(float(s["t"]) / 0.35, 0.0, 1.0)
-		var at: Vector3 = s["at"]
-		for j in SHARDS:
-			var shard: MeshInstance3D = s["shards"][j]
-			var spot: Vector4 = SHARD_AT[j]
-			var tall := spot.w * (0.4 + 0.6 * rise)
-			var foot := at + along * spot.x * cell_len() + across * spot.y * w
-			shard.global_position = foot + Vector3(0, tall * 0.5 - 0.3, 0)
-			shard.rotation = Vector3(spot.z * rise, atan2(-dir.y, dir.x) + j, -spot.z * 0.6 * rise)
-			shard.scale = Vector3(1.0, tall, 1.0)
-		_place_flat(seam, at + Vector3(0, 0.1, 0), Vector2(cell_len() * 0.95, w * 0.85))
-		KitShaders.param(seam, "power", 2.2 * clampf(float(s["t"]) / 0.9, 0.0, 1.0))
+	scar["look"] = float(scar["look"]) - dt
+	if float(scar["look"]) <= 0.0 and float(scar["t"]) > 1.0:
+		scar["look"] = SCAR_LOOK_EVERY
+		k.vfx("ult_scar", Vector3(a.x, _trail_y(a), a.z), dir, {"len": length})

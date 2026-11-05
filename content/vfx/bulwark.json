@@ -1,0 +1,206 @@
+{
+	"palette": {
+		"main": "#1fb5a6",
+		"hot": "#9ffcea",
+		"char": "#0a2630",
+		"smoke": "#9cc9c6",
+		"foam": "#e6fbf5",
+		"deep": "#0e5a66",
+		"lure": "#62ffd2",
+		"heal": "#7dffb0",
+		"wood": "#6e4c30"
+	},
+	"anchors": {
+		"lure": {"nodes": ["anchor_lure"], "bone": "head", "off": [-0.4, 0.55, -0.4], "body": [-0.55, 2.75, 0.45]},
+		"hammer": {"nodes": ["anchor_hammer_head"], "gun": [0.0, 0.0, -0.62], "body": [0.6, 1.0, 0.5]},
+		"shield": {"nodes": ["anchor_shield"], "bone": "hand.L", "off": [0.0, 0.1, 0.0], "body": [-0.3, 1.1, 0.95]},
+		"chest": {"nodes": ["anchor_chest"], "bone": "head", "off": [0.0, -0.5, 0.0], "body": [0.0, 1.4, 0.0]}
+	},
+	"moves": {
+		"lure_flare": {"fx": [
+			{"p": "flare", "at": "lure", "size": 1.3, "grow": 1.5, "life": 0.38, "c": "lure", "c2": "foam", "c3": "deep"},
+			{"p": "star", "at": "lure", "n": 6, "speed": 1.4, "spread": 1.0, "life": 0.5, "size": 0.22, "c": "lure",
+				"c2": "foam", "near": true}
+		]},
+		"throw": {"fx": [
+			{"p": "flare", "at": "hammer", "size": 0.8, "life": 0.16, "c": "main", "c2": "foam"},
+			{"p": "drop", "at": "hammer", "n": 10, "way": "fwd", "speed": 5.0, "spread": 0.35, "grav": 9.0, "life": 0.4,
+				"size": 0.07, "stretch": 0.08, "c2": "foam"}
+		]},
+		"hammer_trail": {"fx": [
+			{"p": "ribbon", "size": 0.7, "life": 0.6, "tail": 0.09, "c": "main", "c2": "foam", "c3": "deep"}
+		]},
+		"plant": {"fx": [
+			{"p": "scorch", "shape": "disc", "size": 1.1, "life": 1.6, "c": "deep", "c2": "hot", "c3": "char"},
+			{"p": "drop", "n": 18, "y": 0.1, "speed": 5.5, "spread": 0.45, "grav": 11.0, "life": 0.55, "size": 0.08,
+				"stretch": 0.07, "c2": "foam"},
+			{"p": "smoke", "n": 4, "y": 0.2, "speed": 1.2, "spread": 1.0, "life": 0.9, "size": 0.7, "c": "foam",
+				"near": true}
+		]},
+		"recall": {"fx": [
+			{"p": "flare", "size": 0.9, "y": 0.4, "life": 0.2, "c": "main", "c2": "foam"},
+			{"p": "drop", "n": 10, "y": 0.3, "speed": 3.5, "spread": 0.8, "grav": 8.0, "life": 0.4, "size": 0.06,
+				"c2": "foam"}
+		]},
+		"catch": {"fx": [
+			{"p": "flare", "at": "hammer", "size": 0.9, "life": 0.18, "c": "main", "c2": "foam"},
+			{"p": "drop", "at": "hammer", "n": 10, "speed": 3.0, "spread": 1.0, "grav": 8.0, "life": 0.35,
+				"size": 0.06, "c2": "foam"}
+		]},
+		"smash_charge": {"fx": [
+			{"p": "drop", "at": "hammer", "shape": "gather", "radius": 1.0, "n": 14, "speed": 2.6, "spread": 0.0,
+				"drag": 0.5, "curl": 0.6, "life": 0.4, "size": 0.06, "stretch": 0.06, "c2": "foam"},
+			{"p": "smoke", "at": "hammer", "n": 3, "speed": 0.4, "spread": 1.0, "life": 0.7, "size": 0.45, "c": "deep",
+				"near": true}
+		]},
+		"smash": {"fx": [
+			{"p": "sweep", "size": "r", "size_k": 0.15, "arc": 180, "y": 0.45, "life": 0.42, "c": "main", "c2": "foam",
+				"c3": "deep"},
+			{"p": "sweep", "size": "r", "size_x": 1.15, "arc": 200, "y": 0.6, "life": 0.5, "c": "lure", "c2": "foam",
+				"c3": "deep", "when": "perfect"},
+			{"p": "scorch", "shape": "cone", "size": "r", "size_x": 0.95, "arc": 170, "life": 1.8, "c": "deep",
+				"c2": "hot", "c3": "char"},
+			{"p": "drop", "fwd": 1.4, "y": 0.4, "n": 24, "n_k": 0.6, "way": "fwd", "lift": 0.6, "speed": 6.0,
+				"spread": 0.55, "grav": 11.0, "life": 0.6, "size": 0.08, "stretch": 0.08, "c2": "foam"},
+			{"p": "smoke", "fwd": 1.6, "y": 0.3, "n": 4, "speed": 1.6, "spread": 1.0, "life": 1.0, "size": 0.8,
+				"c": "foam", "near": true}
+		]},
+		"smash_hit": {"fx": [
+			{"p": "drop", "y": 0.9, "n": 12, "speed": 4.0, "spread": 1.0, "grav": 9.0, "life": 0.45, "size": 0.07,
+				"c2": "foam"},
+			{"p": "chunk", "y": 0.5, "n": 5, "way": "fwd", "lift": 0.6, "speed": 4.5, "spread": 0.5, "grav": 12.0,
+				"life": 0.6, "size": 0.14, "c": "wood", "c3": "char"},
+			{"p": "smoke", "y": 0.7, "n": 3, "speed": 1.0, "spread": 1.0, "life": 0.7, "size": 0.6, "c": "foam",
+				"near": true}
+		]},
+		"aegis_up": {"fx": [
+			{"p": "drop", "shape": "disc", "radius": 1.4, "n": 16, "speed": 3.5, "spread": 0.3, "grav": 10.0,
+				"life": 0.45, "size": 0.07, "c2": "foam"},
+			{"p": "smoke", "shape": "disc", "radius": 1.2, "n": 4, "speed": 0.8, "spread": 1.0, "life": 0.8,
+				"size": 0.7, "c": "foam", "near": true}
+		]},
+		"aegis_block": {"fx": [
+			{"p": "flare", "size": 0.9, "life": 0.16, "c": "main", "c2": "foam"},
+			{"p": "drop", "n": 16, "way": "fwd", "lift": 0.4, "speed": 6.5, "spread": 0.5, "grav": 10.0, "life": 0.4,
+				"size": 0.07, "stretch": 0.09, "c2": "foam"},
+			{"p": "shard", "n": 6, "way": "fwd", "lift": 0.3, "speed": 5.0, "spread": 0.7, "grav": 8.0, "life": 0.3,
+				"size": 0.12, "c": "main", "c2": "foam", "near": true}
+		]},
+		"aegis_break": {"fx": [
+			{"p": "flare", "y": 1.0, "size": 1.8, "grow": 1.4, "life": 0.3, "c": "main", "c2": "foam"},
+			{"p": "chunk", "y": 0.9, "n": 14, "speed": 6.0, "spread": 0.9, "grav": 14.0, "life": 0.8, "size": 0.2,
+				"c": "wood", "c3": "char"},
+			{"p": "drop", "y": 1.0, "n": 24, "speed": 6.5, "spread": 1.0, "grav": 11.0, "life": 0.6, "size": 0.08,
+				"c2": "foam"},
+			{"p": "smoke", "y": 0.4, "n": 5, "speed": 1.4, "spread": 1.0, "life": 1.1, "size": 0.9, "c": "foam",
+				"near": true}
+		]},
+		"dash": {"fx": [
+			{"p": "ribbon", "at": "hammer", "size": 0.5, "life": 0.22, "tail": 0.18, "c": "main", "c2": "foam",
+				"c3": "deep"},
+			{"p": "drop", "y": 0.1, "n": 10, "way": "back", "lift": 0.5, "speed": 4.0, "spread": 0.5, "grav": 10.0,
+				"life": 0.4, "size": 0.06, "c2": "foam"}
+		]},
+		"spin": {"fx": [
+			{"p": "sweep", "size": "r", "arc": 360, "y": 0.5, "life": 0.45, "c": "main", "c2": "foam", "c3": "deep"},
+			{"p": "scorch", "shape": "disc", "size": "r", "size_x": 0.85, "life": 1.6, "c": "deep", "c2": "hot",
+				"c3": "char"},
+			{"p": "drop", "shape": "disc", "radius": 1.6, "y": 0.2, "n": 26, "speed": 5.0, "spread": 0.5, "grav": 11.0,
+				"life": 0.55, "size": 0.08, "stretch": 0.07, "c2": "foam"}
+		]},
+		"charge": {"fx": [
+			{"p": "ribbon", "at": "shield", "size": 0.8, "life": 0.25, "tail": 0.2, "c": "main", "c2": "foam",
+				"c3": "deep"},
+			{"p": "drop", "at": "shield", "n": 14, "way": "fwd", "lift": 0.5, "speed": 5.0, "spread": 0.6,
+				"grav": 10.0, "life": 0.45, "size": 0.07, "c2": "foam"}
+		]},
+		"shield_slam": {"fx": [
+			{"p": "sweep", "size": "r", "arc": 110, "y": 0.6, "life": 0.4, "c": "main", "c2": "foam", "c3": "deep"},
+			{"p": "flare", "at": "shield", "size": 1.6, "grow": 1.3, "life": 0.25, "c": "lure", "c2": "foam"},
+			{"p": "scorch", "shape": "cone", "size": "r", "arc": 110, "life": 1.6, "c": "deep", "c2": "hot",
+				"c3": "char"},
+			{"p": "drop", "fwd": 1.0, "y": 0.6, "n": 24, "way": "fwd", "lift": 0.5, "speed": 7.0, "spread": 0.45,
+				"grav": 11.0, "life": 0.55, "size": 0.08, "stretch": 0.08, "c2": "foam"}
+		]},
+		"crush": {"fx": [
+			{"p": "flare", "y": 1.0, "size": 1.2, "life": 0.2, "c": "main", "c2": "foam"},
+			{"p": "drop", "y": 0.9, "n": 14, "speed": 5.0, "spread": 1.0, "grav": 10.0, "life": 0.5, "size": 0.08,
+				"c2": "foam"},
+			{"p": "chunk", "y": 0.6, "n": 8, "speed": 4.0, "spread": 1.0, "grav": 13.0, "life": 0.7, "size": 0.16,
+				"c": "wood", "c3": "char"}
+		]},
+		"mend_cast": {"fx": [
+			{"p": "drop", "shape": "gather", "radius": 2.6, "y": 0.6, "n": 20, "speed": 2.6, "spread": 0.0,
+				"drag": 0.2, "curl": 0.4, "life": 1.0, "burst": 0.0, "size": 0.07, "c": "heal", "c2": "foam"}
+		]},
+		"mend_open": {"fx": [
+			{"p": "scorch", "shape": "disc", "size": "r", "size_x": 0.9, "life": 2.2, "c": "deep", "c2": "heal",
+				"c3": "char"},
+			{"p": "drop", "shape": "disc", "radius": 2.6, "n": 18, "speed": 3.0, "spread": 0.2, "grav": 7.0,
+				"life": 0.6, "size": 0.07, "c": "heal", "c2": "foam"}
+		]},
+		"mend_pulse": {"fx": [
+			{"p": "drop", "shape": "disc", "radius": 2.8, "n": 8, "speed": 1.6, "spread": 0.1, "grav": -1.5,
+				"life": 0.8, "burst": 0.4, "size": 0.06, "c": "heal", "c2": "foam", "near": true}
+		]},
+		"mend_heal": {"fx": [
+			{"p": "star", "y": 1.0, "n": 4, "speed": 1.2, "spread": 0.8, "grav": -2.0, "life": 0.5, "size": 0.18,
+				"c": "heal", "c2": "foam"}
+		]},
+		"mend_burst": {"fx": [
+			{"p": "flare", "y": 0.8, "size": 2.4, "grow": 1.4, "life": 0.35, "c": "heal", "c2": "foam", "c3": "deep"},
+			{"p": "scorch", "shape": "disc", "size": "r", "life": 1.6, "c": "deep", "c2": "heal", "c3": "char"},
+			{"p": "drop", "shape": "disc", "radius": 1.6, "y": 0.2, "n": 30, "speed": 6.5, "spread": 0.25,
+				"grav": 10.0, "life": 0.7, "size": 0.08, "stretch": 0.07, "c": "heal", "c2": "foam"},
+			{"p": "star", "y": 0.6, "n": 10, "speed": 2.5, "spread": 1.0, "grav": -1.5, "life": 0.7, "size": 0.2,
+				"c": "heal", "c2": "foam", "near": true}
+		]},
+		"mend_revive": {"fx": [
+			{"p": "star", "y": 0.8, "n": 10, "speed": 2.0, "spread": 1.0, "grav": -2.5, "life": 0.7, "size": 0.22,
+				"c": "heal", "c2": "foam"},
+			{"p": "drop", "y": 0.5, "n": 10, "speed": 3.0, "spread": 0.6, "grav": 6.0, "life": 0.5, "size": 0.06,
+				"c": "heal", "c2": "foam"}
+		]},
+		"ult_wind": {"fx": [
+			{"p": "flare", "at": "lure", "size": 2.0, "grow": 1.5, "life": 0.45, "c": "lure", "c2": "foam", "c3": "deep"},
+			{"p": "star", "at": "lure", "n": 8, "speed": 1.8, "spread": 1.0, "life": 0.5, "size": 0.26, "c": "lure",
+				"c2": "foam"},
+			{"p": "drop", "at": "hammer", "shape": "gather", "radius": 1.6, "n": 22, "speed": 4.0, "spread": 0.0,
+				"drag": 0.3, "life": 0.4, "size": 0.07, "stretch": 0.08, "c2": "foam"}
+		]},
+		"ult_slam": {"fx": [
+			{"p": "scorch", "shape": "lane", "len": "len", "w": 2.6, "life": 2.2, "c": "main", "c2": "hot",
+				"c3": "deep"},
+			{"p": "flare", "fwd": 2.0, "y": 0.6, "size": 3.0, "grow": 1.3, "life": 0.3, "c": "main", "c2": "foam"},
+			{"p": "drop", "fwd": 2.0, "y": 0.2, "n": 32, "speed": 8.0, "spread": 0.4, "grav": 12.0, "life": 0.7,
+				"size": 0.09, "stretch": 0.08, "c2": "foam"},
+			{"p": "smoke", "fwd": 2.0, "y": 0.3, "n": 6, "speed": 2.0, "spread": 1.0, "life": 1.2, "size": 1.0,
+				"c": "foam", "near": true}
+		]},
+		"ult_cell": {"fx": [
+			{"p": "drop", "shape": "disc", "radius": 1.8, "y": 0.1, "n": 26, "speed": 7.5, "spread": 0.3, "grav": 12.0,
+				"life": 0.75, "size": 0.09, "stretch": 0.08, "c2": "foam"},
+			{"p": "chunk", "shape": "disc", "radius": 1.4, "n": 6, "speed": 5.0, "spread": 0.5, "grav": 14.0,
+				"life": 0.8, "size": 0.18, "c": "wood", "c3": "char", "near": true},
+			{"p": "smoke", "shape": "disc", "radius": 1.6, "y": 0.3, "n": 5, "speed": 1.5, "spread": 1.0, "life": 1.3,
+				"size": 1.0, "c": "foam"}
+		]},
+		"ult_end": {"fx": [
+			{"p": "vortex", "size": 2.6, "spin": 0.9, "grow": 1.15, "life": 2.2, "c": "main", "c2": "foam", "c3": "char"},
+			{"p": "drop", "shape": "disc", "radius": 2.2, "n": 20, "speed": 2.5, "spread": 0.3, "grav": 5.0,
+				"curl": 3.0, "life": 1.2, "burst": 0.5, "size": 0.07, "c2": "foam"}
+		]},
+		"ult_hit": {"fx": [
+			{"p": "drop", "y": 1.0, "n": 12, "speed": 4.5, "spread": 1.0, "grav": 9.0, "life": 0.45, "size": 0.07,
+				"c2": "foam"},
+			{"p": "smoke", "y": 0.8, "n": 3, "speed": 1.0, "spread": 1.0, "life": 0.7, "size": 0.6, "c": "foam",
+				"near": true}
+		]},
+		"ult_scar": {"fx": [
+			{"p": "scorch", "shape": "lane", "len": "len", "w": 1.4, "life": 2.2, "c": "deep", "c2": "foam",
+				"c3": "char"},
+			{"p": "smoke", "shape": "line", "len": "len", "way": "along", "radius": 0.3, "n": 6, "speed": 0.4,
+				"spread": 1.0, "life": 1.6, "size": 0.6, "c": "foam", "near": true}
+		]}
+	}
+}

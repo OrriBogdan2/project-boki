@@ -475,11 +475,25 @@ func _glove_q(P: Hunter) -> void:
 	P.gear_cd[0] = 0.0
 	P.inp["gear1"] = true
 
-## The swing crescent's centre against him: x = how far it lies along his facing, y = how far it is from him.
+## The swing crescent's centre against him (the HeroVfx sweep showing): x = how far it lies along his facing,
+## y = how far it is from him; none showing reads as behind him and out of reach.
 func _crescent_ahead(P: Hunter, K: BulwarkKit) -> Vector2:
-	var c := K.fx.crescent_centre()
+	var c := Vector3.INF
+	for node in HeroVfx.of(K.m).pools.get("sweep", []):
+		if (node as Node3D).visible:
+			c = _sweep_centre(node)
+	if c == Vector3.INF:
+		return Vector2(-1.0, 99.0)
 	var off := Vector2(c.x - P.pos.x, c.z - P.pos.z)
 	return Vector2(off.dot(P.aim_dir()), off.length())
+
+## Where a 180 degree sweep's area centres on the ground: the centroid of its half band (the arc mesh runs from
+## HeroVfx.SWEEP_INNER of its radius out to the radius, centred on its +Z).
+func _sweep_centre(node: Node3D) -> Vector3:
+	var inner := HeroVfx.SWEEP_INNER
+	var outer := node.global_basis.z.length()
+	var reach := 4.0 / (3.0 * PI) * (1.0 - pow(inner, 3)) / (1.0 - inner * inner) * outer
+	return node.global_position + node.global_basis.z.normalized() * reach
 
 ## #29: the Faultline's trail keeps drawing over the abyss, at his height.
 func _bjorn_abyss() -> void:
