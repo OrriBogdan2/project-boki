@@ -90,13 +90,13 @@ def foot(ph, stride, lift, duty=0.58):
     return stride * (-1 + 2 * e), lift * math.sin(u * math.pi) ** 0.8, 18.0 * math.sin(u * math.pi) * (1 - u)
 
 
-def gait(period, stride, lift, lean, dirv, bob, roll, twist, swing):
+def gait(period, stride, lift, lean, dirv, bob, roll, twist, swing, duty=0.58):
     dx, dy = dirv
 
     def f(t, p):
         ph = t / period
         for side, off, sign in (("r", 0.0, 1), ("l", 0.5, -1)):
-            d, u, pit = foot(ph + off, stride, lift)
+            d, u, pit = foot(ph + off, stride, lift, duty)
             p["f" + side] = (AX * sign + dx * d, (-0.02 if sign > 0 else 0.03) + dy * d, AZ + u)
             p["f" + side + "a"] = pit * abs(dy)
         w = math.sin(ph * tau)
@@ -112,9 +112,10 @@ def gait(period, stride, lift, lean, dirv, bob, roll, twist, swing):
 
 DIRS = {"f": (0, 1), "b": (0, -1), "l": (-1, 0), "r": (1, 0)}
 for nm, d in DIRS.items():
-    C.bake("walk_" + nm, 1.0, [(0, CARRY), (1.0, {})], loop=True, over=gait(1.0, 0.085, 0.045, -3.0, d, 0.012, 8.0, 6.0, 0.05))
-    C.bake("run_" + nm, 0.52, [(0, merged(CARRY, gr=sp(0.08, 0.26, -0.42), sh=sl(0.08, 0.2, -0.33))), (0.52, {})], loop=True,
-           over=gait(0.52, 0.125, 0.07, -13.0, d, 0.02, 11.0, 10.0, 0.11))
+    # (no foot slide: a planted foot travels back at his ground speed: stride x 2 / (period x duty) x his 2.0 size = 2.0 and 4.8 m/s)
+    C.bake("walk_" + nm, 0.5, [(0, CARRY), (0.5, {})], loop=True, over=gait(0.5, 0.145, 0.05, -3.0, d, 0.012, 6.0, 6.0, 0.05))
+    C.bake("run_" + nm, 0.36, [(0, merged(CARRY, gr=sp(0.08, 0.14, -0.28), sh=sl(0.08, 0.14, -0.33))), (0.36, {})], loop=True,
+           over=gait(0.36, 0.18, 0.08, -11.0, d, 0.02, 8.0, 9.0, 0.09, 0.42))
 C.bake("arm_free", 0.5, [(0, merged(CARRY, FREE)), (0.5, {})], loop=True)
 
 # ---------------------------------------------------------------------- LMB

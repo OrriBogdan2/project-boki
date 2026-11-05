@@ -48,18 +48,18 @@ func _fish(main: Node) -> void:
 	var a := "bulwark"
 	var model := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[0], Arch.signature(a), "", PlayerLook.neutral(), a)
 	holder.add_child(model)
-	model.rotation.y = PI
+	model.rotation.y = 0.0
 	var sync := model.get_node("Warden/Sync") as WardenGlb.Sync
 	var an := HunterAnim.new(model)
 	var cam := Camera3D.new()
 	holder.add_child(cam)
-	cam.position = Vector3(-1.2, 2.2, -3.2)
-	cam.look_at_from_position(cam.position, Vector3(-1.2, 2.2, 0.0), Vector3.UP)
+	cam.position = Vector3(1.4, 2.2, -3.4)
+	cam.look_at_from_position(cam.position, Vector3(1.4, 2.1, 0.0), Vector3.UP)
 	cam.fov = 40.0
 	cam.current = true
 	var sk := WardenGlb.skeleton(model.get_node("Warden"))
 	var fish := WardenSkeleton.find(sk, "x_fish")
-	var st := {"vel": Vector3.ZERO, "face": PI, "grounded": true}
+	var st := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}
 	for i in 40:
 		an.update(DT, st)
 		sync._process(DT)
