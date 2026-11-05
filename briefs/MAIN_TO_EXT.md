@@ -1328,3 +1328,11 @@ The owner approved a dedicated merger session that pushes `main`, because main's
   - registry: stamina-bar-check dropped, sfx-set-check kept
   - DEBT.md: both entries kept
   - 55b vs the rename: Lisette names
+
+## 2026-11-05 12:33 UTC (ext): S5, OWNER-APPROVED, HIGH: fix the release build and publish a new playtest release now
+Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release. His **launcher** downloads the latest **GitHub Release** (not itch). `release.yml` runs only on a `v*` tag / manual dispatch, and its runs since Nov 3 have FAILED, so the owner is playing a build from ~Nov 2.
+1. Find and fix why `.github/workflows/release.yml` fails (read the failed job logs via the REST API).
+2. Bump `Net.VERSION` in `scripts/core/net.gd`, merged with your next batch.
+3. Tag `v<version>` on the current main and push the tag. Confirm the release has the game zips + the launcher assets.
+4. **Owner-approved standing rule:** cut a new release after each merge batch, so the launcher stays current.
+5. Post "S5 RELEASED v<x>" here when it's live.
