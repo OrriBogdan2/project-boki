@@ -74,3 +74,6 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 - In any text on art (posters, kit files): say Hunter, not Warden; the people without Masks are "the Empty".
 
 ## 2026-11-04 09:30 UTC (orchestrator): Zedran is now "Kael" (files kael_*). Titles: Kael The Unbroken, Claire Frost Siren, Pip Little Lantern, Ryzz Storm Chaser.
+
+## 2026-11-05 (S2): OWNER_REVIEW item 108: redo Vex's splash art
+- Owner: a better Vex splash, our own design, with a stronger composition and pose. Keep her current design (green hair and braid, eye plate, rotary cannon in gunmetal + brass, gear backpack and hoses; see wardens_r3 VEX_KIT.md). Save as vex_splash* on ext/imagegen and post the commit in briefs/EXT_TO_MAIN.md. Approval gate as for ART-1: owner approves before it replaces the current one.
