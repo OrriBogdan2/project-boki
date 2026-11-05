@@ -23,6 +23,7 @@ const BLINK_EVERY := 3.7      # s
 const BLINK_T := 0.13
 const LURE_REST := 1.0        # x its glow: small, so it never reads as a pickup or a shot
 const LURE_FLARE := 4.0
+const FLARE_M := 0.7          # m, the flare's glow on the neutral model
 
 var root: Node3D
 var skel: Skeleton3D
@@ -31,6 +32,7 @@ var face: ShaderMaterial
 var lure: Array = []          # the lure's materials
 var lure_base := 1.0
 var lure_k := 0.0
+var puff: MeshInstance3D      # the flare's glow
 var bone := -1
 var rest := Quaternion.IDENTITY
 var cur := 0
@@ -69,9 +71,27 @@ func _setup(glb: Node3D) -> void:
 				if over:
 					lure.append(over)
 					lure_base = float(over.get_shader_parameter("glow"))
+	_flare_glow(glb)
 	bone = WardenSkeleton.find(skel, String(d.get("companion", "")))
 	if bone >= 0:
 		rest = skel.get_bone_rest(bone).basis.get_rotation_quaternion()
+
+## The flare past the lure's own white: a soft additive puff that opens on its anchor, off at rest so the small lure
+## never reads as a pickup.
+func _flare_glow(glb: Node3D) -> void:
+	var at := glb.find_child("anchor_lure", true, false) as Node3D
+	if at == null:
+		return
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	m.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	m.albedo_color = Color(0.55, 1.0, 0.9, 0.9)
+	m.albedo_texture = WardenGlb._puff()
+	puff = WardenGlb._bloom_quad(m, FLARE_M, Vector3.ZERO)
+	puff.visible = false
+	at.add_child(puff)
 
 func _want(s: Dictionary) -> String:
 	if bool(s.get("downed", false)) or bool(s.get("dead", false)):
@@ -115,3 +135,6 @@ func step(dt: float) -> void:
 	lure_k = move_toward(lure_k, 1.0 if flare else 0.0, 4.0 * dt)
 	for m in lure:
 		(m as ShaderMaterial).set_shader_parameter("glow", lure_base * lerpf(LURE_REST, LURE_FLARE, lure_k))
+	if puff:
+		puff.visible = lure_k > 0.01
+		puff.scale = Vector3.ONE * lure_k
