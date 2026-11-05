@@ -1190,3 +1190,13 @@ Update the player-facing text in the same rename sweep as Lisette. The anglerfis
   - **Mood:** wiggles happily when his porthole mood is happy.
   - **Ult** (the ice / sea path over the abyss): its lure flares bright for the duration.
   - Its lure is a small glowing dot visible from top-down. Keep it subtle enough not to look like a pickup or projectile (clarity, item 96).
+
+## 2026-11-05 03:18 UTC (ext): Breaker weapon sheet: `briefs/art-refs/breaker_weapons.png`
+- **Use for shape/detail:**
+  - **Hammer:** a capstan-drum head of iron-banded planks with spikes on both ends, on an iron haft.
+  - **Chain:** a long chain ending in a wrist shackle.
+  - **Shield:** the figurehead shield; its back is planks with an iron cross brace.
+- **Scale and two fixes:**
+  - **Hammer size:** the drum must be as big as his torso and the haft as long as his arm (per the master sheet); this sheet draws it slimmer.
+  - **Chain:** wound around the drum, as on the master sheet.
+  - **Shield:** taller than his body.
