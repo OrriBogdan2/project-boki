@@ -11,6 +11,10 @@ extends RefCounted
 ## and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
 ## (Blend2: moves that own the body). The action itself is two seekable channels crossfaded, so one move hands to the
 ## next without a pop (item 32).
+##
+## Data "crouch" (item 143): under air, a crouch layer (idle and a sneak ring) with a one-shot channel for the dip into
+## and out of it. The game state's crouch (0..1) only says which way it is going; the layer has its own eased weight.
+## A Hero with no "crouch" key stands through a crouch, as the clips have no pose for it.
 
 const DIR := "res://content/rules/warden_anim/"
 const STATE := "anim_state"
@@ -25,6 +29,9 @@ const HEADING_MIN := 2.0     # m/s: slower than this has no heading to lean into
 const HEADING_MAX := 1.4     # rad: the most the root turns off the facing
 const HEADING_RATE := 14.0   # 1/s: how fast it turns
 const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
+const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carries it
+const CROUCH_ONE := 0.06     # s: the dip clip eases in and out of the layer
+const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
 var root: Node3D
@@ -54,6 +61,15 @@ var force := {}              # a tool's pick ({clip, t}): skips the state (tools
 var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
 var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
 var weapon_bi := -1          # "weapon_bone": the bone a thrown weapon hides on
+var crouch_on := false       # which way the state's crouch is going
+var crouch_k := 0.0          # the state's crouch last frame
+var crouch_w := 0.0          # how much the crouch layer owns the body
+var crouch_from := 0.0       # crouch_w when it last turned
+var crouch_t := 99.0         # s since it turned
+var crouch_clip := ""        # the dip playing ("" none: turned round mid-dip, the layer just eases)
+var crouch_seek := 0.0       # s into it
+var one_w := 0.0             # how much of the layer the dip owns
+var crouch_pos := Vector2.ZERO
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -144,6 +160,9 @@ func _is_loop(nm: String) -> bool:
 	if nm == lc.get("idle") or nm == lc.get("stance") or nm in (lc.get("walk", {}) as Dictionary).values() \
 			or nm in (lc.get("run", {}) as Dictionary).values():
 		return true
+	var cr: Dictionary = d.get("crouch", {})
+	if cr.has("idle") and (nm == cr["idle"] or nm in (cr["walk"] as Dictionary).values()):
+		return true
 	return nm in ["fall", "glide", "stun", "downed"]
 
 func _anim(nm: String) -> AnimationNodeAnimation:
@@ -180,7 +199,7 @@ func _build() -> AnimationNodeBlendTree:
 	t.connect_node("glide_w", 0, "air_pose")
 	t.connect_node("glide_w", 1, "glide")
 	t.add_node("air", AnimationNodeBlend2.new())
-	t.connect_node("air", 0, "stance_w")
+	t.connect_node("air", 0, _build_crouch(t) if d.has("crouch") else "stance_w")
 	t.connect_node("air", 1, "glide_w")
 	for ch in ["a", "b"]:
 		t.add_node("anim_" + ch, _anim(String(lc["idle"])))
@@ -206,6 +225,31 @@ func _build() -> AnimationNodeBlendTree:
 	t.connect_node("full", 1, "act")
 	t.connect_node("output", 0, "full")
 	return t
+
+## The crouch layer over stance_w: its own BlendSpace2D (idle at the centre, the sneak ring), the dip's seek channel.
+func _build_crouch(t: AnimationNodeBlendTree) -> String:
+	var cr: Dictionary = d["crouch"]
+	var bs := AnimationNodeBlendSpace2D.new()
+	bs.min_space = Vector2(-1, -1)
+	bs.max_space = Vector2(1, 1)
+	bs.blend_mode = AnimationNodeBlendSpace2D.BLEND_MODE_INTERPOLATED
+	bs.add_blend_point(_anim(String(cr["idle"])), Vector2.ZERO)
+	var dirs := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
+	for k in dirs:
+		bs.add_blend_point(_anim(String(cr["walk"][k])), dirs[k])
+	t.add_node("crouch_loco", bs)
+	t.add_node("crouch_rate", AnimationNodeTimeScale.new())
+	t.connect_node("crouch_rate", 0, "crouch_loco")
+	t.add_node("crouch_anim", _anim(String(cr["in"])))
+	t.add_node("crouch_dip", AnimationNodeTimeSeek.new())
+	t.connect_node("crouch_dip", 0, "crouch_anim")
+	t.add_node("crouch_one", AnimationNodeBlend2.new())
+	t.connect_node("crouch_one", 0, "crouch_rate")
+	t.connect_node("crouch_one", 1, "crouch_dip")
+	t.add_node("crouch_w", AnimationNodeBlend2.new())
+	t.connect_node("crouch_w", 0, "stance_w")
+	t.connect_node("crouch_w", 1, "crouch_one")
+	return "crouch_w"
 
 ## The animation track path of a bone.
 func _track(bone: String) -> NodePath:
@@ -312,6 +356,8 @@ func step(dt: float) -> void:
 	_p("upper/blend_amount", up_w)
 	_p("full/blend_amount", act_w)
 	_loco(s, dt)
+	if d.has("crouch"):
+		_crouch(s, dt)
 	tree.advance(dt)
 	_turn_to_heading(s, bool(want.get("heading", false)), dt)
 	_out(dt)
@@ -365,3 +411,52 @@ func _loco(s: Dictionary, dt: float) -> void:
 			land_t = 0.0
 		air_t = 0.0
 	was_air = not grounded
+
+## The crouch layer: the dip plays as the state turns, the weight eases, the sneak ring follows the velocity.
+func _crouch(s: Dictionary, dt: float) -> void:
+	var cr: Dictionary = d["crouch"]
+	var k := float(s.get("crouch", 0.0))
+	var on := crouch_on
+	if k > crouch_k or k >= 1.0:
+		on = true
+	elif k < crouch_k or k <= 0.0:
+		on = false
+	crouch_k = k
+	if on != crouch_on:
+		crouch_on = on
+		crouch_from = crouch_w
+		crouch_t = 0.0
+		crouch_clip = ""
+		if one_w <= 0.0:      # (turned round mid-dip: the clip showing can't be swapped, so no second dip)
+			crouch_clip = String(cr["in" if on else "out"])
+			crouch_seek = 0.0
+			_node("crouch_anim").animation = crouch_clip
+			one_w = 1.0       # (from its first frame: under the fade the hold would drop him early)
+	crouch_t += dt
+	var length := lib.get_animation(crouch_clip).length if crouch_clip != "" else 0.0
+	var fade := CROUCH_IN      # (with a dip: quick going down, under the clip; coming up, the clip's whole length)
+	if length > 0.0:
+		fade = CROUCH_ONE if on else length
+	crouch_w = lerpf(crouch_from, 1.0 if on else 0.0, smoothstep(0.0, fade, crouch_t))
+	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	var flat := Vector2(vel.x, vel.z)
+	var spd := flat.length()
+	var goal := 0.0
+	if crouch_clip != "" and crouch_t < length:
+		goal = CROUCH_MOVING if spd >= STILL else 1.0
+	one_w = move_toward(one_w, goal, dt / CROUCH_ONE)
+	if crouch_clip != "":
+		crouch_seek = minf(crouch_seek + dt, maxf(length - 0.001, 0.0))
+	if one_w > 0.0:
+		_p("crouch_dip/seek_request", crouch_seek)
+	_p("crouch_w/blend_amount", crouch_w)
+	_p("crouch_one/blend_amount", one_w)
+	var face := float(s.get("face", 0.0))
+	var fw := Vector2(-sin(face), -cos(face))
+	var rt := Vector2(cos(face), -sin(face))
+	var speed := float(cr.get("speed", 2.4))
+	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
+	var pos := Vector2(dir.dot(rt), dir.dot(fw)) * clampf(spd / speed, 0.0, 1.0) if spd >= STILL else Vector2.ZERO
+	crouch_pos = crouch_pos.lerp(pos, 1.0 - exp(-dt * 12.0))
+	_p("crouch_loco/blend_position", crouch_pos)
+	_p("crouch_rate/scale", clampf(spd / speed, 0.7, 1.4) if spd >= STILL else 1.0)

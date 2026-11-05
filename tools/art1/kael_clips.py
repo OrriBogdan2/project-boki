@@ -10,6 +10,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
 import kael_pieces as K
+import crouchkit
+from crouchkit import off
 
 UP = (0, 0, 1)
 A_Z = K.ANKLE_Z
@@ -66,6 +68,41 @@ def stance(u):
     p["fing"] = 0.5
     p["brow"], p["lid"] = 1.0, 0.42
     return p
+
+
+# ---- the crouch (item 143): a swordsman's low guard. Square and wide, the lead foot out, hunched behind both hands on the hilt with the blade laid forward at the throat of whatever's ahead; only the eyes move.
+GUARD = {
+    "pel": (0.02, -0.04, -0.23), "prt": (0.46, 0.20, -0.03), "tor": (0.22, -0.26, 0.04), "hed": (-0.64, 0.08, 0.0),
+    "G": (0.20, 0.46, 0.50), "BE": be(4, 16, (0.2, -0.25, 0.95)), "Lw": 1.0, "LP": (-0.10, 0.40, 0.52),
+    "FL": (-0.20, 0.25, A_Z + 0.02), "FR": (0.24, -0.20, A_Z + 0.06), "FLy": 0.25, "FRy": -0.55, "FLp": 0.2, "FRp": 0.55,
+    "brow": 1.0, "lid": 0.42, "fing": 0.6, "skirt": 0.1,
+}
+PAD = {"ankle": A_Z, "foot": 0.10, "width": 0.17, "stride": 0.27, "lift": 0.045, "toe": 0.2, "share": 0.62, "sway": 0.03, "bob": 0.014, "twist": 0.09, "T": 0.66, "toe_out": -0.3, "swing": 0.35}
+
+
+def guard(u):
+    """Still as a set trap: the slow heave of his chest moves the blade's tip, the head tracks a little left and right."""
+    a, b = math.sin(u * 2 * math.pi), math.cos(u * 2 * math.pi)
+    p = dict(GUARD)
+    p["pel"] = (0.02, -0.04, -0.23 - 0.006 * b)
+    p["tor"] = (0.22 + 0.016 * b, -0.26, 0.04)
+    p["hed"] = (-0.64, 0.08 + 0.26 * a, -0.03 * a)
+    p["G"] = (0.20, 0.46, 0.50 - 0.005 * b)
+    p["lid"] = 1.0 if 0.80 < u < 0.83 else 0.42
+    return p
+
+
+def guard_upper(p, u, c1, s2, d):
+    """The blade keeps its line while the legs work under it, as if it were on a rail."""
+    k = max(d.y, 0.6)
+    p["G"] = (0.20 + 0.03 * d.x, 0.46 * k + 0.014 * c1, 0.50 + 0.006 * s2)
+    p["hed"] = (-0.64 * (0.6 + 0.4 * max(d.y, 0.0)), 0.08 - 0.05 * c1, 0.0)
+    p["skirt"] = 0.1 + 0.12 * c1
+
+
+def crouch_set():
+    dip = off(GUARD, pel=(0.0, 0.0, -0.045), prt=(0.08, 0, 0), hed=(-0.06, 0, 0), G=(0.0, -0.08, -0.05))
+    return crouchkit.clips(C, READY, GUARD, guard, PAD, guard_upper, dip, up=dict(READY, pel=(0.015, -0.015, -0.04)))
 
 
 # ---- locomotion: one generator, the stride along any heading
@@ -156,6 +193,7 @@ def clips():
     out = []
     out.append(FnClip("idle", 3.2, idle))
     out.append(FnClip("stance", 4.0, stance))
+    out += crouch_set()
     for nm, sp, T in (("walk", 0.45, 1.1), ("run", 1.0, 0.68)):
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sp, hd, T)))
