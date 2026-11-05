@@ -1012,3 +1012,23 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
 - **Kept from 106:** these become the DEFAULT. The reticle-customisation settings stay; the aim line gets an on/off + opacity setting.
 - Ability-specific aim visuals (Lisette's filling line, cones, charge bars) draw on top and replace the plain line while active.
 - Screenshot at match zoom next to the ref.
+
+## 113. Kael: accuracy pass vs the source's Brall (owner playtest, 12:19 UTC Nov 5). HIGH
+Source of truth: Brall in `briefs/supervive-data/supervive_kits.md` + footage refs (owner notes win). Owner: "he relies on combos; he needs a better pass on accuracy compared to his original, Brall."
+1. **Sword looks comically big and doesn't match his model/splash.** Use `kael_weapons.png` / the master sheet: a straight, broad, jagged greatsword (blade ~shoulder-to-ankle), the same mesh as the new model, glowing white-hot. Scale it to his hand and body, not oversized. (ART-1 Kael + the in-game held weapon.)
+2. **Accidental glide:** holding RMB and pressing jump makes him glide. Not allowed.
+   - No glide from the RMB hold.
+   - During his R (ult), glide is blocked until the last ~1.5 s; in that window a glide input cancels the rest of the ult into a glide.
+   - (ext's reading of "don't let him glide for like 1.5 s until near the end of his R"; confirm with the owner if unclear.)
+3. **RMB hold pose:** the sword held overhead isn't pointing forward. It should be like the source's held stance: the blade angled FORWARD toward the aim, ready to lunge (partly a size problem; fix after 1).
+4. **The ranged auto (LMB long / searing wave)** should be a SIDE SWING (horizontal sweep), not an overhead chop.
+5. **E (Warchain)** still forces him forward, and he can't RMB to the side then E elsewhere.
+   - E fires toward the CURSOR independently of his movement / RMB direction.
+   - RMB in one direction, then immediately E in another: both work, no forced direction carry-over.
+   - The chain pull per the existing tether rules (facing/movement steer, item 57).
+6. **Down-RMB (air RMB / Meteor):** make it a vertical DOWN-SLAM like the source (drops straight down onto the target spot), not the current sideways diving slam.
+7. **Combo must work:** E a foe → R (ult) → mid-ult, pull himself along the chain toward them so the ult's effect hits them as he goes.
+   - E's tether persists into the ult, and the self-pull is usable during it.
+   - Assert this combo end to end.
+8. **Dash = a hit with a short animation:** it damages / knocks like the source but with a much shorter commit/animation than now.
+- **Checks:** --juggernaut-combo-check updated with asserts for 2, 5, 6, 7, 8. A short GIF per change.
