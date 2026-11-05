@@ -834,3 +834,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Checks on the tip: clip 29/0, clip-live-sable 9/0, rig-standard 69/0, warden-model 157/0, health --strict. dash-aim, dancer-combo, weapon-clip passed before the main merge by exit code only. Full suite (138) before the fine-detail round: baseline reds + farm-tutorial. warden-model height_3d 1.05 -> 1.13.
 - Differs: face shares the atlas (not a separate head mesh). Gaps: wings twist in flips, arms ~20% shorter than the scan, faint cheek patch.
 - Owner Qs: antennae size for the match read? Card text "bolts" -> "shots"?
+
+## 2026-11-05 S2: ART-1 Ryzz: ext/art1-ryzz 5536cccd (match ~85%, viewer ~75-80%, one row No: S3's)
+- Meshy scan fitted to the rig: 14,368 tris, 8 surfaces, atlas + normal map, 38 clips, 4 rods with pink arcs, copper wires, gum bubble (mage_gum 1.2 s, pop 0.9 s via mage_bubble_pop). 76 credits.
+- **Fidelity:** hands-free yes (model); finger guns yes; **pink lightning NO** (kit still TEAL/GOLD; origin/ext/vfx-ryzz exists, not in this branch); 4 rods yes; arcing yes; wires yes; pink/blue pigtails yes; rods blaze on ult yes. Proofs: ext/hero-shots-s2 e5128200 art1/ryzz/.
+- Checks: clip, rig-standard, ryzz-live, clip-live, warden-model, warden-glb, mage-combo, archetype 8/8, health --strict on the tip. Suite wasn't one clean run on the tip; baseline reds not diffed against main. warden-model height_3d 1.11. S4: the emote's pop has no sound hook.
+- Owner Qs: Storm Rod in hand on RMB vs HANDS-FREE? Idle both eyes open, or the master's wink?
