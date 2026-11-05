@@ -433,7 +433,7 @@ func _halo(main: Node, a: String) -> void:
 		if mi:
 			rest[mi] = mi.global_position
 	(m.get_node("Rig/Torso/HeadPivot") as Node3D).rotation.x = 0.4
-	# (and the arms swing, the body turns and the aim pitches: a halo can ride a hand, Ostra's void orb, the chest,
+	# (and the arms swing, the body turns and the aim pitches: a halo can ride a hand, Motley's void orb, the chest,
 	# Sable's pendant, or the weapon, Hem's bow and Cinder's flame chamber)
 	for arm in ["Rig/Torso/ArmRPivot", "Rig/Torso/ArmLPivot"]:
 		var ap := m.get_node_or_null(arm) as Node3D

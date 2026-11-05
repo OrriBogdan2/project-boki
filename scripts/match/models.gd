@@ -2613,7 +2613,7 @@ static func deathbox(col: Color) -> Node3D:
 ## shrines (blessing, teal), exits (hatches violet, uplinks cyan), rift keys (violet, like the
 ## hatch they open), eggs (warm gold), revive beacons (mint). Loot is gold / rarity coloured with
 ## a pillar and a ground pool; breakables are matte with no glow; decor stays low-contrast.
-const ICON_COLS := {"bless": Color("5fd0b0"), "hatch": Color("b98aff"), "uplink": Color("4ac8f0"), "key": Color("b98aff"), "ckey": Color("f2c84a"),
+const ICON_COLS := {"bless": Color("5fd0b0"), "hatch": Color("b98aff"), "key": Color("b98aff"), "ckey": Color("f2c84a"),
 	"egg": Color("ffc04a"), "revive": Color("6ae8a0"), "dock": Color("ffb84a")}
 static var _icon_tex := {}
 
@@ -2622,7 +2622,7 @@ static func _icon_sym(kind: String, x: float, y: float) -> bool:
 	match kind:
 		"bless":     # a four-point sparkle
 			return pow(absf(x), 0.5) + pow(absf(y + 0.02), 0.5) < 0.86
-		"hatch", "uplink", "dock":   # an arrow up and out
+		"hatch", "dock":   # an arrow up and out
 			if y >= -0.02 and y <= 0.56 and absf(x) < 0.48 * (0.56 - y) / 0.58: return true
 			return absf(x) < 0.15 and y > -0.56 and y < 0.0
 		"key", "ckey":

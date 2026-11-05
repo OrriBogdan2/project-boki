@@ -126,8 +126,8 @@ func run(main_node: Node) -> void:
 	var seen := 0
 	for f in foes:
 		var fh: Hunter = f
-		if fh.unseen:
-			continue     # hidden in grass: no plate for anyone, by design
+		if fh.unseen or fh.out:
+			continue     # hidden in grass, or eliminated: no plate for anyone, by design
 		seen += 1
 		var fs := _shown(hud, fh)
 		if fs.is_empty() or int(fs.get("lvl", -1)) != fh.lvl:
@@ -162,7 +162,7 @@ func run(main_node: Node) -> void:
 	# ---------------------------------------------------------------- 5. cooldown text
 	P.slot_lv["kin"] = 1
 	P.ak.cd["e"] = 6.4
-	await main.get_tree().process_frame
+	await hud.panels.draw      # the slots are drawn on HudPanels, REDRAW_HZ times a second
 	await main.get_tree().process_frame
 	var ei := P.slot_info("k1")
 	var txt := String(hud.slot_text.get("k1", ""))

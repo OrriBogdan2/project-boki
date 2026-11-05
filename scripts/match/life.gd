@@ -203,6 +203,7 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 	for old in m.boxes:
 		if old["owner"] == h: old["soul_until"] = 0.0
 	var at := box_spot(m, h, why)
+	HeroSfx.voice(m, h, "death")
 	KinTrack.drop_carried(m, h, at)       # a Boki you were carrying home drops for its owner
 	var b := {"owner": h, "team": h.team, "pos": at, "gems": h.gems, "seeds": h.seeds.duplicate(), "caught": h.caught.duplicate(true),
 		"belt": UtilityBelt.clear(h), "soul_until": m.time + R["soul_time"], "prog": {}, "node": null, "empty": false,

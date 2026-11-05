@@ -88,34 +88,36 @@ func _archer_combos() -> void:
 		absf(s1 - 0.6) < 0.01 and absf(s2 - 1.15) < 0.01 and absf(K.draw.over_t() - 1.65) < 0.01,
 		"%.2f %.2f %.2f" % [s1, s2, K.draw.over_t()]
 	)
-	# the draw: its pose, the V reticle closing, the resting aim line
+	# the draw: its pose, the filling line, the resting aim line
 	step(m, 0.2, func(): K.res = 0.0; aim_at(P, T.pos))
 	ok("pin reticle: a faint aim line to the cursor at rest", AimKit.shown(P, "draw_rest"))
 	step(m, 0.3, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
 	var ve := AimKit.entry(P, "draw")
 	ok("pin anim: drawing holds arc_draw", K.anim_id == "arc_draw", K.anim_id)
+	var fe := AimKit.entry(P, "draw_fill")
+	var fl := (fe.get("to", Vector2.ZERO) as Vector2).distance_to(fe.get("from", Vector2.ZERO))
+	var tl := (ve.get("to", Vector2.ZERO) as Vector2).distance_to(ve.get("from", Vector2.ZERO))
 	ok(
-		"pin reticle: drawing shows the V, part closed",
-		AimKit.shown(P, "draw") and String(ve.get("kind", "")) == "vee" and float(
-			ve.get("half", 0.0)
-		) > 0.0 and float(ve.get("half", 1.0)) < deg_to_rad(12.5),
-		"kind %s half %.3f" % [str(ve.get("kind")), float(ve.get("half", -1.0))]
+		"pin reticle: drawing fills the aim line part way (a filling line, no V)",
+		AimKit.shown(P, "draw") and String(ve.get("kind", "")) == "line" and fl > 0.1 and fl < tl - 0.1
+			and AimKit.shown(P, "draw_mark"),
+		"fill %.2f of %.2f" % [fl, tl]
 	)
 	ok(
-		"pin reticle: the cursor charge ring fills",
-		float(AimKit.reticle(P).get("charge", 0.0)) > 0.2,
+		"pin reticle: no cursor ring and no bow glint (the line is the whole readout)",
+		float(AimKit.reticle(P).get("charge", 0.0)) < 0.0 and not K.fx.bow_glint.visible,
 		str(AimKit.reticle(P))
 	)
 	step(m, 1.08, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
 	var le := AimKit.entry(P, "draw")
 	ok(
 		"pin reticle: Supercharged = one thick line out to max range (16m), the foe under it ringed",
-		String(le.get("kind", "")) == "line" and (
-			le.get("to", Vector2.ZERO) as Vector2
-		).distance_to(le.get("from", Vector2.ZERO)) >= 15.9 and AimKit.shown(P, "draw_tgt"),
-		"kind %s len %.1f tgt %s" % [
+		String(le.get("kind", "")) == "line" and absf(
+			(le.get("to", Vector2.ZERO) as Vector2).distance_to(Vector2(P.pos.x, P.pos.z)) - 16.0
+		) < 0.1 and AimKit.shown(P, "draw_tgt"),
+		"kind %s reach %.1f tgt %s" % [
 			str(le.get("kind")),
-			(le.get("to", Vector2.ZERO) as Vector2).distance_to(le.get("from", Vector2.ZERO)),
+			(le.get("to", Vector2.ZERO) as Vector2).distance_to(Vector2(P.pos.x, P.pos.z)),
 			AimKit.shown(P, "draw_tgt")
 		]
 	)
@@ -171,6 +173,10 @@ func _archer_combos() -> void:
 	P.reload_t = 0.0
 	step(m, 1.8, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
 	ok("pin anim: overdrawn, the draw arm shakes (arc_over)", K.anim_id == "arc_over", K.anim_id)
+	var oe := AimKit.entry(P, "draw")
+	ok("pin reticle: overdrawn dims the line to a thin pale one and drops the circle",
+		float(oe.get("alpha", 1.0)) < 0.6 and float(oe.get("lw", 1.0)) < 0.05 and not AimKit.shown(P, "draw_mark"),
+		"alpha %s lw %s" % [str(oe.get("alpha")), str(oe.get("lw"))])
 	_loose_after(m, P, K, 0.05, T.pos)
 	ok("pin anim: an overdrawn release droops (arc_over_loose)", K.anim_id == "arc_over_loose", K.anim_id)
 	step(m, 0.4)
@@ -179,7 +185,7 @@ func _archer_combos() -> void:
 		K.draw.overdraws == od0 + 1 and dmg(T) >= 25.0 and dmg(T) <= 35.0,
 		"overdraws %d took %.0f" % [K.draw.overdraws - od0, dmg(T)]
 	)
-	# perfect release at stage 1: the star, no extra damage, and the next draw reaches Empowered 1.6x faster
+	# perfect release at stage 1: the burst at the bow, no extra damage, and the next draw reaches Empowered 1.6x faster
 	fresh(T)
 	var pf0 := K.perfects
 	_loose_after(m, P, K, 0.63, T.pos)
@@ -187,9 +193,7 @@ func _archer_combos() -> void:
 	step(m, 0.4)
 	ok(
 		"combo pin: stage-1 perfect release (no damage bonus, the quick draw banked)",
-		K.perfects == pf0 + 1 and dmg(T) >= 27.0 and dmg(T) <= 33.0 and K.draw.quick and float(
-			AimKit.reticle(P).get("perfect", 0.0)
-		) >= 0.0,
+		K.perfects == pf0 + 1 and dmg(T) >= 27.0 and dmg(T) <= 33.0 and K.draw.quick,
 		"perfects %d took %.0f quick %s" % [K.perfects - pf0, dmg(T), K.draw.quick]
 	)
 	P.fire_cd = 0.0
