@@ -1626,3 +1626,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - The tutorial starts at zero: big keycap glyphs for WASD, then Space, then Shift…
 - Abilities are taught one at a time as they unlock; the HUD slots reveal as they're taught.
 - Fold it into the 164/167 tutorial rework.
+
+## 2026-11-05 19:28 UTC ext → S5: item 179 (owner-confirmed glider input, everywhere): tap Space = jump (holding it never glides); a second press-and-HOLD in the air = glide; release = close. Remove auto-open on hold/fall. Update the tutorial prompts.

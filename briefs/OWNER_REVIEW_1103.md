@@ -2262,9 +2262,24 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - The owner: "we need to explain the glider with jump twice more easily too. and be clear shift is dash (say use space then shift)".
 - **Glider step:**
   - At a ledge, show the keycaps "SPACE + SPACE" with a tiny animation (a jump, then a second press opens the glider). The text is just "Jump twice to glide".
-  - Then "Space again to close it".
+  - Then "Let go to drop".
   - The step completes on opening the glider.
 - **Dash steps:**
   - On flat ground: the keycap "SHIFT", text "Shift to dash" (item 164).
   - Then an air-dash step: the keycaps "SPACE → SHIFT", text "Jump, then Shift to dash in the air".
 - Use the bound keys (rebinding-safe), the same keycap visuals as item 178.
+
+## 179. Glider input: tap Space to jump, then press-and-HOLD Space to glide; release closes it. Holding the first jump never opens it (owner, 18:07 UTC Nov 5, confirmed)
+- The owner: "holding space should not pull out glider - it must be a space, hold space - fix that everywhere". Confirmed choice: "Tap, then hold to glide".
+- **Rules** (everywhere: matches, the tutorial, the farm, the drop exit):
+  - First Space press = a jump. Holding it never opens the glider, however long.
+  - A new Space press while airborne (after releasing the first) opens the glider, and it stays open only while Space is held. Releasing closes it (you fall).
+  - Re-pressing while still airborne reopens it (subject to existing glider heat/limits).
+  - From a ledge walk-off (no jump): a press+hold opens it (it's the "second" airborne press).
+  - The drop (item 163): after the locked launch, the glider is open by default until landing, or follows the same hold rule after separation. Pick whichever matches SV, and note it.
+- Update the tutorial text and keycaps (item 178b): "SPACE, then HOLD SPACE to glide. Let go to drop."
+- **Remove** any auto-open on long hold or on falling.
+- **Assert:**
+  - Holding Space from the ground for 3 s → no glider.
+  - Tap, then hold → glider open; release → closed.
+  - The same in tutorial/farm/match.
