@@ -1422,3 +1422,7 @@ Use them for shape and detail; **the master sheet wins on any difference.**
 - his **RIGHT** arm has a large stone forearm gauntlet + fist, with a bare upper arm (crescent tattoo on the shoulder).
 
 Build it as in this turnaround.
+
+## 2026-11-05 06:07 UTC (ext): Vex weapon sheet: `vex_weapons.png`.
+- **Shows:** the arm-cannon with its riveted shoulder plate (the arm socket), the gatling barrels, the makeshift launcher with the brass bell muzzle + a ring sight, the grenade drum, the ammo-belt loop, the hoses, the wanted poster, the skull and tallies.
+- **Note:** the spoon sight from the master is drawn as a ring here; either is fine.
