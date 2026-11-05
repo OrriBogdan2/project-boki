@@ -18,12 +18,18 @@ Status: final-design first pass runs in game (model + 42 clips + blend tree); ow
 9. Vertex colour alpha = ink room (Piece.room); RGB = shade (hair layers, warden_look hair "vertex_ao": true).
 10. Near-black paint reads as gloss under the toon rim: lift it to charcoal, lower `fres` on cloth and leather.
 
+11. Real holes: `holed_sheet` cuts cloth with a constrained Delaunay on a grid (cheap: ~30 tris a hole); never fake them with paint. Cloth that shows both sides is two sheets back to back. Ember rims are keyed hot at the hole's lip, with a small `anchor_ember_*` bloom on top.
+12. Hair: locks follow skull meridians from an uneven hairline (`_skull_r`), flat at the root (`root=0.25`), so no brim. Lids: the opening is two curves that meet at the corners (`lid_up`, `lid_down`); lash line in `lid()`.
+13. Stone-and-glow weapons: dark stone ramp, amber next to the core, white core; blade thick enough to read edge-on, plus blooms at root, mid and tip.
+
 ## Rig
 - Contract bones + per-Hero extra bones (Kael: lid.L/R, brow.L/R, fingers.L, thumb.L, foot.L/R; springs spring_mane_*, spring_hangwarchain_*, spring_hangcuff_*, spring_scarf_*). foot.* gives flat feet on bent knees; use it for all Heroes.
 - Use `body.shoulder` to narrow the rig's shoulders; NOT `body.chest` (that squashes the torso non-uniformly). Rerun `--warden-rig-json --warden=<id>` (needs `godot --headless --import` once in a fresh worktree or it hangs).
 - root = pelvis, hips = chest: weight the belly root->hips for a two-segment spine.
 
 ## Animation
+- Glide: the real glider's grips are shoulder + (0.02 in, 0.36 up, 0.06 back) on the rig; key the hands there.
+- Moves with a curved path: `"heading": true` in the kmoves entry turns the root to his velocity. `--clip-live-check` runs a real Match through the render path; copy it for your Hero.
 - posekit.py: keys are targets (pelvis, torso, head, feet + yaw, grip position + blade direction + edge, off-hand place or Lw 1 = on the hilt, brows, lids, fingers); sampled at 30 fps, two-bone IK solved, FK baked per frame. FnClip for cycles; `gait(speed, heading)` makes all walk/run directions.
 - Clip times = the kit's kmove table times (kmoves_*.gd): WardenClips seeks a clip to the kit's own kmove_t. Map in content/rules/warden_anim/<art>.json "kmoves", with "hold_from" for held moves, "upper": true for torso-only.
 - Blend tree (built in code from the JSON): loco BlendSpace2D (idle, walk ring, run ring) > stance > air > upper (filtered, one channel) > full (two crossfaded seek channels). Note: one node output can feed only one input.
