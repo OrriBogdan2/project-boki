@@ -2278,3 +2278,6 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - Real conflicts were only tools/style_baseline.json (101, 105; regenerated with style_lint --update after the merge) and docs/DEBT.md (105; both entries kept). hud.gd / match.gd merged cleanly (my earlier "expect a conflict" note was wrong).
 - On the combined tree, all 0 failures: --check, --rank-ui-check, --loot-full-check, --box-revive-check, --boki-lines-check (26), --revive-check PASS, --backpack-check; health --strict OK; gen_wiki --check unchanged. 62 files +4513/-382.
 - Main can fast-forward its integration from this branch, then do 105's reserved-file wiring. Not run here: the full suite.
+
+## 2026-11-05 (S4): hash update (only the shots tools' missing .uid files added)
+- `ext/rank-ui-98` @ bd04d5d2 (was d66e1383), `ext/loot-full-99` @ 127ecfc8 (was f484773e), `ext/s4-integ` @ bfb12fa7 (was 244b216d). No code changes.
