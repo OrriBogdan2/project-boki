@@ -298,7 +298,7 @@ def purify_burst():
     """The zone's last burst: a wave breaking outward, a bright bell chord blooming over it."""
     d = 1.6; t = T(d)
     wave = mix(kick(100, 45, 0.6, 0.03, 0.08, 2.0) * 0.5,
-               swoosh(0.9, 300, 2600, 0.9, 0.6, 1.0) * 1.2,
+               swoosh(1.1, 300, 2600, 0.9, 0.6, 2.2) * 1.4,
                lpf(noise(d), 1200) * env(N(d), 0.04, 0.35) * 1.0)
     spray = lpf(grains(1.0, 160, 1200, 4500, 0.002, 0.006, fall=0.3), 5000) * 0.6
     bells = mix(at(S.chime(784, 1.2, 0.4) * 0.45, 0.04), at(S.chime(988, 1.2, 0.4) * 0.4, 0.09),
