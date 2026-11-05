@@ -947,3 +947,23 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
   - Holding LMB through the dash keeps firing with no interruption (item 51 rule: everything combos with Shift/jump).
 - **Check the other ranged Hunters** for the same lock (Lisette, Ryzz, Sable, Cinder's flamethrower): their primary should also track the cursor during dashes unless their kit says otherwise. List any changed.
 - **Assert:** a dash east while aiming north fires its shots north (angle within ~5°), with no gap in the fire cadence across the dash. Add it to the gunslinger combo check.
+
+## 110. Wing-glide as a per-Hunter unlock (owner, 05:07 UTC Nov 5) [LATER: cosmetics/progression]
+- Owner: everyone uses gliders by default (gliders are a sellable cosmetic). Winged Hunters can **unlock gliding on their own wings** for that Hunter only, after a set number of games played with them (a mastery reward).
+- **Winged Hunters:**
+  - **Pip:** fairy wings.
+  - **Sable:** her moth-wing coat tails open into wings.
+  - **Claire:** her small bat wings flap fast, or grow while gliding.
+- **Gameplay identical to the glider:** same speed, drop rate, steering, heat/overheat (item 63). Visual + animation + sound only.
+- **Data:**
+  - `glide_unlock: {hunter, games: N}` (N owner-tunable, e.g. 20).
+  - Shown on the Hunter's mastery track; selectable in the loadout like any glider.
+- **Future (optional):** signature glides for the other Hunters as premium cosmetics, e.g.:
+  - Kael's scarf as a sail
+  - Cinder's tank jets
+  - Motley's spinning box
+  - Grimble's junk umbrella
+  - Breaker's balloon anglerfish
+  - Lisette's thread wings
+  - Ryzz's storm kite
+- **Priority:** after the art and model passes and the glider-cosmetic system exist. Not now.
