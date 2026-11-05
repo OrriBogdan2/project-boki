@@ -49,17 +49,20 @@ const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
 ## "brass" is metal split off by its colour, so a model's look can lift it alone at the match camera (Vex r3f).
 const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "brass": 3, "fur": 5, "eyes": 0,
-	"team": 1, "glow": 0, "void": 0, "card": 0, "ice": 1}
+	"team": 1, "glow": 0, "void": 0, "card": 0, "ice": 1, "flame": 0}
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
 const GUM_TAG := "gum"         # a bubble drawn with the gloss pass (gum_gloss.gdshader) instead of an ink shell
-const NO_INK := ["hair", "eyes", "glow", "card"]   # slots drawn without the ink outline shell
+const NO_INK := ["hair", "eyes", "glow", "card", "flame"]   # slots drawn without the ink outline shell
 ## The `void` slot is no lit surface but a window onto the Void (shaders/hero_void.gdshader: a drifting
 ## starfield over its painted colour, Ostra's coat tears); "<void>-<tag>" with a SOFT_TAGS tag also fades
 ## out toward its tip and edges (a body that dissolves into smoke: Ostra's wisp).
 const VOID := preload("res://shaders/hero_void.gdshader")
 const SOFT_TAGS := ["wisp"]
+## The `flame` slot: strips of living fire (shaders/hero_flame.gdshader), "flame-<tag>"; warden_look's "slots" "flame-<tag>"
+## sets its shader parameters. "flame-liquid" is a tank's bubbling fuel behind glass.
+const FLAME: Shader = preload("res://shaders/hero_flame.gdshader")
 ## The "card" slot: see-through alpha cards (wings) on their own shader, both sides drawn, no ink.
 const CARD: Shader = preload("res://shaders/warden_card.gdshader")
 ## Pieces built as clean geometry (tools/meshy/warden_parts.py), "<slot>-<tag>": they take the ink line even on
@@ -662,6 +665,16 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 				var vm := _void(src, tag in SOFT_TAGS)
 				(mi as MeshInstance3D).set_surface_override_material(si, vm)
 				out.append(vm)
+				continue
+			if slot == "flame":
+				var fm := ShaderMaterial.new()
+				fm.shader = FLAME
+				fm.set_shader_parameter("liquid", tag == "liquid")
+				var flame_look: Dictionary = (own.get("slots", {}) as Dictionary).get("flame-" + tag, {})
+				for k in flame_look:
+					fm.set_shader_parameter(k, _param(flame_look[k]))
+				(mi as MeshInstance3D).set_surface_override_material(si, fm)
+				out.append(fm)
 				continue
 			var ink := not slot in NO_INK or tag in INK_TAGS      # (a Hunter's "no_ink" tags: _far_look)
 			var m := Models.toon(src.albedo_color if src else Color.WHITE, ink)
