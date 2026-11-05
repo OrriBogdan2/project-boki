@@ -143,30 +143,13 @@ func _fire(id: String, with: Array, none: Array) -> void:
 	var off := d1.angle_to(d0)
 	ok(off < AIM_DIR_MAX, "%s: aimed, the muzzle is %.3f rad off the no-stance aim (< %.2f)" % [id, off, AIM_DIR_MAX])
 
-## A Hero on clips: its stance clip turns the hips bone away from its idle.
-func _clip_stance(id: String, clips: WardenClips) -> void:
-	var lc: Dictionary = clips.d["loco"]
-	var turn := _hips_rot(clips, String(lc["stance"])).angle_to(_hips_rot(clips, String(lc["idle"])))
-	ok(turn > BONE_MIN, "%s: its stance clip turns the hips bone %.3f rad from idle (> %.2f)" % [id, turn, BONE_MIN])
-
-func _hips_rot(clips: WardenClips, clip: String) -> Quaternion:
-	var a := clips.lib.get_animation(clip)
-	for i in a.get_track_count():
-		if a.track_get_type(i) == Animation.TYPE_ROTATION_3D and String(a.track_get_path(i)).ends_with(":hips"):
-			return a.rotation_track_interpolate(i, 0.0)
-	return Quaternion.IDENTITY
-
 ## A Warden dressed in its 3D model (a .glb, when it loads): the stance turns the armature's hips.
 func _glb(id: String, with: Array, none: Array) -> void:
 	var w := (with[1] as Node3D).get_node_or_null("Warden")
 	var w0 := (none[1] as Node3D).get_node_or_null("Warden")
-	if w == null or w0 == null:
-		return
+	if w == null or w0 == null or not WardenClips.data(WardenGlb.art(id)).is_empty():
+		return      # (a Hero with hand-keyed clips: its stance is the clip, --clip-check)
 	await tree.process_frame
-	var clips: WardenClips = w.get_node("Sync").get("clips")
-	if clips:
-		_clip_stance(id, clips)      # (a Hero on hand-keyed clips: its stance is a clip, the rig's pose isn't shown)
-		return
 	var s1 := w.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	var s0 := w0.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	var bone := s1.find_bone("hips")

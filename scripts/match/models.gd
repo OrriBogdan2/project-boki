@@ -768,8 +768,9 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	root.set_meta("arm_k", arm_k)
 	for sx in [-1.0, 1.0]:
 		var sd := "L" if sx < 0.0 else "R"
-		var sh_x: float = 0.215 * sx * chest_w * float(Arch.body(arch).get("shoulder", 1.0))
-		var piv := Node3D.new(); piv.name = "Arm%sPivot" % sd; piv.position = Vector3(sh_x, 0.5, 0.0)
+		var piv := Node3D.new(); piv.name = "Arm%sPivot" % sd; piv.position = Vector3(0.215 * sx * chest_w,
+				0.5 * float(Arch.body(arch).get("torso", 1.0)), 0.0)
+		piv.position.x *= float(Arch.body(arch).get("shoulder", 1.0))
 		torso.add_child(piv)
 		part(piv, sphere(0.088, 16), m_body, Vector3(0, -0.005, 0), Vector3(1.0, 1.0, 1.0))
 		part(piv, limb(0.088, 0.064, 0.25, 0.16), m_body, Vector3(0, -0.1, 0))
@@ -828,7 +829,8 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	ring.material_override = ring_mat(team_col, 0.16); ring.position = Vector3(0, 0.04, 0)
 	root.add_child(ring)
 	# the head and everything on it turn and nod together from the neck
-	var head := Node3D.new(); head.name = "HeadPivot"; head.position = Vector3(0, 0.68, 0)
+	var head := Node3D.new(); head.name = "HeadPivot"
+	head.position = Vector3(0, 0.68 * float(Arch.body(arch).get("torso", 1.0)), 0)
 	torso.add_child(head)
 	for ch in torso.get_children():
 		if ch is MeshInstance3D and (String(ch.name).begins_with("@") or ch.name == "Head") and (ch as Node3D).position.y > 0.72 and not ch.has_meta("stay"):

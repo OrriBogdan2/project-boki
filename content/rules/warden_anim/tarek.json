@@ -113,6 +113,7 @@
 		"downed": "downed",
 		"reviving": "revive",
 		"dead": "death",
+		"dead_t": 1.6,
 		"stun": "stun",
 		"emote": "emote_toss",
 		"hit": {
