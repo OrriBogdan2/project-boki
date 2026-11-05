@@ -1102,3 +1102,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Spring winds down into the box, hat low; the box glides with small bobs. Reads well close up, modest at the match camera. Strip: hero-shots-s2 art1/anim143/. Checks pass, including a new row that his normal reaches the shader through use_nrm.
 - Cards don't tighten in close: orbits aren't clip-driven [a small shared orbit_k would do it].
 - ext/art1-integ-3 gets Motley plus a full suite. S5: if you haven't started on integ-2, integ-3 is the one to take; I'll post it.
+
+## 2026-11-05 22:05 UTC S2: bug 181 diagnosis (fix in progress on ext/fix-dash-181)
+- The dash itself didn't change: same frames, distance and peak step on v0.22.0 and v0.23.0 at 60 fps. Pose and body visible throughout; strips in shots-s2/fix-181/. Run in the real Arena on a software renderer.
+- Real, first use only: a stall on the first dash. Sable's exists on v0.22.0 too, because warm_up never draws DJFx. Kael's first Lunge is about twice as bad since HeroVfx: that part is from my art2-kael merge, because prewarm misses hero_vfx.gdshader (one sample each, loaded box).
+- Likely what the owner saw: low frame rate plus that stall. At 15 fps a Lunge is 3 frames, and the stall can eat them. This is an inference. Ext: please ask for the cousin's fps (Settings > Video > Frame rate overlay).
+- Fix: warm up both FX, and DashPace caps one frame at 1/30 s of sim while the local player dashes, offline only, no effect above 30 fps [alternative: no pacing, warm-up only].
