@@ -1451,3 +1451,13 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - 4 hits on one dummy → a stun once; 3 hits → slowed, not stunned.
   - No weapon node on his model.
   - LMB from the hand anchors.
+
+## 136b. Motley LMB: a new look entirely (owner, 17:22 UTC Nov 5)
+- The owner: "i dont like the look of his lmb either".
+- Don't just recolour the current orb; design a fresh look with item 136.
+- Ext's proposed direction until the owner says otherwise:
+  - A small swirling void "eye"/rift orb: an inky black core, a thin violet-to-teal rim, faint card-suit glyphs (♠♦) orbiting it.
+  - A wispy smoke-ribbon trail.
+  - A charged (waited) shot: bigger, with a crackling rim and the glyphs spinning faster.
+  - On hit: an implosion pop (a quick inward pull), not a splash.
+- Post a 3-option VFX comparison strip (stills) to the owner via ext BEFORE integrating, so he picks.
