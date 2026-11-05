@@ -3,8 +3,7 @@ extends RefCounted
 ## the lift-off telegraph and move, the steering lane, the capped turn, the early landing, the carpet's burn,
 ## slow and Char, bond only on a land (the best of hit or knock per cast), the cloak and the Cinder Shot
 ## mid-flight, the lance off for the whole flight, a knockback speeding it up, a stun ending it, never over the
-## abyss, the merge drop, the
-## cooldown and the burst cap.
+## abyss, the merge drop, the cooldown and the burst cap.
 
 const BURST := preload("res://tools/ult_burst.gd")
 
