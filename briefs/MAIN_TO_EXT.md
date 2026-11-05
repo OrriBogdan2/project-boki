@@ -1360,3 +1360,18 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
   - sfx-boki and boki-talk-105 wiring: reserved files
 
 ## 2026-11-05 16:05 UTC (ext): OWNER RULE: never stop to ask the owner a question and wait. He is often away. Make the most reasonable call, note it (with the alternative) in your READY/STATUS or EXT_TO_MAIN for review, and keep working. Only an irreversible, risky action (deleting data, force pushes, publishing outside your approved scope) waits, and then you continue with other work meanwhile.
+
+## 2026-11-05 16:20 UTC S5 RELEASED v0.22.0 (main 0237eb8d)
+- https://github.com/OrriBogdan2/project-boki/releases/tag/v0.22.0 is published and is releases/latest. Assets: ProjectBoki-windows.zip (144 MB), -macos.zip (170 MB), -linux.zip (135 MB), ProjectBokiLauncher-windows.zip, ProjectBokiLauncher-macos.zip.
+- **Launcher path verified from outside:** GET api.github.com/repos/OrriBogdan2/project-boki/releases/latest -> tag v0.22.0 -> each platform's asset URL downloads and unzips to what launcher.gd looks for (ProjectBoki.exe; "Project Boki.app/Contents/MacOS/Project Boki"; ProjectBoki.x86_64). The repo is public, so the launcher's unauthenticated API call works.
+- Contents: main 0237eb8d = everything shipped today through batch 8 (sound pass, perf-94c, S4 98/99/101/105, clarity-96, S7 77-92, kits, art follow-ups) + **Net.VERSION 0.22.0**. Players on older builds can't join this one online.
+- Why the release kept failing:
+  - (1) The tag/version check: the last manual run asked for v0.17.0 while net.gd said 0.18.0.
+  - (2) softprops/action-gh-release@v2 (a Node 20 action, now forced onto Node 24) stopped silently after the first of five parallel uploads on today's first try, leaving an untagged draft. The rerun of the failed job succeeded.
+  - The "failed release runs" on every ext/agent-briefs push are separate: that branch still has the pre-PR-#7 release.yml, whose one-line run step with an unquoted "failures: 0" is invalid YAML. They don't affect releases.
+- **Needs someone with workflow permission (S5's token is refused for any .github/workflows change, and for tag pushes):**
+  - (a) Replace the "Publish release" step in release.yml with `gh release create "$TAG" dist/* --target "$GITHUB_SHA" --title "Project Boki $TAG" --notes "..." --latest` (with GH_TOKEN: ${{ github.token }}; `gh release upload --clobber` if it exists) so uploads run one at a time. A ready commit is on S5's machine; I can paste it on request.
+  - (b) Copy main's release.yml onto ext/agent-briefs to stop the failure noise.
+- How S5 releases from now on (owner's standing rule, one release per shipped batch):
+  - S5 can't push tags, so it runs release.yml by hand (workflow_dispatch on main, version v<Net.VERSION>).
+  - The workflow requires the tag to equal Net.VERSION, so **each batch bumps Net.VERSION** (0.23.0 next).
