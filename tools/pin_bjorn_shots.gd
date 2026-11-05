@@ -1,5 +1,5 @@
 extends RefCounted
-## --pin-bjorn-shots --shots-dir=<dir> [--before]: screenshots of Hem's and Breaker's abilities, run
+## --pin-bjorn-shots --shots-dir=<dir> [--before]: screenshots of Lisette's and Breaker's abilities, run
 ## through the real kits with scripted input on a flat stretch of island (xvfb, a renderer). Each shot is
 ## [file stem, hero, script, capture time s, camera lead m east, caption]. Writes <dir>/MANIFEST.txt as
 ## `<hero>/v2|<file>|<caption>`. --before runs only the "before/after" set, touching nothing but input
@@ -19,7 +19,7 @@ const DT := 1.0 / 60.0
 const CLOSE_ZOOM := 0.45
 
 const SHOTS := [
-	# ------------------------------------------------ Hem
+	# ------------------------------------------------ Lisette
 	[
 		"pin_draw_v",
 		"archer",
@@ -70,7 +70,7 @@ const SHOTS := [
 		"perfect",
 		0.68,
 		2.5,
-		"Perfect release: Hem's gold fletch burst with its ring at the bow hand (0.13 s), the cursor star"
+		"Perfect release: Lisette's gold fletch burst with its ring at the bow hand (0.13 s), the cursor star"
 	],
 	[
 		"pin_arrow_flight",
@@ -177,7 +177,7 @@ const SHOTS := [
 		"spin",
 		0.75,
 		1.5,
-		"LMB held: side-on and crouched, the hammer dragged back low behind him, the shield arm forward,"
+		"LMB held: side-on and crouched, the hammer whirling round him with its trail, the shield arm forward,"
 			+ " the gold ring at his feet"
 	],
 	[
@@ -196,6 +196,12 @@ const SHOTS := [
 		1.5,
 		"Full charge: the big gold star flare on the hammer head and the cursor flare"
 	],
+	["o59_spin_a", "bulwark", "spin", 0.68, 1.5, "item 59: strip 1/6, the hammer eases out of the hand"],
+	["o59_spin_b", "bulwark", "spin", 0.74, 1.5, "item 59: strip 2/6, the whirl, a quarter turn on"],
+	["o59_spin_c", "bulwark", "spin", 0.8, 1.5, "item 59: strip 3/6, the whirl, a quarter turn on"],
+	["o59_spin_d", "bulwark", "spin", 1.25, 1.5, "item 59: strip 4/6, faster, the glint on the head"],
+	["o59_spin_e", "bulwark", "spin", 1.68, 1.5, "item 59: strip 5/6, full charge, the flash, still whirling"],
+	["o59_spin_f", "bulwark", "slam", 1.86, 1.5, "item 59: strip 6/6, the release: the slam forward"],
 	[
 		"bjorn_slam",
 		"bulwark",
@@ -368,7 +374,7 @@ const OWNER := [
 		"draw_tgt",
 		1.3,
 		4.0,
-		"owner1103 #5: draw strip 5/5, Supercharged, the thick line from Hem past the cursor"
+		"owner1103 #5: draw strip 5/5, Supercharged, the thick line from Lisette past the cursor"
 	],
 	[
 		"o1103_pin_perfect",
@@ -424,7 +430,7 @@ const OWNER := [
 		"spirit",
 		0.54,
 		2.0,
-		"owner1103 #35: Hem's own dash, the Spirit Walk roll (strip frame 1/3)"
+		"owner1103 #35: Lisette's own dash, the Spirit Walk roll (strip frame 1/3)"
 	],
 	[
 		"o1103_pin_dash_b",
@@ -432,7 +438,7 @@ const OWNER := [
 		"spirit",
 		0.6,
 		2.0,
-		"owner1103 #35: Hem's own dash (strip frame 2/3)"
+		"owner1103 #35: Lisette's own dash (strip frame 2/3)"
 	],
 	[
 		"o1103_pin_dash_c",
@@ -440,7 +446,7 @@ const OWNER := [
 		"spirit",
 		0.7,
 		2.0,
-		"owner1103 #35: Hem's own dash, out of the roll walking as a spirit (frame 3/3)"
+		"owner1103 #35: Lisette's own dash, out of the roll walking as a spirit (frame 3/3)"
 	],
 	[
 		"o1103_bjorn_aegis_idle",
