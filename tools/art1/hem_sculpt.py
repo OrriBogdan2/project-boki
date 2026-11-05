@@ -207,15 +207,28 @@ def smax(a, b, k):
     return b * (1 - h) + a * h + k * h * (1 - h)
 
 
+# the face plate (px in a 640 frame) -> the head sculpt: x by the eyes' spacing, z by landmarks (brow, eyes, nose tip, mouth, chin)
+PLATE_PX = 170.0 / (2 * EYE[0])
+PLATE_Z = ((1.504, 565.0), (1.5424, 462.0), (1.5825, 400.0), (1.619, 312.0), (1.6425, 265.0), (1.724, 55.0))
+MASK_OFF = (0.0, 30.0, 60.0, 85.0, 110.0, 140.0, 165.0, 178.0)        # px off the middle
+MASK_TOP = (324.0, 332.0, 344.0, 347.0, 340.0, 312.0, 272.0, 254.0)   # its upper and lower edge, px down the plate
+MASK_BOT = (366.0, 378.0, 390.0, 393.0, 390.0, 376.0, 343.0, 298.0)
+
+
+def plate_z(py):
+    zs = np.array([p[0] for p in PLATE_Z], F)
+    ys = np.array([p[1] for p in PLATE_Z], F)
+    return np.interp(-np.asarray(py, F), -ys, zs).astype(F)
+
+
 def mask_region(x, y, z):
-    """The domino: a band over the eyes and the bridge of the nose, lifting to a point at the temples, the eyes cut out."""
-    a = np.abs(x)
-    top = 1.6340 + 0.0085 * smooth(0.0, 0.034, a) + 0.0030 * smooth(0.05, 0.078, a)
-    bot = 1.6115 - 0.0175 * smooth(0.006, 0.036, a) + 0.0310 * smooth(0.040, 0.079, a)
-    r = smax(z - top, bot - z, 0.003)
-    r = smax(r, 0.012 - y, 0.004)
-    eye = np.minimum(_almond(1).fn(x, y, z), _almond(-1).fn(x, y, z))
-    return np.maximum(r, -(eye - 0.0030))
+    """The band, on the plate's own lines."""
+    off = np.abs(x) * PLATE_PX
+    px = np.array(MASK_OFF, F)
+    top = plate_z(np.interp(off, px, np.array(MASK_TOP, F)))
+    bot = plate_z(np.interp(off, px, np.array(MASK_BOT, F)))
+    r = smax(z - top, bot - z, 0.002)
+    return smax(smax(r, 0.012 - y, 0.003), off - 178.0, 1.0)
 
 
 def mask(h, vox=0.0013):
@@ -223,12 +236,8 @@ def mask(h, vox=0.0013):
     x, y, z = f.grid()
     d0 = h.d
     reg = mask_region(x, y, z)
-    f.d = np.maximum(np.maximum(d0 - 0.0040, -(d0 - 0.0002)), reg).astype(F)
+    f.d = np.maximum(np.maximum(d0 - 0.0034, -(d0 - 0.0002)), reg).astype(F)
     f.lab[:] = PORC
-    # its raised red edge
-    rim = np.maximum(np.abs(reg + 0.0005) - 0.0014, np.maximum(d0 - 0.0048, -(d0 - 0.0002)))
-    f.lab = np.where(rim < f.d, GOLD, f.lab)
-    f.d = np.minimum(f.d, rim).astype(F)
     return f
 
 
@@ -250,14 +259,14 @@ def hair(h):
     zh = S_interp(th, HAIRLINE[:, 0], HAIRLINE[:, 1]).astype(F)
     # (the parting's little dip off centre)
     fade = smooth(0.0, 0.035, z - zh)
-    thick = 0.0018 + (0.0042 + 0.0105 * smooth(1.60, 1.70, z) + 0.005 * smooth(0.02, -0.08, y)) * fade
+    thick = 0.0022 + (0.0070 + 0.0130 * smooth(1.60, 1.70, z) + 0.009 * smooth(0.02, -0.08, y)) * fade
     # the volume: over the flat top of the skull (no ears, no face: the base field)
-    cr = ell((0, -0.012, 1.655), (0.0835, 0.1225, 0.0885))
+    cr = ell((0, -0.016, 1.660), (0.0905, 0.1300, 0.0960))
     base = h.base
     a = np.minimum(base - thick, cr.fn(x, y, z) + 0.02 * (1 - fade))
     # raked strands: grooves running from the hairline to the bun
     ph = np.arctan2(x - BUN[0], y - BUN[1])
-    a = a + 0.0007 * np.sin(ph * 9 + 3.2 * fbm(x, y, z, 12.0, 2)) * fade
+    a = a + 0.0022 * np.sin(ph * 7 + 3.6 * fbm(x, y, z, 9.0, 2)) * fade
     d = smax(a, zh - z, 0.002)
     f.d = np.maximum(d, -(base + 0.004)).astype(F)
     f.lab[:] = HAIR
@@ -286,6 +295,11 @@ def lock(pts, r0, r1, vox=0.0013, lab=HAIR, spread=0.0):
     rr = [float(r0 + (r1 - r0) * (i / (n - 1)) ** 1.2) * (min(1.0, 0.62 + 2.4 * i / (n - 1)) if r0 > 0.02 else 1.0) for i in range(n)]
     f = Field(lo, hi, vox)
     f.add(path([tuple(c) for c in cc], rr), 0.0, lab, "head")
+    if r0 > 0.03:
+        for k, tw in ((-1, 0.4), (1, 1.5), (1, 3.1)):
+            tt = np.linspace(0, 1, n)
+            off = np.stack((np.cos(tt * 5.0 + tw), np.sin(tt * 5.0 + tw) * 0.8, 0 * tt), 1) * (0.018 * np.sin(np.minimum(tt * 1.1, 1.0) * math.pi))[:, None]
+            f.add(path([tuple(c) for c in (cc + off)], [r * 0.66 for r in rr]), 0.008, lab, "head")
     if spread > 0:
         for k in (-1, 1):
             tt = np.linspace(0, 1, n)
@@ -296,16 +310,16 @@ def lock(pts, r0, r1, vox=0.0013, lab=HAIR, spread=0.0):
 
 
 LOCKS = {
-    # the two locks framing her face, a centre part, down past the jaw
-    "lockR": [(0.006, 0.076, 1.694), (0.046, 0.074, 1.668), (0.0695, 0.060, 1.622), (0.0770, 0.050, 1.570), (0.0755, 0.046, 1.520),
-              (0.0690, 0.052, 1.470), (0.0610, 0.066, 1.425)],
-    "lockL": [(-0.006, 0.076, 1.694), (-0.046, 0.074, 1.668), (-0.0695, 0.060, 1.622), (-0.0770, 0.050, 1.570), (-0.0755, 0.046, 1.520),
-              (-0.0690, 0.052, 1.470), (-0.0610, 0.066, 1.425)],
-    # the high ponytail: up from the tie, over, falling long down her back to the waist
-    "tail": [(0.0, -0.074, 1.742), (0.002, -0.104, 1.758), (0.006, -0.140, 1.732), (0.012, -0.166, 1.655), (0.018, -0.178, 1.545),
-             (0.022, -0.172, 1.420), (0.026, -0.166, 1.290), (0.026, -0.180, 1.160), (0.018, -0.192, 1.045)],
+    # two thick curtains from the centre part, sweeping over the temples, falling past the jaw, the tips turning in
+    "lockR": [(0.004, 0.086, 1.706), (0.040, 0.087, 1.682), (0.0690, 0.067, 1.640), (0.0830, 0.052, 1.585), (0.0860, 0.048, 1.530),
+              (0.0790, 0.056, 1.478), (0.0620, 0.074, 1.440)],
+    "lockL": [(-0.004, 0.086, 1.706), (-0.040, 0.087, 1.682), (-0.0690, 0.067, 1.640), (-0.0830, 0.052, 1.585), (-0.0860, 0.048, 1.530),
+              (-0.0790, 0.056, 1.478), (-0.0620, 0.074, 1.440)],
+    # the high ponytail: up off the tie, arching back, full through the middle, an S down to her waist
+    "tail": [(0.0, -0.078, 1.748), (0.003, -0.116, 1.772), (0.008, -0.158, 1.740), (0.016, -0.190, 1.650), (0.028, -0.200, 1.530),
+             (0.040, -0.186, 1.400), (0.046, -0.176, 1.270), (0.036, -0.192, 1.150), (0.016, -0.214, 1.040)],
 }
-LOCK_R = {"lockR": (0.0105, 0.0012), "lockL": (0.0105, 0.0012), "tail": (0.0330, 0.0030)}
+LOCK_R = {"lockR": (0.0125, 0.0012), "lockL": (0.0125, 0.0012), "tail": (0.0440, 0.0030)}
 
 
 def needle_field(items, vox=0.0011, eye_w=0.0062, eye_l=0.021):

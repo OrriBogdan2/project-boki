@@ -1,6 +1,6 @@
-"""Hem (ART-1, item 108 + 76b): the sculpt to a game mesh on the contract armature with a painted atlas, saved as a .blend
-for tools/art1/hem_anims.py, which keys the clips and exports the .glb:
-  blender -b --factory-startup --python tools/art1/hem_art1.py -- WORKDIR
+"""Hem / Lisette (ART-1, item 108 + 76b): the fitted Meshy scan (hem_source.py) for the body and outfit, scripted geometry for the head, hair, hands, scarf and gear, on
+the contract armature with one painted atlas; saved as a .blend for tools/art1/hem_clips.py, which keys the clips and exports the .glb:
+  blender -b --factory-startup --python tools/art1/hem_art1.py -- WORKDIR SOURCE.blend SCAN_BASE_COLOR.png FACE_PLATE.png
 Shapes: hem_sculpt.py; paint: hem_paint.py. Budget: 15k triangles, the bow included (S1). The bow is skinned in the .glb on
 x_weapon (hand.L); the nocked needle stays a separate piece on x_arrow, resting in the quiver (item 76b).
 tools/blender/breaker_art1.py is the pattern (sculpt_kit's chart seams, density-scaled unwrap, per-texel paint)."""
@@ -13,6 +13,7 @@ import bmesh
 import bpy
 import numpy as np
 from mathutils import Matrix, Vector
+from mathutils.bvhtree import BVHTree
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -25,13 +26,65 @@ import hem_sdf as S
 import warden_kit as K
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
-WORK = sys.argv[sys.argv.index("--") + 1]
+_a = sys.argv[sys.argv.index("--") + 1:]
+WORK, SOURCE, SCAN_TEX, PLATE = _a[0], _a[1], _a[2], _a[3]
 ATLAS = 2048
 F = np.float32
 LSLOT = {H.SKIN: "skin", 0: "skin", H.LID: "skin", H.NAIL: "skin", H.LIP: "skin", H.EAR_IN: "skin", H.HAIR: "hair", H.NEEDLE: "metal",
          H.PORC: "leather", H.GOLD: "cloth", H.SCARF: "cloth", H.FEATHER: "leather", H.PAULDRON: "cloth", H.CORSET: "cloth", H.CORSET_SEAM: "cloth", H.TROUSER: "cloth", H.BOOT: "leather",
          H.BOOT_TOP: "leather", H.LACE: "leather", H.JACKET: "cloth", H.JACKET_DK: "cloth", H.CUFF: "cloth", H.TAPE: "leather",
          H.LEATHER: "leather", H.BUCKLE: "metal", H.STEEL: "metal", H.THREAD: "cloth"}
+
+
+class ScanPaint:
+    """Colours from the fitted scan: the nearest point on its surface, by texel. (mathutils' BVH, one query a texel.)"""
+
+    def __init__(self, me, tex):
+        me.calc_loop_triangles()
+        n = len(me.vertices)
+        co = np.empty(n * 3, np.float64)
+        me.vertices.foreach_get("co", co)
+        self.v = co.reshape(-1, 3)
+        lt = me.loop_triangles
+        self.t = np.empty(len(lt) * 3, np.int32)
+        lt.foreach_get("vertices", self.t)
+        self.t = self.t.reshape(-1, 3)
+        li = np.empty(len(lt) * 3, np.int32)
+        lt.foreach_get("loops", li)
+        uv = np.empty(len(me.loops) * 2, F)
+        me.uv_layers.active.data.foreach_get("uv", uv)
+        self.uv = uv.reshape(-1, 2)[li.reshape(-1, 3)]
+        self.bvh = BVHTree.FromPolygons(self.v.tolist(), self.t.tolist(), all_triangles=True)
+        self.tex = imgio.load(tex)
+
+    def sample(self, pts):
+        N = len(pts)
+        hit = np.empty((N, 3), F)
+        tri = np.empty(N, np.int32)
+        fn = self.bvh.find_nearest
+        for i, q in enumerate(pts.tolist()):
+            h = fn(q)
+            hit[i] = h[0]
+            tri[i] = h[2]
+        a, b, c = [self.v[self.t[tri, j]] for j in range(3)]
+        v0, v1, v2 = b - a, c - a, hit - a
+        d00, d01, d11 = (v0 * v0).sum(1), (v0 * v1).sum(1), (v1 * v1).sum(1)
+        d20, d21 = (v2 * v0).sum(1), (v2 * v1).sum(1)
+        den = np.maximum(d00 * d11 - d01 * d01, 1e-14)
+        w1 = (d11 * d20 - d01 * d21) / den
+        w2 = (d00 * d21 - d01 * d20) / den
+        w0 = 1 - w1 - w2
+        uv = self.uv[tri]
+        u = uv[:, 0, :] * w0[:, None] + uv[:, 1, :] * w1[:, None] + uv[:, 2, :] * w2[:, None]
+        h, w = self.tex.shape[:2]
+        return self.tex[np.clip(((1 - u[:, 1]) % 1) * h, 0, h - 1).astype(int), np.clip((u[:, 0] % 1) * w, 0, w - 1).astype(int)]
+
+
+def slot_of(c):
+    """A surface for a colour off the scan: the toon shader treats skin, cloth and leather differently."""
+    r, g, b = c[:, 0], c[:, 1], c[:, 2]
+    tan = (r > 0.42) & (g > r * 0.42) & (g < r * 0.86) & (b < g * 0.92)
+    return np.where(tan, 0, np.where(r > b * 2.2, 1, 2))
 
 
 def ob_from(name, v, q):
@@ -327,13 +380,20 @@ def main():
     hd = H.head()
     mk = H.mask(hd)
     hr = H.hair(hd)
-    locks = {k: H.lock(v, H.LOCK_R[k][0], H.LOCK_R[k][1], spread=0.0 if k == "tail" else 0.0085) for k, v in H.LOCKS.items()}
+    locks = {k: H.lock(v, H.LOCK_R[k][0], H.LOCK_R[k][1], spread=0.0 if k == "tail" else 0.0125) for k, v in H.LOCKS.items()}
     ey = H.eyes()
     hn = H.needle_field(H.HAIR_NEEDLES, 0.0012, 0.0095, 0.030)
-    tr = H.figure(J)
-    H.legs(tr, J)
-    H.dress(tr)
-    armR, armL = H.arm(J, 1, "R"), H.arm(J, -1, "L")
+    with bpy.data.libraries.load(SOURCE) as (df, dt):
+        dt.objects = ["Src", "Low"]
+    src_me, low = dt.objects[0].data, dt.objects[1]
+    bpy.context.scene.collection.objects.link(low)
+    for mi in low.modifiers:
+        low.modifiers.remove(mi)
+    low.data.materials.clear()
+    low.parent = None
+    print("scan paint", flush=True)
+    sp = ScanPaint(src_me, SCAN_TEX)
+    P.PLATE = imgio.load(PLATE)
     hR, hinfo = H.right_hand(J)
     hL = H.left_hand(J)
     qv = H.quiver()
@@ -365,17 +425,15 @@ def main():
         nose = np.linalg.norm((v - np.array((0, 0.100, 1.590), F)) * (1.3, 1, 0.8), axis=1)
         return np.clip(np.maximum(1.15 - d / 0.03, np.maximum(1.0 - mouth / 0.034, 0.9 - nose / 0.03)), 0.02, 1)
 
-    part("skin_head", hd, 4000, "head", 3.6, hxf, "head", "skin", head_cull, eye_keep)
-    part("mask", mk, 460, "mask", 2.4, hxf, "head", None)
-    part("hair", hr, 1400, "hair", 1.4, hxf, "head", None)
-    part("lockR", locks["lockR"], 200, "lock", 0.6, hxf, "lockR", "hair")
-    part("lockL", locks["lockL"], 200, "lock", 0.6, hxf, "lockL", "hair")
-    part("tail", locks["tail"], 450, "lock", 0.8, hxf, "tail", "hair")
-    part("eyes", ey, 120, "eyes", 5.0, hxf, "head", "skin")   # (on the skin slot: the eyes slot would take the player's tint, hers stay green)
+    part("skin_head", hd, 3000, "head", 3.6, hxf, "head", "skin", head_cull, eye_keep)
+    part("mask", mk, 240, "mask", 2.4, hxf, "head", None)
+    part("hair", hr, 1500, "hair", 1.4, hxf, "head", None)
+    part("lockR", locks["lockR"], 300, "lock", 0.6, hxf, "lockR", "hair")
+    part("lockL", locks["lockL"], 300, "lock", 0.6, hxf, "lockL", "hair")
+    part("tail", locks["tail"], 900, "lock", 0.8, hxf, "tail", "hair")
+    part("eyes", ey, 100, "eyes", 4.0, hxf, "head", "skin")   # (on the skin slot: the eyes slot would take the player's tint, hers stay green)
     part("hair_needles", hn, 110, "needle", 2.6, hxf, "head", "metal")
-    part("trunk", tr, 3000, "trunk", 1.0, None, "trunk", None, lambda v: (v[:, 2] > 1.40))
-    part("armR", armR, 650, "trunk", 1.0, None, "arm")
-    part("armL", armL, 650, "trunk", 1.0, None, "arm")
+    part("Low", None, 0, "scan", 1.25, None, "scan", None, ob=low)
     part("handR", hR, 800, "handR", 2.0, None, "hand")
     part("handL", hL, 500, "handL", 1.7, None, "hand")
     part("cowl", cw, 380, "scarf", 1.0, None, "gear", "cloth")
@@ -494,8 +552,6 @@ def main():
             pts = f.project(pts, 2)
             nn = f.grad(pts, f.vox * 0.9)
             lab = f.label(pts)
-            if p["name"] == "trunk":
-                lab = H.dress_labels(pts, lab)
         nm = p["paint"]
         if nm == "head":
             rgb = P.head(pts, nn, lab, f)
@@ -509,8 +565,8 @@ def main():
             rgb = P.eyes(pts, nn)
         elif nm == "needle":
             rgb = P.needle(pts, nn)
-        elif nm == "trunk":
-            rgb = P.trunk(pts, nn, lab, f, None)
+        elif nm == "scan":
+            rgb = P.scan(sp.sample(pts))
         elif nm in ("handR", "handL"):
             rgb = P.skin_hand(pts, nn, lab, f)
         elif nm == "quiver":
@@ -529,11 +585,11 @@ def main():
             rgb = P.string(pts, nn)
         atlas[idx] = rgb
         mask |= m
+        if p["group"] == "scan":
+            p["tri_slot"] = slot_of(sp.sample(vs[tri].mean(1)))
         if f is not None and not p["slot"]:
             cen = vs[tri].mean(1).astype(F)
             p["tri_lab"] = f.label(f.project(cen, 1))
-            if p["name"] == "trunk":
-                p["tri_lab"] = H.dress_labels(cen, p["tri_lab"])
         if p["xf"] is not None:
             set_verts(ob, p["xf"](vs))
             nrm = (p["xf"](nrm) - p["xf"](np.zeros((1, 3), F)))
@@ -604,6 +660,8 @@ def main():
         vs = verts(ob)
         nm, grp = p["name"], p["group"]
         one = np.ones(len(vs), F)
+        if grp == "scan":
+            continue                # (its weights came with the fit)
         if grp in ("lockR", "lockL", "tail"):
             ch = chains[nm]
             names = ["spring_%s_%d" % (nm, i) for i in range(len(ch) - 1)]
@@ -618,15 +676,6 @@ def main():
         elif grp in ("scarftailR", "scarftailL"):
             W = chain(chains[grp], ["spring_%s_%d" % (grp, i) for i in range(6)], vs)
             W["hips"] = S.smooth(0.09, 0.03, np.linalg.norm(vs - chains[grp][0], axis=1)) * 3.0
-        elif nm == "trunk":
-            W = tr.weights(vs, 0.03, grp_allow)
-            W = {k2: w for k2, w in W.items() if w.max() > 1e-4}
-        elif nm in ("armR", "armL"):
-            f = p["f"]
-            W = f.weights(vs, 0.02)
-            s = "R" if nm == "armR" else "L"
-            W["hips"] = 0.0 * one
-            W = {k2: w for k2, w in W.items() if w.max() > 1e-4}
         elif nm == "handR":
             W = p["f"].weights(vs, 0.006)
         elif nm == "handL":
@@ -688,6 +737,10 @@ def main():
         me = ob.data
         if p["slot"]:
             me.materials.append(mat(p["slot"]))
+        elif p["group"] == "scan":
+            for sl in ("skin", "cloth", "leather"):
+                me.materials.append(mat(sl))
+            me.polygons.foreach_set("material_index", p["tri_slot"].astype(np.int32))
         else:
             # per triangle, from the sculpt's labels (read before the part moved)
             lab = p["tri_lab"]
@@ -703,7 +756,7 @@ def main():
         me.normals_split_custom_set_from_vertices(n.tolist())
 
     ROOM = {"lockR": 0.25, "lockL": 0.25, "tail": 0.5, "hair_needles": 0.0, "quiver_arrows": 0.0, "arrow": 0.0, "shears": 0.1, "string": 0.0,
-            "skin_head": 0.1, "mask": 0.1, "eyes": 0.0, "handR": 0.3, "handL": 0.3, "bow": 0.0, "scarftailR": 0.3, "scarftailL": 0.3, "scarftailR_in": 0.0, "scarftailL_in": 0.0}
+            "skin_head": 0.1, "mask": 0.1, "Low": 0.55, "eyes": 0.0, "handR": 0.3, "handL": 0.3, "bow": 0.0, "scarftailR": 0.3, "scarftailL": 0.3, "scarftailR_in": 0.0, "scarftailL_in": 0.0}
     for p in parts:
         me = p["ob"].data
         at = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
