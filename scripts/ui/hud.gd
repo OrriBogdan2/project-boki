@@ -204,12 +204,15 @@ func _bar(r: Rect2, frac: float, col: Color, back := Color(0, 0, 0, 0.45)) -> vo
 
 func _text(p: Vector2, s: String, size := 15, col := INK, font: Font = null, align := HORIZONTAL_ALIGNMENT_LEFT, width := -1.0) -> void:
 	var f := font if font else body
+	if align == HORIZONTAL_ALIGNMENT_LEFT and width < 0.0:
+		TextCache.draw(c, f, p, s, size, col, 4)       # shaped once, kept while the text stays the same (item 94)
+		return
 	c.draw_string_outline(f, p, s, align, width, size, 4, Color(0, 0, 0, 0.55))
 	c.draw_string(f, p, s, align, width, size, col)
 
 func _ctext(p: Vector2, s: String, size := 15, col := INK, font: Font = null) -> void:
 	var f := font if font else body
-	var w := f.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+	var w := TextCache.width(f, s, size)
 	_text(Vector2(p.x - w * 0.5, p.y), s, size, col, f)
 
 func _arc(center: Vector2, radius: float, frac: float, col: Color, width := 3.0) -> void:
@@ -348,12 +351,13 @@ func _draw_all() -> void:
 
 func _draw_world_labels() -> void:
 	var cam := m.cam
+	LabelCull.begin()        # (item 94: anything off screen or far away isn't laid out)
 	# deathboxes and revive beacons
 	for b in m.boxes:
-		if cam.is_position_behind(b["pos"]):
+		var bp := LabelCull.at(self, b["pos"] + Vector3(0, 1.9, 0))
+		if not bp.is_finite():
 			continue
 		var o: Hunter = b["owner"]
-		var bp := cam.unproject_position(b["pos"] + Vector3(0, 1.9, 0))
 		var soul := Life.soul_here(m, b)
 		var ally: bool = m.player != null and o.team == m.player.team
 		if soul and ally and o != m.player:
@@ -372,7 +376,9 @@ func _draw_world_labels() -> void:
 			continue
 		if m.player and m.player.flat_dist(bc["pos"]) > 26.0 and float(bc["prog"]) <= 0.0:
 			continue
-		var bp := cam.unproject_position(bc["pos"] + Vector3(0, 3.2, 0))
+		var bp := LabelCull.at(self, bc["pos"] + Vector3(0, 3.2, 0))
+		if not bp.is_finite():
+			continue
 		_ctext(bp, "Revive beacon" + ("  ·  contested" if bc["contested"] else ""), 12, Color("8fffc0"), big)
 		if float(bc["prog"]) > 0.0:
 			_bar(Rect2(bp + Vector2(-40, 6), Vector2(80, 5)), float(bc["prog"]), Color("8fffc0"))
@@ -380,10 +386,12 @@ func _draw_world_labels() -> void:
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not h.model.visible or h.unseen:
 			continue
-		var head := _head(h, HudPlate.plate_offset(h))
-		var sp := cam.unproject_position(head)
 		if cam.is_position_behind(h.position):
 			continue
+		var sp := LabelCull.at(self, _head(h, HudPlate.plate_offset(h)))
+		if not sp.is_finite():
+			continue
+		LabelCull.mark(h)
 		_nameplate(sp, h)
 		if not h.downed: GripOverhead.draw(self, sp, h)      # their two gloves and Boki type, under the plate
 		BokiHud.form_overhead(self, sp, h)
@@ -413,7 +421,10 @@ func _draw_world_labels() -> void:
 		elif mb.mkind == "ward": hy = 3.0
 		elif mb.mkind == "brute": hy = 2.4
 		elif mb.mkind == "warden": hy = 3.4
-		var sp := cam.unproject_position(mb.position + Vector3(0, hy, 0))
+		var sp := LabelCull.at(self, mb.position + Vector3(0, hy, 0))
+		if not sp.is_finite():
+			continue
+		LabelCull.mark(mb)
 		if mb.stagger_t > 0.0:
 			_ctext(sp + Vector2(0, -12), "STAGGERED", 18, Color("fff27a"), big)
 		elif mb.stag_open > 0.0:
@@ -458,7 +469,7 @@ func _draw_world_labels() -> void:
 		var is_tune: bool = wp.has("tune") and Data.PERKS.has(String(wp["tune"]))
 		var it := {} if (is_gear or is_tune) else Pack.ground_item(wp)
 		var nm := String(Loot.name_of(Pack.ground_item(wp))) if is_gear else (String(Data.PERKS[String(wp["tune"])]["name"]) if is_tune else Loot.name_of(it))
-		var tw := big.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 10.0
+		var tw := TextCache.width(big, nm, 16) + 10.0
 		var tag := Rect2(sp + Vector2(-tw * 0.5, -16.0), Vector2(tw, 32.0 if (is_gear or is_tune) else 20.0))
 		for tries in 4:
 			var bumped := false
@@ -483,7 +494,10 @@ func _draw_world_labels() -> void:
 	for k in m.kins:
 		if k.dead or not k.visible or k.state == "shoulder" or cam.is_position_behind(k.position):
 			continue
-		var sp := cam.unproject_position(k.position + Vector3(0, 1.05, 0))
+		var sp := LabelCull.at(self, k.position + Vector3(0, 1.05, 0))
+		if not sp.is_finite():
+			continue
+		LabelCull.mark(k)
 		if k.is_wild():
 			if k.state == "dazed":
 				CaptureHud.dazed_label(self, k, sp)       # knocked out: how to scan it, and the scan filling
