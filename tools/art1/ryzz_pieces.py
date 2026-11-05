@@ -10,8 +10,8 @@ NECK_Z = 1.4404
 ANKLE_Z = 0.12
 HS = 0.97                        # the sheet's head, a touch bigger for the match camera
 C = np.array([0.0, 0.012, 1.602])
-EYE = np.array([0.0385, 0.0645, 0.004])
-EYE_R = 0.0225
+EYE = np.array([0.0395, 0.0595, 0.005])
+EYE_R = 0.0265
 WINK = 1.0                       # +1: her right eye (the sheet) carries the bolt and the wink
 HEX6 = [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 6, endpoint=False)]
 HEX5 = [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 5, endpoint=False)]
@@ -38,7 +38,7 @@ def head_sdf(p):
     for s in (-1.0, 1.0):
         d = smin(d, sd_ell(p, (s * 0.054, 0.060, -0.030), (0.024, 0.024, 0.017)), 0.018)    # the cheek
         d = smin(d, sd_cap(p, (s * 0.018, 0.083, 0.036), (s * 0.062, 0.058, 0.046), 0.0065), 0.012)   # a light brow bone
-        d = smax(d, -sd_ell(p, (s * EYE[0], 0.098, EYE[2]), (0.0245, 0.021, 0.0175)), 0.007)  # the socket
+        d = smax(d, -sd_ell(p, (s * EYE[0], 0.098, EYE[2]), (0.0285, 0.024, 0.0205)), 0.007)  # the socket
         d = smin(d, sd_ell(p, (s * 0.0105, 0.097, -0.040), (0.0065, 0.008, 0.0055)), 0.006)   # the nostril's wing
     d = smin(d, sd_cap(p, (0, 0.081, 0.012), (0, 0.1025, -0.030), 0.0058), 0.010)             # the slim bridge
     d = smin(d, sd_ell(p, (0, 0.1045, -0.036), (0.0095, 0.0095, 0.0085)), 0.007)              # the tip, a little turned up
@@ -63,10 +63,20 @@ def ray_dir(D, r0=0.2, steps=48, c=(0, 0, 0)):
     return r
 
 
+def half_width(z):
+    """The head's half width at each height, at y = 0.03: the mask's rows wrap to it, so no corner stands off the skull."""
+    z = np.asarray(z, float)
+    w = np.full(z.shape, 0.002)
+    for _ in range(40):
+        w = w + np.clip(-head_sdf(np.stack([w, np.full(z.shape, 0.03), z], -1)), -0.01, 0.01)
+    return np.maximum(w, 0.004)
+
+
 def face_patch():
-    xs = np.concatenate([np.linspace(-0.09, -0.066, 2), np.linspace(-0.058, 0.058, 19), np.linspace(0.066, 0.09, 2)])
-    zs = np.concatenate([np.linspace(-0.125, -0.092, 4), np.linspace(-0.084, -0.052, 7), np.linspace(-0.045, 0.03, 8), np.linspace(0.04, 0.09, 3)])
+    xs = np.concatenate([np.linspace(-1.0, -0.72, 3), np.linspace(-0.64, 0.64, 17), np.linspace(0.72, 1.0, 3)])
+    zs = np.concatenate([np.linspace(-0.128, -0.094, 4), np.linspace(-0.086, -0.052, 7), np.linspace(-0.045, -0.018, 3), np.linspace(-0.012, 0.03, 8), np.linspace(0.04, 0.09, 3)])
     X, Z = np.meshgrid(xs, zs)
+    X = X * half_width(Z) * 0.995
     Y = np.maximum(ray_y(X, Z), 0.0)
     v = hl(np.stack([X, Y, Z], -1).reshape(-1, 3))
     p = Piece("face", "skin-ryzz", v, grid_faces(len(zs), len(xs)))
@@ -140,6 +150,7 @@ def lids(s):
 def brow(s):
     side = "R" if s > 0 else "L"
     pts = np.array([(0.013, 0.0955, 0.036), (0.034, 0.0925, 0.048), (0.056, 0.078, 0.052), (0.077, 0.052, 0.042)]) * [s, 1, 1]
+    pts[:, 1] = ray_y(pts[:, 0], pts[:, 2]) + 0.0035
     wd = 0.0062 * np.array([0.8, 1.0, 0.8, 0.25])
     b = sweep("brow" + side, "hair-ryzz", hl(pts), [(-1, 0), (0, 0.32), (1, 0), (0, -0.32)], wd * HS * 1.1,
               side_hint=np.array([0, 1.0, 0.3]), uv_rect=(HAIR_R[0] + 0.02, HAIR_R[1], HAIR_R[0] + 0.06, HAIR_R[1] + 0.03), room=0.0)
@@ -236,24 +247,26 @@ def pigtail(s):
         return T0 + np.array(pts) * K * [s, 1, 1]
     out = []
     hint_f = np.array([0.0, 1.0, 0.25])
-    main = [(0, 0, 0), (0.05, -0.012, 0.05), (0.125, -0.02, 0.058), (0.178, -0.028, -0.01), (0.178, -0.03, -0.1), (0.135, -0.03, -0.17)]
-    out.append(lock("pigA" + sd, W(main), 0.072, rings=9, peak=0.45, root=0.5, uv=(0.0, 0.0, 0.25, 0.62), hint=hint_f, thick=0.8))
-    out.append(lock("pigB" + sd, W([(0, -0.002, 0.005), (0.04, -0.04, 0.062), (0.105, -0.06, 0.08), (0.158, -0.07, 0.02), (0.165, -0.075, -0.075)]), 0.060, rings=8, peak=0.45, root=0.5,
-                    uv=(0.25, 0.0, 0.5, 0.62), hint=np.array([0.2, 1.0, 0.3]), thick=0.7))
-    out.append(lock("pigC" + sd, W([(0, 0.004, 0.0), (0.04, 0.026, 0.038), (0.10, 0.034, 0.03), (0.138, 0.036, -0.04), (0.128, 0.036, -0.12)]), 0.052, rings=8, peak=0.45, root=0.5,
-                    uv=(0.5, 0.0, 0.75, 0.62), hint=hint_f, thick=0.7))
-    # the pink flicks over the top of the arc
-    out.append(lock("pigF0" + sd, W([(0.03, -0.01, 0.05), (0.06, -0.012, 0.105), (0.052, -0.016, 0.165), (0.03, -0.02, 0.205)]), 0.036, rings=6, peak=0.35, root=0.7,
-                    uv=(0.75, 0.46, 1.0, 1.0), hint=hint_f, thick=0.55))
-    out.append(lock("pigF1" + sd, W([(0.09, -0.03, 0.07), (0.16, -0.038, 0.098), (0.216, -0.04, 0.09), (0.262, -0.044, 0.052)]), 0.036, rings=6, peak=0.35, root=0.7,
-                    uv=(0.0, 0.46, 0.25, 1.0), hint=hint_f, thick=0.55))
-    out.append(lock("pigF2" + sd, W([(0.15, -0.03, 0.03), (0.215, -0.04, 0.0), (0.27, -0.045, -0.046), (0.292, -0.05, -0.09)]), 0.032, rings=6, peak=0.35, root=0.7,
-                    uv=(0.25, 0.46, 0.5, 1.0), hint=hint_f, thick=0.55))
-    # the S-curl tails, pink through their outer half
-    out.append(lock("pigS0" + sd, W([(0.16, -0.03, -0.07), (0.19, -0.03, -0.15), (0.145, -0.032, -0.205), (0.178, -0.034, -0.27), (0.145, -0.036, -0.325), (0.118, -0.038, -0.355)]), 0.036, rings=10, peak=0.3, root=0.8,
-                    uv=(0.5, 0.42, 0.75, 1.0), hint=hint_f, thick=0.6))
-    out.append(lock("pigS1" + sd, W([(0.13, -0.03, -0.09), (0.10, -0.03, -0.16), (0.135, -0.03, -0.215), (0.098, -0.03, -0.27), (0.075, -0.03, -0.30)]), 0.030, rings=9, peak=0.3, root=0.8,
-                    uv=(0.75, 0.42, 1.0, 1.0), hint=hint_f, thick=0.6))
+    main = [(0, 0, 0), (0.05, -0.012, 0.05), (0.125, -0.02, 0.062), (0.185, -0.028, -0.005), (0.19, -0.03, -0.095), (0.15, -0.03, -0.175)]
+    M_ = dict(root=0.42, peak=0.5, thick=0.95, tip=0.006)
+    out.append(lock("pigA" + sd, W(main), 0.098, rings=11, uv=(0.0, 0.0, 0.25, 0.62), hint=hint_f, **M_))
+    out.append(lock("pigB" + sd, W([(0, -0.002, 0.005), (0.04, -0.045, 0.066), (0.11, -0.068, 0.088), (0.168, -0.078, 0.022), (0.175, -0.085, -0.08)]), 0.082, rings=10,
+                    uv=(0.25, 0.0, 0.5, 0.62), hint=np.array([0.2, 1.0, 0.3]), **M_))
+    out.append(lock("pigC" + sd, W([(0, 0.004, 0.0), (0.04, 0.03, 0.04), (0.10, 0.04, 0.034), (0.145, 0.042, -0.04), (0.135, 0.042, -0.125)]), 0.074, rings=10,
+                    uv=(0.5, 0.0, 0.75, 0.62), hint=hint_f, **M_))
+    F_ = dict(root=0.8, peak=0.42, thick=0.7, tip=0.003)
+    out.append(lock("pigF0" + sd, W([(0.03, -0.012, 0.045), (0.066, -0.014, 0.105), (0.062, -0.018, 0.165), (0.038, -0.022, 0.208)]), 0.054, rings=7,
+                    uv=(0.75, 0.46, 1.0, 1.0), hint=hint_f, **F_))
+    out.append(lock("pigF1" + sd, W([(0.09, -0.032, 0.066), (0.16, -0.04, 0.098), (0.218, -0.042, 0.09), (0.262, -0.046, 0.054)]), 0.052, rings=7,
+                    uv=(0.0, 0.46, 0.25, 1.0), hint=hint_f, **F_))
+    out.append(lock("pigF2" + sd, W([(0.15, -0.032, 0.02), (0.218, -0.04, -0.008), (0.268, -0.046, -0.052), (0.288, -0.05, -0.098)]), 0.048, rings=7,
+                    uv=(0.25, 0.46, 0.5, 1.0), hint=hint_f, **F_))
+    # the S-curl tails, pink through their outer half, side by side so they never cross
+    T_ = dict(root=0.85, peak=0.34, thick=0.72, tip=0.004)
+    out.append(lock("pigS0" + sd, W([(0.18, -0.03, -0.09), (0.222, -0.03, -0.16), (0.19, -0.032, -0.22), (0.224, -0.034, -0.28), (0.196, -0.036, -0.335), (0.178, -0.038, -0.365)]), 0.052, rings=11,
+                    uv=(0.5, 0.42, 0.75, 1.0), hint=hint_f, **T_))
+    out.append(lock("pigS1" + sd, W([(0.115, -0.03, -0.11), (0.138, -0.03, -0.17), (0.106, -0.03, -0.225), (0.136, -0.03, -0.28), (0.116, -0.03, -0.32)]), 0.044, rings=10,
+                    uv=(0.75, 0.42, 1.0, 1.0), hint=hint_f, **T_))
     chain = catmull(W(main + [(0.17, -0.032, -0.26)]), CHAIN_BONES + 1)
     names = ["spring_pig%s_%d" % (sd, i) for i in range(CHAIN_BONES)]
     for p in out:
@@ -389,7 +402,7 @@ def rod(i):
     L = np.linalg.norm(b - a)
     sk = np.array([(0.0, 0.5), (0.02, 1.0), (0.14, 1.0), (0.15, 1.5), (0.19, 1.5), (0.20, 1.0), (0.255, 0.85), (0.27, 0.42)])  # (m along, radius / 0.03)
     pts = np.array([a + d * s_ for s_, _ in sk])
-    sock = sweep("sock%d" % i, "metal-ryzz", pts, HEX6, sk[:, 1] * 0.03, side_hint=np.array([1.0, 0, 0]), uv_rect=COPPER_R, tip=False)
+    sock = sweep("sock%d" % i, "metal-ryzz", pts, HEX6, sk[:, 1] * 0.0185, side_hint=np.array([1.0, 0, 0]), uv_rect=COPPER_R, tip=False)
     shaft_t = np.array([0.24, 0.30, L - 0.12, L - 0.10, L - 0.09, L])
     shaft_r = np.array([1.0, 1.0, 1.0, 1.9, 1.7, 0.06]) * ROD_R
     sh = sweep("rod%d" % i, "metal-ryzz", np.array([a + d * s_ for s_ in shaft_t]), HEX6, shaft_r, side_hint=np.array([1.0, 0, 0]), uv_rect=COPPER_R)
@@ -414,8 +427,8 @@ def wire(name, path, w=0.0048, mat="glow-ryzz", uv=GLOWW_R):
 
 def gum():
     """The bubble: a closed sphere at the lips on its own bone."""
-    c = hl(np.array([0.0, 0.158, -0.070]))
-    r = 0.056
+    c = hl(np.array([-0.022, 0.150, -0.092]))
+    r = 0.046
     rows, cols = 8, 12
     v = [c + np.array([0, 0, r])]
     for i in range(1, rows):

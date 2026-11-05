@@ -2,7 +2,12 @@
 import numpy as np
 from meshkit import smooth, norm
 import ryzz_pieces as K
-from kael_paint import hexc, mix, ramp, fbm
+from kael_paint import hexc, ramp, fbm
+
+
+def mix(a, b, t):
+    """t is a scalar or already has its colour axis (kael_paint.mix adds one itself: two make an n x n array)."""
+    return a * (1 - t) + b * t
 
 KEY = np.array([1.0, 0.16, 0.74])        # the neon: warden_look paint_glow lights texels of this colour on any surface
 SKIN = [hexc("#a8604f"), hexc("#d58a70"), hexc("#efb196"), hexc("#fbd2b8")]

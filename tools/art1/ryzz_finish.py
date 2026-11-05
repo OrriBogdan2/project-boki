@@ -1,6 +1,7 @@
 """ART-1 Ryzz, stage C: rebuilt pieces + the fitted scan -> join, unwrap, paint, skin, export. Budget 15k tris, 8 surfaces.
 Run: blender -b --factory-startup --python tools/art1/ryzz_finish.py -- <source.blend> <rig.json> <out.glb>"""
 import sys, os, json, math
+sys.stdout.reconfigure(line_buffering=True)
 import bpy, bmesh
 import numpy as np
 from mathutils import Vector, Matrix
@@ -23,6 +24,19 @@ TILE = ("cap", "fringe", "pig", "brow", "tie", "sock", "rod", "eye", "wire", "ch
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
+# the scan's colour at 4k from its png (the box is shared: its 8k maps must never reach Cycles), bottom row first like Blender's UVs
+sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
+import imgio, subprocess
+_tmp = os.path.splitext(OUT)[0] + "_scan4k.png"
+subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", os.path.join(os.path.dirname(SRC), "..", "runA", "tex0_base_color.png"), "-vf", "scale=4096:4096", _tmp], check=True)
+SP = imgio.load(_tmp)[::-1]
+sh, sw = SP.shape[:2]
+os.remove(_tmp)
+for mt_ in list(bpy.data.materials):
+    bpy.data.materials.remove(mt_)
+for im_ in list(bpy.data.images):
+    bpy.data.images.remove(im_)
+print("scan colour", sw, sh, SP.mean())
 dg = bpy.context.evaluated_depsgraph_get()
 bvh = BVHTree.FromObject(low, dg)
 
@@ -354,6 +368,9 @@ for pl in me.polygons:
 uvd.foreach_set("uv", loop_uv.ravel())
 me.update()
 
+print("uv range", np.nanmin(loop_uv, 0), np.nanmax(loop_uv, 0), "nan uv", int(np.isnan(loop_uv).sum()), "nan co", int(np.isnan(np.array(verts)).sum()), "co range", np.nanmin(np.array(verts), 0).round(3), np.nanmax(np.array(verts), 0).round(3))
+far = [(names[faces_pid[p_.index]]) for p_ in me.polygons if not np.all(np.isfinite(loop_uv[list(p_.loop_indices)])) or loop_uv[list(p_.loop_indices)].max() > 1.01 or loop_uv[list(p_.loop_indices)].min() < -0.01]
+print("uv outside 0-1:", len(far), sorted(set(far))[:20])
 # ---- texel maps
 me.calc_loop_triangles()
 vco = np.array(verts)
@@ -436,22 +453,6 @@ suv = np.zeros(len(sm.loops) * 2)
 sm.uv_layers.active.data.foreach_get("uv", suv)
 suv = suv.reshape(-1, 2)
 tree = BVHTree.FromPolygons([tuple(v) for v in svco], [tuple(t) for t in tri_v])
-im = None
-for mt in sm.materials:
-    pb_ = next(n_ for n_ in mt.node_tree.nodes if n_.type == "BSDF_PRINCIPLED")
-    lk = pb_.inputs[0].links
-    nd = lk[0].from_node if lk else None
-    while nd is not None and nd.type != "TEX_IMAGE":
-        nd = nd.inputs[0].links[0].from_node if nd.inputs and nd.inputs[0].links else None
-    if nd is not None:
-        im = nd.image
-sw, sh = im.size
-SP = np.zeros(sw * sh * im.channels, np.float32)
-im.pixels.foreach_get(SP)
-SP = SP.reshape(sh, sw, im.channels)[..., :3]
-print("source atlas", im.name, sw, sh, SP.mean())
-
-
 def sample_scan(points):
     hit_i = np.zeros(len(points), np.int64)
     hit_p = np.zeros((len(points), 3))
@@ -505,21 +506,21 @@ ri, gi, bi = OUTC[..., 0], OUTC[..., 1], OUTC[..., 2]
 lumi = OUTC.mean(2)
 z_t = POS[..., 2]
 # near-black leather lifted to charcoal with a cool cast (the toon rim reads it as gloss otherwise)
-dk = mask & (OUTC.max(2) < 0.2)
-OUTC[dk] = OUTC[dk] * 1.25 + np.array([0.075, 0.066, 0.092])
+dk_k = smooth(0.34, 0.12, blur(OUTC.max(2), mask.astype(np.float32), 2))[..., None] * mask[..., None]
+OUTC = OUTC * (1 - dk_k * 0.3) + np.array([0.082, 0.072, 0.1], dtype=np.float32) * dk_k
 # the neon: bright magenta line art, corset, chest bolt, forearm veins -> the glow key (the shader's model_glow colour)
-neon = mask & (ri > 0.72) & (bi > 0.5) & (gi < 0.55) & (ri > gi * 1.6)
+neon = mask & (ri > 0.86) & (bi > 0.62) & (gi < 0.6) & (ri > gi * 1.6) & (z_t > 0.95)
 n_b = blur(neon.astype(np.float32), mask.astype(np.float32), 1)
 core = n_b > 0.5
 print("neon texels", int(core.sum()))
 # the bare back at the waist: the turnaround's corset band out, the master's skin in
-bw = mask & (POS[..., 1] < 0.03) & (z_t > 1.0) & (z_t < 1.16) & (ri > gi * 1.35) & (bi > gi * 0.95)
+bw = mask & (POS[..., 1] < 0.03) & (z_t > 1.0) & (z_t < 1.16) & (ri > gi * 1.35) & (bi > gi * 0.95) & (ri > 0.42)
 OUTC[bw] = P.skin(POS[bw].astype(np.float64), NOR[bw].astype(np.float64), AO[bw].astype(np.float64)).astype(np.float32)
 core &= ~bw
 # fishnets: from the top of the thigh band to the skirt's hem, repainted crisp
-yl = mask & (ri > 0.65) & (gi > 0.55) & (bi < 0.35) & (z_t < 1.0) & (z_t > 0.5)
-BAND = float(z_t[yl].max()) if yl.any() else 0.68
-net = mask & (z_t > BAND + 0.004) & (z_t < 0.86) & (lumi > 0.16) & (np.abs(POS[..., 0]) < 0.2) & (ri > bi * 0.95)
+yl = mask & (ri > 0.65) & (gi > 0.55) & (bi < 0.35) & (z_t < 0.8) & (z_t > 0.5) & (np.abs(POS[..., 0]) < 0.17)
+BAND = float(np.percentile(z_t[yl], 99)) if yl.any() else 0.68
+net = mask & (z_t > BAND + 0.004) & (z_t < 0.84) & (np.hypot(np.abs(POS[..., 0]) - 0.085, POS[..., 1]) < 0.094)
 print("thigh band top", round(BAND, 3), "net texels", int(net.sum()))
 skin_sm = blur(OUTC.mean(2), net.astype(np.float32), 9)
 base = P.skin(POS[net].astype(np.float64), NOR[net].astype(np.float64), AO[net].astype(np.float64))

@@ -26,14 +26,24 @@ READY = {
     "pel": (0.022, 0.0, -0.022), "prt": (0.03, -0.1, -0.05), "tor": (0.0, 0.14, 0.05), "hed": (0.02, -0.08, 0.09),
     "G": (0.215, 0.05, 1.0), "BE": ((0.1, 0.25, -1), (0.1, 1, 0.1)), "LP": (-0.235, 0.055, 0.985), "LBE": ((-0.1, 0.25, -1), (-0.1, 1, 0.1)),
     "FL": (-0.085, 0.09, A_Z), "FR": (0.115, -0.06, A_Z), "FLy": 0.14, "FRy": -0.34, "FLp": 0.0, "FRp": 0.0,
-    "brow": 0.15, "lidR": 0.92, "lidL": 0.12, "smile": 0.7, "gunR": 0.0, "gunL": 0.0, "skirt": 0.0, "gum": 1.0, "fan": 0.0, "lit": 0.0,
+    "brow": 0.15, "lidR": 0.92, "lidL": 0.12, "smile": 0.7, "gunR": 0.0, "gunL": 0.0, "skirt": 0.0, "gum": 0.6, "fan": 0.0, "lit": 0.0,
 }
 GUN = {"gunR": 1.0, "gunL": 1.0}
 BOTH_UP = {"G": (0.27, 0.2, 1.3), "BE": aim(-14, 26), "LP": (-0.27, 0.2, 1.3), "LBE": aim(14, 26), "gunR": 1.0, "gunL": 1.0}
 
 
+def qz(p):
+    """The off hand's frame as a quaternion, so posekit's lerp can carry it (it only knows "BE")."""
+    if "LBE" not in p or len(p["LBE"]) != 2:
+        return p
+    q = frame_of(*p["LBE"])
+    if q.w < 0:
+        q = -q
+    return dict(p, LBE=tuple(q))
+
+
 def C(name, dur, keys, loop=False, base=READY):
-    return Clip(name, dur, keys, base, loop)
+    return Clip(name, dur, [(k[0], qz(k[1])) + tuple(k[2:]) for k in keys], qz(base), loop)
 
 
 def idle(u):
@@ -47,7 +57,7 @@ def idle(u):
     p["LP"] = (-0.235, 0.055, 0.985 - 0.006 * a)
     p["lidL"] = 1.0 if 0.60 < u < 0.63 else 0.12
     # the gum grows and shrinks once a loop
-    p["gum"] = 0.8 + 0.3 * max(0.0, math.sin(u * 2 * math.pi))
+    p["gum"] = 0.5 + 0.3 * max(0.0, math.sin(u * 2 * math.pi))
     return p
 
 
@@ -58,7 +68,7 @@ def stance(u):
     p.update({"pel": (0.05, 0.0, -0.03), "prt": (0.02, -0.16, -0.12), "tor": (0.0, 0.2, 0.13), "hed": (0.06, -0.12, 0.12),
               "G": (0.25, 0.14, 1.31 - 0.006 * a), "BE": aim(-24, 22), "LP": (-0.25, 0.15, 1.29 - 0.006 * a), "LBE": aim(24, 22), "gunR": 1.0, "gunL": 1.0,
               "FL": (-0.05, 0.11, A_Z), "FR": (0.13, -0.08, A_Z), "FLy": 0.0, "FRy": -0.45, "smile": 1.0, "brow": 0.3})
-    p["gum"] = 1.0 + 0.5 * u if u < 0.92 else 0.1
+    p["gum"] = 0.7 + 0.75 * u if u < 0.92 else 0.1
     return p
 
 
@@ -193,7 +203,7 @@ class RSolver(Solver):
 
     def solve(self, P):
         Q, root_at = super().solve(P)
-        fr = P["LBE"] if isinstance(P["LBE"], Quaternion) else frame_of(*P["LBE"])
+        fr = frame_of(*P["LBE"]) if len(P["LBE"]) == 2 else Quaternion(P["LBE"]).normalized()
         Q["hand.L"] = fr @ self.rest_frame.inverted()
         return Q, root_at
 

@@ -23,3 +23,12 @@ for nm, d in (("front", (0, 5, 0)), ("side", (5, 0, 0)), ("back", (0, -5, 0)), (
     cam.rotation_euler = (-Vector(d)).to_track_quat("-Z", "Y").to_euler()
     sc.render.filepath = "%s_%s.png" % (a[1], nm)
     bpy.ops.render.render(write_still=True)
+cam.data.ortho_scale = 0.46
+sc.render.resolution_x, sc.render.resolution_y = 620, 620
+cam.location = Vector((0.0, 3, 1.6)); cam.rotation_euler = (Vector((0, 0, 1.6)) - cam.location).to_track_quat("-Z", "Y").to_euler()
+sc.render.filepath = a[1] + "_head.png"
+bpy.ops.render.render(write_still=True)
+cam.data.ortho_scale = 0.5
+cam.location = Vector((0.5, 2.0, 1.0)); cam.rotation_euler = (Vector((0.15, 0, 0.95)) - cam.location).to_track_quat("-Z", "Y").to_euler()
+sc.render.filepath = a[1] + "_hand.png"
+bpy.ops.render.render(write_still=True)
