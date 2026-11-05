@@ -18,11 +18,11 @@ F = np.float32
 # labels
 WOOD, IRON, RIVET, BRASS, MOSS, BARN, GLASS = 1, 2, 3, 4, 5, 6, 7
 HULL_C = (0.0, 0.0, 0.56)
-HULL_R = (0.475, 0.4, 0.32)
-HELM_C = (0.0, 0.03, 0.8)
+HULL_R = (0.475, 0.4, 0.27)
+HELM_C = (0.0, 0.03, 0.84)
 HELM_R = (0.235, 0.205, 0.185)     # squat, wider than tall, sunk in the hull (breaker_head_squat)
-PORT_C = (0.0, 0.8)
-PORT_R = 0.125
+PORT_C = (0.0, 0.875)
+PORT_R = 0.115
 PORT_Y = HELM_C[1] + HELM_R[1] - 0.012          # the porthole's glass
 MAST_TIP = (0.72, -0.17, 1.3)                 # where the fish's line hangs from
 FISH_AT = (0.72, -0.17, 1.02)
@@ -133,7 +133,7 @@ def helmet():
     porthole, a port each side, a band over the crown. Returns (dome field, collar field): the wide collar lies on the hull."""
     c = np.array(HELM_C, F)
     rx, ry, rz = HELM_R
-    f = Field((-0.3, -0.24, 0.7), (0.3, 0.3, 1.0), 0.002)
+    f = Field((-0.3, -0.24, 0.72), (0.3, 0.3, 1.06), 0.002)
     f.add(ell(HELM_C, HELM_R), 0.0, BRASS)
     f.add(box((0, c[1] - 0.02, c[2] + 0.03), (0.016, ry + 0.006, rz - 0.02), 0.012), 0.004, BRASS)
     pz = PORT_C[1]
@@ -144,12 +144,12 @@ def helmet():
         q = np.array((sd * (rx - 0.01), c[1] - 0.01, pz + 0.01), F)
         f.add(cap(q - (sd * 0.02, 0, 0), q + (sd * 0.022, 0, 0), 0.05, 0.046), 0.004, BRASS)
         f.sub(sph(tuple(q + (sd * 0.04, 0, 0)), 0.032), 0.004, GLASS)
-    f.d = np.maximum(f.d, 0.72 - f.grid()[2])
+    f.d = np.maximum(f.d, 0.745 - f.grid()[2])
     cl = Field((-0.56, -0.48, 0.64), (0.56, 0.48, 0.86), 0.0035)
     x, y, z = cl.grid()
     r = np.sqrt((x / 0.47) ** 2 + (y / 0.41) ** 2)
     sag = 0.05 * np.clip(y / 0.41, 0, 1) ** 2          # it dips at the front, as the art
-    top = 0.8 - 0.15 * r ** 3 - sag
+    top = 0.815 - 0.15 * r ** 3 - sag
     d = np.maximum(np.maximum(z - top, top - 0.075 - z), r - 1.0)
     cl.d = (d * 0.8).astype(F)
     cl.lab[:] = BRASS
@@ -242,7 +242,7 @@ def moss(hl, pads):
     lump = lambda x, y, z: (fbm(x, y, z, 13.0, 3) - 0.5) * 0.08
     fine = lambda x, y, z: (fbm(x, y, z, 26.0, 2) - 0.5) * 0.016
     for s in (-1, 1):
-        f.add(ell((s * 0.44, -0.02, 0.77), (0.12, 0.2, 0.045)), 0.05, MOSS, None, lump)
+        f.add(ell((s * 0.44, -0.02, 0.76), (0.12, 0.2, 0.045)), 0.05, MOSS, None, lump)
         f.add(ell((s * 0.58, 0.0, 0.76), (0.09, 0.14, 0.045)), 0.05, MOSS, None, lump)
     return f
 

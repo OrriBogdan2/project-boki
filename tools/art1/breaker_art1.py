@@ -553,7 +553,7 @@ def main():
         md = o.modifiers.new("Armature", "ARMATURE")
         md.object = arm
     Hc = H_M(np.array([[0, 0, zc]], np.float32))[0]
-    K.anchor(arm, "head", "anchor_head_top", (0, 0.03, 1.02))
+    K.anchor(arm, "head", "anchor_head_top", (0, 0.03, 1.05))
     K.anchor(arm, "hips", "anchor_chest", tuple(c_at))
     K.anchor(arm, "x_weapon", "anchor_hammer_head", tuple(Hc))
     K.anchor(arm, "x_weapon", "anchor_weapon_tip", tuple(H_M(np.array([[0.385, 0, zc]], np.float32))[0]))

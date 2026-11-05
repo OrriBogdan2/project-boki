@@ -369,7 +369,7 @@ def p_limb(p, n, c):
 
 def p_pauldron(p, n, c):
     s = float(c["part"]["side"])
-    lx = (np.abs(p[:, 0]) - 0.557) / 0.0027 * 0.62
+    lx = (np.abs(p[:, 0]) - 0.557) / 0.0027 * 0.4
     y = 228.0 - (p[:, 2] - 0.76) / 0.0027 * 0.9
     f = sample("breaker_turnaround", 105.0 - lx if s > 0 else 412.0 + lx, y)
     b = sample("breaker_turnaround", BC + 153.0 + lx if s > 0 else BC - 153.0 - lx, y)
@@ -378,7 +378,7 @@ def p_pauldron(p, n, c):
 
 def p_leg(p, n, c):
     s = float(c["part"]["side"])
-    lx = (np.abs(p[:, 0]) - 0.176) / 0.0027 * 0.9
+    lx = (np.abs(p[:, 0]) - 0.176) / 0.0027 * 0.6
     y = np.minimum(SOLE - p[:, 2] / 0.0027 * 0.95, 484.0)
     f = sample("breaker_turnaround", (FC - 50.0 - lx) if s > 0 else (FC + 50.0 + lx), y)
     b = sample("breaker_turnaround", (BC + 50.0 + lx) if s > 0 else (BC - 50.0 - lx), y)
