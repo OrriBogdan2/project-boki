@@ -186,23 +186,23 @@ func _screens() -> void:
 	layer.queue_free()
 	UI.toast(Overlay.root, "Bramble Isle is open")
 	await main.get_tree().process_frame
-	var toast_box: Control = Overlay.root.get_child(Overlay.root.get_child_count() - 1)
+	var toast_box: Control = MsgLane.of(Overlay.root).get_child(0)
 	var glass_ok := toast_box is PanelContainer and toast_box.get_theme_stylebox("panel") is UiFrame
 	ok("toast: a glass card from the menu look", glass_ok)
+	MsgLane.of(Overlay.root).clear()
 	var host := Control.new()
 	Overlay.root.add_child(host)
-	for t in ["Harvest ready", "Harvest ready", "Egg hatched", "A", "B", "C", "D", "E"]:
+	for t in ["Harvest ready", "Harvest ready", "Egg hatched", "A", "B", "C", "D", "E", "F", "G"]:
 		UI.toast(host, t)
-	var shown := host.get_children().filter(func(n): return n is PanelContainer)
-	ok("toast: one at a time, repeats merged, the queue capped", shown.size() == 1
-		and (shown[0].find_children("*", "Label", true, false)[0] as Label).text == "Harvest ready  x2"
-		and ((UI._toasts[host.get_instance_id()]["wait"] as Array).size() == UI.TOAST_QUEUE))
+	var lane := MsgLane.of(host)
+	ok("toast: a few at a time, repeats merged, the queue capped", lane.texts().size() == MsgLane.MAX_SHOWN
+		and lane.texts()[0] == "Harvest ready  x2" and lane.waiting() == MsgLane.WAIT_CAP)
 	host.queue_free()
 	var wide := Control.new()
 	Overlay.root.add_child(wide)
 	UI.toast(wide, "Pip, Moss and Fern heard you from the house and are on their way")
 	await main.get_tree().process_frame
-	var long_box := wide.get_child(0) as Control
+	var long_box := MsgLane.of(wide).get_child(0) as Control
 	ok("toast: a long line wraps at a sane width", long_box.size.y < 130.0 and long_box.size.x > 200.0)
 	wide.queue_free()
 	Overlay.close()
