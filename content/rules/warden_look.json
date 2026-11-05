@@ -360,7 +360,8 @@
 				"fres": 0.55
 			},
 			"cloth": {
-				"far_lift": 0.3
+				"far_lift": 0.08,
+				"desat": 0.25
 			},
 			"leather": {
 				"emit": 5.0,

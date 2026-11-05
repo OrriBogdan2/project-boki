@@ -4,6 +4,7 @@ extends RefCounted
 ## <dir>/<clip>/f000.png..., and with
 ## --turn a turntable in <dir>/turntable/. Needs a renderer. ffmpeg makes the GIFs and sheets.
 
+const START_FRAMES := 30      # frames the boot screen takes to clear before the first shot
 var holder: Node3D
 var cam: Camera3D
 var tree: SceneTree
@@ -36,6 +37,8 @@ func run(main: Node) -> void:
 	main.get_window().size = Vector2i(shot_px, shot_px)
 	main.get_viewport().size = Vector2i(shot_px, shot_px)
 	_stage(main)
+	for k in START_FRAMES:
+		await tree.process_frame
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	model.set_meta("anim_seed", 1)
 	holder.add_child(model)

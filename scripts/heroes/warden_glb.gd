@@ -881,6 +881,8 @@ class Springs:
 	const PREFIX := "spring_"
 	const PULL := 0.2           # the share of the way back to the rest shape per 1/60 s, at the root
 	const PULL_TIP := 0.07      # and at the tip
+	const LONG_CHAIN := 0.3     # m: a chain longer than this (in the model) pulls back firmer, by its length over this
+	const MAX_FIRM := 3.0       # and at most this many times
 	const DAMP := 0.84          # the velocity kept per 1/60 s
 	const FOLD := 0.75          # radians a folded wing tips back about the side axis through its root
 	const TUCK := 0.8           # and turns in behind the back about the vertical
@@ -947,6 +949,11 @@ class Springs:
 					var seg := (xf * (rest[i] as Transform3D).origin).distance_to(
 							xf * (rest[i - 1] as Transform3D).origin)
 					want[i] = want[i - 1] + Vector3.DOWN * seg
+			# (a long chain's links eat the pull: Tarek's locs would creep home for seconds)
+			var length := 0.0
+			for i in range(1, n):
+				length += want[i].distance_to(want[i - 1]) / xf.basis.get_scale().y
+			var firm := clampf(length / LONG_CHAIN, 1.0, MAX_FIRM)
 			var pts: PackedVector3Array = ch["pts"]
 			var prev: PackedVector3Array = ch["prev"]
 			if pts.size() != n or pts[0].distance_to(want[0]) > 1.5:      # (the first frame, or a teleport)
@@ -957,7 +964,7 @@ class Springs:
 				var v := (p - prev[i]) * pow(DAMP, k)
 				prev[i] = p
 				p += v
-				var pull := lerpf(PULL, PULL_TIP, float(i) / float(n - 1))
+				var pull := lerpf(PULL, PULL_TIP, float(i) / float(n - 1)) * firm
 				pts[i] = p.lerp(want[i], 1.0 - pow(1.0 - pull, k))
 			pts[0] = want[0]
 			prev[0] = want[0]

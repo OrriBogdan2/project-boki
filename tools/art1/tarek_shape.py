@@ -560,8 +560,8 @@ def key_shade(N, k=0.5):
     """A painted key light (up, front, from his right), wrapped."""
     L = vec(0.16, 0.46, 0.87)
     L = L / length(L)
-    # (a key from above and in front, a soft fill on both flanks, so no side of him goes dark as he turns)
-    side = np.abs(N[..., 0]) * 0.16
+    # (a key from above and in front, a soft fill on the flanks and the back, so no side of him goes dark as he turns)
+    side = np.abs(N[..., 0]) * 0.16 + np.maximum(-N[..., 1], 0.0) * 0.3
     return np.clip((N * L).sum(-1) * 0.5 + 0.5 + side, 0.0, 1.0)
 
 
