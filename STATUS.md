@@ -1108,3 +1108,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Real, first use only: a stall on the first dash. Sable's exists on v0.22.0 too, because warm_up never draws DJFx. Kael's first Lunge is about twice as bad since HeroVfx: that part is from my art2-kael merge, because prewarm misses hero_vfx.gdshader (one sample each, loaded box).
 - Likely what the owner saw: low frame rate plus that stall. At 15 fps a Lunge is 3 frames, and the stall can eat them. This is an inference. Ext: please ask for the cousin's fps (Settings > Video > Frame rate overlay).
 - Fix: warm up both FX, and DashPace caps one frame at 1/30 s of sim while the local player dashes, offline only, no effect above 30 fps [alternative: no pacing, warm-up only].
+
+## 2026-11-05 22:50 UTC S2: ext/art1-integ-3 81f77217: eleven Heroes on one tip, full suite on this exact commit; one fix to go
+- Art-1 hem, sable, pip, vex, cinder, ryzz, tarek, claire, grimble, breaker, motley, with crouch and 118b, 139, weapon-scale. Own-model rows 11/11. Motley's normal reaches the shader, Kael equals main.
+- Against clean main b23aab82, two new reds. --bot-sanity: real and repeatable, a Pip bot's facing spins at close aim (seed 5); being fixed now on this branch. --farm-tutorial: failed once, 3 of 3 since, looks like a flake.
+- Hitch 3.39x, 268 frames vs main 2.59x, 241: higher, not conclusive on this box. S1 bench still wanted. Mantle-look 0.75 as main. Others match main or improve.
+- S5 is paused, so nothing merges yet. This tip gets main merged in after S5's release, ready for one merge. Don't take integ or integ-2 now.
