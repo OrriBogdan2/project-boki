@@ -503,7 +503,7 @@ func _draw_world_labels() -> void:
 		elif k.state == "downed" and k.owner_h and m.player and k.team == m.player.team:
 			BokiHud.downed_label(self, k, sp)
 		elif k.hp < k.max_hp:
-			_bar(Rect2(sp + Vector2(-22, 0), Vector2(44, 5)), k.hp / k.max_hp, Data.TEAM_COLORS[k.team % Data.TEAM_COLORS.size()] if k.owner_h != m.player else GOOD)
+			_bar(Rect2(sp + Vector2(-22, 0), Vector2(44, 5)), k.hp / k.max_hp, SideColor.of(m, k))
 			c.draw_rect(Rect2(sp + Vector2(-22, 0), Vector2(44 * k.hp / k.max_hp, 5)), Color(KinRegen.MOTE_COL, KinRegen.pulse(k, m.time)))
 
 func _draw_bubbles() -> void:
@@ -1482,7 +1482,7 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 			"WISP": pst = "down"
 			"DEATHBOX", "DEAD": pst = "dead"
 			"EXTRACTED": pst = "out"
-		_draw_portrait(pr, h, pst, _unit_col(h))
+		_draw_portrait(pr, h, pst, SideColor.of(m, h))
 		var tx := pr.end.x + 8.0
 		var tw := r.end.x - 8.0 - tx
 		_text(Vector2(tx, r.position.y + 19), h.pname.substr(0, 13), 14, INK if lbl == "ALIVE" else Color(INK, 0.7), big)
@@ -1633,19 +1633,6 @@ func _screen_dir(dv: Vector2) -> float:
 	var a := cam.unproject_position(m.player.position)
 	var b := cam.unproject_position(m.player.position + Vector3(dv.x, 0, dv.y).normalized() * 3.0)
 	return (b - a).angle()
-
-## Supervive-style nameplate over another hunter: a class badge and the name, armor segments over a
-## segmented health bar (each tick is a fixed chunk of health), a white chip that drains after a hit,
-## and a row of status icons. Allies wear their team colour, enemies hostile red. No mana anywhere.
-const HOSTILE := HudStyle.FOE
-
-func _unit_col(h: Hunter) -> Color:
-	if m.player and h.team != m.player.team:
-		return HOSTILE
-	return Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()] if h != m.player else p_team_col()
-
-func p_team_col() -> Color:
-	return Data.TEAM_COLORS[m.player.team % Data.TEAM_COLORS.size()] if m.player else GOOD
 
 func _chip_of(e: Ent, frac: float) -> float:
 	return plates.chip_of(e, frac, get_process_delta_time())
@@ -3019,46 +3006,15 @@ func _pack_tick() -> void:
 			_build_pack()
 
 # ------------------------------------------------------------------ wisp and deathbox revive rings
-## A ring on the ground round every wisp you can see, the size of the revive range: green and
-## filling as a teammate brings them up (both teams see it), red and pulsing while an enemy is
-## standing on it. Near a downed teammate you get a "step in" cue with how far off you are; on top
-## of an enemy wisp you get "Standing on <name>". Deathbox revives get the same ring.
+## Downed Hunters and the Boki tethers (DownedMarks, BokiMarks); on top of an enemy wisp you get
+## "Standing on <name>". Deathbox revives get the same ground ring.
 func _ground_ring(at: Vector3, r: float, col: Color, width: float, frac := 1.0, start := -PI * 0.5) -> void:
-	var cam := m.cam
-	var n := 40
-	var pts := PackedVector2Array()
-	var steps := maxi(2, int(ceil(n * clampf(frac, 0.0, 1.0))))
-	for i in steps + 1:
-		var a := start + TAU * frac * float(i) / float(steps)
-		var wp := at + Vector3(cos(a) * r, 0.08, sin(a) * r)
-		if cam.is_position_behind(wp):
-			return
-		pts.append(cam.unproject_position(wp))
-	c.draw_polyline(pts, col, width, true)
+	DownedMarks.ring(c, m.cam, at, r, col, width, frac, start)
 
 func _draw_wisp_rings() -> void:
 	var p: Hunter = m.player
-	var rr: float = Life.R["revive_radius"]
-	for o in m.hunters:
-		if not o.downed or o.out or (o.unseen and o != p) or m.cam.is_position_behind(o.position):
-			continue
-		var stomped: bool = o.get_meta("stomped", false)
-		var pulse := 0.5 + 0.5 * sin(m.time * 10.0)
-		if stomped:
-			_ground_ring(o.pos, rr * (1.0 + 0.08 * pulse), Color(1.0, 0.18, 0.1, 0.55 + 0.35 * pulse), 4.0)
-			_ground_ring(o.pos, rr * 0.55, Color(1.0, 0.3, 0.2, 0.35 * pulse), 2.5)
-		else:
-			var ally: bool = p != null and o.team == p.team
-			var base := GOOD if ally else Color("ffb36a")
-			_ground_ring(o.pos, rr, Color(base, 0.35), 2.0)
-			if o.revive > 0.0:
-				_ground_ring(o.pos, rr, Color(GOOD, 0.95), 5.0, o.revive)
-		if p == null or p.out or p.downed or p == o:
-			continue
-		var d := p.flat_dist(o)
-		var lp := m.cam.unproject_position(o.pos + Vector3(0, 0.1, 0)) + Vector2(0, 30)
-		if o.team == p.team and not stomped and d > rr and d < 9.0:
-			_ctext(lp, "Step in to revive  ·  %.1fm" % (d - rr), 13, GOOD, big)
+	DownedMarks.draw(c, m)
+	BokiMarks.draw(c, m)
 	# you, standing on an enemy wisp
 	if p and not p.out and p.has_meta("standing_on") and m.time - float(p.get_meta("standing_at", -9.0)) < 0.15:
 		var o2 = p.get_meta("standing_on")

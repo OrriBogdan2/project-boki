@@ -3371,6 +3371,7 @@ func render(delta: float, alpha: float) -> void:
 			see = int(m.time * 14.0) % 3 != 0
 	model.visible = see and not Hex.active(self)       # hexed: the critter stands in for the model
 	ShieldLook.tick(self)
+	SideRings.tick(self)
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
 	_render_balloon(delta)
