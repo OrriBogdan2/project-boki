@@ -138,7 +138,7 @@ def p_wrap(P, N, occ, cav, a):
 def p_trousers(P, N, occ, cav, a):
     v = lightness(T.key_shade(N), occ, cav * 1.2) + 0.035 * T.strokes(P, 26.0, 23)
     c = tones("54402a", "a48a5c", "d8c090", v)
-    dirt = S.sstep(0.62, 0.42, P[:, 2]) * 0.15 + 0.14 * S.sstep(0.1, 0.45, S.fbm(P, 11.0, 25, 3))
+    dirt = S.sstep(0.62, 0.42, P[:, 2]) * 0.12 + 0.08 * S.sstep(0.1, 0.45, S.fbm(P, 11.0, 25, 3))
     c = S.mix(c, c * S.hexc("c8a888"), dirt)
     # the knee patch and its big stitches
     pa = T.trouser_patch(P)

@@ -196,9 +196,9 @@ C.bake("downed", 1.8, [(0, DOWNED), (1.8, {})], over=breathe(1.8, 2.2), loop=Tru
 REV = m(DOWNED, pos=(0, 0.0, -0.46), hips=(-14, 0, 0), head=(2, 0, 0), hr=hand(0.1, 0.34, -0.3), hl=lhand(0.1, 0.34, -0.3), lip=0.1, jaw=0.1, fing_l=1.0)
 C.bake("revive", 1.2, [(0, REV), (1.2, {})], over=breathe(0.9, 2.0), loop=True)
 # death: buckles to the knees, falls on his side; ends lying still (a one-shot: DeathFX keeps the last frame)
-SIDE = m(DOWNED, pos=(-0.3, 0.1, -1.05), rot=(0, -84, 0), hips=(-8, 0, 0), head=(6, 12, 0), hr=hand(0.3, 0.3, -0.5), hl=lhand(0.3, -0.1, -0.5), fr=(AX - 0.9, -0.2, AZ + 0.12), fl=(-AX - 0.5, 0.2, AZ + 0.02), fing_r=0.3, fing_l=0.3, jaw=0.2, lip=0.0)
+SIDE = m(DOWNED, pos=(0.62, 0.0, 0.2), rot=(0, -84, 0), hips=(-6, 0, 0), head=(6, 10, 0), hr=hand(0.3, 0.3, -0.5), hl=lhand(0.3, -0.1, -0.5), fr=(0.66, -0.12, 0.3), fl=(0.56, 0.18, 0.13), fra=0.0, fla=0.0, fing_r=0.3, fing_l=0.3, jaw=0.2, lip=0.0)
 C.bake("death", 1.6, [(0, LOOSE), (0.16, m(LOOSE, pos=(0, -0.05, -0.1), hips=(14, 0, 4), head=(-20, 0, 0), jaw=0.6, lip=-1.0, fing_r=0.1, fing_l=0.1, e="snap")),
-                      (0.65, m(DOWNED, e="in")), (1.25, m(SIDE, e="in")), (1.42, dict(pos=(-0.3, 0.1, -1.0))), (1.6, dict(pos=(-0.3, 0.1, -1.05)))])
+                      (0.65, m(DOWNED, e="in")), (1.25, m(SIDE, e="in")), (1.42, m(SIDE, pos=(0.62, 0.0, 0.25))), (1.6, SIDE)])
 
 # ---------------------------------------------------------------------- the kit (times: KMovesStone's beats)
 # LMB tap, the boulder (0.55): twisted away, the right fist cocked out behind (0.07), hurled long (0.13), through (0.24)
