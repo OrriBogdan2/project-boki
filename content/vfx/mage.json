@@ -1,0 +1,213 @@
+{
+	"palette": {"main": "#ff3fb4", "hot": "#ffc6ee", "char": "#2a0c34", "smoke": "#8f8299", "copper": "#d0783a",
+		"deep": "#b0127a"},
+	"anchors": {
+		"finger_r": {"nodes": ["anchor_finger_r"], "bone": "hand.R", "off": [0.0, 0.1, 0.0], "body": [0.24, 1.25, 0.55]},
+		"finger_l": {"nodes": ["anchor_finger_l"], "bone": "hand.L", "off": [0.0, 0.1, 0.0], "body": [-0.24, 1.25, 0.55]},
+		"hand_r": {"bone": "hand.R", "off": [0.0, 0.03, 0.0], "body": [0.3, 1.35, 0.15]},
+		"hand_l": {"bone": "hand.L", "off": [0.0, 0.03, 0.0], "body": [-0.3, 1.3, 0.2]},
+		"chest": {"nodes": ["anchor_chest"], "bone": "hips", "off": [0.0, 0.35, 0.0], "body": [0.0, 1.1, 0.0]},
+		"feet": {"bone": "root", "off": [0.0, 0.0, 0.0], "body": [0.0, 0.08, 0.0]}
+	},
+	"moves": {
+		"lmb_l": {"fx": [
+			{"p": "flare", "at": "finger_l", "delay": 0.05, "size": 0.45, "life": 0.12, "c2": "main"},
+			{"p": "bolt", "at": "finger_l", "delay": 0.05, "len": 1.3, "jag": 0.55, "size": 0.45, "life": 0.1},
+			{"p": "star", "at": "finger_l", "delay": 0.05, "n": 4, "speed": 2.5, "spread": 0.9, "life": 0.25, "size": 0.16},
+			{"p": "ribbon", "at": "finger_l", "life": 0.12, "tail": 0.14, "size": 0.22},
+			{"p": "smoke", "at": "finger_l", "delay": 0.12, "n": 3, "speed": 0.5, "spread": 0.2, "life": 1.1,
+				"size": 0.16, "curl": 0.6, "c": "smoke", "c3": "smoke", "near": true}
+		]},
+		"lmb_r": {"fx": [
+			{"p": "flare", "at": "finger_r", "delay": 0.05, "size": 0.45, "life": 0.12, "c2": "main"},
+			{"p": "bolt", "at": "finger_r", "delay": 0.05, "len": 1.3, "jag": 0.55, "size": 0.45, "life": 0.1},
+			{"p": "star", "at": "finger_r", "delay": 0.05, "n": 4, "speed": 2.5, "spread": 0.9, "life": 0.25, "size": 0.16},
+			{"p": "ribbon", "at": "finger_r", "life": 0.12, "tail": 0.14, "size": 0.22},
+			{"p": "smoke", "at": "finger_r", "delay": 0.12, "n": 3, "speed": 0.5, "spread": 0.2, "life": 1.1,
+				"size": 0.16, "curl": 0.6, "c": "smoke", "c3": "smoke", "near": true}
+		]},
+		"lmb_bolt": {"fx": [
+			{"p": "ribbon", "size": 0.34, "life": 2.0, "tail": 0.09}
+		]},
+		"lmb_end": {"fx": [
+			{"p": "bolt", "len": "len", "jag": 0.5, "size": 0.6, "life": 0.22},
+			{"p": "flare", "size": 0.7, "life": 0.14},
+			{"p": "ember", "n": 10, "speed": 4.0, "spread": 0.7, "way": "fwd", "life": 0.3, "size": 0.05, "grav": 5.0},
+			{"p": "star", "when": "hit", "n": 5, "speed": 3.0, "spread": 1.0, "life": 0.3, "size": 0.18}
+		]},
+		"static": {"net": false, "fx": [
+			{"p": "bolt", "len": 0.45, "jag": 0.7, "size": 0.28, "size_k": 1.0, "life": 0.09},
+			{"p": "star", "n": 1, "n_k": 2.0, "speed": 1.5, "spread": 1.0, "life": 0.25, "size": 0.1}
+		]},
+		"live": {"sfx": [{"n": "vv_static_full", "db": -2.0}], "fx": [
+			{"p": "bolt", "y": 9.0, "to": "here", "to_y": 0.2, "jag": 0.45, "size": 1.1, "life": 0.42},
+			{"p": "bolt", "y": 9.0, "fwd": 0.4, "to": "here", "to_y": 1.0, "delay": 0.03, "jag": 0.6, "size": 0.5,
+				"life": 0.22},
+			{"p": "flare", "y": 1.1, "size": 1.6, "life": 0.18},
+			{"p": "ember", "y": 0.3, "n": 16, "speed": 5.0, "spread": 0.8, "life": 0.4, "size": 0.06, "grav": 8.0},
+			{"p": "scorch", "size": 1.1, "life": 1.6}
+		]},
+		"live_crawl": {"net": false, "fx": [
+			{"p": "bolt", "jag": 0.6, "size": 0.35, "life": 0.12}
+		]},
+		"dash_ex": {"fx": [
+			{"p": "bolt", "len": "len", "jag": 0.4, "size": 0.5, "life": 0.3},
+			{"p": "ember", "shape": "line", "way": "along", "len": "len", "n": 10, "speed": 1.0, "life": 0.4,
+				"size": 0.05, "grav": -1.0}
+		]},
+		"dash_charge": {"sfx": [{"n": "vv_surge_charge", "db": -3.0}], "fx": [
+			{"p": "bolt", "at": "h", "y": 8.0, "to": "h", "to_y": 0.3, "jag": 0.45, "size": 0.9, "life": 0.22},
+			{"p": "flare", "at": "chest", "size": 0.9, "life": 0.15},
+			{"p": "ember", "at": "chest", "shape": "gather", "radius": 0.9, "n": 14, "speed": 2.2, "life": 0.45,
+				"size": 0.05}
+		]},
+		"dash_hold": {"fx": [
+			{"p": "star", "at": "chest", "radius": 0.55, "n": 6, "speed": 1.2, "spread": 1.0, "life": 0.3, "size": 0.12},
+			{"p": "ember", "at": "chest", "shape": "gather", "radius": 0.8, "n": 6, "n_k": 1.0, "speed": 2.0,
+				"life": 0.35, "size": 0.04}
+		]},
+		"dash_go": {"sfx": [{"n": "vv_surge_go", "db": -1.0}], "fx": [
+			{"p": "bolt", "len": "len", "jag": 0.45, "size": 1.1, "life": 0.5},
+			{"p": "bolt", "len": "len", "y": 0.15, "jag": 0.25, "size": 0.45, "life": 0.4, "c": "hot"},
+			{"p": "ember", "shape": "line", "way": "along", "len": "len", "n": 16, "speed": 1.5, "life": 0.6,
+				"size": 0.05, "grav": -1.0},
+			{"p": "scorch", "at": "h", "when": "ground", "shape": "lane", "len": "len", "w": 0.9, "life": 1.6}
+		]},
+		"dash_hit": {"fx": [
+			{"p": "flare", "size": 0.9, "life": 0.14},
+			{"p": "ember", "n": 10, "speed": 3.5, "spread": 0.9, "life": 0.3, "size": 0.05, "grav": 3.0}
+		]},
+		"blowout": {"sfx": [{"n": "hero_blowout"}], "fx": [
+			{"p": "bolt", "y": 6.0, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 1.4, "life": 0.42, "c3": "deep"},
+			{"p": "flare", "y": 1.0, "size": 2.4, "life": 0.2},
+			{"p": "ember", "y": 0.8, "n": 24, "speed": 7.0, "spread": 0.9, "life": 0.5, "size": 0.07, "grav": 6.0},
+			{"p": "star", "y": 1.0, "n": 8, "speed": 4.0, "spread": 1.0, "life": 0.45, "size": 0.2},
+			{"p": "scorch", "size": 1.2, "life": 1.8}
+		]},
+		"dash_reset": {"fx": [
+			{"p": "flare", "at": "chest", "size": 1.3, "life": 0.16},
+			{"p": "ember", "at": "feet", "shape": "disc", "radius": 0.6, "n": 18, "speed": 5.0, "spread": 0.15,
+				"life": 0.6, "size": 0.06, "c": "copper"},
+			{"p": "star", "at": "chest", "n": 6, "speed": 3.0, "spread": 1.0, "life": 0.4, "size": 0.16}
+		]},
+		"rod_summon": {"sfx": [{"n": "vv_rod_summon", "db": -3.0}], "fx": [
+			{"p": "flare", "size": 0.9, "life": 0.14},
+			{"p": "flare", "at": "hand_r", "size": 0.6, "life": 0.1, "c": "copper"},
+			{"p": "bolt", "len": 0.7, "jag": 0.7, "size": 0.4, "life": 0.12},
+			{"p": "star", "n": 6, "speed": 2.0, "spread": 1.0, "life": 0.3, "size": 0.14}
+		]},
+		"rod_hold": {"fx": [
+			{"p": "ember", "at": "hand_r", "radius": 0.25, "n": 6, "n_k": 1.0, "speed": 1.5, "spread": 1.0,
+				"life": 0.25, "size": 0.04, "grav": -2.0},
+			{"p": "star", "at": "hand_r", "radius": 0.3, "n": 3, "speed": 0.8, "spread": 1.0, "life": 0.3, "size": 0.1}
+		]},
+		"rod_crackle": {"net": false, "fx": [
+			{"p": "bolt", "jag": 0.65, "size": 0.3, "life": 0.09}
+		]},
+		"rod_full": {"sfx": [{"n": "vv_rod_full", "db": -3.0}], "fx": [
+			{"p": "flare", "at": "chest", "size": 1.8, "life": 0.12, "c": "hot"},
+			{"p": "star", "at": "chest", "n": 10, "speed": 3.0, "spread": 1.0, "life": 0.35, "size": 0.14}
+		]},
+		"rod_throw": {"sfx": [{"n": "vv_rod_throw", "db": -1.0, "pitch": 1.2, "pitch_k": -0.2}], "fx": [
+			{"p": "flare", "at": "hand_r", "size": 1.0, "life": 0.12},
+			{"p": "bolt", "at": "hand_r", "len": 2.2, "jag": 0.4, "size": 0.6, "life": 0.14},
+			{"p": "ribbon", "at": "hand_r", "life": 0.2, "tail": 0.15, "size": 0.25}
+		]},
+		"rod_bolt": {"fx": [
+			{"p": "ribbon", "size": 0.5, "life": 2.0, "tail": 0.14}
+		]},
+		"rod_end": {"fx": [
+			{"p": "flare", "size": 1.0, "life": 0.16},
+			{"p": "star", "n": 6, "speed": 2.5, "spread": 1.0, "life": 0.35, "size": 0.16},
+			{"p": "ember", "n": 14, "speed": 4.0, "spread": 0.8, "life": 0.35, "size": 0.05, "grav": 2.0}
+		]},
+		"rod_hit": {"fx": [
+			{"p": "bolt", "y": 1.0, "len": 2.0, "jag": 0.5, "size": 0.6, "life": 0.2},
+			{"p": "flare", "y": 1.0, "size": 1.6, "life": 0.16},
+			{"p": "ember", "y": 1.0, "n": 18, "speed": 4.5, "spread": 1.0, "life": 0.45, "size": 0.06, "grav": 1.0},
+			{"p": "scorch", "size": 1.0, "life": 1.4}
+		]},
+		"rod_slam": {"sfx": [{"n": "ab_wall", "db": -2.0, "pitch": 1.3}], "fx": [
+			{"p": "flare", "y": 0.9, "size": 1.2, "life": 0.14},
+			{"p": "chunk", "y": 0.6, "n": 8, "speed": 4.0, "spread": 0.7, "life": 0.7, "size": 0.12, "grav": 12.0,
+				"c": "copper"},
+			{"p": "shard", "y": 0.9, "n": 6, "speed": 3.0, "spread": 1.0, "life": 0.4, "size": 0.12}
+		]},
+		"orb_drop": {"sfx": [{"n": "vv_orb", "db": -5.0}], "fx": [
+			{"p": "vortex", "size": 0.9, "spin": 1.4, "grow": 1.2, "life": 0.7},
+			{"p": "flare", "y": 0.55, "size": 0.9, "life": 0.14},
+			{"p": "star", "y": 0.55, "n": 8, "speed": 2.5, "spread": 1.0, "life": 0.4, "size": 0.14}
+		]},
+		"orb_hum": {"net": false, "fx": [
+			{"p": "bolt", "len": 0.55, "jag": 0.7, "size": 0.3, "life": 0.1},
+			{"p": "star", "n": 2, "speed": 1.0, "spread": 1.0, "life": 0.3, "size": 0.1, "near": true}
+		]},
+		"orb_fizzle": {"fx": [
+			{"p": "ember", "n": 6, "speed": 1.5, "spread": 1.0, "life": 0.3, "size": 0.05},
+			{"p": "smoke", "n": 3, "speed": 0.4, "life": 0.9, "size": 0.3, "c": "smoke", "c3": "smoke"}
+		]},
+		"orb_grab": {"fx": [
+			{"p": "flare", "at": "chest", "size": 2.0, "life": 0.16, "c": "hot"},
+			{"p": "star", "at": "chest", "n": 10, "speed": 3.5, "spread": 1.0, "life": 0.4, "size": 0.16},
+			{"p": "ember", "at": "feet", "shape": "disc", "radius": 0.5, "n": 12, "speed": 4.0, "spread": 0.2,
+				"life": 0.5, "size": 0.05}
+		]},
+		"orb_fling": {"fx": [
+			{"p": "bolt", "len": "len", "jag": 0.45, "size": 0.6, "life": 0.25}
+		]},
+		"sky_place": {"sfx": [{"n": "vv_sky_place", "db": -3.0}], "fx": [
+			{"p": "ember", "at": "hand_l", "shape": "gather", "radius": 0.6, "n": 10, "speed": 2.0, "life": 0.3,
+				"size": 0.04},
+			{"p": "ribbon", "at": "hand_l", "life": 0.34, "tail": 0.16, "size": 0.22},
+			{"p": "star", "y": 0.3, "n": 6, "speed": 1.5, "spread": 1.0, "life": 0.5, "size": 0.16}
+		]},
+		"sky_count": {"sfx": [{"n": "vv_sky_count", "db": -4.0}], "fx": [
+			{"p": "bolt", "y": 7.0, "to": "here", "to_y": 0.1, "jag": 0.12, "size": 0.6, "life": 0.8, "c": "hot"},
+			{"p": "vortex", "size": 0.9, "spin": -0.8, "grow": 0.5, "life": 0.85},
+			{"p": "star", "y": 0.3, "shape": "disc", "radius": 1.2, "n": 10, "speed": 1.5, "spread": 0.2,
+				"life": 0.8, "size": 0.12, "burst": 0.0}
+		]},
+		"sky_strike": {"sfx": [{"n": "vv_sky_strike"}], "fx": [
+			{"p": "bolt", "y": 9.0, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 1.4, "life": 0.42, "c3": "deep"},
+			{"p": "bolt", "y": 9.0, "fwd": 0.5, "to": "here", "to_y": 0.4, "delay": 0.04, "jag": 0.65, "size": 0.7,
+				"life": 0.24},
+			{"p": "flare", "y": 1.0, "size": 2.2, "life": 0.2},
+			{"p": "ember", "y": 0.4, "n": 24, "speed": 6.0, "spread": 0.9, "life": 0.45, "size": 0.06, "grav": 6.0},
+			{"p": "scorch", "size": 1.4, "life": 1.8}
+		]},
+		"ult_cast": {"sfx": [{"n": "vv_ult_rise", "db": -2.0}], "fx": [
+			{"p": "bolt", "at": "h", "y": 7.0, "to": "h", "to_y": 0.3, "jag": 0.45, "size": 0.9, "life": 0.22},
+			{"p": "flare", "at": "chest", "size": 1.0, "life": 0.14},
+			{"p": "ember", "at": "chest", "shape": "gather", "radius": 1.0, "n": 16, "speed": 2.5, "life": 0.35,
+				"size": 0.05}
+		]},
+		"ult_rise": {"sfx": [{"n": "vv_ult_hum", "db": -6.0}], "fx": [
+			{"p": "bolt", "y": 0.2, "to": "here", "to_y": 5.0, "jag": 0.4, "size": 1.0, "life": 0.3},
+			{"p": "smoke", "shape": "disc", "radius": 1.2, "n": 8, "speed": 1.2, "spread": 0.8, "life": 1.0,
+				"size": 0.6, "c": "smoke", "c3": "smoke"},
+			{"p": "ember", "y": 0.2, "n": 14, "speed": 5.0, "spread": 0.4, "life": 0.4, "size": 0.05}
+		]},
+		"ult_hover": {"fx": [
+			{"p": "star", "at": "chest", "radius": 0.7, "n": 8, "speed": 1.5, "spread": 1.0, "life": 0.35, "size": 0.14},
+			{"p": "ember", "at": "chest", "radius": 0.6, "n": 12, "speed": 2.5, "spread": 1.0, "life": 0.25,
+				"size": 0.04}
+		]},
+		"ult_dive": {"fx": [
+			{"p": "bolt", "len": "len", "jag": 0.35, "size": 1.2, "life": 0.3},
+			{"p": "flare", "size": 1.2, "life": 0.12}
+		]},
+		"ult_strike": {"sfx": [{"n": "vv_ult_slam", "db": 1.0}], "fx": [
+			{"p": "bolt", "y": 12.0, "to": "here", "to_y": 0.1, "jag": 0.45, "size": 1.7, "life": 0.45, "c3": "deep"},
+			{"p": "bolt", "y": 12.0, "fwd": 0.8, "to": "here", "to_y": 0.5, "delay": 0.03, "jag": 0.65, "size": 0.8,
+				"life": 0.26},
+			{"p": "flare", "y": 1.2, "size": 3.2, "life": 0.22},
+			{"p": "ember", "y": 0.3, "n": 30, "speed": 9.0, "spread": 0.6, "life": 0.6, "size": 0.07, "grav": 8.0},
+			{"p": "ember", "shape": "disc", "radius": 1.2, "n": 12, "speed": 1.0, "spread": 0.3, "life": 0.6,
+				"size": 0.05, "burst": 0.0, "delay": 0.1, "c": "copper", "near": true},
+			{"p": "scorch", "size": 2.4, "life": 2.0}
+		]},
+		"ult_chain": {"fx": [
+			{"p": "bolt", "len": "len", "jag": 0.55, "size": 0.6, "life": 0.22}
+		]}
+	}
+}

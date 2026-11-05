@@ -10,13 +10,15 @@ extends ArchKit
 ## The Storm Rod knocks the first foe back (a stun against a wall or another foe) and leaves a charge
 ## orb, a pickup that gives Wirerun back; Skycall drags a crowd the way you flick and grounds it.
 
-const GOLD := Color("ffc95a")        # the lightning's hot core (our own: copper-gold on teal)
+const GOLD := Color("ffc95a")        # the aim kit's accent (her lanes and rings)
 const COPPER := Color("e08a46")
-const VIOLET := Color("3a1c8c")
 const DEEP_GOLD := Color("e0900a")   # the aim kit whitens its accent: this lands as a rich gold
-const TEAL := Color("1fc6dc")        # the lightning's body: a saturated teal that reads on bright grass
+const TEAL := Color("1fc6dc")        # the aim kit's second accent (Kitefall's landing crown)
+const PINK := Color("ff3fb4")        # her lightning burns hot pink (her looks: content/vfx/mage.json)
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
+const ROD_ARC_REACH := 7.0           # m: the held rod's crackle jumps to a charge orb this close
+const CRACKLES := 7.0                # per s: a Static foe's crackle rolls (more stacks, more of them land)
 
 var sparks := {}               # foe id -> {e, n, t}
 var wire := {}                 # Wirerun held: {t, y, air, end}
@@ -24,7 +26,10 @@ var run_t := 0.0               # Wirerun streaking (s left): the model is a ligh
 var motes: Array = []          # charge orbs: {pos, t, node, owner, fly}
 var mote_pool: Array = []      # orb nodes, reused
 var strikes: Array = []        # Skycall: {at, t, dir, phase ("flick" | "count"), dir0}
-var rod: Node3D = null         # the Storm Rod held in the hand while RMB is down
+var rod: Node3D = null         # the Storm Rod held in the hand while RMB is down, and the round once thrown
+var rod_shot := {}             # the thrown rod's shot (m.shots) while it flies
+var bolts: Array = []          # finger bolts in flight: {sd, from, node} (where one ends, its path cracks)
+var bolt_tips: Array = []      # the nodes their trails follow, reused
 var rod_full := false
 var blowouts := 0              # tests and the demo
 var slams := 0
@@ -42,10 +47,10 @@ func _setup() -> void:
 	ult = MageUlt.new(self)
 	sky = MageSky.new(self)
 	# her round is fired after this kit's tick, so its stock orb would draw one frame as a white ball at
-	# her hand before _tick_lmb skins it: hide it just before that frame is drawn
+	# her hand before _tick_lmb hides it: hide it just before that frame is drawn
 	RenderingServer.frame_pre_draw.connect(_hide_fresh_round)
 
-## Hides the stock orb of the round she just fired (the kit's jagged bolt is the round's look).
+## Hides the stock orb of the round she just fired (the kit's pink trail is the round's look).
 func _hide_fresh_round() -> void:
 	if h == null or not is_instance_valid(h) or h.shot_n == last_shot:
 		return
@@ -126,15 +131,10 @@ func add_spark(f: Ent, n := 1) -> void:
 	sparks[key] = s
 	if int(s["n"]) >= int(rd["max"]) and was < int(rd["max"]):
 		# the 4th stack: a bolt drops out of the sky onto them
-		var top := f.position + Vector3(0, 9.0, 0)
-		fx().arc(top, f.position + Vector3(0, 0.2, 0), TEAL, GOLD, 0.9, 0.28)
-		fx().arc(top + Vector3(0.4, 0, -0.3), f.position + Vector3(0, 1.0, 0), TEAL, GOLD, 0.5, 0.2)
-		m.fx.flash(f.position + Vector3(0, 1.1, 0), GOLD, 1.1, 0.1)
-		m.sfx("vv_static_full", f.pos, -2.0)
+		vfx("live", f.position)
 		# the word goes above the marker so the two never print over each other
 		m.fx.word(f.pos + Vector3(0, _top(f) + MARK_LIFT, 0) + fx().screen_up() * 1.6, "LIVE", GOLD, false)
 		if anim_id == "" or m.time - anim_at > 0.3: play("mage_live")
-		net_bolt(top, f.position, TEAL)
 
 func clear_sparks(f: Ent) -> void:
 	var key := f.get_instance_id()
@@ -154,47 +154,43 @@ func _tick_sparks(dt: float) -> void:
 			fx().unmark("vs%d" % key)
 			continue
 		var n := int(s["n"])
-		fx().marker("vs%d" % key, f, n, mx, TEAL, GOLD, _top(f) + MARK_LIFT)
-		if n >= mx and int(m.time * 7.0) != int((m.time - dt) * 7.0):
-			# Live: arcs crawl down the body from the marker to the ground
-			var foot := ground(f.pos) + Vector3(fx().rng.randf_range(-0.5, 0.5), 0.05, fx().rng.randf_range(-0.5, 0.5))
-			fx().arc(f.position + Vector3(0, _top(f) - 0.3, 0), foot, TEAL, GOLD, 0.35, 0.12)
+		fx().marker("vs%d" % key, f, n, mx, PINK, GOLD, _top(f) + MARK_LIFT)
+		if int(m.time * CRACKLES) != int((m.time - dt) * CRACKLES):
+			_crackle(f, n, mx)
+
+## A Static foe's crackle: small pink arcs on the body, more often with every stack; Live, arcs crawl down the
+## body from the marker to the ground.
+func _crackle(f: Ent, n: int, mx: int) -> void:
+	if n >= mx:
+		var foot := ground(f.pos) + _jitter(0.5, 0.05, 0.05)
+		vfx("live_crawl", f.position + Vector3(0, _top(f) - 0.3, 0), null, {"to": foot})
+	elif fx().rng.randf() < float(n) / mx:
+		var a := fx().rng.randf() * TAU
+		vfx("static", f.position + _jitter(0.2, 0.7, 1.4), Vector2(cos(a), sin(a)), {"k": float(n) / mx})
 
 func _tick(dt: float) -> void:
 	_tick_sparks(dt)
 	ult.tick(dt)
 	_tick_echo(dt)
-	_tick_trail()
 	_tick_motes(dt)
 	sky.tick(dt)
 	_tick_lmb()
+	_tick_bolts()
+	_tick_flying_rod()
 	if not wire.is_empty():
 		_tick_wire(dt)
 	if run_t > 0.0:
 		_tick_run(dt)
 	if rmb_down:
 		_tick_rod()
-	elif rod != null and rod.visible:
+	elif rod != null and rod.visible and rod_shot.is_empty():
 		rod.visible = false
 	net_pulse(dt, full_ready())
 
 func own_dash_trail() -> bool:
 	return true
 
-## Moves whose hand leaves a teal swoosh: [hand, from s, to s].
-const TRAILS := {"mage_lmb_l": ["l", 0.0, 0.12], "mage_lmb_r": ["r", 0.0, 0.12], "mage_e": ["l", 0.0, 0.34],
-	"mage_e_snap": ["l", 0.0, 0.12], "mage_live": ["l", 0.0, 0.12], "mage_rmb": ["r", 0.0, 0.2]}
-
-func _tick_trail() -> void:
-	var tr: Array = TRAILS.get(anim_id, [])
-	var t := float(m.time) - anim_at
-	if tr.is_empty() or h.anim == null or t < float(tr[1]) or t > float(tr[2]):
-		return
-	var hand: Node3D = h.anim.hand_l if String(tr[0]) == "l" else h.anim.hand_r
-	if hand != null:
-		fx().trail("vt%d" % h.get_instance_id(), hand.global_position, TEAL, GOLD, 0.24)
-
-## Her own after-images on the air dash and the Wirerun streak: her silhouette in teal (gold on the streak).
+## Her own after-images on the air dash and the Wirerun streak: her silhouette in pink (paler on the streak).
 func _tick_echo(dt: float) -> void:
 	if h.roll_t <= 0.0 and run_t <= 0.0:
 		echo_t = 0.0
@@ -203,12 +199,21 @@ func _tick_echo(dt: float) -> void:
 	if echo_t > 0.0:
 		return
 	echo_t = ECHO_GAP
-	fx().echo(h, GOLD.lerp(TEAL, 0.35) if run_t > 0.0 else TEAL, 0.3)
+	fx().echo(h, PINK.lerp(Color.WHITE, 0.35) if run_t > 0.0 else PINK, 0.3)
+
+## Whether a match shot is still flying.
+func _shot_alive(sd: Dictionary) -> bool:
+	for s in m.get("shots"):
+		if is_same(s, sd):
+			return true
+	return false
 
 func teardown() -> void:
 	super.teardown()
 	if RenderingServer.frame_pre_draw.is_connected(_hide_fresh_round):
 		RenderingServer.frame_pre_draw.disconnect(_hide_fresh_round)
+	bolts.clear()
+	rod_shot = {}
 	for k in sparks.keys():
 		fx().unmark("vs%d" % k)
 	sparks.clear()
@@ -229,8 +234,8 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		add_spark(t)
 
 # ------------------------------------------------------------------ LMB: the finger gun
-## A new finger bolt left the hand: alternate hands (the bolt starts at that hand), a twist, a crackle
-## at the fingertip and sparks at the feet; the round becomes a jagged bolt with a spark impact.
+## A new finger bolt left the hand: alternate hands (the bolt starts at that hand), a twist, a crackle and a
+## wisp of smoke at the fingertip; the round is a hot-pink tracer, and where it ends its path cracks (_tick_bolts).
 func _tick_lmb() -> void:
 	var idle := wire.is_empty() and not rmb_down and run_t <= 0.0 and not ult.busy()
 	if h.is_local() and idle and not h.downed:
@@ -256,36 +261,44 @@ func _tick_lmb() -> void:
 	sd["prev"] = p
 	sd["start"] = p
 	play("mage_lmb_l" if left else "mage_lmb_r")
-	# a teal thrust from the shoulder to the fingertip, then (at the release key, 0.06 s) the fingertip
-	# crackles; gold sparks pop at her feet, a jagged bolt rides the round
-	var shoulder := h.position + Vector3(0, 1.25, 0) + Vector3(-d.y, 0, d.x) * (-0.2 if left else 0.2)
-	fx().smear(shoulder, shoulder + Vector3(d.x, 0, d.y) * 0.9, TEAL, GOLD, 0.3, 0.12)
-	m.later(0.06, _fingertip.bind(left))
-	m.fx.spark(h.pos + Vector3(0, 0.1, 0), Vector3.UP, GOLD, 4, 3.0, 80.0, 0.2, 6.0, 0.7)
-	fx().ride(sd, "bolt", TEAL, GOLD, 1.25, 0.6, _bolt_end.bind(h.pos))
+	if left:
+		vfx("lmb_l")
+	else:
+		vfx("lmb_r")
+	var orb := sd.get("node") as Node3D
+	if orb != null:
+		orb.visible = false
+	var tip := _bolt_tip()
+	tip.global_position = p
+	bolts.append({"sd": sd, "from": p, "node": tip})
+	HeroVfx.of(m).trail(h, "lmb_bolt", tip)
 
-## The finger-gun release: arcs flung out of the pointing fingertip and a star on it.
-func _fingertip(left: bool) -> void:
-	if not is_instance_valid(h) or h.anim == null:
-		return
-	var hand: Node3D = h.anim.hand_l if left else h.anim.hand_r
-	if hand == null:
-		return
-	var d := h.aim_dir()
-	var tip := hand.global_position + Vector3(d.x, 0, d.y) * 0.15
-	fx().crackle(tip, TEAL, GOLD, 0.6, 4, 0.08)
-	fx().star(tip, TEAL, GOLD, 0.75, 0.08)
+## A bare node riding a finger bolt for its trail to follow (the stock orb is hidden), reused.
+func _bolt_tip() -> Node3D:
+	for n: Node3D in bolt_tips:
+		if not n.visible:
+			n.visible = true
+			return n
+	var fresh := own_node()
+	bolt_tips.append(fresh)
+	return fresh
 
-## Where a finger bolt ended: a fan of splinters sprays back toward the caster and a crackle.
-func _bolt_end(at: Vector3, vel: Vector2, from: Vector3) -> void:
-	var back := Vector2(from.x - at.x, from.z - at.z).normalized() if vel.length() > 0.1 else Vector2(0, 1)
-	for i in 4:
-		var a := (float(i) - 1.5) * 0.45 + fx().rng.randf_range(-0.15, 0.15)
-		var bd := back.rotated(a)
-		var ln := fx().rng.randf_range(0.5, 1.0)
-		var tip := at + Vector3(bd.x * ln, fx().rng.randf_range(0.0, 0.4), bd.y * ln)
-		fx().arc(at, tip, TEAL, GOLD, 0.26, 0.12)
-	fx().star(at, TEAL, GOLD, 0.6, 0.12)
+## Finger bolts in flight carry their trail; one that ended cracks its whole path as jagged lightning back to
+## the fingertip and sprays sparks back toward her (one stopped short of full range hit something: stars too).
+func _tick_bolts() -> void:
+	for i in range(bolts.size() - 1, -1, -1):
+		var sd: Dictionary = bolts[i]["sd"]
+		var tip: Node3D = bolts[i]["node"]
+		if _shot_alive(sd):
+			tip.global_position = sd["pos"]
+			continue
+		tip.visible = false
+		var from: Vector3 = bolts[i]["from"]
+		bolts.remove_at(i)
+		var at: Vector3 = sd["pos"]
+		var back := Vector2(from.x - at.x, from.z - at.z)
+		var hit := float(sd["life"]) > 0.05
+		vfx("lmb_end", at, back.normalized(), {"to": from, "len": back.length(), "hit": hit})
 
 # ------------------------------------------------------------------ dash: Wirerun
 func dash_charge() -> float:
@@ -311,7 +324,7 @@ func on_dash(use_ex: bool) -> bool:
 		var ex_dist := float(h.cdat.get("ex_dist", 5.0))
 		travel(ex_dist, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "phase": 1.0}, true)
 		play("mage_dash_ex")
-		fx().arc(a, a + Vector3(h.roll_dir.x, 0, h.roll_dir.y) * ex_dist, TEAL, GOLD, 0.45, 0.3)
+		vfx("dash_ex", a, h.roll_dir, {"len": ex_dist})
 		last_dash_kind = "ex"
 		return true
 	if not wire.is_empty() or run_t > 0.0:
@@ -323,9 +336,7 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	wire = {"t": 0.0, "y": h.pos.y, "air": not h.grounded}
 	play("mage_dash")
-	# a bolt slams down onto her: the charging tell
-	fx().arc(h.position + Vector3(0, 8.0, 0), h.position + Vector3(0, 0.3, 0), col_of(dash_def()), GOLD, 0.8, 0.22)
-	m.sfx("vv_surge_charge", h.pos, -3.0)
+	vfx("dash_charge")          # a bolt slams down onto her: the charging tell
 	return true
 
 ## A Boki merge ends the Wirerun's charge (refunded: nothing ran), the Storm Rod's hold, a Skycall
@@ -384,8 +395,7 @@ func _tick_wire(dt: float) -> void:
 	ring["hot"] = k * 0.6
 	AimKit.circle(h, "dash_end", ring)
 	AimKit.charge(h, k, {"col": col_of(dd), "col2": GOLD})
-	if fx().rng.randf() < 0.35:
-		fx().arc(h.position + _jitter(0.4, 0.2, 1.4), h.position + _jitter(0.5, 0.2, 1.6), TEAL, GOLD, 0.18, 0.08)
+	HeroVfx.of(m).hold(h, "dash_hold", k)
 	if not held("dash") or t >= float(dd.get("auto", float(dd["hold"]) + 0.3)):
 		_end_wire(false)
 		_run(L, d, dr)
@@ -406,10 +416,7 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	var dmg := float(dd["dmg"]) * run_rank_k()
 	h.dash_pass = {"hit": {}, "w": float(dd["width"]) + 0.6, "kx": func(f: Ent): _wire_hit(f, dmg)}
 	var b := a + Vector3(v.x, 0, v.y) * time
-	fx().arc(a, b, TEAL, GOLD, 1.1, time + 0.25)
-	fx().arc(a + Vector3(0, 0.3, 0), b + Vector3(0, 0.2, 0), GOLD, GOLD.lightened(0.5), 0.5, time + 0.15)
-	net_bolt(a, b, col_of(dd))
-	m.sfx("vv_surge_go", h.pos, -1.0)
+	vfx("dash_go", a, v.normalized(), {"to": b, "len": a.distance_to(b), "ground": h.grounded})
 	if h.model: h.model.visible = false
 	m.later(time, _arrive)
 
@@ -438,7 +445,7 @@ func _wire_hit(f: Ent, dmg: float) -> void:
 	var was_live := live(f)
 	if was_live: dmg *= float(dash_def()["full_mult"])     # through a fully charged foe: double
 	f.hurt(dmg * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge"]})
-	m.fx.burst(f.pos + Vector3(0, 0.9, 0), TEAL, 10, 3.5, 0.3)
+	vfx("dash_hit", f.position + Vector3(0, 0.9, 0))
 	if was_live and is_instance_valid(f) and not f.dead:
 		_blowout(f)
 
@@ -450,14 +457,9 @@ func _blowout(f: Ent) -> void:
 	f.hurt(dmg, h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "blowout"], "payoff": true, "crit": true})
 	h.dashes = h.max_dashes()                 # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
-	fx().arc(f.position + Vector3(0, 6.0, 0), f.position + Vector3(0, 0.1, 0), TEAL, GOLD, 1.0, 0.3)
+	vfx("blowout", f.position)
 	payoff_fx(f.pos, "BLOWOUT", GOLD, "", h.dir_to(f), f)
-	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
-	# the refund tell on her: copper coil columns and a starburst (our own look)
-	var me := ground(h.pos)
-	for i in 3:
-		var a := TAU * i / 3.0
-		fx().pillar(me + Vector3(cos(a) * 0.55, 0, sin(a) * 0.55), COPPER, GOLD, 3.2, 0.22, 1.2, false)
+	vfx("dash_reset")              # the refund tell on her: copper sparks rising and a starburst
 	DashReset.cue(h)
 
 # ------------------------------------------------------------------ RMB: Storm Rod
@@ -473,11 +475,8 @@ func rmb_hold_tick(t: float) -> void:
 	var k := clampf(t / float(rmb_def()["hold"]), 0.0, 1.0)
 	if k >= 1.0 and not rod_full:
 		rod_full = true
-		# full: her whole body flashes white for a beat
-		m.fx.flash(h.position + Vector3(0, 1.0, 0), Color.WHITE, 1.6, 0.1)
-		m.fx.flash(h.position + Vector3(0, 1.6, 0), GOLD, 0.9, 0.08)
+		vfx("rod_full")            # full: her whole body flashes white-pink for a beat
 		AimKit.flare(h, {"col2": GOLD})
-		m.sfx("vv_rod_full", h.pos, -3.0)
 
 func _summon_rod() -> void:
 	rod_full = false
@@ -487,27 +486,23 @@ func _summon_rod() -> void:
 	play("mage_rmb_hold")
 	_tick_rod()
 	# it arrives in her hand: a flash and a crackle off the tip
-	var tip := rod.global_position - rod.global_basis.z * 0.75
-	m.fx.flash(_rod_hand(), GOLD, 1.0, 0.08)
-	fx().crackle(tip, TEAL, GOLD, 0.8, 5, 0.16)
-	fx().star(tip, TEAL, GOLD, 1.0, 0.14)
-	m.sfx("vv_rod_summon", h.pos, -3.0)
+	vfx("rod_summon", rod.global_position - rod.global_basis.z * 0.75)
 
 func shows_charge_ball() -> bool:
 	return false                   # the summoned rod is her charge tell
 
 ## The Storm Rod: a 1.3 m copper shaft along -Z (the tip) with a dark grip at +0.25 where the hand
-## holds it, three teal windings and a teal crystal tip with a gold heart.
+## holds it, three pink windings and a pink crystal tip with a gold heart.
 func _build_rod() -> Node3D:
 	var n := own_node()
 	var along := Vector3(PI / 2, 0, 0)
-	var teal := solid_mat(TEAL)
+	var pink := solid_mat(PINK)
 	Models.part(n, Models.cyl(0.045, 0.045, 1.3, 10), Models.shiny(COPPER, 0.8), Vector3.ZERO, Vector3.ONE, along)
 	var grip := Models.toon(Color("2a2233"))
 	Models.part(n, Models.cyl(0.058, 0.058, 0.24, 10), grip, Vector3(0, 0, 0.25), Vector3.ONE, along)
 	for i in 3:
-		Models.part(n, Models.cyl(0.066, 0.066, 0.04, 10), teal, Vector3(0, 0, -0.1 - 0.17 * i), Vector3.ONE, along)
-	Models.part(n, Models.crystal(0.09, 0.42, 4), teal, Vector3(0, 0, -0.68), Vector3.ONE, -along)
+		Models.part(n, Models.cyl(0.066, 0.066, 0.04, 10), pink, Vector3(0, 0, -0.1 - 0.17 * i), Vector3.ONE, along)
+	Models.part(n, Models.crystal(0.09, 0.42, 4), pink, Vector3(0, 0, -0.68), Vector3.ONE, -along)
 	Models.part(n, Models.sphere(0.06, 8), solid_mat(GOLD), Vector3(0, 0, -0.72))
 	for ch in n.get_children():
 		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -530,9 +525,9 @@ func _tick_rod() -> void:
 		var up := (Vector3(d.x * 0.3, 1.0, d.y * 0.3) + out).normalized()
 		rod.global_position = _rod_hand() + up * 0.25
 		rod.look_at(rod.global_position + up, Vector3(d.x, 0, d.y))
-		if fx().rng.randf() < 0.35:
-			var tip := rod.global_position + up * 0.75
-			fx().arc(tip, tip + _jitter(0.35, -0.6, 0.2), TEAL, GOLD, 0.22, 0.08)
+		HeroVfx.of(m).hold(h, "rod_hold", k)
+		if fx().rng.randf() < 0.15:
+			_rod_arc(rod.global_position + up * 0.75)
 	var lane := {"len": float(cd_["range"]), "width": 0.3, "rails": true, "chevrons": 4, "k": k}
 	lane["col"] = col_of(rmb_def())
 	lane["col_full"] = GOLD
@@ -579,32 +574,58 @@ func _coil(k: float) -> void:
 	var done := {"hit": false}
 	var shots: Array = m.get("shots")
 	var n0 := shots.size()
-	run(stg, cx("rmb", "coilshot", aim(), {"on_foe": func(f: Ent, _c: Dictionary):
+	run_own(stg, cx("rmb", "coilshot", aim(), {"on_foe": func(f: Ent, _c: Dictionary):
 		if not done["hit"]:
 			done["hit"] = true
 			_coil_hit(f, dir, k)}))
-	var a := h.position + Vector3(dir.x * 0.6, 1.5, dir.y * 0.6)
+	vfx("rod_throw", h.pos, dir, {"k": k})
 	if shots.size() > n0 and shots[-1]["by"] == h:
-		fx().ride(shots[-1], "bolt", TEAL, GOLD, 3.2, 0.7, func(at: Vector3, _v: Vector2): _rod_end(at))
-	else:
-		fx().arc(a, a + Vector3(dir.x, 0, dir.y) * rng, TEAL, GOLD, 0.7, 0.2)
-	m.fx.flash(a, GOLD, 0.9, 0.08)
-	m.sfx("vv_rod_throw", h.pos, -1.0, 1.0 + 0.2 * (1.0 - k))
+		_throw_rod(shots[-1])
 
-func _rod_end(at: Vector3) -> void:
-	fx().star(at, TEAL, GOLD, 1.0, 0.16)
-	m.fx.burst(at, GOLD, 14, 4.0, 0.35, 2.0, 1.4)
+## The Storm Rod itself is the round: it flies on the shot (whose stock orb hides) trailing pink lightning.
+func _throw_rod(sd: Dictionary) -> void:
+	if rod == null or not is_instance_valid(rod):
+		rod = _build_rod()
+	var orb := sd.get("node") as Node3D
+	if orb != null:
+		orb.visible = false
+	rod_shot = sd
+	rod.visible = true
+	_tick_flying_rod()
+	HeroVfx.of(m).trail(h, "rod_bolt", rod)
+
+## The thrown rod rides its shot, tip first; where the shot ends it bursts.
+func _tick_flying_rod() -> void:
+	if rod_shot.is_empty():
+		return
+	var at: Vector3 = rod_shot["pos"]
+	if not _shot_alive(rod_shot):
+		rod.visible = false
+		rod_shot = {}
+		vfx("rod_end", at)
+		return
+	var v: Vector2 = rod_shot["vel"]
+	rod.global_position = at
+	if v.length() > 0.1:
+		rod.look_at(at + Vector3(v.x, 0, v.y), Vector3.UP)
+
+## A crackle off the held rod's tip: it jumps to a charge orb near her when there is one.
+func _rod_arc(tip: Vector3) -> void:
+	var to := tip + _jitter(0.35, -0.6, 0.2)
+	for mt in motes:
+		var orb: Vector3 = (mt["node"] as Node3D).global_position
+		if orb.distance_to(tip) < ROD_ARC_REACH:
+			to = orb
+			break
+	vfx("rod_crackle", tip, null, {"to": to})
 
 func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 	if not is_instance_valid(f) or f.dead:
 		return
 	var cd_ := rmb_def()["coil"] as Dictionary
 	add_spark(f)
-	# the gold blast, a teal crackle and a shock ring round them
-	m.fx.flash(f.position + Vector3(0, 1.0, 0), GOLD, 1.6, 0.12)
-	m.fx.burst(f.position + Vector3(0, 1.0, 0), GOLD, 18, 4.5, 0.45, 1.0, 1.8)
-	fx().crackle(f.position + Vector3(0, 1.0, 0), TEAL, GOLD, 1.0, 5, 0.18)
-	fx().ring(ground(f.pos), 2.2, TEAL, GOLD, 0.35)
+	# the pink blast, an arc back to her hand, the ground scorched under them
+	vfx("rod_hit", ground(f.pos), -dir, {"to": _rod_hand()})
 	# thrown into a wall or another foe: stunned (so is the one it hits)
 	var reach := 1.6 + 1.4 * k
 	var other: Ent = null
@@ -618,8 +639,7 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "slam"], "stun": stn, "dr": true}
 		f.hurt(0.1, h, slam)
 		m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 1.0, "SLAMMED", GOLD, false)   # over STUNNED
-		fx().ring(ground(f.pos), 1.6, GOLD, COPPER, 0.25)
-		m.sfx("ab_wall", f.pos, -2.0, 1.3)
+		vfx("rod_slam", ground(f.pos))
 		if other != null:
 			other.hurt(0.1, h, slam.duplicate(true))
 			add_spark(other)
@@ -644,22 +664,20 @@ func _drop_mote(at: Vector3) -> void:
 	var mote := {"pos": at, "t": float(cd_["mote_life"]), "node": n, "owner": h}
 	mote["arc"] = 0.0
 	motes.append(mote)
-	fx().ring(at, float(cd_["mote_r"]) + 0.3, GOLD, TEAL, 0.3)
-	m.sfx("vv_orb", at, -5.0)
-	net_ring(at, 1.0, GOLD)
+	vfx("orb_drop", at)
 
-## A charge orb: a gold core in a teal shell wound with two teal bands (it spins), its own light; short
-## arcs crackle off it in _tick_motes. Solid colours, so it reads gold and teal, not a white glow.
+## A charge orb: a gold core in a pink shell wound with two pink bands (it spins), its own light; short
+## arcs crackle off it in _tick_motes. Solid colours, so it reads gold and pink, not a white glow.
 func _build_mote() -> Node3D:
 	var n := own_node()
 	var core := Models.part(n, Models.sphere(0.24, 12), solid_mat(GOLD))
 	core.sorting_offset = 1.0              # drawn after the shell: the gold heart shows through
-	Models.part(n, Models.sphere(0.36, 12), solid_mat(Color(TEAL, 0.22)))
+	Models.part(n, Models.sphere(0.36, 12), solid_mat(Color(PINK, 0.22)))
 	for i in 2:
 		var band := TorusMesh.new()
 		band.inner_radius = 0.33
 		band.outer_radius = 0.39
-		Models.part(n, band, solid_mat(TEAL), Vector3.ZERO, Vector3.ONE, Vector3(0.9 * (i * 2 - 1), 0, 0.5))
+		Models.part(n, band, solid_mat(PINK), Vector3.ZERO, Vector3.ONE, Vector3(0.9 * (i * 2 - 1), 0, 0.5))
 	for ch in n.get_children():
 		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var lt := OmniLight3D.new()
@@ -670,16 +688,15 @@ func _build_mote() -> Node3D:
 	mote_pool.append(n)
 	return n
 
-## Two or three short arcs jump off the orb's shell every ~0.12 s.
+## The orb hums: a short arc jumps off its shell, a new way, every ~0.12 s.
 func _crackle_mote(mt: Dictionary, dt: float) -> void:
 	mt["arc"] = float(mt.get("arc", 0.0)) - dt
 	if float(mt["arc"]) > 0.0:
 		return
 	mt["arc"] = 0.12
-	var c: Vector3 = (mt["node"] as Node3D).global_position
-	for i in 2 + fx().rng.randi() % 2:
-		var out := _jitter(1.0, -0.6, 0.8).normalized()
-		fx().arc(c + out * 0.3, c + out * 0.85 + _jitter(0.15, -0.1, 0.1), TEAL, GOLD, 0.28, 0.1)
+	var a := fx().rng.randf() * TAU
+	var out := Vector2(cos(a), sin(a))
+	vfx("orb_hum", (mt["node"] as Node3D).global_position + Vector3(out.x, 0, out.y) * 0.3, out)
 
 func _tick_motes(dt: float) -> void:
 	for mt in motes.duplicate():
@@ -719,8 +736,7 @@ func _grab_mote(mt: Dictionary) -> void:
 	h.dashes = h.max_dashes()
 	h.dash_buf = 0.0
 	if was_spent:
-		m.fx.flash(h.position + Vector3(0, 1.0, 0), GOLD, 2.4, 0.16)
-		m.fx.flash(h.position + Vector3(0, 1.6, 0), TEAL, 0.9, 0.08)
+		vfx("orb_grab")
 		DashReset.cue(h, "orb")
 	_free_mote(mt, false)
 
@@ -734,7 +750,7 @@ func _free_mote(mt: Dictionary, fizzle: bool) -> void:
 	if n != null and is_instance_valid(n):
 		(n as Node3D).visible = false
 		if fizzle:
-			m.fx.burst((n as Node3D).global_position, GOLD, 6, 1.5, 0.3, 0.0, 0.7)
+			vfx("orb_fizzle", (n as Node3D).global_position)
 	motes.erase(mt)
 
 # ------------------------------------------------------------------ E: Skycall (mage_sky.gd)

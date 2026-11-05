@@ -31,9 +31,7 @@ func cast() -> bool:
 	var ed := kit.e_def()
 	var at := AimMode.point(kit.h, float(ed["reach"]))
 	kit.strikes.append({"at": at, "t": float(ed["drag_max"]), "dir": default_dir(at), "phase": "flick"})
-	kit.fx().star(at + Vector3(0, 0.3, 0), MageKit.TEAL, MageKit.GOLD, 0.8, 0.12)
-	kit.fx().disc(at, float(ed["radius"]), MageKit.VIOLET, MageKit.GOLD, 0.2, MageKit.COPPER)
-	kit.m.sfx("vv_sky_place", at, -3.0)
+	kit.vfx("sky_place", at)
 	kit.play("mage_e")
 	return true
 
@@ -59,7 +57,7 @@ func tick(dt: float) -> void:
 			drag.merge({"col": MageKit.GOLD, "col2": MageKit.GOLD})
 			AimKit.lane(kit.h, "e_drag", drag)
 		var k := 1.0 - float(s["t"]) / float(ed["delay"]) if counting else 0.0
-		# a copper ticked rim with the gold chevron on it pointing the drag (the dark disc is VVFx's)
+		# a copper ticked rim with the gold chevron on it pointing the drag
 		var rim := {"at": at, "r": r, "ticks": true, "pointer": s["dir"], "all": true}
 		rim.merge({"col": MageKit.COPPER, "col2": MageKit.DEEP_GOLD, "fill": k})
 		AimKit.circle(kit.h, "e%d" % i, rim)
@@ -81,10 +79,8 @@ func _commit(s: Dictionary, ed: Dictionary, r: float) -> void:
 	s["dir"] = drag_dir(at)
 	s["phase"] = "count"
 	s["t"] = float(ed["delay"])
-	kit.fx().disc(at, r, MageKit.VIOLET, MageKit.GOLD, float(ed["delay"]) + 0.1, MageKit.COPPER)
-	kit.fx().pillar(at, Color(MageKit.GOLD, 0.45), MageKit.GOLD.lightened(0.6), 8.0, r * 0.95, float(ed["delay"]))
+	kit.vfx("sky_count", at)            # a thread of charge from the sky, a swirl narrowing under it
 	AimKit.hide(kit.h, "e_drag")
-	kit.m.sfx("vv_sky_count", at, -4.0)
 	kit.net_ring(at, r, kit.col_of(ed))
 
 ## The committed drag as a clear arrow inside the circle for the whole countdown.
@@ -111,10 +107,11 @@ func _strike(s: Dictionary) -> void:
 	kit.last_strike = {"at": at, "dir": dir}
 	AimKit.hide(kit.h, "e_arrow0")
 	AimKit.hide(kit.h, "e_arrow1")
-	_strike_fx(at, float(ed["radius"]))
+	kit.vfx("sky_strike", at)
+	kit.play("mage_e_snap")
 	var delivery := {"type": "burst", "origin": "here", "radius": float(ed["radius"])}
 	var stg := kit.stage("e", {"delivery": delivery, "effects": [{"type": "damage", "amount": float(ed["dmg"])}]})
-	kit.run(stg, kit.cx("e", "skycall", at, {"at": at, "dir": dir}))
+	kit.run_own(stg, kit.cx("e", "skycall", at, {"at": at, "dir": dir}))
 	for f in kit.foes_in(at, float(ed["radius"])):
 		kit.add_spark(f, int(ed.get("stacks", 1)))
 		# every body inside is moved along the one committed vector, pinned there for a moment
@@ -123,23 +120,10 @@ func _strike(s: Dictionary) -> void:
 		kit.m.displace.tow(f, null, slide)
 		if f is Hunter:
 			KitStatus.apply(f, "gnd", float(ed["grounded"]))
-		kit.fx().shackle(f, MageKit.TEAL, MageKit.GOLD, float(ed["grounded"]))
+		kit.fx().shackle(f, MageKit.PINK, MageKit.GOLD, float(ed["grounded"]))
 	for mt in kit.motes.duplicate():
 		if (mt["pos"] as Vector3).distance_to(at) < float(ed["radius"]) + 0.6:
 			_fling_orb(mt, dir, ed)
-
-func _strike_fx(at: Vector3, r: float) -> void:
-	var fx := kit.fx()
-	for i in 3:
-		var sky := at + Vector3(0, 9.0, 0) + kit._jitter(0.6, 0.0, 0.0)
-		fx.arc(sky, at + kit._jitter(0.4, 0.1, 0.1), MageKit.TEAL, MageKit.GOLD, 1.0 - 0.25 * i, 0.22)
-	kit.net_bolt(at + Vector3(0, 9.0, 0), at, MageKit.TEAL)
-	fx.ring(at, r, MageKit.GOLD, MageKit.TEAL, 0.35)          # the hit area, at its true size
-	fx.disc(at, r * 0.9, Color("1a1420"), MageKit.GOLD, 0.45, MageKit.COPPER)
-	kit.m.fx.burst(at + Vector3(0, 0.5, 0), MageKit.GOLD, 22, 6.0, 0.45, 6.0, 1.2)
-	kit.m.fx.flash(at + Vector3(0, 1.0, 0), MageKit.GOLD, 1.8, 0.12)
-	kit.m.sfx("vv_sky_strike", at, 0.0)
-	kit.play("mage_e_snap")
 
 ## A charge orb the lightning catches (a rival's becomes hers): dragged toward Ryzz and within reach, it flies
 ## all the way to her and resets her Wirerun on arrival; any other drag flings it a shorter way.
@@ -153,4 +137,5 @@ func _fling_orb(mt: Dictionary, dir: Vector2, ed: Dictionary) -> void:
 	var dest := kit.ground(kit.h.pos) if homing else kit.ground(land)
 	mt["fly"] = {"from": from, "to": dest, "t": 0.0, "home": homing}
 	var lift := Vector3(0, 0.55, 0)
-	kit.fx().arc(from + lift, dest + lift, MageKit.TEAL, MageKit.GOLD, 0.6, 0.25)
+	var way := Vector2(dest.x - from.x, dest.z - from.z)
+	kit.vfx("orb_fling", from + lift, way.normalized(), {"to": dest + lift, "len": way.length()})
