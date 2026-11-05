@@ -274,9 +274,14 @@ func _start_riposte() -> bool:
 func ult_running() -> bool:
 	return riposte.running()
 
-## Planted in the guard and the cleave: no other button does anything.
+## Planted in the guard and the cleave: no other button does anything (but E on a held chain, use_e).
 func busy() -> bool:
 	return super.busy() or (riposte != null and riposte.move_k() <= 0.0)
+
+## Owner 113.2: a held Smash never opens the glider on a jump, nor do the Riposte's guard and cleave. Its last
+## beat, the recovery, is open: a glide there ends the rest of it.
+func no_glide() -> bool:
+	return rmb_down or (riposte != null and riposte.move_k() <= 0.0)
 
 ## The guard takes every hit (no damage, no crowd control) and counts it.
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
@@ -621,11 +626,12 @@ func perfect_window(t: float) -> int:
 	var every := float(ld["perfect_every"])
 	return int(since / every) if fmod(since, every) < float(ld["perfect_w"]) else -1
 
-## "Now": the raised blade flashes white-hot along its length and a bright ring of the hilt rings out.
+## "Now": the levelled blade flashes white-hot along its length and a bright ring of the hilt rings out.
 func _perfect_cue() -> void:
-	var tip := h.pos + Vector3(0, 3.0, 0)
+	var dv := h.aim_dir()
+	var tip := h.pos + Vector3(dv.x * 2.2, 1.2, dv.y * 2.2)         # the levelled blade's point
 	fx().star(tip, Color(1, 1, 1), 1.6, 0.16, LUNGE_FULL)
-	fx().star(h.pos + Vector3(0, 2.2, 0), LUNGE_FULL, 1.0, 0.16)
+	fx().star(h.pos + Vector3(dv.x, 1.2, dv.y), LUNGE_FULL, 1.0, 0.16)
 	m.sfx("jug_full", h.pos, -3.0 if h.is_local() else -7.0, 1.5)
 
 func lunge_k(t: float) -> float:
@@ -1000,6 +1006,9 @@ func e_recastable() -> bool:
 
 ## E: throw the chain, or pull yourself along it (JuggernautChain.press).
 func use_e() -> void:
+	if warchain.hooked() and riposte.move_k() <= 0.0 and not super.busy():
+		riposte.pull_through()         # owner 113.7: the held chain hauls him in, the ult's strike on the way
+		return
 	if busy():
 		h._ab_feedback("k1", "deny")
 		return

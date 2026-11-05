@@ -167,7 +167,7 @@ func pull() -> void:
 	var h := k.h
 	k.start_e_cd()
 	state = "pulling"
-	if k.busy() or h.root_t > 0.0:
+	if (k.busy() and k.riposte.move_k() > 0.0) or h.root_t > 0.0:
 		_stop("stopped", false)
 		return
 	k.arm_haul()
@@ -184,7 +184,7 @@ func pull() -> void:
 	pull_t = dist / pull_speed + 0.5
 	h.dash_with({"type": "dash", "speed": pull_speed, "time": pull_t, "kind": "rush", "dir": pull_dir,
 			"invuln": 0.0})
-	if k.anim_id != "jug_haul_wind": k.play("jug_reel")
+	if k.anim_id != "jug_haul_wind" and not k.riposte.running(): k.play("jug_reel")
 	k.fx().puff(h.pos + Vector3(0, 0.2, 0), Color(1, 1, 1, 0.8), 0.9, 0.35)        # the start puff (footage 0333)
 	k.m.fx.dust(h.pos, 8)
 	k.m.sfx("jug_reel", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
@@ -379,6 +379,11 @@ func _tick_pull(dt: float) -> void:
 	var a := h.pos + Vector3(0, 1.0, 0)
 	k.fx().chain(_fx_id(), a, at + Vector3(0, 1.0 if target != null else 0.6, 0), 0.0, HOT, DARK, 0.16, _bow(steer))
 	_draw_preview()
+
+## Him to the anchor, flat.
+func to_anchor() -> Vector2:
+	var at := _anchor_now()
+	return Vector2(at.x - k.h.pos.x, at.z - k.h.pos.z)
 
 func _anchor_now() -> Vector3:
 	return target.pos if target != null and is_instance_valid(target) else anchor
