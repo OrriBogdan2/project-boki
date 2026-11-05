@@ -1031,8 +1031,8 @@ class Springs:
 				# (a long cloth tail never hangs dead: a slow travelling ripple, stronger toward its tip)
 				for i in range(1, n):
 					var u := float(i) / float(n - 1)
-					var sway := Vector3(sin(wind_t * 1.9 - i * 0.7), 0.35 * sin(wind_t * 1.3 - i * 0.9), 0.0)
-					want[i] += xf.basis * sway * WIND * u * u
+					var ripple := Vector3(sin(wind_t * 1.9 - i * 0.7), 0.35 * sin(wind_t * 1.3 - i * 0.9), 0.0)
+					want[i] += xf.basis * ripple * WIND * u * u
 			if ch["hang"]:
 				for i in range(1, n):
 					var seg := (xf * (rest[i] as Transform3D).origin).distance_to(
