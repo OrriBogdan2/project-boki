@@ -29,7 +29,7 @@ const HEADING_MIN := 2.0     # m/s: slower than this has no heading to lean into
 const HEADING_MAX := 1.4     # rad: the most the root turns off the facing
 const HEADING_RATE := 14.0   # 1/s: how fast it turns
 const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
-const CROUCH_IN := 0.12      # s: the layer eases over the body with no dip to carry it (coming up: the out clip's length)
+const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carries it
 const CROUCH_ONE := 0.06     # s: the dip clip eases in and out of the layer
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
 static var _data := {}       # art name -> its parsed file ({} when it has none)
@@ -433,7 +433,9 @@ func _crouch(s: Dictionary, dt: float) -> void:
 			one_w = 1.0       # (from its first frame: under the fade the hold would drop him early)
 	crouch_t += dt
 	var length := lib.get_animation(crouch_clip).length if crouch_clip != "" else 0.0
-	var fade := CROUCH_ONE if on and length > 0.0 else (length if length > 0.0 else CROUCH_IN)
+	var fade := CROUCH_IN      # (with a dip: quick going down, under the clip; coming up, the clip's whole length)
+	if length > 0.0:
+		fade = CROUCH_ONE if on else length
 	crouch_w = lerpf(crouch_from, 1.0 if on else 0.0, smoothstep(0.0, fade, crouch_t))
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var flat := Vector2(vel.x, vel.z)

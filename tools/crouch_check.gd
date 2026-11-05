@@ -79,8 +79,10 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	ok(pop <= POP, "%s: no pop going down (%.3f m a frame)" % [id, pop])
 	var fl := _at(m, sk, "foot.L")
 	var fr := _at(m, sk, "foot.R")
-	ok(minf(fl.y, fr.y) >= minf(rest_l.y, rest_r.y) - SINK, "%s: the feet stay on the ground (%.3f, %.3f, standing %.3f)" % [id, fl.y, fr.y, rest_l.y])
-	ok(maxf(fl.y, fr.y) > minf(rest_l.y, rest_r.y) + 0.01, "%s: a heel is up, on the ball of the foot" % id)
+	var floor_y := minf(rest_l.y, rest_r.y)
+	var sunk := minf(fl.y, fr.y)
+	ok(sunk >= floor_y - SINK, "%s: the feet stay on the ground (%.3f, standing %.3f)" % [id, sunk, floor_y])
+	ok(maxf(fl.y, fr.y) > floor_y + 0.01, "%s: a heel is up, on the ball of the foot" % id)
 	ok(absf(fl.z - fr.z) >= LEAD, "%s: one foot leads by %.2f m" % [id, absf(fl.z - fr.z)])
 	var v := Vector3(0, 0, -float(WardenClips.data(art_name)["crouch"].get("speed", 2.4)))
 	var hmin := INF
