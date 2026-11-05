@@ -456,3 +456,12 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Pip 108: body.size 0.78 -> 0.68 (about 13% smaller), nameplate 2.05 -> 1.85 (unrequested, not shot). hit_r stays 0.34: already at item 46's 0.85x floor. warden-model targets moved with her size (height 0.74 -> 0.65, height_3d 0.84 -> 0.73), HEIGHT_TOL unchanged. Suite on aaebef5d passed; tip re-ran warden-model, health --strict, gen_wiki only.
 - Shots: ext/hero-shots-s2 kits/breaker/, kits/pip/.
 - Owner Qs: should the spin hit people each turn? 2.5-4 turns/s, or slower and heavier (ART-1 used 1.25)? Pip's hitbox stay at the 0.85x floor, or move the band?
+
+## 2026-11-05 S2: ART-1 Lisette (Hem) first pass: ext/art1-hem 6ac0051d, NOT READY
+- Rebuilt from scratch: 19,512 tris with the bow, 41 clips on Kael's WardenClips runtime, bow skinned (76b), capris and colours per hem_FINAL_sheet, splash and portrait replaced from hem_v4_splash. 0 credits.
+- Not READY: health --strict and style_lint --strict fail on shared files copied from ext/art1-kael @ daf48292 (top of the list not seen); the shared files need one more sync, and the Kael trial merge wasn't rerun after the last one. Full suite not run.
+- Passed: --check, rig-standard, clip-check, warden-model 157, warden-glb 182, warden-stance, portrait 107 (before the tighter crop), archer-combo 128, hero-combo 263.
+- Differs: neckline closed under the scarf (item 108, tasteful; the reference has a cut-out), scarf on spring chains, hand-on-hip idle. Portraits made with ffmpeg, not tools/portrait_art.gd (that rewrites all 12).
+- Found: the exporter's default 24 fps ran clips 25% long; other ART-1 lanes told to check.
+- Shots: ext/hero-shots-s2 art1/lisette/. Not checked: GIF playback, in-engine face close-up, draw with 55b merged, 11 clips on the final build.
+- Owner Qs: closed neckline or the reference's cut-out? OK that thimble claws and wrong-shadow are gone? Notes on ponytail length, scarf motion, hand-on-hip idle? Face and lips are the weakest area.
