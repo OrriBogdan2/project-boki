@@ -154,7 +154,7 @@ def p_knob(S, T):
 
 
 def p_bell(S, T):
-    c = ramp(0.5 + 0.48 * np.cos(S * 6.283 + 0.9), [GOLD_D, GOLD_M, GOLD_L])
+    c = ramp(0.5 + 0.48 * np.cos(S * 6.283 + 0.9), [hx("5e4a30"), hx("a88a58"), hx("ecd9a8")])
     return mix(c * (0.75 + 0.35 * np.sin(np.clip(T, 0, 1) * 3.1))[..., None], hx("20140c"), M.sm(0.72, 0.76, T) * M.sm(0.92, 0.88, T))
 
 

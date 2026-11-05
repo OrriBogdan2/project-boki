@@ -71,12 +71,17 @@ def textures(size=1024):
     deep = np.array((0.03, 0.02, 0.10))
     mid = np.array((0.34, 0.14, 0.78))
     c = deep + (mid - deep) * np.clip((neb * swirl * 2.6 - 0.3), 0, 1)[..., None]
+    def blur_s(a):
+        return (np.roll(a, 2, 0) + np.roll(a, -2, 0) + np.roll(a, 2, 1) + np.roll(a, -2, 1)) * 0.35
+
     stars = np.zeros(U.shape, np.float32)
     n = 420
     ys, xs2, b = rng.randint(2, size - 2, n), rng.randint(2, size - 2, n), rng.rand(n)
     stars[ys, xs2] = b
-    stars[ys + 1, xs2] = b * 0.7
-    stars[ys, xs2 + 1] = b * 0.7
+    stars[ys + 1, xs2] = b
+    stars[ys, xs2 + 1] = b
+    stars[ys + 1, xs2 + 1] = b
+    stars = np.clip(stars * 1.5 + blur_s(stars), 0, 1)
     g, cut = grin(U, V)
     e = slits(U, V)
     shape = np.maximum(g, e)
@@ -94,7 +99,7 @@ def textures(size=1024):
     bloom = np.clip(blur(shape, 18) * 0.8 + blur(shape, 6) * 0.7, 0, 1)
     hot = np.array((1.0, 0.97, 1.0))
     vio = np.array((0.62, 0.26, 1.0))
-    em = vio * (bloom * 0.6)[..., None] + c * 0.42
+    em = vio * (bloom * 0.6)[..., None] + c * 0.6
     em = em + stars[..., None] * np.array((0.9, 0.85, 1.0)) * (1 - shape[..., None])
     teeth = shape
     em = em * (1 - teeth[..., None]) + hot * teeth[..., None]

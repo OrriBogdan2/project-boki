@@ -3,20 +3,18 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dc502k0h3gnk3"
-path.bptc="res://.godot/imported/ostra_atlas.jpg-308d9a5785fcf65cd41837bc0cc91607.bptc.ctex"
-path.astc="res://.godot/imported/ostra_atlas.jpg-308d9a5785fcf65cd41837bc0cc91607.astc.ctex"
+path="res://.godot/imported/ostra_atlas.jpg-308d9a5785fcf65cd41837bc0cc91607.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
-"md5": "d256797563d08b82f518bf39154932f3"
+"md5": "0a8430d4d6fbc063eb89e7d54e11e97e"
 }
 
 [deps]
 
 source_file="res://art/wardens/ostra/ostra_atlas.jpg"
-dest_files=["res://.godot/imported/ostra_atlas.jpg-308d9a5785fcf65cd41837bc0cc91607.bptc.ctex", "res://.godot/imported/ostra_atlas.jpg-308d9a5785fcf65cd41837bc0cc91607.astc.ctex"]
+dest_files=["res://.godot/imported/ostra_atlas.jpg-308d9a5785fcf65cd41837bc0cc91607.ctex"]
 
 [params]
 
