@@ -213,7 +213,7 @@ func take(id: String) -> void:
 	for r in relics:
 		var relic := r as MaskRelic
 		if relic.id == id:
-			MaskMoment.beat(relic, home.player, flash, func(_body): _taken(), false)
+			MaskBeat.play(relic, home.player, func(_body): _taken(), false, true)
 		else:
 			others.append(HeroTitle.base_name(relic.id))
 			relic.drift_to(_portal() + Vector3(0, 1.6, 0), 1.4, 0.3).finished.connect(relic.queue_free)

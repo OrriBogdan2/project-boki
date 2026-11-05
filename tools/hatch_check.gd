@@ -157,7 +157,7 @@ func _first_mask(tree: SceneTree) -> void:
 	press.pressed = true
 	moment._unhandled_input(press)
 	t0 = Time.get_ticks_msec()
-	while moment.phase != "intro" and Time.get_ticks_msec() - t0 < 6000:
+	while moment.phase != "intro" and Time.get_ticks_msec() - t0 < 12000:
 		await tree.process_frame
 	for i in 6: await tree.process_frame
 	ok(moment.phase == "intro" and String(moment.you.get_meta("arch")) == "gunslinger",
