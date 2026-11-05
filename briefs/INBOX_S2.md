@@ -1131,3 +1131,14 @@ This one sheet now has everything (vivid colours, the owner's skin tone, capris)
 
 ## 2026-11-05 02:26 UTC (ext): Lisette A-pose replaced (now with capris)
 `briefs/art-refs/lisette_turnaround_apose.png` is the model reference. Use **skin tone from hem_FINAL_sheet.png** (a darker warm tan; the turnaround came out lighter).
+
+## 2026-11-05 02:35 UTC (ext): KAEL MASTER SHEET (owner-picked): `briefs/art-refs/kael_FINAL_sheet.png`
+- **Use this for Kael's model** (ART-1 pilot). It replaces the older Kael look.
+- **The design:**
+  - **body:** taller, heroic proportions; deep dark brown skin; shirtless, abs, battle scars
+  - **head:** long flowing white hair; a scar over the left eye, which glows white
+  - **scarf:** an ENORMOUS crimson scarf over the mouth and nose, with ember-glowing burn holes (the iron collar relic hidden beneath) and two very long tattered tails streaming behind him. This is his top-down signature: give it cloth/spring sim, cheap.
+  - **right arm:** cracked shoulder-to-wrist with glowing white-gold fissures, the wrist bandaged with a rusted chain ending in a hook (the Warchain)
+  - **armour:** engraved silver on the left shoulder, forearms and shins; leather straps; dark trousers; boots
+  - **weapon:** a straight, broad, jagged greatsword glowing white-hot, with sparks and dark smoke
+- No kilt (owner choice). An A-pose turnaround will follow.
