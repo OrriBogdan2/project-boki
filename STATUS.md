@@ -1016,3 +1016,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Blocks READY: no full suite since item 117 and the polish, and --bot-sanity is still open. Kit half of 136 is S5's: until then RMB still plays the Snap, and shots leave the right hand only.
 - Default (alternative in brackets): the void orb the sheet shows in his hand is dropped per item 136, so his hand is empty apart from the charge glow [keep a small orb]. The fan of cards stays.
 - Shots: hero-shots-s2 art1/motley/.
+
+## 2026-11-05 20:18 UTC S2: ext/art1-grimble 3d383a3e done for this merge, folded into ext/art1-integ
+- Meshy body and head, sewn-shut eye with real stitches, one green eye behind the monocle, junk ball with chains and a brass frame. 14,848 tris, 6 surfaces. No Kael art, merge-tree clean with main.
+- Full suite on the tip: baseline reds only. Worth a look: mantle-look reads 0.77 against 0.78, and it passed on round one, so the new body may have tipped it. The integ suite compares it to main.
+- Lane scores about 80. I viewed vs_art and put him a little lower: the wiry body, face and hook are right; the hoard is simpler than the art; in the ball his head is a pale lump in the frame instead of the sheet's face; the head also reads pale from above.
+- Calls (alternative in brackets): sculpted hoard kept, because the scan came out a speckled lump [a second scan from one clean view]. Wider shoulders stay [narrow them].
+- Weapon-fit row isn't in his table; the 137 audit will fill it. RMB in flight stays a violet arm until S3. Rebuilding needs ~/meshy/grimble, which isn't in git.
+- Shots: hero-shots-s2 art1/grimble/.
