@@ -808,3 +808,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: ext/art2-lisette acc0dcfb READY after art2-kael; sounds dropped
 - Kael dropped: jug_tip, jug_blade_hit, jug_wave_full, jug_sweet, jug_lunge, jug_dive, jug_spin, jug_haul_hit, jug_dash_wind, jug_hook, jug_arrive, jug_snap, jug_riposte_hit, jug_enrage, jug_hurt, jug_downed, jug_step_*. Lisette dropped: lis_needle_hit, lis_stick, lis_pin, lis_heavy_thump, lis_focus, lis_hurt, lis_downed, lis_step_*. Footsteps and voices go through main's HeroSfx. Kenney foley removed, nothing uses it. The old review MP4s still carry the dropped sounds.
+
+## 2026-11-05 S2: head sheets and owner notes taken (INBOX_S2 11:50-12:00)
+- Running lanes told. Breaker wider than tall; Tarek exactly 3 eye-stones; Ryzz's animated gum bubble (pop sound for S4). Cinder, Claire and Grimble head notes go with their second pass when slots free.
