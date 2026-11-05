@@ -2281,3 +2281,38 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 
 ## 2026-11-05 (S4): hash update (only the shots tools' missing .uid files added)
 - `ext/rank-ui-98` @ bd04d5d2 (was d66e1383), `ext/loot-full-99` @ 127ecfc8 (was f484773e), `ext/s4-integ` @ bfb12fa7 (was 244b216d). No code changes.
+
+## 2026-11-05 (S3): READY `ext/clarity-96` @ f41a7157 (owner items 96, 96b, 97, 100, 102, 106: combat clarity)
+- Base origin/main fe51b43b; 12 commits, 83 files +1906/-426. God files shrink overall: hud.gd -197/+? (net -103), match.gd net -2, hunter.gd +4 (two `tick` calls + on_wall_slam arg), world.gd +1, main.gd/home.gd net 0. No budget raised; health --strict OK; gen_wiki --check unchanged. Reserved files (kin*, merge*, capture*, field_book, boki_hud, bot_kin) untouched.
+- New files: scripts/match/{side_color,side_rings,shield_look,ping_input}.gd, scripts/ui/{downed_marks,boki_marks,reticle,msg_lane}.gd; tools/{shield_check,clarity_check,clarity_shots,reticle_check,reticle_shots,ping_check,msg_queue_check}.gd. Deleted: scripts/ui/level_pop.gd.
+- **97 shield invisibility: ROOT CAUSE FIXED.** A wall carried in front of a Hunter (Boki Mass Guard, Breaker's aegis: `follow` walls) counted in World.los, so aiming at a rival put your own shield between you: Match.can_see failed -> `unseen` -> you vanished on their screen. Carried walls no longer block sight (Verbs.blocks_sight). Carried walls also lost their opaque posts and draw at 40% alpha; the Refraction reflect sphere is gone (ground ring kept).
+- **97 shield look: done.** One look for every source (ShieldLook): the Hunter's own ink outline is swapped for a 2.6x wider one in their side colour while `shield > 0` (no extra geometry or draw calls; materials change only on up/down), plus one quick ring+flash pop when a hit breaks it. The nameplate's pale shield bar is unchanged. The passive Boki owner shield (`kin_shield`) shows no body look (always-on noise).
+- **96/96b colour rule: done.** SideColor = HudStyle SELF green / ALLY blue / FOE red; a Boki uses its Hunter's. Applied to: Hunter ground rings and Boki rings (SideRings, recoloured only on change), the shield outline, downed marks, tethers, squad portrait frames, Boki health bars. Scoreboard keeps per-team colours (it must tell rival squads apart).
+- **96b downed: done, one difference.** Side-coloured revive-range ring on the ground (brighter fill as they're picked up, red pulse when stomped), a knocked mark over them ringed by the draining bleed-out, and "Revive Nm" for teammates near the ring. DIFFERS: no "hold F" — reviving is standing in the ring (Life), so the cue doesn't name a key. Kill feed already says "X knocked Y"; off-screen downed ally already has the ALLY KNOCKED card with arrow+distance (kept).
+- **96b Boki: done.** Your Boki has a dashed tether to you whenever it is out; a downed teammate's Boki has a tether to them and an icon: heart (pulling them up), knock (down too), shield (fighting someone over them), run (hanging back hurt). Enemy Boki: ring only.
+- **100 MMB ping: done, one difference.** MMB = new rebindable `ping` action; G alone = throw (KeyMigrate step 5 moves old saved MMB off throw). World: enemy under cursor -> red "Enemy", loot/box/chest -> "Loot", else ground; full map: map point; drop: ground under cursor (DIFFERS: cursor, not the projected landing point). All through Match.squad_ping (+`kind`); world marker, edge arrow, minimap/full-map pins and bot ping_goal reused. **Net.VERSION 0.19.1 -> 0.19.2** ("sping" carries kind; old 5-field form = plain spot).
+- **102 one message queue: done.** MsgLane: fixed column, never overlap, repeats merge ("x3"), max 3 visible, LOW/NORMAL/HIGH, stale LOW dropped, 1.8-3.2 s lifetimes. Routed: Hud.toast/toast_small/tip/level_up, UI.toast (farm/town/interior), tutorial (holds the lane while its banner shows), ALLY KNOCKED/REVIVED cards reserve the top rows. World labels (lair boards, farm "Chop me" marker, Boki bubbles) fade under a card. Combat numbers 46-60 -> 36-46 px, Label3D pool 40 -> 24. ~40 toasts/hints shortened or cut (HEXED/GROUNDED duplicate toasts, LevelPop banner, "Looted X's box"...). DIFFERS: kill feed stays in its own lane (already non-overlapping); hints keep the existing once-per-profile Save "tutorial" flags.
+- **106 reticle: done, one difference.** Default is a small broken ring + centre dot (6 px radius vs the old 13 px cross); aim arcs pulled in (charge 18->13, ammo 22->16). Settings > Gameplay > Reticle: shape (default/dot/small circle/cross/circle+dot), size 50-200%, 6 swatches incl. high-vis yellow, opacity, outline; saved in user://settings.cfg. Ability aim visuals (Hem's line etc.) draw on top. DIFFERS: default is a broken ring so it differs from the "circle + dot" option; the farm has no reticle (OS cursor), so it applies in matches only.
+- Checks (final tree, each with a fresh XDG_DATA_HOME, timeout 1200):
+
+| Check | Result |
+|---|---|
+| --check + all 64 registered *-check flags (full suite) | 64/65 ok |
+| --market-check | FLAKY, not ours: passes on origin/main, passed 1 of 2 reruns on this branch (wall-clock auction timing; branch touches no market/save code) |
+| --shield-check (new) | 0 failures |
+| --clarity-check (new) | 0 failures |
+| --reticle-check (new) | 0 failures |
+| --ping-check (new) | 0 failures |
+| --msg-queue-check (new) | 0 failures |
+| --archetype-check (inline, MMB assertion updated) | 339, 0 failures |
+| --tutorial-hud-check / --hudref-check / --uipolish-check / --perkorb-check / --drop-feel-check / --build-ui-check / --farm-tutorial-check | 0 failures |
+| health.py --strict / gen_wiki --check | OK / unchanged |
+
+- Screenshots: branch `ext/clarity-96-shots` @ dc501547, `shots/clarity-96/{before,after}/`: clarity_2v2(_crop) (2v2, ally downed, both Boki; same scene on fe51b43b and the branch; side-by-side cmp_2v2.png), shield_*.png + shield_strip (every shield source, aiming at the camera: before shows Mass Guard/aegis hiding the body), msg_match_busy / msg_farm_busy(_crop), reticle_default(_zoom), reticle_cross_yellow / reticle_circle_dot_cyan (+_zoom), reticle_settings, ping_enemy_and_loot, fight (baseline).
+- **Wiring / merge notes for main:**
+  - Re-import before running Godot after merging (new class_names; LevelPop removed).
+  - Code that used `hud.toasts`, `hud.small_toasts`, `hud.tips`, `hud.lvl_note`, `LevelPop`, `TutorialHud.defer/draw_toast`, `UI._toasts`/`UI.TOAST_QUEUE` must use `hud.msgs` (clear/texts/count). ext/tut-airdash and S4's branches (rank-ui, loot-full, box-revive) likely touch hud.gd toasts: expect conflicts there.
+  - `hud._draw_wisp_rings` now delegates to DownedMarks/BokiMarks: S4's box-revive work (101b) should draw its box ring with `DownedMarks.ring` / SideColor.
+  - Net.VERSION 0.19.2 (bump again if another branch also changed sync).
+  - Optional for main (reserved): kin.gd still creates the Boki ring in team colour at spawn; SideRings repaints it each colour change, so nothing is needed unless kin.gd's ring is rebuilt.
+  - Match.on_wall_slam lost its unused stun arg (callers updated).
