@@ -50,6 +50,7 @@ static func part(parent: Node3D, mesh: Mesh, mat: Material, pos := Vector3.ZERO,
 	mi.rotation = rot
 	if pname != "":
 		mi.name = pname
+	ShadowPolicy.judge(mi)       # small parts don't cast (item 94)
 	parent.add_child(mi)
 	return mi
 
@@ -621,6 +622,12 @@ static func torso_mesh() -> ArrayMesh:
 ## person for a look from MantleLook.at_home(). outfit names a colourway that replaces the palette
 ## (galleries); "bare" leaves the head uncovered. arch "" takes the look's "arch", else the class default.
 static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", appearance := {}, arch := "") -> Node3D:
+	ShadowPolicy.keep += 1       # a Hunter's parts cast at any size
+	var root := _hunter(cls, team_col, weapon, outfit, appearance, arch)
+	ShadowPolicy.keep -= 1
+	return root
+
+static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", appearance := {}, arch := "") -> Node3D:
 	var um := Unmasked.is_look(appearance)       # your own character: the hunter rig without a hunter's gear
 	var lk: Dictionary
 	var race: Dictionary
@@ -628,7 +635,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		# the Unmasked as MantleLook's own-person params (every slider neutral), its build and colour
 		lk = MantleLook.own(PlayerLook.clean(Unmasked.legacy(appearance)))
 		lk["build"] = float(Unmasked.BUILD_WIDTH[int(Unmasked.clean(appearance)["build"])])
-		lk["skin_col"] = Unmasked.colour(appearance)
+		lk["skin_col"] = Unmasked.VOID_SKIN
 		race = Unmasked.race(appearance)
 		arch = "unmasked"
 	else:
@@ -643,6 +650,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var bare := outfit == "bare"
 	var oi: int = OUTFIT_KEYS.find(outfit)
 	var hero_col: Color = OUTFIT_COLS[oi] if oi >= 0 else lk["outfit_col"]
+	if um: hero_col = Unmasked.colour(appearance)      # the shroud's colour
 	# the outfit is the gear's colourway: a saturated coat, a pale shirt, dark trousers, team colour
 	# on the strongest shapes (hood, cape, crest, pauldron tops, shield), gold on the edges
 	# a clean value structure (dark trousers and leather, a mid-dark coat, light shirt and trim), each
@@ -729,10 +737,11 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	part(torso, lathe(smooth_curve(PackedVector2Array([Vector2(0, 0.0), Vector2(nr * 2.0, 0.0), Vector2(nr * 1.3, 0.035), Vector2(nr, 0.08), Vector2(nr * 0.98, 0.16), Vector2(0, 0.16)]), 3), 28, "neck%.3f" % nr), m_skin, Vector3(0, 0.58, 0))
 	var skirt_n := _pivot(torso, "Skirt", Vector3(0, 0.07, 0))
 	# the glider pack: a rolled wing on a back plate (under whatever the archetype carries)
-	part(torso, box(0.3, 0.32, 0.1), m_leather, Vector3(0, 0.36, 0.24 * bw))
-	part(torso, cyl(0.075, 0.075, 0.44, 12), toon(Color("f3eee2")), Vector3(0, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
-	for sx in [-1.0, 1.0]:
-		part(torso, cyl(0.08, 0.08, 0.06, 12), m_acc, Vector3(0.2 * sx, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
+	if not um:      # (the Empty's shroud covers its back)
+		part(torso, box(0.3, 0.32, 0.1), m_leather, Vector3(0, 0.36, 0.24 * bw))
+		part(torso, cyl(0.075, 0.075, 0.44, 12), toon(Color("f3eee2")), Vector3(0, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
+		for sx in [-1.0, 1.0]:
+			part(torso, cyl(0.08, 0.08, 0.06, 12), m_acc, Vector3(0.2 * sx, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
 	_class_marks(torso, cls, bw, m_acc, m_trim)
 	# head: the sculpted head (jaw, cheeks, brow, chin per race and gender) with its face
 	var hk := HeroKit.head_key(rid, fem)
@@ -741,7 +750,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		for sx in [-1.0, 1.0]:
 			var ear := HeroKit.loft("ear", [Vector3(0, -0.035, 0), Vector3(0, 0.0, 0.008), Vector3(0, 0.035, 0.02)], [Vector2(0.03, 0.012), Vector2(0.04, 0.014), Vector2(0.022, 0.01)], 10, Vector3.RIGHT, 0.75)
 			part(torso, ear, m_skin, Vector3(0.226 * sx * (1.03 if not fem else 0.98), 0.85, 0.012), Vector3.ONE, Vector3(0, 0.25 * sx, 0))
-	if um: Unmasked.face(torso, appearance, skin_c)
+	if um: Unmasked.face(torso, appearance)
 	else: _face(torso, lk, m_dark, m_skin, team_col)
 	# what the archetype wears on its head decides how much hair shows (a hat: all but the crown; a
 	# hood or helm: only what spills out below)
@@ -761,7 +770,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	# ArmXPivot (shoulder) > sleeve, Elbow > forearm "ArmX" and a cuff, Hand > a mitten glove.
 	# Rounded joints overlap at the shoulder and elbow so a bent arm never shows a gap.
 	var hk2 := float(CLASS_LOOK.get(cls, {}).get("hands", 1.0)) * (1.3 if arch == "juggernaut" else 1.0)
-	var m_glove: Material = m_steel if heavy_gear else (m_dark if arch == "thief" else m_leather)
+	var m_glove: Material = m_skin if um else (m_steel if heavy_gear else (m_dark if arch == "thief" else m_leather))
 	var arms := {}
 	for sx in [-1.0, 1.0]:
 		var sd := "L" if sx < 0.0 else "R"
@@ -1281,6 +1290,7 @@ static func merge_static(node: Node3D) -> void:
 		var mi := MeshInstance3D.new()
 		mi.mesh = (g["st"] as SurfaceTool).commit()
 		mi.material_override = g["mat"]
+		ShadowPolicy.judge(mi)       # a merged clump of small parts is still small (item 94)
 		node.add_child(mi)
 	for d in drop:
 		node.remove_child(d)
@@ -1736,6 +1746,7 @@ static func gear_drop(col: Color, rar: int) -> Node3D:
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ring := MeshInstance3D.new(); ring.mesh = flat_quad(1.2)
 	ring.material_override = ring_mat(rc, 0.12); ring.position.y = 0.05
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # (a ground ring: no shadow, item 94)
 	root.add_child(ring)
 	return root
 
@@ -2043,6 +2054,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 		root.scale = Vector3.ONE * 0.82
 	Unique.dress(root, rec)          # this kin's own: size, palette shift, coat marks, proportions, shapes
 	Mutations.dress(root, rec)       # rare mutations: size, palette, extra parts
+	ShadowPolicy.boki(root)      # the body casts, the bits don't (item 94)
 	return root
 
 ## Moves a group's pivot to `at` without moving what's in it.
