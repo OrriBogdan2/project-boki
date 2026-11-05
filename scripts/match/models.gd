@@ -886,6 +886,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 			for n in [ap, ap.get_node("Elbow"), ap.get_node("Elbow/Hand")]:
 				for ch in (n as Node3D).get_children():
 					if ch is MeshInstance3D: (ch as Node3D).scale = Vector3(bk, 1.0, bk)
+	if um: Shrouds.bind(root)
 	bake_part_y(root)
 	root.set_meta("mats", collect_mats(root))
 	for mm in root.get_meta("mats"):

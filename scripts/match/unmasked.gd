@@ -19,7 +19,7 @@ const GLOWS := [Color("8ae8ff"), Color("ff9a5a"), Color("b48cff"), Color("ff7ab0
 const GHOSTS := ["None", "Eyes", "Whole face", "Stitched"]
 const AURA := ["None", "Faint", "Strong"]
 const AURA_COUNT := [0, 16, 40]       # specks drifting round the head, shoulders and shroud
-const SHROUDS := ["Cloak", "Wrap", "Tatters"]
+const SHROUDS := Shrouds.LABELS
 ## The shroud's colours (look["colour"]; an old save's skin colour keeps its index, so it becomes the shroud
 ## colour in the same slot).
 const COLOURS := [Color("6b6f7a"), Color("3f4a63"), Color("2d3561"), Color("4f6b4a"), Color("2f6f73"), Color("7a2f45"),
@@ -35,9 +35,6 @@ const ROWS := [
 ]
 const HOLLOW_ROW := 5
 const VOID_SHADER := preload("res://shaders/void_face.gdshader")
-## The shroud's hem as HeroKit.drape takes it: folds, fold depth, wave, how much longer the back hangs.
-const HEM_PLAIN := [8.0, 0.05, 0.0, 0.0]
-const HEM_RAGGED := [13.0, 0.1, 0.1, 0.18]
 const AURA_RADIUS := 0.5               # m: how far from the shoulders the specks start
 const AURA_SPECK := 0.024             # m: a speck's radius (the old motes were 0.012: too small to see)
 const HEAD_SHELL := 1.012                 # x the head: the void's shell sits just over the head mesh
@@ -260,38 +257,11 @@ static func _aura(torso: Node3D, count: int, glow: Color) -> void:
 	torso.add_child(p)
 
 # ------------------------------------------------------------------------------------------ the shroud
-## The shroud over the body (the colourway comes from the shroud colour, via Models.hunter): a collar hiding the
-## neck, a mantle over the shoulders, a drape to the ankles, and a cowl behind the head. Cloak is plain, Wrap
-## adds a high collar and a crossing sash, Tatters a ragged, uneven hem. The body under it keeps its shape.
+## The shroud over the body (the colourway comes from the shroud colour, via Models.hunter): see Shrouds, which has
+## the cuts. The body under it keeps its shape.
 static func dress(c: Dictionary, lk: Dictionary) -> void:
-	var m: Dictionary = c["m"]
-	var torso: Node3D = c["torso"]
-	var bw: float = c["bw"]
-	var cw: float = c["cw"]
-	var fem: bool = c["fem"]
-	var style := int(clean(lk)["shroud"])
-	_shape(c, fem)
-	var span := (0.9 if fem else 1.0) * cw
-	var tag := "%d|%.3f|%.3f" % [style, bw, span]
-	var collar_h := 0.14 if style == 1 else 0.09
-	Models.part(torso, Models.cyl(0.1, 0.15, collar_h, 18), m["body"], Vector3(0, 0.6 + collar_h * 0.3, 0))
-	Models.part(torso, HeroKit.drape("mantle|" + tag, 0.2 * span, 0.285 * span, 0.2, 0.0, 1.0, 7.0, 0.03),
-		m["body"], Vector3(0, 0.6, 0))
-	var hem := 0.3 * bw * (1.08 if fem else 1.0)
-	var ragged := style == 2
-	var cut: Array = HEM_RAGGED if ragged else HEM_PLAIN
-	var skirt := HeroKit.drape("skirt|%s|%.3f" % [tag, hem], 0.245 * bw, hem, 0.42, 0.0, 1.0,
-		cut[0], cut[1], cut[2], cut[3])
-	Models.part(c["skirt"], skirt, m["body"], Vector3(0, 0.02, 0))
-	var cowl := HeroKit.drape("cowl|" + tag, 0.2, 0.3, 0.3, 0.02, 0.48, 6.0, 0.04)
-	Models.part(torso, cowl, m["body"], Vector3(0, 0.8, 0.02))
-	if style == 1:
-		Models.part(torso, Models.box(0.07, 0.5, 0.025), m["trim"], Vector3(0.0, 0.3, -0.2 * bw - 0.03), Vector3.ONE,
-			Vector3(0, 0, 0.7))
-	else:
-		Models.part(c["skirt"], HeroKit.drape_hem("hem|%s|%.3f" % [tag, hem], 0.245 * bw, hem, 0.42, 0.0, 1.0,
-			cut[0], cut[1], cut[2], cut[3]),
-			m["trim"], Vector3(0, 0.02, 0))
+	_shape(c, c["fem"])
+	Shrouds.dress(c, clean(lk))
 
 ## Female and male read at a glance: a woman's narrower shoulders, fuller hips and a weight-on-one-hip
 ## stance; a man's broad shoulders and squarer, even stance (content/rules/warden_stance.json "empty_f",
