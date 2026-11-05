@@ -288,8 +288,12 @@ func _air_skate_rules() -> void:
 			"tm Shift (items 51/62): a jump in the skate rises and the skate goes on under it, at skate speed",
 			was_ground and top > 0.6 and skated, "ground %s, top %.2f m, skating %s" % [was_ground, top, skated])
 	ok("tm Shift (item 62): off the ground the skate plays its own move, tm_skate_air", air_id, K.anim_id)
+	P.pos.y = P.ground() + 0.02          # brought down to the landing: a jump in the skate sinks as slowly as the skate
 	step(m, 0.1)
-	ok("tm Shift (item 62): landing from it goes back to the ground stride", K.anim_id != "tm_skate_air", K.anim_id)
+	ok(
+			"tm Shift (item 62): landing from it goes back to the ground stride",
+			P.grounded and K.rinkrunning() and K.anim_id == "tm_skate",
+			"%s grounded %s skating %s" % [K.anim_id, P.grounded, K.rinkrunning()])
 	P.inp["dash_down"] = false
 	step(m, 0.5)
 	# a press while gliding
@@ -308,13 +312,16 @@ func _air_skate_rules() -> void:
 			"gliding %s, skating %s, %.1f m/s" % [P.gliding, K.rinkrunning(), P.roll_speed])
 	step(m, 0.2)
 	P.inp["jump"] = true
+	P.inp["glide"] = true          # the key stays down: the glider is held open
 	step(m, 1.0 / 60.0)
 	P.inp["jump"] = false
 	step(m, 1.0 / 60.0)
 	var hv := Vector2(P.vel.x, P.vel.z).length()
+	P.inp["glide"] = false
 	ok(
 			"tm Shift (item 62): a jump press in the air skate opens the glider, keeping the speed",
-			P.gliding and not K.rinkrunning() and hv >= 0.6 * skate_v, "gliding %s, %.1f m/s" % [P.gliding, hv])
+			P.gliding and not K.rinkrunning() and hv >= 0.6 * skate_v,
+			"gliding %s, %.1f m/s" % [P.gliding, hv])
 	P.inp["dash_down"] = false
 	P.inp["move"] = Vector2.ZERO
 	await _free(m)
@@ -1341,7 +1348,9 @@ func rimewright() -> void:
 				and K.lk().live.filter(func(e): return String(e["kind"]) == "chip").size() >= 4,
 			"%.1f m/s" % skate_v)
 	step(m, 0.55)
-	ok("tm Shift: the stride move loops while skating", K.anim_id == "tm_skate" and K.rinkrunning(), K.anim_id)
+	ok("tm Shift: the stride move loops while skating (off the step she is on the air stride)",
+			K.anim_id == ("tm_skate" if P.grounded else "tm_skate_air") and K.rinkrunning(),
+			"%s grounded %s" % [K.anim_id, P.grounded])
 	ok(
 			"tm Shift: she skates on over a ledge (not stopped by leaving the ground)",
 			K.rinkrunning() and float(int(floor(P.pos.x)) - hx) <= -3.0,

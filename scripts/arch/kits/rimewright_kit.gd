@@ -318,13 +318,12 @@ func in_dash() -> bool:
 	return not rinkrun.is_empty() or _rime_carrying()
 
 ## Mid-air she sinks gently along the skate (dash.air_fall m/s, item 62) instead of holding her height; the
-## statue sliding on in the air does the same. A jump pressed in the skate rises and falls as any jump, down to
-## that sink (item 51's combo: the skate goes on under it).
+## statue sliding on in the air does the same. An air press starts at that sink (_begin_skate); a jump pressed in
+## the skate rises and falls as any jump down to it (item 51's combo: the skate goes on under it).
 func dash_vy(dt: float) -> float:
 	if rinkrun.is_empty() and not _rime_carrying():
 		return 0.0
-	var sink := -float(dash_def().get("air_fall", 1.5))
-	return maxf(h.vel.y - Hunter.H_GRAV * dt, sink) if bool(rinkrun.get("jumped", false)) else sink
+	return maxf(h.vel.y - Hunter.H_GRAV * dt, -float(dash_def().get("air_fall", 1.5)))
 
 ## Sealed in Rimelock she is a statue: her facing stays as it was on the cast frame (item 65).
 func face_locked() -> bool:
@@ -373,6 +372,8 @@ func _begin_skate() -> void:
 	var dir := dash_dir()
 	rinkrun = {"t": 0.0, "dir": dir.normalized(), "loop": 0.16, "slab": 0.0, "air": not h.grounded}
 	h.gliding = false          # a press while gliding folds the glider: the skate takes over
+	if not h.grounded:
+		h.vel.y = -float(dash_def().get("air_fall", 1.5))
 	play("tm_skate_go" if h.grounded else "tm_skate_air")
 	m.sfx("rimewright_dash", h.pos, -3.0, 1.0)
 	# ice kicked back off the pushing blade (no ring: a dash never bursts)
@@ -385,8 +386,10 @@ func _tick_rinkrun(dt: float) -> void:
 	var dd := dash_def()
 	rinkrun["t"] = float(rinkrun["t"]) + dt
 	var t := float(rinkrun["t"])
-	if bool(h.inp.get("jump", false)) and h.vel.y > 0.0 and not h.grounded:
-		rinkrun["jumped"] = true
+	if _glide_pressed():
+		_rinkrun_end()
+		h.do_jump()
+		return
 	# she skates on over a ledge (only a glide, a stun or letting go ends it)
 	var stop := h.downed or h.stun_t > 0.0 or h.out or t >= float(dd.get("max_t", 1.6)) or h.gliding
 	if t > float(dd.get("min_t", 0.2)) and not held("dash"):
@@ -427,6 +430,14 @@ func _tick_rinkrun(dt: float) -> void:
 		play(stride)
 		m.sfx("rimewright_skate_scrape", h.pos, -5.0, 1.0)     # each stride's blade on the ice
 	_lay_ice(cur, dt)
+
+## A jump press in the air skate with no jump left in it, clear of the ground: ending in the air takes the normal
+## glide rules (item 62), and the shared press can't open a glider while the skate runs. Near the ground the press
+## stays the shared buffered jump.
+func _glide_pressed() -> bool:
+	if not bool(h.inp.get("jump", false)) or h.grounded or h.vel.y >= Hunter.JUMP_V - 0.01:
+		return false
+	return h.over_void() or h.pos.y - h.ground() > 0.9
 
 ## Rank 3: skating over the Abyss lays ice underfoot, a short span just ahead of her every `ice_gap`
 ## seconds, which stays a few seconds so she (and anyone after her) can land on it.
