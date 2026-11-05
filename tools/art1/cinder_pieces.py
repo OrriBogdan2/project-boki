@@ -85,6 +85,17 @@ def grid_faces(rows, cols, wrap=False):
     return f
 
 
+def half_width(z):
+    """The head's half width at height z (head-local), a little behind the face's middle: the face patch's columns stop at the head's real edge, so none
+    hang in the air."""
+    z = np.asarray(z, float)
+    x = np.full(z.shape, 0.14)
+    for _ in range(40):
+        d = head_sdf(np.stack([x, np.full(z.shape, 0.03), z], -1))
+        x = np.maximum(x - np.clip(d, -0.01, 0.02) * 0.9, 0.002)
+    return x
+
+
 FACE_XS = np.concatenate([np.linspace(-0.098, -0.072, 3), np.linspace(-0.062, 0.062, 15), np.linspace(0.072, 0.098, 3)])
 
 
@@ -92,19 +103,21 @@ def face_parts():
     """The front of the face: an upper patch and a jaw patch split along the lips, so the jaw bone opens a real mouth; past the
     corners both share a line. The jaw patch's top row at the corners stays with the head."""
     xs = FACE_XS
-    mz = mouth_z(np.minimum(np.abs(xs), 0.062))
+    mz = mouth_z(np.minimum(np.abs(xs), 0.056))
     ztop = np.linspace(0.104, 0.0, 6).tolist() + [-0.012, -0.024, -0.038, -0.052, -0.064]
     U_rows = len(ztop) + 1
     ZU = np.zeros((U_rows, len(xs)))
     for i, z in enumerate(ztop):
         ZU[i] = z
     ZU[-1] = mz
-    XU = np.tile(xs, (U_rows, 1))
+    XU = xs[None, :] / xs[-1] * half_width(ZU[:, :1])
     YU = np.maximum(ray_y(XU, ZU), 0.0)
     up = Piece("face", "skin-cinder-hot", hl(np.stack([XU, YU, ZU], -1).reshape(-1, 3)), grid_faces(U_rows, len(xs))).rigid("head")
     fr = np.array([0.0, 0.3, 0.62, 1.0])
-    ZL = np.stack([mz + (-0.138 - mz) * k for k in fr] + [mz * 0 - 0.15])
-    XL = np.tile(xs, (len(ZL), 1))
+    ZL = np.stack([mz + (-0.134 - mz) * k for k in fr])
+    # (the top row keeps the upper patch's columns: the split's corners meet)
+    XL = np.tile(XU[-1], (len(ZL), 1))
+    XL[1:] = xs[None, :] / xs[-1] * half_width(ZL[1:, 10:11])
     YL = np.maximum(ray_y(XL, ZL), 0.0)
     v = hl(np.stack([XL, YL, ZL], -1).reshape(-1, 3))
     lo = Piece("jaw", "skin-cinder-hot", v, grid_faces(len(ZL), len(xs)))
@@ -115,10 +128,10 @@ def face_parts():
 
 def mouth_back():
     """What a parted jaw shows: dark, set back, on the head."""
-    xs = np.linspace(-0.05, 0.05, 4)
-    zs = np.linspace(-0.066, -0.125, 3)
+    xs = np.linspace(-0.038, 0.038, 4)
+    zs = np.linspace(-0.07, -0.104, 3)
     X, Z = np.meshgrid(xs, zs)
-    Y = np.full(X.shape, 0.070)
+    Y = np.full(X.shape, 0.058)
     return Piece("mouthb", "skin-cinder-hot", hl(np.stack([X, Y, Z], -1).reshape(-1, 3)), grid_faces(3, 4)).rigid("head")
 
 
@@ -183,12 +196,12 @@ def goggles():
     up = np.array([0, np.sin(tilt), np.cos(tilt)])
     for s in (1.0, -1.0):
         side = "R" if s > 0 else "L"
-        c = np.array([s * 0.042, 0.083, 0.076])
-        d = norm(np.array([s * 0.28, 0.82, 0.5]))
+        c = np.array([s * 0.036, 0.078, 0.083])
+        d = norm(np.array([s * 0.26, 0.72, 0.62]))
         loc = lambda t, r: None
         k = norm(np.cross(d, (0, 0, 1)))
         l2 = norm(np.cross(d, k))
-        ring = [(0.0135, -0.016), (0.034, -0.016), (0.039, 0.0), (0.036, 0.016), (0.0285, 0.018), (0.0265, 0.006)]
+        ring = [(0.012, -0.014), (0.0285, -0.014), (0.0325, 0.0), (0.030, 0.014), (0.024, 0.015), (0.0222, 0.005)]
         v, f = [], []
         n = 10
         for rr, dd in ring:
@@ -199,17 +212,17 @@ def goggles():
                 a, b = i * n + j, i * n + (j + 1) % n
                 f.append([a, b, b + n, a + n])
         out.append(Piece("gogR" + side, "metal-cinder", hl(v), f).rigid("head"))
-        v2 = [c + (k * np.cos(a) + l2 * np.sin(a)) * 0.0272 + d * 0.0055 for a in np.linspace(0, 2 * np.pi, n, endpoint=False)]
+        v2 = [c + (k * np.cos(a) + l2 * np.sin(a)) * 0.0228 + d * 0.0045 for a in np.linspace(0, 2 * np.pi, n, endpoint=False)]
         v2.append(c + d * 0.009)
         f2 = [[j, (j + 1) % n, n] for j in range(n)]
         lens = Piece("lens" + side, "metal-cinder", hl(v2), f2).rigid("head")
-        lens.frame = (hl(c), k, l2, 0.0272 * HS, s)
+        lens.frame = (hl(c), k, l2, 0.0228 * HS, s)
         out.append(lens)
-    bridge = sweep("gogB", "metal-cinder", hl(catmull([(-0.012, 0.114, 0.084), (0, 0.118, 0.09), (0.012, 0.114, 0.084)], 3)), SEC6[::2] + SEC6[1::2][:0], np.full(3, 0.0065), side_hint=np.array([0, 0, 1.0]))
+    bridge = sweep("gogB", "metal-cinder", hl(catmull([(-0.011, 0.104, 0.096), (0, 0.108, 0.1), (0.011, 0.104, 0.096)], 3)), SEC6[::2] + SEC6[1::2][:0], np.full(3, 0.0065), side_hint=np.array([0, 0, 1.0]))
     out.append(bridge.rigid("head"))
     # the strap: round the skull from cup to cup, behind
     angs = np.radians(np.linspace(52, 308, 11))
-    z0 = 0.062
+    z0 = 0.074
     r = ray_out(angs, np.full(angs.shape, z0)) + 0.0045
     path = np.stack([np.sin(angs) * r, np.cos(angs) * r, z0 + 0.004 * np.cos(angs) - 0.012 * (1 - np.cos(angs))], -1)
     st = sweep("strap", "leather-cinder", hl(path), [(-1, 0.25), (1, 0.25), (1, -0.25), (-1, -0.25)], np.full(11, 0.0125),
@@ -302,18 +315,18 @@ def hair():
     falls: on spring chains."""
     out = []
     # the crown: from behind the goggles' strap, up and out. (theta from the nose, 90 is the top of the head from the side; alpha from straight up toward her right)
-    crown = [(-62, 66, 0.21, 0.125), (-37, 62, 0.27, 0.14), (-13, 60, 0.33, 0.15), (13, 60, 0.31, 0.15), (37, 62, 0.26, 0.14), (62, 66, 0.20, 0.125),
-             (-50, 112, 0.26, 0.15), (-16, 108, 0.30, 0.16), (16, 108, 0.29, 0.16), (50, 112, 0.25, 0.15), (0, 140, 0.25, 0.16)]
+    crown = [(-64, 70, 0.17, 0.09), (-44, 64, 0.22, 0.10), (-26, 62, 0.20, 0.085), (-9, 60, 0.27, 0.11), (9, 60, 0.25, 0.11), (26, 62, 0.19, 0.085), (44, 64, 0.21, 0.10), (64, 70, 0.16, 0.09),
+             (-52, 112, 0.2, 0.11), (-30, 108, 0.24, 0.1), (-10, 106, 0.27, 0.12), (10, 106, 0.25, 0.12), (30, 108, 0.23, 0.1), (52, 112, 0.19, 0.11), (0, 138, 0.2, 0.12)]
     for i, (az, th0, ln, w) in enumerate(crown):
         a = np.radians(az)
         p0, d0 = _on_skull(np.radians(th0), a)
         out_ = norm(d0 * 0.42 + np.array([0, -0.18, 1.0]))
         side = norm(np.cross(out_, (0, 1, 0)) + 1e-6)
-        wob = np.sin(i * 2.1) * 0.045
+        wob = np.sin(i * 2.1) * 0.05 + 0.012
         pts = [p0 - out_ * 0.03, p0 + out_ * ln * 0.33 + side * wob, p0 + out_ * ln * 0.68 - side * wob * 1.3 + [0, -0.02, 0],
                p0 + out_ * ln + side * wob * 0.5 + [0, -0.05, 0]]
         hint = np.cross(d0, out_) if abs(az) > 30 else np.array([0, 1.0, 0.0])
-        out.append(strip("crown%d" % i, "flame-hair", pts, w * 1.15, rows=6, hint=hint + 1e-3, seed=i * 0.083, bright=0.25, root=0.8).rigid("head"))
+        out.append(strip("crown%d" % i, "flame-hair", pts, w * 1.15, rows=7, hint=hint + 1e-3, seed=i * 0.083, bright=0.25, root=0.8).rigid("head"))
     # low flames round the sides and back of the head, filling under the crown
     for i, (th0, az) in enumerate(((98, -92), (98, 92), (128, -108), (128, 108), (150, -140), (150, 140), (168, 0))):
         a = np.radians(az)
@@ -333,11 +346,11 @@ def hair():
     for sg, g in ((1.0, "r"), (-1.0, "l")):
         h = np.array([0.0, 0.25, 1.0])
         a = fall("sideA" + g, g, [(sg * .07, -.03, top + .02), (sg * .135, -.08, top - .1), (sg * .155, -.10, top - .25), (sg * .21, -.12, top - .4),
-                                  (sg * .225, -.14, top - .54), (sg * .29, -.17, top - .68)], 0.17, 0.11 + sg * .03, h)
+                                  (sg * .225, -.14, top - .5), (sg * .27, -.17, top - .6)], 0.19, 0.11 + sg * .03, h)
         b = fall("sideB" + g, g, [(sg * .06, -.07, top + .03), (sg * .15, -.13, top - .08), (sg * .185, -.16, top - .24), (sg * .235, -.17, top - .36),
-                                  (sg * .29, -.19, top - .47), (sg * .33, -.22, top - .55)], 0.16, 0.37 + sg * .04, h)
+                                  (sg * .28, -.19, top - .45), (sg * .31, -.22, top - .52)], 0.18, 0.37 + sg * .04, h)
         c = fall("sideC" + g, g, [(sg * .05, -.09, top + .02), (sg * .11, -.14, top - .12), (sg * .13, -.15, top - .3), (sg * .16, -.145, top - .46),
-                                  (sg * .17, -.15, top - .62), (sg * .21, -.16, top - .76)], 0.15, 0.62 + sg * .02, h)
+                                  (sg * .17, -.15, top - .6), (sg * .2, -.16, top - .7)], 0.2, 0.62 + sg * .02, h)
         d = fall("sideD" + g, g, [(sg * .082, .03, top - .035), (sg * .112, .012, top - .13), (sg * .118, .03, top - .24), (sg * .135, .02, top - .34),
                                   (sg * .13, .035, top - .42)], 0.085, 0.84 + sg * .02, np.array([0.3 * sg, 1.0, 0.2]), bright=0.3)
         # (the bones run down the middle one)

@@ -15,8 +15,8 @@ uniform float lick = 0.62;         // how deep the noise bites the outline
 uniform float sway = 0.018;        // m the tip wavers
 uniform float gain = 1.0;         // brightness over the ramp
 uniform float level = 0.72;        // liquid: the fuel's level, v
-uniform vec4 c_deep : source_color = vec4(0.72, 0.07, 0.02, 1.0);
-uniform vec4 c_mid : source_color = vec4(1.0, 0.33, 0.03, 1.0);
+uniform vec4 c_deep : source_color = vec4(0.95, 0.2, 0.03, 1.0);
+uniform vec4 c_mid : source_color = vec4(1.0, 0.42, 0.04, 1.0);
 uniform vec4 c_hot : source_color = vec4(1.0, 0.68, 0.10, 1.0);
 uniform vec4 c_core : source_color = vec4(1.0, 0.95, 0.62, 1.0);
 #include "res://shaders/noise.gdshaderinc"
@@ -72,17 +72,23 @@ void fragment() {
 		float win = smoothstep(0.03, 0.05, fract(UV.x + 0.1) - 0.1) * (1.0 - smoothstep(0.09, 0.11, fract(UV.x + 0.1) - 0.1));
 		c += vec3(0.55, 0.5, 0.42) * win * 0.5;
 	} else {
-		vec2 p = vec2(UV.x * scale_u + seed * 17.0, UV.y * scale_v - TIME * speed + seed * 9.0);
+		// the strip's middle wanders as it climbs, so the outline isn't the mesh's
+		float t = TIME * speed;
+		float warp = (vnoise(vec2(UV.y * 2.7 - t * 0.8, seed * 31.0)) - 0.5) * 0.7 * UV.y;
+		float u = UV.x + warp;
+		vec2 p = vec2(u * scale_u + seed * 17.0, UV.y * scale_v - t + seed * 9.0);
 		float n = fbm3(p);
-		float n2 = vnoise(p * 2.3 + vec2(3.1, -TIME * speed * 0.7));
-		float edge = 1.0 - pow(abs(UV.x - 0.5) * 2.0, 1.6);
-		float fall = 1.0 - pow(UV.y, 2.2);
-		float h = edge * fall + (n - 0.5) * lick + (n2 - 0.5) * lick * 0.4;
-		if (h < 0.07 && UV.y > 0.03) {
+		float n2 = vnoise(p * 2.3 + vec2(3.1, -t * 0.7));
+		float edge = 1.0 - pow(clamp(abs(u - 0.5) * 2.0, 0.0, 1.0), 1.7);
+		float fall = 1.0 - pow(UV.y, 1.9);
+		float h = edge * fall + (n - 0.5) * lick * (0.35 + UV.y) + (n2 - 0.5) * lick * 0.5 * (0.2 + UV.y);
+		if (h < 0.1 && UV.y > 0.04) {
 			discard;
 		}
+		float streak = vnoise(vec2(u * 7.0 + seed * 5.0, UV.y * 1.6 - t * 0.55)) * 0.6 + vnoise(vec2(u * 15.0 - seed * 3.0, UV.y * 2.6 - t * 0.8)) * 0.4;
+		h = h * 0.55 + 0.12 + (streak - 0.3) * 0.62;
 		// (a strip is mostly saturated fire; the pale core is a thin heart, or it reads as a hole against a bright sky)
-		c = ramp(clamp((h - 0.07) * 0.95 + bright * 0.22, 0.0, 1.0));
+		c = ramp(clamp(h * 1.0 + bright * 0.16 - 0.04, 0.0, 1.0));
 	}
 	c *= gain;
 	float fog = no_fog ? 0.0 : vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);

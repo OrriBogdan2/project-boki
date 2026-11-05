@@ -7,9 +7,9 @@ import cinder_pieces as K
 HOT = np.array([1.0, 0.76, 0.44])        # keyed fully hot by hero_toon's glow_key
 HOT_RIM = np.array([0.84, 0.32, 0.10])   # keyed partly: the edge colour
 SKIN = [hexc("#201d25"), hexc("#322e37"), hexc("#46414b"), hexc("#5b5560"), hexc("#736c77")]
-COPPER = [hexc("#2c1409"), hexc("#5a2b14"), hexc("#8c4a22"), hexc("#b96e38"), hexc("#e8a874")]
-BRASS = [hexc("#2a1c0a"), hexc("#5c4218"), hexc("#94702c"), hexc("#c49a48"), hexc("#efd08c")]
-STEEL = [hexc("#1b1a1d"), hexc("#37353a"), hexc("#5a585e"), hexc("#85838a"), hexc("#bdbcc2")]
+COPPER = [hexc("#4a2210"), hexc("#7c3f1c"), hexc("#ad6230"), hexc("#d68a4c"), hexc("#f6c08c")]
+BRASS = [hexc("#4a3414"), hexc("#7e5e24"), hexc("#b08a3c"), hexc("#d8b45c"), hexc("#f6e0a0")]
+STEEL = [hexc("#35343a"), hexc("#55535a"), hexc("#7a7880"), hexc("#a09ea6"), hexc("#cfced4")]
 LEATHER = [hexc("#1c0f0a"), hexc("#351d12"), hexc("#50301d"), hexc("#6d452b"), hexc("#8d6141")]
 RUBBER = [hexc("#170d0c"), hexc("#2b1612"), hexc("#422219"), hexc("#5a3122"), hexc("#74432e")]
 WRAP = [hexc("#2e0a08"), hexc("#561410"), hexc("#7e1f16"), hexc("#a83422"), hexc("#c95236")]
@@ -87,13 +87,14 @@ def tail(p, n, ao, path, wd):
     rings = 0.5 + 0.5 * np.sin(u * 120.0)
     pale = ramp(np.clip(t * 0.9 + 0.22, 0, 1), [hexc("#3a2a2c"), hexc("#5e4442"), hexc("#7d5f58"), hexc("#987a70"), hexc("#b0958a")])
     c = mix(c, pale * (0.78 + 0.22 * rings)[..., None], belly)
-    e, h = worley(p, 26.0)
-    w = 0.05 + 0.05 * smooth(0.3, 1.0, u)
+    e, h = worley(p, 17.0)
+    w = 0.022 + 0.026 * smooth(0.4, 1.0, u)
     back = (1 - belly) * smooth(0.02, 0.2, u)
     c = mix(c, hexc("#1f1a1e"), back * 0.5 * (h > 0.45))
-    core = (1 - smooth(w * 0.5, w, e)) * back
-    rim = (1 - smooth(w, w * 2.4, e)) * back
-    c = mix(c, HOT_RIM, rim * 0.9)
+    keep = smooth(0.25, 0.42, fbm(p * 7.0)) + smooth(0.75, 1.0, u)
+    core = (1 - smooth(w * 0.5, w, e)) * back * np.clip(keep, 0, 1)
+    rim = (1 - smooth(w, w * 2.4, e)) * back * np.clip(keep, 0, 1)
+    c = mix(c, HOT_RIM, rim * 0.8)
     return mix(c, HOT, core)
 
 
@@ -191,8 +192,8 @@ def face(plate, p, n, ao):
     lum = c.mean(-1)
     r_ = np.sqrt(((px - 510) / 300.0) ** 2 + ((py - 487) / 442.0) ** 2)
     sh = 0.72 + 0.42 * smooth(-0.4, 0.8, n[..., 2] * 0.45 + n[..., 1] * 0.75)
-    hot = smooth(0.2, 0.36, c[..., 0] - c[..., 2]) * smooth(0.42, 0.62, c[..., 0])
-    out = c * (sh * 0.92)[..., None]
+    hot = smooth(0.34, 0.5, c[..., 0] - c[..., 2]) * smooth(0.6, 0.78, c[..., 0])
+    out = c * (sh * 0.74)[..., None] * np.array([1.03, 0.98, 1.0])
     out = mix(out, HOT_RIM, smooth(0.14, 0.3, c[..., 0] - c[..., 2]) * smooth(0.3, 0.45, c[..., 0]) * 0.75)
     out = mix(out, np.minimum(c * 1.25 + 0.15, 1.0) * 0.45 + HOT * 0.55, hot)
     edge = smooth(0.84, 0.97, r_)

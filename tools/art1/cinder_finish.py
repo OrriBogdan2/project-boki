@@ -366,6 +366,10 @@ k1 = smooth(0.22, 0.4, r_ - b_) * smooth(0.36, 0.5, r_)
 k2 = smooth(0.42, 0.62, r_ - b_) * smooth(0.5, 0.72, r_)
 c2 = col * (1 - k1[:, None]) + P.HOT_RIM * k1[:, None]
 c2 = c2 * (1 - k2[:, None]) + P.HOT * k2[:, None]
+# the skin down to the sheet's warm charcoal (the scan runs light and lilac); leather and the cracks stay
+sk = np.clip(1.0 - np.maximum(k1, smooth(1.12, 1.3, r_ / np.maximum(b_, 0.01))), 0, 1)[:, None]
+lum_ = c2.mean(1, keepdims=True)
+c2 = c2 * (1 - sk) + (lum_ * 0.5 + c2 * 0.22) * np.array([1.0, 0.96, 1.02]) * sk
 OUTC[ys, xs] = c2
 
 # ---- the rebuilt pieces
