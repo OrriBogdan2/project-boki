@@ -252,7 +252,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		if up is String:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			up = Vector2(vel.x, vel.z).length() >= STILL
-		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)), "legs_heading": bool(mv.get("legs_heading", false))}
+		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
+			"legs_heading": bool(mv.get("legs_heading", false))}
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	if bool(s.get("reviving", false)) and st.has("reviving"):
@@ -314,12 +315,14 @@ func step(dt: float) -> void:
 	_p("full/blend_amount", act_w)
 	_loco(s, dt)
 	tree.advance(dt)
-	_turn_to_heading(s, bool(want.get("heading", false)) or bool(want.get("legs_heading", false)), bool(want.get("legs_heading", false)), dt)
+	var legs := bool(want.get("legs_heading", false))
+	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
 	_out(dt)
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it.
-## "legs_heading" (Vex's slide, aims_in_dash): only the legs go: the hips take the turn back, so the torso and the arm on the aim keep their pose.
+## "legs_heading" (Vex's slide, aims_in_dash): only the legs go: the hips take the turn back, so the torso
+## and the arm on the aim keep their pose.
 func _turn_to_heading(s: Dictionary, on: bool, legs_only: bool, dt: float) -> void:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var goal := 0.0

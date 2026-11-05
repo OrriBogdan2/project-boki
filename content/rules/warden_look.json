@@ -74,7 +74,7 @@
 					0.4
 				],
 				"size": 0.09,
-				"depth_test": false
+				"depth_test": true
 			},
 			{
 				"at": "anchor_spine",

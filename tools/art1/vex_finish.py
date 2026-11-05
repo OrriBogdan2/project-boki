@@ -340,7 +340,7 @@ for k_, i in enumerate(low_faces):
     if skinny[k_] and sat[k_] > 0.05:
         me.polygons[i].material_index = mat_i["skin-vex"]
         continue
-    if green and z > Z_BELT and L_[k_] > 0.28 and sat[k_] < 0.8:
+    if green and z > Z_BELT and L_[k_] > 0.2:
         m = "cloth-vex"
     elif green:
         m = "leather-vex-hot"
@@ -439,7 +439,7 @@ paint(lambda n: n.startswith("gren"), lambda p, n, ao: ramp(np.clip(lit(n, ao) *
 paint(lambda n: n == "tapetail", lambda p, n, ao: ramp(np.clip(lit(n, ao) * 1.2, 0, 1), [hexc("#8a8778"), hexc("#b7b4a6"), hexc("#dcd9cb")]))
 paint(lambda n: n in ("robofore", "elbowball", "palm", "thumbL") or n.startswith("finger"), P.chrome)
 paint(lambda n: n.startswith(("vert", "vstub")), P.chrome)
-paint(lambda n: n.startswith(("elbowglow", "fpad", "thumbpad", "vglow", "eyelens")), lambda p, n, ao: np.broadcast_to(np.array([0.72, 1.0, 0.45]), p.shape).copy())
+paint(lambda n: n.startswith(("elbowglow", "fpad", "thumbpad", "vglow", "eyelens", "stripe")), lambda p, n, ao: np.broadcast_to(np.array([0.72, 1.0, 0.45]), p.shape).copy())
 
 # hot key on the scan's lines
 ys, xs = np.nonzero(mask)

@@ -1,6 +1,7 @@
 extends RefCounted
-## --vex-clip-live-check: Vex's clips through the real match code (see --clip-live-check for Kael): the Hero's clips are on and no procedural gun shows; the slide's legs turn to the
-## dash while the cannon arm stays on the aim (aims_in_dash); a tapped RMB swings the launcher forward and fires from the top tube; LMB, E and R play; a knock-out plays the death clip.
+## --vex-clip-live-check: Vex's clips through the real match code (see --clip-live-check for Kael): her clips
+## are on and no procedural gun shows; the slide's legs turn to the dash while the cannon arm stays on the aim
+## (aims_in_dash); a tapped RMB swings the launcher forward; LMB plays; a knock-out plays the death clip.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -80,7 +81,8 @@ func run(main: Node) -> void:
 			frames += 1
 	P.inp["move"] = Vector2.ZERO
 	ok(seen.has("dash"), "the dash plays her slide")
-	ok(frames > 0 and legs_turn > 0.8, "the legs follow the dash (up to %.2f rad off the aim, %d frames)" % [legs_turn, frames])
+	ok(frames > 0 and legs_turn > 0.8, "the legs follow the dash (up to %.2f rad off the aim, %d frames)"
+			% [legs_turn, frames])
 	ok(frames > 0 and worst <= AIM_OFF, "the cannon stays on the aim through the slide (worst %.2f rad)" % worst)
 	for f in 60:
 		_frame(m, [P])
@@ -121,6 +123,7 @@ func run(main: Node) -> void:
 		_frame(m, [P])
 		dead_seen = dead_seen or _clips(P).cur == "death"
 		was_visible = was_visible or P.visible
-	ok(dead_seen and was_visible, "a knock-out plays the death clip on screen (clip %s, visible %s)" % [dead_seen, was_visible])
+	ok(dead_seen and was_visible, "a knock-out plays the death clip on screen (clip %s, visible %s)"
+			% [dead_seen, was_visible])
 	print("VEX_CLIP_LIVE_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

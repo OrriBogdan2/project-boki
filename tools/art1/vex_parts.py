@@ -26,7 +26,7 @@ def ammo(bvh):
     SH = VC.J("upper_arm.R")
     top = SH[2]
     H = VC.J("hips")[2]
-    key = [(-.20, .10 * -1, top + .03), (-.15, .06, top + .055), (-.085, .135, top - .08), (-.03, .165, top - .2), (.05, .165, top - .34), (.13, .13, top - .45), (.205, .09, top - .52)]
+    key = [(-.20, .10 * -1, top + .03), (-.15, .06, top + .055), (-.085, .135, top - .08), (-.03, .165, top - .2), (.05, .165, top - .32), (.13, .13, top - .40), (.215, .07, top - .45)]
     path = catmull(np.array(key, float), 44)
     path = project(bvh, path, 0.012)
     # smooth what the projection jittered
@@ -35,6 +35,34 @@ def ammo(bvh):
     side_hint = np.array([0.5, -0.1, 0.85])
     p = VC.belt_path_tile("ammo", path, 0.028, hint=side_hint)
     return p
+
+
+def stripes(bvh):
+    """The thigh-highs' glowing lines as geometry: a slim strip down the shin's front and up the thigh's, on the surface (the scan's paint breaks up under the budget)."""
+    out = []
+    for sd, sx in (("R", 1.0), ("L", -1.0)):
+        K = VC.J("shin." + sd)
+        for nm, z0, z1, bone in (("stripeS", K[2] - 0.075, 0.22, "shin." + sd), ("stripeT", K[2] + 0.08, K[2] + 0.28, "thigh." + sd)):
+            pts = []
+            for z in np.linspace(z0, z1, 7):
+                x = K[0] + (0.0 if z > K[2] else (z - K[2]) * 0.0)
+                hit = bvh.ray_cast(Vector((x, 0.5, z)), Vector((0, -1, 0)), 1.0)
+                if hit[0] is not None:
+                    pts.append((np.array(hit[0]), np.array(hit[1])))
+            if len(pts) < 3:
+                continue
+            v, f = [], []
+            for p, n in pts:
+                s_ = norm(np.cross(n, (0, 0, 1.0)))
+                for off in (-1, 1):
+                    v.append(p + n * 0.003 + s_ * off * 0.0075)
+            for i in range(len(pts) - 1):
+                f.append([i * 2, i * 2 + 1, i * 2 + 3, i * 2 + 2])
+            q = Piece(nm + sd, "glow-vex", np.array(v), f).rigid(bone)
+            c = np.array([pts[0][0][0], pts[0][0][1] - 0.2, (z0 + z1) / 2])
+            q.orient(tuple(c))
+            out.append(q)
+    return out
 
 
 def hoses(pack_c):
@@ -83,9 +111,9 @@ def build(bvh_src, bvh_low):
     belt = ammo(bvh_low)
     belt.w = {"hips": np.ones(len(belt.v))}
     hs = hoses(pack_c)
-    pieces = [face, eye] + lids + brows + cyber + hair + bd + gog + ear + cannon + arm + hnd + [coin] + sp + pack + [belt] + hs
+    pieces = stripes(bvh_low) + [face, eye] + lids + brows + cyber + hair + bd + gog + ear + cannon + arm + hnd + [coin] + sp + pack + [belt] + hs
     for p in pieces:
-        if p.name.startswith(("ammo", "lid", "face", "gfr", "gl", "eyeL")):
+        if p.name.startswith(("ammo", "lid", "face", "gfr", "gl", "eyeL", "stripe")):
             continue
         p.orient()
     return {"pieces": pieces, "hair": hair, "braid": bd, "bnames": bnames, "bpts": bpts, "fnames": fnames, "fpts": fpts, "cyber": cyber, "coin": coin_c, "pack_c": pack_c}

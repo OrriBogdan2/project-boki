@@ -87,7 +87,7 @@ def hand():
     return out + [tp, tip], knuck, a, k, o
 
 
-COIN_R, COIN_T = 0.026, 0.0035
+COIN_R, COIN_T = 0.036, 0.0045
 
 
 def coin(knuck, a, k, o):
