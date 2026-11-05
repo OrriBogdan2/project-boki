@@ -22,7 +22,8 @@ HOOK_R = (0.88, 0.30, 1.0, 0.395)
 EYE_R = (UNIQ_W + 0.005, 0.20, 0.875, 0.295)
 EYE2_R = (UNIQ_W + 0.005, 0.10, 0.875, 0.195)
 GLOW_R = (0.88, 0.20, 1.0, 0.295)
-MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "leather-kael", "metal-kael", "metal-blade-hot", "hair-mane", "eyes-kael", "eyes-glow-hot", "glow-sword", "glow-sword_edge"]
+HALO_R = (0.88, 0.10, 1.0, 0.195)
+MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "metal-kael-hot", "hair-mane", "eyes-glow-hot", "glow-sword"]
 SCALE = {"face": 4.0, "lidU": 2.6, "lidD": 2.6, "mask": 1.2, "cowl": 2.0, "cowlcore": 0.2, "stail": 1.3, "palm": 2.0, "finger": 1.8,
          "thumb": 1.8, "skull": 0.4, "blade": 1.5, "guard": 1.4, "grip": 1.6, "pommel": 1.6, "Low": 1.15}
 
@@ -186,8 +187,8 @@ for i, p in enumerate(me.polygons):
         m2 = "skin-kael"          # (by the scan's paint, below)
     else:
         pm = PIECE_MAT[n]
-        m2 = {"metal-chain": "metal-kael", "metal-hook": "metal-blade-hot", "metal-blade": "metal-kael", "metal-guard": "metal-kael",
-              "leather-grip": "leather-kael", "hair-brow": "hair-mane"}.get(pm, pm)
+        m2 = {"metal-chain": "metal-kael-hot", "metal-hook": "metal-kael-hot", "metal-blade": "metal-kael-hot", "metal-guard": "metal-kael-hot", "metal-kael": "metal-kael-hot",
+              "leather-grip": "cloth-kael", "hair-brow": "hair-mane"}.get(pm, pm)
         if n.startswith(("cowl", "stail")):
             m2 = "cloth-ember-hot"
         if n == "eye" + K.GLOW_EYE:
@@ -313,6 +314,8 @@ for p in me.polygons:
         r = HOOK_R
     elif n.startswith("eye"):
         r = EYE_R
+    elif n.startswith("coreh"):
+        r = HALO_R
     elif n.startswith("core"):
         r = GLOW_R
     else:
@@ -482,7 +485,7 @@ sat = (fcol.max(1) - fcol.min(1)) / np.maximum(fcol.max(1), 0.01)
 for k_, i in enumerate(low_faces):
     r_, g_, b_ = fcol[k_]
     if sat[k_] < 0.14 and L_[k_] > 0.34:
-        m = "metal-kael"
+        m = "metal-kael-hot"
     elif sat[k_] < 0.24:
         m = "cloth-kael"
     elif L_[k_] > 0.5 or (r_ > g_ * 1.7 and b_ > g_ * 0.7):
@@ -492,7 +495,7 @@ for k_, i in enumerate(low_faces):
     elif region[i][0] in ("armL", "torso") and r_ > g_ * 1.25:
         m = "skin-kael"
     else:
-        m = "leather-kael"
+        m = "cloth-kael"
     me.polygons[i].material_index = mat_i[m]
 
 mask = PID == low_pid
@@ -628,6 +631,9 @@ v_, u_ = np.mgrid[0:y1 - y0, 0:x1 - x0]
 OUTC[y0:y1, x0:x1] = P.eye_glow((u_ + 0.5) / (x1 - x0) * 2 - 1, ((v_ + 0.5) / (y1 - y0) - 0.5) * 1.5)
 x0, y0, x1, y1 = rect(GLOW_R)
 OUTC[y0:y1, x0:x1] = (1.0, 0.98, 0.93)
+
+x0, y0, x1, y1 = rect(HALO_R)
+OUTC[y0:y1, x0:x1] = (0.62, 0.47, 0.22)       # (keyed part hot: the gold round the core)
 
 atlas = bpy.data.images.new("kael_atlas", ATLAS, ATLAS)
 px = np.ones((ATLAS, ATLAS, 4), np.float32)
