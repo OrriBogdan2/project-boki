@@ -2412,3 +2412,50 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - **READY: ext/boki-cindle 7ded8605** (on boki-starter 27fab2ad): the owner's fix, smaller eyes on Vespyx (eye dome about 18% smaller, brows brought down to match; the eye rule in RIGGED_BOKI.md now says 18-20% of head width). --boki-rig-check 0 failures, health --strict OK. Review set: ext/boki-shots-s6 fcbe78d7 boki/cindle/ (faces, farm_close, turntable, GIFs). No wiring beyond the starter's.
 - In progress, one branch each: ext/boki-pebbit (Gravadillo, from the owner-approved concept), ext/boki-cairnback, ext/boki-zapple (Echolop), ext/boki-hivara, ext/boki-wisplet (Lunowl), ext/boki-zephyrak. Prismander and Mycroll are already on boki-starter (S2, awaiting owner review). READY entries follow per species.
 - Stretch (INBOX 06:40), after the 9: the next six on ext/boki-roster50 fill the six elements none of the 9 have: Kindlewren (ember), Glintmole (stone), Rimeshrew (frost), Mossgrade (bloom), Kestrike (storm), Gloamshell (shadow). They will be marked NEW: owner approval pending.
+
+## 2026-11-05 (S4): sound base updated: `ext/sfx-base` @ af51093c (was d3d6a77a; merge this one first)
+- Feel.dash_sound skips its shared dash layers (dash+reload, portal, throw+whoosh, ...) for a Hunter that has its own `<arch>_dash`, so the new dashes aren't muddied. --sfx-set-check also reads a set's "kit_files" (helper kit scripts). docs/wiki/Rules.md regenerated. Every Hunter branch below has this base merged in.
+- Checks: --sfx-set-check 0, --gunslinger-combo-check 82/0, health OK, gen_wiki --check unchanged.
+
+## 2026-11-05 (S4): READY sound pass, 6 Hunters (each after ext/sfx-base; no two branches share a changed file, any order)
+All synthesised (tools/gen_sfx_<hero>.py on sfx_lib, own seed), every take at its category loudness, wav + .import committed, no CC0 samples, no reserved files, no wiring for main. Each set: content/sfx/<arch>.json (sounds, signature, kit_files, replaces). Sheets (waveform + spectrogram + levels): briefs/shots/s4/sfx/<hero>_*.jpg ("old" sheets show the replaced sounds).
+
+### `ext/sfx-vex` @ 96e557ca (gunslinger): 77 files changed, 1131 insertions(+), 1 deletion(-)
+- Palette: rotary cannon on her shoulder, brass, servos, ember rounds; voice low, clipped woman with a faint servo under down/death.
+- Fire vn_rifle (3 takes); RMB vn_cock / vn_throw / vn_blast (3); E vn_ion_charge / vn_ion_fire; X vn_nuke_fire / _fall / _boom / _burn; passive vn_stim; dash gunslinger_dash + vn_slide; steps on 4 surfaces (boots + bandolier); hurt (3) / down / death.
+- **Signatures:** gunslinger_spinup (when a string starts after 0.5 s idle, new const SPIN_REST), gunslinger_grenade_thunk (the Burr Charge sticking; replaces vn_stick).
+- Replaces 12 vn_* files. Unused now: vn_stick (cleanup).
+- Checks: --sfx-set-check 0, --gunslinger-combo-check 82/0, --check 0, health OK.
+
+### `ext/sfx-ryzz` @ 81be1f78 (mage): 85 files changed, 1234 insertions(+)
+- Palette: dry, jittery hot-pink lightning, copper, thunder; voice bright, brash young woman.
+- Fire vv_bolt (3); Wirerun vv_surge_charge / vv_surge_go + mage_dash; RMB vv_rod_summon / _full / _throw + new impact mage_rod_hit; E vv_sky_place / _count / _strike (2); X vv_ult_rise / vv_ult_hum / vv_ult_slam; passive vv_static_full, vv_orb; steps (light boots, bangles, static tick); hurt (3) / down / death.
+- **Signatures:** mage_zap (3, every Static stack below the 4th, pitch climbs with the stack), mage_bubble_pop (snapping out of a Wirerun).
+- Replaces 14 vv_* files. Checks: --sfx-set-check 0, --mage-combo-check 112/0, --check 0, health OK.
+
+### `ext/sfx-lisette` @ e39574d5 (archer): 99 files changed, 1369 insertions(+), 1 deletion(-)
+- Palette: plucked red thread (Karplus-Strong), steel needles, shears, the spool's ratchet, cloth; voice cool, breathy woman.
+- Fire pin_loose (3) / pin_loose_super / pin_heavy; draw pin_draw / pin_heavy_draw; stages pin_stage / pin_super / pin_overdraw / pin_perfect (shears snip); hits pin_super_hit (2) / pin_heavy_hit (3); E pin_hail / pin_rain / pin_patter (3); Spirit Walk pin_spirit / _end; ult pin_ult_cast / _nock / _beam / _final; archer_dash; steps (soft, cloak brush); hurt (3) / down / death.
+- **Signature:** archer_thread_twang (3) is now the longbow's shot sound (content/weapons/longbow.json "throw" -> archer_thread_twang), every loose. Anyone using a longbow hears it too.
+- Replaces all 20 pin_* files. Checks: --sfx-set-check 0, --archer-combo-check 128/0, --check 0, --hero-combo-check 272/0, health OK.
+
+### `ext/sfx-sable` @ 906e4b18 (thief): 91 files changed, 1272 insertions(+), 5 deletions(-)
+- Fire dj_bolt (3) is now a flintlock crack (flint snap, pan puff, report, smoke) over her spinning bolts; dj_fizzle.
+- **Signatures:** thief_flintlock_crack (the empowered double shot; replaces dj_bolt_emp), thief_cock (hammer cocked as the empowered bolt forms; replaces the shared click).
+- RMB dj_bola_whirl / _throw / _wrap + thief_bola_stun (replaces ab_stun); E dj_knife_throw, thief_knife_stick (replaces ab_plant), dj_blink; ult dj_encore / dj_encore_whirr / dj_blade (3) / dj_encore_hit (3); knock heal dj_heal; thief_dash (her kit's own dash, replaces dj_cartwheel); steps (light leather + silver jingle); hurt (3) / down / death (pistols clatter).
+- Replaces 12 dj_* files. Unused now: dj_bolt_emp, dj_cartwheel. Checks: --sfx-set-check 0, --dancer-combo-check 126/0, --check 0, health OK.
+
+### `ext/sfx-kael` @ acbe23f0 (juggernaut): 99 files changed, 1332 insertions(+), 12 deletions(-)
+- Fire jug_slash (3), heavy cut + low whoosh.
+- **Signatures:** juggernaut_blade_hiss (2; white-hot hiss and crackle, no fire; now the greatsword's sound in greatsword.json, was the shared cleave), juggernaut_chain_rattle (2; Warchain throw, chain-lunge, haul arrival and landing). Also juggernaut_enrage (replaces knock + charge on Enrage), juggernaut_chain_bite (hook biting; replaces ab_tether), juggernaut_heal (replaces dj_heal for him).
+- RMB jug_wave / jug_charge / jug_slam_wind / jug_full / jug_slam_hit / jug_lunge_hit / jug_drop / jug_meteor; E jug_chain / jug_taut / jug_reel; ult jug_guard / jug_ting (2) / jug_riposte; juggernaut_dash; steps (heavy boots + shackle chain); hurt / down / death (low, rasp; chain and sword fall).
+- Replaces 15 jug_* files. Unused now: jug_dash. Checks: --sfx-set-check 0, --juggernaut-combo-check 164/0, --check 0, health OK.
+
+### `ext/sfx-tarek` @ 4872c687 (dolm): 98 files changed, 1305 insertions(+), 1 deletion(-)
+- Fire br_throw (3) / br_boulder_hit (3) / br_wind / br_punch (2).
+- **Signature:** dolm_rock_crunch (2), played in launch() as each rock tears out of the ground (new line).
+- Rocks br_launch / br_burst; Tremor Sense br_sense; leap and slam br_rise / br_leap / br_slam / br_shove / br_roll; E br_crack / br_raise; ult br_spine; dolm_dash (his air dash, replaces br_shove there); steps (sure-footed, grit); hurt / down / death (his stones drop).
+- Replaces 15 br_* files. Checks: --sfx-set-check 0, --dolm-combo-check 139/0, --check 0, --hero-combo-check 272/0, health OK.
+- Note: Sable/Kael/Tarek's --check and combo checks ran before the base merge; --sfx-set-check reran after it.
+
+Still to come: Cinder, Grimble, Pip, Breaker, Motley, Claire, then ext/sfx-cleanup.
