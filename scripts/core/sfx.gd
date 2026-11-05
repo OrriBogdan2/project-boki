@@ -473,14 +473,25 @@ func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) 
 	p.play()
 
 ## A kit sound not in NAMES (each hero branch adds its own, e.g. pin_* and bjorn_*): loaded from
-## audio/<name>.wav the first time it plays, so new kit sounds need no edit to the shared list.
+## audio/<name>.wav (and its takes <name>_1..4.wav) the first time it plays, so new kit sounds need no
+## edit to the shared list.
 var _lazy_miss := {}
 func _lazy(sname: String) -> bool:
 	if _lazy_miss.has(sname):
 		return false
-	var path := "res://audio/%s.wav" % sname
-	if not ResourceLoader.exists(path):
+	var takes: Array = []
+	var paths: Array = ["res://audio/%s.wav" % sname]
+	for i in range(1, 5):
+		paths.append("res://audio/%s_%d.wav" % [sname, i])
+	for path in paths:
+		if ResourceLoader.exists(path):
+			takes.append(load(path))
+	if takes.is_empty():
 		_lazy_miss[sname] = true
 		return false
-	streams[sname] = load(path)
+	streams[sname] = takes[0] if takes.size() == 1 else takes
 	return true
+
+## Whether a sound exists (loading it on first ask, as play does).
+func ensure(sname: String) -> bool:
+	return streams.has(sname) or _lazy(sname)
