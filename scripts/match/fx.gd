@@ -204,11 +204,14 @@ func beam(a: Vector3, b: Vector3, col: Color, width := 0.45, dur := 0.28) -> voi
 ## burying the fight under confetti.
 const PARTICLES := 0.6
 var particles := PARTICLES     # times the quality preset's particle amount (Settings q("fx"))
+var own_look := false          # a Hero's stage with its own look runs: the shared rings, cones and bursts stay out
 var radial := 0                # bursts and rings spawned so far (dust puffs don't count; checks read it)
 
 ## A particle burst: an effect that marks a hit or a blast, never plain movement (dust is for that).
 func burst(at: Vector3, col: Color, amount := 14, speed := 4.0, life := 0.5, grav := 12.0, size_k := 1.0,
 		dir := Vector3.UP, spread := 180.0) -> void:
+	if own_look:
+		return
 	radial += 1
 	_emit(at, col, amount, speed, life, grav, size_k, dir, spread)
 
@@ -356,6 +359,8 @@ func _clear_spot(at: Vector3) -> Vector3:
 	return spot
 
 func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
+	if own_look:
+		return
 	radial += 1
 	var mi := MeshInstance3D.new()
 	mi.mesh = Models.flat_quad(2.0)
@@ -440,6 +445,8 @@ func bolt(a: Vector3, b: Vector3, col: Color) -> void:
 	burst(b, col, 10, 3.0, 0.3, 4.0)
 
 func cone(at: Vector3, d: Vector2, length: float, col: Color) -> void:
+	if own_look:
+		return
 	for i in 3:
 		burst(at + Vector3(d.x, 0.5, d.y) * (0.5 + i * 1.2), col, 12, 6.0, 0.4, 4.0, 1.4, Vector3(d.x, 0.2, d.y), 25.0)
 
