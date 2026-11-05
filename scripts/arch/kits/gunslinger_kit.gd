@@ -146,6 +146,10 @@ func teardown() -> void:
 func fires_in_dash() -> bool:
 	return String(flow.row("lmb")["mode"]) == "fire"
 
+## Her slide and air dash go where she moves; the rifle stays on the cursor, only her legs follow the dash.
+func aims_in_dash() -> bool:
+	return fires_in_dash()
+
 func move_k() -> float:
 	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
 
