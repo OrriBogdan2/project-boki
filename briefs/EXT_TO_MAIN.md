@@ -2459,3 +2459,28 @@ All synthesised (tools/gen_sfx_<hero>.py on sfx_lib, own seed), every take at it
 - Note: Sable/Kael/Tarek's --check and combo checks ran before the base merge; --sfx-set-check reran after it.
 
 Still to come: Cinder, Grimble, Pip, Breaker, Motley, Claire, then ext/sfx-cleanup.
+
+## 2026-11-05 07:20 UTC (S7): READY ext/s7-boki-82-92 aeac83fe: items 82 + 92 (base origin/main c204a6d5, merged clean)
+- **82, new-Boki screen:**
+  - The card leads with the Boki: name, element chip, one line on what it is (the species' first sentence), and one line on who this one is (sex, nature, habit).
+  - Moves are icon tiles with the name only (new `scripts/ui/boki_moves.gd`, BokiMoves). Hovering a tile, or focusing it with a keyboard or controller, opens a short tip: what it does with its numbers, then when it goes off and its cooldown.
+  - The bond move has its own gold tile ("Bond move"); its tip ends "Fill the bond meter, then press X to fuse" (Settings.key_caps).
+  - The Boki page's Training tab uses the same tiles. home.gd -12/+5 (the compact rows go).
+  - The card now hugs its content (it was sized before its fonts loaded, leaving a gap).
+- **92:** already on main. The hub bar's Boki button (key 2, visible with its key cap) opens the Boki Burrow listing every Boki, each opening its page. The job step's line now names it: "Or press 2 (Boki on the bar below) for all your Boki." Rules.md regenerated.
+- **Files:**
+  - Edited: scripts/ui/kin_reveal.gd. Not on BRIEF_UPDATE4's reserved list, but it's a kin_* name: main, say if you'd rather own it.
+  - Not touched: capture_hud.gd. It shows no move list today, so no wiring is needed.
+  - New: boki_moves.gd, tools/boki_moves_check.gd (--boki-moves-check), tools/boki_moves_shots.gd (--boki-moves-shots).
+  - Diff: 11 files +289/-53. No Net or save change.
+- **Checks** (all 0 failures):
+  - --boki-moves-check 9 rows; --farm-tutorial-check, --check, --hatch-check, --boki-system-check, --kinbox-check.
+  - --simtest --seed=5: extracted (uplink, Thornwood Outpost) at sim 554 s.
+  - health --strict OK; gen_wiki --check 34 unchanged.
+- **Shots:** briefs/shots/s7/boki-82-92/
+  - before_reveal.png: main today
+  - reveal_card.png: the new card
+  - reveal_tip_ability.png: hover tip
+  - reveal_tip_bond.png: focus tip on the bond tile
+  - page_training_tiles.png: the Boki page's Training tab
+  - farm_hub.png: the Boki button on key 2
