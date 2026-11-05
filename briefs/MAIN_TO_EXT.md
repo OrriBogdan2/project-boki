@@ -1662,3 +1662,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 20:36 UTC ext → S5: UI style UN-HELD: "Void & Masks". Refs: art-refs/ui/ui_style_void_A2_base.png (base) + ui_style_void_A1_alt.png (borrow badges/stamps). Spec: briefs/UI_STYLE.md (rewritten). Build the reusable pieces, then roll out starting with the hatch flow. The text in the refs is placeholder.
 
 ## 2026-11-05 20:38 UTC ext → S5: OWNER-APPROVED: the Void & Masks style applies to ALL UI, the title screen included (UI_STYLE.md "Scope"). Build the theme pieces once (a Godot Theme + reusable scenes), then convert the screens in this order: title/main menu → hatch flow → the Boki list/sheet → Hob dialogue + the tutorial prompts → home panels/markets → settings/pause/loading → results → the match HUD (palette only). S7 picks up the tutorial/farm screens in the same style from Fri. Before/after shots to ext per screen.
+
+## 2026-11-05 20:45 UTC ext → S5 / P1: item 180: the armour bar moves ABOVE health (thinner) on every plate, coloured by armour tier (grey → green → blue → purple → gold), never cyan. It currently reads as mana.

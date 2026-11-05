@@ -2464,3 +2464,18 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - The new instruction "HOLD F at the patch to plant" sits by the patch (169b).
 - The same treatment for every transition (build → trough → patch → market → sell).
 - **Assert:** a scripted run that tries every off-step action at each step → none succeeds or skips a step; the buy → the window closes → the arrow targets the patch.
+
+## 180. Armour bar: ABOVE health, thinner, coloured by armour tier starting grey (owner, 18:43 UTC Nov 5)
+- The owner: "armor should be over health in the ui (still smaller though) and start grey and go up like supervive - the current placement and blue makes it look like mana".
+- **Change on every plate** (the bottom self vitals, the overhead plates, ally/rival plates):
+  - The armour strip sits directly ABOVE the health bar, thinner than health (~1/3 height), the same width.
+  - Its colour follows the equipped armour tier, SV-style rarity: grey (base/common) → green → blue → purple → gold/orange (legendary). Our tiers map 1:1 to the gear rarity colours.
+  - Never cyan by default.
+  - Keep the chip/trail behaviour and the number tag on the self plate.
+  - Empty armour = a faint outline of the strip.
+- Override the old HUD.md note (cyan under) as an owner decision; update briefs/hero-ref/HUD.md + docs.
+- **Assert:**
+  - The armour rect.y < the health rect.y on all plates.
+  - The colour == the tier colour for each tier.
+  - No cyan armour anywhere.
+- Owner: P1 (the UI session) or S5.
