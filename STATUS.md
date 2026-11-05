@@ -637,3 +637,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Pip, Claire and Sable added; the other Hunters' jpgs byte-identical. Checks 0 failures: import, --check, portrait 107, archetype 339, class-unlock 153, tutorial-hud, health --strict, gen_wiki. Crops checked, not seen in a running game. Tarek and Ryzz still to add; Vex's splash is with the IMG agent.
 - Sable's crossbows -> pistols: player-facing text has no "crossbow". ext/rename-lisette stays at 1228b324. Her docs and wiki rows still describe a spinning gold chakram; that wording goes with ART-1/ART-2 Sable.
 - Slot: ART-1 Grimble started.
+
+## 2026-11-05 S2: Vex street racer design received
+- vex_FINAL_sheet logged: racing jacket, thigh-highs, cyber-spine, one hybrid arm-cannon (gatling below, grenade tube on top). ART-1 Vex stays last, per the 00:20 order. IMG agent's splash request updated. Item 68/109 kit lane unaffected.
