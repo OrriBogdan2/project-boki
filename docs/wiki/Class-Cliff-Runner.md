@@ -16,8 +16,8 @@ The quarry-hand. Raise rocks out of the ground, stand on them and climb them, th
 ## How it plays
 
 1. Tap the attack to hurl a boulder (it bursts and splashes), or hold it to see the punch lane and let go to punch everything in it.
-2. **Stone Row** (E) raises three rocks after a red flash on the ground. Jump into one to climb it; punch along the row and every rock flies, one after another.
-3. **Quakefall** (RMB): hold to gather (everyone sees the circle and its growing centre), let go to hop and slam. Jump while holding to leap forward; punch to lunge. The centre stuns.
+2. **Stone Row** (E) raises three rocks after a red flash on the ground. Walk into one to climb it; punch along the row and every rock flies, one after another.
+3. **Quakefall** (RMB): tap for an instant slam just ahead; hold for a moment (everyone sees the circle and its growing centre) to hop forward and up and slam where you land. The hold goes by itself at about half a second. Jump while holding to leap further; punch to lunge. The centre stuns.
 4. **Rubble Leap** (Shift): a rock bursts up under you and you leap to the cursor, landing with a crash that shoves whoever is beside you; the rock follows, then rolls on and slows.
 
 <!-- gen:kit -->
@@ -41,7 +41,7 @@ What the in-game kit card (K) says.
 | Passive: Molten Guard | Molten Guard: punching your own rocks gives you a shield. Tremor Sense: sneak to see enemies in a cone ahead through walls; it widens as you sneak. |
 | Dash: Rubble Leap | Rubble Leap: leap to the cursor and land with a crash; the rock you leapt from follows, then rolls on and slows. |
 | LMB | Rubble Fists: tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies. |
-| RMB: Quakefall | Quakefall: hold to gather, let go to hop and slam; the centre stuns. Jump while holding to leap forward. |
+| RMB: Quakefall | Quakefall: tap to slam just ahead; hold for a moment to hop forward and up, then slam harder. The centre stuns. Jump while holding to leap further. |
 | E: Stone Row | Stone Row: raise three rocks ahead. Stand on them, climb them, or punch them into foes. |
 | Hunter ultimate: Basalt Spine | Basalt Spine: from level 6, raise a long ridge of rocks at the cursor; hold and drag to turn it. Over the abyss the rocks are ground you can stand on. |
 | Weapon: Rubble Fists | Tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies. |
@@ -54,8 +54,8 @@ What the in-game kit card (K) says.
 
 **Quakefall (RMB, 11s cooldown).**
 
-- *Tap:* A quick hop and slam just ahead: 14 damage and a shove, the centre stuns, rocks in the ring fly outward.
-- *Hold:* Hold up to 1.2s: a bigger, harder slam (up to 30) whose growing centre stuns up to 1.2s. Jump while holding to leap forward; punch to lunge.
+- *Tap:* An instant slam just ahead, no hop: a slightly smaller circle, 14 damage and a shove; the centre stuns, rocks in the ring fly outward.
+- *Hold:* Hold up to 0.45s (it goes by itself at the end): hop about 2.5m forward and up, keeping your run's speed, steer the landing with the move keys, and slam: the full circle, up to 30, whose centre stuns up to 1.2s. Jump while holding to leap further; punch to lunge.
 - *In the air:* In the air you dive, and slam where you land; pressed while gliding, the glider folds and you plunge. A foe caught in the air is spiked down for +40%, +20 more over the abyss.
 
 **Stone Row (E, 12.5s cooldown).** A red flash on the ground, then three rocks rise in a slight curve 3.4m ahead, spanning 5m (on solid ground only, never into bodies). They stop foes and shots, hold 9s, you can stand on and climb them, and any punch, slam or dash-launch sends them flying.

@@ -132,8 +132,10 @@ func _build(kind: String) -> Node3D:
 func _build_rock(n: Node3D, kind: String) -> void:
 	var r := {"boulder": 0.3, "rock": 0.45, "dashrock": 0.5}[kind] as float
 	var heat := {"boulder": 0.8, "rock": 0.95, "dashrock": 0.75}[kind] as float
+	# Rubble Leap's rock stands tall: a tumbling crag, not a ball
+	var tall := Vector3(1.0, 1.8, 1.0) if kind == "dashrock" else Vector3.ONE
 	var body := Models.part(
-		n, lump(r), rock_mat(heat, vis_rng.randf() * 10.0), Vector3.ZERO, Vector3.ONE, Vector3(0.3, 0.5, 0.2)
+		n, lump(r), rock_mat(heat, vis_rng.randf() * 10.0), Vector3.ZERO, tall, Vector3(0.3, 0.5, 0.2)
 	)
 	body.name = "Spin"
 	Models.part(body, lump(r * 0.55), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(r * 0.55, r * 0.3, 0.0))
@@ -518,7 +520,13 @@ func crowned(e: Ent) -> bool:
 func impact(at: Vector3, r: float, k: float, secs := 1.0) -> void:
 	_timed("burst", at, r * 0.7, 0.32)
 	_timed("crater", at, r * 0.5, secs)
-	for i in int(5 + 6 * k):
+	chips(at, int(5 + 6 * k), k)
+	m.fx.ring(at, r, Color(0.62, 0.47, 0.32, 0.95), 0.42)
+	m.fx.burst(at + Vector3(0, 0.25, 0), Color(0.66, 0.52, 0.38, 0.9), int(14 + 12 * k), 6.0, 0.5, 5.0, 1.8)
+
+## Rock chips thrown out from `at`.
+func chips(at: Vector3, count: int, k: float) -> void:
+	for i in count:
 		var a := vis_rng.randf() * TAU
 		var out := 3.0 + vis_rng.randf() * 4.0 * (0.6 + k)
 		var chip := _take("shard")
@@ -526,8 +534,6 @@ func impact(at: Vector3, r: float, k: float, secs := 1.0) -> void:
 		chip.scale = Vector3.ONE * (0.8 + vis_rng.randf() * 0.8)
 		var vel := Vector3(cos(a) * out, 5.0 + vis_rng.randf() * 4.0, sin(a) * out)
 		timed.append({"n": chip, "kind": "shard", "t": 0.0, "dur": 1.2, "ent": null, "vel": vel, "floor": at.y})
-	m.fx.ring(at, r, Color(0.62, 0.47, 0.32, 0.95), 0.42)
-	m.fx.burst(at + Vector3(0, 0.25, 0), Color(0.66, 0.52, 0.38, 0.9), int(14 + 12 * k), 6.0, 0.5, 5.0, 1.8)
 
 ## Ostra's rune sigil at `at` (radius `r`), its ring lit to `fill` 0..1 in `col` (refresh every step).
 func sigil(key: String, ent: Node3D, at: Vector3, r: float, fill: float, col: Color) -> void:

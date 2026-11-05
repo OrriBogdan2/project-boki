@@ -27,7 +27,7 @@ sounds from `tools/gen_stone_sfx.py` (names in `scripts/core/sfx_kits.gd`).
 ## Scaling used (ratios from the source)
 - Boulder 9 (source 169); a launched rock 14, about 1.5x the boulder (source 244 vs 169, 1.45x). Punch 12-24 (source 199).
 - Quakefall 14-30, the sweet spot x1.2 (source 188 outer vs 225 centre), stun 0.5-1.2s by charge. RMB cooldown 9s (source 11s, ratio 0.82; the
-  dash is 12s as in the source, no longer equal to it). Full charge 1.4s (0.2s tap window + 1.2s; source 1.0-1.5s).
+  dash is 12s as in the source, no longer equal to it). Full charge 0.45s (0.2s tap window + 0.25s; owner item 61 overrides the source's 1.0-1.5s).
 - Punch hold: full at 0.9s (source about 0.75s release), step 0.6m (source 0.5 bh). Rocks 45 hp, 9s.
 - Scale: one body height (bh) is about 1.8m, for gameplay ranges and visuals alike: the punch lane 4.2 by 1.8m (2.5 by 1 bh),
   the slam a 2m hop ahead with a 3.6-4.5m radius (about 2.5 bh), the row 3.4m ahead (2 bh) spanning about 5m (3 bh).
@@ -79,7 +79,7 @@ the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glid
 | Passive Tremor Sense | sneak (crouch) | a pale cone toward the cursor, 16m, 25 deg widening to 40 over 2s | foes in the cone show through walls and fog as a molten ring, refreshed every 0.5s | `breah_sense` on a find | `br_sense` |
 | LMB tap: boulder | tap (under 0.28s) | the shared aim line; flies its full 11m (AimMode.MAX) | 9 dmg, a molten tumbling boulder with an ember trail; bursts with a red ground ring, splashing foes within 0.9m for half | `breah_throw` | `br_throw`, `br_boulder_hit` |
 | LMB hold: punch | hold, release | from the hold: a pale lane 4.2m by 1.8m with 3 chevrons toward the cursor, filling; the cursor charge ring; the fist glows molten orange, hotter with the charge | 12-24 dmg to foes in the lane, knockback 6-11, a 0.6m step, a dust ring and molten spray at the lane's end on the hit; into a wall = 0.9s stun (stars); every rock of the team in the lane flies, and rocks lined up further along the aim (gaps up to 2.8m, to 12m) follow one after another, 0.08s apart. Held as long as you like (no timeout): full stays full until you let go | `breah_wind` (hold), `breah_punch` | `br_wind`, `br_punch`, `br_launch`, `br_burst` |
-| RMB Quakefall | hold to charge, release | everyone sees a red circle a hop (2m) ahead, radius 3.6-4.5m, its sweet spot growing 0.9-1.8m; the cursor charge ring and full flare; both fists glow molten | release: a short hop (a real 0.35s jump arc, about 2m: 1.1 body heights, 0.4m up) into the centre, then the slam as she lands: 14-30, centre x1.2 and stun 0.5-1.2s (stars), rocks in the ring fly outward, foes in the air are dunked (+40%, +20 over the abyss); a molten starburst, rock chips flying, a dust ring at the edge and a dark red cracked crater for 1s. While charging: walk at 55%, jump = a real leap 3.2m forward, about 1.2m up (circle comes along; let go in the air = the arc carries on, slam on landing), a punch = a 1.5m lunge. In the air: dive at 26 m/s and slam on landing. The hop and the leap are real jump arcs (not dashes, which hold your height), so glide works out of them: opening or holding the glider drops the pending slam and the glider takes over, never dragged down (item 26). Pressed while gliding (owner 23:00, the source allows it): the glider folds at once, she plunges at the glider's dive speed (data: 32.5 m/s down, sideways speed x0.25), the glider stays shut while she falls, and she slams where she lands | `breah_crouch` (hold), `breah_leap`, `breah_lunge`, `breah_slam`, `breah_dive`, `breah_slam_land` | `br_leap`, `br_shove`, `br_slam` |
+| RMB Quakefall (owner item 61) | tap, or a short hold | tap: nothing shows, it lands on the release. Hold: everyone sees a red circle a hop (2.5m plus what the hop keeps of his run) ahead, radius 3.82-4.5m, its sweet spot growing 0.9-1.8m; the cursor charge ring; both fists glow molten; the charge is capped at 0.45s (0.2 tap window + 0.25) and fires by itself there | tap: no hop, nothing vertical: an instant slam 1.6m ahead, radius 3.82m (0.85 of the hold's), 14 dmg, centre x1.2 and 0.5s stun. Hold: a real 0.6s jump arc, 2.5m forward and 0.66m up, keeping half his ground speed; the move keys bend it by up to 1.3 m/s (about 0.8m at the landing); he slams as he lands: 14-30 by charge, full circle and centre at the cap, centre x1.2 and stun 0.5-1.2s (stars), rocks in the ring fly outward, foes in the air are spiked (+40%, +20 over the abyss). Jump while holding: the bigger leap (3.2m, 1.57m up). Punch while holding: a 1.5m lunge. Air press: dive and slam on landing; from a glide the glider folds | `breah_crouch`, `breah_slam` (hop, smash at 0.6s), `breah_slam_land` (tap, air), `breah_leap`, `breah_dive`, `breah_lunge` | `br_slam`, `br_leap` |
 | Shift Rubble Leap | tap | to the cursor (1.2m to about 4.25m); everyone sees the landing circle (1.8m) filling through the flight | the rock bursts up under her (0.06s crouch), she leaps in an arc to the spot (0.52s), lands with a crash (dust, no ring or blast): 8 dmg and a shove to everyone within 1.8m, then the rock comes down 0.14s after her and rolls on 6m: 12 dmg, Shred, 1.5s slow. In the air: the class long dash, her own heavy shove with a dust after-image | `breah_dash`, `breah_leap_land`, `breah_exdash` | `br_rise`, `br_leap`, `br_slam`, `br_roll`, `br_shove` |
 | E Stone Row | tap | a 0.2s red-orange flash on the ground at each spot (everyone sees it) | three rocks of jagged basalt columns (tapered, broken tops, leaning apart) in a slight curve 3.4m ahead (outer two 0.45m back, 2.4m apart), thin molten cracks in the ground at their feet cooling over 0.6s; 9s, 45 hp; they block bodies and enemy shots; only she climbs them (walking into one lifts her onto it, no jump) and stands on them; any punch, slam or dash-launch sends them flying | `breah_raise` | `br_crack`, `br_raise` |
 | X Basalt Spine (level 6, 45s) | tap, or hold and drag, release | while X is held (yours only): a pale line 12m long, bent in a shallow arc (25 degrees end to end, the middle bowing away from her), with inward chevrons and a centre ring, at the cursor (up to 11m), across the aim; dragging the cursor 0.8m+ from the centre swings it round the centre toward the cursor. On release everyone sees molten cracks along it for 0.2s | 9 rocks of hers erupt from the centre outward over 0.4s with flame bursts: foes within 1.6m are slowed 35% for 1s (1 damage), bodies on the line are moved to their side of it. The rocks stand 7s, block foes and their shots, carry and climb like hers, and fly when punched, slammed or dashed into (a punch along the ridge sweeps it); one cast's rocks deal at most 40 to any one hunter. They are Stone Row's own rocks (same length, top and thickness), lying along the arc, one rock deep. Over the abyss the rocks are ground (Ent.over_void reads StoneStand.top_under): she and any hunter can land on the ridge and walk along it with no fall or abyss sink while the rocks stand, and fall as normal when they crumble. A rock on a different level of ground than the ridge is left out; it never calls HeroZones.bridge (no tiles change). A stun, knock or merge while aiming cancels it unspent | `breah_spine_aim` (hold), `breah_spine` | `br_spine` |
@@ -111,12 +111,42 @@ row again. The bridge is gone altogether (owner review item 15: no terrain over 
   `rmb (item 14): only the sweet spot stuns...`, `rmb: jump while charging is a real leap, longer than the hop...`.
   Strip: /home/boki/shots-s2/breah/review/breah_rmb_strip.png (`--breah-shots`, tools/breah_shots.gd).
 
+## Quakefall review (owner review item 61, Nov 4; overrides the hold length above and the source's)
+- **Owner:** "it's a short hold or tap". The 1.2s charge is gone: the charge is capped at 0.45s and fires by itself there.
+  Tap: no hop, an instant slam just ahead in a circle 0.85 of the hold's, still hitting and stunning at the centre.
+  Short hold: the hop goes further and higher than item 14's (2.5m, 0.66m up, 0.6s instead of 2m, 0.4m, 0.42s), keeps half
+  his ground speed, and the move keys bend it. The damage and the sweet spot still grow through the short window; the
+  full numbers are the slam at the cap.
+- `slam` data: `time` 0.25 (the charge past the 0.2 tap window), `reach` 1.6 (the tap's spot), `hop` 2.5, `hop_up` 4.4,
+  `carry` 0.5, `nudge` 1.3 m/s, `radius` [3.82, 4.5]. `breah_slam` is re-keyed to the 0.6s arc (smash at 0.6, ends 1.36).
+- The circle shown during the hold is where the hop will land, run speed included (BreahSlam.center).
+- Asserted (`--dolm-combo-check`): `item 61: the charge never passes the cap...`, `item 61: the tap is a slam on the spot...`,
+  `item 61: the hold carries him at least 2m forward...`, `item 61: the move keys nudge the landing...`,
+  `item 61: a hop off a run keeps some of its speed...`.
+  Strips: /home/boki/shots-s2/kits/tarek/new/breah_rmb_strip.png (hold), breah_rmb_tap_strip.png (tap).
+
+## Taller rocks (owner review item 67, Nov 4)
+- Every raised rock is 2.2m tall (was 1.25m; 1.76x): taller than a hunter's head, the tallest column 2.32m. Same footprint
+  (length 1.3m, `th` 0.42), same blocking. Stone Row and Basalt Spine share it; Rubble Leap's rock (`dashrock`) is 1.8x
+  taller and rides higher, so it does not sink into the ground.
+- Look (scripts/arch/rock_look.gd, RockLook): tapered craggy columns, warm umber and sandstone faces (`molten_rock` got an
+  optional warm `rim`), pale tops that read from the top-down camera, a soft ground shadow. They rise over 0.22s with a
+  dust and earth burst and a short rumble (`br_rumble`, at most one per 0.09s so a ridge rumbles as one); broken or timed
+  out they crack and slump into the ground with chips and dust (`br_crumble`, Verbs' `kx_end`). A launched rock still leaves
+  by flying.
+- The climb: StoneStand lifts the caster at 8.5 m/s, easing off 0.85m under the top so it ends about 0.2m past it (a straight
+  8.5 m/s would throw him 2m up). Crossing a rock takes 0.58s (0.52s before). `CLIMB_MAX` 2.7m.
+- A punch or slam from on top of a rock still takes it (HeroZones.rock_in_reach, the old 2m reach would have missed it).
+- Allies still hop over by jumping (owner 23:55, DECISIONS), which item 67's "nobody else can" does not override: foes cannot.
+- Asserted (`--dolm-combo-check`): `item 67: a rock's top is at least 1.6x...`, `item 67: the look reaches the top...`,
+  `item 67: every rock has a ground shadow`, `rock (item 25): ...`. Old vs new: /home/boki/shots-s2/kits/tarek/.
+
 ## Combinations (`--dolm-combo-check`, tools/breah_combo_check.gd; placement in `--zone-check`)
 | Combo | Result | Asserted by |
 |---|---|---|
 | Stone Row, then punch along it | every rock flies in a stream (first at once, the rest 0.08s apart), bursts, shreds, slows, ROCKFALL | `combo: a punch along a row launches every rock in a stream`, `combo: launched rocks burst on the foe...` |
 | Stone Row, then slam | rocks in the ring fly outward | `combo: Stone Row > slam launches the rocks` |
-| Stone Row, then walk into a rock | she rises onto it and walks over (0.53s to cross, no jump); anyone else is stopped | `rock (item 25): walking into her own rock lifts her...`, `rock (item 25): an ally / a foe walking or jumping into her rock is stopped`, `rock: dropped onto a rock, she stands on its top` |
+| Stone Row, then walk into a rock | he rises onto it and walks over (0.58s to cross, no jump); anyone else is stopped | `rock (item 25): walking into her own rock lifts her...`, `rock (item 25): an ally / a foe walking or jumping into her rock is stopped`, `rock: dropped onto a rock, she stands on its top` |
 | Punch into a wall | 0.9s stun with stars | `combo: punch into a wall = stun, with stars over the head` |
 | Charge, jump, let go | a real leap forward with the circle, slam on landing | `rmb: jump while charging is a real leap...`, `rmb: the circle comes with her`, `rmb: let go mid-leap = the leap's arc carries on...` |
 | Quakefall (hop, leap or air press), then glide | the glider opens and the slam is dropped; she keeps her height (item 26) | `glide (item 26, hop/leap/air): ...` |
@@ -238,7 +268,7 @@ row again. The bridge is gone altogether (owner review item 15: no terrain over 
   StoneStand.mover (set and cleared by Hunter around its move step), StoneStand.climb (caster only).
 
 ## Engine notes
-- Rocks are Verbs walls with `top` 1.25m and `th` 0.42 (HeroZones.rock). Verbs.wall_blocks asks StoneStand.top_for how
+- Rocks are Verbs walls with `top` 2.2m and `th` 0.42 (HeroZones.rock). Verbs.wall_blocks asks StoneStand.top_for how
   tall a rock is for the body moving (Rock ownership above); Ent.ground reads StoneStand.top_under; Hunter's move step
   sets StoneStand.mover and calls StoneStand.climb.
 - Every projectile is an ordinary Match shot (spawn_shot), so the height rules and Net behave as for every shot; KitLooks only

@@ -5,7 +5,7 @@ extends "res://tools/vv_shots.gd"
 
 const GRID_CROP := Vector2i(280, 200)    # px round the hero per strip frame (scaled 1.5x)
 const GRID_COLS := 3
-const PARTS := ["rmb", "dash", "spine", "climb", "glide"]
+const PARTS := ["rmb", "rocks", "dash", "spine", "climb", "glide"]
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -74,23 +74,69 @@ func _save_strip(file: String) -> void:
 		out.blit_rect(fr, Rect2i(Vector2i.ZERO, fr.get_size()), at)
 	out.save_png(dir.path_join(file))
 
-## Quakefall: the charge, then the hop and the two-fist smash on landing.
+## Quakefall: the short hold, then the hop and the two-fist smash on landing; the tap.
 func _breah_rmb() -> void:
 	await _reset(6.0)
 	_aim(home + Vector3(6.0, 0, 0))
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	var hold_rmb := func(t: float): P.inp["sec_hold"] = t < 1.2
+	var hold_rmb := func(t: float): P.inp["sec_hold"] = t < 1.0
 	var marks := _strip(
 		"rmb_strip",
-		"Quakefall (RMB), gameplay zoom: the gathered crouch with the circle and its sweet spot; the push-off;"
-			+ " fists high at the top of the short hop; swung down as she drops; the smash on landing;"
-			+ " low in the crater",
-		[1.15, 1.25, 1.37, 1.49, 1.56, 1.9]
+		"Quakefall hold (RMB), gameplay zoom: the gathered crouch with the circle and its sweet spot; the push-off;"
+			+ " fists high at the top of the hop; swung down as he drops; the smash on landing; low in the crater",
+		[0.2, 0.5, 0.75, 0.95, 1.06, 1.2]
 	)
-	marks.append([1.0, "full", "rmb_charge", "Quakefall charging: the red circle a hop ahead, the sweet spot grown"])
-	marks.append([1.58, "full", "rmb_slam", "Quakefall landing: the starburst, chips and crater where she lands"])
-	await _go(2.1, hold_rmb, marks)
+	marks.append([0.42, "full", "rmb_charge", "Quakefall charging (0.45s cap): the red circle a hop ahead"])
+	marks.append([1.08, "full", "rmb_slam", "Quakefall landing: the starburst, chips and crater where he lands"])
+	await _go(1.3, hold_rmb, marks)
+	await _reset(6.0)
+	_aim(home + Vector3(6.0, 0, 0))
+	P.inp["sec_hold"] = false
+	P.ak.press_rmb()
+	var tap_marks := _strip(
+		"rmb_tap_strip",
+		"Quakefall tap (RMB), gameplay zoom: no hop, an instant slam just ahead in a slightly smaller circle",
+		[0.02, 0.06, 0.12, 0.2, 0.35, 0.55]
+	)
+	tap_marks.append([0.08, "full", "rmb_tap", "Quakefall tap: the slam ahead of him, no hop"])
+	await _go(0.6, Callable(), tap_marks)
+
+## Stone Row at gameplay zoom, then the rocks crumbling.
+func _breah_rocks() -> void:
+	await _reset(14.0)
+	_aim(home + Vector3(6.0, 0, 0))
+	P.ak.cd["e"] = 0.0
+	P.ak.use_e()
+	var on_rocks := func(): return home + Vector3(3.2, 1.0, 0)
+	var marks := _focused(
+		_strip(
+			"rocks_strip",
+			"Stone Row rising (item 67), gameplay zoom: the red tell, the dust and the rocks heaving up, standing",
+			[0.15, 0.25, 0.32, 0.4, 0.5, 0.9]
+		),
+		on_rocks
+	)
+	marks.append([1.0, "full", "rocks_row", "Stone Row at the match camera, beside him for scale", on_rocks])
+	await _go(1.1, Callable(), marks)
+	var walls: Array = m.verbs.walls.duplicate()
+	var strip := _focused(
+		_strip(
+			"crumble_strip", "A rock breaking (item 67): the crack, the columns slumping, the chips and dust",
+			[0.03, 0.1, 0.18, 0.26, 0.34, 0.5]
+		),
+		on_rocks
+	)
+	Engine.time_scale = 0.1      # (the crumble is a tween on real time; a software render takes longer per frame)
+	for w in walls:
+		if w.get("rock", false): w["t"] = 0.0
+	await _go(0.6, Callable(), strip)
+	Engine.time_scale = 1.0
+
+func _focused(marks: Array, focus: Callable) -> Array:
+	for mk in marks:
+		(mk as Array).append(focus)
+	return marks
 
 ## Her two dash moves: Rubble Leap on the ground, the long dash in the air (5 frames each).
 func _breah_dash() -> void:
@@ -151,7 +197,7 @@ func _breah_climb() -> void:
 		"climb_strip",
 		"Her own rock (item 25), gameplay zoom: she walks into it with no jump, rises up its face with her walk"
 			+ " carried on, stands on its top (the rock slides under her, her foot ring on its top) and walks on over"
-			+ " (about 0.5s to cross; the top-down camera hides most of the 1.25m rise)",
+			+ " (about 0.6s to cross)",
 		[0.3, 0.42, 0.5, 0.6, 0.72, 0.9]
 	)
 	await _go(1.1, walk, marks)
