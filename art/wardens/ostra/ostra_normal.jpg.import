@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bej610nki3y55"
-path.bptc="res://.godot/imported/ostra_claws_atlas.jpg-2bd7093cd6cf0554418f9a636550485b.bptc.ctex"
-path.astc="res://.godot/imported/ostra_claws_atlas.jpg-2bd7093cd6cf0554418f9a636550485b.astc.ctex"
+uid="uid://oln1obq5wxhu"
+path.bptc="res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.bptc.ctex"
+path.astc="res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "237feb11a5897fe4c6c53d2f355e8bcb"
+"md5": "a9d3d0332cb1561921d639288a48823e"
 }
 
 [deps]
 
-source_file="res://art/wardens/ostra/ostra_claws_atlas.jpg"
-dest_files=["res://.godot/imported/ostra_claws_atlas.jpg-2bd7093cd6cf0554418f9a636550485b.bptc.ctex", "res://.godot/imported/ostra_claws_atlas.jpg-2bd7093cd6cf0554418f9a636550485b.astc.ctex"]
+source_file="res://art/wardens/ostra/ostra_normal.jpg"
+dest_files=["res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.bptc.ctex", "res://.godot/imported/ostra_normal.jpg-1a2520db03a63d06564cd80db19a92f8.astc.ctex"]
 
 [params]
 
@@ -41,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=2048
-detect_3d/compress_to=0
+process/size_limit=0
+detect_3d/compress_to=1

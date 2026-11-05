@@ -7,7 +7,8 @@ extends RefCounted
 
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
-	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker"}
+	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
+	"ostra": "ostra"}
 const DT := 1.0 / 30.0
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
@@ -75,6 +76,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	ok(missing.is_empty(), "%s: the file's %d clips are in the .glb (missing %s)" % [id, named.size(), str(missing)])
 	_timings(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
+	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
 	var shown := 0
 	var which := ""
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
@@ -85,6 +87,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 			which += " " + String(gun.get_path_to(mi))
 	ok(shown == 0, "%s: one weapon drawn (%d procedural pieces showing:%s)" % [id, shown, which])
 	_sliders(id, sync)
+	_sway(id, m, sync, dd)
 	await _on_blade(id, m, sync, clips)
 	# "bone_scale" (item 137): the size holds over every clip that keys the bone
 	for nm in dd.get("bone_scale", {}):
@@ -114,6 +117,25 @@ func _named(dd: Dictionary) -> Array:
 		if v is String:
 			out.append(v)
 	return out
+
+## A body on a spring (data "sway") lags a change of speed, leans away from it, and settles.
+func _sway(id: String, m: Node3D, sync: Node, dd: Dictionary) -> void:
+	var sw: WardenSway = sync.get("sway")
+	if not dd.has("sway"):
+		return
+	ok(sw != null, "%s: sways on its spring" % id)
+	if sw == null:
+		return
+	sw.step(DT)
+	for i in 6:
+		m.position.z -= 0.15 * (i + 1)
+		sw.step(DT)
+	var peak := sw.lean.y
+	for i in 240:
+		sw.step(DT)
+	ok(peak > 0.03 and sw.lean.length() < 0.01, "%s: accelerating forward leans it back (%.3f rad), then settles (%.4f)"
+			% [id, peak, sw.lean.length()])
+	m.position = Vector3.ZERO
 
 ## Each mapped kit move: its clip lasts as long as the move's keys (a held move: at least to its last key).
 func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
@@ -158,9 +180,9 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			var sees: Vector3 = sk.global_transform * (sk.get_bone_global_pose(hb) * tip.position)
 			far = maxf(far, muzzle.global_position.distance_to(sees))
 			var hand: Vector3 = sk.global_transform * sk.get_bone_global_pose(hb).origin
-			var body_k := absf(sk.global_transform.basis.get_scale().x)
-			var len_now := rest * sk.get_bone_pose_scale(hb).y      # ("bone_scale")
-			drift = maxf(drift, absf(hand.distance_to(sees) / body_k - len_now))
+			# (a weapon that grows and shrinks on its bone, Motley's orb, keeps its point)
+			var body_k := absf((sk.global_transform.basis * sk.get_bone_global_pose(hb).basis).get_scale().x)
+			drift = maxf(drift, absf(hand.distance_to(sees) / body_k - rest))
 			n += 1
 	clips.force = {}
 	ok(far <= FX_ON_BLADE, "%s: the Muzzle stays on the visible tip in %d frames (worst %.3f m)" % [id, n, far])
@@ -172,6 +194,7 @@ func _sliders(id: String, sync: Node) -> void:
 	var clips: WardenClips = sync.get("clips")
 	var strays := 0
 	var sk := clips.skel
+	var offsets: Array = clips.d.get("offset_bones", [])      # (Motley's hips ride the spring: the clips move them)
 	var names: Array = []
 	for b in WardenGlb.BONES:
 		if b != "root" and WardenSkeleton.find(sk, b) >= 0:
@@ -179,8 +202,8 @@ func _sliders(id: String, sync: Node) -> void:
 	for nm in clips.lib.get_animation_list():
 		var a := clips.lib.get_animation(nm)
 		for i in a.get_track_count():
-			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D \
-					and String(a.track_get_path(i).get_concatenated_subnames()) in names:
+			var bn := String(a.track_get_path(i).get_concatenated_subnames())
+			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bn in names and not bn in offsets:
 				strays += 1
 	ok(strays == 0, "%s: no clip keys a contract bone's offset (%d tracks), the sliders stay on" % [id, strays])
 	ok((sync.get("look_pose") as Array).size() >= 10, "%s: the look's bone offsets are held under the clips" % id)

@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ejrhbsg468fs"
-path.bptc="res://.godot/imported/ostra_orbit_cards_cells.jpg-739453782cf51dc1b490bd65e5780108.bptc.ctex"
-path.astc="res://.godot/imported/ostra_orbit_cards_cells.jpg-739453782cf51dc1b490bd65e5780108.astc.ctex"
+uid="uid://chkw2vad32tpu"
+path.bptc="res://.godot/imported/ostra_void.jpg-50f78a8b620e3b13387d66231a03d3a0.bptc.ctex"
+path.astc="res://.godot/imported/ostra_void.jpg-50f78a8b620e3b13387d66231a03d3a0.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "cfc4af8566ddf3c27592eb4c01cf65f7"
+"md5": "50cc68bdd76667bb14ca28afd9e7be58"
 }
 
 [deps]
 
-source_file="res://art/wardens/ostra/ostra_orbit_cards_cells.jpg"
-dest_files=["res://.godot/imported/ostra_orbit_cards_cells.jpg-739453782cf51dc1b490bd65e5780108.bptc.ctex", "res://.godot/imported/ostra_orbit_cards_cells.jpg-739453782cf51dc1b490bd65e5780108.astc.ctex"]
+source_file="res://art/wardens/ostra/ostra_void.jpg"
+dest_files=["res://.godot/imported/ostra_void.jpg-50f78a8b620e3b13387d66231a03d3a0.bptc.ctex", "res://.godot/imported/ostra_void.jpg-50f78a8b620e3b13387d66231a03d3a0.astc.ctex"]
 
 [params]
 
@@ -41,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=2048
-detect_3d/compress_to=0
+process/size_limit=0
+detect_3d/compress_to=1

@@ -1685,6 +1685,7 @@ func _emit_shot() -> void:
 		dmg *= 1.0 - float(wpn["sustain_loss"]) * minf(1.0, float(sus_n) / float(wpn.get("sustain_rounds", 10)))
 	sus_n += 1
 	var extra := {"kb": wpn["kb"], "tracer": float(wpn.get("tracer", 1.0))}
+	extra.merge(wpn.get("shot_x", {}), true)      # a weapon's own shot rules (Tether Lantern: through terrain)
 	if wpn.has("decel"):
 		# slugs slow down and stop at the weapon's range: v^2 = 2 a d
 		extra["decel"] = float(wpn["decel"])
@@ -3241,6 +3242,8 @@ func _anim_state(stretch: float) -> void:
 		for e in m.truce.shown:
 			if e["h"] == self:
 				em = String(e["id"]); et = float(e["t"])
+	s["dead"] = out
+	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["emote"] = em
 	s["emote_t"] = et
 	if not grounded and not gliding and not downed:
@@ -3354,7 +3357,7 @@ func render(delta: float, alpha: float) -> void:
 			if boosted:
 				m.fx.ghost(position, face, Color(0.85, 0.95, 1.0), float(cdat["scale"]))
 	# little puffs of dust while running, and a kick of dust when you turn hard
-	if grounded and spd > 4.0 and not downed:
+	if grounded and spd > 4.0 and not downed and KMovesStone.gait(arch) >= 0.5:      # (no feet, no steps: Motley)
 		step_t -= delta
 		if step_t <= 0.0:
 			step_t = 0.32

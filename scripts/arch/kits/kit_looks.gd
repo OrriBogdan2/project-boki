@@ -11,8 +11,8 @@ extends Node3D
 ##   rock       a launched rock: bigger, hotter, flaming trail
 ##   dashrock   Rock Hop's last rock: rolls along the ground, dust and embers
 ##   footrock   the slab under Tarek's foot through a Rock Hop (held)
-##   orb        Ostra's Gravity Orb: a violet glass teardrop with a magenta tail
-##   orb_hot    the Settled bolt: a long blue-violet bolt with a white core
+##   orb        Motley's Gravity Orb: a violet glass teardrop with a magenta tail; skin_orb grows and
+##              brightens it with its charge
 ##   spear      Shard Snap: a long bundle of dark violet crystal prisms with bright rims
 ## Lingering: aura (Ostra's Swollen sphere), crown (stun stars over a head), burst and crater (Tarek's slam:
 ## a molten starburst, then a dark red cracked crater), shard (a rock chip flying off an impact), column (the
@@ -28,6 +28,9 @@ const GLASS_SH := preload("res://shaders/void_glass.gdshader")
 static var vis_rng := RandomNumberGenerator.new()
 const KEEP := 0.12            # s: a refreshed effect (a mote, the aura) stays this long without a refresh
 const TRAIL_DT := 0.016       # s: a skinned shot leaves its trail every frame
+const ORB_CORE := [Color("3a0d5c"), Color("8a3fe0")]      # the orb's glass core, plain and at full charge
+const ORB_RIM := [Color("e070ff"), Color("ffeaff")]       # its rim, the same
+const ORB_HOT_K := 2.2        # how much the orb's white-hot core grows at full charge
 const SHARD_GRAV := 22.0      # m/s2: rock chips fall a little faster than bodies (they read as heavy)
 const SIGIL_SEGS := 16        # arc segments in Ostra's rune sigil ring
 
@@ -89,7 +92,7 @@ func _build(kind: String) -> Node3D:
 			_build_rock(n, kind)
 		"footrock":
 			_build_footrock(n)
-		"orb", "orb_hot", "spear":
+		"orb", "spear":
 			_build_void_shot(n, kind)
 		"aura":
 			Models.part(
@@ -163,16 +166,10 @@ func _build_void_shot(n: Node3D, kind: String) -> void:
 				Vector3(1.0, 1.0, 1.45)
 			)
 			o.name = "Spin"
-			Models.part(n, Models.sphere(0.09, 8), Models.glow_mat(Color("ffd6ff")), Vector3(0, 0, -0.12))
+			var hot := Models.glow_mat(Color("ffd6ff"))
+			hot.render_priority = 1      # always over the glass (same-node alpha sorting flickers in flight)
+			Models.part(n, Models.sphere(0.09, 8), hot, Vector3(0, 0, -0.12)).name = "Hot"
 			_tail(n, 0.22, 1.2, Color(0.88, 0.25, 0.85, 0.55))
-		"orb_hot":
-			Models.part(
-				n, Models.sphere(0.18, 10), glass_mat(Color("23208a"), Color("6f7cff"), 1.0, 0.9), Vector3.ZERO,
-				Vector3(1.0, 1.0, 4.5)
-			)
-			var core := Models.glow_mat(Color(0.9, 0.92, 1.0, 0.8))
-			Models.part(n, Models.sphere(0.04, 8), core, Vector3.ZERO, Vector3(1, 1, 9.0))
-			_tail(n, 0.16, 1.2, Color(0.35, 0.4, 1.0, 0.6))
 		"spear":
 			var b := Node3D.new()
 			b.name = "Spin"
@@ -188,9 +185,9 @@ func _build_void_shot(n: Node3D, kind: String) -> void:
 
 ## A tapering tail of `col` behind a shot: `w` wide at the shot, `len_` long.
 func _tail(n: Node3D, w: float, len_: float, col: Color) -> void:
-	Models.part(
-		n, Models.cyl(0.0, w, len_, 10), shade_mat(col), Vector3(0, 0, len_ * 0.5), Vector3.ONE, Vector3(PI * 0.5, 0, 0)
-	)
+	var mat := shade_mat(col)
+	mat.render_priority = -1      # always under the shot's glass
+	Models.part(n, Models.cyl(0.0, w, len_, 10), mat, Vector3(0, 0, len_ * 0.5), Vector3.ONE, Vector3(PI * 0.5, 0, 0))
 
 func _build_crown(n: Node3D) -> void:
 	var c := Node3D.new()
@@ -349,6 +346,20 @@ func skin_last(by: Ent, kind: String) -> bool:
 			return true
 	return false
 
+## Dresses Motley's last orb at charge k (0..1): `scl` times the plain orb, its glass and core brighter.
+## (Pooled, so a plain orb sets its looks back too.)
+func skin_orb(by: Ent, k: float, scl: float) -> void:
+	if not skin_last(by, "orb"):
+		return
+	var e: Dictionary = live.back()
+	e["k"] = k
+	var n: Node3D = e["n"]
+	n.scale = Vector3.ONE * scl
+	var glass := (n.get_node("Spin") as MeshInstance3D).material_override as ShaderMaterial
+	glass.set_shader_parameter("core", (ORB_CORE[0] as Color).lerp(ORB_CORE[1], k))
+	glass.set_shader_parameter("rim", (ORB_RIM[0] as Color).lerp(ORB_RIM[1], k))
+	(n.get_node("Hot") as Node3D).scale = Vector3.ONE * lerpf(1.0, ORB_HOT_K, k)
+
 func skins_live(kind: String) -> int:
 	return live.filter(func(e): return e["kind"] == kind).size()
 
@@ -367,9 +378,9 @@ func _trail(e: Dictionary, p: Vector3, back: Vector3) -> void:
 			fx.burst(p - Vector3(0, 0.4, 0), dust, 3, 2.0, 0.4, 4.0, 1.4, back + Vector3.UP, 50.0)
 			fx.spark(p, back, Color("ff8a2c"), 2, 2.0, 30.0, 0.25, 4.0, 0.8)
 		"orb":
-			fx.burst(p, Color(0.9, 0.3, 0.9, 0.7), 1, 0.6, 0.25, 0.0, 0.9, back, 15.0)
-		"orb_hot":
-			fx.burst(p, Color(0.5, 0.56, 1.0, 0.75), 2, 1.0, 0.25, 0.0, 0.9, back, 12.0)
+			var k := float(e["k"])
+			var col := Color(0.9, 0.3 + 0.4 * k, 0.9, 0.7)
+			fx.burst(p, col, 1 + roundi(k * 2.0), 0.6, 0.25, 0.0, 0.9 + 0.6 * k, back, 15.0)
 		"spear":
 			fx.burst(p, Color(0.5, 0.2, 0.8, 0.8), 2, 1.5, 0.25, 0.0, 1.0, back, 20.0)
 
@@ -377,12 +388,11 @@ func _impact(e: Dictionary, p: Vector3) -> void:
 	var fx: Fx = m.fx
 	match String(e["kind"]):
 		"orb":
-			fx.burst(p, Color(0.88, 0.3, 0.9, 0.85), 8, 3.0, 0.25, 0.0, 1.0)
-			fx.flash(p, Color("e070ff"), 0.4, 0.06)
-		"orb_hot":
-			fx.burst(p, Color(0.45, 0.5, 1.0, 0.85), 12, 4.0, 0.3, 0.0, 1.1)
-			fx.ring(p, 0.8, Color("6f7cff"), 0.22)
-			fx.flash(p, Color("9fb8ff"), 0.55, 0.07)
+			var k := float(e["k"])
+			fx.burst(p, Color(0.88, 0.3, 0.9, 0.85), 8 + roundi(k * 14.0), 3.0 + k * 2.5, 0.25, 0.0, 1.0 + 0.7 * k)
+			fx.flash(p, Color("e070ff"), 0.4 + 0.7 * k, 0.06 + 0.05 * k)
+			if k > 0.0:
+				fx.ring(p, 0.4 + k, Color("e070ff"), 0.22 + 0.1 * k)
 		"boulder":
 			fx.dust(p, 6)
 

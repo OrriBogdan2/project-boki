@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dnqgvdaim4k2t"
-path.bptc="res://.godot/imported/ostra_halo_atlas.jpg-cce8b501edb910fad7dd05f4775571fa.bptc.ctex"
-path.astc="res://.godot/imported/ostra_halo_atlas.jpg-cce8b501edb910fad7dd05f4775571fa.astc.ctex"
+uid="uid://bolsihk40haoh"
+path.bptc="res://.godot/imported/ostra_glow.jpg-617f0fea6a200e74a3473c3bc5ffe02e.bptc.ctex"
+path.astc="res://.godot/imported/ostra_glow.jpg-617f0fea6a200e74a3473c3bc5ffe02e.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "433207ed9bbc8746c59df9bc977c66e9"
+"md5": "9fb370f83704d6a5d51d246722eb9e91"
 }
 
 [deps]
 
-source_file="res://art/wardens/ostra/ostra_halo_atlas.jpg"
-dest_files=["res://.godot/imported/ostra_halo_atlas.jpg-cce8b501edb910fad7dd05f4775571fa.bptc.ctex", "res://.godot/imported/ostra_halo_atlas.jpg-cce8b501edb910fad7dd05f4775571fa.astc.ctex"]
+source_file="res://art/wardens/ostra/ostra_glow.jpg"
+dest_files=["res://.godot/imported/ostra_glow.jpg-617f0fea6a200e74a3473c3bc5ffe02e.bptc.ctex", "res://.godot/imported/ostra_glow.jpg-617f0fea6a200e74a3473c3bc5ffe02e.astc.ctex"]
 
 [params]
 
@@ -41,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=2048
-detect_3d/compress_to=0
+process/size_limit=0
+detect_3d/compress_to=1
