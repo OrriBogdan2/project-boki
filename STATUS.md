@@ -492,3 +492,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - ART-1 note: ostra_orb_hot plays only at full charge; Trade drift ~1.4 m/s (was 0.93), so ostra_swap clips must hold up at it.
 - Shots: ext/hero-shots-s2 kits/ostra/. Not checked: real-speed motion, chime, online, bots using charge, night.
 - Owner Qs: charge from 0.6 s (DPS unchanged) or 0 s (+15% DPS)? x1.8 size with matching hit radius OK? Should placed walls/domes keep stopping orbs ("walls" taken as terrain)?
+
+## 2026-11-05 S2: Breaker refs complete; queue
+- Have breaker_FINAL_sheet, breaker_turnaround, breaker_weapons, breaker_splash, the anglerfish decision (cosmetic only) and the new title "the Sunken Bulwark". All 8 slots are full (ART-1 Kael, Tarek, Lisette; ART-2 Lisette; drop-107; kits Tarek, Cinder; Boki). Next free slot: ART-1 Breaker restart. Then the title sweep on ext/rename-lisette, then Vex 68, gloves 69, glider 63, Claire 62+64+65.
