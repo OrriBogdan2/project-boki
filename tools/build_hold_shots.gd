@@ -96,12 +96,13 @@ func _building() -> void:
 	home.tw.test_hold = true
 	await main.get_tree().create_timer(3.0).timeout
 	await _until_phase("hammer", 0.45)
-	await _shot("01_hold_to_build", "Holding to build: hammer in hand, weapon away, Boki helping, the bar and spent materials")
+	await _shot("01_hold_to_build", "Holding to build: hammer in hand, weapon away, Boki helping, the bar filling")
 	home.tw.test_hold = false
 
 ## A spot beside the site where interact finds the site (not Hob).
 func _site_spot(hc: Vector3) -> Vector3:
-	for off in [Vector3(0, 0, -3.6), Vector3(3.6, 0, 1.0), Vector3(-3.6, 0, -1.0), Vector3(0, 0, 3.8), Vector3(3.6, 0, -1.5)]:
+	var offsets := [Vector3(0, 0, -3.6), Vector3(3.6, 0, 1.0), Vector3(-3.6, 0, -1.0), Vector3(0, 0, 3.8)]
+	for off in offsets:
 		var p: Vector3 = hc + off
 		if String(home.hob.find(Vector2(p.x, p.z)).get("kind", "")) == "site":
 			return p
@@ -120,7 +121,7 @@ func _paused() -> void:
 	home.player.position = home.ppos
 	_look(hc + Vector3(0, 0, 1.0), 0.8)
 	await main.get_tree().create_timer(0.8).timeout
-	await _shot("02_needs_materials", "The build paused at the quarter: 'Needs 2 more wood and 1 more stone' on the site and the prompt")
+	await _shot("02_needs_materials", "The build paused at the quarter: the site and the prompt say what is needed")
 
 func _gathering(what: String, shot_name: String, caption: String) -> void:
 	var hg: HomeGather = home.hg

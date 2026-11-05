@@ -117,7 +117,7 @@ func _levels() -> void:
 	var cost := FarmSites.upgrade_cost("market_stall", 2)
 	ok(why == "" and int(cost.get("labour", 0)) > 0 and int(cost.get("gems", 0)) > 0 and int(cost.get("wood", 0)) > 0
 		and int(Save.d["gems"]) == g0,
-			"upgrading to L2 takes labour %d, materials and %d gems as it goes (nothing at the start)" % [int(cost.get("labour", 0)),
+			"upgrading to L2 takes labour %d, materials and %d gems as it goes" % [int(cost.get("labour", 0)),
 			int(cost.get("gems", 0))])
 	ok(Stalls.level() == 1, "while the Boki build it, it still works at L1")
 	while FarmSites.has_site(e): FarmSites.add_swing(e)
