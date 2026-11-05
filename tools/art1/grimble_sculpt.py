@@ -655,6 +655,38 @@ def hoard(vox=0.0052):
     return h
 
 
+def frames(vox=0.0052):
+    """What the scan hoard doesn't carry: the coin heap behind his head, the timbers and iron arms for the bells and lanterns, the top hook."""
+    h = Field((-0.56, -0.40, 1.08), (0.56, 0.0, 1.86), vox)
+    # the coin heap behind his head, spilling to his left (the gold is the pile's bright spot from above)
+    coin = lambda x, y, z: 0.0
+    coin = lambda x, y, z: 0.018 * np.sin(x * 37 + y * 11) * np.sin(y * 29 + z * 13)
+    h.add(ell((0.125, -0.135, 1.265), (0.150, 0.095, 0.085), (0.10, 0.10, 0)), 0.02, GOLD, None, coin)
+    h.add(ell((-0.085, -0.150, 1.285), (0.115, 0.085, 0.070), (0.0, -0.2, 0)), 0.02, GOLD, None, coin)
+    h.add(ell((-0.245, -0.125, 1.205), (0.085, 0.080, 0.062)), 0.03, GOLD, None, coin)
+    rng = np.random.RandomState(3)
+    for i in range(24):
+        a = rng.uniform(0, math.tau)
+        c = (0.02 + rng.uniform(-0.29, 0.25), -0.135 + rng.uniform(-0.08, 0.07), 1.33 + rng.uniform(-0.07, 0.03))
+        ax = np.array((rng.uniform(-0.5, 0.5), rng.uniform(-0.5, 0.5), 1.0), F)
+        ax /= np.linalg.norm(ax)
+        h.add(cyl(c, ax, 0.040, 0.0075, 0.002), 0.0, GOLD)
+    # the frames: timbers fanning out of the pile to carry the bells and lanterns
+    for s in (1, -1):
+        h.add(path([(s * 0.10, -0.22, 1.30), (s * 0.255, -0.22, 1.56), (s * 0.30, -0.22, 1.62)], [0.024, 0.021, 0.019]), 0.0, _item("beam", (0, 0, 0), np.eye(3, dtype=F)) if s > 0 else HOARD[-1]["id"])
+        h.add(path([(s * 0.42, -0.21, 1.33), (s * 0.325, -0.215, 1.57), (s * 0.30, -0.215, 1.625)], [0.021, 0.020, 0.018]), 0.0, HOARD[-1]["id"])
+        h.add(path([(s * 0.14, -0.215, 1.46), (s * 0.40, -0.21, 1.42)], [0.0175, 0.0175]), 0.0, HOARD[-1]["id"])
+        h.add(sph((s * 0.303, -0.215, 1.640), 0.024), 0.0, IRON)
+        # iron arm out from the apex, the lantern's chain hangs from it
+        h.add(path([(s * 0.305, -0.215, 1.635), (s * 0.395, -0.215, 1.69), (s * 0.475, -0.215, 1.645)], [0.0115, 0.0105, 0.0095]), 0.0, IRON)
+    # the hook on top, the art's crown
+    h.add(path([(0.075, -0.385, 1.68), (0.095, -0.395, 1.79)], [0.010, 0.010]), 0.0, IRON)
+    h.add(_ring((0.095, -0.395, 1.805), (0, 1, 0), 0.020, 0.0068), 0.0, IRON)
+    return h
+
+
+
+
 BELL_R = 0.082
 BELL_H = 0.135
 
@@ -730,6 +762,13 @@ def ball(vox=0.030):
         b.add(box(tuple(c), (hw, 0.030, hh), 0.012, Rt), 0.012, lab)
     # the window: a deep pocket for the head
     b.sub(ell((0, 0.46, 0.0), (0.27, 0.30, 0.27)), 0.02, DARK)
+    return b
+
+
+def ball_frame(vox=0.012):
+    """The brass frame round the ball's window."""
+    b = Field((-0.40, 0.30, -0.40), (0.40, 0.60, 0.40), vox)
+    b.add(_ring((0, 0.44, 0), (0, 1, 0), 0.285, 0.030, 1.2), 0.0, BRASS)
     return b
 
 

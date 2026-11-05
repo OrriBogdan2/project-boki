@@ -12,6 +12,7 @@ import bmesh
 import bpy
 import numpy as np
 from mathutils import Vector
+from mathutils.bvhtree import BVHTree
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -25,7 +26,7 @@ import warden_kit as K
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 WORK = sys.argv[sys.argv.index("--") + 1]
-ONLY = sys.argv[sys.argv.index("--") + 2] if len(sys.argv) > sys.argv.index("--") + 2 else ""
+MESHY = os.path.expanduser("~/meshy/grimble")     # grimble_source.py's output (never in git)
 ATLAS = 2048
 F = np.float32
 
@@ -269,6 +270,54 @@ def spline(pts, n):
     return np.stack([np.interp(ts, L, pts[:, i]) for i in range(3)], 1).astype(F)
 
 
+SCAN = {}
+
+
+def scan_rgb(tag, pts):
+    """The scan's paint at each point: its nearest surface, by the triangle's UVs."""
+    if tag not in SCAN:
+        d = np.load(os.path.join(MESHY, "src_%s.npz" % tag))
+        tree = BVHTree.FromPolygons(d["v"].tolist(), d["f"].tolist(), all_triangles=True)
+        SCAN[tag] = (tree, d["v"], d["f"], d["uv"], imgio.load(os.path.join(MESHY, "tex_%s.png" % tag))[..., :3].astype(F))
+    tree, v, f, uv, tx = SCAN[tag]
+    H_, W_ = tx.shape[:2]
+    out = np.zeros((len(pts), 3), F)
+    fi = np.zeros(len(pts), np.int64)
+    at = np.zeros((len(pts), 3), F)
+    for i, q in enumerate(pts.tolist()):
+        loc, _, idx, _ = tree.find_nearest(q)
+        if idx is not None:
+            fi[i] = idx
+            at[i] = loc
+    a, b, c = v[f[fi, 0]], v[f[fi, 1]], v[f[fi, 2]]
+    v0, v1, v2 = b - a, c - a, at - a
+    d00, d01, d11 = (v0 * v0).sum(1), (v0 * v1).sum(1), (v1 * v1).sum(1)
+    d20, d21 = (v2 * v0).sum(1), (v2 * v1).sum(1)
+    den = np.maximum(d00 * d11 - d01 * d01, 1e-14)
+    w1, w2 = (d11 * d20 - d01 * d21) / den, (d00 * d21 - d01 * d20) / den
+    w0 = 1 - w1 - w2
+    t = uv[fi]
+    u_ = t[:, 0] * w0[:, None] + t[:, 1] * w1[:, None] + t[:, 2] * w2[:, None]
+    px = np.clip((u_[:, 0] % 1.0 * W_).astype(int), 0, W_ - 1)
+    py = np.clip(((1 - u_[:, 1] % 1.0) * H_).astype(int), 0, H_ - 1)
+    return tx[py, px]
+
+
+def tri_slots(tag, c, cen):
+    """Per triangle, by the paint's colour: gold and brass, olive hide, warm wood and leather, grey (skin on him, iron in the pile)."""
+    r, g, b = c[:, 0], c[:, 1], c[:, 2]
+    warm = r - b
+    out = np.full(len(c), "metal" if tag == "H" else "skin", dtype=object)
+    out[warm > 0.05] = "leather"
+    if tag == "B":
+        out[(g - b > 0.04) & (warm < 0.16)] = "cloth"
+    out[warm > 0.30] = "brass"
+    if tag == "F":
+        out[:] = "skin"
+        out[cen[:, 2] < G.HEAD_C[2] - 0.098] = "metal"
+    return out
+
+
 def main():
     t0 = time.time()
     K.reset()
@@ -290,23 +339,33 @@ def main():
         d = np.linalg.norm(v - G.EYE_C, axis=1)
         return np.clip(np.maximum(1.1 - np.abs(m) / 0.018, 1.0 - d / 0.08), 0.03, 1)
 
-    tr = G.figure(J)
-    part("skin_head", G.head(), 2050, "head", 2.4, None, "head", None, None, face_keep)
-    part("teeth", G.teeth(), 430, "tooth", 1.2, None, "head", "skin")
+    def scan(tag, nm):
+        with bpy.data.libraries.load(os.path.join(MESHY, "low_%s.blend" % nm)) as (src, dst):
+            dst.objects = [n for n in src.objects if n.startswith("Low_")]
+        ob = dst.objects[0]
+        bpy.context.scene.collection.objects.link(ob)
+        ob.data.materials.clear()
+        for u in list(ob.data.uv_layers):
+            ob.data.uv_layers.remove(u)
+        for c in list(ob.data.color_attributes):
+            ob.data.color_attributes.remove(c)
+        return ob
+
+    G.HOARD.clear()
+    part("skin_head", None, 0, "scan_F", 2.3, None, "scan", None, ob=scan("F", "head"))
     part("eye", G.eye(), 80, "eye", 2.6, None, "eye", "glow")
     part("lid", G.lid(), 90, "skin", 1.4, None, "lid", "skin")
     part("monocle", G.monocle(), 340, "gear", 2.2, None, "head", None)
-    part("body", tr, 3450, "skin", 1.0, None, "body", None)
-    part("belt", G.belt(), 230, "gear", 1.0, None, "root", None)
-    part("loin", G.loincloth(), 200, "loin", 0.9, None, "skirt", None)
+    part("body", None, 0, "scan_B", 1.0, None, "scan", None, ob=scan("B", "body"))
     part("straps", G.straps(), 130, "gear", 0.9, None, "hips", None)
     part("cuffR", G.cuff(J, "R", 1), 150, "gear", 1.0, None, "forearm.R", None)
     part("cuffL", G.cuff(J, "L", -1), 150, "gear", 1.0, None, "forearm.L", None)
     gt = G.gauntlet(J)
-    part("gauntlet", gt, 760, "gear", 1.4, None, "gauntlet", None)
-    part("hook", G.hook(J), 360, "gear", 1.3, None, "hook", None)
-    part("gun", G.gun(), 290, "gear", 1.3, G.gun_xf, "gun", None)
-    part("hoard", G.hoard(), 3550, "hoard", 1.0, None, "hoard", None)
+    part("gauntlet", gt, 700, "gear", 1.4, None, "gauntlet", None)
+    part("hook", G.hook(J), 340, "gear", 1.3, None, "hook", None)
+    part("gun", G.gun(), 280, "gear", 1.3, G.gun_xf, "gun", None)
+    part("hoard", None, 0, "scan_H", 1.0, None, "scan", None, ob=scan("H", "hoard"))
+    part("frames", G.frames(), 800, "hoard", 1.0, None, "hoard", None)
     bl = G.bell()
     ln = G.lantern()
     TIP = {"R": np.array((0.475, -0.215, 1.640), F), "L": np.array((-0.475, -0.215, 1.640), F)}
@@ -322,7 +381,11 @@ def main():
         part("bell" + n, bl, 100, "gear", 1.1, tb, "bell" + n, None)
         part("lampchain" + n, None, 0, "iron", 0.5, None, "lamp" + n, "metal", ob=chain_links("lampchain" + n, [TIP[n], ends["lamp" + n]], 0.034, 0.015, 0.0050))
     bf = G.ball()                # (the mesh from a coarse field, the paint from the fine one: decimating the fine one stalls)
-    part("ball", bf, 0, "hoard", 0.9, G.ball_xf, "ball", None, ob=lowpoly("ball", G.ball(0.064), 1300))
+    part("ball", bf, 0, "hoard", 0.9, G.ball_xf, "ball", None, ob=lowpoly("ball", G.ball(0.072), 880))
+    part("ballframe", G.ball_frame(), 130, "gear", 0.9, G.ball_xf, "ball", None)
+    for i, tilt in enumerate((0.5, -0.8)):
+        rg = [(math.cos(t) * G.BALL_R * 1.03, math.sin(t) * math.sin(tilt) * G.BALL_R * 1.03, math.sin(t) * math.cos(tilt) * G.BALL_R * 1.03) for t in np.linspace(0, math.tau, 41)]
+        part("ballchain%d" % i, None, 0, "iron", 0.3, G.ball_xf, "ball", "metal", ob=chain_links("ballchain%d" % i, rg, 0.078, 0.042, 0.016))
     # the chains on the weapon and the eyepiece
     x, wz = float(J["hand.R"][0]), float(J["hand.R"][2])
     k = G.HOOK_SCALE
@@ -412,8 +475,10 @@ def main():
             nn = f.grad(pts, f.vox * 0.9)
             lab = f.label(pts).astype(np.int32)
         nm = p["paint"]
-        if nm == "head":
-            rgb = P.head(pts, nn, lab, f)
+        if nm.startswith("scan_"):
+            rgb = scan_rgb(nm[-1], pts)
+            rgb = np.clip(rgb * (0.86 + 0.40 * P.form(nn))[:, None] * 1.12, 0, 1)
+            p["tri_slot"] = tri_slots(nm[-1], scan_rgb(nm[-1], vs[tri].mean(1).astype(F)), vs[tri].mean(1))
         elif nm == "skin":
             rgb = P.skin(pts, nn, lab, f)
         elif nm == "tooth":
@@ -430,7 +495,7 @@ def main():
             rgb = P.flat(pts, nn, nm)
         atlas[idx] = rgb
         mask |= m
-        if f is not None and not p["slot"]:
+        if f is not None and not p["slot"] and nm != "scanx":
             cen = vs[tri].mean(1).astype(F)
             p["tri_lab"] = f.label(f.project(cen, 1)).astype(np.int32)
         if p["xf"] is not None:
@@ -518,6 +583,8 @@ def main():
         vs = verts(ob)
         nm, grp = p["name"], p["group"]
         one = np.ones(len(vs), F)
+        if grp == "scan":
+            continue        # (its weights came from grimble_source.py)
         if nm == "skin_head":
             h = vs - G.HEAD_C
             neck = S.smooth(-0.125, -0.045, h[:, 1])
@@ -579,6 +646,12 @@ def main():
         me = ob.data
         if p["slot"]:
             me.materials.append(mat(p["slot"]))
+        elif "tri_slot" in p:
+            names = sorted(set(p["tri_slot"].tolist()))
+            for s in names:
+                me.materials.append(mat(s))
+            look = {s: i for i, s in enumerate(names)}
+            me.polygons.foreach_set("material_index", np.array([look[s] for s in p["tri_slot"].tolist()], np.int32))
         else:
             lab = p["tri_lab"]
             slots = sorted({slot_of(a) for a in np.unique(lab)})
@@ -592,8 +665,8 @@ def main():
         n = n / np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-6)
         me.normals_split_custom_set_from_vertices(n.tolist())
 
-    ROOM = {"teeth": 0.0, "eye": 0.0, "lid": 0.0, "skin_head": 0.15, "monocle": 0.1, "monochain": 0.0, "hookchain": 0.0, "lampchainR": 0.0, "lampchainL": 0.0,
-            "ball": 0.5, "hoard": 0.55, "hook": 0.9, "gauntlet": 0.5}
+    ROOM = {"eye": 0.0, "lid": 0.0, "skin_head": 0.15, "monocle": 0.1, "monochain": 0.0, "hookchain": 0.0, "lampchainR": 0.0, "lampchainL": 0.0,
+            "ball": 0.5, "hoard": 0.35, "frames": 0.5, "body": 0.5, "hook": 0.9, "gauntlet": 0.5}
     for p in parts:
         me = p["ob"].data
         at = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
