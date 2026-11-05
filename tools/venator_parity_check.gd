@@ -250,10 +250,12 @@ func _launcher(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) 
 	var plain := _walk_speed(m, P)
 	var p0 := P.pos
 	var puffs0 := K.puffs
+	var burrs0 := K.burrs.size()
 	P.inp["sec"] = true
 	P.inp["sec_hold"] = true
 	m.step(C.DT)
-	var out_now := K.puffs == puffs0 + 1 and float(K.cd["rmb"]) > 0.0
+	# (the charge goes at once; on her model the puff waits for the bell, TUBE_SWING)
+	var out_now := K.burrs.size() == burrs0 + 1 and float(K.cd["rmb"]) > 0.0
 	var b: Dictionary = K.burrs[-1] if not K.burrs.is_empty() else {}
 	var gun := P.model.get_node_or_null("Rig/Torso/Aim/Gun/Muzzle") as Node3D
 	var from_gun := not b.is_empty() and gun != null and (b["pos"] as Vector3).y >= gun.global_position.y
