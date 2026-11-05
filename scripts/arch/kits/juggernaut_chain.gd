@@ -4,8 +4,8 @@ extends RefCounted
 ## The states and every transition are in docs/heroes/juggernaut.md "Warchain: the state machine":
 ## ready -> throwing (the hook flies at the cursor) -> hooked (a foe or a wall: the link chain stays on while
 ## you move, paying out to its full length and holding there, 5s) -> pulling (E again: an impulse toward the
-## anchor that where he looks and his movement input swing into an arc, and backing away first slingshots; Shift or
-## a jump exits) ->
+## anchor that where he looks and his movement input swing into an arc, and backing away first slingshots;
+## Shift or a jump exits) ->
 ## arriving (a short window that keeps some of the pull's speed and still takes the Cinder Spin) -> ready.
 ## A miss, a stun or the time running out breaks it. Owned by JuggernautKit.
 
@@ -306,9 +306,9 @@ func _draw_hooked(stretch: float) -> void:
 		return
 	var a := h.pos + Vector3(0, 1.0, 0)
 	var b := anchor + Vector3(0, 1.0 if target != null else 0.6, 0)
-	_launch(Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z))
-	var bow := _bow(_aimed())
-	k.fx().chain(_fx_id(), a, b, 0.3 * (1.0 - tension), ORANGE.lerp(HOT, tension * 0.6), DARK, 0.13 + 0.03 * tension, bow)
+	_launch(Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z))      # the pull as it would start now, for the preview
+	k.fx().chain(_fx_id(), a, b, 0.3 * (1.0 - tension), ORANGE.lerp(HOT, tension * 0.6), DARK,
+			0.13 + 0.03 * tension, _bow(_aimed()))
 	_draw_preview()
 
 ## How far the chain's middle bends out toward a swing of `aside` m (the side of the pull's line).

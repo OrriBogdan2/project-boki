@@ -833,6 +833,14 @@ func chain_swing() -> void:
 	A.ok("jug swing: the predicted arc shows before the press and ends where he lands (within 1 m)",
 			aside["shown"] and (aside["promised"] as Vector3).distance_to(aside["end"]) < 1.0,
 			"%s against %s" % [aside["promised"], aside["end"]])
+	# a wall on the swing's side: he doesn't grind on it, the pull ends there
+	var Wd = m.world
+	var lv: int = r[5]
+	for dx in range(6, 16):
+		Wd.level[Wd.idx(int(home.x) + dx, int(home.z) - 2)] = lv + 3
+	var walled := _haul(m, P, K, home, T, left, Vector2.ZERO)
+	A.ok("jug swing: swung into a wall the pull ends there, not grinding along it",
+			walled["exit"] == "arrived" and float(walled["t"]) < 0.8, str(walled))
 	await A.done(m)
 
 # ------------------------------------------------------------------ the pull model (steer, curve, slingshot)
@@ -863,7 +871,7 @@ func chain_steer() -> void:
 		if how == "sling":
 			A.step(m, 0.35, func(): P.inp["move"] = Vector2(-1, 0))      # backing away, then pulled while still going
 		if how == "face":
-			A.aim_at(P, home + Vector3(9.0, 0, 8.0))
+			A.aim_at(P, P.pos + Vector3(0, 0, 9.0))
 		var from := P.pos
 		K.use_e()
 		var t := 0.0

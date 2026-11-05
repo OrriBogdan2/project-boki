@@ -318,19 +318,30 @@ func _juggernaut_chain() -> void:
 		[0.9, "full", "warchain_sling_1", "Kael Warchain: hooked, backing away"],
 		[1.07, "full", "warchain_sling_2", "Kael Warchain: E while backing away: the slingshot, flying in faster"],
 		[1.25, "full", "warchain_sling_3", "Kael Warchain: arrived on the dummy, still moving"]], 4.5)
-	await _reset(9.0)
-	var steer := func(t: float):
+	cam_at = home + Vector3(6.5, 0, -2.0)      # item 57: both hauls under one still camera, to lay over each other
+	for run in [["straight", Vector3(13, 0, 0)], ["curved", Vector3(0, 0, -13)]]:
+		await _haul_strip(String(run[0]), run[1])
+	cam_at = Vector3.ZERO
+
+## A haul at the dummy 13 m east: hooked with the cursor on it, then the cursor at `look` from him (it stays put
+## on screen) as E is pressed.
+func _haul_strip(name_of_run: String, look: Vector3) -> void:
+	var K: JuggernautKit = P.ak
+	await _reset(13.0)
+	var haul := func(t: float):
 		if _at(t, 0.1):
 			K.cd["e"] = 0.0
 			K.use_e()
-		if _at(t, 0.6):
+		if _at(t, 0.8):
 			K.use_e()
-		P.inp["move"] = Vector2(0, 1) if t > 0.6 else Vector2.ZERO
-		_aim(T.pos)
-	await _go(1.3, steer, [
-		[0.68, "full", "warchain_steer_1", "Kael Warchain: E with a strafe held: the pull swings out that way"],
-		[0.8, "full", "warchain_steer_2", "Kael Warchain: curving round toward the dummy"],
-		[0.95, "full", "warchain_steer_3", "Kael Warchain: arriving beside it, not on its line"]], 4.5)
+		_aim(T.pos if t < 0.6 else P.pos + look)
+	var marks := []
+	for i in 7:
+		var when := 0.75 + 0.12 * i
+		marks.append([when, "full", "haul_%s_%d" % [name_of_run, i],
+				"Kael Warchain, %s haul, %.2f s after the press" % [name_of_run, when - 0.8]])
+	await _go(1.65, haul, marks)
+	K.warchain.snap("")
 
 ## The audit (Nov 3): Skycall held and dragged, then released; the strike ring at its true radius.
 func _mage_audit() -> void:
