@@ -6,6 +6,8 @@ extends RefCounted
 ## touches the save.
 
 const TRI_BUDGET := 15000
+const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
+	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "grimble"}
 const DT := 1.0 / 30.0
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
@@ -22,6 +24,8 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
+	for id in OWN_MODELS:
+		_own_model(String(id), String(OWN_MODELS[id]))
 	var n := 0
 	for id in Arch.ids():
 		var art_name := WardenGlb.art(String(id))
@@ -32,6 +36,15 @@ func run(main: Node) -> void:
 	ok(n > 0, "at least one Hero has clips (%d)" % n)
 	print("CLIP_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## A Hero's own .glb, wearing its clips: a bad merge of WardenGlb falls back to the procedural body in silence.
+func _own_model(id: String, art_name: String) -> void:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	holder.add_child(m)
+	var sync := m.get_node_or_null("Warden/Sync")
+	var own := WardenGlb.art(id) == art_name and WardenGlb.has_model(id) and bool(m.get_meta("glb", false))
+	ok(own and sync != null and sync.get("clips") != null, "%s: its own %s.glb with clips, not the fallback" % [id, art_name])
+	m.free()
 
 func _hero(main: Node, id: String, art_name: String) -> void:
 	var dd := WardenClips.data(art_name)
