@@ -1107,3 +1107,7 @@ Use it with hem_v4_needlebow.png for the weapon/prop meshes:
 - **arrows:** the fletched needle arrow with red thread binding
 - **quiver:** the spool quiver
 - **mask, hairpin, scissors:** as drawn
+
+## 2026-11-05 02:12 UTC (ext): Hem splash (owner-approved candidate): `briefs/art-refs/hem_v4_splash.png`
+- Use it for her menu splash + portrait crop (replaces `art/portraits/archer_splash`/portrait via the portraits pipeline) when her model lands, or sooner if a lane is free.
+- The owner may send a touched-up version (shadow's bow / mask stitching); if so, ext will replace this file.
