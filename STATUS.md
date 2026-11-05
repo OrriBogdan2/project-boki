@@ -538,3 +538,16 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Before merge:** Net.VERSION still needs a bump for "comet" and "cburst" (TODO in net.gd, inherited from ext/drop); online drops untested. Perf: draws 1275/1714 -> 1946/2955, tris 765k -> 1426k in the wide view (software GL, squad 3): needs one capture on the owner's PC. Not reviewed on Forward+.
 - Review: strips and GIFs on ext/hero-shots-s2 2a400f61 drop-107/; video on disk, not in git: /home/boki/shots-s2/drop-107/drop_107_review.mp4 (64 s, sound). Nobody has heard the mix: -25.9 LUFS, peak -7.6 dBFS.
 - Owner Qs: are the snap and landing punchy enough (bus compressor holds them near -23)? 17x pull-out right? Comet riders OK with break-away only?
+
+## 2026-11-05 S2: main moved (ff92d1e2); trial merges of every READY branch
+- Clean against ff92d1e2: kit-cinder-66, kit-sable-53-54, kit-hem-55b, kit-kael-57, kit-breaker-59, kit-tarek-61-67, pip-scale-108, rename-lisette, drop-107, boki-starter.
+- **CORRECTION: ext/kit-ostra-60-75 f55930d5 is NOT mergeable as posted.** Main took ext/small-60-66-75, an earlier implementation of the same items 60+75 (f44adba4). It conflicts in ostra.json, tether_lantern.json, docs and wiki. Its agent is reconciling it onto main as a patch; don't merge f55930d5.
+- **ext/art2-kael 0fbc63e6 conflicts in tools/check_registry.gd only**; its agent will merge main. Wait for the new commit.
+
+## 2026-11-05 S2: READY ext/kit-cinder-66 ea287770 (item 66, hardening on main's version)
+- 0 behind ff92d1e2, 6 files, +190/-54. Fixes in main's item 66: other weapons could still fire in flight; a bot's press ticked in your ears; a hold carried into the cast ticked; relight_t could block the first frame after a short flight; the pilot flame stayed frozen where she took off. Dead code and stale docs removed.
+- Differs: the lance lights on the first frame after, fire follows its usual 0.2 s pilot; a stun or Boki merge ending the flight isn't asserted.
+- Checks 0 failures: --check, ashwick-combo 110, hero-combo 263, archetype 339, arena 86, class-unlock 153, warden-model, warden-glb, rig-standard, tutorial-hud, dash-flow, keybind, ability, health --strict, gen_wiki 34 unchanged; --import one comment commit earlier. Full run: 10 known reds matched by name only; perch 4 fails on clean ff92d1e2 too. mantle-look passed here.
+- A suite run rewrites art/wardens/src/vex_rig.json (2 values, source unknown): restore it, don't commit it.
+- Not checked: tick by ear; a real online client (the tick is gated on is_local(); a remote client may hear none).
+- Shot: ext/hero-shots-s2 kits/cinder/. Owner Q: LMB held through the flight comes back after the normal 0.2 s pilot; OK, or instant as after a ram?
