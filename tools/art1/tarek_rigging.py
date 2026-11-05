@@ -496,7 +496,7 @@ def scan_reshape(ob):
     return W, ix
 
 
-SKIN_K = S.vec(0.64, 0.5, 0.42)
+SKIN_K = S.vec(0.68, 0.57, 0.51)
 ARM_L_GROW = 0.46
 ARM_R_SHRINK = 0.2
 HAIR_FAT = 0.011              # m the scan's thin locs grow along their normals (tarek_head: thick ropes)
