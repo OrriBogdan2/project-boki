@@ -198,13 +198,14 @@ func close() -> void:
 	listening = ""
 	delete_armed = -1
 	UI.show_backdrop(dim, false)
-	Sfx.play("whoosh", null, -14.0)
+	Sfx.play("ui_close", null, -14.0)
 	closed.emit()
 
 ## The Esc menu: Resume on top, the places you go most next, the rare ones as quiet links, and
 ## leaving at the bottom.
 func open_pause(where: String) -> void:
 	ctx = where
+	Sfx.play("ui_open", null, -10.0)
 	stack.clear()
 	page = ""
 	var v := _page("pause", "Paused" if where == "match" else "Menu", 440)
