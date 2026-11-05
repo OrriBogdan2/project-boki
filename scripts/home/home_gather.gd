@@ -162,9 +162,8 @@ func _crack(at: Vector3, hits: int) -> void:
 		cracks[tile] = holder
 	var mat := Models.toon(CRACK_COL, false)
 	var ang := float(hits) * 2.1 + float(tile)
-	var dir := Vector3(cos(ang), 0, sin(ang))
-	var at_rock := dir * 0.42 + Vector3(0, 0.55, 0)
-	Models.part(holder, Models.box(0.04, 0.5, 0.04), mat, at_rock, Vector3.ONE, Vector3(0.3, ang, 0.9))
+	var at_rock := Vector3(sin(ang) * 0.35, 0.5 + float(hits) * 0.08, 0.7)      # on the face you see from the south
+	Models.part(holder, Models.box(0.07, 0.6, 0.07), mat, at_rock, Vector3.ONE, Vector3(0.4, ang, 0.7))
 
 ## The last hit: it comes down, you get its wood or stone, and it starts growing back.
 func finish() -> int:
