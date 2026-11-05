@@ -193,6 +193,7 @@ bm.from_mesh(low.data)
 dl = bm.verts.layers.deform.verify()
 gi = low.vertex_groups["kill"].index
 bmesh.ops.delete(bm, geom=[v for v in bm.verts if gi in v[dl]], context="VERTS")
+bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0004)     # (the scan is split along its UV seams: weld, or every island cracks open)
 bm.to_mesh(low.data)
 bm.free()
 bpy.ops.object.select_all(action="DESELECT")

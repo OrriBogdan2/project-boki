@@ -556,13 +556,16 @@ by, bx = np.nonzero(bm_)
 bp, bn = RB["p"][by, bx], RB["n"][by, bx]
 BC = S.dilate(imgio.load(os.path.join(WORK, "body.jpg"))[::-1].copy(), bm_, it=6)
 bc = BC[by, bx]
+# the scan's cream runs yellow under the toon light: back to the sheet's linen
+yel = K.smooth(0.72, 0.84, bc[:, 0]) * K.smooth(0.8, 0.86, bc[:, 1] / np.maximum(bc[:, 0], 0.01)) * K.smooth(0.82, 0.72, bc[:, 2] / np.maximum(bc[:, 0], 0.01))
+bc = P.mix(bc, bc.mean(1, keepdims=True) * np.array((1.05, 1.0, 0.92), F), yel * 0.55)
 bl, bst = P.constellation(bp, bn, np.full(len(bp), names.index("body")), names)
 tl2, ts2 = P.tail_stars(bp, bn, tpath)
 bl, bst = np.maximum(bl, tl2), np.maximum(bst, ts2)
 bc, be = P.stack(bc, np.zeros_like(bc), bl, bst)
 d2t = ((bp[:, None, :] - tpath[None, -6:, :].astype(F)) ** 2).sum(2).min(1) ** 0.5
-tipk = K.smooth(0.34, 0.1, d2t)
-be = np.maximum(be, P.rgb("ffdf9c")[None, :] * (tipk * 0.42)[:, None])
+tipk = K.smooth(0.24, 0.08, d2t)
+be = np.maximum(be, P.rgb("ffdf9c")[None, :] * (tipk * 0.3)[:, None])
 fl_c = np.array(BODY_FLOWER, F)
 frad = np.linalg.norm(bp - fl_c, axis=1)
 be = np.maximum(be, P.rgb("ffdf9a")[None, :] * (K.smooth(0.05, 0.012, frad) * 0.6)[:, None])
