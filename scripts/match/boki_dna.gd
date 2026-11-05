@@ -9,7 +9,7 @@ const KINK := 0.32
 const BOB := 0.7
 const TUFT_SHAPE := Vector3(0.8, 1.4, 0.8)
 const HIP := 0.22              # m: longer legs stand it taller by about this x the roll
-const EAR_TIP := Vector3(0.223, 0.86, -0.081)     # model space (right side)
+const EAR_TIP := Vector3(0.218, 0.838, -0.081)    # model space (right side)
 const TAIL_TIP := Vector3(0, 0.77, 0.10)
 const MARKS := {"left flank": Vector3(-0.115, 0.25, 0.09), "right flank": Vector3(0.115, 0.25, 0.09),
 	"back": Vector3(0, 0.335, 0.10), "chest": Vector3(0, 0.235, -0.165)}
@@ -63,7 +63,7 @@ func _shapes(d: Dictionary, mats: Array) -> void:
 			_turn("ear2.L", Vector3.RIGHT, -FOLD)
 			_turn("ear2.R", Vector3.RIGHT, -FOLD)
 		"tufted":
-			var tuft := Models.sphere(0.04, 6)
+			var tuft := Models.sphere(0.03, 6)
 			_stick("ear2.L", EAR_TIP * Vector3(-1, 1, 1), tuft, tuft_m, "Tuft", TUFT_SHAPE)
 			_stick("ear2.R", EAR_TIP, tuft, tuft_m, "Tuft", TUFT_SHAPE)
 	match String(d.get("tailv", "standard")):
