@@ -2177,3 +2177,20 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - The same rule for every build/craft/chop/mine progress bar in the farm (HunterTool / farm_sites / builder).
 - **Assert:** over a full build, the bar's displayed value never decreases between frames.
 - 173 addendum (owner, 17:57): "or not move at all". When no work is happening (you stop hammering, the Boki idle, materials run out), the bar simply holds still: no decay, no wobble. It only ever moves forward, or stays put.
+
+## 174. The "2" Boki list: an obvious, one-click route to each Boki's own sheet (owner, 17:58 UTC Nov 5)
+- The owner: "from pressing 2 (which it offers me) you should be able to access the boki sheet / individual sheet easily (im not sure how) - so make it clear and easy to do".
+- Today: the farm tutorial says "Click {boki}, or press {details} next to it, to open its page. Or press 2 for all your Boki." The list (2) doesn't make it obvious how to open one Boki's sheet.
+- **Fix the list (2):**
+  - A grid/row of cards (portrait, name, level, a mood icon).
+  - The whole card is clickable (hover highlight + cursor) → opens that Boki's individual sheet.
+  - Also a clear "View ›" button on each card, and a double-click / Enter on the selected one.
+  - Arrow keys/WASD move the selection; Esc closes.
+- **The individual sheet:**
+  - A "‹ All Boki" back button returns to the list (with the same selection).
+  - ◀ ▶ arrows (or Q/E) flip to the previous/next Boki without going back.
+- **The farm tutorial step** (steps[5]): "Press 2, then click a Boki to see its sheet." Highlight the first card with the item 166 language on that step.
+- Pressing 2 again or Esc closes from anywhere.
+- **Assert:**
+  - 2 → the list; click a card → the sheet of that Boki; back → the list; next/prev cycles.
+  - The tutorial step completes on opening any sheet.

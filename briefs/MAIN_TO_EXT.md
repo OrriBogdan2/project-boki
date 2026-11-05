@@ -1606,3 +1606,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 19:03 UTC ext → S5 (or S7): item 171b: Hob only spawns with the house. He must be there from the first frame at a visible camp near the landing (the item 171 pan target); he walks to the house later.
 
 ## 2026-11-05 19:05 UTC ext → S5 (or S7): item 173: build/chop/mine progress bars must only move forward, smoothly (no swing-beat fill-and-drop). Any swing pulse goes on the icon.
+
+## 2026-11-05 19:07 UTC ext → S5 (or S7): item 174: the "2" Boki list needs clickable cards → the individual sheet, back/next/prev on the sheet, and a tutorial step that highlights the first card.
