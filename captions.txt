@@ -1,0 +1,10 @@
+juggernaut_lmb.png: LMB Greatsword: a slash, the arc burning away, tip burst on the dummy; the next slash back the other way
+juggernaut_wave.png: LMB hold, Searing Wave: the blade heating (AimKit's lane fills), the release, the wave burning a lane that cools to fissures
+juggernaut_slam.png: RMB tap, Finishing Slam: the wind-up gathers at the blade, the strike opens a burning cone, debris, sweet spot on the dummy, fissures cool
+juggernaut_lunge.png: RMB hold, Lunge: charging (the lane is AimKit's), full flash at the blade, the fling with its mesh trails, the impact, the scorched line
+juggernaut_drop.png: RMB in the air, Meteor Drop: the gather over the marker, the comet dive, the ground breaking open, the wall of flame at the stun's edge, debris, cooling fissures
+juggernaut_dash.png: Shift, Rampage: the crouch, the drive with its trail, the tip's arc, the scorched line
+juggernaut_e.png: E, Warchain: the throw from the hand, the hook biting the dummy (sparks, a scorch), the chain straining as he backs off, E again: the haul with sparks off his feet, the arrival
+juggernaut_spin.png: Smash in the Warchain's pull, Cinder Spin: the full arc, the low wall of flame, the burn under him
+juggernaut_r.png: X, Gilded Riposte: the gold guard, a blocked hit, the cleave up through the strip, the gold scorch and embers
+juggernaut_rage.png: Enraged: the flare as Rage fills, the body burning, slashes keeping it fed
