@@ -1155,3 +1155,11 @@ This one sheet now has everything (vivid colours, the owner's skin tone, capris)
 ## 2026-11-05 02:41 UTC (ext): Kael weapon sheet: `briefs/art-refs/kael_weapons.png`
 - **Use it for:** the shape and detail. The jagged blade glows white-hot with molten cracks; there's a flat iron crossguard, a leather-wrapped grip and a spiked pommel. The chain and hook are rusted; his right wrist is bandaged, with the chain wrapped round it.
 - **Scale: follow the master sheet and splash, NOT this sheet's silhouette.** The blade is long and broad, roughly shoulder-to-ankle on him, with a shorter grip than drawn here.
+
+## 2026-11-05 03:00 UTC (ext): PAUSE Breaker + Ostra MODELS: new concepts in progress (owner)
+- **Breaker** is being fully redesigned: a colossal, very wide frozen deep-sea DIVER (brass diving helmet with glowing eyes, anchor on a chain, a ship's-hatch shield, a glowing compass heart). Don't spend more on `ext/art1-breaker` from the old look; keep the rig/proportion groundwork only.
+- **Ostra** is also getting new concepts. Pause `ext/art1-ostra` the same way.
+- **Lisette (ex-Hem) and Kael have FINAL owner references** in `briefs/art-refs/`: lisette/hem_FINAL_sheet, hem_v4_props, hem_v4_splash, lisette_turnaround_apose; kael_FINAL_sheet, kael_turnaround_apose, kael_weapons, kael_splash.
+  - If `ext/art1-kael` was built from the old look, rework it to kael_FINAL_sheet (huge streaming scarf, silver armour, no kilt).
+  - Lisette next in ART-1.
+- Pip size (108) and kits continue as planned.
