@@ -2168,3 +2168,45 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - Checks: --check 0, --tutorial-hud-check 0, health --strict OK, gen_wiki OK, the tutorial drive completes. --teammate-check 1 = the known rival red.
 - Shots: /home/claude/shots/tut-fix/*.png (ext viewed job_page + speech_after).
 - Known leftover: on the farm the Boki bubble can still overlap a world marker ("Chop a tree"), which is covered by item 102 (S1 clarity pass).
+
+## 2026-11-05 (S4): READY `ext/rank-ui-98` @ d66e1383 (owner item 98: choosing which ability to rank)
+- Base main fe51b43b; 11 files +245/-26 incl. .uid. New: scripts/ui/rank_marks.gd (RankMarks: tier pips, the "+", the hint), scripts/ui/rank_click.gd (RankClick: click target over the "+"), tools/rank_ui_check.gd, tools/rank_ui_shots.gd. hud.gd +1 line (RankClick.attach); hud_slot.gd -20 (the marks moved out).
+- Item 98, point by point:
+  - **Visible "+":** done. Bigger gold "+" (r 11 px, pulsing) on every slot that can rank, and it is **clickable** (it wasn't before). Clicks never fire the weapon (RankClick sits in Hud.ui_extra, so the pointer shows). A locked slot that a point can open takes a click on its face too. Alt + key unchanged.
+  - **Tier pips:** done. Bigger pips over each ranked slot (I-III; Fusion slot I-II), gold once maxed.
+  - **Unspent-point pulse:** done. Stronger gold frame pulse, and when a point arrives the "ALT+key" hint shows on a dark pill over every rankable slot for 5 s (then on hover only), so it's discoverable without flooding the bar.
+  - **Max one ability first:** works (check: 3 level-ups all into E, RMB and dash untouched, E's power 1.00 -> 1.43, cooldown x0.80). Bots still rank by `order`.
+  - **Differs: tier IV / R III.** SLOT_MAX is still RMB/Shift/E 3 and the ranked "ult" (Fusion) 2; the source has I-IV and R I-III. The kits only implement effects up to rank 3, and the Hunter ultimate on R (HunterUltTile) unlocks at a level and has no ranks at all. Raising the tiers is a 12-kit data pass plus the level curve (10 levels = 10 points). **DECISION?** whether to do that pass (and the owner's optional `bonus_point_at_max`, not built: owner to decide).
+  - Tutorial step: on ext/tut-airdash (not touched here).
+- Checks:
+
+| Check | Result |
+|---|---|
+| --rank-ui-check (new) | 0 failures / 16 |
+| health --strict | OK, no budget raised |
+
+- Shots (in this branch): briefs/shots/s4/rank-ui-98/rank_fresh_point.png (a new point: + on RMB, UNLOCK on dash, ALT+RMB hint, E's pips gold), rank_pulse.png (5 s later, hint gone, + pulsing), rank_spent.png (pips only), rank_fresh_point_full.png (whole screen).
+- Wiring for main: none. No reserved files touched (boki_hud's R/Fusion slot goes through HudSlot.skill_slot, so it gets the same marks).
+
+## 2026-11-05 (S4): READY `ext/loot-full-99` @ f484773e (owner item 99: looting with a full inventory)
+- Base main fe51b43b; 13 files +469/-72 incl. .uid and a lowered style baseline. New: scripts/match/loot_full.gd (LootFull: fits/blocked/smart/swap/drop), scripts/ui/loot_hold.gd (LootHold: the hold window, red "full" outline, the shared item row), tools/loot_full_check.gd, tools/loot_full_shots.gd. hud.gd net -32 (row builder moved into LootHold), match.gd -1, pack.gd 3 lines.
+- Item 99, point by point:
+  - **Smart loot reports only what moved:** done ("Took 1 of 3, inventory full", "Inventory full, took nothing", "Took N"). The window stays open when nothing was taken so you can pick by hand.
+  - **Bug fixed on the way:** smart loot's capsule loop never ended when the capsule box was full (infinite loop); it now stops.
+  - **A click that doesn't fit never fakes success:** done. Unfit rows get a red outline, a "Full" button and a short rattle (existing lock_rattle sound, no new asset). Clicking opens your backpack beside the box with the clicked item held in red, with **Swap** (yours goes into the box) and **Drop** (yours to the ground) on each of your items.
+  - **Ground items / chests:** chests drop their loot on the ground, so both use the existing swap window (Hud.open_swap), now with the red outline + rattle on the incoming item; its Drop already leaves yours on the ground.
+  - **Differs:** belt, key and capsule rows that don't fit only get the red outline and a short "Belt full" / "Box full" line, not the swap flow (swapping against belt slots or capsules is a much bigger feature). Box looting is local; Net shape unchanged.
+- Checks:
+
+| Check | Result |
+|---|---|
+| --loot-full-check (new) | 0 failures / 25 |
+| --backpack-check | 0 failures |
+| --keys-check | 0 failures / 84 |
+| --economy-check | 0 failures |
+| --life-check | no FAIL |
+| health --strict | OK, no budget raised |
+
+- Shots (in this branch): briefs/shots/s4/loot-full-99/hold_window.png (full backpack: red "Full" rows, the hold window with Swap/Drop), after_swap.png (box now holds your swapped item), ground_full.png (ground pickup with a full pack); captions.txt.
+- Wiring for main: none. No reserved files touched.
+- Note: S3 (clarity/102) will own the message queue; these use the existing toast path.
