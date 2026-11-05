@@ -664,7 +664,7 @@ for i_, r_ in region.items():
 col = sample_scan(POS[ys, xs].astype(np.float64), _is_arm[FID[ys, xs]])
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 OUTC[ys, xs] = np.power(np.clip(col, 0, 1), 0.9) * 1.06
-OUTC[ys, xs] *= (0.7 + 0.3 * np.clip(AO[ys, xs], 0, 1))[:, None]
+OUTC[ys, xs] *= (0.84 + 0.16 * np.clip(AO[ys, xs], 0, 1))[:, None]      # (the scan's paint is already shaded; more leaves a smudge under the chain)
 ri, gi, bi = OUTC[..., 0], OUTC[..., 1], OUTC[..., 2]
 lumi = OUTC.mean(2)
 z_t = POS[..., 2]
@@ -679,6 +679,9 @@ neon &= (np.abs(POS[..., 0]) < 0.125) | (z_t < 1.09)      # the corset, the ches
 n_b = blur(neon.astype(np.float32), mask.astype(np.float32), 1)
 core = n_b > 0.5
 print("neon texels", int(core.sum()))
+# the forearm's veins, caught by the sleeve hanging over it: leather has no pink
+jk = mask & (np.abs(POS[..., 0]) > 0.1) & (z_t > 1.1) & (z_t < 1.36) & (ri > gi * 1.5) & (bi > gi)
+OUTC[jk] = np.array([0.17, 0.15, 0.19], dtype=np.float32)
 # the bare back at the waist: the turnaround's corset band out, the master's skin in
 bw = mask & (POS[..., 1] < 0.03) & (z_t > 1.0) & (z_t < 1.16) & (ri > gi * 1.35) & (bi > gi * 0.95) & (ri > 0.42)
 OUTC[bw] = P.skin(POS[bw].astype(np.float64), NOR[bw].astype(np.float64), AO[bw].astype(np.float64)).astype(np.float32)
@@ -760,6 +763,27 @@ hot_ = (cc_[:, 0] > 0.8) & (cc_[:, 2] > 0.6) & (cc_[:, 1] < 0.45) & (kk_ > 0.5)
 hot_ &= np.hypot(px_ - EYE_X, pz_ - EYE_Z) > 0.024        # (the pink eye keeps its painted iris; its glow is the bloom on anchor_eye_glow)
 core[yy_, xx_] = False
 core[yy_[hot_], xx_[hot_]] = True
+# the chest bolt from the head sheet (crisp, a bright heart): registered by its own bounds, like the corset
+cb = core & (z_t > 1.3) & (z_t < K.NECK_Z) & (np.abs(POS[..., 0]) < 0.08) & (POS[..., 1] > 0.0)      # (below the choker: the face has its own bolt)
+hwin = np.zeros(hd_.shape[:2], bool)
+hwin[960:1100, 340:470] = True
+hn = hwin & (hd_[..., 0] > 0.8) & (hd_[..., 2] > 0.55) & (hd_[..., 1] < 0.5)
+hy, hx = np.nonzero(hn)
+if cb.sum() > 100 and len(hy) > 100:
+    bz0, bz1 = np.percentile(z_t[cb], 1), np.percentile(z_t[cb], 99)
+    bx0, bx1 = np.percentile(POS[..., 0][cb], 1), np.percentile(POS[..., 0][cb], 99)
+    hv0, hv1, hu0, hu1 = np.percentile(hy, 1), np.percentile(hy, 99), np.percentile(hx, 1), np.percentile(hx, 99)
+    mg = 0.016
+    pb_ = mask & (POS[..., 1] > 0.0) & (z_t > bz0 - mg) & (z_t < bz1 + mg) & (POS[..., 0] > bx0 - mg) & (POS[..., 0] < bx1 + mg)
+    yy_, xx_ = np.nonzero(pb_)
+    uu_ = hu0 + (bx1 - POS[yy_, xx_, 0]) / (bx1 - bx0) * (hu1 - hu0)
+    vv_ = hv0 + (bz1 - z_t[yy_, xx_]) / (bz1 - bz0) * (hv1 - hv0)
+    cc_ = bil(hd_, uu_, vv_)
+    bd_ = np.minimum.reduce([z_t[yy_, xx_] - (bz0 - mg), (bz1 + mg) - z_t[yy_, xx_], POS[yy_, xx_, 0] - (bx0 - mg), (bx1 + mg) - POS[yy_, xx_, 0]])
+    kb_ = smooth(0.0, 0.012, bd_)[:, None]
+    OUTC[yy_, xx_] = (OUTC[yy_, xx_] * (1 - kb_) + cc_ * kb_).astype(np.float32)
+    core[yy_, xx_] = (cc_[:, 0] > 0.86) & (cc_[:, 2] > 0.7) & (cc_[:, 1] < 0.42)
+    print("chest bolt projected", len(yy_), "glow", int(core[yy_, xx_].sum()))
 # a soft edge on the neon: a hard magenta edge rings yellow in the atlas's JPEG
 kf_ = np.clip(blur(core.astype(np.float32), mask.astype(np.float32), 2) * 1.5, 0, 1)[..., None]
 OUTC = OUTC * (1 - kf_) + P.KEY.astype(np.float32) * kf_
