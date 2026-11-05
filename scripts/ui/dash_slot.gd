@@ -7,6 +7,7 @@ extends RefCounted
 ## numbers (src): a match from the Hunter (of_hunter), the farm from its mirror of the same state.
 
 const PIP_H := 4.0                      # px, a charge pip's height
+const PIP_Y := 16.0                     # px from the slot's bottom edge to the pips (clears the key pill)
 const AIR_R := 4.5                      # px, the air-dash diamond's half-size
 const TICK_VOL := -15.0                 # dB of the charge-returned tick
 const TICK_PITCH := 1.9
@@ -64,7 +65,7 @@ static func draw(H, r: Rect2, s: Dictionary, audible := true) -> void:
 	var px := r.get_center().x - (pw * cap + 2.0 * (cap - 1)) * 0.5
 	var fills: Array = []
 	for i in cap:
-		var pr := Rect2(Vector2(px + i * (pw + 2.0), r.end.y - 8.0), Vector2(pw, PIP_H))
+		var pr := Rect2(Vector2(px + i * (pw + 2.0), r.end.y - PIP_Y), Vector2(pw, PIP_H))
 		c.draw_rect(pr.grow(1.0), HudStyle.SHADE_EDGE)
 		c.draw_rect(pr, Color(1, 1, 1, 0.18))
 		var fill := clampf(float(s["charges"]) - float(i), 0.0, 1.0)

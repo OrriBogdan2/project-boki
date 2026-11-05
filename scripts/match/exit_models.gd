@@ -225,21 +225,21 @@ static func uplink() -> Node3D:
 	banner.name = "Banner"
 	banner.position = Vector3(0, OutpostLook.BANNER_LOW, -0.15)
 	mast.add_child(banner)
-	Models.part(banner, Models.box(0.95, 0.07, 0.07), dark, Vector3(0.45, 0, 0))
+	Models.part(banner, Models.box(1.25, 0.08, 0.08), dark, Vector3(0.55, 0, 0))
 	var cloth_mat := Models.toon(OutpostLook.NEUTRAL, false, 0.0)
-	var cloth_at := Vector3(0.45, -0.55, 0)
-	Models.part(banner, Models.box(0.78, 1.0, 0.04), cloth_mat, cloth_at, Vector3.ONE, Vector3.ZERO, "Cloth")
+	var cloth_at := Vector3(0.55, -0.7, 0)
+	Models.part(banner, Models.box(1.0, 1.3, 0.04), cloth_mat, cloth_at, Vector3.ONE, Vector3.ZERO, "Cloth")
 	PropAnim.on(cr, 0.25, 0.04)
-	# the lift: four pylons round the plinth, each with a lamp that lights as the charge fills
+	# the lift: four pylons round the plinth, each capped with a lamp that lights as the charge fills
 	for i in 4:
 		var a := TAU * i / 4.0 + PI / 4.0
 		Models.part(root, Models.box(0.3, 1.2, 0.3), stone, Vector3(cos(a) * 1.9, 0.6, sin(a) * 1.9))
 		if Flora.v2():
 			Models.part(root, Models.box(0.42, 0.14, 0.42), Models.toon(Color("a49e94")), Vector3(cos(a) * 1.9, 1.24, sin(a) * 1.9), Vector3.ONE, Vector3(0, -a, 0))
 			Models.part(root, Models.box(0.44, 0.16, 0.44), Models.toon(Color("6e6a66")), Vector3(cos(a) * 1.9, 0.08, sin(a) * 1.9), Vector3.ONE, Vector3(0, -a, 0))
-		var lamp_at := Vector3(cos(a) * 1.9, 0.9, sin(a) * 1.9)
+		var lamp_at := Vector3(cos(a) * 1.9, 1.38, sin(a) * 1.9)
 		var lamp_mat := Models.toon(OutpostLook.NEUTRAL, false, 0.0)
-		Models.part(root, Models.box(0.1, 0.6, 0.32), lamp_mat, lamp_at, Vector3.ONE, Vector3(0, -a, 0), "Lamp%d" % i)
+		Models.part(root, Models.box(0.3, 0.1, 0.3), lamp_mat, lamp_at, Vector3.ONE, Vector3(0, -a, 0), "Lamp%d" % i)
 	var charge := MeshInstance3D.new(); charge.name = "Charge"; charge.mesh = Models.flat_quad(5.2)
 	var chm := Models.ring_mat(Color(UPLINK.lightened(0.3), 0.95), 0.08)
 	chm.set_shader_parameter("arc", 0.0)
@@ -258,7 +258,7 @@ static func uplink() -> Node3D:
 	lpm.set_shader_parameter("fill", 0.25)
 	pad.material_override = lpm; pad.position.y = 0.09
 	lift.add_child(pad)
-	lift.add_child(_beam(UPLINK, 30.0, 1.5, 1.7, 0.18))
+	lift.add_child(_beam(UPLINK, 9.0, 1.5, 1.7, 0.14))
 	Flora.paint_set_piece(root)
 	return root
 

@@ -7,8 +7,8 @@ extends RefCounted
 ## no column while charging, and the only motion is the banner stirring and the crystal turning slowly.
 
 const NEUTRAL := Color("7d8494")        # stone grey: an uplink nobody holds, or one gone dark
-const BANNER_LOW := 1.7                 # m up the mast: the banner when nobody holds it
-const BANNER_HIGH := 3.15               # m: ... when a team holds it
+const BANNER_LOW := 2.2                 # m up the mast: the banner when nobody holds it
+const BANNER_HIGH := 3.3                # m: ... when a team holds it
 const SWAY_RAD := 0.12                  # rad, how far the banner stirs
 const SWAY_RATE := 1.7                  # rad/s of the stir
 const CRYSTAL_GLOW := 1.3               # shader glow of a fully charged crystal
