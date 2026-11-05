@@ -1093,3 +1093,29 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Seed damage / root / burst unchanged.
 - Update the data, the card text and the tutorial line.
 - **Assert:** a press → the throw at ~1.0 s; the aim direction is sampled at the throw moment; holding longer doesn't delay or change it.
+
+## 119. Remove the word popups: keep damage numbers and essentials only (owner, 16:55 UTC Nov 5; extends item 102)
+- The owner: "getting rid of the ui for stuff like 'vault reset' or 'Sweet spot' - i dont think supervive does this and it clutters the screen - just keep dmg numbers and essentials".
+- Remove the flavour word popups: every `ArchKit.payoff_fx(...)` word (SWEET SPOT, VAULT RESET, and the same kind in every kit: archer, ashwick, bulwark, dolm, dredge, gunslinger, juggernaut, mage, ostra, pin_ult, thief_chain, and so on).
+  - Keep their VFX and sound; only the floating text goes.
+  - Simplest route: payoff_fx stops spawning the label (one switch), and the callers stay.
+- **Keep:**
+  - Damage and heal numbers (crit styling OK).
+  - Essentials that change a decision: DOWNED / REVIVING, the low-ammo and cooldown "not ready" feedback, pickup names, objective and extraction callouts.
+  - When in doubt, cut it.
+- **Assert:** a match with every kit firing its payoff spawns no word labels; damage numbers still appear.
+
+## 120. Sable ult (Encore): spin, slowed, impactful; the outer edge hurts more (owner, 16:55 UTC Nov 5)
+- The owner: "sable should spin around and be slowed during ult - it needs to feel impactful. and hurt people more on the outer edges".
+- **Spin:** while Encore runs (2 s), she spins: a full-body spin (the Death Blossom read), not upper-body throws over walking legs. Blades fan out from the spin.
+- **Slowed:** she moves ~50% slower while it runs (tune). This is a trade for the power, so she shouldn't dash freely through it; the current "keeps moving, shooting and dashing" goes.
+- **Impact:**
+  - Heavier cast hit: a short camera kick and a punchy sound.
+  - The ring flares on each beat, and the blade hits read clearly.
+  - A big final burst at the end.
+- **Outer edge:** the outer-band bonus already exists in code (past 75% radius: harder + blight), but the owner doesn't feel it.
+  - Make it obvious: a bigger multiplier (e.g. x1.6-2 vs the inner area).
+  - A clearly visible gold rim band on the ground.
+  - Rim hits look and sound different.
+- Note: the owner may have tested an old build, but he wants this anyway.
+- **Assert:** the cast → a spin anim playing for the duration; move speed ~0.5x; a rim hit deals ≥1.6x an inner hit.

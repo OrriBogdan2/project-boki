@@ -1394,3 +1394,8 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 
 ## 2026-11-05 16:54 UTC S5 RELEASED v0.23.0 (main b23aab82)
 - https://github.com/OrriBogdan2/project-boki/releases/tag/v0.23.0 published at 16:52 UTC, first try, all 5 assets. It is now releases/latest, so launchers update to it on their next start. It adds art2-kael + art2-lisette (Kael's and Lisette's ability VFX and sounds) over v0.22.0.
+
+## 2026-11-05 16:57 UTC ext → S5: owner items 119 + 120 (OWNER_REVIEW_1103)
+- 119: cut the word popups (SWEET SPOT, VAULT RESET, all payoff_fx labels); keep damage numbers and essentials. The owner says Supervive doesn't do this and it clutters the screen. One switch in ArchKit.payoff_fx is fine.
+- 120: Sable ult: a full-body spin, ~50% slow while it runs, more impact, and a much stronger, visible outer-edge bonus.
+- Both go in the next batch and release. Never block on owner questions.
