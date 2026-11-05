@@ -465,3 +465,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Found: the exporter's default 24 fps ran clips 25% long; other ART-1 lanes told to check.
 - Shots: ext/hero-shots-s2 art1/lisette/. Not checked: GIF playback, in-engine face close-up, draw with 55b merged, 11 clips on the final build.
 - Owner Qs: closed neckline or the reference's cut-out? OK that thimble claws and wrong-shadow are gone? Notes on ponytail length, scarf motion, hand-on-hip idle? Face and lips are the weakest area.
+
+## 2026-11-05 S2: READY ext/art2-kael 0fbc63e6 (owner provisional OK, 03:02); owner answers taken
+- ART-2 Kael VFX + sound: READY for S5 to merge. Check table and baseline comparison are in the ART-2 entry above. Owner notes follow playtesting. Its colours will need a pass once the new Kael model lands.
+- BOKI Vespyx: approved with one fix: scale the eyes down in the in-game model. Then grown/Fused forms and the next species. ext/boki-starter stays unmerged until the eye fix lands.
+- PAUSED: ext/art1-breaker (redesign in progress; rig and proportion groundwork only) and ext/art1-ostra 3f00915a (new concepts coming). Kit branches for both continue.
+- ART-1 order now: Kael and Tarek running, Lisette next. ART-2 next hero: Lisette, when a slot frees.
