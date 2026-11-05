@@ -1548,3 +1548,19 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - The white overlay is on iff in the window, for all timing kits.
   - Lisette window ≈0.22 s, reached ~15% sooner than now.
+
+## 142. Lisette ult: visible big arrows, not a railgun beam, plus a map-wide ult sound (owner, 17:28 UTC Nov 5)
+- The owner: "she should have big arrows for her ult so its less of a railgun looking thing - but not as big as the rmb is currently, like maybe half the size - and it should play a sound so people are aware she used her ult".
+- **Visual:** replace the beam/railgun read with actual arrow projectiles.
+  - Each shot is a big needle-arrow at ~half the CURRENT RMB arrow size, which is about the same as the new RMB size after item 140. Keep the ult a touch bigger/brighter than the RMB so it stays special.
+  - Red thread trail, a visible arrow body in flight (no instant line).
+  - An impact burst and no lingering arrow (the item 140 rule).
+  - Gameplay speed/hit logic unchanged unless the beam was hitscan; then use a very fast projectile (≥80 m/s) to keep the feel.
+- **Ult awareness sound:**
+  - On cast, a distinctive loud cue heard by everyone in a wide radius (map-wide or ≥40 m): her signature (e.g. a taut string creak into a sharp needle "ting" + her voice line).
+  - Audible to enemies so they know the ult is up.
+  - Plus a release sound on each shot.
+  - S4's set.
+- **Assert:**
+  - Ult shots spawn arrow meshes, not a beam.
+  - The cast sfx plays for an enemy listener at 40 m.

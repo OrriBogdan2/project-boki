@@ -1510,3 +1510,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 17:48 UTC ext → S5: owner item 141
 - Every timing hero flashes white (a model rim glow) during its perfect window: one shared component with item 132.
 - Lisette LMB: perfect window 0.15 → ~0.22 s and a ~15% faster draw to it.
+
+## 2026-11-05 17:49 UTC ext → S5: owner item 142 (Lisette ult): real big arrows (~half the current RMB size) instead of the railgun look, plus a loud, wide-radius cast sound so everyone knows she ulted.
