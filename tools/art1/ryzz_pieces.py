@@ -249,11 +249,11 @@ def pigtail(s):
     hint_f = np.array([0.0, 1.0, 0.25])
     main = [(0, 0, 0), (0.05, -0.012, 0.05), (0.125, -0.02, 0.062), (0.185, -0.028, -0.005), (0.19, -0.03, -0.095), (0.15, -0.03, -0.175)]
     M_ = dict(root=0.42, peak=0.5, thick=0.95, tip=0.006)
-    out.append(lock("pigA" + sd, W(main), 0.098, rings=11, uv=(0.0, 0.0, 0.25, 0.62), hint=hint_f, **M_))
+    out.append(lock("pigA" + sd, W(main), 0.098, rings=11, uv=(0.0, 0.0, 0.25, 0.46), hint=hint_f, **M_))
     out.append(lock("pigB" + sd, W([(0, -0.002, 0.005), (0.04, -0.045, 0.066), (0.11, -0.068, 0.088), (0.168, -0.078, 0.022), (0.175, -0.085, -0.08)]), 0.082, rings=10,
-                    uv=(0.25, 0.0, 0.5, 0.62), hint=np.array([0.2, 1.0, 0.3]), **M_))
+                    uv=(0.25, 0.0, 0.5, 0.46), hint=np.array([0.2, 1.0, 0.3]), **M_))
     out.append(lock("pigC" + sd, W([(0, 0.004, 0.0), (0.04, 0.03, 0.04), (0.10, 0.04, 0.034), (0.145, 0.042, -0.04), (0.135, 0.042, -0.125)]), 0.074, rings=10,
-                    uv=(0.5, 0.0, 0.75, 0.62), hint=hint_f, **M_))
+                    uv=(0.5, 0.0, 0.75, 0.46), hint=hint_f, **M_))
     F_ = dict(root=0.8, peak=0.42, thick=0.7, tip=0.003)
     out.append(lock("pigF0" + sd, W([(0.03, -0.012, 0.045), (0.066, -0.014, 0.105), (0.062, -0.018, 0.165), (0.038, -0.022, 0.208)]), 0.054, rings=7,
                     uv=(0.75, 0.46, 1.0, 1.0), hint=hint_f, **F_))
@@ -264,9 +264,9 @@ def pigtail(s):
     # the S-curl tails, pink through their outer half, side by side so they never cross
     T_ = dict(root=0.85, peak=0.34, thick=0.72, tip=0.004)
     out.append(lock("pigS0" + sd, W([(0.18, -0.03, -0.09), (0.222, -0.03, -0.16), (0.19, -0.032, -0.22), (0.224, -0.034, -0.28), (0.196, -0.036, -0.335), (0.178, -0.038, -0.365)]), 0.052, rings=11,
-                    uv=(0.5, 0.42, 0.75, 1.0), hint=hint_f, **T_))
+                    uv=(0.5, 0.2, 0.75, 1.0), hint=hint_f, **T_))
     out.append(lock("pigS1" + sd, W([(0.115, -0.03, -0.11), (0.138, -0.03, -0.17), (0.106, -0.03, -0.225), (0.136, -0.03, -0.28), (0.116, -0.03, -0.32)]), 0.044, rings=10,
-                    uv=(0.75, 0.42, 1.0, 1.0), hint=hint_f, **T_))
+                    uv=(0.75, 0.2, 1.0, 1.0), hint=hint_f, **T_))
     chain = catmull(W(main + [(0.17, -0.032, -0.26)]), CHAIN_BONES + 1)
     names = ["spring_pig%s_%d" % (sd, i) for i in range(CHAIN_BONES)]
     for p in out:
@@ -422,7 +422,7 @@ def strip(name, mat, pts, w, th, uv=None, hint=None, room=1.0):
 
 
 def wire(name, path, w=0.0048, mat="glow-ryzz", uv=GLOWW_R):
-    return sweep(name, mat, path, TRI, np.full(len(path), w), side_hint=np.array([0.3, 0.5, 0.8]), uv_rect=uv, room=0.2)
+    return sweep(name, mat, path, TRI, np.full(len(path), w), side_hint=np.array([0.3, 0.5, 0.8]), uv_rect=uv, room=0.0)
 
 
 def gum():

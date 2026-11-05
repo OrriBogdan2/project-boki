@@ -507,7 +507,7 @@ lumi = OUTC.mean(2)
 z_t = POS[..., 2]
 # near-black leather lifted to charcoal with a cool cast (the toon rim reads it as gloss otherwise)
 dk_k = smooth(0.34, 0.12, blur(OUTC.max(2), mask.astype(np.float32), 2))[..., None] * mask[..., None]
-OUTC = OUTC * (1 - dk_k * 0.3) + np.array([0.082, 0.072, 0.1], dtype=np.float32) * dk_k
+OUTC = OUTC * (1 - dk_k * 0.1) + np.array([0.15, 0.135, 0.175], dtype=np.float32) * dk_k
 # the neon: bright magenta line art, corset, chest bolt, forearm veins -> the glow key (the shader's model_glow colour)
 neon = mask & (ri > 0.86) & (bi > 0.62) & (gi < 0.6) & (ri > gi * 1.6) & (z_t > 0.95)
 n_b = blur(neon.astype(np.float32), mask.astype(np.float32), 1)
