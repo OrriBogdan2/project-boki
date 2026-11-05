@@ -439,3 +439,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: Lisette (was Hem) updates taken
 - ART-1 lane ext/art1-hem has the owner's new refs (lisette_turnaround_apose, hem_FINAL_sheet, hem_v4_props, hem_v4_splash). All 8 slots full; ext/rename-lisette takes the next free slot, then Tarek 61+67, Cinder 66, Vex 68, gloves 69, glider 63, Claire 62+64+65.
+
+## 2026-11-05 S2: ART-1 Ostra built: ext/art1-ostra 3f00915a (awaits the Kael pilot approval; do not merge yet)
+- Rebuilt from scratch in Blender: 16,203 tris with the orb, scale unchanged (0.9), bone-driven sculpted mask, hands with 10 finger bones each, orb skinned on x_weapon with anchor_orb + weapon_muzzle (76b). 36 clips via the WardenClips runtime (content/rules/warden_anim/ostra.json). 0 credits.
+- Checks 0 failures on the 5acdd5a7 code: rig-standard, warden-glb, warden-model, warden-clips, ostra-combo 132, warden-stance, portrait 107, mantle-look, --check, archetype 339, ability, dash-flow, hero-combo 263, health --strict. **Full suite not run**, though it changes shared hooks (hunter_anim, warden_glb, models), and not combined with the Kael/Breaker branches. warden_clips.gd differs from Kael's tip: the merge must keep one version.
+- Shots: ext/hero-shots-s2 art1/ostra/. GIFs not watched one by one; not tested in a live match; AnimationTree cost unmeasured (49 tracks per clip).
+- Gaps: hunter.gd doesn't appear to feed a `dead` state, so the death clip likely never plays for ANY Hero on this runtime; fuse clip untested in a real merge; clips ignore MantleLook shoulder/arm sliders.
+- Owner Qs: 19 deg halo tilt OK for the match read, or vertical as drawn? Smooth living-porcelain mask, or hinged puppet jaw? Stance clip after 6 s still, or after combat?
+- Process: the agent used `pkill -f` on its own hung run, against the no-pattern-pkill rule; it targeted only its own processes and reported it. Lane rules reminded.
