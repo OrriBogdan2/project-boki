@@ -741,3 +741,13 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Gaps: hair facets close up, tail sinks into the ground in downed/revive, a small red polygon on the sternum, dark copper, painted toe claws.
 - Owner Qs: spearhead tip on the gun OK? Vial belt per cinder_weapons (does the "cooler holder" note stand)? Wide tail arc for the top-down read OK?
 - Slot: Boki budget pass.
+
+## 2026-11-05 S2: READY (with caveats) ext/art1-hem 94cef4b0: Lisette
+- About 14.8k tris with the bow, 6 materials, LODs on, one 2048 atlas; 41 clips; bow skinned; portraits back to main's. 0 credits.
+- **Fidelity:** silver needle bow yes; red-thread string yes; needle arrows yes nocked and in the spool, **no in flight** (old FX; ext/art2-lisette covers it); spool quiver yes; red-stitched mask yes; green eyes yes; tan skin yes; long red scarf yes (spring chains with ripple, not true cloth); capris yes; red-thread trail VFX no (S3, or art2-lisette). Proofs: ext/hero-shots-s2 304d5445 art1/lisette/proof_*.png.
+- Checks on final-build code: --check, rig-standard, clip-check, warden-model 157, warden-glb 182, warden-stance, portrait 107, archer-combo 128, hero-combo 272, bot-sanity, health --strict: 0 failures. Full suite ran earlier on c71f545c, before the main merge and the 15k cut: baseline reds only; bot-sanity failed there on seed 9, passes on the final commit.
+- **Merge order: ext/art1-kael first.** It conflicts with a24ba6fe in warden_clips, warden_glb, check_registry, clip_check: take Kael's side. Clean with main, kit-hem-55b, art2-lisette.
+- Check change: warden-glb head-nod test hands a clip Hero's head to the rig.
+- Gaps: two small fixes unbuilt (hair needle dark, thigh pokes a scarf tail in draw); weak hair volume and fine stitching at 15k; 3 anim sheets not viewed on the final build; draw not tested in game with 55b.
+- Owner Qs: closed neckline OK vs the sheet's cut-out? Hand-on-hip idle vs the sheet's held arrow?
+- decimate_warden.py isn't on main/Kael/Motley (S1's branch), so lanes cut by build targets. S1: please land it or say.
