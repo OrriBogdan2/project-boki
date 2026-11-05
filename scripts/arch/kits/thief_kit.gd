@@ -21,16 +21,14 @@ extends ArchKit
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
-const BOLT_GOLD := Color("ffc04a")
-const BOLT_CORE := Color("fff2c0")
-const FIZZLE := Color("6a48ff")    # a bolt running out at the cursor: a blue-violet puff
-const EMP_BLUE := Color("4ab8ff")  # the empowered shot's chakram
+const BOLT_VIOLET := Color("a64dff")   # her shots: violet, a white-violet core
+const BOLT_CORE := Color("f2e6ff")
+const EMP_MOTH := Color("eef0ff")      # the empowered shot: moth-white round the violet
 const GLINT_EDGE := Color("2a1450")    # the dark violet edge round the hand glint
-const GHOST := Color("7af0ff")     # the blink's afterimages
+const GHOST := Color("b48aff")     # the blink's afterimages
 const KNOCK_STAR := Color("ff2a48")
 const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is empowered
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
-const BOLT_TAIL := Color("ff8a2a")     # the bolt's short orange flame tail
 const KNIFE_VIOLET := Color("b07aff")  # the dagger's arrival circle
 const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
@@ -39,7 +37,6 @@ const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the s
 ## that peaks near 0.15s and runs down into the hasted run by the landing (the sheet's measured curve).
 const VAULT_CURVE := [[0.0, 0.4], [0.3, 1.9], [1.0, 0.55]]
 const VAULT_MEAN := 1.2025         # the mean of VAULT_CURVE, so the distance stays the data's
-const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
 const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
 const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
 const CARTWHEELS := ["thf_vault_r", "thf_vault_l", "thf_vault_f", "thf_vault_b", "thf_vault_twist", "thf_exdash"]
@@ -71,7 +68,6 @@ var last_bolt_end := Vector3.ZERO
 var last_bolt_emp := false
 var blinks := 0
 var vault := {}                # the Cartwheel running: {t, dur, speed, air}
-var trail_t := 0.0
 var landing_due := false       # an air cartwheel is over; she lands in a crouch when she touches down
 
 func _setup() -> void:
@@ -240,7 +236,7 @@ func _tick(dt: float) -> void:
 		primed_t -= dt
 		if primed_t <= 0.0:
 			primed_t = 0.0
-			fx().puff(hand_pos(hand == 0), FIZZLE, 0.3, 0.2)       # unused, it fades from the hand
+			vfx("primed_fade", hand_pos(hand == 0))       # unused, it fades from the hand as smoke
 	_tick_pips(dt)
 	# marks fade on every target we've touched
 	for f in m.foes_of(h.team):
@@ -255,7 +251,7 @@ func _tick(dt: float) -> void:
 	_tick_vault(dt)
 	chain.tick(dt)
 	_tick_landing()
-	_tick_trail(dt)
+	_tick_trail()
 	_tick_wrapped(dt)
 	_tick_knife()
 	_tick_glint(dt)
@@ -311,7 +307,7 @@ func _net_glint(dt: float) -> void:
 	if primed_t <= 0.0 or glint_net_t > 0.0:
 		return
 	glint_net_t = GLINT_NET_EVERY
-	net_ring(hand_pos(hand == 0), 0.25, EMP_LINE)
+	vfx("primed_glint", hand_pos(hand == 0))
 
 func move_k() -> float:
 	return 1.0 + (vault_haste() if haste_t > 0.0 else 0.0)
@@ -393,31 +389,26 @@ func _bolt() -> void:
 		sd["dmg"] = float(sd["dmg"]) * empowered_k()
 		sd["r"] = 0.3
 		x["kb"] = 3.0
-		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 2.6, 0.55)
-		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
-		m.sfx("dj_bolt_emp", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
+		HeroVfx.of(m).trail(h, "bolt_emp", fx().ride(sd, "chakram_big", EMP_MOTH, BOLT_VIOLET, 2.6, 0.55))
 	else:
-		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_GOLD, 0.9, 0.3)
-		fx().star(muzzle, BOLT_GOLD, 0.6, 0.1, BOLT_CORE)        # the gold muzzle star at the throwing hand
+		HeroVfx.of(m).trail(h, "bolt", fx().ride(sd, "chakram", BOLT_VIOLET, BOLT_CORE, 0.9, 0.3))
+	vfx("bolt_fire", muzzle, d, {"emp": emp})        # the muzzle flare at the throwing hand, a wisp of smoke
 	last_bolt_emp = emp
 
-## Where a bolt ends: a starburst on a hit, a blue-violet puff at the cursor, sparks on a wall.
+## Where a bolt ends: a violet burst on a hit, a puff of smoke at the cursor, sparks on a wall.
 func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> void:
 	s["dj_end"] = true
 	last_bolt_end = at
 	primed_on = e if emp else null
 	if emp: chain.bolt_ended()
+	var way := (s["vel"] as Vector2).normalized()
 	if e != null:
-		fx().star(at, BOLT_GOLD if not emp else Color("ffe070"),
-				1.5 if emp else 0.7,
-				0.24 if emp else 0.14)
-		if emp: m.fx.spark(at, Vector3.UP, EMP_BLUE, 14, 11.0, 70.0)
+		vfx("bolt_hit", at, way, {"emp": emp})
 	elif why == "expire":
 		fizzles += 1
-		fx().puff(at, FIZZLE, 0.75 if not emp else 1.1, 0.34, Color("c8b8ff"))
-		m.sfx("dj_fizzle", at, -10.0 if h.is_local() else -14.0, 1.0)
+		vfx("bolt_fizzle", at, way)
 	else:
-		m.fx.spark(at, Vector3.UP, BOLT_GOLD, 6, 6.0, 80.0)
+		vfx("bolt_wall", at, way)
 
 # ------------------------------------------------------------------ dash: Vault
 ## The Cartwheel: a Vault charge on the ground; in the air (or out of charges) the long dash, flipped her way.
@@ -495,21 +486,14 @@ func play(move: String) -> void:
 func fires_in_dash() -> bool:
 	return String(flow.row("lmb")["mode"]) == "fire"
 
-## Her own after-images on every dash: cyan streaks and a spinning cyan star where her hands were (not the
+## Her own wake on every dash: violet-grey smoke that hangs where she passed and violet sparks off her (not the
 ## shared team-colour pill).
 func own_dash_trail() -> bool:
 	return true
 
-func _tick_trail(dt: float) -> void:
-	if h.roll_t <= 0.0 or not tells_visible():
-		return
-	trail_t -= dt
-	if trail_t > 0.0:
-		return
-	trail_t = TRAIL_EVERY
-	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
-	fx().streak(h.pos + Vector3(0, 0.7, 0), dir, 1.3, 0.5, GHOST, Color("e0fbff"), 0.3)
-	fx().star(h.pos + Vector3(0, 1.0, 0), GHOST, 0.5, 0.22, Color("c9a0ff"))
+func _tick_trail() -> void:
+	if h.roll_t > 0.0 and tells_visible():
+		HeroVfx.of(m).hold(h, "vault_trail")
 
 ## After a Vault: the flip (the routine's, ThiefChain; from a jump the air one), the white arc its hands and feet
 ## trace, the speed and, by its row, the next bolt empowered: the glint forms in the throwing hand and flares as
@@ -519,9 +503,7 @@ func _vaulted(air: bool, empower: bool) -> void:
 	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
 	play("thf_exdash" if air else chain.next_flip(dir))
 	var t := float(dd["time"])
-	_swoosh(dir)
-	m.later(t * 0.5, func(): if is_instance_valid(h): _swoosh(dir))
-	m.sfx("dj_cartwheel", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
+	vfx("vault", h.pos, dir)          # the arcs her hands and feet trace, the smoke she leaves
 	if not empower:
 		return
 	haste_t = float(dd["haste_t"])
@@ -530,15 +512,10 @@ func _vaulted(air: bool, empower: bool) -> void:
 	m.later(t, func():
 		if not is_instance_valid(h) or primed_t <= 0.0: return
 		glint_pop = 1.0                          # the bolt formed in the hand: empowered
-		net_ring(hand_pos(hand == 0), 0.25, EMP_LINE)
-		m.sfx("click", h.pos, -6.0 if h.is_local() else -10.0, 2.2))
+		vfx("primed", hand_pos(hand == 0)))
 	if not was:
 		m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 		if h.is_local(): h._ab_feedback("dash", "ready")
-
-func _swoosh(dir: Vector2) -> void:
-	fx().crescent(h.pos + Vector3(0, 0.85, 0), dir, 300.0, 1.05, GHOST, AIM_LILAC, 0.3,
-			PI * 0.5)
 
 # ------------------------------------------------------------------ passive hooks
 ## Marks make your bolts on that target stronger: +10% of a bolt each, a flat add like the source's +16 a stack,
@@ -574,20 +551,15 @@ func _primed_hit(t: Ent) -> void:
 	_reset_fx(t)
 	m.later(0.06, func(): if is_instance_valid(h): play("thf_reset"))
 
-## The empowered hit and the reset, in her colours: a blue-white star and an upright blade arc on the target (the
-## source's red-white flash with its blue chakram), a white four-point glint with RESET at her throwing hand,
-## its own sound (no self-shake: item 50).
+## The empowered hit and the reset, in her colours: a violet and moth-white burst with an upright arc on the
+## target, a white glint with RESET at her throwing hand, its own sound (no self-shake: item 50).
 func _reset_fx(t: Ent) -> void:
 	var at := t.pos + Vector3(0, 1.0, 0)
 	var dir := Vector2(t.pos.x - h.pos.x, t.pos.z - h.pos.z)
-	fx().star(at, EMP_BLUE, 2.2, 0.2, Color.WHITE)
-	fx().crescent(at, dir, 160.0, 1.2, EMP_BLUE, Color.WHITE, 0.2, PI * 0.5)
-	m.fx.flash(at, Color("e8f6ff"), 1.0, 0.08)
+	vfx("reset_hit", t.pos, dir.normalized())
 	var at_hand := hand_pos(hand == 1)
-	fx().star(at_hand, Color.WHITE, 1.4, 0.28, GHOST)
+	vfx("reset_hand", at_hand)
 	m.fx.word(at_hand + Vector3(0, 0.7, 0), "RESET", GHOST, false)
-	m.sfx("pay_cashin", at, -2.0, 1.0)
-	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
 ## A rival we hit was knocked (or we assisted): a heal, a crimson star on them, a green pillar on us.
@@ -612,7 +584,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	bola_cast = {"t": float(bd["cast"])}
 	play("thf_bola")                  # the whirl overhead through the wind-up, the sling at the end
-	m.sfx("dj_bola_whirl", h.pos, -4.0 if h.is_local() else -8.0, 1.0)
+	vfx("bola_wind")
 
 func lane_len() -> float:
 	var bd: Dictionary = rmb_def()["bola"]
@@ -655,12 +627,8 @@ func _throw_bola() -> void:
 	var dv := h.aim_dir()
 	bola = {"pos": h.pos + Vector3(dv.x * 0.5, 1.0, dv.y * 0.5), "dir": dv, "left": float(bd["range"]), "first": null,
 			"bounces": int(bd["bounces"]), "stg": stg}
-	m.sfx("dj_bola_throw", h.pos, -3.0, 1.0)
 	Feel.cast_sound(m, "projectile", "control", h.pos, h)
-	# the yellow flash of the throw
-	fx().star(h.pos + Vector3(dv.x * 0.6, 1.2, dv.y * 0.6), col_of(rmb_def()), 0.8, 0.12)
-	net_bolt(h.pos + Vector3(0, 1.0, 0), h.pos + Vector3(dv.x, 0, dv.y) * lane_len() + Vector3(0, 1.0, 0),
-			col_of(rmb_def()))
+	vfx("bola_throw", h.pos, dv)      # the flash of the throw, its cord crackling out
 
 func _ground_t() -> float:
 	return float(rmb_def()["bola"]["ground"])
@@ -683,8 +651,7 @@ func _tick_bola(dt: float) -> void:
 				else: dir.y = -dir.y
 				bola["bounces"] = int(bola["bounces"]) - 1
 				bola_bounces += 1
-				m.fx.spark(p, Vector3.UP, col_of(rmb_def()), 8, 6.0, 70.0)
-				m.sfx("click", p, -5.0, 1.4)
+				vfx("bola_bounce", p, dir)
 				continue
 			_end_bola(p)
 			return
@@ -725,7 +692,7 @@ func _walled(q: Vector3) -> bool:
 func _end_bola(at: Vector3) -> void:
 	bola = {}
 	fx().unplace("bola%d" % h.get_instance_id())
-	m.fx.burst(at, col_of(rmb_def()), 5, 2.0, 0.25, 6.0, 0.6)
+	vfx("bola_end", at)
 
 ## The Bola wraps its first foe: its stage (damage), Grounded and slowed, a Mark, the binding rings.
 func _wrap(f: Ent) -> void:
@@ -735,7 +702,7 @@ func _wrap(f: Ent) -> void:
 	KitStatus.apply(f, "gnd", _ground_t())
 	add_mark(f, 1, true)
 	wrapped[f.get_instance_id()] = [f, _ground_t()]
-	m.sfx("dj_bola_wrap", f.pos, -3.0, 1.0)
+	vfx("bola_wrap", f.pos, h.dir_to(f))
 
 ## Yellow rings bind the Grounded (everyone sees them), two of them winding round their legs.
 func _tick_wrapped(dt: float) -> void:
@@ -771,13 +738,10 @@ func _tangle(f, other: Ent) -> void:
 		var pool := marks_on(both[0]) + marks_on(both[1])
 		for t in both: set_marks(t, pool)
 	var a: Vector3 = other.pos if both.size() < 2 else (both[1] as Ent).pos
-	m.fx.bolt(a + Vector3(0, 0.6, 0), other.pos + Vector3(0, 0.6, 0), col)
-	m.fx.bolt(a + Vector3(0, 1.0, 0), other.pos + Vector3(0, 1.0, 0), col.lightened(0.3))
+	var span := Vector2(other.pos.x - a.x, other.pos.z - a.z)
+	vfx("bola_tangle", a, span.normalized(), {"len": span.length()})      # the cord crackling between them
 	var mid := (a + other.pos) * 0.5
 	m.fx.word(mid + Vector3(0, 2.6, 0), "TANGLED", col, true)
-	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("ff9be8"), 1.2, 0.3)
-	m.sfx("ab_stun", mid, -2.0, 1.1)
-	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
 
 # ------------------------------------------------------------------ E: Shadow Knife
 func in_e() -> bool:
@@ -809,9 +773,8 @@ func _throw_knife() -> void:
 		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			if knife.is_empty() and e == null: _stick(null, ground(at) if _why == "wall" else land)}))
 	if m.shots.size() > n0 and m.shots[-1]["by"] == h:
-		fx().ride(m.shots[-1], "dagger", col_of(ed), Color("ffcf5a"), 1.6, 0.26)
-	fx().star(h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6), Color("ffcf5a"), 0.7, 0.1)
-	m.sfx("dj_knife_throw", h.pos, -3.0, 1.0)
+		HeroVfx.of(m).trail(h, "knife", fx().ride(m.shots[-1], "dagger", col_of(ed), BOLT_CORE, 1.6, 0.26))
+	vfx("knife_throw")
 
 func _stick(f: Ent, at: Vector3) -> void:
 	var ed := e_def()
@@ -822,9 +785,7 @@ func _stick(f: Ent, at: Vector3) -> void:
 	if f and rank("kin") >= 3:
 		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
-	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("ffcf5a"), 0.8, 0.2)
-	m.sfx("ab_plant", at, -6.0, 1.8)
-	net_ring(at, 0.8, col_of(ed))
+	vfx("knife_stick", at + Vector3(0, 0.6 if f else 0.0, 0), h.aim_dir())
 
 ## The stuck dagger (a pooled look, everyone sees it) and, on your screen, the white arrival circle.
 func _tick_knife() -> void:
@@ -888,7 +849,8 @@ func _shadow_step(tgt: Ent) -> void:
 	if dv.length() > 0.05: h.face = atan2(-dv.x, -dv.y)
 	m.sfx("swipe", h.pos, -4.0, 1.9)
 
-## The blink: a near-instant jump with a chain of cyan afterimages from where she was to where she lands.
+## The blink: a near-instant jump with a chain of violet afterimages from where she was to where she lands,
+## smoke hanging at both ends.
 func _blink(to: Vector3) -> void:
 	var from := h.pos
 	var yaw := atan2(-(to.x - from.x), -(to.z - from.z))
@@ -897,9 +859,9 @@ func _blink(to: Vector3) -> void:
 	h.vel = Vector3.ZERO
 	h.gliding = false
 	blinks += 1
-	fx().puff(to + Vector3(0, 0.9, 0), GHOST, 1.2, 0.3)
-	m.sfx("dj_blink", to, -3.0, 1.0)
-	net_bolt(from + Vector3(0, 0.9, 0), to + Vector3(0, 0.9, 0), GHOST)
+	var way := Vector2(to.x - from.x, to.z - from.z).normalized()
+	vfx("blink_leave", from, way)
+	vfx("blink_arrive", to, way)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

@@ -96,8 +96,8 @@ func thief(a) -> void:
 	var ed := Vector2(K.last_bolt_end.x - P.pos.x, K.last_bolt_end.z - P.pos.z).length()
 	A.ok("dancer small mechanics: the empowered bolt flies 12% further (13.4m); firing it ends the speed",
 			K.last_bolt_emp and absf(ed - 13.44) < 0.9 and haste_after <= 0.0, "%.1f m haste %.2f" % [ed, haste_after])
-	A.ok("dancer LMB: each bolt has its own pooled look",
-			DJFx.of(m).free_pools.has("ride_chakram") and DJFx.of(m).free_pools.has("puff"))
+	A.ok("dancer LMB: each bolt has its own pooled look, and the one left at the cursor fizzled to smoke",
+			DJFx.of(m).free_pools.has("ride_chakram") and int(HeroVfx.of(m).plays.get("bolt_fizzle", 0)) > 0)
 	# Marks: +10% per Mark on bolts only, no cap
 	A.fresh(T)
 	K.mark_gap = {}

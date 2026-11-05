@@ -54,9 +54,7 @@ func start() -> void:
 	var h := k.h
 	k.play("thf_encore")
 	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(d["short"]).to_upper(), RING_COL, false)
-	k.m.sfx("dj_encore", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
-	k.m.later(float(d["grow"]), func(): if running(): k.m.sfx("dj_encore_whirr", h.pos, -6.0, 1.0))
-	k.net_ring(h.pos, float(d["reach"]), RING_COL)
+	k.vfx("encore")
 	h.dashes = h.max_dashes()             # the source's info card: it resets the cartwheel
 	DashReset.cue(h)
 
@@ -142,8 +140,7 @@ func _volley(d: Dictionary) -> void:
 		_blade(f, rim, right)
 		thrown = true
 	if thrown:
-		k.fx().star(k.hand_pos(right), RIM_COL, 0.5, 0.1, BLADE_TIP)
-		k.m.sfx("dj_blade", h.pos, -8.0, randf_range(0.95, 1.1))
+		k.vfx("encore_blade", k.hand_pos(right))
 
 ## A cosmetic blade flies from her hand; the hit lands when it arrives.
 func _blade(f: Ent, rim: bool, right: bool) -> void:
@@ -176,11 +173,9 @@ func _hit(f: Ent, rim: bool) -> void:
 	blades += 1
 	if rim:
 		rim_blades += 1
-		k.fx().puff(f.pos + Vector3(0, 1.0, 0), RIM_COL, 0.8, 0.3, HIT_COL)
 		if not was_blighted:
 			# once, as the blight lands (above the damage numbers, so they don't overprint)
 			k.m.fx.word(f.pos + Vector3(0, 3.0, 0), "BLIGHT", Color("b08aff"), false)
-	k.fx().star(f.pos + Vector3(0, 1.0, 0), HIT_COL, 0.8 if rim else 0.55, 0.16)
-	k.m.sfx("dj_encore_hit", f.pos, -10.0, randf_range(0.9, 1.15) * (0.85 if rim else 1.0))
+	k.vfx("encore_hit", f.pos, h.dir_to(f), {"rim": rim})
 	k.refresh_marks()
 	HeroUlt.landed(k, f)
