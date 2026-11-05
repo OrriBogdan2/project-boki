@@ -195,6 +195,8 @@ def paint_texels(pieces, piece_id, p, n, vao):
         if m.any():
             col[m] = paint.paint_piece(pc, p[m], n[m], prim)
     shadow = np.clip(vao, 0, 1)[:, None] ** 1.4
+    lit = np.isin(piece_id, [i for i, pc in enumerate(pieces) if pc.name in ("stalks", "caps")])
+    shadow[lit] = np.maximum(shadow[lit], 0.75)      # pale stalks in deep crevices went violet
     tint = np.array([0.60, 0.50, 0.72])
     return col * (tint + (1 - tint) * shadow)
 

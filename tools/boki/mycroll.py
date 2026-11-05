@@ -21,7 +21,7 @@ EYE_YAW = 0.42
 GLOW_PIECES = ()
 LIT_PIECES = ("caps",)
 BERRY_C = v3(0, 0.05, -0.50)
-FACE = {"mouth_w": 0.048, "mouth_y": 0.178, "mouth_z": -0.40, "cat_mouth": True, "brow_x": 0.095, "brow_up": 0.024,
+FACE = {"mouth_w": 0.06, "mouth_y": 0.172, "mouth_z": -0.40, "cat_mouth": True, "brow_x": 0.095, "brow_up": 0.024,
         "brow_k": 0.85, "fang_k": 0.0}
 NOSE_C = v3(0, 0.205, -0.405)
 TAIL_PTS = [v3(0, 0.20, 0.34), v3(0, 0.205, 0.43), v3(0, 0.25, 0.52)]
@@ -163,7 +163,7 @@ CAP_DARK = hexc("3fc4a8")
 CAP_SPOT = hexc("e8fff0")
 CAP_UNDER = hexc("d8f6dc")
 LILAC = hexc("c8a07c")     # brows
-LID = CREAM
+LID = CREAM * 0.9
 INK = hexc("3a2418")
 MOUTH_DARK = hexc("6e2a2a")
 TONGUE = hexc("f08a8a")
@@ -217,7 +217,7 @@ def paint_piece(pc, q, nn, prim):
     if pc.name == "body":
         return paint_body(q, nn, prim)
     if pc.name == "stalks":
-        return np.tile(STALK, (len(q), 1))
+        return np.tile(STALK, (len(q), 1)) * 1.0
     if pc.name == "caps":
         return paint_caps(q, nn, pc)
     if pc.name.startswith("gp_"):

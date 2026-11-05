@@ -190,7 +190,8 @@ func _coats() -> void:
 
 ## The Fusion on a Hunter, close (front, 3/4, back) and at the match camera.
 func _fusion() -> void:
-	var form := {"type": BokiFusion.type_of(species), "glow": Data.KIN[species]["glow"]}
+	var key := BokiFusion.key_of(species)
+	var form := {"id": key, "kit": key == "tidal_shell", "type": key, "glow": Data.KIN[species]["glow"]}
 	if not BokiFusion.has(form):
 		return
 	var vp := _stage(Vector2i(px, px))
