@@ -546,6 +546,10 @@ func charge_orb() -> bool:
 func in_dash() -> bool:
 	return super.in_dash() or hop.chaining()
 
+## The skid is a roll underneath: the weapon still goes, like the hops around it (its dash row).
+func fires_in_dash() -> bool:
+	return hop.chaining() and hop.st["phase"] == "skid"
+
 ## The chain's time left if nobody presses again (the shared dash's otherwise).
 func dash_left() -> float:
 	return hop.left() if hop.chaining() else super.dash_left()
