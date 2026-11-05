@@ -22,8 +22,14 @@ func run(main: Node) -> void:
 	_clear_view(m, P)
 	for f in 20:
 		await _step(m, P, tree)
-	P.dashes = 1.0
+	await RenderingServer.frame_post_draw
+	main.get_viewport().get_texture().get_image().save_png(out.path_join("stand.png"))
 	P.inp["move"] = Vector2(1, 0)
+	for f in 40:           # plain strokes first: the match look with no skate after-image over her
+		await _step(m, P, tree)
+	await RenderingServer.frame_post_draw
+	main.get_viewport().get_texture().get_image().save_png(out.path_join("strokes.png"))
+	P.dashes = 1.0
 	P.inp["dash"] = true
 	P.inp["dash_down"] = true
 	var shot := 0

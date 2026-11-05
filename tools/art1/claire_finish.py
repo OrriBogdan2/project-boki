@@ -15,11 +15,12 @@ import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
+HEADS = a[3]
 ATLAS = 2048
 MATS = ["skin-face", "skin-body", "cloth-dress", "fur-trim", "hair-fringe", "ice-horn", "ice-wing", "ice-bright"]
 SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "ear": 0.7, "horn": 0.9, "tail": 0.7, "wing": 0.55, "wingarm": 0.5, "wingrod": 0.4, "bowknot": 0.6, "bowloop": 0.6, "ribbon": 0.5,
          "blade": 0.5, "shaft": 1.1, "head": 0.6, "butt": 0.5, "heart": 0.7, "heartcore": 0.6, "prong": 0.4, "collarA": 0.3, "collarB": 0.3, "Low": 1.0, "tailheart": 0.7}
-FACE_K = 3.4                # texel density on the face against the body
+FACE_K = 4.6                # texel density on the face against the body
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
@@ -202,7 +203,7 @@ verts.extend([tuple(v.co) for v in me0.vertices])
 gn = {g.index: g.name for g in low.vertex_groups}
 for v in me0.vertices:
     vw.append({gn[g.group]: g.weight for g in v.groups if g.weight > 0.01})
-rooms.extend([1.0] * len(me0.vertices))
+rooms.extend((0.4 - 0.34 * smooth(0.02, 0.06, np.array([v.co.y for v in me0.vertices])) * smooth(K.NECK_Z + 0.06, K.NECK_Z + 0.1, np.array([v.co.z for v in me0.vertices])) * smooth(0.15, 0.12, np.abs(np.array([v.co.x for v in me0.vertices])))).tolist())
 for p in me0.polygons:
     faces_v.append(list(p.vertices))
     faces_pid.append(0)
@@ -353,6 +354,7 @@ vn = np.zeros(len(me.vertices) * 3)
 me.vertices.foreach_get("normal", vn)
 vn = vn.reshape(-1, 3)
 PID = -np.ones((ATLAS, ATLAS), np.int32)
+FID = -np.ones((ATLAS, ATLAS), np.int32)
 POS = np.zeros((ATLAS, ATLAS, 3), np.float32)
 NOR = np.zeros((ATLAS, ATLAS, 3), np.float32)
 for t in me.loop_triangles:
@@ -378,6 +380,7 @@ for t in me.loop_triangles:
     POS[ys[m], xs[m]] = w @ vco[tv]
     NOR[ys[m], xs[m]] = w @ vn[tv]
     PID[ys[m], xs[m]] = faces_pid[t.polygon_index]
+    FID[ys[m], xs[m]] = t.polygon_index
 NOR = M.norm(NOR)
 print("texels", (PID >= 0).sum(), "of", ATLAS * ATLAS)
 
@@ -462,30 +465,31 @@ col = col * (1 - shorts[:, None]) + np.array([0.2, 0.36, 0.66]) * shorts[:, None
 mx_ = col.max(1)
 lt = smooth(0.5, 0.8, mx_) * (1 - bl) * (pp[:, 2] < K.NECK_Z + 0.12) + smooth(0.5, 0.8, mx_) * (1 - bl) * (pp[:, 1] < 0.0) * (pp[:, 2] >= K.NECK_Z + 0.12)
 col = col * (1 - lt[:, None]) + col * np.array([0.8, 0.87, 0.97]) * lt[:, None]
-# the sheet's pale skin and icy hair: the scan runs tan and slate once it is toon shaded
-head_ = smooth(K.NECK_Z + 0.06, K.NECK_Z + 0.1, pp[:, 2]) * (pp[:, 1] > 0.02)
-skin_ = smooth(0.03, 0.1, col[:, 0] - col[:, 2]) * head_
-pale_ = np.clip(col * np.array([1.08, 1.1, 1.14]) + 0.05, 0, 1)
-col = col * (1 - skin_[:, None]) + pale_ * skin_[:, None]
-hair_ = (1 - smooth(0.0, 0.05, col[:, 0] - col[:, 2])) * smooth(0.25, 0.4, mx_) * smooth(0.82, 0.68, mx_) * head_ * (np.abs(pp[:, 0]) < 0.085) * smooth(K.NECK_Z + 0.2, K.NECK_Z + 0.235, pp[:, 2])
-col = col * (1 - hair_[:, None]) + np.clip(col * 0.55 + np.array([0.46, 0.56, 0.62]), 0, 1) * hair_[:, None]
 OUTC[ys, xs] = col
-# the iris: glowing, with the slit pupil
-HOT_K = np.zeros(len(ys))
+# hair round the face: the sheet's ice blue over the scan's slate, its shading kept
+slot_ = np.array([p_.material_index for p_ in me.polygons])[FID[ys, xs]]
+hair_ = slot_ == mat_i["hair-fringe"]
+hc = OUTC[ys[hair_], xs[hair_]].astype(np.float64)
+OUTC[ys[hair_], xs[hair_]] = P.ramp(np.clip((hc.mean(1) - 0.2) / 0.5, 0, 1), P.HAIR)
+# the face: the owner's head sheet (claire_head.png, hood up, front), warped onto the sculpt's own landmarks; eyes, brows, mouth, blush, fringe
+face_m = np.isin(slot_, [mat_i["skin-face"], mat_i["hair-fringe"]])
+fx, fz = pp[:, 0], pp[:, 2] - K.eye_c(1.0)[2]
+sx_, sy_ = P.sheet_xy(fx, fz)
+r_ = np.hypot((sx_ - 325.0) / 150.0, (sy_ - 702.0) / 150.0)
+sheet_k = smooth(1.0, 0.88, r_) * (pp[:, 1] > 0.02) * (pp[:, 2] > K.NECK_Z + 0.05)
+sh = P.load_sheet(HEADS)
+pc = P.sample_sheet(sh, sx_, sy_)
+# (the slate left inside the hood round the sheet's patch goes to the same ice blue)
+cur_ = OUTC[ys, xs].astype(np.float64)
+inner = (r_ < 1.45) & (pp[:, 1] > -0.02) & (pp[:, 2] > K.NECK_Z + 0.05) & (cur_.max(1) < 0.68)
+cur_[inner] = P.ramp(np.clip((cur_[inner].mean(1) - 0.2) / 0.5, 0, 1), P.HAIR)
+OUTC[ys, xs] = cur_ * (1 - sheet_k[:, None]) + pc * sheet_k[:, None]
+# a soft slit in each glowing iris (the master's close-up): blue, not black, so the eyes stay gentle
 for s_ in (1.0, -1.0):
     ec = K.eye_c(s_)
-    dx = (pp[:, 0] - ec[0]) / (K.EYE_W * K.HK)
-    dz = (pp[:, 2] - ec[2]) / (K.EYE_H * K.HK)
-    q = np.hypot(dx * 1.45, dz * 1.0)
-    front = pp[:, 1] > ec[1] - 0.04
-    iris = smooth(1.02, 0.86, q) * front
-    slit = smooth(0.17, 0.09, np.abs(dx) / np.maximum(1 - np.minimum(dz * dz * 0.9, 0.95), 0.05) ** 0.5) * (np.abs(dz) < 0.92) * front * (q < 1.0)
-    ring = smooth(0.62, 0.86, q) * iris
-    cc = mix(OUTC[ys, xs].astype(np.float64), hexc("#d6f6ff"), iris)
-    cc = mix(cc, hexc("#6fc4f4"), ring * 0.8)
-    cc = mix(cc, P.HOT, iris * (1 - ring) * 0.0)
-    cc = mix(cc, hexc("#123a6e"), slit)
-    OUTC[ys, xs] = cc
+    dx, dz = (pp[:, 0] - ec[0]) / 0.0030, (pp[:, 2] - ec[2]) / 0.0125
+    slit = np.exp(-dx * dx) * smooth(1.0, 0.7, np.abs(dz)) * (pp[:, 1] > 0.03) * face_m
+    OUTC[ys, xs] = mix(OUTC[ys, xs].astype(np.float64), hexc("#2f7fd0"), slit * 0.85)
 
 
 def paint(pred, fn):
@@ -514,7 +518,7 @@ paint(lambda n: n == "heart", lambda p, n, ao: P.heart(p, n, ao, K.sp(0.683), 0.
 paint(lambda n: n == "heartcore", lambda p, n, ao: P.heart(p, n, ao, K.sp(0.68), 0.07) * 0.9 + 0.1)
 paint(lambda n: n.startswith("collar"), P.collar)
 # the lid: her own skin colour, a lash line at its lower edge
-skin_c = sample_scan([K.hs([0.05, 0.115, 1.655])])[0] * 1.06
+skin_c = hexc("#ecd2dc")
 for q, sg in ((lids[0], 1.0), (lids[1], -1.0)):
     def liner(p_, qq=q):
         ca, sa = math.cos(-LID_A), math.sin(-LID_A)

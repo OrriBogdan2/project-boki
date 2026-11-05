@@ -866,6 +866,7 @@ class Sync extends Node:
 		_keep_one_weapon()
 		if clips:
 			_play(dt)
+			springs.still = clips.cur in clips.d.get("still", [])
 		else:
 			apply()
 			apply_blade()
@@ -960,6 +961,7 @@ class Springs:
 	var fold := 0.0             # how far the wing chains are folded (1) or flared (-1) (WING_FOLD)
 	var wind_t := 0.0
 	var calm := false           # no ripple (a check measuring how a chain settles)
+	var still := false          # no ripple: a statue pose (data "still": a clip that holds dead still, Claire's Rimelock)
 
 	func setup(skeleton: Skeleton3D) -> void:
 		skel = skeleton
@@ -1020,7 +1022,7 @@ class Springs:
 				rest.append(r)
 				want.append(xf * r.origin)
 			var n := want.size()
-			if ch["wind"] and not calm:
+			if ch["wind"] and not calm and not still:
 				# (a long cloth tail never hangs dead: a slow travelling ripple, stronger toward its tip)
 				for i in range(1, n):
 					var u := float(i) / float(n - 1)

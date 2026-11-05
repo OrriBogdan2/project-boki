@@ -10,6 +10,35 @@ RIBBON = [hexc("#4a8fd6"), hexc("#74b1ea"), hexc("#9dcdf5"), hexc("#c0e2fb"), he
 GLOVE = [hexc("#8ea4c8"), hexc("#adc2de"), hexc("#c7d7ea"), hexc("#dbe6f2"), hexc("#ecf3fa")]
 FUR = [hexc("#7f9cc4"), hexc("#a4bfe0"), hexc("#bdd3ec"), hexc("#d2e2f4"), hexc("#e6f0fa")]
 PINK = hexc("#f2b2c0")
+HAIR = [hexc("#9db4dc"), hexc("#bcd0ec"), hexc("#d3e2f5"), hexc("#e6effa"), hexc("#f6faff")]
+# the head sheet's face, in its own pixels (2752 wide), against the sculpt: (metres off the eye line, sheet row), (metres off the centre, sheet px)
+SHEET_Z = ([-0.13, -0.11, -0.067, -0.046, 0.0, 0.025, 0.07, 0.115, 0.14], [870.0, 840.0, 784.0, 757.5, 692.0, 647.0, 604.0, 562.0, 540.0])
+SHEET_X = ([0.0, 0.036, 0.11, 0.13], [0.0, 63.7, 145.0, 165.0])
+
+
+def sheet_xy(x, z):
+    sx = 322.7 + np.sign(x) * np.interp(np.abs(x), *SHEET_X)
+    sy = np.interp(z, *SHEET_Z)
+    return sx, sy
+
+
+def load_sheet(path):
+    import bpy
+    im = bpy.data.images.load(path)
+    w, h = im.size
+    a = np.zeros(w * h * im.channels, np.float32)
+    im.pixels.foreach_get(a)
+    return a.reshape(h, w, im.channels)[::-1, :, :3]
+
+
+def sample_sheet(a, x, y):
+    x0, y0 = np.clip(np.floor(x).astype(int), 0, a.shape[1] - 2), np.clip(np.floor(y).astype(int), 0, a.shape[0] - 2)
+    fx, fy = (x - x0)[:, None], (y - y0)[:, None]
+    c = (a[y0, x0] * (1 - fx) + a[y0, x0 + 1] * fx) * (1 - fy) + (a[y0 + 1, x0] * (1 - fx) + a[y0 + 1, x0 + 1] * fx) * fy
+    # (the toon pass adds its own contrast and warmth on top of a painted sheet: lifted and calmed so her skin stays the sheet's pale)
+    lum = c.mean(1, keepdims=True)
+    c = lum + (c - lum) * 0.72
+    return np.clip(np.power(np.clip(c, 0, 1), 0.74) * np.array([0.99, 1.0, 1.04]), 0, 1)
 
 
 def path_u(p, path):
@@ -46,8 +75,9 @@ def ear(p, n, ao, path, s):
 def horn(p, n, ao, path):
     u, d = path_u(p, path)
     t = lit(n, ao) * 1.05 + 0.08
-    band = 0.5 + 0.5 * np.sin(u * 62)
-    c = ramp(np.clip(t + (band - 0.5) * 0.2 + 0.18 * smooth(0.3, 1.0, u), 0, 1), ICE)
+    band = np.abs(np.sin(u * 24))              # the plates' seams
+    c = ramp(np.clip(t * 0.86 + 0.06 + 0.12 * smooth(0.3, 1.0, u), 0, 1), ICE)
+    c = mix(c, hexc("#2f6fb8"), smooth(0.14, 0.04, band) * 0.55)
     return mix(c, hexc("#eefbff"), smooth(0.55, 0.9, np.abs(n[:, 2])) * 0.35)
 
 

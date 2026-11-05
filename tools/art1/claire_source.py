@@ -202,6 +202,26 @@ print("cut faces", len(kill))
 bmesh.ops.delete(bm, geom=kill, context="FACES")
 bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
 bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0004)
+bm.verts.index_update()
+# (bits the cut left floating, cuff scraps that would ride the arm through the skirt)
+seen_, comps_ = set(), []
+for v0_ in bm.verts:
+    if v0_.index in seen_:
+        continue
+    st_, cp_ = [v0_], []
+    seen_.add(v0_.index)
+    while st_:
+        q_ = st_.pop()
+        cp_.append(q_)
+        for e_ in q_.link_edges:
+            o_ = e_.other_vert(q_)
+            if o_.index not in seen_:
+                seen_.add(o_.index)
+                st_.append(o_)
+    comps_.append(cp_)
+comps_.sort(key=len, reverse=True)
+print("islands", [len(c) for c in comps_[:8]], len(comps_))
+bmesh.ops.delete(bm, geom=[v for c in comps_[1:] for v in c], context="VERTS")
 filled = bmesh.ops.holes_fill(bm, edges=[e for e in bm.edges if e.is_boundary], sides=2000)
 print("holes filled", len(filled["faces"]))
 bm.to_mesh(low.data)

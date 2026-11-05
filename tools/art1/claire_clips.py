@@ -34,10 +34,10 @@ class HandSolver(Solver):
 
 
 READY = {
-    "pel": (0.012, 0.0, -0.022), "prt": (0.02, 0.1, -0.02), "tor": (0.03, -0.06, 0.03), "hed": (0.08, 0.1, 0.03),
+    "pel": (0.012, 0.0, -0.022), "prt": (0.02, 0.1, -0.02), "tor": (0.03, -0.06, 0.03), "hed": (0.0, 0.06, 0.0),
     "G": (0.27, 0.15, 1.02), "BE": spr(2, 84, (-0.35, -0.9, -0.1)), "Lw": 0.0, "LP": (-0.29, 0.10, 0.99), "LH": (0.0, 0, 0.0),
     "FL": (-0.078, -0.03, A_Z), "FR": (0.095, 0.10, A_Z), "FLy": 0.4, "FRy": -0.16, "FLp": 0.0, "FRp": 0.0,
-    "brow": -0.25, "lid": 0.16, "fing": 0.14, "skirt": 0.0, "skirtz": 0.0, "smile": 0.55,
+    "brow": -0.45, "lid": 0.04, "fing": 0.14, "skirt": 0.0, "skirtz": 0.0, "smile": 0.5,
 }
 LOWS = {"G": (0.29, 0.02, 0.97), "BE": spr(4, 12, (-0.3, -0.5, 0.8))}             # the spear carried low along her, for speed
 PRAY = {"G": (0.09, 0.27, 1.17), "BE": spr(0, 80, (0.25, -0.95, -0.15)), "Lw": 1.0}
@@ -59,13 +59,13 @@ def idle(u):
     p["prt"] = (0.02, 0.1 + 0.03 * a, -0.02 + 0.02 * a)
     p["tor"] = (0.03 + 0.012 * b, -0.06 - 0.02 * a, 0.03 - 0.015 * a)
     gl = math.exp(-((u - 0.56) / 0.1) ** 2)
-    p["hed"] = (0.1 - 0.13 * gl, 0.1 + 0.22 * gl, 0.03 - 0.06 * gl)
+    p["hed"] = (0.02 - 0.05 * gl, 0.06 + 0.12 * gl, 0.0)
     g = READY["G"]
     p["G"] = (g[0], g[1] + 0.004 * b, g[2] + 0.005 * a)
     p["LP"] = (-0.29 + 0.006 * a, 0.10 + 0.006 * b, 0.99 + 0.006 * a)
-    p["lid"] = 1.0 if 0.30 < u < 0.33 or 0.74 < u < 0.765 else 0.16 - 0.08 * gl
-    p["smile"] = 0.55 + 0.3 * gl
-    p["brow"] = -0.25 - 0.3 * gl
+    p["lid"] = 1.0 if 0.30 < u < 0.33 or 0.74 < u < 0.765 else 0.04
+    p["smile"] = 0.5 + 0.2 * gl
+    p["brow"] = -0.45 - 0.2 * gl
     p["skirtz"] = 0.1 * a
     return p
 
@@ -77,7 +77,7 @@ def stance(u):
     p["pel"] = (0.03 + 0.005 * a, 0.0, -0.03)
     p["prt"] = (0.03, -0.14, -0.03)
     p["tor"] = (0.0 + 0.012 * a, 0.18, 0.05)
-    p["hed"] = (0.16 + 0.02 * b, 0.12, 0.09)
+    p["hed"] = (0.03 + 0.015 * b, 0.1, 0.05)
     p["FR"], p["FL"] = (0.07, 0.05, A_Z), (-0.11, -0.2, A_Z + 0.035)
     p["FRy"], p["FLy"] = -0.2, 0.55
     p["FLp"] = -0.3
@@ -86,8 +86,8 @@ def stance(u):
     p["LP"] = (-0.04, 0.20, 1.27 + 0.006 * a)
     p["LH"] = (-0.9, 0.0, 0.5)
     p["fing"] = 0.45
-    p["lid"] = 1.0 if 0.52 < u < 0.55 else 0.3
-    p["smile"], p["brow"] = 0.8, -0.4
+    p["lid"] = 1.0 if 0.52 < u < 0.55 else 0.06
+    p["smile"], p["brow"] = 0.65, -0.6
     return p
 
 
@@ -200,6 +200,13 @@ def clips():
                 "FR": (0.09 + 0.1 * max(0, sw), 0.2 - 0.58 * max(0.0, sw), A_Z + 0.03 * max(0, sw)), "FL": (-0.09 - 0.1 * max(0, -sw), 0.2 - 0.58 * max(0.0, -sw), A_Z + 0.03 * max(0, -sw)),
                 "FRy": -0.5 * max(0, sw), "FLy": 0.5 * max(0, -sw), "skirt": -0.35, "skirtz": 0.5 * sw, "brow": -0.15, "lid": 0.1, "smile": 0.8, "fing": 0.1}
     out.append(C("skate", 0.56, [(0.0, sk(1.0)), (0.28, sk(-1.0)), (0.56, sk(1.0))]))
+    # in the air (tm_skate_air, item 62, same 0.56 loop): the stride goes soft over nothing: toes pointed, one blade trailing, the arms out for balance on her ribbon of ice
+    def ska(sw):
+        p = sk(sw)
+        p.update({"pel": (sw * 0.03, 0.05, 0.03), "prt": (0.24, 0.06 * sw, 0.07 * sw), "hed": (-0.18, 0.08 * sw, 0.03 * sw), "skirt": -0.5,
+                  "FR": (0.08, 0.08 - 0.3 * max(0.0, sw), A_Z + 0.09), "FL": (-0.08, 0.08 - 0.3 * max(0.0, -sw), A_Z + 0.09), "FRp": 0.35, "FLp": 0.35})
+        return p
+    out.append(C("skate_air", 0.56, [(0.0, ska(1.0)), (0.28, ska(-1.0)), (0.56, ska(1.0))]))
     # stop (tm_skate_stop: 0.07 / 0.22 / 0.5): a hockey-free little T-stop: the blades turn across, spray, and she straightens with a small breath out
     st0 = {"pel": (0.0, -0.03, -0.12), "prt": (-0.1, 0.5, 0.06), "tor": (0.12, -0.5, 0), "hed": (0.0, 0, 0), "FR": (0.16, 0.2, A_Z), "FL": (-0.14, -0.12, A_Z), "FRy": -1.2, "FLy": -0.9, "LP": (-0.34, 0.2, 1.08), "skirt": 0.45, "skirtz": 0.4, "smile": 0.6}
     st0.update(LOWS)
@@ -353,7 +360,7 @@ def extras(P):
     sm = P.get("smile", 0.5)
     for s, side in ((1.0, "R"), (-1.0, "L")):
         # brow: - lifts its inner end (worried, gentle), + lowers it (focus)
-        out["brow." + side] = (Quaternion((0, 1, 0), s * 0.2 * b), Vector((0, 0, -0.005 * b)))
+        out["brow." + side] = (Quaternion((0, 1, 0), -s * 0.2 * b), Vector((0, 0, -0.005 * b)))
         out["lid." + side] = (Quaternion((1, 0, 0), -0.82 * max(0.0, min(1.0, l))), None)
         out["mouth." + side] = (None, Vector((s * 0.0016 * (sm - 0.5), 0, 0.0034 * (sm - 0.5))))
     f = max(P.get("fing", 0.1), P.get("Lw", 0.0))

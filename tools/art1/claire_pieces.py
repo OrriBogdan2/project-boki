@@ -142,16 +142,15 @@ def ear_points(p):
 
 # ---- ram horns: ice, through the hood, one full curl close to the head and the tip turning forward
 def horn(s):
+    """The head sheet's ram horn: thick at the hood, up and out, over and down behind, the tip turning up and forward; segmented."""
     side = "R" if s > 0 else "L"
-    c = np.array([s * 0.158, 0.004, NECK_Z + 0.392])       # the curl's centre
-    th = np.radians(np.linspace(205, -255, 16))
-    r = np.linspace(0.078, 0.028, 16)
-    pts = np.stack([c[0] - s * np.cos(th) * r * -1.0, c[1] + np.linspace(-0.03, 0.03, 16), c[2] + np.sin(th) * r], 1)
-    root = np.array([s * 0.07, -0.012, NECK_Z + 0.325])
-    path = catmull(np.vstack([root, pts[1:]]), 20)
-    u = np.linspace(0, 1, 20)
-    wd = 0.028 * (1 - u) ** 0.72 + 0.003
-    wd *= 1 + 0.07 * np.sin(u * 36)          # the ridges
+    n = NECK_Z
+    pts = [(0.06, -0.01, n + 0.325), (0.085, -0.022, n + 0.388), (0.125, -0.052, n + 0.428), (0.17, -0.09, n + 0.415), (0.2, -0.1, n + 0.36),
+           (0.2, -0.066, n + 0.312), (0.214, -0.018, n + 0.292), (0.242, 0.016, n + 0.316)]
+    path = catmull(np.array(pts) * [s, 1, 1], 22)
+    u = np.linspace(0, 1, 22)
+    wd = 0.036 * (1 - u) ** 0.8 + 0.0035
+    wd *= 1 + 0.05 * np.abs(np.sin(u * 24))          # the plates
     p = sweep("horn" + side, "ice-horn", path, SEC8, wd, side_hint=np.array([0, 1.0, 0.1]))
     p.path, p.u = path, u
     return p.rigid("head")
