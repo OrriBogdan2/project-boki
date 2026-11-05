@@ -52,8 +52,8 @@ func tick(dt: float) -> void:
 	var k: Kin = p.kin
 	if k and p.ult >= 1.0 and KinMerge.def_for(k) and (p.ak == null or int(p.slot_lv.get("ult", 0)) > 0):
 		show("ult")
-	if k and k.state == "active":
-		show("skill")
+	if k and KinCommand.is_engaged(k):
+		show("skill")      # (the first time your Boki takes on a foe)
 	if not m.interact.is_empty() and m.interact["kind"] == "catch":
 		show("catch")
 	if m.exits and not m.interact.is_empty() and m.interact["kind"] == "exit":

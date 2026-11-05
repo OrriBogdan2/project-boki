@@ -813,8 +813,6 @@ func _start(o: Dictionary) -> void:
 	await hud.setup(self)
 	hud.process_mode = hud_mode
 	hud.visible = true
-	if player and player.dropping and tut == null:
-		hud.toast("Steer to choose where you land", Color("f3eee2"))
 	if skydrop.planning and player:
 		hud.open_map(true)
 	if player:

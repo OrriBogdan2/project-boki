@@ -8,7 +8,8 @@ extends RefCounted
 static func fill(v: VBoxContainer) -> void:
 	var ids: Array = MatchTips.seen().filter(func(id): return MatchTips.lines().has(id))
 	if ids.is_empty():
-		v.add_child(UI.para("No tips yet. A tip shows up the first time something new happens on an expedition, and then it waits here.", UI.T_BODY))
+		var none := "No tips yet. A tip shows the first time something new happens on an expedition, then waits here."
+		v.add_child(UI.para(none, UI.T_BODY))
 		return
 	UI.subtitle(v, "Shown once on an expedition, kept here")
 	ids.reverse()

@@ -20,9 +20,11 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
 2. **Your first egg.** Three starter eggs sit on a little island, plus a mystery egg:
    the Venom Egg (Vespyx), the Prism Egg (Prismander), the Spore Egg (Mycroll), and a Mystery Egg
    that hides one of the other common species. Pick one, keep it warm until it hatches, and name it.
-3. **First Flight.** A short tutorial on three small islands: steer your landing, walk, dash, glide,
-   long-dash in the air, shoot, use your E, have your Boki use its ability, throw your Boki at a
-   monster, open a chest, then start an outpost's uplink and hold its yard until the lift opens.
+3. **The Trial Expedition.** A guided run on a few small islands, with your Boki leading the way. It
+   stops at each lesson with a card (what to do, the key, and why) and waits until you press a key:
+   move, dash, air dash, glide, crouch, pick up, fight (your weapon, your abilities, G and your Boki),
+   level up, keys and chests, the outpost, and extract. You can skip it (Esc, or at the hatch) and
+   replay it any time from the expedition panel.
 4. **Your farm.** A new farm is nearly empty: you get 200 gems and place the essentials yourself in
    build mode (B): the house (90), a crop patch (30) and the cooking pot (20), then the market stall
    when you like. See [The farm](The-Farm.md).

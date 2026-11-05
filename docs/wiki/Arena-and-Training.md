@@ -33,7 +33,9 @@ Hunter, weapon, glove, difficulty and behaviour (fight, dodge only, stand still)
 like, and watch your numbers: damage dealt and taken, how many of your shots land, how many of its
 shots you dodge, and knocks. A knock resets the round.
 
-## The tutorial
+## The Trial Expedition
 
-**First Flight**, played once after your first egg hatches: three small islands with nothing random
-on them. See [Getting started](Getting-Started.md).
+A guided run on the **First Flight** course, played after your first egg hatches and before your first
+real expedition. Each lesson pauses the game with a card until you press a key; nothing out there can
+hurt you. Skip it from the pause menu; replay it from the expedition panel (a replay carries nothing
+home). See [Getting started](Getting-Started.md).

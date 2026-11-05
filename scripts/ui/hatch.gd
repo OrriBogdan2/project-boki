@@ -711,7 +711,7 @@ func _show_name() -> void:
 	var btns := UI.hbox(10)
 	btns.add_child(UI.primary("Head out together", func(): _finish(sp_id, ne.text, ye.text, true), 240))
 	var skip := UI.button("Skip the Trial", func(): _finish(sp_id, ne.text, ye.text, false), 180)
-	skip.tooltip_text = "For players who know the basics. Replay the Trial Expedition any time from the expedition panel."
+	skip.tooltip_text = "For players who know the basics. Replay it any time from the expedition panel."
 	skip.flat = true
 	btns.add_child(skip)
 	v.add_child(btns)

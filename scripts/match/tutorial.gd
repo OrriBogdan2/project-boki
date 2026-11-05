@@ -38,7 +38,6 @@ const MINT := Color(0.56, 0.89, 0.78)
 var m: Match
 var step := -1
 var card := false            # this lesson's card is up: the world waits for a key
-var card_shown := -1         # the step whose card has been shown
 var card_t := 0.0            # s the card has been up
 var clip: AbilityClip = null # the card's looping ability clip (TutorialHud places it)
 var text := ""               # this step's one line, on the card and the pill
@@ -182,25 +181,22 @@ func update(dt: float) -> void:
 	nag_t = maxf(0.0, nag_t - dt)
 	spot_t = maxf(0.0, spot_t - dt)
 	if m.hud:
-		m.hud.msgs.hold = card_up() or card_shown != step      # messages wait while a card is up or coming
+		m.hud.msgs.hold = card_up()      # messages wait while the card is up
 	var sid := id()
-	var done := card_shown == step and _is_done(sid, dt)     # (only what you do after the lesson's card counts)
+	var done := _is_done(sid, dt)
 	_point(sid)
 	_stall(dt)
 	_props()
 	if p.kin and p.kin.comp:
 		p.kin.comp.tut(sid, _lead_goal(sid))
-	if card_shown != step:
-		_open_card()
-		return
 	if done:
 		_finish(sid)
 	if step < steps().size():
 		_words()
 
-## The lesson's card comes up and the world waits (Match.step holds while `card`).
+## The lesson's card comes up and the world waits (Match.step holds while `card`), from the very
+## frame the lesson starts: nothing happens between one lesson and the next one's card.
 func _open_card() -> void:
-	card_shown = step
 	card = true
 	card_t = 0.0
 	m.bubbles.clear()       # one voice at a time: the card has the floor
@@ -300,6 +296,8 @@ func _enter() -> void:
 		"uplink", "defend", "extract":
 			pass
 	_words()
+	if step < steps().size():
+		_open_card()
 
 ## The Trial starts with every ability open, so a level-up is given once for real: the pop, the chime and
 ## a skill point (the gold + by the level ring), spent with Alt + the ability's key.
@@ -391,8 +389,8 @@ func _is_done(sid: String, dt: float) -> bool:
 		"pickup": return ground_item().is_empty()
 		"gkey": return p.kin == null or p.kin.st_throws > throws0 or p.kin.state == "downed"
 		"rank":
-			if not flag and card_shown == step and not card:
-				flag = true      # (the level-up pop waits for the card to close, so the two never overlap)
+			if not flag:
+				flag = true      # (the first frame after the card: the level-up pop and the card never overlap)
 				_offer_rank()
 				pts0 = p.skill_pts
 			return flag and p.skill_pts < pts0      # (one point spent: the lesson is learned)
@@ -540,8 +538,6 @@ func _point(sid: String) -> void:
 ## A stall (NAG_T without getting closer): the pill and the marker pulse and the Boki says it once
 ## more. The card doesn't come back.
 func _stall(dt: float) -> void:
-	if card_shown != step:
-		return      # (the lesson hasn't been shown yet)
 	stall_t += dt
 	if target != Vector3.INF:
 		var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()

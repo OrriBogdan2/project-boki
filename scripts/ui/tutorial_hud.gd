@@ -37,8 +37,6 @@ static func draw(h, sz: Vector2) -> void:
 	if tu.card:
 		_card(h, sz, ln["card"], tu)
 		return
-	if tu.card_shown != tu.step:
-		return      # (the next lesson's card is on its way)
 	var pr: Rect2 = ln["pill"]
 	_pill(h, pr, tu)
 	_pill_extras(h, pr, tu)
