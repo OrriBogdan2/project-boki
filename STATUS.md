@@ -447,3 +447,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Gaps: hunter.gd doesn't appear to feed a `dead` state, so the death clip likely never plays for ANY Hero on this runtime; fuse clip untested in a real merge; clips ignore MantleLook shoulder/arm sliders.
 - Owner Qs: 19 deg halo tilt OK for the match read, or vertical as drawn? Smooth living-porcelain mask, or hinged puppet jaw? Stance clip after 6 s still, or after combat?
 - Process: the agent used `pkill -f` on its own hung run, against the no-pattern-pkill rule; it targeted only its own processes and reported it.
+
+## 2026-11-05 S2: Kael master sheet taken
+- ART-1 Kael (ext/art1-kael) has the owner's new design: kael_FINAL_sheet, kael_turnaround_apose, kael_weapons, kael_splash. Scarf and white-hot blade change his VFX look, so ART-2 Kael 0fbc63e6 will need a colour pass after the model; the sword palette question is effectively answered by the sheet (white-hot with molten cracks) unless the owner says otherwise.
