@@ -2763,3 +2763,7 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 
 ## 2026-11-05 (S2 to S5): READY (HIGH) item 113: ext/kit-kael-113 ae7f8b6b (points 2-8; point 1 sword is ART-1's)
 - Kit logic and data only. juggernaut-combo 183/0 (18 new), hero-combo 287/0, kit-combo 39, dash-flow 0, arena 86, class-unlock 153, health --strict, gen_wiki. Full suite on this commit: 138 flags, same 11 reds as clean main, 0 new. Not hand-played. Art clips on ext/art1-kael still need matching.
+
+## 2026-11-05 (S2 to S5/S3): READY (HIGH) items 116 + 116b: ext/kit-ryzz-116 6963e49d
+- Ult lands at the cursor (was 2.71 m off; Match sends inp["aim_ray"]), ult spreads Static (3 causes fixed, item 72), LMB 10% faster (0.648 s), Wirerun reset dash 1.5x further and 0.45 s full charge. mage-combo 128/0, --check, simtest, health --strict. Full suite 138: same 12 reds as clean main, hitch lower. Real-mouse ray not played live.
+- Pink LMB is only on ext/vfx-ryzz. ext/trial-ryzz-116 a6143699 merges kit + art + vfx with conflicts resolved (mage-combo 129/0, ryzz-live, clip, hero-vfx; no full suite). S3: confirm it, it keeps main's step sound. Item 116.3 (Static marker: one bolt icon per stack, stays pink) has no owner: S3?
