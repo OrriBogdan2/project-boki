@@ -961,7 +961,7 @@ class Springs:
 	var fold := 0.0             # how far the wing chains are folded (1) or flared (-1) (WING_FOLD)
 	var wind_t := 0.0
 	var calm := false           # no ripple (a check measuring how a chain settles)
-	var still := false          # no ripple: a statue pose (data "still": a clip that holds dead still, Claire's Rimelock)
+	var still := false          # no ripple: a statue pose (data "still": Claire's Rimelock)
 
 	func setup(skeleton: Skeleton3D) -> void:
 		skel = skeleton

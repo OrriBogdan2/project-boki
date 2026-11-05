@@ -94,6 +94,21 @@ func run(main: Node) -> void:
 	P.inp["sec_hold"] = false
 	_run(m, P, 45, seen)
 	ok(seen.has("spear"), "the release plays the push")
+	# the Rimelock statue (item 65): nothing on her moves while it holds, not even the ribbons' idle ripple
+	var c0 := _clips(P)
+	c0.force = {"clip": "rime_hold", "t": 0.2}
+	_run(m, P, 30, seen)
+	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
+	var sync: WardenGlb.Sync = P.model.get_node("Warden/Sync")
+	var tail := sk.find_bone("spring_scarftail_tail_5")
+	var hand0 := sk.get_bone_global_pose(sk.find_bone("hand.R")).origin
+	var tail0 := sk.get_bone_global_pose(tail).origin
+	_run(m, P, 45, seen)
+	var hand_d := sk.get_bone_global_pose(sk.find_bone("hand.R")).origin.distance_to(hand0)
+	var tail_d := sk.get_bone_global_pose(tail).origin.distance_to(tail0)
+	ok(sync.springs.still and hand_d < 0.002 and tail_d < 0.01,
+			"the statue holds still (hand %.4f m, tail %.4f m, ripple off %s)" % [hand_d, tail_d, sync.springs.still])
+	c0.force = {}
 	# a knock-out
 	P.lives = 1
 	_run(m, P, 30, seen)
