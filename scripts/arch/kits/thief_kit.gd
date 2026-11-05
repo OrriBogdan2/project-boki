@@ -11,10 +11,12 @@ extends ArchKit
 ##   harder from the outer band, refreshing every Mark; the Vault comes back. The Boki Merge has its own key.
 ## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (3.5x, 2 Marks,
 ##   Shred), shown by a gold glint in the throwing hand that flares as she lands, and landing it gives the
-##   Vault back (the payoff: T4, pay_cashin, VAULT RESET). No ring or burst on the dash itself.
+##   Vault back with no cap (the payoff: T4, pay_cashin, RESET at her hand); a chain runs a routine of flips and
+##   keeps fast Shift presses (ThiefChain). No ring or burst on the dash itself.
 ##   What other presses do during the cartwheel: content/dash_flow/thief.json (DashFlow).
 ## - RMB, Bola: a 0.4s wind-up with the lane showing, then a kit-run Bola that grounds the first foe and
-##   flies on (bouncing once off a wall); a second foe caught and both are stunned with bonus damage.
+##   slows it (the owner's call, on top of the source's Ground) and flies on (bouncing once off a wall); a second
+##   foe caught and both are stunned with bonus damage.
 ## - E, Shadow Knife: a dagger to the cursor that sticks in the first foe (slows) or lands; recast to blink
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
@@ -40,7 +42,7 @@ const VAULT_MEAN := 1.2025         # the mean of VAULT_CURVE, so the distance st
 const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
 const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
 const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
-const CARTWHEELS := ["thf_vault_r", "thf_vault_l", "thf_exdash"]
+const CARTWHEELS := ["thf_vault_r", "thf_vault_l", "thf_vault_f", "thf_vault_b", "thf_vault_twist", "thf_exdash"]
 
 var primed_t := 0.0            # Vault empowered the next bolt
 var haste_t := 0.0             # Vault's burst of speed (ends on the empowered hit)
@@ -50,6 +52,7 @@ var knife := {}                # the stuck Shadow Knife: {target, pos, dir}
 var bola_cast := {}            # the Bola winding up, lane showing: {t}
 var bola := {}                 # the Bola in flight: {pos, dir, left, first, bounces, stg}
 var encore: ThiefUlt           # X, the ultimate
+var chain: ThiefChain          # the Vault loop: its routine of flips, the Shift presses it keeps
 var wrapped := {}              # foe instance id -> [foe, time left]: the binding rings on the Grounded
 var glint: Node3D = null       # the empowered tell: a gold glint at the weapon hand
 var glint_pop := 0.0           # 1 as the empowered bolt forms (the landing), easing back to 0
@@ -74,6 +77,7 @@ var landing_due := false       # an air cartwheel is over; she lands in a crouch
 func _setup() -> void:
 	res = 0.0
 	encore = ThiefUlt.new(self)
+	chain = ThiefChain.new(self)
 
 func fx() -> DJFx:
 	return DJFx.of(m)
@@ -249,6 +253,7 @@ func _tick(dt: float) -> void:
 	if not bola.is_empty(): _tick_bola(dt)
 	encore.tick(dt)
 	_tick_vault(dt)
+	chain.tick(dt)
 	_tick_landing()
 	_tick_trail(dt)
 	_tick_wrapped(dt)
@@ -384,6 +389,7 @@ func _bolt() -> void:
 	if emp:
 		primed_t = 0.0
 		haste_t = 0.0
+		chain.bolt_thrown(float(sd["life"]))
 		sd["dmg"] = float(sd["dmg"]) * empowered_k()
 		sd["r"] = 0.3
 		x["kb"] = 3.0
@@ -400,6 +406,7 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 	s["dj_end"] = true
 	last_bolt_end = at
 	primed_on = e if emp else null
+	if emp: chain.bolt_ended()
 	if e != null:
 		fx().star(at, BOLT_GOLD if not emp else Color("ffe070"),
 				1.5 if emp else 0.7,
@@ -417,7 +424,7 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 ## From a jump it carries its speed to the landing (the sheet's ~8m over ~0.95s).
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
-	if not spend_dash(use_ex):
+	if chain.hold_for_bolt(use_ex) or not spend_dash(use_ex):
 		return true
 	var air := use_ex or not h.grounded
 	if use_ex:
@@ -480,6 +487,8 @@ static func _curve(pts: Array, u: float) -> float:
 func play(move: String) -> void:
 	if not vault.is_empty() and anim_id in CARTWHEELS and move not in CARTWHEELS:
 		return
+	if encore.running() and move in ThiefUlt.DANCED_OVER:
+		return
 	super.play(move)
 
 ## Presses during the Cartwheel: the bolt fires mid-flip when its row says so.
@@ -502,15 +511,13 @@ func _tick_trail(dt: float) -> void:
 	fx().streak(h.pos + Vector3(0, 0.7, 0), dir, 1.3, 0.5, GHOST, Color("e0fbff"), 0.3)
 	fx().star(h.pos + Vector3(0, 1.0, 0), GHOST, 0.5, 0.22, Color("c9a0ff"))
 
-## After a Vault: the cartwheel (a side flip in the plane of travel, whichever way you go; from a jump the
-## air one), the white arc its hands and feet trace, the speed and, by its row, the next bolt empowered: the
-## glint forms in the throwing hand and flares as she lands.
+## After a Vault: the flip (the routine's, ThiefChain; from a jump the air one), the white arc its hands and feet
+## trace, the speed and, by its row, the next bolt empowered: the glint forms in the throwing hand and flares as
+## she lands.
 func _vaulted(air: bool, empower: bool) -> void:
 	var dd := dash_def()
 	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
-	var right := Vector2(cos(h.face), -sin(h.face))
-	var wheel := "thf_vault_r" if dir.dot(right) >= 0.0 else "thf_vault_l"
-	play("thf_exdash" if air else wheel)
+	play("thf_exdash" if air else chain.next_flip(dir))
 	var t := float(dd["time"])
 	_swoosh(dir)
 	m.later(t * 0.5, func(): if is_instance_valid(h): _swoosh(dir))
@@ -554,27 +561,31 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return
 	add_mark(t, 1)
 
-## The empowered bolt landed: two Marks (the owner's faster stacking), and the Vault comes back on the spot (its
-## damage was on the bolt itself). Weight without a blast: a blue blade flash on them and the reset snap on her.
+## The empowered bolt landed: two Marks (the owner's faster stacking), and the Vault comes back on the spot, from a
+## jump too (its damage was on the bolt itself). Weight without a blast: a blue blade flash on them and the reset
+## snap on her.
 func _primed_hit(t: Ent) -> void:
 	primed_hits += 1
 	add_mark(t, int(dash_def()["prime_marks"]), true)
 	h.dashes = h.max_dashes()
+	h.ex_cd = 0.0
+	chain.on_reset()
 	DashReset.cue(h)
 	_reset_fx(t)
 	m.later(0.06, func(): if is_instance_valid(h): play("thf_reset"))
 
 ## The empowered hit and the reset, in her colours: a blue-white star and an upright blade arc on the target (the
-## source's red-white flash with its blue chakram), VAULT RESET over them, a cyan four-point star at her hip
-## where the Vault is back, its own sound (no self-shake: item 50).
+## source's red-white flash with its blue chakram), a white four-point glint with RESET at her throwing hand,
+## its own sound (no self-shake: item 50).
 func _reset_fx(t: Ent) -> void:
 	var at := t.pos + Vector3(0, 1.0, 0)
 	var dir := Vector2(t.pos.x - h.pos.x, t.pos.z - h.pos.z)
 	fx().star(at, EMP_BLUE, 2.2, 0.2, Color.WHITE)
 	fx().crescent(at, dir, 160.0, 1.2, EMP_BLUE, Color.WHITE, 0.2, PI * 0.5)
 	m.fx.flash(at, Color("e8f6ff"), 1.0, 0.08)
-	m.fx.word(t.pos + Vector3(0, 2.7, 0), "VAULT RESET", res_col(), true)
-	fx().star(h.pos + Vector3(0, 0.9, 0), GHOST, 1.0, 0.24, Color.WHITE)
+	var at_hand := hand_pos(hand == 1)
+	fx().star(at_hand, Color.WHITE, 1.4, 0.28, GHOST)
+	m.fx.word(at_hand + Vector3(0, 0.7, 0), "RESET", GHOST, true)
 	m.sfx("pay_cashin", at, -2.0, 1.0)
 	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
@@ -639,7 +650,8 @@ func _throw_bola() -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(bd["speed"]),
 			"range": float(bd["range"]), "size": 0.3},
-		"effects": [{"type": "damage", "amount": float(bd["dmg"])}]})
+		"effects": [{"type": "damage", "amount": float(bd["dmg"])},
+				{"type": "slow", "duration": float(bd["ground"]), "strength": float(bd["slow"])}]})
 	var dv := h.aim_dir()
 	bola = {"pos": h.pos + Vector3(dv.x * 0.5, 1.0, dv.y * 0.5), "dir": dv, "left": float(bd["range"]), "first": null,
 			"bounces": int(bd["bounces"]), "stg": stg}
@@ -715,7 +727,7 @@ func _end_bola(at: Vector3) -> void:
 	fx().unplace("bola%d" % h.get_instance_id())
 	m.fx.burst(at, col_of(rmb_def()), 5, 2.0, 0.25, 6.0, 0.6)
 
-## The Bola wraps its first foe: its stage (damage, slow), Grounded and a Mark, the binding rings.
+## The Bola wraps its first foe: its stage (damage), Grounded and slowed, a Mark, the binding rings.
 func _wrap(f: Ent) -> void:
 	var stg: StageSpec = bola["stg"]
 	KinExec.apply_foe(stg.effects, f, cx("rmb", "bola", f.pos, {"at": f.pos}), f.pos, stg)
