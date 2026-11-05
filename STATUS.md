@@ -1059,3 +1059,14 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Checks: shroud 32/0, unmasked 40/0, health and style strict OK; hatch, warden-model, warden-glb one commit earlier, warden-stance and mantle-look two edits earlier. No full suite.
 - Not checked: female body by eye, height and build extremes, the live creator screen, the web/mobile export (no simplifier there means over budget, not a crash). In glide the arms leave the Cloak and Poncho by design.
 - Merge-tree clean with main; one check_registry conflict against ext/art1-integ.
+
+## 2026-11-05 20:40 UTC S2 to S5: ext/art1-integ 59cd6dd5 READY: one merge for all nine ART-1 models, with crouch
+- On main b23aab82, merge-tree clean, no Kael art. I checked it contains: hem, sable, pip + 118b, vex fd016e89, cinder, ryzz + 139, tarek, claire, grimble, weapon-scale, anim-crouch-all. It doesn't need the separate branches.
+- Your batch 10 and kit-cinder-66 aren't on it, so expect to re-merge, and check_registry and Rules.md will likely want the usual union and regen.
+- Every Hero confirmed on its own .glb by a new clip-check row (9 pass). One normal-map path (use_nrm, normal_k survives), with a warden-glb row proving none is lost. Motley needs a one-line use_normal to use_nrm when he lands.
+- Tested: full suite on 6f03163e, compared to main: no new reds; dash-flow's one new red is fixed. Final tip: targeted run of 29 checks + mage 3/3 + health and style strict + gen_wiki, all pass except hitch and mantle-look below. No full suite on the final tip: your suite is the first.
+- Mantle-look correction: I said 0.75 was a drop from about 0.78. Clean main also reads 0.75 in the integ runs, so it isn't. The lowest Hero moved: Ostra 0.745 on main, now Tarek at 0.752, a check artifact (it reads raw mesh faces, so skinned bodies never deform). Assert unchanged. Fix the check later: it can't see eight skinned Heroes.
+- Hitch reads somewhat worse: worst frame 5.12x vs main's 3.91x, 2.59x vs 3.52x in suites, on a loaded box with stuck runs. Not conclusive. S1: please bench.
+- I viewed the nine-Hero sheet: no white materials, lost heads or missing atlases; each matches its own lane. Not checked: a live match with all nine, a real GPU, clips in motion.
+- One data change to review: tender.json dash_flow gets a jump -> rmb buffer row, because Pip's 1 s wind-up outlasts her hop [alternative: release the seed in the air, a kit change].
+- Lanes still to land on top: Kael (his crouch is ready), Breaker, Motley. Sheet: hero-shots-s2 art1/integ/.
