@@ -95,7 +95,10 @@ static func rock(
 	)
 	var old: Node3D = w["node"]
 	var n := RockLook.make()
-	n.scale = Vector3(len_ / 1.15, 1.0, 1.0)
+	var tall := top / ROCK_TOP
+	if tall < 1.0:
+		RockLook.upright(n)
+	n.scale = Vector3(len_ / 1.15, tall, 1.0)
 	m.add_child(n)
 	RockLook.cool(n)
 	w["node"] = n
@@ -105,12 +108,9 @@ static func rock(
 	w["th"] = ROCK_TH
 	w["kx_end"] = func(gone: Dictionary): RockLook.crumble(m, gone)      # (broken or timed out, not launched)
 	m.verbs._place_wall(w, n)
-	# a low rock is the same crag, mostly buried: squashing it would shear its leaning columns
-	n.position.y -= ROCK_TOP - top
-	(n.get_node("Shadow") as Node3D).position.y += ROCK_TOP - top
 	n.scale = Vector3(len_ / 1.15, 0.05, 1.0)
 	n.create_tween().tween_property(
-		n, "scale", Vector3(len_ / 1.15, 1.0, 1.0), ROCK_RISE_T
+		n, "scale", Vector3(len_ / 1.15, tall, 1.0), ROCK_RISE_T
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	if is_instance_valid(old):
 		old.queue_free()

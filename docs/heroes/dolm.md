@@ -156,7 +156,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 ## Taller rocks (owner review item 67, Nov 4)
 - Every raised rock is 2.2m tall (was 1.25m; 1.76x): taller than a hunter's head, the tallest column 2.32m. Same footprint
   (length 1.3m, `th` 0.42), same blocking. Stone Row and Basalt Spine share it; Rock Hop's rolling rock (`dashrock`) is 1.8x
-  taller and rides higher, so it does not sink into the ground. Rock Hop's own rocks are 0.6m tall: the same crag, mostly buried.
+  taller and rides higher, so it does not sink into the ground. Rock Hop's own rocks are 0.6m tall: the same crags, stood straight and squashed.
 - Look (scripts/arch/rock_look.gd, RockLook): tapered craggy columns, warm umber and sandstone faces (`molten_rock` got an
   optional warm `rim`), pale tops that read from the top-down camera, a soft ground shadow. They rise over 0.22s with a
   dust and earth burst and a short rumble (`br_rumble`, at most one per 0.09s so a ridge rumbles as one); broken or timed
