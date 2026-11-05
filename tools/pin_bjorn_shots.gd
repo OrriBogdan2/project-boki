@@ -177,7 +177,7 @@ const SHOTS := [
 		"spin",
 		0.75,
 		1.5,
-		"LMB held: side-on and crouched, the hammer dragged back low behind him, the shield arm forward,"
+		"LMB held: side-on and crouched, the hammer whirling round him with its trail, the shield arm forward,"
 			+ " the gold ring at his feet"
 	],
 	[
@@ -196,6 +196,12 @@ const SHOTS := [
 		1.5,
 		"Full charge: the big gold star flare on the hammer head and the cursor flare"
 	],
+	["o59_spin_a", "bulwark", "spin", 0.68, 1.5, "item 59: strip 1/6, the hammer eases out of the hand"],
+	["o59_spin_b", "bulwark", "spin", 0.74, 1.5, "item 59: strip 2/6, the whirl, a quarter turn on"],
+	["o59_spin_c", "bulwark", "spin", 0.8, 1.5, "item 59: strip 3/6, the whirl, a quarter turn on"],
+	["o59_spin_d", "bulwark", "spin", 1.25, 1.5, "item 59: strip 4/6, faster, the glint on the head"],
+	["o59_spin_e", "bulwark", "spin", 1.68, 1.5, "item 59: strip 5/6, full charge, the flash, still whirling"],
+	["o59_spin_f", "bulwark", "slam", 1.86, 1.5, "item 59: strip 6/6, the release: the slam forward"],
 	[
 		"bjorn_slam",
 		"bulwark",

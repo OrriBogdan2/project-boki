@@ -265,10 +265,10 @@ def peplum():
     for i, t in enumerate(np.linspace(0, 1, nv)):
         o = np.radians(4 + 26 * t)
         a = o + (2 * np.pi - 2 * o) * s
-        rx, ry = 0.09 + 0.15 * t ** 1.2, 0.07 + 0.14 * t ** 1.2
+        rx, ry = 0.09 + 0.19 * t ** 1.2, 0.07 + 0.17 * t ** 1.2
         P[i, :, 0] = np.sin(a) * rx
         P[i, :, 1] = np.cos(a) * ry
-        P[i, :, 2] = 1.05 - 0.19 * t
+        P[i, :, 2] = 1.05 - 0.23 * t
     V, F, ST = grid(P, flip=True)
     return Part("peplum", "cloth", V, F, ST, rigid("hips", len(V)), "peplum", (360, 110)), P
 
@@ -293,7 +293,7 @@ def tails():
         pts = [d * 0.17 + (0, 0, 0.99), d * 0.27 + (0, 0, 0.86), d * (reach * 0.72) + (0, 0, drop + 0.07), d * reach + (0, 0, drop - 0.03), d * (reach + 0.035) + (0, 0, drop - 0.1)]
         path = resample(pts, 15)
         t = np.linspace(0, 1, 15)
-        wd = rmp(t, [0, 0.3, 0.7, 1], [0.082, 0.06, 0.026, 0.004])
+        wd = rmp(t, [0, 0.3, 0.7, 1], [0.125, 0.092, 0.036, 0.004])
         P = np.zeros((15, 3, 3))
         for r in range(15):
             P[r, 0] = path[r] - side * wd[r]

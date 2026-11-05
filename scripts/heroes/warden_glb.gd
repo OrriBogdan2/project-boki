@@ -103,7 +103,8 @@ const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (Hunte
 const WEAPON_OFF := "weapon_offhand"
 const SHIELD_PATH := "Rig/Torso/ArmLPivot/Elbow/Hand/Shield"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
-## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire).
+## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire);
+## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide, Sable's flips and Encore).
 const WING_FOLD := "wing_fold"
 const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
 ## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's data
@@ -960,11 +961,16 @@ class Springs:
 	const WIND := 0.09          # m: how far a scarf tail's tip ripples at rest
 	const FOLD := 0.75          # radians a folded wing tips back about the side axis through its root
 	const TUCK := 0.8           # and turns in behind the back about the vertical
+	const FLARE := 1.15         # radians a flared wing swings out to her side about the front-back axis
 	var skel: Skeleton3D
 	var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}
+<<<<<<< HEAD
 	var fold := 0.0             # 0..1: how far the wing chains are folded (WING_FOLD)
 	var wind_t := 0.0
 	var calm := false           # no ripple (a check measuring how a chain settles)
+=======
+	var fold := 0.0             # how far the wing chains are folded (1) or flared (-1) (WING_FOLD)
+>>>>>>> origin/main
 
 	func setup(skeleton: Skeleton3D) -> void:
 		skel = skeleton
@@ -1008,14 +1014,17 @@ class Springs:
 			var want := PackedVector3Array()
 			# a wing folds: its rest shape tipped back (+Z, behind) and turned in, about its root
 			var turn := Transform3D.IDENTITY
-			if bool(ch["wing"]) and fold > 0.001:
+			if bool(ch["wing"]) and absf(fold) > 0.001:
 				var r0: Transform3D = base * skel.get_bone_global_rest(int(ids[0]))
 				var r1: Transform3D = base * skel.get_bone_global_rest(int(ids[ids.size() - 1]))
 				var out := signf(r1.origin.x - r0.origin.x)
 				var tip_in := Basis(Vector3.UP, -out * TUCK * fold)
 				# (a wing hanging down from its root, Sable's moth wings, tips the other way to go back too)
 				var up := 1.0 if r1.origin.y >= r0.origin.y else -1.0
-				turn = Transform3D(Basis(Vector3.RIGHT, up * FOLD * fold) * tip_in, Vector3.ZERO)
+				if fold > 0.0:
+					turn = Transform3D(Basis(Vector3.RIGHT, up * FOLD * fold) * tip_in, Vector3.ZERO)
+				else:
+					turn = Transform3D(Basis(Vector3.BACK, up * out * FLARE * fold), Vector3.ZERO)
 				turn = Transform3D(Basis.IDENTITY, r0.origin) * turn * Transform3D(Basis.IDENTITY, -r0.origin)
 			for bi in ids:
 				var r: Transform3D = turn * base * skel.get_bone_global_rest(int(bi))

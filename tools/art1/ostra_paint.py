@@ -8,7 +8,7 @@ def hx(s):
     return np.array([int(s[i:i + 2], 16) / 255.0 for i in (0, 2, 4)], np.float32)
 
 
-BLACK, PLUM, DUSK, VIOLET, VIOLET_HI, TRIM, HOT = map(hx, ("150f1c", "261b30", "3d2650", "62308a", "8a46bc", "bb66f2", "e0aaff"))
+BLACK, PLUM, DUSK, VIOLET, VIOLET_HI, TRIM, HOT = map(hx, ("150f1c", "261b30", "45295c", "6e36a0", "9a52d0", "bb66f2", "e0aaff"))
 RUFF_D, RUFF_M, RUFF_L = map(hx, ("3e3a48", "7b7686", "b4afbb"))
 BLUE = hx("3a2f7c")
 

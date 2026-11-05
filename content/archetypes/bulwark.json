@@ -52,6 +52,7 @@
 	"lmb": {
 		"tap": 0.2,
 		"full": 1.25,
+		"spin_turns": [2.5, 4.0],
 		"throw_dmg": 12.0,
 		"throw_range": 9.0,
 		"throw_speed": 24.0,

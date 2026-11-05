@@ -13,6 +13,7 @@ func run(a) -> void:
 	await chain_states()
 	await chain_pull()
 	await chain_steer()
+	await chain_swing()
 	await rmb_rows()
 	await dash_moves()
 	await parity_lmb()
@@ -285,7 +286,9 @@ func chain_pull() -> void:
 	K.use_e()
 	T.teleport(T.pos + Vector3(0, 0, 2.0))
 	var t := 0.0
+	var look: Vector3 = P.inp["aim"] - P.pos           # the cursor stays put on screen as the camera follows him
 	while W.state == "pulling" and t < 1.0:
+		P.inp["aim"] = P.pos + look
 		m.step(A.DT)
 		t += A.DT
 	A.ok("jug pull: it homes on a hooked foe that moves, and arrives against them",
@@ -755,6 +758,91 @@ func parity_rmb() -> void:
 			"on %.1f m, off %.1f m" % [float(on_flash["dist"]), float(off_flash["dist"])])
 	await A.done(m)
 
+# ------------------------------------------------------------------ owner item 57: the swing
+## One pull at a foe 13 m east: `aim` is where the cursor is off him, `move` the held key. Returns the landing, the
+## heading turned, the slowest step and the predicted arc's end.
+func _haul(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, T: Hunter, aim: Vector3, move: Vector2) -> Dictionary:
+	var W := K.warchain
+	_settle(m, P, K, home)
+	A.aim_at(P, T.pos)
+	_hook(m, P, K, T.pos, 0.5)
+	var hooked := W.hooked() and W.target == T
+	A.aim_at(P, P.pos + aim)
+	P.inp["move"] = move
+	m.step(A.DT)
+	var arc: Dictionary = K.fx().chains.get(W._fx_id() + "arc", {})
+	var shown: bool = not arc.is_empty() and (arc["node"] as Node3D).visible
+	var promised := W.preview[-1] if shown else Vector3.ZERO
+	var from := P.pos
+	K.use_e()
+	var t := 0.0
+	var slowest := 99.0
+	var was := P.pos
+	while W.state == "pulling" and t < 1.5:
+		A.aim_at(P, P.pos + aim)                    # the cursor stays put on screen as the camera follows him
+		m.step(A.DT)
+		t += A.DT
+		if W.state == "pulling":
+			slowest = minf(slowest, Vector2(P.pos.x - was.x, P.pos.z - was.z).length() / A.DT)
+		was = P.pos
+	var heading := W.pull_dir
+	var moving := Vector2(P.vel.x, P.vel.z)
+	P.inp["move"] = Vector2.ZERO
+	return {"hooked": hooked, "exit": W.exits, "end": P.pos, "z": P.pos.z - from.z, "turned": rad_to_deg(
+			absf(W.line.angle_to(heading))), "slowest": slowest, "t": t, "moving": moving, "heading": heading,
+			"shown": shown, "promised": promised, "dist": T.pos.distance_to(P.pos)}
+
+## Owner item 57: looking aside swings the pull out in a clear arc around the anchor, at full speed.
+func chain_swing() -> void:
+	var r := A.setup("juggernaut", 13.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var K: JuggernautKit = P.ak
+	var ed := K.e_def()
+	var east := Vector3(13.0, 0, 0)
+	var left := Vector3(0, 0, -13.0)
+	T.teleport(home + east)
+	var ahead := _haul(m, P, K, home, T, east, Vector2.ZERO)
+	var aside := _haul(m, P, K, home, T, left, Vector2.ZERO)
+	var right := _haul(m, P, K, home, T, -left, Vector2.ZERO)
+	var keys := _haul(m, P, K, home, T, east, Vector2(0, -1))
+	var both := _haul(m, P, K, home, T, left, Vector2(0, -1))
+	var against := _haul(m, P, K, home, T, left, Vector2(0, 1))
+	A.ok("jug swing: the cursor straight ahead lands direct, against the foe, no predicted arc",
+			ahead["hooked"] and ahead["exit"] == "arrived" and absf(float(ahead["z"])) < 0.3
+					and float(ahead["dist"]) < 1.6 and not ahead["shown"], str(ahead))
+	var off := absf((aside["end"] as Vector3).z - (ahead["end"] as Vector3).z)
+	A.ok("jug swing: the cursor 90 deg left lands >= 3 m left of the straight endpoint",
+			aside["exit"] == "arrived" and float(aside["z"]) <= -3.0 and off >= 3.0, "%.2f m: %s" % [off, aside])
+	A.ok("jug swing: the cursor 90 deg right swings the other way as far",
+			absf(float(right["z"]) + float(aside["z"])) < 0.3, "%.2f / %.2f" % [right["z"], aside["z"]])
+	A.ok("jug swing: at 13 m the arc turns him 35-45 deg", float(aside["turned"]) >= 35.0
+			and float(aside["turned"]) <= 45.0, "%.1f deg" % float(aside["turned"]))
+	A.ok("jug swing: speed through the curve stays >= 90% of the straight haul",
+			float(aside["slowest"]) >= float(ahead["slowest"]) * 0.9, "%.1f against %.1f m/s" % [
+					float(aside["slowest"]), float(ahead["slowest"])])
+	A.ok("jug swing: he arrives still moving along the curve", float((aside["moving"] as Vector2).length()) > 5.0
+			and (aside["moving"] as Vector2).normalized().dot(aside["heading"]) > 0.95, str(aside["moving"]))
+	A.ok("jug swing: a held key swings as far as the look, and stacks with it (capped at steer_max)",
+			absf(float(keys["z"]) - float(aside["z"])) < 0.5 and float(both["z"]) < float(aside["z"]) - 0.5
+					and absf(float(both["z"])) <= float(ed["steer_max"]) + 0.3, "keys %.2f both %.2f" % [
+					keys["z"], both["z"]])
+	A.ok("jug swing: a key against the look cancels it", absf(float(against["z"])) < 0.5, str(against["z"]))
+	A.ok("jug swing: the predicted arc shows before the press and ends where he lands (within 1 m)",
+			aside["shown"] and (aside["promised"] as Vector3).distance_to(aside["end"]) < 1.0,
+			"%s against %s" % [aside["promised"], aside["end"]])
+	# a wall on the swing's side: he doesn't grind on it, the pull ends there
+	var Wd = m.world
+	var lv: int = r[5]
+	for dx in range(6, 16):
+		Wd.level[Wd.idx(int(home.x) + dx, int(home.z) - 2)] = lv + 3
+	var walled := _haul(m, P, K, home, T, left, Vector2.ZERO)
+	A.ok("jug swing: swung into a wall the pull ends there, not grinding along it",
+			walled["exit"] == "arrived" and float(walled["t"]) < 0.8, str(walled))
+	await A.done(m)
+
 # ------------------------------------------------------------------ the pull model (steer, curve, slingshot)
 ## The pull is an impulse toward the anchor that his movement input and facing curve, and backing away first
 ## slingshots (docs/heroes/juggernaut.md "Warchain: the state machine"). Pulled to a wall 9 m east each time.
@@ -783,14 +871,16 @@ func chain_steer() -> void:
 		if how == "sling":
 			A.step(m, 0.35, func(): P.inp["move"] = Vector2(-1, 0))      # backing away, then pulled while still going
 		if how == "face":
-			A.aim_at(P, home + Vector3(9.0, 0, 8.0))
+			A.aim_at(P, P.pos + Vector3(0, 0, 9.0))
 		var from := P.pos
 		K.use_e()
 		var t := 0.0
 		var wide := 0.0
 		var start_z := W.pull_dir.y
+		var look: Vector3 = P.inp["aim"] - P.pos       # the cursor stays put on screen as the camera follows him
 		while W.state == "pulling" and t < 1.5:
 			P.inp["move"] = Vector2(0, 1) if how == "strafe" else Vector2.ZERO
+			P.inp["aim"] = P.pos + look
 			m.step(A.DT)
 			t += A.DT
 			wide = maxf(wide, absf(P.pos.z - home.z))
@@ -805,8 +895,8 @@ func chain_steer() -> void:
 	A.ok("jug chain pull: holding a strafe curves it, arriving well beside the anchor (>= 1.5 m)",
 			sf["exit"] == "arrived" and float(sf["end_z"]) >= 1.5, str(sf))
 	var fc: Dictionary = runs["face"]
-	A.ok("jug chain pull: looking aside bends it that way too, less than a strafe",
-			float(fc["end_z"]) > 0.5 and float(fc["end_z"]) < float(sf["end_z"]), str(fc))
+	A.ok("jug chain pull: looking aside bends it that way just as far as a strafe",
+			absf(float(fc["end_z"]) - float(sf["end_z"])) < 0.5, str(fc))
 	var sl: Dictionary = runs["sling"]
 	A.ok("jug chain pull: pulled while backing away it slingshots in faster",
 			float(sl["sling"]) > 2.5 and float(sl["speed"]) > float(ed["reel_speed"]) + 2.5

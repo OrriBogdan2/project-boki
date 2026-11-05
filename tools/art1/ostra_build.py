@@ -311,6 +311,12 @@ def main():
     anchor("weapon_muzzle", "x_weapon", tuple(orb_at + (-0.09, 0.0, 0.0)))
     anchor("anchor_grin", "head", (0, 0.14, 1.6))
     anchor("anchor_box", "x_box", (0, 0, 0.36))
+    anchor("anchor_box_base", "x_box", (0, 0, 0.02))
+    anchor("anchor_spring_base", "x_box", (0, 0, 0.33))
+    anchor("anchor_spring_top", "hips", (0, 0, P.SPRING_TOP))
+    anchor("anchor_lid", "x_boxlid", (0, -0.31, 0.75))
+    anchor("anchor_crank", "x_crank", tuple(axle + (0.1, 0, 0)))
+    anchor("anchor_fan", "x_fan", tuple(fc + (0, 0, -0.1)))
     p_ = sys.argv[sys.argv.index("--") + 1] if "--" in sys.argv and len(sys.argv) > sys.argv.index("--") + 1 else OUT + "/ostra.blend"
     bpy.ops.wm.save_as_mainfile(filepath=p_)
     print("OSTRA saved", p_)

@@ -3,11 +3,9 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://f1mfh0ge7awe"
-path.bptc="res://.godot/imported/ostra_face.jpg-7cf14c9077355643535d69f42c8dfb0c.bptc.ctex"
-path.astc="res://.godot/imported/ostra_face.jpg-7cf14c9077355643535d69f42c8dfb0c.astc.ctex"
+path="res://.godot/imported/ostra_face.jpg-7cf14c9077355643535d69f42c8dfb0c.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
 "md5": "54d31d006877d6294bfed5365d6ffb5e"
@@ -16,7 +14,7 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/ostra/ostra_face.jpg"
-dest_files=["res://.godot/imported/ostra_face.jpg-7cf14c9077355643535d69f42c8dfb0c.bptc.ctex", "res://.godot/imported/ostra_face.jpg-7cf14c9077355643535d69f42c8dfb0c.astc.ctex"]
+dest_files=["res://.godot/imported/ostra_face.jpg-7cf14c9077355643535d69f42c8dfb0c.ctex"]
 
 [params]
 
