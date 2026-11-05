@@ -273,6 +273,11 @@ def scale_keys(arm, clip, n):
             r.keyframe_insert("rotation_quaternion", frame=f)
         # the arcs: one of two shapes shows, swapped on an uneven beat; the frame number drives it so a seek can't freeze it on one
         ph = (f // 2 + (f // 7)) % 2
+        # the lids only exist while they close: open, they collapse into the head instead of poking through the eye corners
+        for sd in "RL":
+            k = 1.0 if P.get("lid" + sd, 0.12) > 0.3 else 0.02
+            pbs["lid." + sd].scale = (k, k, k)
+            pbs["lid." + sd].keyframe_insert("scale", frame=f)
         for v in (0, 1):
             on = 1.0 if v == ph else 0.0
             s = max(on, 0.001)

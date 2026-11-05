@@ -16,6 +16,7 @@ import warden_kit as WK
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
 ATLAS = 2048
+FACE_K = 6.0               # the face's texel density against the body
 UNIQ_W = 0.755
 EYE_R = (0.76, 0.12, 0.875, 0.22)
 MATS = ["skin-ryzz", "cloth-ryzz", "leather-ryzz", "hair-ryzz", "metal-ryzz", "glow-ryzz", "glow-wire", "cloth-gum"]
@@ -93,8 +94,28 @@ def surf(D):
 
 K.SURF = surf
 NZ = K.NECK_Z
-EYE_Z, MOUTH_Z, BROW_Z = NZ + 0.137, NZ + 0.061, NZ + 0.160
-EYE_X, EYE_W, EYE_H = 0.0475, 0.0285, 0.0205
+# the scan's own eyes and lips, measured off its paint: the sheet's face has to land on the dents that are really there
+_sm0 = src.data
+_co0 = np.zeros(len(_sm0.vertices) * 3)
+_sm0.vertices.foreach_get("co", _co0)
+_co0 = _co0.reshape(-1, 3)
+_uv0 = np.zeros(len(_sm0.loops) * 2)
+_sm0.uv_layers.active.data.foreach_get("uv", _uv0)
+_uv0 = _uv0.reshape(-1, 2)
+_vi0 = np.zeros(len(_sm0.loops), np.int64)
+_sm0.loops.foreach_get("vertex_index", _vi0)
+_vc = np.zeros((len(_co0), 3), np.float32)
+_vc[_vi0] = SP[np.clip((_uv0[:, 1] % 1 * sh).astype(int), 0, sh - 1), np.clip((_uv0[:, 0] % 1 * sw).astype(int), 0, sw - 1)]
+_near = (_co0[:, 1] > 0.02) & (np.abs(_co0[:, 0]) < 0.082)
+_eye = _near & (_vc[:, 2] > _vc[:, 0] * 1.3) & (_vc[:, 2] > 0.3) & (np.abs(_co0[:, 2] - (NZ + 0.137)) < 0.03)
+_lip = _near & (np.abs(_co0[:, 0]) < 0.03) & (_vc[:, 0] > _vc[:, 1] * 1.45) & (_vc[:, 0] > 0.45) & (_co0[:, 2] > NZ + 0.03) & (_co0[:, 2] < NZ + 0.09)
+_er, _el = _co0[_eye & (_co0[:, 0] > 0)], _co0[_eye & (_co0[:, 0] < 0)]
+EYE_X = float((_er[:, 0].mean() - _el[:, 0].mean()) / 2)
+EYE_Z = float((_er[:, 2].mean() + _el[:, 2].mean()) / 2)
+MOUTH_Z = float(_co0[_lip, 2].mean())
+BROW_Z = EYE_Z + 0.023
+EYE_W, EYE_H = 0.0285, 0.0205
+print("scan landmarks: eye x", round(EYE_X, 4), "z", round(EYE_Z, 4), "(%d, %d verts) mouth z" % (len(_er), len(_el)), round(MOUTH_Z, 4), "(%d)" % int(_lip.sum()))
 MOUTH_C = np.array([0.0, front_y(0.0, MOUTH_Z), MOUTH_Z])
 LID_A = 0.82
 
@@ -385,6 +406,8 @@ for i in range(nf):
             tally[p_] = tally.get(p_, 0) + w_
     part = max(tally, key=tally.get) if tally else "torso"
     c = np.mean([verts[v] for v in faces_v[i]], axis=0)
+    if part == "head" and c[2] > K.NECK_Z + 0.04 and bm.faces[i].normal.y > 0.3:
+        part = "face"       # flat from the front, with its own big share of the atlas
     # (seams at the waist and down the skirt's centre: one big island round its holes folds over itself, and paint lands on the wrong place)
     region[i] = (part, c[1] > 0.0, part == "torso" and c[2] > 1.04, part == "torso" and c[2] <= 1.04 and c[0] > 0.0)
 for e in bm.edges:
@@ -398,6 +421,10 @@ bpy.ops.uv.unwrap(method="CONFORMAL", margin=0.0)
 bm = bmesh.from_edit_mesh(me)
 bm.faces.ensure_lookup_table()
 uvl = bm.loops.layers.uv["UV"]
+for i, r_ in region.items():
+    if r_[0] == "face":
+        for l in bm.faces[i].loops:
+            l[uvl].uv = (l.vert.co.x, l.vert.co.z)
 # faces the solver squashed to nothing (a 6 cm triangle in 0.002 of the atlas: it takes its neighbour's colour as a hard wedge) get their own flat island
 _r, _fi = [], []
 for i in region:
@@ -445,7 +472,7 @@ for i in uniq:
     n = names[faces_pid[i]]
     wgt = SCALE.get(base_name(n), 1.0)
     if i in region:
-        wgt = 3.4 if region[i][0] == "head" else 1.0
+        wgt = {"face": FACE_K, "head": 1.4}.get(region[i][0], 1.0)
         n = n + region[i][0]
     s_ = wgt * math.sqrt(stats[n][0] / max(stats[n][1], 1e-12))
     for l in bm.faces[i].loops:
@@ -487,6 +514,7 @@ me.vertices.foreach_get("normal", vn)
 vn = vn.reshape(-1, 3)
 PID = -np.ones((ATLAS, ATLAS), np.int32)
 COVER = np.zeros((ATLAS, ATLAS), np.int16)
+FID = -np.ones((ATLAS, ATLAS), np.int32)
 OVER = 0
 POS = np.zeros((ATLAS, ATLAS, 3), np.float32)
 NOR = np.zeros((ATLAS, ATLAS, 3), np.float32)
@@ -517,9 +545,12 @@ for t in me.loop_triangles:
     POS[ys[m], xs[m]] = w @ vco[tv]
     NOR[ys[m], xs[m]] = w @ vn[tv]
     PID[ys[m], xs[m]] = faces_pid[t.polygon_index]
+    FID[ys[m], xs[m]] = t.polygon_index
 NOR = M.norm(NOR)
 print("texels", (PID >= 0).sum(), "of", ATLAS * ATLAS)
 print("uv overlap: texels inside two faces", int((COVER > 1).sum()))
+_fm = np.isin(PID, [0]) & (POS[..., 2] > K.NECK_Z + 0.08) & (POS[..., 1] > 0.04)
+print("face texels", int(_fm.sum()), "of", int((PID == 0).sum()), "body texels")
 
 me.polygons.foreach_set("use_smooth", [True] * nf)
 src.hide_render = low.hide_render = True     # (only the shipped body shades itself; and Cycles leaves the scan's 8k maps unloaded)
@@ -565,14 +596,27 @@ tri_l = np.array([t.loops[:] for t in st_])
 suv = np.zeros(len(sm.loops) * 2)
 sm.uv_layers.active.data.foreach_get("uv", suv)
 suv = suv.reshape(-1, 2)
-tree = BVHTree.FromPolygons([tuple(v) for v in svco], [tuple(t) for t in tri_v])
-def sample_scan(points):
+# at rest her arms hang against the hips: arm paint is only for the arm, or the skirt and jacket pick up forearm and glove
+_gn = {g.index: g.name for g in src.vertex_groups}
+_armg = {i for i, n in _gn.items() if n.startswith(("upper_arm.", "forearm.", "hand."))}
+_arm_w = np.zeros(len(sm.vertices), np.float32)
+for v in sm.vertices:
+    for g in v.groups:
+        if g.group in _armg:
+            _arm_w[v.index] += g.weight
+tri_arm = _arm_w[tri_v].mean(1) > 0.5
+ids_body, ids_arm = np.nonzero(~tri_arm)[0], np.nonzero(tri_arm)[0]
+tree_body = BVHTree.FromPolygons([tuple(v) for v in svco], [tuple(t) for t in tri_v[ids_body]])
+tree_arm = BVHTree.FromPolygons([tuple(v) for v in svco], [tuple(t) for t in tri_v[ids_arm]])
+print("scan tris: body", len(ids_body), "arm", len(ids_arm))
+def sample_scan(points, on_arm_=None):
     hit_i = np.zeros(len(points), np.int64)
     hit_p = np.zeros((len(points), 3))
     for i, p in enumerate(points):
-        h = tree.find_nearest(Vector(p))
+        arm_ = on_arm_ is not None and on_arm_[i]
+        h = (tree_arm if arm_ else tree_body).find_nearest(Vector(p))
         if h[2] is not None:
-            hit_i[i] = h[2]
+            hit_i[i] = (ids_arm if arm_ else ids_body)[h[2]]
             hit_p[i] = h[0]
     tv = svco[tri_v[hit_i]]
     v0, v1, v2 = tv[:, 1] - tv[:, 0], tv[:, 2] - tv[:, 0], hit_p - tv[:, 0]
@@ -592,7 +636,8 @@ def sample_scan(points):
 
 low_faces = [i for i in range(nf) if faces_pid[i] == 0]
 fc = np.array([np.mean([verts[v] for v in faces_v[i]], axis=0) for i in low_faces])
-fcol = sample_scan(fc)
+fc_arm = np.array([region[i][0] in ("armR", "armL") for i in low_faces])
+fcol = sample_scan(fc, fc_arm)
 for k_, i in enumerate(low_faces):
     r_, g_, b_ = fcol[k_]
     L_ = fcol[k_].mean()
@@ -613,7 +658,10 @@ for k_, i in enumerate(low_faces):
 
 mask = PID == 0
 ys, xs = np.nonzero(mask)
-col = sample_scan(POS[ys, xs].astype(np.float64))
+_is_arm = np.zeros(nf, bool)
+for i_, r_ in region.items():
+    _is_arm[i_] = r_[0] in ("armR", "armL")
+col = sample_scan(POS[ys, xs].astype(np.float64), _is_arm[FID[ys, xs]])
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 OUTC[ys, xs] = np.power(np.clip(col, 0, 1), 0.9) * 1.06
 OUTC[ys, xs] *= (0.7 + 0.3 * np.clip(AO[ys, xs], 0, 1))[:, None]
@@ -627,6 +675,7 @@ dk_k = smooth(0.34, 0.12, blur(OUTC.max(2), mask.astype(np.float32), 2))[..., No
 OUTC = OUTC + np.array([0.2, 0.18, 0.235], dtype=np.float32) * dk_k
 # the neon: bright magenta line art, corset, chest bolt, forearm veins -> the glow key (the shader's model_glow colour)
 neon = mask & (ri > 0.86) & (bi > 0.62) & (gi < 0.6) & (ri > gi * 1.6) & (z_t > 0.95)
+neon &= (np.abs(POS[..., 0]) < 0.125) | (z_t < 1.09)      # the corset, the chest and the forearms' veins: not the jacket's inner panels
 n_b = blur(neon.astype(np.float32), mask.astype(np.float32), 1)
 core = n_b > 0.5
 print("neon texels", int(core.sum()))
@@ -642,6 +691,15 @@ print("thigh band top", round(BAND, 3), "net texels", int(net.sum()))
 skin_sm = blur(OUTC.mean(2), net.astype(np.float32), 9)
 base = P.skin(POS[net].astype(np.float64), NOR[net].astype(np.float64), AO[net].astype(np.float64))
 OUTC[net] = P.fishnet(POS[net].astype(np.float64), base).astype(np.float32)
+
+
+def bil(img, u, v):
+    """Bilinear lookup: nearest-pixel paint is what looked blocky up close."""
+    u = np.clip(u, 0, img.shape[1] - 1.001)
+    v = np.clip(v, 0, img.shape[0] - 1.001)
+    x0, y0 = u.astype(int), v.astype(int)
+    fx, fy = (u - x0)[:, None], (v - y0)[:, None]
+    return ((img[y0, x0] * (1 - fx) + img[y0, x0 + 1] * fx) * (1 - fy) + (img[y0 + 1, x0] * (1 - fx) + img[y0 + 1, x0 + 1] * fx) * fy)
 
 
 # ---- the master sheet projected on the corset and chest: the detail comes from the art. Registered by the neon outline's bounds, so no hand-placed numbers.
@@ -666,7 +724,7 @@ if len(sy_) > 200 and len(mz) > 200:
     yy_, xx_ = np.nonzero(pj)
     uu_ = u0_ + (x1_ - POS[yy_, xx_, 0]) / (x1_ - x0_) * (u1_ - u0_)
     vv_ = v0_ + (z1_ - POS[yy_, xx_, 2]) / (z1_ - z0_) * (v1_ - v0_)
-    cc_ = sh_[np.clip(vv_.astype(int), 0, SHH - 1), np.clip(uu_.astype(int), 0, SHW - 1)]
+    cc_ = bil(sh_, uu_, vv_)
     skin_like = (cc_[:, 1] > cc_[:, 2] * 1.02) & (cc_[:, 0] > 0.6)     # the sheet's skin between the cups stays the scan's
     keep_ = ~skin_like
     new_neon = (cc_[:, 0] > 0.8) & (cc_[:, 2] > 0.55) & (cc_[:, 1] < 0.5)
@@ -682,26 +740,29 @@ OUTC[head_m] = np.clip(OUTC[head_m] + (OUTC.mean(2) - hb)[head_m][:, None] * 1.1
 # the owner's head sheet, front view, projected on the face: eyes (pink glowing under the bolt, blue), brows, nose, grin. Scaled by its eyes and mouth.
 HEAD = "/home/boki/meshy/ryzz_f/ryzz_head_nogum.png"      # (the sheet's first version, her grin: the later one paints the bubble, and that is geometry here)
 hd_ = imgio.load(HEAD)
-HU, HE, HM = 402.5, 743.0, 856.0                 # the sheet's face centre, eye line and mouth line (px)
-SU = 95.0 * 1.376 / (2 * EYE_X)                  # its eyes are 131 px apart
+HU, HE, HM = 400.8, 746.4, 840.0                 # the sheet's face centre, eye line and mouth line (px, measured)
+SU = 125.0 / (2 * EYE_X)                         # its irises are 125 px apart
 SV = (HM - HE) / (EYE_Z - MOUTH_Z)
+print("head sheet px/m", round(SU), round(SV))
 fm = mask & (POS[..., 1] > 0.0) & (NOR[..., 1] > 0.38) & (z_t > K.NECK_Z + 0.04)      # (front-facing only: the sheet has nothing for her cheeks' sides)
 yy_, xx_ = np.nonzero(fm)
 px_, pz_ = POS[yy_, xx_, 0], z_t[yy_, xx_]
 uu_ = HU - px_ * SU
 vv_ = HE + (EYE_Z - pz_) * SV
-cc_ = hd_[np.clip(vv_.astype(int), 0, hd_.shape[0] - 1), np.clip(uu_.astype(int), 0, hd_.shape[1] - 1)]
-blue_eye = np.hypot(px_ + EYE_X, pz_ - EYE_Z) < 0.022
-not_hair = (cc_[:, 2] < cc_[:, 0] * 1.0) | blue_eye
+cc_ = bil(hd_, uu_, vv_)
 rr_ = np.hypot(px_ / 0.094, (pz_ - (EYE_Z - 0.03)) / 0.125)
+# (the sheet's fringe is geometry here, so its blue goes at the edge of the face; inside it, blue is her brows and eye)
+not_hair = (cc_[:, 2] < cc_[:, 0] * 1.0) | (rr_ < 0.74)
 kk_ = (1 - smooth(0.86, 1.0, rr_)) * not_hair
-cc_[blue_eye] = np.clip(cc_[blue_eye] * np.array([0.8, 1.02, 1.3]), 0, 1)     # the blue eye stays clearly blue under the toon light
+cc_ = np.clip(cc_ * np.array([0.965, 1.035, 1.04]), 0, 1)       # (the toon light warms skin: the sheet's rose would go red)
 OUTC[yy_, xx_] = (OUTC[yy_, xx_] * (1 - kk_[:, None]) + cc_ * kk_[:, None]).astype(np.float32)
 hot_ = (cc_[:, 0] > 0.8) & (cc_[:, 2] > 0.6) & (cc_[:, 1] < 0.45) & (kk_ > 0.5)
 hot_ &= np.hypot(px_ - EYE_X, pz_ - EYE_Z) > 0.024        # (the pink eye keeps its painted iris; its glow is the bloom on anchor_eye_glow)
 core[yy_, xx_] = False
 core[yy_[hot_], xx_[hot_]] = True
-OUTC[core] = P.KEY
+# a soft edge on the neon: a hard magenta edge rings yellow in the atlas's JPEG
+kf_ = np.clip(blur(core.astype(np.float32), mask.astype(np.float32), 2) * 1.5, 0, 1)[..., None]
+OUTC = OUTC * (1 - kf_) + P.KEY.astype(np.float32) * kf_
 print("face projected", int((kk_ > 0.5).sum()), "glow", int(hot_.sum()))
 
 

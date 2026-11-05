@@ -9,7 +9,7 @@ def mix(a, b, t):
     """t is a scalar or already has its colour axis (kael_paint.mix adds one itself: two make an n x n array)."""
     return a * (1 - t) + b * t
 
-KEY = np.array([1.0, 0.16, 0.74])        # the neon: warden_look paint_glow lights texels of this colour on any surface
+KEY = np.array([1.0, 0.0, 1.0])          # the neon: warden_look paint_glow lights this colour; pure magenta, nothing in the art is near it
 SKIN = [hexc("#b9735f"), hexc("#dd9c84"), hexc("#f2bda6"), hexc("#fcd8c4")]
 COPPER = [hexc("#7a3e20"), hexc("#c87a44"), hexc("#eda56c"), hexc("#ffd6a8")]
 LEATHER_C = [hexc("#6a3a1e"), hexc("#a9683a"), hexc("#d39a62")]
