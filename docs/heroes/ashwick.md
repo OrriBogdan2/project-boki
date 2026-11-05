@@ -132,8 +132,9 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - The hose has no fuel and nothing reloads (the source shows no fuel bar; no reload exists in the game). The 0.35s relight gap and the self-slow after release are the only limits.
 - The pilot flame is cyan in our palette too (it reads as cool against warm fire); the burn pips use our own flame shape.
 - Flue Flight: he is not crowd-control immune; a stun ends the flight where he is. He flies over the abyss at the height he had
-  (only the carpet is missing there). The hose and the Cinder Shot are locked while flying (only the cloak was seen cast); a
-  Shift press waits for the landing (the dash buffer).
+  (only the carpet is missing there). The lance is off for the whole flight (owner item 66): the key is ignored, not buffered, a press
+  ticks softly, and the idle pilot flame goes out; it is back the frame the flight ends. The Cinder Shot (item 51) and the cloak
+  work; Shift in the flight is a poof that feeds it.
 - The flight's telegraph for the player is a heading lane with chevrons as long as the flight still has to go; foes see only the
   ember ring and the carpet, as in the footage.
 - Only enemy hunters count for the bond (the carpet still burns monsters and Boki).
@@ -155,7 +156,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | Sweep while firing | the old fire keeps flying its own way (the stream bends) | "lance: a sweep bends the stream (old fire keeps its own heading)" |
 | Look at the stream | narrow at the nozzle, billowing at the end | "lance: narrow at the nozzle, billowing at the far end" |
 | Let go, press again at once | the fire stops at once; 0.35s before it relights; a short slow | "lance: letting go stops the fire at once"; "lance: 0.35s before it can roar again" |
-| Hold the lance through a ram (or a poof, or the flight) / a jump | the stream goes out for the dash and roars again the step it ends (no pilot, no relight gap: the gap is after a release); it keeps burning through a jump | "lance: held through a ram it goes out, then roars again within 0.1s of its end (item 51)"; "lance: it keeps burning through a jump" |
+| Hold the lance through a ram (or a poof) / a jump | the stream goes out for the dash and roars again the step it ends (no pilot, no relight gap: the gap is after a release); it keeps burning through a jump | "lance: held through a ram it goes out, then roars again within 0.1s of its end (item 51)"; "lance: it keeps burning through a jump" |
 | Keep the lance on a foe about 1s | Ablaze, one pip | "lance: ~1s on the foe = Ablaze (level 1)"; "burn stage: one flame pip over a foe Ablaze" |
 | Keep holding on a burning foe | Flashover, three pips and a glow | "lance: kept on a burning foe it Flashes over (level 2)"; "burn stage: three flame pips and a glow over a Flashover" |
 | Lance a burning foe | +25% and 1.5% of health a second (Flashed over: +40% and 2.5%); Char at the full rate | "lance: +25% and 1.5% of health a second on an Ablaze foe (per tick)"; "lance: +40% and 2.5% of health a second on a Flashed-over foe (per tick)"; "lance: a burning foe builds Char at the full rate" |
@@ -178,7 +179,8 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | X through foes | a 5.2s carpet that burns, slows 30% and builds Char; Ablaze in about 2.4s | "ult payoff: a molten carpet along the flight that lingers 5.2s (the flight's +30%)"; "ult payoff: the carpet burns, slows and builds Char"; "ult payoff: standing in it, Ablaze after about 2.4s" |
 | X over nobody / through hunters / knocking one | no bond / a hit (once per cast) / a knock | "ult bond: nothing for a cast that lands on nobody"; "ult bond: burning a hunter fills it once per cast"; "ult bond: a knock with the carpet counts as the cast's best event (0.7)" |
 | X, then E mid-flight | the cloak goes off, the flight goes on (pull foes into the carpet) | "ult: the Furnace Cloak works mid-flight (the flight goes on)" |
-| X, then RMB | denied | "ult: no Cinder Shot mid-flight" |
+| X, then RMB | the Cinder Shot goes, the flight goes on | "ult: the Cinder Shot goes mid-flight and the flight goes on" |
+| X, then LMB (held or tapped) | nothing: no flame, nothing queued, a soft tick on each press; held, the lance lights the frame the flight ends (its usual 0.2s pilot, then the roar) | "ult 66: LMB held through the whole flight: no flame, no pilot, no lance damage, Char or burn"; "ult 66: a tap in the flight is ignored, not buffered (nothing fires on landing)"; "ult 66: LMB works on the first frame after the flight (the lance lights)" |
 | X over a gap | he flies across, no carpet over the void | "ult abyss: the carpet never forms over the void, he flies across" |
 | A knockback or a stun mid-flight | faster / the flight ends | "ult: a knockback mid-flight speeds it up"; "ult: a stun ends the flight" |
 | X, then the merge and its ultimate | a full-health light hunter survives | "burst: Flue Flight then the merge never one-shots a full-health light hunter" |

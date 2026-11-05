@@ -273,12 +273,14 @@ func _shading(a: String) -> void:
 				textured += 1
 			# a textured surface shows its atlas; a flat-painted one (hand-modelled, no atlas) its own colour
 			var shows := false
-			if sm and atlas:
+			if sm and sm.shader == WardenGlb.FLAME:
+				shows = true      # (fire: no paint of its own)
+			elif sm and atlas:
 				shows = bool(sm.get_shader_parameter("use_tex")) and sm.get_shader_parameter("albedo_tex") != null
 			elif sm and src:
 				shows = (sm.get_shader_parameter("albedo") as Color).is_equal_approx(src.albedo_color)
 			# (the void slot is the starfield shader, the card slot its own: RIG_CONTRACT "Materials")
-			var shader_ok := sm != null and sm.shader in [Models.HERO, WardenGlb.VOID, WardenGlb.CARD]
+			var shader_ok := sm != null and sm.shader in [Models.HERO, WardenGlb.VOID, WardenGlb.CARD, WardenGlb.FLAME]
 			if not shader_ok or not shows or not sm in mats:
 				wrong += 1
 	ok(surfaces > 0 and wrong == 0,

@@ -49,17 +49,20 @@ const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
 ## "brass" is metal split off by its colour, so a model's look can lift it alone at the match camera (Vex r3f).
 const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "brass": 3, "fur": 5, "eyes": 0,
-	"team": 1, "glow": 0, "void": 0, "card": 0, "ice": 1}
+	"team": 1, "glow": 0, "void": 0, "card": 0, "ice": 1, "flame": 0}
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
 const GUM_TAG := "gum"         # a bubble drawn with the gloss pass (gum_gloss.gdshader) instead of an ink shell
-const NO_INK := ["hair", "eyes", "glow", "card"]   # slots drawn without the ink outline shell
+const NO_INK := ["hair", "eyes", "glow", "card", "flame"]   # slots drawn without the ink outline shell
 ## The `void` slot is no lit surface but a window onto the Void (shaders/hero_void.gdshader: a drifting
 ## starfield over its painted colour, Ostra's coat tears); "<void>-<tag>" with a SOFT_TAGS tag also fades
 ## out toward its tip and edges (a body that dissolves into smoke: Ostra's wisp).
 const VOID := preload("res://shaders/hero_void.gdshader")
 const SOFT_TAGS := ["wisp"]
+## The `flame` slot: strips of living fire (shaders/hero_flame.gdshader), "flame-<tag>"; warden_look's "slots"
+## "flame-<tag>" sets its shader parameters. "flame-liquid" is a tank's bubbling fuel behind glass.
+const FLAME: Shader = preload("res://shaders/hero_flame.gdshader")
 ## The "card" slot: see-through alpha cards (wings) on their own shader, both sides drawn, no ink.
 const CARD: Shader = preload("res://shaders/warden_card.gdshader")
 ## Pieces built as clean geometry (tools/meshy/warden_parts.py), "<slot>-<tag>": they take the ink line even on
@@ -664,6 +667,16 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 				(mi as MeshInstance3D).set_surface_override_material(si, vm)
 				out.append(vm)
 				continue
+			if slot == "flame":
+				var fm := ShaderMaterial.new()
+				fm.shader = FLAME
+				fm.set_shader_parameter("liquid", tag == "liquid")
+				var flame_look: Dictionary = (own.get("slots", {}) as Dictionary).get("flame-" + tag, {})
+				for k in flame_look:
+					fm.set_shader_parameter(k, _param(flame_look[k]))
+				(mi as MeshInstance3D).set_surface_override_material(si, fm)
+				out.append(fm)
+				continue
 			var ink := not slot in NO_INK or tag in INK_TAGS      # (a Hunter's "no_ink" tags: _far_look)
 			var m := Models.toon(src.albedo_color if src else Color.WHITE, ink)
 			# (a Meshy model's vertex colour holds the ink room, not baked AO)
@@ -965,6 +978,8 @@ class Springs:
 	const PULL_TIP := 0.07      # and at the tip
 	const DAMP := 0.84          # the velocity kept per 1/60 s
 	const WIND := 0.09          # m: how far a scarf tail's tip ripples at rest
+	const FLOOR_CHAIN := PREFIX + "scarftail_tail"     # a tail lies on the ground, not through it (the feet's height)
+	const FLOOR_UP := 0.04      # m its joints stay over the model's origin
 	const FOLD := 0.75          # radians a folded wing tips back about the side axis through its root
 	const TUCK := 0.8           # and turns in behind the back about the vertical
 	const FLARE := 1.15         # radians a flared wing swings out to her side about the front-back axis
@@ -995,7 +1010,8 @@ class Springs:
 				chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array(),
 					"hang": skel.get_bone_name(bi).begins_with(PREFIX + "hang"),
 					"wing": skel.get_bone_name(bi).begins_with(PREFIX + "wing"),
-					"wind": skel.get_bone_name(bi).begins_with(PREFIX + "scarftail")})
+					"wind": skel.get_bone_name(bi).begins_with(PREFIX + "scarftail"),
+					"floor": skel.get_bone_name(bi).begins_with(FLOOR_CHAIN)})
 
 	func _spring(bi: int) -> bool:
 		return skel.get_bone_name(bi).begins_with(PREFIX)
@@ -1064,6 +1080,8 @@ class Springs:
 				var d := pts[i] - pts[i - 1]
 				var ln := want[i].distance_to(want[i - 1])
 				pts[i] = pts[i - 1] + d.normalized() * ln if d.length() > 1e-5 else want[i]
+				if ch["floor"]:
+					pts[i].y = maxf(pts[i].y, xf.origin.y + FLOOR_UP)
 			ch["pts"] = pts
 			ch["prev"] = prev
 			for j in n - 1:

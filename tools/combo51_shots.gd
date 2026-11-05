@@ -4,7 +4,8 @@ extends "res://tools/breah_shots.gd"
 ## renderer: archer|mage|dolm (Lisette, Ryzz, Tarek) and juggernaut|dredge|ashwick (Kael, Grimble, Cinder).
 ## <dir>/captions.txt gets "file: caption" per file.
 ## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Ryzz, Tarek: the audit's strips) or Kael's
-## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS).
+## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS), or Cinder's
+## "item66" (LMB held through Flue Flight).
 
 const LONG := 30                # m of flat ground the chain strips need, east of the spot
 const LONG_PARTS := ["chain"]   # parts shot on an expedition map instead of the Arena
@@ -333,6 +334,31 @@ func _ashwick() -> void:
 		[0.6, 0.76, 0.88, 1.05, 1.3, 1.6]
 	)
 	await _go(1.7, leap, lmarks)
+
+## Cinder, owner item 66 (--combo51-part=item66): LMB held from before the cast to after the landing. She weaves so
+## the flight stays over the island, and the camera follows her.
+func _ashwick_item66() -> void:
+	var K: AshwickKit = P.ak
+	P.lvl = 6
+	await _reset(4.0)
+	var held := func(t: float):
+		P.inp["fire"] = true
+		if _at(t, 0.7):
+			K.cd["x"] = 0.0
+			HunterKeys.ult_pressed(P)
+		if K.jet.running():
+			var d: Vector2 = (K.jet.flight["dir"] as Vector2).rotated(1.7 if fmod(t, 1.0) < 0.5 else -1.7)
+			P.inp["aim"] = P.pos + Vector3(d.x * 6.0, 0.9, d.y * 6.0)
+		else:
+			P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
+	var marks := _strip(
+		"item66_lmb_held_strip",
+		"Cinder (item 66), LMB held throughout: the lance roaring; lift-off, the stream goes out; flying, no"
+			+ " flame and no pilot, the carpet behind; still flying, still held; the frame after the flight, the"
+			+ " cyan pilot lights; the lance roars again",
+		[0.6, 0.8, 1.5, 2.4, 2.56, 2.95]
+	)
+	await _go(3.1, held, marks)
 
 ## Kael's Warchain, as whole views (the chain is longer than a strip crop): it pays out as he backs away and
 ## holds taut at 24 m; backing away then pulling slingshots him in; a strafe held in the pull curves him in beside.

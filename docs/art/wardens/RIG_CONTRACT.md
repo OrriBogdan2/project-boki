@@ -151,6 +151,7 @@ the vertex colour (`vertex_ao`):
 | `eyes` | — (unshaded iris) | the eye pick (`eye_col`) |
 | `team` | 1 | the team colour (keep it on one strong shape: a cuff, a cap, the stem's band) |
 | `glow` | emissive | — (Bjorn's crack, Zedran's fuller) |
+| `flame` | — (shaders/hero_flame.gdshader: strips of fire, raw UV, unlit, no atlas; `flame-liquid`: a tank's fuel; `warden_look` "slots" "flame-<tag>" sets its parameters) | — (Cinder's hair, tail and jets) |
 | `void` | — (shaders/hero_void.gdshader: a drifting starfield over the paint, unlit) | — (Ostra's coat tears; `void-wisp` also fades out toward its tip: `WardenGlb.SOFT_TAGS`) |
 
 A material with an emissive texture (glTF `emissiveTexture`) gets the toon shader's emission layer (`use_emit`,
