@@ -1,4 +1,4 @@
-2026-11-05T00:20:45Z
+2026-11-05T00:30:13Z
 
 FOR EXT (owner item queue): READY reports go here as each branch lands.
 READY (owner review): rigfix @ 0fe7a84e (from origin/integ91; +360/-12, 10 files) - briefs/RIGFIX.md. Posted in EXT_TO_MAIN (32f62738), contact sheets in briefs/rigfix/<hunter>_before_after.jpg.
@@ -43,9 +43,9 @@ BJORN #10 #29 #30: DONE by S1 on ext/kitdata-pin-bjorn @ 7dede8e. S2: skip them.
 DASH TABLE: converged on DashFlow. ext/kitdata-vireo-venator @ 67454b5 has no DashRules left (no rows needed porting; DashFlow already covered them; the S1 mage "rmb_to_dash cancels" row was not carried over since DashFlow's into_dash rows are empty for mage). hero_ult.gd now matches main's newer version (sha1 ef9d382e), taken from main by merge. For S2: --dash-flow-check fails "bulwark air dash -> lmb, pressed early: lost" on dash-flow-base itself (Bulwark mace lmb_override drops an early tap).
 Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on over drops and the abyss (gameplay change) OK? 2 m shield push and 4.2 m wall OK (no source numbers)? The aegis plates read like planks from top-down.
 
-Running now: ONE agent (Opus 5.5 medium, since 00:22 UTC Nov 5): ext/perf-94 from origin/main: item 103 (match audio stops on extract/death/scene change + check) first, then item 94 (perf overlay, benchmark, then the biggest costs; before/after table; tri/particle budget for S2).
-Queued: ext/clarity-96 from main (items 96, 96b, 97, 100, 102, 106) after perf-94. The old item queue (Claire WIP 92ad07b0, Tarek, gloves, Kael, Breaker, Vex, Sable, glider) is with S2/ext now. rigfix 0fe7a84e awaits the owner's review.
-Last INBOX entry handled: 2026-11-05 00:30 UTC ext (S1 unpaused: perf 103 + 94, then clarity 96; one Opus 5.5 medium agent at a time).
+Running now: ONE agent (Opus 5.5 medium, since 00:20 UTC Nov 5): ext/perf-94 from origin/main: item 103 (match audio stops on extract/death/scene change + check) first, then item 94 (perf overlay, benchmark, then the biggest costs; before/after table; tri/particle budget for S2).
+Queued: none. Clarity (96/96b/97/100/102/106) moved to cloud session S3 (INBOX 00:40 UTC); S1 = perf only. Owner-PC GPU numbers will be used from briefs/perf/ when posted. rigfix 0fe7a84e awaits the owner's review.
+Last INBOX entry handled: 2026-11-05 00:40 UTC ext (S1 = perf only; clarity to S3; owner-PC numbers to come in briefs/perf/).
 Watcher: received 19:06 UTC entry
 Questions for the owner: which model id is the 'new low-usage model' in DECISIONS 'Agents and art'? This server can pick Fable 5.1 (claude-fable-5-1), Sonnet 5.5, Opus 5.5 or Haiku 5.5. S1 assumes Fable 5.1 unless told otherwise. Also see the ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
