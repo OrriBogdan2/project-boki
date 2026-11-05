@@ -173,10 +173,39 @@ bpy.ops.object.select_all(action="DESELECT")
 low.select_set(True)
 bpy.context.view_layer.objects.active = low
 bpy.ops.object.modifier_apply(modifier=m.name)
-# Meshy winds some triangles inward: Cycles draws both sides, the game culls them and shows holes (PIPELINE.md)
+# Meshy winds some triangles inward: Cycles draws both sides, the game culls them and shows holes (PIPELINE.md). recalc alone leaves many on an open scan, so each
+# face is tested: a ray out along its normal that crosses the surface an odd number of times started inside. Arms apart from the body: fitted, they hang through the hips.
+from mathutils import Vector
+from mathutils.bvhtree import BVHTree
 bm = bmesh.new()
 bm.from_mesh(low.data)
+bmesh.ops.triangulate(bm, faces=bm.faces)
 bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+bm.faces.ensure_lookup_table()
+bm.verts.ensure_lookup_table()
+dl = bm.verts.layers.deform.verify()
+arm_g = {g.index for g in low.vertex_groups if g.name.startswith(("upper_arm", "forearm", "hand"))}
+is_arm = [sum(w for k, w in v[dl].items() if k in arm_g) > 0.5 for v in bm.verts]
+flip = []
+for part in (True, False):
+    fs = [f_ for f_ in bm.faces if (sum(is_arm[v.index] for v in f_.verts) >= 2) == part]
+    if not fs:
+        continue
+    tree = BVHTree.FromPolygons([v.co.copy() for v in bm.verts], [[v.index for v in f_.verts] for f_ in fs], all_triangles=True)
+    for f_ in fs:
+        n_ = f_.normal
+        o_ = f_.calc_center_median() + n_ * 2e-4
+        hits = 0
+        for _ in range(16):
+            h_ = tree.ray_cast(o_, n_)
+            if h_[0] is None:
+                break
+            hits += 1
+            o_ = h_[0] + n_ * 2e-4
+        if hits % 2:
+            flip.append(f_)
+print("faces turned out", len(flip), "of", len(bm.faces))
+bmesh.ops.reverse_faces(bm, faces=flip)
 bm.to_mesh(low.data)
 bm.free()
 print("Low tris", sum(len(p.vertices) - 2 for p in low.data.polygons))
