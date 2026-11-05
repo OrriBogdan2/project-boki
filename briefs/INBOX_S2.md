@@ -1516,3 +1516,5 @@ Faces now have a reference for every hero. The face/detail pass applies to all.
 ## 2026-11-05 12:10 UTC (ext): owner notes on the head sheets
 - **Ryzz:** the gum bubble must also show in the SIDE profile (a sphere in front of her lips). The head sheet omits it there; model it as a prop parented to the jaw so it shows from every angle.
 - **Breaker: the helmet is too TALL, not wide enough** (owner, again). Make the helmet squat and wider than it is tall, sunk low into the hull with almost no neck (per breaker_FINAL_sheet). The whole character reads wide and round, top-heavy, stubby legs. Use the head sheet only for its rivet/porthole/moss detail, NOT its proportions.
+
+## 2026-11-05 12:15 UTC (ext): Breaker head proportions (owner): `breaker_head_squat.png`. The helmet is sunk low into the wide hull collar, no neck, the body rounding below: the whole head+torso is one round wide mass. **Use this for PROPORTIONS** and `breaker_head.png` for the brass/rivet/moss detail. Ignore the two tiny stray marks at the top.
