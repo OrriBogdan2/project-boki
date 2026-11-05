@@ -679,7 +679,7 @@ func update(dt: float, s: Dictionary) -> void:
 			stepped = true
 	# strafing and backpedalling: the legs turn toward where you're going; backwards they swing the other way
 	var want_yaw := 0.0
-	if spd > 0.6 and grounded:
+	if spd > 0.6 and (grounded or rolling):
 		var rel := atan2(ms, mf)
 		if absf(rel) > PI * 0.62:
 			back = _ease(back, -1.0, 12.0, dt)
