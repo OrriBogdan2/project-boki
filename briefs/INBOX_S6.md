@@ -16,3 +16,11 @@
 - **Reserved files:** kin_* / merge_* / capture* / boki_hud / bot_kin are untouched. Ship new assets + a loader, and list one-line wiring for main (S5 merges it).
 - **Report:** READY per species in `briefs/EXT_TO_MAIN.md`.
 - **Rules:** fresh XDG, `timeout 1200`, health --strict, normal pushes, push every 30 min.
+
+## 2026-11-05 06:40 UTC (ext): STRETCH, after the 9 existing species: NEW Boki designs
+The owner wants new Boki too. Look at `ext/boki-roster50` (the planned 50-species roster: names, elements, roles) for which species aren't modelled yet.
+- For the next ones on it (or new designs that fill elemental/role gaps):
+  1. Make a **concept sheet** per species: front, side, back, an expression row, its grown/Fused forms if known, in the Vespyx style.
+  2. Save it to `briefs/art-refs/boki/<species>_concept.png` on ext/agent-briefs.
+  3. Model and animate it like the others.
+  4. **Mark these "NEW: owner approval pending"** in the READY report. The owner reviews new designs before they ship to players. Original designs only (no existing creature IPs).
