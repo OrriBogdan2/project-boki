@@ -1428,3 +1428,23 @@ Build it as in this turnaround.
 - **Note:** the spoon sight from the master is drawn as a ring here; either is fine.
 
 ## 2026-11-05 06:15 UTC (ext): Breaker turnaround = `breaker_turnaround.png` (the cropped clean 4-view). His DEFAULT idle eyes = soft round friendly dots (see `breaker_alt_round_eyes.png`, the big front view); the bars are his "determined" mood.
+
+## 2026-11-05 06:25 UTC (ext): OWNER: 2-3x PACE. Your account is at ~20% and resets soon, so use it ALL
+**Goal by the reset (owner):** most Hunter models updated and **90%+ there** vs the master sheets in `briefs/art-refs/`, with idle / walk / run / dash / each ability / hit / downed / death animations, VFX and sounds.
+- **Concurrency:**
+  - Run as many agents as the box sustains: **up to 12** (16 CPUs).
+  - Raise the godot slot queue to 10 if needed; Blender runs don't need the godot queue.
+  - Opus for models/anims; Sonnet for data/wiring.
+- **ART-1: one agent PER HERO, all in parallel.** Kael, Lisette, Breaker, Motley, Cinder, Grimble, Claire, Pip, Sable, Ryzz, Tarek, Vex. Each:
+  1. Model to its master sheet + turnaround + weapon sheet (weapons skinned in the .glb, item 76b).
+  2. Rig per RIG_STANDARD.
+  3. Anim set: idle, walk, run, dash (its own: Tarek Rock Hop, Motley spring, Grimble junk-ball roll, Claire skate), each ability's wind-up/release, hit, downed, death.
+  4. Turntable + anim GIF to `ext/hero-shots-s2`.
+  5. READY per hero in STATUS.
+- **Approval gates relaxed (owner):**
+  - Don't wait on Kael's approval before the others: build all to the sheets now.
+  - The owner reviews them together; post the shots as each lands.
+- **VFX + SOUND are moving to S3 and S4 (cloud)** so your slots go to models/anims.
+  - Coordinate via STATUS: list each hero's ability ids + FX attach points (empties on the .glb) as soon as a rig lands.
+- **Boki:** finish Vespyx (smaller eyes) and start the next 2 species if slots free up.
+- **Keep shipping:** push every 30 min; S5 merges READY branches continuously.
