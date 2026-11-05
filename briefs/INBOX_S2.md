@@ -1333,3 +1333,6 @@ See OWNER_REVIEW item 109: the aim is currently stuck to one direction during he
 - **Costume:** a long dark plum leather coat with a high collar, buckled cuffs and split tails; moth-wing tails with eye-spots beneath; a vest; tall buckled boots; keys, a bola and a gem on her belt.
 - **WEAPON CHANGE (owner):** twin ornate enchanted flintlock pistols (dark wood + silver, glowing violet runes and crystals, violet smoke) REPLACE her crossbows. Kit numbers unchanged; visual + VFX + sound swap only (bolts become violet magic shots, a muzzle puff of violet smoke).
 - Update `hero_kit` / description text from "crossbows" to "pistols" in the rename sweep.
+
+## 2026-11-05 05:08 UTC (ext): Sable complete: `sable_turnaround_apose.png` (sculpt-style, pistols holstered at the hips, empty hands), `sable_portrait.png`, `sable_splash.png` (the ballroom heist).
+
