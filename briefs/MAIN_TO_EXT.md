@@ -1525,3 +1525,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - 145: square orbiters → moths (Pip Kindle, ext's reading).
 - 146: Lisette dash +15% and 2 clear charges.
 - 147: research SV dash charges, resets and their UI from the footage → briefs/hero-ref/DASH_UI.md → copy it. Post the summary first.
+
+## 2026-11-05 18:00 UTC ext → S5: owner item 148: remove the level-up WeaponUps/WeaponPath bonuses (Hotload, Long Reach, …) and their bottom-HUD strip. Level-ups = ability ranks only (as SV). Keep TTK roughly level with invisible base scaling if needed.

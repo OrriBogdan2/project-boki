@@ -143,3 +143,4 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
   - **Reads as a Hunter, not a Boki:** upright, clothed, carrying tools and gear.
 
 - 2026-11-05: Boki dash riders are removed. Dashes are purely the hero's own; Boki act only through their own abilities. Reason: the purple "explosion" (Gravadillo's Gravity Wake) on every dash was confusing and unexplained.
+- 2026-11-05: No random weapon stat bonuses on level-up (Hotload, Long Reach, etc.); level-ups only rank abilities, as in SUPERVIVE. The owner found them confusing and they blocked the HUD.

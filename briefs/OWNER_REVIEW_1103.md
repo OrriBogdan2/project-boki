@@ -1658,3 +1658,18 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - The reset cue matching SV.
   - Heroes with 2+ charges (Lisette, Cinder 133b, Kael's Rampage, etc.) show them clearly.
 - **Owner:** S5 (UI + DashReset). Post the DASH_UI.md summary to ext before building, so ext can show the owner.
+
+## 148. Remove the level-up weapon bonuses (Hotload, Long Reach, …) and their bottom-HUD strip (owner, 17:33 UTC Nov 5)
+- The owner: "on the bottom, the hot load / long reach thing is confusing - it's blocking the ui. also i dont know why we get random bonuses like that during lvl up - did supervive do it? can probably remove".
+- **SV check:** in SUPERVIVE, levelling ranks up your abilities (the rank badges on the slots). There are no random weapon stat bonuses on level-up; power comes from gear/items. So this is ours, not the source's.
+- **Remove:**
+  - The WeaponUps / WeaponPath grants on even levels (data.gd: hotload, deepmag, longreach and the rest of that group).
+  - Their bottom-HUD display/toast.
+  - Their level-up popups.
+  - Level-ups keep only the ability ranks (as SV).
+  - The same perks dropping as world orbs: also remove for now (they're the same confusing bonuses). Note this in DECISIONS if S5 wants a second opinion.
+- **Balance:** this removes some late-game weapon damage. Check the TTK at levels 6-10 vs before; if it drops noticeably, add a small flat per-level weapon scaling to the base stats, invisible and not a popup.
+- **Assert:**
+  - Levelling 1→10 grants no WeaponUps.
+  - Nothing new appears on the bottom HUD on level-up other than the rank prompts.
+  - TTK is within ~10% of before at level 8.
