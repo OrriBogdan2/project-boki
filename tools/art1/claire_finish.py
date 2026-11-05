@@ -445,6 +445,16 @@ ys, xs = np.nonzero(mask)
 pp = POS[ys, xs].astype(np.float64)
 col = sample_scan(pp)
 print("scan paint", col.mean(0))
+# the scan drew her glove and cuff into the skirt's sides: those sides take the dress from further round the front
+az_ = np.abs(np.arctan2(pp[:, 1], np.abs(pp[:, 0])))
+side_ = smooth(0.62, 0.42, az_) * (np.abs(pp[:, 0]) > 0.1) * smooth(0.74, 0.8, pp[:, 2]) * smooth(1.04, 0.98, pp[:, 2])
+sid_ = np.nonzero(side_ > 0.01)[0]
+if len(sid_):
+    th_ = 0.7
+    q_ = pp[sid_].copy()
+    sgn_ = np.sign(q_[:, 0])
+    q_[:, 0], q_[:, 1] = q_[:, 0] * np.cos(th_) - sgn_ * q_[:, 1] * np.sin(th_), sgn_ * q_[:, 0] * np.sin(th_) + q_[:, 1] * np.cos(th_)
+    col[sid_] = col[sid_] * (1 - side_[sid_, None]) + sample_scan(q_) * side_[sid_, None]
 col = np.power(np.clip(col, 0, 1), 0.92) * 1.06
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 r_, g_, b_ = col[:, 0], col[:, 1], col[:, 2]
@@ -475,13 +485,13 @@ OUTC[ys[hair_], xs[hair_]] = P.ramp(np.clip((hc.mean(1) - 0.2) / 0.5, 0, 1), P.H
 face_m = np.isin(slot_, [mat_i["skin-face"], mat_i["hair-fringe"]])
 fx, fz = pp[:, 0], pp[:, 2] - K.eye_c(1.0)[2]
 sx_, sy_ = P.sheet_xy(fx, fz)
-r_ = np.hypot((sx_ - 325.0) / 150.0, (sy_ - 702.0) / 150.0)
+r_ = np.hypot((sx_ - 325.0) / 150.0, (sy_ - 695.0) / 158.0)
 sheet_k = smooth(1.0, 0.88, r_) * (pp[:, 1] > 0.02) * (pp[:, 2] > K.NECK_Z + 0.05)
 sh = P.load_sheet(HEADS)
 pc = P.sample_sheet(sh, sx_, sy_)
 # (the slate left inside the hood round the sheet's patch goes to the same ice blue)
 cur_ = OUTC[ys, xs].astype(np.float64)
-inner = (r_ < 1.45) & (pp[:, 1] > -0.02) & (pp[:, 2] > K.NECK_Z + 0.05) & (cur_.max(1) < 0.68)
+inner = (r_ < 1.5) & (pp[:, 1] > -0.03) & (pp[:, 2] > K.NECK_Z + 0.05) & (cur_.max(1) < 0.8)
 cur_[inner] = P.ramp(np.clip((cur_[inner].mean(1) - 0.2) / 0.5, 0, 1), P.HAIR)
 OUTC[ys, xs] = cur_ * (1 - sheet_k[:, None]) + pc * sheet_k[:, None]
 # a soft slit in each glowing iris (the master's close-up): blue, not black, so the eyes stay gentle

@@ -224,6 +224,7 @@ print("islands", [len(c) for c in comps_[:8]], len(comps_))
 bmesh.ops.delete(bm, geom=[v for c in comps_[1:] for v in c], context="VERTS")
 filled = bmesh.ops.holes_fill(bm, edges=[e for e in bm.edges if e.is_boundary], sides=2000)
 print("holes filled", len(filled["faces"]))
+bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
 bm.to_mesh(low.data)
 bm.free()
 # the density goes to the face: a vertex group the Decimate spares
