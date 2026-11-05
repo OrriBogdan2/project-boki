@@ -1918,3 +1918,15 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - A multi-charge hero gets exactly +1.
   - A non-contributing teammate gets none.
   - No double reset for Vex.
+
+## 160. Vex passive → match Ghost's current Combat Rush (ext, from the owner's question 17:45 UTC Nov 5; default = copy SV unless the owner objects)
+- SV now (supervive.wiki.gg/wiki/Ghost):
+  - Combat Rush: "Gain stacking 6% Omnivamp for 3.5s after landing a non-LMB ability" (8% at 05.03.25, cut to 6% at 19.03.25; all stacks expire together; Ghost's grenade attaching counted twice at intro).
+  - Plus "restores 500 Health when Ghost knocks an enemy".
+- Ours (Hot Streak / Fever): a knock gives Slipstep back (now global, item 159); each landing ability lights Fever, one flat 6% lifesteal for 3.5 s, not stacking.
+- **Change:**
+  - Fever stacks: +6% omnivamp per non-LMB ability hit (Burr Charge direct/cone, Longneedle, ult); all stacks share one 3.5 s timer refreshed on each new stack; cap ~4 stacks (tune). Grenade direct hit = 2 stacks.
+  - Omnivamp heals from all her damage (rifle included, as now).
+  - A knock heals her a chunk: SV's 500 on their HP scale. Map it to ours as ~the same % of max HP (S5 converts; ext's guess ≈ 20-25% of max).
+  - The knock→Slipstep refresh comes from the global rule (159), not the passive.
+  - The card text: "Combat Rush: abilities that land stack 6% lifesteal for 3.5s. Knocks heal you."

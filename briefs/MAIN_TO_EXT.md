@@ -1569,3 +1569,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 18:25 UTC ext → S5: owner item 158: MaskMoment becomes a proper transformation (Mask seals → energy seams → shroud dissolves into the Hunter outfit head-down → body morph → weapon forms → pose + shockwave). ~3 s. Spec in OWNER_REVIEW_1103. S2 pose, S3 VFX, S4 sound follow.
 
 ## 2026-11-05 18:30 UTC ext → S5: owner item 159 (global): a knock refreshes the dash of the knocker AND assisters (damage/CC on the victim in the last ~4 s). Single-charge = full; multi-charge = +1. One DashReset path; fold the per-kit knock resets into it. Includes SV research; spec in OWNER_REVIEW_1103. Pairs with item 147 (dash UI).
+
+## 2026-11-05 18:33 UTC ext → S5: item 160: Vex passive = Ghost's current Combat Rush: stacking 6% omnivamp per non-LMB ability hit (a shared 3.5 s timer) + a heal on knock (SV 500 HP, scaled to ours). The knock dash refresh comes from global 159.
