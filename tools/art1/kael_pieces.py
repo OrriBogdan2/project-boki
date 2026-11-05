@@ -14,6 +14,12 @@ C = np.array([0.0, 0.012, 1.482])             # the head's centre
 EYE = np.array([0.036, 0.0625, 0.008])        # head-local; x mirrored
 EYE_R = 0.0215
 SCAR_SIDE = -1.0                              # -1: his left, as the brief; 1: his right, as the sheet and splash draw it
+# the head scan onto the rig: its eyes on the grid render (Meshy frame) -> world
+SCAN_EYE_X, SCAN_EYE_Z, SCAN_EYE_GAP = 0.015, 0.23, 0.35
+EYE_GAP, EYE_Z, NOSE_Y, NOSE_DEPTH = 0.064, 1.49, 0.112, 0.055
+CHIN_DROP, SCARF_WIDEN = 0.05, 0.75
+SHEET_FRONT = (563.0, 611.0, 657.0)                          # the sheet's main view: px of the eyes' middle, eye line, px per scan unit
+SHEET_CX, SHEET_EYE_Y, SHEET_K = 566.0, 613.0, 3531.0       # the sculpt sheet's main view: px at his centre, eye line, px per m
 GLOW_EYE = "L"                                # the eye that glows
 
 
@@ -90,6 +96,36 @@ def skull():
     return Piece("skull", "skin-kael", v, grid_faces(rows, cols, True)).rigid("head")
 
 
+def mask_on(bvh):
+    """The scarf pulled up over the mouth and nose: a cloth shell ray-fitted over the head scan from just under the eyes down into its
+    scarf, the nose tented, a torn top edge."""
+    from mathutils import Vector
+    cols, rows = 13, 6
+    rng = np.random.RandomState(12)
+    ang = np.linspace(-1.05, 1.05, cols)
+    G = np.zeros((rows, cols, 3))
+    axis = np.array([0.0, NOSE_Y - 0.1, 0.0])
+    z_top = EYE_Z - 0.03
+    for j in range(cols):
+        top = z_top - 0.012 + 0.03 * (abs(ang[j]) / 1.05) ** 2 + 0.005 * rng.uniform(-1, 1) + 0.012 * np.exp(-(ang[j] / 0.2) ** 2)
+        for i in range(rows):
+            k = i / (rows - 1)
+            z = top + (EYE_Z - 0.105 - top) * k
+            o = axis + np.array([np.sin(ang[j]) * 0.25, np.cos(ang[j]) * 0.25, z])
+            d = -np.array([np.sin(ang[j]), np.cos(ang[j]), 0.0])
+            hit = bvh.ray_cast(Vector(o), Vector(d), 0.3)
+            r = 0.25 - (hit[3] if hit[3] is not None else 0.2)
+            G[i, j] = axis + np.array([np.sin(ang[j]) * r, np.cos(ang[j]) * r, z])
+    # the cloth bridges the nose and lips: each ring is the hull of its neighbours, puffed out a little
+    for _ in range(2):
+        H = G.copy()
+        H[:, 1:-1] = (G[:, :-2] + 2 * G[:, 1:-1] + G[:, 2:]) / 4
+        G = np.maximum(G, H) * [0, 1, 0] + H * [1, 0, 1]
+    n_ = norm((G - axis) * [1, 1, 0])
+    G = G + n_ * 0.005
+    return holed_sheet("maskfit", "cloth-kael", G, room=0.2).rigid("head")
+
+
 def eyeball(s):
     """The front cap of the eye, facing out a touch. Corner UVs are a flat view of it, painted by paint_eye."""
     c = EYE * [s, 1, 1]
@@ -102,7 +138,7 @@ def eyeball(s):
             d = rot_about(d, (0, 0, 1), -s * 0.1)
             v.append(c + d * EYE_R)
             uv.append((a, b))
-    p = Piece("eye" + ("R" if s > 0 else "L"), "eyes-kael", hl(v), grid_faces(rows, cols)).rigid("head")
+    p = Piece("eye" + ("R" if s > 0 else "L"), "skin-kael", hl(v), grid_faces(rows, cols), room=0.0).rigid("head")
     p.eye_uv = np.array(uv)
     return p
 
@@ -188,7 +224,7 @@ def mask():
 def cowl():
     """The ENORMOUS scarf: one heavy funnel from under the eyes to a torn drape on the shoulders, its folds real relief: thick swags of cloth
     that hang across the front and lap the one below (each swells out, then undercuts), so it reads as a wrapped mass, not a sheet."""
-    cols, rows = 36, 26
+    cols, rows = 32, 20
     z = C[2]
     prof = [(0.018, 0.092, 0.1), (0.05, 0.116, 0.124), (0.1, 0.138, 0.14), (0.15, 0.168, 0.156), (0.19, 0.212, 0.166), (0.225, 0.262, 0.172), (0.252, 0.284, 0.174)]
     pz = np.array([q[0] for q in prof])
@@ -217,7 +253,7 @@ def cowl():
             r = bulge + lobes
             hem = 0.034 * jag[j] * k ** 14
             G[i, j] = (sx * (hw + r), 0.016 + cy * (hd + r), z - dz - 0.018 * front * k + hem)
-    holes = [(5.5, 31.5, 0.8, 1), (8.0, 4.0, 0.8, 2), (12.5, 33.0, 0.8, 3), (15.5, 29.0, 0.9, 4), (17.0, 6.0, 0.9, 5), (20.5, 2.0, 0.7, 6), (19.5, 31.0, 0.7, 7)]
+    holes = [(4.2, 28.0, 0.8, 1), (6.0, 3.5, 0.8, 2), (9.5, 29.3, 0.8, 3), (11.8, 25.8, 0.9, 4), (13.0, 5.3, 0.9, 5), (15.6, 1.8, 0.7, 6), (14.8, 27.5, 0.7, 7)]
     p = holed_sheet("cowl0", "cloth-kael", G, wrap=True, holes=holes)
     w = 1.0 - smooth(0.3, 0.72, p.rowf)
     p.w = {"head": w, "hips": 1 - w}
@@ -459,7 +495,7 @@ def wrist_chain(uv):
         z = HAND_Z + 0.075 - 0.075 * k + 0.008 * np.sin(a * 2.3)
         r = 0.05 - 0.008 * k
         pts.append([cx + np.cos(a) * r * 1.06, np.sin(a) * r, z])
-    p = chain_along("chain_wrap", pts, step=0.0345, uv=uv, ln=0.042, wid=0.023, th=0.0064)
+    p = chain_along("chain_wrap", pts, step=0.05, uv=uv, ln=0.058, wid=0.03, th=0.0072)
     return p.rigid("forearm.R")
 
 
@@ -469,12 +505,12 @@ def hanging_chain(uv):
     drop = 0.40
     path = [top + [0, 0, -k * drop] for k in np.linspace(0, 1, 12)]
     p = chain_along("chain_hang", path, step=0.0395, uv=uv, ln=0.046, wid=0.026, th=0.0068)
-    ring_c = top + [0, 0, -drop - 0.022]
-    pts = catmull([ring_c, ring_c + [0.0, 0.0, -0.05], ring_c + [0.0, 0.016, -0.115], ring_c + [0, 0.05, -0.15], ring_c + [0, 0.098, -0.13],
-                   ring_c + [0, 0.112, -0.082], ring_c + [0, 0.098, -0.05]], 10)
+    ring_c = top + [0, 0, -drop + 0.012]
+    pts = catmull([ring_c, ring_c + [0.0, 0.0, -0.05], ring_c + [-0.016, 0.0, -0.115], ring_c + [-0.05, 0, -0.15], ring_c + [-0.098, 0, -0.13],
+                   ring_c + [-0.112, 0, -0.082], ring_c + [-0.098, 0, -0.05]], 10)
     wd = np.array([0.018, 0.018, 0.019, 0.021, 0.021, 0.02, 0.018, 0.015, 0.01, 0.0015])
     sec = [(-1, 0), (0, 0.55), (1, 0), (0, -0.55)]
-    hook = sweep("hook", "metal-hook", pts, sec, wd * 0.72, side_hint=np.array([1.0, 0, 0]), depth=wd * 1.05, uv_rect=uv)
+    hook = sweep("hook", "metal-hook", pts, sec, wd * 0.72, side_hint=np.array([0, 1.0, 0]), depth=wd * 1.05, uv_rect=uv)
     chain_pts = [top + [0, 0, -(drop + 0.06) * i / 6.0] for i in range(7)]
     return p, hook, chain_pts
 
@@ -540,12 +576,12 @@ def mane():
             wide=True, tile=tile(0), soft=0.3)
     # the fall: big clumps down the back, drifting to his left, ends lifting out
     z = top - .06
-    for i, (x, low, w, drift, g) in enumerate(((.06, .96, .115, .0, "r"), (.0, .88, .13, -.03, "c"), (-.06, .9, .125, -.07, "l"), (-.1, .98, .1, -.11, "l"), (.1, 1.08, .085, .0, "r"))):
+    for i, (x, low, w, drift, g) in enumerate(((.05, 1.0, .062, .012, "r"), (.0, .92, .07, -.02, "c"), (-.05, .96, .066, -.05, "l"))):
         add("back%d" % i, [(x * .6, -.09, z + .04), (x * 1.0, -.15, z - .08), (x * 1.15 + drift * .25, -.18, z - .24), (x * 1.2 + drift * .6, -.19, 1.2), (x * 1.2 + drift, -.19, 1.06),
-                           (x * 1.15 + drift * 1.6, -.21, low)], w, rings=8, wide=True, peak=.45, tile=tile(i), group=g, hint=np.array([0, -1.0, 0.1]), soft=0.12)
-    for i, (x, low, w, drift, g) in enumerate(((.03, .96, .085, -.02, "c"), (-.04, 1.0, .085, -.07, "l"), (.08, 1.06, .07, .0, "r"))):
+                           (x * 1.15 + drift * 1.6, -.21, low)], w, rings=8, wide=True, peak=.45, tile=tile(i), group=g, hint=np.array([0, -1.0, 0.1]), soft=0.0)
+    for i, (x, low, w, drift, g) in enumerate(((.025, 1.03, .042, .02, "c"), (-.03, .99, .044, -.04, "l"), (.085, 1.12, .036, .01, "r"), (-.085, 1.08, .04, -.07, "l"))):
         add("over%d" % i, [(x * .6, -.12, z + .02), (x * 1.0, -.19, z - .08), (x * 1.2, -.215, z - .24), (x * 1.25 + drift * .6, -.22, 1.2), (x * 1.3 + drift * 1.5, -.215, low)], w, rings=7, wide=True,
-            peak=.4, tile=tile(i + 1), group=g, hint=np.array([0, -1.0, 0.1]), soft=0.12)
+            peak=.4, tile=tile(i + 1), group=g, hint=np.array([0, -1.0, 0.1]), soft=0.0)
     cap = hair_cap()
     return [cap] + locks
 
@@ -616,7 +652,7 @@ _a = norm(np.array([0, 0, -1.0]) - GRIP_DIR * np.dot(np.array([0, 0, -1.0]), GRI
 GRIP_AT = np.array([SH, 0.0, HAND_Z + 0.012]) + _a * 0.094 + np.array([-0.03, 0.0, 0.0])    # inside the closed fist
 L_MID = 0.5
 GUARD_OFF = 0.085                                # fist to guard: a short grip, as the master sheet
-BLADE_LEN, BLADE_W = 1.0, 0.128                  # guard to tip; half width: shoulder to ankle on him
+BLADE_LEN, BLADE_W = 0.72, 0.1                  # guard to tip; half width: shoulder to ankle on him
 
 
 def sword_frame():
@@ -665,89 +701,59 @@ def resample_like(core, ol):
     return np.array([core[np.argmin(np.linalg.norm(core - p * [1, .4], axis=1))] for p in ol])
 
 
-def blade():
+W_X0, W_X1, W_TIP, W_GUARD = 150, 382, 78, 912     # the blade's front view on kael_weapons.png (px, full size)
+
+
+def blade(sheet):
+    """The blade traced off the weapon sheet's front view: each row's edges become a slab (flat faces, bevels to a thin edge), and the sheet's own
+    paint is its texture (tile BLADE_R in kael_finish.py), so shape and cracks are the art's. Plus a hot seam along the edges for the side view."""
     b, e, n = sword_frame()
     guard_at = GRIP_AT + b * GUARD_OFF
-    ol, co = outline(), core_outline()
-    m = len(ol)
-    TH = 0.036
-    from mathutils.geometry import tessellate_polygon
-    from mathutils import Vector
-    v, faces = [], []
-
-    def put(a, c, h):
-        return guard_at + b * a + e * c + n * h
-    rng = np.random.RandomState(9)
-    jit = rng.uniform(-.0035, .0035, m)
-    # the rings: edge (shared), both faces' rim tops, both faces' inner walls
-    for i, (a, c) in enumerate(ol):
-        v.append(put(a, c, 0.0))
+    bg = np.median(sheet[20:60, 20:60].reshape(-1, 3), axis=0)
+    mask = np.abs(sheet - bg).sum(2) > 0.14
+    span = W_GUARD - W_TIP
+    rows = np.concatenate([W_TIP + span * np.linspace(0.004, 0.2, 9), W_TIP + span * np.linspace(0.235, 1.0, 17)]).astype(int)
+    ext = []
+    for y in rows:
+        xs = np.nonzero(mask[y, W_X0:W_X1])[0]
+        ext.append((xs.min() + W_X0, xs.max() + W_X0) if len(xs) else (ext[-1] if ext else (260, 262)))
+    ext = np.array(ext, float)
+    cx = float(np.median(ext[9:].mean(1)))
+    k = BLADE_W / float(np.max(np.abs(ext[9:] - cx)))
+    TH = 0.026
+    cols = [(-1.0, 0.0), (-0.72, 1.0), (0.0, 1.0), (0.72, 1.0), (1.0, 0.0)]
+    v, uv_v = [], []
     for sgn in (1.0, -1.0):
-        for i, (a, c) in enumerate(ol):
-            a2, c2 = a - 0.008 * np.sign(a - .5), c * 0.74
-            v.append(put(a2, c2, sgn * (TH + jit[i])))
-        for i, (a, c) in enumerate(ol):
-            a3, c3 = a * 0.985, c * 0.5
-            v.append(put(a3, c3, sgn * (TH * 0.78 + jit[i] * .5)))
-    for k in range(2):
-        r0 = m * (1 + 2 * k)
-        r1 = r0 + m
-        for i in range(m - 1):
-            j = i + 1
-            faces.append([i, j, r0 + j, r0 + i] if k == 0 else [j, i, r0 + i, r0 + j])
-            faces.append([r0 + i, r0 + j, r1 + j, r1 + i] if k == 0 else [r0 + j, r0 + i, r1 + i, r1 + j])
-    # the bottom end is hidden by the guard. Each face's middle stays solid metal under the core's glow plates.
-    for k, sgn in enumerate((1.0, -1.0)):
-        r1 = m * (2 + 2 * k)
-        loop = [r1 + i for i in range(m)]
-        tri = tessellate_polygon([[Vector(v[i]) for i in loop]])
-        for t in tri:
-            q = [loop[t[0]], loop[t[1]], loop[t[2]]]
-            faces.append(q if sgn < 0 else q[::-1])
-    # (each face out of the blade: its flat side or its edge)
-    v_ = np.array(v)
-    mid = guard_at + b * L_MID
-    for i, q in enumerate(faces):
-        pts = v_[q]
-        nrm = np.cross(pts[1] - pts[0], pts[2] - pts[0])
-        c_ = pts.mean(0) - mid
-        h_ = np.dot(c_, n)
-        out = n * np.sign(h_ if abs(h_) > 1e-4 else 1.0) + (e * np.dot(c_, e) + b * np.dot(c_, b)) * 2.0
-        if np.dot(nrm, out) < 0:
-            faces[i] = q[::-1]
-    plate = Piece("blade", "metal-blade", v, faces).rigid("hand.R")
-    plate.ol = ol
-    plate.guard_at, plate.frame = guard_at, (b, e, n)
-    cores = []
-    for k, sgn in enumerate((1.0, -1.0)):
-        vv = [guard_at + b * a + e * c + n * sgn * (TH * 0.78 + 0.0035) for a, c in co]
-        tri = tessellate_polygon([[Vector(p) for p in vv]])
-        ff = [list(t) if sgn > 0 else list(t)[::-1] for t in tri]
-        # keep the fan's winding out of the flat
-        q = np.array(vv)
-        d = np.cross(q[ff[0][1]] - q[ff[0][0]], q[ff[0][2]] - q[ff[0][0]])
-        if np.dot(d, n * sgn) < 0:
-            ff = [f[::-1] for f in ff]
-        cores.append(Piece("core%d" % k, "glow-sword", vv, ff, room=0.0).rigid("hand.R"))
-    # the white-gold halo round the core and its forked cracks, a step below it
-    halos = []
-    for k, sgn in enumerate((1.0, -1.0)):
-        ring = co.copy()
-        cen = np.array([[a_, 0.0] for a_, _ in ring])
-        ring = cen + (ring - cen) * 1.28
-        polys = [ring] + crack_shapes()
-        vv, ff = [], []
-        for poly in polys:
-            q = [guard_at + b * a_ + e * c_ + n * sgn * (TH * 0.78 + 0.002) for a_, c_ in poly]
-            tri = tessellate_polygon([[Vector(x) for x in q]])
-            o = len(vv)
-            vv += q
-            for t in tri:
-                f = [o + t[0], o + t[1], o + t[2]]
-                d = np.cross(np.array(vv[f[1]]) - vv[f[0]], np.array(vv[f[2]]) - vv[f[0]])
-                ff.append(f if np.dot(d, n * sgn) > 0 else f[::-1])
-        halos.append(Piece("coreh%d" % k, "glow-sword_edge", vv, ff, room=0.0).rigid("hand.R"))
-    return [plate] + cores + halos
+        for ri, y in enumerate(rows):
+            l_, r_ = ext[ri]
+            m_, hw = (l_ + r_) / 2, (r_ - l_) / 2
+            a_ = (W_GUARD - y) / span * BLADE_LEN
+            for t_, h_ in cols:
+                px = m_ + t_ * hw
+                v.append(guard_at + b * a_ + e * (px - cx) * k + n * sgn * TH * h_ * (1 - 0.6 * (a_ / BLADE_LEN) ** 3))
+                inset = -np.sign(t_) * 2.0 if abs(t_) == 1.0 else 0.0
+                uv_v.append((((px + inset) - W_X0) / (W_X1 - W_X0), (W_GUARD - y) / span))
+    nr, nc = len(rows), len(cols)
+    faces, uvs = [], []
+    for off, flip in ((0, False), (nr * nc, True)):
+        for i in range(nr - 1):
+            for j in range(nc - 1):
+                q = [off + i * nc + j, off + i * nc + j + 1, off + (i + 1) * nc + j + 1, off + (i + 1) * nc + j]
+                q = q[::-1] if flip else q
+                faces.append(q)
+                uvs.append([uv_v[x] for x in q])
+    plate = Piece("blade", "metal-blade", v, faces, uvs, room=0.3).rigid("hand.R")
+    ve, fe = [], []
+    pts = [(ext[i][0], rows[i]) for i in range(nr)][::-1] + [(ext[i][1], rows[i]) for i in range(nr)]
+    for px, y in pts:
+        a_ = (W_GUARD - y) / span * BLADE_LEN
+        side = np.sign(px - cx) * 0.0016
+        ve.append(guard_at + b * a_ + e * ((px - cx) * k + side) + n * 0.005)
+        ve.append(guard_at + b * a_ + e * ((px - cx) * k + side) - n * 0.005)
+    for i in range(len(pts) - 1):
+        fe.append([i * 2, i * 2 + 1, i * 2 + 3, i * 2 + 2])
+    seam = Piece("coreseam", "glow-sword", ve, fe, room=0.0).rigid("hand.R")
+    return [plate, seam]
 
 
 def hilt(uv_chain):
@@ -756,15 +762,15 @@ def hilt(uv_chain):
     out = []
     # the flat iron crossguard
     sec = [(-1, -1), (1, -1), (1, 1), (-1, 1)]
-    path = [g + e * d for d in (-0.165, -0.15, 0.15, 0.165)]
-    bar = sweep("guard", "metal-guard", path, sec, np.array([0.022, 0.03, 0.03, 0.022]), side_hint=b, depth=np.array([0.018, 0.024, 0.024, 0.018]))
+    path = [g + e * d for d in (-BLADE_W * 1.1, -BLADE_W * 1.02, BLADE_W * 1.02, BLADE_W * 1.1)]
+    bar = sweep("guard", "metal-guard", path, sec, np.array([0.014, 0.018, 0.018, 0.014]), side_hint=b, depth=np.array([0.018, 0.024, 0.024, 0.018]))
     out.append(bar.rigid("hand.R"))
     # the grip, its iron collar and the spiked pommel
     sec8 = [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 8, endpoint=False)]
     p = [g - b * 0.20, g - b * 0.19, g - b * 0.175, g - b * 0.16, g - b * 0.02, g]
     grip = sweep("grip", "leather-grip", p, sec8, np.array([0.03, 0.03, 0.026, 0.0195, 0.0195, 0.024]), side_hint=e)
     out.append(grip.rigid("hand.R"))
-    spike = [g - b * 0.195, g - b * 0.225, g - b * 0.28, g - b * 0.335]
-    sp = sweep("pommel", "metal-guard", spike, [(-1, 0), (0, 1), (1, 0), (0, -1)], np.array([0.022, 0.03, 0.016, 0.001]), side_hint=e)
+    spike = [g - b * 0.195, g - b * 0.21, g - b * 0.235, g - b * 0.27]
+    sp = sweep("pommel", "metal-guard", spike, [(-1, 0), (0, 1), (1, 0), (0, -1)], np.array([0.018, 0.024, 0.012, 0.001]), side_hint=e)
     out.append(sp.rigid("hand.R"))
     return out

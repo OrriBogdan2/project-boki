@@ -10,6 +10,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
 import kael_pieces as K
+import crouchkit
+from crouchkit import off
 
 UP = (0, 0, 1)
 A_Z = K.ANKLE_Z
@@ -66,6 +68,41 @@ def stance(u):
     p["fing"] = 0.5
     p["brow"], p["lid"] = 1.0, 0.42
     return p
+
+
+# ---- the crouch (item 143): a swordsman's low guard. Square and wide, the lead foot out, hunched behind both hands on the hilt with the blade laid forward at the throat of whatever's ahead; only the eyes move.
+GUARD = {
+    "pel": (0.02, -0.04, -0.23), "prt": (0.46, 0.20, -0.03), "tor": (0.22, -0.26, 0.04), "hed": (-0.64, 0.08, 0.0),
+    "G": (0.20, 0.46, 0.50), "BE": be(4, 16, (0.2, -0.25, 0.95)), "Lw": 1.0, "LP": (-0.10, 0.40, 0.52),
+    "FL": (-0.20, 0.25, A_Z + 0.02), "FR": (0.24, -0.20, A_Z + 0.06), "FLy": 0.25, "FRy": -0.55, "FLp": 0.2, "FRp": 0.55,
+    "brow": 1.0, "lid": 0.42, "fing": 0.6, "skirt": 0.1,
+}
+PAD = {"ankle": A_Z, "foot": 0.10, "width": 0.17, "stride": 0.27, "lift": 0.045, "toe": 0.2, "share": 0.62, "sway": 0.03, "bob": 0.014, "twist": 0.09, "T": 0.66, "toe_out": -0.3, "swing": 0.35}
+
+
+def guard(u):
+    """Still as a set trap: the slow heave of his chest moves the blade's tip, the head tracks a little left and right."""
+    a, b = math.sin(u * 2 * math.pi), math.cos(u * 2 * math.pi)
+    p = dict(GUARD)
+    p["pel"] = (0.02, -0.04, -0.23 - 0.006 * b)
+    p["tor"] = (0.22 + 0.016 * b, -0.26, 0.04)
+    p["hed"] = (-0.64, 0.08 + 0.26 * a, -0.03 * a)
+    p["G"] = (0.20, 0.46, 0.50 - 0.005 * b)
+    p["lid"] = 1.0 if 0.80 < u < 0.83 else 0.42
+    return p
+
+
+def guard_upper(p, u, c1, s2, d):
+    """The blade keeps its line while the legs work under it, as if it were on a rail."""
+    k = max(d.y, 0.6)
+    p["G"] = (0.20 + 0.03 * d.x, 0.46 * k + 0.014 * c1, 0.50 + 0.006 * s2)
+    p["hed"] = (-0.64 * (0.6 + 0.4 * max(d.y, 0.0)), 0.08 - 0.05 * c1, 0.0)
+    p["skirt"] = 0.1 + 0.12 * c1
+
+
+def crouch_set():
+    dip = off(GUARD, pel=(0.0, 0.0, -0.045), prt=(0.08, 0, 0), hed=(-0.06, 0, 0), G=(0.0, -0.08, -0.05))
+    return crouchkit.clips(C, READY, GUARD, guard, PAD, guard_upper, dip, up=dict(READY, pel=(0.015, -0.015, -0.04)))
 
 
 # ---- locomotion: one generator, the stride along any heading
@@ -156,55 +193,54 @@ def clips():
     out = []
     out.append(FnClip("idle", 3.2, idle))
     out.append(FnClip("stance", 4.0, stance))
+    out += crouch_set()
     for nm, sp, T in (("walk", 0.45, 1.1), ("run", 1.0, 0.68)):
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sp, hd, T)))
     out += [slash("r"), slash("l")]
 
     # Searing Wave: held, the blade dragged up and back behind his head, chest open; then the carve and long low lunge
-    wind = {"pel": (0.0, -0.06, -0.09), "prt": (-0.08, 0, 0), "tor": (-0.26, 0.12, 0.0), "hed": (-0.08, -0.1, 0),
-            "G": (0.15, -0.02, 1.32), "BE": be(178, 34, (0, 0.5, 0.8)), "Lw": 1.0, "FL": (-0.2, 0.24, A_Z), "FR": (0.22, -0.22, A_Z),
+    wind = {"pel": (0.02, -0.04, -0.1), "prt": (0.1, -0.35, 0), "tor": (0.08, -0.6, 0.05), "hed": (-0.08, 0.6, 0),
+            "G": at(-100, 0.44, 0.84), "BE": be(-109, 3, (0, 1, 0)), "Lw": 0.0, "LP": (-0.3, 0.22, 0.86), "FL": (-0.2, 0.24, A_Z), "FR": (0.22, -0.22, A_Z),
             "brow": 1.0, "lid": 0.2, "fing": 0.9}
-    out.append(C("wave_wind", 0.7, [(0.0, READY_END), (0.25, wind), (0.5, {"pel": (0, -0.08, -0.12), "tor": (-0.34, 0.14, 0)}),
-                                    (0.7, {"pel": (0, -0.075, -0.11), "tor": (-0.31, 0.14, 0)})]))
-    out.append(C("wave", 0.6, [(0.0, wind), (0.1, {"pel": (0, 0.2, -0.2), "prt": (0.5, 0, 0), "tor": (0.45, -0.1, 0), "hed": (-0.75, 0.1, 0),
-                                                   "G": (0.1, 0.62, 0.62), "BE": be(0, -24, (0, 0, -1)), "FL": (-0.2, 0.5, A_Z), "FR": (0.22, -0.34, A_Z),
-                                                   "FRp": -0.5}, "out"),
-                               (0.32, {"pel": (0, 0.18, -0.19), "G": (0.1, 0.6, 0.56)}, "lin"), (0.6, READY_END)]))
+    out.append(C("wave_wind", 0.7, [(0.0, READY_END), (0.25, wind, "out"), (0.5, {"pel": (0.02, -0.05, -0.12), "tor": (0.08, -0.66, 0.05)}),
+                                    (0.7, {"pel": (0.02, -0.045, -0.11), "tor": (0.08, -0.63, 0.05)})]))
+    # the Searing Wave: a flat 3.4 rad side swing, right to left at the waist in 0.1 s (kit 113)
+    mid = {"pel": (0, 0.1, -0.14), "prt": (0.2, 0.05, 0), "tor": (0.16, 0.05, 0), "hed": (-0.25, 0, 0), "G": at(-5, 0.6, 0.84), "BE": be(-10, 1, (0, 0, 1)),
+           "LP": (-0.32, 0.08, 0.78), "FL": (-0.2, 0.42, A_Z), "FR": (0.22, -0.3, A_Z)}
+    end = {"pel": (-0.03, 0.16, -0.16), "prt": (0.28, 0.45, 0), "tor": (0.2, 0.6, -0.06), "hed": (-0.4, -0.7, 0), "G": at(75, 0.56, 0.84), "BE": be(86, 0, (0, -1, 0)),
+           "FRp": -0.5, "skirt": 0.4}
+    out.append(C("wave", 0.6, [(0.0, wind), (0.05, mid, "lin"), (0.1, end, "out"), (0.32, {"G": at(82, 0.54, 0.82), "BE": be(97, 0, (0, -1, 0))}), (0.6, READY_END)]))
     # Finishing Slam: 0.6 s of a coil that rises, the blade high behind, then the whole weight through it at 0.6
-    coil = {"pel": (0.02, -0.1, -0.15), "prt": (-0.02, -0.4, 0.05), "tor": (-0.1, -0.5, 0.08), "hed": (0.05, 0.75, 0),
-            "G": (0.36, -0.16, 1.1), "BE": be(-155, 44, (0, -0.7, 0.7)), "Lw": 1.0, "FL": (-0.2, 0.26, A_Z), "FR": (0.24, -0.25, A_Z),
+    coil = {"pel": (0, -0.03, -0.13), "prt": (0.12, 0.34, 0), "tor": (0.04, 0.22, 0), "hed": (-0.12, -0.5, 0),
+            "G": (0.24, 0.2, 1.2), "BE": be(0, 2, (1, 0, 0)), "Lw": 1.0, "FL": (-0.2, 0.26, A_Z), "FR": (0.24, -0.25, A_Z),
             "brow": 1.0, "lid": 0.2, "fing": 1.0}
     peak = dict(coil)
-    peak.update({"pel": (0.0, -0.05, -0.06), "prt": (-0.14, -0.5, 0.05), "tor": (-0.24, -0.5, 0.1), "G": (0.28, -0.1, 1.36),
-                 "BE": be(-175, 62, (0, -0.8, 0.6))})
-    hit = {"pel": (0, 0.2, -0.24), "prt": (0.5, 0.2, 0), "tor": (0.55, 0.2, -0.05), "hed": (-0.8, -0.2, 0), "G": at(4, 0.62, 0.56),
-           "BE": be(2, -34, (0, 0.6, -0.8)), "FL": (-0.22, 0.46, A_Z), "FR": (0.26, -0.3, A_Z), "FRp": -0.5, "skirt": 0.3}
+    peak.update({"pel": (0, -0.05, -0.1), "prt": (0.04, 0.38, 0), "G": (0.24, 0.15, 1.26), "BE": be(0, 18, (1, 0, 0))})
+    hit = {"pel": (0, 0.2, -0.24), "prt": (0.5, 0.2, 0), "tor": (0.55, 0.2, -0.05), "hed": (-0.8, -0.2, 0), "G": at(4, 0.62, 0.72),
+           "BE": be(2, -38, (1, 0, 0)), "FL": (-0.22, 0.46, A_Z), "FR": (0.26, -0.3, A_Z), "FRp": -0.5, "skirt": 0.3}
     out.append(C("slam", 1.15, [(0.0, READY_END), (0.3, coil), (0.56, peak), (0.62, hit, "out"),
                                 (0.85, {"pel": (0, 0.17, -0.21), "G": at(4, 0.6, 0.52), "tor": (0.48, 0.15, 0)}), (1.15, READY_END)]))
-    # the Lunge held: sunk on the loaded back leg, the blade overhead, tip laid back, trembling with the charge
-    hold = {"pel": (0, -0.1, -0.21), "prt": (0.12, -0.2, 0), "tor": (-0.1, -0.2, 0.03), "hed": (-0.08, 0.3, 0),
-            "G": (0.16, 0.08, 1.4), "BE": be(180, 48, (0, 0.6, 0.8)), "Lw": 1.0, "FL": (-0.2, 0.36, A_Z), "FR": (0.22, -0.3, A_Z),
+    # the Lunge held: sunk on the loaded back leg, the blade levelled forward at the aim, both hands on it, trembling with the charge
+    hold = {"pel": (0, 0.0, -0.13), "prt": (0.16, 0.34, 0), "tor": (0.06, 0.22, 0), "hed": (-0.14, -0.5, 0),
+            "G": (0.24, 0.22, 1.2), "BE": be(0, 0, (1, 0, 0)), "Lw": 1.0, "FL": (-0.2, 0.3, A_Z), "FR": (0.22, -0.3, A_Z),
             "FRp": 0, "brow": 1.0, "lid": 0.18, "fing": 1.0}
     h2 = dict(hold)
-    h2.update({"pel": (0.006, -0.105, -0.215), "G": (0.163, 0.08, 1.392)})
-    out.append(C("lunge_wind", 0.73, [(0.0, READY_END), (0.1, {"prt": (0.1, -0.25, 0), "G": (0.34, 0.0, 1.0), "BE": be(-120, 30, (0, 0, 1)), "Lw": 1.0,
-                                                                 "pel": (0, -0.05, -0.14)}),
+    h2.update({"pel": (0.006, 0.0, -0.135), "G": (0.243, 0.22, 1.193)})
+    out.append(C("lunge_wind", 0.73, [(0.0, READY_END), (0.1, {"prt": (0.14, 0.15, 0), "G": (0.3, 0.26, 1.02), "BE": be(-8, -8, (1, 0, 0.2)), "Lw": 1.0, "pel": (0, -0.03, -0.1)}, "out"),
                                       (0.28, hold), (0.45, h2), (0.59, hold), (0.73, h2)]))
     out.append(C("lunge", 0.6, [(0.0, hold), (0.08, {"pel": (0, 0.3, -0.13), "prt": (0.72, 0.2, 0), "tor": (0.3, 0.1, 0), "hed": (-0.95, -0.1, 0),
                                                      "G": (0.12, 0.72, 0.72), "BE": be(0, -8, (0, 0, -1)), "FL": (-0.2, 0.62, A_Z + 0.03),
                                                      "FR": (0.22, -0.56, A_Z + 0.06), "FRp": -0.8}, "out"),
                                 (0.3, {"pel": (0, 0.26, -0.15), "prt": (0.6, 0.2, 0)}, "lin"), (0.6, READY_END)]))
-    # Meteor: rocks back, hauls the blade up, one full turn gathering, pitches head-first; held till the ground
-    tuck = {"pel": (0, 0, 0.04), "prt": (-0.4, 0, 0), "tor": (-0.25, 0, 0), "hed": (0.1, 0, 0), "G": (0.1, 0.1, 1.42), "BE": be(180, 60, (0, 0.8, 0.6)),
-            "Lw": 1.0, "FL": (-0.14, 0.2, 0.42), "FR": (0.14, 0.16, 0.4), "FLp": -0.5, "FRp": -0.5, "fing": 1.0, "brow": 1.0, "lid": 0.15}
-    spin = dict(tuck)
-    spin["prt"] = (-0.5, -2 * math.pi, 0)
-    dive = {"prt": (1.0, -2 * math.pi, 0), "pel": (0, 0.1, 0.1), "tor": (0.3, 0, 0), "hed": (-1.0, 0, 0), "G": (0.12, 0.62, 0.42), "BE": be(0, -62, (0, 0.8, -0.6)),
-            "FL": (-0.12, -0.46, 0.34), "FR": (0.14, -0.6, 0.42), "FLp": 0.9, "FRp": 0.9}
-    out.append(C("meteor", 0.42, [(0.0, READY_END), (0.08, tuck), (0.2, spin), (0.3, dive, "out"), (0.42, {"pel": (0, 0.11, 0.09)})]))
-    land = {"pel": (0, 0.1, -0.36), "prt": (0.72, 0, 0), "tor": (0.42, 0, 0), "hed": (-1.0, 0, 0), "G": (0.1, 0.6, 0.36), "BE": be(0, -70, (0, 0.8, -0.6)),
-            "FL": (-0.26, 0.36, A_Z), "FR": (0.26, -0.3, A_Z), "FRp": -0.7, "Lw": 1.0, "fing": 1.0, "skirt": 0.6, "brow": 1.0, "lid": 0.2}
+    # Meteor (kit 113): he rises upright with the blade hauled overhead, hangs 0.2 s, then drops straight down, blade point-down under him
+    tuck = {"pel": (0, 0, 0.04), "prt": (-0.12, 0, 0), "tor": (-0.2, 0, 0), "hed": (0.1, 0, 0), "G": (0.1, 0.1, 1.4), "BE": be(180, 76, (1, 0, 0)),
+            "Lw": 1.0, "FL": (-0.14, 0.14, 0.4), "FR": (0.14, 0.08, 0.36), "FLp": -0.5, "FRp": -0.5, "fing": 1.0, "brow": 1.0, "lid": 0.15}
+    dive = {"prt": (0.12, 0, 0), "pel": (0, 0, 0.06), "tor": (0.2, 0, 0), "hed": (-0.5, 0, 0), "G": (0.08, 0.3, 0.8), "BE": be(0, -86, (1, 0, 0)),
+            "FL": (-0.13, 0.08, 0.3), "FR": (0.14, -0.04, 0.34), "FLp": 0.3, "FRp": 0.4}
+    out.append(C("meteor", 0.42, [(0.0, READY_END), (0.08, tuck), (0.2, dict(tuck, pel=(0, 0, 0.05))), (0.3, dive, "out"), (0.42, dict(dive, pel=(0, 0, 0.05)))]))
+    land = {"pel": (0, 0.05, -0.36), "prt": (0.5, 0, 0), "tor": (0.4, 0, 0), "hed": (-0.8, 0, 0), "G": (0.08, 0.46, 0.4), "BE": be(0, -84, (1, 0, 0)),
+            "FL": (-0.26, 0.3, A_Z), "FR": (0.26, -0.3, A_Z), "FRp": -0.7, "Lw": 1.0, "fing": 1.0, "skirt": 0.6, "brow": 1.0, "lid": 0.2}
     out.append(C("meteor_land", 0.5, [(0.0, land), (0.07, {"pel": (0, 0.09, -0.32)}, "out"),
                                       (0.25, {"pel": (0, 0.05, -0.26), "prt": (0.5, 0, 0), "G": (0.25, 0.45, 0.48), "BE": be(-20, -40, (0, 0.6, 0.8))}),
                                       (0.5, READY_END)]))
@@ -217,8 +253,7 @@ def clips():
     th.update({"G": at(-2, 0.92, 0.78), "tor": (0.4, 0.3, 0.1), "FL": (-0.16, 0.56, A_Z)})
     rec = {"pel": (0, 0.08, -0.22), "prt": (0.42, 0.1, 0), "tor": (0.28, 0.1, 0), "hed": (-0.6, -0.05, 0), "G": (0.36, -0.1, 0.66), "BE": be(-168, -18, (0, 0.2, 1)),
            "LP": (-0.3, 0.1, 0.72), "FL": (-0.2, 0.32, A_Z), "FR": (0.22, -0.3, A_Z), "FRp": 0}
-    out.append(C("dash", 0.9, [(0.0, READY_END), (0.07, cr), (0.15, {"pel": (0, -0.07, -0.22)}), (0.21, dr, "out"), (0.38, th, "lin"), (0.5, rec), (0.78, {"pel": (0, 0.05, -0.17)}),
-                               (0.9, READY_END)]))
+    out.append(C("dash", 0.42, [(0.0, READY_END), (0.05, cr), (0.09, dr, "out"), (0.2, th, "lin"), (0.28, rec), (0.42, READY_END)]))
     # the air dash: flat behind the leading shoulder, the blade trailing, knees up at the end
     a0 = {"pel": (0, 0, 0.02), "prt": (0.1, 0.4, 0), "tor": (0.1, 0.2, 0), "hed": (0, -0.3, 0), "G": (0.34, -0.1, 0.8), "BE": be(-150, -10, (0, 0, 1)),
           "FL": (-0.15, 0.15, 0.36), "FR": (0.16, 0.05, 0.3), "FLp": -0.4, "FRp": -0.4, "LP": (-0.28, 0.26, 0.86)}
@@ -329,7 +364,7 @@ def extras(P):
     for s, side in ((1.0, "R"), (-1.0, "L")):
         # brow: + scowls (down and in, inner end low), - lifts (hurt)
         rot = Quaternion((0, 1, 0), -s * 0.22 * b)
-        out["brow." + side] = (rot, Vector((0, 0.004 * b * 0 - 0.0065 * b, 0)))
+        out["brow." + side] = (rot, Vector((0, 0.004 * b * 0 - 0.003 * b, 0)))
         # (a bone's Y is its tail: +Y here is forward; the local X/Z are read off the armature in Solver below)
         out["lid." + side] = (Quaternion((1, 0, 0), 0.75 * (l - 0.3)), None)
     f = P.get("fing", 0.1)

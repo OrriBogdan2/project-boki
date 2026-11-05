@@ -23,7 +23,7 @@ at the rig's `Hand` nodes. Apply all transforms before export.
 - The mesh is built as a medium hunter (head top about 1.55 m); the game applies class, archetype `body.size` and
   the MantleLook sliders on the root. Never bake a Hunter's own height in.
 - Resulting heights against a medium hunter are owner decisions, asserted by `--warden-model-check`: Breaker 1.5x
-  (his hitbox stays the heavy class's 0.50 m), Kael body 1.06, Motley body 0.9.
+  (his hitbox stays the heavy class's 0.50 m), Kael body 1.08, Motley body 0.9.
 - The hit ring and radius are the class's, never the model's.
 
 ## Attachment points

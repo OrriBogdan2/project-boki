@@ -79,6 +79,15 @@ func run(main: Node) -> void:
 			sync.call("_process", 1.0 / 15.0)
 			await _grab(dir.path_join("f%03d.png" % i))
 		model.rotation.y = deg_to_rad(yaw)
+	var tip := sync.get("blade_tip") as Node3D
+	if OS.get_cmdline_user_args().has("--tip"):
+		clips.force = {"clip": "lunge_wind", "t": 0.6}
+		for k in 12:
+			sync.call("_process", 1.0 / 30.0)
+		var sk := clips.skel
+		var at: Vector3 = sk.global_transform * (sk.get_bone_global_pose(int(sync.get("blade_bone"))) * tip.position)
+		var d := at - model.global_position
+		print("TIP lunge hold: %.2f m ahead, %.2f m up" % [Vector2(d.x, d.z).length(), d.y])
 	var names: Array = wanted if not wanted.is_empty() else Array(clips.lib.get_animation_list())
 	for nm in names:
 		var anim_name := String(nm)
