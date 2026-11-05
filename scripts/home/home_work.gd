@@ -478,6 +478,8 @@ func take(k: Dictionary, j: Dictionary) -> void:
 	J["phase"] = "go"; J["go_t"] = 0.0; J["vt"] = 1.0
 	J["lv"] = Work.level(k["rec"], String(J["el"]))
 	k["job"] = J
+	if String(J.get("kind", "")) != "build":
+		FarmTutorial.event("task")      # (a Boki that really starts working counts for the tutorial's job step)
 	taken[String(J["key"])] = String(k["rec"]["uid"])
 	k.erase("chase"); k.erase("stare"); k.erase("task")
 	if randf() < 0.4: h._emote(k, "!")
@@ -997,7 +999,7 @@ func open_station(e: Dictionary) -> void:
 			var l := UI.label("%s  ·  %s %d%s" % [r["name"], Work.name_of(el), Work.level(r, el), note], UI.T_BODY, UI.INK)
 			l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(l)
-			row.add_child(UI.primary("Assign", func(): Work.assign(rr, u); _reassign(rr); Save.save_game(); open_station(e), 120))
+			row.add_child(UI.primary("Assign", func(): Work.assign(rr, u); FarmTutorial.event("task"); _reassign(rr); Save.save_game(); open_station(e), 120))
 			v.add_child(row)
 
 ## A kin's assignment changed: it drops whatever it was doing and picks again.

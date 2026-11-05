@@ -148,29 +148,34 @@ static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen
 	row.add_child(pin_menu(h, rec, reopen))
 	parent.add_child(row)
 
-## Any job / Rest only / Only <element>: one dropdown.
+## A pin choice in words: "Sprout jobs only".
+static func job_label(el: String) -> String:
+	return "%s jobs only" % Work.name_of(el)
+
+## Whatever it's best at / Rest only / <Element> jobs only: one dropdown.
 static func pin_menu(h: Node, rec: Dictionary, reopen: Callable) -> OptionButton:
 	var opt := OptionButton.new()
-	opt.add_item("Any job"); opt.set_item_metadata(0, "")
+	opt.add_item("Whatever it's best at"); opt.set_item_metadata(0, "")
 	opt.add_item("Rest only"); opt.set_item_metadata(1, "rest")
 	var sel := 1 if rec.get("work_rest", false) else 0
 	for it in Work.list(rec):
-		opt.add_item("Only %s" % Work.name_of(String(it[0])))
+		opt.add_item(job_label(String(it[0])))
 		opt.set_item_metadata(opt.item_count - 1, String(it[0]))
 		if Work.pin(rec) == String(it[0]): sel = opt.item_count - 1
 	opt.select(sel)
-	opt.custom_minimum_size.x = 136
+	opt.custom_minimum_size.x = 170
 	opt.add_theme_font_size_override("font_size", 13)
 	opt.item_selected.connect(func(i: int):
 		var m := String(opt.get_item_metadata(i))
 		if m == "rest": Work.set_rest(rec, true)
 		else: Work.set_pin(rec, m)
-		if m != "" and m != "rest": FarmTutorial.event("task")
+		if m != "" and m != "rest": FarmTaskGuide.picked(h, rec, m)
 		_drop(h, rec)
 		Save.save_game()
 		reopen.call())
 	opt.tooltip_text = "Pin it to one kind of job, or keep it to resting"
 	opt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	FarmTaskGuide.mark_dropdown(opt, rec)
 	return opt
 
 static func _drop(h: Node, rec: Dictionary) -> void:

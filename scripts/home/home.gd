@@ -2359,7 +2359,7 @@ func hub_items() -> Array:
 		elif not Save.active_kin().is_empty(): _open_kin(Save.active_kin())
 	var items: Array = []
 	items.append(["expedition", "Expedition", "portal", _open_expedition])
-	items.append(["kin", "Kin", "paw", open_kin])
+	items.append(["kin", "Boki", "paw", open_kin])
 	items.append(["bag", "Bag", "bag", func(): Overlay.open_inventory()])
 	items.append(["shop", "Market", "shop", func(): hmk.open()])
 	if has_method("open_build"):
@@ -2552,7 +2552,7 @@ func _farm_tick() -> void:
 			if (wt <= 0.0 or (by_water and int(d.get("wet", 2)) < 2)) and (raining or by_water):
 				_water(arr, i, "stream" if by_water else "rain")
 				continue
-			if wt > 0.0 and now - wt >= Data.WATER_TIME * (0.5 if arr == "gh_plots" else 1.0):
+			if wt > 0.0 and now - wt >= FarmCropGuide.stage_time(Data.WATER_TIME * (0.5 if arr == "gh_plots" else 1.0)):
 				d["stage"] = int(d["stage"]) + 1
 				# rain only makes it wet; watering it yourself (or a farmhand kin) is what counts as tending
 				if int(d.get("wet", 2)) >= 2:
@@ -2922,7 +2922,7 @@ func _say(k: Dictionary, text: String, secs := 4.0, direct := true) -> void:
 		talk_cd = maxf(talk_cd, 2.0)
 	if not k.has("say"):
 		var l := Label3D.new()
-		l.font = UI.body; l.font_size = 34; l.pixel_size = 0.0105; l.outline_size = 14
+		l.font = UI.body; l.font_size = 34; l.pixel_size = BokiSpeech.FARM_PIXEL * BokiSpeech.SCALE; l.outline_size = 14
 		l.outline_modulate = Color(0.06, 0.05, 0.09, 0.95)
 		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED; l.no_depth_test = true
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; l.width = 520

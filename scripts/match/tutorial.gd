@@ -17,19 +17,22 @@ static func steps() -> Array:
 
 const KEYS := {"land": "move", "move": "move", "dash": "dash", "exdash": "dash", "crouch": "crouch",
 	"pickup": "interact", "shoot": "fire", "sig": "signature", "utility": "secondary", "throw": "throw",
-	"orders": "throw", "chest": "interact", "uplink": "interact"}
+	"orders": "throw", "chest": "interact", "uplink": "interact", "gkey": "throw"}
 ## Which course stop a finished step leaves you at (a fall puts you back there).
 const STOP_AFTER := {"land": "land", "move": "move", "dash": "dash", "exdash": "exdash", "glide": "glide",
 	"crouch": "crouch", "pickup": "yard"}
 const GAP_STEPS := ["dash", "exdash", "glide"]      # leave from the glowing pad on one island, land on the next
-const WALK_LEAD := ["move", "crouch", "pickup", "chest", "goexit", "uplink", "extract"]
+const WALK_LEAD := ["move", "crouch", "pickup", "key", "chest", "goexit", "uplink", "extract"]
 
 const CARD_T := 1.5        # s the top banner stays up before it settles into the pill
 const NAG_T := 15.0        # s without progress before the pill pulses and the Boki says it once more
 const INTRO_T := 2.0       # s the first-time intro card stays up (any key closes it sooner)
 const SPOT_T := 5.0        # s the lookout shows the chest it spotted
 const DONE_T := 0.9        # s of the step-done sting
+const LOOKOUT_R := 4.2     # m: the lookout's top is 3.6 wide; any grounded height within this counts
 const CROUCH_HOLD := 1.5   # s of crouching at the lookout
+const RANK_WAIT_T := 60.0  # s before the rank-up step moves on by itself
+const KEY_WAIT_T := 60.0   # s before the key step moves on by itself
 const KIN_WATCH_T := 12.0  # s to wait for your Boki to use its ability before moving on
 const FAR_SCOUT := 38.0    # m: a target this far off gets "crouch to scout ahead"
 const MINT := Color(0.56, 0.89, 0.78)
@@ -39,6 +42,7 @@ var step := -1
 var intro := true            # the "Training run" card: the first time only, until a key or INTRO_T
 var intro_t := 0.0
 var text := ""               # this step's one line, on the banner and the pill
+var detail := ""             # and the plain-words line under it ("" for none)
 var key_cap := ""            # the key cap beside it ("" for none)
 var got := 0                 # times this step's action has landed (shown as got/need)
 var need := 0
@@ -95,7 +99,8 @@ func setup() -> void:
 	var n := Models.chest()
 	n.position = at
 	m.add_child(n)
-	m.chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "free": true, "tut": true})
+	m.chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "tut": true})
+	KeyChest.dress(n)
 	for id in GAP_STEPS:
 		_add_pad(id)
 	last_stop = stop("land")
@@ -153,6 +158,8 @@ func applies(sid: String) -> bool:
 		"utility": return p.ak != null or (p.runner != null and p.runner.has_slot("utility"))
 		"throw", "orders": return p.kin != null
 		"kin1": return p.kin != null and p.kin.runner != null and p.kin.runner.has_slot("k1")
+		"gkey": return p.kin != null
+		"rank": return p.ak != null
 	return true
 
 ## Called by Match every step.
@@ -240,6 +247,12 @@ func _enter() -> void:
 			m.spawn_gear("vest", 1, at, "", false)
 			m.wpicks[-1]["tut"] = true
 			m.ping(at, Color("dfe8f2"))
+		"gkey":
+			if p.kin:
+				throws0 = p.kin.st_throws
+			_foes(["skitter"])
+		"key":
+			_spawn_key()
 		"shoot":
 			kills = 0
 			_foes(["skitter"])
@@ -270,6 +283,19 @@ func _enter() -> void:
 		"uplink", "defend", "extract":
 			pass
 	_words()
+
+## The tutorial starts with every ability open, so a level-up is given once for real: the pop, the chime and
+## a skill point (the gold + by the level ring), spent with Alt + the ability's key.
+func _offer_rank() -> void:
+	var p := m.player
+	p.gain_xp(float(Hunter.XP_TO[p.lvl]) - p.xp)
+
+## A chest key on the ground a few steps from the player, for the chest that needs one.
+func _spawn_key() -> void:
+	var at := spot(3.5, 0.3)
+	if at == Vector3.INF:
+		at = m.player.pos + Vector3(2.0, 0.0, 0.0)
+	m.drop("ckey", at + Vector3(0, 0.6, 0), 1, "", "", Vector3.ZERO)
 
 ## Brings monsters in near the player for a step (only if none are left).
 func _foes(kinds: Array) -> void:
@@ -330,13 +356,14 @@ func _is_done(sid: String, dt: float) -> bool:
 			flag = flag or p.roll_t > 0.0
 			return near.call(4.0) and (flag or t > 40.0)
 		"exdash":
-			flag = flag or (p.roll_t > 0.0 and p.dash_is_ex)
+			# any dash started off the ground counts: kit air dashes (Vex's air slide) never set dash_is_ex
+			flag = flag or (p.roll_t > 0.0 and (p.dash_is_ex or not p.grounded))
 			return flag and near.call(4.5)
 		"glide":
 			flag = flag or p.gliding
 			return flag and near.call(5.0)
 		"crouch":
-			if p.crouch and p.grounded and Vector2(stop(sid).x - p.pos.x, stop(sid).z - p.pos.z).length() < 3.2:
+			if p.crouch and p.grounded and _dist(stop(sid)) < LOOKOUT_R:
 				crouch_t += dt
 			if crouch_t >= CROUCH_HOLD:
 				spot_t = SPOT_T
@@ -345,6 +372,13 @@ func _is_done(sid: String, dt: float) -> bool:
 				return true
 			return false
 		"pickup": return ground_item().is_empty()
+		"gkey": return p.kin == null or p.kin.st_throws > throws0 or p.kin.state == "downed"
+		"rank":
+			if not flag and t >= CARD_T:
+				flag = true      # (the level-up pop waits for the banner to settle, so the two never overlap)
+				_offer_rank()
+			return flag and (p.skill_pts == 0 or t >= RANK_WAIT_T)
+		"key": return p.chest_keys > 0 or t >= KEY_WAIT_T
 		"shoot":
 			_keep_foe("skitter")
 			got = hits
@@ -450,6 +484,10 @@ func goal(sid: String) -> Vector3:
 					bd = m.player.flat_dist(mb)
 					best = mb
 			return best.pos if best else stop("yard")
+		"key":
+			for pk in m.pickups:
+				if pk["kind"] == "ckey":
+					return pk["pos"]
 		"chest":
 			for c in m.chests:
 				if c.get("tut", false):
@@ -555,9 +593,12 @@ func _words() -> void:
 		need = 2
 	elif sid == "throw":
 		need = 2 if need_back or throw_recalls() else 1
+	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(sid, "")), m.player))
 	key_cap = ""
 	if sid in ["land", "move"]:
 		key_cap = _wasd()
+	elif sid == "rank":
+		key_cap = TutorialText.rank_combo()
 	elif KEYS.has(sid):
 		key_cap = Settings.key_cap(KEYS[sid])
 

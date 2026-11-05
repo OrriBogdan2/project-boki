@@ -22,7 +22,9 @@ var last_shot_t := -99.0
 var shot_seen := 0
 var primed := false
 var base_wpn: Dictionary = {}
-var prime_until := -9.0
+var charge := 0.0              # 0..1: the LMB orb's build-up since the last shot
+var last_orb_c := 0.0          # (checks) the charge and hit radius of the last orb fired
+var last_orb_r := 0.0
 var seed: Dictionary = {}      # {pos, t, grow, rmax, sid, vis, burn, col}
 var sid_n := 0
 var swap: Dictionary = {}      # in flight: {t, T, land, cast, from (where he is now), hold (CastHold)}
@@ -102,14 +104,7 @@ func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
 		return [0.0, o]
 	return [dmg, o]
 
-func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
-	# a Settled orb slows what it hits
-	if m.time < prime_until and String(
-		o.get("src", "")
-	) == "shot" and not o.has("ab") and t != null and t.team != h.team:
-		prime_until = -9.0
-		o["slow"] = float(lmb_def()["prime_slow_t"])
-		o["slow_k"] = float(lmb_def()["prime_slow"])
+func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float:
 	return dmg
 
 ## He drifts slowly (dash.fly_slow of run speed) while the Trade is in flight; the Snap's wind-up slows him.
@@ -168,52 +163,70 @@ func _reticle() -> void:
 	else:
 		AimKit.line(h, "aim", {"col": Color("f2eaff"), "alpha": 0.8})
 
-## The Settled orb: after a pause the next shot is harder and faster, a long bright bolt that slows.
+## The orb charges smoothly with the time since his last shot, from a plain orb to full over lmb.idle:
+## damage, speed and size grow with it (the weapon's numbers are rewritten each tick, so the next shot
+## carries them), and a full orb also slows. Every orb passes through terrain.
 func _tick_weapon() -> void:
 	if h.wid != "tether_lantern":
 		return
+	if not h.wpn.has("_oc"):
+		base_wpn = h.wpn
 	if h.shot_n != shot_seen:
 		shot_seen = h.shot_n
+		var c := charge
 		last_shot_t = m.time
-		var hot := primed
-		KitLooks.of(m).skin_last(h, "orb_hot" if hot else "orb")
-		if hot:
-			_pierce_last()
+		var hot := c >= 0.999
+		_shape_last(c, hot)
 		play("ostra_orb_hot" if hot else "ostra_orb")
-		if hot: m.sfx("os_orb_hot", h.pos, -4.0, 1.0)      # (the plain orb's sound is the weapon's own)
-		if primed:
-			primed = false
+		if hot:
+			m.sfx("os_orb_hot", h.pos, -4.0, 1.0)      # (the plain orb's sound is the weapon's own)
 			settled_shots += 1
-			prime_until = m.time + 1.2
-			if not base_wpn.is_empty(): h.wpn = base_wpn
 			m.fx.burst(_hand(), Color(0.45, 0.5, 1.0, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
-	if primed and not h.downed and snap.is_empty():
-		# (the primed tell on his actual hand, where the 3D model holds its orb: at a fixed point in front of him the
-		# match camera drew it as a disc at his feet; violet and smaller, so it reads as the void orb charging, not
-		# as a blue disc beside it)
-		KitLooks.of(m).hold_on("os_charge", "mote", h, hand_pos(true), 0.5, Color("9a5cff"))
-	if not primed and m.time - last_shot_t >= float(lmb_def()["idle"]) and not h.downed:
-		primed = true
-		base_wpn = h.wpn
-		var w := h.wpn.duplicate()
-		w["dmg"] = float(w["dmg"]) * (1.0 + float(lmb_def()["prime_dmg"]))
-		w["speed"] = float(w["speed"]) * float(lmb_def()["prime_speed"])
-		w["color"] = Color("8f9cff")
+	var was := charge
+	charge = clampf((m.time - last_shot_t) / float(lmb_def()["idle"]), 0.0, 1.0) if not h.downed else 0.0
+	primed = charge >= 0.999
+	if charge >= 0.999 and was < 0.999 and not h.downed:
+		m.sfx("os_prime", h.pos, -12.0, 1.0)      # the soft chime at full
+	if not base_wpn.is_empty():
+		var w := base_wpn.duplicate()
+		w["dmg"] = float(w["dmg"]) * (1.0 + float(lmb_def()["prime_dmg"]) * charge)
+		w["speed"] = float(w["speed"]) * (1.0 + (float(lmb_def()["prime_speed"]) - 1.0) * charge)
+		w["color"] = (w["color"] as Color).lerp(Color("8f9cff"), charge) if w["color"] is Color else w["color"]
+		w["_oc"] = true
 		h.wpn = w
-		m.sfx("os_prime", h.pos, -12.0, 1.0)
+	if charge > 0.05 and not h.downed and snap.is_empty():
+		# (the charge glow sits on his actual hand, where the 3D model holds its orb: violet, growing and
+		# brightening with the charge)
+		var glow := Color("9a5cff").lerp(Color("c9d2ff"), charge)
+		KitLooks.of(m).hold_on("os_charge", "mote", h, hand_pos(true), 0.25 + 0.35 * charge, glow)
+
+## The orb just fired: bigger and brighter with the charge, slows at full, and goes through terrain.
+func _shape_last(c: float, hot: bool) -> void:
+	for i in range(m.shots.size() - 1, -1, -1):
+		var s: Dictionary = m.shots[i]
+		if s["by"] != h:
+			continue
+		var k := 1.0 + float(lmb_def()["size_k"]) * c
+		s["r"] = float(s["r"]) * k
+		s["vr"] = float(s.get("vr", s["r"])) * k
+		var x: Dictionary = s["x"]
+		x["pierce_terrain"] = true
+		if hot:
+			x["slow"] = float(lmb_def()["prime_slow_t"])
+			x["slow_k"] = float(lmb_def()["prime_slow"])
+		last_orb_c = c
+		last_orb_r = float(s["r"])
+		if KitLooks.of(m).skin_last(h, "orb_hot" if c >= 0.5 else "orb"):
+			for e in KitLooks.of(m).live:
+				if e["s"] == s:
+					(e["n"] as Node3D).scale = Vector3.ONE * k
+		return
 
 ## A seed now waits for its recast, so a kit swapped out (practice, the Arena) takes its seed with it.
 func teardown() -> void:
 	if not seed.is_empty():
 		_pop(false)
 	super.teardown()
-
-## The Settled bolt goes through terrain (the source's data: "goes through terrain").
-func _pierce_last() -> void:
-	for i in range(m.shots.size() - 1, -1, -1):
-		if m.shots[i]["by"] == h:
-			(m.shots[i]["x"] as Dictionary)["pierce_terrain"] = true
-			return
 
 # ------------------------------------------------------------------ dash: Lantern Trade
 func swap_time() -> float:
@@ -334,11 +347,10 @@ func _drop_holds() -> void:
 	snap_rec = 0.0
 	if not swap.is_empty():
 		_swap_end(false)
-	if primed:
-		primed = false
-		if not base_wpn.is_empty(): h.wpn = base_wpn
+	primed = false
+	charge = 0.0
+	if not base_wpn.is_empty(): h.wpn = base_wpn
 	last_shot_t = m.time
-	prime_until = -9.0
 
 func _swap_end(go: bool) -> void:
 	var dd := dash_def()
