@@ -13,7 +13,7 @@
   "r": 0.05
  },
  "head_uv": 1.0,
- "head_tris": 100,
+ "head_tris": 0,
  "uv_smooth": 30,
  "uv_angle": 66,
  "uv_margin": 0.001,

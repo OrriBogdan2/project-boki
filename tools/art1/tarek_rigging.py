@@ -597,10 +597,11 @@ CHIN_K = 0.686                # the chin's depth under the hair top, as a share 
 NECK_CUT = 0.075              # m under the chin: where the head's neck stops and the body's begins
 
 
-def scan_head(body, W, ix):
+def scan_head(body):
     """A separate denser head with its own atlas: the body's head and all its hair go, the head model takes their place,
     turned to face +Y, scaled chin-to-crown, and skinned from the body's nearest vertices."""
     P0 = verts_np(body).copy()
+    names, W = group_weights(body)
     top = float(P0[:, 2].max())
     hairtop_scan, chin_scan, neck_scan = 0.946, 0.63, 0.567          # (scan frame, read off the turnaround run)
     s = (top - float(R.neck[2])) / (hairtop_scan - neck_scan)
@@ -616,7 +617,7 @@ def scan_head(body, W, ix):
     head = next(o for o in new if o.type == "MESH")
     head.data.transform(head.matrix_world)
     head.parent = None
-    head.matrix_world = Matrix.Identity
+    head.matrix_world = Matrix.Identity(4)
     for o in new:
         if o is not head:
             bpy.data.objects.remove(o)
@@ -652,8 +653,8 @@ def scan_head(body, W, ix):
     tone = vcol[keep].mean(0) if keep.any() else S.vec(0.6, 0.42, 0.3)
     # the body's head and hair go
     me = body.data
-    names = [m.name for m in me.materials]
-    hair = names.index("hair-body") if "hair-body" in names else -1
+    mnames = [m.name for m in me.materials]
+    hair = mnames.index("hair-body") if "hair-body" in mnames else -1
     bm = bmesh.new()
     bm.from_mesh(me)
     bm.faces.ensure_lookup_table()
@@ -661,7 +662,6 @@ def scan_head(body, W, ix):
     bm.to_mesh(me)
     bm.free()
     # skin: each head vertex rides the head bone, its locs the body's chains by the nearest old vertex
-    names = [g.name for g in body.vertex_groups]
     Qn = verts_np(head)
     W2 = {}
     for i, p in enumerate(Qn):
@@ -697,8 +697,7 @@ def assemble_scan(objs, img, emit):
     scan_bones(arm)
     W, ix = scan_reshape(body)
     scan_cut_hands(body, W, ix)
-    W = W[:]
-    head, tone = scan_head(body, W, ix)
+    head, tone = scan_head(body)
     global SKIN_TONE
     SKIN_TONE = tone
     scan_slots(body)
