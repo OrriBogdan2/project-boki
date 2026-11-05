@@ -8,6 +8,8 @@ extends RefCounted
 const CHECKS := {
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
+	"--drop-check": ["res://tools/drop_check.gd", "drop_check", null],      # the opening drop and the squad comet
+	"--drop-shots": ["res://tools/drop_shots.gd", "drop_shots", null],      # its screenshots (xvfb)
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],      # backpack tiers, at risk
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
@@ -72,7 +74,7 @@ const CHECKS := {
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],      # also --shots-dir=<dir>
 	"--economy-floor-check": ["res://tools/economy_floor_check.gd", "economy_floor_check", null],      # never stuck
 	"--market-check": ["res://tools/market_check.gd", "market_check", null],      # docs/decisions/0013-market.md
-	"--drop-feel-check": ["res://tools/drop_check.gd", "drop_feel_check", null],      # the opening drop
+	"--drop-feel-check": ["res://tools/drop_feel_check.gd", "drop_feel_check", null],      # the opening drop
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],      # --market-shots=<dir>
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],     # 2 games, relay
 	"--rig-standard-check": ["res://tools/rig_standard_check.gd", "rig_standard_check", null],

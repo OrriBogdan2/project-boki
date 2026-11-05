@@ -797,6 +797,7 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.spawns")
 	skydrop = DropSquad.new(self)
 	skydrop.setup()
+	if not opts.get("no_drop", false): add_child(DropFx.new(self))
 	if opts.get("demo_match", false): _demo_drop()
 	await _slice()
 	var Hud = take_prefetched(HUD_SCRIPT)
@@ -1166,11 +1167,12 @@ func _start_drop(h: Hunter, at: Vector3) -> void:
 		# everyone boards the skyship; bots plan to jump when it passes nearest their spot
 		if ship.is_empty(): _setup_ship()
 		h.riding = true
+		h.grounded = false      # (aboard isn't standing still on the ground: a carried Boki stays on you)
 		h.ai["land"] = at
 		var a: Vector3 = ship["a"]; var b: Vector3 = ship["b"]
 		var ab := Vector2(b.x - a.x, b.z - a.z)
 		var k := clampf(Vector2(at.x - a.x, at.z - a.z).dot(ab) / ab.length_squared(), 0.04, 0.97)
-		h.ai["jump_at"] = clampf(k * float(ship["dur"]) - 2.2 + rng.randf_range(-0.8, 0.8), 0.6, float(ship["ride"]) - 0.5)
+		h.ai["jump_at"] = clampf(k * float(ship["dur"]) - SkyFall.JUMP_LEAD + rng.randf_range(-0.8, 0.8), 0.6, float(ship["ride"]) - 0.5)
 		h.teleport(ship_pos())
 		return
 	# straight above your squad's landing spot, so letting go of the keys still lands you safely
@@ -1178,16 +1180,11 @@ func _start_drop(h: Hunter, at: Vector3) -> void:
 	if world.is_void(at.x + off.x, at.z + off.z):
 		off = Vector3.ZERO
 	h.teleport(at + off + Vector3(0, 26.0, 0))
-	h.dropping = true
-	h.diving = true
-	h.drop_from = Vector2(at.x + off.x, at.z + off.z)
-	h.grounded = false
-	h.gliding = true
-	h.glide_k = 1.0
+	SkyFall.start(h, Vector2.ZERO, true)
 	h.ai["land"] = at
 
 # ---- the skyship
-const SHIP_Y := 40.0
+const SHIP_Y := SkyFall.SKY_Y
 const SHIP_SPEED := 11.0
 var big := false
 var ship := {}
@@ -1234,7 +1231,7 @@ func plan_jump(h: Hunter, at: Vector3) -> void:
 	var st := float(s.get("t0", 0.0))
 	var ab := Vector2(b.x - a.x, b.z - a.z)
 	var k := clampf(Vector2(at.x - a.x, at.z - a.z).dot(ab) / ab.length_squared(), 0.04, 0.97)
-	h.ai["jump_at"] = clampf(st + k * float(s["dur"]) - 2.2 + randf_range(-0.5, 0.5), maxf(st + 0.6, time + 0.2), st + float(s["ride"]) - 0.5)
+	h.ai["jump_at"] = clampf(st + k * float(s["dur"]) - SkyFall.JUMP_LEAD + randf_range(-0.5, 0.5), maxf(st + 0.6, time + 0.2), st + float(s["ride"]) - 0.5)
 
 ## Off the ship. A squadmate waiting on the drop leader can't jump by themselves (force: they're
 ## jumping with the leader, or the ship has reached the end of its run).
@@ -1249,19 +1246,13 @@ func ship_jump(h: Hunter, force := false) -> void:
 	var off := Vector3(rng.randf_range(-0.8, 0.8), 0, rng.randf_range(-0.8, 0.8))
 	var hs := ship_of(h)
 	h.teleport(ship_pos_of(hs) + Vector3(0, -1.5, 0) + off)
-	h.dropping = true
-	h.diving = true
-	h.drop_from = Vector2(h.pos.x, h.pos.z)
-	h.gliding = true
-	h.glide_k = 1.0
-	h.grounded = false
-	h.vel = hs["dir"] * 3.0
+	SkyFall.start(h, Vector2((hs["dir"] as Vector3).x, (hs["dir"] as Vector3).z))
 	if h == player:
 		sfx("whoosh", null, -2.0)
 		if hud and not force:
-			hud.toast("Steer with %s%s%s%s  ·  %s opens your glider early" % [Settings.key_cap("up"), Settings.key_cap("left"), Settings.key_cap("down"), Settings.key_cap("right"), Settings.key_cap("jump")], Color("cfeaff"))
+			hud.toast("%s dives  ·  %s %s turn  ·  %s opens your glider" % [Settings.key_cap("up"), Settings.key_cap("left"), Settings.key_cap("right"), Settings.key_cap("jump")], Color("cfeaff"))
 		elif hud:
-			hud.toast("Gliding in formation  ·  %s to break away" % Settings.key_cap("separate"), Color("cfeaff"))
+			hud.toast("In the comet  ·  %s breaks away" % Settings.key_cap("jump"), Color("cfeaff"))
 	if skydrop and skydrop.is_lead(h):
 		skydrop.on_lead_jump(h)
 
@@ -1292,10 +1283,9 @@ func _update_one_ship(s: Dictionary, dt: float) -> void:
 		var auto: bool = h.ctrl == "bot" or opts.get("autoplay", false)
 		var lead: Hunter = skydrop.leader(h.team) if skydrop else null
 		if lead and lead != h and lead.remote and not h.drop_solo and not lead.riding and lead.dropping:
-			# online: the leader jumped on their own machine; join them
+			# online: the leader jumped on their own machine; ride their comet
 			ship_jump(h, true)
-			h.drop_follow = lead
-			h.drop_slot = skydrop._free_slot(lead)
+			skydrop.board(lead, h)
 			continue
 		if skydrop and skydrop.waits(h):
 			continue          # jumps with the leader
@@ -1305,22 +1295,6 @@ func _update_one_ship(s: Dictionary, dt: float) -> void:
 		n.queue_free()
 		s["node"] = null
 		s["gone"] = true
-
-func on_drop_landed(h: Hunter) -> void:
-	h.inv_t = maxf(h.inv_t, 2.0)     # a moment to get your bearings after landing
-	h.set_meta("landed_t", time)     # bots leave a fresh lander be for a while (Bot.fresh)
-	if world.is_block(h.pos.x, h.pos.z):
-		var best := h.pos; var bd := 1e9
-		for dz in range(-2, 3):
-			for dx in range(-2, 3):
-				var q := Vector3(floor(h.pos.x) + dx + 0.5, 0, floor(h.pos.z) + dz + 0.5)
-				if not world.is_void(q.x, q.z) and not world.is_block(q.x, q.z):
-					var d := Vector2(dx, dz).length()
-					if d < bd: bd = d; best = Vector3(q.x, world.ground_at(q.x, q.z), q.z)
-		h.teleport(best)
-	DropFeel.land(self, h)
-	if blight: blight.on_landed(h)
-	if rolling: rolling.on_landed(h)
 
 func _apply_treat(k: Kin) -> void:
 	match String(Save.d.get("treat", "")):
@@ -3609,16 +3583,12 @@ func _process(delta: float) -> void:
 			# boarding: start already behind the ship rather than swinging through it
 			cam.chase = 1.0; cam.yaw = cam.yaw_to; cam.zoom = cam.zoom_to
 		var fp := ship_pos_of(ps) + sd * 27.0
-		cam.follow(Vector3(fp.x, (SHIP_Y - 11.0) / 0.6, fp.z), delta, false)
+		cam.follow(Vector3(fp.x, SHIP_Y - 7.0, fp.z), delta, false)
 	elif player and not player.out and not player.downed:
 		cam.chase_to = 0.0
 		cam.yaw_to = 0.0
 		if player.dropping:
-			# the drop: looking down over your shoulder, pulled back while you're high up
-			var gy: float = world.ground_at(player.pos.x, player.pos.z) if not world.is_void(player.pos.x, player.pos.z) else 0.0
-			var hk := clampf((player.pos.y - gy) / SHIP_Y, 0.0, 1.0)
-			cam.zoom_to = lerpf(1.05, 1.7, hk)
-			cam.top_to = clampf(hk * 0.7, 0.0, 0.6)
+			DropFx.frame_freefall(self, player)     # pulled back, looking down, turned with your heading
 		else:
 			# high in the air or out over the abyss the camera pulls back so you can see where you'll land
 			# the camera only eases back while gliding, so jumps and falls never change the framing
@@ -3688,15 +3658,8 @@ func _gather_input() -> void:
 	if absf(cam.yaw) > 0.001:
 		mv = mv.rotated(-cam.yaw)
 	player.inp["move"] = mv
-	# dropping in without steering over the abyss: drift toward the nearest island so letting go
-	# of the keys never drops you into the void
-	if player.dropping and mv.length() < 0.1 and world.is_void(player.pos.x, player.pos.z):
-		var best := Vector3.INF; var bd := 1e9
-		for sp in world.spawns + world.portal_spots:
-			var d := Vector2(sp.x - player.pos.x, sp.z - player.pos.z).length()
-			if d < bd: bd = d; best = sp
-		if best != Vector3.INF and bd > 0.8:
-			player.inp["move"] = Vector2(best.x - player.pos.x, best.z - player.pos.z).normalized()
+	if player.dropping:
+		SkyFall.assist(self, player)
 	player.inp["aim"] = _mouse_aim()
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
@@ -5826,6 +5789,8 @@ func _net_ev(x, from: String) -> void:
 		"dsep":
 			var sh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if skydrop and sh: skydrop.separate(sh, true)
+		"comet", "cburst":
+			if skydrop: skydrop.comet.net_in(x)      # someone boarded a comet, or it burst
 		"ext":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.extracted:
@@ -6249,7 +6214,7 @@ func _update_aim(alpha: float) -> void:
 	if aim_line == null:
 		return
 	var p := player
-	var show := p != null and not p.out and not p.extracted and not p.downed and not paused
+	var show := p != null and not p.out and not p.extracted and not p.downed and not p.dropping and not paused
 	if show and p.ak != null and p.ak.own_aim_line():
 		show = false          # the kit draws its own (two lines read as two aims)
 	aim_line.visible = show

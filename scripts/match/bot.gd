@@ -31,7 +31,11 @@ static func crowd_at(m: Match, h: Hunter, p: Vector3, r: float) -> int:
 ## Just landed and hasn't started anything: bots leave them be for FRESH_T (no third-partying
 ## someone the moment they touch down); whoever they hit can still hit back (provoked, in _choose).
 static func fresh(m: Match, o: Ent) -> bool:
-	return o is Hunter and ((o as Hunter).dropping or m.time - float(o.get_meta("landed_t", -99.0)) < float(m.opts.get("fresh_t", FRESH_T)))
+	if not o is Hunter:
+		return false
+	var h := o as Hunter
+	# (still coming down from the drop, glider included, counts too)
+	return h.dropping or h.drop_glide or m.time - float(h.get_meta("landed_t", -99.0)) < float(m.opts.get("fresh_t", FRESH_T))
 
 const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
 
@@ -48,25 +52,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	if h.downed:
 		_crawl(m, h)
 		return
-	if h.dropping:
-		# steer the opening glide toward the chosen landing spot
-		var land: Vector3 = a.get("land", h.pos)
-		var to := Vector2(land.x - h.pos.x, land.z - h.pos.z)
-		# too far to glide to from this height: settle for the closest island spot in reach
-		var reach := maxf(0.0, (h.pos.y + 1.0) / Hunter.DROP_FALL * Hunter.DROP_SPEED)
-		if to.length() > reach * 0.85 and not a.get("retarget", false):
-			a["retarget"] = true
-			var best := land; var bd := 1e9
-			for sp in m.world.spawns + m.world.portal_spots:
-				var d := Vector2(sp.x - h.pos.x, sp.z - h.pos.z).length()
-				# (and away from where other squads are coming down: everyone falling short used to
-				# pick the same nearest spot and the opening was a pile-up)
-				var score := (d if d < reach * 0.8 else d + 1000.0) + crowd_at(m, h, sp, LAND_SPREAD) * 30.0
-				if score < bd: bd = score; best = sp
-			a["land"] = best
-			land = best
-			to = Vector2(land.x - h.pos.x, land.z - h.pos.z)
-		inp["move"] = to.normalized() if to.length() > 0.6 else Vector2.ZERO
+	if h.dropping or h.drop_glide:
+		SkyFall.bot_steer(m, h)      # the opening drop: toward its landing spot
 		return
 	# the sky train's horn: off the rails before it gets here
 	if m.skytrain and m.skytrain.eta(h) < SkyTrain.HORN_LEAD + 0.5:

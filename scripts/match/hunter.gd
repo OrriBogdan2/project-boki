@@ -65,16 +65,6 @@ const GLIDE_SPEED := 6.5       # (movefeel, owner: "feels weaker than SUPERVIVE"
 const GLIDE_TIME := 9.0        # (owner: "lasts too long, not punishing enough") was 14s of level glide before the heat ring turns hot
 const GLIDE_DRAG := 1.6         # speed lost per second while gliding (more when going fast)
 const GLIDE_MAX := 15.0
-# The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
-# itself near the ground (or earlier on jump) for a slower, floatier last stretch.
-const DIVE_FALL := 13.0        # [est] a punchy skydive (was 11)
-const DIVE_SPEED := 14.0       # m/s, top flat speed in the dive (DropFeel)
-const DROP_FALL := 4.2
-const DROP_SPEED := 8.0        # m/s, top flat speed under the open glider
-const DIVE_VY_RATE := 7.0      # the dive reaches its fall speed in ~0.3s (was 4)
-const DROP_VY_RATE := 9.0      # the canopy settles to its sink in ~0.2s after it opens (was 4)
-const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, then settles to DROP_FALL
-const DEPLOY_H := 8.0         # the glider opens by itself this high above the ground
 ## Armor, as in Supervive: it takes a flat share off every hit (ARMOR_DR) for as long as it has
 ## durability left; what gets through hurts your health and wears the durability down by the same
 ## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
@@ -226,12 +216,12 @@ var dash_pass := {}           # a kin rider on the dash: what it does to foes yo
 var abil_charge := {}         # holding a charge-up weapon ability (Rail Charge): {t}
 var charge: Dictionary = {}   # Ram
 var idle_fire := 0.0
-var dropping := false         # gliding down from the sky at the start of a match
-var drop_from := Vector2.INF  # where the drop started
-var diving := false           # the skydive part of the drop, before the glider opens
+var dropping := false         # in the opening drop's freefall, before the glider opens (SkyFall)
+var diving := false           # in that freefall, holding forward: the fast, steep dive
+var fall_dir := Vector2.ZERO  # the freefall's heading
+var drop_glide := false       # gliding down after a drop's freefall, until the landing kick
 var riding := false           # aboard the skyship, waiting to jump
-var drop_follow: Hunter = null  # gliding down in formation behind this squad's drop leader (see DropSquad)
-var drop_slot := 0            # which slot of the formation
+var comet_lead: Hunter = null  # riding the squad's comet that this jumpmaster steers (see DropSquad)
 var drop_solo := false        # broke away from the squad's drop
 var bless_t := 0.0
 var wup_dmg := 1.0            # your signature weapon's damage from weapon upgrades (WeaponUps): kits scale their own hits by it
@@ -788,8 +778,8 @@ func do_jump() -> void:
 	if not lfloat.is_empty():
 		_ledge_fling()
 		return
-	if dropping and diving:
-		_deploy()
+	if dropping:
+		SkyFall.space(self)
 		return
 	if pad.size() > 0:
 		# press jump mid-flight off a jump pad and the glider opens, keeping the launch's speed
@@ -2004,6 +1994,9 @@ func sim(dt: float) -> void:
 			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
 				inp[k] = false
 		return
+	if comet_lead != null and not remote:
+		m.skydrop.comet.ride(self)          # in the squad's comet: carried until you break away or it bursts
+		return
 	tick_status(dt)
 	if grounded:
 		air_peak = pos.y
@@ -2151,6 +2144,8 @@ func sim(dt: float) -> void:
 	var want := atan2(-ad.x, -ad.y)
 	if roll_t > 0.0:
 		want = atan2(-roll_dir.x, -roll_dir.y)
+	elif dropping and fall_dir != Vector2.ZERO:
+		want = atan2(-fall_dir.x, -fall_dir.y)      # the freefall faces your heading, not the cursor
 	face = lerp_angle(face, want, minf(1.0, dt * 20.0))
 
 func pad_launch(to: Vector3) -> void:
@@ -2257,11 +2252,7 @@ func _physics(dt: float) -> void:
 		gs += glide_lift.swoop
 		hv = glide_steer(hv, mv * gs, gs, dt)
 		if dropping:
-			# the drop goes where you point and stops when you let go: no fixed heading to circle on
-			gs = DIVE_SPEED if diving else DROP_SPEED
-			hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)
-			if drop_follow != null and m.skydrop:
-				hv = m.skydrop.follow_hv(self, gs)     # in formation: the leader steers
+			hv = SkyFall.steer(self, mv, dt)
 		# wind roads carry you along (either way), updrafts lift you
 		in_current = false
 		if not dropping:
@@ -2304,11 +2295,9 @@ func _physics(dt: float) -> void:
 		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt, 1.0 if glide_fuel > 0.001 else 0.5)
 		glide_lift.hang_t = GlideLift.HANG_T
 	elif gliding:
-		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
+		var sink := 5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length())
 		if dropping:
-			vel.y = DropFeel.fall_vy(vel.y, sink, DIVE_VY_RATE if diving else DROP_VY_RATE, pos.y - ground(), dt)
-			if drop_follow != null and m.skydrop:
-				vel.y = m.skydrop.follow_vy(self)
+			vel.y = SkyFall.fall_vy(self, dt)
 		else:
 			sink = glide_lift.sink(self, sink)     # high over the ground: pulled down, the drop becomes speed
 			if vel.y < -sink:
@@ -2454,11 +2443,9 @@ func _physics(dt: float) -> void:
 			if gliding:
 				gliding = false
 				m.fx.dust(pos, 5)
-			var was_drop := dropping     # (movefeel) the drop's own landing has its feedback (Match.on_drop_landed)
-			if dropping:
-				dropping = false
-				diving = false
-				m.on_drop_landed(self)
+			var was_drop := dropping or drop_glide     # the drop's own landing has its own kick (SkyFall.land)
+			if was_drop:
+				SkyFall.land(self)
 			if shot_down:
 				# spiked onto the ground [wiki]: a 0.7s stun and a little extra damage
 				shot_down = false
@@ -2546,14 +2533,23 @@ func _unclip() -> void:
 		teleport(safe_pos)
 		vel = Vector3.ZERO
 
-## The skydive ends: the glider snaps open and the fall slows right down.
-func _deploy() -> void:
-	if not diving:
+## The freefall ends: the glider snaps open (held open for you) and the normal glide takes over,
+## keeping the fall's speed across as a glide handoff.
+func deploy() -> void:
+	if not dropping:
 		return
+	dropping = false
 	diving = false
+	drop_glide = true
+	gliding = true
+	auto_glide = true
+	_auto_glide_held = true      # (the Space that opened it isn't a fresh press that folds it again)
+	glide_fuel = 1.0
+	glide_cd = 0.0
 	glide_k = 0.0
-	# (movefeel) the canopy bites: your fall checks hard (DEPLOY_POP), then settles to the drop's sink
-	vel.y = maxf(vel.y, DEPLOY_POP)
+	glide_handoff(Vector2(vel.x, vel.z), Vector2(vel.x, vel.z).length())
+	# the canopy bites: your fall checks hard, then settles to the glide's sink
+	vel.y = maxf(vel.y, SkyFall.DEPLOY_POP)
 	m.sfx("glide", pos, -2.0)
 	_glider_sfx("open")
 
@@ -2596,17 +2592,8 @@ func _update_glide(dt: float) -> void:
 	air_t = 0.0 if grounded else air_t + dt
 	glide_lift.tick(self, dt)
 	if dropping:
-		# the opening drop: the glider stays open until you land, or until you sink below the islands
 		gliding = not grounded
-		if diving:
-			var void_below: bool = m.world.is_void(pos.x, pos.z)
-			var above: float = pos.y - (World.VOID if void_below else m.world.ground_at(pos.x, pos.z))
-			if (not void_below and above < DEPLOY_H) or (void_below and pos.y < 7.0) or (drop_follow != null and not drop_follow.diving):
-				_deploy()
-		if pos.y < -1.5:
-			dropping = false
-			diving = false
-			glide_fuel = 1.0
+		SkyFall.tick(self)
 		return
 	if grounded:
 		glide_fuel = minf(1.0, glide_fuel + dt / 1.2)
@@ -3172,8 +3159,9 @@ func _anim_state(stretch: float) -> void:
 	var s := anim_s
 	s["vel"] = vel; s["face"] = face
 	s["grounded"] = grounded and pad.is_empty()
-	s["gliding"] = gliding and not diving
-	s["diving"] = diving
+	s["gliding"] = gliding and not dropping
+	s["diving"] = dropping
+	s["stoop"] = diving
 	s["rolling"] = roll_t > 0.0
 	s["dash_dir"] = roll_dir
 	s["dash_kind"] = _dash_anim_kind()
@@ -3348,7 +3336,7 @@ func render(delta: float, alpha: float) -> void:
 			m.fx.dust(pos, 2)
 			Juice.footstep(self)
 	# (the rig's squash, the skydive and lying downed are posed by HunterAnim)
-	glide_k = move_toward(glide_k, 1.0 if gliding and not diving else 0.0, delta * (7.0 if gliding else 9.0))
+	glide_k = move_toward(glide_k, 1.0 if gliding and not dropping else 0.0, delta * (7.0 if gliding else 9.0))
 	var gl: Node3D = torso.get_node("Glider")
 	gl.visible = glide_k > 0.02
 	if gl.visible:

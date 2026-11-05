@@ -17,10 +17,16 @@ Pick it from the Expedition menu at home: your class, your Boki, a **tier** and 
 The match opens with a short **planning phase**: the full map is up and everyone can ping where they
 want to land (bots ping too). Then the skyship crosses the map.
 
-- Your squad has a **drop leader**. The leader jumps and the rest of the squad follows in formation.
-  **P** passes the lead to a squadmate (or click a name on the map); **X** separates you to drop alone.
-- After jumping you glide down; a ring on the ground shows where you'd land. Anyone still aboard at
-  the far side is dropped.
+- The skyship flies high over the islands. Off it you **freefall**: the camera turns with your heading,
+  **W** dives (fast and steep), letting go floats (slower, further), **A**/**D** turn and **S** brakes.
+  The glider opens by itself 12m over the ground (or on **Space**), then it's the normal glide down.
+  Ship to ground takes about 20 seconds untouched.
+- Your squad has a **drop leader**, the jumpmaster. The leader jumps and the squad goes with them in one
+  burning **comet** that the jumpmaster steers. **Space** (or **X**) breaks you away to fall on your
+  own, with no way back in. **P** passes the lead (or click a name on the map). Near the ground the
+  comet bursts and lands everyone still inside together, each on their own spot.
+- Everyone sees the comets' trails and the solo divers crossing the sky. Your Boki rides down on your
+  back and leaps off when you land. Anyone still aboard at the far side is dropped.
 - Flying low over a rolled spawn spot on the way down scouts it for your squad (see below).
 
 ## Moving around

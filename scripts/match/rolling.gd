@@ -402,7 +402,7 @@ func tick(dt: float) -> void:
 			if not s.is_empty() and m.time > float(s.get("t0", 0.0)) + float(s["ride"]) + 1.0 and not _wave_in_air(w):
 				w["state"] = "done"
 	# a drop that ended early (an ability mid-air, a fall below the islands) never reaches
-	# Match.on_drop_landed: the floor still applies the moment they're down on the ground
+	# SkyFall.land: the floor still applies the moment they're down on the ground
 	for h in m.hunters:
 		if h.grounded and not h.riding and not h.dropping and not h.out and not h.has_meta("rolled_in") and m.time > 0.0:
 			on_landed(h)
@@ -674,7 +674,7 @@ func demo(mode: String) -> void:
 			var sp: Array = spots_along(m.ship, 1)
 			P.riding = false
 			P.teleport(m.world.free_spot_near(sp[0], [], 1.0, 0.45, 8.0))
-			m.on_drop_landed(P)
+			SkyFall.land(P)
 		if P.riding or P.dropping:
 			return
 		_demo["down"] = true

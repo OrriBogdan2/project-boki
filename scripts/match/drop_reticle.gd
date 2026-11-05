@@ -6,8 +6,7 @@ extends Node3D
 const RADIUS := 3.0           # m, your ring
 const MATE_RADIUS := 1.5      # m, a squadmate's
 const BEAM_R := 0.14          # m
-const STEP := 0.1             # s, projection step
-const MAX_STEPS := 120
+const THINK := 0.1            # s between projections (it walks the whole fall: not every frame)
 const PULSE_HZ := 0.8
 const RED := Color(1.0, 0.25, 0.2)
 
@@ -17,6 +16,9 @@ var tag: Label3D
 var ring_mat: ShaderMaterial
 var beam_mat: StandardMaterial3D
 var t := 0.0
+var think := 0.0
+var land := {}                # the latest projection
+var mates := {}               # hunter nid -> its latest projection
 
 ## Per frame, from the local hunter's render: makes the reticle on first use, hides it once landed.
 static func tick(h: Hunter, delta: float) -> void:
@@ -35,23 +37,7 @@ static func tick(h: Hunter, delta: float) -> void:
 
 ## Where `h` comes down (x, y = ground height, z) and whether that's over the void, if it keeps steering with `mv`.
 static func project(h: Hunter, mv: Vector2) -> Dictionary:
-	var w: World = h.m.world
-	var hv := Vector2(h.vel.x, h.vel.z)
-	var p := h.pos
-	var vy := h.vel.y
-	var diving := h.diving
-	for i in MAX_STEPS:
-		var void_here := w.is_void(p.x, p.z)
-		var gy: float = World.VOID if void_here else w.ground_at(p.x, p.z)
-		var above := p.y - (0.0 if void_here else gy)
-		if above <= 0.0:
-			return {"at": Vector3(p.x, 0.0 if void_here else gy, p.z), "void": void_here}
-		diving = diving and above >= Hunter.DEPLOY_H
-		hv = DropFeel.steer(hv, mv, diving, STEP)
-		var sink := Hunter.DIVE_FALL if diving else Hunter.DROP_FALL
-		vy = DropFeel.fall_vy(vy, sink, Hunter.DIVE_VY_RATE if diving else Hunter.DROP_VY_RATE, above, STEP)
-		p += Vector3(hv.x, vy, hv.y) * STEP
-	return {"at": Vector3(p.x, 0.0, p.z), "void": true}
+	return SkyFall.project(h, mv)
 
 func _build() -> void:
 	ring = MeshInstance3D.new()
@@ -85,7 +71,11 @@ func _build() -> void:
 
 func _update(h: Hunter, delta: float) -> void:
 	t += delta
-	var land := project(h, h.inp["move"])
+	think -= delta
+	var fresh := think <= 0.0 or land.is_empty()
+	if fresh:
+		think = THINK
+		land = project(h, h.inp["move"])
 	var at: Vector3 = land["at"]
 	var over_void: bool = land["void"]
 	var col: Color = RED if over_void else Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
@@ -98,8 +88,9 @@ func _update(h: Hunter, delta: float) -> void:
 		if o == h or o.team != h.team or not o.dropping or o.out:
 			continue
 		var mate := _mate(k)
-		var mv := Vector2(o.vel.x, o.vel.z) / Hunter.DIVE_SPEED
-		var ml := project(o, mv)
+		if fresh or not mates.has(o.nid):
+			mates[o.nid] = project(o, o.fall_dir * 0.45)
+		var ml: Dictionary = mates[o.nid]
 		mate._place(ml["at"], MATE_RADIUS, RED if ml["void"] else col, o.pos.y, 0.55)
 		mate.visible = true
 		k += 1

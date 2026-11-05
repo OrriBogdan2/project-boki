@@ -13,6 +13,8 @@ uniform float speed = 0.015;
 uniform float cover = 0.55;      // higher: fewer, smaller clouds
 uniform float alpha = 0.85;
 uniform float seed = 0.0;
+uniform vec2 hole_xz = vec2(0.0);  // a clear hole round a point (the opening drop: round the falling player)
+uniform float hole_r = 0.0;        // m; 0 = no hole
 #include "res://shaders/noise.gdshaderinc"
 float fbm4(vec2 p) {
 	float v = 0.0; float a = 0.5;
@@ -37,5 +39,6 @@ void fragment() {
 	float dist = length(wpos.xz - CAMERA_POSITION_WORLD.xz);
 	col = mix(col, haze.rgb, smoothstep(40.0, 260.0, dist) * 0.7);
 	ALBEDO = col;
-	ALPHA = dens * alpha * (1.0 - smoothstep(180.0, 420.0, dist));
+	float hole = hole_r > 0.0 ? smoothstep(hole_r * 0.45, hole_r, length(wpos.xz - hole_xz)) : 1.0;
+	ALPHA = dens * alpha * hole * (1.0 - smoothstep(180.0, 420.0, dist));
 }

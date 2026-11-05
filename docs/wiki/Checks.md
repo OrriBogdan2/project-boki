@@ -46,7 +46,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--mapcheck` | Generated maps: every island reachable from every other (200 small, 40 big) |
 | `--mapcheck-authored` | The authored map over 20 seeds: every island reachable, every point of interest on solid ground, nothing walled off |
 | `--biome-check` | An expedition on the authored map: what each biome spawned, rarities and hazards, then a minute of play |
-| `--drop-check` | The planning phase, pings, squad formation, passing the lead, separating, and randomised spawns |
+| `--drop-check` | The planning phase, pings, the drop's height and 18-22 s timing, dive vs float, the glider opening, the squad comet (holding together, break-aways, the burst landing on solid ground), bots breaking off, the Net round trip, and randomised spawns |
 | `--extract-check` | Every way out: skiff (waves, rival boarding), rift hatch (keys, losing and looting a key), uplink (stalls, completes, the lift) |
 | `--boss-check` | Lair locks (dial, runes, ward stones), the ward, each boss's phases and enrage, the Rare Egg from the pack to the Incubator; bots can work a dial |
 | `--boss-ttk` | Balance probe: a bot squad fights each boss for real and prints the time to kill |
