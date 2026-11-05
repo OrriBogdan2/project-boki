@@ -4,7 +4,7 @@ extends "res://tools/vv_shots.gd"
 ## tier pips (E maxed in gold); 2 the same a few seconds on, the hint gone and only the + pulsing;
 ## 3 no points left: pips only. <dir>/captions.txt gets "file: caption" per file.
 
-const BAR_CROP := Vector2i(760, 200)       # px: the bottom-centre ability bar
+const BAR_CROP := Vector2i(560, 200)       # px: the bottom-left block with the ability bar
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -40,7 +40,7 @@ func _take(kind: String, file: String, caption: String, _focus: Callable) -> voi
 	var img := main.get_viewport().get_texture().get_image()
 	var sz := img.get_size()
 	img.save_png(dir.path_join(file + "_full.png"))
-	var crop := img.get_region(Rect2i((sz.x - BAR_CROP.x) / 2, sz.y - BAR_CROP.y, BAR_CROP.x, BAR_CROP.y))
+	var crop := img.get_region(Rect2i(0, sz.y - BAR_CROP.y, BAR_CROP.x, BAR_CROP.y))
 	crop.resize(BAR_CROP.x * 2, BAR_CROP.y * 2, Image.INTERPOLATE_BILINEAR)
 	crop.save_png(dir.path_join(file + ".png"))
 	lines.append("%s|%s.png|%s" % [kind, file, caption])
