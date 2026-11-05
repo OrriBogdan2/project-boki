@@ -153,6 +153,18 @@ void ld_look(vec2 uv01, out vec3 body, out float alpha, out vec3 glow) {
 		body = mix(color2.rgb, color.rgb, ring);
 		alpha = clamp(ring + fill, 0.0, 1.0) * k;
 		glow = color.rgb * ring * 0.3 * k;
+	} else if (mode == 13) {
+		// a thin ribbon of smoke climbing from the quad's foot, wavering and breaking into streaks
+		float h = 1.0 - uv01.y;
+		float sway = 0.26 * h * sin(h * 4.5 + TIME * 1.4 + seed * 2.0) + 0.12 * h * h * sin(seed * 5.0);
+		float w = 0.05 + 0.15 * h;
+		float x = uv.x - sway;
+		float n = fbm3(vec2(x * 2.5, h * 3.5 - TIME * 1.1) + seed);
+		float ribbon = 1.0 - smoothstep(w * 0.45, w, abs(x));
+		float streak = smoothstep(0.32, 0.62, n + 0.2);
+		float ends = smoothstep(0.0, 0.1, h) * (1.0 - smoothstep(0.5, 0.95, h));
+		body = mix(color2.rgb, color.rgb, smoothstep(0.0, 0.6, h));
+		alpha = ribbon * streak * ends * color.a * smoothstep(0.0, 0.15, life) * (1.0 - smoothstep(0.55, 1.0, life));
 	} else {
 		float cover = 1.0 - smoothstep(0.7, 1.0, d);
 		float core = 1.0 - smoothstep(0.15, 0.5, d);
