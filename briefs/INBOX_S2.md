@@ -1128,3 +1128,6 @@ This one sheet now has everything (vivid colours, the owner's skin tone, capris)
   - It shows full-length pants: **build CAPRIS (mid-calf) per hem_FINAL_sheet.png**.
   - The long hanging red scarf here is fine for the rest pose (cloth sim).
   - No weapons on the turnaround: build them from hem_v4_props.png.
+
+## 2026-11-05 02:26 UTC (ext): Lisette A-pose replaced (now with capris)
+`briefs/art-refs/lisette_turnaround_apose.png` is the model reference. Use **skin tone from hem_FINAL_sheet.png** (a darker warm tan; the turnaround came out lighter).
