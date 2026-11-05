@@ -1,7 +1,8 @@
 extends RefCounted
-## --clip-live-grimble: Grimble's clips through the real match code, as --clip-live-check does for Kael. One weapon drawn; the
-## hook's throw and reel play their clips and the hook leaves his wrist meanwhile (one hook on screen, item 76b), and comes back;
-## the dash is the junk ball; shots leave the blunderbuss; a hit spills coins; a knock-out plays the death clip. No save.
+## --clip-live-grimble: Grimble's clips through the real match code, as --clip-live-check does for Kael.
+## The hook's throw and reel play their clips and it leaves his wrist meanwhile (one hook on screen, 76b), then
+## comes back; the dash is the junk ball; shots leave the blunderbuss; a hit spills coins; a knock-out plays the
+## death clip. Never touches the save.
 
 const DT := 1.0 / 60.0
 const MUZZLE_OFF := 0.08       # m: the Gun's Muzzle off the visible muzzle
