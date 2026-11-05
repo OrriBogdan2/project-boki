@@ -13,6 +13,7 @@ extends Node3D
 ##   orb        Ostra's Gravity Orb: a violet glass teardrop with a magenta tail
 ##   orb_hot    the Settled bolt: a long blue-violet bolt with a white core
 ##   spear      Shard Snap: a long bundle of dark violet crystal prisms with bright rims
+## (Ostra's trails and impacts are his HeroVfx moments: content/vfx/ostra.json.)
 ## Lingering: aura (Ostra's Swollen sphere), crown (stun stars over a head), burst and crater (Tarek's slam:
 ## a molten starburst, then a dark red cracked crater), shard (a rock chip flying off an impact), column (the
 ## grown seed's light), mote (a coloured glow at a hand: Tarek's fists, Ostra's charge), dark (the Snap's
@@ -112,8 +113,6 @@ func _build(kind: String) -> Node3D:
 				Models.glow_mat(Color(1.0, 0.31, 0.85, 0.55)),
 				Vector3(0, 0.15, 0)
 			).name = "Core"
-		"well":
-			_build_well(n)
 		"mote":
 			Models.part(n, Models.sphere(0.2, 12), shade_mat(Color(1, 1, 1, 0.85)), Vector3.ZERO).name = "Halo"
 			Models.part(n, Models.sphere(0.08, 10), Models.glow_mat(Color(1, 1, 1, 0.9)), Vector3.ZERO).name = "Core"
@@ -266,35 +265,6 @@ func _build_star(n: Node3D) -> void:
 		)
 	Models.part(n, Models.sphere(0.08, 8), Models.glow_mat(Color("d8c8ff")), Vector3.ZERO)
 
-## Ostra's Nightwell, radius 1 (scaled to the well): a dark violet disc, four spiral arms of light turning
-## on it, small black orbs riding the rim, and a pink core shown when she cast it Swollen.
-func _build_well(n: Node3D) -> void:
-	Models.part(n, Models.cyl(1.0, 1.0, 0.03, 32), shade_mat(Color(0.14, 0.03, 0.3, 0.88)), Vector3.ZERO)
-	var spin := Node3D.new()
-	spin.name = "Spin"
-	n.add_child(spin)
-	var arm_mat := shade_mat(Color(0.7, 0.36, 1.0, 0.95))
-	for arm in 4:
-		for j in 6:
-			var u := float(j + 1) / 6.0
-			var ang := TAU * arm / 4.0 + u * 2.2
-			var at := Vector3(cos(ang), 0.03, sin(ang)) * u * 0.92
-			Models.part(spin, Models.box(0.03 + 0.05 * u, 0.01, 0.16), arm_mat, at, Vector3.ONE, Vector3(0, -ang, 0))
-	for i in 8:
-		var a := TAU * i / 8.0
-		Models.part(
-			spin,
-			Models.sphere(0.07, 8),
-			Models.toon(Color("0c0414"), false, 0.0),
-			Vector3(cos(a), 0.12, sin(a))
-		)
-	Models.part(
-		n,
-		Models.sphere(0.22, 14),
-		Models.glow_mat(Color(1.0, 0.31, 0.85, 0.85)),
-		Vector3(0, 0.1, 0)
-	).name = "Core"
-
 func _take(kind: String) -> Node3D:
 	var p: Array = pools.get(kind, [])
 	while not p.is_empty():
@@ -316,9 +286,9 @@ func pooled(kind: String) -> int:
 	return (pools.get(kind, []) as Array).size()
 
 # ------------------------------------------------------------------ shot skins
-## Dresses a Match shot in a skin (the shot dictionary spawn_shot just appended). The shared sphere goes
-## back to Match's pool at once, so it can't be drawn under ours.
-func skin(s: Dictionary, kind: String) -> void:
+## Dresses a Match shot in a skin (the shot dictionary spawn_shot just appended) and returns the skin's node.
+## The shared sphere goes back to Match's pool at once, so it can't be drawn under ours.
+func skin(s: Dictionary, kind: String) -> Node3D:
 	var sn = s.get("node")
 	if sn != null and is_instance_valid(sn):
 		(sn as Node3D).visible = false
@@ -326,6 +296,7 @@ func skin(s: Dictionary, kind: String) -> void:
 	var n := _take(kind)
 	n.global_position = s["pos"]
 	live.append({"s": s, "n": n, "kind": kind, "t": 0.0, "trail": 0.0, "last": s["pos"]})
+	return n
 
 ## The last shot `by` fired, dressed (weapon shots the kit didn't spawn itself).
 func skin_last(by: Ent, kind: String) -> bool:
@@ -353,23 +324,10 @@ func _trail(e: Dictionary, p: Vector3, back: Vector3) -> void:
 			var dust := Color(0.62, 0.48, 0.34, 0.85)
 			fx.burst(p - Vector3(0, 0.4, 0), dust, 3, 2.0, 0.4, 4.0, 1.4, back + Vector3.UP, 50.0)
 			fx.spark(p, back, Color("ff8a2c"), 2, 2.0, 30.0, 0.25, 4.0, 0.8)
-		"orb":
-			fx.burst(p, Color(0.9, 0.3, 0.9, 0.7), 1, 0.6, 0.25, 0.0, 0.9, back, 15.0)
-		"orb_hot":
-			fx.burst(p, Color(0.5, 0.56, 1.0, 0.75), 2, 1.0, 0.25, 0.0, 0.9, back, 12.0)
-		"spear":
-			fx.burst(p, Color(0.5, 0.2, 0.8, 0.8), 2, 1.5, 0.25, 0.0, 1.0, back, 20.0)
 
 func _impact(e: Dictionary, p: Vector3) -> void:
 	var fx: Fx = m.fx
 	match String(e["kind"]):
-		"orb":
-			fx.burst(p, Color(0.88, 0.3, 0.9, 0.85), 8, 3.0, 0.25, 0.0, 1.0)
-			fx.flash(p, Color("e070ff"), 0.4, 0.06)
-		"orb_hot":
-			fx.burst(p, Color(0.45, 0.5, 1.0, 0.85), 12, 4.0, 0.3, 0.0, 1.1)
-			fx.ring(p, 0.8, Color("6f7cff"), 0.22)
-			fx.flash(p, Color("9fb8ff"), 0.55, 0.07)
 		"boulder":
 			fx.dust(p, 6)
 

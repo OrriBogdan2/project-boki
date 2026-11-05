@@ -9,7 +9,8 @@ extends RefCounted
 ## it keeps going. A hard CC or a merge frees him early.
 ## Swollen, it is larger. It closes quietly, with no blast. Bond: each hunter it catches counts as a land
 ## (HeroUlt.landed), paid on the catch, never per tick. Its looks hang on the match, not on Ostra, so a
-## merge or a knock on his doesn't take the placed well down.
+## merge or a knock on his doesn't take the placed well down: the dome is KitLooks', the open well a void vortex
+## with cards swirling up and burning away (content/vfx/ostra.json "well_*"), renewed at CHURN_AT.
 
 const DOME_COL := Color("a8e4ff")
 const DISC_COL := Color("b06bff")
@@ -17,6 +18,7 @@ const PINK := Color("ff4fd8")
 const TICK := 0.1                       # s between damage ticks
 const HOLD_R := 0.25                    # m from the centre where a caught body stops being drawn in
 const GATHER_Y := 2.4                   # m over his ground point: the orb above his raised hands
+const CHURN_AT := 1.6                   # s into the open well its swirl is renewed (each look lasts at most 2.2 s)
 
 var k: OstraKit
 var phase := ""                         # "" | "tell" (the dome) | "open" (the well)
@@ -67,8 +69,8 @@ func start() -> bool:
 	lock_t = 0.0
 	casts += 1
 	k.play("ostra_well")
+	k.vfx("well_cast")
 	k.m.sfx("os_well", center, -2.0, 1.0)
-	k.net_ring(center, radius, DOME_COL)
 	return true
 
 func tick(dt: float) -> void:
@@ -139,16 +141,19 @@ func _open() -> void:
 	opens += 1
 	unlock(true, "ostra_well_snap")
 	k.m.sfx("os_well_hum", center, -3.0, 1.0)
-	k.m.fx.flash(center + Vector3(0, 0.6, 0), Color("e8d8ff"), 1.4, 0.1)
-	k.m.fx.ring(center, radius, DISC_COL, 0.25)
+	k.vfx("well_open", center, null, {"r": _look_r()})
+
+## The radius its looks draw at: the well's, within the widest swirl a look may draw.
+func _look_r() -> float:
+	return minf(radius, OstraKit.LOOK_R_MAX)
 
 func _tick_open(dt: float) -> void:
+	var was := phase_t
 	phase_t += dt
 	var dur := float(xd()["time"])
 	var left := dur - phase_t
-	var disc := KitLooks.of(k.m).hold_on("os_well", "well", k.m, center + Vector3(0, 0.04, 0), radius)
-	(disc.get_node("Spin") as Node3D).rotate_y(-dt * 2.4)
-	(disc.get_node("Core") as Node3D).visible = swollen
+	if was < CHURN_AT and phase_t >= CHURN_AT:
+		k.vfx("well_churn", center, null, {"r": _look_r()})
 	tick_left -= dt
 	if tick_left <= 0.0:
 		tick_left += TICK
@@ -193,5 +198,4 @@ func _close() -> void:
 	for rec in draws:
 		k.m.displace.stop(rec)
 	draws = []
-	k.m.fx.ring(center, radius * 0.4, DISC_COL, 0.2)
-	k.m.fx.burst(center + Vector3(0, 0.3, 0), Color("2a0a3a"), 10, -3.0, 0.3, 0.0, 0.9)
+	k.vfx("well_close", center, null, {"r": _look_r()})
