@@ -6,9 +6,9 @@
 	"personality": "Small, fiery and quick, with a fox's ears and tail and red markings.\nShe is cheerful and bold, and she looks after her friends first.",
 	"role": "Tender",
 	"weight": "medium",
-	"plate_offset": 2.05,
+	"plate_offset": 1.85,
 	"body": {
-		"size": 0.78,
+		"size": 0.68,
 		"hit_r": 0.34,
 		"head": 0.78,
 		"legs": 1.45,
