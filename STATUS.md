@@ -495,3 +495,12 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: Breaker refs complete; queue
 - Have breaker_FINAL_sheet, breaker_turnaround, breaker_weapons, breaker_splash, the anglerfish decision (cosmetic only) and the new title "the Sunken Bulwark". All 8 slots are full (ART-1 Kael, Tarek, Lisette; ART-2 Lisette; drop-107; kits Tarek, Cinder; Boki). Next free slot: ART-1 Breaker restart. Then the title sweep on ext/rename-lisette, then Vex 68, gloves 69, glider 63, Claire 62+64+65.
+
+## 2026-11-05 S2: ART-1 Tarek built: ext/art1-tarek 95e0e243 (awaits the Kael pilot approval; do not merge yet)
+- Rebuilt with no scan: 19,985 tris, SDF sculpts, 39 clips on the WardenClips runtime, grin face, 17 locs on spring chains, three geode stones, fists are the weapon (76b). "Tarek legs" root cause: the Legs node's y-scale sheared them; clips bypass it and retarget_rigid fixes what stays procedural. 0 credits.
+- Proportion data changed: body.arms 1.5, legs 2.9, build 1.08, size 0.83; stones orbit at 0.45.
+- Checks pass on final: rig-standard, clip-check, warden-model, warden-glb, warden-stance, dolm-combo 139, portrait 107, hunter-unlock 153, health --strict. Pre-sync suite (118 flags, d93b3981): 2 never recorded; grammar-runtime, hitch, load, pack-ui, farm-tutorial red and not rerun; merge-form, teammate still red on final; bot-sanity timed out twice, unconfirmed. Synced to 7ffd9875, so it still needs 555fb02c (duplicate-weapon fix).
+- Shared edits to watch: warden_glb.gd (LEG_BONES, retarget_rigid, _rig_pose), hunter_anim/models (arm_k), clip_check, and warden_glb_check's spring test now nulls clips (a check change).
+- Differs: built from SDF sculpts, not the scan-body recipe, so owner notes on Kael's finish may not map directly. Not compared with the final Kael look.
+- Shots: ext/hero-shots-s2 art1/tarek/. Not tested live; perf unmeasured; 6.7 MB .glb.
+- Owner Qs: new proportions OK (arms 1.5x, shorter legs, larger size)? Stones higher and wider so they clear his face?
