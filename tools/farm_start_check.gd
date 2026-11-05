@@ -112,8 +112,14 @@ func run(m: Node) -> void:
 	ok(hb.place_held() and int(Save.d["gems"]) == g0 and FarmSites.is_site(HomeLayout.of(Save.d)["deco"][-1]),
 		"the house goes down where you chose as a free construction site")
 	var house_site: Dictionary = HomeLayout.of(Save.d)["deco"][-1]
-	while FarmSites.has_site(house_site):
+	var house_cost := FarmSites.build_cost("house")
+	Work.add_mat("wood", int(house_cost["wood"]))
+	Work.add_mat("stone", int(house_cost["stone"]))
+	for i in 100:
+		if not FarmSites.has_site(house_site):
+			break
 		FarmSites.add_swing(house_site)
+	Save.d["mats"] = {}
 	hb.apply(false)
 	home._sync_fixtures()
 	ok(home.spots["house"].x > 0.0 and home.spots["house"].distance_to(HomeLayout.rect_center([hc[0].x, hc[0].y, hc[14].x, hc[14].y])) < 0.6 and is_instance_valid(home.house_node), "the farm knows where its house is now (%s)" % str(home.spots["house"]))
