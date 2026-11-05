@@ -1564,3 +1564,27 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - Ult shots spawn arrow meshes, not a beam.
   - The cast sfx plays for an enemy listener at 40 m.
+
+## 143. Animation quality pass: crouch first, then everything (owner, 17:28 UTC Nov 5)
+- The owner: "in general everyone's crouching animation (and animations in general) needs to look cooler".
+- **Phase 1, crouch (all 12):**
+  - A low, athletic, character-specific pose, not a generic squat:
+    - The hips drop and the spine leans forward.
+    - The weight is on the balls of the feet; one foot slightly forward; the head up, scanning.
+    - The weapon/hands held ready in the hero's style.
+  - Personality per hero:
+    - Sable: predatory, low.
+    - Kael: a blade-ready guard.
+    - Pip: timid, lantern close.
+    - Vex: a cocky half-kneel, cannon on the knee.
+    - Breaker: heavy, a hammer-brace.
+    - Ryzz: a bouncy coil, finger guns ready.
+    - etc.
+  - A crouch-walk with a smooth sneak cycle and anticipation on the enter/exit (a 0.1 s dip/settle), not a snap.
+- **Phase 2, the core set per hero,** with the same principles: idle (breathing, a weight shift, a personality idle every ~8 s), run (lean into speed, arm swing, follow-through on hair/scarf/tails), jump/land (anticipation, squash on land), dash (a strong pose silhouette), hit react, downed.
+  - Principles: clear silhouettes at the match camera, anticipation → action → follow-through, ease curves (no linear), secondary motion on cloth/hair.
+  - Reference quality bar: SUPERVIVE / Arcane-style stylised game anims.
+- **Process (S2):**
+  - First, a before/after contact strip of the crouch for 3 heroes (Sable, Kael, Pip) to the owner via ext for a style OK.
+  - Then roll out to all 12 alongside the ART-1 merges.
+  - Weave in the anim notes already queued (131 Kael pose, 136 Motley casts, 139 Ryzz alternating, 118b Pip stretch).

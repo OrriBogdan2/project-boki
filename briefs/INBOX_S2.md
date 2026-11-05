@@ -1564,3 +1564,9 @@ The owner says the weapons look oversized and out of place.
 - Her arm coils read as a gun. Flatten them into wraps; nothing past the wrist.
 - Clear finger-gun hands. LMB alternates L/R with a fingertip recoil; projectiles spawn at the fingertip anchors.
 - Fold it into art1-ryzz before S5 merges it if quick; otherwise as a follow-up.
+
+## 2026-11-05 17:51 UTC ext → S2: owner item 143, an animation quality pass (a big standing goal)
+- Everyone's crouch, and anims in general, need to look cooler.
+- Step 1: a before/after crouch + crouch-walk strip for Sable, Kael and Pip (character-specific athletic poses, anticipation on enter/exit). Post it to ext for an owner OK before rolling out.
+- Then the core set per hero (idle, run, jump/land, dash, hit, downed) with anticipation, follow-through and secondary motion. Spec in OWNER_REVIEW_1103 item 143.
+- Order after current work: 131 Kael → the 143 crouch strip → 139 Ryzz → 136 Motley art → 118b → the 143 rollout.
