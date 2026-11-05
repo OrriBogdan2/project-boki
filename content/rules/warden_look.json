@@ -4,84 +4,82 @@
 		"painted": {
 			"rim_far": 0.35,
 			"rim_far_color": [
-				0.35,
+				0.4,
 				1.0,
-				0.45
+				0.55
 			]
 		},
 		"slots": {
 			"skin": {
-				"top_light": 0.35,
-				"fres": 0.45,
-				"far_lift": 0.12,
-				"shade": 0.9,
-				"paint_glow": 1.0,
-				"paint_glow_color": [
-					0.298,
-					0.765,
-					0.369
-				]
+				"top_light": 0.45,
+				"fres": 0.2,
+				"fres_tint": 0.2,
+				"far_lift": 0.3,
+				"shade": 0.95,
+				"shadow_tint": [
+					0.82,
+					0.82,
+					0.98
+				],
+				"light_neutral_warm": 0.65
 			},
-			"metal": {
-				"top_light": 0.15,
-				"fres": 0.15,
-				"fres_tint": 0.6,
-				"far_lift": 0.0,
-				"sheen": 0.0,
-				"rim_far": 0.0,
-				"light_neutral_warm": 0.6
+			"cloth": {
+				"fres": 0.25,
+				"far_lift": 0.4,
+				"top_light": 0.3
+			},
+			"leather": {
+				"far_lift": 0.25,
+				"fres": 0.25,
+				"top_light": 0.3
 			},
 			"hair": {
+				"vertex_ao": true,
 				"far_lift": 0.5,
+				"fres": 0.25,
+				"glow": 0.1,
+				"top_light": 0.3
+			},
+			"metal": {
+				"top_light": 0.3,
 				"fres": 0.3,
-				"glow": 0.12,
-				"rim_far": 0.0
+				"fres_tint": 0.8,
+				"far_lift": 0.2,
+				"sheen": 0.1
+			},
+			"brass": {
+				"top_light": 0.25,
+				"fres": 0.25,
+				"fres_tint": 0.6,
+				"far_lift": 0.45,
+				"sheen": 0.1
 			},
 			"glow": {
 				"glow": 1.8
-			},
-			"cloth": {
-				"far_lift": 0.0,
-				"fres": 0.25,
-				"rim_far": 0.0,
-				"top_light": 0.3,
-				"light_neutral_warm": 0.75
-			},
-			"leather": {
-				"far_lift": 0.0,
-				"fres": 0.25,
-				"rim_far": 0.0,
-				"top_light": 0.3,
-				"light_neutral_warm": 0.75
-			},
-			"brass": {
-				"top_light": 0.15,
-				"fres": 0.15,
-				"fres_tint": 0.6,
-				"far_lift": 0.5,
-				"sheen": 0.0,
-				"rim_far": 0.0,
-				"light_neutral_warm": 0.4
-			},
-			"hair-braid": {
-				"fres": 0.15,
-				"far_lift": 0.3,
-				"rim_far": 0.0
 			}
 		},
-		"halos": [
+		"bloom": [
 			{
-				"anchor": "anchor_lens",
+				"at": "anchor_lens",
 				"color": [
-					0.7,
-					1.0,
-					0.25
+					0.6,
+					1,
+					0.4,
+					0.4
 				],
-				"strength": 2.4,
-				"px": 2.4,
-				"near_d": 7.0,
-				"far_d": 14.0,
-				"lift": 0.035
+				"size": 0.09,
+				"depth_test": false
+			},
+			{
+				"at": "anchor_spine",
+				"color": [
+					0.5,
+					1,
+					0.4,
+					0.12
+				],
+				"size": 0.2,
+				"depth_test": true
 			}
 		]
 	},

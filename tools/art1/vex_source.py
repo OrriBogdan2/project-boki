@@ -17,7 +17,7 @@ LOW_TRIS = 5400
 CUT_FORE = 0.12                  # along the left forearm: the sleeve ends here
 CHIN_Z = 1.668                   # the scan head goes above this; rebuilt from the scan in vex_head
 SOLE = -0.95                    # the scan's sole (z)
-ANKLE = 0.10                    # the rig has no ankle node: the foot bone sits here
+ANKLE = 0.16                    # the rig has no ankle node: the foot bone sits here (sole on 0)
 # Scan joints (flipped to face +Y, his right +X, z from the sole), measured on grid_front/grid_right.
 S_J = {"neck": (0, -0.02, 1.614), "pelvis": (0, -0.02, 1.03), "crown": (0, -0.02, 1.9), "shoulder.R": (0.18, -0.02, 1.54), "elbow.R": (0.31, -0.02, 1.26), "wrist.R": (0.47, 0, 1.09),
        "shoulder.L": (-0.18, -0.02, 1.54), "elbow.L": (-0.30, -0.02, 1.26), "wrist.L": (-0.47, 0, 1.09), "hip.R": (0.095, -0.01, 1.01), "knee.R": (0.16, -0.02, 0.59),

@@ -533,7 +533,7 @@ for s, side in ((1.0, "R"), (-1.0, "L")):
     bone("brow." + side, "head", b, b + [0, 0.03, 0])
 for sd, sx in (("R", 1.0), ("L", -1.0)):
     th = VC.J("shin." + sd)
-    hd = np.array([th[0], 0.0, 0.10])
+    hd = np.array([th[0], 0.0, 0.16])
     bone("foot." + sd, "shin." + sd, hd, hd + [0, 0.12, 0])
 kn = VA.WR + np.array([0, 0, -0.082])
 bone("fingers.L", "hand.L", kn, kn + [0, 0, -0.06])

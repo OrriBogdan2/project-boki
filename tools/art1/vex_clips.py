@@ -1,6 +1,6 @@
 """ART-1 Vex's animation set. Times match the kit (scripts/match/kmoves_vv.gd). Personality: a hired gun with a street racer's swagger: loose hips, weight thrown to the
 cannon side, chin up, she leans into the slide and enjoys it.
-Her right arm IS the cannon, so it is not an IK hand: "AIM" is the cannon's direction in MODEL space (D(az, el)) and "UA" the strut's, FK. The torso and the legs can
+Her right arm IS the cannon, so it is not an IK hand: "BE" is the cannon's direction in MODEL space (D(az, el)) and "UA" the strut's, FK. The torso and the legs can
 do what they like, the cannon stays on the aim (aims_in_dash: the runtime turns only the legs to the dash).
 Run: blender -b --python tools/art1/vex_clips.py -- <vex.blend> <out.glb> [clip,clip]"""
 import sys, os, math
@@ -29,13 +29,13 @@ def aim(a, e, roll=0.0):
 
 READY = {
     "pel": (0.012, 0.0, -0.04), "prt": (0.0, 0.08, 0.05), "tor": (0.03, -0.1, -0.03), "hed": (-0.02, 0.1, 0.03),
-    "G": (0.3, 0.1, 0.8), "BE": ((0, 1, 0), UP), "Lw": 0.0, "LP": (-0.21, 0.07, 1.02), "LQ": (0.15, 0.0, 0.0),
-    "AIM": aim(-7, -68), "UA": (-14, -80), "LN": 0.0, "GS": 0.0, "CN": 0.0, "CF": 0.0,
+    "G": (0.3, 0.1, 0.8), "Lw": 0.0, "LP": (-0.21, 0.07, 1.02), "LQ": (0.15, 0.0, 0.0),
+    "BE": aim(-7, -68), "UA": (-14, -80), "LN": 0.0, "GS": 0.0, "CN": 0.0, "CF": 0.0,
     "FL": (-0.115, 0.075, A_Z), "FR": (0.15, -0.055, A_Z), "FLy": 0.12, "FRy": -0.34, "FLp": 0.0, "FRp": 0.0,
     "brow": 0.15, "lid": 0.12, "fing": 0.25,
 }
-ON_AIM = {"AIM": aim(0, 2), "UA": (-22, -42)}
-CARRY = {"AIM": aim(-3, -22), "UA": (-18, -58)}
+ON_AIM = {"BE": aim(0, 2), "UA": (-22, -42)}
+CARRY = {"BE": aim(-3, -22), "UA": (-18, -58)}
 BRACE = {"pel": (0.0, -0.02, -0.14), "prt": (0.16, 0.14, 0.0), "tor": (0.12, -0.14, 0.0), "hed": (-0.2, 0.12, 0.0), "FL": (-0.15, 0.2, A_Z), "FR": (0.18, -0.16, A_Z), "FLy": 0.1, "FRy": -0.5}
 
 
@@ -49,7 +49,7 @@ def idle(u):
     p["pel"] = (0.012 + 0.008 * b, 0.0, -0.04 - 0.006 * a)
     p["tor"] = (0.03 + 0.02 * a, -0.1, -0.03 + 0.008 * b)
     p["hed"] = (-0.02 - 0.016 * a, 0.1 + 0.04 * math.sin(u * 4 * math.pi), 0.03)
-    p["AIM"] = aim(-7 + 0.8 * b, -68 + 1.2 * a)
+    p["BE"] = aim(-7 + 0.8 * b, -68 + 1.2 * a)
     p["LP"] = (-0.21, 0.07, 1.02 - 0.006 * a)
     p["lid"] = 1.0 if 0.40 < u < 0.43 or 0.8 < u < 0.83 else 0.12
     return p
@@ -81,7 +81,7 @@ def stance(u):
     p["hed"] = (t * -1.0 - 0.02, 0.5, 0.06)
     p["lid"] = 0.2
     p["brow"] = -0.3
-    p["AIM"] = aim(-10, -72)
+    p["BE"] = aim(-10, -72)
     return p
 
 
@@ -124,7 +124,7 @@ def gait(speed_k, heading, T):
         p["hed"] = (-lean * 1.1, 0.25 * c1 * speed_k, -0.05 * c1)
         w = min(1.0, speed_k * 1.3)
         aa, ee = -3 + 3 * c1 * (1 - speed_k), -30 + 6 * speed_k + 2.2 * s2
-        p["AIM"] = aim(aa, ee)
+        p["BE"] = aim(aa, ee)
         p["UA"] = (-18, -62 + 3 * s2)
         pump = c1 * w
         p["LP"] = (-0.22 + 0.03 * pump, 0.05 + 0.24 * pump, 1.02 + 0.13 * max(0, pump) + 0.03 * s2 + 0.06 * w)
@@ -149,22 +149,22 @@ def clips():
     out.append(C("jump", 0.4, [(0.0, jump), (0.4, dict(jump, FL=(-0.12, 0.1, A_Z + 0.28), FR=(0.14, -0.14, A_Z + 0.16)))]))
     fall = dict(CARRY, pel=(0, 0, 0.0), prt=(0.08, 0, 0), tor=(0.06, 0, 0), hed=(0.1, 0, 0), FL=(-0.13, 0.08, A_Z + 0.08), FR=(0.14, -0.16, A_Z + 0.16), FLp=-0.3, FRp=-0.6, LP=(-0.34, 0.02, 1.26), fing=0.1)
     out.append(C("fall", 0.6, [(0.0, fall), (0.3, dict(fall, LP=(-0.36, 0.0, 1.3))), (0.6, fall)], loop=True))
-    ld = dict(READY, pel=(0, -0.02, -0.26), prt=(0.28, 0, 0), tor=(0.22, 0, 0), hed=(-0.3, 0, 0), FL=(-0.15, 0.13, A_Z), FR=(0.17, -0.12, A_Z), LP=(-0.34, 0.18, 0.9), AIM=aim(0, -30), UA=(-18, -60))
+    ld = dict(READY, pel=(0, -0.02, -0.26), prt=(0.28, 0, 0), tor=(0.22, 0, 0), hed=(-0.3, 0, 0), FL=(-0.15, 0.13, A_Z), FR=(0.17, -0.12, A_Z), LP=(-0.34, 0.18, 0.9), BE=aim(0, -30), UA=(-18, -60))
     out.append(C("land", 0.4, [(0.0, ld), (0.12, ld), (0.4, READY)]))
-    gl = dict(pel=(0, 0, 0.0), prt=(0.22, 0, 0), tor=(0.0, 0, 0), hed=(-0.2, 0, 0), LP=(-0.1, -0.06, 1.72), LQ=(-3.0, 0, 0), UA=(-10, 40), AIM=aim(-6, 72), FL=(-0.09, -0.12, A_Z + 0.04), FR=(0.11, -0.24, A_Z + 0.1), FLp=-0.7, FRp=-0.9)
+    gl = dict(pel=(0, 0, 0.0), prt=(0.22, 0, 0), tor=(0.0, 0, 0), hed=(-0.2, 0, 0), LP=(-0.1, -0.06, 1.72), LQ=(-3.0, 0, 0), UA=(-10, 40), BE=aim(-6, 72), FL=(-0.09, -0.12, A_Z + 0.04), FR=(0.11, -0.24, A_Z + 0.1), FLp=-0.7, FRp=-0.9)
     out.append(C("glide", 1.0, [(0.0, gl), (0.5, dict(gl, FR=(0.11, -0.26, A_Z + 0.13))), (1.0, gl)], loop=True))
 
     # ---- LMB: the gatling's rounds; keys from gunslinger_lmb: the kick at 0.025, back on the aim by 0.09, the next round at 0.12, she eases out by 0.55
     base = dict(BRACE, **ON_AIM)
     base.update(LP=(-0.26, 0.2, 0.98), LQ=(0.3, 0, 0), brow=0.5, lid=0.1)
     spin = math.radians(60)
-    kick = dict(base, AIM=aim(0, 4.5), UA=(-18, -44), tor=(0.08, -0.14, 0.0), GS=spin * 0.3)
+    kick = dict(base, BE=aim(0, 4.5), UA=(-18, -44), tor=(0.08, -0.14, 0.0), GS=spin * 0.3)
     out.append(C("lmb", 0.55, [(0.0, base), (0.025, kick, "out"), (0.09, dict(base, GS=spin * 0.75)), (0.12, dict(base, GS=spin)), (0.3, dict(base, GS=spin * 3.2)), (0.55, dict(READY, GS=spin * 4), "smooth")]))
 
     # ---- RMB: tap: the launcher is over and forward from the press, the grenade thumps out of the bell, the kick rides up the arm, the pipe swings home
-    r0 = dict(BRACE, AIM=aim(0, 7), UA=(-20, -36), LN=1.0, LP=(-0.24, 0.24, 1.08), LQ=(0.5, 0, 0), brow=0.6, lid=0.25, FL=(-0.14, 0.24, A_Z))
-    r1 = dict(r0, AIM=aim(0, 19), UA=(-14, -24), tor=(-0.06, -0.14, 0.0), hed=(-0.1, 0.12, 0.0), pel=(0.0, -0.05, -0.12))
-    out.append(C("rmb", 0.5, [(0.0, r0), (0.05, r1, "out"), (0.13, dict(r1, AIM=aim(0, 14))), (0.32, dict(r0, AIM=aim(0, 4), LN=0.9)), (0.5, dict(READY, LN=0.0))]))
+    r0 = dict(BRACE, BE=aim(0, 7), UA=(-20, -36), LN=1.0, LP=(-0.24, 0.24, 1.08), LQ=(0.5, 0, 0), brow=0.6, lid=0.25, FL=(-0.14, 0.24, A_Z))
+    r1 = dict(r0, BE=aim(0, 19), UA=(-14, -24), tor=(-0.06, -0.14, 0.0), hed=(-0.1, 0.12, 0.0), pel=(0.0, -0.05, -0.12))
+    out.append(C("rmb", 0.5, [(0.0, r0), (0.05, r1, "out"), (0.13, dict(r1, BE=aim(0, 14))), (0.32, dict(r0, BE=aim(0, 4), LN=0.9)), (0.5, dict(READY, LN=0.0))]))
 
     # ---- Slipstep: her slide. On the legs' own heading (runtime: legs_heading) she drops feet first, the lead leg out, the back knee folded under, the left hand trailing on the ground; the torso
     # stays up and the cannon stays on the aim
@@ -176,44 +176,44 @@ def clips():
     out.append(C("dash_ex", 0.5, [(0.0, dict(READY, **ON_AIM)), (0.05, t0), (0.22, dict(t0, prt=(0.0, 0.0, 6.283))), (0.36, dict(READY, **ON_AIM, prt=(0, 0, 6.283), pel=(0, 0, -0.14))), (0.5, dict(READY, prt=(0, 0, 6.283)))]))
 
     # ---- Longneedle: 0.6 s of charge braced deep, the left hand on the sleeve, chin down the barrel; the beam at 0.6 throws her chest back and she settles by 1.05
-    e0 = dict(BRACE, AIM=aim(0, 1), UA=(-14, -38), LP=(0.11, 0.42, 1.06), LQ=(1.2, -0.6, 0), pel=(0, -0.05, -0.2), prt=(0.22, 0.18, 0), tor=(0.26, -0.2, 0), hed=(-0.32, 0.16, 0.06), brow=1.0, lid=0.42, fing=0.75)
-    e1 = dict(e0, pel=(0, -0.07, -0.22), tor=(0.3, -0.2, 0), AIM=aim(0, 0))
-    e2 = dict(e0, AIM=aim(0, 13), UA=(-8, -24), pel=(0, -0.16, -0.08), prt=(-0.12, 0.12, 0), tor=(-0.34, -0.1, 0), hed=(-0.05, 0.1, 0), LP=(-0.34, 0.1, 1.2), LQ=(0.3, 0, 0), brow=-0.2, lid=0.05, fing=0.1)
-    out.append(C("e", 1.05, [(0.0, READY), (0.15, e0), (0.58, e1), (0.65, e2, "out"), (0.8, dict(e2, AIM=aim(0, 4), tor=(-0.05, -0.1, 0), pel=(0, -0.08, -0.1))), (1.05, READY)]))
+    e0 = dict(BRACE, BE=aim(0, 1), UA=(-14, -38), LP=(0.11, 0.42, 1.06), LQ=(1.2, -0.6, 0), pel=(0, -0.05, -0.2), prt=(0.22, 0.18, 0), tor=(0.26, -0.2, 0), hed=(-0.32, 0.16, 0.06), brow=1.0, lid=0.42, fing=0.75)
+    e1 = dict(e0, pel=(0, -0.07, -0.22), tor=(0.3, -0.2, 0), BE=aim(0, 0))
+    e2 = dict(e0, BE=aim(0, 13), UA=(-8, -24), pel=(0, -0.16, -0.08), prt=(-0.12, 0.12, 0), tor=(-0.34, -0.1, 0), hed=(-0.05, 0.1, 0), LP=(-0.34, 0.1, 1.2), LQ=(0.3, 0, 0), brow=-0.2, lid=0.05, fing=0.1)
+    out.append(C("e", 1.05, [(0.0, READY), (0.15, e0), (0.58, e1), (0.65, e2, "out"), (0.8, dict(e2, BE=aim(0, 4), tor=(-0.05, -0.1, 0), pel=(0, -0.08, -0.1))), (1.05, READY)]))
 
     # ---- Cinderfall: the cannon snapped straight up by 0.1, the shot squashes her, held a beat, back on her aim by 0.6
-    x0 = dict(BRACE, AIM=aim(0, 78), UA=(-6, 28), pel=(0, -0.03, -0.06), tor=(-0.14, -0.12, -0.08), hed=(-0.34, 0.1, 0), LP=(-0.3, 0.14, 1.2), brow=0.8, lid=0.1)
-    x1 = dict(x0, pel=(0, -0.05, -0.17), AIM=aim(0, 66), tor=(0.0, -0.12, -0.08))
+    x0 = dict(BRACE, BE=aim(0, 78), UA=(-6, 28), pel=(0, -0.03, -0.06), tor=(-0.14, -0.12, -0.08), hed=(-0.34, 0.1, 0), LP=(-0.3, 0.14, 1.2), brow=0.8, lid=0.1)
+    x1 = dict(x0, pel=(0, -0.05, -0.17), BE=aim(0, 66), tor=(0.0, -0.12, -0.08))
     out.append(C("x", 0.6, [(0.0, READY), (0.1, x0, "out"), (0.14, x1, "out"), (0.3, x0), (0.6, READY)]))
 
     # ---- a knock: the cannon kicked up to rest on her shoulder, chin up, a grin
-    k0 = dict(READY, AIM=aim(6, 58), UA=(-6, -6), tor=(-0.08, 0.16, 0.05), hed=(-0.26, -0.14, 0.05), brow=-0.5, lid=0.2, LP=(-0.26, 0.05, 1.0))
+    k0 = dict(READY, BE=aim(6, 58), UA=(-6, -6), tor=(-0.08, 0.16, 0.05), hed=(-0.26, -0.14, 0.05), brow=-0.5, lid=0.2, LP=(-0.26, 0.05, 1.0))
     out.append(C("knock", 0.6, [(0.0, READY), (0.1, k0, "out"), (0.35, k0), (0.6, READY)]))
 
     # ---- hits
-    hf = dict(READY, pel=(0, -0.06, -0.08), prt=(-0.18, 0, 0.05), tor=(-0.3, -0.1, 0.1), hed=(0.26, 0.2, 0.1), LP=(-0.3, 0.02, 1.16), brow=-1.0, lid=0.75, AIM=aim(-10, -52))
-    hb = dict(READY, pel=(0, 0.06, -0.08), prt=(0.22, 0, 0), tor=(0.3, 0, 0), hed=(-0.34, 0, 0), LP=(-0.3, 0.2, 1.16), brow=-1.0, lid=0.75, AIM=aim(-10, -48))
+    hf = dict(READY, pel=(0, -0.06, -0.08), prt=(-0.18, 0, 0.05), tor=(-0.3, -0.1, 0.1), hed=(0.26, 0.2, 0.1), LP=(-0.3, 0.02, 1.16), brow=-1.0, lid=0.75, BE=aim(-10, -52))
+    hb = dict(READY, pel=(0, 0.06, -0.08), prt=(0.22, 0, 0), tor=(0.3, 0, 0), hed=(-0.34, 0, 0), LP=(-0.3, 0.2, 1.16), brow=-1.0, lid=0.75, BE=aim(-10, -48))
     out.append(C("hit_f", 0.42, [(0.0, READY), (0.08, hf, "out"), (0.42, READY)]))
     out.append(C("hit_b", 0.42, [(0.0, READY), (0.08, hb, "out"), (0.42, READY)]))
-    stn = dict(READY, pel=(0, 0, -0.2), prt=(0.12, 0, 0.1), tor=(0.42, 0, 0.1), hed=(0.34, 0.3, 0.2), AIM=aim(-12, -78), LP=(-0.24, 0.1, 0.86), lid=0.85, brow=-0.9, fing=0.0)
+    stn = dict(READY, pel=(0, 0, -0.2), prt=(0.12, 0, 0.1), tor=(0.42, 0, 0.1), hed=(0.34, 0.3, 0.2), BE=aim(-12, -78), LP=(-0.24, 0.1, 0.86), lid=0.85, brow=-0.9, fing=0.0)
     out.append(C("stun", 1.2, [(0.0, stn), (0.6, dict(stn, tor=(0.42, -0.1, -0.05), hed=(0.34, -0.3, -0.1))), (1.2, stn)], loop=True))
     # ---- down: on her left hip, propped on the robot arm, the cannon's weight dragging
     dn = {"pel": (0, -0.08, -0.72), "prt": (-0.32, 0.3, 0.42), "tor": (0.2, 0, 0.0), "hed": (0.24, 0, 0.1), "FL": (-0.28, 0.42, A_Z - 0.03), "FR": (0.1, 0.5, A_Z - 0.03), "FLy": 0.6, "FRy": 0.2, "FLp": 0.5, "FRp": 0.4,
-          "AIM": aim(-40, -6), "UA": (-40, -30), "LP": (-0.34, -0.1, 0.22), "LQ": (0, 0, 0), "lid": 0.65, "brow": -0.8, "fing": 0.0}
+          "BE": aim(-40, -6), "UA": (-40, -30), "LP": (-0.34, -0.1, 0.22), "LQ": (0, 0, 0), "lid": 0.65, "brow": -0.8, "fing": 0.0}
     out.append(C("downed", 2.4, [(0.0, dn), (1.2, dict(dn, tor=(0.3, 0, 0), hed=(0.38, 0, 0.1))), (2.4, dn)], loop=True))
-    out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, tor=(0.32, 0, 0.1), hed=(-0.1, 0, 0), lid=0.3, brow=0.8)), (0.95, dict(READY, pel=(0, -0.02, -0.26), prt=(0.32, 0, 0), tor=(0.3, 0, 0), hed=(-0.3, 0, 0), FR=(0.16, -0.28, A_Z), LP=(-0.3, 0.1, 0.62), AIM=aim(-16, -42))), (1.6, READY)]))
+    out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, tor=(0.32, 0, 0.1), hed=(-0.1, 0, 0), lid=0.3, brow=0.8)), (0.95, dict(READY, pel=(0, -0.02, -0.26), prt=(0.32, 0, 0), tor=(0.3, 0, 0), hed=(-0.3, 0, 0), FR=(0.16, -0.28, A_Z), LP=(-0.3, 0.1, 0.62), BE=aim(-16, -42))), (1.6, READY)]))
     dead = {"pel": (0, -0.1, -0.86), "prt": (-1.35, 0.1, 0.1), "tor": (0.1, 0.1, -0.1), "hed": (-0.1, 0.4, 0.3), "FL": (-0.2, 0.6, A_Z - 0.04), "FR": (0.16, 0.68, A_Z - 0.04), "FLy": 0.4, "FRy": -0.4, "FLp": 0.6, "FRp": 0.6,
-            "AIM": aim(-58, 4), "UA": (-80, -2), "LP": (-0.42, -0.2, 0.2), "LQ": (0, 0, 0), "lid": 1.0, "brow": -0.3, "fing": 0.0}
-    out.append(C("death", 1.5, [(0.0, READY), (0.16, dict(READY, pel=(0, -0.08, -0.08), tor=(-0.3, 0, 0.1), hed=(-0.4, 0, 0), lid=0.2, brow=-1, AIM=aim(-20, -30)), "out"),
-                                (0.62, dict(READY, pel=(0, -0.1, -0.46), prt=(-0.4, 0, 0.1), tor=(0.1, 0, 0.1), FL=(-0.2, 0.3, A_Z), FR=(0.2, 0.34, A_Z + 0.04), AIM=aim(-30, -24), LP=(-0.36, 0.0, 0.5), lid=0.7)),
+            "BE": aim(-58, 4), "UA": (-80, -2), "LP": (-0.42, -0.2, 0.2), "LQ": (0, 0, 0), "lid": 1.0, "brow": -0.3, "fing": 0.0}
+    out.append(C("death", 1.5, [(0.0, READY), (0.16, dict(READY, pel=(0, -0.08, -0.08), tor=(-0.3, 0, 0.1), hed=(-0.4, 0, 0), lid=0.2, brow=-1, BE=aim(-20, -30)), "out"),
+                                (0.62, dict(READY, pel=(0, -0.1, -0.46), prt=(-0.4, 0, 0.1), tor=(0.1, 0, 0.1), FL=(-0.2, 0.3, A_Z), FR=(0.2, 0.34, A_Z + 0.04), BE=aim(-30, -24), LP=(-0.36, 0.0, 0.5), lid=0.7)),
                                 (1.05, dead), (1.2, dict(dead, pel=(0, -0.1, -0.83))), (1.5, dead)]))
     # ---- Fusion
-    fu0 = dict(READY, pel=(0, -0.03, -0.26), prt=(0.42, 0, 0), tor=(0.5, 0, 0), hed=(0.45, 0, 0), LP=(-0.2, 0.2, 0.96), AIM=aim(0, -40), fing=1.0, lid=0.9, brow=1.0)
-    fu1 = dict(READY, pel=(0, 0, 0.0), prt=(-0.14, 0, 0), tor=(-0.28, 0, 0), hed=(-0.4, 0, 0), AIM=aim(0, 62), UA=(-8, 20), LP=(-0.5, 0.06, 1.46), LQ=(-2.6, 0, 0), lid=0.0, fing=0.0)
+    fu0 = dict(READY, pel=(0, -0.03, -0.26), prt=(0.42, 0, 0), tor=(0.5, 0, 0), hed=(0.45, 0, 0), LP=(-0.2, 0.2, 0.96), BE=aim(0, -40), fing=1.0, lid=0.9, brow=1.0)
+    fu1 = dict(READY, pel=(0, 0, 0.0), prt=(-0.14, 0, 0), tor=(-0.28, 0, 0), hed=(-0.4, 0, 0), BE=aim(0, 62), UA=(-8, 20), LP=(-0.5, 0.06, 1.46), LQ=(-2.6, 0, 0), lid=0.0, fing=0.0)
     out.append(C("fusion", 0.8, [(0.0, READY), (0.18, fu0), (0.3, dict(fu0, pel=(0.006, -0.03, -0.28))), (0.45, fu1, "out"), (0.58, dict(fu1, pel=(0, 0, -0.01))), (0.8, READY)]))
 
     # ---- the emote: flips the coin high, catches it on the back of the robot hand, a slow wink at you, the cannon propped on her shoulder
-    em = dict(READY, AIM=aim(8, 62), UA=(-4, -8), pel=(-0.02, 0, -0.05), prt=(0, -0.1, -0.08), tor=(0.0, 0.16, 0.05), hed=(-0.08, 0.0, 0.08), LP=(-0.2, 0.3, 1.28), LQ=(-2.5, 0.2, 0), fing=0.55, brow=-0.3, lid=0.15, FL=(-0.1, 0.04, A_Z), FR=(0.19, 0.08, A_Z), FRy=-0.5)
+    em = dict(READY, BE=aim(8, 62), UA=(-4, -8), pel=(-0.02, 0, -0.05), prt=(0, -0.1, -0.08), tor=(0.0, 0.16, 0.05), hed=(-0.08, 0.0, 0.08), LP=(-0.2, 0.3, 1.28), LQ=(-2.5, 0.2, 0), fing=0.55, brow=-0.3, lid=0.15, FL=(-0.1, 0.04, A_Z), FR=(0.19, 0.08, A_Z), FRy=-0.5)
     keys = [(0.0, READY), (0.4, em)]
     for t, h in ((0.55, 0.14), (0.72, 0.28), (0.88, 0.32), (1.05, 0.26), (1.2, 0.1), (1.3, 0.0)):
         keys.append((t, dict(em, CN=h, CF=t * 26, hed=(-0.08 - h * 0.7, 0.0, 0.08))))
@@ -230,7 +230,7 @@ class VexSolver(Solver):
         ua = Vector(D(P["UA"][0], P["UA"][1]))
         yr = q_hips @ self.Y0["upper_arm.R"]
         Q["upper_arm.R"] = yr.rotation_difference(ua) @ q_hips
-        fr = P["AIM"] if isinstance(P["AIM"], Quaternion) else frame_of(P["AIM"][0], P["AIM"][1])
+        fr = P["BE"] if isinstance(P["BE"], Quaternion) else frame_of(P["BE"][0], P["BE"][1])
         q_c = fr @ self.cannon_rest.inverted()
         Q["forearm.R"] = q_c
         Q["hand.R"] = q_c
