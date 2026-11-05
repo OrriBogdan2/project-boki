@@ -1168,3 +1168,13 @@ This one sheet now has everything (vivid colours, the owner's skin tone, capris)
 - **BOKI starter Vespyx (ext/boki-starter 5aaaf165): APPROVED with one fix.** The owner says "the Boki has very big eyes in game for some reason". Scale the eyes down in the in-game model (the concept/splash look is fine), then continue with the grown/Fused forms and the next species.
 - **ART-2 Kael VFX + sound (ext/art2-kael 0fbc63e6): provisionally OK.** The owner can't judge VFX from stills: "I'd need to play it". Mark it READY so S5 merges it; owner notes come after playtesting. Continue ART-2 for the next hero.
 - Breaker redesign in progress (a mossy, long-sunken diver with an emotive glowing face); the model stays paused.
+
+## 2026-11-05 03:12 UTC (ext): BREAKER NEW DESIGN (owner-picked): `briefs/art-refs/breaker_FINAL_sheet.png`
+A full redesign; `ext/art1-breaker` restarts from this.
+- **Body:** a non-human, top-heavy construct. The giant round body is a sunken ship's hull: dark planks, rusted iron bands, moss, barnacles, seaweed, teal light glowing between the planks. Broken mast stumps with rope and sail scraps rise from his shoulders. Stubby legs; enormous iron-banded arms and fists.
+- **Head:** a small brass diving-helmet dome whose porthole shows only two simple glowing teal eyes. Animate them as moods (happy, angry, determined, sad), per the expression row; swap textures or a shader param.
+- **Details:** a brass compass glowing on his chest. A glowing anglerfish companion dangles on a line from his mast (secondary motion).
+- **Shield:** a tall carved hatch door with a figurehead.
+- **Weapon:** a HUGE capstan hammer (a drum with a spike, wound with chain, on an iron haft), chained to his wrist. It fits his throw / recall / spin kit (item 59 spin).
+- **Size:** keep the Breaker 1.5x scale; the hitbox matches the round body (item 46).
+- An A-pose turnaround and weapon sheet will follow.
