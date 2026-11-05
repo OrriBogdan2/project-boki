@@ -16,7 +16,8 @@ const COATS := [
 ## Far shots: [clip, at (s), face], left to right.
 const ACTION := [["idle", 0.5, "neutral"], ["run", 0.1, "cheer"], ["ability", 0.5, "angry"], ["hop", 0.45, "happy"]]
 const EMOTES := [["idle", 0.5, "happy"], ["idle", 0.5, "sad"], ["idle", 0.5, "sleepy"], ["idle", 0.5, "angry"]]
-const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
+const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
+	"tend"]
 const GIF_FPS := 15
 const MATCH_PITCH := 66.0
 const MATCH_DIST := 23.0

@@ -5,7 +5,8 @@ extends RefCounted
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const SPECIES := "cindle"
-const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
+const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
+	"tend"]
 const SHAPES := ["blink", "closed", "happy", "sad", "sleepy", "angry", "m_smile", "m_frown", "m_snarl", "m_chomp",
 	"m_o"]
 const MAX_TRIS := 12000
