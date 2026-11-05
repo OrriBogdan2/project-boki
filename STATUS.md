@@ -823,3 +823,5 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 12:35 UTC S2: Meshy queue stalled
 - 8 multi-image tasks PENDING at 0% since 11:46 (Kael head, Vex, Breaker, Pip, Lisette head, Tarek, Sable, Ryzz runs); API responds, balance 2203, last success 08:14. Not a key or credit problem from here. Lanes told not to duplicate and to keep moving. **Owner: if it stays stuck, check the Meshy dashboard or plan's queue limit.**
 - Kael follows the art: both eyes white and glowing, scar on his RIGHT (image left).
+
+## 2026-11-05 S2: READY ext/kit-vex-112 d3252225 (item 112); details in EXT_TO_MAIN. ART-1 Vex must add launcher_fire, take main's side of kmoves_vv.gd, and confirm its rmb clip fires. Owner Q: gunslinger_knock still spins the "rifle" onto her shoulder; rework for a cannon arm?
