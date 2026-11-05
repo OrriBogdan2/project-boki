@@ -159,6 +159,7 @@ Q = Q * (1 - tail_w[:, None]) + qr * tail_w[:, None]
 TP = lerp_move(np.array(TAIL), "pelvis", "neck") - root
 TP = np.stack([TP[:, 0], TP[:, 1] * c + TP[:, 2] * s, -TP[:, 1] * s + TP[:, 2] * c], 1) + root
 TP = catmull(TP, 16)
+Q[:, 1] += CREAM * smooth(0.78, 0.56, Q[:, 2]) * 0.024      # the apron stands off the thighs, or a stride pokes through
 print("fitted", Q[~kill].min(0).round(3), Q[~kill].max(0).round(3))
 me.vertices.foreach_set("co", Q.ravel())
 me.update()
@@ -170,8 +171,13 @@ g.add(ids, 1.0, "REPLACE")
 hips_k = smooth(0.50, 0.72, Q[:, 2]) * (1 - legsum) * (1 - tail_w)
 root_k = (1 - hips_k - legsum - tail_w).clip(0, 1)
 apron = (CREAM * smooth(0.72, 0.56, Q[:, 2])).astype(F)
-hips_k *= (1 - apron)
-root_k *= (1 - apron)
+# (its hem follows the pelvis, not the chest's twist; the bone adds the swing)
+hem = smooth(0.8, 0.6, Q[:, 2]) * CREAM
+root_k = root_k + hips_k * hem
+hips_k = hips_k * (1 - hem)
+root_k *= (1 - apron * 0.45)
+hips_k *= (1 - apron * 0.45)
+apron = apron * 0.45
 cape_back = (GREEN | (FUR & (Q[:, 2] > 0.68))) & (Q[:, 1] < -0.1) & (Q[:, 2] < 1.0)
 WG = {"root": root_k, "hips": hips_k, "apron": apron, "tailw": tail_w, "capew": cape_back.astype(F) * smooth(0.98, 0.85, Q[:, 2])}
 for k_ in list(Wn):
