@@ -1251,7 +1251,7 @@ func ship_jump(h: Hunter, force := false) -> void:
 	h.teleport(ship_pos_of(hs) + Vector3(0, -1.5, 0) + off)
 	SkyFall.start(h, Vector2((hs["dir"] as Vector3).x, (hs["dir"] as Vector3).z))
 	if h == player:
-		sfx("drop_jump", null, -3.0, 0.03)
+		sfx("drop_jump", null, -2.0)
 		if hud and not force:
 			hud.toast("%s dives  ·  %s %s turn  ·  %s opens your glider" % [Settings.key_cap("up"), Settings.key_cap("left"), Settings.key_cap("right"), Settings.key_cap("jump")], Color("cfeaff"))
 		elif hud:

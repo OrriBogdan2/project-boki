@@ -17,6 +17,8 @@ const COMET_TRAIL := 70        # points: ~3.5 s of comet trail
 const TRAIL_FADE := 3          # points a trail loses each step once it has ended (a comet's goes in ~1 s)
 const COMET_R := 1.7           # m: the orb's radius (the squad rides inside)
 const FAR_REDRAW := 3          # frames: a trail that isn't your squad's is redrawn this rarely
+const MUSIC_DUCK_DB := -10.0   # the score under the fall
+const MUSIC_HOLD_S := 1.2      # s, renewed while you fall
 const TAG_K := 0.15            # DropCam.wide above this: name tags over you and your squad
 const ORB := """
 shader_type spatial;
@@ -67,6 +69,7 @@ var _ribbon_mat: ShaderMaterial
 var _phase := {}               # hunter nid -> 1 falling, 2 under the glider or out of a comet's burst
 var _tags := {}                # hunter nid -> Label3D
 var _frame := 0
+var _duck_t := 0.0
 var _fog_base := -1.0          # the look's fog density, held while the wide view clears it
 var _wide_on := false
 var rush_k := 0.0              # (read by the checks) the rush this frame
@@ -126,13 +129,13 @@ func _beats(h: Hunter) -> void:
 ## The glider catching: a crack of air, the canopy's bang.
 func snap(h: Hunter) -> void:
 	blasts.snap(h.render_pos(1.0) + Vector3(0, 1.2, 0), _col(h))
-	m.sfx("drop_snap", h.pos, -3.0 if h.is_local() else -12.0, 0.04)
+	m.sfx("drop_snap", null if h.is_local() else h.pos, 0.0 if h.is_local() else -10.0)
 
 ## Touchdown: the dust ring, a burst of grit and the thud (no self-shake: item 50).
 func land(h: Hunter) -> void:
 	blasts.land(h.pos, _col(h))
 	m.fx.dust(h.pos, 16)
-	m.sfx("drop_land", h.pos, -2.0 if h.is_local() else -10.0, 0.05)
+	m.sfx("drop_land", null if h.is_local() else h.pos, 0.0 if h.is_local() else -10.0)
 
 ## You, your squad's own colours, and everyone else a neutral pale.
 func _col(h: Hunter) -> Color:
@@ -160,7 +163,7 @@ func _local(delta: float) -> void:
 	var above := p.pos.y > CLOUD_Y
 	if _was_above and not above and p.dropping:
 		_flash = 0.5
-		m.sfx("drop_cloud", null, -4.0, 0.04)
+		m.sfx("drop_cloud", null, 0.0)
 	if p.riding:
 		above = true
 	_was_above = above
@@ -175,6 +178,11 @@ func _local(delta: float) -> void:
 		if m.cam and not m.cam.is_position_behind(ahead) and sz.x > 0.0:
 			var at := (m.cam.unproject_position(ahead) / sz).clamp(Vector2(0.2, 0.2), Vector2(0.8, 0.8))
 			_rush_mat.set_shader_parameter("focus", at)
+	if p.dropping:
+		_duck_t -= delta
+		if _duck_t <= 0.0:
+			_duck_t = 1.0
+			Sfx.duck(MUSIC_HOLD_S, MUSIC_DUCK_DB)      # (the score gives the sky to the wind; it's back with the glider)
 	var glide_stage := 2 if p.drop_glide and not p.grounded else 0
 	wind.tick(1 if p.dropping else glide_stage, speed, delta)
 
@@ -245,7 +253,7 @@ func _orb(team: int, l: Hunter) -> void:
 		_orbs[team] = orb
 	orb.visible = true
 	orb.global_position = l.render_pos(1.0) + Vector3(0, 0.9, 0)
-	var pulse := 1.0 + 0.05 * sin(m.time * 14.0)
+	var pulse := (1.0 + 0.05 * sin(m.time * 14.0)) * maxf(1.0, m.cam.zoom * 0.42)
 	var v := l.vel.length()
 	# stretched a little along its flight, like something burning in
 	orb.scale = Vector3(pulse, pulse, pulse * (1.0 + clampf(v / 40.0, 0.0, 0.5)))
@@ -290,6 +298,7 @@ func _trail(key: String, on: bool, at: Vector3, max_pts: int, delta: float) -> v
 
 func _draw_trails() -> void:
 	var eye := m.cam.global_position if m.cam else Vector3.UP * 100.0
+	var far_k := maxf(1.0, m.cam.zoom * 0.42) if m.cam else 1.0
 	for key in _trails.keys():
 		var tr: Dictionary = _trails[key]
 		if not bool(tr["near"]) and (_frame + key.hash()) % FAR_REDRAW != 0:
@@ -301,7 +310,8 @@ func _draw_trails() -> void:
 			continue
 		var comet: bool = tr["comet"]
 		var diver_w := 0.75 if bool(tr["near"]) else 0.45
-		var width := COMET_R * 1.5 if comet else diver_w
+		# (it stays a read from the wide view, your squad's most of all: a thin line at 400 m is nothing)
+		var width := (COMET_R * 1.5 if comet else diver_w) * (far_k if bool(tr["near"]) else sqrt(far_k))
 		var base: Color = tr["col"]
 		im.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 		for i in pts.size():

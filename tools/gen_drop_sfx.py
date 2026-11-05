@@ -157,7 +157,8 @@ def land():
             if at + i < len(grit):
                 grit[at + i] += v * k
     dust = env(biquad(noise(N(s)), 'bp', 900, 0.6), lambda u: min(1.0, u / 0.06) * (1 - u) ** 3)
-    return mix([v * 0.95 for v in thud], [v * 0.8 for v in knock], [v * 0.45 for v in clap], [v * 0.26 for v in grit], [v * 0.08 for v in dust])
+    x = mix([v * 0.95 for v in thud], [v * 0.8 for v in knock], [v * 0.45 for v in clap], [v * 0.26 for v in grit], [v * 0.08 for v in dust])
+    return [math.tanh(v * 2.2) for v in x]        # squeezed: more body under the same peak
 
 
 def write(path, x, sr):

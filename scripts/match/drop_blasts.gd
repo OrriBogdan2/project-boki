@@ -6,7 +6,7 @@ extends MultiMeshInstance3D
 const SIZE := 14                   # at most this many at once: the oldest gives way
 const SNAP_R := 6.0                # m
 const SNAP_S := 0.42               # s
-const LAND_R := 9.5                # m
+const LAND_R := 8.0                # m
 const LAND_S := 0.85               # s
 
 static var HIDDEN := Transform3D(Basis().scaled(Vector3.ZERO), Vector3(0, -500, 0))

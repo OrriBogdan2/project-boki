@@ -6,10 +6,10 @@ extends Node
 
 static var BUILD_S: float = DropData.rules["look"]["wind_build_s"]
 const SILENT_DB := -44.0
-const LOW_DB := Vector2(-30.0, -13.0)      # the body: a breath .. full
-const HIGH_DB := Vector2(-40.0, -15.0)     # the edge: a breath .. a full dive
-const GLIDE_LOW_DB := -27.0                # under the open glider: a breeze
-const GLIDE_HIGH_DB := -38.0
+const LOW_DB := Vector2(-26.0, 0.0)      # the body: a breath .. full
+const HIGH_DB := Vector2(-36.0, -1.0)     # the edge: a breath .. a full dive
+const GLIDE_LOW_DB := -20.0                # under the open glider: a breeze
+const GLIDE_HIGH_DB := -32.0
 const RATE := 5.0                          # 1/s, the fade toward the wanted level
 const CATCH_RATE := 22.0                   # 1/s, the fade at the snap: it has to feel cut
 

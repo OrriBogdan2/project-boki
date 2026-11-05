@@ -34,7 +34,7 @@ func _init(m: Match) -> void:
 		var r := rng.randf_range(R_MIN, R_MAX)
 		var at := mid + Vector3(cos(a) * d, y, sin(a) * d)
 		mm.set_instance_transform(i, Transform3D(Basis().scaled(Vector3.ONE * r), at))
-		mm.set_instance_custom_data(i, Color(rng.randf(), rng.randf_range(0.5, 0.92), 0.0, 0.0))
+		mm.set_instance_custom_data(i, Color(rng.randf(), rng.randf_range(0.35, 0.75), 0.0, 0.0))
 	multimesh = mm
 	var mat := ShaderMaterial.new()
 	mat.shader = load("res://shaders/drop_puff.gdshader")
