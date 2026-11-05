@@ -2839,7 +2839,7 @@ func _pet_kin(k: Dictionary) -> void:
 		pet_done[rec["uid"]] = int(Save.d["matches"])
 		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
 		Save.save_game()
-		_say(k, KinSpeak.say(rec, "love") if Care.speech(rec) < 3 else ["Hehe!", "More!", "That's the spot.", "♥"][randi() % 4], 1.6)
+		_say(k, BokiLines.say(rec, "petted"))
 
 ## Fetch: you toss a ball toward the cursor, the kin runs it down and brings it back.
 func _play_with_kin(k: Dictionary) -> void:
@@ -2907,7 +2907,12 @@ func _fetch_step(k: Dictionary, d: float) -> void:
 		k["t"] = randf_range(1.5, 3.0)
 
 ## A speech bubble over a kin's head.
-func _say(k: Dictionary, text: String, secs := 4.0, direct := true) -> void:
+## secs: how long it stays up (0: the usual BokiLines.bubble_s); an empty line says nothing.
+func _say(k: Dictionary, text: String, secs := 0.0, direct := true) -> void:
+	if text == "":
+		return
+	if secs <= 0.0:
+		secs = BokiLines.bubble_s()
 	if not direct:
 		# chatter waits its turn: nobody else talking nearby, and a breath since the last line
 		if talk_cd > 0.0 or _talking_near(k, 7.0):
@@ -3195,7 +3200,7 @@ func _open_chat(rec: Dictionary) -> void:
 		k["hold_t"] = 9999.0
 		_face(k["pos"])
 		if chat_log.size() == 1:
-			_say(k, _greeting(rec), 5.0)
+			_say(k, _greeting(rec))
 	var bar := UI.card(Color(0.06, 0.07, 0.1, 0.92), 12, 14)
 	bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
@@ -3233,14 +3238,12 @@ func _close_chat() -> void:
 		if not k.is_empty(): k["hold_t"] = 0.6
 	chat_open = false
 
+## What it says when you walk up or start talking: cold if it doesn't trust you, else what it wants.
 func _greeting(rec: Dictionary) -> String:
-	var t := float(rec["trust"])
-	if Care.speech(rec) < 3:
-		var w := Care.want(rec)
-		return KinSpeak.say(rec, "sad" if t < 30.0 else ("question" if w != "" else "happy"), "cold" if t < 30.0 else (w if w != "" else "hello"))
-	if t > 70.0: return "Hi! I was hoping you'd come say hi."
-	if t < 30.0: return "...oh. It's you."
-	return "Hey. What's up?"
+	var w := Care.want(rec)
+	if float(rec["trust"]) < 30.0:
+		return BokiLines.say(rec, "greet_cold")
+	return BokiLines.say(rec, "want_" + w if w != "" else "greet")
 
 ## Keeps the last few lines of the conversation in the bar.
 func _chat_bubble(_role: String, _text: String) -> void:
@@ -4141,23 +4144,23 @@ func _care_tick(d: float) -> void:
 func _update_bubbles(d: float) -> void:
 	var now := Time.get_ticks_msec() / 1000.0
 	KinWants.update(self, d, now)
+	FarmChatter.tick(self, d)
 	KinIndoors.badge(self, _house_door(), KinIndoors.names(kins), ppos)
 	for k in kins:
 		var rec: Dictionary = k["rec"]
-		var w := Care.want(rec) if visit.is_empty() else ""
 		# dusty kin shed a little dust as they go
 		if visit.is_empty() and Care.need(rec, "clean") < 22.0 and randf() < d * 0.4:
 			fx.dust(k["pos"], 3)
 		# saying hello when you walk up to it
 		k["hi_cd"] = float(k.get("hi_cd", 0.0)) - d
-		# the big moment of its last expedition: it brings it up when you're close (KinSpeak.recall_line)
+		# the big moment of its last expedition: it brings it up when you're close
 		if rec.has("recall") and visit.is_empty() and panel_open == "" and not chat_open and not k.get("busy", false) \
 				and float(k.get("nap_t", 0.0)) <= 0.0 and Vector2(ppos.x - k["pos"].x, ppos.z - k["pos"].z).length() < 3.2:
-			var rl := KinSpeak.recall_line(rec)
+			var rl := BokiLines.say(rec, "back_" + String(rec["recall"].get("kind", "")))
 			rec.erase("recall")
 			k["hi_cd"] = 25.0
 			if rl != "":
-				_say(k, rl, 7.0)
+				_say(k, rl)
 				_emote(k, "♥" if float(rec["trust"]) > 55.0 else "!")
 				Sfx.play("kin_happy", k["pos"], -8.0, 0.15, Unique.voice(rec))
 				Save.save_game()
@@ -4165,11 +4168,7 @@ func _update_bubbles(d: float) -> void:
 			if Vector2(ppos.x - k["pos"].x, ppos.z - k["pos"].z).length() < 2.0:
 				k["hi_cd"] = randf_range(18.0, 30.0)
 				if randf() < 0.5 and float(k.get("nap_t", 0.0)) <= 0.0:
-					var trust := float(rec["trust"])
-					if Care.speech(rec) < 3:
-						_say(k, KinSpeak.say(rec, "sad" if trust < 30.0 else ("question" if w != "" else "happy"), w if w != "" else ("cold" if trust < 30.0 else "")), 2.8, false)
-					else:
-						_say(k, _greeting(rec), 2.8, false)
+					_say(k, _greeting(rec), 0.0, false)
 
 ## Gentle routines driven by how it's feeling. Returns true if it chose where to go.
 func _care_goal(k: Dictionary) -> bool:
@@ -4305,11 +4304,11 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
 	var nm: String = rec["name"]
 	if res["hate"]:
-		_say(k, KinSpeak.say(rec, "angry", "mean") if Care.speech(rec) < 3 else "Ugh. No. Not that.", 3.0)
+		_say(k, BokiLines.say(rec, "fed_no"))
 		if res["new"]: _toast("You found out %s won't eat %s" % [nm, Care.food_name(f)])
 		return
 	if res["full"] and not res["ok"]:
-		_say(k, KinSpeak.say(rec, "content", "full") if Care.speech(rec) < 3 else "I'm full, thanks!", 3.0)
+		_say(k, BokiLines.say(rec, "full"))
 		return
 	if Data.CROPS.has(f):
 		for af in Evo.AFF:
@@ -4319,12 +4318,12 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		_emote(k, "♥")
 		fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 16, 2.2)
 		Sfx.play("kin_happy", null, -2.0, 0.1)
-		_say(k, KinSpeak.say(rec, "love", "love") if Care.speech(rec) < 3 else "My favourite! Thank you!", 3.0)
+		_say(k, BokiLines.say(rec, "fed_fav"))
 		if res["new"]: _toast("%s loves %s!" % [nm, Care.food_name(f)])
 	else:
 		_emote(k, "♪")
 		Sfx.play("kin_happy", null, -8.0)
-		_say(k, KinSpeak.say(rec, "happy") if Care.speech(rec) < 3 else "Mm, thanks.", 2.4)
+		_say(k, BokiLines.say(rec, "fed"))
 	if res.get("hungry", false):
 		Save.remember(rec, "fed", "was fed when it was hungry", 2.0)
 	elif int(rec.get("fed_m", -1)) != int(Save.d["matches"]):
@@ -4353,7 +4352,7 @@ func _care_brush(rec: Dictionary) -> void:
 		Care.change(rec, "joy", 18.0 if loves else 6.0)
 		k["joy_t"] = 0.8
 		_emote(k, "♥" if loves else "★")
-		_say(k, KinSpeak.say(rec, "love" if loves else "content") if Care.speech(rec) < 3 else ("Ooh, that's lovely." if loves else "Thanks, that's better."), 2.6)
+		_say(k, BokiLines.say(rec, "brushed"))
 		if loves and Care.discover(rec, "play"): _toast("%s loves being brushed" % rec["name"])
 		if clean_before < 30.0: Save.remember(rec, "brushed", "got brushed clean when it was a mess", 1.5)
 		Save.save_game())
@@ -4375,11 +4374,11 @@ func _finish_bath(k: Dictionary) -> void:
 	fx.burst(k["pos"] + Vector3(0, 0.6, 0), Color("8fd0ff"), 18, 3.0, 0.5)
 	if loves:
 		_emote(k, "♥")
-		_say(k, KinSpeak.say(rec, "excited", "love") if Care.speech(rec) < 3 else "Again! Again!", 2.8)
+		_say(k, BokiLines.say(rec, "bath_fav"))
 		if Care.discover(rec, "play"): _toast("%s loves baths" % rec["name"])
 	elif grumpy:
 		_emote(k, "!")
-		_say(k, (KinSpeak.babble(rec["species"], "angry") + " (shakes water everywhere)") if Care.speech(rec) < 3 else "Brr. I'm soaked.", 2.8)
+		_say(k, BokiLines.say(rec, "bath_grump"))
 	else:
 		_emote(k, "★")
 	k["t"] = 1.5
@@ -4396,7 +4395,7 @@ func _care_nap(rec: Dictionary) -> void:
 	else:
 		k["nap_t"] = 30.0
 		k["slept"] = 0.0
-	_say(k, KinSpeak.say(rec, "sleepy") if Care.speech(rec) < 3 else "Just a little nap...", 2.0)
+	_say(k, BokiLines.say(rec, "nap"))
 
 # ---- training: a timing game at the yard; three rounds, each a little faster
 func _start_drill(rec: Dictionary, stat: String) -> void:
@@ -4406,7 +4405,7 @@ func _start_drill(rec: Dictionary, stat: String) -> void:
 	if Care.need(rec, "energy") < 20.0 or Care.need(rec, "food") < 12.0:
 		_close_panel()
 		var why := "energy" if Care.need(rec, "energy") < 20.0 else "food"
-		_say(k, KinSpeak.say(rec, "sleepy" if why == "energy" else "sad", why), 3.0)
+		_say(k, BokiLines.say(rec, "want_" + why))
 		_toast("%s is too %s to train. %s first" % [rec["name"], "tired" if why == "energy" else "hungry", "Let it nap" if why == "energy" else "Feed it"])
 		return
 	if int(rec["stats"][stat]) >= Care.stat_cap(rec):
@@ -4555,7 +4554,7 @@ func _finish_training() -> void:
 		Save.remember(rec, "trained", "trained %s with you at the yard" % String(Care.STATS[stat]["name"]).to_lower(), 1.0)
 	Save.save_game()
 	_toast("+%d %s  (%d of %d)" % [gained, Care.STATS[stat]["name"], int(rec["stats"][stat]), Care.stat_cap(rec)] if gained > 0 else "No gain this time. Try again after a rest")
-	_say(k, KinSpeak.say(rec, "excited" if gained >= 6 else ("happy" if gained > 0 else "sad")) if Care.speech(rec) < 3 else ("I'm getting stronger!" if gained > 0 else "Again. I'll get it."), 2.6)
+	_say(k, BokiLines.say(rec, "trained" if gained > 0 else "train_miss"))
 	k["busy"] = false
 	k["t"] = 1.5
 	train = {}
@@ -5048,7 +5047,7 @@ func _name_baby(baby: Dictionary) -> void:
 		if not ke.is_empty():
 			ke["pos"] = spot
 			(ke["node"] as Node3D).position = ke["pos"]
-			_say(ke, KinSpeak.say(baby, "excited", "hello"), 3.0), 220))
+			_say(ke, BokiLines.say(baby, "hatched")), 220))
 
 # ---- what it wears
 func _open_wear(rec: Dictionary) -> void:

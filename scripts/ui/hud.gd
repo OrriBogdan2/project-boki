@@ -52,6 +52,7 @@ func setup(match_node: Match) -> void:
 	cursor.z_index = 100
 	add_child(cursor)
 	cursor.draw.connect(_draw_pointer)
+	RankClick.attach(self)      # the gold + on a rankable slot takes a click
 	await _build_minimap()
 	# the painted map (smooth coasts, shading, paths) replaces the tile texture once it's baked
 	c.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
@@ -358,18 +359,7 @@ func _draw_all() -> void:
 
 func _draw_world_labels() -> void:
 	var cam := m.cam
-	# deathboxes and revive beacons
-	for b in m.boxes:
-		if cam.is_position_behind(b["pos"]):
-			continue
-		var o: Hunter = b["owner"]
-		var bp := cam.unproject_position(b["pos"] + Vector3(0, 1.9, 0))
-		var soul := Life.soul_here(m, b)
-		var ally: bool = m.player != null and o.team == m.player.team
-		if soul and ally and o != m.player:
-			_ctext(bp, "%s  ·  %ds" % [o.pname, int(ceil(float(b["soul_until"]) - m.time))], 13, Color("9ee2a0"), big)
-		elif not b["empty"] and m.player and m.player.flat_dist(b["pos"]) < 14.0:
-			_ctext(bp, "%s's box" % o.pname if o != m.player else "Your box", 12, Life.box_color(b), big)
+	ReviveHud.world_labels(self)       # deathboxes and revive beacons
 	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
 	if m.tut and m.tut.target != Vector3.INF and m.player and not m.player.out:
@@ -377,15 +367,6 @@ func _draw_world_labels() -> void:
 	_draw_exit_labels()
 	_draw_lair_labels()
 	_draw_truce_marks()
-	for bc in m.beacons:
-		if bc["used"] or cam.is_position_behind(bc["pos"]):
-			continue
-		if m.player and m.player.flat_dist(bc["pos"]) > 26.0 and float(bc["prog"]) <= 0.0:
-			continue
-		var bp := cam.unproject_position(bc["pos"] + Vector3(0, 3.2, 0))
-		_ctext(bp, "Revive beacon" + ("  ·  contested" if bc["contested"] else ""), 12, Color("8fffc0"), big)
-		if float(bc["prog"]) > 0.0:
-			_bar(Rect2(bp + Vector2(-40, 6), Vector2(80, 5)), float(bc["prog"]), Color("8fffc0"))
 	_draw_wisp_rings()
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not h.model.visible or h.unseen:
@@ -733,6 +714,7 @@ func _draw_minimap(sz: Vector2) -> void:
 			_draw_exit_icon(pv, x, 1.0 if not riding else 0.8)
 	if m.lairs:
 		_draw_map_lairs(inner, to_map, on_map, riding)
+	ReviveHud.minimap(self, inner, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
 		for cnd in m.spawn_plan.cands:
@@ -815,7 +797,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		if m.player == null or h.team != m.player.team:
 			continue
 		var mst := _mate_state(h) if h != m.player else ["ALIVE", INK, h.pos, ""]
-		if mst[2] == Vector3.INF or (h == m.player and (h.out or h.extracted)):
+		if mst[2] == Vector3.INF or h.out or (h == m.player and h.extracted):      # (a fallen mate: their box)
 			continue
 		var pv: Vector2 = to_map.call(mst[2])
 		var col: Color = INK if h == m.player else mst[1]
@@ -1705,7 +1687,7 @@ func _status_row(at: Vector2, e: Ent) -> void:
 		x += 16.0
 
 ## Teammates you can't see on screen get an arrow at the screen edge (with distance, coloured by
-## how they're doing); a dead teammate's deathbox gets a marker while their soul can still be saved.
+## how they're doing; a dead teammate's deathbox in their squad colour while their soul can still be saved).
 func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 	var cam := m.cam
 	var inner := Rect2(Vector2(70, 90), sz - Vector2(140, 220))
@@ -1722,11 +1704,9 @@ func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 		var behind := cam.is_position_behind(wp)
 		var sp := cam.unproject_position(wp)
 		if not behind and inner.has_point(sp):
-			if String(st[0]) == "DEATHBOX":
-				# the overhead label doesn't exist for the dead: mark the box
-				_ctext(sp + Vector2(0, -6), "%s  ·  %s" % [h.pname.substr(0, 12), st[3]], 14, col, big)
-				c.draw_circle(sp + Vector2(0, 8), 5.0, col)
-			continue
+			continue          # on screen: their own label (or their box's, ReviveHud) says it
+		if String(st[0]) == "DEATHBOX":
+			col = m.mate_col(h)
 		var ctr := sz * 0.5
 		var d := (sp - ctr) * (-1.0 if behind else 1.0)
 		if d.length() < 1.0: continue
@@ -1974,7 +1954,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"revive": prog = it["ent"].revive
 			"finish": prog = p.finish_t / Life.R["stomp_commit"]
 			"stomping": prog = float(p.stomp.get("t", 0.0)) / Life.R["stomp_time"]
-			"boxrev": prog = p.box_t / Life.R["box_revive_time"]
+			"boxrev": prog = p.box_t / BoxRevive.time_for(it["box"]["owner"])
 			"loot": prog = p.box_t / Life.R["loot_time"]
 			"catch": prog = CaptureHud.progress(p)
 			"chest": prog = it["chest"]["prog"]
@@ -2603,6 +2583,7 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 ## worth having. Walking away, going down or emptying the box closes it.
 var loot_open = null          # the box Dictionary, or null
 var loot_panel: PanelContainer
+var loot_hold: PanelContainer   # LootHold: your backpack beside the box while a clicked thing won't fit
 var loot_sig := ""
 
 func loot_is(b: Dictionary) -> bool:
@@ -2615,7 +2596,7 @@ var ui_extra: Array = []      # other panels that own the mouse (the practice ar
 
 ## The cursor is over one of the item windows (deathbox loot, swap, backpack) or a panel in ui_extra.
 func mouse_on_panel() -> bool:
-	for pn in [loot_panel, swap_panel, pack_panel] + ui_extra:
+	for pn in [loot_panel, loot_hold, swap_panel, pack_panel] + ui_extra:
 		if pn != null and is_instance_valid(pn) and pn.visible and not pn.is_queued_for_deletion() and pn.get_global_rect().grow(6.0).has_point(pn.get_global_mouse_position()):
 			return true
 	return false
@@ -2655,6 +2636,7 @@ func open_loot(b: Dictionary) -> void:
 
 func close_loot() -> void:
 	loot_open = null
+	_close_hold()
 	if loot_panel and is_instance_valid(loot_panel):
 		loot_panel.queue_free()
 	loot_panel = null
@@ -2673,7 +2655,36 @@ func _loot_tick(_delta: float) -> void:
 	if sig != loot_sig:
 		_build_loot()
 
+## A clicked box thing that doesn't fit: nothing moves; your backpack opens beside the box with it held.
+## (Public so the screenshot tool can open it.)
+func open_hold(row: Dictionary) -> void:
+	_close_hold()
+	if not LootFull.holdable(row):
+		return
+	var b: Dictionary = loot_open
+	var hi := int(row["i"])
+	var swap := func(mi: int): if LootFull.swap_held(m, m.player, b, hi, mi): _hold_done()
+	var drop := func(mi: int): if LootFull.drop_for_held(m, m.player, b, hi, mi): _hold_done()
+	loot_hold = LootHold.build(m.player, (b["pack"] as Array)[hi], swap, drop, _close_hold)
+	add_child(loot_hold)
+	UI.pop_in(loot_hold)
+	await get_tree().process_frame
+	if is_instance_valid(loot_hold) and loot_panel:
+		loot_hold.position = Vector2(maxf(8.0, loot_panel.position.x - loot_hold.size.x - 12.0), loot_panel.position.y)
+
+func _close_hold() -> void:
+	if loot_hold and is_instance_valid(loot_hold):
+		loot_hold.queue_free()
+	loot_hold = null
+
+func _hold_done() -> void:
+	if (loot_open as Dictionary).get("empty", false):
+		close_loot()
+	else:
+		_build_loot()
+
 func _build_loot() -> void:
+	_close_hold()
 	var p: Hunter = m.player
 	var b: Dictionary = loot_open
 	if loot_panel and is_instance_valid(loot_panel):
@@ -2721,6 +2732,7 @@ func _build_loot() -> void:
 		rs.bg_color = Color(it["col"], 0.12 if it["upgrade"] else 0.06)
 		rs.set_corner_radius_all(9)
 		rs.border_color = Color(it["col"], 0.55 if it["upgrade"] else 0.2); rs.border_width_left = 3
+		var fit := LootFull.fits(p, it, b)
 		rs.content_margin_left = 8; rs.content_margin_right = 8; rs.content_margin_top = 5; rs.content_margin_bottom = 5
 		rp.add_theme_stylebox_override("panel", rs)
 		rp.add_child(row)
@@ -2748,19 +2760,21 @@ func _build_loot() -> void:
 		var itc: Dictionary = it
 		var verb := "Take"
 		if it["key"] == "gear": verb = "Swap"
-		elif it["key"] == "pack" and it.get("full", false): verb = "Swap" if it["upgrade"] else "Full"
+		elif not fit: verb = "Full"
+		elif it["key"] == "pack" and it.get("full", false): verb = "Swap"
 		var take_it := func():
-			if loot_open != null and m.player:
-				Life.take_item(m, m.player, loot_open, itc)
-				if (loot_open as Dictionary).get("empty", false): close_loot()
-				else: _build_loot()
+			if loot_open == null or not m.player:
+				return
+			if not LootFull.click(m, m.player, loot_open, itc):
+				open_hold(itc)
+			elif (loot_open as Dictionary).get("empty", false): close_loot()
+			else: _build_loot()
 		var take := UI.button(verb, take_it, 76)
-		if verb != "Full":
-			_row_click(rp, take_it)
+		_row_click(rp, take_it)
 		take.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		if verb == "Full":
-			take.disabled = true
-			take.tooltip_text = "Your backpack is full of better things"
+		if not fit:
+			LootHold.mark_full(rp)
+			take.tooltip_text = "No room: swap it with something of yours"
 		elif it["key"] == "pack" and it.get("full", false):
 			take.tooltip_text = "Swaps out the least valuable thing in your backpack"
 		row.add_child(take)
@@ -2768,9 +2782,9 @@ func _build_loot() -> void:
 	var foot := UI.hbox(8); v.add_child(foot)
 	var sm := UI.primary("Smart loot  (%s)" % Settings.key_cap("interact"), func():
 		if loot_open != null and m.player:
-			var got := Life.smart_loot(m, m.player, loot_open)
-			toast_small(("Smart looted %d thing%s" % [got, "" if got == 1 else "s"]) if got > 0 else "Nothing here beats what you've got", Color("ffd36a"))
-			close_loot(), 200)
+			var got := LootFull.smart(m, m.player, loot_open)
+			if got > 0 or (loot_open as Dictionary).get("empty", false):
+				close_loot(), 200)
 	foot.add_child(sm)
 	var hint := UI.label("Best first: hands, then your backpack", 12, MUTED)
 	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -2833,39 +2847,7 @@ func _item_panel(title: String, col: Color, width: float) -> Array:
 
 ## One item as a row: icon, name, what it does, its worth, and buttons [[text, callable, primary]].
 func _item_row(it: Dictionary, buttons: Array, note := "") -> Control:
-	var rp := PanelContainer.new()
-	var col := Loot.col_of(it)
-	var rs := StyleBoxFlat.new()
-	rs.bg_color = Color(col, 0.09)
-	rs.set_corner_radius_all(9)
-	rs.border_color = Color(Loot.col_of(it), 0.6); rs.border_width_left = 3
-	rs.content_margin_left = 8; rs.content_margin_right = 8; rs.content_margin_top = 5; rs.content_margin_bottom = 5
-	rp.add_theme_stylebox_override("panel", rs)
-	var row := UI.hbox(8); rp.add_child(row)
-	row.add_child(Icons.Glyph.new(Loot.icon_of(it), Loot.col_of(it), 24.0))
-	var cv := UI.vbox(0); cv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var nm := UI.label(Loot.name_of(it) + (("  ·  " + note) if note != "" else ""), 15, col, UI.semi)
-	nm.autowrap_mode = TextServer.AUTOWRAP_OFF
-	nm.clip_text = true
-	nm.custom_minimum_size.x = 200
-	cv.add_child(nm)
-	var sub := UI.label(Loot.sub_of(it), 12, MUTED)
-	sub.autowrap_mode = TextServer.AUTOWRAP_OFF
-	sub.clip_text = true
-	sub.custom_minimum_size.x = 200
-	sub.tooltip_text = Loot.sub_of(it)
-	sub.mouse_filter = Control.MOUSE_FILTER_PASS
-	cv.add_child(sub)
-	row.add_child(cv)
-	row.add_child(Icons.Glyph.new("gem", Color(GOLD, 0.8), 12.0))
-	var vt := UI.label("%d" % Loot.value(it), 13, GOLD, UI.big)
-	vt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(vt)
-	for bt in buttons:
-		var b: Button = UI.primary(String(bt[0]), bt[1], 76) if bt.size() > 2 and bt[2] else UI.button(String(bt[0]), bt[1], 70)
-		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		row.add_child(b)
-	return rp
+	return LootHold.item_row(it, buttons, note)
 
 ## A scrolling list inside an item window: [scroll, rows]. _fit_panel sizes it.
 func _scroll_rows(v: VBoxContainer) -> Array:
@@ -2901,7 +2883,7 @@ func open_swap(wp: Dictionary) -> void:
 	swap_wp = wp
 	_build_swap()
 	if swap_panel: UI.pop_in(swap_panel)
-	Sfx.play("whoosh", null, -10.0, 0.05, 1.1)
+	Sfx.play("lock_rattle", null, -4.0)
 
 func close_swap() -> void:
 	swap_wp = null
@@ -2921,7 +2903,9 @@ func _build_swap() -> void:
 	var cl := UI.button("✕", func(): close_swap(), 36); cl.flat = true
 	head.add_child(cl)
 	v.add_child(UI.label("Picking up", 12, MUTED, UI.caps))
-	v.add_child(_item_row(incoming, []))
+	var incoming_row := _item_row(incoming, [])
+	LootHold.mark_full(incoming_row)
+	v.add_child(incoming_row)
 	v.add_child(UI.label("Drop one to make room", 12, MUTED, UI.caps))
 	var low := Pack.lowest(p)
 	var sl := _scroll_rows(v)
@@ -3068,16 +3052,7 @@ func _draw_wisp_rings() -> void:
 			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
 			_rounded(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 14, sz.y * 0.5 + 70), Vector2(w + 28, 28)), Color(0.12, 0.02, 0.02, 0.85), 8, Color(1, 0.3, 0.2, 0.7), 2)
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.5 + 89), s, 15, Color("ff8a7a"))
-	# deathbox revives in progress
-	for b in m.boxes:
-		if m.time - float(b.get("rev_at", -9.0)) > 0.15 or m.cam.is_position_behind(b["pos"]):
-			continue
-		var by = b.get("rev_by")
-		_ground_ring(b["pos"], 1.6, Color(GOOD, 0.3), 2.0)
-		_ground_ring(b["pos"], 1.6, Color(GOOD, 0.95), 5.0, float(b.get("rev_prog", 0.0)))
-		var bp := m.cam.unproject_position(b["pos"] + Vector3(0, 2.0, 0))
-		var o3: Hunter = b["owner"]
-		_ctext(bp, "%s bringing back %s  %d%%" % [(by as Hunter).pname if is_instance_valid(by) else "Someone", o3.pname, int(float(b.get("rev_prog", 0.0)) * 100.0)], 12, GOOD, big)
+	ReviveHud.revive_rings(self)       # deathbox revives in progress
 
 ## A soft coloured glow round the screen edges (danger to you).
 func _edge_pulse(sz: Vector2, col: Color, a: float) -> void:
