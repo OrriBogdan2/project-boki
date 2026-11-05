@@ -1,7 +1,8 @@
 extends RefCounted
-## --clip-live-claire-check: Claire's clips through the real match code, as --clip-live-check does for Kael: a Match, the kit's own keys and the render
-## path. She wears her clips with one weapon drawn; the darts, the skate (start, stride, stop) and a skating beam play their clips, and her aim stays
-## on the cursor while she fires on the skate (item 109); the spear's hold and push and the wall play theirs; a knock-out plays the death clip on screen.
+## --clip-live-claire-check: Claire's clips through the real match code, as --clip-live-check does for Kael: a Match,
+## the kit's own keys and the render path. She wears her clips with one weapon drawn; the darts, the skate (start,
+## stride, stop) and a skating beam play their clips, and her aim stays on the cursor while she fires on the skate
+## (item 109); the spear's hold and push play theirs; a knock-out plays the death clip on screen.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -66,7 +67,9 @@ func run(main: Node) -> void:
 	_run(m, P, 30, seen)
 	# the skate, then firing on it: the body stays on the cursor while she runs across it
 	P.inp["move"] = Vector2(1, 0)
+	P.dashes = 1.0
 	P.inp["dash"] = true
+	P.inp["dash_down"] = true
 	_run(m, P, 30, seen)
 	ok(seen.has("skate_go") or seen.has("skate"), "the skate plays its clips (%s)" % str(seen.keys()))
 	P.inp["fire"] = true
@@ -84,9 +87,11 @@ func run(main: Node) -> void:
 	# RMB: held, then pushed
 	A.aim_at(P, T.pos)
 	P.inp["sec"] = true
+	P.inp["sec_hold"] = true
 	_run(m, P, 30, seen)
 	ok(seen.has("spear_aim"), "the spear's hold plays its clip")
 	P.inp["sec"] = false
+	P.inp["sec_hold"] = false
 	_run(m, P, 45, seen)
 	ok(seen.has("spear"), "the release plays the push")
 	# a knock-out
@@ -99,7 +104,8 @@ func run(main: Node) -> void:
 		_frame(m, [P])
 		dead_seen = dead_seen or _clips(P).cur == "death"
 		was_visible = was_visible or P.visible
-	ok(dead_seen and was_visible, "a knock-out stays on screen and plays the death clip (clip %s, visible %s)" % [dead_seen, was_visible])
+	ok(dead_seen and was_visible, "a knock-out plays the death clip on screen (clip %s, visible %s)"
+			% [dead_seen, was_visible])
 	print("LIVE kit moves seen: ", ids.keys(), " clips: ")
 	print("CLIP_LIVE_CLAIRE_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
