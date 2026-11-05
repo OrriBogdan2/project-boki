@@ -6,11 +6,11 @@ from meshkit import (Piece, catmull, norm, smooth, sweep, sd_ell, sd_cap, smin, 
 # ---- the rig (kael_rig.json with archetype body.chest 0.9), Blender frame
 SH = 0.2608 * 0.9
 ARM = {"R": 1.0, "L": -1.0}
-HAND_Z, ELBOW_Z, SHOULDER_Z = 0.706, 0.941, 1.151
-ANKLE_Z = 0.085
-NECK_Z = 1.2957
-HS = 0.93                                     # head size
-C = np.array([0.0, 0.012, 1.405])             # the head's centre
+HAND_Z, ELBOW_Z, SHOULDER_Z = 0.8228, 1.0578, 1.2678
+ANKLE_Z = 0.10
+NECK_Z = 1.3729
+HS = 0.76                                     # head size: small on a tall hero (the sheet is 8 heads)
+C = np.array([0.0, 0.012, 1.478])             # the head's centre
 EYE = np.array([0.036, 0.0625, 0.008])        # head-local; x mirrored
 EYE_R = 0.0215
 
@@ -173,57 +173,64 @@ def mask():
     return Piece("mask", "cloth-kael", hl(verts), grid_faces(rows + 1, cols)).rigid("head")
 
 
+COWL_BURNS = [(-0.07, 0.15, C[2] - 0.11, 0.021), (0.085, 0.135, C[2] - 0.13, 0.017), (0.13, 0.13, C[2] - 0.21, 0.024), (-0.15, 0.13, C[2] - 0.2, 0.018),
+              (0.015, 0.17, C[2] - 0.2, 0.014)]
+
+
 def cowl():
-    """The scarf's cowl: rolled folds round the neck, then a torn drape over the chest and shoulders."""
-    cols = 22
-    # (z, half width, half depth, y): the profile from under the chin to the drape's hem
-    prof = [(1.318, 0.074, 0.08, 0.012), (1.296, 0.084, 0.088, 0.012), (1.276, 0.108, 0.108, 0.010),
-            (1.262, 0.128, 0.125, 0.008), (1.247, 0.128, 0.122, 0.010), (1.232, 0.142, 0.132, 0.014),
-            (1.213, 0.170, 0.146, 0.012), (1.192, 0.196, 0.154, 0.010), (1.168, 0.205, 0.152, 0.006)]
+    """The ENORMOUS scarf: a tall funnel from under the eyes, heavy rolled folds, a torn drape over the shoulders and chest."""
+    cols = 26
+    z = C[2]
+    # (z, half width, half depth, y): the funnel's top edge stands off the face, then it widens onto the shoulders
+    prof = [(z - 0.022, 0.092, 0.100, 0.018), (z - 0.046, 0.106, 0.114, 0.018), (z - 0.078, 0.122, 0.128, 0.016),
+            (z - 0.105, 0.134, 0.138, 0.014), (z - 0.128, 0.142, 0.142, 0.012), (z - 0.152, 0.168, 0.152, 0.012),
+            (z - 0.185, 0.215, 0.172, 0.012), (z - 0.225, 0.262, 0.186, 0.010), (z - 0.262, 0.286, 0.190, 0.008)]
     rows = len(prof)
     verts, w_head = [], []
-    rng = np.random.RandomState(7)
-    jag = rng.uniform(-1, 1, cols)
-    for i, (z, hw, hd, y) in enumerate(prof):
+    rng = np.random.RandomState(5)
+    jag = rng.uniform(-1, 1, cols) + 0.7 * np.sign(rng.uniform(-1, 1, cols))
+    for i, (zz, hw, hd, y) in enumerate(prof):
         k = i / (rows - 1)
         for j in range(cols):
             a = j / cols * 2 * np.pi
             sx, cy = np.sin(a), np.cos(a)
-            # front sags, back rides up; folds run round, broken by big soft lobes
-            sag = (0.5 * (cy + 1)) ** 1.5 * 0.055 * k ** 1.4 - (0.5 * (1 - cy)) * 0.03 * k
-            lobes = (0.008 * np.sin(a * 3 + 0.8 + k * 2.2) + 0.006 * np.sin(a * 5 + 2.1)) * smooth(0.1, 0.5, k)
-            hem = (0.016 * jag[j]) * (k ** 6)
-            verts.append([sx * (hw + lobes), y + cy * (hd + lobes), z - sag + hem])
-            w_head.append(1.0 - smooth(0.15, 0.62, k))
+            sag = (0.5 * (cy + 1)) ** 1.5 * 0.06 * k ** 1.4 - (0.5 * (1 - cy)) * 0.022 * k
+            lobes = (0.010 * np.sin(a * 3 + 0.8 + k * 2.2) + 0.008 * np.sin(a * 5 + 2.1 - k)) * smooth(0.05, 0.5, k)
+            hem = 0.024 * jag[j] * k ** 8
+            verts.append([sx * (hw + lobes), y + cy * (hd + lobes), zz - sag + hem])
+            w_head.append(1.0 - smooth(0.25, 0.7, k))
     verts = np.array(verts)
     w = np.array(w_head)
     return Piece("cowl", "cloth-kael", verts, grid_faces(rows, cols, True), weights={"head": w, "hips": 1 - w})
 
 
-def tail(bvh):
-    """The hanging end of the scarf on his left chest, torn, on a spring chain."""
-    rows, cols = 9, 5
-    top_z, bot_z = 1.19, 0.86
-    verts = []
-    jag = np.array([0.0, 0.05, -0.03, 0.06, -0.015])
-    for i in range(rows):
-        k = i / (rows - 1)
-        z = top_z + (bot_z - top_z) * k
-        for j in range(cols):
-            u = j / (cols - 1) - 0.5
-            cx = -0.082 + 0.012 * np.sin(k * 3.0)
-            wd = 0.105 + 0.03 * smooth(0.0, 0.6, k)
-            x = cx + u * wd + 0.004 * np.sin(k * 9 + j)
-            zz = z + (jag[j] * smooth(0.55, 1.0, k))
-            hit = bvh.ray_cast((x, 0.5, zz), (0, -1, 0))
-            yy = (hit[0].y if hit[0] is not None else 0.12) + 0.011 + 0.004 * np.sin(u * 8 + k * 2)
-            verts.append([x, yy, zz])
-    verts = np.array(verts)
-    faces = grid_faces(rows, cols)
-    # two moth-eaten holes
-    drop = {(rows - 3) * (cols - 1) + 1, (rows - 4) * (cols - 1) + 3}
-    faces = [f for n, f in enumerate(faces) if n not in drop]
-    return Piece("tail", "cloth-kael", verts, faces, room=0.25)
+def scarf_tail(side):
+    """One of the two very long tattered tails: a thin double-faced ribbon from the nape, streaming back and down. Its rest
+    shape leans back so the game's spring trails it behind him (his top-down signature); the end is torn into two tips."""
+    s = 1.0 if side == "R" else -1.0
+    z0 = C[2] - 0.2
+    pts = [(s * 0.075, -0.13, z0), (s * 0.10, -0.24, z0 - 0.14), (s * 0.115, -0.36, z0 - 0.36), (s * 0.135, -0.48, z0 - 0.60),
+           (s * 0.15, -0.60, z0 - 0.84), (s * 0.165, -0.72, z0 - 1.06)]
+    n = 16
+    path = catmull(pts, n)
+    k = np.linspace(0, 1, n)
+    wd = (0.058 + 0.052 * smooth(0.0, 0.25, k)) * (1 - 0.35 * smooth(0.8, 1.0, k))
+    wd = wd + 0.009 * np.sin(k * 23 + s) * smooth(0.45, 0.8, k)
+    sec = [(-1, 0.05), (-0.34, 0.09), (0.34, 0.09), (1, 0.05), (1, -0.05), (0.34, -0.09), (-0.34, -0.09), (-1, -0.05)]
+    p = sweep("stail" + side, "cloth-kael", path, sec, wd, side_hint=np.array([1.0, 0, 0]), room=0.0, depth=np.full(n, 0.07))
+    # the torn end: the last rings split round the ribbon's middle, a long tip and a short one
+    m = len(sec)
+    for i in range(n - 4, n):
+        q = (i - (n - 5)) / 4.0
+        for j, (a_, _) in enumerate(sec):
+            off = np.array([0, 0, 1.0]) * (0.05 * q if a_ > 0 else -0.03 * q)
+            pinch = 1 - 0.75 * q * (1 - abs(a_) * 0.2)
+            c = path[i]
+            v = p.v[i * m + j]
+            p.v[i * m + j] = c + (v - c) * pinch + off * s
+    p.t = np.repeat(k, m)
+    p.path = path
+    return p
 
 
 def collar():
@@ -393,43 +400,39 @@ def chain_along(name, path, step=0.033, uv=(0, 0, 1, 1), ln=0.040, wid=0.021, th
 
 
 def wrist_chain(uv):
-    """The chain wound round his right forearm and the bandaged wrist."""
+    """The rusted chain wound round the bandaged right wrist."""
     cx = SH
     pts = []
-    turns = 3.1
-    n = 90
+    turns = 2.4
+    n = 70
     for i in range(n):
         k = i / (n - 1)
         a = k * turns * 2 * np.pi + 0.6
-        z = 0.828 - 0.118 * k + 0.008 * np.sin(a * 2.3)
-        r = 0.058 - 0.012 * k + 0.003 * np.sin(a * 1.7)
+        z = HAND_Z + 0.075 - 0.075 * k + 0.008 * np.sin(a * 2.3)
+        r = 0.05 - 0.008 * k
         pts.append([cx + np.cos(a) * r * 1.06, np.sin(a) * r, z])
     p = chain_along("chain_wrap", pts, step=0.0345, uv=uv, ln=0.042, wid=0.023, th=0.0064)
     return p.rigid("forearm.R")
 
 
 def hanging_chain(uv):
-    """From the wrist down to the hook. Bones spring_hangwarchain_*: the game hangs it from the fist."""
-    top = np.array([SH + 0.046, 0.022, 0.70])
-    path = [top + [0, 0, -k * 0.54] for k in np.linspace(0, 1, 12)]
+    """From the wrist to the hook (spring_hangwarchain_*): the game hangs it from the fist."""
+    top = np.array([SH + 0.044, 0.02, HAND_Z - 0.0])
+    drop = 0.40
+    path = [top + [0, 0, -k * drop] for k in np.linspace(0, 1, 12)]
     p = chain_along("chain_hang", path, step=0.0395, uv=uv, ln=0.046, wid=0.026, th=0.0068)
-    ring_c = top + [0, 0, -0.562]
-    # the eye and the hook itself, a forged J
-    pts = catmull([ring_c + [0, 0, 0.0], ring_c + [0.0, 0.0, -0.05], ring_c + [0.0, 0.016, -0.115],
-                   ring_c + [0, 0.05, -0.15], ring_c + [0, 0.098, -0.13], ring_c + [0, 0.112, -0.082],
-                   ring_c + [0, 0.098, -0.05]], 10)
+    ring_c = top + [0, 0, -drop - 0.022]
+    pts = catmull([ring_c, ring_c + [0.0, 0.0, -0.05], ring_c + [0.0, 0.016, -0.115], ring_c + [0, 0.05, -0.15], ring_c + [0, 0.098, -0.13],
+                   ring_c + [0, 0.112, -0.082], ring_c + [0, 0.098, -0.05]], 10)
     wd = np.array([0.018, 0.018, 0.019, 0.021, 0.021, 0.02, 0.018, 0.015, 0.01, 0.0015])
     sec = [(-1, 0), (0, 0.55), (1, 0), (0, -0.55)]
-    # (flattened across the hook's plane, the art's forged blade section)
     hook = sweep("hook", "metal-hook", pts, sec, wd * 0.72, side_hint=np.array([1.0, 0, 0]), depth=wd * 1.05, uv_rect=uv)
-    hook.tipn = 4
-    bones = ["spring_hangwarchain_%d" % i for i in range(7)]
-    chain_pts = [top + [0, 0, -0.6 * i / 6.0] for i in range(7)]
+    chain_pts = [top + [0, 0, -(drop + 0.06) * i / 6.0] for i in range(7)]
     return p, hook, chain_pts
 
 
 def cuff_chain(uv):
-    top = np.array([-SH - 0.05, 0.0, 0.742])
+    top = np.array([-SH - 0.05, 0.0, HAND_Z + 0.03])
     path = [top + [0, 0, -k * 0.21] for k in np.linspace(0, 1, 6)]
     p = chain_along("chain_cuff", path, step=0.038, uv=uv, ln=0.044, wid=0.024, th=0.0062)
     return p, [top + [0, 0, -0.24 * i / 3.0] for i in range(4)]
@@ -458,53 +461,39 @@ def lock(name, pts, w0, rings=7, wide=False, peak=0.32, tip=0.0, hint=None, tile
 
 
 def mane():
+    """Long white hair swept straight back from the brow, falling down the back; a few strands loose by the face and blown tips."""
     locks = []
     add = lambda *a, **k: locks.append(lock(*a, **k))
     tile = lambda i: (i * 0.25) % 1.0
-    # the crown: swept up off a centre part, then back and out, tips flying past the silhouette
+    top, cz = C[2] + 0.095, C[2]
+    # the sweep: from the hairline over the crown and down behind the head
+    for i, x in enumerate((-0.062, -0.036, -0.012, 0.012, 0.036, 0.062)):
+        s = np.sign(x)
+        add("sweep%d" % i, [(x * .9, .082, top - .03 - abs(x) * .4), (x * 1.15, .05, top + .022 - abs(x) * .3), (x * 1.3, -.02, top + .03 - abs(x) * .4),
+                            (x * 1.5, -.09, top - .02), (x * 1.75, -.13, top - .12), (x * 1.9, -.145, top - .24)], .062, rings=7, wide=True, tile=tile(i), group=None)
     for s in (1.0, -1.0):
-        add("crown_a%d" % s, [(s * .012, .094, 1.515), (s * .05, .095, 1.552), (s * .105, .065, 1.558), (s * .160, .010, 1.535),
-                               (s * .212, -.02, 1.490)], .058, rings=7, wide=True, tile=tile(0), group=None)
-        add("crown_b%d" % s, [(s * .012, .070, 1.530), (s * .040, .050, 1.561), (s * .090, -.005, 1.568),
-                               (s * .150, -.070, 1.55), (s * .205, -.115, 1.525)], .060, rings=7, wide=True, tile=tile(1))
-        add("crown_c%d" % s, [(s * .010, .020, 1.545), (s * .022, -.030, 1.568), (s * .040, -.100, 1.566),
-                               (s * .066, -.165, 1.54), (s * .100, -.205, 1.555)], .056, rings=6, wide=True, tile=tile(2))
-        add("temple_a%d" % s, [(s * .070, .078, 1.505), (s * .118, .060, 1.500), (s * .150, .025, 1.455), (s * .168, -.005, 1.395),
-                               (s * .205, -.015, 1.350)], .050, rings=6, wide=True, tile=tile(3), group=None)
-        add("temple_b%d" % s, [(s * .085, .040, 1.530), (s * .145, .010, 1.530), (s * .195, -.030, 1.485), (s * .235, -.050, 1.445)],
-            .040, rings=5, tile=tile(1))
-        # the forelocks: thin strands down each side of the face, curling in over the mask
-        add("fore_a%d" % s, [(s * .010, .094, 1.505), (s * .040, .103, 1.482), (s * .070, .098, 1.430), (s * .079, .087, 1.365),
-                             (s * .060, .094, 1.300)], .019, rings=6, tile=tile(0))
-        add("fore_b%d" % s, [(s * .046, .094, 1.512), (s * .074, .093, 1.470), (s * .092, .075, 1.410), (s * .094, .060, 1.340)],
-            .022, rings=5, tile=tile(2))
-    add("part", [(0.0, .099, 1.525), (0.004, .107, 1.495), (-.003, .106, 1.465), (-.002, .104, 1.452)], .021, rings=5, tile=tile(1))
-    # the curtain: heavy side falls behind the shoulders, staggered, each tip flicking out
-    for s, g in ((1.0, "r"), (-1.0, "l")):
-        ks = [(.086, .030, -.02, 1.03, .058), (.100, -.012, .0, .90, .056), (.078, -.050, -.04, .95, .064)]
-        for i, (x, y, dx, low, w) in enumerate(ks):
-            mid = (1.40 + low) * 0.5
-            add("side%d_%s" % (i, g), [(s * x, y, 1.50), (s * (x + .055), y - .015, 1.42), (s * (x + .082 + dx), y - .045, 1.30),
-                                       (s * (x + .088 + dx), y - .085, mid), (s * (x + .070 + dx), y - .10, low + .08),
-                                       (s * (x + .096 + dx * 2), y - .09, low)], w, rings=8, wide=True, tile=tile(i + 1), group=g)
-    # the back: a broad wedge of hair, then long locks over it, the tips making the V the turnaround shows
-    for name, x, y, low, w, g in [("back_u0", -.03, -.075, 1.02, .20, "c"), ("back_u1", .03, -.075, 1.02, .20, "c"), ("back_c", 0.0, -.11, .84, .190, "c"), ("back_l", -.070, -.095, .92, .160, "l"),
-                                  ("back_r", .070, -.095, .90, .160, "r")]:
-        add(name, [(x * .5, y + .06, 1.56), (x * .9, y - .04, 1.47), (x * 1.3, y - .055, 1.30), (x * 1.5, y - .05, 1.10),
-                   (x * 1.4, y - .03, .96), (x * .9, y - .03, low)], w, rings=8, wide=True, peak=.45, tile=tile(0),
-            group=g, hint=np.array([0, -1.0, 0.1]))
-    over = [(-.11, -.02, 1.53, .90), (-.065, -.07, 1.56, .83), (-.03, -.09, 1.57, .78), (.025, -.095, 1.58, .76),
-            (.06, -.08, 1.56, .84), (.105, -.03, 1.54, .88), (-.14, .0, 1.50, .98), (.14, .0, 1.50, 1.0)]
-    for i, (x, y, top, low) in enumerate(over):
+        # the sides: from the temples past the ear, behind the shoulders
+        add("temple_a%d" % s, [(s * .066, .07, top - .05), (s * .092, .03, top - .05), (s * .105, -.02, top - .11), (s * .115, -.06, top - .2), (s * .14, -.09, top - .32),
+                               (s * .17, -.12, top - .44)], .05, rings=7, wide=True, tile=tile(3))
+        add("temple_b%d" % s, [(s * .082, .02, top - .02), (s * .112, -.03, top - .05), (s * .125, -.08, top - .16), (s * .135, -.115, top - .3), (s * .13, -.14, top - .5)], .056, rings=6,
+            wide=True, tile=tile(1), group="r" if s > 0 else "l")
+        # the loose strands down each side of the face, over the funnel
+        add("fore_a%d" % s, [(s * .026, .082, top - .03), (s * .05, .086, top - .08), (s * .062, .074, top - .15), (s * .07, .076, top - .23), (s * .064, .10, top - .30)], .014, rings=6,
+            tile=tile(0))
+    # the fall down his back
+    z = top - .08
+    for name, x, low, w, g in [("back_c", 0.0, .86, .2, "c"), ("back_l", -.065, .94, .16, "l"), ("back_r", .065, .92, .16, "r"), ("back_u0", -.03, 1.0, .18, "c"), ("back_u1", .03, 1.0, .18, "c")]:
+        add(name, [(x * .7, -.09, z + .05), (x * 1.0, -.15, z - .09), (x * 1.2, -.175, z - .26), (x * 1.3, -.185, 1.14), (x * 1.2, -.18, 1.02), (x * .9, -.17, low)], w, rings=8, wide=True, peak=.45,
+            tile=tile(0), group=g, hint=np.array([0, -1.0, 0.1]))
+    over = [(-.095, 1.02), (-.058, .92), (-.024, .85), (.022, .83), (.058, .9), (.098, 1.0), (-.125, 1.1), (.13, 1.08)]
+    for i, (x, low) in enumerate(over):
         g = "c" if abs(x) < .05 else ("l" if x < 0 else "r")
-        add("over%d" % i, [(x * .6, y - .06, top), (x * 1.05, y - .13, 1.46), (x * 1.3, y - .165, 1.28), (x * 1.42, y - .16, 1.08),
-                           (x * 1.34, y - .135, .92), (x * 1.5, y - .13, low)], .096, rings=8, peak=.4, tile=tile(i),
-            group=g, hint=np.array([0, -1.0, 0.1]))
-    # below the shoulders the whole mane gathers in behind the back (the turnaround's narrow fall)
-    for p in locks:
-        k = 0.34 * smooth(1.44, 1.12, p.v[:, 2])
-        p.v[:, 0] *= 1 - k
-        p.path[:, 0] *= 1 - 0.34 * smooth(1.44, 1.12, p.path[:, 2])
+        add("over%d" % i, [(x * .6, -.12, z + .03), (x * 1.0, -.185, z - .09), (x * 1.2, -.21, z - .26), (x * 1.32, -.215, 1.15), (x * 1.3, -.205, 1.03), (x * 1.5 + .012, -.2, low)], .088, rings=8,
+            peak=.4, tile=tile(i), group=g, hint=np.array([0, -1.0, 0.1]))
+    # flyaway tips, blown back off the crown
+    for i, (x, y, dz) in enumerate(((.09, -.11, -.08), (-.1, -.12, -.1), (.13, -.1, -.2), (-.14, -.09, -.22))):
+        s = np.sign(x)
+        add("fly%d" % i, [(x * .6, y + .05, top + dz + .02), (x * 1.1, y, top + dz + .03), (x * 1.5, y - .06, top + dz + .05), (x * 2.0, y - .1, top + dz + .09)], .03, rings=5, tile=tile(i))
     cap = hair_cap()
     return [cap] + locks
 
@@ -512,7 +501,7 @@ def mane():
 def hair_cap():
     """The scalp under the crown: a coarse shell, so no bald gap shows between the locks."""
     rows, cols = 7, 14
-    zs = np.linspace(0.122, -0.1, rows)
+    zs = np.linspace(0.122, -0.06, rows)
     A, Z = np.meshgrid(np.linspace(0, 2 * np.pi, cols, endpoint=False) + 0.2, zs)
     R = ray_out(A, Z, r0=0.15) + 0.009
     front = np.cos(A) > 0.25
@@ -573,7 +562,8 @@ def mane_chains(locks):
 GRIP_DIR = norm(np.array([0.0, 0.76, -0.65]))    # the blade from the fist, rest pose (he faces +Y)
 _a = norm(np.array([0, 0, -1.0]) - GRIP_DIR * np.dot(np.array([0, 0, -1.0]), GRIP_DIR))
 GRIP_AT = np.array([SH, 0.0, HAND_Z + 0.012]) + _a * 0.094 + np.array([-0.03, 0.0, 0.0])    # inside the closed fist
-BLADE_LEN, BLADE_W = 0.88, 0.098                 # guard to the broken end; half width
+GUARD_OFF = 0.085                                # fist to guard: a short grip, as the master sheet
+BLADE_LEN, BLADE_W = 0.98, 0.112                 # guard to tip; half width: shoulder to ankle on him
 
 
 def sword_frame():
@@ -586,38 +576,33 @@ def sword_frame():
 
 
 def outline():
-    """The blade's silhouette: (along, across) from the guard, a slab with a broken crenellated end."""
+    """The blade's silhouette: (along, across): a broad jagged slab, chips off its edges, an arrow head of a tip."""
     L, W = BLADE_LEN, BLADE_W
-    rng = np.random.RandomState(4)
-    right = [(0.0, 1.0), (.10, 1.0), (.2, .97), (.32, 1.03), (.43, .98), (.52, .94), (.6, 1.0), (.68, 1.06),
-             (.74, .99), (.8, 1.12), (.84, 1.03), (.88, 1.09)]
-    tip = [(.93, .9), (.915, .72), (.965, .6), (.95, .42), (1.0, .08), (.965, -.06), (.975, -.34), (.93, -.46),
-           (.945, -.72), (.895, -.9)]
-    left = [(.86, -1.13), (.8, -1.0), (.73, -1.08), (.66, -.98), (.57, -1.02), (.48, -.95), (.36, -1.03), (.26, -.97),
-            (.14, -1.02), (0.0, -1.0)]
+    right = [(0.0, .92), (.07, .94), (.12, 1.0), (.2, .96), (.24, 1.03), (.33, 1.0), (.4, .93), (.44, 1.0), (.53, .97), (.6, 1.04), (.66, .96), (.72, .98), (.78, 1.08), (.8, 1.2)]
+    tip = [(.85, .86), (.84, .72), (.9, .5), (.965, .22), (1.0, 0.0)]
+    left = [(.95, -.3), (.9, -.42), (.91, -.6), (.84, -.8), (.82, -1.18), (.76, -1.04), (.69, -.97), (.62, -1.02), (.54, -.94), (.47, -1.03), (.4, -.97), (.3, -1.02), (.22, -.95), (.13, -1.02), (.07, -.93), (0.0, -.92)]
     pts = right + tip + left
     return np.array([(a * L, c * W) for a, c in pts])
 
 
 def core_outline():
-    """The white-hot channel down the blade's heart."""
+    """The white-hot channel down the blade's heart: broad, jagged, with the art's forked breaks."""
     L, W = BLADE_LEN, BLADE_W
-    pts = [(0.0, .34), (.3, .3), (.42, .36), (.46, .24), (.6, .22), (.65, .28), (.72, .13), (.85, .1), (.94, 0.0),
-           (.85, -.1), (.74, -.16), (.68, -.1), (.58, -.3), (.5, -.22), (.4, -.27), (.28, -.2), (.12, -.32), (0.0, -.34)]
+    pts = [(0.0, .44), (.14, .36), (.2, .5), (.27, .3), (.4, .33), (.46, .52), (.5, .3), (.6, .24), (.66, .38), (.72, .22), (.82, .17), (.92, .05), (.95, 0.0), (.92, -.05),
+           (.82, -.16), (.74, -.2), (.66, -.34), (.58, -.26), (.48, -.3), (.4, -.46), (.33, -.3), (.2, -.33), (.12, -.5), (.06, -.36), (0.0, -.44)]
     return np.array([(a * L, c * W) for a, c in pts])
 
 
 def resample_like(core, ol):
-    """Each outline point's nearest core point, for the bevel ring between them."""
     return np.array([core[np.argmin(np.linalg.norm(core - p * [1, .4], axis=1))] for p in ol])
 
 
 def blade():
     b, e, n = sword_frame()
-    guard_at = GRIP_AT + b * 0.105
+    guard_at = GRIP_AT + b * GUARD_OFF
     ol, co = outline(), core_outline()
     m = len(ol)
-    TH = 0.030
+    TH = 0.026
     from mathutils.geometry import tessellate_polygon
     from mathutils import Vector
     v, faces = [], []
@@ -670,25 +655,19 @@ def blade():
 
 def hilt(uv_chain):
     b, e, n = sword_frame()
-    g = GRIP_AT + b * 0.105
+    g = GRIP_AT + b * GUARD_OFF
     out = []
-    # the cross guard: a heavy iron bar
+    # the flat iron crossguard
     sec = [(-1, -1), (1, -1), (1, 1), (-1, 1)]
-    path = [g + e * d for d in (-0.135, -0.11, 0.11, 0.135)]
-    bar = sweep("guard", "metal-guard", path, sec, np.array([0.02, 0.026, 0.026, 0.02]), side_hint=b,
-                depth=np.array([0.018, 0.024, 0.024, 0.018]))
+    path = [g + e * d for d in (-0.165, -0.15, 0.15, 0.165)]
+    bar = sweep("guard", "metal-guard", path, sec, np.array([0.022, 0.03, 0.03, 0.022]), side_hint=b, depth=np.array([0.018, 0.024, 0.024, 0.018]))
     out.append(bar.rigid("hand.R"))
-    # the grip and the pommel collar, chain wound in the paint
-    p = [g - b * 0.235, g - b * 0.205, g - b * 0.19, g - b * 0.02, g]
+    # the grip, its iron collar and the spiked pommel
     sec8 = [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 8, endpoint=False)]
-    grip = sweep("grip", "leather-grip", p, sec8, np.array([0.024, 0.030, 0.019, 0.019, 0.022]), side_hint=e)
+    p = [g - b * 0.20, g - b * 0.19, g - b * 0.175, g - b * 0.16, g - b * 0.02, g]
+    grip = sweep("grip", "leather-grip", p, sec8, np.array([0.03, 0.03, 0.026, 0.0195, 0.0195, 0.024]), side_hint=e)
     out.append(grip.rigid("hand.R"))
-    # three turns of chain round the blade's root: a ribbon of links
-    for r in range(3):
-        base = g + b * (0.032 + r * 0.033)
-        pts = []
-        for t in np.linspace(0, 2 * np.pi, 15):
-            pts.append(base + e * np.cos(t) * (BLADE_W * 1.05) + n * np.sin(t) * 0.04 + b * 0.008 * np.sin(t * 2 + r))
-        c = chain_along("wrap%d" % r, pts, step=0.047, uv=uv_chain, ln=0.056, wid=0.03, th=0.0066, flip=r * .4)
-        out.append(c.rigid("hand.R"))
+    spike = [g - b * 0.195, g - b * 0.225, g - b * 0.28, g - b * 0.335]
+    sp = sweep("pommel", "metal-guard", spike, [(-1, 0), (0, 1), (1, 0), (0, -1)], np.array([0.022, 0.03, 0.016, 0.001]), side_hint=e)
+    out.append(sp.rigid("hand.R"))
     return out

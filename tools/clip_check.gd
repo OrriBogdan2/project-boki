@@ -1,13 +1,13 @@
 extends RefCounted
-## --clip-check: every Hero with hand-keyed clips (content/rules/warden_anim/<art>.json). Per Hero: the .glb stays in the tri
-## budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the timings are
-## the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the Gun and Muzzle
-## lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop. Never touches the save.
+## --clip-check: every Hero with hand-keyed clips (content/rules/warden_anim/<art>.json). Per Hero: the .glb stays in the
+## tri budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the timings
+## are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the Gun and
+## Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop. Never touches the save.
 
 const TRI_BUDGET := 20000
 const DT := 1.0 / 30.0
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
-const POP := 1.0               # m a frame: no teleport across a hand-over (the fastest strikes move 0.5 m a frame on their own)
+const POP := 1.0               # m a frame: no teleport across a hand-over (the fastest strikes move 0.5 m on their own)
 
 var bad := 0
 var holder: Node3D
@@ -115,7 +115,7 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 	var tip := sync.get("blade_tip") as Node3D
 	var muzzle := sync.get("muzzle") as Node3D
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
-	var hb := WardenSkeleton.find(sk, "hand.R")
+	var hb := int(sync.get("blade_bone"))
 	var rest := tip.position.length()
 	var far := 0.0
 	var drift := 0.0
@@ -130,8 +130,8 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			var sees: Vector3 = sk.global_transform * (sk.get_bone_global_pose(hb) * tip.position)
 			far = maxf(far, muzzle.global_position.distance_to(sees))
 			var hand: Vector3 = sk.global_transform * sk.get_bone_global_pose(hb).origin
-			var size := absf(sk.global_transform.basis.get_scale().x)
-			drift = maxf(drift, absf(hand.distance_to(sees) / size - rest))
+			var body_k := absf(sk.global_transform.basis.get_scale().x)
+			drift = maxf(drift, absf(hand.distance_to(sees) / body_k - rest))
 			n += 1
 	clips.force = {}
 	ok(far <= FX_ON_BLADE, "%s: the Muzzle stays on the visible tip in %d frames (worst %.3f m)" % [id, n, far])
@@ -155,7 +155,8 @@ func _sliders(id: String, sync: Node) -> void:
 				strays += 1
 	ok(strays == 0, "%s: no clip keys a contract bone's offset (%d tracks), the sliders stay on" % [id, strays])
 	ok((sync.get("look_pose") as Array).size() >= 10, "%s: the look's bone offsets are held under the clips" % id)
-	ok(not (clips.d.get("states", {}) as Dictionary).has("dead") or float(sync.get("root").get_meta(WardenClips.DEATH_T, 0.0)) > 0.0,
+	var stays := float(sync.get("root").get_meta(WardenClips.DEATH_T, 0.0))
+	ok(not (clips.d.get("states", {}) as Dictionary).has("dead") or stays > 0.0,
 			"%s: a knocked-out Hero stays on screen for its death clip" % id)
 
 ## A dash into an ability into the run: states fed as the game does, the hand never jumps.

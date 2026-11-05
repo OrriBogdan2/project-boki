@@ -721,7 +721,7 @@ static func _glow_colours(m: ShaderMaterial, arch: String, tag: String) -> void:
 	var g: Dictionary = Arch.def(arch).get("model_glow", {}) if arch != "" else {}
 	if g.is_empty():
 		return
-	var core := Color(String(g.get("core", "ffffff")))
+	var core := Color(String(g.get(tag, g.get("core", "ffffff"))))     # (a tag's own: Kael's scarf embers)
 	var edge := Color(String(g.get("edge", g.get("core", "ffffff"))))
 	# (a halo layer, glow-<name>_halo*, keeps its own dimmer painted colour: the bloom's fall-off)
 	if tag.contains("_halo"):
@@ -917,11 +917,13 @@ class Springs:
 	const PULL := 0.2           # the share of the way back to the rest shape per 1/60 s, at the root
 	const PULL_TIP := 0.07      # and at the tip
 	const DAMP := 0.84          # the velocity kept per 1/60 s
+	const WIND := 0.09          # m: how far a scarf tail's tip ripples at rest
 	const FOLD := 0.75          # radians a folded wing tips back about the side axis through its root
 	const TUCK := 0.8           # and turns in behind the back about the vertical
 	var skel: Skeleton3D
 	var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}
 	var fold := 0.0             # 0..1: how far the wing chains are folded (WING_FOLD)
+	var wind_t := 0.0
 
 	func setup(skeleton: Skeleton3D) -> void:
 		skel = skeleton
@@ -943,7 +945,8 @@ class Springs:
 				# a "wing" chain folds back while the Warden skates, WING_FOLD)
 				chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array(),
 					"hang": skel.get_bone_name(bi).begins_with(PREFIX + "hang"),
-					"wing": skel.get_bone_name(bi).begins_with(PREFIX + "wing")})
+					"wing": skel.get_bone_name(bi).begins_with(PREFIX + "wing"),
+					"wind": skel.get_bone_name(bi).begins_with(PREFIX + "scarftail")})
 
 	func _spring(bi: int) -> bool:
 		return skel.get_bone_name(bi).begins_with(PREFIX)
@@ -954,6 +957,7 @@ class Springs:
 		var xf := skel.global_transform
 		var inv := xf.affine_inverse()
 		var k := clampf(dt * 60.0, 0.0, 3.0)
+		wind_t += dt
 		for ch in chains:
 			var ids: Array = ch["ids"]
 			var par := skel.get_bone_parent(int(ids[0]))
@@ -977,6 +981,11 @@ class Springs:
 				rest.append(r)
 				want.append(xf * r.origin)
 			var n := want.size()
+			if ch["wind"]:
+				# (a long cloth tail never hangs dead: a slow travelling ripple, stronger toward its tip)
+				for i in range(1, n):
+					var u := float(i) / float(n - 1)
+					want[i] += xf.basis * Vector3(sin(wind_t * 1.9 - i * 0.7), 0.35 * sin(wind_t * 1.3 - i * 0.9), 0.0) * WIND * u * u
 			if ch["hang"]:
 				for i in range(1, n):
 					var seg := (xf * (rest[i] as Transform3D).origin).distance_to(
