@@ -2317,3 +2317,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Make the HUD ammo readout show a refill animation / ∞-style auto-refill icon, so it never reads as "out of ammo".
 - **Glider:** the item 179 "SPACE, then HOLD SPACE" keycap with an animated hold bar (the same visual language as hold-to-fire).
 - **Assert:** the LMB step requires a sustained hold; the ammo callout fires once, on the first empty.
+
+## 178f. G command wheel: releasing to choose isn't obvious; also accept a click (owner playtest with his dad, 18:10 UTC Nov 5)
+- The owner: "he also didn't realize for G hold you let go instead of pressing it".
+- **Fix:**
+  - Releasing G still picks the highlighted command.
+  - While the wheel is open, a left-click (or pressing G again) also picks it. Both work, so nobody gets stuck.
+  - The wheel shows a centre label: "Move to choose · Let go of G" with a small animated key-release glyph.
+  - The highlighted segment enlarges + glows.
+- **The tutorial's Boki-command step:**
+  - The keycap "HOLD G", then an arrow animation of the mouse flick, then "let go".
+  - It completes on any successful pick.
+  - The item 178c escalation if the player is stuck holding with no pick.
+- **Assert:** both the release and a click while the wheel is open select the highlighted option.
