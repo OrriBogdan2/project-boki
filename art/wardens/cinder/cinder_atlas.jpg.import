@@ -8,7 +8,7 @@ metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "218999574cc479085292e5d2b17a7df3"
+"md5": "87c81ce47f2e8292f37f6a9662066132"
 }
 
 [deps]
@@ -18,8 +18,8 @@ dest_files=["res://.godot/imported/cinder_atlas.jpg-76b09bc7c334aec3f18d12e67687
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
