@@ -636,7 +636,7 @@ func _tut_tick() -> void:
 		var txt := KinVoice.tut_hint(k, id)
 		if txt != "":
 			history.append({"t": m.time, "cat": "tut_" + id, "pri": 0})
-			m.kin_bark(k, txt, "tut", 4.0)
+			m.kin_bark(k, txt, "tut", 4.0 if txt.length() < 60 else 7.0)
 		if to != Vector3.INF:
 			look = to; look_t = 2.0
 			pose = "point" if Tutorial.leads(id) else ("growl" if id in ["shoot", "throw", "kin1"] else "beckon")

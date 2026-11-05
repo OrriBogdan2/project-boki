@@ -5,7 +5,7 @@
  "blend": "~/meshy/dredge_friend/fit.blend",
  "scale": 0.665,
  "turn": 180,
- "max_tris": 5000,
+ "max_tris": 4500,
  "dissolve_deg": 1.0,
  "sharp_deg": 50,
  "groups": {
@@ -134,6 +134,14 @@
    "mode": "move",
    "from": "Forearm.R",
    "to": "forearm.R"
+  },
+  "winch": {
+   "mode": "shift",
+   "by": [
+    0.0,
+    0.0,
+    -0.02
+   ]
   }
  },
  "extra": {
@@ -254,6 +262,30 @@
   "anchor_eye": {
    "bone": "eye",
    "group": "eye"
+  },
+  "anchor_stack": {
+   "bone": "hips",
+   "pos": [
+    0.077,
+    -0.1914,
+    1.7397
+   ]
+  },
+  "anchor_smoke_r": {
+   "bone": "pauldron.R",
+   "pos": [
+    0.27,
+    -0.06,
+    1.53
+   ]
+  },
+  "anchor_smoke_l": {
+   "bone": "pauldron.L",
+   "pos": [
+    -0.27,
+    -0.06,
+    1.53
+   ]
   }
  },
  "orb": {
@@ -264,10 +296,10 @@
    0.468,
    1.3766
   ],
-  "r": 0.016,
+  "r": 0.02,
   "depth": 0.75,
   "material": "glow-eye",
-  "colour": "ff2418"
+  "colour": "ff2a50"
  },
  "drips": [
   {
@@ -416,7 +448,7 @@
   "samples": 24,
   "looks": {
    "metal-brass": {
-    "colour": "6c5530",
+    "colour": "766a40",
     "patina": "4f6a52",
     "patina_at": 0.6,
     "patina_k": 0.6,
@@ -427,19 +459,19 @@
     "grime": "1a160c",
     "grime_k": 0.85,
     "patina_crevice": true,
-    "highlight": "e0b868",
+    "highlight": "cfc088",
     "highlight_at": 0.62,
     "highlight_k": 0.45
    },
    "metal-iron": {
-    "colour": "4c4844",
+    "colour": "7a746e",
     "rust": "6e4428",
     "rust_at": 0.56,
     "rust_k": 0.75,
     "dents": 1.2,
     "dent_scale": 9.0,
     "scratch": "8c8a86",
-    "edge": "8a8580",
+    "edge": "b0aaa2",
     "grime": "1a1614",
     "grime_k": 0.8
    },
@@ -453,7 +485,7 @@
    },
    "metal-glass": {
     "glass": true,
-    "colour": "1c0c0a",
+    "colour": "34424c",
     "crack": "e8ecf0",
     "halo": "c42a18",
     "eye_at": [
@@ -461,9 +493,9 @@
      0.468,
      1.3766
     ],
-    "eye_r": 0.014,
-    "crack_scale": 30.0,
-    "crack_k": 0.6
+    "eye_r": 0.012,
+    "crack_scale": 16.0,
+    "crack_k": 0.85
    },
    "leather-tar": {
     "tar": true,
@@ -495,7 +527,7 @@
     "grime": "1a160c",
     "grime_k": 0.7,
     "ao_dist": 0.05,
-    "gain": 1.18,
+    "gain": 1.38,
     "mask": {
      "at": [
       0.0,
@@ -504,13 +536,13 @@
      ],
      "r": 0.17
     },
-    "highlight": "e8c070",
+    "highlight": "b8a466",
     "highlight_at": 0.62,
-    "highlight_k": 0.35,
+    "highlight_k": 0.22,
     "tint": [
-     0.98,
-     0.86,
-     0.6
+     0.88,
+     0.95,
+     0.84
     ],
     "rust": "7a3e1e",
     "rust_at": 0.52,
@@ -538,22 +570,22 @@
     }
    },
    "metal-helm": {
-    "colour": "9a763e",
-    "highlight": "f0cc7a",
+    "colour": "8e7a4a",
+    "highlight": "d8cc98",
     "highlight_at": 0.5,
     "highlight_k": 0.5,
-    "edge": "f0d088",
+    "edge": "dcd0a0",
     "grime": "2a1c10",
     "grime_k": 0.6,
     "ao_dist": 0.02
    },
    "glow-eye": {
     "glass": true,
-    "colour": "ff2a14",
+    "colour": "ff2a50",
     "crack": "4a0806",
     "crack_k": 0.7,
     "crack_scale": 45.0,
-    "halo": "ff7038",
+    "halo": "ff8aa0",
     "eye_at": [
      0.0,
      0.484,
@@ -635,10 +667,10 @@
   ],
   "r": 0.3,
   "res": [
-   20,
-   30
+   22,
+   32
   ],
-  "dents": 12,
+  "dents": 18,
   "bands": [
    {
     "lat": [
@@ -819,10 +851,46 @@
    }
   ],
   "dent_depth": [
-   0.03,
-   0.06
+   0.05,
+   0.11
   ],
-  "gash_material": "glow-gash"
+  "gash_material": "glow-gash",
+  "bursts": [
+   {
+    "pod": "r",
+    "lame": 1,
+    "at": [
+     12,
+     95
+    ],
+    "rh": 0.1,
+    "n": 6,
+    "bend": 55,
+    "thick": 0.012
+   },
+   {
+    "pod": "l",
+    "lame": 2,
+    "at": [
+     -14,
+     262
+    ],
+    "rh": 0.1,
+    "n": 6,
+    "bend": 55,
+    "thick": 0.012
+   },
+   {
+    "at": [
+     -52,
+     10
+    ],
+    "rh": 0.11,
+    "n": 7,
+    "bend": 50,
+    "thick": 0.012
+   }
+  ]
  },
  "remat": [
   {
@@ -847,7 +915,20 @@
   }
  },
  "extras": {
-  "shines": [],
+  "shines": [
+   {
+    "at": [
+     0.0,
+     0.486,
+     1.3766
+    ],
+    "r": 0.0075,
+    "depth": 0.6,
+    "bone": "head",
+    "material": "glow-shine",
+    "colour": "fff0f4"
+   }
+  ],
   "glows": [
    {
     "at": [
@@ -980,51 +1061,61 @@
     "material": "leather-tar",
     "bone": "hips",
     "at": [
-     -24,
-     -10
+     -13,
+     -9
     ],
-    "r": 0.0084,
-    "hang": 0.18
+    "to": -48,
+    "r": 0.017,
+    "hang": 0.2,
+    "bulb": 1.7
    },
    {
     "material": "leather-tar",
     "bone": "hips",
     "at": [
-     -24,
-     6
+     -13,
+     3
     ],
-    "r": 0.007699999999999999,
-    "hang": 0.24
+    "to": -55,
+    "r": 0.019,
+    "hang": 0.26,
+    "bulb": 1.8
    },
    {
     "material": "leather-tar",
     "bone": "hips",
     "at": [
-     -24,
-     14
+     -13,
+     13
     ],
-    "r": 0.006999999999999999,
-    "hang": 0.12
+    "to": -46,
+    "r": 0.015,
+    "hang": 0.14,
+    "bulb": 1.6
+   },
+   {
+    "material": "leather-tar",
+    "bone": "hips",
+    "at": [
+     12,
+     24
+    ],
+    "to": -40,
+    "r": 0.015,
+    "hang": 0.16,
+    "bulb": 1.6
    },
    {
     "material": "leather-tar",
     "bone": "hips",
     "at": [
      22,
-     36
+     -40
     ],
-    "r": 0.0084,
-    "hang": 0.16
-   },
-   {
-    "material": "leather-tar",
-    "bone": "hips",
-    "at": [
-     -14,
-     -34
-    ],
-    "r": 0.006999999999999999,
-    "hang": 0.1
+    "to": -50,
+    "r": 0.014,
+    "hang": 0.14,
+    "bulb": 1.6
    },
    {
     "material": "leather-tar",
@@ -1033,38 +1124,20 @@
      5,
      165
     ],
-    "r": 0.0084,
-    "hang": 0.2
+    "r": 0.014,
+    "hang": 0.2,
+    "bulb": 1.6
    },
    {
     "material": "leather-tar",
     "bone": "hips",
     "at": [
      -8,
-     200
+     205
     ],
-    "r": 0.007699999999999999,
-    "hang": 0.14
-   },
-   {
-    "material": "leather-tar",
-    "bone": "hips",
-    "at": [
-     30,
-     -80
-    ],
-    "r": 0.006999999999999999,
-    "hang": 0.12
-   },
-   {
-    "material": "leather-tar",
-    "bone": "hips",
-    "at": [
-     10,
-     110
-    ],
-    "r": 0.006999999999999999,
-    "hang": 0.1
+    "r": 0.013,
+    "hang": 0.14,
+    "bulb": 1.5
    }
   ],
   "plates": [
@@ -1082,6 +1155,134 @@
     "nlon": 4,
     "bone": "hips",
     "material": "metal-iron"
+   },
+   {
+    "lat": [
+     70,
+     88
+    ],
+    "lon": [
+     0,
+     360
+    ],
+    "off": 0.045,
+    "thick": 0.075,
+    "nlon": 16,
+    "bone": "hips",
+    "material": "metal-brass"
+   },
+   {
+    "lat": [
+     -27,
+     -13
+    ],
+    "lon": [
+     -16,
+     16
+    ],
+    "off": 0.012,
+    "thick": 0.03,
+    "nlon": 6,
+    "bone": "hips",
+    "material": "leather-recess",
+    "colour": "1a120c",
+    "tag": "grille"
+   },
+   {
+    "lat": [
+     -27,
+     -12
+    ],
+    "lon": [
+     -14.0,
+     -11.6
+    ],
+    "off": 0.032,
+    "thick": 0.05,
+    "nlon": 1,
+    "bone": "hips",
+    "material": "metal-helm",
+    "tag": "grille"
+   },
+   {
+    "lat": [
+     -27,
+     -12
+    ],
+    "lon": [
+     -8.8,
+     -6.4
+    ],
+    "off": 0.032,
+    "thick": 0.05,
+    "nlon": 1,
+    "bone": "hips",
+    "material": "metal-helm",
+    "tag": "grille"
+   },
+   {
+    "lat": [
+     -27,
+     -12
+    ],
+    "lon": [
+     -3.6,
+     -1.2
+    ],
+    "off": 0.032,
+    "thick": 0.05,
+    "nlon": 1,
+    "bone": "hips",
+    "material": "metal-helm",
+    "tag": "grille"
+   },
+   {
+    "lat": [
+     -27,
+     -12
+    ],
+    "lon": [
+     1.6,
+     4.0
+    ],
+    "off": 0.032,
+    "thick": 0.05,
+    "nlon": 1,
+    "bone": "hips",
+    "material": "metal-helm",
+    "tag": "grille"
+   },
+   {
+    "lat": [
+     -27,
+     -12
+    ],
+    "lon": [
+     6.8,
+     9.2
+    ],
+    "off": 0.032,
+    "thick": 0.05,
+    "nlon": 1,
+    "bone": "hips",
+    "material": "metal-helm",
+    "tag": "grille"
+   },
+   {
+    "lat": [
+     -27,
+     -12
+    ],
+    "lon": [
+     12.0,
+     14.4
+    ],
+    "off": 0.032,
+    "thick": 0.05,
+    "nlon": 1,
+    "bone": "hips",
+    "material": "metal-helm",
+    "tag": "grille"
    }
   ],
   "pipes": [
@@ -1111,6 +1312,28 @@
     "r": 0.016,
     "bone": "hips",
     "material": "metal-iron"
+   },
+   {
+    "path": [
+     [
+      58,
+      160,
+      0.0
+     ],
+     [
+      59,
+      160,
+      0.3
+     ],
+     [
+      60,
+      160,
+      0.5
+     ]
+    ],
+    "r": 0.022,
+    "bone": "hips",
+    "material": "metal-iron"
    }
   ],
   "helm": {
@@ -1123,7 +1346,7 @@
    "y1": 0.452,
    "R": 0.082,
    "lip": 0.09,
-   "inner": 0.04,
+   "inner": 0.058,
    "rivets": 12,
    "rivet_r": 0.006,
    "bone": "head",
@@ -1214,8 +1437,45 @@
     "r": 0.075,
     "bone": "upper_arm.L",
     "material": "metal-iron"
+   },
+   {
+    "at": [
+     0.1744,
+     0.0,
+     0.4171
+    ],
+    "r": 0.05,
+    "bone": "shin.R",
+    "material": "metal-iron"
+   },
+   {
+    "at": [
+     -0.1744,
+     0.0,
+     0.4171
+    ],
+    "r": 0.05,
+    "bone": "shin.L",
+    "material": "metal-iron"
    }
-  ]
+  ],
+  "cracks": {
+   "centre": [
+    0.0,
+    0.3218,
+    1.3766
+   ],
+   "R": 0.1462,
+   "n": 8,
+   "reach": [
+    0.022,
+    0.056
+   ],
+   "w": 0.0018,
+   "bone": "head",
+   "material": "glow-crack",
+   "colour": "f4f6f8"
+  }
  },
  "protect": [
   {
@@ -1258,5 +1518,8 @@
  "drop_small": {
   "size": 0.03,
   "tris": 10
+ },
+ "scale_parts": {
+  "hook": 1.9
  }
 }

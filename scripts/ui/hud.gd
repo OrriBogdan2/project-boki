@@ -528,14 +528,14 @@ func _draw_bubbles() -> void:
 			continue
 		var a := clampf((float(b.get("life", 2.6)) - b["t"]) * 3.0, 0.0, 1.0) * clampf(b["t"] * 8.0, 0.0, 1.0)
 		var s: String = b["text"]
-		var tw := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
+		var tw := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, BokiSpeech.MATCH_PX).x
 		var r := Rect2(sp + Vector2(-tw * 0.5 - 12, -44), Vector2(tw + 24, 30))
 		var mine: bool = k.owner_h == m.player
 		var col := Color(0.98, 0.96, 0.9, 0.95 * a) if mine else Color(0.2, 0.22, 0.3, 0.85 * a)
 		var sb := StyleBoxFlat.new(); sb.bg_color = col; sb.set_corner_radius_all(12)
 		c.draw_style_box(sb, r)
 		c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-7, -15), sp + Vector2(7, -15), sp + Vector2(0, -6)]), col)
-		c.draw_string(body, r.position + Vector2(12, 20), s, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color(0.1, 0.09, 0.12, a) if mine else Color(INK, a))
+		c.draw_string(body, r.position + Vector2(12, 20), s, HORIZONTAL_ALIGNMENT_LEFT, -1, BokiSpeech.MATCH_PX, Color(0.1, 0.09, 0.12, a) if mine else Color(INK, a))
 
 func _draw_pings(sz: Vector2) -> void:
 	var cam := m.cam
