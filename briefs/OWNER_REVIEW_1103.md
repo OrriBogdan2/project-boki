@@ -2386,3 +2386,19 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   4. The instruction text names the target plainly: "Walk to the glowing chest", not just an arrow.
 - Every "go somewhere" step uses this same guide.
 - **Assert:** in the key step, the count of chests == 1; the path renders from the player to the chest; the edge arrow is hidden while the chest is on-screen.
+
+## 169b. Hob's farm instructions: clearer, and fix the axe confusion (owner playtest with his dad, 18:15 UTC Nov 5)
+- The owner: "the hob instructions need to be more clear. he's looking for the axe but already has it".
+- **Cause:**
+  - The step hint says "Here, take this axe" (it's auto-given), but the toast says "Someone left a spare axe by the house", so the player goes looking for an axe on the ground.
+  - The pickaxe toast is the same ("And a pickaxe for the rocks, too").
+- **Fix the tools:**
+  - Hob hands it over in person: a short hand-off anim + "Here, take my axe. It's in your hands now." (item 169 voice).
+  - The tool appears in the player's hand and the toolbar slot flashes with a big keycap/label ("Axe equipped").
+  - Remove the "spare axe by the house" / pickaxe toasts.
+  - The next prompt names the action + target: "Walk to a tree and HOLD E to chop" (key-first, 178g; HOLD bar, 178e), and the nearest tree gets the item 178i guide.
+- **General clarity for every Hob step:** one action per line (the verb + the key + the target), the guide on the target, the escalation if ignored (178c). Hob's flavour goes in a separate short line, so the instruction itself is never ambiguous.
+  - E.g. Hob: "Need wood for a house, kid." / Instruction: "HOLD E at a tree to chop (0/6 wood)."
+- **Assert:**
+  - After the axe step, the player has the axe equipped with no toast mentioning a location.
+  - Every farm tutorial instruction contains a key glyph + a target noun.

@@ -1638,3 +1638,8 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 19:41 UTC ext → S5: item 178h: G-tap Sic snaps to the nearest foe within ~3 m of the cursor (a paw reticle shows the pick before the tap). Beginners can't hit monsters exactly.
 
 ## 2026-11-05 19:44 UTC ext → S5: item 178i: tutorial key step, ONE chest only. Replace the blue guide with a footprint path + a light pillar + an off-screen edge arrow, and plain "Walk to the glowing chest" text. A beginner couldn't follow the blue marker.
+
+## 2026-11-05 19:47 UTC ext → S5 (or S7): item 169b
+- The farm tutorial says "take this axe" but the toast says "a spare axe by the house", so a beginner went looking for it.
+- Hob hands the tools over in person, they're equipped, and the toolbar flashes; remove those toasts.
+- Every Hob step is split into a flavour line + a plain instruction (key + target + progress).
