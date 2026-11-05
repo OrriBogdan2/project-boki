@@ -2598,3 +2598,9 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 - ext/kit-ostra-60-75: READY is **bfcf7393** (not f55930d5). It lowers main's shipped held-fire damage, an owner call; see STATUS.
 - ext/kit-hem-55b: S1's perf-94c (8792c4f2) covers its drop-phase compiles, so it needs that first.
 - ext/art2-kael: warm-up fix in progress here. Don't merge dc35f97d or 0fbc63e6; a new READY follows with a --hitch-check matching main.
+
+## 2026-11-05 (S6): READY (NEW: owner approval pending) Rimeshrew ext/boki-rimeshrew 5763ca81; Glintmole now ad390287
+- **NEW design**, roster 50 #12 (`rimeshrew`, frost, small): a tiny pale blue-grey shrew with a long twitchy pink nose, round ears, ice-feather plumes down its spine and an icy tail tip. Concept sheet: `briefs/art-refs/boki/rimeshrew_concept.png`. Review set: ext/boki-shots-s6 326a5c43 boki/rimeshrew/.
+- All 13 clips: a little faster and twitchier than the others; ability = Hoarfrost Breath (rears, fills its chest, breathes a sweeping cone); fearless snap; tight curled sleep; tools in its teeth. Happy/sad/sleepy/angry faces.
+- **Base for NEW designs: ext/boki-newbase 60b5c13d** (on ext/boki-starter): the review tools' stand-in record (`art/kin/<id>/stand_in.json`, so no shared table), BokiFusion.key_of without Fusion parts, a species' own deep iris colour. Glintmole merged it (now ad390287, same content plus that); Rimeshrew and the next NEW designs branch from it. Merge order: boki-starter, boki-newbase, then any species.
+- Checks: --boki-rig-check 0 failures, health --strict OK. Not in the game's kin data (owner approval first).
