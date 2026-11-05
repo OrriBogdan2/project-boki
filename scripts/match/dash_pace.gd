@@ -35,7 +35,8 @@ static func rehearse(m: Match) -> void:
 	fx.beam(at, at + Vector3.RIGHT, Color.WHITE)
 	fx.ghost(at, 0.0, Color.WHITE, 1.0)
 	fx.word(at, "!", Color.WHITE, false)
-	var marks: Array = [fx.telegraph_circle(at, 1.5, Color.WHITE), fx.telegraph_rect(at, Vector2.UP, 3.0, 1.0, Color.WHITE)]
+	var marks: Array = [fx.telegraph_circle(at, 1.5, Color.WHITE),
+		fx.telegraph_rect(at, Vector2.UP, 3.0, 1.0, Color.WHITE)]
 	HeroVfx.of(m).prewarm(at)
 	DJFx.of(m).prewarm(at)
 	var built := _pipelines()

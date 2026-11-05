@@ -21,6 +21,7 @@ const SOFT_K := 2.5
 const MIN_POSE := 0.5            # rad: summed over the rig's main joints, away from the idle before the press
 const WINDOW_S := 1.1
 const STEP_M := 0.02             # m: a drawn position this far from the last counts as a new one
+const JOIN_S := 0.1              # s between two rolls that are one dash
 const LUNGE_HOLD := 0.45         # s: RMB held, past the tap's Slam
 ## Archetype -> [slot, s held, moves that count as this dash's pose].
 const CARTWHEEL := ["thf_vault_r", "thf_vault_l", "thf_vault_f", "thf_vault_b", "thf_vault_twist"]
@@ -302,19 +303,16 @@ func _judge() -> void:
 		_ok(name_i + ": no hitch", worst <= limit and (comp == 0 or not software),
 				"worst %.0f ms, limit %.0f ms (window median %.0f), %d compiles" % [worst, limit, med, comp])
 
-## The frames of the first dash in a window (a press held a frame too long buffers a second one; Rampage's crouch and
-## drive, a frame or two apart, are one).
+## The frames of the first dash in a window. Rampage's crouch and drive, under JOIN_S apart, are one; a later roll
+## is the terrain's (running on into the rocks after the dash).
 func _dash_of(fs: Array) -> Array:
 	var out: Array = []
-	var gap := 0
 	for e: Dictionary in fs:
-		if float(e["roll"]) > 0.0:
-			out.append(e)
-			gap = 0
-		elif not out.is_empty():
-			gap += 1
-			if gap > 3:
-				break
+		if float(e["roll"]) <= 0.0:
+			continue
+		if not out.is_empty() and float(e["t"]) - float(out[-1]["t"]) > JOIN_S:
+			break
+		out.append(e)
 	return out
 
 func _end_hunter() -> void:
