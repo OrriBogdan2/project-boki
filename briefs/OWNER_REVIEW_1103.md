@@ -2176,3 +2176,4 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - If there's a separate swing-timing indicator, show it as a small pulse on the hammer icon, not on the progress bar.
   - The same rule for every build/craft/chop/mine progress bar in the farm (HunterTool / farm_sites / builder).
 - **Assert:** over a full build, the bar's displayed value never decreases between frames.
+- 173 addendum (owner, 17:57): "or not move at all". When no work is happening (you stop hammering, the Boki idle, materials run out), the bar simply holds still: no decay, no wobble. It only ever moves forward, or stays put.
