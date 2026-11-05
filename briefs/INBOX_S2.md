@@ -1248,3 +1248,6 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
   - The vials can feed her vial abilities.
 - The art direction for her is sex appeal (per DECISIONS: adult, stylised, not explicit).
 - The hair and tail are cheap spring/flame shaders (item 94 budget).
+
+## 2026-11-05 03:52 UTC (ext): Cinder views: `briefs/art-refs/cinder_turnaround.png` (front, 3/4, back; in-pose, not a true A-pose). Use it with the master sheet; the side profile is inferred.
+
