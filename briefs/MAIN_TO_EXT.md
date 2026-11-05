@@ -1402,3 +1402,8 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 
 ## 2026-11-05 16:58 UTC ext → S5: owner item 121
 - Sable's Bola passes through people, and ANY second contact stuns: person→person, person→tree/wall (pinned), tree/wall→person. Details in OWNER_REVIEW_1103 item 121. Batch with 119/120.
+
+## 2026-11-05 16:59 UTC ext → S5: owner item 122 (Ryzz)
+- The orb can always be grabbed, by walking over it as well as by Wirerun; with full dashes it banks +1 charge (skill reward).
+- Her electricity goes blue + pink, no gold/yellow anywhere in her kit.
+- Batch with 119-121.

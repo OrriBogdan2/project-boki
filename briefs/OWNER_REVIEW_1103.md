@@ -1136,3 +1136,18 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - Each of the three cases stuns.
   - A single person with nothing behind → grounded and slowed only.
+
+## 122. Ryzz: the lightning orb is always grabbable; her electricity is blue + pink, not yellow (owner, 16:57 UTC Nov 5)
+- The owner: "ryzz should pick up the lightning orb even if she has a dash - it's a skill based thing. also her electricity should be a mix of blue and pink, not yellow".
+- **Orb:** the mage_kit motes. Today an orb is only taken by Wirerun (_tick_run) or a Skycall pull, and on pickup _grab_mote refills dashes. Wherever it is gated or wasted when her dash is already up, remove that.
+  - She can always pick it up: walking over it counts, as well as Wirerun.
+  - Grabbing it is never wasted. With dashes full, bank 1 extra dash charge (overflow cap +1, tune), so chaining orbs is the skill expression.
+  - Show the banked charge on the Shift icon.
+- **Colours:** her whole electric palette goes blue + pink, with NO gold/yellow:
+  - The kit's GOLD / DEEP_GOLD / COPPER become a hot pink (e.g. ff4fb8 / ff7ad0).
+  - TEAL becomes an electric blue (e.g. 3fa9ff).
+  - Covers the arcs, the orbs, Wirerun after-images, Static, the ult, the reset flash and the aim accent.
+  - This matches item 116's pink LMB and pink stack counter.
+- **Assert:**
+  - Walk over an orb with full dashes → the extra charge is banked.
+  - No yellow-hued colour (hue 35-65°) left in mage_kit / mage_sky / mage_ult / vv_fx.
