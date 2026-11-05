@@ -406,6 +406,9 @@ func _show_create() -> void:
 		var hr := UI.hbox(8)
 		var l := UI.label(row[1], UI.T_BODY, UI.MUTED); l.custom_minimum_size.x = 120
 		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		if row.size() > 3:
+			l.tooltip_text = row[3]
+			l.mouse_filter = Control.MOUSE_FILTER_STOP
 		hr.add_child(l)
 		hr.add_child(UI.icon_button("back", func(): _step_look(key, -1, opts.size()), "Previous", 12.0))
 		var i := int(look[key])

@@ -31,6 +31,7 @@ const RIBBON_WAVES := 11.0     # rad along a trail's "wave" (a thread trailing i
 const ARC_SEGS := 24           # segments of a sweep's arc mesh
 const SWEEP_INNER := 0.35      # the arc mesh's inner radius, as a share of its outer one
 const SCORCH_LIFT := 0.06       # m a ground look floats, clear of the ground mesh
+const PREWARM_LIFE := 30.0     # s a loading-screen stand-in particle lives (it must outlast the slowest loading frames)
 const SEED_MAX := 8.0          # a look's noise offset (small: the sine hash loses precision on big inputs)
 
 static var _data := {}         # arch -> its content/vfx data ({} when the Hero has none yet)
@@ -46,6 +47,7 @@ var made := 0                  # nodes made so far (tests: it stops growing once
 var plays := {}                # (tests) move -> times played
 var _arcs := {}                # arc degrees -> arc mesh
 var _cyl: ArrayMesh
+var _warming: Array = []       # the loading screen's stand-ins (prewarm)
 var _anchors := {}             # "<model id>/<anchor>" -> the node found for it (null: none)
 
 static func of(match_node: Node) -> HeroVfx:
@@ -309,6 +311,46 @@ func _cylinder() -> ArrayMesh:
 		st.add_vertex(way + Vector3.UP)
 	_cyl = st.commit()
 	return _cyl
+
+## One of every kind held up at `at` on the loading screen (Match.warm_up, once per view, then prewarm_end), so the
+## first cast compiles nothing. Particles have to run and a trail needs a surface, or their shaders are never built.
+func prewarm(at: Vector3) -> void:
+	if _warming.is_empty():
+		for kind: String in POOL:
+			_warming.append(_prewarm_node(kind))
+	for node: Node3D in _warming:
+		node.global_transform = Transform3D(Basis.IDENTITY, Vector3.ZERO if node.get_meta("strip", false) else at)
+
+func prewarm_end() -> void:
+	for node: Node3D in _warming:
+		node.visible = false
+		if node is GPUParticles3D:
+			(node as GPUParticles3D).emitting = false
+	_warming.clear()
+
+func _prewarm_node(kind: String) -> Node3D:
+	if not MODES.has(kind):
+		var p: GPUParticles3D = _take(kind, _mote_node.bind(kind))
+		p.amount_ratio = 2.0 / float(AMOUNT[kind])
+		p.lifetime = PREWARM_LIFE
+		p.one_shot = false
+		p.emitting = true          # (a finished one-shot isn't drawn, and a loading frame can outlast its life)
+		return p
+	var mi: MeshInstance3D = _take(kind, _surface_node.bind(kind))
+	if kind == "sweep":
+		mi.mesh = _arc(120.0)
+	elif kind == "ribbon":
+		_prewarm_strip(mi.mesh)
+		mi.set_meta("strip", true)
+	return mi
+
+func _prewarm_strip(mesh: ImmediateMesh) -> void:
+	mesh.clear_surfaces()
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+	for i in 3:
+		mesh.surface_set_uv(Vector2(float(i) * 0.5, 0.0))
+		mesh.surface_add_vertex(Vector3(float(i), 0.0, float(i % 2)) * 0.01)
+	mesh.surface_end()
 
 func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vector2, o: Dictionary) -> void:
 	var mi: MeshInstance3D = _take(kind, _surface_node.bind(kind))
