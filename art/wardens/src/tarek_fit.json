@@ -297,17 +297,17 @@
    ],
    "rock": "a8896a",
    "rim": "f6eee0",
-   "iris": "ff7410",
+   "iris": "e85a08",
    "pupil": "1e0a04",
    "slot": "leather",
    "rock_dark": "5c4433",
    "rim_dark": "b49a7e",
-   "iris_hot": "ffb848",
+   "iris_hot": "ff9a30",
    "rel": "head",
    "iris_r": 0.5,
    "anchors": true,
    "depth": 0.95,
-   "eye_tilt": 35
+   "eye_tilt": 20
   },
   {
    "name": "orbit_shards",
