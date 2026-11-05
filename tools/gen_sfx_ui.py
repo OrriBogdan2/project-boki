@@ -5,7 +5,7 @@ fade-in, a short fall) in C major pentatonic, low-passed to stay round, with a s
 Press = a short tap, hover = a tiny high tick, confirm = a rising pair, back = a falling pair, deny = a
 muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a wood tick.
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
-unlock, ping, level_up, warn, charge); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
+unlock, ping, level_up, warn); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
 """
 import numpy as np
 import sfx_lib as S
@@ -157,7 +157,7 @@ def main():
     S.save_cat('level_up', level_up(0), 'ui')
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('warn', warn(0), 'ui')
-    S.save_cat('charge', charge(0), 'ui')
+    S.save_cat('ui_charge', charge(0), 'ui')
 
 
 if __name__ == '__main__':
