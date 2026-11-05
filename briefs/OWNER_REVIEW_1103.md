@@ -2147,3 +2147,15 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   4. Talking to him starts the farm tutorial conversation (item 87 flow).
 - He stands in a consistent, visible spot near the landing (not hidden behind the house); move his spawn if needed.
 - **Assert:** a fresh save → home arrival → the cam pans to Hob; menus are blocked until talk; the edge arrow shows when he's off-screen.
+
+## 172. Farm tutorial house step: no forced spot (and the marked spot is unbuildable, a bug) (owner, 17:56 UTC Nov 5)
+- The owner: "it shouldn't tell you where to put the house - and the area it says to put it i can't put it there anyways".
+- Today: farm_tutorial.json steps[3].hints.place "…then click the marked spot", with a pre-marked site that fails placement validation.
+- **Fix:**
+  - Remove the marked spot. The player places the house anywhere valid, with the normal build-mode ghost (green valid / red invalid) and a short tip on the ghost ("Somewhere flat and open").
+  - The hint becomes: "Time for a roof over your head. Hit {build}, pick House and put it wherever you like." (in Hob's voice, item 169).
+  - Root-cause why the old marked spot was invalid (a site/lot rule vs FarmSites.clean, an overlap with decor, the slope?). Make sure no other tutorial step points at an invalid spot (the crop patch "by the water" too).
+  - If the first placement fails 2×, Hob suggests an open area with a soft highlight (a suggestion, not forced).
+- **Assert:**
+  - A fresh save → the house can be placed at ≥3 different valid spots; the step completes.
+  - No tutorial marker points at a position that fails validation.

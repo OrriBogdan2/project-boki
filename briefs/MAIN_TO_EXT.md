@@ -1600,3 +1600,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 19:00 UTC ext → S5 (or S7): items 170 + 171
 - 170: Black Market tabs renamed (What happened → History; Lost Boki / Held by Rivals / Rival Requests / Rare Goods).
 - 171: on arriving home, a camera pan to Hob + a marker + an off-screen arrow; farm actions gated until you talk to him.
+
+## 2026-11-05 19:02 UTC ext → S5 (or S7): item 172: the farm tutorial forces a marked house spot that isn't even buildable. Remove it (place anywhere valid), root-cause the invalid spot, and check the other tutorial markers.
