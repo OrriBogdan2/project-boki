@@ -2573,7 +2573,7 @@ func _row_click(rp: Control, cb: Callable) -> void:
 func open_loot(b: Dictionary) -> void:
 	loot_open = b
 	loot_sig = ""
-	Sfx.play("whoosh", null, -10.0, 0.05, 1.3)
+	Sfx.play("ui_open", null, -10.0)
 	_build_loot()
 	if loot_panel: UI.pop_in(loot_panel)
 
@@ -2880,7 +2880,7 @@ func toggle_pack() -> void:
 		pack_sig = ""
 		_build_pack()
 		if pack_panel: UI.pop_in(pack_panel)
-		Sfx.play("whoosh", null, -12.0, 0.05, 1.2)
+		Sfx.play("ui_open", null, -10.0)
 
 func close_pack() -> void:
 	if pack_panel and is_instance_valid(pack_panel):

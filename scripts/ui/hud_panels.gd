@@ -11,6 +11,7 @@ const REDRAW_HZ := 20.0      # panel redraws per second
 var hud: Node
 var _t := 0.0
 var used_us := 0             # microseconds spent drawing since tooling last read it (--perf-probe, --perf-bench)
+static var draws := 0        # panel redraws so far; RankMarks keeps a "+" only while the latest one drew it
 
 static func make(h: Node) -> HudPanels:
 	var p := HudPanels.new()
@@ -35,6 +36,7 @@ func tick(delta: float) -> void:
 
 func _draw_panels() -> void:
 	var t0 := Time.get_ticks_usec()
+	draws += 1
 	var main_canvas: Control = hud.c
 	hud.c = self
 	hud.hover_spots.clear()

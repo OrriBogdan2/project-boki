@@ -1,7 +1,7 @@
 {
 	"id": "dredge",
-	"title": "Brass Abomination",
-	"base_name": "Dredge",
+	"title": "Scrap King",
+	"base_name": "Grimble",
 	"gender": "robot",
 	"personality": "A broken machine that leaks dark, corrupt energy. Its joints creak and its eyes flicker.\nHaunted and creepy, it drags a hook and keeps coming.",
 	"weight": "heavy",

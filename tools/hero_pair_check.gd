@@ -1,5 +1,5 @@
 extends RefCounted
-## --zone-check: Tarek (dolm) and Ostra placement (docs/heroes/dolm.md, ostra.md). The combo checks extend
+## --zone-check: Tarek (dolm) and Motley placement (docs/heroes/dolm.md, ostra.md). The combo checks extend
 ## this file: tools/breah_combo_check.gd (--dolm-combo-check), tools/ostra_combo_check.gd (--ostra-combo-check).
 ##   zone: where rocks, the seed and Trade may land: collision, walls, bodies, abyss edges (the Basalt
 ##         Spine clipped there, no walkway), and the Net placement events
@@ -254,7 +254,7 @@ func _zones() -> void:
 	ok("net: a launched rock is removed on the other game", rocks(m).size() == 2 and rocks(m2).size() == 2, "a %d b %d" % [rocks(m).size(), rocks(m2).size()])
 	await done(m2)
 	await done(m)
-	# ---- Ostra: the seed and Trade respect ground, walls and the abyss
+	# ---- Motley: the seed and Trade respect ground, walls and the abyss
 	r = setup("ostra", 9.0, 5)
 	m = r[0]; P = r[1]; T = r[2]; home = r[3]
 	var O: OstraKit = P.ak

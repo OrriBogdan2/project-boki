@@ -195,8 +195,6 @@ func _tick(dt: float) -> void:
 func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team:
 		return
-	if o.get("swing") != null:
-		vfx("blade_hit", t.pos, h.aim_dir())
 	var rd := res_def()
 	var src := String(o.get("src", ""))
 	var k := 0.4 if src == "burn" else 1.0
@@ -207,10 +205,6 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 	if t is Mob and t.hp <= 0.0 and not t.has_meta("jug_fed"):
 		t.set_meta("jug_fed", true)
 		h.heal(t.max_hp * float(rd.get("heal_creep", 0.2)))
-
-## His grunt, for everyone in earshot (the shared hit sounds are the hitter's and the hit player's).
-func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void:
-	vfx("hurt")
 
 func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float:
 	return dmg * (1.0 + float(res_def().get("enraged_dmg", 0.15)) * enraged_k())
@@ -233,7 +227,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		fx().pillar(h.pos, Color("5ae07a"), 3.6, 0.7, 0.75)
 		fx().star(t.pos + Vector3(0, 1.3, 0), Color("ff2a2a"), 3.2, 0.55, Color(1, 0.85, 0.8))
 		m.fx.word(h.pos + Vector3(0, 2.7, 0), "+%d" % int(round(h.hp - hp0)), Color("7fe08a"), true)
-		m.sfx("dj_heal", h.pos, -4.0, 0.8)
+		m.sfx("juggernaut_heal", h.pos, -4.0, 1.0)
 		if h.is_local() and m.hud: m.hud.flash(Color(1, 0.1, 0.05), 0.12)      # the red tint of a kill
 	var key := t.get_instance_id() if is_instance_valid(t) else -1
 	if slam_hit.has(key) and m.time - float(slam_hit[key]) <= float(rmb_def()["slam"].get("reset_t", 2.0)):

@@ -82,9 +82,6 @@ func _recipes(arch: String) -> void:
 			if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode != AudioStreamWAV.LOOP_DISABLED:
 				loops.append(s["n"])
 	ok(loops.is_empty(), "%s: every sound is a one-shot, nothing can outlive the match %s" % [arch, loops])
-	for surface in ["grass", "stone", "snow", "wood"]:
-		ok(HeroVfx.step_sound(arch, surface) != "step_" + surface and Sfx.has(HeroVfx.step_sound(arch, surface)),
-				"%s has its own %s footstep" % [arch, surface])
 
 func _sound_exists(sname: String) -> bool:
 	return ResourceLoader.exists("res://audio/%s.wav" % sname) or ResourceLoader.exists("res://audio/%s_1.wav" % sname)

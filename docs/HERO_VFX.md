@@ -42,6 +42,5 @@ the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_ha
 - **Budget:** `MAX_LIVE` GPU particles alive in a match, `POOL` nodes per kind, the quality preset's `fx` thins particles,
   past `LOD_NEAR` the `near` layers drop and particles halve, past `LOD_FAR` nothing draws. No per-ability lights. Looks
   last at most 2.2 s, flares at most 4 m (checked).
-- **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. Each file is set to its category's loudness
-  in the generator (`tools/gen_kael_sfx.py` TARGET, MAX_S) and measured with `tools/sfx_loudness.py`. Sound names with
-  takes go in `SfxKits.NAMES`.
+- **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
+  standard are docs/AUDIO.md's (content/sfx/<arch>.json); a recipe only says which to play and how loud.

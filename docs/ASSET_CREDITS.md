@@ -57,13 +57,4 @@ Every sound effect is synthesized from scratch by `tools/gen_sfx.py`, `tools/gen
 `scripts/core/synth.gd`. Music and ambience are composed procedurally by `tools/gen_music.py` /
 `tools/compose.py` (the expedition's layered stems) and `tools/gen_ambience.py` (wind over the
 abyss, ruins). `tools/sfx_stats.py` measures the sound effects (peak, loudness, attack, onset, spectral
-centroid), `tools/sfx_loudness.py` their EBU R128 loudness.
-
-The one exception to "synthesized": Kael's sounds (`audio/jug_*.wav`, `tools/gen_kael_sfx.py`) layer our synthesis over
-recorded foley, pitched and filtered:
-
-| Pack | Author | Source | License |
-| --- | --- | --- | --- |
-| RPG Audio ("50 RPG sound effects") | Kenney (kenney.nl) | https://opengameart.org/content/50-rpg-sound-effects (`RPGsounds_Kenney.zip`) | CC0 1.0 |
-
-The 22 files used are in `tools/sfx_src/kenney_rpg/`, with the pack's `license.txt`.
+centroid).

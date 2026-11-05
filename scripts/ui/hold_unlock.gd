@@ -84,7 +84,7 @@ func tick(dt: float) -> void:
 		_hum_at -= dt
 		if _hum_at <= 0.0:
 			# a rising hum: higher pitched as it fills
-			Sfx.play("charge" if Sfx.has("charge") else "hover", null, -12.0, 0.0, 0.8 + 0.8 * k)
+			Sfx.play("ui_charge", null, -12.0, 0.0, 0.8 + 0.8 * k)
 			_hum_at = 0.22
 		if k >= 1.0:
 			_complete()
