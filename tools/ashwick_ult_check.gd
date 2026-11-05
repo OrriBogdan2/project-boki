@@ -1,8 +1,8 @@
 extends RefCounted
 ## Cinder's ultimate on X, Flue Flight, for --ashwick-combo-check (docs/heroes/ashwick.md): the level gate,
 ## the lift-off telegraph and move, the steering lane, the capped turn, the early landing, the carpet's burn,
-## slow and Char, bond only on a land (the best of hit or knock per cast), the cloak, the Cinder Shot and the
-## lance mid-flight, a knockback speeding it up, a stun ending it, never over the abyss, the merge drop, the
+## slow and Char, bond only on a land (the best of hit or knock per cast), the cloak and the Cinder Shot mid-flight,
+## the lance off for the whole flight (owner item 66), a knockback speeding it up, a stun ending it, never over the abyss, the merge drop, the
 ## cooldown and the burst cap.
 
 const BURST := preload("res://tools/ult_burst.gd")
@@ -200,12 +200,15 @@ func _carpet() -> void:
 			"charges %.1f -> %.1f" % [ch0, K.ch_rmb])
 	K.ch_rmb = float(K.rmb_charges())
 	var em0: int = K.hose.emitted
+	var denied0: int = K.lmb_denied
 	ak.step(m, 0.4, func():
 		P.inp["fire"] = true
 		ak.aim_at(P, home + Vector3(16, 0, 0)))
 	P.inp["fire"] = false
-	ok("ult: the lance roars mid-flight", K.hose.emitted > em0 + 4 and J.running(),
+	ok("ult 66: the lance does not roar mid-flight (no flame, no queued shot)", K.hose.emitted == em0 and J.running(),
 			"puffs +%d" % (K.hose.emitted - em0))
+	ok("ult 66: a press ticks softly once (denied), not once a frame", K.lmb_denied == denied0 + 1,
+			"denied %d" % (K.lmb_denied - denied0))
 	ak.step(m, 1.6, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 	# Ablaze in about 2.4s of standing in it (4 Char every 0.3s)
 	ak.fresh(T)
@@ -219,6 +222,7 @@ func _carpet() -> void:
 		"ult payoff: standing in it, Ablaze after about 2.4s", at_14 == 0 and K.burning(T) >= 1,
 		"at 1.4s %d, at 2.6s %d" % [at_14, K.burning(T)]
 	)
+	await _lance_off(m, P, K, T)
 	await _abyss(m, P, K, home, m.world)
 	await _knock_stun_merge(m, P, K, home)
 	await ak.done(m)
@@ -284,6 +288,112 @@ func _knock_stun_merge(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> voi
 		not J.running() and J.laid == laid and P.roll_t <= 0.0, "laid +%d" % (J.laid - laid)
 	)
 	KinMerge.end(P, "test")
+
+## Owner item 66: LMB does nothing in Flue Flight (no flame, nothing queued, a soft tick on a press), and the lance
+## is back on the first frame after it, however the flight ended.
+func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter) -> void:
+	# held through the whole flight, a foe at the nozzle, watched every frame
+	var pilot := "pilot%d" % P.get_instance_id()
+	ak.step(m, 1.0)
+	ok("ult 66: the idle pilot flame shows on the ground", K.fx.shown(pilot))
+	ak.fresh(T)
+	K.chars = {}
+	K.ignites = {}
+	T.teleport(P.pos + Vector3(3.0, 0, 0))
+	var at := P.pos + Vector3(0, 0, 40.0)
+	var J := _cast(P, at)
+	var em := K.hose.emitted
+	var denied := K.lmb_denied
+	var lit_in_flight := false
+	var frames := 0
+	while J.running() and frames < 300:
+		P.inp["fire"] = true
+		T.teleport(P.pos + Vector3(3.0, 0, 0))
+		ak.aim_at(P, P.pos + Vector3(3.0, 0, 0))
+		ak.step(m, 0.001)
+		frames += 1
+		if J.running():
+			lit_in_flight = lit_in_flight or K.was_held or K.fx.shown(pilot) or K.hose.emitted != em
+	ok("ult 66: LMB held through the whole flight: no flame, no pilot, no lance damage, Char or burn",
+			frames > 90 and not lit_in_flight and K.hose.emitted == em and ak.dmg(T) < 0.5 and K.chars.is_empty()
+			and K.burning(T) == 0, "%d frames, puffs +%d, dmg %.1f" % [frames, K.hose.emitted - em, ak.dmg(T)])
+	ok("ult 66: that hold ticks once, on its press", K.lmb_denied == denied + 1, "denied +%d" % (K.lmb_denied - denied))
+	ok("ult 66: LMB works on the first frame after the flight (the lance lights, its pilot up)",
+			K.was_held and K.spool > 0.0 and K.fx.shown(pilot) and P.ak.anim_id == "as_lance",
+			"held %s spool %.3f anim %s" % [K.was_held, K.spool, P.ak.anim_id])
+	ak.step(m, float(K.lmbd()["spool"]) + 0.3, func():
+		P.inp["fire"] = true
+		T.teleport(P.pos + Vector3(3.0, 0, 0))
+		ak.aim_at(P, T.pos))
+	P.inp["fire"] = false
+	ok("ult 66: out of the flight the lance roars and hits, after only its usual pilot",
+			K.hose.emitted > em and ak.dmg(T) > 0.5, "puffs +%d, dmg %.1f" % [K.hose.emitted - em, ak.dmg(T)])
+	ak.step(m, 0.5)
+	# tapped in the flight and let go: nothing waits for the landing
+	J = _cast(P, at)
+	ak.step(m, 0.3)
+	denied = K.lmb_denied
+	for i in 3:
+		ak.step(m, 0.05, func(): P.inp["fire"] = true)
+		P.inp["fire"] = false
+		ak.step(m, 0.05)
+	ok("ult 66: each press ticks", K.lmb_denied == denied + 3, "denied +%d" % (K.lmb_denied - denied))
+	em = K.hose.emitted
+	ak.step(m, 2.0)
+	ok("ult 66: a tap in the flight is ignored, not buffered (nothing fires on landing)",
+			not J.running() and not K.was_held and K.hose.emitted == em, "puffs +%d" % (K.hose.emitted - em))
+	# a stream running at lift-off goes out, and a hold carried in is no press
+	ak.step(m, 0.5, func(): P.inp["fire"] = true)
+	ok("ult 66: (the lance is roaring before the cast)", K.was_held and K.spool > 0.1)
+	denied = K.lmb_denied
+	J = _cast(P, at)
+	ak.step(m, 0.05, func(): P.inp["fire"] = true)
+	em = K.hose.emitted
+	ak.step(m, 0.2, func(): P.inp["fire"] = true)
+	ok("ult 66: a stream running at lift-off goes out; a hold carried in doesn't tick",
+			J.running() and not K.was_held and K.hose.emitted == em and K.lmb_denied == denied,
+			"held %s puffs +%d denied +%d" % [K.was_held, K.hose.emitted - em, K.lmb_denied - denied])
+	# X again lands: the very next frame the lance is live, with the release's relight gap gone too
+	P.inp["fire"] = false
+	J.recast()
+	ak.step(m, 0.5)
+	ak.step(m, 0.5, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	m.step(ak.DT)
+	ok("ult 66: (a release leaves its relight gap running)", float(K.relight_t) > 0.0, "%.2f" % K.relight_t)
+	J = _cast(P, at)
+	ak.step(m, 0.05)
+	J.recast()
+	P.inp["fire"] = true
+	m.step(ak.DT)
+	P.inp["fire"] = false
+	ok("ult 66: landing early with X: LMB lights on the first frame, no relight gap left over", K.was_held,
+			"relight %.2f" % K.relight_t)
+	ak.step(m, 0.5)
+	# whatever is in her hand, and the tick is the local player's own
+	J = _cast(P, at)
+	ak.step(m, 0.05)
+	var wid0 := P.wid
+	P.wid = "rifle"
+	P.inp["fire"] = true
+	ok("ult 66: another weapon in her hand doesn't fire in the flight either", K.lmb_override(true, ak.DT))
+	P.inp["fire"] = false
+	K.lmb_override(false, ak.DT)
+	P.wid = wid0
+	m.hud.slot_fx.erase("base")
+	K.lmb_override(true, ak.DT)
+	ok("ult 66: a press answers on the LMB slot with the deny cue",
+			String((m.hud.slot_fx.get("base", {}) as Dictionary).get("kind", "")) == "deny")
+	K.lmb_override(false, ak.DT)
+	m.hud.slot_fx.erase("base")
+	var ctrl0 := P.ctrl
+	P.ctrl = "bot"
+	K.lmb_override(true, ak.DT)
+	K.lmb_override(false, ak.DT)
+	P.ctrl = ctrl0
+	ok("ult 66: a bot's press is refused the same way, with no tick in your ears", not m.hud.slot_fx.has("base"))
+	J.recast()
+	ak.step(m, 0.5)
 
 ## Item 51: Shift in the flight is a poof that feeds it (the air dash spent, faster, bent its way, still flying);
 ## a jump leaps off it at once, keeping a share of its speed into the air.
