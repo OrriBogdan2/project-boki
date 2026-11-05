@@ -40,6 +40,7 @@ const OPTIONAL := ["cape", "scarf", "tail", "wings"]
 ## bone, and the Warden's kit poses them on top of that (pose_extra): Dredge's grab-claw fingers, the eye, the winch
 ## drum, the rope and cargo hook that hang from it, and the tar pool at his feet.
 const EXTRA := {
+	"bulwark": {"x_weapon": "hand.R", "x_shield": "hand.L", "x_foot.L": "shin.L", "x_foot.R": "shin.R", "x_jaw": "head"},
 	"dredge": {"eye": "head", "claw1.L": "hand.L", "claw1_tip.L": "claw1.L", "claw2.L": "hand.L",
 		"claw2_tip.L": "claw2.L", "claw3.L": "hand.L", "claw3_tip.L": "claw3.L", "winch": "hips", "rope1": "hips",
 		"rope2": "rope1", "hook": "rope2", "pool": "root"},
@@ -103,6 +104,8 @@ const WEAPON_OFF := "weapon_offhand"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
 ## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire).
 const WING_FOLD := "wing_fold"
+const SEAT := "seat_"           # seat_<bone>: the skinned weapon's bone follows the rig's weapon node (Sync.ready_seats)
+const ANIM := "hunter_anim"     # root meta: this model's HunterAnim (its last state drives WardenClips)
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
@@ -209,6 +212,8 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	var off: Array = own.get("weapon_offset", [0.0, 0.0, 0.0])
 	_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]))
 	_hold_shield(root, glb)
+	sync.ready_seats(glb)
+	sync.clips = WardenClips.setup(root, glb, skel, art(arch))
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 	_smoke(root, look(art(arch)))
 	_bloom(root, glb, look(art(arch)))
@@ -418,6 +423,31 @@ static func _hold_shield(root: Node3D, glb: Node3D) -> void:
 	shield.owner = null
 	holder.add_child(shield)
 	shield.transform = Transform3D.IDENTITY
+
+## The node's own visible flags up to the model (visible_in_tree needs the tree; a kit hides one node).
+static func in_tree_visible(nd: Node3D) -> bool:
+	return nd.visible
+
+## The hand-held weapon that leaves the hand (item 76b): a plain copy of the skinned mesh "hammer", on its own node with
+## the grip at the origin in the rig's hammer frame, for the kit to fly and plant. null on a procedural model.
+static func thrown_piece(root: Node3D, mesh_name: String, bone: String) -> Node3D:
+	var w := root.get_node_or_null("Warden")
+	var src := w.find_child(mesh_name, true, false) as MeshInstance3D if w else null
+	var sk := skeleton(w)
+	var seat := w.find_child(SEAT + bone, true, false) as Node3D if w else null
+	if src == null or sk == null or seat == null:
+		return null
+	var at := seat.get_parent() as BoneAttachment3D
+	var base := sk.get_bone_global_rest(WardenSkeleton.find(sk, at.bone_name)) if at else Transform3D.IDENTITY
+	var mi := MeshInstance3D.new()
+	mi.mesh = src.mesh
+	mi.transform = (base * seat.transform).affine_inverse()
+	for si in src.get_surface_override_material_count():
+		mi.set_surface_override_material(si, src.get_surface_override_material(si))
+	var holder := Node3D.new()
+	holder.name = "ThrownPiece"
+	holder.add_child(mi)
+	return holder
 
 ## Poses one of the Warden's variant bones (EXTRA) on its rest, riding its parent: turned by `rot` about its head
 ## (an axis in model space as the model rests: Vector3.RIGHT turns a drum about its side-to-side axle), scaled by `scl`
@@ -725,6 +755,8 @@ class Sync extends Node:
 	var links: Array = []       # [bone index, rig node, node rest (model space) inverse, bone rest (skeleton space)]
 	var springs := Springs.new()  # the spring_ bone chains (braids) swinging on top
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
+	var seats: Array = []         # [bone, node it follows, the node's rest inverse x the bone's rest]: seat_ empties
+	var clips: WardenClips        # the hand-keyed clips, when the Hunter has them (WardenClips)
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -740,8 +772,34 @@ class Sync extends Node:
 		springs.setup(skel)
 		orbits.setup(skel)      # (the glTF import hangs a node riding a bone on a BoneAttachment3D under it)
 
+	## A skinned weapon (ART-1, item 76b): an empty seat_<bone> says which frame of the bone's rest stands for the
+	## rig's weapon node, so a procedural move carries the skinned weapon as it did the pinned one, and the weapon
+	## hides when the kit hides that node (Breaker's thrown hammer). Clips pose the bone on top of this.
+	func ready_seats(glb: Node) -> void:
+		for n in glb.find_children(SEAT + "*", "Node3D", true, false):
+			var bi := WardenSkeleton.find(skel, String(n.name).trim_prefix(SEAT))
+			var w := root.get_node_or_null("Rig/Torso/Aim/Gun").find_child(WEAPON, true, false) as Node3D
+			if bi < 0 or w == null or w.get_parent() == null:
+				continue
+			var at := n.get_parent() as BoneAttachment3D
+			var base := skel.get_bone_global_rest(WardenSkeleton.find(skel, at.bone_name)) if at else Transform3D.IDENTITY
+			var rest: Transform3D = base * (n as Node3D).transform
+			seats.append([bi, w.get_parent(), rest.affine_inverse() * skel.get_bone_global_rest(bi)])
+
+	func _seat() -> void:
+		for st in seats:
+			var nd: Node3D = st[1]
+			var xf := WardenGlb.model_xf(root, nd)
+			xf.basis = xf.basis.orthonormalized()
+			skel.set_bone_global_pose(int(st[0]), xf * (st[2] as Transform3D))
+
 	func _process(dt: float) -> void:
 		apply()
+		_seat()
+		if clips:
+			clips.step(dt, root.get_meta(ANIM, null) as HunterAnim)
+		for st in seats:
+			skel.set_bone_pose_scale(int(st[0]), Vector3.ONE if WardenGlb.in_tree_visible(st[1]) else Vector3.ZERO)
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
 		orbits.step(dt)

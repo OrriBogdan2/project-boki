@@ -104,7 +104,12 @@ func _ready() -> void:
 	hammer.top_level = true
 	hammer.visible = false
 	add_child(hammer)
-	PinBjornWeapons.hammer(hammer, 1.25)
+	# (the skinned hammer's own mesh on a 3D model, else the procedural one)
+	var own := WardenGlb.thrown_piece(h.model, "hammer", "x_weapon") if h.model else null
+	if own:
+		hammer.add_child(own)
+	else:
+		PinBjornWeapons.hammer(hammer, 1.25)
 	hammer_glow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", Color(GOLD, 0.9), true))
 	trail = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", Color(1.0, 0.62, 0.2), true))
 	beacon = KitMeshes.inst(self, KitMeshes.pillar(0.22, 0.4, 5.0), KitShaders.mat("beam", GOLD, true))
@@ -247,6 +252,9 @@ func _pivot() -> Node3D:
 	return null
 
 func _head_world() -> Vector3:
+	var at := WardenGlb.anchor(h.model, "anchor_hammer_head") if h.model else null
+	if at and at.is_inside_tree():
+		return at.global_position
 	var pv := _pivot()
 	if pv == null or not pv.is_inside_tree():
 		return Vector3.INF
@@ -254,6 +262,8 @@ func _head_world() -> Vector3:
 
 ## Shows or hides the hammer in his hand (it's out while thrown).
 func in_hand(on: bool) -> void:
+	if h.model:
+		h.model.set_meta(WardenClips.WEAPON_OUT, not on)
 	var pv := _pivot()
 	if pv:
 		pv.visible = on
@@ -270,7 +280,7 @@ func _cock(pv: Node3D, delta: float) -> void:
 func _place_glint(pv: Node3D) -> void:
 	if not glint.visible:
 		return
-	glint.global_position = pv.to_global(Vector3(0, 0, -0.62))
+	glint.global_position = _head_world()
 	var pulse := 0.85 + 0.15 * sin(Time.get_ticks_msec() * (0.06 if hot else 0.025))
 	glint.scale = Vector3.ONE * lerpf(0.55, 1.2, glint_k) * pulse * (1.35 if hot else 1.0)
 	KitShaders.param(glint, "power", lerpf(0.8, 1.5, glint_k) * (1.4 if hot else 1.0))
