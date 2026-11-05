@@ -490,9 +490,9 @@ func _open_hatch(x: Dictionary, h: Hunter) -> void:
 	m.fx.burst(x["pos"] + Vector3(0, 0.3, 0), ExitModels.HATCH, 12, 2.5, 0.5, -3.0)
 	if m.player and not m.player.out and m.hud and m.player.flat_dist(x["pos"]) < 30.0:
 		if h == m.player:
-			m.hud.toast("RIFT KEY TURNED  ·  THE HATCH OPENS IN %dS" % int(HATCH_UNLOCK_T), ExitModels.HATCH)
+			m.hud.toast("HATCH OPENS IN %dS" % int(HATCH_UNLOCK_T), ExitModels.HATCH)
 		elif h.team != m.player.team:
-			m.hud.toast_small("%s is opening a rift hatch nearby" % h.pname, ExitModels.HATCH)
+			m.hud.toast_small("Rival opening a hatch nearby", ExitModels.HATCH)
 
 func _set_hatch_open(x: Dictionary, open: bool) -> void:
 	var n: Node3D = x["node"]
@@ -752,7 +752,7 @@ func _waves(x: Dictionary, dt: float) -> void:
 	if spawned > 0:
 		m.sfx("thump", focus, -4.0, 0.8)
 		if m.player and not m.player.out and m.player.flat_dist(focus) < 24.0 and m.hud:
-			m.hud.toast_small("Monsters are coming at the %s!" % ("dock" if x["kind"] == "dock" else "outpost"), Color("ff9a6a"))
+			m.hud.toast_small("Monsters incoming!", Color("ff9a6a"))
 
 func _wave_spot(focus: Vector3, ii: int) -> Vector3:
 	var W := m.world
@@ -789,7 +789,7 @@ func on_last_team() -> void:
 		if x["kind"] == "dock" and x["state"] == "called" and float(x["t"]) > RUSH_CALL_T:
 			x["t"] = RUSH_CALL_T
 	if m.player and not m.player.out and not m.player.extracted and m.hud:
-		m.hud.toast_small("Last squad standing: skiffs come faster, uplinks charge faster", Color("8fe3c8"))
+		m.hud.toast_small("Last squad: exits speed up", Color("8fe3c8"))
 
 ## The admin menu's "exits ready now".
 func admin_ready() -> void:

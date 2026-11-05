@@ -91,7 +91,7 @@ func use(it: Dictionary) -> void:
 		return
 	var t := tool_for(String(it["what"]))
 	if not has_tool(t):
-		h._toast("You need a%s %s for that: the market sells them (Farm tab)" % ["n" if t == "axe" else "", String(TOOLS[t]["name"]).to_lower()])
+		h._toast("Needs a%s %s (Market)" % ["n" if t == "axe" else "", String(TOOLS[t]["name"]).to_lower()])
 		return
 	var w: World = h.world
 	var i := int(it["i"])

@@ -347,7 +347,7 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 					h.pack.remove_at(li)
 					h.pack.append(pit)
 				elif h == m.player and m.hud:
-					m.hud.toast_small("Your backpack is full of better things", Color("ffb0a0"))
+					m.hud.toast_small("Pack full", Color("ffb0a0"))
 	m.sfx("pickup", b["pos"], -4.0, 0.9)
 	_settle_box(b)
 
@@ -421,7 +421,7 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 	m.sfx("pickup", b["pos"], -2.0, 0.9)
 	m.fx.burst(b["pos"] + Vector3(0, 0.6, 0), Color("ffd36a"), 14, 3.0, 0.4)
 	if h == m.player and m.hud:
-		m.hud.toast_small("Looted %s's box%s" % [(b["owner"] as Hunter).pname if b["owner"] != h else "your own", ("  +%d gems" % got) if got > 0 else ""], Color("ffd36a"))
+		if got > 0: m.hud.toast_small("+%d gems" % got, Color("ffd36a"))
 
 static func _refresh_box(b: Dictionary) -> void:
 	var n: Node3D = b["node"]
@@ -573,4 +573,4 @@ static func _use_beacon(m: Match, bc: Dictionary, team: int) -> void:
 	m.add_feed("A revive beacon brought back %s" % ", ".join(names))
 	trace(m, "beacon team %d brought back %s" % [team, ", ".join(names)])
 	if m.player and m.player.team != team and m.hud:
-		m.hud.toast_small("A revive beacon went off " + m.direction_word(m.player.pos, bc["pos"]), Color("8fffc0"))
+		m.hud.toast_small("Revive beacon " + m.direction_word(m.player.pos, bc["pos"]), Color("8fffc0"))

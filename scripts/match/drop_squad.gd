@@ -188,7 +188,7 @@ func pass_lead(h: Hunter, to: Hunter = null, from_net := false) -> bool:
 	# aboard: anyone still aboard; in the air: anyone gliding in your formation
 	var pool: Array = m.hunters.filter(func(x): return x.team == h.team and not x.out and not x.extracted and x != h and ((h.riding and x.riding) or (h.dropping and x.dropping and x.drop_follow == h)))
 	if pool.is_empty():
-		if h == m.player and m.hud: m.hud.toast_small("Nobody left to pass the lead to", Color("a9b0bf"))
+		if h == m.player and m.hud: m.hud.toast_small("No one to lead", Color("a9b0bf"))
 		return false
 	if to == null or not pool.has(to):
 		# the next squadmate after you, going round the squad
@@ -233,7 +233,7 @@ func separate(h: Hunter, from_net := false) -> bool:
 	if m.net_on and not from_net:
 		m.net_event(["dsep", h.nid])
 	if h == m.player and m.hud:
-		m.hud.toast_small("You're dropping solo" + ("  ·  %s to jump" % Settings.key_cap("jump") if h.riding else ""), Color("8fd8ff"))
+		m.hud.toast_small("Dropping solo", Color("8fd8ff"))
 	if h.riding and h.ctrl == "bot" and not h.remote:
 		m.plan_jump(h, h.ai.get("land", h.pos))
 	return true
