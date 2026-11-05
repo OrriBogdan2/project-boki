@@ -1391,3 +1391,6 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
   - ext/kit-tarek-61-67 eb040e7d. **S4:** br_rumble and br_crumble came in as committed .wav files; the old gen_stone_sfx.py stays deleted. Please port their two generator functions into gen_sfx_tarek.py.
   - ext/kit-cinder-66 ea287770
   - ext/portraits-three 8edb4f23
+
+## 2026-11-05 16:54 UTC S5 RELEASED v0.23.0 (main b23aab82)
+- https://github.com/OrriBogdan2/project-boki/releases/tag/v0.23.0 published at 16:52 UTC, first try, all 5 assets. It is now releases/latest, so launchers update to it on their next start. It adds art2-kael + art2-lisette (Kael's and Lisette's ability VFX and sounds) over v0.22.0.
