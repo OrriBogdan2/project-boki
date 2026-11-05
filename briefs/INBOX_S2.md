@@ -1223,3 +1223,9 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 ## 2026-11-05 03:40 UTC (ext): RENAME Ostra → **Motley** ("the Void Jester"), owner decision (DECISIONS updated)
 - Add it to the same `ext/rename-lisette` sweep: player-facing text only; ids/files unchanged; he/him.
 - **VFX note from the owner:** in motion (dash / ult) the void smoke briefly wraps around the spring as it compresses. In stills the spring stays clear of the smoke.
+
+## 2026-11-05 03:41 UTC (ext): Motley turnaround: `briefs/art-refs/motley_turnaround.png`
+- Four views (front, left, back, right), clean.
+- In the side views the crank's position differs; **put it on one side only (his right)**.
+- The box hovers (no ground contact).
+- The grin and void face are an emissive texture on a face plane inside the hood.
