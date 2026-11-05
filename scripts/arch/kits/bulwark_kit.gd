@@ -4,11 +4,11 @@ extends ArchKit
 ##
 ## - LMB (War Hammer): tap throws the hammer to the cursor (clamped to its range; it passes through foes
 ##   and stays planted under a gold beacon, showing foes near it to your team, until you tap again to
-##   call it back, hitting on the way). Hold drags the hammer back low behind him, side-on and crouched,
-##   turning with the cursor (a glint on its head from 0.6 s); at full (1.25 s) he coils deepest, and a flash
-##   on its head and a click open the perfect window. Let go and it's a Crushing Blow: a flaming 180 degree
-##   crescent in front that steps him forward with it; let go in the window and it's the perfect swing, a
-##   leaping launch (BjornLaunch).
+##   call it back, hitting on the way). Hold whirls the hammer round him at arm's length, turning faster as it
+##   charges (a glint on its head from 0.6 s, no damage until he lets go); at full (1.25 s) a flash
+##   on its head and a click open the perfect window, the whirl still going. Let go and it's a Crushing Blow: a
+##   flaming 180 degree crescent in front that steps him forward with it; let go in the window and it's the
+##   perfect swing, a leaping launch (BjornLaunch).
 ## - RMB: hold to raise his aegis (its own HP, regenerates); letting go only lowers it.
 ## - Dash: 360 Smash, a short dash that ends in one full spin hit around him; with the aegis raised it's
 ##   the Shield Charge (the Bash: invulnerable for its length, a heavier knock) on the RMB slot's own cooldown.
@@ -37,6 +37,7 @@ var fx: BjornFx                # Breaker's pooled effects
 var ult: BjornUlt              # X: Faultline
 var launch: BjornLaunch        # the perfect swing's launch
 var flared := false            # this hold's full-charge flare has gone off
+var spin := 0.0                # the whirled hammer's angle (rad), counted on match time (BjornFx draws it)
 var throws := 0                # (checks) hammers thrown, and the last throw's landing distance
 var throw_d := 0.0
 var slams := 0                 # (checks) Crushing Blows let go, the last one's charge and carry start
@@ -418,16 +419,23 @@ func cancel_hold() -> void:
 			anim_id = ""
 	hold_blocked = bool(h.inp.get("fire", false))
 
-## The swing held: the hammer dragged back behind him (BjornFx, one whoosh as it goes back), the glint from
-## 0.6 s; at full he coils deepest and the perfect window opens with a flash on its head, a click and the
-## cursor ring's flare (the glint burns hot until the window shuts); the body keeps facing the cursor (Hunter
-## faces its aim).
+## The swing held: the hammer whirls round him (BjornFx draws it; the angle is counted here on match time, the
+## rate is lmb.spin_turns from no charge to full, a whoosh each turn), the glint from 0.6 s; at full the perfect
+## window opens with a flash on its head, a click and the cursor ring's flare (the glint burns hot until the
+## window shuts); the body keeps facing the cursor (Hunter faces its aim). The whirl itself never hits.
 func _hold_tell() -> void:
 	if lmb_t < float(lmb_def()["tap"]):
 		return
 	var k := smash_k()
-	fx.hold(lmb_t, k, launch.in_window(lmb_t))
+	if not fx.held:
+		spin = h.face         # (the head leaves from in front of him)
+	var was := spin
+	var rate: Array = lmb_def()["spin_turns"]
+	spin += TAU * lerpf(float(rate[0]), float(rate[1]), k) * Match.DT
+	fx.hold(lmb_t, k, launch.in_window(lmb_t), spin)
 	AimKit.charge(h, k, {"col": Color("ffc94a"), "col2": Color("fff1c0"), "flare": false})
+	if floori(spin / TAU) > floori(was / TAU):
+		m.sfx("bjorn_spin", h.pos, -9.0 if h.is_local() else -13.0, lerpf(0.9, 1.25, k))
 	if k >= 0.99 and not flared:
 		flared = true
 		fx.full_flare()
@@ -532,6 +540,7 @@ func _recall() -> void:
 func _mace_hit(f: Ent, dmg: float, dir: Vector2) -> void:
 	knock_until = m.time + 0.25       # its knock into a wall Crushes too (data: any knock into a wall)
 	f.hurt(dmg * _wk(), h, {"src": "abil", "ab": "primary", "tags": ["primary", "mace"], "kb": dir * 3.0, "melee": true})
+	m.sfx("bulwark_hammer_clang", f.pos, -4.0)
 
 func _tick_mace(dt: float) -> void:
 	if mace.is_empty():
@@ -637,6 +646,7 @@ func _raise() -> void:
 	last_variant = "air" if rmb_ctx.get("air", false) else "hold"
 	play("bul_guard")
 	m.sfx("bjorn_shield_up", h.pos, -4.0)
+	m.sfx("bulwark_hull_creak", h.pos, -7.0)      # the prow's old timbers take the strain
 	fx.aegis_rise(h.pos + Vector3(d.x, 0, d.y) * 1.2)
 
 ## A Boki merge ends every hold of this kit with no release effect: the Crushing Blow's charge (lmb_t) and the raised
@@ -709,7 +719,7 @@ func on_dash(use_ex: bool) -> bool:
 		travel(sd2, sd2 / float(dd["whirl_speed"]), {"invuln": 0.0, "trail": "dust", "dir": dash_dir()})
 		st["last_dash"] = "short"
 		play("bul_short")
-		m.sfx("ab_whirr", h.pos, -6.0, 0.9)
+		m.sfx("bjorn_spin", h.pos, -6.0, 0.9)
 		return true
 	if not wall.is_empty() and h.grounded:
 		# Shield Charge (into_dash.rmb): behind the raised shield, on its own cooldown (the RMB
@@ -728,7 +738,7 @@ func on_dash(use_ex: bool) -> bool:
 		st["last_dash"] = "charge"
 		play("bul_charge")
 		m.fx.word(h.pos + Vector3(0, 2.3, 0), "SHIELD CHARGE", col_of(dd), false)
-		m.sfx("shield", h.pos, 0.0, 0.55)
+		m.sfx("bulwark_charge", h.pos, -2.0)
 		return true
 	if not spend_dash(use_ex):
 		return true

@@ -8,6 +8,7 @@ uniform float strength = 1.2;
 uniform float px = 3.0;          // the halo's radius on screen (pixels)
 uniform float near_d = 7.0;      // no halo this close to the camera (m) ...
 uniform float far_d = 14.0;      // ... full from here
+uniform float lift = 0.0;        // m more toward the camera (a lens behind a fringe of hair)
 varying float fade;
 void vertex() {
 	vec3 c = (MODELVIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
@@ -18,7 +19,7 @@ void vertex() {
 	float facing = smoothstep(-0.15, 0.35, dot(fwd, -c / max(d, 1e-4)));
 	fade = smoothstep(near_d, far_d, d) * facing;
 	// pulled toward the camera by its radius, so the face it sits on never clips it
-	vec3 centre = c - c / max(d, 1e-4) * r;
+	vec3 centre = c - c / max(d, 1e-4) * (r + lift);
 	vec2 corner = (UV - 0.5) * 2.0;
 	POSITION = PROJECTION_MATRIX * vec4(centre + vec3(corner * r, 0.0), 1.0);
 }

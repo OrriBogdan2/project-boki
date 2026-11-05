@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ckc588dnkvp4c"
-path="res://.godot/imported/breaker_atlas.jpg-d15e857f62dd8d065572fcb5345ae0c0.ctex"
+path.bptc="res://.godot/imported/breaker_atlas.jpg-d15e857f62dd8d065572fcb5345ae0c0.bptc.ctex"
+path.astc="res://.godot/imported/breaker_atlas.jpg-d15e857f62dd8d065572fcb5345ae0c0.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "92959c4613e83b77eee4d81016423412"
+"md5": "919c04118cbcd928896f30703dd51e6c"
 }
 
 [deps]
 
 source_file="res://art/wardens/breaker/breaker_atlas.jpg"
-dest_files=["res://.godot/imported/breaker_atlas.jpg-d15e857f62dd8d065572fcb5345ae0c0.ctex"]
+dest_files=["res://.godot/imported/breaker_atlas.jpg-d15e857f62dd8d065572fcb5345ae0c0.bptc.ctex", "res://.godot/imported/breaker_atlas.jpg-d15e857f62dd8d065572fcb5345ae0c0.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -39,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
-detect_3d/compress_to=1
+process/size_limit=2048
+detect_3d/compress_to=0

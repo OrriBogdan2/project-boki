@@ -152,6 +152,10 @@ static func title(text: String, size := 34, col := INK) -> Label:
 	return l
 
 # ---------------------------------------------------------------- buttons
+## Buttons whose label says "go back" play the falling pair instead of the tap.
+const BACK_WORDS := {"Back": "ui_back", "Close": "ui_back", "Cancel": "ui_back", "✕": "ui_back",
+	"Leave it  (Esc)": "ui_back"}
+
 ## The secondary button (an outline). icon: an Icons id drawn at its left. Hover fills it with the
 ## theme's hover colour (no growing: a button never spills over its neighbours or the panel edge);
 ## pressing sinks it a touch, in about 70 ms.
@@ -159,7 +163,8 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 	var b := Button.new()
 	b.text = text
 	if cb.is_valid():
-		b.pressed.connect(func(): Sfx.play("click"); cb.call())
+		var snd: String = BACK_WORDS.get(text, "click")
+		b.pressed.connect(func(): Sfx.play(String(b.get_meta("snd", snd))); cb.call())
 	if minw > 0.0:
 		b.custom_minimum_size.x = minw
 	if icon != "":
@@ -185,6 +190,7 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 ## The main button of a screen: filled accent, dark text. One per screen.
 static func primary(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := button(text, cb, minw, icon)
+	b.set_meta("snd", "ui_confirm")
 	b.theme_type_variation = "Primary"
 	return b
 
@@ -357,6 +363,7 @@ static func tabs(names: Array, cur: String, cb: Callable, counts := {}, minw := 
 		if counts.has(nm): txt = "%s  %s" % [nm, str(counts[nm])]
 		var b := button(txt, func(): if nm != cur: cb.call(nm), minw)
 		b.theme_type_variation = "SegOn" if nm == cur else "Seg"
+		b.set_meta("snd", "ui_tab")
 		b.set_meta("tab", nm)
 		row.add_child(b)
 	track.set_meta("pg_keep", true)
@@ -1019,72 +1026,16 @@ static func badge(icon: String, col: Color, px := 44.0, rad := R_PILL) -> PanelC
 	b.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return b
 
-## A short note that drops in at the top centre of `host`, holds a moment and fades out
-## ("Bramble Isle is open"). Never more than one line. One at a time per host: the rest queue (up to
-## TOAST_QUEUE) and slide in as each fades; the same text showing or waiting counts up ("x2").
+## A short note at the top centre of `host` ("Bramble Isle is open"), in the host's message lane
+## (MsgLane: stacked, repeats merged, a few at a time). `y` is where the lane starts.
 static func toast(host: Control, txt: String, col := GOLD, y := 100.0) -> void:
-	var hid := host.get_instance_id()
-	for k in _toasts.keys():
-		if not is_instance_id_valid(k): _toasts.erase(k)
-	var st: Dictionary = _toasts.get(hid, {"cur": {}, "wait": []})
-	_toasts[hid] = st
-	var cur: Dictionary = st["cur"]
-	if not cur.is_empty() and cur["txt"] == txt:
-		cur["n"] += 1
-		(cur["label"] as Label).text = "%s  x%d" % [txt, cur["n"]]
-		return
-	var wait: Array = st["wait"]
-	for w in wait:
-		if w["txt"] == txt:
-			w["n"] += 1
-			return
-	wait.append({"txt": txt, "col": col, "y": y, "n": 1})
-	if wait.size() > TOAST_QUEUE:      # drop the oldest repeat first, else the oldest
-		var drop := 0
-		for i in wait.size():
-			if wait[i]["n"] > 1:
-				drop = i
-				break
-		wait.remove_at(drop)
-	if cur.is_empty(): _toast_next(host)
+	var lane := MsgLane.of(host)
+	lane.top = y
+	lane.push(txt, col)
 
-const TOAST_QUEUE := 5       # toasts waiting behind the one on show
-static var _toasts := {}     # host instance id -> {cur: the toast on show, wait: [the next ones]}
-
-## Shows the next waiting toast on `host`; when it fades the one after it slides in.
-static func _toast_next(host: Control) -> void:
-	var st: Dictionary = _toasts.get(host.get_instance_id(), {})
-	if st.is_empty() or not is_instance_valid(host): return
-	if (st["wait"] as Array).is_empty():
-		st["cur"] = {}
-		return
-	var cur: Dictionary = (st["wait"] as Array).pop_front()
-	st["cur"] = cur
-	var y: float = cur["y"]
-	var c := glass(12, R_CARD)
-	var f := c.get_theme_stylebox("panel") as UiFrame
-	f.edge = Color(cur["col"], 0.35)
-	f.padded(20, 10)
-	var l := label(String(cur["txt"]), 21, cur["col"], big)
-	l.add_theme_constant_override("outline_size", 4)
-	l.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.08, 0.6))
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # a long line wraps at a sane width, never word by word
-	var natural := big.get_string_size(l.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 21).x
-	l.custom_minimum_size.x = minf(natural, host.get_viewport_rect().size.x * 0.7)
-	c.add_child(l)
-	cur["label"] = l
-	host.add_child(c)
-	c.reset_size()
-	c.position = Vector2((host.get_viewport_rect().size.x - c.size.x) * 0.5, y - 16.0)
-	c.modulate.a = 0.0
-	var tw := c.create_tween()
-	tw.tween_property(c, "modulate:a", 1.0, 0.18)
-	tw.parallel().tween_property(c, "position:y", y, 0.24).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
-	tw.tween_interval(2.2)
-	tw.tween_property(c, "modulate:a", 0.0, 0.4)
-	tw.tween_callback(func():
-		c.queue_free()
-		_toast_next(host))
+## True while a toast is on show (or waiting) over `host`.
+static func toast_busy(host: Control) -> bool:
+	return MsgLane.of(host).count() > 0
 
 ## The layer under confirm(): Esc (or the pad's B) cancels it before anything else sees the key.
 class Modal extends Control:

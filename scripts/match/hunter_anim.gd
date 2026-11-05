@@ -41,6 +41,7 @@ const LEG := THIGH + SHIN
 const UPPER := 0.21
 const FORE := 0.235
 const REACH := UPPER + FORE
+const WEAPON_SLACK := 0.02     # m: the trigger hand may sit this far off its grip before the weapon is pulled to it
 const BODY_C := Vector3(0, 0.62, 0)      # whole-body turns (flips, rolls) go about the hips
 const G_UP := Hunter.H_GRAV                # for guessing how long a jump stays up
 const FLIP_MIN := 0.8                     # total airtime that earns a trick
@@ -60,6 +61,7 @@ const PAD_FOLLOW := 0.55
 ## Where each kind of weapon sits under Aim while aimed (pos), the relaxed carry (low: pitch, yaw),
 ## and where the hands go on it (gr: the trigger hand, gl: the support hand; Vector3.INF = free).
 ## Recoil: kick (pitch), push (back), jitter (the gun wobbles in the hand).
+const EMPTY_HAND := Vector3(0.09, -0.45, 0.03)     # m from the shoulder: an empty right hand, hanging loose
 const HOLDS := {
 	"rifle": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.38), "gr": Vector3(0, -0.07, 0.04), "gl": Vector3(0, -0.06, -0.2), "kick": 0.12, "push": 0.05, "jitter": 0.2},
 	"burst_rifle": {"pos": Vector3(0.12, -0.14, -0.3), "low": Vector2(-0.48, 0.36), "gr": Vector3(0, -0.08, 0.0), "gl": Vector3(0, -0.06, -0.16), "kick": 0.14, "push": 0.05, "jitter": 0.15},
@@ -321,8 +323,9 @@ func _init(m: Node3D) -> void:
 	race = String(m.get_meta("race", "human"))
 	arch = String(m.get_meta("arch", ""))
 	st = (STANCE.get(cls, STANCE["medium"]) as Dictionary).duplicate()
-	st.merge(WardenStance.gait(arch), true)
-	ws = WardenStance.new(arch)
+	var stance := String(m.get_meta("stance", arch))      # the Empty's own stance by sex (Unmasked)
+	st.merge(WardenStance.gait(stance), true)
+	ws = WardenStance.new(stance)
 	rng = int(m.get_meta("anim_seed", m.get_instance_id())) & 0x7fffffff
 	seed_ph = _rand() * TAU
 	weight = 1.0 if _rand() < 0.5 else -1.0
@@ -654,9 +657,11 @@ func update(dt: float, s: Dictionary) -> void:
 	was_rolling = rolling
 	dash_t += dt
 	dash_k = _ease(dash_k, 1.0 if rolling and dash_kind != "roll" else 0.0, 22.0 if rolling else 9.0, dt)
-	# a 3D model's wings fold back while she skates (WardenGlb.Springs, the root's WING_FOLD meta)
-	if dash_kind == "skate" or model.has_meta(WardenGlb.WING_FOLD):
-		model.set_meta(WardenGlb.WING_FOLD, dash_k if dash_kind == "skate" else 0.0)
+	# a 3D model's wings fold back while she skates and flare on a kit move's "wg" (WardenGlb.Springs,
+	# the root's WING_FOLD meta)
+	var flare := float(km.get("wg", 0.0))
+	if dash_kind == "skate" or flare > 0.0 or model.has_meta(WardenGlb.WING_FOLD):
+		model.set_meta(WardenGlb.WING_FOLD, dash_k if dash_kind == "skate" else -flare)
 	var roll_k := 0.0
 	var roll_ang := 0.0
 	if roll_t >= 0.0:
@@ -676,7 +681,7 @@ func update(dt: float, s: Dictionary) -> void:
 			stepped = true
 	# strafing and backpedalling: the legs turn toward where you're going; backwards they swing the other way
 	var want_yaw := 0.0
-	if spd > 0.6 and grounded:
+	if spd > 0.6 and (grounded or rolling):
 		var rel := atan2(ms, mf)
 		if absf(rel) > PI * 0.62:
 			back = _ease(back, -1.0, 12.0, dt)
@@ -1009,7 +1014,12 @@ func update(dt: float, s: Dictionary) -> void:
 	# a Warden's and the leg-length slider's)
 	var dl2 := (THIGH * cos(hl) + SHIN * cos(hl + kl)) * cos(wl)
 	var dr2 := (THIGH * cos(hr) + SHIN * cos(hr + kr)) * cos(wr)
-	var drop := (LEG - maxf(dl2, dr2)) * legs.scale.y * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k) * (1.0 - dive_k) * (1.0 if roll_t < 0.0 else 0.0)
+	var leg_ref := LEG
+	if arch == "unmasked":      # the Empty's soles, not a point foot, meet the ground
+		dl2 = FootPlant.reach(hl, kl, wl)
+		dr2 = FootPlant.reach(hr, kr, wr)
+		leg_ref = FootPlant.HIP
+	var drop := (leg_ref - maxf(dl2, dr2)) * legs.scale.y * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k) * (1.0 - dive_k) * (1.0 if roll_t < 0.0 else 0.0)
 	var off := Vector3(wk * 0.028 * still, -drop + bounce * 0.008, 0.0) + ws.hip
 	if arch == "juggernaut":
 		off.y -= absf(cos(ph)) * 0.035 * r1        # each footfall lands with weight
@@ -1082,7 +1092,8 @@ func update(dt: float, s: Dictionary) -> void:
 ## turns about the hips: forward flip, side flip, spin), sq (squash; negative stretches), legs
 ## [hl kl hr kr] with lw (their weight), fl / fr (a free hand's place from its shoulder) with hw / rw,
 ## blade (the greatsword's yaw, pitch, roll, like SWINGS) with bw, rad (the blade's reach), gp (a
-## gun's extra pitch), wa / wo (a held weapon's extra pitch, yaw, roll and offset).
+## gun's extra pitch), wa / wo (a held weapon's extra pitch, yaw, roll and offset), wg (a 3D model's wings
+## flared, 0..1: WardenGlb.Springs).
 ## A move with "hold": true stays on its last key until another replaces it; with
 ## "loop": t as well it cycles from t to the last key instead (a recoil wobble, hand over hand). A move with
 ## "stance": true keys its legs as a planted stance, used only standing (stance_leg_k); with "swing": n the
@@ -1093,7 +1104,7 @@ const KMOVES := {
 ## (their hero sheets measure ~2.3-2.5 strides a second at a run).
 const STRIDE := {"archer": 2.9, "bulwark": 2.9}
 ## wf: how far a kit move takes the held weapon with the body (0: it stays on the aim, 1: it turns with the torso)
-const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw", "bw", "rad", "gp", "wf"]
+const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw", "bw", "rad", "gp", "wf", "wg"]
 var km := {}                   # the kit move's channels this frame (empty: none)
 var km_id := ""
 var km_prev_t := 99.0
@@ -1476,7 +1487,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	var at := aim.transform
 	var grip_r: Vector3 = hd["gr"]
 	var grip_l: Vector3 = hd["gl"]
-	var tr := at * (gun.transform * grip_r) if gun else sh_r + Vector3(0, -0.4, 0)
+	var tr := at * (gun.transform * grip_r) if gun else sh_r + EMPTY_HAND      # (no weapon: it hangs at the side)
 	var tl := Vector3.INF
 	if hold == "twin" and offhand:
 		tl = at * (offhand.transform * Vector3.ZERO)
@@ -1649,6 +1660,10 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	_ik(arm_r, el_r, sh_r + bsh, tr2, pole_r)
 	if hd.get("fist", false):
 		_fists_to_hands(grip_r)
+	elif gun and (free_r < 0.5 or hold == "twin"):
+		_weapon_to_hand(grip_r)
+	if hold == "twin" and offhand:
+		_offhand_to_hand()      # (twin weapons stay in the hands a kit move carries: fl / fr)
 	# the flask in the left hand
 	if drink_k > 0.0 and flask == null and hand_l:
 		flask = Node3D.new(); flask.name = "Flask"
@@ -1775,6 +1790,19 @@ func _fists_to_hands(grip: Vector3) -> void:
 		gun.position = to_aim * (arm_r.transform * (el_r.transform * hand_r.position)) - gun.basis * grip
 	if offhand and hand_l:
 		offhand.position = to_aim * (arm_l.transform * (el_l.transform * hand_l.position)) - offhand.basis * grip
+
+## A weapon whose trigger-hand grip is out of the arm's reach (a flip, a long lunge) comes to the hand: it never
+## detaches (RIG_STANDARD: the weapon stays in the hand in every state).
+func _weapon_to_hand(grip: Vector3) -> void:
+	var hand := aim.transform.affine_inverse() * (arm_r.transform * (el_r.transform * hand_r.position))
+	var off := hand - gun.transform * grip
+	if off.length() > WEAPON_SLACK:
+		gun.position += off
+
+func _offhand_to_hand() -> void:
+	var hand := aim.transform.affine_inverse() * (arm_l.transform * (el_l.transform * hand_l.position))
+	if hand.distance_to(offhand.position) > WEAPON_SLACK:
+		offhand.position = hand
 
 static func _reachable(sh: Vector3, want: Vector3, back_to: Vector3, reach: float) -> Vector3:
 	if sh.distance_to(want) <= reach:

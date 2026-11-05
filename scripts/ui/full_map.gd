@@ -33,12 +33,14 @@ func _init(h, match_node: Match) -> void:
 
 func open(by_plan := false) -> void:
 	is_open = true
+	Sfx.play("ui_open", null, -8.0)
 	auto = by_plan
 	zoom = 1.0
 	zoom_to = 1.0
 	center = Vector2(m.world.w, m.world.h) * 0.5
 
 func close() -> void:
+	if is_open: Sfx.play("ui_close", null, -8.0)
 	is_open = false
 	auto = false
 	_press = Vector2.INF
@@ -183,6 +185,7 @@ func draw(sz: Vector2) -> void:
 					hud._ctext(pv + Vector2(0, 17.0 * ek), st, 10, Exits.color_of(x) if m.exits.live(x) else MUTED, hud.big)
 	hud.mm_circ = saved
 	_spawns(c, team, kk)
+	ReviveHud.full_map(self)
 	_lair_alerts(c)
 	_ship(c)
 	_wave_ships(c)
@@ -604,7 +607,8 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	hud._text(Vector2(r.position.x + 14, y + 6), "Vaults and lairs are known to all.", 11, MUTED)
 	hud._text(Vector2(r.position.x + 14, y + 20), "The rest show up once your squad sees them.", 11, MUTED)
 	# exits, under the spawns
-	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 104 + (22 if not m.shrines.is_empty() else 0)))
+	var exit_rows := 3 + int(not m.shrines.is_empty()) + int(not m.beacons.is_empty())
+	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 38 + exit_rows * 22))
 	if r2.end.y < sz.y - 10 and m.exits:
 		hud._rounded(r2, Color(0.04, 0.05, 0.08, 0.88), 12)
 		hud._text(r2.position + Vector2(14, 22), "WAYS OUT", 14, Color("8fe3c8"), hud.big)
@@ -614,9 +618,14 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			var col := Exits.color_of(fake)
 			_exit_glyph(c, String(ex[i][0]), Vector2(r2.position.x + 26, r2.position.y + 42 + i * 22), col)
 			hud._text(Vector2(r2.position.x + 48, r2.position.y + 47 + i * 22), String(ex[i][1]), 12, INK)
+		var row_y := r2.position.y + 42 + 3 * 22
 		if not m.shrines.is_empty():
-			shrine_glyph(c, Vector2(r2.position.x + 26, r2.position.y + 42 + 3 * 22), 5.5)
-			hud._text(Vector2(r2.position.x + 48, r2.position.y + 47 + 3 * 22), "Shrine (hold F: a power-up)", 12, INK)
+			shrine_glyph(c, Vector2(r2.position.x + 26, row_y), 5.5)
+			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Shrine (hold F: a power-up)", 12, INK)
+			row_y += 22
+		if not m.beacons.is_empty():
+			ReviveHud.beacon_glyph(c, Vector2(r2.position.x + 26, row_y), 5.0, {}, 0.0)
+			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)", 12, INK)
 
 func _exit_glyph(c: Control, kind: String, pv: Vector2, col: Color) -> void:
 	match kind:

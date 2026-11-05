@@ -40,7 +40,7 @@ func toggle() -> void:
 		room.prompt_box.visible = false
 		Placement.build_view(room.cam, true)
 		_open_ui()
-		Sfx.play("whoosh", null, -8.0)
+		Sfx.play("ui_open", null, -8.0)
 	else:
 		_drop_held()
 		_close_menu()
@@ -65,11 +65,11 @@ func _open_ui() -> void:
 	bar.undo_fn = undo_last
 	bar.undo_off_fn = func() -> bool: return undo.is_empty()
 	bar.done_fn = toggle
+	bar.sweep_fn = _set_sweep
+	bar.sweep_on_fn = func() -> bool: return sweep
 	room.root_ui.add_child(bar)
 	keys = BuildKeys.new()
 	keys.above = bar
-	keys.actions = {"rotate": rotate_held, "place": func(): click_place(), "store": store_held, "cancel": cancel_held,
-		"sweep_on": func(): _set_sweep(true), "sweep_off": func(): _set_sweep(false)}
 	room.root_ui.add_child(keys)
 	refresh()
 
@@ -230,7 +230,7 @@ func place() -> bool:
 	if held.is_empty():
 		return false
 	if not ghost_ok:
-		Sfx.play("warn", null, -12.0)
+		Sfx.play("ui_deny", null, -12.0)
 		room._toast(String(room.why))
 		return false
 	var id := String(held["id"])
@@ -325,7 +325,8 @@ func open_menu(index: int) -> void:
 		{"label": "Store", "key": Settings.key_cap("store"), "cb": func(): store_placed(index)},
 	]
 	var title := String(Data.FURN[room.decor[index]["id"]]["name"])
-	menu = BuildMenu.open(room.root_ui, room.get_viewport().get_mouse_position(), title, entries)
+	menu = BuildMenu.open(room.root_ui, room.get_viewport().get_mouse_position(), title, entries, [], "", Callable(),
+		BuildKeys.blocked_rects(bar, keys.avoid))
 
 func _close_menu() -> void:
 	if is_instance_valid(menu):
@@ -393,8 +394,10 @@ func _update_keys() -> void:
 		var name_text := String(Data.FURN[held["id"]]["name"])
 		_light(room.nodes[room.blocker] if not ghost_ok and room.blocker >= 0 else null)
 		state.merge({"held": true, "item": name_text, "can_rotate": true, "can_store": true,
-			"fresh": int(held["from"]) < 0, "ok": ghost_ok, "reason": room.why})
-		text = "%s: %s" % [name_text, room.why] if not ghost_ok else "%s: click to put it down" % name_text
+			"ok": ghost_ok, "reason": room.why})
+		text = "%s: click to put it down  ·  Hold Shift to place more" % name_text
+		if not ghost_ok:
+			text = "%s: %s" % [name_text, room.why]
 	keys.show_state(state)
 	if bar.hint.text != text:
 		bar.hint.text = text

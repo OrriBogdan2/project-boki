@@ -1,5 +1,9 @@
 # Warden 3D pipeline (Meshy image-to-3D -> bake -> Blender fit -> WardenSkeleton .glb)
 
+**Game budget (item 94, overrides the per-Warden IMPORT.md notes below):** every .glb at most 15k triangles
+(`tools/blender/decimate_warden.py` after the fit), imported with LODs; every texture VRAM-compressed, mipmapped,
+at most 2048². See RIG_CONTRACT.md "Budget and checks".
+
 **Start from docs/art/wardens/RECIPE_95.md** (2026-11-04: the golden recipe from Vex r3d, run by
 `tools/meshy/recipe.py` from a per-Hunter spec). The sections below are the history and the details it builds on.
 
@@ -384,6 +388,17 @@ Then the r3c recipe: re-baked (art/wardens/src/pip_bake.json) and refitted (new 
 ramps of pip_front's colours, the lantern in her left paw with arched panes and a light, stronger wing cards,
 warden_look.json `pip`, the tender stance's left paw out. IMPORT.md "Stage 2".
 
+### Claire b3 (Phase B), 2026-11-04 (balance 3804 before, 3688 after: 116 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Claire b3 edit front | 15:19 | 01a1a724-7f04-7753-b255-e723662d89a4 | nano-banana-pro (image-to-image) | from the stage-1 front edit: horns and both front pigtails out | 9 | Hair still over the shoulders: edited again |
+| Claire b3 edit side | 15:19 | 01a1a724-7f25-76a1-ada4-73ba1e51191c | nano-banana-pro | from the stage-1 side edit: horn and front pigtail out | 9 | Kept |
+| Claire b3 edit back | 15:19 | 01a1a724-7f90-768e-9e37-54ec4828f78d | nano-banana-pro | from the stage-1 back edit: horns out | 9 | Kept |
+| Claire b3 edit front 2 | 15:21 | 01a1a726-cb4f-7065-bcfa-bfd188419b67 | nano-banana-pro | the hair entirely behind her back, shoulders and upper arms clear | 9 | Kept |
+| Claire B3 off | 15:23 | 01a1a728-1c2b-7750-92eb-9e34b9a3b54c | meshy-7.1 | 3 edited views (front, side, back) as images and texture refs; geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: a clean chest and shoulders, long wavy hair behind, skates |
+| Claire B3 on | 15:23 | 01a1a728-1c2c-77d4-be29-f85cb8df23af | meshy-7.1 | as B3 off, enhancement on | 40 | Dropped: legs wide apart, arms flung out |
+
+
 ### Vex r3c and r3d (2026-11-04): credit-free
 r3c (09:00-10:30) and r3d (11:25-13:30) used no Meshy credits: every change is in the fit spec, the parts tools, the
 paint-over, the shared look (16c18b4f) and warden_look.json. Recipe: RECIPE_95.md.
@@ -463,6 +478,7 @@ No Meshy. The model's own rigid skin and extra bones are kept; the script rename
    another bone by where they sit), `fit` (limbs turned and stretched joint to joint, or moved), `carry`, `skin`,
    `extra` (variant bones, also listed in `WardenGlb.EXTRA`), `weapon` (a group cut into the Gun's space with a
    `weapon_muzzle`), `materials` ("<slot>-<what>" and a colour from the art), `max_tris`, `anchors`.
+   Give thin parts (rods, fingers, ropes) their own decimation share (`protect`): at the body's ratio they vanish.
 4. `blender -b --factory-startup --python tools/blender/fit_rigged.py -- art/wardens/src/<name>_fit.json`, import,
    the checks, the shots: as steps 9 to 12 above.
 
@@ -480,6 +496,12 @@ No Meshy. The model's own rigid skin and extra bones are kept; the script rename
 | Dredge r3f | 2026-11-04 16:40 | none (credit-free) | - | ORCH's r3d review: one riveted brass helm and the grilled port, hairline lens cracks, thin crimson-sheened tar, glowing gashes, warm tarnished brass with rust streaks, the eye lifted; the match-zoom fix (f4b59cb3) | 0 | Kept |
 | Dredge r3g | 2026-11-04 17:30 | none (credit-free) | - | ORCH's r3f review: tarnished bronze, rivet rows, a smaller cracked orb, helm drips, smoother hull, brass grille, upright stance | 0 | Kept |
 | Dredge r3h | 2026-11-04 18:20 | none (credit-free) | - | ORCH's r3g review: no spec ovals, brighter eye and far rim, cracked glowing orb, bronze with seams and rivet rows, smoother lames, shards stripped | 0 | Kept |
+| Dredge r3i | 2026-11-04 19:10 | none (credit-free) | - | ORCH's r3h review: a small orb in a wide brass ring, no flap shards, smoother pods, shoulder joints, the horn seated | 0 | Kept |
+| Dredge r3i + v2 | 2026-11-04 19:40 | none (credit-free) | - | the shared match-zoom fix v2 ported by hand (outline + hero_toon from the branch, FAR_LOOK and _far_look in the loader) | 0 | Kept |
+| Dredge r3j | 2026-11-04 20:30 | none (credit-free) | - | r3i limb loss fixed (per-part decimation budgets, `protect`), shards dropped, smaller pods, warm gold, darker pool | 0 | Kept |
+| Dredge r3k | 2026-11-04 21:30 | none (credit-free) | - | a bigger hook, deeper dents, knee joints and bent knees, shoulder smoke, brighter brass and lighter limbs | 0 | Kept |
+| Dredge r3l | 2026-11-04 23:30 | none (credit-free) | - | olive bronze hull, torn holes with peeled teeth breaking the outline, winch seated, a smoke ribbon off a stack, a cracked blue-grey porthole | 0 | Kept |
+| Dredge r3m | 2026-11-05 00:30 | none (credit-free) | - | heavy tar runs with drops, three bigger torn holes, smoke over both shoulders, a pink-red pupil with a white heart, the grille, a softer hull top | 0 | Kept |
 
 ## Blender-driven modelling (vs Meshy)
 The owner's friend made Dredge in Blender, probably by driving it through a Blender MCP server (an LLM sends bpy

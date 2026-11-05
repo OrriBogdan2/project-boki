@@ -245,8 +245,8 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	var arrow_look: Array = PinFx.LOOK["arrow"]
 	var heavy_look: Array = PinFx.LOOK["heavy"]
 	var ratio := float(heavy_look[6]) / float(arrow_look[6])
-	ok("pin heavy: the arrow is 3-4 times a normal arrow with a long trail",
-		ratio >= 3.0 and ratio <= 4.0 and float(heavy_look[4]) >= 2.0 * float(arrow_look[4]),
+	ok("pin heavy: the arrow is the bow's arrow made much bigger (PinFx.HEAVY_SCALE) with a long trail",
+		is_equal_approx(ratio, PinFx.HEAVY_SCALE) and float(heavy_look[4]) >= 2.0 * float(arrow_look[4]),
 		"scale x%.1f trail %.1f vs %.1f" % [ratio, float(heavy_look[4]), float(arrow_look[4])])
 	fresh(T)
 	T.teleport(home + Vector3(7.0, 0, 0))
@@ -263,7 +263,7 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	var bar := AimKit.entry(P, "rmb_bar")
 	var d := P.aim_dir()
 	ok("pin heavy: the telegraph while held is a thick gold lane with a tip, from Hem along the aim line",
-		AimKit.shown(P, "rmb_bar") and AimKit.shown(P, "rmb_v") and float(bar.get("width", 0.0)) >= 0.45
+		AimKit.shown(P, "rmb_bar") and not AimKit.shown(P, "rmb_v") and float(bar.get("width", 0.0)) >= 0.45
 		and bool(bar.get("tip", false)) and (bar.get("dir", Vector2.ZERO) as Vector2).distance_to(d) < 0.01,
 		"width %.2f tip %s" % [float(bar.get("width", 0.0)), str(bar.get("tip"))])
 	step(m, 0.5, rmb_at.bind(P, T.pos))
@@ -283,7 +283,7 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 		elif kind != "":
 			lmb_kinds += 1
 	ok("pin heavy: it spawns its own projectile type (heavy), never an LMB arrow type",
-		heavy >= 1 and lmb_kinds == 0 and node != null and (node.get_node("Core") as Node3D).visible,
+		heavy >= 1 and lmb_kinds == 0 and node != null and not (node.get_node("Core") as Node3D).visible,
 		"heavy %d lmb %d" % [heavy, lmb_kinds])
 	var burst := burst_node(K)
 	ok("pin heavy: a release burst at the bow, on the aim line, wider than the bow cues, with a screen kick",

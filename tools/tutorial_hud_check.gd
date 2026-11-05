@@ -94,12 +94,12 @@ func _course() -> void:
 		if m.hud == null:
 			continue
 		if tu.card_up():
-			toast_in_card += m.hud.toasts.size() + m.hud.small_toasts.size()
+			toast_in_card += m.hud.msgs.texts().size()
 			bubble_in_card += m.bubbles.size()
 			under += _under_banner()
-		elif not m.hud.toasts.is_empty():
+		elif not m.hud.msgs.texts().is_empty():
 			shown_after += 1
-			m.hud.toasts.clear()
+			m.hud.msgs.clear()
 	ok(m.player.extracted, "the course still finishes")
 	ok(toast_in_card == 0, "no toast shows while a banner is up (%d seen)" % toast_in_card)
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)

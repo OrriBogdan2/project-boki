@@ -72,7 +72,7 @@ static func stash(m, h, wp: Dictionary) -> bool:
 		_off_ground(m, wp)
 		h.pack.append(it)
 		_told(m, h, "%s  ·  in your pack (%d/%d)" % [Loot.name_of(it), h.pack.size(), h.pack_cap], Loot.col_of(it))
-		m.sfx("pickup", h.pos, -2.0, 1.1)
+		m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, -2.0, 1.1)
 		return true
 	if h == m.player and m.hud:
 		m.hud.open_swap(wp)
@@ -113,7 +113,7 @@ static func _wear(m, h, it: Dictionary) -> Dictionary:
 	h.refresh_gear()
 	if h == m.player and m.hud:
 		m.hud.toast("%s  ·  %s" % [Loot.name_of(it), Gear.stat_text(String(it["id"]), int(it["rar"]))], Gear.ALL[it["id"]]["col"])
-	m.sfx("pickup", h.pos, 0.0, 0.9)
+	m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, 0.0, 0.9)
 	if old.is_empty():
 		return {}
 	return Loot.gear(String(old["id"]), int(old["rar"]))
@@ -159,11 +159,11 @@ static func haul(h) -> Array:
 static func smart_loot(m, h, b: Dictionary) -> int:
 	var n := 0
 	for it in Life.box_items(m, h, b):
-		if String(it["key"]) in ["keys", "chest_keys", "gems", "seeds", "belt", "backpack"]:
+		if String(it["key"]) in ["keys", "chest_keys", "gems", "seeds", "belt", "backpack"] and LootFull.fits(h, it, b):
 			Life.take_item(m, h, b, it)
 			n += 1
-	# kin one at a time from the front (taking one shifts the rest down)
-	while not (b["caught"] as Array).is_empty():
+	# kin one at a time from the front (taking one shifts the rest down), while the capsule box has room
+	while not (b["caught"] as Array).is_empty() and LootFull.fits(h, {"key": "caught", "i": 0}, b):
 		Life.take_item(m, h, b, {"key": "caught", "i": 0})
 		n += 1
 	# worn: the best piece for each gear slot if it beats yours (yours goes back in the box, so it can still be packed)

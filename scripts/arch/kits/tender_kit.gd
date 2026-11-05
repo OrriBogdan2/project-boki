@@ -262,7 +262,7 @@ func pick_up(o: Hunter) -> void:
 	if rank("dash") >= 3:
 		h.ex_cd = 0.0
 	if h.is_local() and m.hud:
-		m.hud.toast_small("Carrying %s. Press %s to set them down" % [o.pname, Settings.key_cap(SETDOWN)], res_col())
+		m.hud.toast_small("Carrying %s  ·  %s sets down" % [o.pname, Settings.key_cap(SETDOWN)], res_col())
 
 func drop_all(broken: bool) -> void:
 	for o in carrying():
@@ -456,6 +456,7 @@ func cast_e() -> bool:
 	lk().burst("plus", h.pos + Vector3(0, 1.9, 0), {"r": 0.9, "dur": 0.4})
 	lk().burst("rays", h.pos, {"col": Color("9cf07a"), "r": 1.0, "dur": 0.45})
 	m.sfx("tend_hearth", h.pos, -2.0, 1.0)
+	m.sfx("tender_lantern_chime", h.pos, -4.0, 1.0)      # her lantern's star rings as she lifts it
 	return true
 
 func e_recastable() -> bool:
@@ -778,6 +779,7 @@ func _call_end(done: bool) -> void:
 	var at := who.pos if not rescue else h.pos
 	# a rescue has its own revive banner, and the bond word lands on her now: no third word there
 	CareUtil.payoff(m, h, at, "" if rescue else "MENDED", Color("9cf07a"), "tend_arrive")
+	m.sfx("tender_cheer", h.pos, -3.0, 1.0)              # she cheers when her light mends someone
 	lk().burst("flare", at, {"col": Color("9cf07a"), "rim": Color("ffd27a"), "r": 1.8, "dur": 0.4, "pattern": 1.0})
 	lk().burst("rays", at, {"col": Color("b8ff9a"), "r": 0.9, "dur": 0.45})
 	play("mm_call_end")

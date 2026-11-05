@@ -7,13 +7,14 @@
 	"weight": "medium",
 	"body": {"size": 0.89, "chest": 1.0, "hit_r": 0.416, "head": 0.72, "legs": 1.95, "neck": -0.02, "build": 1.12},
 	"color": "#ff9a5c",
+	"clip": {"lines": {"dash": "Skid or slide, and keep shooting.", "lmb": "Full-auto rifle. Dazed foes take 90% more.", "rmb": "Throw the charge; its blast Dazes.", "e": "Stand still, then fire a beam through walls.", "x": "Call a burning shell down on the cursor.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}},
 	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light.",
 	"silhouette": "the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle",
 	"card": {
 		"loop": "Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.",
 		"dash": "Slipstep: tap to skid, hold to slide further; you can shoot the whole time and it goes where you move, not where you aim.",
 		"passive": "Hot Streak: knocking a hunter down gives Slipstep back. An ability that lands gives you a little lifesteal for a few seconds.",
-		"rmb": "Burr Charge: hold to see its lane, let go to throw. A direct hit hurts and Dazes the foe. Where it meets a wall or the ground it blasts a cone back at you, hurting and Dazing everyone in it.",
+		"rmb": "Burr Charge: tap to throw it along your aim. A direct hit hurts and Dazes the foe. Where it meets a wall or the ground it blasts a cone back at you, hurting and Dazing everyone in it.",
 		"e": "Longneedle: stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it.",
 		"x": "Cinderfall (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall.",
 		"weapons": {
@@ -59,7 +60,6 @@
 		"col": "#ffb36a",
 		"cooldown": 6.5,
 		"charges": 1,
-		"hold": 0.5,
 		"burr": {
 			"speed": 26.0,
 			"range": 10.5,
@@ -75,7 +75,7 @@
 			"wall_daze": 0.6
 		},
 		"variants": {
-			"tap": "Hold RMB: a 10.5m lane with an arrow tip shows (foes in it are marked); let go to throw. The charge flies the lane, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.",
+			"tap": "Tap RMB: she throws on the press. The charge flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.",
 			"full": "Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer."
 		},
 		"sockets": {
@@ -83,8 +83,7 @@
 			"ctrl": "add",
 			"ctrl_cap": "soft",
 			"mod": "add"
-		},
-		"auto": 4.0
+		}
 	},
 	"e": {
 		"delivery": "burst",
@@ -96,12 +95,13 @@
 		"charge": 0.6,
 		"self_slow": 1.0,
 		"range": 18.0,
-		"width": 0.5,
+		"width": 0.9,
+		"view_zoom": 0.25,
 		"dmg": 36.0,
 		"rattle_k": 0.2,
 		"shave": 0.2,
 		"shave_rank3": 0.3,
-		"desc": "Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. Then the beam fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).",
+		"desc": "Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core, tracking your aim while your view pulls out along it. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",

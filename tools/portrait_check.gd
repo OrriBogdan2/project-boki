@@ -13,7 +13,7 @@ extends RefCounted
 const PORTRAIT_PX := 512
 const SPLASH_PX := Vector2i(960, 540)
 ## Wardens whose splash isn't in yet (or was redrawn away): their portrait stands in.
-const NO_SPLASH := ["gunslinger", "tender"]
+const NO_SPLASH := []
 
 var main: Node
 var fails := 0
@@ -61,7 +61,7 @@ func _art() -> void:
 					and Vector2i(st.get_size()) == SPLASH_PX, splash)
 	var names_ok: bool = HeroTitle.base_name("gunslinger") == "Vex" and HeroTitle.base_name("rimewright") == "Claire"
 	var names2: bool = HeroTitle.base_name("tender") == "Pip" and HeroTitle.base_name("mage") == "Ryzz"
-	var names3: bool = HeroTitle.base_name("bulwark") == "Breaker" and HeroTitle.base_name("archer") == "Hem"
+	var names3: bool = HeroTitle.base_name("bulwark") == "Breaker" and HeroTitle.base_name("archer") == "Lisette"
 	var names4: bool = HeroTitle.base_name("juggernaut") == "Kael"
 	ok("the new names", names_ok and names2 and names3 and names4)
 
@@ -122,24 +122,26 @@ func _menus() -> void:
 	await tree.process_frame
 	ok("the Hunter viewer shows Vex's portrait by the name", _first_pic(viewer) == Portraits.art_path("gunslinger"))
 	viewer.queue_free()
-	var pick := ClassPick.row([], func(_a): pass)
-	var second_pick := ClassPick.row([], func(_a): pass, true)
-	var chips: Array = []
-	_collect(pick, "starter_chip", chips)
-	_collect(second_pick, "starter_chip", chips)
-	var chip_art := chips.map(func(b): return String(b.get_meta("portrait_art", "")))
-	var chip_want := chips.map(func(b): return Portraits.art_path(String(b.get_meta("arch"))))
-	var iconed := chips.all(func(b): return b.icon != null) or DisplayServer.get_name() == "headless"
-	ok("the Mask picks: each chip shows its Hunter's face (Vex, then Kael, Pip, Cinder)",
-			chips.size() == 4 and chip_art == chip_want and not chip_want.has("") and iconed)
-	second_pick.free()
-	pick.free()
+	var mask_faces: Array = []
+	for id in ["gunslinger", "juggernaut", "tender", "ashwick"]:
+		var v := HunterViewer.make(id, Vector2.ZERO)
+		host.add_child(v)
+		await tree.process_frame
+		mask_faces.append(_first_pic(v) == Portraits.art_path(id) and Portraits.art_path(id) != "")
+		v.queue_free()
+	ok("the Mask moments: each Mask shows its Hunter's face (Vex, then Kael, Pip, Cinder)",
+			mask_faces.all(func(f): return f))
 	var card := KitCard.make("rimewright", "", func(): pass)
 	host.add_child(card)
 	await tree.process_frame
-	ok("the kit card shows Claire's splash", _first_pic(card) == Portraits.art_path("rimewright", true))
+	ok("the kit card shows Claire's portrait", _first_pic(card) == Portraits.art_path("rimewright"))
 	await _shot(tree, "kit_card")
 	card.queue_free()
+	for ak in ["gunslinger", "juggernaut", "tender"]:
+		card = KitCard.make(ak, "cindle", func(): pass)
+		host.add_child(card)
+		await _shot(tree, "kit_card_" + ak)
+		card.queue_free()
 	_fallback_menus()
 	layer.queue_free()
 	await tree.process_frame

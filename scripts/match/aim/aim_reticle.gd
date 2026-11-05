@@ -5,7 +5,7 @@ extends Control
 ## - full-charge flare: on reaching full, a ring that snaps out and fades plus a 4-point glint (0.28 s);
 ## - perfect-window star: a gold 4-point star with a soft ring, held for one footage frame (0.12 s).
 
-const R := 26.0           # px: the charge ring's radius (the HUD's ammo ring is 22, its resource arc 30)
+const R := 26.0           # px: the charge ring's radius, outside the HUD's ammo and resource arcs (Reticle.RES_R)
 const FLARE_T := 0.28     # s: the full-charge flare
 const PERFECT_T := 0.12   # s: the perfect-window star (one 5 fps footage frame, enough to register)
 

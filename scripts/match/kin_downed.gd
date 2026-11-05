@@ -105,6 +105,8 @@ static func _rescue(k: Kin, h: Hunter, r: Dictionary, dt: float) -> void:
 			stop(k, h, why)
 			return
 		_carry(k, h)
+		# the rising hum lasts while the carry does: it stops by itself once these calls do (Sfx.loop_hold)
+		Sfx.loop_hold("rescue%d" % k.get_instance_id(), "revive_hum", k.pos, -8.0, 0.8 + 0.55 * scoop_k(k))
 		if contested(k):
 			return                       # (they are on you: the progress waits)
 		k.rescue_t += dt
@@ -124,7 +126,6 @@ static func _rescue(k: Kin, h: Hunter, r: Dictionary, dt: float) -> void:
 		h.set_meta("f_edge_t", -9.0)
 		if h.ak != null:
 			h.ak.drop_holds()
-		k.m.sfx("revive_hum", k.pos, -8.0, 1.0)
 
 ## Can the owner pick it up right now? Walking into it does it when no foe is close and it was not just put down;
 ## a fresh interact press does it either way.
@@ -166,7 +167,7 @@ static func stop(k: Kin, h: Hunter, why: String) -> void:
 	if why == "cc":
 		k.m.sfx("kin_unsure", k.pos, -6.0)
 		if h.is_local() and k.m.hud:
-			k.m.hud.toast_small("Dropped it: run into it to try again", Color("ffd89a"))
+			k.m.hud.toast_small("Dropped it", Color("ffd89a"))
 
 ## Speed factor while carrying a Boki (Hunter._physics).
 static func carry_speed(h: Hunter) -> float:

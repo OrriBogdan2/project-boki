@@ -19,7 +19,7 @@ Perks were chosen from a "Pick a perk: 1/2/3" prompt after a chest, shrine, boss
 - **Old kit passives** field_kit, magpie, satchel, spyglass and tinker_roll are perks now with the same numbers (the kit gear files stay until agent A removes them from gear). Magpie's gem bonus used to be a stat nothing read; `PerkOrbs.gem_mult` makes it work, with Scavenger.
 - **Net.** `odrop` (id, perk, fan, x, y, z) when orbs spawn and `otake` (id, taker) when one is taken; the other game spawns or removes it and records the fan. Two games taking the same orb in the same instant both get it (same as ground pickups). Net 0.14.0 to 0.15.2 (the split gives A 0.15.1, B 0.15.2, C 0.15.3; the main session reconciles).
 - **Bots** walk to the orb they want most within 16 m (`PerkOrbs.bot_goal`, goal kind "orb", before chests), never take two from one fan, and skip perks they have maxed.
-- **Level-ups.** Skill points and ability ranks are unchanged. On every even level a hero's signature weapon takes the next step of its path (`WeaponPath`, `content/rules/weapon_path.json`: five WeaponUps steps for each hero in `Arch.ORDER`). A step an orb already maxed becomes the next open plain upgrade. A banner (`LevelPop`) names the level and what improved. Brands and extra stacks are only in the orb pool.
+- **Level-ups.** Skill points and ability ranks are unchanged. On every even level a hero's signature weapon takes the next step of its path (`WeaponPath`, `content/rules/weapon_path.json`: five WeaponUps steps for each hero in `Arch.ORDER`). A step an orb already maxed becomes the next open plain upgrade. A line in the message lane (`Hud.level_up`, `MsgLane`) names the level and what improved. Brands and extra stacks are only in the orb pool.
 
 ## Consequences
 - Removed: `offer_perks`, `choose_perk`, `perk_offer`, `perk_queue`, the 1-3 perk keys and the prompt cards. Keys 1, 2 and 3 are free for the utility belt.
@@ -36,7 +36,7 @@ The owner approved parts 1 and 2 of the proposal below and turned down part 3.
   - Kit code that reads `m.dmg_mult(h)` directly instead of `power()` doesn't grow yet. The hero-kit owners can switch it over.
   - The new health is added to the bar. A class change in practice keeps it (`LevelGrowth.reset`).
   - Only levels actually gained grow you. A level set straight on a hunter (practice tools, checks) grows nothing, so fixtures that jump to level 6 keep their numbers.
-- **No banner on odd levels.** Every level flashes the level badge and plays the chime. Only even levels, where the weapon takes its path step, show the `LevelPop` banner and the gold wash.
+- **No banner on odd levels.** Every level flashes the level badge and plays the chime. Only even levels, where the weapon takes its path step, name the step and get the gold wash.
 - The vitals tooltip on the portrait and level badge gives the totals: "Level N · From levels: +X% max health, +Y% ability power".
 - Max health was never synced and still isn't (the same as gear health and Tough Skin), so Net is unchanged.
 

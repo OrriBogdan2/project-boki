@@ -24,6 +24,7 @@ var holder: Node3D
 var cam: Camera3D
 var anims: Array = []
 var tree: SceneTree
+var close_cfg := {}           # a Warden's warden_look "closeup" {fov, up}: a wider head shot (Motley's raised orb)
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -68,6 +69,7 @@ func _hero(id: String, dir: String, sheets: String) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var caps: Array = []
 	var title := String(Arch.def(id).get("name", id))
+	close_cfg = WardenGlb.look(WardenGlb.art(id)).get("closeup", {})
 	# 1. the turnaround at the match camera, then close
 	var row := _row(id, YAWS.size())
 	for i in row.size():
@@ -240,9 +242,11 @@ func _head(h: Node3D) -> Image:
 		var span := top.global_position.y - pivot.y
 		hp.y = pivot.y + span * 0.5
 		back *= span / 0.32
-	cam.fov = 24.0
-	cam.position = Vector3(h.position.x, hp.y + 0.1, hp.z + back)
-	cam.look_at(hp + Vector3(0, -0.08, 0))
+	# (a Warden's warden_look "closeup" {fov, up} frames its head shot: Motley's raised orb)
+	var up := float(close_cfg.get("up", 0.0))
+	cam.fov = float(close_cfg.get("fov", 24.0))
+	cam.position = Vector3(h.position.x, hp.y + 0.1 + up, hp.z + back)
+	cam.look_at(hp + Vector3(0, -0.08 + up, 0))
 	await _settle(4)
 	var img := await _grab()
 	var w := img.get_height()

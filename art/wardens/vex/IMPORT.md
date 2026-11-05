@@ -1,4 +1,4 @@
-# Vex (r3f: the owner's pick r3b, polished; the RECIPE_95 reference): import note
+# Vex (r3g: the owner's pick r3b, polished; the RECIPE_95 reference): import note
 
 `vex.glb` is the owner-approved round-3 Vex redesign (docs/art/gen/wardens_r3/vex_* and VEX_KIT.md on
 ext/imagegen fb523188), built as the design variant `vex_r3b` and picked by the owner over the r3 model
@@ -23,8 +23,8 @@ ext/imagegen fb523188), built as the design variant `vex_r3b` and picked by the 
 - **Cyber eye:** her right eye plate and its glowing lens, drawn from the face sheet as a decal (`glow` slot for the lens; see r3e).
 - **Texture:** the bake, smoothed within its UV islands and recoloured by ramps of the art's colours per slot
   and hue (toxic-green hair and trim, flat blacks, pale skin, gunmetal, brass); the face keeps its own paint.
-- Imports: the three extracted atlases lossless (`compress/mode=0`); `vex.glb.import`:
-  `generate_lods=false`, `force_disable_compression=true`.
+- Imports: the extracted atlases VRAM-compressed at most 2048², and the .glb decimated to 14k triangles with
+  LODs (item 94; docs/art/wardens/RIG_CONTRACT.md "Budget and checks"); `force_disable_compression=true`.
 
 r3c (the polish pass, INBOX_S2 09:00; the reference recipe in PIPELINE.md):
 - **Proportions:** gunslinger body legs 1.95 and size 0.89 (was 1.58 / 0.97): the art's long legs at the same
@@ -83,5 +83,27 @@ r3f (the r3e report's next steps and ORCH's 15:10 review; credit-free):
 - **Braids:** flatter strand colours, eight thicker locks in each tuft, and a `hair-braid` look (fres 0.15, far_lift
   0.3, no rim): solid plaits, no green edge noise.
 - **Hair at the match camera:** far_lift 0.5, fres 0.3, no rim (it had gone pale cyan).
-- **The shared match-zoom fix** (ext/warden-matchzoom f0ad9f60, picked as 5fa9e23a): no speckle fringe, the ink gone
-  from ~13.5 m, a halo shell on the glow pieces; the review frame is `--arena-demo=pose_clear`.
+- **The shared match-zoom fix:** v2 (ext/warden-matchzoom-v2 161708cc, c89a5273 and 8af89a9e, picked as 5b6d6ac8,
+  3434a660 and 1312af72; the v1 pick 5fa9e23a reverted): no speckle fringe, the ink gone from ~13.5 m, a halo shell on the glow
+  pieces; the review frame is `--arena-demo=pose_clear`.
+
+r3g (the r3f report's next steps; credit-free):
+- **Chest straps:** the skin around the upper chest's straps cleaned by value (`fill`: Meshy's dark strap shadows and
+  the art's white highlights), the straps' own painted edges kept.
+- **Circuits:** the belly's and chest's circuit tattoos as vector strokes (`stamp`: the art's lines thinned to their
+  centres, stamped 2 mm wide in one green, skin only).
+- **Gorget:** its seams stamped from the face sheet in the bright seam green, then onto the glow slot.
+- **Gun mount:** the whole block on metal (a value rule had split it with the black jacket: dark blotches) and
+  flattened to gunmetal.
+- **Halo:** lime [0.7, 1.0, 0.25], a hue apart from the hair's green (it was lost in the hair at the match camera).
+
+r3h (ORCH's 17:10 review of r3f; credit-free):
+- **Face:** the eyeshadow's magenta taken to the face sheet's smoky plum (`desat`); the head a little larger and
+  wider (chunk head 1.21, head_x 1.04: it read small and gaunt); the cheek and temple circuits stamped from the
+  face sheet, their round nodes whole.
+- **Chest and belly:** the upper chest's blown highlights capped (`cap`), more of the strap streaks filled; the
+  belly's Meshy green filled further down in saturation before its circuit strokes.
+- **Gorget:** its grey plates taken to bronze (`warm`), its seams stamped green on the glow slot.
+- **Gun mount and left sleeve:** the mount a darker flat gunmetal, the left sleeve flat black leather.
+- **Night:** the circuit tattoos glow (`glow_key` on the skin slot, hero_toon); the lens and the gorget's seams
+  were on the glow slot already. The lens halo is lifted 3.5 cm toward the camera, in front of her fringe.

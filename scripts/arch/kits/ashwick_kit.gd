@@ -50,6 +50,8 @@ var trail_t := 0.0              # the next dash after-image puff
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
+var lmb_blocked_held := false    # the LMB key is down during the flight (a press ticks once)
+var lmb_denied := 0              # (tests) presses refused during Flue Flight
 var jet: AshwickJet             # X, Flue Flight (its flight is a hold: jet.flight)
 var ignitions := 0              # (tests)
 var upgrades := 0
@@ -71,7 +73,6 @@ func ready_label() -> String: return "FLASHOVER" if not ignites.is_empty() else 
 
 func _setup() -> void:
 	fx = LDFx.of(m)
-	LDSfx.ensure()
 	jet = AshwickJet.new(self)
 
 func _best_char() -> float:
@@ -285,6 +286,22 @@ func ignite_pct(f: Ent) -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "flamethrower":
 		return false
+	# Flue Flight: the lance is off for the whole ult. The key is ignored, not buffered, and a press ticks
+	# softly; it works again the moment the flight ends.
+	if jet.running():
+		if held and not lmb_blocked_held:
+			lmb_denied += 1
+			m.sfx("warn", null, -16.0, 1.6)
+		lmb_blocked_held = held
+		if was_held:
+			was_held = false
+			hose.snuff()
+		hose_paused = false
+		spool = 0.0
+		flame_acc = 0.0
+		h.mel_hold = 0.0
+		return true
+	lmb_blocked_held = false
 	# a merge ends the roar: holding the key on must not relight it
 	var merging := KinMerge.transforming(h) or KinMerge.active(h)
 	if held and was_held and not merging and flow.pauses_hold("lmb") and not jet.running():
@@ -293,6 +310,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if not held or not h.can_fire() or merging or (relight_t > 0.0 and not was_held):
 		if was_held and not hose_paused:
 			play("as_lance_end")
+			m.sfx("ashwick_tank_hiss", h.pos, -4.0, 1.0)      # the tank's valve vents as she lets go
 		if was_held:
 			after_t = float(lmbd().get("slow_after", 0.35))
 			relight_t = float(lmbd().get("relight", 0.35))      # a short gap before the lance can roar again
@@ -614,6 +632,8 @@ func _cloak_blast() -> void:
 		if not sees(f):
 			continue
 		hit += 1
+		if hit == 1:
+			m.sfx("ashwick_cloak_hit", f.pos, -2.0, 1.0)
 		f.hurt(float(ed["dmg"]) * power("kin"), h, {"src": "flame", "ab": "k1", "tags": ["flame", "cloak"]})
 		add_char(f, float(ed["char"]))
 		KitStatus.apply(f, "blt", float(ed["blt_t"]))
@@ -638,7 +658,7 @@ func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
 func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
 func ult_running() -> bool: return jet.running()
-## In the flight (a roll) the lance and the Cinder Shot still work (item 51: the source is silent, so allow it).
+## In the flight (a roll) the Cinder Shot still works (item 51); the lance does not (item 66).
 func fires_in_dash() -> bool: return jet.running()
 
 # ------------------------------------------------------------------ bots

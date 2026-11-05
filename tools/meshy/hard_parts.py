@@ -105,10 +105,10 @@ def ice_paint(u, v):
 
 def clear_ice_paint(u, v):
     """Clear ice (Claire's spear shaft): pale blue-white, a lighter core streak, faint cracks."""
-    lo, mid, hi = hexcol("7fa2d8"), hexcol("a9c6ee"), hexcol("e4f0ff")
+    lo, mid, hi = hexcol("5f8ed0"), hexcol("8fb8ec"), hexcol("e8f4ff")
     n = noise(u, v, 7.0, 3)
     col = lo[None, None] * (1 - n[..., None]) * 0.45 + mid[None, None] * (0.55 + 0.45 * n[..., None])
-    core = np.exp(-((u - 0.5) / 0.12) ** 2)[..., None] * 0.6
+    core = np.exp(-((u - 0.5) / 0.08) ** 2)[..., None] * 0.45
     col = col * (1 - core) + hi[None, None] * core
     crack = np.exp(-((np.sin(u * 9.0 + np.sin(v * 7.0) * 1.6) * 0.5 + 0.5 - 0.5) / 0.03) ** 2)
     return col * (1 - 0.15 * crack[..., None])
@@ -462,6 +462,8 @@ def shield_card(spec):
             keep |= new
         return img
     fc, bc = bleed(fc, fb), bleed(bc, bb)
+    gain = float(spec.get("gain", 1.0))      # (the sheet's wood a step lighter: it reads at the match camera)
+    fc, bc = np.clip(fc * gain, 0, 1), np.clip(bc * gain, 0, 1)
     fw, bw = fc.shape[1], bc.shape[1]
     tex = np.zeros((max(fc.shape[0], bc.shape[0]), fw + bw, 3), np.float32)
     tex[:fc.shape[0], :fw] = fc
@@ -601,7 +603,8 @@ def spear(spec):
               cells["ice"], "ice")
     ob = finish(bld, "weapon")
     img = at.image("spear_atlas")
-    mats = {"ice": material(ob, "ice", "spear", img)}
+    # (slot: Claire's spear on its own slot, so its look can read as glassy ice apart from her pale ice costume)
+    mats = {"ice": material(ob, spec.get("slot", "ice"), "spear", img)}
     for p in ob.data.polygons:
         p.material_index = mats["ice"]
     hard_edges(ob, 35.0)
@@ -721,6 +724,10 @@ def wings(spec, body, arm, rig):
     # the wing's texture: the art's pixels, the membrane's own colour bled past its edge
     th, tw = crop.shape[:2]
     tex = crop.copy()
+    if spec.get("fill_median"):
+        # (the card's pixels outside the art's wing, its cut edge and the dropped hair: one membrane colour, not
+        # the bleed's streaks dragged across them)
+        tex[~blob] = np.median(crop[blob & (crop.mean(axis=2) < 0.5)], axis=0)
     keep = blob.copy()
     for _i in range(int(spec.get("bleed", 6))):     # (past the simplified outline's corners too)
         grow = keep.copy()
@@ -761,6 +768,8 @@ def wings(spec, body, arm, rig):
             z = (float(spec["sole_y"]) - (y0 + py)) * k
             local = np.array([sx * d * math.cos(sweep) * wscale[0], -d * math.sin(sweep) * wscale[0],
                               (z - root[2]) * wscale[1]])
+            # (tilt: the card leans back above its root, so the match camera looking down sees its face)
+            local[1] -= max(0.0, local[2]) * math.tan(math.radians(float(spec.get("tilt", 0.0))))
             return root + local - np.array([0.0, layer * gap, 0.0])
 
         for layer in (0, 1):
@@ -908,7 +917,7 @@ def horns(spec, arm):
             x = sx * (xa + (xb - xa) * math.sin(t * math.pi * 0.5))
             rings.append(np.array([x, c[1] + r * math.cos(ph), c[2] + r * math.sin(ph)]))
             base = t0 + (t1 - t0) * t ** 0.9
-            radii.append(max(1e-4, base * (1.0 + 0.09 * math.cos(t * ridges * 2 * math.pi))))
+            radii.append(max(1e-4, base * (1.0 + float(spec.get("ridge_amp", 0.09)) * math.cos(t * ridges * 2 * math.pi))))
         bld.tube(rings, radii, 12, cell[0], cell[2], cell[1], cell[3], "horn", [0.0] * n, cap_end=True,
                  cap_start=True)
     ob = finish(bld, "horns")
@@ -995,7 +1004,8 @@ def feet_forward(ob, rig, min_dot=0.8):
 def repaint(body, rules):
     """Recolours the body atlas's texels of faces picked in the fitted frame (box [x0, x1, y0, y1, z0, z1], a hue
     range [h0, h1] wrapping past 1, sat_min): Breaker's beard paint on the back of his neck to his skin. Keeps each
-    texel's value against the new colour (warm mode)."""
+    texel's value against the new colour (warm mode); sat_max / val_min pick pale texels (the rags' white fringe),
+    `flat` sets them to the colour outright."""
     import colorsys
     me = body.data
     img = None
@@ -1034,12 +1044,102 @@ def repaint(body, rules):
             sat = (mx - rgb.min(axis=1)) / np.maximum(mx, 1e-6)
             hue = np.array([colorsys.rgb_to_hsv(*c3)[0] for c3 in rgb]) if len(rgb) else np.zeros(0)
             hue_ok = (hue >= h0) & (hue <= h1) if h0 <= h1 else (hue >= h0) | (hue <= h1)
-            sel = hue_ok & (sat >= float(r.get("sat_min", 0.0)))
-            val = (mx[sel] / max(float(col.max()), 1e-3))[:, None]
+            sel = hue_ok & (sat >= float(r.get("sat_min", 0.0))) & (sat <= float(r.get("sat_max", 1.0))) & \
+                (mx >= float(r.get("val_min", 0.0)))
+            val = (mx[sel] / max(float(col.max()), 1e-3))[:, None] if not r.get("flat") else 1.0
             px[yy[sel], xx[sel], :3] = np.clip(col[None] * val, 0, 1)
             n += int(sel.sum())
         log("repaint %s: %d texels" % (r["colour"], n))
     img.pixels = px.ravel()
+
+
+def stuck(specs, body, arm):
+    """Small pieces stuck on the body's surface (Breaker's icicles and kelp, after breaker_front): each is placed
+    where a ray from `from` along `ray` first meets the body (fitted frame), then grown along `dir`: an icicle a
+    clear-ice cone (the `ice` slot), a kelp blade a thin two-sided ribbon that waves and narrows (cloth, olive);
+    each rides `bone` rigidly. specs: [{kind, bone, from, ray, dir, len, r}]."""
+    from mathutils.bvhtree import BVHTree
+    bvh = WP.body_bvh([body])
+    def compass_face(u, v):
+        d = np.sqrt((u - 0.5) ** 2 + (v - 0.5) ** 2)
+        col = np.where((d < 0.36)[..., None], hexcol("ddd2b4")[None, None], hexcol("9a7632")[None, None])
+        # a thin four-point star (the art's compass rose), its north point red
+        au, av = np.abs(u - 0.5), np.abs(v - 0.5)
+        star = ((au < 0.06 * (1 - av / 0.3)) & (av < 0.3)) | ((av < 0.06 * (1 - au / 0.3)) & (au < 0.3))
+        col = np.where(star[..., None], hexcol("2c3e60")[None, None], col)
+        col = np.where((star & (v > 0.5) & (au < 0.05))[..., None], hexcol("9e2a22")[None, None], col)
+        return col
+    at = Atlas(3, 64)
+    cells = {"ice": at.cell("ice", ice_paint),
+             "kelp": at.cell("kelp", lambda u, v: hexcol("3f5a2a")[None, None] * (0.75 + 0.45 * v[..., None])),
+             "brass": at.cell("brass", flat("9a7632", 0.06, 5)),
+             "face": at.cell("face", compass_face),
+             "barnacle": at.cell("barnacle", lambda u, v: hexcol("cfd2cc")[None, None] * (0.7 + 0.3 * noise(u, v, 20.0, 4))[..., None])}
+    out = []
+    for kind in ("icicle", "kelp", "compass", "barnacle"):
+        group = [sp for sp in specs if sp["kind"] == kind]
+        if not group:
+            continue
+        bld = WP.Builder()
+        bones = []
+        for sp in group:
+            hit = bvh.ray_cast(Vector(sp["from"]), Vector(sp["ray"]).normalized(), 3.0)
+            if hit[0] is None:
+                log("stuck %s: no surface from %s" % (kind, sp["from"]))
+                continue
+            base = np.array(hit[0][:]) + np.array(hit[1][:]) * 0.004
+            d = np.array(sp["dir"], np.float64)
+            d /= np.linalg.norm(d)
+            ln, r = float(sp["len"]), float(sp.get("r", 0.012))
+            v0 = len(bld.v)
+            if kind == "icicle":
+                spike(bld, base - d * r * 0.5, base + d * ln, r, 5, cells["ice"], "ice")
+            elif kind == "compass":
+                # a brass case with a cream face and a red needle, its face along the surface normal
+                nrm = np.array(hit[1][:])
+                bld.prism(base, base + nrm * ln, r, 16, cells["brass"], "brass", 0.0)
+                face0 = len(bld.v)
+                bld.prism(base + nrm * ln, base + nrm * (ln + 0.002), r * 0.86, 16, cells["face"], "face", 0.0)
+                upv = np.array([0.0, 0.0, 1.0]) - nrm * nrm[2]
+                upv /= max(np.linalg.norm(upv), 1e-6)
+                sidev = np.cross(nrm, upv)
+                fu0, fv0, fu1, fv1 = cells["face"]
+                for vi in range(face0, len(bld.v)):
+                    q = bld.v[vi] - base
+                    bld.uv[vi] = (fu0 + (fu1 - fu0) * (0.5 + 0.5 * float(q @ sidev) / r),
+                                  fv0 + (fv1 - fv0) * (0.5 + 0.5 * float(q @ upv) / r))
+                bld.torus(base + nrm * ln, nrm, r * 0.9, r * 0.12, 16, 4, cells["brass"], "brass", 0.0)
+            elif kind == "barnacle":
+                nrm = np.array(hit[1][:])
+                rings = [base - nrm * r * 0.3, base + nrm * r * 0.35, base + nrm * r * 0.6]
+                bld.tube(rings, [r, r * 0.8, r * 0.35], 7, *cells["barnacle"][0::2], *cells["barnacle"][1::2],
+                         "barnacle", [0.0] * 3, cap_end=True)
+            else:
+                side = np.cross(d, [0.0, 1.0, 0.0])
+                side = side / max(np.linalg.norm(side), 1e-6) if np.linalg.norm(side) > 1e-6 else np.array([1.0, 0, 0])
+                rings, radii = [], []
+                for i in range(7):
+                    t = i / 6.0
+                    wav = side * math.sin(t * math.pi * 2.0 + len(bones)) * ln * 0.08
+                    rings.append(base + d * ln * t + wav)
+                    radii.append(max(1e-4, r * (1.0 - 0.85 * t)))
+                bld.tube(rings, radii, 4, *cells["kelp"][0::2], *cells["kelp"][1::2], "kelp", [0.0] * 7,
+                         cap_end=True)
+            bones.append((sp["bone"], v0, len(bld.v)))
+        if not bones:
+            continue
+        ob = finish(bld, {"icicle": "Icicles", "kelp": "Kelp", "compass": "Compass", "barnacle": "Barnacles"}[kind])
+        img = at.image("stuck_atlas")
+        material(ob, {"icicle": "ice", "kelp": "cloth", "compass": "metal", "barnacle": "skin"}[kind], "stuck", img)
+        for bone, a, b in bones:
+            g = ob.vertex_groups.get(bone) or ob.vertex_groups.new(name=bone)
+            g.add(list(range(a, b)), 1.0, "REPLACE")
+        ob.parent = arm
+        mod = ob.modifiers.new("Armature", "ARMATURE")
+        mod.object = arm
+        log("stuck %s: %d pieces, %d tris" % (kind, len(bones), sum(len(q.vertices) - 2 for q in ob.data.polygons)))
+        out.append(ob)
+    return out
 
 
 # ------------------------------------------------------------------------------------------------ entry
@@ -1065,4 +1165,6 @@ def build(spec, body, arm, rig):
         out["extra"].append(tail(ps["tail"], body, arm))
     if "horns" in ps:
         out["extra"].append(horns(ps["horns"], arm))
+    if "stuck" in ps:
+        out["extra"].extend(stuck(ps["stuck"], body, arm))
     return out

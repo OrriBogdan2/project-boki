@@ -53,6 +53,7 @@ const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "bra
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
+const GUM_TAG := "gum"         # a bubble drawn with the gloss pass (gum_gloss.gdshader) instead of an ink shell
 const NO_INK := ["hair", "eyes", "glow", "card"]   # slots drawn without the ink outline shell
 ## The `void` slot is no lit surface but a window onto the Void (shaders/hero_void.gdshader: a drifting
 ## starfield over its painted colour, Ostra's coat tears); "<void>-<tag>" with a SOFT_TAGS tag also fades
@@ -101,12 +102,14 @@ const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (Hunte
 ## hold hands it to the left hand (its node x < -0.04: _setup_weapon moves it into the Offhand)
 const WEAPON_OFF := "weapon_offhand"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
-## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire).
+## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire);
+## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide, Sable's flips and Encore).
 const WING_FOLD := "wing_fold"
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
 static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
+static var _gloss_m: ShaderMaterial
 static var _measuring := false  # building that neutral model: no .glb on it
 static var _variants = null     # art name -> the design variant the command line picks (variant())
 static var _look = null         # content/rules/warden_look.json, read once (look())
@@ -205,10 +208,13 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	_lights(glb, look(art(arch)))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
-	_hold_weapon(root, glb)
+	var own := look(art(arch))
+	var off: Array = own.get("weapon_offset", [0.0, 0.0, 0.0])
+	_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]))
 	_hold_shield(root, glb)
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 	_smoke(root, look(art(arch)))
+	_bloom(root, glb, look(art(arch)))
 
 ## A model's wisps of smoke off its held weapon (warden_look.json "smoke": colour [r, g, b, a], amount, life (s),
 ## size (m), rise (m/s); Kael's demon blade): dark soft puffs from along the weapon's length that drift up and
@@ -279,6 +285,65 @@ static func _smoke(root: Node3D, own: Dictionary) -> void:
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	weapon.add_child(p)
 
+## A model's soft glow around what burns (warden_look.json "bloom": a list of {at: "weapon" or an anchor name,
+## color [r, g, b, a], size (m), count (along the weapon's length, from `from` of it), depth_test}): additive
+## camera-facing puffs, so a white-hot blade core or a magma arm glows past its own edges like the art's bloom
+## instead of reading as flat white paint. World-sized, so it shrinks with the model at the match camera.
+static func _bloom(root: Node3D, glb: Node3D, own: Dictionary) -> void:
+	for b in own.get("bloom", []):
+		var at := String(b.get("at", "weapon"))
+		var col := _param(b.get("color", [1.0, 0.9, 0.7, 0.35])) as Color
+		var m := StandardMaterial3D.new()
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		m.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+		m.no_depth_test = not bool(b.get("depth_test", false))
+		m.albedo_color = col
+		m.albedo_texture = _puff()
+		m.cull_mode = BaseMaterial3D.CULL_DISABLED
+		var sz := float(b.get("size", 0.2))
+		if at == "weapon":
+			var gun := root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
+			var weapon := gun.get_node_or_null(WEAPON) as Node3D if gun else null
+			if weapon == null or not weapon is MeshInstance3D:
+				continue
+			var box := (weapon as MeshInstance3D).get_aabb()
+			var ax := 0
+			for i in 3:
+				if box.size[i] > box.size[ax]:
+					ax = i
+			var n := int(b.get("count", 5))
+			var k0 := float(b.get("from", 0.35))
+			for j in n:
+				var p := box.get_center()
+				p[ax] = box.position[ax] + box.size[ax] * lerpf(k0, 0.95, (j + 0.5) / n)
+				weapon.add_child(_bloom_quad(m, sz, p))
+		else:
+			var a := glb.find_child(at, true, false) as Node3D
+			if a:
+				# (on the root, following the anchor like the halos: the model's own surfaces stay toon-only)
+				var q := _bloom_quad(m, sz, Vector3.ZERO)
+				root.add_child(q)
+				var follow := RemoteTransform3D.new()
+				follow.name = "BloomFollow"
+				follow.update_scale = false
+				follow.update_rotation = false
+				a.add_child(follow)
+				follow.remote_path = follow.get_path_to(q)
+
+static func _bloom_quad(m: Material, sz: float, at: Vector3) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.name = "Bloom"
+	var q := QuadMesh.new()
+	q.size = Vector2(sz, sz)
+	mi.mesh = q
+	mi.material_override = m
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.position = at
+	mi.set_meta("glb_hidden", true)      # (kept out of the model's own bounds, like the hidden procedural parts)
+	return mi
+
 static var _puff_tex: Texture2D
 ## A soft round puff (a radial fall-off), made once.
 static func _puff() -> Texture2D:
@@ -298,7 +363,7 @@ static func _puff() -> Texture2D:
 
 ## The .glb's own weapon (a mesh named WEAPON, modelled in the Gun node's space) goes into the hands in place
 ## of the procedural one; the Gun node and its Muzzle stay, so shots and grips are unchanged.
-static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
+static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vector3.ZERO) -> void:
 	var weapon := glb.find_child(WEAPON, true, false) as Node3D
 	var gun := root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 	if weapon == null or gun == null:
@@ -314,7 +379,8 @@ static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
 		if c.has_meta("hammer_pivot") and not c.is_queued_for_deletion():
 			seat = c
 	seat.add_child(weapon)
-	weapon.transform = Transform3D.IDENTITY
+	# warden_look "weapon_scale", and "weapon_offset" (m, Gun space: seats the grip in the hand)
+	weapon.transform = Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * wscale), shift)
 	var off := weapon.find_child(WEAPON_OFF, true, false) as Node3D
 	if off:
 		var at := WardenGlb.model_xf(gun, off)
@@ -568,6 +634,8 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 				m.set_shader_parameter("emit", EMIT)
 				m.set_shader_parameter("emit_flicker", EMIT_FLICKER)
 				_emit_colour(m, arch)
+			if tag == GUM_TAG:
+				m.next_pass = _gloss()      # (a gum bubble: a glossy see-through skin over its toon pass, no ink)
 			if slot == "ice":
 				for k in ICE:
 					m.set_shader_parameter(k, ICE[k])
@@ -622,6 +690,12 @@ static func _emit_colour(m: ShaderMaterial, arch: String) -> void:
 	var g: Dictionary = Arch.def(arch).get("model_glow", {}) if arch != "" else {}
 	if g.has("core"):
 		m.set_shader_parameter("emit_tint", Color(String(g["core"])))
+
+static func _gloss() -> ShaderMaterial:
+	if _gloss_m == null:
+		_gloss_m = ShaderMaterial.new()
+		_gloss_m.shader = load("res://shaders/gum_gloss.gdshader")
+	return _gloss_m
 
 static func _painted_ink() -> ShaderMaterial:
 	if _ink == null:
@@ -700,9 +774,10 @@ class Springs:
 	const DAMP := 0.84          # the velocity kept per 1/60 s
 	const FOLD := 0.75          # radians a folded wing tips back about the side axis through its root
 	const TUCK := 0.8           # and turns in behind the back about the vertical
+	const FLARE := 1.15         # radians a flared wing swings out to her side about the front-back axis
 	var skel: Skeleton3D
 	var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}
-	var fold := 0.0             # 0..1: how far the wing chains are folded (WING_FOLD)
+	var fold := 0.0             # how far the wing chains are folded (1) or flared (-1) (WING_FOLD)
 
 	func setup(skeleton: Skeleton3D) -> void:
 		skel = skeleton
@@ -744,14 +819,17 @@ class Springs:
 			var want := PackedVector3Array()
 			# a wing folds: its rest shape tipped back (+Z, behind) and turned in, about its root
 			var turn := Transform3D.IDENTITY
-			if bool(ch["wing"]) and fold > 0.001:
+			if bool(ch["wing"]) and absf(fold) > 0.001:
 				var r0: Transform3D = base * skel.get_bone_global_rest(int(ids[0]))
 				var r1: Transform3D = base * skel.get_bone_global_rest(int(ids[ids.size() - 1]))
 				var out := signf(r1.origin.x - r0.origin.x)
 				var tip_in := Basis(Vector3.UP, -out * TUCK * fold)
 				# (a wing hanging down from its root, Sable's moth wings, tips the other way to go back too)
 				var up := 1.0 if r1.origin.y >= r0.origin.y else -1.0
-				turn = Transform3D(Basis(Vector3.RIGHT, up * FOLD * fold) * tip_in, Vector3.ZERO)
+				if fold > 0.0:
+					turn = Transform3D(Basis(Vector3.RIGHT, up * FOLD * fold) * tip_in, Vector3.ZERO)
+				else:
+					turn = Transform3D(Basis(Vector3.BACK, up * out * FLARE * fold), Vector3.ZERO)
 				turn = Transform3D(Basis.IDENTITY, r0.origin) * turn * Transform3D(Basis.IDENTITY, -r0.origin)
 			for bi in ids:
 				var r: Transform3D = turn * base * skel.get_bone_global_rest(int(bi))

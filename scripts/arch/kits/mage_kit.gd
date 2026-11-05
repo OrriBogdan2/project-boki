@@ -8,7 +8,7 @@ extends ArchKit
 ## end ring grow with the charge, you can't steer and you keep your height, any drift carries) through
 ## a Live foe is a Blowout: the run hits double, Static spent, Wirerun back at once (the only reset).
 ## The Storm Rod knocks the first foe back (a stun against a wall or another foe) and leaves a charge
-## orb that zaps nearby foes with Static; Skycall drags a crowd the way you flick and grounds it.
+## orb, a pickup that gives Wirerun back; Skycall drags a crowd the way you flick and grounds it.
 
 const GOLD := Color("ffc95a")        # the lightning's hot core (our own: copper-gold on teal)
 const COPPER := Color("e08a46")
@@ -21,7 +21,7 @@ const ECHO_GAP := 0.045              # s between her after-images on the Wirerun
 var sparks := {}               # foe id -> {e, n, t}
 var wire := {}                 # Wirerun held: {t, y, air, end}
 var run_t := 0.0               # Wirerun streaking (s left): the model is a lightning silhouette
-var motes: Array = []          # charge orbs: {pos, t, node, owner, zap}
+var motes: Array = []          # charge orbs: {pos, t, node, owner, fly}
 var mote_pool: Array = []      # orb nodes, reused
 var strikes: Array = []        # Skycall: {at, t, dir, phase ("flick" | "count"), dir0}
 var rod: Node3D = null         # the Storm Rod held in the hand while RMB is down
@@ -29,7 +29,6 @@ var rod_full := false
 var blowouts := 0              # tests and the demo
 var slams := 0
 var orb_bursts := 0
-var zaps := 0
 var lmb_n := 0                 # finger bolts fired (left, right, left...)
 var last_shot := 0
 var last_dash_kind := ""
@@ -37,9 +36,11 @@ var last_strike := {}          # tests: the last Skycall's {at, dir}
 var last_push := 0.0           # tests: how hard the last rod knocked
 var echo_t := 0.0
 var ult: MageUlt               # Kitefall, her ultimate on X
+var sky: MageSky               # Skycall (E) and the orbs it flings
 
 func _setup() -> void:
 	ult = MageUlt.new(self)
+	sky = MageSky.new(self)
 	# her round is fired after this kit's tick, so its stock orb would draw one frame as a white ball at
 	# her hand before _tick_lmb skins it: hide it just before that frame is drawn
 	RenderingServer.frame_pre_draw.connect(_hide_fresh_round)
@@ -134,6 +135,8 @@ func add_spark(f: Ent, n := 1) -> void:
 		m.fx.word(f.pos + Vector3(0, _top(f) + MARK_LIFT, 0) + fx().screen_up() * 1.6, "LIVE", GOLD, false)
 		if anim_id == "" or m.time - anim_at > 0.3: play("mage_live")
 		net_bolt(top, f.position, TEAL)
+	elif int(s["n"]) > was:
+		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(s["n"]))     # the zap climbs with each stack
 
 func clear_sparks(f: Ent) -> void:
 	var key := f.get_instance_id()
@@ -165,7 +168,7 @@ func _tick(dt: float) -> void:
 	_tick_echo(dt)
 	_tick_trail()
 	_tick_motes(dt)
-	_tick_strikes(dt)
+	sky.tick(dt)
 	_tick_lmb()
 	if not wire.is_empty():
 		_tick_wire(dt)
@@ -429,6 +432,7 @@ func _arrive() -> void:
 	run_t = 0.0
 	if h.model: h.model.visible = true
 	m.fx.dust(h.pos, 5)           # a quiet arrival: no ring or burst on a dash, the hits are on the way
+	m.sfx("mage_bubble_pop", h.pos, -5.0)     # she snaps back into her body with a pop of her gum
 	if ult.phase() != MageUlt.CROUCH:
 		play("mage_dash_land")      # (a run out of Kitefall's crouch lands in the crouch: it plays that instead)
 
@@ -599,6 +603,7 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		return
 	var cd_ := rmb_def()["coil"] as Dictionary
 	add_spark(f)
+	m.sfx("mage_rod_hit", f.pos, -2.0)
 	# the gold blast, a teal crackle and a shock ring round them
 	m.fx.flash(f.position + Vector3(0, 1.0, 0), GOLD, 1.6, 0.12)
 	m.fx.burst(f.position + Vector3(0, 1.0, 0), GOLD, 18, 4.5, 0.45, 1.0, 1.8)
@@ -641,7 +646,6 @@ func _drop_mote(at: Vector3) -> void:
 	n.visible = true
 	n.global_position = at + Vector3(0, 0.55, 0)
 	var mote := {"pos": at, "t": float(cd_["mote_life"]), "node": n, "owner": h}
-	mote["zap"] = float(cd_["zap_t"]) * 0.5
 	mote["arc"] = 0.0
 	motes.append(mote)
 	fx().ring(at, float(cd_["mote_r"]) + 0.3, GOLD, TEAL, 0.3)
@@ -682,49 +686,52 @@ func _crackle_mote(mt: Dictionary, dt: float) -> void:
 		fx().arc(c + out * 0.3, c + out * 0.85 + _jitter(0.15, -0.1, 0.1), TEAL, GOLD, 0.28, 0.1)
 
 func _tick_motes(dt: float) -> void:
-	var cd_ := rmb_def()["coil"] as Dictionary
 	for mt in motes.duplicate():
-		mt["t"] = float(mt["t"]) - dt
 		var n: Node3D = mt["node"]
-		var mp: Vector3 = mt["pos"]
+		if mt.has("fly"):
+			_fly_mote(mt, dt)
+		else:
+			mt["t"] = float(mt["t"]) - dt
 		if is_instance_valid(n):
+			var mp: Vector3 = mt["pos"]
 			n.global_position = mp + Vector3(0, 0.55 + 0.12 * sin(m.time * 5.0), 0)
 			n.rotation.y += dt * 4.0
 			_crackle_mote(mt, dt)
 		if float(mt["t"]) <= 0.0:
 			_free_mote(mt, true)
-			continue
-		if mt["owner"] != h:
-			continue
-		# it zaps the nearest foe close by with Static (short arcs between them)
-		mt["zap"] = float(mt["zap"]) - dt
-		if float(mt["zap"]) <= 0.0:
-			mt["zap"] = float(cd_["zap_t"])
-			var best: Ent = null
-			var bd := float(cd_["zap_r"]) + 1.0
-			for f in foes_in(mp, float(cd_["zap_r"])):
-				var dd := Vector2(f.pos.x - mp.x, f.pos.z - mp.z).length()
-				if dd <= bd:
-					best = f
-					bd = dd
-			if best != null:
-				zaps += 1
-				add_spark(best)
-				fx().arc(mp + Vector3(0, 0.55, 0), best.position + Vector3(0, 1.0, 0), TEAL, GOLD, 0.3, 0.14)
-				m.sfx("zap", mp, -10.0, 1.8)
 
-## Wirerun through an orb: it bursts, 2 Static on every foe near it (no dash refund: the owner's rule).
-func _burst_mote(mt: Dictionary) -> void:
-	var cd_ := rmb_def()["coil"] as Dictionary
-	var mp: Vector3 = mt["pos"]
+## A flung orb glides to where it lands; one pulled to her ends in her hands (see _grab_mote).
+func _fly_mote(mt: Dictionary, dt: float) -> void:
+	var fly: Dictionary = mt["fly"]
+	var dur := float(e_def()["fling_t"])
+	fly["t"] = float(fly["t"]) + dt
+	var u := clampf(float(fly["t"]) / dur, 0.0, 1.0)
+	var to: Vector3 = fly["to"]
+	if bool(fly["home"]):
+		to = ground(h.pos)
+	mt["pos"] = (fly["from"] as Vector3).lerp(to, 1.0 - (1.0 - u) * (1.0 - u))
+	if u >= 1.0:
+		mt.erase("fly")
+		if bool(fly["home"]):
+			_grab_mote(mt)
+
+## An orb in her hands (Skycall pulled it in) or under her Wirerun: the dash is back at once, with the
+## usual reset cue (the chime and the Shift icon) and a flash on her. It adds Static to nobody.
+func _grab_mote(mt: Dictionary) -> void:
 	orb_bursts += 1
-	for f in foes_in(mp, float(cd_["zap_r"])):
-		add_spark(f, int(cd_["burst_n"]))
-		fx().arc(mp + Vector3(0, 0.55, 0), f.position + Vector3(0, 1.0, 0), TEAL, GOLD, 0.45, 0.18)
-	fx().ring(mp, float(cd_["zap_r"]), GOLD, TEAL, 0.35)
-	m.fx.flash(mp + Vector3(0, 0.6, 0), GOLD, 1.0, 0.08)
-	m.sfx("vv_orb", mp, -1.0, 1.5)
+	var was_spent := h.dashes < h.max_dashes()
+	h.dashes = h.max_dashes()
+	h.dash_buf = 0.0
+	if was_spent:
+		m.fx.flash(h.position + Vector3(0, 1.0, 0), GOLD, 2.4, 0.16)
+		m.fx.flash(h.position + Vector3(0, 1.6, 0), TEAL, 0.9, 0.08)
+		DashReset.cue(h, "orb")
 	_free_mote(mt, false)
+
+## Wirerun through an orb picks it up like a hand does.
+func _burst_mote(mt: Dictionary) -> void:
+	m.sfx("vv_orb", mt["pos"], -1.0, 1.5)
+	_grab_mote(mt)
 
 func _free_mote(mt: Dictionary, fizzle: bool) -> void:
 	var n = mt.get("node")
@@ -734,112 +741,9 @@ func _free_mote(mt: Dictionary, fizzle: bool) -> void:
 			m.fx.burst((n as Node3D).global_position, GOLD, 6, 1.5, 0.3, 0.0, 0.7)
 	motes.erase(mt)
 
-# ------------------------------------------------------------------ E: Skycall
-## Press: the circle drops at the cursor. While E is held (up to drag_max) the drag follows the cursor from
-## the circle (toward you pulls in, away throws out); the release commits it and the pillar counts down. A tap
-## commits at once with the default drag (away from her).
+# ------------------------------------------------------------------ E: Skycall (mage_sky.gd)
 func cast_e() -> bool:
-	var ed := e_def()
-	var at := AimMode.point(h, float(ed["reach"]))
-	var d0 := Vector2(at.x - h.pos.x, at.z - h.pos.z)
-	d0 = d0.normalized() if d0.length() > 0.1 else h.aim_dir()
-	strikes.append({"at": at, "t": float(ed["drag_max"]), "dir": d0, "dir0": d0, "phase": "flick"})
-	fx().star(at + Vector3(0, 0.3, 0), TEAL, GOLD, 0.8, 0.12)
-	fx().disc(at, float(ed["radius"]), VIOLET, GOLD, 0.2, COPPER)
-	m.sfx("vv_sky_place", at, -3.0)
-	play("mage_e")
-	return true
-
-## Skycall is held to drag (the data: "HOLD AND DRAG before release to aim"): the key read here for the local
-## player, inp["e_down"] for tests and scripted demos. Bots never hold (a tap: the default drag).
-func _e_held() -> bool:
-	if bool(h.inp.get("e_down", false)):
-		return true
-	return h.is_local() and Input.is_action_pressed("signature")
-
-func flick_dir(s: Dictionary) -> Vector2:
-	var at: Vector3 = s["at"]
-	var c: Vector3 = h.inp.get("aim", at)
-	var v := Vector2(c.x - at.x, c.z - at.z)
-	return v.normalized() if v.length() > 0.8 else (s["dir0"] as Vector2)
-
-func _tick_strikes(dt: float) -> void:
-	var ed := e_def()
-	var r := float(ed["radius"])
-	for i in strikes.size():
-		var s: Dictionary = strikes[i]
-		var at: Vector3 = s["at"]
-		var counting := String(s["phase"]) == "count"
-		if not counting:
-			s["dir"] = flick_dir(s)
-			var drag := {"from": at, "dir": s["dir"], "len": 4.0, "width": 0.55, "tip": true, "col": GOLD, "col2": GOLD}
-			AimKit.lane(h, "e_drag", drag)
-		var k := 1.0 - float(s["t"]) / float(ed["delay"]) if counting else 0.0
-		# a copper ticked rim with the gold chevron on it pointing the drag (the dark disc is VVFx's)
-		var rim := {"at": at, "r": r, "ticks": true, "pointer": s["dir"], "all": true, "col": COPPER, "col2": DEEP_GOLD}
-		rim["fill"] = k
-		AimKit.circle(h, "e%d" % i, rim)
-		_chevron(at, s["dir"] as Vector2, r)
-	for s in strikes.duplicate():
-		s["t"] = float(s["t"]) - dt
-		var dragging := String(s["phase"]) == "flick"
-		if float(s["t"]) > 0.0 and (not dragging or _e_held()):
-			continue
-		if dragging:
-			s["phase"] = "count"
-			s["t"] = float(ed["delay"])
-			var at: Vector3 = s["at"]
-			fx().disc(at, r, VIOLET, GOLD, float(ed["delay"]) + 0.1, COPPER)
-			fx().pillar(at, Color(GOLD, 0.45), GOLD.lightened(0.6), 8.0, r * 0.95, float(ed["delay"]))
-			AimKit.hide(h, "e_drag")
-			m.sfx("vv_sky_count", at, -4.0)
-			net_ring(at, r, col_of(ed))
-		else:
-			strikes.erase(s)
-			_strike(s)
-
-## The gold rim chevron pointing the drag: two short gold strokes, redrawn every step.
-func _chevron(at: Vector3, d: Vector2, r: float) -> void:
-	var tip := at + Vector3(d.x, 0, d.y) * (r + 0.55) + Vector3(0, 0.15, 0)
-	for side in [-1.0, 1.0]:
-		var wing := d.rotated(side * 2.4)
-		fx().smear(tip + Vector3(wing.x, 0, wing.y) * 0.55, tip, GOLD, GOLD.lightened(0.4), 0.2, 0.05)
-
-func _strike(s: Dictionary) -> void:
-	var ed := e_def()
-	var at: Vector3 = s["at"]
-	var dir: Vector2 = s["dir"]
-	last_strike = {"at": at, "dir": dir}
-	for i in 3:
-		var sky := at + Vector3(0, 9.0, 0) + _jitter(0.6, 0.0, 0.0)
-		fx().arc(sky, at + _jitter(0.4, 0.1, 0.1), TEAL, GOLD, 1.0 - 0.25 * i, 0.22)
-	net_bolt(at + Vector3(0, 9.0, 0), at, TEAL)
-	fx().ring(at, float(ed["radius"]), GOLD, TEAL, 0.35)          # the hit area, at its true size
-	fx().disc(at, float(ed["radius"]) * 0.9, Color("1a1420"), GOLD, 0.45, COPPER)
-	m.fx.burst(at + Vector3(0, 0.5, 0), GOLD, 22, 6.0, 0.45, 6.0, 1.2)
-	m.fx.flash(at + Vector3(0, 1.0, 0), GOLD, 1.8, 0.12)
-	m.sfx("vv_sky_strike", at, 0.0)
-	play("mage_e_snap")
-	var delivery := {"type": "burst", "origin": "here", "radius": float(ed["radius"])}
-	var stg := stage("e", {"delivery": delivery, "effects": [{"type": "damage", "amount": float(ed["dmg"])}]})
-	run(stg, cx("e", "skycall", at, {"at": at, "dir": dir}))
-	for f in foes_in(at, float(ed["radius"])):
-		add_spark(f, int(ed.get("stacks", 1)))
-		# dragged along the ground the way you flicked, pinned there for a moment
-		var slide := {"mode": "slide", "dir": [dir.x, dir.y], "dur": float(ed["slide_t"]),
-			"dist": float(ed["slide_dist"])}
-		m.displace.tow(f, null, slide)
-		if f is Hunter:
-			KitStatus.apply(f, "gnd", float(ed["grounded"]))
-		fx().shackle(f, TEAL, GOLD, float(ed["grounded"]))
-	# lightning flings a charge orb it catches the same way; a rival's becomes mine
-	for mt in motes:
-		if (mt["pos"] as Vector3).distance_to(at) < float(ed["radius"]) + 0.6:
-			var from: Vector3 = mt["pos"]
-			mt["pos"] = ground(from + Vector3(dir.x, 0, dir.y) * 11.0)
-			mt["owner"] = h
-			mt["t"] = float(rmb_def()["coil"]["mote_life"])
-			fx().arc(from + Vector3(0, 0.55, 0), (mt["pos"] as Vector3) + Vector3(0, 0.55, 0), TEAL, GOLD, 0.6, 0.25)
+	return sky.cast()
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

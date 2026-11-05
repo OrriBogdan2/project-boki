@@ -12,7 +12,7 @@ const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit"
 	"ab_throw", "ab_rail", "ab_charge", "ab_blast", "ab_leap", "ab_slam", "ab_wall", "ab_shield_hit", "ab_guard", "ab_parry",
 	"ab_plant", "ab_tether", "ab_blink", "ab_whirr", "ab_stun", "ab_slow", "ab_hit", "ab_ready",
 	"pay_deadeye", "pay_flashpoint", "pay_called", "pay_slam", "pay_cashin", "pay_rage", "level_up",
-	"hero_blowout", "hero_skewer", "pay_salvage", "dr_haul", "dr_anchor", "as_flame", "as_ignite", "as_cloak", "pay_rockfall", "pay_collapse",
+	"hero_blowout", "hero_skewer", "dr_anchor", "as_ignite", "pay_rockfall", "pay_collapse",
 	"rustle", "squeak", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c",
 	"break_wood", "break_clay", "break_metal", "fuse_hiss"]
 const POOL := 24
@@ -71,7 +71,7 @@ func _ready() -> void:
 		add_child(mp); music.append(mp)
 	amb = AudioStreamPlayer.new(); amb.bus = "Ambience"; amb.volume_db = -80.0
 	add_child(amb)
-	for n in NAMES + VOICES + SfxKits.NAMES + VVSfx.NAMES:      # (VVSfx: Ryzz and Vex, tools/gen_vv_sfx.py)
+	for n in NAMES + VOICES + SfxKits.NAMES + VVSfx.NAMES:      # (VVSfx: Ryzz and Vex)
 		var takes: Array = []
 		var s = load("res://audio/%s.wav" % n) if ResourceLoader.exists("res://audio/%s.wav" % n) else null
 		if s: takes.append(s)
@@ -254,10 +254,10 @@ func set_layers(want: Dictionary) -> void:
 	for st in want:
 		layer_want[st] = clampf(float(want[st]), 0.0, 1.0)
 
-## Leaving a match for any other screen (Main.show_screen): the layered score and the abyss / ruins
-## beds belong to the match, so they fade out with the screen change. Without this they outlived it,
-## because the title asks for the "match" wind that is already the current ambience (an early
-## return) and so never cleared the beds. The single tracks and the main ambience are left to the
+## A match leaving the tree (extract, death, quit, a rematch; Match._exit_tree): everything it started
+## stops. The layered score and the abyss / ruins beds fade out (the title asks for the "match" wind that
+## is already the current ambience, an early return, so it would never clear them), every keyed loop
+## stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left to the
 ## next screen's play_music / play_ambience, which crossfade them.
 func reset_scene_audio(fade := 1.2) -> void:
 	if not layers.is_empty():
@@ -265,6 +265,25 @@ func reset_scene_audio(fade := 1.2) -> void:
 		music_name = ""
 	if not amb_layers.is_empty():
 		clear_amb_layers(fade)
+	for key in loops.keys():
+		loop_stop(key)
+	for p in players:
+		p.stop()
+
+## How many players that never end on their own are still sounding (a looping pool voice, keyed loops,
+## score stems and beds): 0 once a match's reset_scene_audio has run and the fades are done
+## (--match-audio-check). A pool one-shot ends by itself, so a farm footstep doesn't count.
+func match_voices() -> int:
+	var n := 0
+	for p in players:
+		if p.playing and loops_forever(p.stream):
+			n += 1
+	for key in loops:
+		if is_instance_valid(loops[key]["p"]): n += 1
+	for c in get_children():
+		if c is AudioStreamPlayer and c.playing and not c in players and not c in music and c != amb:
+			n += 1          # also a stem or bed or loop still fading out
+	return n
 
 func _stop_layers(fade: float) -> void:
 	for st in layers:
@@ -301,6 +320,8 @@ func clear_amb_layers(fade := 1.0) -> void:
 	amb_layers = {}
 
 func _process(delta: float) -> void:
+	if not loops.is_empty():
+		_drop_stale_holds()
 	for n in amb_layers:
 		var ap: AudioStreamPlayer = amb_layers[n]["p"]
 		var full := db_to_linear(-12.0)
@@ -385,10 +406,26 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 			i = (i + 1) % arr.size()
 		last_take[sname] = i
 		st = arr[i]
-	p.stream = st
+	p.stream = _once(st)
 	p.volume_db = v
 	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
 	p.play()
+
+## A pool voice is never reused while it plays, so a looping file sent through play() would sound
+## forever, past the match and into the farm: owner item 103, the Boki rescue's revive_hum. One-shots
+## get a copy of a looping file that plays once; a sound that should last goes through loop_hold.
+var _once_of := {}
+func _once(st: AudioStream) -> AudioStream:
+	if not loops_forever(st):
+		return st
+	if not _once_of.has(st):
+		var c := (st as AudioStreamWAV).duplicate() as AudioStreamWAV
+		c.loop_mode = AudioStreamWAV.LOOP_DISABLED
+		_once_of[st] = c
+	return _once_of[st]
+
+static func loops_forever(st: AudioStream) -> bool:
+	return st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode != AudioStreamWAV.LOOP_DISABLED
 
 
 ## The "reset" cue (a dash or ability is back): the variant picked in Settings > Gameplay (a, b or c),
@@ -443,6 +480,20 @@ func loop_stop(key: String) -> void:
 		tw.tween_property(p, "volume_db", -60.0, 0.12)
 		tw.tween_callback(p.queue_free)
 
+## A loop that lasts only while its owner keeps asking for it, once per tick (a Boki rescue's hum): if the
+## calls stop (the channel ends any way, or its node is freed mid-channel) it stops within HOLD_MS.
+const HOLD_MS := 250
+func loop_hold(key: String, sname: String, pos = null, vol_db := 0.0, pitch := 1.0) -> void:
+	loop_start(key, sname, pos, vol_db)
+	loops[key]["held"] = Time.get_ticks_msec()
+	loop_set(key, pos, pitch)
+
+func _drop_stale_holds() -> void:
+	var now := Time.get_ticks_msec()
+	for key in loops.keys():
+		if now - int(loops[key].get("held", now)) > HOLD_MS:
+			loop_stop(key)
+
 func loop_on(key: String) -> bool:
 	return loops.has(key)
 
@@ -473,14 +524,25 @@ func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) 
 	p.play()
 
 ## A kit sound not in NAMES (each hero branch adds its own, e.g. pin_* and bjorn_*): loaded from
-## audio/<name>.wav the first time it plays, so new kit sounds need no edit to the shared list.
+## audio/<name>.wav (and its takes <name>_1..4.wav) the first time it plays, so new kit sounds need no
+## edit to the shared list.
 var _lazy_miss := {}
 func _lazy(sname: String) -> bool:
 	if _lazy_miss.has(sname):
 		return false
-	var path := "res://audio/%s.wav" % sname
-	if not ResourceLoader.exists(path):
+	var takes: Array = []
+	var paths: Array = ["res://audio/%s.wav" % sname]
+	for i in range(1, 5):
+		paths.append("res://audio/%s_%d.wav" % [sname, i])
+	for path in paths:
+		if ResourceLoader.exists(path):
+			takes.append(load(path))
+	if takes.is_empty():
 		_lazy_miss[sname] = true
 		return false
-	streams[sname] = load(path)
+	streams[sname] = takes[0] if takes.size() == 1 else takes
 	return true
+
+## Whether a sound exists (loading it on first ask, as play does).
+func ensure(sname: String) -> bool:
+	return streams.has(sname) or _lazy(sname)

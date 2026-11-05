@@ -228,7 +228,7 @@ func _archer_combos() -> void:
 	var bar0 := float(AimKit.entry(P, "rmb_bar").get("len", 0.0))
 	ok(
 		"pin RMB held: the gold V and a gold bar from the bow",
-		AimKit.shown(P, "rmb_v") and AimKit.shown(P, "rmb_bar") and K.anim_id == "arc_heavy_wind",
+		not AimKit.shown(P, "rmb_v") and AimKit.shown(P, "rmb_bar") and K.anim_id == "arc_heavy_wind",
 		"v %s bar %s anim %s" % [AimKit.shown(P, "rmb_v"), AimKit.shown(P, "rmb_bar"), K.anim_id]
 	)
 	step(m, 0.55, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos))
@@ -751,14 +751,14 @@ func _bulwark_combos() -> void:
 	m.step(DT)
 	P.inp["fire"] = false
 	step(m, 1.0)
-	# LMB held: the hammer dragged back behind him, the glint from 0.6 s, the flare at full; let go: the slam
+	# LMB held: the hammer whirling round him, the glint from 0.6 s, the flare at full; let go: the slam
 	# carries him forward with a flaming crescent
 	reset.call()
 	_clear_wall(m, home, lv, 3)
 	T.teleport(home + Vector3(2.4, 0, 0))
 	step(m, 0.4, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok(
-		"bjorn LMB held: the hammer dragged back behind him (no spin), no glint yet",
+		"bjorn LMB held: the hammer whirling round him (item 59), no glint yet",
 		K.fx.held and not K.fx.glint.visible and K.anim_id == "bul_smash_wind",
 		"held %s glint %s anim %s" % [K.fx.held, K.fx.glint.visible, K.anim_id]
 	)

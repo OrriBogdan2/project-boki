@@ -8,7 +8,7 @@ The lamplighter who floats. Stuns from range, drops a growing bomb on the stunne
 |  |  |
 |---|---|
 | Class title | Void Jester |
-| Base character | Ostra, male |
+| Base character | Motley, male |
 | Personality | A sinister, grinning jester who floats a little above the ground and plays with the dark. Menacing and gleeful, he treats every fight as a joke only he gets. |
 
 <!-- /gen:profile -->
@@ -44,13 +44,13 @@ What the in-game kit card (K) says.
 | RMB: Shard Snap | Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew. |
 | E: Brimseed | Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew. |
 | Hunter ultimate: Nightwell | Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle. |
-| Weapon: Tether Lantern | Quick orbs to full range; pause 1.4s and the next one is a fast bright bolt that slows and goes through terrain. |
+| Weapon: Tether Lantern | Quick orbs to full range through walls; the longer you wait between shots (up to 1.4s) the bigger, faster and harder the next one, and a full orb slows. |
 
 ### Abilities in full
 
 **Swell (passive).** Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 9s, wrapped in a pink sphere: your seed grows larger and faster, Trade lands sooner, your Snap hits 44% harder. You float: lava, spore pods and other ground hazards pass you by.
 
-**Lantern Trade (dash, Shift, 9.5s cooldown).** Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 20% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.
+**Lantern Trade (dash, Shift, 9.5s cooldown).** Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 30% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.
 
 **Shard Snap (RMB, 10s cooldown).**
 

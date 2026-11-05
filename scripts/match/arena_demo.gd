@@ -99,6 +99,16 @@ static func zoom_or(close: float) -> float:
 		if String(a).begins_with("--demo-zoom="): return float(String(a).substr(12))
 	return close
 
+## The pose demo's facing: --demo-face=dx,dz turns the Hunter toward that offset (default: 3/4 toward the camera,
+## her right side to it; Hem's review uses 5,3.5 so the bow in her left hand is on the camera's side).
+static func _face(fallback: Vector3) -> Vector3:
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--demo-face="):
+			var f := String(a).get_slice("=", 1).split(",")
+			if f.size() == 2:
+				return Vector3(float(f[0]), 0.9, float(f[1]))
+	return fallback
+
 static func tick(A: Arena, dt: float) -> void:
 	var w := what()
 	if w == "":
@@ -293,7 +303,7 @@ static func tick(A: Arena, dt: float) -> void:
 				at_t = go + 0.7 if "--hold-shot" in OS.get_cmdline_user_args() else go + 1.05
 		_ when w.begins_with("dj_"):
 			at_t = DJDemo.still(A, P, D, w.substr(3), t, dt)      # Sable and Kael stills (scripts/arch/dj_demo.gd)
-			if m.hud: m.hud.toasts.clear()
+			if m.hud: m.hud.msgs.clear()
 		_ when w.begins_with("pair_"):
 			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Tarek and Ostra (scripts/arch/pair_demo.gd)
 		_ when w.begins_with("anim_"):
@@ -314,7 +324,7 @@ static func tick(A: Arena, dt: float) -> void:
 			P.inp["move"] = Vector2.ZERO
 			P.hp = P.max_hp
 			_anim_trigger(A, P, D, mv, t, dt)
-			if m.hud: m.hud.toasts.clear()        # the hero line from the swap would sit over the frames
+			if m.hud: m.hud.msgs.clear()        # the hero line from the swap would sit over the frames
 			var times: Array = spec[2]
 			for i in times.size():
 				if _at(t, dt, float(times[i])):
@@ -332,7 +342,7 @@ static func tick(A: Arena, dt: float) -> void:
 						P.teleport(P.pos + Vector3(float(at[0]), 0.0, float(at[1])))
 						A.home = P.pos
 			P.inp["move"] = Vector2.ZERO
-			P.inp["aim"] = P.pos + Vector3(-5.0, 0.9, 3.5)
+			P.inp["aim"] = P.pos + _face(Vector3(-5.0, 0.9, 3.5))
 			at_t = 2.0
 		"bulwark", "crushed":
 			var H: Hunter = A.dummies[2]["h"]
@@ -679,7 +689,7 @@ static func _pose_clear(A: Arena, P: Hunter, t: float) -> float:
 			m.cam.snap(P.pos)
 	_clear_frame(A, P, t)
 	P.inp["move"] = Vector2.ZERO
-	P.inp["aim"] = P.pos + Vector3(-5.0, 0.9, 3.5)
+	P.inp["aim"] = P.pos + _face(Vector3(-5.0, 0.9, 3.5))
 	return 2.0
 
 ## --arena-demo=pose_clear: the review frame's spot, flat open ground near the start (no block, void or slope

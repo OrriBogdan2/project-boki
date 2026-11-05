@@ -112,7 +112,7 @@ func tick() -> void:
 	var t := h.draw_t
 	var drawing := t >= 0.0 and h.wpn.has("draw")
 	var s := stage_t()
-	var col := Color(String(k.d.get("color", "#9fe0a8")))
+	var col := Color(String(k.d.get("color", "#e8483e")))
 	if h.wpn.has("draw") and not drawing and k.tells_visible() and h.can_fire():
 		AimKit.line(h, "draw_rest", {"alpha": LINE_A, "col": col, "fletch": FLETCH * 0.6})
 	if drawing:
