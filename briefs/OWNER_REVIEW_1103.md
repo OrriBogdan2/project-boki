@@ -2411,3 +2411,8 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - A brief glow/pulse on arrival.
   - The goal tracker row flashes too.
   - A step change never happens silently.
+- 178c addendum 2 (owner, 18:17): in menus during a tutorial step, gold-highlight the exact UI element to click.
+  - E.g. after pressing B (build), the House button glows gold with a pulsing outline + a small bouncing pointer.
+  - Other options are dimmed slightly.
+  - The same for every menu-driven step (the trough Fill, the patch Plant, the Market Seeds tab / Buy / Sell tab, the Boki list card (174), a job assignment).
+  - A generic "tutorial highlight" helper for Controls, in the item 166 gold language.
