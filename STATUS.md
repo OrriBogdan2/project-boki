@@ -793,3 +793,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 S2: READY ext/portraits-three 8edb4f23
 - Tarek (dolm), Ryzz (mage), Vex (gunslinger) portraits and splashes; the other nine byte-identical. Checks 0 failures: import, --check, portrait 107, tutorial-hud, health --strict. All 12 Hunters now use owner portraits once merged. Crops checked, not seen in a running game.
 - Slot: Claire kit 62+64+65.
+
+## 2026-11-05 S2: ART-1 Tarek monk: ext/art1-tarek e78850a6 (about 70%, one fidelity row No; contains kit-tarek-61-67)
+- 14,604 tris, 7 materials, 41 clips. Decimate duplicate faces fixed (bevelled slabs, painted cracks). body.head 0.8.
+- **Fidelity:** blindfold yes; three eye-stones yes; stones turn toward enemies yes, no screenshot (test only, not seen live); huge stone LEFT arm + shoulder yes; right gauntlet yes; dreads with copper beads yes (hidden at match camera); prayer beads yes; orange sash yes; **Dash = Rock Hop No** (clips exist, unmapped, waiting on ext/kit-tarek-111). Proofs: ext/hero-shots-s2 ca42662d art1/tarek/.
+- **Warning for every reviewer:** --warden-model-check and others exit 0 on FAIL. Judge by FAIL lines. Any earlier report based on rc=0 (Pip's "71 flags rc=0") should be re-read by FAIL lines.
+- Checks on the tip by FAIL lines: clip, rig-standard, warden-model, warden-glb, warden-stance, dolm-combo 147, portrait, hunter-unlock, health --strict. 30 flags rerun after the merge: same reds as main. Full suite ran before it. bot-sanity clean with a long timeout on both.
+- Owner Qs: ground rings hidden at the match camera OK? Open left hand (turnaround) or closed stone fist (master)?
