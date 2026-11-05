@@ -836,3 +836,119 @@ Owner's top priority: "the performance is really bad" + "combat clarity is not g
 
 ## 2026-11-05 00:40 UTC (ext): S1 = PERF ONLY (`ext/perf-94`, with 103 first)
 Combat clarity (96/96b/97/100/102/106) moves to a new cloud session "S3" on the fresh account; don't start it. Real-GPU numbers from the owner's PC will land in this file ("owner PC" entry, `briefs/perf/`) — use them when they arrive.
+
+## 2026-11-05 00:47 UTC (owner PC): REAL-GPU PERF NUMBERS for item 94
+
+S1: measured on the owner's PC with the real GPU (Vulkan Forward+, windowed, no `--headless`), on origin/main `fe51b43` with Godot 4.6.2 stable. All three runs exited cleanly (42 s, 43 s, 69 s); none hung. Raw reports: `briefs/perf/perf_default.txt`, `perf_high.txt`, `perf_squad3.txt`.
+
+**PC:** NVIDIA GeForce RTX 4070 SUPER (driver 32.0.16.1692); Intel Core i5-13400 (10 cores, 16 threads); 32 GB DDR5-6000 (2 x 16 GB; 31.7 GB usable); one display at 2560x1440, 143 Hz (Windows reports 143); Windows 11 Home.
+
+**Read these first:**
+- **These runs were NOT at 1440p.** The commands had no `--probe-full`, so the probe asks for a 640x360 window with MSAA off (`tests/perf_probe.gd` `_ready`; reports confirm msaa=0). The `size=(1280, 720)` in each report header is the viewport rect, not the window pixels. GPU fill cost is therefore well under what a player at 1440p with default MSAA 4x pays, so treat these frame times as a best case. Counts (draws, primitives) should still hold.
+- Vsync was on (project default, 143 Hz), but every phase ran slower than that cap, so it did not hide any cost.
+- The brief asked for the 10 worst hitches; the probe's report only keeps 8 per run, and no code was changed to get more. The PerfLog marks column was empty for all of them: no build step ran inside any of these frames. Load-time marks are in the build steps line of each run.
+- The fight's worst frame lands at sim t=22.4 in all three runs (182.4 / 190.7 / 222.3 ms), so it is repeatable.
+- `--quality=high` is within noise of the default run on this PC (default reports quality=auto).
+- Same engine log errors in all runs, not investigated: "Invalid polygon data, triangulation failed" (3 in default, 19 in squad3), an OptionButton theme variation error, and 13 resources in use at exit.
+
+### Run 1: default
+
+`godot --path . -- --perf-probe --probe-out=perf_default.txt`
+
+- load total 12473 ms over 202 frames; worst frame 1017 ms
+- build steps total 11010 ms: build.hunters 3636, build.spawns 1299, build.warm_up 1284, build.mobs 873, world.terrain 686, build.chests 597, build.generate 552, world.scatter_plan 468, world.walls 449, build.p
+
+| phase | frames | avg ms | p95 ms | worst ms | script ms | render cpu ms | hud ms | draws avg/max | prims (k) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| first | 31 | 19.5 | 20.5 | 28.0 | 1.64 | 2.36 | 10.81 | 2292/2295 | 2259 |
+| planning | 75 | 20.1 | 21.4 | 41.6 | 0.24 | 2.55 | 10.87 | 2502/2513 | 2383 |
+| ride | 145 | 39.0 | 48.4 | 79.4 | 4.30 | 2.09 | 6.69 | 1536/1983 | 1639 |
+| drop | 91 | 32.0 | 44.6 | 65.5 | 5.86 | 2.02 | 7.05 | 1550/1929 | 2042 |
+| land | 151 | 20.9 | 24.5 | 40.8 | 7.96 | 1.94 | 6.14 | 1564/2118 | 2131 |
+| map | 60 | 26.9 | 28.4 | 33.4 | 9.57 | 2.07 | 10.17 | 2085/2119 | 2142 |
+| fight | 301 | 20.3 | 22.0 | 182.4 | 7.02 | 2.03 | 6.28 | 2006/2041 | 2295 |
+
+Fight draws by pass: 3D 331, shadows 1241, canvas (HUD) 433.
+
+Worst frames (the report keeps 8; PerfLog marks column was empty on every one):
+
+| # | wall ms | script ms | render cpu ms | hud ms | phase | sim t (s) | PerfLog marks |
+|---:|---:|---:|---:|---:|---|---:|---|
+| 1 | 182.4 | 7.86 | 2.5 | 6.8 | fight | 22.4 | none |
+| 2 | 79.4 | 4.04 | 1.6 | 6.5 | ride | 7.1 | none |
+| 3 | 65.5 | 5.60 | 6.2 | 10.6 | drop | 14.4 | none |
+| 4 | 57.8 | 5.54 | 1.6 | 6.2 | drop | 18.3 | none |
+| 5 | 57.1 | 5.95 | 2.1 | 9.1 | ride | 12.2 | none |
+| 6 | 53.5 | 3.18 | 2.9 | 7.2 | ride | 4.2 | none |
+| 7 | 51.6 | 5.91 | 1.9 | 7.7 | drop | 15.0 | none |
+| 8 | 49.2 | 5.94 | 1.3 | 6.0 | ride | 12.5 | none |
+
+Memory: textures 635.9 MB, buffers 152.5 MB, video 1042.6 MB, static 529.3 MB, objects 18265, nodes 7309.
+
+### Run 2: quality high
+
+`godot --path . -- --perf-probe --quality=high --probe-out=perf_high.txt`
+
+- load total 12456 ms over 209 frames; worst frame 861 ms
+- build steps total 11021 ms: build.hunters 3213, build.spawns 1629, build.mobs 1142, build.warm_up 1085, build.chests 776, world.terrain 684, build.generate 548, world.walls 443, world.scatter_plan 433, build.
+
+| phase | frames | avg ms | p95 ms | worst ms | script ms | render cpu ms | hud ms | draws avg/max | prims (k) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| first | 31 | 19.5 | 19.9 | 27.6 | 1.62 | 2.37 | 10.82 | 2292/2295 | 2259 |
+| planning | 75 | 20.1 | 20.7 | 41.5 | 0.24 | 2.53 | 10.96 | 2501/2511 | 2383 |
+| ride | 145 | 39.2 | 48.8 | 78.6 | 4.33 | 2.14 | 6.76 | 1537/1983 | 1639 |
+| drop | 91 | 32.6 | 46.3 | 64.3 | 5.98 | 2.05 | 7.27 | 1555/1930 | 2048 |
+| land | 151 | 21.0 | 24.4 | 38.9 | 8.01 | 1.97 | 6.20 | 1571/2122 | 2142 |
+| map | 60 | 27.1 | 28.4 | 35.2 | 9.54 | 2.12 | 10.24 | 2091/2124 | 2148 |
+| fight | 301 | 20.4 | 22.4 | 190.7 | 7.06 | 1.97 | 6.23 | 2023/2070 | 2290 |
+
+Fight draws by pass: 3D 334, shadows 1239, canvas (HUD) 450.
+
+Worst frames (the report keeps 8; PerfLog marks column was empty on every one):
+
+| # | wall ms | script ms | render cpu ms | hud ms | phase | sim t (s) | PerfLog marks |
+|---:|---:|---:|---:|---:|---|---:|---|
+| 1 | 190.7 | 8.05 | 2.9 | 6.7 | fight | 22.4 | none |
+| 2 | 78.6 | 4.19 | 1.5 | 6.6 | ride | 7.1 | none |
+| 3 | 64.3 | 5.79 | 6.1 | 10.9 | drop | 14.4 | none |
+| 4 | 57.2 | 5.90 | 2.1 | 9.3 | ride | 12.2 | none |
+| 5 | 56.7 | 5.41 | 2.0 | 6.7 | drop | 18.3 | none |
+| 6 | 53.2 | 3.23 | 2.7 | 7.8 | ride | 4.2 | none |
+| 7 | 50.9 | 6.17 | 1.9 | 7.8 | drop | 15.0 | none |
+| 8 | 49.8 | 5.09 | 1.5 | 5.8 | ride | 12.9 | none |
+
+Memory: textures 636.4 MB, buffers 152.4 MB, video 1043.0 MB, static 529.0 MB, objects 18258, nodes 7283.
+
+### Run 3: squad of 3
+
+`godot --path . -- --perf-probe --probe-squad=3 --probe-out=perf_squad3.txt`
+
+- load total 18510 ms over 213 frames; worst frame 1786 ms
+- build steps total 16824 ms: build.hunters 8625, build.spawns 1615, build.warm_up 1524, build.mobs 892, build.chests 817, world.terrain 701, build.generate 557, world.scatter_plan 529, world.walls 445, build.p
+
+| phase | frames | avg ms | p95 ms | worst ms | script ms | render cpu ms | hud ms | draws avg/max | prims (k) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| first | 31 | 26.8 | 28.4 | 37.6 | 2.46 | 2.56 | 15.41 | 2562/2564 | 2280 |
+| planning | 75 | 27.7 | 29.9 | 49.1 | 0.40 | 2.75 | 15.68 | 2785/2803 | 2407 |
+| ride | 145 | 87.1 | 127.1 | 148.1 | 11.11 | 2.30 | 11.76 | 1788/2296 | 1667 |
+| drop | 89 | 78.6 | 84.9 | 138.3 | 18.58 | 3.02 | 12.05 | 2347/2705 | 3051 |
+| land | 151 | 38.6 | 43.2 | 92.6 | 21.53 | 2.32 | 8.10 | 1913/2396 | 2689 |
+| map | 60 | 39.6 | 42.4 | 45.1 | 18.44 | 2.56 | 12.14 | 2367/2395 | 2644 |
+| fight | 301 | 37.8 | 40.9 | 222.3 | 20.11 | 2.55 | 8.41 | 2212/2316 | 2618 |
+
+Fight draws by pass: 3D 455, shadows 1263, canvas (HUD) 495.
+
+Worst frames (the report keeps 8; PerfLog marks column was empty on every one):
+
+| # | wall ms | script ms | render cpu ms | hud ms | phase | sim t (s) | PerfLog marks |
+|---:|---:|---:|---:|---:|---|---:|---|
+| 1 | 222.3 | 17.61 | 3.2 | 9.1 | fight | 22.4 | none |
+| 2 | 148.1 | 17.49 | 2.3 | 11.2 | ride | 9.8 | none |
+| 3 | 144.2 | 13.28 | 2.0 | 12.5 | ride | 6.7 | none |
+| 4 | 141.1 | 20.44 | 3.1 | 11.8 | ride | 6.6 | none |
+| 5 | 138.3 | 17.03 | 6.6 | 16.7 | drop | 14.4 | none |
+| 6 | 135.3 | 13.01 | 1.6 | 11.2 | ride | 11.7 | none |
+| 7 | 131.8 | 17.58 | 1.9 | 10.4 | ride | 13.1 | none |
+| 8 | 129.9 | 17.61 | 1.6 | 10.2 | ride | 12.9 | none |
+
+Memory: textures 1187.9 MB, buffers 207.7 MB, video 1603.8 MB, static 564.8 MB, objects 25029, nodes 10323.
