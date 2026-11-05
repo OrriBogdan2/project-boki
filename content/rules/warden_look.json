@@ -1061,7 +1061,8 @@
 					0.88,
 					0.9
 				],
-				"light_neutral_warm": 0.5
+				"light_neutral_warm": 0.5,
+				"shade": 0.6
 			},
 			"cloth": {
 				"far_lift": 0.15,
@@ -1098,9 +1099,15 @@
 			},
 			"skin-face": {
 				"fres": 0.05,
-				"top_light": 0.1,
+				"top_light": 0.05,
 				"far_lift": 0.08,
-				"sss": 0.3
+				"sss": 0.12,
+				"shade": 0.5,
+				"albedo": [
+					0.98,
+					1.0,
+					1.0
+				]
 			}
 		},
 		"lights": [

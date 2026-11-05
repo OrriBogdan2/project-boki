@@ -137,7 +137,7 @@ for s_, sd in ((1.0, "R"), (-1.0, "L")):
     # a skin dome behind each eye, slid out through it to shut the eye (the scan's eyes are paint)
     c_ = K.h(K.EYE * (s_, 1, 1))
     near = hv[np.argmin(np.linalg.norm((hv - c_) * (1, 0, 1), axis=1) + (hv[:, 1] < c_[1] - 0.1) * 9)]
-    p_ = K.ball("lid" + sd, "skin", (c_[0], near[1] - 0.012, c_[2]), (0.046, 0.016, 0.048), n=10, m=5, room=0.0)
+    p_ = K.ball("lid" + sd, "skin", (c_[0], near[1] - 0.04, c_[2]), (0.046, 0.016, 0.048), n=10, m=5, room=0.0)
     pieces.append(p_)
 tail = K.tail()
 pieces.append(tail)

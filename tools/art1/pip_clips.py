@@ -324,7 +324,7 @@ class Extras:
         l = P.get("lid", 0.0)
         e = P.get("ear", 0.0)
         for s, sd in ((1.0, "R"), (-1.0, "L")):
-            out["lid." + sd] = (None, Vector((0, 0.026 * min(max(l * 1.6 - 0.3, 0.0), 1.0), 0)))
+            out["lid." + sd] = (None, Vector((0, 0.05 * min(max(l * 1.6 - 0.3, 0.0), 1.0), 0)))
             ee = e + P.get("ear" + sd, 0.0)
             out["ear." + sd] = (Quaternion((1, 0, 0), -1.05 * ee) @ Quaternion((0, 0, 1), s * 0.25 * ee), None)
             n = max(1.0, round(P.get("wfq", 1.0) * self.dur))
