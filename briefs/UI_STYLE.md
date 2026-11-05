@@ -1,4 +1,4 @@
-# UI style (owner-approved reference, 2026-11-05)
+# UI style: ON HOLD (owner 2026-11-05 18:59 UTC: the reference "reads too basic adventure"; a new direction is coming. Build only neutral theme plumbing for now.)
 
 Reference: `briefs/art-refs/ui/ui_style_ref_boki_card.png`. Its text and names are placeholders ("Stinger Fox", "Tail Whip"); use real data.
 
