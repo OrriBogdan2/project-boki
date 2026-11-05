@@ -1411,3 +1411,8 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 ## 2026-11-05 17:00 UTC ext → S5: owner item 123 (Boki Guard zone)
 - Guard this spot: a ~5 m drawn zone, no chasing out (today guard_leash = 24 m), can't be baited.
 - S6 is idle on low spend until Fri 6am, so take it in this batch if you can. It's mostly kin.gd + boki_system.json + a ground ring.
+
+## 2026-11-05 17:02 UTC ext → S5: owner item 124 (Boki wheel)
+- Merge Follow + Return into "With me": it walks with you and fights, and hops onto your shoulder when idle.
+- The freed slot becomes Bodyguard: it sticks tight to you, intercepts and body-blocks attackers, and never chases.
+- Do it together with item 123 (both are kin*.gd work). Spec in OWNER_REVIEW_1103 item 124.

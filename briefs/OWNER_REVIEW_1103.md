@@ -1168,3 +1168,23 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - A foe kiting at 8 m from the centre → the Boki never goes past ~7 m.
   - After the foe leaves, it is back within 1 m of the centre in under 3 s.
   - The ring is drawn while cmd == "guard".
+
+## 124. Boki wheel: merge Follow + Return into "With me"; the new slot is Bodyguard (owner, 17:02 UTC Nov 5)
+- The owner: "i dont see a big difference between follow and return - should it just be one? and use the other slot for a diff ai command". He picked Bodyguard for the freed slot.
+- **With me** (replaces Follow and Return):
+  - It walks beside you and joins your fights as Follow does now.
+  - Out of combat (no foe within combat_radius for ~2 s), it hops onto your shoulder by itself, so G throws it from there as Return does now.
+  - The explicit-disengage behaviour of Follow stays.
+- **Bodyguard (new):**
+  - It sticks tight to you (≤2.5 m, never more than ~4 m away).
+  - It intercepts whoever damages you: it hits them and body-blocks their line to you (stands between you and them).
+  - It never chases. Once the attacker backs off past ~4 m from you, it returns to your side.
+  - Its own ability prioritises peel and defence (knock away / shield) over damage.
+  - A small shield-paw icon over it while active.
+- **Wheel:** Chase, Guard, With me, Bodyguard.
+  - Update the KinWheel icons and labels, the kin_command callout text ("with you" / "guarding you"), bots' order use and the tutorial line.
+  - Old saves or orders using "return"/"follow" map to "with me".
+- **Assert:**
+  - Wheel picks → the four cmds.
+  - With me, idle 2 s → on the shoulder.
+  - Bodyguard: a foe hitting the owner from 8 m → the Boki engages, but stays within 4 m of the owner.
