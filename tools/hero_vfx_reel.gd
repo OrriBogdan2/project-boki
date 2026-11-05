@@ -224,12 +224,12 @@ func _juggernaut_voice() -> void:
 		P.inp["move"] = Vector2(0, -1) if t < 2.2 else Vector2.ZERO
 		if fmod(t, 0.32) < DT:
 			var surface: String = ["grass", "stone", "snow", "wood"][int(t / 0.56) % 4]
-			Sfx.play(HeroVfx.step_sound("juggernaut", surface), P.pos, -13.0, 0.08)
+			Sfx.play(HeroSfx.of(P, "step_" + surface, "step_" + surface), P.pos, -13.0, 0.08)
 			step_k += 1
 		if _at(t, 2.5) or _at(t, 2.9) or _at(t, 3.3):
-			P.ak.vfx("hurt")
+			HeroSfx.voice(m, P, "hurt")
 		if _at(t, 3.8):
-			P.ak.vfx("downed")
+			HeroSfx.voice(m, P, "down")
 		_aim(T.pos)
 	await _go(5.0, walk)
 
@@ -350,10 +350,10 @@ func _archer_voice() -> void:
 		P.inp["move"] = Vector2(0, -1) if t < 2.2 else Vector2.ZERO
 		if fmod(t, 0.28) < DT:
 			var surface: String = ["grass", "stone", "snow", "wood"][int(t / 0.56) % 4]
-			Sfx.play(HeroVfx.step_sound("archer", surface), P.pos, -13.0, 0.08)
+			Sfx.play(HeroSfx.of(P, "step_" + surface, "step_" + surface), P.pos, -13.0, 0.08)
 		if _at(t, 2.5) or _at(t, 2.9) or _at(t, 3.3):
-			P.ak.vfx("hurt")
+			HeroSfx.voice(m, P, "hurt")
 		if _at(t, 3.8):
-			P.ak.vfx("downed")
+			HeroSfx.voice(m, P, "down")
 		_aim(T.pos)
 	await _go(5.0, walk)
