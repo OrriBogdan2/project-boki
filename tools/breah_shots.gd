@@ -138,20 +138,24 @@ func _focused(marks: Array, focus: Callable) -> Array:
 		(mk as Array).append(focus)
 	return marks
 
-## Her two dash moves: Rubble Leap on the ground, the long dash in the air (5 frames each).
+## Her two dash moves: Rock Hop on the ground, the long dash in the air.
 func _breah_dash() -> void:
 	await _reset(9.0)
-	_aim(home + Vector3(4.0, 0, 0))
+	_aim(home + Vector3(9.0, 0, 3.0))
 	P.ak.on_dash(false)
+	var K: DolmKit = P.ak
+	# the chain re-presses by itself as it reaches each skid, steered a little each time
+	var press := func(_t):
+		if K.hop.chaining() and K.hop.st["phase"] == "skid":
+			_aim(P.pos + Vector3(6.0, 0, -4.0 if int(K.hop.st["n"]) == 1 else 4.0))
+			K.on_dash(true)
 	var ground := _strip(
 		"dash_ground_strip",
-		"Rubble Leap (ground dash), gameplay zoom: crouched on the rock as it heaves up; kicked off it, fists swept"
-			+ " back; tucked at the top, fists overhead; legs reaching down; the two-fist landing (dust, no ring)."
-			+ " Reference: footage 0516-0518, the rock bursting up in front and a low shove behind it (ours is the"
-			+ " owner's leap over that rock)",
-		[0.04, 0.13, 0.31, 0.47, 0.64]
+		"Rock Hop (ground dash), gameplay zoom: crouched on the rock as it bursts up; a low hop on the foot slab; the"
+			+ " next rock rising under him and the skid; hop 2 steered; hop 3 steered; the crash; the rock rolling on",
+		[0.04, 0.2, 0.42, 0.6, 0.85, 1.05, 1.3, 1.5, 1.7]
 	)
-	await _go(0.9, Callable(), ground)
+	await _go(1.9, press, ground)
 	await _reset(9.0)
 	_aim(home + Vector3(4.0, 0, 0))
 	P.pos.y += 2.2

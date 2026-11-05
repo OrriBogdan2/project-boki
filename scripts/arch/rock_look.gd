@@ -42,6 +42,12 @@ static func make() -> Node3D:
 	_cracks(n)
 	return n
 
+## Stands the columns straight, so a low rock can be squashed without shearing them.
+static func upright(n: Node3D) -> void:
+	for c in n.get_children():
+		if c.name.begins_with("Col"):
+			(c as Node3D).rotation = Vector3.ZERO
+
 ## The soft ground shadow: from the match camera it plants the rock on the ground.
 static func _shadow(n: Node3D) -> void:
 	var s := Models.part(

@@ -224,7 +224,7 @@ func slam(c: float, at_feet: bool) -> void:
 			m.displace.spike(f, -22.0)      # spiked down (after the hit, which would lift it)
 		gained = true
 	for w in m.verbs.walls.duplicate():
-		if not w.get("rock", false) or int(w["team"]) != h.team: continue
+		if not k.launchable(w): continue
 		var mid := k.rock_mid(w)
 		var rel := Vector2(mid.x - at.x, mid.z - at.z)
 		if rel.length() <= r + 1.1 and HeroZones.rock_in_reach(mid.y, at.y):
