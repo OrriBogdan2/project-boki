@@ -205,7 +205,7 @@ def clean_skin(col, m, blur):
     l = col.mean(-1)
     mf = m.astype(np.float32)
     l1, l2 = blur(l, mf, 2), blur(l, mf, 20)
-    t = np.clip(0.52 + (l1 - l2) * 3.0, 0, 1)
+    t = np.clip(0.42 + (l1 - l2) * 3.0, 0, 1)
     new = ramp(t, SKIN_R) + (l - l1)[..., None] * 0.5
     return np.where(m[..., None], new.astype(np.float32), col)
 

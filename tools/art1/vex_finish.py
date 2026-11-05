@@ -40,7 +40,7 @@ hw = {"head": np.zeros(len(hv)), "hips": np.zeros(len(hv))}
 for i_, v_ in enumerate(hlow.data.vertices):
     for g_ in v_.groups:
         hw[gn_[g_.group]][i_] = g_.weight
-hscan = M.Piece("hscan", "skin-vex", hv, [list(p.vertices) for p in hlow.data.polygons], weights=hw)
+hscan = M.Piece("hscan", "skin-vex", hv, [list(p.vertices) for p in hlow.data.polygons], weights=hw, room=0.2)
 pieces.insert(0, hscan)
 for p_ in parts["hair"] + parts["braid"]:
     t_ = getattr(p_, "t", None)
@@ -484,7 +484,9 @@ hc = sample_head(POS[ys_, xs_])
 hc = np.clip(hc, 0, 1)
 gr_ = (hc[:, 1] > hc[:, 0] * 1.12) & (hc[:, 1] > hc[:, 2] * 1.04)
 g0_ = hc[gr_].mean(1, keepdims=True)
-hc[gr_] = np.clip((g0_ + (hc[gr_] - g0_) * 1.3) * 1.08, 0, 1)             # the sheet's hair, a touch more colour under the toon light
+hc[gr_] = np.clip((g0_ + (hc[gr_] - g0_) * 1.35) * np.array([1.4, 1.5, 1.2]) + np.array([0.02, 0.05, 0.02]), 0, 1)             # the sheet's hair, a touch more colour under the toon light
+skn_ = (hc[:, 0] > hc[:, 1] * 1.1) & (hc[:, 0] < hc[:, 1] * 1.7) & (hc.mean(1) > 0.22)
+hc[skn_] = np.clip(hc[skn_] * np.array([1.3, 1.24, 1.2]), 0, 1)
 OUTC[ys_, xs_] = hc * (0.84 + 0.16 * np.clip(AO[ys_, xs_], 0, 1))[:, None]
 skin_m = mask & (OUTC[..., 0] > OUTC[..., 1] * 1.08) & (OUTC[..., 0] < OUTC[..., 1] * 1.6) & (OUTC.mean(2) > 0.36)
 OUTC = P.clean_skin(OUTC, skin_m, blur)
@@ -497,7 +499,8 @@ g_ = OUTC[jm].mean(1, keepdims=True)
 OUTC[jm] = np.clip((g_ + (OUTC[jm] - g_) * 1.55) * np.array([1.05, 1.17, 0.9], np.float32), 0, 1)
 
 SKIN = lambda p, n, ao: ramp(np.clip(lit(n, ao) * 1.05, 0, 1), [hexc("#8c5a5c"), hexc("#c58a84"), hexc("#e5ac9f"), hexc("#f3c9bb"), hexc("#fde4d7")])
-paint(lambda n: n == "lidUL", lambda p, n, ao: P.mix(SKIN(p, n, ao), hexc("#1b1518"), smooth(0.92, 0.82, np.arctan2(p[..., 2] - parts["lid_c"][2], p[..., 1] - parts["lid_c"][1]))))
+paint(lambda n: n == "lidUL", lambda p, n, ao: P.mix(SKIN(p, n, ao), hexc("#2a2024"), smooth(0.9, 0.78, np.arctan2(p[..., 2] - parts["lid_c"][2], p[..., 1] - parts["lid_c"][1]))))
+paint(lambda n: n.startswith("ebrow"), lambda p, n, ao: np.broadcast_to(hexc("#20382a"), p.shape).copy())
 paint(lambda n: n == "ear", SKIN)
 paint(lambda n: n == "sleeve", P.sleeve)
 paint(lambda n: n == "tube", P.tube)

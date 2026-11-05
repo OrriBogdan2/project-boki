@@ -16,8 +16,9 @@ def hs(p):
 
 # scan units (flipped: +X her right), read on grid_front
 HC = hs((0, -0.015, 1.785))                  # the head's centre
-EYE_Z = hs((0, 0, 1.754))[2]
-EYE_X = 0.056
+GRID_CHIN0 = hs((0, 0, 1.655))[2]
+EYE_Z = GRID_CHIN0 + 0.003 + 0.384 * 0.295        # the head scan's eye line (vex_headscan.py)
+EYE_X = 0.0408
 EYE_R = 0.0245
 GRID_CHIN = hs((0, 0, 1.655))[2]
 TOP = hs((0, 0, 1.9))[2]
@@ -238,7 +239,7 @@ BRAID_N = 8
 def braid():
     """One long braid from the nape, down behind her left shoulder to the thigh: alternate fat lobes on a spring chain, a brass tie, a fanned tip."""
     z0 = HC[2] - 0.11
-    pts = np.array([(-.02, HC[1] - .135, z0), (-.075, HC[1] - .185, z0 - .13), (-.115, HC[1] - .20, z0 - .32), (-.135, HC[1] - .195, z0 - .52), (-.15, HC[1] - .18, z0 - .72), (-.17, HC[1] - .175, z0 - .86)])
+    pts = np.array([(-.02, HC[1] - .09, z0 - .02), (-.075, HC[1] - .165, z0 - .14), (-.115, HC[1] - .20, z0 - .32), (-.135, HC[1] - .195, z0 - .52), (-.15, HC[1] - .18, z0 - .72), (-.17, HC[1] - .175, z0 - .86)])
     path = catmull(pts, 40)
     t, s_, n = frames(path, (0, 1.0, 0))
     out = []
@@ -422,8 +423,7 @@ def scan_brows(bvh):
         if len(path) < 3:
             continue
         path = catmull(np.array(path), 6)
-        b = sweep("brow" + side, "hair-mane", path, [(-1, 0), (0, 0.3), (1, 0), (0, -0.3)], np.interp(np.linspace(0, 1, 6), np.linspace(0, 1, 5), wd), side_hint=np.array([0, 1.0, 0.3]),
-                  uv_rect=(0.1, 0.02, 0.18, 0.1), room=0.0)
+        b = sweep("ebrow" + side, "leather-vex", path, [(-1, 0), (0, 0.3), (1, 0), (0, -0.3)], np.interp(np.linspace(0, 1, 6), np.linspace(0, 1, 5), wd), side_hint=np.array([0, 1.0, 0.3]), room=0.0)
         out.append(b.rigid("brow." + side))
     return out
 

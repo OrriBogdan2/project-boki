@@ -86,7 +86,12 @@ func run(main: Node) -> void:
 	ok(frames > 0 and worst <= AIM_OFF, "the cannon stays on the aim through the slide (worst %.2f rad)" % worst)
 	for f in 60:
 		_frame(m, [P])
-	# RMB tap
+	# RMB tap: the fixed firing point is found and sits ahead of her on the aim, right at the press
+	var fire := WardenGlb.anchor(P.model, "launcher_fire")
+	ok(fire != null and WardenGlb.anchor(P.model, "launcher_muzzle") != null, "the launcher's two FX points are found")
+	if fire:
+		var ahead := (fire.global_position - P.model.global_position).dot(P.model.global_transform.basis.z * -1.0)
+		print("LIVE launcher_fire %.2f m along her facing at rest" % ahead)
 	var lb := sk.find_bone("launcher")
 	var rest_q := sk.get_bone_pose_rotation(lb)
 	seen.clear()
