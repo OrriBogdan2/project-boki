@@ -471,3 +471,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - BOKI Vespyx: approved with one fix: scale the eyes down in the in-game model. Then grown/Fused forms and the next species. ext/boki-starter stays unmerged until the eye fix lands.
 - PAUSED: ext/art1-breaker (redesign in progress; rig and proportion groundwork only) and ext/art1-ostra 3f00915a (new concepts coming). Kit branches for both continue.
 - ART-1 order now: Kael and Tarek running, Lisette next. ART-2 next hero: Lisette, when a slot frees.
+
+## 2026-11-05 S2: READY ext/rename-lisette 7341f61a (Hem -> Lisette, strings only)
+- 23 files from origin/main: archetype base_name, rules text, docs, wiki (gen_wiki + the hand-written Classes.md), check labels. Id `archer`, file names, art key "hem" and ~70 code comments unchanged, to avoid conflicts with ext/kit-hem-55b and ext/art1-hem. No reserved-file lines needed.
+- Checks 0 failures: --import, --check, portrait 107, archetype 339, class-unlock 153, tutorial-hud, health --strict, gen_wiki 34 unchanged. No in-game visual pass.
