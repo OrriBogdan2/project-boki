@@ -1658,3 +1658,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - **S4, Fri:** the sounds for 127, 135, 140, 142, 158, 149.
 - **S6, Fri:** Boki items + help S5 with 123/124 if not done.
 - **UI skin:** waits for the owner's pick of the new mockup.
+
+## 2026-11-05 20:36 UTC ext → S5: UI style UN-HELD: "Void & Masks". Refs: art-refs/ui/ui_style_void_A2_base.png (base) + ui_style_void_A1_alt.png (borrow badges/stamps). Spec: briefs/UI_STYLE.md (rewritten). Build the reusable pieces, then roll out starting with the hatch flow. The text in the refs is placeholder.

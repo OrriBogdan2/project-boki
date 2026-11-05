@@ -1,28 +1,31 @@
-# UI style: ON HOLD (owner 2026-11-05 18:59 UTC: the reference "reads too basic adventure"; a new direction is coming. Build only neutral theme plumbing for now.)
+# UI style: "Void & Masks" (owner direction 2026-11-05; ext's pick of the base, pending a final owner nod)
 
-Reference: `briefs/art-refs/ui/ui_style_ref_boki_card.png`. Its text and names are placeholders ("Stinger Fox", "Tail Whip"); use real data.
+**References:**
+- **Base:** `briefs/art-refs/ui/ui_style_void_A2_base.png`.
+- **Borrow from:** `ui_style_void_A1_alt.png`.
+- The old `ui_style_ref_boki_card.png` is REJECTED (too "basic adventure").
+- All the text in the refs is placeholder (names, abilities, "DoT"); use real data and plain words.
 
 ## Look
 - **Panels:**
-  - Deep navy body (~#252e4a) with a lighter navy header bar (~#364464).
-  - Soft inner bevel and drop shadow; slightly rounded corners.
-  - Thin warm-gold double trim with filigree corner flourishes (gold ~#d9a85a to #f1dd8c highlight).
-- **Content rows:** parchment cards (~#e5c9a2) with a torn/soft edge and a subtle paper texture. Dark brown text (~#483224); bold names.
-- **Header/title text:** a chunky rounded display font with a gold gradient fill, a dark brown outline and a soft drop shadow.
-- **Icon tiles:**
-  - Square, gold-framed, dark inner bevel, the icon centred.
-  - A small label baked under it (e.g. "Ability", "Passive").
-  - Element-coloured backgrounds (green venom, etc.).
-- **Portrait:** a framed square tab breaking out of the panel's top edge, on a navy backdrop.
-- **Primary button:**
-  - A dark brown-plum fill (~#483d3e), a gold rim and an outer warm glow on hover.
-  - Cream bold label.
-  - One primary button per screen.
-- **Backgrounds:** behind modal screens, the world/sky blurred (no flat dim).
+  - Black-violet (~#1e1430 to #2a1c40), with rough torn/asymmetric edges and faint scratched runes + speckle/ink spatter texture.
+  - A neon edge glow running teal (~#3fe0d0) → magenta (~#ff3fd0) around the outline.
+- **Portrait:** a cracked-mask/void window: the creature over a deep starfield, with teal crack lines through the frame.
+- **Title:** a torn parchment tab pinned/taped at the top (A2) or at an angle (A1), with a bold hand-cut black display font.
+- **Info rows:** torn parchment strips pinned with nails, a bold name + one short line in dark ink. Icons sit in jagged mask/bat-shaped black badges (A2's solid black glyph badges; A1's outlined mask badges also OK).
+- **Primary button:** a torn ticket-stub shape, magenta neon rim, pink caps label. One per screen.
+- **Accents** (used sparingly): rubber stamps ("LOGGED", "EXPEDITION", "VOID-TOUCHED" style, for state badges like captured/rare); chalk tally marks; scratched runes.
+- **Backgrounds:** the world blurred behind modals (dusk broken-isle palette); floating void specks drift around the panel.
 
 ## Rules
-- Only interactive things get hover/press states (glow, scale 1.03). Info rows (Ability/Passive) are static.
-- Spacing: generous padding (~24 px panel, ~16 px between rows) on the UI.T_* type scale.
-- Text diet (OWNER_REVIEW item 155): labels, not paragraphs.
-- Build it as reusable theme pieces (a StyleBox panel with nine-patch gold trim, a parchment row, an icon tile, a primary button, a portrait tab) in the UI helpers, so every screen uses the same parts.
-- Rollout order: the hatch flow (item 157), the Boki list/sheet (174), the Black Market (170), the home panels, then everything else.
+- Only interactive things glow on hover (the neon edge brightens, a scale of 1.03). Info strips are static.
+- Readability first: the parchment strips carry the text; never put body text directly on the noisy texture. Min body size at 720p as UI.T_BODY.
+- Keep the chaos in the frame and decoration, not in the content layout. One clear hierarchy per screen: title → portrait → rows → button.
+- Build reusable pieces:
+  - a torn panel (nine-patch + an edge-glow shader with a gradient param),
+  - a parchment strip,
+  - a mask badge,
+  - a ticket button,
+  - a void portrait window (a starfield shader + a crack overlay),
+  - a stamp label.
+- Rollout: the hatch flow (157) → the Boki list/sheet (174) → the Black Market (170) → home panels → everything else. The HUD in matches stays clean and minimal (only borrow colours/edges).
