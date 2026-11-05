@@ -81,7 +81,7 @@ const DEPLOY_H := 8.0         # the glider opens by itself this high above the g
 const ARMOR_DR := 0.2
 const ARMOR_DUR := 2.2        # durability as a multiple of max health
 const ARMOR_WAIT := 4.0
-const CONSUME_VULN := 1.2     # you take this much more damage while drinking or repairing
+const CONSUME_VULN := 1.2     # you take this much more damage while drinking, repairing or reviving a box
 
 var pname := "Hunter"
 var cls := "medium"
@@ -132,7 +132,7 @@ var sick_t := 0.0              # resurrection sickness after a beacon revive: -2
 var stolen_carry := false      # carrying someone else's kin: it struggles, slowing you a little
 var chase: Hunter = null       # whoever has your kin: you run faster toward them
 var box_t := 0.0               # holding interact at a deathbox
-var box_rev_at := -9.0         # last time we were channelling a deathbox revive (kneeling, locked in place)
+var box_rev_at := -9.0         # last time we were channelling a deathbox revive (BoxRevive)
 var hurt_at := -9.0            # last time a hit landed (channels like a box revive break on it)
 var hit_k := 1.0               # how hard the last hit was (Oomph): scales the flinch
 var hit_shake := 0.0           # the model's hit-shake left (Oomph.render_hit)
@@ -535,9 +535,9 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 			return 0.0
 	regen_wait = 5.0
 	armor_wait = ARMOR_WAIT
-	if drink_t > 0.0 or kit_t > 0.0:
+	if drink_t > 0.0 or kit_t > 0.0 or box_reviving():
 		d *= CONSUME_VULN
-		# drinking or repairing leaves you open: any real hit spills it (you keep the tonic or kit)
+		# drinking, repairing or reviving leaves you open: any real hit spills it (you keep the item)
 		if d >= 1.0 and opts.get("src", "") != "heat":
 			_interrupt_consume()
 	if armor > 0.0 and not shelled and opts.get("src", "") not in ["fall", "burn", "heat"]:
@@ -2060,13 +2060,9 @@ func sim(dt: float) -> void:
 		if down_hp <= 0.0:
 			m.eliminate(self, last_hit_by, "finished")
 			return
-	# bringing a teammate back at their deathbox: kneeling over it, locked in place (let go of
-	# interact to stop)
+	# bringing a teammate back at their deathbox: no attacks, and moving breaks it
 	if box_reviving():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
-				"gear1", "gear2", "fire", "throw", "kin_ab"]:
-			inp[kk] = false
-		inp["move"] = Vector2.ZERO
+		BoxRevive.guard_inputs(self)
 	# mid-stomp you're committed: none of your own buttons do anything until it ends
 	if not stomp.is_empty():
 		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
@@ -2580,12 +2576,13 @@ func _fold_for_action() -> void:
 		glide_cd = maxf(glide_cd, 0.4)
 		_glider_sfx("close")
 
-## Knocked out of a drink or a repair: it spills (nothing is used up) and everyone sees it.
+## Knocked out of a drink, a repair or a box revive: it spills (nothing is used up) and everyone sees it.
 func _interrupt_consume() -> void:
-	if drink_t <= 0.0 and kit_t <= 0.0:
+	if drink_t <= 0.0 and kit_t <= 0.0 and not box_reviving():
 		return
 	drink_t = 0.0
 	kit_t = 0.0
+	BoxRevive.cancel(self)
 	m.fx.word(pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("ff8a5a"))
 	m.fx.burst(pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
 	m.sfx("crit", pos, -4.0, 0.7)
@@ -3375,7 +3372,7 @@ func render(delta: float, alpha: float) -> void:
 	_render_balloon(delta)
 	Oomph.render_hit(self, delta)
 	Hex.tick(self, delta)
-	if (drink_t > 0.0 or kit_t > 0.0) and visible and see:
+	if (drink_t > 0.0 or kit_t > 0.0 or box_reviving()) and visible and see:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:
 			vuln_fx_t = 0.22

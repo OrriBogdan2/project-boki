@@ -389,9 +389,9 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 392,
+"long_line": 388,
 "nested_ternary": 7,
-"semicolon": 408,
+"semicolon": 407,
 "shadow": 3
 },
 "scripts/match/abilities.gd": {
@@ -464,7 +464,7 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 25,
+"long_line": 24,
 "nested_ternary": 1,
 "semicolon": 49
 },
@@ -634,13 +634,13 @@
 "semicolon": 25
 },
 "scripts/match/life.gd": {
-"long_line": 15,
+"long_line": 14,
 "nested_ternary": 1,
-"semicolon": 4
+"semicolon": 3
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 231,
+"long_line": 230,
 "nested_ternary": 20,
 "semicolon": 146,
 "shadow": 9
@@ -832,7 +832,7 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 196,
+"long_line": 195,
 "nested_ternary": 40,
 "semicolon": 52,
 "shadow": 2
