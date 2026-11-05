@@ -47,7 +47,7 @@ def tail_shape():
 
 
 def collar_shape():
-    prims = [Ellipsoid("c", "root", v3(0, 0.84, 0.03), v3(0.2, 0.075, 0.17), k=0)]
+    prims = [Ellipsoid("c", "root", v3(0, 0.84, 0.13), v3(0.17, 0.07, 0.09), k=0)]
     for sd, sx in SIDES:
         prims.append(Cone("st" + sd, "gill." + sd, v3(sx * 0.12, 0.84, 0.08), v3(sx * 0.24, 0.84, 0.11), 0.06, 0.04, k=0.03))
     return Shape(prims)
