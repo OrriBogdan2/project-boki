@@ -185,10 +185,18 @@ def past_wrist(f):
     return max(hand_w[v.index] for v in f.verts) > 0.5 or (max(arm_w[v.index] for v in f.verts) > 0.3 and f.calc_center_median().z < wrist_z)
 
 
+all_arm = arm_w + GROUP["upper_arm.R"] + GROUP["upper_arm.L"]
+
+
 kill = [f for f in bm.faces if past_wrist(f)]
 bmesh.ops.delete(bm, geom=kill, context="FACES")
 bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
-bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0006)
+# (welded per side of the arm: at rest the forearms touch the skirt, and one weld across would stretch hip to hand in every raised-arm pose)
+bm.verts.ensure_lookup_table()
+on_arm = [v for v in bm.verts if all_arm[v.index] > 0.5]
+off_arm = [v for v in bm.verts if all_arm[v.index] <= 0.5]
+bmesh.ops.remove_doubles(bm, verts=on_arm, dist=0.0006)
+bmesh.ops.remove_doubles(bm, verts=[v for v in off_arm if v.is_valid], dist=0.0006)
 bm.to_mesh(low.data)
 bm.free()
 bpy.ops.object.select_all(action="DESELECT")

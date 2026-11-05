@@ -65,8 +65,10 @@ func run(main: Node) -> void:
 		_run(m, P, 54, seen)
 	ok(seen.has("lmb_l") and seen.has("lmb_r"), "the finger bolts play lmb_l and lmb_r")
 	var calm := _flare(P)
+	P.grounded = true          # (in the air the rod goes on the press, with no hold)
+	P.gliding = false
 	K.press_rmb()
-	_run(m, P, 70, seen)
+	_run(m, P, 40, seen)
 	K._release_rmb()
 	_run(m, P, 50, seen)
 	ok(seen.has("rmb_hold") and seen.has("rmb"), "Storm Rod plays its hold and its throw")

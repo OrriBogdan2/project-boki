@@ -93,7 +93,7 @@
 			"leather": {"top_light": 0.3, "fres": 0.25, "fres_tint": 0.5, "far_lift": 0.12, "light_neutral_warm": 0.8},
 			"hair": {"vertex_ao": false, "top_light": 0.5, "fres": 0.35, "far_lift": 0.2, "glow": 0.1, "fres_tint": 0.9},
 			"metal": {"top_light": 0.5, "fres": 0.45, "fres_tint": 0.8, "far_lift": 0.6, "sheen": 0.1},
-			"glow": {"glow": 1.8}, "glow-wire": {"glow": 0.9}
+			"glow": {"glow": 1.8}, "glow-wire": {"glow": 0.7}
 		},
 		"no_ink": ["gum"],
 		"bloom": [{"at": "anchor_rod_0", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}, {"at": "anchor_rod_1", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}, {"at": "anchor_rod_2", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}, {"at": "anchor_rod_3", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}]
