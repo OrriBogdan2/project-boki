@@ -753,7 +753,9 @@ tile_ = crop_[iy_][:, ix_].copy()
 lt_ = tile_.mean(2)
 stone_ = lt_ < 0.62
 tile_[stone_] *= 0.56
-tile_[lt_ > 0.8] = P.HOT
+rim_ = (lt_ >= 0.62) & (lt_ <= 0.9)
+tile_[rim_] = np.minimum(tile_[rim_] * 0.5, 0.4)      # (the art's peach rim under hero_toon's heat key: only the core burns)
+tile_[lt_ > 0.9] = P.HOT
 OUTC[y0:y1, x0:x1] = tile_
 x0, y0, x1, y1 = rect(HALO_R)
 OUTC[y0:y1, x0:x1] = (0.52, 0.4, 0.2)       # (keyed part hot: the gold round the core)
