@@ -867,3 +867,5 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 S2: 5-hour limit again; lanes resume after 15:20 UTC
 - Work saved on ext/wip-art1-*, ext/wip-kit-*. READY: ext/kit-kael-113 ae7f8b6b (item 113 points 2-8); details in EXT_TO_MAIN. Differs: glider blocked 0.75 s then open 0.35 s (the ult is only 1.1 s); E pins a Slam to its start direction; guard can run ~1.1 s during a haul (small balance change). ART-1 Kael needs lunge_wind, wave_wind, wave, meteor, dash, guard clips matched.
 - Owner Qs: glide timing OK? RMB hold while chained: run the chain, or go to the cursor? Longer invulnerable guard during the haul OK?
+
+## 2026-11-05 S2: READY ext/kit-ryzz-116 6963e49d (116, 116b); ext/art1-ryzz 1ad57b8f new idle and walk; details in EXT_TO_MAIN. Open: 116.3 Static marker (S3?), 116.5 sounds (S4; emote pop too). Owner Q: should a pulled-in charge orb's reset also give the boost? Agent assumed yes.
