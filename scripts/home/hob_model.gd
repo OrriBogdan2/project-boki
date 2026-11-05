@@ -57,6 +57,7 @@ func _process(dt: float) -> void:
 	if _shout_t > 0.0:
 		_shout_t -= dt
 		bubble.visible = _shout_t > 0.0
+		tag.modulate.a = 0.0 if bubble.visible else 1.0      # (one line over him at a time)
 
 func _turn(dt: float) -> void:
 	if face_to.x == INF:

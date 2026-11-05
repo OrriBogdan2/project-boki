@@ -27,6 +27,13 @@ const POSE_S := 0.6            # s: the Hunter's cast pose (HunterAnim's "ult" c
 const NAME_IN_S := 0.35        # s after the snap that the name comes in
 const STING_AT_S := 0.25       # s after the snap that the sting starts
 const HAND_BACK_S := 0.5       # s at the end that the camera eases back to the scene's own
+const SOUNDS := {               # our own (tools/gen_mask_sfx.py), loaded with the script so the beat starts at once
+	"mask_swell": preload("res://audio/mask_swell.wav"),
+	"mask_heart": preload("res://audio/mask_heart.wav"),
+	"mask_whisper": preload("res://audio/mask_whisper.wav"),
+	"mask_impact": preload("res://audio/mask_impact.wav"),
+	"mask_sting": preload("res://audio/mask_sting.wav"),
+}
 
 var id := ""
 var mask: MaskRelic
@@ -48,6 +55,7 @@ var _rules: Dictionary
 var _was_cam: Camera3D
 var _from: Transform3D         # the scene camera where the beat took over
 var _close: Transform3D        # the push-in framing on the face
+var _look_from := Vector3.ZERO  # where the scene camera was looking, at the face's distance
 var _head := Vector3.ZERO
 var _front := Vector3.FORWARD
 var _mask_from := Vector3.ZERO
@@ -81,7 +89,7 @@ func _ready() -> void:
 	_rules = Content.rules(RULES)
 	_times = _rules["short" if short else "full"]
 	_head = (body.get_node("Rig/Torso/HeadPivot") as Node3D).global_position
-	_front = -body.global_basis.z.normalized()
+	_front = Vector3(-body.global_basis.z.x, 0.0, -body.global_basis.z.z).normalized()      # (the farm leans you)
 	_mask_from = mask.global_position
 	mask.bobbing = false
 	mask.face_to = _head + _front * 3.0
@@ -106,6 +114,7 @@ func _take_camera() -> void:
 	cam.current = true
 	var eye := _head + _front * CAM_BACK * body.scale.y + Vector3.UP * 0.08
 	_close = Transform3D(Basis(), eye).looking_at(_head, Vector3.UP)
+	_look_from = _from.origin - _from.basis.z * _from.origin.distance_to(_head)
 
 func _build_ui() -> void:
 	ui = CanvasLayer.new()
@@ -182,7 +191,7 @@ func _quiet() -> void:
 func _player(sound: String, db: float) -> AudioStreamPlayer:
 	var p := AudioStreamPlayer.new()
 	p.bus = "SFX"
-	p.stream = load("res://audio/%s.wav" % sound)
+	p.stream = SOUNDS[sound]
 	p.volume_db = db
 	add_child(p)
 	return p
@@ -364,8 +373,11 @@ func _show_name() -> void:
 	ui.add_child(name_box)
 	UI.pop_in(name_box)
 
+## The camera k of the way from where the scene had it to the face, always looking at what it moves toward.
 func _ease_camera(k: float) -> void:
-	cam.global_transform = _from.interpolate_with(_close, clampf(k, 0.0, 1.0))
+	var c := clampf(k, 0.0, 1.0)
+	var eye := _from.origin.lerp(_close.origin, c)
+	cam.global_transform = Transform3D(Basis(), eye).looking_at(_look_from.lerp(_head, c), Vector3.UP)
 
 func _restore_ambience() -> void:
 	var amb := AudioServer.get_bus_index("Ambience")

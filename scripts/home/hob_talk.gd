@@ -51,6 +51,7 @@ func start() -> void:
 	Save.save_game()
 	h.panel_open = TALK
 	h.cam.zoom_to = TALK_ZOOM
+	_screen_clear(false)
 	box = TalkBox.open(h, FarmBuilder.full_name(), HobModel.portrait(TalkBox.FACE_PX))
 	box.line_shown.connect(_on_line)
 	box.closed.connect(_closed)
@@ -109,6 +110,7 @@ func _put_on(id: String) -> void:
 	box.close()
 	var h = hob.h
 	h.panel_open = TALK      # (you stay still through the Mask moment)
+	_screen_clear(false)
 	var relic := MaskRelic.make(id)
 	h.add_child(relic)
 	var hands := hob.node.global_position - hob.node.global_basis.z * 0.5 + Vector3.UP * 1.2
@@ -123,6 +125,7 @@ func _after_beat(id: String) -> void:
 	if h.panel_open == TALK:
 		h.panel_open = ""
 	h.cam.zoom_to = h.HOME_ZOOM
+	_screen_clear(true)
 	h._refresh_top()
 
 func _on_line(_i: int, line: Dictionary) -> void:
@@ -155,8 +158,17 @@ func _closed() -> void:
 	if h.panel_open == TALK:
 		h.panel_open = ""
 	h.cam.zoom_to = h.HOME_ZOOM
+	_screen_clear(true)
 	if h.guide:
 		h.guide.refresh()
+
+## The hub bar and the goal line step aside while you talk (shown: true puts them back).
+func _screen_clear(shown: bool) -> void:
+	var h = hob.h
+	if h.hub:
+		h.hub.visible = shown
+	if h.guide and h.guide.hint_visible():
+		h.guide.hint_box.visible = shown
 
 # ------------------------------------------------------------------ every frame
 func tick(dt: float) -> void:
@@ -187,6 +199,7 @@ func _intro(dt: float) -> void:
 			return
 		tut["hob_intro"] = true
 		intro_t = 0.0
+		h.cam.zoom_to = TALK_ZOOM
 		hob.node.pose = "wave"
 		hob.node.face_to = h.ppos
 		hob.node.shout(String(rules()["call"]))
@@ -195,6 +208,7 @@ func _intro(dt: float) -> void:
 	intro_t += dt
 	if intro_t > float(rules()["intro_pan_s"]) + EASE_S * 2.0:
 		intro_t = -1.0
+		h.cam.zoom_to = h.HOME_ZOOM
 
 ## The camera's focus: on you, drawn toward Hob while you talk (and toward what he points at), and over to him
 ## on the first arrival.

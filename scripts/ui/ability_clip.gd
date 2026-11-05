@@ -18,6 +18,7 @@ const MELEE_AT := Vector3(0.55, 0.0, 0.0)  # where a melee Hunter stands to swin
 const LINE_CHARS := 64         # the fallback line's length, cut at a word
 ## The effect each delivery reads as (an archetype's "clip" block can name its own per slot in "fx").
 const FX_BY_DELIVERY := {"projectile": "bolt", "cone": "cone", "zone": "zone", "wall": "wall"}
+static var _paren: RegEx        # "(...)" asides cut from a fallback line, compiled once
 
 var id := ""
 var slot := ""
@@ -76,8 +77,9 @@ static func line_for(hunter_id: String, ability: String) -> String:
 	if own != "":
 		return own
 	var text := String(HunterViewer.slot_info(hunter_id, ability)["line"])
-	var paren := RegEx.create_from_string("\\s*\\([^)]*\\)")
-	text = paren.sub(text, "", true)
+	if _paren == null:
+		_paren = RegEx.create_from_string("\\s*\\([^)]*\\)")
+	text = _paren.sub(text, "", true)
 	if text.find(": ") >= 0 and text.find(": ") < 30:
 		text = text.substr(text.find(": ") + 2)
 	for stop in [". ", "; "]:

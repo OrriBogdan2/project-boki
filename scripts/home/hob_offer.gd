@@ -7,8 +7,8 @@ extends RefCounted
 ## ClassUnlock.choose_second opens it, and HobTalk plays the short Mask moment. "Not now" lets it wait.
 
 const CARD_W := 230.0          # px
-const FACE_PX := 120.0
-const CLIP := Vector2(320, 150)      # px: the focused Mask's ability clip
+const FACE_PX := 110.0
+const CLIP := Vector2(300, 130)      # px: the focused Mask's ability clip
 
 var chat: HobTalk
 var ids: Array = []

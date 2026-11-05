@@ -1,7 +1,7 @@
 extends RefCounted
 ## --empty-shots --shots-dir=<dir>: review screenshots of the Empty creator (Male / Female, three heights,
 ## builds, hollow styles), the Masks viewer and the first-Mask moment (xvfb with a renderer). Add
-## --only=creator|viewer|mask|second to take one group (second: the farm's second-Mask offer by the portal).
+## --only=creator|viewer|mask to take one group (the second Mask, from Hob: --hob-check --shots-dir=).
 
 const LOOKS := {
 	"creator_female": {"gender": 0},
@@ -35,8 +35,6 @@ func run(main_node: Node) -> void:
 		await _viewer(tree)
 	if only in ["", "mask"]:
 		await _mask(tree)
-	if only in ["", "second"]:
-		await _second(tree)
 	print("EMPTYSHOTS done in %s" % dir)
 	tree.quit(0)
 
@@ -105,44 +103,6 @@ func _mask(tree: SceneTree) -> void:
 	await _shot(tree, "mask_6_you_as_vex", 0.6)
 	await _shot(tree, "mask_7_vex_intro", 2.2)
 	hx.queue_free()
-	await tree.process_frame
-
-func _second(tree: SceneTree) -> void:
-	_fresh()
-	var d := Save.d
-	d["roster"] = [Save.new_kin("cindle", "Ember")]
-	d["active"] = d["roster"][0]["uid"]
-	d["look"] = Unmasked.default_look()
-	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true, "match": true}
-	ClassUnlock.choose_starters(["gunslinger"])
-	d["arch"] = "gunslinger"
-	Game.apply_result({"arch": "gunslinger", "extracted": true, "why": "extracted", "knocks": 0, "kills": 0, "gems": 0,
-			"seeds": {}, "stats": {}, "lvl": 1, "caught": [], "kin_runs": [], "tonics": 0, "tutorial": true})
-	var hm = await main._hb_home()
-	var portal: Vector3 = hm.spots["portal"]
-	hm.player.position = portal + Vector3(0, 0, 6)
-	hm.ppos = hm.player.position
-	await _shot(tree, "second_1_portal_glows", 1.4)
-	await _shot(tree, "second_2_masks_out", 2.4)
-	var t0 := Time.get_ticks_msec()
-	while hm.masks and hm.masks.phase != "ready" and Time.get_ticks_msec() - t0 < 8000:
-		await tree.process_frame
-	await _shot(tree, "second_3_waiting", 2.0)
-	var pip: Node3D = hm.masks.relics[1]
-	var off: Vector3 = (hm.player.position - pip.position).normalized() * 1.2
-	hm.player.position = Vector3(pip.position.x, 0, pip.position.z) + off
-	hm.player.position.y = 0.0
-	hm.ppos = hm.player.position
-	await _shot(tree, "second_4_preview_pip", 1.5)
-	hm.masks.take("tender")
-	await _shot(tree, "second_5_put_on", 0.5)
-	await _shot(tree, "second_6_reveal", 2.0)
-	for rv in hm.find_children("*", "ClassReveal", false, false):
-		(rv as ClassReveal)._finish(false)
-	await tree.process_frame
-	HomeClasses.open(hm, "ashwick")
-	await _shot(tree, "masks_screen", 1.5)
-	hm.queue_free()
 	await tree.process_frame
 
 func _shot(tree: SceneTree, file: String, secs: float) -> void:

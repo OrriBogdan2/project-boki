@@ -9,7 +9,8 @@ extends RefCounted
 ##   reveal        a new Mask's reveal (its splash and clips)
 ##   offer         Hob's second-Mask offer: the three Masks side by side
 ##   offer_focus   moving the focus to another of the three
-##   accept        picking one: the save, the Mask moment and the reveal behind it
+##   accept        picking one (Hob's answer types out)
+##   put_on        the click after it: the short Mask moment starts
 ## Headless (nothing drawn) the time is the scripts' alone and a frame over BUDGET_MS fails, except a frame that
 ## built a Mask's model (PreviewBuild allows one a frame; reported with its time). Every scenario also counts the
 ## 3D previews rendering at once. Under xvfb with a software rasterizer every frame also pays the raster, so the
@@ -62,25 +63,24 @@ func _new_save() -> void:
 	var k := Save.new_kin("zapple", "Pip")
 	d["roster"].append(k)
 	d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}
 	Save.d = d
+	HomeLayout.ensure(Save.d)      # (a farm-start island, where Hob is)
+	d["tutorial"]["home"] = true
 	ClassUnlock.choose_starters(["gunslinger"])
 	ClassUnlock.open_bonus()
 
+## Hob's offer: the talk opened straight on the pick (HobTalk, HobOffer), a focus move, then taking Pip.
 func _offer_scenarios(tree: SceneTree) -> void:
-	MaskOffer.offer(home)
-	var offer: MaskOffer = home.masks
-	while offer.phase != "ready":
-		await tree.process_frame
-	var r0: Node3D = offer.relics[0]
+	var chat: HobTalk = home.hob.chat
 	await _time("offer", func():
-		home.player.position = Vector3(r0.position.x, 0, r0.position.z)
-		home.ppos = home.player.position)
-	var r2: Node3D = offer.relics[2]
-	await _time("offer_focus", func():
-		home.player.position = Vector3(r2.position.x, 0, r2.position.z)
-		home.ppos = home.player.position)
-	await _time("accept", func(): offer.take("tender"))
+		chat.start()
+		chat._show_offer(), 1)
+	await _time("offer_focus", func(): chat.offer.focus(2), 1)
+	await _time("accept", func():
+		chat.offer.pick("tender")
+		chat.box.advance())
+	await _time("put_on", func(): chat.box.advance())
 	ok(ClassUnlock.is_open("tender"), "the pick opened Pip")
 	await tree.process_frame
 
@@ -101,6 +101,9 @@ func _time(scenario: String, act: Callable, max_views := -1, judged := true) -> 
 		var now := Time.get_ticks_usec()
 		var built := PreviewBuild.last_frame == Engine.get_process_frames() - 1
 		(builds if built else plain).append((now - last_us) / 1000.0)
+		if not built and now - last_us > int(BUDGET_MS * 1000.0):
+			var n := plain.size() + builds.size()
+			print("MASKLAG   %s: frame %d took %.1f ms" % [scenario, n, (now - last_us) / 1000.0])
 		last_us = now
 		views = maxi(views, _live_views(home))
 	plain.sort()

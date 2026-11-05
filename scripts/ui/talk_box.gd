@@ -3,8 +3,8 @@ extends CanvasLayer
 ## A face-to-face conversation box (Hob on the farm: FarmHob): the speaker's portrait and name, one short line
 ## at a time typed out, advanced with a click or the interact key (a click while it types finishes the line).
 ## A line is {text, show?, pose?}: line_shown tells the speaker's side which line is up, so it can point at
-## what he talks about. show_extra() puts something to choose from over the box (the Mask offer); while it is
-## up the lines don't advance.
+## what he talks about. show_extra() puts something to choose from in the box's place (the Mask offer); while
+## it is up the lines don't advance.
 ##
 ##   var box := TalkBox.open(home, "Hob Brackenridge", HobModel.portrait(112.0))
 ##   box.say([{"text": "Hello!"}], func(): box.close())
@@ -101,17 +101,18 @@ func advance() -> void:
 	Sfx.play("click", null, -14.0, 0.15)
 	line_shown.emit(i, line)
 
-## Something to choose from over the box (the lines wait until clear_extra()).
+## Something to choose from in place of the box (the lines wait until clear_extra()).
 func show_extra(c: Control) -> void:
 	clear_extra()
 	extra.add_child(c)
-	hint.text = ""
+	panel.visible = false
 	UI.pop_in(c)
 
 func clear_extra() -> void:
 	for c in extra.get_children():
 		extra.remove_child(c)
 		c.queue_free()
+	panel.visible = true
 
 func close() -> void:
 	closed.emit()

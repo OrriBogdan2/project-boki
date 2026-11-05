@@ -188,7 +188,7 @@
 				"go": "Hob is calling you over at the market stall: walk up and press {interact}."
 			},
 			"world": {
-				"go": "Hob the builder"
+				"go": "Talk to Hob"
 			}
 		},
 		{

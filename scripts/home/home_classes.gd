@@ -172,8 +172,9 @@ static func _show(home: Node, id: String) -> void:
 			var tile := _tile(home, aid, aid == id)
 			(grid as GridContainer).add_child(tile)
 			(grid as GridContainer).move_child(tile, at)
-	(viewer as HunterViewer).set_hunter(id)
 	_fill(home, id, viewer)
+	home.get_tree().process_frame.connect(func():      # (the viewer next frame: one frame doesn't do both)
+		if is_instance_valid(viewer): (viewer as HunterViewer).set_hunter(id), CONNECT_ONE_SHOT)
 
 ## Your glider: every skin you own as a chip (a click glides on it from now on), and the one this
 ## Hunter's mastery gives, with how to earn it. Gliders are looks only (Gliders).
