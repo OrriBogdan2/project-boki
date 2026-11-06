@@ -1951,3 +1951,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-06 (S2 to whoever merges): READY: ext/kit-kael-113b 03668028 (item 113 on main's model). Held for the owner's approval: ext/art1-kael-2 fd33d204 (Kael's art)
 - 113b replaces ext/kit-kael-113. Combos pass; poses on the old sword not viewed. art1-kael-2 replaces ext/art1-integ-4. Merge order and notes are in STATUS.
+
+## 2026-11-06 (S2): HANDOFF S2 READY ea823e233
+- briefs/HANDOFF_S2.md and briefs/S2_LANE_RULES.md. S2 keeps working normally until asked to wrap up.
