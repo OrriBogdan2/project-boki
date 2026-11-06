@@ -54,10 +54,16 @@ All S1 branches are merged into main (checked against origin/main 7907d9af, 2026
 - **Owner preferences:** quality first; don't ship below the bar. Done means played. Fewer, bigger merges, ideally one integrated READY branch per session per day. Keep owner messages brief and plain, with minimal em dashes.
 
 ## 4. In-flight work
-- **Running agents:** none.
+- **Running agents:** none. Item 185 is assigned but not started (see step 0).
 - **Uncommitted:** none in S1 worktrees. The ~/boki-* worktrees listed in `git worktree list` that belong to S1 can be removed: perf-94, perf-94b, perf-integ (= ext/perf-94c), rigfix, small-60-66-75, claire-62-65, hem-reticle, mapclean, mapclean-fix, airdash-glide, kitdata-*, kitfix-*. They're all pushed.
 
 ## 5. Next steps, in order
+0. **FIRST: item 185 (bug 181 reopened), branch ext/phys-185-boki-dash from origin/main, post READY there.** Assigned by the coordinator at INBOX 2026-11-06 07:40 UTC, after this handoff was first written; not started on S1.
+   - The owner says the "blink" dashes (Kael's RMB Lunge, Sable's dash) come from a Boki interaction changing the dash, not frame rate.
+   - On current main, verify the item 129 dash-rider removal (DECISIONS 2026-11-05).
+   - List every code path where a Boki touches the hero's dash or movement: Boki kits, kin.gd, buffs, passives, auras, commands. Remove or fence what remains. kin_* files are reserved, so fence from the hero/dash side or ask the coordinator.
+   - Add a check: with every Boki species equipped in turn, Kael's Lunge and Sable's dash keep the no-Boki baseline's duration, distance and animation frames.
+   - Input: the Boki audit, item 186.
 1. **Physics items 149, 150, 151, 162/162b and 163** (newly assigned): one ext/phys-* branch per group, from origin/main.
    - Read each item fully; 150 is the SUPERVIVE parity pass.
    - Mind 151's layout rules versus mapclean's no-tiny-walls rule (owner #2): both must hold.
