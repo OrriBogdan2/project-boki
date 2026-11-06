@@ -186,10 +186,10 @@ The Arena, training, the tutorial and the duel room are always clear.
 ## The Demo match
 
 On the title screen once you have a save: a real expedition set up for showing the game. Duos with a
-bot squadmate, on the Dusk Isles (so a Boki in a deathbox can be lost), on a fixed map roll with clear
+bot squadmate, on the Dusk Isles, on a fixed map roll with clear
 weather and no Blight. Rivals leave you alone for a minute after you land, and your squadmate leads
 the drop to land you between a live boss lair and an uplink outpost. It plays on your save like any
-expedition: what you bring can be lost, and what you extract is kept. **Settings > Demo** applies the
+expedition: what you bring can be lost, and what you extract is kept. **Demo match (Hollow)** is the same match on the Hollow (tier 2), where a dazed Boki at a deathbox can be lost (Ransom House). Recording mode (F10, Settings > Gameplay, `--record`) is global, so it applies to both. **Settings > Demo** applies the
 same calm options to your own offline matches.
 
 ## Maps

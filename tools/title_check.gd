@@ -51,7 +51,7 @@ func _pass(preset: String) -> Dictionary:
 	var labels: Array = ts.menu_labels()
 	var has: bool = not Save.d["roster"].is_empty()
 	var want: Array = ["Continue" if has else "New game", "Arena"]
-	if has: want.append("Demo match")
+	if has: want.append_array(["Demo match", "Demo match (Hollow)"])
 	if Net.available(): want.append("Play with friends")
 	want.append_array(["Save files", "Settings"])
 	if not OS.has_feature("web"): want.append("Quit")

@@ -4840,13 +4840,13 @@ func demo_shielded(e: Ent) -> bool:
 	return e != null and e == player and bool(opts.get("demo_match", false)) and not player_engaged and Bot.fresh(self, e)
 
 ## The Demo match (title screen): a real Duos expedition set up for filming. A fixed map roll, clear
-## weather, no Blight, normal rivals (who leave you be for a minute after you land), on the Dusk Isles (the first tier where a Boki can be lost: one in
+## weather, no Blight, normal rivals (who leave you be for a minute after you land), on the Dusk Isles (tier 1; Boki loss starts at tier 2, the Hollow: pass tier 2 for that beat, a Boki in
 ## a deathbox goes to whoever loots it); your bot squadmate leads the drop to land you between a live boss
 ## lair and an outpost uplink (_demo_drop). It plays on your save like any expedition (what you bring
 ## can be lost, what you extract is kept).
 const DEMO_SEED := 5
-static func demo_opts() -> Dictionary:
-	return {"teams": Data.MATCH_PLAYERS / 2, "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 1, "seed": DEMO_SEED,
+static func demo_opts(tier := 1) -> Dictionary:
+	return {"teams": Data.MATCH_PLAYERS / 2, "squad": 2, "total": Data.MATCH_PLAYERS, "tier": tier, "seed": DEMO_SEED,
 		"raid": "clear", "blight": false, "fresh_t": Settings.DEMO_FRESH_T, "demo_match": true,
 		"live_lair": "The Thornhive"}     # (the Hollow Crown: the Thornhive and Thornwood's uplink share an island)
 
