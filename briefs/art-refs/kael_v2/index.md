@@ -31,3 +31,23 @@ Design notes:
 | kael_v2_splash_arena_foreground.png | Nano Banana Pro | 16:9, 4K, a fresh gen (refs: the colour-pass splash + the master sheet) | The arena splash with forced-perspective champions in the foreground corners (ogre L, executioner + war-hound R). Alternative to kael_v2_splash_arena.png. |
 | kael_v2_splash_final.png | Nano Banana Pro | 16:9, 4K, a two-image merge (the knight layout + the moody dusk lighting) | **FINAL splash, "The Hundredth Fight".** Kael large and centre, glowing eyes and sword, the curse on one arm, a swept-sand ring; framing figures in the foreground (masked guard L, black knight R); the roster behind. |
 | kael_v2_splash_final.png (replaced) | Nano Banana Pro | 16:9, 4K | Owner pick: the bright golden version (Kael large, a swept-sand ring, moderate red eyes, clean colours, the fighters at a distance). Replaces the darker foreground merge, which drifted magenta over repeated edits. |
+
+## Splash: FINAL (Nov 6, 13:35 ET)
+`kael_v2_splash_final.jpg`, "The Hundredth Fight".
+
+Generation chain (Nano Banana Pro, 16:9, 4K):
+1. The arena gen.
+2. The varied champions.
+3. The merge with the foreground framing (ogre L, executioner + war-hound R).
+4. The scale fix ("realistic adult size next to him").
+5. The duelist dives at him.
+6. The stray blade removed.
+7. The scarf edge redrawn (no lip-shaped fold).
+
+Local colour pass (Python/PIL, not AI):
+- Strong magenta → crimson (the scarf, eyes); weak magenta/purple → warm orange-brown.
+- Gamma 1.15; a "spotlight" vignette (edges −50%, the top band −28%); Kael region +18%.
+- Kael's skin desaturated ~40% toward neutral pale.
+- The duelist dimmed 22%.
+
+Replaces the earlier splash_final candidates.
