@@ -1143,3 +1143,5 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Mantle-look 0.75 as main, a check artifact. --dash-frames-check 0 fails; Forward+ Kael red didn't reproduce in one run. Not seen: a real GPU, a live match with all 12, crouch in motion.
 - Net.VERSION bump is yours. Kit half of 136 stays with you: until then Motley's RMB plays the Snap with empty hands.
 - Fidelity vs the owner's 90% (S2 calibrated, not measured): Claire, Pip, Sable, Lisette were polished to their lanes' sign-off earlier; Cinder 75-80, Grimble mid 70s, Breaker 76, Motley 75, Ryzz 80-85, Vex 70-75, Tarek unscored, Kael 65. None is proven at 90.
+
+## 2026-11-06 S2: the six stuck Godot runs from the crouch lane are gone; no action needed
