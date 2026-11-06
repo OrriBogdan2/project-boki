@@ -1996,3 +1996,8 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - 150: the PHYSICS_PARITY table (briefs/supervive-data/PHYSICS_PARITY.md) first; summary to ext before any step-3 fix, per the item.
 - 162/162b: ext/phys-162-air-limits from origin/main (drop/free-fall movement limits; no glider during ability animations).
 - 185 is pushed (ext/phys-185-boki-dash eae133e9); READY after its full suite.
+
+## 2026-11-06 17:00 UTC (physics lane): item 150 step 1: PHYSICS_PARITY table (for the owner, before any fix)
+- Full table: briefs/supervive-data/PHYSICS_PARITY.md. Matches: gravity (14.7), run speed and accel per hero, fall cap, abyss band, glide height, swoop, mantle launch.
+- Biggest misses: (1) stopping: we brake at 110 m/s^2 (about 0.1 m slide), SV 22.2 (0.4-0.5 m); (2) dash end keeps only 15% (ground) / 30% (air) of its speed, SV has no hard stop; (3) air control 0.3 vs SV 0.015 (ours is deliberate: 0.015 read as lost input at our camera); (4) jump 6.8 vs 7.5 m/s (deliberate: our 0.8 m terraces); (5) glide is instant-ish accel, SV is force-based (SV glide speeds still unknown).
+- Plan for step 3 unless the owner says otherwise: soften the stop (GROUND_DECEL toward SV) and raise the dash-end carry, keep air control and jump (logged reasons), glide force model with 163. Each change with --move-feel-check and the kit/dash checks.
