@@ -193,7 +193,7 @@ def fm_brow(fm, shape, sx, c, r):
     tris = []
     for i in range(n):
         j = (i + 1) % n
-        tris.append((n, j, i) if sx > 0 else (n, i, j))
+        tris.append((n, i, j) if sx > 0 else (n, j, i))      # facing out, as the mouth does
     fm.add(base, uv, tris, keys)
 
 

@@ -20,6 +20,7 @@ EYE_R = v3(0.056, 0.062, 0.036)
 EYE_YAW = 0.42
 GLOW_PIECES = ()
 LIT_PIECES = ("caps",)
+PALE_PIECES = ("stalks", "caps")
 BERRY_C = v3(0, 0.05, -0.50)
 FACE = {"mouth_w": 0.06, "mouth_y": 0.172, "mouth_z": -0.40, "cat_mouth": True, "brow_x": 0.095, "brow_up": 0.024,
         "brow_k": 0.85, "fang_k": 0.0}
