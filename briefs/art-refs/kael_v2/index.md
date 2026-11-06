@@ -26,3 +26,4 @@ Design notes:
 |---|---|---|---|
 | kael_v2_master_sheet.png | Nano Banana Pro | 16:9, 4K edit | Eyes made visible (pale, sharp); a colour pass (neutral bg, true crimson); the tired head restored. Replaces the earlier master. |
 | kael_v2_turnaround.png | Nano Banana Pro | 16:9, 4K | The 3D-modelling turnaround (sculpt-render style), colour-accurate; S2 models from this. |
+| kael_v2_portrait.png | Nano Banana Pro | 1:1 (2000²) | Portrait bust: a three-quarter view, readable silver eyes, scar, crimson scarf, sword hilt and chain, curse at the neckline. Approved Nov 6. |
