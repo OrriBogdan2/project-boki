@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cchl3awujnf2x"
-path.bptc="res://.godot/imported/kael_Image_0.jpg-6c78f664e386933e21c84d10d132f85a.bptc.ctex"
-path.astc="res://.godot/imported/kael_Image_0.jpg-6c78f664e386933e21c84d10d132f85a.astc.ctex"
+uid="uid://dui5boyal022o"
+path.bptc="res://.godot/imported/kael_head.jpg-3c5d98799939e0256bab29de28545d9b.bptc.ctex"
+path.astc="res://.godot/imported/kael_head.jpg-3c5d98799939e0256bab29de28545d9b.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "1e4c8db2eff7c4bb15faa318471572c3"
+"md5": "11ac08e811cfb88a06cd2c013268063a"
 }
 
 [deps]
 
-source_file="res://art/wardens/kael/kael_Image_0.jpg"
-dest_files=["res://.godot/imported/kael_Image_0.jpg-6c78f664e386933e21c84d10d132f85a.bptc.ctex", "res://.godot/imported/kael_Image_0.jpg-6c78f664e386933e21c84d10d132f85a.astc.ctex"]
+source_file="res://art/wardens/kael/kael_head.jpg"
+dest_files=["res://.godot/imported/kael_head.jpg-3c5d98799939e0256bab29de28545d9b.bptc.ctex", "res://.godot/imported/kael_head.jpg-3c5d98799939e0256bab29de28545d9b.astc.ctex"]
 
 [params]
 
@@ -41,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=2048
+process/size_limit=0
 detect_3d/compress_to=0

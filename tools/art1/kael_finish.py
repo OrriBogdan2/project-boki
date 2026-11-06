@@ -14,22 +14,34 @@ import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
+HEAD_GLB = os.path.expanduser("~/meshy/kael_h/bake/low.glb")
+ART_PATH = os.path.expanduser("~/art1kael/ref2/kael_art_fb.png")
 ATLAS = 2048
 UNIQ_W = 0.755                       # the unique islands' share of the atlas width; the tiles sit to its right
-HAIR_R = (UNIQ_W + 0.005, 0.40, 1.0, 1.0)
+HAIR_R = (UNIQ_W + 0.005, 0.40, 0.90, 1.0)
+BLADE_R = (0.905, 0.40, 1.0, 1.0)
 CHAIN_R = (UNIQ_W + 0.005, 0.30, 0.875, 0.395)
 HOOK_R = (0.88, 0.30, 1.0, 0.395)
 EYE_R = (UNIQ_W + 0.005, 0.20, 0.875, 0.295)
 EYE2_R = (UNIQ_W + 0.005, 0.10, 0.875, 0.195)
 GLOW_R = (0.88, 0.20, 1.0, 0.295)
-MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "leather-kael", "metal-kael", "metal-blade-hot", "hair-mane", "eyes-kael", "eyes-glow-hot", "glow-sword", "glow-sword_edge"]
-SCALE = {"face": 4.0, "lidU": 2.6, "lidD": 2.6, "mask": 1.2, "cowl": 2.0, "cowlcore": 0.2, "stail": 1.3, "palm": 2.0, "finger": 1.8,
-         "thumb": 1.8, "skull": 0.4, "blade": 1.5, "guard": 1.4, "grip": 1.6, "pommel": 1.6, "Low": 1.15}
+HALO_R = (0.88, 0.10, 1.0, 0.195)
+MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "metal-kael", "hair-mane", "skin-head-hot", "metal-sword-hot"]
+SCALE = {"face": 4.0, "lidU": 2.6, "lidD": 2.6, "mask": 1.2, "cowl": 2.0, "cowlcore": 0.2, "stail": 0.7, "palm": 2.0, "finger": 1.8,
+         "thumb": 1.8, "skull": 0.4, "blade": 0.75, "guard": 1.4, "grip": 1.6, "pommel": 1.6, "Low": 2.4, "maskfit": 2.0}
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
 depsgraph = bpy.context.evaluated_depsgraph_get()
 bvh_low = BVHTree.FromObject(low, depsgraph)
+
+
+def load_rgb(path):
+    im_ = bpy.data.images.load(path)
+    w_, h_ = im_.size
+    px_ = np.zeros(w_ * h_ * im_.channels, np.float32)
+    im_.pixels.foreach_get(px_)
+    return px_.reshape(h_, w_, im_.channels)[::-1, :, :3]
 
 
 def tile_uv(r, uv):
@@ -38,41 +50,31 @@ def tile_uv(r, uv):
 
 
 hair_tile_uv = (0, 0, 1, 1)
+WEAP = load_rgb(os.path.expanduser("~/art1kael/ref2/kael_weapons_full.png"))
 tails = [K.scarf_tail("R"), K.scarf_tail("L")]
-cowl_ps = K.cowl()
-pieces = [K.face_patch(), K.skull(), K.mask()] + cowl_ps + tails
-for s in (1.0, -1.0):
-    pieces.append(K.eyeball(s))
-    pieces += K.lids(s)
-    pieces += K.brows(s)
+pieces = list(tails)
 pieces += K.hand("R", K.GRIP_DIR, (1.25, 1.35, 0.9), 0.0)
 pieces += K.hand("L", (0.0, 1.0, -0.15), (0.55, 0.75, 0.5), 0.05)
-locks = K.mane()
+locks = K.mane()[1:]         # (no cap: the head scan has the crown)
+locks = [l_ for l_ in locks if l_.name.startswith(("back", "over"))]
 chains = K.mane_chains(locks)
 pieces += locks
 pieces.append(K.wrist_chain((0, 0, 1, 1)))
 hang, hook, hang_pts = K.hanging_chain((0, 0, 1, 1))
 cuff, cuff_pts = None, None
-pieces += [hang, hook] + K.blade() + K.hilt((0, 0, 1, 1))
+pieces += [hang, hook] + K.blade(WEAP) + K.hilt((0, 0, 1, 1))
 
 # ---- faces wound outward (the game culls back faces)
 HEAD_C = tuple(K.C)
 for p_ in pieces:
     n_ = p_.name
-    if n_ in ("face", "skull", "mask", "cap") or n_.startswith(("eye", "lid")):
-        p_.orient(HEAD_C if not n_.startswith(("eye", "lid")) else tuple(K.hl(K.EYE * [1 if n_.endswith("R") else -1, 1, 1])))
-    elif n_.startswith("cowl"):
-        p_.orient((0, 0.01, K.C[2] - 0.13))
-    elif n_.startswith("stail"):
+    if n_.startswith("stail") or n_ == "headscan" or n_ == "maskfit":
         pass        # (two sheets back to back, wound as built)
     else:
         p_.orient()
 
 # ---- the hair's depth: root shade and layers, in the vertex colour (warden_look hair: vertex_ao)
 for p_ in locks:
-    if getattr(p_, "t", None) is None:
-        p_.shade = np.full(len(p_.v), 0.85)
-        continue
     layer = 0.86 if p_.name.startswith("back") else 1.0
     p_.shade = np.ones(len(p_.v)) if p_.name.startswith("sweep") else layer * (0.72 + 0.28 * smooth(0.0, 0.22, p_.t))
 
@@ -110,6 +112,105 @@ for p_ in tails:
         w_[names_[b_]][i] += u * (1 - q)
         w_[names_[min(b_ + 1, TAIL_N - 2)]][i] += u * q
     p_.w = w_
+
+# ---- the head: its own Meshy run from the sculpt sheet, baked to a dense low mesh with its own texture (tools/art1/kael_head_bake.json)
+bpy.ops.import_scene.gltf(filepath=HEAD_GLB)
+head_ob = next(o for o in bpy.context.selected_objects if o.type == "MESH")
+head_img = None
+for nd in head_ob.data.materials[0].node_tree.nodes:
+    if nd.type == "TEX_IMAGE":
+        head_img = nd.image
+h_mw = head_ob.matrix_world.copy()
+hv = np.array([h_mw @ v.co for v in head_ob.data.vertices])
+# (glTF splits a vertex at every UV seam: welded here, or each island shades as a hard shard)
+_, h_first, h_map = np.unique(np.round(hv, 5), axis=0, return_index=True, return_inverse=True)
+hv = hv[h_first]
+hv_m = hv.copy()                                                  # (the scan's own frame: the sheet projects in it)
+hv = np.stack([-hv[:, 0], -hv[:, 1], hv[:, 2]], 1)                # (Meshy frame faces -Y: to +Y)
+band = (hv[:, 2] > K.SCAN_EYE_Z - 0.3) & (hv[:, 2] < K.SCAN_EYE_Z + 0.1) & (np.abs(hv[:, 0]) < 0.3)
+nose_y = hv[band, 1].max()
+face_at = np.array([K.SCAN_EYE_X, nose_y, K.SCAN_EYE_Z])
+hs_ = K.EYE_GAP / K.SCAN_EYE_GAP
+hv = (hv - face_at) * hs_
+# the scarf opens out below the chin to the sheet's width and reaches the chest
+drop = -(hv[:, 2] + K.CHIN_DROP)
+kd = smooth(0.0, 0.11, drop)
+hv[:, 0] *= 1 + K.SCARF_WIDEN * kd
+hv[:, 1] = (hv[:, 1] + K.NOSE_DEPTH) * (1 + K.SCARF_WIDEN * 0.7 * kd) - K.NOSE_DEPTH
+hv[:, 2] -= np.maximum(drop, 0.0) * 0.45
+hv = hv + np.array([0.0, K.NOSE_Y, K.EYE_Z])
+hf = [[int(h_map[i_]) for i_ in p.vertices] for p in head_ob.data.polygons]
+hu = head_ob.data.uv_layers[0].data
+huv = [[tuple(hu[li].uv) for li in p.loop_indices] for p in head_ob.data.polygons]
+hk = 1.0 - smooth(K.NECK_Z - 0.09, K.NECK_Z + 0.03, hv[:, 2])         # (0 on the head, 1 down on the shoulders)
+hw = {"head": 1 - hk, "hips": hk}
+for sd_, sg_ in (("R", 1.0), ("L", -1.0)):
+    c_ = K.hl(np.array([sg_ * 0.04, 0.09, 0.043]))
+    hw["brow." + sd_] = (1 - smooth(0.012, 0.03, np.linalg.norm(hv - c_, axis=1))) * (hv[:, 1] > 0.05)
+    hw["head"] = hw["head"] - hw["brow." + sd_] * hw["head"]
+head_bvh = BVHTree.FromPolygons([tuple(v_) for v_ in hv], [tuple(f_) for f_ in hf])
+mask_pc = K.mask_on(head_bvh)
+pieces.append(mask_pc)
+head_pc = M.Piece("headscan", "skin-head-hot", hv, hf, huv, weights=hw, room=0.1)
+pieces.append(head_pc)
+head_tex = np.zeros(head_img.size[0] * head_img.size[1] * head_img.channels, np.float32)
+head_img.pixels.foreach_get(head_tex)
+head_tex = head_tex.reshape(head_img.size[1], head_img.size[0], head_img.channels)
+# the sculpt sheet's main view projected on the front of the head (scar, brows, stubble, fissures come from the art), then graded
+# by class to flat ramps the toon light keeps dark and clean
+SHEET = load_rgb(os.path.expanduser("~/art1kael/ref2/kael_head.png"))
+H_, W_ = head_tex.shape[:2]
+hvn = np.zeros_like(hv_m)
+for f_ in hf:
+    p0_ = hv_m[f_[0]]
+    n_ = np.cross(hv_m[f_[1]] - p0_, hv_m[f_[2]] - p0_)
+    hvn[f_] += n_
+hvn = M.norm(hvn)
+HP = np.zeros((H_, W_, 3), np.float32)
+HN = np.zeros((H_, W_, 3), np.float32)
+HM = np.zeros((H_, W_), bool)
+for f_, u_ in zip(hf, huv):
+    for k_ in range(1, len(f_) - 1):
+        ids_ = [f_[0], f_[k_], f_[k_ + 1]]
+        q_ = np.array([u_[0], u_[k_], u_[k_ + 1]]) * [W_, H_] - 0.5
+        x0_, y0_ = np.maximum(np.floor(q_.min(0)).astype(int) - 1, 0)
+        x1_, y1_ = np.ceil(q_.max(0)).astype(int) + 1
+        x1_, y1_ = min(x1_, W_ - 1), min(y1_, H_ - 1)
+        if x1_ < x0_ or y1_ < y0_:
+            continue
+        yy_, xx_ = np.mgrid[y0_:y1_ + 1, x0_:x1_ + 1]
+        d_ = (q_[1, 1] - q_[2, 1]) * (q_[0, 0] - q_[2, 0]) + (q_[2, 0] - q_[1, 0]) * (q_[0, 1] - q_[2, 1])
+        if abs(d_) < 1e-9:
+            continue
+        l0_ = ((q_[1, 1] - q_[2, 1]) * (xx_ - q_[2, 0]) + (q_[2, 0] - q_[1, 0]) * (yy_ - q_[2, 1])) / d_
+        l1_ = ((q_[2, 1] - q_[0, 1]) * (xx_ - q_[2, 0]) + (q_[0, 0] - q_[2, 0]) * (yy_ - q_[2, 1])) / d_
+        l2_ = 1 - l0_ - l1_
+        m_ = (l0_ >= -0.03) & (l1_ >= -0.03) & (l2_ >= -0.03)
+        w_ = np.stack([l0_[m_], l1_[m_], l2_[m_]], -1)
+        HP[yy_[m_], xx_[m_]] = w_ @ hv_m[ids_]
+        HN[yy_[m_], xx_[m_]] = w_ @ hvn[ids_]
+        HM[yy_[m_], xx_[m_]] = True
+ys_, xs_ = np.nonzero(HM)
+px_ = np.clip((K.SHEET_FRONT[0] + (HP[ys_, xs_, 0] + K.SCAN_EYE_X) * K.SHEET_FRONT[2]).astype(int), 0, SHEET.shape[1] - 1)
+py_ = np.clip((K.SHEET_FRONT[1] - (HP[ys_, xs_, 2] - K.SCAN_EYE_Z) * K.SHEET_FRONT[2]).astype(int), 0, SHEET.shape[0] - 1)
+art_ = SHEET[py_, px_]
+ch_ = head_tex[..., :3]
+sc_ = ch_[ys_, xs_]
+hair_ = lambda c_: ((c_.max(1) - c_.min(1)) < 0.14) & (c_.mean(1) > 0.42)
+facing_ = -M.norm(HN[ys_, xs_])[:, 1]
+k_ = smooth(0.3, 0.6, facing_) * (~hair_(art_)) * (~hair_(sc_))
+ch_[ys_, xs_] = sc_ * (1 - k_[:, None]) + art_ * k_[:, None]
+ch_[...] = P.grade_head(ch_)
+head_tex[..., :3] = ch_
+# (a new image: the exporter writes an imported image's packed original, whatever its pixels say)
+head_new = bpy.data.images.new("kael_head", head_img.size[0], head_img.size[1])
+head_new.pixels.foreach_set(head_tex.ravel())
+head_new.filepath_raw = os.path.join(os.path.dirname(OUT), "head.png")
+head_new.file_format = "PNG"
+head_new.save()
+head_img = head_new
+head_tex = head_tex[..., :3]
+bpy.data.objects.remove(head_ob)
 
 # ---- one mesh: the scan first, then the pieces
 faces_v, faces_pid, faces_uv, verts, vw, rooms, shades = [], [], [], [], [], [], []
@@ -173,7 +274,7 @@ def base_name(n):
 
 
 def is_tile(n):
-    return n == "cap" or n.startswith(("sweep", "fore", "back", "over", "brow", "chain_", "hook", "eye", "core"))
+    return n == "headscan" or n == "blade" or n.startswith(("sweep", "fore", "back", "over", "brow", "chain_", "hook", "eye", "core"))
 
 
 # material per face
@@ -186,9 +287,9 @@ for i, p in enumerate(me.polygons):
         m2 = "skin-kael"          # (by the scan's paint, below)
     else:
         pm = PIECE_MAT[n]
-        m2 = {"metal-chain": "metal-kael", "metal-hook": "metal-blade-hot", "metal-blade": "metal-kael", "metal-guard": "metal-kael",
-              "leather-grip": "leather-kael", "hair-brow": "hair-mane"}.get(pm, pm)
-        if n.startswith(("cowl", "stail")):
+        m2 = {"metal-chain": "metal-kael", "metal-hook": "metal-kael", "metal-blade": "metal-sword-hot", "glow-sword": "metal-sword-hot", "metal-guard": "metal-kael", "metal-kael": "metal-kael",
+              "leather-grip": "cloth-kael", "hair-brow": "hair-mane"}.get(pm, pm)
+        if n.startswith(("cowl", "stail", "coreh")):
             m2 = "cloth-ember-hot"
         if n == "eye" + K.GLOW_EYE:
             m2 = "eyes-glow-hot"    # the eye under the scar glows
@@ -307,12 +408,20 @@ for p in me.polygons:
         loop_uv[ls, 0] *= UNIQ_W
         continue
     fu = faces_uv[i]
-    if n.startswith(("chain_", "wrap")):
+    if n == "headscan":
+        for l, (x, y) in zip(ls, fu):
+            loop_uv[l] = (x, y)
+        continue
+    if n == "blade":
+        r = BLADE_R
+    elif n.startswith(("chain_", "wrap")):
         r = CHAIN_R
     elif n.startswith("hook"):
         r = HOOK_R
     elif n.startswith("eye"):
         r = EYE_R
+    elif n.startswith("coreh"):
+        r = HALO_R
     elif n.startswith("core"):
         r = GLOW_R
     else:
@@ -492,63 +601,92 @@ for k_, i in enumerate(low_faces):
     elif region[i][0] in ("armL", "torso") and r_ > g_ * 1.25:
         m = "skin-kael"
     else:
-        m = "leather-kael"
+        m = "cloth-kael"
     me.polygons[i].material_index = mat_i[m]
+
+# ---- the flat art projected on the body: front and back turnaround views through the bones (kael_source art_map); where the art
+# has no body (grey ground, hair or tails over it), or the surface turns side on, the scan's own paint
+ART = np.load(os.path.splitext(SRC)[0] + "_art.npz")
+ART_IMG = load_rgb(ART_PATH)
+
+
+def bary_of(points):
+    hit_i = np.zeros(len(points), np.int64)
+    hit_p = np.zeros((len(points), 3))
+    for i, p in enumerate(points):
+        h = tree.find_nearest(Vector(p))
+        if h[2] is not None:
+            hit_i[i] = h[2]
+            hit_p[i] = h[0]
+    tv = svco[tri_v[hit_i]]
+    v0, v1, v2 = tv[:, 1] - tv[:, 0], tv[:, 2] - tv[:, 0], hit_p - tv[:, 0]
+    d00, d01, d11 = (v0 * v0).sum(1), (v0 * v1).sum(1), (v1 * v1).sum(1)
+    d20, d21 = (v2 * v0).sum(1), (v2 * v1).sum(1)
+    den = np.maximum(d00 * d11 - d01 * d01, 1e-14)
+    bv = (d11 * d20 - d01 * d21) / den
+    bw = (d00 * d21 - d01 * d20) / den
+    return hit_i, np.stack([1 - bv - bw, bv, bw], 1)
+
 
 mask = PID == low_pid
 ys, xs = np.nonzero(mask)
-col = sample_scan(POS[ys, xs])
-col = np.power(np.clip(col, 0, 1), 0.85) * 1.16
-# the near-black trousers up to a readable charcoal, a little cool
-dk = (col.max(1) < 0.27)[:, None]
-col = col * (1 - dk) + (col * 1.4 + np.array([0.09, 0.09, 0.105])) * dk
+points = POS[ys, xs]
+col = sample_scan(points)
+col = np.power(np.clip(col, 0, 1), 0.85) * 1.1
+hi_, bc_ = bary_of(points)
+nrm_ = NOR[ys, xs]
+h_, w_ = ART_IMG.shape[:2]
+for nm_, sign_ in (("front", 1.0), ("back", -1.0)):
+    uvq = (ART[nm_][tri_v[hi_]] * bc_[..., None]).sum(1)
+    ix = np.clip(uvq[:, 0].round().astype(int), 0, w_ - 1)
+    iy = np.clip(uvq[:, 1].round().astype(int), 0, h_ - 1)
+    a_ = ART_IMG[iy, ix]
+    m_ = a_.max(1)
+    sat_ = (m_ - a_.min(1)) / np.maximum(m_, 0.01)
+    ground = (sat_ < 0.05) & (a_.mean(1) > 0.68) & (a_.mean(1) < 0.83)
+    white = (sat_ < 0.1) & (a_.mean(1) > 0.84)
+    red = (a_[:, 0] > 0.22) & (a_[:, 0] > a_[:, 1] * 2.4) & (a_[:, 0] > a_[:, 2] * 1.7)
+    drop = ground | white | (red if nm_ == "back" else (red & (points[:, 2] < K.HAND_Z)))
+    k = smooth(0.12, 0.42, nrm_[:, 1] * sign_) * (~drop)
+    col = col * (1 - k[:, None]) + a_ * k[:, None]
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 OUTC[ys, xs] = col
+ART_DONE = True
 # a little of the shared light's occlusion on the scan too
-OUTC[ys, xs] *= (0.62 + 0.38 * np.clip(AO[ys, xs], 0, 1))[:, None]
+OUTC[ys, xs] *= (0.88 + 0.12 * np.clip(AO[ys, xs], 0, 1))[:, None]
 
-# the body's paint cleaned to planes: skin to a warm ramp of its smoothed light, the mottling off, the forms sharpened (an
-# unsharp mask at the size of a muscle); silver to a bright clean ramp that keeps its engraving
-def blur_ao(a, m, r):
-    return blur(a, m, r)
-
-
+# flat class ramps for the match camera: each class keeps its forms (a band of its own light) and dark line work, the mottling goes
 lumi = OUTC.mean(2)
-ri, gi, bi = OUTC[..., 0], OUTC[..., 1], OUTC[..., 2]
-sat_t = (OUTC.max(2) - OUTC.min(2)) / np.maximum(OUTC.max(2), 0.01)
-skin_t = (mask & (ri > gi * 1.22) & (ri < bi * 2.6) & (lumi < 0.5)).astype(np.float32)
-silver_t = (mask & (sat_t < 0.16) & (lumi > 0.5)).astype(np.float32)
-l1 = blur(lumi, skin_t, 3)
-l2 = blur(lumi, skin_t, 22)
-t_ = np.clip(0.33 + (l1 - l2.mean() * 0 - l2) * 3.4 + (l2 - np.sum(l2 * skin_t) / max(skin_t.sum(), 1)) * 2.2, 0, 1)
-skin_new = P.ramp(t_, P.SKIN)
-keep = lumi - l1                                       # the scars and fine lines, a little
-skin_new = skin_new + keep[..., None] * 0.7
-k_ = (skin_t > 0.5)[..., None]
-OUTC = np.where(k_, skin_new.astype(np.float32), OUTC)
-s1 = blur(lumi, silver_t, 2)
-s2 = blur(lumi, silver_t, 16)
-t_ = np.clip(0.42 + (s1 - s2) * 3.2 + (s2 - 0.62) * 0.8, 0, 1)
-k_ = (silver_t > 0.5)[..., None]
-OUTC = np.where(k_, P.ramp(t_, P.SILVER).astype(np.float32), OUTC)
-
-canvas = P.crack_map(K.HAND_Z + 0.09, K.SHOULDER_Z + 0.09)
-rid = np.zeros(ATLAS * ATLAS, bool).reshape(ATLAS, ATLAS)
-hot_ids = np.zeros(len(me.polygons), bool)
-for i in low_faces:
-    hot_ids[i] = me.materials[me.polygons[i].material_index].name == "skin-kael-hot"
-armm = (PID == low_pid) & (POS[..., 0] > 0.13) & (POS[..., 2] > K.HAND_Z + 0.09)
-yy, xx = np.nonzero(armm)
-sk_ = OUTC[yy, xx]
-skinny = (sk_[:, 0] > sk_[:, 1] * 1.15) & (sk_.mean(1) < 0.55)
-yy, xx = yy[skinny], xx[skinny]
-ck = P.cracks(POS[yy, xx], canvas, K.SH)
-core = M.smooth(0.3, 0.5, ck)[:, None]
-rim = M.smooth(0.12, 0.34, ck)[:, None]
-c = np.minimum(OUTC[yy, xx], 0.38)
-c = c * (1 - rim * 0.9) + P.HOT_RIM * rim * 0.9
-c = c * (1 - core) + P.HOT * core
-OUTC[yy, xx] = c
+r_, g_, b_ = OUTC[..., 0], OUTC[..., 1], OUTC[..., 2]
+hi_ = OUTC.max(2)
+sat_t = (hi_ - OUTC.min(2)) / np.maximum(hi_, 0.01)
+isbody = PID == low_pid
+hotish = (r_ > 0.72) & (g_ > 0.48) & (b_ < 0.75) & (sat_t > 0.2)
+red_t = isbody & (r_ > g_ * 2.0) & (r_ > b_ * 1.6) & ~hotish
+silver_t = isbody & (sat_t < 0.2) & (lumi > 0.36) & ~hotish
+dark_t = isbody & (sat_t < 0.34) & (lumi <= 0.36) & (b_ >= r_ * 0.9)
+skin_t = isbody & (r_ > b_ * 1.02) & ~hotish & ~red_t & ~silver_t & ~dark_t
+# the classes' confetti out, so the match camera's mips average one colour: a pixel takes the class round it (small belts survive as line work)
+bf_ = isbody.astype(np.float32)
+dm_ = blur(dark_t.astype(np.float32), bf_, 5)
+sm_ = blur(skin_t.astype(np.float32), bf_, 5)
+flip_d = dark_t & (dm_ < 0.42) & (sm_ > 0.4)
+flip_s = skin_t & (dm_ > 0.62)
+dark_t = (dark_t & ~flip_d) | flip_s
+skin_t = (skin_t & ~flip_s) | flip_d
+for cls_, ramp_, base_, gain_, wide_ in ((skin_t, P.SKIN2, 0.38, 1.7, 0.35), (silver_t, P.SILVER, 0.42, 3.0, 1.4), (dark_t, P.DARK, 0.34, 2.2, 0.7), (red_t, P.RED, 0.45, 2.2, 0.7)):
+    fm_ = cls_.astype(np.float32)
+    l1_ = blur(lumi, fm_, 4 if ramp_ is P.SKIN2 else 2)
+    l2_ = blur(lumi, fm_, 18)
+    mean_ = float(np.sum(lumi * fm_) / max(fm_.sum(), 1.0))
+    t_ = np.clip(base_ + (l1_ - l2_) * gain_ + (l2_ - mean_) * wide_, 0, 1)
+    new_ = P.ramp(t_, ramp_) + np.minimum(lumi - l1_, 0.0)[..., None] * 0.8
+    OUTC = np.where(cls_[..., None], np.clip(new_, 0, 1).astype(np.float32), OUTC)
+# the art's fissures to the keyed hot colour, so they glow
+hotm = (PID == low_pid) & (OUTC[..., 0] > 0.8) & (OUTC[..., 1] > 0.6) & (OUTC[..., 2] < 0.72) & (POS[..., 0] > 0.1)
+OUTC[hotm] = P.HOT
+rimm = (PID == low_pid) & (OUTC[..., 0] > 0.6) & (OUTC[..., 2] < 0.3) & (OUTC[..., 1] > 0.3) & (POS[..., 0] > 0.1)
+OUTC[rimm] = P.HOT_RIM
 
 # ---- the rebuilt pieces
 def paint(names_pred, fn):
@@ -559,15 +697,14 @@ def paint(names_pred, fn):
         OUTC[ys, xs] = fn(POS[ys, xs].astype(np.float64), NOR[ys, xs].astype(np.float64), AO[ys, xs].astype(np.float64))
 
 
-paint(lambda n: n == "face", lambda p, n, ao: P.face(p, ao))
-paint(lambda n: n == "skull", P.skin)
-for sd_, sg_ in (("R", 1.0), ("L", -1.0)):
-    paint(lambda n, q="lidU" + sd_: n == q, lambda p, n, ao, sg=sg_: P.lid(p, n, ao, sg, True))
-    paint(lambda n, q="lidD" + sd_: n == q, lambda p, n, ao, sg=sg_: P.lid(p, n, ao, sg, False))
-paint(lambda n: n == "mask", P.mask_cloth)
-for pc_ in cowl_ps[:-1]:
-    paint(lambda n, q=pc_.name: n == q, lambda p, n, ao, sp=pc_.burns: P.burnt(P.wrap_cloth(p, n, ao), p, sp))
-paint(lambda n: n == "cowlcore", lambda p, n, ao: np.broadcast_to(P.hexc("#120508"), p.shape).copy())
+def mask_art(p, n, ao):
+    """The band over the mouth from the sculpt sheet's own scarf, front view: his right is image left."""
+    px = np.clip((K.SHEET_CX - p[:, 0] * K.SHEET_K).astype(int), 0, SHEET.shape[1] - 1)
+    py = np.clip((K.SHEET_EYE_Y + (K.EYE_Z - p[:, 2]) * K.SHEET_K).astype(int), 0, SHEET.shape[0] - 1)
+    return P.grade_head(SHEET[py, px][None, :, :])[0]
+
+
+paint(lambda n: n == "maskfit", mask_art)
 paint(lambda n: n.startswith(("palm", "finger", "thumb")) and n.endswith("L"), P.skin)
 
 
@@ -582,14 +719,6 @@ def right_hand(p, n, ao):
 
 
 paint(lambda n: n.startswith(("palm", "finger", "thumb")) and n.endswith("R"), right_hand)
-blade_ids = [i for i, n in enumerate(names) if n == "blade"]
-pl = next(p for p in pieces if p.name == "blade")
-b_, e_, n_ = pl.frame
-m = np.isin(PID, blade_ids)
-ys, xs = np.nonzero(m)
-pp = POS[ys, xs].astype(np.float64) - pl.guard_at
-col = P.blade_paint(pp @ b_, pp @ e_, pp @ n_, NOR[ys, xs].astype(np.float64), AO[ys, xs].astype(np.float64), None)
-OUTC[ys, xs] = col
 paint(lambda n: n == "guard", lambda p, n, ao: P.iron(p, n, ao, 0.3))
 paint(lambda n: n == "grip", P.grip)
 paint(lambda n: n == "pommel", lambda p, n, ao: P.iron(p, n, ao, 0.1))
@@ -620,14 +749,24 @@ x0, y0, x1, y1 = rect(CHAIN_R)
 OUTC[y0:y1, x0:x1] = P.chain_tile(y1 - y0, x1 - x0)
 x0, y0, x1, y1 = rect(HOOK_R)
 OUTC[y0:y1, x0:x1] = P.hook_tile(y1 - y0, x1 - x0)
-x0, y0, x1, y1 = rect(EYE_R)
-v_, u_ = np.mgrid[0:y1 - y0, 0:x1 - x0]
-OUTC[y0:y1, x0:x1] = P.eye((u_ + 0.5) / (x1 - x0) * 2 - 1, ((v_ + 0.5) / (y1 - y0) - 0.5) * 1.5)
-x0, y0, x1, y1 = rect(EYE2_R)
-v_, u_ = np.mgrid[0:y1 - y0, 0:x1 - x0]
-OUTC[y0:y1, x0:x1] = P.eye_glow((u_ + 0.5) / (x1 - x0) * 2 - 1, ((v_ + 0.5) / (y1 - y0) - 0.5) * 1.5)
 x0, y0, x1, y1 = rect(GLOW_R)
-OUTC[y0:y1, x0:x1] = (1.0, 0.98, 0.93)
+OUTC[y0:y1, x0:x1] = P.HOT
+
+# the blade's tile: the sheet's own paint, its white core keyed hot, its stone a step down for the toon light
+x0, y0, x1, y1 = rect(BLADE_R)
+crop_ = WEAP[K.W_TIP:K.W_GUARD, K.W_X0:K.W_X1][::-1]
+iy_ = ((np.arange(y1 - y0) + 0.5) / (y1 - y0) * crop_.shape[0]).astype(int)
+ix_ = ((np.arange(x1 - x0) + 0.5) / (x1 - x0) * crop_.shape[1]).astype(int)
+tile_ = crop_[iy_][:, ix_].copy()
+lt_ = tile_.mean(2)
+stone_ = lt_ < 0.62
+tile_[stone_] *= 0.56
+rim_ = (lt_ >= 0.62) & (lt_ <= 0.9)
+tile_[rim_] = np.minimum(tile_[rim_] * 0.5, 0.4)      # (the art's peach rim under hero_toon's heat key: only the core burns)
+tile_[lt_ > 0.9] = P.HOT
+OUTC[y0:y1, x0:x1] = tile_
+x0, y0, x1, y1 = rect(HALO_R)
+OUTC[y0:y1, x0:x1] = (0.52, 0.4, 0.2)       # (keyed part hot: the gold round the core)
 
 atlas = bpy.data.images.new("kael_atlas", ATLAS, ATLAS)
 px = np.ones((ATLAS, ATLAS, 4), np.float32)
@@ -645,7 +784,7 @@ for mt in me.materials:
         if nd.type == "TEX_IMAGE":
             nt.nodes.remove(nd)
     t = nt.nodes.new("ShaderNodeTexImage")
-    t.image = atlas
+    t.image = head_img if mt.name == "skin-head-hot" else atlas
     pb = nt.nodes["Principled BSDF"]
     nt.links.new(t.outputs[0], pb.inputs[0])
     pb.inputs["Roughness"].default_value = 0.7
@@ -719,10 +858,24 @@ A = {"anchor_head_top": ("head", (0, 0.0, K.C[2] + 0.12)), "anchor_chest": ("hip
      "anchor_arm_fore": ("forearm.R", (K.SH, 0.03, K.ELBOW_Z - 0.09)), "anchor_chain": ("forearm.R", (K.SH + 0.05, 0.0, K.HAND_Z + 0.02)),
      "weapon_muzzle": ("hand.R", tuple(g + b_ * K.BLADE_LEN)), "anchor_blade_root": ("hand.R", tuple(g + b_ * 0.05)),
      "anchor_blade_mid": ("hand.R", tuple(g + b_ * K.BLADE_LEN * 0.55)),
-     "anchor_hook_mouth": (HANG[-2], tuple(np.array(hang_pts[0]) + [0, 0.10, -0.5]))}
-for i_, b_u in enumerate([b_ for pc_ in cowl_ps[:-1] for b_ in pc_.burns][:5]):
-    A["anchor_ember_%d" % i_] = ("hips" if b_u[2] < K.NECK_Z else "head", tuple(b_u[:3]))
-A["anchor_eye_glow"] = ("head", tuple(K.hl(K.EYE * [1 if K.GLOW_EYE == "R" else -1, 1, 1]) + np.array([0, 0.02, 0])))
+     "anchor_hook_mouth": (HANG[-2], tuple(np.array(hang_pts[0]) + [-0.10, 0, -0.5]))}
+# the embers and eyes, found on the head's own paint: the hottest spots, kept apart
+vi_ = np.array([faces_v[i_][j_] for i_ in range(nf) if names[faces_pid[i_]] == "headscan" for j_ in range(len(faces_v[i_]))])
+uu_ = np.array([u_ for i_ in range(nf) if names[faces_pid[i_]] == "headscan" for u_ in faces_uv[i_]])
+hh_, hw_ = head_tex.shape[:2]
+cc_ = head_tex[np.clip((uu_[:, 1] * hh_).astype(int), 0, hh_ - 1), np.clip((uu_[:, 0] * hw_).astype(int), 0, hw_ - 1)]
+hot_ = (cc_[:, 0] - cc_[:, 2]).argsort()[::-1]
+picks_ = []
+for i_ in hot_[:600]:
+    p_ = vco[vi_[i_]]
+    if all(np.linalg.norm(p_ - q_) > 0.06 for q_ in picks_):
+        picks_.append(p_)
+    if len(picks_) >= 5:
+        break
+for i_, p_ in enumerate(picks_):
+    A["anchor_ember_%d" % i_] = ("hips" if p_[2] < K.NECK_Z else "head", tuple(p_))
+for sd_, sg_ in (("", 1.0), ("_l", -1.0)):
+    A["anchor_eye_glow" + sd_] = ("head", (sg_ * K.EYE_GAP * 0.5, K.NOSE_Y - 0.018, K.EYE_Z))
 for nm, (bn, at) in A.items():
     e = bpy.data.objects.new(nm, None)
     bpy.context.scene.collection.objects.link(e)

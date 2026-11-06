@@ -15,7 +15,7 @@ const POP := 0.12          # m: the head's most in one frame at 60 fps, down or 
 const BOB := 0.07          # m: the head's rise and fall over a sneak
 const STEP := 0.14         # m: how far a foot travels over a sneak
 const K := 8.0             # 1/s: Hunter.render's crouch rate
-const LATER := ["juggernaut"]    # Kael: landing after art1-integ
+const LATER := []    # (every Hero with clips has a crouch)
 
 var bad := 0
 var holder: Node3D
