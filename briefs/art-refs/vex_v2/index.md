@@ -38,3 +38,9 @@ Rejected:
 Local pass: neutral white balance; low-saturation magenta reduced 45%.
 
 Rejected tops: the V-ring bandeau, the twist-knot, and the sweetheart cups (the owner preferred the original bandeau).
+
+## Turnaround: FINAL (Nov 6, 15:51 ET)
+`vex_v2_turnaround.jpg`: 3D-modelling reference (front, 3/4, side, back), approved by the owner.
+- Model: Nano Banana Pro, 16:9, 4K. Single reference: the master sheet.
+- The prompt asked for a colour-painted 3D model (not grey clay), a true A-pose and the minigun in every view.
+- First attempt rejected: grey-blue skin, arms down, no minigun in the back view (that attempt also used Kael's turnaround as a style reference).
