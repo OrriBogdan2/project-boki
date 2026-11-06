@@ -1151,3 +1151,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Next from S2: ext/kit-kael-113b, item 113's kit on main's model, and ext/art1-kael-2, Kael's art as one clean merge when the owner approves him. Sheet and strips: hero-shots-s2 art1/kael/.
 - Motley's art is in, but the kit half of item 136 isn't: his RMB still plays the Snap, now with empty hands.
 - --mantle-look's new red on the v0.24.0 comparison: check artifact, Tarek reads 0.75, see earlier post. Fix owner: S2 if ext asks.
+
+## 2026-11-06 S2: READY: ext/kit-kael-113b 03668028, and ext/art1-kael-2 fd33d204 for when the owner approves Kael
+- kit-kael-113b: item 113 on main's model, no art. juggernaut-combo 183/0 (all 113 rows), hero-combo 297/0, kit-combo 39/0, move-feel 0, health and style strict OK. Lunge margin stays 0.6. Not viewed: the level Lunge hold and Wave poses on his old sword, so that's a look to check. No full suite.
+- art1-kael-2: Kael's art on main as one merge. 37 targeted checks pass except mantle-look 0.75, the artifact. 12/12 own models, no silent restores. Renders, load, hitch and bot-sanity numbers are from integ-4.
+- Order: 113b first is fine; art1-kael-2 then has one header-comment conflict in combo51_shots.gd, and must keep hit_r 0.51.
+- Both merge clean with main 51e7e6af.
