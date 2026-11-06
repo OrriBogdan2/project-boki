@@ -64,6 +64,19 @@ func run(main: Node) -> void:
 
 ## The moves a Hero's kit asks for (from its scripts' source).
 func _called(arch: String) -> Dictionary:
+	var called := {}
+	var re := RegEx.create_from_string("(?:vfx\\(|(?:hold|trail)\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"")
+	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
+		if f.ends_with(".gd") and (KIT_FILES.get(arch, []) as Array).any(func(pre): return f.begins_with(pre)):
+			for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)):
+				called[hit.get_string(1)] = true
+	return called
+
+## Everything the data promises is really there, and everything the kit asks for is in the data.
+func _recipes(arch: String) -> void:
+	var d := HeroVfx.data(arch)
+	var moves: Dictionary = d.get("moves", {})
+	ok(not moves.is_empty(), "%s has a recipe file" % arch)
 	var called := _called(arch)
 	var missing := called.keys().filter(func(k): return not (moves.has(k) or String(k).ends_with("_")))
 	ok(not called.is_empty() and missing.is_empty(),
@@ -254,7 +267,8 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	var sk := WardenGlb.skeleton(P.model.get_node_or_null("Warden"))
 	var palm := V.anchor_pos(P, "palm")
 	if sk != null:
-		var want := sk.global_transform * (sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand.R")) * Vector3(0.0, 0.05, 0.0))
+		var pose := sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand.R"))
+		var want := sk.global_transform * (pose * Vector3(0.0, 0.05, 0.0))
 		ok(palm.distance_to(want) < 0.001, "a bone anchor follows the model's hand.R")
 	else:
 		ok(palm.distance_to(P.pos) < 1.6, "a bone anchor on a model without a skeleton falls back to the body")
