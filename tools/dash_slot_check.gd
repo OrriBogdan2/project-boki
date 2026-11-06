@@ -43,6 +43,7 @@ func run(main_node: Node) -> void:
 	var hud = m.hud
 	var hid: int = hud.get_instance_id()
 	ok(not ("stam" in hud.plates), "the overhead plates have no dash bar any more")
+	ok(DashSlot.PIP_R * 2.0 >= 8.0, "a charge pip is a disc at least 8 px across (%.0f)" % (DashSlot.PIP_R * 2.0))
 	await _pips_and_timer(m, P, hid)
 	await _flash_and_tick(m, P, hid)
 	await _deny(m, P)

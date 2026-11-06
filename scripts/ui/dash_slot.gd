@@ -6,8 +6,10 @@ extends RefCounted
 ## tick when a charge returns, and a small diamond for the long air dash. Both callers hand it the same
 ## numbers (src): a match from the Hunter (of_hunter), the farm from its mirror of the same state.
 
-const PIP_H := 4.0                      # px, a charge pip's height
-const PIP_Y := 16.0                     # px from the slot's bottom edge to the pips (clears the key pill)
+const PIP_R := 5.0                      # px, a charge pip's radius (a round disc, readable at a glance)
+const PIP_Y := 18.0                     # px from the slot's bottom edge to the pips' centres (clears the key pill)
+const PIP_GAP := 3.0                    # px between pip discs
+const RING_W := 2.0                     # px, the recharging pip's progress ring
 const AIR_R := 4.5                      # px, the air-dash diamond's half-size
 const TICK_VOL := -15.0                 # dB of the charge-returned tick
 const TICK_PITCH := 1.9
@@ -61,15 +63,11 @@ static func draw(H, r: Rect2, s: Dictionary, audible := true) -> void:
 	var key := Settings.key_cap("dash")
 	HudSlot.ab_slot(H, "dash", r, String(s["icon"]), key, col, left / float(s["regen"]), left, n >= 1)
 	var cap := int(s["cap"])
-	var pw := minf(12.0, (r.size.x - 12.0) / float(cap) - 2.0)
-	var px := r.get_center().x - (pw * cap + 2.0 * (cap - 1)) * 0.5
+	var px := r.get_center().x - ((PIP_R * 2.0 + PIP_GAP) * cap - PIP_GAP) * 0.5 + PIP_R
 	var fills: Array = []
 	for i in cap:
-		var pr := Rect2(Vector2(px + i * (pw + 2.0), r.end.y - PIP_Y), Vector2(pw, PIP_H))
-		c.draw_rect(pr.grow(1.0), HudStyle.SHADE_EDGE)
-		c.draw_rect(pr, Color(1, 1, 1, 0.18))
 		var fill := clampf(float(s["charges"]) - float(i), 0.0, 1.0)
-		c.draw_rect(Rect2(pr.position, Vector2(pw * fill, PIP_H)), col)
+		_pip(c, Vector2(px + i * (PIP_R * 2.0 + PIP_GAP), r.end.y - PIP_Y), fill, col)
 		fills.append(fill)
 	shown[hid] = {"pips": fills, "text": "", "air": -1.0}
 	if n >= 1 and left > 0.0:
@@ -81,6 +79,17 @@ static func draw(H, r: Rect2, s: Dictionary, audible := true) -> void:
 		var back := 1.0 - float(s["air_cd"]) / float(s["air_max"])
 		shown[hid]["air"] = clampf(back, 0.0, 1.0)
 		_air_mark(c, Vector2(r.end.x - 9.0, r.position.y + 9.0), back)
+
+## One charge: a lit disc when ready, a dark disc with a light ring when spent, the ring filling while it recharges.
+static func _pip(c: CanvasItem, at: Vector2, fill: float, col: Color) -> void:
+	c.draw_circle(at, PIP_R + 1.0, HudStyle.SHADE_EDGE)
+	if fill >= 0.999:
+		c.draw_circle(at, PIP_R, col)
+		return
+	c.draw_circle(at, PIP_R, Color(0.0, 0.0, 0.02, 0.85))
+	c.draw_arc(at, PIP_R - RING_W * 0.5, 0.0, TAU, 20, Color(1, 1, 1, 0.3), RING_W)
+	if fill > 0.0:
+		c.draw_arc(at, PIP_R - RING_W * 0.5, -PI * 0.5, -PI * 0.5 + TAU * fill, 20, col, RING_W)
 
 ## The air dash: a diamond, bright once it is back, a growing fill while it recharges.
 static func _air_mark(c: CanvasItem, at: Vector2, ready_frac: float) -> void:
