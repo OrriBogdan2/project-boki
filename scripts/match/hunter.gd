@@ -242,6 +242,7 @@ var backpack := 0              # the backpack tier worn (Backpacks): 0 is the Po
 var swap_hold := false
 var dash_at := -9.0           # when the last dash started, for perfect dodges
 var jump_at := -9.0           # when you last jumped off the ground (AirLimits: a move from before it is over)
+var launch_at := -1.0         # when the skyship launch started (DropLaunch), -1 once it is over
 var dodged := false        # F has to be let go between weapon swaps
 var lives := 1                # comes back this many times minus one before it's really out
 var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
@@ -2197,7 +2198,8 @@ func _physics(dt: float) -> void:
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
 			gs = DIVE_SPEED if diving else DROP_SPEED
-			hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)
+			if not DropLaunch.locked(self):
+				hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)     # (the launch flies its arc)
 			if drop_follow != null and m.skydrop:
 				hv = m.skydrop.follow_hv(self, gs)     # in formation: the leader steers
 		# wind roads carry you along (either way), updrafts lift you
@@ -2519,6 +2521,7 @@ var air_t := 0.0                # time since you left the ground
 func _update_glide(dt: float) -> void:
 	air_t = 0.0 if grounded else air_t + dt
 	glide_lift.tick(self, dt)
+	DropLaunch.tick(self)            # the squad launch over: break off, the glider opens (item 163)
 	if dropping:
 		# the opening drop: the glider stays open until you land, or until you sink below the islands
 		gliding = not grounded
