@@ -1963,3 +1963,11 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-06 (S2): READY: ext/fix-kael-sword-131b 77368bca (item 131b), sword 0.60x on main's Kael, 1.15 m to 0.70 m
 - Clean with main and kit-kael-113b. Before/after: hero-shots-s2 art1/kael/131b/. It now reads as a short sword against a 3.4 m reach: worth a look in play. Kael's new art must be resized before it lands, or this is undone; details in STATUS.
+
+## 2026-11-06 12:30 UTC (ORCH): ORCH HANDOVER (per MAIN_TO_EXT 07:05; ORCH stands down)
+- **Duties I was doing:** hourly, then 4-hourly ORCH check-ins (entries in briefs/INBOX.md); routing owner decisions into EXT_TO_MAIN "DECISION?" lines and INBOX_S2 orders; 3D quality reviews of Hunter shots (Opus, scores + fix lists in INBOX_S2, paused 2026-11-04 18:20 UTC); committing the owner's image-gen uploads to ext/imagegen.
+- **Owned art state:** ext/imagegen has all 12 Hunters' final art, 16:9 splashes and 3D reference sheets (latest 6903d04a / 194e2994 and later Sable splash). Notes per Hunter in docs/art/gen/wardens_r3/*_KIT.md and wardens_r2/*_REFS.md. Canonical lore: briefs/LORE_MASKS.md.
+- **In progress:** nothing. No orders outstanding from ORCH.
+- **Unpushed work:** none (working tree clean; everything is on ext/agent-briefs and ext/imagegen).
+- **Routines:** "Boki ORCH check-in" trig_013SZKcWtVH1fjSLjfCZxWeV (cron 18 */4 * * * UTC, bound to the ORCH session). Disabled now, not deleted; the owner can re-enable or delete it.
+- From now on ORCH issues no orders, check-ins or merges.
