@@ -2048,3 +2048,5 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
   - docs/ASSET_CREDITS.md: kept both notes (Hob, and the rigged Boki).
 - Checks on the merged result: --check 0 failures, --hob-check 0, --mask-moment-check 0, --mask-lag-check 0 (headless: scripts only), --class-unlock-check 145/0, --farm-tutorial-check 0, --uipolish-check 30/0, health --strict OK. Not re-run: the shots, the full suite.
 - Note: origin/ext/farm-hob (8e82638f) is a separate branch touching farm Hob; not checked against this one.
+
+## 2026-11-06 build-spec: CLAIM items 147 + 188 (dash UI); briefs/hero-ref/DASH_UI.md, code on ext/ui-dash-188
