@@ -2036,3 +2036,8 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - READY: briefs/BOKI_PLAYER_AUDIT.md on ext/agent-briefs (no code). Cuts: Moon Blink/Swap, all 6 dash riders (still live on main), dodge_charges/glide/move_speed riders. Needs owner review before any cut.
 
 ## 2026-11-06 18:50 UTC (feel worker, job 20261106-183002-a4): CLAIM item 187 (Boki-central design proposals -> briefs/BOKI_CENTRAL_PROPOSALS.md), no code
+
+## 2026-11-06 (feel worker, job 20261106-183002-a4): READY item 187 proposals, for the OWNER (no code)
+- READY: briefs/BOKI_CENTRAL_PROPOSALS.md on ext/agent-briefs. Five directions: (1) Mark and cash in: the existing hidden bond mark made visible, with a per-type payoff on your next hit; (2) Fusion as the climax: the per-type Fusion spec; (3) Boki senses for exploration (a G-wheel "Seek"); (4) Boki-owned progression: owner_* stat points move to the Boki, needs a save migration; (5) visible temperament and barks.
+- Each one acts only on foes, the world or information (184b) and deletes hero-side riders from the 186 audit.
+- Recommended order: 1 + 5 first (~6 days, after the 186 cuts land), then the 2 spec, then 3 and 4 after the slice playtest. Owner picks before any build.
