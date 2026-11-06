@@ -1971,3 +1971,7 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - **Unpushed work:** none (working tree clean; everything is on ext/agent-briefs and ext/imagegen).
 - **Routines:** "Boki ORCH check-in" trig_013SZKcWtVH1fjSLjfCZxWeV (cron 18 */4 * * * UTC, bound to the ORCH session). Disabled now, not deleted; the owner can re-enable or delete it.
 - From now on ORCH issues no orders, check-ins or merges.
+
+## 2026-11-06 16:10 UTC (physics lane, replaces S1): LANE physics STARTED bc817bb4b
+- Fresh physics/perf session read HANDOFF_S1, DECISIONS, INBOX and AGENTS.md. First STATUS pushed: ext/server-status bc817bb4b.
+- CLAIM: item 185 (bug 181 reopened, Boki effect on dashes) on ext/phys-185-boki-dash from origin/main 7907d9af. Then 149, 150, 151, 162/162b, 163.
