@@ -49,3 +49,6 @@ Model: Nano Banana Pro (no seed exposed). Exploration at 2K.
 - `ryzz_v2_portrait.jpg` ("Static Bubble", 1:1): she pokes a lightning-filled bubblegum bubble with wide fake-innocent eyes.
 - Splash pick: "Who, Me?" (market version, `explorations/splash_who_me_market_square.jpg`). It was generated square by mistake, so a 16:9 extension is pending.
 - Alternates in explorations: storm surfer x2, lightning rod x2, who-me (city), oops portraits x2, static bubble alt.
+
+## Note for 3D/animation
+The bubblegum bubble is a separate animated prop (a pink sphere that grows from her lips and pops), not part of the face mesh. The turnaround deliberately shows a neutral closed mouth. The bubble should play in her idle and emotes; see the master sheet and portrait for its look.
