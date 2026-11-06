@@ -269,11 +269,11 @@ func open_pause(where: String) -> void:
 		item.call("Save and go to the main menu", "home", func():
 			Save.save_game()
 			close()
-			Game.goto("title"))
+			RateCard.gate(root, func(): Game.goto("title")))
 	if not OS.has_feature("web"):
 		var q: Button = item.call("Save and quit the game", "close", func():
 			Save.save_game()
-			get_tree().quit(), "", "Ghost")
+			RateCard.gate(root, get_tree().quit), "", "Ghost")
 		q.add_theme_color_override("font_color", UI.MUTED)
 	res.grab_focus.call_deferred()
 
