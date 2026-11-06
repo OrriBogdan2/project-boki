@@ -114,6 +114,7 @@ func mage() -> void:
 	_mage_shift(m, P, K, home)
 	_mage_jump(m, P, K, home)
 	_mage_spread(m, P, T, T2, K, home)
+	await _mage_116(m, P, T, T2, K, home)
 	await ac.done(m)
 	await _mage_burst()
 	var flow = load("res://tools/dash_flow_check.gd").new()
@@ -193,6 +194,112 @@ func _kitefall_with(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home
 	var res := [K.spark_n(T), K.spark_n(T2)]
 	ac.step(m, 0.6)
 	return res
+
+## Item 116: what play showed and the {3, 0} test above could not. The landing comes from the cursor's ray on the
+## ground, not inp["aim"] (the plane at her own height, 5 m up, or a foe's); Static waits for her while she is up;
+## the spread is drawn from the stacked foe even when the ult's own stack lands on it first.
+func _mage_116(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vector3) -> void:
+	var U := K.ult
+	var xd := K.x_def()
+	var spot := home + Vector3(6.0, 0, 2.0)
+	var g := Vector3(spot.x, K.ground(spot).y, spot.z)
+	var cam_at := g + Vector3(0, 21.0, 9.4)
+	var ray_dir := (g - cam_at).normalized()
+	var ray := [cam_at, ray_dir]
+	K.cd["x"] = 0.0
+	P.teleport(home)
+	K.sparks.clear()
+	HunterKeys.ult_pressed(P)
+	var hang := func() -> void:
+		# as Match does: inp["aim"] is the ray cut at her own height + 0.95, inp["aim_ray"] the ray itself
+		var t := ((P.pos.y + 0.95) - cam_at.y) / ray_dir.y
+		P.inp["aim"] = cam_at + ray_dir * t
+		P.inp["aim_ray"] = ray
+	ac.step(m, float(xd["windup"]) + float(xd["rise"]) + float(xd["min_air"]) + 0.05, hang)
+	var off: float = hc._flat(U.land_point(), g)
+	var naive := Vector2(P.inp["aim"].x - g.x, P.inp["aim"].z - g.z).length()
+	ok("Kitefall lands exactly at the cursor, from 5 m up",
+			off < 0.1, "%.2f m off (the aim plane is %.2f m off)" % [off, naive])
+	HunterKeys.ult_pressed(P)
+	ac.step(m, float(xd["drop"]) + 0.1, hang)
+	ok("Kitefall: she is on that spot", hc._flat(P.pos, g) < 0.1, "%.2f m" % hc._flat(P.pos, g))
+	ac.step(m, 0.7)
+	P.inp.erase("aim_ray")
+	# Static out-waits the flight: a stack put on just before a full hover is still there when she lands
+	K.cd["x"] = 0.0
+	P.teleport(home)
+	ac.fresh(T)
+	ac.fresh(T2)
+	T.teleport(spot + Vector3(0.8, 0, 0))
+	T2.teleport(spot + Vector3(-0.8, 0, 0))
+	K.sparks.clear()
+	K.add_spark(T, 2)
+	var dur := float(K.res_def()["dur"])
+	ac.step(m, dur - 2.2)
+	ac.aim_at(P, spot)
+	HunterKeys.ult_pressed(P)
+	var whole := float(xd["windup"]) + float(xd["rise"]) + float(xd["hover"]) + float(xd["drop"]) + 0.1
+	ac.step(m, whole, func(): ac.aim_at(P, spot))
+	ok("Kitefall: Static waits for her in the air (2 + the ult's 1 on the stacked foe)",
+			K.spark_n(T) == 3, str(K.spark_n(T)))
+	ok("Kitefall: the waited Static still spreads", K.spark_n(T2) == 3, str(K.spark_n(T2)))
+	ac.step(m, 0.6)
+	# drawn whichever foe the loop reaches first
+	for first in [T, T2]:
+		var other: Hunter = T2 if first == T else T
+		K.cd["x"] = 0.0
+		P.teleport(home)
+		ac.fresh(T)
+		ac.fresh(T2)
+		T.teleport(spot + Vector3(0.8, 0, 0))
+		T2.teleport(spot + Vector3(-0.8, 0, 0))
+		K.sparks.clear()
+		K.add_spark(first, 2)
+		ac.aim_at(P, spot)
+		var before := int(U.get("spreads") if U.get("spreads") != null else 0)
+		HunterKeys.ult_pressed(P)
+		var air := float(xd["windup"]) + float(xd["rise"]) + float(xd["min_air"]) + 0.05
+		ac.step(m, air, func(): ac.aim_at(P, spot))
+		HunterKeys.ult_pressed(P)
+		ac.step(m, float(xd["drop"]) + 0.1)
+		var drawn := int(U.get("spreads") if U.get("spreads") != null else 0) - before
+		var when := "first" if first == T else "second"
+		ok("Kitefall: the spread is drawn, stacked foe %s" % when, drawn == 1, str(drawn))
+		ok("Kitefall: and counted", K.spark_n(other) == 3, str(K.spark_n(other)))
+		ac.step(m, 0.6)
+	ac.fresh(T2)
+	K.sparks.clear()
+	await _mage_116b(m, P, T, K, home)
+
+## Items 116.2 and 116b: the bolt rate, and the Wirerun after a reset (further, charged quicker), press and hold.
+func _mage_116b(m: Match, P: Hunter, T: Hunter, K: MageKit, home: Vector3) -> void:
+	var pd: Dictionary = P.wpn
+	ok("LMB: the bolts 10% faster (0.72 x 0.9)", absf(float(pd["rate"]) - 0.648) < 0.001, str(pd["rate"]))
+	var dd := K.dash_def()
+	var far := float(dd["dist"][1])
+	var hold := float(dd["hold"])
+	K.reset_dash_boost = false
+	ok("Wirerun: a plain run stays 7.5 to 13 m, full at 0.6 s",
+			absf(K.wire_len(0.0) - float(dd["dist"][0])) < 0.01 and absf(K.wire_len(hold) - far) < 0.01)
+	K.cd["dash"] = 0.0
+	P.teleport(home)
+	K.grant_reset()
+	ok("Wirerun: a reset arms the longer run", K.reset_dash_boost)
+	P.dashes = P.max_dashes()
+	K.on_dash(false)
+	var boosted := bool(K.wire.get("boost", false))
+	ok("Wirerun: the press takes the boost", boosted and not K.reset_dash_boost)
+	var quick := hold * float(dd["reset_charge"])
+	ok("Wirerun: the reset run charges in 0.75x the time",
+			absf(K.wire_hold() - quick) < 0.001, "%.3f s" % K.wire_hold())
+	ok("Wirerun: full at that time, 1.5x further", absf(K.wire_len(quick) - far * 1.5) < 0.01,
+			"%.2f m" % K.wire_len(quick))
+	ok("Wirerun: a tap is still a short zap, 1.5x", absf(K.wire_len(0.0) - float(dd["dist"][0]) * 1.5) < 0.01)
+	K._end_wire(true)
+	K.reset_dash_boost = false
+	K.grant_reset()
+	ac.step(m, float(dd["reset_window"]) + 0.1)
+	ok("Wirerun: the boost fades if the reset goes unused", not K.reset_dash_boost)
 
 ## Item 51: Shift in Kitefall's crouch charges the Wirerun at once; the crouch waits for the run, starts over
 ## where it ended, and she launches from there (the ring moves with her) and still comes down.

@@ -3729,6 +3729,7 @@ func _gather_input() -> void:
 		if best != Vector3.INF and bd > 0.8:
 			player.inp["move"] = Vector2(best.x - player.pos.x, best.z - player.pos.z).normalized()
 	player.inp["aim"] = _mouse_aim()
+	player.inp["aim_ray"] = cam.mouse_ray()
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
 	var over_ui: bool = hud != null and hud.mouse_on_ui() and player.draw_t < 0.0

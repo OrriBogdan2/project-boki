@@ -49,7 +49,8 @@ func _park() -> void:
 func _item_70() -> void:
 	var dash: Dictionary = K.dash_def()
 	var wpn: Dictionary = P.wpn
-	ok("item 70: autos every 0.72 s, bolt speed 37", is_equal_approx(float(wpn["rate"]), 0.72)
+	ok("items 70, 116: autos every 0.648 s, bolt speed 37",
+			is_equal_approx(float(wpn["rate"]), 0.648)
 			and is_equal_approx(float(wpn["speed"]), 37.0), "%s %s" % [wpn["rate"], wpn["speed"]])
 	ok("item 70: Wirerun 7.5 to 13 m at 40 m/s, hold 0.6 s", is_equal_approx(float(dash["dist"][0]), 7.5)
 			and is_equal_approx(float(dash["dist"][1]), 13.0) and is_equal_approx(float(dash["speed"]), 40.0)
@@ -57,7 +58,7 @@ func _item_70() -> void:
 	ok("item 70: the lane preview scales with the charge (full hold = 13 m)",
 			is_equal_approx(K.wire_len(0.6), 13.0) and is_equal_approx(K.wire_len(0.0), 7.5))
 	var text := String(Arch.def("mage")["card"]["weapons"]["coilcaster"])
-	ok("item 70: the card says every 0.72s", text.contains("every 0.72s"), text)
+	ok("items 70, 116: the card says every 0.65s", text.contains("every 0.65s"), text)
 	_park()
 	P.fire_cd = 0.0
 	P.inp["fire"] = true
@@ -72,7 +73,8 @@ func _item_70() -> void:
 			shots.append(t)
 	P.inp["fire"] = false
 	var gap := shots[1] - shots[0] if shots.size() > 1 else 0.0
-	ok("item 70: held fire shoots every 0.72 s", shots.size() >= 3 and absf(gap - 0.72) < 0.05, "gap %.3f" % gap)
+	ok("items 70, 116: held fire shoots every 0.648 s",
+			shots.size() >= 3 and absf(gap - 0.648) < 0.05, "gap %.3f" % gap)
 
 # ------------------------------------------------------------------ item 71
 ## Casts Skycall on a circle at `at`, drags toward `drag_to`, lets go and runs the 0.8 s plus the fling.

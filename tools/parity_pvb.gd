@@ -160,8 +160,8 @@ func vireo() -> void:
 			fired.append([t, sid, v.length()])
 			anims[K.anim_id] = true
 	var gap := float(fired[1][0]) - float(fired[0][0]) if fired.size() >= 2 else 0.0
-	ok("parity vireo: held, one bolt every 0.72s (card), also while walking",
-		absf(gap - 0.72) < 0.05 and fired.size() >= 3,
+	ok("parity vireo: held, one bolt every 0.648s (item 116), also while walking",
+		absf(gap - 0.648) < 0.05 and fired.size() >= 3,
 		"%d bolts, gap %.2f s" % [fired.size(), gap])
 	ok("parity vireo: each bolt leaves along the cursor of its step, the body facing it (cursor sweeping 60 deg/s)",
 		worst < SHOT_DEG and worst_face < TRACK_DEG, "shot %.1f deg, face %.1f deg" % [worst, worst_face])
