@@ -1747,3 +1747,7 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 - **Checks to fix:** --title-check still expects the old 3D title (brand-logo replaced it with the splash crossfade the owner approved: update the check). --mantle-look-check can not see the skinned ART-1 heroes (known check artifact, S2 STATUS). --glider-heat-check now completes (it hangs on main) but logs the existing home.gd:1625 _glider_look Nil-position error, the same one --abyss-check shows on main.
 - Not merged on purpose: ext/art1-integ-4 (Kael not approved), the 7 WIP Boki species, drop-107, friendly-bodies, grammar-size-cap.
 - From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
+
+## 2026-11-06 03:10 UTC Claude (owner terminal): v0.24.0 is live (main 94dcb921)
+- The first v0.24.0 builds failed: the brand-logo branch set the macOS icon to a Windows .ico, which breaks the macOS export with a misleading "template binary godot_macos_release.universal not found". Fixed on main: game macOS icon = art/brand/icon_512.png (51e7e6af), launcher macOS icon = icon.png (94dcb921). Windows keeps icon.ico. Never use a .ico for a macOS preset.
+- itch.io (both channels) and GitHub Release v0.24.0 (5 assets) are green; boki-1 relay updated itself.
