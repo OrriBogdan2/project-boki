@@ -28,3 +28,13 @@ Rejected:
 - Underboob tops.
 - A glowing eye, and a green-ring eye (edits rendered it as fire or as alien black-rimmed eyes).
 - A hip underwear strap.
+
+## Update (Nov 6, 15:46 ET): composited final sheet
+`vex_v2_master_sheet.jpg` was replaced. Base: redraw run 2, with three views regenerated as single figures (Nano Banana Pro, 3:4, 4K) and pasted in locally (scaled to the old figure's height, background-matched):
+- Front: a fuller bust in the original bandeau with the ammo strap (edit on the front crop).
+- Side: a moderately fuller bust to match the front (edit on the side crop, text-only bust description; using the front as a second reference made it copy the front pose).
+- Back: the jacket slipped off the bare-shoulder side, showing the tally tattoos (fresh single-figure gen).
+
+Local pass: neutral white balance; low-saturation magenta reduced 45%.
+
+Rejected tops: the V-ring bandeau, the twist-knot, and the sweetheart cups (the owner preferred the original bandeau).
