@@ -86,7 +86,7 @@ What the in-game kit card (K) says.
 
 **Heavy Shot (RMB, 16s cooldown).**
 
-- *Hold:* Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, stops on the first foe; driven into a wall within 3m it hits again (5 -> 12 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
+- *Hold:* Heavy Shot: hold to draw a great needle on the bow (0.5s to start, full at 1.1s; you move at 38% speed while you hold) and let go to loose it: 16 -> 30 damage, push 6 -> 12, stops on the first foe; driven into a wall within 3m it hits again (5 -> 12 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
 
 **Hail Wall (E, 15s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
 

@@ -90,7 +90,7 @@ static func _far(m: Node, at: Vector3) -> bool:
 ## the delivery (a rail's bolt of light, a cone's blast fan, a wall's slam, a trap's spark, a blink's
 ## implosion). o: optional {range, radius}.
 static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vector2, col: Color, o := {}) -> void:
-	if m == null or m.get("fx") == null or caster == null or _far(m, at):
+	if m == null or m.get("fx") == null or caster == null or _far(m, at) or m.fx.own_look:
 		return
 	var fx: Fx = m.fx
 	var mine := _mine(m, caster)

@@ -40,9 +40,15 @@ const WAKE_POOL := 6
 const WAKE_EVERY := 0.06
 ## the Bash's gold fan: half its angle (rad) and its reach scale over the Bash's radius
 const BASH_HALF := 0.6
-## the whirled hammer: how far above the hand the circle runs (m), its tilt (rad, the head a little up) and the
-## s it eases out of the hand into the circle
+const CHAIN_LINKS := 18
+const CHAIN_SAG := 0.5        # m at its deepest, once the hammer is far out
+const WRIST := "Rig/Torso/ArmRPivot/Elbow/Hand"
+## the whirled hammer: the 3D model's size over the one in the hand (it reads at the match camera; the procedural
+## hammer is drawn big enough as it is), how far above the hand the circle runs (m), its tilt (rad, the head a
+## little up) and the s it eases out of the hand into the circle
+const ORBIT_SCALE := 1.4
 const ORBIT_RISE := 0.45
+const WHIRL_HEAD_R := 0.95     # the skinned hammer's head from his axis in the whirl (m, neutral)
 const ORBIT_TILT := 0.12
 const WHIRL_IN := 0.12
 ## the whirl's trail ribbon: inner and outer radius (m at scale 1), how far past the head's circle its outer
@@ -109,6 +115,9 @@ var hot := false               # the perfect window is open: the glint burns whi
 var glint_k := -1.0            # the glint's size 0..1 while it shows (-1: not yet)
 var fx_clock := 0.0            # the match time effects last advanced to
 
+var own_piece: Node3D         # the model's own hammer, when it has a skinned one (WardenGlb.thrown_piece)
+var chain: Array = []         # the links to the thrown hammer (_build_chain)
+
 func _init(hunter: Hunter) -> void:
 	h = hunter
 	top_level = true
@@ -119,7 +128,9 @@ func _ready() -> void:
 	hammer.top_level = true
 	hammer.visible = false
 	add_child(hammer)
-	PinBjornWeapons.hammer(hammer, 1.25)
+	# (the skinned hammer's own mesh on a 3D model, else the procedural one)
+	if not _own_hammer():
+		PinBjornWeapons.hammer(hammer, 1.25)
 	hammer_glow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", Color(GOLD, 0.9), true))
 	trail = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", Color(1.0, 0.62, 0.2), true))
 	beacon = KitMeshes.inst(self, KitMeshes.pillar(0.22, 0.4, 5.0), KitShaders.mat("beam", GOLD, true))
@@ -153,6 +164,57 @@ func _ready() -> void:
 	column.material_override.set_shader_parameter("speed", -1.2)
 	disc = KitMeshes.inst(self, KitMeshes.band(0.2, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GREEN))
 	disc.material_override.set_shader_parameter("color2", Color("e8fff0"))
+
+## The model's own hammer on the thrown piece, once the model wears it (an Arena swap dresses him after the kit starts).
+func _own_hammer() -> bool:
+	if own_piece:
+		return true
+	own_piece = WardenGlb.thrown_piece(h.model, "hammer") if h.model else null
+	if own_piece == null:
+		return false
+	for c in hammer.get_children():
+		c.queue_free()
+	hammer.add_child(own_piece)
+	own_piece.scale = Vector3.ONE * h.model.scale.x
+	_build_chain()
+	return true
+
+## The chain from his wrist to the thrown hammer: pooled iron links, shown only while it is out of the hand.
+func _build_chain() -> void:
+	var torus := TorusMesh.new()
+	torus.inner_radius = 0.09
+	torus.outer_radius = 0.17
+	torus.rings = 8
+	torus.ring_segments = 4
+	var iron := Models.toon(Color("4a4038"))
+	for i in CHAIN_LINKS:
+		var mi := MeshInstance3D.new()
+		mi.mesh = torus
+		mi.material_override = iron
+		mi.top_level = true
+		mi.visible = false
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)
+		chain.append(mi)
+
+func _tick_chain() -> void:
+	var wrist := h.model.get_node_or_null(WRIST) as Node3D if h.model else null
+	var on := hammer.visible and wrist != null and wrist.is_inside_tree()
+	for i in chain.size():
+		var mi: MeshInstance3D = chain[i]
+		mi.visible = on
+		if not on:
+			continue
+		var a := wrist.global_position
+		var b := hammer.global_position
+		var u := (i + 0.5) / chain.size()
+		var sag := Vector3.DOWN * CHAIN_SAG * minf(a.distance_to(b) * 0.1, 1.0) * sin(u * PI)
+		var at := a.lerp(b, u) + sag
+		var along := (b - a).normalized()
+		var up := Vector3.UP if absf(along.y) < 0.95 else Vector3.RIGHT
+		var fix := Basis.looking_at(along, up)
+		mi.global_transform = Transform3D(fix.rotated(along, PI * 0.5 * (i % 2)) * Basis(Vector3.RIGHT, PI * 0.5), at)
+		mi.scale = Vector3(1.0, 1.0, 1.0) * clampf(a.distance_to(b) / chain.size() * 2.2, 0.5, 1.6)
 
 ## The wall of forged plates, built once: two rows of riveted plates along the arc, ribs between them, a
 ## rim along the top and a round boss with the hammer's cross in the middle. Local space: the curve's
@@ -199,6 +261,7 @@ func _build_aegis() -> void:
 # ------------------------------------------------------------------ the thrown hammer
 ## In flight at `p` along `dir`, tumbling at `spin_rate` rad/s.
 func hammer_fly(p: Vector3, dir: Vector2, spin_rate: float) -> void:
+	_own_hammer()
 	hammer.visible = true
 	hammer.global_position = p
 	hammer.rotation = Vector3(Time.get_ticks_msec() * 0.001 * spin_rate, atan2(-dir.x, -dir.y), 0.0)
@@ -215,10 +278,11 @@ func hammer_fly(p: Vector3, dir: Vector2, spin_rate: float) -> void:
 ## Planted: standing head-down in the ground, leaning back along its flight, the beacon over it.
 func hammer_plant(p: Vector3, yaw: float) -> void:
 	hammer.visible = true
-	hammer.scale = Vector3.ONE * PLANT_SCALE / 1.25
+	var plant_k := h.model.scale.x if own_piece else PLANT_SCALE
+	hammer.scale = Vector3.ONE if own_piece else Vector3.ONE * PLANT_SCALE / 1.25
 	# the head points down (-Z turned to -Y), leaning PLANT_LEAN off vertical
 	hammer.rotation = Vector3(-PI * 0.5 - PLANT_LEAN, yaw, 0.0)
-	var head_drop := 0.62 * PLANT_SCALE * cos(PLANT_LEAN)
+	var head_drop := 0.62 * plant_k * cos(PLANT_LEAN)
 	hammer.global_position = p + Vector3(0, head_drop - 0.2, 0)
 	hammer_glow.visible = false
 	trail.visible = false
@@ -238,6 +302,10 @@ func hold(held_t: float, k: float, window: bool, turn: float) -> void:
 	held = true
 	spin = turn
 	spin_k = k
+	if _own_hammer():
+		# (the skinned hammer whirls in the clip: its loop runs on the kit's angle. The clip's a = 0 is his right, the
+		# kit's 0 his front, so a quarter turn on.)
+		h.model.set_meta(WardenClips.PHASE, fposmod((turn - h.model.rotation.y + PI * 0.5) / TAU, 1.0))
 	glint_k = k if held_t >= 0.6 else -1.0
 	glint.visible = glint_k >= 0.0
 	hot = window
@@ -248,6 +316,9 @@ func full_flare() -> void:
 
 func hold_end() -> void:
 	held = false
+	if h.model:
+		h.model.remove_meta(WardenClips.PHASE)
+		h.model.remove_meta(WardenClips.WEAPON_K)
 	whirl_k = 0.0
 	hot = false
 	glint_k = -1.0
@@ -267,6 +338,13 @@ func _pivot() -> Node3D:
 	return null
 
 func _head_world() -> Vector3:
+	var at := WardenGlb.anchor(h.model, "anchor_hammer_head") if h.model else null
+	if at and at.is_inside_tree():
+		if held:      # (whirling: on the kit's own angle, the clip seeks to it; the anchor gives the height)
+			var out := Basis(Vector3.UP, spin) * Vector3(0, 0, -WHIRL_HEAD_R * h.model.scale.x)
+			var c := h.model.global_position
+			return Vector3(c.x + out.x, at.global_position.y, c.z + out.z)
+		return at.global_position
 	var pv := _pivot()
 	if pv == null or not pv.is_inside_tree():
 		return Vector3.INF
@@ -274,6 +352,8 @@ func _head_world() -> Vector3:
 
 ## Shows or hides the hammer in his hand (it's out while thrown).
 func in_hand(on: bool) -> void:
+	if h.model:
+		h.model.set_meta(WardenClips.WEAPON_OUT, not on)
 	var pv := _pivot()
 	if pv:
 		pv.visible = on
@@ -284,7 +364,11 @@ func _whirl(pv: Node3D, delta: float) -> void:
 	whirl_k = minf(1.0, whirl_k + delta / WHIRL_IN)
 	var gun := pv.get_parent() as Node3D
 	var orbit_size := gun.global_basis.get_scale().x
+	if pv.has_node(WardenGlb.WEAPON):
+		orbit_size *= ORBIT_SCALE
 	var centre := gun.global_position + Vector3(0, ORBIT_RISE, 0)
+	if own_piece:      # (the head you see runs round his body, at its own height)
+		centre = Vector3(h.model.global_position.x, _head_world().y, h.model.global_position.z)
 	var turn := Basis(Vector3.UP, spin)
 	var at := Transform3D(turn * Basis(Vector3.RIGHT, ORBIT_TILT).scaled(Vector3.ONE * orbit_size), centre)
 	pv.transform = Transform3D.IDENTITY.interpolate_with(gun.global_transform.affine_inverse() * at, whirl_k)
@@ -301,7 +385,7 @@ func _whirl(pv: Node3D, delta: float) -> void:
 func _place_glint(pv: Node3D) -> void:
 	if not glint.visible:
 		return
-	glint.global_position = pv.to_global(Vector3(0, 0, -0.62))
+	glint.global_position = _head_world()
 	var pulse := 0.85 + 0.15 * sin(Time.get_ticks_msec() * (0.06 if hot else 0.025))
 	glint.scale = Vector3.ONE * lerpf(0.55, 1.2, glint_k) * pulse * (1.35 if hot else 1.0)
 	KitShaders.param(glint, "power", lerpf(0.8, 1.5, glint_k) * (1.4 if hot else 1.0))
@@ -396,6 +480,7 @@ func aegis_rise(at: Vector3) -> void:
 ## A block: the whole wall flashes and gold sparks fly off its face at `at`.
 func aegis_block(at: Vector3) -> void:
 	aegis_hit = 1.0
+	WardenMood.poke(h.model)
 	var out := Vector3(at.x - h.pos.x, 0.15, at.z - h.pos.z).normalized()
 	h.m.fx.spark(at, out, Color("ffd25a"), 14, 9.0, 70.0, 0.25, 10.0, 1.2)
 	h.m.fx.flash(at, Color("ffc94a"), 0.8, 0.06)
@@ -458,6 +543,8 @@ func _process(_delta: float) -> void:
 	var delta := clampf(float(h.m.time) - fx_clock, 0.0, 1.0 / 30.0)
 	fx_clock = float(h.m.time)
 	_tick_hold(delta)
+	if not chain.is_empty():
+		_tick_chain()
 	_tick_flare(delta)
 	_tick_slam(delta)
 	if aegis_hit > 0.0:

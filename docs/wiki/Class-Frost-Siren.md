@@ -55,7 +55,7 @@ R is your Boki's Merge.
 | Body | 124 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Hoar Fan (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them. |
-| Silhouette | the big furred collar and the long trailing scarf, on blade skates |
+| Silhouette | a bunny-eared fur hood with curled ice horns, a long candy-striped ice spear, on glowing blade skates |
 | Resource | Chill (max 8) |
 
 ### Kit card
@@ -77,7 +77,7 @@ What the in-game kit card (K) says.
 
 **Hoarfrost (passive).** Your damaging abilities Chill foes for 4s (a Chilled foe is a little slower and shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.
 
-**Skate (dash, Shift, 13s cooldown).** Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams. In the air, press it to buffer the skate: it starts the moment you land.
+**Skate (dash, Shift, 13s cooldown).** Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.
 
 **Ice Spear (RMB, 10.2s cooldown, 2 charges).**
 
@@ -85,7 +85,7 @@ What the in-game kit card (K) says.
 
 **Rink Wall (E, 17s cooldown).** A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.
 
-**Rimelock (hunter ultimate, from level 6, 80s cooldown).** Cast it: you are sealed in a frost shell, invulnerable and rooted, and a 7.2m (4 body heights) rink snaps out round you. Cast from a skate, your momentum carries you about 3m on as the shell closes, then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
+**Rimelock (hunter ultimate, from level 6, 80s cooldown).** Cast it: you are sealed in a frost shell, a frozen statue: invulnerable and rooted, your facing locked as you cast, and a 7.2m (4 body heights) rink snaps out round you. Cast from a skate, the statue slides on along your skate (about 6m at full speed, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
 
 ### Ranks
 

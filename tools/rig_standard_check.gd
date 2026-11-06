@@ -65,7 +65,7 @@ func _hunter(id: String) -> void:
 
 func _skeleton(id: String, m: Node3D) -> void:
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
-	var wrong: Array = WardenSkeleton.mismatches(sk, WardenGlb.neutral_rest(id), WardenGlb.EXTRA.get(id, {}))
+	var wrong: Array = WardenSkeleton.mismatches(sk, WardenGlb.neutral_rest(id), WardenGlb.extra_bones(id))
 	ok(wrong.is_empty(), "%s: the armature is the standard one, on the rig's nodes %s" % [id, str(wrong)])
 
 func _attachments(id: String, m: Node3D) -> void:
@@ -79,7 +79,10 @@ func _attachments(id: String, m: Node3D) -> void:
 	if id in SHIELDED and m.get_node_or_null("Rig/Torso/ArmLPivot/Elbow/Hand/Shield") == null:
 		missing.append("Shield")
 	var an := HunterAnim.new(m)
-	if not an.hold in NO_SEAT and gun and gun.find_child(WardenGlb.WEAPON, true, false) == null:
+	var skinned := bool(WardenClips.data(WardenGlb.art(id)).get("skinned_weapon", false))
+	if skinned and WardenGlb.anchor(m, WardenGlb.WEAPON_MUZZLE) == null:
+		missing.append(WardenGlb.WEAPON_MUZZLE)      # (item 76b: its FX points are empties on the skinned weapon)
+	if not skinned and not an.hold in NO_SEAT and gun and gun.find_child(WardenGlb.WEAPON, true, false) == null:
 		missing.append("weapon")
 	ok(missing.is_empty(), "%s: carries the standard attachment points (missing %s)" % [id, str(missing)])
 

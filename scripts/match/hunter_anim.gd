@@ -215,6 +215,7 @@ var vdir_prev := 0.0
 var legs_yaw := 0.0
 var face_prev := 0.0
 var face_rate := 0.0
+var arm_k := 1.0               # the arms' length against the standard (archetype body "arms", Models.hunter)
 var lag := 0.0                 # how far the feet are behind the body turning on the spot
 var shuffle_t := -1.0
 var shuffle_side := 1.0
@@ -308,6 +309,7 @@ func _init(m: Node3D) -> void:
 	knee_r = leg_r.get_node_or_null("Knee")
 	head = torso.get_node_or_null("HeadPivot")
 	aim = torso.get_node_or_null("Aim")
+	arm_k = float(m.get_meta("arm_k", 1.0))
 	arm_l = torso.get_node_or_null("ArmLPivot")
 	arm_r = torso.get_node_or_null("ArmRPivot")
 	if arm_l:
@@ -518,6 +520,7 @@ static func _spin_e(p: float) -> float:
 	return p - sin(p * TAU) / TAU
 
 func update(dt: float, s: Dictionary) -> void:
+	model.set_meta(WardenClips.STATE, s)     # (a Hero's hand-keyed clips read the same state)
 	if dt <= 0.0:
 		return
 	t += dt
@@ -565,6 +568,8 @@ func update(dt: float, s: Dictionary) -> void:
 	base_k = _ease(base_k, 1.0 if base_p >= 0.0 else 0.0, 6.0, dt)
 	stun_k = _ease(stun_k, 1.0 if stun and not downed else 0.0, 8.0, dt)
 	var still := (1.0 - r1) * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k)
+	if s.get("statue", false):
+		still = 0.0       # a statue (Rimelock): no sway, breath, glance or fidget
 	if moving or not grounded or fired < 1.0 or rolling or downed:
 		idle_t = 0.0
 	else:
@@ -1498,8 +1503,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		tl = at * (offhand.transform * Vector3.ZERO)
 	elif grip_l != Vector3.INF and gun:
 		tl = at * (gun.transform * grip_l)
-		tl = _reachable(sh_l, tl, at * (gun.transform * grip_r), REACH * 0.97)
-	tr = _reachable(sh_r, tr, tr, REACH * 0.99)
+		tl = _reachable(sh_l, tl, at * (gun.transform * grip_r), REACH * arm_k * 0.97)
+	tr = _reachable(sh_r, tr, tr, REACH * arm_k * 0.99)
 	if tl == Vector3.INF:
 		free_l = 1.0
 	# free hands: relaxed at the sides, swinging when running (against the legs), pumping hard in a sprint
@@ -1838,14 +1843,16 @@ func _ik(piv: Node3D, elbow: Node3D, s: Vector3, tgt: Vector3, pole: Vector3) ->
 	if dl < 0.001:
 		d = Vector3(0, -1, 0); dl = 1.0
 	var u := d / dl
-	var dist := clampf(dl, absf(UPPER - FORE) + 0.02, REACH - 0.003)
-	var ca := clampf((UPPER * UPPER + dist * dist - FORE * FORE) / (2.0 * UPPER * dist), -1.0, 1.0)
+	var up := UPPER * arm_k
+	var fo := FORE * arm_k
+	var dist := clampf(dl, absf(up - fo) + 0.02, up + fo - 0.003)
+	var ca := clampf((up * up + dist * dist - fo * fo) / (2.0 * up * dist), -1.0, 1.0)
 	var sa := sqrt(maxf(0.0, 1.0 - ca * ca))
 	var v := pole - u * pole.dot(u)
 	if v.length_squared() < 1e-6:
 		v = Vector3(0, 0, 1) - u * u.z
 	v = v.normalized()
-	var e := s + u * (UPPER * ca) + v * (UPPER * sa)
+	var e := s + u * (up * ca) + v * (up * sa)
 	var hnd := s + u * dist
 	var n := v.cross(u).normalized()
 	var y1 := (s - e).normalized()

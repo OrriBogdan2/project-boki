@@ -60,6 +60,8 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	k._setup()
 	return k
 
+const OWN_LOOK_SKIP := ["boom", "ping", "whoosh", "throw"]     # KinExec's delivery sounds (see run_own)
+
 # ------------------------------------------------------------------ data
 func rmb_def() -> Dictionary: return d.get("rmb", {})
 func e_def() -> Dictionary: return d.get("e", {})
@@ -113,6 +115,7 @@ func r_recast() -> bool: return false                # R pressed while it runs (
 func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
+func gate_inputs() -> void: pass                    # a kit drops the presses it locks out
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 ## Does this kit have the class long dash (Shift in the air)? The HUD shows its segment only then.
 func has_long_dash() -> bool: return true
@@ -598,6 +601,15 @@ func cx(slot: String, ability: String, aim: Vector3, extra := {}) -> Dictionary:
 func run(st_: StageSpec, c: Dictionary) -> void:
 	KinExec.run_stage(st_, c)
 
+## A stage whose look and sound are the Hero's own (HeroVfx): the rules run, the shared cast language stays out.
+func run_own(st_: StageSpec, c: Dictionary) -> void:
+	c["silent"] = true
+	m.fx.own_look = true
+	Sfx.skip = OWN_LOOK_SKIP
+	KinExec.run_stage(st_, c)
+	Sfx.skip = []
+	m.fx.own_look = false
+
 # ------------------------------------------------------------------ helpers
 func aim() -> Vector3:
 	return h.inp.get("aim", h.pos)
@@ -833,6 +845,10 @@ func aims_in_dash() -> bool: return false
 func in_dash() -> bool: return h.roll_t > 0.0 and h.move_kind == "dash"
 ## s left in that dash (0 when not in one); a kit that overrides in_dash() overrides this too.
 func dash_left() -> float: return h.roll_t if in_dash() else 0.0
+## The vertical speed a dash in the air holds while it runs (0: it holds the height); a skate sinks gently.
+func dash_vy(_dt: float) -> float: return 0.0
+## True while the model's facing is frozen (a statue): Hunter keeps `face` as it is, whatever the cursor does.
+func face_locked() -> bool: return false
 func fire_ok_rmb() -> bool: return true
 
 # ------------------------------------------------------------------ payoffs and state tells (shared)
@@ -878,6 +894,12 @@ func own_node() -> Node3D:
 	h.add_child(n)
 	self_nodes.append(n)
 	return n
+
+## One of the Hero's moments (HeroVfx, content/vfx/<arch>.json), by default at the body along the aim.
+func vfx(move: String, at: Variant = null, dir: Variant = null, o := {}) -> void:
+	var where: Vector3 = h.pos if at == null else at
+	var way: Vector2 = h.aim_dir() if dir == null else dir
+	HeroVfx.of(m).play(h, move, where, way, o)
 
 ## Whether the hunter's own tells should draw (hidden while down, out, or unseen by the viewer).
 func tells_visible() -> bool:

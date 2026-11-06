@@ -126,8 +126,8 @@ func _mage() -> void:
 	ok("LMB: alternating hands (left, then right)",
 			a1 == "mage_lmb_l" and K.anim_id == "mage_lmb_r",
 			"%s %s" % [a1, K.anim_id])
-	ok("LMB: one bolt every 0.72s, no magazine to speak of",
-			is_equal_approx(float(P.wpn["rate"]), 0.72) and int(P.wpn["mag"]) >= 99)
+	ok("LMB: one bolt every 0.648s (item 116), no magazine to speak of",
+			is_equal_approx(float(P.wpn["rate"]), 0.648) and int(P.wpn["mag"]) >= 99)
 	# 2. Static: a weapon hit is 1, the marker shows the count; the 4th is Live
 	ac.fresh(T)
 	T.teleport(home + Vector3(5, 0, 0))
@@ -414,7 +414,7 @@ func _mage() -> void:
 	P.ak.use_e()
 	ok("dash table: E is cast mid-dash (not dropped)", not K.strikes.is_empty())
 	ok("dash table: the tapped bolt does not fire inside the dash", P.shot_n == n_di and P.roll_t > 0.0)
-	ac.step(m, 0.9)
+	ac.step(m, 0.5)      # (under one interval: a check's key stays down, Match reads the real one every frame)
 	ok("dash table: the bolt tapped inside the dash goes off when it ends", P.shot_n == n_di + 1, "%d -> %d" % [n_di, P.shot_n])
 	P.inp["fire"] = false       # DashFlow's replayed tap leaves the key down in this harness (a real frame rewrites it)
 	var n_di2 := P.shot_n

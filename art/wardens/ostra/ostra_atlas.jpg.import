@@ -2,7 +2,7 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cbdlssfi6pfnm"
+uid="uid://dc502k0h3gnk3"
 path.bptc="res://.godot/imported/ostra_atlas.jpg-308d9a5785fcf65cd41837bc0cc91607.bptc.ctex"
 path.astc="res://.godot/imported/ostra_atlas.jpg-308d9a5785fcf65cd41837bc0cc91607.astc.ctex"
 metadata={
@@ -10,7 +10,7 @@ metadata={
 "vram_texture": true
 }
 generator_parameters={
-"md5": "77961002e871583bae2c684695da687a"
+"md5": "f37a693a8063bc723eca65fb38801ba5"
 }
 
 [deps]
@@ -41,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=2048
-detect_3d/compress_to=0
+process/size_limit=0
+detect_3d/compress_to=1

@@ -35,31 +35,32 @@ const BONES := {
 	"wings": "Rig/Torso/Wings",
 }
 const OPTIONAL := ["cape", "scarf", "tail", "wings"]
+const LEG_BONES := ["thigh.L", "shin.L", "thigh.R", "shin.R"]
 ## A Warden's variant of the contract (RIG_CONTRACT "Variant bones"): its own extra bones -> their parents. A .glb of
 ## that Warden must carry them (WardenSkeleton.mismatches); they are skinned like the rest and follow their parent
 ## bone, and the Warden's kit poses them on top of that (pose_extra): Dredge's grab-claw fingers, the eye, the winch
 ## drum, the rope and cargo hook that hang from it, and the tar pool at his feet.
 const EXTRA := {
-	"dredge": {"eye": "head", "claw1.L": "hand.L", "claw1_tip.L": "claw1.L", "claw2.L": "hand.L",
-		"claw2_tip.L": "claw2.L", "claw3.L": "hand.L", "claw3_tip.L": "claw3.L", "winch": "hips", "rope1": "hips",
-		"rope2": "rope1", "hook": "rope2", "pool": "root"},
 }
 ## Procedural pieces that stay when the .glb dresses the hunter (the contract's "nodes the game keeps").
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
 ## "brass" is metal split off by its colour, so a model's look can lift it alone at the match camera (Vex r3f).
 const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "brass": 3, "fur": 5, "eyes": 0,
-	"team": 1, "glow": 0, "void": 0, "card": 0, "ice": 1}
+	"team": 1, "glow": 0, "void": 0, "card": 0, "ice": 1, "flame": 0}
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
 const GUM_TAG := "gum"         # a bubble drawn with the gloss pass (gum_gloss.gdshader) instead of an ink shell
-const NO_INK := ["hair", "eyes", "glow", "card"]   # slots drawn without the ink outline shell
+const NO_INK := ["hair", "eyes", "glow", "card", "flame"]   # slots drawn without the ink outline shell
 ## The `void` slot is no lit surface but a window onto the Void (shaders/hero_void.gdshader: a drifting
 ## starfield over its painted colour, Ostra's coat tears); "<void>-<tag>" with a SOFT_TAGS tag also fades
 ## out toward its tip and edges (a body that dissolves into smoke: Ostra's wisp).
 const VOID := preload("res://shaders/hero_void.gdshader")
 const SOFT_TAGS := ["wisp"]
+## The `flame` slot: strips of living fire (shaders/hero_flame.gdshader), "flame-<tag>"; warden_look's "slots"
+## "flame-<tag>" sets its shader parameters. "flame-liquid" is a tank's bubbling fuel behind glass.
+const FLAME: Shader = preload("res://shaders/hero_flame.gdshader")
 ## The "card" slot: see-through alpha cards (wings) on their own shader, both sides drawn, no ink.
 const CARD: Shader = preload("res://shaders/warden_card.gdshader")
 ## Pieces built as clean geometry (tools/meshy/warden_parts.py), "<slot>-<tag>": they take the ink line even on
@@ -95,16 +96,23 @@ const ANCHORS := ["anchor_head_top", "anchor_chest"]
 ## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model (or a design
 ## variant's name, art()).
 const SETTING := "warden_models"
+const FAR_HIDE_D := 13.0        # m from the camera: "far_hide" pieces stop being drawn
+const ORBIT_LOOK := "orbit_look"   # root meta, a world point: the seeing-stones turn to it (DolmKit)
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
 const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
 const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (HunterAnim spins them while firing)
 ## the second weapon of a twin hold (Sable's left crossbow), a child of WEAPON placed so that HunterAnim's twin
 ## hold hands it to the left hand (its node x < -0.04: _setup_weapon moves it into the Offhand)
 const WEAPON_OFF := "weapon_offhand"
+const SHIELD_PATH := "Rig/Torso/ArmLPivot/Elbow/Hand/Shield"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
 ## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire);
 ## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide, Sable's flips and Encore).
 const WING_FOLD := "wing_fold"
+const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
+## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's data
+## lists in "hide_while_chain" shrink away (item 76b.4), so one chain shows, never two.
+const CHAIN_OUT := "chain_out"
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
@@ -193,7 +201,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	var scene := _scene(arch)
 	var glb: Node3D = scene.instantiate() as Node3D if scene else null
 	var skel := skeleton(glb)
-	var bad: Array = WardenSkeleton.mismatches(skel, rest, EXTRA.get(arch, {})) if skel else ["no armature"]
+	var bad: Array = WardenSkeleton.mismatches(skel, rest, extra_bones(arch)) if skel else ["no armature"]
 	if not bad.is_empty():
 		push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [path(arch), str(bad)])
 		if glb:
@@ -206,18 +214,32 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	sync.name = "Sync"
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
+	sync.use_clips(glb, art(arch))
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
 	_lights(glb, look(art(arch)))
+	_far_hide(glb, look(art(arch)))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
 	var own := look(art(arch))
 	var off: Array = own.get("weapon_offset", [0.0, 0.0, 0.0])
-	_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]))
+	if bool(WardenClips.data(art(arch)).get("skinned_weapon", false)):
+		_skinned_weapon(root)
+	else:
+		_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]))
 	_hold_shield(root, glb)
+	sync.mood = WardenMood.make(root, glb, skel, art(arch))
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 	_smoke(root, look(art(arch)))
 	_bloom(root, glb, look(art(arch)))
+
+## Small pieces the match camera only sees as speckle (warden_look "far_hide": node names, Tarek's beads and fist
+## shards) are drawn only up to FAR_HIDE_D from the camera; close-ups keep them.
+static func _far_hide(glb: Node3D, own: Dictionary) -> void:
+	for nm in own.get("far_hide", []):
+		for n in glb.find_children(String(nm) + "*", "GeometryInstance3D", true, false):
+			(n as GeometryInstance3D).visibility_range_end = FAR_HIDE_D
+			(n as GeometryInstance3D).visibility_range_end_margin = 1.0
 
 ## A model's wisps of smoke off its held weapon (warden_look.json "smoke": colour [r, g, b, a], amount, life (s),
 ## size (m), rise (m/s); Kael's demon blade): dark soft puffs from along the weapon's length that drift up and
@@ -226,16 +248,21 @@ static func _smoke(root: Node3D, own: Dictionary) -> void:
 	var sm: Dictionary = own.get("smoke", {})
 	var gun := root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 	var weapon := gun.get_node_or_null(WEAPON) as Node3D if gun else null
-	if sm.is_empty() or weapon == null:
+	# (a skinned weapon: "at" names an anchor on it, "box" the half size round that anchor)
+	var at_anchor := anchor(root, String(sm.get("at", ""))) if sm.has("at") else null
+	if sm.is_empty() or (weapon == null and at_anchor == null):
 		return
 	var box := AABB()
 	var meshes: Array = []
 	if weapon is MeshInstance3D:
 		meshes.append(weapon)
-	meshes.append_array(weapon.find_children("*", "MeshInstance3D", true, false))
+	if weapon:
+		meshes.append_array(weapon.find_children("*", "MeshInstance3D", true, false))
 	for mi in meshes:
 		var a := (mi as MeshInstance3D).get_aabb()
 		box = a if box.size == Vector3.ZERO else box.merge(a)
+	if at_anchor:
+		box = AABB(Vector3.ONE * -0.2, Vector3.ONE * 0.4)
 	var p := CPUParticles3D.new()
 	p.name = "Smoke"
 	p.amount = int(sm.get("amount", 16))
@@ -286,7 +313,7 @@ static func _smoke(root: Node3D, own: Dictionary) -> void:
 	q.material = m
 	p.mesh = q
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	weapon.add_child(p)
+	(at_anchor if at_anchor else weapon).add_child(p)
 
 ## A model's soft glow around what burns (warden_look.json "bloom": a list of {at: "weapon" or an anchor name,
 ## color [r, g, b, a], size (m), count (along the weapon's length, from `from` of it), depth_test}): additive
@@ -412,18 +439,47 @@ static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vect
 		mag.name = "Mag"
 		mag.set_meta("glb", true)          # (the .glb's own, not the procedural one: --warden-glb-check)
 
-## The .glb's shield (SHIELD, modelled in the Shield node's space) replaces the procedural one on the left hand.
-static func _hold_shield(root: Node3D, glb: Node3D) -> void:
-	var shield := glb.find_child(SHIELD, true, false) as Node3D
-	var holder := root.get_node_or_null("Rig/Torso/ArmLPivot/Elbow/Hand/Shield") as Node3D
-	if shield == null or holder == null:
+## The rig's procedural prow goes (the .glb draws its own).
+static func _hide_shield(root: Node3D) -> void:
+	var holder := root.get_node_or_null(SHIELD_PATH) as Node3D
+	if holder == null:
 		return
 	for mi in holder.find_children("*", "MeshInstance3D", true, false):
 		(mi as MeshInstance3D).visible = false
+
+## The .glb's shield (SHIELD, modelled in the Shield node's space) replaces the procedural one on the left hand.
+static func _hold_shield(root: Node3D, glb: Node3D) -> void:
+	var shield := glb.find_child(SHIELD, true, false) as Node3D
+	var holder := root.get_node_or_null(SHIELD_PATH) as Node3D
+	if shield == null or holder == null:
+		return
+	_hide_shield(root)
 	shield.get_parent().remove_child(shield)
 	shield.owner = null
 	holder.add_child(shield)
 	shield.transform = Transform3D.IDENTITY
+
+## The part of a skinned weapon that truly leaves the hand (item 76b): a plain copy of the mesh `mesh_name` on its own
+## node, the grip at the origin, -Z toward the head (WEAPON_THROWN's frame), for the kit to fly and plant. The skinned
+## one hides meanwhile (WardenClips "weapon_bone"). null on a procedural model.
+static func thrown_piece(root: Node3D, mesh_name: String) -> Node3D:
+	var w := root.get_node_or_null("Warden")
+	var src := w.find_child(mesh_name, true, false) as MeshInstance3D if w else null
+	var sk := skeleton(w)
+	var frame := w.find_child(WEAPON_THROWN, true, false) as Node3D if w else null
+	if src == null or sk == null or frame == null:
+		return null
+	var at := frame.get_parent() as BoneAttachment3D
+	var base := sk.get_bone_global_rest(WardenSkeleton.find(sk, at.bone_name)) if at else Transform3D.IDENTITY
+	var mi := MeshInstance3D.new()
+	mi.mesh = src.mesh
+	mi.transform = (base * frame.transform).affine_inverse()
+	for si in src.get_surface_override_material_count():
+		mi.set_surface_override_material(si, src.get_surface_override_material(si))
+	var holder := Node3D.new()
+	holder.name = "ThrownPiece"
+	holder.add_child(mi)
+	return holder
 
 ## Poses one of the Warden's variant bones (EXTRA) on its rest, riding its parent: turned by `rot` about its head
 ## (an axis in model space as the model rests: Vector3.RIGHT turns a drum about its side-to-side axle), scaled by `scl`
@@ -469,6 +525,26 @@ static func _scene(arch: String) -> PackedScene:
 		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
 		_scenes[p] = ResourceLoader.load_threaded_get(p) if asked else load(p)
 	return _scenes[p] as PackedScene
+
+## A Warden's variant bones: the code table above, plus its art's data file (content/rules/warden_anim/<art>.json).
+static func extra_bones(arch: String) -> Dictionary:
+	var out: Dictionary = (EXTRA.get(arch, {}) as Dictionary).duplicate()
+	out.merge(WardenClips.data(art(arch)).get("extra_bones", {}), true)
+	return out
+
+## A weapon skinned in the .glb (item 76b): the procedural weapon's meshes go, its Gun node stays as the invisible aim
+## and FX reference, which Sync keeps on the blade you see (Sync.apply_blade).
+static func _skinned_weapon(root: Node3D) -> void:
+	var gun := root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
+	if gun == null:
+		return
+	for mi in gun.find_children("*", "MeshInstance3D", true, false):
+		(mi as MeshInstance3D).visible = false
+		mi.set_meta("glb_hidden", true)
+	var mag := gun.get_node_or_null("Mag") as MeshInstance3D      # (the reload's motion stays, shown or not)
+	if mag:
+		mag.mesh = null
+		mag.visible = false
 
 ## The rig rest of the Warden's model in the neutral look (built once a session).
 static func neutral_rest(arch: String) -> Dictionary:
@@ -631,6 +707,16 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 				(mi as MeshInstance3D).set_surface_override_material(si, vm)
 				out.append(vm)
 				continue
+			if slot == "flame":
+				var fm := ShaderMaterial.new()
+				fm.shader = FLAME
+				fm.set_shader_parameter("liquid", tag == "liquid")
+				var flame_look: Dictionary = (own.get("slots", {}) as Dictionary).get("flame-" + tag, {})
+				for k in flame_look:
+					fm.set_shader_parameter(k, _param(flame_look[k]))
+				(mi as MeshInstance3D).set_surface_override_material(si, fm)
+				out.append(fm)
+				continue
 			var ink := not slot in NO_INK or tag in INK_TAGS      # (a Hunter's "no_ink" tags: _far_look)
 			var m := Models.toon(src.albedo_color if src else Color.WHITE, ink)
 			# (a Meshy model's vertex colour holds the ink room, not baked AO)
@@ -657,6 +743,9 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 				# ("<slot>-<texture>-hot": only the atlas's hot texels glow, keyed per texel: Kael's arm cracks)
 				m.set_shader_parameter("glow_key", hot)
 				_glow_colours(m, arch, tag)
+			if src and src.normal_enabled and src.normal_texture:
+				m.set_shader_parameter("normal_tex", src.normal_texture)
+				m.set_shader_parameter("use_nrm", true)
 			if src and src.emission_enabled and src.emission_texture:
 				m.set_shader_parameter("emit_tex", src.emission_texture)
 				m.set_shader_parameter("use_emit", true)
@@ -701,7 +790,7 @@ static func _glow_colours(m: ShaderMaterial, arch: String, tag: String) -> void:
 	var g: Dictionary = Arch.def(arch).get("model_glow", {}) if arch != "" else {}
 	if g.is_empty():
 		return
-	var core := Color(String(g.get("core", "ffffff")))
+	var core := Color(String(g.get(tag, g.get("core", "ffffff"))))     # (a tag's own: Kael's scarf embers)
 	var edge := Color(String(g.get("edge", g.get("core", "ffffff"))))
 	# (a halo layer, glow-<name>_halo*, keeps its own dimmer painted colour: the bloom's fall-off)
 	if tag.contains("_halo"):
@@ -758,13 +847,50 @@ static func model_xf(root: Node3D, nd: Node3D) -> Transform3D:
 static func retarget(now: Transform3D, link: Array) -> Transform3D:
 	return now * (link[2] as Transform3D) * (link[3] as Transform3D)
 
+## retarget for a leg bone without the shear (warden_anim "legs_rigid": Tarek): the rig's Legs node is scaled by
+## the archetype's leg length on y only (Models.hunter), so a leg swung inside it is sheared, which a thin
+## procedural leg hides but a baggy trouser and a big foot don't. The bone keeps retarget's origin and turns as the
+## rig's leg points; along that line it shortens as the rig's leg does, and its girth stays.
+static func retarget_rigid(now: Transform3D, link: Array) -> Transform3D:
+	var xf := retarget(now, link)
+	var rest := (link[2] as Transform3D).affine_inverse()
+	var d := now.basis.y.normalized()
+	var k := now.basis.y.length() / maxf(rest.basis.y.length(), 1e-6)
+	var turn := _along_y(now.basis) * _along_y(rest.basis).inverse()
+	var stretch := Basis.IDENTITY
+	for i in 3:
+		stretch[i] += d * d[i] * (k - 1.0)      # (I + (k - 1) d d^T: a scale by k along d)
+	xf.basis = stretch * turn * (link[3] as Transform3D).basis
+	return xf
+
+## A basis's rotation keeping its y axis's direction (the leg's line), x then z made square to it.
+static func _along_y(b: Basis) -> Basis:
+	var y := b.y.normalized()
+	var x := (b.x - y * b.x.dot(y)).normalized()
+	return Basis(x, y, x.cross(y))
+
 ## Each frame, after the hunter's animation, puts every mapped bone where its rig node has moved it.
 class Sync extends Node:
 	var root: Node3D
 	var skel: Skeleton3D
 	var links: Array = []       # [bone index, rig node, node rest (model space) inverse, bone rest (skeleton space)]
 	var springs := Springs.new()  # the spring_ bone chains (braids) swinging on top
+	var rigid_legs := {}        # bone index -> true: legs retargeted without the Legs node's shear (retarget_rigid)
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
+	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
+	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
+	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
+	var blade_tip: Node3D
+	var blade_bone := -1
+	var blade_root_bone := -1     # (the bone blade_root rides; data "root_bone", else blade_bone)
+	var gun: Node3D
+	var muzzle: Node3D
+	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
+	var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
+	var mood: WardenMood          # a face on glass and a hanging companion, when the art has them
+	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
+	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
+	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -780,15 +906,140 @@ class Sync extends Node:
 		springs.setup(skel)
 		orbits.setup(skel)      # (the glTF import hangs a node riding a bone on a BoneAttachment3D under it)
 
+	## Plays the Hero's clips when its art has them; and finds a skinned weapon's FX points.
+	func use_clips(glb: Node3D, art_name: String) -> void:
+		var dd := WardenClips.data(art_name)
+		if bool(dd.get("legs_rigid", false)):
+			for b in LEG_BONES:
+				rigid_legs[WardenSkeleton.find(skel, b)] = true
+		var bl: Dictionary = dd.get("blade", {})
+		if not bl.is_empty():
+			blade_root = glb.find_child(String(bl["root"]), true, false) as Node3D
+			blade_tip = glb.find_child(String(bl["tip"]), true, false) as Node3D
+			blade_bone = WardenSkeleton.find(skel, String(bl.get("bone", "hand.R")))
+			# ("root_bone": the root empty rides another bone than the tip: Vex's barrels on the arm)
+			blade_root_bone = WardenSkeleton.find(skel, String(bl.get("root_bone", bl.get("bone", "hand.R"))))
+			gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
+			muzzle = gun.get_node_or_null("Muzzle") as Node3D if gun else null
+		for b in dd.get("hide_while_chain", []):
+			hide_out.append(WardenSkeleton.find(skel, String(b)))
+		clips = WardenClips.make(root, glb, skel, art_name)
+		sway = WardenSway.make(root, skel, dd.get("sway", {}))
+		if clips:
+			_look_pose()
+			root.set_meta(WardenClips.DEATH_T, float((dd.get("states", {}) as Dictionary).get("dead_t", 0.0)))
+		if clips and bool(dd.get("rig_root", false)):
+			rig_root = links.filter(func(l): return int(l[0]) == WardenSkeleton.find(skel, "root"))
+		if clips:
+			for sd in ["L", "R"]:
+				var nd := root.get_node_or_null(String(BONES["hand." + sd])) as Node3D
+				var bi := WardenSkeleton.find(skel, "hand." + sd)
+				if nd and bi >= 0:
+					hand_nodes.append([nd, bi])
+
+	## Hunter.equip rebuilds the rig's weapon and prow (a new match, a practice swap): on a skinned weapon those pieces
+	## must stay hidden, so one weapon is drawn in every mode (item 76b.5).
+	func _keep_one_weapon() -> void:
+		if gun == null:
+			return
+		var holder := root.get_node_or_null(SHIELD_PATH)
+		var last := gun.get_child(gun.get_child_count() - 1)
+		var now := [last.get_instance_id(), holder.get_instance_id() if holder else 0]
+		if now != built:
+			built = now
+			WardenGlb._skinned_weapon(root)
+			WardenGlb._hide_shield(root)
+
 	func _process(dt: float) -> void:
-		apply()
+		_keep_one_weapon()
+		if clips:
+			_play(dt)
+			springs.still = clips.cur in clips.d.get("still", [])
+		else:
+			apply()
+			apply_blade()
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
+		apply_blade()       # (again: a weapon that hangs on a chain, Pip's lantern, moved with the springs)
+		orbits.look = root.get_meta(ORBIT_LOOK, Vector3.INF)
 		orbits.step(dt)
+		if mood:
+			mood.step(dt)
+		if sway:
+			sway.tumble(dt, orbits.pivots)
+		if bool(root.get_meta(CHAIN_OUT, false)):
+			for bi in hide_out:
+				skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
 
 	func apply() -> void:
 		for l in links:
+			skel.set_bone_global_pose(int(l[0]), _rig_pose(l))
+
+	func _rig_pose(l: Array) -> Transform3D:
+		var now := WardenGlb.model_xf(root, l[1])
+		return WardenGlb.retarget_rigid(now, l) if rigid_legs.has(int(l[0])) else WardenGlb.retarget(now, l)
+
+	## The player's MantleLook sliders under the clips: each contract bone's offset and scale for this look, against the
+	## neutral rig the clips were keyed on. The clips key rotations; these stay on the bones (WardenClips strips the
+	## position and scale tracks of the contract bones, the root's position aside).
+	func _look_pose() -> void:
+		var now: Dictionary = root.get_meta("rig_rest", {})
+		var glob := {}
+		for b in BONES:
+			var bi := WardenSkeleton.find(skel, b)
+			for l in links:
+				if int(l[0]) == bi and now.has(b):
+					glob[bi] = WardenGlb.retarget(now[b] as Transform3D, l)
+		for bi in glob:
+			var par := skel.get_bone_parent(int(bi))
+			if par < 0 or not glob.has(par):
+				continue
+			var local: Transform3D = (glob[par] as Transform3D).affine_inverse() * (glob[bi] as Transform3D)
+			look_pose.append([int(bi), local.origin, local.basis.get_scale()])
+
+	## The clips' pose, mixed with the retargeted rig while a state hands over (clips.proc_w), then the rig's hands and
+	## the Gun laid on what is shown, so kit FX leave the bodies you see.
+	func _play(dt: float) -> void:
+		for o in look_pose:
+			skel.set_bone_pose_position(int(o[0]), o[1])
+			skel.set_bone_pose_scale(int(o[0]), o[2])
+		clips.step(dt)
+		var w := clips.proc_w
+		if w >= 1.0:
+			apply()
+		elif w > 0.0:
+			var poses: Array = []
+			for l in links:
+				poses.append(skel.get_bone_global_pose(int(l[0])))
+			for i in links.size():
+				var l: Array = links[i]
+				var pose: Transform3D = poses[i]
+				skel.set_bone_global_pose(int(l[0]), pose.interpolate_with(
+						_rig_pose(l), w))
+		for l in rig_root:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
+		if sway:
+			sway.step(dt)
+		if w < 1.0:
+			var inv := skel.global_transform
+			for h in hand_nodes:
+				(h[0] as Node3D).global_position = inv * skel.get_bone_global_pose(int(h[1])).origin
+		apply_blade()
+
+	## The Gun on the skinned blade: its origin at the blade's root, -Z along the blade, the Muzzle on the tip.
+	func apply_blade() -> void:
+		if blade_tip == null or blade_root == null or gun == null or not gun.is_inside_tree():
+			return
+		# (from the bone, not the attachment nodes: those update after the skeleton does, a frame late)
+		var hand := skel.global_transform * skel.get_bone_global_pose(blade_bone)
+		var a := skel.global_transform * skel.get_bone_global_pose(blade_root_bone) * blade_root.position
+		var b := hand * blade_tip.position
+		if a.distance_squared_to(b) < 0.000000000001:
+			return
+		var up := Vector3.UP if absf((b - a).normalized().y) < 0.95 else Vector3.RIGHT
+		gun.global_transform = Transform3D(Basis.looking_at(b - a, up), a)
+		if muzzle:
+			muzzle.global_position = b
 
 ## Hanging pieces on bone chains (RIG_CONTRACT "Spring chains"): bones named spring_<name>_<i>, each the next
 ## one's parent, the first a child of a contract bone (a braid hangs from the head). Each chain is a rope of its
@@ -801,12 +1052,18 @@ class Springs:
 	const PULL := 0.2           # the share of the way back to the rest shape per 1/60 s, at the root
 	const PULL_TIP := 0.07      # and at the tip
 	const DAMP := 0.84          # the velocity kept per 1/60 s
+	const WIND := 0.09          # m: how far a scarf tail's tip ripples at rest
+	const FLOOR_CHAIN := PREFIX + "scarftail_tail"     # a tail lies on the ground, not through it (the feet's height)
+	const FLOOR_UP := 0.04      # m its joints stay over the model's origin
 	const FOLD := 0.75          # radians a folded wing tips back about the side axis through its root
 	const TUCK := 0.8           # and turns in behind the back about the vertical
 	const FLARE := 1.15         # radians a flared wing swings out to her side about the front-back axis
 	var skel: Skeleton3D
 	var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}
 	var fold := 0.0             # how far the wing chains are folded (1) or flared (-1) (WING_FOLD)
+	var wind_t := 0.0
+	var calm := false           # no ripple (a check measuring how a chain settles)
+	var still := false          # no ripple: a statue pose (data "still": Claire's Rimelock)
 
 	func setup(skeleton: Skeleton3D) -> void:
 		skel = skeleton
@@ -828,7 +1085,9 @@ class Springs:
 				# a "wing" chain folds back while the Warden skates, WING_FOLD)
 				chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array(),
 					"hang": skel.get_bone_name(bi).begins_with(PREFIX + "hang"),
-					"wing": skel.get_bone_name(bi).begins_with(PREFIX + "wing")})
+					"wing": skel.get_bone_name(bi).begins_with(PREFIX + "wing"),
+					"wind": skel.get_bone_name(bi).begins_with(PREFIX + "scarftail"),
+					"floor": skel.get_bone_name(bi).begins_with(FLOOR_CHAIN)})
 
 	func _spring(bi: int) -> bool:
 		return skel.get_bone_name(bi).begins_with(PREFIX)
@@ -839,6 +1098,7 @@ class Springs:
 		var xf := skel.global_transform
 		var inv := xf.affine_inverse()
 		var k := clampf(dt * 60.0, 0.0, 3.0)
+		wind_t += dt
 		for ch in chains:
 			var ids: Array = ch["ids"]
 			var par := skel.get_bone_parent(int(ids[0]))
@@ -865,6 +1125,12 @@ class Springs:
 				rest.append(r)
 				want.append(xf * r.origin)
 			var n := want.size()
+			if ch["wind"] and not calm and not still:
+				# (a long cloth tail never hangs dead: a slow travelling ripple, stronger toward its tip)
+				for i in range(1, n):
+					var u := float(i) / float(n - 1)
+					var ripple := Vector3(sin(wind_t * 1.9 - i * 0.7), 0.35 * sin(wind_t * 1.3 - i * 0.9), 0.0)
+					want[i] += xf.basis * ripple * WIND * u * u
 			if ch["hang"]:
 				for i in range(1, n):
 					var seg := (xf * (rest[i] as Transform3D).origin).distance_to(
@@ -881,6 +1147,8 @@ class Springs:
 				prev[i] = p
 				p += v
 				var pull := lerpf(PULL, PULL_TIP, float(i) / float(n - 1))
+				if bool(ch["wing"]) and fold < -0.3:
+					pull = lerpf(pull, 1.0, 0.85)      # (flared through a flip: the wing turns with her, no twist)
 				pts[i] = p.lerp(want[i], 1.0 - pow(1.0 - pull, k))
 			pts[0] = want[0]
 			prev[0] = want[0]
@@ -888,6 +1156,8 @@ class Springs:
 				var d := pts[i] - pts[i - 1]
 				var ln := want[i].distance_to(want[i - 1])
 				pts[i] = pts[i - 1] + d.normalized() * ln if d.length() > 1e-5 else want[i]
+				if ch["floor"]:
+					pts[i].y = maxf(pts[i].y, xf.origin.y + FLOOR_UP)
 			ch["pts"] = pts
 			ch["prev"] = prev
 			for j in n - 1:
@@ -908,6 +1178,9 @@ class Orbits:
 	const ORBIT_HZ := 0.12      # turns a second
 	const BOB := 0.025          # m, each prop up and down
 	const BOB_HZ := 0.5
+	const LOOKERS := "orbit_stones"   # the orbit whose props are eyes (Tarek's seeing-stones)
+	const LOOK_RATE := 7.0      # 1/s: how fast they turn to what they watch
+	var look := Vector3.INF     # world point they watch (ORBIT_LOOK), INF for none
 	var pivots: Array = []      # [node, its rest transform, [prop, its rest position]...]
 	var t := 0.0
 
@@ -919,7 +1192,7 @@ class Orbits:
 			var props: Array = []
 			for ch in nd.get_children():
 				if ch is Node3D:
-					props.append([ch, (ch as Node3D).position])
+					props.append([ch, (ch as Node3D).position, (ch as Node3D).quaternion])
 			pivots.append([nd, nd.transform, props])
 
 	func step(dt: float) -> void:
@@ -932,3 +1205,13 @@ class Orbits:
 			for i in props.size():
 				var pr: Node3D = props[i][0]
 				pr.position = (props[i][1] as Vector3) + Vector3.UP * BOB * sin(TAU * BOB_HZ * t + i * 2.1)
+				if nd.name == LOOKERS and pr.is_inside_tree():
+					_face(pr, props[i][2], dt)
+
+	## A seeing-stone's eye (-Z on the prop) turns toward what the kit is watching, then back to looking outward.
+	func _face(pr: Node3D, rest: Quaternion, dt: float) -> void:
+		var want := rest
+		if look.is_finite() and pr.global_position.distance_squared_to(look) > 0.01:
+			var to := Basis.looking_at(look - pr.global_position, Vector3.UP).get_rotation_quaternion()
+			want = (pr.get_parent() as Node3D).global_basis.get_rotation_quaternion().inverse() * to
+		pr.quaternion = pr.quaternion.slerp(want, 1.0 - exp(-LOOK_RATE * dt))

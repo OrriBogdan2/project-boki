@@ -2,7 +2,7 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bdndaaxhey3xu"
+uid="uid://c68yyevfvxc7k"
 path.bptc="res://.godot/imported/claire_atlas.jpg-ad3522b5ce69ae870af0e89cd1e2fd83.bptc.ctex"
 path.astc="res://.godot/imported/claire_atlas.jpg-ad3522b5ce69ae870af0e89cd1e2fd83.astc.ctex"
 metadata={
@@ -10,7 +10,7 @@ metadata={
 "vram_texture": true
 }
 generator_parameters={
-"md5": "ddb732a396ab305ee54ea2c9e423083b"
+"md5": "00e0993b7216911ec05eb76ec226f110"
 }
 
 [deps]
@@ -42,4 +42,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=2048
-detect_3d/compress_to=0
+detect_3d/compress_to=1

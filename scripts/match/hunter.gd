@@ -35,8 +35,8 @@ const GLIDE_ENGAGE := 0.1        # hold Space this long in the air before the gl
 const ABYSS_LIFT := 22.0         # [est] upward pull (m/s^2) just under the lip...
 const ABYSS_LIFT_PER_M := 7.0    # [est] ...plus this per metre deeper (10m down: 92 m/s^2)
 const ABYSS_LIFT_MAX := 5.0      # [est] fastest climb just under the lip...
-const ABYSS_LIFT_MAX_PER_M := 1.7  # [est] ...plus this per metre deeper (12m down: ~25 m/s)
-const ABYSS_LIFT_CAP := 26.0
+const ABYSS_LIFT_MAX_PER_M := 1.1  # [est] ...plus this per metre deeper (12m down: ~18 m/s; item 63: ~30% under the old ~25)
+const ABYSS_LIFT_CAP := 18.2     # item 63: the deepest climb is 30% softer than the old 26
 const ABYSS_BRAKE_DIST := 2.5    # ...that brakes near ground level (let go just before to keep the height)
 const ABYSS_BRAKE := 60.0
 const ABYSS_LIP_VY := 4.5        # [est] m/s still rising as the lift reaches the lip: it bounces up past it
@@ -331,13 +331,13 @@ func reclass(c: String, a: String, w := "") -> void:
 	wid = Arch.weapon_for(arch, cls, w)
 	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Unmasked.mask_look() if ctrl == "local" else bot_look, arch))
 	anim = null
-	equip(wid)
+	equip(wid, -1, false)      # (Models.hunter just built this weapon, a 3D Warden's own model included)
 	dashes = max_dashes(); ex_cd = 0.0
 	roll_t = 0.0; stun_t = 0.0; root_t = 0.0
 
 ## Puts a weapon in hand with this run's weapon upgrades on it (WeaponUps). A hunter has one
 ## signature weapon (Arch.signature), so this is only called to build it, or when practice swaps archetype.
-func equip(w: String, with_ammo := -1) -> void:
+func equip(w: String, with_ammo := -1, rebuild := true) -> void:
 	wid = w
 	wpn = Data.weapon_stats(w)
 	WeaponUps.apply(self)
@@ -345,7 +345,7 @@ func equip(w: String, with_ammo := -1) -> void:
 	wbloom = 0.0; warm_t = 0.0; spin = 0.0; spun_t = 0.0; sus_n = 0; mel_hold = 0.0; strike_at_end = {}
 	ammo = int(wpn["mag"]) if with_ammo < 0 else mini(with_ammo, int(wpn["mag"])); reload_t = 0.0; fire_cd = 0.25
 	if ammo <= 0 and not remote: start_reload()
-	var gun: Node3D = model.find_child("Gun", true, false) if model else null
+	var gun: Node3D = model.find_child("Gun", true, false) if model and rebuild else null
 	if gun:
 		for ch in gun.get_children():
 			if ch.name != "Muzzle":
@@ -920,7 +920,7 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float
 
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and glide_fuel > FEATHER_MIN and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down
+		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down
 
 func _open_glider() -> void:
 	gliding = true
@@ -1067,7 +1067,7 @@ func _tick_base(dt: float) -> void:
 		cancel_base("your teammate can't take you")
 		return
 	var mv: Vector2 = inp.get("move", Vector2.ZERO)
-	if mv.length() > 0.2 or inp.get("fire", false) or inp["dash"] or inp["jump"] or inp["sig"] or inp["sec"] or inp["ult"] or inp.get("gear1", false) or inp.get("throw", false):
+	if mv.length() > 0.2 or inp.get("fire", false) or inp["dash"] or inp["jump"] or inp["sig"] or inp["sec"] or inp["ult"] or inp.get("gear1", false) or inp.get("gear2", false) or inp.get("throw", false):
 		cancel_base("you moved")
 		return
 	base_t -= dt
@@ -1685,6 +1685,7 @@ func _emit_shot() -> void:
 		dmg *= 1.0 - float(wpn["sustain_loss"]) * minf(1.0, float(sus_n) / float(wpn.get("sustain_rounds", 10)))
 	sus_n += 1
 	var extra := {"kb": wpn["kb"], "tracer": float(wpn.get("tracer", 1.0))}
+	extra.merge(wpn.get("shot_x", {}), true)      # a weapon's own shot rules (Tether Lantern: through terrain)
 	if wpn.has("decel"):
 		# slugs slow down and stop at the weapon's range: v^2 = 2 a d
 		extra["decel"] = float(wpn["decel"])
@@ -2083,6 +2084,7 @@ func sim(dt: float) -> void:
 	# inputs
 	KinDowned.commit(self)           # carrying your Boki: Shift or interact puts it down; no jump, glide or firing
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
+	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
 	# gloves need no point: Gloves
 	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
 		_gate(gk[0], gk[1], gk[2])
@@ -2158,7 +2160,8 @@ func sim(dt: float) -> void:
 	var want := atan2(-ad.x, -ad.y)
 	if roll_t > 0.0 and not (ak and ak.aims_in_dash()):
 		want = atan2(-roll_dir.x, -roll_dir.y)
-	face = lerp_angle(face, want, minf(1.0, dt * 20.0))
+	if not (ak and ak.face_locked()):
+		face = lerp_angle(face, want, minf(1.0, dt * 20.0))
 
 func pad_launch(to: Vector3) -> void:
 	var d := Vector2(to.x - pos.x, to.z - pos.z).length()
@@ -2329,7 +2332,7 @@ func _physics(dt: float) -> void:
 	elif MergeKit.rising(self):
 		vel.y = MergeKit.rise_vy(self)      # the ultimate's climb (Thunderhead)
 	elif roll_t > 0.0 and not grounded and not dropping:
-		vel.y = 0.0          # a dash in the air holds your height for its length
+		vel.y = ak.dash_vy(dt) if ak else 0.0          # an air dash holds your height (a skate sinks)
 	elif not grounded:
 		vel.y = maxf(vel.y - H_GRAV * dt, -HunterMove.fall_cap(self))
 	# a person walks straight off an island's edge and falls (then the glider and the abyss rules
@@ -2637,7 +2640,7 @@ func _update_glide(dt: float) -> void:
 			hurt(20.0, null, {"src": "heat"})
 	# an overheated glider stays open (slow and sinking) until you land or get hit again
 	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and (glide_fuel > 0.0 or gliding) and pad.is_empty() and not shot_down
+		and m.time - kb_t > 0.4 and pad.is_empty() and not shot_down
 	var want: bool = inp.get("glide", false) or auto_glide
 	if gliding and not _handoff.is_empty() and want and can:
 		_take_glide_handoff()       # (movefeel) a burst that ended with the glider still open
@@ -2646,8 +2649,6 @@ func _update_glide(dt: float) -> void:
 			gliding = false
 			glide_off_t = 0.0 if want == false and can else 9.0     # (feathering) a let-go, not a knock
 			_glider_sfx("close")
-			if glide_fuel <= 0.0:
-				glide_cd = 0.5
 		elif not in_current:
 			# heat builds faster while the glider is lifting you out of the abyss
 			# [footage] ~1s of lift burns a quarter; (feathering) a short tap's impulse costs less
@@ -2657,7 +2658,7 @@ func _update_glide(dt: float) -> void:
 			glide_fuel = maxf(0.0, glide_fuel - dt * hk / (glide_max * (1.0 + gear_stat("heat"))))
 		if not dropping:
 			stats["glide_t"] = float(stats.get("glide_t", 0.0)) + dt
-	elif want and can and air_t >= (0.0 if inp.get("glide_btn", false) else GLIDE_ENGAGE) and glide_fuel > FEATHER_MIN and not gliding:
+	elif want and can and air_t >= (0.0 if inp.get("glide_btn", false) else GLIDE_ENGAGE) and not gliding:
 		# hold Space in the air and the glider opens a beat after you leave the ground (the glide
 		# button opens it at once: there's no tap-to-jump to tell apart)
 		gliding = true
@@ -3190,6 +3191,8 @@ func _anim_state(stretch: float) -> void:
 	s["dash_kind"] = _dash_anim_kind()
 	s["crouch"] = crouch_k
 	s["downed"] = downed
+	s["dead"] = out
+	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["ledge"] = grap.size() > 0
 	var mk := -1.0
 	if pad.has("face"):
@@ -3212,6 +3215,7 @@ func _anim_state(stretch: float) -> void:
 	if ak and ak.anim_id != "":
 		s["kmove"] = ak.anim_id                # the kit's own full-body move (HunterAnim.KMOVES)
 		s["kmove_t"] = m.time - ak.anim_at
+	if ak and ak.face_locked(): s["statue"] = true       # frozen: no idle sway, glance or fidget
 	MergeKit.anim_state(self, s)
 	KinDowned.anim_state(self, s)
 	s["hit_t"] = m.time - hurt_at
@@ -3239,6 +3243,8 @@ func _anim_state(stretch: float) -> void:
 		for e in m.truce.shown:
 			if e["h"] == self:
 				em = String(e["id"]); et = float(e["t"])
+	s["dead"] = out
+	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["emote"] = em
 	s["emote_t"] = et
 	if not grounded and not gliding and not downed:
@@ -3279,7 +3285,7 @@ func render(delta: float, alpha: float) -> void:
 	if absf(step_vis) > 0.001:
 		position.y += step_vis
 		step_vis = lerpf(step_vis, 0.0, 1.0 - exp(-16.0 * delta))
-	visible = not out and not extracted and not riding and not unseen
+	visible = (not out or WardenClips.dying(self)) and not extracted and not riding and not unseen
 	if not model:
 		return
 	if m.cam: model.basis = m.cam.char_basis(face, model.scale)     # leaned toward the camera (CamRig.char_lean)
@@ -3352,7 +3358,7 @@ func render(delta: float, alpha: float) -> void:
 			if boosted:
 				m.fx.ghost(position, face, Color(0.85, 0.95, 1.0), float(cdat["scale"]))
 	# little puffs of dust while running, and a kick of dust when you turn hard
-	if grounded and spd > 4.0 and not downed:
+	if grounded and spd > 4.0 and not downed and KMovesStone.gait(arch) >= 0.5:      # (no feet, no steps: Motley)
 		step_t -= delta
 		if step_t <= 0.0:
 			step_t = 0.32

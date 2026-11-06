@@ -521,19 +521,16 @@ func _title_card() -> void:
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(col)
-	var big := Label.new(); big.text = "PROJECT BOKI"
-	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	big.add_theme_font_override("font", UI.big); big.add_theme_font_size_override("font_size", 110)
-	big.add_theme_color_override("font_color", Color("f7a03c"))
-	big.add_theme_constant_override("outline_size", 18); big.add_theme_color_override("font_outline_color", Color("2a1530"))
+	# the brand wordmark (art/brand/logo_wordmark.png); no subtitle (OWNER_REVIEW item 156)
+	var big := TextureRect.new()
+	big.texture = load("res://art/brand/logo_wordmark.png")
+	big.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	big.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	big.custom_minimum_size = Vector2(800, 390)
+	big.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(big)
-	var sub := Label.new(); sub.text = "Every hunter's story starts with an egg."
-	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub.add_theme_font_override("font", UI.big); sub.add_theme_font_size_override("font_size", 26)
-	sub.add_theme_color_override("font_color", Color("ffe6c8"))
-	col.add_child(sub)
 	card.modulate.a = 0.0
-	big.pivot_offset = Vector2(400, 60)
+	big.pivot_offset = Vector2(400, 195)
 	var tw := create_tween()
 	tw.tween_property(fade, "color:a", 0.75, 0.6)
 	tw.parallel().tween_property(card, "modulate:a", 1.0, 1.0)

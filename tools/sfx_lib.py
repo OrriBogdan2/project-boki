@@ -14,7 +14,7 @@ tail, reflections, ring, grains, mix, at, sat) and adds:
 
 44.1 kHz mono 16-bit, written to audio/. Original synthesis, no samples.
 """
-import json, os
+import json, os, wave
 import numpy as np
 import sfx_combat as C
 from sfx_combat import (SR, N, T, noise, lpf, hpf, bpf, env, mix, at, sat, kick, click, crack, sub, tail,
@@ -22,7 +22,7 @@ from sfx_combat import (SR, N, T, noise, lpf, hpf, bpf, env, mix, at, sat, kick,
 
 __all__ = ['SR', 'N', 'T', 'noise', 'lpf', 'hpf', 'bpf', 'env', 'mix', 'at', 'sat', 'kick', 'click', 'crack',
            'sub', 'tail', 'reflections', 'ring', 'grains', 'level', 'CATS', 'reseed', 'rng', 'save_cat',
-           'takes_cat', 'shape', 'soft_in', 'voice', 'chime', 'creak', 'fm', 'sweep', 'rattle', 'hiss', 'pad']
+           'takes_cat', 'save_loop', 'shape', 'soft_in', 'voice', 'chime', 'creak', 'fm', 'sweep', 'rattle', 'hiss', 'pad']
 
 # Category loudness (content/rules/sfx_levels.json, the same table --sfx-set-check measures against):
 # RMS in dBFS over the audible part, and the peak ceiling. The game's volume_db at the call site then
@@ -45,6 +45,27 @@ def reseed(seed):
 
 def save_cat(name, x, cat):
     C.save(name, x, rms_db=CATS[cat], peak_db=PEAK_DB)
+
+
+def save_loop(name, x, cat, xfade=0.06):
+    """A seamless loop for Sfx.loop_start (a minigun spin, a charge hum): the last `xfade` seconds are
+    cross-faded into the start, and there is no fade-in or fade-out, so it repeats without a dip or a
+    click. Levelled to its category like save_cat."""
+    x = hpf(np.asarray(x, dtype=float), 30)
+    k = N(xfade)
+    ramp = 0.5 - 0.5 * np.cos(np.pi * np.arange(k) / k)
+    head = x[:k] * ramp + x[-k:] * (1.0 - ramp)
+    x = np.concatenate([head, x[k:-k]])
+    pk = np.max(np.abs(x)) or 1.0
+    act = np.abs(x) > pk * 0.02
+    x = x * (10 ** (CATS[cat] / 20) / (np.sqrt(np.mean(x[act] ** 2)) or 1.0))
+    ceil = 10 ** (PEAK_DB / 20)
+    knee = ceil * 0.6
+    a = np.abs(x)
+    x = np.where(a > knee, np.sign(x) * (knee + (ceil - knee) * np.tanh((a - knee) / (ceil - knee))), x)
+    with wave.open(os.path.join(C.OUT, name + '.wav'), 'wb') as w:
+        w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
+        w.writeframes((np.clip(x, -1, 1) * 32767).astype(np.int16).tobytes())
 
 
 def takes_cat(name, fn, n, cat):
