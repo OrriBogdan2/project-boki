@@ -1163,3 +1163,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - One FAIL: Sable's second dash had a 45 ms frame, with 0 compiles, so not the shader stall; one run, cause unknown. Rerun before chasing it.
 - Only Compatibility on an M5 was tested; Forward+ on a real GPU and a low-end PC are still unmeasured. The cousin's frame rate is still wanted.
 - Correction: S2's two earlier GPU jobs (rc 124) were my error: a stale import after moving the worktree. No hitch number came from them; use the cron's GPU reports on ext/reports.
+
+## 2026-11-06 S2: bug 181 GPU rerun
+- Sable's 45 ms frame didn't repeat: worst 29 ms over three dashes. Kael's first Lunge 27 ms, 0 compiles.
+- New: the run's last four rows failed with 0 frames, so Kael's later moves never started in that run (40 s, against 136 s for the first). Reads as the check's harness, not a dash failure, because a move with 0 frames never began; not diagnosed. Next: read tools/dash_frames.gd's wait for the next cast at real frame rates.
