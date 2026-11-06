@@ -920,7 +920,7 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float
 
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down
+		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down and not (ak != null and ak.no_glide())
 
 func _open_glider() -> void:
 	gliding = true

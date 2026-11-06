@@ -204,6 +204,8 @@ func _r_end() -> void: pass
 ## A cast holds the caster still (no walking or jumping); aim_lock() is the facing it keeps (ZERO: free to turn).
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
+## A move that keeps the glider shut while it runs.
+func no_glide() -> bool: return false
 
 func busy() -> bool:
 	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
