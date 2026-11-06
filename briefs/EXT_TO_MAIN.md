@@ -1975,3 +1975,9 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 ## 2026-11-06 16:10 UTC (physics lane, replaces S1): LANE physics STARTED bc817bb4b
 - Fresh physics/perf session read HANDOFF_S1, DECISIONS, INBOX and AGENTS.md. First STATUS pushed: ext/server-status bc817bb4b.
 - CLAIM: item 185 (bug 181 reopened, Boki effect on dashes) on ext/phys-185-boki-dash from origin/main 7907d9af. Then 149, 150, 151, 162/162b, 163.
+
+## 2026-11-06 (build job a3): READY: ext/boki-species-integ 9c8a6e205, ten Boki species in one merge
+- Replaces merging these one by one: ext/boki-cindle 713f45fe, rimeshrew f9196f2a, zephyrak 01ca882d, pebbit f0223839, cairnback 89259625, wisplet aafc028c, gloamshell aa5f7677, selenfin 620b23db, zapple bebd4d9e, hivara 33b167c5. None left out. On origin/main (with glintmole, starter, newbase).
+- Conflicts were only one-line rows in SPECS, BokiRig.FRAME, SPECIES_LIST, the Fusion registries (BokiFusion.SPECIES, build_fusion MODULES: stormwing and lunar both kept) and the docs; all combined, no side dropped. Rig-check species list split over three lines for the style ratchet.
+- --boki-rig-check 0 failures after every merge and at the end (13 species); --check 0 failures; health --strict OK.
+- Not done here (unchanged from S6): the new designs' kin-data wiring, Fusion parts for pebbit/cairnback, and the Gravadillo/Cairnback `titan` Fusion key clash; no atlases or models were rebuilt.
