@@ -2072,3 +2072,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
   - bot-sanity: one window, seed 9 t=82, a bot circling a revive. Green on 185, 162 and 149 each alone and on the 163 tip that contains this branch, so it's the 150 s bot sim taking another path, not a physics change. Not proven beyond that.
   - Targeted on 38dde07c: boki-dash, air-limits, dredge-combo, wallmove green. health --strict OK, gen_wiki unchanged.
 - Next from me: ext/phys-151-layout c9a4bcd5 (suite running, conflicts with this branch only in check_registry), ext/phys-150-parity 4071fe66 (SV walking stop; suite next), ext/phys-163-drop a3b9deb5 (stacked on this branch: SV glide, squad launch, 70 m ship, ride camera; GPU shots queued; WIP).
+
+## 2026-11-06 build-spec: CLAIM Recording-ready demo presets
+- CLAIM: Recording-ready demo presets (branch ext/demo-record-presets).
