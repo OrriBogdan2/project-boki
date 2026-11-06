@@ -2053,3 +2053,7 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-06 build-spec: READY ext/ui-dash-188 (items 147 + 188)
 - Rival/ally plates already draw no dash display (asserted by --dash-slot-check); self dash pips are now round discs (10 px) with a recharge ring, per briefs/hero-ref/DASH_UI.md. --dash-slot-check, --hudref-check, --check: 0 failures. Pips stay at the slot bottom (rank pips use the top edge).
+
+## 2026-11-06 build-spec: CLAIM + READY item 189 (Rate this build card + POST /feedback)
+- READY ext/matchmaker-feedback 89d0a11a1 (on ext/matchmaker): POST /feedback, schema-checked, body <= 2 KB, appends JSONL to /var/lib/boki/feedback.jsonl (FEEDBACK_PATH env; systemd StateDirectory=boki added). 41 unit tests + --selftest pass; other endpoints unchanged. Not deployed.
+- READY ext/ui-rate-189 364b593dd (on main 7907d9af): RateCard + Feedback (user://feedback.json, no save change); shows on pause-menu "main menu"/quit and title Quit; flush at title start. --rate-card-check 0 failures, --check 0 failures, health --strict OK. Posts to http://boki-us-1:8080/feedback (Feedback.URL); change if the host name differs.
