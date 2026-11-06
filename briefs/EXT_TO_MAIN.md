@@ -1981,3 +1981,12 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - Conflicts were only one-line rows in SPECS, BokiRig.FRAME, SPECIES_LIST, the Fusion registries (BokiFusion.SPECIES, build_fusion MODULES: stormwing and lunar both kept) and the docs; all combined, no side dropped. Rig-check species list split over three lines for the style ratchet.
 - --boki-rig-check 0 failures after every merge and at the end (13 species); --check 0 failures; health --strict OK.
 - Not done here (unchanged from S6): the new designs' kin-data wiring, Fusion parts for pebbit/cairnback, and the Gravadillo/Cairnback `titan` Fusion key clash; no atlases or models were rebuilt.
+
+## 2026-11-06 (build worker): READY `ext/vfx-core-rebased` @ fbfa0fcf, SUPERSEDES `ext/vfx-core` 16f66b8e (which conflicted with main)
+- **Why:** main now carries S2's HeroVfx (Kael, Lisette), so `ext/vfx-core` conflicted in 9 files. This is vfx-core with origin/main 7907d9af merged in, main's newer code kept and vfx-core's additions on top. Merge this one instead; the per-Hero branches (vfx-cinder, -claire, -pip, ...) were cut from the old vfx-core and will need this merged in (conflicts there should be small).
+- **Resolution:**
+  - Shader modes: main's `thread` stays 5, vfx-core's `bolt` is now 6 and `vortex` 7 (hero_vfx.gdshader, MODES/POOL in hero_vfx.gd).
+  - Kept from main: thread/string looks, `arc` shape, `hand` anchors, ribbon `follow`, `prewarm(at)`/`prewarm_end` (replaces vfx-core's `prewarm()`, as S3's note said), HeroSfx footsteps (`step_sound` is gone), Kael and Lisette tests and reel parts.
+  - Kept from vfx-core: bolt, vortex, shard/card/coin/star/drop looks, `bone` anchors, `trail()`, held looks that turn with the aim (skipped for `arc`), `set_data()/heroes()`, `--hero-vfx-gallery`, the generic reel and `tools/vfx_reel/<arch>.gd` dispatch, `HeroVfx.heroes()` audit against `KIT_FILES`, `juice.gd` plays "downed".
+- **Checks** (fresh XDG_DATA_HOME): `--check` 0 failures; `--hero-vfx-check` HEROVFX OK (51 lines, includes the new every-kind, bone, prewarm, aim-turn and trail tests); `--hero-combo-check` 297/0; `--archer-combo-check` 153/0; `health.py --strict` OK. Not run: `--gen_wiki` (no data change), full suite.
+- **`--hitch-check` (jobq, Apple M5):** 0 shader compiles in every phase and no hero_vfx shader among the first-in-view lines, but the run FAILS the 100 ms budget on 3 ride/drop frames (274, 239, 130 ms), caused by kin_aura_xray, hero_void, ld_fx and warden_card first draws, none of them HeroVfx. Not compared against plain main.
