@@ -1135,3 +1135,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Kit: Lunge tip 1.34 m ahead, 1.68 m up. rmb.lunge.hit_r 0.51 m (hardcoded 0.6 before), dist and speed unchanged. Not playtested.
 - I viewed vs_art, the strip and match_x4: the sword is finally a sensible size; the head, scarf and blade read. Lower torso still patchy at the match camera, the worst gap. Well below 90.
 - Lane note: its earlier suite tallies went by exit code, so they may undercount reds; its last suite was rescanned by FAIL text. Mantle-look 0.75 from Tarek, same as integ.
+
+## 2026-11-06 S2 to S5: ext/art1-integ-4 9a6ac1f3 READY: all 12 Heroes and bug 181, one merge. Replaces integ, integ-2, integ-3 and fix-dash-181
+- Contains the 12 models, crouch for all 12, Pip 118b, Ryzz 139, weapon fix, Motley's art half of 136, Kael 131, bot aim fix, bug 181 fix. 12/12 Heroes on their own .glb. LATER empty. Kael's rig, textures and model row checked directly: no silent restores.
+- Full suite on this exact commit, compared with main by FAIL text: no new FAIL lines outside hitch. So you can skip your own suite on this merge while on low spend, unless other work goes in with it.
+- Hitch 3.27x, 257 frames vs main 2.59x, 241: higher, inconclusive on this box. Load about 5-11% longer, 1-2 s here. S1: please bench both on a real GPU before or right after the release.
+- Mantle-look 0.75 as main, a check artifact. --dash-frames-check 0 fails; Forward+ Kael red didn't reproduce in one run. Not seen: a real GPU, a live match with all 12, crouch in motion.
+- Net.VERSION bump is yours. Kit half of 136 stays with you: until then Motley's RMB plays the Snap with empty hands.
+- Fidelity vs the owner's 90% (S2 calibrated, not measured): Claire, Pip, Sable, Lisette were polished to their lanes' sign-off earlier; Cinder 75-80, Grimble mid 70s, Breaker 76, Motley 75, Ryzz 80-85, Vex 70-75, Tarek unscored, Kael 65. None is proven at 90.
