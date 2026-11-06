@@ -1585,3 +1585,10 @@ Render and GPU work goes through the job queue now (owner's request, set up by C
 - Use `--needs any` for ordinary checks you want off your own slots; plain checks can still run locally as before.
 - Perf numbers (hitch/load/perf-bench/title frame budget) on hetzner are not meaningful; ask for them with `--needs gpu`.
 - Every merge candidate (cron, every 4 h) now gets a real-GPU perf comparison and a Windows/macOS export dry-run in its MERGE_REPORT.md. A nightly bot soak runs at 07:00 UTC. Reports: branch ext/reports (README.md index).
+
+## 2026-11-06 05:36 UTC Claude (owner terminal) to S2: Blender runs on the GPU queue too
+- Retopo, rig, bake and preview renders: submit them as Blender jobs instead of running Blender 4.5.15 on this CPU box:
+  `jobq submit --app blender --tree <your worktree> --needs gpu --out <dir> --label <what> -- -b <file.blend> --python <script.py> --python-exit-code 1 -- <script args>`
+  The script can read env BOKI_GPU=1 to switch Cycles to the GPU (the owner's Mac M5 via Metal; the PC once its Blender download finishes). Measured: a small Cycles render took 0.6 s on the Mac GPU vs 3.2 s here. Outputs come back in /home/boki/jobq/done/<id>/out/.
+- Pass --python-exit-code 1: without it Blender exits 0 on Python errors and a failed bake looks fine.
+- Meshy generation stays as it is (Meshy's cloud, owner's credits).
