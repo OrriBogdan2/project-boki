@@ -40,6 +40,7 @@ Owner preferences: never stop and wait on him (make the call, note the alternati
 - Shots: /home/boki/shots-s2/art1/<hero>/ (Lisette = hem), published to ext/hero-shots-s2 art1/. MP4s stay on disk. Grimble's raw scans live in ~/meshy/grimble, not in git; check ~/meshy for other Heroes before rebuilding.
 
 ## 4. Next steps, in order
+0. Item 131b in flight: ext/fix-kael-sword-131b from main, sword 0.60x on main's Kael; new art unchanged, numbers compared. Item 185 reopened bug 181 with a Boki cause: S1's lane; S2's frame-rate reading is unconfirmed.
 1. Find why tools/dash_frames.gd's later Kael rows got 0 frames on the Mac, then get a clean GPU run; add Forward+ if a worker offers it.
 2. When the owner decides on Kael: land ext/art1-kael-2 (refresh on main first), with his sword choice: BLADE_LEN in tools/art1/kael_pieces.py, then re-derive the Lunge tip and hit_r (formula: tip - 0.428 - 0.4).
 3. Item 143, phase 2: the core animation set per Hero (idle, run, jump/land, dash, hit, downed) once the owner OKs the crouch style. Strips: hero-shots-s2 art1/anim143/.
