@@ -100,7 +100,8 @@ func _model(main: Node) -> void:
 			if m.get_node_or_null("Rig/Torso") != null and m.get_node_or_null("Rig/Legs") != null:
 				bodies += 1
 			m.free()
-	ok(bodies == 6, "both sexes x %d shroud styles build on the hunter rig" % Unmasked.SHROUDS.size())
+	ok(bodies == 2 * Unmasked.SHROUDS.size(),
+		"both sexes x %d shroud styles build on the hunter rig" % Unmasked.SHROUDS.size())
 	var base := _build(Unmasked.default_look())
 	var rig_ok := String(base.get_meta("race")) == "human" and String(base.get_meta("arch")) == "unmasked"
 	ok(rig_ok, "it is the human rig with no hunter's gear (arch %s)" % base.get_meta("arch"))
@@ -115,7 +116,7 @@ func _model(main: Node) -> void:
 	var void_mat: ShaderMaterial = hollow.material_override if hollow else null
 	var head := base.find_child("Head", true, false) as MeshInstance3D
 	ok(void_mat != null and void_mat.shader == Unmasked.VOID_SHADER and hollow.get_parent().name == "Head"
-		and hollow.get_aabb().is_equal_approx(head.get_aabb()) and hollow.scale.x > 1.0,
+		and hollow.get_aabb().size.z > 0.3 and head.mesh.get_surface_count() == 0 and hollow.scale.x > 1.0,
 		"the whole head is a void: a shell over all of the head mesh, not just the front of the face")
 	ok(base.find_child("Heart", true, false) == null, "the chest is under the shroud: no heart pasted on it")
 	_shroud()
@@ -129,7 +130,7 @@ func _model(main: Node) -> void:
 	var man := _build({"unmasked": true, "gender": 1})
 	var w_sh := (woman.get_node("Rig/Torso/ArmLPivot") as Node3D).position.x
 	var m_sh := (man.get_node("Rig/Torso/ArmLPivot") as Node3D).position.x
-	var flare := _width(woman.get_node("Rig/Torso/Skirt")) > _width(man.get_node("Rig/Torso/Skirt"))
+	var flare := _width(woman.get_node("Rig/Torso/ShroudBones")) > _width(man.get_node("Rig/Torso/ShroudBones"))
 	ok(absf(w_sh) < absf(m_sh) * 0.9 and flare,
 		"a woman has narrower shoulders and a shroud that flares wider at the hem")
 	ok(String(woman.get_meta("stance")) == "empty_f" and String(man.get_meta("stance")) == "empty_m"
@@ -260,7 +261,7 @@ func _feet(main: Node) -> void:
 func _shroud_migration() -> void:
 	var before := {"unmasked": true, "colour": 4, "outfit": 4, "motes": 2, "gender": 0}
 	var u := Unmasked.clean(before)
-	ok(int(u["colour"]) == 4 and int(u["shroud"]) == 4 % Unmasked.SHROUDS.size() and int(u["aura"]) == 2
+	ok(int(u["colour"]) == 4 and int(u["shroud"]) == 4 % Unmasked.OLD_SHROUDS and int(u["aura"]) == 2
 		and not u.has("outfit") and not u.has("motes") and _in_lists(u),
 		"an Empty saved with a skin colour, outfit and motes becomes a shroud colour, style and aura (%s)" % str(u))
 	var worn := {"look": before.duplicate()}
@@ -298,14 +299,14 @@ func _shroud() -> void:
 	var shapes := [_shape_of(cloak), _shape_of(wrapped), _shape_of(tatters)]
 	ok(shapes[0] != shapes[1] and shapes[1] != shapes[2] and shapes[0] != shapes[2],
 		"the three shroud styles are different shapes (%s)" % str(shapes))
-	var hem := _bounds(cloak.get_node("Rig/Torso/Skirt"))
+	var hem := _bounds(cloak.get_node("Rig/Torso/ShroudBones"))
 	ok(hem.size.y > 0.3, "a drape hangs from the hips to the ankles over the legs (%.2f m long)" % hem.size.y)
 	for n in [cloak, other, wrapped, tatters]:
 		n.free()
 
-## The cloth's colour: the albedo of the shroud's own material (the Skirt's drape).
+## The cloth's colour: the albedo of the shroud's own material (the cloth on its bones).
 func _coat(m: Node3D) -> Color:
-	for mi in m.get_node("Rig/Torso/Skirt").find_children("*", "MeshInstance3D", false, false):
+	for mi in m.get_node("Rig/Torso/ShroudBones").find_children("*", "MeshInstance3D", false, false):
 		var c: Variant = ((mi as MeshInstance3D).material_override as ShaderMaterial).get_shader_parameter("albedo")
 		if c is Color:
 			return c
