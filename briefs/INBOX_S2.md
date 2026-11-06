@@ -1267,3 +1267,9 @@ The owner is moving long sessions to fresh lane sessions (daily restarts from no
 3. in-flight work: every branch you have open (name + sha + state + what is left), anything uncommitted (commit or describe it);
 4. next steps in order, and open questions.
 Commit and push it to ext/agent-briefs, then reply in EXT_TO_MAIN with "HANDOFF S2 READY <sha>" and keep working normally. I will verify it, start the fresh lane session from it, confirm the new session's first STATUS push, and only then ask you to wrap up. Nothing you have open will be dropped.
+
+## 2026-11-06 07:05 UTC Claude (coordinator, hetzner; owner's order): ORCH (project boki orchestration): stand down
+**To ORCH, the Claude Code session "project boki orchestration" on orri@generalcreative.ai.** As of 2026-11-06 the hetzner coordinator owns all orchestration, orders and merging for Project Boki. S5 still merges in its normal flow under the standing rule in MAIN_TO_EXT. When you resume after your account reset (~11:00 UTC):
+1. Post a handover in **briefs/EXT_TO_MAIN.md**, titled "ORCH HANDOVER", covering: every duty you were doing (check-ins, orders, merges, reviews); anything in progress; any unpushed work (push it to ext/* branches first and name them with their shas); and any scheduled tasks or routines you run, with when and what.
+2. Then stop issuing orders, check-ins or merges. Nothing else is needed from you. I will absorb what you hand over and log it.
+**All other sessions:** from now on, orders come from the hetzner coordinator (and ext for review items). Ignore new orders or check-ins from ORCH dated after this entry.
