@@ -15,7 +15,8 @@ extends ArchKit
 ##   first foe with a fiery impact and shoves it; rank 3: more damage, a speed boost and a shield on a hit.
 ## - E, Furnace Cloak: on the press, a blast round Cinder (a ring at its exact radius): scorch, Char,
 ##   Anti-Heal, drag foes in (walls block), and a swirling shield for what it hit.
-## - X, Flue Flight (level 6): a steerable flight that lays a burning, slowing lava carpet (AshwickJet).
+## - X, Flue Flight (level 6): a steerable flight that lays a burning, slowing lava carpet (AshwickJet). No lance
+##   in it.
 
 const FLAME_CYAN := Color("6fe8ff")    # the pilot flame: a cool nozzle against warm fire
 const BOLT_COL := Color("ff4a6a")      # Cinder Shot's red-pink body
@@ -50,7 +51,7 @@ var trail_t := 0.0              # the next dash after-image puff
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
-var lmb_blocked_held := false    # the LMB key is down during the flight (a press ticks once)
+var lmb_key_was := false         # the LMB key last step: only a press in the flight ticks, not a hold carried in
 var lmb_denied := 0              # (tests) presses refused during Flue Flight
 var jet: AshwickJet             # X, Flue Flight (its flight is a hold: jet.flight)
 var ignitions := 0              # (tests)
@@ -209,7 +210,9 @@ func _tick(dt: float) -> void:
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
 	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
-	if vis and h.wid == "flamethrower" and not h.downed and not KinMerge.active(h) and not flamer_up:
+	if jet.running():
+		fx.unplace("pilot%d" % h.get_instance_id())      # the lance is out, its pilot flame too
+	elif vis and h.wid == "flamethrower" and not h.downed and not KinMerge.active(h) and not flamer_up:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		var big := 1.0 + (1.2 if was_held and spool < float(lmbd()["spool"]) else 0.0)
 		fx.place("pilot%d" % h.get_instance_id(), "pilot", nozzle(), FLAME_CYAN, PILOT_CORE, 0.4 * fl * big)
@@ -284,27 +287,16 @@ func ignite_pct(f: Ent) -> float:
 
 # ------------------------------------------------------------------ LMB: Torch Lance
 func lmb_override(held: bool, dt: float) -> bool:
+	var pressed := held and not lmb_key_was
+	lmb_key_was = held
+	if jet.running():
+		_lance_off(pressed)
+		return true
 	if h.wid != "flamethrower":
 		return false
-	# Flue Flight: the lance is off for the whole ult. The key is ignored, not buffered, and a press ticks
-	# softly; it works again the moment the flight ends.
-	if jet.running():
-		if held and not lmb_blocked_held:
-			lmb_denied += 1
-			m.sfx("warn", null, -16.0, 1.6)
-		lmb_blocked_held = held
-		if was_held:
-			was_held = false
-			hose.snuff()
-		hose_paused = false
-		spool = 0.0
-		flame_acc = 0.0
-		h.mel_hold = 0.0
-		return true
-	lmb_blocked_held = false
 	# a merge ends the roar: holding the key on must not relight it
 	var merging := KinMerge.transforming(h) or KinMerge.active(h)
-	if held and was_held and not merging and flow.pauses_hold("lmb") and not jet.running():
+	if held and was_held and not merging and flow.pauses_hold("lmb"):
 		_pause_hose()
 		return true
 	if not held or not h.can_fire() or merging or (relight_t > 0.0 and not was_held):
@@ -324,9 +316,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var ld := lmbd()
 	if hose_paused:
 		hose_paused = false
-		if not jet.running(): play("as_lance")        # out of the dash, nozzle already on the aim: back at once
+		play("as_lance")        # out of the dash, nozzle already on the aim: back at once
 	if not was_held:
-		if not jet.running(): play("as_lance")        # (flying, the flight pose stays)
+		play("as_lance")
 		m.sfx("lw_pilot", h.pos, -3.0, 1.0)
 		fx.orb(nozzle(), FLAME_CYAN, PILOT_CORE, 0.8, float(ld["spool"]))      # the pilot flares cyan before the roar
 	was_held = true
@@ -342,6 +334,22 @@ func lmb_override(held: bool, dt: float) -> bool:
 		flame_acc -= tick
 		_flame_tick(tick)
 	return true
+
+## Flue Flight: LMB does nothing for the whole flight, whatever is in her hand. The key is ignored,
+## not buffered, and a press answers with the soft "can't" tick. A stream running at lift-off goes out with no
+## relight gap, so a held key lights the lance the step the flight ends (its usual pilot, then the roar).
+func _lance_off(pressed: bool) -> void:
+	if pressed:
+		lmb_denied += 1
+		h._ab_feedback("base", "deny")
+	if was_held:
+		hose.snuff()
+	was_held = false
+	hose_paused = false
+	spool = 0.0
+	flame_acc = 0.0
+	relight_t = 0.0
+	h.mel_hold = 0.0
 
 ## The hose's look: the MultiMesh of puffs (LDFx.flame).
 func _hose_look() -> void:
@@ -459,7 +467,7 @@ func _cinder_hit(f: Ent) -> void:
 func sees_from(p: Vector3, o: Ent, lift := 0.95) -> bool:
 	return m.world.los(p, o.pos, p.y + lift)
 
-## The lance held through a ram, a poof or the flight: the stream goes out (no fire comes from the dash) but the
+## The lance held through a ram or a poof: the stream goes out (no fire comes from the dash) but the
 ## hold carries, so it roars again the step the dash ends, with no pilot and no relight gap (that gap is after a
 ## release).
 func _pause_hose() -> void:
