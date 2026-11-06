@@ -1,0 +1,29 @@
+{
+	"doc": "Cinder's hand-keyed clips (art/wardens/cinder/cinder.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Times are the kit's (kmoves_pair.gd).",
+	"skinned_weapon": true,
+	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "fin.L": "head", "fin.R": "head", "jaw": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R", "jet.0": "hips", "jet.1": "hips"},
+	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
+	"loco": {
+		"idle": "idle", "stance": "stance", "stance_after": 6.0,
+		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
+		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
+		"walk_speed": 2.2, "run_speed": 4.6
+	},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
+	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "hop"},
+	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
+	"kmoves": {
+		"as_lance": {"clip": "lance", "hold_from": 0.34, "upper": "moving"},
+		"lw_stoke_lance": {"clip": "lance_stoke", "hold_from": 0.5, "upper": "moving"},
+		"as_lance_end": {"clip": "lance_end", "upper": "moving"},
+		"as_aim": {"clip": "aim", "hold_from": 0.12, "upper": "moving"}, "as_shot": {"clip": "shot", "upper": "moving"},
+		"as_leap": {"clip": "leap", "heading": true}, "lw_hop": {"clip": "hop"},
+		"as_cloak": {"clip": "cloak"}, "lw_stoke": {"clip": "stoke", "upper": true},
+		"lw_jet": {"clip": "jet", "hold_from": 0.22}, "lw_land": {"clip": "jet_land"},
+		"lw_jump": {"clip": "jump"},
+		"mf_xform": {"clip": "fusion"}
+	},
+	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
+	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "lid.R", "jaw", "fin.L", "fin.R"]
+}

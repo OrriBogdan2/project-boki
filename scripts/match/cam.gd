@@ -251,6 +251,12 @@ func char_lean() -> Basis:
 func char_basis(face: float, scl: Vector3) -> Basis:
 	return char_lean() * Basis(Vector3.UP, face).scaled_local(scl)
 
+## The mouse's ray into the world: [origin, direction]. A ground-targeted move reads this, not inp["aim"] (that is the
+## ray cut at the shooter's own height, or a foe's: right for shots, far off the ground under the cursor).
+func mouse_ray() -> Array:
+	var mp := get_viewport().get_mouse_position()
+	return [project_ray_origin(mp), project_ray_normal(mp)]
+
 ## Where the mouse points on the horizontal plane at height y.
 func mouse_on_plane(y: float) -> Vector3:
 	var mp := get_viewport().get_mouse_position()

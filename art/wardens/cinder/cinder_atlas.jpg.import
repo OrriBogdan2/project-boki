@@ -2,24 +2,26 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://du86fbnfciqff"
-path="res://.godot/imported/cinder_atlas.jpg-76b09bc7c334aec3f18d12e676876b5b.ctex"
+uid="uid://cxke01iylovx5"
+path.bptc="res://.godot/imported/cinder_atlas.jpg-76b09bc7c334aec3f18d12e676876b5b.bptc.ctex"
+path.astc="res://.godot/imported/cinder_atlas.jpg-76b09bc7c334aec3f18d12e676876b5b.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "e4983237f2e7734f37955397c87fff9d"
+"md5": "ab68db5c2ab403aee7e7e29dc2e8ca14"
 }
 
 [deps]
 
 source_file="res://art/wardens/cinder/cinder_atlas.jpg"
-dest_files=["res://.godot/imported/cinder_atlas.jpg-76b09bc7c334aec3f18d12e676876b5b.ctex"]
+dest_files=["res://.godot/imported/cinder_atlas.jpg-76b09bc7c334aec3f18d12e676876b5b.bptc.ctex", "res://.godot/imported/cinder_atlas.jpg-76b09bc7c334aec3f18d12e676876b5b.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -40,4 +42,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

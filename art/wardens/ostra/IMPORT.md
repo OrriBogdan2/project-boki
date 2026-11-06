@@ -1,41 +1,22 @@
-# Ostra: import note (stage 2, 2026-11-04)
+# Ostra (Motley, the Void Jester): import note (ART-1, 2026-11-05)
 
-`ostra.glb` is stage 1 of the round-2 Ostra (ext/imagegen docs/art/gen/wardens_r2/ostra_* and OSTRA_KIT.md):
-Meshy generation, the bake, the rig fit. No hand polish yet (stage 2 applies the Vex r3c recipe). Built by script,
-nothing hand-edited in Blender; run log in docs/art/wardens/PIPELINE.md.
+`ostra.glb` is the owner's final design, a cursed jack-in-the-box (briefs/art-refs ostra_FINAL_sheet, motley_turnaround, motley_splash), built by
+script in Blender on the shared armature; id and files stay `ostra`. Under the 15k budget, 6 materials, 36 hand-keyed clips at 30 fps.
 
-    # 9:16 crops of the turnaround, edited: his raised right hand lowered; the crescent halo, the void orb, the
-    # strings, the card shards, the floating shadow and the ground line out (prompts in edit_*/request.json)
-    python3 -I tools/meshy/meshy_task.py create ~/meshy/ostra/runA in/front.png in/side.png in/back.png --texture-refs in/front.png in/side.png in/back.png --enhance off
-    blender -b --factory-startup --python tools/meshy/bake_warden.py -- art/wardens/src/ostra_bake.json
-    godot --headless -- --warden-rig-json --warden=ostra --out=res://art/wardens/src/ostra_rig.json
-    blender -b --factory-startup --python tools/meshy/fit_warden.py -- art/wardens/src/ostra_fit.json
+    blender -b --factory-startup --python tools/art1/ostra_build.py            # ~/art1/motley/ostra.blend (OSTRA_WORK moves it)
+    blender -b ~/art1/motley/ostra.blend --python tools/art1/ostra_anim.py -- all --export art/wardens/ostra/ostra.glb
+    godot --headless --path . --import
 
-- **Body:** meshy-7.1 from three edited views (the 3/4 edit failed), baked 1.1M -> 36k triangles with a 4096 atlas
-  (2048 in the game). Archetype body build 0.65 (his thin shoulders). Meshy ended the body at the coat's hem; its
-  ground is set below the hem (`sole_z`) so the hips land on the rig's and the hem hangs 0.2 m up. The coat below
-  the hips rides the hips bone (no legs to swing it).
-- **Hover:** the rig's own (KMovesStone.hover lifts Rig 0.3 m with a bob; the root bone follows), so he floats
-  with a gap over his shadow and ring as the procedural Ostra does.
-- **Wisp:** a curling tube with three tendrils (`void-wisp`) under the hem on a `spring_wisp_*` chain under the
-  hips: hero_void.gdshader's starfield, soft (fading to its tip and edges). The coat's tears are the `void` slot
-  too (the same starfield, opaque).
-- **Mask (his relic):** split off as its own skinned mesh `Mask` (`leather-mask`) with an emissive layer
-  `ostra_mask_emit.jpg`: the violet mouth, eye pinpoints, tear and crack lit.
-- **Crescent halo:** `glow-halo`, rigid on the head bone behind his head.
-- **Weapon:** an empty `weapon` node: the procedural tether lantern is hidden (not in his art). The strings, card
-  shards and the void orb are VFX/props for the kit, not in the model.
-- Imports: atlases lossless (`compress/mode=0`); `ostra.glb.import`: `generate_lods=false`, `force_disable_compression=true`.
-
-## Stage 2 (the Vex r3c recipe; owner refs ostra_head_sheet, ostra_mask_sheet, ostra_cap_halo_sheet, ostra_front_float on
-ext/imagegen fb503983)
-- **Proportions:** archetype body legs 1.8 and size 0.74 (was 0.9): his hips and hem ride higher so the wisp hangs long
-  below the coat, nearly to the ground with a gap over his shadow (ostra_front_float), at the same 1.09x height.
-- **Paint-over:** smooth within the UV islands, then ramps of the art's violets, blacks, the grey ruff and the gloves.
-  The mask keeps Meshy's paint: the art's projection greyed the porcelain (its painted shading).
-- **Halo:** violet (no longer white), larger (0.42 m) behind the head, softer cracks.
-- **Wisp:** 1.3 m along a curl with four tendrils on five spring bones; opaque further down (hero_void fade_from 0.72).
-- **Orb:** a glowing violet orb (`glow-orb`) on the right hand, raised to the shoulder by the stance (`ostra` carry),
-  the left hand open and out to the side, as ostra_front_float draws him.
-- **Look:** content/rules/warden_look.json `ostra`: a violet rim on the coat (fres, fres_color) and the match-camera
-  lift so he reads at match zoom; the mask's emission stronger; the halo's glow lower so it stays violet.
+- **Rig:** `root` is the Rig; the box rides `x_box` under it, with `x_boxlid` (the lid, 0 open as modelled, 1 shut), `x_crank` (his right side only),
+  `x_void` (the void tail goes into the box with him), `x_smoke` (the smoke wound on the spring, scaled to nothing in every still). `hips` sits at the
+  top of the spring: the spring is a blend of x_box and hips, so moving the hips compresses it. Clips key the hips' position and scale (`offset_bones`):
+  a scale of 0.02 with the lid shut is "down in the box" (the arrive, the emote, the death).
+- **Normal map:** `ostra_normal.jpg`, made from the paint's own relief (`ostra_paint.normal_map`): plank gaps, grain, folds, pleats. hero_toon `use_nrm`, `normal_k` per slot in warden_look.json.
+- **Face:** an emissive texture on a dished plane inside the hood (`tools/art1/ostra_mask.py`, to briefs/art-refs/ostra_head.png), tipped up 16 degrees for the match camera; `x_jaw`,
+  `x_brow.*`, `x_cheek.*` bend the grin and slits.
+- **No weapon (item 136):** the void orb is gone. `anchor_orb`, `anchor_hand_r` (right palm), `anchor_hand_l`, `anchor_cards` (left palm), `weapon_muzzle` (right fingertips, an FX
+  point the Gun follows). The fan of cards on `x_fan` is the deck. The flurry's card is `void_card.png`, built by `scripts/heroes/void_card.gd`.
+- **Cards:** `orbit_cards`, `orbit_cardsb` on the hips, tumbled by WardenSway (`sway` in content/rules/warden_anim/ostra.json), some burnt or torn.
+- **Clips:** `tools/art1/ostra_clips.py` (keys), `ostra_pose.py` (hands by target, two-bone IK, fingers, face, box), `ostra_anim.py` (30 fps from frame 0).
+- Imports: `animation/fps=30`, `remove_immutable_tracks=false`, `generate_lods=true`, `force_disable_compression=true`; textures `compress/mode=2`,
+  high quality, mipmaps (S1's budget).

@@ -9,9 +9,9 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 
 | Weapon | Carried by | Weight | Damage | Fire interval | Magazine | Reload | Range | Notes |
 |---|---|---|---|---|---|---|---|---|
-| Arc Bolts | Silver Thief | light | 13 | 0.45s | none | none | 12m | A spinning bolt from alternating hands every 0.45s. It flies to your cursor (12m at most) and fizzles there if it hits nothing. |
+| Arc Shots | Silver Thief | light | 13 | 0.45s | none | none | 12m | A spinning shot from alternating hands every 0.45s. It flies to your cursor (12m at most) and fizzles there if it hits nothing. |
 | Burst Rifle | none | medium | 7 | 0.45s | 27 | 1.5s | 10.5m | Three rounds per pull. Accurate at range. |
-| Coilcaster | Storm Chaser | light | 12 | 0.72s | none | none | 13m | No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range. |
+| Coilcaster | Storm Chaser | light | 12 | 0.648s | none | none | 13m | No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range. |
 | Torch Lance | Mad Pyromancer | heavy | 2.7 | 0.1s | none | none | 7m | Hold to hose fire 7m ahead: the stream trails behind a sweep, narrow at the nozzle and billowing at the end. No fuel: it roars as long as you hold. It builds Char; at full Char the foe goes Ablaze. |
 | Greatsword | The Unbroken | heavy | 11 | 0.5s | none | none | 3.4m | A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far. |
 | Hoar Fan | Frost Siren | light | 4 | 0.18s | none | none | 10m | A folding fan of ice slats. Hold for a barrage of slow ice darts (one every 0.18s) that fly out along your aim and curve in onto the foe nearest your cursor toward the end of their flight: four darts, then three large ones that hit twice as hard, fly faster and reach further, and round again. Eight on one foe Shatter them. While skating they fly as fast, thick beams that home in the same way. |
@@ -22,12 +22,12 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 | Quill Rifle | Hired Gun | medium | 6 | 0.12s | 30 | none | 11m | A long-shrouded auto rifle fed from a 30-round drum that refills fast whenever the trigger rests (no reloading by hand); run it dry and it fires again once the drum is full, about a second later. It fires out to full range. Long strings of fire lose half their punch after ten rounds; Dazed foes take 90% more. |
 | Rifle | none | medium | 6 | 0.13s | 20 | 1.8s | 9.5m | Steady and accurate. Long strings of fire lose some damage, so fire in bursts. |
 | Rubble Fists | Cliff Runner | medium | 9 | 0.6s | none | none | 11m | Tap to hurl a boulder 11m. Hold and let go to punch: it throws foes back, stuns them against a wall and sends rocks flying. |
-| Shotgun | Brass Abomination | heavy | 2 | 0.5s | none | none | 6.3m | Seven slugs in a tight fan that slow and stop at 6.3m, a shot every half second. One slug landing still hurts. Spread grows with each shot and settles when you stop. |
+| Shotgun | Scrap King | heavy | 2 | 0.5s | none | none | 6.3m | Seven slugs in a tight fan that slow and stop at 6.3m, a shot every half second. One slug landing still hurts. Spread grows with each shot and settles when you stop. |
 | SMG | none | light | 4.6 | 0.12s | 22 | 1.4s | 7m | Fast and loose. Spread grows the longer you hold it, and damage drops off at the far end. |
 | Sniper | none | light | 36 | 1.5s | 5 | 2.2s | 16m | Winds up for 0.6s with a laser showing, then hits hard. Weak point-blank, full damage from half range. |
 | Spellstaff | none | medium | 9.5 | 0.55s | 12 | 1.4s | 10m | An orb bolt every 0.45s, 10m. Every 4th bolt hits 50% harder. |
 | Tether Lantern | Void Jester | medium | 9 | 0.6s | none | none | 14m | A quick violet orb every 0.6s, flying its full 14m. Every orb passes through walls. The longer you wait between shots (up to 1.4s) the bigger, brighter, faster and harder the next one; a full orb also slows. |
-| War Hammer & Aegis | Frozen Bulwark | heavy | 11 | 0.55s | none | none | 2.4m | Tap to throw the hammer: it flies to the cursor (up to 9m), passes through foes, stays planted under a gold beacon (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to spin it up into a Crushing Blow (full at 1.25s: 66 damage, a big knock, stun 0.4): a flaming crescent in front that carries you forward. Right click raises the aegis. |
+| War Hammer & Aegis | Sunken Bulwark | heavy | 11 | 0.55s | none | none | 2.4m | Tap to throw the hammer: it flies to the cursor (up to 9m), passes through foes, stays planted under a gold beacon (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to spin it up into a Crushing Blow (full at 1.25s: 66 damage, a big knock, stun 0.4): a flaming crescent in front that carries you forward. Right click raises the aegis. |
 | Twin Blades | none | light | 7 | 0.3s | none | none | 2.3m | Tap for a quick 3-hit combo. Hold 0.5s for a spinning double slash all around you. |
 
 ## Weapon upgrades
@@ -119,5 +119,5 @@ Every player and bot now plays a class, whose kit owns Shift and right click. A 
 | Rifle | Rail Charge | 8s | Hold to charge for up to 1s, let go to fire a rail that pierces everyone in its line: 10 to 34 damage, 9 to 17m, full charge stuns. |
 | SMG | Razor Disc | 7s | Throw a spinning disc 8m that cuts everything it passes, then flies back to you and cuts them again. |
 | Longsword | Riposte | 8s | Raise your blade for 0.7s: shots hitting your front fly back at the shooter (+30%), and a sword or claw that hits it is parried and stunned 1s. |
-| Arc Bolts, Twin Blades | Shadow Step | 8s | Throw a knife 9m. If it hits, you appear behind that foe and your next hits for 1.5s crit. |
+| Arc Shots, Twin Blades | Shadow Step | 8s | Throw a knife 9m. If it hits, you appear behind that foe and your next hits for 1.5s crit. |
 | Sniper | Tripwire Mine | 10s | Plant a mine up to 8m away (2 charges). The first rival to step on it is rooted 1.4s, revealed for 3s and takes 14. |

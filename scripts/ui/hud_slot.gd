@@ -17,6 +17,15 @@ const POP_T := 0.3             # s: the pop when a press lands
 
 static var shown_keys := {}    # slot id -> the key cap last drawn under it (checks read it)
 
+## Moves the per-slot animation state of host `H` on by `delta` s: presses age out, "ready" rings fade.
+static func decay(H, delta: float) -> void:
+	for id in H.slot_fx.keys():
+		H.slot_fx[id]["t"] = float(H.slot_fx[id]["t"]) + delta
+		if float(H.slot_fx[id]["t"]) > ResetPop.LEN: H.slot_fx.erase(id)
+	for id in H.ready_flash.keys():
+		H.ready_flash[id] = float(H.ready_flash[id]) - delta
+		if float(H.ready_flash[id]) <= 0.0: H.ready_flash.erase(id)
+
 ## The countdown as shown: whole seconds from 1s up, tenths under it.
 static func cd_text(secs: float) -> String:
 	return str(int(ceil(secs))) if secs >= 1.0 else "%.1f" % secs
@@ -110,8 +119,9 @@ static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: Strin
 ## The part of a slot still cooling: a slice from 12 o'clock, clockwise, cut to the slot's square so
 ## it never spills past the frame.
 static func sweep(c: CanvasItem, r: Rect2, frac: float, col: Color) -> void:
-	if frac <= 0.001:
+	if frac <= 0.005:
 		return
+	frac = minf(frac, 0.995)      # (a full turn closes on itself: the polygon would not triangulate)
 	var ctr := r.get_center()
 	var half := r.size * 0.5
 	var pts := PackedVector2Array([ctr])

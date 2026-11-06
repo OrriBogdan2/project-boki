@@ -57,7 +57,7 @@
 		"id": "spirit_walk",
 		"name": "Spirit Walk",
 		"icon": "vanish",
-		"col": "#8dffa8",
+		"col": "#ff6a72",
 		"cd": 9.5,
 		"roll": 3.5,
 		"roll_t": 0.24,
@@ -95,11 +95,12 @@
 			"full": 1.1,
 			"wall_dmg": 12.0,
 			"wall_floor": 0.4,
-			"max_hold": 3.0
+			"max_hold": 3.0,
+			"hold_move": 0.38
 		},
 		"cd_per_rank": 3.0,
 		"variants": {
-			"hold": "Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, stops on the first foe; driven into a wall within 3m it hits again (5 -> 12 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing."
+			"hold": "Heavy Shot: hold to draw a great needle on the bow (0.5s to start, full at 1.1s; you move at 38% speed while you hold) and let go to loose it: 16 -> 30 damage, push 6 -> 12, stops on the first foe; driven into a wall within 3m it hits again (5 -> 12 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing."
 		},
 		"sockets": {
 			"hit": "add",
@@ -113,7 +114,7 @@
 		"name": "Hail Wall",
 		"short": "Hail",
 		"icon": "barrage",
-		"col": "#6ee08a",
+		"col": "#ff4a54",
 		"cooldown": 15.0,
 		"reach": 9.0,
 		"width": 1.8,
@@ -139,7 +140,7 @@
 		"name": "Starpiercer",
 		"short": "Starpierce",
 		"icon": "skypierce",
-		"col": "#5affd2",
+		"col": "#ff2a3a",
 		"unlock": 6,
 		"cooldown": 60.0,
 		"shots": 3,

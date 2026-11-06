@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bll677b0ukonr"
-path="res://.godot/imported/sable_atlas.jpg-83bc09335376c028eceafee3065d4cf6.ctex"
+path.bptc="res://.godot/imported/sable_atlas.jpg-83bc09335376c028eceafee3065d4cf6.bptc.ctex"
+path.astc="res://.godot/imported/sable_atlas.jpg-83bc09335376c028eceafee3065d4cf6.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "a64887a1a5ee4e20ae46210b1cb0836e"
+"md5": "8a7ea8c5d463c9217c7f667ca128808f"
 }
 
 [deps]
 
 source_file="res://art/wardens/sable/sable_atlas.jpg"
-dest_files=["res://.godot/imported/sable_atlas.jpg-83bc09335376c028eceafee3065d4cf6.ctex"]
+dest_files=["res://.godot/imported/sable_atlas.jpg-83bc09335376c028eceafee3065d4cf6.bptc.ctex", "res://.godot/imported/sable_atlas.jpg-83bc09335376c028eceafee3065d4cf6.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -39,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=2048
 detect_3d/compress_to=0

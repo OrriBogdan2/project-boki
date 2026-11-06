@@ -29,7 +29,7 @@ Durations (slow 1.5s, boost and shield 2s) and counts (+1 charge) copy the data.
 | RMB, Cinder Shot | hold to aim, release | a thin lane of its full 14m while held, then a red-pink fireball that always flies its full 14m whatever the cursor distance, and fizzles at its end on a miss; 14 damage, a 30% slow for 1.5s, sets the foe Ablaze; on a burning foe it does 25% (40%) more, upgrades the burn and spreads it (at the old level) to foes within 4m. 7s. Rank 3 holds two charges | bolt applies Ignite and a slow; bonus damage on an Ignited foe; it spreads (initial level) and upgrades; no knockback; rank 4 +1 charge | always its full range (owner review item 19) |
 | Shift, Soot Ram | tap, 2 charges | a quick, short head-first dash toward the cursor (3.4m in 0.28s before the global dash feel, about 2.9m in 0.32s after it, fastest at the start) that stops on the first foe: 16 damage, a heavy shove (7), 17 Char, and Cinder bounces back a little. Two charges chain right away. Rank 3: +4.3 damage, and a hit gives +16% speed and a shield of 11.6% health for 2s | dash in flames, knocks struck targets back and the hero slightly back, 17 burns, 2 charges, rank 4 (owner data): +40 base damage, +75 move speed and a 150 shield for 2s on a hit | none (the folded lava carpet went back to the ult on X) |
 | E, Furnace Cloak | tap (fires on the press) | the blast goes off at once round him, never at the cursor, with a quick arms-out flare (0.24s) and a thin ring at its exact 4.5m that everyone sees: 7 damage, 16 Char, Anti-Heal 3s, foes in sight dragged to you (walls stop them), a swirling 3s fire shield of 6.4% + 5.1% per foe hit. A knock resets it. 10.5s | spin: damage, Anti-Heal, pull, shield by foes hit, knock reset, blocked by line of sight; a 0.2s edge ring before it (footage) | instant on the press, no 0.2s ring first (owner review item 11) |
-| X, Flue Flight (ult, level 6) | tap; X again lands | a ring of embers (2.2m, everyone sees it), then 1.8s of low flight (12.6 m/s, about 22.7m) toward the cursor that steers with the aim at up to 120 degrees a second. A 1.8m molten carpet forms under him and lasts 5.2s (the oldest end fades first): 4.5 damage a second, a 30% slow and 4 Char every 0.3s (Ablaze in about 2.4s). The Furnace Cloak works mid-flight; a knockback speeds the flight up; a stun ends it; the carpet never forms over the abyss. 32s | flight forward that steers, a fire trail that slows and builds Ignite (4 stacks every 0.3s), 4s, recast ends it, Heat Shield castable mid-flight, impulses speed it up, no trail over abyss | no flamethrower mid-flight (owner item 66: LMB is ignored, not buffered, with a soft tick on a press; back the moment the flight ends); the Cinder Shot works (item 51); the flight and the carpet's linger are 30% longer (owner review item 20) |
+| X, Flue Flight (ult, level 6) | tap; X again lands | a ring of embers (2.2m, everyone sees it), then 1.8s of low flight (12.6 m/s, about 22.7m) toward the cursor that steers with the aim at up to 120 degrees a second. A 1.8m molten carpet forms under him and lasts 5.2s (the oldest end fades first): 4.5 damage a second, a 30% slow and 4 Char every 0.3s (Ablaze in about 2.4s). Only the Furnace Cloak works mid-flight (no RMB, Shift, gloves or items); a knockback speeds the flight up; a stun ends it; the carpet never forms over the abyss. 32s | flight forward that steers, a fire trail that slows and builds Ignite (4 stacks every 0.3s), 4s, recast ends it, Heat Shield castable mid-flight, impulses speed it up, no trail over abyss | no flamethrower mid-flight (owner item 66: LMB is ignored, not buffered, with a soft tick on a press; back the moment the flight ends); only E works (owner decision: RMB, Shift, gloves and items are dropped too); the flight and the carpet's linger are 30% longer (owner review item 20) |
 | R | | the Boki Merge (not a hero ability) | | |
 
 Rank 2 / 3: the shared steps (-10% cooldown, +15% damage a rank; the ram recharges 15% faster a rank). Rank 3 specials follow
@@ -75,7 +75,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--ash
 | E cooldown | ok | (c) | fine |
 | E pose length | LOW | (b) | CLOAK_POSE_T 0.25 s (item 11's 0.15-0.25 s) |
 | X cooldown | LOW | (b) | 36 s (the data's 45 s at the kit's 0.8x). "ult cast: its own cooldown starts (36s ...)" |
-| X casting in flight | MED | (b) | the Cinder Shot works mid-flight (item 51); the lance does not (owner item 66). "ult: the Cinder Shot goes mid-flight ...", "ult 66: ..." |
+| X casting in flight | MED | (b) | only E works mid-flight (owner item 66 decision: no lance, Cinder Shot, Shift, gloves or items). "ult: the Cinder Shot goes mid-flight ...", "ult 66: ..." |
 | X lift-off ring | LOW | (b) | the ember puffs and wave stay (footage f25); the AimKit disc shown to everyone is gone (it hit nothing). "ult cast: lifts off in its ember puffs, no aim disc" |
 | X aim / recast | ok | (c) | matches |
 | Passive Flashover | ok | (c) | matches |
@@ -132,8 +132,10 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - The hose has no fuel and nothing reloads (the source shows no fuel bar; no reload exists in the game). The 0.35s relight gap and the self-slow after release are the only limits.
 - The pilot flame is cyan in our palette too (it reads as cool against warm fire); the burn pips use our own flame shape.
 - Flue Flight: he is not crowd-control immune; a stun ends the flight where he is. He flies over the abyss at the height he had
-  (only the carpet is missing there). The hose and the Cinder Shot are locked while flying (only the cloak was seen cast); a
-  Shift press waits for the landing (the dash buffer).
+  (only the carpet is missing there). The lance is off for the whole flight (owner item 66): the key is ignored, not buffered, a press
+  ticks softly, and the idle pilot flame goes out; it is back the frame the flight ends. Owner: in the flight ONLY E (the cloak) works, and X again lands.
+  RMB, Shift (no poof), the glove and utility slots, gear, the Boki's C and a throw are dropped, not buffered (AshwickJet.lock_inputs).
+  Steering and a jump stay (movement, not abilities).
 - The flight's telegraph for the player is a heading lane with chevrons as long as the flight still has to go; foes see only the
   ember ring and the carpet, as in the footage.
 - Only enemy hunters count for the bond (the carpet still burns monsters and Boki).
@@ -155,7 +157,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | Sweep while firing | the old fire keeps flying its own way (the stream bends) | "lance: a sweep bends the stream (old fire keeps its own heading)" |
 | Look at the stream | narrow at the nozzle, billowing at the end | "lance: narrow at the nozzle, billowing at the far end" |
 | Let go, press again at once | the fire stops at once; 0.35s before it relights; a short slow | "lance: letting go stops the fire at once"; "lance: 0.35s before it can roar again" |
-| Hold the lance through a ram (or a poof, or the flight) / a jump | the stream goes out for the dash and roars again the step it ends (no pilot, no relight gap: the gap is after a release); it keeps burning through a jump | "lance: held through a ram it goes out, then roars again within 0.1s of its end (item 51)"; "lance: it keeps burning through a jump" |
+| Hold the lance through a ram (or a poof) / a jump | the stream goes out for the dash and roars again the step it ends (no pilot, no relight gap: the gap is after a release); it keeps burning through a jump | "lance: held through a ram it goes out, then roars again within 0.1s of its end (item 51)"; "lance: it keeps burning through a jump" |
 | Keep the lance on a foe about 1s | Ablaze, one pip | "lance: ~1s on the foe = Ablaze (level 1)"; "burn stage: one flame pip over a foe Ablaze" |
 | Keep holding on a burning foe | Flashover, three pips and a glow | "lance: kept on a burning foe it Flashes over (level 2)"; "burn stage: three flame pips and a glow over a Flashover" |
 | Lance a burning foe | +25% and 1.5% of health a second (Flashed over: +40% and 2.5%); Char at the full rate | "lance: +25% and 1.5% of health a second on an Ablaze foe (per tick)"; "lance: +40% and 2.5% of health a second on a Flashed-over foe (per tick)"; "lance: a burning foe builds Char at the full rate" |
@@ -171,14 +173,15 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | X below level 6 | nothing | "ult: no cast below level 6" |
 | X | the ember ring, the lift-off move, a heading lane, 32s cooldown | "ult cast: lifts off with the ember ring everyone sees"; "ult cast: its own cooldown starts (32s)"; "ult telegraph: the heading lane shows while flying" |
 | X, then X again | lands early | "ult recast: X again lands early" |
-| Shift in the flight | a poof from the bellows feeds it like a knockback: the air dash spent, the flight faster (up to its cap) and bent toward the dash, still flying | "ult: Shift in the flight is a poof that feeds it" |
+| Shift, RMB, gloves, items in the flight | nothing: no cooldown or charge spent, no projectile, no item used; E still works | "ult 66: RMB mid-flight ..."; "ult 66: Shift (dash), Q/V gloves ..."; "ult 66: the utility slots use no item"; "ult 66: E still works after all that" |
 | Jump in the flight | he leaps off it at once: the flight ends (the carpet stays), a jump-out-of-a-dash share of its speed carried into the air and on into a glide | "ult: a jump in the flight leaps off it within 0.1s, keeping its speed into the air" |
 | X and steer | the flight curves, at most 120 degrees a second | "ult steer: the heading turns toward the cursor, capped at 120 deg/s"; "ult steer: the flight curves (it ends well to the side)" |
 | X | a 1.8s flight of about 22.7m | "ult: the flight lasts 1.8s (+25-35% on 1.4s) and covers about 22.7m" |
 | X through foes | a 5.2s carpet that burns, slows 30% and builds Char; Ablaze in about 2.4s | "ult payoff: a molten carpet along the flight that lingers 5.2s (the flight's +30%)"; "ult payoff: the carpet burns, slows and builds Char"; "ult payoff: standing in it, Ablaze after about 2.4s" |
 | X over nobody / through hunters / knocking one | no bond / a hit (once per cast) / a knock | "ult bond: nothing for a cast that lands on nobody"; "ult bond: burning a hunter fills it once per cast"; "ult bond: a knock with the carpet counts as the cast's best event (0.7)" |
 | X, then E mid-flight | the cloak goes off, the flight goes on (pull foes into the carpet) | "ult: the Furnace Cloak works mid-flight (the flight goes on)" |
-| X, then RMB | denied | "ult: no Cinder Shot mid-flight" |
+| X, then RMB | the Cinder Shot goes, the flight goes on | "ult: the Cinder Shot goes mid-flight and the flight goes on" |
+| X, then LMB (held or tapped) | nothing: no flame, nothing queued, a soft tick on each press; held, the lance lights the frame the flight ends (its usual 0.2s pilot, then the roar) | "ult 66: LMB held through the whole flight: no flame, no pilot, no lance damage, Char or burn"; "ult 66: a tap in the flight is ignored, not buffered (nothing fires on landing)"; "ult 66: LMB works on the first frame after the flight (the lance lights)" |
 | X over a gap | he flies across, no carpet over the void | "ult abyss: the carpet never forms over the void, he flies across" |
 | A knockback or a stun mid-flight | faster / the flight ends | "ult: a knockback mid-flight speeds it up"; "ult: a stun ends the flight" |
 | X, then the merge and its ultimate | a full-health light hunter survives | "burst: Flue Flight then the merge never one-shots a full-health light hunter" |
@@ -212,8 +215,11 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
   flat flame skull with long ember tails on the ram and ember-puff after-images, the jagged 14-ray sunburst and cracked scorch of
   the cloak, the deep orange two-ring fire shield, the molten carpet with charred edges, and the flame pips over burning foes.
 - Weapon: `HeroGearPair.flamer`: ribbed brass barrel, flared bell nozzle with a pilot cage, fuel canister, hose to the pack.
-- Sounds (tools/sfx_linwick_dredge.py): `lw_pilot`, `lw_roar`, `lw_bolt`, `lw_bolt_hit`, `lw_bash`, `lw_bash_hit`, `lw_shield`,
-  `lw_blaze`, `lw_trail`, `lw_hop`, `lw_jet` (lift-off whoomp and jet roar), `lw_jet_land` (plus the older `as_ignite`).
+- Sounds (`tools/gen_sfx_cinder.py`, set `content/sfx/ashwick.json`, docs/AUDIO.md): the lance's pilot and roar (`lw_pilot`,
+  `lw_roar`, three takes, one every 0.4 s while held), the tank hiss on release (`ashwick_tank_hiss`), `lw_bolt`/`lw_bolt_hit`,
+  `as_ignite` (Ablaze), `lw_blaze` (Flashover), `lw_bash`/`lw_bash_hit`, the bellows poof `lw_hop`, `lw_shield` and
+  `ashwick_cloak_hit` (Furnace Cloak), `lw_jet`/`lw_jet_land`/`lw_trail` (Flue Flight), and her own dash, footsteps
+  (a light patter, the pack clinking every other step) and wordless voice (`ashwick_hurt`, `_down`, `_death`).
 - Flue Flight (`scripts/arch/kits/ashwick_jet.gd`): the ember ring, scorch and sunburst at lift-off, a hot core and embers blown
   out of the bellows while flying, and the carpet as pooled LDFx lava strips drawn with their own alpha-blended shader
   (`shaders/ld_lava.gdshader`), so the charred rim stays dark on bright ground.

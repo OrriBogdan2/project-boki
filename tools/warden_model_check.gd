@@ -14,24 +14,28 @@ const EPS := 0.0005
 ## scale and movement feel"), its width against a medium (from, to), and the prefix of its keyed moves.
 ## height_3d: the 3D model's top where something stands over the head the procedural one doesn't have.
 const WARDENS := {
-	"bulwark": {"hit_r": 0.46, "height": 1.5, "width": [1.3, 2.2], "moves": "bul_"},     # (1.5x, owner)
+	"bulwark": {"hit_r": 0.46, "height": 1.5, "height_3d": 1.9, "width": [1.3, 5.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.392, "height": 0.98, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
 	"gunslinger": {"hit_r": 0.416, "height": 1.04, "width": [0.7, 1.3], "moves": "gunslinger_"},   # (slim)
-	"mage": {"hit_r": 0.4, "height": 1.04, "width": [0.6, 1.3], "moves": "mage_"},     # (slim and long-legged)
-	# (Sable's feather plumes stand ~0.2 m over her head)
-	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.05, "width": [0.6, 1.3], "moves": "thf_"},
+	# (slim and long-legged; height_3d: her rods stand over the head)
+	"mage": {"hit_r": 0.4, "height": 1.04, "height_3d": 1.11, "width": [0.6, 1.3], "moves": "mage_"},
+	# (Sable's moth antennae stand ~0.3 m over her head, as on the master sheet)
+	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "thf_"},
 	"dolm": {"hit_r": 0.388, "height": 1.19, "width": [0.7, 1.5], "moves": "breah_"},     # (lean, the locs: his art)
-	# (Ostra: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
-	"ostra": {"hit_r": 0.412, "height": 1.33, "height_3d": 1.31, "width": [0.5, 1.3], "moves": "ostra_"},
-	"rimewright": {"hit_r": 0.38, "height": 1.11, "width": [0.6, 1.1], "moves": "tm_"},     # (tall and slim)
-	# (Cinder's fin-crest stands over her head)
-	"ashwick": {"hit_r": 0.376, "height": 1.02, "height_3d": 1.11, "width": [0.7, 1.5], "moves": "as_"},
+	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
+	# (Motley on his box: the hover came down to a hand's width, Nov 5, so his top is 0.14 m lower; the cards widen him)
+	"ostra": {"hit_r": 0.412, "height": 1.18, "height_3d": 1.2, "width": [0.5, 1.6], "moves": "ostra_"},
+	# (Claire, the final design: the hood and horns stand over her head; capelet and skirt widen the old slim build)
+	"rimewright": {"hit_r": 0.38, "height": 1.08, "height_3d": 1.21, "width": [0.6, 1.25], "moves": "tm_"},
+	# (Cinder's fire stands over her head)
+	"ashwick": {"hit_r": 0.376, "height": 1.02, "height_3d": 1.14, "width": [0.7, 1.5], "moves": "as_"},
 	# (Kael: body size 1.06, owner Nov 4: 9% bigger; juggernaut.md's 1.12x was at 1.0)
 	"juggernaut": {"hit_r": 0.428, "height": 1.26, "height_3d": 1.19, "width": [1.0, 2.0], "moves": "jug"},
-	"dredge": {"hit_r": 0.452, "height": 1.28, "width": [1.3, 2.4], "moves": "dr_"},     # (~2.25 m, very broad)
+	# (Grimble: the head at his old height, the hoard towers over it)
+	"dredge": {"hit_r": 0.452, "height": 1.3, "height_3d": 1.49, "width": [1.3, 2.4], "moves": "dr_"},
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
-	# (Pip: body size 0.68, item 108; her sheet's 0.74, 3D 0.84, was at 0.78)
-	"tender": {"hit_r": 0.34, "height": 0.65, "height_3d": 0.73, "width": [0.5, 1.5], "moves": "mm_"},
+	# (Pip: body size 0.68, item 108; ART-1 model: 0.66 with the ears, waist-high on the sheet's silhouette)
+	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.66, "width": [0.5, 1.5], "moves": "mm_"},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured
@@ -41,9 +45,9 @@ const ANCHORS := ["Rig/Legs/LegL/Knee", "Rig/Legs/LegR/Knee", "Rig/Torso/HeadPiv
 	"Rig/Torso/Skirt", "Rig/Torso/Shoulder", "Rig/Torso/Glider", "TeamRing"]
 ## Nodes a hero's own kit or weapon code finds by name (BjornFx: the hammer pivot under Gun; the prow).
 const HERO_ANCHORS := {"bulwark": ["Rig/Torso/ArmLPivot/Elbow/Hand/Shield"]}
-const SKIP := ["Glider", "Gun", "Shield", "TeamRing"]     # not part of the body's silhouette
-## a .glb's floating pieces (warden_parts.crescent, Ostra's void orb held up by his head): not headwear
-const FLOATING := ["Halo", "Orb"]
+const SKIP := ["hammer", "Glider", "Gun", "Shield", "TeamRing"]     # not part of the body's silhouette
+## a .glb's floating pieces (warden_parts.crescent, Motley's void orb held up by his head): not headwear
+const FLOATING := ["hammer", "Halo", "Orb"]
 
 var bad := 0
 var n := 0
@@ -217,7 +221,7 @@ func _glb_top(m: Node3D) -> float:
 	var top := -INF
 	for nd in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		if String(nd.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX) or String(nd.name) in FLOATING:
-			continue        # (floating props, Tarek's stones and Ostra's halo: not the height)
+			continue        # (floating props, Tarek's stones and Motley's halo: not the height)
 		for p in WARDEN_SKIN.points(nd as MeshInstance3D):
 			top = maxf(top, p.y)
 	return top - m.global_position.y

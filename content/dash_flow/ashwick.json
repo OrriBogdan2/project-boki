@@ -20,14 +20,14 @@
 		"lmb": {"mode": "fire", "source": "Data: the flamethrower is a hold with a 0.35s gap between uses. Footage: he walks while firing; no dash out of the hose shown. Ours: Shift rams at once; the stream goes out for the ram and, still held, roars again the step it ends (hold.lmb)."},
 		"rmb": {"mode": "fire", "source": "Footage: the aim lane shows about 0.4s while he keeps moving. Ours: Shift while aiming rams; the bolt still goes on release."},
 		"e": {"mode": "fire", "source": "Heat Shield is instant (owner item 11): there is no wind-up to dash out of."},
-		"x": {"mode": "fire", "source": "Data: the flight is his movement; knockback impulses speed it up; reactivating lands. Footage: no dash during the flight. Ours: Shift in the flight is a poof from the bellows that feeds it like a knockback (it spends the air dash; the flight's speed grows up to its cap and bends toward the dash) and the flight carries on."},
+		"x": {"mode": "lock", "reason": "Owner decision (item 66): in Flue Flight only E works, so Shift does nothing there: no poof, no dash spent, not buffered (AshwickJet.lock_inputs).", "source": "Data: the flight is his movement; knockback impulses speed it up; reactivating lands. Footage: no dash during the flight. Ours (owner, item 66): in Flue Flight only E works, so Shift in the flight does nothing (no poof, no dash spent, not buffered); AshwickJet.lock_inputs."},
 		"q": {"mode": "fire", "source": "No source glove."}
 	},
 	"into_jump": {
 		"x": {"mode": "cancel", "source": "Data: reactivating ends the flight early (the source's way out of it); the flight holds him low. Ours: a jump in the flight leaps off it at once: the flight ends (the carpet laid stays), he keeps a jump-out-of-a-dash share of its speed and hands it on to a glide (Hunter.glide_handoff)."}
 	},
 	"hold": {
-		"lmb": {"ground": {"mode": "keep", "source": "Data: the flamethrower is a hold, the 0.35s gap is between uses; Pyro Pounce: no fire during it. Footage (0159-0161): upright out of the bash with the nozzle already on the aim. Ours: held through the ram the stream goes out and roars again the step it ends: no pilot, no relight gap."}, "air": {"mode": "keep", "source": "As on the ground: held through the poof, the stream is back the step it ends."}, "jump": {"mode": "keep", "source": "Ours: the hose keeps burning through a jump."}},
+		"lmb": {"ground": {"mode": "keep", "source": "Data: the flamethrower is a hold, the 0.35s gap is between uses; Pyro Pounce: no fire during it. Footage (0159-0161): upright out of the bash with the nozzle already on the aim. Ours: held through the ram the stream goes out and roars again the step it ends: no pilot, no relight gap. Flue Flight is no dash here (owner item 66): LMB is off for the whole flight, ignored, not buffered, a press ticks softly, and the lance lights as usual the step it ends."}, "air": {"mode": "keep", "source": "As on the ground: held through the poof, the stream is back the step it ends."}, "jump": {"mode": "keep", "source": "Ours: the hose keeps burning through a jump."}},
 		"rmb": {
 			"ground": {"mode": "keep"},
 			"air": {"mode": "keep"},

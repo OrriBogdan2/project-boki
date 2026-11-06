@@ -3,8 +3,9 @@ extends ArchKit
 ## Vex (archetype id "gunslinger", medium): the ember-rifle skirmisher. docs/heroes/gunslinger.md
 ## has the per-slot table, the assumptions and the research notes (briefs/hero-ref/venator.md, owner notes).
 ##
-## Loop: tap RMB and the Burr Charge goes along the aim. A direct hit on a foe damages and Dazes
-## it ("rat" Rattled in code) on the spot. Otherwise it flies its 10.5 m and sticks where it meets a wall
+## Loop: tap RMB and the Burr Charge fires from the arm-cannon's launcher along the aim. A direct hit on a foe
+## damages and Dazes it ("rat" Rattled in code) on the spot.
+## Otherwise it flies its 10.5 m and sticks where it meets a wall
 ## or the ground at the end: a cone shows back toward you for its fuse, then blasts, shoving
 ## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +90% to a Dazed foe, in big
 ## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
@@ -26,9 +27,13 @@ const ECHO_GAP := 0.05               # s between her after-images on a slide or 
 const ECHO_ALPHA := 0.35             # see-through, so the trail never covers her live body
 const ECHO_BACK := 0.35              # m behind her along her travel: the echoes trail, not overlap
 const PIP_LIFT := 0.9                # m up the screen the Fever pips sit, clear of her cap and face
-const TOSS_Y := 1.05                 # m: the Burr Charge leaves from the hip (a side toss, not overhead)
+const TUBE_UP := 0.16                # m above the gun's muzzle: the launcher tube, on a model without its empties
+const TUBE_FIRE := "launcher_fire"   # fixed on the cannon at the bell's firing spot: the charge leaves from here
+const TUBE_BELL := "launcher_muzzle" # on the swinging launcher: over and forward only after TUBE_SWING
+const TUBE_SWING := 0.1              # s from the press to the bell coming forward
 const BRACKET_R := 1.25              # m: the firing brackets either side of her (footage: about 0.7 bh)
 const BRACKET_DEG := 56.0            # each bracket's arc
+const SPIN_REST := 0.5               # s without a round before the next string winds the barrels up again
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, wall, fuse, fuse0, range, out, y0}
@@ -45,6 +50,8 @@ var wall_slams := 0
 var last_dash_kind := ""
 var last_cone := {}            # tests: {at, dir, wall}
 var last_shot := 0
+var puffs := 0                 # tests: launcher puffs
+var last_puff := Vector3.ZERO  # tests: where the last one went off
 var echo_t := 0.0
 var refill_part := 0.0         # rounds the resting drum has part-refilled
 var dry := false               # the drum ran dry: no round until it is full again
@@ -104,7 +111,7 @@ func shows_charge_ball() -> bool:
 	return false                   # the Longneedle charges an ember orb at the muzzle instead
 
 ## Moves whose hand leaves an ember swoosh: [hand, from s, to s].
-const TRAILS := {"gunslinger_rmb": ["l", 0.0, 0.2], "gunslinger_knock": ["r", 0.0, 0.25]}
+const TRAILS := {"gunslinger_knock": ["r", 0.0, 0.25]}
 
 func _tick_trail() -> void:
 	var tr: Array = TRAILS.get(anim_id, [])
@@ -195,6 +202,8 @@ func _tick_lmb() -> void:
 	if h.shot_n == last_shot:
 		return
 	last_shot = h.shot_n
+	if m.time - round_at > SPIN_REST:
+		m.sfx("gunslinger_spinup", h.pos, -6.0)      # the shoulder cannon winds up as a string starts
 	round_at = m.time
 	var shots: Array = m.get("shots")
 	for i in range(shots.size() - 1, -1, -1):
@@ -367,7 +376,7 @@ func fire_rmb(c: Dictionary) -> void:
 		burr_pool.append(n)
 	n.visible = true
 	n.scale = Vector3.ONE
-	var at := h.pos + Vector3(d.x * 0.6, TOSS_Y, d.y * 0.6)
+	var at := _launcher_at(d)
 	n.global_position = at
 	var burr := {"pos": at, "dir": d, "t": 0.0, "node": n, "wall": false, "fuse": -1.0, "fuse0": float(bd["fuse"])}
 	burr["range"] = float(bd["range"])
@@ -375,7 +384,31 @@ func fire_rmb(c: Dictionary) -> void:
 	burr["g0"] = ground(h.pos).y
 	burrs.append(burr)
 	play("gunslinger_rmb")
-	m.sfx("vn_throw", h.pos, -2.0)
+	_launcher_puff(at, d)
+	m.sfx("gunslinger_grenade_thunk", h.pos, -2.0)
+
+## Where the Burr Charge leaves: the cannon's firing spot, read live so it follows the aim, else above the muzzle.
+func _launcher_at(d: Vector2) -> Vector3:
+	var spot := WardenGlb.anchor(h.model, TUBE_FIRE)
+	if spot != null:
+		return spot.global_position
+	var muzzle := h.model.get_node_or_null("Rig/Torso/Aim/Gun/Muzzle") as Node3D if h.model else null
+	return (muzzle.global_position if muzzle else _muzzle(d)) + Vector3.UP * TUBE_UP
+
+## The launcher's puff: at the bell once it has swung forward, or at once where there is no swinging bell.
+func _launcher_puff(at: Vector3, d: Vector2) -> void:
+	var bell := WardenGlb.anchor(h.model, TUBE_BELL)
+	if bell == null:
+		_puff(at, d)
+		return
+	m.later(TUBE_SWING, func():
+		if is_instance_valid(bell) and is_instance_valid(h):
+			_puff(bell.global_position, h.aim_dir()))
+
+func _puff(at: Vector3, d: Vector2) -> void:
+	puffs += 1
+	last_puff = at
+	m.fx.muzzle(at, d, EMBER, 2.0)
 
 ## The charge: a bronze ball about 0.3 m across, a dark band round it, an ember heart showing through
 ## and eight hot spikes. Solid colours, so it reads bronze and ember on any ground.
@@ -497,7 +530,7 @@ func _stick(b: Dictionary, at: Vector3, wall: bool) -> void:
 	b["fuse"] = float(bd["fuse"])
 	b["fuse0"] = float(bd["fuse"])
 	b["out"] = -(b["dir"] as Vector2)
-	m.sfx("vn_stick", at, -3.0)
+	m.sfx("gunslinger_grenade_thunk", at, -3.0)
 	fx().star(at, EMBER, HOT, 0.6, 0.12)
 	net_ring(at, 1.0, EMBER)
 

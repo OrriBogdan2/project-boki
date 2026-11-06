@@ -4,6 +4,7 @@ extends CanvasLayer
 
 var m: Match
 var c: Control
+var panels: HudPanels
 var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
@@ -37,6 +38,8 @@ func setup(match_node: Match) -> void:
 	m = match_node
 	layer = 5
 	Record.hide_in_cinema(self)      # recording mode with the HUD hidden
+	panels = HudPanels.make(self)       # the fixed panels, under c, redrawn 20 times a second
+	add_child(panels)
 	c = Control.new()
 	c.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -91,6 +94,7 @@ func _process(delta: float) -> void:
 	hit_t = maxf(0.0, hit_t - delta)
 	_hud_tick(delta)
 	plates.tick(delta)
+	panels.tick(delta)
 	flash_t = maxf(0.0, flash_t - delta * 4.0)
 	hurt_t = maxf(0.0, hurt_t - delta)
 	_place_msgs()
@@ -192,12 +196,15 @@ func _bar(r: Rect2, frac: float, col: Color, back := Color(0, 0, 0, 0.45)) -> vo
 
 func _text(p: Vector2, s: String, size := 15, col := INK, font: Font = null, align := HORIZONTAL_ALIGNMENT_LEFT, width := -1.0) -> void:
 	var f := font if font else body
+	if align == HORIZONTAL_ALIGNMENT_LEFT and width < 0.0:
+		TextCache.draw(c, f, p, s, size, col, 4)       # shaped once, kept while the text stays the same (item 94)
+		return
 	c.draw_string_outline(f, p, s, align, width, size, 4, Color(0, 0, 0, 0.55))
 	c.draw_string(f, p, s, align, width, size, col)
 
 func _ctext(p: Vector2, s: String, size := 15, col := INK, font: Font = null) -> void:
 	var f := font if font else body
-	var w := f.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+	var w := TextCache.width(f, s, size)
 	_text(Vector2(p.x - w * 0.5, p.y), s, size, col, f)
 
 func _arc(center: Vector2, radius: float, frac: float, col: Color, width := 3.0) -> void:
@@ -216,7 +223,6 @@ var hover_t := 0.0
 func _draw_all() -> void:
 	var sz := c.size
 	var p := m.player
-	hover_spots.clear()
 	if m.tut and m.tut.intro:
 		TutorialHud.draw(self, sz)      # the intro card alone: the rest of the HUD waits
 		return
@@ -272,7 +278,7 @@ func _draw_all() -> void:
 		if abyss_a > 0.8 and p == m.player:
 			# the point of no return is close: say so, pulsing, in the middle of the screen
 			var wk := clampf((abyss_a - 0.8) / 0.15, 0.0, 1.0)
-			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "NO GLIDER HEAT")
+			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "HOLD GLIDE: HALF LIFT, IT BURNS")
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.36), txt, 26, Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)), big)
 	if p and not p.downed and not p.out and p.hp < p.max_hp * 0.35:
 		var pulse := 0.5 + 0.5 * sin(m.time * 6.0)
@@ -283,16 +289,10 @@ func _draw_all() -> void:
 		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0)))
 	if p and (p.out or p.downed) and m.killcam_text != "":
 		_ctext(Vector2(sz.x * 0.5, maxf(sz.y * 0.22, msgs.bottom() + 30.0)), m.killcam_text, 22, Color("ff9a8a"), big)
-	_draw_top(sz)
-	if p and m.lairs:
-		_draw_boss_bar(sz, p)
-		_draw_lair_victory(sz, p)
 	if p and not m.duel:
 		_draw_alerts(sz, p)
 	else:
 		alerts_h = 0.0
-	_draw_feed(sz)
-	_draw_minimap(sz)
 	for dk in BokiHud.squad_downed(m):
 		BokiHud.downed_arrow(self, dk, sz)
 	if p and not p.out and not p.extracted:
@@ -300,14 +300,6 @@ func _draw_all() -> void:
 		_draw_glider_heat(p)
 	if p:
 		_draw_hurt_dirs(sz)
-		if not p.out and not p.extracted:
-			HudVitals.draw(self, sz, p)
-			_draw_abilities(sz, p)
-			_draw_weapon(sz, p)
-			GearPanel.draw(self, sz, p)
-			_draw_kin_card(sz, p)
-			_draw_squad(sz, p)
-			_draw_perks(sz, p)
 		if not p.riding:
 			_draw_kit(sz, p)
 		elif not map_open():
@@ -341,6 +333,7 @@ func _draw_all() -> void:
 
 func _draw_world_labels() -> void:
 	var cam := m.cam
+	LabelCull.begin()        # (item 94: anything off screen or far away isn't laid out)
 	ReviveHud.world_labels(self)       # deathboxes and revive beacons
 	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
@@ -353,10 +346,12 @@ func _draw_world_labels() -> void:
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not h.model.visible or h.unseen:
 			continue
-		var head := _head(h, HudPlate.plate_offset(h))
-		var sp := cam.unproject_position(head)
 		if cam.is_position_behind(h.position):
 			continue
+		var sp := LabelCull.at(self, _head(h, HudPlate.plate_offset(h)))
+		if not sp.is_finite():
+			continue
+		LabelCull.mark(h)
 		_nameplate(sp, h)
 		if not h.downed: GripOverhead.draw(self, sp, h)      # their two gloves and Boki type, under the plate
 		BokiHud.form_overhead(self, sp, h)
@@ -386,7 +381,10 @@ func _draw_world_labels() -> void:
 		elif mb.mkind == "ward": hy = 3.0
 		elif mb.mkind == "brute": hy = 2.4
 		elif mb.mkind == "warden": hy = 3.4
-		var sp := cam.unproject_position(mb.position + Vector3(0, hy, 0))
+		var sp := LabelCull.at(self, mb.position + Vector3(0, hy, 0))
+		if not sp.is_finite():
+			continue
+		LabelCull.mark(mb)
 		if mb.stagger_t > 0.0:
 			_ctext(sp + Vector2(0, -12), "STAGGERED", 18, Color("fff27a"), big)
 		elif mb.stag_open > 0.0:
@@ -431,7 +429,7 @@ func _draw_world_labels() -> void:
 		var is_tune: bool = wp.has("tune") and Data.PERKS.has(String(wp["tune"]))
 		var it := {} if (is_gear or is_tune) else Pack.ground_item(wp)
 		var nm := String(Loot.name_of(Pack.ground_item(wp))) if is_gear else (String(Data.PERKS[String(wp["tune"])]["name"]) if is_tune else Loot.name_of(it))
-		var tw := big.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 10.0
+		var tw := TextCache.width(big, nm, 16) + 10.0
 		var tag := Rect2(sp + Vector2(-tw * 0.5, -16.0), Vector2(tw, 32.0 if (is_gear or is_tune) else 20.0))
 		for tries in 4:
 			var bumped := false
@@ -456,7 +454,10 @@ func _draw_world_labels() -> void:
 	for k in m.kins:
 		if k.dead or not k.visible or k.state == "shoulder" or cam.is_position_behind(k.position):
 			continue
-		var sp := cam.unproject_position(k.position + Vector3(0, 1.05, 0))
+		var sp := LabelCull.at(self, k.position + Vector3(0, 1.05, 0))
+		if not sp.is_finite():
+			continue
+		LabelCull.mark(k)
 		if k.is_wild():
 			if k.state == "dazed":
 				CaptureHud.dazed_label(self, k, sp)       # knocked out: how to scan it, and the scan filling
@@ -895,8 +896,8 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 		c.draw_colored_polygon(PackedVector2Array([edge + d * 38.0, edge - d * 9.0 + perp * 23.0, edge - d * 9.0 - perp * 23.0]), col)
 		_ctext(edge - d * 62.0, "%s  %dm" % [label, dist], 22, col, big)
 
-## An exit on the minimap: a little boat for a skiff dock, a diamond for a rift hatch, a walled square
-## with a mast for an outpost. Bright when it's usable, grey when not; a pulsing ring while it's going.
+## An exit on the minimap: a little boat for a skiff dock, a diamond for a rift hatch, an outpost's banner
+## post (OutpostGlyph). Bright when it's usable, grey when not; a pulsing ring while it's going.
 func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
 	var col: Color = Exits.color_of(x)
 	var usable: bool = m.exits.live(x)
@@ -918,12 +919,11 @@ func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
 			c.draw_colored_polygon(dm, col if st == "open" or (m.player and m.player.rift_keys > 0) else Color(col, 0.55))
 			c.draw_circle(pv, 1.6 * k, dark)
 		"outpost":
-			var r := Rect2(pv - Vector2(5.5, 5.5) * k, Vector2(11, 11) * k)
-			c.draw_rect(r.grow(1.5), dark)
-			c.draw_rect(r, col, false, 2.0)
-			c.draw_circle(pv, 2.2 * k, col)
+			var held := OutpostLook.held(x)
+			var flag: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if held else Color(0.55, 0.58, 0.64, 0.9)
+			OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x))
 			if st == "charging":
-				_arc(pv, 9.0 * k, float(x["prog"]), col, 2.0)
+				_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
 	if st in ["called", "boarding", "charging", "open", "unlocking"]:
 		var ph := fmod(m.time * 1.2, 1.0)
 		c.draw_arc(pv, (8.0 + ph * 8.0) * k, 0, TAU, 24, Color(col, 0.8 * (1.0 - ph)), 2.0, true)
@@ -1005,8 +1005,6 @@ var slot_fx := {}          # slot id -> {kind: "cast"|"deny", t}: a pop when a p
 ## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red; "reset" (it just came back) swells it with a ring.
 func ability_feedback(id: String, kind: String) -> void:
 	slot_fx[id] = {"kind": kind, "t": 0.0}
-	if id == "dash" and kind == "deny" and m.player:
-		plates.stam.deny(m.player)
 var hurt_dirs: Array = []  # {ang, t}
 
 func hurt_from(at: Vector3) -> void:
@@ -1055,12 +1053,7 @@ func _hud_tick(delta: float) -> void:
 	if hd and not _h_down and (m.opts.get("training", false) or m.opts.get("duel", false)):
 		guide_hidden = not guide_hidden
 	_h_down = hd
-	for id in slot_fx.keys():
-		slot_fx[id]["t"] = float(slot_fx[id]["t"]) + delta
-		if float(slot_fx[id]["t"]) > ResetPop.LEN: slot_fx.erase(id)
-	for id in ready_flash.keys():
-		ready_flash[id] = float(ready_flash[id]) - delta
-		if float(ready_flash[id]) <= 0.0: ready_flash.erase(id)
+	HudSlot.decay(self, delta)
 	for h in hurt_dirs.duplicate():
 		h["t"] = float(h["t"]) + delta
 		if float(h["t"]) > 1.2: hurt_dirs.erase(h)
@@ -1162,9 +1155,7 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 		_skill_slot("sec", "sec", sr, util.icon, Settings.key_cap("secondary"), util.color, p.runner.cd_frac("utility"), p.runner.cd_left("utility") if not p.runner.is_ready("utility") else 0.0, p.runner.is_ready("utility"), p.runner.charges("utility") if util.charges > 1 else -1, util.charges if util.charges > 1 else 0)
 	x += s + gap
 	# Shift: your dash
-	var dmax := p.max_dashes()
-	var dcd := (1.0 - fposmod(p.dashes, 1.0)) if p.dashes < dmax - 0.001 else 0.0
-	_skill_slot("dash", "dash", Rect2(Vector2(x, y), Vector2(s, s)), "dash", Settings.key_cap("dash"), Color("bfe6ff"), dcd, dcd * p.dash_regen(), p.dashes >= 1.0, int(floor(p.dashes)), int(dmax))
+	DashSlot.row_slot(self, Rect2(Vector2(x, y), Vector2(s, s)), p)
 	x += s + gap
 	# E: your kin's ability
 	var er := Rect2(Vector2(x, y), Vector2(s, s))
@@ -1209,8 +1200,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	BokiHud.aug_mark(self, p, sr, "rmb")
 	x += s + gap
 	var di := p.slot_info("dash")
-	var dmax := int(di["max_charges"])
-	_skill_slot("dash", "dash", Rect2(Vector2(x, y), Vector2(s, s)), String(di["icon"]), Settings.key_cap("dash"), di["col"], float(di["cd"]) / maxf(0.01, float(di["cd_max"])) if float(di["cd"]) > 0.0 else 0.0, float(di["cd"]), bool(di["ready"]), int(di["charges"]), dmax)
+	DashSlot.row_slot(self, Rect2(Vector2(x, y), Vector2(s, s)), p)
 	if di.get("full", false):
 		# the payoff lives on the dash (the Thief's Primed shot into 3 Marks): the same gold dot
 		c.draw_circle(Vector2(x, y) + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
@@ -1463,8 +1453,6 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 					HudStyle.strip(c, Rect2(Vector2(tx, r.position.y + 38), Vector2(tw, 3)), h.armor / h.max_armor, h.armor_col())
 				if _has_status(h):
 					_status_row(Vector2(tx + tw * 0.5, r.position.y + 52), h)
-				else:
-					plates.stam.draw(c, Rect2(Vector2(tx, r.position.y + 46), Vector2(tw * 0.6, 3)), h)
 			"WISP":
 				var left := _bleed_left(h)
 				var stp: bool = h.get_meta("stomped", false)
@@ -2060,7 +2048,7 @@ var abyss_fx: CanvasLayer = null
 func _head(h: Node3D, up: float) -> Vector3:
 	return h.position + (m.cam.char_lean() * Vector3(0, up, 0) if m.cam else Vector3(0, up, 0))
 
-## Health and stamina (dash charges) right above your hunter, where your eyes already are.
+## Health right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
 	var cam := m.cam
 	var at := _head(p, 2.7 * float(p.cdat["scale"]))
@@ -2572,7 +2560,7 @@ func _row_click(rp: Control, cb: Callable) -> void:
 func open_loot(b: Dictionary) -> void:
 	loot_open = b
 	loot_sig = ""
-	Sfx.play("whoosh", null, -10.0, 0.05, 1.3)
+	Sfx.play("ui_open", null, -10.0)
 	_build_loot()
 	if loot_panel: UI.pop_in(loot_panel)
 
@@ -2879,7 +2867,7 @@ func toggle_pack() -> void:
 		pack_sig = ""
 		_build_pack()
 		if pack_panel: UI.pop_in(pack_panel)
-		Sfx.play("whoosh", null, -12.0, 0.05, 1.2)
+		Sfx.play("ui_open", null, -10.0)
 
 func close_pack() -> void:
 	if pack_panel and is_instance_valid(pack_panel):

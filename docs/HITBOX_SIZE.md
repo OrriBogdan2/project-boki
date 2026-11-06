@@ -6,11 +6,11 @@ Changing a hero's hit radius is one line (`body.hit_r`). The creator's look slid
 
 | Archetype | Warden | x standard | `hit_r` (m) | Why |
 |---|---|---|---|---|
-| bulwark | Breaker | 1.15 | 0.460 | tallest and widest |
-| dredge | Dredge | 1.13 | 0.452 | hulking |
+| bulwark | Breaker | 1.15 | 0.460 | tallest and widest (band cap; the hull itself is 0.95 m) |
+| dredge | Grimble | 1.13 | 0.452 | hulking |
 | juggernaut | Kael | 1.07 | 0.428 | broad |
 | gunslinger | Vex | 1.04 | 0.416 | broad |
-| ostra | Ostra | 1.03 | 0.412 | tall and thin; hitbox stays at ground level (item 18) |
+| ostra | Motley | 1.03 | 0.412 | tall and thin; hitbox stays at ground level (item 18) |
 | mage | Ryzz | 1.00 | 0.400 | average |
 | archer | Lisette | 0.98 | 0.392 | average, slim |
 | dolm | Tarek (Breah's base) | 0.97 | 0.388 | lean |

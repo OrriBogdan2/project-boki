@@ -225,4 +225,4 @@ static func footstep(h: Hunter) -> void:
 	if w.bridge.has(i): surf = "wood"
 	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND: surf = "stone"
 	elif w.style_at(i) == "frost": surf = "snow"
-	Sfx.play(HeroVfx.step_sound(h.arch, surf), h.pos, -13.0 if h == p else -17.0, 0.08)
+	Sfx.play(HeroSfx.of(h, "step_" + surf, "step_" + surf), h.pos, -13.0 if h == p else -17.0, 0.08)

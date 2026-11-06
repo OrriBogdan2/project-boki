@@ -115,6 +115,7 @@ func r_recast() -> bool: return false                # R pressed while it runs (
 func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
+func gate_inputs() -> void: pass                    # a kit drops the presses it locks out
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 ## Does this kit have the class long dash (Shift in the air)? The HUD shows its segment only then.
 func has_long_dash() -> bool: return true
@@ -844,6 +845,10 @@ func aims_in_dash() -> bool: return false
 func in_dash() -> bool: return h.roll_t > 0.0 and h.move_kind == "dash"
 ## s left in that dash (0 when not in one); a kit that overrides in_dash() overrides this too.
 func dash_left() -> float: return h.roll_t if in_dash() else 0.0
+## The vertical speed a dash in the air holds while it runs (0: it holds the height); a skate sinks gently.
+func dash_vy(_dt: float) -> float: return 0.0
+## True while the model's facing is frozen (a statue): Hunter keeps `face` as it is, whatever the cursor does.
+func face_locked() -> bool: return false
 func fire_ok_rmb() -> bool: return true
 
 # ------------------------------------------------------------------ payoffs and state tells (shared)

@@ -1,0 +1,188 @@
+{
+	"doc": "Grimble's hand-keyed clips (art/wardens/dredge/dredge.glb; id and files stay dredge) and which game state plays which (scripts/heroes/warden_clips.gd).",
+	"skinned_weapon": true,
+	"extra_bones": {
+		"foot.L": "shin.L",
+		"foot.R": "shin.R",
+		"eye": "head",
+		"lid": "head",
+		"brow": "head",
+		"jaw": "head",
+		"fingers.L": "hand.L",
+		"fingers2.L": "fingers.L",
+		"thumb.L": "hand.L",
+		"hook": "hand.R",
+		"gun": "root",
+		"hoard": "hips",
+		"ball": "root"
+	},
+	"blade": {
+		"root": "anchor_gun_root",
+		"tip": "weapon_muzzle",
+		"bone": "gun"
+	},
+	"hide_while_chain": [
+		"hook"
+	],
+	"loco": {
+		"idle": "idle",
+		"stance": "stance",
+		"stance_after": 6.0,
+		"walk": {
+			"f": "walk_f",
+			"b": "walk_b",
+			"l": "walk_l",
+			"r": "walk_r"
+		},
+		"run": {
+			"f": "run_f",
+			"b": "run_b",
+			"l": "run_l",
+			"r": "run_r"
+		},
+		"walk_speed": 2.2,
+		"run_speed": 4.4
+	},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
+	"air": {
+		"rise": "jump",
+		"fall": "fall",
+		"glide": "glide",
+		"dive": "pounce"
+	},
+	"land": {
+		"clip": "land",
+		"dur": 0.4,
+		"min_fall": 0.25
+	},
+	"kmoves": {
+		"dr_shot": {
+			"clip": "shot",
+			"upper": true
+		},
+		"dr_throw": {
+			"clip": "throw",
+			"upper": "moving"
+		},
+		"dr_reel": {
+			"clip": "reel",
+			"hold_from": 0.18,
+			"upper": "moving"
+		},
+		"dr_pullend": {
+			"clip": "pullend",
+			"upper": "moving"
+		},
+		"dr_anchor": {
+			"clip": "anchor",
+			"upper": "moving"
+		},
+		"dr_dive": {
+			"clip": "dive",
+			"hold_from": 0.12
+		},
+		"dr_quake": {
+			"clip": "quake"
+		},
+		"dr_lunge": {
+			"clip": "lunge"
+		},
+		"dr_pounce": {
+			"clip": "pounce"
+		},
+		"dr_flex": {
+			"clip": "flex",
+			"upper": true
+		},
+		"dr_blast": {
+			"clip": "blast",
+			"upper": "moving"
+		},
+		"dr_jump": {
+			"clip": "jump"
+		},
+		"dr_land": {
+			"clip": "land"
+		},
+		"mf_xform": {
+			"clip": "fusion"
+		}
+	},
+	"states": {
+		"downed": "downed",
+		"reviving": "revive",
+		"dead": "death",
+		"dead_t": 1.5,
+		"stun": "stun",
+		"emote": "emote",
+		"hit": {
+			"front": "hit_f",
+			"back": "hit_b",
+			"dur": 0.42
+		}
+	},
+	"flow": [
+		[
+			"dr_shot",
+			0.3
+		],
+		[
+			"dr_lunge",
+			0.38
+		],
+		[
+			"dr_shot",
+			0.3
+		],
+		[
+			"dr_throw",
+			0.5
+		],
+		[
+			"dr_reel",
+			0.5
+		],
+		[
+			"dr_pullend",
+			0.36
+		],
+		[
+			"dr_anchor",
+			0.7
+		],
+		[
+			"dr_lunge",
+			0.38
+		],
+		[
+			"dr_blast",
+			1.3
+		]
+	],
+	"procedural": [
+		"ledge",
+		"mantle",
+		"stomp",
+		"base",
+		"drink"
+	],
+	"upper": [
+		"hips",
+		"head",
+		"upper_arm.L",
+		"forearm.L",
+		"hand.L",
+		"upper_arm.R",
+		"forearm.R",
+		"hand.R",
+		"fingers.L",
+		"fingers2.L",
+		"thumb.L",
+		"brow",
+		"lid",
+		"jaw",
+		"eye",
+		"hoard",
+		"gun"
+	]
+}

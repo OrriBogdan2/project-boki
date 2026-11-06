@@ -3,11 +3,11 @@
 	"kit_owns": [],
 	"dash": {
 		"ground": {
-			"lmb": {"mode": "fire", "carry": true, "source": "Footage tip 'Punch to Extend Dash/RMB': a punch during Landslide goes off and carries her on. Ours: the boulder or punch goes off mid-leap and the leap's arc carries on (a punch's step pushes her a little further)."},
-			"rmb": {"mode": "fire", "carry": true, "source": "Footage tip 'Dash -> RMB Dunk Combo' (0965-1010): Landslide shoves the foe out, then she leap-slams onto it. Ours: the charge starts mid-leap; let go in the air and the slam lands where the leap does."},
-			"e": {"mode": "buffer", "source": "Card: Rockwave is only castable over ground; nothing on casting it mid-Landslide. Ours: held to the landing, then raised from there."},
-			"x": {"mode": "fire", "source": "Not in the data or footage. Tetraform is placed at the cursor, not at her, so the aim starts mid-leap; the ridge rises on release."},
-			"q": {"mode": "fire", "source": "Not in the data or footage (the glove is ours). It goes off mid-leap like any glove."}
+			"lmb": {"mode": "fire", "carry": true, "source": "Footage tip 'Punch to Extend Dash/RMB': a punch during Landslide goes off and carries her on. Ours: the boulder or punch goes off mid-hop and the hop's arc carries on (a punch's step pushes him a little further); every hop of a Rock Hop chain counts as the dash."},
+			"rmb": {"mode": "fire", "carry": true, "source": "Footage tip 'Dash -> RMB Dunk Combo' (0965-1010): Landslide shoves the foe out, then she leap-slams onto it. Ours: the charge starts mid-hop; let go in the air and the slam lands where the hop does, which ends the chain there."},
+			"e": {"mode": "buffer", "source": "Card: Rockwave is only castable over ground; nothing on casting it mid-Landslide. Ours: held to the end of the chain, then raised from there."},
+			"x": {"mode": "fire", "source": "Not in the data or footage. Tetraform is placed at the cursor, not at her, so the aim starts mid-hop; the ridge rises on release."},
+			"q": {"mode": "fire", "source": "Not in the data or footage (the glove is ours). It goes off mid-hop like any glove."}
 		},
 		"air": {
 			"lmb": {"mode": "buffer", "source": "Not in the data or footage (the source shows no air dash). The shared air dash can't fire the weapon; the press goes at its end."},
@@ -18,10 +18,10 @@
 		}
 	},
 	"into_dash": {
-		"lmb": {"mode": "fire", "source": "Not in the data or footage. Shift during the punch's wind-up leaps at once; the hold carries on and the punch goes on release."},
-		"rmb": {"mode": "fire", "source": "Footage: jumping while charging leaps her forward with the circle; Shift during the charge does the same with Rubble Leap (the circle comes along, the charge carries on)."},
-		"e": {"mode": "fire", "source": "Not in the data or footage. The rocks are already placed during the 0.2s flash; Shift leaps at once and they rise anyway."},
-		"x": {"mode": "fire", "source": "Not in the data or footage. Shift while aiming the ridge leaps at once; the aim carries on."}
+		"lmb": {"mode": "fire", "source": "Not in the data or footage. Shift during the punch's wind-up hops at once; the hold carries on and the punch goes on release."},
+		"rmb": {"mode": "fire", "source": "Footage: jumping while charging leaps her forward with the circle; Shift during the charge does the same with Rock Hop (the circle comes along, the charge carries on)."},
+		"e": {"mode": "fire", "source": "Not in the data or footage. The rocks are already placed during the 0.2s flash; Shift hops at once and they rise anyway."},
+		"x": {"mode": "fire", "source": "Not in the data or footage. Shift while aiming the ridge hops at once; the aim carries on."}
 	},
 	"hold": {
 		"lmb": {

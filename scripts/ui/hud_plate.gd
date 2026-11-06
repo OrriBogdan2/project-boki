@@ -3,13 +3,12 @@ extends RefCounted
 ## Overhead plates (one per hunter): the name or a status word, the run level on a coin, health in
 ## fixed-size segments with armour as a thin strip under it and shields as a pale fill past the end
 ## of health, a chip that holds then drains after a hit, a white flash on the frame when struck, an
-## armour-break crack, status icons to the right, dash bar under the frame, and a downed plate with a
+## armour-break crack, status icons to the right, and a downed plate with a
 ## knock burst. Hud owns one of these (hud.plates) and calls draw() / draw_self() per hunter; the
 ## same chip tracker feeds the mob and boss bars and the squad list (chip_of).
 ## Look and sizes: HudStyle. Layout around the anchor `sp` (the point over the head):
 ##   name / status word ............ sp.y - 7
 ##   frame (health + armour) ....... sp.y .. sp.y + PAD*2 + HP_H + 1 + AR_H
-##   dash bar (StaminaBar) ......... just under the frame
 ##   loadout icon row (others) ..... sp.y + HudStyle.PLATE_ICON_ROW and down: left free here
 
 const CHIP_HOLD := 0.4         # s the lost chunk stays after the last hit
@@ -21,8 +20,6 @@ const LVL_POP_T := 0.7        # s of the pulse on a plate's level badge when tha
 const PRUNE_T := 5.0           # s unseen before a hunter's plate state is dropped
 const PLATE_OFFSET := 2.35     # m over the feet where a plate sits unless the archetype sets its own
 
-## The dash bar every plate, the vitals block and the squad frames draw (StaminaBar).
-var stam := StaminaBar.new()
 ## nid -> {chip, hold, frac, armor, flash, brk, down, burst, seen}
 var st := {}
 var now := 0.0
@@ -167,9 +164,6 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), HeroTitle.of_hunter(h), HudStyle.PLATE_NAME_FS, name_col)
 	if not sts.is_empty():
 		icon_row(c, Vector2(frame.end.x + 3.0, frame.get_center().y), sts)
-	# the dash bar under the frame within 14m: "they used it, now go" (DASHES §3.3)
-	if viewer and h.flat_dist(viewer) < 14.0:
-		stam.draw(c, Rect2(Vector2(x0 + 8.0, frame.end.y + 2.0), Vector2(w - 16.0, 3)), h)
 	if h.ak and h.ak.tell != "":
 		_resource_tell(c, H.m.time, Vector2(x0 + w + 5.0, frame.position.y - 3.0), h)
 	shown[h.nid] = {"segs": HudStyle.seg_count(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false,
@@ -185,7 +179,7 @@ static func _resource_tell(c: CanvasItem, time: float, at: Vector2, h: Hunter) -
 	else:
 		c.draw_circle(at, 3.0, Color(rc, 0.45))
 
-## Your own plate over your head: wider, with your health number and the dash strip under it.
+## Your own plate over your head: wider, with your health number.
 func draw_self(H, sp: Vector2, p: Hunter) -> void:
 	var c: CanvasItem = H.c
 	var dt: float = H.get_process_delta_time()
@@ -204,7 +198,6 @@ func draw_self(H, sp: Vector2, p: Hunter) -> void:
 	HudStyle.text(c, Vector2(frame.end.x + 5.0, hr.end.y + 1.0), str(int(ceil(p.hp))), 13, Color(1, 1, 1, 0.92))
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), p.lvl, HudStyle.SELF, pop)
-	stam.draw(c, Rect2(Vector2(x0, frame.end.y + 3.0), Vector2(w, 5)), p, true)
 	var sts := statuses(p)
 	var word := ""
 	if not sts.is_empty():
@@ -252,7 +245,7 @@ static func level_badge(c: CanvasItem, corner: Vector2, lvl: int, role: Color, p
 	var k := 1.0 - pop
 	var sc := 1.0 + 0.45 * sin(k * PI) if pop > 0.0 else 1.0
 	var tab_h := 15.0 * sc
-	var w := maxf(tab_h, (HudStyle.BIG.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 7.0) * sc)
+	var w := maxf(tab_h, (TextCache.width(HudStyle.BIG, txt, 12) + 7.0) * sc)
 	var ctr := corner + Vector2(-w * 0.5 + 6.0, -2.0)
 	var r := Rect2(ctr - Vector2(w, tab_h) * 0.5, Vector2(w, tab_h))
 	var rim: Color = HudStyle.GOLD if ult_open else role

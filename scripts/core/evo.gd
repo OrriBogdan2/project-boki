@@ -158,6 +158,8 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 		if mats.size() > 0:
 			(mats[0] as ShaderMaterial).set_shader_parameter("albedo", base)
 		root.set_meta("evo_scale", 1.0 + minf(forms.size() * 0.1, 0.6))
+	if body.has_node("BokiRig"):
+		return         # its grown parts are on the rig (BokiDna)
 	var mats2: Array = root.get_meta("mats", [])
 	for m in muts:
 		var col: Color = base.lerp(AFF[m["aff"]]["tint"], 0.6)
