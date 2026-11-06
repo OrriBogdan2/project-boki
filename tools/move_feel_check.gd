@@ -24,8 +24,8 @@ const SPAN_SKIP := ["Glider", "Gun", "Shield"]
 const T := {
 	"ground_input_frames":     ["<=", 1.0, "frames", "press to velocity change, same sim step"],
 	"ground_t95":              ["<=", 0.10, "s", "[game data] MaxAcceleration 4700-5400 uu/s2: top speed in ~0.09s"],
-	"ground_stop_t":           ["<=", 0.06, "s", "[spec] near-instant stop"],
-	"ground_stop_dist":        ["<=", 0.20, "m", "[spec] no floaty slide"],
+	"ground_stop_t":           ["~", [0.12, 0.25], "s", "[game data] braking 2220 uu/s2, friction 2 (item 150)"],
+	"ground_stop_dist":        ["~", [0.2, 0.5], "m", "[game data] the same stop (item 150)"],
 	"ground_reverse_t":        ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
 	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
 	"speed_light":             ["~", [4.4, 4.9], "m/s", "[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],

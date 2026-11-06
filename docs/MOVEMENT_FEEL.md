@@ -45,8 +45,8 @@ Nothing here comes from SUPERVIVE's files.
 |---|---|---|---|---|
 | ground_input_frames | 1 | 1 | <= 1 step | press acts the same step |
 | ground_t95 (to 95% run speed) | 0.083s | 0.067s | <= 0.07s | [spec] 0.05–0.1s |
-| ground_stop_t | 0.067s | 0.050s | <= 0.06s | [spec] near-instant |
-| ground_stop_dist | 0.10m | 0.075m | <= 0.2m | [spec] no slide |
+| ground_stop_t | 0.050s | 0.167s | 0.12-0.25s | [game data] SV braking 22.2 m/s2 + friction 2 (item 150) |
+| ground_stop_dist | 0.075m | 0.305m | 0.2-0.5m | [game data] the same stop (item 150) |
 | ground_reverse_t (180 degrees) | 0.150s | 0.117s | <= 0.12s | [spec] crisp |
 | ground_turn90_t | 0.100s | 0.083s | <= 0.09s | [spec] crisp |
 | speed light / medium / heavy | 5.2 / 5.0 / 4.73 | same | class data | KINFALL_CLASSES |
