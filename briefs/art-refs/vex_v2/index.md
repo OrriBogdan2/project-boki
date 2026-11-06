@@ -44,3 +44,19 @@ Rejected tops: the V-ring bandeau, the twist-knot, and the sweetheart cups (the 
 - Model: Nano Banana Pro, 16:9, 4K. Single reference: the master sheet.
 - The prompt asked for a colour-painted 3D model (not grey clay), a true A-pose and the minigun in every view.
 - First attempt rejected: grey-blue skin, arms down, no minigun in the back view (that attempt also used Kael's turnaround as a style reference).
+
+## Portrait and splash: FINAL (Nov 6, 16:02 ET)
+All Nano Banana Pro. References: the master sheet plus the smirk close-up only. Kael's images were dropped as style refs because they made her static.
+
+- `vex_v2_portrait.jpg` ("Over the Shoulder", 1:1, 4K). She looks back over her bare freckled shoulder with tally tattoos, a sly smirk and the minigun on her shoulder, under a warm rim light. Matches the framing of the other heroes' portraits.
+- `vex_v2_splash.jpg` ("Power Slide", 16:9, 4K). A rooftop power-slide while firing, laughing, with a coin flip. The generation came out mirrored (minigun on the left arm); the whole image was flipped locally, so all details are consistent.
+
+Alternates kept for marketing/loading screens:
+- `vex_v2_alt_tavern.jpg` (tavern bounty portrait). Known issue: two mechanical hands plus a detached minigun, and garbled poster text. Needs an arm-fix edit before use.
+- `vex_v2_alt_joyride.jpg` (mine-cart splash).
+
+Rejected:
+- Static rooftop splash and portrait (accurate but no personality).
+- Coin-bite portrait (owner: not sly or hot enough).
+- Bubblegum, kiss-for-luck (off-model / held gun).
+- Freefall splash.
