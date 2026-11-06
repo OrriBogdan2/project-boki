@@ -42,3 +42,4 @@ Model: Nano Banana Pro (no seed exposed). Style ref for the merges: the Ryzz mas
 - `ravel_v2_portrait.jpg` ("Cut Strings", 1:1): a warm red glow from the strings on her porcelain hand; the doll neck and choker are visible. Picked for small-size readability.
 - `explorations/portrait_moody_alt.jpg`: the moodier, darker alternate.
 - `ravel_v2_master_sheet_wide.jpg`: a 16:9 sheet from the turnaround prompt. It ignored the A-pose, but it's a clean, consistent wide master sheet. The A-pose turnaround still needs a rerun.
+- `ravel_v2_turnaround.jpg` (16:9): strict A-pose; front, 3/4, side and back; bow shown separately. Approved for modelling. Note: the back-view boots show a small heel, while the front is flat; flat heels are canonical.
