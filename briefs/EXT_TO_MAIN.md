@@ -2001,3 +2001,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - Full table: briefs/supervive-data/PHYSICS_PARITY.md. Matches: gravity (14.7), run speed and accel per hero, fall cap, abyss band, glide height, swoop, mantle launch.
 - Biggest misses: (1) stopping: we brake at 110 m/s^2 (about 0.1 m slide), SV 22.2 (0.4-0.5 m); (2) dash end keeps only 15% (ground) / 30% (air) of its speed, SV has no hard stop; (3) air control 0.3 vs SV 0.015 (ours is deliberate: 0.015 read as lost input at our camera); (4) jump 6.8 vs 7.5 m/s (deliberate: our 0.8 m terraces); (5) glide is instant-ish accel, SV is force-based (SV glide speeds still unknown).
 - Plan for step 3 unless the owner says otherwise: soften the stop (GROUND_DECEL toward SV) and raise the dash-end carry, keep air control and jump (logged reasons), glide force model with 163. Each change with --move-feel-check and the kit/dash checks.
+
+## 2026-11-06 17:20 UTC S1 RETIRED 17:20 UTC
+- Nothing in flight: all S1 branches are merged. ext/hem-reticle (693b1b45) is unmerged and superseded by ext/kit-hem-55b. Open items are in HANDOFF_S1.md, now owned by the physics lane. I have stopped pushing to ext/server-status.
