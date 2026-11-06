@@ -23,6 +23,7 @@ var trail: Array = []           # carpet pieces: {a, b, until}
 var tick_acc := 0.0
 var laid := 0
 var flights := 0                # (tests)
+var locked := 0                 # (tests) presses the flight swallowed
 var landings := 0
 var early := 0
 var boosts := 0
@@ -40,6 +41,28 @@ func xd() -> Dictionary:
 
 func running() -> bool:
 	return not flight.is_empty()
+
+## Flue Flight: ONLY E (Heat Shield) and X (land early) work; the flight's own steering and a jump stay. Every
+## other ability or item press is dropped before it reaches its handler (not buffered): RMB (Cinder Shot, and a
+## hold carried in is cancelled with nothing fired), Shift (no poof, no Soot Ram), the glove/utility slots,
+## gear, the Boki's C and a throw. A press answers with the soft "can't" tick.
+const LOCKED := ["dash", "sec", "util1", "util2", "util3", "util4", "gear1", "gear2", "kin_ab", "skill", "throw"]
+
+func lock_inputs() -> void:
+	if not running():
+		return
+	for key in LOCKED:
+		if h.inp.get(key, false):
+			locked += 1
+			h.inp[key] = false
+			h._ab_feedback(key if key in ["dash", "sec"] else "base", "deny")
+	h.dash_buf = 0.0
+	h.inp["dash_down"] = false
+	h.inp["sec_hold"] = false
+	if k.rmb_down:
+		k.rmb_down = false           # a hold carried in: its release must not fire
+		k.aiming = false
+		AimKit.hide(h, "rmb")
 
 ## Lift-off: an ember ring at his feet, the jet roars, the flight starts toward the cursor.
 func start() -> bool:

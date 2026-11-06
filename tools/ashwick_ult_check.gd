@@ -182,7 +182,7 @@ func _carpet() -> void:
 	)
 	T.downed = false
 	ak.fresh(T)
-	# a new flight with nobody near: the cloak and the Cinder Shot work mid-flight (item 51)
+	# a new flight with nobody near: only the cloak works mid-flight (item 66, owner)
 	ak.step(m, 4.0)
 	T.teleport(home + Vector3(0, 0, -5.0))
 	T2.teleport(home + Vector3(-3.0, 0, -5.0))
@@ -192,12 +192,8 @@ func _carpet() -> void:
 	ak.step(m, 0.4, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 	var used0: int = K.cloaks
 	P.ak.use_e()
-	ok("ult: the Furnace Cloak works mid-flight (the flight goes on)", K.cloaks == used0 + 1 and J.running())
-	var ch0 := K.ch_rmb
-	P.ak.press_rmb()
-	ak.step(m, 0.02)
-	ok("ult: the Cinder Shot goes mid-flight and the flight goes on", K.ch_rmb < ch0 and J.running(),
-			"charges %.1f -> %.1f" % [ch0, K.ch_rmb])
+	ok("ult: E (Furnace Cloak) still works mid-flight, the flight goes on", K.cloaks == used0 + 1 and J.running())
+	await _locked_inputs(m, P, K, home + Vector3(16, 0, 0))
 	K.ch_rmb = float(K.rmb_charges())
 	var em0: int = K.hose.emitted
 	var denied0: int = K.lmb_denied
@@ -406,8 +402,8 @@ func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) ->
 	J.recast()
 	ak.step(m, 0.5)
 
-## Item 51: Shift in the flight is a poof that feeds it (the air dash spent, faster, bent its way, still flying);
-## a jump leaps off it at once, keeping a share of its speed into the air.
+## Item 66: Shift in the flight does nothing; item 51: a jump leaps off it at once, keeping a share of its speed
+## into the air (plain flight movement is not an ability and stays).
 func _shift_and_jump(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 	var J := K.jet
 	var at := home + Vector3(16, 0, 0)
@@ -416,16 +412,19 @@ func _shift_and_jump(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 	_cast(P, at)
 	ak.step(m, 0.3, func(): ak.aim_at(P, at))
 	var sp0 := float(J.flight["speed"])
+	var b0 := J.boosts
+	var ex0 := P.ex_cd
+	var dashes0 := P.dashes
 	P.inp["move"] = Vector2(0, 1)
 	P.inp["dash"] = true
 	ak.step(m, 0.05, func(): ak.aim_at(P, at))
 	P.inp["dash"] = false
 	P.inp["move"] = Vector2.ZERO
-	var dir: Vector2 = J.flight.get("dir", Vector2.ZERO)
 	ok(
-		"ult: Shift in the flight is a poof that feeds it: the air dash spent, faster, bent its way (item 51)",
-		J.running() and P.ex_cd > 0.0 and float(J.flight["speed"]) > sp0 + 3.0 and dir.y > 0.1,
-		"speed %.1f -> %.1f, heading %s" % [sp0, float(J.flight.get("speed", 0.0)), dir]
+		"ult: Shift in the flight does nothing now (no poof, no dash spent, no speed; owner: only E works)",
+		J.running() and J.boosts == b0 and P.ex_cd == ex0 and P.dashes == dashes0
+				and float(J.flight["speed"]) <= sp0 + 0.01,
+		"speed %.1f -> %.1f, boosts %d" % [sp0, float(J.flight.get("speed", 0.0)), J.boosts - b0]
 	)
 	ak.step(m, 2.0)
 	P.teleport(home)
@@ -462,3 +461,56 @@ func _burst() -> void:
 		"burst: Flue Flight then the merge never one-shots a full-health light hunter",
 		bool(res["merged"]) and bool(res["alive"]), info
 	)
+
+## Owner decision (item 66): in Flue Flight ONLY E works. RMB, Shift, the glove and utility slots, gear, a throw and
+## the Boki's C are dropped before their handlers: no cooldown or charge spent, no projectile, no item used. E and
+## X (land early) still work, and RMB is back the moment the flight ends. Called mid-flight, E-checked after.
+func _locked_inputs(m: Match, P: Hunter, K: AshwickKit, at: Vector3) -> void:
+	var J := K.jet
+	UtilityBelt.set_slot(P, 0, "tonic", 3)
+	UtilityBelt.set_slot(P, 1, "smoke", 2)
+	P.gear[0] = {"id": "blink", "rar": 1}
+	P.gear[1] = {"id": "blink", "rar": 1}
+	P.gear_cd = [0.0, 0.0]
+	K.ch_rmb = float(K.rmb_charges())
+	K.cd["rmb"] = 0.0
+	P.ex_cd = 0.0
+	var shots0: int = m.shots.size()
+	var ch0 := K.ch_rmb
+	var hp0 := P.hp
+	var pos_y := P.pos.y
+	var l0 := J.locked
+	var keys := ["sec", "dash", "util1", "util2", "util3", "util4", "gear1", "gear2", "kin_ab", "skill", "throw"]
+	for key in keys:
+		ak.step(m, 0.05, func():
+			P.inp[key] = true
+			if key == "sec": P.inp["sec_hold"] = true
+			ak.aim_at(P, at))
+		P.inp[key] = false
+		P.inp["sec_hold"] = false
+	ak.step(m, 0.05, func(): ak.aim_at(P, at))
+	ok("ult 66: RMB mid-flight spends no charge and fires nothing", K.ch_rmb == ch0 and K.cd["rmb"] == 0.0
+			and m.shots.size() == shots0 and not K.aiming and not K.rmb_down,
+			"charges %.1f -> %.1f, shots +%d" % [ch0, K.ch_rmb, m.shots.size() - shots0])
+	ok("ult 66: Shift (dash), Q/V gloves, Boki C, skill and throw spend nothing",
+			P.ex_cd == 0.0 and P.dash_buf == 0.0 and float(P.gear_cd[0]) == 0.0 and float(P.gear_cd[1]) == 0.0,
+			"ex_cd %.2f gear_cd %s" % [P.ex_cd, P.gear_cd])
+	ok("ult 66: the utility slots use no item (tonic and smoke stay, nothing drunk)",
+			int(P.belt[0]["n"]) == 3 and int(P.belt[1]["n"]) == 2 and P.drink_t <= 0.0 and P.hp <= hp0 + 0.01,
+			"tonic %s smoke %s" % [P.belt[0]["n"], P.belt[1]["n"]])
+	ok("ult 66: every blocked press was swallowed and the flight went on", J.locked - l0 >= keys.size() and J.running(),
+			"swallowed %d of %d" % [J.locked - l0, keys.size()])
+	ok("ult 66: flight steering still works (still flying, low)", P.pos.y < pos_y + 1.0, "y %.2f" % P.pos.y)
+	var cl0: int = K.cloaks
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ok("ult 66: E still works after all that", K.cloaks == cl0 + 1 and J.running())
+	J.recast()
+	ak.step(m, 0.5)
+	ok("ult 66: X lands it early", not J.running())
+	P.ak.press_rmb()
+	ak.step(m, 0.02)
+	ok("ult 66: the moment it ends RMB fires again", K.ch_rmb < ch0, "charges %.1f -> %.1f" % [ch0, K.ch_rmb])
+	K.ch_rmb = float(K.rmb_charges())
+	_cast(P, at)
+	ak.step(m, 0.4, func(): ak.aim_at(P, at))
