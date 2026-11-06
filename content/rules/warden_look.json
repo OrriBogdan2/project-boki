@@ -11,12 +11,6 @@
 		},
 		"slots": {
 			"skin": {
-				"paint_glow": 1.2,
-				"paint_glow_color": [
-					0.298,
-					0.765,
-					0.369
-				],
 				"top_light": 0.45,
 				"fres": 0.2,
 				"fres_tint": 0.2,
@@ -59,35 +53,8 @@
 				"fres_tint": 0.6,
 				"far_lift": 0.45,
 				"sheen": 0.1
-			},
-			"glow": {
-				"glow": 1.1
 			}
-		},
-		"bloom": [
-			{
-				"at": "anchor_lens",
-				"color": [
-					0.6,
-					1,
-					0.4,
-					0.4
-				],
-				"size": 0.09,
-				"depth_test": true
-			},
-			{
-				"at": "anchor_spine",
-				"color": [
-					0.5,
-					1,
-					0.4,
-					0.12
-				],
-				"size": 0.2,
-				"depth_test": true
-			}
-		]
+		}
 	},
 	"ryzz": {
 		"painted": {"rim_far": 0.3, "rim_far_color": [1.0, 0.3, 0.72]},
