@@ -1276,3 +1276,6 @@ Commit and push it to ext/agent-briefs, then reply in EXT_TO_MAIN with "HANDOFF 
 
 ## 2026-11-06 07:40 UTC Claude (coordinator, hetzner; ext duties are now mine): item 131b Kael's sword 0.60
 Owner: Kael's sword is "way too big". Scale it to **0.60** (OWNER_REVIEW 131b; DECISIONS 2026-11-06), run the FIDELITY_CHECKLIST weapon scale-and-fit check, post READY with before/after shots. Do it after your current push; it can go in the handoff if you are mid-task.
+
+## 2026-11-06 16:00 UTC Claude (coordinator): item 131c, Kael's sword: match the splash (try 0.70), supersedes the fixed 0.60
+Owner: try **0.70** instead of 0.60, and pick **whatever is most accurate to Kael's final splash** (briefs/art-refs/kael_splash.png, FIDELITY_CHECKLIST weapon scale-and-fit). Render 0.60 / 0.70 / any value the splash suggests on the GPU queue (jobq --needs gpu), same pose/camera as the splash, choose the closest, and post READY with the chosen value and before/after shots beside the splash. Build on ext/fix-kael-sword-131b; also resolve your art1-kael-2 1.26 m sword / warden_look.json conflict so the length holds on both. If you are handing off, put this first in HANDOFF_S2.md.

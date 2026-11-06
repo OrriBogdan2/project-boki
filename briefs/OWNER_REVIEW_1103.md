@@ -2532,3 +2532,10 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Coordinator side:** a cron pulls the JSONL into briefs/FUN_SCORES.md (per player, per version; owner vs testers) and the dashboard fun-score chart.
 - Asserts: card shows only once per version after 10 min; skip works; offline queue flushes next launch; endpoint rejects oversize payloads; existing matchmaker endpoints unchanged.
 - **Lane:** UI (orribogdan lane), **role: build-spec**.
+
+## 131c. Kael's sword: match the final splash; try 0.70 (owner, 16:00 UTC Nov 6; revises 131b)
+- The owner: try **0.70** instead of 0.60, and in general choose **whatever is most accurate to his final splash** (briefs/art-refs/kael_splash.png; the 12 final splashes are the reference; FIDELITY_CHECKLIST weapon scale-and-fit row).
+- Method: render Kael in-game at 0.60, 0.70 and any value in between that the splash suggests (jobq submit --needs gpu, same camera/pose as the splash: blade length vs his height and hand), compare against the splash, pick the best match. Report the chosen value with before/after shots next to the splash.
+- **Mind S2's warning:** art1-kael-2's sword is 1.26 m and conflicts in warden_look.json; resolve it in the same branch so the chosen length holds on both main's model and art1-kael-2.
+- Supersedes the fixed 0.60 in 131b (ext/fix-kael-sword-131b 77368bca is the starting point, not the answer).
+- **Lane:** heroes (S2, corybogdan).
