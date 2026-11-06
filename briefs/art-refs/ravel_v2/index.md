@@ -37,3 +37,8 @@ Model: Nano Banana Pro (no seed exposed). Style ref for the merges: the Ryzz mas
 - `Ravel_nocked` (wooden bar plus nocked needle).
 - `Ravel_draw` (full-draw pose, for the splash).
 - `Ravel_mix1` (the first premium pass).
+
+## Portrait and wide sheet (Nov 6, 18:41 ET)
+- `ravel_v2_portrait.jpg` ("Cut Strings", 1:1): a warm red glow from the strings on her porcelain hand; the doll neck and choker are visible. Picked for small-size readability.
+- `explorations/portrait_moody_alt.jpg`: the moodier, darker alternate.
+- `ravel_v2_master_sheet_wide.jpg`: a 16:9 sheet from the turnaround prompt. It ignored the A-pose, but it's a clean, consistent wide master sheet. The A-pose turnaround still needs a rerun.
