@@ -1,0 +1,34 @@
+# Ryzz v2 redesign (in progress, Nov 6)
+
+Model: Nano Banana Pro (no seed exposed). Exploration at 2K.
+
+## Current direction (owner-approved)
+`ryzz_v2_base_underboob.jpg` is the base design. Pending: a fuller-briefs edit, then the master sheet.
+
+**Identity:**
+- Blue-to-pink twin pigtails; lightning scar over the right eye; flushed nose with a nose ring (keep it).
+- Always blowing pink bubblegum, with a fake-clueless "who, me?" look. She plays dumb while hiding a ball of pink lightning behind her hip.
+- Copper lightning-rod backpack: four tall rods, pink arcs between them. This is her relic.
+
+**Outfit:**
+- Black high-neck crop top ending under the bust (underboob reveal).
+- A glowing pink lightning-bolt strip running from the top into a high-cut black brief.
+- Copper wire coils on the arms; cable straps on the thighs.
+- Yellow/black hazard windbreaker tied at the hips.
+- Mismatched legs: fishnet on one, black thigh-high on the other.
+- Platform combat boots; fingerless gloves with hazard cuffs.
+
+**Distinct from Vex:** Vex has cleavage and the jacket off one shoulder; Ryzz has a high neck with underboob and the jacket tied at the waist.
+
+## Alternates
+`ryzz_v2_skin_candidate_bolt_neckline.jpg` is a skin candidate ("Live Wire Ryzz"): a plunging neckline that zigzags as a lightning bolt.
+
+## explorations/ (kept for reference)
+- `outfit_tied_jacket_zip_top`(_v1): pink zip crop top with a black jacket tied at the waist.
+- `outfit_hazard_windbreaker_tube_top`: lightning tube top, hazard windbreaker, mismatched legs.
+- `outfit_live_wire`: black cutout leotard with copper coils and rubber gloves.
+- `outfit_spire_climber`: climbing harness, carabiners, copper rope.
+- `ryzz_v2_plunge_no_bolt`: plunge bodysuit merge after the backpack fix.
+- `ryzz_v2_bolt_plus_underboob_a/b`: bolt neckline plus underboob. Judged too much skin at once.
+- `sheet_hotter_ABC`(_v2): the first "hotter" sheets (corset, zip top, bodysuit).
+- `sheet_storm_directions_grey_hair`: the rejected grey-hair storm directions. The owner kept the blue/pink hair.
