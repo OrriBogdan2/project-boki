@@ -50,7 +50,6 @@ _Hedgehog + Toadstool_ (`burrlet`). A hedgehog whose quills are glowing toadstoo
 
 - E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - Auto ability (it casts this on its own): **Spore Patch** (11s cooldown, range 7m). On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
-- On your dash: **Spore Puff**
 - Bond ultimate (merge): **Sporewake** (8s). Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious > Spore Drift; Swift: Swift
 
@@ -92,7 +91,6 @@ _Fox + Scorpion_ (`cindle`). A sly fox with a scorpion's curled tail. Its sting 
 
 - E ability: **Stinger Hook** (8s cooldown, range 8m). Vespyx lashes its tail 8m: the first foe it stings is dragged back to it, poisoned, blighted (healing halved) and stunned 0.3s.
 - Auto ability (it casts this on its own): **Stinger Dash** (9s cooldown, range 7m). On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
-- On your dash: **Venom Trail**
 - Bond ultimate (merge): **Venom Fusion** (7s). Vespyx fuses onto you as venomous armor for 7s: 20% more damage, and your shots poison and burst.
 - Evolution paths: Fierce: Fierce > Barbed Tail; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
@@ -134,7 +132,6 @@ _Armadillo + Rhino beetle_ (`pebbit`). An armadillo with a rhino beetle's horn. 
 
 - E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
-- On your dash: **Gravity Wake**
 - Bond ultimate (merge): **Heavy Star** (10s). Gravadillo folds into you as a heavy star for 10s. Slam with the left button, roll through foes with the right, drag them in with E, then Fuse again brings the whole sky down.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast > Dense Plate; Curious: Curious; Swift: Swift
 
@@ -155,7 +152,6 @@ _Axolotl_ (`puddlet`). An axolotl whose frills grew into living crystal. It bend
 
 - E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
 - Auto ability (it casts this on its own): **Refraction** (12s cooldown). When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
-- On your dash: **Prism Decoy**
 - Bond ultimate (merge): **Prism Shell** (10s). Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Fuse again shatters the shell outward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast > Wide Prism; Curious: Curious; Swift: Swift
 
@@ -176,7 +172,6 @@ _Owl + Luna moth_ (`wisplet`). A moonlit owl with soft moth wings. It flits on m
 
 - E ability: **Moon Swap** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.
 - Auto ability (it casts this on its own): **Moonlift** (14s cooldown). On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
-- On your dash: **Moon Blink**
 - Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift > Long Throw
 
@@ -197,7 +192,6 @@ _Hare + Bat_ (`zapple`). A long-eared hare with bat wings. It hears everything c
 
 - E ability: **Echo Chain** (7s cooldown, range 7m). A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
 - Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
-- On your dash: **Echo Step**
 - Bond ultimate (merge): **Resonance** (6s). Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift > Overtone
 

@@ -71,25 +71,6 @@
 			}
 		]
 	},
-	"dodge_rider": {
-		"name": "Venom Trail",
-		"on_pass": [
-			{
-				"type": "damage",
-				"amount": 3
-			},
-			{
-				"type": "damage",
-				"preset": "poison",
-				"amount": 12
-			},
-			{
-				"type": "mark",
-				"preset": "blight",
-				"duration": 3
-			}
-		]
-	},
 	"active": "stinger_hook",
 	"auto": "flare_dash",
 	"merge": "blaze_mantle",

@@ -288,7 +288,7 @@ func on_dash(use_ex: bool) -> bool:
 	var air: Dictionary = dd.get("air", {})
 	var dist := float(air["dist"]) if use_ex else float(dd["dist"])
 	var tt := float(air["time"]) if use_ex else float(dd["time"])
-	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12)), "dir": dash_dir()}, use_ex)
+	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12)), "dir": dash_dir()})
 	# the ground hop goes through the global dash feel (its data is set so the result is the source's 2 bh in
 	# 0.2 s); the glide is the source's own measured curve (dash.air), so the feel doesn't touch it
 	if use_ex:

@@ -355,7 +355,7 @@ func on_dash(use_ex: bool) -> bool:
 			return true
 		var a := h.position + Vector3(0, 0.9, 0)
 		var ex_dist := float(h.cdat.get("ex_dist", 5.0))
-		travel(ex_dist, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "phase": 1.0}, true)
+		travel(ex_dist, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "phase": 1.0})
 		play("mage_dash_ex")
 		fx().arc(a, a + Vector3(h.roll_dir.x, 0, h.roll_dir.y) * ex_dist, TEAL, GOLD, 0.45, 0.3)
 		last_dash_kind = "ex"

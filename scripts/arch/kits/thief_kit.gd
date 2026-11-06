@@ -429,7 +429,7 @@ func on_dash(use_ex: bool) -> bool:
 	var air := use_ex or not h.grounded
 	if use_ex:
 		h.ex_next = false            # her own distance and time, not the class's long dash
-		travel(float(dd["air_dist"]), float(dd["air_time"]), {"invuln": 0.1}, true)
+		travel(float(dd["air_dist"]), float(dd["air_time"]), {"invuln": 0.1})
 		h.dash_is_ex = true
 		h.vel.y = maxf(h.vel.y, 0.0)
 	else:

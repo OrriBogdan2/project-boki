@@ -222,7 +222,7 @@ var perks: Array = []           # perks picked up this expedition, one entry per
 var ult := 0.0                # the bond meter, 0..1: R calls your kin's bond ultimate at 1
 var crit_t := 0.0             # shots crit while this runs (Blink)
 var phase_t := 0.0            # Light's Phase Step: shots pass through you while this runs
-var dash_pass := {}           # a kin rider on the dash: what it does to foes you pass through {hit, opts}
+var dash_pass := {}           # a grammar dash or a kit dash: what it does to foes you pass through {hit, opts}
 var abil_charge := {}         # holding a charge-up weapon ability (Rail Charge): {t}
 var charge: Dictionary = {}   # Ram
 var idle_fire := 0.0
@@ -369,7 +369,7 @@ func accent() -> Color:
 
 func max_dashes() -> float:
 	var base := float(dodge_def.charges) if dodge_def else float(cdat["dashes"])
-	return base + float(int(owner_stat("dodge_charges"))) + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
+	return base + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
 
 func dash_regen() -> float:
 	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)
@@ -1146,7 +1146,6 @@ func do_dash() -> void:
 		dashes -= 1.0
 	var effs: Array = dodge_def.effects if dodge_def else [{"type": "dash", "speed": DASH_SPEED, "time": DASH_TIME, "invuln": 0.14}]
 	Effects.run(effs, self, {"slot": "dodge", "ability": dodge_def.id if dodge_def else "dash", "level": ability_level("dash")})
-	_dash_rider(use_ex)
 	CombatBus.ability_used.emit(self, dodge_def.id if dodge_def else "dash", "dodge")
 
 ## The theme of the kin you brought ("venom", "lunar"...). Cosmetic only: it tints, never rules.
@@ -1154,77 +1153,6 @@ func kin_element() -> String:
 	if kin == null or (kin as Kin).dead:
 		return ""
 	return String(Data.KIN.get((kin as Kin).species, {}).get("type", ""))
-
-## Your kin's dodge rider for the HUD: {name, desc, color} ({} when it has none).
-func dash_rider() -> Dictionary:
-	var k: Kin = kin
-	if k == null or k.dead or k.ks == null or k.ks.dodge_rider.is_empty():
-		return {}
-	return {"name": String(k.ks.dodge_rider.get("name", "")), "desc": KinText.rider(k.ks), "color": _rider_color(k.ks).to_html(false)}
-
-static func _rider_color(ks: KinSpec) -> Color:
-	var r: Dictionary = ks.dodge_rider
-	if not (r.get("on_pass", []) as Array).is_empty(): return KinRules.effects_color(r["on_pass"])
-	for key in ["on_start", "on_end"]:
-		for st in r.get(key, []):
-			if not (st as StageSpec).effects.is_empty(): return KinRules.effects_color((st as StageSpec).effects)
-	return KinRules.cat_color("utility")
-
-## The kin adds a rider to every class dodge (KinSpec dodge_rider, run by KinExec): effects on what
-## you dodge through, stages where you start and where you stop, an echo, or a blink.
-func _dash_rider(ex: bool) -> void:
-	dash_pass = {}
-	var k: Kin = kin
-	if k == null or k.dead or k.ks == null or k.ks.dodge_rider.is_empty():
-		return
-	var rd: Dictionary = k.ks.dodge_rider
-	var col := _rider_color(k.ks)
-	var cx := KinExec.make_cx(m, self, k, self, inp.get("aim", pos), m.dmg_mult(self) * Effects.level_k({"level": ability_level("dash")}), "dodge", "rider_" + k.species)
-	if String(rd.get("as", "dash")) == "blink" and not ex and grounded:
-		# no travel at all, you're simply there
-		var dist := roll_speed * roll_t
-		roll_t = 0.0
-		var best := pos
-		var kk := dist + 0.4
-		while kk > 0.5:
-			var q := pos + Vector3(roll_dir.x, 0, roll_dir.y) * kk
-			if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
-				best = Vector3(q.x, m.world.ground_at(q.x, q.z), q.z); break
-			kk -= 0.5
-		m.fx.ghost(position, face, col, float(cdat["scale"]))
-		teleport(best)
-		vel.x = roll_dir.x * 3.0; vel.z = roll_dir.y * 3.0
-		phase_t = maxf(phase_t, 0.15)
-	if not (rd.get("on_start", []) as Array).is_empty():
-		var c1 := cx.duplicate(); c1["at"] = pos; c1["dir"] = roll_dir
-		KinExec.run_stages(rd["on_start"], c1)
-	if not (rd.get("on_pass", []) as Array).is_empty():
-		var on_pass: Array = rd["on_pass"]
-		dash_pass = {"hit": {}, "kx": func(f: Ent) -> void: KinExec.apply_foe(on_pass, f, cx, pos)}
-	if not (rd.get("on_end", []) as Array).is_empty():
-		var tt := maxf(0.02, roll_t)
-		var on_end: Array = rd["on_end"]
-		m.later(tt, func():
-			if is_instance_valid(self) and not dead and not out:
-				var c2 := cx.duplicate(); c2["at"] = pos; c2["dir"] = roll_dir
-				KinExec.run_stages(on_end, c2))
-	for md in rd.get("modifiers", []):
-		if (md as PartSpec).type != "repeat" or ex:
-			continue
-		var d0 := roll_dir
-		var spd0 := roll_speed
-		var t0 := roll_t
-		var pr: Dictionary = (md as PartSpec).params
-		for i in int(pr["count"]):
-			m.later(t0 + float(pr["delay"]) * float(i + 1) + t0 * float(i), func():
-				if is_instance_valid(self) and not dead and not out and not downed and stun_t <= 0.0 and roll_t <= 0.0:
-					roll_dir = d0
-					roll_speed = spd0
-					roll_t = t0 * float(pr["falloff"])
-					move_kind = "dash"
-					inv_t = maxf(inv_t, roll_t)
-					m.fx.dash_trail(self)
-					m.sfx("dash", pos, -6.0, 1.4))
 
 var roll_speed := DASH_SPEED
 var wedged_t := 0.0
@@ -1307,7 +1235,7 @@ func dash_with(e: Dictionary) -> void:
 	if not (ak and ak.own_dash_trail()):
 		m.fx.dash_trail(self)          # the shared puff and ring; a kit with its own trail draws no ring
 
-## A kin rider (or a grammar dash you perform): what you dash through gets its effects.
+## A grammar dash you perform (or a kit's dash that hits): what you dash through gets its effects.
 func _pass_along() -> void:
 	for f in m.foes_of(team):
 		if dash_pass.is_empty(): return
@@ -1812,10 +1740,9 @@ func slot_info(slot: String) -> Dictionary:
 				"cd_max": runner.cd_max("utility"), "charges": runner.charges("utility"), "max_charges": d.charges, "verb": d.verb, "ready": runner.is_ready("utility"), "charge": charge_frac()}, true)
 		"dash", "dodge":
 			var d: AbilityDef = dodge_def
-			var rd := dash_rider()
 			var dmax := max_dashes()
 			out.merge({"name": d.display_name if d else "Dash", "short": (d.short if d else "Dash"), "icon": d.icon if d else "dash", "col": d.color if d else Color("bfe6ff"),
-				"desc": (d.desc if d else "") + (("  " + String(rd.get("desc", ""))) if not rd.is_empty() else ""), "rider": String(rd.get("name", "")),
+				"desc": d.desc if d else "",
 				"cd": (1.0 - fposmod(dashes, 1.0)) * dash_regen() if dashes < dmax - 0.001 else 0.0, "cd_max": dash_regen(), "charges": int(floor(dashes)), "max_charges": int(dmax),
 				"verb": d.verb if d else "dash", "ready": dashes >= 1.0}, true)
 		"gear", "gear0", "q", "gear1", "v":
