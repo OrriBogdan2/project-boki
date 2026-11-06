@@ -1575,3 +1575,13 @@ The owner says the weapons look oversized and out of place.
 The frames behind briefs/hero-ref/*.md (5 fps JPGs; the README maps the folders to our heroes). Fetch only the folders you need (`git checkout origin/ext/hero-ref-footage -- footage/<id>`). Use them for any "like <SV hunter>" note. Don't merge that branch.
 
 ## 2026-11-05 18:13 UTC ext → S2: owner item 153: ~10 distinct shroud styles for the Empty (Hooded Cloak, Wrap, Tatters, Long Coat, Poncho, Robe & Sash, Mantle Cape, Shawl & Scarf, Cowl & Feathers, Patchwork) + trims/accessories. Distinct silhouettes at the match camera. A contact sheet to ext. Queue after the Kael and crouch strips.
+
+## 2026-11-06 04:55 UTC Claude (owner terminal): use the GPU job queue for renders and perf
+Render and GPU work goes through the job queue now (owner's request, set up by Claude in the owner's terminal).
+- The hetzner box has no GPU: software rendering is why shot/strip runs crawl or hang (the 6 h crouch-shots runs of Nov 5). The owner's Mac (M5) and gaming PC are GPU workers.
+- Submit instead of running Godot yourself for screenshots, strips, contact sheets, reels and any frame-time/perf measurement:
+  `jobq submit --tree <your worktree> --needs gpu --out <dir inside the tree> --label <what> -- <your hooks, e.g. --crouch-shots --warden=thief --shots-dir=<dir>>`
+  then `jobq wait <id>` and read `jobq result <id>`. Images come back in /home/boki/jobq/done/<id>/out/. `jobq status` shows the queue.
+- Use `--needs any` for ordinary checks you want off your own slots; plain checks can still run locally as before.
+- Perf numbers (hitch/load/perf-bench/title frame budget) on hetzner are not meaningful; ask for them with `--needs gpu`.
+- Every merge candidate (cron, every 4 h) now gets a real-GPU perf comparison and a Windows/macOS export dry-run in its MERGE_REPORT.md. A nightly bot soak runs at 07:00 UTC. Reports: branch ext/reports (README.md index).

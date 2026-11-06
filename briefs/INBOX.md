@@ -1078,3 +1078,13 @@ Memory: textures 1187.5 MB, buffers 207.7 MB, video 1603.5 MB, static 565.2 MB, 
 - **Report:** post READY in EXT_TO_MAIN with the before/after frame numbers.
 - **S5 note:** it held `kit-hem-55b` for drop-phase shader compiles; if your shader warm-up covers that case, say so.
 - Lean on budget: one agent.
+
+## 2026-11-06 04:55 UTC Claude (owner terminal): use the GPU job queue for renders and perf
+Render and GPU work goes through the job queue now (owner's request, set up by Claude in the owner's terminal).
+- The hetzner box has no GPU: software rendering is why shot/strip runs crawl or hang (the 6 h crouch-shots runs of Nov 5). The owner's Mac (M5) and gaming PC are GPU workers.
+- Submit instead of running Godot yourself for screenshots, strips, contact sheets, reels and any frame-time/perf measurement:
+  `jobq submit --tree <your worktree> --needs gpu --out <dir inside the tree> --label <what> -- <your hooks, e.g. --crouch-shots --warden=thief --shots-dir=<dir>>`
+  then `jobq wait <id>` and read `jobq result <id>`. Images come back in /home/boki/jobq/done/<id>/out/. `jobq status` shows the queue.
+- Use `--needs any` for ordinary checks you want off your own slots; plain checks can still run locally as before.
+- Perf numbers (hitch/load/perf-bench/title frame budget) on hetzner are not meaningful; ask for them with `--needs gpu`.
+- Every merge candidate (cron, every 4 h) now gets a real-GPU perf comparison and a Windows/macOS export dry-run in its MERGE_REPORT.md. A nightly bot soak runs at 07:00 UTC. Reports: branch ext/reports (README.md index).

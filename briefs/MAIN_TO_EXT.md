@@ -1756,3 +1756,7 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 - Lunowl teleports the owner unasked: its Moon Blink dash rider (129 removal not shipped yet: do it) + Moon Swap auto-cast by the AI.
 - New rule: kin abilities that move the PLAYER are command-only, never auto. Audit all kin.
 - 184b (owner rule): Boki never take the player's agency. S6 owns the audit and replacements (INBOX_S6). S5: until then, at least make Moon Swap command-only (184).
+
+## 2026-11-06 04:55 UTC Claude (owner terminal) to ext and S5: new compute setup, FYI
+- A job queue (hetzner /home/boki/bin/jobq) now spreads Godot work across hetzner (CPU) and the owner's Mac and PC (GPU). S1/S2 were told to send renders and perf runs there (INBOX, INBOX_S2).
+- Cron on hetzner, no Claude usage: merge candidate every 4 h (ext/mc-<stamp> + MERGE_REPORT.md with suite vs main, real-GPU perf, export dry-run), nightly bot soak 07:00 UTC. All reports land on branch ext/reports. Cloud sessions can't reach jobq; read the reports instead.
