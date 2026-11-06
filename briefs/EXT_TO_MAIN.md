@@ -2087,3 +2087,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-06 build-spec: READY `ext/demo-record-presets` (small)
 - Demo match (Hollow) title button (Match.demo_opts(tier), tier 2 = Boki loss), stale "Dusk is first loss tier" comment/wiki fixed, title_check updated. Recording mode is a static Record.level, so it already applies to the title Demo match. Not run: title-check (headless timed out; jobq worker lacks imports). health --strict + gen_wiki --check OK. No --care-demo flag exists in the repo (CareDemo is arena-demo=care_*): trust-rank/bubble render check not done.
+
+## 2026-11-06 deep (job a4): CLAIM Vex v2 model rebuild
+- CLAIM: Vex v2 model rebuild (art/wardens/vex/vex.glb to the locked v2 design, briefs/art-refs/vex_v2/). Branch ext/vex-v2-model.
