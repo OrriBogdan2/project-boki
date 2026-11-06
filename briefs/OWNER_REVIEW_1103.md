@@ -2501,3 +2501,34 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Keep each Boki's identity (lunar stays lunar, etc.). Keep balance roughly level.
   - Dash riders are already removed (129); verify none remain.
 - **Assert:** a scripted test where every kin casts its kit 20× near an idle owner → the owner's position and velocity are never changed by kin effects (except the abyss-rescue whitelist).
+
+## 131b. Kael's sword: scale 0.60 (owner, 07:30 UTC Nov 6)
+- The owner finds the sword "way too big". Set Kael's sword to **0.60** of its current scale (all poses, RMB hold included), then run the FIDELITY_CHECKLIST weapon scale-and-fit check and post before/after shots.
+- **Lane:** heroes (S2, corybogdan). Folds into item 131.
+
+## 185. Bug 181 REOPENED: the "blink" dashes were caused by a BOKI interaction, not frame rate (owner, 07:30 UTC Nov 6)
+- The owner says the cause of 181 (dashes look like an instant blink: Kael RMB Lunge, Sable dash) was a **Boki interaction changing the dash**, not frame rate. Reopen 181 with that root cause.
+- Verify against the dash-rider removal (item 129 DECISION, DECISIONS 2026-11-05): confirm on current main that no Boki rider, passive, aura, stat buff or command alters dash distance, speed, duration, animation or i-frames. List every code path where a Boki touches the hero's dash or movement (grep the Boki kits, kin.gd, buffs) and remove or fence what remains.
+- Asserts: with every Boki species equipped in turn, Kael's Lunge and Sable's dash keep identical duration/distance/animation frames to the no-Boki baseline (a check that fails if a Boki changes them).
+- **Lane:** physics/perf (S1, orri-projectboki) with the Boki audit (186) as input.
+
+## 186. AUDIT: every Boki interaction that affects the player character (owner direction A, 07:30 UTC Nov 6)
+- The owner: Boki interactions that change the player's gameplay (movement, dash, abilities, stats, control) "have tended to hurt". Review **every** one. Anything that changes gameplay must be strongly justified; **default to removing or restricting**.
+- Deliverable first (no code): briefs/BOKI_PLAYER_AUDIT.md, one row per interaction: Boki species, what it does to the player (movement / dash / abilities / stats / control), trigger, code path, and a **keep / cut / limit** recommendation with a one-line reason. Includes 184 (Lunowl Moon Swap) and the 184b agency rule. The owner reviews the list before anything is cut.
+- **Lane:** Boki (S6 lane; scout/build-spec role). Supersedes the narrower 184b audit.
+
+## 187. DESIGN PASS: make Boki feel central, not add-ons (owner direction B, 07:30 UTC Nov 6)
+- Per PRIORITIES (Boki are the star). **Proposals first**: briefs/BOKI_CENTRAL_PROPOSALS.md with 3-5 concrete directions (how Boki drive the loop: fights, exploration, progression, identity), each with what changes, what it costs, and how it respects 184b (no agency taken) and 186 (fewer stat/move riders). The owner reviews before any build.
+- **Lane:** Boki; **role: feel (Fable)**.
+
+## 188. Rival dash bars: don't show them; our OWN dash charge UI is unclear (owner, 07:30 UTC Nov 6)
+- **Rivals:** follow SUPERVIVE. briefs/hero-ref/HUD.md section 1 (overhead plate stack: name, segmented health, armour strip, shield strip, level chip, status icons) shows **no dash charges** on other hunters. So by default we **do not show enemies' dash charges**; remove them if our plates draw them.
+- **Own dash UI:** the owner finds our own dash charge display unclear. Fix it as part of **item 147** (dash charges, resets and the dash UI: copy SUPERVIVE): write briefs/hero-ref/DASH_UI.md from the footage first, then make the self charge pips/gauge clear.
+- **Lane:** UI (orribogdan lane), with 147.
+
+## 189. In-game "Rate this build" card + feedback endpoint (owner, 07:35 UTC Nov 6)
+- **Behaviour:** on the first return-to-title or quit on a **new game version**, after **>= 10 min** of play on that version, show a small **skippable** card in the Void & Masks style (briefs/UI_STYLE.md): four 1-10 ratings (combat feel, Boki, onboarding, look) and an optional one-line note. **Once per player per version.**
+- **Submit:** JSON {version, player name/id, scores, note, minutes_played} by HTTP POST to a new **POST /feedback** on the existing matchmaker service (boki-us-1:8080; code on ext/matchmaker). Store JSONL. Keep the matchmaker's existing behaviour untouched; reject payloads over 2 KB and malformed JSON. If offline: queue locally and send on the next launch.
+- **Coordinator side:** a cron pulls the JSONL into briefs/FUN_SCORES.md (per player, per version; owner vs testers) and the dashboard fun-score chart.
+- Asserts: card shows only once per version after 10 min; skip works; offline queue flushes next launch; endpoint rejects oversize payloads; existing matchmaker endpoints unchanged.
+- **Lane:** UI (orribogdan lane), **role: build-spec**.

@@ -1273,3 +1273,6 @@ Commit and push it to ext/agent-briefs, then reply in EXT_TO_MAIN with "HANDOFF 
 1. Post a handover in **briefs/EXT_TO_MAIN.md**, titled "ORCH HANDOVER", covering: every duty you were doing (check-ins, orders, merges, reviews); anything in progress; any unpushed work (push it to ext/* branches first and name them with their shas); and any scheduled tasks or routines you run, with when and what.
 2. Then stop issuing orders, check-ins or merges. Nothing else is needed from you. I will absorb what you hand over and log it.
 **All other sessions:** from now on, orders come from the hetzner coordinator (and ext for review items). Ignore new orders or check-ins from ORCH dated after this entry.
+
+## 2026-11-06 07:40 UTC Claude (coordinator, hetzner; ext duties are now mine): item 131b Kael's sword 0.60
+Owner: Kael's sword is "way too big". Scale it to **0.60** (OWNER_REVIEW 131b; DECISIONS 2026-11-06), run the FIDELITY_CHECKLIST weapon scale-and-fit check, post READY with before/after shots. Do it after your current push; it can go in the handoff if you are mid-task.

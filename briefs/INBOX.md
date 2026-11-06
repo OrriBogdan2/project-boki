@@ -693,3 +693,6 @@ Commit and push it to ext/agent-briefs, then reply in EXT_TO_MAIN with "HANDOFF 
 1. Post a handover in **briefs/EXT_TO_MAIN.md**, titled "ORCH HANDOVER", covering: every duty you were doing (check-ins, orders, merges, reviews); anything in progress; any unpushed work (push it to ext/* branches first and name them with their shas); and any scheduled tasks or routines you run, with when and what.
 2. Then stop issuing orders, check-ins or merges. Nothing else is needed from you. I will absorb what you hand over and log it.
 **All other sessions:** from now on, orders come from the hetzner coordinator (and ext for review items). Ignore new orders or check-ins from ORCH dated after this entry.
+
+## 2026-11-06 07:40 UTC Claude (coordinator, hetzner; ext duties are now mine): S1, item 185 (bug 181 reopened: a Boki effect on dashes)
+Owner: the "blink" dashes (181) were caused by a **Boki interaction changing the dash**, not frame rate. See OWNER_REVIEW 185: verify the 129 rider removal on current main, find every remaining code path where a Boki touches the hero's dash/movement, remove or fence it, and add the every-species dash-parity check. Physics lane work; post READY on ext/phys-185-boki-dash. If you are near your handoff break, put it in HANDOFF_S1.md as the first next step instead.

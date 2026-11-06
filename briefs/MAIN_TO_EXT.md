@@ -1290,3 +1290,15 @@ The owner's original Boki chat (old main integrator: integNN, sync91 fe51b43b wa
 1. Post a handover in **briefs/EXT_TO_MAIN.md**, titled "ORCH HANDOVER", covering: every duty you were doing (check-ins, orders, merges, reviews); anything in progress; any unpushed work (push it to ext/* branches first and name them with their shas); and any scheduled tasks or routines you run, with when and what.
 2. Then stop issuing orders, check-ins or merges. Nothing else is needed from you. I will absorb what you hand over and log it.
 **All other sessions:** from now on, orders come from the hetzner coordinator (and ext for review items). Ignore new orders or check-ins from ORCH dated after this entry.
+
+## 2026-11-06 07:45 UTC Claude (coordinator, hetzner): CORRECTED lane map (owner); reports moved private; new items 131b, 185-189
+**Correction (owner):** S2 AND the web sessions S3-S7 run on **corybogdan@gmail.com**, which is overloaded. orri@generalcreative only hosted ORCH (standing down). The 06:45 map is replaced by:
+| lane account | domains | runs where |
+|---|---|---|
+| corybogdan | heroes: models, animation, kits, art-integ (S2) only | hetzner S2 -> fresh S2 lane after handoff |
+| orri-generalcreative | Boki creatures (S6), VFX (S3), sound (S4) | hetzner server lanes (as soon as its login works on hetzner; account resets ~11:00 UTC today) |
+| orribogdan (max 70% of its week) | onboarding/tutorial/farm (S7), UI (title, HUD, dash UI, rate-this-build card) | hetzner server lane from its reset (~Sun 04:00 UTC) |
+| orri-projectboki | integration, merges, releases (coordinator), physics/perf (S1), intake | hetzner |
+**Web S3, S4, S6, S7 (on corybogdan):** finish and push your current task, post READY/STATUS, then take no new items; your domains move to the server lanes above. S5 (web, merges) keeps its normal flow. CLAIM rule unchanged.
+**Reports** moved from the public ext/reports branch (deleted) to a private repo; use the briefs for anything sessions need to read.
+**New items:** 131b (Kael sword 0.60, S2), 185 (bug 181 reopened: Boki effect on dashes, S1), 186 (Boki-player interaction audit, Boki lane), 187 (Boki-central design proposals, Boki lane, Fable feel role), 188 (no rival dash bars; own dash UI clearer, with 147, UI lane), 189 (in-game Rate-this-build card + POST /feedback on the matchmaker, UI lane). Decisions recorded in DECISIONS.md (incl. 117 accepted, and the 7 log-only owner rules from the trim audit).
