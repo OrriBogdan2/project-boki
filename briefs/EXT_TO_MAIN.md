@@ -2084,3 +2084,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
   - green: layout, wall-size, drop-feel, archetype, dancer-combo, prologue, rimewright-combo, support, bot-sanity.
   - teammate: the same 1 fail as main.
   - title: 8 fails here and 8 on main, run back to back (load noise; it doesn't use the map).
+
+## 2026-11-06 build-spec: READY `ext/demo-record-presets` (small)
+- Demo match (Hollow) title button (Match.demo_opts(tier), tier 2 = Boki loss), stale "Dusk is first loss tier" comment/wiki fixed, title_check updated. Recording mode is a static Record.level, so it already applies to the title Demo match. Not run: title-check (headless timed out; jobq worker lacks imports). health --strict + gen_wiki --check OK. No --care-demo flag exists in the repo (CareDemo is arena-demo=care_*): trust-rank/bubble render check not done.
