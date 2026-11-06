@@ -2566,3 +2566,18 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Audit every kin active for owner-moving effects and make the same rule for all of them (log it in docs).
   - Moonlift (the auto lift when falling into the abyss) can stay automatic. It's a save, and it reads clearly.
 - **Assert:** Lunowl bonded and a foe at 5 m for 10 s with no input → the owner's position is never swapped; a dash with Lunowl → a normal dash, no blink.
+
+## 184b. Boki design rule: nothing that takes agency away from the player (owner, 03:20 UTC Nov 6)
+- The owner: "anything that takes away agency from the player or affects things in a weird way like that should be removed from boki abilities and changed with something else".
+- **The rule** (DECISIONS.md): Boki abilities never move, steer, stop, swap, teleport, launch, root or otherwise act ON the player's own character or controls, auto or commanded.
+  - Exception: Moonlift-style rescues that only help in an obvious emergency (falling into the abyss) and read clearly.
+  - Boki act on enemies, the world, and the player's stats (heal, shield, buff), never on the player's position or input.
+- **Do (S6, owner of the Boki):**
+  - Audit every kin ability (actives, autos, merges, evolutions; all kin_v2 + abilities_v2 owned by kin) for effects whose target is the owner and that move or disable: swap places, pull/push the owner, blink/teleport the owner, launch, root/slow the owner, take camera control, force-glide, and so on.
+  - Write the list to docs/BOKI_AGENCY_AUDIT.md: ability → the offending effect → its replacement.
+  - **Replace each with an ability of the same theme and strength that acts on foes or the world instead.** Examples:
+    - Moon Swap → "Moon Mark": the first foe hit is marked and revealed for 4 s and takes +15% damage from you, or is pulled 3 m toward the Boki, not you.
+    - Anything that "pulls you to safety" → a shield bubble on you instead.
+  - Keep each Boki's identity (lunar stays lunar, etc.). Keep balance roughly level.
+  - Dash riders are already removed (129); verify none remain.
+- **Assert:** a scripted test where every kin casts its kit 20× near an idle owner → the owner's position and velocity are never changed by kin effects (except the abyss-rescue whitelist).

@@ -1755,3 +1755,4 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 ## 2026-11-06 03:20 UTC ext → S5 / S6: item 184
 - Lunowl teleports the owner unasked: its Moon Blink dash rider (129 removal not shipped yet: do it) + Moon Swap auto-cast by the AI.
 - New rule: kin abilities that move the PLAYER are command-only, never auto. Audit all kin.
+- 184b (owner rule): Boki never take the player's agency. S6 owns the audit and replacements (INBOX_S6). S5: until then, at least make Moon Swap command-only (184).

@@ -45,3 +45,6 @@ Use 1 agent at a time, Sonnet (not Opus), finish only your current in-flight bra
 
 ## 2026-11-05 17:58 UTC ext → all: the SUPERVIVE reference footage is on branch `ext/hero-ref-footage`
 The frames behind briefs/hero-ref/*.md (5 fps JPGs; the README maps the folders to our heroes). Fetch only the folders you need (`git checkout origin/ext/hero-ref-footage -- footage/<id>`). Use them for any "like <SV hunter>" note. Don't merge that branch.
+
+## 2026-11-06 03:22 UTC ext → S6: OWNER RULE (DECISIONS.md) + your first job on Fri: item 184b
+Boki abilities must never move, swap, teleport, launch, root or steer the player. Audit all kin → docs/BOKI_AGENCY_AUDIT.md, and replace each offender with a same-theme ability that acts on foes/the world (e.g. Moon Swap → Moon Mark). Keep the identity and balance. A scripted check that the owner's position is never changed by kin.
