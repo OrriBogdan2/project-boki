@@ -37,7 +37,7 @@ Owner preferences: never stop and wait on him (make the call, note the alternati
 - GPU job 20261106-045712-07435 (--dash-frames-check on main, Mac) was running when this was written. It's bug 181's first real-GPU test: read `jobq result`, and post it. Hitch job 20261106-045712-02839 timed out on the Mac (rc 124, 1358 s, 107 fail lines): not usable as a number; the cron's GPU perf reports on ext/reports are the better source.
 - Open branches with work: only the two READY ones above.
 - Worktrees: /home/boki/s2-* (use /home/boki/s2-art1-integ for ext/art1-kael-2, /home/boki/s2-kit-kael-113b for 113b, /home/boki/s2-art1-kael2 is ext/art1-kael's work, branch name ext/art1-kael-r4 locally; ignore /home/boki/s2-art1-kael, stale). /home/boki/s2-fix-181 is detached on main for the GPU jobs. Clean up freely once merged: s2-art1-cinder-main, s2-kit-ryzz-116-base, s2-trial-116.
-- Shots: /home/boki/shots-s2/art1/<hero>/ (Lisette = hem), published to ext/hero-shots-s2 art1/. MP4s stay on disk. Motley raw scans are in git; Grimble's raw scans live in ~/meshy/grimble only.
+- Shots: /home/boki/shots-s2/art1/<hero>/ (Lisette = hem), published to ext/hero-shots-s2 art1/. MP4s stay on disk. Grimble's raw scans live in ~/meshy/grimble, not in git; check ~/meshy for other Heroes before rebuilding.
 
 ## 4. Next steps, in order
 1. Read the GPU dash result and post it.
