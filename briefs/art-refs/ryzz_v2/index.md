@@ -32,3 +32,7 @@ Model: Nano Banana Pro (no seed exposed). Exploration at 2K.
 - `ryzz_v2_bolt_plus_underboob_a/b`: bolt neckline plus underboob. Judged too much skin at once.
 - `sheet_hotter_ABC`(_v2): the first "hotter" sheets (corset, zip top, bodysuit).
 - `sheet_storm_directions_grey_hair`: the rejected grey-hair storm directions. The owner kept the blue/pink hair.
+
+## Final-top candidates (Nov 6, 16:25 ET), both going to master-sheet tests
+- `ryzz_v2_candidate_bolt_cutout.jpg`: a one-piece high-neck bodysuit with a jagged lightning-bolt cutout running from under the bust down the stomach into the brief (underboob shows through the bolt). Claude's pick.
+- `ryzz_v2_candidate_emblem_hem.jpg`: a high-neck crop top with a glowing bolt emblem on the chest and a jagged lightning-point hem (underboob), plus a separate bikini-cut bottom.
