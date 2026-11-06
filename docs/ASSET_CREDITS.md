@@ -61,5 +61,5 @@ centroid).
 abyss, ruins). No recorded or downloaded audio is used. `tools/sfx_stats.py` measures the
 sound effects (peak, loudness, attack, onset, spectral centroid).
 
-The rigged Boki (`art/kin/cindle/`, `puddlet/`, `burrlet/`) are ours: built by script in Blender (`tools/boki/`). Their
-concepts are our own image-gen (Meshy image-to-image, not shipped). No outside asset is used.
+The rigged Boki (`art/kin/cindle/`, `puddlet/`, `burrlet/`, `zephyrak/`) are ours: built by script in Blender
+(`tools/boki/`). Their concepts are our own image-gen (Meshy image-to-image, not shipped). No outside asset is used.
