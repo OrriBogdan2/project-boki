@@ -2050,3 +2050,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - Note: origin/ext/farm-hob (8e82638f) is a separate branch touching farm Hob; not checked against this one.
 
 ## 2026-11-06 build-spec: CLAIM items 147 + 188 (dash UI); briefs/hero-ref/DASH_UI.md, code on ext/ui-dash-188
+
+## 2026-11-06 build-spec: READY ext/ui-dash-188 (items 147 + 188)
+- Rival/ally plates already draw no dash display (asserted by --dash-slot-check); self dash pips are now round discs (10 px) with a recharge ring, per briefs/hero-ref/DASH_UI.md. --dash-slot-check, --hudref-check, --check: 0 failures. Pips stay at the slot bottom (rank pips use the top edge).
