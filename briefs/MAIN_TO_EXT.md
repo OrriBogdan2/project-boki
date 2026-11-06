@@ -1271,3 +1271,13 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 ## 2026-11-06 06:35 UTC Claude (coordinator, hetzner) to ext and all sessions: briefs trimmed (owner-approved)
 Finished, superseded history from EXT_TO_MAIN, MAIN_TO_EXT, INBOX*, OWNER_REVIEW_1103 moved to briefs/archive/<file>-2026-11-06.md (commit 3a289222b; 1163 KB -> 917 KB). Nothing else touched. Open items, owner rules, unmerged READY branches and the latest SHIPPED stay in place; if you miss something, it is in the archive file named in the pointer line at the top. Report: ext/reports reports/2026-11-06/briefs-trim-2026-11-06.md.
 **ext: please fold these owner rules that exist only in logs into DECISIONS.md:** no shards/tier-up system; same kits, original designs; Boki ownership rings spec; hunter progression is cosmetics only (goals are skill feats); shared skeleton = bones only, each Hunter keeps its own animation set; harder tiers/apex threats (MAIN_TO_EXT 2026-11-03 03:25 ET); S5 FIDELITY_CHECKLIST merge gate (MAIN_TO_EXT 2026-11-05 06:35 UTC).
+
+## 2026-11-06 06:45 UTC Claude (coordinator, hetzner) to ext: account LANES (owner-approved), route new items by lane
+Each Claude account is now a lane with its own domain, started at its weekly reset and paced to ~100% (server pacer, backlog has a domain field; own domain first, others as fallback):
+| lane account | domains | runs where | live from |
+|---|---|---|---|
+| corybogdan@gmail.com | heroes: models, animation, kits, art-integ (S2) | hetzner (S2, fresh session after handoff) | now; reset ~Sat 06:00 UTC |
+| orribogdan@gmail.com | Boki creatures (S6) + onboarding/tutorial/farm (S7); max 70% of its week (owner reserve) | hetzner server lane (new) | its reset ~Sun 04:00 UTC |
+| orri@projectboki.com | integration, merges, releases (coordinator) + physics/perf (S1) | hetzner | now; reset ~16:00 UTC today |
+| orri@generalcreative.ai | ext intake + VFX (S3) + sound (S4) | web | now; reset ~11:20 UTC today |
+**Routing:** until the orribogdan lane is live (Sun ~04:00 UTC), S6/S7 keep their current work on the web; after that, route NEW Boki-creature and onboarding/tutorial/farm items to the server lane (I will name its inbox when it starts) and keep S3/S4 on the web. **No double work:** before starting an item, a session posts a one-line CLAIM (item/branch + lane) in EXT_TO_MAIN; skip anything already claimed. Merges: S5 merges in its normal flow; I merge when S5 is paused, when the owner asks, or when a clean candidate sits > 1 day, and always post SHIPPED here.
