@@ -9,11 +9,11 @@
 		"gunslinger": {"dash": ["gunslinger_dash"], "lmb": ["gunslinger_lmb"], "rmb": ["gunslinger_rmb"], "e": ["gunslinger_e"], "x": ["gunslinger_x"]},
 		"juggernaut": {"dash": ["jug_dash"], "lmb": ["jug_slash_r", "jug_slash_l"], "rmb": ["jug_lunge_wind", "jug_lunge"], "e": ["jug_chain", "jug_reel"], "passive": ["jug_roar"], "x": ["jug_guard", "jug_riposte"]},
 		"bulwark": {"dash": ["bul_charge"], "lmb": ["bul_smash_wind", "bul_smash"], "rmb": ["bul_guard", "bul_slamshield"], "e": ["bul_mend"], "passive": ["bul_whirl"], "x": ["bul_ult_wind", "bul_ult_slam"]},
-		"dredge": {"dash": ["dr_lunge", "dr_pounce"], "lmb": ["dr_shot"], "rmb": ["dr_throw", "dr_reel", "dr_pullend"], "e": ["dr_anchor"], "x": ["dr_quake"]},
+		"dredge": {"dash": ["dr_lunge", "dr_pounce"], "lmb": ["dr_shot"], "rmb": ["dr_throw", "dr_reel", "dr_pullend"], "e": ["dr_anchor", "dr_quake"], "x": ["dr_blast"]},
 		"ashwick": {"dash": ["as_leap", "lw_hop"], "lmb": ["as_lance", "as_lance_end"], "rmb": ["as_aim", "as_shot"], "e": ["as_cloak"], "x": ["lw_jet"]},
 		"tender": {"dash": ["mm_skip", "mm_float"], "lmb": ["mm_shot_r", "mm_shot_l"], "rmb": ["mm_seed_aim", "mm_seed"], "e": ["mm_hearth"], "x": ["mm_call", "mm_call_end"]},
-		"rimewright": {"dash": ["tm_skate", "tm_skate_go"], "lmb": ["tm_dart_r", "tm_dart_l"], "rmb": ["tm_spear_aim", "tm_spear"], "e": ["tm_wall"], "x": ["tm_rime", "tm_rime_crash"]},
-		"dolm": {"dash": ["breah_dash"], "lmb": ["breah_throw"], "rmb": ["breah_crouch", "breah_slam"], "e": ["breah_raise"], "x": ["breah_spine_aim", "breah_spine"]},
+		"rimewright": {"dash": ["tm_skate", "tm_skate_go", "tm_skate_air"], "lmb": ["tm_dart_r", "tm_dart_l"], "rmb": ["tm_spear_aim", "tm_spear"], "e": ["tm_wall"], "x": ["tm_rime", "tm_rime_crash"]},
+		"dolm": {"dash": ["breah_hop", "breah_skate"], "lmb": ["breah_throw"], "rmb": ["breah_crouch", "breah_slam"], "e": ["breah_raise"], "x": ["breah_spine_aim", "breah_spine"]},
 		"ostra": {"dash": ["ostra_swap_aim", "ostra_swap"], "lmb": ["ostra_orb"], "rmb": ["ostra_snap_wind", "ostra_snap"], "e": ["ostra_seed"], "x": ["ostra_well"]}
 	}
 }

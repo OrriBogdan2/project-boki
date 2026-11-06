@@ -63,6 +63,15 @@ func _warden(id: String, lim: Dictionary) -> PackedFloat32Array:
 	var straight := lean < float(lim["min_spine"]) and shift < float(lim["min_hip"])
 	ok(not straight, "%s: standing spine %.3f rad off upright, hips %.3f m over (>= %.2f or >= %.2f)"
 			% [id, lean, shift, float(lim["min_spine"]), float(lim["min_hip"])])
+	if id == "archer":
+		# owner item 114: Lisette stands upright with her weight forward, never leaning back, the bow low
+		var ref := (none[0] as HunterAnim)
+		var up0 := (ref.rig.basis * ref.torso.basis).y.normalized()
+		var tip := up.dot(Vector3.BACK) - up0.dot(Vector3.BACK)
+		ok(tip < -0.1 and lean < 0.35, "archer: the torso pitched forward (%.3f), %.3f rad off upright (under 0.35)"
+				% [tip, lean])
+		var carry: Array = Content.rules(WardenStance.RULES)["archer"]["pose"]["carry"]["pos"]
+		ok(float(carry[1]) <= -0.35, "archer: the bow carried low (%.2f m)" % float(carry[1]))
 	var applied := _dist(pose, _pose(none))
 	ok(applied > float(lim["min_diff"]), "%s: the stance moves the procedural model by %.3f" % [id, applied])
 	await _glb(id, with, none)
@@ -147,8 +156,8 @@ func _fire(id: String, with: Array, none: Array) -> void:
 func _glb(id: String, with: Array, none: Array) -> void:
 	var w := (with[1] as Node3D).get_node_or_null("Warden")
 	var w0 := (none[1] as Node3D).get_node_or_null("Warden")
-	if w == null or w0 == null:
-		return
+	if w == null or w0 == null or not WardenClips.data(WardenGlb.art(id)).is_empty():
+		return      # (a Hero with hand-keyed clips: its stance is the clip, --clip-check)
 	await tree.process_frame
 	var s1 := w.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	var s0 := w0.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D

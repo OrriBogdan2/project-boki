@@ -5,8 +5,8 @@ click), a right-click ability with several variants, a utility on E and an ultim
 twelve, four in each weight class:
 
 - **Light:** [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset), [Lisette](Class-Red-Stitch.md) (pin people, then the big shot), [Ryzz](Class-Storm-Chaser.md) (load Sparks, then Wirerun through them) and [Claire](Class-Frost-Siren.md) (skate on ice, chill foes, shelter the squad behind ice).
-- **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Pip](Class-Little-Lantern.md) (heal, carry the downed), [Tarek](Class-Cliff-Runner.md) (raise rocks, punch them into the fight) and [Ostra](Class-Void-Jester.md) (swell, plant a seed, trade places).
-- **Heavy:** [Kael](Class-The-Unbroken.md) (rage, chain in, crush), [Breaker](Class-Frozen-Bulwark.md) (block, then smash them into walls), [Dredge](Class-Brass-Abomination.md) (haul a foe in, drop the anchor) and [Cinder](Class-Mad-Pyromancer.md) (build Char, flash foes over).
+- **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Pip](Class-Little-Lantern.md) (heal, carry the downed), [Tarek](Class-Cliff-Runner.md) (raise rocks, punch them into the fight) and [Motley](Class-Void-Jester.md) (swell, plant a seed, trade places).
+- **Heavy:** [Kael](Class-The-Unbroken.md) (rage, chain in, crush), [Breaker](Class-Sunken-Bulwark.md) (block, then smash them into walls), [Grimble](Class-Scrap-King.md) (haul a foe in, drop the anchor) and [Cinder](Class-Mad-Pyromancer.md) (build Char, flash foes over).
 
 The weight class sets health, speed, mass (how far hits push you) and how many dash charges you get.
 Everything else comes from the class kit.
@@ -51,17 +51,17 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| [Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Bolts | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
+| [Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
 | [Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
 | [Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
 | [Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Fusion) |
 | [The Unbroken](Class-The-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Fusion) |
-| [Frozen Bulwark](Class-Frozen-Bulwark.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
-| [Brass Abomination](Class-Brass-Abomination.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none (Boki Fusion) |
+| [Sunken Bulwark](Class-Sunken-Bulwark.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
+| [Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none (Boki Fusion) |
 | [Mad Pyromancer](Class-Mad-Pyromancer.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Fusion) |
 | [Little Lantern](Class-Little-Lantern.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none (Boki Fusion) |
 | [Frost Siren](Class-Frost-Siren.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
-| [Cliff Runner](Class-Cliff-Runner.md) | 145 / 1 | Rubble Fists | Molten Guard | Rubble Leap | Quakefall | Stone Row | none (Boki Fusion) |
+| [Cliff Runner](Class-Cliff-Runner.md) | 145 / 1 | Rubble Fists | Molten Guard | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
 | [Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
 
 ### How Hunters unlock
@@ -75,8 +75,8 @@ A new save picks 1 of 1 starters (Hired Gun) before the egg pick and plays the t
 | [Storm Chaser](Class-Storm-Chaser.md) | medium | Stagger 6 monsters with abilities | 6 |
 | [Hired Gun](Class-Hired-Gun.md) | starter | pick at the start, or after your first expedition | - |
 | [The Unbroken](Class-The-Unbroken.md) | easy | Knock 3 enemies into walls | 3 |
-| [Frozen Bulwark](Class-Frozen-Bulwark.md) | medium | Knock down 2 hunters while under half health | 2 |
-| [Brass Abomination](Class-Brass-Abomination.md) | medium | Make it out carrying 8 items | 8 |
+| [Sunken Bulwark](Class-Sunken-Bulwark.md) | medium | Knock down 2 hunters while under half health | 2 |
+| [Scrap King](Class-Scrap-King.md) | medium | Make it out carrying 8 items | 8 |
 | [Mad Pyromancer](Class-Mad-Pyromancer.md) | easy | Hit 3 enemies at once with one ability | 1 |
 | [Little Lantern](Class-Little-Lantern.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
 | [Frost Siren](Class-Frost-Siren.md) | medium | Slow 20 enemies | 20 |
@@ -109,14 +109,14 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | The Unbroken | Knock down 2 hunters while fused | 2 | Emote: Chest Thump |
 | The Unbroken | Open 8 chests | 8 | Banner: Broken Chain |
 | The Unbroken | Make it out after being knocked down | 1 | Title: the Unbowed |
-| Frozen Bulwark | Revive 3 teammates | 3 | Colourway: Oathsteel |
-| Frozen Bulwark | Knock 8 enemies into walls | 8 | Emote: Shield Rap |
-| Frozen Bulwark | Make it out after being knocked down | 1 | Title: Still Standing |
-| Frozen Bulwark | Open 6 chests | 6 | Banner: Iron Oath |
-| Brass Abomination | Make it out carrying 10 items | 10 | Glider: Patchwork Wing |
-| Brass Abomination | Stun 10 enemies | 10 | Colourway: Rust and Brine |
-| Brass Abomination | Open 10 chests | 10 | Title: Salvager |
-| Brass Abomination | Bring 2 wild Boki home | 2 | Emote: Heave Ho |
+| Sunken Bulwark | Revive 3 teammates | 3 | Colourway: Oathsteel |
+| Sunken Bulwark | Knock 8 enemies into walls | 8 | Emote: Shield Rap |
+| Sunken Bulwark | Make it out after being knocked down | 1 | Title: Still Standing |
+| Sunken Bulwark | Open 6 chests | 6 | Banner: Iron Oath |
+| Scrap King | Make it out carrying 10 items | 10 | Glider: Patchwork Wing |
+| Scrap King | Stun 10 enemies | 10 | Colourway: Rust and Brine |
+| Scrap King | Open 10 chests | 10 | Title: Salvager |
+| Scrap King | Bring 2 wild Boki home | 2 | Emote: Heave Ho |
 | Mad Pyromancer | Set 25 enemies burning | 25 | Colourway: Coal and Cinder |
 | Mad Pyromancer | Hit 3 enemies at once with one ability, 3 times | 3 | Trail: Ash Drift |
 | Mad Pyromancer | Open 6 chests | 6 | Banner: Lantern Flame |

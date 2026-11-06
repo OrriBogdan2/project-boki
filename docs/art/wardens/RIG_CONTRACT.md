@@ -64,12 +64,7 @@ one or hangs it on another parent. They are skinned like the rest and follow the
 (the loader never writes them), and only that Warden's kit poses them, on their rest, with
 `WardenGlb.pose_extra(model, bone, rot, scale)` (`rot` about the bone's head, its axis in model space as the model
 rests; a zero scale hides what rides the bone). On a procedural model the call does nothing.
-- **Dredge** (`dredge`): `eye` (head); the grab-claw's three fingers `claw1.L`..`claw3.L` (hand.L), each with a
-  `claw<n>_tip.L`; the winch drum `winch` (hips, its head on the drum's axle, which runs side to side); the rope
-  `rope1` (hips) > `rope2` > `hook`; the tar pool `pool` (root, at his feet). DredgeKit spreads the claw for the Grapnel throw and clenches it while he
-  reels, spins the drum out while the hook flies and in while he reels, and hides the hanging rope and hook while
-  the kit draws them in flight, and spreads the pool only while he stands on the ground. Anchors `anchor_claw` (the throw's rope leaves from it), `anchor_hook`,
-  `anchor_winch`, `anchor_eye`.
+- **Grimble** (`dredge`, art id unchanged): declared in content/rules/warden_anim/dredge.json (`extra_bones`): `hook`, `gun`, `hoard`, `ball`, face and hand bones. See art/wardens/dredge/IMPORT.md.
 
 The kit moves (`kmoves_*.gd`) only key channels on these nodes (`p` pitch, `y` yaw, `r` roll, `lift`, `sq`
 squash, `fx`/`fy`/`fz` whole-body turns, `legs` [hip, knee, hip, knee], `fl`/`fr` free-hand targets, `gp` weapon
@@ -94,9 +89,9 @@ iris out and its plain back in). `WardenGlb.Orbits` (run by Sync) turns the empt
 `--warden-glb-check` and stay out of `--warden-model-check`'s height.
 
 ### Hovering bodies
-A body with no feet (Ostra) is built with its ground below its hem (fit spec `sole_z`); the rig's own hover
-(`KMovesStone.hover`, which lifts `Rig`, so the `root` bone) floats it and keeps the gap above the shadow. Its
-lower body is a `void` wisp on a `spring_wisp_*` chain under `hips` (`warden_parts.wisp()`).
+A body with no feet (Motley on his box, id `ostra`) is built with its ground at the box's foot; the rig's own hover (`KMovesStone.hover`, which lifts
+`Rig`, so the `root` bone) floats it a hand's width over the shadow. With hand-keyed clips, `"rig_root": true` in its content/rules/warden_anim file keeps
+the `root` bone on `Rig` under them, so the hover and the kit's lifts carry on. Its legs are unskinned.
 
 ### Design variants
 Another design of the same Warden can sit beside the shipped model while the owner compares them:
@@ -151,6 +146,7 @@ the vertex colour (`vertex_ao`):
 | `eyes` | — (unshaded iris) | the eye pick (`eye_col`) |
 | `team` | 1 | the team colour (keep it on one strong shape: a cuff, a cap, the stem's band) |
 | `glow` | emissive | — (Bjorn's crack, Zedran's fuller) |
+| `flame` | — (shaders/hero_flame.gdshader: strips of fire, raw UV, unlit, no atlas; `flame-liquid`: a tank's fuel; `warden_look` "slots" "flame-<tag>" sets its parameters) | — (Cinder's hair, tail and jets) |
 | `void` | — (shaders/hero_void.gdshader: a drifting starfield over the paint, unlit) | — (Ostra's coat tears; `void-wisp` also fades out toward its tip: `WardenGlb.SOFT_TAGS`) |
 
 A material with an emissive texture (glTF `emissiveTexture`) gets the toon shader's emission layer (`use_emit`,
@@ -184,8 +180,12 @@ slots at most ±35% per channel from the Warden's own colours. Bone names may co
 The armature and its meshes sit at the .glb's origin (no offset on the scene root), so skeleton space is model space.
 
 ## Budget and checks
-- About 30–45k triangles per Warden (a Meshy model baked to a clean low mesh: ~10k of them on the head, the
-  weapon included; `--warden-glb-check` holds 45k), one 2048² atlas; no more than 8 material slots.
+- **At most 15k triangles per Warden, weapon included** (owner item 94; `--warden-glb-check` holds it). A Meshy
+  bake (30–50k) goes through `tools/blender/decimate_warden.py` (one collapse ratio for every part over 400
+  triangles; the armature, rest pose, anchors, weights and materials are untouched). The import generates
+  LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses.
+- Textures: at most 2048² (`process/size_limit=2048`), VRAM-compressed (`compress/mode=2`, high quality:
+  BPTC on desktop), mipmapped; one atlas per Warden where possible; no more than 8 material slots.
   A hand-made model may be flat-painted instead (one colour a material, no atlas) or use a 2048² atlas with
   its ageing painted in (Dredge); slots, not materials, count (Dredge's ten materials use four).
 - `--warden-glb-check`: the bone table covers every part HunterAnim binds; a Warden without a .glb builds the

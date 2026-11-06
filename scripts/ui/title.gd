@@ -31,7 +31,7 @@ var embers: CPUParticles3D
 var ash: CPUParticles3D
 var mouse_k := Vector2.ZERO      # smoothed mouse position, -1..1 on both axes (parallax)
 var cam_override: Array = []     # tooling: --title-cam=x,y,z,lx,ly,lz to try framings
-var logo: TitleLogo
+var logo: Control
 var menu_col: VBoxContainer
 var stung := false
 
@@ -58,16 +58,7 @@ func _ready() -> void:
 			cam_override = Array(a.substr(12).split(",")).map(func(x): return float(x))
 		elif a.begins_with("--title-t="):
 			t = float(a.substr(10))
-	_sky()
-	_hero_isle()
-	_squad()
-	_skylands()
-	if not low:
-		_shafts()
-	_cloud_banks()
-	_wyrm()
-	_weather()
-	_glider()
+	_sky()        # the painted splashes (TitleBackdrop) cover the screen, so the 3D island, squad and sky props are off
 	cam = Camera3D.new(); cam.fov = 36.0; cam.far = 1600.0
 	add_child(cam)
 	cam.make_current()
@@ -438,6 +429,7 @@ func _build_ui() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.name = "TitleUI"
 	ui.add_child(root)
+	root.add_child(TitleBackdrop.new())
 	# a dark wash on the left so the menu reads over the scene, and a vignette with a little
 	# letterbox weight top and bottom
 	var shade := TextureRect.new()
@@ -469,26 +461,23 @@ func _build_ui() -> void:
 	col.add_theme_constant_override("separation", 4)
 	root.add_child(col)
 	menu_col = col
-	logo = TitleLogo.new()
+	# the brand wordmark (art/brand/logo_wordmark.png, owner-approved Nov 5); TitleLogo below is the old drawn one
+	var lt := TextureRect.new()
+	lt.texture = load("res://art/brand/logo_wordmark.png")
+	lt.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	lt.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
+	lt.custom_minimum_size = Vector2(500, 244)
+	lt.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	logo = lt
 	logo.name = "Logo"
 	col.add_child(logo)
-	var tag := UI.label("Raise them.  Risk them.  Bring them home.", 17, Color("e9dccb"), _spaced())
-	tag.name = "Tagline"
-	tag.autowrap_mode = TextServer.AUTOWRAP_OFF
-	tag.add_theme_constant_override("outline_size", 5)
-	tag.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.05, 0.7))
-	col.add_child(tag)
+	# no tagline under the logo
 	var has: bool = not Save.d["roster"].is_empty()
 	col.add_child(UI.spacer(12 if has else 30))     # (with a save the menu has one more row: Demo match)
 	# the one big button: carry on where you left off, or start a new story
 	var b1 := _menu_main(("Continue" if has else "New game"), func(): Game.goto("home" if has else "prologue"))
 	col.add_child(b1)
-	var who := UI.label(_resume_line() if has else "A short story first, then your very first egg.", 14, Color(1, 0.93, 0.84, 0.72))
-	who.autowrap_mode = TextServer.AUTOWRAP_OFF
-	who.add_theme_constant_override("outline_size", 5)
-	who.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.05, 0.7))
-	var wm := MarginContainer.new(); wm.add_theme_constant_override("margin_left", 6); wm.add_child(who)
-	col.add_child(wm)
+	# no subtext under the main button
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
 	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
@@ -511,26 +500,24 @@ func _build_ui() -> void:
 		UI.pop_in(ch, 0.9 + i * 0.07)
 		i += 1
 	# bottom corners: what this is, and how to drive the menu without a mouse
-	var ver := UI.label("Project Boki  ·  early build  ·  open source", 13, Color(1, 1, 1, 0.45))
+	var ver := UI.label("v" + Net.VERSION, 13, Color(1, 1, 1, 0.45))
 	ver.autowrap_mode = TextServer.AUTOWRAP_OFF
 	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	ver.offset_left = 28; ver.offset_top = -40; ver.offset_bottom = -18
 	root.add_child(ver)
-	# like a game client's login screen: a small news card in the corner, the playtest and how to join
-	var news := UI.glass(12, 12)
+	# a small playtest chip low in the corner, clear of the splash's hero: the build and the Discord link
+	var news := UI.glass(8, 6)
 	news.name = "News"
 	news.mouse_filter = Control.MOUSE_FILTER_STOP
-	news.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)       # up in the open sky, clear of the squad
+	news.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	news.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	news.offset_right = -28; news.offset_top = 28
-	var nv := UI.vbox(4); news.add_child(nv)
-	nv.add_child(UI.label("PLAYTEST  ·  BUILD %s" % Net.VERSION, 11, Color("e9b48a"), UI.caps))
-	nv.add_child(UI.label("Twelve Masks, one Boki each", UI.T_HEAD, UI.INK, UI.big))
-	var nl := UI.label("Bring your Boki on a run, bring it home. Tell us what broke.", 13, UI.MUTED)
-	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; nl.custom_minimum_size.x = 280
-	nv.add_child(nl)
-	var nb := UI.ghost("Join the playtest Discord", func(): OS.shell_open(DISCORD), 0, "bond")
-	nb.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	news.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	news.offset_right = -28; news.offset_bottom = -64
+	var nv := UI.hbox(10); news.add_child(nv)
+	var tag := UI.label("PLAYTEST  ·  %s" % Net.VERSION, 11, Color("e9b48a"), UI.caps)
+	tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	nv.add_child(tag)
+	var nb := UI.ghost("Join the Discord", func(): OS.shell_open(DISCORD), 0, "bond")
 	nb.focus_mode = Control.FOCUS_NONE
 	nv.add_child(nb)
 	root.add_child(news)

@@ -5,8 +5,8 @@
 	},
 	"anchors": {
 		"nozzle": {"nodes": ["anchor_flame", "weapon_muzzle"], "gun": [0.0, 0.02, -0.75], "body": [0.15, 0.9, 1.3]},
-		"tank_l": {"nodes": ["anchor_tank_l"], "bone": "hips", "off": [-0.13, 0.55, 0.24], "body": [-0.14, 1.15, -0.3]},
-		"tank_r": {"nodes": ["anchor_tank_r"], "bone": "hips", "off": [0.13, 0.55, 0.24], "body": [0.14, 1.15, -0.3]},
+		"tank_l": {"nodes": ["anchor_jet_0"], "bone": "hips", "off": [-0.13, 0.55, 0.24], "body": [-0.14, 1.15, -0.3]},
+		"tank_r": {"nodes": ["anchor_jet_1"], "bone": "hips", "off": [0.13, 0.55, 0.24], "body": [0.14, 1.15, -0.3]},
 		"chest": {"nodes": ["anchor_chest"], "bone": "hips", "off": [0.0, 0.36, -0.1], "body": [0.0, 1.0, 0.1]}
 	},
 	"moves": {

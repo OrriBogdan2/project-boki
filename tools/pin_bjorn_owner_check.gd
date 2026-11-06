@@ -53,6 +53,7 @@ func pin() -> void:
 	step(m, 0.3)
 	_pin_no_early_release(m, P, T, K)
 	_pin_readout(m, P, T, K)
+	_pin_114(m, P, T, K)
 	_pin_draw_pose(m, P, T, K)
 	_pin_heavy(m, P, T, K, home, lv)
 	_pin_dash(m, P, T, K)
@@ -71,6 +72,92 @@ func ready_bow(P: Hunter) -> void:
 	P.fire_cd = 0.0
 	P.reload_t = 0.0
 	P.draw_t = -1.0
+
+## No aim shape of Lisette's is a V, in any hold.
+func no_vee(m: Match) -> bool:
+	for e in AimKit.layer(m).entries.values():
+		if String((e as Dictionary).get("kind", "")) == "vee":
+			return false
+	return true
+
+## Owner item 114: no V, the big needle drawn on the bow while RMB charges, and she is slowed holding it.
+func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
+	var clean := true
+	ready_bow(P)
+	var aim := press_dry.bind(P, K, T.pos)
+	for i in 100:
+		aim.call()
+		m.step(DT)
+		clean = clean and no_vee(m)
+	P.inp["fire"] = false
+	step(m, 1.0)
+	var start := P.pos
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.inp["move"] = Vector2(0, 1)
+	step(m, 0.3, func(): aim_at(P, T.pos))
+	var free0 := P.pos
+	step(m, 0.4, func(): aim_at(P, T.pos))
+	var free_v := free0.distance_to(P.pos) / 0.4
+	var n := K.needle
+	ok("114 needle: nothing on the bow before the hold", not n.visible)
+	var hold := rmb_at.bind(P, T.pos)
+	P.inp["sec_hold"] = true
+	K.press_rmb()
+	step(m, 0.3, hold)
+	var d := P.aim_dir()
+	var along := (n.tip - n.eye).normalized()
+	ok("114 needle: on the bow by 0.3 s, pointing along the aim",
+		n.visible and n.is_visible_in_tree() and Vector2(along.x, along.z).dot(d) > 0.98,
+		"visible %s dot %.2f" % [n.visible, Vector2(along.x, along.z).dot(d)])
+	ok("114 needle: oversized, over 2.5 times a loosed arrow", n.eye.distance_to(n.tip) >= 2.0,
+		"%.2f m" % n.eye.distance_to(n.tip))
+	var eye_ahead := func() -> float:
+		return Vector2(n.eye.x - P.position.x, n.eye.z - P.position.z).dot(d)
+	var eye0: float = eye_ahead.call()
+	var glow0: float = n.shell_mat.get_shader_parameter("color").a
+	var end: Vector3 = n.points[-1]
+	var thread_back := Vector2(end.x - n.eye.x, end.z - n.eye.z).dot(d)
+	ok("114 needle: the red thread trails behind the eye", thread_back < -0.8, "%.2f m" % thread_back)
+	var p0 := P.pos
+	step(m, 0.4, hold)
+	var held_v := p0.distance_to(P.pos) / 0.4
+	ok("114 slow: she moves at the data's share of her speed while she holds RMB",
+		free_v > 1.0 and absf(held_v / free_v - float(K.rmb_def()["pin"]["hold_move"])) < 0.08,
+		"free %.2f held %.2f" % [free_v, held_v])
+	step(m, 0.6, hold)
+	var eye1: float = eye_ahead.call()
+	var glow1: float = n.shell_mat.get_shader_parameter("color").a
+	var hot: Color = n.steel.get_shader_parameter("albedo")
+	ok("114 needle: it draws back and glows up with the charge, the silver going red-hot",
+		K.heavy_k() >= 0.99 and n.charge >= 0.99 and eye1 < eye0 - 0.2 and glow1 > glow0 + 0.3 and hot.r > hot.b + 0.3,
+		"eye %.2f -> %.2f glow %.2f -> %.2f k %.2f" % [eye0, eye1, glow0, glow1, K.heavy_k()])
+	ok("114 V: none in the Heavy Shot hold or the bow draw", clean and no_vee(m))
+	P.inp["sec_hold"] = false
+	m.step(DT)
+	m.step(DT)
+	ok("114 needle: gone the moment it's loosed", not n.visible and not K.rmb_down, "visible %s" % n.visible)
+	var p1 := P.pos
+	step(m, 0.4, func(): aim_at(P, T.pos))
+	var after_v := p1.distance_to(P.pos) / 0.4
+	ok("114 slow: back to full speed after the shot", after_v > free_v * 0.8, "%.2f vs %.2f" % [after_v, free_v])
+	# a hold ended by a stun: the needle goes with it
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.inp["sec_hold"] = true
+	K.press_rmb()
+	step(m, 0.4, hold)
+	var up := n.visible
+	P.stun_t = 0.3
+	step(m, 0.1, hold)
+	ok("114 needle: a stun drops it", up and not n.visible, "up %s visible %s" % [up, n.visible])
+	P.inp["sec_hold"] = false
+	P.inp["move"] = Vector2.ZERO
+	step(m, 1.0)
+	P.teleport(start)
+	fresh(T)
+	K.cd["rmb"] = 0.0
+	step(m, 0.3)
 
 ## #5: the arrow leaves only when the button comes up.
 func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
@@ -158,40 +245,94 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var aim := press_dry.bind(P, K, T.pos)
 	step(m, 0.3, aim)
 	var d := P.aim_dir()
+	var s := K.draw.stage_t()
 	var ve := AimKit.entry(P, "draw")
+	var fe := AimKit.entry(P, "draw_fill")
 	var from: Vector2 = ve.get("from", Vector2(-99, -99))
-	var vd: Vector2 = ve.get("dir", Vector2.ZERO)
-	ok("pin readout: the V leaves Hem along the aim line and is symmetric about it",
-		String(ve.get("kind", "")) == "vee" and from.distance_to(Vector2(P.pos.x, P.pos.z)) < 0.01
-		and vd.distance_to(d) < 0.01 and float(ve.get("half", 0.0)) > 0.0,
-		"from %s dir %s aim %s" % [str(from), str(vd), str(d)])
-	ok("pin readout: the bow cue sits on the aim line, not beside her", off_line(P.pos, d, K.draw.bow_at()) < 0.02,
-		"off %.3f" % off_line(P.pos, d, K.draw.bow_at()))
-	step(m, 0.4, aim)
-	ve = AimKit.entry(P, "draw")
-	ok("pin readout: Empowered ready merges the two lines into one on the aim line",
-		bool(ve.get("merged", false)) and (ve.get("dir", Vector2.ZERO) as Vector2).distance_to(d) < 0.01,
-		"merged %s t %.2f" % [str(ve.get("merged")), P.draw_t])
-	step(m, 0.7, aim)
+	var full := (ve.get("to", Vector2.ZERO) as Vector2).distance_to(from)
+	var filled := (fe.get("to", Vector2.ZERO) as Vector2).distance_to(fe.get("from", Vector2.ZERO))
+	ok("pin readout: the line leaves Lisette along the aim line and the fill grows out of its start",
+		String(ve.get("kind", "")) == "line" and String(fe.get("kind", "")) == "line"
+		and off_line(P.pos, d, Vector3(from.x, P.pos.y, from.y)) < 0.01
+		and (fe.get("from", Vector2.ZERO) as Vector2).distance_to(from) < 0.01,
+		"from %s fill from %s" % [str(from), str(fe.get("from"))])
+	ok("pin readout: the fill fraction tracks the draw time",
+		absf(filled / full - K.draw.fill_frac(P.draw_t)) < 0.03 and K.draw.fill_frac(P.draw_t) > 0.2,
+		"fill %.3f vs %.3f at t %.2f" % [filled / full, K.draw.fill_frac(P.draw_t), P.draw_t])
+	var me := AimKit.entry(P, "draw_mark")
+	var mpos: Vector2 = me.get("at", Vector2.ZERO)
+	ok("pin readout: the perfect-timing circle sits on the line at the Empowered fraction",
+		String(me.get("kind", "")) == "circle" and absf(mpos.distance_to(from) / full - K.draw.mark_frac(1)) < 0.03
+		and off_line(P.pos, d, Vector3(mpos.x, P.pos.y, mpos.y)) < 0.05,
+		"at %.3f want %.3f" % [mpos.distance_to(from) / full, K.draw.mark_frac(1)])
+	# frame by frame: the circle is quiet on every frame the drawn fill is short of it, lit on the first that reaches it
+	var quiet := true
+	var want := K.draw.mark_frac(1)
+	var flen := func() -> float:
+		var e := AimKit.entry(P, "draw_fill")
+		return (e["to"] as Vector2).distance_to(e["from"]) / full
+	while flen.call() < want and P.draw_t < s.x + 0.2:
+		quiet = quiet and float(AimKit.entry(P, "draw_mark").get("fill", 1.0)) < 0.0
+		aim.call()
+		m.step(DT)
+	ok("pin readout: the circle is quiet on every frame before the fill reaches it", quiet, "t %.3f" % P.draw_t)
+	me = AimKit.entry(P, "draw_mark")
+	var rq := float(me.get("r", 0.0))
+	ok("pin readout: the circle flashes on the very frame the fill reaches it",
+		float(me.get("fill", -1.0)) > 0.0 and rq > K.draw.MARK_R and flen.call() - want < 0.03,
+		"fill %s drawn %.3f want %.3f r %.2f" % [str(me.get("fill")), flen.call(), want, rq])
+	step(m, K.draw.perfect_t() + 0.1, aim)
+	me = AimKit.entry(P, "draw_mark")
+	mpos = me.get("at", Vector2.ZERO)
+	var line_len := (AimKit.entry(P, "draw").get("to", Vector2.ZERO) as Vector2).distance_to(from)
+	ok("pin readout: past the window it moves on: one circle, quiet, at the end of the line for Supercharged",
+		float(me.get("fill", 1.0)) < 0.0 and absf(mpos.distance_to(from) - line_len) < 0.05,
+		"fill %s at %.2f of %.2f" % [str(me.get("fill")), mpos.distance_to(from), line_len])
+	step(m, s.y - P.draw_t + DT, aim)
+	ok("pin readout: and flashes when the fill reaches it at Supercharged",
+		float(AimKit.entry(P, "draw_mark").get("fill", -1.0)) > 0.0, "t %.3f" % P.draw_t)
+	var cue: Dictionary = AimKit.reticle(P)
+	ok("pin readout: no V and no UI: no cursor ring, no flare, no bow glint, all through the draw",
+		float(cue["charge"]) < 0.0 and float(cue["flare"]) == 0.0 and not K.fx.bow_glint.visible
+			and K.chg.is_empty() and not AimKit.shown(P, "draw_mark2"),
+		"%s glint %s chg %s" % [str(cue), K.fx.bow_glint.visible, str(K.chg)])
+	step(m, K.draw.perfect_t() + 0.1, aim)
+	ok("pin readout: after the last window the circle goes", not AimKit.shown(P, "draw_mark"), "t %.3f" % P.draw_t)
+	step(m, 0.2, aim)
 	var le := AimKit.entry(P, "draw")
 	var to: Vector2 = le.get("to", Vector2.ZERO)
 	var cursor := Vector2(T.pos.x - P.pos.x, T.pos.z - P.pos.z).length()
-	ok("pin readout: full draw runs one line from Hem along the aim line, past the cursor, to max range",
+	ok("pin readout: full draw runs one line from Lisette along the aim line, past the cursor, to max range",
 		String(le.get("kind", "")) == "line" and to.distance_to(le.get("from", Vector2.ZERO)) > cursor + 3.0
 		and off_line(P.pos, d, Vector3(to.x, P.pos.y, to.y)) < 0.05,
 		"len %.1f cursor %.1f" % [to.distance_to(le.get("from", Vector2.ZERO)), cursor])
 	P.inp["fire"] = false
 	step(m, 1.0)
-	# the perfect release: a gold flash on the aim line (and the star on the cursor), never beside her
+	# a release inside the flash is perfect, just outside it (either side) is not
+	for r in [[-0.05, false], [0.02, true], [K.draw.perfect_t() - 0.02, true], [K.draw.perfect_t() + 0.04, false]]:
+		for stage: float in [s.x, s.y]:
+			ready_bow(P)
+			K.draw.quick = false
+			var pf := K.draw.perfects
+			step(m, stage + float(r[0]), aim)
+			var lit := float(AimKit.entry(P, "draw_mark").get("fill", -1.0)) > 0.0
+			P.inp["fire"] = false
+			m.step(DT)
+			ok("pin readout: release %+.2f s from %.2f s: perfect %s, and the flash agrees" % [r[0], stage, r[1]],
+				(K.draw.perfects == pf + 1) == bool(r[1]) and lit == bool(r[1]),
+				"perfects +%d lit %s" % [K.draw.perfects - pf, lit])
+			step(m, 1.0)
+	# the perfect release: a gold burst on the aim line at the bow, nothing on the cursor, never beside her
 	ready_bow(P)
+	K.draw.quick = false
 	step(m, K.draw.stage_t().x + 0.05, aim)
 	P.inp["fire"] = false
 	m.step(DT)
 	var flash := burst_node(K)
 	var at := flash.global_position if flash != null else Vector3(999, 0, 999)
-	ok("pin readout: the perfect release flash sits on the aim line at the bow, and the cursor star fires",
+	ok("pin readout: the perfect release burst sits on the aim line at the bow, with no cursor star",
 		K.draw.perfect_now and flash != null and off_line(P.pos, d, at) < 0.05
-			and float(AimKit.reticle(P)["perfect"]) > 0.0,
+			and float(AimKit.reticle(P)["perfect"]) == 0.0,
 		"perfect %s off %.3f" % [K.draw.perfect_now, off_line(P.pos, d, at)])
 	step(m, 1.0)
 
@@ -262,7 +403,7 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	step(m, 0.8, rmb_at.bind(P, T.pos))
 	var bar := AimKit.entry(P, "rmb_bar")
 	var d := P.aim_dir()
-	ok("pin heavy: the telegraph while held is a thick gold lane with a tip, from Hem along the aim line",
+	ok("pin heavy: the telegraph while held is a thick gold lane with a tip, from Lisette along the aim line",
 		AimKit.shown(P, "rmb_bar") and not AimKit.shown(P, "rmb_v") and float(bar.get("width", 0.0)) >= 0.45
 		and bool(bar.get("tip", false)) and (bar.get("dir", Vector2.ZERO) as Vector2).distance_to(d) < 0.01,
 		"width %.2f tip %s" % [float(bar.get("width", 0.0)), str(bar.get("tip"))])

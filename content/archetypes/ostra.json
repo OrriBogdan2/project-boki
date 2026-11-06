@@ -1,7 +1,7 @@
 {
 	"id": "ostra",
 	"title": "Void Jester",
-	"base_name": "Ostra",
+	"base_name": "Motley",
 	"gender": "male",
 	"personality": "A sinister, grinning jester who floats a little above the ground and plays with the dark.\nMenacing and gleeful, he treats every fight as a joke only he gets.",
 	"weight": "medium",
@@ -11,7 +11,7 @@
 	"card": {
 		"role": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
 		"loop": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
-		"lmb": "Tether Lantern: quick orbs to full range; pause and the next one is a fast bright bolt that slows and goes through terrain.",
+		"lmb": "Tether Lantern: quick orbs to full range through walls; the longer you wait between shots, the bigger and harder the next one, and a full orb slows.",
 		"rmb": "Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew.",
 		"e": "Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew.",
 		"dash": "Lantern Trade: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs.",
@@ -42,6 +42,7 @@
 	},
 	"lmb": {
 		"idle": 1.4,
+		"charge_from": 0.6,
 		"prime_dmg": 0.34,
 		"prime_speed": 1.4,
 		"prime_slow": 0.1,

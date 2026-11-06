@@ -1,5 +1,5 @@
 extends "res://tools/hero_pair_check.gd"
-## --ostra-combo-check: Ostra, docs/heroes/ostra.md. His reticle (the aim line, the Snap's rails, the
+## --ostra-combo-check: Motley, docs/heroes/ostra.md. His reticle (the aim line, the Snap's rails, the
 ## Trade's two ends), charge and wind-up timings, where each thing lands, the payoffs, the owner's notes
 ## (Shift never travels on its own, keeps his height, one Snap charge that visibly stuns the training
 ## dummy), the small mechanics, the merge-start drops, and that every move, sound and look exists.
@@ -8,6 +8,14 @@ func run(main_node: Node) -> void:
 	main = main_node
 	await _ostra()
 	await _bolt_through_terrain()
+	var orb_check = load("res://tools/ostra_orb_check.gd").new()
+	await orb_check.orbs(main)
+	n += orb_check.n
+	fails += orb_check.fails
+	var arena_check = load("res://tools/ostra_arena_check.gd").new()
+	await arena_check.arena(main)
+	n += arena_check.n
+	fails += arena_check.fails
 	var ult_check = load("res://tools/ostra_ult_check.gd").new()
 	await ult_check.ult(main)
 	n += ult_check.n
@@ -80,7 +88,7 @@ func _ostra() -> void:
 		"swollen %.1f" % K.swollen_t
 	)
 	ok("anim: Swollen plays ostra_empower", K.anim_id == "ostra_empower")
-	# ---- LMB: plain orbs fly to full range past the cursor; a pause primes a fast bright bolt
+	# ---- LMB: plain orbs fly to full range past the cursor (the charge: ostra_orb_check.gd)
 	reset.call()
 	aim_at(P, home + Vector3(3.0, 0, 0))
 	T.teleport(home + Vector3(12.0, 0, 0))
@@ -98,26 +106,23 @@ func _ostra() -> void:
 	reset.call()
 	step(m, 1.6)
 	ok(
-		"lmb: a pause primes the next orb (a charge held at his hand)",
-		K.primed and KitLooks.of(m).holding("os_charge"), "primed %s" % K.primed
+		"lmb: a pause charges the next orb (a glow held at his hand)",
+		K.charge >= 1.0 and KitLooks.of(m).holding("os_charge"), "charge %.2f" % K.charge
 	)
 	var spd_hot := float(P.wpn["speed"])
 	P.inp["fire"] = true
 	step(m, 0.05, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
-	ok(
-		"lmb: the Settled orb is a long bright bolt, faster (1.4x)",
-		KitLooks.of(m).skins_live("orb_hot") >= 1 and spd_hot > 40.0, "speed %.0f" % spd_hot
-	)
-	ok("anim: the Settled bolt plays ostra_orb_hot", K.anim_id == "ostra_orb_hot")
+	ok("lmb: a full orb is faster (1.4x)", spd_hot > 40.0, "speed %.0f" % spd_hot)
+	ok("anim: a full orb plays ostra_orb_hot", K.anim_id == "ostra_orb_hot")
 	step(m, 1.0)
 	ok(
-		"lmb: the Settled orb hits harder and slows", K.settled_shots == 1 and dmg(T) >= 11.0 and T.slow_t > 0.0,
+		"lmb: a full orb hits harder and slows", K.settled_shots == 1 and dmg(T) >= 11.0 and T.slow_t > 0.0,
 		"took %.1f slow %.1f" % [dmg(T), T.slow_t]
 	)
 	ok(
 		"item 60: the charge restarts from zero after a shot (plain again)",
-		not K.primed and K.last_orb_c >= 0.999 and K.charge < 0.9, "charge %.2f" % K.charge
+		K.last_orb_c >= 0.999 and K.charge < 0.9, "charge %.2f" % K.charge
 	)
 	_orb_parity(m, P, home, K)
 	# ---- RMB: one charge, a visible wind-up with the two rails, one bundle, a stun that reads
@@ -212,7 +217,7 @@ func _ostra() -> void:
 		) < 0.01 and absf(float(K.e_def()["cooldown"]) - 10.0) < 0.01
 	)
 	ok(
-		"data: a Settled orb is 34% harder (353 vs 263)",
+		"data: a full orb is 34% harder (353 vs 263)",
 		absf(float(K.lmb_def()["prime_dmg"]) - (353.0 / 263.0 - 1.0)) < 0.01
 	)
 	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
@@ -516,15 +521,15 @@ func _ostra() -> void:
 	home = r[3]
 	K = P.ak
 	step(m, 1.6)
-	ok("merge hold: the orb is Settled before the merge", K.primed)
+	ok("merge hold: the orb is charged before the merge", K.charge >= 1.0)
 	K.swap_aim = 0.2
 	K.snap = {"t": 0.1, "T": 0.32}
 	ok("merge hold: a merge is under way", _merge(P))
 	step(m, 0.2)
 	ok(
-		"merge hold: the prime, the Shift aim and the Snap wind-up drop with the merge",
-		not K.primed and K.charge < 0.9 and K.swap_aim < 0.0 and K.snap.is_empty() and K.snaps == 0,
-		"primed %s" % K.primed
+		"merge hold: the orb's charge, the Shift aim and the Snap wind-up drop with the merge",
+		K.charge <= 0.0 and K.swap_aim < 0.0 and K.snap.is_empty() and K.snaps == 0,
+		"charge %.2f" % K.charge
 	)
 	_dash_moves(K)
 	# ---- every move, sound and look exists
@@ -533,13 +538,13 @@ func _ostra() -> void:
 		"ostra_arrive", "ostra_seed", "ostra_pop", "ostra_empower", "ostra_well", "ostra_well_snap", "ostra_well_end"
 	]
 	ok(
-		"anim: every Ostra move is keyed (KMovesStone)",
+		"anim: every Motley move is keyed (KMovesStone)",
 		moves.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty()),
 		str(moves.filter(func(mv): return HunterAnim.km_sample(mv, 0.1).is_empty()))
 	)
 	var snd := SfxKits.NAMES.filter(func(s): return String(s).begins_with("os_"))
 	ok(
-		"sfx: every Ostra sound is loaded by Sfx", snd.size() >= 12 and snd.all(func(s): return Sfx.has(s)),
+		"sfx: every Motley sound is loaded by Sfx", snd.size() >= 12 and snd.all(func(s): return Sfx.has(s)),
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)
@@ -664,7 +669,7 @@ func _dash_moves(K: OstraKit) -> void:
 		lengths.all(func(l): return l > 0.2 and l <= quickest), str(lengths)
 	)
 
-## Item 17: while the lantern flies he drifts slowly (15-25% of run speed), holds his height even over the abyss,
+## Items 17 and 75: while the lantern flies he drifts slowly (30% of run speed), holds his height even over the abyss,
 ## and the Trade sends everyone to where he is when it lands.
 func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var W = m.world

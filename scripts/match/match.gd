@@ -240,11 +240,13 @@ func warm_up(progress := Callable()) -> void:
 				pn.call("_make_stars")
 				break
 		break
-	HeroVfx.of(self).prewarm()        # one node of every Hero look kind, so the first cast never compiles
+	if player: player.warm_marker()      # and the hit-marker balloon over a Hunter
 	var seen := {}
 	var batch_cb := func(f: float) -> void:
 		if progress.is_valid(): progress.call(0.7 * f)
+	var aim_warm := _warm_aim_stand_in()      # (item 94c: the aim kit's one material draws only once somebody aims)
 	var batched: bool = await _warm_batches(batch_cb, seen)
+	if is_instance_valid(aim_warm): aim_warm.queue_free()
 	if not batched:
 		return
 	var shown: Array = []
@@ -264,6 +266,7 @@ func warm_up(progress := Callable()) -> void:
 		fx.spark(at + Vector3(0, 1, 0), Vector3.UP, Color.WHITE, 4)
 		fx.slash(at + Vector3(0, 0.8, 0), 0.0, 2.0, 1.6, Color.WHITE)
 		fx.beam(at + Vector3(0, 1, 0), at + Vector3(2, 1, 0), Color.WHITE)
+		HeroVfx.of(self).prewarm(at + Vector3(0, 1, 0))
 		var tg := fx.telegraph_circle(at, 1.5, Color(1, 0.3, 0.2))
 		# the muzzle flash light lights whatever stands near a shot: the lit variants compile now too
 		if muzzle_light:
@@ -280,6 +283,7 @@ func warm_up(progress := Callable()) -> void:
 		if not is_inside_tree():
 			return
 		if progress.is_valid(): progress.call(0.7 + 0.2 * (vi + 1) / views.size())
+	HeroVfx.of(self).prewarm_end()
 	# and the materials that only exist now (the effects just shown, the shots), the same way: a
 	# telegraph is held up for it (the views' own are gone by now)
 	var late_cb := func(f: float) -> void:
@@ -314,6 +318,7 @@ func warm_up(progress := Callable()) -> void:
 	times.sort()
 	if not times.is_empty():
 		Settings.note_benchmark(float(times[times.size() / 2]))
+	await DashPace.rehearse(self)
 	PerfLog.skip()
 
 ## Stand-ins drawn in the first batch of warm_up; later batches grow while a batch's frames stay
@@ -324,6 +329,27 @@ const WARM_FRAME_MS := 45.0
 
 ## The stand-ins of warm_up, a batch a frame, each batch drawn once under each light setup.
 ## False if the match went away meanwhile.
+## The aim kit (AimKit: every kit's aim lines, rings and the Hem draw's fill line and perfect circle) draws one
+## ImmediateMesh that is empty until a Hunter aims, so the scan below never sees its material and the first
+## aim after landing compiled its shader mid-play. A one-triangle mesh with the same material and vertex
+## format stands in for it for the warm-up.
+func _warm_aim_stand_in() -> MeshInstance3D:
+	var d := AimKit.layer(self)
+	if d == null or d.mat == null:
+		return null
+	var arr := []
+	arr.resize(Mesh.ARRAY_MAX)
+	arr[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3.ZERO, Vector3.RIGHT, Vector3.UP])
+	arr[Mesh.ARRAY_COLOR] = PackedColorArray([Color.WHITE, Color.WHITE, Color.WHITE])
+	var am := ArrayMesh.new()
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	am.surface_set_material(0, d.mat)
+	var mi := MeshInstance3D.new()
+	mi.mesh = am
+	mi.visible = false
+	add_child(mi)
+	return mi
+
 func _warm_batches(progress: Callable, seen: Dictionary) -> bool:
 	var list: Array = await _warm_sources(seen)
 	if not is_inside_tree():
@@ -648,6 +674,7 @@ static func _trim_shadows(root: Node) -> void:
 				stack.append(ch)
 
 func _start(o: Dictionary) -> void:
+	ShadowPolicy.watch_particles(get_tree())      # no particle system casts a shadow (item 94)
 	PerfLog.reset()
 	_stage_done_ms = 0.0
 	opts = o
@@ -2166,7 +2193,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if target == player and by and hud:
 		hud.hurt_from(by.pos)
 	if target == player:
-		sfx("hurt", null, -4.0)
+		sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)
 		if hud: hud.hurt_flash(d)
 	Juice.hit(self, target, by, d, o, crit, armor_hit)
 
@@ -2218,6 +2245,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		add_feed("%s went down" % HeroTitle.of_hunter(h))
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	sfx("knock", h.pos, 0.0)
+	HeroSfx.voice(self, h, "down")
 	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)
 	Juice.knock(self, h, credit)
 	if net_on and not h.remote:
@@ -2937,8 +2965,7 @@ func _exit_tree() -> void:
 	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
 	SeeThrough.off()
 	Capture.teardown(self)           # scan beams and hums outlive the match otherwise
-	for key in box_hums.keys():
-		Sfx.loop_stop(String(key))
+	Sfx.reset_scene_audio()          # every sound the match started stops with it, owner item 103
 	box_hums.clear()
 	Beacons.stop_sounds(self)
 	if biomes: biomes.free_up()
@@ -3098,7 +3125,9 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		sd["deco"] = _make_deco(String(extra.get("deco", "")), col, size, extra.get("rope", false))
 	shots.append(sd)
 	if net_on and not extra.get("cos", false) and not extra.get("melee", false) and not by.remote:
-		net_event(["s", _r(at.x), _r(at.y), _r(at.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, 1 if extra.get("mob", false) else 0])
+		var kind := 1 if extra.get("mob", false) else 0
+		if extra.get("pierce_terrain", false): kind = 2      # the copy has to fly through walls too
+		net_event(["s", _r(at.x), _r(at.y), _r(at.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind])
 	if by is Hunter and not extra.get("melee", false):
 		fx.flash(at, col.lightened(0.4), 0.22, 0.05)
 		note_sound(by, at, "shot")
@@ -3529,7 +3558,7 @@ func _process(delta: float) -> void:
 		hitstop -= delta
 		_gather_input()
 		return
-	var d := minf(delta, 0.1)
+	var d := DashPace.frame_dt(self, minf(delta, 0.1))
 	if slowmo > 0.0:
 		slowmo -= d
 		d *= slow_k
@@ -3700,6 +3729,7 @@ func _gather_input() -> void:
 		if best != Vector3.INF and bd > 0.8:
 			player.inp["move"] = Vector2(best.x - player.pos.x, best.z - player.pos.z).normalized()
 	player.inp["aim"] = _mouse_aim()
+	player.inp["aim_ray"] = cam.mouse_ray()
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
 	var over_ui: bool = hud != null and hud.mouse_on_ui() and player.draw_t < 0.0
@@ -3961,8 +3991,10 @@ func step(dt: float) -> void:
 				player.teleport(Vector3(q.x + 1.0, player.pos.y - 4.0, q.z)); player.grounded = false
 				break
 	if opts.has("aim_demo") and player:
-		if opts.has("glove") and (player.gear[0] as Dictionary).is_empty():
-			player.gear[0] = {"id": String(opts["glove"]), "rar": 2}
+		var demo_gloves := String(opts.get("glove", "")).split(",", false)      # --glove=a[,b]: Q, V
+		for gi in mini(2, demo_gloves.size()):
+			if (player.gear[gi] as Dictionary).is_empty():
+				player.gear[gi] = {"id": demo_gloves[gi], "rar": 2}
 		aim_hold = String(opts["aim_demo"])
 		player.inp["aim"] = player.pos + Vector3(4.0, 0, -3.0)
 	if opts.get("sandbox_demo", false) and player:
@@ -4237,7 +4269,7 @@ func step(dt: float) -> void:
 	_prof("pre")
 	for h in hunters:
 		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted:
-			bot_brain.think(self, h, dt)
+			bot_brain.tick(self, h, dt)
 	Capture.tick(self, dt)          # a running scan roots its hunter, after the bots have decided
 	_prof("bots")
 	if skytrain: skytrain.tick(dt)
@@ -5743,6 +5775,7 @@ func _net_ev(x, from: String) -> void:
 			var ex := {"cos": true}
 			if float(x[9]) > 0.0: ex["boom"] = float(x[9])
 			if int(x[11]) == 1: ex["mob"] = true
+			if int(x[11]) == 2: ex["pierce_terrain"] = true
 			var fake := Ent.new(); fake.team = int(x[10]); fake.remote = true
 			spawn_shot(fake, Vector3(x[1], x[2], x[3]), Vector2(x[4], x[5]), 0.0, float(x[6]), float(x[7]), col, ex)
 			fake.free()
@@ -5758,6 +5791,7 @@ func _net_ev(x, from: String) -> void:
 				var by: Ent = ents_by_id.get(String(x[2]), null)
 				who.downed = true
 				sfx("knock", who.pos, 0.0)
+				HeroSfx.voice(self, who, "down")
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
 				if by == player:
 					player.knocks += 1

@@ -1,10 +1,11 @@
 class_name Unmasked
 extends RefCounted
 ## The Empty (lore: the Wyrm stole everyone's essence, so people are born without faces): your own character.
-## A readable person whose face is a hollow, a glowing socket shaped for a Mask with a starfield inside
-## and faint ghosts of the features that should be there, and a small glowing void where the heart is.
-## The body (sex, height, build), the hollow (shape, glow, ghost features, motes), an outfit and one body
-## colour. Masks fill you in: in a match you are the Hunter (mask_look); look["marks"] holds features a
+## A person whose whole head is a void (a starfield seen with parallax), with a glowing socket shaped for a
+## Mask floating on it and faint ghosts of the features that should be there, and whose body is wrapped in a
+## shroud (no skin shows). The body (sex, height, build) shapes the silhouette under the shroud; the hollow
+## (shape, glow, ghost features), the aura and the shroud (style, colour) are the rest.
+## Masks fill you in: in a match you are the Hunter (mask_look); look["marks"] holds features a
 ## Mask left on you. Built by Models.hunter on the hunter rig, so every HunterAnim animation plays on it.
 
 const SEXES := ["Female", "Male"]
@@ -16,34 +17,38 @@ const BUILD_BULK := [0.9, 1.0, 1.14]        # and the race bulk on top: thicker 
 const HOLLOWS := ["Oval", "Mask", "Torn", "Crescent"]
 const GLOWS := [Color("8ae8ff"), Color("ff9a5a"), Color("b48cff"), Color("ff7ab0"), Color("ffd36a"), Color("7affc4")]
 const GHOSTS := ["None", "Eyes", "Whole face", "Stitched"]
-const MOTES := ["None", "A few", "A swarm"]
-const MOTE_COUNT := [0, 6, 18]
-const OUTFITS := ["Traveller", "Scholar", "Smith", "Sailor", "Festival"]
-const OUTFIT_COL := [3, 1, 4, 2, 5]      # each outfit's colourway: an index into Models.OUTFIT_COLS
-const COLOURS := [Color("f1e6d6"), Color("e3c9a8"), Color("d2a77f"), Color("b27c58"), Color("86573a"), Color("5a3b2a"),
-	Color("a9c7e8"), Color("b9d8b0"), Color("c9b8e8"), Color("f0b8c8"), Color("c4c8d2"), Color("e8d27a")]
-## The creator's rows: look key, label, choices (colours show as a swatch). The body rows come first, then
-## the hollow's from HOLLOW_ROW on.
+const AURA := ["None", "Faint", "Strong"]
+const AURA_COUNT := [0, 16, 40]       # specks drifting round the head, shoulders and shroud
+const SHROUDS := Shrouds.LABELS
+const OLD_SHROUDS := 3                  # the first three cuts: what an outfit from before the shroud maps onto
+## The shroud's colours (look["colour"]; an old save's skin colour keeps its index, so it becomes the shroud
+## colour in the same slot).
+const COLOURS := [Color("6b6f7a"), Color("3f4a63"), Color("2d3561"), Color("4f6b4a"), Color("2f6f73"), Color("7a2f45"),
+	Color("a4552f"), Color("b58a3c"), Color("6a4a8c"), Color("d9cfbc"), Color("34343c"), Color("b8607a")]
+const VOID_SKIN := Color("0b0814")    # what the head, neck and hands are made of: nothing shows but the void
+## The creator's rows: look key, label, choices (colours show as a swatch), and a tooltip where the row needs
+## one. The body and shroud rows come first, then the hollow's from HOLLOW_ROW on.
 const ROWS := [
 	["gender", "Sex", SEXES], ["height", "Height", HEIGHTS], ["build", "Build", BUILDS],
-	["outfit", "Outfit", OUTFITS], ["colour", "Colour", COLOURS],
-	["hollow", "Hollow", HOLLOWS], ["glow", "Glow", GLOWS], ["ghost", "Ghost", GHOSTS], ["motes", "Motes", MOTES],
+	["shroud", "Shroud", SHROUDS], ["colour", "Shroud colour", COLOURS],
+	["hollow", "Hollow", HOLLOWS], ["glow", "Glow", GLOWS], ["ghost", "Ghost", GHOSTS],
+	["aura", "Aura", AURA, "Glowing specks that drift around you"],
 ]
 const HOLLOW_ROW := 5
 const VOID_SHADER := preload("res://shaders/void_face.gdshader")
-const HEAD_SHELL := 1.012                 # x the head: the hollow's shell sits just over the skin
+const AURA_RADIUS := 0.5               # m: how far from the shoulders the specks start
+const AURA_SPECK := 0.024             # m: a speck's radius (the old motes were 0.012: too small to see)
+const HEAD_SHELL := 1.012                 # x the head: the void's shell sits just over the head mesh
 
 ## The old face options (eyes, brows, blush) -> the closest hollow, ghost and glow.
 const HOLLOW_FROM_EYES := [0, 0, 2, 1, 3, 1]
 const GHOST_FROM_BROWS := [0, 1, 1, 2, 3]
 ## Old creator face (Models.LOOK_FACES) -> the closest old eyes.
 const EYES_FROM_FACE := [0, 1, 2, 3, 4, 3, 5, 4, 1]
-## Old outfit (Models.LOOK_OUTFITS) -> the closest new one.
-const OUTFIT_FROM_OLD := [4, 1, 0, 0, 2, 2, 3, 2, 4]
 
 static func default_look() -> Dictionary:
-	return {"unmasked": true, "gender": 1, "height": 1, "build": 1, "hollow": 0, "glow": 0, "ghost": 1, "motes": 1,
-		"outfit": 0, "colour": 1, "marks": []}
+	return {"unmasked": true, "gender": 1, "height": 1, "build": 1, "hollow": 0, "glow": 0, "ghost": 1, "aura": 1,
+		"shroud": 0, "colour": 1, "marks": []}
 
 static func random_look() -> Dictionary:
 	var out := default_look()
@@ -61,6 +66,7 @@ static func clean(lk: Dictionary) -> Dictionary:
 	var src := lk if is_look(lk) else from_old(lk)
 	out.merge(src, true)
 	_hollow_from_face(out, src)
+	_shroud_from_outfit(out, src)
 	for row in ROWS:
 		out[row[0]] = clampi(_i(out[row[0]], 0), 0, (row[2] as Array).size() - 1)
 	if not out["marks"] is Array:
@@ -75,6 +81,16 @@ static func _hollow_from_face(out: Dictionary, src: Dictionary) -> void:
 		out["glow"] = 3 if _i(src.get("blush"), 0) > 0 else 0
 	for k in ["eyes", "brows", "blush"]:
 		out.erase(k)
+
+## An Unmasked saved before the shroud: its outfit becomes a shroud style, its motes the aura. (The skin
+## colour index in "colour" now picks the shroud colour, the same slot.)
+static func _shroud_from_outfit(out: Dictionary, src: Dictionary) -> void:
+	if src.has("outfit") and not src.has("shroud"):
+		out["shroud"] = posmod(_i(src["outfit"], 0), OLD_SHROUDS)
+	if src.has("motes") and not src.has("aura"):
+		out["aura"] = _i(src["motes"], 1)
+	out.erase("outfit")
+	out.erase("motes")
 
 ## The closest Unmasked to an old detailed look (race, face, hair, skin...): race and hair are dropped.
 ## A whole number from whatever an old save held there (a string, nothing, a float), else `fallback`.
@@ -101,8 +117,8 @@ static func from_old(old: Dictionary) -> Dictionary:
 	out["hollow"] = HOLLOW_FROM_EYES[EYES_FROM_FACE[face]]
 	out["ghost"] = GHOST_FROM_BROWS[_brows_for(face, gender)]
 	out["glow"] = 3 if gender == 0 or face == 3 else 0
-	out["outfit"] = OUTFIT_FROM_OLD[outfit]
-	out["colour"] = _nearest_colour(Models.LOOK_SKIN[skin])
+	out["shroud"] = outfit % OLD_SHROUDS
+	out["colour"] = skin % COLOURS.size()
 	return out
 
 ## Short races read as Short, big ones as Tall.
@@ -116,17 +132,6 @@ static func _brows_for(face: int, gender: int) -> int:
 	if face in [4, 7]:
 		return 4
 	return 1 if gender == 0 else 2
-
-static func _nearest_colour(c: Color) -> int:
-	var best := 0
-	var bd := 1e9
-	for i in COLOURS.size():
-		var p: Color = COLOURS[i]
-		var d := (p.r - c.r) * (p.r - c.r) + (p.g - c.g) * (p.g - c.g) + (p.b - c.b) * (p.b - c.b)
-		if d < bd:
-			bd = d
-			best = i
-	return best
 
 ## Upgrades a save's look in place (old saves hold the detailed creator's look). Safe to run twice.
 static func migrate(data: Dictionary) -> void:
@@ -167,7 +172,7 @@ static func legacy(lk: Dictionary) -> Dictionary:
 	var u := clean(lk)
 	return {
 		"race": 0, "body": u["build"], "gender": u["gender"], "face": 1, "skin": 0, "hair": 13, "hair_v": 2,
-		"hair_col": 0, "detail": 0, "outfit": OUTFIT_COL[u["outfit"]], "glider": u.get("glider", "classic"),
+		"hair_col": 0, "detail": 0, "outfit": 0, "glider": u.get("glider", "classic"),
 	}
 
 ## The race entry Models.hunter reads: always human, sized by height.
@@ -180,9 +185,9 @@ static func colour(lk: Dictionary) -> Color:
 	return COLOURS[clean(lk)["colour"]]
 
 # ------------------------------------------------------------------------------------------ the hollow
-## The hollow face: a shell of the head (Head's own mesh, a hair larger) that shows only the socket, its
-## starfield, rim and ghost features; motes drifting round the head; and any kept Mask marks.
-static func face(torso: Node3D, lk: Dictionary, skin: Color) -> void:
+## The void head: a shell of the head (Head's own mesh, a hair larger) that is void all the way round, with the
+## hollow's socket, rim and ghost features floating on it; the aura drifting round you; any kept Mask marks.
+static func face(torso: Node3D, lk: Dictionary) -> void:
 	var u := clean(lk)
 	var head := torso.get_node("Head") as MeshInstance3D
 	var glow: Color = GLOWS[u["glow"]]
@@ -191,55 +196,58 @@ static func face(torso: Node3D, lk: Dictionary, skin: Color) -> void:
 	shell.mesh = head.mesh
 	shell.scale = Vector3.ONE * HEAD_SHELL
 	shell.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	shell.material_override = void_mat(int(u["hollow"]), int(u["ghost"]), glow, skin)
+	shell.material_override = void_mat(int(u["hollow"]), int(u["ghost"]), glow)
 	head.add_child(shell)
-	_motes(head, MOTE_COUNT[u["motes"]], glow)
+	_aura(torso, AURA_COUNT[u["aura"]], glow)
 	for m in u["marks"]:
 		var md: Dictionary = m
 		var col := Models.toon(Color(String(md.get("col", "#ffffff"))), false)
 		var at := Vector3(float(md.get("x", 0.0)), float(md.get("y", 0.85)), -0.215)
 		Models.part(torso, Models.sphere(float(md.get("size", 0.02)), 10), col, at, Vector3(1.0, 1.0, 0.3))
 
-## The void material for a hollow of this shape (see shaders/void_face.gdshader), its ghost features and
-## glow. The deep colour leans a little toward the body colour so the socket belongs to the face.
-static func void_mat(shape: int, ghost: int, glow: Color, skin := Color.BLACK) -> ShaderMaterial:
+## The void material for a head with a hollow of this shape (see shaders/void_face.gdshader), its ghost
+## features and glow.
+static func void_mat(shape: int, ghost: int, glow: Color) -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
 	mat.shader = VOID_SHADER
 	mat.set_shader_parameter("shape", shape)
 	mat.set_shader_parameter("ghost", ghost)
 	mat.set_shader_parameter("glow", glow)
-	mat.set_shader_parameter("deep", Color(0.02, 0.015, 0.05).lerp(skin.darkened(0.85), 0.25))
 	return mat
 
-## A few specks of the glow drifting up round the head (none at 0).
-static func _motes(head: Node3D, count: int, glow: Color) -> void:
+## Specks of the glow drifting up and round the head, shoulders and shroud (none at 0). Big and bright enough
+## to read from the farm's camera.
+static func _aura(torso: Node3D, count: int, glow: Color) -> void:
 	if count <= 0:
 		return
 	var p := CPUParticles3D.new()
-	p.name = "Motes"
+	p.name = "Aura"
+	p.position = Vector3(0, 0.3, 0)      # (torso space: the middle of the head and shoulders)
 	p.amount = count
-	p.lifetime = 3.2
-	p.preprocess = 3.2
+	p.lifetime = 3.0
+	p.preprocess = 3.0
 	p.local_coords = true
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
-	p.emission_sphere_radius = 0.32
+	p.emission_sphere_radius = AURA_RADIUS
 	p.direction = Vector3.UP
-	p.spread = 35.0
+	p.spread = 30.0
 	p.gravity = Vector3.ZERO
-	p.initial_velocity_min = 0.04
-	p.initial_velocity_max = 0.12
-	p.scale_amount_min = 0.6
-	p.scale_amount_max = 1.3
+	p.initial_velocity_min = 0.1
+	p.initial_velocity_max = 0.25
+	p.orbit_velocity_min = 0.12
+	p.orbit_velocity_max = 0.3
+	p.scale_amount_min = 0.8
+	p.scale_amount_max = 1.7
 	var fade := Gradient.new()
 	fade.set_color(0, Color(glow, 0.0))
 	fade.set_color(1, Color(glow, 0.0))
-	fade.add_point(0.4, Color(glow.lightened(0.3), 1.0))
+	fade.add_point(0.3, Color(glow.lightened(0.2), 1.0))
 	p.color_ramp = fade
 	var dot := SphereMesh.new()
-	dot.radius = 0.012
-	dot.height = 0.024
-	dot.radial_segments = 6
-	dot.rings = 3
+	dot.radius = AURA_SPECK
+	dot.height = AURA_SPECK * 2.0
+	dot.radial_segments = 8
+	dot.rings = 4
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.vertex_color_use_as_albedo = true
@@ -247,42 +255,20 @@ static func _motes(head: Node3D, count: int, glow: Color) -> void:
 	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	dot.material = mat
 	p.mesh = dot
-	head.add_child(p)
+	torso.add_child(p)
 
-# ------------------------------------------------------------------------------------------ outfits
-## What the outfit adds over the plain tunic (the colourway comes from OUTFIT_COL): no hunter gear.
+# ------------------------------------------------------------------------------------------ the shroud
+## The shroud over the body (the colourway comes from the shroud colour, via Models.hunter): see Shrouds, which has
+## the cuts. The body under it keeps its shape.
 static func dress(c: Dictionary, lk: Dictionary) -> void:
-	var m: Dictionary = c["m"]
-	var torso: Node3D = c["torso"]
-	var bw: float = c["bw"]
-	var rz := 0.214 * bw + 0.01
-	var rx := 0.222 * maxf(c["cw"], bw) + 0.01
-	var belt := HeroKit.band("ubelt|%.3f|%.3f" % [rx, rz], rx, rz, 0.05, 0.014)
-	Models.part(torso, belt, m["leather"], Vector3(0, 0.1, 0))
-	var front := Vector3(0.0, 0.33, -0.2 * bw)
-	_shape(c, int(clean(lk)["gender"]) == 0)
-	_heart(torso, bw, GLOWS[clean(lk)["glow"]])
-	match int(clean(lk)["outfit"]):
-		1:   # Scholar: a long coat skirt
-			Models.part(c["skirt"], Models.cyl(0.2 * bw, 0.3 * bw, 0.38, 20), m["body"], Vector3(0, -0.17, 0))
-		2:   # Smith: an apron and its strap
-			Models.part(torso, Models.box(0.26 * bw, 0.36, 0.02), m["leather"], Vector3(0, 0.12, -rz - 0.004))
-			Models.part(torso, Models.box(0.05, 0.2, 0.02), m["leather"], Vector3(0, 0.45, -rz + 0.01))
-		3:   # Sailor: a scarf
-			Models.part(torso, Models.cyl(0.11, 0.13, 0.06, 18), m["trim"], Vector3(0, 0.6, 0))
-			Models.part(torso, Models.box(0.06, 0.2, 0.02), m["trim"], Vector3(0.06, 0.5, -0.1))
-		4:   # Festival: a sash across the chest
-			Models.part(torso, Models.box(0.07, 0.5, 0.025), m["gold"], front, Vector3.ONE, Vector3(0, 0, 0.7))
-		_:   # Traveller: a satchel strap
-			Models.part(torso, Models.box(0.04, 0.5, 0.02), m["leather"], front, Vector3.ONE, Vector3(0, 0, -0.7))
+	_shape(c, c["fem"])
+	Shrouds.dress(c, clean(lk))
 
 ## Female and male read at a glance: a woman's narrower shoulders, fuller hips and a weight-on-one-hip
 ## stance; a man's broad shoulders and squarer, even stance (content/rules/warden_stance.json "empty_f",
 ## "empty_m", read by HunterAnim through the model's "stance" meta).
 static func _shape(c: Dictionary, fem: bool) -> void:
 	var torso: Node3D = c["torso"]
-	var m: Dictionary = c["m"]
-	var bw: float = c["bw"]
 	torso.get_parent().get_parent().set_meta("stance", "empty_f" if fem else "empty_m")
 	for ch in torso.get_children():
 		if ch is MeshInstance3D and (ch as MeshInstance3D).mesh == HeroKit.torso(fem):
@@ -296,8 +282,6 @@ static func _shape(c: Dictionary, fem: bool) -> void:
 		(c["p" + sd.to_lower()] as Node3D).position.x *= shoulder
 	if not fem:
 		return
-	var peplum := HeroKit.drape("empty_peplum|%.3f" % bw, 0.215 * bw, 0.3 * bw, 0.2, 0.0, 1.0, 10.0, 0.025)
-	Models.part(c["skirt"], peplum, m["body"], Vector3(0, 0.02, 0))
 	var legs := torso.get_parent().get_node("Legs")
 	for nm in ["LegL", "LegR"]:
 		var leg := legs.get_node(nm) as Node3D
@@ -321,24 +305,3 @@ static func figure(fem: bool) -> ArrayMesh:
 			k += 0.07 * smoothstep(-0.05, 0.22, p.y) - 0.03 * exp(-pow((p.y + 0.1) / 0.12, 2.0))
 		return Vector3(p.x * k, p.y, p.z * lerpf(1.0, k, 0.6))
 	return HeroKit.surf("empty_torso|%s" % fem, fn, 48, 26)
-
-## The heart's hollow: a small glowing void on the chest, where the essence was taken.
-static func _heart(torso: Node3D, bw: float, glow: Color) -> void:
-	var heart := MeshInstance3D.new()
-	heart.name = "Heart"
-	var disc := SphereMesh.new()
-	disc.radius = 0.075
-	disc.height = 0.15
-	disc.radial_segments = 16
-	disc.rings = 8
-	heart.mesh = disc
-	heart.scale = Vector3(1.0, 1.0, 0.25)
-	heart.position = Vector3(-0.085, 0.48, -0.228 * bw)      # (the left of the chest, clear of the strap)
-	heart.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var mat := void_mat(4, 0, glow)
-	mat.set_shader_parameter("planar", true)
-	mat.set_shader_parameter("extent", Vector2(0.06, 0.06))
-	mat.set_shader_parameter("pulse", 1.0)
-	mat.set_shader_parameter("halo", 0.5)
-	heart.material_override = mat
-	torso.add_child(heart)

@@ -37,6 +37,24 @@ static func fresh(m: Match, o: Ent) -> bool:
 const STAY_GOALS := ["yard", "board", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon"]
 const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
 
+## A bot this far from the local player, with no target and nothing urgent on (a revive, a lair, an exit),
+## decides every FAR_EVERY sim steps (20 Hz) instead of every step, with the skipped time added in; its
+## last inputs carry on in between. A big match has most of its bots roaming far away: item 94, script
+## time grew with the Hunter count. (Fights and revives stay every step: at 20 Hz they turned in place.)
+const FAR_M := 45.0            # m from the local player
+const FAR_EVERY := 3           # sim steps per decision when that far
+
+func tick(m: Match, h: Hunter, dt: float) -> void:
+	var a := h.ai
+	var acc := float(a.get("far_dt", 0.0)) + dt
+	var me := m.player
+	var busy: bool = a.get("tgt") != null or String(a.get("goal_kind", "")) in URGENT_GOALS
+	if me != null and not me.out and not busy and h.flat_dist(me) > FAR_M and acc < dt * FAR_EVERY - dt * 0.5:
+		a["far_dt"] = acc
+		return
+	a["far_dt"] = 0.0
+	think(m, h, acc)
+
 func think(m: Match, h: Hunter, dt: float) -> void:
 	var a := h.ai
 	a["think"] -= dt
@@ -349,6 +367,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 ## round several times a second. Shots and abilities still aim exactly where they were meant to.
 const AIM_TURN := 5.0          # rad/s with nothing to fight
 const AIM_TURN_FIGHT := 9.0    # rad/s with a target, between shots
+const AIM_NEAR := 1.5          # m: an aim point this close says nothing about a way to face: hold the facing
 func _ease_aim(h: Hunter, dt: float) -> void:
 	var a := h.ai
 	var inp := h.inp
@@ -364,7 +383,8 @@ func _ease_aim(h: Hunter, dt: float) -> void:
 	# (from where the bot is facing now: Hunter.face points along (-sin, -cos))
 	var cur := atan2(-cos(h.face), -sin(h.face))
 	var rate := AIM_TURN_FIGHT if a.get("tgt") != null else AIM_TURN
-	cur += clampf(wrapf(want - cur, -PI, PI), -rate * dt, rate * dt)
+	if dv.length() >= AIM_NEAR:
+		cur += clampf(wrapf(want - cur, -PI, PI), -rate * dt, rate * dt)
 	var L := maxf(dv.length(), 1.0)
 	inp["aim"] = Vector3(h.pos.x + cos(cur) * L, aim3.y, h.pos.z + sin(cur) * L)
 

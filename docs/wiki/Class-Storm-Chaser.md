@@ -61,17 +61,17 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them. |
 | Passive: Static | Static: every hit adds a stack (4 max, shown over their head). The 4th calls a sky bolt and makes them Live. |
-| Dash: Wirerun | Wirerun: hold to charge a lane (length grows with the hold), let go to streak; through a 4-Static foe it hits double and comes back at once. |
+| Dash: Wirerun | Wirerun: tap for a short zap, hold to charge a longer lane, let go to streak; through a 4-Static foe it hits double and comes back at once, and a run that came back goes 1.5x further and charges faster. |
 | RMB: Storm Rod | Storm Rod: hold to summon a copper rod, let go to throw it to full range. It adds 1 Static, knocks the first foe back, stuns them on a wall and leaves a charge orb that gives Wirerun back. |
 | E: Skycall | Skycall: drop a circle at your cursor, hold and drag the mouse to pick the drag, let go. 0.8s later lightning drags everyone inside that way (an arrow shows it) and grounds them. |
 | Hunter ultimate: Kitefall | Kitefall (ultimate, level 6): launch up out of reach, then strike down at your cursor anywhere in a wide ring. It knocks everyone round the landing back and adds Static, spreading the highest count to all it hits. |
-| Weapon: Coilcaster | Finger bolts every 0.72s, left hand then right, out to full range; each stops on the first foe it hits and adds 1 Static. |
+| Weapon: Coilcaster | Finger bolts every 0.65s, left hand then right, out to full range; each stops on the first foe it hits and adds 1 Static. |
 
 ### Abilities in full
 
 **Static (passive).** Your finger bolts, Storm Rod and Skycall each add Static to what they hit (one each; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Only a charge orb picked up (by Wirerun or pulled in with Skycall) also gives it back. Knocking a hunter down heals you for 15% of your health.
 
-**Wirerun (dash, Shift, 8s cooldown).** Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 7.5 to 13m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 40m/s (shots pass through you), carrying that drift. Every foe you cross takes 20. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once: the only way it comes back early.
+**Wirerun (dash, Shift, 8s cooldown).** Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 7.5 to 13m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 40m/s (shots pass through you), carrying that drift. Every foe you cross takes 20. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once. A run that came back (a Blowout or a charge orb, used within 5s) goes 1.5x further and charges in 0.45s.
 
 **Storm Rod (RMB, 8s cooldown).**
 

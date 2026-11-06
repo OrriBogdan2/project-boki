@@ -6,7 +6,7 @@
 	],
 	"primary": {
 		"dmg": 12.0,
-		"rate": 0.72,
+		"rate": 0.648,
 		"speed": 37,
 		"kb": 0.8,
 		"spread": 0.0,

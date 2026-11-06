@@ -2,24 +2,26 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bdndaaxhey3xu"
-path="res://.godot/imported/claire_atlas.jpg-ad3522b5ce69ae870af0e89cd1e2fd83.ctex"
+uid="uid://c68yyevfvxc7k"
+path.bptc="res://.godot/imported/claire_atlas.jpg-ad3522b5ce69ae870af0e89cd1e2fd83.bptc.ctex"
+path.astc="res://.godot/imported/claire_atlas.jpg-ad3522b5ce69ae870af0e89cd1e2fd83.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "ddb732a396ab305ee54ea2c9e423083b"
+"md5": "00e0993b7216911ec05eb76ec226f110"
 }
 
 [deps]
 
 source_file="res://art/wardens/claire/claire_atlas.jpg"
-dest_files=["res://.godot/imported/claire_atlas.jpg-ad3522b5ce69ae870af0e89cd1e2fd83.ctex"]
+dest_files=["res://.godot/imported/claire_atlas.jpg-ad3522b5ce69ae870af0e89cd1e2fd83.bptc.ctex", "res://.godot/imported/claire_atlas.jpg-ad3522b5ce69ae870af0e89cd1e2fd83.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -39,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
-detect_3d/compress_to=0
+process/size_limit=2048
+detect_3d/compress_to=1

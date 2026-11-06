@@ -11,8 +11,9 @@ const int M_SCORCH = 1;     // the ground burning: UV across the quad
 const int M_SKIRT = 2;      // a wall of flame: UV.x round it, UV.y foot (0) to top (1)
 const int M_FLARE = 3;      // a ragged burst, facing the camera
 const int M_RIBBON = 4;     // a mesh trail: UV.x head (0) to tail (1), UV.y across
-const int M_BOLT = 5;       // a strip from A (UV.x 0) to B (1), facing the camera: lightning when jag > 0, a thread at 0
-const int M_VORTEX = 6;     // a disc on the ground spinning inward to a dark core: UV across the quad
+const int M_BOLT = 6;       // a strip from A (UV.x 0) to B (1), facing the camera: lightning when jag > 0, a thread at 0
+const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core: UV across the quad
+const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
 
 uniform int mode = 0;
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);    // the body of the look
@@ -27,6 +28,7 @@ uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures ke
 uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
+uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
 
 void vertex() {
 	if (billboard) {
@@ -77,7 +79,38 @@ vec4 sweep(vec2 uv) {
 	return vec4(ramp(heat) * a, a * mix(0.95, 0.7, depth));
 }
 
+// A seam along a lane: a torn slit with a thread running through it and cross-stitches over it, drawn in as it goes.
+vec4 seam(vec2 uv) {
+	float along = uv.y * aspect * 1.5;
+	float x = abs(uv.x - 0.5) * 2.0;
+	float cell = fract(along) - 0.5;
+	float cross_a = abs(x * 0.42 - abs(cell));
+	float arm = (1.0 - smoothstep(0.0, 0.07, cross_a)) * (1.0 - smoothstep(0.62, 0.8, x));
+	float slit = (1.0 - smoothstep(0.0, 0.12, x)) * 0.8;
+	float front = smoothstep(0.0, 0.3, life) * 1.25;
+	float lit = 1.0 - smoothstep(front - 0.1, front, uv.y);
+	float n = fbm3(uv * vec2(3.0, 9.0) + seed);
+	float gone = smoothstep(life * 1.3 - 0.3, life * 1.3, n + 0.15);
+	float ends = smoothstep(0.0, 0.03, uv.y) * (1.0 - smoothstep(0.97, 1.0, uv.y));
+	float a = max(arm, slit) * lit * gone * ends;
+	vec3 c = mix(col3.rgb, col.rgb, arm);
+	c = mix(c, col2.rgb, (1.0 - smoothstep(0.0, 0.02, cross_a)) * (1.0 - smoothstep(0.1, 0.4, life)));
+	return vec4(c * a, a);
+}
+
+vec4 thread(vec2 uv) {
+	float wander = sin(uv.y * 8.0 + seed) * 0.17 + sin(uv.y * 3.1 + seed * 1.7) * 0.13;
+	float sway = sin(TIME * 2.2 + seed + uv.y * 5.0) * 0.03 * uv.y;
+	float d = abs(uv.x - 0.5 - (wander + sway) * smoothstep(0.0, 0.5, uv.y));
+	float line = 1.0 - smoothstep(0.03, 0.075, d);
+	float fade = 1.0 - smoothstep(0.7, 1.0, life);
+	float end = 1.0 - smoothstep(0.82 * (1.0 - life * 0.6), 1.0 * (1.0 - life * 0.6), uv.y);
+	float a = line * fade * end;
+	return vec4(mix(col.rgb, col2.rgb, line * 0.2) * a, a);
+}
+
 vec4 scorch(vec2 uv) {
+	if (stitch) { return seam(uv); }
 	vec2 p = uv * 2.0 - 1.0;
 	float d = length(p);
 	float mask = 1.0;
@@ -193,7 +226,8 @@ void fragment() {
 	else if (mode == M_FLARE) { v = flare(UV); }
 	else if (mode == M_BOLT) { v = bolt(UV); }
 	else if (mode == M_VORTEX) { v = vortex(UV); }
-	else { v = ribbon(UV); }
+	else if (mode == M_RIBBON) { v = ribbon(UV); }
+	else { v = thread(UV); }
 	ALBEDO = v.rgb * gain;
 	ALPHA = v.a * gain;
 }
