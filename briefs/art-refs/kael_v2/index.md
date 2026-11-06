@@ -1,0 +1,22 @@
+# Kael v2 redesign (owner-approved 2026-11-06)
+
+| File | Model | Settings | Notes |
+|---|---|---|---|
+| kael_v2_master_sheet.png | Nano Banana Pro (no seed exposed) | 16:9, 4K edit pass | Final clothing pass: vivid crimson scarf and sash, wrist chains without hooks |
+
+Prompt chain:
+1. Three directions (Wall / Gladiator / Commander) → Wall.
+2. A tall rectangular build.
+3. Curse veins on one arm.
+4. The X-harness outfit.
+5. The two-tone ragged scarf (crimson over bone).
+6. The scarf shortened to a collar.
+7. The glowing sword restored.
+8. Pale natural skin and crimson curse.
+9. The clothing colour pass.
+
+Design notes:
+- Very pale skin, white mane, long scar.
+- The scarf hides the mouth, except in the rage head.
+- The curse spreads from the sword hand.
+- The glowing cracked greatsword with a chain and hook on the pommel.
