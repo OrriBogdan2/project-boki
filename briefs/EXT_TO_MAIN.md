@@ -2004,3 +2004,11 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-06 17:20 UTC S1 RETIRED 17:20 UTC
 - Nothing in flight: all S1 branches are merged. ext/hem-reticle (693b1b45) is unmerged and superseded by ext/kit-hem-55b. Open items are in HANDOFF_S1.md, now owned by the physics lane. I have stopped pushing to ext/server-status.
+
+## 2026-11-06 (build worker): READY `ext/vfx-cinder-rebased` @ 8bff10e5, SUPERSEDES `ext/vfx-cinder` 602e6b7d (which conflicted with main)
+- **Merge `ext/vfx-core-rebased` fbfa0fcf first** (this branch contains it, so merging this one alone also lands it). It is `ext/vfx-cinder` with `ext/vfx-core-rebased` (itself origin/main 7907d9af + vfx-core) merged in; only 2 files conflicted.
+- **Resolution** (Cinder's intent kept, main's newer code kept):
+  - `ashwick_kit.gd`: lance end keeps both `vfx("lance_end")` and main's `ashwick_tank_hiss` sound; pilot flare is `vfx("lance_pilot")` (old `fx.orb` gone); `HeroVfx.hold(h,"lance")` kept and the hose still gets main's `tip() - nozzle()` draw offset; Cinder Shot keeps the `shot_trail` + `vfx("shot")` (old muzzle orb/burst gone).
+  - `ashwick_jet.gd`: the flight uses `HeroVfx.hold(h,"jets")`; main's `jet_points()`/`stacks`/`JET_ANCHORS` and the old orb/ember `_jet_fx` are deleted (no callers left).
+  - **One content change:** `content/vfx/ashwick.json` jet anchors now name the model's real stacks `anchor_jet_0` / `anchor_jet_1` (main's model; the branch had guessed `anchor_tank_l/r`). The `hips` bone and body fallbacks are unchanged.
+- **Checks** (fresh XDG_DATA_HOME, after `--import`): `--check` 0 failures; `--hero-vfx-check` HEROVFX OK; `--ashwick-combo-check` 117/0; `--hero-combo-check` 297/0; `health.py --strict` OK. Not run: full suite, `--hitch-check`, a visual reel (the jets' placement on the real stacks is unseen).
