@@ -798,9 +798,8 @@ func _hop_item61(m: Match, P: Hunter, K: DolmKit, home: Vector3, reset: Callable
 		float(ran["x"]) > float(plain["x"]) + 0.3, "run %.2f standing %.2f" % [float(ran["x"]), float(plain["x"])]
 	)
 
-## Item 26: Quakefall then the glider. Glide held from the hop, or pressed after a charge leap or an air
-## press: the glider opens, she never drops below where she took off (for the first 0.3s), and it sinks
-## like a normal glide.
+## Item 162b (replaces item 26's glide mid-Quakefall): glide held from the hop, a charge leap or an air press
+## never opens the glider while the Quakefall runs (AirLimits; DolmKit.locks_glide). Over the abyss it may.
 func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
 	for mode in ["hop", "leap", "air"]:
 		reset.call()
@@ -822,21 +821,17 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 			tap(m, P)
 			z0 = P.pos.y
 		var dove := K.dive
-		var floor_z := -Hunter.GLIDE_SINK * 0.3 - 0.02 if mode == "air" else -0.01     # (in the air: a glide's sink)
-		var low := 99.0
-		var sink := 0.0
+		var opened := false
 		var t := 0.0
 		P.inp["jump"] = true
-		while t < 0.3:
+		while t < 0.3 and K.dive:
 			P.inp["glide"] = true
 			m.step(DT)
 			t += DT
-			low = minf(low, P.pos.y - z0)
-			if P.gliding: sink = minf(sink, P.vel.y)
+			opened = opened or (P.gliding and K.dive)
 		ok(
-			"glide (item 26, %s): Quakefall, then glide opens the glider; height kept, a normal glide" % mode,
-			dove and P.gliding and not K.dive and low >= floor_z and sink >= -Hunter.GLIDE_SINK - 0.05,
-			"gliding %s dive %s low %.2f sink %.2f" % [P.gliding, K.dive, low, sink]
+			"glide (item 162b, %s): glide held through the Quakefall never opens the glider mid-move" % mode,
+			dove and not opened, "dove %s opened %s (%.2fs, %.1fm over the take-off)" % [dove, opened, t, P.pos.y - z0]
 		)
 		P.inp["glide"] = false
 		step(m, 0.8)
