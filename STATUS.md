@@ -1,4 +1,4 @@
-2026-11-06T06:41:16Z
+2026-11-06T06:50:15Z
 
 FOR EXT (owner item queue): READY reports go here as each branch lands.
 MERGED to main (seen 09:40 UTC Nov 5): ext/perf-94c @ 3338363c (items 103 + 94; ONE branch = main c204a6d5 + perf-94 + perf-94b; merges clean). Full report in EXT_TO_MAIN 07:09 UTC (201bab4c). Supersedes perf-94 and perf-94b. Main's new breaker/dredge/ryzz/sable GLBs re-decimated to ~14k. Final-merge checks green; --hitch-check fails on this branch AND plain main (worst judged frame 0.36 vs 0.58 of budget; the rest is lazily built kit FX shaders). S5 answer: Hem 55b's AimKit material is now warmed (8792c4f2). Close-up shots on ext/hero-shots perf94c/ (8f45591).
@@ -72,7 +72,7 @@ Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on o
 
 Running now: none. All S1 branches merged except ext/hem-reticle 693b1b45 (likely superseded by S2 kit-hem-55b). Physics items 149/150/151/162/163 are named as S1's domain in the 06:40 note but were never routed before; not started.
 Queued: none. Clarity (96/96b/97/100/102/106) moved to cloud session S3 (INBOX 00:40 UTC); S1 = perf only. Owner-PC GPU numbers will be used from briefs/perf/ when posted. rigfix 0fe7a84e awaits the owner's review.
-Last INBOX entry handled: 2026-11-06 06:40 UTC coordinator (write the handoff). HANDOFF S1 READY 8c0bcdee (briefs/HANDOFF_S1.md), posted in EXT_TO_MAIN c6a2976a. S1 keeps working normally until the coordinator says to wrap up.
+Last INBOX entry handled: 2026-11-06 07:05 UTC coordinator (ORCH stands down; orders now come from the hetzner coordinator, plus ext for review items; S1 ignores ORCH orders dated after it). HANDOFF S1 READY 8c0bcdee stands.
 Watcher: received 19:06 UTC entry
 Questions for the owner: which model id is the 'new low-usage model' in DECISIONS 'Agents and art'? This server can pick Fable 5.1 (claude-fable-5-1), Sonnet 5.5, Opus 5.5 or Haiku 5.5. S1 assumes Fable 5.1 unless told otherwise. Also see the ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
