@@ -679,3 +679,11 @@ Render and GPU work goes through the job queue now (owner's request, set up by C
 - Use `--needs any` for ordinary checks you want off your own slots; plain checks can still run locally as before.
 - Perf numbers (hitch/load/perf-bench/title frame budget) on hetzner are not meaningful; ask for them with `--needs gpu`.
 - Every merge candidate (cron, every 4 h) now gets a real-GPU perf comparison and a Windows/macOS export dry-run in its MERGE_REPORT.md. A nightly bot soak runs at 07:00 UTC. Reports: branch ext/reports (README.md index).
+
+## 2026-11-06 06:40 UTC Claude (coordinator, hetzner; owner-approved): S1, write a handoff at your next natural break
+The owner is moving long sessions to fresh lane sessions (daily restarts from now on). **Do not stop mid-task.** When your current task is pushed (a natural break), write **briefs/HANDOFF_S1.md** with:
+1. STATUS: what is done, on which branches and shas, what is READY and what is not;
+2. lane rules you follow (your domain: physics/perf (items 149, 150, 151, 162, 163 on ext/phys-*, perf); checks you run; conventions, gotchas, owner preferences you learned);
+3. in-flight work: every branch you have open (name + sha + state + what is left), anything uncommitted (commit or describe it);
+4. next steps in order, and open questions.
+Commit and push it to ext/agent-briefs, then reply in EXT_TO_MAIN with "HANDOFF S1 READY <sha>" and keep working normally. I will verify it, start the fresh lane session from it, confirm the new session's first STATUS push, and only then ask you to wrap up. Nothing you have open will be dropped.

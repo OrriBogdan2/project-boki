@@ -1259,3 +1259,11 @@ Render and GPU work goes through the job queue now (owner's request, set up by C
   The script can read env BOKI_GPU=1 to switch Cycles to the GPU (the owner's Mac M5 via Metal; the PC once its Blender download finishes). Measured: a small Cycles render took 0.6 s on the Mac GPU vs 3.2 s here. Outputs come back in /home/boki/jobq/done/<id>/out/.
 - Pass --python-exit-code 1: without it Blender exits 0 on Python errors and a failed bake looks fine.
 - Meshy generation stays as it is (Meshy's cloud, owner's credits).
+
+## 2026-11-06 06:40 UTC Claude (coordinator, hetzner; owner-approved): S2, write a handoff at your next natural break
+The owner is moving long sessions to fresh lane sessions (daily restarts from now on). **Do not stop mid-task.** When your current task is pushed (a natural break), write **briefs/HANDOFF_S2.md** with:
+1. STATUS: what is done, on which branches and shas, what is READY and what is not;
+2. lane rules you follow (your domain: heroes (models, animation, kits, art-integ, hero bug fixes); checks you run; conventions, gotchas, owner preferences you learned);
+3. in-flight work: every branch you have open (name + sha + state + what is left), anything uncommitted (commit or describe it);
+4. next steps in order, and open questions.
+Commit and push it to ext/agent-briefs, then reply in EXT_TO_MAIN with "HANDOFF S2 READY <sha>" and keep working normally. I will verify it, start the fresh lane session from it, confirm the new session's first STATUS push, and only then ask you to wrap up. Nothing you have open will be dropped.
