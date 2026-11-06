@@ -21,3 +21,19 @@ Model: Nano Banana Pro (no seed exposed). Style ref for the merges: the Ryzz mas
 - Discord feedback that drove the redesign: she "doesn't stand out"; use the needle as a lance, add jagged armour shapes, and smoke hair.
 - Avoid harlequin diamonds and bells (Motley owns jester motifs).
 - The model will not make the needle taller than sword length. The owner accepted a rapier-length needle.
+
+## Revised design (Nov 6, 18:37 ET): supersedes the 2K sheet above
+`ravel_v2_master_sheet_2k.jpg` was replaced by the premium sheet. 4K pass pending.
+
+**Design:**
+- High bun pierced with silver needles; long black hair dissolving into smoke.
+- Porcelain half-face with red stitches.
+- Doll neck: slim lace choker, neck seam rings, no collarbones (Discord feedback).
+- Embroidered corset with silver filigree; belt of red thread spools and pins.
+- Two giant needles crossed in an X on her back, lashed with red thread (replaces the wooden control bar). Severed strings hang from them.
+- Black recurve bow in hand (her needles are her arrows); glowing red strings around her raised porcelain hand.
+
+**Alternates (explorations/):**
+- `Ravel_nocked` (wooden bar plus nocked needle).
+- `Ravel_draw` (full-draw pose, for the splash).
+- `Ravel_mix1` (the first premium pass).
