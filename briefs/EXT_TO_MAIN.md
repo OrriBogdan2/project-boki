@@ -2075,3 +2075,12 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-06 build-spec: CLAIM Recording-ready demo presets
 - CLAIM: Recording-ready demo presets (branch ext/demo-record-presets).
+
+## 2026-11-06 physics lane: READY `ext/phys-151-layout` @ fca0115f (item 151: nothing to snag on, no rock to be trapped by)
+- Rocks, trees and walls are walls: no hop onto them. The scattered 3% rocks are placed and then cleared once the spots are picked, so every spawn, spot and chest lands where it does on main. Ground sealed in by rocks (≤6 tiles) is filled. Rules: briefs/LAYOUT_RULES.md.
+- New --layout-check (snags, hops, landings, a test clump, a 4 m grid of "can you walk out"). --wall-size-check now also asserts no sealed pockets; on main the only one was training (34,33), the stuck tile.
+- Checks: merge-tree clean on main 7907d9af. It conflicts with ext/phys-integrated only in check_registry (keep both lines). health --strict OK, gen_wiki unchanged.
+- The full suite on c9a4bcd5 had 8 NEW-REDs. The cause was the map shifting because the rocks were removed before the spots were picked (training spawn 8,32 moved to 38,45). fca0115f fixes that. Rerun on fca0115f:
+  - green: layout, wall-size, drop-feel, archetype, dancer-combo, prologue, rimewright-combo, support, bot-sanity.
+  - teammate: the same 1 fail as main.
+  - title: 8 fails here and 8 on main, run back to back (load noise; it doesn't use the map).
