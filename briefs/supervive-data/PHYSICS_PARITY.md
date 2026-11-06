@@ -165,3 +165,14 @@ Sync62 slowdown (git): a196808ca (2026-11-02) "Slower, shorter dashes for everyo
 8. Dive speed. `Hunter.DIVE_FALL` hunter.gd:70: 13 → up to 32.5 if parity wanted (SV -3250 uu/s); drop-pod feel, [est] value. Low priority for walking physics.
 
 Rows I could not verify: recall/revive/death-circle values (not movement), yaw rate equivalence, UE friction/braking formulas, MaxGlide meaning, mantle suction force model, rail grinding (not found in code).
+
+## Step 2 and step 3 (physics lane, 2026-11-06)
+- Step 2 (footage timing): the reference footage is 5 fps (0.2 s a frame). SV's stop takes ~0.18 s and a dash's decel less, so the frames can't resolve them; jump airtime is ~5 frames +-1. The game data above is the reference instead.
+- Step 3, changed (ext/phys-150-parity 4071fe66):
+  - Walking stop: braking 110 -> 22.2 m/s^2 plus friction 2 /s (GroundFriction 1.0 x UE's braking factor 2). A let-go now stops in ~0.17 s / ~0.3 m from a run (SV ~0.18 s / ~0.38 m); it was 0.05 s / 0.08 m.
+  - Speed over a run (a dash, a kit step, a knock) still sheds at 110 m/s^2 with no keys, so every kit-tuned distance holds (Breaker's step, Tarek's punch, Storm Rod knocks).
+- Step 3, changed with item 163 (ext/phys-163-drop): glide cruise 6.5 -> 5.0 m/s (MaxGlide 500) and the glide steers as a force (16.25 m/s^2 = GlideTargetXYForce 162,500 / UE's 100 kg): a 90-degree turn ~0.38 s, a reversal ~0.6 s.
+- Kept, with the reason:
+  - Dash carry 0.15 / 0.3: SV's dash curves aren't decoded, and 0.5 / 0.6 pushed Breaker's step past item 30's 2 m.
+  - Air control 0.3 and jump 6.8 m/s: deliberate (owner feel items), unchanged.
+  - Base glide sink 1.4 m/s below 8.5 m: it is what the glider-heat limit is tuned on (owner: "lasts too long"); above 8.5 m it is SV's 3.5.
