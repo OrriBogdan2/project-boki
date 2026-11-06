@@ -8,7 +8,8 @@ extends RefCounted
 ##   move's recovery). Held glide opens it the moment the animation ends, with the speed it left you, so the
 ##   momentum carries into the glide. A move that travels (a dash, a Lunge) ends with its travel, and a kit's
 ##   Shift move (a skate) is the dash's, so the glider takes the burst the step it ends (--move-feel-check
-##   dashglide_reopen_frames, --airdash-glide-check). An open glider is never folded by this rule.
+##   dashglide_reopen_frames, --airdash-glide-check). A jump off the ground ends the move it left (a slam's
+##   recovery doesn't hold the glider shut after you jump out of it). An open glider is never folded by this rule.
 
 ## Every press the drop ignores (move, aim and glide stay: they steer).
 const TRAVEL_JOIN_S := 0.05      # s: a kit move started this close after a travel or Shift press is that move's
@@ -44,7 +45,7 @@ static func glide_locked(h: Hunter) -> bool:
 ## A kit move still inside its keys. A held move (a hold pose) counts only through the hold itself above,
 ## so a pose left on its last key never blocks the glider.
 static func move_running(k: ArchKit, h: Hunter) -> bool:
-	if k.anim_id == "" or k.anim_at <= maxf(h.dash_at, k.dash_press_at) + TRAVEL_JOIN_S:
+	if k.anim_id == "" or k.anim_at <= maxf(maxf(h.dash_at, k.dash_press_at) + TRAVEL_JOIN_S, h.jump_at):
 		return false
 	var mv := HunterAnim.km_def(k.anim_id)
 	if mv.is_empty() or mv.get("hold", false):

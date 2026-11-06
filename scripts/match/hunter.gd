@@ -242,6 +242,7 @@ var pack_cap := 6
 var backpack := 0              # the backpack tier worn (Backpacks): 0 is the Pouch everyone has
 var swap_hold := false
 var dash_at := -9.0           # when the last dash started, for perfect dodges
+var jump_at := -9.0           # when you last jumped off the ground (AirLimits: a move from before it is over)
 var dodged := false        # F has to be let go between weapon swaps
 var lives := 1                # comes back this many times minus one before it's really out
 var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
@@ -817,6 +818,7 @@ func do_jump() -> void:
 		glide_handoff(roll_dir, roll_speed)         # (movefeel) dash, jump, glide carries the dash
 	if grounded or coyote > 0.0:
 		vel.y = JUMP_V * (float((kin as Kin).ks.mount.get("jump", 1.0)) if mounted() else 1.0)
+		jump_at = m.time
 		grounded = false
 		coyote = 0.0
 		m.sfx("jump", pos, -6.0)
