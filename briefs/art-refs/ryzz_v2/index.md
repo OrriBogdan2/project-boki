@@ -52,3 +52,12 @@ Model: Nano Banana Pro (no seed exposed). Exploration at 2K.
 
 ## Note for 3D/animation
 The bubblegum bubble is a separate animated prop (a pink sphere that grows from her lips and pops), not part of the face mesh. The turnaround deliberately shows a neutral closed mouth. The bubble should play in her idle and emotes; see the master sheet and portrait for its look.
+
+## FINAL set at 4K (Nov 6, 16:37 ET)
+Nano Banana Pro "recreate exactly at higher resolution" passes from the 2K approved images:
+- `ryzz_v2_master_sheet.jpg` (emblem top, 3:4).
+- `ryzz_v2_turnaround.jpg` (16:9).
+- `ryzz_v2_portrait.jpg` ("Static Bubble", 1:1).
+- `ryzz_v2_splash.jpg` ("Who, Me?", wrecked market, 16:9 extension of the square version).
+
+Rejected: one 4K sheet run that came out square and dropped the bubblegum head (kept as `explorations/master_sheet_4k_rejected_square.jpg`).
