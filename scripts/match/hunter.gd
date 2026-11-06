@@ -331,13 +331,13 @@ func reclass(c: String, a: String, w := "") -> void:
 	wid = Arch.weapon_for(arch, cls, w)
 	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Unmasked.mask_look() if ctrl == "local" else bot_look, arch))
 	anim = null
-	equip(wid)
+	equip(wid, -1, false)      # (Models.hunter just built this weapon, a 3D Warden's own model included)
 	dashes = max_dashes(); ex_cd = 0.0
 	roll_t = 0.0; stun_t = 0.0; root_t = 0.0
 
 ## Puts a weapon in hand with this run's weapon upgrades on it (WeaponUps). A hunter has one
 ## signature weapon (Arch.signature), so this is only called to build it, or when practice swaps archetype.
-func equip(w: String, with_ammo := -1) -> void:
+func equip(w: String, with_ammo := -1, rebuild := true) -> void:
 	wid = w
 	wpn = Data.weapon_stats(w)
 	WeaponUps.apply(self)
@@ -345,7 +345,7 @@ func equip(w: String, with_ammo := -1) -> void:
 	wbloom = 0.0; warm_t = 0.0; spin = 0.0; spun_t = 0.0; sus_n = 0; mel_hold = 0.0; strike_at_end = {}
 	ammo = int(wpn["mag"]) if with_ammo < 0 else mini(with_ammo, int(wpn["mag"])); reload_t = 0.0; fire_cd = 0.25
 	if ammo <= 0 and not remote: start_reload()
-	var gun: Node3D = model.find_child("Gun", true, false) if model else null
+	var gun: Node3D = model.find_child("Gun", true, false) if model and rebuild else null
 	if gun:
 		for ch in gun.get_children():
 			if ch.name != "Muzzle":
