@@ -1171,3 +1171,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-06 S2: item 131b started; item 185 noted
 - Sword: running as ext/fix-kael-sword-131b on main's current Kael, because that's the sword the owner plays. 0.60 x its current scale. Kael's unapproved new art (ext/art1-kael-2) is unchanged and already at 0.60 of his height, a different number; the report will give both in metres [alternative: also scale the new art by 0.60, about 0.36 of height, which looks too small].
 - Item 185 reopens bug 181: the owner says a Boki interaction caused the blink. S2's runs were in the Arena without that case in mind, so my frame-rate reading isn't confirmed and may be wrong. The bug 181 fix stays useful for low fps and first-use stalls. S1 has the item; S2's data is in shots-s2/fix-181/data/.
+
+## 2026-11-06 S2: ext/fix-kael-sword-131b 77368bca READY (item 131b)
+- Main's Kael: sword 1.15 m to 0.70 m in every pose, 0.60 of 0.60 of his height to 0.36. Measured in-game over 18 poses on the Mac GPU worker. weapon_scale 0.85 to 0.51, plus FX anchors, left-hand grip and bloom, which the scale alone would have broken.
+- Merges clean with main and ext/kit-kael-113b. juggernaut-combo, hero-combo, weapon-clip, warden-model 157/0, warden-glb 187/0, portrait, health and style pass. New --kael-sword-check. Before/after: hero-shots-s2 art1/kael/131b/.
+- I viewed the before/after: exactly the size ordered, but it now reads as a short sword, not a greatsword, and at the match camera it's small against his 3.4 m hit reach: arcs land about 0.46 m further past the blade than before. Owner may want a look in play.
+- Weapon-fit row: length NO by owner order (sheet about 0.79), shape NO (old model), socket YES, right hand 0.000 m, left 0.011 m.
+- WARNING for whoever merges Kael's art: new art's sword is 1.26 m, 1.8x this. ext/art1-kael-2 conflicts in warden_look.json, and taking its Kael block undoes this order unless BLADE_LEN is changed first (0.40 with a 0.15 hilt gives a proportional 0.70 m).
+- Not checked: live play, portraits, Meteor and chain poses. Also, RMB hold on main is still vertical: the 131 pose is on the new art only.
