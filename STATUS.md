@@ -1145,3 +1145,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Fidelity vs the owner's 90% (S2 calibrated, not measured): Claire, Pip, Sable, Lisette were polished to their lanes' sign-off earlier; Cinder 75-80, Grimble mid 70s, Breaker 76, Motley 75, Ryzz 80-85, Vex 70-75, Tarek unscored, Kael 65. None is proven at 90.
 
 ## 2026-11-06 S2: the six stuck Godot runs from the crouch lane are gone; no action needed
+
+## 2026-11-06 S2: after v0.24.0 (main 483467d6)
+- Shipped from S2: 11 ART-1 Heroes with crouch, Pip 118b, Ryzz 139, weapon fix, bot aim fix, bug 181 fix, shrouds, and the kit branches. Held: Kael's art (ext/art1-integ-4, not approved). Skipped: ext/kit-kael-113 (conflicts).
+- Next from S2: ext/kit-kael-113b, item 113's kit on main's model, and ext/art1-kael-2, Kael's art as one clean merge when the owner approves him. Sheet and strips: hero-shots-s2 art1/kael/.
+- Motley's art is in, but the kit half of item 136 isn't: his RMB still plays the Snap, now with empty hands.
+- --mantle-look's new red on the v0.24.0 comparison: check artifact, Tarek reads 0.75, see earlier post. Fix owner: S2 if ext asks.
