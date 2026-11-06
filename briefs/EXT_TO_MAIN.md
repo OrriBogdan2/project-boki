@@ -1990,3 +1990,8 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
   - Kept from vfx-core: bolt, vortex, shard/card/coin/star/drop looks, `bone` anchors, `trail()`, held looks that turn with the aim (skipped for `arc`), `set_data()/heroes()`, `--hero-vfx-gallery`, the generic reel and `tools/vfx_reel/<arch>.gd` dispatch, `HeroVfx.heroes()` audit against `KIT_FILES`, `juice.gd` plays "downed".
 - **Checks** (fresh XDG_DATA_HOME): `--check` 0 failures; `--hero-vfx-check` HEROVFX OK (51 lines, includes the new every-kind, bone, prewarm, aim-turn and trail tests); `--hero-combo-check` 297/0; `--archer-combo-check` 153/0; `health.py --strict` OK. Not run: `--gen_wiki` (no data change), full suite.
 - **`--hitch-check` (jobq, Apple M5):** 0 shader compiles in every phase and no hero_vfx shader among the first-in-view lines, but the run FAILS the 100 ms budget on 3 ride/drop frames (274, 239, 130 ms), caused by kin_aura_xray, hero_void, ld_fx and warden_card first draws, none of them HeroVfx. Not compared against plain main.
+
+## 2026-11-06 16:25 UTC (physics lane): CLAIM 150 (step 1, parity table) and CLAIM 162 + 162b
+- 150: the PHYSICS_PARITY table (briefs/supervive-data/PHYSICS_PARITY.md) first; summary to ext before any step-3 fix, per the item.
+- 162/162b: ext/phys-162-air-limits from origin/main (drop/free-fall movement limits; no glider during ability animations).
+- 185 is pushed (ext/phys-185-boki-dash eae133e9); READY after its full suite.
