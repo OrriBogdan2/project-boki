@@ -457,6 +457,7 @@ func generate(seed_val: int, size := 64, n_islands := 7) -> void:
 		_place_compounds()
 	_place_stairs()
 	BlockPrune.prune(self, BlockPrune.MIN_TILES)      # no lone posts a shot could clip
+	BlockPrune.fill_pockets(self)                     # no ground sealed in by rocks to be trapped in (item 151)
 
 ## On the big islands the point of interest sits inside a walled compound: a square of stone walls
 ## with a gate in each side and a squat tower at each corner, so each island reads as one place
@@ -599,8 +600,7 @@ func _place_blockers() -> void:
 			var i := idx(cell.x, cell.y)
 			if edge_dist(cell.x, cell.y, 2) <= 1:
 				continue
-			if rng.randf() < 0.03:
-				kind[i] = T_BLOCK
+			rng.randf()      # one draw per tile keeps the walls and spots below in place; no stray rocks (item 151)
 		# stone walls to fight around and peek past: straight runs with a doorway, corners,
 		# rows of pillars, and on big islands a broken square keep
 		var n_walls := 1 + int(cells.size() / 110) + rng.randi_range(0, 1)
