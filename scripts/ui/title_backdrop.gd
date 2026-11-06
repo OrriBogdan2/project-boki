@@ -1,13 +1,14 @@
 class_name TitleBackdrop
 extends Control
 ## The title screen's backdrop: the Hunters' painted splashes (art/brand/title/<archetype>.jpg), one at a time,
-## each drifting in slowly (a gentle push-in and pan) and crossfading to the next, in place of a 3D scene.
+## each held still and crossfading to the next, in place of a 3D scene. (The slow push-in and pan was removed
+## Nov 6: the owner read it as screen shake, mostly the lurch when a fresh, un-zoomed splash faded in over a
+## zoomed, panned one.)
 
 const ORDER := ["juggernaut", "gunslinger", "mage", "archer", "bulwark", "rimewright",
 	"ostra", "thief", "dolm", "ashwick", "dredge", "tender"]
 const HOLD := 7.0            # s each splash is on screen
 const FADE := 1.4            # s of crossfade into the next
-const ZOOM := 0.07           # how much it pushes in over its time
 
 var shown: Array = []        # [TextureRect, age]
 var idx := 0
@@ -30,10 +31,11 @@ func _next() -> void:
 	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tr.modulate.a = 0.0
 	add_child(tr)
-	shown.append([tr, 0.0, 1.0 if idx % 2 == 0 else -1.0])
+	shown.append([tr, 0.0])
 	idx += 1
 
 func _process(delta: float) -> void:
+	delta = minf(delta, 0.1)   # a hitch never skips the crossfade
 	age += delta
 	if age >= HOLD:
 		age = 0.0
@@ -41,10 +43,8 @@ func _process(delta: float) -> void:
 	for s in shown.duplicate():
 		var tr: TextureRect = s[0]
 		s[1] = float(s[1]) + delta
-		var k := clampf(float(s[1]) / (HOLD + FADE), 0.0, 1.0)
-		var z := 1.0 + ZOOM * k
-		tr.size = size * z
-		tr.position = -(size * (z - 1.0)) * Vector2(0.5 + 0.25 * float(s[2]) * (k - 0.5), 0.5)
+		tr.size = size
+		tr.position = Vector2.ZERO
 		if s != shown.back():
 			continue
 		tr.modulate.a = minf(1.0, float(s[1]) / FADE)
