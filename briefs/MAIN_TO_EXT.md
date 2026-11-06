@@ -1722,3 +1722,28 @@ Also 164b (S7's tutorial rework; S5 if you get there first): no wild monsters on
 - Don't run the full suite more than once. Use Sonnet/low effort, no subagents.
 - Post "S5 PAUSED" with what's left when you stop.
 - brand-logo update: the news card is now a small chip in the bottom-right (it blocked Claire).
+
+## 2026-11-06 02:41 UTC Claude (owner's terminal) SHIPPED 483467d6 + RELEASED v0.24.0
+The owner asked for every READY branch to be merged and shipped while S5 is paused. S5: do NOT re-merge these.
+- **Merged:** ext/art1-integ-3 ext/art-shrouds-153 ext/boki-glintmole ext/boki-newbase ext/boki-starter ext/brand-logo ext/claire-62-65 ext/fix-breaker-spin ext/fix-dash-181 ext/kit-cinder-66 ext/kit-cinder-ult-e ext/kit-glider-63 ext/kit-gloves-69 ext/kit-lisette-114 ext/kit-ostra-60-75 ext/kit-pip-118 ext/kit-ryzz-116 ext/kit-tarek-111 ext/kit-vex-112 ext/portraits-three ext/sfx-base-2 
+- **Suite:** all 152 flags on the merge, main re-run where red: NEW-RED: 1  WORSE: 3  FIXED: 15  reds on main: 42. Details: /home/boki/suite-claude/compare.txt on hetzner.
+- **Skipped (conflicts; owners please rebase on main and re-post READY):**
+  - ext/s7-mask-hob-83-89 486e652c conflicts: scripts/heroes/warden_glb.gd
+  - ext/boki-cindle 7ded8605 conflicts: art/kin/cindle/cindle.glb art/kin/cindle/cindle_cindle_atlas.webp art/kin/cindle/cindle_cindle_atlas.webp.import
+  - ext/boki-rimeshrew 5763ca81 conflicts: docs/art/kin/RIGGED_BOKI.md scripts/match/boki_rig.gd tools/boki/build_boki.py tools/boki_rig_check.gd
+  - ext/boki-zephyrak e29baa56 conflicts: docs/art/kin/RIGGED_BOKI.md scripts/match/boki_rig.gd tools/boki/build_boki.py tools/boki_rig_check.gd
+  - ext/boki-pebbit 136f8511 conflicts: docs/art/kin/RIGGED_BOKI.md scripts/match/boki_rig.gd tools/boki/build_boki.py tools/boki_rig_check.gd
+  - ext/boki-cairnback 8cae62dc conflicts: docs/art/kin/RIGGED_BOKI.md scripts/match/boki_rig.gd tools/boki/build_boki.py tools/boki_rig_check.gd
+  - ext/boki-wisplet 38ac73e9 conflicts: docs/art/kin/RIGGED_BOKI.md scripts/match/boki_rig.gd tools/boki/build_boki.py tools/boki_rig_check.gd
+  - ext/boki-gloamshell e7b1885e conflicts: docs/art/kin/RIGGED_BOKI.md scripts/match/boki_rig.gd tools/boki/build_boki.py tools/boki_rig_check.gd
+  - ext/boki-selenfin ba573892 conflicts: docs/art/kin/RIGGED_BOKI.md scripts/match/boki_rig.gd tools/boki/build_boki.py tools/boki_rig_check.gd
+  - ext/boki-zapple 00cd0153 conflicts: docs/art/kin/RIGGED_BOKI.md scripts/match/boki_rig.gd tools/boki/build_boki.py tools/boki_rig_check.gd
+  - ext/boki-hivara 1cdebed5 conflicts: docs/art/kin/RIGGED_BOKI.md scripts/match/boki_rig.gd tools/boki/build_boki.py tools/boki_rig_check.gd
+  - ext/kit-kael-113 ae7f8b6b conflicts: scripts/arch/kits/juggernaut_chain.gd scripts/arch/kits/juggernaut_drop.gd scripts/arch/kits/juggernaut_kit.gd scripts/arch/kits/juggernaut_ult.gd tools/combo51_shots.gd
+  - ext/vfx-core 16f66b8e conflicts: docs/HERO_VFX.md scripts/match/hero_vfx.gd scripts/match/juice.gd scripts/match/match.gd shaders/hero_vfx.gdshader shaders/hero_vfx_mote.gdshader shaders/hero_vfx_motes.gdshader tools/hero_vfx_check.gd tools/hero_vfx_reel.gd
+  - ext/vfx-cinder 602e6b7d conflicts: docs/HERO_VFX.md scripts/arch/kits/ashwick_kit.gd scripts/match/hero_vfx.gd scripts/match/juice.gd scripts/match/match.gd shaders/hero_vfx.gdshader shaders/hero_vfx_mote.gdshader shaders/hero_vfx_motes.gdshader tools/hero_vfx_check.gd tools/hero_vfx_reel.gd
+  - ext/vfx-claire 05815856 conflicts: docs/HERO_VFX.md scripts/arch/kits/rimewright_kit.gd scripts/match/hero_vfx.gd scripts/match/juice.gd scripts/match/match.gd shaders/hero_vfx.gdshader shaders/hero_vfx_mote.gdshader shaders/hero_vfx_motes.gdshader tools/hero_vfx_check.gd tools/hero_vfx_reel.gd
+  - ext/vfx-pip 45a1949b conflicts: docs/HERO_VFX.md scripts/arch/kits/tender_kit.gd scripts/match/hero_vfx.gd scripts/match/juice.gd scripts/match/match.gd shaders/hero_vfx.gdshader shaders/hero_vfx_mote.gdshader shaders/hero_vfx_motes.gdshader tools/hero_vfx_check.gd tools/hero_vfx_reel.gd
+- **Checks to fix:** --title-check still expects the old 3D title (brand-logo replaced it with the splash crossfade the owner approved: update the check). --mantle-look-check can not see the skinned ART-1 heroes (known check artifact, S2 STATUS). --glider-heat-check now completes (it hangs on main) but logs the existing home.gd:1625 _glider_look Nil-position error, the same one --abyss-check shows on main.
+- Not merged on purpose: ext/art1-integ-4 (Kael not approved), the 7 WIP Boki species, drop-107, friendly-bodies, grammar-size-cap.
+- From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
