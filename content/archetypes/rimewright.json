@@ -8,15 +8,18 @@
 	"weight": "light",
 	"body": {
 		"size": 1.15,
-		"bulk": 0.78,
+		"bulk": 1.0,
 		"hit_r": 0.38,
-		"head": 0.58,
-		"legs": 2.15,
-		"neck": -0.08
+		"head": 0.6,
+		"legs": 2.04,
+		"torso": 0.96,
+		"shoulder": 0.84,
+		"neck": -0.04
 	},
+	"model_glow": {"core": "#d9f7ff", "edge": "#7fd2ff", "strength": 2.2},
 	"color": "#5fd6c4",
 	"fantasy": "A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them.",
-	"silhouette": "the big furred collar and the long trailing scarf, on blade skates",
+	"silhouette": "a bunny-eared fur hood with curled ice horns, a long candy-striped ice spear, on glowing blade skates",
 	"card": {
 		"role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
 		"loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
@@ -61,7 +64,7 @@
 		"refund": 0.6,
 		"min_t": 0.2,
 		"rink_t": 0.0,
-		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams. In the air, press it to buffer the skate: it starts the moment you land.",
+		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.",
 		"steer": 3.6,
 		"ice_gap": 0.2,
 		"ice_look": 2.0,
@@ -70,6 +73,7 @@
 		"ice_time": 5.0,
 		"ice_col": "#bff0ff",
 		"ramp": 0.2,
+		"air_fall": 1.5,
 		"stop": 0.15
 	},
 	"rmb": {
@@ -171,7 +175,7 @@
 		"cooldown": 80.0,
 		"radius": 7.2,
 		"snap_t": 0.2,
-		"carry_t": 0.5,
+		"carry_t": 0.8,
 		"hold": 3.5,
 		"late": 0.75,
 		"late_k": 0.67,
@@ -180,6 +184,6 @@
 		"slow_base": 0.15,
 		"slow_per_s": 0.12,
 		"slow_max": 0.55,
-		"desc": "Cast it: you are sealed in a frost shell, invulnerable and rooted, and a 7.2m (4 body heights) rink snaps out round you. Cast from a skate, your momentum carries you about 3m on as the shell closes, then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
+		"desc": "Cast it: you are sealed in a frost shell, a frozen statue: invulnerable and rooted, your facing locked as you cast, and a 7.2m (4 body heights) rink snaps out round you. Cast from a skate, the statue slides on along your skate (about 6m at full speed, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
 	}
 }

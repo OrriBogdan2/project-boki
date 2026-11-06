@@ -1,7 +1,7 @@
 class_name FarmTutorial
 extends RefCounted
 ## The guided farm tutorial (content/rules/farm_tutorial.json; the screen side is FarmGuide). Short steps
-## on a new farm: axe, chop a tree, house, hammer, a job for your Boki, mine a rock, feed, crop (by the water),
+## on a new farm: axe, chop trees, mine rocks, house, hammer, a job for your Boki, feed, crop (by the water),
 ## buy a seed, sell a crop, meet Hob, head out.
 ## State is Save.d.tutorial.ft:
 ##   did      step id -> true for the steps done
@@ -118,6 +118,7 @@ static func hint_text(id: String) -> String:
 		return ""
 	var raw := String((s["hints"] as Dictionary).get(stage(id), ""))
 	var txt := FarmTaskGuide.fill(raw).replace("{build}", Settings.key_cap("build"))
+	txt = txt.replace("{house_cost}", FarmSites.cost_text(FarmSites.build_cost("house")))
 	return txt.replace("{interact}", Settings.key_cap("interact")).replace("{details}", Settings.key_cap("details"))
 
 static func world_text(id: String) -> String:
@@ -139,20 +140,23 @@ static func event(what: String) -> void:
 static func detect() -> void:
 	if not active():
 		return
-	var wood := int(FarmSites.build_cost("house").get("wood", 0))
+	var cost := FarmSites.build_cost("house")
+	var wood := int(cost.get("wood", 0))
+	var stone := int(cost.get("stone", 0))
 	if HomeGather.has_tool("axe"):
 		mark("axe")
 	if FarmSites.have("wood") >= wood and wood > 0:
 		mark("axe")
 		mark("chop")
+	if HomeGather.has_tool("pickaxe") and FarmSites.have("stone") >= stone and stone > 0:
+		mark("stone")
 	if not FarmHob.house_entry().is_empty():
 		mark("axe")
 		mark("chop")
+		mark("stone")
 		mark("house")
 	if house_built():
 		mark("hammer")
-	if HomeGather.has_tool("pickaxe") and FarmSites.have("stone") > 0:
-		mark("stone")
 	if Econ.feeders().any(func(f): return Econ.fill(f) > 0):
 		mark("feed")
 	if Progress.stat("harvested") > 0 and not HomeLayout.fixtures(Save.d, "farm").is_empty():

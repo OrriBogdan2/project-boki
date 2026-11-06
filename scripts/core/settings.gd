@@ -9,7 +9,7 @@ const DEFAULTS := {
 	# audio
 	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
 	# video
-	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 4, "video_v": 2, "shadows": true, "ui_scale": 1.0, "show_fps": false,
+	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 4, "video_v": 3, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
@@ -63,26 +63,32 @@ func quality() -> String:
 	var found := String(v.get("quality_found", ""))
 	return found if QUALITY.has(found) else detect_quality()
 
+## Settings > Video > Frame rate: "" hidden, "fps" the rate alone, "full" the performance overlay
+## (show_fps was a toggle before, so a saved true is the plain rate).
+func fps_mode() -> String:
+	match int(v.get("show_fps", 0)):
+		0: return ""
+		1: return "fps"
+	return "full"
+
 ## A knob of the preset in effect (see QUALITY).
 func q(key: String):
 	return QUALITY[quality()].get(key, QUALITY["high"][key])
 
-## A first guess from the graphics adapter: software renderers get Low, integrated GPUs and browsers
-## Medium, discrete GPUs High. The first expedition's loading screen then measures real frames and
-## steps it down if they come in slow (see note_benchmark).
+## A first guess from the graphics adapter: software renderers get Low, everything else Medium (the
+## default the game is tuned to hold 60 fps at; High and Ultra are a pick in Settings > Video). The first
+## expedition's loading screen then measures real frames and steps it down if they come in slow
+## (see note_benchmark).
 func detect_quality() -> String:
 	if OS.has_feature("web"):
 		return "medium"
 	if DisplayServer.get_name() == "headless":
 		return "high"
-	match RenderingServer.get_video_adapter_type():
-		RenderingDevice.DEVICE_TYPE_DISCRETE_GPU: return "high"
-		RenderingDevice.DEVICE_TYPE_INTEGRATED_GPU, RenderingDevice.DEVICE_TYPE_VIRTUAL_GPU: return "medium"
-		RenderingDevice.DEVICE_TYPE_CPU: return "low"
+	if RenderingServer.get_video_adapter_type() == RenderingDevice.DEVICE_TYPE_CPU:
+		return "low"
 	var nm := RenderingServer.get_video_adapter_name().to_lower()
 	if nm.contains("llvmpipe") or nm.contains("swiftshader") or nm.contains("software"): return "low"
-	if nm.contains("intel") or nm.contains("integrated") or nm.contains("vega") and nm.contains("graphics"): return "medium"
-	return "high"
+	return "medium"
 
 ## Auto quality only: frame times measured while the first expedition loads (ms, the world on screen
 ## from the skyship). Too slow for 60 fps steps the preset down once and remembers it.
@@ -151,6 +157,12 @@ func _ready() -> void:
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)
 		if int(v.get("msaa", 2)) == 2 or not cf.has_section_key("s", "msaa"): v["msaa"] = 2 if OS.has_feature("web") else 4
 		v["video_v"] = 2
+	if int(v.get("video_v", 2)) < 3:
+		# Medium became the default (item 94): an automatic pick of High or Ultra steps down once; a hand pick stays
+		if String(v.get("quality", "auto")) == "auto" and String(v.get("quality_found", "")) in ["high", "ultra"]:
+			v["quality_found"] = "medium"
+		v["video_v"] = 3
+	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
 	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
 	_quality_basics = not cf.has_section_key("s", "quality")
 	for a in OS.get_cmdline_user_args():

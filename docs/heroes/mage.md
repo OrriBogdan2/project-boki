@@ -13,7 +13,7 @@ coils at both wrists and a copper rod mast flying a pennant. Palette: teal, copp
 
 ## Scaling
 Source health is roughly 8 to 10 times ours (Light = 124 HP). Ratios kept against the basic attack:
-bolt 12 every 0.72s (about 15 dps, unchanged from before); Storm Rod 18 to 30 (1.5 to 2.5 bolts; the
+bolt 12 every 0.648s (item 116; about 18.5 dps, unchanged from before); Storm Rod 18 to 30 (1.5 to 2.5 bolts; the
 source is about 4, held lower because the rod also stuns and leaves an orb); Skycall 20 (source 2.5
 bolts, ours 1.7); Wirerun pass 10, doubled through a full-Static foe, plus a Blowout of 16 + 18% of
 their health (about 5.7 bolts on a Light; the source detonation is about 9). Cooldowns follow the
@@ -38,7 +38,7 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/vireo.md a
 |---|---|---|---|
 | LMB beats | alternating hands: a torso twist and one arm flung out, back to the wide arms-out stance; gold sparks at the feet [footage 0003-0020] | `mage_lmb_l` / `mage_lmb_r`: out at 0.03 s, settled by 0.35 s; sparks at the feet; a fan of splinters back toward her on impact | matches; asserted |
 | LMB tracking | faces the cursor [footage] | each bolt leaves along the cursor of its step and the body faces it, while walking and with the cursor sweeping 60 deg/s | matches; asserted |
-| LMB cadence | one bolt every 0.8 s held, no magazine [data card, footage] | 0.72 s (owner item 70), mag 99 | matches; asserted |
+| LMB cadence | one bolt every 0.8 s held, no magazine [data card, footage] | 0.648 s (owner items 70, 116), mag 99 | matches; asserted |
 | LMB range and speed | always to max range (about 7.5 bh) past the cursor, about 18 bh/s [footage]; one target [data] | 13 m past the cursor, 37 m/s, stops on the first foe (audit fix) | matches; asserted |
 | RMB spear | hold, summoned spear by the shoulder, body flash at full, overarm throw; fixed lane [footage] | Storm Rod: the same beats, fixed 13 m lane | matches |
 | E Lightning Strike | place, then pick the pull direction; 0.8 s countdown; Grounded slide [footage] | Skycall: place, hold and drag, release (audit: was a 0.3 s flick), 0.8 s countdown, slide and Grounded 1.5 s | matches |
@@ -144,7 +144,7 @@ slot changes. R reloads and the Boki Merge is on its own key (T by default).
 ## Engine notes
 - Kit `scripts/arch/kits/mage_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd` + `shaders/vv_fx.gdshader`;
   moves `scripts/match/kmoves_vv.gd`; the finger-gun hold `"finger"` in `HunterAnim.HOLDS`; the wrist
-  coil `scripts/match/hero_arms_vv.gd`; sounds `tools/gen_vv_sfx.py` (pure Python) listed in `VVSfx.NAMES`.
+  coil `scripts/match/hero_arms_vv.gd`; sounds `tools/gen_sfx_ryzz.py` listed in `VVSfx.NAMES` and content/sfx/mage.json.
 - Telegraphs and cursor states through AimKit (docs/AIMKIT.md). No Net change.
 - Kitefall: `scripts/arch/kits/mage_ult.gd` (MageUlt), on the shared ult base `scripts/arch/hero_ult.gd` (HeroUlt: the
   cooldown in `cd["x"]`, the recast, one bond id per cast, KinBond.from_ult on a land). X reaches

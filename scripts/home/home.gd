@@ -72,6 +72,7 @@ var grave_r := 0
 var burrow_r := 0
 var _fx_sig := ""
 var away_work: Array = []          # lines: what assigned Boki made while you were away
+var tw := ToolWork.new()           # your tool swing: axe, pickaxe, hammer (tool_work.gd)
 var hg: HomeGather = null           # chopping wild trees and mining boulders with your tools (home_gather.gd)
 
 ## The island being shown: yours, or the one you're visiting.
@@ -91,11 +92,9 @@ const DAY_LEN := 300.0          # seconds for a full day at home
 var env_res: Environment
 var sun_l: DirectionalLight3D
 var p_anim: HunterAnim = null
-var p_fired := 99.0             # seconds since you last swung a tool (gathering), for the animation
 var crouch_on := false          # crouching (the match's crouch key and its tap-to-toggle setting)
 var p_crouch_k := 0.0           # the crouched pose, eased in and out
 const CROUCH_SPEED := 0.55      # walking speed crouched (the same as in a match)
-var p_swing_n := 0              # melee swings so far, so each one plays its arc
 var lamps: Array = []           # OmniLight3D
 var day_t := 0.3                # 0..1, 0.25 is morning, 0.5 noon, 0.75 dusk
 var rain: CPUParticles3D
@@ -1045,7 +1044,7 @@ var dash_t := 0.0
 var dash_v := Vector2.ZERO
 var dash_charges := 2.0
 var ex_cd := 0.0               # the long dash (Shift in the air, or with the short ones spent), as in a match
-var dash_pips: Control = null  # the stamina pips over your head, as in a match
+var dash_slot: HomeDashSlot = null  # the dash slot on screen, the match bar's own (DashSlot)
 var safe_at := Vector3(38.0, 0, 34.5)
 var glider_node: MeshInstance3D = null
 const HOME_ZOOM := 1.2         # the camera on arriving home: midway between close (0.8) and the widest the wheel goes (1.6)
@@ -1143,29 +1142,6 @@ func try_dash(mv: Vector2, air: bool) -> bool:
 	pvy = maxf(pvy, 0.0)
 	return true
 
-## The stamina pips over your head: one per dash charge (the next filling as it recharges), and the
-## long dash last, like the match HUD's.
-func _draw_dash_pips() -> void:
-	if dash_pips == null or player == null or cam == null or panel_open != "":
-		return
-	var at := player.position + Vector3(0, 2.3, 0)
-	if cam.is_position_behind(at):
-		return
-	var sp := cam.unproject_position(at)
-	if not sp.is_finite():
-		return
-	var dg := _dodge()
-	var n := int(dg["charges"]) + 1
-	var col := Color("ffd66a")
-	for i in n:
-		var cpt := sp + Vector2(-(n - 1) * 6.5 + i * 13, 0)
-		var fill := clampf(dash_charges - i, 0.0, 1.0) if i < n - 1 else 1.0 - ex_cd / maxf(0.1, float(dg["ex_cd"]))
-		dash_pips.draw_colored_polygon(PackedVector2Array([cpt + Vector2(0, -5), cpt + Vector2(5, 0), cpt + Vector2(0, 5), cpt + Vector2(-5, 0)]), Color(0.04, 0.04, 0.06, 0.8))
-		if fill >= 1.0:
-			dash_pips.draw_colored_polygon(PackedVector2Array([cpt + Vector2(0, -3.5), cpt + Vector2(3.5, 0), cpt + Vector2(0, 3.5), cpt + Vector2(-3.5, 0)]), col)
-		elif fill > 0.0:
-			dash_pips.draw_arc(cpt, 3.0, -PI * 0.5, -PI * 0.5 + TAU * fill, 10, Color(col, 0.6), 2.0)
-
 func start_dash(dir: Vector2, speed: float, time: float) -> void:
 	if dir.length() < 0.1:
 		dir = Vector2(-sin(pface), -cos(pface))
@@ -1207,7 +1183,8 @@ func _move_player(d: float) -> void:
 	var crouching := crouch_on and not air and dash_t <= 0.0 and not gliding and wdep == 0
 	p_crouch_k = move_toward(p_crouch_k, 1.0 if crouching else 0.0, d * 8.0)
 	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0 and not water.swimming:
-		try_dash(mv, air)
+		if not try_dash(mv, air) and dash_slot:
+			dash_slot.deny()
 	_mv = mv
 	var hv := Vector2(pvel.x, pvel.z)
 	if dash_t > 0.0:
@@ -1306,29 +1283,22 @@ func _move_player(d: float) -> void:
 		if ad.length() > 0.4: want = atan2(-ad.x, -ad.y)
 	elif hv.length() > 0.3:
 		want = atan2(-hv.x, -hv.y)
-	if hg and hg.busy(): want = hg.face()      # chopping: face the tree
+	if tw.active(): want = tw.face_from(ppos)      # working: face the target
 	pface = lerp_angle(pface, want, minf(1.0, d * 14.0))
 	player.basis = cam.char_basis(pface, player.scale)     # leaned toward the camera, as in a match
 	player.basis = water.tilt(player.basis, hv.length())      # swimming: tipped into a stroke
 	if p_anim == null or p_anim.model != player:
 		p_anim = HunterAnim.new(player)
-	p_fired += d
-	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water.k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "fired": p_fired,
-		"swing_n": p_swing_n, "combo": maxi(0, p_swing_n - 1) % 3, "crouch": p_crouch_k}
+	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water.k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "crouch": p_crouch_k}
+	ps.merge(tw.anim_state())      # the Empty carries no class weapon at home; a tool only while working
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
 	p_anim.update(d, ps)
-	if (dash_pips == null or not is_instance_valid(dash_pips)) and ui:
-		dash_pips = Control.new(); dash_pips.name = "DashPips"
-		dash_pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		dash_pips.set_anchors_preset(Control.PRESET_FULL_RECT)
-		dash_pips.draw.connect(_draw_dash_pips)
-		ui.add_child(dash_pips)
-		ui.move_child(dash_pips, 0)
-	if is_instance_valid(dash_pips):
-		var dg0 := _dodge()
-		dash_pips.visible = dash_charges < float(dg0["charges"]) or ex_cd > 0.0
-		if dash_pips.visible: dash_pips.queue_redraw()
+	if dash_slot == null and ui:
+		dash_slot = HomeDashSlot.new()
+		dash_slot.home = self
+		ui.add_child(dash_slot)
+		ui.move_child(dash_slot, 0)
 	if p_anim.stepped:
 		Sfx.step(null, -20.0)
 
@@ -2950,26 +2920,19 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 		r.add_child(kc)
 		var tv := UI.vbox(1); tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		tv.add_child(UI.label(nm, UI.T_BODY, c, UI.semi))
-		if compact:
-			var dl := UI.label(desc, 12, UI.MUTED)
-			dl.autowrap_mode = TextServer.AUTOWRAP_OFF
-			dl.clip_text = true
-			dl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-			dl.tooltip_text = desc
-			dl.mouse_filter = Control.MOUSE_FILTER_PASS
-			tv.add_child(dl)
-		else:
-			tv.add_child(UI.para(desc, 12, UI.MUTED))
+		tv.add_child(UI.para(desc, 12, UI.MUTED))
 		r.add_child(tv)
 		c2.add_child(r)
+	if compact:
+		c2.add_child(BokiMoves.new(String(rec["species"]), rec))      # tiles with tips (item 82)
 	# read from its parts (the kin grammar): what it does, coloured by effect category
-	for ai in abl.size():
+	for ai in (0 if compact else abl.size()):
 		var ad := KinLib.ability(String(abl[ai]))
 		if ad == null: continue
 		var eff := KinLib.effective(ad, "k1" if ai == 0 else "k2", kspec, rec)
 		ab_row.call(Settings.key_cap("signature") if ai == 0 else "auto", ad.display_name, (KinText.ability(eff) if ai == 0 else KinText.when(ad) + ": " + KinText.ability(eff)), KinText.color(ad).lerp(UI.INK, 0.3))
 	var ud := KinLib.merge(String(sp.get("ultimate", "")))
-	if ud:
+	if ud and not compact:
 		ab_row.call(Settings.key_caps("ultimate"), "Fusion: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
 	if kspec == null:
 		return

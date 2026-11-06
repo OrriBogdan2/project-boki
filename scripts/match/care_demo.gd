@@ -40,6 +40,7 @@ const SPEC := {
 	"rimewright_dash": {"strip": [0.32, 0.45, 0.62, 0.8, 1.06], "keys": {"dash": 0.7, "dash_stop": 1.06}},
 	"rimewright_skatefire": {"strip": [0.5, 0.58, 0.64, 0.7, 0.8, 0.9], "keys": {"skatefire": 0.66}},
 	"rimewright_air": {"strip": [0.3, 0.5, 0.7, 0.9, 1.1], "keys": {"air": 0.5, "air_land": 0.9}},
+	"rimewright_airgap": {"strip": [0.3, 0.55, 0.75, 0.95, 1.2], "side": 560, "keys": {"airgap": 0.75}},
 	"rimewright_e": {
 		"strip": [0.34, 0.42, 0.5, 0.55, 0.62, 0.9], "keys": {"e": 0.56, "e_slide": 1.3, "e_full": 2.6}},
 	"rimewright_walk": {"strip": [0.6, 0.68, 0.76, 0.84, 0.92, 1.0], "keys": {"walk": 0.8}},
@@ -195,12 +196,14 @@ static func _script(
 				if arch == "rimewright":
 					P.pos.y += 2.0          # a clear drop, so the press lands well before she does
 					P.grounded = false
-			# Claire has no air dash: Shift held in the air starts the skate as she lands
+			# Claire's Shift in the air skates at once (item 62)
 			P.inp["dash_down"] = arch == "rimewright" and t >= go and t < 1.3
 			if _at(t, dt, go):
 				P.ex_cd = 0.0
 				P.dashes = P.max_dashes()
 				K.on_dash(true)
+		"airgap":
+			_air_gap(A, P, t, dt)
 		"lmb", "heavy":
 			P.inp["fire"] = t > 0.3 and t < 1.5
 		"shatter":
@@ -286,6 +289,29 @@ static func _open_lane(A: Arena, P: Hunter, Al: Hunter) -> void:
 	P.teleport(D.pos + Vector3(6.0, 0, 9.4))
 	if Al != null:
 		Al.teleport(D.pos + Vector3(-12.0, 0, -6.0))
+
+## Item 62: a jump off the near edge of a 6 m abyss gap and Shift at the top of it: she skates across.
+static func _air_gap(A: Arena, P: Hunter, t: float, dt: float) -> void:
+	var right: Vector2 = A.get_meta("care_right", Vector2(1, 0))
+	var side := Vector2(-right.y, right.x)
+	if t < 0.2:
+		_open_lane(A, P, A.get_meta("care_ally"))
+	if _at(t, dt, 0.1):
+		var W = A.m.world
+		for a in range(3, 9):
+			for b in range(-4, 5):
+				var q := Vector2(P.pos.x, P.pos.z) + right * (a + 0.5) + side * b
+				if W.inb(int(floor(q.x)), int(floor(q.y))):
+					W.kind[W.idx(int(floor(q.x)), int(floor(q.y)))] = World.T_VOID
+		W.build_meshes()
+	P.inp["move"] = right if t > 0.2 else Vector2.ZERO
+	if _at(t, dt, 0.25):
+		P.vel.y = 6.0
+		P.grounded = false
+	P.inp["dash_down"] = t >= 0.55 and t < 1.7
+	if _at(t, dt, 0.55):
+		P.dashes = P.max_dashes()
+		P.ak.on_dash(true)
 
 ## Claire skates (Shift held from 0.3s) inland along the clear lane, presses X at 0.75s: carried on as the bud
 ## seals, then rooted.

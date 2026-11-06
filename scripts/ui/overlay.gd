@@ -10,7 +10,7 @@ const SETTINGS_TABS := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Acc
 var root: Control
 var dim: ColorRect              # the blurred backdrop (UI.backdrop)
 var host: CenterContainer
-var fps_lbl: Label
+var fps_lbl: PerfOverlay
 var page := ""                  # "" when nothing is open
 var ctx := ""                   # title | home | town | match
 var stack: Array = []           # pages to go back to with Esc
@@ -36,16 +36,16 @@ func _ready() -> void:
 	host.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	host.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(host)
-	fps_lbl = UI.label("", 13, UI.MUTED)
+	fps_lbl = PerfOverlay.new()
 	fps_lbl.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	fps_lbl.position = Vector2(-80, 4)
+	fps_lbl.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	fps_lbl.position.y = 4
+	fps_lbl.offset_right = -8
 	root.add_child(fps_lbl)
 
 func _process(_d: float) -> void:
 	Record.tick(get_tree(), _d)
-	fps_lbl.visible = bool(Settings.get_v("show_fps")) and not Record.clean()
-	if fps_lbl.visible:
-		fps_lbl.text = "%d fps" % Engine.get_frames_per_second()
+	fps_lbl.tick("" if Record.clean() else Settings.fps_mode(), _d)
 
 func is_open() -> bool:
 	return page != ""
@@ -198,13 +198,14 @@ func close() -> void:
 	listening = ""
 	delete_armed = -1
 	UI.show_backdrop(dim, false)
-	Sfx.play("whoosh", null, -14.0)
+	Sfx.play("ui_close", null, -14.0)
 	closed.emit()
 
 ## The Esc menu: Resume on top, the places you go most next, the rare ones as quiet links, and
 ## leaving at the bottom.
 func open_pause(where: String) -> void:
 	ctx = where
+	Sfx.play("ui_open", null, -10.0)
 	stack.clear()
 	page = ""
 	var v := _page("pause", "Paused" if where == "match" else "Menu", 440)
@@ -391,7 +392,8 @@ func _tab_video(v: VBoxContainer) -> void:
 		"Grass, draw distance, cloud layers and particles change from your next expedition")
 	_choice(v, "Anti-aliasing", "msaa", [[0, "Off"], [2, "2x"], [4, "4x"]], Callable(), "Smooths jagged edges")
 	_toggle(v, "Shadows", "shadows")
-	_toggle(v, "Show frame rate", "show_fps", "In the top right corner")
+	_choice(v, "Frame rate", "show_fps", [[0, "Hidden"], [1, "Frame rate"], [2, "Performance overlay"]], Callable(),
+		"Top right. The overlay adds frame time, draw calls, triangles and script costs")
 	var modelled: Array = Arch.ORDER.filter(WardenGlb.has_model)
 	if not modelled.is_empty():
 		_group(v, "Warden models")

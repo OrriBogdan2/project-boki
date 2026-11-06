@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cfvtu47g4jnyn"
-path="res://.godot/imported/pip_atlas.jpg-b0aa7d7e1a64e576e38c764648355df6.ctex"
+path.bptc="res://.godot/imported/pip_atlas.jpg-b0aa7d7e1a64e576e38c764648355df6.bptc.ctex"
+path.astc="res://.godot/imported/pip_atlas.jpg-b0aa7d7e1a64e576e38c764648355df6.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "8118cfc35ed93891608b88cbf738715c"
+"md5": "7e4947610a882e6100a788e6a740d141"
 }
 
 [deps]
 
 source_file="res://art/wardens/pip/pip_atlas.jpg"
-dest_files=["res://.godot/imported/pip_atlas.jpg-b0aa7d7e1a64e576e38c764648355df6.ctex"]
+dest_files=["res://.godot/imported/pip_atlas.jpg-b0aa7d7e1a64e576e38c764648355df6.bptc.ctex", "res://.godot/imported/pip_atlas.jpg-b0aa7d7e1a64e576e38c764648355df6.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -39,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=2048
 detect_3d/compress_to=0

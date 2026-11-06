@@ -24,7 +24,7 @@ var holder: Node3D
 var cam: Camera3D
 var anims: Array = []
 var tree: SceneTree
-var close_cfg := {}           # a Warden's warden_look "closeup" {fov, up}: a wider head shot (Ostra's raised orb)
+var close_cfg := {}           # a Warden's warden_look "closeup" {fov, up}: a wider head shot (Motley's raised orb)
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -242,7 +242,7 @@ func _head(h: Node3D) -> Image:
 		var span := top.global_position.y - pivot.y
 		hp.y = pivot.y + span * 0.5
 		back *= span / 0.32
-	# (a Warden's warden_look "closeup" {fov, up} frames its head shot: Ostra's raised orb)
+	# (a Warden's warden_look "closeup" {fov, up} frames its head shot: Motley's raised orb)
 	var up := float(close_cfg.get("up", 0.0))
 	cam.fov = float(close_cfg.get("fov", 24.0))
 	cam.position = Vector3(h.position.x, hp.y + 0.1 + up, hp.z + back)
@@ -304,7 +304,7 @@ const KIT_FRAMES := {
 	"archer": [["draw", "arc_draw", 0.8], ["loose", "arc_loose", 0.94], ["Spirit Walk roll", "pin_roll", 0.58],
 		["Heavy Shot", "arc_heavy", 1.42]],
 	"dolm": [["punch", "breah_punch", 0.12], ["throw", "breah_throw", 0.2], ["leap", "breah_leap", 0.2],
-		["slam", "breah_slam", 0.1], ["sense", "breah_sense", 0.3], ["dash", "breah_dash", 0.15]],
+		["slam", "breah_slam", 0.1], ["sense", "breah_sense", 0.3], ["dash", "breah_hop", 0.15]],
 	"ostra": [["orb", "ostra_orb", 0.1], ["snap", "ostra_snap", 0.1], ["swap", "ostra_swap", 0.3],
 		["seed", "ostra_seed", 0.2], ["well", "ostra_well", 0.3], ["empower", "ostra_empower", 0.4]],
 }

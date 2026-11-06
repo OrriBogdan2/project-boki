@@ -47,6 +47,8 @@ var ui: CanvasLayer
 var fade: ColorRect
 var flash: ColorRect
 var caption: Label
+const CAPTION_MARGIN := 0.07      # of the width, each side: the caption wraps inside the rest
+const CAPTION_LINES_PER_HEIGHT := 25.0      # the caption's font size is the window's height over this
 var bar_top: ColorRect
 var bar_bot: ColorRect
 var card: Control
@@ -386,11 +388,21 @@ func _build_ui() -> void:
 	tw.tween_property(bar_bot, "offset_top", -128.0, 1.2).set_trans(Tween.TRANS_SINE)
 	caption = Label.new()
 	caption.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	caption.offset_top = -122.0; caption.offset_bottom = -12.0
+	caption.anchor_left = CAPTION_MARGIN
+	caption.anchor_right = 1.0 - CAPTION_MARGIN
+	caption.offset_left = 0.0
+	caption.offset_right = 0.0
+	caption.offset_bottom = -12.0
+	caption.offset_top = -12.0
+	caption.grow_vertical = Control.GROW_DIRECTION_BEGIN      # a long caption wraps and grows upward
+	caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	caption.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 	caption.add_theme_font_override("font", UI.big)
-	caption.add_theme_font_size_override("font_size", 28)
+	caption.add_theme_color_override("font_outline_color", Color(0.02, 0.02, 0.04, 0.9))
+	caption.add_theme_constant_override("outline_size", 6)
+	get_viewport().size_changed.connect(_fit_caption)
+	_fit_caption()
 	caption.add_theme_color_override("font_color", Color("ffe6c8"))
 	caption.add_theme_constant_override("line_spacing", 4)
 	caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -471,6 +483,11 @@ func _next_shot() -> void:
 	Sfx.play("whoosh", null, -14.0, 0.05, 0.8)
 
 ## Sets the stage for a shot behind the wipe: its light, its specks, the Wyrm in or out.
+## The caption's text size follows the window's height, so it wraps to a few lines at any size.
+func _fit_caption() -> void:
+	var px := int(get_viewport().get_visible_rect().size.y / CAPTION_LINES_PER_HEIGHT)
+	caption.add_theme_font_size_override("font_size", clampi(px, 15, 40))
+
 func _enter(ev: String, mood: String) -> void:
 	_mood(mood)
 	wyrm.visible = ev in ["wyrm", "break"]
@@ -504,19 +521,16 @@ func _title_card() -> void:
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(col)
-	var big := Label.new(); big.text = "PROJECT BOKI"
-	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	big.add_theme_font_override("font", UI.big); big.add_theme_font_size_override("font_size", 110)
-	big.add_theme_color_override("font_color", Color("f7a03c"))
-	big.add_theme_constant_override("outline_size", 18); big.add_theme_color_override("font_outline_color", Color("2a1530"))
+	# the brand wordmark (art/brand/logo_wordmark.png); no subtitle (OWNER_REVIEW item 156)
+	var big := TextureRect.new()
+	big.texture = load("res://art/brand/logo_wordmark.png")
+	big.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	big.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	big.custom_minimum_size = Vector2(800, 390)
+	big.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(big)
-	var sub := Label.new(); sub.text = "Every hunter's story starts with an egg."
-	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub.add_theme_font_override("font", UI.big); sub.add_theme_font_size_override("font_size", 26)
-	sub.add_theme_color_override("font_color", Color("ffe6c8"))
-	col.add_child(sub)
 	card.modulate.a = 0.0
-	big.pivot_offset = Vector2(400, 60)
+	big.pivot_offset = Vector2(400, 195)
 	var tw := create_tween()
 	tw.tween_property(fade, "color:a", 0.75, 0.6)
 	tw.parallel().tween_property(card, "modulate:a", 1.0, 1.0)

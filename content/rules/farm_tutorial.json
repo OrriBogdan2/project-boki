@@ -3,16 +3,15 @@
 	"options": {
 		"tracker_replaces_day1": true,
 		"player_swing": true,
-		"swing_cooldown_s": 2.0,
 		"crop_stage_s": 6,
 		"end_gems": 30,
 		"skippable": false,
-		"house_cost_in": "farm_build.json build.house (a little wood and 8 swings of labour)",
+		"house_cost_in": "farm_build.json build.house (wood and stone, spent as it goes up, and swings of labour)",
 		"free_order": true,
 		"free_tools": true,
 		"market_gems": true
 	},
-	"options_doc": "tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: the interact key near a site swings a hammer (one swing per swing_cooldown_s), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and meet-Hob can come in any order (false: strictly in the listed order). skippable: shows a Skip button (the owner says the farm tutorial cannot be skipped on a new save). free_tools: a step with gives_tool hands that tool over (the axe, the pickaxe); the Market still sells them later. market_gems: the buy step tops the gems up to one seed's price so nobody gets stuck.",
+	"options_doc": "tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: holding the interact key near a site hammers (hold it: a hammer beat every HunterTool.TOOLS.hammer.period seconds), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and meet-Hob can come in any order (false: strictly in the listed order). skippable: shows a Skip button (the owner says the farm tutorial cannot be skipped on a new save). free_tools: a step with gives_tool hands that tool over (the axe, the pickaxe); the Market still sells them later. market_gems: the buy step tops the gems up to one seed's price so nobody gets stuck.",
 	"house_spot": {
 		"from": "landing",
 		"x": 0.0,
@@ -40,23 +39,39 @@
 			"needs": [
 				"axe"
 			],
-			"title": "Chop a tree",
+			"title": "Chop trees for the house",
 			"hints": {
-				"go": "Walk up to a tree and press {interact} to chop. The wood shows in the bar at the top."
+				"go": "Walk up to a tree and hold {interact} to chop. The house takes {house_cost}: keep chopping and mining until the bar at the top shows it."
 			},
 			"world": {
 				"go": "Chop a tree"
 			}
 		},
 		{
-			"id": "house",
+			"id": "stone",
 			"needs": [
 				"chop"
 			],
+			"title": "Mine rocks for the house",
+			"hints": {
+				"go": "Rocks give stone. Take this pickaxe and hold {interact} at a rock."
+			},
+			"world": {
+				"go": "Mine this rock"
+			},
+			"gives_tool": "pickaxe",
+			"gets": "stone"
+		},
+		{
+			"id": "house",
+			"needs": [
+				"chop",
+				"stone"
+			],
 			"title": "Place your house",
 			"hints": {
-				"place": "Now for a house. Press {build}, choose House, then click the marked spot. It costs a little wood.",
-				"wait": "Your Boki are building it. Press {interact} at the house to help with a hammer."
+				"place": "Now for a house. Press {build}, choose House, then click the marked spot. Marking it out is free. The {house_cost} are spent while it goes up.",
+				"wait": "Hold {interact} at the house to hammer. Your Boki come to help, and it uses up the wood and stone as it goes."
 			},
 			"world": {
 				"place": "Your house goes here",
@@ -70,7 +85,7 @@
 			],
 			"title": "Swing a hammer",
 			"hints": {
-				"go": "Press {interact} at the house to grab a hammer and help build."
+				"go": "Hold {interact} at the house to take up a hammer and build."
 			},
 			"world": {
 				"go": "Help build"
@@ -83,28 +98,13 @@
 			],
 			"title": "Give your Boki a job",
 			"hints": {
-				"go": "Click {boki}, or press {details} next to it, to open its page. Or click Boki on the bar below.",
+				"go": "Click {boki}, or press {details} next to it, to open its page. Or press 2 (Boki on the bar below) for all your Boki.",
 				"page": "Pick a job here: try '{job}'. Or assign it at a work station."
 			},
 			"world": {
 				"go": "Your Boki"
 			},
 			"after_built": true
-		},
-		{
-			"id": "stone",
-			"needs": [
-				"house"
-			],
-			"title": "Mine a rock",
-			"hints": {
-				"go": "Rocks give stone for sturdier builds. Take this pickaxe and press {interact} at a rock."
-			},
-			"world": {
-				"go": "Mine this rock"
-			},
-			"gives_tool": "pickaxe",
-			"gets": "stone"
 		},
 		{
 			"id": "feed",

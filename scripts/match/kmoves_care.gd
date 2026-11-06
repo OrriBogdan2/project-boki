@@ -84,16 +84,23 @@ const MOVES := {
 					"y": 0.7, "p": -0.25, "sq": -0.15, "lift": 0.18, "fr": Vector3(-0.02, 0.08, -0.6), "rw": 1.0,
 					"fl": Vector3(-0.36, 0.25, 0.36), "hw": 1.0, "lw": 0.8, "legs": [0.15, -0.2, -0.45, -0.1]}],
 		[0.55, {}]]},
-	# Burrseed held: turned side-on (~70 deg), the casting fist pointed down the lane, the other hand
-	# cupped up beside the ear, knees bent
-	"mm_seed_aim": {"hold": true, "keys": [
+	# Burrseed wind-up (item 118, a fixed 1.0 s: tender.json rmb windup): turned side-on (~70 deg),
+	# the casting fist pointed down the lane, the other hand drawn up beside the ear, sinking on the
+	# back leg until the throw
+	"mm_seed_aim": {"keys": [
 		[0.0, {}],
 		[
-				0.12,
+				0.2,
+				{
+					"y": 1.0, "p": 0.06, "r": 0.06, "sq": 0.06, "fr": Vector3(-0.42, 0.05, -0.4), "rw": 1.0,
+					"fl": Vector3(0.02, 0.32, 0.12), "hw": 1.0, "lw": 0.7, "legs": [-0.25, -0.4, 0.35, -0.55]}],
+		[
+				1.0,
 				{
 					"y": 1.2, "p": 0.1, "r": 0.08, "sq": 0.12, "fr": Vector3(-0.42, 0.05, -0.4), "rw": 1.0,
 					"fl": Vector3(0.02, 0.4, 0.12), "hw": 1.0, "lw": 0.8, "legs": [-0.3, -0.5, 0.45, -0.7]}]]},
-	# ... let go: the coil deepens, then a small hop forward with a two-handed push, the flare round her
+	# ... the throw as the wind-up ends: the coil deepens, then a small hop forward with a
+	# two-handed push, the flare round her
 	"mm_seed": {"keys": [
 		[
 				0.0,
@@ -400,6 +407,27 @@ const MOVES := {
 				{
 					"p": -0.45, "r": 0.18, "y": -0.2, "lift": -0.12, "lw": 1.0, "legs": [0.85, -1.4, -0.6, -0.3],
 					"fl": Vector3(-0.15, -0.05, 0.35), "hw": 0.9, "wa": Vector3(0.3, 0.4, 0), "wo": Vector3(0, 0, -0.2),
+					"wf": 1.0}]]},
+	# Skate in the air (item 62, looped like tm_skate): no push, a long glide over the ribbon, the free leg
+	# stretched behind, the arms out for balance; ART-1 has no clip for it yet
+	"tm_skate_air": {"keys": [
+		[
+				0.0,
+				{
+					"p": -0.5, "r": 0.1, "y": -0.1, "lift": 0.0, "lw": 1.0, "legs": [0.5, -0.8, -0.7, -0.2],
+					"fl": Vector3(-0.1, -0.05, 0.3), "hw": 0.9, "wa": Vector3(0.3, 0.3, 0), "wo": Vector3(0, 0, -0.15),
+					"wf": 1.0}],
+		[
+				0.28,
+				{
+					"p": -0.42, "r": -0.1, "y": 0.1, "lift": 0.04, "lw": 1.0, "legs": [0.55, -0.9, -0.8, -0.25],
+					"fl": Vector3(0.1, 0.05, -0.3), "hw": 0.9, "wa": Vector3(0.3, -0.3, 0), "wo": Vector3(0, 0, 0.15),
+					"wf": 1.0}],
+		[
+				0.56,
+				{
+					"p": -0.5, "r": 0.1, "y": -0.1, "lift": 0.0, "lw": 1.0, "legs": [0.5, -0.8, -0.7, -0.2],
+					"fl": Vector3(-0.1, -0.05, 0.3), "hw": 0.9, "wa": Vector3(0.3, 0.3, 0), "wo": Vector3(0, 0, -0.15),
 					"wf": 1.0}]]},
 	# Skate start: a deep crouch and a hard push off the back blade
 	"tm_skate_go": {"keys": [

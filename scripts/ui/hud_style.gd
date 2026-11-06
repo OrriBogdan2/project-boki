@@ -154,13 +154,11 @@ static func count_badge(c: CanvasItem, at: Vector2, n: int, col: Color) -> void:
 
 ## Outlined text, left-aligned at `p` (baseline). `ol` is the outline width in px.
 static func text(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Color, ol := 4, font: Font = BIG) -> void:
-	if ol > 0:
-		c.draw_string_outline(font, p, s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, ol, Color(0, 0, 0, 0.6 * col.a))
-	c.draw_string(font, p, s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, col)
+	TextCache.draw(c, font, p, s, font_size, col, ol, Color(0, 0, 0, 0.6 * col.a))
 
 ## Outlined text centred on x at baseline `p.y`.
 static func ctext(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Color, ol := 4, font: Font = BIG) -> void:
-	var w := font.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var w := TextCache.width(font, s, font_size)
 	text(c, Vector2(p.x - w * 0.5, p.y), s, font_size, col, ol, font)
 
 ## Floating damage number colour: by who was hit and how (Match picks, Fx draws).

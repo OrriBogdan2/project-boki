@@ -13,6 +13,7 @@ var bot: Hunter = null
 var arch := "gunslinger"       # the bot's Hunter (its weight follows)
 var weapon := ""
 var glove := ""
+var glove2 := ""        # the bot's second glove, on V (item 69)
 var diff := "medium"
 var mode := "fight"
 var home_at := Vector3.ZERO      # where you start each round
@@ -81,8 +82,10 @@ func spawn_bot() -> void:
 	bot.lives = 99
 	bot.tonics = 0
 	if glove != "" and Gear.ALL.has(glove):
-		bot.gear[Gear.slot_of(glove)] = {"id": glove, "rar": 2}
-		bot.refresh_gear()
+		bot.gear[0] = {"id": glove, "rar": 2}
+	if glove2 != "" and Gear.ALL.has(glove2) and glove2 != glove:
+		bot.gear[1] = {"id": glove2, "rar": 2}
+	bot.refresh_gear()
 	reset()
 
 func _remove_bot() -> void:
@@ -207,6 +210,10 @@ func cycle(what: String, step := 1) -> void:
 			var keys: Array = [""] + Gear.ALL.keys().filter(func(g): return Gear.active(String(g)))
 			keys.sort()
 			glove = String(keys[(keys.find(glove) + step + keys.size()) % keys.size()])
+		"glove2":
+			var keys2: Array = [""] + Gear.ALL.keys().filter(func(g): return Gear.active(String(g)))
+			keys2.sort()
+			glove2 = String(keys2[(keys2.find(glove2) + step + keys2.size()) % keys2.size()])
 		"diff":
 			var order: Array = Data.BOT_ORDER
 			diff = String(order[(order.find(diff) + step + order.size()) % order.size()])
@@ -220,6 +227,7 @@ func pick_text(what: String) -> String:
 		"cls": return Arch.name_of(arch)
 		"weapon": return String(Data.weapon_stats(weapon).get("name", weapon)) if weapon != "" else "-"
 		"glove": return String(Gear.ALL[glove]["name"]) if glove != "" and Gear.ALL.has(glove) else "None"
+		"glove2": return String(Gear.ALL[glove2]["name"]) if glove2 != "" and Gear.ALL.has(glove2) else "None"
 		"diff": return String(Data.BOT_DIFF[diff]["name"])
 		"mode": return String(MODE_NAMES[mode])
 	return ""
@@ -276,7 +284,9 @@ func _fill_menu(v: VBoxContainer) -> void:
 	for ch in v.get_children():
 		ch.queue_free()
 	v.add_child(UI.label("Changing the Hunter, glove or difficulty brings in a fresh bot. The behaviour switches on the spot.", 14, UI.MUTED))
-	for row in [["cls", "Hunter"], ["glove", "Glove (Q)"], ["diff", "Difficulty"], ["mode", "Behaviour"]]:
+	var rows := [["cls", "Hunter"], ["glove", "Glove 1 (%s)" % Gloves.key_cap(0)]]
+	rows += [["glove2", "Glove 2 (%s)" % Gloves.key_cap(1)], ["diff", "Difficulty"], ["mode", "Behaviour"]]
+	for row in rows:
 		var what: String = row[0]
 		var h := UI.hbox(8)
 		var l := UI.label(row[1], 15, UI.MUTED); l.custom_minimum_size.x = 120

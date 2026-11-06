@@ -7,7 +7,7 @@ extends RefCounted
 ##
 ## Net (Net.VERSION 0.14.0): ["zone", kind, ...] events through the existing "ev" topic. The caster's
 ## game sends them; every other game builds the same thing, so a rock stops a remote body the same way.
-##   ["zone", "rock",   nid, rid, x, y, z, dx, dz, len, time, hp]
+##   ["zone", "rock",   nid, rid, x, y, z, dx, dz, len, time, hp, top?]   (top: a low Rock Hop rock's height)
 ##   ["zone", "rockgo", rid]                     a rock was launched or crumbled: remove it
 ##   ["zone", "bridge", nid, x, y, z, dx, dz, len, width, time, color?]   (color: hex, rock-tan when absent)
 ##   ["zone", "seed",   nid, sid, x, y, z, rmax, grow]
@@ -15,11 +15,12 @@ extends RefCounted
 
 const ROCK_COL := Color("c98d4a")
 const ROCK_R := 0.5                  # a rock's footprint when it asks the world if it fits
-# m: a rock's flat top above its base (StoneStand: you stand on it; a jump clears it)
-const ROCK_TOP := 1.25
+# m: a rock's top above its base (StoneStand: you stand on it), taller than a hunter's head; dolm.json rock.top
+const ROCK_TOP := 2.2
 const ROCK_TH := 0.42                # m: half its depth (wider than a barrier so a body fits on top)
 const STEP := 0.25                   # the walk along a cast, metres
-const CRACK_T := 0.6                 # s: a fresh rock's ground cracks cool off
+const ROCK_RISE_T := 0.22            # s: a rock heaving up out of the ground
+const ROCK_REACH := 0.75             # m: past a rock's top, how far above its base a punch or slam still takes it
 
 ## Tests read what would go out over the network without a connection (--zone-check).
 static var capture := false
@@ -32,7 +33,7 @@ static func tx(m: Node, e: Array) -> void:
 		m.net_event(e)
 
 ## Can a rock or seed sit at p? Solid ground within a step of `y`, nothing in the way, no body inside.
-static func fits(m: Node, p: Vector3, y: float, bodies := true) -> bool:
+static func fits(m: Node, p: Vector3, y: float, bodies := true, skip: Ent = null) -> bool:
 	var w: World = m.world
 	var g: float = w.ground_at(p.x, p.z)
 	if g <= World.VOID + 1.0 or absf(g - y) > 0.9:
@@ -41,7 +42,7 @@ static func fits(m: Node, p: Vector3, y: float, bodies := true) -> bool:
 		return false
 	if bodies:
 		for e in m.hunters:
-			if is_instance_valid(e) and not e.dead and Vector2(
+			if is_instance_valid(e) and e != skip and not e.dead and Vector2(
 				e.pos.x - p.x, e.pos.z - p.z
 			).length() < ROCK_R + e.r + 0.15 and absf(e.pos.y - g) < 2.0:
 				return false
@@ -84,96 +85,44 @@ static func walk(m: Node, from: Vector3, aim: Vector3, reach: float) -> Dictiona
 	return out
 
 # ------------------------------------------------------------------ rocks
-## Tarek's rock: a cluster of jagged basalt columns, tapering to broken tops and leaning apart, with
-## molten cracks in the stone (shaders/molten_rock.gdshader) and thin glowing cracks in the ground at
-## its foot that cool off over CRACK_T. The tallest column tops out at ROCK_TOP (you stand there).
-## No other wall in the game looks like it.
-static func rock_node() -> Node3D:
-	var n := Node3D.new()
-	# [x, z, base radius, height, lean]
-	var cols := [
-		[-0.3, 0.04, 0.36, ROCK_TOP, -0.08], [0.12, -0.12, 0.34, ROCK_TOP - 0.12, 0.1],
-		[0.4, 0.14, 0.26, ROCK_TOP + 0.12, 0.16], [-0.05, 0.24, 0.24, ROCK_TOP - 0.4, -0.14],
-		[0.55, -0.16, 0.18, ROCK_TOP - 0.55, 0.22]
-	]
-	for c in cols:
-		_column(n, Vector3(float(c[0]), 0, float(c[1])), float(c[2]), float(c[3]), float(c[4]))
-	var cracks := Node3D.new()
-	cracks.name = "Cracks"
-	n.add_child(cracks)
-	for i in 7:
-		var a := TAU * i / 7.0 + KitLooks.vis_rng.randf() * 0.4
-		var len_ := 0.35 + KitLooks.vis_rng.randf() * 0.45
-		Models.part(
-			cracks, Models.box(0.035, 0.012, len_), KitLooks.shade_mat(Color(1.0, 0.45, 0.1, 0.95)),
-			Vector3(cos(a), 0.02, sin(a)) * (0.55 + len_ * 0.5), Vector3.ONE, Vector3(0, -a + PI * 0.5, 0)
-		)
-	for mi in cracks.get_children():
-		(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	return n
-
-## One basalt column: six-sided, tapering to about half its width, leaning by `lean` (rad) away from the
-## middle, with a broken cap tilted on top.
-static func _column(n: Node3D, at: Vector3, r: float, hgt: float, lean: float) -> void:
-	var tip := r * (0.45 + KitLooks.vis_rng.randf() * 0.2)
-	var tilt := Vector3(lean * 0.6, KitLooks.vis_rng.randf() * TAU, lean)
-	var col := Node3D.new()
-	col.name = "Col"
-	col.position = at
-	col.rotation = tilt
-	n.add_child(col)
-	var stone := KitLooks.rock_mat(0.35, KitLooks.vis_rng.randf() * 10.0)
-	Models.part(col, Models.cyl(tip, r, hgt, 6), stone, Vector3(0, hgt * 0.5, 0))
-	Models.part(
-		col, Models.cyl(tip * 0.7, tip * 1.05, 0.14, 5), Models.toon(Color("4e3a30"), false, 0.0),
-		Vector3(0, hgt + 0.05, 0), Vector3.ONE, Vector3(0.35, 0.0, -0.25)
-	)
-
-## The ground cracks at a fresh rock's foot cool and fade out.
-static func _cool(n: Node3D) -> void:
-	var cracks := n.get_node_or_null("Cracks") as Node3D
-	if cracks == null:
-		return
-	var tw := n.create_tween().set_parallel()
-	for mi in cracks.get_children():
-		var mat := (mi as MeshInstance3D).material_override as StandardMaterial3D
-		tw.tween_property(mat, "albedo_color:a", 0.0, CRACK_T).set_ease(Tween.EASE_IN)
-	tw.chain().tween_callback(func(): cracks.visible = false)
-
 ## Builds a rock (a movement-blocking Verbs wall wearing a rock's look). send: tell the other games.
 static func rock(
-	m: Node, by: Ent, at: Vector3, dir: Vector2, rid: String, len_: float, time_: float, hp: float, send := true
+	m: Node, by: Ent, at: Vector3, dir: Vector2, rid: String, len_: float, time_: float, hp: float, send := true,
+	top := ROCK_TOP
 ) -> Dictionary:
 	var w: Dictionary = m.verbs.add_wall(
 		by, at, dir, {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true, "color": "#c98d4a"}, 1.0
 	)
 	var old: Node3D = w["node"]
-	var n := rock_node()
-	n.scale = Vector3(len_ / 1.15, 1.0, 1.0)
+	var n := RockLook.make()
+	var tall := top / ROCK_TOP
+	if tall < 1.0:
+		RockLook.upright(n)
+	n.scale = Vector3(len_ / 1.15, tall, 1.0)
 	m.add_child(n)
-	_cool(n)
+	RockLook.cool(n)
 	w["node"] = n
 	w["rock"] = true
 	w["rid"] = rid
-	w["top"] = ROCK_TOP
+	w["top"] = top
 	w["th"] = ROCK_TH
+	w["kx_end"] = func(gone: Dictionary): RockLook.crumble(m, gone)      # (broken or timed out, not launched)
 	m.verbs._place_wall(w, n)
 	n.scale = Vector3(len_ / 1.15, 0.05, 1.0)
 	n.create_tween().tween_property(
-		n, "scale", Vector3(len_ / 1.15, 1.0, 1.0), 0.18
+		n, "scale", Vector3(len_ / 1.15, tall, 1.0), ROCK_RISE_T
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	if is_instance_valid(old):
 		old.queue_free()
-	m.fx.burst(at + Vector3(0, 0.3, 0), Color("d9b27a"), 10, 3.0, 0.4, 8.0, 1.0)
-	m.fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, Color("ff7a2a"), 8, 5.0, 40.0, 0.3, 10.0, 1.0)
+	RockLook.rise_fx(m, at)
 	if send and by != null and (m.net_on or capture) and not by.remote:
-		tx(
-			m,
-			[
-				"zone", "rock", by.nid, rid, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.001),
-				snappedf(dir.y, 0.001), snappedf(len_, 0.01), snappedf(time_, 0.1), snappedf(hp, 0.1)
-			]
-		)
+		var ev := [
+			"zone", "rock", by.nid, rid, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.001),
+			snappedf(dir.y, 0.001), snappedf(len_, 0.01), snappedf(time_, 0.1), snappedf(hp, 0.1)
+		]
+		if top != ROCK_TOP:
+			ev.append(snappedf(top, 0.01))
+		tx(m, ev)
 	return w
 
 static func find_rock(m: Node, rid: String) -> Dictionary:
@@ -181,6 +130,11 @@ static func find_rock(m: Node, rid: String) -> Dictionary:
 		if w.get("rid", "") == rid:
 			return w
 	return {}
+
+## Can a punch or slam at height `y` take a rock whose base is at `base_y`? From the ground, or from on top
+## of the rock itself.
+static func rock_in_reach(base_y: float, y: float) -> bool:
+	return y - base_y < ROCK_TOP + ROCK_REACH and base_y - y < 2.0
 
 ## Takes a rock out of the world without the break effects (it was launched).
 static func remove_rock(m: Node, w: Dictionary, send := true) -> void:
@@ -253,7 +207,7 @@ static func net_in(m: Node, x: Array) -> void:
 			if by == null or not find_rock(m, String(x[3])).is_empty(): return
 			rock(
 				m, by, Vector3(x[4], x[5], x[6]), Vector2(x[7], x[8]), String(x[3]), float(x[9]), float(x[10]),
-				float(x[11]), false
+				float(x[11]), false, float(x[12]) if x.size() > 12 else ROCK_TOP
 			)
 		"rockgo":
 			var w := find_rock(m, String(x[2]))

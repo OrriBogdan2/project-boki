@@ -1,0 +1,29 @@
+{
+	"doc": "Ryzz's hand-keyed clips (art/wardens/ryzz/ryzz.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Hands-free: no weapon on the .glb; the index fingers carry the FX points (weapon_muzzle on the right, anchor_finger_L on the left), the rods carry anchor_rod_0..3.",
+	"skinned_weapon": true,
+	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "mouth.L": "head", "mouth.R": "head", "gum": "head", "foot.L": "shin.L", "foot.R": "shin.R",
+		"index.L": "hand.L", "index2.L": "index.L", "curl.L": "hand.L", "curl2.L": "curl.L", "thumb.L": "hand.L", "index.R": "hand.R", "index2.R": "index.R", "curl.R": "hand.R", "curl2.R": "curl.R", "thumb.R": "hand.R",
+		"rod.0": "hips", "rod.1": "hips", "rod.2": "hips", "rod.3": "hips", "rodlit.0": "rod.0", "rodlit.1": "rod.1", "rodlit.2": "rod.2", "rodlit.3": "rod.3", "arc.0": "hips", "arc.1": "hips"},
+	"blade": {"root": "anchor_gun_R", "tip": "weapon_muzzle"},
+	"loco": {
+		"idle": "idle", "stance": "stance", "stance_after": 6.0,
+		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
+		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
+		"walk_speed": 2.2, "run_speed": 4.8
+	},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "fall"},
+	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
+	"kmoves": {
+		"mage_lmb_l": {"clip": "lmb_l", "upper": true}, "mage_lmb_r": {"clip": "lmb_r", "upper": true},
+		"mage_rmb_hold": {"clip": "rmb_hold", "hold_from": 0.12, "upper": true}, "mage_rmb": {"clip": "rmb", "upper": true},
+		"mage_dash": {"clip": "dash", "hold_from": 0.12}, "mage_dash_go": {"clip": "dash_go"}, "mage_dash_land": {"clip": "dash_land"}, "mage_dash_ex": {"clip": "dash_ex"},
+		"mage_e": {"clip": "sky", "upper": true}, "mage_e_snap": {"clip": "sky_snap", "upper": true}, "mage_live": {"clip": "live", "upper": true}, "mage_gum": {"clip": "gum", "upper": true},
+		"mage_x": {"clip": "ult", "hold_from": 0.1}, "mage_x_air": {"clip": "ult_air", "hold_from": 0.2}, "mage_x_dive": {"clip": "ult_dive", "hold_from": 0.05}, "mage_x_land": {"clip": "ult_land"},
+		"mf_xform": {"clip": "fusion"}
+	},
+	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
+	"flow": [["mage_lmb_l", 0.35], ["mage_lmb_r", 0.35], ["mage_dash", 0.3], ["mage_dash_go", 0.3], ["mage_dash_land", 0.42], ["mage_lmb_r", 0.3], ["mage_rmb_hold", 0.5], ["mage_rmb", 0.7], ["mage_e", 1.1], ["mage_e_snap", 0.55]],
+	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "index.L", "index2.L", "curl.L", "curl2.L", "thumb.L", "index.R", "index2.R", "curl.R", "curl2.R", "thumb.R", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R", "gum", "rod.0", "rod.1", "rod.2", "rod.3", "rodlit.0", "rodlit.1", "rodlit.2", "rodlit.3"]
+}

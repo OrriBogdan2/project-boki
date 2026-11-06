@@ -1,7 +1,7 @@
 extends RefCounted
 ## --level-hud-check: the run level reads at a glance. The portrait carries a big level number with
 ## an XP ring that fills toward the next level; a level-up pops the badge, washes the screen gold and
-## plays its own sound (audio/level_up.wav, made by tools/gen_level_sfx.py); R shows locked (a
+## plays its own sound (audio/level_up.wav, made by tools/gen_sfx_ui.py); R shows locked (a
 ## padlock and "6") until level 6, and can't be cast or ranked before then. Never touches the save.
 
 var bad := 0

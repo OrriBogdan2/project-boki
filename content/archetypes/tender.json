@@ -3,7 +3,7 @@
 	"title": "Little Lantern",
 	"base_name": "Pip",
 	"gender": "female",
-	"personality": "Small, fiery and quick, with a fox's ears and tail and red markings.\nShe is cheerful and bold, and she looks after her friends first.",
+	"personality": "A brave little field medic, a fairy fox waist-high to a human.\nShe is afraid of the dark, and the lantern she carries holds a star she caught as a kid.",
 	"role": "Tender",
 	"weight": "medium",
 	"plate_offset": 1.85,
@@ -11,18 +11,20 @@
 		"size": 0.68,
 		"hit_r": 0.34,
 		"head": 0.78,
-		"legs": 1.45,
-		"neck": -0.16
+		"legs": 0.98,
+		"torso": 1.02,
+		"shoulder": 1.12,
+		"neck": -0.036
 	},
 	"color": "#ffc46a",
 	"clip": {"lines": {"dash": "A quick hop, a long glide in the air.", "lmb": "Embers from both hands mark foes.", "rmb": "A seed that roots its target.", "e": "A healing ring for you and your team.", "x": "Tether a teammate and heal them as you go."}, "fx": {"e": "heal", "x": "tether"}},
 	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with lantern light, pins chasers with burr-seeds.",
-	"silhouette": "small and low: a tiny courier with a trailing ember tail, casting light from her hands",
+	"silhouette": "small: a tiny fairy fox medic with gold-veined wings, a leaf cape and a big glowing star lantern",
 	"card": {
 		"role": "Support medic: heals and carries the downed, roots whoever chases them.",
 		"loop": "Support medic: heals and carries the downed, roots whoever chases them.",
 		"lmb": "Ember Cast: hold to push embers from alternating hands; they fly past the cursor and each hit on a foe adds Kindle.",
-		"rmb": "Burrseed: hold to aim the lane, let go to throw; it sticks to a foe and roots them 0.7s later.",
+		"rmb": "Burrseed: a 1s wind-up, then the seed flies at the cursor; it sticks to a foe and roots them 0.7s later.",
 		"e": "Hearthlight: a healing ring on you; press again to throw it to the cursor.",
 		"dash": "Relay Step: a quick hop where you move; in the air, a long floaty glide.",
 		"passive": "Carrier: run into a downed teammate to carry up to 2 behind a shield.",
@@ -85,7 +87,9 @@
 		"col": "#c8e07a",
 		"cooldown": 10.5,
 		"charges": 1,
-		"hold": 0.25,
+		"windup": 1.0,
+		"wind_move": 0.5,
+		"wind_lane": 6.0,
 		"seed": {
 			"speed": 30.0,
 			"range": 14.0,
@@ -98,7 +102,7 @@
 			"root": 1.1
 		},
 		"variants": {
-			"tap": "Hold to show a faint dotted lane to the seed's full 14m (it flies past the cursor); let go to throw. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled."
+			"tap": "Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled."
 		},
 		"sockets": {
 			"hit": "add",

@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b8ncopbe8q725"
-path="res://.godot/imported/pip_wing_atlas.png-8cf9abac659be7c2a6b5cc135daf67b2.ctex"
+path.bptc="res://.godot/imported/pip_wing_atlas.png-8cf9abac659be7c2a6b5cc135daf67b2.bptc.ctex"
+path.astc="res://.godot/imported/pip_wing_atlas.png-8cf9abac659be7c2a6b5cc135daf67b2.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "95510aab49c84af1dd9b3694ef9cb0b6"
+"md5": "053e5bb8f7079d2247d1d47789acf5f5"
 }
 
 [deps]
 
 source_file="res://art/wardens/pip/pip_wing_atlas.png"
-dest_files=["res://.godot/imported/pip_wing_atlas.png-8cf9abac659be7c2a6b5cc135daf67b2.ctex"]
+dest_files=["res://.godot/imported/pip_wing_atlas.png-8cf9abac659be7c2a6b5cc135daf67b2.bptc.ctex", "res://.godot/imported/pip_wing_atlas.png-8cf9abac659be7c2a6b5cc135daf67b2.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -39,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=2048
 detect_3d/compress_to=0

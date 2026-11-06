@@ -132,7 +132,7 @@ func _rare_card(e: Dictionary) -> Control:
 	var eid := String(e["id"])
 	var buy := UI.button(str(int(e["price"])), func():
 		var r := BlackMarket.buy(eid)
-		Sfx.play("unlock" if r["ok"] else "click")
+		Sfx.play("unlock" if r["ok"] else "ui_deny")
 		h._toast(("%s is yours" % BlackMarket.name_of(key)) if r["ok"] else String(r["why"]))
 		h._refresh_top()
 		open(), 76, "gem")

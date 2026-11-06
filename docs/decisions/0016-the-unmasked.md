@@ -39,3 +39,16 @@ flared tunic, narrower shoulders and her own stance (warden_stance.json "empty_f
 `Unmasked.clean` (eyes -> hollow, brows -> ghost, blush -> a rose glow). The first Mask is no longer a pick
 before the egg: after you name your Boki, Vex's Mask drifts to you and you put it on (`MaskMoment`); the
 second Mask waits by the farm portal after the first expedition (`MaskOffer`).
+
+## Update: the shroud, the void head, the aura, the soles (owner, Nov 4, items 77-81)
+- The whole head is the void (`void_face.gdshader`: a dim starfield all round with a lit edge); the hollow's socket
+  and ghost features float on it. The heart on the chest is gone: the body is wrapped in a **shroud** (collar,
+  mantle, drape to the ankles, a cowl), in three styles (Cloak, Wrap, Tatters), and head, neck and hands are the
+  void colour: no skin shows, so there is no skin colour. `look["colour"]` is now the **shroud colour** (an old
+  skin colour keeps its slot index), `look["shroud"]` the style (from the old outfit), `look["aura"]` (from the
+  old motes). `Unmasked.clean` migrates all three; old saves load.
+- **Aura** (None / Faint / Strong, tooltip "Glowing specks that drift around you"): big bright specks that swirl
+  round the head, shoulders and shroud.
+- **Soles**: `FootPlant.reach` gives HunterAnim the real lowest boot point so the hips drop or lift until the sole
+  meets the ground, standing and walking, at every height, build and sex (`--unmasked-check` asserts 2 cm).
+- Prologue captions wrap inside 86% of the width and grow upward from the bottom, never off screen.

@@ -1,7 +1,7 @@
 extends "res://tools/hero_pair_check.gd"
-## Ostra's ultimate on X, Nightwell, for --ostra-combo-check (docs/heroes/ostra.md): the level gate, the well at
+## Motley's ultimate on X, Nightwell, for --ostra-combo-check (docs/heroes/ostra.md): the level gate, the well at
 ## the cursor clamped to 10m, the 1.0s dome everyone sees, the opening, the catch (stunned until it closes and
-## drawn to the middle), a foe walking in later, a foe behind a wall, allies untouched, Ostra locked in the
+## drawn to the middle), a foe walking in later, a foe behind a wall, allies untouched, Motley locked in the
 ## cast for the 1.0s dome and then free while the well runs, the small ticks, the quiet close, the Swollen
 ## size, the bond once per cast and only on a catch, the cooldown, the merge (the placed well stays) and the burst cap.
 
@@ -221,7 +221,7 @@ func _burst() -> void:
 	)
 
 ## The lock (Void's footage holds the cast for the 1.0s telegraph, f23-f33, and acts freely
-## once it opens, f50): from the press until the well opens Ostra can't walk, use another ability or attack, or
+## once it opens, f50): from the press until the well opens Motley can't walk, use another ability or attack, or
 ## turn once the wind-up is over; when it opens he is free to walk out at full speed and fight while it holds.
 func _lock_and_release() -> void:
 	var r := setup_ult("ostra", 7.0)

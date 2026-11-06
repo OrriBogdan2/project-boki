@@ -166,6 +166,8 @@ func sim(dt: float) -> void:
 		net_follow(dt)
 		_net_telegraph()
 		return
+	if _napping(dt):
+		return
 	cd -= dt
 	st_t -= dt
 	if md.get("stag", false):
@@ -269,6 +271,27 @@ func sim(dt: float) -> void:
 	var look := atk_dir if st in ["windup", "lunge"] else Vector2(vel.x, vel.z)
 	if look.length() > 0.2:
 		face = lerp_angle(face, atan2(-look.x, -look.y), minf(1.0, dt * 10.0))
+
+## An idle monster with no Hunter or Boki within NAP_M stops simulating (no wandering, no physics) and
+## looks again every NAP_CHECK seconds: most camps sit far from every fight, and nobody sees them wander.
+const NAP_M := 36.0          # m: anyone this close keeps it awake (beyond the match camera's view)
+const NAP_CHECK := 0.5       # s between its looks around while asleep
+var _nap := 0.0
+func _napping(dt: float) -> bool:
+	if st != "idle" or not grounded or tgt != null or md.get("flee", false):
+		_nap = 0.0
+		return false
+	if _nap > 0.0:
+		_nap -= dt
+		return true
+	for e in m.hunters:
+		if not e.out and flat_dist(e) < NAP_M:
+			return false
+	for k in m.kins:
+		if not k.dead and flat_dist(k) < NAP_M:
+			return false
+	_nap = NAP_CHECK
+	return true
 
 func _begin_attack() -> void:
 	st = "windup"

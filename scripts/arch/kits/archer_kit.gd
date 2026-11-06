@@ -3,7 +3,7 @@ extends ArchKit
 ## Hem (id archer, light; docs/heroes/archer.md, hero sheet pin.md). Spirit Walk (Shift), Focus, the Heavy Shot
 ## (RMB, hold only: a charged arrow that knocks the first foe back and stuns it into a wall), Hail Wall (E, a curved arc of rain at the cursor distance), and on X
 ## Starpiercer (level 6, PinUlt: three empowered piercing beams). R is the Merge.
-## The bow (PinDraw): hold to draw through two stages with a V reticle that closes at each; tap and
+## The bow (PinDraw): hold to draw through two stages with a filling aim line and a perfect-timing circle; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
 ## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
 ##
@@ -18,7 +18,8 @@ var fx: PinFx                  # Hem's pooled effects
 var ult: PinUlt                # X: Starpiercer
 var perfects: int:
 	get: return draw.perfects if draw else 0
-var pin_aim := false           # the Heavy Shot is being held (its gold V and growing bar show)
+var pin_aim := false           # the Heavy Shot is being held (the needle on the bow and its growing bar show)
+var needle: PinNeedle          # the Heavy Shot's needle while it's held
 var high_t := 0.0              # re-checks high ground now and then
 var on_high := false
 var loosed := 0.0              # a Focus shot is in the air until this time (its hit can be a Deadeye)
@@ -37,6 +38,9 @@ func _setup() -> void:
 	fx = PinFx.new(h)
 	h.add_child(fx)
 	self_nodes.append(fx)
+	needle = PinNeedle.new()
+	h.add_child(needle)
+	self_nodes.append(needle)
 	draw = PinDraw.new(self)
 	ult = PinUlt.new(self)
 	h.add_child(ult)
@@ -65,8 +69,7 @@ func take_focus_shot() -> bool:
 	was_full = false
 	loosed = m.time + float(res_def().get("window", 1.2))
 	var d := h.aim_dir()
-	m.fx.flash(h.pos + Vector3(d.x * 0.6, 1.0, d.y * 0.6), res_col(), 0.8, 0.08)
-	m.sfx("rail", h.pos, -9.0 if h.is_local() else -12.0, 1.7)       # the string's snap
+	vfx("focus_shot", h.pos, d)
 	return true
 
 ## A rooted or stunned foe (anyone's root counts), or one that was a moment ago.
@@ -102,11 +105,10 @@ func _deadeye(t: Ent) -> void:
 	t.hurt(float(rd.get("deadeye", 18.0)) * power("sec"), h, opts)
 	deadeyes += 1
 	play("pin_deadeye")
-	m.fx.bolt(h.pos + Vector3(0, 1.2, 0), t.pos + Vector3(0, 1.0, 0), gold)
-	m.fx.bolt(h.pos + Vector3(0, 1.25, 0), t.pos + Vector3(0, 1.05, 0), Color(1, 1, 1, 0.8))
-	m.fx.burst(t.pos + Vector3(0, 1.0, 0), res_col(), 18, 9.0, 0.4, 0.0, 1.0, Vector3(dir.x, 0.2, dir.y), 25.0)
+	vfx("deadeye", t.pos, dir, {"len": h.flat_dist(t)})
+	m.fx.own_look = true
 	payoff_fx(t.pos, "DEADEYE", gold, "pay_deadeye", dir, t)
-	net_bolt(h.pos + Vector3(0, 1.2, 0), t.pos + Vector3(0, 1.0, 0), gold)
+	m.fx.own_look = false
 	CombatBus.ability_used.emit(h, "deadeye", "secondary")
 
 func _tick(dt: float) -> void:
@@ -146,6 +148,10 @@ func _tick(dt: float) -> void:
 	net_pulse(dt, full)
 	if pin_aim and rmb_down:
 		_heavy_tele()
+	if pin_aim and rmb_down and tells_visible():
+		needle.hold(h.position, h.aim_dir(), heavy_k(), float(h.cdat.get("scale", 1.0)), dt)
+	elif needle.visible:
+		needle.put_away()
 	if not rain.is_empty():
 		_tick_rain(dt)
 	draw.tick()
@@ -154,6 +160,29 @@ func _tick(dt: float) -> void:
 	spirit.tick_orbs(dt)
 	_tag_shots()
 	fx.tick_shots()
+	_tick_bow()
+
+## The bow's own looks: the glowing thread string, and thread gathering at the nock while she draws.
+func _tick_bow() -> void:
+	if not tells_visible():
+		return
+	var vfx_on := HeroVfx.of(m)
+	var drawing := h.draw_t >= 0.0
+	vfx_on.hold(h, "string_draw" if drawing else "string_idle")
+	if drawing:
+		vfx_on.hold(h, "draw")
+	if pin_aim and rmb_down:
+		vfx_on.hold(h, "heavy_hold", heavy_k())
+	if spirit.active():
+		vfx_on.hold(h, "spirit")
+	if ult.active():
+		vfx_on.hold(h, "ult_armed")
+
+## The player's own draw shows only on the filling line: no shared wind-up ring at her feet, ticks or ping.
+## Anyone else still sees the ring (the wind-up tell), and the Heavy Shot keeps it.
+func charge_now() -> Array:
+	var cn := super.charge_now()
+	return ["", -1.0] if h.is_local() and String(cn[0]) == "draw" else cn
 
 ## Her bow hand carries its own tell (PinFx's fletch glint), so the shared charge orb stays off.
 func charge_orb() -> bool:
@@ -197,11 +226,15 @@ func _tag_shots() -> void:
 		if x.get("cos", false):
 			continue
 		var kind := "arrow"
-		if String(x.get("src", "")) == "abil" or x.has("ab"):
+		if String(x.get("ab", "")) == "ultimate":
+			kind = "ult"
+		elif String(x.get("src", "")) == "abil" or x.has("ab"):
 			kind = "heavy"          # (an ability's projectile carries its slot as "ab"; the bow's arrows have none)
 		elif draw.pending != "":
 			kind = draw.pending
-		fx.skin(s, kind)
+		var arrow: Node3D = fx.skin(s, kind)
+		if arrow != null:
+			vfx("fire_" + kind, s["pos"], h.aim_dir(), {"follow": arrow})
 	draw.pending = ""
 
 ## Passive, Hawk Sense: rivals under half health are seen through cover and fog within 22m.
@@ -322,14 +355,10 @@ func _arrow_hit(t: Ent) -> void:
 		if (e["pos"] as Vector3).distance_to(t.pos) < 2.8: kind = String(e["kind"])
 	if kind == "":
 		kind = draw.last_kind          # a fast arrow can be gone from the pool on the step it lands
-	var at := t.pos + Vector3(0, 1.0, 0)
 	if kind == "super":
-		fx.star(at, 1.6, PinFx.TEAL, 0.22, 0.8, PI * 0.25, 2.0)
-		fx.fletch_burst(at, 1.2, Color("a8ffe0"), 0.05, 0.15, 0.0, 5.0)
-		m.fx.burst(at, PinFx.TEAL, 18, 7.0, 0.35, 2.0, 1.2)
-		m.sfx("pin_super_hit", t.pos, -2.0)
+		vfx("super_hit", t.pos, h.dir_to(t))
 	elif kind in ["arrow", "tap"]:
-		fx.star(at, 0.8, PinFx.GREEN, 0.1)
+		vfx("arrow_hit", t.pos, h.dir_to(t))
 
 # ------------------------------------------------------------------ dash: Spirit Walk
 func on_dash(use_ex: bool) -> bool:
@@ -341,6 +370,7 @@ func on_dash(use_ex: bool) -> bool:
 		# after-images (no bursts on a dash); 19 m/s, the base dash speed
 		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"}, true)
 		play("pin_flick")
+		vfx("flick")
 		st["last_dash"] = "flick"
 		return true
 	CombatBus.ability_used.emit(h, "spirit_walk", "dodge")
@@ -349,13 +379,15 @@ func on_dash(use_ex: bool) -> bool:
 
 ## While walking as a spirit she moves quicker; at rank 3 inside something she starts faster still and
 ## that fades with the walk. A draw right after a perfect release slows her less (wiki: perfect shots ease
-## the self-slow).
+## the self-slow). Holding the Heavy Shot slows her hard (pin.hold_move of her speed).
 func move_k() -> float:
 	var k := 1.0
 	if spirit and spirit.active():
 		k = float(dash_def().get("walk_k", 1.1)) + spirit.inside_boost()
 	if draw and draw.quick and h.draw_t >= 0.0:
 		k *= float(h.wpn.get("perfect_slow", 0.85)) / maxf(0.05, float(h.wpn.get("draw_slow", 0.7)))
+	if pin_aim and rmb_down:
+		k *= float(rmb_def()["pin"]["hold_move"])
 	return k
 
 # ------------------------------------------------------------------ RMB: Heavy Shot
@@ -379,7 +411,7 @@ func press_rmb() -> void:
 
 func rmb_hold_tick(t: float) -> void:
 	if t > 0.15 and not pin_aim:
-		# the Heavy Shot's draw: a red bar growing from the bow (its own creak)
+		# the Heavy Shot's draw: the needle on the bow, a red bar growing from it (its own creak)
 		play("arc_heavy_wind")
 		pin_aim = true
 		m.sfx("pin_heavy_draw", h.pos, -6.0 if h.is_local() else -10.0)
@@ -430,7 +462,8 @@ func _drop_holds() -> void:
 func _drop_tele() -> void:
 	pin_aim = false
 	fx.bow_glint_at(Vector3.ZERO, 0.0, HEAVY_GOLD)
-	AimKit.hide(h, "rmb_v"); AimKit.hide(h, "rmb_bar")
+	needle.put_away()
+	AimKit.hide(h, "rmb_bar")
 
 func fire_rmb(c: Dictionary) -> void:
 	_drop_tele()
@@ -459,25 +492,20 @@ func _pin(a: Vector3, k: float) -> void:
 		# the impact: a red-white burst, a white dust cloud as it's driven back, a white ring round it
 		var at := f.pos + Vector3(0, 1.0, 0)
 		fx.note_hit(f.pos)
-		fx.star(at, 1.5 + 0.7 * k, Color("ff5a4a"), 0.14, 0.0, PI * 0.25, 2.0)
-		m.fx.burst(at, Color("ff8a6a"), 14, 6.5, 0.3, 4.0, 1.2)
-		m.fx.burst(at, Color("fff0e8"), 8, 4.0, 0.25, 4.0, 0.9)
-		m.fx.dust(f.pos, 14)
-		m.later(0.12, func(): if is_instance_valid(f): m.fx.ring(f.pos, 1.3, Color.WHITE, 0.3))
-		m.sfx("pin_heavy_hit", f.pos, -3.0)
+		vfx("heavy_hit", f.pos, dir, {"k": k})
 		f.flash_t = 0.2                      # a hit flash on the body
-		m.fx.flash(at, HEAVY_GOLD, 1.6 + 0.8 * k, 0.1)
 		# knocked while burning in the Hail Wall: Cremated (a burst of the blue fire)
 		if not rain.is_empty() and _in_rain(f):
 			cremations += 1
 			f.hurt(float(e_def().get("cremate", 10.0)) * power("kin"), h, {"src": "abil", "ab": "signature", "tags": ["signature", "cremate"]})
 			if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(e_def()["blight"]) + 1.5))
-			m.fx.burst(f.pos + Vector3(0, 1.0, 0), Color("5aa8ff"), 18, 4.0, 0.5, -3.0, 1.2)
+			vfx("cremate", f.pos, dir)
 			m.fx.word(f.pos + Vector3(0, 2.4, 0), "CREMATED", Color("8ac8ff"), false)
 		# driven into terrain within 3m: pinned (a stun), and the shot lines up: full Focus
 		if _wall_behind(f, dir, float(pd["wall"])):
 			pins += 1
 			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
+			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			add_focus(res_max())
 			if rank("sec") >= 3:
 				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge
@@ -488,12 +516,8 @@ func _pin(a: Vector3, k: float) -> void:
 					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
 					m.fx.word(f.pos + Vector3(0, 2.2, 0), "PINNED", Feel.cat_color("control"), true)
 					m.fx.dust(f.pos, 10))
-	run(stg, cx("rmb", "heavy_shot", a, extra))
-	m.sfx("pin_heavy", h.pos, lerpf(-6.0, 0.0, k), lerpf(1.15, 0.9, k))
-	m.sfx("pin_super", h.pos, lerpf(-8.0, -2.0, k), 0.6)           # a deep thump under it: heavier than the bow
-	var d := h.aim_dir()
-	# a small pink crescent swipe at the feet on the release
-	m.fx.slash(h.pos + Vector3(0, 0.15, 0), atan2(d.y, d.x), PI * 0.6, 1.1, Color("ff9ad8"), false)
+	run_own(stg, cx("rmb", "heavy_shot", a, extra))
+	vfx("heavy_go", h.pos, dir, {"k": k, "len": reach * (1.0 + 0.2 * k)})
 	# the release burst sits on the aim line at the bow, bigger than any bow cue, and a screen kick along the shot
 	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, HEAVY_GOLD, 0.08, 0.14, 1.0, 5.0)
 	heavy_kicks += 1
@@ -536,8 +560,7 @@ func cast_e() -> bool:
 		var lob_v := dv * maxf(4.0, radius / tell)
 		m.spawn_shot(h, h.pos + Vector3(0, 1.4, 0), lob_v, 0.0, tell, 0.05, PinFx.GREEN, {"lob": 3.5, "cos": true})
 	fx.lob(h.pos + Vector3(0, 1.6, 0), d)
-	m.sfx("pin_hail", h.pos, -2.0)
-	net_ring(c, 1.6, col_of(ed))
+	vfx("hail_go", h.pos, d)
 	play("arc_hail")
 	var t := float(ed["time"])
 	rain = {"center": center, "c": c, "d": d, "radius": radius, "t": t + tell, "start": tell, "tick": 0.0, "patter": 0.0}
@@ -565,6 +588,8 @@ func _tick_rain(dt: float) -> void:
 	if float(rain["patter"]) <= 0.0:
 		rain["patter"] = randf_range(0.08, 0.14)
 		m.sfx("pin_patter", rain["c"], -12.0, randf_range(0.85, 1.25))
+	HeroVfx.of(m).hold(h, "rain", 0.0, {"at": rain["center"], "radius": rain["radius"], "deg": _arc_deg(),
+			"dir_x": (rain["d"] as Vector2).x, "dir_y": (rain["d"] as Vector2).y})
 	var inside: Array = []
 	for f in m.foes_of(h.team):
 		if f.hittable() and _in_rain(f): inside.append(f)

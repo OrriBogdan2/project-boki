@@ -2,15 +2,14 @@ extends RefCounted
 ## Vex's parity pass and audit fixes (docs/heroes/gunslinger.md, "Parity pass"), run inside --gunslinger-combo-check
 ## (tools/hero_combo_check.gd): the rifle's cadence, how its rounds track the cursor while she walks, the 30-round
 ## drum that refills whenever the trigger rests, the firing brackets, the shouldered recoil pose, and the Burr
-## Charge's side toss (the owner's call over the footage's overhand), a tap she walks through, and the Longneedle's
-## wide beam, pushed-out view and aim (item 68).
-
+## Charge fired from the cannon's launcher (item 112), a tap she walks through, and the Longneedle's wide beam,
+## pushed-out view and aim (item 68).
 const ROUND_GAP := 0.12      # s between rounds held
 const MAG := 30              # rounds in the drum (game data: a 30-round magazine)
 const REFILL_DRY := 1.3      # s from running dry to the next round, the trigger held (0.35s rest + 30 at 40/s)
 const REFILL_BY := 1.2       # s of rest that brings a drum back from 18 to full ("rapidly reloads when not firing")
 const TURN_180 := 0.2        # s: the body turns 180 degrees to a new cursor (the source's 1280 deg/s: 0.14s)
-const WALK_KEEP := 0.85      # share of her walk she keeps while firing or tossing the grenade
+const WALK_KEEP := 0.85      # share of her walk she keeps while firing
 const OLD_NEEDLE_W := 0.5    # m either side of the line, before item 68
 const SWEEP := 6.0           # rad/s the cursor swings round her (a round a step late would be 5.7 degrees off)
 var C                        # the combo check (ok, ac, helpers)
@@ -25,7 +24,7 @@ func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> voi
 	_drum(m, P, K, home)
 	_brackets(m, P, home)
 	_rifle_pose()
-	_side_toss(m, P, K, T, home)
+	_launcher(m, P, K, T, home)
 	_needle(m, P, K, T, home)
 	_audit(m, P, K, T, home)
 	P.inp["fire"] = false
@@ -233,14 +232,16 @@ func _rifle_pose() -> void:
 			and bool(mv.get("stance", false)),
 			"gp %.2f, torso %.2f -> %.2f" % [kick["gp"], a["p"], kick["p"]])
 
-## The Burr Charge, the owner's side toss rather than overhead: a tap, flicked sidearm from the hip with little
-## wind-up, and she keeps walking.
-func _side_toss(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
-	var start := HunterAnim.km_sample("gunslinger_rmb", 0.0)
-	var release := HunterAnim.km_sample("gunslinger_rmb", 0.05)
-	var low := (start["fl"] as Vector3).y < 0.0 and (start["fl"] as Vector3).x < -0.3
-	var flick := (release["fl"] as Vector3).z < -0.5 and (release["fl"] as Vector3).y < 0.1
+## Item 112: the Burr Charge is a tap fired from the cannon's launcher: no throw in the move, a kick on the gun, out
+## within a step of the press, once however long the key stays down, and she keeps walking.
+func _launcher(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
+	var kick := HunterAnim.km_sample("gunslinger_rmb", 0.04)
 	var stance := bool(KMovesVV.MOVES["gunslinger_rmb"].get("stance", false))
+	var no_hand := (KMovesVV.MOVES["gunslinger_rmb"]["keys"] as Array).all(func(key: Array) -> bool:
+		return float((key[1] as Dictionary).get("hw", 0.0)) == 0.0 and not (key[1] as Dictionary).has("fl"))
+	C.ok("Vex item 112: no throw pose, the left hand stays out of it, a recoil kick on the cannon",
+			no_hand and stance and float(kick["gp"]) > 0.3 and not GunslingerKit.TRAILS.has("gunslinger_rmb"),
+			"gp %.2f" % kick["gp"])
 	T.teleport(home + Vector3(30, 0, 8))
 	P.teleport(home)
 	K.cd["rmb"] = 0.0
@@ -248,19 +249,86 @@ func _side_toss(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3)
 	C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
 	var plain := _walk_speed(m, P)
 	var p0 := P.pos
-	var n0 := K.burrs.size()
-	K.press_rmb()
-	var b: Dictionary = K.burrs[-1] if K.burrs.size() > n0 else {}
-	var y := float(b.get("y0", 9.0)) - float(b.get("g0", 0.0))
-	C.ac.step(m, 0.6)
-	var walked := P.flat_dist(p0) / 0.6
+	var puffs0 := K.puffs
+	var burrs0 := K.burrs.size()
+	P.inp["sec"] = true
+	P.inp["sec_hold"] = true
+	m.step(C.DT)
+	# (the charge goes at once; on her model the puff waits for the bell, TUBE_SWING)
+	var out_now := K.burrs.size() == burrs0 + 1 and float(K.cd["rmb"]) > 0.0
+	var b: Dictionary = K.burrs[-1] if not K.burrs.is_empty() else {}
+	var gun := P.model.get_node_or_null("Rig/Torso/Aim/Gun/Muzzle") as Node3D
+	var from_gun := not b.is_empty() and gun != null and (b["pos"] as Vector3).y >= gun.global_position.y
+	var was_at: Vector3 = b.get("y0", 0.0) * Vector3.UP
+	C.ac.step(m, 1.0, func(): P.inp["sec_hold"] = true)
+	P.inp["sec_hold"] = false
+	var walked: float = P.flat_dist(p0) / (1.0 + C.DT)
 	P.inp["move"] = Vector2.ZERO
-	C.ok("Vex parity RMB: a side toss, from low at the hip, flicked sidearm at 0.05s, leaving from the hip",
-			low and flick and stance and absf(y - GunslingerKit.TOSS_Y) < 0.2,
-			"hand %s -> %s, leaves %.2f m up" % [start["fl"], release["fl"], y])
-	C.ok("Vex parity RMB: she keeps walking through the toss (85% of her walk or more)",
+	# (her model has the launcher's own firing point, which the empties check below covers)
+	from_gun = from_gun or WardenGlb.anchor(P.model, GunslingerKit.TUBE_FIRE) != null
+	C.ok("Vex item 112: a tap fires within one step, from above the gun's muzzle on a model with no launcher",
+			out_now and from_gun, "y %.2f" % was_at.y)
+	C.ok("Vex item 112: a 1s hold fires once, at the press", K.puffs == puffs0 + 1 and not K.rmb_down,
+			"%d puffs" % (K.puffs - puffs0))
+	C.ac.step(m, 1.2)
+	_launcher_empties(m, P, K, home)
+	C.ok("Vex item 112: she keeps walking through the shot (85% of her walk or more)",
 			walked >= plain * WALK_KEEP, "%.2f of %.2f m/s" % [walked, plain])
 	C.ac.step(m, 1.5)
+
+## On the new model: the charge leaves from launcher_fire at the press, read live, and the flash waits for the bell
+## (launcher_muzzle), which starts the shot behind her shoulder. Her real empties, held at known spots for the shot,
+## or stand-ins on a stand-in Warden node on a model that has none.
+func _launcher_empties(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
+	var w := P.model.get_node_or_null("Warden") as Node3D
+	var made := w == null
+	if made:
+		w = Node3D.new()
+		w.name = "Warden"
+		P.model.add_child(w)
+	var spot := WardenGlb.anchor(P.model, GunslingerKit.TUBE_FIRE)
+	var bell := WardenGlb.anchor(P.model, GunslingerKit.TUBE_BELL)
+	var stand_in := spot == null or bell == null
+	if stand_in:
+		spot = Node3D.new()
+		spot.name = GunslingerKit.TUBE_FIRE
+		bell = Node3D.new()
+		bell.name = GunslingerKit.TUBE_BELL
+		w.add_child(spot)
+		w.add_child(bell)
+	var spot0 := spot.transform
+	var bell0 := bell.transform
+	P.teleport(home)
+	C.ac.step(m, 0.1)
+	spot.global_position = P.pos + Vector3(0.7, 1.4, 0.2)
+	bell.global_position = P.pos + Vector3(-0.5, 1.7, 0.0)
+	var fire_at := spot.global_position
+	var bell_at := bell.global_position
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	var puffs0 := K.puffs
+	K.press_rmb()
+	var b: Dictionary = K.burrs[-1] if not K.burrs.is_empty() else {}
+	var from_spot := not b.is_empty() and (b["pos"] as Vector3).distance_to(fire_at) < 0.01
+	var waits := K.puffs == puffs0
+	C.ac.step(m, 0.05)
+	waits = waits and K.puffs == puffs0
+	bell.global_position = bell_at
+	C.ac.step(m, 0.1)
+	C.ok("Vex item 112: the charge leaves launcher_fire at the press, the flash launcher_muzzle after 0.1s",
+			from_spot and waits and K.puffs == puffs0 + 1 and K.last_puff.distance_to(bell_at) < 0.01,
+			"from spot %s, waited %s, %d puff" % [from_spot, waits, K.puffs - puffs0])
+	spot.transform = spot0
+	bell.transform = bell0
+	if stand_in:
+		w.remove_child(spot)
+		w.remove_child(bell)
+		spot.free()
+		bell.free()
+	if made:
+		P.model.remove_child(w)
+		w.free()
+	C.ac.step(m, 1.2)
 
 ## Item 68: the Longneedle hits a line at least 1.5x as wide, the view pushes out at least 15% through the cast, along
 ## the aim, with no shake, and is back within 0.3 s of the shot; the beam goes exactly where the line last pointed.

@@ -20,8 +20,9 @@ static func world_labels(hud) -> void:
 	var m: Match = hud.m
 	var cam: Camera3D = m.cam
 	for b in m.boxes:
-		if not cam.is_position_behind(b["pos"]):
-			_box_label(hud, b, cam.unproject_position(b["pos"] + Vector3(0, 1.9, 0)))
+		var bp := LabelCull.at(hud, b["pos"] + Vector3(0, 1.9, 0))      # (item 94)
+		if bp.is_finite():
+			_box_label(hud, b, bp)
 	for bc in m.beacons:
 		if bc["used"]:
 			continue
@@ -31,7 +32,9 @@ static func world_labels(hud) -> void:
 			continue
 		if m.player and m.player.flat_dist(bc["pos"]) > 26.0 and float(bc["prog"]) <= 0.0:
 			continue
-		var bp := cam.unproject_position(bc["pos"] + Vector3(0, 3.2, 0))
+		var bp := LabelCull.at(hud, bc["pos"] + Vector3(0, 3.2, 0))
+		if not bp.is_finite():
+			continue
 		hud._ctext(bp, "Revive beacon" + ("  ·  contested" if bc["contested"] else ""), 12, Beacons.COL, hud.big)
 		if float(bc["prog"]) > 0.0:
 			hud._bar(Rect2(bp + Vector2(-40, 6), Vector2(80, 5)), float(bc["prog"]), Beacons.COL)

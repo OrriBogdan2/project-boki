@@ -234,7 +234,8 @@ func _stage(col: Color) -> Control:
 	vp.transparent_bg = true
 	vp.msaa_3d = Viewport.MSAA_4X
 	vp.size = Vector2i(stage_size)
-	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	# drawn only while it is on screen (not scrolled away or hidden under another page)
+	vp.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
 	svc.add_child(vp)
 	_build_world(col)
 	fx = Control.new()

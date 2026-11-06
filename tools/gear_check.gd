@@ -212,7 +212,7 @@ func _match() -> void:
 			if e["kind"] == "gear":
 				if int(e["rar"]) < 2: low = true
 				if int(e["rar"]) == 4: legend += 1
-			elif Data.PERKS[e["id"]]["wup"].has("brand"): brand = true
+			elif e["kind"] == "tune" and Data.PERKS[e["id"]]["wup"].has("brand"): brand = true
 	ok("a boss drops few items", float(bossn) / 200.0 <= 4.0, "%.2f a boss" % (float(bossn) / 200.0))
 	ok("boss gear is Rare or better, with a Brand and sometimes Legendary", not low and brand and legend > 0, "legend %d/200" % legend)
 	var per_chest := float(total["chest"]) / 40.0

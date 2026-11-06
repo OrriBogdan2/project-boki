@@ -12,7 +12,7 @@ const PLUS_R := 11.0           # px: the "+" badge's radius before its pulse
 const PLUS_HIT := 16.0         # px: half the clickable square round the "+"
 const HINT_SECS := 5.0         # s: the ALT+key hint shows on every rankable slot after a new point
 
-static var plus_spots := {}    # slot -> [Rect2 the "+" covers, frame drawn] (RankClick reads it)
+static var plus_spots := {}    # slot -> [Rect2 the "+" covers, HudPanels.draws when drawn] (RankClick reads it)
 static var _pts_was := 0
 static var _hint_until := 0.0
 
@@ -52,12 +52,13 @@ static func plus(H, r: Rect2, id: String, slot: String, key: String) -> void:
 
 ## Make `at` the clickable spot that spends a point on `slot` this frame (a locked slot's whole face).
 static func mark(slot: String, at: Rect2) -> void:
-	plus_spots[slot] = [at, Engine.get_process_frames()]
+	plus_spots[slot] = [at, HudPanels.draws]
 
-## The "+" rect for `slot` if it was drawn this frame or the last, else an empty Rect2.
+## The "+" rect for `slot` if HudPanels' latest redraw drew it, else an empty Rect2 (the panels redraw
+## REDRAW_HZ times a second, so a "+" lives until the next redraw leaves it out).
 static func spot(slot: String) -> Rect2:
 	var s: Array = plus_spots.get(slot, [])
-	if s.is_empty() or Engine.get_process_frames() - int(s[1]) > 1:
+	if s.is_empty() or int(s[1]) != HudPanels.draws:
 		return Rect2()
 	return s[0]
 

@@ -75,8 +75,6 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 	if p.ak:
 		H._draw_res_bar(x0, ar.end.y + 4, w, p)
 	_hidden_tag(H, sz, p)
-	# the dash bar under the dash slot (second in the ability row), in the margin below the portrait
-	H.plates.stam.draw(c, Rect2(Vector2(x0 + 60.0 - 35.0, o.y + H.HUD_PORTRAIT.y + 7.0), Vector2(120, 6)), p, true)
 
 ## HIDDEN / CROUCHED / SPOTTED over the middle of the bar when you're in grass or crouching.
 static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:

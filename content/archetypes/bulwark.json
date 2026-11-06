@@ -1,19 +1,22 @@
 {
 	"id": "bulwark",
-	"title": "Frozen Bulwark",
+	"title": "Sunken Bulwark",
 	"base_name": "Breaker",
 	"gender": "male",
 	"personality": "A huge, warm-hearted northern ferryman in a fur-lined coat, carrying the frozen, iron-banded prow of his old ship as a shield.\nHe laughs easily and guards everyone near him. Small things are off: frost that never melts on him, and no breath in the cold.",
 	"weight": "heavy",
 	"color": "#8fd0ff",
 	"body": {
-		"size": 1.335,
-		"build": 1.18,
+		"size": 2.0,
+		"build": 1.4,
 		"hit_r": 0.46,
-		"head": 0.52,
-		"legs": 1.3,
-		"neck": 0.1
+		"head": 0.3,
+		"legs": 0.46,
+		"torso": 1.06,
+		"shoulder": 1.35,
+		"neck": 0.0
 	},
+	"model_glow": {"core": "#1fe0cc", "edge": "#0f9a94", "compass": "#ffb347", "lure": "#8ff5e0", "strength": 1.5},
 	"plate_offset": 2.6,
 	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",
 	"silhouette": "the frozen prow shield and the long ice-cased oar",
