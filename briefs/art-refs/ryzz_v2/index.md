@@ -36,3 +36,10 @@ Model: Nano Banana Pro (no seed exposed). Exploration at 2K.
 ## Final-top candidates (Nov 6, 16:25 ET), both going to master-sheet tests
 - `ryzz_v2_candidate_bolt_cutout.jpg`: a one-piece high-neck bodysuit with a jagged lightning-bolt cutout running from under the bust down the stomach into the brief (underboob shows through the bolt). Claude's pick.
 - `ryzz_v2_candidate_emblem_hem.jpg`: a high-neck crop top with a glowing bolt emblem on the chest and a jagged lightning-point hem (underboob), plus a separate bikini-cut bottom.
+
+## Master sheet (Nov 6, 16:28 ET): owner chose the emblem top
+`ryzz_v2_master_sheet.jpg` (Nano Banana Pro, 3:4, 2K; single ref: the emblem candidate).
+- Layout: front, side, back, 3 heads (bubblegum, smirk with sparks, laugh), backpack close-up.
+- The backpack design is canon: copper plate with two coil springs, black cables and a glowing pink bolt emblem.
+- Alternates: `explorations/master_sheet_emblem_alt.jpg`, `explorations/master_sheet_boltcut.jpg`.
+- The bolt-cutout top is now a skin candidate alongside the bolt-neckline one.
