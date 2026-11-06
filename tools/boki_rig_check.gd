@@ -5,7 +5,7 @@ extends RefCounted
 ## Prints PASS/FAIL lines.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
-const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew", "zephyrak", "pebbit", "cairnback"]
+const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew", "zephyrak", "pebbit", "cairnback", "wisplet"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend"]
