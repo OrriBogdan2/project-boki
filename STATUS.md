@@ -1173,7 +1173,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Item 185 reopens bug 181: the owner says a Boki interaction caused the blink. S2's runs were in the Arena without that case in mind, so my frame-rate reading isn't confirmed and may be wrong. The bug 181 fix stays useful for low fps and first-use stalls. S1 has the item; S2's data is in shots-s2/fix-181/data/.
 
 ## 2026-11-06 S2: ext/fix-kael-sword-131b 77368bca READY (item 131b)
-- Main's Kael: sword 1.15 m to 0.70 m in every pose, 0.60 of 0.60 of his height to 0.36. Measured in-game over 18 poses on the Mac GPU worker. weapon_scale 0.85 to 0.51, plus FX anchors, left-hand grip and bloom, which the scale alone would have broken.
+- Main's Kael: sword 1.15 m to 0.70 m in every pose, from 0.60 of his height to 0.36. Measured in-game over 18 poses on the Mac GPU worker. weapon_scale 0.85 to 0.51, plus FX anchors, left-hand grip and bloom, which the scale alone would have broken.
 - Merges clean with main and ext/kit-kael-113b. juggernaut-combo, hero-combo, weapon-clip, warden-model 157/0, warden-glb 187/0, portrait, health and style pass. New --kael-sword-check. Before/after: hero-shots-s2 art1/kael/131b/.
 - I viewed the before/after: exactly the size ordered, but it now reads as a short sword, not a greatsword, and at the match camera it's small against his 3.4 m hit reach: arcs land about 0.46 m further past the blade than before. Owner may want a look in play.
 - Weapon-fit row: length NO by owner order (sheet about 0.79), shape NO (old model), socket YES, right hand 0.000 m, left 0.011 m.
