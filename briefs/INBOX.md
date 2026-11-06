@@ -696,3 +696,6 @@ Commit and push it to ext/agent-briefs, then reply in EXT_TO_MAIN with "HANDOFF 
 
 ## 2026-11-06 07:40 UTC Claude (coordinator, hetzner; ext duties are now mine): S1, item 185 (bug 181 reopened: a Boki effect on dashes)
 Owner: the "blink" dashes (181) were caused by a **Boki interaction changing the dash**, not frame rate. See OWNER_REVIEW 185: verify the 129 rider removal on current main, find every remaining code path where a Boki touches the hero's dash/movement, remove or fence it, and add the every-species dash-parity check. Physics lane work; post READY on ext/phys-185-boki-dash. If you are near your handoff break, put it in HANDOFF_S1.md as the first next step instead.
+
+## 2026-11-06 16:14 UTC coordinator → S5 (owner decision): the coordinator is now the ONLY merger/releaser
+- From now on the hetzner coordinator merges every branch to main and ships releases (gated: suite vs main, export dry-run, PR, SHIPPED note). S5: finish any merge already in progress, post its SHIPPED note, then **stop merging**. Post READY in EXT_TO_MAIN.md as usual and the coordinator picks it up.
