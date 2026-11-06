@@ -1,0 +1,23 @@
+# Ravel v2 (was Lisette/Hem; renamed by owner Nov 6), "the Red Stitch", id `archer`
+
+Model: Nano Banana Pro (no seed exposed). Style ref for the merges: the Ryzz master sheet.
+
+## Locked design (owner, Nov 6 18:06 ET)
+- **Concept:** the Tyrant's seamstress, turned into his living puppet. She cut her own strings and now hunts the Masks she sewed.
+- **Skin:** ghostly porcelain white with a warm undertone and a rose blush (owner's pick over tanned).
+- **Porcelain doll parts:** cream ball-joints with dark cracks at the shoulders, elbows, wrists and knees.
+- **Marionette:** a snapped wooden control cross on her back, with severed red strings to her wrists.
+- **Masks:** a cracked white half-mask over her right eye, with red-thread stitches; a white mask sewn to her left shoulder as a pauldron.
+- **Hair and stitches:** long black hair that dissolves into smoke (her loose shadow); red stitches down her sternum.
+- **Outfit:** black corset with red lacing; short skirt fraying into red threads; black laced boots with flat heels.
+- **Weapons:** a giant silver sewing needle with red thread (her melee weapon and arrow); a black recurve bow strung with red thread.
+
+## Files
+- `ravel_v2_master_sheet_2k.jpg`: the approved 2K sheet. A 4K pass is pending.
+- `explorations/master_sheet_tanned_alt.jpg`: the tanned version (skin candidate or alternate).
+- `explorations/`: direction sheets (armour, gown, coat, marionette), merges, and skin A/B tests.
+
+## Notes
+- Discord feedback that drove the redesign: she "doesn't stand out"; use the needle as a lance, add jagged armour shapes, and smoke hair.
+- Avoid harlequin diamonds and bells (Motley owns jester motifs).
+- The model will not make the needle taller than sword length. The owner accepted a rapier-length needle.
