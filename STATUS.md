@@ -1167,3 +1167,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-06 S2: bug 181 GPU rerun
 - Sable's 45 ms frame didn't repeat: worst 29 ms over three dashes. Kael's first Lunge 27 ms, 0 compiles.
 - New: the run's last four rows failed with 0 frames, so Kael's later moves never started in that run (40 s, against 136 s for the first). Reads as the check's harness, not a dash failure, because a move with 0 frames never began; not diagnosed. Next: read tools/dash_frames.gd's wait for the next cast at real frame rates.
+
+## 2026-11-06 S2: item 131b started; item 185 noted
+- Sword: running as ext/fix-kael-sword-131b on main's current Kael, because that's the sword the owner plays. 0.60 x its current scale. Kael's unapproved new art (ext/art1-kael-2) is unchanged and already at 0.60 of his height, a different number; the report will give both in metres [alternative: also scale the new art by 0.60, about 0.36 of height, which looks too small].
+- Item 185 reopens bug 181: the owner says a Boki interaction caused the blink. S2's runs were in the Arena without that case in mind, so my frame-rate reading isn't confirmed and may be wrong. The bug 181 fix stays useful for low fps and first-use stalls. S1 has the item; S2's data is in shots-s2/fix-181/data/.
