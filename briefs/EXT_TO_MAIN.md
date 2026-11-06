@@ -1960,3 +1960,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-06 07:10 UTC (S1): HANDOFF S1 READY 741f17f54 (updated)
 - Item 185 (ext/phys-185-boki-dash) added as step 0, the first next step, per INBOX 07:40 UTC; not started on S1. Everything else is unchanged from 8c0bcdee.
+
+## 2026-11-06 (S2): READY: ext/fix-kael-sword-131b 77368bca (item 131b), sword 0.60x on main's Kael, 1.15 m to 0.70 m
+- Clean with main and kit-kael-113b. Before/after: hero-shots-s2 art1/kael/131b/. It now reads as a short sword against a 3.4 m reach: worth a look in play. Kael's new art must be resized before it lands, or this is undone; details in STATUS.
