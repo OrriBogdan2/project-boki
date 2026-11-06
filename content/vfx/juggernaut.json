@@ -2,8 +2,8 @@
 	"palette": {"main": "ff7a1a", "hot": "ffd04a", "char": "2a0c04", "smoke": "3a2a26", "magenta": "ff3df0", "red": "ff3a2a", "wave": "ff9a3a",
 		"gold": "ffc94a", "gold_hot": "ffe39a", "gold_char": "5a3208", "violet": "b06aff", "pink": "ff5ad8", "iron": "8a7058", "steel": "ffd8a0", "heal": "ffd27a"},
 	"anchors": {
-		"blade_tip": {"nodes": ["anchor_blade_tip", "weapon_muzzle"], "gun": [0.0, 0.0, -0.53], "body": [0.3, 1.5, 0.9]},
-		"blade_mid": {"nodes": ["anchor_blade_mid"], "gun": [0.0, 0.0, -0.3], "body": [0.3, 1.3, 0.6]},
+		"blade_tip": {"nodes": ["anchor_blade_tip", "weapon_muzzle"], "gun": [0.0, 0.0, -0.316], "body": [0.3, 1.5, 0.9]},
+		"blade_mid": {"nodes": ["anchor_blade_mid"], "gun": [0.0, 0.0, -0.18], "body": [0.3, 1.3, 0.6]},
 		"hand_chain": {"nodes": ["anchor_chain_hand"], "body": [-0.35, 1.05, 0.25]},
 		"chest": {"nodes": ["anchor_chest"], "body": [0.0, 1.15, 0.0]},
 		"head": {"nodes": ["anchor_head_top"], "body": [0.0, 1.95, 0.0]},

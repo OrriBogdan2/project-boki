@@ -634,8 +634,8 @@
 					0.78,
 					0.42
 				],
-				"size": 0.34,
-				"count": 6,
+				"size": 0.2,
+				"count": 4,
 				"from": 0.3
 			},
 			{
@@ -646,8 +646,8 @@
 					0.9,
 					0.5
 				],
-				"size": 0.16,
-				"count": 8,
+				"size": 0.1,
+				"count": 5,
 				"from": 0.3
 			},
 			{
@@ -681,7 +681,8 @@
 				"size": 0.2
 			}
 		],
-		"weapon_scale": 0.85
+		"weapon_scale": 0.51,
+		"grip_l": [0.0, 0.0, 0.07]
 	},
 	"dredge": {
 		"painted": {"gloss": 0.0, "sheen": 0.0, "desat": 0.1, "light_neutral_warm": 0.5, "top_light": 0.12, "rim_far": 0.3, "rim_far_color": [0.72, 0.95, 0.72]},
