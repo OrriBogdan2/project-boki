@@ -43,3 +43,9 @@ Model: Nano Banana Pro (no seed exposed). Exploration at 2K.
 - The backpack design is canon: copper plate with two coil springs, black cables and a glowing pink bolt emblem.
 - Alternates: `explorations/master_sheet_emblem_alt.jpg`, `explorations/master_sheet_boltcut.jpg`.
 - The bolt-cutout top is now a skin candidate alongside the bolt-neckline one.
+
+## Turnaround + portrait (Nov 6, 16:32 ET)
+- `ryzz_v2_turnaround.jpg`: A-pose; front, 3/4, side and back; colour-painted; legs and backpack consistent. Approved for modelling.
+- `ryzz_v2_portrait.jpg` ("Static Bubble", 1:1): she pokes a lightning-filled bubblegum bubble with wide fake-innocent eyes.
+- Splash pick: "Who, Me?" (market version, `explorations/splash_who_me_market_square.jpg`). It was generated square by mistake, so a 16:9 extension is pending.
+- Alternates in explorations: storm surfer x2, lightning rod x2, who-me (city), oops portraits x2, static bubble alt.
