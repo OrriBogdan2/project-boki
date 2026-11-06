@@ -37,7 +37,7 @@ def build(cfg: config.Config) -> Matchmaker:
 
 def serve(cfg: config.Config) -> None:
     core = build(cfg)
-    httpd = make_server(core, cfg.http_host, cfg.http_port)
+    httpd = make_server(core, cfg.http_host, cfg.http_port, cfg.feedback_path)
     stop = threading.Event()
     ticker = threading.Thread(target=run_ticker, args=(core, cfg.tick_s, stop), name="ticker", daemon=True)
     ticker.start()

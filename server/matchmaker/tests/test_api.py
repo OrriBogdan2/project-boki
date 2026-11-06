@@ -1,5 +1,7 @@
 """The HTTP endpoints as the client sees them, on a fake launcher."""
 import json
+import os
+import tempfile
 import threading
 import unittest
 import urllib.error
@@ -15,7 +17,9 @@ class ApiTest(unittest.TestCase):
     def setUpClass(cls):
         cls.clock = Clock()
         cls.core = make_core(cls.clock)
-        cls.httpd = make_server(cls.core, "127.0.0.1", 0)
+        cls.tmp = tempfile.mkdtemp()
+        cls.fb = os.path.join(cls.tmp, "fb", "feedback.jsonl")
+        cls.httpd = make_server(cls.core, "127.0.0.1", 0, cls.fb)
         threading.Thread(target=cls.httpd.serve_forever, daemon=True).start()
         cls.base = f"http://127.0.0.1:{cls.httpd.server_address[1]}"
 
@@ -33,6 +37,21 @@ class ApiTest(unittest.TestCase):
                 return resp.status, json.loads(resp.read())
         except urllib.error.HTTPError as e:
             return e.code, json.loads(e.read())
+
+    def test_feedback_stored_and_validated(self):
+        ok = {"version": VERSION, "player": "Ana", "scores": {"combat": 7, "boki": 9, "onboarding": 4, "look": 10},
+              "note": "fun", "minutes_played": 12.5}
+        self.assertEqual(self.call("POST", "/feedback", ok), (200, {"ok": True}))
+        with open(self.fb, encoding="utf-8") as f:
+            lines = f.read().splitlines()
+        self.assertEqual(json.loads(lines[-1])["scores"]["boki"], 9)
+        bad = dict(ok, scores={"combat": 11, "boki": 1, "onboarding": 1, "look": 1})
+        self.assertEqual(self.call("POST", "/feedback", bad)[0], 400)
+        self.assertEqual(self.call("POST", "/feedback", raw=b"{nope")[0], 400)
+        big = dict(ok, note="x" * 3000)
+        self.assertEqual(self.call("POST", "/feedback", big)[0], 400)
+        with open(self.fb, encoding="utf-8") as f:
+            self.assertEqual(len(f.read().splitlines()), len(lines))   # rejects store nothing
 
     def test_health(self):
         status, out = self.call("GET", "/health")

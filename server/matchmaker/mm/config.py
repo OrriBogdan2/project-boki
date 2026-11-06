@@ -28,6 +28,7 @@ class Config:
     ready_timeout_s: float = 30.0         # the server must print its ready line within this or is killed
     tokens_dir: str = "/run/boki"
     tick_s: float = 0.5
+    feedback_path: str = "/var/lib/boki/feedback.jsonl"   # POST /feedback appends JSONL here
 
     def modes(self) -> dict:
         """Queue -> match shape."""
@@ -68,4 +69,5 @@ def load(env_file: str = ENV_FILE, environ: dict = None) -> Config:
     cfg.token_ttl_s = float(values.get("TOKEN_TTL_S", cfg.token_ttl_s))
     cfg.ready_timeout_s = float(values.get("READY_TIMEOUT_S", cfg.ready_timeout_s))
     cfg.tokens_dir = values.get("TOKENS_DIR", cfg.tokens_dir)
+    cfg.feedback_path = values.get("FEEDBACK_PATH", cfg.feedback_path)
     return cfg

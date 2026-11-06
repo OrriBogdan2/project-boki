@@ -126,6 +126,7 @@ WorkingDirectory=/opt/boki
 EnvironmentFile=/etc/boki/matchmaker.env
 RuntimeDirectory=boki
 RuntimeDirectoryMode=0700
+StateDirectory=boki
 ExecStart=/usr/bin/python3 /opt/boki/matchmaker/matchmaker.py --env-file /etc/boki/matchmaker.env
 Restart=always
 RestartSec=3

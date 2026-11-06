@@ -3,6 +3,7 @@ import json
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+from . import feedback
 from .core import Matchmaker
 from .log import log
 
@@ -10,7 +11,7 @@ MAX_BODY = 4096          # bytes; a queue request is a few names
 STATUS = {"version": 409, "mode": 400, "bad_request": 400}
 
 
-def make_server(core: Matchmaker, host: str, port: int) -> ThreadingHTTPServer:
+def make_server(core: Matchmaker, host: str, port: int, feedback_path: str = "/var/lib/boki/feedback.jsonl") -> ThreadingHTTPServer:
     """An HTTP server bound to host:port (port 0 picks a free one) answering with `core`."""
 
     class Handler(BaseHTTPRequestHandler):
@@ -25,6 +26,8 @@ def make_server(core: Matchmaker, host: str, port: int) -> ThreadingHTTPServer:
             self._reply(404, {"error": "not_found"})
 
         def do_POST(self):
+            if self.path == "/feedback":
+                return self._feedback()
             if self.path != "/queue":
                 return self._reply(404, {"error": "not_found"})
             body = self._json_body()
@@ -44,10 +47,22 @@ def make_server(core: Matchmaker, host: str, port: int) -> ThreadingHTTPServer:
             core.cancel(ticket)
             self._reply(200, {"state": "gone"})
 
-        def _json_body(self):
+        def _feedback(self):
+            body = self._json_body(feedback.MAX_FEEDBACK)
+            reason = feedback.validate(body)
+            if reason:
+                return self._reply(400, {"error": "bad_request", "field": reason})
+            try:
+                feedback.store(feedback_path, body)
+            except OSError as e:
+                log("feedback_error", error=repr(e))
+                return self._reply(500, {"error": "store_failed"})
+            self._reply(200, {"ok": True})
+
+        def _json_body(self, limit: int = MAX_BODY):
             try:
                 n = int(self.headers.get("Content-Length", "0"))
-                if n > MAX_BODY:
+                if n > limit:
                     return None
                 body = json.loads(self.rfile.read(n) or b"{}")
                 return body if isinstance(body, dict) else None
