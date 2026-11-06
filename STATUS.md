@@ -1,5 +1,18 @@
-2026-11-06T16:24:47Z
+2026-11-06T17:13:55Z
 
+PHYSICS LANE (fresh session replacing S1; worktree /home/boki/lanes/physics-20261106-1607). S1 below is retiring (INBOX 7822453b).
+| item | branch | sha | state |
+|---|---|---|---|
+| 185 Boki never change a dash | ext/phys-185-boki-dash | eae133e9 | pushed, merge-tree clean on main; full suite running, READY after |
+| 162/162b air limits | ext/phys-162-air-limits | ea1952f0 | pushed, targeted checks green; conflicts with 185 only in tools/check_registry.gd |
+| 149 wall hop | ext/phys-149-wall-bounce | 89879b96 | pushed, targeted checks green; adds fx "whop" (no Net.VERSION bump) |
+| 150 parity | briefs/supervive-data/PHYSICS_PARITY.md | 3734c076 | step 1 done; step 3 next (ground decel, dash carry) |
+| 151, 163 | - | - | queued |
+- 185 root cause: the 129 rider removal never shipped. Lunowl's Moon Blink turned travel() dashes (Sable's dash, Kael's Lunge) into a teleport, and Echo Step repeated them. New --boki-dash-check: every species vs the no-Boki baseline, step by step.
+- Plan: one integrated READY branch (185+162+149) with one full suite, per the owner preference.
+- Left for the Boki lane (reserved files): KinSpec.dodge_rider, KinText.rider, the KinParts dodge_charges row (docs/DEBT.md).
+
+---- S1 (retiring) ----
 FOR EXT (owner item queue): READY reports go here as each branch lands.
 MERGED to main (seen 09:40 UTC Nov 5): ext/perf-94c @ 3338363c (items 103 + 94; ONE branch = main c204a6d5 + perf-94 + perf-94b; merges clean). Full report in EXT_TO_MAIN 07:09 UTC (201bab4c). Supersedes perf-94 and perf-94b. Main's new breaker/dredge/ryzz/sable GLBs re-decimated to ~14k. Final-merge checks green; --hitch-check fails on this branch AND plain main (worst judged frame 0.36 vs 0.58 of budget; the rest is lazily built kit FX shaders). S5 answer: Hem 55b's AimKit material is now warmed (8792c4f2). Close-up shots on ext/hero-shots perf94c/ (8f45591).
 PUSHED (not for direct merge): ext/perf-94b @ c8b131b7 (stacked on perf-94; +451/-18, 17 files) - item 94 follow-up. Both perf-94 and perf-94b now CONFLICT with main 8f7a33d2 (59 commits later; new art for breaker/dredge/ryzz/sable .glb + hud.gd). S1 is building ONE integrated branch ext/perf-94c (main + perf-94b, main's new GLBs re-decimated); merge THAT when posted, not perf-94/94b.
