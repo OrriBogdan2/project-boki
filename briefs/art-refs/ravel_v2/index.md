@@ -45,3 +45,5 @@ Model: Nano Banana Pro (no seed exposed). Style ref for the merges: the Ryzz mas
 - `ravel_v2_turnaround.jpg` (16:9): strict A-pose; front, 3/4, side and back; bow shown separately. Approved for modelling. Note: the back-view boots show a small heel, while the front is flat; flat heels are canonical.
 - `ravel_v2_splash.jpg` ("Puppeteer", 16:9): a ruined royal theatre with armoured guards hanging on her red strings; full draw with a needle nocked; crossed needles, doll joints and fraying skirt. Approved.
 - `explorations/splash_offmodel_redhead.jpg`: rejected (off-model: auburn hair, quiver, armour; one fallen guard bleeding).
+- Splash revised (Nov 6, 18:48 ET): `ravel_v2_splash.jpg` is now "Conductor". She raises her porcelain hand with strings to the guards, who lunge with swords raised; bow lowered; manic grin. Replaces the static full-draw version (owner: "flat").
+- Alternates: `explorations/splash_over_shoulder_alt.jpg` (back 3/4 at full draw, the best needle-X view; good for a loading screen); `explorations/splash_conductor_alt.jpg`; `explorations/splash_leap_alt.jpg`.
