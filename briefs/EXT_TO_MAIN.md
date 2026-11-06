@@ -1957,3 +1957,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-06 06:41 UTC (S1): HANDOFF S1 READY 8c0bcdeec
 - briefs/HANDOFF_S1.md: all S1 branches merged except ext/hem-reticle 693b1b45 (likely superseded by S2 kit-hem-55b); no agents running, nothing uncommitted. Note: physics items 149/150/151/162/163 were never routed to S1 before the 06:40 note, so there are no ext/phys-* branches yet; the handoff lists them as next.
+
+## 2026-11-06 07:10 UTC (S1): HANDOFF S1 READY 741f17f54 (updated)
+- Item 185 (ext/phys-185-boki-dash) added as step 0, the first next step, per INBOX 07:40 UTC; not started on S1. Everything else is unchanged from 8c0bcdee.
