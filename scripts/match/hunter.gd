@@ -2158,7 +2158,8 @@ func sim(dt: float) -> void:
 	var want := atan2(-ad.x, -ad.y)
 	if roll_t > 0.0 and not (ak and ak.aims_in_dash()):
 		want = atan2(-roll_dir.x, -roll_dir.y)
-	face = lerp_angle(face, want, minf(1.0, dt * 20.0))
+	if not (ak and ak.face_locked()):
+		face = lerp_angle(face, want, minf(1.0, dt * 20.0))
 
 func pad_launch(to: Vector3) -> void:
 	var d := Vector2(to.x - pos.x, to.z - pos.z).length()
@@ -2329,7 +2330,7 @@ func _physics(dt: float) -> void:
 	elif MergeKit.rising(self):
 		vel.y = MergeKit.rise_vy(self)      # the ultimate's climb (Thunderhead)
 	elif roll_t > 0.0 and not grounded and not dropping:
-		vel.y = 0.0          # a dash in the air holds your height for its length
+		vel.y = ak.dash_vy(dt) if ak else 0.0          # an air dash holds your height (a skate sinks)
 	elif not grounded:
 		vel.y = maxf(vel.y - H_GRAV * dt, -HunterMove.fall_cap(self))
 	# a person walks straight off an island's edge and falls (then the glider and the abyss rules
@@ -3212,6 +3213,7 @@ func _anim_state(stretch: float) -> void:
 	if ak and ak.anim_id != "":
 		s["kmove"] = ak.anim_id                # the kit's own full-body move (HunterAnim.KMOVES)
 		s["kmove_t"] = m.time - ak.anim_at
+	if ak and ak.face_locked(): s["statue"] = true       # frozen: no idle sway, glance or fidget
 	MergeKit.anim_state(self, s)
 	KinDowned.anim_state(self, s)
 	s["hit_t"] = m.time - hurt_at

@@ -565,6 +565,8 @@ func update(dt: float, s: Dictionary) -> void:
 	base_k = _ease(base_k, 1.0 if base_p >= 0.0 else 0.0, 6.0, dt)
 	stun_k = _ease(stun_k, 1.0 if stun and not downed else 0.0, 8.0, dt)
 	var still := (1.0 - r1) * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k)
+	if s.get("statue", false):
+		still = 0.0       # a statue (Rimelock): no sway, breath, glance or fidget
 	if moving or not grounded or fired < 1.0 or rolling or downed:
 		idle_t = 0.0
 	else:
