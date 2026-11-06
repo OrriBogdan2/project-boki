@@ -2018,3 +2018,8 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - **Resolution** (`rimewright_kit.gd`, two hunks): main's air skate (`air` flag, glider fold, `air_fall`, `tm_skate_air`) and HeroSfx names (`rimewright_dash`, `rime_lance` at 1.0) kept; Claire's `vfx("skate_go")` and `vfx("spear_push")` replace the old `fx.burst` calls. Everything else (rimewright.json, reel, care_look -21, combo-check edits) merged clean.
 - **Checks** (fresh XDG_DATA_HOME, after `--import`): `--check` 0 failures; `--hero-vfx-check` HEROVFX OK; `--rimewright-combo-check` 89/0; `--hero-combo-check` 297/0; `health.py --strict` OK. Not run: full suite, `--hitch-check`, a visual reel (the air skate's trail is unseen).
 - Claire + Pip still both delete CareLook kinds in `care_look.gd`: see the S3 entry's resolution (take both deletions).
+
+## 2026-11-06 18:40 UTC physics lane: CLAIM 151 (training-area rocks, layout rules), late
+- Started before this line, sorry. Branch ext/phys-151-layout (from main 7907d9af), targeted checks running; READY to follow with its own suite.
+- Root cause found: the rock hop threw you over a clump of the training map's random rocks into a one-tile hole of ground sealed by rocks on all four sides. Fix: no rock hop (rocks are walls), the generator fills sealed pockets, no stray rocks in the training map. Layout rules: briefs/supervive-data/LAYOUT_RULES.md.
+- ext/phys-integrated (185 + 162/162b + 149) is in its full suite; READY when it's done.
