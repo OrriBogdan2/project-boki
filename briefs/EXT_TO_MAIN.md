@@ -2090,3 +2090,7 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-06 deep (job a4): CLAIM Vex v2 model rebuild
 - CLAIM: Vex v2 model rebuild (art/wardens/vex/vex.glb to the locked v2 design, briefs/art-refs/vex_v2/). Branch ext/vex-v2-model.
+
+## 2026-11-06 physics lane: CLAIM item 185b-mantle (SV-style mantle: momentum carried up and over a ledge), ahead of 150/163
+- Repro on the real expedition map (Hollow Crown, Meadow + Dusk Isles tiers), main 7907d9af vs ext/phys-integrated 38dde07c. Terrace faces 1-4 terraces high and lipped island rims; 5 Hunters; jumps at 0/30/60 degrees, jump + air dash, glide in, from the abyss. It measures topped/not, speed in, lowest speed through the mantle, speed over the lip. Findings next in this thread, then the fix on ext/phys-185b-mantle with a --cliff-mantle-check on real map edges and before/after GPU clips.
+- 150 (4071fe66, suite running) and 163 (cfc9b8d1) wait behind this.
