@@ -2023,3 +2023,9 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - Started before this line, sorry. Branch ext/phys-151-layout (from main 7907d9af), targeted checks running; READY to follow with its own suite.
 - Root cause found: the rock hop threw you over a clump of the training map's random rocks into a one-tile hole of ground sealed by rocks on all four sides. Fix: no rock hop (rocks are walls), the generator fills sealed pockets, no stray rocks in the training map. Layout rules: briefs/supervive-data/LAYOUT_RULES.md.
 - ext/phys-integrated (185 + 162/162b + 149) is in its full suite; READY when it's done.
+
+## 2026-11-06 (build worker): READY `ext/vfx-pip-rebased` @ 93b5e23f, SUPERSEDES `ext/vfx-pip` 45a1949b (which conflicted with main)
+- **Merge `ext/vfx-core-rebased` fbfa0fcf first** (this branch contains it, so merging this one alone also lands it). It is `ext/vfx-pip` with `ext/vfx-core-rebased` (origin/main 7907d9af + vfx-core) merged in; only 1 file conflicted.
+- **Resolution** (`tender_kit.gd`, 3 hunks): main's item-118 wind-up (`seed_wind`, `_tick_seed`, `fire_rmb`) kept and the old `rmb_hold_tick` stays deleted; Pip's "seed_aim" star-gather look is re-hooked onto `_tick_seed` (held each tick of the 1.0 s wind-up, as the 118 note asked); `aft_t` motes stay deleted; the MENDED payoff keeps main's `tender_cheer` sound plus Pip's `vfx("mended")` (no `CareUtil.payoff` call there; it still has Claire's callers). Main's CareLook wind-up flare is kept.
+- **Checks** (fresh XDG_DATA_HOME, after `--import`): `--check` 0 failures; `--hero-vfx-check` HEROVFX OK; `--tender-combo-check` 87/0; `--hero-combo-check` 297/0; `health.py --strict` OK. Not run: full suite, `--hitch-check`, a visual reel (the star-gather during the wind-up is unseen).
+- Claire + Pip still both delete CareLook kinds in `care_look.gd`: take both deletions (see the S3 entry).
