@@ -352,8 +352,8 @@ func _wyrm_at(tt: float) -> Vector3:
 
 ## Embers and ash on the wind, around the squad and in front of the camera.
 func _weather() -> void:
-	embers = _particles(int(140 * fx_k), Color("ffa24a"), Color("ff5a1e"), 0.035, 0.07, 6.0, Vector3(9, 4, 7), Vector3(0.3, 0.9, 0.2))
-	ash = _particles(int(220 * fx_k), Color(0.75, 0.72, 0.72, 0.55), Color(0.55, 0.52, 0.55, 0.35), 0.03, 0.07, 7.0, Vector3(11, 5, 8), Vector3(0, -0.25, 0))
+	embers = _particles(int(140 * fx_k), Color("ffa24a"), Color("ff5a1e"), 0.035, 0.07, 6.0, Vector3(9, 4, 5), Vector3(0.3, 0.9, 0.2))
+	ash = _particles(int(220 * fx_k), Color(0.75, 0.72, 0.72, 0.55), Color(0.55, 0.52, 0.55, 0.35), 0.03, 0.07, 7.0, Vector3(11, 5, 5.5), Vector3(0, -0.25, 0))
 
 func _particles(n: int, c0: Color, c1: Color, s0: float, s1: float, life: float, box: Vector3, lift: Vector3) -> CPUParticles3D:
 	var p := CPUParticles3D.new()
@@ -363,7 +363,7 @@ func _particles(n: int, c0: Color, c1: Color, s0: float, s1: float, life: float,
 	p.local_coords = false
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
 	p.emission_box_extents = box
-	p.position = Vector3(1.0, 2.2, -7.0)
+	p.position = Vector3(1.6, 2.2, -8.5)
 	p.direction = (WIND + lift).normalized()
 	p.spread = 25.0
 	p.initial_velocity_min = WIND.length() * 0.7
@@ -378,6 +378,7 @@ func _particles(n: int, c0: Color, c1: Color, s0: float, s1: float, life: float,
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	m.vertex_color_use_as_albedo = true
 	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	m.albedo_texture = _soft_dot()          # round and soft, never a square
 	if c0.r > 0.9:
 		m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD        # embers glow
 		m.disable_fog = true
@@ -389,6 +390,19 @@ func _particles(n: int, c0: Color, c1: Color, s0: float, s1: float, life: float,
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(p)
 	return p
+
+static var _dot: GradientTexture2D
+static func _soft_dot() -> GradientTexture2D:
+	if _dot == null:
+		var g := Gradient.new()
+		g.set_color(0, Color(1, 1, 1, 1)); g.set_color(1, Color(1, 1, 1, 0))
+		g.add_point(0.45, Color(1, 1, 1, 0.8))
+		_dot = GradientTexture2D.new()
+		_dot.gradient = g
+		_dot.fill = GradientTexture2D.FILL_RADIAL
+		_dot.fill_from = Vector2(0.5, 0.5); _dot.fill_to = Vector2(1.0, 0.5)
+		_dot.width = 32; _dot.height = 32
+	return _dot
 
 ## A hunter glides past on the wind every few seconds (one, re-launched: no hitches).
 func _glider() -> void:
@@ -409,10 +423,10 @@ func _launch_glider() -> void:
 	var near := rng.randf() < 0.5
 	var z := rng.randf_range(-24.0, -18.0) if near else rng.randf_range(-48.0, -34.0)
 	var y := rng.randf_range(4.0, 7.5) if near else rng.randf_range(8.0, 14.0)
-	# out of the haze behind the squad, coming toward us and passing over to the left, so the wing
-	# shows its full span
-	glider["a"] = Vector3(rng.randf_range(20.0, 34.0), y + 6.0, z - 40.0)
-	glider["b"] = Vector3(rng.randf_range(-16.0, -8.0), y - rng.randf_range(1.0, 3.0), z + 14.0)
+	# out of the haze behind the squad, coming toward us and away to the right (never across the
+	# menu or the logo), at an angle so the wing shows its span
+	glider["a"] = Vector3(rng.randf_range(4.0, 10.0), y + 5.0, z - 40.0)
+	glider["b"] = Vector3(rng.randf_range(26.0, 36.0), y - rng.randf_range(1.0, 3.0), z + 12.0)
 	glider["dur"] = rng.randf_range(5.0, 7.0) if near else rng.randf_range(8.0, 10.0)
 	glider["t"] = 0.0
 	var h: Node3D = glider["node"]
