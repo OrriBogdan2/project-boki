@@ -2034,3 +2034,5 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-06 build-spec: READY item 186 audit
 - READY: briefs/BOKI_PLAYER_AUDIT.md on ext/agent-briefs (no code). Cuts: Moon Blink/Swap, all 6 dash riders (still live on main), dodge_charges/glide/move_speed riders. Needs owner review before any cut.
+
+## 2026-11-06 18:50 UTC (feel worker, job 20261106-183002-a4): CLAIM item 187 (Boki-central design proposals -> briefs/BOKI_CENTRAL_PROPOSALS.md), no code
