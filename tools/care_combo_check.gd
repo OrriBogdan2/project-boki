@@ -788,38 +788,60 @@ func tender() -> void:
 			"mm LMB: after a pause the next ember is Empowered (40% further, its own move)",
 			K.stats["emp"] > e0 and K.anim_id == "mm_shot_emp", "emp %d anim %s" % [K.stats["emp"], K.anim_id])
 	step(m, 0.6)
-	# --- Burrseed: hold shows the dotted lane to max range, the coiled pose; release throws
+	# --- Burrseed (item 118): a press, a fixed wind-up, the throw by itself on the aim of that moment
 	K.kind.clear()
 	T.hp = T.max_hp
 	T.root_t = 0.0
-	sc.aim_at(P, T.pos)
+	sc.aim_at(P, P.pos + Vector3(0, 0, -8.0))         # off the foe: the aim at the press misses him
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	var n0: int = _mine(m, P).size()
+	var wind := float(K.rmb_def()["windup"])
+	ok(
+			"mm RMB: not a hold (no hold data), the wind-up is about 1 s, its clip as long",
+			not K.rmb_def().has("hold") and wind >= 0.9 and wind <= 1.0
+			and absf(KMovesCare.length("mm_seed_aim") - wind) < 0.01
+			and not bool(HunterAnim.km_def("mm_seed_aim").get("hold", false)))
 	P.inp["sec"] = true
 	P.inp["sec_hold"] = true
 	step(m, 0.3)
 	var lane: Dictionary = AimKit.entry(P, "rmb")
 	ok(
-			"mm RMB: held, a dotted lane to the seed's full range and the coiled pose",
+			"mm RMB: winding up, a short dotted lane, the coiled pose, half speed",
 			AimKit.shown(P, "rmb")
 			and String(lane.get("kind", "")) == "dotted"
-			and absf(float(lane.get("len", 0.0)) - float(K.rmb_def()["seed"]["range"])) < 0.1
-			and K.anim_id == "mm_seed_aim",
-			"%s len %.1f %s" % [String(lane.get("kind", "")), float(lane.get("len", 0.0)), K.anim_id])
-	ok("mm RMB: nothing leaves while it is held", _mine(m, P).size() == n0)
+			and absf(float(lane.get("len", 0.0)) - float(K.rmb_def()["wind_lane"])) < 0.1
+			and K.anim_id == "mm_seed_aim"
+			and absf(K.move_k() - float(K.rmb_def()["wind_move"])) < 0.01,
+			"%s len %.1f %s k %.2f" % [
+				String(lane.get("kind", "")), float(lane.get("len", 0.0)), K.anim_id, K.move_k()])
+	ok("mm RMB: nothing leaves during the wind-up", _mine(m, P).size() == n0 and K.ch_rmb >= 1.0)
+	# letting go early changes nothing; the flick onto him at the very end is what counts
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
-	var t_stick := -1.0
-	var tt := 0.0
-	while tt < 0.5 and t_stick < 0.0:
+	step(m, 0.3)
+	ok("mm RMB: letting go early does not throw or cancel", K.seed_aim and _mine(m, P).size() == n0)
+	var tt := 0.6
+	while _mine(m, P).size() == n0 and tt < 1.5:
+		if tt >= wind - 0.1:
+			sc.aim_at(P, T.pos)
 		step(m, 1.0 / 60.0)
 		tt += 1.0 / 60.0
-		if K.burrs.size() > 0: t_stick = tt
 	ok(
-			"mm RMB: let go, a fast seed (6 m in under 0.35 s) with the throw move",
-			t_stick > 0.0 and t_stick < 0.35 and K.anim_id == "mm_seed",
-			"stuck at %.2f s, %s" % [t_stick, K.anim_id])
+			"mm RMB: the seed goes by itself at the end of the wind-up (thrown at %.2f s)" % tt,
+			absf(tt - wind) <= 0.05 and K.anim_id == "mm_seed" and not K.seed_aim
+				and not AimKit.shown(P, "rmb"),
+			"%.2f %s" % [tt, K.anim_id])
+	var t_stick := -1.0
+	var ts := 0.0
+	while ts < 0.5 and t_stick < 0.0:
+		step(m, 1.0 / 60.0)
+		ts += 1.0 / 60.0
+		if K.burrs.size() > 0: t_stick = ts
+	ok(
+			"mm RMB: the aim is sampled at the throw: flicked onto the foe, it sticks in under 0.35 s",
+			t_stick > 0.0 and t_stick < 0.35,
+			"stuck at %.2f s" % t_stick)
 	var bid := "burr%d" % int(K.burrs[0]["id"]) if K.burrs.size() > 0 else ""
 	step(m, 0.1)
 	var tele: Dictionary = AimKit.entry(P, bid)
@@ -950,15 +972,42 @@ func tender() -> void:
 	K.drop_holds()
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
-	step(m, 0.2)
+	step(m, float(K.rmb_def()["windup"]) + 0.2)
 	ok(
-			"mm merge: drop_holds ends the Burrseed aim without a throw",
+			"mm merge: drop_holds ends the Burrseed wind-up without a throw",
 			aiming
 			and not K.seed_aim
 			and not K.rmb_down
 			and not AimKit.shown(P, "rmb")
 			and _mine(m, P).size() == n1
 			and K.ch_rmb >= 1.0)
+	# holding the key through it changes nothing: one throw, on time
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	sc.aim_at(P, T.pos)
+	var n2: int = _mine(m, P).size()
+	P.inp["sec"] = true
+	P.inp["sec_hold"] = true
+	var th := 0.0
+	while _mine(m, P).size() == n2 and th < 2.0:
+		step(m, 1.0 / 60.0)
+		th += 1.0 / 60.0
+	step(m, 1.0)
+	P.inp["sec"] = false
+	P.inp["sec_hold"] = false
+	ok(
+			"mm RMB: held down, it goes at the same moment, once (%.2f s)" % th,
+			absf(th - float(K.rmb_def()["windup"])) <= 0.05 and K.ch_rmb < 1.0 and not K.seed_aim)
+	# a stun loses the throw, not the charge
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	K.press_rmb()
+	var n3: int = _mine(m, P).size()
+	step(m, 0.2)
+	P.stun_t = 0.3
+	step(m, 1.2)
+	ok("mm RMB: a stun in the wind-up loses the throw, not the charge",
+			not K.seed_aim and K.ch_rmb >= 1.0 and _mine(m, P).size() == n3)
 	await _free(m)
 	await growth()
 	await burr_ranks()
@@ -1178,7 +1227,7 @@ func _seed_burst(lvl: int) -> float:
 	step(m, 0.3)
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
-	step(m, 1.2)
+	step(m, 1.2 + float(K.rmb_def()["windup"]))
 	var dmg := h0 - T.hp
 	await _free(m)
 	return dmg
