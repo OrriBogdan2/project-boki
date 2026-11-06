@@ -17,7 +17,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 ## How it plays
 
 1. **Quill Rifle** (LMB): a full-auto rifle out to full range. A long string loses half its punch, but a Dazed foe takes 90% more (big gold numbers) and the string doesn't fade on them.
-2. **Burr Charge** (RMB): tap to throw it along your aim. It goes off on the first foe it strikes, or sticks to a wall or the ground at the end of its flight. A cone shows back toward you for 0.9s, then it blasts: damage, a big shove along the cone and Dazed. A hunter shoved into more terrain is stunned and the cooldown drops 40%.
+2. **Burr Charge** (RMB): tap to fire it from your arm-cannon along your aim. It goes off on the first foe it strikes, or sticks to a wall or the ground at the end of its flight. A cone shows back toward you for 0.9s, then it blasts: damage, a big shove along the cone and Dazed. A hunter shoved into more terrain is stunned and the cooldown drops 40%.
 3. **Longneedle** (E): stand still for 0.6s while a wide line narrows to a thin core, then fire a heavy beam through cover and everyone in its line, your view pulled out along it. A Dazed hunter hit is Skewered. Each hunter hit takes 30% off its cooldown. The recoil shoves you back a step.
 4. **Slipstep** (Shift): tap to skid, hold to slide; it goes where you move and you keep shooting. Let go early for part of it back. In the air a tap slides two thirds as far.
 5. **Hot Streak** (passive): a knock gives Slipstep back and heals a quarter of your health. Abilities that land add a little lifesteal (Fever).
@@ -35,7 +35,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 
 ## Tips
 
-- A charge that strikes a foe hurts and Dazes them at once; thrown at a wall it Dazes everyone in the cone.
+- A charge that strikes a foe hurts and Dazes them at once; fired at a wall it Dazes everyone in the cone.
 - Slide sideways while you keep shooting.
 - You stand still while Longneedle charges: use cover, since the beam ignores it.
 
@@ -61,7 +61,7 @@ What the in-game kit card (K) says.
 | Loop | Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts. |
 | Passive: Hot Streak | Hot Streak: knocking a hunter down gives Slipstep back. An ability that lands gives you a little lifesteal for a few seconds. |
 | Dash: Slipstep | Slipstep: tap to skid, hold to slide further; you can shoot the whole time and it goes where you move, not where you aim. |
-| RMB: Burr Charge | Burr Charge: tap to throw it along your aim. A direct hit hurts and Dazes the foe. Where it meets a wall or the ground it blasts a cone back at you, hurting and Dazing everyone in it. |
+| RMB: Burr Charge | Burr Charge: tap to fire it from your arm-cannon along your aim. A direct hit hurts and Dazes the foe. Where it meets a wall or the ground it blasts a cone back at you, hurting and Dazing everyone in it. |
 | E: Longneedle | Longneedle: stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it. |
 | Hunter ultimate: Cinderfall | Cinderfall (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall. |
 | Weapon: Quill Rifle | Full-auto rifle out to full range. Long strings lose punch; Dazed foes take 90% more (big gold numbers). |
@@ -74,7 +74,7 @@ What the in-game kit card (K) says.
 
 **Burr Charge (RMB, 6.5s cooldown).**
 
-- *Tap:* Tap RMB: she throws on the press. The charge flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.
+- *Tap:* Tap RMB: it fires from the launcher on her arm-cannon on the press. The charge flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.
 - *Resource full:* Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer.
 
 **Longneedle (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core, tracking your aim while your view pulls out along it. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
