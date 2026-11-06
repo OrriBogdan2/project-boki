@@ -16,6 +16,7 @@ const SWORD_POSES := [["carried", {}], ["walk", {"vel": 2.0}], ["run", {"vel": 4
 	["Slam wind-up", {"kmove": "jug_slam", "kmove_t": 0.56}], ["Slam", {"kmove": "jug_slam", "kmove_t": 0.7}],
 	["Rampage drive", {"kmove": "jug_dash", "kmove_t": 0.21}], ["Rampage tip", {"kmove": "jug_dash", "kmove_t": 0.38}],
 	["Rampage drag", {"kmove": "jug_dash", "kmove_t": 0.6}], ["Guard", {"kmove": "jug_guard", "kmove_t": 0.36}]]
+const SMOKE_FRAMES := 200
 const HOLDS := ["Lunge hold 0.10", "Lunge hold 0.28", "Lunge hold 0.45", "Lunge hold 1.20"]
 const POMMEL := Vector3(0, 0, 0.155)     # kael.glb's weapon mesh: pommel end, tip, guard (model units)
 const TIP := Vector3(0, 0, -0.62)
@@ -43,15 +44,17 @@ func run(main: Node, mode: String = "check") -> void:
 	tree.quit()
 
 func _hold(i: int, st: Dictionary) -> void:
-	var an: HunterAnim = anims[i][0]
+	for k in 60:
+		_step(i, st)
+
+func _step(i: int, st: Dictionary) -> void:
 	var h := anims[i][1] as Node3D
 	var fwd := Vector3(-sin(h.rotation.y), 0, -cos(h.rotation.y))
-	for k in 60:
-		var s := {"fired": 99.0, "face": h.rotation.y, "grounded": true}
-		s.merge(st)
-		if st.has("vel"):
-			s["vel"] = fwd * float(st["vel"])
-		an.update(1.0 / 60.0, s)
+	var s := {"fired": 99.0, "face": h.rotation.y, "grounded": true}
+	s.merge(st)
+	if st.has("vel"):
+		s["vel"] = fwd * float(st["vel"])
+	(anims[i][0] as HunterAnim).update(1.0 / 60.0, s)
 
 func _sword(h: Node3D) -> MeshInstance3D:
 	return h.get_node_or_null("Rig/Torso/Aim/Gun/" + WardenGlb.WEAPON) as MeshInstance3D
@@ -116,12 +119,14 @@ func _hand_off(sk: Skeleton3D, weapon_x: Transform3D, bone: String) -> float:
 
 func _posed(names: Array, yaw: float) -> Array:
 	var row := _row("juggernaut", names.size())
-	await _settle(30, false)      # (the smoke fills in)
 	for i in row.size():
 		(row[i] as Node3D).rotation.y = yaw
-		for p in SWORD_POSES:
-			if p[0] == names[i]:
-				_hold(i, p[1])
+	for k in SMOKE_FRAMES:      # (held there: a new emitter's first puffs sit in a dark ball at the hilt)
+		for i in row.size():
+			for p in SWORD_POSES:
+				if p[0] == names[i]:
+					_step(i, p[1])
+		await tree.process_frame
 	return row
 
 func _shots(out: String) -> void:
