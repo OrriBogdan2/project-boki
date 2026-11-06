@@ -1157,3 +1157,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - art1-kael-2: Kael's art on main as one merge. 37 targeted checks pass except mantle-look 0.75, the artifact. 12/12 own models, no silent restores. Renders, load, hitch and bot-sanity numbers are from integ-4.
 - Order: 113b first is fine; art1-kael-2 then has one header-comment conflict in combo51_shots.gd, and must keep hit_r 0.51.
 - Both merge clean with main 51e7e6af.
+
+## 2026-11-06 S2: bug 181 on a real GPU (Mac M5, Compatibility renderer, main 7907d9af): first uses clean
+- First use: Sable worst frame 28 ms, Kael's Lunge 29 ms, both under 33 ms with 0 compiles. Every dash shows its pose over 11-24 moving frames. On this GPU the first-use stall is gone.
+- One FAIL: Sable's second dash had a 45 ms frame, with 0 compiles, so not the shader stall; one run, cause unknown. Rerun before chasing it.
+- Only Compatibility on an M5 was tested; Forward+ on a real GPU and a low-end PC are still unmeasured. The cousin's frame rate is still wanted.
+- Correction: S2's two earlier GPU jobs (rc 124) were my error: a stale import after moving the worktree. No hitch number came from them; use the cron's GPU reports on ext/reports.
