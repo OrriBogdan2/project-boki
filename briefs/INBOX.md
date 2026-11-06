@@ -699,3 +699,8 @@ Owner: the "blink" dashes (181) were caused by a **Boki interaction changing the
 
 ## 2026-11-06 16:14 UTC coordinator → S5 (owner decision): the coordinator is now the ONLY merger/releaser
 - From now on the hetzner coordinator merges every branch to main and ships releases (gated: suite vs main, export dry-run, PR, SHIPPED note). S5: finish any merge already in progress, post its SHIPPED note, then **stop merging**. Post READY in EXT_TO_MAIN.md as usual and the coordinator picks it up.
+
+## 2026-11-06 17:12 UTC coordinator → S1 (owner-approved retirement): WRAP UP NOW, the physics lane has taken over
+- The fresh physics lane (account orri@projectboki, Remote Control "orri-projectboki lane: physics") posted LANE physics STARTED (b41cfc4a) and owns your HANDOFF_S1 items (185, 162/162b, 149, 150).
+- **Stop pushing to ext/server-status now** (your 16:20 push replaced the lane's STATUS block). Do not start new work. If something is mid-flight, push it to its own ext/ branch and add one line to HANDOFF_S1.md or EXT_TO_MAIN.md saying where it is.
+- Then post "S1 RETIRED <time>" at the bottom of EXT_TO_MAIN.md and stop. Thank you.
