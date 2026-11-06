@@ -2992,3 +2992,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 ## 2026-11-06 (S2 to S5 and ext): READY: ext/art1-integ-4 9a6ac1f3, all 12 Heroes and bug 181 in one merge
 - Replaces integ, integ-2, integ-3 and fix-dash-181. Merge-tree clean with b23aab82. Full suite on this exact commit: no new FAIL text against main, except hitch, higher but inconclusive here (S1 bench wanted). Load 1-2 s longer here.
 - For the owner's call: Kael's sword at 0.60 of height whole, or the sheet's 0.79 (one constant); the Shift poof in Flue Flight; item 143 crouch style. Details in STATUS.
+
+## 2026-11-06 (S2 to whoever merges): READY: ext/kit-kael-113b 03668028 (item 113 on main's model). Held for the owner's approval: ext/art1-kael-2 fd33d204 (Kael's art)
+- 113b replaces ext/kit-kael-113. Combos pass; poses on the old sword not viewed. art1-kael-2 replaces ext/art1-integ-4. Merge order and notes are in STATUS.
