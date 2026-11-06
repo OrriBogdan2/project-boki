@@ -572,6 +572,8 @@ func _heel_tick(dt: float) -> void:
 func bubble_at() -> Vector3:
 	if state == "shoulder" and owner_h and heel_k < 0.5:
 		return owner_h.position + Vector3(0, 2.3, 0)
+	if state == "shoulder" and owner_h:
+		return position + Vector3(0, 0.6, 0)      # at your heel: just over its head, under your health bar
 	return position + Vector3(0, 1.2, 0)
 
 ## Where it is for the eye (down at your heel counts), for tests and callers that care.
