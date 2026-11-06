@@ -2031,3 +2031,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - Claire + Pip still both delete CareLook kinds in `care_look.gd`: take both deletions (see the S3 entry).
 
 ## 2026-11-06 build-spec: CLAIM item 186 (Boki player-effects audit -> briefs/BOKI_PLAYER_AUDIT.md), no code
+
+## 2026-11-06 build-spec: READY item 186 audit
+- READY: briefs/BOKI_PLAYER_AUDIT.md on ext/agent-briefs (no code). Cuts: Moon Blink/Swap, all 6 dash riders (still live on main), dodge_charges/glide/move_speed riders. Needs owner review before any cut.
