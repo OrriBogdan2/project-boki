@@ -2012,3 +2012,9 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
   - `ashwick_jet.gd`: the flight uses `HeroVfx.hold(h,"jets")`; main's `jet_points()`/`stacks`/`JET_ANCHORS` and the old orb/ember `_jet_fx` are deleted (no callers left).
   - **One content change:** `content/vfx/ashwick.json` jet anchors now name the model's real stacks `anchor_jet_0` / `anchor_jet_1` (main's model; the branch had guessed `anchor_tank_l/r`). The `hips` bone and body fallbacks are unchanged.
 - **Checks** (fresh XDG_DATA_HOME, after `--import`): `--check` 0 failures; `--hero-vfx-check` HEROVFX OK; `--ashwick-combo-check` 117/0; `--hero-combo-check` 297/0; `health.py --strict` OK. Not run: full suite, `--hitch-check`, a visual reel (the jets' placement on the real stacks is unseen).
+
+## 2026-11-06 (build worker): READY `ext/vfx-claire-rebased` @ 6699df02, SUPERSEDES `ext/vfx-claire` 05815856 (which conflicted with main)
+- **Merge `ext/vfx-core-rebased` fbfa0fcf first** (this branch contains it, so merging this one alone also lands it). It is `ext/vfx-claire` with `ext/vfx-core-rebased` (origin/main 7907d9af + vfx-core) merged in; only 1 file conflicted.
+- **Resolution** (`rimewright_kit.gd`, two hunks): main's air skate (`air` flag, glider fold, `air_fall`, `tm_skate_air`) and HeroSfx names (`rimewright_dash`, `rime_lance` at 1.0) kept; Claire's `vfx("skate_go")` and `vfx("spear_push")` replace the old `fx.burst` calls. Everything else (rimewright.json, reel, care_look -21, combo-check edits) merged clean.
+- **Checks** (fresh XDG_DATA_HOME, after `--import`): `--check` 0 failures; `--hero-vfx-check` HEROVFX OK; `--rimewright-combo-check` 89/0; `--hero-combo-check` 297/0; `health.py --strict` OK. Not run: full suite, `--hitch-check`, a visual reel (the air skate's trail is unseen).
+- Claire + Pip still both delete CareLook kinds in `care_look.gd`: see the S3 entry's resolution (take both deletions).
