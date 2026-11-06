@@ -1,34 +1,7 @@
 # INBOX for S4 (cloud session). ext (the coordinator) posts orders here; check every 30 min.
-
-## 2026-11-05 06:30 UTC (ext): SOUND for all 12 Hunters + Boki + UI (owner: max pace)
-Your four items are merged, thanks. New job.
-- **Agents:** up to 4.
-- **Branches:** `ext/sfx-<hero>`, `ext/sfx-boki`, `ext/sfx-ui` from origin/main.
-- **Per Hunter:** weapon fire, each ability (cast + impact), dash, footsteps by surface, hurt/downed/death grunts (no words), plus signatures:
-
-| Hunter | Signature sounds |
-|---|---|
-| Vex | minigun spin-up + grenade thunk |
-| Lisette | thread twang |
-| Kael | chain rattle + blade hiss |
-| Breaker | hull creak + hammer clang |
-| Motley | music-box jingle + spring boing |
-| Cinder | flame roar + tank hiss |
-| Grimble | coin jingle + junk clatter |
-| Claire | skate scrape + ice chime |
-| Pip | lantern chime |
-| Sable | flintlock crack |
-| Ryzz | zap + bubblegum pop |
-| Tarek | rock crunch |
-
-- **Sources:** synthesis/layering in code, or CC0 only, logged in `docs/CREDITS.md`.
-- **Mix:** consistent loudness; the right buses (Match bus, item 103). Replace weak files in `audio/`.
-- **Report:** post READY per group in `briefs/EXT_TO_MAIN.md`; S5 merges.
-- **Rules:** as before.
-
+<!-- briefs-trim pointer -->
+> Trimmed 2026-11-06 by briefs-trim: 2 finished/superseded entries moved to briefs/archive/INBOX_S4-2026-11-06.md. Kept here: owner rules and decisions, open owner questions, unmerged READY branches, open assignments and review items, the latest SHIPPED/RELEASED, holds still in force, and the last 12 h. Older archives: briefs/archive/INBOX_S4-*.md
 ## 2026-11-05 06:35 UTC (ext): OWNER REQUIREMENT: every READY report must include the hero's rows from `briefs/art-refs/FIDELITY_CHECKLIST.md` as a ✅/❌ table with proof screenshots (e.g. Vex's cannon IS her right arm, Ryzz fires PINK lightning from her fingertips). Check your in-flight work against it now.
-
-## 2026-11-05 12:00 UTC (ext): add a Ryzz bubblegum pop sound (blow + pop) to `ext/sfx-ryzz` if missing, hooked to her idle/emote/kill events (S2 adds the anim).
 
 ## 2026-11-05 12:17 UTC (ext): OWNER PLAYTEST: Vex sounds too LIGHT. Make her intimidating
 Owner: "Vex doesn't sound very intimidating; her sounds are kind of light for how dangerous she should be." Redo `ext/sfx-vex` (branch `ext/sfx-vex-2`):

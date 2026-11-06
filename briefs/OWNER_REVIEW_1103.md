@@ -1,6 +1,7 @@
 # Owner playtest review, 2026-11-03 (sync75 on his PC). Running list; more items will be added
+<!-- briefs-trim pointer -->
+> Trimmed 2026-11-06 by briefs-trim: 11 finished/superseded entries moved to briefs/archive/OWNER_REVIEW_1103-2026-11-06.md. Kept here: owner rules and decisions, open owner questions, unmerged READY branches, open assignments and review items, the latest SHIPPED/RELEASED, holds still in force, and the last 12 h. Older archives: briefs/archive/OWNER_REVIEW_1103-*.md
 Each item says which branch fixes it. Build on main sync75 or later. Use Sonnet. Keep fixes small, each with a check.
-
 ## 1. Venator's grenade (kit fix → ext/kitdata-vireo-venator, or a new ext/fix-venator-nade from main)
 - **On a direct hit to a hunter:** it damages them and applies the damage-taken debuff (Dazed: they take more damage). It does NOT need to explode in a cone on a person, but it must hurt and debuff. Today it reads as passing through and only hitting walls.
 - **On a wall or the ground:** it explodes in the visible cone as now, and **everyone hit by the cone also gets the same debuff**.
@@ -12,11 +13,6 @@ Each item says which branch fixes it. Build on main sync75 or later. Use Sonnet.
 - Ruins or rubble decoration can stay only if it has **no collision** for projectiles, or is clearly big enough to read as a wall.
 - Asserts: no wall or obstacle component smaller than N tiles exists (the check prints any it finds); --drop-check, --extract-check, --cover-check and --bot-sanity-check still pass.
 - Screenshots: before and after of the training area and two Hollow Crown spots.
-
-## 3. HUD ability bar: Merge shows on R, and there's no X ultimate tile (MAIN, reserved boki_hud.gd plus hud slots)
-- In the owner's build (sync75), the bottom bar shows the Merge slot labelled **R**, and **no tile for the hunter's ultimate on X**. R is reload now. Merge is on T until the C-into-G pass, then on C. The ult is on X.
-- Fix: the Merge slot reads `Settings.key_cap("ultimate")`. Add an X ultimate tile in the hunter's own bar, beside E/Shift: the ult icon, a level-6 lock before then, a cooldown sweep, and `key_cap("hunter_ult")`. Drop `BokiHud.r_slot` from the left bar if the right-side Boki box (ext/equal-loadout GripHud) already shows Merge.
-- The round-2 reviewer flagged the missing X tile too. Assert in --hudref-check or --keybind-check that every shown key label comes from key_cap, and that an X tile exists for every hunter.
 
 ## 4. Venator's Slipstep shows a fake "explosion" (kit fix, same branch as item 1)
 - At slide start, scripts/arch/kits/gunslinger_kit.gd (~lines 229–236) draws two expanding rings and a scorched disc at the start point. That's purely cosmetic, with no damage, but it reads like an explosion, and the tooltip says nothing about it. The owner was confused.
@@ -364,12 +360,6 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Every hunter has a ground circle under them whose radius equals their hitbox, in team colour (it's gameplay info, so it fits the ground-shape rule). Reuse the existing under-hunter ring; just drive its size from hit_r.
 - Assert: every archetype's hit_r is within the 0.85–1.15 band; the drawn circle radius equals hit_r; hit tests use hit_r.
 
-## 47. Dash / stamina bar: a proper fill-up UI (owner asked, 16:58 UTC; spec is ext's default until the owner adds notes)
-- Today: dash charges are small yellow pips under the health bar over the hunter (hud_plate.gd) plus dash_strip.gd. They pop on and off; there's no visible refill.
-- Build it like the source's readable stamina bar, in our own style: a segmented bar right under the health bar over the hunter, one segment per dash charge; each spent segment visibly **fills back up** (smooth sweep over its recharge time); a short bright flash + soft tick sound when a segment completes; spent segments dimmed, not hidden; a long/air dash shows its own state (e.g. the bar tints cool blue while the air dash is on cooldown); a gentle shake/red flash when you press dash with no charge. Same component in the bottom-left HUD block and for teammates (smaller). Read the values from the kit/class data, never hard-coded.
-- Files: hud_plate.gd / dash_strip.gd / hud.gd are main's UI files: build the bar as a new component file (e.g. scripts/ui/stamina_bar.gd) with wiring-only edits, or hand it to main if wiring is more than a few lines.
-- Checks: bar segments = charges for every hunter; fill fraction matches the recharge timer; flash fires on completion. Screenshots: a 6-frame strip of dash, dash, refill, refill-complete flash, empty press.
-
 ## 48. Bjorn's ult: he's only planted for the wind-up and slam, then moves while the fissure erupts (owner asked to confirm, 17:19 UTC)
 - Footage check (ext, hero-ref bjorn.md, frames f25–f49 of the ult clip at 10 fps): Oath is planted for the wind-up and slam only (f25–f31, ~0.6 s). From the slam onward, while the fissure races down the lane and the cells erupt (~0.8 s more) and the scar lingers, he shifts position: he's free to move. Nothing in the data says he's slowed after the slam.
 - Make ours match: root only during the wind-up + slam (~0.4 s wind-up, slam on ~0.6 s), then release him to full movement while the lane erupts. If ours currently holds him for the whole eruption or slows him, remove that. Keep the eruption itself independent of where he walks after.
@@ -596,39 +586,10 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
   5. One weapon only: hide the procedural weapon meshes everywhere (already hidden) and make sure no second copy shows in any mode (Fused, Masks screen, portraits).
 - Assert: per Hunter, through all KMOVES the weapon stays attached to its bone (no drift, no float), FX spawn within a few cm of the visible muzzle/tip, and only one weapon is drawn. Screenshots: per Hunter, idle + signature attack close-ups, old vs new.
 
-## 77. BUG: a prologue slide's third text line runs off the screen (owner, 22:56 UTC Nov 4)
-- Owner: "right now the 3rd line on the video thing goes off screen." A prologue caption wraps to a third line that is cut off at the bottom (likely the longer slide 3/4 captions, or the LORE_MASKS prologue text, at 1280x720 and smaller).
-- Fix: the caption box sizes to its text and stays fully on screen at every resolution (anchor from the bottom with a margin, wrap width ~70% of the screen, grow upward); or shorten the lines to two. Check every slide at 1280x720, 1920x1080 and a small window.
-- Small; whoever has budget. Not urgent.
-
 ## 78. LATER: redo the prologue film: open on an evil deity in human form (owner, 22:56 UTC Nov 4)
 - Owner: "I think we need to redo the film to show an evil deity in human form first. All of it is pretty rough. Put that as a note for later."
 - Direction for the rebuild (after the resets; with the art pipeline): the film opens on the **evil deity in human form**: the Wyrm-crowned Tyrant / the Wyrm as a human sovereign (DECISIONS + LORE_MASKS) on the Throne, so players meet the villain before the fall. Then the rest of the story beats from LORE_MASKS (the cold open with the girl in chains and the Mask, the Sundering, the Wardens' Masks scattering, the race for the Wyrmheart). Owner verdict on the current film: "pretty rough": plan it as a proper storyboarded short (key art from the image-gen pipeline, camera work, timing) rather than polishing the current scenes.
 - Not now: logged for planning after the usage resets.
-
-## 79. The Empty: the void look covers the whole head and body, not just the front of the face (owner, 22:57 UTC Nov 4; follows empty90 in sync91)
-- Owner: "the whole face/body should be that void thing, not just the front of it."
-- Today (empty90, shaders/void_face.gdshader) the void effect sits only on the front of the face, so from the side, back or above the head and body read as a normal surface.
-- Change: the Empty's whole head and body use the void material (the starry, depthless look), from every angle, including the back of the head, neck, hands and body under the outfit's open areas. Outfits and accessories can sit on top as solid pieces. Keep the face marks (eyes, brows, blush) as decals floating on the void face. The look must read at the farm's camera distance (top-down), not only in the creator close-up.
-- Check: the creator and farm screenshots from front, side, back and top-down show the void everywhere. Small; whoever has budget.
-
-## 79b. CORRECTION to item 79 (owner, 22:58 UTC Nov 4): keep the face customisation; wrap the body in a shroud; drop skin colour
-- Owner: "it's cool that you can change the face shape stuff, but the rest of the body should be in a shroud or something. It's weird you can change the skin colour and it's just plastered on the front for the look."
-- **Head:** the whole head is the void (all sides), and the face shape and face marks stay customisable as now, floating on it.
-- **Body:** covered by a shroud/cloak (a hooded or draped wrap that hides the body shape, with hands either void or wrapped). No exposed skin anywhere.
-- **Creator:** remove the skin colour option. In its place: the shroud's colour (and, if cheap, 2–3 shroud styles or trims). Height, build and Male/Female still shape the silhouette under the shroud.
-- Migrate saves: the old skin colour maps to the shroud colour (or a default).
-- Supersedes item 79's "void on the body under the outfit".
-
-## 80. The creator's "Motes" row is invisible and unexplained (owner, 22:58 UTC Nov 4)
-- Owner: "I don't see what Motes does and don't know what it is."
-- What it is (scripts/match/unmasked.gd `_motes`): None / A few / A swarm = 0 / 6 / 18 tiny specks of the face's glow colour drifting up around the head. They are so small and few that they don't read in the creator or in the world.
-- Fix (default; the owner may say "just remove it"): rename the row to something self-explanatory, e.g. **"Aura"** (None / Faint / Strong), and make it clearly visible: bigger, brighter specks drifting up and around the head and shoulders (and the shroud from item 79b), with a short tooltip line "Glowing specks that drift around you". Show it in the creator preview at a size you can see. If it still doesn't add anything once visible, remove the row.
-
-## 81. BUG: the Empty's feet clip through the ground (owner, 22:58 UTC Nov 4)
-- Owner: "also his feet clip through the ground" (the Empty: creator preview and the farm/town).
-- Likely cause: the Empty's "real height" and build scaling (empty90) scales the model from its centre instead of the feet, or the height offset isn't re-applied after scaling, so shorter/taller settings sink the feet. Also check the walk cycle's foot height on uneven ground.
-- Fix: scale from a feet-level pivot and keep the soles on the ground for every height/build/gender setting; idle and walk keep the feet on the surface (no sinking). Assert: at min/mid/max height and both builds, the lowest foot vertex is within 2 cm of the ground in idle and across the walk cycle. Do it with items 79b/80 (same Empty files).
 
 ## 82. The new-Boki screen: less text, hoverable moves (owner, 22:59 UTC Nov 4)
 - Owner: "the moves / bond move need to be hoverable when you get a new pet; right now the screen is too text-heavy and doesn't really say anything."
@@ -832,15 +793,6 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
   - Hints show once.
 - Assert: firing 5 messages at once gives no overlap (layout check); screenshots before/after of a busy moment in a match and on the farm. List what was removed.
 
-## 103. BUG: a sound keeps playing forever after an expedition (owner, 23:24 UTC Nov 4, "again")
-- Owner: "Getting a sound bug again where it persists indefinitely from an expedition."
-- Root-cause it, don't patch one sound:
-  - Find every looping AudioStreamPlayer / ambient / channel loop started in a match (storm, glide wind, channelled abilities, extraction beacon, hold-to-build hammering, music layers).
-  - On match end / extraction / death / scene change, all match audio must stop: parent it to the match scene or put it on a "Match" bus that is muted and cleared on exit.
-  - Also stop loops when the owning node frees mid-channel (e.g. extracting during a channel).
-- Add a check (register it): run a short match, extract mid-channel and return to the farm; assert no match-started players are still playing.
-- Do this first in the item 94 perf pass (it touches the same audio/scene teardown).
-
 ## 104. Farm Boki speech text is now too big (owner, 23:24 UTC Nov 4)
 - Owner: "The text from the Boki in your farm is too big now. Before it was too small but you went overboard."
 - Bring the farm Boki speech/bubble text to the middle: roughly 65-70% of the current size, still readable at the farm camera. Shorter lines help too (item 102).
@@ -937,16 +889,6 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
   - grey with a single green eye
   - Dredge uses the friend's Blender model, so a recolour + new animations, not a new model.
 - The image-gen concepts come first (the owner prompts them by hand); then S2 builds from the owner's picks.
-
-## 109. BUG/FEEL: Vex can't aim while dashing (owner, 04:46 UTC Nov 5)
-- Owner: "Vex should be able to move her LMB and shoot while dashing. It sticks to one direction."
-- Today, during Vex's dash/slide her LMB aim locks to a single direction (likely the dash direction or the aim at dash start).
-- **Fix:**
-  - While dashing (ground slide and air dash), Vex's rifle keeps tracking the cursor every frame and fires freely toward it. The dash direction and the aim direction are independent.
-  - The upper body / gun rotates to the aim while the legs follow the dash; the shots spawn along the true aim.
-  - Holding LMB through the dash keeps firing with no interruption (item 51 rule: everything combos with Shift/jump).
-- **Check the other ranged Hunters** for the same lock (Lisette, Ryzz, Sable, Cinder's flamethrower): their primary should also track the cursor during dashes unless their kit says otherwise. List any changed.
-- **Assert:** a dash east while aiming north fires its shots north (angle within ~5°), with no gap in the fire cadence across the dash. Add it to the gunslinger combo check.
 
 ## 110. Wing-glide as a per-Hunter unlock (owner, 05:07 UTC Nov 5) [LATER: cosmetics/progression]
 - Owner: everyone uses gliders by default (gliders are a sellable cosmetic). Winged Hunters can **unlock gliding on their own wings** for that Hunter only, after a set number of games played with them (a mastery reward).
@@ -1074,13 +1016,6 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Pass-through damage + the 4-stack bonus + the reset loop should flow into chained dashes.
 - Data-tuned; assert the reset distance ≈1.5x the base and that the charge-to-max time is reduced.
 - Pairs with 116.5 (the reset zing sound).
-
-## 117. Motley (ex-Ostra) LMB: goes THROUGH WALLS + is visibly bigger when charged (owner playtest, 12:24 UTC Nov 5)
-- Item 60 ("charge-by-wait, through walls") shipped in `ext/small-60-66-75`, but in play the LMB still stops at walls and the slow vs fast shots look the same.
-- **Fix:**
-  - The LMB projectile passes through terrain (all of them, or at least the charged ones, per the source; check the data and pick the source rule).
-  - The size scales with the charge: a quick fire = a small orb; a slow/charged fire = a clearly bigger orb (≥1.6x visual + hitbox), brighter, with a bigger impact.
-- **Assert:** the charged shot hits a target behind a wall, and the projectile radius at full charge ≥1.6x the quick one.
 
 ## 118. Pip's RMB (Burrseed): a ~1 s WIND-UP, NOT holdable (owner playtest, 12:26 UTC Nov 5)
 - **Today:** "hold to aim the lane, let go to throw" (`tender.json` rmb hold 0.25).
@@ -1498,21 +1433,6 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - The anim length matches the wind-up.
   - The gather VFX is visible to enemies.
   - Hold or release timing doesn't change it.
-
-## 139. Ryzz: clearly finger guns, alternating hands; the arm coils mustn't read as a gun (owner, 17:26 UTC Nov 5)
-- The owner: "ryzz looks like she has a gun or something cuz of the coils on her arm - needs to be clear it's a finger gun and she uses both fingers (alternating)".
-- **Model (S2):**
-  - Slim and flatten the arm coils so they read as bracelets/wraps hugging the forearm, not a barrel or tube.
-  - Nothing extends past the wrist along the firing line.
-  - Hands bare and readable: index finger + thumb up, a clear finger-gun silhouette at the match camera.
-  - Check it against ryzz_FINAL_sheet / weapons refs (hands free, no kite, per earlier notes).
-- **Anim:** LMB alternates hands every shot, L then R:
-  - Each hand snaps into a finger-gun point, a small recoil flick of the fingertip, the other arm relaxed.
-  - The spark/bolt spawns from the FINGERTIP anchor of the firing hand (blue-pink per item 122), with a tiny fingertip flash.
-- **Assert:**
-  - Muzzle anchors = the fingertips, alternating L/R.
-  - A match-camera still where a viewer would read "finger gun".
-  - The weapon-scale row (item 137) for her coils.
 
 ## 140. Lisette (Red Stitch) RMB Heavy Shot: no arrow left on the ground, a smaller projectile, longer range, a better wind-up, a stronger slow, a loud Myth-like sound (owner, 17:27 UTC Nov 5)
 - The owner: "red stitch rmb shouldnt leave an arrow on the ground, and its way too big. also her range should be longer and the windup feel better. rmb should slow her more and have a louder sound like myth rmb".

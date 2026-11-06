@@ -1,13 +1,6 @@
 # Inbox for the second server session (S2)
-## 2026-11-03 07:15 UTC: start
-- Read briefs/SERVER2_START.md and begin with Breah + Ostra (bugs 26 and 42 first).
-
-## 2026-11-03 07:20 UTC: owner demo tomorrow, quality first
-- The owner is showing the game to someone tomorrow. Goal: speed AND quality. Finish fewer things completely rather than many halfway.
-- Each branch must land whole: every item on it done, asserted, screenshots viewed, full suite green, then reported ready in STATUS. No half-done branches at the cutoff.
-- Within your share, do bugs first, then the items a player notices in the first minutes of play: the look and feel of RMB/E/ult, the dashes, and obvious glitches. Leave subtle tuning for later.
-- A delivery cutoff time will follow once the owner gives the demo time.
-
+<!-- briefs-trim pointer -->
+> Trimmed 2026-11-06 by briefs-trim: 69 finished/superseded entries moved to briefs/archive/INBOX_S2-2026-11-06.md. Kept here: owner rules and decisions, open owner questions, unmerged READY branches, open assignments and review items, the latest SHIPPED/RELEASED, holds still in force, and the last 12 h. Older archives: briefs/archive/INBOX_S2-*.md
 ## 2026-11-03 07:25 UTC: CUTOFF 2026-11-03 21:00 UTC (4 pm Toronto)
 - The owner records the demo tonight. Every branch you want in it must be reported READY in your STATUS by 21:00 UTC today, so main can merge and the owner can play it before recording.
 - Plan your pairs to fit: anything that can't land whole by then goes after the cutoff on its own branch. Report at ~15:00 UTC which pairs will make it.
@@ -67,22 +60,6 @@
 - **Mantle look (item 45) conflict:** main's ext/classes removed the old creator card and moved the name entry onto the Boki card. Put the creator as its own new step after the Boki card (name stays where it is now), not as an edit of a removed card.
 - Use git commit time when you write hours in STATUS (your clock reads ~1 h ahead).
 
-## 2026-11-03 08:02 UTC: known-red checks, don't chase
-- `--pack-ui-check`, `--simtest` and `--train-check` are known red/flaky on main (see COMMON rules); `--teammate-check` flakes under load. Don't spend reruns on them: note them as pre-existing in your report and move on.
-
-## 2026-11-03 14:10 UTC (orchestrator): re-check your READY branches on main's physics pass
-- Main landed physics76 (4d39c623: new gravity, ~0.9 s jump hang, ledge top-out). Your six READY branches sit on 16dd7fa, before it. Merge 4d39c623 into each, re-run that hero's combo checks + --dash-flow-check (targeted, not the full suite), and re-post the tips in STATUS. Watch Breah's hop, Zedran's air slam, Moosh Moosh's 3x glide ratio, and the Tamsin/Dredge/Ostra z-holds.
-
-## 2026-11-03 14:25 UTC: main moved (physics76 landed, 4d39c623): pre-merge it into the demo branches
-- Main merged its physics pass (gravity/jump/air control/ledges/glide) as 4d39c623 but hasn't started the demo merges yet. To save main time before the 21:00 UTC cutoff, merge origin/main 4d39c623 into each demo branch in the plan (dash-flow-base, review-breah-ostra, review-linwick-moosh, review-dancer, review-bjorn, prologue-polish; and S1's kitdata-vireo-venator, airdash-glide, mapclean if S1 isn't doing it), resolve conflicts, re-run the targeted checks for that branch (hero combo, dash-flow, move-feel, airdash-glide, class-unlock, archetype, keys) plus health, push, and update the commits in your FOR MAIN plan. Watch for physics76 changing glide/air-dash handoff values that the airdash-glide and dash-flow checks assert.
-- Post the updated plan by 17:00 UTC.
-
-## 2026-11-03 16:00 UTC: push your trial integration as ONE branch
-- Excellent work. Push the trial integration you ran (main 4d39c623 + the six S2 branches + S1's airdash-glide 411a591 + kitdata-vireo-venator 67454b5, in plan order, generated files regenerated) as `ext/demo-integ`, and add S1's ext/mapclean 2082d0d if it merges clean and --wall-size-check passes. Run the full suite once on it (known-red checks noted, not chased). Put the commit and results at the top of your FOR MAIN section. Main can then merge one branch.
-
-## 2026-11-03 16:05 UTC (orchestrator): demo-integ, use mapclean caf5deb
-- For ext/demo-integ, take ext/mapclean at **caf5deb** (S1 re-merged it on 4d39c623, breakables conflict resolved, READY 15:00 UTC), not 2082d0d.
-
 ## 2026-11-03 16:10 UTC: owner approved the concepts; new queue (after ext/demo-integ's full suite is posted)
 Owner on ext/concepts: "concepts are good, obviously a bit too shape-y and needs a good amount of polish". Specific: **Ostra more menacing; Moosh Moosh cuter**; polish everyone.
 1. **Concepts 1b (Opus, 1 agent), on ext/concepts:** a polish pass on all 12 sheets: less geometric, more organic forms (tapered limbs, overlapping cloth and armour, varied curves, secondary detail where the eye lands), richer shading and rim light, expressive faces and poses. Ostra: more menacing (taller, sharper, a grin that unsettles, long fingers, a darker palette with sickly violet light), never the source's look. Moosh Moosh: cuter (bigger head and eyes, shorter limbs, rounder shapes, a bigger tail, a happier pose). Keep each silhouette identifiable. Redo the lineup. Report for owner review.
@@ -101,16 +78,6 @@ Keep up to 6 agents. Don't start anything that touches the demo branches until m
 - Owner wants the quality much higher, aiming at top-MOBA level. Push as far as the medium allows; ext is discussing art pipeline options with the owner separately.
 
 ## 2026-11-03 16:25 UTC: OWNER_REVIEW item 46 (hitbox by size + ground circle): queue it after main merges ext/demo-integ; Sonnet, small. Set the hit_r values together with the concept heights (1b).
-
-## 2026-11-03 16:30 UTC: owner approves a Blender pipeline for the Warden models (replaces item 2 of the 16:10 queue's approach)
-- Install Blender (latest LTS, official Linux tarball into ~/tools, no root needed) on the server. Build the Warden models with scripted Blender (bpy), Opus 5.5 medium, starting with **Bjorn**, then Pin, Zedran, Cinder:
-  - real meshes: base forms blocked from the concept sheets, then subdivision surface, sculpt-style deformation (displace/shrinkwrap, smooth), bevelled hard-surface armour, cloth folds; stylised toon-friendly topology that reads top-down;
-  - textures: hand-painted look via baked procedural shaders (gradients, AO, edge wear, rim highlights) into a single atlas per hero; matching the game's toon shader;
-  - rig with a shared humanoid armature (Rigify or our own) so HunterAnim moves map onto bones; export glTF (.glb) into the repo under art/wardens/<id>/ with a small import note; Godot loads them through a new builder file (models.gd wiring only).
-  - Budget per hero: a turnaround render (front/side/3-4/back) in Blender plus an in-engine shot at gameplay zoom and close-up, next to the concept sheet. Ext reviews Bjorn's before the others go ahead.
-- Keep the old procedural model as the fallback until a hero's .glb passes review. Hitbox and FX anchors unchanged.
-
-## 2026-11-03 17:00 UTC: queue OWNER_REVIEW item 47 (dash/stamina fill-up bar), Sonnet, after demo-integ is in main (it is: main 31ef8481). Small UI job; build it on a branch from current main.
 
 ## 2026-11-03 17:20 UTC: OWNER_REVIEW item 48 (Bjorn's ult: free after the slam). Small; on a branch from current main. Sonnet.
 
@@ -165,10 +132,6 @@ The image-gen session's art lands on **origin/ext/imagegen** (30 commits; main i
 - Use the new art from origin/ext/imagegen (`docs/art/gen/wardens/<name>_portrait.png`, and the splash where a bigger image fits) in the **menus now**: character select / Mantle pick, the hunter viewer, the kit card, and the HUD portrait slot. Use ext/portrait's frame/HUD side (DECISIONS: "portraits come from the art pass; ext/portrait keeps only its frame/HUD side").
 - Replace the procedural portrait renders with these images for all 12. Keep the procedural render as a fallback if an image is missing. Use the new names (Vex, Claire).
 - Small and separate from the models: a branch like `ext/portraits-2d` off main, rebased on main. Checks: uipolish, hunter-unlock, class-unlock, hudref. Post READY in EXT_TO_MAIN with a screenshot of character select. Main merges it at the next check-in.
-
-## 2026-11-03 20:35 UTC: fold the Claire rename into ext/class-titles (MAIN_TO_EXT 18:20 UTC)
-- Owner renamed Tamsin to **Claire** (rimewright). Main asked for it inside ext/class-titles: base name Claire, everywhere (HeroKit names, archetype text, kit cards, tooltips, docs/heroes, wiki). The title stays "Icy Dancer". Push and post the new commit as READY. Also read briefs/DECISIONS.md (it overrides older items: Claire's RMB is a push-like emerge, not a throw; Moosh Moosh's dashes copy Elluna, the 3x rule is dropped; Ostra's ult has a ~1 s lock, then he moves).
-- Your ext/stamina-bar and ext/hitbox-size: reported to main as READY (main had planned to build them itself).
 
 ## 2026-11-03 20:35 UTC (MAIN): the portrait IMAGES are done; only wiring them in is left. Names to use
 - All 12 `docs/art/gen/wardens/<name>_portrait.png` (2048²) are on origin/ext/imagegen. ext/portraits-2d only has to downscale them (e.g. 512² webp/png into assets) and wire them into the screens. This is a small job: please do it next, before the models, so it ships in tonight's next sync.
@@ -312,9 +275,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
   3. **Batches 3+:** the new roster species, ~10 at a time, the rideables when riding is approved.
 - Each batch: models pass the art-match test, shots go to ext/hero-shots-s2, then one READY integration branch for main. Credits are watched per batch.
 
-## 2026-11-04 02:00 UTC (ext): owner: focus on the Warden and Boki art for tomorrow's video
-- The owner films the demo video tomorrow instead of tonight, to get the new art in. Put your capacity on the Meshy Wardens first, then the Boki; everything else waits. Land Wardens as they pass the acceptance test (looks like the image-gen art, rig + animations + FX anchors OK) so main can merge them in batches through the day. A matched set reads best on video, so post which Wardens pass and when.
-
 ## 2026-11-04 02:30 UTC (orchestrator): OWNER: PAUSE the Warden 3D fan-out; the 2D art gets redone first
 - The owner reviewed the Warden art and wants most of it regenerated before committing to 3D (feedback in INBOX_IMG 02:30; Vex becomes a cyborg with a gun-arm, a big change). **Don't spend Meshy credits on any Warden until its new art is approved.** Keep the pipeline and the fit tools ready; the Meshy Vex (41b95f7) is superseded by the new Vex art.
 - Still useful now: push the Meshy Vex shots anyway (warden-3d/vex/meshy_*) so the owner can see what the pipeline produces.
@@ -327,9 +287,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 ## 2026-11-04 02:45 UTC (ext): owner on Vex (Meshy v2) + new item 52
 - Owner: the in-game Vex model is OK, but the texture/quality is still somewhat low, and her design needs to be better anyway. The image-gen agent is improving the base pictures first. **Don't spend credits on the other 11 yet**: wait for the improved base art (watch ext/imagegen IMG_STATUS.md), then run them. When you do, aim for flat, clean, bright painted colour (no mottled grain) and slightly chunkier game proportions (bigger head and hands, thicker silhouette) so each Warden reads at match zoom.
 - Meanwhile, do OWNER_REVIEW item 52 now (Opus): a signature stance and idle per Warden on the shared rig, as data, working on today's models and the Meshy ones.
-
-## 2026-11-04 03:15 UTC (ext): build ext/kits-integ
-- Main has merged only combo-flow-base and dancer-feel of your kit work. To make it one step for main: build `ext/kits-integ` = current origin/main + online-displace + no-shake + the five audit tips + vex-ammo (resolve generated files with gen_wiki), run the full suite once, post the commit as READY in STATUS and EXT_TO_MAIN. Same play as demo-integ.
 
 ## 2026-11-04 03:40 UTC (orchestrator): OWNER APPROVED the new Vex art: make a better Meshy 3D Vex (Vex only)
 - The new art is on **origin/ext/imagegen @ a9fd3b92**, under docs/art/gen/wardens_r2/: vex_turnaround.png, vex_splash.png, vex_portrait.png (review/vex_before_after.jpg). She's a punk cyborg: a minigun fused to a mechanical right arm, black hair with an orange streak, a bolt in the bun, a brass monocle-eye, a denim vest, an orange crop top, shorts, torn tights, boots, and candles on the shoulder. The owner OKs her for 3D; the 11 others still wait for their own approval.
@@ -345,9 +302,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 ## 2026-11-04 03:58 UTC (orchestrator): Vex side profile is in
 - origin/ext/imagegen @ 865da870: docs/art/gen/wardens_r2/vex_side.webp (a true profile; the gun-arm on her right). Use it with vex_turnaround(_2k) for the Meshy run. Her hair is a ponytail in the side view vs a messy bun in the turnaround: the turnaround wins. Side views for Zedran and Pin are there too; they are NOT approved for 3D yet.
 
-## 2026-11-04 04:05 UTC (orchestrator): correction, the creator is now the Unmasked (DECISIONS)
-- My 01:50 creator plan (modular faces/hair parts) is superseded by DECISIONS: one near-faceless Meshy base with params + decals + outfits. Ext leads it; follow DECISIONS.
-
 ## 2026-11-04 04:15 UTC (orchestrator): OWNER APPROVES 3D FOR ALL WARDENS ("do as you think best"): fan out
 - The owner approves Meshy 3D for every Warden, with the orchestrator's judgement on details. The rule: **model from the round-2 art only** (docs/art/gen/wardens_r2/ on origin/ext/imagegen). Don't spend credits on old round-1 art that the owner asked to redo.
 - **Now (round-2 art + side view present):** Vex (in progress), **Zedran**, **Pin**, **Cinder**. Source of truth = the turnaround + side view; the splash is for mood (Zedran's splash is mirrored: magma arm and lion on his RIGHT, chain in his LEFT). Pin: planted feet, claw scratches (no handprint), smoke only as FX. Cinder: keep her design as drawn (gill-frills OK); the weapon is the turnaround's syringe-spear.
@@ -355,9 +309,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 - Run 3-4 Opus agents in parallel per INBOX_S2 01:20. Same acceptance test (side by side with the round-2 art; no AI-patchy texture, flat painted colour, chunkier game proportions, signature stance from item 52), and push the shots to ext/hero-shots-s2 warden-3d/<name>/r2_*.
 - **Batches to main:** Batch 1 (video) = Vex, Zedran, Pin, Cinder → one READY integration, then the rest.
 - **Credits:** ~940 left this month; 4 Wardens ≈ 540-720. Post "OWNER: buy N" before you'd run out; never buy.
-
-## 2026-11-04 04:25 UTC (orchestrator): OWNER RENAME: Vireo is now "Ryzz"
-- Do a rename sweep like rename-burple: display name, kit text, docs/heroes, wiki (gen_wiki), and the old name into --hero-title-check. id mage unchanged. New art files are named ryzz_*. Small branch, READY to main.
 
 ## 2026-11-04 04:35 UTC (orchestrator): RYZZ (was Vireo) round-2 art is in: add her to the 3D fan-out
 - origin/ext/imagegen: docs/art/gen/wardens_r2/ryzz_{turnaround,side,portrait,splash}.webp. Approved for 3D (the owner approved all Wardens). Source = the turnaround (spear in her RIGHT hand) + the side view. Signature: electrified blue hair standing up (model it as chunky hair cards/shells with an emissive lightning layer as FX), lightning veins on her arms (emissive texture), copper-coiled spear with a black flag, bubblegum as an idle fidget. Queue: Vex, Zedran, Pin, Cinder, then Ryzz.
@@ -389,9 +340,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 06:15 UTC (orchestrator): Dredge full set in
 - ext/imagegen wardens_r2/dredge_{turnaround (unlabelled, clean for Meshy),side,portrait,splash}.webp. Owner-locked; 3D after Vex passes.
-
-## 2026-11-04 06:25 UTC (orchestrator): OWNER RENAME: Bjorn is now "Breaker"
-- Rename sweep like rename-ryzz (display name, kit text, docs, wiki, old name into --hero-title-check; id bulwark unchanged). Small branch, READY to main. New art and model files: breaker_*.
 
 ## 2026-11-04 06:35 UTC (orchestrator): Breaker (was Bjorn) art in
 - ext/imagegen wardens_r2/breaker_{turnaround,side,portrait,splash}.webp. Approved for 3D after Vex passes. Signature: the biggest Warden (towering), undead tells (white eyes, pale frost skin, rot wounds with bone), the prow shield (scroll top), and the ice-block hammer with an anchor fluke. The turnaround is ordered back/side/3-4/front.
@@ -436,18 +384,8 @@ Build, in this order; post progress in EXT_TO_MAIN:
 ## 2026-11-04 08:55 UTC (orchestrator): Breaker round 3 (sea-ogre) art in; it supersedes r2
 - ext/imagegen docs/art/gen/wardens_r3/breaker_* + BREAKER_KIT.md. Use these, not wardens_r2/breaker_*. Good candidate for the hybrid route: script the hammer and the prow shield in Blender (hard surface), Meshy for the ogre body. Check for an extra third hand (the kit warns the generator adds one). No lantern; a plain hammer.
 
-## 2026-11-04 09:20 UTC (orchestrator): canonical Mask lore
-- briefs/LORE_MASKS.md: each Warden's relic (the visible signature prop) and their current story. When you render the Mask put-on beat or a hero's idle, the relic is the hero prop to feature (e.g. Breaker's compass, Ryzz's bolt jar, Tarek's seeing-stone).
-
-## 2026-11-04 09:55 UTC (orchestrator): terms changed (player text)
-- "Warden" is gone from player-facing text: the Masks hold **fallen Hunters**; you at home are **the Empty** (not "the Unmasked"). Code/file names (warden_*, WardenSkeleton, unmasked) can stay. Any new kit text, tooltips or docs: follow briefs/LORE_MASKS.md "Terms".
-
 ## 2026-11-04 10:20 UTC (orchestrator): Hem (was Pin) art in
 - ext/imagegen wardens_r3/hem_* + HEM_KIT.md. Queued for 3D after Vex passes. Notes: the bow in her LEFT hand, draw RIGHT; the glowing red-thread bowstring (emissive line); the needle-arrows with a stitched-trail VFX; her shadow is a VFX/decal trick (too long, clawed, red seams), not a creature and not in the mesh; the porcelain-shard mask as its own mesh; the thimble claws on the right hand.
-
-## 2026-11-04 10:45 UTC (orchestrator): Hem's title is now "Red Stitch" (was Dark Archer); include it in the rename sweep.
-
-## 2026-11-04 10:50 UTC (orchestrator): titles: Dredge = "Brass Abomination", Tarek = "Cliff Runner" (plus Hem = "Red Stitch"); include them in the title sweep.
 
 ## 2026-11-04 09:00 UTC (orchestrator): OWNER PICKS Vex r3b; polish it before any other Warden
 - The owner picks **r3b** (the green redesign). Make it the shipped Vex: move vex_r3b into art/wardens/vex/ (r3 stays in history), and apply your carry-pitch fix (-1.3 -> -1.05).
@@ -553,14 +491,6 @@ ext/imagegen fb503983. The owner made flat-lit face/head sheets, prop sheets and
 ## 2026-11-04 12:45 UTC (ORCH): clarification (owner): 95% = ship, not stop
 - Owner: 95% is the bar to SHIP, not to stop. Once a Hunter ships at ~95%, keep improving it toward 100% and post each better version as a new READY commit on the same branch; main ships the update in the next sync.
 
-## 2026-11-04 12:55 UTC (ORCH): 3D review Vex (r3c; no r3d shots yet): ~80% close-up, ~65% match zoom
-1. Skin: reads lilac/grey-violet; the art is warm pale peach. Warm the skin tone (same violet cast as Ryzz: check the shared toon light/look override).
-2. Rotary cannon: reads as one black mass. Art: gunmetal grey barrels with clear brass bands, brass housing, ammo belt over the shoulder, hoses. Lift value and separate the materials; at match zoom the cannon should read grey+brass, not black.
-3. Overall value: the model is far darker than the art; jacket, top, trousers and gun all merge to black at match zoom. Raise the darks one step and keep the green trim/tattoos bright so she reads.
-4. Back: the art's gear backpack (brass plate, cogs) and the 3-4 thick hoses to the gun are missing or thin.
-5. Keep: green hair and braid (great), eye plate, face (close), top, tattoos, belt, boots, proportions.
-6. With 1-3 done she should clear 95%: ship her then and keep the r3d face pass going.
-
 ## 2026-11-04 13:05 UTC (ORCH): OWNER: max parallel — one Opus agent per Hunter, target all 12 shipped before Fri 06:00
 - Owner wants speed. Run one Opus agent per Hunter in parallel (Vex, Kael, Hem, Breaker, Ryzz, Cinder, Dredge, Pip, Claire, Tarek, Ostra, Sable), each owning its ext/warden-3d-<id> branch, iterating to ~95% then marking READY (and continuing toward 100%).
 - First do the shared fix once: the toon light / look override pushes every model violet and too dark (Vex skin lilac, Ryzz magenta). Fix it in one shared commit and rebase the Hunter branches on it.
@@ -578,9 +508,6 @@ Owner: "figure out the most efficient way to get one done fast and then do them 
 **Phase C, by ~23:00 UTC:** main merges all READY branches in one integ and ships sync89. Anything under 95% ships anyway if it's better than the current procedural model, and keeps iterating tomorrow.
 - ORCH reviews each batch shot set within the hour. Post READY lines in EXT_TO_MAIN as each lands.
 
-## 13:20 UTC (ORCH): batch 3D review of the newest round (10 Hunters, Opus), shared issues first
-- Shared look fix: dark/violet is fixed. Overshoots to correct per Hunter: Pip coral, Tarek orange skin, Kael red-brown, Ostra flat bright purple, Dredge olive brass.
-- Shared at match zoom (every Hunter): high-contrast speckle/dither and dark outline noise break the silhouette. Cut texture micro-contrast at distance (mip/LOD bias or a smoothed albedo), clean the outline, add a per-Hunter rim light in the signature colour. This is the biggest lever for the match-zoom scores; put it in RECIPE_95.
 ## 13:10 UTC (ORCH): 3D review Dredge (r3d): ~75% close-up, ~60% match zoom
 1. Eye: the six black crack strips sit on the orb as a black "spider/face" glyph. Make them thin pale-grey hairline cracks across the porthole glass (in front of the eye), not on the orb itself.
 2. Helm: the porthole is three thick black concentric rings with no brass. Use one brass rim with rivets and dark only in the recess, and add the small grilled porthole above-left of the eye (it is on the portrait and turnaround).
@@ -668,26 +595,6 @@ Shared look fix verdict: models are no longer too dark. Sable now reads right, b
 6. Match zoom: the shield reads pinkish-brown and the ice block is barely visible. Lift the ice-blue value on the hammer head and the iron rim on the shield. Check the 1.5x scale against a medium hunter in the same frame.
 7. KEEP: the bald head, white eyes, grin and tusks, the plain ice-block hammer in two bands with a rope-wrapped haft and no anchor, the prow shield with its broken top planks, flat figurehead and iron rim, and the mantle, belts, boots and back view (close to the turnaround).
 
-## 13:10 UTC (ORCH): 3D review Claire (s2): ~60% close-up, ~50% match zoom
-1. Horns: still wrong, the owner's main ask. They still rise straight up like tall black pigtails. Rebuild them as compact ram curls that go back and down around the skull, with the tips forward at cheek height (claire_head_sheet front and side).
-2. Hair: make it long and wavy, falling to mid-back in LOW pigtails with ice-crystal ties at the collarbone. s2's hair is bunched up high and short, and it merges with the horns into one dark tower.
-3. Face (claire_face): soften the blush, which is a hot-pink blotch, into a light rosy glow. Add the frost freckles, and make the eyes bigger with brighter pale-blue glow and lashes.
-4. Wings: scale them up to roughly the art's span (tips past her elbows, wider than her shoulders). From the front and 3/4 only her left wing shows, so fix the clipping or placement of the right wing.
-5. Feet and tail: add the white skates with clear ice blades (s2 has bare pointed feet). Give the tail its spade tip and an S-curve instead of a straight drop to the ankle.
-6. Pose and spear: the free left hand should be raised and open by her shoulder, not clawed at her chest (both arms are bent in at the chest now). Make the spearhead a bigger crystal and the shaft translucent ice, not a thin cyan line.
-7. Match zoom: she reads as a white figure with dark speckle noise from outline artifacts all over the body. Clean the outline and texture at that distance so the horn and wing silhouette and the skates read.
-8. KEEP: one spear in her RIGHT hand, taller than her (fixed since s1), the pale blue-white skin, the slim figure and proportions, the faceted crystal top and ribbon wraps, and the dark navy wing colour.
-
-## 14:15 UTC (ORCH): batch 3D review of the 6 READY Hunters (Opus x2). Shared: match zoom is still the gap for all (55-70%); brass reads yellow (Vex, Dredge) -> darken/desaturate; the match shots have HUD caption text + a palm plant over the hero, clear the frame for review shots.
-## 14:10 UTC (ORCH): 3D review Vex (r3d): ~82% close-up, ~68% match zoom
-1. Match zoom: she turns to muddy khaki/brown (pants read brown, hair teal, gun lost against the body). Push black/gunmetal values and toxic-green hair saturation at the far camera; she should read as black + green + brass.
-2. Brass is school-bus yellow (eye plate, backpack, gun bands, shoulder piece). Darken and desaturate it to the art's aged brass/bronze with gunmetal grey.
-3. The lens iris reads yellow/orange inside a yellow ring. It should be a glowing toxic-green lens with concentric rings (vex_face).
-4. Chest/belly circuit tattoos are white-green paint smears. They need thin, crisp green circuit lines on clean warm skin ("no green cast on the skin").
-5. Neck: the brass-and-gunmetal gorget with green-glowing seams is missing (the neck is dark). Add it, plus the shoulder ammo belts.
-6. Braids are speckled with green noise. Make them solid plaits with copper ties. The gun is still mostly black: the barrels need gunmetal grey, and the hoses are barely visible in the turnaround.
-Improved: warm skin (no lilac), angular brass eye plate and circuits on the cheek, backpack brass plate and cogs, brass bands on the gun, clean jaw/strap area.
-
 ## 14:10 UTC (ORCH): 3D review Ryzz (s5): ~84% close-up, ~70% match zoom
 1. The gum bubble is a flat pink disc on her nose (a clown nose in 3/4). Move it to the lips as a glossy translucent sphere, off to one side.
 2. Match zoom: the pigtails wash out to pale cyan/white and the pink ends vanish (the electric-blue far rim is too hot). Keep them mid-blue with pink tips; the hazard bands and boot trim are still not readable.
@@ -706,15 +613,6 @@ Improved: magenta skin smears gone, gum bubble added, smooth blue pigtails with 
 6. Bow pose: it is held almost vertical against the body. Angle it out at her left side as in the turnaround; the glowing string is only visible in 3/4.
 Improved: smooth porcelain mask with gold rim and stitches (no facets), true black recurve with a red glowing string, coat now mid-calf with a back tail, red-threaded needles, needles in the bun right, red rim at the match camera.
 
-## 14:10 UTC (ORCH): 3D review Sable (s5): ~84% close-up, ~62% match zoom
-1. Match zoom still breaks up: white/dark speckle fringes on the crossbows, wings and hair. She reads as noise with a pink dot, not purple jacket, silver hair and pale wings. Fix the alpha/outline edge first.
-2. Crossbows overshot: they're now rifle-long and pointed out sideways. Art: hand crossbows held low by the thighs with glowing violet bolt tips. The tips render as small white points with no glow.
-3. Pendant is a flat pink drop with no halo or bloom. Art: a red faceted gem that glows on the chest.
-4. Wings are narrow and hide behind the legs from the front. Art: wide moth wings flaring past the hips with clear eyespots. The back view is closer but still slim.
-5. Braid and hair still have cream/tan shadows (the back of the head reads beige). Fur collar is pure white; it should be grey-lilac. Cool the shadows to lilac-grey.
-6. Back: the laced open back barely reads. The braid should hang down the spine with silver rings.
-Improved: one braid over her right shoulder, silver-white hair, crossbows about 1.5x, upright wide stance, wings longer, face (almond eyes, liner, mask) close to sable_face.
-
 ## 14:10 UTC (ORCH): 3D review Tarek (s6): ~76% close-up, ~55% match zoom
 1. Stones: one hovers right in front of his face and hides the bandana and grin in the front, 3/4 and close-up views. They're also flat tan discs with yellow slit irises. Art: three rough geodes with crystal-lined openings and orange-amber eyes, orbiting above and beside the head.
 2. Gauntlets are now forearm-length but look like cream skin with a giraffe pattern of yellow cracks. Art: chunky dark grey-brown rock plates that stand out from the arm, with orange crack glow. They need volume and a darker value.
@@ -732,76 +630,6 @@ Improved: slate (not khaki) vest, darker skin, real forearm bracers, raised righ
 5. Stance still pitches forward and hunches; the hull sits low and the legs are short. Art: an upright, tall-legged robot with the hull on top. The grilled port reads as red stripes; it should be a brass grille with dark slots.
 Improved: black glyph gone, one riveted brass ring round the eye, warmer brass than olive, red rib core and tears, the eye faces the camera, back hatch and pipe modelled.
 
-## 15:15 UTC (ORCH): review of 8 READY Hunters (Opus x3) + two process asks
-- **Match zoom is stuck** (most Hunters flat at 55-73% since 13:20) because no per-Hunter agent owns it. Put ONE agent on the shared match-zoom fix now: (a) the white/dark speckle fringe = alpha-card/outline edges and texture mip at distance (fix in the shared shader/outline: alpha-to-coverage or dither-free cutout, outline width by distance, mip bias), (b) per-Hunter signature rim light, (c) clean review frame: no HUD caption text, palm plant or props over the hero. Then every Hunter rebases on it.
-- **Art integ branch**: still not posted ~2 h after the first READY. Build it now on current main with the 8 READY Hunters so main can ship tonight; update it as READY commits move.
-## 15:10 UTC (ORCH): 3D review Vex (r3e): ~85% close-up, ~73% match zoom
-1. The chest and belly circuit tattoos are still white-green paint smears, and they bleed onto the jacket and cleavage. She needs thin, crisp green circuit lines on clean warm skin (vex_face, front).
-2. The jacket and the gun's shoulder mount are camo-blotched with white/grey streaks. Make them clean black leather and gunmetal with brass trim.
-3. Gorget: the neck now has a dark collar with a green seam, but the brass plates and the glowing seam lines from vex_face are still missing.
-4. The braids are still speckled with green noise along the edges, although the copper ties now read. Make them solid plaits.
-5. The lens is green now but dull and muddy. It needs a bright glowing core with concentric rings, as in the art.
-6. Match zoom reads black + green now, but the hair goes pale cyan and the speckle fringe is still on the braids and gun. The hoses are barely visible in the turnaround.
-Improved: brass is now aged bronze (no longer school-bus yellow), the gun barrels are gunmetal grey, the shoulder ammo belt is added, the lens iris is green (no longer yellow/orange), and at match zoom she reads as black + green instead of khaki.
-
-## 15:10 UTC (ORCH): 3D review Ryzz (s7): ~85% close-up, ~70% match zoom
-1. Pigtails: the bodies are still faceted, low-poly blue slabs, and the pink ends are still thin squiggle strands. Make them rounded, fuller curls with pink sweeping through the outer half (ryzz_front).
-2. Match zoom (clean shot): the pigtails still wash out to pale cyan and the body breaks into pink/black speckle. The plain match shot still has HUD text and a palm plant over her.
-3. The gum bubble is now at the mouth corner, but it is a flat matte pink disc. It should be a glossy translucent sphere.
-4. The jacket is still near-black. Shift it to plum-grey leather with copper zips. The rods are still bright orange, not copper.
-5. The hazard bands read as solid yellow with no black stripes. The fishnets are barely visible on the thighs.
-6. The corset bolt is a split gap, not a crisp neon keyhole outline.
-Improved: skin is now pink-peach (no longer orange/tan), the gum bubble is off the nose, the white streaks on the corset are mostly gone, and the hazard bands and boot trim now show in the game turnaround.
-
-## 15:10 UTC (ORCH): 3D review Hem (s5): ~84% close-up, ~63% match zoom
-1. Match zoom is unchanged: a red blob with white speckle. The mask is a white smear, the bow and string are lost, and the frame still has HUD text, a palm plant and a flower over her.
-2. Back view: the coat tail still flares into two lobes that look like baggy red trousers. It needs the art's straight, split, asymmetric tail over black trousers.
-3. Bow: it is still held vertical against the body in the front view; angle it out at her left side. The limbs read navy, not black.
-4. The mask has grey and red smudge blotches. Make it clean porcelain with crisp red stitches.
-5. The shears at the hip and the silver thimble claws are still missing (the hands are plain white). The forearm wrap is plain bandage. A stray brown block sits by her left foot.
-6. The needle threads are straight orange lines. They should be red thread drooping out of the needle eyes.
-Improved: the coat is darker crimson (smears reduced), the quiver needles are now silver with eyes at the top (no longer arrows or brushes), and the quiver and its diagonal strap now read from the back.
-
-## 15:10 UTC (ORCH): 3D review Sable (s6): ~86% close-up, ~62% match zoom
-1. Match zoom is still white/dark speckle on the crossbows, wings and hair (not done). It reads as noise plus a red dot. Fix the alpha/outline edge, and clear the palm plant and "(…oki, glove)" HUD text from the frame.
-2. Bolt tips are still small white points. Art: glowing violet tips with bloom.
-3. The pendant is now a red drop but has no halo or bloom. The fur collar is still pure white; it should be grey-lilac.
-4. Back of the head and hair still read cream/beige in the back views. Cool them to lilac-grey. The laced open back shows as a dark patch with no laces, and the braid doesn't hang down the spine with silver rings.
-5. The crossbows are pitched forward like pistols. Angle them down by the thighs as in the turnaround.
-Improved: crossbows back to hand size and held low, wide moth wings flaring past the hips with clear eyespots (front and back), red gem shape, face still close to sable_face.
-
-## 15:10 UTC (ORCH): 3D review Tarek (s7): ~79% close-up, ~55% match zoom
-1. Match zoom is still one speckled orange-brown blob with yellow pixel noise (not done). Only a grey vest patch reads. Separate the values and cut the edge speckle; the palm plant also sits on him.
-2. Gauntlets are now dark, but they're a pebble mosaic with flat yellow blotches. Art: a few chunky rock plates with thin orange crack glow.
-3. Stones are still flat tan discs with yellow slits. Art: rough geodes with crystal-lined openings and orange-amber eyes.
-4. Skin is still red-orange (not done). Push it to warm mid-brown.
-5. The legs still knock inward at the knees and the knee patches are missing. Locs are longer but still clumped and short of the art's length.
-Improved: stones now orbit above and beside the head (face, bandana and grin clear), vest is slate grey (blue gone), sand trousers, harness and pitons read in back view, copper loc rings.
-
-## 15:10 UTC (ORCH): 3D review Dredge (r3g): ~78% close-up, ~55% match zoom
-1. Match zoom is still a brown blob with no visible eye (not done), plus HUD text in frame. Lift the eye glow and the rim at the far camera.
-2. The hull is still faceted, with black outline triangles and shards at the edges, and big white oval spec blotches. Smooth it and break up the spec with grime.
-3. The eye is still a glossy red ball with a white dot. It now sits in a cracked red recess, but it should be a smaller glassy cracked orb.
-4. Brass is darker but still too warm and clean. Push it toward tarnished bronze and add plate seams; rivets are on the rims only.
-Improved: upright, tall-legged stance with the hull on top, brass grille with dark slots, rivet rows on the helm and eye rings, tar drips off the eye rim (not across the lens), less yellow brass.
-
-## 15:10 UTC (ORCH): 3D review Breaker (s3): ~78% close-up, ~68% match zoom
-1. Beard is still one shaggy red goatee. Rebuild it as the head sheet's THREE stiff frozen braids with silver rings and icy tips. This was fix #1 last round and it is still not done.
-2. Shield still floats beside him with a visible gap in the front and 3/4 views. Rest it against his LEFT forearm and hip, with the rope grip in his hand.
-3. Skin: the arms and torso are still smooth pale blue. Add frost cracks, barnacles and icicles (a few barnacles are on the head now). The brass compass on the chest strap is still missing, and so is the kelp on the mantle.
-4. Match zoom: the body breaks into grey and brown dither, and the shield reads as a brown blob. Lift the iron rim and the ice-blue value, add a rim light, and check the 1.5x scale against a medium hunter.
-5. Back view: the red beard pokes through the back of his neck. Fix the clipping.
-Improved: the hold (haft diagonal over the RIGHT shoulder, fist up), red brows, the teddy bear on the belt, and a brighter ice hammer that reads at match zoom.
-
-## 15:10 UTC (ORCH): 3D review Ostra (b9): ~72% close-up, ~38% match zoom
-1. Match zoom is still a thin purple streak, a white crescent and a brown smear (the ruff and chest). Add the violet emissive rim and glow from ostra_front_float, lighten the ruff to grey, and give the whole figure a readable silhouette.
-2. Halo: it is a pale pink-white crescent off to one side. Make it violet emissive and cracked, larger than the head, and centred behind it.
-3. Void orb, strings and card shards are still missing or unreadable. Add the black swirling core with a violet glow in the raised hand, with strings and cards hanging from it.
-4. Mask: the violet mouth is in, but the eye holes are flat black. Add violet pinpoints, the painted violet tear (viewer's left) and the glowing crack (viewer's right).
-5. Wisp: it tapers now, but it is a stiff straight cone. Curl it into the smoky S-tail from the turnaround, and make the low hand's long clawed fingers clearer.
-Improved: the coat now reads black with violet panels, the mouth glows violet, the orb hand is raised by the head instead of a T-pose, the lower body is a starry tapering wisp, and the blue disc at his feet is gone.
-
-## 16:15 UTC (ORCH): review of the newest rounds (Opus x2). Priority: the 3 newest READY are the weakest (Claire 62/52, Cinder 65/45, Kael 70/63): give them the strongest agents; match zoom remains the shared gap (the matchzoom agent's result is what moves every score).
 ## 16:10 UTC (ORCH): 3D review Claire (b2): ~62% close-up, ~52% match zoom
 1. Hair: the pigtails are thick black braided ropes lying over the chest, with noisy clumps on the back. They should be long, loose, wavy low pigtails that hang to the hips, with the crystal clips at the ties (no clips yet).
 2. Horns: they now curl, but they're ribbed, rise above the crown and float off the head. Seat them low at the temples and curl them back and down, tight to the skull.
@@ -823,46 +651,6 @@ Improved/Keep: rounded salamander face (not a snout), big amber eyes, black skin
 4. Collar: chunky rectangular gold blocks floating over the scarf. It needs thinner, broken, jagged torc plates sitting on the neck.
 Improved/Keep: red mask-scarf, gold collar now reads from above, harness, tally belt, pleated red skirt, greaves, shackle, chain-wrapped arm, hook on the chain, white mane reads at match zoom.
 
-## 16:10 UTC (ORCH): 3D review Ryzz (s8): ~85% close-up, ~71% match zoom
-1. Pigtails: the bodies are still faceted, low-poly blue slabs. The pink ends are fuller ribbons now but still squiggly. Make the curls rounded, with pink sweeping through the outer half.
-2. Match zoom (clean shot): the pigtails still wash out to pale cyan and the body still breaks into pink/black speckle.
-3. The gum bubble is still a flat matte pink disc stuck on the cheek. It should be a glossy translucent sphere at the lips.
-4. The jacket is still near-black; shift it to plum-grey leather with copper zips. The corset bolt is still a brown torn gap, not a crisp neon keyhole.
-5. The fishnets are still barely visible on the thighs.
-Improved: the plain match shot no longer has HUD text or the palm plant, the hazard bands show black stripes at the wrist, and the rods read darker and more copper.
-
-## 16:10 UTC (ORCH): 3D review Hem (s6): ~85% close-up, ~62% match zoom
-1. Match zoom is still a red blob with white speckle, the mask is a white smear, and the bow is lost. The HUD text is gone, but a large yellow flower still sits over her legs.
-2. Back view: the coat tail still flares into baggy red trouser lobes, now with a ragged zig-zag hem. Art: a straight, split, asymmetric tail over black trousers.
-3. The mask still has red and grey smudge blotches. Make it clean porcelain with crisp red stitches.
-4. The shears at the hip and the silver thimble claws are still missing (the hands are plain white), and the forearm wrap is still plain bandage.
-Improved: the bow is now black and angled out at her left side, the needle threads are red and hang from the eyes, and the stray brown block by her foot is gone.
-
-## 16:10 UTC (ORCH): 3D review Tarek (s9): ~81% close-up, ~55% match zoom
-1. Match zoom is still one speckled brown blob with edge noise. Only the grey vest reads. Separate the values and cut the edge speckle.
-2. Gauntlets are still a pebble mosaic with flat yellow blotches. Art: a few chunky rock plates with thin orange crack glow.
-3. Stones are now lumpy rocks, but plain tan with no geode openings or orange-amber eyes.
-4. The legs still knock inward at the knees, and the knee patches are still missing.
-Improved: skin is now warm mid-brown (no longer red-orange), the locs are longer and less clumped, and the palm plant is off him at match.
-
-## 16:10 UTC (ORCH): 3D review Dredge (r3h): ~80% close-up, ~55% match zoom
-1. Match zoom is still a brown blob with no readable eye (only a red sliver at the side), and HUD text is still in frame. Lift the eye glow and the rim at the far camera.
-2. Black outline shards and triangles still fringe the hull and shoulder edges, and the shoulder pods are faceted.
-3. The eye is now a cracked glowing red orb, but it is far too big, filling the porthole. Art: a small glassy orb inside a large brass ring.
-4. The arms and trumpet float with gaps from the body in the turnaround. Seat them on the shoulders.
-Improved: the white spec blotches are replaced by grime, the brass is a darker olive-bronze with vertical plate seams and rivets, and the eye is cracked and glowing instead of a ball with a white dot.
-
-## 16:10 UTC (ORCH): 3D review Ostra (b10): ~76% close-up, ~45% match zoom
-1. Void orb, strings and cards are still missing. The raised hand holds a dark shard cluster; it needs a black swirling core with a violet glow, with strings and cards hanging from it.
-2. Match zoom: he now reads as a violet streak with a pink arc, but he is still thin and noisy and the mask doesn't read. Add the emissive violet rim and glow from ostra_front_float.
-3. Wisp: it is fuller, but still a stiff straight cone. Curl it into the smoky S-tail.
-4. Halo: it is violet, large and centred behind the head now, but it is smooth, not cracked, and doubles into two crescents in the 3/4 close-up. The eye holes still lack bright violet pinpoints.
-Improved: the halo is violet emissive and centred, the ruff is grey (no longer brown), the mask has the violet tear and the glowing crack, and the match read lifted from smear to violet figure.
-
-## 17:15 UTC (ORCH): REGRESSION + reviews (Opus x2)
-- **Dredge r3i REGRESSED: his arms and legs are missing/invisible** (boots, horn and cuffs float off the hull). Do NOT ship r3i: keep ext/art-integ on r3h (05596f3f) until a fixed round is posted.
-- Shots: reshoot every match crop on --arena-demo=pose_clear with match-zoom v2 (Tarek s11 and Dredge r3i still show the aim line, and Tarek's is pre-v2).
-- Owner's 17:05 accuracy pipeline (MAIN_TO_EXT) is the method from here; ORCH now also scores face close-up per Hunter.
 ## 17:10 UTC (ORCH): 3D review Pip (b10): ~83% close-up, ~76% match zoom, face ~80%
 1. Face: blotchy cream mask patches on cheeks/muzzle and dark smudges on forehead/ears; paint one clean cream muzzle + two soft blush dots. Eyes are the right size, but the catchlights don't match and the lids are thin, so add the art's heavy lash wing.
 2. Wings: opaque flat grey-white panes. Make them translucent with an iridescent pink rim and veins; at match zoom they read as white blobs.
@@ -893,15 +681,6 @@ Hem, Ostra, Ryzz and Vex now read at match zoom. Sable is mostly white and pale 
 Tarek is the weakest: he is still a brown, busy blob with yellow bead dots. The gauntlets don't read, and the stones are tan dots with no orange eye. The fix took the noise out but gave him no read; that needs model and palette work, not the shader.
 The new pose_clear frame is right: no HUD, sign, aim line or grass over the hero. Every Hunter should reshoot their match crop with it (Tarek s11 and Dredge r3i still show an aim line).
 
-## 17:10 UTC (ORCH): 3D review Breaker (s4): ~80% close-up, ~70% match zoom, face ~76%
-1. Brass compass on the chest strap: still missing, and it is a hook of the portrait and front sheet. Add it where the rope crosses his chest.
-2. Kelp on the shoulders and icicles on the mantle are still missing. The skin is still smooth: paint frost cracks and more barnacles (only a few white spots on the scalp).
-3. The shield still hangs beside his hip with no hand or strap on it. Put his LEFT fist on the rim, as in breaker_front, and check that the side view isn't a flat board.
-4. The right hand doesn't grip the haft: the hammer lies on the shoulder untouched. Close the fist round the haft below the head, as in the art.
-5. The edges of the mantle and skirt have a white and grey fringe in every close view. Clean the alpha and the outline on the rags.
-6. Match: the braids break into a red/black checker. Merge them into one solid red mass at the far LOD.
-Improved: three frozen red braids with silver rings (the right shape now), the shield's grey fringe gone, the skin blue at match zoom, the hammer and the blue body read clearly in game.
-
 ## 17:10 UTC (ORCH): 3D review Tarek (s11): ~80% close-up, ~55% match zoom, face ~82%
 1. The gauntlets are near-black boulders hung on the forearm. The art has tan-grey stone plates fitted elbow to knuckle with orange cracks. Make them lighter, warm grey-tan, flatter and tight to the arm.
 2. The seeing-stones still show no orange eye from the camera: brown swirl rocks close up, tan dots in game. Make one bright orange iris on each outward face and push emissive so it reads at match zoom.
@@ -909,14 +688,6 @@ Improved: three frozen red braids with silver rings (the right shape now), the s
 4. The orange sash and knot don't read; the waist is busy fragments with a white fringe. Give him one solid orange-red sash with a hanging tail.
 5. Match: still a muddy brown column with yellow speckles. Cut the beads and plates at the far LOD and keep the grey vest, the orange sash and the two stones as clean blocks. Reshoot on pose_clear with v2 (the s11 match is pre-v2 and still shows the aim line).
 Improved: the face (warm smile, blindfold, deep-brown skin) and the locs with copper beads closely match the head sheet; the gauntlets are fewer, chunkier slabs; the stones sit beside the head.
-
-## 17:10 UTC (ORCH): 3D review Dredge (r3i): ~72% close-up, ~50% match zoom, face ~72%
-1. He has no limbs now: the thin iron arms and legs are invisible or missing, so the boots, horn and cuffs float apart from the hull. This is worse than r3h. Put back solid dark-iron tube limbs from the hull to each boot and hand.
-2. Dark fragment shards still fly round the arms and legs in every view: the outline or tears on thin geometry. Remove them.
-3. The left claw hand is missing (the art has a 3-finger hook claw). The hook on the winch line is also missing.
-4. The hull is a wide barrel with huge shoulder pods. The art is a round diving-helm sphere with small pauldrons and a porthole on the side. Shrink the pods and round the hull.
-5. The brass is too dark and muddy at match zoom (a brown blob). Lift it to warm gold with a bright rim. The red tar pool reads as a blood decal: make it smaller or darker.
-Improved: the eye is now a small glowing red orb in a wide brass ring, close to the portrait (the old too-big eye is fixed); the black flap shards on the hull are gone; the winch on top reads.
 
 ## 18:20 UTC (ORCH): ORCH reviews paused (owner: this account is low on usage until Fri 06:00)
 - ORCH stops the per-round image reviews. Self-review each round with the owner's rubric v2 (full body, face close-up, match zoom, dark scene; MAIN_TO_EXT 17:05) and score honestly: ORCH's reads ran 5-15 pts below your self-scores, so calibrate down.
@@ -1116,9 +887,6 @@ Use it with hem_v4_needlebow.png for the weapon/prop meshes:
 - Owner's pick for colour: vivid green eyes, a slightly darker warm tan skin, crisp reds.
 - **Use it for colours / skin tone. Use `hem_v4_needlebow.png` for the outfit cut: she wears CAPRIS (mid-calf), not full pants.**
 
-## 2026-11-05 02:22 UTC (ext): HEM MASTER SHEET: `briefs/art-refs/hem_FINAL_sheet.png`
-This one sheet now has everything (vivid colours, the owner's skin tone, capris). It **supersedes** hem_v4_needlebow + hem_v5_sheet_vivid for the outfit and colour. The props sheet and splash stay as they are.
-
 ## 2026-11-05 02:24 UTC (ext): RENAME Hem → **Lisette** ("the Red Stitch"), owner decision (DECISIONS.md updated)
 - **Rename sweep** (small, Sonnet, a KITS-lane branch `ext/rename-lisette` from main):
   - every player-facing string, i.e. the archetype JSON display name, hero_kit, HUD/menus, tutorial/lore text and the wiki via gen_wiki
@@ -1142,11 +910,6 @@ This one sheet now has everything (vivid colours, the owner's skin tone, capris)
   - **armour:** engraved silver on the left shoulder, forearms and shins; leather straps; dark trousers; boots
   - **weapon:** a straight, broad, jagged greatsword glowing white-hot, with sparks and dark smoke
 - No kilt (owner choice). An A-pose turnaround will follow.
-
-## 2026-11-05 02:37 UTC (ext): Kael model turnaround: `briefs/art-refs/kael_turnaround_apose.png`
-- Four views (front, left, back, right), consistent: silver pauldron on his LEFT shoulder, the cracked glowing arm on his RIGHT.
-- The arms hang closer than a true A-pose; rig to the shared armature anyway.
-- The scarf's burn-hole glow and the sword come from kael_FINAL_sheet.png.
 
 ## 2026-11-05 02:39 UTC (ext): Kael splash (owner-approved): `briefs/art-refs/kael_splash.png`
 - Use it for his menu splash + portrait crop.
@@ -1204,9 +967,6 @@ Update the player-facing text in the same rename sweep as Lisette. The anglerfis
 ## 2026-11-05 03:22 UTC (ext): Breaker splash: `briefs/art-refs/breaker_splash.png`
 His ult moment: a teal sea path over the abyss, allies crossing behind him, shield blocking raiders. Use it for the menu splash + portrait crop.
 
-## 2026-11-05 03:31 UTC (ext): Breaker splash final: `briefs/art-refs/breaker_splash.png`
-The dock defence. **The model follows `breaker_FINAL_sheet.png`, NOT this splash's body:** the splash drifted to shell plates, a rope belt and longer legs.
-
 ## 2026-11-05 03:38 UTC (ext): OSTRA NEW DESIGN (owner-picked): `briefs/art-refs/ostra_FINAL_sheet.png`
 A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner deciding; ext suggested "Motley").
 - **The design:** a cursed jack-in-the-box jester.
@@ -1224,31 +984,6 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 - Add it to the same `ext/rename-lisette` sweep: player-facing text only; ids/files unchanged; he/him.
 - **VFX note from the owner:** in motion (dash / ult) the void smoke briefly wraps around the spring as it compresses. In stills the spring stays clear of the smoke.
 
-## 2026-11-05 03:41 UTC (ext): Motley turnaround: `briefs/art-refs/motley_turnaround.png`
-- Four views (front, left, back, right), clean.
-- In the side views the crank's position differs; **put it on one side only (his right)**.
-- The box hovers (no ground contact).
-- The grin and void face are an emissive texture on a face plane inside the hood.
-
-## 2026-11-05 03:42 UTC (ext): Motley splash: `briefs/art-refs/motley_splash.png` (the carnival, his Nightwell ult)
-
-
-## 2026-11-05 03:50 UTC (ext): CINDER REDESIGN (owner-picked): `briefs/art-refs/cinder_FINAL_sheet.png`
-- **Body:** an attractive, unhinged salamander femme fatale.
-  - **Face:** mostly human and beautiful, with fin ears, ember slit-pupil eyes and a manic grin.
-  - **Hair and skin:** long flowing hair of living fire; charcoal skin with glowing magma cracks.
-  - **Figure:** voluptuous, in a laced leather corset, torn shorts and a shredded apron.
-  - **Feet and tail:** clawed bare feet; a long tail with a burning tip.
-- **Gear:**
-  - **Tank:** a riveted copper-and-glass tank of bubbling liquid fire on her back, with a gauge and two exhaust nozzles venting flame.
-  - **Hoses and nozzle:** hoses to a flamethrower nozzle (her held LMB), which replaces the lance as her weapon visual.
-  - **The rest:** goggles, a vial belt.
-- **Kit hooks:**
-  - The tank's exhaust nozzles flare as jets during Flue Flight (ult).
-  - The vials can feed her vial abilities.
-- The art direction for her is sex appeal (per DECISIONS: adult, stylised, not explicit).
-- The hair and tail are cheap spring/flame shaders (item 94 budget).
-
 ## 2026-11-05 03:52 UTC (ext): Cinder views: `briefs/art-refs/cinder_turnaround.png` (front, 3/4, back; in-pose, not a true A-pose). Use it with the master sheet; the side profile is inferred.
 
 
@@ -1258,36 +993,13 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 - Her figure / bust follows the master sheet, which is fuller than here.
 - The flames on the tank nozzles and the gauge come from the master sheet.
 
-## 2026-11-05 03:55 UTC (ext): Cinder splash: `briefs/art-refs/cinder_splash.png` (the burning potion workshop)
-
-
 ## 2026-11-05 03:56 UTC (ext): Cinder A-pose REPLACED: `cinder_turnaround_apose.png` now has the fire hair, fangs and the nozzle flames. Use it for the model. The bust is slightly fuller per the master sheet.
-
-
-## 2026-11-05 04:07 UTC (ext): RENAME + REDESIGN Dredge → **Grimble, the Scrap King** (DECISIONS updated)
-- Add the name to the rename sweep. A new design is coming: a skinny greedy junk-hoarder (see DECISIONS).
-- **Stop any Dredge model work.** The master sheet is coming from the owner shortly.
-
-## 2026-11-05 04:08 UTC (ext): GRIMBLE MASTER SHEET: `briefs/art-refs/grimble_FINAL_sheet.png`
-- **Body:** wiry, long-limbed, hunched; grey stitched skin; a monocle green eye; a crooked grin.
-- **Hoard:** towering on his back (secondary motion: the bells and lanterns swing, coins spill on hits).
-- **Kit visuals:** a big gaff hook on a chain (right arm), a scrap fist (left), a blunderbuss at his hip.
-- **Poses:** the junk-ball roll for his dashes; rears up on one foot (an idle / emote).
-- Panel (b) is a second front view, not a back view; a turnaround will follow.
-
-## 2026-11-05 04:10 UTC (ext): Grimble turnaround: `briefs/art-refs/grimble_turnaround.png` (4 views, sculpt-style, an excellent model reference including the back of the hoard)
-
-
-## 2026-11-05 04:12 UTC (ext): Grimble splash: `briefs/art-refs/grimble_splash.png` (hooking a knight over the abyss). Alts kept: _alt_lair, _alt_ruins.
 
 
 ## 2026-11-05 04:22 UTC (ext): PORTRAITS (owner-made): `briefs/art-refs/<hero>_portrait.png`
 - **Delivered:** lisette, kael, motley, cinder, grimble. Breaker's is still to come.
 - **Use them for** the HUD, character select and kill feed (replacing the splash crops via the portraits pipeline).
 - **Note:** Grimble's portrait shows a second normal eye (the design has ONE eye behind the monocle); the owner may redo it. Use it until then.
-
-## 2026-11-05 04:24 UTC (ext): Breaker portrait: `briefs/art-refs/breaker_portrait.png` (happy). Alt `_alt_determined` (the same image with determined eyes) can be swapped in by mood. All six portraits are now in.
-
 
 ## 2026-11-05 04:30 UTC (ext): CLAIRE REDESIGN (candidate, owner confirming): `briefs/art-refs/claire_FINAL_sheet.png`
 - **Design:** an ice succubus "snow bunny" on skates, clearly adult.
@@ -1305,12 +1017,6 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 - **Animation tone:** gentle and graceful (figure-skating flourishes), never seductive.
 - She can start ART-1 after the current queue. The cute alt is withdrawn.
 
-## 2026-11-05 04:34 UTC (ext): Claire splash + A-pose: `claire_splash.png` (the frozen lake, monsters frozen in her trail), `claire_turnaround_apose.png` (a 4-view sculpt-style turnaround, an excellent model reference).
-
-
-## 2026-11-05 04:46 UTC (ext): OWNER ITEM 109 to the KITS lane, HIGH: Vex aims and shoots freely while dashing
-See OWNER_REVIEW item 109: the aim is currently stuck to one direction during her dash. Small, Sonnet (or fold it into the Vex 68 branch if it's still open). Check the other ranged primaries for the same lock. Post READY in STATUS.
-
 ## 2026-11-05 04:47 UTC (ext): PIP UPGRADE (owner): `briefs/art-refs/pip_FINAL_sheet.png`
 - **Design:**
   - the fairy wings are back
@@ -1322,20 +1028,11 @@ See OWNER_REVIEW item 109: the aim is currently stuck to one direction during he
 - **Size:** waist-high to a human (the corner silhouette); keep the item 108 hitbox matching.
 - **Personality:** see DECISIONS (afraid of the dark, the lantern as her courage). She must read as a Hunter, not a Boki: upright, uses her hands, clothed.
 
-## 2026-11-05 04:55 UTC (ext): Pip master sheet updated (subtle glowing gold constellation markings in her fur, a glowing tail tip, gold wing veins, glowing flowers; the markings brighten when she heals) + splash `pip_splash.png` (a dark cave, healing a knight, eyes in the dark).
-
-
-## 2026-11-05 04:58 UTC (ext): Pip turnaround: `briefs/art-refs/pip_turnaround.png` (4 clean views). Pip, Claire portraits added (`pip_portrait.png`, `claire_portrait.png`). Eight heroes now have a full set: master sheet, turnaround, splash, portrait.
-
-
 ## 2026-11-05 05:05 UTC (ext): SABLE UPGRADE (owner): `briefs/art-refs/sable_FINAL_sheet.png`
 - **Same Sable, evolved:** grey-lilac skin, a sly smile + beauty mark, pointed ears, feathery moth antennae (no hood), a long white braid.
 - **Costume:** a long dark plum leather coat with a high collar, buckled cuffs and split tails; moth-wing tails with eye-spots beneath; a vest; tall buckled boots; keys, a bola and a gem on her belt.
 - **WEAPON CHANGE (owner):** twin ornate enchanted flintlock pistols (dark wood + silver, glowing violet runes and crystals, violet smoke) REPLACE her crossbows. Kit numbers unchanged; visual + VFX + sound swap only (bolts become violet magic shots, a muzzle puff of violet smoke).
 - Update `hero_kit` / description text from "crossbows" to "pistols" in the rename sweep.
-
-## 2026-11-05 05:08 UTC (ext): Sable complete: `sable_turnaround_apose.png` (sculpt-style, pistols holstered at the hips, empty hands), `sable_portrait.png`, `sable_splash.png` (the ballroom heist).
-
 
 ## 2026-11-05 05:14 UTC (ext): RYZZ UPGRADE (owner): `briefs/art-refs/ryzz_FINAL_sheet.png`
 - **Signature (owner):** HANDS-FREE. Her attacks are cocky finger guns, with a spark + smoke wisp at the fingertip.
@@ -1343,10 +1040,6 @@ See OWNER_REVIEW item 109: the aim is currently stuck to one direction during he
 - **Kit hooks:** the rods light up on the ult (Kitefall). Wirerun shoots a wire from her hand. The rods read from top-down.
 - **Model fix:** the front view's left boot is drawn cut off (an art error). Build both legs as in the side and back views.
 - Keep the rest of her look (pink/blue pigtails, bubblegum, the face bolt mark, the corset, the off-shoulder leather jacket, the pleated skirt, fishnets, the hazard bands, thigh-high boots).
-
-## 2026-11-05 05:18 UTC (ext): Ryzz turnaround + portrait saved (ryzz_turnaround_apose.png, ryzz_portrait.png). Splash pending a redo: the first one gave her pistols, but she is hands-free.
-
-## 2026-11-05 05:20 UTC (ext): Ryzz splash: `ryzz_splash.png` (hyped, arms up, lightning off her hands, neon city rooftop). Ryzz complete. Future skin ideas now live in `briefs/art-refs/skins/README.md`.
 
 ## 2026-11-05 05:25 UTC (ext): WEAPON / PROP SHEETS: `briefs/art-refs/<hero>_weapons.png`
 Use them for shape and detail; **the master sheet wins on any difference.**
@@ -1376,10 +1069,6 @@ Use them for shape and detail; **the master sheet wins on any difference.**
 - The climber version is kept as `tarek_alt_climber.png` (skin idea).
 - The Rock Hop dash (item 111) is unchanged.
 
-## 2026-11-05 05:33 UTC (ext): Tarek complete.
-- **Files:** `tarek_FINAL_sheet.png` (eye-stones now in every view), `tarek_turnaround_apose.png`, `tarek_portrait.png`, `tarek_splash.png` (Rock Hop across a canyon).
-- **Model note:** the turnaround shows stone on BOTH forearms; follow the master: one huge stone RIGHT arm + shoulder, the left arm mostly bare (a small stone bracer at most).
-
 ## 2026-11-05 05:39 UTC (ext): VEX UPGRADE (owner): `briefs/art-refs/vex_FINAL_sheet.png`
 - **Kept:** the same face, hair (long side-swept green + braid), cyber-eye, circuit tattoos and gatling arm-gun with the gear backpack.
 - **New punk outfit:** a cropped black leather jacket slipping off one shoulder, with patches + a mini wanted poster; a torn black crop top; a studded belt; ripped olive short shorts over torn black tights; lace-up combat boots.
@@ -1402,8 +1091,6 @@ Use them for shape and detail; **the master sheet wins on any difference.**
 - **Outfit:** the light green racing jacket, a low-cut crop top, a studded "VEX" belt, bike shorts with an orange stripe, glowing thigh-highs with chrome knees.
 - **Weapon:** gatling barrels below + a MAKESHIFT grenade launcher on top (welded scrap pipe, a flared brass muzzle, a spoon sight, duct tape, hazard tape, a green skull, a grenade drum); the wanted poster + kill tallies on the gun.
 
-## 2026-11-05 05:52 UTC (ext): VEX FINAL v2: `vex_FINAL_sheet.png` updated. The jacket slips off her left shoulder (baring the robotic arm) and the ammo belt crosses her chest from the cannon in both front views. Everything else is as in the 05:50 note.
-
 ## 2026-11-05 05:55 UTC (ext): Vex complete.
 - **Files:** `vex_splash.png` (the neon alley, hover-bike crash, cannon firing), `vex_portrait.png`, `vex_turnaround_apose.png`.
 - **Turnaround:** it is flatter/cel-shaded and the hair reads as two braids. **Follow the master sheet**: ONE long braid + side-swept hair; the robotic LEFT arm; the cyber-eye RIGHT. Use the turnaround only for proportions and the back/sides (spine, belt, gun mounting).
@@ -1415,19 +1102,6 @@ Use them for shape and detail; **the master sheet wins on any difference.**
   - The two side views are unreliable: the jacket is missing, and both show the same side. Take the side silhouette from the master sheet.
 
 ## 2026-11-05 05:58 UTC (ext): `vex_turnaround_apose.png` v3: all four views are now valid. The jacket and ammo belt show in the side views; the cannon reads as her right arm; the robotic left arm. Use all four views.
-
-## 2026-11-05 06:06 UTC (ext): Tarek turnaround v2 + CORRECTION to the arm notes
-`tarek_turnaround_apose.png` is replaced and now matches the master sheet. **Correction to ext's earlier notes ("left arm mostly bare"):** per the master, Tarek has stone on BOTH arms:
-- his **LEFT** arm (viewer's right in the front view) is the HUGE stone arm, covering the shoulder and spreading onto his chest, with molten cracks;
-- his **RIGHT** arm has a large stone forearm gauntlet + fist, with a bare upper arm (crescent tattoo on the shoulder).
-
-Build it as in this turnaround.
-
-## 2026-11-05 06:07 UTC (ext): Vex weapon sheet: `vex_weapons.png`.
-- **Shows:** the arm-cannon with its riveted shoulder plate (the arm socket), the gatling barrels, the makeshift launcher with the brass bell muzzle + a ring sight, the grenade drum, the ammo-belt loop, the hoses, the wanted poster, the skull and tallies.
-- **Note:** the spoon sight from the master is drawn as a ring here; either is fine.
-
-## 2026-11-05 06:15 UTC (ext): Breaker turnaround = `breaker_turnaround.png` (the cropped clean 4-view). His DEFAULT idle eyes = soft round friendly dots (see `breaker_alt_round_eyes.png`, the big front view); the bars are his "determined" mood.
 
 ## 2026-11-05 06:25 UTC (ext): OWNER: 2-3x PACE. Your account is at ~20% and resets soon, so use it ALL
 **Goal by the reset (owner):** most Hunter models updated and **90%+ there** vs the master sheets in `briefs/art-refs/`, with idle / walk / run / dash / each ability / hit / downed / death animations, VFX and sounds.
@@ -1531,8 +1205,6 @@ Faces now have a reference for every hero. The face/detail pass applies to all.
 
 ## 2026-11-05 12:26 UTC (ext): OWNER ITEM 117 (playtest): Motley LMB must go through walls in play + be clearly bigger when charged (item 60 did not land as felt). See OWNER_REVIEW 117. KITS lane, small.
 
-## 2026-11-05 12:27 UTC (ext): OWNER BUG (playtest, arena): Breaker's LMB hold spin is NOT back in play, though `ext/kit-breaker-59` (8840f3d6) is merged in main (fb1bcc90). Verify in ARENA specifically (`--arena` / the arena loadout path) and in an expedition: hold LMB means the hammer whirls (2.5-4 turns/s), release means the slam. Find why it does not trigger (an arena kit override? an input remap? the old bot path?) and fix with an arena assert. HIGH, small.
-
 ## 2026-11-05 12:28 UTC (ext): OWNER ITEM 118 (playtest): Pip RMB = a fixed ~1 s wind-up then an auto-throw at the cursor (aim sampled at the throw, "flick to land"); not holdable. See OWNER_REVIEW 118. KITS lane, small.
 
 ## 2026-11-05 16:05 UTC (ext): OWNER RULE: never stop to ask the owner a question and wait. He is often away. Make the most reasonable call, note it (with the alternative) in your READY/STATUS or EXT_TO_MAIN for review, and keep working. Only an irreversible, risky action (deleting data, force pushes, publishing outside your approved scope) waits, and then you continue with other work meanwhile.
@@ -1559,11 +1231,6 @@ The owner says the weapons look oversized and out of place.
 ## 2026-11-05 17:42 UTC ext → S2: item 118b (Pip RMB wind-up anim)
 - A 1.0 s stretch-and-gather (arms sweep up and out, onto her toes, motes drawn into the lantern), then a snap release. Elluna-style channel.
 - The mechanics are on ext/kit-pip-118. Small; slot it after Kael 131.
-
-## 2026-11-05 17:44 UTC ext → S2: item 139 (Ryzz finger guns)
-- Her arm coils read as a gun. Flatten them into wraps; nothing past the wrist.
-- Clear finger-gun hands. LMB alternates L/R with a fingertip recoil; projectiles spawn at the fingertip anchors.
-- Fold it into art1-ryzz before S5 merges it if quick; otherwise as a follow-up.
 
 ## 2026-11-05 17:51 UTC ext → S2: owner item 143, an animation quality pass (a big standing goal)
 - Everyone's crouch, and anims in general, need to look cooler.

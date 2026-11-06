@@ -1,6 +1,6 @@
 # Inbox for the image-gen agent (IMG)
-## 2026-11-03 16:30 UTC: start with the style frame (deliverable 1) and stop for approval.
-
+<!-- briefs-trim pointer -->
+> Trimmed 2026-11-06 by briefs-trim: 7 finished/superseded entries moved to briefs/archive/INBOX_IMG-2026-11-06.md. Kept here: owner rules and decisions, open owner questions, unmerged READY branches, open assignments and review items, the latest SHIPPED/RELEASED, holds still in force, and the last 12 h. Older archives: briefs/archive/INBOX_IMG-*.md
 ## 2026-11-04 01:35 UTC (orchestrator): OWNER: Boki art next; it feeds the 3D pipeline
 - The Wardens are now built in 3D with Meshy image-to-3D from your turnarounds, so the quality of your sheets sets the quality of the models. The owner wants the **Boki** to look better next, through the same pipeline.
 - Do now (main's 20:30 item 1): the **starter and common Boki species first**, to STYLE.md. For each one:
@@ -49,12 +49,6 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 - For every turnaround from now on: include a **true side profile** (front / side / back, plus 3/4 optional), because Meshy reads clean orthographic views best. If you can, add a pure side view of Vex too.
 - If you can't push from your machine, bundles work: the owner hands them over.
 
-## 2026-11-04 04:05 UTC (orchestrator): correction to my 01:50 creator note
-- DECISIONS now defines the player as **the Unmasked**: a smooth, near-faceless base (gender silhouettes; height/build as params), face marks as decals (eye shape/expression, brows, blush), outfits and colours; **no hair, race, species or nose**. Drop the 01:50 list (faces, hair styles). Ext leads it (EXT_TO_MAIN 03:40); make what it asks for.
-
-## 2026-11-04 04:25 UTC (orchestrator): Vireo is renamed "Ryzz"
-- Name her new round-2 files ryzz_turnaround / ryzz_side / ryzz_portrait / ryzz_splash. Her look notes are unchanged (electrified hair, energy/personality, not AI-generic).
-
 ## 2026-11-04 04:35 UTC (orchestrator): received and committed
 - Ryzz round 2 (turnaround, side, portrait, splash, before/after) is committed to ext/imagegen from the owner's uploads. Next redos still wanted: Sable, Bjorn, Dredge, Burple, Claire, Tarek, Ostra (each with a true side view).
 
@@ -67,19 +61,8 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 ## 2026-11-04 07:10 UTC (orchestrator): Ryzz gets a lightning scar
 - Owner idea: her closed right eye is a scar, not a wink. In any Ryzz redo, paint a branching lightning-shaped scar through the right brow and cheek (faint blue glow), the eye closed or half-lidded. Cinder: draw her spear in her RIGHT hand from now on.
 
-## 2026-11-04 08:45 UTC (orchestrator): Pin is renamed "Hem"
-- Name her new files hem_*. Her redesign prompt (the Mask-Stitcher) is in briefs/specs/REDESIGN_PROMPTS_R3.md.
-
-## 2026-11-04 09:55 UTC (orchestrator): terms
-- In any text on art (posters, kit files): say Hunter, not Warden; the people without Masks are "the Empty".
-
-## 2026-11-04 09:30 UTC (orchestrator): Zedran is now "Kael" (files kael_*). Titles: Kael The Unbroken, Claire Frost Siren, Pip Little Lantern, Ryzz Storm Chaser.
-
 ## 2026-11-05 (S2): OWNER_REVIEW item 108: redo Vex's splash art
 - Owner: a better Vex splash, our own design, with a stronger composition and pose. Keep her current design (green hair and braid, eye plate, rotary cannon in gunmetal + brass, gear backpack and hoses; see wardens_r3 VEX_KIT.md). Save as vex_splash* on ext/imagegen and post the commit in briefs/EXT_TO_MAIN.md. Approval gate as for ART-1: owner approves before it replaces the current one.
 
 ## 2026-11-05 (S2): Vex splash request updated
 - The 00:52 request's design note is out of date: use briefs/art-refs/vex_FINAL_sheet.png (the street racer version, one hybrid arm-cannon) for any Vex splash. Skip it if the owner already made one.
-
-## 2026-11-05 (S2): Vex splash request closed
-- The owner delivered vex_splash.png, vex_portrait.png and the final sheet. No Vex splash needed from IMG.
