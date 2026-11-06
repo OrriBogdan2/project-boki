@@ -8,14 +8,20 @@ const WANT_FRAC := [0.3, 0.4]    # the owner's 0.60 of main's sword (0.34): pomm
 const ON_HILT := 0.1             # m: how far a gripping hand's bone may sit off the hilt
 const TIP_SLACK := 0.03          # m: the blade_tip FX anchor against the blade's real tip
 const SWORD_POSES := [["carried", {}], ["walk", {"vel": 2.0}], ["run", {"vel": 4.6}],
-	["LMB swing 1", {"kmove": "jug_slash_r", "kmove_t": 0.1}], ["LMB swing 2", {"kmove": "jug_slash_l", "kmove_t": 0.1}],
+	["LMB swing 1", {"kmove": "jug_slash_r", "kmove_t": 0.1}],
+	["LMB swing 2", {"kmove": "jug_slash_l", "kmove_t": 0.1}],
 	["Wave wind-up", {"kmove": "jug_wave_wind", "kmove_t": 0.3}], ["Wave", {"kmove": "jug_wave", "kmove_t": 0.2}],
-	["Lunge hold 0.10", {"kmove": "jug_lunge_wind", "kmove_t": 0.1}], ["Lunge hold 0.28", {"kmove": "jug_lunge_wind", "kmove_t": 0.28}],
-	["Lunge hold 0.45", {"kmove": "jug_lunge_wind", "kmove_t": 0.45}], ["Lunge hold 1.20", {"kmove": "jug_lunge_wind", "kmove_t": 1.2}],
+	["Lunge hold 0.10", {"kmove": "jug_lunge_wind", "kmove_t": 0.1}],
+	["Lunge hold 0.28", {"kmove": "jug_lunge_wind", "kmove_t": 0.28}],
+	["Lunge hold 0.45", {"kmove": "jug_lunge_wind", "kmove_t": 0.45}],
+	["Lunge hold 1.20", {"kmove": "jug_lunge_wind", "kmove_t": 1.2}],
 	["Lunge", {"kmove": "jug_lunge", "kmove_t": 0.2}],
-	["Slam wind-up", {"kmove": "jug_slam", "kmove_t": 0.56}], ["Slam", {"kmove": "jug_slam", "kmove_t": 0.7}],
-	["Rampage drive", {"kmove": "jug_dash", "kmove_t": 0.21}], ["Rampage tip", {"kmove": "jug_dash", "kmove_t": 0.38}],
-	["Rampage drag", {"kmove": "jug_dash", "kmove_t": 0.6}], ["Guard", {"kmove": "jug_guard", "kmove_t": 0.36}]]
+	["Slam wind-up", {"kmove": "jug_slam", "kmove_t": 0.56}],
+	["Slam", {"kmove": "jug_slam", "kmove_t": 0.7}],
+	["Rampage drive", {"kmove": "jug_dash", "kmove_t": 0.21}],
+	["Rampage tip", {"kmove": "jug_dash", "kmove_t": 0.38}],
+	["Rampage drag", {"kmove": "jug_dash", "kmove_t": 0.6}],
+	["Guard", {"kmove": "jug_guard", "kmove_t": 0.36}]]
 const SMOKE_FRAMES := 200
 const HOLDS := ["Lunge hold 0.10", "Lunge hold 0.28", "Lunge hold 0.45", "Lunge hold 1.20"]
 const POMMEL := Vector3(0, 0, 0.155)     # kael.glb's weapon mesh: pommel end, tip, guard (model units)
@@ -91,10 +97,10 @@ func _measure() -> void:
 		var gun := w.get_parent() as Node3D
 		var a: Array = anchors.get("blade_tip", {}).get("gun", [0, 0, -0.53])
 		var tip_off := (gun.global_transform * Vector3(a[0], a[1], a[2])).distance_to(x * TIP)
-		print("SWORD %-16s sword %.3f m = %.3f of height, blade %.3f m, R hand %.3f off the hilt, L hand %.3f, tip FX %.3f off, tip y %.2f"
-				% [p[0], whole, whole / tall, blade, r, l, tip_off, (x * TIP).y])
+		print("SWORD %-16s sword %.3f m = %.3f of height, blade %.3f m, hand R %.3f L %.3f off the hilt, tip FX %.3f"
+				% [p[0], whole, whole / tall, blade, r, l, tip_off])
 		if whole / tall < WANT_FRAC[0] or whole / tall > WANT_FRAC[1]:
-			print("FAIL: %s sword is %.3f of his height, wanted %.2f-%.2f" % [p[0], whole / tall, WANT_FRAC[0], WANT_FRAC[1]])
+			print("FAIL: %s sword is %.3f of his height" % [p[0], whole / tall])
 			fails += 1
 		if r > ON_HILT:
 			print("FAIL: %s right hand %.3f m off the hilt" % [p[0], r])
