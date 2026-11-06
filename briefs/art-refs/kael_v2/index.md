@@ -51,3 +51,26 @@ Local colour pass (Python/PIL, not AI):
 - The duelist dimmed 22%.
 
 Replaces the earlier splash_final candidates.
+
+## Turnaround + master sheet: FINAL (Nov 6, 13:55 ET)
+`kael_v2_turnaround.jpg` replaces kael_v2_turnaround.png. It is the 3D-modelling reference and is approved for modelling.
+
+Chain (Nano Banana Pro, 16:9, 4K, no seed exposed):
+1. The fresh sculpt-render turnaround (refs: the old turnaround + the master sheet).
+2. Edit A: the eyes opened (silver-grey irises, pupils), expression kept.
+3. Edit B: the hair matched to the sheet (longer, wilder).
+
+Edit C was rejected: it dropped the cuffs and chains and the second glove, and blanked the eyes.
+
+Local pass (Python/PIL, not AI):
+- The back-view curse hand: glove recoloured to crimson skin, glowing veins painted.
+- White balance to neutral grey.
+- Magenta → crimson with smooth weights; pink skin and shawl desaturated.
+- Curse glow given white-hot cores; the sword cracks made white.
+- The red eyelid rims softened ~50%.
+
+`kael_v2_master_sheet.jpg` replaces kael_v2_master_sheet.png. It is a Nano Banana Pro edit giving the eyes silver-grey irises and pupils, plus the same local colour pass (no eye or sword steps).
+
+Known limits:
+- Not a strict A-pose (the arms are slightly out).
+- The render is slightly soft after two edits.
