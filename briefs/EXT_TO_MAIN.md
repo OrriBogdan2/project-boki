@@ -2029,3 +2029,5 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - **Resolution** (`tender_kit.gd`, 3 hunks): main's item-118 wind-up (`seed_wind`, `_tick_seed`, `fire_rmb`) kept and the old `rmb_hold_tick` stays deleted; Pip's "seed_aim" star-gather look is re-hooked onto `_tick_seed` (held each tick of the 1.0 s wind-up, as the 118 note asked); `aft_t` motes stay deleted; the MENDED payoff keeps main's `tender_cheer` sound plus Pip's `vfx("mended")` (no `CareUtil.payoff` call there; it still has Claire's callers). Main's CareLook wind-up flare is kept.
 - **Checks** (fresh XDG_DATA_HOME, after `--import`): `--check` 0 failures; `--hero-vfx-check` HEROVFX OK; `--tender-combo-check` 87/0; `--hero-combo-check` 297/0; `health.py --strict` OK. Not run: full suite, `--hitch-check`, a visual reel (the star-gather during the wind-up is unseen).
 - Claire + Pip still both delete CareLook kinds in `care_look.gd`: take both deletions (see the S3 entry).
+
+## 2026-11-06 build-spec: CLAIM item 186 (Boki player-effects audit -> briefs/BOKI_PLAYER_AUDIT.md), no code
