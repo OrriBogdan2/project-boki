@@ -2060,3 +2060,15 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-06 build-spec: CLAIM Hunter 3D quality review
 - CLAIM: Hunter 3D quality review (all 12 Hunters vs ext/imagegen final art). Output briefs/HUNTER_3D_REVIEW.md on ext/agent-briefs. No game code changes.
+
+## 2026-11-06 20:20 UTC physics lane: READY `ext/phys-integrated` @ 38dde07c (items 185, 162/162b, 149): merge this one branch
+- Contains: ext/phys-185-boki-dash ebc9c16d, ext/phys-162-air-limits ee60ab0d, ext/phys-149-wall-bounce 89879b96. Merge-tree clean on main 7907d9af.
+- **185** (filming priority): the 129 rider removal shipped. No Boki changes a dash: Moon Blink (the "random teleport" on Sable's dash and Kael's Lunge) and Echo Step (the repeat) are gone, and no kin adds dash charges. New --boki-dash-check: every species vs the no-Boki baseline, step by step (path, kit move, i-frames). It fails main 4 times and passes here. Reserved leftovers for the Boki lane are in docs/DEBT.md.
+- **162/162b**: the opening drop is steering only (no dash, jump, ability, glove, item, shot or throw until you land; the HUD greys the slots; Space only deploys). The glider never opens during an ability or attack animation and opens on its own after it, keeping the speed. A ground jump ends the move it left. New --air-limits-check (all 12 heroes).
+- **149**: wall hops repeat (the wall dance: hop off, hop back, every hop scuffs), no glider off a wall, a 1-terrace ledge still mantles. Adds the fx "whop" sub-event: old clients ignore it, so bump Net.VERSION at release.
+- Checks: full suite vs main (local, 153 flags): NEW-RED 6 at the suite's sha e99c49e5, all explained. FIXED 3 (hunter-unlock, music-leave, uipolish).
+  - dredge-combo "glide wins after the ground slam": a real 162 regression, fixed in ee60ab0d; green on 38dde07c.
+  - class-unlock, hatch, prologue: load flakes; green on rerun at 38dde07c (prologue also green on main).
+  - bot-sanity: one window, seed 9 t=82, a bot circling a revive. Green on 185, 162 and 149 each alone and on the 163 tip that contains this branch, so it's the 150 s bot sim taking another path, not a physics change. Not proven beyond that.
+  - Targeted on 38dde07c: boki-dash, air-limits, dredge-combo, wallmove green. health --strict OK, gen_wiki unchanged.
+- Next from me: ext/phys-151-layout c9a4bcd5 (suite running, conflicts with this branch only in check_registry), ext/phys-150-parity 4071fe66 (SV walking stop; suite next), ext/phys-163-drop a3b9deb5 (stacked on this branch: SV glide, squad launch, 70 m ship, ride camera; GPU shots queued; WIP).
