@@ -34,13 +34,13 @@ Owner preferences: never stop and wait on him (make the call, note the alternati
 
 ## 3. In flight
 - No S2 agents running. Nothing uncommitted that matters.
-- Bug 181 on a real GPU (Mac M5, Compatibility, job 20261106-065923-30932): first uses 28-29 ms, 0 compiles; one 45 ms frame on Sable's second dash, 0 compiles, unexplained, rerun it. Before any jobq run, `--import` the worktree after moving it, or the job fails on a stale class cache (that is why two earlier jobs timed out at rc 124). No GPU hitch number from S2 yet; see ext/reports.
+- Bug 181 on a real GPU (Mac M5, Compatibility, job 20261106-065923-30932): first uses 28-29 ms, 0 compiles; a 45 ms frame on Sable's second dash did not repeat on the rerun (job 20261106-070202-08522, worst 29 ms). That rerun's last four Kael rows had 0 frames: his later moves never started, which looks like the harness; not diagnosed. Before any jobq run, `--import` the worktree after moving it, or the job fails on a stale class cache (that is why two earlier jobs timed out at rc 124). No GPU hitch number from S2 yet; see ext/reports.
 - Open branches with work: only the two READY ones above.
 - Worktrees: /home/boki/s2-* (use /home/boki/s2-art1-integ for ext/art1-kael-2, /home/boki/s2-kit-kael-113b for 113b, /home/boki/s2-art1-kael2 is ext/art1-kael's work, branch name ext/art1-kael-r4 locally; ignore /home/boki/s2-art1-kael, stale). /home/boki/s2-fix-181 is detached on main for the GPU jobs. Clean up freely once merged: s2-art1-cinder-main, s2-kit-ryzz-116-base, s2-trial-116.
 - Shots: /home/boki/shots-s2/art1/<hero>/ (Lisette = hem), published to ext/hero-shots-s2 art1/. MP4s stay on disk. Grimble's raw scans live in ~/meshy/grimble, not in git; check ~/meshy for other Heroes before rebuilding.
 
 ## 4. Next steps, in order
-1. Rerun --dash-frames-check on a real GPU to see if Sable's 45 ms frame repeats; add Forward+ if a worker offers it.
+1. Find why tools/dash_frames.gd's later Kael rows got 0 frames on the Mac, then get a clean GPU run; add Forward+ if a worker offers it.
 2. When the owner decides on Kael: land ext/art1-kael-2 (refresh on main first), with his sword choice: BLADE_LEN in tools/art1/kael_pieces.py, then re-derive the Lunge tip and hit_r (formula: tip - 0.428 - 0.4).
 3. Item 143, phase 2: the core animation set per Hero (idle, run, jump/land, dash, hit, downed) once the owner OKs the crouch style. Strips: hero-shots-s2 art1/anim143/.
 4. Item 158 pose, after S5's Mask transformation lands. S3 VFX, S4 sound follow.
