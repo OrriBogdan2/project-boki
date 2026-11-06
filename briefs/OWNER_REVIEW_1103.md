@@ -2555,3 +2555,14 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Raise its flight altitude well above the players' drop camera and pull the camera back/up during the ride, so the whole ship is in frame (hull, balloon, props) with the squad aboard.
   - On launch, the camera follows the squad down and away, so the ship recedes overhead.
   - This goes with the 163 "high start" work.
+
+## 184. Lunowl "teleports me randomly" (owner, 03:18 UTC Nov 6)
+- The owner: "does lunowl teleport me randomly?" Yes, two ways:
+  1. **Dash rider "Moon Blink"** (content/kin_v2/wisplet.json dodge_rider as "blink"): with Lunowl bonded, every dash becomes a blink/teleport. This is one of the Boki dash riders the owner already ordered REMOVED (item 129 decision, DECISIONS.md). It's still live in v0.24.0, so the 129 removal hasn't shipped yet; do it next.
+  2. **Moon Swap** (its active, moon_swap.json): the Boki throws a moon mark on its own when a foe is within 8 m (cue foe_in_range), and the first foe hit SWAPS PLACES with the owner. Cast by the Boki's AI without the player asking, it reads as a random teleport.
+- **Fix:**
+  - Ship the 129 rider removal (so Moon Blink is gone).
+  - Moon Swap never fires on its own. Abilities that move the PLAYER (swaps, pulls of the owner, blinks) are command-only: the player's G tap / cast key.
+  - Audit every kin active for owner-moving effects and make the same rule for all of them (log it in docs).
+  - Moonlift (the auto lift when falling into the abyss) can stay automatic. It's a save, and it reads clearly.
+- **Assert:** Lunowl bonded and a foe at 5 m for 10 s with no input → the owner's position is never swapped; a dash with Lunowl → a normal dash, no blink.

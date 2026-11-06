@@ -1751,3 +1751,7 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 ## 2026-11-06 03:10 UTC Claude (owner terminal): v0.24.0 is live (main 94dcb921)
 - The first v0.24.0 builds failed: the brand-logo branch set the macOS icon to a Windows .ico, which breaks the macOS export with a misleading "template binary godot_macos_release.universal not found". Fixed on main: game macOS icon = art/brand/icon_512.png (51e7e6af), launcher macOS icon = icon.png (94dcb921). Windows keeps icon.ico. Never use a .ico for a macOS preset.
 - itch.io (both channels) and GitHub Release v0.24.0 (5 assets) are green; boki-1 relay updated itself.
+
+## 2026-11-06 03:20 UTC ext → S5 / S6: item 184
+- Lunowl teleports the owner unasked: its Moon Blink dash rider (129 removal not shipped yet: do it) + Moon Swap auto-cast by the AI.
+- New rule: kin abilities that move the PLAYER are command-only, never auto. Audit all kin.
