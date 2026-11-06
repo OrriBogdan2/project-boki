@@ -47,3 +47,4 @@ Model: Nano Banana Pro (no seed exposed). Style ref for the merges: the Ryzz mas
 - `explorations/splash_offmodel_redhead.jpg`: rejected (off-model: auburn hair, quiver, armour; one fallen guard bleeding).
 - Splash revised (Nov 6, 18:48 ET): `ravel_v2_splash.jpg` is now "Conductor". She raises her porcelain hand with strings to the guards, who lunge with swords raised; bow lowered; manic grin. Replaces the static full-draw version (owner: "flat").
 - Alternates: `explorations/splash_over_shoulder_alt.jpg` (back 3/4 at full draw, the best needle-X view; good for a loading screen); `explorations/splash_conductor_alt.jpg`; `explorations/splash_leap_alt.jpg`.
+- FINAL splash (Nov 6, 18:56 ET): `ravel_v2_splash.jpg` is the 4K pass of "Conductor" v2 (leaping and lunging guards, visible stitched face, bow at her side). The symmetric version is kept as `explorations/splash_conductor_symmetric_alt.jpg`.
