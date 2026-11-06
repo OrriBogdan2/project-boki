@@ -1,5 +1,5 @@
 # Hunter 3D quality review (build-spec, 2026-11-06)
-Source: `--warden-shots` on origin/main 7907d9afe (jobq 20261106-205337-05470, all 12, GPU), idle front_34 + closeup_front, vs `briefs/art-refs/<hero>_FINAL_sheet.png` and the FIDELITY_CHECKLIST rows. Scores are my read, 1-10, calibrated down (ORCH ran 5-15 pts under self-scores). Not covered: moves, poses, dark scene, match-zoom x4, VFX; kit-by-kit (wardens_r3/*_KIT.md) lists were not re-diffed, so ask the owning lane to check them. Grimble = dredge, Lisette = Hem (archer).
+Source: `--warden-shots` on origin/main 7907d9afe (jobq 20261106-205337-05470, all 12, GPU), idle front_34 + closeup_front, vs `briefs/art-refs/<hero>_FINAL_sheet.png` and the FIDELITY_CHECKLIST rows. Scores are my read, 1-10, calibrated down (ORCH ran 5-15 pts under self-scores). Pass 2 (build, same jobq shots: turnaround_close, poses_game, back/side) added back/side views and the ext/imagegen KIT.md diffs (section 'Pass 2' below). Still not covered: dark scene, match-zoom x4, VFX, Pip/Sable/Grimble/Kael back and side views. Grimble = dredge, Lisette = Hem (archer).
 
 | Hunter | Score |
 |---|---|
@@ -7,9 +7,9 @@ Source: `--warden-shots` on origin/main 7907d9afe (jobq 20261106-205337-05470, a
 | Ostra | 8 |
 | Claire | 7.5 |
 | Cinder | 7.5 |
-| Hem | 7 |
-| Tarek | 7 |
-| Ryzz | 7 |
+| Hem | 6.5 |
+| Tarek | 6.5 |
+| Ryzz | 6.5 |
 | Vex | 6.5 |
 | Sable | 6.5 |
 | Grimble | 6.5 |
@@ -34,3 +34,15 @@ Source: `--warden-shots` on origin/main 7907d9afe (jobq 20261106-205337-05470, a
 - Fix first: Kael, Breaker framing, Sable and Vex colour/skin.
 - Faces: several close-ups (Claire, Sable) show eyes closed in idle; a shared eye/blink default is worth checking.
 - Re-shoot with `--arena-demo=pose_clear` for match zoom before scoring again.
+
+## Pass 2 (build, 2026-11-06): back/side views and kit diffs
+**Canon conflict (owner decides, one line):** the 3D models match `briefs/art-refs/*_FINAL_sheet.png` (main) for Breaker (barrel hull + porthole), Claire (hood, ram horns, light-blue wings) and Ostra (jack-in-the-box, black starry face). The ext/imagegen kits say otherwise: Breaker r3 = sea-ogre (1.5x, bald, three icy braids, hammer on right shoulder, no anglerfish or lantern); Claire r2 = demoness (dark horns/wings, dark wavy hair, ice-crystal costume); Ostra r2 = white porcelain mask, no legs, crescent halo, no box. Scores above stand against the FINAL sheets; if the kits are canon, Breaker drops to about 2 and Claire/Ostra to 4-5 (new models needed, not fixes). Breaker item 3 (anglerfish) is FINAL-sheet only: the kit says no lantern.
+Kits agree with the model on Pip, Sable, Tarek, Vex, Cinder, Hem, Ryzz as listed below.
+- **Ryzz 7 -> 6.5:** back view shows 4-5 copper rods fanned out plus a round copper ring. Kit: exactly 3, the middle one scorched and bent (relic); no ring. Fix first. One coil tie per pigtail base only.
+- **Hem 7 -> 6.5:** (kit) head has a black ponytail; kit has a sleek bun pierced with silver needles. Bow is white/silver; kit is a black recurve with a glowing red thread string and spool. Body is a black bodysuit with red lines; kit is a crimson high-collar coat, open over a black corset, plus tape measure, shears, needle bandolier. Face covering reads as a red scarf; kit is a cracked porcelain half-mask with red stitches. The long red tail is the asymmetric coat tail: keep, but attach it to a coat. Quiver on back is good.
+- **Vex 6.5:** back view confirms a bulky launcher/backpack on the right shoulder with hoses (ok), but the right forearm must END in the six-barrel rotary gun with no hand; check the gold forearm piece. Green seams on the legs are good. Add the green braids' copper wire and bolts.
+- **Tarek 7 -> 6.5:** (kit) both arms are huge white-grey stone gauntlets, shoulder to fist; kit is a lean runner with bracers on the forearms only and open hands. Shirtless with tiger-stripe tattoos; kit has an open slate vest, harness with pitons and a chalk pouch. Terracotta sash and wrapped feet are good. Stones orbit correctly.
+- **Cinder 7.5:** back view shows the copper tank and hose, tail with fin and magma spots: the earlier "tank not visible" note is resolved (tank is there, good). Kit wants a thin translucent fin-crest with a glowing orange edge instead of the long flame-hair sheet, goggles cracked on the crest (goggles present), a flame in the lance chamber, glowing skull vials on the bandolier.
+- **Breaker (framing):** the default turnaround shows the hull from the front; poses_game shows a top-down tub with the hammer as a flat pole. The hammer is not a capstan wheel chained to the wrist. Fix with the FINAL sheet: capstan wheel head with spike, chain to the wrist.
+- **Claire (back):** bow and wings read well, tail has no heart tip. Spear has the candy stripe (the earlier "needs stripe" note was wrong); it still needs a heart tip.
+- **Ostra (back):** spring box reads well from all sides, cards orbit; no crescent halo or starfield anywhere (kit and FINAL sheet both show the starry void body).

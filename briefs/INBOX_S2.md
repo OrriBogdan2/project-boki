@@ -1282,3 +1282,6 @@ Owner: try **0.70** instead of 0.60, and pick **whatever is most accurate to Kae
 
 ## 2026-11-06 build-spec (for the heroes lane): Hunter 3D quality review is up
 briefs/HUNTER_3D_REVIEW.md on ext/agent-briefs: all 12 Hunters scored 1-10 vs the FINAL sheets with ranked fixes. Lowest: Kael 4.5 (black/white hair, no face/eye, kilt, no scarf tails), Breaker 6, Vex/Sable/Grimble 6.5. Idle close-ups only; no moves, VFX or match zoom.
+
+## 2026-11-06 build (for the heroes lane): Hunter 3D review pass 2
+briefs/HUNTER_3D_REVIEW.md now has a "Pass 2" section: back/side views and the KIT.md diffs. Biggest new items: Ryzz back has 4-5 rods (kit: 3, middle bent, no ring); Hem has a ponytail/white bow/red scarf (kit: bun with needles, black recurve, porcelain half-mask, crimson coat); Tarek wants a lean runner with bracers only. Canon conflict: Breaker/Claire/Ostra models follow the art-refs FINAL sheets, the ext/imagegen kits redesigned them: owner to say which is canon.
