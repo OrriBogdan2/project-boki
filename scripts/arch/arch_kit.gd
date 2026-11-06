@@ -34,6 +34,7 @@ var bonded_glow := false
 var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, guard}
 var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
 var flow: DashFlow             # what ability presses do during this hero's dash
+var dash_press_at := -9.0      # when Shift last went to on_dash (AirLimits: the dash's moves never hold the glider)
 
 static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	var k: ArchKit
@@ -116,6 +117,7 @@ func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
 func gate_inputs() -> void: pass                    # a kit drops the presses it locks out
+func locks_glide() -> bool: return false            # a move AirLimits can't see from the shared state (a dive)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 ## Does this kit have the class long dash (Shift in the air)? The HUD shows its segment only then.
 func has_long_dash() -> bool: return true

@@ -47,6 +47,7 @@ const CHECKS := {
 	"--ping-check": ["res://tools/ping_check.gd", "ping_check", null],
 	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],      # dash -> ability rows
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
+	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
 	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],
