@@ -48,6 +48,10 @@ const FRAME := {
 		"ear_tip": Vector3(0.204, 0.665, -0.038), "tail_tip": Vector3(0, 0.114, 0.257), "tip_bone": "tail1",
 		"marks": {"left flank": Vector3(-0.18, 0.22, 0.03), "right flank": Vector3(0.18, 0.22, 0.03),
 			"back": Vector3(0, 0.3, 0.18), "chest": Vector3(0, 0.25, -0.17)}},
+	"gloamshell": {"head": Vector3(0, 0.33, -0.35), "top": 0.6, "carry": Vector3(0, 0.56, 0.1),
+		"ear_tip": Vector3(0.085, 0.56, -0.29), "tail_tip": Vector3(0, 0.04, 0.42), "tip_bone": "tail2", "hip": 0.0,
+		"marks": {"left flank": Vector3(-0.15, 0.09, -0.05), "right flank": Vector3(0.15, 0.09, -0.05),
+			"back": Vector3(0, 0.16, 0.26), "chest": Vector3(0, 0.2, -0.3)}},
 }
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
