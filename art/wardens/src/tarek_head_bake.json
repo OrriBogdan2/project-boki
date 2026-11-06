@@ -1,0 +1,24 @@
+{
+ "high": "~/meshy/tarek_m/head1/glb.glb",
+ "out": "~/meshy/tarek_m/head_bake/low.glb",
+ "blend": "~/meshy/tarek_m/head_bake/bake.blend",
+ "tris": 3400,
+ "tex": 2048,
+ "head": {
+  "centre": [
+   0,
+   0,
+   0.2
+  ],
+  "r": 0.05
+ },
+ "head_uv": 1.0,
+ "head_tris": 0,
+ "uv_smooth": 30,
+ "uv_angle": 66,
+ "uv_margin": 0.001,
+ "cage": 0.008,
+ "ray": 0.03,
+ "margin_px": 12,
+ "floater_verts": 60
+}

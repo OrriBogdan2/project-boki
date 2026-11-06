@@ -250,10 +250,12 @@ func _launcher(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) 
 	var plain := _walk_speed(m, P)
 	var p0 := P.pos
 	var puffs0 := K.puffs
+	var burrs0 := K.burrs.size()
 	P.inp["sec"] = true
 	P.inp["sec_hold"] = true
 	m.step(C.DT)
-	var out_now := K.puffs == puffs0 + 1 and float(K.cd["rmb"]) > 0.0
+	# (the charge goes at once; on her model the puff waits for the bell, TUBE_SWING)
+	var out_now := K.burrs.size() == burrs0 + 1 and float(K.cd["rmb"]) > 0.0
 	var b: Dictionary = K.burrs[-1] if not K.burrs.is_empty() else {}
 	var gun := P.model.get_node_or_null("Rig/Torso/Aim/Gun/Muzzle") as Node3D
 	var from_gun := not b.is_empty() and gun != null and (b["pos"] as Vector3).y >= gun.global_position.y
@@ -262,6 +264,8 @@ func _launcher(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) 
 	P.inp["sec_hold"] = false
 	var walked: float = P.flat_dist(p0) / (1.0 + C.DT)
 	P.inp["move"] = Vector2.ZERO
+	# (her model has the launcher's own firing point, which the empties check below covers)
+	from_gun = from_gun or WardenGlb.anchor(P.model, GunslingerKit.TUBE_FIRE) != null
 	C.ok("Vex item 112: a tap fires within one step, from above the gun's muzzle on a model with no launcher",
 			out_now and from_gun, "y %.2f" % was_at.y)
 	C.ok("Vex item 112: a 1s hold fires once, at the press", K.puffs == puffs0 + 1 and not K.rmb_down,
@@ -273,7 +277,8 @@ func _launcher(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) 
 	C.ac.step(m, 1.5)
 
 ## On the new model: the charge leaves from launcher_fire at the press, read live, and the flash waits for the bell
-## (launcher_muzzle), which starts the shot behind her shoulder. Stand-in empties on a stand-in Warden node.
+## (launcher_muzzle), which starts the shot behind her shoulder. Her real empties, held at known spots for the shot,
+## or stand-ins on a stand-in Warden node on a model that has none.
 func _launcher_empties(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	var w := P.model.get_node_or_null("Warden") as Node3D
 	var made := w == null
@@ -281,12 +286,18 @@ func _launcher_empties(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> 
 		w = Node3D.new()
 		w.name = "Warden"
 		P.model.add_child(w)
-	var spot := Node3D.new()
-	spot.name = GunslingerKit.TUBE_FIRE
-	var bell := Node3D.new()
-	bell.name = GunslingerKit.TUBE_BELL
-	w.add_child(spot)
-	w.add_child(bell)
+	var spot := WardenGlb.anchor(P.model, GunslingerKit.TUBE_FIRE)
+	var bell := WardenGlb.anchor(P.model, GunslingerKit.TUBE_BELL)
+	var stand_in := spot == null or bell == null
+	if stand_in:
+		spot = Node3D.new()
+		spot.name = GunslingerKit.TUBE_FIRE
+		bell = Node3D.new()
+		bell.name = GunslingerKit.TUBE_BELL
+		w.add_child(spot)
+		w.add_child(bell)
+	var spot0 := spot.transform
+	var bell0 := bell.transform
 	P.teleport(home)
 	C.ac.step(m, 0.1)
 	spot.global_position = P.pos + Vector3(0.7, 1.4, 0.2)
@@ -307,10 +318,13 @@ func _launcher_empties(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> 
 	C.ok("Vex item 112: the charge leaves launcher_fire at the press, the flash launcher_muzzle after 0.1s",
 			from_spot and waits and K.puffs == puffs0 + 1 and K.last_puff.distance_to(bell_at) < 0.01,
 			"from spot %s, waited %s, %d puff" % [from_spot, waits, K.puffs - puffs0])
-	w.remove_child(spot)
-	w.remove_child(bell)
-	spot.free()
-	bell.free()
+	spot.transform = spot0
+	bell.transform = bell0
+	if stand_in:
+		w.remove_child(spot)
+		w.remove_child(bell)
+		spot.free()
+		bell.free()
 	if made:
 		P.model.remove_child(w)
 		w.free()

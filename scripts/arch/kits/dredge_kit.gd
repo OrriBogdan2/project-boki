@@ -34,13 +34,10 @@ const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const ARM_THICK := 0.5                 # m, the abyssal arm's girth (an arm, not a rope)
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the rope snaps taut on each
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
-const SMOKE_T := 0.22                  # s between the 3D model's smoke ribbons (from each source in turn)
-const SMOKE_AT := ["anchor_stack", "anchor_smoke_r", "anchor_smoke_l"]
-const SMOKE_COL := Color(0.7, 0.68, 0.66, 0.6)    # (the ribbon's top; its alpha the ribbon's cover)
-const SMOKE_CORE := Color(0.36, 0.34, 0.35, 1.0)  # (and its foot, darker by the stack's mouth)
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 
+var coins := DredgeCoins.new()  # the hoard's spill on a hit
 var pull := {}                  # hold: the reel {t (the foe), tow (its Displace record), ally, wisp, from, scoop}
 var hook_hold: CastHold         # throw to the end of the reel or the miss: height held, a slow walk in flight
 var flying := false             # hold: the hook is in the air
@@ -70,11 +67,6 @@ var arrivals := 0
 var stacks_lost := 0
 var volleys := 0
 var last_quake_k := 0.0         # (tests) the height bonus of the last air smash
-var winch_a := 0.0              # the 3D model's winch drum turn (rad)
-var smoke_t := 0.0              # the next smoke ribbon (3D model)
-var smoke_i := 0                # and the source it rises from (SMOKE_AT)
-var pool_k := 0.0               # the 3D model's tar pool at his feet (0 gone, 1 spread)
-var claw_k := 0.0               # the 3D model's grab-claw: 1 spread for the throw, -1 clenched on the rope, 0 rest
 var _down_seen := false
 var _stab_at := -9.0
 
@@ -93,7 +85,7 @@ static func reeling(hn: Hunter) -> bool:
 	return hn.ak is DredgeKit and not (hn.ak as DredgeKit).pull.is_empty()
 
 func _hand() -> Vector3:
-	# the 3D model throws from its grab-claw (anchor_claw, between the finger tips)
+	# the 3D model throws from the hook's mouth (anchor_claw)
 	var claw := WardenGlb.anchor(h.model, "anchor_claw") if h.model else null
 	if claw and claw.is_inside_tree():
 		return claw.global_position
@@ -267,64 +259,13 @@ func _tick_looks(dt: float) -> void:
 			Color("1a5a6a"), 0.6
 		)
 
-## Dredge's 3D model (WardenGlb.EXTRA; nothing on the procedural one): the winch drum pays the rope out while the
-## hook flies and winds it in while he reels; the rope and the cargo hook hanging from the drum are gone while the
-## kit draws them out on the throw; the grab-claw spreads for the throw and clenches on the rope while he reels.
-func _tick_model(dt: float) -> void:
-	var sk := WardenGlb.extra_skeleton(h.model)
-	if sk == null:
+## Grimble's 3D model: the hook leaves his wrist while the kit flies and reels it (one hook on screen, 76b).
+## A hit knocks coins off the hoard.
+func _tick_model(_dt: float) -> void:
+	if h.model == null:
 		return
-	var out := flying or not pull.is_empty()
-	var spin := 0.0
-	var want := 0.0
-	if flying:
-		spin = -16.0
-		want = 1.0
-	elif not pull.is_empty():
-		spin = 10.0
-		want = -1.0
-	elif anim_id == "dr_throw":
-		want = 1.0
-	winch_a += dt * spin
-	claw_k = move_toward(claw_k, want, dt * 9.0)
-	WardenGlb.pose_extra(h.model, "winch", Quaternion(Vector3.RIGHT, wrapf(winch_a, -PI, PI)))
-	WardenGlb.pose_extra(h.model, "rope1", Quaternion.IDENTITY, Vector3.ONE * (0.001 if out else 1.0))
-	# thin streaks of smoke rising off his stack and both broken shoulders (the art's), a new ribbon each SMOKE_T
-	# from each in turn, so a few always overlap
-	smoke_t -= dt
-	if smoke_t <= 0.0 and tells_visible():
-		smoke_t = SMOKE_T * randf_range(0.8, 1.2)
-		smoke_i = (smoke_i + 1) % SMOKE_AT.size()
-		var src := WardenGlb.anchor(h.model, SMOKE_AT[smoke_i])
-		if src:
-			fx.wisp(src.global_position, SMOKE_COL, SMOKE_CORE, randf_range(0.32, 0.42), randf_range(1.3, 1.7))
-	# the tar pool spreads under him while he stands, and is gone the moment he moves or leaves the ground
-	var still := h.grounded and Vector2(h.vel.x, h.vel.z).length() < 0.6
-	if still:
-		pool_k = move_toward(pool_k, 1.0, dt * 0.5)
-	else:
-		pool_k = move_toward(pool_k, 0.0, dt * 6.0)
-	var spread := maxf(pool_k, 0.001)
-	WardenGlb.pose_extra(h.model, "pool", Quaternion.IDENTITY, Vector3(spread, 1.0 if pool_k > 0.01 else 0.001, spread))
-	# each finger turns out from the claw's middle (spread) or in toward it (clench), about its knuckle
-	var mid := Vector3.ZERO
-	var heads: Array = []
-	for i in [1, 2, 3]:
-		var bi := WardenSkeleton.find(sk, "claw%d.L" % i)
-		if bi < 0:
-			return
-		heads.append(sk.get_bone_global_rest(bi))
-		mid += (heads[-1] as Transform3D).origin / 3.0
-	for i in 3:
-		var hx: Transform3D = heads[i]
-		var along := hx.basis.y.normalized()
-		var away := hx.origin - mid
-		away = (away - along * away.dot(along)).normalized()
-		var axis := along.cross(away).normalized()
-		if axis.length() < 0.5:
-			continue
-		WardenGlb.pose_extra(h.model, "claw%d.L" % (i + 1), Quaternion(axis, 0.5 * claw_k))
-		WardenGlb.pose_extra(h.model, "claw%d_tip.L" % (i + 1), Quaternion(axis, 0.35 * minf(claw_k, 0.0)))
+	h.model.set_meta(WardenGlb.CHAIN_OUT, flying or not pull.is_empty())
+	coins.tick(h, m.time, tells_visible())
 
 # ------------------------------------------------------------------ RMB: Abyssal Hand
 func fire_rmb(c: Dictionary) -> void:

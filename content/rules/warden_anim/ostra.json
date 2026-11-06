@@ -1,0 +1,35 @@
+{
+	"doc": "Motley's hand-keyed clips (art/wardens/ostra/ostra.glb, tools/art1/ostra_clips.py) and which game state plays which (scripts/heroes/warden_clips.gd). rig_root: the root bone stays on the Rig under the clips, so the kit's lifts, squashes and whole-body turns and his hover (KMovesStone.hover) carry on; the clips key from the box and the hips up. sway: the upper body lags on the spring (WardenSway).",
+	"skinned_weapon": true,
+	"rig_root": true,
+	"offset_bones": ["hips"],
+	"extra_bones": {"x_box": "root", "x_boxlid": "x_box", "x_crank": "x_box", "x_smoke": "x_box", "x_void": "x_box", "x_fan": "hand.L", "x_jaw": "head", "x_brow.L": "head", "x_brow.R": "head", "x_cheek.L": "head", "x_cheek.R": "head"},
+	"blade": {"root": "anchor_orb", "tip": "weapon_muzzle", "bone": "hand.R"},
+	"sway": {"bone": "hips", "stiff": 70.0, "damp": 7.0, "gain": 0.009, "max": 0.45, "tumble_hz": 0.35, "swirl_m": 0.13, "clear_m": 0.5, "clear_orbit": "orbit_cards"},
+	"loco": {
+		"idle": "idle", "stance": "stance", "stance_after": 6.0,
+		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
+		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
+		"walk_speed": 2.2, "run_speed": 4.6
+	},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
+	"flow": [["ostra_swap_aim", 0.2], ["ostra_swap", 0.2], ["ostra_orb", 0.2], ["ostra_snap_wind", 0.2], ["ostra_snap", 0.2], ["ostra_seed", 0.2], ["ostra_pop", 0.2]],
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive"},
+	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
+	"kmoves": {
+		"ostra_orb": {"clip": "orb", "alt": "orb_l", "upper": true}, "ostra_orb_hot": {"clip": "orb_hot", "upper": true},
+		"ostra_flurry": {"clip": "flurry", "upper": true},
+		"ostra_snap_wind": {"clip": "snap_wind", "hold_from": 0.3}, "ostra_snap": {"clip": "snap"},
+		"ostra_swap_aim": {"clip": "swap_aim", "hold_from": 0.16}, "ostra_swap": {"clip": "swap"},
+		"ostra_swap_air": {"clip": "swap_air", "hold_from": 0.47}, "ostra_arrive": {"clip": "arrive"},
+		"ostra_seed": {"clip": "seed"}, "ostra_pop": {"clip": "pop", "upper": true},
+		"ostra_well": {"clip": "well", "hold_from": 0.27}, "ostra_well_snap": {"clip": "well_snap"}, "ostra_well_end": {"clip": "well_end"},
+		"ostra_empower": {"clip": "empower"},
+		"mf_xform": {"clip": "fuse"}
+	},
+	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.6, "stun": "stun", "emote": "emote", "hit": {"front": "hit", "back": "hit", "dur": 0.35}},
+	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "pauldron.L", "pauldron.R", "x_fan", "x_jaw", "x_brow.L", "x_brow.R", "x_cheek.L", "x_cheek.R",
+		"x_fing1.L", "x_fing1b.L", "x_fing2.L", "x_fing2b.L", "x_fing3.L", "x_fing3b.L", "x_fing4.L", "x_fing4b.L", "x_thumb.L", "x_thumbb.L",
+		"x_fing1.R", "x_fing1b.R", "x_fing2.R", "x_fing2b.R", "x_fing3.R", "x_fing3b.R", "x_fing4.R", "x_fing4b.R", "x_thumb.R", "x_thumbb.R"]
+}

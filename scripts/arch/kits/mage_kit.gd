@@ -15,6 +15,8 @@ const COPPER := Color("e08a46")
 const VIOLET := Color("3a1c8c")
 const DEEP_GOLD := Color("e0900a")   # the aim kit whitens its accent: this lands as a rich gold
 const TEAL := Color("1fc6dc")        # the lightning's body: a saturated teal that reads on bright grass
+const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
+const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
 
@@ -39,10 +41,12 @@ var last_push := 0.0           # tests: how hard the last rod knocked
 var echo_t := 0.0
 var ult: MageUlt               # Kitefall, her ultimate on X
 var sky: MageSky               # Skycall (E) and the orbs it flings
+var gum                        # the bubble she blows and pops (mage_gum.gd)
 
 func _setup() -> void:
 	ult = MageUlt.new(self)
 	sky = MageSky.new(self)
+	gum = load("res://scripts/arch/kits/mage_gum.gd").new(self)
 	# her round is fired after this kit's tick, so its stock orb would draw one frame as a white ball at
 	# her hand before _tick_lmb skins it: hide it just before that frame is drawn
 	RenderingServer.frame_pre_draw.connect(_hide_fresh_round)
@@ -58,6 +62,11 @@ func _hide_fresh_round() -> void:
 			if orb != null and is_instance_valid(orb):
 				orb.visible = false
 			return
+
+## A rival went down: she pops her gum at them.
+func on_knock(_t: Hunter, mine: bool) -> void:
+	if mine:
+		gum.blow()
 
 func fx() -> VVFx:
 	return VVFx.of(m)
@@ -167,6 +176,7 @@ func _tick_sparks(dt: float) -> void:
 
 func _tick(dt: float) -> void:
 	_tick_sparks(dt)
+	gum.tick(dt)
 	if reset_dash_boost:
 		reset_boost_t -= dt
 		reset_dash_boost = reset_boost_t > 0.0
@@ -258,8 +268,14 @@ func _tick_lmb() -> void:
 	lmb_n += 1
 	var left := lmb_n % 2 == 1
 	var d := h.aim_dir()
-	var side := Vector3(-d.y, 0, d.x) * (-0.24 if left else 0.24)
-	var p: Vector3 = (sd["pos"] as Vector3) + side
+	# (from the fingertip of the hand that fires: the arm is still coming up, so where that fingertip will be. The round
+	# has already flown a tick from the old muzzle: it gets that time back, so her reach stays what it was)
+	var side := Vector3(-d.y, 0, d.x) * (-FINGER_SIDE if left else FINGER_SIDE)
+	var was_at: Vector3 = sd["pos"]
+	var p := Vector3(h.pos.x, was_at.y, h.pos.z) + side + Vector3(d.x, 0, d.y) * FINGER_AHEAD
+	var speed := (sd["vel"] as Vector2).length()
+	if speed > 0.1:
+		sd["life"] = float(sd["life"]) + Vector2(was_at.x - p.x, was_at.z - p.z).length() / speed
 	sd["pos"] = p
 	sd["prev"] = p
 	sd["start"] = p
@@ -281,6 +297,10 @@ func _fingertip(left: bool) -> void:
 		return
 	var d := h.aim_dir()
 	var tip := hand.global_position + Vector3(d.x, 0, d.y) * 0.15
+	if h.model:
+		var at := WardenGlb.anchor(h.model, "anchor_finger_L" if left else "weapon_muzzle")
+		if at != null:
+			tip = at.global_position
 	fx().crackle(tip, TEAL, GOLD, 0.6, 4, 0.08)
 	fx().star(tip, TEAL, GOLD, 0.75, 0.08)
 

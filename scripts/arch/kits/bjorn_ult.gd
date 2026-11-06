@@ -121,6 +121,8 @@ func trail_len() -> float:
 
 ## Every step: the phases, the telegraph and the scar.
 func tick(dt: float) -> void:
+	if h.model:
+		h.model.set_meta(WardenMood.FLARE, phase != "")
 	if not scar.is_empty():
 		_tick_scar(dt)
 	if phase == "":

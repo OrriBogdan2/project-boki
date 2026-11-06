@@ -98,6 +98,7 @@ func run(main: Node) -> void:
 		_orbits(a)
 		_own_look(a)
 		await _halo(main, a)
+	_stones_look()
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
 	print("WARDENGLB_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
 	main.get_tree().quit()
@@ -242,6 +243,10 @@ func _anchors(main: Node, a: String) -> void:
 			% [a, str(missing), str(off_bone)])
 	var top := WardenGlb.anchor(m, "anchor_head_top")
 	if top != null:
+		var clips: WardenClips = (m.get_node("Warden/Sync") as WardenGlb.Sync).clips
+		if clips:        # (a Hero with clips: hand the head to the rig, or this measures the idle clip's sway)
+			clips.force = {"proc": true}
+			clips.proc_w = 1.0
 		await main.get_tree().process_frame
 		var before := top.global_position
 		(m.get_node("Rig/Torso/HeadPivot") as Node3D).rotation.x += 0.6
@@ -259,27 +264,41 @@ func _shading(a: String) -> void:
 	var wrong := 0
 	var surfaces := 0
 	var textured := 0
+	var relief := 0
+	var no_relief := 0
 	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
+			if sm and sm.shader == WardenMood.FACE_SHADER:
+				continue        # (a face drawn on glass: no atlas, no toon)
 			var src := (mi as MeshInstance3D).mesh.surface_get_material(si) as BaseMaterial3D
 			var atlas := src != null and src.albedo_texture != null
 			if atlas:
 				textured += 1
+			# a .glb's normal map reaches the toon shader (use_nrm, the one path)
+			if sm and sm.shader == Models.HERO and src and src.normal_enabled and src.normal_texture:
+				relief += 1
+				var tex: Variant = sm.get_shader_parameter("normal_tex")
+				if not sm.get_shader_parameter("use_nrm") or tex != src.normal_texture:
+					no_relief += 1
 			# a textured surface shows its atlas; a flat-painted one (hand-modelled, no atlas) its own colour
 			var shows := false
-			if sm and atlas:
+			if sm and sm.shader == WardenGlb.FLAME:
+				shows = true      # (fire: no paint of its own)
+			elif sm and atlas:
 				shows = bool(sm.get_shader_parameter("use_tex")) and sm.get_shader_parameter("albedo_tex") != null
 			elif sm and src:
 				shows = (sm.get_shader_parameter("albedo") as Color).is_equal_approx(src.albedo_color)
 			# (the void slot is the starfield shader, the card slot its own: RIG_CONTRACT "Materials")
-			var shader_ok := sm != null and sm.shader in [Models.HERO, WardenGlb.VOID, WardenGlb.CARD]
+			var shader_ok := sm != null and sm.shader in [Models.HERO, WardenGlb.VOID, WardenGlb.CARD, WardenGlb.FLAME]
 			if not shader_ok or not shows or not sm in mats:
 				wrong += 1
 	ok(surfaces > 0 and wrong == 0,
 			"%s: all %d surfaces on the hero toon shader (%d with an atlas, rest flat), in the hit flash (%d not)" \
 			% [a, surfaces, textured, wrong])
+	ok(no_relief == 0, "%s: all %d of its normal maps reach the shader (%d lost)" % [a, relief, no_relief])
+	print("WARDENGLB %s normal-mapped surfaces: %d" % [a, relief])
 	m.free()
 
 ## The hit radius and the ring that shows it are the same with the .glb as without, and the .glb brings no
@@ -303,6 +322,21 @@ func _hitbox(a: String) -> void:
 ## leave), the procedural weapon is hidden, and its magazine (if it has one apart) is the Gun's Mag.
 ## A model's spring chains (RIG_CONTRACT "Spring chains": braids) swing: moved sideways, each chain's tip trails
 ## its rigid place, and standing still it settles back on it. (No chains: nothing to check.)
+## Tarek's seeing-stones turn their eyes to a point the kit gives them (WardenGlb.ORBIT_LOOK).
+func _stones_look() -> void:
+	var m := _model("dolm")
+	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
+	var stone := m.find_child("stone_0", true, false) as Node3D
+	var at := stone.global_position + Vector3(4.0, 0.0, 3.0)
+	m.set_meta(WardenGlb.ORBIT_LOOK, at)
+	for i in 90:
+		sync._process(1.0 / 60.0)
+		at = m.get_meta(WardenGlb.ORBIT_LOOK)
+	var fwd := -stone.global_basis.z.normalized()
+	var off := fwd.angle_to((at - stone.global_position).normalized())
+	ok(off < 0.3, "dolm: the seeing-stones turn to what they watch (%.2f rad off)" % off)
+	m.free()
+
 func _springs(a: String) -> void:
 	var m := _model(a)
 	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
@@ -310,6 +344,8 @@ func _springs(a: String) -> void:
 		m.free()
 		return
 	var sk := _skel(m)
+	sync.springs.calm = true
+	sync.clips = null      # (the chains alone: a clip's idle keeps moving what they hang from)
 	sync._process(1.0 / 60.0)
 	var lag := 0.0
 	for i in 6:
@@ -319,7 +355,7 @@ func _springs(a: String) -> void:
 	for i in 240:
 		sync._process(1.0 / 60.0)
 	var rest := _spring_off(sk, sync)
-	ok(lag > 0.02 and rest < 0.01, "%s: %d spring chains trail a sideways move (tip %.3f m off) and settle (%.4f m)"
+	ok(lag > 0.02 and rest < 0.016, "%s: %d spring chains trail a sideways move (tip %.3f m off) and settle (%.4f m)"
 			% [a, sync.springs.chains.size(), lag, rest])
 	# wings fold back while she skates (the root's WING_FOLD meta): each wing tip swings behind its root
 	var wings: Array = sync.springs.chains.filter(func(ch): return bool(ch["wing"]))

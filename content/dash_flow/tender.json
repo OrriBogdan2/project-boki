@@ -16,6 +16,9 @@
 			"q": {"mode": "fire", "source": "No source glove."}
 		}
 	},
+	"jump": {
+		"rmb": {"mode": "buffer", "reason": "Burrseed's fixed 1 s wind-up outlasts the hop, so the seed leaves after she lands", "source": "Ours: owner items 118 and 118b, the wind-up and snap release."}
+	},
 	"into_dash": {
 		"lmb": {"mode": "fire", "source": "Footage (716.3-717.6 s): she pushes embers while moving. Ours: Shift skips at once between embers."},
 		"rmb": {"mode": "fire", "source": "Ours: Shift while aiming the seed skips; the throw still goes on release."},

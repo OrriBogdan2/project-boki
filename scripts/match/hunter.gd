@@ -3191,6 +3191,8 @@ func _anim_state(stretch: float) -> void:
 	s["dash_kind"] = _dash_anim_kind()
 	s["crouch"] = crouch_k
 	s["downed"] = downed
+	s["dead"] = out
+	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["ledge"] = grap.size() > 0
 	var mk := -1.0
 	if pad.has("face"):
@@ -3241,6 +3243,8 @@ func _anim_state(stretch: float) -> void:
 		for e in m.truce.shown:
 			if e["h"] == self:
 				em = String(e["id"]); et = float(e["t"])
+	s["dead"] = out
+	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["emote"] = em
 	s["emote_t"] = et
 	if not grounded and not gliding and not downed:
@@ -3281,7 +3285,7 @@ func render(delta: float, alpha: float) -> void:
 	if absf(step_vis) > 0.001:
 		position.y += step_vis
 		step_vis = lerpf(step_vis, 0.0, 1.0 - exp(-16.0 * delta))
-	visible = not out and not extracted and not riding and not unseen
+	visible = (not out or WardenClips.dying(self)) and not extracted and not riding and not unseen
 	if not model:
 		return
 	if m.cam: model.basis = m.cam.char_basis(face, model.scale)     # leaned toward the camera (CamRig.char_lean)
@@ -3354,7 +3358,7 @@ func render(delta: float, alpha: float) -> void:
 			if boosted:
 				m.fx.ghost(position, face, Color(0.85, 0.95, 1.0), float(cdat["scale"]))
 	# little puffs of dust while running, and a kick of dust when you turn hard
-	if grounded and spd > 4.0 and not downed:
+	if grounded and spd > 4.0 and not downed and KMovesStone.gait(arch) >= 0.5:      # (no feet, no steps: Motley)
 		step_t -= delta
 		if step_t <= 0.0:
 			step_t = 0.32

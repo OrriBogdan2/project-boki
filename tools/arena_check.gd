@@ -48,7 +48,11 @@ func _breaker_whirl() -> void:
 		var how := "opened as him" if start == "bulwark" else "swapped to him"
 		var pv: Node3D = K.fx._pivot()
 		var mesh := pv.get_node_or_null(WardenGlb.WEAPON) as MeshInstance3D
-		ok("arena Breaker (%s): his 3D hammer is on the swing's pivot" % how,
+		var warden := P.model.get_node_or_null("Warden")
+		var skinned := warden != null and warden.find_child("hammer", true, false) != null
+		if skinned:      # (skinned in the .glb, item 76b: on its bone, the pivot stays as the reference)
+			mesh = warden.find_child("hammer", true, false) as MeshInstance3D
+		ok("arena Breaker (%s): his 3D hammer is %s" % [how, "skinned on him" if skinned else "on the swing's pivot"],
 			mesh != null and mesh.is_visible_in_tree())
 		P.fire_cd = 0.0
 		var last := Vector3.ZERO
@@ -65,13 +69,16 @@ func _breaker_whirl() -> void:
 			last = v
 			if mesh and is_instance_valid(mesh):
 				var box := mesh.get_aabb()
-				long_m = maxf(long_m, mesh.global_basis.get_scale().x * box.size[box.get_longest_axis_index()])
+				var k := mesh.global_basis.get_scale().x * float(P.model.get_meta(WardenClips.WEAPON_K, 1.0))
+				long_m = maxf(long_m, k * box.size[box.get_longest_axis_index()])
 		var rate := turns / TAU / (59.0 * DT)
 		ok("arena Breaker (%s): held, the hammer whirls at the data's rate" % how,
 			K.fx.held and K.anim_id == "bul_smash_wind" and rate >= float(K.lmb_def()["spin_turns"][0]) - 0.1,
 			"%.2f turns/s" % rate)
-		ok("arena Breaker (%s): the whirled hammer reads at the match camera (>= 2.5 m long)" % how,
-			long_m >= 2.5,
+		# (item 137: a skinned hammer is true to the sheet, 0.79 of his height; the pinned one is scaled up to read)
+		var want := 1.5 if skinned else 2.5
+		ok("arena Breaker (%s): the whirled hammer reads at the match camera (>= %.1f m long)" % [how, want],
+			long_m >= want,
 			"%.2f m" % long_m)
 		var s0 := K.slams
 		P.inp["fire"] = false

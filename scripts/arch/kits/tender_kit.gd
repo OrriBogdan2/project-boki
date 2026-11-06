@@ -588,6 +588,7 @@ func heal_k() -> float:
 func _pulse(c: Vector3, per: float) -> void:
 	var ed := e_def()
 	var boost := 1.0 + throw_boost() if float(hearth.get("boost", 0.0)) > 0.0 else 1.0
+	PipStars.pulse(h)
 	for o in m.hunters:
 		if o.team != h.team or o.out or o.extracted:
 			continue
@@ -604,6 +605,7 @@ func _hearth_end(flare: bool, word: String) -> void:
 		var amt := float(ed["burst"]) * heal_k()
 		_bloom(c, rr)
 		play_soft("mm_flare")
+		PipStars.pulse(h)
 		for o in m.hunters:
 			if o.team != h.team or o.out or o.extracted:
 				continue
@@ -763,6 +765,7 @@ func _tick_call(dt: float) -> void:
 ## too, as the source's channel heals an ally or a Wisp: it tops up what keeps them from bleeding out.
 func _call_heal(who: Hunter, amount: float) -> void:
 	var amt := amount * LevelGrowth.ap(h)
+	PipStars.pulse(h)
 	if who == h:
 		CareUtil.heal(m, h, amt * float(e_def().get("self_k", 0.33)))
 	else:

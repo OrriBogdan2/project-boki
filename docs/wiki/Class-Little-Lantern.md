@@ -10,7 +10,7 @@ downed friends out of danger and roots foes that chase them. She has no ultimate
 |---|---|
 | Class title | Little Lantern |
 | Base character | Pip, female |
-| Personality | Small, fiery and quick, with a fox's ears and tail and red markings. She is cheerful and bold, and she looks after her friends first. |
+| Personality | A brave little field medic, a fairy fox waist-high to a human. She is afraid of the dark, and the lantern she carries holds a star she caught as a kid. |
 
 <!-- /gen:profile -->
 
@@ -55,7 +55,7 @@ downed friends out of danger and roots foes that chase them. She has no ultimate
 | Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Ember Cast (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with lantern light, pins chasers with burr-seeds. |
-| Silhouette | small and low: a tiny courier with a trailing ember tail, casting light from her hands |
+| Silhouette | small: a tiny fairy fox medic with gold-veined wings, a leaf cape and a big glowing star lantern |
 | Resource | Kindle (max 5) |
 
 ### Kit card

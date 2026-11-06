@@ -302,6 +302,7 @@ func _strike() -> void:
 	kit.fx().cut(leap.get("disc"))
 	_next(AFTER)
 	kit.play("mage_x_land")
+	kit.m.later(0.55, kit.gum.blow)      # (once she is back on her feet)
 	_strike_fx(at, r)
 	var struck := kit.foes_in(at, r)
 	var shared := _highest_static(struck)

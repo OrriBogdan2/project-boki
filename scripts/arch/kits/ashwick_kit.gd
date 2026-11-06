@@ -34,7 +34,8 @@ const POOF_PUFFS := 5                  # smoke puffs the bellows blow out behind
 const CLOAK_POSE_T := 0.25            # s the Furnace Cloak flare holds the flamer up off the aim (as_cloak)
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
-const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the nozzle's tip from the feet in the aim pose: forward, up, right (m)
+const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the tip from the feet in the aim pose, no model to read: fwd, up, right (m)
+const NOZZLE_REACH := 2.6                # m: a model's nozzle further off than this isn't posed yet: use NOZZLE
 
 var chars := {}                 # foe id -> {e, n, t}
 var ignites := {}               # foe id -> {e, lvl, until}
@@ -51,6 +52,7 @@ var trail_t := 0.0              # the next dash after-image puff
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
+var nozzle_at: Node3D           # the Gun's Muzzle, kept on the skinned gun's tip by the model (Sync.apply_blade)
 var lmb_key_was := false         # the LMB key last step: only a press in the flight ticks, not a hold carried in
 var lmb_denied := 0              # (tests) presses refused during Flue Flight
 var jet: AshwickJet             # X, Flue Flight (its flight is a hold: jet.flight)
@@ -86,10 +88,22 @@ func _fwd() -> Vector3:
 	var d2 := h.aim_dir()
 	return Vector3(d2.x, 0.0, d2.y)
 
-## The nozzle: held low at the right hip, pointed forward (sheet: LMB animation).
+## The nozzle for the rules: a fixed offset from her feet in the aim pose (the model's braced tip, --cinder-art-check),
+## so the stream's reach never depends on the camera's lean of the model.
 func nozzle() -> Vector3:
 	var f := _fwd()
 	return h.pos + f * NOZZLE.x + f.cross(Vector3.UP) * NOZZLE.z + Vector3(0, NOZZLE.y, 0)
+
+## The tip of the gun you see, for what's drawn (item 76b): the Gun's Muzzle sits on it. No skinned gun: nozzle().
+func tip() -> Vector3:
+	if nozzle_at == null or not is_instance_valid(nozzle_at):
+		var skinned: bool = h.model != null and WardenGlb.anchor(h.model, "weapon_muzzle") != null
+		nozzle_at = h.model.get_node_or_null("Rig/Torso/Aim/Gun/Muzzle") if skinned else null
+	if nozzle_at != null and nozzle_at.is_inside_tree():
+		var at := nozzle_at.global_position
+		if at.distance_to(h.pos) < NOZZLE_REACH:
+			return at
+	return nozzle()
 
 # ------------------------------------------------------------------ Char and Flashover
 func char_of(f: Ent) -> float:
@@ -215,7 +229,7 @@ func _tick_tells(dt: float) -> void:
 	elif vis and h.wid == "flamethrower" and not h.downed and not KinMerge.active(h) and not flamer_up:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		var big := 1.0 + (1.2 if was_held and spool < float(lmbd()["spool"]) else 0.0)
-		fx.place("pilot%d" % h.get_instance_id(), "pilot", nozzle(), FLAME_CYAN, PILOT_CORE, 0.4 * fl * big)
+		fx.place("pilot%d" % h.get_instance_id(), "pilot", tip(), FLAME_CYAN, PILOT_CORE, 0.4 * fl * big)
 	ember_t -= dt
 	if ember_t <= 0.0:
 		ember_t = 0.35
@@ -320,14 +334,14 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if not was_held:
 		play("as_lance")
 		m.sfx("lw_pilot", h.pos, -3.0, 1.0)
-		fx.orb(nozzle(), FLAME_CYAN, PILOT_CORE, 0.8, float(ld["spool"]))      # the pilot flares cyan before the roar
+		fx.orb(tip(), FLAME_CYAN, PILOT_CORE, 0.8, float(ld["spool"]))      # the pilot flares cyan before the roar
 	was_held = true
 	h.idle_fire = 0.0
 	spool += dt
 	h.mel_hold = minf(spool, float(ld["spool"]))
 	if spool < float(ld["spool"]):
 		return true                # the pilot's flicker: no fire yet
-	hose.emit(nozzle(), h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), float(ld["range"]), dt)
+	hose.emit(nozzle(), h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), float(ld["range"]), dt, tip() - nozzle())
 	flame_acc += dt
 	var tick := float(ld["tick"])
 	while flame_acc >= tick:
@@ -420,7 +434,7 @@ func fire_rmb(c: Dictionary) -> void:
 	run(stg, cx("rmb", "cinder_shot", aim(), {"on_foe": func(f: Ent, _c: Dictionary): _cinder_hit(f)}))
 	if m.shots.size() > n0:
 		fx.ride(m.shots[-1], "cinder", BOLT_COL, BOLT_CORE, 1.6, 0.5, _bolt_end)
-	var mz := nozzle() + Vector3(0, 0.2, 0)
+	var mz := tip()
 	fx.orb(mz, Color("ff6a3a"), BOLT_CORE, 0.8, 0.12)
 	m.fx.burst(mz, Color("ffb04a"), 10, 4.0, 0.3, -2.0, 1.2, _fwd(), 30.0)
 	m.sfx("lw_bolt", h.pos, -2.0, 1.0)
