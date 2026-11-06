@@ -168,6 +168,27 @@ func _arena() -> void:
 	P.gear_cd[0] = 9.0
 	A.tick(DT)
 	ok("cooldowns off covers the glove", float(P.gear_cd[0]) <= 0.0)
+	# item 69: two glove slots, Q and V, picked and fired independently
+	var gid0 := func(i: int) -> String: return String(P.gear[i].get("id", ""))
+	A.give_glove("grapple", 1)
+	ok("two gloves: blink stays on Q, grapple goes to V", gid0.call(0) == "blink" and gid0.call(1) == "grapple")
+	P.gear_cd[0] = 9.0
+	P.gear_cd[1] = 9.0
+	A.tick(DT)
+	ok("cooldowns off covers both gloves", float(P.gear_cd[0]) <= 0.0 and float(P.gear_cd[1]) <= 0.0)
+	A.cd_off = false
+	P.gear_cd[0] = 0.0
+	P.gear_cd[1] = 0.0
+	m.use_gear(P, 1)
+	ok("the V glove fires alone: V on cooldown, Q ready", float(P.gear_cd[1]) > 0.0 and float(P.gear_cd[0]) <= 0.0)
+	m.use_gear(P, 0)
+	ok("then the Q glove fires too", float(P.gear_cd[0]) > 0.0)
+	A.give_glove("blink", 1)
+	ok("one glove can't be worn twice: blink to V empties Q", A.gloves[0] == "" and gid0.call(1) == "blink")
+	A.give_glove("grapple", 0)
+	ok("two gloves again: grapple Q, blink V", gid0.call(0) == "grapple" and gid0.call(1) == "blink")
+	A.give_glove("blink", 0)
+	A.give_glove("grapple", 1)
 	A.cd_off = false
 	A.toggle_ult()
 	ok("ult toggle: locked", int(P.slot_lv["ult"]) == 0)
@@ -180,7 +201,7 @@ func _arena() -> void:
 		P.arch == "juggernaut" and P.cls == "heavy" and P.ak is JuggernautKit and P.max_hp >= 180.0,
 		"%s %s hp %.0f" % [P.arch, P.cls, P.max_hp]
 	)
-	ok("swap keeps the glove", String(P.gear[0].get("id", "")) == "blink")
+	ok("swap keeps both gloves", gid0.call(0) == "blink" and gid0.call(1) == "grapple")
 	ok("the swap brings the archetype's one weapon", P.wid == Arch.signature("juggernaut"))
 	A.set_kin("cindle")
 	ok("Boki swap: cindle on your shoulder", P.kin != null and (P.kin as Kin).species == "cindle")
