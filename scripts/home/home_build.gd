@@ -993,7 +993,7 @@ func toggle() -> void:
 		return
 	cat = "Buildings"      # B always opens on Buildings
 	_enter()
-	Sfx.play("whoosh", null, -8.0)
+	Sfx.play("ui_open", null, -8.0)
 	_build_bar()
 
 ## Takes the catalog bar, the key hints and any open menu off the screen.
@@ -1025,11 +1025,7 @@ func take(id: String) -> void:
 		h._toast("%s: %s" % [FarmUnlocks.name_of(id), FarmUnlocks.lock_text(id)])
 		return
 	var g := cost_of(id, 1)
-	if _site_cost(id) != {}:
-		if not FarmSites.can_pay(_site_cost(id)):
-			h._toast("Not enough %s" % FarmSites.label(FarmSites.short_of(_site_cost(id))))
-			return
-	elif not c.has("brush") and not c.has("line") and int(g[2]) == 0 and not _can_pay(int(g[0]), int(g[1]), int(g[3]), int(g[4])):
+	if _site_cost(id) == {} and not c.has("brush") and not c.has("line") and int(g[2]) == 0 and not _can_pay(int(g[0]), int(g[1]), int(g[3]), int(g[4])):
 		h._toast("Not enough %s" % _short(int(g[0]), int(g[1]), int(g[3]), int(g[4])))
 		return
 	held = {"kind": "deco", "id": id, "r": 0, "from": -1}
@@ -1093,7 +1089,7 @@ func upgrade(uid: int) -> bool:
 		return false
 	apply(false)
 	if nodes.has(uid): FarmBuildUi.pop(nodes[uid])
-	_done(HomeLayout.deco_center(e), "Upgrade started: Boki will build it")
+	_done(HomeLayout.deco_center(e), "Upgrade marked out: hold %s to hammer, Boki help" % Settings.key_cap("interact"))
 	return true
 
 func _drop_held() -> void:
@@ -1750,11 +1746,7 @@ func place_held() -> bool:
 	var n := at.size() if from < 0 else 0
 	var cost := cost_of(id, n)
 	var site := _site_cost(id) if from < 0 else {}
-	if not site.is_empty():
-		if not FarmSites.can_pay(site):
-			h._toast("Not enough %s" % FarmSites.label(FarmSites.short_of(site)))
-			return false
-	elif not _can_pay(int(cost[0]), int(cost[1]), int(cost[3]), int(cost[4])):
+	if site.is_empty() and not _can_pay(int(cost[0]), int(cost[1]), int(cost[3]), int(cost[4])):
 		h._toast("Not enough %s" % _short(int(cost[0]), int(cost[1]), int(cost[3]), int(cost[4])))
 		return false
 	_snap()
@@ -1769,7 +1761,6 @@ func place_held() -> bool:
 		lay["inv"][id] = int(lay["inv"].get(id, 0)) - int(cost[2])
 		if int(lay["inv"][id]) <= 0: lay["inv"].erase(id)
 		if site.is_empty(): _pay(int(cost[0]), int(cost[1]), int(cost[3]), int(cost[4]))
-		else: FarmSites.pay(site)
 		for t in at:
 			var e := {"u": HomeLayout._next_uid(lay), "id": id, "x": t.x, "z": t.y, "r": int(held["r"])}
 			if c.get("colour", false) or id == "banner": e["c"] = _held_colour()
@@ -1780,7 +1771,7 @@ func place_held() -> bool:
 		anchor = Vector2i(-999, -999)
 		if is_instance_valid(ghost_cells): ghost_cells.set_meta("sig", "")
 	apply(false)
-	_done(Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), "Site marked out: Boki will build it" if not site.is_empty() else "")
+	_done(Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), "Site marked out: hold %s to hammer, Boki help" % Settings.key_cap("interact") if not site.is_empty() else "")
 	if nodes.has(popped): FarmBuildUi.pop(nodes[popped])
 	return true
 

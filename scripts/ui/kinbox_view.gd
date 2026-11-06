@@ -171,7 +171,7 @@ func _done(t: String) -> void:
 	if home and home.has_method("_refresh_burrow"): home._refresh_burrow()
 
 func _fail(t: String) -> void:
-	Sfx.play("warn", null, -8.0)
+	Sfx.play("ui_deny", null, -8.0)
 	_say(t, UI.BAD)
 
 ## Rebuilds the farm list, the page and the side panel (the toolbar stays, so typing keeps focus).

@@ -10,7 +10,7 @@ extends Node3D
 ## - arrows: the look of each of her shots (Empowered green bolt, Supercharged white-teal beam, a dull
 ##   overdrawn shaft, the gold Impaling arrow with violet fins), each with its own trail, drawn
 ##   over the shot the match moves (the round's own sphere is shrunk away)
-## - spent arrows: one that lands with no hit stays stuck in the ground glowing teal for 4 s
+## - spent arrows: one that lands with no hit stays stuck in the ground, thread attached, for 4 s
 ## - the Rain of Arrows: the curved panels with fletch posts, a ground glow, arrows streaking down, blue
 ##   burn flames on foes inside
 ## - the Spirit Walk screen tint while she is inside something (her own screen only)
@@ -33,6 +33,9 @@ const HEAVY_SCALE := 6.0
 const GREEN := Color("ff5a4e")      # (named for its old colour: Hem is red now, owner Nov 4)
 const TEAL := Color("ffb0a0")       # (the light half of her red)
 const GOLD := Color("ffc02a")
+const SILVER := Color("dfe6f0")     # her needles
+const THREAD := Color("ff2a3a")     # the red thread bound on them
+const FLETCH := Color("c8b48c")     # the feathers
 const VIOLET := Color("b884ff")
 
 var h: Hunter
@@ -83,10 +86,10 @@ func _ready() -> void:
 	for i in 8:
 		panels.append(KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("panel", GREEN)))
 	for i in 9:
-		var p := KitMeshes.inst(self, Models.box(0.06, 1.0, 0.06), Models.glow_mat(Color(GREEN.lightened(0.4), 0.95)))
+		var p := KitMeshes.inst(self, Models.box(0.05, 1.0, 0.05), Models.glow_mat(Color(SILVER, 0.95)))
 		var fl := MeshInstance3D.new()
 		fl.mesh = Models.prism_tip()
-		fl.material_override = Models.glow_mat(Color(GREEN, 0.9))
+		fl.material_override = Models.glow_mat(Color(THREAD, 0.9))
 		fl.scale = Vector3(0.22, 0.24, 0.05)
 		fl.position = Vector3(0, 0.62, 0)
 		fl.rotation = Vector3(PI, 0, 0)
@@ -95,7 +98,7 @@ func _ready() -> void:
 		posts.append(p)
 	glow = KitMeshes.inst(self, KitMeshes.band(1.0, 1.0, -1.0, 1.0), KitShaders.mat("swirl", GREEN))
 	for i in STREAKS:
-		var streak_node := KitMeshes.inst(self, KitMeshes.quad(0.09, 1.3), KitShaders.mat("streak", GREEN))
+		var streak_node := KitMeshes.inst(self, KitMeshes.quad(0.07, 1.3), KitShaders.mat("streak", SILVER))
 		streaks.append({"node": streak_node, "t": 0.0})
 	for i in WISPS:
 		var wisp := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", GREEN, true))
@@ -118,12 +121,17 @@ func _arrow_node() -> Node3D:
 	trail.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(trail)
 	# solid toon parts with a soft glow: they keep their colour on bright grass (no additive wash)
-	var shaft := Models.part(n, Models.box(0.035, 0.035, 0.75), Models.toon(GREEN, true, 0.6), Vector3(0, 0, 0.3),
+	var shaft := Models.part(n, Models.box(0.03, 0.03, 0.75), Models.toon(GREEN, true, 0.6), Vector3(0, 0, 0.3),
 		Vector3.ONE, Vector3.ZERO, "Shaft")
 	shaft.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var head := Models.part(n, Models.prism_tip(), Models.toon(TEAL, true, 0.8), Vector3(0, 0, -0.1),
 		Vector3(0.12, 0.2, 0.05), Vector3(-PI * 0.5, 0, 0), "Head")
 	head.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# the red thread binding the shaft behind the head and before the feathers
+	for at_z in [0.08, 0.5]:
+		var bind := Models.part(n, Models.box(0.06, 0.06, 0.09), Models.toon(THREAD, true, 0.8), Vector3(0, 0, at_z),
+			Vector3.ONE, Vector3.ZERO, "Bind%d" % int(at_z * 10.0))
+		bind.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# a bright core riding the head (the Heavy Shot's alone)
 	var core := KitMeshes.inst(n, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", GOLD, true))
 	core.name = "Core"
@@ -137,10 +145,11 @@ func _arrow_node() -> Node3D:
 
 ## Each kind's look: [shaft colour, head colour, fin colour, trail colour, trail length m, trail width m, body scale]
 const LOOK := {
-	"tap": [Color("f0b8b0"), Color("ffe0d8"), Color("e8605a"), Color(1.0, 0.6, 0.55, 0.5), 1.2, 0.07, 0.8],
-	"arrow": [GREEN, TEAL, GREEN, Color(1.0, 0.4, 0.35, 0.85), 2.4, 0.12, 1.0],
-	"super": [Color("c8fff0"), Color("e8fffa"), TEAL, Color(0.45, 1.0, 0.88, 1.0), 5.0, 0.5, 1.35],
-	"over": [Color("9fb8a0"), Color("c8d8c0"), Color("7a9a80"), Color(0.6, 0.75, 0.62, 0.35), 1.0, 0.06, 0.9],
+	"tap": [SILVER, Color.WHITE, FLETCH, Color(1.0, 0.16, 0.22, 0.4), 1.2, 0.05, 0.8],
+	"arrow": [SILVER, Color.WHITE, FLETCH, Color(1.0, 0.16, 0.22, 0.6), 2.4, 0.07, 1.0],
+	"super": [Color.WHITE, Color.WHITE, THREAD, Color(1.0, 0.2, 0.26, 0.9), 5.0, 0.3, 1.35],
+	"over": [Color("8fa0b4"), Color("c0c8d4"), Color("7a6a58"), Color(0.6, 0.12, 0.16, 0.35), 1.0, 0.04, 0.9],
+	"ult": [Color.WHITE, Color.WHITE, THREAD, Color(1.0, 0.2, 0.26, 0.9), 5.0, 0.3, 2.4],
 	"heavy": [Color("e02a2a"), TEAL, GREEN, Color(1.0, 0.25, 0.2, 0.95), 7.0, 0.9, HEAVY_SCALE],
 }
 
@@ -165,6 +174,8 @@ func _dress(n: Node3D, kind: String) -> void:
 	var thick := s * (2.2 if kind == "super" else 1.0)
 	(n.get_node("Shaft") as Node3D).scale = Vector3(thick, thick, s)
 	(n.get_node("Head") as Node3D).scale = Vector3(0.12, 0.2, 0.05) * s * (1.6 if kind == "heavy" else 1.0)
+	for b in ["Bind0", "Bind5"]:
+		(n.get_node(b) as Node3D).scale = Vector3(s, s, s)
 	for f in ["Fin0", "Fin2"]:
 		(n.get_node(f) as Node3D).scale = Vector3.ONE * s * (1.7 if kind == "heavy" else 1.0)
 
@@ -221,7 +232,7 @@ func bow_glint_at(at: Vector3, k: float, col: Color) -> void:
 
 # ------------------------------------------------------------------ shots and spent arrows
 ## Skins a shot of ours as `kind` (the match keeps moving it; we draw over it).
-func skin(s: Dictionary, kind: String) -> void:
+func skin(s: Dictionary, kind: String) -> Node3D:
 	var x: Dictionary = s["x"]
 	x["pin"] = kind
 	x["tracer"] = 0.0
@@ -231,7 +242,8 @@ func skin(s: Dictionary, kind: String) -> void:
 			_dress(n, kind)
 			n.visible = true
 			live[int(s["sid"])] = {"node": n, "kind": kind, "pos": s["pos"], "life": float(s["life"]), "s": s}
-			return
+			return n
+	return null
 
 func note_hit(at: Vector3) -> void:
 	hits.append([at, h.m.time])
@@ -268,7 +280,7 @@ func tick_shots() -> void:
 		if not hit and kind in ["tap", "arrow", "over", "heavy"]:
 			_plant(at, (e["s"]["vel"] as Vector2), kind)
 
-## A spent arrow stuck in the ground where the shot ended, glowing teal, fading over SPENT_T.
+## A spent needle stuck in the ground where the shot ended, its thread lying behind it, gone after SPENT_T.
 func _plant(at: Vector3, v: Vector2, kind: String) -> void:
 	var best: Dictionary = spent[0]
 	for c in spent:
@@ -279,7 +291,6 @@ func _plant(at: Vector3, v: Vector2, kind: String) -> void:
 	var n: Node3D = best["node"]
 	_dress(n, kind)
 	(n.get_node("Trail") as Node3D).visible = false
-	(n.get_node("Head") as MeshInstance3D).material_override.set_shader_parameter("albedo", TEAL)
 	var g: Vector3 = AimMode.ground(h.m, at)
 	if g.y < at.y - 1.6: g = at
 	n.global_position = g + Vector3(0, 0.22, 0)
@@ -287,7 +298,7 @@ func _plant(at: Vector3, v: Vector2, kind: String) -> void:
 	n.visible = true
 	best["t"] = SPENT_T
 	planted += 1
-	star(g + Vector3(0, 0.15, 0), 0.5, TEAL, 0.1)
+	HeroVfx.of(h.m).play(h, "needle_stuck", g, -v.normalized(), {"t": SPENT_T})
 
 ## The Heavy Shot's stake: a wall pin leaves its big arrow standing in the wall at `at`, pointing along `dir`
 ## (into the wall), for STAKE_T s.
@@ -361,6 +372,8 @@ func rain_on(center: Vector3, dir: Vector2, radius: float, deg: float, t: float)
 		var q := _arc_pt(center, yaw, radius, u)
 		(posts[i] as Node3D).global_position = q + Vector3(0, 0.5, 0)
 		(posts[i] as Node3D).visible = true
+		if i > 0:
+			_stitch(_arc_pt(center, yaw, radius, lerpf(-half, half, float(i - 1) / n)), q, t)
 	for i in n:
 		var u0 := lerpf(-half, half, float(i) / n)
 		var u1 := lerpf(-half, half, float(i + 1) / n)
@@ -376,6 +389,11 @@ func rain_on(center: Vector3, dir: Vector2, radius: float, deg: float, t: float)
 	glow.global_position = AimMode.ground(h.m, center) + Vector3(0, 0.05, 0)
 	glow.rotation = Vector3(0, yaw, 0)
 	glow.visible = true
+
+## The thread running from one needle post to the next, stitching the wall to the ground.
+func _stitch(a: Vector3, b: Vector3, t: float) -> void:
+	var to := Vector2(b.x - a.x, b.z - a.z)
+	HeroVfx.of(h.m).play(h, "rain_thread", a, to.normalized(), {"len": to.length(), "t": t})
 
 func _arc_pt(center: Vector3, yaw: float, radius: float, u: float) -> Vector3:
 	var a := yaw + u
@@ -450,7 +468,7 @@ func _tick_streaks(dt: float) -> void:
 			n.visible = false
 			c["t"] = 0.0
 			if not c.get("up", false):
-				h.m.fx.spark(to + Vector3(0, 0.05, 0), Vector3.UP, GREEN, 3, 3.0, 70.0, 0.18, 8.0, 0.7)
+				h.m.fx.spark(to + Vector3(0, 0.05, 0), Vector3.UP, SILVER, 3, 3.0, 70.0, 0.18, 8.0, 0.7)
 
 # ------------------------------------------------------------------ Spirit Walk tint
 func tint_to(k: float) -> void:

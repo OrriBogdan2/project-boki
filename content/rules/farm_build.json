@@ -1,5 +1,5 @@
 {
-	"desc": "The farm building pass (docs/decisions/0004-farm-building.md). Farm level is points from play; items unlock by farm level or a milestone; new buildings are construction sites that Boki build with materials and labour; buildings upgrade L1 to L3. Units: gems and materials are counts, labour is Boki work swings (one swing is about 6 s at building skill 1).",
+	"desc": "The farm building pass (docs/decisions/0004-farm-building.md). Farm level is points from play; items unlock by farm level or a milestone; new buildings are construction sites that you hammer (hold interact) and your Boki help build; the materials are spent a quarter at a time as the work goes; buildings upgrade L1 to L3. Units: gems and materials are counts, labour is work swings (one hammer beat of yours is 0.8 s, one swing of a Boki is about 3 s at building skill 1).",
 	"points": {"extracts": 3.0, "bosses": 6.0, "caught": 2.0, "hatched": 2.0, "harvested": 0.25, "built": 2.0, "fb_built": 2.0},
 	"points_doc": "Farm points = sum(stat * weight). 'built' counts the lot buildings you built, 'fb_built' the buildings Boki finished on the farm.",
 	"levels": [0, 6, 16, 30, 48, 70],
@@ -14,7 +14,7 @@
 	"lots": {"board": {"wood": 6, "stone": 4}},
 	"lots_doc": "Wood and stone a building LOT costs on a farm under the building pass, instead of its gem price in Data.BUILDINGS (the Challenge House: Hob draws it up after the first expedition).",
 	"starter": ["crop_patch", "cook_pot"],
-	"starter_doc": "Placed at once, no site. The house is not here: it goes up as a site your Boki build (build.house), a little wood on a new save.",
+	"starter_doc": "Placed at once, no site. The house is not here: it goes up as a site you and your Boki build (build.house): 10 wood and 6 stone, spent as it goes up.",
 	"start_doc": "What Hob offers from the first minute is every item with no entry in unlock: house, crop_patch, cook_pot, ranch_pen, fence, path_dirt, flowers (and the feeder in storage). Everything in unlock opens by farm level or milestone and is then drawn up when you talk to Hob (scripts/home/farm_builder.gd).",
 	"unlock": {
 		"path_clear": {"level": 2}, "picket": {"level": 2}, "path_stone": {"level": 2}, "bush": {"level": 2}, "job_board": {"level": 2}, "lumber_camp": {"level": 2}, "quarry": {"level": 2}, "storage_chest": {"level": 2},
@@ -26,7 +26,7 @@
 	"cradles": {"6": 4, "7": 5, "8": 6},
 	"cradles_doc": "Incubator cradle number -> farm level that lets you buy it.",
 	"build": {
-		"house": {"wood": 3, "labour": 8},
+		"house": {"wood": 10, "stone": 6, "labour": 12},
 		"market_stall": {"gems": 10, "wood": 6, "fibre": 4, "labour": 4},
 		"nesting_nook": {"gems": 15, "wood": 10, "fibre": 6, "labour": 6},
 		"boki_burrow": {"gems": 12, "wood": 8, "stone": 5, "fibre": 4, "labour": 6},
@@ -54,6 +54,5 @@
 	"tier_names": ["", "Sturdy", "Fine"],
 	"upgradable": ["house", "crop_patch", "cook_pot", "market_stall", "nesting_nook", "boki_burrow", "training_post", "graveyard", "job_board", "lumber_camp", "quarry", "storage_chest", "hearth_oven", "workbench", "spark_mill", "cold_store", "ranch_pen", "infirmary", "seed_garden", "kiln"],
 	"house_upgrade": {"2": {"gems": 40, "wood": 10, "stone": 6, "fibre": 6, "labour": 8, "level": 3}, "3": {"gems": 80, "wood": 18, "stone": 14, "coals": 2, "fibre": 10, "labour": 12, "level": 5}},
-	"swing_s": 6.0,
 	"crew_slots": 2
 }

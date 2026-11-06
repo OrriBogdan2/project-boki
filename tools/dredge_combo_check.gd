@@ -1,5 +1,5 @@
 extends RefCounted
-## --dredge-combo-check: Dredge's abilities and their interactions, scripted one by one in the
+## --dredge-combo-check: Grimble's abilities and their interactions, scripted one by one in the
 ## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Abyssal Hand
 ## reel, only the barge during it, reel into the Anchor Drop, terrain the hook pierces, the abyss, the Salvage
 ## passive, the back hit, the barge's turn lock after the Anchor, the rank-3 specials, and the X ult,
@@ -399,7 +399,7 @@ func _all() -> void:
 		"grapples %d took %.1f cd %.1f" % [K.grapples, ak.dmg(T), float(K.cd["rmb"])]
 	)
 	ok(
-		"reel: Dredge is Grounded while he reels, the foe is stunned",
+		"reel: Grimble is Grounded while he reels, the foe is stunned",
 		KitStatus.grounded(P) and T.stun_t > 0.0 and K.fx.shown("chain%d" % P.get_instance_id()),
 		"gnd %s stun %.2f" % [KitStatus.grounded(P), T.stun_t]
 	)
@@ -432,7 +432,7 @@ func _all() -> void:
 		K.arrivals == 1 and K.pull.is_empty() and not KitStatus.grounded(T) and P.flat_dist(T) < 3.6,
 		"arrivals %d dist %.1f (was %.1f)" % [K.arrivals, P.flat_dist(T), d0]
 	)
-	ok("reel: Dredge's own Grounded ends with the reel", not KitStatus.grounded(P))
+	ok("reel: Grimble's own Grounded ends with the reel", not KitStatus.grounded(P))
 	# --- reel then Anchor Drop on the Grounded foe
 	ak.fresh(T)
 	T.teleport(P.pos + Vector3(2.0, 0, 0))
@@ -539,7 +539,7 @@ func _all() -> void:
 	ok(
 		"reel audit: braced, he shuffles at a fifth of his walk (not full speed), and that still swings the arrival",
 		shuffle <= P.base_speed * 0.4 and absf(T.pos.z - start.z) >= 0.25 and K.arrivals >= 1,
-		"arrival shift %.1f m, Dredge %.2f m/s" % [absf(T.pos.z - start.z), shuffle]
+		"arrival shift %.1f m, Grimble %.2f m/s" % [absf(T.pos.z - start.z), shuffle]
 	)
 	ok("reel: the body still swings on an arc, not a straight line", dev > 0.2, "off the straight line by %.2f m" % dev)
 	# --- an ally in the hook's path is reeled to safety (no damage, no stun); a wisp on the way is scooped up

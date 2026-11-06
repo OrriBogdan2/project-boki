@@ -204,7 +204,7 @@ ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats 
 - Effects: scripts/arch/kits/dj_fx.gd and shaders/dj_fx.gdshader, every node pooled: the gold chakram and its
   comet trail, the empowered blue chakram in a lightning streak, the fizzle puff, the Bola's two weights, the
   dagger, the cyan afterimage chain, the knock star and heal pillar, the cartwheel arc.
-- Sounds: tools/gen_dj_sfx.py (`dj_*`), synthesized.
+- Sounds: tools/gen_sfx_sable.py (`dj_*`, `thief_*`), synthesized; set in content/sfx/thief.json.
 
 ## Engine notes
 

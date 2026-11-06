@@ -21,13 +21,28 @@ const CLOSE_ZOOM := 0.45
 const SHOTS := [
 	# ------------------------------------------------ Lisette
 	[
-		"pin_draw_v",
+		"pin_draw_idle",
+		"archer",
+		"aim",
+		0.3,
+		3.0,
+		"At rest: one faint thin line to the cursor, nothing else"
+	],
+	[
+		"pin_draw_start",
 		"archer",
 		"draw",
-		0.35,
+		0.2,
 		3.0,
-		"Draw toward Empowered: the feathered V closing on the cursor from the bow, the cursor ring"
-			+ " filling, no glint yet"
+		"The thin line to the cursor, the bright fill just growing out of Lisette, the small circle ahead of it"
+	],
+	[
+		"pin_draw_mid",
+		"archer",
+		"draw",
+		0.5,
+		3.0,
+		"The fill most of the way to the circle (the circle still quiet)"
 	],
 	[
 		"pin_draw_empowered",
@@ -35,8 +50,15 @@ const SHOTS := [
 		"draw",
 		0.64,
 		3.0,
-		"Empowered ready: the lines merged into one bright line, the leaf glint riding out, a green"
-			+ " fletch burst at the bow"
+		"The fill has reached the circle and the circle flashes: release now for the perfect shot"
+	],
+	[
+		"pin_draw_next",
+		"archer",
+		"draw",
+		0.95,
+		3.0,
+		"Past the perfect window: the circle has moved on to the end of the line, the fill running on toward it"
 	],
 	[
 		"pin_draw_super",
@@ -44,8 +66,7 @@ const SHOTS := [
 		"draw_tgt",
 		1.3,
 		4.0,
-		"Supercharged held: the thick feathered mint line past the cursor to max range, the mint fletch glint at"
-			+ " the bow hand, the dummy ringed at its feet"
+		"Supercharged held: the thick white line past the cursor to max range, the dummy ringed at its feet"
 	],
 	[
 		"pin_super_ready",
@@ -53,7 +74,7 @@ const SHOTS := [
 		"draw_tgt",
 		1.18,
 		4.0,
-		"Supercharged comes up: the body flash, a mint fletch burst at the bow, the feathered line past the cursor"
+		"Supercharged comes up: the body flash, the fill reaching the end circle, the white line past the cursor"
 	],
 	[
 		"pin_quick_draw",
@@ -61,16 +82,23 @@ const SHOTS := [
 		"quick",
 		1.16,
 		3.0,
-		"Quick draw after a perfect release: the next Empowered comes up in 0.38 s (merged line, leaf glint)"
+		"Quick draw after a perfect release: the next Empowered comes up in 0.38 s (the fill reaching the circle)"
 	],
-	["pin_overdraw", "archer", "draw_tgt", 1.85, 4.0, "Overdrawn: the line and the bow glint dim, the draw arm shakes"],
+	[
+		"pin_overdraw",
+		"archer",
+		"draw_tgt",
+		1.85,
+		4.0,
+		"Overdrawn: the line dims to a thin pale one, the draw arm shakes"
+	],
 	[
 		"pin_perfect",
 		"archer",
 		"perfect",
 		0.68,
 		2.5,
-		"Perfect release: Lisette's gold fletch burst with its ring at the bow hand (0.13 s), the cursor star"
+		"Perfect release: Lisette's gold fletch burst with its ring at the bow, on the aim line (0.13 s)"
 	],
 	[
 		"pin_arrow_flight",
@@ -110,7 +138,7 @@ const SHOTS := [
 		"heavy",
 		1.0,
 		3.0,
-		"Heavy Shot held (before full): the gold V closing and the gold bar growing from the bow"
+		"Heavy Shot held: the great silver needle on the bow, its red thread trailing, glowing with the charge"
 	],
 	[
 		"pin_heavy_flight",
@@ -350,7 +378,7 @@ const OWNER := [
 		"draw_tgt",
 		0.3,
 		3.0,
-		"owner1103 #5: draw strip 2/5, the steady pull, the V closing on the aim line"
+		"owner1103 #5: draw strip 2/5, the steady pull, the fill growing along the aim line"
 	],
 	[
 		"o1103_pin_draw_c",
@@ -358,7 +386,7 @@ const OWNER := [
 		"draw_tgt",
 		0.64,
 		3.0,
-		"owner1103 #5: draw strip 3/5, Empowered ready, one line and the glint on the aim line"
+		"owner1103 #5: draw strip 3/5, Empowered ready, the fill on the circle, the circle flashing"
 	],
 	[
 		"o1103_pin_draw_d",
@@ -366,7 +394,7 @@ const OWNER := [
 		"draw_tgt",
 		0.95,
 		4.0,
-		"owner1103 #5: draw strip 4/5, the V re-opening toward Supercharged"
+		"owner1103 #5: draw strip 4/5, the fill running on toward Supercharged"
 	],
 	[
 		"o1103_pin_draw_e",
@@ -390,7 +418,7 @@ const OWNER := [
 		"heavy_pin",
 		1.0,
 		3.0,
-		"owner1103 #6: the Heavy Shot held, the thick gold lane and V from the bow"
+		"owner1103 #6: the Heavy Shot held, the thick gold lane from the bow"
 	],
 	[
 		"o1103_pin_heavy_release",
@@ -775,6 +803,8 @@ func _input(what: String, t: float) -> void:
 	var K = P.ak
 	var at := func(x: float) -> bool: return t >= x - DT * 0.5 and t < x + DT * 0.5
 	match what:
+		"aim":
+			P.inp["fire"] = false
 		"draw":
 			P.inp["fire"] = t >= 0.0
 			K.res = 0.0

@@ -141,7 +141,19 @@ func _tutorial_rules() -> void:
 	ok(FarmTutorial.did("axe") and FarmTutorial.current() == "chop", "owning an axe finishes step 1: chop a tree")
 	Work.add_mat("wood", int(FarmSites.build_cost("house")["wood"]))
 	FarmTutorial.detect()
-	ok(FarmTutorial.did("chop") and FarmTutorial.current() == "house", "enough wood for the house finishes chopping")
+	ok(FarmTutorial.did("chop") and FarmTutorial.current() == "stone",
+			"enough wood for the house finishes chopping; the rocks are next")
+	ok(FarmTutorial.give_step_tool("stone") == "pickaxe" and HomeGather.has_tool("pickaxe"),
+			"the rock step hands over a pickaxe")
+	ok(FarmTutorial.hint_text("stone").contains("stone") and FarmTutorial.world_text("stone") != "",
+			"it says what stone is for and marks a rock")
+	ok(not FarmTutorial.available("house"), "the house waits until its stone is in hand too")
+	Work.add_mat("stone", int(FarmSites.build_cost("house")["stone"]))
+	FarmTutorial.detect()
+	ok(FarmTutorial.did("stone") and FarmTutorial.current() == "house", "enough stone for the house finishes mining")
+	var house_hint := FarmTutorial.hint_text("house")
+	ok(house_hint.contains(FarmSites.cost_text(FarmSites.build_cost("house"))) and not house_hint.contains("{"),
+			"the house hint names what it costs: %s" % house_hint)
 	FarmTutorial.event("hob")
 	ok(not FarmTutorial.did("hob"), "doing a later step early does not count")
 	var site := _add_house(L, true)
@@ -151,24 +163,19 @@ func _tutorial_rules() -> void:
 	ok(not FarmTutorial.available("task"),
 			"a job for your Boki waits until the house stands (a pinned Boki would stop building)")
 	FarmTutorial.event("swing")
-	ok(FarmTutorial.did("hammer") and FarmTutorial.current() == "stone",
-			"a swing counts, and the first step left is the rock (the job waits for the house)")
+	ok(FarmTutorial.did("hammer") and FarmTutorial.current() == "feed",
+			"a swing counts, and the first step left is feeding (the job waits for the house)")
 	var feed_hint := FarmTutorial.hint_text("feed")
 	var has_key := feed_hint.contains(Settings.key_cap("build")) and not feed_hint.contains("{")
 	ok(FarmTutorial.stage("feed") == "place" and has_key, "the hint names the real key, no leftovers")
 	FarmTutorial.event("hob")
-	ok(FarmTutorial.did("hob") and FarmTutorial.current() == "stone",
+	ok(FarmTutorial.did("hob") and FarmTutorial.current() == "feed",
 			"free order: meeting Hob first is fine, the prompt stays on the first step left")
 	site.erase("site")
 	ok(FarmTutorial.available("task") and FarmTutorial.current() == "task",
 			"once the house stands the job step is next")
 	FarmTutorial.event("task")
-	ok(FarmTutorial.did("task") and FarmTutorial.current() == "stone", "pinning a Boki to a job finishes it")
-	ok(FarmTutorial.give_step_tool("stone") == "pickaxe" and HomeGather.has_tool("pickaxe"), "the rock step hands over a pickaxe")
-	ok(FarmTutorial.hint_text("stone").contains("stone") and FarmTutorial.world_text("stone") != "", "it says what stone is for and marks a rock")
-	Work.add_mat("stone", 1)
-	FarmTutorial.detect()
-	ok(FarmTutorial.did("stone") and FarmTutorial.current() == "feed", "a first stone finishes mining")
+	ok(FarmTutorial.did("task") and FarmTutorial.current() == "feed", "pinning a Boki to a job finishes it")
 	Save.d["feeders"] = [{"id": "f1", "kind": "trough", "x": 40.0, "z": 30.0, "food": [], "auto": false}]
 	ok(FarmTutorial.stage("feed") == "fill", "a trough down moves the prompt to filling it")
 	Save.d["feeders"][0]["food"] = ["kibble"]
@@ -341,9 +348,10 @@ func _world() -> void:
 			"the first prompt is on screen: %s" % home.guide.hint_lbl.text)
 	ok(home.get("day1_box") == null, "the old first-day card is gone")
 	var g0 := int(Save.d["gems"])
-	Work.add_mat("wood", 3)
+	var house_cost := FarmSites.build_cost("house")
 	ok(home.guide.place_house() and FarmSites.is_site(_entry("house")), "the house goes down as a site")
-	ok(int(Save.d["gems"]) == g0 and Work.mat("wood") == 0, "and costs a little wood (3) and no gems on a new save")
+	ok(int(Save.d["gems"]) == g0 and Work.mat("wood") == 0 and Work.mat("stone") == 0,
+			"marking it out is free: nothing is spent yet")
 	home._sync_fixtures()
 	ok(is_instance_valid(home.hob.node), "Hob turns up once the house is down")
 	var hc: Vector3 = HomeLayout.deco_center(_entry("house"))
@@ -358,17 +366,21 @@ func _world() -> void:
 			"walking up to him offers to talk: '%s'" % home._label_for(it))
 	home.ppos = hc + Vector3(2.0, 0, 2.2)
 	it = home.hob.find(Vector2(home.ppos.x, home.ppos.z))
-	ok(String(it.get("kind", "")) == "site" and home._label_for(it).contains("0/8"),
-			"by the site you may swing a hammer: '%s'" % home._label_for(it))
+	ok(String(it.get("kind", "")) == "site" and home._label_for(it).begins_with("Needs "),
+			"by a site with no materials the prompt says what it needs: '%s'" % home._label_for(it))
 	var e := _entry("house")
+	Work.add_mat("wood", int(house_cost["wood"]))
+	Work.add_mat("stone", int(house_cost["stone"]))
+	var prompt: String = home._label_for(it)
+	ok(prompt.contains("Hold to hammer") and prompt.contains("0/%d" % int(house_cost["labour"])),
+			"with them, you may hold to hammer: '%s'" % home._label_for(it))
 	home.hob.use(it)
-	ok(int(e["site"]["got"]) == 1, "a swing adds one")
-	home.hob.use(it)
-	ok(int(e["site"]["got"]) == 1,
-			"but not again at once (cool-down %.0fs)" % float(FarmTutorial.option("swing_cooldown_s")))
-	home.hob.swing_cd = 0.0
-	home.hob.use(it)
-	ok(int(e["site"]["got"]) == 2, "and again after it")
+	home.tw.test_hold = true
+	var beats := 2
+	for i in int(HunterTool.period("hammer") * 20.0) * beats + 4:
+		home.hob.tick(0.05)
+	home.tw.test_hold = false
+	ok(int(e["site"]["got"]) == beats, "holding the key hammers beat after beat (%d)" % int(e["site"]["got"]))
 	# the tracker card sits in the old first-day slot, and the Hob step
 	ok(is_instance_valid(home.guide.tracker) and home.guide.tracker.get_parent() == home.root_ui,
 			"the Goals card is on screen")
@@ -394,6 +406,8 @@ func _world() -> void:
 	# the one Boki builds it alone, and it is finished by the work
 	var need := int(e["site"]["need"])
 	e["site"]["got"] = 0
+	Work.add_mat("wood", int(house_cost["wood"]))
+	Work.add_mat("stone", int(house_cost["stone"]))
 	home.hw.scan_t = 0.0
 	home.hw.scan()
 	var ticks1: int = await _sim(home, home.hw, 400.0, func() -> bool: return not FarmSites.has_site(_entry("house")))
@@ -428,7 +442,8 @@ func _world() -> void:
 	await main.get_tree().process_frame
 	# two Boki: two crew slots, and no slower than one
 	var home2 = await _home(2)
-	Work.add_mat("wood", 3)
+	Work.add_mat("wood", int(house_cost["wood"]))
+	Work.add_mat("stone", int(house_cost["stone"]))
 	home2.guide.place_house()
 	home2.hw.scan_t = 0.0
 	home2.hw.scan()

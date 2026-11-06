@@ -72,6 +72,10 @@ func _ready() -> void:
 		add_child(l)
 		num_pool.append(l)
 	_build_sparks()
+	# no effect casts a shadow: rings, telegraphs, decals, particles, bolts (item 94, ShadowPolicy)
+	ShadowPolicy.off(self)
+	child_entered_tree.connect(ShadowPolicy.off)
+	ShadowPolicy.watch_particles(get_tree())     # and no particle system anywhere in the match does
 
 func _build_sparks() -> void:
 	var qm := QuadMesh.new(); qm.size = Vector2(1, 1)

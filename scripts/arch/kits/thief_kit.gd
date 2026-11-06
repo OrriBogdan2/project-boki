@@ -395,7 +395,7 @@ func _bolt() -> void:
 		x["kb"] = 3.0
 		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 2.6, 0.55)
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
-		m.sfx("dj_bolt_emp", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
+		m.sfx("thief_flintlock_crack", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
 	else:
 		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_GOLD, 0.9, 0.3)
 		fx().star(muzzle, BOLT_GOLD, 0.6, 0.1, BOLT_CORE)        # the gold muzzle star at the throwing hand
@@ -525,7 +525,7 @@ func _vaulted(air: bool, empower: bool) -> void:
 	var t := float(dd["time"])
 	_swoosh(dir)
 	m.later(t * 0.5, func(): if is_instance_valid(h): _swoosh(dir))
-	m.sfx("dj_cartwheel", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
+	m.sfx("thief_dash", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
 	if not empower:
 		return
 	haste_t = float(dd["haste_t"])
@@ -535,7 +535,7 @@ func _vaulted(air: bool, empower: bool) -> void:
 		if not is_instance_valid(h) or primed_t <= 0.0: return
 		glint_pop = 1.0                          # the bolt formed in the hand: empowered
 		net_ring(hand_pos(hand == 0), 0.25, EMP_LINE)
-		m.sfx("click", h.pos, -6.0 if h.is_local() else -10.0, 2.2))
+		m.sfx("thief_cock", h.pos, -6.0 if h.is_local() else -10.0, 1.0))
 	if not was:
 		m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 		if h.is_local(): h._ab_feedback("dash", "ready")
@@ -780,7 +780,7 @@ func _tangle(f, other: Ent) -> void:
 	var mid := (a + other.pos) * 0.5
 	m.fx.word(mid + Vector3(0, 2.6, 0), "TANGLED", col, true)
 	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("ff9be8"), 1.2, 0.3)
-	m.sfx("ab_stun", mid, -2.0, 1.1)
+	m.sfx("thief_bola_stun", mid, -2.0, 1.0)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
 
 # ------------------------------------------------------------------ E: Shadow Knife
@@ -827,7 +827,7 @@ func _stick(f: Ent, at: Vector3) -> void:
 		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
 	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("ffcf5a"), 0.8, 0.2)
-	m.sfx("ab_plant", at, -6.0, 1.8)
+	m.sfx("thief_knife_stick", at, -6.0, 1.0)
 	net_ring(at, 0.8, col_of(ed))
 
 ## The stuck dagger (a pooled look, everyone sees it) and, on your screen, the white arrival circle.

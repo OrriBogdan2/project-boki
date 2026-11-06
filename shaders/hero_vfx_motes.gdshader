@@ -4,7 +4,8 @@
 shader_type particles;
 render_mode disable_force, disable_velocity;
 
-uniform int shape = 0;            // 0 a ball, 1 a line (`span`), 2 a disc on the ground, 3 converging on the node
+uniform int shape = 0;            // 0 a ball, 1 a line (`span`), 2 a disc on the ground, 3 converging on the node, 4 an arc
+                                  // (the node at its centre, `radius` out; span: half angle rad, yaw rad, depth m)
 uniform float radius = 0.2;       // m
 uniform vec3 span = vec3(0.0, 0.0, 1.0);    // m, the line from the node
 uniform vec3 dir = vec3(0.0, 1.0, 0.0);
@@ -47,6 +48,10 @@ void start() {
 		float a = rnd(s) * 6.28318;
 		float r = sqrt(rnd(s)) * radius;
 		at = vec3(cos(a) * r, 0.05, sin(a) * r);
+	} else if (shape == 4) {
+		float a = span.y + (rnd(s) * 2.0 - 1.0) * span.x;
+		float r = radius + (rnd(s) - 0.5) * span.z;
+		at = vec3(sin(a) * r, 0.05, cos(a) * r);
 	} else {
 		vec3 out_way = rnd_dir(s);
 		at = out_way * radius;

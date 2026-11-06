@@ -88,9 +88,18 @@ AimKit.dotted(h, "rmb", {"len": 15.0})     # Pip seed: a faint 0.4 bh strip with
 ```
 Params: `from`, `dir`, `len` (8), `width` (0.72), `gap` (0.6 m between dots), `dot` (0.06 m radius).
 
-### V that closes into one line
+### Filling line
+No shape of its own: two lines and a circle.
 ```gdscript
-# Lisette's draw: the V opens 25 deg and closes as the stage charges; one bright line at k = 1
+# Lisette's draw: a faint line to the cursor, a bright fill growing out along it, a circle at the perfect point
+AimKit.line(h, "draw", {"len": L, "arrow": false})
+AimKit.line(h, "draw_fill", {"len": L * fill, "arrow": false})
+AimKit.circle(h, "draw_mark", {"at": point, "r": 0.22})
+```
+
+### V that closes into one line
+Nothing in the game uses it now (Lisette's draw was the V until owner item 55b).
+```gdscript
 AimKit.vee(h, "draw", {"k": stage_k, "glint": stage_k * 0.4, "col2": Color("b6ff8a")})
 ```
 Params: `from`, `dir`, `len` (to the cursor, clamped 1.5-20), `k`, `open` (degrees, 25), `glint`
@@ -100,7 +109,7 @@ Params: `from`, `dir`, `len` (to the cursor, clamped 1.5-20), `k`, `open` (degre
 ```gdscript
 # Vex wall cone: from the stuck point back out, everyone sees it for the fuse
 AimKit.cone(h, "wallcone", {"from": stick, "dir": back, "len": 6.0, "deg": 100.0, "fill": fuse_k, "all": true, "dur": 0.8})
-# Dredge Buckshot: just the two edge lines
+# Grimble Buckshot: just the two edge lines
 AimKit.cone(h, "spread", {"len": 6.3, "deg": 30.0 + h.wbloom, "edges": true})
 ```
 Params: `from`, `dir`, `len` (4), `deg` (60), `inner` (0.3 m), `edges`, `fill`.
@@ -132,19 +141,19 @@ Params: `center` (the hunter), `dir`, `radius` (the cursor distance clamped to `
 
 ### Two-end swap marker
 ```gdscript
-AimKit.swap(h, "dash", {"range": 9.0, "fill": t / swap_t})   # Ostra: origin ring, destination sigil filling
+AimKit.swap(h, "dash", {"range": 9.0, "fill": t / swap_t})   # Motley: origin ring, destination sigil filling
 ```
 Params: `a` (the hunter), `b` (the cursor point, clamped to `range`), `r` (1.35), `fill`.
 
 ### Extras the sheets need
 ```gdscript
-AimKit.line(h, "aim")                                        # the thin aim line to the cursor (Ostra, Claire)
+AimKit.line(h, "aim")                                        # the thin aim line to the cursor (Motley, Claire)
 AimKit.line(h, "aim", {"col": Color("ffd25a"), "hot": 0.6})   # Sable's gold empowered line
 AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor to max range (Lisette stage 2)
 AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Tarek Tetraform: a long line, inward chevrons, centre ring
 AimKit.star(h, "lock", {"at": foe.pos, "size": 0.5})          # a glint on the ground
 ```
-The two parallel lines (Ostra RMB) are `lane` with `"rails": true` and no chevrons. The Breaker R
+The two parallel lines (Motley RMB) are `lane` with `"rails": true` and no chevrons. The Breaker R
 rectangle is a plain `lane`. The Juggernaut hold-blast arc round the body is `circle` with
 `"self": true`. A target highlight ring at someone's feet is a small `circle` at their position. Ryzz's E is a
 `circle` with `ticks` and `"pointer": drag_dir`, plus a `lane` with `"from": disc, "tip": true` for the

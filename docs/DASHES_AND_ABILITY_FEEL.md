@@ -285,8 +285,9 @@ and context-targeted. Six different inputs, so no two archetype dashes play alik
 
 ### 3.3 Dash-wide rules
 
-- Every dash spends a visible pip. Enemies see a hunter's remaining dash charges as small pips under
-  their health bar, within 14m. This is the two-sided "they used it, now go" read the owner asked for.
+- Every dash spends a visible pip on your own dash slot (DashSlot: a pip per charge, the countdown for the
+  next, a flash and tick on return; the same slot at home). Owner item 84 removed the dash bar under the
+  overhead health bar, so enemies' charges are no longer shown; the enemy read is the dash animation itself.
 - Every dash has a start pose of at least 0.05s (an animation, not a delay on movement) and a unique
   sound per archetype. The kin's rider adds a theme sweetener.
 - Wind-down: no glider for 0.12s after a ground dash ends, as SUPERVIVE did. Dash → jump is unchanged.
@@ -462,7 +463,7 @@ Rules:
   this to Elluna's delayed root.
 - A victim of reveal, mark, blight or vulnerable gets a HUD status icon with a timer, and their model
   shows the mark to everyone (reveal outline, vulnerable crack overlay, blight sickly tint).
-- Enemy dash charges show as pips (3.3). Each enemy's merge and resource states have tells
+- (Enemy dash pips were removed by owner item 84.) Each enemy's merge and resource states have tells
   (ARCHETYPES.md), so you can track their big tools.
 
 ### 5.3 Telegraph timing
@@ -614,7 +615,7 @@ authors see what the game will do.
 
 ## 6. Open questions
 
-- Should enemy dash pips show in squads only, or in solo too? (Recommendation: everywhere within 14m.)
+- (Enemy dash pips: removed, owner item 84.)
 - Per-entity hitstop online: is a local-only presentation freeze acceptable to the netcode owner?
   It doesn't touch simulation, but the two players see a 45-90ms visual hold.
 - Mycroll's merge pulse: lower the root (proposed) or lengthen the interval?

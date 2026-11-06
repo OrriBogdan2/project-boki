@@ -1,0 +1,30 @@
+{
+	"doc": "Claire's hand-keyed clips (art/wardens/claire/claire.glb) and which game state plays which (scripts/heroes/warden_clips.gd). She skates everywhere: walk and run are her strokes, tm_skate is Rink Run.",
+	"skinned_weapon": true,
+	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "mouth.L": "head", "mouth.R": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R"},
+	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
+	"loco": {
+		"idle": "idle", "stance": "stance", "stance_after": 6.0,
+		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
+		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
+		"walk_speed": 2.2, "run_speed": 4.6
+	},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
+	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "fall"},
+	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
+	"kmoves": {
+		"tm_dart_r": {"clip": "dart_r", "upper": "moving"}, "tm_dart_l": {"clip": "dart_l", "upper": "moving"}, "tm_dart_heavy": {"clip": "dart_heavy", "upper": "moving"},
+		"tm_beam": {"clip": "beam", "upper": true},
+		"tm_spear_aim": {"clip": "spear_aim", "hold_from": 0.12, "upper": "moving"}, "tm_spear": {"clip": "spear", "upper": "moving"},
+		"tm_wall": {"clip": "wall"}, "tm_freeze": {"clip": "freeze", "upper": "moving"},
+		"tm_skate_go": {"clip": "skate_go", "heading": true}, "tm_skate": {"clip": "skate", "heading": true}, "tm_skate_air": {"clip": "skate_air", "heading": true}, "tm_skate_stop": {"clip": "skate_stop"},
+		"tm_shatter": {"clip": "shatter", "upper": "moving"}, "tm_clench": {"clip": "clench", "upper": "moving"},
+		"tm_rime": {"clip": "rime"}, "tm_rime_carry": {"clip": "rime_carry"}, "tm_rime_hold": {"clip": "rime_hold", "hold_from": 0.0}, "tm_rime_crash": {"clip": "rime_crash"}, "tm_rime_break": {"clip": "rime_break"},
+		"mf_xform": {"clip": "fusion"}
+	},
+	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
+	"flow": [["tm_dart_r", 0.16], ["tm_dart_l", 0.16], ["tm_dart_r", 0.16], ["tm_dart_heavy", 0.18], ["tm_skate_go", 0.16], ["tm_skate", 0.56], ["tm_beam", 0.22], ["tm_skate", 0.56], ["tm_skate_stop", 0.5], ["tm_spear_aim", 0.4], ["tm_spear", 0.55], ["tm_wall", 0.7], ["tm_freeze", 0.42], ["tm_rime", 0.2], ["tm_rime_hold", 0.8], ["tm_rime_crash", 0.4]],
+	"still": ["rime", "rime_hold"],
+	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"]
+}

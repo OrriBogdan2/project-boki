@@ -1,28 +1,27 @@
 shader_type spatial;
-// The Empty's hollow (Unmasked): a socket cut into the face (or the chest) where a self should be. Inside,
-// a deep starfield seen with real parallax, so it reads as a hole rather than paint; at the edge a glowing
-// rim and a soft halo on the skin; faint ghost outlines of the missing features float in the dark.
-// `planar` maps the shape flat on the mesh's XY (the chest's heart); otherwise round the head (a shell
-// of the head, centred on 0, front -Z).
+// The Empty's head (Unmasked): void all the way round, a dim starfield seen with real parallax and a lit edge
+// so it reads against any ground. A socket shaped for a Mask floats on the face: inside it the stars are deep
+// and bright with a glowing rim, and faint ghost outlines of the missing features float in the dark; outside it
+// the glow spills softly onto the void. Shell of the head, centred on 0, front -Z.
 render_mode unshaded, shadows_disabled, cull_back, depth_draw_opaque, blend_mix;
 
-uniform int shape = 0;                 // 0 oval, 1 mask, 2 torn, 3 crescent, 4 heart
+uniform int shape = 0;                 // 0 oval, 1 mask, 2 torn, 3 crescent
 uniform int ghost = 1;                 // 0 none, 1 eyes, 2 full face, 3 stitched
-uniform bool planar = false;
-uniform vec2 extent = vec2(0.85, 0.9); // rad (round the head) or m (planar): the shape's half size
+uniform vec2 extent = vec2(0.85, 0.9); // rad round the head: the shape's half size
 uniform float lift = 0.08;             // rad: the face sits this far below the head's middle
 uniform vec4 glow : source_color = vec4(0.55, 0.85, 1.0, 1.0);
 uniform vec4 deep : source_color = vec4(0.02, 0.015, 0.05, 1.0);
 uniform float depth = 0.35;            // how far back the stars sit (parallax)
 uniform float stars = 1.0;             // star density
-uniform float halo = 0.16;             // shape units the glow spills onto the skin
-uniform float pulse = 0.0;             // 0..1: how much the glow breathes
+uniform float halo = 0.16;             // shape units the glow spills onto the void round the socket
 
 varying vec3 obj_pos;
 varying vec3 obj_eye;
+varying vec3 obj_normal;
 
 void vertex() {
 	obj_pos = VERTEX;
+	obj_normal = NORMAL;
 	obj_eye = (inverse(MODEL_MATRIX) * vec4(CAMERA_POSITION_WORLD, 1.0)).xyz;
 }
 
@@ -54,16 +53,6 @@ float sdf_shape(vec2 p) {
 		float outer = ellipse(p, vec2(0.8, 0.94));
 		float bite = ellipse(p - vec2(0.48, 0.12), vec2(0.62, 0.78));
 		return max(outer, -bite);
-	}
-	if (shape == 4) {
-		// a heart (Inigo Quilez's exact heart, point down at the bottom of the shape)
-		vec2 q = vec2(abs(p.x), p.y + 1.05) * 0.55;
-		if (q.y + q.x > 1.0) {
-			return (length(q - vec2(0.25, 0.75)) - sqrt(2.0) / 4.0) / 0.55;
-		}
-		float a = dot(q - vec2(0.0, 1.0), q - vec2(0.0, 1.0));
-		vec2 m = q - 0.5 * max(q.x + q.y, 0.0);
-		return sqrt(min(a, dot(m, m))) * sign(q.x - q.y) / 0.55;
 	}
 	return ellipse(p, vec2(0.78, 0.92));
 }
@@ -130,9 +119,6 @@ float star_layer(vec2 p, float cell, float seed) {
 }
 
 vec2 face_uv(vec3 v) {
-	if (planar) {
-		return v.xy / extent;
-	}
 	vec3 n = normalize(v);
 	return vec2(atan(n.x, -n.z), asin(clamp(n.y, -1.0, 1.0)) + lift) / extent;
 }
@@ -140,40 +126,33 @@ vec2 face_uv(vec3 v) {
 void fragment() {
 	vec2 p = face_uv(obj_pos);
 	float d = sdf_shape(p);
-	if (d > halo) {
-		discard;
-	}
-	float breathe = 1.0 + pulse * 0.25 * sin(TIME * 2.2);
+	// looking into the hole: the eye ray, in the face's own frame, carries the far layers sideways
+	vec3 to_eye = normalize(obj_eye - obj_pos);
+	vec2 par = to_eye.xy / max(-to_eye.z, 0.25);
+	par = clamp(par, vec2(-2.0), vec2(2.0)) / extent.x;      // (seen from behind the parallax would run wild)
+	float s = star_layer(p + par * depth * 0.6, 7.0, 1.0) * 0.9;
+	s += star_layer(p + par * depth * 1.2, 11.0, 5.0) * 0.6;
+	s += star_layer(p + par * depth * 2.0, 17.0, 9.0) * 0.4;
+	vec3 stars_col = mix(vec3(1.0), glow.rgb, 0.35) * s;
 	vec3 col;
-	float a;
 	if (d > 0.0) {
-		// the halo on the skin round the socket
-		float k = 1.0 - d / halo;
-		col = glow.rgb * 1.4;
-		a = k * k * (planar ? 0.85 : 0.55) * breathe;
+		float edge = pow(1.0 - clamp(dot(normalize(obj_normal), normalize(obj_eye - obj_pos)), 0.0, 1.0), 3.0);
+		float k = clamp(1.0 - d / halo, 0.0, 1.0);
+		col = deep.rgb + stars_col * 0.7 + glow.rgb * edge * 0.55;
+		col = mix(col, glow.rgb * 1.4, k * k * 0.55);
 	} else {
-		// looking into the hole: the eye ray, in the face's own frame, carries the far layers sideways
-		vec3 to_eye = normalize(obj_eye - obj_pos);
-		vec2 par = planar ? to_eye.xy / max(to_eye.z, 0.25) : vec2(to_eye.x, to_eye.y) / max(-to_eye.z, 0.25);
-		par *= 1.0 / extent.x;
 		float inner = clamp(-d / 0.32, 0.0, 1.0);
 		col = mix(glow.rgb * 0.35, deep.rgb, smoothstep(0.0, 1.0, inner));
 		// a faint nebula far back
 		vec2 pn = p + par * depth * 1.6;
 		float neb = 0.5 + 0.5 * sin(pn.x * 3.1 + sin(pn.y * 2.3 + TIME * 0.15) * 1.7);
 		col += glow.rgb * 0.08 * neb * inner;
-		float s = star_layer(p + par * depth * 0.6, 7.0, 1.0) * 0.9;
-		s += star_layer(p + par * depth * 1.2, 11.0, 5.0) * 0.6;
-		s += star_layer(p + par * depth * 2.0, 17.0, 9.0) * 0.4;
-		col += mix(vec3(1.0), glow.rgb, 0.35) * s * inner;
+		col += stars_col * inner;
 		// ghost features hang a little way back
-		col += glow.rgb * 0.55 * ghosts(p + par * depth * 0.3) * (0.7 + 0.3 * breathe);
-		a = 1.0;
+		col += glow.rgb * 0.55 * ghosts(p + par * depth * 0.3);
 	}
 	// the bright lip of the socket
 	float rim = exp(-pow(d / 0.03, 2.0));
-	col = mix(col, glow.rgb * 1.8 + vec3(0.2), rim * 0.85 * breathe);
-	a = max(a, rim);
+	col = mix(col, glow.rgb * 1.8 + vec3(0.2), rim * 0.85);
 	ALBEDO = col;
-	ALPHA = clamp(a, 0.0, 1.0);
 }

@@ -277,8 +277,11 @@ static func sound(m: Node, layer: String, what: String, at: Vector3, by: Ent = n
 		"impact": vol -= 3.0
 	m.sfx(String(row[0]), at, vol - 4.0, float(row[1]))
 
-## The dash's own sound per archetype (plus the kin's sweetener, played by the rider).
+## The dash's own sound per archetype (plus the kin's sweetener, played by the rider). A Hunter with its
+## own <arch>_dash (HeroSfx, played with the dash itself) needs none of these shared layers.
 static func dash_sound(m: Node, arch: String, at: Vector3, by: Ent) -> void:
+	if by is Hunter and HeroSfx.of(by as Hunter, "dash", "") != "":
+		return
 	for s in DASH_SOUND.get(arch, [["dash", 1.0, 0.0]]):
 		var sn := String(s[0]); var pt := float(s[1]); var dl := float(s[2])
 		if dl <= 0.0:

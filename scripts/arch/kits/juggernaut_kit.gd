@@ -20,14 +20,10 @@ extends ArchKit
 ##   upward cleave that heals 80% of its damage; a knock with it makes it ready again. The Boki Merge has its own key.
 ## Matched to the footage in briefs/hero-ref/juggernaut.md; docs/heroes/juggernaut.md.
 
-const SLASH_OUT := Color("ff3df0")     # the slash crescent's magenta edge
-const SLASH_IN := Color("ffc83a")      # ... and its flame-yellow fill
+const SLASH_OUT := Color("ff3df0")     # the Slam's magenta strike lane
 const LUNGE_RED := Color("ff4a3a")     # the Lunge lane while charging
 const LUNGE_FULL := Color("ff3df0")    # ... at full
 const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
-const SWEET_RING := Color("ff5a2a")    # the sweet spot's shock ring
-const FLAME_ORANGE := Color("ff7a1a")  # Rampage's flame streaks
-const FLAME_HOT := Color("ffd04a")
 const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent
 const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
 const WAVE_FULL := Color("ffc23a")     # ... gold-hot at full charge
@@ -64,7 +60,6 @@ var perfects := 0              # (tests) Lunges let go in a perfect window
 var knock_healed := 0.0        # (tests) health the knock heals gave back
 var rampage_wind := 0.0        # the Rampage's crouch still to go before the drive
 var rampage_dir := Vector2.ZERO  # the way the Rampage will drive once its crouch ends
-var trail_t := 0.0
 
 func _setup() -> void:
 	riposte = JuggernautUlt.new(self)
@@ -121,10 +116,8 @@ func cd_k(slot: String) -> float:
 func _enrage_fx() -> void:
 	var rc := res_col()
 	if lunge.is_empty() and slam_w.is_empty() and not rmb_down: play("jug_roar")
-	m.sfx("knock", h.pos, 0.0, 0.6)          # the roar, audible within 25m
-	m.sfx("charge", h.pos, -3.0, 0.45)
+	vfx("enrage")
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), "ENRAGED", rc, true)
-	m.fx.burst(h.pos + Vector3(0, 1.2, 0), rc, 30, 6.0, 0.6, -2.0, 1.4)      # flaring off the body (no ground ring)
 	if h.is_local():
 		if m.hud: m.hud.flash(rc, 0.15)
 	_make_aura()
@@ -133,8 +126,8 @@ func _make_aura() -> void:
 	if aura and is_instance_valid(aura):
 		return
 	aura = Node3D.new()
-	# the Enraged look is on the body: embers streaming off him and dark red drips (_tick_look), no shell
-	# or ground disc and no light (from above those read as a pale disc that hid his feet)
+	# the Enraged look is on the body (the "enraged" hold, _tick_look), no shell or ground disc and no light
+	# (from above those read as a pale disc that hid his feet)
 	h.add_child(aura)
 
 func _drop_aura() -> void:
@@ -156,28 +149,20 @@ func _tick_look(dt: float) -> void:
 		if not h.model.has_meta("base_scale"):
 			h.model.set_meta("base_scale", h.model.scale)
 		h.model.scale = (h.model.get_meta("base_scale") as Vector3) * (1.0 + 0.16 * grow)
-	if aura and is_instance_valid(aura):
-		if randf() < dt * 18.0:
-			for sx in [-0.45, 0.45]:
-				m.fx.burst(h.pos + Vector3(sx, 1.75, 0), res_col(), 2, 1.6, 0.5, -3.0, 0.9)
-			var on_body := Vector3(randf_range(-0.35, 0.35), randf_range(0.5, 1.6), randf_range(-0.35, 0.35))
-			m.fx.burst(h.pos + on_body, Color("ff5a1a"), 1, 0.9, 0.45, -4.0, 0.8)
-			# dark red drips running off him
-			m.fx.burst(h.pos + Vector3(randf_range(-0.4, 0.4), 1.2, randf_range(-0.4, 0.4)), Color("8a1010"), 1, 0.4,
-					0.5, 6.0, 0.8)
 	if enraged_t <= 0.0 and aura:
 		_drop_aura()
-	# the heat: embers off the shoulders that thicken with Rage (everyone sees how hot it is); no light,
-	# which pooled into a pale disc on the ground under him
+	# everyone sees how hot he is: embers off the shoulders that thicken with Rage, then the whole body burning
+	if not tells_visible():
+		return
 	var hk := heat_k()
-	if hk > 0.15 and tells_visible() and enraged_t <= 0.0:
-		if randf() < dt * 6.0 * hk:
-			for sx in [-0.42, 0.42]:
-				m.fx.burst(h.pos + Vector3(sx, 1.7, 0), res_col(), 1, 1.0, 0.45, -3.0, 0.7)
+	if enraged_t > 0.0:
+		HeroVfx.of(m).hold(h, "enraged")
+	elif hk > 0.15:
+		HeroVfx.of(m).hold(h, "heat", hk)
 
 func _tick(dt: float) -> void:
 	_tick_look(dt)
-	_tick_trail(dt)
+	_tick_trail()
 	if rampage_wind > 0.0: _tick_crouch(dt)
 	var rd := res_def()
 	if enraged_t > 0.0:
@@ -242,7 +227,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		fx().pillar(h.pos, Color("5ae07a"), 3.6, 0.7, 0.75)
 		fx().star(t.pos + Vector3(0, 1.3, 0), Color("ff2a2a"), 3.2, 0.55, Color(1, 0.85, 0.8))
 		m.fx.word(h.pos + Vector3(0, 2.7, 0), "+%d" % int(round(h.hp - hp0)), Color("7fe08a"), true)
-		m.sfx("dj_heal", h.pos, -4.0, 0.8)
+		m.sfx("juggernaut_heal", h.pos, -4.0, 1.0)
 		if h.is_local() and m.hud: m.hud.flash(Color(1, 0.1, 0.05), 0.12)      # the red tint of a kill
 	var key := t.get_instance_id() if is_instance_valid(t) else -1
 	if slam_hit.has(key) and m.time - float(slam_hit[key]) <= float(rmb_def()["slam"].get("reset_t", 2.0)):
@@ -379,6 +364,7 @@ func _wave_preview() -> void:
 			"col": WAVE_RED, "col_full": WAVE_FULL}
 	AimKit.lane(h, "lmb", lane)
 	AimKit.charge(h, k, {"col": WAVE_RED, "col2": WAVE_FULL})
+	HeroVfx.of(m).hold(h, "wave_charge", k)
 
 ## The Searing Wave charge waits out what stops the blade, rather than ending: a dash its hold row keeps it through.
 func _hold_waits() -> bool:
@@ -402,18 +388,13 @@ func _slash() -> void:
 	h.wpn["color"] = SLASH_OUT
 	h._strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), float(ld["kb"]), {})
 	h.wpn = keep
-	# the two-tone crescent (magenta edge, flame-yellow fill), sweeping the other way each swing, and a
-	# white star on anyone caught at the tip
+	# the swing's arc of flame, sweeping the other way each swing, and a burst on anyone caught at the tip
 	var dv := h.aim_dir()
-	# swept in 0.1s, then held whole at full strength for another 0.1s before it fades
-	var flip := 0.0 if slash_n % 2 == 1 else PI
-	fx().crescent(h.pos + Vector3(0, 0.85, 0), dv, float(ld["arc"]), float(ld["reach"]) - 0.8, SLASH_OUT, SLASH_IN, 0.3,
-			flip, 3.0)
+	vfx("slash", h.pos, dv, {"flip": slash_n % 2 == 0, "r": float(ld["reach"]), "arc": float(ld["arc"])})
 	for f in foes_in(h.pos, float(ld["reach"]) + 0.4):
 		var to := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z)
 		if to.length() >= float(ld["reach"]) * 0.7 and absf(dv.angle_to(to)) <= deg_to_rad(float(ld["arc"]) * 0.5):
-			fx().star(f.pos + Vector3(0, 1.1, 0), Color(1, 1, 1), 1.3, 0.2, Color(1, 0.95, 0.8))
-	m.sfx("jug_slash", h.pos, -5.0 if h.is_local() else -9.0, randf_range(0.95, 1.08))
+			vfx("slash_tip", f.pos, dv)
 
 ## The Searing Wave: a held, charged wave of fire that rolls through everyone in a line (full: it
 ## burns and slows).
@@ -446,9 +427,8 @@ func _wave() -> void:
 					"effects": effs, "modifiers": [{"type": "pierce", "count": 6}]},
 			"", GrammarReport.new())
 	var c := KinExec.make_cx(m, h, h.kin, h, aim(), _wk(), "primary", "searing_wave")
-	c["silent"] = true
 	_shots0 = m.shots.size()
-	KinExec.run_stage(stg, c)
+	run_own(stg, c)
 	# the fire rolling along its line: a red standing crescent of flame (pooled) riding the wave's shot
 	var dv := h.aim_dir()
 	var from := h.pos
@@ -456,20 +436,10 @@ func _wave() -> void:
 	if sd != null:
 		sd["col"] = WAVE_RED              # its sparks along the way are red too
 		fx().ride(sd, "crescent_bolt", WAVE_RED, WAVE_EDGE if not full else WAVE_FULL, 1.6, wave_size * 3.6)
-	m.sfx("jug_wave", h.pos, -2.0, 1.0 - 0.15 * k)
-	var steps := int(rng / 1.2)
-	for s in steps:
-		var p := from + Vector3(dv.x, 0, dv.y) * (1.0 + 1.2 * s)
-		m.later(1.2 * s / float(ld["wave_speed"]), func():
-			m.fx.burst(p + Vector3(0, 0.5, 0), res_col() if full else Color("ffb070"), 6 + int(6 * k), 2.5 + 2.0 * k,
-					0.4, -4.0, 0.9 + 0.6 * k, Vector3.UP, 50.0))
-	fx().crescent(h.pos + Vector3(0, 0.6, 0), dv, 70.0, 2.6, WAVE_RED, WAVE_EDGE, 0.25, 0.0, 3.0)
-	m.sfx("cleave", h.pos, -1.0, 0.7)
-	m.sfx("ab_blast", h.pos, -5.0 if not full else -2.0, 1.2 - 0.3 * k)
+	vfx("wave_fire", from, dv, {"k": k, "full": full, "len": rng, "w": wave_size * 2.0})
 	h.swing_t = 0.18
 	h.swing_n += 1
 	Oomph.on_fire(h, true)
-	net_bolt(h.pos + Vector3(0, 0.6, 0), h.pos + Vector3(dv.x * rng, 0.6, dv.y * rng), Color("ff8a4a"))
 
 # ------------------------------------------------------------------ dash: Rampage
 ## Shift during one of his moves does what its into_dash row in content/dash_flow/juggernaut.json says: held to
@@ -510,7 +480,7 @@ func on_dash(use_ex: bool) -> bool:
 		anim_at -= float(dd.get("windup", 0.15))       # (straight into the drive's keys)
 		_rampage(dir)
 		return true
-	m.sfx("jug_charge", h.pos, -8.0 if h.is_local() else -12.0, 1.4)
+	vfx("dash_wind", h.pos, dir)
 	# the crouch is the dash's start standing still (planted; DashFlow and the dash rules see the dash from here)
 	rampage_wind = wind
 	h.dash_with({"type": "dash", "speed": 0.0, "time": wind, "dir": dir, "invuln": 0.0})
@@ -536,24 +506,16 @@ func _rampage(dir: Vector2) -> void:
 	travel(float(dd["dist"]), t,
 			{"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk,
 					"trail": "dust", "dir": dir})
-	m.sfx("jug_dash", h.pos, -4.0 if h.is_local() else -8.0, 1.0)
+	vfx("dash_go", h.pos, dir, {"len": float(dd["dist"]) * float(dash_feel()["dist"])})
 	m.later(t * 0.85, func(): if is_instance_valid(h) and not h.downed: _tip())
-	m.sfx("ab_whirr", h.pos, -4.0, 0.7)
 
 ## His own after-images on a dash: orange flame streaks along the ground behind him, not the shared pill.
 func own_dash_trail() -> bool:
 	return true
 
-func _tick_trail(dt: float) -> void:
-	if h.roll_t <= 0.0 or h.roll_speed < 1.0 or not tells_visible():
-		return
-	trail_t -= dt
-	if trail_t > 0.0:
-		return
-	trail_t = 0.03
-	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
-	var side := Vector3(-dir.y, 0, dir.x) * randf_range(-0.35, 0.35)
-	fx().streak(h.pos + Vector3(0, randf_range(0.4, 1.3), 0) + side, dir, 1.8, 0.45, FLAME_ORANGE, FLAME_HOT, 0.32)
+func _tick_trail() -> void:
+	if h.roll_t > 0.0 and h.roll_speed >= 1.0 and tells_visible():
+		HeroVfx.of(m).hold(h, "dash_drive")
 
 ## The tip of the Rampage: the sweet spot, a short arc at the end of the dash.
 func _tip() -> void:
@@ -567,11 +529,9 @@ func _tip() -> void:
 				{"src": "abil", "ab": "dodge", "tags": ["dodge", "tip"], "kb": dv * float(dd["tip_kb"]),
 						"melee": true, "crit": true})
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "TIP", res_col(), false)
-	fx().crescent(h.pos + Vector3(0, 0.9, 0), dv, 100.0, 2.2, FLAME_ORANGE, FLAME_HOT, 0.25, 0.0, 3.0)
+	vfx("dash_tip", h.pos, dv, {"hit": hit})
 	if hit:
 		tips += 1
-		m.sfx("cleave", at, -2.0, 0.9)
-		net_ring(at, 1.4, col_of(dd))
 
 # ------------------------------------------------------------------ RMB: Smash (Adaptive Strike)
 func rmb_charge_full() -> float:
@@ -601,12 +561,13 @@ func rmb_hold_tick(t: float) -> void:
 		lane["len0"] = lane["len"]
 	AimKit.lane(h, "rmb", lane)
 	AimKit.charge(h, k, {"col": LUNGE_RED, "col2": LUNGE_FULL})
+	HeroVfx.of(m).hold(h, "lunge_charge", k)
 	if anim_id != "jug_lunge_wind":
 		play("jug_lunge_wind")
-		m.sfx("jug_charge", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
+		vfx("lunge_wind")
 	if k >= 1.0 and not lunge_full:
 		lunge_full = true
-		m.sfx("jug_full", h.pos, -2.0 if h.is_local() else -6.0, 1.0)
+		vfx("lunge_full")
 	var window := perfect_window(t)
 	if window >= 0 and window != perfect_flashed:
 		perfect_flashed = window
@@ -622,12 +583,9 @@ func perfect_window(t: float) -> int:
 	var every := float(ld["perfect_every"])
 	return int(since / every) if fmod(since, every) < float(ld["perfect_w"]) else -1
 
-## "Now": the raised blade flashes white-hot along its length and a bright ring of the hilt rings out.
+## "Now": the raised blade flashes white-hot at its tip and rings out.
 func _perfect_cue() -> void:
-	var tip := h.pos + Vector3(0, 3.0, 0)
-	fx().star(tip, Color(1, 1, 1), 1.6, 0.16, LUNGE_FULL)
-	fx().star(h.pos + Vector3(0, 2.2, 0), LUNGE_FULL, 1.0, 0.16)
-	m.sfx("jug_full", h.pos, -3.0 if h.is_local() else -7.0, 1.5)
+	vfx("lunge_perfect")
 
 func lunge_k(t: float) -> float:
 	var sd := rmb_def()
@@ -744,7 +702,7 @@ func fire_rmb(c: Dictionary) -> void:
 		# the Finishing Slam winds up first (you keep aiming); everyone sees the warning over you
 		slam_w = {"t": float(rmb_def()["windup"])}
 		play("jug_slam")                # keyed to the wind-up: the strike lands at 0.6s
-		m.sfx("jug_slam_wind", h.pos, -3.0, 1.0)
+		vfx("slam_tell")
 
 func _tick_slam(dt: float) -> void:
 	slam_w["t"] = float(slam_w["t"]) - dt
@@ -756,7 +714,7 @@ func _tick_slam(dt: float) -> void:
 	var wk := 1.0 - clampf(float(slam_w["t"]) / float(rmb_def()["windup"]), 0.0, 1.0)
 	AimKit.lane(h, "slam",
 			{"len": float(sl["radius"]), "width": 1.9, "fill": wk, "col": SLASH_OUT, "all": true, "chevrons": 2})
-	if randf() < 0.5: m.fx.burst(h.pos + Vector3(0, 2.3, 0), Color("ff5a3a"), 1, 1.0, 0.25, 0.0, 0.8)
+	HeroVfx.of(m).hold(h, "slam_wind", wk)
 	if float(slam_w["t"]) <= 0.0:
 		slam_w = {}
 		_slam()
@@ -773,7 +731,7 @@ func _slam() -> void:
 			{"delivery": {"type": "cone", "radius": float(sl["radius"]), "angle": float(sl["angle"])}, "effects": effs})
 	var from := h.pos
 	var paid := {}
-	run(stg, cx("rmb", "finishing_slam", aim(), {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+	run_own(stg, cx("rmb", "finishing_slam", aim(), {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return
 		if not f.dead and f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
 			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["low_k"]) * power("sec"), h,
@@ -792,24 +750,10 @@ func _slam() -> void:
 			paid["x"] = true
 			sweet_spots += 1
 			payoff_fx(f.pos, "SWEET SPOT", res_col(), "pay_rage", dd, f)
-			_shock_ring(f.pos)
+			vfx("slam_sweet", f.pos, dd)
 		slam_hit[f.get_instance_id()] = m.time}))
 	AimKit.hide(h, "slam")
-	m.fx.cone(h.pos + Vector3(0, 0.1, 0), dd, float(sl["radius"]), col_of(sd))
-	fx().crescent(h.pos + Vector3(0, 0.6, 0), dd, 80.0, float(sl["radius"]), SLASH_OUT, SLASH_IN, 0.24, PI * 0.5)
-	m.sfx("jug_slam_hit", h.pos, -1.0, 1.0)
-	m.fx.dust(h.pos + Vector3(dd.x, 0, dd.y) * 2.4, 12)
-	m.sfx("cleave", h.pos, -1.0, 0.75)
-	m.sfx("ab_slam", h.pos, -3.0, 0.85)
-
-## The sweet spot's own mark on the ground: a 3m red-orange shock ring with dark cracks running out of it.
-func _shock_ring(at: Vector3) -> void:
-	m.fx.ring(at, 1.5, SWEET_RING, 0.6)
-	fx().crescent(at + Vector3(0, 0.1, 0), h.aim_dir(), 355.0, 1.6, SWEET_RING, Color("6a1a0a"), 0.8, 0.0, 6.0)
-	for i in 7:
-		var a := TAU * float(i) / 7.0 + randf_range(-0.3, 0.3)
-		fx().streak(at + Vector3(0, 0.06, 0), Vector2(-cos(a), -sin(a)), randf_range(1.5, 2.1), 0.28, Color("2a0c04"),
-				SWEET_RING, 0.9)
+	vfx("slam_hit", h.pos, dd, {"r": float(sl["radius"])})
 
 ## The hold: a charged dash attack into the first foe in its path; a miss doubles the cooldown.
 ## The Lunge let go at charge `k`; `perfect`: in a perfect window, it flings him lunge.perfect_k further.
@@ -822,16 +766,14 @@ func _lunge(k: float, perfect: bool) -> void:
 	perfect_flashed = -1
 	AimKit.hide(h, "rmb")
 	travel(dist, t, {"invuln": 0.0, "trail": "dust", "dir": dv})
-	fx().crescent(h.pos + Vector3(0, 0.9, 0), dv, 50.0, 2.0, LUNGE_RED, Color(1, 0.8, 0.6), 0.25)
 	h.fortify_t = maxf(h.fortify_t, t + 0.05)
 	lunge = {"end": m.time + t * float(dash_feel()["time"]) + 0.02, "dir": dv, "k": k}
 	play("jug_lunge")
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "LUNGE", col_of(rmb_def()), false)
-	m.sfx("charge", h.pos, -3.0, 0.7 + 0.4 * k)
+	vfx("lunge_go", h.pos, dv, {"k": k, "len": dist * float(dash_feel()["dist"]), "perfect": perfect})
 	if perfect:
 		perfects += 1
 		AimKit.perfect(h, {"col": LUNGE_FULL})
-		m.sfx("jug_lunge_hit", h.pos, -4.0 if h.is_local() else -8.0, 1.6)      # a bright metal ring on the release
 
 func _tick_lunge() -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
@@ -847,7 +789,6 @@ func _tick_lunge() -> void:
 				f.hurt(1.0, h,
 						{"src": "abil", "ab": "utility", "tags": ["utility", "chain_lunge"], "stun": 0.35, "dr": true})
 				m.fx.word(f.pos + Vector3(0, 2.4, 0), "RUN THROUGH", Color("ffcf6a"), true)
-				m.sfx("ab_tether", f.pos, -2.0, 1.3)
 			var dmg := lerpf(float(ld["dmg"][0]), float(ld["dmg"][1]), k) * smash_k() * (1.25 if was_chain else 1.0)
 			var stg := stage("rmb",
 					{"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
@@ -856,13 +797,7 @@ func _tick_lunge() -> void:
 					{"hit": "add", "mod": "add"})
 			var c := cx("rmb", "lunge", f.pos, {"at": f.pos})
 			KinExec.apply_foe(stg.effects, f, c, f.pos, stg)
-			m.fx.slash(h.pos + Vector3(0, 0.9, 0), atan2(dv.y, dv.x), deg_to_rad(60.0), 2.4, col_of(rmb_def()), true)
-			# the impact: a huge white burst and a horizontal red slash across them
-			fx().star(f.pos + Vector3(0, 1.1, 0), LUNGE_FULL, 2.6 + 1.4 * k, 0.3, FLAME_HOT)
-			fx().crescent(f.pos + Vector3(0, 1.0, 0), dv.rotated(PI * 0.5), 120.0, 1.6, LUNGE_RED, Color(1, 0.6, 0.5),
-					0.2)
-			m.sfx("jug_lunge_hit", f.pos, -1.0, 1.0)
-			m.sfx("cleave", f.pos, 0.0, 0.7)
+			vfx("lunge_hit", f.pos, dv, {"k": k})
 			return
 	if m.time >= float(lunge["end"]) or h.roll_t <= 0.0:
 		var to_wall: bool = lunge.get("chain", false)
@@ -884,9 +819,7 @@ func _chain_lunge(k: float) -> void:
 	var dist := clampf(dv.length() - gap + 0.6, 2.0, float(e_def()["range"]) + 1.0)
 	var t := dist / (float(ld["speed"]) * 1.25)
 	chain_lunges += 1
-	m.fx.bolt(h.pos + Vector3(0, 1.0, 0), dest + Vector3(0, 1.0, 0), Color("ffcf6a"))
-	m.fx.bolt(h.pos + Vector3(0, 0.7, 0), dest + Vector3(0, 0.7, 0), FLAME_HOT)
-	net_bolt(h.pos + Vector3(0, 1.0, 0), dest + Vector3(0, 1.0, 0), Color("ffcf6a"))
+	vfx("chain_lunge", h.pos, dv.normalized(), {"len": dist})
 	warchain.spend()
 	# the whole way down the chain (travel() scales by the global dash feel; the chain sets the length)
 	var feel := dash_feel()
@@ -896,8 +829,6 @@ func _chain_lunge(k: float) -> void:
 	lunge = {"end": m.time + t + 0.02, "dir": dv.normalized(), "k": k, "chain": true}
 	play("jug_chainlunge")
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CHAIN LUNGE", Color("ffcf6a"), true)
-	m.sfx("ab_tether", h.pos, -1.0, 0.9)
-	m.sfx("charge", h.pos, -2.0, 1.1)
 
 ## The pull starting with the Lunge charging: the charge becomes a Haul Slam for the arrival.
 func arm_haul() -> void:
@@ -934,20 +865,14 @@ func _haul_land(k: float) -> void:
 	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(hd["radius"])},
 		"effects": [{"type": "damage", "amount": lerpf(float(hd["dmg"][0]), float(hd["dmg"][1]), k) * smash_k()},
 				{"type": "push", "strength": float(hd["push"])}]})
-	run(stg, cx("rmb", "haul_slam", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+	run_own(stg, cx("rmb", "haul_slam", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if is_instance_valid(f) and not f.dead:
 			f.hurt(1.0, h,
 					{"src": "abil", "ab": "utility", "tags": ["utility", "haul_slam"],
 							"stun": lerpf(float(hd["stun"][0]), float(hd["stun"][1]), k), "dr": true})}))
 	play("jug_haulslam")
 	m.fx.word(at + Vector3(0, 2.6, 0), "HAUL SLAM", Color("ffcf6a"), true)
-	m.fx.ring(at, float(hd["radius"]), Color("ffcf6a"), 0.35)
-	m.fx.dust(at, 18)
-	m.fx.burst(at + Vector3(0, 0.4, 0), Color("ffcf6a"), 24, 6.0, 0.5, 6.0, 1.2)
-	m.sfx("ab_slam", at, 0.0, 0.65)
-	m.sfx("boom", at, -4.0, 0.9)
-	m.sfx("ab_tether", at, -6.0, 0.6)
-	net_ring(at, float(hd["radius"]), Color("ffcf6a"))
+	vfx("haul_hit", at, h.aim_dir(), {"r": float(hd["radius"])})
 
 ## The reads that aren't a key press: the wounded outlined red while the Smash is ready (yours only),
 ## the landing disc under the cursor while you're in the air with it ready, and the ring round the body
@@ -979,17 +904,10 @@ func _spin() -> void:
 	var stg := stage("rmb",
 			{"delivery": {"type": "burst", "origin": "caster", "radius": float(sp["radius"])},
 					"effects": [{"type": "damage", "amount": float(sp["dmg"]) * smash_k()}]})
-	run(stg, cx("rmb", "cinder_spin", h.pos, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+	run_own(stg, cx("rmb", "cinder_spin", h.pos, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if is_instance_valid(f) and not f.dead: KitStatus.apply(f, "blt", float(sp["blight"]))}))
-	for i in 3:
-		m.later(0.06 * i,
-				func(): if is_instance_valid(h): m.fx.slash(h.pos + Vector3(0, 0.9, 0), m.time * 11.0, TAU,
-						float(sp["radius"]), Color("ff7a3a"), i == 2))
-	m.fx.ring(h.pos, float(sp["radius"]), Color("ff7a3a"), 0.3)
+	vfx("spin", h.pos, h.aim_dir(), {"r": float(sp["radius"])})
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CINDER SPIN", Color("ff7a3a"), false)
-	m.sfx("ab_whirr", h.pos, -2.0, 0.9)
-	m.sfx("ab_blast", h.pos, -6.0, 1.0)
-	net_ring(h.pos, float(sp["radius"]), Color("ff7a3a"))
 
 # ------------------------------------------------------------------ E: Warchain (JuggernautChain)
 ## "During E" for the Smash is the pull and the moment after it (the Cinder Spin).

@@ -167,16 +167,17 @@ func run(m: Node) -> void:
 	for it in bi:
 		if String(it["name"]).begins_with("House"): house_it = it
 	var hc_cost: Dictionary = house_it.get("cost", {})
-	var priced: bool = int(hc_cost.get("gems", 0)) == 0 and int(hc_cost.get("wood", 0)) == 3 and int(hc_cost.get("labour", 0)) == 8
+	var priced: bool = int(hc_cost.get("gems", 0)) == 0 and int(hc_cost.get("wood", 0)) >= 10 \
+			and int(hc_cost.get("stone", 0)) >= 6 and int(hc_cost.get("labour", 0)) >= 8
 	ok(bi.size() >= 3 and priced and bi.all(func(it): return not it.get("lock", false)),
-			"the Buildings tab shows the house for a little wood and 8 swings, and nothing locked")
+			"the Buildings tab shows the house for wood, stone and swings of work, and nothing locked")
 	var chips := 0
 	for ch in hb.bar.find_children("*", "Control", true, false):
 		if ch is FarmIcon: chips += 1
 	ok(chips >= 1, "the cost icons are on the bar (%d)" % chips)
 	# the starters go up at once
 	var land := HomeLayout.LANDING
-	_mats(3, 0, 0, 0)      # the house costs a little wood
+	_mats(10, 6, 0, 0)      # the house costs wood and stone, spent as it goes up
 	hb.take("house")
 	var hc := _spot(hb, land + Vector3(0, 0, -8))
 	ok(_put(hb, hc) and FarmSites.is_site(_entry(L, "house")) and HomeLayout.fixtures(Save.d, "house").is_empty(),
@@ -205,7 +206,8 @@ func run(m: Node) -> void:
 	# unlock the Lumber Camp by level, then try to buy it with nothing
 	_stats(0, 0, 0, 24)
 	hb.take("lumber_camp")
-	ok(hb.held.is_empty(), "open but unaffordable (no wood): it can't be picked up")
+	ok(hb.held.get("id", "") == "lumber_camp", "open, and free to mark out even with no wood")
+	hb._drop_held()
 	_mats(10, 10, 10, 2)
 	var g0 := int(Save.d["gems"])
 	hb.take("lumber_camp")
@@ -229,8 +231,8 @@ func run(m: Node) -> void:
 	var cost := FarmSites.build_cost("lumber_camp")
 	ok(FarmSites.is_site(camp) and int(camp["site"]["need"]) == int(cost["labour"]) and int(camp["site"]["got"]) == 0,
 			"it is a construction site needing %d swings of Boki work" % int(camp["site"]["need"]))
-	ok(int(Save.d["gems"]) == g0 - int(cost["gems"]) and Work.mat("wood") == 10 - int(cost["wood"]) and Work.mat("stone") == 10 - int(cost["stone"]),
-			"it paid %s" % FarmSites.cost_text(cost))
+	ok(int(Save.d["gems"]) == g0 and Work.mat("wood") == 10 and Work.mat("stone") == 10,
+			"marking it out is free (it will take %s as it goes up)" % FarmSites.cost_text(cost))
 	ok(HomeLayout.stations(Save.d).is_empty() and not hw.has_station("lumber_camp"),
 			"a site is not a working station yet")
 	var cn: Node3D = hb.nodes.get(int(camp["u"]))
@@ -249,12 +251,16 @@ func run(m: Node) -> void:
 	ok(_put(hb, cc2) and FarmSites.is_site(_entry(L, "lumber_camp")) and int(_entry(L, "lumber_camp")["u"]) == int(camp["u"]) and Work.mat("wood") == 10,
 			"moved: still the same site, nothing paid twice")
 	# take it down: full refund, nothing in storage
+	FarmSites.add_swing(_entry(L, "lumber_camp"))      # the first swing pays the first quarter
+	var paid: Dictionary = (_entry(L, "lumber_camp")["site"]["paid"] as Dictionary).duplicate()
+	ok(not paid.is_empty() and Work.mat("wood") < 10, "the first swing spent the first quarter (%s)" % FarmSites.cost_text(paid))
 	hb.pick_up_at(cc2[0])
-	var w_before := Work.mat("wood"); var gm_before := int(Save.d["gems"])
+	var w_before := Work.mat("wood")
+	var gm_before := int(Save.d["gems"])
 	hb.store_held()
-	ok(_entry(L, "lumber_camp").is_empty() and Work.mat("wood") == w_before + int(cost["wood"]) and int(Save.d["gems"]) == gm_before + int(cost["gems"]) and int(L["inv"].get("lumber_camp", 0)) == 0,
-			
-		"taking a site down gives back everything it cost and puts nothing in storage")
+	var back: bool = Work.mat("wood") == w_before + int(paid.get("wood", 0)) and int(Save.d["gems"]) == gm_before + int(paid.get("gems", 0))
+	ok(_entry(L, "lumber_camp").is_empty() and back and int(L["inv"].get("lumber_camp", 0)) == 0,
+			"taking a site down gives back what it had spent and puts nothing in storage")
 	# undo restores everything, fibre and coals included (the Market stall opens at farm level 3)
 	_stats(0, 0, 0, 64)
 	_mats(10, 10, 10, 2)
@@ -262,7 +268,7 @@ func run(m: Node) -> void:
 	var st_cost := FarmSites.build_cost("storage_chest")
 	var stc := _spot(hb, home.spots["house"] + Vector3(-6, 0, 4))
 	var f0 := Work.mat("fibre"); var gg := int(Save.d["gems"])
-	ok(_put(hb, stc) and Work.mat("fibre") == f0 - int(st_cost["fibre"]), "the storage chest site paid fibre as well (%s)" % FarmSites.cost_text(st_cost))
+	ok(_put(hb, stc) and Work.mat("fibre") == f0, "the storage chest site is free to mark out (it will take %s)" % FarmSites.cost_text(st_cost))
 	hb.undo_last()
 	L = HomeLayout.of(Save.d)      # (undo puts the saved layout back)
 	ok(Work.mat("fibre") == f0 and int(Save.d["gems"]) == gg and _entry(L, "storage_chest").is_empty(), "undo takes the site back and returns gems, wood and fibre")
@@ -341,8 +347,8 @@ func run(m: Node) -> void:
 	_stats(0, 0, 0, 70)          # farm level 3 (17.5 points)
 	var w1 := Work.mat("wood"); var g1 := int(Save.d["gems"])
 	var ucost := FarmSites.upgrade_cost("lumber_camp", 2)
-	ok(hb.upgrade(cu) and FarmSites.is_upgrading(camp) and Work.mat("wood") == w1 - int(ucost["wood"]) and int(Save.d["gems"]) == g1 - int(ucost["gems"]),
-			"tier 2 pays %s and starts an upgrade site" % FarmSites.cost_text(ucost))
+	ok(hb.upgrade(cu) and FarmSites.is_upgrading(camp) and Work.mat("wood") == w1 and int(Save.d["gems"]) == g1,
+			"tier 2 starts an upgrade site that will take %s as it goes" % FarmSites.cost_text(ucost))
 	ok(hw.has_station("lumber_camp"), "the camp keeps working while it is being upgraded")
 	ok(not hb.upgrade(cu), "it can't be upgraded again while the work is going on")
 	hb.toggle()

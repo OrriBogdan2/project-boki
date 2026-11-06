@@ -38,7 +38,7 @@ const KILN_T := 70.0                    # seconds between firings at the Kiln (a
 
 ## Base seconds for each kind of job at level 1 (a level 4 kin takes under half).
 const TIME := {"grow": 8.0, "fire": 9.0, "water": 3.0, "plant": 4.0, "tend": 4.5, "harvest": 3.5, "chop": 9.0, "break": 9.0, "log": 6.5, "ore": 7.0,
-	"bake": 7.0, "craft": 11.0, "build": 6.0, "power": 5.0, "chill": 5.0, "carry": 1.2, "stock": 1.5, "mend": 3.5, "brew": 14.0, "ranch": 22.0, "warm": 30.0}
+	"bake": 7.0, "craft": 11.0, "build": 3.0, "power": 5.0, "chill": 5.0, "carry": 1.2, "stock": 1.5, "mend": 3.5, "brew": 14.0, "ranch": 22.0, "warm": 30.0}
 ## What each job is called on the hover card and the Job Board.
 const VERB := {"grow": "Raising seedlings", "fire": "Firing the kiln", "water": "Watering the %s", "plant": "Sowing a plot", "tend": "Tending the %s", "harvest": "Picking the %s",
 	"chop": "Felling a tree", "break": "Breaking a boulder", "log": "Splitting logs", "ore": "Mining rock", "bake": "Baking kibble",
@@ -429,20 +429,22 @@ func _night() -> bool:
 
 ## A free kin looks for work. True if it took a job.
 func pick(k: Dictionary) -> bool:
-	if not on():
-		return false
-	var rec: Dictionary = k["rec"]
-	if not Work.can_work(rec) or k.has("break_t") or k.has("job"):
-		return false
-	if Care.need(rec, "food") < Work.START["food"] or Care.need(rec, "energy") < Work.START["energy"]:
-		return false
-	if _night() and not Work.NOCTURNAL.has(String(rec["species"])):
+	if not on() or k.has("job") or not fit_to_work(k):
 		return false
 	var best := best_job(k)
 	if best.is_empty():
 		return false
 	take(k, best)
 	return true
+
+## Is this kin able and rested enough to start a job (whatever it is doing now)?
+func fit_to_work(k: Dictionary) -> bool:
+	var rec: Dictionary = k["rec"]
+	if not Work.can_work(rec) or k.has("break_t"):
+		return false
+	if Care.need(rec, "food") < Work.START["food"] or Care.need(rec, "energy") < Work.START["energy"]:
+		return false
+	return not _night() or Work.NOCTURNAL.has(String(rec["species"]))
 
 ## The job this kin would take now ({} for none).
 func best_job(k: Dictionary) -> Dictionary:
@@ -702,6 +704,7 @@ func _finish(k: Dictionary, J: Dictionary) -> bool:
 	var lv := int(J["lv"])
 	var at: Vector3 = J["look"]
 	var nm := String(rec["name"])
+	Sfx.play("boki_work", at, -8.0, 0.1, Unique.voice(rec))
 	rec["trust"] = minf(100.0, float(rec["trust"]) + 0.15)
 	match String(J["kind"]):
 		"build":

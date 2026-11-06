@@ -190,6 +190,10 @@ var revive_k := 0.0
 var act_k := 0.0            # holding interact: the pose for what's being worked (see _act_legs)
 var act_kind := ""
 var act_t := 0.0
+var tool_kind := ""            # the tool in hand or fading out (HunterTool)
+var tool_k := 0.0
+var tool_ph := 0.0             # where the tool is in its swing, 0..1
+var stow_k := 0.0              # the weapon put away for a tool, or holstered at home
 var base_k := 0.0
 var stun_k := 0.0
 var aim_k := 0.0               # 1 aiming (just fired), 0 relaxed carry
@@ -211,6 +215,7 @@ var vdir_prev := 0.0
 var legs_yaw := 0.0
 var face_prev := 0.0
 var face_rate := 0.0
+var arm_k := 1.0               # the arms' length against the standard (archetype body "arms", Models.hunter)
 var lag := 0.0                 # how far the feet are behind the body turning on the spot
 var shuffle_t := -1.0
 var shuffle_side := 1.0
@@ -304,6 +309,7 @@ func _init(m: Node3D) -> void:
 	knee_r = leg_r.get_node_or_null("Knee")
 	head = torso.get_node_or_null("HeadPivot")
 	aim = torso.get_node_or_null("Aim")
+	arm_k = float(m.get_meta("arm_k", 1.0))
 	arm_l = torso.get_node_or_null("ArmLPivot")
 	arm_r = torso.get_node_or_null("ArmRPivot")
 	if arm_l:
@@ -514,6 +520,7 @@ static func _spin_e(p: float) -> float:
 	return p - sin(p * TAU) / TAU
 
 func update(dt: float, s: Dictionary) -> void:
+	model.set_meta(WardenClips.STATE, s)     # (a Hero's hand-keyed clips read the same state)
 	if dt <= 0.0:
 		return
 	t += dt
@@ -555,11 +562,14 @@ func update(dt: float, s: Dictionary) -> void:
 	var st_ph := float(s.get("stomp", -1.0))
 	stomp_k = _ease(stomp_k, 1.0 if st_ph >= 0.0 else 0.0, 16.0, dt)
 	revive_k = _ease(revive_k, 1.0 if s.get("reviving", false) and grounded and spd < 1.5 else 0.0, 8.0, dt)
+	HunterTool.tick(self, dt, s)
 	_act_tick(dt, s, grounded, spd)
 	var base_p := float(s.get("base", -1.0))
 	base_k = _ease(base_k, 1.0 if base_p >= 0.0 else 0.0, 6.0, dt)
 	stun_k = _ease(stun_k, 1.0 if stun and not downed else 0.0, 8.0, dt)
 	var still := (1.0 - r1) * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k)
+	if s.get("statue", false):
+		still = 0.0       # a statue (Rimelock): no sway, breath, glance or fidget
 	if moving or not grounded or fired < 1.0 or rolling or downed:
 		idle_t = 0.0
 	else:
@@ -1012,7 +1022,12 @@ func update(dt: float, s: Dictionary) -> void:
 	# a Warden's and the leg-length slider's)
 	var dl2 := (THIGH * cos(hl) + SHIN * cos(hl + kl)) * cos(wl)
 	var dr2 := (THIGH * cos(hr) + SHIN * cos(hr + kr)) * cos(wr)
-	var drop := (LEG - maxf(dl2, dr2)) * legs.scale.y * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k) * (1.0 - dive_k) * (1.0 if roll_t < 0.0 else 0.0)
+	var leg_ref := LEG
+	if arch == "unmasked":      # the Empty's soles, not a point foot, meet the ground
+		dl2 = FootPlant.reach(hl, kl, wl)
+		dr2 = FootPlant.reach(hr, kr, wr)
+		leg_ref = FootPlant.HIP
+	var drop := (leg_ref - maxf(dl2, dr2)) * legs.scale.y * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k) * (1.0 - dive_k) * (1.0 if roll_t < 0.0 else 0.0)
 	var off := Vector3(wk * 0.028 * still, -drop + bounce * 0.008, 0.0) + ws.hip
 	if arch == "juggernaut":
 		off.y -= absf(cos(ph)) * 0.035 * r1        # each footfall lands with weight
@@ -1050,6 +1065,7 @@ func update(dt: float, s: Dictionary) -> void:
 	torso.rotation = Vector3(pitch + dz, yaw, roll)
 	# ================================================================ WEAPON AND ARMS
 	_upper(dt, s, vel, r1, still, pitch, yaw, cast_k, em_t, fired, breath)
+	HunterTool.place(self)
 	# ================================================================ HEAD
 	if head:
 		glance_t -= dt
@@ -1283,6 +1299,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	var want_carry := 1.0 if r1 > 0.55 and aim_k < 0.3 and grounded and hold != "minigun" else 0.0
 	carry_k = _ease(carry_k, want_carry, 6.0, dt)
 	var stow := maxf(maxf(glide_k, dive_k), maxf(emote_k * (0.0 if emote_id == "" else 1.0), down_k))
+	stow = maxf(stow, stow_k)
 	stow = maxf(stow, ledge_k * 0.0)
 	gun_vis = _ease(gun_vis, 0.0 if stow > 0.5 else 1.0, 14.0, dt)
 	var side_r := Vector3(1, 0, 0)
@@ -1486,8 +1503,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		tl = at * (offhand.transform * Vector3.ZERO)
 	elif grip_l != Vector3.INF and gun:
 		tl = at * (gun.transform * grip_l)
-		tl = _reachable(sh_l, tl, at * (gun.transform * grip_r), REACH * 0.97)
-	tr = _reachable(sh_r, tr, tr, REACH * 0.99)
+		tl = _reachable(sh_l, tl, at * (gun.transform * grip_r), REACH * arm_k * 0.97)
+	tr = _reachable(sh_r, tr, tr, REACH * arm_k * 0.99)
 	if tl == Vector3.INF:
 		free_l = 1.0
 	# free hands: relaxed at the sides, swinging when running (against the legs), pumping hard in a sprint
@@ -1685,6 +1702,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 ##   loot     crouched over a deathbox, rummaging
 ##   rune     both palms on the stone
 ##   offer    down on one knee, both hands held out together at the chest (the prologue's relic)
+##   chop, mine, build   a tool swing (HunterTool): the weapon put away, the tool in both hands (one for the hammer)
 const ACT_KNEEL := ["scan", "revive", "key", "loot", "offer"]
 func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 	var want := String(s.get("act", ""))
@@ -1700,6 +1718,8 @@ func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 
 ## Leg angles for the hold: Vector4(hip_l, knee_l, hip_r, knee_r).
 func _act_legs() -> Vector4:
+	if HunterTool.ACTS.has(act_kind):
+		return HunterTool.legs(act_kind, tool_ph)
 	var w := sin(act_t * 3.0)
 	match act_kind:
 		"scan", "revive", "key", "loot", "offer":
@@ -1719,6 +1739,8 @@ func _act_legs() -> Vector4:
 
 ## How far forward the body leans into the hold (negative leans back).
 func _act_pitch() -> float:
+	if HunterTool.ACTS.has(act_kind):
+		return HunterTool.pitch(act_kind, tool_ph)
 	match act_kind:
 		"scan": return 0.25 + 0.04 * sin(act_t * 1.6)
 		"revive": return 0.4 + 0.06 * maxf(0.0, sin(act_t * 6.0))
@@ -1735,6 +1757,8 @@ func _act_pitch() -> float:
 
 ## Where the hands go: [left hand, right hand, how much the right hand lets go of the weapon].
 func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
+	if HunterTool.ACTS.has(act_kind):
+		return HunterTool.hands(act_kind, tool_ph, sh_l, sh_r)
 	var t := act_t
 	match act_kind:
 		"scan":
@@ -1819,14 +1843,16 @@ func _ik(piv: Node3D, elbow: Node3D, s: Vector3, tgt: Vector3, pole: Vector3) ->
 	if dl < 0.001:
 		d = Vector3(0, -1, 0); dl = 1.0
 	var u := d / dl
-	var dist := clampf(dl, absf(UPPER - FORE) + 0.02, REACH - 0.003)
-	var ca := clampf((UPPER * UPPER + dist * dist - FORE * FORE) / (2.0 * UPPER * dist), -1.0, 1.0)
+	var up := UPPER * arm_k
+	var fo := FORE * arm_k
+	var dist := clampf(dl, absf(up - fo) + 0.02, up + fo - 0.003)
+	var ca := clampf((up * up + dist * dist - fo * fo) / (2.0 * up * dist), -1.0, 1.0)
 	var sa := sqrt(maxf(0.0, 1.0 - ca * ca))
 	var v := pole - u * pole.dot(u)
 	if v.length_squared() < 1e-6:
 		v = Vector3(0, 0, 1) - u * u.z
 	v = v.normalized()
-	var e := s + u * (UPPER * ca) + v * (UPPER * sa)
+	var e := s + u * (up * ca) + v * (up * sa)
 	var hnd := s + u * dist
 	var n := v.cross(u).normalized()
 	var y1 := (s - e).normalized()

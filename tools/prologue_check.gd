@@ -31,6 +31,8 @@ const STRIP := [
 		[-0.2, "end: the Wyrm watching the race"]],
 ]
 const FRAME := Vector2i(1280, 720)      # px: the game's window (project.godot), the smallest it frames for
+## px: the game's window, a big one, a small one
+const WINDOWS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(800, 450)]
 const BOKI_GAP := 0.75          # m: the least room between two Boki, or a Boki and the hunter's feet
 
 var bad := 0
@@ -65,6 +67,8 @@ func run(m: Node) -> void:
 	ok(pr.shots.size() == 5, "five slides (%d)" % pr.shots.size())
 	ok(String(pr.shots[2]["text"]) == SUNDERING, "THE SUNDERING reads the owner's line")
 	ok(String(pr.shots[3]["text"]) == MASKS, "THE MASKS reads the owner's line")
+	await _captions_fit(pr, tree)
+	main.get_window().size = FRAME
 	await _play(pr, tree)
 	for i in 900:
 		if main.current != pr:
@@ -159,3 +163,34 @@ func _shot(i: int, n: int, pr) -> void:
 	var file := "s%d_%d.png" % [i + 1, n + 1]
 	img.save_png(dir.path_join(file))
 	caps.append("%s: %s, %.1f s in. %s" % [file, String(pr.shots[i]["chapter"]), pr.shot_t, String(STRIP[i][n][1])])
+
+## Item 77: every slide's caption stays fully on screen (wrapped, growing upward) at the game's window, a big
+## one and a small one. With --shots-dir each is saved as <dir>/caption_<width>_s<slide>.png.
+func _captions_fit(pr, tree: SceneTree) -> void:
+	var worst := 0.0
+	var lines := 0
+	for size in WINDOWS:
+		main.get_window().size = size
+		for i in 3:
+			await tree.process_frame
+		for i in pr.shots.size():
+			pr.caption.text = String(pr.shots[i]["text"])
+			pr.caption.visible_ratio = 1.0
+			pr.caption.modulate.a = 1.0
+			for n in 2:
+				await tree.process_frame
+			# (canvas units: the window's stretch applies)
+			var view: Rect2 = pr.caption.get_viewport().get_visible_rect()
+			var box: Rect2 = pr.caption.get_global_rect()
+			var over := maxf(maxf(view.position.x - box.position.x, view.position.y - box.position.y),
+				maxf(box.end.x - view.end.x, box.end.y - view.end.y))
+			worst = maxf(worst, over)
+			lines = maxi(lines, pr.caption.get_line_count())
+			if dir != "":
+				RenderingServer.render_loop_enabled = true
+				await tree.process_frame
+				await tree.process_frame
+				tree.root.get_texture().get_image().save_png(dir.path_join("caption_%d_s%d.png" % [size.x, i + 1]))
+				RenderingServer.render_loop_enabled = false
+	ok(worst <= 0.5, "every caption stays on screen at %s (worst overhang %.1f px, up to %d lines)"
+		% [str(WINDOWS), worst, lines])

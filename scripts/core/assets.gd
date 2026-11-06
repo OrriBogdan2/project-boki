@@ -433,6 +433,7 @@ static func mob(kind: String, base: Color) -> Node3D:
 	var s := float(spec["h"]) / maxf(0.01, ab.size.y)
 	model.scale = Vector3(s * float(spec.get("wide", 1.0)), s, s * float(spec.get("wide", 1.0)))
 	model.position.y = -ab.position.y * s
+	ShadowPolicy.judge_tree(model)       # eyes, jaws, small limbs don't cast (item 94)
 	if sk:
 		for side in ["r", "l"]:
 			if not spec.has(side): continue

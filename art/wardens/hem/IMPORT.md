@@ -1,58 +1,30 @@
-# Hem (archer; was Pin): import note, stage 1 (2026-11-04)
+# Hem (archer; was Pin): import note, ART-1 rebuild (2026-11-05, owner item 108 + 76b)
 
-`hem.glb` is Hem's stage-1 model (INBOX_S2 09:05/09:10 fan-out): one Meshy 7.1 run from the owner-approved r3 art
-(ext/imagegen docs/art/gen/wardens_r3/hem_* + HEM_KIT.md), baked to a clean low-poly and fitted to the Warden
-contract by script. **No hand polish** (stage 2 applies the Vex r3c recipe): no paint-over ramps, palette snap or
-lift (`lift` 1/1/1), no per-Warden shader. Raw files in ~/meshy/hem/ (not in git). Run log: docs/art/wardens/PIPELINE.md.
+`hem.glb`: two Meshy scans plus scripted parts, on the shared armature. Body and outfit: a scan of lisette_turnaround_apose. Head, hair, ponytail, tie and cowl: a scan of
+hem_head.png, 6.6k of the budget, the face at about 2.7x the body's texel density with the painted plate projected over it. Scripted: hands, scarf tails, bow, arrows, spool, scissors,
+needle pin. Raw files in ~/meshy/lisette and ~/meshy/lisette_head (never in git). 41 clips keyed as targets. Under 15k triangles with the bow (S1 perf), one 2048 atlas, one 2048
+relief normal map. Slots: skin, hair, cloth, leather, metal, glow.
 
-    BP=~/tools/blender-4.5.15-linux-x64/4.5/python/bin/python3.11; B="~/tools/blender-4.5.15-linux-x64/blender -b --factory-startup --python"
-    $BP -I tools/meshy/hem_crops.py tools/meshy art/hem_turnaround.png ~/meshy/hem/crops      # 9:16 crops, shadow painted out
-    python3 -I tools/meshy/meshy_task.py edit ...  (x4: front, 3/4, side, back; prompts in ~/meshy/hem/edit_*/request.json)
-    $BP -I tools/meshy/hem_prep.py tools/meshy ~/meshy/hem                                   # padded squares -> ~/meshy/hem/in
-    python3 -I tools/meshy/meshy_task.py create ~/meshy/hem/runA in/front.png in/tq.png in/side.png in/back.png \
-        --texture-refs in/front.png in/tq.png in/side.png in/back.png --enhance off
-    $B tools/meshy/bake_warden.py -- art/wardens/src/hem_bake.json
-    godot --headless -- --warden-rig-json --warden=archer          # -> art/wardens/src/hem_rig.json
-    $B tools/meshy/fit_warden.py -- art/wardens/src/hem_fit.json
+    ~/meshy/lisette/edit.sh; ~/meshy/lisette_head/edit2.sh     # Meshy edits (hair, scarf, mask, scissors out, corset closed high; needle out) and the multi-view runs
+    B=~/tools/blender-4.5.15-linux-x64/blender; ulimit -v 12000000
+    $B -b --factory-startup --python tools/art1/hem_source.py -- runA/glb.glb art/wardens/src/hem_rig.json stage/source.blend    # body fit
+    $B -b --factory-startup --python tools/art1/hem_head_source.py -- runA/glb.glb stage/head.blend                             # head set on the neck
+    $B -b --factory-startup --python tools/art1/hem_art1.py -- WORK source.blend scan_base.png head.blend head_base.png edit_face/image0.png
+    $B -b --python tools/art1/hem_clips.py -- WORK/hem_art1.blend WORK/hem.glb
 
-- **Inputs:** the turnaround's four views, each edited once (nano-banana-pro): the bow, its glowing string, spool and
-  loose threads out, her LEFT hand hanging empty (side view: the left arm hidden behind her), the ground line and the
-  long clawed VFX shadow out (it is VFX only, never mesh). Nothing mirrored.
-- **Body:** Meshy 7.1, no remesh, geometry 2k, meshy-7 texture 8k, PBR, A-pose, enhancement off; baked 706k -> 36k
-  triangles (head 9k), new UVs, 4096 atlas. Archetype body: legs 1.85 (her long-legged art; r2 used the same),
-  size 0.98 (the sheet's height with the longer legs). `chunk` head 1.12, hand 1.2, girth 1.06. The quiver and its
-  needles are weighted to the hips (`weight_rules`), not the right arm.
-- **Mask:** the porcelain-shard half-mask is its own mesh (`mask`, material `metal-mask` on the body atlas):
-  `pieces` in hem_fit.json splits the white/gilt faces over her nose and mouth off the face, closes the stitches and
-  lips into it, keeps its largest part and lifts it 3 mm off the face. Skinned to the head.
-- **Thimble claws:** on her right hand, from the scan (no scripted claws in stage 1).
-- **Bow (weapon):** built by script, tools/meshy/bow_parts.py: `weapon` in the Gun node's space, as the procedural
-  longbow and HunterAnim's `_gun` hold: the LEFT hand on the grip, the RIGHT hand drawing at the string. Black
-  faceted recurve, red grip and tip wraps, a spool of red thread on the grip, the string a glowing red thread
-  (`glow-bow_string`: an emissive line). The nocked arrow (`weapon_mag`, the Gun's Mag) is an iron sewing needle with
-  a red glowing thread through its eye. `anchor_nock` on hand.R. The stitched trail, drifting threads, floating
-  needles and her shadow are VFX.
-- `hem.glb.import`: `generate_lods=false`, `force_disable_compression=true`; the atlas imported lossless.
-
-## Stage 2 (2026-11-04, the Vex r3c recipe; credit-free)
-- **Paint-over:** `smooth`, then `ramps` of the art's own colours (crimson, blacks, wraps, leather, silver, hair;
-  the skin ramp is hem_face's skin so the projected face has no edge), `despeckle`; `project_late` paints
-  hem_face (the 12:40 face sheet: eyes, brows, liner, the mask's cracks, gold rim, stitches and smile) over the face,
-  registered on the mesh's own render (tools: register.py), and the edited front view over the chest.
-- **Mask:** still its own mesh (`pieces`), now on the leather slot (warm porcelain, no metal sheen), closed one ring.
-- **Needles:** the scan's ragged quiver needles cut (`cut_boxes`) and rebuilt clean (tools/meshy/hem_parts.py:
-  four iron needles with long eyes, two threaded red), on the hips.
-- **Look:** content/rules/warden_look.json `hem` (skin, crimson cloth, metal and leather brighter at the match
-  camera, the bow string's glow up).
-- **Stance:** content/rules/warden_stance.json archer: upright, feet planted (was hunched), the bow carried in her
-  LEFT hand at her side with the right hand free (new `free_r` in the carry: WardenStance.carry_free_r).
-- `chunk` head 1.14.
-
-## Stage 3 (2026-11-04, after the shared painted-look fix 16c18b4f; credit-free)
-- The shared look fix cherry-picked; warden_look.json `hem` retuned down on top of it.
-- `cut_strands` (from ext/warden-meshy-pin): the scan's dark strands across the cheeks cut.
-- Mask: only the white porcelain and gilt texels (no pale skin), pushed 0.5 mm, so no shards stick out at its side.
-- Thimble claws (hem_weapons_sheet): silver caps with hooked claws on the right hand's four fingertips
-  (tools/meshy/hem_parts.py thimbles), rigid on hand.R.
-- Bow: lighter lacquer and edge (it read black at match zoom), a thicker glowing string; `arrow: false` keeps only
-  the needle's eye and thread at the nock as the Mag, so no needle sticks forward off the hanging bow.
+Traps this model hit: weld a scan in its own pose (fitted, the arms hang through the hips and get sewn to them); sample arm and body paint separately for the same reason; never ABF a scan
+(a chart folds over itself and paints the wrong place; smart project does not); Meshy winds faces inward, and Cycles hides what the game culls; every vertex needs a weight in a Decimate group.
+- **Design (owner, Nov 5; Lisette, the Red Stitch; id and files stay):** model briefs/art-refs/lisette_turnaround_apose.png, outfit and
+  colour hem_FINAL_sheet.png (vivid green eyes, a darker warm tan, crisp reds, capris to mid-calf), weapons and props hem_v4_props.png:
+  silver needle bow (needle eyes at the tips, slots by the grip, curve read off the sheet), red-wrapped grip, glowing thread string,
+  fletched needle arrows, thread-spool quiver on her right hip, high ponytail tied in red thread and pinned with a needle, red scarf
+  (the scan's cowl + two tails on spring_scarftailR/L_*), red-stitched eye mask, stitched corset, pauldrons, half-sleeves, bracers, tall laced boots,
+  silver scissors on the belt. Extra red on the shoulders for the top-down read.
+  Item 108 (tasteful): the reference's cleavage cut-out is closed; the corset runs up under the scarf. The midriff stays, as the sheet has it.
+- **Weapon (76b):** the bow is skinned on bones `bow` (hand.L), `bow_t`, `bow_b` (limbs) and `bow_s` (the string's nock); `"skinned_weapon": true`.
+  FX points are empties: `weapon_muzzle`, `anchor_bow_root`, `anchor_nock`, `halo_bow_top/mid/low`. The Gun follows them (Sync.apply_blade).
+  The left hand is sculpted closed round the grip for good. The nocked arrow stays a separate piece, `arrow_mesh` on bone `arrow`: at
+  rest it stands in the spool as one more arrow; `ar` in a clip puts it on the string.
+- **Clips:** content/rules/warden_anim/hem.json maps the kit's kmoves. The draw clip is on the draw's own clock: one steady pull to
+  1.15 s, no pose change at Empowered, so it reads with the 55b fill line. Springs: spring_tail, spring_scarftailR, spring_scarftailL (the shared rest ripple).
+- `hem_fit.json`, `hem_bake.json`, `tools/meshy/bow_parts.py`, `hem_parts.py` belong to the old scan pipeline and no longer build this model.

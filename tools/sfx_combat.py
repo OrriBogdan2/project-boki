@@ -273,10 +273,6 @@ def build():
                    click(0.003, 1500, 5000) * 0.9, sub(65, 42, d, 0.07) * 0.3)
     takes('hurt', hurt, rms_db=-16)
 
-    def kinhit(i):
-        d = 0.26
-        return mix(kick(240 + 15 * i, 100, d, 0.01, 0.035, 2.4) * 0.55, crack(d, 300, 2200, 0.025) * 2.4, click(0.003, 2000, 7000) * 1.0)
-    takes('kinhit', kinhit, rms_db=-17)
 
     # ============================================================== big moments
     # someone knocked down: a heavy body slam with a cracking tail
@@ -451,12 +447,6 @@ def build():
         return mix(grains(d, 500, 2500, 9000, 0.001, 0.004, fall=0.15) * 1.6, ring((2093, 3136), d, (0.12, 0.08), (0.2, 0.1)),
                    crack(d, 600, 3000, 0.02) * 1.0)
     takes('ab_slow', ab_slow, 1, rms_db=-19)
-
-    # ============================================================== interface
-    # crisp and tactile: a woody tick for a press, a faint glassy tick for a hover
-    save('click', mix(click(0.002, 2500, 9000) * 0.8, ring((1180, 2410, 3560), 0.06, (0.012, 0.008, 0.005), (0.6, 0.25, 0.1)),
-                      kick(420, 260, 0.06, 0.004, 0.01, 1.4) * 0.3), rms_db=-21)
-    save('hover', mix(ring((2200, 3300), 0.04, (0.006, 0.004), (0.5, 0.2)), click(0.0015, 4000, 10000) * 0.3), rms_db=-27)
 
     # ============================================================== footsteps by surface
     # quiet, short and dry so a run reads without ever cluttering a fight; three takes of each

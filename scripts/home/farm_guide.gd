@@ -159,12 +159,14 @@ func _skip_buttons() -> void:
 		asking = false
 		_skip_buttons(), 0))
 
-## Skips the tutorial: nothing is granted or taken; the house is put down as a site if it isn't.
+## Skips the tutorial: nothing is taken; the house is put down as a site if it isn't, with the materials it
+## needs handed over so it can still be built.
 func skip() -> void:
 	asking = false
 	FarmTutorial.skip()
 	if FarmHob.house_entry().is_empty():
 		place_house()
+		FarmSites.refund(FarmSites.build_cost("house"))
 	_clear_hint()
 	h.hob.sync()
 	h._refresh_top()
@@ -174,16 +176,13 @@ func house_spot() -> Vector3:
 	var sp: Dictionary = FarmTutorial.rules()["house_spot"]
 	return HomeLayout.LANDING + Vector3(float(sp["x"]), 0, float(sp["z"]))
 
-## Puts the house down as a construction site on the free ground nearest the suggested spot (paying its
-## cost; a skipper who cannot is handed just that).
+## Puts the house down as a construction site on the free ground nearest the suggested spot (marking it
+## out costs nothing; the materials are spent as it goes up).
 func place_house() -> bool:
 	var hb: HomeBuild = h.hb
 	var was_active := hb.active
 	if not was_active:
 		hb.active = true
-	var cost := FarmSites.build_cost("house")
-	if not FarmSites.can_pay(cost):
-		FarmSites.refund(cost)      # a skipped tutorial: the house goes down anyway, with the wood it needs
 	hb.take("house")
 	var found := false
 	var p := house_spot()
