@@ -2041,3 +2041,10 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - READY: briefs/BOKI_CENTRAL_PROPOSALS.md on ext/agent-briefs. Five directions: (1) Mark and cash in: the existing hidden bond mark made visible, with a per-type payoff on your next hit; (2) Fusion as the climax: the per-type Fusion spec; (3) Boki senses for exploration (a G-wheel "Seek"); (4) Boki-owned progression: owner_* stat points move to the Boki, needs a save migration; (5) visible temperament and barks.
 - Each one acts only on foes, the world or information (184b) and deletes hero-side riders from the 186 audit.
 - Recommended order: 1 + 5 first (~6 days, after the 186 cuts land), then the 2 spec, then 3 and 4 after the slice playtest. Owner picks before any build.
+
+## 2026-11-06 (build worker): READY `ext/s7-mask-hob-83-89-rebased` @ 294897be, SUPERSEDES `ext/s7-mask-hob-83-89` 486e652c (which conflicted with main)
+- It is `ext/s7-mask-hob-83-89` with origin/main 7907d9af merged in; same items (83, 87, 88, 89) and the same READY entry above (2026-11-05 S7). Only 2 files conflicted:
+  - scripts/heroes/warden_glb.gd: kept both sides (the branch's fetch/fetched/has_rest/_scene cache, main's extra_bones and _skinned_weapon). main's dress() already calls extra_bones and the branch's `_scene`; no other changes.
+  - docs/ASSET_CREDITS.md: kept both notes (Hob, and the rigged Boki).
+- Checks on the merged result: --check 0 failures, --hob-check 0, --mask-moment-check 0, --mask-lag-check 0 (headless: scripts only), --class-unlock-check 145/0, --farm-tutorial-check 0, --uipolish-check 30/0, health --strict OK. Not re-run: the shots, the full suite.
+- Note: origin/ext/farm-hob (8e82638f) is a separate branch touching farm Hob; not checked against this one.
