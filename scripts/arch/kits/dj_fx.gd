@@ -30,6 +30,8 @@ var _cres := {}                # arc degrees -> crescent mesh (unit reach)
 var _col: ArrayMesh
 var _ribbon: ArrayMesh
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
+var _warming: Array = []       # the loading screen's stand-ins (prewarm)
+var _solids: Array = []        # kept for the match: freeing the last material of a kind frees its compiled shader
 
 static func of(match_node: Node) -> DJFx:
 	if match_node.has_meta("dj_fx"):
@@ -96,6 +98,28 @@ func _take(kind: String, build: Callable) -> Node3D:
 			riders.erase(r)
 			break
 	return old
+
+## The loading screen's stand-ins (Match.warm_up): each of this library's shaders on each of its mesh kinds and its two
+## plain colours, drawn once so the first dash or shot of a match doesn't compile them mid-move (item 181).
+func prewarm(at: Vector3) -> void:
+	if _warming.is_empty():
+		for mesh: Mesh in [_quad_mesh(), _ribbon_mesh(), _crescent_mesh(140.0), _column()]:
+			_warming.append(_mi(mesh, _mat(0, Color.WHITE, Color.WHITE)))
+			_warming.append(_mi(mesh, _mat(0, Color.WHITE, Color.WHITE, false, true)))
+		_solids = [solid(Color.WHITE), solid(Color(1, 1, 1, 0.5))]
+		for mesh: Mesh in [_quad_mesh(), star_mesh(4, 0.3), Models.sphere(0.1, 8), Models.capsule(0.3, 1.25)]:
+			for mt: Material in _solids:
+				_warming.append(_mi(mesh, mt))
+		for node: MeshInstance3D in _warming:
+			node.top_level = true
+			add_child(node)
+	for node: MeshInstance3D in _warming:
+		node.global_position = at
+
+func prewarm_end() -> void:
+	for node: MeshInstance3D in _warming:
+		node.queue_free()
+	_warming.clear()
 
 # ------------------------------------------------------------------ meshes
 func _quad_mesh() -> QuadMesh:
