@@ -53,6 +53,7 @@ func pin() -> void:
 	step(m, 0.3)
 	_pin_no_early_release(m, P, T, K)
 	_pin_readout(m, P, T, K)
+	_pin_114(m, P, T, K)
 	_pin_draw_pose(m, P, T, K)
 	_pin_heavy(m, P, T, K, home, lv)
 	_pin_dash(m, P, T, K)
@@ -71,6 +72,92 @@ func ready_bow(P: Hunter) -> void:
 	P.fire_cd = 0.0
 	P.reload_t = 0.0
 	P.draw_t = -1.0
+
+## No aim shape of Lisette's is a V, in any hold.
+func no_vee(m: Match) -> bool:
+	for e in AimKit.layer(m).entries.values():
+		if String((e as Dictionary).get("kind", "")) == "vee":
+			return false
+	return true
+
+## Owner item 114: no V, the big needle drawn on the bow while RMB charges, and she is slowed holding it.
+func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
+	var clean := true
+	ready_bow(P)
+	var aim := press_dry.bind(P, K, T.pos)
+	for i in 100:
+		aim.call()
+		m.step(DT)
+		clean = clean and no_vee(m)
+	P.inp["fire"] = false
+	step(m, 1.0)
+	var start := P.pos
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.inp["move"] = Vector2(0, 1)
+	step(m, 0.3, func(): aim_at(P, T.pos))
+	var free0 := P.pos
+	step(m, 0.4, func(): aim_at(P, T.pos))
+	var free_v := free0.distance_to(P.pos) / 0.4
+	var n := K.needle
+	ok("114 needle: nothing on the bow before the hold", not n.visible)
+	var hold := rmb_at.bind(P, T.pos)
+	P.inp["sec_hold"] = true
+	K.press_rmb()
+	step(m, 0.3, hold)
+	var d := P.aim_dir()
+	var along := (n.tip - n.eye).normalized()
+	ok("114 needle: on the bow by 0.3 s, pointing along the aim",
+		n.visible and n.is_visible_in_tree() and Vector2(along.x, along.z).dot(d) > 0.98,
+		"visible %s dot %.2f" % [n.visible, Vector2(along.x, along.z).dot(d)])
+	ok("114 needle: oversized, over 2.5 times a loosed arrow", n.eye.distance_to(n.tip) >= 2.0,
+		"%.2f m" % n.eye.distance_to(n.tip))
+	var eye_ahead := func() -> float:
+		return Vector2(n.eye.x - P.position.x, n.eye.z - P.position.z).dot(d)
+	var eye0: float = eye_ahead.call()
+	var glow0: float = n.shell_mat.get_shader_parameter("color").a
+	var end: Vector3 = n.points[-1]
+	var thread_back := Vector2(end.x - n.eye.x, end.z - n.eye.z).dot(d)
+	ok("114 needle: the red thread trails behind the eye", thread_back < -0.8, "%.2f m" % thread_back)
+	var p0 := P.pos
+	step(m, 0.4, hold)
+	var held_v := p0.distance_to(P.pos) / 0.4
+	ok("114 slow: she moves at the data's share of her speed while she holds RMB",
+		free_v > 1.0 and absf(held_v / free_v - float(K.rmb_def()["pin"]["hold_move"])) < 0.08,
+		"free %.2f held %.2f" % [free_v, held_v])
+	step(m, 0.6, hold)
+	var eye1: float = eye_ahead.call()
+	var glow1: float = n.shell_mat.get_shader_parameter("color").a
+	var hot: Color = n.steel.get_shader_parameter("albedo")
+	ok("114 needle: it draws back and glows up with the charge, the silver going red-hot",
+		K.heavy_k() >= 0.99 and n.charge >= 0.99 and eye1 < eye0 - 0.2 and glow1 > glow0 + 0.3 and hot.r > hot.b + 0.3,
+		"eye %.2f -> %.2f glow %.2f -> %.2f k %.2f" % [eye0, eye1, glow0, glow1, K.heavy_k()])
+	ok("114 V: none in the Heavy Shot hold or the bow draw", clean and no_vee(m))
+	P.inp["sec_hold"] = false
+	m.step(DT)
+	m.step(DT)
+	ok("114 needle: gone the moment it's loosed", not n.visible and not K.rmb_down, "visible %s" % n.visible)
+	var p1 := P.pos
+	step(m, 0.4, func(): aim_at(P, T.pos))
+	var after_v := p1.distance_to(P.pos) / 0.4
+	ok("114 slow: back to full speed after the shot", after_v > free_v * 0.8, "%.2f vs %.2f" % [after_v, free_v])
+	# a hold ended by a stun: the needle goes with it
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.inp["sec_hold"] = true
+	K.press_rmb()
+	step(m, 0.4, hold)
+	var up := n.visible
+	P.stun_t = 0.3
+	step(m, 0.1, hold)
+	ok("114 needle: a stun drops it", up and not n.visible, "up %s visible %s" % [up, n.visible])
+	P.inp["sec_hold"] = false
+	P.inp["move"] = Vector2.ZERO
+	step(m, 1.0)
+	P.teleport(start)
+	fresh(T)
+	K.cd["rmb"] = 0.0
+	step(m, 0.3)
 
 ## #5: the arrow leaves only when the button comes up.
 func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:

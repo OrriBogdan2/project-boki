@@ -138,7 +138,7 @@ const SHOTS := [
 		"heavy",
 		1.0,
 		3.0,
-		"Heavy Shot held (before full): the gold bar growing from the bow"
+		"Heavy Shot held: the great silver needle on the bow, its red thread trailing, glowing with the charge"
 	],
 	[
 		"pin_heavy_flight",
