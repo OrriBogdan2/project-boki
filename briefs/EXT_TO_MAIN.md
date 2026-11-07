@@ -2350,3 +2350,8 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 - Checks: --portrait-check rc=0 fails=0 (GPU jobs 20261107-134927-23045 after, 20261107-134930-01408 before), health.py --strict OK.
 - Screenshots (briefs/art-refs/portraits_unified/ingame/): kit_card_{before,after}.png, practice_picker_{before,after}.png.
 - Note: the prior mechanical attempt's GPU job failed because the tree had no .godot import; run `godot --headless --import` first.
+
+## 2026-11-07 build-spec (job 20261107-123002-a4): READY ext/camera-depth 2af88a105 (from origin/main 7907d9afe): height cues
+- Step 1: briefs/CAMERA_DEPTH.md (Supervive vs ours). Camera pitch/FOV already match; the gap is value contrast (abyss/cliff faces/lip) and ground anchors.
+- Step 2 (setting `depth_cues`, default on, Accessibility tab): cliff faces shaded lip-to-foot, lit ground lip, blob shadow disc under each hunter (scripts/match/depth_cues.gd, shaders/blob_shadow). Before/after: briefs/camera_depth/. Tool: --depth-shots.
+- Checks: health --strict OK; GPU capture job ran clean (rc 0). Hitch/perf and the full suite NOT run (usage); cost is one quad per hunter and a few height taps per ground pixel. Not done: abyss darkening, tier tint, projectile shadows.
