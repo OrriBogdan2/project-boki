@@ -30,3 +30,13 @@ Locked design (from 2A + 2C):
   - Luna-moth wings rejected (overlap with Sable); the giant scarf rejected (overlap with Kael); the comet tail over her head rejected (reads as a squirrel, awkward in 3D).
   - Skin ideas: Sleepy Pip (nightcap, blanket, fuzzy socks), Star-catcher (net, star jar, map), Field Medic (patchwork vest), Blossom (petal skirt, flower crown).
 - `explorations/pip_v2_collars.jpg`: alternatives to the leaf collar (neckerchief with an orange cross, petal collar, starry capelet, knit cowl). Note: both runs shrank or dropped the big lantern.
+
+## Renamed: Lumi, "the Little Lantern" (owner, Nov 7, 00:49 ET)
+Pip is renamed **Lumi** ("Lumi the Little Lantern"). Display name only; ids and files stay (`tender`, `pip_*`, `pip_v2/`). Elluna was rejected as a name because it is the source game's character.
+
+New lore (owner direction: she is a Boki that became sentient through her lantern):
+- Lumi was a small, timid wild fox-kit Boki, afraid of the dark. She caught a fallen star in an old brass lantern and slept curled around its light for years.
+- The starlight changed her: glowing constellations in her fur, fairy wings, standing upright, speech. She was the first Boki seen to become something more.
+- She still fears the dark, but her lantern's light heals, so she became a field medic who walks into the places that scare her for those who need her.
+- The star is her Mask relic, her oldest friend and her courage.
+- Visual rule kept: she reads as a Hunter (upright, clothed, gear), because she grew beyond being a Boki.
