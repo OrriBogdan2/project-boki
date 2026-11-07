@@ -178,3 +178,9 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-07 (owner, via coordinator): roster order
 - Hero order (owner's Boki website order; also the hero-select, wiki and any roster list): Vex, Mossy, Ryzz, Kael, Ravel, Cinder, Grimble, Pip, Claire, Tarek, Motley, Sable.
+
+## 2026-11-07 (owner, via coordinator): Boki 50, build them all now
+- Goal: 50 Boki as soon as possible, each with a 2D design (concept sheet: front, side, back, expression row; plus a clean turnaround for 3D) AND a 3D model in game. The owner cuts or changes ones he doesn't like later, so don't hold species for review.
+- The list is docs/boki/ROSTER_50.md + content/kin_v2_roster/ (branch ext/boki-roster50): the 9 live + 41 new. It is approved as the build list; its originality rules stand (our own creature fusions, never franchise-based).
+- The 186/187 Boki proposals: nothing is cut for now (the owner cuts later); breadth first.
+- Kael's curse: the sword arm (right) if it can be done cleanly on the v2 model (move/mirror the emissive veins and swap the black glove to the left hand); otherwise keep it on the left arm as the sheet shows.

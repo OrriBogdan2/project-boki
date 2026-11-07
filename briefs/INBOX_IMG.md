@@ -66,3 +66,14 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 
 ## 2026-11-05 (S2): Vex splash request updated
 - The 00:52 request's design note is out of date: use briefs/art-refs/vex_FINAL_sheet.png (the street racer version, one hybrid arm-cannon) for any Vex splash. Skip it if the owner already made one.
+
+## 2026-11-07 03:55 UTC (coordinator): OWNER ORDER: Boki 50, 2D designs for every species
+The owner wants 50 Boki ASAP, each with a 2D design and a 3D model (DECISIONS 2026-11-07 "Boki 50"). The 3D side runs on the server as soon as a sheet lands. Your part, per species, in docs/art/gen/STYLE.md style (same quality as Pebbit and Glintmole):
+1. a concept sheet `briefs/art-refs/boki/<id>_concept.png` (front, side, back, an expression row);
+2. a clean turnaround `briefs/art-refs/boki/<id>_turnaround.png` (front / side / back / 3/4, neutral stance, flat light, plain background, whole body in frame, no overlapping views; tails, ears, wings, fins readable in side and back; feet and stance clear).
+Design source: each species' entry in docs/boki/ROSTER_50.md on ext/boki-roster50 (name, look, colours, the "not like" line). Push each species as it's done and add a line to IMG_STATUS.md. Do 10 at a time, in this order:
+- Batch 1 (no 3D yet, small/medium first): kilnbadger, moonloris, murmurling, nacrolin, sentrikat, lilybara, limpetor, gibbelle, duskapi, caecilith
+- Batch 2 (no 3D yet): casquebill, cindowary, floenatee, heatherhorn, hoarheron, opalisk, orchisloth, scaldamus, spatewader, velvorm
+- Batch 3 (no 3D yet, incl. the big ones): basaltoad, glaciyak, goliathite, moundvark, nimbostrich, squalltross, threadwyrm, tuatrune, umbrathere
+- Batch 4 (3D exists, 2D design missing; match the existing model): burrlet (Mycroll), cindle (Vespyx), puddlet (Prismander), wisplet (Lunowl), zapple (Echolop), hivara, zephyrak, cairnback, kindlewren, mossgrade, kestrike, lodestick, marchleaf, nettlynx, thrumbird
+Already done: pebbit, glintmole, gloamshell, glomwort, rimeshrew, selenfin.
