@@ -28,3 +28,13 @@ Alternates: `cinder_v2_bigprops_alt.jpg` (large bubbling tank), `cinder_v2_face_
 - `cinder_v2_splash.jpg` ("Last Dance"): waltzing with a masked noble in a blighted ballroom; flames bloom from her heels and tail; the crowd is spellbound.
 - Alternates: `cinder_v2_splash_moth_alt.jpg` (luring corrupted villagers into a bonfire), `cinder_v2_splash_cleansing_alt.jpg`.
 - Turnaround: the 4-view A-pose was blocked by the image filter twice (revealing design plus a neutral full-body pose). For 3D, use `cinder_v2_master_sheet.jpg` (front, 3/4, back) plus `cinder_v2_design_locked.jpg`.
+
+## Turnaround (Nov 6, 22:11 ET)
+`cinder_v2_turnaround.jpg` is the 3D-modelling turnaround (front, 3/4, side, back), 5504×3072. It replaces the earlier note that the turnaround was blocked.
+
+Chain (Nano Banana Pro, 16:9, 4K, no seed exposed):
+1. A fresh generation with the outfit described as full obsidian plate armour, which passed the filter. Refs: the front/back views cropped from the master sheet, plus the face crop.
+2. Edit 1, torso: the corset, belt and skirt became the shard top and hip piece, with the midriff bare.
+3. Edit 2, limbs: the boots became cracked obsidian shards.
+
+Known limit: the gauntlets are still clean plated bracers, not the shard forearms from the master sheet. Use the master sheet for those.
