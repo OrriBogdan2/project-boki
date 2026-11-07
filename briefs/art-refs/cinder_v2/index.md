@@ -68,3 +68,6 @@ Known limit: the hose routing on the two side views is still inconsistent: it lo
 - **Splash (alternate):** `cinder_v2_splash_alt.jpg` = "The Pyre Queen": she lounges on a lava-rock throne in a burning cathedral; knights kneel and cower; a flame dances in her hand.
 - The old "Last Dance" splash moved to `explorations/cinder_v2_splash_last_dance.jpg`; "Firestorm" is in explorations.
 - **Now outdated (need a redo):** the master sheet, turnaround and weapon sheet still show the tank and flamethrower. The goggles are absent in both new splashes; the owner should confirm whether they stay.
+
+## Portrait: no goggles (owner, Nov 7, 05:01 ET)
+`cinder_v2_portrait.jpg`: goggles removed by an edit (the Flame Queen has no steampunk gear). The flame at her lips, her horns, cheek scales, lava cracks and the shard top are kept. The goggles version is now `explorations/cinder_v2_portrait_goggles.jpg`. Decision: **Cinder has no goggles** anywhere going forward.
