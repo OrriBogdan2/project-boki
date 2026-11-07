@@ -2178,3 +2178,5 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - Decision: the hook arm never hides now, so hide_while_chain / CHAIN_OUT go (dredge was the only user). Alternative: hide the crescent while the abyssal hand flies.
 - Checks: --warden-rig-json dredge (weapon box only), warden-glb PASS (14900 ≤ 15000), warden-model PASS, hero-vfx OK, hero-check 0 fails, dredge-combo 93/0, warden-clips/rig-standard/warden-stance 0 fails, health --strict OK, gen_wiki updated.
 - Not done: GPU in-game shots (jobs 20261107-051057-07844 / -29573) were still queued, the GPU worker offline; portrait/splash still v1.
+
+- Grimble v2 addendum: GPU in-engine shots done (jobs 20261107-051057-07844, -29573, rc=0): briefs/art-refs/grimble_v2/ingame/game_closeup.jpg (match camera x4 + moves close), game_vs_sheet.jpg, game_poses.jpg. At the match camera the head and loupe show ahead of the hoard; veins and lanterns glow. ⚠ the skin reads pinker and lighter than the sheet's grey-mauve (v1's warden_look skin lift, unchanged).
