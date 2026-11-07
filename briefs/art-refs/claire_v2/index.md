@@ -54,3 +54,4 @@ The old v1 set has moved to `explorations/old_claire_v2_*`.
 Known limits:
 - In the portrait and splash her hair is a short bob plus the braid, not long hair (accept: it reads well).
 - In the turnaround her eyes are pale without the glow; use the main design for the glow.
+- **Splash updated (owner, 04:36 ET):** `nivi_v2_splash.jpg` = "Blizzard Dash" (a speed-skater lunge through shattering shadow wolves in a blizzard); `nivi_v2_splash_alt.jpg` = "Thin Ice" (she seals the cracking river to save a child). The aurora spin moved to explorations (stiff pose).
