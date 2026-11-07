@@ -83,6 +83,13 @@ func _first_time() -> void:
 	var got := [null]
 	var t0 := Time.get_ticks_msec()
 	var beat := MaskBeat.play(parts[1], parts[0], func(b): got[0] = b)
+	var planned := _planned_s(beat)
+	var clock := [0.0, 0.0]      # [the beat's own seconds (the frames' deltas), the longest frame]
+	var tick := func():
+		var dt := main.get_process_delta_time()
+		clock[0] += dt
+		clock[1] = maxf(clock[1], dt)
+	tree.process_frame.connect(tick)
 	await tree.process_frame
 	ok(not MaskBeat.seen() and beat.skip_hint == null and beat.cam.current, "the first time: no skip, its own camera")
 	var cam_from := beat.cam.global_position
@@ -112,11 +119,13 @@ func _first_time() -> void:
 	await _shot(tree, "mask_beat_5_reveal")
 	while got[0] == null and Time.get_ticks_msec() - t0 < 30000:
 		await tree.process_frame
-	var secs := (Time.get_ticks_msec() - t0) / 1000.0
+	tree.process_frame.disconnect(tick)
+	var secs := float(clock[0])
 	ok(got[0] != null and String((got[0] as Node3D).get_meta("arch", "")) == "gunslinger",
 			"done hands back Vex's model, standing where you stood")
-	if shots == "":      # (a software rasterizer's frames and the screenshots stretch it)
-		ok(secs >= 4.0 and secs <= 6.5, "it took %.1f s" % secs)
+	if shots == "":      # (a phase ends on a frame: a slow rasterizer stretches each by up to one frame)
+		ok(secs >= planned - 0.3 and secs <= planned + 6.0 * float(clock[1]),
+				"it ran %.1f s of the %.1f s planned (longest frame %.2f s)" % [secs, planned, clock[1]])
 	ok(scene_cam.current and MaskBeat.seen(), "the scene's camera is back and the beat is marked seen")
 	host.queue_free()
 	await tree.process_frame
@@ -140,6 +149,14 @@ func _again() -> void:
 			"interact skips it; the farm's cut keeps the body you had")
 	host.queue_free()
 	await tree.process_frame
+
+## The seconds the beat's phases add up to.
+func _planned_s(beat: MaskBeat) -> float:
+	var t: Dictionary = beat._times
+	var total := float(t["build_s"]) + float(t["rise_s"]) + float(t["black_s"]) + float(t["reveal_s"])
+	for s in t["memory_s"]:
+		total += float(s)
+	return total
 
 func _until(tree: SceneTree, beat: MaskBeat, phase: String) -> void:
 	var t0 := Time.get_ticks_msec()

@@ -506,7 +506,7 @@ static func fetch(arch: String) -> void:
 	if not uses_model(arch) or _scenes.has(p):
 		return
 	if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
-		ResourceLoader.load_threaded_request(p)
+		BackgroundWork.request(p)
 
 ## Whether a Warden's model can be built without waiting on the disk (fetch() starts the read when it hasn't).
 static func fetched(arch: String) -> bool:
@@ -523,7 +523,7 @@ static func _scene(arch: String) -> PackedScene:
 	var p := path(arch)
 	if not _scenes.has(p):
 		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
-		_scenes[p] = ResourceLoader.load_threaded_get(p) if asked else load(p)
+		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
 	return _scenes[p] as PackedScene
 
 ## A Warden's variant bones: the code table above, plus its art's data file (content/rules/warden_anim/<art>.json).

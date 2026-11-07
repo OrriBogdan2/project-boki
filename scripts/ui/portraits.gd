@@ -97,7 +97,7 @@ static func cut_soon(ak: String, path: String, px: Vector2i, greyed := false) ->
 		var job: Array = _jobs[key]
 		if not WorkerThreadPool.is_task_completed(int(job[0])):
 			return null
-		WorkerThreadPool.wait_for_task_completion(int(job[0]))
+		BackgroundWork.join(int(job[0]))
 		_jobs.erase(key)
 		_cuts[key] = ImageTexture.create_from_image(job[1])
 		return _cuts[key]
@@ -106,7 +106,7 @@ static func cut_soon(ak: String, path: String, px: Vector2i, greyed := false) ->
 		return null
 	var at := Rect2i(region(ak, path, Vector2(src.get_size()), Vector2(px)))
 	var job := [0, null]
-	job[0] = WorkerThreadPool.add_task(func(): job[1] = _cut_pixels(src, at, px, greyed))
+	job[0] = BackgroundWork.add_task(func(): job[1] = _cut_pixels(src, at, px, greyed))
 	_jobs[key] = job
 	return null
 
@@ -125,11 +125,11 @@ static func read_soon(path: String) -> Texture2D:
 		return _art[path]
 	match ResourceLoader.load_threaded_get_status(path):
 		ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
-			ResourceLoader.load_threaded_request(path)
+			BackgroundWork.request(path)
 			return null
 		ResourceLoader.THREAD_LOAD_IN_PROGRESS:
 			return null
-	_art[path] = ResourceLoader.load_threaded_get(path)
+	_art[path] = BackgroundWork.take(path)
 	return _art[path]
 
 ## The texture's pixels, or null where they can't be read (headless, or no texture).

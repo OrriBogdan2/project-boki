@@ -338,7 +338,14 @@ func _home(kin_count: int):
 	Save.d = _new_save(kin_count)
 	HomeLayout.ensure(Save.d)
 	_stats()
+	return await _ready_home()
+
+## A Home with its interface built (its meshes build over a few frames; slower on a software rasterizer).
+func _ready_home():
 	var home = await main._hb_home()
+	var t0 := Time.get_ticks_msec()
+	while home.panel_host == null and Time.get_ticks_msec() - t0 < 60000:
+		await main.get_tree().process_frame
 	home._close_panel()
 	return home
 
@@ -434,8 +441,7 @@ func _world() -> void:
 	Save.d = JSON.parse_string(js)
 	ok(FarmTutorial.did("house") and FarmTutorial.did("hob") and not FarmTutorial.did("feed"),
 			"after save and load the tutorial is where it was")
-	home = await main._hb_home()
-	home._close_panel()
+	home = await _ready_home()
 	ok(is_instance_valid(home.hob.node), "Hob is there again")
 	home.queue_free()
 	await main.get_tree().process_frame
