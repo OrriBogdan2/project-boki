@@ -242,7 +242,7 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - Art: `briefs/art-refs/cinder_v2/`. Main splash `cinder_v2_splash.jpg` ("The Last Kiss"); alternate `cinder_v2_splash_alt.jpg` ("The Pyre Queen"). The main splash is used wherever splashes are used: hero select, Relic offer, loading screens, website.
 - Her current master sheet, turnaround and weapon sheet still show the tank/hose/flamethrower and are being redone. Until then, model from the turnaround and IGNORE those parts. Do not build them.
 - Flue Flight ult: lift no longer comes from tank exhaust jets. DEFAULT (owner to confirm): fire bursting from her heels and tail.
-- Brass goggles: OPEN owner question (both new splashes leave them out). DEFAULT until answered: no goggles.
+- Brass goggles: REMOVED (owner confirmed 2026-11-07). No goggles on the model, splash, portrait or any art; supersedes "lizard horns and goggles" above.
 - FIDELITY_CHECKLIST Cinder row: remove "copper/glass fire TANK on her back with 2 exhaust nozzles", "hose" and "FLAMETHROWER (held LMB)"; add "No weapons. Fire comes from her hands (LMB = a fire stream or bolts from her palms). Glowing magma cracks brighten while casting. A fire-queen look: an obsidian-shard outfit, horns, living-fire hair, a flame-tipped tail."
 
 ## 2026-11-07 (owner): hero full names read "<Name> the <Title>"
