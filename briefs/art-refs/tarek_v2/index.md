@@ -46,3 +46,8 @@ Canon:
 Known limits:
 - He is slightly bulkier than on the master sheet; use the master sheet's leaner build.
 - One or two glyphs on the gauntlet look letter-like ("F"); the modeller should use the simple set (spirals, crescents, bars, dots).
+
+## Portrait: FINAL (Nov 6, 22:51 ET)
+`tarek_v2_portrait.jpg`, 4096×4096. He listens with a half smile in a misty mountain shrine at dusk. One eye stone floats in front of him, staring at the viewer; two drift behind. His stone arm is folded across his chest, glyphs glowing; no orange light.
+
+Nano Banana Pro, 1:1, 4K, a fresh generation (ref: the master sheet). The model drew four eye stones, so the fourth (right side) was painted out locally (OpenCV inpaint plus a soft blend, not AI). The original is `explorations/tarek_v2_portrait_4stones.jpg`.
