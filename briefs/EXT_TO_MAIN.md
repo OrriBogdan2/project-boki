@@ -2429,3 +2429,21 @@ Please look at:
 - warden_model_check height_3d for ashwick is now 1.04 (v1's fire crest is gone).
 - Hair flame strips were dropped: they read as yellow flakes. Hair is no literal fire, only the ember fade.
 - Shots used software GL: the GPU queue stalled (job 20261107-144810-02832). Colours and speed need a GPU look.
+
+## READY 2026-11-07: Cinder the Flame Queen, kit and splash (ext/cinder-flame-queen, c3f4f1729)
+
+Branch ext/cinder-flame-queen, 2 commits (17 files, +167/-149). It does not touch her 3D model (the cinder-v2 job owns that).
+- LMB fire stream and Cinder Shot now start at her casting hand (`AshwickKit.tip()` uses `anim.hand_r`). Rules origin (NOZZLE), damage, range and timing are unchanged; only the drawn start moved.
+- Flue Flight: fire bursts from both heels and the tail, with the roar sound hook, in one function (`AshwickJet.jet_points` and `_jet_fx`). dash_with, hover, speed and time are untouched, so lift motion and timing are the source's. No alternatives built.
+- Texts: weapon and ability text, tooltips and docs/heroes/ashwick.md no longer mention tank, hose, fuel or nozzles. Title "Flame Queen" shown through the HeroTitle helper. Procedural gun (canister, hose, nozzle) removed from `HeroGearPair.flamer`.
+- Splash: cinder_v2_splash.jpg ("The Last Kiss") is art/portraits/ashwick_splash.jpg (960x540); the alt is ashwick_splash_alt.jpg. ashwick.jpg now comes from cinder_v2_portrait.jpg (the old one had goggles and the tank). No goggles anywhere.
+- FIDELITY_CHECKLIST Cinder row has the specified text; cinder_art_check now asserts hands and heel/tail fire.
+Checks, all pass: cinder-art, ashwick-combo, hero-title, portrait, title-check, hero-combo; gen_wiki. health --strict fails only on files this branch does not change (hero_title_check.gd, vv_ult_check.gd long lines). ashwick-ult-check timed out (1500 s) when the machine was loaded; the re-run is noted below if it finished.
+GPU shots (jobq 20261107-161020-18116): briefs/art-refs/cinder_v2/ingame/queen_lmb_hands_strip.png, queen_flue_flight_strip.png.
+
+Please look at:
+- The model still holds its own lance (the glb's weapon node), and its arm clips still pose around a gun. Both belong to the model/animation rebuild; I did not touch them. From above the stream already reads as leaving her hand.
+- Magma cracks brightening while casting is not done (model job).
+- Alternative for the hand origin: PALM_AHEAD (0.12 m) pushes the start just past the palm.
+
+READY ext/cinder-flame-queen c3f4f1729
