@@ -61,3 +61,6 @@ Known limits:
 Replaces "Nivi". Neve is Italian for "snow". Display name only; ids and files stay (`rimewright`, `claire_*`, `nivi_v2_*`).
 - **Portrait updated (05:08 ET):** `nivi_v2_portrait.jpg` = Frost Queen (confident smirk at viewer, spear over shoulder, swirling frost scarf, frosted frame). Alts: fighter, spin in explorations/.
 - **Portrait FINAL (05:18 ET):** `nivi_v2_portrait.jpg` = the close snowball wink (owner pick). Flustered, joy and snowflake moved to emotes/.
+
+## Portrait: white braid (owner, Nov 7, 15:02 ET)
+`nivi_v2_portrait.jpg` was edited (Nano Banana Pro, 1:1): the braid is snowy white all the way down. Before the edit it turned blue from the jaw down; that version is `explorations/nivi_v2_portrait_blue_braid.jpg`.

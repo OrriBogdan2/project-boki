@@ -64,3 +64,6 @@ Rejected: one 4K sheet run that came out square and dropped the bubblegum head (
 
 ## Splash edit (owner, Nov 7, 14:58 ET)
 `ryzz_v2_splash.jpg` was edited (Nano Banana Pro, 16:9, 4K) to show the knights clearly electrocuted: pink arcs, scorch marks, smoke and frizzled hair. The fire cracks under her boots are now pink lightning cracks. The pre-edit version is in explorations.
+
+## Splash v2 (owner, Nov 7, 15:02 ET)
+`ryzz_v2_splash.jpg` is the main splash. A fourth electrocuted knight, smoking and scorched, now lies on the left, so she walks out from between the two groups she zapped. The previous shock edit is `ryzz_v2_splash_alt_shock.jpg`.

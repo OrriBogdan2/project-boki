@@ -11,3 +11,12 @@ Known limits: the reaching hand is very large and slightly flat; the background 
 
 ## Splash edit (owner, Nov 7, 14:58 ET)
 `motley_v2_splash.jpg` was edited (Nano Banana Pro, 16:9, 4K): the reaching glove has more depth (folds, knuckle seams, shading, a purple rim light) and long pointed fingers. The pre-edit version is in explorations.
+
+## Master sheet (owner, Nov 7, 15:02 ET)
+`motley_v2_master_sheet.jpg`:
+- Hero pose with a fan of burning cards.
+- Small front and back views on void ribbons into the hovering box, with no legs.
+- Four void-face expressions.
+- A close-up of the box and spring.
+
+Nano Banana Pro, new generation, 3:4, 4K. Refs: the front view from `motley_turnaround.png` and `motley_portrait.png`. One edit then replaced the legs in the small views with the void ribbon.
