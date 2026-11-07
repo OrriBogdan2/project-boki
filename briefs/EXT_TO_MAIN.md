@@ -2115,3 +2115,20 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-07 deep (job 20261107-003002-a4): CLAIM Kael v2 model rebuild
 - CLAIM: Kael v2 model rebuild (art/wardens/kael/ to the locked v2 design, briefs/art-refs/kael_v2/). Branch ext/kael-v2-model. Supersedes art1-kael-2 / item 131c.
+
+## 2026-11-07 deep (job 20261107-003002-a4): READY `ext/kael-v2-model` @ a22927c1d (Kael v2 model rebuild)
+- kael.glb is the owner's locked v2 design (kael_v2_turnaround + master sheet) through the ART-1 pipeline: one Meshy body scan (wrist chains and sash tails edited out), fitted onto the contract rig by script. 12.6k tris (body 11.7k, sword 0.9k), one 2048 colour atlas + a 2048 vein emission map + a 512x256 card atlas. Same armature (contract + v1's spring chains), every anchor name, procedural clips and kit wiring unchanged. 116 Meshy credits (PIPELINE.md). Supersedes art1-kael-2 / 131c.
+- Renders (briefs/art-refs/kael_v2/ingame/): before_after.jpg (v1 shipped vs v2), vs_turnaround.jpg, vs_master.jpg, game_vs_sheet.jpg / game_turnaround.jpg / game_closeup.jpg (GPU --warden-shots), match_camera.jpg.
+- Rig: the v2 sheet is a tall, long-legged build. juggernaut body legs 1.55->2.05, head 0.62->0.48, neck -0.012, size 1.06->0.97 (same in-game height). warden-model-check height_3d 1.19->1.27 (the mane stands over his head; v1's model was shorter than the sheet's 1.26).
+- Fidelity vs kael_v2:
+  - ✅ pale skin, white wild mane, pale eyes, face scar, crimson scarf over the mouth
+  - ✅ two-tone torn crimson/bone shawl; torn hem and sash tails as alpha cards
+  - ✅ leather X-harness, studded belts, red sash, dark trousers, knee guards, buckled boots; black right glove
+  - ✅ curse: crimson emissive veins on the LEFT arm, bare crimson hand and chest, as all four turnaround views draw it (model_glow core crimson; the arm blooms moved to the left arm)
+  - ✅ cuffs with short 2-bone chains (hangcuff / hangwarchain bones)
+  - ✅ sword: broad cracked silver blade, white-hot crack ribbons, guard, red grip, ring pommel with hooked chain. Scale: whole 0.82 of his height (sheet 0.80), blade 0.61 (0.61), width 0.103 (0.10). In his right hand, as the kit holds it.
+  - ⚠ knee-guard spikes are smooth; arms a bit slim; hair a bit large
+  - ⚠ the blade's shaded face goes dark in side views
+- Decision: curse on the left arm per the sheet; the sword stays in the right hand (clips/kit). Alternative: mirror the curse to the sword arm, as "spreads from the sword hand" reads.
+- Removed: v1 build tools (tools/meshy/kael_*, kael_bake/fit/recipe.json, Kael-only fit_warden paths, art1 kael_clips/assemble/paint). Shared helpers moved to meshkit/paintkit.
+- Checks: --warden-rig-json --warden=juggernaut, warden-glb (187/0), warden-model PASS, hero-vfx OK, juggernaut-combo 164/0, warden-stance 0 fails, health --strict OK, gen_wiki updated. mantle-look-check fails on Dolm's silhouette (0.755), not Kael's. GPU shots rc=0 (jobs 20261107-010811-22924, -015407-17691).
