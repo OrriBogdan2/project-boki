@@ -2558,3 +2558,6 @@ READY ext/parity-ostra-bomb 5b9a528d2 (KIT_PARITY 17: Ostra Brimseed peak 3.5x; 
 
 ## 2026-11-07 deep (job 20261107-213004-a4): CLAIM Motley v2 model rebuild
 - CLAIM: Motley the Void Jester v2 model (id ostra, art/wardens/ostra/ from motley_v2_turnaround.jpg + motley_v2_master_sheet.jpg: painted style, void ribbon on the brass spring, hovering card box, no legs (hover/bob, root and foot anchors kept)). Branch ext/ostra-v2-model.
+
+## 2026-11-07 build (job 20261107-214501-a2): CLAIM 2D art swap
+- CLAIM: swap new 2D art: splashes Sparkle (mage) + Motley (ostra); portraits Neve (rimewright), Motley, Mossy (bulwark), Vex (gunslinger). Branch ext/art-2d-swap.
