@@ -2180,3 +2180,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - Not done: GPU in-game shots (jobs 20261107-051057-07844 / -29573) were still queued, the GPU worker offline; portrait/splash still v1.
 
 - Grimble v2 addendum: GPU in-engine shots done (jobs 20261107-051057-07844, -29573, rc=0): briefs/art-refs/grimble_v2/ingame/game_closeup.jpg (match camera x4 + moves close), game_vs_sheet.jpg, game_poses.jpg. At the match camera the head and loupe show ahead of the hoard; veins and lanterns glow. ⚠ the skin reads pinker and lighter than the sheet's grey-mauve (v1's warden_look skin lift, unchanged).
+
+## 2026-11-07 build (job 20261107-060002-a4): CLAIM Boki 50 integration
+- CLAIM: Boki 50 integration step 1 (all modelled Boki + ext/boki-roster50 loadable, 29 redesigned stubs renamed from BOKI_50_DESIGNS.md). Branch ext/boki-50-integ from origin/main + ext/boki-species-integ.
