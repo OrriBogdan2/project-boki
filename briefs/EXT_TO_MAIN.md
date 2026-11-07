@@ -2343,3 +2343,10 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 
 ## 2026-11-07 deep (job 20261107-140001-a4): CLAIM Tarek v2 model rebuild
 - CLAIM: Tarek/Kibo v2 model rebuild (id dolm, art/wardens/tarek/ to the locked v2 design, briefs/art-refs/tarek_v2/; jade-glyph stone, no orange at rest). Branch ext/tarek-v2-model.
+
+## 2026-11-07 deep (job 20261107-134501-a4): READY ext/portraits-unified (51c79fc89), unified select-screen portraits + roster order
+- art/portraits/<id>.jpg (12) swapped for briefs/art-refs/portraits_unified/ at 512 px (same names, import settings and mipmaps kept; splashes untouched). Same files feed hero select, HUD/scoreboard and the title backdrop users.
+- Roster order (DECISIONS 2026-11-07): Arch.ORDER and HeroKit.ARCH_ORDER = Vex, Mossy, Ryzz, Kael, Ravel, Cinder, Grimble, Pip, Claire, Tarek, Motley, Sable (ids unchanged); docs/wiki/Classes.md and docs/heroes/dash_interactions.md regenerated.
+- Checks: --portrait-check rc=0 fails=0 (GPU jobs 20261107-134927-23045 after, 20261107-134930-01408 before), health.py --strict OK.
+- Screenshots (briefs/art-refs/portraits_unified/ingame/): kit_card_{before,after}.png, practice_picker_{before,after}.png.
+- Note: the prior mechanical attempt's GPU job failed because the tree had no .godot import; run `godot --headless --import` first.
