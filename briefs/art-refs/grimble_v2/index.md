@@ -45,3 +45,4 @@ Base: the original `briefs/art-refs/grimble_turnaround.png`. The old "Dredge" sh
 - Teeth: silver scrap metal with one gold tooth and a gap; purple gums.
 - Right arm: purple mutated bone hook (the hook IS the arm; no chain). Corruption veins and bone spurs spread over the right shoulder and back.
 - `grimble_v2_splash.jpg` ("Reeling In", 16:9, 4K): bone hook snagging a knight in a dark hoard cave; three-lens loupe, no nose, metal teeth. Weaknesses: fairly side-on staging, and he looks towards the camera rather than at the knight.
+- Splash replaced (Nov 6, 20:33 ET): `grimble_v2_splash.jpg` is now "The Scrapyard" (he bursts out of a junk pile, the bone hook flips a thief upside down, loot spills, purple lair). Alternates: `explorations/splash_highway_robbery.jpg` (cliff road, wagon crashing), `explorations/splash_bridge.jpg`, `explorations/splash_reeling_in.jpg`.
