@@ -2267,3 +2267,6 @@ Nivi -> Neve (display only, id claire stays). hero-title, hatch, class-unlock ch
 - GPU: ride shots jobq 20261106-204051-02736 (ride_030/120, ride_launch_020/070/160).
 - Merger: Net.VERSION bump notes from 149/163 still apply. Merge after ext/phys-integrated (it contains it).
 READY ext/text-relic-renames ee88f3c2c: final roster names (Sparkle, Lace, Tenzo, Meeko the Dawnfox, Neve the Snowglide, Mossy the Barnacle Knight); title/hatch/class-unlock checks 0 failures; website strings in docs/TEXT_PASS_2026-11-07.md
+
+## 2026-11-07 Hunter order + Snowglider (job 20261107-103511-a3, verified by coordinator): READY ext/text-relic-renames d6ec7954e (supersedes ee88f3c2c)
+- Neve the Snowglider everywhere (Snowglide retired in hero_title_check); titles stored without "the" (juggernaut "Unbroken"), one helper Arch.name_of/HeroTitle.label adds it; canonical Hunter order in Arch.ORDER; second_picks juggernaut, ashwick, tender. Old order remains only in the history parts of docs/TEXT_PASS_2026-11-07.md (intended).
