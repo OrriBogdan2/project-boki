@@ -2561,3 +2561,6 @@ READY ext/parity-ostra-bomb 5b9a528d2 (KIT_PARITY 17: Ostra Brimseed peak 3.5x; 
 
 ## 2026-11-07 build (job 20261107-214501-a2): CLAIM 2D art swap
 - CLAIM: swap new 2D art: splashes Sparkle (mage) + Motley (ostra); portraits Neve (rimewright), Motley, Mossy (bulwark), Vex (gunslinger). Branch ext/art-2d-swap.
+
+## 2026-11-07 deep (job 20261107-214504-a4): CLAIM Meeko companions (sun + raincloud) model
+- CLAIM: Meeko the Dawnfox (tender, art pip) sun and raincloud companions from pip_v2/meeko_v2_companions_sheet.jpg: 4 views each + 8 expression faces (texture swaps), replacing the lantern stand-in, keeping FX points and spawn code. Branch ext/pip-companions-v2.
