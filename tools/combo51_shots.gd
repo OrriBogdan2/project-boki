@@ -4,11 +4,11 @@ extends "res://tools/breah_shots.gd"
 ## renderer: archer|mage|dolm (Lisette, Sparkle, Tarek) and juggernaut|dredge|ashwick (Kael, Grimble, Cinder).
 ## <dir>/captions.txt gets "file: caption" per file.
 ## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Sparkle, Tarek: the audit's strips) or Kael's
-## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS), or Cinder's
-## "item66" (LMB held through Flue Flight).
+## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS), Cinder's
+## "item66" (LMB held through Flue Flight), or "acc" (Kael's accuracy points as frame runs, acc_<name>_<n>).
 
 const LONG := 30                # m of flat ground the chain strips need, east of the spot
-const LONG_PARTS := ["chain"]   # parts shot on an expedition map instead of the Arena
+const LONG_PARTS := ["chain", "acc"]   # parts shot on an expedition map instead of the Arena
 
 var part := ""                 # --combo51-part=<name>: another set of strips for the hero (`_<hero>_<part>`)
 
@@ -414,6 +414,58 @@ func _haul_strip(name_of_run: String, look: Vector3) -> void:
 				"Kael Warchain, %s haul, %.2f s after the press" % [name_of_run, when - 0.8]])
 	await _go(1.65, haul, marks)
 	K.warchain.snap("")
+
+## Item 113: one frame run per point, for GIFs.
+func _juggernaut_acc() -> void:
+	var K: JuggernautKit = P.ak
+	var east := func(): _aim(P.pos + Vector3(8, 0, 0))
+	await _acc("hold", 7.0, 1.0, func(t: float):
+		P.inp["sec_hold"] = true
+		if _at(t, 0.1): K.press_rmb()
+		east.call())
+	P.inp["sec_hold"] = false
+	await _acc("wave", 7.0, 1.3, func(t: float):
+		P.inp["fire"] = t >= 0.1 and t < 1.0
+		east.call())
+	await _acc("slam_then_e", 7.0, 1.0, func(t: float):
+		if _at(t, 0.1):
+			_aim(P.pos + Vector3(0, 0, -6))
+			K.press_rmb()
+		if _at(t, 0.3):
+			_aim(T.pos)
+			K.use_e())
+	K.warchain.snap("")
+	await _acc("meteor", 3.0, 1.2, func(t: float):
+		if _at(t, 0.1): P.do_jump()
+		if _at(t, 0.45):
+			_aim(T.pos)
+			K.press_rmb())
+	await _acc("e_r_pull", 11.0, 1.9, func(t: float):
+		if _at(t, 0.1):
+			_aim(T.pos)
+			K.use_e()
+		if _at(t, 0.65): K.cast_ult()
+		if _at(t, 0.8): K.use_e())
+	K.warchain.snap("")
+	await _acc("dash", 4.0, 0.7, func(t: float):
+		if _at(t, 0.1): P.do_dash()
+		P.inp["move"] = Vector2(1, 0) if t > 0.05 and t < 0.5 else Vector2.ZERO
+		east.call())
+
+## A frame every 0.06 s of `secs`, the dummy `td` m east, under one still camera.
+func _acc(run_name: String, td: float, secs: float, each: Callable) -> void:
+	var K: JuggernautKit = P.ak
+	await _reset(td)
+	for s in ["e", "rmb", "x", "air"]:
+		K.cd[s] = 0.0
+	P.lvl = 6
+	P.slot_lv["ult"] = 1
+	cam_at = home + Vector3(td * 0.5, 0, 0)
+	var marks := []
+	for i in int(secs / 0.06):
+		marks.append([0.06 * i, "full", "acc_%s_%02d" % [run_name, i], "Kael 113 %s" % run_name])
+	await _go(secs, each, marks)
+	cam_at = Vector3.ZERO
 
 ## The audit (Nov 3): Skycall held and dragged, then released; the strike ring at its true radius.
 func _mage_audit() -> void:
