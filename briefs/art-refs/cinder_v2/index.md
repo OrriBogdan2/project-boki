@@ -50,3 +50,14 @@ The turnaround is now complete and matches the master sheet's outfit. The hair i
 Update (22:20): an edit pass replaced the duplicate side view with a top view (nozzle up), with the hose leaving the grip and ending in a brass connector. The pre-edit sheet is kept as `cinder_v2_weapon_sheet_alt.jpg`.
 
 Known limit: the hose routing on the two side views is still inconsistent: it loops into the barrel collar, and the right view shows two hose ends. Trust the top view and the assembly view: one braided hose runs from the base of the grip to the bottom of the tank.
+
+## Queued (owner, Nov 7, 01:16 ET)
+1. **Splash focus:** in "Last Dance" a viewer asked whether the main character is Cinder or the masked noble. Make it unmistakably her:
+   - Larger and lit.
+   - Facing the viewer.
+   - The noble darker, partly in shadow or turned away.
+2. **Rear coverage:** her back and seat are very open and read like a human butt. Options:
+   - Obsidian shard plates or a short scaled tail-skirt over the hips.
+   - Scaled lizard skin there instead of smooth skin.
+   - The tail base sweeping over it.
+   Apply to the master sheet, turnaround and any splash pose that shows it.
