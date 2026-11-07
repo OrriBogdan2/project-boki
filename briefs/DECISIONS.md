@@ -255,7 +255,14 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 ## 2026-11-07 (owner): FINAL roster names. Replaces every rename earlier tonight (Lumi, Nivi, Kibo, Ravyl, Snowglider, Magic Fox)
 - Display names only; ids, files and folders stay. Ryzz -> **Sparkle** the Storm Chaser; Ravyl -> **Lace** the Red Stitch; Kibo -> **Tenzo** the Stone Seer; Meeko's title -> **the Dawnfox**; Neve stays **the Snowglider** (owner 10:20 UTC: Snowglider, not Snowglide); Mossy's title -> **the Barnacle Knight**. Others unchanged (see the names line at the top).
 - Update every player-facing mention: hero select, kit and ability text, tooltips, barks, docs, wiki, website, Relic (Mask) offers and the post-tutorial pick. Full-name form stays "<Name> the <Title>".
-- Roster order (display names): Vex, Mossy, Sparkle, Kael, Lace, Neve, Grimble, Meeko, Cinder, Tenzo, Motley, Sable.
+- Roster order: superseded by "canonical Hunter order" below.
 
 ## 2026-11-07 (owner): every hero title carries "the"
 - Every hero has "the" before the title wherever it shows: the full name ("Vex the Hired Gun") AND a title shown on its own (class page, subtitle, hero select: "The Hired Gun" at the start of a line, "the Hired Gun" mid-sentence). Supersedes "a title shown on its own may drop the name/the". Data: store titles without "the" in content/archetypes/*.json (juggernaut "The Unbroken" -> "Unbroken") and add "the" in one display helper, so no "the The" doubles. No commas between name and title.
+
+## 2026-11-07 (owner): canonical Hunter order + Neve is "the Snowglider"
+- Neve's title is **the Snowglider**, never "the Snowglide" (display only). Supersedes every "Snowglide" above.
+- Canonical Hunter order, wherever the game lists all Hunters (hero select, Relics/collection screen, wiki, docs; projectboki.com already uses it). Supersedes every roster order above:
+  1 Vex the Hired Gun (gunslinger, free starter, met first), 2 Kael the Unbroken (juggernaut), 3 Cinder the Flame Queen (ashwick), 4 Meeko the Dawnfox (tender), 5 Tenzo the Stone Seer (dolm), 6 Lace the Red Stitch (archer), 7 Grimble the Scrap King (dredge), 8 Neve the Snowglider (rimewright), 9 Motley the Void Jester (ostra), 10 Mossy the Barnacle Knight (bulwark), 11 Sparkle the Storm Chaser (mage), 12 Sable the Silver Thief (thief).
+- Ids: gunslinger, juggernaut, ashwick, tender, dolm, archer, dredge, rimewright, ostra, bulwark, mage, thief (scripts/arch/arch.gd ORDER).
+- Post-tutorial pick offers Kael, Cinder, Meeko in that order (content/rules/class_unlock.json second_picks = juggernaut, ashwick, tender).
