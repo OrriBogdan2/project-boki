@@ -43,8 +43,8 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	for k in 30:
 		await tree.process_frame
 	var tall := _height(model)
-	cam.position = Vector3(0, tall * 0.55, tall * 2.6)
-	cam.look_at(Vector3(0, tall * 0.48, 0))
+	cam.position = Vector3(0, tall * 0.52, tall * 2.15)
+	cam.look_at(Vector3(0, tall * 0.5, 0))
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
