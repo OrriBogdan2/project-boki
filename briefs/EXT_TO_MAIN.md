@@ -2366,3 +2366,8 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 
 ## 2026-11-07 deep (job 20261107-143001-a2): CLAIM Sable v2 model rebuild
 - CLAIM: Sable v2 model rebuild (id thief, art/wardens/sable/ to the locked v2 design, briefs/art-refs/sable_v2/). Branch ext/sable-v2-model.
+
+## 2026-11-07 build (job 20261107-141502-a4): READY ext/camera-depth (round 2, replaces 2af88a105)
+- Adds to round 1: abyss clouds darkened x0.55 (cloud sea + layers, `abyss_dim`) and lower terraces up to 20% darker (terrain shader); both behind `depth_cues` (Settings > Accessibility). Gameplay/camera/aim untouched.
+- Before/after (same seed 77, same spots): briefs/camera_depth/{before,after}_{a_edge,b_step,c_low}.png, round-1 shots after1_*. Notes: briefs/CAMERA_DEPTH.md. Branch briefs: ext/agent-briefs.
+- Checks: health --strict OK; --depth-shots GPU job rc 0. Hitch/perf and full suite NOT run (usage). Not done: projectile shadows.
