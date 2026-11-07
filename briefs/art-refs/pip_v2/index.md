@@ -118,3 +118,6 @@ Known limits:
 `meeko_v2_splash.jpg`: a dark cave ringed by glowing eyes. Meeko, scared but brave, faces a wounded knight; the sun blazes and drives back the dark while the shy cloud rains glowing healing drops on him, with a rainbow between them. Nano Banana Pro, 16:9, 4K, a fresh generation.
 
 Known limits: her stance reads slightly more startled than brave; the knight's face is realistic next to her cartoon style.
+
+## Portrait candidate (Nov 7, 02:26 ET)
+`meeko_v2_portrait_candidate.jpg`: the double kiss (sun and cloud kiss both cheeks, she blushes with her eyes shut), a dusky sky with a rainbow. The pose and expression are right, but the render is posterised (colour banding in the sky and fur, a flat vector look), unlike the other portraits. Needs a cleaner re-run.
