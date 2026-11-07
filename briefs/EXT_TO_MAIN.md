@@ -2523,3 +2523,10 @@ Please look at:
 - Barrels still a touch pale right under the muzzle halo in closeup shots.
 
 READY ext/sable-v2-model 3e1816a6e
+
+## 2026-11-07 deep (job 20261107-173003-a4): READY ext/s7-mask-hob-83-89-fix 6b433e542 (supersedes f123d7cd6; fast-forward, on origin/main 7907d9afe)
+READY ext/s7-mask-hob-83-89-fix 6b433e542 (fixes shutdown crash in --portrait/--class-unlock/--hunter-unlock-check; --farm-tutorial, --mask-moment, --teammate-check green)
+- 87aadb855 teammate_check: "rival behind you before the chest" (red on main too): a map chest called in _fresh() left a 4.3 s quiet gap, the Boki knocked the rival inside 7 m on screen (no "behind" there) before it ended; the part now starts with the companion quiet (gap_t, cds, seen). "leads you to the outpost" flake: when the fight ends ~10 m from the outpost, goexit lasts ~1 s while the Boki flies home / falls / rides your shoulder; goexit and uplink both point at the outpost, so either counts.
+- 6b433e542 farm_tutorial_check: "dragging a river ... 12 gems" flaked (2/6 under load): row 36-41,27 is wild land on some Save.fresh() random seeds; the channel now goes on a row open this run, "beside it" is relative to it.
+- Checks (xvfb opengl3 + headless): portrait/class-unlock/hunter-unlock x3 each rc 0, 0 FAIL, no signal 11 (both modes); farm-tutorial 7/7 headless + 1 xvfb rc 0; mask-moment 3 headless + 1 xvfb rc 0; teammate full 3 headless + 1 xvfb rc 0, tutorial part 12/12 and priority part green; health --strict OK.
+- Open, not this branch: 1 of ~22 teammate tutorial runs stuck at the "dash" step for 600 s (driver), seen once, not traced.
