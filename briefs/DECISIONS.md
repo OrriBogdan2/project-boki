@@ -278,3 +278,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - Ours-only riders: keep NONE. Remove Neve's Chill 15% slow, Sable's empowered Shred, Meeko's carrier shield.
 - Defaults under PARITY FIRST (owner may override): cooldowns at source values (1.0x), Tenzo's allies can hop his rocks.
 - Lace: CUT Focus/Deadeye (owner, after explanation). Keep Hawk Sense.
+
+## 2026-11-07 evening (owner): Neve is **"Neve the Snowglide"** again (NOT "Snowglider")
+- Display text only. Supersedes every "Snowglider" above, including the canonical-order entry. hero_title_check must now retire "Snowglider" instead of "Snowglide". Website title too.
