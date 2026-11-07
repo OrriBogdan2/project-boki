@@ -24,7 +24,16 @@ SPECIES = "cindle"
 # id -> (shapes module, paint module, skeleton and clips module)
 SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prismander", "prismander", "prismander_anim"),
          "burrlet": ("mycroll", "mycroll", "mycroll_anim"),
-         "glintmole": ("glintmole", "glintmole", "glintmole_anim")}
+         "glintmole": ("glintmole", "glintmole", "glintmole_anim"),
+         "rimeshrew": ("rimeshrew", "rimeshrew", "rimeshrew_anim"),
+         "zephyrak": ("zephyrak", "zephyrak", "zephyrak_anim"),
+         "pebbit": ("gravadillo", "gravadillo", "gravadillo_anim"),
+         "cairnback": ("cairnback", "cairnback", "cairnback_anim"),
+         "wisplet": ("lunowl", "lunowl", "lunowl_anim"),
+         "gloamshell": ("gloamshell", "gloamshell", "gloamshell_anim"),
+         "selenfin": ("selenfin", "selenfin", "selenfin_anim"),
+         "zapple": ("echolop", "echolop", "echolop_anim"),
+         "hivara": ("hivara", "hivara", "hivara_anim")}
 creature = paint = anim = None
 ATLAS_PX = 2048
 GROWN_K = 0.22         # most Boki show one or two grown parts; all of them hide in every tri count
@@ -94,7 +103,7 @@ def mesh_pieces():
     for name, (shape, h, tris) in creature.prop_parts().items():
         v, q = boki_sdf.mesh_shape(shape, h)
         v, t = decimated(v, q, tris)
-        out.append(Piece(name, shape, v, t, 0, prop=True))
+        out.append(Piece(name, shape, v, t, 1 if name in creature.GLOW_PIECES else 0, prop=True))
     for pid, (_, _, look, tris, prims) in creature.grown_parts().items():
         shape = boki_sdf.Shape(prims)
         v, q = boki_sdf.mesh_shape(shape, 0.003)

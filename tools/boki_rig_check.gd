@@ -5,7 +5,9 @@ extends RefCounted
 ## Prints PASS/FAIL lines.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
-const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole"]
+const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
+	"zephyrak", "pebbit", "cairnback", "wisplet", "gloamshell",
+	"selenfin", "zapple", "hivara"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend"]
@@ -22,7 +24,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
-	ok(not BokiRig.has("pebbit"), "a species without one keeps its KinModels body")
+	ok(not BokiRig.has("no_model"), "an id without one keeps its KinModels body")
 	for id in SPECIES_LIST:
 		kin_id = id
 		await _species(main)

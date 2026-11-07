@@ -5,7 +5,7 @@ import mathutils
 import numpy as np
 
 KEEP_INFLUENCES = 4
-HARD_PIECES = ("tail", "collar", "sting", "tail_fin", "gills", "shards")
+HARD_PIECES = ("tail", "collar", "sting", "tail_fin", "gills", "shards", "runes")
 CLIP_SCALE = 0.95    # clip offsets are in the build's metres
 # where an unused prop sits (from its rest place), collapsed inside the body so its ink shell never shows
 HIDE_AT = {}
