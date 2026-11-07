@@ -33,7 +33,7 @@ HEM_TOP = 0.56                       # z: the cards start tucked up inside the s
 HEM_N = 46                           # hanging strips round the skirt
 SLIT = 0.36                          # rad either side of the front: the slit, no fringe
 SKIRT_Z = (HEM_TOP - 0.04, BELT_Z - 0.06)    # z: the scan's skirt, between its hem and the belt
-PORCELAIN = "#e3dae3"                # the sheet's lilac porcelain skin
+PORCELAIN = "#dbd0dc"                # the sheet's lilac porcelain skin
 SKIRT_LO, SKIRT_HI, SKIRT_RED = "#21111c", "#5c3352", "#6e1733"    # the skirt: plum folds dark to light, its red hem fade
 rig = json.load(open(RIG))
 bpy.ops.wm.open_mainfile(filepath=SRC)
@@ -172,6 +172,7 @@ slot[(sat < 0.22) & (mx > 0.3) & (mx <= 0.42)] = "metal"
 slot[(mx > 0.45) & (sat < 0.5) & np.array([str(b).startswith(("thigh", "shin")) for b in dom])] = "skin"
 slot[dark & (legs | (fc[:, 2] < 0.98))] = "leather"              # the boots, the skirt and the belt: one plum look
 slot[dark & on_head] = "hair"
+slot[(slot == "cloth") & np.array([str(b).startswith(("thigh", "shin")) for b in dom])] = "skin"    # the legs at the slit: no corset there
 for i, p in enumerate(me.polygons):
     p.material_index = MATS.index(fsrc[i]) if i >= N_LOW else MATS.index(slot[i] + "-hem")
 print("slots", {s: int((slot[:N_LOW] == s).sum()) for s in SLOTS})
@@ -251,8 +252,8 @@ def repaint(col):
     sk = np.abs(part - 1.0) < 0.1
     base = blur_in(lum, sk, 12)
     ref = float(np.median(lum[sk]))
-    shade = np.clip(base / ref, 0.8, 1.05) * 0.88 + np.clip(lum / ref, 0.6, 1.2) * 0.12
-    red = smooth(0.6, 0.8, sat) * (col[..., 0] > col[..., 1] + 0.2)
+    shade = np.clip(base / ref, 0.74, 1.05) * 0.88 + np.clip(lum / ref, 0.6, 1.2) * 0.12
+    red = smooth(0.6, 0.8, sat) * (col[..., 0] > col[..., 1] + 0.2) * (lum < 0.4)    # dark crimson only, not the scan's pink
     crack = smooth(0.05, 0.14, base - lum)
     warm = smooth(0.04, 0.1, col[..., 1] - col[..., 2]) * smooth(0.1, 0.2, sat)
     keep = np.clip(np.maximum(np.maximum(red, crack), warm), 0, 1)[..., None]
