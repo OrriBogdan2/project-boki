@@ -100,3 +100,9 @@ The red-flame aura was rejected as too much. The owner wanted a subtle force-fie
 4. Local colour match outside Kael to step 2 (removes the slight pink cast).
 
 `kael_v2_splash_final.jpg` is v4. The red-aura version is superseded.
+
+## Splash: FINAL v5 "Lunge" (owner, Nov 7, 03:48 ET)
+The arena splash was replaced because it was passive and lower quality than the roster. These are fresh generations from the turnaround in four directions (A Unbroken, B Warchain, C Lunge, D Last One Standing), then a scarf edit (the prompts had wrongly asked for a long streaming scarf; the canon is the short wrapped collar over his mouth).
+- `kael_v2_splash_final.jpg` = **C, Lunge**: charging at the viewer through a storm, the white-hot sword dragging fire, soldiers fleeing.
+- `kael_v2_splash_alt_warchain.jpg` = **B, Warchain**: the cursed chain hooks a knight mid-air (alternate; good for the ability page or a loading screen).
+- The old arena splash is now `explorations/kael_v2_splash_arena_old.jpg`.
