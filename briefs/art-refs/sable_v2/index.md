@@ -34,7 +34,7 @@ Canon:
 - A long dark coat with violet trim and buckled sleeves, open in a deep plunge with nothing underneath.
 - A stolen violet gem on a silver chain from the collar, resting at her sternum; three chains across her midriff link the coat edges.
 - Moth-wing coat tails with eye spots.
-- A belt with keys and two silver bell bolas; fitted trousers; tall buckled boots.
+- A belt with keys (one tiny bell on the ring); a sheath on each hip with throwing knives, their blades curved like a moth's wing with a violet sheen (the knife she throws and blinks to); fitted trousers; tall buckled boots.
 - Twin enchanted flintlocks with violet runes.
 - Owner wants the front showy; the X-harness was dropped because it repeats Kael's.
 
@@ -42,3 +42,5 @@ Notes for 3D:
 - Fix the coat's front edges to the body (or constrain the cloth) so the plunge holds during runs, dashes and shooting.
 - **One braid.** The two small views wrongly show a braid on each side; follow the large figure.
 - The pistols are still slim; a weapon sheet will define them.
+
+Update (23:32 ET): the owner rejected the bell bolas ("looks like bells, not a weapon"). The final is an edit on the keys version (step 7) adding throwing knives, then a local colour fix. The model put a sheath on each hip rather than one on the right thigh; accepted. For 3D, sheathe the blades (the sheet shows them poking out below the sheaths). The Bola ability can be VFX-only when thrown.
