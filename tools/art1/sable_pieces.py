@@ -202,7 +202,7 @@ def antenna(s):
     t_ = norm(np.gradient(path, axis=0))
     side_v = norm(np.cross(t_, np.array([0, 1.0, 0])))                # across the plume, in her front plane
     side_v = side_v * np.sign(side_v[n // 2, 0] * s)                   # +side_v points out, away from her midline
-    side_v = norm(side_v + np.array([0, -0.4, 0]))                     # tilted back a little, so the plume also reads from the side
+    # (the plumes stay square to her front: tipped back about their stems they faced apart, and the one turned from the sun went black)
     nrm = norm(np.cross(side_v, t_))
     half = 0.036 * smooth(0.1, 0.55, u) * smooth(1.0, 0.7, u) + 0.0025      # the fuzz either side of the stem
     barb = np.array([1.0 if i % 2 == 0 else 0.82 for i in range(n)])     # the feather's notched edge
