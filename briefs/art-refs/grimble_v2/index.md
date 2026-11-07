@@ -31,3 +31,6 @@ Base: the original `briefs/art-refs/grimble_turnaround.png`. The old "Dredge" sh
 - `grimble_v2_master_sheet.jpg`: front, side and back, 3 heads, bone-hook detail. Note: two heads show a small nose bridge; the turnaround is canonical (no nose).
 - Alternates: `explorations/wide_portrait_banner.jpg` (16:9 portrait from the splash prompt; the model did not stage an action scene), `explorations/master_sheet_alt.jpg`.
 - Rejected: two runs where the nose came back.
+
+## Three-lens goggles restored (Nov 6, 20:03 ET)
+`grimble_v2_turnaround.jpg` and `grimble_v2_portrait.jpg` now have the original brass three-lens loupe (a big green lens over the eye, two small lenses fanning up towards the temple, gold chain). The single-monocle versions are in explorations/.
