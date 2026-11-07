@@ -104,6 +104,10 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - Arena mode: 4v4 rounds like the source's, each round a little different.
 - **Name (owner, Nov 5):** the current practice space players reach as "Arena" (Training Room + duel ring, `--arena`) is called the **Training Grounds** in all player text (owner, Nov 7; was "Training Area"). "Arena" is kept for the future 4v4 mode above. Internal ids (`arena`, `--arena-check`) can stay.
 
+## Lore factions (owner, Nov 7)
+- Five factions, for lore, voice lines, banter, key art and marketing only; squads stay free-pick. The Street Crew (Vex, Sparkle, Tenzo), the Tyrant's Former Court (Kael, Cinder, Lace), the Protectors (Mossy, Neve, Meeko), the Thieves (Sable, Grimble), the Solo Demon (Motley). Full text, hooks, stories and relics: LORE_MASKS.md (wins over older lore).
+- Relics changing (proposed, owner OK pending): Cinder a cracked obsidian shard crown, Meeko the shelter's hearthstone, Grimble his brass monocle.
+
 ## Agents and art
 - Agent models: the owner says the new model costs only about 15% of the usage, so **push most work onto the new low-usage model**. Use Opus only where the owner or DECISIONS asks for it (feel-critical parity, e.g. Kael item 22). Sonnet for small, clear fixes.
 - Art pass scope (owner, Nov 3): the Boki art pass also brings the **custom character creator** (you on the farm: face, body, hair, outfits, to the new STYLE.md quality) and the **cutscenes** (prologue and story moments, incl. the put-on-a-Mask moment) up to the same standard. Plan them together so everything matches.

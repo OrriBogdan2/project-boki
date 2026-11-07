@@ -1,10 +1,10 @@
-# Masks and relics: canonical lore (owner-approved 2026-11-04; orchestrator write-up)
-This file wins over older relic names (the concept-pass list: Drowned Bell, Last Pin, Champion's Torc, Ember Phial, Hollow Bell, Split Geode, Moonsilver Key, Stormglass, Paid-Up Tags, Leaking Heart, Hearth Acorn, Rink Blade) and over hero lore written before the Nov 4 redesigns. ext syncs the Lore Bible artifact and docs/art/gen/stories/*.md to it.
+# Masks and relics: canonical lore (owner-approved 2026-11-04; factions and current designs, owner Nov 7)
+This file wins over older relic names (the concept-pass list: Drowned Bell, Last Pin, Champion's Torc, Ember Phial, Hollow Bell, Split Geode, Moonsilver Key, Stormglass, Paid-Up Tags, Leaking Heart, Hearth Acorn, Rink Blade) and over hero lore written before the Nov 4 redesigns. Nov 7: also wins over the retired relics (Cinder's goggles, Pip's hearth lantern, Dredge's porthole eye) and the old names (Hem, Breaker, Ryzz, Pip, Claire, Tarek, Ostra, Dredge). ext syncs the Lore Bible artifact and docs/art/gen/stories/*.md to it.
 
 ## The premise (owner's words, Nov 4; this is the voice for all lore text)
 > The Wyrm came, and stole our essence. In time, humans, beasts and skyfolk alike were born without faces. We became a new race: **the Empty**.
 > Our only salvation became the cursed fossils we once tried to destroy: **Masks**, each carrying the soul of a fallen Hunter of old.
-- Masks are old, cursed relics dug from the ruins. People feared them and tried to destroy them; now they're the only way to have a self again. (Where they came from: the Hunters who fought the Wyrm were sealed into their relics when they fell. Hem stitched many of them for the Tyrant.)
+- Masks are old, cursed relics dug from the ruins. People feared them and tried to destroy them; now they're the only way to have a self again. (Where they came from: the Hunters who fought the Wyrm were sealed into their relics when they fell. Lace stitched many of them for the Tyrant.)
 - Not every Mask has a face: a relic can be a compass, a jar, a pair of skates. Wearing it gives you that Hunter's face, form and memories.
 
 ## How Masks work
@@ -15,37 +15,67 @@ This file wins over older relic names (the concept-pass list: Drowned Bell, Last
 - The put-on beat: you touch the relic, a ghostly porcelain face flickers over yours, then the Hunter's form settles in. This works even when the relic is a compass.
 - The relic is always visible on the hero as their signature prop.
 - The more you wear a Mask, the more its Hunter seeps into you, even at home (the "masks take hold" idea, kept mask features).
-- **Getting Masks:** you unlock a Mask through challenges or rewards first, then buy it. Vex is free at the first portal, and after the tutorial the second Mask is a pick of one of Kael, Pip or Cinder (Hem is an early challenge unlock). The shop and economy pass set the prices.
+- **Getting Masks:** you unlock a Mask through challenges or rewards first, then buy it. Vex is free at the first portal, and after the tutorial the second Mask is a pick of Kael, Cinder or Meeko, in that order (Lace is an early challenge unlock). The shop and economy pass set the prices.
 
-## The twelve relics
-| Hunter (id) | Relic (the Mask) | Why it holds their self |
-|---|---|---|
-| Vex (gunslinger) | her brass cyber-eye | it saw every job she ever took |
-| Kael (juggernaut; was Zedran) | the broken champion's collar (the demon blade is bound to it) | the shackle he tore out of the arena wall |
-| Hem (archer) | the stitched porcelain mask | literal: she sewed it from the masks she once made |
-| Breaker (bulwark) | the ship's compass | it led his refugees home across the ice |
-| Ryzz (mage) | the first copper lightning rod she ever climbed | where the Wyrm's storm struck her |
-| Cinder (ashwick) | her cracked goggles | the last thing she saw before she drank the Blight |
-| Dredge (dredge) | the cracked porthole eye | the window his haunting looks through |
-| Pip (tender) | the hearth lantern | the shelter's fire lives in it |
-| Claire (rimewright) | her ice skates | the night she skated the festival to safety |
-| Tarek (dolm) | one of his seeing-stones | how he sees the world |
-| Ostra (ostra) | the grinning jester mask | literal: the Tyrant sealed him in it |
-| Sable (thief) | the silver domino mask | literal: the thief's disguise from the night she reached the Wyrmheart |
+## Factions (owner, Nov 7)
+They come from the premise's own line, "one wish to remake the world, or rule it." Every Hunter hunts the Wyrmheart, but they group by who they trust and why. **Factions are for lore, voice lines, banter, key art and marketing only. Squads in game stay free-pick.** Use them in all lore, story and marketing text.
 
-## Hunter stories (current designs)
-- **Vex, Hired Gun:** a foundry kid who swept brass casings off the Tyrant's war-foundry floors. A siege engine took her arm in the Sundering; she bolted its rotary cannon to her own shoulder. She's now the Skylands' most famous gun-for-hire, keeps every bounty she cashed, and adds a tally mark for each one.
-- **Kael, the Unbroken (was Zedran; his glow is white-hot, not orange):** the Tyrant's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain is his weapon. The Blight burned the magma cracks into his sword arm. A demon lives in his blade and in his mind, and it must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off.
-- **Hem, Dark Archer (was Pin):** the Tyrant's royal mask-stitcher, who sewed the Hunters' selves into their Masks. She deserted and now hunts the Tyrant's loyalists, leaving a red-threaded needle at every kill. Her own shadow came loose when she stitched her first Mask; it's only a wrong-looking shadow, not a pet.
-- **Breaker, Frozen Bulwark (was Bjorn):** a ferryman who carried refugees across the ice the night of the Sundering and went down with his ship so they could reach shore. The frozen sea remade him into a sea-ogre. He doesn't remember his old name, only the children's faces. The teddy bear belonged to the last child he saved.
-- **Ryzz, Storm Chaser (was Vireo):** a street kid struck by the Wyrm's storm in the market square. The bolt took her right eye (a lightning scar) and left the storm inside her. Her lightning burns hot pink. She chases storms, climbs to the highest spires, and throws lightning straight from her hands; she swears she'll give the Wyrm's bolt back to it someday.
-- **Cinder, Mad Pyromancer (was Linwick):** the Tyrant's court alchemist, ordered to distil the Wyrm's blood into fire. She drank a vial instead; it made her fireproof and a little mad. She brews "bottled Blight" with doodled-skull labels.
-- **Dredge, Broken Abomination:** a broken diving machine haunted by whatever drowned inside it; it hooks the living down to where it was lost.
-- **Pip, Little Lantern (was Moosh Moosh / Burple):** a fox-kit who tended the hearth of a Boki shelter. The hearth's fire lives in her lantern now, and she heals with it.
-- **Claire, Frost Siren (was Tamsin):** the star show-skater of the winter canal festival. The night the ice broke she skated the crowd to safety, and the frost took her: a frost demoness with a sweet face and a demonic body.
-- **Tarek, Rock Elementalist (was Breah):** a blind cliff-runner who sees through stone; his three floating seeing-stones are his eyes.
-- **Ostra, Void Jester:** the Tyrant's court jester. He laughed the night the Hunters were sealed, so the Tyrant sealed him in his own jester mask. The man behind it fell into the Void; he steals his victims' laughter, and his bells ring only when he swaps.
-- **Sable, Silver Thief (was Dancer):** the thief who reached the Wyrmheart in the hoard. It woke the Wyrm and set off the Sundering.
+| Faction | Hunters | What binds them | What they'd wish for |
+|---|---|---|---|
+| **The Street Crew** | Vex, Sparkle, Tenzo | The young, scrappy ones who grew up with nothing in the ruins after the Sundering and look out for each other. Vex is the starter Mask, so this is the first crew players meet. | A world where nobody has to scrape by |
+| **The Tyrant's Former Court** | Kael, Cinder, Lace | The Tyrant's arena champion, his court alchemist and his mask-stitcher. They knew him best and know what he really is, which makes them the most dangerous crew. They don't trust each other. | Each wants something different: Kael freedom from the demon, Cinder the throne, Lace the last loyalist dead |
+| **The Protectors** | Mossy, Neve, Meeko | The ones who saved people the night everything broke. | To heal the world |
+| **The Thieves** (a duo) | Sable, Grimble | In it for the treasure. | The hoard, all of it |
+| **The Solo Demon** | Motley | He belongs to no one and plays every side against the others. | Nobody knows; the joke, probably |
+
+**Banter and event hooks:**
+- Kael vs Cinder: the Blight she distilled burned the cracks into his arm.
+- Lace vs anyone who served the Tyrant.
+- Everyone vs Sable: she started the Sundering.
+- Vex vs whoever didn't pay her.
+- Inside the Street Crew: Vex's loyalty is technically for sale, but she sticks with them. Tenzo is the calm one.
+- Grimble and Sable: she opened the door, and he carries the loot out. Each thinks the other works for them.
+
+## The twelve relics (Nov 7 review)
+Three relics change because their objects left the designs: **Cinder, Meeko and Grimble**. The new ones are proposals until the owner OKs them. The rest still fit the current designs and stay. The relic is always visible on the hero.
+
+| Hunter (id) | Relic (the Mask) | Why it holds their self | Status |
+|---|---|---|---|
+| Vex (gunslinger) | her brass cyber-eye | it saw every job she ever took | keep |
+| Kael (juggernaut) | the broken champion's collar (the demon blade is bound to it) | the shackle he tore out of the arena wall | keep |
+| Cinder (ashwick) | **a cracked obsidian shard crown** | she shaped it in her own fire from the glass of the Tyrant's throne room the night she drank the Wyrm's blood: her first claim to the throne | NEW, proposed (replaces the goggles) |
+| Meeko (tender) | **the shelter's hearthstone**, a small warm stone on a cord | the shelter's fire lives in it. The tiny sun is that fire, grown a face; the shy raincloud is the storm that tried to put it out and stayed | NEW, proposed (replaces the lantern) |
+| Tenzo (dolm) | one of his three seeing-stones | how he sees the world | keep |
+| Lace (archer) | the stitched porcelain mask | literal: she sewed it from the masks she once made | keep (alt: the red-threaded needle) |
+| Grimble (dredge) | **his brass monocle** | he has priced every treasure in the hoard through it; it's the one thing he would never sell | NEW, proposed (replaces the porthole eye) |
+| Neve (rimewright) | her ice skates | the night she skated the festival to safety | keep |
+| Sparkle (mage) | the first copper lightning rod she ever climbed | where the Wyrm's storm struck her | keep |
+| Mossy (bulwark) | the ship's compass, now set in his chest | it led his refugees home across the ice | keep |
+| Sable (thief) | the silver domino mask | literal: the thief's disguise from the night she reached the Wyrmheart | keep |
+| Motley (ostra) | the grinning jester mask | literal: the Tyrant sealed him in it | keep |
+
+## Hunter stories (current designs, Nov 7; canonical order)
+**The Street Crew**
+- **Vex, the Hired Gun:** a foundry kid who swept brass casings off the Tyrant's war-foundry floors. A siege engine took her arm in the Sundering, and the gatling she bolted to her shoulder is her right arm now. She's the Skylands' most famous gun-for-hire and keeps a tally mark for every bounty she cashed. Her loyalty is technically for sale, but she sticks with the crew. Starter Mask: the first Hunter players meet.
+- **Sparkle, the Storm Chaser (was Ryzz):** a street kid struck by the Wyrm's storm in the market square. The bolt took her right eye (a lightning scar) and left the storm inside her. Her lightning burns hot pink. She climbs the highest spires to chase storms, throws lightning straight from her hands, and swears she'll give the Wyrm's bolt back to it someday.
+- **Tenzo, the Stone Seer (was Tarek):** a young cliff-runner, blind since birth, who ran messages along the cliff paths by the feel of the rock. When the Sundering cracked the cliffs, the stone started answering him: three seeing-stones float around him and are his eyes. He isn't fully grown yet. He's the youngest of the crew and the calm one, who hears trouble through the ground before Vex sees it.
+
+**The Tyrant's Former Court**
+- **Kael, the Unbroken:** the Tyrant's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain became his weapon. The Blight burned white-hot cracks into his sword arm (the Blight Cinder distilled, so he doesn't fully trust her). A demon lives in his blade and in his mind, and it must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off.
+- **Cinder, the Flame Queen:** the Tyrant's court alchemist, ordered to distil the Wyrm's blood into fire. She drank it instead. Now fire answers her bare hands, and she no longer needs a tank, a flame-gun or goggles. She served the throne for years, and she wants it for herself. She is not mad, just certain.
+- **Lace, the Red Stitch (was Hem):** the Tyrant's royal mask-stitcher, who sewed the Hunters' selves into their Masks. She deserted and now hunts the Tyrant's loyalists, leaving a red-threaded needle at every kill. Her own shadow came loose when she stitched her first Mask; it's only a wrong-looking shadow, not a pet.
+
+**The Protectors**
+- **Mossy, the Barnacle Knight (was Breaker):** a ferryman who carried refugees across the ice the night of the Sundering and sank his own ship so they could reach shore. The sea remade him: his hull became his armour, his brass diving helmet never comes off, and the ship's compass is set in his chest, with the sea's cyan light glowing between the hull planks. He doesn't remember his old name, only the children's faces. The teddy bear belonged to the last child he saved.
+- **Neve, the Snowglide (was Claire):** the star show-skater of the winter canal festival. The night the ice broke she skated the festival crowd to safety, and the frost took her. She glides on the skates that saved them and fights with a candy-cane spear from the festival.
+- **Meeko, the Dawnfox (was Pip):** a fox-kit who kept the hearth of a Boki shelter alive through the night everything broke. The fire lives in her hearthstone now, and it grew into a tiny sun that follows her; a shy raincloud, the storm that tried to drown the hearth, came along too. She heals through the two of them.
+
+**The Thieves**
+- **Sable, the Silver Thief:** the thief who reached the Wyrmheart in the hoard. Touching it woke the Wyrm and set off the Sundering. Everyone has a reason to hate her, and she knows it. She's still after the treasure.
+- **Grimble, the Scrap King (was Dredge):** a scavenger who crawled into the Wyrm's hoard after it woke and never came out poor again. The Blight sludge seeping through the hoard mutated his right arm into a bruised-purple bone hook and spread purple veins up his chest. One eye is stitched shut; the other squints through a brass monocle at whatever he's pricing. His teeth are scrap metal, with one gold tooth. He carries his hoard on his back (chests, coins, bells, lanterns) and calls himself king of whatever's left.
+
+**The Solo Demon**
+- **Motley, the Void Jester (was Ostra):** the Tyrant's court jester. He laughed the night the Hunters were sealed, so the Tyrant sealed him in his own jester mask. The man behind it fell into the Void and came back as a jack-in-the-box: a jester on a brass spring, rising from a hovering card box. He steals his victims' laughter, his bells ring only when he swaps, and he belongs to no one.
 
 ## Terms (owner, Nov 4; replaces the earlier list)
 - **The Empty:** the people the Wyrm emptied, and you at home without a Mask (this replaces "the Unmasked" in player text; the code may keep `unmasked` ids).
