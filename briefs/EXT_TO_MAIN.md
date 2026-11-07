@@ -2322,3 +2322,10 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 
 ## 2026-11-07 deep (job 20261107-130004-a4): CLAIM Claire v2 model rebuild
 - CLAIM: Claire v2 model rebuild (art/wardens/claire/ to the locked v2 design, briefs/art-refs/claire_v2/). Branch ext/claire-v2-model.
+
+## 2026-11-07 deep (job 20261107-121501-a4): READY ext/grimble-hook-arm-v2 (315cdf2af), Grimble's stretching hook arm on the v2 model (replaces ext/grimble-hook-arm)
+- ext/grimble-hook-arm (build job 20261107-043002-a4) rebased onto ext/grimble-v2-model (54df2f18a); merge v2 first, or this branch alone (it contains v2). Old branch left as is (force-push not allowed): skip it.
+- v2's arm IS the hook, so the model's hook and the kit's hook at the arm's end showed twice. hide_while_chain/CHAIN_OUT are back for bone `hook` only: the model's hook shrinks into his wrist while the arm is out, the arm grows from the wrist (bone pose, not the lagging attachment), the snap-back lands on v2's anchor_hook_tip where his hook reappears. Alternative: keep his hook and draw none at the arm's end.
+- Gameplay untouched (range, timing, hitbox, pull). hero-vfx-reel gets --reel-frames (the GPU worker returns no movie).
+- Checks: --dredge-combo-check 93/0, --hero-vfx-check OK, --clip-live-grimble 0 fails (new: the arm's root on the wrist, 0.00 m), health.py --strict OK.
+- GPU clips (pc-MRROBOTO, match camera, jobs 20261107-125639-01088 before / -24371 after): briefs/shots/grimble_hook/hook_before.mp4, hook_after.mp4, hook_before_after.mp4 (stacked), before_sheet.png / after_sheet.png. These replace the CPU renders.
