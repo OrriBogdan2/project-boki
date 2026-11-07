@@ -162,7 +162,9 @@ func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:
 			continue
 		var vol := float(s.get("db", 0.0)) + (0.0 if h.is_local() else float(s.get("other", -4.0)))
 		var pitch := float(s.get("pitch", 1.0)) + float(s.get("pitch_k", 0.0)) * k + float(o.get("pitch", 0.0))
-		var pos: Variant = h.pos if String(s.get("at", "here")) == "h" else at
+		var pos: Variant = h.pos if s.get("at") == "h" else at
+		if s.get("at") == "all":
+			pos = null          # heard anywhere on the map
 		var delay := float(s.get("delay", 0.0))
 		if delay > 0.0:
 			m.later(delay, Sfx.play.bind(String(s["n"]), pos, vol, float(s.get("var", 0.05)), pitch))
