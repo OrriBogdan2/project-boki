@@ -16,5 +16,5 @@ Rows are in the canonical Hunter order (owner Nov 7): use it wherever the game l
 | 8 | rimewright | **Neve**, the Snowglider | Claire / Nivi |
 | 9 | mage | **Sparkle**, the Storm Chaser | Ryzz (too close to the slang "rizz" and to LoL's Ryze) |
 | 10 | bulwark | Mossy, **the Barnacle Knight** | Mossy the Sunken Bulwark |
-| 11 | ostra | Motley, the Void Jester | (unchanged) |
-| 12 | thief | Sable, the Silver Thief | (unchanged; retitle offered) |
+| 11 | thief | Sable, the Silver Thief | (unchanged; retitle offered) |
+| 12 | ostra | Motley, the Void Jester | (unchanged) |
