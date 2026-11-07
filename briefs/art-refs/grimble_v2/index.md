@@ -44,3 +44,4 @@ Base: the original `briefs/art-refs/grimble_turnaround.png`. The old "Dredge" sh
 - Three-lens loupe: the big green lens over one eye; two small lenses on a brass bracket running up the forehead; gold chain on the outer side. The other eye is always visible, a smug squint.
 - Teeth: silver scrap metal with one gold tooth and a gap; purple gums.
 - Right arm: purple mutated bone hook (the hook IS the arm; no chain). Corruption veins and bone spurs spread over the right shoulder and back.
+- `grimble_v2_splash.jpg` ("Reeling In", 16:9, 4K): bone hook snagging a knight in a dark hoard cave; three-lens loupe, no nose, metal teeth. Weaknesses: fairly side-on staging, and he looks towards the camera rather than at the knight.
