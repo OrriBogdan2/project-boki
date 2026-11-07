@@ -34,7 +34,8 @@ Alternates: `cinder_v2_bigprops_alt.jpg` (large bubbling tank), `cinder_v2_face_
 
 Chain (Nano Banana Pro, 16:9, 4K, no seed exposed):
 1. A fresh generation with the outfit described as full obsidian plate armour, which passed the filter. Refs: the front/back views cropped from the master sheet, plus the face crop.
-2. Edit 1, torso: the corset, belt and skirt became the shard top and hip piece, with the midriff bare.
-3. Edit 2, limbs: the boots became cracked obsidian shards.
+2. Edit 1, torso: the corset, belt and skirt became the shard top and hip piece, with the midriff bare. The boots also became cracked obsidian shards in the same pass.
+
+Edit 2 (gauntlets and boots) failed.
 
 Known limit: the gauntlets are still clean plated bracers, not the shard forearms from the master sheet. Use the master sheet for those.
