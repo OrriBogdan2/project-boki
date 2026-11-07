@@ -2584,3 +2584,5 @@ READY ext/gameplay-media e6881d69f (gameplay media capture tool + encode script;
 
 ## 2026-11-07 build (job 20261107-233002-a2): CLAIM Training Grounds
 - CLAIM: grow the --arena Training Area into the Training Grounds (DECISIONS "Modes and queues"): a much bigger open expanse (3x+) joined to sky islands by jump pads/glides, every Hunter/Boki/item/ability and bot spawning reachable, practice stations and duel ring kept. Branch ext/training-grounds.
+
+- READY ext/hero-heights 4538174a8: Hunter heights from the owner's final chart (Neve 1.56, Sparkle 1.62, Vex 1.66, Kael 2.05 ...). Coordinator post; was missing from mc runs.
