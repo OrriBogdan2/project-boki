@@ -54,3 +54,8 @@ Ravel is respelled **Ravyl** ("Ravyl the Red Stitch"), so players pronounce it a
 
 ## Queued (owner, Nov 7, 01:43 ET): splash
 Make Ravyl's splash (`ravel_v2_splash.jpg`, "Conductor") slightly more porcelain-looking: smoother, paler, doll-like skin with a soft sheen, in line with her ghostly-white look. Try a light local skin pass first (desaturate and lift her skin, add a subtle glaze highlight); use a single edit only if that isn't enough.
+
+## Splash: FINAL "Spotlight" (owner, Nov 7, 03:22 ET)
+`ravel_v2_splash.jpg`: porcelain-skinned Ravyl at full draw, a giant needle nocked and aimed at the viewer, in a moonlight spotlight on the stage. Knights pinned with needles hang on red threads tied to her bow; the theatre is in shadow. The old "Conductor" splash is now `explorations/ravel_v2_splash_conductor_old.jpg`.
+
+Chain: the porcelain edit, then the owner's run (scar kept), then the needles in the knights, then four pose variations (full draw picked), then the spotlight edit. A final polish edit (glowing threads, crisper detail) changed nothing measurable, so the spotlight version is final (`explorations/ravyl_fulldraw_polish.jpg`).
