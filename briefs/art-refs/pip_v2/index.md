@@ -55,3 +55,11 @@ New lore (owner direction: she is a Boki that became sentient through her lanter
 
 ## Chroma sources (Nov 7, 01:04 ET)
 The full original sheets are kept in `chromas_source/` (q95). Every chroma needs an **AI isolation edit** before use, because plain crops catch the neighbouring figures. See `chromas_source/README.md` for the sheet map and the prompt template. `lumi_v2_main_design.jpg` is now the AI-isolated Cotton Candy (01:09 ET). The capelet trim came out plain white (the rainbow heart clasp is kept).
+
+## Holding nothing (owner's girlfriend's feedback, Nov 7, 01:23 ET)
+The owner's girlfriend doesn't like Lumi holding anything. The star becomes a floating companion.
+- `explorations/lumi_holder_*.jpg`: the holder options, now dropped.
+- `explorations/lumi_freehands_1.jpg`: the free-hands sheet.
+  - Picked: **pose 1**: the star floats above her shoulder with a stardust trail; her paws are held together nervously.
+  - This run is plain pink with a pink capelet, not Cotton Candy; restore the colours once the star is chosen.
+- Next: star-style variations in the same pose (plush, crystal, nebula, four-point twinkle).
