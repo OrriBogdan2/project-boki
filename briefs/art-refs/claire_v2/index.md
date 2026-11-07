@@ -72,3 +72,6 @@ Replaces "Nivi". Neve is Italian for "snow". Display name only; ids and files st
 - A silhouette for scale.
 
 Refs: a crop of the spear from the turnaround and a crop of the skates from the main design. Alt (twisted shaft, smaller cuffs): explorations.
+
+## Master sheet (owner, Nov 7, 15:53 ET)
+`nivi_v2_master_sheet.jpg` (16:9) is the standard sheet: a gliding hero pose with the spear and frost scarf, small front and back views, three heads (wink with tongue out, laugh, flustered) and a close-up of the braid tip with its snowflake clasp. It supersedes the older claire master sheet, now in explorations. Alt 3:4 version: explorations. Nano Banana Pro, new generation, 4K. Refs: the main design and the portrait.

@@ -155,3 +155,6 @@ The earlier cave splash looked too cartoony next to the roster. These are fresh 
 - Eight expression faces: sun happy, laughing, grumpy, sleeping; cloud shy, happy, sleeping, crying.
 
 Nano Banana Pro, new generation, 16:9, 4K. Refs: the sun and cloud cropped from the turnaround, and `meeko_v2_companion_moments.jpg`. Known nit: the sun side view shows a little of the face at both edges; trust the front view for the face.
+
+## Master sheet (owner, Nov 7, 15:53 ET)
+`meeko_v2_master_sheet.jpg` is the standard sheet: a hero pose (paws clasped, with the sun and cloud and a stardust trail), small front and back views, three heads (happy, shy wink, determined) and a close-up of the heart brooch and wing. Nano Banana Pro, new generation, 3:4, 4K. Refs: the main design and the turnaround.

@@ -19,3 +19,6 @@ Chain (Nano Banana Pro, 3:4, 4K, no seed exposed):
 
 ## Turnaround (owner, Nov 7, 15:38 ET)
 `mossy_v2_turnaround.jpg` is the 3D turnaround in the new painted style: front, 3/4, side and back, without the hammer and shield. It shows the compass, the glowing cracks, the masts and the anglerfish. It replaces `breaker_turnaround.png`. For weapons use the master sheet and the old `breaker_weapons.png`, whose capstan hammer and hatch shield still match. Nano Banana Pro, new generation, 16:9, 4K. Ref: the master sheet.
+
+## Portrait v2 (owner, Nov 7, 15:53 ET)
+`mossy_v2_portrait.jpg` is the painted re-render of `breaker_portrait.png`: a happy porthole face, the anglerfish hanging on his chest, moss and barnacles. The saved copy is 2000px (from chat); swap in the full 4K original when available.

@@ -74,3 +74,6 @@ Plan: one edit on the final splash for each item (face first, then needles), sin
 
 ## Renamed: Lace, "the Red Stitch" (owner, Nov 7, 05:00 ET)
 Replaces "Ravyl" (and Ravel/Lisette/Hem/Pin before it). The owner couldn't remember the old name. Display name only; ids and files stay (`archer`, `ravel_v2/`, `lisette_*`, `hem_*`). Title kept as "the Red Stitch" unless the owner changes it ("the Puppeteer" was offered).
+
+## Prop sheet (owner, Nov 7, 15:53 ET)
+`ravel_v2_prop_sheet.jpg` contains: the giant needle (front, side, eye), the recurve bow (strung, side, grip), the stitched porcelain mask (front, 3/4, back), the spool belt with needles, two hair needles and a scale silhouette. It replaces the old hem_v4 prop files. Nano Banana Pro, new generation, 16:9, 4K. Refs: the turnaround back view and the bow; the master sheet crop.

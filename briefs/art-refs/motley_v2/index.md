@@ -23,3 +23,6 @@ Nano Banana Pro, new generation, 3:4, 4K. Refs: the front view from `motley_turn
 
 ## Turnaround (owner, Nov 7, 15:32 ET)
 `motley_v2_turnaround.jpg` is the 3D turnaround in the new painted style: front, 3/4, side and back, with the void ribbon on the spring and the hovering box. It matches the two-tone doublet on the master sheet and replaces the old `motley_turnaround.png` at the art-refs root. Nano Banana Pro, new generation, 16:9, 4K; ref: the master sheet. The alt `explorations/motley_v2_turnaround_alt_harlequin.jpg` has a diamond harlequin pattern and puffed sleeves, which is off-model.
+
+## Portrait v2 (owner, Nov 7, 15:53 ET)
+`motley_v2_portrait.jpg` is the painted re-render of `motley_portrait.png`, with no outlines and with crisp stars, ruffles and burning cards. The saved copy is 2000px (from chat); swap in the full 4K original when available.
