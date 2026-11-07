@@ -137,3 +137,4 @@ Known limit: the hunter's expression reads slightly panicked.
 
 **Meeko v2 complete:** main design, turnaround, portrait, splash.
 - Also saved (02:37 ET): `explorations/meeko_v2_splash_sky_medic.jpg` (flying over a floating-island battle at sunset) and `explorations/meeko_v2_splash_cave_v3.jpg` (another cave run with the beam; beasts retreat). Owner to pick between the cave and the sky version.
+- **FINAL splash (owner, 02:37 ET): the cave v3 run**, now `meeko_v2_splash.jpg`. The previous final is `explorations/meeko_v2_splash_beam_v2.jpg`. The Sky Medic version is suggested for a loading screen or store banner.
