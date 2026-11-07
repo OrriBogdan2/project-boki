@@ -56,3 +56,5 @@ Nano Banana Pro, 1:1, 4K, a fresh generation (ref: the master sheet). The model 
 `tarek_v2_portrait.jpg` is now the owner's own run from a slightly different prompt: no eye stone in front, three stones framing his head (canon count, no fix needed). The face is larger and higher, so it reads better at select-screen size.
 
 The front-stone version (fourth stone painted out) moves to `explorations/tarek_v2_portrait_front_stone.jpg`.
+
+`explorations/tarek_v2_portrait_wide.jpg` (16:9, the owner's run): a waist-up shot in a misty canyon, his right stone gauntlet across his chest and the huge stone left arm hanging, three eye stones. It is the clearest read of which arm is which, and could serve as a website or banner image.
