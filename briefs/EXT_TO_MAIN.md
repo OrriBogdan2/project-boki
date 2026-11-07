@@ -2363,3 +2363,6 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 - Renders: briefs/art-refs/kael_v2/clips/ before_*.jpg vs after_*.jpg (full length, back, closeup, match-camera turnaround and poses, run) and strip_<move>.jpg frame strips (idle, run_f, slash_l, slash_r, slam, lunge, wave, dash, meteor, guard).
 - CAVEAT: several v1 clips were authored for kit 113 (levelled lunge, side-swing wave, upright meteor, 0.42 s dash), which is NOT on main. On main's older poses they pass every check but read slightly off (e.g. lunge/wave aim); re-fit them when kit 113 lands. Not hand-fixed: only the failing timing and pops.
 - The idle closeup now shows the clip's head-bowed idle, not the static rest pose.
+
+## 2026-11-07 deep (job 20261107-143001-a2): CLAIM Sable v2 model rebuild
+- CLAIM: Sable v2 model rebuild (id thief, art/wardens/sable/ to the locked v2 design, briefs/art-refs/sable_v2/). Branch ext/sable-v2-model.
