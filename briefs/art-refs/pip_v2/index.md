@@ -148,3 +148,10 @@ Known limit: the hunter's expression reads slightly panicked.
 The earlier cave splash looked too cartoony next to the roster. These are fresh generations in the roster's painted style (refs: the main design plus Kibo's and Nivi's splashes). The owner picked "Lantern in the Dark": Meeko leads wounded hunters through a dark cave inside her sun's circle of light, the raincloud heals them, and glowing eyes watch from the dark.
 - Alternates in explorations/: sunrise (off-model), healing rain (too cartoony), night rounds, the cave-edit attempts.
 - The previous final is now `explorations/meeko_v2_splash_cave_v3_cartoon.jpg`.
+
+## Companion modelling sheet (owner, Nov 7, 15:16 ET)
+`meeko_v2_companions_sheet.jpg`:
+- The sun and the raincloud in front, 3/4, side and back views. Side views show thickness; backs have no face.
+- Eight expression faces: sun happy, laughing, grumpy, sleeping; cloud shy, happy, sleeping, crying.
+
+Nano Banana Pro, new generation, 16:9, 4K. Refs: the sun and cloud cropped from the turnaround, and `meeko_v2_companion_moments.jpg`. Known nit: the sun side view shows a little of the face at both edges; trust the front view for the face.
