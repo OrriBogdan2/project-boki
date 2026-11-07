@@ -61,3 +61,6 @@ Nano Banana Pro "recreate exactly at higher resolution" passes from the 2K appro
 - `ryzz_v2_splash.jpg` ("Who, Me?", wrecked market, 16:9 extension of the square version).
 
 Rejected: one 4K sheet run that came out square and dropped the bubblegum head (kept as `explorations/master_sheet_4k_rejected_square.jpg`).
+
+## Splash edit (owner, Nov 7, 14:58 ET)
+`ryzz_v2_splash.jpg` was edited (Nano Banana Pro, 16:9, 4K) to show the knights clearly electrocuted: pink arcs, scorch marks, smoke and frizzled hair. The fire cracks under her boots are now pink lightning cracks. The pre-edit version is in explorations.
