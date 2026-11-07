@@ -266,3 +266,8 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
   1 Vex the Hired Gun (gunslinger, free starter, met first), 2 Kael the Unbroken (juggernaut), 3 Cinder the Flame Queen (ashwick), 4 Meeko the Dawnfox (tender), 5 Tenzo the Stone Seer (dolm), 6 Lace the Red Stitch (archer), 7 Grimble the Scrap King (dredge), 8 Neve the Snowglider (rimewright), 9 Motley the Void Jester (ostra), 10 Mossy the Barnacle Knight (bulwark), 11 Sparkle the Storm Chaser (mage), 12 Sable the Silver Thief (thief).
 - Ids: gunslinger, juggernaut, ashwick, tender, dolm, archer, dredge, rimewright, ostra, bulwark, mage, thief (scripts/arch/arch.gd ORDER).
 - Post-tutorial pick offers Kael, Cinder, Meeko in that order (content/rules/class_unlock.json second_picks = juggernaut, ashwick, tender).
+
+## 2026-11-07 (owner): PARITY FIRST, invent later
+- Top priority: game feel, and porting all 12 kits and their animations over as faithfully as possible (abilities, cancels, buffering, timings, motion as the source does it). Do NOT invent new mechanics, variants or effects until a kit feels as close to parity as possible; the owner makes changes after parity.
+- Owner design notes already in DECISIONS (names, Cinder fire from hands, keys) still apply; where they force a change, keep the source's timing and feel.
+- Every kit/VFX/animation job: match the source first; put any idea of ours in the final answer as a suggestion, not in the build.
