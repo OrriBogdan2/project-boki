@@ -51,3 +51,8 @@ Known limits:
 `tarek_v2_portrait.jpg`, 4096×4096. He listens with a half smile in a misty mountain shrine at dusk. One eye stone floats in front of him, staring at the viewer; two drift behind. His stone arm is folded across his chest, glyphs glowing; no orange light.
 
 Nano Banana Pro, 1:1, 4K, a fresh generation (ref: the master sheet). The model drew four eye stones, so the fourth (right side) was painted out locally (OpenCV inpaint plus a soft blend, not AI). The original is `explorations/tarek_v2_portrait_4stones.jpg`.
+
+## Portrait swapped (Nov 6, 22:55 ET)
+`tarek_v2_portrait.jpg` is now the owner's own run from a slightly different prompt: no eye stone in front, three stones framing his head (canon count, no fix needed). The face is larger and higher, so it reads better at select-screen size.
+
+The front-stone version (fourth stone painted out) moves to `explorations/tarek_v2_portrait_front_stone.jpg`.
