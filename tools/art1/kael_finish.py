@@ -23,7 +23,7 @@ WORK = os.path.dirname(os.path.abspath(OUT))
 ATLAS = 2048
 CARDS = 512
 UNIQ_W = 0.94                        # the scan's islands' share of the atlas width; the flat cells sit to its right
-CELL = {"metal-chain": "#77737b", "metal-sword": "#a49ba4", "metal-sword_edge": "#dcd6de", "metal-sword_dk": "#6c666f",
+CELL = {"metal-chain": "#77737b", "metal-sword": "#c9c1c9", "metal-sword_edge": "#ebe6ec", "metal-sword_dk": "#857e88",
         "leather-grip": "#7e1b25", "glow-sword": "#ffffff"}
 # card cells (u0, v0, u1, v1) in the card atlas: the sash tail, the shawl's crimson hem, its bone hem
 SASH_C, HEM_RED_C, HEM_BONE_C = (0.0, 0.0, 0.34, 1.0), (0.35, 0.0, 0.66, 1.0), (0.67, 0.0, 1.0, 1.0)
