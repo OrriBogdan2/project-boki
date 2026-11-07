@@ -19,7 +19,7 @@ uniform float flicker = 0.25;
 uniform float flicker_hz = 9.0;
 uniform float phase = 0.0;
 void fragment() {
-	float edge = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 2.0);
+	float edge = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 	float wave = 0.25 * sin(TIME * flicker_hz + phase) + 0.25 * sin(TIME * flicker_hz * 2.3 + phase * 1.7);
 	float flick = 1.0 - flicker * (0.5 + wave);
 	ALBEDO = mix(core_col.rgb, rim_col.rgb, edge) * glow * flash * flick;
@@ -115,8 +115,8 @@ static func _ball(node_name: String, radius: float, mat: Material) -> MeshInstan
 	var mesh := SphereMesh.new()
 	mesh.radius = radius
 	mesh.height = radius * 2.0
-	mesh.radial_segments = 16
-	mesh.rings = 8
+	mesh.radial_segments = 32
+	mesh.rings = 16
 	var mi := MeshInstance3D.new()
 	mi.name = node_name
 	mi.mesh = mesh

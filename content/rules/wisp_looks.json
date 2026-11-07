@@ -5,8 +5,8 @@
 		"default": {
 			"name": "Wisp",
 			"desc": "A small glowing spirit in your team's colour.",
-			"core": {"radius": 0.22, "color": "team", "rim": "ffffff", "glow": 2.0, "flicker": 0.25, "flicker_hz": 9.0},
-			"halo": {"radius": 0.5, "alpha": 0.22},
+			"core": {"radius": 0.22, "color": "team", "rim": "ffffff", "glow": 0.85, "flicker": 0.25, "flicker_hz": 9.0},
+			"halo": {"radius": 0.5, "alpha": 0.12},
 			"eyes": {"on": true, "color": "1a1530", "size": 0.04, "gap": 0.07, "height": 0.03},
 			"motes": {"amount": 10, "color": "ffffff", "size": 0.05, "life": 0.9, "rise": 0.5},
 			"trail": {"amount": 20, "color": "team", "size": 0.16, "life": 0.5},
