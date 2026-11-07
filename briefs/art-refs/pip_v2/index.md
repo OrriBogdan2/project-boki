@@ -82,3 +82,8 @@ Next: star-companion variations with this exact fox and pose.
 
 **What the owner liked: the interactions with the plain star.** The star peeks shyly behind her ear (she blushes), sleeps on her shoulder with a bubble while she dozes, cheers with her, and kisses her cheek (set 5). Owner correction (01:53 ET): the star is NOT locked. The rules: **one single companion** (not multiple), and **whatever wins must have these interactions** (peeking shyly, napping on her, cheering, kissing her cheek), used for idle animations, emotes, the portrait and the splash. Next: compare candidate companions doing the same interactions.
 - Owner (01:55 ET): it can also be **two companions** in different colours, which she could shoot as heals (e.g. one heals allies, one hits enemies). Max two; each must carry the interactions.
+
+## Sun + raincloud companions (Nov 7, 02:02 ET)
+- `lumi_suncloud_styles.jpg`: plush, glowing magic, sticker, knitted. Correct small size at shoulder height.
+- `lumi_suncloud_colours_failed.jpg`: the model drew the sun and cloud as large icons above her head and put little blob spirits beside her; not usable.
+- `lumi_suncloud_moments.jpg`: four interaction close-ups (sun waving while the cloud hides shyly, both napping on her shoulders, both kissing her cheeks, the cloud raining on a grumpy sun while she laughs with a rainbow). Strong personality; confirms the pair carries the interactions.
