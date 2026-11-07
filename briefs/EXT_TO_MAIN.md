@@ -2319,3 +2319,6 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 
 ## 2026-11-07 build-spec (job 20261107-123002-a4): CLAIM Camera depth readability
 - CLAIM: Camera depth readability. Step 1 briefs/CAMERA_DEPTH.md (Supervive vs ours), step 2 cheapest 2-3 wins behind a setting, branch ext/camera-depth.
+
+## 2026-11-07 deep (job 20261107-130004-a4): CLAIM Claire v2 model rebuild
+- CLAIM: Claire v2 model rebuild (art/wardens/claire/ to the locked v2 design, briefs/art-refs/claire_v2/). Branch ext/claire-v2-model.
