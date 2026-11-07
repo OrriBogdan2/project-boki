@@ -564,14 +564,16 @@ func _farm2() -> void:
 	L["water"].clear()
 	Save.d["gems"] = 100
 	home.hb.take("river")
-	var line: Array = []
-	for x in range(36, 42): line.append(Vector2i(x, 27))
+	var line := _free_row(home.hb, 6)
+	ok(not line.is_empty(), "found an open row for a channel")
 	home.hb.cells = line
 	home.hb._check_cells()
 	var placed: bool = home.hb.place_held()
 	ok(placed and (L["water"] as Dictionary).size() == line.size() and int(Save.d["gems"]) == 100 - 2 * line.size(),
 			"dragging a river puts water on every tile of the channel for %d gems" % (2 * line.size()))
-	ok(FarmWater.near_cells(Save.d, [Vector2i(38, 29)]) and not FarmWater.near_cells(Save.d, [Vector2i(38, 35)]), "and a patch beside it is near water")
+	var mid: Vector2i = line[2] if line.size() > 2 else Vector2i.ZERO
+	var beside := FarmWater.near_cells(Save.d, [mid + Vector2i(0, 2)])
+	ok(beside and not FarmWater.near_cells(Save.d, [mid + Vector2i(0, 8)]), "and a patch beside it is near water")
 	home.hb.toggle()
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -588,6 +590,19 @@ func _note_text(hb) -> String:
 func _note_col(hb) -> Color:
 	var l := _note_label(hb)
 	return l.modulate if l else Color.WHITE
+
+## `n` tiles in a row that can all be built on (the wild land comes from the save's random island seed, so
+## no fixed row is open every run).
+func _free_row(hb, n: int) -> Array:
+	var p := HomeLayout.LANDING
+	for dz in range(-12, 13):
+		for dx in range(-12, 13):
+			var row: Array = []
+			for i in n:
+				row.append(Vector2i(int(p.x) + dx + i, int(p.z) + dz))
+			if row.all(func(c): return hb.cell_reason(c) == "") and hb.keeps_paths([], row):
+				return row
+	return []
 
 func _free_cells(hb, sz: Vector2i) -> Array:
 	var p := HomeLayout.LANDING
