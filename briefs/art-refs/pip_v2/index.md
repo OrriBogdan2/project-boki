@@ -87,3 +87,10 @@ Next: star-companion variations with this exact fox and pose.
 - `lumi_suncloud_styles.jpg`: plush, glowing magic, sticker, knitted. Correct small size at shoulder height.
 - `lumi_suncloud_colours_failed.jpg`: the model drew the sun and cloud as large icons above her head and put little blob spirits beside her; not usable.
 - `lumi_suncloud_moments.jpg`: four interaction close-ups (sun waving while the cloud hides shyly, both napping on her shoulders, both kissing her cheeks, the cloud raining on a grumpy sun while she laughs with a rainbow). Strong personality; confirms the pair carries the interactions.
+
+## Renamed again: Meeko, "the Magic Fox" (owner, Nov 7, 02:13 ET)
+Replaces "Lumi the Little Lantern". Display name only; ids and files stay (`tender`, `pip_*`, `pip_v2/`).
+
+Noted risk (owner accepted): Disney's Pocahontas has a raccoon companion named Meeko. Different species and look, so likely fine as a name, but check trademarks before any merch (plushies), and expect search results to be crowded. (Not legal advice.)
+
+Lore update: the star lantern is gone. She holds nothing. Her companions are in progress: the lead candidate is a tiny sentient sun and a raincloud (plush style), which she sends out to heal; the companions carry her interactions (peeking shyly, napping on her shoulders, kissing her cheeks, the cloud raining on a grumpy sun).
