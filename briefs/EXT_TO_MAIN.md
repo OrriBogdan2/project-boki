@@ -2530,3 +2530,4 @@ READY ext/s7-mask-hob-83-89-fix 6b433e542 (fixes shutdown crash in --portrait/--
 - 6b433e542 farm_tutorial_check: "dragging a river ... 12 gems" flaked (2/6 under load): row 36-41,27 is wild land on some Save.fresh() random seeds; the channel now goes on a row open this run, "beside it" is relative to it.
 - Checks (xvfb opengl3 + headless): portrait/class-unlock/hunter-unlock x3 each rc 0, 0 FAIL, no signal 11 (both modes); farm-tutorial 7/7 headless + 1 xvfb rc 0; mask-moment 3 headless + 1 xvfb rc 0; teammate full 3 headless + 1 xvfb rc 0, tutorial part 12/12 and priority part green; health --strict OK.
 - Open, not this branch: 1 of ~22 teammate tutorial runs stuck at the "dash" step for 600 s (driver), seen once, not traced.
+READY ext/text-relic-renames-rebased e9f0f9847 (supersedes 6b2895ed9; owner order: Sable 11th, Motley 12th)
