@@ -5,6 +5,8 @@ extends "res://tools/combo51_shots.gd"
 ## Run it under the movie writer so the looks run on the fixed step and the real mix is recorded:
 ##   xvfb-run -a godot --rendering-driver opengl3 --resolution 1280x720 --path . --fixed-fps 60 \
 ##       --write-movie <dir>/reel.avi -- --hero-vfx-reel --shots-dir=<dir>
+## --reel-frames also saves every drawn frame as <dir>/frames/NNNNN.jpg (FRAME_W wide), for a clip made off the
+## box (jobq's GPU worker returns the out dir, not a movie): ffmpeg -framerate 60 -i <dir>/frames/%05d.jpg ...
 
 const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
@@ -12,8 +14,10 @@ const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "das
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
+const FRAME_W := 960                      # px wide, each --reel-frames frame
 
 var only := ""
+var frame_dir := ""            # --reel-frames: where each drawn frame goes
 var crop_px := SHEET_CROP
 var crop_zoom := 1.0
 var frames := 0
@@ -29,10 +33,15 @@ func run(main_node: Node) -> void:
 			who = arg.substr(12)
 		if arg.begins_with("--reel-only="):
 			only = arg.substr(12)
+		if arg == "--reel-frames":
+			frame_dir = "frames"
 	hero_name = String(who)
 	if who == "archer":
 		crop_px = WIDE_CROP
 	DirAccess.make_dir_recursive_absolute(dir)
+	if frame_dir != "":
+		frame_dir = dir.path_join(frame_dir)
+		DirAccess.make_dir_recursive_absolute(frame_dir)
 	await _setup()
 	P.lvl = 6
 	for slot in P.slot_lv:
@@ -51,7 +60,20 @@ func run(main_node: Node) -> void:
 ## (the match's own step is off here, so the ears and the detail share follow from this)
 func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> void:
 	Sfx.listener = P.pos
-	await super._go(secs, each, marks, lead)
+	var step := each
+	if frame_dir != "":
+		step = func(t: float) -> void:
+			_save_frame()
+			if each.is_valid():
+				each.call(t)
+	await super._go(secs, step, marks, lead)
+
+## (--reel-frames) the frame last drawn, scaled down to FRAME_W
+func _save_frame() -> void:
+	var img := main.get_viewport().get_texture().get_image()
+	img.resize(FRAME_W, FRAME_W * img.get_height() / img.get_width(), Image.INTERPOLATE_BILINEAR)
+	img.save_jpg(frame_dir.path_join("%05d.jpg" % frames), 0.88)
+	frames += 1
 
 ## Larger crops than the shared strips: an area look must fit, at the match camera's own scale.
 func _take(kind: String, _file: String, caption: String, focus: Callable) -> void:
