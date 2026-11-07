@@ -2410,3 +2410,22 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 - checks: health --strict OK, gen_wiki --check OK, merge-tree vs origin/main clean, full suite vs 150 base: NEW-RED 2 (class-unlock, dash-frames) WORSE 0 — both pass 0 failures on quiet reruns of botnav and base (same load flakes as 163).
 
 READY ext/phys-150-botnav e44f34b22 (coordinator one-liner for the merge-candidate parser; carries 150-parity 074453ec, see the 150-botnav post above)
+
+## READY 2026-11-07: Cinder v2, the Flame Queen (ext/cinder-v2-model, 2235dfa01)
+
+Rebuilt from the turnaround with the master sheet's longer hair. Owner override applied: no tank, no hose, no weapon; hands empty and posed for casting, palm is `weapon_muzzle`, magma cracks brighten while she casts.
+
+Fidelity: scaled grey-violet skin, obsidian shards with molten seams, heeled boots, shards on the hands, long dark hair to ember ends (alpha cards), orange eyes, spined tail with an FX flame tip. No goggles, no fins. Weapon check moot: she has no weapon. Checklist row updated.
+Build: 11135 tris, one 2048 atlas, shared armature, FX points and clip set kept.
+
+Checks, all pass: cinder-art, warden-glb, warden-model, warden-clips, hero-vfx, ashwick-combo, warden-rig-json, health --strict. Match camera: the tail does not hide her.
+
+Renders in briefs/art-refs/cinder_v2/ingame/: before.jpg, vs_sheet.png, closeup_front.png, poses_game.png, turnaround_game.png.
+
+Please look at:
+- Horns are the weakest part: blocky, almost cat ears from the front, not the sheet's curved lizard horns. The scan's shape; not fixed. Alternative: replace them with built pieces.
+- Tail is plain as in the turnaround. face_tail ref shows molten cracks on it; alternative is to paint them.
+- mantle_look ashwick base colours changed (they tinted her blue); this also affects the procedural model.
+- warden_model_check height_3d for ashwick is now 1.04 (v1's fire crest is gone).
+- Hair flame strips were dropped: they read as yellow flakes. Hair is no literal fire, only the ember fade.
+- Shots used software GL: the GPU queue stalled (job 20261107-144810-02832). Colours and speed need a GPU look.
