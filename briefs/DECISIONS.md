@@ -175,3 +175,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - Mature, sultry lizard-woman with an elegant human face; lizard horns and goggles, no fins; spined tail with a flame tip; living-obsidian shard armour with molten seams spread evenly; heeled obsidian boots; scales on the skin.
 - Props stay small: a compact brass flamethrower and a small copper backpack tank with a glass window (cinder_v2_weapon_sheet.jpg; the hose runs from the grip to the base of the tank).
 - 3D: cinder_v2_turnaround.jpg (hair length and the flamethrower from cinder_v2_master_sheet.jpg). Final splash: "Last Dance" (cinder_v2_splash.jpg). Portrait: cinder_v2_portrait.jpg.
+
+## 2026-11-07 (owner, via coordinator): roster order
+- Hero order (owner's Boki website order; also the hero-select, wiki and any roster list): Vex, Mossy, Ryzz, Kael, Ravel, Cinder, Grimble, Pip, Claire, Tarek, Motley, Sable.
