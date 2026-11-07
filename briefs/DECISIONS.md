@@ -195,7 +195,7 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 ## 2026-11-07 (owner, via coordinator): Ravel is respelled **Ravyl** ("Ravyl the Red Stitch")
 - Spelling change so players pronounce it right. Display name only: the id `archer`, file and folder names (`hem_*`, `lisette_*`, `art/wardens/hem`) stay. Change every player-facing "Ravel" to "Ravyl": hero select, kit and ability text, tooltips, barks, docs, wiki and website, plus the hero order list. This supersedes "Ravel" everywhere above.
 
-## 2026-11-07 (owner, via coordinator): Pip is renamed **Lumi** ("Lumi the Little Lantern"), with new lore
+## 2026-11-07 (owner, via coordinator): ~~Pip is renamed Lumi~~ SUPERSEDED the same night by "Pip/Lumi is renamed Meeko" below
 - Display name only, like the other renames: the id `tender`, file and folder names (`pip_*`, `art/wardens/pip`, `briefs/art-refs/pip_v2/`) stay. Change every player-facing "Pip": hero select, kit and ability text, tooltips, barks, docs, wiki, website, and the post-tutorial second-Mask pick. This supersedes "Pip" everywhere above.
 - Lore (replaces the old Pip personality line):
   - Lumi was once a small, timid wild Boki, a fox kit who was afraid of the dark.
@@ -214,7 +214,7 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - Internal identifiers (class names, enums, save keys, asset paths, network ids) stay unless trivial and safe; where they stay, a short comment notes that "mask" in code means "Relic" in game. This supersedes "Mask" as a player-facing word everywhere above.
 
 ## 2026-11-07 (owner): roster order swap
-- Cinder and Claire (Nivi) swap places. Order is now: Vex, Mossy, Ryzz, Kael, Ravyl, Nivi, Grimble, Lumi, Cinder, Kibo, Motley, Sable (display names).
+- Cinder and Claire (Nivi) swap places. Order is now: Vex, Mossy, Ryzz, Kael, Ravyl, Nivi, Grimble, Meeko, Cinder, Kibo, Motley, Sable (display names).
 
 ## 2026-11-07 (owner, via coordinator): going down turns you into a **Wisp**
 - When a Hunter is downed, the hero model pops into a Wisp (a small glowing spirit). No per-hero downed animation is needed; existing `downed` clips become unused (keep the files, stop playing them).
@@ -224,3 +224,14 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-07 (owner): Nivi's title is **"Nivi the Snowglider"** (was "the Snowglide")
 - Display text only. Supersedes "Nivi the Snowglide" everywhere above (hero select, wiki, website title "Snowglider").
+
+## 2026-11-07 (owner): Pip/Lumi is renamed **Meeko** ("Meeko the Magic Fox"). Replaces "Lumi the Little Lantern"
+- Display name only: id `tender`, files and folders (`pip_*`, `art/wardens/pip`, `briefs/art-refs/pip_v2/`) stay. Change every player-facing "Pip" or "Lumi": hero select, kit and ability text, tooltips, barks, docs, wiki, website, and the post-tutorial second-Relic pick.
+- Lore (replaces the old Pip personality line and the Lumi lore):
+  - Meeko was once a small, timid wild Boki, a fox kit who was afraid of the dark.
+  - Magic changed her: glowing constellations in her fur, glowing fairy wings, standing upright, and finally speech. She was the first Boki anyone had seen become something more.
+  - She still fears the dark, but she became a field medic who walks into the places that scare her for anyone who needs her.
+- Use the lore in her hero-select bio, wiki page and the website; barks can lean on it (nervous in the dark, brave for others).
+- Companions (IN PROGRESS, do not build yet): no lantern, she holds nothing. Lead design: two tiny sentient companions floating at her shoulders, a little sun and a little raincloud, which she sends out to heal (possibly to damage). Personality animations: the cloud peeking shyly behind her ear while the sun waves; both napping on her shoulders; both kissing her cheeks; the cloud raining on a grumpy sun while she laughs and a rainbow appears. Plan her idles and emotes around these once the design is locked.
+- Visual rule: she still reads as a Hunter (upright, clothed, carrying gear).
+- Art: v2 redesign in `briefs/art-refs/pip_v2/`. Do NOT swap any Meeko art or model into the game until her master sheet is final. Name + lore text can ship now.
