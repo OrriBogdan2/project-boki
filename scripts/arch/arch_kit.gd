@@ -471,9 +471,9 @@ func dash_feel() -> Dictionary:
 		_dash_feel = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/dash_feel.json"))
 	return _dash_feel.get(id, _dash_feel["default"])
 
-## A travelling dash of a given length and time (the Effects dash, so perfect dodges, riders and
-## the dash buffer all work as before).
-func travel(dist: float, t: float, extra := {}, use_ex := false) -> void:
+## A travelling dash of a given length and time (the Effects dash, so perfect dodges and the dash
+## buffer all work as before). The hero's own: no Boki changes it (DECISIONS 2026-11-05, --boki-dash-check).
+func travel(dist: float, t: float, extra := {}) -> void:
 	var feel := dash_feel()
 	dist *= float(feel["dist"])
 	t *= float(feel["time"])
@@ -481,41 +481,8 @@ func travel(dist: float, t: float, extra := {}, use_ex := false) -> void:
 	for k in extra:
 		e[k] = extra[k]
 	Effects.run([e], h, {"slot": "dodge", "ability": String(dash_def().get("id", "dash")), "level": rank("dash")})
-	h._dash_rider(use_ex)
 	Feel.dash_sound(m, id, h.pos, h)
 	CombatBus.ability_used.emit(h, String(dash_def().get("id", "dash")), "dodge")
-
-## The kin's dodge rider on a dash that doesn't travel (a blink, a zip, a leap): on_start at the
-## departure, on_pass on foes within 1m of the line (the streak rule), on_end at the arrival
-## (DASHES §3.4). Returns the rider's repeat and as fields for the shape to interpret.
-func rider_points(from: Vector3, to: Vector3) -> Dictionary:
-	var out := {"repeat": null, "as": ""}
-	var k: Kin = h.kin
-	if k == null or k.dead or k.ks == null or k.ks.dodge_rider.is_empty():
-		return out
-	var rd: Dictionary = k.ks.dodge_rider
-	var cx := KinExec.make_cx(m, h, k, h, h.inp.get("aim", to), m.dmg_mult(h) * Effects.level_k({"level": rank("dash")}), "dodge", "rider_" + k.species)
-	var dir := Vector2(to.x - from.x, to.z - from.z)
-	dir = dir.normalized() if dir.length() > 0.05 else h.aim_dir()
-	if not (rd.get("on_start", []) as Array).is_empty():
-		var c1 := cx.duplicate(); c1["at"] = from; c1["dir"] = dir
-		KinExec.run_stages(rd["on_start"], c1)
-	if not (rd.get("on_pass", []) as Array).is_empty():
-		var a2 := Vector2(from.x, from.z); var b2 := Vector2(to.x, to.z)
-		for f in m.foes_of(h.team):
-			var fp := Vector2(f.pos.x, f.pos.z)
-			if fp.distance_to(Geometry2D.get_closest_point_to_segment(fp, a2, b2)) < 1.0 + f.r and absf(f.pos.y - from.y) < 2.0:
-				KinExec.apply_foe(rd["on_pass"], f, cx, from)
-		m.fx.bolt(from + Vector3(0, 0.8, 0), to + Vector3(0, 0.8, 0), Hunter._rider_color(k.ks))
-	if not (rd.get("on_end", []) as Array).is_empty():
-		var c2 := cx.duplicate(); c2["at"] = to; c2["dir"] = dir
-		KinExec.run_stages(rd["on_end"], c2)
-	for md in rd.get("modifiers", []):
-		if (md as PartSpec).type == "repeat": out["repeat"] = md
-	out["as"] = String(rd.get("as", "dash"))
-	var th := String(Data.KIN.get(k.species, {}).get("type", ""))
-	Feel.sound(m, "sweet", th, from, h)
-	return out
 
 # ------------------------------------------------------------------ infusion and the grammar
 ## The kin's infusion, or {} with no kin able to fight.

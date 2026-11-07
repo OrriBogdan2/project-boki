@@ -684,7 +684,7 @@ func _air_barge(dd: Dictionary, dir: Vector2, keep_pose: bool) -> void:
 	var feel := dash_feel()
 	var air_t := float(dd["time"]) * float(feel["time"])
 	var air_dist := float(dd["dist"]) * float(dd["air_k"]) * float(feel["dist"])
-	travel(air_dist, air_t, {"invuln": 0.08, "trail": "", "dir": dir}, true)
+	travel(air_dist, air_t, {"invuln": 0.08, "trail": "", "dir": dir})
 	h.roll_t = air_t
 	h.roll_speed = air_dist / air_t
 	if not keep_pose: play("dr_pounce")

@@ -368,13 +368,13 @@ func on_dash(use_ex: bool) -> bool:
 	if ex:
 		# the long dash (in the air, or out of charges): Hem's own flick and tumble with her fletch
 		# after-images (no bursts on a dash); 19 m/s, the base dash speed
-		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"}, true)
+		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"})
 		play("pin_flick")
 		vfx("flick")
 		st["last_dash"] = "flick"
 		return true
 	CombatBus.ability_used.emit(h, "spirit_walk", "dodge")
-	spirit.start(use_ex)
+	spirit.start()
 	return true
 
 ## While walking as a spirit she moves quicker; at rank 3 inside something she starts faster still and
