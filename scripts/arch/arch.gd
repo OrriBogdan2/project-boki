@@ -44,7 +44,9 @@ static func bare_title(id: String) -> String:
 ## mid=true "the Hired Gun" inside a sentence. Names with the title go through HeroTitle.label.
 static func name_of(id: String, mid := false) -> String:
 	var t := bare_title(id)
-	return ("the " if mid else "The ") + t if def(id).has("title") else t
+	if not def(id).has("title"):
+		return t
+	return ("the " if mid else "The ") + t
 
 ## The Hunter's display name, or "Hunter" for a body with no Hunter kit (dummies, old saves).
 static func label(id: String) -> String:

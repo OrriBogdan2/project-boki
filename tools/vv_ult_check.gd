@@ -119,7 +119,7 @@ func mage() -> void:
 	await _mage_burst()
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var bad: int = await flow.combos_of(hc.main, "mage")
-	ok("Sparkle item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; the Rod held through every move",
+	ok("Sparkle item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; the Rod held on",
 			bad == 0, "%d failing (the DASHFLOW lines)" % bad)
 
 ## A cast that strikes empty ground: comes down by itself at the cursor when the hover runs out, pays no bond.

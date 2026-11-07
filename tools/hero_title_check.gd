@@ -8,7 +8,10 @@ const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tam
 	"Ryzz", "Ravyl", "Kibo", "Magic Fox", "Snowglide", "Sunken Bulwark"]
 ## Words retired from player text (Hunter / Relic / the Empty / Fusion replace them; ids and code names may keep them).
 const RETIRED_TERMS := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|unmasked|masks?)\\b"
-const CANONICAL_ORDER := ["gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer", "dredge", "rimewright", "ostra", "bulwark", "mage", "thief"]
+const CANONICAL_ORDER := [
+	"gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer",
+	"dredge", "rimewright", "ostra", "bulwark", "mage", "thief",
+]
 const GENDERS := ["male", "female", "robot"]
 
 var bad := 0
@@ -37,7 +40,8 @@ func run(main: Node) -> void:
 		ok(story_lines <= 3, "%s personality is three lines at most" % id)
 		var label := HeroTitle.label("Orri", id)
 		var bare := HeroTitle.title(id)
-		ok(not String(data["title"]).begins_with("The ") and not String(data["title"]).begins_with("the "), "%s stores its title without 'the'" % id)
+		var title := String(data["title"])
+		ok(not title.begins_with("The ") and not title.begins_with("the "), "%s stores its title without 'the'" % id)
 		ok(label == "Orri the %s" % bare and not label.contains("the The"), "%s label reads '%s'" % [id, label])
 		var shown: Array = [Arch.name_of(id), Arch.label(id), label, _plain_text(data)]
 		for text in shown:
