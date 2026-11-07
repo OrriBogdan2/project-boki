@@ -10,7 +10,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "blender"))
 import meshkit as M, claire_pieces as K, claire_paint as P
 from meshkit import smooth, Piece
-from kael_paint import hexc, mix
+from paintkit import hexc, mix
 import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
