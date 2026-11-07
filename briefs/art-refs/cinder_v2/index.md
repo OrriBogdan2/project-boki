@@ -41,3 +41,5 @@ Edit 2 (gauntlets and boots) failed.
 Edit 3 (retry), forearms: the plated bracers became obsidian shard bracers with molten cracks. Refs: the turnaround + a forearm-only crop from the master sheet. It passed on the second try.
 
 The turnaround is now complete and matches the master sheet's outfit. The hair is slightly shorter than on the sheet, and the flamethrower is not shown; take both from the master sheet.
+
+`cinder_v2_turnaround_alt.jpg` is the same forearm edit, also run on the edit-1 result. In it the shards stop at the wrist and the hands are left bare. The final (A) keeps it: its shards carry over the back of the hands, matching the master sheet.
