@@ -2,7 +2,7 @@
 One 2048 colour atlas (the scan's paint; the scripted pieces on flat cells at its right edge), a 2048 emission map (the
 curse veins on his right arm and chest: model_glow core tints it), a small RGBA card atlas (the shawl's torn hem and the
 sash tails). The armature is the contract's (kael_rig.json) plus the spring chains the game already knows (mane, the
-cuffs' hang chains). The sword is the unskinned `weapon` (kael_pieces.sword, Gun space).
+cuffs' hang chains). The sword (kael_pieces.sword) is joined to the body, skinned to hand.R: the clips carry it (docs/art/wardens/CLIPS.md).
 Run: blender -b --factory-startup --python tools/art1/kael_finish.py -- <source.blend> <rig.json> <out.glb>"""
 import sys, os, json, math
 import bpy, bmesh
@@ -441,14 +441,16 @@ A = {"anchor_head_top": ("head", (0, 0, rig["land"]["crown"] + 0.07)), "anchor_c
 for nm, (bn, at) in A.items():
     WK.anchor(arm, bn, nm, at)
 
-# ---- the sword, its own unskinned mesh in the Gun's space, on the flat cells
+# ---- the sword: skinned to the sword hand (the clips move it), joined to the body, on the flat cells
 sw = K.sword()
-sv, sf, smat = [], [], []
+sm, so = K.sword_matrix(WK.bone_head(rig, "hand.R") + Vector((0, 0, -0.08)))
+sv, sf, smat, srooms = [], [], [], []
 for pc in sw:
     o = len(sv)
-    sv += [tuple(v) for v in pc.v]
+    sv += [tuple(sm @ v + so) for v in pc.v]
     sf += [[o + i for i in f] for f in pc.f]
     smat += [pc.mat] * len(pc.f)
+    srooms += [pc.room] * len(pc.v)
 wme = bpy.data.meshes.new("weapon")
 wme.from_pydata(sv, [], sf)
 wme.update()
@@ -467,14 +469,26 @@ for p in wme.polygons:
     p.material_index = wm.index(smat[p.index])
     for li in p.loop_indices:
         wuv.data[li].uv = cells[smat[p.index]]
-for m_ in (me, wme):
-    m_.polygons.foreach_set("use_smooth", [True] * len(m_.polygons))
-    m_.validate()                    # (the decimation leaves a few degenerate faces)
-    m_.update()
-print("tris body", WK.tris([ob]), "weapon", WK.tris([wob]), "total", WK.tris([ob, wob]))
+wattr = wme.color_attributes.new("ink", "FLOAT_COLOR", "POINT")
+wic = np.ones((len(sv), 4), np.float32)
+wic[:, 3] = srooms
+wattr.data.foreach_set("color", wic.ravel())
+wob.vertex_groups.new(name="hand.R").add(list(range(len(sv))), 1.0, "REPLACE")
+bpy.ops.object.select_all(action="DESELECT")
+wob.select_set(True)
+ob.select_set(True)
+bpy.context.view_layer.objects.active = ob
+bpy.ops.object.join()
+me = ob.data
+me.polygons.foreach_set("use_smooth", [True] * len(me.polygons))
+me.validate()                    # (the decimation leaves a few degenerate faces)
+me.update()
+for nm, f in (("weapon_muzzle", 1.0), ("anchor_blade_mid", 0.5), ("anchor_blade_root", 0.02)):
+    WK.anchor(arm, "hand.R", nm, tuple(np.array(so) + sm @ np.array([0.0, K.BLADE_Y0 + K.BLADE_L * f, 0.0])))
+print("tris", WK.tris([ob]))
 for o in list(bpy.data.objects):
     if o.name in ("Src", "Low"):
         bpy.data.objects.remove(o)
 bpy.ops.wm.save_as_mainfile(filepath=os.path.splitext(OUT)[0] + ".blend")
-WK.export(OUT, [arm, ob, wob] + [o for o in bpy.data.objects if o.type == "EMPTY"], colors=True)
+WK.export(OUT, [arm, ob] + [o for o in bpy.data.objects if o.type == "EMPTY"], colors=True)
 print("exported", OUT, os.path.getsize(OUT))

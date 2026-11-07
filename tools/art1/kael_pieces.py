@@ -1,7 +1,7 @@
 """ART-1 Kael v2 (briefs/art-refs/kael_v2/): the pieces built by script around the scan, as data (meshkit Pieces).
 Body pieces are in the Blender frame (Z up, he faces +Y, his right hand is +X), on the rig of art/wardens/src/kael_rig.json.
-The sword is the Warden's `weapon` (RIG_CONTRACT: unskinned, in the Gun node's space, +Y along the blade, the grip about
-the origin): the turnaround's broad cracked blade, the guard, the red wrapped grip, the ring pommel with its hooked chain.
+The sword is built in a Gun's space (+Y along the blade, the grip about the origin; sword_matrix puts it in his fist, where it
+is skinned to the hand: the clips carry it): the turnaround's broad cracked blade, the guard, the red wrapped grip, the ring pommel with its hooked chain.
 Its size is the turnaround's against his height (FIDELITY_CHECKLIST weapon scale): whole sword 0.80 of his height, blade
 0.61, blade width 0.10; the game puts the Gun scale (1.42) and warden_look's weapon_scale (0.85) on top, so one Gun metre
 is GUN_M of his model metres."""
@@ -135,6 +135,18 @@ def hilt():
 def sword():
     """Every piece of the weapon, in the Gun's frame."""
     return blade() + [cracks()] + hilt()
+
+
+GRIP_DIR = norm(np.array([0.0, 0.76, -0.65]))    # the blade from the fist at rest (he faces +Y, the hand hangs): forward and down
+
+
+def sword_matrix(fist):
+    """The sword is skinned to the hand (the clips move it): Gun space -> model metres, the grip's middle in the fist at `fist`,
+    the blade along GRIP_DIR, its flats facing sideways. Returns (3x3, offset)."""
+    e = norm(np.cross(GRIP_DIR, (1.0, 0, 0)))
+    e = e if e[2] > 0 else -e
+    m = np.column_stack([-e, GRIP_DIR, np.cross(GRIP_DIR, e)]) * GUN_M
+    return m, np.asarray(fist, float) - m @ np.array([0.0, GUARD_Y - GRIP_L / 2, 0.0])
 
 
 def wrist_chain(side, bones):

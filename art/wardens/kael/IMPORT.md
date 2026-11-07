@@ -32,10 +32,19 @@ files in ~/meshy/kael_v2/ (never in git; `build.sh` there reruns everything). Ru
   the shawl's own surface) and two sash tails from the knot at his right hip, placed on the trousers by ray.
 - **Wrist chains:** short chains from each cuff, two bones each on the hang chains the game knows
   (spring_hangcuff_* left, spring_hangwarchain_* right).
-- **Sword (`weapon`, Gun space):** the turnaround's broad cracked blade (bevelled slab, white-hot cracks as
+- **Sword (skinned, joined into Body):** the turnaround's broad cracked blade (bevelled slab, white-hot cracks as
   `glow-sword` ribbons in model_glow `sword`), the guard with its point, the red wrapped grip, the ring pommel and
   its hooked chain. Sized to the turnaround against his height: whole sword 0.80, blade 0.61, blade width 0.10
-  (after the Gun's 1.42 and warden_look weapon_scale 0.85).
-- **Armature:** the contract's plus the spring chains of v1 (mane x5, hangcuff, hangwarchain); every anchor of v1
-  kept (anchor_head_top, anchor_chest, anchor_arm_*). 12.6k triangles in all (body 11.7k, sword 0.9k).
+  (after the Gun's 1.42 and warden_look weapon_scale 0.85). It is weighted 1.0 to hand.R in the glb, so the clips
+  carry it (`skinned_weapon` in content/rules/warden_anim/kael.json; the Gun is only an invisible reference). The FX
+  empties weapon_muzzle (tip), anchor_blade_mid and anchor_blade_root sit on hand.R along the blade.
+- **Clips:** 49, retargeted from the v1 glb (origin/ext/art1-kael-2) by bone name with `tools/art1/kael_retarget.py`
+  (shared bones keep their rest rotations; translation tracks take the rest-translation delta; v1 spring and
+  renamed bones are dropped, the game's spring chains drive them; dash is padded to the kit's 0.9 s). Config:
+  content/rules/warden_anim/kael.json (`fade` on jug_wave_wind, jug_lunge_wind). Several clips were authored for
+  kit 113 (levelled lunge, side-swing wave, upright meteor, 0.42 s dash), which is not on main yet; they run on
+  main's older poses and want a re-fit when kit 113 lands. Checked by `--clip-check` (juggernaut in OWN_MODELS).
+- **Armature:** the contract's plus the spring chains of v1 (mane x5, hangcuff, hangwarchain); the anchors of v1
+  kept (anchor_head_top, anchor_chest, anchor_arm_*), no anchor_blade_tip (weapon_muzzle is the tip). 12.6k triangles
+  in all (body 11.7k, sword 0.9k).
 - `kael.glb.import`: `generate_lods=false` (LODs would eat the thin cards), `force_disable_compression=true`.
