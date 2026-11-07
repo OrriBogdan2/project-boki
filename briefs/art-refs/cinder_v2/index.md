@@ -23,3 +23,8 @@ Alternates: `cinder_v2_bigprops_alt.jpg` (large bubbling tank), `cinder_v2_face_
 - `cinder_v2_splash.jpg` ("Cleansing Fire"): wide ruined chapel; she burns the blight vines; green shoots grow from the ash.
 - `cinder_v2_splash_alt.jpg`: closer, symmetric version.
 - Turnaround still pending.
+
+## Splash: FINAL (Nov 6, 22:03 ET)
+- `cinder_v2_splash.jpg` ("Last Dance"): waltzing with a masked noble in a blighted ballroom; flames bloom from her heels and tail; the crowd is spellbound.
+- Alternates: `cinder_v2_splash_moth_alt.jpg` (luring corrupted villagers into a bonfire), `cinder_v2_splash_cleansing_alt.jpg`.
+- Turnaround: the 4-view A-pose was blocked by the image filter twice (revealing design plus a neutral full-body pose). For 3D, use `cinder_v2_master_sheet.jpg` (front, 3/4, back) plus `cinder_v2_design_locked.jpg`.
