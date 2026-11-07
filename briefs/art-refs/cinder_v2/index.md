@@ -62,7 +62,7 @@ Known limit: the hose routing on the two side views is still inconsistent: it lo
    - The tail base sweeping over it.
    Apply to the master sheet, turnaround and any splash pose that shows it.
 
-## REDESIGN: Cinder the Fire Queen (owner, Nov 7, 03:05 ET)
+## REDESIGN: Cinder the Flame Queen (owner, Nov 7, 03:05 ET; title "the Flame Queen" confirmed 03:06)
 - **No weapons:** the flamethrower, the hose and the copper fuel tank are removed from her design. She now **shoots fire from her hands**.
 - **Splash (main):** `cinder_v2_splash.jpg` = "The Last Kiss": she cradles a kneeling knight's face; his helmet and armour glow and melt under her touch; a burning battlefield.
 - **Splash (alternate):** `cinder_v2_splash_alt.jpg` = "The Pyre Queen": she lounges on a lava-rock throne in a burning cathedral; knights kneel and cower; a flame dances in her hand.
