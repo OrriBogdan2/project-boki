@@ -22,3 +22,6 @@ Base: the original `briefs/art-refs/grimble_turnaround.png`. The old "Dredge" sh
 
 ## Turnaround updated (Nov 6, 19:44 ET)
 `grimble_v2_turnaround.jpg` replaced with metal-teeth run 6: a clenched, slightly narrower grin; grey scrap-metal teeth with a gold tooth and a black gap; a smug squinting natural eye. `explorations/teeth_comparison.jpg` shows all 8 runs side by side.
+
+## Turnaround updated (Nov 6, 19:51 ET): no nose
+`grimble_v2_turnaround.jpg` is now no-nose run 5: a smooth, flat face with no nose or nostrils (as in the original; the owner prefers it creepier). Metal teeth with a gold tooth, smug squint. Keep "no nose, no nostrils" in every future prompt.
