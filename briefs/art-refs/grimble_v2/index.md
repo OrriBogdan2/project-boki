@@ -58,3 +58,6 @@ Canon check: no nose, three-lens loupe and metal teeth with a gold tooth intact.
 
 ## Weapon sheet (owner, Nov 7, 15:32 ET)
 `grimble_v2_weapon_sheet.jpg` is an edit of the old `grimble_weapons.png` (Nano Banana Pro, 1:1, 4K). The steel hook row became the purple-slime bone-hook arm: four views plus a close-up of the dripping tip. The loot pack, loupe, blunderbuss, gauntlets and helmet are unchanged. The chain and socket close-ups stay for the hook-grab chain. Alt (16:9, dark panel): explorations.
+
+## Nose removed on the grumpy head (owner, Nov 7, 15:50 ET)
+A local OpenCV inpaint plus smoothing removed the leftover nose on the third head (grumpy) of `grimble_v2_master_sheet.jpg`. All three heads now match the canon: no nose.
