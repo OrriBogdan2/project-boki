@@ -1,12 +1,13 @@
-2026-11-06T18:48:18Z
+2026-11-07T06:18:17Z
 
 PHYSICS LANE (worktree /home/boki/lanes/physics-20261106-1607). S1 retired 17:20 UTC; its last STATUS is commit 5f165a95 on this branch.
 
 | item | branch | sha | state |
 |---|---|---|---|
-| 185 + 162/162b + 149 | ext/phys-integrated | 38dde07c | READY (00:30 UTC candidate gate) |
+| 185 + 162/162b + 149 | ext/phys-integrated | ceab95f4 | READY (08:30 UTC candidate). 38dde07c plus a merge of kit-kael-113b (the 00:30 run skipped it on a conflict) |
+| 185b mantle (owner) | ext/phys-185b-mantle | cc3212ae | READY on top of integrated. A dash keeps 0.6x over the lip; findings in briefs/supervive-data/MANTLE_185b.md; clips in /home/boki/clips/185b |
 | 151 training rocks + layout rules | ext/phys-151-layout | fca0115f | READY. Conflicts with integrated only in check_registry |
-| 150 SV parity | ext/phys-150-parity | 4071fe66 | SV walking stop (braking 22.2, friction 2, shed to run speed); full suite running |
+| 150 SV parity | ext/phys-150-parity | 4071fe66 | SV walking stop (braking 22.2, friction 2, shed to run speed); suite: bot-sanity seed 9 is red on every run. Investigating whether the braking change causes it; READY held |
 | 163 squad launch + SV glide | ext/phys-163-drop | cfc9b8d1 | stacked on integrated; checks + GPU shots done; suite after 150 |
 
 - 151 root cause: the rock hop threw you over a clump of scattered rocks into a one-tile hole sealed by rocks on four sides. Fix: no rock hop; stray rocks placed then cleared (the map otherwise matches main); sealed pockets filled.
