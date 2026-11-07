@@ -567,11 +567,7 @@
 	"kael": {
 		"painted": {
 			"rim_far": 0.35,
-			"rim_far_color": [
-				1.0,
-				0.8,
-				0.36
-			]
+			"rim_far_color": [1.0, 0.36, 0.4]
 		},
 		"slots": {
 			"skin": {
@@ -610,7 +606,8 @@
 			},
 			"glow": {
 				"glow": 2.8
-			}
+			},
+			"card": {"sheen": 0.0, "glow": 0.08}
 		},
 		"smoke": {
 			"color": [
@@ -652,33 +649,18 @@
 			},
 			{
 				"at": "anchor_arm_up",
-				"color": [
-					1.0,
-					0.8,
-					0.5,
-					0.28
-				],
-				"size": 0.26
+				"color": [1.0, 0.16, 0.22, 0.2],
+				"size": 0.2
 			},
 			{
 				"at": "anchor_arm_elbow",
-				"color": [
-					1.0,
-					0.8,
-					0.5,
-					0.22
-				],
-				"size": 0.2
+				"color": [1.0, 0.16, 0.22, 0.16],
+				"size": 0.16
 			},
 			{
 				"at": "anchor_arm_fore",
-				"color": [
-					1.0,
-					0.8,
-					0.5,
-					0.22
-				],
-				"size": 0.2
+				"color": [1.0, 0.16, 0.22, 0.16],
+				"size": 0.16
 			}
 		],
 		"weapon_scale": 0.85
