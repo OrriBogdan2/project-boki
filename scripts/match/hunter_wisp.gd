@@ -70,7 +70,7 @@ static func _look_id(h: Hunter) -> String:
 	return WispLook.equipped() if h.is_local() else ""
 
 static func _team_col(h: Hunter) -> Color:
-	return Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
+	return SideColor.of(h.m, h)      # the colour of the hunter's ring and downed marker
 
 static func _pop_in(h: Hunter, st: Dictionary) -> void:
 	_free_node(st)

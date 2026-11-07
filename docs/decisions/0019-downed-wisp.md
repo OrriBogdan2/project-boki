@@ -28,7 +28,7 @@ Add an entry under `looks` in `wisp_looks.json` with only the keys that differ f
 (nested keys merge). No code. `--wisp-check` covers every entry.
 
 ## Consequences
-- The local player's Wisp look is not sent to other players (they see `default`, tinted by team). Sending it
+- The local player's Wisp look is not sent to other players (they see `default`, tinted by their side colour, SideColor). Sending it
   needs a join-kit field and a Net.VERSION bump: see docs/DEBT.md.
 - `HunterAnim`'s downed crawl code is dead and can go.
 - Check: `--wisp-check`.
