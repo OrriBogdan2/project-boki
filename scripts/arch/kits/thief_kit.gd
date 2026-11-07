@@ -491,14 +491,6 @@ func play(move: String) -> void:
 		return
 	super.play(move)
 
-## Presses during the Cartwheel: the bolt fires mid-flip when its row says so.
-func fires_in_dash() -> bool:
-	return String(flow.row("lmb")["mode"]) == "fire"
-
-## flip_for picks the flip from her facing, so she keeps the cursor through it and a sideways Vault is a true cartwheel.
-func aims_in_dash() -> bool:
-	return fires_in_dash()
-
 ## Her own after-images on every dash: cyan streaks and a spinning cyan star where her hands were (not the
 ## shared team-colour pill).
 func own_dash_trail() -> bool:

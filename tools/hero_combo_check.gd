@@ -405,20 +405,17 @@ func _mage() -> void:
 	var n_di := P.shot_n
 	P.do_dash()
 	m.step(DT)
-	ok("dash table: Wirerun is rolling and DashFlow says LMB buffers, E fires",
-			P.roll_t > 0.0 and String(DashFlow.row_of("mage", "lmb", false)["mode"]) == "buffer" and String(DashFlow.row_of("mage", "e", false)["mode"]) == "fire"
+	ok("dash table: Wirerun is rolling and DashFlow says LMB fires (the source is silent), E fires",
+			P.roll_t > 0.0 and String(DashFlow.row_of("mage", "lmb", false)["mode"]) == "fire" and String(DashFlow.row_of("mage", "e", false)["mode"]) == "fire"
 			and absf(DashFlow.BUFFER_S - 0.15) < 0.001)
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
 	P.ak.use_e()
 	ok("dash table: E is cast mid-dash (not dropped)", not K.strikes.is_empty())
-	ok("dash table: the tapped bolt does not fire inside the dash", P.shot_n == n_di and P.roll_t > 0.0)
-	ac.step(m, 0.5)      # (under one interval: a check's key stays down, Match reads the real one every frame)
-	ok("dash table: the bolt tapped inside the dash goes off when it ends", P.shot_n == n_di + 1, "%d -> %d" % [n_di, P.shot_n])
-	P.inp["fire"] = false       # DashFlow's replayed tap leaves the key down in this harness (a real frame rewrites it)
+	ok("dash table: the tapped bolt fires inside the dash", P.shot_n == n_di + 1 and P.roll_t > 0.0, "%d -> %d" % [n_di, P.shot_n])
 	var n_di2 := P.shot_n
-	ac.step(m, 0.9)
+	ac.step(m, 0.5)
 	ok("dash table: and only once", P.shot_n == n_di2)
 	K.strikes.clear()
 	# dash animation: Wirerun and Slipstep keep their own moves, none shared
