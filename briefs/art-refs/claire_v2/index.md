@@ -64,3 +64,11 @@ Replaces "Nivi". Neve is Italian for "snow". Display name only; ids and files st
 
 ## Portrait: white braid (owner, Nov 7, 15:02 ET)
 `nivi_v2_portrait.jpg` was edited (Nano Banana Pro, 1:1): the braid is snowy white all the way down. Before the edit it turned blue from the jaw down; that version is `explorations/nivi_v2_portrait_blue_braid.jpg`.
+
+## Weapon sheet (owner, Nov 7, 15:32 ET)
+`nivi_v2_weapon_sheet.jpg` is a new prop sheet (Nano Banana Pro, 16:9, 4K) and replaces the old `claire_weapons.png`:
+- The candy-cane striped lavender spear: an ice heart guard with small icicle wings and an ice butt spike. Three views plus close-ups.
+- White figure skates with big fluffy fur cuffs, candy-cane laces and ice blades. Side, front, back and sole views, plus a lace close-up.
+- A silhouette for scale.
+
+Refs: a crop of the spear from the turnaround and a crop of the skates from the main design. Alt (twisted shaft, smaller cuffs): explorations.

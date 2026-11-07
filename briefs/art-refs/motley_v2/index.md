@@ -20,3 +20,6 @@ Known limits: the reaching hand is very large and slightly flat; the background 
 - A close-up of the box and spring.
 
 Nano Banana Pro, new generation, 3:4, 4K. Refs: the front view from `motley_turnaround.png` and `motley_portrait.png`. One edit then replaced the legs in the small views with the void ribbon.
+
+## Turnaround (owner, Nov 7, 15:32 ET)
+`motley_v2_turnaround.jpg` is the 3D turnaround in the new painted style: front, 3/4, side and back, with the void ribbon on the spring and the hovering box. It matches the two-tone doublet on the master sheet and replaces the old `motley_turnaround.png` at the art-refs root. Nano Banana Pro, new generation, 16:9, 4K; ref: the master sheet. The alt `explorations/motley_v2_turnaround_alt_harlequin.jpg` has a diamond harlequin pattern and puffed sleeves, which is off-model.

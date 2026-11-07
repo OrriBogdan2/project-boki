@@ -74,3 +74,6 @@ Portrait: candidate A saved (`explorations/sable_v2_portrait_candidate_A.jpg`): 
 Known limit: slight banding in the background fog.
 
 **Sable v2 set complete:** master sheet, turnaround, portrait, splash.
+
+## Weapon sheet (owner, Nov 7, 15:32 ET)
+`sable_v2_weapon_sheet.jpg` is an edit of the old `sable_weapons.png` (Nano Banana Pro, 1:1, 4K). The four round silver flasks, leftovers from the rejected bolas, became her moth-wing throwing knives: side, top and back views, plus one in its hip sheath. Ref: a crop of the knives from the master sheet. Known leftover: the round silver egg and the four flask close-ups on the right; see any later fix.

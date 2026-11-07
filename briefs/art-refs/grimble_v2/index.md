@@ -55,3 +55,6 @@ Edit the existing splash (`grimble_v2_splash.jpg`, "Scrapyard"), not a fresh gen
 
 Canon check: no nose, three-lens loupe and metal teeth with a gold tooth intact.
 - 03:36 ET: nose removed by an edit (ref: the no-nose portrait face); the result is now `grimble_v2_splash.jpg`.
+
+## Weapon sheet (owner, Nov 7, 15:32 ET)
+`grimble_v2_weapon_sheet.jpg` is an edit of the old `grimble_weapons.png` (Nano Banana Pro, 1:1, 4K). The steel hook row became the purple-slime bone-hook arm: four views plus a close-up of the dripping tip. The loot pack, loupe, blunderbuss, gauntlets and helmet are unchanged. The chain and socket close-ups stay for the hook-grab chain. Alt (16:9, dark panel): explorations.
