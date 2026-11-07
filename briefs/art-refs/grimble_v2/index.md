@@ -54,3 +54,4 @@ Edit the existing splash (`grimble_v2_splash.jpg`, "Scrapyard"), not a fresh gen
 `grimble_v2_splash.jpg`: his bone-hook slime arm hooks the red-haired boy around the waist, flipping him upside down, while the money bag flies away, bursting with glowing gold coins, pearls and gems. Grimble's face is panicked: wide eyes behind the loupe, teeth bared, a sweat drop, his free hand grasping at the treasure. Chain: edits on the "Scrapyard" splash (claws, then the bone-hook grip, then the panicked face and brighter money). The old version is `explorations/grimble_v2_splash_scrapyard_old.jpg`.
 
 Canon check: no nose, three-lens loupe and metal teeth with a gold tooth intact.
+- 03:36 ET: nose removed by an edit (ref: the no-nose portrait face); the result is now `grimble_v2_splash.jpg`.
