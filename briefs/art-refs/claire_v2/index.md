@@ -56,3 +56,6 @@ Known limits:
 - In the turnaround her eyes are pale without the glow; use the main design for the glow.
 - **Splash updated (owner, 04:36 ET):** `nivi_v2_splash.jpg` = "Blizzard Dash" (a speed-skater lunge through shattering shadow wolves in a blizzard); `nivi_v2_splash_alt.jpg` = "Thin Ice" (she seals the cracking river to save a child). The aurora spin moved to explorations (stiff pose).
 - **Portrait updated (04:37 ET):** `nivi_v2_portrait.jpg` = the festival-market version (warm lights, cabins and trees behind her; richer than the lake one).
+
+## Renamed: Neve, "the Snowglide" (owner, Nov 7, 04:38 ET)
+Replaces "Nivi". Neve is Italian for "snow". Display name only; ids and files stay (`rimewright`, `claire_*`, `nivi_v2_*`).
