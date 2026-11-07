@@ -2210,3 +2210,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - Checks on d36913e85: --wisp-check (all 12 heroes, teammate, tutorial, bleed-out, look data: 0 failures), warden-clips, box-revive, revive, practice-hero, clip, arena (0 failures); health.py --strict OK. --teammate-check has 1 failure ("a rival behind you is called before the chest") that is identical with 7907d9afe's hunter.gd, so not mine. I did not run the full suite.
 - Renders: first set (`--wisp-shots`, too bright: the core read as a white blob) /home/boki/jobq/done/20261107-063242-15952/out; a re-render with the toned-down glow is queued as jobq 20261107-064655-18778 (out dir /home/boki/jobq/done/20261107-064655-18778/out once it runs; the GPU queue was backed up).
 - Debt (docs/DEBT.md): HunterAnim downed crawl code is dead; the Wisp id is local only (others see the default, like glider skins; needs a join-kit field and a Net bump); no Wisp shop/picker UI.
+
+## 2026-11-07 deep (job 20261107-071501-a2): CLAIM Ravel v2 model rebuild
+- CLAIM: Ravel v2 model rebuild (art/wardens/hem/ to the locked v2 design, briefs/art-refs/ravel_v2/). Branch ext/ravel-v2-model.
