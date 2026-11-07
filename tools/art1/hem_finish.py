@@ -30,8 +30,11 @@ MATS = [s + "-hem" for s in SLOTS] + list(CELL) + ["card-hem"]
 BELT_Z = 0.965                       # the spool belt's height on the fitted scan
 SPOOL_X = (-0.15, -0.105, -0.06, 0.06, 0.105, 0.15)
 HEM_TOP = 0.56                       # z: the cards start tucked up inside the skirt's hem
-HEM_N = 34                           # hanging strips round the skirt
+HEM_N = 46                           # hanging strips round the skirt
 SLIT = 0.36                          # rad either side of the front: the slit, no fringe
+SKIRT_Z = (HEM_TOP - 0.04, BELT_Z - 0.06)    # z: the scan's skirt, between its hem and the belt
+PORCELAIN = "#e3dae3"                # the sheet's lilac porcelain skin
+SKIRT_LO, SKIRT_HI, SKIRT_RED = "#21111c", "#5c3352", "#6e1733"    # the skirt: plum folds dark to light, its red hem fade
 rig = json.load(open(RIG))
 bpy.ops.wm.open_mainfile(filepath=SRC)
 sc = bpy.context.scene
@@ -58,7 +61,7 @@ def belt_at(x):
     return p, np.array((p[0], p[1] * 2.0, 0.0)) / max(np.hypot(p[0], p[1] * 2.0), 1e-6)
 
 
-pieces = H.fist(J) + H.rigid(H.spools(belt_at, SPOOL_X), "hips") + H.rigid(H.back_needle(1) + H.back_needle(-1) + H.lash() + H.strings(), "hips") + H.rigid(H.bun_pins(BUN), "head")
+pieces = H.fist(J) + H.rigid(H.spools(belt_at, SPOOL_X), "hips") + H.rigid(H.back_needle(1) + H.back_needle(-1) + H.lash() + H.strings(), "hips") + H.rigid(H.bun_pins(BUN), "head") + H.rigid(H.shoulder_mask(J), "upper_arm.L")
 verts, faces, fsrc, vw, rooms = [], [], [], [], []
 for co, d in zip(lo_co, lo_w):
     verts.append(tuple(co))
@@ -101,7 +104,7 @@ for f in bm.faces:
     f.select = f.index < N_LOW
 bmesh.update_edit_mesh(me)
 bpy.ops.uv.smart_project(angle_limit=math.radians(66), island_margin=0.0, area_weight=0.0, scale_to_bounds=False)
-bpy.ops.uv.pack_islands(rotate=True, scale=True, margin_method="FRACTION", margin=0.003, shape_method="CONCAVE")
+bpy.ops.uv.pack_islands(rotate=True, scale=True, margin_method="FRACTION", margin=0.005, shape_method="CONCAVE")
 bpy.ops.object.mode_set(mode="OBJECT")
 cells = {nm: ((UNIQ_W + 1.0) / 2, (i + 0.5) / len(CELL)) for i, nm in enumerate(CELL)}
 uv = me.uv_layers["UV"]
@@ -141,7 +144,7 @@ for o in bpy.data.objects:
 src.select_set(True)
 ob.select_set(True)
 bpy.context.view_layer.objects.active = ob
-bpy.ops.object.bake(type="EMIT", use_clear=True, margin=8)
+bpy.ops.object.bake(type="EMIT", use_clear=True, margin=12)
 COL = np.array(atlas.pixels[:], np.float32).reshape(ATLAS, ATLAS, 4)[..., :3].copy()
 print("baked")
 
@@ -172,6 +175,99 @@ slot[dark & on_head] = "hair"
 for i, p in enumerate(me.polygons):
     p.material_index = MATS.index(fsrc[i]) if i >= N_LOW else MATS.index(slot[i] + "-hem")
 print("slots", {s: int((slot[:N_LOW] == s).sum()) for s in SLOTS})
+
+
+def box(a_, r):
+    """Box blur of radius r over the first two axes."""
+    for ax in (0, 1):
+        p_ = np.pad(a_, [(r + 1, r) if i == ax else (0, 0) for i in range(a_.ndim)], mode="edge")
+        c_ = np.cumsum(p_, axis=ax)
+        n_ = a_.shape[ax]
+        a_ = (np.take(c_, np.arange(2 * r + 1, 2 * r + 1 + n_), axis=ax) - np.take(c_, np.arange(n_), axis=ax)) / (2 * r + 1)
+    return a_
+
+
+def blur_in(v, m_, r):
+    """Blur of v over the texels in mask m_ only (no bleed across islands)."""
+    w_ = box(m_.astype(np.float32), r)
+    if v.ndim == 3:
+        return box(v * m_[..., None], r) / np.maximum(w_, 1e-4)[..., None]
+    return box(v * m_, r) / np.maximum(w_, 1e-4)
+
+
+def class_bake():
+    """Per texel: R its part (1 skin to repaint, 0.75 skirt to dye, 0.5 the rest, 0 no island), G its height / 2."""
+    skirt = (slot == "leather") & ~legs & (fc[:, 2] > SKIRT_Z[0]) & (fc[:, 2] < SKIRT_Z[1])
+    cls = np.where((slot == "skin") & ~on_head, 1.0, np.where(skirt, 0.75, 0.5))
+    cls[N_LOW:] = 0.5
+    lv = np.zeros(len(me.loops), int)
+    me.loops.foreach_get("vertex_index", lv)
+    lp = np.repeat(np.arange(len(me.polygons)), [p.loop_total for p in me.polygons])
+    cc = np.ones((len(me.loops), 4), np.float32)
+    cc[:, 0], cc[:, 1], cc[:, 2] = cls[lp], np.array(verts)[lv, 2] / 2.0, 0.0
+    ca = me.color_attributes.new("cls", "FLOAT_COLOR", "CORNER")
+    ca.data.foreach_set("color", cc.ravel())
+    tm = bpy.data.materials.new("tmp_cls")
+    tm.use_nodes = True
+    nt = tm.node_tree
+    at_, em = nt.nodes.new("ShaderNodeAttribute"), nt.nodes.new("ShaderNodeEmission")
+    at_.attribute_name = "cls"
+    nt.links.new(at_.outputs["Color"], em.inputs["Color"])
+    nt.links.new(em.outputs[0], nt.nodes["Material Output"].inputs["Surface"])
+    img = bpy.data.images.new("cls", ATLAS, ATLAS, float_buffer=True)
+    t_ = nt.nodes.new("ShaderNodeTexImage")
+    t_.image = img
+    nt.nodes.active = t_
+    me.materials.append(tm)
+    mi = np.zeros(len(me.polygons), np.int32)
+    me.polygons.foreach_get("material_index", mi)
+    me.polygons.foreach_set("material_index", np.full(len(mi), len(me.materials) - 1, np.int32))
+    sc.render.bake.use_selected_to_active = False
+    src.select_set(False)
+    bpy.ops.object.bake(type="EMIT", use_clear=True, margin=0)
+    me.polygons.foreach_set("material_index", mi)
+    me.materials.pop()
+    me.color_attributes.remove(ca)
+    return np.array(img.pixels[:], np.float32).reshape(ATLAS, ATLAS, 4)
+
+
+def repaint(col):
+    """Fills the bake's misses (black texels in an island), smooths the skin to porcelain keeping the red stitches, the dark
+    cracks and the cream joints, and dyes the skirt plum with a red fade at its hem."""
+    cb = class_bake()
+    part, z = cb[..., 0], cb[..., 1] * 2.0
+    cover = part > 0.25
+    miss = cover & (col.max(-1) < 0.012)
+    print("misses", int(miss.sum()))
+    for _ in range(10):
+        ok = cover & ~miss
+        est = blur_in(col, ok, 2)
+        got = miss & (box(ok.astype(np.float32), 2) > 0.01)
+        col[got] = est[got]
+        miss &= ~got
+    lum = col @ np.array((0.3, 0.59, 0.11), np.float32)
+    mx, mn = col.max(-1), col.min(-1)
+    sat = (mx - mn) / np.maximum(mx, 1e-4)
+    sk = np.abs(part - 1.0) < 0.1
+    base = blur_in(lum, sk, 12)
+    ref = float(np.median(lum[sk]))
+    shade = np.clip(base / ref, 0.8, 1.05) * 0.88 + np.clip(lum / ref, 0.6, 1.2) * 0.12
+    red = smooth(0.6, 0.8, sat) * (col[..., 0] > col[..., 1] + 0.2)
+    crack = smooth(0.05, 0.14, base - lum)
+    warm = smooth(0.04, 0.1, col[..., 1] - col[..., 2]) * smooth(0.1, 0.2, sat)
+    keep = np.clip(np.maximum(np.maximum(red, crack), warm), 0, 1)[..., None]
+    skin_c = hexc(PORCELAIN)[None, None] * shade[..., None]
+    col[sk] = (skin_c * (1 - keep) + col * keep)[sk]
+    sd = np.abs(part - 0.75) < 0.1
+    t_ = np.clip(lum / 0.26, 0, 1.4)[..., None]
+    plum = hexc(SKIRT_LO)[None, None] * (1 - t_) + hexc(SKIRT_HI)[None, None] * t_
+    fade = (smooth(HEM_TOP + 0.12, HEM_TOP, z) * 0.75)[..., None]
+    dye = plum * (1 - fade) + hexc(SKIRT_RED)[None, None] * (0.55 + 0.6 * t_) * fade
+    col[sd] = dye[sd]
+    print("repaint skin", int(sk.sum()), "skirt", int(sd.sum()), "ref", round(ref, 3))
+
+
+repaint(COL)
 for nm in cells:
     x0, y0 = int((UNIQ_W + 0.004) * ATLAS), int((cells[nm][1] - 0.5 / len(CELL)) * ATLAS) + 2
     COL[y0:y0 + ATLAS // len(CELL) - 4, x0:] = hexc(CELL[nm])
@@ -203,7 +299,7 @@ def card_atlas():
     # hem
     u0, _, u1, _ = HEM_C
     cx = (xs - u0) / (u1 - u0)
-    plum, red, deep = hexc("#2a1d2c"), hexc("#9c1636"), hexc("#561226")
+    plum, red, deep = hexc("#3e2238"), hexc("#9c1636"), hexc(SKIRT_RED)
     a_ = np.zeros((h, w), np.float32)
     k = 15
     for layer, (kk, lmin, lmax, wd) in enumerate(((k, 0.45, 0.8, 0.5), (k * 2 + 1, 0.55, 1.0, 0.22), (k * 3 + 2, 0.7, 1.0, 0.1))):
@@ -259,8 +355,8 @@ def hem_cards():
         hit = bvh.ray_cast(Vector((d[0] * 0.5, d[1] * 0.5, z0)), Vector((-d[0], -d[1], 0.0)), 0.6)
         r = (Vector((hit[0].x, hit[0].y, 0)).length if hit[0] is not None else 0.2) + 0.002
         # the fringe's length: short by the slit, long at the sides, a shade shorter dead behind
-        ln = 0.13 + 0.25 * smooth(SLIT, 1.5, off) - 0.04 * smooth(2.3, 3.14, off) + rng.uniform(-0.02, 0.03)
-        hw = math.pi * r / HEM_N * 1.5
+        ln = 0.18 + 0.25 * smooth(SLIT, 1.5, off) - 0.04 * smooth(2.3, 3.14, off) + rng.uniform(-0.02, 0.03)
+        hw = math.pi * r / HEM_N * 1.9
         t_ = np.array((math.cos(th), math.sin(th), 0.0))
         p = d * r + np.array((0, 0, z0))
         rows = [p + d * (0.035 * q * q) + np.array((0, 0, -ln * q)) for q in (0.0, 0.34, 0.68, 1.0)]

@@ -30,6 +30,11 @@ NEEDLE_TOP, NEEDLE_TIP, NEEDLE_Y = (-0.243, 1.8), (0.358, 0.75), -0.185
 EYE_LEN, EYE_W = 0.19, 0.044         # the eye's loop, length and half width
 NEEDLE_WRAPS = ((0.17, 0.33), (0.49, 0.61), (0.905, 0.925))      # along the needle, 0 eye .. 1 tip
 LASH_S = 0.405                       # where the two cross
+# the porcelain mask on her left shoulder (sheet: shoulder top to mid upper arm, turned out and forward)
+MASK_H, MASK_W, MASK_D = 0.105, 0.07, 0.036      # half height, half width, the dome's depth (m)
+MASK_OUT = np.array((-0.054, 0.024, -0.07), F)    # its centre from the upper_arm.L joint
+MASK_N = (-0.75, 0.62, 0.1)                     # the way it faces
+MASK_TILT = 0.22                                  # rad, its chin turned toward her back
 
 
 def joints(rig_path):
@@ -208,4 +213,58 @@ def arrow(at, ax, ay, az):
         out.append(sweep("bind", THREAD, [xf(0, yy - 0.007), xf(0, yy + 0.007)], HEX, [0.0062, 0.0062], side_hint=az, tip=False, room=0.0))
     for sg in (-1, 1):
         out.append(sweep("vane", "leather-vane", [xf(sg * 0.003, 0.03), xf(sg * 0.017, 0.07), xf(sg * 0.02, 0.1), xf(sg * 0.003, 0.127)], SQ, [0.0012, 0.0024, 0.0024, 0.0012], side_hint=ay, depth=[0.0024, 0.012, 0.012, 0.0024], room=0.0))
+    return out
+
+
+def _mask_frame(J):
+    n = norm(np.array(MASK_N, F))
+    up = norm(np.array((0, 0, 1.0)) - n * n[2])
+    side = np.cross(up, n)
+    c, s_ = math.cos(MASK_TILT), math.sin(MASK_TILT)
+    up, side = up * c + side * s_, side * c - up * s_
+    return J["upper_arm.L"] + MASK_OUT, side, up, n
+
+
+def _mask_depth(x, y):
+    """The face's relief over the unit oval: dome, brow, nose, cheeks, chin."""
+    r2 = x * x + y * y
+    d = np.sqrt(np.maximum(1.0 - r2, 0.0)) * 0.75 + 0.25 * (1.0 - r2)
+    d += 0.22 * np.exp(-(x / 0.13) ** 2 - ((y + 0.02) / 0.3) ** 2)          # nose
+    d += 0.08 * np.exp(-((y - 0.3) / 0.12) ** 2) * (1 - x * x)              # brow
+    d -= 0.1 * np.exp(-((np.abs(x) - 0.36) / 0.16) ** 2 - ((y - 0.17) / 0.11) ** 2)    # sockets
+    return d
+
+
+def shoulder_mask(J):
+    """The porcelain half-mask on her left shoulder: a closed relief oval, hollow black eyes, a red seam of stitches."""
+    c, sd, up, n = _mask_frame(J)
+    ang = np.linspace(0, math.tau, 18, endpoint=False)
+    rings = (0.0, 0.2, 0.4, 0.58, 0.74, 0.88, 1.0)
+    at = lambda x, y, k=1.0: c + sd * x * MASK_W + up * y * MASK_H + n * _mask_depth(x, y) * MASK_D * k
+    verts, faces = [at(0, 0)], []
+    for r in rings[1:]:
+        verts += [at(r * math.cos(t) * 0.999, r * math.sin(t) * 0.999) for t in ang]
+    m = len(ang)
+    for j in range(m):
+        faces.append([0, 1 + j, 1 + (j + 1) % m])
+    for i in range(len(rings) - 2):
+        b = 1 + i * m
+        for j in range(m):
+            faces.append([b + j, b + m + j, b + m + (j + 1) % m, b + (j + 1) % m])
+    back = len(verts)
+    verts.append(c - n * MASK_D * 0.15)
+    rim = 1 + (len(rings) - 2) * m
+    for j in range(m):
+        faces.append([back, rim + (j + 1) % m, rim + j])
+    out = [Piece("mask", SKIN, verts, faces)]
+    for sg in (-1, 1):                 # the hollow eyes: thin closed lenses lying in the sockets
+        ex, ey = sg * 0.36, 0.17
+        ring = [at(ex + 0.21 * math.cos(t), ey + 0.1 * math.sin(t) - sg * 0.04 * math.cos(t), 1.02) for t in np.linspace(0, math.tau, 8, endpoint=False)]
+        lens = [at(ex, ey, 1.04)] + ring + [at(ex, ey, 0.9)]
+        out.append(Piece("mask_eye", BOW, lens, [[0, 1 + k, 1 + (k + 1) % 8] for k in range(8)] + [[9, 1 + (k + 1) % 8, 1 + k] for k in range(8)]))
+    seam = [at(0.62 + 0.08 * math.sin(y * 3), y, 1.08) for y in np.linspace(0.62, -0.7, 6)]
+    out.append(sweep("mask_seam", THREAD, seam, SQ, [0.003] * 6, side_hint=up, tip=False, room=0.0))
+    for k, y in enumerate(np.linspace(0.5, -0.55, 5)):
+        x0 = 0.62 + 0.08 * math.sin(y * 3)
+        out.append(sweep("mask_stitch", THREAD, [at(x0 - 0.16, y + 0.04, 1.08), at(x0 + 0.16, y - 0.04, 1.08)], SQ, [0.0028, 0.0028], side_hint=n, tip=False, room=0.0))
     return out
