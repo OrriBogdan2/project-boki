@@ -28,3 +28,18 @@ Update "frost demoness" to something like "frost spirit", since the demon parts 
 
 ## Renamed: Nivi, "the Snowglide" (owner, Nov 7, 00:13 ET)
 Claire is renamed **Nivi** ("Nivi the Snowglide"). Display name only; ids and files stay (`rimewright`, `claire_*`). Passed to the coordinator via the owner.
+
+## REDESIGN: Nivi v2 main design (Nov 7, 04:26 ET)
+`nivi_v2_main_design.jpg`. Built by edits on the subtle-bunny figure-skater (M2), one feature at a time:
+- Her human face (no bunny nose); big glowing ice-blue eyes; rosy cheeks.
+- Tall white bunny ears (one upright, one folded) with a red-and-white candy-cane bow at the base of the upright ear.
+- Big fluffy cheek fur tufts; soft white fur on her shoulders and arms to fluffy wrist cuffs; a big fluffy tail.
+- One thick braid, white fading to icy blue, with a glowing snowflake clasp.
+- A glowing frost-mist scarf trailing behind her. **For 3D, make it a VFX trail, not a cloth mesh.**
+- An icy-blue skating leotard with a sheer sparkling frost skirt; a candy-cane sash with a bow at her waist.
+- Fluffy fur cuffs over ice-blade skates with candy-cane laces.
+- Her candy-cane-striped ice spear with the heart-crystal head.
+
+Explorations: bunny levels, outfits (elegant / sporty), signature elements, the snow princess sheet, and a failed merge (fresh generations drifted to a chibi toy style; edits kept her).
+
+Skin ideas from the outfit sheets: Snow Princess (E4), Crystal Ballerina (E1), Midnight (E2), Speed Skater (S1), Hockey (S3), Cosy Snow Bunny (O2), Candy-Cane Festival (O4).
