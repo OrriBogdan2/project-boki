@@ -215,3 +215,9 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-07 (owner): roster order swap
 - Cinder and Claire (Nivi) swap places. Order is now: Vex, Mossy, Ryzz, Kael, Ravyl, Nivi, Grimble, Lumi, Cinder, Kibo, Motley, Sable (display names).
+
+## 2026-11-07 (owner, via coordinator): going down turns you into a **Wisp**
+- When a Hunter is downed, the hero model pops into a Wisp (a small glowing spirit). No per-hero downed animation is needed; existing `downed` clips become unused (keep the files, stop playing them).
+- Needed visuals: a short "pop into Wisp" effect, a Wisp idle/move loop, and a tiny "pop back" when revived (the hero reappears from the Wisp). One shared Wisp for now.
+- Gameplay of the downed state (timers, movement speed, revive channel, bleed-out) stays as it is today unless the owner changes it; only the presentation changes.
+- Wisps are a cosmetic slot we can sell: build it as a swappable look (a Wisp id on the player's cosmetics, default Wisp first), so new Wisp looks are data, not code. Original designs only (genre inspiration OK, no copied looks).
