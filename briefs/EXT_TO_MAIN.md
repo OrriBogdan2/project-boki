@@ -2492,3 +2492,34 @@ READY ext/text-relic-renames-rebased e6389cff (fixes the combo51_shots.gd confli
 - NOT fixed, not this branch: --teammate-check has ONE failure on origin/main 7907d9afe too ("a rival behind you is called before the chest (["loot"])", teammate_check.gd:199; deterministic, 1 fail on both). The 'leads you to the chest and the outpost' assertion passes on this branch and on main here (led includes chest, goexit), so it did not reproduce; it may only fail under load. Treat --teammate-check as red-on-main (same), not NEW-RED.
 - Cost: +78/-11 lines in 6 files; 1 new file (scripts/core/background_work.gd, 43 lines, + .uid).
 READY ext/text-relic-renames-rebased 6b2895ed9 (supersedes e6389cff; adds owner order swap: Sparkle 9th, Motley 11th)
+
+## READY 2026-11-07: Sable v2 model rebuild, escalation pass (ext/sable-v2-model, 3e1816a6e)
+Supersedes READY 4281b56a2. Same model contract: 14,893 tris, 7,994 verts, one 2048 atlas, 8 materials, shared 18-bone armature, every FX point and anchor name, 47 clips, kit wiring. Commits on top of 4281b56a2: 1192cbb60 (feather-plume antennae, chevron braid, maroon pistol stocks), 78279e19c (smaller muzzle halos, metal fresnel down, height_3d 1.06, debt note), 3e1816a6e (plumes square to her front). No Meshy credits spent. No Net or save change.
+
+What changed from the escalation list:
+- Antennae are now the turnaround's feather plumes in a V (two sheets back to back, 192 tris each), not the old fan-edged wings. The notched fuzz sheet remains the debt note's compromise.
+- Pistol stocks painted deep maroon (#2b1316 to #8c584c); barrel silver a step darker and the muzzle halos smaller (px 7, strength 1.2), so the barrels keep their grey under the glow. Metal fresnel 0.25.
+- Braid: 11-lobe sweep with painted chevron creases, reads woven at match zoom (DEBT.md says what a real plait would cost).
+- A plume tipped back about its stem rendered black at close range in the engine (one side faced away from the sun); the plumes now stand square to her front. closeup_front_before.png shows the 4281b56a2 antennae for comparison.
+
+Renders in briefs/art-refs/sable_v2/ingame/ (jobq 20261107-175351-11674, final build): turnaround_close, turnaround_game, front_34, back_34, closeup_front, moves_close_1; match.png (jobq 20261107-172732-03122, one commit earlier, no antenna difference at that distance). closeup_front_before.png is the 4281b56a2 engine shot.
+
+Weapon scale vs the sheet (FIDELITY_CHECKLIST), unchanged:
+| Item | Sheet | Model |
+| Pistol length | about .22 of body height, about .39 rig | barrel .365 plus stock, length unchanged |
+| Barrel diameter | about .038 | about .045, a little thick |
+| Knife | about .34 (master) | about .39, a little long |
+
+Checks on the final build, all pass: --warden-rig-json thief (18 bones), --warden-glb-check (187 checks, 0 failed), --warden-model-check (157 checks, 0 failed; 1.057x a medium hunter, sheet 1.06x), health.py --strict (STYLE OK, HEALTH OK). On the same mesh one antenna rebuild earlier (no weapon or rig change since): --rig-standard-check, --hero-check --hero=thief, --hero-vfx-check, --weapon-clip-check (CLIP PASS, worst clearance 0.047 m). gen_wiki run.
+
+Decisions (alternative in brackets):
+- Plumes face front, no back tilt. (A tilt reads better from the side but needs the sun on both faces; a two-sided fur slot would allow it.)
+- Weapon ramps sit a step under the sheet so the engine's 1.35x light lands on the sheet's colour. (Match the sheet in Blender and let the engine overshoot.)
+- Collar-edge violet left as is: it is the lining's glow slot bleeding one texel, not visible in play.
+- Godot's import cache must be refreshed (godot --headless --import) before checks or shots on a rebuilt glb; a stale cache showed the old mesh once in this pass.
+
+Please look at:
+- Braid flat close up, fuzz a notched opaque sheet (DEBT.md, about 300 tris over the budget to fix).
+- Barrels still a touch pale right under the muzzle halo in closeup shots.
+
+READY ext/sable-v2-model 3e1816a6e
