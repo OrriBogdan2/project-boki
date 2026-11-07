@@ -68,3 +68,4 @@ On the final splash (`ravel_v2_splash.jpg`):
 - Her face should look creepier and more porcelain: glazed doll skin with fine cracks, painted doll features, a more unsettling stare and grin.
 - The two giant crossed needles on her back aren't visible; bring them back (they should show over her shoulders).
 Plan: one edit on the final splash for each item (face first, then needles), since one change per edit sticks best.
+- **FINAL v2 (04:51 ET):** `ravel_v2_splash.jpg` is the spotlight full draw with the crossed needles on her back (edit with ref `ref_needles_back`), plus a face edit (sly closed-mouth smile, ref from the master sheet), plus a local colour match to the pre-edit spotlight version to undo the magenta drift. Candidates are in explorations/ (`ravyl_faceswap_A/B/C`, `ravyl_face_too_creepy`).
