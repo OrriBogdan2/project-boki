@@ -14,7 +14,7 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | File | What |
 |---|---|
 | `tools/boki/boki_sdf.py` | Signed-distance primitives, surface nets, smooth noise |
-| `tools/boki/vespyx.py`, `prismander.py`, `mycroll.py`, `glintmole.py`, `rimeshrew.py`, `zephyrak.py`, `gravadillo.py`, `cairnback.py`, `lunowl.py`, `gloamshell.py`, `selenfin.py`, `mycroll.py`, `mycroll.py` | The creature: primitives, each naming its bone; work props; palette |
+| `tools/boki/vespyx.py`, `prismander.py`, `mycroll.py`, `glintmole.py`, `rimeshrew.py`, `zephyrak.py`, `gravadillo.py`, `cairnback.py`, `lunowl.py`, `gloamshell.py`, `selenfin.py` | The creature: primitives, each naming its bone; work props; palette |
 | `tools/boki/vespyx_paint.py` (and the same modules) | The coat, painted off the same fields into a 2k atlas |
 | `tools/boki/boki_grown.py`, `boki_tools.py` | Evo's mutations and the tools, placed from each species' anchors |
 | `tools/boki/*_fusion.py`, `build_fusion.py`, `scripts/match/boki_fusion.gd` | Fusion parts on the Hunter's torso |
