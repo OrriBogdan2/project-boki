@@ -61,8 +61,8 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [the Snowglider](Class-Snowglider.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
 | [the Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
 | [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
-| [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
 | [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
+| [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
 
 ### How Hunters unlock
 
@@ -80,8 +80,8 @@ A new save picks 1 of 1 starters (the Hired Gun) before the egg pick and plays t
 | [the Snowglider](Class-Snowglider.md) | medium | Slow 20 enemies | 20 |
 | [the Storm Chaser](Class-Storm-Chaser.md) | medium | Stagger 6 monsters with abilities | 6 |
 | [the Barnacle Knight](Class-Barnacle-Knight.md) | medium | Knock down 2 hunters while under half health | 2 |
-| [the Void Jester](Class-Void-Jester.md) | hard | Knock down 3 hunters while fused with your Boki, once 8 Hunters are open | 3 |
 | [the Silver Thief](Class-Silver-Thief.md) | medium | Land 12 hits while in the air | 12 |
+| [the Void Jester](Class-Void-Jester.md) | hard | Knock down 3 hunters while fused with your Boki, once 8 Hunters are open | 3 |
 
 ### Mastery
 
@@ -130,15 +130,15 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Barnacle Knight | Knock 8 enemies into walls | 8 | Emote: Shield Rap |
 | the Barnacle Knight | Make it out after being knocked down | 1 | Title: Still Standing |
 | the Barnacle Knight | Open 6 chests | 6 | Banner: Iron Oath |
+| the Silver Thief | Land 25 hits while in the air | 25 | Colourway: Midnight Silk |
+| the Silver Thief | Stun 6 enemies | 6 | Emote: Twirl |
+| the Silver Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
+| the Silver Thief | Knock down a hunter while fused | 1 | Glider: Dusk Moth |
 | the Void Jester | Knock down 4 hunters while fused | 4 | Skin: Void Bloom |
 | the Void Jester | Stun 15 enemies | 15 | Trail: Lantern Motes |
 | the Void Jester | Make it out carrying 8 items | 8 | Title: Swapkeeper |
 | the Void Jester | Fly through 15 air rings | 15 | Glider: Lantern Moth |
 | the Void Jester | Revive 3 teammates | 3 | Banner: Tidelight |
-| the Silver Thief | Land 25 hits while in the air | 25 | Colourway: Midnight Silk |
-| the Silver Thief | Stun 6 enemies | 6 | Emote: Twirl |
-| the Silver Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
-| the Silver Thief | Knock down a hunter while fused | 1 | Glider: Dusk Moth |
 
 ### Run levels
 
