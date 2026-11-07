@@ -11,7 +11,7 @@ static func open(home: Node, sel := "") -> void:
 static func kit(home: Node, ak: String) -> void:
 	var v: VBoxContainer = home._new_panel("Kit: %s" % Arch.name_of(ak), KitCard.SIZE.x + 40, true)
 	v.add_child(KitCard.make(ak, String(Save.active_kin().get("species", ""))))
-	UI.footer_left(v).add_child(UI.ghost("Back to Masks", func(): open(home, ak), 0))
+	UI.footer_left(v).add_child(UI.ghost("Back to Relics", func(): open(home, ak), 0))
 
 ## Plays `ak` from now on: saved as the expedition pick (its weight, id and weapon family), and the
 ## hunter on the farm turns into it with a flash, a puff and a sound.

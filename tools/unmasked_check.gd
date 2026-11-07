@@ -214,7 +214,7 @@ func _blend(main: Node) -> void:
 	Unmasked.blend(hero)
 	var tint_after: Color = mat.get_shader_parameter("albedo")
 	ok(hero.scale.y > before_scale.y and hero.scale.y < before_scale.y * 1.09 and hero.scale.x > before_scale.x,
-		"the Mask keeps about 90%% Hunter: height and build show a tenth (%.3f x)" % (hero.scale.y / before_scale.y))
+		"the Relic keeps about 90%% Hunter: height and build show a tenth (%.3f x)" % (hero.scale.y / before_scale.y))
 	var want := tint_before.lerp(Unmasked.colour(Save.d["look"]), Unmasked.SHOW)
 	ok(tint_after.is_equal_approx(want), "and your shroud colour tints the Hunter a tenth")
 	hero.free()

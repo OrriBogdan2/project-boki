@@ -30,7 +30,7 @@ static func maybe_show(home: Node) -> ClassReveal:
 		announce_fresh(home)
 		var news := ClassUnlock.take_news()
 		if news > 0 and home.has_method("_toast"):
-			home._toast("A Mask unlock is ready. Open Masks (%s) and hold to unlock it." % Settings.key_cap("hero"))
+			home._toast("A Relic unlock is ready. Open Relics (%s) and hold to unlock it." % Settings.key_cap("hero"))
 			Save.save_game()
 		return null
 	return show_for(home, String(waiting[0]))
@@ -72,7 +72,7 @@ func _ready() -> void:
 	var v := UI.vbox(10)
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
 	center.add_child(v)
-	var kick := UI.label("NEW MASK", UI.T_HEAD, UI.GOLD, UI.caps)
+	var kick := UI.label("NEW RELIC", UI.T_HEAD, UI.GOLD, UI.caps)
 	kick.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(kick)
 	# the ring of light, with the Hunter standing in it, beside its name and its abilities working

@@ -1,5 +1,5 @@
 extends RefCounted
-## --pip-live-check: Pip's clips through the real match code: a Match, her Hunter, the kit's own
+## --pip-live-check: Lumi's clips through the real match code: a Match, her Hunter, the kit's own
 ## presses and the render path (Hunter.render, HunterAnim, Sync). E plays its clip, the lantern
 ## hangs under her right hand, the gold constellations brighten while she heals and fall back.
 ## A knock-out plays the death clip on screen.
@@ -42,7 +42,7 @@ func run(main: Node) -> void:
 		_frame(m, P)
 	var sync: Node = P.model.get_node("Warden/Sync")
 	var clips: WardenClips = sync.get("clips")
-	ok(clips != null, "Pip wears her clips in a match")
+	ok(clips != null, "Lumi wears her clips in a match")
 	var K: TenderKit = P.ak
 	T.teleport(home + Vector3(6.0, 0, 0))
 	A.aim_at(P, T.pos)

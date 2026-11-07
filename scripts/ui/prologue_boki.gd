@@ -2,9 +2,9 @@ class_name PrologueBoki
 extends Node3D
 ## THE BOKI, the prologue's fourth shot: morning on a lone isle. The Boki bound out of the grass one by one,
 ## the lead one hops up to greet the hunter, he kneels to it, it hops up to the relic in his hand and the
-## relic wakes in his Mask's colour. Built at the set's centre; the prologue calls play() each frame.
+## relic wakes in his Relic's colour. Built at the set's centre; the prologue calls play() each frame.
 
-## the hunter takes up Vex's Mask, so the relic wakes in that colour
+## the hunter takes up Vex's Relic, so the relic wakes in that colour
 const MANTLE := "gunslinger"
 const HUNTER_AT := Vector3(0.9, 0, -0.3)        # m from the set's centre
 const HUNTER_LOOKOUT := -0.93                   # rad: his yaw at first, looking out to the sunrise
@@ -63,7 +63,7 @@ func build(rng: RandomNumberGenerator, rise: CPUParticles3D) -> void:
 		add_child(k)
 		kin_nodes.append(k)
 
-## The relic: a dull stone held in both his hands until the lead Boki touches it; then it lights in the Mask's
+## The relic: a dull stone held in both his hands until the lead Boki touches it; then it lights in the Relic's
 ## colour. A solid outlined stone with a hot core (an additive glow alone washes out to white against the morning
 ## sky), a soft halo, a pulsing ring and a warm light spilling on the pair. Kept between his hands in play().
 func _relic(col: Color) -> void:
@@ -156,7 +156,7 @@ func _lift_relic() -> void:
 	tw.tween_property(relic, "position", HANG_AT, 1.0).set_trans(Tween.TRANS_SINE)
 	tw.tween_property(relic, "scale", Vector3(1.3, 1.6, 1.3), 1.0)
 
-## The touch: the relic lights in the Mask's colour, light floods the hunter, specks rise round him and a ring
+## The touch: the relic lights in the Relic's colour, light floods the hunter, specks rise round him and a ring
 ## sweeps out over the grass.
 func _wake_relic() -> void:
 	relic_k = 0.001

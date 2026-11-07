@@ -186,7 +186,7 @@ func _data() -> void:
 			if not Arch.def(a).has(k): bad.append("%s missing %s" % [a, k])
 	ok("data: every kit complete, weapons exist", bad.is_empty(), str(bad))
 	ok("weapons: one signature weapon each", ids.all(func(x): return Arch.weapons(x).size() == 1 and Arch.signature(x) != "" and Arch.weapon_ok(x, Arch.signature(x))), str(ids.map(func(x): return Arch.signature(x))))
-	ok("weapons: Sable bolts / Lisette bow / Ryzz coil / Breaker hammer and aegis", Arch.signature("thief") == "arc_bolts" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
+	ok("weapons: Sable bolts / Ravyl bow / Ryzz coil / Mossy hammer and aegis", Arch.signature("thief") == "arc_bolts" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
 	ok("weapons: another archetype's weapon is not yours", not Arch.weapon_ok("bulwark", "greatsword") and not Arch.weapon_ok("thief", "smg"))
 	ok("weapons: asking for another weapon gives the signature", Arch.weapon_for("gunslinger", "medium", "longsword") == "quill_rifle")
 	# no ammo but the source's one gun (Ghost's 30-round rifle): no magazine, no reload timer, no count on the HUD

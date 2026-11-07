@@ -733,7 +733,7 @@ func tender() -> void:
 	var T: Hunter = r[3]
 	var K: TenderKit = P.ak
 	ok(
-			"mm: renamed Pip, kit sounds load",
+			"mm: renamed Lumi, kit sounds load",
 			Arch.name_of("tender") == "Little Lantern"
 			and Sfx.streams.has("tend_seed")
 			and Sfx.streams.has("tend_root")
@@ -1253,7 +1253,7 @@ func burr_ranks() -> void:
 			"r1 %.2f r3 %.2f" % [wide1, wide3])
 	await _free(m)
 
-# ================================================================== Claire
+# ================================================================== Nivi
 func rimewright() -> void:
 	var r: Array = sc.setup("rimewright", 6.0)
 	var m: Match = r[0]

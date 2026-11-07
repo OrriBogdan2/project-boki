@@ -7,7 +7,7 @@ extends RefCounted
 ## or the challenge it still needs. Rules and numbers: content/rules/class_unlock.json, logic:
 ## ClassUnlock. (Internal names keep "class": the file, the save key and the ids.)
 
-const TITLE := "Masks"
+const TITLE := "Relics"
 const RANK := ["ready", "open", "progress", "locked"]
 const TILE_W := 140.0          # px, one Hunter tile
 const TILE_COLS := 3

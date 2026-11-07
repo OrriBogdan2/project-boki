@@ -1,9 +1,10 @@
 class_name MaskRelic
 extends Node3D
-## A Mask as a thing in the world (lore: briefs/LORE_MASKS.md): a cracked porcelain face, mended with gold,
+## A Relic as a thing in the world (lore: briefs/LORE_MASKS.md): a cracked porcelain face, mended with gold,
 ## that carries a fallen Hunter's soul, glowing in its Hunter's colour and trailing motes as it drifts. It
-## bobs where it hovers and turns to face whoever it is drifting toward. Used by the Mask moments
-## (MaskMoment: the first Mask after naming your Boki; MaskOffer: the second at the farm portal).
+## bobs where it hovers and turns to face whoever it is drifting toward. Used by the Relic moments
+## (MaskMoment: the first Relic after naming your Boki; MaskOffer: the second at the farm portal).
+# "mask" in code = "Relic" in game, owner 2026-11-07
 
 const BOB_HZ := 0.35           # bobs a second
 const BOB_M := 0.06            # m up and down

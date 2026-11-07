@@ -1,22 +1,23 @@
 class_name MaskOffer
 extends Node
-## The second Mask, offered in the world (after the first finished expedition; ClassUnlock.second_pending). Once
+## The second Relic, offered in the world (after the first finished expedition; ClassUnlock.second_pending). Once
 ## you are home and nothing else is on screen (no panel, no toast, no building), the portal glows and the three
-## Masks on offer (Kael, Pip, Cinder: ClassUnlock.second_picks) drift out of it and hover in a row in front of
+## Relics on offer (Kael, Pip, Cinder: ClassUnlock.second_picks) drift out of it and hover in a row in front of
 ## it while the camera takes them in. Walk up to one to see what it does (its name and two ability clips);
 ## interact takes it: it drifts to your face and plays the put-on beat (MaskMoment.beat), the other two drift
-## back into the portal (they open through their own challenges), and the new Mask's reveal plays
+## back into the portal (they open through their own challenges), and the new Relic's reveal plays
 ## (ClassReveal). Walk away and they wait by the portal, each with its name and a ring under it.
 ## Home wires it in at a few points: the camera (frame), interact (find, label, use).
+# "mask" in code = "Relic" in game, owner 2026-11-07 (also home.gd "masks", the "mask" item kind)
 
 const ROW_OUT := 2.4           # m in front of the portal, toward where you stand
-const ROW_GAP := 1.5           # m between the Masks
+const ROW_GAP := 1.5           # m between the Relics
 const HOVER_Y := 1.45          # m up
-const OUT_S := 2.2             # s each Mask takes to drift out
+const OUT_S := 2.2             # s each Relic takes to drift out
 const STAGGER_S := 0.35        # s between them leaving the portal
 const FRAME_S := 4.0           # s the camera holds on them
 const FRAME_ZOOM := 0.6
-const FARM_SCALE := 2.4        # x a Mask's size by the portal: it has to read from the farm's high camera
+const FARM_SCALE := 2.4        # x a Relic's size by the portal: it has to read from the farm's high camera
 const REACH := 2.2             # m: close enough to look at one and take it
 const PREVIEW_CLIP := Vector2(210, 118)
 const AWAY := "%s and %s return to the portal. Their own challenges open them."
@@ -32,7 +33,7 @@ var glow: OmniLight3D
 var _frame_t := -1.0
 var _row_mid := Vector3.ZERO
 
-## Puts the second-Mask offer on the farm when it is due. Returns whether one is (or was already) there.
+## Puts the second-Relic offer on the farm when it is due. Returns whether one is (or was already) there.
 static func offer(farm: Node) -> bool:
 	if not ClassUnlock.second_pending() or farm == null or not farm.is_inside_tree():
 		return false
@@ -62,7 +63,7 @@ func _clear() -> bool:
 func _portal() -> Vector3:
 	return home.spots["portal"]
 
-## The portal glows and the Masks drift out to hover in a row in front of it, facing you.
+## The portal glows and the Relics drift out to hover in a row in front of it, facing you.
 func _come_out() -> void:
 	phase = "out"
 	var portal := _portal()
@@ -113,7 +114,7 @@ func _mark(relic: MaskRelic) -> void:
 	ring.position = Vector3(0, (0.05 - HOVER_Y) / FARM_SCALE, 0)
 	relic.add_child(ring)
 
-## The camera's focus: on you, drawn over to take in the Masks while they come out.
+## The camera's focus: on you, drawn over to take in the Relics while they come out.
 func frame(at: Vector3) -> Vector3:
 	if _frame_t < 0.0:
 		return at
@@ -151,7 +152,7 @@ func _nearest() -> String:
 			best = (r as MaskRelic).id
 	return best
 
-## The Mask you're at: its name and title, and two of its abilities working (AbilityClip).
+## The Relic you're at: its name and title, and two of its abilities working (AbilityClip).
 func _show_preview() -> void:
 	if preview:
 		preview.queue_free()
@@ -181,13 +182,13 @@ func _show_preview() -> void:
 	preview = holder
 	UI.pop_in(card)
 
-## The two abilities a Mask's preview shows (its "clip" block's "preview", else attack and right click).
+## The two abilities a Relic's preview shows (its "clip" block's "preview", else attack and right click).
 static func preview_slots(hunter_id: String) -> Array:
 	var own: Array = (Arch.def(hunter_id).get("clip", {}) as Dictionary).get("preview", [])
 	return own if own.size() == 2 else ["lmb", "rmb"]
 
 # ------------------------------------------------------------------ interact (Home's find, label, use)
-## The Mask in reach of `p2`, for Home's interact prompt.
+## The Relic in reach of `p2`, for Home's interact prompt.
 func find(p2: Vector2) -> Dictionary:
 	if phase != "ready":
 		return {}
@@ -200,7 +201,7 @@ func label(it: Dictionary) -> String:
 func use(it: Dictionary) -> void:
 	take(String(it["id"]))
 
-## Takes this Mask: it drifts to your face (the put-on beat), the others go back into the portal, and its
+## Takes this Relic: it drifts to your face (the put-on beat), the others go back into the portal, and its
 ## reveal plays.
 func take(id: String) -> void:
 	if phase != "ready" or not ClassUnlock.choose_second(id):
