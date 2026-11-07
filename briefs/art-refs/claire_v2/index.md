@@ -25,3 +25,6 @@ Update "frost demoness" to something like "frost spirit", since the demon parts 
 - `claire_v2_turnaround.jpg`: A-pose; front, 3/4, side, back; spear separate. Ears are consistent (one upright, one folded), small tail.
 - `claire_v2_portrait.jpg`: catching a glowing snowflake; festival lanterns.
 - `claire_v2_splash.jpg` ("Festival Skate"): leaping over cracking ice with a frost-ribbon spear sweep; the crowd reaches safety on the bank.
+
+## Renamed: Nivi, "the Snowglide" (owner, Nov 7, 00:13 ET)
+Claire is renamed **Nivi** ("Nivi the Snowglide"). Display name only; ids and files stay (`rimewright`, `claire_*`). Passed to the coordinator via the owner.
