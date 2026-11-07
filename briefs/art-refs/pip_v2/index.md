@@ -121,3 +121,8 @@ Known limits: her stance reads slightly more startled than brave; the knight's f
 
 ## Portrait candidate (Nov 7, 02:26 ET)
 `meeko_v2_portrait_candidate.jpg`: the double kiss (sun and cloud kiss both cheeks, she blushes with her eyes shut), a dusky sky with a rainbow. The pose and expression are right, but the render is posterised (colour banding in the sky and fur, a flat vector look), unlike the other portraits. Needs a cleaner re-run.
+
+## Splash: FINAL "Into the Dark" (Nov 7, 02:27 ET)
+`meeko_v2_splash.jpg` (replaces the startled version, now `explorations/meeko_v2_splash_startled.jpg`): Meeko kneels at the wounded hunter's side with her glowing paws on his arm, healing him. The sun blazes and drives back the shadow creatures (red eyes; a beast lunging from the left); the shy cloud rains glowing healing drops; there's a rainbow between them. The hunter is drawn in the cartoon style, surprised and grateful. Nano Banana Pro, 16:9, 4K, a fresh generation ("brand-new image" phrasing).
+
+Known limit: the hunter's expression reads slightly panicked.
