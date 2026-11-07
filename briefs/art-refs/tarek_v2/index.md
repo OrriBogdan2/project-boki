@@ -37,3 +37,12 @@ Canon:
 - Dreadlocks with copper rings, small carved grey stone beads and a jade bead near his face.
 - Prayer beads, a cream waist wrap, a burnt-orange sash, dark brown trousers, wrapped bare feet.
 - His molten abilities (Volcano Crusher, Molten Guard) can flare in their VFX; at rest he has no orange glow, which keeps him distinct from Cinder.
+
+## Turnaround: FINAL (Nov 6, 22:49 ET)
+`tarek_v2_turnaround.jpg`, 5504×3072: front, 3/4, side (his right side) and back, with the eye stones shown once beside the side view. Nano Banana Pro, 16:9, 4K, a fresh generation (ref: the master sheet); no edits and no colour pass needed.
+- The arm sides check out in every view: the stone arm is on his left, the gauntlet on his right.
+- His hair jewellery is lighter than on the master sheet: a few copper rings mixed with grey stone beads, plus the short strand with a jade bead. Treat the turnaround as the reference for the amount.
+
+Known limits:
+- He is slightly bulkier than on the master sheet; use the master sheet's leaner build.
+- One or two glyphs on the gauntlet look letter-like ("F"); the modeller should use the simple set (spirals, crescents, bars, dots).
