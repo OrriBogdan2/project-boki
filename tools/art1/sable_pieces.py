@@ -1,6 +1,6 @@
-"""ART-1 Sable: the rebuilt pieces as data: fingerless gloved hands round twin flintlocks, feathery moth antennae, the long white braid, the split coat tails
-and their purple lining, the moth wings, the belt's keys, bola and gem, the upper lids. The body, hair cap and face are the scan's (sable_source.py).
-Blender frame: Z up, she faces +Y, her right hand is +X. Budget: <=15k tris incl. both pistols, <=8 materials. Recipe: /home/boki/shots-s2/art1/STYLE_NOTES.md."""
+"""ART-1 Sable v2: the rebuilt pieces as data: fingerless gloved hands round twin flintlocks, fuzzy moth antennae, the one long white braid, the long coat's split panels and violet lining, the moth wings
+under them, the hip sheaths and their moth-curved knives, the belt's keys and tiny bell, the gem and midriff chains, the upper lids, the skull's back. The body, front hair and face are the scan's (sable_source.py).
+Blender frame: Z up, she faces +Y, her right hand is +X. Budget: <=15k tris incl. both pistols, <=8 materials. Measures: briefs/art-refs/sable_v2 (turnaround FINAL; master sheet for detail)."""
 import json, os
 import numpy as np
 from meshkit import Piece, catmull, norm, smooth, sweep, frames, rot_about
@@ -32,13 +32,12 @@ def hs(p):
 
 
 # ---- the eyes and mouth, on the scan (measured off the grid renders)
-EYE = np.array([0.045, 0.094, 1.607])         # rig space, read off the fitted head (x from the face's centre line)
-EYE_W, EYE_H = 0.0295, 0.0125
-BROW = np.array([0.04, 0.097, 1.632])
-MOUTH = np.array([0.023, 0.113, 1.536])
-MARK_OFF = np.array([-0.058, 0.074, 1.575])    # the scan's second beauty mark, painted out: the master has one, on her right cheek
-MARK_ON = np.array([0.058, 0.074, 1.577])
-FACE_X = 0.002
+EYE = np.array([0.040, 0.058, 1.574])         # rig space, read off the fitted head (x from the face's centre line)
+EYE_W, EYE_H = 0.0228, 0.0137
+BROW = np.array([0.05, 0.055, 1.60])
+MOUTH = np.array([0.03, 0.08, 1.512])
+MARK = np.array([0.060, 0.03, 1.548])          # the one beauty mark, on her right cheek (the scan's is a smudge: cleaned and redrawn)
+FACE_X = 0.001
 
 
 def eye_c(s):
@@ -120,22 +119,22 @@ def pistol(side):
     BV = 0.052                              # the barrel's height over the fist
     # the barrel: octagonal, a ring at the breech and mid-way, flaring to a bell mouth
     us = [-0.030, 0.0, 0.11, 0.12, 0.13, 0.25, 0.30, 0.325, MUZZLE_U]
-    rs = [0.019, 0.0175, 0.0165, 0.0195, 0.0165, 0.0160, 0.0195, 0.027, 0.0305]
+    rs = [0.0255, 0.0235, 0.0225, 0.0265, 0.0225, 0.0215, 0.0265, 0.036, 0.041]
     out.append(sweep("barrel" + side, "metal-silver", [p(u, BV) for u in us], SEC8, np.array(rs), side_hint=x_, tip=False))
     # the mouth's glowing plug
     m0, m1 = p(MUZZLE_U - 0.012, BV), p(MUZZLE_U + 0.001, BV)
-    out.append(sweep("mouth" + side, "glow-rune", [m0, m1, m1 + (m1 - m0) * 0.01], SEC8, np.array([0.024, 0.024, 0.001]), side_hint=x_))
+    out.append(sweep("mouth" + side, "glow-rune", [m0, m1, m1 + (m1 - m0) * 0.01], SEC8, np.array([0.032, 0.032, 0.001]), side_hint=x_))
     # the ramrod under the barrel
-    out.append(sweep("rod" + side, "metal-silver", [p(u, BV - 0.031) for u in (0.11, 0.25, 0.29, 0.30)], SEC6[::2], np.array([0.0055, 0.0055, 0.0085, 0.006]), side_hint=x_))
+    out.append(sweep("rod" + side, "metal-silver", [p(u, BV - 0.037) for u in (0.11, 0.25, 0.29, 0.30)], SEC6[::2], np.array([0.0055, 0.0055, 0.0085, 0.006]), side_hint=x_))
     # stock: the forestock under the barrel, the wrist through the fist, the swelling butt; flattened sideways
     path = catmull([p(0.235, BV - 0.015), p(0.12, BV - 0.015), p(0.03, BV - 0.012), p(0.0, 0.02), p(-0.005, -0.02), p(-0.03, -0.065), p(-0.075, -0.098)], 12)
-    wd = np.array([0.013, 0.017, 0.019, 0.021, 0.0215, 0.022, 0.0215, 0.022, 0.024, 0.027, 0.030, 0.030])
-    dp = np.array([0.012, 0.019, 0.021, 0.024, 0.024, 0.026, 0.024, 0.024, 0.026, 0.030, 0.034, 0.030])
+    wd = np.array([0.013, 0.017, 0.019, 0.021, 0.0215, 0.022, 0.0215, 0.022, 0.024, 0.027, 0.030, 0.030]) * 1.2
+    dp = np.array([0.012, 0.019, 0.021, 0.024, 0.024, 0.026, 0.024, 0.024, 0.026, 0.030, 0.034, 0.030]) * 1.25
     out.append(sweep("stock" + side, "leather-dark", path, SEC8, wd, side_hint=x_, depth=dp))
     # the butt cap
     c = path[-1]
     d = norm(path[-1] - path[-2])
-    out.append(sweep("cap" + side, "metal-silver", [c - d * 0.016, c, c + d * 0.012, c + d * 0.024], SEC8, np.array([0.028, 0.031, 0.027, 0.0008]), side_hint=x_))
+    out.append(sweep("cap" + side, "metal-silver", [c - d * 0.016, c, c + d * 0.012, c + d * 0.024], SEC8, np.array([0.034, 0.038, 0.033, 0.0008]), side_hint=x_))
     # lock plate, cock, frizzen: on her outer side, chunky so they read
     lock = sweep("lock" + side, "metal-silver", [p(-0.04, BV - 0.012, 0.024), p(0.0, BV - 0.012, 0.024), p(0.05, BV - 0.012, 0.024), p(0.07, BV - 0.012, 0.024)], SEC4, np.array([0.015, 0.02, 0.018, 0.008]), side_hint=x_ * 0 + U_REST, depth=np.full(4, 0.006))
     out.append(lock)
@@ -151,18 +150,18 @@ def pistol(side):
     guard = np.array([g0 + B_REST * (0.045 * np.cos(t)) + U_REST * (0.03 - 0.05 * np.sin(t)) for t in th])
     out.append(sweep("guard" + side, "metal-silver", guard, SEC4, np.full(8, 0.0042), side_hint=x_))
     # runes: a raised strip on each flank and on top of the barrel, painted with glyphs (bright on dark) in the glow slot
-    for nm, w, n_ in (("runeA", 0.0165, x_), ("runeB", -0.0165, -x_)):
+    for nm, w, n_ in (("runeA", 0.0222, x_), ("runeB", -0.0222, -x_)):
         a0, a1 = 0.135, 0.285
         c0, c1 = p(a0, BV, w), p(a1, BV, w)
-        hv = U_REST * 0.0078
+        hv = U_REST * 0.0098
         q = [c0 - hv + n_ * 0.0012, c0 + hv + n_ * 0.0012, c1 + hv + n_ * 0.0012, c1 - hv + n_ * 0.0012]
         pc = Piece(nm + side, "glow-rune", np.array(q), [[0, 1, 2, 3]])
         pc.rune = (a0, a1)
         out.append(pc)
     # ... and one along the top, the side the match camera sees
     a0, a1 = 0.135, 0.285
-    hw = x_ * 0.0078
-    tn = U_REST * (0.0165 + 0.0012)
+    hw = x_ * 0.0098
+    tn = U_REST * (0.0222 + 0.0012)
     c0, c1 = p(a0, BV), p(a1, BV)
     out.append(Piece("runeC" + side, "glow-rune", np.array([c0 + tn + hw * ARM[side], c0 + tn - hw * ARM[side], c1 + tn - hw * ARM[side], c1 + tn + hw * ARM[side]]), [[0, 1, 2, 3]]))
     for q in out:
@@ -187,31 +186,32 @@ def gem_piece(name, c, h, w, up):
     return Piece(name, "glow-rune", np.array(v), f)
 
 
-# ---- the antennae: a thin stem off the hairline, then one big feather sweeping out and up, barbed along its lower edge. Two sheets back to back.
-ANT_N = 4
+# ---- the antennae: dark stems off the hairline in a V, swept back, dusty lilac fuzz on the outer side from a third up. Two sheets back to back, one bone each.
+ANT_N = 2
 
 
 def antenna(s):
     side = "R" if s > 0 else "L"
-    top = hs([0, 0, 1.87])[2]
-    pts = np.array([(0.030, 0.036, top - 0.02), (0.05, 0.018, top + 0.05), (0.09, 0.0, top + 0.115), (0.15, -0.012, top + 0.16), (0.205, -0.018, top + 0.225), (0.232, -0.018, top + 0.335)]) * [s, 1, 1]
-    n = 11
+    top = hs([0, 0, 1.857])[2]
+    pts = np.array([(0.03, 0.062, top - 0.05), (0.058, 0.05, top + 0.0), (0.104, 0.024, top + 0.05), (0.137, -0.006, top + 0.10), (0.138, -0.03, top + 0.142), (0.112, -0.05, top + 0.172)]) * [s, 1, 1]
+    n = 25
     path = catmull(pts, n)
     u = np.linspace(0, 1, n)
     t_ = norm(np.gradient(path, axis=0))
     side_v = norm(np.cross(t_, np.array([0, 1.0, 0])))                # in her front plane
     if side_v[n // 2, 2] > 0:
         side_v = -side_v                                               # the barbs point out and down
-    wd = 0.082 * smooth(0.16, 0.5, u) * smooth(1.0, 0.7, u) + 0.0055
-    up_w = 0.012 * smooth(0.25, 0.6, u) * smooth(1.0, 0.8, u) + 0.003
+    side_v = norm(side_v + np.array([0, -0.55, 0]))                    # and back a little, so the feather also reads from the side
+    wd = 0.04 * smooth(0.14, 0.4, u) * smooth(1.0, 0.62, u) + 0.0035
+    up_w = 0.012 * smooth(0.25, 0.6, u) * smooth(1.0, 0.8, u) + 0.0032
     v, f = [], []
-    barb = np.array([1.0 if i % 2 == 0 else 0.76 for i in range(n)])     # the feather's notched edge
+    barb = np.array([1.0 if i % 2 == 0 else 0.74 for i in range(n)])     # the feather's notched edge
     rows = 3
     for lay, off in ((0, 0.0028), (1, -0.0028)):
         base = len(v)
         for i in range(n):
             lean = t_[i] * (0.03 * smooth(0.25, 0.6, u[i]))              # the barbs comb toward the tip
-            v.append(path[i] - side_v[i] * up_w[i] + [0, off, 0])
+            v.append(path[i] - side_v[i] * up_w[i] * barb[i] + [0, off, 0])
             v.append(path[i] + side_v[i] * wd[i] * 0.45 + lean * 0.5 + [0, off * 1.6, 0])
             v.append(path[i] + side_v[i] * wd[i] * barb[i] + lean + [0, off, 0])
         for i in range(n - 1):
@@ -232,24 +232,23 @@ def antenna_points(p):
     return [tuple(p.path[int(round(t * (len(p.path) - 1)))]) for t in np.linspace(0.08, 1.0, ANT_N)]
 
 
-# ---- the braid: fat lobes laid in a zigzag, two ties, a soft tuft. It leaves the nape and swings out behind her right side so the camera sees it.
-BRAID_N = 7
+# ---- the one braid: fat lobes in a zigzag, two lilac ties, a soft tuft. It leaves the nape over the collar and falls behind her right arm to the hip (the turnaround's back view, narrowed to the arm's rest).
+BRAID_N = 6
 
 
 def braid():
-    n0 = NECK_Z
-    pts = np.array([(0.0, -0.075, n0 + 0.075), (0.012, -0.112, n0 - 0.02), (0.05, -0.150, n0 - 0.16), (0.108, -0.175, n0 - 0.30), (0.168, -0.195, n0 - 0.44), (0.205, -0.21, n0 - 0.56), (0.222, -0.22, n0 - 0.64)])
-    lobes = 9
-    rings = lobes * 3 + 1
+    pts = np.array([(0.0, -0.1, 1.56), (0.012, -0.15, 1.50), (0.04, -0.172, 1.40), (0.075, -0.182, 1.28), (0.105, -0.188, 1.15), (0.13, -0.192, 1.035)])
+    lobes = 11
+    rings = lobes * 2 + 1
     path = catmull(pts, rings)
     u = np.linspace(0, 1, rings)
     wd = np.zeros(rings)
     offs = np.zeros(rings)
     for i in range(rings):
-        ph = i / 3.0
+        ph = i / 2.0
         fr = ph - np.floor(ph)
-        wd[i] = (0.044 - 0.014 * u[i]) * (0.74 + 0.26 * np.sin(fr * np.pi))
-        offs[i] = (1 if int(ph) % 2 else -1) * 0.011 * np.sin(fr * np.pi)
+        wd[i] = (0.034 - 0.008 * u[i]) * (0.72 + 0.28 * np.sin(fr * np.pi))
+        offs[i] = (1 if int(ph) % 2 else -1) * 0.0075 * np.sin(fr * np.pi)
     t, s_, n_ = frames(path, (1, 0, 0))
     centre = path + s_ * offs[:, None]
     p = sweep("braid", "hair-braid", centre, SEC6, wd, side_hint=np.array([1.0, 0, 0]), depth=wd * 0.86)
@@ -257,11 +256,24 @@ def braid():
     return p
 
 
-def nape():
-    """Hair over the place the scan's bun was: the braid's root sits in it."""
-    n0 = NECK_Z
-    c = [np.array(q) for q in ((0.0, -0.062, n0 + 0.135), (0.0, -0.086, n0 + 0.105), (0.0, -0.1, n0 + 0.065), (0.0, -0.098, n0 + 0.03), (0.0, -0.088, n0 + 0.0))]
-    return sweep("nape", "hair-braid", c, SEC8, np.array([0.03, 0.062, 0.066, 0.05, 0.004]), side_hint=np.array([1.0, 0, 0]), depth=np.array([0.012, 0.03, 0.038, 0.032, 0.004])).rigid("head")
+def hairback():
+    """The back of the skull, where the scan's buns were cut away: an ellipsoid fitted inside the scan's hair at the sides and shallow in front (so it never reaches her face or ears), tapering down the nape into the braid."""
+    C, R, FRONT = np.array([0.0, -0.012, 1.63]), np.array([0.117, 0.113, 0.097]), 0.055
+    rows = [(1.726, 0.1), (1.72, 0.3), (1.705, 0.55), (1.68, 0.8), (1.655, 0.94), (1.625, 1.0), (1.595, 0.93), (1.57, 0.82), (1.545, 0.62), (1.525, 0.4), (1.5, 0.34), (1.475, 0.26)]
+    n = 16
+    v, f = [], []
+    for z, k in rows:
+        for i in range(n):
+            t = i / n * 2 * np.pi
+            sn = np.sin(t)
+            v.append((C[0] + np.cos(t) * R[0] * k, C[1] + sn * (FRONT if sn > 0 else R[1]) * k - 0.02 * smooth(1.6, 1.53, z), z))
+    for r in range(len(rows) - 1):
+        for i in range(n):
+            j = (i + 1) % n
+            f.append([r * n + i, (r + 1) * n + i, (r + 1) * n + j, r * n + j])
+    f.append(list(range(n)))
+    f.append([len(rows) * n - 1 - i for i in range(n)])
+    return Piece("hairback", "hair-braid", np.array(v), f).rigid("head")
 
 
 def braid_tie(p, at_u, name, rad):
@@ -269,46 +281,44 @@ def braid_tie(p, at_u, name, rad):
     a, b = p.path[i], p.path[i + 1]
     d = norm(b - a)
     c = (a + b) / 2
-    return sweep(name, "metal-silver", [c - d * 0.022, c - d * 0.016, c + d * 0.016, c + d * 0.022], SEC8, np.array([rad * 0.82, rad, rad, rad * 0.82]), side_hint=np.array([1.0, 0, 0]))
+    return sweep(name, "hair-braid", [c - d * 0.018, c - d * 0.014, c + d * 0.014, c + d * 0.018], SEC8, np.array([rad * 0.82, rad, rad, rad * 0.82]), side_hint=np.array([1.0, 0, 0]))
 
 
 def braid_tuft(p):
     e = p.path[-1]
     d = norm(p.path[-1] - p.path[-3])
     sd = norm(np.cross(d, (0, 1, 0)))
-    path = catmull([e - d * 0.02, e + d * 0.05, e + d * 0.12 + sd * 0.015, e + d * 0.2 + sd * 0.05, e + d * 0.25 + sd * 0.11], 8)
-    wd = np.array([0.019, 0.032, 0.041, 0.042, 0.036, 0.027, 0.015, 0.002])
-    q = sweep("tuft", "hair-braid", path, SEC6, wd, side_hint=np.array([1.0, 0, 0]), depth=wd * 0.55)
+    path = catmull([e - d * 0.02, e + d * 0.04, e + d * 0.09 + sd * 0.01, e + d * 0.14 + sd * 0.03, e + d * 0.175 + sd * 0.06], 8)
+    wd = np.array([0.016, 0.027, 0.034, 0.034, 0.029, 0.022, 0.012, 0.002])
+    q = sweep("tuft", "hair-braid", path, SEC6, wd, side_hint=np.array([1.0, 0, 0]), depth=wd * 0.6)
     q.path = path
     return q
 
 
-# ---- the coat tails: two panels from the jacket's hem to the shin, split at the front and the back. Outer leather and a purple lining: two sheets back to back.
-HEM_Z = 0.20
+# ---- the long coat: two panels from the jacket's hem. The back stays closed under the belt, then the split opens in a curve all the way to the sharp corner at the side, over the wings;
+# the front edge falls from the hip to the same corner (the turnaround's back view). Outer leather and a violet lining: two sheets back to back. On hips at the top, on 2 bones a chain below.
+HEM_Z = 0.19
 TAIL_ROWS, TAIL_COLS = 8, 9
-TOP_Z = None     # set by the source (the scan's jacket hem)
+SPLIT_T = (0.0, 0.24, 0.5, 0.72, 0.87, 1.0)     # the split's half width down the panel (metres at the hem's flare)
+SPLIT_X = (0.0, 0.03, 0.095, 0.19, 0.28, 0.33)
 
 
 def tail_grid(s, top_z=0.80, r0=(0.165, 0.128), cy=-0.012):
-    """(rows, cols, 3): row 0 the top ring, col 0 the front edge, the last col the back edge."""
+    """(rows, cols, 3): row 0 the top ring, col 0 the front edge, the last col the split."""
     G = np.zeros((TAIL_ROWS, TAIL_COLS, 3))
-    a0, a1 = np.radians(16), np.radians(150)
     for r in range(TAIL_ROWS):
         t = r / (TAIL_ROWS - 1)
+        fl = 1.0 + 0.78 * t ** 1.3
+        rx, ry = r0[0] * fl, r0[1] * fl
+        a0 = np.radians(60 + 36 * t ** 1.4)
+        a1 = max(np.pi - np.arcsin(min(np.interp(t, SPLIT_T, SPLIT_X) / rx, 1.0)), a0 + 0.02)
         for c in range(TAIL_COLS):
             k = c / (TAIL_COLS - 1)
-            # the front corner lifts in a curve off the legs; the back corner hangs furthest; the side falls in a soft point
-            front_cut = 1 - 0.20 * smooth(0.28, 0.0, k)
-            back_lift = 1 - 0.06 * smooth(0.82, 1.0, k)
-            ln = (top_z - HEM_Z) * front_cut * back_lift
-            z = top_z - ln * t ** 1.05
             a = a0 + (a1 - a0) * k
-            fl = 1.0 + 0.34 * t ** 1.2 + 0.1 * t * np.sin(k * np.pi)
-            fold = 1 + 0.05 * t * np.cos(k * 15.0)                     # three soft folds down the leather
-            rx, ry = r0[0] * fl * fold, r0[1] * fl * fold
-            x, y = np.sin(a) * rx, np.cos(a) * ry + cy
-            y -= 0.1 * t ** 1.5                                       # the rest shape leans back, so the tails read from above
-            G[r, c] = (s * x, y, z)
+            fold = 1 + 0.045 * t * np.cos(k * 13.0)                    # soft folds down the leather
+            x, y = np.sin(a) * rx * fold, np.cos(a) * ry * fold + cy
+            y -= 0.1 * t ** 1.5                                       # the rest shape leans back, so the panels read from above
+            G[r, c] = (s * x, y, top_z - (top_z - HEM_Z) * t)
     return G
 
 
@@ -345,29 +355,26 @@ def tail_chain(G, col_u):
     a, b = int(np.floor(c)), min(int(np.floor(c)) + 1, C - 1)
     q = c - a
     pts = G[:, a] * (1 - q) + G[:, b] * q
-    idx = np.linspace(0, R - 1, 4).round().astype(int)
+    idx = np.linspace(0, R - 1, 3).round().astype(int)
     return [tuple(pts[i]) for i in idx]
 
 
-# ---- the moth wings, hanging from the small of her back inside the coat's split, tips swept behind. One sheet each (the card slot draws both sides).
+# ---- the moth wings: cards hanging from under the coat's split, on 2 bones (the card slot draws both sides). Outline and paint: the turnaround's back view (proj/wings.png, its crop flipped so x grows outward).
 W_COLS = 6
-WING_N = 4
-W_PX = 0.00111                 # metres a pixel of the turnaround's back view (the wing is projected from it, sable_paint.wing)
-W_XR = 229.0                   # the pixel of her right wing's inner edge, where it meets the rig
-W_MIRROR = 430.0               # her left wing's pixels: W_MIRROR - x
-# her right wing's outline in that crop: y, inner x, outer x
-W_EDGE = [(0, 240, 282), (60, 236, 312), (120, 232, 345), (180, 230, 380), (240, 229, 412), (300, 228, 432), (350, 229, 438), (400, 232, 430), (440, 237, 405), (480, 243, 400),
-          (530, 252, 392), (580, 270, 372), (620, 290, 348), (650, 312, 332), (666, 322, 324)]
-W_LEN = 666 * W_PX
+WING_N = 3
+W_PX = 0.00064                 # metres a pixel of that crop, at the rig's height below the belt
+W_XR = 318.0                   # the pixel of her centre line
+W_Y0 = 220.0                   # the crop's row at the wing's root
+# the outline in that crop: row, inner x, outer x
+W_EDGE = [(0, 328, 334), (80, 345, 362), (210, 354, 402), (380, 366, 500), (540, 377, 670), (580, 380, 655), (740, 430, 600), (870, 482, 555), (955, 515, 517)]
+W_LEN = 955 * W_PX
 
 
 def wing_plane(s):
-    """Root, along (down the wing), across (outward), both in the wing's rest plane."""
-    root = np.array([s * 0.018, -0.118, 0.905])
-    along = norm(np.array([s * 0.10, -0.40, -0.92]))
-    across = norm(np.cross(along, np.array([0, -1.0, 0.25])))
-    if across[0] * s < 0:
-        across = -across
+    """Root (the centre line at the wing's top), along (down the wing), across (outward and forward), both in the wing's rest plane."""
+    root = np.array([0, -0.118, 0.745])
+    along = norm(np.array([0, -0.2, -0.98]))
+    across = norm(np.array([s, 0.38, 0.0]))     # curving forward round the legs, under the panels
     return root, along, across
 
 
@@ -380,23 +387,23 @@ def wing(s):
         for c in range(W_COLS):
             k = c / (W_COLS - 1)
             x = xi + (xo - xi) * k
-            bow = 0.035 * np.sin(k * np.pi) * np.sin(min(y / 666.0 * 1.2, 1) * np.pi)
+            bow = 0.03 * np.sin(k * np.pi) * np.sin(min(y / W_EDGE[-1][0] * 1.2, 1) * np.pi)
             v.append(root + along * y * W_PX + across * (x - W_XR) * W_PX + normal * bow)
     for r in range(len(W_EDGE) - 1):
         for c in range(W_COLS - 1):
             q = r * W_COLS + c
             f.append([q, q + 1, q + 1 + W_COLS, q + W_COLS])
     p = Piece("wing" + side, "card-wing", np.array(v), f)
-    p.root, p.along, p.across, p.s = root, along, across, s
+    p.root, p.along, p.across = root, along, across
     return p
 
 
 def wing_points(s):
     root, along, across = wing_plane(s)
-    return [tuple(root + along * W_LEN * t + across * 0.05 * t) for t in np.linspace(0.0, 1.0, WING_N)]
+    return [tuple(root + along * W_LEN * t + across * (0.02 + 0.12 * t)) for t in np.linspace(0.0, 1.0, WING_N)]
 
 
-# ---- the belt's hangers: keys on a ring, the bola's two weights on a cord, the gem on its chain. Each on a little hang chain.
+# ---- the belt's hangers: keys and one tiny bell on a ring at her right hip, on a little hang chain
 BELT_Z = 0.835
 
 
@@ -411,7 +418,7 @@ def keys(top):
     th = np.linspace(0, 2 * np.pi, 7)
     ring = np.array([top + np.array([0.021 * np.cos(t), 0.004, -0.021 - 0.021 * np.sin(t)]) for t in th])
     out.append(sweep("keyring", "metal-silver", ring, SEC4, np.full(7, 0.0036), side_hint=np.array([0, 1.0, 0]), tip=False))
-    for i, a in enumerate((-0.32, 0.02, 0.36)):
+    for i, a in enumerate((-0.32, 0.02)):
         d = np.array([np.sin(a), 0.0, -np.cos(a)])
         c0 = top + np.array([0.0, 0.004, -0.04])
         c1 = c0 + d * 0.105
@@ -419,6 +426,9 @@ def keys(top):
         out.append(sh)
         sd = np.array([np.cos(a), 0.0, np.sin(a)])
         out.append(sweep("keybit%d" % i, "metal-silver", [c1 - d * 0.03, c1 - d * 0.03 + sd * 0.022, c1 - d * 0.03 + sd * 0.024], SEC4, np.array([0.0085, 0.0085, 0.0001]), side_hint=np.array([0, 1.0, 0])))
+    c = top + np.array([0.034, 0.006, -0.095])
+    out.append(sweep("bellcord", "metal-silver", [top + np.array([0.012, 0.004, -0.04]), c + np.array([0, 0, 0.02])], SEC4, np.full(2, 0.0028), side_hint=np.array([0, 1.0, 0])))
+    out.append(ball("bell", c, 0.019))
     return out
 
 
@@ -430,34 +440,53 @@ def ball(name, c, r):
     return sweep(name, "metal-silver", path, SEC8, wd, side_hint=np.array([1.0, 0, 0]))
 
 
-def bola(top):
-    top = np.asarray(top, float)
-    a = top + np.array([0.038, 0.0, -0.205])
-    b = top + np.array([-0.022, 0.012, -0.235])
-    out = [ball("bolaA", a, 0.034), ball("bolaB", b, 0.034)]
-    out.append(sweep("cordA", "leather-dark", [top, (top + a) / 2 + [0.006, 0, 0], a + [0, 0, 0.03]], SEC4[::1], np.full(3, 0.0045), side_hint=np.array([0, 1.0, 0])))
-    out.append(sweep("cordB", "leather-dark", [top, (top + b) / 2 + [-0.003, 0, 0], b + [0, 0, 0.03]], SEC4[::1], np.full(3, 0.0045), side_hint=np.array([0, 1.0, 0])))
+# ---- the sheaths: a pair of knives on each hip, hilts up at the belt, the blades' moth-curved ends bare below the leather (turnaround). A knife is about a pistol's length on the sheet, ~0.39 at the rig's scale.
+KNIFE_TOP, KNIFE_TIP = np.array([0.172, 0.0, 0.955]), np.array([0.214, 0.0, 0.575])
+KNIFE_Y = (0.05, 0.002)                        # the outer pair's depth, then the second, set a little shorter
+
+
+def knife(s, k):
+    tag = ("R" if s > 0 else "L") + str(k)
+    y_ = np.array([0, KNIFE_Y[k], 0])
+    a, b = KNIFE_TOP * [s, 1, 1] + y_, KNIFE_TIP * [s, 1, 1] + y_ + [0, 0, 0.05 * k]
+    d = norm(b - a)
+    L = np.linalg.norm(b - a)
+    o = np.array([s, 0, 0.0])
+    at = lambda t, off=0.0: a + d * (t * L) + o * off
+    out = [sweep("pommel" + tag, "metal-silver", [at(-0.03), at(-0.02), at(0.01)], SEC6, np.array([0.002, 0.0145, 0.0125]), side_hint=o),
+           sweep("hilt" + tag, "cloth-coat", [at(0.01), at(0.12), at(0.22)], SEC6, np.array([0.0125, 0.0115, 0.0125]), side_hint=o, depth=np.array([0.01, 0.0095, 0.01])),
+           sweep("sheath" + tag, "leather-dark", [at(0.21), at(0.24), at(0.45), at(0.6, 0.003), at(0.65, 0.004)], SEC6, np.array([0.024, 0.031, 0.03, 0.025, 0.017]), side_hint=o, depth=np.array([0.014, 0.017, 0.016, 0.013, 0.009]))]
+    # the blade: flat and leaf-wide, its back bowed out, its belly in a moth wing's curve to the point
+    bow = catmull([at(0.58, 0.004), at(0.72, 0.012), at(0.87, 0.012), at(1.0, -0.014)], 6)
+    wd = np.array([0.018, 0.026, 0.0265, 0.021, 0.012, 0.0012])
+    out.append(sweep("blade" + tag, "metal-silver", bow, SEC4, wd, side_hint=o, depth=wd * 0.2))
+    for q in out:
+        q.rigid("hips")
     return out
 
 
-def gem(top):
-    """The pendant: a silver shield frame round a cut crystal, on a chain from the belt."""
-    top = np.asarray(top, float)
-    c = top + np.array([0, 0.0, -0.205])
-    out = [sweep("gemchain", "metal-silver", [top, top + np.array([-0.005, 0, -0.08]), c + np.array([0, 0, 0.065])], SEC4, np.array([0.004, 0.004, 0.0065]), side_hint=np.array([0, 1.0, 0]))]
-    y = np.array([0, 1.0, 0])
+def gem(y):
+    """The pendant at the sternum: a silver kite round a cut crystal, on the scan's surface (y: its depth there). -> pieces, the stone's centre."""
+    c = np.array([0, y + 0.012, 1.213])
+    y_ = np.array([0, 1.0, 0])
     x = np.array([1.0, 0, 0])
     z = np.array([0, 0, 1.0])
-    # the frame
-    rim = [c + x * a + z * b for a, b in ((0, 0.066), (0.046, 0.024), (0.04, -0.012), (0, -0.07), (-0.04, -0.012), (-0.046, 0.024), (0, 0.066))]
-    out.append(sweep("gemframe", "metal-silver", rim, SEC4, np.full(7, 0.0062), side_hint=y, tip=False))
-    # the stone: faceted, both faces
-    ring = rim[:-1]
-    v = [p for p in ring] + [c + y * 0.016, c - y * 0.016]
+    rim = [c + x * a + z * b for a, b in ((0, 0.044), (0.027, 0.0), (0, -0.052), (-0.027, 0.0), (0, 0.044))]
+    out = [sweep("gemframe", "metal-silver", rim, SEC4, np.full(5, 0.0048), side_hint=y_, tip=False)]
+    v = [q for q in rim[:-1]] + [c + y_ * 0.012, c - y_ * 0.008]
     f = []
-    for i in range(6):
-        j = (i + 1) % 6
-        f.append([6, j, i])
-        f.append([7, i, j])
+    for i in range(4):
+        j = (i + 1) % 4
+        f.append([4, i, j])
+        f.append([5, j, i])
     out.append(Piece("gemstone", "glow-rune", np.array(v), f))
     return out, c
+
+
+# ---- the chains over the bare chest and midriff: (left stud, sag): the V up from the gem to the collar, then three swags from coat edge to coat edge
+SWAGS = ((0.084, 1.114, 1.077), (0.08, 1.0675, 1.024), (0.082, 1.024, 0.9725))
+COLLAR_STUD = (0.066, 1.333)
+
+
+def swag(name, pts, room=0.004):
+    return sweep(name, "metal-silver", pts, SEC4, np.full(len(pts), room), side_hint=np.array([0, 1.0, 0]))

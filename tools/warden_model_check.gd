@@ -20,7 +20,7 @@ const WARDENS := {
 	# (slim and long-legged; height_3d: her rods stand over the head)
 	"mage": {"hit_r": 0.4, "height": 1.04, "height_3d": 1.11, "width": [0.6, 1.3], "moves": "mage_"},
 	# (Sable's moth antennae stand ~0.3 m over her head, as on the master sheet)
-	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "thf_"},
+	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.03, "width": [0.6, 1.3], "moves": "thf_"},
 	"dolm": {"hit_r": 0.388, "height": 1.19, "width": [0.7, 1.5], "moves": "breah_"},     # (lean, the locs: his art)
 	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
 	# (Motley on his box: the hover came down to a hand's width, Nov 5, so his top is 0.14 m lower; the cards widen him)
