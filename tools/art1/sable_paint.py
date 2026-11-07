@@ -13,9 +13,9 @@ LEATHER = [hexc("#2a1d30"), hexc("#3b2a43"), hexc("#533c5e"), hexc("#73587f"), h
 LINING = [hexc("#2d1147"), hexc("#46196e"), hexc("#5f2595"), hexc("#7a35b5"), hexc("#9a55d2")]
 HAIR = [hexc("#8f8a9c"), hexc("#b6b2c2"), hexc("#d5d2dd"), hexc("#ecebf1"), hexc("#ffffff")]
 SKIN = [hexc("#5a5568"), hexc("#7d7889"), hexc("#a09bab"), hexc("#bcb8c6"), hexc("#d6d3de")]
-SILVER = [hexc("#454352"), hexc("#6b6979"), hexc("#8f8e9c"), hexc("#b5b4c2"), hexc("#dcdce6")]
-WOOD = [hexc("#3f151d"), hexc("#5f2029"), hexc("#7c2d37"), hexc("#9a4049"), hexc("#b8606a")]
-FUZZ = [hexc("#5d5170"), hexc("#756888"), hexc("#8d7f9f"), hexc("#a496b4"), hexc("#bdb0c9")]
+SILVER = [hexc("#3c3a47"), hexc("#5b5968"), hexc("#7b7a8a"), hexc("#9c9bab"), hexc("#c2c1cd")]      # a step under the sheet: the engine lifts metal
+WOOD = [hexc("#2b1316"), hexc("#43201f"), hexc("#5a2d2a"), hexc("#73403a"), hexc("#8c584c")]        # the sheet's deep maroon stock, not red
+FUZZ = [hexc("#6a5a80"), hexc("#857596"), hexc("#a08fb0"), hexc("#b9a9c6"), hexc("#d0c3da")]
 STEM = hexc("#4a3a66")
 SKIN_LIFT = np.array([0.92, 0.98, 1.05])
 TRIM = hexc("#7c34c4")
@@ -112,20 +112,20 @@ def path_u(p, path):
 
 
 def feather(p, n, ao, path):
-    """The dark lilac stem, the dusty lilac fuzz combed out from it in soft notched barbs."""
+    """The thin dark stem, the dusty lilac fuzz combed out either side of it: darker by the stem, paler and notched at the edge."""
     u, d, sd = path_u(p, path)
     barbs = 0.5 + 0.5 * np.sin(u * 110.0 + d * 120.0)
-    fz = ramp(np.clip(0.42 + lit(n, ao) * 0.34 + (barbs - 0.5) * 0.3 * smooth(0.006, 0.016, d), 0, 1), FUZZ)
-    return mix(fz, STEM[None, :] * (0.8 + 0.3 * np.clip(lit(n, ao), 0, 1))[:, None], smooth(0.0085, 0.0055, d))
+    fz = ramp(np.clip(0.2 + 0.5 * smooth(0.004, 0.03, d) + lit(n, ao) * 0.22 + (barbs - 0.5) * 0.2, 0, 1), FUZZ)
+    return mix(fz, STEM[None, :] * (0.8 + 0.3 * np.clip(lit(n, ao), 0, 1))[:, None], smooth(0.0045, 0.0025, d))
 
 
 def braid(p, n, ao, path):
-    """Fat crossing lobes as on sable_head.png: a dark crease between lobes, fine strands combed along each."""
+    """Fat crossing lobes: the creases between them run in chevrons down the plait (so it reads woven, not beaded), fine strands combed along each lobe."""
     u, d, sd = path_u(p, path)
-    k = u * 11.0
+    k = u * 11.0 + np.abs(sd) * 7.0
     fr = k - np.floor(k)
     flip = np.where(np.floor(k) % 2 == 0, 1.0, -1.0)
-    crease = smooth(0.17, 0.03, np.minimum(fr, 1 - fr))
+    crease = smooth(0.12, 0.03, np.minimum(fr, 1 - fr))
     strands = np.sin((fr * 2.2 + flip * sd * 24.0) * 9.0)
     return ramp(np.clip(0.58 + lit(n, ao) * 0.42 - crease * 0.5 + strands * 0.05, 0, 1), HAIR)
 

@@ -186,43 +186,43 @@ def gem_piece(name, c, h, w, up):
     return Piece(name, "glow-rune", np.array(v), f)
 
 
-# ---- the antennae: dark stems off the hairline in a V, swept back, dusty lilac fuzz on the outer side from a third up. Two sheets back to back, one bone each.
+# ---- the antennae: feather plumes in a V off the hairline (the turnaround's front view): a thin dark stem with dusty lilac fuzz combed out on BOTH sides,
+# narrow at the root, widest past the middle, to a point. Two sheets back to back, one bone each.
 ANT_N = 2
+ANT_RINGS = 13                                 # 5 verts a ring, 2 sheets: 192 tris an antenna (the budget's share)
 
 
 def antenna(s):
     side = "R" if s > 0 else "L"
     top = hs([0, 0, 1.857])[2]
-    pts = np.array([(0.03, 0.062, top - 0.05), (0.058, 0.05, top + 0.0), (0.104, 0.024, top + 0.05), (0.137, -0.006, top + 0.10), (0.138, -0.03, top + 0.142), (0.112, -0.05, top + 0.172)]) * [s, 1, 1]
-    n = 25
+    pts = np.array([(0.03, 0.062, top - 0.05), (0.052, 0.052, top + 0.01), (0.082, 0.034, top + 0.08), (0.112, 0.012, top + 0.15), (0.135, -0.012, top + 0.215)]) * [s, 1, 1]
+    n = ANT_RINGS
     path = catmull(pts, n)
     u = np.linspace(0, 1, n)
     t_ = norm(np.gradient(path, axis=0))
-    side_v = norm(np.cross(t_, np.array([0, 1.0, 0])))                # in her front plane
-    if side_v[n // 2, 2] > 0:
-        side_v = -side_v                                               # the barbs point out and down
-    side_v = norm(side_v + np.array([0, -0.55, 0]))                    # and back a little, so the feather also reads from the side
-    wd = 0.04 * smooth(0.14, 0.4, u) * smooth(1.0, 0.62, u) + 0.0035
-    up_w = 0.012 * smooth(0.25, 0.6, u) * smooth(1.0, 0.8, u) + 0.0032
+    side_v = norm(np.cross(t_, np.array([0, 1.0, 0])))                # across the plume, in her front plane
+    side_v = side_v * np.sign(side_v[n // 2, 0] * s)                   # +side_v points out, away from her midline
+    side_v = norm(side_v + np.array([0, -0.4, 0]))                     # tilted back a little, so the plume also reads from the side
+    nrm = norm(np.cross(side_v, t_))
+    half = 0.036 * smooth(0.1, 0.55, u) * smooth(1.0, 0.7, u) + 0.0025      # the fuzz either side of the stem
+    barb = np.array([1.0 if i % 2 == 0 else 0.82 for i in range(n)])     # the feather's notched edge
+    ks = (-1.0, -0.45, 0.0, 0.45, 1.0)
     v, f = [], []
-    barb = np.array([1.0 if i % 2 == 0 else 0.74 for i in range(n)])     # the feather's notched edge
-    rows = 3
-    for lay, off in ((0, 0.0028), (1, -0.0028)):
+    for lay, off in ((0, 0.0025), (1, -0.0025)):
         base = len(v)
         for i in range(n):
-            lean = t_[i] * (0.03 * smooth(0.25, 0.6, u[i]))              # the barbs comb toward the tip
-            v.append(path[i] - side_v[i] * up_w[i] * barb[i] + [0, off, 0])
-            v.append(path[i] + side_v[i] * wd[i] * 0.45 + lean * 0.5 + [0, off * 1.6, 0])
-            v.append(path[i] + side_v[i] * wd[i] * barb[i] + lean + [0, off, 0])
+            lean = t_[i] * (0.025 * smooth(0.2, 0.6, u[i]))              # the barbs comb toward the tip
+            for k in ks:
+                edge = abs(k) > 0.9
+                v.append(path[i] + side_v[i] * half[i] * k * (barb[i] if edge else 1.0) + lean * abs(k) + nrm[i] * off * (1.0 if edge or k == 0 else 1.6))
         for i in range(n - 1):
-            for r in range(rows - 1):
-                a = base + i * rows + r
-                q = [a, a + 1, a + rows + 1, a + rows]
+            for r in range(len(ks) - 1):
+                a = base + i * len(ks) + r
+                q = [a, a + 1, a + len(ks) + 1, a + len(ks)]
                 f.append(q if lay == 0 else q[::-1])
     p = Piece("antenna" + side, "fur-feather", np.array(v), f)
-    # the front sheet winds toward the front (+y), its twin away
     a_, b_, c_ = (p.v[f[len(f) // 8][i]] for i in (0, 1, 2))
-    if np.cross(b_ - a_, c_ - a_)[1] < 0:
+    if np.dot(np.cross(b_ - a_, c_ - a_), nrm[n // 4]) < 0:    # each sheet faces away from its twin (the body shader culls back faces)
         p.f = [q[::-1] for q in p.f]
     p.path, p.u = path, u
     return p
@@ -247,8 +247,8 @@ def braid():
     for i in range(rings):
         ph = i / 2.0
         fr = ph - np.floor(ph)
-        wd[i] = (0.034 - 0.008 * u[i]) * (0.72 + 0.28 * np.sin(fr * np.pi))
-        offs[i] = (1 if int(ph) % 2 else -1) * 0.0075 * np.sin(fr * np.pi)
+        wd[i] = (0.034 - 0.008 * u[i]) * (0.86 + 0.14 * np.sin(fr * np.pi))      # a shallow pinch between lobes (deeper reads as beads)
+        offs[i] = (1 if int(ph) % 2 else -1) * 0.0095 * np.sin(fr * np.pi)
     t, s_, n_ = frames(path, (1, 0, 0))
     centre = path + s_ * offs[:, None]
     p = sweep("braid", "hair-braid", centre, SEC6, wd, side_hint=np.array([1.0, 0, 0]), depth=wd * 0.86)
