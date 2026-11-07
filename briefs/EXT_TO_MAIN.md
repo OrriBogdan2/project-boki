@@ -2538,3 +2538,4 @@ READY ext/parity-lace 4aa011a49 (Lace/archer KIT_PARITY 6+7: wall pin 4.94x the 
 READY ext/parity-dashlmb 4e788af65 (KIT_PARITY item 9: dash->LMB fires mid-dash on Hem, Ryzz, Cinder, Tarek air per item 51; Zedran/Bjorn stay buffer/cancel as sourced; --dash-flow-check asserts the rows)
 READY ext/lace-ult-arrows dfaeae389 (Lace ult: big travelling arrows at 90 m/s, map-wide cast sound; archer-combo-check, health --strict, gen_wiki --check pass)
 READY ext/sparkle-orb-pickup 3f03c9dc1 (walking over a charge orb picks it up + resets the dash; Sparkle's lightning/orbs/marks pink+teal instead of gold; mage combo check extended)
+READY ext/parity-snowglide ea140cf53 (Snowglider -> Snowglide everywhere, based on ext/text-relic-renames; hero_title_check retires Snowglider)
