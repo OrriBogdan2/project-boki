@@ -2340,3 +2340,6 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 - Renders (briefs/art-refs/claire_v2/ingame/): v1 top / v2 bottom in closeup_front_, turnaround_close_, turnaround_game_before_after.jpg and workbench_before_after.jpg; vs_sheet_after.jpg (GPU job 20261107-132623-00008, pc-MRROBOTO; before = 20261106-205337-05470).
 - Fidelity: ✅ frost-white rabbit ears, pink inside, one upright one folded | ✅ small puff tail | ✅ no horns, wings or devil tail | ✅ long white-to-ice braid | ✅ candy-cane bow + belt | ✅ lilac gloves | ✅ blade skates with fur cuffs | ✅ spear scale (sheet ~1.85 rig m vs model 1.895, 2%; in hand, tip clear of the ears) | ✅ youthful adult, not sexualised | ❌ scarf's long ends (DEBT: scarf ribbon-trail VFX on a new neck anchor) | ❌ hair is scan mesh, fringe shards up close, no alpha cards (DEBT) | ❌ close-up eyes read soft/half-lidded (atlas bake; a face-touch pass is the follow-up).
 - Alternative not taken: explorations/old_claire_v2_turnaround.jpg (index.md: nivi_v2 wins).
+
+## 2026-11-07 deep (job 20261107-140001-a4): CLAIM Tarek v2 model rebuild
+- CLAIM: Tarek/Kibo v2 model rebuild (id dolm, art/wardens/tarek/ to the locked v2 design, briefs/art-refs/tarek_v2/; jade-glyph stone, no orange at rest). Branch ext/tarek-v2-model.
