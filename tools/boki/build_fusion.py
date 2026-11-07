@@ -18,6 +18,7 @@ import importlib
 ATLAS_PX = 1024
 MODULES = {"cindle": "vespyx_fusion", "puddlet": "prismander_fusion", "burrlet": "mycroll_fusion",
            "zephyrak": "zephyrak_fusion"}
+           "wisplet": "lunowl_fusion"}
 fusion = None
 
 
