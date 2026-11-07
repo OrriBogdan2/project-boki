@@ -277,4 +277,4 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - Neve: darts semi-home while skating too (source behaviour).
 - Ours-only riders: keep NONE. Remove Neve's Chill 15% slow, Sable's empowered Shred, Meeko's carrier shield.
 - Defaults under PARITY FIRST (owner may override): cooldowns at source values (1.0x), Tenzo's allies can hop his rocks.
-- Lace's Focus/Deadeye: still open (owner asked for an explanation).
+- Lace: CUT Focus/Deadeye (owner, after explanation). Keep Hawk Sense.
