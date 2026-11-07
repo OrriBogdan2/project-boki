@@ -77,3 +77,6 @@ Replaces "Ravyl" (and Ravel/Lisette/Hem/Pin before it). The owner couldn't remem
 
 ## Prop sheet (owner, Nov 7, 15:53 ET)
 `ravel_v2_prop_sheet.jpg` contains: the giant needle (front, side, eye), the recurve bow (strung, side, grip), the stitched porcelain mask (front, 3/4, back), the spool belt with needles, two hair needles and a scale silhouette. It replaces the old hem_v4 prop files. Nano Banana Pro, new generation, 16:9, 4K. Refs: the turnaround back view and the bow; the master sheet crop.
+
+## Master sheet at 4K (owner, Nov 7, 16:01 ET)
+`ravel_v2_master_sheet.jpg` (3584x4800) is the full-resolution version of the same sheet as `ravel_v2_master_sheet_2k.jpg`, and it is now the master. It has a slightly warmer and pinker grade, and the eyes are grey rather than pale blue.
