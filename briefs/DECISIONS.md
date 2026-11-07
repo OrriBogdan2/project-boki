@@ -169,4 +169,9 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - Grimble (id dredge): the right arm IS the hook (purple mutated bone hook, no chain). The hook ability's visual is the arm extending, not a thrown chain. No nose, three-lens brass loupe, metal teeth with one gold tooth (grimble_v2/index.md canon notes). Old refs that say "Dredge" are his old name.
 - Claire: now a frost bunny. Real rabbit ears, a small fist-sized tail; no horns, bat wings or devil tail. She is 18, a youthful adult, not a seductress. Lore: "frost demoness" becomes "frost spirit" everywhere player-facing.
 - Portraits: briefs/art-refs/portraits_unified/ (12 portraits, shared vignette) are the select-screen and website portraits.
-- Next from the art session (do NOT model yet): Cinder redesign (lizard features instead of fish fins, protective gloves/suit, even ember cracks, softer face, "fire cleanses"); Sable (moth antennae instead of head wings). Optional: Tarek stones in his hair, Vex knee guards.
+- Cinder v2 is locked (owner, Nov 7; see below). Next from the art session (do NOT model yet): Sable (moth antennae instead of head wings). Optional: Tarek stones in his hair, Vex knee guards.
+
+## 2026-11-07 (owner, via coordinator): Cinder v2 locked (briefs/art-refs/cinder_v2/, index.md wins)
+- Mature, sultry lizard-woman with an elegant human face; lizard horns and goggles, no fins; spined tail with a flame tip; living-obsidian shard armour with molten seams spread evenly; heeled obsidian boots; scales on the skin.
+- Props stay small: a compact brass flamethrower and a small copper backpack tank with a glass window (cinder_v2_weapon_sheet.jpg; the hose runs from the grip to the base of the tank).
+- 3D: cinder_v2_turnaround.jpg (hair length and the flamethrower from cinder_v2_master_sheet.jpg). Final splash: "Last Dance" (cinder_v2_splash.jpg). Portrait: cinder_v2_portrait.jpg.
