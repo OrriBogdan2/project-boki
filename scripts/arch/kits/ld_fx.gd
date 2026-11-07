@@ -640,7 +640,7 @@ func arm(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.32) -> void:
 		for ring: Array in rings:
 			var k: float = ring[2]
 			im2.surface_set_color(Color(1, 1, 1, smoothstep(ARM_BONE_FROM, 1.0, k)))
-			for ang: float in [ang1, ang0]:
+			for ang: float in [ang0, ang1]:
 				var dir := side * cos(ang) + up * sin(ang)
 				im2.surface_set_normal(dir)
 				im2.surface_set_uv(Vector2(k * length, ang / TAU))
