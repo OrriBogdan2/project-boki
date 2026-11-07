@@ -30,13 +30,13 @@ var mobs_on := false             # wild monsters stay (clip 2 spawns its own); o
 func run(main_node: Node) -> void:
 	main = main_node
 	var secs := 12.0
-	var size := "1920x1080"
+	var res := "1920x1080"
 	var child := false
 	for a in OS.get_cmdline_user_args():
 		var arg := String(a)
 		child = child or arg == "--media-child"
 		if arg.begins_with("--media-size="):
-			size = arg.substr(13)
+			res = arg.substr(13)
 		if arg.begins_with("--shots-dir="):
 			dir = arg.substr(12)
 		if arg.begins_with("--media-clip="):
@@ -47,7 +47,7 @@ func run(main_node: Node) -> void:
 		dir = ProjectSettings.globalize_path("res://").path_join(dir)
 	DirAccess.make_dir_recursive_absolute(dir)
 	if not child:
-		_record(size)
+		_record(res)
 		return
 	Save.no_write = true
 	Record.set_level(1)
@@ -62,9 +62,9 @@ func run(main_node: Node) -> void:
 
 ## The movie writer's flags are engine arguments, and the GPU workers (jobq) pass their job arguments after "--",
 ## so this runs the same scene again as a child Godot with --write-movie (the child gets --media-child).
-func _record(size: String) -> void:
-	var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-driver", "opengl3", "--audio-driver", "Dummy",
-		"--position", "30000,30000", "--resolution", size, "--fixed-fps", "30",
+func _record(res: String) -> void:
+	var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-driver", "opengl3",
+		"--audio-driver", "Dummy", "--position", "30000,30000", "--resolution", res, "--fixed-fps", "30",
 		"--write-movie", dir.path_join("clip%d.avi" % clip), "--"]
 	args.append_array(OS.get_cmdline_user_args())
 	args.append("--media-child")
