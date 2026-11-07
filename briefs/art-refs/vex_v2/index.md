@@ -60,3 +60,4 @@ Rejected:
 - Coin-bite portrait (owner: not sly or hot enough).
 - Bubblegum, kiss-for-luck (off-model / held gun).
 - Freefall splash.
+- **Portrait updated (05:08 ET):** `vex_v2_portrait.jpg` = barrels to camera + robotic V-sign (natural green eye + glowing cyber-eye, gun reads as her right arm). Alts: firing, reloading in explorations/.

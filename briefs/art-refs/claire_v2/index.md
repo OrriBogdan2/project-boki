@@ -59,3 +59,4 @@ Known limits:
 
 ## Renamed: Neve, "the Snowglide" (owner, Nov 7, 04:38 ET)
 Replaces "Nivi". Neve is Italian for "snow". Display name only; ids and files stay (`rimewright`, `claire_*`, `nivi_v2_*`).
+- **Portrait updated (05:08 ET):** `nivi_v2_portrait.jpg` = Frost Queen (confident smirk at viewer, spear over shoulder, swirling frost scarf, frosted frame). Alts: fighter, spin in explorations/.
