@@ -2329,3 +2329,6 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 - Gameplay untouched (range, timing, hitbox, pull). hero-vfx-reel gets --reel-frames (the GPU worker returns no movie).
 - Checks: --dredge-combo-check 93/0, --hero-vfx-check OK, --clip-live-grimble 0 fails (new: the arm's root on the wrist, 0.00 m), health.py --strict OK.
 - GPU clips (pc-MRROBOTO, match camera, jobs 20261107-125639-01088 before / -24371 after): briefs/shots/grimble_hook/hook_before.mp4, hook_after.mp4, hook_before_after.mp4 (stacked), before_sheet.png / after_sheet.png. These replace the CPU renders.
+
+## 2026-11-07 deep (job 20261107-131501-a2): CLAIM Cinder v2 model rebuild
+- CLAIM: Cinder v2 model rebuild (art/wardens/cinder/ to the locked Flame Queen design: no tank, hose, flamethrower or goggles; briefs/art-refs/cinder_v2/). Branch ext/cinder-v2-model.
