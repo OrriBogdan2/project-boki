@@ -2316,3 +2316,6 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 - Checks: --wisp-check PASS (12 heroes, bot teammate, tutorial, bleed-out, look data). --revive-check, --box-revive-check, --clip-check, --warden-clips-check, --tutorial-hud-check and --check: 0 failures. health --strict OK. The full suite was not run.
 - Renders (GPU job 20261107-120848-03528): briefs/art-refs/downed_wisp/ (pop-in, idle, moving, ally Wisp, revive a/b; captions.txt).
 - Debt (docs/DEBT.md "Downed Wisp"): HunterAnim's crawl branch is dead. The Wisp id is local only (others see default; sending it needs a join-kit field and a Net.VERSION bump). There is no picker/shop UI.
+
+## 2026-11-07 build-spec (job 20261107-123002-a4): CLAIM Camera depth readability
+- CLAIM: Camera depth readability. Step 1 briefs/CAMERA_DEPTH.md (Supervive vs ours), step 2 cheapest 2-3 wins behind a setting, branch ext/camera-depth.
