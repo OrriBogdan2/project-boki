@@ -99,3 +99,6 @@ Lore update: the star lantern is gone. She holds nothing. Her companions are in 
 - **Final:** the original smooth, glossy, softly glowing style (`explorations/lumi_suncloud_moments.jpg`): a bright golden sun with rounded rays and a white raincloud with drops, both small at shoulder height, with cute faces and blush.
 - **Interactions (for animations and emotes):** the sun waves or taps her cheek while the cloud peeks shyly behind her ear; both nap on her shoulders; both kiss her cheeks; the cloud rains on a grumpy sun while she laughs and a rainbow appears.
 - **SAVED FOR LATER: the plush version** (`explorations/lumi_suncloud_moments_plush_swap.jpg`, stitched fabric toys). **Remind the owner** to consider it as a skin, e.g. "Bedtime Meeko" (her childhood toys came alive), or as a possible design change for her.
+
+## MAIN DESIGN LOCKED: Meeko (Nov 7, 02:21 ET)
+`meeko_v2_main_design.jpg`: the girlfriend's favourite pose with the magical sun (her left, waving) and the shy raincloud (her right, a drop falling), the stardust trail, the glowing star wings and the white capelet with the rainbow heart. This is the base for the master sheet, turnaround, portrait and splash. (`lumi_v2_main_design.jpg` is superseded.)
