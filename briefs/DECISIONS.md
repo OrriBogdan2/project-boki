@@ -235,3 +235,12 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - Companions (IN PROGRESS, do not build yet): no lantern, she holds nothing. Lead design: two tiny sentient companions floating at her shoulders, a little sun and a little raincloud, which she sends out to heal (possibly to damage). Personality animations: the cloud peeking shyly behind her ear while the sun waves; both napping on her shoulders; both kissing her cheeks; the cloud raining on a grumpy sun while she laughs and a rainbow appears. Plan her idles and emotes around these once the design is locked.
 - Visual rule: she still reads as a Hunter (upright, clothed, carrying gear).
 - Art: v2 redesign in `briefs/art-refs/pip_v2/`. Do NOT swap any Meeko art or model into the game until her master sheet is final. Name + lore text can ship now.
+
+## 2026-11-07 (owner): Cinder redesign, **"Cinder the Flame Queen"**: no weapons, fire from her hands
+- Removed from her design: the brass flamethrower, the hose and the copper fuel tank. Her own body is the weapon: LMB = a fire stream or bolts from her palms.
+- Look: obsidian-shard outfit, horns, living-fire hair, a flame-tipped tail; glowing magma cracks brighten while casting.
+- Art: `briefs/art-refs/cinder_v2/`. Main splash `cinder_v2_splash.jpg` ("The Last Kiss"); alternate `cinder_v2_splash_alt.jpg` ("The Pyre Queen"). The main splash is used wherever splashes are used: hero select, Relic offer, loading screens, website.
+- Her current master sheet, turnaround and weapon sheet still show the tank/hose/flamethrower and are being redone. Until then, model from the turnaround and IGNORE those parts. Do not build them.
+- Flue Flight ult: lift no longer comes from tank exhaust jets. DEFAULT (owner to confirm): fire bursting from her heels and tail.
+- Brass goggles: OPEN owner question (both new splashes leave them out). DEFAULT until answered: no goggles.
+- FIDELITY_CHECKLIST Cinder row: remove "copper/glass fire TANK on her back with 2 exhaust nozzles", "hose" and "FLAMETHROWER (held LMB)"; add "No weapons. Fire comes from her hands (LMB = a fire stream or bolts from her palms). Glowing magma cracks brighten while casting. A fire-queen look: an obsidian-shard outfit, horns, living-fire hair, a flame-tipped tail."
