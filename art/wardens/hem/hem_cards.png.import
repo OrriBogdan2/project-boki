@@ -2,26 +2,24 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://l317avsygbwq"
-path.bptc="res://.godot/imported/hem_normal.jpg-d1335e57ffa70f454ac4593450c5bb97.bptc.ctex"
-path.astc="res://.godot/imported/hem_normal.jpg-d1335e57ffa70f454ac4593450c5bb97.astc.ctex"
+uid="uid://wd4vsjaw36w"
+path="res://.godot/imported/hem_cards.png-bd80fc8ccfea542322548e571b70a7c2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
-"md5": "09cc7d8b89e92c89de564563fdc79737"
+"md5": "f7431c3f926cbc739890b5aa66b5dcda"
 }
 
 [deps]
 
-source_file="res://art/wardens/hem/hem_normal.jpg"
-dest_files=["res://.godot/imported/hem_normal.jpg-d1335e57ffa70f454ac4593450c5bb97.bptc.ctex", "res://.godot/imported/hem_normal.jpg-d1335e57ffa70f454ac4593450c5bb97.astc.ctex"]
+source_file="res://art/wardens/hem/hem_cards.png"
+dest_files=["res://.godot/imported/hem_cards.png-bd80fc8ccfea542322548e571b70a7c2.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

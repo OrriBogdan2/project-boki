@@ -10,8 +10,8 @@
 		"size": 0.98,
 		"hit_r": 0.392,
 		"head": 0.72,
-		"legs": 1.85,
-		"neck": 0.03
+		"legs": 2.05,
+		"neck": -0.05
 	},
 	"fantasy": "The hunter of high ground. Climbs, reads the field, pins people to walls.",
 	"silhouette": "the long weapon over the shoulder",
