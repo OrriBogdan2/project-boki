@@ -2213,3 +2213,7 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-07 deep (job 20261107-071501-a2): CLAIM Ravel v2 model rebuild
 - CLAIM: Ravel v2 model rebuild (art/wardens/hem/ to the locked v2 design, briefs/art-refs/ravel_v2/). Branch ext/ravel-v2-model.
+
+## 2026-11-07 text pass follow-up (job 20261107-072237-a3): READY ext/text-relic-renames ff4cf2f97 (supersedes cfc5759a above)
+- Lumi is now Meeko ("Meeko the Magic Fox", title Magic Fox) with the DECISIONS lore, barks, wiki and no lantern/star-relic lines; Nivi is "the Snowglider". Roster order unchanged (already matches). Wiki pages: Class-Magic-Fox, Class-Snowglider (renamed). No art, no companions.
+- Checks: hero-title-check 0 fails; title-check 10 fails, identical to origin/main (headless, no GPU). Details in docs/TEXT_PASS_2026-11-07.md.
