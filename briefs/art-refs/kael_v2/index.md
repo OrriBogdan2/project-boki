@@ -91,3 +91,12 @@ To do after Lumi, Nivi and maybe Motley's splash:
 4. Local fix: the slight magenta drift outside Kael was matched back to step 2's colours (soft mask, so the aura is kept).
 
 Edge brightness now sits in the roster range.
+
+## Splash: FINAL v4 (Nov 7, 03:02 ET)
+The red-flame aura was rejected as too much. The owner wanted a subtle force-field aura, white to match his hair and sword. Chain from `kael_v2_splash_step2.jpg`:
+1. Edit: a subtle white energy outline with sparks.
+2. Local sharpen (rejected as not enough).
+3. Edit: a high-detail re-render of Kael; three runs, run B picked (the sharpest: measured detail ~1.7x the others; white aura and sparks intact).
+4. Local colour match outside Kael to step 2 (removes the slight pink cast).
+
+`kael_v2_splash_final.jpg` is v4. The red-aura version is superseded.
