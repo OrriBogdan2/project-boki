@@ -67,3 +67,10 @@ Local fix (not AI): garbled "Contracts" lettering on three papers was painted ou
 Known limits: the small glowing creatures read as butterflies rather than moths; some bodyguards are armoured knights rather than mobsters.
 
 Portrait: candidate A saved (`explorations/sable_v2_portrait_candidate_A.jpg`): wink, knife and moth on her antenna. A fix-up edit is pending: the hand appears fused to the knife, and the moth looks like a butterfly.
+
+## Portrait: FINAL (Nov 6, 23:52 ET)
+`sable_v2_portrait.jpg`: a sly wink, a moth-wing throwing knife raised beside her face, a fuzzy violet moth on the tip of one antenna, moonlit rooftops. Candidate A plus one edit: the knife grip redone, the butterfly turned into a plump fuzzy moth. Nano Banana Pro, 1:1, 4K.
+
+Known limit: slight banding in the background fog.
+
+**Sable v2 set complete:** master sheet, turnaround, portrait, splash.
