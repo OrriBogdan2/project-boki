@@ -2549,3 +2549,6 @@ READY ext/parity-ostra-bomb 5b9a528d2 (KIT_PARITY 17: Ostra Brimseed peak 3.5x; 
 
 ## 2026-11-07 deep (job 20261107-211501-a2): CLAIM Mossy v2 model rebuild
 - CLAIM: Mossy the Barnacle Knight v2 model (id bulwark, art/wardens/breaker/ from mossy_v2 turnaround + master sheet: brass chest compass, restrained cyan crack emissive, bulk vs hero-heights 0.8). Branch ext/breaker-v2-model.
+
+## 2026-11-07 deep (job 20261107-211504-a4): CLAIM Cinder the Flame Queen model to the final turnaround
+- CLAIM: Cinder (ashwick) model pass to cinder_v2_turnaround.jpg + cinder_v2_master_sheet.jpg: clean back, empty casting palms (FX both palms, weapon_muzzle on the dominant palm), waist-length hair cards, curved lizard horns. Branch ext/cinder-v2-palms (from ext/cinder-v2-model).
