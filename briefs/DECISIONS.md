@@ -247,3 +247,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-07 (owner): hero full names read "<Name> the <Title>"
 - Meeko is "Meeko the Magic Fox", never "Meeko Magic Fox" or "Meeko · Magic Fox". Same form for every hero wherever name and title appear together: Vex the Hired Gun, Mossy the Sunken Bulwark, Ryzz the Storm Chaser, Kael the Unbroken (not "the The Unbroken"), Ravyl the Red Stitch, Nivi the Snowglider, Grimble the Scrap King, Meeko the Magic Fox, Cinder the Flame Queen, Kibo the Stone Seer, Motley the Void Jester, Sable the Silver Thief. A title shown on its own (class pages, a subtitle line) may drop the name.
+
+## 2026-11-07 (owner): Nivi is renamed **Neve** ("Neve the Snowglider")
+- Display text only (id `claire`, files and internal names stay). Supersedes "Nivi" everywhere above: hero select, kit/ability text, tooltips, barks, docs, wiki, website, Model Room. Roster order unchanged: Vex, Mossy, Ryzz, Kael, Ravyl, Neve, Grimble, Meeko, Cinder, Kibo, Motley, Sable.
