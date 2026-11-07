@@ -2233,3 +2233,27 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-07 full names (job 20261107-081221-a3): READY ext/text-relic-renames e51b4f191 (supersedes ff4cf2f97 above)
 "<Name> the <Title>" everywhere: HunterViewer.display_name (hero select, Relic offer, reveal, hatch) now uses HeroTitle.label, so "Meeko the Magic Fox", "Kael the Unbroken", no commas; docs/heroes headings; Cinder's title "Flame Queen" (title text only; wiki page renamed Class-Flame-Queen). Checks: hero-title 0 fails, hatch 0, class-unlock 0, ashwick-combo 0. Details in docs/TEXT_PASS_2026-11-07.md.
+
+## 2026-11-07 deep (job 20261107-071501-a2): READY ext/ravel-v2-model c1a221ad0 (Ravel v2 model), with known ❌ below
+Rebuilt art/wardens/hem/ with ART-1 from ravel_v2_turnaround.jpg + master_sheet_wide. Shared armature, FX points, anchors, clip set (48) and kit wiring kept. 13,856 tris (body 12,960, bow 752, arrow 144), one 2048 atlas plus a card sheet (hem_cards.png: 34-strip thread hem, 6 smoke). Meshy: 103 credits.
+- Renders: briefs/art-refs/ravel_v2/ingame/ (before_after, vs_turnaround, vs_master, game_closeup, game_poses, game_match_turn, match_still, match_still_zoom). All are llvmpipe (CPU worker): the GPU worker claimed nothing for 30+ min. No GPU turntable exists yet; look may differ on a real GPU. Jobs 20261107-083741-{18010,29591,31414} may still run later; they are superseded (no cancel command) and 18010's tree is removed, so ignore them.
+- Weapon scale and fit: back needle 1.21 m on a 1.81 m rig = 0.669 of height; sheet 0.668. Bow 1.6 m (.88 of height). Evidence: vs_turnaround.jpg, match_still_zoom.jpg.
+
+| Must-have (v2 sheet; the checklist's Lisette row is outdated) | | Evidence / gap |
+|---|---|---|
+| Two needles crossed in X, lashed, severed strings | ✅ | vs_turnaround (wraps more saturated red than the sheet's wine) |
+| Black recurve bow, needle arrows | ✅ | vs_turnaround; archer-combo-check |
+| Bun with silver needles, long black hair | ✅ | game_closeup |
+| Corset, belt of spools and pins, choker, red face stitch | ✅ | game_closeup, vs_master |
+| Weapon scale at match camera | ✅ | needles read in match_still_zoom |
+| Skirt | ❌ | reads shorter, blacker and more broken than the sheet's long plum skirt with red fade |
+| Porcelain skin | ❌ | arms and legs blotchy, thigh highlight hot pink/white near the slit; sheet is smooth lilac porcelain |
+| Shoulder mask | ❌ | present but flat; nearly lost in game, a major sheet feature |
+| Eyes | ❌ | painted from the scan; lid blink moves nothing visible |
+| Proportions | ❌ | shared rig: belt ~7 cm lower than sheet, head a bit big |
+| Smoke hair ends, doll joints | ⚠ | smoke cards barely read; knee joints read, cracks are faint |
+| Match-camera colour | ⚠ | reads as a saturated red blob, not plum and porcelain |
+| Glowing strings on raised hand | ⚠ | portrait/FX, not in the model |
+
+Recommendation: playable, but not a final look; the owner should decide if it merges as is. Next pass: skirt, skin bake, shoulder mask, in that order.
+Checks: warden-rig-json OK, warden-model-check 157/0, warden-glb-check 187/0, warden-clips 0 fails, hero-check 0, hero-vfx OK, health --strict OK on c1a221ad0. archer-combo 153/0 ran before the last look tune (colours only; not rerun).
