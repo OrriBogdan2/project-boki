@@ -2746,7 +2746,9 @@ func _boss_check() -> void:
 	var egg_items: Array = []
 	for h in [P, C]:      # (a kin's own attacks and abilities would move the scripted hp thresholds; its species is random)
 		for k in [h.kin, h.kin2]:
-			if k != null: k.dead = true; k.visible = false
+			if k != null:
+				k.dead = true
+				k.visible = false
 	for L in [F, E, H]:
 		for g in L["guards"]: if is_instance_valid(g) and not g.dead: g.dead = true; g.visible = false
 		var b: Boss = L["boss_mob"]
