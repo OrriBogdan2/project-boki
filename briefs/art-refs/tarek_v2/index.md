@@ -67,3 +67,12 @@ Local fix (not AI): the two background assassins had glowing teal eyes, which cl
 `explorations/tarek_v2_splash_alt.jpg` is the second run: a squarer pose with stronger spotlight. Not chosen because all four assassins have glowing green eyes, his stone arm is washed teal, and the composition is more static.
 
 Not achieved: the eye stones turning toward the attackers. All three face the viewer.
+
+## Splash: FINAL, action version (Nov 6, 23:05 ET)
+The owner wanted Tarek fighting back, not posing. `tarek_v2_splash.jpg` (5504×3072) shows him leaping off a rock pillar. His huge stone left fist smashes a boulder that flies at an assassin in a jade-teal burst; pillars erupt under two more assassins, throwing them into the air; flung rocks are mid-flight; he grins. Nano Banana Pro, 16:9, 4K, a fresh generation (refs: the turnaround and the master sheet; the old splash was deliberately not used as a ref, to avoid copying its standing pose). Owner's pick: his foot is clearly on the rock, and the punch reads well in 3D.
+
+Local fix (not AI): the hit assassin's glowing teal eyes were darkened to normal eyes.
+
+Alternates in `explorations/`:
+- `tarek_v2_splash_action_pose_alt.jpg`: the second action run, which the owner likes for its pose. His back leg merges into the rock pillar, and the punch lands straight on the assassin.
+- `tarek_v2_splash_standing.jpg` and `tarek_v2_splash_standing_alt.jpg`: the earlier "surrounded but calm" runs, which had no action.
