@@ -36,10 +36,10 @@ TAIL_PTS = [(0, -.085, HIPS_Z + .07), (0, -.17, HIPS_Z - .06), (.035, -.265, HIP
 DORSAL = np.array((0.0, -0.8, 0.6))
 HORN_M = "metal-horn"                                  # (its own painted strip: HORN_UV in cinder_finish)
 HORN_C, HORN_TIP = "#4a4452", "#1a1520"                # grey-violet stone at the root, near black at the tip
-# Her right horn, off the head joint: out of the skull's side-top, up and out, then back (the sheet's curve); the left is its mirror
-HORN_PTS = [(.078, -.035, .238), (.098, -.045, .280), (.116, -.065, .323), (.126, -.090, .360), (.124, -.115, .386)]
-HORN_R = 0.027                                         # m, at its root
-HORN_RINGS = 16
+# Her right horn, off the head joint: out of the skull's side-top, swept back past her crown, the tip curling up (the turnaround's side view); the left is its mirror
+HORN_PTS = [(.066, .004, .226), (.086, -.032, .256), (.106, -.078, .279), (.122, -.128, .296), (.132, -.168, .320), (.134, -.190, .354), (.128, -.196, .390)]
+HORN_R = 0.03                                          # m, at its root
+HORN_RINGS = 20
 HORN_SEC = [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 8, endpoint=False)]
 SEC = [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 10, endpoint=False)]
 

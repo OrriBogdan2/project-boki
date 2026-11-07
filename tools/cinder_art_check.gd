@@ -1,6 +1,7 @@
 extends RefCounted
 ## --cinder-art-check: Cinder's model (ART-1) against her kit, through the real match code and render path.
-## The fire leaves her casting palm (no weapon) through the idle hold and the stream, and that palm is really held out;
+## The fire leaves her casting palm (no weapon; the left palm has its own point) through the idle hold and
+## the stream, and that palm is really held out;
 ## her magma cracks brighten while it runs and fall back after; in Flue Flight both heels carry a jet (their flames
 ## stretched by the clip) and the hand is free; the fire surfaces are on the flame shader. Never touches the save.
 
@@ -47,6 +48,11 @@ func run(main: Node) -> void:
 		_frame(m, P)
 	var mz := WardenGlb.anchor(P.model, "weapon_muzzle")
 	ok(mz != null, "the casting hand has its fire point")
+	var ml := WardenGlb.anchor(P.model, "weapon_muzzle_l")
+	var at_l := ml.get_parent() as BoneAttachment3D if ml else null
+	var mirrored := mz != null and ml != null and absf(ml.position.length() - mz.position.length()) < 0.01
+	var on_left := at_l != null and at_l.bone_name.ends_with("hand.L")
+	ok(on_left and mirrored, "the left palm has its fire point, mirroring the right palm's")
 	ok(WardenGlb.anchor(P.model, "anchor_tail_tip") != null, "the tail tip has its flame point")
 	var fire := 0
 	for mat in P.model.find_children("*", "MeshInstance3D", true, false):

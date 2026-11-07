@@ -29,6 +29,7 @@ FLAMES = ["flame-jet"]
 MATS = [s + "-cinder" for s in SLOTS] + list(CELL) + [K.HORN_M] + FLAMES + ["card-cinder"]
 HEEL_J = (0.0, -0.2, -1.0)           # the jets' axis: down and a little back
 EMBER = (0.5, 0.95)                  # a hair card's run from root to tip: the ember starts, it's full
+HAIR_END = 0.88                      # m: the back curtain's longest card ends at her waist, the strands' tips at the top of her seat
 SKIN_C, SKIN_DK = "#8d8799", "#4d4656"    # the sheet's scaled grey-violet
 OBS_LO, OBS_HI = "#100c15", "#584a6a"     # living obsidian, deep to its sheen
 HAIR_LO, HAIR_HI = "#0e0b12", "#2e2733"
@@ -60,7 +61,7 @@ gn = {g.index: g.name for g in low.vertex_groups}
 lo_co = np.array([v.co[:] for v in low.data.vertices])
 lo_w = [{gn[g.group]: g.weight for g in v.groups if g.weight > 0.01} for v in low.data.vertices]
 lo_bvh = BVHTree.FromPolygons([tuple(v) for v in lo_co], [list(p.vertices) for p in low.data.polygons])
-CARD_CH = {"c": 5, "r": 6, "l": 6}
+CARD_CH = {"c": 6, "r": 6, "l": 6}
 
 
 def surf(x, z, d, gap=0.012):
@@ -76,7 +77,7 @@ def body_y(x, z, d, was):
 
 # The hair's chains: the scan's hair, then on down: to the small of her back behind, to her chest at the sides
 hc = [np.array(p, float) for p in META["hairc"]]
-for z_ in (1.08, 0.99, 0.91):
+for z_ in (1.08, 0.99, 0.90, 0.84):
     hc.append(np.array((0.0, body_y(0.0, z_, -1, hc[-1][1] + 0.02), z_)))
 hr = [np.array(p, float) for p in META["hairr"]]
 for z_ in (1.16, 1.11, 1.06, 1.01):
@@ -575,15 +576,15 @@ def lock(g, x0, d, z0, z1, wide, u0, out_x=0.0, gap=0.012):
 
 
 def hair_cards():
-    """The master sheet's length: behind, a curtain to the small of her back; before her shoulders, two long locks to her chest."""
+    """The turnaround's length: behind, a curtain as wide as her back to her waist; before her shoulders, two long locks to her chest."""
     out = []
     rng = np.random.default_rng(3)
     for layer, gap in ((0, 0.012), (1, 0.022)):
-        for i in range(7):
-            x = -0.08 + 0.16 * i / 6.0 + 0.008 * layer
-            ln = 1.0 - 0.12 * abs(i - 3) / 3.0 + rng.uniform(-0.03, 0.03)
-            z1 = 1.36 + (0.98 - 1.36) * ln
-            out += lock("c", x, -1, 1.36, z1, 0.045, rng.uniform(0, 0.7), out_x=x * 0.06, gap=gap)
+        for i in range(9):
+            x = -0.12 + 0.24 * i / 8.0 + 0.008 * layer
+            ln = 1.0 - 0.1 * abs(i - 4) / 4.0 + rng.uniform(-0.03, 0.03)
+            z1 = 1.36 + (HAIR_END - 1.36) * ln
+            out += lock("c", x, -1, 1.36, z1, 0.045, rng.uniform(0, 0.7), out_x=x * 0.25, gap=gap)
         for sg, g in ((1.0, "r"), (-1.0, "l")):
             for i, (x, z1) in enumerate(((0.07, 1.15), (0.085, 1.09), (0.1, 1.11), (0.115, 1.17))):
                 out += lock(g, sg * (x + 0.006 * layer), 1, 1.39, z1, 0.026, rng.uniform(0, 0.7), out_x=sg * 0.008, gap=gap)
@@ -706,10 +707,10 @@ def skin(o_, weights):
 
 skin(ob, vw)
 
-# ---- FX points. The nozzle is her casting hand now: the kit's Gun/Muzzle follows hand.R
+# ---- FX points. The nozzle is her casting hand now: the kit's Gun/Muzzle follows hand.R (her dominant palm); weapon_muzzle_l is the left palm
 OFF = np.array((-K.MUZZLE_OFF, 0.0, 0.0))
 A_ = {"anchor_head_top": ("head", (0, 0, CROWN)), "anchor_crown": ("head", (0, -0.03, CROWN + 0.07)), "anchor_chest": ("hips", (0, 0.11, K.SHOULDER_Z - 0.13)),
-      "weapon_muzzle": ("hand.R", PALM + OFF), "anchor_blade_root": ("hand.R", PALM), "anchor_gun_mid": ("hand.R", PALM * 0.5 + hand * 0.5),
+      "weapon_muzzle": ("hand.R", PALM + OFF), "weapon_muzzle_l": ("hand.L", (PALM + OFF) * (-1, 1, 1)), "anchor_blade_root": ("hand.R", PALM), "anchor_gun_mid": ("hand.R", PALM * 0.5 + hand * 0.5),
       "anchor_jet_0": ("jet.0", HEELS[0][0]), "anchor_jet_1": ("jet.1", HEELS[1][0]), "anchor_tank": ("hips", (0, -0.12, K.SHOULDER_Z - 0.2)),
       "anchor_tail_tip": ("spring_scarftail_tail_%d" % (K.TAIL_N - 2), pl.path[-1])}
 for i_, (bn, at) in enumerate((("hips", (0.0, 0.12, 1.1)), ("hips", (0.0, 0.1, 0.98)), ("forearm.R", (J("forearm.R") + J("hand.R")) / 2), ("forearm.L", (J("forearm.L") + J("hand.L")) / 2))):
