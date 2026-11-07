@@ -92,7 +92,7 @@ _Cane toad + Castle rampart_ (`basaltoad`). A toad with a castle wall on its bac
 | Personality | bravery 0.7, loyalty 0.7, temper 0.2, curiosity 0.25 |
 | Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
 | Rides | perch (Bedrock Skin) |
-| Farm work | none listed |
+| Farm work | Stone 3, Timber 2, Haul 1 |
 | Egg | Basaltoad Egg: Something placid is in here. |
 
 - E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
@@ -133,7 +133,7 @@ _Caecilian + Giant zipper_ (`caecilith`). A worm that unzips the ground: it dive
 | Personality | bravery 0.55, loyalty 0.45, temper 0.5, curiosity 0.85 |
 | Fighting style | trickster; aggression 0.45, loyalty 0.55, caution 0.65 |
 | Rides | perch (Burrow) |
-| Farm work | none listed |
+| Farm work | Forage 3, Craft 2, Haul 1 |
 | Egg | Caecilith Egg: Something sly is in here. |
 
 - E ability: **Moon Swap** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.
@@ -174,7 +174,7 @@ _Hornbill + Ship's anchor_ (`casquebill`). A hornbill whose casque is a ship's a
 | Personality | bravery 0.7, loyalty 0.7, temper 0.35, curiosity 0.4 |
 | Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
 | Rides | perch (Heavy Head) |
-| Farm work | none listed |
+| Farm work | Stone 3, Haul 2, Timber 1 |
 | Egg | Casquebill Egg: Something dignified is in here. |
 
 - E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
@@ -215,7 +215,7 @@ _Cassowary + Forge bellows_ (`cindowary`). A cassowary whose head crest is a lea
 | Personality | bravery 0.9, loyalty 0.75, temper 0.75, curiosity 0.3 |
 | Fighting style | bruiser; aggression 0.8, loyalty 0.5, caution 0.25 |
 | Rides | mount (Ash Stride) |
-| Farm work | none listed |
+| Farm work | Ember 3, Craft 2, Forage 1 |
 | Egg | Cindowary Egg: Something fierce is in here. |
 
 - E ability: **Gale Lance** (8s cooldown, range 8m). Zephyrak spears 8m through the air, shocking everything it passes, then bursts in a ring of wind that throws foes back and arcs lightning to two more.
@@ -235,7 +235,7 @@ _Okapi + Brass candelabra_ (`duskapi`). An okapi with a candelabra for horns; sn
 | Personality | bravery 0.4, loyalty 0.8, temper 0.3, curiosity 0.6 |
 | Fighting style | trickster; aggression 0.45, loyalty 0.55, caution 0.65 |
 | Rides | mount (Dusk Step) |
-| Farm work | none listed |
+| Farm work | Forage 3, Craft 2, Haul 1 |
 | Egg | Duskapi Egg: Something shy is in here. |
 
 - E ability: **Moon Swap** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.
@@ -255,7 +255,7 @@ _Manatee + Antique icebox_ (`floenatee`). A manatee carrying an old icebox on it
 | Personality | bravery 0.5, loyalty 0.9, temper 0.05, curiosity 0.5 |
 | Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
 | Rides | mount (Floe Saddle) |
-| Farm work | none listed |
+| Farm work | Frost 3, Craft 2, Mend 1 |
 | Egg | Floenatee Egg: Something kind is in here. |
 
 - E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
@@ -275,7 +275,7 @@ _Gibbon + Bronze temple bell_ (`gibbelle`). A gibbon whose belly is a temple bel
 | Personality | bravery 0.65, loyalty 0.65, temper 0.5, curiosity 0.75 |
 | Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
 | Rides | perch (Morning Song) |
-| Farm work | none listed |
+| Farm work | Spark 3, Forage 2, Craft 1 |
 | Egg | Gibbelle Egg: Something joyful is in here. |
 
 - E ability: **Echo Chain** (7s cooldown, range 7m). A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
@@ -295,7 +295,7 @@ _Yak + Icebreaker prow_ (`glaciyak`). A yak with an icebreaker's iron prow for h
 | Personality | bravery 0.75, loyalty 0.85, temper 0.2, curiosity 0.4 |
 | Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
 | Rides | mount (Snowplough) |
-| Farm work | none listed |
+| Farm work | Frost 3, Craft 2, Mend 1 |
 | Egg | Glaciyak Egg: Something steady is in here. |
 
 - E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
@@ -315,7 +315,7 @@ _Star-nosed mole + Quartz geode_ (`glintmole`). A star-nosed mole whose back is 
 | Personality | bravery 0.35, loyalty 0.75, temper 0.3, curiosity 0.7 |
 | Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
 | Rides | shoulder (Tremor Sense) |
-| Farm work | none listed |
+| Farm work | Stone 3, Timber 2, Haul 1 |
 | Egg | Glintmole Egg: Something shy is in here. |
 
 - E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
@@ -335,7 +335,7 @@ _Garden snail + Smoked obsidian_ (`gloamshell`). A snail whose shell is smoked o
 | Personality | bravery 0.3, loyalty 0.6, temper 0.35, curiosity 0.55 |
 | Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
 | Rides | shoulder (Dusk Trail) |
-| Farm work | none listed |
+| Farm work | Forage 3, Craft 2, Haul 1 |
 | Egg | Gloamshell Egg: Something private is in here. |
 
 - E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
@@ -355,7 +355,7 @@ _Slime mold + Puffball_ (`glomwort`). A yellow slime mold that creeps like a net
 | Personality | bravery 0.5, loyalty 0.6, temper 0.25, curiosity 0.95 |
 | Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
 | Rides | shoulder (Creep) |
-| Farm work | none listed |
+| Farm work | Bloom 3, Mend 2, Ranch 1 |
 | Egg | Glomwort Egg: Something curious is in here. |
 
 - E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
@@ -375,7 +375,7 @@ _Goliath beetle + Marble statue face_ (`goliathite`). A beetle the size of a car
 | Personality | bravery 0.7, loyalty 0.85, temper 0.2, curiosity 0.45 |
 | Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
 | Rides | mount (Statue Shell) |
-| Farm work | none listed |
+| Farm work | Stone 3, Timber 2, Haul 1 |
 | Egg | Goliathite Egg: Something earnest is in here. |
 
 - E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
@@ -395,7 +395,7 @@ _Highland cow + Stone cottage garden_ (`heatherhorn`). A highland cow with a wal
 | Personality | bravery 0.7, loyalty 0.85, temper 0.2, curiosity 0.35 |
 | Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
 | Rides | mount (Meadow Back) |
-| Farm work | none listed |
+| Farm work | Bloom 3, Forage 2, Mend 1 |
 | Egg | Heatherhorn Egg: Something gentle is in here. |
 
 - E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
@@ -436,7 +436,7 @@ _Grey heron + Ice skates_ (`hoarheron`). A heron on ice skates with an ice-pick 
 | Personality | bravery 0.6, loyalty 0.65, temper 0.3, curiosity 0.3 |
 | Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
 | Rides | perch (Still Water) |
-| Farm work | none listed |
+| Farm work | Frost 3, Craft 2, Mend 1 |
 | Egg | Hoarheron Egg: Something patient is in here. |
 
 - E ability: **Gale Lance** (8s cooldown, range 8m). Zephyrak spears 8m through the air, shocking everything it passes, then bursts in a ring of wind that throws foes back and arcs lightning to two more.
@@ -456,7 +456,7 @@ _Kestrel + Copper lightning rod_ (`kestrike`). A kestrel with a copper crest tha
 | Personality | bravery 0.8, loyalty 0.6, temper 0.5, curiosity 0.45 |
 | Fighting style | skirmisher; aggression 0.7, loyalty 0.45, caution 0.3 |
 | Rides | perch (Lightning Rod) |
-| Farm work | none listed |
+| Farm work | Spark 3, Tide 2, Haul 1 |
 | Egg | Kestrike Egg: Something proud is in here. |
 
 - E ability: **Echo Chain** (7s cooldown, range 7m). A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
@@ -476,7 +476,7 @@ _Honey badger + Blacksmith's anvil_ (`kilnbadger`). A honey badger with a red-ho
 | Personality | bravery 0.95, loyalty 0.75, temper 0.8, curiosity 0.4 |
 | Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
 | Rides | perch (Fired Hide) |
-| Farm work | none listed |
+| Farm work | Ember 3, Craft 2, Forage 1 |
 | Egg | Kilnbadger Egg: Something fearless is in here. |
 
 - E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
@@ -496,7 +496,7 @@ _Wren + Ember coal_ (`kindlewren`). A cocky little wren that carries a live coal
 | Personality | bravery 0.85, loyalty 0.5, temper 0.7, curiosity 0.6 |
 | Fighting style | skirmisher; aggression 0.7, loyalty 0.45, caution 0.3 |
 | Rides | perch (Kindling) |
-| Farm work | none listed |
+| Farm work | Ember 3, Craft 2, Forage 1 |
 | Egg | Kindlewren Egg: Something cheeky is in here. |
 
 - E ability: **Gale Lance** (8s cooldown, range 8m). Zephyrak spears 8m through the air, shocking everything it passes, then bursts in a ring of wind that throws foes back and arcs lightning to two more.
@@ -516,7 +516,7 @@ _Capybara + Hot-spring pool_ (`lilybara`). A capybara with a hot spring on its b
 | Personality | bravery 0.55, loyalty 0.85, temper 0.05, curiosity 0.55 |
 | Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
 | Rides | mount (Lily Raft) |
-| Farm work | none listed |
+| Farm work | Bloom 3, Forage 2, Mend 1 |
 | Egg | Lilybara Egg: Something calm is in here. |
 
 - E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
@@ -536,7 +536,7 @@ _Giant limpet + Riveted iron shield_ (`limpetor`). A giant limpet whose shell is
 | Personality | bravery 0.8, loyalty 0.75, temper 0.4, curiosity 0.15 |
 | Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
 | Rides | mount (Clamp) |
-| Farm work | none listed |
+| Farm work | Stone 3, Timber 2, Haul 1 |
 | Egg | Limpetor Egg: Something stubborn is in here. |
 
 - E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
@@ -556,7 +556,7 @@ _Stick insect + Lodestone_ (`lodestick`). A stick insect made of dark lodestone 
 | Personality | bravery 0.45, loyalty 0.55, temper 0.2, curiosity 0.6 |
 | Fighting style | trickster; aggression 0.45, loyalty 0.55, caution 0.65 |
 | Rides | shoulder (Still Point) |
-| Farm work | none listed |
+| Farm work | Stone 3, Haul 2, Timber 1 |
 | Egg | Lodestick Egg: Something still is in here. |
 
 - E ability: **Moon Swap** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.
@@ -576,7 +576,7 @@ _Leafcutter ant + Leaf_ (`marchleaf`). A leafcutter ant hauling a leaf ten times
 | Personality | bravery 0.75, loyalty 0.7, temper 0.5, curiosity 0.35 |
 | Fighting style | bruiser; aggression 0.8, loyalty 0.5, caution 0.25 |
 | Rides | shoulder (Work Crew) |
-| Farm work | none listed |
+| Farm work | Ranch 3, Bloom 2, Craft 1 |
 | Egg | Marchleaf Egg: Something dutiful is in here. |
 
 - E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
@@ -596,7 +596,7 @@ _Slow loris + Paper lantern_ (`moonloris`). A slow loris that is a paper lantern
 | Personality | bravery 0.3, loyalty 0.85, temper 0.2, curiosity 0.6 |
 | Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
 | Rides | perch (Night Eyes) |
-| Farm work | none listed |
+| Farm work | Frost 3, Mend 2, Craft 1 |
 | Egg | Moonloris Egg: Something sleepy is in here. |
 
 - E ability: **Moon Swap** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.
@@ -616,7 +616,7 @@ _Tardigrade + Cushion moss_ (`mossgrade`). A plump water bear wearing a cushion 
 | Personality | bravery 0.5, loyalty 0.85, temper 0.1, curiosity 0.4 |
 | Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
 | Rides | shoulder (Cushion) |
-| Farm work | none listed |
+| Farm work | Bloom 3, Forage 2, Mend 1 |
 | Egg | Mossgrade Egg: Something unbothered is in here. |
 
 - E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
@@ -636,7 +636,7 @@ _Aardvark + Termite clay spire_ (`moundvark`). An aardvark with a termite cathed
 | Personality | bravery 0.6, loyalty 0.7, temper 0.3, curiosity 0.8 |
 | Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
 | Rides | mount (Living Mound) |
-| Farm work | none listed |
+| Farm work | Ranch 3, Bloom 2, Craft 1 |
 | Egg | Moundvark Egg: Something nosy is in here. |
 
 - E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
@@ -656,7 +656,7 @@ _Starling + Pan-pipes_ (`murmurling`). A starling with pan-pipes for a tail; eve
 | Personality | bravery 0.6, loyalty 0.6, temper 0.45, curiosity 0.8 |
 | Fighting style | skirmisher; aggression 0.7, loyalty 0.45, caution 0.3 |
 | Rides | perch (Flock) |
-| Farm work | none listed |
+| Farm work | Ranch 3, Bloom 2, Craft 1 |
 | Egg | Murmurling Egg: Something sociable is in here. |
 
 - E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
@@ -676,7 +676,7 @@ _Pangolin + Disco ball_ (`nacrolin`). A pangolin covered in mirror tiles; curl i
 | Personality | bravery 0.4, loyalty 0.8, temper 0.3, curiosity 0.45 |
 | Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
 | Rides | perch (Pearl Scales) |
-| Farm work | none listed |
+| Farm work | Tide 3, Craft 2, Mend 1 |
 | Egg | Nacrolin Egg: Something timid is in here. |
 
 - E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
@@ -696,7 +696,7 @@ _Lynx kitten + Stinging nettle_ (`nettlynx`). A lynx kitten whose ear tufts and 
 | Personality | bravery 0.8, loyalty 0.5, temper 0.75, curiosity 0.5 |
 | Fighting style | bruiser; aggression 0.8, loyalty 0.5, caution 0.25 |
 | Rides | shoulder (Nettle Sting) |
-| Farm work | none listed |
+| Farm work | Ember 3, Mend 2, Forage 1 |
 | Egg | Nettlynx Egg: Something prickly is in here. |
 
 - E ability: **Stinger Hook** (8s cooldown, range 8m). Vespyx lashes its tail 8m: the first foe it stings is dragged back to it, poisoned, blighted (healing halved) and stunned 0.3s.
@@ -716,7 +716,7 @@ _Ostrich + Thunderhead and copper coil_ (`nimbostrich`). A thundercloud ostrich 
 | Personality | bravery 0.55, loyalty 0.6, temper 0.6, curiosity 0.7 |
 | Fighting style | skirmisher; aggression 0.7, loyalty 0.45, caution 0.3 |
 | Rides | mount (Thunder Run) |
-| Farm work | none listed |
+| Farm work | Spark 3, Tide 2, Haul 1 |
 | Egg | Nimbostrich Egg: Something skittish is in here. |
 
 - E ability: **Echo Chain** (7s cooldown, range 7m). A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
@@ -736,7 +736,7 @@ _Basilisk lizard + Soap bubble_ (`opalisk`). A lizard that blows a soap-bubble c
 | Personality | bravery 0.4, loyalty 0.5, temper 0.55, curiosity 0.8 |
 | Fighting style | trickster; aggression 0.45, loyalty 0.55, caution 0.65 |
 | Rides | shoulder (Flash) |
-| Farm work | none listed |
+| Farm work | Tide 3, Craft 2, Mend 1 |
 | Egg | Opalisk Egg: Something showy is in here. |
 
 - E ability: **Moon Swap** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.
@@ -756,7 +756,7 @@ _Three-toed sloth + Glass greenhouse_ (`orchisloth`). A sloth carrying a little 
 | Personality | bravery 0.35, loyalty 0.9, temper 0.05, curiosity 0.5 |
 | Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
 | Rides | perch (Slow Bloom) |
-| Farm work | none listed |
+| Farm work | Bloom 3, Forage 2, Mend 1 |
 | Egg | Orchisloth Egg: Something gentle is in here. |
 
 - E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
@@ -818,7 +818,7 @@ _Shrew + Hoarfrost_ (`rimeshrew`). A tiny shrew with a frost-feathered coat that
 | Personality | bravery 0.9, loyalty 0.5, temper 0.65, curiosity 0.75 |
 | Fighting style | skirmisher; aggression 0.7, loyalty 0.45, caution 0.3 |
 | Rides | shoulder (Rime) |
-| Farm work | none listed |
+| Farm work | Frost 3, Craft 2, Mend 1 |
 | Egg | Rimeshrew Egg: Something frantic is in here. |
 
 - E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
@@ -838,7 +838,7 @@ _Hippopotamus + Steam locomotive_ (`scaldamus`). A hippo that is half steam engi
 | Personality | bravery 0.85, loyalty 0.7, temper 0.6, curiosity 0.2 |
 | Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
 | Rides | mount (Mud Bath) |
-| Farm work | none listed |
+| Farm work | Ember 3, Craft 2, Forage 1 |
 | Egg | Scaldamus Egg: Something lazy is in here. |
 
 - E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
@@ -858,7 +858,7 @@ _Hatchetfish + Moonstone_ (`selenfin`). A silver hatchetfish that swims through 
 | Personality | bravery 0.4, loyalty 0.8, temper 0.15, curiosity 0.5 |
 | Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
 | Rides | shoulder (Moonwater) |
-| Farm work | none listed |
+| Farm work | Frost 3, Mend 2, Craft 1 |
 | Egg | Selenfin Egg: Something serene is in here. |
 
 - E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
@@ -878,7 +878,7 @@ _Meerkat + Brass barometer_ (`sentrikat`). A meerkat with a barometer in its bel
 | Personality | bravery 0.6, loyalty 0.8, temper 0.45, curiosity 0.7 |
 | Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
 | Rides | perch (Lookout) |
-| Farm work | none listed |
+| Farm work | Spark 3, Tide 2, Haul 1 |
 | Egg | Sentrikat Egg: Something alert is in here. |
 
 - E ability: **Echo Chain** (7s cooldown, range 7m). A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
@@ -898,7 +898,7 @@ _Giant salamander + Wooden rain barrel_ (`spatewader`). A giant salamander with 
 | Personality | bravery 0.65, loyalty 0.75, temper 0.25, curiosity 0.4 |
 | Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
 | Rides | mount (Floodrider) |
-| Farm work | none listed |
+| Farm work | Spark 3, Tide 2, Haul 1 |
 | Egg | Spatewader Egg: Something lazy is in here. |
 
 - E ability: **Echo Chain** (7s cooldown, range 7m). A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
@@ -918,7 +918,7 @@ _Albatross + Patched ship sails_ (`squalltross`). An albatross with patched ship
 | Personality | bravery 0.75, loyalty 0.55, temper 0.3, curiosity 0.8 |
 | Fighting style | skirmisher; aggression 0.7, loyalty 0.45, caution 0.3 |
 | Rides | mount (Tailwind) |
-| Farm work | none listed |
+| Farm work | Spark 3, Tide 2, Haul 1 |
 | Egg | Squalltross Egg: Something wandering is in here. |
 
 - E ability: **Gale Lance** (8s cooldown, range 8m). Zephyrak spears 8m through the air, shocking everything it passes, then bursts in a ring of wind that throws foes back and arcs lightning to two more.
@@ -938,7 +938,7 @@ _Slow worm + Knotted hemp rope_ (`threadwyrm`). A rope snake with mushroom caps 
 | Personality | bravery 0.45, loyalty 0.75, temper 0.15, curiosity 0.65 |
 | Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
 | Rides | perch (Mycelium Web) |
-| Farm work | none listed |
+| Farm work | Bloom 3, Mend 2, Ranch 1 |
 | Egg | Threadwyrm Egg: Something thoughtful is in here. |
 
 - E ability: **Puffcap Mines** (10s cooldown, range 8m). Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
@@ -958,7 +958,7 @@ _Hummingbird + Tuning fork_ (`thrumbird`). A hummingbird whose forked tail rings
 | Personality | bravery 0.55, loyalty 0.8, temper 0.3, curiosity 0.85 |
 | Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
 | Rides | perch (Steady Hum) |
-| Farm work | none listed |
+| Farm work | Spark 3, Forage 2, Craft 1 |
 | Egg | Thrumbird Egg: Something bright is in here. |
 
 - E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
@@ -978,7 +978,7 @@ _Tuatara + Iron padlock_ (`tuatrune`). A lizard with a padlock shackle for a cre
 | Personality | bravery 0.75, loyalty 0.75, temper 0.2, curiosity 0.5 |
 | Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
 | Rides | perch (Third Eye) |
-| Farm work | none listed |
+| Farm work | Haul 3, Stone 2, Timber 1 |
 | Egg | Tuatrune Egg: Something ancient is in here. |
 
 - E ability: **Boulder Heave** (9s cooldown, range 8m). Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
@@ -998,7 +998,7 @@ _Giant ground sloth + Ragged black umbrella_ (`umbrathere`). A giant ground slot
 | Personality | bravery 0.8, loyalty 0.85, temper 0.3, curiosity 0.35 |
 | Fighting style | tank; aggression 0.55, loyalty 0.8, caution 0.2 |
 | Rides | mount (Night Coat) |
-| Farm work | none listed |
+| Farm work | Forage 3, Craft 2, Haul 1 |
 | Egg | Umbrathere Egg: Something brooding is in here. |
 
 - E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
@@ -1018,7 +1018,7 @@ _Velvet worm + Piping bag_ (`velvorm`). A velvet-cake worm with icing nozzles fo
 | Personality | bravery 0.5, loyalty 0.7, temper 0.45, curiosity 0.6 |
 | Fighting style | controller; aggression 0.5, loyalty 0.65, caution 0.45 |
 | Rides | perch (Silk Glands) |
-| Farm work | none listed |
+| Farm work | Ember 3, Mend 2, Forage 1 |
 | Egg | Velvorm Egg: Something soft is in here. |
 
 - E ability: **Hive Swarm** (9s cooldown, range 6m). Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
