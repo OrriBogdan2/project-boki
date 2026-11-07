@@ -66,6 +66,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - In-match shops (ext/shops) count as map work, not economy. Queue them low, with the expedition and map work.
 - Chests: 1–3 fixed, learnable groups per map, sparse, a mini objective.
 - Breakables break in one hit. Kegs explode.
+- **Map update (owner, Nov 7; wins over the Nov 6 'keep The Hollow Crown as is' line):** The Hollow Crown grows about 100% (2x the play area: SIZE 216 to about 305; the alternative reading, 2x the width, would be 4x the area) so each match holds more squads. Raise squads per match in step, so the number of squads per square metre stays about the same as today. Every area must also feel more interesting: each region gets its own identity (landmark, terrain shape, cover pattern, a reason to go there), with no flat filler. The BIGGER_MAP.md notes (winding sky train route, no jump-pad-only floating islands) apply here.
 - The Hollow Crown is the beginner map. Harder tiers get their own maps, with apex threats (sound and sight hunting) and stealth.
 
 ## Farm and onboarding
@@ -86,7 +87,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
   1. **Extraction: trios only.** One queue, squads of 3, auto-filled (solos are filled in, bots backfill early). No solo or duo queue.
   2. **Arena: squads, 4v4** across several arena maps.
   3. **Training Grounds:** one big open expanse joined to sky islands, where you can try everything (every Hunter, Boki, item and ability, bots, the practice stations). The open expanse must be much bigger than today's.
-- Duel (1v1) is no longer its own queue. It lives in the Training Grounds duel ring (fight a bot, or a friend who joins). Coordinator call; the alternative is keeping a Duel queue in the launcher.
+- **Duel (1v1) keeps an online queue (owner, Nov 7)**, reached only from the Training Grounds duel ring, not from the Arena (4v4) mode or the main mode list. In the ring: search for a duel online, fight a bot, or fight a friend.
 
 ## Hosting and distribution (owner, Nov 3)
 - Stage 1 (testers and early players): our own authoritative headless Godot servers on small VPS **in EU and NA from day one** (Hetzner EU and US: Ashburn/Hillsboro; Edgegap only if more regions are needed), plus a small matchmaker (self-hosted Nakama or a custom one). **Distribution: the itch.io desktop app** installs the native Windows/Mac build and auto-patches via butler. NOT a browser game.
