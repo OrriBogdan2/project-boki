@@ -82,12 +82,25 @@ def spear_u(p):
 
 
 def shaft(p, n, ao):
-    """The sheet's candy cane: white and candy red spiralling."""
+    """The sheet's candy cane: white and lavender spiralling, thin stripes."""
     u, a, _ = spear_u(p)
-    w = ((u * 7.5 + a / (2 * np.pi)) % 1.0)
+    w = ((u * 12.0 + a / (2 * np.pi)) % 1.0)
     st = smooth(0.46, 0.5, w) * smooth(1.0, 0.96, w)
-    c = mix(hexc("#ffffff"), hexc("#d9475e"), st)
+    c = mix(hexc("#f6f2fb"), hexc("#9f86cf"), st)
     return c * (0.76 + 0.3 * lit(n, ao))[:, None]
+
+
+def lace(p, n, ao):
+    """The skate laces: candy-cane red and white twisting stripes (the sheet), along the lace's own run."""
+    w = ((p[:, 2] * 150 + p[:, 0] * 110 * np.sign(p[:, 0])) % 1.0)
+    c = mix(hexc("#fbf3f3"), hexc("#d93c4f"), smooth(0.42, 0.5, w) * smooth(1.0, 0.92, w))
+    return c * (0.8 + 0.25 * lit(n, ao))[:, None]
+
+
+def puff_cuff(p, n, ao):
+    """The boot's fur cuff: white fluff with tufts shaded cool, like the tail puff."""
+    t = np.clip(lit(n, ao) * 1.0 + 0.2 + (fbm(p * 110) - 0.5) * 0.3, 0, 1)
+    return ramp(t, FUR)
 
 
 def crystal(p, n, ao):

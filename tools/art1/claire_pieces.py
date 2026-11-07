@@ -3,6 +3,7 @@ the braid with its snowflake clasp, the ice blades, the candy-cane spear. The bo
 Blender frame: Z up, she faces +Y, her right hand is +X. Recipe: /home/boki/shots-s2/art1/STYLE_NOTES.md."""
 import json, os
 import numpy as np
+from mathutils import Vector
 from meshkit import Piece, catmull, norm, smooth, sweep, frames, rot_about
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -274,6 +275,47 @@ def blade(s):
         for k in range(1, len(q) - 1):
             tris.append([q[0], q[k], q[k + 1]])
     return Piece("blade" + side, "ice-bright", np.array(pos), tris).rigid("foot." + side)
+
+
+# ---- the skates (nivi_v2_weapon_sheet): the fluffy fur cuff round the boot top, candy-cane laces crossing up the instep
+BOOT_X, BOOT_Y = 0.092, -0.03          # the shin's axis at the ankle (the scan's metres)
+CUFF_Z, CUFF_R, CUFF_T = 0.265, 0.064, 0.03
+
+
+def fur_cuff(side):
+    """A fat tufted ring (tube of 16 x 6) round the boot top, on the shin."""
+    sg = 1.0 if side == "R" else -1.0
+    nm, nt = 16, 6
+    v = []
+    for i in range(nm):
+        a = 2 * np.pi * i / nm
+        tuft = 1.0 + 0.18 * np.sin(a * 5 + (1.3 if sg > 0 else 0.4))
+        for j in range(nt):
+            b = 2 * np.pi * j / nt
+            r = CUFF_R + CUFF_T * tuft * np.cos(b)
+            v.append([sg * BOOT_X + r * np.cos(a), BOOT_Y + r * np.sin(a), CUFF_Z + CUFF_T * 1.15 * tuft * np.sin(b)])
+    f = [[i * nt + j, i * nt + (j + 1) % nt, ((i + 1) % nm) * nt + (j + 1) % nt, ((i + 1) % nm) * nt + j] for i in range(nm) for j in range(nt)]
+    return Piece("bootcuff" + side, "fur-trim", np.array(v), f).rigid("shin." + side)
+
+
+def candy_laces(side, tree):
+    """Two strips cross at each of three levels up the instep (ray-cast onto the boot), candy-striped: crossed laces up to the cuff."""
+    sg = 1.0 if side == "R" else -1.0
+    out = []
+    n = np.array([0.0, 1.0, 0.45])
+    n = n / np.linalg.norm(n)
+
+    def on_boot(t, dx):
+        c = np.array([sg * BOOT_X + dx, 0.115 - 0.075 * t, 0.085 + 0.18 * t])
+        h = tree.ray_cast(Vector(c + n * 0.12), Vector(-n), 0.3)
+        return (np.array(h[0]) if h[0] is not None else c) + n * 0.004
+    levels = np.linspace(0.0, 0.78, 4)
+    for k in range(3):
+        for flip in (1.0, -1.0):
+            path = [on_boot(levels[k] + (levels[k + 1] - levels[k]) * u, flip * 0.028 * (1 - 2 * u)) for u in np.linspace(0, 1, 5)]
+            out.append(sweep("lace%s%d%d" % (side, k, flip > 0), "fur-trim", path, SEC6, np.full(5, 0.0055), side_hint=np.array([1.0, 0, 0]), room=0.3)
+                       .rigid("foot." + side))
+    return out
 
 
 # ---- the spear (the sheet's, 2.0 m against her 1.81 m to the crown): candy-cane shaft, a heart guard, a long crystal head, a spike at the butt

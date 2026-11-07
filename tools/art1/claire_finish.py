@@ -157,7 +157,7 @@ hR = K.hand("R", K.GRIP_K, (1.3, 1.45, 0.95))
 hL = K.hand("L", (0.0, 1.0, -0.15), (0.32, 0.42, 0.3), 0.07)
 for q_ in hR + hL:
     q_.room = 0.2        # (a full ink line round each finger is a black mitt at the match camera)
-pieces = [el, er, tl, br, fl, K.blade(1.0), K.blade(-1.0)] + sp + lids + hR + hL + [K.cuff_cap("R"), K.cuff_cap("L")] + panels
+pieces = [el, er, tl, br, fl, K.blade(1.0), K.blade(-1.0)] + [K.fur_cuff("R"), K.fur_cuff("L")] + K.candy_laces("R", tree) + K.candy_laces("L", tree) + sp + lids + hR + hL + [K.cuff_cap("R"), K.cuff_cap("L")] + panels
 
 
 def chain_w(p, pts, names, tip_free=True):
@@ -524,6 +524,8 @@ paint(lambda n: n == "braid", lambda p, n, ao: P.braid(p, n, ao, br.path))
 paint(lambda n: n == "flake", P.flake)
 paint(lambda n: n.startswith("blade"), P.blade)
 paint(lambda n: n == "shaft", P.shaft)
+paint(lambda n: n.startswith("lace"), P.lace)
+paint(lambda n: n.startswith("bootcuff"), P.puff_cuff)
 paint(lambda n: n in ("head", "butt") or n.startswith("prong"), P.crystal)
 paint(lambda n: n == "heart", lambda p, n, ao: P.heart(p, n, ao, K.sp(0.683), 0.082))
 paint(lambda n: n == "heartcore", lambda p, n, ao: P.heart(p, n, ao, K.sp(0.68), 0.07) * 0.9 + 0.1)
