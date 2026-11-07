@@ -2381,3 +2381,22 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 
 ## 2026-11-07 build (job 20261107-151501-a4): CLAIM Cinder the Flame Queen (kit, VFX, ult, splash)
 - CLAIM: DECISIONS "Cinder the Flame Queen": fidelity row, LMB fire from her hands, Flue Flight heels+tail fire (lift parity), splash swap, texts/titles. Not the 3D model (ext/cinder-v2-model). Branch ext/cinder-flame-queen (on ext/text-relic-renames).
+
+## 2026-11-07 deep (job 20261107-140001-a4): READY Tarek v2 model (dolm)
+- READY: ext/tarek-v2-model (7747ad995 model, fa5c036a8 look). art/wardens/tarek/ rebuilt to briefs/art-refs/tarek_v2 (index.md canon, turnaround final): one Meshy v2 scan (76 credits, PIPELINE.md), baked + fitted to the shared armature; tools/art1/tarek_scan.py replaces the v1 build (6 scripts, -2900 lines). Same 33 bones, all 14 anchors/orbit points, the same 48 clips, kit wiring untouched. 14455 tris, one 2048 atlas + a glyph emission map.
+- Glow: only the arm/gauntlet glyphs glow (jade, dolm.json model_glow #5ce6b8 / teal edge #2fc2b4); seams dark; v1 orange rim + stone halos retinted jade, fist halos dropped. Molten orange stays in the ability VFX only (dolm_kit untouched; procedural hero_arms fist is hidden on the glb).
+- Renders: briefs/art-refs/tarek_v2/ingame/ (tarek_v2_vs_sheet = GPU turntable vs the turnaround, _turntable, _closeup, _match_cam, _before_after_blender = v1 top / v2 bottom). The in-game v1 "before" GPU shots were dropped: the GPU queue stalled 30+ min and they need the tree held at v1.
+- Checks: warden-rig-json dolm, warden-model (157/0 after height_3d), warden-glb 187/0, warden-clips 0, clip 0, rig-standard 0, hero 0, hero-vfx OK, dolm-combo 170/0, tarek_clipcheck 0/48, health --strict OK.
+- Check change: warden_model_check dolm height_3d 1.15 (v2 locs hang; v1's piled crown made 1.19).
+
+| Tarek fidelity | |
+|---|---|
+| Plain cloth blindfold, no glow | ✅ closeup |
+| Three floating eye stones, jade-teal eyes, turn to targets | ✅ vs_sheet, warden-glb check |
+| HUGE stone left arm + shoulder onto chest (scale: upper arm ~1.6x the right's width, as the sheet) | ✅ vs_sheet |
+| Stone gauntlet on right forearm | ✅ |
+| Locs with copper rings, grey beads, one jade bead | ✅ (beads small at match cam) |
+| Prayer beads, cream wrap, orange sash, brown trousers, wrapped feet | ✅ |
+| Rock Hop dash | unchanged kit |
+- Known gaps: eye-stone eyes face the watched target so often away from the camera; locs read smoother than the sheet (scan limit); stone has a few skin-tone streaks on the chest plates from the scan texture.
+- Names: the owner note says player name Kibo, tarek_v2/index.md says renamed Tenzo; names untouched, owner to settle.
