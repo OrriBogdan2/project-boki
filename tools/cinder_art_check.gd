@@ -57,7 +57,7 @@ func run(main: Node) -> void:
 			var sm := (mat as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
 			if sm and sm.shader == WardenGlb.FLAME:
 				fire += 1
-	ok(fire >= 2, "hair and jets are on the flame shader (%d surfaces)" % fire)
+	ok(fire >= 1, "the heel jets are on the flame shader (%d surfaces)" % fire)
 	var gm := P.model.get_node("Rig/Torso/Aim/Gun/Muzzle") as Node3D
 	ok(kit.tip().distance_to(gm.global_position) < NEAR, "at rest the fire point sits on her palm")
 	T.teleport(P.pos + Vector3(0, 0, 40.0))

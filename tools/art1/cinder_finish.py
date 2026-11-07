@@ -24,7 +24,7 @@ UNIQ_W = 0.90                        # the scan's islands' share of the atlas wi
 TAIL_U = (0.905, 0.972)              # the tail's strip, then the flat cells
 CELL = {K.OBSIDIAN: "#1b1520"}
 SLOTS = ["skin", "hair", "metal"]
-FLAMES = ["flame-hair", "flame-jet"]
+FLAMES = ["flame-jet"]
 MATS = [s + "-cinder" for s in SLOTS] + list(CELL) + FLAMES + ["card-cinder"]
 HEEL_J = (0.0, -0.2, -1.0)           # the jets' axis: down and a little back
 EMBER = (0.5, 0.95)                  # a hair card's run from root to tip: the ember starts, it's full
@@ -34,7 +34,6 @@ HAIR_LO, HAIR_HI = "#0e0b12", "#2e2733"
 SEAM_SHARE = 0.08                   # of the body's texels: restrained, the seams draw lines and no more
 HORN = 0.6                           # her horns against her skin
 PLUM = 0.33                          # the paint's saturation above which it's armour, not skin
-TAIL_GLOW = 0.55                     # the tail's cracks against the shards' seams
 rig = json.load(open(RIG))
 bpy.ops.wm.open_mainfile(filepath=SRC)
 sc = bpy.context.scene
@@ -95,25 +94,9 @@ HEELS = [(np.array((hx["R"] + 0.03, -0.075, 0.035)), norm(np.array(HEEL_J))), (n
 jets = K.jet_flames(HEELS)
 
 
-END = {"r": np.array((0.1, surf(0.1, 1.11, 1) or 0.12, 1.11)), "l": np.array((-0.1, surf(-0.1, 1.11, 1) or 0.12, 1.11))}    # the front locks' ends
 
 
-def hair_flames():
-    """Licks of fire off her hair's ends."""
-    out = []
-    for g, pts, n_, x_ in (("c", hc, 4, 0.11), ("r", hr, 2, 0.022), ("l", hl, 2, 0.022)):
-        tip = pts[-1]
-        for i in range(n_):
-            off = np.array((x_ * ((i + 0.5) / n_ * 2 - 1), 0.0, 0.0))
-            lean = np.array((0.015 * (-1) ** i, -0.008 if g == "c" else 0.008, -0.05))
-            b = (tip if g == "c" else END[g]) + off + np.array((0, 0, 0.07 if g == "c" else 0.0))
-            o = K.strip("hf%s%d" % (g, i), "flame-hair", [b, b + lean * 0.5, b + lean * 1.1 + (0.012, 0, 0), b + lean * 1.8], 0.05, rows=4, hint=(0, 1, 0), seed=0.13 * (i + 3) + 0.3 * len(g), bright=0.15, root=0.8)
-            o.rigid("spring_scarftail_hair%s_%d" % (g, CARD_CH[g] - 1))
-            out.append(o)
-    return out
-
-
-pieces = [pl] + sp + jets + hair_flames()
+pieces = [pl] + sp + jets
 verts, faces, fsrc, fraw, vw, rooms = [], [], [], [], [], []
 for co, d in zip(lo_co, lo_w):
     verts.append(tuple(co))
@@ -298,6 +281,8 @@ def class_bake():
     return np.array(img.pixels[:], np.float32).reshape(ATLAS, ATLAS, 4)
 
 
+EYE_DZ = 0.15                                          # m: her sockets over the head joint
+EYE_W, EYE_H, EYE_IRIS = 0.017, 0.008, 0.0066         # m: the almond of her eye and its iris
 HOT = ("#b32e06", "#ff6a12", "#ffc23a", "#fff2c0")     # the seam's ramp: its edge to its white-yellow core
 
 
@@ -365,7 +350,7 @@ def repaint(col):
 
 
 def paint_tail(col):
-    """The tail's strip: overlapping grey-violet scales, the back darker than the belly, the belly warm with the fire inside, cracks fading toward the tip."""
+    """The tail's strip: overlapping grey-violet scales, the back darker than the belly (no cracks: the sheet keeps her fire on the armour)."""
     x0, x1 = int(TAIL_U[0] * ATLAS), int(TAIL_U[1] * ATLAS)
     h, w = ATLAS, x1 - x0
     v, u = np.mgrid[0:h, 0:w] / np.array([h, w])[:, None, None]
@@ -382,15 +367,9 @@ def paint_tail(col):
     edge = np.clip(np.maximum(np.abs(cu - 0.5) * 2.0, cv * 0.8), 0, 1)
     sc_ = 1.0 - 0.45 * smooth(0.72, 1.0, edge)
     back = hexc(K.TAIL_C)[None, None] * (1 - v[..., None] * 0.35)
-    belly = hexc("#9a5a3a")[None, None] * (1 - smooth(0.3, 0.85, v)[..., None] * 0.65)
+    belly = hexc("#5e5666")[None, None] * (1 - smooth(0.3, 0.85, v)[..., None] * 0.65)
     c_ = (back * (1 - smooth(0.45, 0.85, bel)[..., None]) + belly * smooth(0.45, 0.85, bel)[..., None]) * sc_[..., None]
-    w1 = np.abs(np.sin(v * 58.0 + 1.6 * np.sin(u * math.tau * 2 + v * 17.0)))
-    w2 = np.abs(np.sin(u * math.tau * 2.5 + 2.2 * np.sin(v * 31.0)))
-    crack = np.maximum(smooth(0.09, 0.03, w1), smooth(0.05, 0.015, w2) * smooth(0.3, 0.7, np.sin(v * 41.0) * 0.5 + 0.5))
-    crack *= (1 - smooth(0.55, 0.95, v)) * (0.35 + 0.65 * bel)
-    hot = ramp_hot(crack * 0.55)
-    col[0:h, x0:x1] = c_ * (1 - crack[..., None]) + hot * crack[..., None]
-    EMIT[0:h, x0:x1] = hot * (crack * TAIL_GLOW)[..., None]
+    col[0:h, x0:x1] = c_
 
 
 def norm_rows(m_):
@@ -398,6 +377,54 @@ def norm_rows(m_):
 
 
 repaint(COL)
+
+
+def paint_eyes(col):
+    """The scan left dark pits for her eyes: finds them on the face, then paints orange irises through the UVs."""
+    face = []
+    lum = col @ np.array((0.3, 0.59, 0.11), np.float32)
+    ez = K.J("head")[2] + EYE_DZ
+    for p in me.polygons:
+        ctr = p.center
+        if p.index >= N_LOW or p.normal.y < 0.2 or abs(ctr.z - ez) > 0.05 or abs(ctr.x) > 0.09:
+            continue
+        ls = list(p.loop_indices)
+        for t in range(1, len(ls) - 1):
+            lt = [ls[0], ls[t], ls[t + 1]]
+            uvs = luv[lt] * ATLAS
+            co = np.array([me.vertices[me.loops[i].vertex_index].co[:] for i in lt])
+            mn, mx = np.floor(uvs.min(0)).astype(int), np.ceil(uvs.max(0)).astype(int) + 1
+            ys, xs = np.mgrid[mn[1]:mx[1], mn[0]:mx[0]]
+            a_ = np.column_stack((uvs[1] - uvs[0], uvs[2] - uvs[0]))
+            if abs(np.linalg.det(a_)) < 1e-9:
+                continue
+            bc = np.linalg.solve(a_, np.stack((xs.ravel() - uvs[0, 0], ys.ravel() - uvs[0, 1])))
+            ins = (bc[0] >= -0.02) & (bc[1] >= -0.02) & (bc.sum(0) <= 1.02)
+            face.append(np.column_stack((ys.ravel()[ins], xs.ravel()[ins], co[0] + bc[:, ins].T @ (co[1:] - co[0]))))
+    fc = np.concatenate(face)
+    r_, c_, pos = fc[:, 0].astype(int), fc[:, 1].astype(int), fc[:, 2:]
+    dark = lum[r_, c_]
+    at = []
+    for sg in (1, -1):
+        m = (sg * pos[:, 0] > 0.02) & (sg * pos[:, 0] < 0.058) & (abs(pos[:, 2] - ez) < 0.025)
+        at.append(pos[m][dark[m] <= np.quantile(dark[m], 0.1)].mean(0))
+    x_, z_ = (at[0][0] - at[1][0]) / 2, (at[0][2] + at[1][2]) / 2
+    print("meta eyes at x", round(x_, 3), "z", round(z_, 3), "socket z", round(ez, 3))
+    for sg in (1, -1):
+        dx, dz = pos[:, 0] - sg * x_, pos[:, 2] - z_
+        almond = (dx / EYE_W) ** 2 + (dz / EYE_H) ** 2 < 1
+        r = np.hypot(dx, dz)
+        rim = almond & (r >= EYE_IRIS)
+        iris = almond & (r < EYE_IRIS)
+        pupil = r < EYE_IRIS * 0.35
+        col[r_[rim], c_[rim]] = hexc("#1a1018")
+        col[r_[iris], c_[iris]] = hexc("#ff8a1e")
+        EMIT[r_[iris], c_[iris]] = hexc("#ff7a14")
+        col[r_[iris & pupil], c_[iris & pupil]] = hexc("#2a0d06")
+        EMIT[r_[iris & pupil], c_[iris & pupil]] = 0.0
+
+
+paint_eyes(COL)
 paint_tail(COL)
 for nm in cells:
     x0 = int((TAIL_U[1] + 0.004) * ATLAS)
@@ -446,7 +473,7 @@ def card_atlas():
     col = dark * (1 - smooth(0.0, 0.3, fade)) + deep * (smooth(0.0, 0.3, fade) - smooth(0.3, 0.7, fade)) + emb * smooth(0.3, 0.7, fade)
     img = np.zeros((h, w, 4), np.float32)
     img[..., :3] = col * streak
-    img[..., 3] = box(a_, 1)
+    img[..., 3] = box(a_, 1) * smooth(0.0, 0.1, down)      # (the root melts into the scan's hair: no square top)
     return img
 
 
@@ -501,8 +528,8 @@ def hair_cards():
             z1 = 1.36 + (0.98 - 1.36) * ln
             out += lock("c", x, -1, 1.36, z1, 0.045, rng.uniform(0, 0.7), out_x=x * 0.06, gap=gap)
         for sg, g in ((1.0, "r"), (-1.0, "l")):
-            for i, (x, z1) in enumerate(((0.075, 1.15), (0.1, 1.09), (0.125, 1.12), (0.145, 1.18))):
-                out += lock(g, sg * (x + 0.006 * layer), 1, 1.31, z1, 0.026, rng.uniform(0, 0.7), out_x=sg * 0.008, gap=gap)
+            for i, (x, z1) in enumerate(((0.07, 1.15), (0.085, 1.09), (0.1, 1.11), (0.115, 1.17))):
+                out += lock(g, sg * (x + 0.006 * layer), 1, 1.39, z1, 0.026, rng.uniform(0, 0.7), out_x=sg * 0.008, gap=gap)
     return out
 
 
@@ -593,7 +620,7 @@ PALM = hand + (knk - hand) * 0.62
 for sd, sg, x_m in (("R", 1.0, (1, 1, 1)), ("L", -1.0, (-1, 1, 1))):
     hx_ = J("shin." + sd)[0]
     add_bone("foot." + sd, (hx_, -0.01, K.ANKLE_Z), (hx_, 0.15, 0.025), "shin." + sd, (0, 0, 1))
-    EYE = np.array((sg * 0.036, J("head")[1] + 0.085, J("head")[2] + 0.122))
+    EYE = np.array((sg * 0.036, J("head")[1] + 0.085, J("head")[2] + EYE_DZ))
     add_bone("lid." + sd, EYE, EYE + (sg * 0.03, 0, 0), "head", (0, 0, 1))
     add_bone("brow." + sd, EYE + (0, 0.005, 0.03), EYE + (0, 0.035, 0.03), "head")
     add_bone("fingers." + sd, knk * x_m, tip * x_m, "hand." + sd, (-sg, 0, 0))

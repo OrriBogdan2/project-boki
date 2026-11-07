@@ -42,7 +42,7 @@
 		"gunslinger": {"gender": "female", "race": "human", "face": "Determined", "hair": "Long", "detail": "Scar",
 			"skin": "c68a5c", "hair_col": "5a3a26", "eyes": "6a4a2a", "outfit": "ff9a5c"},
 		"ashwick": {"gender": "female", "race": "scalefolk", "face": "Starry", "hair": "Frills", "detail": "Freckles",
-			"skin": "d8604a", "hair_col": "ff8a2a", "eyes": "e8c050", "outfit": "ff9a3a"},
+			"skin": "8d8799", "hair_col": "2a2330", "eyes": "e8c050", "outfit": "ff9a3a"},
 		"dredge": {"gender": "robot", "race": "human", "face": "Calm", "hair": "Bald", "detail": "None",
 			"skin": "9a9aa8", "hair_col": "2b2124", "eyes": "e0b040", "outfit": "e0b040",
 			"tint": {"skin": {"pull": 0.0}}},

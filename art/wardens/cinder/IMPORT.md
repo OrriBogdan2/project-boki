@@ -15,7 +15,7 @@ Owner override (DECISIONS 'Cinder the Flame Queen'): no tank, no hose, no flamet
 `cinder.glb.import`: `generate_lods=false`, `force_disable_compression=true`, `remove_immutable_tracks=false`.
 
 From the scan: body, face, horns, shards. The scan welded her forearms to the hip plates: `part_arms` cuts that seam and closes both sides.
-Added: the spined tail (9 spring bones, `cinder_pieces.py`), hair cards with ember ends and flame strips (`flame-hair`), heel jets on `jet.*`
+Added: the spined tail (9 spring bones, `cinder_pieces.py`), hair cards with ember ends, orange eyes painted over the scan's dark sockets (`paint_eyes`), heel jets on `jet.*`
 (`flame-jet`, for Flue Flight). The seams are the emission map, white-yellow core to orange; `PipStars.pulse` brightens it while she casts.
 The flame on the tail is not mesh: `smoke` and `bloom` on `anchor_tail_tip` in warden_look.json. `weapon_muzzle` is her right palm (the kit's
 fire point); `anchor_tank`, `anchor_vial_*` and `anchor_gun_mid` stay as contract names only. Her fire stream keeps the rules' NOZZLE.
