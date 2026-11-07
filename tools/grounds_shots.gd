@@ -38,10 +38,11 @@ func run(main_node: Node) -> void:
 	await _ground("start")
 	P.teleport(A.home + Vector3(0, 0, -9.0))
 	await _ground("room")
-	if A.grounds != null:
+	var G = A.get("grounds")         # (untyped: the old Arena has none, for the before numbers)
+	if G != null:
 		await _overview()
 		var seen := {}
-		for s in A.grounds.stations:
+		for s in G.stations:
 			if seen.has(s["kind"]):
 				continue
 			seen[s["kind"]] = true
