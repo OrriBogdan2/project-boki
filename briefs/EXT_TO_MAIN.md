@@ -2094,3 +2094,21 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 ## 2026-11-06 physics lane: CLAIM item 185b-mantle (SV-style mantle: momentum carried up and over a ledge), ahead of 150/163
 - Repro on the real expedition map (Hollow Crown, Meadow + Dusk Isles tiers), main 7907d9af vs ext/phys-integrated 38dde07c. Terrace faces 1-4 terraces high and lipped island rims; 5 Hunters; jumps at 0/30/60 degrees, jump + air dash, glide in, from the abyss. It measures topped/not, speed in, lowest speed through the mantle, speed over the lip. Findings next in this thread, then the fix on ext/phys-185b-mantle with a --cliff-mantle-check on real map edges and before/after GPU clips.
 - 150 (4071fe66, suite running) and 163 (cfc9b8d1) wait behind this.
+
+## 2026-11-07 deep (job a4): READY `ext/vex-v2-model` @ 24e4f2d62 (Vex v2 model rebuild)
+- vex.glb is the owner's locked v2 design. It went through the ART-1 pipeline with new Meshy body and head scans: 10.7k tris, six slots, one 2048 atlas, the same armature, all 36 clips, and every FX point and anchor name. 152 Meshy credits (logged in PIPELINE.md).
+- Renders: briefs/art-refs/vex_v2/ingame/before_after.jpg (v1 shipped vs v2, turntable), briefs/art-refs/vex_v2/ingame/vs_turnaround.jpg (vs the turnaround), briefs/art-refs/vex_v2/ingame/weapon_vs_sheet.jpg (aiming vs the minigun detail), briefs/art-refs/vex_v2/ingame/match_strip.jpg (match camera: idle, run, lmb, rmb, dash, e).
+- Fidelity vs vex_v2/index.md:
+  - ✅ right forearm = minigun from the elbow, no hand (cuff, receiver, 6 barrels spin on gatling, drum, ribbed belt loop, chain and bullet charm); aim = arm pose
+  - ✅ left arm brass, mechanical, coin on `coin`
+  - ✅ teal-green hair, bangs, goggles, one thick braid with gold rings on the spring chain
+  - ✅ amber eyes, brass wire on her left eye, nothing glows
+  - ✅ freckles, wine lips, choker with coin
+  - ✅ lime cropped jacket off one shoulder, bandeau with ammo strap, charcoal cargo trousers with green splatter (texture), coin hip chain (rigid), boots
+  - ✅ weapon scale: elbow to muzzle 0.55 m = 31% of her height (turnaround: ~30%)
+  - ⚠ tally tattoos and stickers are small at the match camera
+  - ⚠ skin is a touch light and flat next to the sheet
+- No launcher tube in v2. The `launcher` bone stays (the clip still swings it) with no mesh. launcher_muzzle and launcher_fire sit at the drum's mouth, so the Burr Charge leaves from the drum. The v1 FIDELITY row (launcher, cyber-spine, VEX belt) no longer applies.
+- Look: removed the skin paint glow, the lens and spine blooms, and the glow slot. Portrait, splash and title backdrop now use the v2 art; the splash framing is moved to her head. There is no site in this repo.
+- warden-model-check: the gunslinger width span is now 0.5-1.15 (the archer's). She measures 0.60x. The old 0.7 floor came from v1's wide cannon.
+- Checks: --warden-rig-json --warden=gunslinger, vex-clip-live, warden-glb, rig-standard, clip, warden-model, dash-aim, clip-live and gunslinger-combo are all green. health --strict OK, gen_wiki updated. GPU turntable, close and match renders were rc=0. venator-parity-check was not run: it hangs headless on the hetzner box (killed at 1500 s).
