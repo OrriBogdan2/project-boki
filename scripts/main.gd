@@ -818,6 +818,11 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var scr = L.new()
 			scr.setup(opts)
 			current = _layer(scr)
+		"prematch":
+			var Pv = load("res://scripts/ui/prematch_view.gd")
+			var pscr = Pv.new()
+			pscr.setup(opts)
+			current = _layer(pscr)
 		"title":
 			var Tt = load("res://scripts/ui/title.gd")
 			current = Tt.new()
