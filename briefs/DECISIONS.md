@@ -177,7 +177,7 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - 3D: cinder_v2_turnaround.jpg (hair length and the flamethrower from cinder_v2_master_sheet.jpg). Final splash: "Last Dance" (cinder_v2_splash.jpg). Portrait: cinder_v2_portrait.jpg.
 
 ## 2026-11-07 (owner, via coordinator): roster order
-- Hero order (owner's Boki website order; also the hero-select, wiki and any roster list): Vex, Mossy, Ryzz, Kael, Ravel, Cinder, Grimble, Pip, Claire, Tarek, Motley, Sable.
+- Hero order (owner's Boki website order; also the hero-select, wiki and any roster list): Vex, Mossy, Ryzz, Kael, Ravyl, Cinder, Grimble, Pip, Claire, Tarek, Motley, Sable.
 
 ## 2026-11-07 (owner, via coordinator): Boki 50, build them all now
 - Goal: 50 Boki as soon as possible, each with a 2D design (concept sheet: front, side, back, expression row; plus a clean turnaround for 3D) AND a 3D model in game. The owner cuts or changes ones he doesn't like later, so don't hold species for review.
@@ -191,3 +191,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-07 (owner, via coordinator): Tarek is renamed **Kibo** ("Kibo the Stone Seer")
 - Display name only, like Breaker -> Mossy: the id `dolm`, file and folder names (`tarek_*`, `art/wardens/tarek`, `briefs/art-refs/tarek_v2/`) stay. Change every player-facing "Tarek" and "Cliff Runner": hero select, kit and ability text, tooltips, barks, docs, wiki and website. This supersedes "Tarek" everywhere above.
+
+## 2026-11-07 (owner, via coordinator): Ravel is respelled **Ravyl** ("Ravyl the Red Stitch")
+- Spelling change so players pronounce it right. Display name only: the id `archer`, file and folder names (`hem_*`, `lisette_*`, `art/wardens/hem`) stay. Change every player-facing "Ravel" to "Ravyl": hero select, kit and ability text, tooltips, barks, docs, wiki and website, plus the hero order list. This supersedes "Ravel" everywhere above.
