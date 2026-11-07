@@ -143,3 +143,8 @@ Known limit: the hunter's expression reads slightly panicked.
   2. Both nap on her shoulders.
   3. Both kiss her cheeks.
   4. The cloud rains on a grumpy sun while she laughs and a rainbow appears.
+
+## Splash: FINAL v4 "Lantern in the Dark" (owner, Nov 7, 03:54 ET)
+The earlier cave splash looked too cartoony next to the roster. These are fresh generations in the roster's painted style (refs: the main design plus Kibo's and Nivi's splashes). The owner picked "Lantern in the Dark": Meeko leads wounded hunters through a dark cave inside her sun's circle of light, the raincloud heals them, and glowing eyes watch from the dark.
+- Alternates in explorations/: sunrise (off-model), healing rain (too cartoony), night rounds, the cave-edit attempts.
+- The previous final is now `explorations/meeko_v2_splash_cave_v3_cartoon.jpg`.
