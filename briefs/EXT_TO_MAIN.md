@@ -2555,3 +2555,6 @@ READY ext/parity-ostra-bomb 5b9a528d2 (KIT_PARITY 17: Ostra Brimseed peak 3.5x; 
 
 ## 2026-11-07 build (job 20261107-213002-a2): CLAIM Hero props swap to the new sheets
 - CLAIM: props swap to vex_v2_weapon_sheet, nivi_v2_weapon_sheet, grimble_v2_weapon_sheet (hook arm, confirm no nose), sable_v2_weapon_sheet, ravel_v2_prop_sheet. One branch per hero ext/props-<art> (vex, claire, grimble, sable, ravel), each from the hero v2 branch.
+
+## 2026-11-07 deep (job 20261107-213004-a4): CLAIM Motley v2 model rebuild
+- CLAIM: Motley the Void Jester v2 model (id ostra, art/wardens/ostra/ from motley_v2_turnaround.jpg + motley_v2_master_sheet.jpg: painted style, void ribbon on the brass spring, hovering card box, no legs (hover/bob, root and foot anchors kept)). Branch ext/ostra-v2-model.
