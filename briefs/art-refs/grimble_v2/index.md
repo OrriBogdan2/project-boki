@@ -49,3 +49,8 @@ Base: the original `briefs/art-refs/grimble_turnaround.png`. The old "Dredge" sh
 
 ## Queued (owner, Nov 7, 01:56 ET): splash edit
 Edit the existing splash (`grimble_v2_splash.jpg`, "Scrapyard"), not a fresh generation. Have the person caught in his claws (the bone-hook hand) as he reaches for and tries to grab the chest. Keep everything else. One edit; check that the hook arm and his canon stay intact (no nose, three-lens loupe, metal and gold teeth).
+
+## Splash: FINAL v2 (owner, Nov 7, 03:32 ET)
+`grimble_v2_splash.jpg`: his bone-hook slime arm hooks the red-haired boy around the waist, flipping him upside down, while the money bag flies away, bursting with glowing gold coins, pearls and gems. Grimble's face is panicked: wide eyes behind the loupe, teeth bared, a sweat drop, his free hand grasping at the treasure. Chain: edits on the "Scrapyard" splash (claws, then the bone-hook grip, then the panicked face and brighter money). The old version is `explorations/grimble_v2_splash_scrapyard_old.jpg`.
+
+Canon check: no nose, three-lens loupe and metal teeth with a gold tooth intact.
