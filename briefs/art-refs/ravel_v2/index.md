@@ -62,3 +62,9 @@ Chain: the porcelain edit, then the owner's run (scar kept), then the needles in
 - Update (03:24 ET): the owner's regen of the polish was no better. The threads were brightened locally instead: thin red lines detected and given a bright crimson core and a soft glow; curtains and corset untouched. That version is the final `ravel_v2_splash.jpg`.
 - 03:24 ET: the owner rejected the local thread glow; `ravel_v2_splash.jpg` is reverted to the spotlight version, pending an AI edit for brighter threads.
 - **FINAL (03:37 ET):** `ravel_v2_splash.jpg` is the spotlight full draw plus a light thread edit (one coil by her boot, strands from the lower bow tip and her hands). The heavy-pool, laser and pinned variants are in explorations/.
+
+## Queued (owner, Nov 7, 04:07 ET): splash polish
+On the final splash (`ravel_v2_splash.jpg`):
+- Her face should look creepier and more porcelain: glazed doll skin with fine cracks, painted doll features, a more unsettling stare and grin.
+- The two giant crossed needles on her back aren't visible; bring them back (they should show over her shoulders).
+Plan: one edit on the final splash for each item (face first, then needles), since one change per edit sticks best.
