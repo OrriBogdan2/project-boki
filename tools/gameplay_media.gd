@@ -1,9 +1,9 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-4> --shots-dir=<dir> [--media-secs=<s>]: scripted, seeded gameplay for the
-## website clips and stills (HUD on, recording mode "clean" so no debug text). Plays one scene on the fixed step
-## and saves the still at the scene's best moment (<dir>/clip<N>.png). Run it under the movie writer on a GPU worker:
-##   godot --resolution 1920x1080 --fixed-fps 30 --write-movie <dir>/clip<N>.avi -- --gameplay-media --media-clip=1 --shots-dir=<dir>
-## and cut/encode the AVI with tools/gameplay_media.sh. MEDIA_MARK lines give the frame each phase starts on.
+## --gameplay-media --media-clip=<1-4> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
+## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
+## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
+## tools/gameplay_media.sh. MEDIA_MARK lines give the frame each phase starts on. (--media-child: the scene alone.)
 ##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off
 ##   2 Boki combat   a Boki fighting beside its Hunter against wild monsters
 ##   3 extraction    the squad boards the skiff and leaves as the boarding timer ends
@@ -29,15 +29,25 @@ var squad_b: Array = []
 func run(main_node: Node) -> void:
 	main = main_node
 	var secs := 12.0
+	var size := "1920x1080"
+	var child := false
 	for a in OS.get_cmdline_user_args():
 		var arg := String(a)
+		child = child or arg == "--media-child"
+		if arg.begins_with("--media-size="):
+			size = arg.substr(13)
 		if arg.begins_with("--shots-dir="):
 			dir = arg.substr(12)
 		if arg.begins_with("--media-clip="):
 			clip = int(arg.substr(13))
 		if arg.begins_with("--media-secs="):
 			secs = float(arg.substr(13))
+	if dir.is_relative_path():
+		dir = ProjectSettings.globalize_path("res://").path_join(dir)
 	DirAccess.make_dir_recursive_absolute(dir)
+	if not child:
+		_record(size)
+		return
 	Save.no_write = true
 	Record.set_level(1)
 	Settings.v["tips"] = false
@@ -46,8 +56,24 @@ func run(main_node: Node) -> void:
 		2: await _boki_combat(secs)
 		3: await _extraction(secs)
 		4: await _hatch(secs)
-	print("MEDIA_DONE clip=%d frames=%d" % [clip, frame])
+	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
+
+## The movie writer's flags are engine arguments, and the GPU workers (jobq) pass their job arguments after "--",
+## so this runs the same scene again as a child Godot with --write-movie (the child gets --media-child).
+func _record(size: String) -> void:
+	var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-driver", "opengl3", "--audio-driver", "Dummy",
+		"--position", "30000,30000", "--resolution", size, "--fixed-fps", "30",
+		"--write-movie", dir.path_join("clip%d.avi" % clip), "--"]
+	args.append_array(OS.get_cmdline_user_args())
+	args.append("--media-child")
+	var out: Array = []
+	var rc := OS.execute(OS.get_executable_path(), args, out, true)
+	for line in (String(out[0]) if out.size() > 0 else "").split("\n"):
+		if line.begins_with("MEDIA_") or line.contains("ERROR"):
+			print(line)
+	print("MEDIA_CHILD rc=%d" % rc)
+	main.get_tree().quit(rc)
 
 # ------------------------------------------------------------------ the match rig
 ## A seeded Dusk Isles match with only the player in it (the rest are made by hand), no drop, no mobs.
@@ -104,7 +130,11 @@ func _go(secs: float, each: Callable, cam_to: Callable) -> void:
 
 func _still() -> void:
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("clip%d.png" % clip))
-	print("MEDIA_MARK still frame=%d" % frame)
+	_mark("still")
+
+## The movie frame (AVI frame index) a phase starts on.
+func _mark(what: String) -> void:
+	print("MEDIA_MARK %s movie_frame=%d" % [what, Engine.get_frames_drawn()])
 
 func _centre(hs: Array) -> Vector3:
 	var c := Vector3.ZERO
@@ -152,7 +182,7 @@ func _fight(secs: float) -> void:
 		h.teleport(h.pos)
 	m.cam.zoom_to = 0.8
 	still_at = 4.0
-	print("MEDIA_MARK start frame=%d" % frame)
+	_mark("start")
 	await _go(secs, func(t: float):
 		_assist(t, squad_a, squad_b)
 		_assist(t, squad_b, squad_a),
@@ -219,7 +249,7 @@ func _hatch(secs: float) -> void:
 	hx._pick(0)
 	hx.auto_warm = true
 	still_at = secs * 0.7
-	print("MEDIA_MARK start frame=%d" % frame)
+	_mark("start")
 	var t := 0.0
 	while t < secs:
 		await main.get_tree().process_frame
