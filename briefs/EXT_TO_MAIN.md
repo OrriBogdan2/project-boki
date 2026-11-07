@@ -2408,3 +2408,5 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 - change: bot.gd — a non-urgent goal with no walkable path is banned for 20 s after 1.5 s (was: shuffle at the rim until the 14 s give-up). main.gd `_bot_sanity` — ledge rises (lfloat) don't count as ring time (decision: a mantle is a climb, not hanging in the air; alternative was raising MAX_RING, rejected as it would hide real hangs).
 - proof: --bot-sanity-check seeds 1-20 (groups 3,5,9 / 1,2,4,6-8,10,11 / 12-20): botnav 0 flags, main 0 flags, 0 script errors on full imports.
 - checks: health --strict OK, gen_wiki --check OK, merge-tree vs origin/main clean, full suite vs 150 base: NEW-RED 2 (class-unlock, dash-frames) WORSE 0 — both pass 0 failures on quiet reruns of botnav and base (same load flakes as 163).
+
+READY ext/phys-150-botnav e44f34b22 (coordinator one-liner for the merge-candidate parser; carries 150-parity 074453ec, see the 150-botnav post above)
