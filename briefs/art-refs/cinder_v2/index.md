@@ -12,3 +12,8 @@ Feedback applied: fish fins -> lizard horns; heat-proof gauntlets and boots; emb
 - small copper tank and brass flamethrower (owner prefers smaller, less noisy props);
 - goggles and horns; no fins.
 Alternates: `cinder_v2_bigprops_alt.jpg` (large bubbling tank), `cinder_v2_face_tail.jpg` (smooth black chest).
+
+## Master sheet + pose (Nov 6, 21:56 ET)
+- `cinder_v2_master_sheet.jpg`: seductive S-curve front pose (finger at collarbone, flamethrower held low), 3/4, back, head close-up.
+- `cinder_v2_seductive_pose.jpg`: single figure, low-key light with embers; the base for her portrait and splash.
+- `cinder_v2_master_sheet_alt.jpg`: same sheet in the earlier hand-on-hip pose.
