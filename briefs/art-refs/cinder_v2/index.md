@@ -17,3 +17,9 @@ Alternates: `cinder_v2_bigprops_alt.jpg` (large bubbling tank), `cinder_v2_face_
 - `cinder_v2_master_sheet.jpg`: seductive S-curve front pose (finger at collarbone, flamethrower held low), 3/4, back, head close-up.
 - `cinder_v2_seductive_pose.jpg`: single figure, low-key light with embers; the base for her portrait and splash.
 - `cinder_v2_master_sheet_alt.jpg`: same sheet in the earlier hand-on-hip pose.
+
+## Portrait + splash (Nov 6, 21:59 ET)
+- `cinder_v2_portrait.jpg`: a flame on her fingertip at her lips; half-lidded smile; embers.
+- `cinder_v2_splash.jpg` ("Cleansing Fire"): wide ruined chapel; she burns the blight vines; green shoots grow from the ash.
+- `cinder_v2_splash_alt.jpg`: closer, symmetric version.
+- Turnaround still pending.
