@@ -150,7 +150,7 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save wears Vex first (`s
 |---|---|
 | starters | ["gunslinger"] |
 | starter_picks | 1 |
-| second_picks | ["juggernaut", "tender", "ashwick"] |
+| second_picks | ["juggernaut", "ashwick", "tender"] |
 | hold_s | 1.6 |
 | tiers | {"easy": "about 1-2 expeditions", "medium": "a handful of expeditions", "hard": "real effort, once other Hunters are open"} |
 | reward_kinds | {"glider": "Glider", "skin": "Skin", "colourway": "Colourway", "emote": "Emote", "title": "Title", "banner": "Banner", "trail": "Trail"} |

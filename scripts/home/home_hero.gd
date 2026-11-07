@@ -33,5 +33,5 @@ static func pick(home: Node, ak: String) -> void:
 	var pl: Node3D = home.player
 	var tw: Tween = pl.create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)      # (bound to the body: it stops if the body is swapped again)
 	tw.tween_method(func(v: Vector3): if is_instance_valid(pl): pl.set_meta("pop", v), Vector3(0.6, 1.35, 0.6), Vector3.ONE, 0.35)
-	home._toast("Now playing %s" % Arch.name_of(ak))
+	home._toast("Now playing %s" % Arch.name_of(ak, true))
 

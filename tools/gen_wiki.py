@@ -212,13 +212,18 @@ def kname(kid):
     return KIN2.get(kid, {}).get("name", kid)
 
 # ------------------------------------------------------------------ classes
+def the(title):
+    """A title shown on its own carries "the" (titles are stored without it)."""
+    return "the " + title
+
+
 def class_page_name(aid):
     return "Class-" + ARCH[aid]["title"].replace(" ", "-")
 
 def class_profile(d):
     gender = "a robot" if d["gender"] == "robot" else d["gender"]
     return table(["", ""], [
-        ["Class title", d["title"]],
+        ["Class title", the(d["title"])],
         ["Base character", "%s, %s" % (d["base_name"], gender)],
         ["Personality", d["personality"].replace("\n", " ")],
     ])
@@ -232,7 +237,7 @@ def gen_classes():
         d = ARCH.get(aid)
         if not d: continue
         cs = CLASSES.get(d["weight"], {})
-        rows.append([link(class_page_name(aid), d["title"]), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
+        rows.append([link(class_page_name(aid), the(d["title"])), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
                      d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Fusion)"])
     cu = json.load(open(os.path.join(ROOT, "content", "rules", "class_unlock.json"), encoding="utf-8"))
     kinds = cu["reward_kinds"]
@@ -244,12 +249,12 @@ def gen_classes():
         when = "starter, else " if aid in cu["starters"] else ""
         after = ", once %d Hunters are open" % ch["after"] if ch.get("after") else ""
         if not ch:
-            cu_rows.append([link(class_page_name(aid), ARCH[aid]["title"]), "starter", "pick at the start, or after your first expedition", "-"])
+            cu_rows.append([link(class_page_name(aid), the(ARCH[aid]["title"])), "starter", "pick at the start, or after your first expedition", "-"])
         else:
-            cu_rows.append([link(class_page_name(aid), ARCH[aid]["title"]), when + ch.get("tier", "?"), ch.get("text", "") + after, num(ch.get("target", "?"))])
+            cu_rows.append([link(class_page_name(aid), the(ARCH[aid]["title"])), when + ch.get("tier", "?"), ch.get("text", "") + after, num(ch.get("target", "?"))])
         for g in cu["mastery"].get(aid, []):
-            m_rows.append([ARCH[aid]["title"], g["text"], num(g["target"]), "%s: %s" % (kinds.get(g["reward"]["kind"], g["reward"]["kind"]), g["reward"]["name"])])
-    starters = ", ".join(ARCH[a]["title"] for a in cu["starters"] if a in ARCH)
+            m_rows.append([the(ARCH[aid]["title"]), g["text"], num(g["target"]), "%s: %s" % (kinds.get(g["reward"]["kind"], g["reward"]["kind"]), g["reward"]["name"])])
+    starters = ", ".join(the(ARCH[a]["title"]) for a in cu["starters"] if a in ARCH)
     unlock = "### How Hunters unlock\n\nA new save picks %d of %d starters (%s) before the egg pick and plays the tutorial as it. The other starters open after your first expedition. " % (cu["starter_picks"], len(cu["starters"]), starters)
     unlock += "Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for %s, and letting go early cancels it. " % secs(cu.get("hold_s", 1.6))
     unlock += "Tiers: easy is %s, medium %s, hard %s. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.\n\n" % (cu["tiers"]["easy"], cu["tiers"]["medium"], cu["tiers"]["hard"])
@@ -452,7 +457,7 @@ def gen_gear():
     rows = []
     for wid, w in WEAPONS.items():
         p = w.get("primary", {})
-        users = [ARCH[a]["title"] for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
+        users = [the(ARCH[a]["title"]) for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
         rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", secs(p["reload"]) if "reload" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
     body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Kael's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
     body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)

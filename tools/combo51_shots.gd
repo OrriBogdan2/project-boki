@@ -22,7 +22,7 @@ func run(main_node: Node) -> void:
 			who = arg.substr(15)
 		if arg.begins_with("--combo51-part="):
 			part = arg.substr(15)
-	hero_name = Arch.name_of(who).to_lower()
+	hero_name = Arch.bare_title(who).to_lower()
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
 	await Callable(self, "_%s" % (who if part == "" else who + "_" + part)).call()

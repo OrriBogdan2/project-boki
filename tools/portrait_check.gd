@@ -123,13 +123,13 @@ func _menus() -> void:
 	ok("the Hunter viewer shows Vex's portrait by the name", _first_pic(viewer) == Portraits.art_path("gunslinger"))
 	viewer.queue_free()
 	var mask_faces: Array = []
-	for id in ["gunslinger", "juggernaut", "tender", "ashwick"]:
+	for id in ["gunslinger", "juggernaut", "ashwick", "tender"]:
 		var v := HunterViewer.make(id, Vector2.ZERO)
 		host.add_child(v)
 		await tree.process_frame
 		mask_faces.append(_first_pic(v) == Portraits.art_path(id) and Portraits.art_path(id) != "")
 		v.queue_free()
-	ok("the Relic moments: each Relic shows its Hunter's face (Vex, then Kael, Meeko, Cinder)",
+	ok("the Relic moments: each Relic shows its Hunter's face (Vex, then Kael, Cinder, Meeko)",
 			mask_faces.all(func(f): return f))
 	var card := KitCard.make("rimewright", "", func(): pass)
 	host.add_child(card)

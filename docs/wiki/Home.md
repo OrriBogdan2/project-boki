@@ -19,7 +19,7 @@ hand; change the data and rerun the script. Hand-written pages may also hold gen
 | [Getting started](Getting-Started.md) | Your first egg, the tutorial, the farm and your first expedition |
 | [Controls](Controls.md) | Every key, in a match and at home |
 | [Classes](Classes.md) | The twelve classes and how levels and ranks work |
-| [Silver Thief](Class-Silver-Thief.md), [Red Stitch](Class-Red-Stitch.md), [Storm Chaser](Class-Storm-Chaser.md), [Hired Gun](Class-Hired-Gun.md), [The Unbroken](Class-The-Unbroken.md), [Barnacle Knight](Class-Barnacle-Knight.md) | One page per class |
+| [The Hired Gun](Class-Hired-Gun.md), [The Unbroken](Class-Unbroken.md), [The Flame Queen](Class-Flame-Queen.md), [The Dawnfox](Class-Dawnfox.md), [The Stone Seer](Class-Stone-Seer.md), [The Red Stitch](Class-Red-Stitch.md), [The Scrap King](Class-Scrap-King.md), [The Snowglider](Class-Snowglider.md), [The Void Jester](Class-Void-Jester.md), [The Barnacle Knight](Class-Barnacle-Knight.md), [The Storm Chaser](Class-Storm-Chaser.md), [The Silver Thief](Class-Silver-Thief.md) | One page per class |
 | [Boki](Boki.md) | Types, personality, scanning, breeding, bonds, losing a Boki |
 | [Boki species](Boki-Species.md) *(generated)* | Every species with its abilities, merge and evolution paths |
 | [Boki growth](Boki-Growth.md) *(generated)* | Evolution nodes, mutations, bond ranks, IVs, natures |

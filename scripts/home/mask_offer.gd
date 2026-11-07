@@ -2,7 +2,7 @@ class_name MaskOffer
 extends Node
 ## The second Relic, offered in the world (after the first finished expedition; ClassUnlock.second_pending). Once
 ## you are home and nothing else is on screen (no panel, no toast, no building), the portal glows and the three
-## Relics on offer (Kael, Pip, Cinder: ClassUnlock.second_picks) drift out of it and hover in a row in front of
+## Relics on offer (Kael, Cinder, Meeko: ClassUnlock.second_picks) drift out of it and hover in a row in front of
 ## it while the camera takes them in. Walk up to one to see what it does (its name and two ability clips);
 ## interact takes it: it drifts to your face and plays the put-on beat (MaskMoment.beat), the other two drift
 ## back into the portal (they open through their own challenges), and the new Relic's reveal plays

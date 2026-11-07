@@ -5,9 +5,10 @@ extends RefCounted
 const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tamsin", "Linwick", "Dredge",
 	"Moosh Moosh", "Burple", "Breah", "Ostra",
 	"Breaker", "Lisette", "Ravel", "Claire", "Tarek", "Pip", "Frost Siren", "Cliff Runner",
-	"Ryzz", "Ravyl", "Kibo", "Magic Fox", "Snowglider", "Sunken Bulwark"]
+	"Ryzz", "Ravyl", "Kibo", "Magic Fox", "Snowglide", "Sunken Bulwark"]
 ## Words retired from player text (Hunter / Relic / the Empty / Fusion replace them; ids and code names may keep them).
 const RETIRED_TERMS := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|unmasked|masks?)\\b"
+const CANONICAL_ORDER := ["gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer", "dredge", "rimewright", "ostra", "bulwark", "mage", "thief"]
 const GENDERS := ["male", "female", "robot"]
 
 var bad := 0
@@ -22,6 +23,9 @@ func run(main: Node) -> void:
 	for id in Arch.ids():
 		titles.append(HeroTitle.title(id))
 	ok(Arch.ids().size() == 12, "twelve classes (%d)" % Arch.ids().size())
+	ok(Arch.ORDER == CANONICAL_ORDER, "Arch.ORDER is the canonical Hunter order")
+	ok(Arch.name_of("rimewright") == "The Snowglider" and Arch.name_of("juggernaut", true) == "the Unbroken",
+		"a title on its own carries 'the' (%s, %s)" % [Arch.name_of("rimewright"), Arch.name_of("juggernaut", true)])
 	for id in Arch.ids():
 		var data := Arch.def(id)
 		var complete: bool = true
@@ -32,7 +36,8 @@ func run(main: Node) -> void:
 		var story_lines := String(data.get("personality", "")).split("\n").size()
 		ok(story_lines <= 3, "%s personality is three lines at most" % id)
 		var label := HeroTitle.label("Orri", id)
-		var bare := HeroTitle.title(id).trim_prefix("The ")   # "Orri the Unbroken", never "the The"
+		var bare := HeroTitle.title(id)
+		ok(not String(data["title"]).begins_with("The ") and not String(data["title"]).begins_with("the "), "%s stores its title without 'the'" % id)
 		ok(label == "Orri the %s" % bare and not label.contains("the The"), "%s label reads '%s'" % [id, label])
 		var shown: Array = [Arch.name_of(id), Arch.label(id), label, _plain_text(data)]
 		for text in shown:

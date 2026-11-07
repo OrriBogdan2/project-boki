@@ -1,4 +1,4 @@
-# Stone Seer
+# The Stone Seer
 
 Tenzo, the quarry-hand who reads the ground. Raise rocks out of the ground, stand on them and climb them, then punch them into the enemy. A slam that knocks resets itself.
 
@@ -7,7 +7,7 @@ Tenzo, the quarry-hand who reads the ground. Raise rocks out of the ground, stan
 
 |  |  |
 |---|---|
-| Class title | Stone Seer |
+| Class title | the Stone Seer |
 | Base character | Tenzo, male |
 | Personality | A young, nimble rock elementalist with a bandana tied over his eyes. He reads the ground by feel. Quiet and light on his feet, he moves stone like it is a dance partner. |
 

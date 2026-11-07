@@ -1,4 +1,4 @@
-# Neve the Snowglide (`rimewright`, light ice controller)
+# Neve the Snowglider (`rimewright`, light ice controller)
 
 Internal design doc. Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (gameplay only). The fidelity pass (ext/kitfix-moosh-tamsin) worked from the footage reference sheet (`briefs/hero-ref/tamsin.md`), the public wiki page and the owner's notes. Scale: 1 bh = 1.8 m.
 

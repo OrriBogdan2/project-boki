@@ -1,4 +1,4 @@
-# Storm Chaser
+# The Storm Chaser
 
 The storm-kite runner. Every hit loads a Spark onto your target; at four they are Live, and a Wirerun
 straight through them is a Blowout that gives your dash back at once.
@@ -8,7 +8,7 @@ straight through them is a Blowout that gives your dash back at once.
 
 |  |  |
 |---|---|
-| Class title | Storm Chaser |
+| Class title | the Storm Chaser |
 | Base character | Sparkle, female |
 | Personality | Bold and revolutionary, with tattoos, a leather jacket and plenty of jewellery. She calls the lightning down and does not ask permission. |
 

@@ -116,7 +116,7 @@ func _ready() -> void:
 	var btns := UI.hbox(12)
 	btns.alignment = BoxContainer.ALIGNMENT_CENTER
 	btns.add_child(UI.ghost("Later", func(): _finish(false), 140))
-	var play := UI.primary("Play %s" % Arch.name_of(id), func(): _finish(true), 220)
+	var play := UI.primary("Play %s" % Arch.name_of(id, true), func(): _finish(true), 220)
 	btns.add_child(play)
 	v.add_child(btns)
 	root.set_meta("class_id", id)

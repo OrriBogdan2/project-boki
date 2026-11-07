@@ -734,7 +734,7 @@ func tender() -> void:
 	var K: TenderKit = P.ak
 	ok(
 			"mm: renamed Meeko, kit sounds load",
-			Arch.name_of("tender") == "Dawnfox"
+			Arch.name_of("tender") == "The Dawnfox"
 			and Sfx.streams.has("tend_seed")
 			and Sfx.streams.has("tend_root")
 			and Sfx.streams.has("tend_hop"))

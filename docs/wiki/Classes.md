@@ -4,9 +4,9 @@ A class is a whole character: its own dash, a passive with a resource it builds,
 click), a right-click ability with several variants, a utility on E and an ultimate on R. There are
 twelve, four in each weight class:
 
-- **Light:** [Sparkle](Class-Storm-Chaser.md) (load Sparks, then Wirerun through them), [Lace](Class-Red-Stitch.md) (pin people, then the big shot), [Neve](Class-Snowglide.md) (skate on ice, chill foes, shelter the squad behind ice) and [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset).
+- **Light:** [Lace](Class-Red-Stitch.md) (pin people, then the big shot), [Neve](Class-Snowglider.md) (skate on ice, chill foes, shelter the squad behind ice), [Sparkle](Class-Storm-Chaser.md) (load Sparks, then Wirerun through them) and [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset).
 - **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Meeko](Class-Dawnfox.md) (heal, carry the downed), [Tenzo](Class-Stone-Seer.md) (raise rocks, punch them into the fight) and [Motley](Class-Void-Jester.md) (swell, plant a seed, trade places).
-- **Heavy:** [Mossy](Class-Barnacle-Knight.md) (block, then smash them into walls), [Kael](Class-The-Unbroken.md) (rage, chain in, crush), [Grimble](Class-Scrap-King.md) (haul a foe in, drop the anchor) and [Cinder](Class-Flame-Queen.md) (build Char, flash foes over).
+- **Heavy:** [Kael](Class-Unbroken.md) (rage, chain in, crush), [Cinder](Class-Flame-Queen.md) (build Char, flash foes over), [Grimble](Class-Scrap-King.md) (haul a foe in, drop the anchor) and [Mossy](Class-Barnacle-Knight.md) (block, then smash them into walls).
 
 The weight class sets health, speed, mass (how far hits push you) and how many dash charges you get.
 Everything else comes from the class kit.
@@ -51,37 +51,37 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| [Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Fusion) |
-| [Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
-| [Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
-| [The Unbroken](Class-The-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Fusion) |
-| [Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
-| [Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
-| [Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none (Boki Fusion) |
-| [Dawnfox](Class-Dawnfox.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none (Boki Fusion) |
-| [Flame Queen](Class-Flame-Queen.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Fusion) |
-| [Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Molten Guard | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
-| [Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
-| [Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
+| [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Fusion) |
+| [the Unbroken](Class-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Fusion) |
+| [the Flame Queen](Class-Flame-Queen.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Fusion) |
+| [the Dawnfox](Class-Dawnfox.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none (Boki Fusion) |
+| [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Molten Guard | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
+| [the Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
+| [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none (Boki Fusion) |
+| [the Snowglider](Class-Snowglider.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
+| [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
+| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
+| [the Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
+| [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
 
 ### How Hunters unlock
 
-A new save picks 1 of 1 starters (Hired Gun) before the egg pick and plays the tutorial as it. The other starters open after your first expedition. Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for 1.6s, and letting go early cancels it. Tiers: easy is about 1-2 expeditions, medium a handful of expeditions, hard real effort, once other Hunters are open. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.
+A new save picks 1 of 1 starters (the Hired Gun) before the egg pick and plays the tutorial as it. The other starters open after your first expedition. Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for 1.6s, and letting go early cancels it. Tiers: easy is about 1-2 expeditions, medium a handful of expeditions, hard real effort, once other Hunters are open. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.
 
 | Hunter | Tier | Challenge | Target |
 |---|---|---|---|
-| [Hired Gun](Class-Hired-Gun.md) | starter | pick at the start, or after your first expedition | - |
-| [Barnacle Knight](Class-Barnacle-Knight.md) | medium | Knock down 2 hunters while under half health | 2 |
-| [Storm Chaser](Class-Storm-Chaser.md) | medium | Stagger 6 monsters with abilities | 6 |
-| [The Unbroken](Class-The-Unbroken.md) | easy | Knock 3 enemies into walls | 3 |
-| [Red Stitch](Class-Red-Stitch.md) | easy | Stun 4 enemies | 4 |
-| [Snowglide](Class-Snowglide.md) | medium | Slow 20 enemies | 20 |
-| [Scrap King](Class-Scrap-King.md) | medium | Make it out carrying 8 items | 8 |
-| [Dawnfox](Class-Dawnfox.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
-| [Flame Queen](Class-Flame-Queen.md) | easy | Hit 3 enemies at once with one ability | 1 |
-| [Stone Seer](Class-Stone-Seer.md) | hard | Hit 3 enemies at once with one ability, 5 times, once 6 Hunters are open | 5 |
-| [Void Jester](Class-Void-Jester.md) | hard | Knock down 3 hunters while fused with your Boki, once 8 Hunters are open | 3 |
-| [Silver Thief](Class-Silver-Thief.md) | medium | Land 12 hits while in the air | 12 |
+| [the Hired Gun](Class-Hired-Gun.md) | starter | pick at the start, or after your first expedition | - |
+| [the Unbroken](Class-Unbroken.md) | easy | Knock 3 enemies into walls | 3 |
+| [the Flame Queen](Class-Flame-Queen.md) | easy | Hit 3 enemies at once with one ability | 1 |
+| [the Dawnfox](Class-Dawnfox.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
+| [the Stone Seer](Class-Stone-Seer.md) | hard | Hit 3 enemies at once with one ability, 5 times, once 6 Hunters are open | 5 |
+| [the Red Stitch](Class-Red-Stitch.md) | easy | Stun 4 enemies | 4 |
+| [the Scrap King](Class-Scrap-King.md) | medium | Make it out carrying 8 items | 8 |
+| [the Snowglider](Class-Snowglider.md) | medium | Slow 20 enemies | 20 |
+| [the Void Jester](Class-Void-Jester.md) | hard | Knock down 3 hunters while fused with your Boki, once 8 Hunters are open | 3 |
+| [the Barnacle Knight](Class-Barnacle-Knight.md) | medium | Knock down 2 hunters while under half health | 2 |
+| [the Storm Chaser](Class-Storm-Chaser.md) | medium | Stagger 6 monsters with abilities | 6 |
+| [the Silver Thief](Class-Silver-Thief.md) | medium | Land 12 hits while in the air | 12 |
 
 ### Mastery
 
@@ -89,56 +89,56 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 
 | Hunter | Goal | Target | Reward |
 |---|---|---|---|
-| Hired Gun | Land 30 hits from 12 m or more | 30 | Colourway: Dust Rider |
-| Hired Gun | Revive 2 teammates | 2 | Emote: Hat Tip |
-| Hired Gun | Fly through 10 air rings | 10 | Trail: Spent Brass |
-| Hired Gun | Make it out of 3 expeditions | 3 | Title: Long Shot |
-| Barnacle Knight | Revive 3 teammates | 3 | Colourway: Oathsteel |
-| Barnacle Knight | Knock 8 enemies into walls | 8 | Emote: Shield Rap |
-| Barnacle Knight | Make it out after being knocked down | 1 | Title: Still Standing |
-| Barnacle Knight | Open 6 chests | 6 | Banner: Iron Oath |
-| Storm Chaser | Stagger 10 monsters with abilities | 10 | Colourway: Storm Violet |
-| Storm Chaser | Land 15 hits while in the air | 15 | Trail: Static |
-| Storm Chaser | Fly through 12 air rings | 12 | Banner: Thunderhead |
-| Storm Chaser | Your Boki lands 50 hits | 50 | Title: Live Wire |
-| The Unbroken | Knock 10 enemies into walls | 10 | Colourway: Forge Red |
-| The Unbroken | Knock down 2 hunters while fused | 2 | Emote: Chest Thump |
-| The Unbroken | Open 8 chests | 8 | Banner: Broken Chain |
-| The Unbroken | Make it out after being knocked down | 1 | Title: the Unbowed |
-| Red Stitch | Stun 12 enemies | 12 | Colourway: Fletcher Green |
-| Red Stitch | Your Boki lands 40 hits | 40 | Emote: Quiver Spin |
-| Red Stitch | Fly through 8 air rings | 8 | Glider: Paper Crane |
-| Red Stitch | Make it out after being knocked down | 1 | Title: Last Arrow |
-| Snowglide | Slow 40 enemies | 40 | Colourway: Hoarfrost |
-| Snowglide | Fly through 10 air rings | 10 | Glider: Frost Kite |
-| Snowglide | Revive 2 teammates | 2 | Emote: Snow Angel |
-| Snowglide | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
-| Scrap King | Make it out carrying 10 items | 10 | Glider: Patchwork Wing |
-| Scrap King | Stun 10 enemies | 10 | Colourway: Rust and Brine |
-| Scrap King | Open 10 chests | 10 | Title: Salvager |
-| Scrap King | Bring 2 wild Boki home | 2 | Emote: Heave Ho |
-| Dawnfox | Revive 5 teammates | 5 | Skin: Moonbeam |
-| Dawnfox | Root 10 enemies | 10 | Emote: Big Hug |
-| Dawnfox | Bring 3 wild Boki home | 3 | Glider: Puffball Wings |
-| Dawnfox | Make it out of 5 expeditions | 5 | Title: Wisp Keeper |
-| Dawnfox | Open 8 chests | 8 | Banner: Moon Lantern |
-| Flame Queen | Set 25 enemies burning | 25 | Colourway: Coal and Cinder |
-| Flame Queen | Hit 3 enemies at once with one ability, 3 times | 3 | Trail: Ash Drift |
-| Flame Queen | Open 6 chests | 6 | Banner: Lantern Flame |
-| Flame Queen | Scan a wild Boki and bring it home | 1 | Glider: Ember Leaf |
-| Stone Seer | Hit 3 enemies at once with one ability, 5 times | 5 | Skin: Slate and Moss |
-| Stone Seer | Knock 12 enemies into walls | 12 | Emote: Ground Pound |
-| Stone Seer | Open 10 chests | 10 | Glider: Slate Kite |
-| Stone Seer | Make it out after being knocked down, twice | 2 | Title: Bedrock |
-| Void Jester | Knock down 4 hunters while fused | 4 | Skin: Void Bloom |
-| Void Jester | Stun 15 enemies | 15 | Trail: Lantern Motes |
-| Void Jester | Make it out carrying 8 items | 8 | Title: Swapkeeper |
-| Void Jester | Fly through 15 air rings | 15 | Glider: Lantern Moth |
-| Void Jester | Revive 3 teammates | 3 | Banner: Tidelight |
-| Silver Thief | Land 25 hits while in the air | 25 | Colourway: Midnight Silk |
-| Silver Thief | Stun 6 enemies | 6 | Emote: Twirl |
-| Silver Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
-| Silver Thief | Knock down a hunter while fused | 1 | Glider: Dusk Moth |
+| the Hired Gun | Land 30 hits from 12 m or more | 30 | Colourway: Dust Rider |
+| the Hired Gun | Revive 2 teammates | 2 | Emote: Hat Tip |
+| the Hired Gun | Fly through 10 air rings | 10 | Trail: Spent Brass |
+| the Hired Gun | Make it out of 3 expeditions | 3 | Title: Long Shot |
+| the Unbroken | Knock 10 enemies into walls | 10 | Colourway: Forge Red |
+| the Unbroken | Knock down 2 hunters while fused | 2 | Emote: Chest Thump |
+| the Unbroken | Open 8 chests | 8 | Banner: Broken Chain |
+| the Unbroken | Make it out after being knocked down | 1 | Title: the Unbowed |
+| the Flame Queen | Set 25 enemies burning | 25 | Colourway: Coal and Cinder |
+| the Flame Queen | Hit 3 enemies at once with one ability, 3 times | 3 | Trail: Ash Drift |
+| the Flame Queen | Open 6 chests | 6 | Banner: Lantern Flame |
+| the Flame Queen | Scan a wild Boki and bring it home | 1 | Glider: Ember Leaf |
+| the Dawnfox | Revive 5 teammates | 5 | Skin: Moonbeam |
+| the Dawnfox | Root 10 enemies | 10 | Emote: Big Hug |
+| the Dawnfox | Bring 3 wild Boki home | 3 | Glider: Puffball Wings |
+| the Dawnfox | Make it out of 5 expeditions | 5 | Title: Wisp Keeper |
+| the Dawnfox | Open 8 chests | 8 | Banner: Moon Lantern |
+| the Stone Seer | Hit 3 enemies at once with one ability, 5 times | 5 | Skin: Slate and Moss |
+| the Stone Seer | Knock 12 enemies into walls | 12 | Emote: Ground Pound |
+| the Stone Seer | Open 10 chests | 10 | Glider: Slate Kite |
+| the Stone Seer | Make it out after being knocked down, twice | 2 | Title: Bedrock |
+| the Red Stitch | Stun 12 enemies | 12 | Colourway: Fletcher Green |
+| the Red Stitch | Your Boki lands 40 hits | 40 | Emote: Quiver Spin |
+| the Red Stitch | Fly through 8 air rings | 8 | Glider: Paper Crane |
+| the Red Stitch | Make it out after being knocked down | 1 | Title: Last Arrow |
+| the Scrap King | Make it out carrying 10 items | 10 | Glider: Patchwork Wing |
+| the Scrap King | Stun 10 enemies | 10 | Colourway: Rust and Brine |
+| the Scrap King | Open 10 chests | 10 | Title: Salvager |
+| the Scrap King | Bring 2 wild Boki home | 2 | Emote: Heave Ho |
+| the Snowglider | Slow 40 enemies | 40 | Colourway: Hoarfrost |
+| the Snowglider | Fly through 10 air rings | 10 | Glider: Frost Kite |
+| the Snowglider | Revive 2 teammates | 2 | Emote: Snow Angel |
+| the Snowglider | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
+| the Void Jester | Knock down 4 hunters while fused | 4 | Skin: Void Bloom |
+| the Void Jester | Stun 15 enemies | 15 | Trail: Lantern Motes |
+| the Void Jester | Make it out carrying 8 items | 8 | Title: Swapkeeper |
+| the Void Jester | Fly through 15 air rings | 15 | Glider: Lantern Moth |
+| the Void Jester | Revive 3 teammates | 3 | Banner: Tidelight |
+| the Barnacle Knight | Revive 3 teammates | 3 | Colourway: Oathsteel |
+| the Barnacle Knight | Knock 8 enemies into walls | 8 | Emote: Shield Rap |
+| the Barnacle Knight | Make it out after being knocked down | 1 | Title: Still Standing |
+| the Barnacle Knight | Open 6 chests | 6 | Banner: Iron Oath |
+| the Storm Chaser | Stagger 10 monsters with abilities | 10 | Colourway: Storm Violet |
+| the Storm Chaser | Land 15 hits while in the air | 15 | Trail: Static |
+| the Storm Chaser | Fly through 12 air rings | 12 | Banner: Thunderhead |
+| the Storm Chaser | Your Boki lands 50 hits | 50 | Title: Live Wire |
+| the Silver Thief | Land 25 hits while in the air | 25 | Colourway: Midnight Silk |
+| the Silver Thief | Stun 6 enemies | 6 | Emote: Twirl |
+| the Silver Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
+| the Silver Thief | Knock down a hunter while fused | 1 | Glider: Dusk Moth |
 
 ### Run levels
 
