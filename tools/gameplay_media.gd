@@ -116,6 +116,11 @@ func _hunter(id: String, team: int, arch: String, kin: String, at: Vector3) -> H
 	h.ai = m.bot_brain.new_mind(m.rng, 0.85, m.bot_cfg)
 	return h
 
+## Frames the shot at once (the camera would otherwise ease in from the default over several seconds).
+func _zoom(z: float) -> void:
+	m.cam.zoom = z
+	m.cam.zoom_to = z
+
 func _purge() -> void:
 	if mobs_on:
 		return
@@ -197,7 +202,7 @@ func _fight(secs: float) -> void:
 			_hunter("b2", 1, "mage", "puddlet", _ground(foe_at + Vector3(1.4, 0, -1.6)))]
 	for h in squad_a + squad_b:
 		h.teleport(h.pos)
-	m.cam.zoom_to = 0.6
+	_zoom(0.55)
 	still_at = 4.0
 	_mark("start")
 	await _go(secs, func(t: float):
@@ -215,7 +220,7 @@ func _boki_combat(secs: float) -> void:
 	var foes: Array = []
 	for i in 3:
 		foes.append(m.spawn_mob("brute" if i == 0 else "skitter", _ground(base + Vector3(7.0 + i, 0, (i - 1) * 2.5))))
-	m.cam.zoom_to = 0.5
+	_zoom(0.4)
 	still_at = 3.5
 	await _go(secs, func(_t: float): pass, func(_t: float): return (P.pos + P.kin.pos) * 0.5)
 
@@ -237,7 +242,7 @@ func _extraction(secs: float) -> void:
 		var h: Hunter = squad_a[i]
 		h.ctrl = "idle"
 		h.teleport(_ground(berth - out3 * (9.0 + 1.5 * i) + side * (i - 1) * 2.0))
-	m.cam.zoom_to = 0.6
+	_zoom(0.55)
 	still_at = secs * 0.6
 	await _go(secs, func(_t: float):
 		if String(d["state"]) == "boarding":
