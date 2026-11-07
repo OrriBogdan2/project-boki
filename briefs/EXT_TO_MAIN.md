@@ -2307,3 +2307,12 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
   - The scan's painted mask splotches still show on the upper arm next to the new mask.
 
   Next pass: modelled eyelids and eyes, then clean the arm splotches.
+
+## 2026-11-07 deep (job 20261107-120002-a4, continues job 20261107-060821-a2): READY ext/downed-wisp 3da5e9acd (owner decision "going down turns you into a Wisp")
+- A downed Hunter pops into a Wisp: the hero hides, there is a 0.25 s flash, ring and puff with a sound, then the Wisp bobs, flickers, leans and trails as it moves. A revive is a 0.3 s reverse pop (the Wisp brightens and fades, the hero grows from 0.6 with a squash). Bleed-out or an execute breaks it into sparks. The Wisp takes the hunter's side colour (SideColor, like its ring). Per-hero `downed` clips are no longer played; the files stay.
+- Gameplay is unchanged: HunterWisp only reads `downed`/`out`, so nothing new is replicated. Remote players, bots and the tutorial get it from the state they already have. Decision: docs/decisions/0019-downed-wisp.md.
+- Cosmetic slot: `content/rules/wisp_looks.json` (WispLook). New look = a JSON entry listing only what differs from `default`; no code. It is picked by `Save.d["look"]["wisp"]`.
+- This pass fixed the previous attempt's look: it rendered as a white square (untextured additive particle quads). It now uses the Fx soft dot, a mixed core and a soft halo, and is bigger. New shaders: shaders/wisp_core, shaders/wisp_halo.
+- Checks: --wisp-check PASS (12 heroes, bot teammate, tutorial, bleed-out, look data). --revive-check, --box-revive-check, --clip-check, --warden-clips-check, --tutorial-hud-check and --check: 0 failures. health --strict OK. The full suite was not run.
+- Renders (GPU job 20261107-120848-03528): briefs/art-refs/downed_wisp/ (pop-in, idle, moving, ally Wisp, revive a/b; captions.txt).
+- Debt (docs/DEBT.md "Downed Wisp"): HunterAnim's crawl branch is dead. The Wisp id is local only (others see default; sending it needs a join-kit field and a Net.VERSION bump). There is no picker/shop UI.
