@@ -2552,3 +2552,6 @@ READY ext/parity-ostra-bomb 5b9a528d2 (KIT_PARITY 17: Ostra Brimseed peak 3.5x; 
 
 ## 2026-11-07 deep (job 20261107-211504-a4): CLAIM Cinder the Flame Queen model to the final turnaround
 - CLAIM: Cinder (ashwick) model pass to cinder_v2_turnaround.jpg + cinder_v2_master_sheet.jpg: clean back, empty casting palms (FX both palms, weapon_muzzle on the dominant palm), waist-length hair cards, curved lizard horns. Branch ext/cinder-v2-palms (from ext/cinder-v2-model).
+
+## 2026-11-07 build (job 20261107-213002-a2): CLAIM Hero props swap to the new sheets
+- CLAIM: props swap to vex_v2_weapon_sheet, nivi_v2_weapon_sheet, grimble_v2_weapon_sheet (hook arm, confirm no nose), sable_v2_weapon_sheet, ravel_v2_prop_sheet. One branch per hero ext/props-<art> (vex, claire, grimble, sable, ravel), each from the hero v2 branch.
