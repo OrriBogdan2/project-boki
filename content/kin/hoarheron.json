@@ -11,5 +11,10 @@
 		"belly": "#f7eeee",
 		"glow": "#ffaa9f",
 		"wing": "#e0c8c8"
+	},
+	"work": {
+		"frost": 3,
+		"craft": 2,
+		"mend": 1
 	}
 }

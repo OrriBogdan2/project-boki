@@ -10,5 +10,10 @@
 		"color": "#5a8a9a",
 		"belly": "#a0c7d0",
 		"glow": "#6a99ff"
+	},
+	"work": {
+		"stone": 3,
+		"timber": 2,
+		"haul": 1
 	}
 }

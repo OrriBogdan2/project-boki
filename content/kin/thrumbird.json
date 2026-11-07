@@ -11,5 +11,10 @@
 		"belly": "#eee8f4",
 		"glow": "#ff967f",
 		"wing": "#d06aab"
+	},
+	"work": {
+		"spark": 3,
+		"forage": 2,
+		"craft": 1
 	}
 }

@@ -10,5 +10,10 @@
 		"color": "#9b9c78",
 		"belly": "#f0f0e0",
 		"glow": "#ffc19a"
+	},
+	"work": {
+		"spark": 3,
+		"forage": 2,
+		"craft": 1
 	}
 }

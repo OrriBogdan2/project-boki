@@ -10,5 +10,10 @@
 		"color": "#4c9e9a",
 		"belly": "#90d3d8",
 		"glow": "#a0ffcf"
+	},
+	"work": {
+		"bloom": 3,
+		"forage": 2,
+		"mend": 1
 	}
 }

@@ -11,5 +11,10 @@
 		"belly": "#f2f2f2",
 		"glow": "#ffaa9f",
 		"wing": "#684c4a"
+	},
+	"work": {
+		"spark": 3,
+		"tide": 2,
+		"haul": 1
 	}
 }

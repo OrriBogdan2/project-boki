@@ -11,5 +11,10 @@
 		"belly": "#d0e4e8",
 		"glow": "#d7ff8c",
 		"wing": "#4a423a"
+	},
+	"work": {
+		"stone": 3,
+		"haul": 2,
+		"timber": 1
 	}
 }

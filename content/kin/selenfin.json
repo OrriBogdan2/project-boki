@@ -10,5 +10,10 @@
 		"color": "#e1ccc7",
 		"belly": "#fff3e5",
 		"glow": "#a0afff"
+	},
+	"work": {
+		"frost": 3,
+		"mend": 2,
+		"craft": 1
 	}
 }

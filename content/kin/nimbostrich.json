@@ -10,5 +10,10 @@
 		"color": "#6b6259",
 		"belly": "#e8e4e0",
 		"glow": "#6a81ff"
+	},
+	"work": {
+		"spark": 3,
+		"tide": 2,
+		"haul": 1
 	}
 }

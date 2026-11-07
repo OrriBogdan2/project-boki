@@ -10,5 +10,10 @@
 		"color": "#258f6e",
 		"belly": "#7ad8d1",
 		"glow": "#cf6aff"
+	},
+	"work": {
+		"ranch": 3,
+		"bloom": 2,
+		"craft": 1
 	}
 }
