@@ -62,3 +62,6 @@ Rejected:
 - Freefall splash.
 - **Portrait updated (05:08 ET):** `vex_v2_portrait.jpg` = barrels to camera + robotic V-sign (natural green eye + glowing cyber-eye, gun reads as her right arm). Alts: firing, reloading in explorations/.
 - **Portrait FINAL (05:18 ET):** `vex_v2_portrait.jpg` = the belly laugh, wiping a tear (owner pick). Pout and embarrassed moved to emotes/.
+
+## Weapon sheet (owner, Nov 7, 15:38 ET)
+`vex_v2_weapon_sheet.jpg` is the current minigun prop sheet and replaces the old `vex_weapons.png`. It shows the brass and gold six-barrel rotary gun with sticker badges (a green ghost face, a purple flame), the looping brass shell belt and the chain with a bullet charm, in four views, three close-ups and a scale silhouette. Nano Banana Pro, new generation, 16:9, 4K. Refs: the minigun close-up from the master sheet and the splash.

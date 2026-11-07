@@ -16,3 +16,6 @@ Chain (Nano Banana Pro, 3:4, 4K, no seed exposed):
 2. Edit: the plain mallet became the capstan hammer. Ref: a hammer crop from the old sheet.
 3. Edit: added the compass and more glowing cracks. Ref: a chest crop from the old sheet.
 4. Local fix: the anglerfish close-up's dark square was replaced with the sheet's grey background, blended in seamlessly, keeping the cyan glow.
+
+## Turnaround (owner, Nov 7, 15:38 ET)
+`mossy_v2_turnaround.jpg` is the 3D turnaround in the new painted style: front, 3/4, side and back, without the hammer and shield. It shows the compass, the glowing cracks, the masts and the anglerfish. It replaces `breaker_turnaround.png`. For weapons use the master sheet and the old `breaker_weapons.png`, whose capstan hammer and hatch shield still match. Nano Banana Pro, new generation, 16:9, 4K. Ref: the master sheet.
