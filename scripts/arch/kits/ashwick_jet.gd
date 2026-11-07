@@ -14,16 +14,20 @@ const STEER_LEAD := 1.0         # m the heading lane runs past where the flight 
 const LAVA_DY := 1.6            # m above the carpet a body still stands in it
 const RING_PUFFS := 10          # flame puffs standing round the lift-off ring
 const FOOTING := 0.05           # s: the low flight counts as footing for a jump (Hunter.coyote) while it runs
-const JET_ANCHORS := ["anchor_jet_0", "anchor_jet_1"]   # the tank's two exhaust stacks on the model
+const HEEL_SIDE := 0.14         # m each heel's fire sits off her centre line
+const HEEL_UP := 0.12           # m above her feet
+const TAIL_BACK := 0.5          # m behind her the tail's fire burns
+const TAIL_UP := 0.85           # m above her feet (the tail's root)
+const ROAR_EVERY := 0.45        # s between the roars of the heel and tail fire
 
 var k: AshwickKit
 var h: Hunter
 var m: Node
-var stacks: Array = []          # the model's stack anchors (Node3D), once it has them
 var flight := {}                # hold: the flight under way {t, dir, speed, last, set_v}
 var trail: Array = []           # carpet pieces: {a, b, until}
 var tick_acc := 0.0
 var laid := 0
+var last_roar := -9.0           # when the flight last roared from her heels and tail
 var flights := 0                # (tests)
 var locked := 0                 # (tests) presses the flight swallowed
 var landings := 0
@@ -277,8 +281,8 @@ func _liftoff_fx() -> void:
 	m.sfx("lw_jet", h.pos, -1.0, 1.0)
 	k.net_ring(at, r, k.col_of(x))
 
-## The tank's two exhaust stacks: a hot core on each (the model's anchor_jet_*; its flight clip stretches
-## their flames) and embers blown down behind her. With no model: one core at her back.
+## The flight's lift: fire bursting from her heels and her tail, a hot core on each and embers blown down behind
+## her. This and jet_points are the one place the lift's look lives (swap them to change where it burns).
 func _jet_fx(dir: Vector2) -> void:
 	if not k.tells_visible():
 		return
@@ -286,20 +290,14 @@ func _jet_fx(dir: Vector2) -> void:
 	var down := Vector3(-dir.x * 0.6, -1.0, -dir.y * 0.6).normalized()
 	for at in cores:
 		k.fx.orb(at, Color("ff9a3a"), Color("fff4c0"), 0.55 / sqrt(float(cores.size())), 0.06)
-		var embers := 2 if cores.size() == 1 else 1
-		m.fx.burst(at, Color("ff7a2a"), embers, 4.0, 0.3, 2.0, 0.9, down, 25.0)
+		m.fx.burst(at, Color("ff7a2a"), 1, 4.0, 0.3, 2.0, 0.9, down, 25.0)
+	if m.time - last_roar >= ROAR_EVERY:
+		last_roar = m.time
+		m.sfx("lw_jet", h.pos, -6.0, 1.1)
 
-## Where the jets burn: each stack's mouth on the model, else the one point at her back.
+## Where the lift burns: both heels, then the tail.
 func jet_points(dir: Vector2) -> Array:
-	if stacks.is_empty() and h.model:
-		for nm in JET_ANCHORS:
-			var a := WardenGlb.anchor(h.model, nm)
-			if a:
-				stacks.append(a)
-	var out: Array = []
-	for a in stacks:
-		if is_instance_valid(a) and (a as Node3D).is_inside_tree():
-			out.append((a as Node3D).global_position)
-	if out.is_empty():
-		out.append(h.pos + Vector3(0, 1.1, 0) - Vector3(dir.x, 0, dir.y) * 0.45)
-	return out
+	var fwd := Vector3(dir.x, 0.0, dir.y)
+	var side := fwd.cross(Vector3.UP) * HEEL_SIDE
+	var heel := h.pos + Vector3(0, HEEL_UP, 0) - fwd * 0.1
+	return [heel + side, heel - side, h.pos + Vector3(0, TAIL_UP, 0) - fwd * TAIL_BACK]

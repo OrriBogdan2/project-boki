@@ -4,6 +4,11 @@ Internal design doc. Source behaviour: the hero named in the Inspired-by table i
 names, text or looks appear in the game). Everything the player sees and hears is ours. The kitfix pass (Nov 2026) rebuilt the kit
 against the reference sheet made from gameplay footage (kept outside the repo) and the wiki's fine print.
 
+**Flame Queen redesign (owner, 2026-11-07):** she carries no weapon, tank or goggles. LMB's stream and the Cinder Shot leave her
+casting (right) hand (`AshwickKit.tip()`); the rules' numbers, range and timing are unchanged. Flue Flight's fire bursts from her
+heels and tail (`AshwickJet.jet_points`, the one place to swap the look); the flight itself is unchanged. Where the tables below
+say gun, nozzle, tank or hose, read hand, palm and stream: they describe the source footage.
+
 ## Research summary
 Sources (gameplay facts only, written in our own words):
 - The reference hero's public kit page (see the Inspired-by table in docs/ARCHETYPES.md), patch notes on that page.
@@ -214,14 +219,14 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
   yellow core, violet halo, dark smoke tail; a red jagged flash, red orb and embers on hit, a violet fizzle ring on a miss), the
   flat flame skull with long ember tails on the ram and ember-puff after-images, the jagged 14-ray sunburst and cracked scorch of
   the cloak, the deep orange two-ring fire shield, the molten carpet with charred edges, and the flame pips over burning foes.
-- Weapon: `HeroGearPair.flamer`: ribbed brass barrel, flared bell nozzle with a pilot cage, fuel canister, hose to the pack.
+- Weapon: none (the procedural `HeroGearPair.flamer` is only the stand-in until her rebuilt model lands).
 - Sounds (`tools/gen_sfx_cinder.py`, set `content/sfx/ashwick.json`, docs/AUDIO.md): the lance's pilot and roar (`lw_pilot`,
-  `lw_roar`, three takes, one every 0.4 s while held), the tank hiss on release (`ashwick_tank_hiss`), `lw_bolt`/`lw_bolt_hit`,
+  `lw_roar`, three takes, one every 0.4 s while held), the fire guttering out on release (`ashwick_tank_hiss`, sound id unchanged), `lw_bolt`/`lw_bolt_hit`,
   `as_ignite` (Ablaze), `lw_blaze` (Flashover), `lw_bash`/`lw_bash_hit`, the bellows poof `lw_hop`, `lw_shield` and
   `ashwick_cloak_hit` (Furnace Cloak), `lw_jet`/`lw_jet_land`/`lw_trail` (Flue Flight), and her own dash, footsteps
   (a light patter, the pack clinking every other step) and wordless voice (`ashwick_hurt`, `_down`, `_death`).
 - Flue Flight (`scripts/arch/kits/ashwick_jet.gd`): the ember ring, scorch and sunburst at lift-off, a hot core and embers blown
-  out of the bellows while flying, and the carpet as pooled LDFx lava strips drawn with their own alpha-blended shader
+  out of her heels and tail while flying (a roar every 0.45 s), and the carpet as pooled LDFx lava strips drawn with their own alpha-blended shader
   (`shaders/ld_lava.gdshader`), so the charred rim stays dark on bright ground.
 
 ## Engine notes
