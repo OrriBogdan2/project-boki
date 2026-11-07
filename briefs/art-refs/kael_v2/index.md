@@ -74,3 +74,6 @@ Local pass (Python/PIL, not AI):
 Known limits:
 - Not a strict A-pose (the arms are slightly out).
 - The render is slightly soft after two edits.
+
+## Splash relight candidate (Nov 6, 21:06 ET)
+`kael_v2_splash_relit_candidate.jpg`: local split-tone. Cool, desaturated shadows on the surround; a warm key kept on Kael; his skin's red cast reduced. Fixes the all-red monochrome look. Owner to choose.
