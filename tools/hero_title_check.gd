@@ -10,7 +10,7 @@ const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tam
 const RETIRED_TERMS := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|unmasked|masks?)\\b"
 const CANONICAL_ORDER := [
 	"gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer",
-	"dredge", "rimewright", "ostra", "bulwark", "mage", "thief",
+	"dredge", "rimewright", "mage", "bulwark", "ostra", "thief",
 ]
 const GENDERS := ["male", "female", "robot"]
 
