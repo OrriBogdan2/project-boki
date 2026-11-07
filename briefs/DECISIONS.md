@@ -177,7 +177,7 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - 3D: cinder_v2_turnaround.jpg (hair length and the flamethrower from cinder_v2_master_sheet.jpg). Final splash: "Last Dance" (cinder_v2_splash.jpg). Portrait: cinder_v2_portrait.jpg.
 
 ## 2026-11-07 (owner, via coordinator): roster order
-- Hero order (owner's Boki website order; also the hero-select, wiki and any roster list): Vex, Mossy, Ryzz, Kael, Ravyl, Cinder, Grimble, Lumi, Claire, Tarek, Motley, Sable.
+- Hero order (owner's Boki website order; also the hero-select, wiki and any roster list): Vex, Mossy, Ryzz, Kael, Ravyl, Claire, Grimble, Lumi, Cinder, Tarek, Motley, Sable.
 
 ## 2026-11-07 (owner, via coordinator): Boki 50, build them all now
 - Goal: 50 Boki as soon as possible, each with a 2D design (concept sheet: front, side, back, expression row; plus a clean turnaround for 3D) AND a 3D model in game. The owner cuts or changes ones he doesn't like later, so don't hold species for review.
@@ -206,3 +206,12 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - Use the lore in her hero-select bio, her wiki page and the website. Barks can lean on it: nervous in the dark, brave for others, talking to her star.
 - Visual rule: she still reads as a Hunter (upright, clothed, carrying gear); her outfit shows she has grown beyond being a Boki. Signature: an oversized lantern almost as tall as she is.
 - Art: v2 redesign in progress in `briefs/art-refs/pip_v2/`. Do NOT swap any Lumi art or model into the game until her master sheet is final (owner/art-coordinator says so). The name and lore text can ship now.
+
+## 2026-11-07 (owner, via coordinator): "Mask" is renamed **Relic** in all player-facing text
+- The object still LOOKS like a mask: same models, icons and art. Only the name changes.
+- Lore framing: a Relic is the mask of a fallen Hero. Wearing one lets you fight as that Hunter. Only those with a Hero's Relic can save our souls.
+- Scope: UI strings, tooltips, menus, loading tips, tutorial text, item names/descriptions, lore and codex, store and Steam copy, player-facing docs. (Lumi's "Mask relic" = her Relic; the "second-Mask pick" = the second-Relic pick.)
+- Internal identifiers (class names, enums, save keys, asset paths, network ids) stay unless trivial and safe; where they stay, a short comment notes that "mask" in code means "Relic" in game. This supersedes "Mask" as a player-facing word everywhere above.
+
+## 2026-11-07 (owner): roster order swap
+- Cinder and Claire (Nivi) swap places. Order is now: Vex, Mossy, Ryzz, Kael, Ravyl, Nivi, Grimble, Lumi, Cinder, Kibo, Motley, Sable (display names).
