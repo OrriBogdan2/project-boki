@@ -2257,3 +2257,6 @@ Rebuilt art/wardens/hem/ with ART-1 from ravel_v2_turnaround.jpg + master_sheet_
 
 Recommendation: playable, but not a final look; the owner should decide if it merges as is. Next pass: skirt, skin bake, shoulder mask, in that order.
 Checks: warden-rig-json OK, warden-model-check 157/0, warden-glb-check 187/0, warden-clips 0 fails, hero-check 0, hero-vfx OK, health --strict OK on c1a221ad0. archer-combo 153/0 ran before the last look tune (colours only; not rerun).
+
+## 2026-11-07 Neve rename (job 20261107-094010-a3): READY ext/text-relic-renames 544d41fd1 (supersedes e51b4f191 above)
+Nivi -> Neve (display only, id claire stays). hero-title, hatch, class-unlock checks 0 failures. Remaining "Nivi" only in docs/TEXT_PASS_2026-11-07.md history.
