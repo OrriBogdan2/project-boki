@@ -2154,3 +2154,8 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-07 deep (job 20261107-042925-a3): CLAIM Grimble v2 model rebuild
 - CLAIM: Grimble v2 model rebuild (art/wardens/dredge/ to the locked v2 design, briefs/art-refs/grimble_v2/). Branch ext/grimble-v2-model.
+
+## READY: ext/grimble-hook-arm (a97e7cc87), Grimble's hook is his stretching bone-hook arm (build session 20261107-043002-a4)
+- Visual only (DECISIONS 2026-11-07): the old braided rope and open hand are gone; `LDFx.arm` draws a bruised-purple flesh tube (bone ridge, bone at the end) from his forearm (anchor_claw) to a bone-hook prop (`hook`), purple sludge drips off it, and it snaps back (0.14 s) after a miss or the reel. Range, timing, hitbox and pull untouched. `ext/grimble-v2-model` did not exist, so it sits on the current dredge model (hook point = anchor_claw); swap `_hand()` to the v2 hook-tip point when that model lands.
+- Checks: `--dredge-combo-check` 93/93, `--hero-vfx-check` 41 ok / 0 fail, `--clip-live-grimble` all ok, `health.py --strict` OK. `--hero-vfx-reel --reel-hero=dredge` (new `hook` part) renders the clip.
+- Clip, match camera, before/after: briefs/shots/grimble_hook/{before,after}.mp4 and {before,after}_sheet.png. NOTE: the GPU worker (pc-MRROBOTO) was offline, so these were rendered on CPU (xvfb, software GL), not on the GPU; re-run on GPU if you want it exact.
