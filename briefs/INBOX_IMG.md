@@ -77,3 +77,7 @@ Design source: each species' entry in docs/boki/ROSTER_50.md on ext/boki-roster5
 - Batch 3 (no 3D yet, incl. the big ones): basaltoad, glaciyak, goliathite, moundvark, nimbostrich, squalltross, threadwyrm, tuatrune, umbrathere
 - Batch 4 (3D exists, 2D design missing; match the existing model): burrlet (Mycroll), cindle (Vespyx), puddlet (Prismander), wisplet (Lunowl), zapple (Echolop), hivara, zephyrak, cairnback, kindlewren, mossgrade, kestrike, lodestick, marchleaf, nettlynx, thrumbird
 Already done: pebbit, glintmole, gloamshell, glomwort, rimeshrew, selenfin.
+
+## 2026-11-07 04:10 UTC (coordinator): Boki 50 UPDATE: wait for the new designs
+- The owner raised the bar: every Boki must be a cool, creative mix (DECISIONS "Boki design bar"). A redesign pass is rewriting the bland roster entries now. It lands as briefs/BOKI_50_DESIGNS.md with an image prompt per species and a top-10 for batch 1.
+- Use BOKI_50_DESIGNS.md (not ROSTER_50.md) for every species it covers, and its top 10 as batch 1. If it isn't there yet, start with the species marked "kept" in it, or wait; don't make sheets from the old roster text.
