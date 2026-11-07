@@ -7,7 +7,8 @@ extends RefCounted
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"zephyrak", "pebbit", "cairnback", "wisplet", "gloamshell",
-	"selenfin", "zapple", "hivara"]
+	"selenfin", "zapple", "hivara", "glomwort", "kestrike", "kindlewren", "lodestick", "marchleaf", "mossgrade",
+	"nettlynx", "thrumbird"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend"]
