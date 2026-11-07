@@ -246,11 +246,6 @@ func _tick_dive() -> void:
 	if h.downed:
 		dive = false
 		dive_glide = false
-	elif (h.gliding or bool(h.inp.get("glide", false))) and not dive_glide:
-		dive = false
-		h.fly_t = 0.0
-		if dive_fall:
-			h.vel.y = maxf(h.vel.y, 0.0)      # the canopy takes the plunge's speed at once
 	elif h.grounded:
 		dive = false
 		dive_glide = false
@@ -563,6 +558,10 @@ func charge_orb() -> bool:
 	return false
 
 ## A Rock Hop chain is her ground dash for DashFlow: from the press until it ends (the rock rolling on after is not).
+## The Quakefall runs to its landing: no glider mid-move (item 162b), except over the abyss (a rescue).
+func locks_glide() -> bool:
+	return dive and not h.over_void()
+
 func in_dash() -> bool:
 	return super.in_dash() or hop.chaining()
 
