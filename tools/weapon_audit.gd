@@ -19,7 +19,7 @@ const ITEMS := {
 	"mage": [],
 	"ostra": [["orb", ["x_weapon"], []]],
 }
-const LABEL := {"ashwick": "Cinder", "rimewright": "Nivi",
+const LABEL := {"ashwick": "Cinder", "rimewright": "Neve",
 	"juggernaut": "Kael", "thief": "Sable", "gunslinger": "Vex",
 	"dredge": "Grimble", "archer": "Ravyl", "bulwark": "Mossy", "tender": "Meeko", "dolm": "Kibo", "mage": "Ryzz",
 	"ostra": "Motley"}

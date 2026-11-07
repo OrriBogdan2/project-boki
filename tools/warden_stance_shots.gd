@@ -16,7 +16,7 @@ const CAM_FOV := 32.0
 const ENLARGE := 2
 const YAW_34 := -PI * 0.8     # three-quarter front, the weapon hand toward the camera
 const YAW_SIDE := -PI * 0.5   # side on, facing right in the picture
-const NAMES := {"gunslinger": "Vex", "rimewright": "Nivi", "dolm": "Kibo", "ashwick": "Cinder", "thief": "Sable",
+const NAMES := {"gunslinger": "Vex", "rimewright": "Neve", "dolm": "Kibo", "ashwick": "Cinder", "thief": "Sable",
 	"juggernaut": "Kael", "archer": "Ravyl", "mage": "Ryzz", "tender": "Meeko", "bulwark": "Mossy",
 	"dredge": "Grimble",
 	"ostra": "Motley"}

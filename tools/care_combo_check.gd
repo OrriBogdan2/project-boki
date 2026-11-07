@@ -1253,7 +1253,7 @@ func burr_ranks() -> void:
 			"r1 %.2f r3 %.2f" % [wide1, wide3])
 	await _free(m)
 
-# ================================================================== Nivi
+# ================================================================== Neve
 func rimewright() -> void:
 	var r: Array = sc.setup("rimewright", 6.0)
 	var m: Match = r[0]

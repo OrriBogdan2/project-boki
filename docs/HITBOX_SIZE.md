@@ -15,7 +15,7 @@ Changing a hero's hit radius is one line (`body.hit_r`). The creator's look slid
 | archer | Ravyl | 0.98 | 0.392 | average, slim |
 | dolm | Kibo (Breah's base) | 0.97 | 0.388 | lean |
 | thief | Sable | 0.96 | 0.384 | lean |
-| rimewright | Nivi | 0.95 | 0.380 | slight |
+| rimewright | Neve | 0.95 | 0.380 | slight |
 | ashwick | Cinder | 0.94 | 0.376 | low and hunched |
 | tender | Meeko | 0.85 | 0.340 | smallest (at the band's floor: item 108 shrank her model, not this) |
 

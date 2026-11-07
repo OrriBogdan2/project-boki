@@ -4,7 +4,7 @@ A class is a whole character: its own dash, a passive with a resource it builds,
 click), a right-click ability with several variants, a utility on E and an ultimate on R. There are
 twelve, four in each weight class:
 
-- **Light:** [Ryzz](Class-Storm-Chaser.md) (load Sparks, then Wirerun through them), [Ravyl](Class-Red-Stitch.md) (pin people, then the big shot), [Nivi](Class-Snowglider.md) (skate on ice, chill foes, shelter the squad behind ice) and [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset).
+- **Light:** [Ryzz](Class-Storm-Chaser.md) (load Sparks, then Wirerun through them), [Ravyl](Class-Red-Stitch.md) (pin people, then the big shot), [Neve](Class-Snowglider.md) (skate on ice, chill foes, shelter the squad behind ice) and [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset).
 - **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Meeko](Class-Magic-Fox.md) (heal, carry the downed), [Kibo](Class-Stone-Seer.md) (raise rocks, punch them into the fight) and [Motley](Class-Void-Jester.md) (swell, plant a seed, trade places).
 - **Heavy:** [Mossy](Class-Sunken-Bulwark.md) (block, then smash them into walls), [Kael](Class-The-Unbroken.md) (rage, chain in, crush), [Grimble](Class-Scrap-King.md) (haul a foe in, drop the anchor) and [Cinder](Class-Flame-Queen.md) (build Char, flash foes over).
 

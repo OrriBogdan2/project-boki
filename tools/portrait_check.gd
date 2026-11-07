@@ -59,7 +59,7 @@ func _art() -> void:
 			var st := load(splash) as Texture2D
 			ok("%s: its splash" % Arch.name_of(ak), splash.ends_with("_splash.jpg") and st != null
 					and Vector2i(st.get_size()) == SPLASH_PX, splash)
-	var names_ok: bool = HeroTitle.base_name("gunslinger") == "Vex" and HeroTitle.base_name("rimewright") == "Nivi"
+	var names_ok: bool = HeroTitle.base_name("gunslinger") == "Vex" and HeroTitle.base_name("rimewright") == "Neve"
 	var names2: bool = HeroTitle.base_name("tender") == "Meeko" and HeroTitle.base_name("mage") == "Ryzz"
 	var names3: bool = HeroTitle.base_name("bulwark") == "Mossy" and HeroTitle.base_name("archer") == "Ravyl"
 	var names4: bool = HeroTitle.base_name("juggernaut") == "Kael"
@@ -134,7 +134,7 @@ func _menus() -> void:
 	var card := KitCard.make("rimewright", "", func(): pass)
 	host.add_child(card)
 	await tree.process_frame
-	ok("the kit card shows Nivi's portrait", _first_pic(card) == Portraits.art_path("rimewright"))
+	ok("the kit card shows Neve's portrait", _first_pic(card) == Portraits.art_path("rimewright"))
 	await _shot(tree, "kit_card")
 	card.queue_free()
 	for ak in ["gunslinger", "juggernaut", "tender"]:

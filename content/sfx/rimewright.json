@@ -1,6 +1,6 @@
 {
 	"group": "rimewright",
-	"name": "Nivi",
+	"name": "Neve",
 	"script": "tools/gen_sfx_claire.py",
 	"sounds": {
 		"rime_shard": "fire",
