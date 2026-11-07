@@ -475,6 +475,9 @@ The scan welded her forearm shards to her hip plates (read as wings once the arm
 `cinder_source.py part_arms` cuts every face joining an arm to the body under the armpit and caps both sides. Raw files in
 `~/meshy/cinder_v2`, rebuilt by `build.sh` there from `tools/art1/cinder_*.py`.
 A tail near the floor: `Springs.FLOOR_UP` holds joints up from the *posed* root, so leave the stance's root drop as well.
+The scan's horns came out as short wedges (cat ears from the front): `cinder_finish.py tuck_horns` presses them to the crown and
+`cinder_pieces.py horns` sweeps the sheet's curved horns over them, rigid on the head, painted in their own strip under the atlas's flat
+cells. The tail's molten cracks (the side view) are a seeded random walk painted into the tail strip of both the atlas and the emit map.
 
 ## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
 No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.
