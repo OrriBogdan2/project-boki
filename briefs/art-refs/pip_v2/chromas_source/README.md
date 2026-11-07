@@ -11,4 +11,4 @@ These are the original full sheets (5504×3072, saved at JPG q95), kept uncroppe
 Isolation prompt template (replace the ordinal and the description):
 > Edit image 1. Keep only the [third] character from the left: [the pink fairy-fox with baby-blue ear tips and tail, the white lace-edged capelet with the rainbow heart clasp], and her big brass lantern with the smiling star. Remove the other three characters and their lanterns completely. Show her alone, full body from her ears to her feet and the whole tail, centred on a plain dark grey background with nothing else in the frame. Complete any parts of her wings, tail and lantern that were hidden behind the other characters, keeping her design, pose, colours and style exactly the same. No text.
 
-Status: Cotton Candy isolation in progress (Nov 7, 01:04 ET). The others are pending.
+Status: Cotton Candy isolated (Nov 7, 01:09 ET), saved as `../lumi_v2_main_design.jpg`. The other 11 are pending.

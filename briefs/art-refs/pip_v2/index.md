@@ -54,4 +54,4 @@ New lore (owner direction: she is a Boki that became sentient through her lanter
 - Medic signal: the heart clasp (the rainbow heart in the default; the heart-plus in some chromas).
 
 ## Chroma sources (Nov 7, 01:04 ET)
-The full original sheets are kept in `chromas_source/` (q95). Every chroma needs an **AI isolation edit** before use, because plain crops catch the neighbouring figures. See `chromas_source/README.md` for the sheet map and the prompt template. `lumi_v2_main_design.jpg` is a rough crop, to be replaced by the AI-isolated Cotton Candy.
+The full original sheets are kept in `chromas_source/` (q95). Every chroma needs an **AI isolation edit** before use, because plain crops catch the neighbouring figures. See `chromas_source/README.md` for the sheet map and the prompt template. `lumi_v2_main_design.jpg` is now the AI-isolated Cotton Candy (01:09 ET). The capelet trim came out plain white (the rainbow heart clasp is kept).
