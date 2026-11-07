@@ -2546,3 +2546,6 @@ READY ext/parity-idle-audit 8b2217e8b (idle audit of all 12 Hunters + --idle-sho
 READY ext/parity-mossy-cadence 9c336682d (KIT_PARITY item 12, Mossy: throw cadence 0.45 s per the source card, asserted; hold walk 55% kept per owner #59, asserted; --bulwark-combo-check 145 PASS/0 FAIL, health --strict OK, gen_wiki --check OK)
 READY ext/parity-grimble-airdash 0a5b33f48 (KIT_PARITY item 13, Grimble: air pounce is an explicit own 12.5 s slot, 2 s less per rank, asserted; the slot already existed via the class default so the audit's 'missing' was overstated; --dredge-combo-check 94 PASS/0 FAIL, health --strict OK, gen_wiki --check OK)
 READY ext/parity-ostra-bomb 5b9a528d2 (KIT_PARITY 17: Ostra Brimseed peak 3.5x; dmg_max_k 3.0->3.5 with formula k-1, identical damage curve, check asserts full pop = 3.5 x 12.5)
+
+## 2026-11-07 deep (job 20261107-211501-a2): CLAIM Mossy v2 model rebuild
+- CLAIM: Mossy the Barnacle Knight v2 model (id bulwark, art/wardens/breaker/ from mossy_v2 turnaround + master sheet: brass chest compass, restrained cyan crack emissive, bulk vs hero-heights 0.8). Branch ext/breaker-v2-model.
