@@ -76,3 +76,6 @@ Local fix (not AI): the hit assassin's glowing teal eyes were darkened to normal
 Alternates in `explorations/`:
 - `tarek_v2_splash_action_pose_alt.jpg`: the second action run, which the owner likes for its pose. His back leg merges into the rock pillar, and the punch lands straight on the assassin.
 - `tarek_v2_splash_standing.jpg` and `tarek_v2_splash_standing_alt.jpg`: the earlier "surrounded but calm" runs, which had no action.
+
+## Renamed: Kibo, "the Stone Seer" (owner, Nov 7, 00:17 ET)
+Tarek is renamed **Kibo** ("Kibo the Stone Seer"). Display name only; ids and files stay (`dolm`, `tarek_*`). Passed to the coordinator via the owner.
