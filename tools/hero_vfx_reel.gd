@@ -7,7 +7,8 @@ extends "res://tools/combo51_shots.gd"
 ##       --write-movie <dir>/reel.avi -- --hero-vfx-reel --shots-dir=<dir>
 
 const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
-	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"]}
+	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
+	"dredge": ["hook"]}
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
@@ -263,6 +264,19 @@ func _archer_lmb() -> void:
 	await _go(2.6, shots, _sheet("lmb",
 			"LMB: a tap needle, then the Empowered draw: thread gathering at the nock, the needle with its "
 			+ "red thread trailing, the hit on the dummy", [0.06, 0.14, 0.3, 0.9, 1.3, 1.53, 1.58, 1.65, 1.8]), 3.0)
+	await _go(GAP)
+
+## Grimble's RMB at the dummy: the arm stretches out, the hook bites, the reel hauls it in.
+func _dredge_hook() -> void:
+	await _reset(8.0)
+	var K: DredgeKit = P.ak
+	var hook := func(t: float):
+		if _at(t, 0.1):
+			K.press_rmb()
+		_aim(T.pos)
+	await _go(2.4, hook, _sheet("hook",
+			"RMB, the hook: the arm stretches to the dummy, the hook bites, the reel hauls it in, the arm snaps back",
+			[0.15, 0.3, 0.45, 0.6, 0.9, 1.2, 1.5, 1.8, 2.2]), 3.0)
 	await _go(GAP)
 
 func _archer_miss() -> void:
