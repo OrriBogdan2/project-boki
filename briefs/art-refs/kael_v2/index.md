@@ -77,3 +77,8 @@ Known limits:
 
 ## Splash relight candidate (Nov 6, 21:06 ET)
 `kael_v2_splash_relit_candidate.jpg`: local split-tone. Cool, desaturated shadows on the surround; a warm key kept on Kael; his skin's red cast reduced. Fixes the all-red monochrome look. Owner to choose.
+
+## Queued (owner, Nov 7, 00:53 ET): splash colour pass
+To do after Lumi, Nivi and maybe Motley's splash:
+- Lift the dark edges of `kael_v2_splash_final.jpg` so it matches the other splashes' brightness (the earlier local vignette pulled the edges ~50% down, which is too strong next to the roster).
+- Add a red aura coming off Kael (the curse); a local glow or one edit.
