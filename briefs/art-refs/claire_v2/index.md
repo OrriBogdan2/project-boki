@@ -43,3 +43,14 @@ Claire is renamed **Nivi** ("Nivi the Snowglide"). Display name only; ids and fi
 Explorations: bunny levels, outfits (elegant / sporty), signature elements, the snow princess sheet, and a failed merge (fresh generations drifted to a chibi toy style; edits kept her).
 
 Skin ideas from the outfit sheets: Snow Princess (E4), Crystal Ballerina (E1), Midnight (E2), Speed Skater (S1), Hockey (S3), Cosy Snow Bunny (O2), Candy-Cane Festival (O4).
+
+## Set complete (Nov 7, 04:30 ET)
+- `nivi_v2_turnaround.jpg`: front, 3/4, side, back, plus the spear separately; sculpt-render, first try. The back shows the braid, tail and scarf drape.
+- `nivi_v2_portrait.jpg`: catching a glowing snowflake at a festival-lit frozen lake.
+- `nivi_v2_splash.jpg`: a spinning leap on an aurora-lit lake; the spear sweep freezes a wave of shadow wolves into ice.
+
+The old v1 set has moved to `explorations/old_claire_v2_*`.
+
+Known limits:
+- In the portrait and splash her hair is a short bob plus the braid, not long hair (accept: it reads well).
+- In the turnaround her eyes are pale without the glow; use the main design for the glow.
