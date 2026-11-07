@@ -2411,24 +2411,25 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 
 READY ext/phys-150-botnav e44f34b22 (coordinator one-liner for the merge-candidate parser; carries 150-parity 074453ec, see the 150-botnav post above)
 
-## READY 2026-11-07: Cinder v2, the Flame Queen (ext/cinder-v2-model, 2235dfa01)
+## READY 2026-11-07: Cinder v2, the Flame Queen (ext/cinder-v2-model, 108309cba)
 
 Rebuilt from the turnaround with the master sheet's longer hair. Owner override applied: no tank, no hose, no weapon; hands empty and posed for casting, palm is `weapon_muzzle`, magma cracks brighten while she casts.
 
 Fidelity: scaled grey-violet skin, obsidian shards with molten seams, heeled boots, shards on the hands, long dark hair to ember ends (alpha cards), orange eyes, spined tail with an FX flame tip. No goggles, no fins. Weapon check moot: she has no weapon. Checklist row updated.
-Build: 11135 tris, one 2048 atlas, shared armature, FX points and clip set kept.
+Build: 11615 tris, one 2048 atlas, shared armature, FX points and clip set kept.
+Follow-up (job 20261107-160001-a2): the scan's wedge horns are tucked under built curved lizard horns (rigid on the head, own painted strip); the tail's back carries a sparse web of molten cracks in the atlas and the emit map (the turnaround's side view). warden_model_check height_3d for ashwick 1.08 (measured 1.079).
 
 Checks, all pass: cinder-art, warden-glb, warden-model, warden-clips, hero-vfx, ashwick-combo, warden-rig-json, health --strict. Match camera: the tail does not hide her.
 
-Renders in briefs/art-refs/cinder_v2/ingame/: before.jpg, vs_sheet.png, closeup_front.png, poses_game.png, turnaround_game.png.
+Renders in briefs/art-refs/cinder_v2/ingame/ (GPU, job 20261107-161743-12800): closeup_front.png, back_34.png, poses_game.png, turnaround_game.png; before_after_front.png and before_after_back.png (left/top: the first v2 build, right/bottom: horns and tail cracks); before.jpg is v1; vs_sheet.png the first build against the sheet.
 
 Please look at:
-- Horns are the weakest part: blocky, almost cat ears from the front, not the sheet's curved lizard horns. The scan's shape; not fixed. Alternative: replace them with built pieces.
-- Tail is plain as in the turnaround. face_tail ref shows molten cracks on it; alternative is to paint them.
+- Horns are now built pieces (dark stone, growth rings); the scan's stubs sit flattened under their roots. If they read too long, HORN_PTS in cinder_pieces.py scales them.
+- Tail cracks: 11 seeded walks on its back, brightness as the armour seams; TAIL_CRACKS in cinder_finish.py if fewer are wanted.
 - mantle_look ashwick base colours changed (they tinted her blue); this also affects the procedural model.
-- warden_model_check height_3d for ashwick is now 1.04 (v1's fire crest is gone).
+- warden_model_check height_3d for ashwick is 1.08 (the horn tips; v1's fire crest was 1.14).
 - Hair flame strips were dropped: they read as yellow flakes. Hair is no literal fire, only the ember fade.
-- Shots used software GL: the GPU queue stalled (job 20261107-144810-02832). Colours and speed need a GPU look.
+- Shots are GPU renders now (the queue unstalled).
 
 ## READY 2026-11-07: Cinder the Flame Queen, kit and splash (ext/cinder-flame-queen, c3f4f1729)
 
