@@ -32,7 +32,7 @@ No source hero's pose or attitude is copied.
 | 5 | Sparkle the Storm Chaser (`mage`) | "Never quite still" stands frozen for 5 s; the gum pops |
 | 6 | Motley the Void Jester (`ostra`) | Finger pop of 11 to 16 deg at every loop; T-pose arms; the stance has no body keys |
 | 7 | Meeko the Dawnfox (`tender`) | Idle and stance built on the lantern that DECISIONS dropped |
-| 8 | Neve the Snowglider (`rimewright`) | Toy-soldier pike stance, feet together; no skater weight |
+| 8 | Neve the Snowglide (`rimewright`) | Toy-soldier pike stance, feet together; no skater weight |
 | 9 | Sable the Silver Thief (`thief`) | Square, locked knees; the stance only raises the pistol |
 | 10 | Vex the Hired Gun (`gunslinger`) | Locked knees and a dead pelvis, but the coin flip is a real signature |
 | 11 | Lace the Red Stitch (`archer`) | Close in attitude; only the head moves |
@@ -210,7 +210,7 @@ Each target applies **quality** parity only. The attitude comes from the line qu
 - **Note:** the model swap waits for her final master sheet (DECISIONS). The rework edits only the clips on the
   current model and hides the lantern by keying it out of view. If companion bones exist by then, leave them unkeyed.
 
-### 8. Neve the Snowglider (`rimewright`, art `claire`)
+### 8. Neve the Snowglide (`rimewright`, art `claire`)
 
 - **Source:** archetype ("a graceful ice skater who glides where others walk... elegant and playful, with a cold
   edge").
