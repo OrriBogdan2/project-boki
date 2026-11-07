@@ -2564,3 +2564,17 @@ READY ext/parity-ostra-bomb 5b9a528d2 (KIT_PARITY 17: Ostra Brimseed peak 3.5x; 
 
 ## 2026-11-07 deep (job 20261107-214504-a4): CLAIM Meeko companions (sun + raincloud) model
 - CLAIM: Meeko the Dawnfox (tender, art pip) sun and raincloud companions from pip_v2/meeko_v2_companions_sheet.jpg: 4 views each + 8 expression faces (texture swaps), replacing the lantern stand-in, keeping FX points and spawn code. Branch ext/pip-companions-v2.
+
+## READY 2026-11-07 deep (job 20261107-211504-a4): Cinder v2 pass 2, final turnaround (ext/cinder-v2-palms, 766b44cdd)
+On ext/cinder-v2-model (merge this one instead; it carries that branch). Model from cinder_v2_turnaround.jpg + cinder_v2_master_sheet.jpg (Nov 7 14:15/14:57).
+- Clean back: no tank, hose, flamethrower, goggles or weapon (already true of the scan; re-checked in the GPU back views).
+- Hair: the back curtain is 9 alpha cards as wide as her back, to her waist, dark fading to ember (was 7 narrow cards to mid-back).
+- Horns: swept back past her crown, tips curling up (the turnaround's side view); before they stood straight up.
+- Palms: `weapon_muzzle` stays on the right palm (dominant: the kit, clips and Gun/Muzzle all cast from hand.R); new `weapon_muzzle_l` on the left palm (Sable's name). Alternative not taken: left as dominant (the master sheet's raised hand), which would mean redoing the clips.
+- Casting clips still read as palm casts: the LMB stream leaves her outstretched right palm (p2_lmb_palm_strip.png).
+- 11775 tris, one 2048 atlas, shared armature, every FX point/anchor name, 41 clips, and the kit wiring unchanged. No new Meshy credits: same scan, rebuilt pieces.
+Checks, all pass: warden-rig-json (rig unchanged), cinder-art (new: left palm point on hand.L, mirrors the right), warden-glb, warden-model, warden-clips, hero-vfx, ashwick-combo (117/0), health --strict.
+GPU renders (jobq 20261107-211901-07554, 20261107-214639-10392) in briefs/art-refs/cinder_v2/ingame/: p2_before_after_front.png (left before), p2_before_after_back.png (top before), p2_vs_sheet.png (sheet + match camera), p2_turnaround_close.png, p2_poses_game.png, p2_lmb_palm_strip.png.
+Known gap: the top of her head is still the scan's decimated hair, a little faceted in the close-up; her front locks end at the chest, whereas the sheet shows hair at her sides down to the waist.
+
+READY ext/cinder-v2-palms 766b44cdd (Cinder v2 pass 2: waist hair, swept-back horns, fire point on both palms; supersedes ext/cinder-v2-model)
