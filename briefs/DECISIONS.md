@@ -63,10 +63,12 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 ## Loadout, loot, world
 - 2 gloves, 2 charms, boots, 4 utility slots, 5 perk orbs. No upgrading. Every item exists once in a deathbox. Backpacks come from enemy deathboxes, home and shops, not random drops. Keys sit in utility slots.
 - Black Market extras are UNFROZEN (owner, Nov 3); ext/market merges in the economy step.
-- In-match shops (ext/shops) count as map work, not economy. Queue them low, with the expedition and map work.
+- In-match shops (ext/shops) count as map work, not economy. (Nov 7: now queued with the map update, see Utilities and shops.)
 - Chests: 1–3 fixed, learnable groups per map, sparse, a mini objective.
 - Breakables break in one hit. Kegs explode.
-- **Map update (owner, Nov 7; wins over the Nov 6 'keep The Hollow Crown as is' line):** The Hollow Crown grows about 100% (2x the play area: SIZE 216 to about 305; the alternative reading, 2x the width, would be 4x the area) so each match holds more squads. Raise squads per match in step, so the number of squads per square metre stays about the same as today. Every area must also feel more interesting: each region gets its own identity (landmark, terrain shape, cover pattern, a reason to go there), with no flat filler. The BIGGER_MAP.md notes (winding sky train route, no jump-pad-only floating islands) apply here.
+- **Map update (owner, Nov 7; wins over the Nov 6 'keep The Hollow Crown as is' line):** The Hollow Crown becomes a big map, **double the size** (2x the land; one SIZE constant so it can grow further after a look), with more squads per match so squads per square metre stays about the same as today. **The sky train is the fast travel:** a winding loop that reaches every region, with stops close enough to matter. Every area must feel interesting and has a **reason to go there** (e.g. the best spot for gold armor drops, a Boki habitat, a shop). No flat filler. The BIGGER_MAP.md notes (winding route, no jump-pad-only floating islands) apply.
+- **Hot zone (owner, Nov 7):** each match picks one area that is the hot drop zone, with better loot, and it changes from match to match. It is shown on the drop map and the minimap.
+- **Utilities and shops (owner, Nov 7):** copy all of the source's map utilities (e.g. teleport to a teammate, 'Anywhere But Here', and the rest; research the full list) with our own names and art, and sell them in the in-match shops. **Each shop sells a different set, and the set stays fixed** match to match, so players can plan drops around shops. Shops are no longer queued low.
 - The Hollow Crown is the beginner map. Harder tiers get their own maps, with apex threats (sound and sight hunting) and stealth.
 
 ## Farm and onboarding
