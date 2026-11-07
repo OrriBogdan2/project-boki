@@ -2578,3 +2578,4 @@ GPU renders (jobq 20261107-211901-07554, 20261107-214639-10392) in briefs/art-re
 Known gap: the top of her head is still the scan's decimated hair, a little faceted in the close-up; her front locks end at the chest, whereas the sheet shows hair at her sides down to the waist.
 
 READY ext/cinder-v2-palms 766b44cdd (Cinder v2 pass 2: waist hair, swept-back horns, fire point on both palms; supersedes ext/cinder-v2-model)
+READY ext/prematch-lobby 861e46547 (90 s pre-match lobby before expeditions: Hunter pick, squad, text chat + voice stub, lock at 0; admin lobby_enabled; richer loading screen; Net.VERSION 0.25.0; --prematch-check 0 failures, health --strict OK)
