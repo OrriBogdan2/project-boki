@@ -57,6 +57,10 @@ const FRAME := {
 		"hover": true,
 		"marks": {"left flank": Vector3(-0.09, 0.42, 0.06), "right flank": Vector3(0.09, 0.42, 0.06),
 			"back": Vector3(0, 0.57, 0.04), "chest": Vector3(0, 0.33, -0.12)}},
+	"zapple": {"head": Vector3(0, 0.43, -0.32), "top": 0.6, "carry": Vector3(0, 0.42, 0.06),
+		"ear_tip": Vector3(0.135, 0.86, -0.087), "tail_tip": Vector3(0, 0.285, 0.295), "tip_bone": "tail2", "hip": 0.2,
+		"marks": {"left flank": Vector3(-0.165, 0.19, 0.07), "right flank": Vector3(0.165, 0.19, 0.07),
+			"back": Vector3(0, 0.32, 0.06), "chest": Vector3(0, 0.2, -0.16)}},
 }
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
