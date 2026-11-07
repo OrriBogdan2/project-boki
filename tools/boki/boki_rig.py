@@ -9,6 +9,8 @@ HARD_PIECES = ("tail", "collar", "sting", "tail_fin", "gills", "shards", "runes"
 CLIP_SCALE = 0.95    # clip offsets are in the build's metres
 # where an unused prop sits (from its rest place), collapsed inside the body so its ink shell never shows
 HIDE_AT = {}
+# bones besides root and the props whose size the clips key, from their "<bone>_sc" (a species' blooming flowers)
+SCALED = set()
 
 
 def armature(bones, bl):
@@ -120,7 +122,7 @@ def make_clips(arm, clips, fps=30):
                     b.keyframe_insert("location", frame=f + 1)
                     b.scale = (0.001, 0.001, 0.001)
                     b.keyframe_insert("scale", frame=f + 1)
-                if b.name in ("root", "hips") or hide:
+                if b.parent is None or b.name == "hips" or hide:
                     off = pose.get(b.name + "_at", (0, 0, 0))
                     if hide and pose.get(b.name) != "on":
                         off = hide
@@ -132,7 +134,7 @@ def make_clips(arm, clips, fps=30):
                     sc = (1, 1, 1) if pose.get(b.name) == "on" else (0.001, 0.001, 0.001)
                 elif sc is None:
                     sc = (1, 1, 1)
-                if b.name == "root" or b.name.startswith("prop_"):
+                if b.name == "root" or b.name.startswith("prop_") or b.name in SCALED:
                     b.scale = _bone_scale(rest[b.name], sc)
                     b.keyframe_insert("scale", frame=f + 1)
     arm.animation_data.action = None

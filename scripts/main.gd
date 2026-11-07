@@ -2703,6 +2703,11 @@ func _boss_check() -> void:
 	run.call(13.0)      # (the boss settles back to sleep with nobody inside)
 	# 5. each boss: wakes when you walk in, phases at 66% and 33%, attacks, enrages, drops its egg
 	var egg_items: Array = []
+	for h in [P, C]:      # (a kin's own attacks and abilities would move the scripted hp thresholds; its species is random)
+		for k in [h.kin, h.kin2]:
+			if k != null:
+				k.dead = true
+				k.visible = false
 	for L in [F, E, H]:
 		for g in L["guards"]: if is_instance_valid(g) and not g.dead: g.dead = true; g.visible = false
 		var b: Boss = L["boss_mob"]
@@ -2904,8 +2909,9 @@ func _boss_check() -> void:
 	var any_rare := false
 	for i in 60:
 		if Data.is_rare(String(m.bot_kin_record()["species"])): any_rare = true
-	ok.call(not any_rare and Data.common_kin().size() == 6 and Data.KIN.keys().filter(func(k): return Data.is_rare(k)).size() >= 2,
-		"rare species (%s) only come from eggs" % str(Data.KIN.keys().filter(func(k): return Data.is_rare(k))))
+	var rares: Array = Data.KIN.keys().filter(func(k): return Data.is_rare(k))
+	ok.call(not any_rare and Data.common_kin().size() + rares.size() == Data.KIN.size() and rares.size() >= 2,
+		"rare species (%s) only come from eggs" % str(rares))
 	m.queue_free()
 	# 10. a bot can work a dial
 	var m2 := Match.new()
