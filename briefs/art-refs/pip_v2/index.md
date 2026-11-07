@@ -76,3 +76,8 @@ The owner's girlfriend doesn't like Lumi holding anything. The star becomes a fl
 Chain: the free-hands sheet, then the wing swap (Nano Banana Pro edit), then the collar fix (edit with a close-up of the original collar as reference).
 
 Next: star-companion variations with this exact fox and pose.
+
+## Companion explorations (Nov 7, 01:52 ET)
+`explorations/lumi_companion_set_1..6.jpg`: orbiting objects, spirit animals, spirit lights, the star with accessories, the star with interactions, and cuter stars. None stood out as a new companion design.
+
+**What the owner liked: the interactions with the plain star.** The star peeks shyly behind her ear (she blushes), sleeps on her shoulder with a bubble while she dozes, cheers with her, and kisses her cheek (set 5). Decision: keep the simple chubby yellow star as her companion. Its personality comes from how it and Lumi react to each other. Use these interactions for idle animations, emotes, the portrait and the splash.
