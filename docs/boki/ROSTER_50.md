@@ -4,11 +4,51 @@ Status: **proposal, for owner review before any art.** Revised after the owner's
 "a bunch of original Boki to play with that have good 3D modelling I can later change": 50 species in
 total, a range of sizes, and some big rideable ones (revised: big Boki get roles, at most about 6 mounts). Today's 9 count toward the 50, so this adds 41.
 
-- Stubs: `content/kin_v2_roster/<id>.json`, one per new species, in the real kin grammar
-  (docs/KIN_GRAMMAR.md). They are **not loaded by the game** (see "Where the stubs live" below).
-- Check: `godot --headless -- --roster-check` (tools/roster_check.gd) parses every stub, checks it against
-  the live abilities, merges and evolution nodes, rejects id or name clashes, and counts sizes.
+- Stubs: `content/kin_v2/<id>.json`, one per new species, in the real kin grammar (docs/KIN_GRAMMAR.md), with home data in
+  `content/kin/<id>.json`. All 50 are **loaded by the game** (see "Where the stubs live" below). A species with no model yet
+  is drawn by the `KinModels` primitives of its `look`; the 21 with `art/kin/<id>/<id>.glb` use their rig.
+- Check: `godot --headless -- --roster-check` (tools/roster_check.gd): 50 species, no name clashes, home data present, 4-6 rideables.
 - Big-Boki roles and riding: docs/boki/RIDING_SPEC.md (specs only, waiting for the owner's OK).
+
+## Name map (creature-design pass, 2026-11-07)
+
+The 29 species that had no 3D model were redesigned in `briefs/BOKI_50_DESIGNS.md` (on ext/agent-briefs). Their stubs now carry the
+new display name, the two main ingredients of the new mix (`animals` holds at most 2) and a description (`flavor`) made of the design's
+hook plus its personality line. Ids, abilities, merge, size, rig, stats and the numeric `personality` weights are unchanged, so every
+table and entry below that says "Name" still refers to the old name; look it up here. Murmurling and Umbrathere keep their names.
+The 21 species with models and the 8 kept designs are untouched; the 13 "v2 upgrades" are model edits for the art session, not stub edits.
+
+| id | Roster name (before) | Display name now | Stub mix (`animals`) |
+|---|---|---|---|
+| `opalisk` | Opalisk | **Bubblisk** | Basilisk lizard + Soap bubble |
+| `kilnbadger` | Kilnbadger | **Anvilbrock** | Honey badger + Blacksmith's anvil |
+| `hoarheron` | Hoarheron | **Skateron** | Grey heron + Ice skates |
+| `sentrikat` | Sentrikat | **Barokat** | Meerkat + Brass barometer |
+| `basaltoad` | Basaltoad | **Rampartoad** | Cane toad + Castle rampart |
+| `orchisloth` | Orchisloth | **Terrasloth** | Three-toed sloth + Glass greenhouse |
+| `caecilith` | Caecilith | **Zippelith** | Caecilian + Giant zipper |
+| `velvorm` | Velvorm | **Pipewurm** | Velvet worm + Piping bag |
+| `gibbelle` | Gibbelle | **Gongibbon** | Gibbon + Bronze temple bell |
+| `casquebill` | Casquebill | **Anchorbill** | Hornbill + Ship's anchor |
+| `nacrolin` | Nacrolin | **Mirrolin** | Pangolin + Disco ball |
+| `moonloris` | Moonloris | **Lanterloris** | Slow loris + Paper lantern |
+| `murmurling` | Murmurling | **Murmurling** | Starling + Pan-pipes |
+| `threadwyrm` | Threadwyrm | **Knotwyrm** | Slow worm + Knotted hemp rope |
+| `tuatrune` | Tuatrune | **Lockatara** | Tuatara + Iron padlock |
+| `squalltross` | Squalltross | **Canvastross** | Albatross + Patched ship sails |
+| `scaldamus` | Scaldamus | **Chuggamus** | Hippopotamus + Steam locomotive |
+| `floenatee` | Floenatee | **Frigatee** | Manatee + Antique icebox |
+| `limpetor` | Limpetor | **Buckleron** | Giant limpet + Riveted iron shield |
+| `umbrathere` | Umbrathere | **Umbrathere** | Giant ground sloth + Ragged black umbrella |
+| `moundvark` | Moundvark | **Spirevark** | Aardvark + Termite clay spire |
+| `goliathite` | Goliathite | **Effigeetle** | Goliath beetle + Marble statue face |
+| `spatewader` | Spatewader | **Barrelmander** | Giant salamander + Wooden rain barrel |
+| `cindowary` | Cindowary | **Bellowary** | Cassowary + Forge bellows |
+| `glaciyak` | Glaciyak | **Prowyak** | Yak + Icebreaker prow |
+| `nimbostrich` | Nimbostrich | **Boltstrich** | Ostrich + Thunderhead and copper coil |
+| `lilybara` | Lilybara | **Soakybara** | Capybara + Hot-spring pool |
+| `duskapi` | Duskapi | **Snuffapi** | Okapi + Brass candelabra |
+| `heatherhorn` | Heatherhorn | **Crofthorn** | Highland cow + Stone cottage garden |
 
 ## Rules this roster follows
 
@@ -678,27 +718,15 @@ dark hyena (Mightyena), boar mount (Rushoar), deer or elk mount (Eikthyrdeer, Sa
 | Orchisloth | Slakoth | three-toed sloth with orchids and moss, tan |
 | Heatherhorn | Miltank, Mozzarina | shaggy ginger highland cow, long horns, heather on the back |
 
-## Where the stubs live, and how main turns them on
+## Where the stubs live
 
-Read from the loader, not guessed:
-- `KinLib` loads `res://content/kin_v2/*.json` (`KinGrammar.load_root("res://content")` reads exactly
-  `abilities_v2/`, `merges_v2/`, `evolution_v2/`, `kin_v2/` under that root, not subfolders or siblings).
-- `Data.load_kin_content` puts every loaded kin into `Data.KIN`; `Data.common_kin()` (everything not
-  rare) feeds wild spawns (`spawn_plan.gd`), the mystery starter egg (`hatch.gd`), rivals, the shelter,
-  the town and the Field Book. So a file in `content/kin_v2/` is live everywhere at once, and the
-  check in main.gd that expects `Data.common_kin().size() == 6` ("rare species only come from eggs") would fail.
+All 41 new stubs are switched on (ext/boki-50-integ): `content/kin_v2/<id>.json` plus home data `content/kin/<id>.json`
+(`size` cm/kg by size class; `rare`/`boss` only for the three boss-egg species). `KinLib` loads them, `Data.KIN` holds all 50, and
+`Data.common_kin()` (everything not boss-egg rare, so 47) feeds wild spawns (`spawn_plan.gd`), the mystery starter egg (`hatch.gd`),
+rivals, the shelter, the town and the Field Book. A species without a model draws as the `KinModels` primitives of its `look`
+(ears, body, tail, feet, aura) in its colours, so it is never missing a mesh. Big-Boki roles and riding stay with docs/boki/RIDING_SPEC.md.
 
-So the stubs live in **`content/kin_v2_roster/`**, which nothing loads. To check them, `--roster-check`
-parses them against the live library. I also copied the live grammar folders plus all 50 kin into a
-scratch root and ran `--grammar-check=<root>` on it: 50 kin, 0 errors, so they would load cleanly.
-
-To switch a species on, main (who owns the reserved files):
-1. `git mv content/kin_v2_roster/<id>.json content/kin_v2/<id>.json`.
-2. Add `content/kin/<id>.json` home data (`size` cm/kg; `rare`/`boss` only for boss eggs).
-3. Decide spawn weighting: today the wild pool is uniform over `common_kin()`; the biomes in this
-   roster need a per-biome pool (or a rare flag for the rare ones) before 41 more go live.
-4. Update the main.gd check that counts 6 common kin, regenerate the wiki (`tools/gen_wiki.py`).
-5. `--roster-check` keeps passing as files move (it counts live + roster = 50).
+Not done here: per-biome spawn pools (the wild pool is uniform over `common_kin()`; the Rarity / where column is data for that later).
 
 ## Credit estimate (Phase 2 art)
 

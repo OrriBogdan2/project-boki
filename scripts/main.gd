@@ -2945,8 +2945,9 @@ func _boss_check() -> void:
 	var any_rare := false
 	for i in 60:
 		if Data.is_rare(String(m.bot_kin_record()["species"])): any_rare = true
-	ok.call(not any_rare and Data.common_kin().size() == 6 and Data.KIN.keys().filter(func(k): return Data.is_rare(k)).size() >= 2,
-		"rare species (%s) only come from eggs" % str(Data.KIN.keys().filter(func(k): return Data.is_rare(k))))
+	var rares: Array = Data.KIN.keys().filter(func(k): return Data.is_rare(k))
+	ok.call(not any_rare and Data.common_kin().size() + rares.size() == Data.KIN.size() and rares.size() >= 2,
+		"rare species (%s) only come from eggs" % str(rares))
 	m.queue_free()
 	# 10. a bot can work a dial
 	var m2 := Match.new()
