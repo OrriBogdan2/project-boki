@@ -61,8 +61,16 @@ func run(main_node: Node) -> void:
 	main.get_tree().quit(0)
 
 ## The movie writer's flags are engine arguments, and the GPU workers (jobq) pass their job arguments after "--",
-## so this runs the same scene again as a child Godot with --write-movie (the child gets --media-child).
+## so this runs the same scene again as a child Godot with --write-movie (the child gets --media-child). The movie
+## is as big as the project's viewport setting, so the child gets that (and a better MJPEG quality) from a
+## temporary override.cfg.
 func _record(res: String) -> void:
+	var wh := res.split("x")
+	var cfg := ProjectSettings.globalize_path("res://override.cfg")
+	var f := FileAccess.open(cfg, FileAccess.WRITE)
+	f.store_string("[display]\n\nwindow/size/viewport_width=%s\nwindow/size/viewport_height=%s\n\n" % [wh[0], wh[1]])
+	f.store_string("[editor]\n\nmovie_writer/mjpeg_quality=0.95\n")
+	f.close()
 	var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-driver", "opengl3",
 		"--audio-driver", "Dummy", "--position", "30000,30000", "--resolution", res, "--fixed-fps", "30",
 		"--write-movie", dir.path_join("clip%d.avi" % clip), "--"]
@@ -70,6 +78,7 @@ func _record(res: String) -> void:
 	args.append("--media-child")
 	var out: Array = []
 	var rc := OS.execute(OS.get_executable_path(), args, out, true)
+	DirAccess.remove_absolute(cfg)
 	for line in (String(out[0]) if out.size() > 0 else "").split("\n"):
 		if line.begins_with("MEDIA_") or line.contains("ERROR"):
 			print(line)
