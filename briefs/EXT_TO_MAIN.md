@@ -2332,3 +2332,11 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 
 ## 2026-11-07 deep (job 20261107-131501-a2): CLAIM Cinder v2 model rebuild
 - CLAIM: Cinder v2 model rebuild (art/wardens/cinder/ to the locked Flame Queen design: no tank, hose, flamethrower or goggles; briefs/art-refs/cinder_v2/). Branch ext/cinder-v2-model.
+
+## 2026-11-07 deep (job 20261107-130004-a4): READY ext/claire-v2-model (7b2165a7c), Claire v2 model rebuild
+- art/wardens/claire/ rebuilt with ART-1 from the locked nivi_v2 turnaround (Meshy edits front/3/4/side/back + run A ultra; 6 tasks, 85 credits, logged in PIPELINE.md). 13.6k tris, one 2048 atlas, shared 17-bone rig unchanged, 49 clips, FX anchors and kit wiring kept. Raw files in ~/meshy/claire_v2.
+- Data: v1's bake/fit/face-touch specs and claire_assemble.py removed (in git history); recipe = v2 record; warden_look drops the tail-tip bloom (the puff is not a tail); rimewright silhouette text updated, wiki regenerated.
+- Checks: warden-model 157/0, warden-glb PASS, warden-clips 0, hero-combo 297/0, hero-vfx OK, rimewright-combo 89/0, clip-live-claire 0, health.py --strict OK.
+- Renders (briefs/art-refs/claire_v2/ingame/): v1 top / v2 bottom in closeup_front_, turnaround_close_, turnaround_game_before_after.jpg and workbench_before_after.jpg; vs_sheet_after.jpg (GPU job 20261107-132623-00008, pc-MRROBOTO; before = 20261106-205337-05470).
+- Fidelity: ✅ frost-white rabbit ears, pink inside, one upright one folded | ✅ small puff tail | ✅ no horns, wings or devil tail | ✅ long white-to-ice braid | ✅ candy-cane bow + belt | ✅ lilac gloves | ✅ blade skates with fur cuffs | ✅ spear scale (sheet ~1.85 rig m vs model 1.895, 2%; in hand, tip clear of the ears) | ✅ youthful adult, not sexualised | ❌ scarf's long ends (DEBT: scarf ribbon-trail VFX on a new neck anchor) | ❌ hair is scan mesh, fringe shards up close, no alpha cards (DEBT) | ❌ close-up eyes read soft/half-lidded (atlas bake; a face-touch pass is the follow-up).
+- Alternative not taken: explorations/old_claire_v2_turnaround.jpg (index.md: nivi_v2 wins).
