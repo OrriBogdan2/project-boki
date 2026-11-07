@@ -281,3 +281,7 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-07 evening (owner): Neve is **"Neve the Snowglide"** again (NOT "Snowglider")
 - Display text only. Supersedes every "Snowglider" above, including the canonical-order entry. hero_title_check must now retire "Snowglider" instead of "Snowglide". Website title too.
+
+## 2026-11-07 evening (owner): parity means QUALITY, not personality
+- "dont do parity with personality - i care quality parity on animations, art, etc - but our art is different and our characters are different."
+- Kits: mechanics parity stands. Animations/art: match the source game's polish (weight, timing, silhouette, loops), but poses, attitude, idles, emotes and looks come from OUR characters (archetype personality text, lore, owner art sheets). Never copy a source hero's pose or personality.
