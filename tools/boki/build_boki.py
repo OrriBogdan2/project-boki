@@ -38,7 +38,8 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "kestrike": ("kestrike", "kestrike", "kestrike_anim"),
          "kindlewren": ("kindlewren", "kindlewren", "kindlewren_anim"),
          "lodestick": ("lodestick", "lodestick", "lodestick_anim"),
-         "marchleaf": ("marchleaf", "marchleaf", "marchleaf_anim")}
+         "marchleaf": ("marchleaf", "marchleaf", "marchleaf_anim"),
+         "mossgrade": ("mossgrade", "mossgrade", "mossgrade_anim")}
 creature = paint = anim = None
 ATLAS_PX = 2048
 GROWN_K = 0.22         # most Boki show one or two grown parts; all of them hide in every tri count
@@ -393,6 +394,7 @@ def main():
     use_species(species)
     boki_rig.HIDE_AT.clear()
     boki_rig.HIDE_AT.update(anim.HIDE_AT)
+    boki_rig.SCALED = set(getattr(anim, "SCALED", ()))
     pieces, body_obj, face_obj, piece_of, _, face_n = build_geometry()
     print("geometry", time.time() - t0)
     arm = boki_rig.armature(anim.BONES, bl)

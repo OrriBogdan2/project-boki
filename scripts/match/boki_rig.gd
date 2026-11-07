@@ -85,6 +85,10 @@ const FRAME := {
 		"ear_tip": Vector3(0.19, 0.61, -0.34), "tail_tip": Vector3(0, 0.29, 0.32), "tip_bone": "tail1", "hip": 0.15,
 		"marks": {"left flank": Vector3(-0.12, 0.24, 0.19), "right flank": Vector3(0.12, 0.24, 0.19),
 			"back": Vector3(0, 0.35, 0.18), "chest": Vector3(0, 0.19, -0.1)}},
+	"mossgrade": {"head": Vector3(0, 0.29, -0.33), "top": 0.43, "carry": Vector3(0, 0.53, 0.05),
+		"ear_tip": Vector3(0.125, 0.42, -0.19), "tail_tip": Vector3(0, 0.22, 0.3), "tip_bone": "hips", "hip": 0.1,
+		"marks": {"left flank": Vector3(-0.205, 0.24, 0.05), "right flank": Vector3(0.205, 0.24, 0.05),
+			"back": Vector3(0, 0.37, 0.22), "chest": Vector3(0, 0.15, -0.22)}},
 }
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
