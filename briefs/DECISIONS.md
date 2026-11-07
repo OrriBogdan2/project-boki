@@ -188,3 +188,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-07 (owner, via coordinator): Claire is renamed **Nivi** ("Nivi the Snowglide")
 - Display name only, like Breaker -> Mossy: the id `rimewright`, file and folder names (`claire_*`, `art/wardens/claire`, `briefs/art-refs/claire_v2/`) stay. Change every player-facing "Claire" and "Frost Siren": hero select, kit and ability text, tooltips, barks, docs, wiki and website. Lore stays "frost spirit" (frost bunny, 18). This supersedes "Claire" everywhere above.
+
+## 2026-11-07 (owner, via coordinator): Tarek is renamed **Kibo** ("Kibo the Stone Seer")
+- Display name only, like Breaker -> Mossy: the id `dolm`, file and folder names (`tarek_*`, `art/wardens/tarek`, `briefs/art-refs/tarek_v2/`) stay. Change every player-facing "Tarek" and "Cliff Runner": hero select, kit and ability text, tooltips, barks, docs, wiki and website. This supersedes "Tarek" everywhere above.
