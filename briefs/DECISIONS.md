@@ -271,3 +271,10 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - Top priority: game feel, and porting all 12 kits and their animations over as faithfully as possible (abilities, cancels, buffering, timings, motion as the source does it). Do NOT invent new mechanics, variants or effects until a kit feels as close to parity as possible; the owner makes changes after parity.
 - Owner design notes already in DECISIONS (names, Cinder fire from hands, keys) still apply; where they force a change, keep the source's timing and feel.
 - Every kit/VFX/animation job: match the source first; put any idea of ours in the final answer as a suggestion, not in the build.
+
+## 2026-11-07 (owner): parity calls on invented kit extras
+- Mossy: CUT the Guard meter and Shield Slam (back to source shield / bash / wall-stun kit).
+- Neve: darts semi-home while skating too (source behaviour).
+- Ours-only riders: keep NONE. Remove Neve's Chill 15% slow, Sable's empowered Shred, Meeko's carrier shield.
+- Defaults under PARITY FIRST (owner may override): cooldowns at source values (1.0x), Tenzo's allies can hop his rocks.
+- Lace's Focus/Deadeye: still open (owner asked for an explanation).
