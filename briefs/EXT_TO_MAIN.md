@@ -2400,3 +2400,5 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 | Rock Hop dash | unchanged kit |
 - Known gaps: eye-stone eyes face the watched target so often away from the camera; locs read smoother than the sheet (scan limit); stone has a few skin-tone streaks on the chest plates from the scan texture.
 - Names: the owner note says player name Kibo, tarek_v2/index.md says renamed Tenzo; names untouched, owner to settle.
+
+- Correction to the READY above: the stone-arm "~1.6x" is a visual estimate from vs_sheet, not a measurement; the scan keeps the sheet's proportions (no arm-grow applied).
