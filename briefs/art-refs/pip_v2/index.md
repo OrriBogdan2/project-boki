@@ -94,3 +94,8 @@ Replaces "Lumi the Little Lantern". Display name only; ids and files stay (`tend
 Noted risk (owner accepted): Disney's Pocahontas has a raccoon companion named Meeko. Different species and look, so likely fine as a name, but check trademarks before any merch (plushies), and expect search results to be crowded. (Not legal advice.)
 
 Lore update: the star lantern is gone. She holds nothing. Her companions are in progress: the lead candidate is a tiny sentient sun and a raincloud (plush style), which she sends out to heal; the companions carry her interactions (peeking shyly, napping on her shoulders, kissing her cheeks, the cloud raining on a grumpy sun).
+
+## Companions LOCKED: magical sun + raincloud (owner, Nov 7, 02:17 ET)
+- **Final:** the original smooth, glossy, softly glowing style (`explorations/lumi_suncloud_moments.jpg`): a bright golden sun with rounded rays and a white raincloud with drops, both small at shoulder height, with cute faces and blush.
+- **Interactions (for animations and emotes):** the sun waves or taps her cheek while the cloud peeks shyly behind her ear; both nap on her shoulders; both kiss her cheeks; the cloud rains on a grumpy sun while she laughs and a rainbow appears.
+- **SAVED FOR LATER: the plush version** (`explorations/lumi_suncloud_moments_plush_swap.jpg`, stitched fabric toys). **Remind the owner** to consider it as a skin, e.g. "Bedtime Meeko" (her childhood toys came alive), or as a possible design change for her.
