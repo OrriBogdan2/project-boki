@@ -1,6 +1,6 @@
-"""ART-1 Cinder v2 (ids stay `ashwick`, art `cinder`), stage B: join the scan's low mesh with the tail and the flames, unwrap, bake the scan's paint, draw the
-molten seams into an emission map, hang the long hair's alpha cards, skin on the shared armature, the FX points, export.
-One 2048 colour atlas: the scan's islands, then a strip for the tail, then flat cells at its right edge. A second 2048 for the emission, a small card atlas.
+"""ART-1 Cinder v2 (ids stay `ashwick`, art `cinder`), stage B: join the scan's low mesh with the horns, the tail and the flames, unwrap, bake the scan's
+paint, draw the molten seams into an emission map, hang the long hair's alpha cards, skin on the shared armature, the FX points, export.
+One 2048 colour atlas: the scan's islands, then a strip for the tail, then the horns' strip under flat cells at its right edge. A second 2048 for the emission, a small card atlas.
 Run: blender -b --factory-startup --python tools/art1/cinder_finish.py -- <source.blend> <rig.json> <out.glb>"""
 import sys, os, json, math
 import bpy, bmesh
@@ -23,23 +23,39 @@ CARDS = 512
 UNIQ_W = 0.90                        # the scan's islands' share of the atlas width
 TAIL_U = (0.905, 0.972)              # the tail's strip, then the flat cells
 CELL = {K.OBSIDIAN: "#1b1520"}
+HORN_UV = (TAIL_U[1] + 0.004, 0.0, 0.999, 0.47)   # the horns' strip: the lower half of the cells' column
 SLOTS = ["skin", "hair", "metal"]
 FLAMES = ["flame-jet"]
-MATS = [s + "-cinder" for s in SLOTS] + list(CELL) + FLAMES + ["card-cinder"]
+MATS = [s + "-cinder" for s in SLOTS] + list(CELL) + [K.HORN_M] + FLAMES + ["card-cinder"]
 HEEL_J = (0.0, -0.2, -1.0)           # the jets' axis: down and a little back
 EMBER = (0.5, 0.95)                  # a hair card's run from root to tip: the ember starts, it's full
 SKIN_C, SKIN_DK = "#8d8799", "#4d4656"    # the sheet's scaled grey-violet
 OBS_LO, OBS_HI = "#100c15", "#584a6a"     # living obsidian, deep to its sheen
 HAIR_LO, HAIR_HI = "#0e0b12", "#2e2733"
 SEAM_SHARE = 0.08                   # of the body's texels: restrained, the seams draw lines and no more
-HORN = 0.6                           # her horns against her skin
+HORN = 0.6                           # the scan's horn stubs against her skin (under the built horns)
+TAIL_CRACKS = 11                     # molten cracks down the back of her tail (the turnaround's side view), each with maybe a branch
 PLUM = 0.33                          # the paint's saturation above which it's armour, not skin
 rig = json.load(open(RIG))
 bpy.ops.wm.open_mainfile(filepath=SRC)
 sc = bpy.context.scene
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
 META = json.loads(sc["cinder"])
+CROWN = float(rig["land"]["crown"])
 
+
+def tuck_horns():
+    """The scan's horns are short wedges (cat ears from the front): pressed down to the crown, under the built horns' roots."""
+    n_ = 0
+    for v_ in low.data.vertices:
+        x_, y_, z_ = v_.co
+        if z_ > CROWN + 0.003 and abs(x_) > 0.055 and -0.1 < y_ < -0.02:
+            v_.co.z = CROWN + (z_ - CROWN) * 0.25
+            n_ += 1
+    print("scan horns tucked", n_)
+
+
+tuck_horns()
 gn = {g.index: g.name for g in low.vertex_groups}
 lo_co = np.array([v.co[:] for v in low.data.vertices])
 lo_w = [{gn[g.group]: g.weight for g in v.groups if g.weight > 0.01} for v in low.data.vertices]
@@ -92,11 +108,9 @@ K.weight_tail(pl, sp)
 hx = {sd: K.J("shin." + sd)[0] for sd in "RL"}
 HEELS = [(np.array((hx["R"] + 0.03, -0.075, 0.035)), norm(np.array(HEEL_J))), (np.array((hx["L"] - 0.03, -0.075, 0.035)), norm(np.array(HEEL_J)))]
 jets = K.jet_flames(HEELS)
+horns = K.horns(HORN_UV)
 
-
-
-
-pieces = [pl] + sp + jets
+pieces = [pl] + sp + jets + horns
 verts, faces, fsrc, fraw, vw, rooms = [], [], [], [], [], []
 for co, d in zip(lo_co, lo_w):
     verts.append(tuple(co))
@@ -350,7 +364,8 @@ def repaint(col):
 
 
 def paint_tail(col):
-    """The tail's strip: overlapping grey-violet scales, the back darker than the belly (no cracks: the sheet keeps her fire on the armour)."""
+    """The tail's strip: overlapping grey-violet scales, the back darker than the belly, and a sparse web of molten cracks down its back
+    (the turnaround's side view and the face_tail ref), fading out before the flame tip."""
     x0, x1 = int(TAIL_U[0] * ATLAS), int(TAIL_U[1] * ATLAS)
     h, w = ATLAS, x1 - x0
     v, u = np.mgrid[0:h, 0:w] / np.array([h, w])[:, None, None]
@@ -369,7 +384,48 @@ def paint_tail(col):
     back = hexc(K.TAIL_C)[None, None] * (1 - v[..., None] * 0.35)
     belly = hexc("#5e5666")[None, None] * (1 - smooth(0.3, 0.85, v)[..., None] * 0.65)
     c_ = (back * (1 - smooth(0.45, 0.85, bel)[..., None]) + belly * smooth(0.45, 0.85, bel)[..., None]) * sc_[..., None]
-    col[0:h, x0:x1] = c_
+    dist = tail_cracks(((u - d_u + 0.5) % 1.0 - 0.5) * math.tau * K.TAIL_R, v * 1.6)
+    glow = smooth(0.009, 0.003, dist) * (1.0 - smooth(0.72, 0.9, v))
+    heat = smooth(0.007, 0.0015, dist)
+    hot = ramp_hot(heat * 0.92)
+    col[0:h, x0:x1] = c_ * (1 - glow[..., None]) + hot * glow[..., None]
+    EMIT[0:h, x0:x1] = hot * (glow * (0.45 + 0.55 * heat))[..., None]
+
+
+def tail_cracks(x_, y_):
+    """Per texel of the tail's strip (x_ round it from the back ridge, y_ down it, m at the root): the distance to the nearest crack.
+    Each crack wanders down the tail from a seed on its back; some fork once."""
+    rng = np.random.default_rng(11)
+
+    def walk(at, head, steps, step):
+        pts = [np.array(at, float)]
+        for _ in range(steps):
+            head += rng.normal(0, 0.45)
+            pts.append(pts[-1] + step * np.array((math.sin(head), math.cos(head))))
+        return pts
+    walks = []
+    for _ in range(TAIL_CRACKS):
+        p_ = walk((rng.uniform(-0.085, 0.085), rng.uniform(0.04, 0.7)), rng.normal(0, 0.4), int(rng.integers(3, 7)), 0.035)
+        walks.append(p_)
+        if rng.random() < 0.6:
+            walks.append(walk(p_[int(rng.integers(1, len(p_) - 1))], rng.choice((-1.1, 1.1)), 2, 0.025))
+    dist = np.full(x_.shape, 1.0)
+    for p_ in walks:
+        for a_, b_ in zip(p_[:-1], p_[1:]):
+            ab = b_ - a_
+            t_ = np.clip(((x_ - a_[0]) * ab[0] + (y_ - a_[1]) * ab[1]) / max(float(ab @ ab), 1e-9), 0, 1)
+            dist = np.minimum(dist, np.hypot(x_ - a_[0] - ab[0] * t_, y_ - a_[1] - ab[1] * t_))
+    return dist
+
+
+def paint_horns(col):
+    """The horns' strip: grey-violet stone at the root darkening to the tip, grooved by growth rings (u round, v root to tip)."""
+    x0, x1, y1 = int(HORN_UV[0] * ATLAS), int(HORN_UV[2] * ATLAS), int(HORN_UV[3] * ATLAS)
+    v, u = np.mgrid[0:y1, 0:x1 - x0] / np.array([y1, x1 - x0])[:, None, None]
+    base = hexc(K.HORN_C)[None, None] * (1 - v[..., None] * 0.7) + hexc(K.HORN_TIP)[None, None] * v[..., None] * 0.7
+    ring = 0.5 + 0.5 * np.cos(v * math.tau * 15 + 1.2 * np.sin(u * math.tau))
+    groove = smooth(0.75, 0.98, ring) * (1 - smooth(0.8, 1.0, v))
+    col[0:y1, x0:x1] = base * (1.0 + 0.12 * np.cos(u * math.tau) - 0.4 * groove)[..., None]
 
 
 def norm_rows(m_):
@@ -430,6 +486,7 @@ for nm in cells:
     x0 = int((TAIL_U[1] + 0.004) * ATLAS)
     y0 = int((cells[nm][1] - 0.5 / len(CELL)) * ATLAS) + 2
     COL[y0:y0 + ATLAS // len(CELL) - 4, x0:] = hexc(CELL[nm])
+paint_horns(COL)
 luv[flame_l] = raw_l
 uv.data.foreach_set("uv", luv.ravel())
 me.update()
@@ -650,9 +707,8 @@ def skin(o_, weights):
 skin(ob, vw)
 
 # ---- FX points. The nozzle is her casting hand now: the kit's Gun/Muzzle follows hand.R
-crown = float(rig["land"]["crown"])
 OFF = np.array((-K.MUZZLE_OFF, 0.0, 0.0))
-A_ = {"anchor_head_top": ("head", (0, 0, crown)), "anchor_crown": ("head", (0, -0.03, crown + 0.07)), "anchor_chest": ("hips", (0, 0.11, K.SHOULDER_Z - 0.13)),
+A_ = {"anchor_head_top": ("head", (0, 0, CROWN)), "anchor_crown": ("head", (0, -0.03, CROWN + 0.07)), "anchor_chest": ("hips", (0, 0.11, K.SHOULDER_Z - 0.13)),
       "weapon_muzzle": ("hand.R", PALM + OFF), "anchor_blade_root": ("hand.R", PALM), "anchor_gun_mid": ("hand.R", PALM * 0.5 + hand * 0.5),
       "anchor_jet_0": ("jet.0", HEELS[0][0]), "anchor_jet_1": ("jet.1", HEELS[1][0]), "anchor_tank": ("hips", (0, -0.12, K.SHOULDER_Z - 0.2)),
       "anchor_tail_tip": ("spring_scarftail_tail_%d" % (K.TAIL_N - 2), pl.path[-1])}

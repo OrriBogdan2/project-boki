@@ -1,4 +1,4 @@
-"""ART-1 Cinder v2: what the scan can't give, as data. The spined lizard tail, the jets at her heels and the licks of fire at her hair's ends.
+"""ART-1 Cinder v2: what the scan can't give, as data. The curved lizard horns, the spined tail, the jets at her heels and the licks of fire at her hair's ends.
 The body, face, shards and heels are the scan (cinder_source.py). Blender frame: Z up, she faces +Y, her right hand is +X.
 Flame pieces are strips with raw UV (u across, v root to tip) and their seed in the vertex colour: shaders/hero_flame.gdshader."""
 import json, os
@@ -34,6 +34,13 @@ TAIL_R = 0.066                                         # m, at its root
 TAIL_PTS = [(0, -.085, HIPS_Z + .07), (0, -.17, HIPS_Z - .06), (.035, -.265, HIPS_Z - .27), (.12, -.345, HIPS_Z - .50), (.27, -.39, HIPS_Z - .665), (.45, -.35, HIPS_Z - .71),
             (.59, -.21, HIPS_Z - .715), (.65, -.03, HIPS_Z - .675), (.625, .10, HIPS_Z - .555)]
 DORSAL = np.array((0.0, -0.8, 0.6))
+HORN_M = "metal-horn"                                  # (its own painted strip: HORN_UV in cinder_finish)
+HORN_C, HORN_TIP = "#4a4452", "#1a1520"                # grey-violet stone at the root, near black at the tip
+# Her right horn, off the head joint: out of the skull's side-top, up and out, then back (the sheet's curve); the left is its mirror
+HORN_PTS = [(.078, -.035, .238), (.098, -.045, .280), (.116, -.065, .323), (.126, -.090, .360), (.124, -.115, .386)]
+HORN_R = 0.027                                         # m, at its root
+HORN_RINGS = 16
+HORN_SEC = [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 8, endpoint=False)]
 SEC = [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 10, endpoint=False)]
 
 
@@ -47,6 +54,18 @@ def tail(uv_rect):
     p.t = np.concatenate([np.repeat(k, len(SEC)), np.ones(len(p.v) - len(k) * len(SEC))])
     p.path, p.wd = path, wd
     return p
+
+
+def horns(uv_rect):
+    """The curved lizard horns: tapering tubes rigid on the head, every other ring a slight swell (growth rings). UV: u round, v root to tip."""
+    k = np.linspace(0, 1, HORN_RINGS)
+    swell = np.where((np.arange(HORN_RINGS) % 2 == 1) & (k > 0.1) & (k < 0.9), 1.06, 0.97)
+    wd = HORN_R * ((1 - k) ** 0.85 + 0.08) * swell
+    out = []
+    for sd, m in (("R", (1, 1, 1)), ("L", (-1, 1, 1))):
+        path = catmull([(x * m[0], y, NECK_Z + z) for x, y, z in HORN_PTS], HORN_RINGS)
+        out.append(sweep("horn." + sd, HORN_M, path, HORN_SEC, wd, side_hint=np.array([0, 1.0, 0]), uv_rect=uv_rect, depth=wd * 0.9).rigid("head"))
+    return out
 
 
 def spines(tl, count=24):
