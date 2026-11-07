@@ -52,3 +52,6 @@ New lore (owner direction: she is a Boki that became sentient through her lanter
   - Honeybee, Lilac Dream, Ember Night (`lumi_chromas_2_*`).
   - The capelet runs: lavender, baby blue, cream with a heart-plus, midnight (`lumi_capelet_run1/2`).
 - Medic signal: the heart clasp (the rainbow heart in the default; the heart-plus in some chromas).
+
+## Chroma sources (Nov 7, 01:04 ET)
+The full original sheets are kept in `chromas_source/` (q95). Every chroma needs an **AI isolation edit** before use, because plain crops catch the neighbouring figures. See `chromas_source/README.md` for the sheet map and the prompt template. `lumi_v2_main_design.jpg` is a rough crop, to be replaced by the AI-isolated Cotton Candy.
