@@ -38,4 +38,6 @@ Chain (Nano Banana Pro, 16:9, 4K, no seed exposed):
 
 Edit 2 (gauntlets and boots) failed.
 
-Known limit: the gauntlets are still clean plated bracers, not the shard forearms from the master sheet. Use the master sheet for those.
+Edit 3 (retry), forearms: the plated bracers became obsidian shard bracers with molten cracks. Refs: the turnaround + a forearm-only crop from the master sheet. It passed on the second try.
+
+The turnaround is now complete and matches the master sheet's outfit. The hair is slightly shorter than on the sheet, and the flamethrower is not shown; take both from the master sheet.
