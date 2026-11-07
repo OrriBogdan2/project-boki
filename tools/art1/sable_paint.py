@@ -13,10 +13,11 @@ LEATHER = [hexc("#2a1d30"), hexc("#3b2a43"), hexc("#533c5e"), hexc("#73587f"), h
 LINING = [hexc("#2d1147"), hexc("#46196e"), hexc("#5f2595"), hexc("#7a35b5"), hexc("#9a55d2")]
 HAIR = [hexc("#8f8a9c"), hexc("#b6b2c2"), hexc("#d5d2dd"), hexc("#ecebf1"), hexc("#ffffff")]
 SKIN = [hexc("#5a5568"), hexc("#7d7889"), hexc("#a09bab"), hexc("#bcb8c6"), hexc("#d6d3de")]
-SILVER = [hexc("#4c4a58"), hexc("#7b7988"), hexc("#a9a8b5"), hexc("#d3d3dc"), hexc("#fbfbff")]
+SILVER = [hexc("#454352"), hexc("#6b6979"), hexc("#8f8e9c"), hexc("#b5b4c2"), hexc("#dcdce6")]
 WOOD = [hexc("#3f151d"), hexc("#5f2029"), hexc("#7c2d37"), hexc("#9a4049"), hexc("#b8606a")]
 FUZZ = [hexc("#5d5170"), hexc("#756888"), hexc("#8d7f9f"), hexc("#a496b4"), hexc("#bdb0c9")]
 STEM = hexc("#4a3a66")
+SKIN_LIFT = np.array([0.92, 0.98, 1.05])
 TRIM = hexc("#7c34c4")
 
 
@@ -35,7 +36,7 @@ def scan_grade(col, p, ao):
     sat = (col.max(1) - col.min(1)) / np.maximum(col.max(1), 0.01)
     purple = smooth(0.25, 0.5, sat) * smooth(0.02, 0.08, col[:, 2] - col[:, 1]) * (p[:, 2] < K.NECK_Z)
     c = col.copy()
-    c = mix(c, np.clip((col - lum) * 1.45 + lum, 0, 1) * np.array([1.04, 0.95, 1.2]), purple)
+    c = mix(c, np.clip((col - lum) * 1.25 + lum, 0, 1) * np.array([1.0, 0.95, 1.1]), purple)
     # the coat a step up and toward plum, so its purple reads in the toon light
     body = smooth(K.NECK_Z - 0.02, K.NECK_Z - 0.06, p[:, 2]) * smooth(0.5, 0.36, lum[:, 0])
     c = mix(c, c * np.array([1.26, 1.14, 1.32]) + np.array([0.032, 0.014, 0.042]), body)
@@ -187,11 +188,10 @@ def face_fix(c, p):
     f = smooth(0.0, 0.03, p[:, 1])
     ax = np.abs(p[:, 0] - K.FACE_X)
     skin_ = np.median(c[(ax > 0.03) & (ax < 0.05) & (np.abs(p[:, 2] - 1.53) < 0.01) & (p[:, 1] > 0.03)], axis=0)
-    # the scan's skin up to the sheet's grey-lilac: lighter and cooler
+    # the scan's skin toward the sheet's grey-lilac: cooler, and a step down so it stays apart from the hair in the toon light
     lum, sat = c.mean(1), (c.max(1) - c.min(1)) / np.maximum(c.max(1), 0.01)
-    lift = np.array([1.12, 1.17, 1.2])
-    c = mix(c, np.clip(c * lift, 0, 1), smooth(0.34, 0.42, lum) * smooth(0.76, 0.68, lum) * smooth(0.32, 0.24, sat))
-    skin_ = skin_ * lift
+    c = mix(c, np.clip(c * SKIN_LIFT, 0, 1), smooth(0.34, 0.42, lum) * smooth(0.76, 0.68, lum) * smooth(0.32, 0.24, sat))
+    skin_ = skin_ * SKIN_LIFT
     # the mouth wiped and redrawn as the sheet's thin smile, the lower lip a soft shade under it
     mz, z_ = K.MOUTH[2] - 0.002, p[:, 2]
     c = mix(c, skin_ * 0.97, smooth(0.05, 0.042, ax) * smooth(0.024, 0.018, np.abs(z_ - mz)) * f)

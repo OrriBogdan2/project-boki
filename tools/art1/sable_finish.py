@@ -594,7 +594,7 @@ paint(lambda n: n.startswith("mouth"), P.mouth_glow)
 paint(lambda n: n.startswith("rune"), P.runes)
 paint(lambda n: n.startswith("crystal") or n == "gemstone", P.crystal)
 paint(lambda n: n.startswith(("keyring", "keyshaft", "keybit", "bell", "swag", "stud", "gemframe", "pommel")), P.silver)
-skin_c = sample_scan([K.EYE + [0.03, 0.0, -0.035]])[0] * 1.03
+skin_c = np.array(OUTC[ys, xs][np.argmin(np.abs(pp - (K.EYE + [0.03, 0.0, -0.035])).sum(1))], dtype=np.float64)    # the graded skin under the eye
 for q, sg in ((lids[0], 1.0), (lids[1], -1.0)):
     def liner(p_, qq=q):
         ca, sa = math.cos(-LID_A), math.sin(-LID_A)
