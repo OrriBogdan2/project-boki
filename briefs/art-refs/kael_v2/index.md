@@ -82,3 +82,12 @@ Known limits:
 To do after Lumi, Nivi and maybe Motley's splash:
 - Lift the dark edges of `kael_v2_splash_final.jpg` so it matches the other splashes' brightness (the earlier local vignette pulled the edges ~50% down, which is too strong next to the roster).
 - Add a red aura coming off Kael (the curse); a local glow or one edit.
+
+## Splash: FINAL v3 (owner, Nov 7, 02:54 ET)
+`kael_v2_splash_final.jpg` replaces the earlier final. Chain, starting from `kael_v2_splash_relit_candidate.jpg`:
+1. Nano Banana Pro edit: the edge enemies relit with warm arena light (`kael_v2_splash_relit_enemies.jpg`). A local edge-lift was tried first and rejected: it washed the near-black silhouettes to blotchy grey.
+2. Edit: the spear gladiator beside Kael removed; Kael slightly larger and sharpened (`kael_v2_splash_step2.jpg`).
+3. Edit: a crimson curse aura (red wisps, embers, a red glow on the sand).
+4. Local fix: the slight magenta drift outside Kael was matched back to step 2's colours (soft mask, so the aura is kept).
+
+Edge brightness now sits in the roster range.
