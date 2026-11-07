@@ -10,6 +10,7 @@ from meshkit import Piece, catmull, norm, smooth, sweep
 
 F = np.float64
 SKIN, THREAD, BOW, BOW_HI, STEEL, STEEL_DK, PIN = "skin-doll", "cloth-thread", "leather-bow", "leather-bow_hi", "metal-needle", "metal-needle_dk", "metal-pin"
+LID = "skin-lid"                  # the eyelids: porcelain in the eye's shadow, so a closed eye reads shut and not blank
 HEX = [(math.cos(t), math.sin(t)) for t in np.linspace(0, math.tau, 6, endpoint=False)]
 SQ = [(math.cos(t), math.sin(t)) for t in (0.8, 2.4, 3.9, 5.5)]
 LENS = [(-1, 0), (-0.4, 0.5), (0.4, 0.5), (1, 0), (0.4, -0.5), (-0.4, -0.5)]
@@ -201,6 +202,31 @@ def bun_pins(c):
         p0, p1 = c - d * ln0, c + d * ln1
         out.append(sweep("pin", PIN, [p0, c, p1], HEX, [0.0009, 0.0045, 0.0052], side_hint=(0, 1, 0), room=ROOM_THIN))
     return out
+
+
+LID_R = (0.017, 0.016, 0.017)     # an eye's lid shell: half-width, depth, half-height (the painted eye is 3 x 1.2 cm)
+
+
+def eyelids(C):
+    """One eye's lid on lid.<side>: a skin shell (rows of an ellipsoid about C, the pivot 13 mm under the face) that rides
+    inside the face open, its dark lash rim a hair proud just over the painted upper lash line; hem_clips turns the bone
+    down 0.92 rad for a blink and the shell comes out over the painted eye (9 mm under its centre to 8 mm over). Both
+    pieces wind outward from C."""
+    C = np.asarray(C, F)
+    phis = np.radians(np.linspace(-58, 58, 7))
+
+    def ring(th):
+        th = math.radians(th)
+        return np.stack([C[0] + LID_R[0] * math.sin(th) * np.sin(phis), C[1] + LID_R[1] * math.sin(th) * np.cos(phis), C[2] + LID_R[2] * math.cos(th) * np.ones_like(phis)], 1)
+
+    def shell(name, mat, rows):
+        v = np.concatenate([ring(t) for t in rows])
+        n = len(phis)
+        f = [[r * n + i, r * n + i + 1, (r + 1) * n + i + 1, (r + 1) * n + i] for r in range(len(rows) - 1) for i in range(n - 1)]
+        pc = Piece(name, mat, v, f, room=0.0)
+        pc.ref = C
+        return pc
+    return [shell("lid", LID, (4, 28, 58)), shell("lash", BOW, (58, 66))]
 
 
 def arrow(at, ax, ay, az):

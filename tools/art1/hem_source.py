@@ -20,7 +20,8 @@ MASK_TRIS = 900                   # the shoulder mask keeps its face
 SOLE = -0.951
 HEEL_Z = 0.015                    # the scan's boots keep a small heel: everything under the toe's sole is cut flat
 ANKLE = 0.1
-HEAD_K = 1.06                     # the head a touch big for the match camera
+HEAD_K = 1.0                      # the sheet's head: chin to crown 0.27 m on the shared rig (pass 2's 1.06 read big)
+EYE_S = (0.034, 0.116, 1.710)     # scan: the right eye's painted centre on the face (checked on a head render)
 HAND_TWIST = -np.pi / 2           # the scan's palm faces forward, the rig's faces her thigh
 HAIR_Z = (1.62, 1.215)            # scan heights: the hair leaves the head, its tip
 ARM_SLOPE = 0.6056                # scan: the forearm's run in x per unit of z
@@ -267,7 +268,14 @@ def fitted(xz):
     return Q[np.argsort(d)[:12]].mean(0).tolist()
 
 
-META = {"tail": tail_pts, "skirt_chain": SKIRT_CHAIN, "fing_a": [fitted(p) for p in FINGER_A], "fing_b": [fitted(p) for p in FINGER_B], "thumb": [fitted(p) for p in THUMB]}
+def fitted3(p):
+    """Where a scan point of the head landed."""
+    d = np.linalg.norm(P0 - np.array(p, float), axis=1)
+    return Q[np.argsort(d)[:12]].mean(0).tolist()
+
+
+META = {"tail": tail_pts, "skirt_chain": SKIRT_CHAIN, "fing_a": [fitted(p) for p in FINGER_A], "fing_b": [fitted(p) for p in FINGER_B], "thumb": [fitted(p) for p in THUMB],
+        "eyes": [fitted3(EYE_S), fitted3((-EYE_S[0], EYE_S[1], EYE_S[2]))]}
 
 for b, w in GROUP.items():
     g = src.vertex_groups.new(name=b)

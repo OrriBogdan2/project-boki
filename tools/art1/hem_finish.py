@@ -22,7 +22,7 @@ WORK = os.path.dirname(os.path.abspath(OUT))
 ATLAS = 2048
 CARDS = 512
 UNIQ_W = 0.94                        # the scan's islands' share of the atlas width; the flat cells sit to its right
-CELL = {H.SKIN: "#ded3d1", H.THREAD: "#7a1230", H.BOW: "#2b2129", H.BOW_HI: "#4a3a48", H.STEEL: "#b4b3bd", H.STEEL_DK: "#5d5b66",
+CELL = {H.SKIN: "#ded3d1", H.LID: "#bfaab8", H.THREAD: "#7a1230", H.BOW: "#2b2129", H.BOW_HI: "#4a3a48", H.STEEL: "#b4b3bd", H.STEEL_DK: "#5d5b66",
         H.PIN: "#cfcdd5", "leather-vane": "#a5835c"}
 HEM_C, SMOKE_C = (0.0, 0.0, 0.62, 1.0), (0.64, 0.0, 1.0, 1.0)    # card cells (u0, v0, u1, v1)
 SLOTS = ["skin", "hair", "cloth", "leather", "metal"]
@@ -34,6 +34,8 @@ HEM_N = 46                           # hanging strips round the skirt
 SLIT = 0.36                          # rad either side of the front: the slit, no fringe
 SKIRT_Z = (HEM_TOP - 0.04, BELT_Z - 0.06)    # z: the scan's skirt, between its hem and the belt
 PORCELAIN = "#dbd0dc"                # the sheet's lilac porcelain skin
+JOINT_CREAM = "#e0c69a"               # the doll joints' cream
+SMOKE_ROOT, SMOKE_TIP = "#191419", "#6a5a78"    # the hair's smoke ends: dark root to grey-violet
 SKIRT_LO, SKIRT_HI, SKIRT_RED = "#21111c", "#5c3352", "#6e1733"    # the skirt: plum folds dark to light, its red hem fade
 rig = json.load(open(RIG))
 bpy.ops.wm.open_mainfile(filepath=SRC)
@@ -51,6 +53,11 @@ BUN = top.mean(0)
 print("bun", BUN.round(3))
 
 lo_bvh = BVHTree.FromPolygons([tuple(v) for v in lo_co], [list(p.vertices) for p in low.data.polygons])
+EYE_C = {}                        # each lid's pivot: 13 mm under the face at the painted eye (hem_source META eyes)
+for sd, e in zip("RL", META["eyes"]):
+    hit = lo_bvh.ray_cast(Vector((e[0], 0.5, e[2])), Vector((0, -1, 0)), 0.8)
+    EYE_C[sd] = np.array((e[0], (hit[0].y if hit[0] is not None else e[1]) - H.LID_R[1] + 0.003, e[2] - 0.002))
+print("eyes", {k: v.round(4).tolist() for k, v in EYE_C.items()})
 
 
 def belt_at(x):
@@ -62,6 +69,7 @@ def belt_at(x):
 
 
 pieces = H.fist(J) + H.rigid(H.spools(belt_at, SPOOL_X), "hips") + H.rigid(H.back_needle(1) + H.back_needle(-1) + H.lash() + H.strings(), "hips") + H.rigid(H.bun_pins(BUN), "head") + H.rigid(H.shoulder_mask(J), "upper_arm.L")
+pieces += H.rigid(H.eyelids(EYE_C["R"]), "lid.R") + H.rigid(H.eyelids(EYE_C["L"]), "lid.L")
 verts, faces, fsrc, vw, rooms = [], [], [], [], []
 for co, d in zip(lo_co, lo_w):
     verts.append(tuple(co))
@@ -197,9 +205,12 @@ def blur_in(v, m_, r):
 
 
 def class_bake():
-    """Per texel: R its part (1 skin to repaint, 0.75 skirt to dye, 0.5 the rest, 0 no island), G its height / 2."""
+    """Per texel: R its part (1 skin to repaint, 0.9 the skin under the shoulder mask: plain porcelain, 0.75 skirt to dye,
+    0.5 the rest, 0 no island), G its height / 2."""
     skirt = (slot == "leather") & ~legs & (fc[:, 2] > SKIRT_Z[0]) & (fc[:, 2] < SKIRT_Z[1])
     cls = np.where((slot == "skin") & ~on_head, 1.0, np.where(skirt, 0.75, 0.5))
+    under_mask = (slot == "skin") & (dom == "upper_arm.L") & (np.linalg.norm(fc - (J["upper_arm.L"] + H.MASK_OUT), axis=1) < 0.1)
+    cls[under_mask] = 0.9                                            # the scan's own painted mask: splotches
     cls[N_LOW:] = 0.5
     lv = np.zeros(len(me.loops), int)
     me.loops.foreach_get("vertex_index", lv)
@@ -249,16 +260,18 @@ def repaint(col):
     lum = col @ np.array((0.3, 0.59, 0.11), np.float32)
     mx, mn = col.max(-1), col.min(-1)
     sat = (mx - mn) / np.maximum(mx, 1e-4)
-    sk = np.abs(part - 1.0) < 0.1
+    sk = part > 0.85
+    plain = (np.abs(part - 0.9) < 0.04)[..., None]
     base = blur_in(lum, sk, 12)
     ref = float(np.median(lum[sk]))
     shade = np.clip(base / ref, 0.74, 1.05) * 0.88 + np.clip(lum / ref, 0.6, 1.2) * 0.12
     red = smooth(0.6, 0.8, sat) * (col[..., 0] > col[..., 1] + 0.2) * (lum < 0.4)    # dark crimson only, not the scan's pink
     crack = smooth(0.05, 0.14, base - lum)
     warm = smooth(0.04, 0.1, col[..., 1] - col[..., 2]) * smooth(0.1, 0.2, sat)
-    keep = np.clip(np.maximum(np.maximum(red, crack), warm), 0, 1)[..., None]
+    keep = np.clip(np.maximum(np.maximum(red, crack), warm), 0, 1)[..., None] * (1 - plain)
     skin_c = hexc(PORCELAIN)[None, None] * shade[..., None]
-    col[sk] = (skin_c * (1 - keep) + col * keep)[sk]
+    kept = col * (1 - 0.35 * crack[..., None]) * (1 - 0.45 * warm[..., None]) + hexc(JOINT_CREAM)[None, None] * 0.45 * warm[..., None]    # deeper cracks, cream ball joints
+    col[sk] = (skin_c * (1 - keep) + kept * keep)[sk]
     sd = np.abs(part - 0.75) < 0.1
     t_ = np.clip(lum / 0.26, 0, 1.4)[..., None]
     plum = hexc(SKIRT_LO)[None, None] * (1 - t_) + hexc(SKIRT_HI)[None, None] * t_
@@ -324,8 +337,9 @@ def card_atlas():
     d = np.abs(cx - wob) / (0.46 * (1.0 - down * 0.62))
     wisp = np.clip(1.0 - d, 0, 1) ** 0.8 * (1.0 - smooth(0.3, 1.0, down))
     wisp *= 0.72 + 0.28 * np.sin(cx * 21.0 + down * 12.0)
-    img[m, :3] = hexc("#191419")
-    img[m, 3] = np.clip(wisp, 0, 1)[m] * 0.92
+    t_ = smooth(0.05, 0.85, down)[..., None]
+    img[m, :3] = (hexc(SMOKE_ROOT)[None, None] * (1 - t_) + hexc(SMOKE_TIP)[None, None] * t_)[m]    # dense dark root to pale lilac
+    img[m, 3] = np.clip(wisp, 0, 1)[m] * 0.98
     return img
 
 
@@ -380,7 +394,7 @@ def smoke_cards():
     tail = np.array(META["tail"])
     tip, d0 = tail[-1], (tail[-1] - tail[-3]) / np.linalg.norm(tail[-1] - tail[-3])
     rng = np.random.default_rng(2)
-    for k_, (dx, ln, wd, drift) in enumerate(((-0.035, 0.15, 0.05, -0.04), (0.035, 0.16, 0.05, 0.04), (0.0, 0.2, 0.055, 0.0), (-0.06, 0.11, 0.04, -0.06), (0.06, 0.12, 0.04, 0.06), (0.0, 0.14, 0.05, 0.03))):
+    for k_, (dx, ln, wd, drift) in enumerate(((-0.04, 0.2, 0.07, -0.05), (0.04, 0.21, 0.07, 0.05), (0.0, 0.26, 0.075, 0.0), (-0.07, 0.15, 0.055, -0.08), (0.07, 0.16, 0.055, 0.08), (0.0, 0.18, 0.07, 0.04))):
         at = tip + np.array((dx, -0.008 * (k_ % 3), 0.04))
         side = np.array((1.0, 0.0, 0.0))
         pts = [at + d0 * ln * q + side * drift * q * q + np.array((0, -0.03 * q, 0)) for q in (0.0, 0.4, 0.75, 1.0)]
@@ -513,7 +527,7 @@ def spring(prefix, pts, parent):
 for sd, sg in (("R", 1.0), ("L", -1.0)):
     hx = J["shin." + sd][0]
     add_bone("foot." + sd, (hx, 0, 0.082), (hx, 0.17, 0.03), "shin." + sd, (0, 0, 1))
-    EYE = np.array((sg * 0.036, J["head"][1] + 0.085, J["head"][2] + 0.122))
+    EYE = EYE_C[sd]
     add_bone("lid." + sd, EYE, EYE + (sg * 0.03, 0, 0), "head", (0, 0, 1))
     add_bone("brow." + sd, EYE + (0, 0.005, 0.03), EYE + (0, 0.035, 0.03), "head")
 for nm, k in (("fing_a", "fing_a"), ("fing_b", "fing_b"), ("thumb", "thumb")):
