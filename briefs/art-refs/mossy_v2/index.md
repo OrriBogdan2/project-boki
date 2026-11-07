@@ -1,0 +1,18 @@
+# Mossy, the Barnacle Knight (formerly Breaker)
+
+The older Breaker files at the art-refs root are still his splash, portrait and turnaround: `breaker_splash.png`, `breaker_portrait.png` and `breaker_turnaround.png`. `breaker_FINAL_sheet.png` is superseded: it is printed with his old name and title.
+
+## Master sheet (owner, Nov 7, 15:10 ET)
+`mossy_v2_master_sheet.jpg`:
+- A large hero pose with the figurehead hatch shield and the spiked capstan hammer chained to his wrist.
+- Masts with torn sails and the anglerfish lure.
+- A brass compass on his chest, with cyan cracks glowing between the hull planks.
+- Small front and back views.
+- Four porthole expressions: happy, angry, determined and sad.
+- An anglerfish close-up.
+
+Chain (Nano Banana Pro, 3:4, 4K, no seed exposed):
+1. A new generation. Refs: a crop of the old sheet's front figure without its title, and the porthole faces with their labels cropped off.
+2. Edit: the plain mallet became the capstan hammer. Ref: a hammer crop from the old sheet.
+3. Edit: added the compass and more glowing cracks. Ref: a chest crop from the old sheet.
+4. Local fix: the anglerfish close-up's dark square was replaced with the sheet's grey background, blended in seamlessly, keeping the cyan glow.
