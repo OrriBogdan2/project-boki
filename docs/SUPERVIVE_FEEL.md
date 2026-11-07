@@ -10,11 +10,12 @@ The owner read these straight from the installed game (config files, curve table
 |---|---|---|---|
 | Gravity | -1470 uu/s² | -14.7 m/s² | **Yes**: `Hunter.H_GRAV`, one gravity up and down (match and home) |
 | Jump velocity | 750 uu/s | 7.5 m/s (~1.9 m jump, apex ~0.51 s) | Partly: 6.8 m/s (1.5 m, 0.9 s in the air), so jump + mantle stays under our 4-terrace walls (the wall kick tops those) |
-| Air control | 0.015 | almost no steering mid-jump | Translated: keys steer at 0.3x ground accel (`physics.air_control`), a reverse takes ~0.5 s; ledge rises still steer crisply |
+| Air control | 0.015 | almost no steering mid-jump | **Yes**: keys steer at 0.015x ground accel (`physics.air_control`), a jump keeps its run-up; ledge rises still steer crisply |
 | Falling lateral friction | 0.375 | | **Yes**: `physics.air_friction`, a jump keeps its run-up |
 | Run speed per hunter | 445-485 uu/s | 4.45-4.85 m/s | **Yes**: `content/rules/hunter_move.json` |
 | Acceleration per hunter | 4700-5400 uu/s² | 47-54 m/s² | **Yes**: `HunterMove` (Oath, Kingpin 47; Tetra 50; others 54) |
-| Braking (no input) | 2220 uu/s² | 22.2 m/s² | Not yet |
+| Braking (no input) | 2220 uu/s², GroundFriction 1.0 (x2 braking factor) | 22.2 m/s², 2/s | **Yes**: `physics.brake`, `physics.ground_friction`: a let-go from a run stops in ~0.17 s, ~0.3 m. Speed over a run with no keys (a kit step, a knock) sheds at `Hunter.GROUND_SHED` first (kit distances) |
+| Dash end | no hard stop (dash curves not decoded) | | **Yes**: a dash hands over at run speed (`physics.dash_exit_run`), then the walk, brake or air carry |
 | Walkable floor | 50° | | n/a (heightmap) |
 | Walk off ledges | off | you need a jump or dash to leave a platform | No, on purpose: the owner wants walking off ledges allowed everywhere |
 | Mantle | pulls up ledges within 150 uu; Z speed cap 250 uu/s; mini-mantle launch 0.75 s at 0.6x forward speed, min 350 uu/s | 1.5 m, 2.5 m/s, min 3.5 m/s | Reach 1.5 m; topping out sends you onto the ledge at max(0.6x run speed, 3.5 m/s) (`physics.mantle_launch_*`) |
