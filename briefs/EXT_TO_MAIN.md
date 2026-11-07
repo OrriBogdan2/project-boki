@@ -2535,3 +2535,4 @@ READY ext/text-relic-renames-rebased e9f0f9847 (supersedes 6b2895ed9; owner orde
 READY ext/parity-dash-scale 2f24ae36b (KIT_PARITY item 11: air dash double scale fixed for Cinder+Grimble; Cinder ram 3.4m/.33s, poof 6.8m/.28s; combo checks assert source numbers)
 READY ext/parity-move-feel 64e6c681f (KIT_PARITY 2-4 all heroes: brake 22.2 + friction 2, air control 0.015, dash exits at run speed; one table hunter_move.json)
 READY ext/parity-lace 4aa011a49 (Lace/archer KIT_PARITY 6+7: wall pin 4.94x the shot as in source, RMB dead zone 0.5->0.15 s; archer-combo-check 155 PASS, health --strict, gen_wiki --check ok)
+READY ext/parity-dashlmb 4e788af65 (KIT_PARITY item 9: dash->LMB fires mid-dash on Hem, Ryzz, Cinder, Tarek air per item 51; Zedran/Bjorn stay buffer/cancel as sourced; --dash-flow-check asserts the rows)
