@@ -36,4 +36,4 @@ Base: the original `briefs/art-refs/grimble_turnaround.png`. The old "Dredge" sh
 `grimble_v2_turnaround.jpg` and `grimble_v2_portrait.jpg` now have the original brass three-lens loupe (a big green lens over the eye, two small lenses fanning up towards the temple, gold chain). The single-monocle versions are in explorations/.
 
 ## Turnaround: FINAL (Nov 6, 20:18 ET)
-`grimble_v2_turnaround.jpg`: the front view was replaced by a single-figure generation (`grimble_v2_front.jpg`). The two small loupe lenses were composited locally from another run onto his forehead, so his smug squinting eye is visible. The front figure is pasted into the sheet, scaled to the old height and background-matched. Side and back views are unchanged.
+`grimble_v2_turnaround.jpg`: the front view was replaced by a single-figure generation (`grimble_v2_front.jpg`). The loupe lenses were added by a single-figure edit (owner-approved, 20:21 ET), so his smug squinting eye is visible. The front figure is pasted into the sheet, scaled to the old height and background-matched. Side and back views are unchanged.
