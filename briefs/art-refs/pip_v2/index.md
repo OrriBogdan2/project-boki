@@ -102,3 +102,19 @@ Lore update: the star lantern is gone. She holds nothing. Her companions are in 
 
 ## MAIN DESIGN LOCKED: Meeko (Nov 7, 02:21 ET)
 `meeko_v2_main_design.jpg`: the girlfriend's favourite pose with the magical sun (her left, waving) and the shy raincloud (her right, a drop falling), the stardust trail, the glowing star wings and the white capelet with the rainbow heart. This is the base for the master sheet, turnaround, portrait and splash. (`lumi_v2_main_design.jpg` is superseded.)
+
+## Turnaround: FINAL (Nov 7, 02:24 ET)
+`meeko_v2_turnaround.jpg`: front, 3/4, side and back, plus the sun and cloud at true size on the right. Nano Banana Pro, 16:9, 4K, a fresh generation (ref: the main design). The first attempt returned the input unchanged; the fix was "create a brand-new image, using image 1 only as a reference" plus a plain background with no glow.
+
+Checks:
+- The wing attachment and the full tail shape are visible.
+- The rainbow heart clasp, the satchel and the goggles are consistent.
+
+Known limits:
+- The back view's goggle strap reads as a collar.
+- The tail tip is cream in some views and pink in others; the main design is cream-tipped.
+
+## Splash: "Into the Dark" (Nov 7, 02:24 ET)
+`meeko_v2_splash.jpg`: a dark cave ringed by glowing eyes. Meeko, scared but brave, faces a wounded knight; the sun blazes and drives back the dark while the shy cloud rains glowing healing drops on him, with a rainbow between them. Nano Banana Pro, 16:9, 4K, a fresh generation.
+
+Known limits: her stance reads slightly more startled than brave; the knight's face is realistic next to her cartoon style.
