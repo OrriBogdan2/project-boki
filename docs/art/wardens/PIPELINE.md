@@ -465,6 +465,17 @@ Breaker total: 6 tasks, 116 credits (the body's two attempts used).
 | Breaker C | 13:31 | 01a1a688-d08d-74e2-9e69-9015055e4130 | meshy-7.1 | front, side, back edited; texture refs the same; 2k, meshy-7 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the art's bare belly, sash, skirt, bare feet, braids, closed fists |
 | Breaker D | 13:31 | 01a1a688-d0b4-738f-bed8-df735492629b | meshy-7.1 | as C, enhancement on | 40 | Dropped: open splayed hands |
 
+### Cinder v2 (Flame Queen), 2026-11-07 (balance 1322 before; 76 credits)
+| Task | Id | Model | Credits | Result |
+|---|---|---|---:|---|
+| edit front / side / back / 3-4 | 01a1b628-26fa-714e / 26b8-73d2 / 26e2-7241 / 26ef-728a | nano-banana-pro | 36 | No tank, hose, goggles: kept |
+| scan | 01a1b62a-16b7-739b-81ce-e1fee79ab44c | multi-image-to-3d | 40 | Kept |
+
+The scan welded her forearm shards to her hip plates (read as wings once the arms moved):
+`cinder_source.py part_arms` cuts every face joining an arm to the body under the armpit and caps both sides. Raw files in
+`~/meshy/cinder_v2`, rebuilt by `build.sh` there from `tools/art1/cinder_*.py`.
+A tail near the floor: `Springs.FLOOR_UP` holds joints up from the *posed* root, so leave the stance's root drop as well.
+
 ## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
 No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.
 1. **Inspect** it in Blender: bones (names, parents, heads), each vertex group's bounds, loose parts, materials,

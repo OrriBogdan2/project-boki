@@ -10,7 +10,7 @@ head first, and hits back harder after every knock.
 |---|---|
 | Class title | Mad Pyromancer |
 | Base character | Cinder, female |
-| Personality | A salamander-folk alchemist with charcoal skin split by glowing magma, fin ears, hair of living fire and a long burning tail. She wears cracked goggles, a corset and a shredded apron, hauls a tank of liquid fire on her back, and she is delighted by every fire she starts. |
+| Personality | A lizard-folk fire queen with scaled grey-violet skin, lizard horns, hair of living fire and a long flame-tipped tail. She wears living obsidian shards split by glowing magma, casts fire from her bare hands, and she is delighted by every fire she starts. |
 
 <!-- /gen:profile -->
 
@@ -49,7 +49,7 @@ head first, and hits back harder after every knock.
 | Body | 193 health, 4.4 m/s, 2 dash charges |
 | Signature weapon | Torch Lance (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The flue sweep. Hoses foes down with fire until they blaze, rams them head first, and hits back harder after every knock. |
-| Silhouette | the blazing hair, the copper tank of fire on her back and the long burning tail |
+| Silhouette | the horns, the ember-tipped hair, the obsidian shards and the long flame-tipped tail |
 | Resource | Char (max 31) |
 
 ### Kit card

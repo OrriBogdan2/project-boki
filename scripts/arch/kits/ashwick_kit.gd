@@ -31,11 +31,13 @@ const RAM_BACK_K := 0.85
 const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull_speed, stopping gap m away)
 const EMBER_EVERY := 0.035             # s between the ember puffs a ram or poof leaves behind
 const POOF_PUFFS := 5                  # smoke puffs the bellows blow out behind him as the air poof goes off
-const CLOAK_POSE_T := 0.25            # s the Furnace Cloak flare holds the flamer up off the aim (as_cloak)
+const CLOAK_POSE_T := 0.25            # s the Furnace Cloak flare holds her hand up off the aim (as_cloak)
+const CRACKS_PEAK := 4.0               # her magma cracks' emission while the fire runs (rest: the toon's 2.2)
+const CRACKS_FADE := 0.5               # s back to rest when it stops
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
-const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the tip from the feet in the aim pose, no model to read: fwd, up, right (m)
-const NOZZLE_REACH := 2.6                # m: a model's nozzle further off than this isn't posed yet: use NOZZLE
+const NOZZLE := Vector3(1.3, 0.9, 0.15)  # where the rules start the fire, from the feet: fwd, up, right (m)
+const NOZZLE_REACH := 2.6                # m: a model's palm further off than this isn't posed yet: use NOZZLE
 
 var chars := {}                 # foe id -> {e, n, t}
 var ignites := {}               # foe id -> {e, lvl, until}
@@ -52,7 +54,7 @@ var trail_t := 0.0              # the next dash after-image puff
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
-var nozzle_at: Node3D           # the Gun's Muzzle, kept on the skinned gun's tip by the model (Sync.apply_blade)
+var nozzle_at: Node3D           # the Gun's Muzzle, kept on her casting palm by the model (Sync.apply_blade)
 var lmb_key_was := false         # the LMB key last step: only a press in the flight ticks, not a hold carried in
 var lmb_denied := 0              # (tests) presses refused during Flue Flight
 var jet: AshwickJet             # X, Flue Flight (its flight is a hold: jet.flight)
@@ -88,13 +90,13 @@ func _fwd() -> Vector3:
 	var d2 := h.aim_dir()
 	return Vector3(d2.x, 0.0, d2.y)
 
-## The nozzle for the rules: a fixed offset from her feet in the aim pose (the model's braced tip, --cinder-art-check),
+## The nozzle for the rules: a fixed offset from her feet in the aim pose (ahead of her braced palm),
 ## so the stream's reach never depends on the camera's lean of the model.
 func nozzle() -> Vector3:
 	var f := _fwd()
 	return h.pos + f * NOZZLE.x + f.cross(Vector3.UP) * NOZZLE.z + Vector3(0, NOZZLE.y, 0)
 
-## The tip of the gun you see, for what's drawn (item 76b): the Gun's Muzzle sits on it. No skinned gun: nozzle().
+## Her casting palm, for what's drawn: the Gun's Muzzle sits on it. No model: nozzle().
 func tip() -> Vector3:
 	if nozzle_at == null or not is_instance_valid(nozzle_at):
 		var skinned: bool = h.model != null and WardenGlb.anchor(h.model, "weapon_muzzle") != null
@@ -346,6 +348,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var tick := float(ld["tick"])
 	while flame_acc >= tick:
 		flame_acc -= tick
+		PipStars.pulse(h, CRACKS_PEAK, CRACKS_FADE)
 		_flame_tick(tick)
 	return true
 
