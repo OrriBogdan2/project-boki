@@ -160,3 +160,13 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 ## 2026-11-06 (owner, via coordinator): Lisette is renamed **Ravel** ("Ravel the Red Stitch"), with a v2 redesign
 - Display name only. The id `archer` and the file names (`hem_*`, `lisette_*`, `art/wardens/hem`) stay. Change every player-facing "Lisette" the same way as the Mossy rename.
 - Design: briefs/art-refs/ravel_v2/index.md (porcelain marionette seamstress, needles crossed in an X on her back, red strings, recurve bow). Final splash, portrait and A-pose turnaround are in that folder. The in-game model is rebuilt from the turnaround.
+
+## 2026-11-07 (owner, via coordinator): v2 art set locked (briefs/art-refs/<hero>_v2/, each index.md wins for its hero)
+- Finished v2 heroes (master sheet, turnaround, portrait, splash; 4K): Kael, Vex, Ryzz, Ravel, Grimble, Claire. In-game models are rebuilt from the turnarounds (one backlog item per hero).
+- Kael: every glow on him (sword cracks, eyes) is white-hot, never orange. The curse is crimson (left arm, chest). Website splash: kael_v2_splash_relit_candidate.jpg; in-game/key art: kael_v2_splash_final.jpg.
+- Vex: both arms are mechanical; her right forearm IS the minigun (no hand). Alternates: vex_v2_alt_tavern.jpg (needs an arm fix before any use), vex_v2_alt_joyride.jpg.
+- Ryzz: the bubblegum bubble is a separate animated prop, never part of the face mesh. Two skin candidates are in ryzz_v2/ (not chosen).
+- Grimble (id dredge): the right arm IS the hook (purple mutated bone hook, no chain). The hook ability's visual is the arm extending, not a thrown chain. No nose, three-lens brass loupe, metal teeth with one gold tooth (grimble_v2/index.md canon notes). Old refs that say "Dredge" are his old name.
+- Claire: now a frost bunny. Real rabbit ears, a small fist-sized tail; no horns, bat wings or devil tail. She is 18, a youthful adult, not a seductress. Lore: "frost demoness" becomes "frost spirit" everywhere player-facing.
+- Portraits: briefs/art-refs/portraits_unified/ (12 portraits, shared vignette) are the select-screen and website portraits.
+- Next from the art session (do NOT model yet): Cinder redesign (lizard features instead of fish fins, protective gloves/suit, even ember cracks, softer face, "fire cleanses"); Sable (moth antennae instead of head wings). Optional: Tarek stones in his hair, Vex knee guards.
