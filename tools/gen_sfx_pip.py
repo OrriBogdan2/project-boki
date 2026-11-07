@@ -1,4 +1,4 @@
-"""Pip's sounds (id tender, the Magic Fox): a small pastel fairy-fox field medic, brave but afraid of the
+"""Pip's sounds (id tender, the Dawnfox): a small pastel fairy-fox field medic, brave but afraid of the
 dark. Her lantern holds a star she caught as a kid; it is her relic and her courage. She heals with its light.
 
     cd tools && python3 gen_sfx_pip.py      (then: godot --headless --import)

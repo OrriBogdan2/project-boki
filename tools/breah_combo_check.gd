@@ -1,5 +1,5 @@
 extends "res://tools/hero_pair_check.gd"
-## --dolm-combo-check: Kibo (id dolm), docs/heroes/dolm.md. Every slot, its telegraph and cursor state
+## --dolm-combo-check: Tenzo (id dolm), docs/heroes/dolm.md. Every slot, its telegraph and cursor state
 ## while aiming or holding, the charge timings, where it lands, the payoffs, the small mechanics
 ## (docs/heroes/dolm.md "Small mechanics"), standing on and climbing rocks, the merge-start drops, and
 ## that every move, sound and look the kit plays exists.
@@ -701,13 +701,13 @@ func _breah() -> void:
 		"breah_raise", "breah_sense"
 	]
 	ok(
-		"anim: every Kibo move is keyed (KMovesStone)",
+		"anim: every Tenzo move is keyed (KMovesStone)",
 		moves.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty()),
 		str(moves.filter(func(mv): return HunterAnim.km_sample(mv, 0.1).is_empty()))
 	)
 	var snd := SfxKits.NAMES.filter(func(s): return String(s).begins_with("br_"))
 	ok(
-		"sfx: every Kibo sound is loaded by Sfx", snd.size() >= 14 and snd.all(func(s): return Sfx.has(s)),
+		"sfx: every Tenzo sound is loaded by Sfx", snd.size() >= 14 and snd.all(func(s): return Sfx.has(s)),
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)

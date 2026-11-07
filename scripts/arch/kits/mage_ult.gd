@@ -1,6 +1,6 @@
 class_name MageUlt
 extends RefCounted
-## Ryzz's ultimate, Kitefall (X). docs/heroes/mage.md has the numbers and the research notes.
+## Sparkle's ultimate, Kitefall (X). docs/heroes/mage.md has the numbers and the research notes.
 ##
 ## Press: a short crouch (a Shift or a jump in it combines: she launches from where it takes her), then she
 ## launches straight up and hangs there invulnerable while a gold range ring and its dark interior show round

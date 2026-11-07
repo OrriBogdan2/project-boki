@@ -112,7 +112,7 @@ func run(main_node: Node) -> void:
 		if String(a).begins_with("--ak-only="): only = String(a).substr(10)
 	for who in ["mage", "gunslinger"]:
 		if "--%s-combo-check" % who in OS.get_cmdline_user_args():
-			var hc = load("res://tools/hero_combo_check.gd").new()      # Ryzz's and Vex's cross-ability interactions
+			var hc = load("res://tools/hero_combo_check.gd").new()      # Sparkle's and Vex's cross-ability interactions
 			await hc.run(main_node, who)
 			return
 	if "--kit-combo-check" in OS.get_cmdline_user_args():
@@ -168,7 +168,7 @@ func _data() -> void:
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
-			if sl == "ult" and not Arch.def(a).has("r"): continue      # Ryzz and Vex have no R (Boki Merge owns it)
+			if sl == "ult" and not Arch.def(a).has("r"): continue      # Sparkle and Vex have no R (Boki Merge owns it)
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
 			if not (r2.contains("->") and r2.length() > 20): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
@@ -186,7 +186,7 @@ func _data() -> void:
 			if not Arch.def(a).has(k): bad.append("%s missing %s" % [a, k])
 	ok("data: every kit complete, weapons exist", bad.is_empty(), str(bad))
 	ok("weapons: one signature weapon each", ids.all(func(x): return Arch.weapons(x).size() == 1 and Arch.signature(x) != "" and Arch.weapon_ok(x, Arch.signature(x))), str(ids.map(func(x): return Arch.signature(x))))
-	ok("weapons: Sable bolts / Ravyl bow / Ryzz coil / Mossy hammer and aegis", Arch.signature("thief") == "arc_bolts" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
+	ok("weapons: Sable bolts / Lace bow / Sparkle coil / Mossy hammer and aegis", Arch.signature("thief") == "arc_bolts" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
 	ok("weapons: another archetype's weapon is not yours", not Arch.weapon_ok("bulwark", "greatsword") and not Arch.weapon_ok("thief", "smg"))
 	ok("weapons: asking for another weapon gives the signature", Arch.weapon_for("gunslinger", "medium", "longsword") == "quill_rifle")
 	# no ammo but the source's one gun (Ghost's 30-round rifle): no magazine, no reload timer, no count on the HUD
@@ -531,7 +531,7 @@ func _bulwark() -> void:
 
 # ------------------------------------------------------------------ levels and the Bonded R
 func _levels_and_bond() -> void:
-	var r := setup("thief", 6.0, "cindle")      # (a kit with an R: Ryzz and Vex have none)
+	var r := setup("thief", 6.0, "cindle")      # (a kit with an R: Sparkle and Vex have none)
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	# a fresh run: R locked until level 6
 	P.lvl = 1; P.xp = 0.0; P.skill_pts = 1
@@ -589,7 +589,7 @@ func _infusion() -> void:
 	var poison: bool = (f["effects"] as Array).any(func(e): return String(e["type"]) == "damage" and float(e.get("over", 0.0)) > 0.0)
 	ok("infusion: Vespyx poisons the Thief's Bola", poison, "; ".join(f["notes"]))
 	var fm := Arch.fill(Arch.def("mage")["rmb"]["sockets"], Arch.infusion(KinLib.kin("pebbit")), "rmb", "projectile")
-	ok("infusion: Gravadillo adds a control to Ryzz's Coilshot", (fm["effects"] as Array).any(func(e): return KinParts.category(String(e["type"])) == "control"), "; ".join(fm["notes"]))
+	ok("infusion: Gravadillo adds a control to Sparkle's Coilshot", (fm["effects"] as Array).any(func(e): return KinParts.category(String(e["type"])) == "control"), "; ".join(fm["notes"]))
 	var fj := Arch.fill(Arch.def("juggernaut")["rmb"]["sockets"], Arch.infusion(KinLib.kin("pebbit")), "rmb", "cone")
 	ok("infusion: Gravadillo lifts on a cone", (fj["effects"] as Array).any(func(e): return String(e["type"]) == "lift"), "; ".join(fj["notes"]))
 	var fz := Arch.fill(Arch.def("gunslinger")["rmb"]["sockets"], Arch.infusion(KinLib.kin("zapple")), "rmb", "projectile")
@@ -618,7 +618,7 @@ func _infusion() -> void:
 	m = r[0]; P = r[1]; T = r[2]
 	hold(m, P, 0.5)
 	step(m, 0.6)
-	ok("infusion runtime: a Boki's type rides Ryzz's Coilshot", dmg(T) > 0.0 and (T.slow_t > 0.0 or T.burn_t > 0.0 or T.stun_t > 0.0 or T.root_t > 0.0), "slow %.2f burn %.2f stun %.2f" % [T.slow_t, T.burn_t, T.stun_t])
+	ok("infusion runtime: a Boki's type rides Sparkle's Coilshot", dmg(T) > 0.0 and (T.slow_t > 0.0 or T.burn_t > 0.0 or T.stun_t > 0.0 or T.root_t > 0.0), "slow %.2f burn %.2f stun %.2f" % [T.slow_t, T.burn_t, T.stun_t])
 	await done(m)
 
 # ------------------------------------------------------------------ feel

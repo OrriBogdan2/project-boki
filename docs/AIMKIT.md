@@ -75,7 +75,7 @@ AimKit.lane(h, "rmb", {"len": 10.0, "width": 0.72, "tip": true})
 AimKit.lane(h, "rmb", {"len": 5.4, "len0": 1.2, "k": k, "fill": k, "width": 1.3, "col_full": Color("ff3df0")})
 # Vex E: a long lane that narrows over the cast
 AimKit.lane(h, "e", {"len": 16.0, "width": 1.0, "width_to": 0.12, "k": cast_k})
-# Ryzz Surge: rails with chevrons (pair it with a circle for the end marker)
+# Sparkle Surge: rails with chevrons (pair it with a circle for the end marker)
 AimKit.lane(h, "dash", {"len": 13.0, "width": 0.35, "rails": true, "chevrons": 5})
 ```
 Params: `from` (the hunter), `dir` (the aim), `len` (6), `width` (0.9), `k`, `len0`, `width_to`,
@@ -91,14 +91,14 @@ Params: `from`, `dir`, `len` (8), `width` (0.72), `gap` (0.6 m between dots), `d
 ### Filling line
 No shape of its own: two lines and a circle.
 ```gdscript
-# Ravyl's draw: a faint line to the cursor, a bright fill growing out along it, a circle at the perfect point
+# Lace's draw: a faint line to the cursor, a bright fill growing out along it, a circle at the perfect point
 AimKit.line(h, "draw", {"len": L, "arrow": false})
 AimKit.line(h, "draw_fill", {"len": L * fill, "arrow": false})
 AimKit.circle(h, "draw_mark", {"at": point, "r": 0.22})
 ```
 
 ### V that closes into one line
-Nothing in the game uses it now (Ravyl's draw was the V until owner item 55b).
+Nothing in the game uses it now (Lace's draw was the V until owner item 55b).
 ```gdscript
 AimKit.vee(h, "draw", {"k": stage_k, "glint": stage_k * 0.4, "col2": Color("b6ff8a")})
 ```
@@ -118,22 +118,22 @@ Params: `from`, `dir`, `len` (4), `deg` (60), `inner` (0.3 m), `edges`, `fill`.
 ```gdscript
 AimKit.circle(h, "r", {"r": 2.9, "ticks": true})                     # Vex Mini Nuke at the cursor
 AimKit.circle(h, "e", {"self": true, "r": 4.5, "all": true, "dur": 0.2})   # Cinder's 0.2 s edge ring
-AimKit.circle(h, "end", {"at": end_p, "r": 2.25, "ticks": true, "star": true})   # Ryzz Surge end marker
+AimKit.circle(h, "end", {"at": end_p, "r": 2.25, "ticks": true, "star": true})   # Sparkle Surge end marker
 ```
 Params: `at` (the cursor point, clamped to `range`), `range`, `self` (centred on the hunter), `r`
 (1.35), `fill` (0..1 radial), `ticks`, `star`, `dashed`, `core`, `pointer` (a `Vector2`: a chevron on
-the rim pointing that way, as on Ryzz's E drag disc).
+the rim pointing that way, as on Sparkle's E drag disc).
 
 ### Circle with a growing sweet spot
 ```gdscript
-# Kibo RMB: a 2.5 bh circle a hop ahead; the inner ring grows 0.5 -> 1 bh with the charge
+# Tenzo RMB: a 2.5 bh circle a hop ahead; the inner ring grows 0.5 -> 1 bh with the charge
 AimKit.sweet(h, "rmb", {"at": h.pos + Vector3(d.x, 0, d.y) * 2.6, "k": k, "fill": k, "all": true})
 ```
 Params: as for the circle (`r` defaults to 4.5 m), plus `k`, `core0` (0.9) and `core1` (1.8).
 
 ### Curved arc wall
 ```gdscript
-AimKit.arc_wall(h, "e", {"rmax": reach})       # Ravyl's Rain of Arrows: at the cursor distance, 120 deg
+AimKit.arc_wall(h, "e", {"rmax": reach})       # Lace's Rain of Arrows: at the cursor distance, 120 deg
 var w := AimKit.entry(h, "e")                  # read the radius back for the cast
 ```
 Params: `center` (the hunter), `dir`, `radius` (the cursor distance clamped to `rmin`..`rmax`, 2..9),
@@ -149,13 +149,13 @@ Params: `a` (the hunter), `b` (the cursor point, clamped to `range`), `r` (1.35)
 ```gdscript
 AimKit.line(h, "aim")                                        # the thin aim line to the cursor (Motley, Neve)
 AimKit.line(h, "aim", {"col": Color("ffd25a"), "hot": 0.6})   # Sable's gold empowered line
-AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor to max range (Ravyl stage 2)
-AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Kibo Tetraform: a long line, inward chevrons, centre ring
+AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor to max range (Lace stage 2)
+AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Tenzo Tetraform: a long line, inward chevrons, centre ring
 AimKit.star(h, "lock", {"at": foe.pos, "size": 0.5})          # a glint on the ground
 ```
 The two parallel lines (Motley RMB) are `lane` with `"rails": true` and no chevrons. The Mossy R
 rectangle is a plain `lane`. The Juggernaut hold-blast arc round the body is `circle` with
-`"self": true`. A target highlight ring at someone's feet is a small `circle` at their position. Ryzz's E is a
+`"self": true`. A target highlight ring at someone's feet is a small `circle` at their position. Sparkle's E is a
 `circle` with `ticks` and `"pointer": drag_dir`, plus a `lane` with `"from": disc, "tip": true` for the
 drag arrow.
 
@@ -198,7 +198,7 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - Use `col2` for the accent, and `col_full` for a lane that changes colour at full charge.
   - Keep `alpha` near 1. These are meant to be readable, not loud.
 - **Aim mode.**
-  - For the signature weapon, set `"aim"` in the weapon JSON, or `h.shot_aim` per shot (Ravyl: stage 1
+  - For the signature weapon, set `"aim"` in the weapon JSON, or `h.shot_aim` per shot (Lace: stage 1
     cursor, stage 2 `MAX`).
   - For kit-spawned shots, use `AimMode.dist` and `AimMode.point` so the telegraph and the shot agree.
 - **Checks.** In combo checks, assert `AimKit.shown(h, id)` while aiming or holding, and read

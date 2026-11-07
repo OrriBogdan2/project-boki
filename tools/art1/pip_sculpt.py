@@ -1,4 +1,4 @@
-"""Pip's sculpt (ART-1, the Magic Fox; id tender). No scan: signed distance fields for the body, arms and head (hem_sdf.py)
+"""Pip's sculpt (ART-1, the Dawnfox; id tender). No scan: signed distance fields for the body, arms and head (hem_sdf.py)
 and scripted pieces (tail, ears, leaf mantle, apron, goggles, pouch, star lantern, wings), all on the rig's own joints
 (art/wardens/src/pip_rig.json). Master sheet briefs/art-refs/pip_FINAL_sheet.png, views pip_turnaround.png, props pip_props.png.
 Space: Blender's, facing +Y, her right hand +X, up +Z, metres at the class-neutral size. Her right hand has the lantern; the

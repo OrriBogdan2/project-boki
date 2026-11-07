@@ -11,9 +11,9 @@ Changing a hero's hit radius is one line (`body.hit_r`). The creator's look slid
 | juggernaut | Kael | 1.07 | 0.428 | broad |
 | gunslinger | Vex | 1.04 | 0.416 | broad |
 | ostra | Motley | 1.03 | 0.412 | tall and thin; hitbox stays at ground level (item 18) |
-| mage | Ryzz | 1.00 | 0.400 | average |
-| archer | Ravyl | 0.98 | 0.392 | average, slim |
-| dolm | Kibo (Breah's base) | 0.97 | 0.388 | lean |
+| mage | Sparkle | 1.00 | 0.400 | average |
+| archer | Lace | 0.98 | 0.392 | average, slim |
+| dolm | Tenzo (Breah's base) | 0.97 | 0.388 | lean |
 | thief | Sable | 0.96 | 0.384 | lean |
 | rimewright | Neve | 0.95 | 0.380 | slight |
 | ashwick | Cinder | 0.94 | 0.376 | low and hunched |

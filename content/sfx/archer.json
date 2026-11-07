@@ -1,6 +1,6 @@
 {
  "group": "archer",
- "name": "Ravyl",
+ "name": "Lace",
  "script": "tools/gen_sfx_lisette.py",
  "sounds": {
   "archer_thread_twang": "signature",

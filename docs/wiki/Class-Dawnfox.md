@@ -1,4 +1,4 @@
-# Magic Fox
+# Dawnfox
 
 A small field-medic support. Meeko was once a small, timid wild Boki, a fox kit afraid of the dark. Magic changed her: glowing constellations in her fur, glowing fairy wings, an upright stance and, at last, speech. She was the first Boki anyone saw become something more. She still fears the dark, but she walks into the places that scare her for anyone who needs her.
 
@@ -9,7 +9,7 @@ Meeko keeps the squad on its feet: she heals with Hearthlight, carries downed fr
 
 |  |  |
 |---|---|
-| Class title | Magic Fox |
+| Class title | Dawnfox |
 | Base character | Meeko, female |
 | Personality | Meeko was once a small, timid wild Boki, a fox kit who was afraid of the dark. Magic changed her: glowing constellations in her fur, glowing fairy wings, an upright stance and, at last, speech. She was the first Boki anyone saw become something more. She still fears the dark, but she became a field medic who walks into the places that scare her for anyone who needs her. |
 

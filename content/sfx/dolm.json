@@ -1,6 +1,6 @@
 {
  "group": "dolm",
- "name": "Kibo",
+ "name": "Tenzo",
  "script": "tools/gen_sfx_tarek.py",
  "sounds": {
   "br_throw": "fire",

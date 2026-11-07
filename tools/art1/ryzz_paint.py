@@ -1,4 +1,4 @@
-"""ART-1 Ryzz: texel-space paint (display values). Art colours sampled off ryzz_FINAL_sheet."""
+"""ART-1 Sparkle: texel-space paint (display values). Art colours sampled off ryzz_FINAL_sheet."""
 import numpy as np
 from meshkit import smooth, norm
 import ryzz_pieces as K

@@ -35,7 +35,7 @@ func _gate(m: Match, P: Hunter, K: ArchKit) -> void:
 			not pressed and float(K.cd["x"]) == 0.0 and int(P.used.get("x", 0)) == 0)
 	P.lvl = int(Hunter.ULT_AT[0])
 
-# ------------------------------------------------------------------ Ryzz: Kitefall
+# ------------------------------------------------------------------ Sparkle: Kitefall
 func mage() -> void:
 	var r: Array = ac.setup("mage", 6.0, KIN, true)
 	var m: Match = r[0]
@@ -119,7 +119,7 @@ func mage() -> void:
 	await _mage_burst()
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var bad: int = await flow.combos_of(hc.main, "mage")
-	ok("Ryzz item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; the Rod held through every move",
+	ok("Sparkle item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; the Rod held through every move",
 			bad == 0, "%d failing (the DASHFLOW lines)" % bad)
 
 ## A cast that strikes empty ground: comes down by itself at the cursor when the hover runs out, pays no bond.

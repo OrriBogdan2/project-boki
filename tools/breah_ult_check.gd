@@ -1,5 +1,5 @@
 extends "res://tools/hero_pair_check.gd"
-## Kibo's ultimate on X, Basalt Spine, for --dolm-combo-check (docs/heroes/dolm.md): the level gate, the
+## Tenzo's ultimate on X, Basalt Spine, for --dolm-combo-check (docs/heroes/dolm.md): the level gate, the
 ## tap (across the aim, at the cursor) and the hold-and-drag (pivots on its centre), the preview only while
 ## held, the 0.2s cracks everyone sees, the centre-out rise over 0.4s, the slow beside it, bodies shoved off
 ## the line, the rocks standing apart from Stone Row's, a punch along the ridge launching it, the bond only on
@@ -282,7 +282,7 @@ func _arc_and_width(m: Match, K: DolmKit) -> void:
 		extent < 0.65 * 19.8 and extent > 0.5 * 19.8 * 0.6, "extent %.1f" % extent
 	)
 
-## Over the abyss the rocks are ground: Kibo and a foe land on the ridge and stand on it (no fall, no abyss
+## Over the abyss the rocks are ground: Tenzo and a foe land on the ridge and stand on it (no fall, no abyss
 ## sink, nothing taken), walk along it, and fall as normal once the rocks crumble.
 func _walkway() -> void:
 	var r := setup_ult("dolm", 9.0, 4)
@@ -311,7 +311,7 @@ func _walkway() -> void:
 	var stands := func(h: Hunter) -> bool:
 		return h.grounded and not h.over_void() and not h.out and not h.dead and absf(h.pos.y - top) < 0.15
 	ok(
-		"spine walkway: Kibo stands on a rock over the abyss, no fall, no abyss sink, no damage",
+		"spine walkway: Tenzo stands on a rock over the abyss, no fall, no abyss sink, no damage",
 		stands.call(P) and P.hp >= hp0,
 		"y %.2f top %.2f g%d void%d hp %.0f" % [P.pos.y, top, int(P.grounded), int(P.over_void()), P.hp]
 	)
@@ -323,7 +323,7 @@ func _walkway() -> void:
 	step(m, 0.6, func(): P.inp["move"] = Vector2(0, 1))
 	P.inp["move"] = Vector2.ZERO
 	ok(
-		"spine walkway: Kibo walks along the ridge over the abyss and stays on it",
+		"spine walkway: Tenzo walks along the ridge over the abyss and stays on it",
 		stands.call(P) and P.pos.z - z0 > 1.0, "moved %.2f y %.2f" % [P.pos.z - z0, P.pos.y]
 	)
 	step(m, 8.0)

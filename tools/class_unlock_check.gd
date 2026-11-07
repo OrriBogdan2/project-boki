@@ -120,7 +120,7 @@ func _rules() -> void:
 	ok(ClassUnlock.challenge(FIRST).is_empty(), "%s has no unlock challenge (it is a starter)" % Arch.name_of(FIRST))
 	var easy_ids := ["ashwick", "archer", "juggernaut"]
 	ok(easy_ids.all(func(a): return ClassUnlock.tier(a) == "easy"),
-			"Ravyl (an early unlock), Kael and Cinder are easy challenges")
+			"Lace (an early unlock), Kael and Cinder are easy challenges")
 	var others := Arch.ids().filter(func(a):
 		return not STARTERS.has(a) and not easy_ids.has(a) and not CHALLENGE_ONLY.has(a))
 	ok(others.all(func(a): return ClassUnlock.tier(String(a)) == "medium"), "the other Hunters are medium")
@@ -643,7 +643,7 @@ func _viewer(tree: SceneTree) -> void:
 # ---------------------------------------------------------------- 9. the Hunters screen and the hold
 func _home(tree: SceneTree) -> void:
 	new_save(["archer"])
-	# some play: Kael's challenge done (ready to hold), Sable's half way, Ravyl's ring goal done
+	# some play: Kael's challenge done (ready to hold), Sable's half way, Lace's ring goal done
 	var jt := int(ClassUnlock.challenge("juggernaut")["target"])
 	var gt := int(ClassUnlock.challenge("thief")["target"])
 	Game.apply_result(result("archer", true, {"slams": jt, "air_hits": gt / 2, "rings": 8, "stuns": 5}))
