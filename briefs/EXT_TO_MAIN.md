@@ -2291,3 +2291,19 @@ READY ext/text-relic-renames ee88f3c2c: final roster names (Sparkle, Lace, Tenzo
 READY ext/boki-rigs-batch (integration of ext/boki-cindle, rimeshrew, zephyrak, pebbit, cairnback, wisplet, gloamshell, selenfin, zapple, hivara; supersedes all ten). Rig and hatch checks pass.
 
 READY ext/vfx-cinder-rebased-fix (036f3b3ff; supersedes ext/vfx-cinder-rebased 7ed30d5b + merged origin/main). cinder_art_check now asserts the jets via HeroVfx anchor_pos(tank_l/tank_r) = anchor_jet_0/1 (two jets apart, within 0.8 m of the body). Dropped the "behind aim dir" assertion: in flight the anchors sit ahead of the aim dir (dot +0.6), so it was not true. Checks: --cinder-art-check rc 0 / 0 fails, --hero-vfx-check rc 0, health --strict OK. Note: jobq GPU worker lacked a class cache (parse errors, rc 124); ran locally after godot --import.
+
+## 2026-11-07 feel (job 20261107-114502-a4, continues the CLAIM of job 20261107-071501-a2): READY ext/ravel-v2-model fc36532f5 (Ravel v2 pass 2; supersedes c1a221ad0)
+Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and shoulder mask. 14,244 tris (body 13,348, bow 752, arrow 144). Still one 2048 atlas plus the card sheet. No Meshy credits used.
+- **Skin:** porcelain repaint in the bake (tools/art1/hem_finish.py `class_bake`/`repaint`). The class bake marks skin, skirt and other per texel. Skin is set to #dbd0dc with the scan's shading; only dark crimson (stitches, cracks) and the warm blush are kept. Bake misses are filled, so the black seam lines are gone. Leg faces at the slit now count as skin, and the hot pink is gone.
+- **Skirt:** dyed plum (#21111c..#5c3352) with a red fade toward the hem. The thread fringe has 46 cards (was 34) and is longer and fuller. Leather far-rim changed from red to plum (warden_look.json, hem leather).
+- **Shoulder mask:** a real 3D relief mask (dome, brow, nose, sockets), rigid on upper_arm.L. It has lens eyes and a red-thread seam with 5 cross stitches (hem_pieces.py `shoulder_mask`). It reads in the GPU closeup.
+- **Renders (GPU, pc-MRROBOTO, job 20261107-120218-11839):** briefs/art-refs/ravel_v2/ingame/pass2_before_after.jpg (top: pass 1, bottom: pass 2), pass2_vs_turnaround.jpg (sheet over the in-game turnaround), pass2_front34.jpg. Earlier GPU job 20261107-115815-23276 found the red skirt and pink slit fixed in this pass.
+- **Checks on f480daa16 (fc36532f5 only adds the import md5):** warden-rig-json --warden=archer rc 0 with no diff, warden-model-check PASS, warden-glb-check PASS, warden-clips 0 fails, hero-check 0, hero-vfx OK, archer-combo 153/0, health --strict OK.
+- **Table update:** Skirt ✅, Porcelain skin ✅, Shoulder mask ✅, Match-camera colour ✅ (plum and porcelain).
+- **Debt (unchanged):**
+  - Eyes ❌: painted, so the blink moves nothing visible.
+  - Proportions ❌: shared rig, belt about 7 cm low, head a bit big.
+  - Smoke hair ends and doll joints ⚠.
+  - The scan's painted mask splotches still show on the upper arm next to the new mask.
+
+  Next pass: modelled eyelids and eyes, then clean the arm splotches.
