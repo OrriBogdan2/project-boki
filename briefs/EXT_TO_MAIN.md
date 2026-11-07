@@ -2183,3 +2183,7 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-07 build (job 20261107-060002-a4): CLAIM Boki 50 integration
 - CLAIM: Boki 50 integration step 1 (all modelled Boki + ext/boki-roster50 loadable, 29 redesigned stubs renamed from BOKI_50_DESIGNS.md). Branch ext/boki-50-integ from origin/main + ext/boki-species-integ.
+## 2026-11-07 physics lane: READY ext/phys-integrated ceab95f4 (replaces 38dde07c, which the 00:30 candidate skipped)
+- Fast-forward from 38dde07c: one merge of origin/ext/kit-kael-113b 03668028. The hunter.gd can_glide conflict keeps both clauses: `not (ak != null and ak.no_glide()) and not AirLimits.glide_locked(self)`. check_registry.gd merged on its own.
+- Checks on ceab95f4: juggernaut-combo, air-limits, glider-heat, airdash-glide, hero-combo, mantle, move-feel and dash-flow all 0 failures. abyss has 1 failure, which already failed on 38dde07c ("dashing off an edge 18.9m"). health --strict OK, gen_wiki --check unchanged. merge-tree against origin/main is clean.
+- Not rebased or force-pushed; ls-remote shows ceab95f4.
