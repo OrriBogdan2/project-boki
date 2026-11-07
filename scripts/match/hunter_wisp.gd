@@ -17,6 +17,7 @@ const FULL_LEAN_SPEED := 6.0  # m/s at which the lean and stretch are full
 const POP_OVERSHOOT := 1.70158   # the "back" ease's overshoot: the pop swells a little past full size
 const POP_FROM := 0.3         # fraction of full size the Wisp pops in from
 const FLASH_BOOST := 3.0      # extra glow at the instant of a pop
+const EYES_AHEAD := 0.4       # how far the eyes turn from the camera toward the facing
 
 ## Runs every render frame, before the hero's own basis is built: advances the state and poses the hero's
 ## size (a pop-out) and the Wisp.
@@ -173,10 +174,18 @@ static func _pose_body(h: Hunter, st: Dictionary, dt: float) -> void:
 		tilt.basis = Basis.IDENTITY
 	var stretch := float(look["stretch"]) * lean
 	tilt.scale = Vector3(1.0 - stretch * 0.5, 1.0 + stretch, 1.0 - stretch * 0.5)
-	var eyes := tilt.get_node_or_null("Eyes") as Node3D
-	if eyes:
-		eyes.rotation.y = h.face
+	_aim_eyes(h, tilt.get_node_or_null("Eyes") as Node3D)
 	(node.get_node("Trail") as CPUParticles3D).emitting = speed > MOVE_SPEED
+
+## The eyes look up at the camera (from the top-down view they would sit on the Wisp's edge), a little
+## toward where the hunter faces.
+static func _aim_eyes(h: Hunter, eyes: Node3D) -> void:
+	var cam := h.get_viewport().get_camera_3d() if eyes else null
+	if cam == null:
+		return
+	var to_cam := (cam.global_position - eyes.global_position).normalized()
+	var ahead := Basis(Vector3.UP, h.face) * Vector3.FORWARD
+	eyes.look_at(eyes.global_position + to_cam + ahead * EYES_AHEAD, Vector3.UP)
 
 static func _pose_out(h: Hunter, st: Dictionary, dt: float) -> void:
 	var look: Dictionary = st["look"]

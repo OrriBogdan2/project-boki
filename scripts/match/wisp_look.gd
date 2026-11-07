@@ -6,29 +6,11 @@ extends RefCounted
 ## needs no code. HunterWisp plays it; this file only reads the data and builds the body.
 
 const RULES_PATH := "res://content/rules/wisp_looks.json"
-const GLOW_SHADER := """
-shader_type spatial;
-render_mode unshaded, blend_add, depth_draw_never;
-uniform vec4 core_col : source_color = vec4(1.0);
-uniform vec4 rim_col : source_color = vec4(1.0);
-uniform float glow = 2.0;
-uniform float alpha = 1.0;
-uniform float flash = 1.0;
-uniform float fade = 1.0;
-uniform float flicker = 0.25;
-uniform float flicker_hz = 9.0;
-uniform float phase = 0.0;
-void fragment() {
-	float edge = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
-	float wave = 0.25 * sin(TIME * flicker_hz + phase) + 0.25 * sin(TIME * flicker_hz * 2.3 + phase * 1.7);
-	float flick = 1.0 - flicker * (0.5 + wave);
-	ALBEDO = mix(core_col.rgb, rim_col.rgb, edge) * glow * flash * flick;
-	ALPHA = clamp((0.55 + 0.45 * edge) * alpha * fade, 0.0, 1.0);
-}
-"""
+const CORE_SHADER := preload("res://shaders/wisp_core.gdshader")
+const HALO_SHADER := preload("res://shaders/wisp_halo.gdshader")
+const DOT_SHADER := preload("res://shaders/fx_dot.gdshader")      # the soft round dots Fx bursts use
 
 static var _rules := {}
-static var _shader: Shader
 
 ## All look entries by id (the file, read once).
 static func rules() -> Dictionary:
@@ -82,10 +64,11 @@ static func build(look: Dictionary, team_col: Color) -> Node3D:
 	var core: Dictionary = look["core"]
 	var tint := colour(String(core["color"]), team_col)
 	var mats: Array = []
-	var core_mat := _glow_mat(core, tint, 1.0)
+	var core_mat := _glow_mat(CORE_SHADER, core, tint)
 	tilt.add_child(_ball("Core", float(core["radius"]), core_mat))
 	var halo: Dictionary = look["halo"]
-	var halo_mat := _glow_mat(core, tint, float(halo["alpha"]))
+	var halo_mat := _glow_mat(HALO_SHADER, core, tint)
+	halo_mat.set_shader_parameter("alpha", float(halo["alpha"]))
 	tilt.add_child(_ball("Halo", float(halo["radius"]), halo_mat))
 	mats.append(core_mat)
 	mats.append(halo_mat)
@@ -96,16 +79,12 @@ static func build(look: Dictionary, team_col: Color) -> Node3D:
 	root.set_meta("mats", mats)
 	return root
 
-static func _glow_mat(core: Dictionary, tint: Color, alpha: float) -> ShaderMaterial:
-	if _shader == null:
-		_shader = Shader.new()
-		_shader.code = GLOW_SHADER
+static func _glow_mat(shader: Shader, core: Dictionary, tint: Color) -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
-	mat.shader = _shader
+	mat.shader = shader
 	mat.set_shader_parameter("core_col", tint)
 	mat.set_shader_parameter("rim_col", Color(String(core["rim"])))
 	mat.set_shader_parameter("glow", float(core["glow"]))
-	mat.set_shader_parameter("alpha", alpha)
 	mat.set_shader_parameter("flicker", float(core["flicker"]))
 	mat.set_shader_parameter("flicker_hz", float(core["flicker_hz"]))
 	mat.set_shader_parameter("phase", randf() * TAU)
@@ -161,6 +140,7 @@ static func _particles(node_name: String, spec: Dictionary, team_col: Color, amb
 	p.color = colour(String(spec["color"]), team_col)
 	p.color_ramp = _fade_ramp()
 	p.mesh = _quad()
+	p.material_override = _dot_mat()
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return p
 
@@ -171,13 +151,11 @@ static func _fade_ramp() -> Gradient:
 	return g
 
 static func _quad() -> QuadMesh:
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	mat.vertex_color_use_as_albedo = true
-	mat.disable_receive_shadows = true
 	var q := QuadMesh.new()
 	q.size = Vector2.ONE
-	q.material = mat
 	return q
+
+static func _dot_mat() -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	mat.shader = DOT_SHADER
+	return mat
