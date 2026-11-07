@@ -46,3 +46,6 @@ Base: the original `briefs/art-refs/grimble_turnaround.png`. The old "Dredge" sh
 - Right arm: purple mutated bone hook (the hook IS the arm; no chain). Corruption veins and bone spurs spread over the right shoulder and back.
 - `grimble_v2_splash.jpg` ("Reeling In", 16:9, 4K): bone hook snagging a knight in a dark hoard cave; three-lens loupe, no nose, metal teeth. Weaknesses: fairly side-on staging, and he looks towards the camera rather than at the knight.
 - Splash replaced (Nov 6, 20:33 ET): `grimble_v2_splash.jpg` is now "The Scrapyard" (he bursts out of a junk pile, the bone hook flips a thief upside down, loot spills, purple lair). Alternates: `explorations/splash_highway_robbery.jpg` (cliff road, wagon crashing), `explorations/splash_bridge.jpg`, `explorations/splash_reeling_in.jpg`.
+
+## Queued (owner, Nov 7, 01:56 ET): splash edit
+Edit the existing splash (`grimble_v2_splash.jpg`, "Scrapyard"), not a fresh generation. Have the person caught in his claws (the bone-hook hand) as he reaches for and tries to grab the chest. Keep everything else. One edit; check that the hook arm and his canon stay intact (no nose, three-lens loupe, metal and gold teeth).
