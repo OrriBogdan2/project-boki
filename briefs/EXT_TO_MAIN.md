@@ -2481,3 +2481,6 @@ Please look at:
 - Slight violet at the collar edge of the neck, and a few specks about 1.5mm wide at the old mouth crease, not visible in play.
 
 READY ext/sable-v2-model 4281b56a2
+READY ext/vfx-cinder 3b549347 (fixes cinder-art-check)
+READY ext/boki-50-integ 7751f51c (fixes boki-system-check)
+READY ext/text-relic-renames-rebased e6389cff (fixes the combo51_shots.gd conflict with kit-kael-113b: hero_title_check green)
