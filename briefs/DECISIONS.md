@@ -136,7 +136,7 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
   - **Hoard:** a towering junk hoard on his back (chests, barrels, bells, lanterns, coins).
   - **Kit visuals:** a giant gaff hook on a chain (hook grab), a scrap fist (slam), a junk blunderbuss (shotgun ult). He rolls as a junk ball and rears up on one foot.
   - The friend's old Blender model no longer applies; S2 builds a new one.
-- **Pip personality (owner, Nov 5):** a brave little field medic who is afraid of the dark. Her lantern holds a star she caught as a kid, and it is her **Mask relic** and her courage.
+- ~~Pip personality (owner, Nov 5)~~ SUPERSEDED 2026-11-07: see 'Pip is renamed Lumi' below for her lore.
   - **Look:** a patched apron with a flower-cross patch, a bandaged ear, an herb notebook.
   - **Expression:** nervous but determined.
   - **Voice / anims:** she talks to her lantern, flinches when it flickers, cheers when she heals.
@@ -177,7 +177,7 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - 3D: cinder_v2_turnaround.jpg (hair length and the flamethrower from cinder_v2_master_sheet.jpg). Final splash: "Last Dance" (cinder_v2_splash.jpg). Portrait: cinder_v2_portrait.jpg.
 
 ## 2026-11-07 (owner, via coordinator): roster order
-- Hero order (owner's Boki website order; also the hero-select, wiki and any roster list): Vex, Mossy, Ryzz, Kael, Ravyl, Cinder, Grimble, Pip, Claire, Tarek, Motley, Sable.
+- Hero order (owner's Boki website order; also the hero-select, wiki and any roster list): Vex, Mossy, Ryzz, Kael, Ravyl, Cinder, Grimble, Lumi, Claire, Tarek, Motley, Sable.
 
 ## 2026-11-07 (owner, via coordinator): Boki 50, build them all now
 - Goal: 50 Boki as soon as possible, each with a 2D design (concept sheet: front, side, back, expression row; plus a clean turnaround for 3D) AND a 3D model in game. The owner cuts or changes ones he doesn't like later, so don't hold species for review.
@@ -194,3 +194,15 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-07 (owner, via coordinator): Ravel is respelled **Ravyl** ("Ravyl the Red Stitch")
 - Spelling change so players pronounce it right. Display name only: the id `archer`, file and folder names (`hem_*`, `lisette_*`, `art/wardens/hem`) stay. Change every player-facing "Ravel" to "Ravyl": hero select, kit and ability text, tooltips, barks, docs, wiki and website, plus the hero order list. This supersedes "Ravel" everywhere above.
+
+## 2026-11-07 (owner, via coordinator): Pip is renamed **Lumi** ("Lumi the Little Lantern"), with new lore
+- Display name only, like the other renames: the id `tender`, file and folder names (`pip_*`, `art/wardens/pip`, `briefs/art-refs/pip_v2/`) stay. Change every player-facing "Pip": hero select, kit and ability text, tooltips, barks, docs, wiki, website, and the post-tutorial second-Mask pick. This supersedes "Pip" everywhere above.
+- Lore (replaces the old Pip personality line):
+  - Lumi was once a small, timid wild Boki, a fox kit who was afraid of the dark.
+  - One night she caught a fallen star in an old brass lantern and slept curled around its light for years.
+  - The starlight changed her: glowing constellations in her fur, fairy wings, standing upright, and finally speech. She was the first Boki anyone had seen become something more.
+  - She still fears the dark, but her lantern's light heals, so she became a field medic who walks into the places that scare her for anyone who needs her.
+  - The star is her Mask relic, her oldest friend and her courage.
+- Use the lore in her hero-select bio, her wiki page and the website. Barks can lean on it: nervous in the dark, brave for others, talking to her star.
+- Visual rule: she still reads as a Hunter (upright, clothed, carrying gear); her outfit shows she has grown beyond being a Boki. Signature: an oversized lantern almost as tall as she is.
+- Art: v2 redesign in progress in `briefs/art-refs/pip_v2/`. Do NOT swap any Lumi art or model into the game until her master sheet is final (owner/art-coordinator says so). The name and lore text can ship now.
