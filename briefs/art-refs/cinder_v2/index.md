@@ -47,6 +47,6 @@ The turnaround is now complete and matches the master sheet's outfit. The hair i
 ## Weapon sheet (Nov 6, 22:18 ET)
 `cinder_v2_weapon_sheet.jpg` is the prop reference sheet: a compact brass flamethrower with a braided leather hose (two side views), and the copper backpack tank with a glass fuel window and leather straps (front, side, back), plus a small assembly view showing how the hose connects. Nano Banana Pro, 16:9, 4K, fresh generation. Refs: ref_props (the flamethrower design) and a crop of the tank from the turnaround.
 
-Known limits:
-- The top two gun views are the same side, so there is no top or muzzle-on view.
-- The braided hose loops from the grip back to the barrel collar on the gun views. Trust the assembly view: the hose runs from the grip to the base of the tank.
+Update (22:20): an edit pass replaced the duplicate side view with a top view (nozzle up), with the hose leaving the grip and ending in a brass connector. The pre-edit sheet is kept as `cinder_v2_weapon_sheet_alt.jpg`.
+
+Known limit: the hose routing on the two side views is still inconsistent: it loops into the barrel collar, and the right view shows two hose ends. Trust the top view and the assembly view: one braided hose runs from the base of the grip to the bottom of the tank.
