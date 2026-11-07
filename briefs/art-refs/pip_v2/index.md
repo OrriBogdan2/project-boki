@@ -131,3 +131,8 @@ Known limit: the hunter's expression reads slightly panicked.
 `meeko_v2_portrait.jpg`: the polish edit of the banded candidate (now `explorations/meeko_v2_portrait_banded.jpg`), with smooth gradients, soft fur and a starry night with clouds. The edit returned 3:4, so it was cropped locally to a square (top 10% trimmed, satchel cut at the bottom); the full tall version is `explorations/meeko_v2_portrait_tall.jpg`.
 
 **Meeko v2 set:** main design, turnaround, portrait, splash. Pending: the optional splash edit (the sun wards off the demons).
+
+## Splash: FINAL v2, sun wards off the demons (Nov 7, 02:34 ET)
+`meeko_v2_splash.jpg`: the edit on the healing splash at 16:9. The sun frowns and blasts a golden beam at the shadow creatures; the front beast recoils, shielding its eyes, and the others fade back. The cloud heals and Meeko treats the hunter. The previous version is `explorations/meeko_v2_splash_no_beam.jpg`.
+
+**Meeko v2 complete:** main design, turnaround, portrait, splash.
