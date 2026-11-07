@@ -19,7 +19,7 @@ const GROUND_OVERSPEED := 30.0   # how fast dash or pad speed bleeds off on the 
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by HunterMove.air_steer)
 const AIR_DECEL := 9.0           # let go on a ledge rise and you mostly stop
 const AIR_OVERSPEED := 3.0       # but momentum above run speed (a dash, a pad) still carries
-const GLIDE_ACCEL := 26.0        # up to cruise speed (6.5) in ~0.25s (was 10)
+const GLIDE_ACCEL := 16.25       # [game data] GlideTargetXYForce 162,500 / UE's 100 kg: a force, so steering has inertia
 const GLIDE_DECEL := 1.4         # let go of the keys and the glider drifts on, a long soft coast
 const GLIDE_OVERSPEED := 1.1     # extra glide momentum bleeds off slowly: a dash into a glide carries for seconds
 const GLIDE_TURN := 420.0        # deg/s the glider turns at cruise speed (90 degrees in ~0.2s); wider arcs when fast
@@ -60,8 +60,7 @@ const LEDGE_REACH := 2.8
 const LEDGE_CD := 0.45
 const FLOAT_SPEED := 12.0
 const GLIDE_FALL := 1.7
-const GLIDE_SPEED := 6.5       # (movefeel, owner: "feels weaker than SUPERVIVE") between [footage] ~5-5.5 and
-                               # [spec] eyeball 7-10 m/s, leaning to the stronger glide; was 5.0
+const GLIDE_SPEED := 5.0       # [game data] MaxGlide 500 uu/s (item 163: "too fast and controllable"; was 6.5)
 const GLIDE_TIME := 9.0        # (owner: "lasts too long, not punishing enough") was 14s of level glide before the heat ring turns hot
 const GLIDE_DRAG := 1.6         # speed lost per second while gliding (more when going fast)
 const GLIDE_MAX := 15.0
@@ -246,6 +245,7 @@ var backpack := 0              # the backpack tier worn (Backpacks): 0 is the Po
 var swap_hold := false
 var dash_at := -9.0           # when the last dash started, for perfect dodges
 var jump_at := -9.0           # when you last jumped off the ground (AirLimits: a move from before it is over)
+var launch_at := -1.0         # when the skyship launch started (DropLaunch), -1 once it is over
 var dodged := false        # F has to be let go between weapon swaps
 var lives := 1                # comes back this many times minus one before it's really out
 var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
@@ -880,7 +880,9 @@ static func glide_steer(hv: Vector2, wish: Vector2, gs: float, dt: float) -> Vec
 	if ws < 0.05:
 		# let go: drift on; anything above cruise bleeds a little faster
 		return hv.move_toward(Vector2.ZERO, (GLIDE_DECEL + (GLIDE_OVERSPEED if s > gs else 0.0)) * dt)
-	if s < 0.3:
+	if s <= gs + 0.05:
+		# at or under cruise, the glide force pulls you toward where you steer: turns and reversals take time
+		# (item 163, SUPERVIVE's GlideTargetXYForce), never a snap
 		return hv.move_toward(wish, GLIDE_ACCEL * dt)
 	var d := hv / s
 	var wd := wish / ws
@@ -2199,7 +2201,8 @@ func _physics(dt: float) -> void:
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
 			gs = DIVE_SPEED if diving else DROP_SPEED
-			hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)
+			if not DropLaunch.locked(self):
+				hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)     # (the launch flies its arc)
 			if drop_follow != null and m.skydrop:
 				hv = m.skydrop.follow_hv(self, gs)     # in formation: the leader steers
 		# wind roads carry you along (either way), updrafts lift you
@@ -2513,6 +2516,7 @@ var air_t := 0.0                # time since you left the ground
 func _update_glide(dt: float) -> void:
 	air_t = 0.0 if grounded else air_t + dt
 	glide_lift.tick(self, dt)
+	DropLaunch.tick(self)            # the squad launch over: break off, the glider opens (item 163)
 	if dropping:
 		# the opening drop: the glider stays open until you land, or until you sink below the islands
 		gliding = not grounded
