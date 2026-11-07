@@ -221,3 +221,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - Needed visuals: a short "pop into Wisp" effect, a Wisp idle/move loop, and a tiny "pop back" when revived (the hero reappears from the Wisp). One shared Wisp for now.
 - Gameplay of the downed state (timers, movement speed, revive channel, bleed-out) stays as it is today unless the owner changes it; only the presentation changes.
 - Wisps are a cosmetic slot we can sell: build it as a swappable look (a Wisp id on the player's cosmetics, default Wisp first), so new Wisp looks are data, not code. Original designs only (genre inspiration OK, no copied looks).
+
+## 2026-11-07 (owner): Nivi's title is **"Nivi the Snowglider"** (was "the Snowglide")
+- Display text only. Supersedes "Nivi the Snowglide" everywhere above (hero select, wiki, website title "Snowglider").
