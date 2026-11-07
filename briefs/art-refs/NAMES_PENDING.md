@@ -14,7 +14,7 @@ Rows are in the canonical Hunter order (owner Nov 7): use it wherever the game l
 | 6 | archer | **Lace**, the Red Stitch | Ravyl / Ravel / Lisette / Hem / Pin |
 | 7 | dredge | Grimble, the Scrap King | (unchanged) |
 | 8 | rimewright | **Neve**, the Snowglider | Claire / Nivi |
-| 9 | ostra | Motley, the Void Jester | (unchanged) |
+| 9 | mage | **Sparkle**, the Storm Chaser | Ryzz (too close to the slang "rizz" and to LoL's Ryze) |
 | 10 | bulwark | Mossy, **the Barnacle Knight** | Mossy the Sunken Bulwark |
-| 11 | mage | **Sparkle**, the Storm Chaser | Ryzz (too close to the slang "rizz" and to LoL's Ryze) |
+| 11 | ostra | Motley, the Void Jester | (unchanged) |
 | 12 | thief | Sable, the Silver Thief | (unchanged; retitle offered) |
