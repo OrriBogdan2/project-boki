@@ -1736,6 +1736,7 @@ func _decorate() -> void:
 		cm.set_shader_parameter("deep", (clouds[0] as Color).lightened(0.1))
 		cm.set_shader_parameter("light", (clouds[1] as Color).lightened(0.28))
 		cm.set_shader_parameter("glow_amount", 0.25)
+	cm.set_shader_parameter("abyss_dim", DepthCues.abyss_dim())
 	sea.material_override = cm
 	sea.position = Vector3(w / 2.0, -18.0, h / 2.0)
 	sea.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

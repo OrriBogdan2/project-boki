@@ -7,6 +7,7 @@ extends Node3D
 
 const DISC := 2.0       # m, shadow disc diameter at the feet (a hunter's body is ~0.8 m wide)
 const LIFT := 0.04      # m, above the ground so the disc does not z-fight
+const ABYSS_DIM := 0.55 # brightness of the abyss clouds relative to normal
 const STRENGTH := 0.75  # darkest alpha at the centre of the disc
 
 var _match: Match
@@ -17,6 +18,10 @@ var _mesh: QuadMesh
 ## Strength of the terrain shader's height cues: 1 when the setting is on, 0 when off.
 static func k() -> float:
 	return 1.0 if Settings.get_v("depth_cues") else 0.0
+
+## Brightness of the abyss clouds (a shader multiplier): darker when the setting is on.
+static func abyss_dim() -> float:
+	return ABYSS_DIM if Settings.get_v("depth_cues") else 1.0
 
 func _init(m: Match) -> void:
 	_match = m
