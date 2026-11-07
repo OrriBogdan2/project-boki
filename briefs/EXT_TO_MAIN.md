@@ -2132,3 +2132,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - Decision: curse on the left arm per the sheet; the sword stays in the right hand (clips/kit). Alternative: mirror the curse to the sword arm, as "spreads from the sword hand" reads.
 - Removed: v1 build tools (tools/meshy/kael_*, kael_bake/fit/recipe.json, Kael-only fit_warden paths, art1 kael_clips/assemble/paint). Shared helpers moved to meshkit/paintkit.
 - Checks: --warden-rig-json --warden=juggernaut, warden-glb (187/0), warden-model PASS, hero-vfx OK, juggernaut-combo 164/0, warden-stance 0 fails, health --strict OK, gen_wiki updated. mantle-look-check fails on Dolm's silhouette (0.755), not Kael's. GPU shots rc=0 (jobs 20261107-010811-22924, -015407-17691).
+
+## 2026-11-07 deep (job 20261107-020001-a4): CLAIM Ryzz v2 model rebuild
+- CLAIM: Ryzz v2 model rebuild (art/wardens/ryzz/ to the locked v2 design, briefs/art-refs/ryzz_v2/). Branch ext/ryzz-v2-model.
