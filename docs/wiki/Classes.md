@@ -4,8 +4,8 @@ A class is a whole character: its own dash, a passive with a resource it builds,
 click), a right-click ability with several variants, a utility on E and an ultimate on R. There are
 twelve, four in each weight class:
 
-- **Light:** [Ryzz](Class-Storm-Chaser.md) (load Sparks, then Wirerun through them), [Ravyl](Class-Red-Stitch.md) (pin people, then the big shot), [Nivi](Class-Snowglide.md) (skate on ice, chill foes, shelter the squad behind ice) and [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset).
-- **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Lumi](Class-Little-Lantern.md) (heal, carry the downed), [Kibo](Class-Stone-Seer.md) (raise rocks, punch them into the fight) and [Motley](Class-Void-Jester.md) (swell, plant a seed, trade places).
+- **Light:** [Ryzz](Class-Storm-Chaser.md) (load Sparks, then Wirerun through them), [Ravyl](Class-Red-Stitch.md) (pin people, then the big shot), [Nivi](Class-Snowglider.md) (skate on ice, chill foes, shelter the squad behind ice) and [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset).
+- **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Meeko](Class-Magic-Fox.md) (heal, carry the downed), [Kibo](Class-Stone-Seer.md) (raise rocks, punch them into the fight) and [Motley](Class-Void-Jester.md) (swell, plant a seed, trade places).
 - **Heavy:** [Mossy](Class-Sunken-Bulwark.md) (block, then smash them into walls), [Kael](Class-The-Unbroken.md) (rage, chain in, crush), [Grimble](Class-Scrap-King.md) (haul a foe in, drop the anchor) and [Cinder](Class-Mad-Pyromancer.md) (build Char, flash foes over).
 
 The weight class sets health, speed, mass (how far hits push you) and how many dash charges you get.
@@ -56,9 +56,9 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
 | [The Unbroken](Class-The-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Fusion) |
 | [Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
-| [Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
+| [Snowglider](Class-Snowglider.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
 | [Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none (Boki Fusion) |
-| [Little Lantern](Class-Little-Lantern.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none (Boki Fusion) |
+| [Magic Fox](Class-Magic-Fox.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none (Boki Fusion) |
 | [Mad Pyromancer](Class-Mad-Pyromancer.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Fusion) |
 | [Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Molten Guard | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
 | [Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
@@ -75,9 +75,9 @@ A new save picks 1 of 1 starters (Hired Gun) before the egg pick and plays the t
 | [Storm Chaser](Class-Storm-Chaser.md) | medium | Stagger 6 monsters with abilities | 6 |
 | [The Unbroken](Class-The-Unbroken.md) | easy | Knock 3 enemies into walls | 3 |
 | [Red Stitch](Class-Red-Stitch.md) | easy | Stun 4 enemies | 4 |
-| [Snowglide](Class-Snowglide.md) | medium | Slow 20 enemies | 20 |
+| [Snowglider](Class-Snowglider.md) | medium | Slow 20 enemies | 20 |
 | [Scrap King](Class-Scrap-King.md) | medium | Make it out carrying 8 items | 8 |
-| [Little Lantern](Class-Little-Lantern.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
+| [Magic Fox](Class-Magic-Fox.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
 | [Mad Pyromancer](Class-Mad-Pyromancer.md) | easy | Hit 3 enemies at once with one ability | 1 |
 | [Stone Seer](Class-Stone-Seer.md) | hard | Hit 3 enemies at once with one ability, 5 times, once 6 Hunters are open | 5 |
 | [Void Jester](Class-Void-Jester.md) | hard | Knock down 3 hunters while fused with your Boki, once 8 Hunters are open | 3 |
@@ -109,19 +109,19 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | Red Stitch | Your Boki lands 40 hits | 40 | Emote: Quiver Spin |
 | Red Stitch | Fly through 8 air rings | 8 | Glider: Paper Crane |
 | Red Stitch | Make it out after being knocked down | 1 | Title: Last Arrow |
-| Snowglide | Slow 40 enemies | 40 | Colourway: Hoarfrost |
-| Snowglide | Fly through 10 air rings | 10 | Glider: Frost Kite |
-| Snowglide | Revive 2 teammates | 2 | Emote: Snow Angel |
-| Snowglide | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
+| Snowglider | Slow 40 enemies | 40 | Colourway: Hoarfrost |
+| Snowglider | Fly through 10 air rings | 10 | Glider: Frost Kite |
+| Snowglider | Revive 2 teammates | 2 | Emote: Snow Angel |
+| Snowglider | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
 | Scrap King | Make it out carrying 10 items | 10 | Glider: Patchwork Wing |
 | Scrap King | Stun 10 enemies | 10 | Colourway: Rust and Brine |
 | Scrap King | Open 10 chests | 10 | Title: Salvager |
 | Scrap King | Bring 2 wild Boki home | 2 | Emote: Heave Ho |
-| Little Lantern | Revive 5 teammates | 5 | Skin: Moonbeam |
-| Little Lantern | Root 10 enemies | 10 | Emote: Big Hug |
-| Little Lantern | Bring 3 wild Boki home | 3 | Glider: Puffball Wings |
-| Little Lantern | Make it out of 5 expeditions | 5 | Title: Wisp Keeper |
-| Little Lantern | Open 8 chests | 8 | Banner: Moon Lantern |
+| Magic Fox | Revive 5 teammates | 5 | Skin: Moonbeam |
+| Magic Fox | Root 10 enemies | 10 | Emote: Big Hug |
+| Magic Fox | Bring 3 wild Boki home | 3 | Glider: Puffball Wings |
+| Magic Fox | Make it out of 5 expeditions | 5 | Title: Wisp Keeper |
+| Magic Fox | Open 8 chests | 8 | Banner: Moon Lantern |
 | Mad Pyromancer | Set 25 enemies burning | 25 | Colourway: Coal and Cinder |
 | Mad Pyromancer | Hit 3 enemies at once with one ability, 3 times | 3 | Trail: Ash Drift |
 | Mad Pyromancer | Open 6 chests | 6 | Banner: Lantern Flame |

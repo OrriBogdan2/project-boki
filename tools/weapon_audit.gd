@@ -21,7 +21,7 @@ const ITEMS := {
 }
 const LABEL := {"ashwick": "Cinder", "rimewright": "Nivi",
 	"juggernaut": "Kael", "thief": "Sable", "gunslinger": "Vex",
-	"dredge": "Grimble", "archer": "Ravyl", "bulwark": "Mossy", "tender": "Lumi", "dolm": "Kibo", "mage": "Ryzz",
+	"dredge": "Grimble", "archer": "Ravyl", "bulwark": "Mossy", "tender": "Meeko", "dolm": "Kibo", "mage": "Ryzz",
 	"ostra": "Motley"}
 ## arch -> [body ref file, rect (orig px)], [weapon ref file, rect]
 const REFS := {

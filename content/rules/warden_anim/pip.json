@@ -1,5 +1,5 @@
 {
-	"doc": "Lumi's hand-keyed clips (art/wardens/pip/pip.glb) and which game state plays which (scripts/heroes/warden_clips.gd). The lantern is her weapon: skinned on a hanging spring chain under hand.R, so the FX points ride that chain.",
+	"doc": "Meeko's hand-keyed clips (art/wardens/pip/pip.glb) and which game state plays which (scripts/heroes/warden_clips.gd). The lantern is her weapon: skinned on a hanging spring chain under hand.R, so the FX points ride that chain.",
 	"skinned_weapon": true,
 	"extra_bones": {"lid.L": "head", "lid.R": "head", "ear.L": "head", "ear.R": "head", "jaw": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R", "wing.L": "hips", "wing.R": "hips", "apron": "hips"},
 	"blade": {"root": "anchor_lantern_top", "tip": "weapon_muzzle", "bone": "spring_hanglantern_0"},

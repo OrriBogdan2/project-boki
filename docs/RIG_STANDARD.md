@@ -1,7 +1,7 @@
 # Hunter rig standard (locked, RIGFIX 2026-11-04)
 
 One skeleton, one set of attachment points and one set of scale rules for all 12 Hunters (Vex, Kael, Ravyl, Mossy,
-Ryzz, Nivi, Lumi, Kibo, Grimble, Motley, Sable, Cinder). Any rebuild of a Hunter's model (the face and texture
+Ryzz, Nivi, Meeko, Kibo, Grimble, Motley, Sable, Cinder). Any rebuild of a Hunter's model (the face and texture
 accuracy pass included) MUST keep everything below, so the animation work (HunterAnim and the kit moves) carries
 over to the new model unchanged. `--rig-standard-check` asserts it; `docs/art/wardens/RIG_CONTRACT.md` has the
 full bone table and loader details.

@@ -1,11 +1,11 @@
 extends RefCounted
 ## --hunter-unlock-check (alias --class-unlock-check): Hunter unlocks and mastery (docs/decisions/0005,
 ## content/rules/class_unlock.json, content/rules/hunter_viewer.json).
-##   1. the data: Vex first (the one starter), a second Relic picked from Kael, Lumi or Cinder, one challenge per
+##   1. the data: Vex first (the one starter), a second Relic picked from Kael, Meeko or Cinder, one challenge per
 ##      other Hunter with its tier,
 ##      3-5 mastery goals each that mix kinds, every stat measurable, the viewer's kit moves
 ##   2. mastery rewards are cosmetic only; gliders change no handling
-##   3. Vex is always owned; the starter pick is Vex alone; after the first expedition exactly 1 of Kael, Lumi and
+##   3. Vex is always owned; the starter pick is Vex alone; after the first expedition exactly 1 of Kael, Meeko and
 ##      Cinder opens as the second Relic (nothing else can be picked); challenge-only Hunters can't be picked
 ##   4. challenge progress makes a Hunter ready (never open by itself); mastery counts per Hunter
 ##   5. the feats HunterFeats records from the combat signals
@@ -21,7 +21,7 @@ extends RefCounted
 
 const FIRST := "gunslinger"
 const STARTERS := ["gunslinger"]
-const SECOND := ["juggernaut", "tender", "ashwick"]      # the second-Relic choices: Kael, Lumi, Cinder
+const SECOND := ["juggernaut", "tender", "ashwick"]      # the second-Relic choices: Kael, Meeko, Cinder
 const CHALLENGE_ONLY := ["ostra", "tender", "dolm"]      # (tender is also a second-Relic choice)
 ## Which stats count as which kind of goal (the owner's mix: kit feats, team play, exploration,
 ## extraction and Boki goals).
@@ -110,7 +110,7 @@ func _rules() -> void:
 	ok(ClassUnlock.starters() == STARTERS, "Vex is the one starter, by id: %s" % str(ClassUnlock.starters()))
 	ok(ClassUnlock.picks_needed() == 1, "the starter pick is 1 of them")
 	ok(ClassUnlock.second_picks() == SECOND,
-		"the second Relic is a pick of Kael, Lumi or Cinder: %s" % str(ClassUnlock.second_picks()))
+		"the second Relic is a pick of Kael, Meeko or Cinder: %s" % str(ClassUnlock.second_picks()))
 	ok(CHALLENGE_ONLY.all(func(a): return not ClassUnlock.starters().has(a)),
 			"%s are challenge-only" % str(CHALLENGE_ONLY.map(func(a): return Arch.name_of(a))))
 	var stats: Dictionary = ClassUnlock.rules()["stats"]
@@ -257,10 +257,10 @@ func _creation_rules() -> void:
 	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == [FIRST],
 			"a knocked-out first expedition offers the second Relic, nothing opens (%s)" % str(ClassUnlock.open_ids()))
 	var refused_second := ["archer", "thief", FIRST].all(func(a): return not ClassUnlock.choose_second(a))
-	ok(refused_second, "only Kael, Lumi or Cinder can be the second Relic")
+	ok(refused_second, "only Kael, Meeko or Cinder can be the second Relic")
 	ok(ClassUnlock.choose_second("tender") and ClassUnlock.open_ids() == [FIRST, "tender"]
 			and ClassUnlock.pending_reveal() == ["tender"],
-				"Lumi opens, with her reveal queued (%s)" % str(ClassUnlock.open_ids()))
+				"Meeko opens, with her reveal queued (%s)" % str(ClassUnlock.open_ids()))
 	ok(not ClassUnlock.second_pending() and not ClassUnlock.choose_second("juggernaut"), "the second pick is made once")
 	ok(not ClassUnlock.is_bonus("juggernaut") and ClassUnlock.status("juggernaut") == "locked"
 			and ClassUnlock.requirement("juggernaut").begins_with(ClassUnlock.challenge_text("juggernaut")),
@@ -502,7 +502,7 @@ func _new_game_flow(tree: SceneTree) -> void:
 	hx.queue_free()
 	for i in 3: await tree.process_frame
 
-## Back home after the first expedition: once the screen is clear the three second Relics (Kael, Lumi, Cinder)
+## Back home after the first expedition: once the screen is clear the three second Relics (Kael, Meeko, Cinder)
 ## drift out of the portal and wait there; walking up to one previews it, interact puts it on and its reveal
 ## plays; the other two go back into the portal. Nothing pops up over the farm.
 func _first_return(tree: SceneTree) -> void:
@@ -525,7 +525,7 @@ func _first_return(tree: SceneTree) -> void:
 		return
 	ok(offer.phase == "ready", "the Relics come out once the screen is clear (%s)" % offer.phase)
 	var ids := offer.relics.map(func(r): return (r as MaskRelic).id)
-	ok(ids == SECOND, "Kael, Lumi and Cinder drift out of the portal (%s)" % str(ids))
+	ok(ids == SECOND, "Kael, Meeko and Cinder drift out of the portal (%s)" % str(ids))
 	var portal: Vector3 = hm.spots["portal"]
 	var by_portal: bool = offer.relics.all(func(r): return Vector2((r as Node3D).position.x - portal.x,
 			(r as Node3D).position.z - portal.z).length() < 4.0)
@@ -544,7 +544,7 @@ func _first_return(tree: SceneTree) -> void:
 	var clips := card.find_children("*", "AbilityClip", true, false) if card else []
 	ok(card != null and String(card.get_meta("mask_preview")) == "tender" and clips.size() == 2
 			and _any_text(card, HunterViewer.display_name("tender")),
-			"walking up to Lumi shows its name and two ability clips (%d)" % clips.size())
+			"walking up to Meeko shows its name and two ability clips (%d)" % clips.size())
 	var it: Dictionary = offer.find(Vector2(pip.position.x, pip.position.z))
 	ok(String(it.get("kind", "")) == "mask" and offer.label(it) == "Put on %s" % HunterViewer.display_name("tender"),
 			"interact there reads: %s" % (offer.label(it) if not it.is_empty() else "(nothing)"))

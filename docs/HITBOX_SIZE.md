@@ -17,6 +17,6 @@ Changing a hero's hit radius is one line (`body.hit_r`). The creator's look slid
 | thief | Sable | 0.96 | 0.384 | lean |
 | rimewright | Nivi | 0.95 | 0.380 | slight |
 | ashwick | Cinder | 0.94 | 0.376 | low and hunched |
-| tender | Lumi | 0.85 | 0.340 | smallest (at the band's floor: item 108 shrank her model, not this) |
+| tender | Meeko | 0.85 | 0.340 | smallest (at the band's floor: item 108 shrank her model, not this) |
 
 Shots connect inside `hit_r + Match.HIT_SLACK (0.08) + the shot's radius`. `--hitbox-size-check` asserts the band, the drawn circle radius, and a shot just inside and outside the circle for the smallest and biggest.

@@ -2,7 +2,7 @@ class_name ClassUnlock
 extends RefCounted
 ## Relic unlocks and mastery (docs/decisions/0005; internally Hunters, archetypes and the save key "classes").
 ## A new save wears Vex first (the one starter, taken before the egg pick) and plays the tutorial as Vex. After
-## the first finished expedition (the tutorial) it picks 1 of 3 as the second Relic: Kael, Pip or Cinder
+## the first finished expedition (the tutorial) it picks 1 of 3 as the second Relic: Kael, Meeko or Cinder
 ## ("second_picks"). Every other Relic opens through its own challenge (content/rules/class_unlock.json "unlock"),
 ## counted across every expedition whoever you play. A done challenge never opens a Hunter by itself: it is
 ## unlocked by holding the button on the Relics screen (HoldUnlock calls unlock()). Each Hunter also has

@@ -7,7 +7,7 @@ extends RefCounted
 ## charges. ArchKit runs one hunter's kit; this file is the data side: lookups, weapon families,
 ## and the kin's infusion (how a kin's typing fills an archetype ability's sockets, ARCHETYPES §4).
 
-const ORDER := ["gunslinger", "bulwark", "mage", "juggernaut", "archer", "rimewright", "dredge", "tender", "ashwick", "dolm", "ostra", "thief"]   # roster order: Vex, Mossy, Ryzz, Kael, Ravyl, Nivi, Grimble, Lumi, Cinder, Kibo, Motley, Sable
+const ORDER := ["gunslinger", "bulwark", "mage", "juggernaut", "archer", "rimewright", "dredge", "tender", "ashwick", "dolm", "ostra", "thief"]   # roster order: Vex, Mossy, Ryzz, Kael, Ravyl, Nivi, Grimble, Meeko, Cinder, Kibo, Motley, Sable
 const DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}
 
 static func def(id: String) -> Dictionary:

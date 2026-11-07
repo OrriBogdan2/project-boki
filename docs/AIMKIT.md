@@ -84,7 +84,7 @@ Params: `from` (the hunter), `dir` (the aim), `len` (6), `width` (0.9), `k`, `le
 
 ### Dotted lane
 ```gdscript
-AimKit.dotted(h, "rmb", {"len": 15.0})     # Lumi seed: a faint 0.4 bh strip with dots, to max range
+AimKit.dotted(h, "rmb", {"len": 15.0})     # Meeko seed: a faint 0.4 bh strip with dots, to max range
 ```
 Params: `from`, `dir`, `len` (8), `width` (0.72), `gap` (0.6 m between dots), `dot` (0.06 m radius).
 
