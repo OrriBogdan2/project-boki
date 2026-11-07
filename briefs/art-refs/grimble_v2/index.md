@@ -37,3 +37,4 @@ Base: the original `briefs/art-refs/grimble_turnaround.png`. The old "Dredge" sh
 
 ## Turnaround: FINAL (Nov 6, 20:18 ET)
 `grimble_v2_turnaround.jpg`: the front view was replaced by a single-figure generation (`grimble_v2_front.jpg`). The loupe lenses were added by a single-figure edit (owner-approved, 20:21 ET), so his smug squinting eye is visible. The front figure is pasted into the sheet, scaled to the old height and background-matched. Side and back views are unchanged.
+- Master sheet updated (Nov 6, 20:24 ET): three-lens loupe in every view. Known flaws: the snarl and squint heads show a nose (canon is no nose; follow the turnaround and portrait); no bone-hook close-up.
