@@ -56,3 +56,14 @@ Known limits:
 - The side view shows the coat front closed (the plunge isn't visible in profile); use the front and 3/4 views.
 - Her irises glow brighter violet than on the master sheet (dark lilac); the owner can pick.
 - The knife blades still poke out below the sheaths.
+
+## Splash: "The Rafters" (Nov 6, 23:41 ET)
+`sable_v2_splash.jpg`, 5504×3072: she crouches on a ceiling rafter under a moonlit skylight, pistols crossed, grinning down at a smoky mob meeting (thugs, an orc and armoured bodyguards) around a card table with an open strongbox holding a glowing violet jewel. Nano Banana Pro, 16:9, 4K, a fresh generation (refs: the turnaround and the master sheet; owner's idea and run).
+
+Local fix (not AI): garbled "Contracts" lettering on three papers was painted out.
+
+`explorations/sable_v2_splash_alt.jpg`, the other run, was not chosen: it shows two braids, hides the gem behind her arms, and has a flatter pose.
+
+Known limits: the small glowing creatures read as butterflies rather than moths; some bodyguards are armoured knights rather than mobsters.
+
+Portrait: candidate A saved (`explorations/sable_v2_portrait_candidate_A.jpg`): wink, knife and moth on her antenna. A fix-up edit is pending: the hand appears fused to the knife, and the moth looks like a butterfly.
