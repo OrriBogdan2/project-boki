@@ -2449,3 +2449,35 @@ Please look at:
 
 READY ext/cinder-flame-queen c3f4f1729
 READY ext/downed-wisp bdca844e (fixes --hudref-check)
+
+## READY 2026-11-07: Sable v2 model rebuild (ext/sable-v2-model, 4281b56a2)
+Sable (id thief) is rebuilt from sable_v2_turnaround.jpg with the ART-1 pipeline: 14,893 tris, one 2048 atlas, 8 materials, 8034 verts. Shared 18-bone armature, every FX point and anchor name, the clip set and the kit wiring are kept. Commits 1c5d44fac (model), c5b34e2ec (scripts, height check, run log, debt note), 4281b56a2 (toon light tuning). 121 Meshy credits. Raw files in ~/meshy/sable_v2, not in git. No Net or save change.
+
+Renders in briefs/art-refs/sable_v2/ingame/:
+- before_after_blender.png: old model on top, new below, same Blender light. v1 had no engine shots, so the before is not an engine render.
+- Engine, final art (jobq 20261107-163505-12293): turnaround_close, turnaround_game, front_34, back_34, closeup_front, moves_close_1.
+- match.png (jobq 20261107-162656-28272): match camera. Taken one step before the closed-lid colour fix, which does not show at that distance.
+
+Weapon scale vs the sheet (FIDELITY_CHECKLIST):
+| Item | Sheet | Model |
+| Pistol length | about .22 of body height, about .39 rig | barrel .365 plus stock, length unchanged |
+| Barrel diameter | about .038 | about .045, a little thick |
+| Knife | about .34 (master) | about .39, a little long |
+
+Checks, all pass on the final build: --warden-rig-json thief (18 bones), --warden-glb-check, --warden-model-check, --rig-standard-check (0 failures), --hero-check --hero=thief (0 failures), --hero-vfx-check, health.py --strict. gen_wiki run.
+Not completed: --weapon-clip-check timed out at 170s under load and was not rerun.
+
+Decisions (alternative in brackets):
+- Two knives on each hip, as the turnaround side view shows. (One per hip; the master shows two on her right only.)
+- Pistols are procedural silver and wood, not projected from the sheet. (Projected from the sheet.)
+- height_3d is 1.03, was 1.13: the antennae stand lower than the old wings.
+- anchor_bola stays on the hips by name only.
+- Skin sits a step below the hair and cooler than the sheet preview, and glow, gem and muzzle halos are lowered in warden_look.json, because engine light runs about 1.35x brighter than Blender.
+- Portrait and splash swap left out, not in this task.
+
+Please look at:
+- Pistol stocks read brighter red than the sheet's deep maroon in the engine; barrels go pale with the muzzle glow.
+- Braid is beaded close up and the fuzz is a notched sheet (DEBT.md).
+- Slight violet at the collar edge of the neck, and a few specks about 1.5mm wide at the old mouth crease, not visible in play.
+
+READY ext/sable-v2-model 4281b56a2
