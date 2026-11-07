@@ -15,7 +15,7 @@ files in ~/meshy/kael_v2/ (never in git; `build.sh` there reruns everything). Ru
 - **Edits:** each view loses both wrist chains (cuffs kept) and the long sash tails (knot kept); nothing else.
 - **Scan:** meshy-7.1, no pose (the A-pose run opened his fists and gloved the cursed hand black: not used). It
   keeps his own head, white mane, scarf over the mouth, the two-tone torn shawl, the X-harness, belts, trousers,
-  knee guards, boots, the black right glove and the bare crimson left hand.
+  knee guards, boots, the black right glove and the bare crimson left hand (swapped to the sword arm in the finish).
 - **Rig:** the v2 sheet is a tall build (8 heads, long legs). juggernaut.json `body`: legs 1.55 -> 2.05, head
   0.62 -> 0.48, neck -0.02 -> -0.012 put the rig's joints on the scan's (hip 0.52, shoulder 0.79, head pivot 0.87
   of his height); `size` 1.06 -> 0.97 keeps his height in the game (the owner's Nov 4 size).
@@ -23,10 +23,11 @@ files in ~/meshy/kael_v2/ (never in git; `build.sh` there reruns everything). Ru
   girth 1.07 (torso) and 1.1 (arms) for the sheet's broad build; decimated to 11k triangles.
 - **Finish** (kael_finish): the scan's colour baked onto the low mesh (one 2048 atlas, the scripted pieces on flat
   cells at its right edge). Slots by colour and by distance off the body (the shawl and scarf stand off the skin).
-- **Curse:** on his LEFT arm and hand and the chest, as all four turnaround views draw it (the sword stays in his
-  right hand, as the clips and kit hold it). The veins are a 2048 emission map (kael_emit), tinted by
-  juggernaut.json `model_glow.core` (crimson); the arm blooms (warden_look `kael`) sit on anchor_arm_up / _elbow /
-  _fore, now on the left arm.
+- **Curse:** on his RIGHT (sword) arm and hand and the chest. The scan draws it on the left, so kael_finish bakes the
+  scan twice (once mirrored in x) and the arm, hand and chest skin take the mirrored bake: the veined arm and bare
+  crimson hand land on the sword arm, the black glove on the left. The veins are a 2048 emission map (kael_emit),
+  tinted by juggernaut.json `model_glow.core` (crimson); the arm blooms (warden_look `kael`) sit on anchor_arm_up /
+  _elbow / _fore, on the right arm.
 - **Cards** (`card-kael`, a 512x256 RGBA kael_cards atlas): the shawl's torn hem (a card under each rim edge, down
   the shawl's own surface) and two sash tails from the knot at his right hip, placed on the trousers by ray.
 - **Wrist chains:** short chains from each cuff, two bones each on the hang chains the game knows

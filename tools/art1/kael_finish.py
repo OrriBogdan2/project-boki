@@ -1,6 +1,6 @@
 """ART-1 Kael v2, stage B: join, unwrap, bake the scan's paint, the curse veins' emission, the alpha cards, skin, export.
 One 2048 colour atlas (the scan's paint; the scripted pieces on flat cells at its right edge), a 2048 emission map (the
-curse veins on his left arm and chest: model_glow core tints it), a small RGBA card atlas (the shawl's torn hem and the
+curse veins on his right arm and chest: model_glow core tints it), a small RGBA card atlas (the shawl's torn hem and the
 sash tails). The armature is the contract's (kael_rig.json) plus the spring chains the game already knows (mane, the
 cuffs' hang chains). The sword is the unskinned `weapon` (kael_pieces.sword, Gun space).
 Run: blender -b --factory-startup --python tools/art1/kael_finish.py -- <source.blend> <rig.json> <out.glb>"""
@@ -29,7 +29,7 @@ CELL = {"metal-chain": "#77737b", "metal-sword": "#c9c1c9", "metal-sword_edge": 
 SASH_C, HEM_RED_C, HEM_BONE_C = (0.0, 0.0, 0.34, 1.0), (0.35, 0.0, 0.66, 1.0), (0.67, 0.0, 1.0, 1.0)
 SLOTS = ["skin", "hair", "cloth", "leather", "metal"]
 MATS = [s + "-kael" for s in SLOTS] + ["metal-chain", "card-kael"]
-CURSE_BONES = ("upper_arm.L", "forearm.L", "hand.L")
+CURSE_BONES = ("upper_arm.R", "forearm.R", "hand.R")   # the sword arm (the scan draws the curse on the left)
 ARM_OFF = 0.06                       # m from the upper arm's bone: further out is the shawl
 TORSO_R = (0.2, 0.135)               # m, the torso's skin ellipse (x, y) round the spine: outside it is the shawl
 SASH_OUT = 0.018                     # m, the sash tails off the trousers' front
@@ -141,16 +141,16 @@ ob.select_set(True)
 bpy.context.view_layer.objects.active = ob
 bpy.ops.object.bake(type="EMIT", use_clear=True, margin=8)
 COL = np.array(atlas.pixels[:], np.float32).reshape(ATLAS, ATLAS, 4)[..., :3].copy()
+src.scale.x = -1                     # the scan mirrored: its cursed left arm and chest land on his right (sword) side
+bpy.context.view_layer.update()
+bpy.ops.object.bake(type="EMIT", use_clear=True, margin=8)
+COL_MIR = np.array(atlas.pixels[:], np.float32).reshape(ATLAS, ATLAS, 4)[..., :3].copy()
 print("baked")
 
 # ---- per face: its paint, its slot
 fuv = np.zeros((len(me.polygons), 2))
 for p in me.polygons:
     fuv[p.index] = luv[list(p.loop_indices)].mean(0)
-px = np.clip((fuv * ATLAS).astype(int), 0, ATLAS - 1)
-fcol = COL[px[:, 1], px[:, 0]]
-mx, mn = fcol.max(1), fcol.min(1)
-sat = (mx - mn) / np.maximum(mx, 1e-4)
 fc = np.array([np.mean([verts[i] for i in f], axis=0) for f in faces])
 fw = [{} for _ in faces]
 for i, f in enumerate(faces):
@@ -171,24 +171,7 @@ for i, b in enumerate(dom):
         off[i] = math.hypot(x - math.copysign(arm_x, x), y) > ARM_OFF
     elif b in ("hips", "root"):
         off[i] = z > belt_z and (z > sh_z - 0.03 or math.hypot(x / TORSO_R[0], y / TORSO_R[1]) > 1.0)
-curse_f = np.array([sum(w.get(b, 0) for b in CURSE_BONES) > 0.5 for w in fw]) & ~off
-chest_f = np.array([b in ("hips", "root") for b in dom]) & ~off & (fc[:, 2] > belt_z + 0.04)
-red = (fcol[:, 0] > 0.25) & (fcol[:, 0] - np.maximum(fcol[:, 1], fcol[:, 2]) > 0.15) & (sat > 0.5)
-hair = (sat < 0.1) & (mx > 0.75) & ((fc[:, 2] > neck_z - 0.02) | (fc[:, 1] < -0.06))
-dark = mx < 0.33
-grey = (sat < 0.14) & (mx >= 0.33) & ~hair
-slot = np.full(len(faces), "skin", dtype=object)
-slot[red & ~curse_f & ~chest_f] = "cloth"
-slot[off & ~hair] = "cloth"
-slot[dark] = "leather"
-slot[grey & ~off] = "metal"
-slot[hair] = "hair"
-head_f = np.array([b == "head" for b in dom])
-slot[head_f & ~hair & ~red & ~dark] = "skin"
-for i, p in enumerate(me.polygons):
-    p.material_index = MATS.index(fsrc[i]) if i >= N_LOW else MATS.index(slot[i] + "-kael")
-print("slots", {s: int((slot[:N_LOW] == s).sum()) for s in SLOTS})
-
+# ---- the curse side is mirrored in from the scan: arm, hand and chest skin take the mirrored bake (the shawl keeps its own)
 # ---- texel maps: which face, where
 ftex = -np.ones((ATLAS, ATLAS), np.int32)
 for p in me.polygons:
@@ -213,16 +196,43 @@ for p in me.polygons:
         ok = (xi >= 0) & (xi < ATLAS) & (yi >= 0) & (yi < ATLAS)
         ftex[yi[ok], xi[ok]] = p.index
 
-# ---- the curse: his left arm, hand and the chest's veins glow (emission); the hand is bare crimson skin
-zone = np.zeros((ATLAS, ATLAS), bool)
 okf = ftex >= 0
+arm_f = np.array([d.startswith(("upper_arm", "forearm", "hand")) for d in dom]) & ~off
+chest_all = np.array([d in ("hips", "root") for d in dom]) & ~off & (fc[:, 2] > belt_z + 0.04)
+mir = np.zeros((ATLAS, ATLAS), bool)
+mir[okf] = (arm_f | chest_all)[ftex[okf]]
+COL[mir] = COL_MIR[mir]
+px = np.clip((fuv * ATLAS).astype(int), 0, ATLAS - 1)
+fcol = COL[px[:, 1], px[:, 0]]
+mx, mn = fcol.max(1), fcol.min(1)
+sat = (mx - mn) / np.maximum(mx, 1e-4)
+curse_f = np.array([sum(w.get(b, 0) for b in CURSE_BONES) > 0.5 for w in fw]) & ~off
+chest_f = np.array([b in ("hips", "root") for b in dom]) & ~off & (fc[:, 2] > belt_z + 0.04)
+red = (fcol[:, 0] > 0.25) & (fcol[:, 0] - np.maximum(fcol[:, 1], fcol[:, 2]) > 0.15) & (sat > 0.5)
+hair = (sat < 0.1) & (mx > 0.75) & ((fc[:, 2] > neck_z - 0.02) | (fc[:, 1] < -0.06))
+dark = mx < 0.33
+grey = (sat < 0.14) & (mx >= 0.33) & ~hair
+slot = np.full(len(faces), "skin", dtype=object)
+slot[red & ~curse_f & ~chest_f] = "cloth"
+slot[off & ~hair] = "cloth"
+slot[dark] = "leather"
+slot[grey & ~off] = "metal"
+slot[hair] = "hair"
+head_f = np.array([b == "head" for b in dom])
+slot[head_f & ~hair & ~red & ~dark] = "skin"
+for i, p in enumerate(me.polygons):
+    p.material_index = MATS.index(fsrc[i]) if i >= N_LOW else MATS.index(slot[i] + "-kael")
+print("slots", {s: int((slot[:N_LOW] == s).sum()) for s in SLOTS})
+
+# ---- the curse: his right (sword) arm, hand and the chest's veins glow (emission); the hand is bare crimson skin
+zone = np.zeros((ATLAS, ATLAS), bool)
 zone[okf] = (curse_f | (chest_f & (fc[:, 1] > 0)))[ftex[okf]] & (slot[ftex[okf]] != "leather")
-hand_l = np.array([w.get("hand.L", 0) > 0.5 for w in fw]) & (slot != "metal")
+hand_c = np.array([w.get("hand.R", 0) > 0.5 for w in fw]) & (slot != "metal")
 r, g, b = COL[..., 0], COL[..., 1], COL[..., 2]
 vein = smooth(0.18, 0.4, r - np.maximum(g, b)) * smooth(0.35, 0.6, r)
 EMIT = np.where(zone, vein, 0.0)
 hand_t = np.zeros((ATLAS, ATLAS), bool)
-hand_t[okf] = hand_l[ftex[okf]]
+hand_t[okf] = hand_c[ftex[okf]]
 lum = COL.mean(-1)
 crimson = np.array([0.42, 0.05, 0.08]) * (0.55 + 0.9 * lum[..., None])
 COL[hand_t] = np.maximum(COL[hand_t] * [1.0, 0.3, 0.32], crimson[hand_t])
@@ -422,12 +432,12 @@ for vi, d in enumerate(vw):
         g = ob.vertex_groups.get(b) or ob.vertex_groups.new(name=b)
         g.add([vi], w / tot if tot > 0 else 0, "REPLACE")
 
-# ---- FX points: the arm anchors sit on the cursed (left) arm, its glow blooms there
-up, el, hd = WK.bone_head(rig, "upper_arm.L"), WK.bone_head(rig, "forearm.L"), WK.bone_head(rig, "hand.L")
+# ---- FX points: the arm anchors sit on the cursed (right, sword) arm, its glow blooms there
+up, el, hd = WK.bone_head(rig, "upper_arm.R"), WK.bone_head(rig, "forearm.R"), WK.bone_head(rig, "hand.R")
 A = {"anchor_head_top": ("head", (0, 0, rig["land"]["crown"] + 0.07)), "anchor_chest": ("hips", (0, 0.1, up.z - 0.14)),
-     "anchor_arm_up": ("upper_arm.L", tuple(up + (el - up) * 0.45 + Vector((-0.02, 0.03, 0))))
-     , "anchor_arm_elbow": ("forearm.L", tuple(el + Vector((-0.01, 0.03, 0)))),
-     "anchor_arm_fore": ("forearm.L", tuple(el + (hd - el) * 0.5 + Vector((-0.01, 0.03, 0))))}
+     "anchor_arm_up": ("upper_arm.R", tuple(up + (el - up) * 0.45 + Vector((0.02, 0.03, 0))))
+     , "anchor_arm_elbow": ("forearm.R", tuple(el + Vector((0.01, 0.03, 0)))),
+     "anchor_arm_fore": ("forearm.R", tuple(el + (hd - el) * 0.5 + Vector((0.01, 0.03, 0))))}
 for nm, (bn, at) in A.items():
     WK.anchor(arm, bn, nm, at)
 
