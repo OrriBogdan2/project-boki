@@ -2371,3 +2371,10 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 - Adds to round 1: abyss clouds darkened x0.55 (cloud sea + layers, `abyss_dim`) and lower terraces up to 20% darker (terrain shader); both behind `depth_cues` (Settings > Accessibility). Gameplay/camera/aim untouched.
 - Before/after (same seed 77, same spots): briefs/camera_depth/{before,after}_{a_edge,b_step,c_low}.png, round-1 shots after1_*. Notes: briefs/CAMERA_DEPTH.md. Branch briefs: ext/agent-briefs.
 - Checks: health --strict OK; --depth-shots GPU job rc 0. Hitch/perf and full suite NOT run (usage). Not done: projectile shadows.
+
+## 2026-11-07 deep (job 20261107-143004-a4): READY ext/kael-v2-model (ca52dc648), supersedes the 3419a661a READY above
+- Re-checked the build job's two commits (curse on the sword arm 7fc2d59c3, 49 retargeted clips 3419a661a). Rest rotations: of the 32 shared skin bones only the 10 spring_mane_l/r bones differ (they're dropped, the spring chains drive them), so the clips copy as is.
+- Fixed a regression (ca52dc648): joining the sword into Body removed the `weapon` node, so warden_look's two `"at": "weapon"` blade blooms were silently skipped and the blade rendered flat black. A bloom entry can now take `"to"` (a second anchor on the same bone): `count` puffs from the anchor to it. Kael's blade blooms run anchor_blade_root -> weapon_muzzle with the old counts and colours. His `weapon_scale` 0.85 is gone (it reached nothing; GUN_M bakes it in). Net +10/-8 lines.
+- Checks on ca52dc648 (all rc 0): --clip-check 0 failures, --warden-glb-check PASS, --hero-vfx-check OK, --juggernaut-combo-check 164/0 (on 3419a661a; ca52dc648 changes no kit code), health.py --strict OK.
+- GPU job 20261107-144058-18235: briefs/art-refs/kael_v2/clips/bloom_front_34.jpg, bloom_turnaround_game.jpg, bloom_poses_game.jpg (compare after_front_34.jpg = without the fix, before_turnaround_game.jpg = a22927c1d).
+- Still open (from the build job): some v1 clips were made for kit 113 (lunge, wave, meteor, dash), so re-fit them when 113 lands. The skinned blade casts no ground shadow now (the old `weapon` node did).
