@@ -5,5 +5,10 @@
 		"cm": 32,
 		"kg": 2.5,
 		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
+	"shiny": {
+		"color": "#bd55a1",
+		"belly": "#e0e8f0",
+		"glow": "#9affa9"
 	}
 }
