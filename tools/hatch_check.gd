@@ -165,7 +165,7 @@ func _first_mask(tree: SceneTree) -> void:
 	var viewer := moment.intro.find_children("*", "HunterViewer", true, false)
 	var clips := moment.intro.find_children("*", "AbilityClip", true, false)
 	ok(viewer.size() == 1 and _texts(moment.intro).has(HunterViewer.display_name("gunslinger"))
-		and HunterViewer.display_name("gunslinger") == "Vex, the Hired Gun", "then Vex, the Hired Gun")
+		and HunterViewer.display_name("gunslinger") == "Vex the Hired Gun", "then Vex the Hired Gun")
 	ok(clips.size() == HunterViewer.CLIP_SLOTS.size(), "with a clip for each ability (%d)" % clips.size())
 	var gender := RegEx.create_from_string("(?i)\\b(female|male|she|her|he|his|woman|man)\\b")
 	var said: Array = _texts(moment.intro).filter(func(t): return gender.search(String(t)) != null)

@@ -70,13 +70,10 @@ static func key_for(slot: String) -> String:
 		return "auto"
 	return Settings.key_cap(String(SLOT_ACTIONS[slot]))
 
-## "Vex, the Hired Gun": the Relic's name and title (a title starting with "The" keeps one "the").
+## "Vex the Hired Gun": the Relic's name and title (the shared HeroTitle form).
 static func display_name(hunter_id: String) -> String:
-	var title := Arch.name_of(hunter_id)
-	if title.begins_with("The "):
-		title = title.substr(4)
 	var base := HeroTitle.base_name(hunter_id)
-	return "%s, the %s" % [base, title] if base != "" else title
+	return HeroTitle.label(base, hunter_id) if base != "" else Arch.name_of(hunter_id)
 
 static func rules() -> Dictionary:
 	if _rules.is_empty():
@@ -179,7 +176,7 @@ func _rebuild_body() -> void:
 	_cols.add_child(right)
 	select(0)
 
-## The face, "Vex, the Hired Gun" and what it brings. No story or gender here: the clips do the talking.
+## The face, "Vex the Hired Gun" and what it brings. No story or gender here: the clips do the talking.
 func _header(col: Color) -> Control:
 	var head := UI.hbox(12)
 	head.add_child(ClassCard.portrait(id, PORTRAIT_PX))

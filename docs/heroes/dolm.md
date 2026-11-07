@@ -1,4 +1,4 @@
-# Stone Seer (base character Kibo; archetype id `dolm`, Medium; was "Dolm")
+# Kibo the Stone Seer (archetype id `dolm`, Medium; was "Dolm")
 
 Internal note: the behaviour reference is the hero named in the Inspired-by table in docs/ARCHETYPES.md. Nothing below is
 player-facing; every name, number and word in the shipped game is our own (renames: Stonesight -> Tremor Sense, Landslide ->

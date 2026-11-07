@@ -40,7 +40,7 @@ func run(main: Node) -> void:
 		var retired := RegEx.create_from_string(RETIRED_TERMS).search(_plain_text(data))
 		ok(retired == null, "%s: no retired term in its text (%s)" % [id, retired.get_string() if retired else ""])
 		var shown_name := HunterViewer.display_name(id)
-		ok(shown_name.begins_with(HeroTitle.base_name(id) + ", the ") and not shown_name.contains("the The"),
+		ok(shown_name.begins_with(HeroTitle.base_name(id) + " the ") and not shown_name.contains("the The"),
 				"%s shows as '%s', with no gender line" % [id, shown_name])
 	print("HEROTITLE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

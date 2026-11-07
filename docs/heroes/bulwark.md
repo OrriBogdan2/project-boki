@@ -1,4 +1,4 @@
-# Sunken Bulwark (base character Mossy; id `bulwark`, Heavy) - fidelity pass (hero sheet bjorn.md)
+# Mossy the Sunken Bulwark (id `bulwark`, Heavy) - fidelity pass (hero sheet bjorn.md)
 
 Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Sunken Bulwark; the id, files and save keys stay `bulwark`. The minigun ability that was also called "Bulwark" (content/abilities/bulwark.json) is now Bracewall.
 

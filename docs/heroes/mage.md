@@ -1,4 +1,4 @@
-# Storm Chaser (base character Ryzz; archetype id `mage`, Light)
+# Ryzz the Storm Chaser (archetype id `mage`, Light)
 
 Internal design note. This file may name the source hero for traceability; nothing in the game does.
 Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (reference

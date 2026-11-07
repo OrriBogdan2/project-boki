@@ -1,4 +1,4 @@
-# Red Stitch (base character Ravyl; id `archer`, Light) - fidelity pass (hero sheet pin.md)
+# Ravyl the Red Stitch (id `archer`, Light) - fidelity pass (hero sheet pin.md)
 
 Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Red Stitch; the id, files and save keys stay `archer`.
 

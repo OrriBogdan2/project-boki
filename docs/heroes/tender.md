@@ -1,4 +1,4 @@
-# Magic Fox (base character Meeko; `tender`, a small support on medium stats)
+# Meeko the Magic Fox (`tender`, a small support on medium stats)
 
 Internal design doc (was "Linnet"; the id and file names stay `tender`). Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (gameplay only; nothing of its names, look or text is used in the game). The fidelity pass (ext/kitfix-moosh-tamsin) worked from the footage reference sheet (`briefs/hero-ref/mooshmoosh.md`), the public wiki page and the owner's notes. Scale: 1 body height (bh) = 1.8 m.
 

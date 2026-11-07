@@ -12,7 +12,7 @@
   - [Snowglider](Class-Snowglider.md)
   - [Scrap King](Class-Scrap-King.md)
   - [Magic Fox](Class-Magic-Fox.md)
-  - [Mad Pyromancer](Class-Mad-Pyromancer.md)
+  - [Flame Queen](Class-Flame-Queen.md)
   - [Stone Seer](Class-Stone-Seer.md)
   - [Void Jester](Class-Void-Jester.md)
   - [Silver Thief](Class-Silver-Thief.md)
