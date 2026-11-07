@@ -201,16 +201,8 @@
 		]
 	},
 	"tarek": {
-		"painted": {
-			"rim_far": 0.3,
-			"rim_far_color": [
-				1.0,
-				0.62,
-				0.15
-			],
-			"far_smooth": 1.0
-		},
-		"far_hide": ["tarek_beads", "shard_", "ground_rings"],
+		"painted": {"rim_far": 0.3, "rim_far_color": [0.36, 0.9, 0.72], "far_smooth": 1.0},
+		"far_hide": ["shard_", "ground_rings"],
 		"slots": {
 			"skin": {
 				"top_light": 0.0,
@@ -221,7 +213,7 @@
 				"shade": 0.78,
 				"desat": 0.2,
 				"albedo": [0.72, 0.62, 0.56],
-								"light_neutral": 1.0,
+				"light_neutral": 1.0,
 				"rim_far": 0.0
 			},
 			"hair": {
@@ -251,66 +243,9 @@
 			}
 		},
 		"halos": [
-			{
-				"anchor": "anchor_stones_0",
-				"color": [
-					1.0,
-					0.62,
-					0.18
-				],
-				"strength": 3.4,
-				"px": 5.5,
-				"near_d": 7.0,
-				"far_d": 14.0
-			},
-			{
-				"anchor": "anchor_stones_1",
-				"color": [
-					1.0,
-					0.62,
-					0.18
-				],
-				"strength": 3.4,
-				"px": 5.5,
-				"near_d": 7.0,
-				"far_d": 14.0
-			},
-			{
-				"anchor": "anchor_stones_2",
-				"color": [
-					1.0,
-					0.62,
-					0.18
-				],
-				"strength": 3.4,
-				"px": 5.5,
-				"near_d": 7.0,
-				"far_d": 14.0
-			},
-			{
-				"anchor": "anchor_fist_L",
-				"color": [
-					1.0,
-					0.62,
-					0.18
-				],
-				"strength": 3.4,
-				"px": 6.5,
-				"near_d": 7.0,
-				"far_d": 14.0
-			},
-			{
-				"anchor": "anchor_fist_R",
-				"color": [
-					1.0,
-					0.62,
-					0.18
-				],
-				"strength": 3.4,
-				"px": 6.5,
-				"near_d": 7.0,
-				"far_d": 14.0
-			}
+			{"anchor": "anchor_stones_0", "color": [0.36, 0.9, 0.72], "strength": 3.4, "px": 5.5, "near_d": 7.0, "far_d": 14.0},
+			{"anchor": "anchor_stones_1", "color": [0.36, 0.9, 0.72], "strength": 3.4, "px": 5.5, "near_d": 7.0, "far_d": 14.0},
+			{"anchor": "anchor_stones_2", "color": [0.36, 0.9, 0.72], "strength": 3.4, "px": 5.5, "near_d": 7.0, "far_d": 14.0}
 		]
 	},
 	"breaker": {
