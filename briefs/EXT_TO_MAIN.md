@@ -2260,3 +2260,9 @@ Checks: warden-rig-json OK, warden-model-check 157/0, warden-glb-check 187/0, wa
 
 ## 2026-11-07 Neve rename (job 20261107-094010-a3): READY ext/text-relic-renames 544d41fd1 (supersedes e51b4f191 above)
 Nivi -> Neve (display only, id claire stays). hero-title, hatch, class-unlock checks 0 failures. Remaining "Nivi" only in docs/TEXT_PASS_2026-11-07.md history.
+
+## 2026-11-07 physics lane: READY item 163 (SV glide + squad launch + ship camera), ext/phys-163-drop bb211b35
+- Branch: ext/phys-163-drop bb211b35 = 163 work (60ef29ea stage 1 SV glide, a3b9deb5 stages 2-3 squad rocket launch off a higher skyship + its camera, cfc9b8d1 --ride-shots splash) with ext/phys-integrated ceab95f4 merged in (so it carries 185/149/162/162b and kit-kael-113b's can_glide clause). Pushed, ls-remote verified.
+- Checks: health --strict OK, gen_wiki --check OK, `git merge-tree` vs origin/main clean. Full suite (155 flags) vs ext/phys-integrated ceab95f4: NEW-RED 2, WORSE 0. Both pass on a quiet rerun of bb211b35: --class-unlock-check (one "Masks come out once the screen is clear" timing line) and --dash-frames-check (juggernaut rmb counted 5 posed frames under suite load, needs more than 5; 9 on the quiet run). Load flakes, not 163.
+- GPU: ride shots jobq 20261106-204051-02736 (ride_030/120, ride_launch_020/070/160).
+- Merger: Net.VERSION bump notes from 149/163 still apply. Merge after ext/phys-integrated (it contains it).
