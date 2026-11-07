@@ -84,3 +84,13 @@ Chain (Nano Banana Pro, edit, 16:9, 4K, no seed exposed):
 2. Removed the goggles, with refs: step 1 + a head crop of `cinder_v2_portrait.jpg` for the hairline.
 
 The old tank and goggles turnarounds are in explorations. The master sheet and weapon sheet still show the tank; the turnaround takes priority for 3D.
+
+## Master sheet: Flame Queen (owner, Nov 7, 14:57 ET)
+`cinder_v2_master_sheet.jpg` is the new master sheet:
+- Hero pose with a flame in her raised palm.
+- Small front and back views.
+- Three heads: smirk, fanged snarl, laughing wink.
+- A close-up of fire spiralling from her palm.
+- No tank, weapons or goggles.
+
+Nano Banana Pro, new generation, 3:4, 4K, no seed exposed. Refs: `cinder_v2_turnaround.jpg` and a face crop from `cinder_v2_portrait.jpg`. The old tank and goggles sheets are in explorations.
