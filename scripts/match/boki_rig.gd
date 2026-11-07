@@ -93,6 +93,11 @@ const FRAME := {
 		"ear_tip": Vector3(0.175, 0.62, -0.143), "tail_tip": Vector3(0, 0.363, 0.322), "tip_bone": "tail3", "hip": 0.15,
 		"marks": {"left flank": Vector3(-0.14, 0.22, 0.055), "right flank": Vector3(0.14, 0.22, 0.055),
 			"back": Vector3(0, 0.34, 0.1), "chest": Vector3(0, 0.2, -0.17)}},
+	"thrumbird": {"head": Vector3(0, 0.84, -0.2), "top": 0.96, "carry": Vector3(0, 0.24, -0.03),
+		"ear_tip": Vector3(0.034, 0.6, 0.133), "tail_tip": Vector3(0, 0.133, 0.261), "tip_bone": "tail1", "hip": 0.12,
+		"hover": true,
+		"marks": {"left flank": Vector3(-0.105, 0.2, 0.05), "right flank": Vector3(0.105, 0.2, 0.05),
+			"back": Vector3(0, 0.3, 0.05), "chest": Vector3(0, 0.26, -0.14)}},
 }
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
