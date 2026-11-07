@@ -3,7 +3,7 @@ Body pieces are in the Blender frame (Z up, he faces +Y, his right hand is +X), 
 The sword is built in a Gun's space (+Y along the blade, the grip about the origin; sword_matrix puts it in his fist, where it
 is skinned to the hand: the clips carry it): the turnaround's broad cracked blade, the guard, the red wrapped grip, the ring pommel with its hooked chain.
 Its size is the turnaround's against his height (FIDELITY_CHECKLIST weapon scale): whole sword 0.80 of his height, blade
-0.61, blade width 0.10; the game puts the Gun scale (1.42) and warden_look's weapon_scale (0.85) on top, so one Gun metre
+0.61, blade width 0.10; the Gun scale (1.42) and the owner's 0.85 (Nov 4) go on top, so one Gun metre
 is GUN_M of his model metres."""
 import os, json
 import numpy as np
@@ -11,7 +11,7 @@ from meshkit import Piece, norm, sweep, chain_along
 
 RIG = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "art", "wardens", "src", "kael_rig.json")))
 CROWN = RIG["land"]["crown"]                  # his height, model metres
-GUN_M = 1.42 * 0.85                           # model metres per Gun metre (heavy Gun scale x warden_look weapon_scale)
+GUN_M = 1.42 * 0.85                           # model metres per Gun metre (heavy Gun scale x the owner's 0.85, Nov 4)
 HAND = {sd: np.array([x, -z, y]) for sd, (x, y, z) in ((sd, RIG["bones"]["hand." + sd]["head"]) for sd in "RL")}     # Blender frame
 
 

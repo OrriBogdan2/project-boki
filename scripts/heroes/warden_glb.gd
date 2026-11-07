@@ -313,7 +313,8 @@ static func _smoke(root: Node3D, own: Dictionary) -> void:
 	(at_anchor if at_anchor else weapon).add_child(p)
 
 ## A model's soft glow around what burns (warden_look.json "bloom": a list of {at: "weapon" or an anchor name,
-## color [r, g, b, a], size (m), count (along the weapon's length, from `from` of it), depth_test}): additive
+## color [r, g, b, a], size (m), count (along the weapon's length, or from the anchor to the anchor `to`
+## on the same bone: a skinned blade; from `from` of it), depth_test}): additive
 ## camera-facing puffs, so a white-hot blade core or a magma arm glows past its own edges like the art's bloom
 ## instead of reading as flat white paint. World-sized, so it shrinks with the model at the match camera.
 static func _bloom(root: Node3D, glb: Node3D, own: Dictionary) -> void:
@@ -348,7 +349,11 @@ static func _bloom(root: Node3D, glb: Node3D, own: Dictionary) -> void:
 				weapon.add_child(_bloom_quad(m, sz, p))
 		else:
 			var a := glb.find_child(at, true, false) as Node3D
-			if a:
+			if a == null:
+				continue
+			var to := glb.find_child(String(b.get("to", "")), true, false) as Node3D if b.has("to") else null
+			var n := int(b.get("count", 1)) if to else 1
+			for j in n:
 				# (on the root, following the anchor like the halos: the model's own surfaces stay toon-only)
 				var q := _bloom_quad(m, sz, Vector3.ZERO)
 				root.add_child(q)
@@ -356,6 +361,9 @@ static func _bloom(root: Node3D, glb: Node3D, own: Dictionary) -> void:
 				follow.name = "BloomFollow"
 				follow.update_scale = false
 				follow.update_rotation = false
+				if to:      # (both ride one bone: the step between them is fixed in the anchor's frame)
+					var step := (a.transform.affine_inverse() * to.transform).origin
+					follow.position = step * lerpf(float(b.get("from", 0.0)), 1.0, (j + 0.5) / n)
 				a.add_child(follow)
 				follow.remote_path = follow.get_path_to(q)
 
