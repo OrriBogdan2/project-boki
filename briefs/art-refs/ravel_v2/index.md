@@ -51,3 +51,6 @@ Model: Nano Banana Pro (no seed exposed). Style ref for the merges: the Ryzz mas
 
 ## Renamed: Ravyl (owner, Nov 7, 00:41 ET)
 Ravel is respelled **Ravyl** ("Ravyl the Red Stitch"), so players pronounce it as intended. Display name only; ids and files stay (`archer`, `ravel_v2/`, `lisette_*`/`hem_*`).
+
+## Queued (owner, Nov 7, 01:43 ET): splash
+Make Ravyl's splash (`ravel_v2_splash.jpg`, "Conductor") slightly more porcelain-looking: smoother, paler, doll-like skin with a soft sheen, in line with her ghostly-white look. Try a light local skin pass first (desaturate and lift her skin, add a subtle glaze highlight); use a single edit only if that isn't enough.
