@@ -82,13 +82,16 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - Notices are bullet points in plain words.
 
 ## Modes and queues
-- Extraction: one queue, squads of 3, auto-filled (solos are filled in, bots backfill early). No solo or duo queue.
-- Duel: 1v1, online search or against a bot. Arena: 4v4 across several arena maps.
+- **Three modes (owner, Nov 7):** the lineup the source game ended with. Wins over older lines below.
+  1. **Extraction: trios only.** One queue, squads of 3, auto-filled (solos are filled in, bots backfill early). No solo or duo queue.
+  2. **Arena: squads, 4v4** across several arena maps.
+  3. **Training Grounds:** one big open expanse joined to sky islands, where you can try everything (every Hunter, Boki, item and ability, bots, the practice stations). The open expanse must be much bigger than today's.
+- Duel (1v1) is no longer its own queue. It lives in the Training Grounds duel ring (fight a bot, or a friend who joins). Coordinator call; the alternative is keeping a Duel queue in the launcher.
 
 ## Hosting and distribution (owner, Nov 3)
 - Stage 1 (testers and early players): our own authoritative headless Godot servers on small VPS **in EU and NA from day one** (Hetzner EU and US: Ashburn/Hillsboro; Edgegap only if more regions are needed), plus a small matchmaker (self-hosted Nakama or a custom one). **Distribution: the itch.io desktop app** installs the native Windows/Mac build and auto-patches via butler. NOT a browser game.
 - Steam: not now (owner, Nov 3). itch.io stays the launcher until a public launch is planned.
-- Modes ship with an online launcher and an easy install: one download that installs, auto-patches and opens straight into the online modes (Duel matchmaking, Arena 4v4, extraction trios). Spec it with Duel/Arena (owner OK first).
+- Modes ship with an online launcher and an easy install: one download that installs, auto-patches and opens straight into the online modes (Extraction trios, Arena 4v4, Training Grounds). Spec it with Duel/Arena (owner OK first).
 - Servers are live (S2, Nov 3): matchmakers EU http://2.31.98.197:8080 and US http://5.161.241.179:8080; EU runs 3 matches at once, US 2. boki-1 (5.161.240.47) stays until the launcher's 'Play with friends' relay moves.
 - itch.io page: https://projectboki.itch.io/project-boki (butler target `projectboki/project-boki:windows`). Uploads are automatic: `.github/workflows/itch.yml` builds Windows and macOS on every push to main and runs butler (repo secret BUTLER_API_KEY, set by the owner). Channels: windows, mac. Game servers go on the **existing Hetzner account** (new small EU and US servers, separate from the agent box).
 - The owner is creating the accounts (itch.io, Hetzner, later Steamworks). Agents never sign up or pay.
@@ -96,7 +99,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 ## Practice and Arena
 - One connected space: the Training Room (left, practice stations) and a duel ring (right, spawn a bot or fight a player).
 - Arena mode: 4v4 rounds like the source's, each round a little different.
-- **Name (owner, Nov 5):** the current practice space players reach as "Arena" (Training Room + duel ring, `--arena`) is called the **Training Area** in all player text. "Arena" is kept for the future 4v4 mode above. Internal ids (`arena`, `--arena-check`) can stay.
+- **Name (owner, Nov 5):** the current practice space players reach as "Arena" (Training Room + duel ring, `--arena`) is called the **Training Grounds** in all player text (owner, Nov 7; was "Training Area"). "Arena" is kept for the future 4v4 mode above. Internal ids (`arena`, `--arena-check`) can stay.
 
 ## Agents and art
 - Agent models: the owner says the new model costs only about 15% of the usage, so **push most work onto the new low-usage model**. Use Opus only where the owner or DECISIONS asks for it (feel-critical parity, e.g. Kael item 22). Sonnet for small, clear fixes.
