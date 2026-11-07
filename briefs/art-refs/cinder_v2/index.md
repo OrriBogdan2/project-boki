@@ -71,3 +71,16 @@ Known limit: the hose routing on the two side views is still inconsistent: it lo
 
 ## Portrait: no goggles (owner, Nov 7, 05:01 ET)
 `cinder_v2_portrait.jpg`: goggles removed by an edit (the Flame Queen has no steampunk gear). The flame at her lips, her horns, cheek scales, lava cracks and the shard top are kept. The goggles version is now `explorations/cinder_v2_portrait_goggles.jpg`. Decision: **Cinder has no goggles** anywhere going forward.
+
+## Turnaround: Flame Queen (owner, Nov 7, 14:15 ET)
+`cinder_v2_turnaround.jpg` is the **current 3D turnaround**: front, 3/4, side and back, 5504×3072. Use it for modelling.
+- No tank, hose, straps or goggles.
+- Waist-length black hair with ember tips; it covers her back in the rear view.
+- Forehead lava cracks.
+- Hands empty: she casts fire from her palms.
+
+Chain (Nano Banana Pro, edit, 16:9, 4K, no seed exposed):
+1. The owner removed the tank (one edit; prompt worded by the owner). That step is `explorations/cinder_v2_turnaround_step1_no_tank.jpg`.
+2. Removed the goggles, with refs: step 1 + a head crop of `cinder_v2_portrait.jpg` for the hairline.
+
+The old tank and goggles turnarounds are in explorations. The master sheet and weapon sheet still show the tank; the turnaround takes priority for 3D.
