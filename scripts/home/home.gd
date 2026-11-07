@@ -1190,7 +1190,7 @@ func _move_player(d: float) -> void:
 	if dash_t > 0.0:
 		dash_t -= d
 		hv = dash_v
-		if dash_t <= 0.0: hv = dash_v * (Hunter.DASH_CARRY_AIR if air else Hunter.DASH_CARRY_GROUND)
+		if dash_t <= 0.0: hv = HunterMove.dash_exit(dash_v, SPEED)
 	else:
 		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0) * water.speed_mul(wdep, air)
 		hv += (mv * spd - hv) * (1.0 - exp(-(14.0 if not air else (4.0 if gliding else 6.0)) * d))
