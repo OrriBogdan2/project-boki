@@ -244,3 +244,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - Flue Flight ult: lift no longer comes from tank exhaust jets. DEFAULT (owner to confirm): fire bursting from her heels and tail.
 - Brass goggles: OPEN owner question (both new splashes leave them out). DEFAULT until answered: no goggles.
 - FIDELITY_CHECKLIST Cinder row: remove "copper/glass fire TANK on her back with 2 exhaust nozzles", "hose" and "FLAMETHROWER (held LMB)"; add "No weapons. Fire comes from her hands (LMB = a fire stream or bolts from her palms). Glowing magma cracks brighten while casting. A fire-queen look: an obsidian-shard outfit, horns, living-fire hair, a flame-tipped tail."
+
+## 2026-11-07 (owner): hero full names read "<Name> the <Title>"
+- Meeko is "Meeko the Magic Fox", never "Meeko Magic Fox" or "Meeko · Magic Fox". Same form for every hero wherever name and title appear together: Vex the Hired Gun, Mossy the Sunken Bulwark, Ryzz the Storm Chaser, Kael the Unbroken (not "the The Unbroken"), Ravyl the Red Stitch, Nivi the Snowglider, Grimble the Scrap King, Meeko the Magic Fox, Cinder the Flame Queen, Kibo the Stone Seer, Motley the Void Jester, Sable the Silver Thief. A title shown on its own (class pages, a subtitle line) may drop the name.
