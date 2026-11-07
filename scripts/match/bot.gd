@@ -938,6 +938,7 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 	var to := Vector2(goal.x, goal.z)
 	if _clear_line(m, from, to):
 		h.ai.erase("wp")
+		h.ai.erase("nopath")
 		return h.dir_to(goal)
 	var gt := Vector2i(int(floor(goal.x)), int(floor(goal.z)))
 	var wp: Dictionary = h.ai.get("wp", {})
@@ -946,7 +947,11 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 		h.ai["wp"] = wp
 	var path: Array = wp["path"]
 	if path.is_empty():
+		# no way there on foot: walking straight at it had the bot shuffle at a rim (or step off a
+		# terrace and climb back) until the 14 s give-up. Give up on it after a moment instead.
+		_no_path(m, h)
 		return h.dir_to(goal)
+	h.ai.erase("nopath")
 	# aim for the furthest waypoint we can walk straight to
 	var pick: Vector2 = path[0]
 	for i in range(path.size() - 1, -1, -1):
@@ -957,6 +962,22 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 		path.pop_front()
 	var d := pick - from
 	return d.normalized() if d.length() > 0.05 else h.dir_to(goal)
+
+const NO_PATH_GIVE_UP := 1.5     # seconds without a walkable path before a goal is banned for now
+
+func _no_path(m: Match, h: Hunter) -> void:
+	var a: Dictionary = h.ai
+	var g: Vector3 = a.get("goal", Vector3.INF)
+	if g == Vector3.INF or String(a.get("goal_kind", "")) in URGENT_GOALS:
+		return
+	var np: Array = a.get("nopath", [])
+	if np.is_empty() or np[0] != g:
+		a["nopath"] = [g, m.time]      # (per goal: a new one gets its own moment)
+	elif m.time - float(np[1]) > NO_PATH_GIVE_UP:
+		var bans: Dictionary = a.get("banned", {})
+		bans[g] = m.time + 20.0
+		a["banned"] = bans
+		a.erase("nopath")
 
 func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 	var d := b - a
