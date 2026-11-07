@@ -60,3 +60,4 @@ Make Ravyl's splash (`ravel_v2_splash.jpg`, "Conductor") slightly more porcelain
 
 Chain: the porcelain edit, then the owner's run (scar kept), then the needles in the knights, then four pose variations (full draw picked), then the spotlight edit. A final polish edit (glowing threads, crisper detail) changed nothing measurable, so the spotlight version is final (`explorations/ravyl_fulldraw_polish.jpg`).
 - Update (03:24 ET): the owner's regen of the polish was no better. The threads were brightened locally instead: thin red lines detected and given a bright crimson core and a soft glow; curtains and corset untouched. That version is the final `ravel_v2_splash.jpg`.
+- 03:24 ET: the owner rejected the local thread glow; `ravel_v2_splash.jpg` is reverted to the spotlight version, pending an AI edit for brighter threads.
