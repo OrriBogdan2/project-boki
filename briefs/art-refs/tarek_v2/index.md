@@ -79,3 +79,6 @@ Alternates in `explorations/`:
 
 ## Renamed: Kibo, "the Stone Seer" (owner, Nov 7, 00:17 ET)
 Tarek is renamed **Kibo** ("Kibo the Stone Seer"). Display name only; ids and files stay (`dolm`, `tarek_*`). Passed to the coordinator via the owner.
+
+## Renamed: Tenzo, "the Stone Seer" (owner, Nov 7, 05:04 ET)
+Replaces "Kibo" (clashed with Kael). Display name only; ids and files stay (`dolm`, `tarek_*`, `tarek_v2/`).
