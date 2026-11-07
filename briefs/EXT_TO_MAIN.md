@@ -2581,3 +2581,6 @@ READY ext/cinder-v2-palms 766b44cdd (Cinder v2 pass 2: waist hair, swept-back ho
 READY ext/prematch-lobby 861e46547 (90 s pre-match lobby before expeditions: Hunter pick, squad, text chat + voice stub, lock at 0; admin lobby_enabled; richer loading screen; Net.VERSION 0.25.0; --prematch-check 0 failures, health --strict OK)
 Gameplay media (4 looping 1080p clips + stills, 12 files): https://github.com/OrriBogdan2/project-boki-reports/releases/tag/gameplay-media-20261107
 READY ext/gameplay-media e6881d69f (gameplay media capture tool + encode script; clips use the new Hunter names via a render-only merge of ext/text-relic-renames-rebased)
+
+## 2026-11-07 build (job 20261107-233002-a2): CLAIM Training Grounds
+- CLAIM: grow the --arena Training Area into the Training Grounds (DECISIONS "Modes and queues"): a much bigger open expanse (3x+) joined to sky islands by jump pads/glides, every Hunter/Boki/item/ability and bot spawning reachable, practice stations and duel ring kept. Branch ext/training-grounds.
