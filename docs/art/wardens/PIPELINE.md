@@ -465,6 +465,19 @@ Breaker total: 6 tasks, 116 credits (the body's two attempts used).
 | Breaker C | 13:31 | 01a1a688-d08d-74e2-9e69-9015055e4130 | meshy-7.1 | front, side, back edited; texture refs the same; 2k, meshy-7 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the art's bare belly, sash, skirt, bare feet, braids, closed fists |
 | Breaker D | 13:31 | 01a1a688-d0b4-738f-bed8-df735492629b | meshy-7.1 | as C, enhancement on | 40 | Dropped: open splayed hands |
 
+### Ryzz v2 (owner redesign, briefs/art-refs/ryzz_v2/), 2026-11-07 (76 credits; balance 1662 before, 1586 after)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Ryzz v2 edits | 2026-11-07 02:03 | 01a1b3be-8841-747d-bb1c-1de43c334ba5, 01a1b3be-8852-77ae-a033-6fa8f3789bbc, 01a1b3be-8843-718b-8706-843fe25430f9, 01a1b3be-8864-7710-a23f-6368f9ee53a0 | nano-banana-pro (image-to-image) | turnaround front, 3/4, left side, back (square, padded): both pigtails and ties, the backpack, its four rods and the cables out, nothing else | 36 | Kept (the back edit drew a bolt on the top's back; the pack covers it) |
+| Ryzz v2 body A | 02:09 | 01a1b3c6-90cd-7085-afba-c79e7c229a5f | meshy-7.1 | the 4 edited views (2x lanczos) + the same as texture refs; A-pose | 40 | **Kept** |
+
+Ryzz v2 notes: the v1 tools (ryzz_source/pieces/finish/clips) rebuilt for v2. Scripted: the long blue-to-pink pigtails on
+the spring chains (crimson ties), the copper pack (a deep box, two low coil springs, the bolt painted as the glow key), the
+four rods in sockets on its top, the black cables to the gloves, the hands, gum and nose ring. The pink arcs and the
+lightning ball are VFX (the arc meshes and `arc.*` bones are gone). The fishnet is the scan's paint on her right leg. The face is
+the turnaround's front view projected by its eyes and mouth (`~/meshy/ryzz_v2/ref/front_full.png`). The tied jacket hangs
+from the pelvis as v1's skirt did; the thighs under it stay (the jacket is open at the front).
+
 ## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
 No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.
 1. **Inspect** it in Blender: bones (names, parents, heads), each vertex group's bounds, loose parts, materials,
