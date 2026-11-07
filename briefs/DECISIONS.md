@@ -256,3 +256,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - Display names only; ids, files and folders stay. Ryzz -> **Sparkle** the Storm Chaser; Ravyl -> **Lace** the Red Stitch; Kibo -> **Tenzo** the Stone Seer; Meeko's title -> **the Dawnfox**; Neve stays **the Snowglider** (owner 10:20 UTC: Snowglider, not Snowglide); Mossy's title -> **the Barnacle Knight**. Others unchanged (see the names line at the top).
 - Update every player-facing mention: hero select, kit and ability text, tooltips, barks, docs, wiki, website, Relic (Mask) offers and the post-tutorial pick. Full-name form stays "<Name> the <Title>".
 - Roster order (display names): Vex, Mossy, Sparkle, Kael, Lace, Neve, Grimble, Meeko, Cinder, Tenzo, Motley, Sable.
+
+## 2026-11-07 (owner): every hero title carries "the"
+- Every hero has "the" before the title wherever it shows: the full name ("Vex the Hired Gun") AND a title shown on its own (class page, subtitle, hero select: "The Hired Gun" at the start of a line, "the Hired Gun" mid-sentence). Supersedes "a title shown on its own may drop the name/the". Data: store titles without "the" in content/archetypes/*.json (juggernaut "The Unbroken" -> "Unbroken") and add "the" in one display helper, so no "the The" doubles. No commas between name and title.
