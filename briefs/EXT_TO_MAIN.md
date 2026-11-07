@@ -2112,3 +2112,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - Look: removed the skin paint glow, the lens and spine blooms, and the glow slot. Portrait, splash and title backdrop now use the v2 art; the splash framing is moved to her head. There is no site in this repo.
 - warden-model-check: the gunslinger width span is now 0.5-1.15 (the archer's). She measures 0.60x. The old 0.7 floor came from v1's wide cannon.
 - Checks: --warden-rig-json --warden=gunslinger, vex-clip-live, warden-glb, rig-standard, clip, warden-model, dash-aim, clip-live and gunslinger-combo are all green. health --strict OK, gen_wiki updated. GPU turntable, close and match renders were rc=0. venator-parity-check was not run: it hangs headless on the hetzner box (killed at 1500 s).
+
+## 2026-11-07 deep (job 20261107-003002-a4): CLAIM Kael v2 model rebuild
+- CLAIM: Kael v2 model rebuild (art/wardens/kael/ to the locked v2 design, briefs/art-refs/kael_v2/). Branch ext/kael-v2-model. Supersedes art1-kael-2 / item 131c.
