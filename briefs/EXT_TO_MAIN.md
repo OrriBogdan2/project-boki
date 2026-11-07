@@ -2159,3 +2159,22 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - Visual only (DECISIONS 2026-11-07): the old braided rope and open hand are gone; `LDFx.arm` draws a bruised-purple flesh tube (bone ridge, bone at the end) from his forearm (anchor_claw) to a bone-hook prop (`hook`), purple sludge drips off it, and it snaps back (0.14 s) after a miss or the reel. Range, timing, hitbox and pull untouched. `ext/grimble-v2-model` did not exist, so it sits on the current dredge model (hook point = anchor_claw); swap `_hand()` to the v2 hook-tip point when that model lands.
 - Checks: `--dredge-combo-check` 93/93, `--hero-vfx-check` 41 ok / 0 fail, `--clip-live-grimble` all ok, `health.py --strict` OK. `--hero-vfx-reel --reel-hero=dredge` (new `hook` part) renders the clip.
 - Clip, match camera, before/after: briefs/shots/grimble_hook/{before,after}.mp4 and {before,after}_sheet.png. NOTE: the GPU worker (pc-MRROBOTO) was offline, so these were rendered on CPU (xvfb, software GL), not on the GPU; re-run on GPU if you want it exact.
+
+## 2026-11-07 deep (job 20261107-042925-a3): READY `ext/grimble-v2-model` @ 54df2f18a (Grimble v2 model rebuild)
+- dredge.glb is the owner's locked v2 design (FINAL turnaround + master sheet) through the ART-1 pipeline: one Meshy scan (hoard, blunderbuss, loupe, sludge edited out) fitted onto the same contract rig. 14.9k tris, one 2048 atlas, same armature, all 40 clips, every anchor/FX point.
+- Renders (briefs/art-refs/grimble_v2/ingame/): before_after.jpg (v1 shipped vs v2), vs_turnaround.jpg, vs_master.jpg (face vs the head sheet), game_zoom_above.jpg (55° from above: the head and loupe clear of the hoard). Blender workbench renders, not in-engine.
+- Fidelity vs grimble_v2 canon:
+  - ✅ no nose, no nostrils (the scan's flat face)
+  - ✅ three-lens brass loupe: a big glowing green lens over his right eye, two small lenses up the forehead, gold chain on the outer side (spring bones)
+  - ✅ left eye a smug half-lidded squint (paint over the scan's open eye)
+  - ✅ silver teeth, gold tooth, gaps, purple gums (paint fix; small at the match camera)
+  - ✅ right arm = purple bone hook, no chain, no iron hook. anchor_claw + anchor_hook_tip on the hook tip; the kit's abyssal arm reaches from there (dredge-combo 93/0). Scale: arm reaches the ground at rest as on the sheet; crescent about hip-height tall.
+  - ✅ hunch kept; scrap gauntlet on the left hand; belt, loincloth, holstered blunderbuss on the left hip
+  - ✅ veins: texture keyed to one colour, glowing via warden_look skin paint_glow; bone spurs are the scan's mesh; sludge/puddles are not geometry
+  - ✅ hoard = rigid chunks on the torso bone (v1's sculpt, moved onto v2's back), lanterns glow; top inside the cap (height_3d 1.494x vs 1.49x)
+  - ⚠ the hoard is v1's sculpt: darker and more iron than the sheet's chests-and-barrels stack; no coin pile on the shoulders, no head strap on the loupe
+  - ⚠ gauntlet fingers are rigid (finger bones kept, unweighted); the crescent's lowest edge rides the right foot
+  - ⚠ sludge drip / puddle FX not made (not geometry, per the brief; a VFX task)
+- Decision: the hook arm never hides now, so hide_while_chain / CHAIN_OUT go (dredge was the only user). Alternative: hide the crescent while the abyssal hand flies.
+- Checks: --warden-rig-json dredge (weapon box only), warden-glb PASS (14900 ≤ 15000), warden-model PASS, hero-vfx OK, hero-check 0 fails, dredge-combo 93/0, warden-clips/rig-standard/warden-stance 0 fails, health --strict OK, gen_wiki updated.
+- Not done: GPU in-game shots (jobs 20261107-051057-07844 / -29573) were still queued, the GPU worker offline; portrait/splash still v1.
