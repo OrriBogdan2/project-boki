@@ -60,7 +60,7 @@ Known limit: the hose routing on the two side views is still inconsistent: it lo
    - Obsidian shard plates or a short scaled tail-skirt over the hips.
    - Scaled lizard skin there instead of smooth skin.
    - The tail base sweeping over it.
-   Apply to the master sheet, turnaround and any splash pose that shows it.
+   Apply to splash poses only. Owner, Nov 7, 14:08 ET: the back view is fine as is for 3D, so the master sheet and turnaround stay unchanged.
 
 ## REDESIGN: Cinder the Flame Queen (owner, Nov 7, 03:05 ET; title "the Flame Queen" confirmed 03:06)
 - **No weapons:** the flamethrower, the hose and the copper fuel tank are removed from her design. She now **shoots fire from her hands**.
