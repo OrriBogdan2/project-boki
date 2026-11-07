@@ -97,7 +97,7 @@ func _throw() -> void:
 			"range": float(ed["range"]), "size": 0.22, "rope": true},
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}]})
 	var shots0: int = k.m.shots.size()
-	k.run(stg, k.cx("e", "warchain", k.aim(), {
+	k.run_own(stg, k.cx("e", "warchain", k.aim(), {
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if state == "throwing" and is_instance_valid(f) and not f.dead: _hook(f, f.pos),
 		"on_shot_end": func(at: Vector3, why: String, e: Ent):
@@ -110,8 +110,7 @@ func _throw() -> void:
 		# the shared hook look and its thin pale rope would draw over the Warchain's own chain
 		if sd.has("deco") and is_instance_valid(sd["deco"]):
 			(sd["deco"] as Node3D).visible = false
-	k.m.sfx("jug_chain", h.pos, -3.0, 1.0)
-	k.m.sfx("juggernaut_chain_rattle", h.pos, -4.0, 1.0)
+	k.vfx("chain_throw")
 
 func _hook(f: Ent, at: Vector3) -> void:
 	var ed := data()
@@ -123,14 +122,11 @@ func _hook(f: Ent, at: Vector3) -> void:
 	strained = false
 	tightened = false
 	hooks += 1
-	k.fx().star(at + Vector3(0, 1.0 if f else 0.5, 0), Color("ffd84a"), 0.9, 0.18)      # the spark at the anchor
+	k.vfx("chain_hook", at + Vector3(0, 1.0 if f else 0.5, 0))
 	if f:
 		m.fx.word(f.pos + Vector3(0, 2.3, 0), "CHAINED", k.col_of(ed), true)
 	else:
 		m.fx.word(at + Vector3(0, 1.4, 0), "ANCHORED", k.col_of(ed), false)
-	m.sfx("juggernaut_chain_bite", at, -2.0, 1.0)
-	m.sfx("jug_taut", at, -6.0, 1.1)
-	k.net_bolt(k.h.pos + Vector3(0, 1.0, 0), at + Vector3(0, 1.0, 0), k.col_of(ed))
 	if m.time - e_pressed_at <= JuggernautKit.BUFFER:
 		pull()                      # E was pressed a hair before it bit
 
@@ -138,6 +134,7 @@ func _miss(at: Vector3) -> void:
 	state = "ready"
 	misses += 1
 	k.start_e_cd()                  # hooked nothing: the chain breaks, its cooldown starts
+	k.vfx("chain_snap", at)
 	k.m.fx.word(at + Vector3(0, 1.2, 0), "MISS", Color("c0b0a0"), false)
 
 ## Breaks a throw or a hold (a stun, the time, a merge): the cooldown starts.
@@ -145,7 +142,9 @@ func snap(word := "CHAIN BROKE") -> void:
 	if state == "throwing" or state == "hooked":
 		breaks += 1
 		k.start_e_cd()
-		if word != "": k.m.fx.word(k.h.pos + Vector3(0, 2.2, 0), word, Color("c0b0a0"), false)
+		if word != "":
+			k.vfx("chain_snap", k.h.pos + Vector3(0, 1.0, 0))
+			k.m.fx.word(k.h.pos + Vector3(0, 2.2, 0), word, Color("c0b0a0"), false)
 	elif state == "pulling":
 		_stop("stopped", false)
 	state = "ready"
@@ -186,9 +185,7 @@ func pull() -> void:
 	h.dash_with({"type": "dash", "speed": pull_speed, "time": pull_t, "kind": "rush", "dir": pull_dir,
 			"invuln": 0.0})
 	if k.anim_id != "jug_haul_wind" and not k.riposte.running(): k.play("jug_reel")
-	k.fx().puff(h.pos + Vector3(0, 0.2, 0), Color(1, 1, 1, 0.8), 0.9, 0.35)        # the start puff (footage 0333)
-	k.m.fx.dust(h.pos, 8)
-	k.m.sfx("jug_reel", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
+	k.vfx("chain_pull", h.pos, pull_dir)
 	k.last_e = "reel"
 
 ## The pull's start along `chain` (him to the anchor): the reel speed, plus a slingshot from his speed away from
@@ -239,6 +236,8 @@ func _arced(dir: Vector2, to: Vector2, step: float, most: float) -> Vector2:
 
 ## Each step (before the hunter moves).
 func tick(dt: float) -> void:
+	if k.h.model:
+		k.h.model.set_meta(WardenGlb.CHAIN_OUT, state != "ready")      # (the arm's chain is the one in the air: 76b)
 	match state:
 		"hooked": _tick_hooked(dt)
 		"pulling": _tick_pull(dt)
@@ -293,19 +292,18 @@ func _hold_taut(most: float) -> void:
 	if not tightened:
 		tightened = true
 		holds += 1
-		k.m.sfx("jug_taut", h.pos, -3.0, 0.75)          # the chain snapping taut at its length
+		k.vfx("chain_tight", h.pos)     # the chain snapping taut at its length
 
 ## The attached chain: straight striped links that pull taut and glow hotter as it stretches (with a creak).
 func _draw_hooked(stretch: float) -> void:
 	var h := k.h
 	var tension := clampf((stretch - 0.5) / (TAUT - 0.5), 0.0, 1.0)
 	if stretch >= TAUT and not strained:
-		k.m.sfx("jug_taut", h.pos, -5.0, 0.9)
-		k.fx().star(anchor + Vector3(0, 1.0, 0), HOT, 0.6, 0.15)
+		k.vfx("chain_taut", anchor + Vector3(0, 1.0, 0))
 	strained = stretch >= TAUT
 	if not (k.tells_visible() or target != null):
 		return
-	var a := h.pos + Vector3(0, 1.0, 0)
+	var a := _chain_from()
 	var b := anchor + Vector3(0, 1.0 if target != null else 0.6, 0)
 	_launch(Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z))      # the pull as it would start now, for the preview
 	k.fx().chain(_fx_id(), a, b, 0.3 * (1.0 - tension), ORANGE.lerp(HOT, tension * 0.6), DARK,
@@ -342,10 +340,15 @@ func _draw_preview() -> void:
 		preview.append(Vector3(pos.x, y, pos.y))
 	k.fx().path_line(_fx_id() + "arc", preview, Color(HOT, 0.4), 0.12)
 
+## Where the chain leaves him: the socket on his wrist on the 3D model, else the chest.
+func _chain_from() -> Vector3:
+	var at := WardenGlb.anchor(k.h.model, "anchor_chain") if k.h.model else null
+	return at.global_position if at else k.h.pos + Vector3(0, 1.0, 0)
+
 func _draw_flight() -> void:
 	for s in k.m.shots:
 		if s["by"] == k.h and (s["x"] as Dictionary).get("rope", false):
-			k.fx().chain(_fx_id(), k.h.pos + Vector3(0, 1.0, 0), s["pos"], 1.0, ORANGE, ORANGE, 0.12)
+			k.fx().chain(_fx_id(), _chain_from(), s["pos"], 1.0, ORANGE, ORANGE, 0.12)
 			return
 
 func _tick_pull(dt: float) -> void:
@@ -377,6 +380,7 @@ func _tick_pull(dt: float) -> void:
 	h.roll_dir = pull_dir
 	h.roll_speed = pull_speed
 	h.roll_t = maxf(h.roll_t, dt * 2.0)
+	HeroVfx.of(k.m).hold(h, "chain_drag")
 	var a := h.pos + Vector3(0, 1.0, 0)
 	k.fx().chain(_fx_id(), a, at + Vector3(0, 1.0 if target != null else 0.6, 0), 0.0, HOT, DARK, 0.16, _bow(steer))
 	_draw_preview()
@@ -402,8 +406,7 @@ func _arrive() -> void:
 	last_arrival = h.pos
 	state = "arriving"
 	arrive_t = float(ed["arrive_t"])
-	k.m.fx.dust(h.pos, 10)
-	k.m.sfx("juggernaut_chain_rattle", h.pos, -6.0, 1.0)
+	k.vfx("chain_arrive", h.pos, dir)
 	k.land_haul()
 
 ## Shift mid-pull: the pull ends and the dash takes over the movement.

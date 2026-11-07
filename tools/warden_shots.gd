@@ -304,7 +304,7 @@ const KIT_FRAMES := {
 	"archer": [["draw", "arc_draw", 0.8], ["loose", "arc_loose", 0.94], ["Spirit Walk roll", "pin_roll", 0.58],
 		["Heavy Shot", "arc_heavy", 1.42]],
 	"dolm": [["punch", "breah_punch", 0.12], ["throw", "breah_throw", 0.2], ["leap", "breah_leap", 0.2],
-		["slam", "breah_slam", 0.1], ["sense", "breah_sense", 0.3], ["dash", "breah_dash", 0.15]],
+		["slam", "breah_slam", 0.1], ["sense", "breah_sense", 0.3], ["dash", "breah_hop", 0.15]],
 	"ostra": [["orb", "ostra_orb", 0.1], ["snap", "ostra_snap", 0.1], ["swap", "ostra_swap", 0.3],
 		["seed", "ostra_seed", 0.2], ["well", "ostra_well", 0.3], ["empower", "ostra_empower", 0.4]],
 }

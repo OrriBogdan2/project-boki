@@ -266,6 +266,7 @@ func warm_up(progress := Callable()) -> void:
 		fx.spark(at + Vector3(0, 1, 0), Vector3.UP, Color.WHITE, 4)
 		fx.slash(at + Vector3(0, 0.8, 0), 0.0, 2.0, 1.6, Color.WHITE)
 		fx.beam(at + Vector3(0, 1, 0), at + Vector3(2, 1, 0), Color.WHITE)
+		HeroVfx.of(self).prewarm(at + Vector3(0, 1, 0))
 		var tg := fx.telegraph_circle(at, 1.5, Color(1, 0.3, 0.2))
 		# the muzzle flash light lights whatever stands near a shot: the lit variants compile now too
 		if muzzle_light:
@@ -282,6 +283,7 @@ func warm_up(progress := Callable()) -> void:
 		if not is_inside_tree():
 			return
 		if progress.is_valid(): progress.call(0.7 + 0.2 * (vi + 1) / views.size())
+	HeroVfx.of(self).prewarm_end()
 	# and the materials that only exist now (the effects just shown, the shots), the same way: a
 	# telegraph is held up for it (the views' own are gone by now)
 	var late_cb := func(f: float) -> void:
@@ -316,6 +318,7 @@ func warm_up(progress := Callable()) -> void:
 	times.sort()
 	if not times.is_empty():
 		Settings.note_benchmark(float(times[times.size() / 2]))
+	await DashPace.rehearse(self)
 	PerfLog.skip()
 
 ## Stand-ins drawn in the first batch of warm_up; later batches grow while a batch's frames stay
@@ -3122,7 +3125,9 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		sd["deco"] = _make_deco(String(extra.get("deco", "")), col, size, extra.get("rope", false))
 	shots.append(sd)
 	if net_on and not extra.get("cos", false) and not extra.get("melee", false) and not by.remote:
-		net_event(["s", _r(at.x), _r(at.y), _r(at.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, 1 if extra.get("mob", false) else 0])
+		var kind := 1 if extra.get("mob", false) else 0
+		if extra.get("pierce_terrain", false): kind = 2      # the copy has to fly through walls too
+		net_event(["s", _r(at.x), _r(at.y), _r(at.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind])
 	if by is Hunter and not extra.get("melee", false):
 		fx.flash(at, col.lightened(0.4), 0.22, 0.05)
 		note_sound(by, at, "shot")
@@ -3553,7 +3558,7 @@ func _process(delta: float) -> void:
 		hitstop -= delta
 		_gather_input()
 		return
-	var d := minf(delta, 0.1)
+	var d := DashPace.frame_dt(self, minf(delta, 0.1))
 	if slowmo > 0.0:
 		slowmo -= d
 		d *= slow_k
@@ -3724,6 +3729,7 @@ func _gather_input() -> void:
 		if best != Vector3.INF and bd > 0.8:
 			player.inp["move"] = Vector2(best.x - player.pos.x, best.z - player.pos.z).normalized()
 	player.inp["aim"] = _mouse_aim()
+	player.inp["aim_ray"] = cam.mouse_ray()
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
 	var over_ui: bool = hud != null and hud.mouse_on_ui() and player.draw_t < 0.0
@@ -3985,8 +3991,10 @@ func step(dt: float) -> void:
 				player.teleport(Vector3(q.x + 1.0, player.pos.y - 4.0, q.z)); player.grounded = false
 				break
 	if opts.has("aim_demo") and player:
-		if opts.has("glove") and (player.gear[0] as Dictionary).is_empty():
-			player.gear[0] = {"id": String(opts["glove"]), "rar": 2}
+		var demo_gloves := String(opts.get("glove", "")).split(",", false)      # --glove=a[,b]: Q, V
+		for gi in mini(2, demo_gloves.size()):
+			if (player.gear[gi] as Dictionary).is_empty():
+				player.gear[gi] = {"id": demo_gloves[gi], "rar": 2}
 		aim_hold = String(opts["aim_demo"])
 		player.inp["aim"] = player.pos + Vector3(4.0, 0, -3.0)
 	if opts.get("sandbox_demo", false) and player:
@@ -5767,6 +5775,7 @@ func _net_ev(x, from: String) -> void:
 			var ex := {"cos": true}
 			if float(x[9]) > 0.0: ex["boom"] = float(x[9])
 			if int(x[11]) == 1: ex["mob"] = true
+			if int(x[11]) == 2: ex["pierce_terrain"] = true
 			var fake := Ent.new(); fake.team = int(x[10]); fake.remote = true
 			spawn_shot(fake, Vector3(x[1], x[2], x[3]), Vector2(x[4], x[5]), 0.0, float(x[6]), float(x[7]), col, ex)
 			fake.free()
@@ -5775,6 +5784,7 @@ func _net_ev(x, from: String) -> void:
 				"ring": fx.ring(Vector3(x[2], x[3], x[4]), float(x[5]), Color.html(String(x[6])), 0.35)
 				"bolt": fx.bolt(Vector3(x[2], x[3], x[4]), Vector3(x[5], x[6], x[7]), Color.html(String(x[8])))
 				"cone": fx.cone(Vector3(x[2], x[3], x[4]), Vector2(x[5], x[6]), 5.0, Color.html(String(x[7])))
+				"hvfx": HeroVfx.of(self).net_in(x)
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.downed:

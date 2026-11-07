@@ -43,8 +43,7 @@ func start(use_ex: bool) -> void:
 	k.st["last_dash"] = "spirit"
 	if k.rank("dash") >= 3:
 		_share_with_allies()
-	k.m.fx.dust(h.pos, 6)           # a quiet cue, no ring or burst on a dash; the green shell shows the walk
-	k.m.sfx("pin_spirit", h.pos, -3.0 if h.is_local() else -7.0)
+	k.vfx("spirit_go", h.pos, dir)  # no ring or burst on a dash; the shell shows the walk
 
 ## Seconds of Spirit Walk after the roll: rank 3 adds "time_rank3".
 func walk_time() -> float:
@@ -78,7 +77,7 @@ func _drop_orb(at: Vector3) -> void:
 	n.global_position = at + Vector3(0, 0.9, 0)
 	n.scale = Vector3.ONE * 1.4
 	orbs.append({"pos": at, "t": ORB_T, "node": n})
-	k.m.fx.ring(at, ORB_R, PinFx.GREEN, 0.3)
+	k.vfx("spirit_orb", at)
 
 ## The orbs and the walks they gave (run every step, walking or not).
 func tick_orbs(dt: float) -> void:
@@ -142,12 +141,10 @@ func end(why: String) -> void:
 	if blocked_here():
 		snap_backs += 1
 		k.add_res(-float(k.dash_def().get("stuck_cost", 30.0)))
-		k.m.fx.burst(h.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 10, 3.0, 0.3)
 		h.teleport(entry)
 		h.vel = Vector3.ZERO
-		k.m.fx.ring(entry, 1.0, PinFx.GREEN, 0.25)
-		k.m.sfx("pin_spirit_end", entry, -4.0, 0.8)
+		k.vfx("spirit_snap", entry)
 	elif why != "merge":
-		k.m.sfx("pin_spirit_end", h.pos, -8.0)
+		k.vfx("spirit_end")
 	if k.anim_id in ["pin_roll", "pin_walk"]:
 		k.anim_id = ""

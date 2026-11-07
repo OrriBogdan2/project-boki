@@ -16,6 +16,10 @@ const FALL := "fall"
 const AFTER := "after"
 const AIRBORNE := [RISE, AIR, FALL]
 const STEP_BACK := 0.5           # m: how finely the landing spot backs off a wall or a gap toward the take-off
+const RAY_STEP := 0.25           # m along the cursor's ray
+const RAY_FINE := 8              # the last step, cut this many times
+const RAY_ABOVE := 12.0          # m: the ray is walked from this far above the take-off...
+const RAY_BELOW := 12.0          # ... to this far below it
 const CAM_PULL := 0.45           # how far the camera eases back while she hangs in the air
 const DUST := Color("c9b48a")
 
@@ -24,6 +28,7 @@ var leap := {}                 # the running cast: {phase, t, from, base, top, l
 var casts := 0                 # (tests)
 var hits := 0                  # foes the strikes hit (tests)
 var last := {}                 # (tests) the last strike: {at, hits, bond}
+var spreads := 0               # (tests) Static carried to a foe by a strike
 
 func _init(owner_kit: MageKit) -> void:
 	kit = owner_kit
@@ -189,11 +194,37 @@ func _take_off() -> void:
 	_untouchable(0.2)
 
 # ------------------------------------------------------------------ aiming the landing
+## The ground under the cursor: its ray walked down to the first ground it meets. Hanging 5 m up, inp["aim"] (the
+## ray cut at her own height) is metres away from it. Without a ray (a bot, a remote hunter) the aim point is the spot.
+func cursor_spot() -> Vector3:
+	var ray = kit.h.inp.get("aim_ray")
+	if not (ray is Array) or (ray as Array).size() != 2:
+		return kit.aim()
+	var o: Vector3 = ray[0]
+	var d: Vector3 = ray[1]
+	if d.y > -0.01:
+		return kit.aim()
+	var low: float = (leap["from"] as Vector3).y - RAY_BELOW
+	var t := maxf(0.0, (((leap["from"] as Vector3).y + RAY_ABOVE) - o.y) / d.y)
+	var end := (low - o.y) / d.y
+	while t < end:
+		var p := o + d * t
+		if p.y <= kit.m.world.ground_at(p.x, p.z):
+			# (back up the last step in small ones, for the exact spot)
+			for i in RAY_FINE:
+				var q := o + d * (t - RAY_STEP * float(i) / RAY_FINE)
+				if q.y > kit.m.world.ground_at(q.x, q.z):
+					return o + d * (t - RAY_STEP * float(i - 1) / RAY_FINE)
+			return p
+		t += RAY_STEP
+	# over the abyss: the plane she took off from (land_point backs off to ground)
+	return o + d * (((leap["from"] as Vector3).y - o.y) / d.y)
+
 ## Where she would come down: the cursor clamped inside the ring, backed off toward the take-off spot until it
 ## is standable ground (never a wall, never the abyss).
 func land_point() -> Vector3:
 	var from: Vector3 = leap["from"]
-	var a := kit.aim()
+	var a := cursor_spot()
 	var v := Vector2(a.x - from.x, a.z - from.z).limit_length(float(data()["range"]))
 	var steps := maxi(1, int(ceil(v.length() / STEP_BACK)))
 	for i in steps + 1:
@@ -271,9 +302,12 @@ func _strike() -> void:
 	kit.fx().cut(leap.get("disc"))
 	_next(AFTER)
 	kit.play("mage_x_land")
+	kit.m.later(0.55, kit.gum.blow)      # (once she is back on her feet)
 	_strike_fx(at, r)
 	var struck := kit.foes_in(at, r)
 	var shared := _highest_static(struck)
+	# (found before the ult's stack lands: that lifts the stacked foe past the count, and the arc lost its source)
+	var source: Ent = _static_source(struck, shared)
 	var dmg := float(xd["dmg"]) * power()
 	for f in struck:
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
@@ -281,7 +315,7 @@ func _strike() -> void:
 		var o := {"src": "abil", "ab": "ult", "tags": ["ult", "kitefall"], "kb": away * float(xd["push"])}
 		o["lift"] = float(xd["lift"])
 		f.hurt(dmg, h, o)
-		_share_static(f, shared, struck)
+		_share_static(f, shared, source)
 		kit.add_spark(f, int(xd["stacks"]))
 		HeroUlt.landed(kit, f)
 	hits += struck.size()
@@ -293,18 +327,22 @@ func _highest_static(struck: Array) -> int:
 		best = maxi(best, kit.spark_n(f))
 	return best
 
+func _static_source(struck: Array, shared: int) -> Ent:
+	for f in struck:
+		if shared > 0 and kit.spark_n(f) == shared:
+			return f
+	return null
+
 ## Thunderstorm: when the strike hits a foe carrying Static, every foe it hits is raised to the highest count
 ## among them (before the ult's own stack), with lightning arcing from the stacked foe to each.
-func _share_static(f: Ent, shared: int, struck: Array) -> void:
+func _share_static(f: Ent, shared: int, source: Ent) -> void:
 	var have := kit.spark_n(f)
-	if shared <= have:
+	if shared <= have or source == null:
 		return
 	kit.add_spark(f, shared - have)
-	for src in struck:
-		if kit.spark_n(src) == shared and src != f:
-			var chest := Vector3(0, 1.0, 0)
-			kit.fx().arc(src.position + chest, f.position + chest, MageKit.TEAL, MageKit.GOLD, 0.6, 0.2)
-			return
+	spreads += 1
+	var chest := Vector3(0, 1.0, 0)
+	kit.fx().arc(source.position + chest, f.position + chest, MageKit.TEAL, MageKit.GOLD, 0.6, 0.2)
 
 ## A pillar of gold light slams onto the spot out of the sky, a shock ring and a spray of sparks.
 func _strike_fx(at: Vector3, r: float) -> void:

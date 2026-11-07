@@ -384,7 +384,9 @@ static func tick(A: Arena, dt: float) -> void:
 				_shot_later(A, 0.7)       # the card pauses the match: shoot on a wall-clock timer
 			at_t = 99.0
 		"menu":
-			if t < 0.05: A.give_glove("blink")
+			if t < 0.05:
+				A.give_glove("blink", 0)
+				A.give_glove("grapple", 1)
 			if _at(t, dt, 0.3):
 				A.open_menu()
 				_shot_later(A, 0.7)

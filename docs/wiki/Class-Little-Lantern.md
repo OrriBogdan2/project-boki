@@ -10,7 +10,7 @@ downed friends out of danger and roots foes that chase them. She has no ultimate
 |---|---|
 | Class title | Little Lantern |
 | Base character | Pip, female |
-| Personality | Small, fiery and quick, with a fox's ears and tail and red markings. She is cheerful and bold, and she looks after her friends first. |
+| Personality | A brave little field medic, a fairy fox waist-high to a human. She is afraid of the dark, and the lantern she carries holds a star she caught as a kid. |
 
 <!-- /gen:profile -->
 
@@ -19,7 +19,7 @@ downed friends out of danger and roots foes that chase them. She has no ultimate
 1. **Hold left click** to flick embers from the Lantern Crook. They fly their full range, past the
    cursor. Each ember **Kindles** a foe (up to 5): Kindle adds damage to your embers, and an ember into a
    Kindled foe winds Hearthlight back. Pause a second and the next ember is Empowered and flies further.
-2. **Hold RMB** to see the Burrseed's dotted lane, let go to throw. The seed sticks to the first foe, a
+2. **Press RMB** for the Burrseed: a 1s wind-up at half speed, then it flies at the cursor by itself, so flick your aim onto the target as it ends. The seed sticks to the first foe, a
    violet disc shows the area under them, and 0.7s later it roots everyone in it.
 3. **E** lights Hearthlight, a ring that heals the squad and flares at the end. Press E again to throw it
    to the cursor; it latches onto the first teammate it passes.
@@ -55,7 +55,7 @@ downed friends out of danger and roots foes that chase them. She has no ultimate
 | Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Ember Cast (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with lantern light, pins chasers with burr-seeds. |
-| Silhouette | small and low: a tiny courier with a trailing ember tail, casting light from her hands |
+| Silhouette | small: a tiny fairy fox medic with gold-veined wings, a leaf cape and a big glowing star lantern |
 | Resource | Kindle (max 5) |
 
 ### Kit card
@@ -68,7 +68,7 @@ What the in-game kit card (K) says.
 | Passive: Carrier | Carrier: run into a downed teammate to carry up to 2 behind a shield. |
 | Dash: Relay Step | Relay Step: a quick hop where you move; in the air, a long floaty glide. |
 | LMB | Ember Cast: hold to push embers from alternating hands; they fly past the cursor and each hit on a foe adds Kindle. |
-| RMB: Burrseed | Burrseed: hold to aim the lane, let go to throw; it sticks to a foe and roots them 0.7s later. |
+| RMB: Burrseed | Burrseed: a 1s wind-up, then the seed flies at the cursor; it sticks to a foe and roots them 0.7s later. |
 | E: Hearthlight | Hearthlight: a healing ring on you; press again to throw it to the cursor. |
 | Hunter ultimate: Hearth Call | Hearth Call (hunter ultimate, level 6): tether a teammate for 5s of healing while you walk; a downed one is pulled to you and stood up at the end. |
 | Weapon: Ember Cast | Hold to push embers from alternating hands that fly past the cursor; each hit on a foe adds Kindle. |
@@ -81,7 +81,7 @@ What the in-game kit card (K) says.
 
 **Burrseed (RMB, 10.5s cooldown).**
 
-- *Tap:* Hold to show a faint dotted lane to the seed's full 14m (it flies past the cursor); let go to throw. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled.
+- *Tap:* Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled.
 
 **Hearthlight (E, 11s cooldown).** A 2.6m ring of lantern light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.
 

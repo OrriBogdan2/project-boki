@@ -1,6 +1,6 @@
 class_name OstraKit
 extends ArchKit
-## Ostra (medium): Swell, Tether Lantern (a Settled orb after a pause), Lantern Trade, Shard Snap,
+## Motley (medium): Swell, Tether Lantern (the wait between shots charges the next orb), Lantern Trade, Shard Snap,
 ## Brimseed, and Nightwell on X (ostra_well.gd). docs/heroes/ostra.md. The loop: hits (ten times as much on
 ## hunters) fill Swell; Swollen, the seed grows bigger and quicker, Trade lands sooner and Snap hits harder.
 ## Snap to stun at range, drop the seed on the stunned foe, let it grow, pop it; Trade puts you or the foe
@@ -16,13 +16,17 @@ const TEAL := Color("7fe0d0")
 const VOID_COL := Color("b06bff")
 const PINK := Color("ff4fd8")
 const GROUND_HAZARDS := ["hazard", "lava", "spore", "toxic", "molten"]
+const ORB_FULL_COL := Color("efd4ff")      # the orb's shot colour at full charge (what other games draw)
+const GLOW_COL := Color("8a3dff")          # the charge glow at his hand, starting...
+const GLOW_FULL_COL := Color("d070ff")     # ...and at full charge
+const GLOW_SIZE := Vector2(0.4, 1.25)      # the glow's scale (a mote is 0.4m wide at 1), starting and at full
 
 var swollen_t := 0.0
 var last_shot_t := -99.0
 var shot_seen := 0
-var primed := false
-var base_wpn: Dictionary = {}
-var charge := 0.0              # 0..1: the LMB orb's build-up since the last shot
+var charge := 0.0              # 0..1: the next orb's build-up since the last shot; orb_wpn carries it
+var base_wpn: Dictionary = {}  # the weapon as loaded, the plain orb
+var orb_wpn: Dictionary = {}   # his live weapon: a copy of base_wpn with the charge written in
 var last_orb_c := 0.0          # (checks) the charge and hit radius of the last orb fired
 var last_orb_r := 0.0
 var seed: Dictionary = {}      # {pos, t, grow, rmax, sid, vis, burn, col}
@@ -35,6 +39,7 @@ var well: OstraWell            # X: Nightwell
 # counters for the checks
 var swells := 0
 var settled_shots := 0
+var full_chimes := 0
 var swaps := 0
 var swapped_foes := 0
 var swapped_allies := 0
@@ -104,9 +109,6 @@ func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
 		return [0.0, o]
 	return [dmg, o]
 
-func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float:
-	return dmg
-
 ## He drifts slowly (dash.fly_slow of run speed) while the Trade is in flight; the Snap's wind-up slows him.
 func move_k() -> float:
 	if well.locked:
@@ -163,69 +165,76 @@ func _reticle() -> void:
 	else:
 		AimKit.line(h, "aim", {"col": Color("f2eaff"), "alpha": 0.8})
 
-## The orb charges smoothly with the time since his last shot, from a plain orb to full over lmb.idle:
-## damage, speed and size grow with it (the weapon's numbers are rewritten each tick, so the next shot
-## carries them), and a full orb also slows. Every orb passes through terrain.
+## The wait between shots charges the next orb: its damage, speed, size and colour follow the charge, and a
+## full one also slows. Written into his live weapon (only when the charge moves), so bots and Net get it too.
 func _tick_weapon() -> void:
 	if h.wid != "tether_lantern":
 		return
-	if not h.wpn.has("_oc"):
-		base_wpn = h.wpn
 	if h.shot_n != shot_seen:
 		shot_seen = h.shot_n
-		var c := charge
-		last_shot_t = m.time
-		var hot := c >= 0.999
-		_shape_last(c, hot)
-		play("ostra_orb_hot" if hot else "ostra_orb")
-		if hot:
-			m.sfx("os_orb_hot", h.pos, -4.0, 1.0)      # (the plain orb's sound is the weapon's own)
-			settled_shots += 1
-			m.fx.burst(_hand(), Color(0.45, 0.5, 1.0, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
-	var was := charge
-	charge = clampf((m.time - last_shot_t) / float(lmb_def()["idle"]), 0.0, 1.0) if not h.downed else 0.0
-	primed = charge >= 0.999
-	if charge >= 0.999 and was < 0.999 and not h.downed:
-		m.sfx("os_prime", h.pos, -12.0, 1.0)      # the soft chime at full
-	if not base_wpn.is_empty():
-		var w := base_wpn.duplicate()
-		w["dmg"] = float(w["dmg"]) * (1.0 + float(lmb_def()["prime_dmg"]) * charge)
-		w["speed"] = float(w["speed"]) * (1.0 + (float(lmb_def()["prime_speed"]) - 1.0) * charge)
-		w["color"] = (w["color"] as Color).lerp(Color("8f9cff"), charge) if w["color"] is Color else w["color"]
-		w["_oc"] = true
-		h.wpn = w
-	if charge > 0.05 and not h.downed and snap.is_empty():
-		# (the charge glow sits on his actual hand, where the 3D model holds its orb: violet, growing and
-		# brightening with the charge)
-		var glow := Color("9a5cff").lerp(Color("c9d2ff"), charge)
-		KitLooks.of(m).hold_on("os_charge", "mote", h, hand_pos(true), 0.25 + 0.35 * charge, glow)
+		_orb_fired()
+	_set_charge(wait_charge())
+	if charge > 0.0 and not h.downed and snap.is_empty():
+		var col := GLOW_COL.lerp(GLOW_FULL_COL, charge)
+		# (on his actual hand, where the 3D model holds its orb: at a fixed point in front of him the match
+		# camera drew it as a disc at his feet)
+		KitLooks.of(m).hold_on("os_charge", "mote", h, hand_pos(true), lerpf(GLOW_SIZE.x, GLOW_SIZE.y, charge), col)
 
-## The orb just fired: bigger and brighter with the charge, slows at full, and goes through terrain.
-func _shape_last(c: float, hot: bool) -> void:
-	for i in range(m.shots.size() - 1, -1, -1):
-		var s: Dictionary = m.shots[i]
-		if s["by"] != h:
-			continue
-		var k := 1.0 + float(lmb_def()["size_k"]) * c
-		s["r"] = float(s["r"]) * k
-		s["vr"] = float(s.get("vr", s["r"])) * k
-		var x: Dictionary = s["x"]
-		x["pierce_terrain"] = true
-		if hot:
-			x["slow"] = float(lmb_def()["prime_slow_t"])
-			x["slow_k"] = float(lmb_def()["prime_slow"])
-		last_orb_c = c
-		last_orb_r = float(s["r"])
-		if KitLooks.of(m).skin_last(h, "orb_hot" if c >= 0.5 else "orb"):
-			for e in KitLooks.of(m).live:
-				if e["s"] == s:
-					(e["n"] as Node3D).scale = Vector3.ONE * k
+## The next orb's charge from the time since the last shot: 0 until lmb.charge_from (the fire rate, so held
+## fire stays plain orbs), then a straight build to 1 at lmb.idle.
+func wait_charge() -> float:
+	var ld := lmb_def()
+	var from := float(ld["charge_from"])
+	return clampf((m.time - last_shot_t - from) / (float(ld["idle"]) - from), 0.0, 1.0)
+
+func _set_charge(k: float) -> void:
+	var fresh := not is_same(h.wpn, orb_wpn)      # first step, or a weapon upgrade replaced it
+	if fresh:
+		base_wpn = h.wpn
+		orb_wpn = base_wpn.duplicate()
+		h.wpn = orb_wpn
+	elif k == charge:
 		return
+	var ld := lmb_def()
+	var shot_x: Dictionary = (base_wpn["shot_x"] as Dictionary).duplicate()
+	if k >= 1.0:
+		shot_x["slow"] = float(ld["prime_slow_t"])
+		shot_x["slow_k"] = float(ld["prime_slow"])
+		if charge < 1.0 and not h.downed:
+			full_chimes += 1
+			m.sfx("os_prime", h.pos, -12.0, 1.0)      # the soft chime at full
+			m.fx.flash(hand_pos(true), GLOW_FULL_COL, 0.45, 0.08)
+	orb_wpn["shot_x"] = shot_x
+	orb_wpn["dmg"] = float(base_wpn["dmg"]) * (1.0 + float(ld["prime_dmg"]) * k)
+	orb_wpn["speed"] = float(base_wpn["speed"]) * lerpf(1.0, float(ld["prime_speed"]), k)
+	orb_wpn["size"] = float(base_wpn["size"]) * orb_size_k(k)
+	orb_wpn["color"] = Color(base_wpn["color"]).lerp(ORB_FULL_COL, k)
+	charge = k
+
+## The orb's size at charge k, as a share of the plain orb's.
+func orb_size_k(k: float) -> float:
+	return 1.0 + float(lmb_def()["size_k"]) * k
+
+## The orb just left at the charge it was fired with; a full one has its own flick, sound and flash.
+func _orb_fired() -> void:
+	last_shot_t = m.time
+	last_orb_c = charge
+	last_orb_r = float(h.wpn["size"])
+	KitLooks.of(m).release("os_charge")
+	KitLooks.of(m).skin_orb(h, charge, orb_size_k(charge))
+	var full := charge >= 1.0
+	play("ostra_orb_hot" if full else "ostra_orb")
+	if full:
+		settled_shots += 1
+		m.sfx("os_orb_hot", h.pos, -4.0, 1.0)      # (the plain orb's sound is the weapon's own)
+		m.fx.burst(_hand(), Color(0.8, 0.6, 1.0, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
 
 ## A seed now waits for its recast, so a kit swapped out (practice, the Arena) takes its seed with it.
 func teardown() -> void:
 	if not seed.is_empty():
 		_pop(false)
+	if is_same(h.wpn, orb_wpn):
+		h.wpn = base_wpn
 	super.teardown()
 
 # ------------------------------------------------------------------ dash: Lantern Trade
@@ -347,10 +356,9 @@ func _drop_holds() -> void:
 	snap_rec = 0.0
 	if not swap.is_empty():
 		_swap_end(false)
-	primed = false
-	charge = 0.0
-	if not base_wpn.is_empty(): h.wpn = base_wpn
 	last_shot_t = m.time
+	if is_same(h.wpn, orb_wpn):
+		_set_charge(0.0)
 
 func _swap_end(go: bool) -> void:
 	var dd := dash_def()

@@ -2,7 +2,7 @@ extends RefCounted
 ## --dash-dir-check: a plain dash follows the "Dash toward the cursor" setting for every hunter. With it off
 ## (the default) you dash the way you're moving even while aiming the other way; with it on you dash at the
 ## cursor. Hunters whose Shift is aimed movement by design (Archer's grapple, Mage's blink, Motley's swap,
-## Tarek's leap to a target area and Bulwark's shield charge) are left out. Never touches the save.
+## Tarek's Rock Hop to the cursor and Bulwark's shield charge) are left out. Never touches the save.
 
 const AIMED := ["archer", "mage", "ostra", "dolm"]
 

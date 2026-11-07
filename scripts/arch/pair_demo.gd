@@ -9,7 +9,7 @@ extends RefCounted
 const ANIM := {
 	"br_throw": ["dolm", "rubble_fists", [0.5, 0.56, 0.62, 0.7, 0.85, 1.0]],
 	"br_punch": ["dolm", "rubble_fists", [0.7, 1.2, 1.44, 1.47, 1.52, 1.75]],
-	"br_slam": ["dolm", "rubble_fists", [0.8, 1.4, 1.52, 1.66, 1.81, 2.2]],
+	"br_slam": ["dolm", "rubble_fists", [0.8, 0.98, 1.2, 1.4, 1.55, 1.9]],
 	"br_leap": ["dolm", "rubble_fists", [0.85, 1.0, 1.12, 1.28, 1.5, 1.9]],
 	"br_lunge": ["dolm", "rubble_fists", [0.85, 0.93, 0.98, 1.06, 1.25]],
 	"br_dive": ["dolm", "rubble_fists", [0.5, 0.62, 0.75, 0.9, 1.05, 1.4]],
@@ -68,7 +68,7 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 			P.inp["fire"] = t > 0.5 and t < 1.45
 		"br_slam":
 			if t < 0.45: P.teleport(Vector3(D.pos.x - 3.6, P.pos.y, D.pos.z))
-			_rmb_hold(K, t, dt, 0.5, 1.45)
+			_rmb_hold(K, t, dt, 0.5, 0.95)
 		"br_leap":
 			_rmb_hold(K, t, dt, 0.5, 1.4)
 			if at(t, dt, 0.9): P.inp["jump"] = true
@@ -85,9 +85,9 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				K.cd["rmb"] = 0.0
 				K.press_rmb()
 		"br_dash":
-			# a leap that lands just short of the dummy: the crash catches it at the edge, the rock rolls into it
-			if t < 0.45: P.teleport(Vector3(D.pos.x - 6.0, P.pos.y, D.pos.z))
-			P.inp["aim"] = D.pos + Vector3(-1.9, 0.9, 0.0)
+			# one hop that lands just short of the dummy: the crash catches it at the edge, the rock rolls into it
+			if t < 0.45: P.teleport(Vector3(D.pos.x - 4.2, P.pos.y, D.pos.z))
+			P.inp["aim"] = D.pos + Vector3(-1.6, 0.9, 0.0)
 			if at(t, dt, 0.5):
 				P.dashes = P.max_dashes()
 				P.do_dash()
@@ -170,8 +170,8 @@ const SHOTS := {
 	"pair_breah_throw_key": ["br_throw", 0.58, -5.0], "pair_breah_throw_hit": ["br_throw", 0.76, -5.0],
 	"pair_breah_punch_tele": ["br_punch", 1.2, -2.4], "pair_breah_punch_key": ["br_punch", 1.45, -2.4],
 	"pair_breah_punch_hit": ["br_punch", 1.49, -2.4],
-	"pair_breah_slam_tele": ["br_slam", 1.4, -3.6], "pair_breah_slam_key": ["br_slam", 1.81, -3.6],
-	"pair_breah_slam_hit": ["br_slam", 2.07, -3.6],
+	"pair_breah_slam_tele": ["br_slam", 0.85, -3.6], "pair_breah_slam_key": ["br_slam", 1.55, -3.6],
+	"pair_breah_slam_hit": ["br_slam", 1.7, -3.6],
 	"pair_breah_leap_key": ["br_leap", 1.15, -5.0], "pair_breah_lunge_key": ["br_lunge", 0.98, -5.0],
 	"pair_breah_dash_tele": ["br_dash", 0.62, -6.0], "pair_breah_dash_key": ["br_dash", 0.82, -6.0],
 	"pair_breah_dash_hit": ["br_dash", 1.12, -6.0], "pair_breah_dash_rock": ["br_dash", 1.3, -6.0],

@@ -6,20 +6,20 @@
 	"personality": "Bold and revolutionary, with tattoos, a leather jacket and plenty of jewellery.\nShe calls the lightning down and does not ask permission.",
 	"weight": "light",
 	"plate_offset": 2.2,
-	"body": {"size": 1.03, "chest": 1.0, "head": 0.74, "legs": 1.95, "neck": -0.02, "build": 0.92, "hit_r": 0.4},
-	"model_glow": {"core": "#ff3fb4"},
+	"body": {"size": 1.03, "chest": 1.0, "head": 0.74, "legs": 1.95, "neck": -0.05, "shoulder": 0.85, "build": 0.92, "hit_r": 0.4},
+	"model_glow": {"core": "#ff3fb4", "wire": "#e0441c", "arcblue": "#56c8ff"},
 	"color": "#5fe3c8",
 	"fantasy": "The storm-kite runner. Points and crackles bolts from her fingertip until a foe is fully charged, then runs straight through them as a streak of lightning and comes out with the dash back.",
 	"silhouette": "the copper rod mast and kite pennant on the back",
 	"card": {
 		"loop": "Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.",
-		"dash": "Wirerun: hold to charge a lane (length grows with the hold), let go to streak; through a 4-Static foe it hits double and comes back at once.",
+		"dash": "Wirerun: tap for a short zap, hold to charge a longer lane, let go to streak; through a 4-Static foe it hits double and comes back at once, and a run that came back goes 1.5x further and charges faster.",
 		"passive": "Static: every hit adds a stack (4 max, shown over their head). The 4th calls a sky bolt and makes them Live.",
 		"rmb": "Storm Rod: hold to summon a copper rod, let go to throw it to full range. It adds 1 Static, knocks the first foe back, stuns them on a wall and leaves a charge orb that gives Wirerun back.",
 		"e": "Skycall: drop a circle at your cursor, hold and drag the mouse to pick the drag, let go. 0.8s later lightning drags everyone inside that way (an arrow shows it) and grounds them.",
 		"x": "Kitefall (ultimate, level 6): launch up out of reach, then strike down at your cursor anywhere in a wide ring. It knocks everyone round the landing back and adds Static, spreading the highest count to all it hits.",
 		"weapons": {
-			"coilcaster": "Finger bolts every 0.72s, left hand then right, out to full range; each stops on the first foe it hits and adds 1 Static."
+			"coilcaster": "Finger bolts every 0.65s, left hand then right, out to full range; each stops on the first foe it hits and adds 1 Static."
 		}
 	},
 	"signature": "coilcaster",
@@ -44,6 +44,9 @@
 		"icon": "dash",
 		"col": "#9ff5e0",
 		"cd": 8.0,
+		"reset_mult": 1.5,
+		"reset_charge": 0.75,
+		"reset_window": 5.0,
 		"dist": [
 			7.5,
 			13.0
@@ -52,7 +55,7 @@
 		"speed": 40.0,
 		"dmg": 20.0,
 		"width": 0.9,
-		"desc": "Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 7.5 to 13m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 40m/s (shots pass through you), carrying that drift. Every foe you cross takes 20. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once: the only way it comes back early.",
+		"desc": "Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 7.5 to 13m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 40m/s (shots pass through you), carrying that drift. Every foe you cross takes 20. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once. A run that came back (a Blowout or a charge orb, used within 5s) goes 1.5x further and charges in 0.45s.",
 		"auto": 0.9,
 		"full_mult": 2.0,
 		"end_r": 2.25,

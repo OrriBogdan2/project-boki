@@ -35,11 +35,17 @@ at the rig's `Hand` nodes. Apply all transforms before export.
 | offhand | child `weapon_offhand` | a twin weapon's second piece, left of x = -0.04, handed to the left hand |
 | shield | mesh `shield` | modelled in the Shield node's space on `Hand.L` (Breaker) |
 | anchors | empties `anchor_head_top`, `anchor_chest`, plus a Hunter's own (`anchor_*`) | children of their bone; kits find them with `WardenGlb.anchor` |
+| FX anchors | optional empties a Hero's looks read (`content/vfx/<arch>.json` "anchors"; Kael: `anchor_blade_tip`, `anchor_blade_mid`, under `weapon`; `anchor_chain_hand`, `anchor_feet`, on their bones; Lisette: `anchor_nock`, `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`) | looks fall back to the Gun's space, then the body, without them (docs/HERO_VFX.md) |
 
 The weapon is part of the Hunter's design: it stays seated in the hand (its bounds hold the grip within 6 cm) and
 follows the hand in every state. `HunterAnim._weapon_to_hand` pulls a weapon whose grip the arm cannot reach (a flip,
 a long lunge) to the hand, so it never detaches. Moves that deliberately free a hand (`fl`/`fr` keys: throws,
 palm casts) are exempt.
+
+Item 76b (ART-1): a Hero rebuilt with `skinned_weapon` (docs/art/wardens/CLIPS.md) carries no `weapon` node: its weapon is
+skinned to its bones in the .glb, its FX points are empties on them (`weapon_muzzle`, the blade's root), and the Gun is
+an invisible reference kept on the blade. `body.shoulder` in the archetype moves the arm pivots in or out (keep the
+Hero's own width there, never by `body.chest`). A Hero's variant bones can sit in its data file (`extra_bones`).
 
 ## The check
 `--rig-standard-check` (all 12): the armature matches the standard; the attachment points exist; the rest pose has

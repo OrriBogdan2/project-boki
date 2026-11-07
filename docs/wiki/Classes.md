@@ -51,7 +51,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| [Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Bolts | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
+| [Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
 | [Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
 | [Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
 | [Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Fusion) |
@@ -61,7 +61,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Mad Pyromancer](Class-Mad-Pyromancer.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Fusion) |
 | [Little Lantern](Class-Little-Lantern.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none (Boki Fusion) |
 | [Frost Siren](Class-Frost-Siren.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
-| [Cliff Runner](Class-Cliff-Runner.md) | 145 / 1 | Rubble Fists | Molten Guard | Rubble Leap | Quakefall | Stone Row | none (Boki Fusion) |
+| [Cliff Runner](Class-Cliff-Runner.md) | 145 / 1 | Rubble Fists | Molten Guard | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
 | [Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
 
 ### How Hunters unlock

@@ -6,7 +6,7 @@ Changing a hero's hit radius is one line (`body.hit_r`). The creator's look slid
 
 | Archetype | Warden | x standard | `hit_r` (m) | Why |
 |---|---|---|---|---|
-| bulwark | Breaker | 1.15 | 0.460 | tallest and widest |
+| bulwark | Breaker | 1.15 | 0.460 | tallest and widest (band cap; the hull itself is 0.95 m) |
 | dredge | Grimble | 1.13 | 0.452 | hulking |
 | juggernaut | Kael | 1.07 | 0.428 | broad |
 | gunslinger | Vex | 1.04 | 0.416 | broad |

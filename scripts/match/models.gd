@@ -742,7 +742,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		part(torso, cyl(0.075, 0.075, 0.44, 12), toon(Color("f3eee2")), Vector3(0, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
 		for sx in [-1.0, 1.0]:
 			part(torso, cyl(0.08, 0.08, 0.06, 12), m_acc, Vector3(0.2 * sx, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
-	_class_marks(torso, cls, bw, m_acc, m_trim)
+	if not um: _class_marks(torso, cls, bw, m_acc, m_trim)      # (the shroud covers the back it would sit on)
 	# head: the sculpted head (jaw, cheeks, brow, chin per race and gender) with its face
 	var hk := HeroKit.head_key(rid, fem)
 	part(torso, HeroKit.head(hk), m_skin, Vector3(0, 0.86, 0), Vector3.ONE, Vector3.ZERO, "Head")
@@ -772,16 +772,21 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	var hk2 := float(CLASS_LOOK.get(cls, {}).get("hands", 1.0)) * (1.3 if arch == "juggernaut" else 1.0)
 	var m_glove: Material = m_skin if um else (m_steel if heavy_gear else (m_dark if arch == "thief" else m_leather))
 	var arms := {}
+	# (archetype body "arms": long arms as its art draws them; HunterAnim solves the same lengths)
+	var arm_k := float(Arch.body(arch).get("arms", 1.0))
+	root.set_meta("arm_k", arm_k)
 	for sx in [-1.0, 1.0]:
 		var sd := "L" if sx < 0.0 else "R"
-		var piv := Node3D.new(); piv.name = "Arm%sPivot" % sd; piv.position = Vector3(0.215 * sx * chest_w, 0.5, 0.0)
+		var piv := Node3D.new(); piv.name = "Arm%sPivot" % sd; piv.position = Vector3(0.215 * sx * chest_w,
+				0.5 * float(Arch.body(arch).get("torso", 1.0)), 0.0)
+		piv.position.x *= float(Arch.body(arch).get("shoulder", 1.0))
 		torso.add_child(piv)
 		part(piv, sphere(0.088, 16), m_body, Vector3(0, -0.005, 0), Vector3(1.0, 1.0, 1.0))
 		part(piv, limb(0.088, 0.064, 0.25, 0.16), m_body, Vector3(0, -0.1, 0))
-		var elbow := Node3D.new(); elbow.name = "Elbow"; elbow.position = Vector3(0, -0.21, 0); piv.add_child(elbow)
+		var elbow := Node3D.new(); elbow.name = "Elbow"; elbow.position.y = -0.21 * arm_k; piv.add_child(elbow)
 		part(elbow, sphere(0.064, 14), m_body)
 		part(elbow, limb(0.068, 0.05, 0.22, 0.14), m_body, Vector3(0, -0.09, 0), Vector3.ONE, Vector3.ZERO, "Arm" + sd)
-		var hand := Node3D.new(); hand.name = "Hand"; hand.position = Vector3(0, -0.235, 0); elbow.add_child(hand)
+		var hand := Node3D.new(); hand.name = "Hand"; hand.position.y = -0.235 * arm_k; elbow.add_child(hand)
 		part(hand, HeroKit.mitten(), m_glove, Vector3(0, 0.0, 0.0), Vector3(hk2, hk2, hk2) * Vector3(1.0, 1.0, 1.0))
 		part(hand, HeroKit.thumb(), m_glove, Vector3(-0.042 * sx * hk2, 0.01, -0.03 * hk2), Vector3.ONE * hk2, Vector3(0, 0, 0.35 * sx))
 		part(hand, HeroKit.cuff(0.062 * hk2, 0.078 * hk2, 0.05), m_glove if heavy_gear else m_leather, Vector3(0, 0.065, 0))
@@ -833,7 +838,8 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	ring.material_override = ring_mat(team_col, 0.16); ring.position = Vector3(0, 0.04, 0)
 	root.add_child(ring)
 	# the head and everything on it turn and nod together from the neck
-	var head := Node3D.new(); head.name = "HeadPivot"; head.position = Vector3(0, 0.68, 0)
+	var head := Node3D.new(); head.name = "HeadPivot"
+	head.position = Vector3(0, 0.68 * float(Arch.body(arch).get("torso", 1.0)), 0)
 	torso.add_child(head)
 	for ch in torso.get_children():
 		if ch is MeshInstance3D and (String(ch.name).begins_with("@") or ch.name == "Head") and (ch as Node3D).position.y > 0.72 and not ch.has_meta("stay"):
@@ -886,6 +892,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 			for n in [ap, ap.get_node("Elbow"), ap.get_node("Elbow/Hand")]:
 				for ch in (n as Node3D).get_children():
 					if ch is MeshInstance3D: (ch as Node3D).scale = Vector3(bk, 1.0, bk)
+	if um: Shrouds.bind(root)
 	bake_part_y(root)
 	root.set_meta("mats", collect_mats(root))
 	for mm in root.get_meta("mats"):

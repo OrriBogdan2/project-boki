@@ -36,6 +36,7 @@ const BLAST_PEAK_DB := -6.0
 ## Distance falloff: full volume within NEAR metres, then a gentle roll-off; muffled beyond FAR.
 const NEAR := 3.5
 const FAR := 9.0
+var skip: Array = []      # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
 var last_take := {}
 var recent := {}          # sound -> start times (ms) still inside the stacking window
 
@@ -44,6 +45,7 @@ var players: Array[AudioStreamPlayer] = []
 var next := 0
 var listener := Vector3.ZERO   # set by the camera each frame
 var hear_range := 22.0
+var sound_reach := {}       # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
 var last_played := {}
 var rng := RandomNumberGenerator.new()
 
@@ -83,11 +85,23 @@ func _ready() -> void:
 			streams[n] = takes[0]
 		elif takes.size() > 1:
 			streams[n] = takes
+	_load_reach()
 	for i in POOL:
 		var p := AudioStreamPlayer.new()
 		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
+
+## Heavy sounds that carry further than hear_range (a gatling you hear coming): each sound set lists them
+## under "reach" (metres). Past FAR they still go through the muffled bus, so what carries is the low end.
+func _load_reach() -> void:
+	for f in DirAccess.get_files_at("res://content/sfx"):
+		if not f.ends_with(".json"):
+			continue
+		var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/" + f))
+		if d is Dictionary:
+			for sname in (d as Dictionary).get("reach", {}):
+				sound_reach[sname] = float(d["reach"][sname])
 
 ## The effects on the buses: SFX gets a soft compressor, a little room and a limiter; far-away sounds
 ## are low-passed on their way into it; the master has a last safety limiter.
@@ -377,14 +391,14 @@ func _voice(pos) -> AudioStreamPlayer:
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter.
 func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> void:
-	if not streams.has(sname) and not _lazy(sname):
+	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
 		return
 	var now := Time.get_ticks_msec()
 	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, 30))
 	if sname.begins_with("step_"): gap = 25      # footsteps: several people can walk at once
 	if now - int(last_played.get(sname, -1000)) < gap:
 		return
-	var v := vol_db + _distance_db(pos) + (BLAST_DB if sname in BLAST else 0.0)
+	var v := vol_db + _distance_db(pos, float(sound_reach.get(sname, 0.0))) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
 		return
 	var times: Array = recent.get(sname, [])
@@ -449,7 +463,8 @@ func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 
 	var p := AudioStreamPlayer.new()
 	p.bus = "SFX"
 	add_child(p)
-	loops[key] = {"p": p, "pos": pos, "vol": vol_db, "reach": reach}
+	var carry := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
+	loops[key] = {"p": p, "pos": pos, "vol": vol_db, "reach": carry}
 	if st == null:
 		return
 	if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:

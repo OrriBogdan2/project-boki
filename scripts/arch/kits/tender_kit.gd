@@ -27,7 +27,8 @@ var setdown_was := false        # the set-down key (crouch, never F: F is the Bo
 const SETDOWN := "crouch"      # the one place to change the set-down key (a Hunter.inp key)
 var look: CareLook             # pooled visuals (made on first use)
 var shot_seen := 0             # the hunter's shot counter at the last ember we dressed
-var seed_aim := false          # RMB held: the dotted lane and the coiled pose are up (a hold: dropped on merge)
+var seed_aim := false          # the Burrseed wind-up is running (item 118; a merge start drops it)
+var seed_wind := 0.0           # s of it left
 var aft_t := 0.0               # next dash ember mote
 var glide := {}                # the air dash's long glide: {t, top (m/s)} (a dash: dropped on merge)
 var stats := {"embers": 0, "emp": 0, "swirls": 0, "flares": 0, "calls": 0, "rescues": 0, "broken": 0}   # tests
@@ -114,6 +115,7 @@ func _tick(dt: float) -> void:
 	if h.idle_fire >= 1.0 and not h.downed:
 		h.shot_range_k = 1.4
 		emp_until = m.time + 0.9
+	_tick_seed(dt)
 	_tick_burrs(dt)
 	_tick_hearth(dt)
 	_tick_carry(dt)
@@ -200,9 +202,8 @@ func _drop_holds() -> void:
 	if not hearth_call.is_empty():
 		_call_end(false)
 	if seed_aim or rmb_down:
-		seed_aim = false
 		rmb_down = false
-		if anim_id == "mm_seed_aim": anim_id = ""
+		_seed_cancel()
 	if not carrying().is_empty():
 		drop_all(false)
 	carry_t = 0.0
@@ -339,26 +340,57 @@ func _tick_glide(dt: float) -> void:
 		h.vel.y = maxf(h.vel.y, -float(air.get("float_fall", 1.2)))
 
 # ------------------------------------------------------------------ RMB: Burrseed
-## Held: a faint dotted lane out to the seed's full range (it flies past the cursor) and the coiled
-## pose; let go (or tap) to throw. Not a charge: no charge ring.
+## Owner item 118: a press starts a fixed wind-up (`windup`) that nothing extends: she slows
+## (`wind_move`), a short dotted lane follows the aim and a ring glows round her. The seed then
+## goes by itself, along the aim of that moment: you flick it onto the target. Not a hold, not a
+## charge; letting go does nothing. A stun, a Hex or going down loses the throw, not the charge.
 func rmb_charge_full() -> float: return 0.0
-
-func rmb_hold_tick(_t: float) -> void:
-	if not rmb_ready() or busy():
-		return
-	var sd: Dictionary = rmb_def()["seed"]
-	AimKit.dotted(h, "rmb", {"len": float(sd["range"]), "width": float(sd["hit_r"]) * 2.0, "col": Color("e8f6c8")})
-	if not seed_aim:
-		seed_aim = true
-		play("mm_seed_aim")
-		m.sfx("tend_seed_aim", h.pos, -6.0, 1.0)
 
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
+	if seed_aim:
+		return
+	if not rmb_ready():
+		h._ab_feedback("sec", "deny")
+		return
+	seed_aim = true
+	seed_wind = float(rmb_def()["windup"])
+	play("mm_seed_aim")
+	m.sfx("tend_seed_aim", h.pos, -6.0, 1.0)
+	lk().burst("flare", h.pos,
+			{"col": Color("9a6aff"), "rim": Color("ffd27a"), "r": 1.4, "dur": seed_wind, "pattern": 3.0})
+	_seed_lane()
+
+func _seed_lane() -> void:
+	var sd := rmb_def()
+	var width := float(sd["seed"]["hit_r"]) * 2.0
+	AimKit.dotted(h, "rmb", {"len": float(sd["wind_lane"]), "width": width, "col": Color("e8f6c8")})
+
+## Her share of run speed during the wind-up.
+func move_k() -> float:
+	return float(rmb_def()["wind_move"]) if seed_aim else 1.0
+
+func _tick_seed(dt: float) -> void:
+	if not seed_aim:
+		return
+	if busy():
+		_seed_cancel()
+		return
+	seed_wind -= dt
+	if seed_wind > 0.0:
+		_seed_lane()
+		return
+	_seed_cancel()
+	_throw_seed()
+
+func _seed_cancel() -> void:
 	seed_aim = false
+	seed_wind = 0.0
 	AimKit.hide(h, "rmb")
+	if anim_id == "mm_seed_aim": anim_id = ""
+
+func _throw_seed() -> void:
 	if not spend_rmb():
-		if anim_id == "mm_seed_aim": anim_id = ""
 		return
 	play("mm_seed")
 	var sd: Dictionary = rmb_def()["seed"]
@@ -556,6 +588,7 @@ func heal_k() -> float:
 func _pulse(c: Vector3, per: float) -> void:
 	var ed := e_def()
 	var boost := 1.0 + throw_boost() if float(hearth.get("boost", 0.0)) > 0.0 else 1.0
+	PipStars.pulse(h)
 	for o in m.hunters:
 		if o.team != h.team or o.out or o.extracted:
 			continue
@@ -572,6 +605,7 @@ func _hearth_end(flare: bool, word: String) -> void:
 		var amt := float(ed["burst"]) * heal_k()
 		_bloom(c, rr)
 		play_soft("mm_flare")
+		PipStars.pulse(h)
 		for o in m.hunters:
 			if o.team != h.team or o.out or o.extracted:
 				continue
@@ -731,6 +765,7 @@ func _tick_call(dt: float) -> void:
 ## too, as the source's channel heals an ally or a Wisp: it tops up what keeps them from bleeding out.
 func _call_heal(who: Hunter, amount: float) -> void:
 	var amt := amount * LevelGrowth.ap(h)
+	PipStars.pulse(h)
 	if who == h:
 		CareUtil.heal(m, h, amt * float(e_def().get("self_k", 0.33)))
 	else:

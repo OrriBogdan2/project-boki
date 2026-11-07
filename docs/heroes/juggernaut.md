@@ -322,10 +322,10 @@ gather and turn, then the dive) / `jug_meteor_land` (the crouch onto the knees a
 
 ## Look and sound (all ours)
 
-Effects in scripts/arch/kits/dj_fx.gd and shaders/dj_fx.gdshader (pooled): the two-tone slash crescents, the
-red flame crescent of the Searing Wave, the white impact bursts, the gold guard shell, the upward gold cleave, the purple dive ring, the
-wavy and striped chains, the heal column. Sounds: tools/gen_sfx_kael.py (`jug_*`, `juggernaut_*`), synthesized, including the
-rising Lunge whine (`jug_charge`) and its full ping (`jug_full`).
+His moments are recipes in content/vfx/juggernaut.json, played by the shared HeroVfx (docs/HERO_VFX.md): flame arcs, burning
+ground that cools to fissures, walls of flame, mesh trails, GPU embers, smoke and debris, in his ember, magenta and gold.
+The projectile looks that ride a shot and the Warchain itself stay in scripts/arch/kits/dj_fx.gd. Sounds: tools/gen_sfx_kael.py
+(`jug_*`, `juggernaut_*`), played from the recipes.
 
 ## Originality
 
