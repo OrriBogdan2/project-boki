@@ -7,7 +7,7 @@ set -euo pipefail
 src=$1; still=$2; s=$3; len=$4; out=$5; x=${6:-0.6}
 max=$((4 * 1000 * 1000))
 total=$(awk -v l="$len" -v x="$x" 'BEGIN{print l + x}')
-vf="[0:v]trim=start=${s}:duration=${total},setpts=PTS-STARTPTS,fps=30,scale=1920:1080:flags=lanczos,format=yuv420p,split=3[a][b][c];"
+vf="[0:v]trim=start=${s}:duration=${total},setpts=PTS-STARTPTS,fps=30,scale=1920:1080:flags=lanczos:in_range=full:out_range=limited,format=yuv420p,split=3[a][b][c];"
 vf+="[a]trim=start=${len}:duration=${x},setpts=PTS-STARTPTS[tail];[b]trim=duration=${x},setpts=PTS-STARTPTS[head];"
 vf+="[tail][head]blend=all_expr='A*(1-T/${x})+B*(T/${x})'[mix];"
 vf+="[c]trim=start=${x}:duration=$(awk -v l="$len" -v x="$x" 'BEGIN{print l - x}'),setpts=PTS-STARTPTS[mid];"
