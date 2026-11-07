@@ -58,3 +58,12 @@ Nano Banana Pro, 1:1, 4K, a fresh generation (ref: the master sheet). The model 
 The front-stone version (fourth stone painted out) moves to `explorations/tarek_v2_portrait_front_stone.jpg`.
 
 `explorations/tarek_v2_portrait_wide.jpg` (16:9, the owner's run): a waist-up shot in a misty canyon, his right stone gauntlet across his chest and the huge stone left arm hanging, three eye stones. It is the clearest read of which arm is which, and could serve as a website or banner image.
+
+## Splash: "Nothing Hidden" (Nov 6, 22:59 ET)
+`tarek_v2_splash.jpg`, 5504×3072: four hooded assassins close in through moonlit shrine ruins. Tarek stands calm on a rock pillar bursting from the ground, one foot raised, with dust swirling and three eye stones around his head. Nano Banana Pro, 16:9, 4K, a fresh generation (refs: the turnaround and the master sheet; the owner's run).
+
+Local fix (not AI): the two background assassins had glowing teal eyes, which clashes with Tarek's jade colour language. They were darkened to normal eyes.
+
+`explorations/tarek_v2_splash_alt.jpg` is the second run: a squarer pose with stronger spotlight. Not chosen because all four assassins have glowing green eyes, his stone arm is washed teal, and the composition is more static.
+
+Not achieved: the eye stones turning toward the attackers. All three face the viewer.
