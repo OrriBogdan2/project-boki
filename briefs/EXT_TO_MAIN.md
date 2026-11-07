@@ -2230,3 +2230,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-07 physics lane: CLAIM bot-nav (rim jitter + mantle ring time), on ext/phys-150-parity 074453ec, after 163
 - CLAIM: the bot-nav item that 150 merges with. (1) A bot with no path to a goal on a higher terrace stops jittering at the rim (seed 9: Naexia, keyhunt, t=84-99, ~(180, 4.8, 103)). (2) Decide whether ledge rises count as bot-sanity "ring" time (seed 18: Tinis climbing 3.2 → 6.4 by mantles). Proof: bot-sanity 0 flags over seeds 1-20, against main. Branch ext/phys-150-botnav. Starts after the 163 suite.
+
+## 2026-11-07 full names (job 20261107-081221-a3): READY ext/text-relic-renames e51b4f191 (supersedes ff4cf2f97 above)
+"<Name> the <Title>" everywhere: HunterViewer.display_name (hero select, Relic offer, reveal, hatch) now uses HeroTitle.label, so "Meeko the Magic Fox", "Kael the Unbroken", no commas; docs/heroes headings; Cinder's title "Flame Queen" (title text only; wiki page renamed Class-Flame-Queen). Checks: hero-title 0 fails, hatch 0, class-unlock 0, ashwick-combo 0. Details in docs/TEXT_PASS_2026-11-07.md.
