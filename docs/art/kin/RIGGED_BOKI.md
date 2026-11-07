@@ -35,8 +35,8 @@ use them. Materials: `boki_coat` (atlas, ink), `boki_glow` (the species' glow), 
 
 Checks and review: `--boki-rig-check`; `--boki-rig-shots --shots-dir=<dir>`, then `tools/boki/review_gifs.sh <dir>`.
 
-Eyes: a visible eye about 20-25% of the head's width, as on the concepts. The dome is bigger than what shows: the head
-covers its rim. Past that the high cameras and `CamRig.char_lean` make it take the face.
+Eyes: a visible eye about 18-20% of the head's width (the owner asked for smaller eyes in game). The dome is bigger
+than what shows: the head covers its rim. Past that the high cameras and `CamRig.char_lean` make it take the face.
 
 Palettes live at the top of each species' coat section (`PLUM`, `SHELL`...); tools held in the tail are Vespyx's `chop`
 and `mine` clips, and `boki_clips.chop_mouth` / `mine_mouth` are the mouth versions the others use.
