@@ -2135,3 +2135,19 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-07 deep (job 20261107-020001-a4): CLAIM Ryzz v2 model rebuild
 - CLAIM: Ryzz v2 model rebuild (art/wardens/ryzz/ to the locked v2 design, briefs/art-refs/ryzz_v2/). Branch ext/ryzz-v2-model.
+
+## 2026-11-07 deep (job 20261107-020001-a4): READY `ext/ryzz-v2-model` @ 6355dee78 (Ryzz v2 model rebuild)
+- ryzz.glb is the owner's locked v2 design, made with the ART-1 pipeline: one Meshy scan of the v2 turnaround with the pigtails, pack, rods and cables edited out, fitted onto the same contract rig. Total 12.4k tris (the scan body is 8.2k), one 2048 atlas + normal map, all 45 clips, every anchor/FX point (weapon_muzzle, anchor_finger_L, anchor_gun_*, anchor_rod_0-3, anchor_wire_*, anchor_gum, anchor_harness, anchor_eye_glow…). 76 Meshy credits (PIPELINE.md).
+- Renders (briefs/art-refs/ryzz_v2/ingame/): before_after.jpg (v1 shipped vs v2), vs_turnaround.jpg, vs_master.jpg, game_vs_sheet.jpg, game_poses_game.jpg, game_closeup.jpg, game_turnaround_close.jpg (GPU --warden-shots, job 20261107-041257-21554).
+- Fidelity vs ryzz_v2:
+  - ✅ hands-free; the finger-gun hands and their firing points (items 139/122) are unchanged
+  - ✅ blue-to-pink twin pigtails (scripted, on the spring chains) with crimson ties; nose ring; the scar over her LEFT eye, as the turnaround and sheet draw it (index.md says right: the art wins; anchor_eye_glow moved to that eye)
+  - ✅ black high-neck crop top, neon bolt and under-bust trim, high-cut brief, hazard jacket tied at the hips, thigh straps, fishnet right leg (the scan's paint) / thigh-high left, platform boots, fingerless gloves with hazard cuffs
+  - ✅ copper pack: deep box, two coil springs (low poly), the pink bolt (glow key), 4 rods in sockets on top; black cables down both arms
+  - ✅ arcs and the lightning ball are VFX: the arc meshes and arc.* bones are gone. Rod-tip anchors and the hip-hand anchors are kept. Gum is still the separate `gum` bone prop.
+  - ✅ rod scale: the inner rods are 0.49 m, about 28% of her height, with tips a hand above her head. That sits between the turnaround (~20%, tips at the crown) and the master sheet (~26-30%).
+  - ⚠ arm coils read as dark bands, not copper rings; the springs' turns are flat
+  - ⚠ at the match camera the pink rim makes the front read magenta (v1's warden_look rim_far, unchanged)
+- Removed: v1 stage-1 tools (tools/meshy/ryzz_parts.py, ryzz_prep.py, src/ryzz_fit.json, ryzz_bake.json), the arc/strap/chain pieces, unused paint helpers, and mage model_glow wire/arcblue. warden-model-check: mage height_3d 1.11 -> 1.06 (the shorter v2 rods).
+- Checks: --warden-rig-json --warden=mage (only the weapon box changed), warden-glb 187/0, warden-model PASS, hero-vfx OK, ryzz-live 0 fails, rig-standard 0, clip 0, mage-combo 128/0, health --strict OK, gen_wiki updated. The full suite was not run.
+- Not done: portrait/splash/title backdrop still show v1 art (the v2 portrait and splash are in the refs).
