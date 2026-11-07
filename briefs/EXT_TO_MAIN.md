@@ -2217,3 +2217,13 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 ## 2026-11-07 text pass follow-up (job 20261107-072237-a3): READY ext/text-relic-renames ff4cf2f97 (supersedes cfc5759a above)
 - Lumi is now Meeko ("Meeko the Magic Fox", title Magic Fox) with the DECISIONS lore, barks, wiki and no lantern/star-relic lines; Nivi is "the Snowglider". Roster order unchanged (already matches). Wiki pages: Class-Magic-Fox, Class-Snowglider (renamed). No art, no companions.
 - Checks: hero-title-check 0 fails; title-check 10 fails, identical to origin/main (headless, no GPU). Details in docs/TEXT_PASS_2026-11-07.md.
+
+## 2026-11-07 physics lane: READY ext/phys-150-parity 074453ec (item 150 SV walking stop), with one known red: bot-sanity seed 9
+- 150 = SUPERVIVE's walking stop (BrakingDecelerationWalking 22.2 m/s² + GroundFriction 2; a let-go coasts ~0.38 m, where it used to stop in ~0.1 m) + 074453ec: a bot that stops at a rim counter-steers instead of coasting over a drop or the void (bot.gd `_brake_at_lip`).
+- bot-sanity over 20 seeds (1-20), main 7907d9af vs 150: main has 0 flagged windows; 150 before 074453ec had 3 (seeds 4, 9, 18), after it 2 (9, 18). Seed 9 is in the check's default seed list, so the check stays red.
+  - seed 4 (Senor, goal=revive): it stopped at a rim with keys off, coasted off and mantled back. Fixed by 074453ec.
+  - seed 9 (Naexia, keyhunt, t=84-99): no path (wp=[]) to a goal on lv6. It jitters its keys at a rim for ~15 s, steps off to lv4 and mantles back, and then gives up. Its keys are held the whole window, so the walking stop never runs there; the stop only changed when the bot got to that spot.
+  - seed 18 (Tinis, lair_camp, cross): it climbs a run of 1.6 m terraces (3.2 → 4.8 → 6.4), one mantle per step, with keys held. That puts it 3.1 s airborne in a 5 s window.
+  - 2 of 20 against 0 of 20 doesn't settle whether this is the stop or chance. The mechanism in both remaining cases is pre-existing bot pathing near terrace rims.
+- Decision: READY with the seed 9 red explained. Alternatives logged: (a) a bot-nav item for the no-path rim jitter, and possibly not counting mantle rises as "ring" time in bot-sanity; (b) hold 150 until (a). The coordinator decides.
+- Other checks: full suite on 4071fe66 against main: NEW-RED bot-sanity (above); class-unlock and hatch pass on rerun. On 074453ec: revive, move-feel, wallmove 0 failures. teammate: "rival called" fails on 150, its base and 185b alike, and "leads you to the chest" fails intermittently with and without the brake (2 runs each). health --strict OK, gen_wiki unchanged, merge-tree clean against origin/main and ext/phys-integrated ceab95f4, ls-remote verified.
