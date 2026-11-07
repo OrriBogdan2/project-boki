@@ -23,3 +23,10 @@ Locked design (from 2A + 2C):
 - A leaf collar, a cream medic apron with an orange cross, a woven satchel.
 - The brass lantern hugged to her chest, with a tiny smiling star inside.
 - Glowing gold constellation markings on her arms, legs and cheeks; star-dusted fairy wings; a cream glowing tail tip.
+
+## Explorations (Nov 7, 00:36-00:41 ET)
+- `explorations/pip_v2_explorations.jpg` (1A-5D):
+  - Signature pick: **5A, the big lantern** (almost her height, hugged in both arms).
+  - Luna-moth wings rejected (overlap with Sable); the giant scarf rejected (overlap with Kael); the comet tail over her head rejected (reads as a squirrel, awkward in 3D).
+  - Skin ideas: Sleepy Pip (nightcap, blanket, fuzzy socks), Star-catcher (net, star jar, map), Field Medic (patchwork vest), Blossom (petal skirt, flower crown).
+- `explorations/pip_v2_collars.jpg`: alternatives to the leaf collar (neckerchief with an orange cross, petal collar, starry capelet, knit cowl). Note: both runs shrank or dropped the big lantern.
