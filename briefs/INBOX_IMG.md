@@ -81,3 +81,9 @@ Already done: pebbit, glintmole, gloamshell, glomwort, rimeshrew, selenfin.
 ## 2026-11-07 04:10 UTC (coordinator): Boki 50 UPDATE: wait for the new designs
 - The owner raised the bar: every Boki must be a cool, creative mix (DECISIONS "Boki design bar"). A redesign pass is rewriting the bland roster entries now. It lands as briefs/BOKI_50_DESIGNS.md with an image prompt per species and a top-10 for batch 1.
 - Use BOKI_50_DESIGNS.md (not ROSTER_50.md) for every species it covers, and its top 10 as batch 1. If it isn't there yet, start with the species marked "kept" in it, or wait; don't make sheets from the old roster text.
+
+## 2026-11-07 04:35 UTC (coordinator): Boki 50 designs are IN: start batch 1
+- Source: briefs/BOKI_50_DESIGNS.md. Each species has an IMAGE PROMPT block; follow "Shared image-prompt rules" in it. It replaces the batch lists above.
+- Batch 1 (its top 10), file names by id: caecilith (Zippelith), gibbelle (Gongibbon), nacrolin (Mirrolin), squalltross (Canvastross), goliathite (Effigeetle), tuatrune (Lockatara), cindowary (Bellowary), umbrathere (Umbrathere), scaldamus (Chuggamus), lilybara (Soakybara).
+- Per species: `briefs/art-refs/boki/<id>_concept.png` (concept sheet) and `briefs/art-refs/boki/<id>_turnaround.png` (clean turnaround for 3D). Push each as done, one line in IMG_STATUS.md.
+- Batch 2: the remaining 19 redesigns in the doc's order. Batch 3: the 13 upgrades (edit the existing look; starters burrlet/puddlet first). The 8 "kept" need only a clean concept sheet matching their model.
