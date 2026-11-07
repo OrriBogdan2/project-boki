@@ -19,7 +19,7 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 | LMB release: timing [footage 0146-0149] | one-frame sweep, the impact the frame after, ~0.4 s recovery | the same keys (`bul_smash`), 0.61 s before the next action | unchanged; asserted: the swing goes on the release step at the cursor (even behind him), the hit within 0.1 s, 0.61 s recovery |
 | LMB release: lunge [footage] | none | 1.5-1.8 m step, 4 m perfect launch | kept (owner #30, #49) |
 | LMB tap: throw [footage 0033-0036] | one frame of wind-up, cocked low behind, then an overhand throw | the hammer left on the press while the arm was still cocking | leaves the hand ~0.12 s after the press, as the arm comes through (`THROW_WIND`); asserted |
-| LMB cadence [game data, card] | throw 0.45 s card | 0.48 s (owner #10) | unchanged |
+| LMB cadence [game data, card] | throw 0.45 s card | 0.45 s (parity item 12; was 0.48) | `bjorn parity LMB: the throw's cadence` |
 | RMB [game data: Brightshield 0.1 s; footage 0185-0200] | up after a 0.1 s cast, sweeps round with the cursor at once | up after 0.2 s, follows the aim | up after 0.1 s; asserted both |
 | Shift [footage 0369-0380, game data Spin Dash] | ~3.5 m hard dash, one spin, 0.4 s recovery; 8 s (data at level 15) / 9.2 s (card) | matched in the earlier pass (3.5 m, 0.17 s, one spin) | unchanged; cooldown 8 s (game data, set in the audit) |
 | Shift while charging [wiki] | a short dash without the spin, ending the charge, on a reduced cooldown | short dash for half a charge | short dash on a full charge (owner #51 keeps the charge, so the reduction has no reason left; the game data doesn't list one) |
