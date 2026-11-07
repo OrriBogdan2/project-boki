@@ -136,3 +136,4 @@ Known limit: the hunter's expression reads slightly panicked.
 `meeko_v2_splash.jpg`: the edit on the healing splash at 16:9. The sun frowns and blasts a golden beam at the shadow creatures; the front beast recoils, shielding its eyes, and the others fade back. The cloud heals and Meeko treats the hunter. The previous version is `explorations/meeko_v2_splash_no_beam.jpg`.
 
 **Meeko v2 complete:** main design, turnaround, portrait, splash.
+- Also saved (02:37 ET): `explorations/meeko_v2_splash_sky_medic.jpg` (flying over a floating-island battle at sunset) and `explorations/meeko_v2_splash_cave_v3.jpg` (another cave run with the beam; beasts retreat). Owner to pick between the cave and the sky version.
