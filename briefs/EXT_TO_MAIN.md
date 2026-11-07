@@ -2579,3 +2579,5 @@ Known gap: the top of her head is still the scan's decimated hair, a little face
 
 READY ext/cinder-v2-palms 766b44cdd (Cinder v2 pass 2: waist hair, swept-back horns, fire point on both palms; supersedes ext/cinder-v2-model)
 READY ext/prematch-lobby 861e46547 (90 s pre-match lobby before expeditions: Hunter pick, squad, text chat + voice stub, lock at 0; admin lobby_enabled; richer loading screen; Net.VERSION 0.25.0; --prematch-check 0 failures, health --strict OK)
+Gameplay media (4 looping 1080p clips + stills, 12 files): https://github.com/OrriBogdan2/project-boki-reports/releases/tag/gameplay-media-20261107
+READY ext/gameplay-media e6881d69f (gameplay media capture tool + encode script; clips use the new Hunter names via a render-only merge of ext/text-relic-renames-rebased)
