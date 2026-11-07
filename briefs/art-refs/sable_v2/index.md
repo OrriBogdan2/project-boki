@@ -44,3 +44,15 @@ Notes for 3D:
 - The pistols are still slim; a weapon sheet will define them.
 
 Update (23:32 ET): the owner rejected the bell bolas ("looks like bells, not a weapon"). The final is an edit on the keys version (step 7) adding throwing knives, then a local colour fix. The model put a sheath on each hip rather than one on the right thigh; accepted. For 3D, sheathe the blades (the sheet shows them poking out below the sheaths). The Bola ability can be VFX-only when thrown.
+
+## Turnaround: FINAL (Nov 6, 23:35 ET)
+`sable_v2_turnaround.jpg`, 5504×3072: front, 3/4, side and back in sculpt-render style, a pistol in each hand. Nano Banana Pro, 16:9, 4K, a fresh generation (ref: the master sheet). It passed the filter first try; no edits and no colour fix needed.
+
+Checks:
+- One braid, consistently over her right shoulder; use this, not the two braids in the master sheet's small views.
+- The antennae, gem, midriff chains, hip knives, keys and moth-wing tails are all present.
+
+Known limits:
+- The side view shows the coat front closed (the plunge isn't visible in profile); use the front and 3/4 views.
+- Her irises glow brighter violet than on the master sheet (dark lilac); the owner can pick.
+- The knife blades still poke out below the sheaths.
