@@ -40,3 +40,15 @@ New lore (owner direction: she is a Boki that became sentient through her lanter
 - She still fears the dark, but her lantern's light heals, so she became a field medic who walks into the places that scare her for those who need her.
 - The star is her Mask relic, her oldest friend and her courage.
 - Visual rule kept: she reads as a Hunter (upright, clothed, gear), because she grew beyond being a Boki.
+
+## Main design + chromas locked (owner, Nov 7, 00:58 ET)
+- **Default look: Cotton Candy**, `lumi_v2_main_design.jpg`:
+  - Pink fur fading to baby blue at the ear tips and tail, cream chest, glowing gold constellations.
+  - A white lace-edged capelet with pink and blue trim, and a rainbow heart clasp.
+  - Flowered brass goggles, a bandaged ear, a woven satchel, fairy wings.
+  - The big brass lantern (almost her height) hugged in both arms, with the tiny smiling star inside.
+- **Chromas** (all saved in `explorations/`):
+  - Moonlight, Sunrise, Mint Tea, Snowdrop (`lumi_chromas_1_*`).
+  - Honeybee, Lilac Dream, Ember Night (`lumi_chromas_2_*`).
+  - The capelet runs: lavender, baby blue, cream with a heart-plus, midnight (`lumi_capelet_run1/2`).
+- Medic signal: the heart clasp (the rainbow heart in the default; the heart-plus in some chromas).
