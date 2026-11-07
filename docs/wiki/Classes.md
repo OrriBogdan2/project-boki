@@ -4,9 +4,9 @@ A class is a whole character: its own dash, a passive with a resource it builds,
 click), a right-click ability with several variants, a utility on E and an ultimate on R. There are
 twelve, four in each weight class:
 
-- **Light:** [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset), [Lisette](Class-Red-Stitch.md) (pin people, then the big shot), [Ryzz](Class-Storm-Chaser.md) (load Sparks, then Wirerun through them) and [Claire](Class-Frost-Siren.md) (skate on ice, chill foes, shelter the squad behind ice).
-- **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Pip](Class-Little-Lantern.md) (heal, carry the downed), [Tarek](Class-Cliff-Runner.md) (raise rocks, punch them into the fight) and [Motley](Class-Void-Jester.md) (swell, plant a seed, trade places).
-- **Heavy:** [Kael](Class-The-Unbroken.md) (rage, chain in, crush), [Breaker](Class-Sunken-Bulwark.md) (block, then smash them into walls), [Grimble](Class-Scrap-King.md) (haul a foe in, drop the anchor) and [Cinder](Class-Mad-Pyromancer.md) (build Char, flash foes over).
+- **Light:** [Ryzz](Class-Storm-Chaser.md) (load Sparks, then Wirerun through them), [Ravyl](Class-Red-Stitch.md) (pin people, then the big shot), [Nivi](Class-Snowglide.md) (skate on ice, chill foes, shelter the squad behind ice) and [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset).
+- **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Lumi](Class-Little-Lantern.md) (heal, carry the downed), [Kibo](Class-Stone-Seer.md) (raise rocks, punch them into the fight) and [Motley](Class-Void-Jester.md) (swell, plant a seed, trade places).
+- **Heavy:** [Mossy](Class-Sunken-Bulwark.md) (block, then smash them into walls), [Kael](Class-The-Unbroken.md) (rage, chain in, crush), [Grimble](Class-Scrap-King.md) (haul a foe in, drop the anchor) and [Cinder](Class-Mad-Pyromancer.md) (build Char, flash foes over).
 
 The weight class sets health, speed, mass (how far hits push you) and how many dash charges you get.
 Everything else comes from the class kit.
@@ -51,18 +51,18 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| [Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
-| [Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
-| [Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
 | [Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Fusion) |
-| [The Unbroken](Class-The-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Fusion) |
 | [Sunken Bulwark](Class-Sunken-Bulwark.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
+| [Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
+| [The Unbroken](Class-The-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Fusion) |
+| [Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
+| [Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
 | [Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none (Boki Fusion) |
-| [Mad Pyromancer](Class-Mad-Pyromancer.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Fusion) |
 | [Little Lantern](Class-Little-Lantern.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none (Boki Fusion) |
-| [Frost Siren](Class-Frost-Siren.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
-| [Cliff Runner](Class-Cliff-Runner.md) | 145 / 1 | Rubble Fists | Molten Guard | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
+| [Mad Pyromancer](Class-Mad-Pyromancer.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Fusion) |
+| [Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Molten Guard | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
 | [Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
+| [Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
 
 ### How Hunters unlock
 
@@ -70,18 +70,18 @@ A new save picks 1 of 1 starters (Hired Gun) before the egg pick and plays the t
 
 | Hunter | Tier | Challenge | Target |
 |---|---|---|---|
-| [Silver Thief](Class-Silver-Thief.md) | medium | Land 12 hits while in the air | 12 |
-| [Red Stitch](Class-Red-Stitch.md) | easy | Stun 4 enemies | 4 |
-| [Storm Chaser](Class-Storm-Chaser.md) | medium | Stagger 6 monsters with abilities | 6 |
 | [Hired Gun](Class-Hired-Gun.md) | starter | pick at the start, or after your first expedition | - |
-| [The Unbroken](Class-The-Unbroken.md) | easy | Knock 3 enemies into walls | 3 |
 | [Sunken Bulwark](Class-Sunken-Bulwark.md) | medium | Knock down 2 hunters while under half health | 2 |
+| [Storm Chaser](Class-Storm-Chaser.md) | medium | Stagger 6 monsters with abilities | 6 |
+| [The Unbroken](Class-The-Unbroken.md) | easy | Knock 3 enemies into walls | 3 |
+| [Red Stitch](Class-Red-Stitch.md) | easy | Stun 4 enemies | 4 |
+| [Snowglide](Class-Snowglide.md) | medium | Slow 20 enemies | 20 |
 | [Scrap King](Class-Scrap-King.md) | medium | Make it out carrying 8 items | 8 |
-| [Mad Pyromancer](Class-Mad-Pyromancer.md) | easy | Hit 3 enemies at once with one ability | 1 |
 | [Little Lantern](Class-Little-Lantern.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
-| [Frost Siren](Class-Frost-Siren.md) | medium | Slow 20 enemies | 20 |
-| [Cliff Runner](Class-Cliff-Runner.md) | hard | Hit 3 enemies at once with one ability, 5 times, once 6 Hunters are open | 5 |
+| [Mad Pyromancer](Class-Mad-Pyromancer.md) | easy | Hit 3 enemies at once with one ability | 1 |
+| [Stone Seer](Class-Stone-Seer.md) | hard | Hit 3 enemies at once with one ability, 5 times, once 6 Hunters are open | 5 |
 | [Void Jester](Class-Void-Jester.md) | hard | Knock down 3 hunters while fused with your Boki, once 8 Hunters are open | 3 |
+| [Silver Thief](Class-Silver-Thief.md) | medium | Land 12 hits while in the air | 12 |
 
 ### Mastery
 
@@ -89,56 +89,56 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 
 | Hunter | Goal | Target | Reward |
 |---|---|---|---|
-| Silver Thief | Land 25 hits while in the air | 25 | Colourway: Midnight Silk |
-| Silver Thief | Stun 6 enemies | 6 | Emote: Twirl |
-| Silver Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
-| Silver Thief | Knock down a hunter while fused | 1 | Glider: Dusk Moth |
-| Red Stitch | Stun 12 enemies | 12 | Colourway: Fletcher Green |
-| Red Stitch | Your Boki lands 40 hits | 40 | Emote: Quiver Spin |
-| Red Stitch | Fly through 8 air rings | 8 | Glider: Paper Crane |
-| Red Stitch | Make it out after being knocked down | 1 | Title: Last Arrow |
-| Storm Chaser | Stagger 10 monsters with abilities | 10 | Colourway: Storm Violet |
-| Storm Chaser | Land 15 hits while in the air | 15 | Trail: Static |
-| Storm Chaser | Fly through 12 air rings | 12 | Banner: Thunderhead |
-| Storm Chaser | Your Boki lands 50 hits | 50 | Title: Live Wire |
 | Hired Gun | Land 30 hits from 12 m or more | 30 | Colourway: Dust Rider |
 | Hired Gun | Revive 2 teammates | 2 | Emote: Hat Tip |
 | Hired Gun | Fly through 10 air rings | 10 | Trail: Spent Brass |
 | Hired Gun | Make it out of 3 expeditions | 3 | Title: Long Shot |
-| The Unbroken | Knock 10 enemies into walls | 10 | Colourway: Forge Red |
-| The Unbroken | Knock down 2 hunters while fused | 2 | Emote: Chest Thump |
-| The Unbroken | Open 8 chests | 8 | Banner: Broken Chain |
-| The Unbroken | Make it out after being knocked down | 1 | Title: the Unbowed |
 | Sunken Bulwark | Revive 3 teammates | 3 | Colourway: Oathsteel |
 | Sunken Bulwark | Knock 8 enemies into walls | 8 | Emote: Shield Rap |
 | Sunken Bulwark | Make it out after being knocked down | 1 | Title: Still Standing |
 | Sunken Bulwark | Open 6 chests | 6 | Banner: Iron Oath |
+| Storm Chaser | Stagger 10 monsters with abilities | 10 | Colourway: Storm Violet |
+| Storm Chaser | Land 15 hits while in the air | 15 | Trail: Static |
+| Storm Chaser | Fly through 12 air rings | 12 | Banner: Thunderhead |
+| Storm Chaser | Your Boki lands 50 hits | 50 | Title: Live Wire |
+| The Unbroken | Knock 10 enemies into walls | 10 | Colourway: Forge Red |
+| The Unbroken | Knock down 2 hunters while fused | 2 | Emote: Chest Thump |
+| The Unbroken | Open 8 chests | 8 | Banner: Broken Chain |
+| The Unbroken | Make it out after being knocked down | 1 | Title: the Unbowed |
+| Red Stitch | Stun 12 enemies | 12 | Colourway: Fletcher Green |
+| Red Stitch | Your Boki lands 40 hits | 40 | Emote: Quiver Spin |
+| Red Stitch | Fly through 8 air rings | 8 | Glider: Paper Crane |
+| Red Stitch | Make it out after being knocked down | 1 | Title: Last Arrow |
+| Snowglide | Slow 40 enemies | 40 | Colourway: Hoarfrost |
+| Snowglide | Fly through 10 air rings | 10 | Glider: Frost Kite |
+| Snowglide | Revive 2 teammates | 2 | Emote: Snow Angel |
+| Snowglide | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
 | Scrap King | Make it out carrying 10 items | 10 | Glider: Patchwork Wing |
 | Scrap King | Stun 10 enemies | 10 | Colourway: Rust and Brine |
 | Scrap King | Open 10 chests | 10 | Title: Salvager |
 | Scrap King | Bring 2 wild Boki home | 2 | Emote: Heave Ho |
-| Mad Pyromancer | Set 25 enemies burning | 25 | Colourway: Coal and Cinder |
-| Mad Pyromancer | Hit 3 enemies at once with one ability, 3 times | 3 | Trail: Ash Drift |
-| Mad Pyromancer | Open 6 chests | 6 | Banner: Lantern Flame |
-| Mad Pyromancer | Scan a wild Boki and bring it home | 1 | Glider: Ember Leaf |
 | Little Lantern | Revive 5 teammates | 5 | Skin: Moonbeam |
 | Little Lantern | Root 10 enemies | 10 | Emote: Big Hug |
 | Little Lantern | Bring 3 wild Boki home | 3 | Glider: Puffball Wings |
 | Little Lantern | Make it out of 5 expeditions | 5 | Title: Wisp Keeper |
 | Little Lantern | Open 8 chests | 8 | Banner: Moon Lantern |
-| Frost Siren | Slow 40 enemies | 40 | Colourway: Hoarfrost |
-| Frost Siren | Fly through 10 air rings | 10 | Glider: Frost Kite |
-| Frost Siren | Revive 2 teammates | 2 | Emote: Snow Angel |
-| Frost Siren | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
-| Cliff Runner | Hit 3 enemies at once with one ability, 5 times | 5 | Skin: Slate and Moss |
-| Cliff Runner | Knock 12 enemies into walls | 12 | Emote: Ground Pound |
-| Cliff Runner | Open 10 chests | 10 | Glider: Slate Kite |
-| Cliff Runner | Make it out after being knocked down, twice | 2 | Title: Bedrock |
+| Mad Pyromancer | Set 25 enemies burning | 25 | Colourway: Coal and Cinder |
+| Mad Pyromancer | Hit 3 enemies at once with one ability, 3 times | 3 | Trail: Ash Drift |
+| Mad Pyromancer | Open 6 chests | 6 | Banner: Lantern Flame |
+| Mad Pyromancer | Scan a wild Boki and bring it home | 1 | Glider: Ember Leaf |
+| Stone Seer | Hit 3 enemies at once with one ability, 5 times | 5 | Skin: Slate and Moss |
+| Stone Seer | Knock 12 enemies into walls | 12 | Emote: Ground Pound |
+| Stone Seer | Open 10 chests | 10 | Glider: Slate Kite |
+| Stone Seer | Make it out after being knocked down, twice | 2 | Title: Bedrock |
 | Void Jester | Knock down 4 hunters while fused | 4 | Skin: Void Bloom |
 | Void Jester | Stun 15 enemies | 15 | Trail: Lantern Motes |
 | Void Jester | Make it out carrying 8 items | 8 | Title: Swapkeeper |
 | Void Jester | Fly through 15 air rings | 15 | Glider: Lantern Moth |
 | Void Jester | Revive 3 teammates | 3 | Banner: Tidelight |
+| Silver Thief | Land 25 hits while in the air | 25 | Colourway: Midnight Silk |
+| Silver Thief | Stun 6 enemies | 6 | Emote: Twirl |
+| Silver Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
+| Silver Thief | Knock down a hunter while fused | 1 | Glider: Dusk Moth |
 
 ### Run levels
 

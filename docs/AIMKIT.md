@@ -84,21 +84,21 @@ Params: `from` (the hunter), `dir` (the aim), `len` (6), `width` (0.9), `k`, `le
 
 ### Dotted lane
 ```gdscript
-AimKit.dotted(h, "rmb", {"len": 15.0})     # Pip seed: a faint 0.4 bh strip with dots, to max range
+AimKit.dotted(h, "rmb", {"len": 15.0})     # Lumi seed: a faint 0.4 bh strip with dots, to max range
 ```
 Params: `from`, `dir`, `len` (8), `width` (0.72), `gap` (0.6 m between dots), `dot` (0.06 m radius).
 
 ### Filling line
 No shape of its own: two lines and a circle.
 ```gdscript
-# Lisette's draw: a faint line to the cursor, a bright fill growing out along it, a circle at the perfect point
+# Ravyl's draw: a faint line to the cursor, a bright fill growing out along it, a circle at the perfect point
 AimKit.line(h, "draw", {"len": L, "arrow": false})
 AimKit.line(h, "draw_fill", {"len": L * fill, "arrow": false})
 AimKit.circle(h, "draw_mark", {"at": point, "r": 0.22})
 ```
 
 ### V that closes into one line
-Nothing in the game uses it now (Lisette's draw was the V until owner item 55b).
+Nothing in the game uses it now (Ravyl's draw was the V until owner item 55b).
 ```gdscript
 AimKit.vee(h, "draw", {"k": stage_k, "glint": stage_k * 0.4, "col2": Color("b6ff8a")})
 ```
@@ -126,14 +126,14 @@ the rim pointing that way, as on Ryzz's E drag disc).
 
 ### Circle with a growing sweet spot
 ```gdscript
-# Tarek RMB: a 2.5 bh circle a hop ahead; the inner ring grows 0.5 -> 1 bh with the charge
+# Kibo RMB: a 2.5 bh circle a hop ahead; the inner ring grows 0.5 -> 1 bh with the charge
 AimKit.sweet(h, "rmb", {"at": h.pos + Vector3(d.x, 0, d.y) * 2.6, "k": k, "fill": k, "all": true})
 ```
 Params: as for the circle (`r` defaults to 4.5 m), plus `k`, `core0` (0.9) and `core1` (1.8).
 
 ### Curved arc wall
 ```gdscript
-AimKit.arc_wall(h, "e", {"rmax": reach})       # Lisette's Rain of Arrows: at the cursor distance, 120 deg
+AimKit.arc_wall(h, "e", {"rmax": reach})       # Ravyl's Rain of Arrows: at the cursor distance, 120 deg
 var w := AimKit.entry(h, "e")                  # read the radius back for the cast
 ```
 Params: `center` (the hunter), `dir`, `radius` (the cursor distance clamped to `rmin`..`rmax`, 2..9),
@@ -147,13 +147,13 @@ Params: `a` (the hunter), `b` (the cursor point, clamped to `range`), `r` (1.35)
 
 ### Extras the sheets need
 ```gdscript
-AimKit.line(h, "aim")                                        # the thin aim line to the cursor (Motley, Claire)
+AimKit.line(h, "aim")                                        # the thin aim line to the cursor (Motley, Nivi)
 AimKit.line(h, "aim", {"col": Color("ffd25a"), "hot": 0.6})   # Sable's gold empowered line
-AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor to max range (Lisette stage 2)
-AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Tarek Tetraform: a long line, inward chevrons, centre ring
+AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor to max range (Ravyl stage 2)
+AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Kibo Tetraform: a long line, inward chevrons, centre ring
 AimKit.star(h, "lock", {"at": foe.pos, "size": 0.5})          # a glint on the ground
 ```
-The two parallel lines (Motley RMB) are `lane` with `"rails": true` and no chevrons. The Breaker R
+The two parallel lines (Motley RMB) are `lane` with `"rails": true` and no chevrons. The Mossy R
 rectangle is a plain `lane`. The Juggernaut hold-blast arc round the body is `circle` with
 `"self": true`. A target highlight ring at someone's feet is a small `circle` at their position. Ryzz's E is a
 `circle` with `ticks` and `"pointer": drag_dir`, plus a `lane` with `"from": disc, "tip": true` for the
@@ -198,7 +198,7 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - Use `col2` for the accent, and `col_full` for a lane that changes colour at full charge.
   - Keep `alpha` near 1. These are meant to be readable, not loud.
 - **Aim mode.**
-  - For the signature weapon, set `"aim"` in the weapon JSON, or `h.shot_aim` per shot (Lisette: stage 1
+  - For the signature weapon, set `"aim"` in the weapon JSON, or `h.shot_aim` per shot (Ravyl: stage 1
     cursor, stage 2 `MAX`).
   - For kit-spawned shots, use `AimMode.dist` and `AimMode.point` so the telegraph and the shot agree.
 - **Checks.** In combo checks, assert `AimKit.shown(h, id)` while aiming or holding, and read

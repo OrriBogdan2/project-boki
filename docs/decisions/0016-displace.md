@@ -5,7 +5,7 @@
 - **Area:** networking / combat
 
 ## Problem
-Kit audit item 1: abilities that move someone else's body skipped `remote` bodies (Cinder's cloak pull, Grimble's reel) or moved only this game's copy, which the owner's next snapshot puts back (Bjorn's push, Vireo's drag, Claire's wall carry, Tarek's and Grimble's spikes, the glove pull/spike/swap). Online they never moved another player. Hits already go to the body's owner (`Match.net_send_hit`), but only as damage plus one impulse.
+Kit audit item 1: abilities that move someone else's body skipped `remote` bodies (Cinder's cloak pull, Grimble's reel) or moved only this game's copy, which the owner's next snapshot puts back (Bjorn's push, Vireo's drag, Nivi's wall carry, Kibo's and Grimble's spikes, the glove pull/spike/swap). Online they never moved another player. Hits already go to the body's owner (`Match.net_send_hit`), but only as damage plus one impulse.
 
 ## Options
 1. A per-kit net event for each ability: twelve paths that drift apart.
