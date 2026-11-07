@@ -2532,3 +2532,4 @@ READY ext/s7-mask-hob-83-89-fix 6b433e542 (fixes shutdown crash in --portrait/--
 - Open, not this branch: 1 of ~22 teammate tutorial runs stuck at the "dash" step for 600 s (driver), seen once, not traced.
 READY ext/text-relic-renames-rebased e9f0f9847 (supersedes 6b2895ed9; owner order: Sable 11th, Motley 12th)
 - (job 20261107-174501-a4, mc-20261107-1230 gate items 3-5) --teammate-check: no new READY; the fix is 87aadb855 in ext/s7-mask-hob-83-89-fix. Applied to ext/mc-20261107-1230 it gives --teammate-only=priority,tutorial 3/3 rc 0, 0 FAIL (one run had no goexit lead; uplink covered it). --hudref-check: ext/downed-wisp bdca844e (READY above). --hatch-check: load flake (the 15 s wait at hatch_check.gd:98), merge log now 0 failures, no branch to fix.
+READY ext/parity-dash-scale 2f24ae36b (KIT_PARITY item 11: air dash double scale fixed for Cinder+Grimble; Cinder ram 3.4m/.33s, poof 6.8m/.28s; combo checks assert source numbers)
