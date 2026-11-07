@@ -43,3 +43,10 @@ Edit 3 (retry), forearms: the plated bracers became obsidian shard bracers with 
 The turnaround is now complete and matches the master sheet's outfit. The hair is slightly shorter than on the sheet, and the flamethrower is not shown; take both from the master sheet.
 
 `cinder_v2_turnaround_alt.jpg` is the same forearm edit, also run on the edit-1 result. In it the shards stop at the wrist and the hands are left bare. The final (A) keeps it: its shards carry over the back of the hands, matching the master sheet.
+
+## Weapon sheet (Nov 6, 22:18 ET)
+`cinder_v2_weapon_sheet.jpg` is the prop reference sheet: a compact brass flamethrower with a braided leather hose (two side views), and the copper backpack tank with a glass fuel window and leather straps (front, side, back), plus a small assembly view showing how the hose connects. Nano Banana Pro, 16:9, 4K, fresh generation. Refs: ref_props (the flamethrower design) and a crop of the tank from the turnaround.
+
+Known limits:
+- The top two gun views are the same side, so there is no top or muzzle-on view.
+- The braided hose loops from the grip back to the barrel collar on the gun views. Trust the assembly view: the hose runs from the grip to the base of the tank.
