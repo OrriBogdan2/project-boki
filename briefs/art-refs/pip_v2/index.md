@@ -63,3 +63,4 @@ The owner's girlfriend doesn't like Lumi holding anything. The star becomes a fl
   - Picked: **pose 1**: the star floats above her shoulder with a stardust trail; her paws are held together nervously.
   - This run is plain pink with a pink capelet, not Cotton Candy; restore the colours once the star is chosen.
 - Next: star-style variations in the same pose (plush, crystal, nebula, four-point twinkle).
+- **Collar colour (owner's girlfriend, 01:29 ET):** she prefers the Cotton Candy main-design capelet: white with white lace and the rainbow heart clasp (`lumi_v2_main_design.jpg`). Use it, not the pink capelet from the free-hands run.
