@@ -2378,3 +2378,6 @@ Pass 2 does the three fixes the pass-1 READY asked for: skirt, skin bake and sho
 - Checks on ca52dc648 (all rc 0): --clip-check 0 failures, --warden-glb-check PASS, --hero-vfx-check OK, --juggernaut-combo-check 164/0 (on 3419a661a; ca52dc648 changes no kit code), health.py --strict OK.
 - GPU job 20261107-144058-18235: briefs/art-refs/kael_v2/clips/bloom_front_34.jpg, bloom_turnaround_game.jpg, bloom_poses_game.jpg (compare after_front_34.jpg = without the fix, before_turnaround_game.jpg = a22927c1d).
 - Still open (from the build job): some v1 clips were made for kit 113 (lunge, wave, meteor, dash), so re-fit them when 113 lands. The skinned blade casts no ground shadow now (the old `weapon` node did).
+
+## 2026-11-07 build (job 20261107-151501-a4): CLAIM Cinder the Flame Queen (kit, VFX, ult, splash)
+- CLAIM: DECISIONS "Cinder the Flame Queen": fidelity row, LMB fire from her hands, Flue Flight heels+tail fire (lift parity), splash swap, texts/titles. Not the 3D model (ext/cinder-v2-model). Branch ext/cinder-flame-queen (on ext/text-relic-renames).
