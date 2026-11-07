@@ -2151,3 +2151,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - Removed: v1 stage-1 tools (tools/meshy/ryzz_parts.py, ryzz_prep.py, src/ryzz_fit.json, ryzz_bake.json), the arc/strap/chain pieces, unused paint helpers, and mage model_glow wire/arcblue. warden-model-check: mage height_3d 1.11 -> 1.06 (the shorter v2 rods).
 - Checks: --warden-rig-json --warden=mage (only the weapon box changed), warden-glb 187/0, warden-model PASS, hero-vfx OK, ryzz-live 0 fails, rig-standard 0, clip 0, mage-combo 128/0, health --strict OK, gen_wiki updated. The full suite was not run.
 - Not done: portrait/splash/title backdrop still show v1 art (the v2 portrait and splash are in the refs).
+
+## 2026-11-07 deep (job 20261107-042925-a3): CLAIM Grimble v2 model rebuild
+- CLAIM: Grimble v2 model rebuild (art/wardens/dredge/ to the locked v2 design, briefs/art-refs/grimble_v2/). Branch ext/grimble-v2-model.
