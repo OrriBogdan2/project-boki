@@ -41,18 +41,21 @@ Three relics change because their objects left the designs: **Cinder, Meeko and 
 
 | Hunter (id) | Relic (the Mask) | Why it holds their self | Status |
 |---|---|---|---|
-| Vex (gunslinger) | her brass cyber-eye | it saw every job she ever took | keep |
-| Kael (juggernaut) | the broken champion's collar (the demon blade is bound to it) | the shackle he tore out of the arena wall | keep |
-| Cinder (ashwick) | **a cracked obsidian shard crown** | she shaped it in her own fire from the glass of the Tyrant's throne room the night she drank the Wyrm's blood: her first claim to the throne | NEW, proposed (replaces the goggles) |
-| Meeko (tender) | **the shelter's hearthstone**, a small warm stone on a cord | the shelter's fire lives in it. The tiny sun is that fire, grown a face; the shy raincloud is the storm that tried to put it out and stayed | NEW, proposed (replaces the lantern) |
+| Vex (gunslinger) | her gatling arm, a tally mark scratched on the barrels per bounty | every job she ever took is scratched on it (her eye is now built-in robot, so the brass eye is retired) | NEW, proposed Nov 7 (needs tally scratches on model) |
+| Kael (juggernaut) | his broken chain (on his wrists and sword pommel), bound to the demon blade | the shackle he tore out of the arena wall | LOCKED Nov 7 (owner; model has no collar) |
+| Cinder (ashwick) | **a cracked obsidian shard crown**, hung from her belt; worn only in victory pose/splash | shaped in her own fire from the glass of the Tyrant's throne room the night she drank the Wyrm's blood | proposed (needs small model add + intro line; alt: palm fire) |
+| Meeko (tender) | her little sun, the shelter's last fire grown a face | she kept that fire alive all night in her paws | NEW, proposed Nov 7 (already on model; hearthstone dropped) |
 | Tenzo (dolm) | one of his three seeing-stones | how he sees the world | keep |
 | Lace (archer) | the stitched porcelain mask | literal: she sewed it from the masks she once made | keep (alt: the red-threaded needle) |
-| Grimble (dredge) | **his brass monocle** | he has priced every treasure in the hoard through it; it's the one thing he would never sell | NEW, proposed (replaces the porthole eye) |
+| Grimble (dredge) | **his brass monocle** | he has priced every treasure in the hoard through it | LOCKED Nov 7 (owner) |
 | Neve (rimewright) | her ice skates | the night she skated the festival to safety | keep |
-| Sparkle (mage) | the first copper lightning rod she ever climbed | where the Wyrm's storm struck her | keep |
+| Sparkle (mage) | the lightning rod from the top of the spire where her friend fell | where the storm struck them both | keep (story revised Nov 7) |
 | Mossy (bulwark) | the ship's compass, now set in his chest | it led his refugees home across the ice | keep |
-| Sable (thief) | the silver domino mask | literal: the thief's disguise from the night she reached the Wyrmheart | keep |
-| Motley (ostra) | the grinning jester mask | literal: the Tyrant sealed him in it | keep |
+| Sable (thief) | her moth-wing knife | in her hand when she touched the Wyrmheart | LOCKED Nov 7 (owner; design has no domino mask) |
+| Motley (ostra) | his hovering card box | the Tyrant locked him in it and threw it into the Void | LOCKED Nov 7 (owner; story changed from mask to box) |
+
+- **Beast-folk (owner, Nov 7):** animal-human folk (Sable, Meeko, Neve...) always lived in the Skylands; the Wyrm did not create them.
+- **Naming open (owner, Nov 7):** faction names, the Tyrant's name, and a replacement for "the Sundering" are being picked in the Hunter Character Cards doc (https://claude.ai/artifact/69URCwGcfL3rZj9Lf2rbvb). Sparkle and Tenzo stories revised there; Vex and the Tyrant get a fuller pass next.
 
 ## Hunter stories (current designs, Nov 7; canonical order)
 **The Street Crew**
