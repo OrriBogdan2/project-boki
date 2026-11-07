@@ -10,3 +10,30 @@ Direction options to put to the owner (not yet chosen):
 - **A. Jade runes:** matte grey stone arms with carved prayer-script runes glowing soft jade green, the floating eye stones glowing jade to match.
 - **B. Crystal:** rough stone with amber or quartz crystal growing from the knuckles and forearms, no glow.
 - **C. Pure earth:** no glow at all; cracks filled with dust and moss, sand trickling from the joints.
+
+## Direction chosen: A, jade runes (Nov 6, 22:34 ET)
+`explorations/tarek_v2_directions_ABC.jpg` shows the three directions: A jade runes, B amber crystal, C sandstone. The owner picked A.
+- B was dropped because its amber put him back in Cinder's orange range.
+- C was dropped because its tan stone was too close to his skin tone.
+
+## Master sheet: FINAL (Nov 6, 22:45 ET)
+`tarek_v2_master_sheet.jpg`, 3584×4800.
+
+Chain (Nano Banana Pro, 3:4, 4K, no seed exposed):
+1. A fresh generation (ref: direction A cropped).
+2. Edit: dark, non-glowing seams; the runes became simple glyphs (main figure only took it).
+3. Edit: the small front and back views matched to the main figure.
+4. Hair jewellery edit, rejected: about a dozen big glowing cubes with letters.
+5. Local colour fix (below), then a subtle hair edit: small matte stone beads and a jade bead near the face.
+6. Local colour fix again.
+
+Local colour pass (Python, not AI): per-channel histogram match to the first generation's palette, removing the magenta drift from the edits.
+
+Canon:
+- A plain cream blindfold (no glow).
+- Three floating rough-grey eye stones with jade-teal eyes.
+- A huge stone left arm onto his chest; a stone gauntlet on his right forearm.
+- Matte grey stone with **dark seams that never glow**; only the carved glyphs glow (spirals, crescents, bars, dots, never letters), jade with a slight teal tint.
+- Dreadlocks with copper rings, small carved grey stone beads and a jade bead near his face.
+- Prayer beads, a cream waist wrap, a burnt-orange sash, dark brown trousers, wrapped bare feet.
+- His molten abilities (Volcano Crusher, Molten Guard) can flare in their VFX; at rest he has no orange glow, which keeps him distinct from Cinder.
