@@ -61,3 +61,10 @@ Known limit: the hose routing on the two side views is still inconsistent: it lo
    - Scaled lizard skin there instead of smooth skin.
    - The tail base sweeping over it.
    Apply to the master sheet, turnaround and any splash pose that shows it.
+
+## REDESIGN: Cinder the Fire Queen (owner, Nov 7, 03:05 ET)
+- **No weapons:** the flamethrower, the hose and the copper fuel tank are removed from her design. She now **shoots fire from her hands**.
+- **Splash (main):** `cinder_v2_splash.jpg` = "The Last Kiss": she cradles a kneeling knight's face; his helmet and armour glow and melt under her touch; a burning battlefield.
+- **Splash (alternate):** `cinder_v2_splash_alt.jpg` = "The Pyre Queen": she lounges on a lava-rock throne in a burning cathedral; knights kneel and cower; a flame dances in her hand.
+- The old "Last Dance" splash moved to `explorations/cinder_v2_splash_last_dance.jpg`; "Firestorm" is in explorations.
+- **Now outdated (need a redo):** the master sheet, turnaround and weapon sheet still show the tank and flamethrower. The goggles are absent in both new splashes; the owner should confirm whether they stay.
