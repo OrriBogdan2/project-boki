@@ -465,6 +465,17 @@ Breaker total: 6 tasks, 116 credits (the body's two attempts used).
 | Breaker C | 13:31 | 01a1a688-d08d-74e2-9e69-9015055e4130 | meshy-7.1 | front, side, back edited; texture refs the same; 2k, meshy-7 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the art's bare belly, sash, skirt, bare feet, braids, closed fists |
 | Breaker D | 13:31 | 01a1a688-d0b4-738f-bed8-df735492629b | meshy-7.1 | as C, enhancement on | 40 | Dropped: open splayed hands |
 
+### Grimble v2 (owner redesign, briefs/art-refs/grimble_v2/), 2026-11-07 (76 credits; balance 1586 before, 1510 after)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Grimble v2 edits | 2026-11-07 04:33 | 01a1b448-33c3-71c5-88e2-4498de4e57f0, 01a1b448-339e-773e-8604-2af0645042da, 01a1b448-33be-77c3-91ea-8a8c18b7962c | nano-banana-pro (image-to-image) | the FINAL turnaround's front, left side, back (square, padded, neighbours masked): the hoard, coins, straps, blunderbuss, loupe and all the sludge out | 27 | Front and back kept; the side drew his hidden right arm with a small hook |
+| Grimble v2 side, again | 04:34 | 01a1b449-0e66-7513-a76f-f33b5af3b191 | nano-banana-pro | as above, "the right arm is hidden behind his body: do not draw it" | 9 | Kept |
+| Grimble v2 body A | 04:34 | 01a1b449-7821-711a-949a-7959663e2266 | meshy-7.1 | the 3 edited views + the same as texture refs; A-pose | 40 | **Kept**: no nose, the bone hook to the ground, the gauntlet, the spurs and veins |
+
+Grimble v2 notes: one body scan replaces v1's body, head and hoard scans. grimble_source.py fits it (the limbs keep the scan's spread,
+the rig's joint heights; past a bone's ends the scan's own scale). The hoard, bells, lanterns, blunderbuss and junk ball are v1's sculpt;
+the loupe is scripted; the face's squint, teeth and gums and the glowing veins are paint fixes (grimble_paint.scan_face, vein_key).
+
 ## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
 No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.
 1. **Inspect** it in Blender: bones (names, parents, heads), each vertex group's bounds, loose parts, materials,

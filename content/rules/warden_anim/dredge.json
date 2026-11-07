@@ -21,9 +21,6 @@
 		"tip": "weapon_muzzle",
 		"bone": "gun"
 	},
-	"hide_while_chain": [
-		"hook"
-	],
 	"loco": {
 		"idle": "idle",
 		"stance": "stance",
