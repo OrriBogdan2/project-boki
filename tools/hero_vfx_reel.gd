@@ -7,15 +7,20 @@ extends "res://tools/combo51_shots.gd"
 ## Run it under the movie writer so the looks run on the fixed step and the real mix is recorded:
 ##   xvfb-run -a godot --rendering-driver opengl3 --resolution 1280x720 --path . --fixed-fps 60 \
 ##       --write-movie <dir>/reel.avi -- --hero-vfx-reel --shots-dir=<dir>
+## --reel-frames also saves every drawn frame as <dir>/frames/NNNNN.jpg (FRAME_W wide), for a clip made off the
+## box (jobq's GPU worker returns the out dir, not a movie): ffmpeg -framerate 60 -i <dir>/frames/%05d.jpg ...
 
 const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
-	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"]}
+	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
+	"dredge": ["hook"]}
 const GENERIC := ["lmb", "rmb", "dash", "e", "r"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
+const FRAME_W := 960                      # px wide, each --reel-frames frame
 
 var only := ""
+var frame_dir := ""            # --reel-frames: where each drawn frame goes
 var crop_px := SHEET_CROP
 var crop_zoom := 1.0
 var frames := 0
@@ -35,6 +40,8 @@ func run(main_node: Node) -> void:
 			who = arg.substr(12)
 		if arg.begins_with("--reel-only="):
 			only = arg.substr(12)
+		if arg == "--reel-frames":
+			frame_dir = "frames"
 	var own := "res://tools/vfx_reel/%s.gd" % who
 	if get_script().resource_path != own and ResourceLoader.exists(own):
 		await load(own).new().run(main_node)
@@ -43,6 +50,9 @@ func run(main_node: Node) -> void:
 	if who == "archer":
 		crop_px = WIDE_CROP
 	DirAccess.make_dir_recursive_absolute(dir)
+	if frame_dir != "":
+		frame_dir = dir.path_join(frame_dir)
+		DirAccess.make_dir_recursive_absolute(frame_dir)
 	await _setup()
 	P.lvl = 6
 	for slot in P.slot_lv:
@@ -61,7 +71,20 @@ func run(main_node: Node) -> void:
 ## (the match's own step is off here, so the ears and the detail share follow from this)
 func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> void:
 	Sfx.listener = P.pos
-	await super._go(secs, each, marks, lead)
+	var step := each
+	if frame_dir != "":
+		step = func(t: float) -> void:
+			_save_frame()
+			if each.is_valid():
+				each.call(t)
+	await super._go(secs, step, marks, lead)
+
+## (--reel-frames) the frame last drawn, scaled down to FRAME_W
+func _save_frame() -> void:
+	var img := main.get_viewport().get_texture().get_image()
+	img.resize(FRAME_W, FRAME_W * img.get_height() / img.get_width(), Image.INTERPOLATE_BILINEAR)
+	img.save_jpg(frame_dir.path_join("%05d.jpg" % frames), 0.88)
+	frames += 1
 
 ## Larger crops than the shared strips: an area look must fit, at the match camera's own scale.
 func _take(kind: String, _file: String, caption: String, focus: Callable) -> void:
@@ -323,6 +346,19 @@ func _archer_lmb() -> void:
 	await _go(2.6, shots, _sheet("lmb",
 			"LMB: a tap needle, then the Empowered draw: thread gathering at the nock, the needle with its "
 			+ "red thread trailing, the hit on the dummy", [0.06, 0.14, 0.3, 0.9, 1.3, 1.53, 1.58, 1.65, 1.8]), 3.0)
+	await _go(GAP)
+
+## Grimble's RMB at the dummy: the arm stretches out, the hook bites, the reel hauls it in.
+func _dredge_hook() -> void:
+	await _reset(8.0)
+	var K: DredgeKit = P.ak
+	var hook := func(t: float):
+		if _at(t, 0.1):
+			K.press_rmb()
+		_aim(T.pos)
+	await _go(2.4, hook, _sheet("hook",
+			"RMB, the hook: the arm stretches to the dummy, the hook bites, the reel hauls it in, the arm snaps back",
+			[0.15, 0.3, 0.45, 0.6, 0.9, 1.2, 1.5, 1.8, 2.2]), 3.0)
 	await _go(GAP)
 
 func _archer_miss() -> void:

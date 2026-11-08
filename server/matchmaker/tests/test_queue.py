@@ -45,12 +45,11 @@ class QueueTest(unittest.TestCase):
         self.assertEqual(len(self.q.pick("arena", 160)), 1)
 
     def test_trio_takes_up_to_the_match_size_and_leaves_the_rest(self):
-        n = self.cfg.trio_slots
-        for i in range(n + 2):
+        for i in range(14):
             self.q.add(ticket("trio", f"p{i}", 100 + i))
         picked = self.q.pick("trio", 100)
-        self.assertEqual(len(picked), n)
-        self.assertEqual([t.name for t in self.q.waiting["trio"]], [f"p{n}", f"p{n + 1}"])
+        self.assertEqual(len(picked), self.cfg.trio_slots)
+        self.assertEqual([t.name for t in self.q.waiting["trio"]], ["p12", "p13"])
 
     def test_position_and_eta(self):
         first, second = ticket("duel", "a", 100), ticket("duel", "b", 105)

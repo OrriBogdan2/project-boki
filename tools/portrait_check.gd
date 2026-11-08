@@ -61,7 +61,7 @@ func _art() -> void:
 					and Vector2i(st.get_size()) == SPLASH_PX, splash)
 	var names_ok: bool = HeroTitle.base_name("gunslinger") == "Vex" and HeroTitle.base_name("rimewright") == "Neve"
 	var names2: bool = HeroTitle.base_name("tender") == "Meeko" and HeroTitle.base_name("mage") == "Sparkle"
-	var names3: bool = HeroTitle.base_name("bulwark") == "Mossy" and HeroTitle.base_name("archer") == "Lace"
+	var names3: bool = HeroTitle.base_name("bulwark") == "Albert" and HeroTitle.base_name("archer") == "Lace"
 	var names4: bool = HeroTitle.base_name("juggernaut") == "Kael"
 	ok("the new names", names_ok and names2 and names3 and names4)
 
@@ -123,13 +123,13 @@ func _menus() -> void:
 	ok("the Hunter viewer shows Vex's portrait by the name", _first_pic(viewer) == Portraits.art_path("gunslinger"))
 	viewer.queue_free()
 	var mask_faces: Array = []
-	for id in ["gunslinger", "juggernaut", "tender", "ashwick"]:
+	for id in ["gunslinger", "juggernaut", "ashwick", "tender"]:
 		var v := HunterViewer.make(id, Vector2.ZERO)
 		host.add_child(v)
 		await tree.process_frame
 		mask_faces.append(_first_pic(v) == Portraits.art_path(id) and Portraits.art_path(id) != "")
 		v.queue_free()
-	ok("the Mask moments: each Mask shows its Hunter's face (Vex, then Kael, Meeko, Cinder)",
+	ok("the Relic moments: each Relic shows its Hunter's face (Vex, then Kael, Cinder, Meeko)",
 			mask_faces.all(func(f): return f))
 	var card := KitCard.make("rimewright", "", func(): pass)
 	host.add_child(card)

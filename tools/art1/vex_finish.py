@@ -481,10 +481,9 @@ OUTC[jm] = np.clip((g_ + (OUTC[jm] - g_) * 1.4) * np.array([0.98, 1.08, 0.82], n
 SKIN = lambda p, n, ao: ramp(np.clip(lit(n, ao) * 1.05, 0, 1), [hexc("#8c5a5c"), hexc("#c58a84"), hexc("#e5ac9f"), hexc("#f3c9bb"), hexc("#fde4d7")])
 paint(lambda n: n == "lidUL", lambda p, n, ao: mix(SKIN(p, n, ao), hexc("#2a2024"), smooth(0.9, 0.78, np.arctan2(p[..., 2] - parts["lid_c"][2], p[..., 1] - parts["lid_c"][1]))))
 paint(lambda n: n.startswith("ebrow"), lambda p, n, ao: np.broadcast_to(hexc("#2b3a35"), p.shape).copy())
-paint(lambda n: n in ("cuff", "receiver", "drum", "gband52"), P.gun_brass)
+paint(lambda n: n in ("cuff", "receiver", "drum"), P.gun_brass)
 paint(lambda n: n in ("bullet", "coin", "wristband", "robopanel", "robofore", "palm", "thumbL", "elbowball") or n.startswith(("braidtie", "hipcoin", "finger")), P.brass)
-paint(lambda n: n.startswith(("boss", "drumface", "chain")), P.steel)
-paint(lambda n: n.startswith(("gcollar", "gspindle", "gband41", "barrel")), lambda p, n, ao: P.steel(p, n, ao, P.BARREL))
+paint(lambda n: n.startswith(("boss", "gcollar", "gspindle", "gband", "barrel", "drumface", "chain")), P.steel)
 paint(lambda n: n.startswith(("elbowcap", "fpad", "thumbpad")), lambda p, n, ao: P.steel(p, n, ao, P.BLACKM))
 paint(lambda n: n == "gren0", lambda p, n, ao: ramp(np.clip(lit(n, ao) * 1.12, 0, 1), [hexc("#2c3a14"), hexc("#55702a"), hexc("#86a843"), hexc("#b9d77a")]))
 

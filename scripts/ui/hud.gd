@@ -698,7 +698,6 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.lairs:
 		_draw_map_lairs(inner, to_map, on_map, riding)
 	ReviveHud.minimap(self, inner, to_map, on_map)
-	if m.biomes: m.biomes.hot.minimap(self, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
 		for cnd in m.spawn_plan.cands:
@@ -1031,7 +1030,8 @@ func _keycap(center: Vector2, key: String, col: Color) -> void:
 
 ## One ability slot (HudSlot draws it; BokiHud's slots come through here too).
 func _ab_slot(id: String, rect: Rect2, icon: String, key: String, col: Color, cd_frac: float, cd_secs: float, ready: bool, charges := -1, max_ch := 0, label := "") -> void:
-	HudSlot.ab_slot(self, id, rect, icon, key, col, cd_frac, cd_secs, ready, charges, max_ch, label)
+	var on := ready and not AirLimits.drop_locked(m.player)      # greyed through the opening drop
+	HudSlot.ab_slot(self, id, rect, icon, key, col, cd_frac, cd_secs, on, charges, max_ch, label)
 
 var guide_hidden := false
 var abyss_pulse := 0.0
@@ -1237,7 +1237,7 @@ func r_lock_text(p: Hunter) -> String:
 
 ## One ability in the row, aware of run levels (HudSlot.skill_slot).
 func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1, mx := 0) -> void:
-	HudSlot.skill_slot(self, slot, id, r, icon, key, col, cdf, cds, ready, ch, mx)
+	HudSlot.skill_slot(self, slot, id, r, icon, key, col, cdf, cds, ready and not AirLimits.drop_locked(m.player), ch, mx)
 
 ## Your kin, perched on the top corner of your portrait: its face, a health ring and its state.
 func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
@@ -1922,7 +1922,7 @@ func _draw_crosshair(p: Hunter) -> void:
 	if p.wpn.has("tighten_from_deg") and p.spin > 0.0:
 		spread += lerpf(12.0, 0.0, clampf(p.spun_t / float(p.wpn.get("tighten_time", 1.5)), 0.0, 1.0))
 	Reticle.draw(c, mp, spread)
-	if p.ak:
+	if p.ak and p.ak.has_meter():
 		# the archetype resource as an arc hugging the crosshair
 		var rf := p.ak.res_frac()
 		var rc := p.ak.res_col()

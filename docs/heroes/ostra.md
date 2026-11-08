@@ -1,19 +1,8 @@
-# Void Jester (base character Motley; archetype id `ostra`, Medium)
+# Motley the Void Jester (archetype id `ostra`, Medium)
 
 Internal note: the behaviour reference is the hero named in the Inspired-by table in docs/ARCHETYPES.md. Nothing below is
 player-facing; every name, number and word in the shipped game is our own (renames: Swap -> Lantern Trade, Void Snap -> Shard
 Snap, Unstable Anomaly -> Brimseed, gravity orb -> Tether Lantern orb).
-
-## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
-Source: Void, `Upg:` lines. Numbers live in `rank_cd` / `rank_dmg` (the shared 10% / 15% / 15% steps are not used). Cooldown
-cuts are the source's seconds (our base cooldowns equal the source's tier-I ones). The ultimate takes no upgrade in our kit
-(the source's R: -5s, twice; our X has a fixed 70s), so it is not changed.
-
-| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
-|---|---|---|---|
-| RMB Shard Snap | +20% damage, -1.5s x2; tier IV: +50 speed on the cast, +100 on the impact | 9s / 8s, damage +15% / +30%; speed bursts at 3 | 8.5s / 7s, damage +20% / +40%; speed bursts at 3 |
-| Shift Lantern Trade | -1.5s x2; tier IV: allies entering the circle get a shield | 8.1s / 6.7s (shared -15%); shield at 3 | 8s / 6.5s; shield at 3; no damage step |
-| E Brimseed | +10% x2; tier IV: -2s and a damage-over-time on foes inside | 9s / 8s, damage +15% / +30%; burn at 3 | 10s / 8s, damage +10% / +20%; burn at 3 |
 
 ## Research summary
 - Sources: the reference sheet from footage (briefs/hero-ref/ostra.md, outside the repo), the wiki page
@@ -134,12 +123,13 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 2074-hp hunter (level 15) -> 26 of 145.
 - Done: the pop no longer Grounds; the knock heal is gone; ground hazards pass him by (`incoming`; the lightning rod's sky
   strike still hits); Snap's speed bursts at rank 3 (the data's rank IV); the seed's burn at rank 3 is 8.2 a second and its
-  cooldown is 10s -> 8s at rank 3 (the data's -2s at rank IV).
+  cooldown is 10s -> 8s at rank 3 through the shared rank step (the data's -2s at rank IV).
 - Kept, not in the data: the Snap's distance-scaled stun (the owner's note: RMB visibly stuns); the Trade's 1.8s (no number in the
   data).
 - Not done: items in the swap circle (the data says "all
   units"; pickups are each game's own copies); an ice patch's slide still takes him (ground grip is not his to change).
-- Rank paths: see "Upgrade parity" (the shared rank step is gone for this hero).
+- Rank paths that do not fit: the data's Snap +20% damage at ranks 2 and 3, the seed's +10% each and the Trade's -1.5s twice go
+  through the shared rank step (+15%/+30% damage, -10%/-20% cooldown on RMB and E, -15%/-30% recharge on the dash).
 
 ## Small mechanics
 | Mechanic | Source | Footage | Ours |

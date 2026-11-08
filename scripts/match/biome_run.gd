@@ -31,14 +31,12 @@ var hazards: Array = []             # {kind, pos, node, t, phase, tele, ...}
 var pending: Array = []             # delayed effects {t, fn}
 var hz_ent: Ent = null              # stands in for "the environment" as a damage source (never credited)
 var player_biome := ""
-var hot: HotZone = null             # the regions' own loot and this match's hot drop zone
 var rng := RandomNumberGenerator.new()
 
 func _init(match_node: Node) -> void:
 	m = match_node
 	w = m.world
 	rng.seed = int(m.seed_val) * 13 + 5
-	hot = HotZone.new(w, int(m.seed_val))
 	for isl in w.islands:
 		var b := String(isl.get("biome", ""))
 		if b != "" and not defs.has(b):
@@ -560,15 +558,13 @@ func _tick_hazards(dt: float) -> void:
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(7.0, 10.0)
 
 # ------------------------------------------------------------------ loot
-## Slot weights for gear found at p (by slot name): the biome and the map region lean toward
-## their own kinds of gear.
+## Slot weights for gear found at p (by slot name): the region leans toward its own kind of gear.
 func slot_lean_at(p: Vector3) -> Dictionary:
-	return hot.slot_lean(p, _biome(p).get("loot", {}).get("slots", {}))
+	return _biome(p).get("loot", {}).get("slots", {})
 
-## Extra rarity steps for loot here: the biome's (the Gloom pays better), the island's danger,
-## the map region's own and the hot zone's.
+## Extra rarity steps for loot in this region (the Gloom pays better), plus the island's danger.
 func rarity_bonus_at(p: Vector3) -> int:
-	return int(_biome(p).get("loot", {}).get("rarity_bonus", 0)) + (1 if _danger(p) >= 2 else 0) + hot.rarity_bonus(p)
+	return int(_biome(p).get("loot", {}).get("rarity_bonus", 0)) + (1 if _danger(p) >= 2 else 0)
 
 ## The region's gear leanings (tags), for glove/gear tables that read them.
 func gear_tags_at(p: Vector3) -> Array:

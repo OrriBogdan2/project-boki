@@ -34,6 +34,7 @@ var bonded_glow := false
 var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, guard}
 var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
 var flow: DashFlow             # what ability presses do during this hero's dash
+var dash_press_at := -9.0      # when Shift last went to on_dash (AirLimits: the dash's moves never hold the glider)
 
 static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	var k: ArchKit
@@ -71,29 +72,21 @@ func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
 func res_max() -> float: return float(res_def().get("max", 100.0))
+## false when the passive has no meter (Hawk Sense)
+func has_meter() -> bool: return String(res_def().get("kind", "")) != "none"
 func res_col() -> Color: return Color(String(res_def().get("col", "#ffffff")))
 func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff")))
 
 func rank(slot: String) -> int:
 	return h.ability_level(slot)
 
-## A hero's own multiplier for one slot at its rank: JSON `<table>` {slot: [rank 1, rank 2, rank 3]}
-## (rank_dmg, rank_cd, rank_shield; the source's upgrades, see docs/heroes). `shared` when the hero has no row.
-func rank_k(table: String, slot: String, shared: float) -> float:
-	var row: Array = d.get(table, {}).get(slot, [])
-	return float(row[clampi(rank(slot) - 1, 0, row.size() - 1)]) if not row.is_empty() else shared
-
-## The hero's rank damage (rank_dmg, else +15% a rank: Effects.level_k) on top of the hunter's own damage
-## multiplier and the ability power their level gives (LevelGrowth.ap).
+## +15% damage per rank (Effects.level_k) on top of the hunter's own damage multiplier and the
+## ability power their level gives (LevelGrowth.ap).
 func power(slot: String) -> float:
-	return m.dmg_mult(h) * rank_k("rank_dmg", slot, Effects.level_k({"level": rank(slot)})) * LevelGrowth.ap(h)
+	return m.dmg_mult(h) * Effects.level_k({"level": rank(slot)}) * LevelGrowth.ap(h)
 
 func cd_k(slot: String) -> float:
-	return rank_k("rank_cd", slot, h.rank_cd_k(slot))
-
-## The dash recharge multiplier at the dash rank (rank_cd.dash, else 15% faster a rank past the first).
-func dash_k() -> float:
-	return rank_k("rank_cd", "dash", 1.0 - 0.15 * float(rank("dash") - 1))
+	return h.rank_cd_k(slot)
 
 func rmb_charges() -> int: return int(rmb_def().get("charges", 1))
 
@@ -126,6 +119,7 @@ func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
 func gate_inputs() -> void: pass                    # a kit drops the presses it locks out
+func locks_glide() -> bool: return false            # a move AirLimits can't see from the shared state (a dive)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 ## Does this kit have the class long dash (Shift in the air)? The HUD shows its segment only then.
 func has_long_dash() -> bool: return true
@@ -135,6 +129,7 @@ func on_block(_dmg: float, _by) -> void: pass
 func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func move_k() -> float: return 1.0
+func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
 func draw_rate() -> float: return 1.0               # a bow's draw speed (Hem's quick draw after a perfect release)
 func fire_ok() -> bool: return true

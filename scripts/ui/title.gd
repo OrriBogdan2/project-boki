@@ -482,7 +482,7 @@ func _build_ui() -> void:
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
 	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
-	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts()), "knock"])
+	items.append(["Arena", func(): Game.start_match(Match.arena_opts()), "knock"])
 	if has:
 		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)

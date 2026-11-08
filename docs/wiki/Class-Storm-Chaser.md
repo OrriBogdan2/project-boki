@@ -1,4 +1,4 @@
-# Storm Chaser
+# The Storm Chaser
 
 The storm-kite runner. Every hit loads a Spark onto your target; at four they are Live, and a Wirerun
 straight through them is a Blowout that gives your dash back at once.
@@ -8,7 +8,7 @@ straight through them is a Blowout that gives your dash back at once.
 
 |  |  |
 |---|---|
-| Class title | Storm Chaser |
+| Class title | the Storm Chaser |
 | Base character | Sparkle, female |
 | Personality | A street kid struck by the Wyrm's storm in the market square. The bolt took her right eye and left the storm inside her, burning hot pink. She climbs the highest spires to chase storms, throws lightning straight from her hands, and swears she'll give the Wyrm's bolt back to it someday. She has never told anyone she is also looking for Rink, the boy she lost in the storm. |
 
@@ -21,7 +21,7 @@ straight through them is a Blowout that gives your dash back at once.
 3. **Wirerun** (Shift): hold to stretch the lane from 4 to 7m, let go to streak. Shots pass through you and every foe you cross takes a hit. Through a Live foe it is a **Blowout** and the dash resets.
 4. **Coilshot** (RMB): hold to charge a heavy round that throws the first foe back. Into a wall or another foe, they are stunned. A hit on a hunter drops a charge mote; pick it up for your dash back.
 5. **Skycall** (E): mark a spot, and a moment later lightning flings everyone there along your aim and grounds them (no dashing). It steals a rival's mote too.
-6. A knock heals you for 15% of your health. There is no R: the Boki Fusion takes that key.
+6. A knock heals you for 15% of your health. There is no R: the Boki Merge takes that key.
 
 ## Combos and interactions
 
@@ -88,9 +88,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 8s -> 7.2s, damage +20%. | cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top). |
-| Dash (Shift) | recharge 8s -> 7.3s. | recharge 8s -> 6.7s; the run's own hit deals double. |
-| E | damage +25%. | cooldown 10.5s -> 7.9s (a quarter off), damage +50%. |
+| RMB | cooldown 8s -> 7.2s, damage +15%. | cooldown 8s -> 6.4s, damage +30%; +50% damage on top. |
+| Dash (Shift) | recharge 8s -> 7.2s. | recharge 8s -> 6.4s; the run's own hit deals double. |
+| E | cooldown 10.5s -> 9.5s, damage +15%. | cooldown 10.5s -> 5.4s (3s off), damage +30%. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E.
 

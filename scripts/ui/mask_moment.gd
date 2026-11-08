@@ -1,28 +1,29 @@
 class_name MaskMoment
 extends Node
-## Your first Mask, after you name your Boki and before the tutorial (no pick: Vex is the only one). An
+## Your first Relic, after you name your Boki and before the tutorial (no pick: Vex is the only one). An
 ## in-world beat on the hatch island: the camera frames you, one of the Empty, with your new Boki; the light
-## goes down and Vex's Mask drifts out of the heart-crystal toward you, glowing and trailing motes; your Boki
-## hops and looks up at it. "Put on the Mask" (the interact key) plays the put-on beat (MaskBeat), and you are
+## goes down and Vex's Relic drifts out of the heart-crystal toward you, glowing and trailing motes; your Boki
+## hops and looks up at it. "Put on the Relic" (the interact key) plays the put-on beat (MaskBeat), and you are
 ## mostly Vex (Unmasked.blend). Then a short look at what Vex does (HunterViewer: her ability clips) and
 ## `finished` sends you on to the tutorial.
+# "mask" in code = "Relic" in game, owner 2026-11-07
 
 signal finished
 
 const YOU_AT := Vector3(-0.45, 0.0, 1.0)
 const BOKI_AT := Vector3(0.55, 0.0, 1.35)
 const FROM_AT := Vector3(0.0, 2.6, -5.2)         # the heart-crystal in the broken arch
-const HOVER := Vector3(0.55, -0.12, 0.6)          # m from your head: where the Mask waits, beside your face
-const CAM_YOU := Vector3(0.15, 1.35, 4.6)        # framing you, the Boki and the Mask's path
+const HOVER := Vector3(0.55, -0.12, 0.6)          # m from your head: where the Relic waits, beside your face
+const CAM_YOU := Vector3(0.15, 1.35, 4.6)        # framing you, the Boki and the Relic's path
 const LOOK_YOU := Vector3(0.05, 1.0, 0.6)
 const CAM_INTRO := Vector3(1.2, 1.35, 5.6)       # framing the new you on the left of the intro panel
 const LOOK_INTRO := Vector3(1.15, 0.85, 0.9)
 const BOKI_INTRO := Vector3(-1.25, 0.0, 1.45)     # your Boki at your side while you look at the clips
-const DRIFT_S := 3.4                             # s the Mask takes to reach you
-const DIM := 0.45                                # x the island's lights while the Mask comes
+const DRIFT_S := 3.4                             # s the Relic takes to reach you
+const DIM := 0.45                                # x the island's lights while the Relic comes
 const CLIP := Vector2(250, 140)                  # px: each ability clip in the intro
-const TEXT := "This Mask holds a fallen Hunter. Put it on, and you become them."
-const BUTTON := "Put on the Mask"
+const TEXT := "This Relic is the mask of a fallen Hunter. Put it on, and their soul becomes yours."
+const BUTTON := "Put on the Relic"
 const GO := "Into the portal"
 
 var hunter_id := "gunslinger"
@@ -55,7 +56,7 @@ static func make(scene: Node3D, camera: Camera3D, boki: Node3D, id := "gunslinge
 
 func _ready() -> void:
 	you = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], "", "", Unmasked.worn())
-	you.get_node("Rig/Torso/Aim/Gun").free()      # (empty-handed: the Mask brings the weapon)
+	you.get_node("Rig/Torso/Aim/Gun").free()      # (empty-handed: the Relic brings the weapon)
 	you.position = YOU_AT
 	you.rotation.y = PI
 	host.add_child(you)
@@ -76,7 +77,7 @@ func _build_ui() -> void:
 	ui.layer = 20
 	add_child(ui)
 
-## The light goes down and the Mask leaves the crystal, drifting to wait in front of your face.
+## The light goes down and the Relic leaves the crystal, drifting to wait in front of your face.
 func _arrive() -> void:
 	phase = "arrive"
 	relic = MaskRelic.make(hunter_id)
@@ -130,7 +131,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif phase == "intro" and go_button and event.is_action_pressed("ui_accept"):
 		_go()
 
-## The put-on beat (MaskBeat): the Mask rises to your hollow face, a cut to black, the fallen Hunter, and you
+## The put-on beat (MaskBeat): the Relic rises to your hollow face, a cut to black, the fallen Hunter, and you
 ## stand as them.
 func put_on() -> void:
 	if phase != "wait":

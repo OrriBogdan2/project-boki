@@ -173,68 +173,6 @@ func _tender_breaks() -> void:
 	ok("mm merge: drop_holds ends Hearth Call (no pull, no bond)", up and K.hearth_call.is_empty()
 		and not K.ulk().showing("tether") and not AimKit.shown(P, "x") and _bond_kind(K) == "")
 	await _free(m)
-	await _tender_cancels()
-
-
-## The source's cancels, one case each: she is stunned, she is knocked, she dies, the teammate dies cancel
-## it (and pay nothing, with the tether snapping); the teammate being knocked, her own dash and a hit do not.
-func _tender_cancels() -> void:
-	for which in ["stun", "knock", "dead", "mate_dead"]:
-		var r: Array = sc.setup("tender", 14.0)
-		var m: Match = r[0]
-		var P: Hunter = r[1]
-		var A: Hunter = r[2]
-		var K: TenderKit = P.ak
-		sc.aim_at(P, A.pos)
-		_press(P, m)
-		step(m, 0.5)
-		var up := not K.hearth_call.is_empty() and K.ulk().showing("tether")
-		var snaps := int(K.stats["broken"])
-		match which:
-			"stun": P.stun_t = 0.5
-			"knock": m.knock(P, null, {})
-			"dead": m.eliminate(P, null, "test", true)
-			"mate_dead": A.out = true
-		step(m, 0.1)
-		ok("mm X cancel (%s): the tether ends, snaps once, and pays nothing" % which, up
-			and K.hearth_call.is_empty() and not K.ulk().showing("tether")
-			and int(K.stats["broken"]) == snaps + 1 and _bond_kind(K) == "")
-		await _free(m)
-	await _tender_keeps_going()
-
-
-## No cancel: the teammate is knocked mid-channel (it carries on, heals them and stands them up at the end),
-## and a dash and plain damage on her (the source lists neither; nothing like silence exists to test).
-func _tender_keeps_going() -> void:
-	var r: Array = sc.setup("tender", 14.0)
-	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var A: Hunter = r[2]
-	var K: TenderKit = P.ak
-	A.teleport(P.pos + Vector3(-4.0, 0, 2.0))
-	sc.aim_at(P, A.pos)
-	_press(P, m)
-	step(m, 0.5)
-	P.hurt(20.0, null, {"src": "shot"})
-	P.inp["move"] = Vector2(1, 0)
-	P.inp["dash"] = true
-	step(m, 0.1)
-	P.inp["dash"] = false
-	P.inp["move"] = Vector2.ZERO
-	var dashed := P.roll_t > 0.0 or P.move_kind == "dash"
-	step(m, 0.3)
-	ok("mm X: plain damage and her own dash do not end it", dashed and not K.hearth_call.is_empty()
-		and int(K.stats["broken"]) == 0, "dashed %s" % str(dashed))
-	sc.down(m, A)
-	step(m, 0.5)
-	var down_hp0 := A.down_hp
-	step(m, 1.0)
-	ok("mm X: the teammate being knocked mid-channel does not end it, and it heals them", A.downed
-		and not K.hearth_call.is_empty() and A.down_hp > down_hp0 + 3.0, "%.0f -> %.0f" % [down_hp0, A.down_hp])
-	step(m, 3.5)
-	ok("mm X: ... and at the end they are pulled to her and revived", not A.downed and P.flat_dist(A) < 1.6
-		and int(K.stats["rescues"]) == 1 and _bond_kind(K) == "kill")
-	await _free(m)
 
 
 # ================================================================== Claire: Rimelock

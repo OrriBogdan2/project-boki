@@ -1,5 +1,5 @@
 extends "res://tools/archetype_check.gd"
-## The parity pass (the owner's 18:45 request, briefs-s2/PARITY_BRIEF.md) for Hem, Ryzz and Breah: each LMB's
+## The parity pass (the owner's 18:45 request, briefs-s2/PARITY_BRIEF.md) for Hem, Sparkle and Breah: each LMB's
 ## tracking (the aim and the body follow the cursor during the attack, also while walking), its timing and cadence,
 ## its range and projectile speed against the source (game data, then the footage at 5 fps), and each move's beats.
 ## Runs from each hero's combo check (--archer-combo-check, --mage-combo-check, --dolm-combo-check), which adds n
@@ -56,7 +56,6 @@ func pin() -> void:
 	step(m, 0.3)
 	P.inp["move"] = Vector2(0, 1)
 	var east := func():
-		K.res = 0.0
 		aim_at(P, _at_angle(P, home, 0.0))
 	var run_v := _speed(m, P, 0.4, east)
 	P.inp["fire"] = true
@@ -64,7 +63,6 @@ func pin() -> void:
 	ok("parity pin: drawing she walks slower (footage f111-116), about 0.7 of her run",
 		draw_v < run_v * 0.8 and draw_v > run_v * 0.55, "%.1f of %.1f m/s" % [draw_v, run_v])
 	var north := func():
-		K.res = 0.0
 		aim_at(P, _at_angle(P, home, -90.0))
 	step(m, 0.1, north)
 	ok("parity pin: mid-draw the body turns to a moved cursor at once (the source turns throughout)",
@@ -127,7 +125,7 @@ func _pin_audit(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: ArcherKit, home: 
 	ok("audit pin: the Heavy Shot stops on the first foe (data: one target, a knockback; no pierce)",
 		dmg(T) > 10.0 and dmg(T2) == 0.0, "%.0f / %.0f" % [dmg(T), dmg(T2)])
 
-# ------------------------------------------------------------------ Ryzz: the finger bolts
+# ------------------------------------------------------------------ Sparkle: the finger bolts
 func vireo() -> void:
 	var r := setup("mage", 7.0)
 	var m: Match = r[0]

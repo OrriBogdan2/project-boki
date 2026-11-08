@@ -73,7 +73,7 @@ func _ready() -> void:
 		add_child(mp); music.append(mp)
 	amb = AudioStreamPlayer.new(); amb.bus = "Ambience"; amb.volume_db = -80.0
 	add_child(amb)
-	for n in NAMES + VOICES + SfxKits.NAMES + VVSfx.NAMES:      # (VVSfx: Ryzz and Vex)
+	for n in NAMES + VOICES + SfxKits.NAMES + VVSfx.NAMES:      # (VVSfx: Sparkle and Vex)
 		var takes: Array = []
 		var s = load("res://audio/%s.wav" % n) if ResourceLoader.exists("res://audio/%s.wav" % n) else null
 		if s: takes.append(s)

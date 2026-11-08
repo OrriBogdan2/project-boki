@@ -1,8 +1,8 @@
 {
-	"desc": "Hunter unlocks and mastery (docs/decisions/0005). A new save wears Vex first (`starters`, picked on the first-Mask screen, free at the first portal) and plays the tutorial as Vex. After its first finished expedition the player picks one of `second_picks` as the second Mask; the other two open through their own challenges, like Lace. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.",
+	"desc": "Hunter unlocks and mastery (docs/decisions/0005). A new save wears Vex first (`starters`, picked on the first-Relic screen, free at the first portal) and plays the tutorial as Vex. After its first finished expedition the player picks one of `second_picks` as the second Relic; the other two open through their own challenges, like Lace. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.",
 	"starters": ["gunslinger"],
 	"starter_picks": 1,
-	"second_picks": ["juggernaut", "tender", "ashwick"],
+	"second_picks": ["juggernaut", "ashwick", "tender"],
 	"hold_s": 1.6,
 	"tiers": {
 		"easy": "about 1-2 expeditions",

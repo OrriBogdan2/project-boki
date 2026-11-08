@@ -54,7 +54,7 @@ var petted := {}
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
-var hob: FarmHob = null            # Hob the builder: talks, blueprints, the second Mask, a hammer (farm_hob.gd)
+var hob: FarmHob = null            # Hob the builder: talks, blueprints, the second Relic, a hammer (farm_hob.gd)
 var guide: FarmGuide = null        # the Goals card and the farm tutorial on screen (farm_guide.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
@@ -1189,7 +1189,7 @@ func _move_player(d: float) -> void:
 	if dash_t > 0.0:
 		dash_t -= d
 		hv = dash_v
-		if dash_t <= 0.0: hv = dash_v * (Hunter.DASH_CARRY_AIR if air else Hunter.DASH_CARRY_GROUND)
+		if dash_t <= 0.0: hv = HunterMove.dash_exit(dash_v, SPEED)
 	else:
 		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0) * water.speed_mul(wdep, air)
 		hv += (mv * spd - hv) * (1.0 - exp(-(14.0 if not air else (4.0 if gliding else 6.0)) * d))
@@ -2331,7 +2331,7 @@ func hub_items() -> Array:
 	if has_method("open_build"):
 		items.append(["build", "Build", "hammer", func(): call("open_build")])
 	items.append(["settings", "Settings", "gear", func(): Overlay.ctx = "home"; Overlay.open_settings()])
-	items.append(["hero", "Masks", "swap", func(): HomeHero.open(self)])
+	items.append(["hero", "Relics", "swap", func(): HomeHero.open(self)])
 	return items
 
 func _build_hub() -> void:
@@ -3368,7 +3368,7 @@ func _open_expedition() -> void:
 		right.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Black Market holds the unclaimed ones).", 12, UI.FAINT))
 	# the way out: practice on the left, go on the right
 	var fl := UI.footer_left(v)
-	fl.add_child(UI.ghost("Training Grounds", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
+	fl.add_child(UI.ghost("Arena", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
 	fl.add_child(UI.ghost("Training area", _start_training, 0, "jump"))
 	fl.add_child(UI.ghost("Duel room", _start_duel, 0, "knock"))
 	if Net.available():

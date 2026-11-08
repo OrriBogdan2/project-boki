@@ -1,4 +1,4 @@
-"""ART-1 Vex v2: the texel-space paint of the rebuilt pieces (see kael_paint.py): arrays of texels in, sRGB out."""
+"""ART-1 Vex v2: the texel-space paint of the rebuilt pieces (see paintkit.py): arrays of texels in, sRGB out."""
 import os, sys
 import numpy as np
 from meshkit import smooth
@@ -9,13 +9,13 @@ sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
 import imgio
 
 STEEL = [hexc("#222329"), hexc("#3f4148"), hexc("#61636c"), hexc("#868992"), hexc("#b0b3ba")]
-BARREL = [hexc("#4b4e56"), hexc("#7d8089"), hexc("#a9acb4"), hexc("#cfd1d6"), hexc("#eeeff2")]  # the sheet's polished barrels
 BLACKM = [hexc("#141417"), hexc("#26262b"), hexc("#3b3b42"), hexc("#585862"), hexc("#7a7a86")]
 BRASS = [hexc("#3d2a14"), hexc("#6e4c26"), hexc("#a07842"), hexc("#c9a266"), hexc("#ead3a2")]    # the sheet's worn brass
-# the gun's stickers (vex_v2_weapon_sheet): (shape, s, angle round the axis from outward toward the top, half size along s, half size
-# round, colour). A teal ghost and a purple flame on the receiver's outer side, the same pair swapped on its inner side.
-STICKERS = [("ghost", 0.15, 0.45, 0.024, 0.026, hexc("#79d6bf")), ("flame", 0.215, 0.2, 0.022, 0.026, hexc("#b357d6")),
-            ("flame", 0.15, np.pi - 0.45, 0.022, 0.026, hexc("#b357d6")), ("ghost", 0.215, np.pi - 0.2, 0.024, 0.026, hexc("#79d6bf"))]
+# the gun's stickers (the sheet): (s, angle round the axis from outward toward the top, the axis's u, f; half size along s, half size
+# round, colour, the lower half's colour)
+STICKERS = [(0.055, 0.75, 0.0, 0.0, 0.022, 0.024, hexc("#79d6bf"), hexc("#79d6bf")),
+            (0.19, 0.25, 0.0, 0.0, 0.02, 0.02, hexc("#b357d6"), hexc("#b357d6")),
+            (0.18, -0.2, 0.0, VC.DRUM_F, 0.026, 0.03, hexc("#ef8b3b"), hexc("#3a6fd8"))]
 
 
 def scs(p):
@@ -38,31 +38,20 @@ def brass(p, n, ao):
     return scuff(p, ramp(np.clip(lit(n, ao) * 1.08 + (fbm(p * 24) - .5) * .16, 0, 1), BRASS))
 
 
-def sticker_mask(shape, x, y):
-    """x, y in -1..1 across the sticker (y grows toward its base): the ghost (domed head, wavy hem, two dark eyes) or the flame (a teardrop)."""
-    if shape == "ghost":
-        body = ((y < 0.3) & (x ** 2 + (y + 0.1) ** 2 < 0.85)) | ((y >= 0.3) & (np.abs(x) < 0.92) & (y < 0.75 + 0.15 * np.sin(x * 9)))
-        face = ((np.abs(np.abs(x) - 0.3) < 0.13) & (np.abs(y + 0.05) < 0.13)) | ((np.abs(x) < 0.25) & (np.abs(y - 0.35) < 0.07))
-        return body, face
-    half = 0.95 * np.sin(np.pi * np.clip((y + 1) / 2, 0, 1) ** 0.7)
-    return (np.abs(x) < half) & (np.abs(y) < 1), np.abs(x + 0.15 * y) < 0.05
-
-
 def gun_brass(p, n, ao):
-    """The cuff, receiver and drum: worn brass with the sheet's four stickers (each with a pale edge and dark detail)."""
+    """The cuff, receiver and drum: brass with the sheet's three stickers (teal on the cuff, purple on the receiver's side, orange
+    and blue on the drum), each with a dark edge."""
     c = brass(p, n, ao)
     s, u, f = scs(p)
-    a = np.arctan2(f, u)
-    r = np.hypot(u, f)
-    lt = np.clip(lit(n, ao) * 1.1, 0.35, 1.05)[..., None]
-    for shape, s0, a0, hs_, ha, col in STICKERS:
-        x, y = (s - s0) / hs_, (a - a0) * r / ha
-        body, face = sticker_mask(shape, x, y)
-        body &= (np.abs(x) < 1) & (np.abs(y) < 1)
-        edge = body & ~sticker_mask(shape, x * 1.18, y * 1.18)[0]
-        c = np.where(body[..., None], col * lt, c)
-        c = np.where(edge[..., None], hexc("#eef3e6") + 0 * c, c)
-        c = np.where((body & face)[..., None], hexc("#23323a") + 0 * c, c)
+    for s0, a0, cu, cf, hs_, ha, top, low in STICKERS:
+        a = np.arctan2(f - cf, u - cu)
+        r = np.hypot(u - cu, f - cf)
+        d = np.maximum(np.abs(s - s0) / hs_, np.abs((a - a0) * r) / ha)
+        on = d < 1.0
+        k = np.where((a > a0)[..., None], top, low)
+        lt = np.clip(lit(n, ao) * 1.1, 0.35, 1.05)[..., None]
+        c = np.where(on[..., None], k * lt, c)
+        c = np.where(((d > 0.86) & on)[..., None], hexc("#2a1d14") + 0 * c, c)
     return c
 
 

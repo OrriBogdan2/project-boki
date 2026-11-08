@@ -194,8 +194,8 @@ func _skinned_top(h: Node3D, body_only: bool, list: bool, id: String) -> Vector3
 		if bb.size == Vector3.ZERO and bb.position == Vector3.ZERO:
 			continue
 		if list:
-			var top := bb.end.y - h.global_position.y
-			print("LINEUP_MESH %s %s top=%.2f%s" % [id, path, top, " (prop)" if prop else ""])
+			var tag := " (prop)" if prop else ""
+			print("LINEUP_MESH %s %s top=%.2f%s" % [id, path, bb.end.y - h.global_position.y, tag])
 		lo = lo.min(bb.position)
 		hi = hi.max(bb.end)
 		n += 1
@@ -223,8 +223,9 @@ func _mesh_bounds(m: MeshInstance3D) -> AABB:
 			continue
 		var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 		var bones: PackedInt32Array = arr[Mesh.ARRAY_BONES] if arr[Mesh.ARRAY_BONES] != null else PackedInt32Array()
-		var w_raw = arr[Mesh.ARRAY_WEIGHTS]
-		var weights: PackedFloat32Array = w_raw if w_raw != null else PackedFloat32Array()
+		var weights := PackedFloat32Array()
+		if arr[Mesh.ARRAY_WEIGHTS] != null:
+			weights = arr[Mesh.ARRAY_WEIGHTS]
 		var per := bones.size() / maxi(verts.size(), 1)
 		for v in verts.size():
 			var pos := Vector3.ZERO

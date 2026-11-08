@@ -1,4 +1,4 @@
-# The Unbroken (base character Kael; archetype id `juggernaut`, heavy)
+# Kael the Unbroken (archetype id `juggernaut`, heavy)
 
 Display name is the class title The Unbroken; the id, file names and code names stay `juggernaut`.
 

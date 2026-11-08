@@ -5,9 +5,6 @@ Boki on a floating-island farm, take one along on expeditions into the Skylands,
 monsters and the Blight, and try to get home with what you found. Your Boki can come home changed, or
 not at all.
 
-The Wyrm broke the land and stole everyone's face. People became the Empty, and a Mask, a relic holding a fallen
-Hunter's soul, is the only way back to a self. Twelve Hunters in five crews race for the Wyrmheart; see [Lore](Lore.md).
-
 The code still says **kin** for Boki and **Kinfall** for the game in places (ids, file names, class
 names). Player-facing text says Boki and Project Boki.
 
@@ -22,8 +19,7 @@ hand; change the data and rerun the script. Hand-written pages may also hold gen
 | [Getting started](Getting-Started.md) | Your first egg, the tutorial, the farm and your first expedition |
 | [Controls](Controls.md) | Every key, in a match and at home |
 | [Classes](Classes.md) | The twelve classes and how levels and ranks work |
-| [Silver Thief](Class-Silver-Thief.md), [Red Stitch](Class-Red-Stitch.md), [Storm Chaser](Class-Storm-Chaser.md), [Hired Gun](Class-Hired-Gun.md), [The Unbroken](Class-The-Unbroken.md), [Barnacle Knight](Class-Barnacle-Knight.md) | One page per class |
-| [Lore](Lore.md) *(generated)* | The Wyrm, the Masks, the five crews and each Hunter's relic |
+| [The Hired Gun](Class-Hired-Gun.md), [The Unbroken](Class-Unbroken.md), [The Ashen Kiss](Class-Ashen-Kiss.md), [The Dawnfox](Class-Dawnfox.md), [The Stone Seer](Class-Stone-Seer.md), [The Red Stitch](Class-Red-Stitch.md), [The Scrap King](Class-Scrap-King.md), [The Snowglide](Class-Snowglide.md), [The Void Jester](Class-Void-Jester.md), [The Barnacle Knight](Class-Barnacle-Knight.md), [The Storm Chaser](Class-Storm-Chaser.md), [The Silver Thief](Class-Silver-Thief.md) | One page per class |
 | [Boki](Boki.md) | Types, personality, scanning, breeding, bonds, losing a Boki |
 | [Boki species](Boki-Species.md) *(generated)* | Every species with its abilities, merge and evolution paths |
 | [Boki growth](Boki-Growth.md) *(generated)* | Evolution nodes, mutations, bond ranks, IVs, natures |

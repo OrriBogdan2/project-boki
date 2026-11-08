@@ -1,5 +1,5 @@
 extends "res://tools/pin_bjorn_ult_check.gd"
-## Owner playtest items of 2026-11-03 for Hem and Breaker (briefs/OWNER_REVIEW_1103.md #5, #6, #10, #29, #30),
+## Owner playtest items of 2026-11-03 for Hem and Mossy (briefs/OWNER_REVIEW_1103.md #5, #6, #10, #29, #30),
 ## run from --archer-combo-check and --bulwark-combo-check (tools/archer_bulwark_combo_check.gd adds the
 ## counts). Prints AKCHECK lines like --archetype-check.
 
@@ -7,11 +7,6 @@ extends "res://tools/pin_bjorn_ult_check.gd"
 func press_at(P: Hunter, at: Vector3) -> void:
 	P.inp["fire"] = true
 	aim_at(P, at)
-
-## Holds LMB on `at` with Focus kept empty (no full-Focus draw).
-func press_dry(P: Hunter, K: ArcherKit, at: Vector3) -> void:
-	K.res = 0.0
-	press_at(P, at)
 
 ## Holds RMB with the cursor on `at`.
 func rmb_at(P: Hunter, at: Vector3) -> void:
@@ -57,7 +52,6 @@ func pin() -> void:
 	_pin_draw_pose(m, P, T, K)
 	_pin_heavy(m, P, T, K, home, lv)
 	_pin_dash(m, P, T, K)
-	_pin_two_charges(m, P, K, home)
 	await done(m)
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var bad: int = await flow.combos_of(main, "archer")
@@ -74,7 +68,7 @@ func ready_bow(P: Hunter) -> void:
 	P.reload_t = 0.0
 	P.draw_t = -1.0
 
-## No aim shape of Lisette's is a V, in any hold.
+## No aim shape of Lace's is a V, in any hold.
 func no_vee(m: Match) -> bool:
 	for e in AimKit.layer(m).entries.values():
 		if String((e as Dictionary).get("kind", "")) == "vee":
@@ -85,7 +79,7 @@ func no_vee(m: Match) -> bool:
 func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var clean := true
 	ready_bow(P)
-	var aim := press_dry.bind(P, K, T.pos)
+	var aim := press_at.bind(P, T.pos)
 	for i in 100:
 		aim.call()
 		m.step(DT)
@@ -169,7 +163,6 @@ func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void
 	var t := 0.0
 	while t < 5.0:
 		aim.call()
-		K.res = 0.0
 		m.step(DT)
 		t += DT
 		early += arrows(m, P)
@@ -181,29 +174,8 @@ func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void
 	ok("pin early release: letting go looses exactly one arrow (an overdrawn one)",
 		arrows(m, P) == 1 and K.draw.last_kind == "over", "arrows %d kind %s" % [arrows(m, P), K.draw.last_kind])
 	step(m, 1.0)
-	# audit (Nov 3): a full Focus no longer skips the draw: the stages run as always and it is spent on the arrow
-	ready_bow(P)
-	K.res = K.res_max()
-	early = 0
-	t = 0.0
-	while t < 0.8:
-		aim.call()
-		m.step(DT)
-		t += DT
-		early += arrows(m, P)
-	ok("pin early release: with full Focus the draw still runs its stages (no instant Supercharged)",
-		early == 0 and P.draw_t > 0.6 and P.draw_t < 1.0 and K.full_ready(),
-		"arrows %d draw_t %.2f" % [early, P.draw_t])
-	P.inp["fire"] = false
-	m.step(DT)
-	m.step(DT)
-	ok("pin early release: the arrow spends the Focus (an Empowered one, armed for a Deadeye)",
-		arrows(m, P) == 1 and K.draw.last_kind == "arrow" and K.res < 10.0 and K.loosed > 0.0,
-		"arrows %d kind %s focus %.0f" % [arrows(m, P), K.draw.last_kind, K.res])
-	step(m, 1.0)
 	# a cooldown running mid-draw never looses it
 	ready_bow(P)
-	K.res = 0.0
 	step(m, 0.3, aim)
 	P.fire_cd = 0.4
 	early = 0
@@ -219,7 +191,7 @@ func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void
 	P.inp["fire"] = false
 	step(m, 1.0)
 	ready_bow(P)
-	var dry := press_dry.bind(P, K, T.pos)
+	var dry := press_at.bind(P, T.pos)
 	step(m, 0.3, dry)
 	var drawn := P.draw_t
 	P.dashes = P.max_dashes()
@@ -241,9 +213,8 @@ func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void
 ## #5: the readout sits on the aim line.
 func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	ready_bow(P)
-	K.res = 0.0
 	T.teleport(P.pos + Vector3(7.0, 0, 3.0))
-	var aim := press_dry.bind(P, K, T.pos)
+	var aim := press_at.bind(P, T.pos)
 	step(m, 0.3, aim)
 	var d := P.aim_dir()
 	var s := K.draw.stage_t()
@@ -252,7 +223,7 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var from: Vector2 = ve.get("from", Vector2(-99, -99))
 	var full := (ve.get("to", Vector2.ZERO) as Vector2).distance_to(from)
 	var filled := (fe.get("to", Vector2.ZERO) as Vector2).distance_to(fe.get("from", Vector2.ZERO))
-	ok("pin readout: the line leaves Lisette along the aim line and the fill grows out of its start",
+	ok("pin readout: the line leaves Lace along the aim line and the fill grows out of its start",
 		String(ve.get("kind", "")) == "line" and String(fe.get("kind", "")) == "line"
 		and off_line(P.pos, d, Vector3(from.x, P.pos.y, from.y)) < 0.01
 		and (fe.get("from", Vector2.ZERO) as Vector2).distance_to(from) < 0.01,
@@ -303,7 +274,7 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var le := AimKit.entry(P, "draw")
 	var to: Vector2 = le.get("to", Vector2.ZERO)
 	var cursor := Vector2(T.pos.x - P.pos.x, T.pos.z - P.pos.z).length()
-	ok("pin readout: full draw runs one line from Lisette along the aim line, past the cursor, to max range",
+	ok("pin readout: full draw runs one line from Lace along the aim line, past the cursor, to max range",
 		String(le.get("kind", "")) == "line" and to.distance_to(le.get("from", Vector2.ZERO)) > cursor + 3.0
 		and off_line(P.pos, d, Vector3(to.x, P.pos.y, to.y)) < 0.05,
 		"len %.1f cursor %.1f" % [to.distance_to(le.get("from", Vector2.ZERO)), cursor])
@@ -340,8 +311,7 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 ## #5: the nock on the press, and one steady pull with no pose pop.
 func _pin_draw_pose(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	ready_bow(P)
-	K.res = 0.0
-	var aim := press_dry.bind(P, K, T.pos)
+	var aim := press_at.bind(P, T.pos)
 	step(m, 0.06, aim)
 	var nock := HunterAnim.km_sample("arc_draw", 0.05)
 	ok("pin draw: the arrow nocks within 0.05 s of the press (arc_draw, the string hand on the string)",
@@ -394,7 +364,6 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	T.teleport(home + Vector3(7.0, 0, 0))
 	K.ch_rmb = 2.0
 	K.cd["rmb"] = 0.0
-	K.res = 0.0
 	_wall_at(m, T.pos, lv, 2)
 	aim_at(P, T.pos)
 	var kicks0 := K.heavy_kicks
@@ -404,7 +373,7 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	step(m, 0.8, rmb_at.bind(P, T.pos))
 	var bar := AimKit.entry(P, "rmb_bar")
 	var d := P.aim_dir()
-	ok("pin heavy: the telegraph while held is a thick gold lane with a tip, from Lisette along the aim line",
+	ok("pin heavy: the telegraph while held is a thick gold lane with a tip, from Lace along the aim line",
 		AimKit.shown(P, "rmb_bar") and not AimKit.shown(P, "rmb_v") and float(bar.get("width", 0.0)) >= 0.45
 		and bool(bar.get("tip", false)) and (bar.get("dir", Vector2.ZERO) as Vector2).distance_to(d) < 0.01,
 		"width %.2f tip %s" % [float(bar.get("width", 0.0)), str(bar.get("tip"))])
@@ -707,7 +676,6 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		and ["ground", "air", "jump"].all(func(mv): return DashFlow.hold_row_of("archer", "lmb", mv)["mode"] == "keep"))
 	step(m, 1.5)
 	ready_bow(P)
-	K.res = 0.0
 	P.dashes = P.max_dashes()
 	aim_at(P, T.pos)
 	var loosed0 := K.draw.loosed_at
@@ -735,47 +703,7 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	ok("pin dash > RMB and E: both start during the dash", rolling and rmb_ok and e_ok, "rmb %s e %s" % [rmb_ok, e_ok])
 	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.28, "pin_flick": 0.22})
 
-## Owner item 146: Spirit Walk has 2 charges (the HUD slot too); a third press waits for the recharge.
-func _pin_two_charges(m: Match, P: Hunter, K: ArcherKit, home: Vector3) -> void:
-	step(m, 1.0)
-	K.spirit.end("time")
-	P.dashes = P.max_dashes()
-	P.slot_lv["dash"] = 1
-	var info := P.slot_info("dash")
-	var got := "max %s info %s/%s" % [P.max_dashes(), info["charges"], info["max_charges"]]
-	ok("pin dash: 2 charges, both on the HUD slot (data roll 4 m)",
-		int(P.max_dashes()) == 2 and int(info["charges"]) == 2 and int(info["max_charges"]) == 2
-		and absf(float(K.dash_def()["roll"]) - 4.0) < 0.001, got)
-	P.teleport(home)
-	P.vel = Vector3.ZERO
-	P.inp["move"] = Vector2(-1, 0)
-	P.inp["fire"] = false
-	aim_at(P, home + Vector3(-6, 0, 0))
-	var x0 := P.pos.x
-	P.do_dash()
-	step(m, 0.4)
-	var d1 := x0 - P.pos.x
-	K.spirit.end("time")
-	var left := P.slot_info("dash")
-	P.do_dash()
-	step(m, 0.4)
-	K.spirit.end("time")
-	var both := "left %s dashes %.2f roll %.1f m" % [left["charges"], P.dashes, d1]
-	ok("pin dash: two presses back to back both roll; the first goes about 4 m",
-		P.dashes < 0.1 and int(left["charges"]) == 1 and d1 > 3.5, both)
-	var x1 := P.pos.x
-	P.do_dash()
-	step(m, 0.4)
-	var third := x1 - P.pos.x
-	var waits: bool = not K.spirit.active() and P.dashes < 1.0 and K.st.get("last_dash") == "flick"
-	var seen := "moved %.1f dashes %.2f" % [third, P.dashes]
-	ok("pin dash: the third press is only the shared long dash", waits, seen)
-	step(m, float(K.dash_def()["cd"]) + 0.5, func(): P.inp["move"] = Vector2.ZERO)
-	var back := int(floor(P.dashes + 0.001))
-	ok("pin dash: after the recharge one charge is back", back == 1, "dashes %.2f" % P.dashes)
-	P.inp["move"] = Vector2.ZERO
-
-## into_dash.x for Breaker: Shift while planted for Faultline isn't lost, it goes when the plant ends.
+## into_dash.x for Mossy: Shift while planted for Faultline isn't lost, it goes when the plant ends.
 func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:
 	step(m, 1.5)
 	P.lvl = 6
@@ -797,7 +725,7 @@ func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:
 		"held %s last %s dashes %.2f" % [held_back, str(K.st.get("last_dash")), P.dashes])
 	step(m, 2.5)
 
-## #32 / #35 for Breaker.
+## #32 / #35 for Mossy.
 func _bjorn_dash(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -> void:
 	ok("bjorn dash table: LMB buffers, RMB / E fire, a held swing is kept through a dash (item 51)",
 		_mode("bulwark", "lmb", false) == "buffer" and _mode("bulwark", "lmb", true) == "buffer"

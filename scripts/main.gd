@@ -1426,7 +1426,7 @@ func _ability_check() -> void:
 	P.inp["sec_hold"] = false
 	_ac_run(m, 0.3)
 	_ac("rail hold-to-charge", T.hp < T.max_hp - 25.0, "took %.0f" % (T.max_hp - T.hp))
-	# the same hold as an archetype (Ryzz's Coilshot): the shared wind-up fills, ticks full, punches out
+	# the same hold as an archetype (Sparkle's Coilshot): the shared wind-up fills, ticks full, punches out
 	P.reclass("light", "mage"); P.unlock_all()
 	_ac_run(m, 0.3)      # (the swap to a Light body settles on the ground first)
 	T.hp = T.max_hp

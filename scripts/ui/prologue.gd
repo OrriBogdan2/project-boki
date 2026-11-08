@@ -340,7 +340,7 @@ func _fire(parent: Node3D, at: Vector3, size := 1.0) -> void:
 	sm.mesh = _blob(0.6, false)
 	parent.add_child(sm)
 
-## Specks drifting in a set's air (the Hollowing's dust, the Mask rising): `box` half-extents in m, `radius` the
+## Specks drifting in a set's air (the Hollowing's dust, the Relic rising): `box` half-extents in m, `radius` the
 ## speck radius in m, `rise` m/s² up (negative sinks), `glow` adds light instead of covering.
 func _drift(at: Vector3, box: Vector3, col: Color, n: int, radius: float, rise: float, glow: bool) -> CPUParticles3D:
 	var p := CPUParticles3D.new()

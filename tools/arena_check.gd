@@ -30,7 +30,7 @@ func run(main_node: Node) -> void:
 	print("ARENACHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
 
-## Breaker's LMB hold in the Arena, both ways in (opened as him, swapped to him from the menu), with the effect
+## Mossy's LMB hold in the Arena, both ways in (opened as him, swapped to him from the menu), with the effect
 ## ticking on real frames: his own 3D hammer stays in the hand, it whirls at the data's rate and it is big enough
 ## to read at the match camera. The release slams.
 func _breaker_whirl() -> void:
@@ -52,7 +52,7 @@ func _breaker_whirl() -> void:
 		var skinned := warden != null and warden.find_child("hammer", true, false) != null
 		if skinned:      # (skinned in the .glb, item 76b: on its bone, the pivot stays as the reference)
 			mesh = warden.find_child("hammer", true, false) as MeshInstance3D
-		ok("arena Breaker (%s): his 3D hammer is %s" % [how, "skinned on him" if skinned else "on the swing's pivot"],
+		ok("arena Mossy (%s): his 3D hammer is %s" % [how, "skinned on him" if skinned else "on the swing's pivot"],
 			mesh != null and mesh.is_visible_in_tree())
 		P.fire_cd = 0.0
 		var last := Vector3.ZERO
@@ -72,18 +72,18 @@ func _breaker_whirl() -> void:
 				var k := mesh.global_basis.get_scale().x * float(P.model.get_meta(WardenClips.WEAPON_K, 1.0))
 				long_m = maxf(long_m, k * box.size[box.get_longest_axis_index()])
 		var rate := turns / TAU / (59.0 * DT)
-		ok("arena Breaker (%s): held, the hammer whirls at the data's rate" % how,
+		ok("arena Mossy (%s): held, the hammer whirls at the data's rate" % how,
 			K.fx.held and K.anim_id == "bul_smash_wind" and rate >= float(K.lmb_def()["spin_turns"][0]) - 0.1,
 			"%.2f turns/s" % rate)
 		# (item 137: a skinned hammer is true to the sheet, 0.79 of his height; the pinned one is scaled up to read)
 		var want := 1.5 if skinned else 2.5
-		ok("arena Breaker (%s): the whirled hammer reads at the match camera (>= %.1f m long)" % [how, want],
+		ok("arena Mossy (%s): the whirled hammer reads at the match camera (>= %.1f m long)" % [how, want],
 			long_m >= want,
 			"%.2f m" % long_m)
 		var s0 := K.slams
 		P.inp["fire"] = false
 		m.step(DT)
-		ok("arena Breaker (%s): the release slams" % how, K.slams == s0 + 1 and not K.fx.held,
+		ok("arena Mossy (%s): the release slams" % how, K.slams == s0 + 1 and not K.fx.held,
 			"slams +%d" % (K.slams - s0))
 		# the usual order in play: throw it, then press and keep holding: it comes back and he goes into the whirl
 		step(m, 1.0)
@@ -94,7 +94,7 @@ func _breaker_whirl() -> void:
 		var out := not K.mace.is_empty()
 		P.inp["fire"] = true
 		step(m, 2.0)
-		ok("arena Breaker (%s): held through a recall, the catch goes into the whirl" % how,
+		ok("arena Mossy (%s): held through a recall, the catch goes into the whirl" % how,
 			out and K.mace.is_empty() and K.fx.held, "out %s back %s held %s" % [out, K.mace.is_empty(), K.fx.held])
 		P.inp["fire"] = false
 		m.queue_free()
@@ -142,7 +142,7 @@ func _arena() -> void:
 	P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = 1.0
 	var tot0 := float(A.dummies[0]["total"])
 	P.inp["sec_hold"] = false; P.ak.press_rmb()
-	step(m, 0.75)          # (the Bola's flight)
+	step(m, 0.75)          # (the Bola's 0.4s wind-up with the lane, then its flight)
 	var tk := P.ak as ThiefKit
 	ok("thief Bola hits a dummy, Grounds and Marks it", float(A.dummies[0]["total"]) > tot0 and tk.marks_on(D) >= 1,
 		"total %.0f marks %d" % [float(A.dummies[0]["total"]), tk.marks_on(D)])

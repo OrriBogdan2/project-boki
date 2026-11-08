@@ -283,8 +283,9 @@ func _tracker_rules() -> void:
 	var c := ClassUnlock.state()
 	var target := ""
 	for id in Arch.ids():
-		if not ClassUnlock.is_open(String(id)) and ClassUnlock.open_needed(String(id)) <= ClassUnlock.open_ids().size():
-			target = String(id)
+		var sid := String(id)    # a second-Relic pick (is_bonus) waits for Hob, never a challenge
+		if not ClassUnlock.is_open(sid) and not ClassUnlock.is_bonus(sid) and ClassUnlock.open_needed(sid) <= ClassUnlock.open_ids().size():
+			target = sid
 			break
 	if target != "":
 		var ch := ClassUnlock.challenge(target)

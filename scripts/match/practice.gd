@@ -41,7 +41,7 @@ static func attach(match_node: Match) -> Practice:
 ## The bar's entries: [id, label, icon, open, key cap]. The Arena and the training area share a loadout
 ## menu (L), the Duel room has its setup menu (B).
 func items() -> Array:
-	var out: Array = [["hero", "Masks", "swap", func(): PracticeHero.toggle(self), Settings.key_cap("hero")]]
+	var out: Array = [["hero", "Relics", "swap", func(): PracticeHero.toggle(self), Settings.key_cap("hero")]]
 	if m.arena:
 		out.append(["menu", "Loadout", "bag", func(): if not m.paused: m.arena.open_menu(), "L"])
 	elif m.duel:

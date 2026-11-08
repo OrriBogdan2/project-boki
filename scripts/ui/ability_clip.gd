@@ -1,10 +1,10 @@
 class_name AbilityClip
 extends PanelContainer
-## One ability of a Mask, shown working: a small looping scene in its own SubViewport, the Hunter (the
+## One ability of a Relic, shown working: a small looping scene in its own SubViewport, the Hunter (the
 ## real model, side on) using the ability on a training dummy, with the kit's own move on the body, the
 ## effect in the ability's colour (shots, a thrown charge, a beam, a strike from above...), the hit
 ## sparks, the dummy's flinch and the damage. Under it the key (Settings.key_cap), the name and one
-## short line. Used by HunterViewer (the Masks screen, the Mask moments and the reveal). Only a clip that is
+## short line. Used by HunterViewer (the Relics screen, the Relic moments and the reveal). Only a clip that is
 ## playing builds its scene (one a frame: PreviewBuild) and renders; one out of focus holds a still frame, or
 ## its ability's icon until it has played once.
 ##

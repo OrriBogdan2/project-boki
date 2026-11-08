@@ -7,7 +7,7 @@ extends RefCounted
 ## charges. ArchKit runs one hunter's kit; this file is the data side: lookups, weapon families,
 ## and the kin's infusion (how a kin's typing fills an archetype ability's sockets, ARCHETYPES §4).
 
-const ORDER := ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark", "dredge", "ashwick", "tender", "rimewright", "dolm", "ostra"]
+const ORDER := ["gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer", "dredge", "rimewright", "mage", "bulwark", "thief", "ostra"]   # canonical Hunter order (display order everywhere): Vex, Kael, Cinder, Meeko, Tenzo, Lace, Grimble, Neve, Motley, Mossy, Sparkle, Sable
 const DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}
 
 static func def(id: String) -> Dictionary:
@@ -36,8 +36,17 @@ static func exists(id: String) -> bool:
 static func weight(id: String) -> String:
 	return String(def(id).get("weight", ""))
 
-static func name_of(id: String) -> String:
-	return String(def(id).get("title", id.capitalize()))
+## The stored title without "the" ("Unbroken"); for ids, file names and the one place that adds "the".
+static func bare_title(id: String) -> String:
+	return String(def(id).get("title", id.capitalize())).trim_prefix("The ")
+
+## A title shown on its own, the one display helper: "The Hired Gun" at the start of a line, with
+## mid=true "the Hired Gun" inside a sentence. Names with the title go through HeroTitle.label.
+static func name_of(id: String, mid := false) -> String:
+	var t := bare_title(id)
+	if not def(id).has("title"):
+		return t
+	return ("the " if mid else "The ") + t
 
 ## The Hunter's display name, or "Hunter" for a body with no Hunter kit (dummies, old saves).
 static func label(id: String) -> String:

@@ -7,8 +7,8 @@ extends ArchKit
 ##   health). Stoking a foe that already burns Flashes it over (fiercer). One flame pip over a foe
 ##   Ablaze, three and a glow over one that Flashed over. Char falls off after 5s. A knock heals, and resets the cloak.
 ##   A burning foe takes more from the stream and the cinder (ignite_bonus), and the stream chips its health.
-## - LMB, Torch Lance: hold for a hose of fire (a cyan pilot flame first); the stream keeps its own
-##   velocity so a sweep bends it, narrow at the nozzle and billowing at the end.
+## - LMB, Torch Lance: hold for a stream of fire from her hand (a cyan pilot flame first); the stream keeps its own
+##   velocity so a sweep bends it, narrow at the palm and billowing at the end.
 ## - RMB, Cinder Shot: hold to aim down a lane, release: a cinder that always flies its full 14m;
 ##   it slows the foe and sets it Ablaze; on a burning foe it upgrades and spreads. Rank 3: a second charge.
 ## - Shift, Soot Ram: two charges of a short head-first dash toward the cursor that STOPS on the
@@ -18,7 +18,7 @@ extends ArchKit
 ## - X, Flue Flight (level 6): a steerable flight that lays a burning, slowing lava carpet (AshwickJet). No lance
 ##   in it.
 
-const FLAME_CYAN := Color("6fe8ff")    # the pilot flame: a cool nozzle against warm fire
+const FLAME_CYAN := Color("6fe8ff")    # the pilot flame: a cool spark in her palm against warm fire
 const BOLT_COL := Color("ff4a6a")      # Cinder Shot's red-pink body
 const BOLT_CORE := Color("ffe070")
 const SKULL_COL := Color("ff6a2a")
@@ -28,16 +28,18 @@ const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange 
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
-# s into as_leap: the squash key; a hit earlier jumps the move there (source: knocked back within 0.1 s)
-const RAM_IMPACT_KEY := 0.36
 const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull_speed, stopping gap m away)
 const TONGUE_EVERY := 2                # flame ticks between two tongues licking off the stream
 const LICK_EVERY := 3                  # flame ticks between two scorches where the stream's end licks the ground
-const CLOAK_POSE_T := 0.25            # s the Furnace Cloak flare holds the flamer up off the aim (as_cloak)
+const CLOAK_POSE_T := 0.25            # s the Furnace Cloak flare holds her hand up off the aim (as_cloak)
+const CRACKS_PEAK := 4.0               # her magma cracks' emission while the fire runs (rest: the toon's 2.2)
+const CRACKS_FADE := 0.5               # s back to rest when it stops
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
-const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the tip from the feet in the aim pose, no model to read: fwd, up, right (m)
-const NOZZLE_REACH := 2.6                # m: a model's nozzle further off than this isn't posed yet: use NOZZLE
+const NOZZLE := Vector3(1.3, 0.9, 0.15)  # where the rules start the fire, from the feet: fwd, up, right (m)
+const NOZZLE_REACH := 2.6                # m: a palm further off than this isn't posed yet: use NOZZLE
+# m the fire leaves ahead of the wrist, off the palm (a model without a palm point)
+const PALM_AHEAD := 0.12
 
 var chars := {}                 # foe id -> {e, n, t}
 var ignites := {}               # foe id -> {e, lvl, until}
@@ -53,7 +55,7 @@ var ember_t := 0.0
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
-var nozzle_at: Node3D           # the Gun's Muzzle, kept on the skinned gun's tip by the model (Sync.apply_blade)
+var nozzle_at: Node3D           # the Gun's Muzzle, kept on her casting palm by the model (Sync.apply_blade)
 var lmb_key_was := false         # the LMB key last step: only a press in the flight ticks, not a hold carried in
 var lmb_denied := 0              # (tests) presses refused during Flue Flight
 var jet: AshwickJet             # X, Flue Flight (its flight is a hold: jet.flight)
@@ -89,22 +91,24 @@ func _fwd() -> Vector3:
 	var d2 := h.aim_dir()
 	return Vector3(d2.x, 0.0, d2.y)
 
-## The nozzle for the rules: a fixed offset from her feet in the aim pose (the model's braced tip, --cinder-art-check),
+## Where the stream starts for the rules: a fixed offset from her feet in the aim pose (ahead of her braced palm),
 ## so the stream's reach never depends on the camera's lean of the model.
 func nozzle() -> Vector3:
 	var f := _fwd()
 	return h.pos + f * NOZZLE.x + f.cross(Vector3.UP) * NOZZLE.z + Vector3(0, NOZZLE.y, 0)
 
-## The tip of the gun you see, for what's drawn (item 76b): the Gun's Muzzle sits on it. No skinned gun: nozzle().
+## Her casting palm, for what's drawn: the Gun's Muzzle when the model puts it on the palm (weapon_muzzle),
+## else a palm's width ahead of her right wrist. No posed hand yet: nozzle().
 func tip() -> Vector3:
 	if nozzle_at == null or not is_instance_valid(nozzle_at):
 		var skinned: bool = h.model != null and WardenGlb.anchor(h.model, "weapon_muzzle") != null
 		nozzle_at = h.model.get_node_or_null("Rig/Torso/Aim/Gun/Muzzle") if skinned else null
+	var at := Vector3.INF
 	if nozzle_at != null and nozzle_at.is_inside_tree():
-		var at := nozzle_at.global_position
-		if at.distance_to(h.pos) < NOZZLE_REACH:
-			return at
-	return nozzle()
+		at = nozzle_at.global_position
+	elif h.anim != null and h.anim.hand_r != null and h.anim.hand_r.is_inside_tree():
+		at = h.anim.hand_r.global_position + _fwd() * PALM_AHEAD
+	return at if at.distance_to(h.pos) < NOZZLE_REACH else nozzle()
 
 # ------------------------------------------------------------------ Char and Flashover
 func char_of(f: Ent) -> float:
@@ -169,7 +173,7 @@ func _flashover_fx(f: Ent) -> void:
 		m.hud.flash(col, 0.12)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
-## The Flashover fist pump; mid-roar the nozzle stays on the foe and only the off arm and the body move.
+## The Flashover fist pump; mid-roar the hand stays on the foe and only the off arm and the body move.
 func _stoke_pose() -> void:
 	play("lw_stoke_lance" if was_held else "lw_stoke")
 
@@ -229,7 +233,7 @@ func _tick(dt: float) -> void:
 		tell = "half"
 	net_pulse(dt, not ignites.is_empty(), 1.3)
 
-## The pilot flame at the nozzle, embers over a heavily charred foe, and the burn stage over each burning
+## The pilot flame in her palm, embers over a heavily charred foe, and the burn stage over each burning
 ## foe: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b).
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
@@ -327,7 +331,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		if was_held and not hose_paused:
 			play("as_lance_end")
 			vfx("lance_end")
-			m.sfx("ashwick_tank_hiss", h.pos, -4.0, 1.0)      # the tank's valve vents as she lets go
+			m.sfx("ashwick_tank_hiss", h.pos, -4.0, 1.0)      # the fire gutters out as she lets go
 		if was_held:
 			after_t = float(lmbd().get("slow_after", 0.35))
 			relight_t = float(lmbd().get("relight", 0.35))      # a short gap before the lance can roar again
@@ -341,7 +345,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var ld := lmbd()
 	if hose_paused:
 		hose_paused = false
-		play("as_lance")        # out of the dash, nozzle already on the aim: back at once
+		play("as_lance")        # out of the dash, hand already on the aim: back at once
 	if not was_held:
 		play("as_lance")
 		m.sfx("lw_pilot", h.pos, -3.0, 1.0)
@@ -358,6 +362,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var tick := float(ld["tick"])
 	while flame_acc >= tick:
 		flame_acc -= tick
+		PipStars.pulse(h, CRACKS_PEAK, CRACKS_FADE)
 		_flame_tick(tick)
 	return true
 
@@ -377,7 +382,7 @@ func _lance_off(pressed: bool) -> void:
 	relight_t = 0.0
 	h.mel_hold = 0.0
 
-## The hose's look: the MultiMesh of puffs (LDFx.flame).
+## The stream's look: the MultiMesh of puffs (LDFx.flame).
 func _hose_look() -> void:
 	var id := "hose%d" % h.get_instance_id()
 	if not tells_visible():
@@ -420,8 +425,8 @@ func _stream_looks() -> void:
 		vfx("lance_lick", ground(live[0]["p"]))
 
 # ------------------------------------------------------------------ RMB: Cinder Shot
-## Held: a thin white lane of the shot's full, fixed length (the cursor distance doesn't matter), the gun hand
-## cocked.
+## Held: a thin white lane of the shot's full, fixed length (the cursor distance doesn't matter), her casting hand
+## drawn back.
 func rmb_hold_tick(_t: float) -> void:
 	if KinMerge.active(h) or not rmb_ready():
 		return
@@ -541,7 +546,7 @@ func _poof(dd: Dictionary, dir: Vector2) -> void:
 	var feel := dash_feel()
 	var air_t := float(dd["air_time"]) * float(feel["time"])
 	var air_dist := float(dd["air_dist"]) * float(feel["dist"])
-	travel(air_dist, air_t, {"invuln": 0.08, "trail": "", "dir": dir})
+	travel(float(dd["air_dist"]), float(dd["air_time"]), {"invuln": 0.08, "trail": "", "dir": dir})
 	h.roll_t = air_t
 	h.roll_speed = air_dist / air_t
 	play("lw_hop")
@@ -608,8 +613,6 @@ func _bash_impact(f: Ent) -> void:
 	bash["hit"] = true
 	bash_hits += 1
 	h.roll_t = 0.0                  # the dash stops on the foe
-	if anim_id == "as_leap":
-		anim_at = minf(anim_at, m.time - RAM_IMPACT_KEY)      # the squash on the hit frame, not at the full ram
 	var dir: Vector2 = bash["dir"]
 	# and he bounces back a little off them
 	h.vel.x = -dir.x * float(dd["recoil"])

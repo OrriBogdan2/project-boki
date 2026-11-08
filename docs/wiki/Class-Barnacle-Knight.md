@@ -1,4 +1,4 @@
-# Barnacle Knight
+# The Barnacle Knight
 
 A heavy hammer-and-shield fighter. Blocks with his aegis to build Guard, then slams people into walls
 and into each other. Plants his hammer where the fight is and heals the squad there.
@@ -8,8 +8,8 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 |  |  |
 |---|---|
-| Class title | Barnacle Knight |
-| Base character | Mossy, male |
+| Class title | the Barnacle Knight |
+| Base character | Albert, male |
 | Personality | A ferryman who carried refugees across the ice the night of the Hollowing and sank his own ship so they could reach shore. The sea remade him: his hull became his armour, his brass diving helmet never comes off, and the ship's compass is set in his chest, with the sea's cyan light glowing between the hull planks. He doesn't remember his old name, only the children's faces. The teddy bear belonged to the last child he saved. |
 
 <!-- /gen:profile -->
@@ -99,9 +99,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | shield HP +25% (160 -> 200). | shield HP +50% (240); regen 20 -> 30 per second, back up in 1.4s and 2s when broken. |
-| Dash (Shift) | recharge 8s -> 6.5s per charge; the Shield Charge cooldown 6s -> 4.5s. | recharge 8s -> 5s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it; both dashes go 1m further. |
-| E | healing +25% (burst 18 -> 22). | cooldown 12s -> 8s, healing +50% in all. |
+| RMB | shield HP +25% (160 -> 200), damage +15%. | shield HP +50% (240), damage +30%; regen 20 -> 30 per second, back up in 1.4s and 2s when broken. |
+| Dash (Shift) | recharge 8s -> 6.8s per charge; the Shield Charge cooldown 6s -> 4.5s. | recharge 8s -> 5.6s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it. |
+| E | healing +25% (burst 18 -> 22), damage +15%. | cooldown 12s -> 8s, healing +50% in all. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > Glove (Q).
 

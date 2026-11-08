@@ -1,6 +1,6 @@
 class_name MageSky
 extends RefCounted
-## Ryzz's Skycall (E) and what it does to her charge orbs. docs/heroes/mage.md has the numbers.
+## Sparkle's Skycall (E) and what it does to her charge orbs. docs/heroes/mage.md has the numbers.
 ##
 ## Press drops the circle at the cursor; while E is held the drag follows the cursor from the circle; the
 ## release commits ONE vector (the drag, or the away-from-her default when it is tiny) and every foe and orb
@@ -16,7 +16,7 @@ var kit: MageKit
 func _init(owner_kit: MageKit) -> void:
 	kit = owner_kit
 
-## The tap default: from Ryzz out through the circle, from where she stands right now.
+## The tap default: from Sparkle out through the circle, from where she stands right now.
 func default_dir(at: Vector3) -> Vector2:
 	var away := Vector2(at.x - kit.h.pos.x, at.z - kit.h.pos.z)
 	return away.normalized() if away.length() > 0.1 else kit.h.aim_dir()
@@ -141,7 +141,7 @@ func _strike_fx(at: Vector3, r: float) -> void:
 	kit.m.sfx("vv_sky_strike", at, 0.0)
 	kit.play("mage_e_snap")
 
-## A charge orb the lightning catches (a rival's becomes hers): dragged toward Ryzz and within reach, it flies
+## A charge orb the lightning catches (a rival's becomes hers): dragged toward Sparkle and within reach, it flies
 ## all the way to her and resets her Wirerun on arrival; any other drag flings it a shorter way.
 func _fling_orb(mt: Dictionary, dir: Vector2, ed: Dictionary) -> void:
 	var from: Vector3 = mt["pos"]

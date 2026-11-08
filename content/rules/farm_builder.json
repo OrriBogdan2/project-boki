@@ -36,7 +36,7 @@
 			{"text": "A house needs wood. Here, take an axe and chop a tree.", "show": "tree"}
 		],
 		"offer": [
-			{"text": "By the way... I see you found a {mask} Mask."},
+			{"text": "By the way... I see you found a {mask} Relic."},
 			{"text": "Could I interest you in another?"}
 		],
 		"offer_title": "Pick one. It's yours to keep.",
