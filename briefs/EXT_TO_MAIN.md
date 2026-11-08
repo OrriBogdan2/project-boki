@@ -3261,3 +3261,6 @@ Please build a small runner on your side (this ext workspace cannot reach Google
 4. Re-runs: I grade each result; anything below 8.5 gets a rewritten prompt in jobs.json with a new id suffix (_r2, _r3). Run only jobs with no output yet.
 Please report the cost per image you see and whether 4K works through the API, before running the full batch. Start with a 5-job test.
 READY ext/drop-solo-after: separate / drop solo only after the team drop is made (owner 11-08). Check --drop-launch-check, health --strict OK. PR: https://github.com/OrriBogdan2/project-boki/pull/new/ext/drop-solo-after (gh missing on w2)
+
+## 2026-11-08 deep (job 20261108-231105-a4): CLAIM roster-109
+- CLAIM: DECISIONS "roster of 109, evolution, sex, Inks": species registry matches ROSTER_100.html array G (109), themes tide/wyrm/wild in KinParts.THEMES, optional second type, data-only content/kin_v2 entries for missing species (not spawnable without a model), roster_check TARGET_TOTAL 109 + loosened rideable cap, Ermink replaces Hatchet as the mystery egg. Branch ext/roster-109 from origin/main.
