@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+"""Builds jobs.json from compact specs. Existing jobs are kept; new ids are appended."""
+import json
+from pathlib import Path
+HERE=Path(__file__).resolve().parent
+SR='briefs/boki-art/style_refs/boki_style_ref_v2.png'
+T='briefs/boki-art/turnarounds/'; E='briefs/boki-art/evolutions/'
+ELEM={
+'ember':'ember, shown clearly by glowing orange-red ember cracks and a few rising sparks',
+'bloom':'bloom, shown clearly by living leaves, petals or moss growing from its body, fresh green',
+'storm':'storm, shown clearly by crackling electric-yellow sparks and small lightning arcs',
+'frost':'frost, shown clearly by translucent ice-blue crystals and a faint cold mist',
+'venom':'venom, shown clearly by dripping lime-green venom and a toxic glossy shine',
+'swarm':'swarm, shown clearly by insect-like segments and a faint shimmer of many small wings',
+'tempest':'tempest, shown clearly by wind-swept streamers and sky-blue swirl markings',
+'stone':'stone, shown clearly by rough rock plates, cracks and pebbles',
+'shadow':'shadow, shown clearly by inky black edges that fade into smoke, with a violet glow',
+'spore':'spore, shown clearly by drifting pale spore puffs and softly glowing spots',
+'prism':'prism, shown clearly by glassy crystal facets that throw rainbow glints',
+'lunar':'lunar, shown clearly by a soft pale moonlight glow and crescent markings',
+'echo':'echo, shown clearly by gold sound rings rippling out from its body',
+'gravity':'gravity, shown clearly by small rocks floating around it and a faint dark purple warp',
+'titan':'titan, shown clearly by massive, heavy armour and a powerful, grounded build',
+'tide':'tide, shown clearly by water droplets, ripples and a sea-blue sheen',
+'wyrm':'wyrm, shown clearly by dragon horns, serpent scales and a shimmering gold glow',
+'wild':'wild, shown clearly by natural earthy colours and a plain, honest animal look',
+}
+ARCH={'cute':'cute: round soft shapes, a big head and short limbs','tough':'tough: blocky, wide and heavy, with a low stance','fast':'fast: lean and forward-leaning, with swept-back shapes','sleek':'sleek: long smooth lines and a streamlined shape','pretty':'pretty: graceful curves and an elegant shape','creepy':'creepy and weird: odd proportions and an unsettling calm','majestic':'majestic: big and upright, with crown-like features and calm power'}
+SHEET=("Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. ")
+CORE=("A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. ")
+RENDER="Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. "
+def base(d):
+    return ("Creature-collector monster design for a fantasy action game: an endearing but dangerous creature built from one clear idea, a real animal fused with an object so that the object is part of its body. "+CORE+RENDER+"Do not copy image 1's creatures, faces or colours. "+SHEET+d)
+REL={'baby':"This creature is the baby first form that later grows up into the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but clearly a baby: much smaller, rounder and softer, with a bigger head, bigger eyes and short stubby limbs, and its object in a smaller, simpler, earlier form. ",
+'mid':"This creature is the middle form of the creature in image 1's family: the same species, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but bigger and older with its own new silhouette, and clearly not yet a final form. ",
+'final':"This creature is the final evolved form of the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell at a glance they are related, but much bigger, stronger and more impressive, clearly a final form with its own new silhouette. ",
+'female':"This creature is the female form of the creature in image 1: the same species at the same stage, keeping its face shape, core idea and overall build so anyone can tell they are the same species, but with a few clear differences in build, crest or tail shape, the size of its signature part and colour tint. ",
+'redo_of':""}
+def evo(rel,d):
+    return ("Creature-collector monster design for a fantasy action game. "+REL[rel]+"Do not copy image 1's pose, and ignore image 1's background. "+CORE+RENDER+SHEET+d)
+def desc(body,face,cols,avoid,el,arch):
+    return f"{body} Face: {face}. Main colours: {cols}. Avoid: {avoid}. Element: {ELEM[el]}. Archetype: {ARCH[arch]}."
+SPECS=[]
+def B(i,n,body,face,cols,avoid,el,arch): SPECS.append({'id':i,'name':n,'refs':[SR],'prompt':base(desc(body,face,cols,avoid,el,arch))})
+def V(i,n,ref,rel,body,face,cols,avoid,el,arch): SPECS.append({'id':i,'name':n,'refs':[ref],'prompt':evo(rel,desc(body,face,cols,avoid,el,arch))})
+exec(open(HERE/'specs_wave1.py').read())
+jobs=json.loads((HERE/'jobs.json').read_text()) if (HERE/'jobs.json').exists() else []
+have={j['id'] for j in jobs}
+for s in SPECS:
+    if s['id'] in have: continue
+    s.update({'runs':2,'aspect':'16:9','size':'4K'}); jobs.append(s)
+(HERE/'jobs.json').write_text(json.dumps(jobs,indent=2))
+print(len(jobs),'jobs')
