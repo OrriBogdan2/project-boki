@@ -801,8 +801,7 @@ func _call_end(done: bool) -> void:
 		ult_look.drop("tether")
 	if not done or who == null:
 		stats["broken"] += 1
-		m.fx.word(h.pos + Vector3(0, 2.4, 0), "BROKEN", Color("ff8a6a"), false)
-		m.sfx("knock", h.pos, -8.0, 1.5)
+		_call_snap(who)
 		if anim_id == "mm_call_hold":
 			anim_id = ""
 		return
@@ -818,6 +817,16 @@ func _call_end(done: bool) -> void:
 	lk().burst("flare", at, {"col": Color("9cf07a"), "rim": Color("ffd27a"), "r": 1.8, "dur": 0.4, "pattern": 1.0})
 	lk().burst("rays", at, {"col": Color("b8ff9a"), "r": 0.9, "dur": 0.45})
 	play("mm_call_end")
+
+
+## The tether snaps where everyone can see it: coral sparks at her hand and at the far end, and the word.
+func _call_snap(who: Hunter) -> void:
+	var snap := Color("ff8a6a")
+	m.fx.burst(CareUtil.hand_at(h, false), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
+	if who != null:
+		m.fx.burst(who.pos + Vector3(0, 1.1, 0), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
+	m.fx.word(h.pos + Vector3(0, 2.4, 0), "BROKEN", snap, false)
+	m.sfx("knock", h.pos, -8.0, 1.5)
 
 
 ## Pulls a downed teammate to her side and stands them up (Displace and the "rev" event: an online
