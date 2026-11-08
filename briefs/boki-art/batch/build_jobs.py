@@ -43,7 +43,8 @@ def desc(body,face,cols,avoid,el,arch):
 SPECS=[]
 def B(i,n,body,face,cols,avoid,el,arch): SPECS.append({'id':i,'name':n,'refs':[SR],'prompt':base(desc(body,face,cols,avoid,el,arch))})
 def V(i,n,ref,rel,body,face,cols,avoid,el,arch): SPECS.append({'id':i,'name':n,'refs':[ref],'prompt':evo(rel,desc(body,face,cols,avoid,el,arch))})
-exec(open(HERE/'specs_wave1.py').read())
+import glob
+for _f in sorted(glob.glob(str(HERE/'specs_*.py'))): exec(open(_f).read())
 jobs=json.loads((HERE/'jobs.json').read_text()) if (HERE/'jobs.json').exists() else []
 have={j['id'] for j in jobs}
 for s in SPECS:

@@ -1,0 +1,37 @@
+{
+  "approved_by_claude": [
+    {
+      "id": "chuggamus_r2",
+      "pick": 1,
+      "grade": 8.5,
+      "note": "iron-plate hide, piston legs, no band; only 3 views"
+    },
+    {
+      "id": "vespox_mid",
+      "pick": 2,
+      "grade": 8.5,
+      "note": "lanky middle form, between Vespyx and Glaivyx"
+    },
+    {
+      "id": "lanternmit",
+      "pick": 2,
+      "grade": 8.5,
+      "note": "glowing lantern shell, brass claw"
+    },
+    {
+      "id": "stormit",
+      "pick": 2,
+      "grade": 8.5,
+      "note": "storm bottle, copper coils, jittery face"
+    }
+  ],
+  "rerolled": [
+    {
+      "id": "ringrove",
+      "grade": 8.0,
+      "why": "reads as Sporcupine with more mushrooms, not a final form",
+      "new": "ringrove_r2"
+    }
+  ],
+  "sent_to_owner": []
+}
