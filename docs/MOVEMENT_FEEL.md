@@ -57,6 +57,7 @@ Nothing here comes from SUPERVIVE's files.
 | air_carry_m (let go at take-off) | n/a | 3.4m | >= 3.0m | [game data] FallingLateralFriction 0.375 |
 | air_reverse_dv (keys reversed for a whole jump) | n/a | 0.63 m/s | 0.5–1.1 m/s | [game data] AirControl 0.015 |
 | dash_exit_run (speed as a dash ends / run speed) | 0.15x | 1.0x | 0.95–1.05x | [game data] no hard stop |
+| dash_exit kit rule (an archetype dash that hands no momentum on: Sparkle) | n/a | cap 1.5x run, eased to run over 0.25s, no glide handoff | at run speed 0.3s after | `scripts/match/dash_exit.gd`, `dash.exit_cap`/`exit_ease`, `--sparkle-dash-check` |
 | dash_exit_slide_m (let go out of a dash) | ~0.02m | 0.33m | 0.2–0.5m | [game data] the walking stop |
 | coyote_frames | 7 | 7 | >= 6 | FeelConfig 0.1s |
 | jump_buffer_frames | 6 | 7 | >= 7 | FeelConfig 0.12s |
