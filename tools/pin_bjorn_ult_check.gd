@@ -25,7 +25,7 @@ func press_x(m: Match, P: Hunter) -> void:
 	m.step(DT)
 
 ## Holds LMB until one more beam has gone (or `cap` s pass).
-func beam(m: Match, P: Hunter, K: ArcherKit, at: Vector3, cap := 1.2) -> void:
+func beam(m: Match, P: Hunter, K: ArcherKit, at: Vector3, cap := 1.8) -> void:   # recover 1.0 + nock 0.5
 	var f0 := K.ult.fired
 	var t := 0.0
 	while K.ult.fired == f0 and t < cap:
@@ -76,7 +76,7 @@ func pin() -> void:
 	ok("pin ult telegraph: the beam's lane out to 18m and the crosshair ring at her feet",
 		AimKit.shown(P, "x") and AimKit.shown(P, "x_ring") and absf(float(lane.get("len", 0.0)) - 18.0) < 0.1,
 		"lane %s ring %s" % [str(lane.get("len")), AimKit.shown(P, "x_ring")])
-	# a press nocks (0.3s, its own held move, the cursor ring filling), then the beam pierces both
+	# a press nocks (0.5 s, its own held move, the cursor ring filling), then the beam pierces both
 	T.teleport(home + Vector3(7, 0, 0))
 	T2.teleport(home + Vector3(16, 0, 0))
 	fresh(T)
@@ -86,12 +86,22 @@ func pin() -> void:
 	ok("pin ult anim: a press nocks (pin_ult_nock), the cursor ring fills",
 		K.anim_id == "pin_ult_nock" and K.ult.nock_t > 0.0 and float(AimKit.reticle(P).get("charge", 0.0)) > 0.0,
 		"%s nock %.2f" % [K.anim_id, K.ult.nock_t])
+	var t_press := m.time - 0.1
 	beam(m, P, K, T.pos)
+	var t_beam := m.time - t_press
+	var t_fire1 := m.time
 	step(m, 0.2)
 	var want := float(xd["dmg"]) * ap
 	ok("pin ult payoff: the beam pierces both foes, 16m out too (1.5x her Empowered range)",
 		dmg(T) > want * 0.6 and dmg(T2) > want * 0.9, "took %.0f / %.0f (want %.0f)" % [dmg(T), dmg(T2), want])
-	ok("pin ult small: the beam needs no draw (out 0.3s after the press)", K.ult.fired == 1 and P.draw_t < 0.0)
+	ok("pin ult small: the beam needs no draw (out 0.5 s after the press, footage: a 0.4-0.8 s draw)",
+		K.ult.fired == 1 and P.draw_t < 0.0 and absf(t_beam - 0.5) < 0.05, "out at %.2f" % t_beam)
+	# footage f48/f63/f78 at 10 fps: 1.5 s a shot. Holding fire: no nock through the recover, the next beam 1.5 s on
+	hold_fire(m, P, T.pos, 0.7)
+	ok("pin ult anim: no nock during the 1.0 s recover after a beam (held fire waits)",
+		K.ult.nock_t < 0.0 and K.ult.fired == 1 and K.anim_id != "pin_ult_nock",
+		"%s nock %.2f" % [K.anim_id, K.ult.nock_t])
+	P.inp["fire"] = false
 	ok("pin ult small: armor shredded by 10 on top of the hit",
 		T.armor <= 30.0 - float(xd["shred"]) + 0.01,
 		"armor %.1f" % T.armor)
@@ -102,6 +112,9 @@ func pin() -> void:
 	# a miss pays nothing
 	var b0 := best(P)
 	beam(m, P, K, home + Vector3(0, 0, 12))
+	var cadence := m.time - t_fire1
+	ok("pin ult cadence: 1.5 s from beam to beam with fire held (footage f48/f63/f78: 1.5 s)",
+		K.ult.fired == 2 and absf(cadence - 1.5) < 0.06, "%.2f s" % cadence)
 	step(m, 0.2)
 	ok("pin ult bond: a beam that misses pays nothing", best(P) == b0 and K.ult.fired == 2,
 		"owed %.2f -> %.2f" % [b0, best(P)])
@@ -161,8 +174,8 @@ func _pin_window() -> void:
 		K.ult.fired == 1 and dmg(T) <= 0.01,
 		"took %.0f" % dmg(T))
 	_clear_wall(m, home + Vector3(4, 0, 0), lv, 0)
-	# a merge mid nock: no beam, the window ends
-	step(m, 0.6)
+	# a merge mid nock: no beam, the window ends (the 1.0 s recover first)
+	step(m, 0.9)
 	hold_fire(m, P, T.pos, 0.1)
 	ok("pin ult: nocking before the merge", K.ult.nock_t > 0.0)
 	merge_now(P)

@@ -235,6 +235,11 @@ func _archer_combos() -> void:
 		not AimKit.shown(P, "rmb_v") and AimKit.shown(P, "rmb_bar") and K.anim_id == "arc_heavy_wind",
 		"v %s bar %s anim %s" % [AimKit.shown(P, "rmb_v"), AimKit.shown(P, "rmb_bar"), K.anim_id]
 	)
+	ok(
+		"pin anim: the Heavy Shot's draw clip runs on the hold's clock (its full-draw key 1.1 lands with full 1.1)",
+		absf((m.time - K.anim_at) - K.rmb_t) < 0.02,
+		"clip %.2f hold %.2f" % [m.time - K.anim_at, K.rmb_t]
+	)
 	step(m, 0.55, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos))
 	var bar1 := float(AimKit.entry(P, "rmb_bar").get("len", 0.0))
 	ok(
@@ -404,6 +409,13 @@ func _archer_combos() -> void:
 	P.do_dash()
 	step(m, 0.1)
 	ok("pin anim: Spirit Walk's roll plays pin_roll", K.anim_id == "pin_roll", K.anim_id)
+	var roll_t0 := K.anim_at
+	step(m, 0.18, func(): P.inp["move"] = Vector2(1, 0))
+	ok(
+		"pin anim: the roll hands to the crouched walk as the travel ends (roll_t 0.24, footage: no landing beat)",
+		K.anim_id == "pin_walk" and absf(K.anim_at - roll_t0 - 0.24) < 0.03,
+		"%s at +%.2f" % [K.anim_id, K.anim_at - roll_t0]
+	)
 	var in0 := K.spirit.passed
 	var mk := [0.0]
 	step(m, 1.2, func():
