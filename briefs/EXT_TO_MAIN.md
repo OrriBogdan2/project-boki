@@ -3009,3 +3009,9 @@ READY ext/farm-tut-batch-1108 1c2b08ca2+e8b276b10 (PR #20, job 20261108-180818-a
 - Checks: new --farm-place-check 0 failures; --hob-check, --farm-tutorial-check, --build-hold/build-ui/class-unlock/economy/economy-floor/home-build/incubator/kinbox/kin-regen/kin-loss/market/tutorial-hud/work 0 failures; --kin-indoors-check flaked once under load, 0 failures alone. --farm-start-check ("open meadow tints green") and --train-check ("sky train") fail identically on the base. health --strict OK. No suite-fast in the repo (the merge-tree script is the owner's); I ran the affected set by hand.
 - GPU shots (jobs 20261108-191335-28927, -17686, before 20261108-191645-17812) were still queued at post time (PC queue 50+ deep); they read the live tree, so frames land under shots/, shots2/ (after) and shots3/ (before, Hob bubble).
 - Not merged.
+
+## 2026-11-08 deep (job 20261108-174506-a4): READY ext/anim-quality-audit (re-verified)
+- READY ext/anim-quality-audit e70ec15cb (on origin/ext/release-integ-0243; ships with 0.24.3). Supersedes the 9c9703ff1 READY above (job 20261108-164504-a2 ended partial only on a stray background command; its work stands).
+- Re-ran `godot -- --anim-audit` (the gait gate): 12 Hunters, FAIL 0, numbers match docs/art/ANIM_QUALITY_AUDIT.md (run slide 9-23 %, counter-swing +0.39..+0.91; ostra and rimewright exempt, backlogged).
+- e70ec15cb: `--anim-shots --close` (side camera at hip height to read arms and feet); docs/art/anim_audit/.gdignore so the doc strips are not imported/exported by Godot.
+- Not done: close-up before/after render (jobq 20261108-175055-02515) still queued; the GPU worker took nothing after 18:39. Match-camera before/after strips are in the doc.
