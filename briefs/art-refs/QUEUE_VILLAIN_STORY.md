@@ -98,7 +98,9 @@ Palette: pearl and pink, matching the Queen. Throne room: `villain/solmere_thron
 - **Look:** the golden kingdom on solid ground, with red banners, and the palace with the throne room and vault.
 - **Deliverables:** two wide environment paintings, one of the city skyline and one of the throne room.
 
-### 7. The Heart's Chamber
+### 7. The Heart's Chamber: LOCKED (owner, Nov 8, 00:30 ET)
+`villain/hearts_chamber.jpg`: the Wyrmheart floats above the cracked pearl serpent throne at the bottom of the Hollow. Broken columns and rose windows lie around it, with crowns and masks in the rubble, a fallen Auburn Knight, rising souls, and a tiny hooded figure for scale. Mood alternate: `explorations/hearts_chamber_mood_D.jpg`. **The villain set (items 1 to 7) is COMPLETE. Item 8 (corruption stages) stays parked.**
+
 - **Look:** the bottom of the Hollow: a vast dark cavern of broken kingdom rubble where the cracked Heart floats, glowing, with relics and soul-light drifting upward.
 - **Deliverable:** a wide environment painting.
 

@@ -2775,3 +2775,13 @@ READY ext/lace-tall-climb 8b684f259 (Lace tall-ledge climb was already built via
 briefs/art-refs/villain/auburn_knight_armor.jpg is the shared armour of the 7 Auburn Knights. Their helms have faces made from the Queen's porcelain mask, with glowing pink-red eyes. The plate is crimson and pearl with gold trim and rose motifs. The shield is white with a gold serpent crest, and they carry gold-hilted dueling swords.
 READY ext/dash-refresh-assist 398f4a9c5 (item 159: knock/assist dash refresh in DashReset, multi-charge +1, softer assist cue, knock_refresh opt-out, decision 0019)
 READY ext/text-lore-integ 930f01e0f (supersedes: ext/hero-names 5e42b4b58, ext/lore-factions 9732ab9bb, ext/s7-mask-hob-83-89-fix-rebased a5be26e69 / ext/s7-mask-hob-83-89-fix; ext/text-relic-renames already in mc-20261108-0030)
+
+## 2026-11-08 00:32 ET (art): villain/story set COMPLETE
+Everything is in briefs/art-refs/villain/:
+- the Wyrmheart
+- the mask
+- Malgrave: human form, turnaround, splash, portrait, hybrid and dragon
+- the Auburn Knight armour
+- Solmere: solmere_skyline.jpg and solmere_throne_room.jpg, in pearl and pink (the city matches the Queen)
+- the Heart's Chamber: hearts_chamber.jpg
+Corruption stages stay parked until the Nov 28 reminder. Next on the art side: the Grimble splash redo, the Sable splash fix, and the face-off without the heart.
