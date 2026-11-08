@@ -12,6 +12,8 @@ extends ArchKit
 const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
 const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
+const AFTERGLOW_T := 0.7       # s a heal pulse's soft glow lingers over the Hearthlight
+const ZONE_FILL := 0.5         # care_disc body of her ground zones: ~0.15 alpha at the centre, under the 0.25 cap
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
 var burrs: Array = []          # seeds stuck to foes: {t: Ent, left, total: float, id: int}
@@ -33,9 +35,14 @@ var glide := {}                # the air dash's long glide: {t, top (m/s)} (a da
 var stats := {"embers": 0, "emp": 0, "swirls": 0, "flares": 0, "calls": 0, "rescues": 0, "broken": 0}   # tests
 var hearth_call := {}          # Hearth Call running: {who: Hunter, left, tick, fx} (a channel: dropped on merge)
 var ult_look: UltLook          # the tether (pooled, made on first use)
+var leaf: Color                # her signature (Arch.color): every body of her kit draws in it or a tint of it
 
 func _setup() -> void:
 	res = 0.0
+	leaf = Arch.color(id)
+
+func pale() -> Color: return leaf.lightened(0.6)
+func deep() -> Color: return leaf.darkened(0.35)
 
 func lk() -> CareLook:
 	if look == null:
@@ -132,7 +139,7 @@ func _tick_look(dt: float) -> void:
 		var s := lk().last_shot()
 		if not s.is_empty() and String((s["x"] as Dictionary).get("src", "")) != "abil":
 			_dress_ember(s)
-	# Kindle reads on the foe: an ember-violet glow at the feet that grows per stack
+	# Kindle reads on the foe: a leaf glow at the feet that warms to the Kindle amber per stack
 	for key in kind:
 		var e: Dictionary = kind[key]
 		var n := kindle_on(e["t"])
@@ -141,8 +148,8 @@ func _tick_look(dt: float) -> void:
 			lk().keep(
 					"kin%d" % key, "kindle", t.pos,
 					{
-						"r": 0.55 + 0.12 * n, "col": Color("9a6aff").lerp(Color("ffb347"), float(n) / 5.0),
-						"a": 0.35 + 0.13 * n, "fill": 0.8, "pattern": 0.0})
+						"r": 0.55 + 0.12 * n, "col": leaf.lerp(res_col(), float(n) / 5.0),
+						"a": 0.35 + 0.13 * n, "fill": 0.5, "pattern": 0.0, "glow": 1.0})
 	_tick_dash_look(dt)
 	lk().tick(dt)
 	if ult_look != null:
@@ -157,7 +164,7 @@ func _dress_ember(s: Dictionary) -> void:
 	var from := Vector3(h.pos.x + d2.x * 0.5 + side.x, h.pos.y + 0.72, h.pos.z + d2.y * 0.5 + side.y)
 	s["pos"] = from
 	s["start"] = from
-	lk().skin(s, "ember")
+	lk().skin(s, "ember", {}, float(s["r"]) / CareLook.EMBER_R)       # the pellet drawn at its hit radius
 	HeroVfx.of(m).trail(h, "cast_trail", s["node"])
 	stats["embers"] += 1
 	stats["swirls"] += 1
@@ -346,7 +353,7 @@ func fire_rmb(c: Dictionary) -> void:
 	play("mm_seed_aim")
 	m.sfx("tend_seed_aim", h.pos, -6.0, 1.0)
 	lk().burst("flare", h.pos,
-			{"col": Color("9a6aff"), "rim": Color("ffd27a"), "r": 1.4, "dur": seed_wind, "pattern": 3.0})
+			{"col": deep(), "rim": pale(), "r": 1.4, "dur": seed_wind, "pattern": 3.0, "glow": 1.0})
 	_seed_lane()
 
 func _seed_lane() -> void:
@@ -411,7 +418,7 @@ func _stick(e: Ent) -> void:
 	burr_n += 1
 	burrs.append({"t": e, "left": float(sd["delay"]), "total": float(sd["delay"]), "id": burr_n})
 	# the area shows at once: a disc the size of the burst under them, and a light column falling
-	lk().burst("column", e.pos, {"col": Color("8a5cff"), "r": 1.0, "dur": float(sd["delay"]) + 0.1, "ent": e})
+	lk().burst("column", e.pos, {"col": leaf, "r": 1.0, "dur": float(sd["delay"]) + 0.1, "ent": e})
 	m.sfx("tend_stick", e.pos, -3.0, 1.0)
 	vfx("seed_stick", e.pos)
 
@@ -430,9 +437,9 @@ func _tick_burrs(dt: float) -> void:
 		lk().keep(
 				key, "disc", t.pos,
 				{
-					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": 1.2,
-					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 0.9})
-		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": Color("b98aff")})
+					"r": burst_radius(), "col": deep(), "rim": pale(), "fill": ZONE_FILL,
+					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 0.9, "glow": 1.0})
+		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": pale()})
 		if float(b["left"]) <= 0.0:
 			burrs.erase(b)
 			lk().drop(key)
@@ -454,6 +461,7 @@ func _burst(t: Ent) -> void:
 				{
 					"src": "abil", "ab": "utility", "root": root, "dr": true, "kindle": true,
 					"tags": ["utility", "burrseed"]})
+		# the root holds in the control-status violet (docs/VFX_QUALITY.md), readable over her leaf
 		lk().burst("beam_root", f.pos, {"col": Color("9a6aff"), "r": 1.0, "dur": root, "ent": f})
 	m.fx.word(at + Vector3(0, 2.2, 0), "ROOTED", col, false)
 	stats["flares"] += 1
@@ -538,13 +546,13 @@ func _tick_hearth(dt: float) -> void:
 	var c := hearth_center()
 	hearth["pos"] = c if String(hearth["mode"]) != "flying" else hearth["pos"]
 	var tossed := bool(hearth.get("tossed", false))
-	# on her: a soft warm ring with a faint inside; thrown: a filled disc, warm amber in the middle shading
-	# to teal, a bright rim, its lantern floating over the middle
+	# on her: a lit leaf ring with a faint inside; thrown: the same ring wider and brighter, pale in the middle
+	# shading to leaf at a glowing rim, its lantern floating over the middle
 	var gk := float(hearth["left"]) / maxf(0.01, float(ed["time"]))
-	var look_p := {"r": hearth_r(), "col": Color("ffd27a"), "rim": Color("ffb347"), "fill": 0.45, "pattern": 5.0,
+	var look_p := {"r": hearth_r(), "col": pale(), "rim": leaf, "fill": 0.45, "pattern": 5.0, "glow": 1.0,
 		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
 	if tossed:
-		look_p.merge({"col": Color("ffd27a"), "rim": Color("3fd8d0"), "fill": 1.8, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
+		look_p.merge({"fill": ZONE_FILL, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
 	lk().keep("hearth", "hearth", c, look_p)
 	hearth["left"] = float(hearth["left"]) - dt
 	e_t = float(hearth["left"])
@@ -570,6 +578,8 @@ func _pulse(c: Vector3, per: float) -> void:
 	var ed := e_def()
 	var boost := 1.0 + throw_boost() if float(hearth.get("boost", 0.0)) > 0.0 else 1.0
 	PipStars.pulse(h)
+	# the pulse's afterglow: a soft leaf glow swells to the ring's edge and lingers before it fades
+	lk().burst("flare", c, {"col": Color(leaf, 0.5), "rim": pale(), "r": hearth_r(), "dur": AFTERGLOW_T, "glow": 1.0})
 	for o in m.hunters:
 		if o.team != h.team or o.out or o.extracted:
 			continue
@@ -661,8 +671,8 @@ func _call_preview() -> void:
 	if who == null or who == h:
 		return
 	var xd := x_def()
-	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": Color("ffd27a"), "dashed": true, "alpha": 1.2})
-	AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": Color("ffb347"), "lw": 0.1, "alpha": 1.8})
+	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": leaf, "dashed": true, "alpha": 1.2})
+	AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": pale(), "lw": 0.1, "alpha": 1.8})
 	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": Color("9cf07a"), "ticks": true, "alpha": 1.6})
 	# a faint tether already strung from her raised hand onto them: this is who X will reach
 	ulk().keep("tether_aim", "tether", h.pos + Vector3(0, 1.3, 0), {"b": who.pos + Vector3(0, 1.0, 0), "a": 0.45})
@@ -716,7 +726,7 @@ func _start_call() -> bool:
 	vfx("call")
 	vfx("call_land", who.pos)
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), "HEARTH CALL", col_of(x_def()), true)
-	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), Color("ffd27a"))
+	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), leaf)
 	return true
 
 
@@ -749,6 +759,7 @@ func _tick_call(dt: float) -> void:
 func _call_heal(who: Hunter, amount: float) -> void:
 	var amt := amount * LevelGrowth.ap(h)
 	PipStars.pulse(h)
+	vfx("call_pulse", who.pos)          # each heal tick swirls under them, so the channel reads for its 5 s
 	if who == h:
 		_mend(h, amt * float(e_def().get("self_k", 0.33)))
 	else:
@@ -757,9 +768,8 @@ func _call_heal(who: Hunter, amount: float) -> void:
 
 func _call_look(who: Hunter, dt: float) -> void:
 	var xd := x_def()
-	var gold := Color("ffd27a")
-	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": gold, "all": true, "dashed": true})
-	AimKit.circle(h, "x_me", {"self": true, "r": 0.7, "col": Color("ffc46a"), "all": true})
+	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": leaf, "all": true, "dashed": true})
+	AimKit.circle(h, "x_me", {"self": true, "r": 0.7, "col": pale(), "all": true})
 	if who != h:
 		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color("9cf07a"), "all": true})
 		var hand := CareUtil.hand_at(h, false)

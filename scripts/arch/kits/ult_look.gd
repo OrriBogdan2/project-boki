@@ -38,18 +38,18 @@ func _build(kind: String) -> Node3D:
 	return n
 
 
-## Two strands of lantern light twisting round a soft core, 1 m long along -Z (scaled to the gap).
+## Two strands of lantern light in her leaf (#5fdc6a) twisting round a pale core, 1 m long along -Z (scaled to the gap).
 func _build_tether(n: Node3D) -> void:
-	var core := _off(Models.part(n, Models.box(0.09, 0.09, 1.0), glow_mat(Color("ffe2b0", 0.95)), Vector3(0, 0, -0.5)))
+	var core := _off(Models.part(n, Models.box(0.09, 0.09, 1.0), glow_mat(Color("f2ffe8", 0.95)), Vector3(0, 0, -0.5)))
 	core.name = "Core"
-	var halo := _off(Models.part(n, Models.box(0.32, 0.32, 1.0), glow_mat(Color("ffc46a", 0.22)), Vector3(0, 0, -0.5)))
+	var halo := _off(Models.part(n, Models.box(0.32, 0.32, 1.0), glow_mat(Color("5fdc6a", 0.22)), Vector3(0, 0, -0.5)))
 	halo.name = "Halo"
 	var twist := Node3D.new()
 	twist.name = "Twist"
 	n.add_child(twist)
 	for side in [-1.0, 1.0]:
 		var strand := Models.box(0.04, 0.04, 1.0)
-		_off(Models.part(twist, strand, glow_mat(Color("ffe6a8", 0.85)), Vector3(0.11 * side, 0, -0.5)))
+		_off(Models.part(twist, strand, glow_mat(Color("b8f08a", 0.85)), Vector3(0.11 * side, 0, -0.5)))
 
 
 ## A flat disc (care_disc pattern 4: ragged edge, cracks) and a fringe of short crystals on its rim.

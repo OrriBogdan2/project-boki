@@ -18,6 +18,8 @@ const ICE: Shader = preload("res://shaders/care_ice.gdshader")
 const GLOW: Shader = preload("res://shaders/care_glow.gdshader")
 const KEEP := 0.1             # s a held look stays after its last refresh
 const CAP := 24               # per kind: past this the oldest live one is reused
+const EMBER_R := 0.22         # m: the ember's head radius as built; the kit scales it to the shot's hit radius
+const EMBER_HIT_R := 0.6      # m: the leaf flash where an ember lands, about a small foe's hit circle
 
 var m: Node
 var h: Hunter
@@ -97,13 +99,13 @@ func _build(kind: String) -> Node3D:
 	n.name = kind
 	match kind:
 		"ember":
-			# a mote of her lantern's star: a 0.52 m teardrop comet head of soft gold with a near-white core, a
-			# pastel pink halo and a wide 2 m gold tail, so it reads in flight at gameplay zoom (starlight, not fire)
-			var head := Models.sphere(0.26, 12)
-			_off(Models.part(n, head, orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.7)))
-			_off(Models.part(n, Models.sphere(0.12, 8), orb_mat(Color("fff6dc", 1.0)), Vector3(0, 0, -0.08)))
-			_off(Models.part(n, Models.sphere(0.46, 10), orb_mat(Color("f6a6c8", 0.5)), Vector3.ZERO))
-			_tail(n, 0.5, 2.0, Color("ffe0a0", 1.0))
+			# a mote of her lantern's light in her leaf green (#5fdc6a, Arch.color): a teardrop head the size of the
+			# shot's hit circle with a near-white core, a thin pale-leaf halo and a tail as wide as the head
+			var head := Models.sphere(EMBER_R, 12)
+			_off(Models.part(n, head, orb_mat(Color("5fdc6a", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.5)))
+			_off(Models.part(n, Models.sphere(EMBER_R * 0.45, 8), orb_mat(Color("f2ffe8", 1.0)), Vector3(0, 0, -0.06)))
+			_off(Models.part(n, Models.sphere(EMBER_R * 1.35, 10), orb_mat(Color("b8f08a", 0.35)), Vector3.ZERO))
+			_tail(n, EMBER_R * 1.8, 1.6, Color("b8f08a", 0.9))
 		"burr":
 			# a spiky green burr that tumbles, a fluff halo and a pale seed-down tail
 			var sp := Node3D.new()
@@ -348,9 +350,9 @@ func impact(kind: String, at: Vector3, s: Dictionary) -> void:
 	var back := Vector3(-d2.x, 0.4, -d2.y)
 	match kind:
 		"ember":
-			m.fx.flash(at, Color("fff0c0"), 0.6, 0.07)
-			m.fx.spark(at, back, Color("ffd27a"), 8, 6.0, 70.0, 0.25, 6.0)
-			burst("star", at, {"col": Color("9a6aff"), "rim": Color("e0c8ff"), "r": 0.8, "dur": 0.22})
+			m.fx.flash(at, Color("f2ffe8"), 0.6, 0.07)
+			m.fx.spark(at, back, Color("5fdc6a"), 8, 6.0, 70.0, 0.25, 6.0)
+			burst("star", at, {"col": Color("5fdc6a"), "rim": Color("f2ffe8"), "r": EMBER_HIT_R, "dur": 0.3, "glow": 1.0})
 		"shard":
 			m.fx.flash(at, Color("9af0ff"), 0.5, 0.06)
 			m.fx.spark(at, back, Color("6fd8f0"), 7, 7.0, 80.0, 0.22, 12.0, 0.9)
@@ -363,7 +365,8 @@ func impact(kind: String, at: Vector3, s: Dictionary) -> void:
 			m.fx.flash(at, Color("c8e07a"), 0.6, 0.06)
 
 # ------------------------------------------------------------------ timed one-offs
-## A one-off look that plays out by itself. p: col, r (size), dur, ent (follow a body), dir (Vector2).
+## A one-off look that plays out by itself. p: col, r (size), dur, ent (follow a body), dir (Vector2), and for a
+## flare: rim, pattern, glow.
 func burst(kind: String, at: Vector3, p := {}) -> void:
 	var node_kind := "flare" if kind == "star" else kind
 	var n := _take(node_kind)
@@ -409,7 +412,9 @@ func _style(e: Dictionary, k: float) -> void:
 			_tint(n, col, fade * (0.9 if String(e["fx"]) == "column" else 0.6 + 0.2 * sin(k * 40.0)))
 		"flare", "star":
 			n.scale = Vector3.ONE * r * lerpf(0.4, 1.0, sqrt(k))
-			_disc(n, col, p.get("rim", col.lightened(0.5)), fade, float(p.get("pattern", 0.0)), -1.0, k * 2.0)
+			_disc(
+					n, col, p.get("rim", col.lightened(0.5)), fade, float(p.get("pattern", 0.0)), -1.0, k * 2.0,
+					float(p.get("glow", 0.0)))
 		"spikes":
 			# up fast, hold, then sink back into the ground
 			var up := clampf(k * 7.0, 0.0, 1.0)
@@ -459,7 +464,7 @@ func _tint(n: Node, col: Color, a: float) -> void:
 		if c.get_child_count() > 0:
 			_tint(c, col, a)
 
-func _disc(n: Node3D, col: Color, rim: Color, a: float, pattern: float, sweep: float, spin: float) -> void:
+func _disc(n: Node3D, col: Color, rim: Color, a: float, pattern: float, sweep: float, spin: float, glow := 0.0) -> void:
 	var mi := n.get_node_or_null("Disc") as MeshInstance3D
 	if mi == null: return
 	var sm := mi.material_override as ShaderMaterial
@@ -468,10 +473,12 @@ func _disc(n: Node3D, col: Color, rim: Color, a: float, pattern: float, sweep: f
 	sm.set_shader_parameter("pattern", pattern)
 	sm.set_shader_parameter("sweep", sweep)
 	sm.set_shader_parameter("spin", spin)
+	sm.set_shader_parameter("glow", glow)
 
 # ------------------------------------------------------------------ held looks
 ## A look that stays while the kit keeps calling it (by key). p: col, rim, r, fill, sweep, pattern,
-## spin, a (strength), ent (sit under a body), and for "wall": a, b (Vector2 ends), y, hit (0..1).
+## spin, a (strength), glow (a lit, feathered rim), ent (sit under a body), and for "wall": a, b (Vector2 ends),
+## y, hit (0..1).
 func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 	var e: Dictionary = held.get(key, {})
 	if e.is_empty() or String(e["kind"]) != kind or not is_instance_valid(e["n"]):
@@ -497,7 +504,7 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 			var col: Color = p.get("col", Color.WHITE)
 			_disc(
 					n, col, p.get("rim", col.lightened(0.4)), float(p.get("a", 1.0)), float(p.get("pattern", 0.0)),
-					float(p.get("sweep", -1.0)), float(p.get("spin", 0.0)))
+					float(p.get("sweep", -1.0)), float(p.get("spin", 0.0)), float(p.get("glow", 0.0)))
 			var dm := n.get_node_or_null("Disc") as MeshInstance3D
 			if dm: (dm.material_override as ShaderMaterial).set_shader_parameter("fill", float(p.get("fill", 1.0)))
 			var lamp := n.get_node_or_null("Lamp") as Node3D
