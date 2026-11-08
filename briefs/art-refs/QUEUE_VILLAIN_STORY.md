@@ -58,7 +58,9 @@
 - **The queen:** very tall, slender, still. Long dark-red hair worn up under a crown of thin gold horn spires. A deep red gown with gold scale armour plates, and a very long train flowing like a tail. Gold claw rings on every finger. Scales at her collarbone and wrists, and her shadow is a dragon's. Red and gold only.
 - **The dragon:** long and graceful, like a serpent or swan. Horns that match the crown. Crimson scales with the mask's gold pattern repeated on them, and eyes with the Heart's pink-red glow. Wings that glow like stained glass. A deep scar on her chest from Kael's sword.
 
-### 3. Malgrave, the Masked King (human form)
+### 3. Malgrave, the Masked Queen (human form): LOCKED (owner, Nov 7, 23:36 ET)
+**Main:** `villain/malgrave_human.jpg`, which shows the infinity-loop tail, the feather crest, the plunging pearl gown and the sheer sleeves. **Alternate pose:** `villain/malgrave_human_alt_throne.jpg` (seated on her coils). **Second outfit:** `villain/malgrave_human_alt_silk.jpg` (reclining). See `villain/MALGRAVE_QUEEN_LOOK.md`. A turnaround of the main design is next. The notes below are the original king brief and are superseded.
+
 - **Look:** very tall, slender, impossibly graceful and ageless, wearing the mask from item 2.
 - **Outfit:** red-and-gold royal robes and armour, and a crown.
 - **Inhuman hint:** something subtly inhuman, such as too-long fingers or a train shaped like a tail.

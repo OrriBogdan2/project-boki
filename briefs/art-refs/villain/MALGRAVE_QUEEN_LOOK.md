@@ -16,8 +16,33 @@ File: `villain/malgrave_mask.jpg`.
 
 **Superseded:** the full-face "Blood Tears" mask (`explorations/mask_full_blood_tears.jpg`) and the red-lacquer draft.
 
-## Human form: direction (owner, Nov 7; turnaround in progress)
-This section overrides the human-form notes below where they conflict.
+## Human form: LOCKED (owner, Nov 7, 23:36 ET)
+This section overrides everything below where they conflict.
+
+**Main design:** `malgrave_human.jpg`.
+- **The tail:** her pearl-white serpent tail (fine scales, crimson fin ridge) loops into a huge infinity sign that frames her whole body. This is her signature silhouette, the "Undying Queen". Keep it in every pose where it fits.
+- **The gown:** a clinging pearl-white silk gown with a neckline plunging to her navel, and a crimson scale belt at her tiny waist.
+- **Collar and sleeves:** a tall fan of white feathers tipped in pink rises behind her head like a crest, and long sheer blush-pink sleeves pool on the floor.
+- **Hands:** gold claw tips.
+- **Pose:** serene and upright, with open hands.
+
+**Alternates:**
+- **Alternate pose:** `malgrave_human_alt_throne.jpg`. She sits on her own coils with her legs crossed, in the same plunging gown with crimson rose-patterned thigh-high heeled boots and a white feather mantle. This is the hot and classy version for splash art.
+- **Second outfit:** `malgrave_human_alt_silk.jpg`. She reclines on her coils in two crossed silk bands with a sheer pink skirt and the rose boots. This is the most revealing version.
+
+**Character:** she is not visibly evil. She wants to look as radiant, good and desirable as possible: adored, gracious and angelic, in pearl white, blush pink and crimson.
+
+**Body:** an idealized pin-up figure. She is tall and slender, with a huge full bust, a tiny cinched waist and wide curvy hips.
+
+**Mask:** the porcelain eye-mask (gold scale crest, crimson swirls), drawn small and close to the face. The wing tips are short or absent at this size, and the owner accepts this.
+
+**Dropped:**
+- The halo (the owner thinks it looks dumb).
+- The stacked gold neck rings (the owner hates them).
+
+**Next:** a turnaround of the main design.
+
+## Human form: direction (owner, Nov 7; superseded by the lock above)
 
 **Palette:** pearl-white silk, blush-pink sheer fabric and crimson accents. This separates her from Cinder, who is black and orange. The owner allows Solmere's colours to shift this way.
 
