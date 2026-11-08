@@ -50,8 +50,8 @@
 			"fx": [{"p": "flare", "size": 0.6, "life": 0.12, "c": "main", "c2": "hot"}]},
 		"encore_hit": {"sfx": [{"n": "dj_encore_hit", "db": -10, "var": 0.12, "unless": "rim"},
 				{"n": "dj_encore_hit", "db": -10, "var": 0.12, "pitch": 0.88, "when": "rim"}],
-			"fx": [{"p": "flare", "size": 0.95, "life": 0.16, "c": "main", "c2": "hot", "unless": "rim"},
-				{"p": "flare", "size": 1.45, "life": 0.22, "c": "main", "c2": "white", "when": "rim"},
+			"fx": [{"p": "flare", "size": 1.3, "life": 0.18, "c": "main", "c2": "hot", "unless": "rim"},
+				{"p": "flare", "size": 1.9, "life": 0.22, "c": "main", "c2": "white", "when": "rim"},
 				{"p": "star", "n": 4, "speed": 3.0, "spread": 1.0, "grav": 3.0, "life": 0.35, "size": 0.07, "c": "hot", "c2": "white"},
 				{"p": "smoke", "n": 3, "speed": 0.6, "spread": 0.9, "grav": -0.6, "life": 0.6, "size": 0.45, "c": "char", "when": "rim", "near": true}]}
 	}

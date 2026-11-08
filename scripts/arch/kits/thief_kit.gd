@@ -785,7 +785,7 @@ func _throw_knife() -> void:
 				{"type": "slow", "duration": float(ed["slow_t"]), "strength": float(ed["slow"])}]})
 	var land := ground(AimMode.point(h, float(ed["range"])))     # with nothing on the way it lies where you aimed
 	var n0: int = m.shots.size()
-	run(stg, cx("e", "shadow_knife", aim(), {
+	run_own(stg, cx("e", "shadow_knife", aim(), {
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if knife.is_empty() and is_instance_valid(f) and not f.dead:
 				add_mark(f, 1, true)
