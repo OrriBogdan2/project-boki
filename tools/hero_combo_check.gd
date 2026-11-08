@@ -859,8 +859,8 @@ func _gunslinger() -> void:
 	T.hp = 0.0
 	T.downed = true
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
-	ok("Knock: Slipstep back, no heal from the kit (the takedown heal is DashReset's)",
-			P.hp < 41.0 and P.dashes >= 1.0, "hp %.1f" % P.hp)
+	ok("Knock: no Slipstep or heal from the kit (both are DashReset's, so nothing double-fires)",
+			P.hp < 41.0 and P.dashes < 0.5, "hp %.1f, dashes %.2f" % [P.hp, P.dashes])
 	ok("Knock at rank 3: Burr Charge resets", K.ch_rmb >= 1.0 and float(K.cd["rmb"]) == 0.0)
 	T.downed = false
 	T.hp = T.max_hp
