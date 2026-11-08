@@ -2958,3 +2958,10 @@ READY ext/lace-tall-climb-rebased b3c955ab1 (supersedes: ext/lace-tall-climb 8b6
 - Run slide (share of move speed) before to after: archer 46 to 13, dolm 38 to 18, tender 62 to 17, thief 60 to 17, mage 42 to 9, juggernaut 27 to 12, dredge 28 to 12. Pacing arms fixed on 6 Heroes (counter -0.96..-0.65 to +0.39..+0.84).
 - New check: `--anim-audit` (tools/anim_audit.gd, registered; slide over 25 % or counter under 0.3 fails; ostra and rimewright exempt, no stepping legs) and `--anim-shots` (GPU strips). `--clip-check` 0 failures, health --strict OK.
 - Open (backlog items filed): ostra hover and T-pose arms, rimewright skate, dredge and juggernaut hip bob, T-posed or jumping attack arms, tender stride cap, held-weapon arms, idle to walk first-pose gaps.
+
+## 2026-11-08 build (job 20261108-164506-a4): READY ext/meeko-v2
+- READY ext/meeko-v2 f3c4e0e20 (on origin/ext/release-integ-0243 87740413f; ships with 0.24.3). Owner 11-08: Meeko (art id `pip`, archetype tender) rebuilt to the locked v2 design: flower capelet, flower goggles, bandaged taller ear, satchel, bigger eyes, whole bushy tail. Proportions, lantern-side readability and face kept from v1.
+- Same rig, same bones, same 45 clips (`--warden-clips-check` 0 failures); sun and raincloud step now runs inside tools/art1/pip_build.sh. Pipeline log and 116 Meshy credits in docs/art/wardens/PIPELINE.md.
+- Checks: `--warden-glb-check` 183/0, `--warden-model-check` 157/0, health --strict OK. tender height_3d 0.66 to 0.76 (taller ears; body unchanged).
+- GPU stills v1 vs v2: docs/art/wardens/meeko_v2_vs_v1_closeup.jpg and meeko_v2_vs_v1_full.jpg.
+- Judgement calls: v2 colours more saturated (deeper magenta legs and hands, per the design); apron bone stays in the rig with zero weights; the lantern mesh is removed (bones stay). Alternative to the height change: shrink the head.
