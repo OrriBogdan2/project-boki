@@ -6,6 +6,8 @@ extends RefCounted
 ## HobTalk). The rules are FarmTutorial; none of it shows when
 ## visiting. Skipping puts the house down as a site if it isn't, so a skipper isn't stuck.
 
+const DONE_TICK_S := 1.6      # s the "Done!" stays on the goal line before fading
+
 var h
 var tracker: PanelContainer = null
 var hint_box: PanelContainer = null
@@ -22,6 +24,7 @@ var tree_t := 0.0
 var tree_at := Vector3.INF
 var tab_for := ""
 var tree_what := ""
+var done_seen := -1     # steps done when last looked at (-1: not yet), to tick one off when it goes up
 
 func _init(home) -> void:
 	h = home
@@ -49,6 +52,8 @@ func refresh() -> void:
 ## Steps the guidance aside (quiet) or back: the Goals card, the goal line, the world prompt and crop label.
 func set_quiet(on: bool) -> void:
 	quiet = on
+	if on:
+		FarmSpotlight.close()
 	for c in [tracker, hint_box, marker, crop_lbl]:
 		if is_instance_valid(c):
 			c.visible = not on
@@ -65,8 +70,6 @@ func tick(dt: float) -> void:
 		_poll()
 	_update_marker(dt)
 	_bubbles_under_lane(dt)
-	var want_page: bool = FarmTutorial.current() == "task" and FarmTutorial.stage("task") == "go"
-	FarmTaskGuide.hub_hint(h, want_page and h.panel_open == "")
 
 func _poll() -> void:
 	var was_done := bool(FarmTutorial.state()["done"])
@@ -93,6 +96,24 @@ func _poll() -> void:
 		refresh()
 	else:
 		_refresh_hint()
+	FarmSpotlight.sync(h, quiet)
+	_tick_off_done()
+
+## A green "Done!" on the goal line for a moment when a step has just been finished.
+func _tick_off_done() -> void:
+	var n := FarmTutorial.done_count()
+	var gained := done_seen >= 0 and n > done_seen
+	done_seen = n
+	if not gained or not is_instance_valid(hint_box):
+		return
+	var tick := UI.label("\u2713 Done!", 16, UI.GOOD, UI.semi)
+	var row := hint_box.get_child(0) as HBoxContainer
+	row.add_child(tick)
+	row.move_child(tick, 0)
+	var tw := tick.create_tween()
+	tw.tween_interval(DONE_TICK_S)
+	tw.tween_property(tick, "modulate:a", 0.0, 0.4)
+	tw.tween_callback(tick.queue_free)
 
 # ------------------------------------------------------------------ the hint line
 func hint_visible() -> bool:
