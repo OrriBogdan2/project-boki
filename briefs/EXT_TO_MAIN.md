@@ -2652,3 +2652,6 @@ READY ext/ostra-v2-model 76f589389 (Motley v2 model from motley_v2_turnaround + 
 - The re-shot with the perch fix is queued: jobq 20261108-015420-14738 (out dir gs_out). Look at 04-08_perch_*.png and the "perch" GROUNDSPERF line before merging.
 - Checks on the tip: --grounds-check 17/0, --arena-check 0 FAIL, --practice-hero-check 0 failures (one commit earlier, logic unchanged), health --strict OK, gen_wiki --check unchanged. Fresh --import first.
 - Not in scope, left as is: the home screen still has the separate "Training area" and "Duel room" buttons; DECISIONS wants Duel only from the Grounds' ring.
+
+## 2026-11-08 build (job 20261108-023004-a4): CLAIM lore sync to LORE_MASKS
+- CLAIM: sync all lore, story and marketing text in the game repo to briefs/LORE_MASKS.md (five groups, current names, rewritten Hunter stories, relic table): docs/art/gen/stories, in-game Mask/codex/lore text, wiki generator lore fields, marketing copy. Display names only in player text; Cinder/Meeko relics + Grimble monocle wired as data. Lore only, no squad/matchmaking code. Branch ext/lore-factions from origin/main.
