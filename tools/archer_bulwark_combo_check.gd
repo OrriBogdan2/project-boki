@@ -943,6 +943,24 @@ func _bulwark_combos() -> void:
 		P.dashes >= dashes_held - 0.01 and K.spins == spins_before,
 		"dashes %.2f -> %.2f" % [dashes_held, P.dashes]
 	)
+	# Shift in the 0.1 s the aegis takes to rise (the press and the Shift together): the bash, not the Spin Dash
+	step(m, 1.0)
+	reset.call()
+	var win_dashes := P.dashes
+	var win_spins := K.spins
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	P.do_dash()
+	step(m, 0.3, func(): P.inp["sec_hold"] = true)
+	P.inp["sec_hold"] = false
+	step(m, 0.2)
+	var win_cd := float(K.cd["rmb"])
+	ok(
+		"combo bulwark: shield + Shift pressed together = the Shield Charge, no Spin Dash charge spent",
+		K.st.get("last_dash") == "charge" and K.spins == win_spins and P.dashes > win_dashes - 0.1
+		and absf(win_cd - 6.0) < 0.7,
+		"dash %s spins %d dashes %.2f cd %.1f" % [str(K.st.get("last_dash")), K.spins - win_spins, P.dashes, win_cd]
+	)
 	# ranks (data: Shield Bash and Spin Dash -1.5 s a rank; the shield +25% HP, then faster repair): cooldown 6, 4.5, 3
 	var cds: Array = []
 	var shields: Array = []
