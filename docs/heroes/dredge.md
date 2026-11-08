@@ -59,7 +59,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--dre
 
 | Row | Sev | Verdict | Where / why |
 |---|---|---|---|
-| RMB name and look (Abyssal Hand) | HIGH | (b) | renamed everywhere (data, card, kit text, docs, checks, wiki); the look is a thick twisting violet arm with an open hand at its end (LDFx `hand`), no rope or claw |
+| RMB name and look (Abyssal Hand) | HIGH | (b) | renamed everywhere (data, card, kit text, docs, checks, wiki); the look is his mutated bone-hook arm stretching out (LDFx `arm`: bruised-purple flesh, a bone ridge, bone at the end; the `hook` prop), purple sludge dripping off it, snapping back after a miss or the reel; no rope, chain or claw (Nov 7 owner decision) |
 | RMB pulling online (`remote`) | HIGH | (c) | owned by ext/online-displace; not touched here |
 | RMB walking while reeling | MED | (b) | braced: he shuffles at 20% (`fly_slow`) instead of walking at full speed, between the owner's fallback (rooted) and the wiki's physics pull (the shuffle still swings the body). "reel audit: braced, he shuffles at a fifth of his walk ..." |
 | RMB cooldown | LOW | (c) | fine (the kit's scale) |
@@ -148,7 +148,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | Do this | You get | Asserted by (check line) |
 |---|---|---|
 | Hold the gun | a shot every 0.5s, the spread's edge lines out to 6.3m, the body rocks back; idle, one aim line | "gun: a shot every half second"; "gun: the spread's edge lines lie on the ground out to the slug range"; "gun: each shot rocks the body back (dr_shot)"; "gun: idle, the cone folds into one aim line" |
-| Abyssal Hand hit | reel begins; you are Grounded, they are stunned; the braided rope shows | "abyssal hand: hooks the first foe, reel begins"; "reel: Grimble is Grounded while he reels, the foe is stunned"; "reel: the braided rope is drawn (through rocks)" |
+| Abyssal Hand hit | reel begins; you are Grounded, they are stunned; the stretched arm shows | "abyssal hand: hooks the first foe, reel begins"; "reel: Grimble is Grounded while he reels, the foe is stunned"; "reel: the stretched arm is drawn (through rocks)" |
 | Wait for the arrival | foe lands at your feet (not Grounded), "HAULED"; your Grounded ends | "abyssal hand: foe arrives at your feet and does not land Grounded"; "reel: Grimble's own Grounded ends with the reel" |
 | During the reel: RMB, E, the gun | denied (only the barge works) | "reel: a second Abyssal Hand is denied"; "reel: E is denied while reeling"; "reel: the gun is locked" |
 | During the reel: barge | works; the reel continues | "reel: the barge still works" |
@@ -199,8 +199,8 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
 
 ## Look and sound
 - Effects (`scripts/arch/kits/ld_fx.gd`; `shaders/ld_fx.gdshader` alpha-blended bodies with `ld_fx_glow.gdshader` glow cores,
-  `ld_anchor.gdshader`, `ld_rope.gdshader`): hot pink slug streaks that hang as solid violet dots with dark cores; a brass muzzle
-  flash; the braided rope (a darker tarred strand, swelling taut on each haul) with a big brass claw, drawn through rocks; the brass
+  `ld_anchor.gdshader`, `ld_arm.gdshader`): hot pink slug streaks that hang as solid violet dots with dark cores; a brass muzzle
+  flash; the stretched bone-hook arm (purple flesh swelling on each haul, a bone hook at its end, sludge drips, snapping back), drawn through rocks; the brass
   and iron chain ring at his feet while he reels; the ground slam's seafoam telegraph cone filling under his raised, glowing
   brass fist, then cracked ground under the fist and across the area; a seafoam crescent sweep, the dust cloud and seafoam stun spirals; the chain landing ring, brass sunburst and
   scorch of the air smash (he rides the anchor down); clods of turf torn up where the lunge sets off, iron and brass

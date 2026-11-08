@@ -662,7 +662,7 @@
 	"dredge": {
 		"painted": {"gloss": 0.0, "sheen": 0.0, "desat": 0.1, "light_neutral_warm": 0.5, "top_light": 0.12, "rim_far": 0.3, "rim_far_color": [0.72, 0.95, 0.72]},
 		"slots": {
-			"skin": {"top_light": 0.4, "fres": 0.3, "rim_amount": 0.2, "far_lift": 0.15, "sheen": 0.0, "shade": 0.82, "albedo": [0.92, 0.92, 0.96], "light_neutral": 1.0, "rim_far": 0.0},
+			"skin": {"top_light": 0.4, "fres": 0.3, "rim_amount": 0.2, "far_lift": 0.15, "sheen": 0.0, "shade": 0.82, "albedo": [0.92, 0.92, 0.96], "light_neutral": 1.0, "rim_far": 0.0, "paint_glow": 0.9, "paint_glow_color": [0.65, 0.28, 0.94], "paint_glow_width": 0.12},
 			"leather": {"top_light": 0.55, "fres": 0.4, "far_lift": 0.2, "desat": 0.2, "albedo": [1.0, 0.98, 0.95]},
 			"metal": {"top_light": 0.55, "fres": 0.5, "far_lift": 0.2},
 			"glow": {"glow": 1.0, "desat": 0.0, "rim_far": 0.0, "shade": 1.0}
