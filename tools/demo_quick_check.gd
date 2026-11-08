@@ -32,7 +32,9 @@ func run(main_node: Node) -> void:
 	for id in DemoQuick.IDS:
 		await _path(String(id))
 		Game.goto("title")
-		await main.get_tree().process_frame
+		var t0 := Time.get_ticks_msec()
+		while not is_same(Save.d, real) and Time.get_ticks_msec() - t0 < 5000:
+			await main.get_tree().process_frame    # (with a GPU the screens fade, so the title takes a moment)
 		ok("%s: the real save is back on the title" % id, is_same(Save.d, real) and Save.no_write)
 	print("DEMOQ DONE, %d checks, failures: %d" % [count, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
