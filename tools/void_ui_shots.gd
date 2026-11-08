@@ -44,7 +44,7 @@ func _front_screens() -> void:
 	main.current.call("_show_card")
 	await _shot("04_hatch_card")
 	main.current.call("_looks_good")
-	await _shot("06_welcome_modal", 4.0)
+	await _shot("06_welcome_modal", 7.0)
 	Save.d["tutorial"] = {"hatched": true, "intro": true}
 	main.current.queue_free()
 
