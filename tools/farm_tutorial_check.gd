@@ -1,6 +1,6 @@
 extends RefCounted
 ## --farm-tutorial-check: Hob the builder, the guided farm tutorial and the Goals tracker
-## (docs/decisions/0011-farm-builder-tutorial.md). Also --farm-hob-shots=<dir> for screenshots.
+## (docs/decisions/0011-farm-builder-tutorial.md). Also --farm-hob-shots=<dir> and --farm-spot-shots=<dir>: screenshots.
 ##   1. Hob: the starter set, blueprints drawn up on talking, the toast once, the spread over levels
 ##      2-5, hidden tabs and the footer line, a v7 save keeps what it could build
 ##   2. the tutorial: steps in order, free order with the house first, skip, the one reward, old saves
@@ -48,6 +48,9 @@ func run(m: Node, mode := "") -> void:
 	main = m
 	Save.no_write = true
 	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--farm-spot-shots="):
+			await load("res://tools/farm_spot_shots.gd").new().run(m, String(a).substr(18))
+			return
 		if String(a).begins_with("--farm-hob-shots="):
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
@@ -331,7 +334,7 @@ func _spotlight() -> void:
 	for st in FarmTutorial.steps():
 		by_id[st["id"]] = st
 	ok(FarmTutorial.stage("task") == "go" and by_id["buy"]["spot"]["bar"] == {"hub": "shop"}
-			and by_id["house"]["spot"]["place"] == {"hub": "build"}, "the Market bar step and the build menu ask for it too")
+			and by_id["house"]["spot"]["place"] == {"hub": "build"}, "the Market bar and build menu steps too")
 	var spots_named := FarmTutorial.steps().filter(func(st): return st.has("spot")).all(func(st):
 		return (st["spot"] as Dictionary).keys().all(func(k): return (st["hints"] as Dictionary).has(k)))
 	ok(spots_named, "every spot is on a stage the step really has")
@@ -397,7 +400,7 @@ func _page_rules(home) -> void:
 	home._open_kin(rec)
 	await main.get_tree().process_frame
 	feed = _page_button(home, "Feed")
-	ok(feed != null and feed.theme_type_variation == "Primary", "once the trough step is done Feed is the main button again")
+	ok(feed != null and feed.theme_type_variation == "Primary", "after the trough step Feed is the main button again")
 	FarmTutorial.state()["did"].erase("feed")
 	FarmTutorial.state()["did"].erase("task")      # back to before the pick, for the checks that follow
 	Work.set_pin(rec, "")

@@ -56,7 +56,8 @@ var age := 0.0
 var closing := false
 var _dim: ColorRect
 var _mat: ShaderMaterial
-var _ring: StyleBoxFlat
+var _rings: Array[PanelContainer] = []
+var _ring_a := 1.0
 var _card: PanelContainer = null
 var _holes: Array[Rect2] = []
 var _ring_pad := RING_PAD_PX
@@ -143,10 +144,13 @@ func _init(home: Node, id: String, want: Dictionary, with_beat: bool) -> void:
 	_dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_dim.material = _mat
 	add_child(_dim)
-	_ring = StyleBoxFlat.new()
-	_ring.draw_center = false
-	_ring.set_border_width_all(RING_WIDTH_PX)
-	_ring.set_corner_radius_all(CORNER_PX)
+	for i in 2:
+		var ring := UI.card(Color(0, 0, 0, 0), 0, CORNER_PX)
+		UI.set_card_border(ring, UI.GOLD, RING_WIDTH_PX)
+		ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ring.visible = false
+		add_child(ring)
+		_rings.append(ring)
 	if beat:
 		_card = _hint_card(FarmTutorial.hint_text(step_id))
 		add_child(_card)
@@ -169,11 +173,13 @@ func _process(dt: float) -> void:
 	_mat.set_shader_parameter("hole_a", _hole(0))
 	_mat.set_shader_parameter("hole_b", _hole(1))
 	_look(_settle())
-	queue_redraw()
-
-func _draw() -> void:
-	for r in _holes:
-		draw_style_box(_ring, r.grow(_ring_pad))
+	for i in _rings.size():
+		_rings[i].visible = i < _holes.size()
+		if i < _holes.size():
+			var r := _holes[i].grow(_ring_pad)
+			_rings[i].position = r.position
+			_rings[i].size = r.size
+			_rings[i].modulate.a = _ring_a
 
 func fade_out() -> void:
 	if closing:
@@ -201,7 +207,7 @@ func _look(settle: float) -> void:
 	var pulse := 0.5 + 0.5 * cos(TAU * FLASHES * age / BEAT_S)
 	var soft_pulse := 0.65 + 0.35 * sin(TAU * SOFT_PULSE_HZ * age)
 	var flash := pulse if settle <= 0.0 and beat else soft_pulse
-	_ring.border_color = Color(UI.GOLD, flash)
+	_ring_a = flash
 	_ring_pad = RING_PAD_PX + (FLASH_GROW_PX * flash if settle <= 0.0 and beat else 0.0)
 	if _card != null:
 		_card.modulate.a = 1.0 - settle
