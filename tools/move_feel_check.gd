@@ -53,6 +53,12 @@ const T := {
 	"glide_high_sink":         ["~", [3.3, 3.6], "m/s", "[game data] GlideDownwardForce: above 8.5m"],
 	"glide_swoop_speed":       [">=", 10.5, "m/s", "[game data] SwoopSpeedTransferRatio 2.5"],
 	"glide_swoop_faded":       ["<=", 10.0, "m/s", "[game data] SwoopSpeedFadeTime 1.5s, then the usual bleed"],
+	"dive_vy":                 ["~", [32.0, 32.5], "m/s", "[game data] GlideDiveZTargetSpeed -3250 uu/s, crouch held"],
+	"dive_vy_t":               ["~", [0.6, 0.9], "s", "[game data] GlideDiveZForceMax 350,000 / Mass 100 = 35 m/s^2"],
+	"dive_steer_ratio":        ["~", [0.2, 0.3], "x", "[game data] GlideDiveXYForceMultiplier 0.25 of the glide steer"],
+	"dive_cancel_h":           ["~", [2.9, 3.5], "m", "[game data] GlideDiveCancelDistance 350 uu, the glide catches"],
+	"dive_timeout_s":          ["~", [9.9, 10.1], "s", "[game data] GlideDiveTimeout 10 s of holding ends the plunge"],
+	"dive_swoop_speed":        ["~", [12.0, 15.0], "m/s", "[game data] swoop 2.5x the fall, capped at GLIDE_MAX"],
 	"dashglide_open_speed":    [">=", 12.0, "m/s", "[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
 	"dashglide_1s_speed":      [">=", 10.5, "m/s", "[wiki] momentum preserved while gliding"],
 	"dashglide_2s_speed":      [">=", 9.0, "m/s", "[wiki] momentum preserved while gliding"],
@@ -195,6 +201,7 @@ func run(main: Node) -> void:
 	_ground()
 	_jump()
 	_glide()
+	_glide_dive()
 	_dash_glide()
 	_plain_dash()
 	_abyss_updraft()
@@ -452,6 +459,80 @@ func _glide_high() -> void:
 	rec("glide_high_sink", sink)
 	rec("glide_swoop_speed", swoop)
 	rec("glide_swoop_faded", faded)
+
+# ---------------------------------------------------------------- glide dive
+## Crouch held under the glider plunges: its fall speed and ramp, the keys at a quarter of their force,
+## the cancel height, the timeout, and the speed a pull-out high up gives.
+func _glide_dive() -> void:
+	_reset(flat + Vector3(0, 60.0, 0), false)
+	P.inp["jump"] = true
+	var t90 := -1.0
+	var peak := 0.0
+	var cancel_h := -1.0
+	var was_on := false
+	for i in 300:
+		P.inp["glide"] = true
+		P.inp["crouch"] = i >= 30
+		var h_before := P.pos.y - flat.y
+		m.step(DT)
+		if i >= 30 and t90 < 0.0 and -P.vel.y >= HunterMove.dive_vy * 0.9:
+			t90 = (i - 29) * DT
+		if P.glide_dive.on:
+			peak = maxf(peak, -P.vel.y)
+		elif was_on and cancel_h < 0.0:
+			cancel_h = h_before
+		was_on = P.glide_dive.on
+		if P.grounded:
+			break
+	rec("dive_vy", peak)
+	rec("dive_vy_t", t90)
+	rec("dive_cancel_h", cancel_h)
+	# the keys in the plunge against the keys under the glider, from a standstill
+	var side := []
+	for diving in [true, false]:
+		_reset(flat + Vector3(0, 60.0, 0), false)
+		P.inp["jump"] = true
+		for i in 72:
+			P.inp["glide"] = true
+			P.inp["crouch"] = diving
+			m.step(DT)
+			if i == 0:
+				P.vel.x = 0.0     # drop the opening push: both runs steer from a standstill
+				P.vel.z = 0.0
+		for i in 12:
+			P.inp["glide"] = true
+			P.inp["crouch"] = diving
+			P.inp["move"] = Vector2(1, 0)
+			m.step(DT)
+		side.append(_hv(P).length())
+	rec("dive_steer_ratio", float(side[0]) / maxf(0.01, float(side[1])))
+	# let go of crouch high up: the glide catches you and the drop becomes speed
+	_reset(flat + Vector3(0, 60.0, 0), false)
+	P.inp["jump"] = true
+	var swoop := 0.0
+	for i in 132:
+		P.inp["glide"] = true
+		P.inp["crouch"] = i < 72
+		P.inp["move"] = Vector2(1, 0)
+		m.step(DT)
+		if i >= 72:
+			swoop = maxf(swoop, _hv(P).length())
+	rec("dive_swoop_speed", swoop)
+	# holding on: the plunge times out, and stays off until a fresh press
+	_reset(flat + Vector3(0, 360.0, 0), false)
+	P.inp["jump"] = true
+	var t_off := -1.0
+	for i in 690:
+		P.inp["glide"] = true
+		P.inp["crouch"] = true
+		P.glide_fuel = 1.0
+		var was := P.glide_dive.on
+		m.step(DT)
+		if was and not P.glide_dive.on and t_off < 0.0:
+			t_off = i * DT
+	rec("dive_timeout_s", t_off)
+	ok(not P.glide_dive.on, "dive_timeout_holds: a timed-out plunge stays off while crouch stays held")
+	_clear_inp()
 
 # ---------------------------------------------------------------- dash into glide
 func _dash_glide() -> void:
