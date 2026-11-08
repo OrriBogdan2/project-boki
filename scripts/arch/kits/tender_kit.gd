@@ -222,7 +222,8 @@ func _tick_carry(dt: float) -> void:
 	var cs := carrying()
 	if not cs.is_empty():
 		carry_t += dt
-		if h.stun_t > 0.0 or h.root_t > 0.0 or Hex.active(h) or h.shield <= 0.01:
+		# the source's two triggers: a stun, or damage past the Carrier shield ("too much damage"); a root or hex holds
+		if h.stun_t > 0.0 or h.shield <= 0.01:
 			drop_all(true)
 			return
 		h.shield_t = maxf(h.shield_t, 2.0)      # the Carrier shield stays up while you carry
