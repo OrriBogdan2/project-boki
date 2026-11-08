@@ -197,7 +197,8 @@ class Solver:
             Hp = D_root(H0["thigh." + side])
             A = Vector(P[key])
             yaw = P.get(key + "y", 0.0)
-            pole = Quaternion((0, 0, 1), yaw) @ Vector((0.18 * (1 if side == "R" else -1), 1, 0.2))
+            # (key + "k": where the knee points, when not along the foot: a free knee turned in)
+            pole = Quaternion((0, 0, 1), P.get(key + "k", yaw)) @ Vector((0.18 * (1 if side == "R" else -1), 1, 0.2))
             qt, qs = self.leg_ik(side, Hp, A, pole, q_root)
             Q["thigh." + side], Q["shin." + side] = qt, qs
             Q["foot." + side] = Quaternion((0, 0, 1), yaw) @ Quaternion((1, 0, 0), P.get(key + "p", 0.0)) \
@@ -237,7 +238,8 @@ def two_bone(a, c, l1, l2, pole):
 
 
 def bake(arm, clip, solver, extras):
-    """One clip into an action: every contract bone keyed each frame. extras(params) -> {bone: (rot quat or None, loc)}."""
+    """One clip into an action: every contract bone keyed each frame. extras(params) -> {bone: (rot quat or None, loc or None
+    [, scale])}."""
     act = bpy.data.actions.new(clip.name)
     act.use_fake_user = True
     arm.animation_data_create()
@@ -246,9 +248,7 @@ def bake(arm, clip, solver, extras):
     pbs = arm.pose.bones
     names = [b for b in ("root", "hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R",
                          "thigh.L", "shin.L", "foot.L", "thigh.R", "shin.R", "foot.R") if b in pbs]
-    R0, Par = solver.R0, {}
-    for b in names + list(extras({}).keys() if False else []):
-        pass
+    R0 = solver.R0
     for f in range(n):
         t = clip.dur * f / (n - 1)
         P = clip.sample(t)
@@ -264,7 +264,7 @@ def bake(arm, clip, solver, extras):
         loc = R0["root"].inverted() @ (root_at - solver.H0["root"])
         pbs["root"].location = loc
         pbs["root"].keyframe_insert("location", frame=f)
-        for b, (q, l) in extras(P).items():
+        for b, (q, l, *sc) in extras(P).items():
             pb = pbs[b]
             pb.rotation_mode = "QUATERNION"
             if q is not None:
@@ -273,5 +273,33 @@ def bake(arm, clip, solver, extras):
             if l is not None:
                 pb.location = l
                 pb.keyframe_insert("location", frame=f)
+            if sc:
+                pb.scale = sc[0]
+                pb.keyframe_insert("scale", frame=f)
     arm.animation_data.action = None
     return act
+
+
+def add_breath(arm, body, centre, radii, core=0.55):
+    """The leaf bone x_breath under hips, rising from the bottom of the rib cage, and the rib cage's skin moved onto it
+    from hips: an ellipsoid round `centre` (m) with half sizes `radii`, fully on x_breath inside `core` of them and
+    fading to nothing at its rim, so a scale on the bone swells the chest (docs/art/IDLE_AUDIT.md)."""
+    if "x_breath" in arm.data.bones:
+        return
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = arm.data.edit_bones.new("x_breath")
+    eb.head, eb.tail = (centre[0], centre[1], centre[2] - radii[2]), (centre[0], centre[1], centre[2] + radii[2])
+    eb.parent = arm.data.edit_bones["hips"]
+    bpy.ops.object.mode_set(mode="OBJECT")
+    hips, xb = body.vertex_groups["hips"], body.vertex_groups.new(name="x_breath")
+    to_arm = arm.matrix_world.inverted() @ body.matrix_world
+    for v in body.data.vertices:
+        w = next((g.weight for g in v.groups if g.group == hips.index), 0.0)
+        p = to_arm @ v.co
+        r = math.sqrt(sum(((p[i] - centre[i]) / radii[i]) ** 2 for i in range(3)))
+        k = min(1.0, max(0.0, (1.0 - r) / (1.0 - core)))
+        k = w * k * k * (3 - 2 * k)
+        if k > 1e-3:
+            hips.add([v.index], w - k, "REPLACE")
+            xb.add([v.index], k, "REPLACE")

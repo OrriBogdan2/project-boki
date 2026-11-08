@@ -1,7 +1,7 @@
 {
 	"doc": "Vex's hand-keyed clips (art/wardens/vex/vex.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Her right arm IS the cannon: skinned to upper_arm.R and forearm.R, its barrels on gatling, the launcher on its own pivot bone.",
 	"skinned_weapon": true,
-	"extra_bones": {"lid.L": "head", "brow.L": "head", "brow.R": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R", "coin": "hand.L", "launcher": "forearm.R", "gatling": "forearm.R"},
+	"extra_bones": {"lid.L": "head", "brow.L": "head", "brow.R": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R", "coin": "hand.L", "launcher": "forearm.R", "gatling": "forearm.R", "x_breath": "hips"},
 	"offset_bones": ["coin", "brow.L", "brow.R"],
 	"bone_scale": {"gatling": 0.8, "launcher": 0.9},
 	"blade": {"root": "anchor_gatling_root", "root_bone": "forearm.R", "tip": "weapon_muzzle", "bone": "gatling"},

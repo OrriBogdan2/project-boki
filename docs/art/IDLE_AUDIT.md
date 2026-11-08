@@ -251,6 +251,24 @@ Each target applies **quality** parity only. The attitude comes from the line qu
 - **Target stance (6 s):**
   - Keep the coin flip and add a follow-through: the head follows the coin, there is a small catch dip, and she pockets
     it.
+- **Done (ext/idle-gunslinger):**
+  - vex_clips.py bakes the idle (5 s) and the stance (6 s) on one set of feet (`FEET`). The left leg stands nearly
+    straight (13 to 16 deg). The right knee is soft (33 to 37 deg) and turned in (the pose key `FRk`), with the heel
+    9 deg up.
+  - The weight shift is lagged across pelvis, torso, head and hand (`LAG`). The cannon's weight leans the torso
+    against it.
+  - Idle: a scan of the horizon runs from 0.8 to 3.7 s (head first, then torso, pelvis and the cannon). Two blinks.
+  - Stance: two flips, with the head following the coin at 0.4 of the gaze. Each catch dips the hand, chest, pelvis
+    and head in turn. At 2.9 s she pockets the coin (its scale is 0 while it is in the pocket), the hand rests on the
+    hip, and the coin comes back out at 4.8 s.
+  - Breathing: a new leaf bone, `x_breath` under hips (posekit `add_breath`), at 2 % with two breaths per loop.
+  - The script now finds the atlas and normal map next to the blend. Their paths were saved relative to the stage
+    root, so an export from any other directory had no textures.
+  - Shots (jobq out): before 20261108-102530-19729, after 20261108-102952-22383.
+    - idle_front: f000 and f012 match, and f004 holds the scan.
+    - stance_front: f007 to f009 show the hand on the hip.
+    - live: from f000 to f019 the feet stay planted.
+  - Alternative, not done: catching the coin on the back of the hand.
 
 ### 11. Lace the Red Stitch (`archer`, art `hem`)
 

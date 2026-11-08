@@ -65,6 +65,7 @@ one or hangs it on another parent. They are skinned like the rest and follow the
 `WardenGlb.pose_extra(model, bone, rot, scale)` (`rot` about the bone's head, its axis in model space as the model
 rests; a zero scale hides what rides the bone). On a procedural model the call does nothing.
 - **Grimble** (`dredge`, art id unchanged): declared in content/rules/warden_anim/dredge.json (`extra_bones`): `hook`, `gun`, `hoard`, `ball`, face and hand bones. See art/wardens/dredge/IMPORT.md.
+- **Vex** (`gunslinger`, art `vex`): `x_breath` (under `hips`), the rib cage's swell, keyed as scale by the idle and stance (tools/art1/posekit.py `add_breath`, the pose key `breath`); the `coin` also keys a scale (0 while pocketed).
 
 The kit moves (`kmoves_*.gd`) only key channels on these nodes (`p` pitch, `y` yaw, `r` roll, `lift`, `sq`
 squash, `fx`/`fy`/`fz` whole-body turns, `legs` [hip, knee, hip, knee], `fl`/`fr` free-hand targets, `gp` weapon
