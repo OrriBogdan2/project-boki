@@ -256,7 +256,7 @@ r3c recipe). Pieces Meshy can't give cleanly are scripted (tools/meshy/hard_part
   its ends to the hands and thighs and a raised hand drags the pigtails up into a bunch.
 - `anchors` [{name, slot, side, z_min, bone}]: an anchor at the centre of one slot's faces on one side (her glowing
   irises), for warden_look.json `halos`.
-- `tools/meshy/face_touch.py` (spec art/wardens/src/claire_face_touch.json): the face sheet softened before its
+- `tools/meshy/face_touch.py` (spec: Claire v1's claire_face_touch.json, in git history before the v2 rebuild): the face sheet softened before its
   projection (blush toward the skin, freckles deepened, eyes magnified with a soft lens and their iris lifted).
 - hard_parts: `wings.scale`, `horns.slot`/`root`/`tipcol`/`crest`, `spear.blade_w`/`blade_t`/`shaft_r`/`pale`.
 
@@ -505,6 +505,18 @@ from the pelvis as v1's skirt did; the thighs under it stay (the jacket is open 
 Grimble v2 notes: one body scan replaces v1's body, head and hoard scans. grimble_source.py fits it (the limbs keep the scan's spread,
 the rig's joint heights; past a bone's ends the scan's own scale). The hoard, bells, lanterns, blunderbuss and junk ball are v1's sculpt;
 the loupe is scripted; the face's squint, teeth and gums and the glowing veins are paint fixes (grimble_paint.scan_face, vein_key).
+
+### Claire v2 (owner redesign: rabbit ears, braid, puff tail), 2026-11-07 (85 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Claire v2 edit front | 13:02 | 01a1b61a-8f75-7116-b432-5496b1cabe44 | nano-banana-pro (image-to-image) | nivi_v2_turnaround crop; ears, braid, scarf ends, tail and blades out, skirt opaque | 9 | Kept |
+| Claire v2 edit 3/4 | 13:02 | 01a1b61a-8f6e-751a-8ac5-5ea408b53214 | nano-banana-pro | as front, 3/4 view | 9 | Dropped: redone |
+| Claire v2 edit 3/4 b | 13:03 | 01a1b61b-63af-7744-9912-974dcd66e6eb | nano-banana-pro | the 3/4 again | 9 | Kept |
+| Claire v2 edit side | 13:02 | 01a1b61a-8f85-7599-8580-5d05d1ce9c55 | nano-banana-pro | as front, right side | 9 | Kept |
+| Claire v2 edit back | 13:02 | 01a1b61a-8f67-738a-b5d9-5bf863cb4f67 | nano-banana-pro | as front, back | 9 | Kept |
+| Claire v2 A | 13:04 | 01a1b61c-3d74-7213-95c7-5b709948ce1d | meshy multi-image | front, 3/4, side, back edits; ultra, HD texture | 40 | Kept: ART-1 (tools/art1/claire_build.sh), 13.6k tris |
+
+Claire v2 total: 6 tasks, 85 credits. Prompts in art/wardens/src/claire_recipe.json; built pieces (ears, braid, tail, spear) in art/wardens/claire/IMPORT.md.
 
 ## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
 No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.
