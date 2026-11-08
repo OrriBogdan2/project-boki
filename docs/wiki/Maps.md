@@ -40,15 +40,15 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 | Region | Biome | Purpose |
 |---|---|---|
-| The Crown | Gloom | Contested core: the vault on the Throne, two boss Gaols, the richest loot and the most Blight. Every route in is a bridge or a glide over open air. |
-| Frostgate | Frost | Northern ridge and Keep: high ground over the Gate Span, a camp to level on, Rimefield cover. |
-| Cinder Steps | Ember | Western forge country: the Kilns overlook the Crown's west face; the Ash Bridge to the Ashen Gaol. |
-| Stormbreak | Storm | Eastern tableland with the shrine on the Shrine Table; launch pad up to Shardfall. |
-| Thornwood | Bloom | Southern wood: tall grass ambushes, the Boki nest, the Thornhive lair and its uplink. |
-| Larkhollow | Meadow | Quiet NW landing with a skiff dock. |
-| Highwatch | Frost | Quiet NE landing with an uplink outpost. |
-| Duskmoor | Storm | Quiet SE landing with a skiff dock. |
-| Saltmere | Bloom | Quiet SW landing with an uplink outpost. |
+| The Crown | Gloom | The vault on the Throne, two boss Gaols and the richest chests, under the most Blight. |
+| Frostgate | Frost | The best armor on the map, and the Keep's high ground over the Gate Span. |
+| Cinder Steps | Ember | Forge country: gloves and weapon tunings from the Kilns, a camp to level on. |
+| Stormbreak | Storm | The shrine on the Shrine Table, boots, and the launch pad to Shardfall. |
+| Thornwood | Bloom | The Boki nest and the Thornhive lair; tall-grass ambushes and an uplink by the nest. |
+| Larkhollow | Meadow | Wild Boki graze in the Hollow; a calm place to catch one, with a skiff dock out. |
+| Highwatch | Frost | The Lookout over the Gaol and the Watch Road, boots, and an uplink out. |
+| Duskmoor | Storm | Relics in the Moor Chapel ruins, and a skiff dock out. |
+| Saltmere | Bloom | Salt caches along the dry river, the outer ring's most chests, and an uplink out. |
 
 ### Islands
 
@@ -60,11 +60,11 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 | Frostgate | camp | Frost | contested | 6 | Frostgate Keep, Rimefield |
 | Cinder Steps | camp | Ember | contested | 15 | The Kilns, Forge Yard |
 | Stormbreak | shrine | Storm | contested | 11 |  |
-| Thornwood | nest | Bloom | contested | 30 |  |
-| Larkhollow | landing | Meadow | quiet | 20 | Lark Stones |
-| Highwatch | landing | Frost | quiet | 3 |  |
-| Duskmoor | landing | Storm | quiet | 11 |  |
-| Saltmere | landing | Bloom | quiet | 16 |  |
+| Thornwood | nest | Bloom | contested | 28 | Bramble Rise |
+| Larkhollow | landing | Meadow | quiet | 25 | The Hollow |
+| Highwatch | landing | Frost | quiet | 3 | The Lookout |
+| Duskmoor | landing | Storm | quiet | 10 | Moor Chapel |
+| Saltmere | landing | Bloom | quiet | 8 | Salt River |
 | Shardfall | perch | Gloom | dangerous | 0 |  |
 
 ### Boss lairs
