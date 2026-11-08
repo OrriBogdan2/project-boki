@@ -61,8 +61,8 @@ func _charge_and_waves() -> void:
 	var shots0: int = m.shot_n
 	_cast(P, home + Vector3(4, 0, 0))
 	ok(
-		"ult cast: the charge move plays, its own cooldown starts (21s)",
-		B.charging() and K.anim_id == "dr_blast" and absf(float(K.cd["x"]) - 21.0) < 0.2, "cd %.1f" % float(K.cd["x"])
+		"ult cast: the charge move plays, its own cooldown starts (36s)",
+		B.charging() and K.anim_id == "dr_blast" and absf(float(K.cd["x"]) - 36.0) < 0.2, "cd %.1f" % float(K.cd["x"])
 	)
 	ak.step(m, 0.3, func(): P.inp["move"] = Vector2(0, 1))
 	var fan: Dictionary = AimKit.entry(P, "x_fan")

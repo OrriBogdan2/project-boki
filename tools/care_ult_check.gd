@@ -73,8 +73,8 @@ func tender() -> void:
 		"calls +%d" % (int(K.stats["calls"]) - calls0))
 	ok("mm X: X starts the tether on that teammate with the cast move", not K.hearth_call.is_empty()
 		and K.hearth_call["who"] == A and K.anim_id == "mm_call", K.anim_id)
-	ok("mm X: its own cooldown (46 s) starts on the cast", absf(float(K.cd["x"]) - HeroUlt.cooldown(K)) < 0.2
-		and HeroUlt.cooldown(K) == 46.0, "cd %.1f" % float(K.cd["x"]))
+	ok("mm X: its own cooldown (60 s) starts on the cast", absf(float(K.cd["x"]) - HeroUlt.cooldown(K)) < 0.2
+		and HeroUlt.cooldown(K) == 60.0, "cd %.1f" % float(K.cd["x"]))
 	ok("mm X: no bond is paid for the cast alone", _bond_kind(K) == "", _bond_kind(K))
 	# --- the channel: she walks, the tether shows, the ring is shown to everyone, the teammate heals
 	var p0 := P.pos

@@ -82,18 +82,18 @@ What the in-game kit card (K) says.
 
 **Rage (passive).** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
 
-**Rampage (dash, Shift, 10.4s cooldown).** A short crouch, then a dash attack of about 4m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
+**Rampage (dash, Shift, 13s cooldown).** A short crouch, then a dash attack of about 4m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
 
-**Smash (RMB, 2s cooldown).**
+**Smash (RMB, 2.5s cooldown).**
 
 - *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Its sweet spot, the far tip dead ahead, hits 40% harder. Knock a hunter within 2s of hitting them with it and the Gilded Riposte is ready again.
 - *Hold:* Lunge: the blade raised over your head (the lane grows ahead of you, magenta and flashing at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. At full the raised blade flashes white once a second: let go on the flash for 20% more distance. You can jump while you charge. Strike nothing and the cooldown doubles.
 - *In the air:* Meteor Drop: a disc shows under your cursor (5m at most). Press and you hang over it for a beat, the blade raised (everyone sees where you'll land), then dive onto it: a 2.6m burst, 18 and slow 40% for 1.5s; the inner ring (1.2m) takes +50% and is stunned 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back.
 - *During E:* With the Warchain: press while it pulls you, or as you arrive, for a Cinder Spin at once (2.6m, 18, blights 4s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); charge while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 
-**Warchain (E, 12.8s cooldown).** Throw a chain 13m: it hooks the first foe (8 damage) or bites a wall, and holds for 5s while you move, paying out up to 24m and holding taut there. Press E again to be hauled to it: look aside (a held direction stacks) to swing out in an arc and land beside or past it, back away first to slingshot in faster, Shift or jump to break off (a jump keeps the speed), and you arrive still moving. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
+**Warchain (E, 16s cooldown).** Throw a chain 13m: it hooks the first foe (8 damage) or bites a wall, and holds for 5s while you move, paying out up to 24m and holding taut there. Press E again to be hauled to it: look aside (a held direction stacks) to swing out in an arc and land beside or past it, back away first to slingshot in faster, Shift or jump to break off (a jump keeps the speed), and you arrive still moving. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 
-**Gilded Riposte (hunter ultimate, from level 6, 36s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 43, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once.
+**Gilded Riposte (hunter ultimate, from level 6, 45s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 43, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once.
 
 ### Ranks
 
