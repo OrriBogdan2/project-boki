@@ -1,0 +1,45 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://celfm1rkbhigu"
+path.bptc="res://.godot/imported/rimeshrew_rimeshrew_eye.webp-4b4641cb3c7d371181a6f6eb3e5b8a16.bptc.ctex"
+path.astc="res://.godot/imported/rimeshrew_rimeshrew_eye.webp-4b4641cb3c7d371181a6f6eb3e5b8a16.astc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
+generator_parameters={
+"md5": "4ed6d3faaba23d5dfcf9e307efda9343"
+}
+
+[deps]
+
+source_file="res://art/kin/rimeshrew/rimeshrew_rimeshrew_eye.webp"
+dest_files=["res://.godot/imported/rimeshrew_rimeshrew_eye.webp-4b4641cb3c7d371181a6f6eb3e5b8a16.bptc.ctex", "res://.godot/imported/rimeshrew_rimeshrew_eye.webp-4b4641cb3c7d371181a6f6eb3e5b8a16.astc.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=true
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/channel_remap/red=0
+process/channel_remap/green=1
+process/channel_remap/blue=2
+process/channel_remap/alpha=3
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=1

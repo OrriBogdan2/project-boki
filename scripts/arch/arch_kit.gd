@@ -34,6 +34,7 @@ var bonded_glow := false
 var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, guard}
 var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
 var flow: DashFlow             # what ability presses do during this hero's dash
+var dash_press_at := -9.0      # when Shift last went to on_dash (AirLimits: the dash's moves never hold the glider)
 
 static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	var k: ArchKit
@@ -71,19 +72,31 @@ func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
 func res_max() -> float: return float(res_def().get("max", 100.0))
+## false when the passive has no meter (Hawk Sense)
+func has_meter() -> bool: return String(res_def().get("kind", "")) != "none"
 func res_col() -> Color: return Color(String(res_def().get("col", "#ffffff")))
 func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff")))
 
 func rank(slot: String) -> int:
 	return h.ability_level(slot)
 
-## +15% damage per rank (Effects.level_k) on top of the hunter's own damage multiplier and the
-## ability power their level gives (LevelGrowth.ap).
+## A hero's own multiplier for one slot at its rank: JSON `<table>` {slot: [rank 1, rank 2, rank 3]}
+## (rank_dmg, rank_cd, rank_shield; the source's upgrades, see docs/heroes). `shared` when the hero has no row.
+func rank_k(table: String, slot: String, shared: float) -> float:
+	var row: Array = d.get(table, {}).get(slot, [])
+	return float(row[clampi(rank(slot) - 1, 0, row.size() - 1)]) if not row.is_empty() else shared
+
+## The hero's rank damage (rank_dmg, else +15% a rank: Effects.level_k) on top of the hunter's own damage
+## multiplier and the ability power their level gives (LevelGrowth.ap).
 func power(slot: String) -> float:
-	return m.dmg_mult(h) * Effects.level_k({"level": rank(slot)}) * LevelGrowth.ap(h)
+	return m.dmg_mult(h) * rank_k("rank_dmg", slot, Effects.level_k({"level": rank(slot)})) * LevelGrowth.ap(h)
 
 func cd_k(slot: String) -> float:
-	return h.rank_cd_k(slot)
+	return rank_k("rank_cd", slot, h.rank_cd_k(slot))
+
+## The dash recharge multiplier at the dash rank (rank_cd.dash, else 15% faster a rank past the first).
+func dash_k() -> float:
+	return rank_k("rank_cd", "dash", 1.0 - 0.15 * float(rank("dash") - 1))
 
 func rmb_charges() -> int: return int(rmb_def().get("charges", 1))
 
@@ -116,6 +129,7 @@ func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
 func gate_inputs() -> void: pass                    # a kit drops the presses it locks out
+func locks_glide() -> bool: return false            # a move AirLimits can't see from the shared state (a dive)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 ## Does this kit have the class long dash (Shift in the air)? The HUD shows its segment only then.
 func has_long_dash() -> bool: return true
@@ -125,6 +139,7 @@ func on_block(_dmg: float, _by) -> void: pass
 func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func move_k() -> float: return 1.0
+func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
 func draw_rate() -> float: return 1.0               # a bow's draw speed (Hem's quick draw after a perfect release)
 func fire_ok() -> bool: return true
@@ -204,6 +219,8 @@ func _r_end() -> void: pass
 ## A cast holds the caster still (no walking or jumping); aim_lock() is the facing it keeps (ZERO: free to turn).
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
+## A move that keeps the glider shut while it runs.
+func no_glide() -> bool: return false
 
 func busy() -> bool:
 	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
@@ -469,9 +486,9 @@ func dash_feel() -> Dictionary:
 		_dash_feel = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/dash_feel.json"))
 	return _dash_feel.get(id, _dash_feel["default"])
 
-## A travelling dash of a given length and time (the Effects dash, so perfect dodges, riders and
-## the dash buffer all work as before).
-func travel(dist: float, t: float, extra := {}, use_ex := false) -> void:
+## A travelling dash of a given length and time (the Effects dash, so perfect dodges and the dash
+## buffer all work as before). The hero's own: no Boki changes it (DECISIONS 2026-11-05, --boki-dash-check).
+func travel(dist: float, t: float, extra := {}) -> void:
 	var feel := dash_feel()
 	dist *= float(feel["dist"])
 	t *= float(feel["time"])
@@ -479,41 +496,8 @@ func travel(dist: float, t: float, extra := {}, use_ex := false) -> void:
 	for k in extra:
 		e[k] = extra[k]
 	Effects.run([e], h, {"slot": "dodge", "ability": String(dash_def().get("id", "dash")), "level": rank("dash")})
-	h._dash_rider(use_ex)
 	Feel.dash_sound(m, id, h.pos, h)
 	CombatBus.ability_used.emit(h, String(dash_def().get("id", "dash")), "dodge")
-
-## The kin's dodge rider on a dash that doesn't travel (a blink, a zip, a leap): on_start at the
-## departure, on_pass on foes within 1m of the line (the streak rule), on_end at the arrival
-## (DASHES §3.4). Returns the rider's repeat and as fields for the shape to interpret.
-func rider_points(from: Vector3, to: Vector3) -> Dictionary:
-	var out := {"repeat": null, "as": ""}
-	var k: Kin = h.kin
-	if k == null or k.dead or k.ks == null or k.ks.dodge_rider.is_empty():
-		return out
-	var rd: Dictionary = k.ks.dodge_rider
-	var cx := KinExec.make_cx(m, h, k, h, h.inp.get("aim", to), m.dmg_mult(h) * Effects.level_k({"level": rank("dash")}), "dodge", "rider_" + k.species)
-	var dir := Vector2(to.x - from.x, to.z - from.z)
-	dir = dir.normalized() if dir.length() > 0.05 else h.aim_dir()
-	if not (rd.get("on_start", []) as Array).is_empty():
-		var c1 := cx.duplicate(); c1["at"] = from; c1["dir"] = dir
-		KinExec.run_stages(rd["on_start"], c1)
-	if not (rd.get("on_pass", []) as Array).is_empty():
-		var a2 := Vector2(from.x, from.z); var b2 := Vector2(to.x, to.z)
-		for f in m.foes_of(h.team):
-			var fp := Vector2(f.pos.x, f.pos.z)
-			if fp.distance_to(Geometry2D.get_closest_point_to_segment(fp, a2, b2)) < 1.0 + f.r and absf(f.pos.y - from.y) < 2.0:
-				KinExec.apply_foe(rd["on_pass"], f, cx, from)
-		m.fx.bolt(from + Vector3(0, 0.8, 0), to + Vector3(0, 0.8, 0), Hunter._rider_color(k.ks))
-	if not (rd.get("on_end", []) as Array).is_empty():
-		var c2 := cx.duplicate(); c2["at"] = to; c2["dir"] = dir
-		KinExec.run_stages(rd["on_end"], c2)
-	for md in rd.get("modifiers", []):
-		if (md as PartSpec).type == "repeat": out["repeat"] = md
-	out["as"] = String(rd.get("as", "dash"))
-	var th := String(Data.KIN.get(k.species, {}).get("type", ""))
-	Feel.sound(m, "sweet", th, from, h)
-	return out
 
 # ------------------------------------------------------------------ infusion and the grammar
 ## The kin's infusion, or {} with no kin able to fight.
@@ -837,10 +821,11 @@ func _tick_knocks() -> void:
 
 ## A rival we hit in the last 5s was knocked (mine: our blow did it; else an assist).
 func on_knock(_t: Hunter, _mine: bool) -> void: pass
-func fires_in_dash() -> bool: return false
+## The weapon fires in this hero's dash when its LMB row says "fire" (DashFlow); a kit with its own dash overrides.
+func fires_in_dash() -> bool: return String(flow.row("lmb")["mode"]) == "fire"
 ## The body and weapon stay on the cursor through this dash, the legs alone following it (item 109). False: she
 ## turns along the dash. A kit that fires mid-dash answers true, or the gun points away from its own rounds.
-func aims_in_dash() -> bool: return false
+func aims_in_dash() -> bool: return fires_in_dash()
 ## In this hero's dash right now, as DashFlow sees it (a kit with its own dash state overrides this).
 func in_dash() -> bool: return h.roll_t > 0.0 and h.move_kind == "dash"
 ## s left in that dash (0 when not in one); a kit that overrides in_dash() overrides this too.

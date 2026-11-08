@@ -1,5 +1,5 @@
 extends "res://tools/hero_pair_check.gd"
-## --dolm-combo-check: Tarek (id dolm), docs/heroes/dolm.md. Every slot, its telegraph and cursor state
+## --dolm-combo-check: Tenzo (id dolm), docs/heroes/dolm.md. Every slot, its telegraph and cursor state
 ## while aiming or holding, the charge timings, where it lands, the payoffs, the small mechanics
 ## (docs/heroes/dolm.md "Small mechanics"), standing on and climbing rocks, the merge-start drops, and
 ## that every move, sound and look the kit plays exists.
@@ -57,7 +57,7 @@ func _breah() -> void:
 		step(m, 0.25)
 	ok(
 		"name: the display name is the class title",
-		Arch.name_of("dolm") == "Cliff Runner", Arch.name_of("dolm")
+		Arch.name_of("dolm") == "The Stone Seer", Arch.name_of("dolm")
 	)
 	var card: Dictionary = K.d["card"]
 	ok(
@@ -251,32 +251,42 @@ func _breah() -> void:
 			and not bool(cross["jumped"]),
 		"cross %.2fs peak %.2f top %.2f" % [float(cross["t"]), float(cross["peak"]), top - home.y]
 	)
-	var tgt := Vector3(mid0.x, home.y, mid0.z)
+	var into := Vector2(mid0.x - home.x, mid0.z - home.z).normalized()
 	P.teleport(home + Vector3(0, 0, -6.0))
 	for team in [P.team, 5]:
 		var B: Hunter = m.make_hunter("B", team, "medium", "Other", "idle", {}, home, {"arch": "none"})
 		var walk := _walk_over(m, B, home, w0)
+		# the bot rule at the face: jump a teammate's rock at once; the caster walks up his own; a foe goes round
+		var bot_hops := StoneStand.hop_ahead(B, into)
+		var at_face := B.pos
+		P.teleport(at_face)
+		P.grounded = true
+		var caster_hops := StoneStand.hop_ahead(P, into)
+		P.teleport(home + Vector3(0, 0, -6.0))
 		B.teleport(home)
 		B.vel = Vector3.ZERO
 		var jump_peak := [0.0]
-		step(m, 0.3, func(): B.inp["move"] = Vector2(tgt.x - B.pos.x, tgt.z - B.pos.z).normalized())
+		step(m, 0.3, func(): B.inp["move"] = into)
 		B.inp["jump"] = true
-		step(m, 0.9, func():
-			B.inp["move"] = Vector2(tgt.x - B.pos.x, tgt.z - B.pos.z).normalized()
+		step(m, 1.4, func():
+			B.inp["move"] = into
 			jump_peak[0] = maxf(jump_peak[0], B.pos.y - home.y))
-		var near_side := (B.pos - mid0).dot((mid0 - home).normalized()) < 0.0
+		var past := (B.pos - mid0).dot(Vector3(into.x, 0, into.y))
 		var walk_stopped := float(walk["t"]) < 0.0 and float(walk["peak"]) < 0.1
 		if team == P.team:
-			var over := not near_side or B.pos.y >= top - 0.1
-			ok("rock (the data, the owner's 23:55 answer): an ally walking into his rock is stopped, jumping hops on",
-				walk_stopped and over, "walk cross %.2f peak %.2f, jump peak %.2f, y %.2f top %.2f" % [
-					float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y, top
+			ok("rock (the data, DECISIONS): an ally walking into his rock is stopped, jumping carries him up and over",
+				walk_stopped and past > float(w0["th"]) + B.r and jump_peak[0] >= top - home.y - 0.1,
+				"walk cross %.2f peak %.2f, jump peak %.2f top %.2f, past %.2f" % [
+					float(walk["t"]), float(walk["peak"]), jump_peak[0], top - home.y, past
 				])
+			ok("rock (bots): an ally bot at his rock jumps it at once; a Tenzo bot walks up his own (no jump)",
+				bot_hops and not caster_hops,
+				"ally %s caster %s at %s" % [str(bot_hops), str(caster_hops), str(at_face)])
 		else:
-			ok("rock (item 25): a foe walking or jumping into his rock is stopped",
-				walk_stopped and jump_peak[0] > 0.8 and near_side and B.pos.y < top - 0.5,
-				"walk cross %.2f peak %.2f, jump peak %.2f, y %.2f" % [
-					float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y - home.y
+			ok("rock (DECISIONS): a foe walking or jumping into his rock is stopped, and a foe bot does not jump it",
+				walk_stopped and jump_peak[0] > 0.8 and past < 0.0 and B.pos.y < top - 0.5 and not bot_hops,
+				"walk cross %.2f peak %.2f, jump peak %.2f, y %.2f, bot hops %s" % [
+					float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y - home.y, str(bot_hops)
 				])
 		B.queue_free()
 		m.hunters.erase(B)
@@ -701,13 +711,13 @@ func _breah() -> void:
 		"breah_raise", "breah_sense"
 	]
 	ok(
-		"anim: every Tarek move is keyed (KMovesStone)",
+		"anim: every Tenzo move is keyed (KMovesStone)",
 		moves.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty()),
 		str(moves.filter(func(mv): return HunterAnim.km_sample(mv, 0.1).is_empty()))
 	)
 	var snd := SfxKits.NAMES.filter(func(s): return String(s).begins_with("br_"))
 	ok(
-		"sfx: every Tarek sound is loaded by Sfx", snd.size() >= 14 and snd.all(func(s): return Sfx.has(s)),
+		"sfx: every Tenzo sound is loaded by Sfx", snd.size() >= 14 and snd.all(func(s): return Sfx.has(s)),
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)
@@ -798,9 +808,8 @@ func _hop_item61(m: Match, P: Hunter, K: DolmKit, home: Vector3, reset: Callable
 		float(ran["x"]) > float(plain["x"]) + 0.3, "run %.2f standing %.2f" % [float(ran["x"]), float(plain["x"])]
 	)
 
-## Item 26: Quakefall then the glider. Glide held from the hop, or pressed after a charge leap or an air
-## press: the glider opens, she never drops below where she took off (for the first 0.3s), and it sinks
-## like a normal glide.
+## Item 162b (replaces item 26's glide mid-Quakefall): glide held from the hop, a charge leap or an air press
+## never opens the glider while the Quakefall runs (AirLimits; DolmKit.locks_glide). Over the abyss it may.
 func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
 	for mode in ["hop", "leap", "air"]:
 		reset.call()
@@ -822,21 +831,17 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 			tap(m, P)
 			z0 = P.pos.y
 		var dove := K.dive
-		var floor_z := -Hunter.GLIDE_SINK * 0.3 - 0.02 if mode == "air" else -0.01     # (in the air: a glide's sink)
-		var low := 99.0
-		var sink := 0.0
+		var opened := false
 		var t := 0.0
 		P.inp["jump"] = true
-		while t < 0.3:
+		while t < 0.3 and K.dive:
 			P.inp["glide"] = true
 			m.step(DT)
 			t += DT
-			low = minf(low, P.pos.y - z0)
-			if P.gliding: sink = minf(sink, P.vel.y)
+			opened = opened or (P.gliding and K.dive)
 		ok(
-			"glide (item 26, %s): Quakefall, then glide opens the glider; height kept, a normal glide" % mode,
-			dove and P.gliding and not K.dive and low >= floor_z and sink >= -Hunter.GLIDE_SINK - 0.05,
-			"gliding %s dive %s low %.2f sink %.2f" % [P.gliding, K.dive, low, sink]
+			"glide (item 162b, %s): glide held through the Quakefall never opens the glider mid-move" % mode,
+			dove and not opened, "dove %s opened %s (%.2fs, %.1fm over the take-off)" % [dove, opened, t, P.pos.y - z0]
 		)
 		P.inp["glide"] = false
 		step(m, 0.8)

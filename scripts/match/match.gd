@@ -722,6 +722,7 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.generate")
 	await world.build_meshes()
 	RaidLook.tune_world(world, raid)
+	if DepthCues.k() > 0.0: add_child(DepthCues.new(self))
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	brk = Breakables.new(self)
@@ -1114,6 +1115,7 @@ func _spawn_hunters() -> void:
 		spots = rolling.spots_along(ship, n_teams)
 	var total := int(opts.get("total", 999))
 	var made := 0
+	var mates: Array = opts.get("mates", [])
 	for t in n_teams:
 		var base: Vector3 = spots[t % spots.size()] if spots.size() > 0 else world.random_ground()
 		for s in squad:
@@ -1157,20 +1159,29 @@ func _spawn_hunters() -> void:
 					_apply_treat(player.kin)
 				_start_drop(player, at)
 				continue
-			var h := make_bot(t, at, names)
+			var mate: Dictionary = mates[s - 1] if t == 0 and s > 0 and s <= mates.size() else {}
+			var h := make_bot(t, at, names, mate)
 			_start_drop(h, at)
 
-## A rival bot hunter for squad t, standing at `at` (the drop is up to the caller).
-func make_bot(t: int, at: Vector3, names: Array) -> Hunter:
+## A rival bot hunter for squad t, standing at `at` (the drop is up to the caller). `mate`: your
+## squadmate the lobby dealt ({name, arch}, see Prematch.deal_mates), else a random one.
+func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 	var bk := bot_kit()
-	var bname: String = names.pop_back() if names.size() > 0 else "Bot"
+	var bname := "Bot"
+	if not mate.is_empty():
+		bname = String(mate["name"])
+		bk["arch"] = String(mate["arch"])
+	elif names.size() > 0:
+		bname = names.pop_back()
 	var brec := bot_kin_record()
 	# a rival who's holding one of your lost kin may be out here with it
 	var held := _held_for_match(t)
 	if not held.is_empty():
 		bname = String(held["holder"])
 		brec = (held["rec"] as Dictionary).duplicate(true)
-	var h := make_hunter(next_id("b"), t, "", bname, "bot", brec, at, bk, bot_kin_record() if rng.randf() < 0.6 else {})
+	var cls := Arch.weight(String(bk.get("arch", "")))
+	var own_kin := bot_kin_record() if rng.randf() < 0.6 else {}
+	var h := make_hunter(next_id("b"), t, cls, bname, "bot", brec, at, bk, own_kin)
 	if not held.is_empty() and h.kin:
 		(h.kin as Kin).lost_uid = String(brec.get("uid", ""))
 		(h.kin as Kin).lost_from = "you"
@@ -1215,7 +1226,9 @@ func _start_drop(h: Hunter, at: Vector3) -> void:
 	h.ai["land"] = at
 
 # ---- the skyship
-const SHIP_Y := 40.0
+const SHIP_Y := 70.0      # item 163: a high start, a long readable glide down
+const RIDE_CAM_DIST := 44.0  # m back from the ship on the ride: the whole ship in frame (item 163)
+const LAUNCH_CAM_DIST := 26.0  # m back from the squad in the launch
 const SHIP_SPEED := 11.0
 var big := false
 var ship := {}
@@ -1283,13 +1296,13 @@ func ship_jump(h: Hunter, force := false) -> void:
 	h.gliding = true
 	h.glide_k = 1.0
 	h.grounded = false
-	h.vel = hs["dir"] * 3.0
+	DropLaunch.start(h, hs["dir"])      # the squad's rocket launch (item 163)
 	if h == player:
 		sfx("whoosh", null, -2.0)
 		if hud and not force:
-			hud.toast("Steer with %s%s%s%s  ·  %s opens your glider early" % [Settings.key_cap("up"), Settings.key_cap("left"), Settings.key_cap("down"), Settings.key_cap("right"), Settings.key_cap("jump")], Color("cfeaff"))
+			hud.toast("Launch!  ·  your glider opens in a moment, then steer your own way down", Color("cfeaff"))
 		elif hud:
-			hud.toast("Gliding in formation  ·  %s to break away" % Settings.key_cap("separate"), Color("cfeaff"))
+			hud.toast("Launching with your squad  ·  %s to break away early" % Settings.key_cap("separate"), Color("cfeaff"))
 	if skydrop and skydrop.is_lead(h):
 		skydrop.on_lead_jump(h)
 
@@ -2156,6 +2169,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
+	DashReset.note(target, credit)
 	if target is Hunter and target != credit:
 		(target as Hunter).dmg_taken += d
 		if by is Blight: kstat["bl_dmg"] = float(kstat.get("bl_dmg", 0.0)) + d
@@ -2229,7 +2243,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
 		credit.knocks += 1
-		# the knock reward: a dash back (all charges) and a small heal (DashReset), armor and XP
+		# the knock reward: a dash refresh for the knocker and assisters, a small heal (DashReset), armor and XP
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
@@ -2346,6 +2360,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		_lose_life(h, by, why)
 		return
 	cancel_abilities(h)
+	if h.ak: h.ak.drop_holds()      # an out hunter's kit no longer ticks: a channel (Hearth Call) would hang on
 	h.out = true
 	h.downed = false
 	if net_on and not h.remote:
@@ -3635,12 +3650,22 @@ func _process(delta: float) -> void:
 		cam.yaw_to = atan2(-sd.x, -sd.z)
 		cam.chase_to = 1.0
 		cam.top_to = 0.0
-		cam.zoom_to = 56.0 / cam.dist
+		cam.zoom_to = RIDE_CAM_DIST / cam.dist
 		if time < 0.5:
 			# boarding: start already behind the ship rather than swinging through it
 			cam.chase = 1.0; cam.yaw = cam.yaw_to; cam.zoom = cam.zoom_to
-		var fp := ship_pos_of(ps) + sd * 27.0
-		cam.follow(Vector3(fp.x, (SHIP_Y - 11.0) / 0.6, fp.z), delta, false)
+		# item 163: the whole ship in frame (hull, balloon, props) with the squad aboard (follow aims ~4 m under)
+		var fp := ship_pos_of(ps) + sd * 3.0
+		cam.follow(Vector3(fp.x, ship_pos_of(ps).y + 7.0, fp.z), delta, false)
+	elif player and DropLaunch.locked(player):
+		# the launch: chasing the squad down its heading, the ship receding overhead (item 163)
+		var hd := Vector2(player.vel.x, player.vel.z)
+		if hd.length() > 0.5:
+			cam.yaw_to = atan2(-hd.x, -hd.y)
+		cam.chase_to = 1.0
+		cam.top_to = 0.0
+		cam.zoom_to = LAUNCH_CAM_DIST / cam.dist
+		cam.follow(player.pos + Vector3(0, 4.0, 0), delta, false)
 	elif player and not player.out and not player.downed:
 		cam.chase_to = 0.0
 		cam.yaw_to = 0.0
@@ -5785,6 +5810,7 @@ func _net_ev(x, from: String) -> void:
 				"bolt": fx.bolt(Vector3(x[2], x[3], x[4]), Vector3(x[5], x[6], x[7]), Color.html(String(x[8])))
 				"cone": fx.cone(Vector3(x[2], x[3], x[4]), Vector2(x[5], x[6]), 5.0, Color.html(String(x[7])))
 				"hvfx": HeroVfx.of(self).net_in(x)
+				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.downed:
@@ -5793,9 +5819,9 @@ func _net_ev(x, from: String) -> void:
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
+				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
 				if by == player:
 					player.knocks += 1
-					DashReset.takedown(player, who)
 					_reward_moment(who.pos)
 				_check_team(player.team if player else -9)
 		"out":
@@ -5803,9 +5829,9 @@ func _net_ev(x, from: String) -> void:
 			if who is Hunter and not who.out:
 				var by: Ent = ents_by_id.get(String(x[2]), null)
 				who.out = true
+				if by is Hunter: DashReset.takedown(by, who)
 				if by == player:
 					player.kills += 1
-					DashReset.takedown(player, who)
 				add_feed(out_text(who.pname, String(x[3])))
 				if who.kin:
 					who.kin.dead = true

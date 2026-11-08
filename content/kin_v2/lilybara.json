@@ -1,0 +1,120 @@
+{
+	"grammar": 1,
+	"id": "lilybara",
+	"name": "Soakybara",
+	"animals": [
+		"Capybara",
+		"Hot-spring pool"
+	],
+	"theme": "bloom",
+	"flavor": "A capybara with a hot spring on its back; you ride sitting in the bath, and the steam heals the squad. Calm and sociable, the friend of everything; nothing ruffles it.",
+	"colors": {
+		"body": "#9a7050",
+		"belly": "#d8b890",
+		"glow": "#ffa0d0"
+	},
+	"look": {
+		"ears": "leaf",
+		"body": "boulder",
+		"tail": "sprout",
+		"feet": "stumps",
+		"aura": "leaves"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.5,
+		"mass": 1.5,
+		"gait": {
+			"hop_rate": 6.0,
+			"hop_height": 0.08,
+			"pace": 1.0
+		}
+	},
+	"stats": {
+		"kin_hp": 9,
+		"kin_damage": 1,
+		"kin_speed": 4,
+		"owner_regen": 4,
+		"owner_shield": 2
+	},
+	"personality": {
+		"bravery": 0.55,
+		"loyalty": 0.85,
+		"temper": 0.05,
+		"curiosity": 0.55
+	},
+	"ai": {
+		"aggression": 0.3,
+		"loyalty": 0.9,
+		"caution": 0.6,
+		"role": "support"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Lily Raft",
+		"passives": [
+			{
+				"stat": "regen",
+				"amount": 2.5
+			}
+		],
+		"mount": {
+			"speed": 1.15,
+			"jump": 0.9,
+			"turn": 0.7
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "root",
+				"duration": 0.8
+			}
+		]
+	},
+	"active": "prism_wall",
+	"auto": "refraction",
+	"merge": "tidal_shell",
+	"evolution": {
+		"root": "Lily",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "calm, cheerful, unhurried",
+		"syllables": [
+			"Lily",
+			"bara"
+		]
+	},
+	"egg": {
+		"name": "Lilybara Egg",
+		"temper": "Calm",
+		"desc": "Something calm is in here.",
+		"play": "Keeps you alive and patched up."
+	}
+}

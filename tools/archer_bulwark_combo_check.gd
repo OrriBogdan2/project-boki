@@ -13,20 +13,23 @@ func run(main_node: Node) -> void:
 	ult.main = main_node
 	var own = load("res://tools/pin_bjorn_owner_check.gd").new()
 	own.main = main_node
+	var tall = load("res://tools/tall_climb_check.gd").new()
+	tall.main = main_node
 	var launch = load("res://tools/bjorn_launch_check.gd").new()
 	launch.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		await ult.pin()
 		await own.pin()
+		await tall.tall()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
 		await _growth()
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	n += ult.n + own.n + launch.n
-	fails += ult.fails + own.fails + launch.fails
+	n += ult.n + own.n + launch.n + tall.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -60,11 +63,11 @@ func _shot_reach(m: Match, P: Hunter) -> float:
 	return -1.0
 
 ## Draws the bow for `t` seconds (aim kept on `at`), then lets go; returns how far the arrow will fly.
-func _loose_after(m: Match, P: Hunter, K: ArcherKit, t: float, at: Vector3) -> float:
+func _loose_after(m: Match, P: Hunter, t: float, at: Vector3) -> float:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
 	P.reload_t = 0.0
-	step(m, t, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, at))
+	step(m, t, func(): P.inp["fire"] = true; aim_at(P, at))
 	P.inp["fire"] = false
 	m.step(DT)
 	m.step(DT)
@@ -89,9 +92,9 @@ func _archer_combos() -> void:
 		"%.2f %.2f %.2f" % [s1, s2, K.draw.over_t()]
 	)
 	# the draw: its pose, the filling line, the resting aim line
-	step(m, 0.2, func(): K.res = 0.0; aim_at(P, T.pos))
+	step(m, 0.2, func(): aim_at(P, T.pos))
 	ok("pin reticle: a faint aim line to the cursor at rest", AimKit.shown(P, "draw_rest"))
-	step(m, 0.3, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	step(m, 0.3, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	var ve := AimKit.entry(P, "draw")
 	ok("pin anim: drawing holds arc_draw", K.anim_id == "arc_draw", K.anim_id)
 	var fe := AimKit.entry(P, "draw_fill")
@@ -108,7 +111,7 @@ func _archer_combos() -> void:
 		float(AimKit.reticle(P).get("charge", 0.0)) < 0.0 and not K.fx.bow_glint.visible,
 		str(AimKit.reticle(P))
 	)
-	step(m, 1.08, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	step(m, 1.08, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	var le := AimKit.entry(P, "draw")
 	ok(
 		"pin reticle: Supercharged = one thick line out to max range (16m), the foe under it ringed",
@@ -134,7 +137,7 @@ func _archer_combos() -> void:
 	T.teleport(home + Vector3(0, 0, 9.0))
 	T2.teleport(home + Vector3(0, 0, -9.0))
 	var cur := home + Vector3(6.0, 0, 0)
-	var e1 := _loose_after(m, P, K, 0.85, cur)
+	var e1 := _loose_after(m, P, 0.85, cur)
 	ok(
 		"pin aim: an Empowered arrow lands at the cursor (6m)",
 		absf(e1 - 6.0) < 0.9 and K.draw.last_kind == "arrow",
@@ -148,14 +151,14 @@ func _archer_combos() -> void:
 		K.fx.planted > pl0,
 		"planted %d" % (K.fx.planted - pl0)
 	)
-	var e2 := _loose_after(m, P, K, 1.3, cur)
+	var e2 := _loose_after(m, P, 1.3, cur)
 	ok(
 		"pin aim: a Supercharged arrow flies past the cursor to 16m",
 		e2 >= 15.0 and K.draw.last_kind == "super",
 		"reach %.1f kind %s" % [e2, K.draw.last_kind]
 	)
 	step(m, 0.6)
-	var e3 := _loose_after(m, P, K, 0.2, home + Vector3(4.0, 0, 0))
+	var e3 := _loose_after(m, P, 0.2, home + Vector3(4.0, 0, 0))
 	ok(
 		"pin aim: a tap shot lands at the cursor (4m)",
 		absf(e3 - 4.0) < 0.9 and K.draw.last_kind == "tap",
@@ -171,13 +174,13 @@ func _archer_combos() -> void:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
 	P.reload_t = 0.0
-	step(m, 1.8, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	step(m, 1.8, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok("pin anim: overdrawn, the draw arm shakes (arc_over)", K.anim_id == "arc_over", K.anim_id)
 	var oe := AimKit.entry(P, "draw")
 	ok("pin reticle: overdrawn dims the line to a thin pale one and drops the circle",
 		float(oe.get("alpha", 1.0)) < 0.6 and float(oe.get("lw", 1.0)) < 0.05 and not AimKit.shown(P, "draw_mark"),
 		"alpha %s lw %s" % [str(oe.get("alpha")), str(oe.get("lw"))])
-	_loose_after(m, P, K, 0.05, T.pos)
+	_loose_after(m, P, 0.05, T.pos)
 	ok("pin anim: an overdrawn release droops (arc_over_loose)", K.anim_id == "arc_over_loose", K.anim_id)
 	step(m, 0.4)
 	ok(
@@ -188,7 +191,7 @@ func _archer_combos() -> void:
 	# perfect release at stage 1: the burst at the bow, no extra damage, and the next draw reaches Empowered 1.6x faster
 	fresh(T)
 	var pf0 := K.perfects
-	_loose_after(m, P, K, 0.63, T.pos)
+	_loose_after(m, P, 0.63, T.pos)
 	ok("pin anim: a perfect release plays arc_perfect", K.anim_id == "arc_perfect", K.anim_id)
 	step(m, 0.4)
 	ok(
@@ -199,7 +202,7 @@ func _archer_combos() -> void:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
 	P.reload_t = 0.0
-	step(m, 0.42, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	step(m, 0.42, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok(
 		"combo pin: perfect > the next draw reaches Empowered in ~0.38s",
 		P.draw_t >= s1 and K.draw.quick_used,
@@ -210,22 +213,20 @@ func _archer_combos() -> void:
 		absf(K.move_k() * 0.7 - 0.85) < 0.01,
 		"move_k %.2f" % K.move_k()
 	)
-	step(m, 0.25, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	step(m, 0.25, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	P.inp["fire"] = false
 	step(m, 0.6)
 	ok("pin: a draw without a perfect is back to normal speed", not K.draw.quick, "quick %s" % K.draw.quick)
 	T.teleport(home + Vector3(7.0, 0, 0))
 	T2.teleport(home + Vector3(9.0, 0, 0))
-	# Heavy Shot into a wall: wall hit + 1.2s stun, fills Focus; then the next shot is a Deadeye
+	# Heavy Shot into a wall: wall hit + 1.2s stun; the next arrow is a plain one
 	fresh(T)
 	K.ch_rmb = 2.0
 	K.cd["rmb"] = 0.0
-	K.res = 0.0
 	var wall_pos := T.pos
 	_wall_at(m, T.pos, lv, 2)
 	aim_at(P, T.pos)
 	var pn0 := K.pins
-	var de0 := K.deadeyes
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.6, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos))
@@ -234,6 +235,11 @@ func _archer_combos() -> void:
 		"pin RMB held: the gold V and a gold bar from the bow",
 		not AimKit.shown(P, "rmb_v") and AimKit.shown(P, "rmb_bar") and K.anim_id == "arc_heavy_wind",
 		"v %s bar %s anim %s" % [AimKit.shown(P, "rmb_v"), AimKit.shown(P, "rmb_bar"), K.anim_id]
+	)
+	ok(
+		"pin anim: the Heavy Shot's draw clip runs on the hold's clock (its full-draw key 1.1 lands with full 1.1)",
+		absf((m.time - K.anim_at) - K.rmb_t) < 0.02,
+		"clip %.2f hold %.2f" % [m.time - K.anim_at, K.rmb_t]
 	)
 	step(m, 0.55, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos))
 	var bar1 := float(AimKit.entry(P, "rmb_bar").get("len", 0.0))
@@ -255,7 +261,18 @@ func _archer_combos() -> void:
 		K.pins >= pn0 + 1 and T.stun_t > 0.7 and dmg(T) >= 35.0 and K.anim_id == "arc_heavy",
 		"pins %d stun %.2f took %.0f anim %s" % [K.pins - pn0, T.stun_t, dmg(T), K.anim_id]
 	)
-	ok("combo archer: wall pin fills Focus", K.full_ready())
+	var pd: Dictionary = K.rmb_def()["pin"]
+	var want := float(pd["dmg"][1]) * (1.0 + 173.0 / 35.0)
+	ok(
+		"parity lace: wall pin pays 173 extra on the 35 shot (source ratio 4.94x), not our old 0.4x",
+		absf(float(pd["wall_mult"]) - 173.0 / 35.0) < 0.02 and dmg(T) >= want * 0.95,
+		"took %.0f, want %.0f" % [dmg(T), want]
+	)
+	ok(
+		"parity lace: RMB charge starts at the press (guard 0.15 s, was a 0.5 s dead zone)",
+		float(K.rmb_def()["hold"]) <= 0.15 and K.rmb_charge_full() > 1.0,
+		"hold %.2f" % float(K.rmb_def()["hold"])
+	)
 	var dd0 := dmg(T)
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
@@ -265,18 +282,17 @@ func _archer_combos() -> void:
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok(
-		"combo archer: wall pin > shot = Deadeye",
-		K.deadeyes == de0 + 1 and dmg(T) - dd0 >= 18.0,
-		"deadeyes %d dealt %.0f" % [K.deadeyes - de0, dmg(T) - dd0]
+		"combo archer: wall pin > shot is a plain arrow (Focus and Deadeye are cut, not in the source)",
+		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0 and K.anim_id != "pin_deadeye"
+			and not K.has_meter() and K.res == 0.0,
+		"dealt %.0f anim %s res %.0f" % [dmg(T) - dd0, K.anim_id, K.res]
 	)
-	ok("pin anim: the Deadeye payoff plays pin_deadeye", K.anim_id == "pin_deadeye", K.anim_id)
 	# rank 3 (data: Heartpiercer IV): a wall stun gives a dash charge
 	P.slot_lv["sec"] = 3
 	fresh(T)
 	T.teleport(wall_pos)
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
-	K.res = 0.0
 	P.dashes = 0.0
 	aim_at(P, T.pos)
 	hold(m, P, 1.2)
@@ -290,7 +306,6 @@ func _archer_combos() -> void:
 	fresh(T)
 	fresh(T2)
 	K.cd["e"] = 0.0
-	K.res = 0.0
 	P.teleport(home)
 	aim_at(P, home + Vector3(5.0, 0, 0))
 	T.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(45.0)))
@@ -304,7 +319,7 @@ func _archer_combos() -> void:
 		str(AimKit.entry(P, "e").get("radius"))
 	)
 	ok("archer anim: Hail Wall plays arc_hail", K.anim_id == "arc_hail", K.anim_id)
-	step(m, 1.6, func(): K.res = 0.0)
+	step(m, 1.6)
 	ok(
 		"pin E: a foe on the arc 45 degrees off the aim burns, one inside it does not",
 		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and K.fx.panels[0].visible,
@@ -316,7 +331,7 @@ func _archer_combos() -> void:
 	K.cd["rmb"] = 0.0
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	step(m, 0.7, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos); K.res = 0.0)
+	step(m, 0.7, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos))
 	P.inp["sec_hold"] = false
 	m.step(DT)
 	step(m, 0.3)
@@ -328,7 +343,6 @@ func _archer_combos() -> void:
 	step(m, 3.5)
 	# the Heavy Shot is hold only (data: Heartpiercer): one charge, 16 s, a tap looses nothing and costs nothing
 	fresh(T)
-	K.res = 0.0
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	P.teleport(home)
@@ -404,6 +418,13 @@ func _archer_combos() -> void:
 	P.do_dash()
 	step(m, 0.1)
 	ok("pin anim: Spirit Walk's roll plays pin_roll", K.anim_id == "pin_roll", K.anim_id)
+	var roll_t0 := K.anim_at
+	step(m, 0.18, func(): P.inp["move"] = Vector2(1, 0))
+	ok(
+		"pin anim: the roll hands to the crouched walk as the travel ends (roll_t 0.24, footage: no landing beat)",
+		K.anim_id == "pin_walk" and absf(K.anim_at - roll_t0 - 0.24) < 0.03,
+		"%s at +%.2f" % [K.anim_id, K.anim_at - roll_t0]
+	)
 	var in0 := K.spirit.passed
 	var mk := [0.0]
 	step(m, 1.2, func():
@@ -437,13 +458,12 @@ func _archer_combos() -> void:
 		P.pos.x > bx + 1.3 and K.spirit.passed > in0,
 		"x %.1f (rock at %d) inside %d" % [P.pos.x, bx, K.spirit.passed - in0]
 	)
-	# ...and ending inside it puts her back where she went in, for 30 Focus
+	# ...and ending inside it puts her back where she went in (no cost: there is no Focus)
 	K.spirit.end("time")
 	step(m, 0.5)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	P.dashes = P.max_dashes()
-	K.res = 80.0
 	P.inp["move"] = Vector2(1, 0)
 	P.do_dash()
 	step(m, 0.25, func(): P.inp["move"] = Vector2.ZERO)
@@ -451,13 +471,53 @@ func _archer_combos() -> void:
 	P.inp["move"] = Vector2.ZERO
 	step(m, 0.05)
 	var sn0 := K.spirit.snap_backs
-	var f0 := K.res
 	K.spirit.end("time")
 	ok(
-		"combo pin: Spirit Walk ending inside a rock = back to the entry, Focus spent",
-		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx and K.res <= f0 - 29.0,
-		"x %.1f (rock %d, entry %.1f) focus %.0f -> %.0f" % [P.pos.x, bx, K.spirit.entry.x, f0, K.res]
+		"combo pin: Spirit Walk ending inside a rock = back to the entry",
+		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx,
+		"x %.1f (rock %d, entry %.1f)" % [P.pos.x, bx, K.spirit.entry.x]
 	)
+	# Phase Walk crosses a raised-platform wall (data, supervive_kits.md:78): a wall two terraces high and
+	# two tiles thick, west of her, that a plain walk stops at; she walks through at her own floor
+	var wx := int(home.x) - 4
+	var wl: PackedByteArray = W.level
+	for dz in range(-2, 3):
+		for dx in 2: wl[W.idx(wx - dx, int(home.z) + dz)] = lv + 2
+	W.level = wl
+	step(m, 0.5)
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	step(m, 1.5, func(): P.inp["move"] = Vector2(-1, 0))
+	var plain_x := P.pos.x
+	P.teleport(home)
+	P.dashes = P.max_dashes()
+	K.res = 80.0
+	P.inp["move"] = Vector2(-1, 0)
+	P.do_dash()
+	var in1 := K.spirit.passed
+	# (stop pushing once she is clear of the wall: the dash exit now keeps run speed, and the map ends west of it)
+	step(m, 1.5, func(): P.inp["move"] = Vector2(-1, 0) if P.pos.x > wx - 2.0 else Vector2.ZERO)
+	P.inp["move"] = Vector2.ZERO
+	ok(
+		"combo pin: Spirit Walk passes a raised terrace wall that stops a plain walk",
+		plain_x > wx + 1.0 and P.pos.x < wx - 1.5 and K.spirit.passed > in1 and absf(P.pos.y - home.y) < 0.1,
+		"plain x %.1f, spirit x %.1f y %+.2f (wall %d..%d) inside %d"
+			% [plain_x, P.pos.x, P.pos.y - home.y, wx - 1, wx + 1, K.spirit.passed - in1]
+	)
+	# ending inside the terrace puts her back on her side, at the floor she left
+	P.teleport(Vector3(wx + 0.5, home.y, home.z))
+	step(m, 0.05)
+	var sn1 := K.spirit.snap_backs
+	K.spirit.end("time")
+	ok(
+		"combo pin: Spirit Walk ending inside a terrace = back to the entry",
+		K.spirit.snap_backs == sn1 + 1 and absf(P.pos.y - home.y) < 0.1
+			and W.ground_at(P.pos.x, P.pos.z) <= home.y + 0.1,
+		"x %.1f y %+.2f entry %s" % [P.pos.x, P.pos.y - home.y, K.spirit.entry]
+	)
+	for dz in range(-2, 3):
+		for dx in 2: wl[W.idx(wx - dx, int(home.z) + dz)] = lv
+	W.level = wl
 	# damage ends it
 	P.teleport(home)
 	P.dashes = P.max_dashes()
@@ -525,7 +585,6 @@ func _archer_combos() -> void:
 	P.vel = Vector3(0, -2, 0)
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
-	K.res = 0.0
 	P.ak.press_rmb()
 	ok("archer RMB air: the press starts a draw, no Plunge", K.rmb_down and P.vel.y < 5.0, "vy %.1f" % P.vel.y)
 	K.rmb_down = false
@@ -535,7 +594,6 @@ func _archer_combos() -> void:
 	fresh(T)
 	K.ch_rmb = 2.0
 	K.cd["rmb"] = 0.0
-	K.res = 0.0
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 3)
 	P.reload_t = 0.0
@@ -563,7 +621,6 @@ func _archer_combos() -> void:
 	K = P.ak
 	K.ch_rmb = 2.0
 	K.cd["rmb"] = 0.0
-	K.res = 0.0
 	aim_at(P, T.pos)
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
@@ -888,6 +945,24 @@ func _bulwark_combos() -> void:
 		P.dashes >= dashes_held - 0.01 and K.spins == spins_before,
 		"dashes %.2f -> %.2f" % [dashes_held, P.dashes]
 	)
+	# Shift in the 0.1 s the aegis takes to rise (the press and the Shift together): the bash, not the Spin Dash
+	step(m, 1.0)
+	reset.call()
+	var win_dashes := P.dashes
+	var win_spins := K.spins
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	P.do_dash()
+	step(m, 0.3, func(): P.inp["sec_hold"] = true)
+	P.inp["sec_hold"] = false
+	step(m, 0.2)
+	var win_cd := float(K.cd["rmb"])
+	ok(
+		"combo bulwark: shield + Shift pressed together = the Shield Charge, no Spin Dash charge spent",
+		K.st.get("last_dash") == "charge" and K.spins == win_spins and P.dashes > win_dashes - 0.1
+		and absf(win_cd - 6.0) < 0.7,
+		"dash %s spins %d dashes %.2f cd %.1f" % [str(K.st.get("last_dash")), K.spins - win_spins, P.dashes, win_cd]
+	)
 	# ranks (data: Shield Bash and Spin Dash -1.5 s a rank; the shield +25% HP, then faster repair): cooldown 6, 4.5, 3
 	var cds: Array = []
 	var shields: Array = []
@@ -941,6 +1016,28 @@ func _bulwark_combos() -> void:
 		K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0,
 		"charges %.1f cd %.1f" % [K.ch_rmb, float(K.cd["rmb"])]
 	)
+	# the refund gives the dash-reset cue; a miss (dashing away) and rank 1 (a hit) refund nothing
+	var cues: Array = []
+	var on_cue := func(_h, src): cues.append(src)
+	CombatBus.dash_reset_cue.connect(on_cue)
+	for refund_case in [["rank 3 hit", 3, 1.0, true], ["rank 3 miss", 3, -1.0, false], ["rank 1 hit", 1, 1.0, false]]:
+		step(m, 1.0)
+		reset.call()
+		P.slot_lv["dash"] = int(refund_case[1])
+		K.ch_rmb = 0.0
+		K.cd["rmb"] = 4.0
+		cues.clear()
+		P.inp["move"] = Vector2(float(refund_case[2]), 0)
+		P.do_dash()
+		step(m, 0.4)
+		P.inp["move"] = Vector2.ZERO
+		var refunded: bool = K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0
+		ok(
+			"combo bulwark: dash refund, %s: refunded %s, cue %s" % [refund_case[0], refund_case[3], refund_case[3]],
+			refunded == refund_case[3] and (cues == ["dash_hit"]) == refund_case[3],
+			"charges %.1f cd %.1f cues %s" % [K.ch_rmb, float(K.cd["rmb"]), cues]
+		)
+	CombatBus.dash_reset_cue.disconnect(on_cue)
 	P.slot_lv["dash"] = 1
 	# Guard at 50: the Shield Charge ends in a Shield Slam (stun 0.6, spends the Guard)
 	step(m, 1.0)
@@ -1041,6 +1138,25 @@ func _bulwark_combos() -> void:
 		) < 0.01 and absf(heals[2] - 1.5) < 0.01,
 		"cds %s heals %s" % [str(ecds), str(heals)]
 	)
+	# upgrade parity (docs/heroes/bulwark.md): Spin Dash recharge -1.5 s a rank;
+	# the source gives none of the three slots a damage step
+	var recharge: Array = []
+	var pw: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["dash"] = rk
+		P.slot_lv["sec"] = rk
+		P.slot_lv["kin"] = rk
+		recharge.append(K.dash_def()["cd"] * K.dash_k())
+		pw.append([K.power("sec"), K.power("dash"), K.power("kin")])
+	ok(
+		"upgrade parity: Spin Dash recharge 8 / 6.5 / 5 s, no damage step on any slot",
+		absf(recharge[0] - 8.0) < 0.01 and absf(recharge[1] - 6.5) < 0.01
+		and absf(recharge[2] - 5.0) < 0.01 and absf(pw[2][0] - pw[0][0]) < 0.001
+		and absf(pw[2][1] - pw[0][1]) < 0.001 and absf(pw[2][2] - pw[0][2]) < 0.001,
+		"recharge %s power %s" % [str(recharge), str(pw)]
+	)
+	P.slot_lv["sec"] = 1
+	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
 	# small mechanics (wiki): a broken aegis isn't repaired by it; a downed teammate inside starts coming back
 	K.cd["e"] = 0.0

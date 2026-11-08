@@ -2,7 +2,7 @@ class_name Displace
 extends RefCounted
 ## Every ability that moves someone else's body goes through here: a teleport (Ostra's Trade, a rock rising
 ## under a foot), a shove, a spike down, and the tows that move a body over time (Cinder's cloak pull,
-## Dredge's reel, Breaker's shield push, Ryzz's Skycall drag, Claire's wall carry, the Nightwell's draw).
+## Dredge's reel, Breaker's shield push, Sparkle's Skycall drag, Claire's wall carry, the Nightwell's draw).
 ##
 ## A body this game owns moves here, now. A body another game owns (Ent.remote: every other player online,
 ## and the host's bots and monsters on a guest's game) is moved by ITS game: the same call goes out over Net
@@ -81,6 +81,7 @@ func tow(e: Ent, by: Ent, p: Dictionary) -> Dictionary:
 	var rec := {"e": e, "by": by, "p": p, "left": float(p["dur"]), "t": 0.0, "v": Vector2.ZERO, "gone": 0.0,
 		"mirror": e.remote, "hauled": 0}
 	tows.append(rec)
+	if by: DashReset.note(e, by)      # being hauled is crowd control: it counts toward an assist
 	if e.remote:
 		_send(["tow", e.nid, by.nid if by else "", p])
 	elif p.get("unroll", false) and e is Hunter:
@@ -237,7 +238,7 @@ func _push(rec: Dictionary, e: Ent, dt: float) -> String:
 	rec["gone"] = float(rec["gone"]) + step
 	return ""
 
-## Ryzz's Skycall drag: a slow ground slide that eases out (speed falls straight to zero), covering exactly
+## Sparkle's Skycall drag: a slow ground slide that eases out (speed falls straight to zero), covering exactly
 ## dist over dur unless a wall stops it.
 func _slide(rec: Dictionary, e: Ent) -> String:
 	var p: Dictionary = rec["p"]

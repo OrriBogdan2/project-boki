@@ -5,6 +5,11 @@ extends RefCounted
 ## moves and sounds, merge-start hold drops. Runs on tools/support_check.gd's setup and report.
 
 const MOVE_TAIL_MAX := 0.45    # s a dash move may run past its dash (the landing and settle)
+## Each move's release beat in pip.glb (tools/art1/pip_clips.py: the push, arms up, thrust), s into the clip.
+const RELEASE_BEAT := {
+	"mm_shot_r": 0.08, "mm_shot_l": 0.08, "mm_shot_emp": 0.14, "mm_seed": 0.07, "mm_hearth": 0.18, "mm_call": 0.1}
+const BEAT_TOL := 0.05          # s: how near the kit's effect frame the beat sits (a source frame is 0.2 s)
+const SRC_WIND := 0.07          # s: the source's cast wind before the hand releases (footage 716.3 s, 30 fps)
 
 var sc        # the SupportCheck running us (setup, step, ok, aim_at)
 
@@ -74,7 +79,7 @@ func _skate_feel() -> void:
 	ok(
 			"tm Shift: she steers the skate into a curve (not a snap) with ice spraying off the edge",
 			K.rinkrunning() and turned > 60.0 and rad_to_deg(absf(Vector2(1, 0).angle_to(early))) < 40.0
-				and K.lk().live.filter(func(e): return String(e["kind"]) == "chip").size() >= 4,
+				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2,
 			"turned %.0f deg" % turned)
 	ok(
 			"tm Shift: LMB keeps firing (straight beams) the whole skate",
@@ -606,25 +611,66 @@ func _late_homing() -> void:
 	step(m, 1.0 / 60.0)
 	P.inp["dash"] = false
 	var beams0: int = K.stats["beams"]
-	for i in 36:
+	var launch := {}                  # beam sid -> heading it left with
+	var beam_turn := 0.0              # deg the most-turned skating beam bent off that heading
+	for i in 76:
 		sc.aim_at(P, T.pos + Vector3(1.5, 0, 0))
-		P.inp["fire"] = true
+		P.inp["fire"] = i < 36
 		step(m, 1.0 / 60.0)
+		for b in _mine(m, P):
+			var v: Vector2 = b["vel"]
+			launch[b["sid"]] = launch.get(b["sid"], v)
+			beam_turn = maxf(beam_turn, rad_to_deg(absf((launch[b["sid"]] as Vector2).angle_to(v))))
 	P.inp["fire"] = false
 	P.inp["dash_down"] = false
-	step(m, 0.4)
 	var shot := int(K.stats["beams"]) - beams0
 	ok(
-			"tm Shift: skating, beams aimed 1.5 m off a foe still home in late and hit it",
-			shot >= 3 and hp0 - T.hp >= float(P.wpn["dmg"]) * float(shot) * 0.6,
-			"%d beams, %.0f damage" % [shot, hp0 - T.hp])
+			"tm Shift: skating, beams aimed 1.5 m off a foe home in late (bend over 5 deg) and hit it",
+			shot >= 3 and beam_turn > 5.0 and hp0 - T.hp >= float(P.wpn["dmg"]) * float(shot) * 0.6,
+			"%d beams, bent %.1f deg, %.0f damage" % [shot, beam_turn, hp0 - T.hp])
 	P.inp["move"] = Vector2.ZERO
 	step(m, 1.8)
 	var slabs := K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size()
 	ok(
 			"tm Shift: her ice trail lasts a few seconds (plates still down 2 s after the skate), skate cd 13 s (data)",
 			slabs >= 3 and absf(P.dash_regen() - 13.0) < 0.01, "%d plates, cd %.1f s" % [slabs, P.dash_regen()])
+	var dart_dmg := float(P.wpn["dmg"])
 	await _free(m)
+	var caught := await _skate_past_dummy(Vector3(3.0, 0, -5.0), Vector3(3.0, 0, 0), true)
+	ok(
+			"tm Shift: skating past a dummy that walks on, beams aimed 1.5 m off it curve onto it late",
+			caught >= dart_dmg * 3.0, "%.0f damage" % caught)
+	var missed := await _skate_past_dummy(Vector3(4.0, 0, -12.0), Vector3.ZERO, false)
+	ok("tm Shift: a dummy far off the line of fire (12 m aside) is never hit: no hard lock", missed < 0.01,
+			"%.0f damage" % missed)
+
+## Skates +x firing at a dummy placed `at` from her and walking at `vel` (m/s); the cursor stays 1.5 m ahead of the
+## dummy when `track`, else dead ahead of her. Returns the damage the dummy took.
+func _skate_past_dummy(at: Vector3, vel: Vector3, track: bool) -> float:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[3]
+	T.teleport(P.pos + at)
+	step(m, 0.05)
+	var hp0 := T.hp
+	P.dashes = 1.0
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	for i in 36:
+		T.teleport(T.pos + vel / 60.0)
+		sc.aim_at(P, T.pos + Vector3(1.5, 0, 0) if track else P.pos + Vector3(8.0, 0, 0))
+		P.inp["fire"] = true
+		step(m, 1.0 / 60.0)
+	P.inp["fire"] = false
+	P.inp["dash_down"] = false
+	step(m, 0.4)
+	var dealt := hp0 - T.hp
+	await _free(m)
+	return dealt
 
 ## Owner 19:50: the further the spear goes, the longer it travels; it always starts at her, never at the target.
 func _spear_travel() -> void:
@@ -735,6 +781,20 @@ func _moon_shot_parity(m: Match, P: Hunter, K: TenderKit) -> void:
 	ok("mm LMB: each ember leaves at the cursor as it swings round her (within 8 deg)", worst < 8.0, "%.1f deg" % worst)
 	var unwind := absf(float(KMovesCare.MOVES["mm_shot_r"]["keys"][2][1]["y"]))
 	ok("mm LMB: the push unwinds the torso about 45 degrees (footage)", unwind >= 0.7, "%.2f rad" % unwind)
+	_release_beats()
+
+## The clip's release beat lands on the frame the kit's effect fires (every effect starts at its move's t 0), so the
+## hand and the ember, the seed, the plus and the thrust read as one frame, as in the source.
+func _release_beats() -> void:
+	var km: Dictionary = WardenClips.data("pip")["kmoves"]
+	var worst := 0.0
+	for id in RELEASE_BEAT:
+		worst = maxf(worst, absf(float(RELEASE_BEAT[id]) - float((km[id] as Dictionary).get("lead", 0.0))))
+	ok("mm clips: each release beat lands on the kit's effect frame (within %.2f s)" % BEAT_TOL,
+			worst <= BEAT_TOL, "%.3f s" % worst)
+	var wind := float(RELEASE_BEAT["mm_shot_r"]) - float((km["mm_shot_r"] as Dictionary)["lead"])
+	ok("mm LMB: the hand releases within the source's %.2f s wind of the ember" % SRC_WIND,
+			wind <= SRC_WIND, "%.3f s" % wind)
 
 func _mine(m: Match, P: Hunter) -> Array:
 	return m.shots.filter(func(s): return s["by"] == P)
@@ -748,8 +808,8 @@ func tender() -> void:
 	var T: Hunter = r[3]
 	var K: TenderKit = P.ak
 	ok(
-			"mm: renamed Pip, kit sounds load",
-			Arch.name_of("tender") == "Little Lantern"
+			"mm: renamed Meeko, kit sounds load",
+			Arch.name_of("tender") == "The Dawnfox"
 			and Sfx.streams.has("tend_seed")
 			and Sfx.streams.has("tend_root")
 			and Sfx.streams.has("tend_hop"))
@@ -932,15 +992,16 @@ func tender() -> void:
 	P.inp["move"] = Vector2(1, 0)
 	P.dashes = P.max_dashes()
 	P.inp["dash"] = true
+	Sfx.listener = P.pos          # (the star trail draws only near the camera's focus)
 	step(m, 0.05)
 	P.inp["dash"] = false
-	var aft := K.lk().live.filter(func(e): return String(e["kind"]) == "mote").size()
+	var aft := (HeroVfx.of(m).holds.keys() as Array).filter(func(k): return String(k).ends_with("/dash_trail")).size()
 	step(m, 0.25)
 	P.inp["move"] = Vector2.ZERO
 	ok(
-			"mm Shift: Relay Step goes where you move (cursor elsewhere), its own hop and after-images",
+			"mm Shift: Relay Step goes where you move (cursor elsewhere), its own hop and a trail of stars",
 			P.pos.x - p0.x > 2.5 and absf(P.pos.z - p0.z) < 1.0 and aft >= 1,
-			"dx %.1f dz %.1f aft %d" % [P.pos.x - p0.x, P.pos.z - p0.z, aft])
+			"dx %.1f dz %.1f trail %d" % [P.pos.x - p0.x, P.pos.z - p0.z, aft])
 	ok(
 			"mm Shift: the hop is its own move (no shared roll under it)",
 			K.anim_id == "mm_skip" and K.dodge_anim() == "kit")
@@ -1287,7 +1348,7 @@ func burr_ranks() -> void:
 			"r1 %.2f r3 %.2f" % [wide1, wide3])
 	await _free(m)
 
-# ================================================================== Claire
+# ================================================================== Neve
 func rimewright() -> void:
 	var r: Array = sc.setup("rimewright", 6.0)
 	var m: Match = r[0]
@@ -1371,7 +1432,13 @@ func rimewright() -> void:
 	step(m, 0.5)
 	# --- Shatter on a knock (Chilled foe)
 	T.hp = 8.0
+	T.slow_t = 0.0
 	K.add_chill(T)
+	step(m, 0.1)
+	ok(
+			"tm passive: Chill is 4 s and shatter only, no slow of ours (the source has none)",
+			K.chilled(T) and float(Arch.def("rimewright")["passive"]["chill_t"]) == 4.0 and T.slow_t <= 0.0,
+			"slow_t %.2f" % T.slow_t)
 	T2.teleport(T.pos + Vector3(1.5, 0, 0))
 	T2.hp = T2.max_hp
 	step(m, 0.05)
@@ -1426,9 +1493,10 @@ func rimewright() -> void:
 	step(m, 0.15)
 	var skate_v := Vector2(P.vel.x, P.vel.z).length()
 	ok(
-			"tm Shift: full skating speed (dash.speed) within about 0.2 s, with a ribbon of ice chips",
+			"tm Shift: full skating speed (dash.speed) within about 0.2 s, laying a frost trail (ice plates, frost)",
 			absf(skate_v - float(K.dash_def()["speed"])) < 0.6
-				and K.lk().live.filter(func(e): return String(e["kind"]) == "chip").size() >= 4,
+				and K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size() >= 4
+				and int(HeroVfx.of(m).plays.get("skate_frost", 0)) >= 1,
 			"%.1f m/s" % skate_v)
 	step(m, 0.55)
 	ok("tm Shift: the stride move loops while skating (off the step she is on the air stride)",

@@ -1,4 +1,4 @@
-# Red Stitch
+# The Red Stitch
 
 A light marksman who controls space. Every bow draw is timed, Heavy Shots pin people to walls, and a pinned
 target eats the big shot. Spirit Walk carries her through rocks and barriers.
@@ -8,9 +8,9 @@ target eats the big shot. Spirit Walk carries her through rocks and barriers.
 
 |  |  |
 |---|---|
-| Class title | Red Stitch |
-| Base character | Lisette, female |
-| Personality | A cool, patient hunter in a dark cloak with a thread of red. She says little and watches everything. She picks the high ground, waits, and pins you to the wall. |
+| Class title | the Red Stitch |
+| Base character | Lace, female |
+| Personality | Malgrave's royal seamstress, who stitched the fallen into the court's Relics. She deserted and now hunts Malgrave's loyalists, leaving a red-threaded needle at every kill. Her own shadow came loose when she stitched her first Relic; it's only a wrong-looking shadow, not a pet. |
 
 <!-- /gen:profile -->
 
@@ -61,7 +61,7 @@ target eats the big shot. Spirit Walk carries her through rocks and barriers.
 | Signature weapon | Longbow (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The hunter of high ground. Climbs, reads the field, pins people to walls. |
 | Silhouette | the long weapon over the shoulder |
-| Resource | Focus (max 100) |
+| Resource | Hawk Sense (max 1) |
 
 ### Kit card
 
@@ -69,28 +69,28 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, then cash a full Focus in as a Deadeye. |
-| Passive: Focus | Focus fills while you stand still or pin a foe; at full your next shot is a Deadeye. Hurt foes show through cover. |
-| Dash: Spirit Walk | Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers. |
+| Loop | Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover. |
+| Passive: Hawk Sense | Hawk Sense: rivals under half health show through cover. |
+| Dash: Spirit Walk | Spirit Walk (2 charges): a dodge roll, then 2.8s walking through rocks, trees and barriers. |
 | LMB | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
 | RMB: Heavy Shot | Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls. |
 | E: Hail Wall | Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing. |
-| Hunter ultimate: Starpiercer | Starpiercer (level 6): your next 3 shots need no draw and fly as piercing beams; the third can finish a foe. |
+| Hunter ultimate: Starpiercer | Starpiercer (level 6): your next 3 shots need no draw and fly as big piercing arrows; the third can finish a foe. |
 | Weapon: Longbow | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
 
 ### Abilities in full
 
-**Focus (passive).** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next arrow (drawn through its stages as always) flies 20% further, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m.
+**Hawk Sense (passive).** Rivals under half health are seen through cover within 22m.
 
-**Spirit Walk (dash, Shift, 9.5s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.
+**Spirit Walk (dash, Shift, 9.5s cooldown).** Two charges. A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you are put back where you went in.
 
 **Heavy Shot (RMB, 16s cooldown).**
 
-- *Hold:* Heavy Shot: hold to draw a great needle on the bow (0.5s to start, full at 1.1s; you move at 38% speed while you hold) and let go to loose it: 16 -> 30 damage, push 6 -> 12, stops on the first foe; driven into a wall within 3m it hits again (5 -> 12 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
+- *Hold:* Heavy Shot: hold to draw a great needle on the bow (full at 1.1s; you move at 38% speed while you hold) and let go to loose it: 16 -> 30 damage, push 6 -> 12, stops on the first foe; driven into a wall within 3m it hits again for about 5 times the shot (80 -> 148 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
 
 **Hail Wall (E, 15s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
 
-**Starpiercer (hunter ultimate, from level 6, 60s cooldown).** Tap: your next 3 bow shots within 6s need no draw. Each press nocks for 0.3s and looses a beam to 18m that pierces every foe, knocks back and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health.
+**Starpiercer (hunter ultimate, from level 6, 60s cooldown).** Tap: your next 3 bow shots within 6s need no draw. Each press nocks for 0.5s and looses a big arrow to 18m that pierces every foe, knocks back and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health.
 
 ### Ranks
 
@@ -99,7 +99,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
 | RMB | cooldown 16s -> 13s, damage +15%. | cooldown 16s -> 10s, damage +30%; flies 3m farther and a wall stun gives a dash charge. |
-| Dash (Shift) | recharge 9.5s -> 8.1s per charge. | recharge 6s -> 4.2s; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
+| Dash (Shift) | recharge 9.5s -> 8.1s per charge. | recharge 9.5s -> 6.7s per charge; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
 | E | cooldown 15s -> 12.8s, damage +15%. | cooldown 9s -> 7.2s, damage +30%; the Hail Wall is 30% wider. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > E.
@@ -108,8 +108,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Moment | Tell |
 |---|---|
-| Building up | a faint lens glint |
-| Armed / full | a bright glint and a thin aim line; crosshairs over every rooted foe |
 | Dash spent | a green spirit shell over her while it lasts; dash pip dark |
 
 <!-- /gen:kit -->

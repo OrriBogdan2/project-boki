@@ -1,9 +1,14 @@
 {
 	"id": "tender",
-	"title": "Little Lantern",
-	"base_name": "Pip",
+	"title": "Dawnfox",
+	"base_name": "Meeko",
 	"gender": "female",
-	"personality": "A brave little field medic, a fairy fox waist-high to a human.\nShe is afraid of the dark, and the lantern she carries holds a star she caught as a kid.",
+	"personality": "A fox-kit who kept the hearth of a Boki shelter alive through the night everything broke. The fire grew into a tiny sun that follows her, and a shy raincloud, the storm that tried to drown the hearth, came along too.\nShe heals through the two of them, and keeps them safe in a little glass globe.",
+	"barks": {
+		"dark": ["It's so dark in here... stay close, okay?", "I'm not scared. My knees just shake sometimes.", "Don't look at the shadows. Look at me."],
+		"brave": ["I've got you. Hold on to me.", "Dark or not, I'm coming!", "Nobody gets left in the dark. Not while I'm here."],
+		"magic": ["Shine for us, okay? Just a little.", "Oh, you're scared too? Then we're brave together.", "I used to be so small. Look at me now!"]
+	},
 	"role": "Tender",
 	"weight": "medium",
 	"plate_offset": 1.85,
@@ -18,8 +23,8 @@
 	},
 	"color": "#ffc46a",
 	"clip": {"lines": {"dash": "A quick hop, a long glide in the air.", "lmb": "Embers from both hands mark foes.", "rmb": "A seed that roots its target.", "e": "A healing ring for you and your team.", "x": "Tether a teammate and heal them as you go."}, "fx": {"e": "heal", "x": "tether"}},
-	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with lantern light, pins chasers with burr-seeds.",
-	"silhouette": "small: a tiny fairy fox medic with gold-veined wings, a leaf cape and a big glowing star lantern",
+	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds.",
+	"silhouette": "small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a raincloud floating beside her",
 	"card": {
 		"role": "Support medic: heals and carries the downed, roots whoever chases them.",
 		"loop": "Support medic: heals and carries the downed, roots whoever chases them.",
@@ -27,7 +32,7 @@
 		"rmb": "Burrseed: a 1s wind-up, then the seed flies at the cursor; it sticks to a foe and roots them 0.7s later.",
 		"e": "Hearthlight: a healing ring on you; press again to throw it to the cursor.",
 		"dash": "Relay Step: a quick hop where you move; in the air, a long floaty glide.",
-		"passive": "Carrier: run into a downed teammate to carry up to 2 behind a shield.",
+		"passive": "Carrier: run into a downed teammate to carry up to 2; a hit or a stun drops them.",
 		"weapons": {
 			"lantern_crook": "Hold to push embers from alternating hands that fly past the cursor; each hit on a foe adds Kindle."
 		},
@@ -50,9 +55,7 @@
 	},
 	"passive": {
 		"name": "Carrier",
-		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Carrier shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If the shield breaks or you're stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
-		"shield": 40.0,
-		"shield_lv": 6.0,
+		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, you drop them (a root or hex does not) and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
 		"max": 2,
 		"pick_r": 1.1,
 		"pick_speed": 0.6,
@@ -129,7 +132,7 @@
 		"toss_speed": 45.0,
 		"latch_r": 1.0,
 		"boost": 0.5,
-		"desc": "A 2.6m ring of lantern light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.",
+		"desc": "A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"
@@ -185,6 +188,6 @@
 		"every": 0.5,
 		"land_r": 0.9,
 		"self_when_solo": true,
-		"desc": "Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a lantern tether heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you."
+		"desc": "Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you."
 	}
 }

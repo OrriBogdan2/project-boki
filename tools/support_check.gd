@@ -84,6 +84,8 @@ func run(mn: Node, md := "all") -> void:
 	combos.sc = self
 	var ults = load("res://tools/care_ult_check.gd").new()
 	ults.sc = self
+	var anims = load("res://tools/rimewright_anim_check.gd").new()
+	anims.sc = self
 	if mode in ["all", "tender"]:
 		await _tender_support()
 		await combos.tender()
@@ -92,6 +94,7 @@ func run(mn: Node, md := "all") -> void:
 		await _rime_support()
 		await combos.rimewright()
 		await ults.rimewright()
+		await anims.rimewright()
 		await ults.burst_cap()
 	print("SUPPORT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -147,7 +150,7 @@ func _tender_support() -> void:
 	A.down_hp = 60.0
 	A.teleport(P.pos + Vector3(0.6, 0, 0)); step(m, 0.1)
 	ok("Carrier: running into a downed teammate carries them", CareUtil.is_carried(A) and K.carrying().size() == 1)
-	ok("Carrier: shield up and no slow while carrying", P.shield > 30.0 and absf(K.move_k() - 1.0) < 0.01, "shield %.0f k %.2f" % [P.shield, K.move_k()])
+	ok("Carrier: no shield of ours and no slow while carrying", P.shield <= 0.01 and absf(K.move_k() - 1.0) < 0.01, "shield %.0f k %.2f" % [P.shield, K.move_k()])
 	var dh := A.down_hp
 	P.teleport(P.pos + Vector3(5, 0, 0)); step(m, 2.0)
 	ok("Carrier: the carried teammate rides along and does not bleed", A.flat_dist(P) < 1.0 and A.down_hp >= dh - 0.5, "dist %.2f down_hp %.1f -> %.1f" % [A.flat_dist(P), dh, A.down_hp])
@@ -155,21 +158,52 @@ func _tender_support() -> void:
 	ok("Carrier: crouch (never F) sets them down", not CareUtil.is_carried(A) and K.carrying().is_empty())
 	# --- carry then a stun drops them
 	T.teleport(P.pos + Vector3(14, 0, 0))
-	P.shield = 0.0
 	P.slot_lv["dash"] = 3; P.ex_cd = 5.0
 	A.teleport(P.pos + Vector3(0.4, 0, 0)); K.lock_t = 0.0; step(m, 0.1)
 	var carried_again := CareUtil.is_carried(A)
 	ok("Relay Step rank 3: picking up a teammate refreshes the air dash", carried_again and P.ex_cd < 0.01, "ex_cd %.2f" % P.ex_cd)
 	P.stun_t = 0.5; step(m, 0.1)
 	ok("Carrier: a stun drops them and locks pickup", carried_again and not CareUtil.is_carried(A) and K.lock_t > 3.0, "again %s lock %.1f" % [str(carried_again), K.lock_t])
-	# --- a broken shield drops them too, and costs you no stun of your own
+	# --- a hit drops them too, and costs you no stun of your own
 	P.stun_t = 0.0; K.lock_t = 0.0
 	A.teleport(P.pos + Vector3(0.4, 0, 0)); step(m, 0.1)
 	var carried_third := CareUtil.is_carried(A)
-	P.shield = 0.0; step(m, 0.1)
-	ok("Carrier: a broken shield drops them with a 4s lock and no stun on you",
+	P.hurt(5.0, T, {}); step(m, 0.1)
+	ok("Carrier: a hit drops them with a 4s lock and no stun on you",
 		carried_third and not CareUtil.is_carried(A) and K.lock_t > 3.0 and P.stun_t <= 0.0,
 		"lock %.1f stun %.2f" % [K.lock_t, P.stun_t])
+	# --- the source's drop set: a stun or damage; a root or a hex holds; 4s no re-pick (no shield of ours)
+	P.stun_t = 0.0
+	K.lock_t = 0.0
+	A.down_hp = 60.0
+	A.teleport(P.pos + Vector3(0.4, 0, 0))
+	step(m, 0.1)
+	var held := CareUtil.is_carried(A)
+	P.root_t = 0.5
+	Hex.apply(P, 0.5, false)
+	step(m, 0.1)
+	ok("Carrier: a root and a hex hold them", held and CareUtil.is_carried(A))
+	P.root_t = 0.0
+	P.hurt(10.0, T, {"src": "primary"})
+	step(m, 0.1)
+	var lock0 := K.lock_t
+	ok("Carrier: a rival's hit drops them, 4s lock, no stun on you",
+		held and not CareUtil.is_carried(A) and lock0 > 3.8 and P.stun_t <= 0.0, "lock %.2f" % lock0)
+	A.teleport(P.pos + Vector3(0.4, 0, 0))
+	var locked := true
+	for i in 8:
+		A.down_hp = 60.0
+		A.revive = 0.0       # standing beside a Wisp revives it on its own: keep it a Wisp for the lock test
+		step(m, 0.5)
+		if i < 7:
+			locked = locked and A.downed and not CareUtil.is_carried(A)
+	ok("Carrier: no re-pick for 4s after a drop, then they can be scooped up",
+		locked and CareUtil.is_carried(A), "lock %.2f" % K.lock_t)
+	P.hurt(10.0, null, {"src": "mob"})
+	step(m, 0.1)
+	ok("Carrier: damage from any source drops them",
+		not CareUtil.is_carried(A) and K.lock_t > 3.8)
+	K.lock_t = 0.0
 	# --- rank 3 flare: the revive went back to Hearth Call (X); the flare tops the bleed-out bar up instead
 	P.stun_t = 0.0
 	P.slot_lv["kin"] = 3

@@ -11,7 +11,7 @@ static func toggle(p: Practice) -> void:
 	else: open(p)
 
 static func open(p: Practice) -> void:
-	var body := _show(p, "Masks", 860, func(): close(p), "Done", "heroes")
+	var body := _show(p, "Relics", 860, func(): close(p), "Done", "heroes")
 	UI.subtitle(body, "Who you play here and on expeditions. Your Boki stays. "
 			+ "Hover a Hunter for its kit, K for the full kit card.")
 	var grid := HeroGrid.build(body, func(ak: String): pick(p, ak), func(ak: String): kit(p, ak),

@@ -1,4 +1,4 @@
-"""ART-1 Vex: the robotic left forearm and hand (rigid per bone: a machine has no skin to slide), the gold coin. Upper arm and sleeve stay the scan's."""
+"""ART-1 Vex: the mechanical brass left forearm and hand (rigid per bone: a machine has no skin to slide), the gold coin. Upper arm and sleeve stay the scan's."""
 import numpy as np
 from meshkit import Piece, norm, smooth, sweep, frames
 from vex_cannon import J, ring, box
@@ -28,7 +28,7 @@ def forearm():
     L = np.linalg.norm(WR - EL)
     ps = []
     ps.append(_lat("elbowball", "metal-vex", EL, (1.0, 0, 0), [(-0.042, 0.0), (-0.042, 0.022), (-0.03, 0.04), (0.03, 0.04), (0.042, 0.022), (0.042, 0.0)], 9, "forearm.L"))
-    ps.append(_lat("elbowglow", "glow-vex", EL, (-1.0, 0, 0), [(0.043, 0.0), (0.043, 0.024)], 8, "forearm.L"))
+    ps.append(_lat("elbowcap", "metal-vex", EL, (-1.0, 0, 0), [(0.043, 0.0), (0.043, 0.024)], 8, "forearm.L"))
     prof = [(0.02, 0.03), (0.045, 0.043), (L * 0.32, 0.05), (L * 0.55, 0.046), (L * 0.8, 0.036), (L * 0.97, 0.03)]
     ps.append(_lat("robofore", "metal-vex", EL, FA, prof, 9, "forearm.L", flat=0.9))
     ps.append(_lat("wristband", "brass-vex", EL, FA, [(L * 0.82, 0.037), (L * 0.84, 0.042), (L * 1.0, 0.038), (L * 1.02, 0.03)], 9, "forearm.L", flat=0.92))
@@ -59,7 +59,7 @@ def panel():
 
 
 def hand():
-    """Palm block, three-joint metal fingers with glowing pads, the thumb. Rest: relaxed open. k along the knuckles (first finger first), a wrist to knuckles, o out of its back."""
+    """Palm block, three-joint metal fingers with steel pads, the thumb. Rest: relaxed open. k along the knuckles (first finger first), a wrist to knuckles, o out of its back."""
     wrist = WR.copy()
     a = np.array([0, 0, -1.0])
     k = np.array([0.0, 1.0, 0.0])          # the first finger forward
@@ -95,7 +95,7 @@ def hand():
         body = sweep("finger%dL" % f, "metal-vex", pts[:3], [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 5, endpoint=False)], np.array([rd, rd * 0.86, rd * 0.86]), side_hint=k, tip=False)
         q = smooth(0.006, 0.014, np.linalg.norm(body.v - base, axis=1))
         body.w = {"hand.L": 1 - q, "fingers.L": q}
-        pad = sweep("fpad%dL" % f, "glow-vex", pts[2:4] * 1, [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 5, endpoint=False)], np.array([rd * 0.98, rd * 0.72]), side_hint=k)
+        pad = sweep("fpad%dL" % f, "metal-vex", pts[2:4] * 1, [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 5, endpoint=False)], np.array([rd * 0.98, rd * 0.72]), side_hint=k)
         pad.rigid("fingers.L")
         out += [body, pad]
     base = wrist + a * 0.024 + k * 0.04 - o * 0.006
@@ -105,7 +105,7 @@ def hand():
     tp = sweep("thumbL", "metal-vex", [base, t1, t2], [(np.cos(x), np.sin(x)) for x in np.linspace(0, 2 * np.pi, 5, endpoint=False)], np.array([0.0145, 0.0115, 0.01]), side_hint=o, tip=False)
     q = smooth(0.006, 0.024, np.linalg.norm(tp.v - base, axis=1))
     tp.w = {"hand.L": 1 - q, "thumb.L": q}
-    tip = sweep("thumbpad", "glow-vex", [t2, t3], [(np.cos(x), np.sin(x)) for x in np.linspace(0, 2 * np.pi, 5, endpoint=False)], np.array([0.0102, 0.0072]), side_hint=o)
+    tip = sweep("thumbpad", "metal-vex", [t2, t3], [(np.cos(x), np.sin(x)) for x in np.linspace(0, 2 * np.pi, 5, endpoint=False)], np.array([0.0102, 0.0072]), side_hint=o)
     tip.rigid("thumb.L")
     return out + [tp, tip], knuck, a, k, o
 
