@@ -194,7 +194,6 @@ func tick() -> void:
 func use(i: int) -> void:
 	var s: Dictionary = stations[i]
 	var id := String(s["id"])
-	var P: Hunter = m.player
 	match String(s["kind"]):
 		"arch": a.set_arch(id)
 		"kin": a.set_kin(id)

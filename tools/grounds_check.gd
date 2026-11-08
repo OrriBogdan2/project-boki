@@ -37,6 +37,7 @@ func run(main_node: Node) -> void:
 	_sites(m, G)
 	step(m, 0.3)
 	_use_all(m, G)
+	_rides(m)
 	_duel_and_fall(m, G)
 	print("GROUNDSCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
@@ -54,10 +55,54 @@ func _map(m: Match) -> void:
 	var info := "%d tiles vs %d" % [floor_tiles, OLD_FLOOR_TILES]
 	ok("floor is at least 3x the old arena", floor_tiles >= 3 * OLD_FLOOR_TILES, info)
 	ok("five sky perches", perches == 5, "%d" % perches)
-	ok("a pad up to each perch", W.pads.size() >= 5, "%d pads" % W.pads.size())
-	var d := World.load_layout("arena")
-	ok("a glide off each perch", (d.get("glides", []) as Array).size() >= 5)
 	ok("training room walls kept (3 dummies)", m.arena.dummies.size() == 3)
+
+## Ride every pad up and every glide route down: each must land you on its island.
+func _rides(m: Match) -> void:
+	var W: World = m.world
+	var P: Hunter = m.player
+	var bad: Array = []
+	for pd in W.pads:
+		P.teleport(pd["pos"])
+		P.vel = Vector3.ZERO
+		_settle(m, P, Vector2.ZERO, 4.0)
+		if W.island_id(P.pos.x, P.pos.z) != String(W.islands[pd["to"]]["id"]):
+			bad.append("pad to %s" % W.islands[pd["to"]]["id"])
+	ok("every pad lands you on its perch", bad.is_empty() and W.pads.size() >= 5, " ".join(bad))
+	bad.clear()
+	var glides := 0
+	for L in W.links:
+		if not L.get("glide", false):
+			continue
+		glides += 1
+		var take: Vector3 = L["take"]
+		var land: Vector3 = L["land"]
+		var dir := Vector2(land.x - take.x, land.z - take.z).normalized()
+		P.teleport(take - Vector3(dir.x, 0, dir.y) * 1.5)
+		P.vel = Vector3.ZERO
+		_settle(m, P, dir, 20.0)
+		var to := String(W.islands[L["to"]]["id"])
+		if W.island_id(P.pos.x, P.pos.z) != to:
+			bad.append("%s>%s" % [W.islands[L["from"]]["id"], to])
+	var info := "%d routes %s" % [glides, " ".join(bad)]
+	ok("every glide route lands you on its island", bad.is_empty() and glides >= 5, info)
+	P.teleport(m.arena.home)
+	P.vel = Vector3.ZERO
+	P.inp["move"] = Vector2.ZERO
+	P.inp["glide"] = false
+
+## Hold `move` (and the glider once airborne) until you are back on the ground, up to `secs`.
+func _settle(m: Match, P: Hunter, move: Vector2, secs: float) -> void:
+	var t := 0.0
+	var flew := false
+	while t < secs:
+		P.inp["move"] = move
+		P.inp["glide"] = not P.grounded
+		m.step(DT)
+		t += DT
+		flew = flew or not P.grounded
+		if flew and P.grounded and P.pad.is_empty() and t > 0.5:
+			return
 
 func _counts(G: Grounds) -> void:
 	var by := {}
