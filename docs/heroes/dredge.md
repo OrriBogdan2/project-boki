@@ -22,7 +22,7 @@ and cooldown numbers that already follow the ratios below. Numbers follow the so
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
 | Passive, Salvage | none | Knocks and assists stack Salvage (+2.5% health each, max 10); being downed costs one; hits on a hunter's back +50%; a knock heals 16% | stacks of max health per knock/assist, lose one on death, +50% backstab, heal on knock | heal as a share of health |
-| LMB, scattergun | hold/tap | 7 slugs in a 30 degree fan (bloom to +15) that stop at 6.3m and hang there as violet dots for 0.3s; a shot every 0.5s; while firing the spread's two edge lines lie on the ground, idle one aim line to the cursor; the body rocks back each shot; the barge resets the bloom only at dash rank 3 | 7 slugs, sharp bloom, a fixed stop range, cone edge lines and an idle aim line (footage), 0.5s | the no-spread armour bonus is not reproduced |
+| LMB, scattergun | hold/tap | 7 slugs in a 30 degree fan (bloom to +15) that stop at 6.3m and hang there; a shot every 0.5s; while firing the spread's two edge lines lie on the ground, idle one aim line to the cursor; the body rocks back each shot; the barge resets the bloom only at dash rank 3 | 7 slugs, sharp bloom, a fixed stop range, cone edge lines and an idle aim line (footage), 0.5s | the no-spread armour bonus is not reproduced |
 | RMB, Abyssal Hand | tap | a reaching abyssal arm 11.5m to the first foe: it pierces terrain (rocks, props and cliff faces) and drags the foe over it (only a placed wall stops it); the foe is stunned and reeled to your feet (11 m/s, up to 3s) with weight; he stands braced while he reels, shuffling at 20% of his walk, which still swings them round him; you are Grounded while you reel (no jump or glide, the barge still works). From the throw until the miss or the end of the reel he holds his height (no fall mid-air or over the abyss; `CastHold.hover_slow`), and while the hook flies out he can only walk at 20% speed (`rmb.fly_slow`). Rank 3: a foe it hits takes half the cooldown off. It also catches an ally (reeled in to safety) and scoops up wisps on the way. 12s | the arm pierces terrain, grabs the first target (enemy or ally), physics pull that swings, scoops wisps, only dash castable; rank 4: -50% cooldown on an enemy hit | heavy bodies (wardens) can't be pulled; a placed wall stops it |
 | Shift, Barge | tap | a quick, short lunge the way you move (3.2m in 0.16s before the global dash feel, about 2.7m in 0.18s after it; 3 charges at 10s that chain 0.22s apart): a monster's low lunge, both hands clawing at the ground ahead and hauling him along, clods of turf thrown back (no burst: the owner's no-explosions-on-dashes rule); it touches nobody (the source's Brute Dash has no hit); in the air (the class air dash) a pounce, claws raked forward, 35% further (3.7m in 0.18s, the dash feel applied once); turn limited to 35 degrees for 0.8s after the Anchor | ground and air dash with separate cooldowns, further in the air, turn limit after the slam | one pool of ground charges plus the class air dash. The footage's red burst at the start point is dropped (owner item 8/35) |
 | E, Anchor Drop | tap | on the ground, planted: the free fist raised high and glowing brass while the exact 3m, 110 degree cone fills on the ground in front (everyone sees it; the direction locks at the press), then at 0.38s the fist slams down into it: the damage lands on that frame, cracks under the fist and across the area, a crescent sweep, dust and a shake there, a recoil and a slow recovery: 25 damage, stun 1.1s, slammed down and Grounded. In the air: you smash straight down at once with the anchor falling beside you, a landing ring shows, and the 3.2m ring hits at the landing with up to +50% damage by the height fallen (owner note). Rank 3: double damage on a foe over the abyss and +0.2s stun more. 7s | fist slam: damage, stun, ground slam, pushes you down (not over the abyss), dunks foes over the abyss; rank 4: +100% damage vs foes over the abyss and +0.2s stun | owner note: the air cast is a straight-down smash with a height bonus (the source's rank 4 height bonus stays base). Owner item 33: one clear fist slam with a ground telegraph; the footage's forward hop and the ghost anchor are gone (the hop moved the area the telegraph promised) |
@@ -136,7 +136,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - The scattergun keeps a magazine (12 rounds, 6s of fire) and reload; the source spends mana instead.
 - Backstab and Salvage values follow the wiki; the footage doesn't show them separately.
 - Brass Broadside: the fan and the waves turn with his aim the whole time (owner item 36; the footage locks it at the press). The source data gives no move speed for it, so the owner's defaults are used (30% charging, 20% firing). A stun in the charge stops it with a short cooldown
-  (8s); a stun between the waves stops the second. The second wave is a different colour (violet) like the footage's bluer one.
+  (8s); a stun between the waves stops the second. Both waves are coin gold (the second mirrors the sweep).
 - Only enemy hunters count for the bond (the slugs still hit monsters and Boki).
 - Body and movement (hero-ref "Body, scale and movement feel"): a heavy's height, 1.3x as broad across the chest and shoulders;
   slower, longer, planted steps (0.9x the step rate, stride 0.7).
@@ -148,7 +148,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | Do this | You get | Asserted by (check line) |
 |---|---|---|
 | Hold the gun | a shot every 0.5s, the spread's edge lines out to 6.3m, the body rocks back; idle, one aim line | "gun: a shot every half second"; "gun: the spread's edge lines lie on the ground out to the slug range"; "gun: each shot rocks the body back (dr_shot)"; "gun: idle, the cone folds into one aim line" |
-| Abyssal Hand hit | reel begins; you are Grounded, they are stunned; the stretched arm shows | "abyssal hand: hooks the first foe, reel begins"; "reel: Grimble is Grounded while he reels, the foe is stunned"; "reel: the stretched arm is drawn (through rocks)" |
+| Abyssal Hand hit | reel begins; you are Grounded, they are stunned; the gold chain shows | "abyssal hand: hooks the first foe, reel begins"; "reel: Grimble is Grounded while he reels, the foe is stunned"; "reel: the gold chain runs to the foe, yanked taut" |
 | Wait for the arrival | foe lands at your feet (not Grounded), "HAULED"; your Grounded ends | "abyssal hand: foe arrives at your feet and does not land Grounded"; "reel: Grimble's own Grounded ends with the reel" |
 | During the reel: RMB, E, the gun | denied (only the barge works) | "reel: a second Abyssal Hand is denied"; "reel: E is denied while reeling"; "reel: the gun is locked" |
 | During the reel: barge | works; the reel continues | "reel: the barge still works" |
@@ -198,13 +198,15 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
 | Brass Broadside (X) | `dr_blast` | hunched over the gun and his free fist through the 1.1s charge (deeper at the end), a shove with overshoot and a barrel kick at wave 1, a short rewind, the second shove at 1.7s, then he straightens up (2.1s) |
 
 ## Look and sound
-- Effects (`scripts/arch/kits/ld_fx.gd`; `shaders/ld_fx.gdshader` alpha-blended bodies with `ld_fx_glow.gdshader` glow cores,
-  `ld_anchor.gdshader`, `ld_arm.gdshader`): hot pink slug streaks that hang as solid violet dots with dark cores; a brass muzzle
-  flash; the stretched bone-hook arm (purple flesh swelling on each haul, a bone hook at its end, sludge drips, snapping back), drawn through rocks; the brass
-  and iron chain ring at his feet while he reels; the ground slam's seafoam telegraph cone filling under his raised, glowing
-  brass fist, then cracked ground under the fist and across the area; a seafoam crescent sweep, the dust cloud and seafoam stun spirals; the chain landing ring, brass sunburst and
-  scorch of the air smash (he rides the anchor down); clods of turf torn up where the lunge sets off, iron and brass
-  after-images along it.
+- Effects: everything is coin gold `#ffc832` (his signature, docs/VFX_QUALITY.md). The abilities are data in
+  `content/vfx/dredge.json` played by HeroVfx (docs/HERO_VFX.md): a gold muzzle flash with sparks, smoke and spent brass,
+  pale-gold slugs with gold trails that hang at the stop line; the hook thrown as a gold chain of links from his hand
+  (`hook_chain`, a hold): slack and swaying as it pays out, yanked taut and glowing as the hook bites (`hook_bite`, a burst
+  of coins and sparks), again on each haul, sparks as it snaps back; the slam's gold telegraph cone with sparks along its
+  edge under his raised fist, then a gold sweep, cracked ground, debris and coins; the air smash's ring of fire, debris and
+  coins. Kit-drawn in `scripts/arch/kits/ld_fx.gd`: the bone hook at the chain's end (`ld_bone.gdshader`, drawn through
+  rocks), the ghost anchor (`ld_anchor.gdshader`, gold rim), the chain ring at his feet while he reels, the gold stun
+  spirals, the barge's iron and brass after-images.
 - Weapon: `HeroGearPair.scattergun`: a fat iron barrel with a flared brass bell, a rope-wrapped pump, a slug drum, a glowing seam.
 - Sounds (`tools/gen_sfx_grimble.py`, set `content/sfx/dredge.json`, docs/AUDIO.md): the junk blunderbuss `dr_shot` (three
   takes), the gaff hook on its chain (`dr_throw`, `dr_grab`, the winch ratchet `dr_reel`), the scrap fist (`dr_anchor_wind`,
@@ -212,10 +214,9 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
   `dr_hop`, Brass Broadside (`dr_blast_charge`: junk crammed in and a crank ratcheting; `dr_blast`, pitched down for wave 2),
   coins for every Salvage stack and a hauled foe (`dredge_coin_jingle`) and for loot he pockets (`dredge_pickup`, with a wheezy
   chuckle), skittery claw footsteps and a wheezy, creaturely wordless voice (`dredge_hurt`, `_down`, `_death`).
-- Brass Broadside (`scripts/arch/kits/dredge_blast.gd`): the growing fan in saturated brass, sparks arcing between his fists
-  while charging, six big orbs per wave with a dark core and a smear (`LDFx.volley`: saturated brass for wave 1, violet for wave
-  2) that fly the whole fan in the shot's 0.2s and hang at its edge fading for 0.35s as the source's orbs do (f35-f38), a
-  sunburst at the fists and a crescent sweep across the fan per wave, a violet flicker rising from each target.
+- Brass Broadside (`scripts/arch/kits/dredge_blast.gd`): the growing gold fan with sparks rising along its edge and gold
+  gathering in his fists while charging; each wave a gold sweep across the fan, a flash at the fists and coins and sparks
+  flying out with the six pale-gold slugs and their trails; a gold flash and coins on each target.
 
 ## Engine notes
 The reel is a Displace "haul" tow (`scripts/combat/displace.gd`, decision 0016): the body moves in small steps toward wherever

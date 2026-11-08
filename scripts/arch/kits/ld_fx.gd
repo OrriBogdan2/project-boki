@@ -218,8 +218,8 @@ func _anchor_node() -> Node3D:
 		add.call(Models.box(0.34, 0.5, 0.34), Vector3(1.2 * sx, 1.0, 0), Vector3(0, 0, 0.3 * sx))
 	return n
 
-## Grimble's bone hook, the end of his chain (HeroVfx hook_chain): a knuckle, the jagged hook curling to one side, a short split
-## prong on the other and two spurs on top, drawn through walls (-z is the way it reaches).
+## Grimble's bone hook, the end of his chain (HeroVfx hook_chain): a knuckle, the jagged hook curling to one side,
+## a short split prong on the other and two spurs on top, drawn through walls (-z is the way it reaches).
 func _hook_node(_col: Color) -> Node3D:
 	var n := Node3D.new()
 	var mt := ShaderMaterial.new()

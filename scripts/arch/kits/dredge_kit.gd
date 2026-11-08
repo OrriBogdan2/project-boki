@@ -8,10 +8,10 @@ extends ArchKit
 ## - LMB: the scattergun (the weapon's own firing): a tight fan of slugs that stop and hang at 6.3m; the
 ##   two cone-edge lines on the ground while firing, one aim line when idle; the body rocks back on each
 ##   shot. At dash rank 3 pellet hits trim the barge recharge.
-## - RMB, Abyssal Hand: he throws a gold chain from his mutated arm, a bone hook at its end, piercing terrain to the first body
-##   (a placed wall still stops it), grabs it and reels it in stunned, over rocks and cliffs; he stands braced
-##   while he reels (Grounded, a slow shuffle that swings the body), and only the barge works. Rank 3: a foe hit
-##   takes half the cooldown off.
+## - RMB, Abyssal Hand: he throws a gold chain from his mutated arm, a bone hook at its end, piercing terrain to
+##   the first body (a placed wall still stops it), grabs it and reels it in stunned, over rocks and cliffs; he
+##   stands braced while he reels (Grounded, a slow shuffle that swings the body), and only the barge works.
+##   Rank 3: a foe hit takes half the cooldown off.
 ## - E, Anchor Drop: the fist raised through a short wind-up (he can walk slowly), then a giant ghost anchor
 ##   slams the cone in front: a long stun. In the air you smash straight down, the anchor lands with you, a ring
 ##   at the landing, and the height adds damage. Rank 3: double damage on a foe over the abyss and a longer stun.
