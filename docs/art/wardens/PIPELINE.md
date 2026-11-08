@@ -496,6 +496,20 @@ The scan's horns came out as short wedges (cat ears from the front): `cinder_fin
 `cinder_pieces.py horns` sweeps the sheet's curved horns over them, rigid on the head, painted in their own strip under the atlas's flat
 cells. The tail's molten cracks (the side view) are a seeded random walk painted into the tail strip of both the atlas and the emit map.
 
+### Sable v2 (owner redesign: moth antennae, one braid, plunging coat, wing tails, twin flintlocks), 2026-11-07 (121 credits; balance 1170 -> 1049)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Sable v2 edits, first try | ~14:30 | (try1, ~/meshy/sable_v2/try1) | nano-banana-pro (image-to-image) | 3 views of the turnaround; the gem and chains also removed | 27 | Dropped: invented a wider opening; the gem and three chains stay in the scan from here on |
+| Sable v2 edit front | 14:34 | 01a1b66e-9287-7247-820c-3cb60762a99a | nano-banana-pro | sable_v2_turnaround crop; antennae, braid, wings, tails, knives, pistols out; gem and chains kept | 9 | Kept |
+| Sable v2 edit 3/4 | 14:34 | 01a1b66e-9293-749d-89e1-c126284bec19 | nano-banana-pro | as front | 9 | Kept |
+| Sable v2 edit side | 14:34 | 01a1b66e-92a8-727f-8336-3dc8448791fa | nano-banana-pro | as front, coat closed in this view | 9 | Dropped: bare midriff, long hem; fixed by side 2 |
+| Sable v2 edit back | 14:32 | 01a1b66d-47b6-76ee-9168-f9d98fcbcd53 | nano-banana-pro | as front, back seams stay | 9 | Dropped: pale discs by the knees; fixed by back 2 |
+| Sable v2 edit side 2 | 14:35 | 01a1b66f-5b51-75e4-8215-732eb9128fc4 | nano-banana-pro | on side: jacket to the belt, midriff covered | 9 | Kept |
+| Sable v2 edit back 2 | 14:34 | 01a1b66e-928a-763c-8972-3c9e1c11c2ba | nano-banana-pro | on back: the discs out | 9 | Kept |
+| Sable v2 A | 14:35 | 01a1b66f-cbed-7121-adf1-b345e7c627b9 | meshy-7.1 | edited front, 3/4, side, back (+ texture refs), geometry 2k, meshy-7 texture 8k, PBR, no remesh, enhancement off; 328,169 verts | 40 | Kept |
+
+Prompts: art/wardens/src/sable_recipe.json. Build: tools/art1/sable_build.sh. Lessons: keep what must hold its place (the gem, the chains) in the scan and rebuild only what has to move. Previews lie close up: a 5x render of the mouth found the scan's stitches in three layers (paint, normal bake, the low mesh's folded crease) and only smoothing the mesh cleared them.
+
 ## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
 No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.
 1. **Inspect** it in Blender: bones (names, parents, heads), each vertex group's bounds, loose parts, materials,

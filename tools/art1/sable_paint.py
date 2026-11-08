@@ -1,5 +1,5 @@
-"""ART-1 Sable: the texel-space paint (recipe: kael_paint.py): arrays of texels (world position, normal, occlusion) to sRGB in 0..1. Palette off sable_FINAL_sheet: dark plum leather,
-purple trim and lining, pearl moth wings with grey-lilac eye-spots, white hair, lilac skin, silver, dark wood, violet glow."""
+"""ART-1 Sable v2: the texel-space paint (recipe: kael_paint.py): arrays of texels (world position, normal, occlusion) to sRGB in 0..1. Palette off sable_v2_turnaround and the master sheet: dark plum leather,
+violet trim and lining, pearl moth wings with violet eye spots, white hair, grey-lilac skin, silver, red-brown wood, violet glow."""
 import os
 import numpy as np
 from meshkit import norm, smooth
@@ -7,15 +7,17 @@ from kael_paint import hexc, mix, fbm, lit, ramp, hash3
 import sable_pieces as K
 import imgio
 
-ART = os.path.expanduser("~/meshy/sable_f/proj/")      # crops of the owner's sheets
-WINGS, HEAD, GUN = imgio.load(ART + "wings.png"), imgio.load(ART + "head_sheet.png"), imgio.load(ART + "gun.png")
+WINGS = imgio.load(os.path.expanduser("~/meshy/sable_v2/proj/wings.png"))      # the turnaround's back view, flipped so x grows outward
 
 LEATHER = [hexc("#2a1d30"), hexc("#3b2a43"), hexc("#533c5e"), hexc("#73587f"), hexc("#9a7fa6")]
 LINING = [hexc("#2d1147"), hexc("#46196e"), hexc("#5f2595"), hexc("#7a35b5"), hexc("#9a55d2")]
 HAIR = [hexc("#8f8a9c"), hexc("#b6b2c2"), hexc("#d5d2dd"), hexc("#ecebf1"), hexc("#ffffff")]
-SKIN = [hexc("#5e5470"), hexc("#7e7492"), hexc("#a097b2"), hexc("#bcb4cb"), hexc("#d6d0e0")]
-SILVER = [hexc("#4c4a58"), hexc("#7b7988"), hexc("#a9a8b5"), hexc("#d3d3dc"), hexc("#fbfbff")]
-WOOD = [hexc("#35202a"), hexc("#4c2c36"), hexc("#643b45"), hexc("#7f4f5a"), hexc("#9d6a75")]
+SKIN = [hexc("#5a5568"), hexc("#7d7889"), hexc("#a09bab"), hexc("#bcb8c6"), hexc("#d6d3de")]
+SILVER = [hexc("#3c3a47"), hexc("#5b5968"), hexc("#7b7a8a"), hexc("#9c9bab"), hexc("#c2c1cd")]      # a step under the sheet: the engine lifts metal
+WOOD = [hexc("#2b1316"), hexc("#43201f"), hexc("#5a2d2a"), hexc("#73403a"), hexc("#8c584c")]        # the sheet's deep maroon stock, not red
+FUZZ = [hexc("#6a5a80"), hexc("#857596"), hexc("#a08fb0"), hexc("#b9a9c6"), hexc("#d0c3da")]
+STEM = hexc("#4a3a66")
+SKIN_LIFT = np.array([0.92, 0.98, 1.05])
 TRIM = hexc("#7c34c4")
 
 
@@ -34,7 +36,7 @@ def scan_grade(col, p, ao):
     sat = (col.max(1) - col.min(1)) / np.maximum(col.max(1), 0.01)
     purple = smooth(0.25, 0.5, sat) * smooth(0.02, 0.08, col[:, 2] - col[:, 1]) * (p[:, 2] < K.NECK_Z)
     c = col.copy()
-    c = mix(c, np.clip((col - lum) * 1.45 + lum, 0, 1) * np.array([1.04, 0.95, 1.2]), purple)
+    c = mix(c, np.clip((col - lum) * 1.25 + lum, 0, 1) * np.array([1.0, 0.95, 1.1]), purple)
     # the coat a step up and toward plum, so its purple reads in the toon light
     body = smooth(K.NECK_Z - 0.02, K.NECK_Z - 0.06, p[:, 2]) * smooth(0.5, 0.36, lum[:, 0])
     c = mix(c, c * np.array([1.26, 1.14, 1.32]) + np.array([0.032, 0.014, 0.042]), body)
@@ -90,12 +92,6 @@ def crystal(p, n, ao):
     return mix(hexc("#9a1fd8"), hexc("#f6a2ff"), smooth(0.3, 0.95, k))
 
 
-def bola(p, n, ao):
-    t = lit(n, ao) * 1.0 + 0.04
-    band = smooth(0.012, 0.007, np.abs(np.modf((p[:, 2] + p[:, 0] * 0.0) * 14.0 + 40)[0] - 0.5) / 14.0 * 3.0)
-    return ramp(np.clip(t - band * 0.28, 0, 1), SILVER)
-
-
 def path_u(p, path):
     path = np.asarray(path)
     a, b = path[:-1], path[1:]
@@ -116,23 +112,33 @@ def path_u(p, path):
 
 
 def feather(p, n, ao, path):
-    """A quill along the top edge, barbs combed out from it and notched: soft shade between them."""
+    """The thin dark stem, the dusty lilac fuzz combed out either side of it: darker by the stem, paler and notched at the edge."""
     u, d, sd = path_u(p, path)
-    barbs = 0.5 + 0.5 * np.sin(u * 95.0 + d * 90.0)
-    quill = smooth(0.012, 0.005, d)
-    t = 0.66 + lit(n, ao) * 0.2 + (barbs - 0.5) * 0.26 * smooth(0.008, 0.02, d) + quill * 0.12
-    return ramp(np.clip(t, 0, 1), HAIR)
+    barbs = 0.5 + 0.5 * np.sin(u * 110.0 + d * 120.0)
+    fz = ramp(np.clip(0.2 + 0.5 * smooth(0.004, 0.03, d) + lit(n, ao) * 0.22 + (barbs - 0.5) * 0.2, 0, 1), FUZZ)
+    return mix(fz, STEM[None, :] * (0.8 + 0.3 * np.clip(lit(n, ao), 0, 1))[:, None], smooth(0.0045, 0.0025, d))
 
 
 def braid(p, n, ao, path):
-    """Fat crossing lobes as on sable_head.png: a dark crease between lobes, fine strands combed along each."""
+    """Fat crossing lobes: the creases between them run in chevrons down the plait (so it reads woven, not beaded), fine strands combed along each lobe."""
     u, d, sd = path_u(p, path)
-    k = u * 9.0
+    k = u * 11.0 + np.abs(sd) * 7.0
     fr = k - np.floor(k)
     flip = np.where(np.floor(k) % 2 == 0, 1.0, -1.0)
-    crease = smooth(0.17, 0.03, np.minimum(fr, 1 - fr))
+    crease = smooth(0.12, 0.03, np.minimum(fr, 1 - fr))
     strands = np.sin((fr * 2.2 + flip * sd * 24.0) * 9.0)
     return ramp(np.clip(0.58 + lit(n, ao) * 0.42 - crease * 0.5 + strands * 0.05, 0, 1), HAIR)
+
+
+def hairback(p, n, ao, c=np.array([0.0, -0.012, 1.63])):
+    """White hair combed from the crown down to the nape, the scan's tone."""
+    q = p - c
+    st = 0.5 + 0.5 * np.sin(np.arctan2(q[:, 0], -q[:, 1]) * 26.0)
+    return np.clip(hexc("#efedf2")[None, :] * (0.93 + 0.07 * st)[:, None], 0, 1)
+
+
+def tie(p, n, ao):
+    return ramp(np.clip(lit(n, ao) * 0.8 + 0.2, 0, 1), FUZZ)
 
 
 def tuft(p, n, ao):
@@ -141,11 +147,11 @@ def tuft(p, n, ao):
 
 
 def coat_outer(p, n, ao, G):
-    """Plum leather with soft creases; a purple piped hem and front edge."""
+    """Plum leather with soft creases; violet piping down the front edge and the split."""
     c = ramp(np.clip(lit(n, ao) * 0.92 + (fbm(p * np.array([9.0, 9.0, 3.0])) - 0.5) * 0.3, 0, 1), LEATHER)
     # distance to the panel's free edges, in the grid
     d = np.full(len(p), 9.0)
-    for line in (G[-1], G[:, 0], G[:, -1]):
+    for line in (G[:, 0], G[:, -1]):
         a, b = line[:-1], line[1:]
         for i in range(len(a)):
             ab = b[i] - a[i]
@@ -158,58 +164,54 @@ def lining(p, n, ao):
     return ramp(np.clip(lit(n, ao) * 0.95 + 0.1, 0, 1), LINING)
 
 
-def wing(p, n, ao, root, along, across, s):
-    """Projected from the turnaround's back view: the outline in sable_pieces.W_EDGE is cut to it, so its pixels land on the wing."""
+def wing(p, n, ao, root, along, across):
+    """Projected from the turnaround's back view: the outline in sable_pieces.W_EDGE is cut to it, so its pixels land on the card. The two wings mirror."""
     q = p - root
-    y, x = (q @ along) / K.W_PX, (q @ across) / K.W_PX + K.W_XR
-    if s < 0:
-        x = K.W_MIRROR - x
+    y, x = (q @ along) / K.W_PX + K.W_Y0, (q @ across) / K.W_PX + K.W_XR
     return sample(WINGS, x, y) * (0.92 + 0.1 * np.clip(ao, 0, 1))[:, None]
 
 
-def pistol_art(p, n, ao, fallback):
-    """The weapon sheet's side view on the pistol's own (u, v) plane: dark wood and silver per the master (the sheet's brass goes to silver, its wood darker); off the drawing, the fallback paint."""
-    g = K.grip("R")
-    u, v = g[2] - p[:, 2], p[:, 1] - g[1]
-    px, py = 25 + (K.MUZZLE_U - u) * 1780.0, 100 + (0.052 - v) * 1780.0
-    c = sample(GUN, px, py)
+def blade(p, n, ao):
+    """Pale lilac steel, a violet sheen down the belly."""
+    k = 0.5 + 0.5 * np.sin(p[:, 2] * 38.0 + np.abs(p[:, 0]) * 70.0)
+    return mix(ramp(np.clip(lit(n, ao) * 0.7 + 0.42, 0, 1), FUZZ), hexc("#8a4fe0"), 0.42 * k)
+
+
+def wrap(p, n, ao):
+    """The hilt's violet cord."""
+    w = 0.5 + 0.5 * np.sin((p[:, 2] + np.abs(p[:, 0]) * 1.5) * 300.0)
+    return ramp(np.clip(lit(n, ao) * 0.7 + 0.12 + w * 0.2, 0, 1), LINING)
+
+
+def face_fix(c, p):
+    """The scan's face cleaned: its stitched mouth corners back to skin, the beauty mark redrawn."""
+    f = smooth(0.0, 0.03, p[:, 1])
+    ax = np.abs(p[:, 0] - K.FACE_X)
+    skin_ = np.median(c[(ax > 0.03) & (ax < 0.05) & (np.abs(p[:, 2] - 1.53) < 0.01) & (p[:, 1] > 0.03)], axis=0)
+    # the scan's skin toward the sheet's grey-lilac: cooler, and a step down so it stays apart from the hair in the toon light
     lum, sat = c.mean(1), (c.max(1) - c.min(1)) / np.maximum(c.max(1), 0.01)
-    warm = smooth(0.15, 0.3, sat) * (c[:, 0] > c[:, 2])
-    wood = mix(c, c * np.array([0.72, 0.56, 0.62]), warm)
-    brass = warm * smooth(0.42, 0.56, lum)
-    out = mix(wood, np.stack([lum, lum, lum * 1.06], 1) * 1.05, brass)
-    off = smooth(0.72, 0.8, lum) * smooth(0.12, 0.06, sat)             # the sheet's grey ground
-    fb = fallback(p, n, ao)
-    return mix(out, fb, off)
-
-
-def face_art(col, p, n):
-    """sable_head.png's front view on the face, graded to the scan's skin. -> (colour, mask)."""
-    px, py = 401 - (p[:, 0] - K.FACE_X) * 1978.0, 695 + (K.EYE[2] - p[:, 2]) * 1901.0        # (the art's eyes on the scan's sockets, mouth on mouth)
-    c = sample(HEAD, px, py)
-    m = smooth(1.0, 0.84, np.hypot((px - 401) / 192.0, (py - 738) / 196.0)) * smooth(0.02, 0.05, p[:, 1]) * smooth(0.2, 0.5, n[:, 1])
-    ref = (np.hypot(px - 401, py - 885) < 34) & (m > 0.8)              # the chin, to match the two skins
-    if ref.sum() > 20:
-        c = np.clip(c * (np.median(col[ref].mean(1)) / max(np.median(c[ref].mean(1)), 0.02)) ** 0.6, 0, 1)      # brightness only: the art keeps its cool lilac and grey irises
-    # (the toon light saturates lilac: the art a touch greyer, as on the sheet)
-    c = mix(c, c.mean(1, keepdims=True) * np.array([0.99, 0.98, 1.05]), 0.28)
-    # the irises a step lighter and cooler: the sockets' toon shade darkens them
-    for ex in (312.0, 490.0):
-        e = smooth(1.0, 0.8, np.hypot((px - ex) / 44.0, (py - 695) / 24.0))
-        c = mix(c, np.clip(c * 1.3 + np.array([0.034, 0.036, 0.046]), 0, 1), e)
-    return c, m
-
-
-def lacing(c, p):
-    """The master's corset lacing on the coat's lower back."""
-    z0, z1 = 0.915, 1.125
-    k = (p[:, 2] - z0) / (z1 - z0)
-    w = 0.032 - 0.016 * k
-    t = (k * 5.0) % 1.0
-    line = np.abs(np.abs(p[:, 0]) / w - np.abs(2 * t - 1))
-    m = smooth(0.2, 0.1, line) * (p[:, 1] < -0.04) * (np.abs(p[:, 0]) < w * 1.08) * (k > 0) * (k < 1)
-    c = mix(c, hexc("#17111d"), (np.abs(p[:, 0]) < 0.011 + 0 * k) * (p[:, 1] < -0.04) * (k > 0) * (k < 1) * 0.75)
-    return mix(c, hexc("#b9acc9"), m)
+    c = mix(c, np.clip(c * SKIN_LIFT, 0, 1), smooth(0.34, 0.42, lum) * smooth(0.76, 0.68, lum) * smooth(0.32, 0.24, sat))
+    skin_ = skin_ * SKIN_LIFT
+    # the mouth wiped and redrawn as the sheet's thin smile, the lower lip a soft shade under it
+    mz, z_ = K.MOUTH[2] - 0.002, p[:, 2]
+    c = mix(c, skin_ * 0.97, smooth(0.05, 0.042, ax) * smooth(0.024, 0.018, np.abs(z_ - mz)) * f)
+    line = smooth(0.0032, 0.0016, np.abs(z_ - mz - 0.0075 * (ax / 0.036) ** 2))
+    c = mix(c, hexc("#3a2c44"), 0.85 * line * smooth(0.034, 0.028, ax) * f)
+    c = mix(c, hexc("#8b8095"), 0.35 * smooth(0.011, 0.003, np.abs(z_ - mz + 0.012)) * smooth(0.024, 0.012, ax) * f)
+    dm = np.hypot(p[:, 0] - K.MARK[0], p[:, 2] - K.MARK[2])
+    c = mix(c, skin_, smooth(0.022, 0.012, dm) * f)
+    c = mix(c, hexc("#2a2233"), smooth(0.0052, 0.0036, dm) * f)
+    # the collar's violet that bled onto the neck, back to skin
+    lum, sat = c.mean(1), (c.max(1) - c.min(1)) / np.maximum(c.max(1), 0.01)
+    c = mix(c, skin_ * 0.88, smooth(0.062, 0.05, ax) * smooth(1.385, 1.4, z_) * smooth(1.485, 1.47, z_) * smooth(-0.04, -0.02, p[:, 1]) * smooth(0.16, 0.24, sat))
+    # behind the ears, where the buns were cut: the white scraps low on the collar go dark, higher up it is hair
+    back = smooth(-0.03, -0.05, p[:, 1])
+    c = mix(c, hexc("#2c2333"), smooth(1.46, 1.48, z_) * smooth(1.53, 1.52, z_) * back * smooth(0.3, 0.38, lum) * smooth(0.4, 0.3, sat))
+    c = mix(c, hexc("#e4e2ea"), smooth(1.515, 1.535, z_) * smooth(1.6, 1.585, z_) * back * smooth(0.112, 0.1, ax))
+    # the scan's speckled belt buckles down to one plain silver
+    lum, sat = c.mean(1), (c.max(1) - c.min(1)) / np.maximum(c.max(1), 0.01)
+    bk = smooth(0.76, 0.78, p[:, 2]) * smooth(0.95, 0.93, p[:, 2]) * smooth(0.3, 0.36, lum) * smooth(0.34, 0.24, sat)
+    return mix(c, hexc("#a9a6b2"), bk)
 
 
 def lid(p, n, ao, skin_c, liner_fn):
