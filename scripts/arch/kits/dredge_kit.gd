@@ -85,7 +85,7 @@ static func reeling(hn: Hunter) -> bool:
 	return hn.ak is DredgeKit and not (hn.ak as DredgeKit).pull.is_empty()
 
 func _hand() -> Vector3:
-	# the 3D model throws from the hook's mouth (anchor_claw)
+	# the 3D model reaches from the bone hook's tip (anchor_claw)
 	var claw := WardenGlb.anchor(h.model, "anchor_claw") if h.model else null
 	if claw and claw.is_inside_tree():
 		return claw.global_position
@@ -259,12 +259,11 @@ func _tick_looks(dt: float) -> void:
 			Color("1a5a6a"), 0.6
 		)
 
-## Grimble's 3D model: the hook leaves his wrist while the kit flies and reels it (one hook on screen, 76b).
-## A hit knocks coins off the hoard.
+## Grimble's 3D model: a hit knocks coins off the hoard. (His arm IS the hook: it stays on him, and the abyssal
+## arm the kit draws reaches out from its tip, anchor_claw.)
 func _tick_model(_dt: float) -> void:
 	if h.model == null:
 		return
-	h.model.set_meta(WardenGlb.CHAIN_OUT, flying or not pull.is_empty())
 	coins.tick(h, m.time, tells_visible())
 
 # ------------------------------------------------------------------ RMB: Abyssal Hand
