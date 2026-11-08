@@ -56,6 +56,7 @@ static func ensure() -> void:
 		d["raid_out"] = []
 	Equal.recover_belt()        # utility brought on an expedition that never ended goes back in the stash
 	Backpacks.ensure()          # owned backpacks, the pick, and one left out by a crash
+	revive_neglected()
 
 ## Backpack slots on an expedition before any bonus: the same for everyone (Equal.base_pack).
 static func pack_cap() -> int:
@@ -368,6 +369,42 @@ static func kin_dies(rec: Dictionary, cause: String) -> Dictionary:
 	if str(d.get("active2", "")) == String(rec["uid"]):
 		d["active2"] = ""
 	return g
+
+## No natural death (content/rules/neglect.json): a Boki that "starved" in an earlier version comes
+## back weak, as itself (level, memories, trust kept), and a living one past the sick cap is eased down
+## to it. Safe to run on every load: nothing is left to revive the second time. The names go to
+## Save.d["neglect_back"] for the home screen to tell you about once.
+static func revive_neglected() -> void:
+	if Care.natural_death():
+		return
+	var d := Save.d
+	for rec in d.get("roster", []):
+		if float(rec.get("starve", 0.0)) > Care.starve_cap_s():
+			rec["starve"] = Care.starve_cap_s()
+	for g in graves().filter(func(x): return String(x.get("cause", "")) == "starved"):
+		var rec := _grave_rec(g)
+		if String(rec.get("uid", "")) == "" or not Save.kin(String(rec["uid"])).is_empty():
+			rec["uid"] = Save.new_id()
+		rec["level"] = maxi(1, int(g.get("level", rec.get("level", 1))))
+		rec.erase("needs")
+		rec.erase("needs_t")
+		Care.ensure(rec)
+		rec["needs"] = {"food": 30.0, "energy": 40.0, "joy": 35.0, "clean": 50.0}
+		rec["starve"] = float(Care.STARVE["weak"]) * 3600.0
+		Save.remember(rec, "returned", "was found weak, not gone: hunger never takes a Boki for good", 0.0)
+		Save.log_event("recovered", rec)
+		d["roster"].append(rec)
+		KinBox.route_back(rec)
+		d["graves"].erase(g)
+		d["neglect_back"] = d.get("neglect_back", []) + [String(rec["name"])]
+	if str(d.get("active", "")) == "" and not (d["roster"] as Array).is_empty():
+		d["active"] = d["roster"][0]["uid"]
+
+## What a grave kept of the kin: its whole record, or (a very old grave) a plain one of its name and kind.
+static func _grave_rec(g: Dictionary) -> Dictionary:
+	if g.get("rec") is Dictionary:
+		return (g["rec"] as Dictionary).duplicate(true)
+	return Save.new_kin(String(g["species"]), String(g["name"]))
 
 static func graves() -> Array:
 	return Save.d.get("graves", [])

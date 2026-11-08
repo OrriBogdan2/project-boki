@@ -1137,8 +1137,10 @@ func _economy_check() -> void:
 		if st == "dead" and died_at < 0.0: died_at = days
 		line.append("%.1fd: %s (food %d, %.0fh starving, trust %d)" % [days, st if st != "" else "fine", int(Care.need(r2, "food")), Care.starve_h(r2), int(r2["trust"])])
 	print("ECON  starving timeline: " + "  |  ".join(line))
-	ok.call(died_at >= 3.0 and died_at <= 5.0, "unfed with no feeder, a kin dies after several days (day %.1f)" % died_at)
-	ok.call(Econ.graves().size() >= 1 and String(Econ.graves()[0]["cause"]) == "starved" and String(Econ.graves()[0]["name"]) == "Pip", "a grave with its name (%d graves, %d memories)" % [Econ.graves().size(), (Econ.graves()[0]["mem"] as Array).size() if Econ.graves().size() > 0 else 0])
+	ok.call(died_at < 0.0 and Care.starve_stage(Save.d["roster"][0]) == "sick", "unfed with no feeder, a kin gets sick but never dies (natural_death is off)")
+	var pip: Dictionary = Save.d["roster"][0]
+	Econ.kin_dies(pip, "lost")
+	ok.call(Econ.graves().size() == 1 and String(Econ.graves()[0]["cause"]) == "lost", "a kin lost another way gets a grave")
 	# 6. the Soul Shrine brings one back, changed
 	var g: Dictionary = Econ.graves()[Econ.graves().size() - 1]
 	ok.call(Econ.keep_soul(g) != "", "no shrine yet: can't keep a soul")

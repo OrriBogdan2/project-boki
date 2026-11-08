@@ -23,8 +23,21 @@ const STARVE_INFO := {
 	"starving": ["Starving", "Hasn't eaten in a while. Feed it, or fill a feeder."],
 	"weak": ["Weak from hunger", "Slow, and weaker on expeditions. Losing trust in you."],
 	"refuse": ["Too weak to go out", "Won't come on expeditions until it's eaten."],
-	"sick": ["Sick from hunger", "Ill and miserable. It won't last much longer without food."],
+	"sick": ["Sick from hunger", "Ill and miserable. Feed it and let it rest, and it will pick up."],
 }
+const NEGLECT_PATH := "res://content/rules/neglect.json"
+static var _neglect: Dictionary = {}
+
+## content/rules/neglect.json natural_death: false means the clock stops at "sick" and never reaches "dead".
+static func natural_death() -> bool:
+	if _neglect.is_empty():
+		var parsed = JSON.parse_string(FileAccess.get_file_as_string(NEGLECT_PATH))
+		_neglect = parsed if typeof(parsed) == TYPE_DICTIONARY else {"natural_death": false}
+	return bool(_neglect.get("natural_death", false))
+
+## The most the starve clock may hold, in seconds: "sick" when nothing may die of neglect.
+static func starve_cap_s() -> float:
+	return INF if natural_death() else float(STARVE["sick"]) * 3600.0
 
 const STATS := {
 	"power": {"name": "Power", "col": Color("ff7a5a"), "desc": "+0.4% damage a point", "drill": "Dummy strikes"},
@@ -168,7 +181,9 @@ static func catch_up(rec: Dictionary) -> float:
 		for k in floors:
 			nd[k] = maxf(float(nd[k]), minf(float(before[k]), floors[k]))
 		# the floor means it found enough to get by; one that was already empty starved the whole time
-		var st1 := st0 + gone if float(before["food"]) <= 0.5 else minf(float(rec.get("starve", 0.0)), st0)
+		var st1 := minf(float(rec.get("starve", 0.0)), st0)
+		if float(before["food"]) <= 0.5:
+			st1 = minf(st0 + gone, starve_cap_s())
 		if st1 > 0.0: rec["starve"] = st1
 		else: rec.erase("starve")
 	rec["needs_t"] = Time.get_unix_time_from_system()
@@ -181,7 +196,7 @@ static func starve_h(rec: Dictionary) -> float:
 ## "" (fine), "starving", "weak", "refuse", "sick" or "dead".
 static func starve_stage(rec: Dictionary) -> String:
 	var h := starve_h(rec)
-	if h >= STARVE["dead"]: return "dead"
+	if h >= STARVE["dead"] and natural_death(): return "dead"
 	if h >= STARVE["sick"]: return "sick"
 	if h >= STARVE["refuse"]: return "refuse"
 	if h >= STARVE["weak"]: return "weak"
@@ -198,7 +213,7 @@ static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0) -> void
 		if st / 3600.0 >= STARVE["weak"]:
 			# weak and still hungry: it trusts you a little less every few hours
 			rec["trust"] = clampf(float(rec.get("trust", 0.0)) - z / 10800.0, 0.0, 100.0)
-		st += z
+		st = minf(st + z, starve_cap_s())
 	elif need(rec, "food") > 20.0 and st > 0.0:
 		st = maxf(0.0, st - secs * 3.0)
 	if st > 0.0: rec["starve"] = st
