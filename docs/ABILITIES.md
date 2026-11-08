@@ -15,7 +15,7 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | **Ryzz** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
 | **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
 | **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
-| **Breaker** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
+| **Breaker** | heavy | War Hammer & Aegis | 360 Smash | Crushed | Aegis | Mending Ground (12s) | none (X is the Merge) |
 
 ### Thief (light)
 
@@ -82,13 +82,12 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
 
 _The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot._
 
-- **Passive: Guard.** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage).
+- **Passive: Crushed.** Any knock of yours (Crushing Blow, 360 Smash, Shield Charge) that drives a foe into a wall or another foe stuns it 0.5s (8 damage).
 - **Shift: 360 Smash** (9s a charge). 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
 - **RMB: Aegis** (6s):
   - tap: A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.
   - hold: Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
   - in the air: Shield Surf: hold to block from the front while gliding.
-  - resource full: Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
 - **E: Mending Ground** (12s). A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, Q
 

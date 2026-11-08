@@ -56,7 +56,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
 | [Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Fusion) |
 | [The Unbroken](Class-The-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Fusion) |
-| [Sunken Bulwark](Class-Sunken-Bulwark.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
+| [Sunken Bulwark](Class-Sunken-Bulwark.md) | 193 / 2 | War Hammer & Aegis | Crushed | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
 | [Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none (Boki Fusion) |
 | [Mad Pyromancer](Class-Mad-Pyromancer.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Fusion) |
 | [Little Lantern](Class-Little-Lantern.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none (Boki Fusion) |

@@ -118,7 +118,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			if d > worst:
 				worst = d
 				worst_mv = k
-		if moved < 0.03 and not k in ["bul_short", "bul_crush", "bul_armed"]:
+		if moved < 0.03 and not k in ["bul_short", "bul_crush"]:
 			still.append(k)
 		_play(m, an, sync, st, 12)
 	ok(still.is_empty(), "%s: each move's clip moves the hand (%s)" % [art_name, str(still)])
