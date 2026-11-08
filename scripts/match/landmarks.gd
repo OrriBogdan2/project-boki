@@ -82,8 +82,8 @@ func _spot(ii: int) -> Vector3:
 			if Vector2(bx, bz).distance_to(p) < 7.0:
 				score -= 30.0
 				break
-		if not W.train_route.is_empty():
-			if absf(p.distance_to(W.train_route["center"]) - float(W.train_route["r"])) < 7.0: score -= 30.0
+		var tn := TrainRoute.near(W, p.x, p.y)
+		if tn != Vector3.INF and absf(tn.y) < 7.0: score -= 30.0
 		if score > best_s:
 			best_s = score
 			best = Vector3(p.x, last_y, p.y)

@@ -5,8 +5,9 @@ extends Node
 const TEAM_COLORS := [Color("f2a24a"), Color("5ab0f0"), Color("e0607e"), Color("8fd16a"), Color("b48cf2"), Color("f0d45a"),
 	Color("4ad8c8"), Color("ff8ad8"), Color("c8a07a"), Color("9ab4ff"), Color("ff6a4a"), Color("b8e05a"), Color("e6e6f0"),
 	Color("7a8cff"), Color("ffb8a0"), Color("5ae08a"), Color("d07aff"), Color("ffe08a"), Color("6ac0ff"), Color("ff9a5a")]
-## Every expedition has about this many hunters, however they're split into squads.
-const MATCH_PLAYERS := 20
+## Every expedition has about this many hunters, however they're split into squads. 40 on the 305 m
+## Hollow Crown keeps the squads per square metre the 216 m map had with 20 (305² / 216² = 1.99).
+const MATCH_PLAYERS := 40
 
 const CLASSES := {
 	"light": {

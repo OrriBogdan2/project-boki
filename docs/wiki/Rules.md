@@ -15,7 +15,7 @@ _Generated from `scripts/core/data.gd`, `scripts/match/life.gd`, `content/rules`
 
 | Setting | Value | Meaning |
 |---|---|---|
-| players | 20 | hunters in an expedition (solos, duos or trios) |
+| players | 40 | hunters in an expedition (solos, duos or trios) |
 | length | 360 | seconds until the islands fall |
 | down_hp | 100 | so about 40 seconds downed before you bleed out |
 

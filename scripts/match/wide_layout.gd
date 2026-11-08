@@ -70,7 +70,12 @@ static func widen(L: Dictionary) -> Dictionary:
 		B["from"] = sh2.call(B["from"]); B["to"] = sh2.call(B["to"])
 	for U in W.get("updrafts", []):
 		U["at"] = sh2.call(U["at"])
-	if W.has("train"): W["train"]["center"] = sh2.call(W["train"]["center"])
+	if W.has("train"):
+		var T: Dictionary = W["train"]
+		if T.has("center"): T["center"] = sh2.call(T["center"])
+		if T.has("path"):        # (a winding loop: its points and its stops move with the land)
+			T["path"] = (T["path"] as Array).map(sh2)
+			T["stations"] = (T["stations"] as Array).map(sh2)
 	for k in ["docks", "outposts", "hatches", "portals"]:
 		if W.has(k): W[k] = (W[k] as Array).map(func(a): return sh2.call(a))
 	for LD in W.get("lairs", []):

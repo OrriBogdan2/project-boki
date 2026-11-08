@@ -4,7 +4,7 @@ extends Node
 ## and logs per phase: wall frame time, script time, draw calls, objects, primitives, memory, and the
 ## worst hitches with the build steps (PerfLog marks) that ran inside them.
 ##   xvfb-run -a -s "-screen 0 1280x720x24" godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-probe
-##   [--probe-out=/path/report.txt] [--probe-quick] [--probe-squad=3] [--quality=high]
+##   [--probe-out=/path/report.txt] [--probe-quick] [--probe-squad=3] [--probe-teams=40] [--quality=high]
 ## A software-rendered GPU makes wall time mostly raster time, so read the CPU columns (script,
 ## render submit) and the counts; wall time is still where hitches show.
 
@@ -50,11 +50,13 @@ func _ready() -> void:
 	Save.no_write = true      # never touches the dev save (the music list would write it)
 	Save.d["tutorial"]["home"] = true
 	var squad := 1
+	var teams := 6       # --probe-teams=N: a full lobby (Data.MATCH_PLAYERS) for before/after match-size runs
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--probe-squad="): squad = int(a.substr(14))
+		if a.begins_with("--probe-teams="): teams = int(a.substr(14))
 	started_us = Time.get_ticks_usec()
 	last_us = started_us
-	Game.main.show_screen("match", {"teams": 6, "squad": squad, "tier": 0, "seed": 4101, "autoplay": true, "probe": true, "god": true})
+	Game.main.show_screen("match", {"teams": teams, "squad": squad, "tier": 0, "seed": 4101, "autoplay": true, "probe": true, "god": true})
 
 func _rinfo(k: int) -> int:
 	return RenderingServer.get_rendering_info(k)
