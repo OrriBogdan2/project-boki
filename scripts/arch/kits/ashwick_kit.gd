@@ -681,7 +681,8 @@ func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
 func ult_running() -> bool: return jet.running()
 ## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
-func fires_in_dash() -> bool: return jet.running()
+func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
+func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()
 func gate_inputs() -> void: jet.lock_inputs()
 
 # ------------------------------------------------------------------ bots

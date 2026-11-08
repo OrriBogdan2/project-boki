@@ -698,8 +698,8 @@ func _mode(hero: String, slot: String, in_air: bool) -> String:
 ## #32 / #35 for Hem: a press during the roll is carried, RMB / E / X work at once; item 51: a draw carries
 ## through a dash (Shift mid-draw rolls at once).
 func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
-	ok("pin dash table: LMB buffers, RMB / E / X fire, a draw carries through a dash",
-		_mode("archer", "lmb", false) == "buffer" and _mode("archer", "lmb", true) == "buffer"
+	ok("pin dash table: LMB, RMB / E / X fire (the source is silent), a draw carries through a dash",
+		_mode("archer", "lmb", false) == "fire" and _mode("archer", "lmb", true) == "fire"
 		and _mode("archer", "rmb", false) == "fire" and _mode("archer", "e", false) == "fire"
 		and _mode("archer", "x", false) == "fire"
 		and DashFlow.into_dash_of("archer", "lmb").get("mode") == "fire"
@@ -716,7 +716,7 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		P.inp["fire"] = true
 		m.step(DT)
 	step(m, 0.8, _let_go.bind(P))
-	ok("pin dash > LMB: a tap during the roll is not lost, the arrow goes when the roll ends",
+	ok("pin dash > LMB: a tap during the roll draws and looses (no buffering)",
 		rolling and K.draw.loosed_at > loosed0, "rolling %s loosed %.2f -> %.2f" % [rolling, loosed0, K.draw.loosed_at])
 	step(m, 1.0)
 	P.dashes = P.max_dashes()
