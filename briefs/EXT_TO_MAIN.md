@@ -3174,3 +3174,6 @@ READY ext/leave-match-warning-1108 8a8f66a42 (off main d255acbee; not merged; no
 
 
 ## Nov 8 17:55 (art): Gongibbon line changed. Base Gongibbon = chest-gong gibbon (turnarounds/Gongibbon.jpg). Its evolution is now the crest-gong gibbon (evolutions/Gongibbon_evolution_crest.jpg), replacing Carillangutan; name pending owner. Vespyx line: the old Vespox sheet is now Glaivyx (Fierce final); a new smaller Vespox middle form is in progress.
+
+
+## Nov 8 17:56: Gongibbon's evolution is named **Gongrowl** (evolutions/Gongrowl.jpg).

@@ -16,3 +16,6 @@
 
 ## Owner rule (Nov 8, 15:11 ET)
 Always paste prompts in the chat itself, never as prompt files, and at most 10 prompts per message (owner, 15:19). Each prompt lists its settings (model, image 1, ratio, resolution).
+
+- General review (owner, Nov 8): Gongrowl needs further stylisation as a final form (less realistic ape, bigger, more iconic).
+- Naming: owner says I pick names from here on, except Gongrowl (owner's choice).
