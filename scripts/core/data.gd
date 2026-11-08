@@ -15,9 +15,10 @@ const TEAM_COLORS := [Color("f2a24a"), Color("5ab0f0"), Color("e0607e"), Color("
 ## OKLab distance (unitless, 0..~0.5 for these): the least any two TEAM_COLORS may differ. 0.08 is about
 ## four times a just-noticeable step, enough to tell two squads apart on a nameplate at a glance.
 const TEAM_COLOR_GAP := 0.08
-## Every expedition has about this many hunters, however they're split into squads. 40 on the 305 m
-## Hollow Crown keeps the squads per square metre the 216 m map had with 20 (305² / 216² = 1.99).
-const MATCH_PLAYERS := 40
+## Every expedition has about this many hunters, however they're split into squads. 30 on the 305 m
+## Hollow Crown: 40 would keep the 216 m map's squads per square metre (305² / 216² = 1.99), but a
+## 40-hunter match was not perf-flat with 20 on the GPU box (decision 0021), so it is capped at 30.
+const MATCH_PLAYERS := 30
 
 const CLASSES := {
 	"light": {
