@@ -3082,3 +3082,5 @@ READY ext/farm-tut-tools-cam 1d699b029 (job 20261108-211514-a1 on w3; on main d2
 
 ## 2026-11-08 feel (job 20261108-214531-a4): CLAIM two-step abilities in your face
 - CLAIM: DECISIONS "two-step abilities must be obvious and in your face": one shared recast/combo cue system (HUD pulse + "<KEY> AGAIN" + timer ring + expired, world marker with key, open/tick/payoff sounds, enemy combo icon with time left, payoff flash, 0.15s recast buffer), keys from live InputMap. Branch ext/recast-clarity-1108 from origin/main.
+
+CLAIM vex-coin-palm-1108 (job 20261108-214542-a4): owner 11-08 Vex Burr Charge -> Coin Blast (coin projectile, flick throw) and Longneedle -> Palm Lance (from cyborg palm). Branch ext/vex-coin-palm-1108, built on READY ext/vfx-gunslinger 1bb6c7bcd.
