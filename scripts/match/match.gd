@@ -120,13 +120,7 @@ var _net_seen_rec := {}
 var _rev_out := {}
 var _net_rev_t := 0.0
 var _finish_now := false
-var rolling: Rolling = null     # a rolling 30-minute session (opts "rolling"): waves, join-in-progress, late-joiner levels (scripts/match/rolling.gd)
-var sess_t0 := 0.0              # session time when this match's clock started (rolling: when your wave set off; else 0)
-var ships: Array = []           # the other drop waves' skyships (rolling sessions); `ship` is your own
 var _bot_names: Array = []
-func sess_time() -> float: return sess_t0 + time     # the session clock: seconds since the session began (the match clock unless you joined a rolling session part-way)
-func sess_len() -> float: return Rolling.SESSION if rolling else length     # the whole session (a rolling session: Rolling.SESSION)
-func at_sess(k: float) -> float: return k * sess_len() - sess_t0     # match time at a share of the session (negative if before you joined)
 
 func _ready() -> void:
 	set_process(false)
@@ -685,10 +679,6 @@ func _start(o: Dictionary) -> void:
 	# real expeditions happen on the big map and start from the skyship
 	big = not (o.get("tutorial", false) or o.get("training", false)) and o.get("big", true)
 	length = float(o.get("length", Data.MATCH["length"] * (1.7 if big else 1.0)))
-	if Rolling.enabled(o):
-		# a rolling session: the waves, which one you're in, who's out there already (sets length and sess_t0)
-		rolling = Rolling.new(self)
-		rolling.plan(o)
 	tier = clampi(int(o.get("tier", 0)), 0, Data.TIERS.size() - 1)
 	T = Data.TIERS[tier]
 	bot_diff = String(o.get("bot_diff", Settings.get_v("bot_diff")))
@@ -708,7 +698,7 @@ func _start(o: Dictionary) -> void:
 	var layout := {}
 	# --procgen (or opts.procedural): the old island generator instead, as a fallback
 	if big and not o.get("procedural", false) and not "--procgen" in OS.get_cmdline_user_args():
-		layout = WideLayout.pick(o, rolling != null, tier)     # a rolling session gets the wide Skyreach; otherwise the expedition map
+		layout = World.load_layout(String(o.get("map", World.layout_for_tier(tier))))     # the expedition map
 	elif o.get("tutorial", false):
 		layout = World.load_layout("tutorial")
 	elif o.get("arena", false):
@@ -811,8 +801,6 @@ func _start(o: Dictionary) -> void:
 		# the Blight: Wardens on the islands from the start, Skitters later (scripts/match/blight_dir.gd)
 		blight = BlightDir.new(self)
 		blight.setup()
-	if rolling:
-		rolling.after_setup()      # the map as picked over as the session is old
 	if not (opts.get("duel", false) or opts.get("arena", false) or opts.get("tutorial", false)):
 		keys = KeyRun.new(self)
 		keys.setup()               # who carries the chest keys, and the Shrublings
@@ -1107,11 +1095,6 @@ func _spawn_hunters() -> void:
 	if net_on:
 		_spawn_net_hunters(spots, names)
 		return
-	if rolling:
-		# who's already out there, then your wave's ship over the quiet side and its squads' spots under it
-		rolling.populate_before(names)
-		_setup_ship()
-		spots = rolling.spots_along(ship, n_teams)
 	var total := int(opts.get("total", 999))
 	var made := 0
 	for t in n_teams:
@@ -1222,10 +1205,6 @@ var ship := {}
 var biomes: BiomeRun = null     # biome regions on an authored map (spawn tables, rarity, mutations, traps)
 
 func _setup_ship() -> void:
-	if rolling:
-		# your wave's ship flies over the less crowded side (Rolling.new_ship), starting now
-		if ship.is_empty(): ship = rolling.new_ship(0.0)
-		return
 	var ang := rng.randf() * TAU
 	var c := Vector3(world.w / 2.0 + rng.randf_range(-10, 10), SHIP_Y, world.h / 2.0 + rng.randf_range(-10, 10))
 	var dir := Vector3(cos(ang), 0, sin(ang))
@@ -1237,32 +1216,22 @@ func _setup_ship() -> void:
 	add_child(n)
 	ship["node"] = n
 
+## Where the skyship is now.
 func ship_pos() -> Vector3:
-	return ship_pos_of(ship)
-
-## Where a skyship is now (each drop wave's ship sets off at its own "t0", match time).
-func ship_pos_of(s: Dictionary) -> Vector3:
-	if s.is_empty() or not s.has("a"):
+	if ship.is_empty() or not ship.has("a"):
 		return Vector3.ZERO
-	return (s["a"] as Vector3).lerp(s["b"], clampf((time - float(s.get("t0", 0.0))) / float(s["dur"]), 0.0, 1.0))
-
-## The skyship a hunter rides (a rolling session's later waves have their own; otherwise `ship`).
-func ship_of(h: Hunter) -> Dictionary:
-	if h != null and h.has_meta("ship"):
-		return h.get_meta("ship")
-	return ship
+	return (ship["a"] as Vector3).lerp(ship["b"], clampf(time / float(ship["dur"]), 0.0, 1.0))
 
 ## When a bot aboard should jump to come down on a spot: as the ship passes nearest it.
 func plan_jump(h: Hunter, at: Vector3) -> void:
-	var s := ship_of(h)
+	var s := ship
 	if s.is_empty() or not s.has("a"):
 		return
 	h.ai["land"] = at
 	var a: Vector3 = s["a"]; var b: Vector3 = s["b"]
-	var st := float(s.get("t0", 0.0))
 	var ab := Vector2(b.x - a.x, b.z - a.z)
 	var k := clampf(Vector2(at.x - a.x, at.z - a.z).dot(ab) / ab.length_squared(), 0.04, 0.97)
-	h.ai["jump_at"] = clampf(st + k * float(s["dur"]) - 2.2 + randf_range(-0.5, 0.5), maxf(st + 0.6, time + 0.2), st + float(s["ride"]) - 0.5)
+	h.ai["jump_at"] = clampf(k * float(s["dur"]) - 2.2 + randf_range(-0.5, 0.5), maxf(0.6, time + 0.2), float(s["ride"]) - 0.5)
 
 ## Off the ship. A squadmate waiting on the drop leader can't jump by themselves (force: they're
 ## jumping with the leader, or the ship has reached the end of its run).
@@ -1275,15 +1244,14 @@ func ship_jump(h: Hunter, force := false) -> void:
 		return
 	h.riding = false
 	var off := Vector3(rng.randf_range(-0.8, 0.8), 0, rng.randf_range(-0.8, 0.8))
-	var hs := ship_of(h)
-	h.teleport(ship_pos_of(hs) + Vector3(0, -1.5, 0) + off)
+	h.teleport(ship_pos() + Vector3(0, -1.5, 0) + off)
 	h.dropping = true
 	h.diving = true
 	h.drop_from = Vector2(h.pos.x, h.pos.z)
 	h.gliding = true
 	h.glide_k = 1.0
 	h.grounded = false
-	h.vel = hs["dir"] * 3.0
+	h.vel = ship["dir"] * 3.0
 	if h == player:
 		sfx("whoosh", null, -2.0)
 		if hud and not force:
@@ -1293,24 +1261,19 @@ func ship_jump(h: Hunter, force := false) -> void:
 	if skydrop and skydrop.is_lead(h):
 		skydrop.on_lead_jump(h)
 
+## The skyship along its line, and everyone aboard it: jump when it's time, or at the end of its run.
 func _update_ship(dt: float) -> void:
-	_update_one_ship(ship, dt)
-
-## One skyship along its line, and everyone aboard it: jump when it's time, or at the end of its run.
-func _update_one_ship(s: Dictionary, dt: float) -> void:
+	var s := ship
 	if s.is_empty() or s.get("gone", false):
 		return
-	var st := float(s.get("t0", 0.0))
 	var n: Node3D = s["node"]
 	# drawn along the line past the end too, so it sails off over the clouds
-	n.position = (s["a"] as Vector3).lerp(s["b"], (time - st) / float(s["dur"])) + Vector3(0, 1.4 + sin(time * 1.3) * 0.25, 0)
+	n.position = (s["a"] as Vector3).lerp(s["b"], time / float(s["dur"])) + Vector3(0, 1.4 + sin(time * 1.3) * 0.25, 0)
 	for pn in ["PropL", "PropR"]:
 		(n.get_node(pn) as Node3D).rotation.z += dt * 14.0
-	var done := time >= st + float(s["ride"])
+	var done := time >= float(s["ride"])
 	for h in hunters:
-		if h.riding and not is_same(ship_of(h), s):
-			continue
-		if h.riding and h.remote and is_host and time > st + float(s["ride"]) + 6.0:
+		if h.riding and h.remote and is_host and time > float(s["ride"]) + 6.0:
 			# someone who dropped connection aboard: stop counting them as still in the match
 			h.riding = false
 			eliminate(h, null, "left", true)
@@ -1329,7 +1292,7 @@ func _update_one_ship(s: Dictionary, dt: float) -> void:
 			continue          # jumps with the leader
 		if done or (auto and time >= float(h.ai.get("jump_at", 0.0))):
 			ship_jump(h, done)
-	if done and time > st + float(s["dur"]) * 1.5:
+	if done and time > float(s["dur"]) * 1.5:
 		n.queue_free()
 		s["node"] = null
 		s["gone"] = true
@@ -1348,7 +1311,6 @@ func on_drop_landed(h: Hunter) -> void:
 		h.teleport(best)
 	DropFeel.land(self, h)
 	if blight: blight.on_landed(h)
-	if rolling: rolling.on_landed(h)
 
 func _apply_treat(k: Kin) -> void:
 	match String(Save.d.get("treat", "")):
@@ -1391,7 +1353,6 @@ func _spawn_mobs() -> void:
 			var smb := spawn_mob(kk, q)
 			if biomes: biomes.dress(smb)
 			made.append(smb)
-		if rolling: rolling.note_camp(p, comp, made)     # (cleared camps come back in a rolling session)
 
 func spawn_mob(kk: String, at: Vector3) -> Mob:
 	at = _clear_spot(at)
@@ -2243,7 +2204,6 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 				BokiChatter.say(self, player.kin, "kill")
 	else:
 		add_feed("%s went down" % HeroTitle.of_hunter(h))
-	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")
 	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)
@@ -2508,7 +2468,7 @@ func _check_last() -> void:
 	for h in hunters:
 		if not h.out and not h.extracted:
 			teams[h.team] = true
-	if teams.size() <= 1 and exits and (rolling == null or rolling.waves_left() == 0):
+	if teams.size() <= 1 and exits:
 		exits.on_last_team()
 
 func on_fell(e: Ent) -> void:
@@ -3630,8 +3590,7 @@ func _process(delta: float) -> void:
 	if player and player.riding:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its
 		# course over the islands, like riding the bus in a battle royale
-		var ps := ship_of(player)
-		var sd: Vector3 = ps.get("dir", Vector3.FORWARD)
+		var sd: Vector3 = ship.get("dir", Vector3.FORWARD)
 		cam.yaw_to = atan2(-sd.x, -sd.z)
 		cam.chase_to = 1.0
 		cam.top_to = 0.0
@@ -3639,7 +3598,7 @@ func _process(delta: float) -> void:
 		if time < 0.5:
 			# boarding: start already behind the ship rather than swinging through it
 			cam.chase = 1.0; cam.yaw = cam.yaw_to; cam.zoom = cam.zoom_to
-		var fp := ship_pos_of(ps) + sd * 27.0
+		var fp := ship_pos() + sd * 27.0
 		cam.follow(Vector3(fp.x, (SHIP_Y - 11.0) / 0.6, fp.z), delta, false)
 	elif player and not player.out and not player.downed:
 		cam.chase_to = 0.0
@@ -4315,11 +4274,6 @@ func step(dt: float) -> void:
 	_prof("pickups")
 	if not ship.is_empty() and not ship.get("gone", false):
 		_update_ship(dt)
-	for s in ships:
-		_update_one_ship(s, dt)
-	if rolling:
-		rolling.tick(dt)
-		if opts.has("rolling_demo"): rolling.demo(String(opts["rolling_demo"]))
 	_update_interact(dt)
 	_update_box_hums()
 	_prof("interact")
@@ -5174,10 +5128,10 @@ func _update_events() -> void:
 	if opts.get("tutorial", false) or opts.get("training", false):
 		return
 	_update_meteors()
-	if not glimmer_done and time > at_sess(0.5) and (not net_on or is_host):
+	if not glimmer_done and time > length * 0.5 and (not net_on or is_host):
 		glimmer_done = true
 		_spawn_glimmer()
-	if warden_done or time < at_sess(0.4) or world.heart_spot == Vector3.INF:
+	if warden_done or time < length * 0.4 or world.heart_spot == Vector3.INF:
 		return
 	warden_done = true
 	if not net_on or is_host:
@@ -5206,17 +5160,12 @@ func _update_meteors() -> void:
 			_meteor_hit(mt["at"])
 	if not big or (net_on and not is_host):
 		return
-	if meteor_at < 0.0 or (rolling and time > meteor_end + 1.0 and meteor_end > 0.0):
-		if rolling:
-			# a rolling session has a shower every few minutes: fresh gems for the late arrivals too
-			meteor_at = rolling.next_meteor(maxf(time, meteor_end))
-		else:
-			meteor_at = length * 0.24 if not opts.get("meteor_test", false) else 1.5
+	if meteor_at < 0.0:
+		meteor_at = length * 0.24 if not opts.get("meteor_test", false) else 1.5
 		meteor_end = meteor_at + 16.0
 	if time < meteor_at or time > meteor_end:
 		return
 	if time - dt < meteor_at:
-		if rolling: rolling.stats["meteors"] += 1
 		_announce("A meteor shower is coming down. Stars leave gems where they land", Color("ffcf8a"))
 		if net_on: net_event(["anc", "meteor", 0, 0, 0])
 	meteor_next -= dt
@@ -5373,8 +5322,6 @@ func _end_soon(after: float) -> void:
 	if result.get("ending", false):
 		return
 	result["ending"] = true
-	if opts.get("sim_keep", false) and time < length:
-		return      # (--rolling-sim: the session runs on to 30:00 after the player is done)
 	get_tree().create_timer(after).timeout.connect(_finish)
 
 func _finish() -> void:
@@ -5444,8 +5391,6 @@ func _finish() -> void:
 		if h.extracted and h != player:
 			placed += 0
 	r["placed"] = placed
-	if rolling:
-		r["rolling"] = {"joined_at": rolling.t0, "left_at": sess_time(), "session": Rolling.SESSION, "wave": rolling.join_i}
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if net_on:
 		Net.end_match()

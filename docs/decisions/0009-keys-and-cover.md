@@ -24,6 +24,6 @@ Chests came in three tiers, so where you opened one decided what you got, and an
 
 ## Consequences
 - New: `key_run.gd`, `key_carry.gd`, `key_chest.gd`, `key_glint.gd`, `key_models.gd`, `chest_loot.gd`, `shrubling.gd`, `shrubling_model.gd`, `key_bonus.gd`, `bot_keys.gd`, `content/rules/keys.json`, `content/rules/chest_keys.json`, four sounds (`tools/gen_key_sfx.py`), `tools/keys_check.gd` (`--keys-check`), `tools/cover_check.gd` (`--cover-check`). Both are in `CheckRegistry`.
-- Changed: chest code in `models.gd`, `props_sculpt.gd`, `match.gd`, `world.gd`, `spawn_plan.gd`, `rolling.gd`, `polish_tools.gd`, `life.gd` and `pack.gd` (the box field), the `gear.json` table, `bot.gd`, `hud.gd` (one call), `sfx.gd`, `net.gd` (version).
+- Changed: chest code in `models.gd`, `props_sculpt.gd`, `match.gd`, `world.gd`, `spawn_plan.gd`, `polish_tools.gd`, `life.gd` and `pack.gd` (the box field), the `gear.json` table, `bot.gd`, `hud.gd` (one call), `sfx.gd`, `net.gd` (version).
 - Removed: chest tiers everywhere. Sky-train crates stay free to open, so the train puzzle does not need a key. The tutorial chest is free.
 - Debt: none added to the big files beyond wiring; `match.gd` stays under its budget. Open owner questions are listed in the part C report.

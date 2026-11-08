@@ -35,7 +35,7 @@ static func list(m) -> Array:
 static func gem_mult(h) -> float:
 	return 1.0 + 0.25 * float(h.perk_n("scavenger")) + h.gear_stat("gems")
 
-# ------------------------------------------------------------------ rolling
+# ------------------------------------------------------------------ rolls
 
 static func kind_of(id: String) -> String:
 	var ks: Dictionary = rules().get("kinds", {})

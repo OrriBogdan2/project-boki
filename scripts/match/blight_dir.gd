@@ -85,7 +85,7 @@ func time_k(t: float) -> float:
 
 ## The Blight's strength at a spot, against a squad.
 func level(p: Vector3, team: int) -> float:
-	var tk := time_k(squad_time(team)) if team >= 0 else time_k(m.sess_time())
+	var tk := time_k(squad_time(team)) if team >= 0 else time_k(m.time)
 	return clampf((0.1 + 0.9 * tk) * region_k(p) * raid_k, 0.0, LVL_MAX)
 
 func level_vs(b: Blight, team: int) -> float:
@@ -93,7 +93,7 @@ func level_vs(b: Blight, team: int) -> float:
 
 ## A Warden or a Skitter between squads: as strong as the match is old, where it stands.
 func level_here(p: Vector3) -> float:
-	return clampf((0.1 + 0.9 * time_k(m.sess_time())) * region_k(p) * raid_k, 0.0, LVL_MAX)
+	return clampf((0.1 + 0.9 * time_k(m.time)) * region_k(p) * raid_k, 0.0, LVL_MAX)
 
 func on_landed(h: Hunter) -> void:
 	if not land_at.has(h.team):

@@ -2008,7 +2008,7 @@ func sim(dt: float) -> void:
 		if remote:
 			net_follow(dt)
 		else:
-			pos = m.ship_pos_of(m.ship_of(self)) + Vector3(0, -1.2, 0)
+			pos = m.ship_pos() + Vector3(0, -1.2, 0)
 			prev = pos
 			vel = Vector3.ZERO
 			if ctrl == "local" and inp["jump"]:
@@ -2931,8 +2931,6 @@ var slot_lv := {"sec": 0, "dash": 0, "kin": 0, "ult": 0}
 func gain_xp(x: float) -> void:
 	if lvl >= XP_TO.size() or x <= 0.0:
 		return
-	if m and m.rolling:
-		x = m.rolling.scale_xp(self, x)      # catch-up XP below the session's median level (Rolling.xp_mult)
 	xp += x
 	while lvl < XP_TO.size() and xp >= float(XP_TO[lvl]):
 		lvl += 1

@@ -188,10 +188,8 @@ func draw(sz: Vector2) -> void:
 	ReviveHud.full_map(self)
 	_lair_alerts(c)
 	_ship(c)
-	_wave_ships(c)
 	_pings(c, team)
 	_enemies(c, team)
-	_bounties(c, team)
 	_squad(c, team)
 	_legend(c, sz, team)
 	_side(c, sz)
@@ -409,38 +407,6 @@ func _ship(c: Control) -> void:
 	c.draw_colored_polygon(PackedVector2Array([sp + fw * 13.0, sp - fw * 8.0 + sd * 8.0, sp - fw * 4.0, sp - fw * 8.0 - sd * 8.0]), Color(0, 0, 0, 0.6))
 	c.draw_colored_polygon(PackedVector2Array([sp + fw * 11.0, sp - fw * 6.0 + sd * 6.5, sp - fw * 3.0, sp - fw * 6.0 - sd * 6.5]), GOLD)
 	hud._ctext(sp + Vector2(0, -14), "SKYSHIP", 10, GOLD, hud.big)
-
-## A rolling session's other drop waves: their skyships and routes, in amber (anyone can see a ship).
-func _wave_ships(c: Control) -> void:
-	if m.rolling == null:
-		return
-	for s in m.ships:
-		if s.get("gone", false) or s.get("node") == null:
-			continue
-		var a := to_screen(s["a"]); var b := to_screen(s["b"])
-		var L := a.distance_to(b)
-		var d := 0.0
-		while d < L:
-			c.draw_line(a.lerp(b, d / L), a.lerp(b, minf(1.0, (d + 6.0) / L)), Color(1.0, 0.72, 0.35, 0.4), 2.0, true)
-			d += 12.0
-		var sp := to_screen(m.ship_pos_of(s))
-		sp = Vector2(clampf(sp.x, rect.position.x + 8, rect.end.x - 8), clampf(sp.y, rect.position.y + 8, rect.end.y - 8))
-		var dir: Vector3 = s["dir"]
-		var fw := Vector2(dir.x, dir.z).normalized(); var sd := Vector2(-fw.y, fw.x)
-		c.draw_colored_polygon(PackedVector2Array([sp + fw * 11.0, sp - fw * 6.0 + sd * 6.5, sp - fw * 3.0, sp - fw * 6.0 - sd * 6.5]), Color("ffb64a"))
-		hud._ctext(sp + Vector2(0, -14), "DROP WAVE", 10, Color("ffb64a"), hud.big)
-
-## Hunters with a bounty on them (a rolling session): everyone sees where they are.
-func _bounties(c: Control, team: int) -> void:
-	if m.rolling == null:
-		return
-	for h in m.hunters:
-		if h.team == team or not h.has_meta("bounty") or h.out or h.extracted:
-			continue
-		var pv := to_screen(h.pos)
-		if rect.has_point(pv):
-			hud.bounty_marker(c, pv, 1.25)
-			hud._ctext(pv + Vector2(0, -16), "LV %d" % h.lvl, 10, Color("ffb64a"), hud.big)
 
 ## A lair fight you heard: the boss's icon at the lair, a pulsing ring and what's going on there
 ## (the fight and its seal's clock, or that the boss has fallen and the gate's clock).

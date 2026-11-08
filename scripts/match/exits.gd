@@ -68,12 +68,11 @@ func setup(match_node: Match) -> void:
 	if docks.size() > 1:
 		var keep: int = m.rng.randi_range(0, docks.size() - 1)
 		var fr := [0.62, 0.74, 0.86, 0.9, 0.93]
-		if m.rolling: fr = [0.84, 0.89, 0.93, 0.95]     # a rolling session: the docks close in its last few minutes
 		var k := 0
 		for i in docks.size():
 			if i == keep:
 				continue
-			docks[i]["close_at"] = m.at_sess(float(fr[mini(k, fr.size() - 1)]))
+			docks[i]["close_at"] = m.length * float(fr[mini(k, fr.size() - 1)])
 			k += 1
 		docks[keep]["last"] = true
 	for i in list.size():
@@ -145,7 +144,7 @@ func _add_dock(d: Dictionary) -> void:
 	sk.rotation.y = yaw
 	m.add_child(sk)
 	list.append({"kind": "dock", "pos": beacon, "berth": berth, "out": out, "node": n, "skiff": sk, "name": (nm + " Dock") if nm != "" else "Skiff Dock",
-		"state": "idle", "t": 0.0, "open_at": m.at_sess(0.18), "close_at": 1e9, "team": -1, "caller": "", "hold": {}, "waves": 0, "wave_t": 0.0, "aboard": []})
+		"state": "idle", "t": 0.0, "open_at": m.length * 0.18, "close_at": 1e9, "team": -1, "caller": "", "hold": {}, "waves": 0, "wave_t": 0.0, "aboard": []})
 
 func _add_hatch(d: Dictionary) -> void:
 	var p: Vector3 = d["pos"]
@@ -165,7 +164,7 @@ func _add_outpost(d: Dictionary, tut: bool) -> void:
 		_place(pal, at)
 	var nm := _island_name(at)
 	list.append({"kind": "outpost", "pos": at, "node": n, "name": (nm + " Outpost") if nm != "" else "Outpost", "state": "idle", "t": 0.0, "prog": 0.0,
-		"open_at": 0.0 if tut else m.at_sess(0.22), "team": -1, "hold": {}, "waves": 0, "wave_t": 0.0, "contested": false, "steal": 0.0, "tut": tut})
+		"open_at": 0.0 if tut else m.length * 0.22, "team": -1, "hold": {}, "waves": 0, "wave_t": 0.0, "contested": false, "steal": 0.0, "tut": tut})
 
 # ------------------------------------------------------------------ queries
 func of_kind(k: String) -> Array:
