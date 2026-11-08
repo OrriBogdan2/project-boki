@@ -384,10 +384,11 @@ func _world() -> void:
 	# the tracker card sits in the old first-day slot, and the Hob step
 	ok(is_instance_valid(home.guide.tracker) and home.guide.tracker.get_parent() == home.root_ui,
 			"the Goals card is on screen")
+	_check_beacon(home)
 	home.hob.talk()
 	ok(home.panel_open == "Hob Brackenridge" and FarmTutorial.did("hob"),
 			"talking opens his panel and ticks the meet-Hob step")
-	home._close_panel()
+	await _check_dialogue(home)
 	# the build menu
 	home.hb.toggle()
 	ok(home.hb.cat == "Buildings", "B opens on Buildings")
@@ -586,3 +587,49 @@ func _free_cells(hb, sz: Vector2i) -> Array:
 			var cs := HomeLayout.cells_of([x, z, x + sz.x - 1, z + sz.y - 1])
 			if hb.fits(hb.held, cs): return cs
 	return []
+
+## Hob's beacon: the glow on every part, his name over his head, and the edge arrow only when wanted.
+func _check_beacon(home) -> void:
+	var b: NpcBeacon = home.hob.beacon
+	ok(is_instance_valid(b) and b.get_parent() == home.hob.node, "Hob wears a beacon")
+	var parts: Array = home.hob.node.find_children("*", "MeshInstance3D", true, false)
+	ok(parts.all(func(m): return m.material_override.next_pass == b._glow), "the glow outlines every part of him")
+	var tags: Array = b.find_children("*", "Label3D", true, false)
+	ok(tags.size() == 1 and tags[0].text == "Hob Brackenridge", "his name tag floats over his head")
+	b.wants_arrow = false
+	b._place_arrow()
+	ok(not b._arrow.visible, "no edge arrow when he has nothing for you")
+
+## The dialogue box: the '...' bubble, typing, advancing page by page, the camera on his head, the
+## tutorial waiting, and the box closing (two frames after the last press).
+func _check_dialogue(home) -> void:
+	var box: NpcDialogue = home.npc_talk.box
+	ok(home.npc_talk.is_open() and box.get_parent() == home.panel_host, "his lines open in the dialogue box")
+	ok(box.pages.size() == 2 and box.is_typing() and box._dots.visible, "a '...' bubble comes first")
+	ok(box._portrait.texture != null, "the box has his portrait")
+	var at := Vector3(home.ppos.x, 0, home.ppos.z)
+	var lift := Vector3(0, 0, float(NpcDialogue.rules()["cam_lift"])).rotated(Vector3.UP, home.cam.yaw)
+	var aim := at
+	for i in 40:
+		aim = home.npc_talk.frame(at, 0.05)
+	ok(aim.distance_to(home.npc_talk.head + lift) < 0.1, "the camera eases in on his head")
+	home.guide.detect_t = 0.0
+	home.guide.tick(0.05)
+	ok(home.guide.detect_t <= 0.0, "the tutorial waits while he talks")
+	box.dots_left = 0.0
+	box._process(0.2)
+	ok(box.shown > 0.0 and box.is_typing(), "the line types out letter by letter")
+	box.advance()
+	ok(not box.is_typing() and box._text.visible_characters == -1, "a press finishes the line")
+	box.advance()
+	ok(box.page == 1, "the next press moves on")
+	box.advance()
+	box.advance()
+	ok(box._choice and box.page == 1, "the last line offers the build menu")
+	for i in 4:
+		await main.get_tree().process_frame
+	ok(not home.npc_talk.is_open() and home.panel_open == "", "the box closes after the last line")
+	for i in 40:
+		aim = home.npc_talk.frame(at, 0.05)
+	ok(aim.distance_to(at) < 0.05 and home.cam.zoom_to != float(NpcDialogue.rules()["cam_zoom"]),
+			"the camera eases back out")
