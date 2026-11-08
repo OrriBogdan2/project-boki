@@ -21,8 +21,8 @@ const WARDENS := {
 	"gunslinger": {"hit_r": 0.416, "height": 1.09, "width": [0.5, 1.15], "moves": "gunslinger_"},   # (slim)
 	# (slim and long-legged; height_3d: her v2 rods stand a hand over the head)
 	"mage": {"hit_r": 0.4, "height": 1.08, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "mage_"},
-	# (Sable's moth antennae stand ~0.3 m over her head, as on the master sheet)
-	"thief": {"hit_r": 0.384, "height": 0.98, "height_3d": 1.18, "width": [0.6, 1.3], "moves": "thf_"},
+	# (Sable v2's moth antennae stand over her head, as on the turnaround)
+	"thief": {"hit_r": 0.384, "height": 0.98, "height_3d": 1.1, "width": [0.6, 1.3], "moves": "thf_"},
 	# (lean; height_3d: the v2 locs hang down, no piled crown over the head)
 	"dolm": {"hit_r": 0.388, "height": 1.09, "height_3d": 1.08, "width": [0.7, 1.5], "moves": "breah_"},
 	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
@@ -31,9 +31,9 @@ const WARDENS := {
 	# (Claire, the v2 design: the ears stand over her head; at the chart's 0.96x she is slim, as Vex)
 	"rimewright": {"hit_r": 0.38, "height": 0.96, "height_3d": 1.06, "width": [0.5, 1.25], "moves": "tm_"},
 	# (Cinder v2: her built lizard horns stand over her head; the chart's taller Cinder is wider by as much)
-	"ashwick": {"hit_r": 0.376, "height": 1.16, "height_3d": 1.33, "width": [0.7, 1.75], "moves": "as_"},
+	"ashwick": {"hit_r": 0.376, "height": 1.16, "height_3d": 1.22, "width": [0.7, 1.75], "moves": "as_"},
 	# (Kael v2 on his long-legged rig, the owner's height; height_3d: his wild mane over his head)
-	"juggernaut": {"hit_r": 0.428, "height": 1.31, "height_3d": 1.23, "width": [1.0, 2.0], "moves": "jug"},
+	"juggernaut": {"hit_r": 0.428, "height": 1.31, "height_3d": 1.32, "width": [1.0, 2.0], "moves": "jug"},
 	# (Grimble: the head at his old height, the hoard towers over it)
 	"dredge": {"hit_r": 0.452, "height": 1.48, "height_3d": 1.7, "width": [1.3, 2.4], "moves": "dr_"},
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
