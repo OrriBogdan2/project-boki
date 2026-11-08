@@ -19,6 +19,7 @@ const CHECKS := {
 	"--rimewright-combo-check": ["res://tools/support_check.gd", "support_check", "rimewright"],
 	"--zone-check": ["res://tools/hero_pair_check.gd", "hero_pair_check", null],
 	"--dolm-combo-check": ["res://tools/breah_combo_check.gd", "hero_pair_check", null],
+	"--tenzo-feel-check": ["res://tools/tenzo_feel_check.gd", "tenzo_feel_check", null],      # owner 11-08 items 21, 22
 	"--ostra-combo-check": ["res://tools/ostra_combo_check.gd", "hero_pair_check", null],
 	"--dredge-combo-check": ["res://tools/dredge_combo_check.gd", "hero_check", null],
 	"--ashwick-combo-check": ["res://tools/ashwick_combo_check.gd", "hero_check", null],

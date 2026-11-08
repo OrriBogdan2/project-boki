@@ -476,6 +476,15 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## tuning (`content/rules/tuning.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The one shared tuning file: movement and feel numbers, one section per hero or system (Tuning.of). Units are in each section's doc. |
+| tenzo | {"doc": "Tenzo (dolm). r_floor: the slab of rock ground his R (Basalt Spine) raises under him on the press, the same frame (BreahSpine.floor_under): r m round him (abyss tiles only turn to ground), time s it lasts, warn s of cracks and shake before it crumbles, rise s the slab takes to heave up (the ground is solid at once), col its stone. rmb: Quakefall's held hop (BreahSlam): windup s planted in a deep crouch before take-off, hop_up m/s up off the ground, fall_k the gravity multiplier on the way down (a thrown stone drops hard), ease how much faster than its average the hop leaves the ground (its ground speed eases to nil at the landing), carry the share of his run the hop keeps, nudge m/s the move keys bend its ground speed by, dive_hang s he hangs at the top of an air press before the plunge, dive_acc m/s^2 the plunge speeds up at toward its cap.", "r_floor": {"r": 1.6, "time": 6.0, "warn": 1.5, "rise": 0.12, "col": "#5b86c9"}, "rmb": {"windup": 0.16, "hop_up": 6.0, "fall_k": 1.4, "ease": 1.5, "carry": 0.25, "nudge": 1.2, "dive_hang": 0.1, "dive_acc": 70.0}} |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 

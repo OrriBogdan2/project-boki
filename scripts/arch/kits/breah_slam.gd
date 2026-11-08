@@ -7,6 +7,12 @@ extends RefCounted
 ## slowly, jump to leap forward (the circle comes with him) and punch to lunge further. The centre stuns,
 ## foes in the air are dunked, rocks inside fly outward, and at rank 3 each slam that catches something
 ## adds a Molten Guard shield stack (DolmKit.guard_stack).
+## Owner 11-08 (the hop read as too fast and glitchy): the held hop now winds up first (planted in a deep
+## crouch for `windup`), leaves the ground fast and eases its ground speed to nil at the landing, falls harder
+## than it rose (a thrown stone), and stops short at the first body in its path (a swept test each step) instead
+## of shoving it along. Its feel numbers are in content/rules/tuning.json (tenzo.rmb).
+
+const SWEEP_PAD := 1.2         # m past the step's length a foe's centre may lie and still be tested (body radii)
 
 var k: DolmKit
 var leapt := false             # jumped during this charge (the leap forward)
@@ -17,12 +23,19 @@ var extends_n := 0
 var hops := 0
 var taps := 0
 var hop_on := false            # the hold's hop is in the air (the move keys nudge it)
-var hop_v := Vector2.ZERO      # ...its speed along the ground before the nudge
+var hop_v := Vector2.ZERO      # ...its average speed along the ground (eased, before the nudge)
+var hop_t := 0.0               # ...how long it has flown
+var wind_t := -1.0             # the held hop's wind-up so far (-1: none)
+var wind_dir := Vector2.ZERO   # ...the hop's aim and charge, fixed at the release
+var wind_run := Vector2.ZERO   # ...and the run it keeps
+var wind_k := 0.0
+var stops := 0                 # hops stopped short at a body (checks)
 
 func _init(kit: DolmKit) -> void:
 	k = kit
 
 func sd() -> Dictionary: return k.slam_def()
+func feel() -> Dictionary: return Tuning.of("tenzo")["rmb"]
 
 ## The charge so far, 0..1 (the press's first `hold` seconds are the tap window).
 func charge_k(t: float) -> float:
@@ -40,7 +53,7 @@ func center() -> Vector3:
 	var d := h.aim_dir()
 	var c := h.pos + Vector3(d.x, 0, d.y) * float(sd()["hop"])
 	if h.grounded:
-		c += Vector3(h.vel.x, 0, h.vel.z) * float(sd()["carry"]) * _flight(float(sd()["hop_up"]))
+		c += Vector3(h.vel.x, 0, h.vel.z) * float(feel()["carry"]) * flight()
 	return c
 
 ## The tap's spot: just in front of him.
@@ -50,32 +63,80 @@ func tap_spot() -> Vector3:
 
 func _flight(up: float) -> float: return 2.0 * up / Hunter.H_GRAV
 
+## The held hop's time in the air: up at hop_up, down under fall_k times the gravity.
+func flight() -> float:
+	var up := float(feel()["hop_up"]) / Hunter.H_GRAV
+	return up * (1.0 + 1.0 / sqrt(float(feel()["fall_k"])))
+
 func move_k() -> float:
+	if wind_t >= 0.0:
+		return 0.0
 	return float(sd()["walk_k"]) if charging() else 1.0
 
 func drop() -> void:
 	leapt = false
 	lunges = 0
 	hop_on = false
+	wind_t = -1.0
 
-func tick(_dt: float) -> void:
+func tick(dt: float) -> void:
 	if not k.rmb_down:
 		leapt = false
 		lunges = 0
 	was_ground = k.h.grounded
-	_tick_hop()
+	_tick_wind(dt)
+	_tick_hop(dt)
 
-## The hop's steering: the move keys bend its ground speed by up to `nudge` m/s, no more.
-func _tick_hop() -> void:
+## The wind-up: planted, sinking into the crouch, then the take-off.
+func _tick_wind(dt: float) -> void:
+	if wind_t < 0.0:
+		return
+	var h := k.h
+	if h.downed or h.stun_t > 0.0:
+		wind_t = -1.0
+		return
+	wind_t += dt
+	h.vel.x = 0.0
+	h.vel.z = 0.0
+	if wind_t >= float(feel()["windup"]):
+		wind_t = -1.0
+		_take_off()
+
+## The hop's flight: its ground speed leaves at `ease` times the average and eases to nil at the landing
+## (a curve whose average is exactly the average, so it lands where the circle showed), the move keys bend it
+## by up to `nudge` m/s, the way down pulls harder (fall_k), and a body in the way stops it short.
+func _tick_hop(dt: float) -> void:
 	var h := k.h
 	if not hop_on:
 		return
 	if not k.dive or h.grounded or h.fly_t <= 0.0:
 		hop_on = false
 		return
-	var v := hop_v + (h.inp["move"] as Vector2).limit_length(1.0) * float(sd()["nudge"])
+	hop_t += dt
+	var ease := float(feel()["ease"])
+	var u := clampf(hop_t / flight(), 0.0, 1.0)
+	var v := hop_v * ease * (1.0 - pow(u, 1.0 / (ease - 1.0)))
+	v += (h.inp["move"] as Vector2).limit_length(1.0) * float(feel()["nudge"])
+	if _blocked(v * dt):
+		hop_v = Vector2.ZERO
+		v = Vector2.ZERO
+		stops += 1
 	h.vel.x = v.x
 	h.vel.z = v.y
+	if h.vel.y < 0.0:
+		h.vel.y -= Hunter.H_GRAV * (float(feel()["fall_k"]) - 1.0) * dt
+
+## Swept test: does this step's move along the ground run into a foe's body (circle against circle, so no
+## speed passes through one)? A body already touching only stops a move toward it.
+func _blocked(step: Vector2) -> bool:
+	var h := k.h
+	var p := Vector2(h.pos.x, h.pos.z)
+	for f in k.foes_in(h.pos, step.length() + SWEEP_PAD, 2.0):
+		var c := Vector2(f.pos.x, f.pos.z)
+		var near := Geometry2D.get_closest_point_to_segment(c, p, p + step)
+		if near.distance_to(c) < f.r + h.r and step.dot(c - p) > 0.0:
+			return true
+	return false
 
 func hold_tick(t: float) -> void:
 	var h := k.h
@@ -148,27 +209,48 @@ func fire(c: Dictionary) -> void:
 	if air:
 		# pressed in the air: dive and slam where you land; let go mid-leap: the leap's arc carries on
 		k.dive_fall = h.fly_t <= 0.0
+		k.dive_t = 0.0
 		k.play("breah_dive" if k.dive_fall else "breah_leap")
 		k.m.sfx("br_leap", h.pos, -2.0, 0.8)
 		return
-	# the hop into the circle's centre, both fists coming down as he lands there
+	# the wind-up: planted in a deep crouch, the fists drawn back, then the hop (_take_off)
+	k.dive = false
+	wind_t = 0.0
+	wind_k = ck
+	wind_dir = h.aim_dir()
+	wind_run = Vector2(h.vel.x, h.vel.z) * float(feel()["carry"])
+	h.vel.x = 0.0
+	h.vel.z = 0.0
+	k.play("breah_windup")
+	k.m.fx.dust(h.pos, 5)
+	k.m.sfx("br_crack", h.pos, -8.0, 0.8)
+
+## The hop into the circle's centre, both fists coming down as he lands there.
+func _take_off() -> void:
+	var h := k.h
 	hops += 1
+	k.dive = true
+	k.dive_k = wind_k
 	k.dive_fall = false
 	k.play("breah_slam")
 	k.m.fx.dust(h.pos, 8)                # the push-off kicks up the ground he leaves
 	k.m.sfx("br_leap", h.pos, -6.0, 1.15)
-	var run := Vector2(h.vel.x, h.vel.z) * float(sd()["carry"])
-	arc(float(sd()["hop"]), float(sd()["hop_up"]), h.aim_dir(), run)
-	hop_v = Vector2(h.vel.x, h.vel.z)
+	var up := float(feel()["hop_up"])
+	var t := flight()
+	var v := wind_dir.normalized() * float(sd()["hop"]) / t + wind_run
+	h.vel = Vector3(v.x, up, v.y)
+	h.grounded = false
+	h.fly_t = t
+	hop_v = v
+	hop_t = 0.0
 	hop_on = true
 
-## A real jump arc (not a dash, which holds your height): `dist` along `dir`, leaving the ground at
-## `up` m/s, so the glider can still open from it (DolmKit._tick hands the arc over when glide is held).
-## carry: ground speed the arc keeps on top (his run).
-func arc(dist: float, up: float, dir: Vector2, carry := Vector2.ZERO) -> void:
+## The leap's jump arc (not a dash, which holds your height): `dist` along `dir`, leaving the ground at `up` m/s,
+## so the glider can still open from it (DolmKit._tick hands the arc over when glide is held).
+func arc(dist: float, up: float, dir: Vector2) -> void:
 	var h := k.h
 	var flight := _flight(up)
-	var v := dir.normalized() * dist / flight + carry
+	var v := dir.normalized() * dist / flight
 	h.vel = Vector3(v.x, up, v.y)
 	h.grounded = false
 	h.fly_t = flight

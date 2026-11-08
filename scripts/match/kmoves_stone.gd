@@ -6,6 +6,12 @@ extends RefCounted
 ## (deep knees, squash on every impact, the huge fists leading); Ostra floats (lifts, stretches and a
 ## spin on her Swell, light hands).
 
+## The bottom of Quakefall's wind-up: the deepest crouch, fists drawn back (breah_windup's end, breah_slam's start).
+const WOUND := {
+	"p": -0.5, "sq": 0.36, "lift": -0.22, "legs": [1.1, -1.85, 1.0, -1.75], "lw": 1.0,
+	"fl": Vector3(-0.38, -0.36, 0.32), "hw": 1.0, "fr": Vector3(0.38, -0.36, 0.32), "rw": 1.0
+}
+
 const MOVES := {
 	# ---------------------------------------------------------------- Tarek
 	# Basalt Spine held: sunk wide and low, both fists spread out to the sides at the ground, the body
@@ -174,12 +180,9 @@ const MOVES := {
 				"hw": 1.0, "fr": Vector3(0.16, 1.0, 0.12), "rw": 1.0
 			}
 		]]},
-	# Quakefall let go (the hop is a real 0.6s arc, the slam lands with him, owner item 61): from the gathered
-	# crouch he drives up off both legs with the fists swinging back (0.05), arches at the top with both fists
-	# high behind his head (0.3), whips them over and down as he drops (0.5), smashes them into the ground on
-	# landing (0.6: flat squash, knees wide), rebounds a little in the crater (0.7), stays low over his
-	# fists while the dust settles (0.88) and heaves himself up (1.12-1.36)
-	"breah_slam": {"keys": [
+	# Quakefall released: the wind-up (tenzo.rmb.windup, 0.16s), planted, sinking from the held crouch into a
+	# deeper one with both fists drawn back past the hips, the tell before the hop
+	"breah_windup": {"hold": true, "keys": [
 		[
 			0.00,
 			{
@@ -187,6 +190,14 @@ const MOVES := {
 				"fl": Vector3(-0.34, -0.26, 0.08), "hw": 1.0, "fr": Vector3(0.34, -0.26, 0.08), "rw": 1.0
 			}
 		],
+		[0.16, WOUND]]},
+	# Quakefall's take-off after the wind-up (the hop is a real 0.75s arc, BreahSlam.flight(), the slam lands with
+	# him, owner item 61 and 11-08): from the wound-up crouch he drives up off both legs with the fists swinging
+	# back (0.05), arches at the top with both fists high behind his head (0.41), whips them over and down as he
+	# drops (0.62), smashes them into the ground on landing (0.75: flat squash, knees wide), rebounds a little in
+	# the crater (0.85), stays low over his fists while the dust settles (1.03) and heaves himself up (1.27-1.51)
+	"breah_slam": {"keys": [
+		[0.00, WOUND],
 		[
 			0.05,
 			{
@@ -195,48 +206,48 @@ const MOVES := {
 			}
 		],
 		[
-			0.30,
+			0.41,
 			{
 				"p": 0.4, "sq": -0.26, "lift": 0.1, "legs": [0.75, -1.35, 0.65, -1.2], "lw": 1.0,
 				"fl": Vector3(-0.2, 1.08, 0.24), "hw": 1.0, "fr": Vector3(0.2, 1.08, 0.24), "rw": 1.0
 			}
 		],
 		[
-			0.50,
+			0.62,
 			{
 				"p": -0.35, "sq": -0.12, "legs": [0.45, -0.7, 0.4, -0.65], "lw": 1.0,
 				"fl": Vector3(-0.18, 0.55, -0.45), "hw": 1.0, "fr": Vector3(0.18, 0.55, -0.45), "rw": 1.0
 			}
 		],
 		[
-			0.60,
+			0.75,
 			{
 				"p": -0.88, "lift": -0.16, "sq": 0.52, "legs": [0.95, -1.55, 0.85, -1.45], "lw": 1.0,
 				"fl": Vector3(-0.2, -0.72, -0.52), "hw": 1.0, "fr": Vector3(0.2, -0.72, -0.52), "rw": 1.0
 			}
 		],
 		[
-			0.70,
+			0.85,
 			{
 				"p": -0.74, "lift": -0.08, "sq": 0.3, "legs": [0.85, -1.4, 0.75, -1.3], "lw": 1.0,
 				"fl": Vector3(-0.2, -0.62, -0.5), "hw": 1.0, "fr": Vector3(0.2, -0.62, -0.5), "rw": 1.0
 			}
 		],
 		[
-			0.88,
+			1.03,
 			{
 				"p": -0.62, "lift": -0.1, "sq": 0.24, "legs": [0.8, -1.35, 0.7, -1.25], "lw": 1.0,
 				"fl": Vector3(-0.2, -0.6, -0.48), "hw": 1.0, "fr": Vector3(0.2, -0.6, -0.48), "rw": 1.0
 			}
 		],
 		[
-			1.12,
+			1.27,
 			{
 				"p": -0.22, "sq": 0.06, "fl": Vector3(-0.24, -0.2, -0.3), "hw": 0.6, "fr": Vector3(0.24, -0.2, -0.3),
 				"rw": 0.6
 			}
 		],
-		[1.36, {}]]},
+		[1.51, {}]]},
 	# the air Quakefall: fists high, pitched down over them as she falls
 	"breah_dive": {"hold": true, "keys": [
 		[0.00, {}],

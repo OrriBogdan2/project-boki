@@ -1,0 +1,8 @@
+{
+	"_doc": "The one shared file for movement and feel numbers (owner 2026-11-08). One section per system; each value says its unit in its key or note. Read through Tuning.of(section).",
+	"tenzo": {
+		"_note": "Tenzo (dolm). r_floor: the slab of rock ground his R (Basalt Spine) raises under him on the press, the same frame (BreahSpine.floor_under): r m round him (abyss tiles only turn to ground), time s it lasts, warn s of cracks and shake before it crumbles, rise s the slab takes to heave up (the ground is solid at once), col its stone. rmb: Quakefall's held hop (BreahSlam): windup s planted in a deep crouch before take-off, hop_up m/s up off the ground, fall_k the gravity multiplier on the way down (a thrown stone drops hard), ease how much faster than its average the hop leaves the ground (its ground speed eases to nil at the landing), carry the share of his run the hop keeps, nudge m/s the move keys bend its ground speed by, dive_hang s he hangs at the top of an air press before the plunge, dive_acc m/s^2 the plunge speeds up at toward its cap.",
+		"r_floor": {"r": 1.6, "time": 6.0, "warn": 1.5, "rise": 0.12, "col": "#5b86c9"},
+		"rmb": {"windup": 0.16, "hop_up": 6.0, "fall_k": 1.4, "ease": 1.5, "carry": 0.25, "nudge": 1.2, "dive_hang": 0.1, "dive_acc": 70.0}
+	}
+}

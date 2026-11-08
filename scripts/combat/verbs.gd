@@ -13,13 +13,18 @@ var _mirror_pool: Dictionary = {}   # key -> free reflect-window nodes (hidden),
 var mirrors: Array = []   # {ent, t, r, arc, team, k, riposte, node, col, front}
 var tethers: Array = []   # {a, b: Ent, max, t, dmg, stun, col, node, pw}
 var traps: Array = []     # {at, r, team, arm, t, effects, caster, ctx, node, col}
-var terrain: Array = []   # {tiles: [[i, kind, level]], t, node, warned}
+var terrain: Array = []   # {tiles: [[i, kind, level]], t, node, col, slow, team, warn}
 var drags: Array = []     # {ent, from, to, t, dur, h}
 var decoys: Array = []    # {pos, team, t, node, owner}
 
 const WALL_TH := 0.32      # half thickness of a barrier
 const WALL_H := 2.3
 const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bearer reads through it
+const BRIDGE_RISE_DROP := 0.6   # m below its place a rising span's slabs start (add_bridge e.rise)
+const BRIDGE_SHAKE := 0.07      # m: a crumble-warned span's shake at the very end
+const BRIDGE_SHAKE_HZ := 9.0    # its shake's speed (cycles per second)
+const BRIDGE_FALL := 3.0        # m the slabs drop as it crumbles
+const BRIDGE_FALL_T := 0.45     # s: ...over this long
 
 func _init(match_node: Node) -> void:
 	m = match_node
@@ -218,7 +223,9 @@ func add_trap(caster: Node, at: Vector3, e: Dictionary, ctx: Dictionary) -> void
 	m.sfx("click", at, -4.0, 0.9)
 
 # ------------------------------------------------------------------ terrain
-## Turns abyss tiles along a line into ground for a while: an ice bridge (or any element's span).
+## Turns abyss tiles along a line into ground for a while: an ice bridge (or any element's span). The ground is
+## solid at once; e.rise (s) heaves the slabs up into place, and e.warn (s) gives the last seconds a crumble
+## warning (cracks and a shake) in place of the flicker, the slabs dropping away at the end.
 func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 	var length := float(e.get("length", 9.0))
 	var width := float(e.get("width", 2.0))
@@ -256,9 +263,57 @@ func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 		n.free()
 		return 0
 	m.add_child(n)
-	terrain.append({"tiles": tiles, "t": float(e.get("time", 6.0)), "node": n, "col": col, "slow": e.get("slow", 0.0), "team": int(by.team)})
+	var rise := float(e.get("rise", 0.0))
+	if rise > 0.0:
+		n.position.y = -BRIDGE_RISE_DROP
+		n.create_tween().tween_property(n, "position:y", 0.0, rise).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	terrain.append({
+		"tiles": tiles, "t": float(e.get("time", 6.0)), "node": n, "col": col, "slow": e.get("slow", 0.0),
+		"team": int(by.team), "warn": float(e.get("warn", 0.0)),
+	})
 	m.sfx("shield", from, -2.0, 1.6)
 	return tiles.size()
+
+## A crumble-warned span's last seconds: cracks show and the slabs shake harder as the end nears (smooth sines,
+## no per-frame jitter); at the end they drop away.
+func _bridge_warn(tz: Dictionary, n: Node3D) -> void:
+	var left := float(tz["t"])
+	var k := clampf(1.0 - left / float(tz["warn"]), 0.0, 1.0)
+	var a := BRIDGE_SHAKE * (0.3 + 0.7 * k * k)
+	var ph := float(m.time) * BRIDGE_SHAKE_HZ * TAU
+	n.position = Vector3(sin(ph) * a, sin(ph * 1.7 + 1.3) * a * 0.5, sin(ph * 1.3 + 2.1) * a)
+	if n.get_node_or_null("Cracks") == null:
+		_bridge_cracks(n, tz)
+
+func _bridge_cracks(n: Node3D, tz: Dictionary) -> void:
+	var cracks := Node3D.new()
+	cracks.name = "Cracks"
+	n.add_child(cracks)
+	var mat := Models.glow_mat(Color((tz["col"] as Color).lightened(0.6), 0.95))
+	var w: World = m.world
+	for td in tz["tiles"]:
+		var i := int(td[0])
+		var c := Vector3(i % w.w + 0.5, w.level[i] * World.LEVEL + 0.01, i / w.w + 0.5)
+		var crack := Models.part(cracks, Models.box(0.05, 0.02, 1.1), mat, c)
+		crack.rotation.y = float(i % 7) * 0.45
+		crack.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	m.sfx("br_crack", _bridge_mid(tz), -6.0, 0.9)
+
+## The middle of a span (its middle tile's centre, on its top).
+func _bridge_mid(tz: Dictionary) -> Vector3:
+	var w: World = m.world
+	var i := int(tz["tiles"][tz["tiles"].size() / 2][0])
+	return Vector3(i % w.w + 0.5, w.level[i] * World.LEVEL, i / w.w + 0.5)
+
+## A crumble-warned span ends: its slabs drop into the abyss in a spray of dust.
+func _bridge_crumble(n: Node3D, tz: Dictionary) -> void:
+	var at := _bridge_mid(tz)
+	m.fx.dust(at, 12)
+	m.fx.burst(at + Vector3(0, 0.2, 0), tz["col"], 14, 4.0, 0.4, -6.0, 1.3)
+	m.sfx("br_crumble", at, -3.0, 0.9)
+	var tw := n.create_tween()
+	tw.tween_property(n, "position:y", -BRIDGE_FALL, BRIDGE_FALL_T).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw.tween_callback(n.queue_free)
 
 # ------------------------------------------------------------------ forced movement
 ## Pull a body to a spot over `dur` seconds in a low arc. Hunters fly there with their own physics;
@@ -512,10 +567,14 @@ func tick(dt: float) -> void:
 		tz["t"] = float(tz["t"]) - dt
 		if float(tz["t"]) <= 0.0:
 			var w: World = m.world
+			if is_instance_valid(tz["node"]):
+				if float(tz["warn"]) > 0.0:
+					_bridge_crumble(tz["node"], tz)       # (reads the tiles' level: before they turn back)
+				else:
+					tz["node"].queue_free()
 			for td in tz["tiles"]:
 				w.kind[int(td[0])] = int(td[1])
 				w.level[int(td[0])] = int(td[2])
-			if is_instance_valid(tz["node"]): tz["node"].queue_free()
 			terrain.erase(tz)
 	for dg in drags.duplicate():
 		var ent: Ent = dg["ent"]
@@ -609,7 +668,11 @@ func render(_alpha: float) -> void:
 			rgn.material_override.set_shader_parameter("color", Color(tr["col"], (0.85 if armed else 0.35) if mine else 0.35))
 	for tz in terrain:
 		var n5: Node3D = tz["node"]
-		if is_instance_valid(n5) and float(tz["t"]) < 1.2:
+		if not is_instance_valid(n5):
+			continue
+		if float(tz["t"]) < float(tz["warn"]):
+			_bridge_warn(tz, n5)
+		elif float(tz["warn"]) <= 0.0 and float(tz["t"]) < 1.2:
 			n5.visible = fmod(float(tz["t"]), 0.24) > 0.08   # about to go: it flickers
 	for dc in decoys:
 		var n6: Node3D = dc["node"]

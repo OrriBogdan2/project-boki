@@ -145,17 +145,20 @@ static func remove_rock(m: Node, w: Dictionary, send := true) -> void:
 		tx(m, ["zone", "rockgo", String(w.get("rid", ""))])
 
 ## A temporary rock bridge over the abyss from `from` along `dir`. Returns the tiles turned to ground.
+## warn, rise: Verbs.add_bridge's crumble warning and heave-up (s; 0 = none).
 static func bridge(
 	m: Node, by: Ent, from: Vector3, dir: Vector2, len_: float, width: float, time_: float, send := true,
-	color := "#d9b27a"
+	color := "#d9b27a", warn := 0.0, rise := 0.0
 ) -> int:
-	var n: int = m.verbs.add_bridge(by, from, dir, {"length": len_, "width": width, "time": time_, "color": color})
+	var e := {"length": len_, "width": width, "time": time_, "color": color, "warn": warn, "rise": rise}
+	var n: int = m.verbs.add_bridge(by, from, dir, e)
 	if n > 0 and send and by != null and (m.net_on or capture) and not by.remote:
 		tx(
 			m,
 			[
 				"zone", "bridge", by.nid, m._r(from.x), m._r(from.y), m._r(from.z), snappedf(dir.x, 0.001),
-				snappedf(dir.y, 0.001), snappedf(len_, 0.1), snappedf(width, 0.1), snappedf(time_, 0.1), color
+				snappedf(dir.y, 0.001), snappedf(len_, 0.1), snappedf(width, 0.1), snappedf(time_, 0.1), color,
+				snappedf(warn, 0.01), snappedf(rise, 0.01)
 			]
 		)
 	return n
@@ -218,9 +221,11 @@ static func net_in(m: Node, x: Array) -> void:
 			var by2: Ent = m.ents_by_id.get(String(x[2]), null)
 			if by2 != null:
 				var tint := String(x[11]) if x.size() > 11 else "#d9b27a"
+				var warn := float(x[12]) if x.size() > 13 else 0.0
+				var rise := float(x[13]) if x.size() > 13 else 0.0
 				bridge(
 					m, by2, Vector3(x[3], x[4], x[5]), Vector2(x[6], x[7]), float(x[8]), float(x[9]), float(x[10]),
-					false, tint
+					false, tint, warn, rise
 				)
 		"seed":
 			if x.size() < 9: return
