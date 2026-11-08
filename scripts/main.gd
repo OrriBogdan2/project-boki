@@ -678,6 +678,8 @@ func _ready() -> void:
 		show_screen("prologue", {"then": "title"})    # test: the opening story
 	elif "--creator" in args:
 		show_screen("hatch", {"create": true})    # test: the hunter creator
+	elif DemoQuick.arg(args) != "":
+		DemoQuick.start(DemoQuick.arg(args))    # --demo=expedition|farm|hatch: a quick start for filming
 	elif "--demo-match" in args:
 		# the title screen's Demo match (tooling: screenshots of it); other match flags still apply
 		var dm := Match.demo_opts()

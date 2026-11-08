@@ -39,7 +39,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `show_fps` | Video > Quality | `overlay.gd` | |
 | `ui_scale` | Accessibility > Readability | `settings.gd` | |
 | `shake`, `reduce_flashes` | Accessibility > Comfort | `cam.gd`; `hud.gd`, `reset_pop.gd` | |
-| `rec_level`, `demo_weather`, `demo_blight`, `demo_fresh` | Demo | `settings.gd` (`demo_opts`, `Record`) | |
+| `rec_level`, `demo_weather`, `demo_blight`, `demo_fresh` | Demo | `settings.gd` (`demo_opts`, `Record`) | Recording mode also forces v-sync and a 60 fps cap (`Record.frame_cap`). The Demo tab's Quick start buttons (`DemoQuick`, also `--demo=expedition\|farm\|hatch`) are not settings: they play on a made-up save that is never written. |
 
 ## Looked for and not found
 

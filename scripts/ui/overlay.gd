@@ -431,6 +431,16 @@ func _tab_demo(v: VBoxContainer) -> void:
 		Record.set_level(i)
 		Settings.set_v("rec_level", i))
 	rec_row.add_child(rec_ob)
+	_group(v, "Quick start")
+	var qs := HFlowContainer.new()
+	qs.add_theme_constant_override("h_separation", 8)
+	for i in DemoQuick.IDS.size():
+		var id := String(DemoQuick.IDS[i])
+		qs.add_child(UI.button(String(DemoQuick.NAMES[i]), func():
+			close()
+			DemoQuick.start(id)))
+	v.add_child(qs)
+	_note(v, "Plays on a made-up save that is never written. Your own save is back on the title screen.")
 	_group(v, "Next match")
 	_choice(v, "Weather", "demo_weather", [["random", "Random"], ["clear", "Always clear"]])
 	_choice(v, "Blight", "demo_blight", [[true, "On"], [false, "Off"]])
