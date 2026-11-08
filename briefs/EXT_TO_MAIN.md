@@ -2811,3 +2811,4 @@ READY ext/sable-bola-instant b31c26641 (Sable Bola: instant release, wall/tree a
 - Grimble. grimble_v2/grimble_v2_splash.jpg is now "The Leap": he dives off a sky cliff, and his stretched bone-hook arm pierces a falling chest.
 - Sable. sable_v2/sable_v2_splash.jpg is now "The Slip": she steals the gem from behind a laughing card gang with a wink and a "shh". There are three alternates (_alt_perch, _alt_upside_down, _alt_dodge). sable_v2_portrait.jpg now has her master-sheet dark eyes and pendant.
 - Ideas list (no schedule): corruption stages. The Nov 28 reminder was cancelled by the owner.
+READY ext/anim-time-meeko 5a6864ab4 (Meeko clip lead: release beats land on effect frames, timing table, combo check)
