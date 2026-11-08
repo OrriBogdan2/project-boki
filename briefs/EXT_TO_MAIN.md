@@ -2836,3 +2836,4 @@ READY ext/heal-knock-source f66273fcd (knock heals settled vs the data: Brall/Sh
 READY ext/neve-chill-shatter cd2f3f296 (Neve Chill/Shatter parity audit: knock tell, no re-Shatter on a felled foe, combo asserts)
 READY ext/idle-dolm 9ce102a73 (Tenzo the Stone Seer idle+stance rework)
 READY ext/idle-juggernaut 2c700e15c (Kael the Unbroken idle+stance rework; based on ext/kael-v2-integ, merge that first)
+READY ext/idle-ostra 2a99a0912 (Motley the Void Jester idle+stance rework; based on ext/parity-idle-audit, merge that first; trivial doc/STAND_OPEN conflicts with ext/idle-bulwark)
