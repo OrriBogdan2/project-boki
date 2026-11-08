@@ -2604,3 +2604,6 @@ READY ext/gameplay-media e6881d69f (gameplay media capture tool + encode script;
 
 ## 2026-11-08 feel (job 20261108-003053-a4): tutorial dialogue + NPC beacons
 - READY ext/tutorial-dialogue 53e56a9e0: a dialogue box every NPC can use (NpcDialogue, npc_talk.json). It has a big portrait (neutral, happy and warning shown by the frame colour), a name plate, a '...' bubble, then typed text with voice blips; tap, click or interact moves it on. The camera eases in on the speaker's head and back out. The tutorial poll waits while the box is open. In the world, NpcBeacon adds a glow outline, a name tag and an edge arrow (only while Hob has new blueprints or the tutorial says "meet Hob"). Hob's head and hat are bigger. Portraits are a render of the model for now; painted ones go in at res://art/portraits/hob_{neutral,happy,warning}.png and load with no code change. Decision 0019. --farm-tutorial-check: 0 failures (17 new asserts). health --strict OK. home.gd: +2 lines of wiring, 1 line changed. No save or Net change.
+
+## 2026-11-08 build-spec (job 20261108-011502-a4): relic pickup art spec
+- READY ext/relic-art-adds 88bab293d: docs/art/relics/RELIC_ART_SPEC.md, one 3D+2D pickup spec and a prompt for each of the 12 relics (round-3 locks applied). No model edits, no code, no checks needed.
