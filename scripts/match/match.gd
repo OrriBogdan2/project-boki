@@ -3165,6 +3165,7 @@ func _update_shots(dt: float) -> void:
 		var n := int(ceil(step.length() / 0.25))
 		var hit := false
 		var sx: Dictionary = s["x"]
+		var near := _shot_targets(s, p, step.length() + float(s["r"]) + HIT_SLACK)      # once a step, not per 0.25 m
 		for i in n:
 			p += step / n
 			if sx.has("lob"):
@@ -3216,7 +3217,7 @@ func _update_shots(dt: float) -> void:
 					brk.hit(bh, s["by"])
 				_shot_end(s, p, null)
 				hit = true; break
-			for e in _shot_targets(s):
+			for e in near:
 				if Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < e.r + s["r"] + HIT_SLACK and (shot_height_ok(e, p.y) or shot_from_above_ok(s, e, p.y)):
 					if sx.has("hitset"):
 						# piercing / boomerang shots hit each thing once per pass and fly on
@@ -3301,9 +3302,14 @@ func _shot_break(s: Dictionary, p: Vector3) -> Dictionary:
 			return b
 	return {}
 
-func _shot_targets(s: Dictionary) -> Array:
+## (Only those whose flat distance from `at` is under reach plus their radius: a shot checks the few
+## it can reach this step, not all 150 things in a 40-hunter match.)
+func _shot_targets(s: Dictionary, at := Vector3.ZERO, reach := INF) -> Array:
 	var x: Dictionary = s["x"]
 	var out: Array = []
+	if reach < INF:
+		return _shot_targets(s).filter(func(e: Ent) -> bool:
+			return Vector2(e.pos.x - at.x, e.pos.z - at.z).length() < reach + e.r)
 	if x.has("lob"):
 		return out       # a lobbed shell sails over everyone and comes down where it was aimed
 	if x.get("cos", false):

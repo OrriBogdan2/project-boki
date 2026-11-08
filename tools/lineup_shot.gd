@@ -1,7 +1,8 @@
 extends RefCounted
 ## --lineup-shot --shots-dir=<dir> [--list-meshes]: all 12 Hunters as the game builds them (Models.hunter, same
 ## loader and scale), idle playing, in one row at true scale on a 1 m grid. Writes <dir>/lineup_front.png (straight
-## on), <dir>/lineup_match.png (the match camera's angle and distance) and lineup_match_close.png (same angle, closer), and prints each Hunter's measured standing height:
+## on), <dir>/lineup_match.png (the match camera's angle and distance) and lineup_match_close.png
+## (same angle, closer), and prints each Hunter's measured standing height:
 ## the skinned bounds of every visible mesh ("all": weapon and props included) and of the body meshes alone ("body":
 ## meshes whose names say weapon, prop or similar are left out), plus the head-top anchor when the model has one.
 ## --list-meshes prints every mesh with its own skinned top. Needs a renderer.
@@ -193,7 +194,8 @@ func _skinned_top(h: Node3D, body_only: bool, list: bool, id: String) -> Vector3
 		if bb.size == Vector3.ZERO and bb.position == Vector3.ZERO:
 			continue
 		if list:
-			print("LINEUP_MESH %s %s top=%.2f%s" % [id, path, bb.end.y - h.global_position.y, " (prop)" if prop else ""])
+			var top := bb.end.y - h.global_position.y
+			print("LINEUP_MESH %s %s top=%.2f%s" % [id, path, top, " (prop)" if prop else ""])
 		lo = lo.min(bb.position)
 		hi = hi.max(bb.end)
 		n += 1
@@ -221,7 +223,8 @@ func _mesh_bounds(m: MeshInstance3D) -> AABB:
 			continue
 		var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 		var bones: PackedInt32Array = arr[Mesh.ARRAY_BONES] if arr[Mesh.ARRAY_BONES] != null else PackedInt32Array()
-		var weights: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS] if arr[Mesh.ARRAY_WEIGHTS] != null else PackedFloat32Array()
+		var w_in = arr[Mesh.ARRAY_WEIGHTS]
+		var weights: PackedFloat32Array = w_in if w_in != null else PackedFloat32Array()
 		var per := bones.size() / maxi(verts.size(), 1)
 		for v in verts.size():
 			var pos := Vector3.ZERO

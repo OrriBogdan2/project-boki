@@ -2,14 +2,19 @@ extends Node
 ## Every tunable definition in the game lives here: classes, weapons, kin, monsters, crops.
 ## Distances are in tiles (1 unit), speeds in tiles per second, times in seconds.
 
+## One per squad (MATCH_PLAYERS solos repeat none). The first eight are the old palette; the rest are
+## picked farthest-first in OKLab among mid-light, mid-chroma colours, so no two sit closer than
+## TEAM_COLOR_GAP (--team-colors checks it). Past ~40, colour alone runs out: add marks, not shades.
 const TEAM_COLORS := [Color("f2a24a"), Color("5ab0f0"), Color("e0607e"), Color("8fd16a"), Color("b48cf2"), Color("f0d45a"),
-	Color("4ad8c8"), Color("ff8ad8"), Color("c8a07a"), Color("9ab4ff"), Color("ff6a4a"), Color("b8e05a"), Color("e6e6f0"),
-	Color("7a8cff"), Color("ffb8a0"), Color("5ae08a"), Color("d07aff"), Color("ffe08a"), Color("6ac0ff"), Color("ff9a5a"),
-	# 21-40: a deeper shade of each, nudged in hue, so a 40-solo match (MATCH_PLAYERS) repeats none
-	Color("96791c"), Color("274c95"), Color("8b2d2d"), Color("3e8235"), Color("7a4996"),
-	Color("8f9527"), Color("1e7986"), Color("9e466c"), Color("7c6c41"), Color("51539e"),
-	Color("9e511b"), Color("568b29"), Color("8a8795"), Color("463b9e"), Color("9e7955"),
-	Color("298b63"), Color("933b9e"), Color("9e9c46"), Color("31569e"), Color("9e7126")]
+	Color("4ad8c8"), Color("ff8ad8"), Color("227722"), Color("4455cc"), Color("995522"), Color("993399"),
+	Color("779977"), Color("ccccff"), Color("227788"), Color("8877aa"), Color("cc7700"), Color("bb2255"),
+	Color("66aa00"), Color("0088dd"), Color("44ffaa"), Color("cc99aa"), Color("ffccbb"), Color("aaeedd"),
+	Color("00bb88"), Color("bb55bb"), Color("bbaa00"), Color("885577"), Color("ff7755"), Color("777733"),
+	Color("0099aa"), Color("009955"), Color("cc4422"), Color("8855cc"), Color("bbbb88"), Color("bbee55"),
+	Color("aa7766"), Color("7788ff"), Color("77ddff"), Color("00ffee")]
+## OKLab distance (unitless, 0..~0.5 for these): the least any two TEAM_COLORS may differ. 0.08 is about
+## four times a just-noticeable step, enough to tell two squads apart on a nameplate at a glance.
+const TEAM_COLOR_GAP := 0.08
 ## Every expedition has about this many hunters, however they're split into squads. 40 on the 305 m
 ## Hollow Crown keeps the squads per square metre the 216 m map had with 20 (305² / 216² = 1.99).
 const MATCH_PLAYERS := 40

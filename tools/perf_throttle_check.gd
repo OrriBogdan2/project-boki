@@ -3,7 +3,8 @@ extends RefCounted
 ## simulating and wakes when a Hunter comes close; a bot further than SimLod.FAR_M from the local player, on
 ## the ground, roaming or fighting something as far off, thinks and simulates every SimLod.EVERY steps (the
 ## skipped time added in); a near one, one fighting near the player or just hit by them, every step; its
-## Boki steps with it.
+## Boki steps with it. A calm one past SimLod.THINK_FAR_M picks goals SimLod.THINK_FAR_K times less often;
+## a bot aboard the sky ship picks nothing.
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
@@ -104,6 +105,20 @@ func _far_bots() -> void:
 	b.ai["goal_kind"] = "board"
 	ok(_lod_steps(b, 6)[0] == 6, "boarding something that moves it steps every step")
 	b.ai["goal_kind"] = "roam"
+	ok(SimLod.think_k(m, b) == 1.0, "inside %.0f m it chooses at the usual pace" % SimLod.THINK_FAR_M)
+	b.teleport(m.player.pos + Vector3(SimLod.THINK_FAR_M + 15.0, 0, 0))
+	b.grounded = true
+	var far_m := SimLod.THINK_FAR_M
+	var k := SimLod.THINK_FAR_K
+	ok(SimLod.think_k(m, b) == k, "past %.0f m and calm it chooses %.0fx less often" % [far_m, k])
+	b.ai["tgt"] = m.player
+	ok(SimLod.think_k(m, b) == 1.0, "past %.0f m but fighting the player it chooses at the usual pace" % far_m)
+	b.ai["tgt"] = null
+	b.riding = true
+	b.inp["move"] = Vector2(1, 0)
+	m.bot_brain.think(m, b, Match.DT)
+	ok(b.inp["move"] == Vector2.ZERO, "aboard the sky ship it holds still and picks nothing")
+	b.riding = false
 	b.teleport(m.player.pos + Vector3(5.0, 0, 0))
 	b.grounded = true
 	ok(_lod_steps(b, 6)[0] == 6, "near the player it steps every step")

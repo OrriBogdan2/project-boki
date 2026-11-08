@@ -770,7 +770,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			if (not opts.get("autoplay", false) or opts.get("probe", false)) and (not _has_arg("--shot=") or _has_arg("--show-loading")):
 				var tier_i := clampi(int(opts.get("tier", 0)), 0, Data.TIERS.size() - 1)
 				Sfx.prefetch(["music_hollow" if tier_i >= 2 else "music_match", "amb_match"])
-				Match.prefetch([Match.HUD_SCRIPT])
+				Match.prefetch([Match.HUD_SCRIPT] + WardenGlb.scene_paths())
 				ld = load("res://scripts/ui/loading.gd").new()
 				ld.setup(opts)
 				add_child(ld)

@@ -122,8 +122,23 @@ static var _gloss_m: ShaderMaterial
 static var _measuring := false  # building that neutral model: no .glb on it
 static var _variants = null     # art name -> the design variant the command line picks (variant())
 static var _look = null         # content/rules/warden_look.json, read once (look())
+static var _scenes := {}        # .glb path -> its PackedScene, kept: nothing else holds it, and a reload is ~70 ms
 const LOOK_PATH := "res://content/rules/warden_look.json"
 const HALO := preload("res://shaders/warden_halo.gdshader")
+
+## The Warden's model scene, loaded once per path (a match dresses up to 40 Hunters from a dozen models):
+## taken from the loading screen's worker-thread prefetch (scene_paths) when it is there.
+static func _scene(arch: String) -> PackedScene:
+	var p := path(arch)
+	if not _scenes.has(p):
+		_scenes[p] = Match.take_prefetched(p) as PackedScene
+	return _scenes[p]
+
+## Every Warden model scene a match may dress a Hunter in, for Match.prefetch as the loading screen comes
+## up: the first load of each was 200-450 ms on the main thread, a dozen of them in a 40-hunter build.
+static func scene_paths() -> Array:
+	var used := Arch.ORDER.filter(func(a: String) -> bool: return uses_model(a))
+	return used.map(func(a: String) -> String: return path(a))
 
 static func path(arch: String) -> String:
 	var nm := art(arch)
@@ -196,7 +211,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	if _measuring or not uses_model(arch):
 		return
 	var rest := neutral_rest(arch)
-	var scene := load(path(arch)) as PackedScene
+	var scene := _scene(arch)
 	var glb: Node3D = scene.instantiate() as Node3D if scene else null
 	var skel := skeleton(glb)
 	var bad: Array = WardenSkeleton.mismatches(skel, rest, extra_bones(arch)) if skel else ["no armature"]

@@ -23,6 +23,9 @@ const TRAIN_CALM_S := 1.5 # s after standing on a train car (the car carries it;
 const FULL_RATE_GOALS := ["board", "lift", "yard", "hum", "beacon", "lair_fight", "lair_escape", "lair_lever",
 	"lair_updraft"]
 
+const THINK_FAR_M := 90.0  # m from the local player (flat): two camera views off, nobody sees it decide
+const THINK_FAR_K := 2.0   # how much longer such a bot waits between picking goals and targets
+
 static var _n := 0             # sim steps planned (staggers the bots' slots)
 
 ## Once per sim step, before the bots think: sets each bot's step time for this step (0 = skip).
@@ -42,6 +45,15 @@ static func plan(m: Match, dt: float) -> void:
 		else:
 			a["lod_dt"] = 0.0
 			a["lod_step"] = acc
+
+## How much longer than usual a bot waits before it chooses again (Bot.think): THINK_FAR_K when it
+## is more than THINK_FAR_M from the local player and calm (same rule as the 20 Hz step), else 1. A
+## far bot still steers, aims and fires every step it takes; it only re-picks its goal less often.
+static func think_k(m: Match, h: Hunter) -> float:
+	var me := m.player
+	if me == null or me.out or me.extracted or h.remote or h.flat_dist(me) <= THINK_FAR_M:
+		return 1.0
+	return THINK_FAR_K if _calm(m, h, me) else 1.0
 
 ## The time this hunter steps by this sim step (dt for anyone not on the plan).
 static func step_dt(h: Hunter, dt: float) -> float:

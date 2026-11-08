@@ -54,6 +54,11 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	if h.downed:
 		_crawl(m, h)
 		return
+	if h.riding:
+		# aboard the sky ship: the match jumps it (its jump_at) and its drop plan picks the landing, so
+		# there is nothing to choose yet (40 riders each picking fights and revives was a third of the ride)
+		inp["move"] = Vector2.ZERO
+		return
 	if h.dropping:
 		# steer the opening glide toward the chosen landing spot
 		var land: Vector3 = a.get("land", h.pos)
@@ -79,7 +84,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		inp["move"] = m.skytrain.step_off_dir(h)
 		return
 	if a["think"] <= 0.0:
-		a["think"] = randf_range(0.12, 0.3) / (0.6 + a["skill"])
+		a["think"] = randf_range(0.12, 0.3) / (0.6 + a["skill"]) * SimLod.think_k(m, h)
 		_choose(m, h)
 	# crossing to another island on a glide route: run off the edge, jump, open the glider at the
 	# top of the jump and steer for the landing (through any rings on the way)

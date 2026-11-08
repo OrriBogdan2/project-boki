@@ -24,9 +24,11 @@ ring form (`TrainRoute` reads either one). A ride averages ~8 m/s between stops 
 MAX_NODES, because cross-island trips on the bigger land ran out of nodes.
 
 ## Consequences
-- Net.VERSION 0.25.0 (match size and map change). No save change.
+- Net.VERSION 0.26.0 (match size and map change). No save change.
 - Matchmaker trio slots should follow the 40-player size on the matchmaker branch (follow-up).
-- TEAM_COLORS has 40 entries (the 20 added are deeper, hue-nudged shades), so a 40-solo match repeats none.
+- TEAM_COLORS has 40 entries: the first 8 as before, the other 32 picked farthest-first in OKLab, so no two
+  are closer than Data.TEAM_COLOR_GAP (0.08; the earlier deeper shades came as close as 0.028 and two
+  squads read as one). `--crowd-check` holds the count and the gap.
 - Perf at 40 hunters. Offline, `SimLod` (scripts/match/sim_lod.gd) steps a bot (think and sim) every 3rd
   step with the skipped time added, when it is more than 45 m from the player, on the ground, not on a
   moving or scripted goal, not fighting anything near the player and not just hit by them. Its Boki
@@ -40,5 +42,10 @@ MAX_NODES, because cross-island trips on the bigger land ran out of nodes.
 - Load still grows with the hunter count: each hunter model takes ~120 ms (GPU box) to build, and a
   Warden with a 3D model builds the whole procedural body first, then hides it (docs/DEBT.md).
   Alternative not taken: 30 hunters (loses squads-per-area parity for ~0.8 s).
+- Flat pass (job 20261108-121503-a4): an idle camp naps (Mob.NAP_M 36 m, 3D, looked at every 0.5 s);
+  a Warden's .glb scene is loaded once a session and prefetched on a thread with the HUD; a bot aboard
+  the sky ship picks nothing; a calm bot past SimLod.THINK_FAR_M (90 m) chooses half as often; shots
+  gather their possible targets once a step, not every 0.25 m. `--crowd-check` covers the naps, the
+  scene cache and the colours.
 - The generator now fails a rock over the void, and `sc_rocks` moves touching rocks as one group so
   an L-shaped boulder doesn't split under the scale.

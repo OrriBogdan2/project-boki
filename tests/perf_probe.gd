@@ -294,7 +294,7 @@ func _print_phase(ph: String) -> void:
 	var w := _stats(fl, "wall"); var pr := _stats(fl, "proc"); var dr := _stats(fl, "draws"); var pm := _stats(fl, "prims")
 	var si := _stats(fl, "sim"); var vi := _stats(fl, "vis"); var hd := _stats(fl, "hud")
 	print("PROBE phase %s draws by pass: 3D %.0f, shadows %.0f, canvas (HUD) %.0f" % [ph, _stats(fl, "d3d")[0], _stats(fl, "dsh")[0], _stats(fl, "dcv")[0]])
-	if ph in ["land", "fight"] and not Match.prof.is_empty():
+	if ph in ["ride", "land", "fight"] and not Match.prof.is_empty():
 		var tot := 0
 		for k in Match.prof: tot += int(Match.prof[k])
 		var ks := Match.prof.keys()
