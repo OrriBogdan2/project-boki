@@ -2831,3 +2831,4 @@ READY ext/airdash-rule-audit a3a45b2af (air dash = ground dash for Hem, Tarek, O
 READY ext/vex-e-turn 27859acfe (hero_combo_check: zero Vex's velocity after the Longneedle aim test; fixes --gunslinger-combo-check with phys-150-botnav, mc-20261108-0430)
 READY ext/map-regions 15a8ebd57 (HudRefDemo: no rival stood in the void near an edge; fixes --hudref-check. Still red with this branch: --keys-check, --truce-check, --box-revive-check, see mc-20261108-0430 triage)
 READY ext/kit-parity-lock 76783a368 (--kit-parity-check + content/rules/kit_parity.json, 13 sourced D rows)
+READY ext/dash-buffer-window 77fa3ffde (DashFlow.BUFFER_S 0.2 s = one 5 fps footage frame, no early-press limit; window evidence per hero in dash_interactions.md; --dash-flow-check stuns inside/outside the window)
