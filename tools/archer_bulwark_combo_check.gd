@@ -255,6 +255,18 @@ func _archer_combos() -> void:
 		K.pins >= pn0 + 1 and T.stun_t > 0.7 and dmg(T) >= 35.0 and K.anim_id == "arc_heavy",
 		"pins %d stun %.2f took %.0f anim %s" % [K.pins - pn0, T.stun_t, dmg(T), K.anim_id]
 	)
+	var pd: Dictionary = K.rmb_def()["pin"]
+	var want := float(pd["dmg"][1]) * (1.0 + 173.0 / 35.0)
+	ok(
+		"parity lace: wall pin pays 173 extra on the 35 shot (source ratio 4.94x), not our old 0.4x",
+		absf(float(pd["wall_mult"]) - 173.0 / 35.0) < 0.02 and dmg(T) >= want * 0.95,
+		"took %.0f, want %.0f" % [dmg(T), want]
+	)
+	ok(
+		"parity lace: RMB charge starts at the press (guard 0.15 s, was a 0.5 s dead zone)",
+		float(K.rmb_def()["hold"]) <= 0.15 and K.rmb_charge_full() > 1.0,
+		"hold %.2f" % float(K.rmb_def()["hold"])
+	)
 	ok("combo archer: wall pin fills Focus", K.full_ready())
 	var dd0 := dmg(T)
 	P.fire_cd = 0.0
