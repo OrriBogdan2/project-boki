@@ -478,7 +478,7 @@ func _smash() -> void:
 		launch.start(dv)
 	else:
 		_carry(dv, k)
-	fx.slam(dv, k)
+	fx.slam(dv, float(md["smash_reach"]))
 	m.fx.dust(h.pos + Vector3(dv.x, 0, dv.y) * 1.6, 8 + int(10 * k))
 	for f in foes_in(h.pos + Vector3(dv.x, 0, dv.y) * 1.2, float(md["smash_reach"]), 2.2):
 		_impact_trail(f, dv, k)
@@ -781,7 +781,7 @@ func _spin_hit(wd: Vector2) -> void:
 		cd["rmb"] = 0.0
 	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
-	fx.smash_ring(h.pos)
+	fx.smash_ring(h.pos, r)
 	m.fx.dust(h.pos, 10)
 	m.sfx("bjorn_whirl", h.pos, -2.0)
 	net_ring(h.pos, r, Color("ff7a3a"))

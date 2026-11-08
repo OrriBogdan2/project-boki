@@ -786,6 +786,9 @@ func _bulwark_combos() -> void:
 		K.slams == sl0 + 1 and K.slam_k >= 0.99 and P.pos.x - px0 >= 1.0 and dmg(T) >= 55.0 and not K.fx.held,
 		"carry %.2f took %.0f" % [P.pos.x - px0, dmg(T)]
 	)
+	ok("bjorn telegraph: the crescent's outer edge is the blow's reach (the hit area), whatever the charge",
+			absf(K.fx.crescent.scale.x * BjornFx.CRES_OUT - float(K.lmb_def()["smash_reach"])) < 0.01,
+			"drawn %.2f vs reach %.2f" % [K.fx.crescent.scale.x * BjornFx.CRES_OUT, float(K.lmb_def()["smash_reach"])])
 	ok("bjorn anim: the slam plays bul_smash", K.anim_id == "bul_smash", K.anim_id)
 	ok(
 		"bjorn small: wind-down after the slam, no glider straight away (momentum kept)",
@@ -808,6 +811,9 @@ func _bulwark_combos() -> void:
 		mid == 0.0 and K.spins == sp0 + 1 and dmg(T) >= 18.0 and dmg(T) <= 30.0,
 		"mid %.0f spins %d took %.0f" % [mid, K.spins - sp0, dmg(T)]
 	)
+	ok("bjorn telegraph: the Whirl's swirl reaches exactly the spin's radius",
+			absf(K.fx.swirl.scale.x * BjornFx.SWIRL_OUT - float(K.dash_def()["spin_r"])) < 0.01,
+			"drawn %.2f vs spin_r %.2f" % [K.fx.swirl.scale.x * BjornFx.SWIRL_OUT, float(K.dash_def()["spin_r"])])
 	# the aegis: his own curved slab over the wall while raised
 	reset.call()
 	P.inp["sec_hold"] = true
@@ -961,6 +967,11 @@ func _bulwark_combos() -> void:
 		K.shield_slams == slams_before + 1 and K.res <= guard_before - 49.0,
 		"slams %d guard %.0f -> %.0f stun %.2f" % [K.shield_slams - slams_before, guard_before, K.res, T.stun_t]
 	)
+	var sl: Dictionary = K.rmb_def()["slam"]
+	ok("bulwark telegraph: the Shield Slam's fan is the cone it hits (its radius, half its angle a side)",
+			absf(K.fx.bash_fan.scale.x - float(sl["radius"])) < 0.01
+			and absf(BjornFx.BASH_HALF - deg_to_rad(float(sl["angle"]) * 0.5)) < 0.001,
+			"fan %.2f vs %.2f, half %.3f" % [K.fx.bash_fan.scale.x, float(sl["radius"]), BjornFx.BASH_HALF])
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
 	reset.call()

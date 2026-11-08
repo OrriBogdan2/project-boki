@@ -31,6 +31,8 @@ const CRES_FADE := 0.2
 const CRES_IN := 1.1
 const CRES_OUT := 2.9
 const CRES_Y := 0.45
+## m: the swirl's outer radius at scale 1
+const SWIRL_OUT := 2.4
 const SWIRL_T := 0.45
 const BASH_T := 0.2
 ## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
@@ -38,8 +40,9 @@ const BASH_T := 0.2
 const WAKE_T := 0.28
 const WAKE_POOL := 6
 const WAKE_EVERY := 0.06
-## the Bash's gold fan: half its angle (rad) and its reach scale over the Bash's radius
-const BASH_HALF := 0.6
+## the Shield Slam's gold fan: half its angle (rad), the cone's 100 degrees in content/archetypes/bulwark.json
+## (rmb.slam.angle); the fan's outer edge is scaled to the slam's radius
+const BASH_HALF := deg_to_rad(50.0)
 const CHAIN_LINKS := 18
 const CHAIN_SAG := 0.5        # m at its deepest, once the hammer is far out
 const WRIST := "Rig/Torso/ArmRPivot/Elbow/Hand"
@@ -142,7 +145,7 @@ func _ready() -> void:
 	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", ORBIT_COL, true))
 	var cres_mesh := KitMeshes.band(CRES_IN, CRES_OUT, -PI * 0.5, PI * 0.5, 40)
 	crescent = KitMeshes.inst(self, cres_mesh, KitShaders.mat("crescent", Color(1.0, 0.6, 0.12), true))
-	var swirl_mesh := KitMeshes.band(1.0, 2.4, 0.0, TAU, 48)
+	var swirl_mesh := KitMeshes.band(1.0, SWIRL_OUT, 0.0, TAU, 48)
 	swirl = KitMeshes.inst(self, swirl_mesh, KitShaders.mat("swirl", Color("e8301a"), true))
 	KitShaders.param(swirl, "color2", Color("ffc93a"))
 	KitShaders.param(swirl, "twist", 2.2)
@@ -392,13 +395,13 @@ func _place_glint(pv: Node3D) -> void:
 	KitShaders.param(glint, "white", 0.7 if hot else 0.25)
 
 # ------------------------------------------------------------------ slam crescent and smash swirl
-## The Crushing Blow's crescent: 180 degrees in front of him toward `dir` (the blow's hit area), bigger with the
-## charge k. It rides with him through the slam's carry, so it stays in front instead of being left behind.
-func slam(dir: Vector2, k: float) -> void:
+## The Crushing Blow's crescent: 180 degrees in front of him toward `dir`, its outer edge at the blow's `reach`
+## (the hit area). It rides with him through the slam's carry, so it stays in front instead of being left behind.
+func slam(dir: Vector2, reach: float) -> void:
 	crescent.visible = true
 	crescent.global_position = _cres_at()
 	crescent.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
-	crescent.scale = Vector3.ONE * lerpf(0.85, 1.0, k)
+	crescent.scale = Vector3.ONE * reach / CRES_OUT
 	cres_t = CRES_HOLD + CRES_FADE
 
 ## Where the crescent is drawn this frame: on him, so it rides through the carry.
@@ -413,8 +416,10 @@ func crescent_centre() -> Vector3:
 	var ahead := -crescent.basis.z.normalized()
 	return _cres_at() + ahead * reach - Vector3(0, CRES_Y, 0)
 
-func smash_ring(at: Vector3) -> void:
+## The Whirl's swirl: its outer edge at the spin's radius `r` (the hit area).
+func smash_ring(at: Vector3, r: float) -> void:
 	swirl.visible = true
+	swirl.scale = Vector3.ONE * r / SWIRL_OUT
 	swirl.global_position = at + Vector3(0, 0.3, 0)
 	swirl_t = SWIRL_T
 
@@ -507,7 +512,7 @@ func push_hint(w: Dictionary, n: Vector2, push: float, flash: bool) -> void:
 	var hot := clampf(push_flash / PUSH_FLASH_T, 0.0, 1.0)
 	AimKit.lane(h, "aegis_push", {
 		"from": Vector3(mid.x + n.x * 0.5, h.pos.y, mid.y + n.y * 0.5), "dir": n, "len": push,
-		"width": float(w["len"]) * 0.7, "chevrons": 2, "fill": fmod(t * 1.5, 1.0), "col": GOLD, "col2": AEGIS,
+		"width": float(w["len"]), "chevrons": 2, "fill": fmod(t * 1.5, 1.0), "col": GOLD, "col2": AEGIS,
 		"alpha": 1.1 + 0.4 * (0.5 + 0.5 * sin(t * 7.0)) + hot, "hot": 0.3 + hot, "lw": 0.1, "all": true})
 
 # ------------------------------------------------------------------ Purify
@@ -611,7 +616,6 @@ func _tick_slam(delta: float) -> void:
 		var life := clampf(swirl_t / SWIRL_T, 0.0, 1.0)
 		swirl.rotation.y += delta * 12.0
 		KitShaders.param(swirl, "life", minf(1.0, life * 1.6))
-		swirl.scale = Vector3.ONE * lerpf(1.12, 0.88, life)
 		swirl.visible = swirl_t > 0.0
 
 ## The beacon stands along the camera's up so it reads as a vertical ray on screen wherever it is, and

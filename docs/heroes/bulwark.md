@@ -142,6 +142,21 @@ Rank paths that do not fit our system: the Spin Dash's own cooldown still uses t
 ## Scaling
 Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x the throw, the source's 3x and 5.6x); 360 Smash 24 (2x the throw); Slam 18; Crushed 8 + stun 0.5; Mending Ground 2 per 0.5 s for 4 s + a burst of 18; Faultline 4 strike + 18 eruption (40 s cooldown, about 3.6x the 360 Smash as in the source). Numbers follow the source's ratios, not its values.
 
+## Telegraphs (audit C: every ground shape is gameplay, drawn at the hit's true size)
+
+Rule (DECISIONS, movement rules): a ring, disc or burst on the ground means gameplay; drawn size is the data size. Checked in `--bulwark-combo-check` (`tools/archer_bulwark_combo_check.gd`; the chevron width in `tools/pin_bjorn_owner_check.gd`).
+
+| Ability | Drawn | Hit (data) | Seen by | Now |
+|---|---|---|---|---|
+| Crushing Blow (LMB held) | a 180 degree crescent, outer edge at `lmb.smash_reach` 2.8 m | `_strike` fan, 2.8 m, 180 degrees | all | was 0.85 to 1.0 x 2.9 m by charge (2.47 to 2.9); now a constant 2.8. The band's inner hole (1.1 m) is style: the hit has no hole |
+| 360 Smash (Shift, Whirl) | swirl, outer edge at `dash.spin_r` 2.2 m | 360 degree strike, 2.2 m | all | was 2.1 to 2.7 m (a scale swell); now a constant 2.2 |
+| Shield (RMB held) | the curved aegis wall, 4.2 m (`rmb.shield.len`), and a double chevron `push` 2.0 m long, as wide as the wall | foes touching the wall are shoved `push` | all | the chevron was 0.7 x the wall; now the full wall width |
+| Shield Slam (Guard 50 + Shift) | a gold fan, `rmb.slam.radius` 2.6 m, half angle 50 degrees (`BASH_HALF`) | cone radius 2.6, angle 100 | all | was a 69 degree fan against a 100 degree cone |
+| Mending Ground (E) | circle at `e.radius` 3.5 m | 3.5 m zone | all | already true |
+| Faultline (X) | lane `x.width` 4.5 m | the cells' width | all | already true |
+
+Source-faithful, kept: the crescent's hollow band, the swirl's hollow centre.
+
 ## Cross-ability interactions (combos)
 | Combination | Result | Check |
 |---|---|---|

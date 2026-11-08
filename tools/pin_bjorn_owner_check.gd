@@ -521,7 +521,8 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 	var hint := AimKit.entry(P, "aegis_push")
 	ok("bjorn shield: a forward double chevron shows in front of the raised wall, to everyone, as long as the push",
 		AimKit.shown(P, "aegis_push") and int(hint.get("chevrons", 0)) == 2 and bool(hint.get("all", false))
-		and absf(float(hint.get("len", 0.0)) - float(sd["push"])) < 0.01,
+		and absf(float(hint.get("len", 0.0)) - float(sd["push"])) < 0.01
+		and absf(float(hint.get("width", 0.0)) - float(sd["len"])) < 0.01,
 		str(hint.keys()))
 	var d := P.aim_dir()
 	ok("bjorn shield: the chevron points the way the wall faces", (hint.get("dir",
