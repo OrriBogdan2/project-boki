@@ -34,11 +34,14 @@
 `keyart_last_light_final.jpg`
 
 **The shot:**
-- Mossy plants his figurehead shield against Motley, who lunges from the void in a storm of burning cards.
-- Neve readies her spear behind the shield, and Meeko's sun blazes.
-- Grimble cowers behind Mossy, clutching his loot.
-- Together with the other two pieces, this completes the key art for all 12 heroes.
+- Over Motley's shoulder: his hat, ruff and gloved hands frame the foreground as burning cards fly at the heroes.
+- Mossy blocks with his figurehead shield.
+- Neve lunges with her spear aimed at Motley's grin.
+- Meeko is behind them with her sun and cloud.
+- Grimble cowers behind Mossy, clutching his coin sack (he's not part of the team).
 
 **How it was made:**
-- A single fresh generation (Nano Banana Pro, 16:9, 4K). Refs: front views of Mossy, Neve, Meeko, Motley and Grimble, plus Meeko's companions sheet.
-- Local pass: clarity and sharpening.
+- A fresh POV generation (Nano Banana Pro, 16:9, 4K).
+- Edits: Grimble made to cower, Neve turned to aim at Motley, then Grimble's face and loupe fixed. The loupe came out with 2 lenses, not 3.
+- Local restore: colours matched back to the pre-edit base, then sharpened.
+- The earlier flat lineup version is in `explorations/`.
