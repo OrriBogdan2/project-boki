@@ -52,7 +52,7 @@ func _setup() -> void:
 	# her hand before _tick_lmb skins it: hide it just before that frame is drawn
 	RenderingServer.frame_pre_draw.connect(_hide_fresh_round)
 
-## Hides the stock orb of the round she just fired until _tick_lmb has moved it to her fingertip (it is the bolt's head).
+## Hides the stock orb of the round she just fired until _tick_lmb has moved it to her fingertip (the bolt's head).
 func _hide_fresh_round() -> void:
 	if h == null or not is_instance_valid(h) or h.shot_n == last_shot:
 		return
