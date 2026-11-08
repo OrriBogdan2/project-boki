@@ -33,7 +33,7 @@ Rubric, 2 points each: (1) idea fused through the whole body, (2) silhouette tha
 | Prismink | 8.0 | upright, mostly a recolour | redo |
 | Oarlet | 8.0 | generic otter plus paddle | redo |
 | Amanitusk | 8.0 | realistic boar | redo |
-| Lashyx | 8.5 | edit A: venom blade-pincers on forelegs | keep |
+| Lashyx | 7.5 | owner: reads smaller and weaker than Vespox, not a final form | redo from new Vespox |
 | Bellowary | 7.5 | realistic turkey head, strapped saddle | redo (batch 1) |
 | Prismander | 9.0 | redo D: faceted crystal body, prism gills, glass tail blade; re-laid from 5 views | keep |
 | Zippelith | 8.5 | owner regrade: the simple glossy blob is its charm | keep (Zipling must look clearly different) |
