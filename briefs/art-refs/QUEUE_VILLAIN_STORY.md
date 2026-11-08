@@ -68,6 +68,7 @@
 
 ### 3b. Malgrave hero set (owner, Nov 7, 23:40 ET)
 She will become a playable character eventually. Make a turnaround (`malgrave_turnaround.jpg`), a splash (`malgrave_splash.jpg`, 16:9, 4K) and a portrait (`malgrave_portrait.jpg`, 1:1, 4K), in the same formats as the hero splashes and portraits. Then the dragon form, then the rest of the villain set.
+**Scope (owner, Nov 7, 23:48 ET):** her main design gets a turnaround (done: `villain/malgrave_turnaround.jpg`), a splash and a portrait. The hybrid form and the dragon form get one picture each (`malgrave_hybrid.jpg`, `malgrave_dragon.jpg`), with no splash, portrait or turnaround. The alternates in `malgrave_alts/` get nothing more for now.
 
 ### 4. The Wyrm (true form)
 - **Look:** an ancient, huge dragon.
