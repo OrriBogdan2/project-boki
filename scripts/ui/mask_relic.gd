@@ -67,7 +67,8 @@ func _accent(col: Color) -> void:
 		coin.bottom_radius = 0.05
 		coin.height = 0.012
 		coin.radial_segments = 20
-		Models.part(plate, coin, Models.shiny(Color("e0b040"), 0.9), _on_plate(0.36, 0.14, 0.012), Vector3.ONE, Vector3(PI / 2, 0, 0))
+		var at := _on_plate(0.36, 0.14, 0.012)
+		Models.part(plate, coin, Models.shiny(Color("e0b040"), 0.9), at, Vector3.ONE, Vector3(PI / 2, 0, 0))
 		return
 	for k in 7:
 		var at := _on_plate(-0.6 + 0.2 * k, 0.45 - 0.05 * absf(k - 3), 0.006)

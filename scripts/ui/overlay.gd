@@ -396,7 +396,7 @@ func _tab_video(v: VBoxContainer) -> void:
 		"Top right. The overlay adds frame time, draw calls, triangles and script costs")
 	var modelled: Array = Arch.ORDER.filter(WardenGlb.has_model)
 	if not modelled.is_empty():
-		_group(v, "Warden models")
+		_group(v, "Hunter models")
 		for a in modelled:
 			var hint := "Off: the simpler built-in model. From the next match or Hunter swap"
 			var r := _row(v, String(WardenGlb.ART[a]).capitalize(), hint)

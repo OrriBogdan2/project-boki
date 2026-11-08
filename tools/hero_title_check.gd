@@ -58,12 +58,14 @@ func _lore_check() -> void:
 		var homes: int = lore["factions"].filter(func(f): return f["hunters"].has(id)).size()
 		ok(homes == 1, "%s sits in exactly one faction (%d)" % [id, homes])
 		var relic: Dictionary = lore["hunters"].get(id, {}).get("relic", {})
-		ok(RELIC_STATUS.has(relic.get("status", "")) and String(relic.get("name", "")) != "", "%s has a relic with a status" % id)
+		var known: bool = RELIC_STATUS.has(relic.get("status", "")) and String(relic.get("name", "")) != ""
+		ok(known, "%s has a relic with a status" % id)
 	var text := JSON.stringify(lore)
 	ok(_old_name_in(text) == "", "lore.json: no old name (%s)" % _old_name_in(text))
 	ok(RegEx.create_from_string(RETIRED_TERMS).search(text) == null, "lore.json: no retired term")
 	var cinder := _plain_text(Arch.def("ashwick")) + JSON.stringify(lore["hunters"]["ashwick"])
-	ok(RegEx.create_from_string("(?i)goggles|\\btank\\b|\\bhose").search(cinder) == null, "Cinder: no goggles, tank or hose")
+	var banned := RegEx.create_from_string("(?i)goggles|\\btank\\b|\\bhose")
+	ok(banned.search(cinder) == null, "Cinder: no goggles, tank or hose")
 	var meeko := _plain_text(Arch.def("tender")) + JSON.stringify(lore["hunters"]["tender"])
 	ok(not meeko.to_lower().contains("lantern"), "Meeko: no lantern")
 

@@ -217,7 +217,7 @@ const KIN := [
 const BOT := [
 	"Slate", "Mako", "Jinx", "Fen", "Kite", "Hex", "Drift", "Vale", "Kestrel", "Hollow", "Ivy", "Scythe",
 	"Frost", "Thorn", "Dagger", "Mara", "Tarn", "Echo", "Quill", "Nim", "Shade", "Ash", "Orin", "Cobalt",
-	"Nova", "Warden", "Volt", "Wraith", "Juno", "Raven", "Moss", "Rust", "Spike", "Gale", "Cato", "Storm",
+	"Nova", "Marlow", "Volt", "Wraith", "Juno", "Raven", "Moss", "Rust", "Spike", "Gale", "Cato", "Storm",
 	"Blaze", "Crow", "Ghost", "Zephyr", "Hawk", "Grim", "Reef", "Wick", "Jolt", "Cinder", "Flint", "Vexa",
 	"Talon", "Viper", "Lynx", "Pike", "Riot", "Lux", "Rook", "Zed", "Briar", "Rho", "Onyx", "Bryn", "Ember",
 	"Bolt", "Sable", "Moys", "Zardyn", "Skusor", "Stickia", "Vixa", "Nexo", "Faevri", "Dramar", "Jithie",
