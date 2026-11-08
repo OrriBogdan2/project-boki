@@ -11,7 +11,7 @@ R is your Boki's Merge.
 |---|---|
 | Class title | the Snowglide |
 | Base character | Neve, female |
-| Personality | A graceful ice skater who glides where others walk and leaves frost behind her. Elegant and playful, with a cold edge when crossed. |
+| Personality | The star show-skater of the winter canal festival. The night the ice broke she skated the festival crowd to safety, and the frost took her. She glides on the skates that saved them and fights with a candy-cane spear from the festival. |
 
 <!-- /gen:profile -->
 

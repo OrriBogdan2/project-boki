@@ -10,7 +10,7 @@ every knock.
 |---|---|
 | Class title | the Unbroken |
 | Base character | Kael, male |
-| Personality | A proud champion in a spartan kit, mostly bare skin and gilded armour. He fights like the crowd is watching. He loves a duel and never backs down from one. |
+| Personality | Malgrave's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain became his weapon. The Blight burned white-hot cracks into his sword arm (the Blight Cinder distilled, so he doesn't fully trust her). A demon lives in his blade and in his mind and must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off. |
 
 <!-- /gen:profile -->
 
@@ -28,7 +28,7 @@ every knock.
 5. **Warchain** (E): hook a foe or a wall, then press E again to pull yourself in.
 6. **Gilded Riposte** (X, from level 6): a 0.65s gold guard where nothing hurts or stuns you, then you lunge
    into an upward cleave through the strip ahead and heal 80% of what it deals. Each hit you block makes it
-   harder; a knock with it makes it ready again. The Boki Merge has its own key.
+   harder; a knock with it makes it ready again. The Boki Fusion has its own key.
 
 ## Combos and interactions
 

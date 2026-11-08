@@ -17,7 +17,7 @@ const ENLARGE := 2
 const YAW_34 := -PI * 0.8     # three-quarter front, the weapon hand toward the camera
 const YAW_SIDE := -PI * 0.5   # side on, facing right in the picture
 const NAMES := {"gunslinger": "Vex", "rimewright": "Neve", "dolm": "Tenzo", "ashwick": "Cinder", "thief": "Sable",
-	"juggernaut": "Kael", "archer": "Lace", "mage": "Sparkle", "tender": "Meeko", "bulwark": "Mossy",
+	"juggernaut": "Kael", "archer": "Lace", "mage": "Sparkle", "tender": "Meeko", "bulwark": "Albert",
 	"dredge": "Grimble",
 	"ostra": "Motley"}
 const BEFORE_AFTER := ["gunslinger", "archer", "juggernaut"]

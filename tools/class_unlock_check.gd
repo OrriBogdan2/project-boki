@@ -10,12 +10,12 @@ extends RefCounted
 ##   4. challenge progress makes a Hunter ready (never open by itself); mastery counts per Hunter
 ##   5. the feats HunterFeats records from the combat signals
 ##   6. save migration keeps every Hunter a save had unlocked or played, and adds Vex
-##   7. the new-game flow (one card, making yourself, the egg pick: no Relic pick) and the second Relic in the world
-##      by the portal after the first expedition (MaskOffer)
+##   7. the new-game flow (one card, making yourself, the egg pick: no Relic pick); the second Relic comes from Hob
+##      on the farm (--hob-check)
 ##   8. the viewer: name and title, every ability as a clip of it working (AbilityClip), keys from the bindings
 ##   9. the Hunters screen: challenge progress, mastery, the glider pick, hold to unlock and the reveal
 ##  10. locked Hunters playable in the Arena (its Training dummy) and the practice picker
-## With --shots-dir=<dir>: new_game_card, egg_pick, second_masks, second_mask_preview, viewer, hunters_screen,
+## With --shots-dir=<dir>: new_game_card, egg_pick, viewer, hunters_screen,
 ## glider_pick, hold_unlock and reveal_burst as PNGs. Prints HUNTERCHECK lines and
 ## "HUNTERCHECK DONE, n checks, failures: n".
 
@@ -98,7 +98,6 @@ func run(m: Node) -> void:
 	_feats()
 	_migration()
 	await _new_game_flow(tree)
-	await _first_return(tree)
 	await _viewer(tree)
 	await _home(tree)
 	await _arena(tree)
@@ -502,70 +501,6 @@ func _new_game_flow(tree: SceneTree) -> void:
 	hx.queue_free()
 	for i in 3: await tree.process_frame
 
-## Back home after the first expedition: once the screen is clear the three second Relics (Kael, Cinder, Meeko)
-## drift out of the portal and wait there; walking up to one previews it, interact puts it on and its reveal
-## plays; the other two go back into the portal. Nothing pops up over the farm.
-func _first_return(tree: SceneTree) -> void:
-	new_save()
-	ClassUnlock.choose_starters([FIRST])
-	Save.d["arch"] = FIRST
-	Save.d["cls"] = Arch.weight(FIRST)
-	Save.d["weapon"] = Arch.signature(FIRST)
-	Game.apply_result(result(FIRST, true, {}, {"tutorial": true}))
-	var hm = await main._hb_home()
-	var offer: MaskOffer = null
-	var t0 := Time.get_ticks_msec()
-	while Time.get_ticks_msec() - t0 < 15000:
-		await tree.process_frame
-		offer = hm.masks
-		if offer and offer.phase == "ready": break
-	ok(offer != null and _find_meta(hm, "second_pick") == null, "home after the first expedition: no popup pick")
-	if offer == null:
-		hm.queue_free()
-		return
-	ok(offer.phase == "ready", "the Relics come out once the screen is clear (%s)" % offer.phase)
-	var ids := offer.relics.map(func(r): return (r as MaskRelic).id)
-	ok(ids == SECOND, "Kael, Cinder and Meeko drift out of the portal (%s)" % str(ids))
-	var portal: Vector3 = hm.spots["portal"]
-	var by_portal: bool = offer.relics.all(func(r): return Vector2((r as Node3D).position.x - portal.x,
-			(r as Node3D).position.z - portal.z).length() < 4.0)
-	ok(by_portal and ClassUnlock.second_pending() and ClassUnlock.open_ids() == [FIRST],
-			"they hover by the portal and nothing opens by itself")
-	await shot(tree, "second_masks", 2)
-	var far := portal + Vector3(12, 0, 12)
-	_stand(hm, far)
-	for i in 10: await tree.process_frame
-	ok(offer.phase == "ready" and offer.preview == null and offer.find(Vector2(far.x, far.z)).is_empty(),
-			"walk away and they wait by the portal")
-	var pip: Node3D = offer.relics[2]
-	_stand(hm, pip.position)
-	for i in 10: await tree.process_frame
-	var card := _find_meta(offer.ui, "mask_preview")
-	var clips := card.find_children("*", "AbilityClip", true, false) if card else []
-	ok(card != null and String(card.get_meta("mask_preview")) == "tender" and clips.size() == 2
-			and _any_text(card, HunterViewer.display_name("tender")),
-			"walking up to Meeko shows its name and two ability clips (%d)" % clips.size())
-	var it: Dictionary = offer.find(Vector2(pip.position.x, pip.position.z))
-	ok(String(it.get("kind", "")) == "mask" and offer.label(it) == "Put on %s" % HunterViewer.display_name("tender"),
-			"interact there reads: %s" % (offer.label(it) if not it.is_empty() else "(nothing)"))
-	await shot(tree, "second_mask_preview", 4)
-	var cinder: Node3D = offer.relics[1]
-	_stand(hm, cinder.position)
-	for i in 6: await tree.process_frame
-	offer.use(offer.find(Vector2(cinder.position.x, cinder.position.z)))
-	ok(ClassUnlock.open_ids() == [FIRST, "ashwick"] and not ClassUnlock.second_pending(),
-			"putting on Cinder opens her, and nothing else (%s)" % str(ClassUnlock.open_ids()))
-	t0 = Time.get_ticks_msec()
-	while Time.get_ticks_msec() - t0 < 4000 and _find_meta(hm, "class_id") == null:
-		await tree.process_frame
-	ok(_find_meta(hm, "class_id") != null and hm.masks == null, "the put-on beat, then her reveal plays")
-	hm.queue_free()
-	for i in 3: await tree.process_frame
-
-func _stand(hm: Node, at: Vector3) -> void:
-	hm.player.position = Vector3(at.x, 0, at.z)
-	hm.ppos = hm.player.position
-
 # ---------------------------------------------------------------- 8. the viewer: abilities shown working
 func _viewer(tree: SceneTree) -> void:
 	new_save(["juggernaut", "archer"])
@@ -582,7 +517,9 @@ func _viewer(tree: SceneTree) -> void:
 	layer.add_child(host)
 	var v := HunterViewer.make("juggernaut", Vector2(220, 300))
 	host.add_child(v)
-	for i in 4: await tree.process_frame
+	var t0 := Time.get_ticks_msec()
+	while v.model == null and Time.get_ticks_msec() - t0 < 8000:      # (built on its own frame: PreviewBuild)
+		await tree.process_frame
 	v.set_process(false)       # (stepped by hand below)
 	var want: Array = KitCard.slots_of("juggernaut").filter(func(x): return x != "r" and x != "x") + ["x", "r"]
 	ok(HunterViewer.slots_for("juggernaut") == want
@@ -613,6 +550,7 @@ func _viewer(tree: SceneTree) -> void:
 		if not row is AbilityClip: continue
 		var clip := row as AbilityClip
 		clip.set_process(false)
+		clip.build()
 		clip.t = 0.0
 		clip._hit_i = 0
 		clip.tick(AbilityClip.ACT_AT + 0.05)
@@ -624,6 +562,10 @@ func _viewer(tree: SceneTree) -> void:
 		if not clip._hits.is_empty() and clip._hit_i == 0:
 			hits_ok = false
 			print("  %s (%s) never hits the dummy" % [clip.slot, clip.fx])
+	var clip_rows: Array = v.rows.filter(func(r): return r is AbilityClip)
+	v.select(v.rows.find(clip_rows[2]))
+	ok(clip_rows[2].playing and clip_rows.filter(func(r): return r.playing).size() == 1,
+			"only the clip in focus plays; the others hold still")
 	ok(moves_ok, "each clip drives the Hunter with the kit's own move (KMOVES)")
 	ok(hits_ok, "and each one lands on the training dummy")
 	var long_lines: Array = []

@@ -5,7 +5,7 @@ extends RefCounted
 ## and that it ends on the hatch. With --shots-dir (under xvfb with a renderer) it also saves a 5-frame strip
 ## per slide (start, two key beats, middle, end) as <dir>/s<slide>_<n>.png with <dir>/captions.txt.
 
-const SUNDERING := "The Wyrm broke the land and stole our essence.\n" \
+const HOLLOWING := "The Wyrm broke the land and stole our essence.\n" \
 	+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty."
 const RELICS := "Our only salvation became the cursed fossils we had tried to destroy:\n" \
 	+ "Relics, the masks of fallen Heroes.\nOnly those who wear a Hero's Relic can save our souls."
@@ -65,7 +65,7 @@ func run(m: Node) -> void:
 		tree.quit(1)
 		return
 	ok(pr.shots.size() == 5, "five slides (%d)" % pr.shots.size())
-	ok(String(pr.shots[2]["text"]) == SUNDERING, "THE SUNDERING reads the owner's line")
+	ok(String(pr.shots[2]["text"]) == HOLLOWING, "THE HOLLOWING reads the owner's line")
 	ok(String(pr.shots[3]["text"]) == RELICS, "THE RELICS reads the owner's line")
 	await _captions_fit(pr, tree)
 	main.get_window().size = FRAME

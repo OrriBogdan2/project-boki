@@ -10,7 +10,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 |---|---|
 | Class title | the Silver Thief |
 | Base character | Sable, female |
-| Personality | Quick, quiet and light-fingered. She is never where you aimed, and she smiles when you miss. She steals the moment first and the loot second. |
+| Personality | The thief who reached the Wyrmheart in Malgrave's vault. Touching it woke the Wyrm and set off the Hollowing. Everyone has a reason to hate her, and she knows it. She's still after the treasure. |
 
 <!-- /gen:profile -->
 
@@ -25,7 +25,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
    and flies on; catch a second and both are stunned. It bounces once off a wall.
 5. **Encore** (X, from level 6): a violet ring grows round you and rides with you; for 2s blades fly at every
    foe inside it, harder from its outer edge (which also blights them), and the Vault comes back. Landing it
-   on a rival hunter fills your bond meter a long way. The Boki Merge has its own key.
+   on a rival hunter fills your bond meter a long way. The Boki Fusion has its own key.
 
 ## Combos and interactions
 
