@@ -7,6 +7,10 @@ All picks are uploaded to the pack's cards and saved in turnarounds/. Batch 1 is
 - **Weak:** Canvastross (three ideas at once: sails, harpoons and a harness; noisy at game distance) and Bellowary (the bellows sits like a hat and the steel spurs are strapped-on gear, not anatomy). Zippelith is clean but almost too plain, so the zipper should be bolder.
 - **Style drift:** the edgy redos use thicker cartoon outlines and flatter shading than the website art. Batch 2's block locks the render to the website look; the review can decide whether to rerun the redos.
 
+## Owner calls (Nov 8, 15:02 ET)
+- Redo: Soakybara (too basic: a plain capybara with a pool on it), Mirrolin (stands upright like a person, bland), Canvastross, Bellowary. Keep: Umbrathere (owner on the fence; designer keeps it for its silhouette).
+- Weapons can be real weapons (sword, axe, spear, mace), but grown from the body as if born with them; never held or strapped on.
+
 ## Rules for every new design
 1. One idea, fused into the anatomy. The object is a body part, not worn. Gear only for mounts (saddles).
 2. Silhouette first: recognisable as a solid shadow.
