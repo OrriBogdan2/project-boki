@@ -3027,3 +3027,11 @@ READY ext/ui-void-masks-2 153acf74e (job 20261108-200012-a4; based on ext/ui-voi
 
 READY ext/hunter-screen-name PR #24: hunter kit card shows name (Tenzo) big, title subtitle; picker chips use names. Screenshot briefs/shots/hunter_name_after.png. No merge.
 READY ext/vfx-quality-base 9a9bb3b79 (PR #14, job 20261108-201526-a4; supersedes c9d17cdc0). Scorecard re-scored from GPU strips, worst first: Tenzo 14, Motley 14, Vex 15, Grimble 16, Lace 16, Meeko 17, Sable 18, Albert 20, Sparkle 20, Neve 26, Kael 27, Cinder 28. Tenzo before/after on ext/vfx-quality-strips (not for merge), linked on PR #14. All check reds match main (grammar-runtime, build-hold, build-ui, clip-live-sable, dash-frames, dash-slot, rate-card exit abort); hob was a load flake. vfx-quality-* backlog reordered to match.
+
+
+## Nov 8: Boki roster 100, types, sex (owner decisions)
+Owner-approved, needs game work:
+1. **Sex on every Boki.** Roll male or female at hatch and wild spawn, save it with uid and lineage, and show it in the Boki screen. Evolved forms get a male and a female look (design rule 14 in boki-art/BOKI_DESIGN_RULES.md). Plan for a second model or material per form that differs.
+2. **Second type slot** on every species, plus three new themes: Tide (water), Wyrm (dragon), Wild (normal). The mapping and each species' types are in boki-art/ROSTER_100.md and ROSTER_100.html.
+3. **Evolution into new forms.** A form swap at the evolution level, with some lines branching by affinity path (fierce, steadfast, curious, swift). The line list is in ROSTER_100.html.
+Art lands in boki-art/turnarounds (existing species) and boki-art/evolutions (new forms).
