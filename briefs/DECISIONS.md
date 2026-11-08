@@ -356,3 +356,8 @@ Match movement must have strong WASD air control (at least as good as the farm t
 
 ## 2026-11-08 coordinator (owner asked): explicit state machines
 New or rewritten stateful code (movement, ability phases, Boki AI, match flow, tutorials, UI flows) uses ONE explicit state per machine (enum + single state var + guarded transition table + enter/exit + debug readout), not scattered bools and *_t timers. Pattern and ranked migration plan: briefs/STATE_MACHINES.md (job state-machines-audit-1108). Locomotion goes first, inside movement-air-core-1108. Kit/ability-phase migration waits until the wave-2 kit jobs merge, to avoid conflicts.
+
+## 2026-11-08 owner: hatch scene, mystery egg
+- The 3 starter eggs (cindle, puddlet, burrlet) stay front and obvious.
+- The mystery egg is a BLACK egg, set in a basket at the back of the hatch scene, somewhat hidden so players discover it and try it.
+- Its pool: many early creatures, rares included (not just the 3 starters), with a higher chance of cool mutations at birth than starters.
