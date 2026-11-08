@@ -110,9 +110,6 @@ const SHIELD := "shield"        # a shield modelled in the left hand's Shield no
 ## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide, Sable's flips and Encore).
 const WING_FOLD := "wing_fold"
 const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
-## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's data
-## lists in "hide_while_chain" shrink away (item 76b.4), so one chain shows, never two.
-const CHAIN_OUT := "chain_out"
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
@@ -859,7 +856,6 @@ class Sync extends Node:
 	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
 	var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
 	var mood: WardenMood          # a face on glass and a hanging companion, when the art has them
-	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
 
@@ -892,8 +888,6 @@ class Sync extends Node:
 			blade_root_bone = WardenSkeleton.find(skel, String(bl.get("root_bone", bl.get("bone", "hand.R"))))
 			gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 			muzzle = gun.get_node_or_null("Muzzle") as Node3D if gun else null
-		for b in dd.get("hide_while_chain", []):
-			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
 		sway = WardenSway.make(root, skel, dd.get("sway", {}))
 		if clips:
@@ -938,9 +932,6 @@ class Sync extends Node:
 			mood.step(dt)
 		if sway:
 			sway.tumble(dt, orbits.pivots)
-		if bool(root.get_meta(CHAIN_OUT, false)):
-			for bi in hide_out:
-				skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
 
 	func apply() -> void:
 		for l in links:

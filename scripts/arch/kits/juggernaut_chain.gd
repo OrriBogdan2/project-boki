@@ -235,8 +235,6 @@ func _arced(dir: Vector2, to: Vector2, step: float, most: float) -> Vector2:
 
 ## Each step (before the hunter moves).
 func tick(dt: float) -> void:
-	if k.h.model:
-		k.h.model.set_meta(WardenGlb.CHAIN_OUT, state != "ready")      # (the arm's chain is the one in the air: 76b)
 	match state:
 		"hooked": _tick_hooked(dt)
 		"pulling": _tick_pull(dt)
