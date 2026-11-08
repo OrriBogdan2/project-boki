@@ -186,7 +186,8 @@ func _tutorial_rules() -> void:
 	FarmTutorial.detect()
 	ok(FarmTutorial.did("feed") and FarmTutorial.current() == "crop", "food in a trough finishes feeding")
 	(L["water"] as Dictionary).clear()
-	ok(FarmTutorial.stage("crop") == "patch_dry" and FarmTutorial.world_text("crop") == "", "no water on the island: the plain patch hint, no marker")
+	ok(FarmTutorial.stage("crop") == "patch_dry" and FarmTutorial.world_text("crop") == "",
+			"no water on the island: the plain patch hint, no marker")
 	L["water"][HomeLayout.key(46, 35)] = 1
 	ok(FarmTutorial.stage("crop") == "patch" and FarmTutorial.hint_text("crop").contains("water") and FarmTutorial.world_text("crop") != "",
 			"crops start at the patch, by the water, with a marker")
@@ -331,7 +332,8 @@ func _spotlight() -> void:
 	for st in FarmTutorial.steps():
 		by_id[st["id"]] = st
 	ok(FarmTutorial.stage("task") == "go" and by_id["buy"]["spot"]["bar"] == {"hub": "shop"}
-			and by_id["house"]["spot"]["place"] == {"hub": "build"}, "the Market bar step and the build menu ask for it too")
+			and by_id["house"]["spot"]["place"].get("tile") == "house",
+			"the Market bar step and the build menu ask for it too")
 	var spots_named := FarmTutorial.steps().filter(func(st): return st.has("spot")).all(func(st):
 		return (st["spot"] as Dictionary).keys().all(func(k): return (st["hints"] as Dictionary).has(k)))
 	ok(spots_named, "every spot is on a stage the step really has")

@@ -81,7 +81,9 @@
 			},
 			"spot": {
 				"place": {
-					"hub": "build"
+					"hub": "build",
+					"tile": "house",
+					"click": "Click here"
 				}
 			}
 		},
@@ -134,7 +136,9 @@
 			},
 			"spot": {
 				"place": {
-					"hub": "build"
+					"hub": "build",
+					"tile": "feeder_trough",
+					"click": "Click here"
 				}
 			}
 		},
