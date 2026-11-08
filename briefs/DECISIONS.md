@@ -330,3 +330,4 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - Female (she/her): Cinder, Lace, Neve, Meeko, Sable, Vex, Sparkle. Villain: Malgrave (she/her).
 
 - 2026-11-08 (owner: "just do it yourself"): **Pip stays as the default Boki pet name** (a Boki name now, not a hero). **Relic rule adopted:** a relic need not be on the hero's 3D model; it is the object found in the world and shows in the relic pickup, menus, splash and lore art.
+- 2026-11-08 (owner: "yes"): **Skylands = the name for the broken land after the Hollowing.** Before it was Solmere, one kingdom on solid ground; the Wyrm's waking broke it into floating islands. Malgrave is not defeated (alive in the Hollow; beating her is the end goal). Beast-folk 'always lived in Solmere's lands'. Wins over earlier wording; LORE_MASKS.md has the text.
