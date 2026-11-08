@@ -2,11 +2,11 @@
 import numpy as np
 from meshkit import smooth, norm
 import ryzz_pieces as K
-from kael_paint import hexc, ramp, fbm
+from paintkit import hexc, ramp, fbm
 
 
 def mix(a, b, t):
-    """t is a scalar or already has its colour axis (kael_paint.mix adds one itself: two make an n x n array)."""
+    """t is a scalar or already has its colour axis (paintkit.mix adds one itself: two make an n x n array)."""
     return a * (1 - t) + b * t
 
 KEY = np.array([1.0, 0.0, 1.0])          # the neon: warden_look paint_glow lights this colour; pure magenta, nothing in the art is near it

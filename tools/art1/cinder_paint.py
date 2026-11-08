@@ -1,7 +1,7 @@
-"""ART-1 Cinder: the texel-space paint (recipe: kael_paint.py): arrays of texels (world position, normal, occlusion) to sRGB in 0..1."""
+"""ART-1 Cinder: the texel-space paint (recipe: paintkit.py): arrays of texels (world position, normal, occlusion) to sRGB in 0..1."""
 import numpy as np
 from meshkit import norm, smooth
-from kael_paint import hexc, mix, fbm, vnoise, lit, ramp
+from paintkit import hexc, mix, fbm, vnoise, lit, ramp
 import cinder_pieces as K
 
 HOT = np.array([1.0, 0.56, 0.12])        # keyed fully hot by hero_toon's glow_key; she keeps her painted colours (no model_glow core), so the iris stays

@@ -1,9 +1,9 @@
-"""ART-1 Sable: the texel-space paint (recipe: kael_paint.py): arrays of texels (world position, normal, occlusion) to sRGB in 0..1. Palette off sable_FINAL_sheet: dark plum leather,
+"""ART-1 Sable: the texel-space paint (recipe: paintkit.py): arrays of texels (world position, normal, occlusion) to sRGB in 0..1. Palette off sable_FINAL_sheet: dark plum leather,
 purple trim and lining, pearl moth wings with grey-lilac eye-spots, white hair, lilac skin, silver, dark wood, violet glow."""
 import os
 import numpy as np
 from meshkit import norm, smooth
-from kael_paint import hexc, mix, fbm, lit, ramp, hash3
+from paintkit import hexc, mix, fbm, lit, ramp, hash3
 import sable_pieces as K
 import imgio
 
