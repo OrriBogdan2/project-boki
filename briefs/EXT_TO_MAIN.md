@@ -2729,3 +2729,19 @@ The main design is briefs/art-refs/villain/malgrave_human.jpg, option I: Malgrav
 - Checks (headless): --check 0 failures (x2); health --strict OK; --hob-check, --mask-moment-check, --class-unlock-check (x2), --hunter-unlock-check, --portrait-check, --teammate-check rc 0 / 0 FAIL; --farm-tutorial-check rc 0 x2 after the fix. Not rerun under xvfb.
 - Against mc-20261108-0030 three keep-both conflicts are left: docs/ASSET_CREDITS.md, docs/DEBT.md, tools/check_registry.gd (both sides add lines). Clean against origin/main.
 READY ext/lace-dash-charges 7b83eae8 (Lace Spirit Walk: 2 charges + roll 3.5->4.0 m, item 146; archer-combo, dash-slot, health, wiki pass)
+
+READY ext/feel-integ bed04e50b (release integration on ext/mc-20261108-0030 88b1ac50e; deep worker 20261108-042434-a1)
+- In it, in this order: parity-move-feel 64e6c681, parity-dash-scale 2f24ae36, parity-dashlmb 4e788af6, cinder-flame-queen c3f4f172, cinder-v2-palms 766b44cd (carries cinder-v2-model), sable-v2-model 3e1816a6, fix-albert-blade-clip cb61e7f3d (READY in time).
+- Left out: fix-cinder-art-check cb8131be9. Its own note says to drop it once flame-queen merges, and the merged check passes (braced palm reach 0.60 m against REACH_MIN 0.3).
+- Resolutions:
+  - The ground brake is the HunterMove.brake table.
+  - The move-feel decision was renumbered to docs/decisions/0020, because 0019 was already used.
+  - Dash travel is scaled once (no use_ex).
+  - Cinder's jets stay data-driven (HeroVfx "jets", heel_l/heel_r/tail on the v2 anchor_jet_*/anchor_tail_tip) with the roar.
+  - tip() uses the v2 palm Muzzle, falling back to hand_r + PALM_AHEAD.
+  - cinder-art-check is the union of both versions. The tail-behind threshold is now 0.1 m, because the v2 tail curls.
+  - The title is the Ashen Kiss everywhere (Class-Flame-Queen.md became Class-Ashen-Kiss.md, and its intro text was rewritten).
+  - Long lines were wrapped for the style ratchet.
+- Checks:
+  - Passing: --check 0, health --strict OK, move-feel 0, dash-flow 0 (14 skipped), cinder-art 0, clip-check 0, hero-combo 304/0, ashwick-combo 119/0.
+  - warden-model-check FAIL: only the "stands Nx a medium hunter" height lines, for 8 heroes. The base 88b1ac50e already fails the same lines and more (Cinder's width too, which is now fixed). This is not caused by this branch.
