@@ -1,0 +1,1 @@
+Grimble (dredge) VFX before/after strips, not for merge. Before: jobq vfxq-before-dredge (20261108-180332-24264, main d255acbee, worker w2-4). After: jobq vfxq-after-dredge (20261108-210626-15092, ext/vfx-dredge c633f8297, worker rp1-1: its ground grade renders yellow, not a change in the branch). Parts changed: lmb, hold, rmb, hook, e, r (dash unchanged).
