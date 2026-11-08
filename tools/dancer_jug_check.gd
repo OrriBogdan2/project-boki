@@ -439,6 +439,8 @@ func juggernaut(a) -> void:
 	var home: Vector3 = r[4]
 	var lv: int = r[5]
 	var K: JuggernautKit = P.ak
+	A.air_dash_is_ground(m, P, home)
+	A.step(m, 0.8)
 	P.slot_lv["dash"] = 1
 	var charges_r1 := P.max_dashes()
 	P.slot_lv["dash"] = 2

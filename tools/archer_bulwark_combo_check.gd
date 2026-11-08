@@ -554,6 +554,9 @@ func _archer_combos() -> void:
 		P.draw_t < 0.0 and dmg(T) == hurt0 and P.ammo == ammo0,
 		"draw_t %.2f took %.0f ammo %d -> %d" % [P.draw_t, dmg(T) - hurt0, ammo0, P.ammo]
 	)
+	fresh(T)
+	fresh(T2)
+	air_dash_is_ground(m, P, home)
 	await done(m)
 	var r2 := setup("archer", 7.0, "", true)
 	m = r2[0]
@@ -649,6 +652,8 @@ func _bulwark_combos() -> void:
 	var home: Vector3 = r[4]
 	var lv: int = r[5]
 	var K: BulwarkKit = P.ak
+	air_dash_is_ground(m, P, home)
+	step(m, 0.8)
 	_wall_at(m, home, lv, 3)
 	var reset := func():
 		P.teleport(home)

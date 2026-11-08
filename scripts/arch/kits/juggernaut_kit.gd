@@ -458,21 +458,22 @@ func on_dash(use_ex: bool) -> bool:
 		warchain.dash_out()
 	if riposte.running():
 		riposte.drop()               # (only its recovery is left by now: Shift moves him out of it)
-	if use_ex and not h.grounded:
+	if use_ex and not h.grounded and h.dashes < 1.0:          # a charge in the air is the same Rampage (item 183)
 		if not spend_dash(true): return true
 		travel(float(h.cdat.get("ex_dist", 4.2)), float(h.cdat.get("ex_time", 0.21)),
 				{"invuln": 0.08, "trail": "dust"}, true)
-		if not meteor.running(): play("jug_exdash")     # an air dash: a hurled shoulder charge, knees tucked
+		if not meteor.running(): play("jug_exdash")     # out of charges: a hurled shoulder charge, knees tucked
 		return true
 	if not spend_dash(false):
 		return true
 	var dd := dash_def()
-	var wind := 0.0 if from_pull or from_slam else float(dd.get("windup", 0.15))
+	var in_hang := meteor.running()           # the Smash's gather: the drive rides it, the gather pose kept
+	var wind := 0.0 if from_pull or from_slam or in_hang else float(dd.get("windup", 0.15))
 	var dir := h.aim_dir() if from_slam else dash_dir()
 	rampage_dir = dir
 	st["last_dash"] = "rampage"
 	h.glide_cd = maxf(h.glide_cd, wind + float(dd["time"]) + 0.35)    # its wind-down: no glider straight out
-	if from_slam:
+	if from_slam or in_hang:
 		_rampage(dir)                # the Slam's own keys run on: the overhead blade rides the drive in
 		return true
 	play("jug_dash")                 # the crouch with the blade cocked high behind, then the drive

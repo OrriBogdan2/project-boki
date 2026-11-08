@@ -362,11 +362,11 @@ func _arrow_hit(t: Ent) -> void:
 
 # ------------------------------------------------------------------ dash: Spirit Walk
 func on_dash(use_ex: bool) -> bool:
-	var ex := use_ex and not h.gliding
+	var ex := use_ex and h.dashes < 1.0 and not h.gliding       # a charge in the air is the same Spirit Walk (item 183)
 	if not spend_dash(ex):
 		return true
 	if ex:
-		# the long dash (in the air, or out of charges): Hem's own flick and tumble with her fletch
+		# the long dash (out of charges): Hem's own flick and tumble with her fletch
 		# after-images (no bursts on a dash); 19 m/s, the base dash speed
 		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"}, true)
 		play("pin_flick")

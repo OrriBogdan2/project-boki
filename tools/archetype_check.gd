@@ -64,6 +64,46 @@ func setup(arch: String, dist: float, kin_sp := "", second := false) -> Array:
 func aim_at(P: Hunter, p: Vector3) -> void:
 	P.inp["aim"] = p + Vector3(0, 0.9, 0); P.inp["aim_y"] = p.y
 
+## Item 183: with a charge in hand, a hero's air dash is its ground dash: the same kit move and clip, the same reach
+## (within 5%), one charge spent and the long-dash slot (ex_cd) untouched. `home` is open ground; the match is
+## left with the hunter back at home.
+func air_dash_is_ground(m: Match, P: Hunter, home: Vector3) -> void:
+	var parked := {}
+	for h in m.hunters:
+		if h != P:
+			parked[h] = h.pos
+			h.teleport(h.pos + Vector3(0, 0, 60))     # a dummy in the lane would stop the ground run short
+	var ground := _dash_run(m, P, home, false)
+	var air := _dash_run(m, P, home, true)
+	for h in parked:
+		h.teleport(parked[h])
+	var label := "item 183 %s: its air dash is its ground dash (%s, reach %.2f vs %.2f)"
+	ok(label % [P.arch, ground["anim"], air["reach"], ground["reach"]],
+		air["anim"] == ground["anim"] and air["spent"] == ground["spent"] and air["spent"] > 0.5 and air["ex_cd"] == 0.0
+		and absf(air["reach"] - ground["reach"]) <= 0.05 * ground["reach"], str([ground, air]))
+	P.teleport(home)
+
+func _dash_run(m: Match, P: Hunter, home: Vector3, air: bool) -> Dictionary:
+	P.teleport(home + Vector3(0, 40.0 if air else 0.0, 0))
+	P.grounded = not air
+	P.vel = Vector3.ZERO
+	P.roll_t = 0.0
+	P.dashes = P.max_dashes()
+	P.ex_cd = 0.0
+	aim_at(P, P.pos + Vector3(8, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	var from := P.pos
+	var charges := P.dashes
+	P.do_dash()
+	var out := {"anim": P.ak.anim_id, "spent": charges - P.dashes, "ex_cd": P.ex_cd, "reach": 0.0}
+	var t := 0.0
+	while t < 1.0 and (t < 0.1 or P.roll_t > 0.0):
+		m.step(DT)
+		t += DT
+		out["reach"] = Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
+	P.inp["move"] = Vector2.ZERO
+	return out
+
 func step(m: Match, secs: float, each := Callable()) -> void:
 	var t := 0.0
 	while t < secs:

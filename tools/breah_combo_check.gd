@@ -596,13 +596,25 @@ func _breah() -> void:
 	)
 	# ---- Rock Hop (item 111): the rocks, the chain, the crash, the rock rolling on
 	await _leap(m, P, T, home, K, reset)
-	# the base dash (in the air): her own heavy shove move
+	# item 183: a charge in the air is the same Rock Hop as on the ground (its clip, its charge, its reach)
+	reset.call()
+	var hop_x := _first_hop_reach(m, P, false)
+	reset.call()
+	var charges := P.dashes
+	var air_x := _first_hop_reach(m, P, true)
+	ok("item 183: her air dash is the Rock Hop: breah_hop, a charge spent, ex_cd untouched, reach %.2f vs %.2f"
+			% [air_x, hop_x],
+		K.anim_id == "breah_hop" and P.dashes < charges and P.ex_cd == 0.0 and absf(air_x - hop_x) <= 0.05 * hop_x,
+		"anim %s charges %.1f -> %.1f ex_cd %.1f" % [K.anim_id, charges, P.dashes, P.ex_cd])
+	step(m, 0.8)
+	# out of charges the long dash is hers alone: the heavy shove move
 	reset.call()
 	P.ex_cd = 0.0
+	P.dashes = 0.0
 	P.pos.y += 1.5
 	P.grounded = false
 	P.do_dash()
-	ok("anim: her long air dash plays breah_exdash", K.anim_id == "breah_exdash")
+	ok("anim: her long dash (no charge left) plays breah_exdash", K.anim_id == "breah_exdash")
 	step(m, 0.8)
 	await _dash_moves(m, P, T, home, K, reset)
 	_air_dash_hold(m, P, K, reset)
@@ -911,6 +923,20 @@ func _air_dash_hold(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	P.inp["move"] = Vector2.ZERO
 	step(m, 0.8)
 
+## How far a Rock Hop pressed east gets in its flight time, from the ground or (`air`) 1.5m up.
+func _first_hop_reach(m: Match, P: Hunter, air: bool) -> float:
+	if air:
+		P.pos.y += 1.5
+		P.grounded = false
+	var from := P.pos
+	P.inp["move"] = Vector2(1, 0)
+	aim_at(P, P.pos + Vector3(8, 0, 0))
+	P.do_dash()
+	var flight := BreahHop.CROUCH + float(P.ak.dash_def()["time"]) * float(P.ak.dash_feel()["time"])
+	step(m, flight)
+	P.inp["move"] = Vector2.ZERO
+	return Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
+
 ## Item 35: her own ground (Rock Hop) and air (the long dash) moves, ids no other hero's table has, each one
 ## keyed to end with its dash (a hop's flight; the air dash's time with the dash feel), and
 ## neither dash draws a ground ring or a blast (the hit area is the landing circle, shown in flight).
@@ -940,6 +966,7 @@ func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, rese
 			P.pos.y += 1.5
 			P.grounded = false
 			P.ex_cd = 0.0
+			P.dashes = 0.0
 			P.do_dash()
 		else:
 			P.ak.on_dash(false)
@@ -947,7 +974,7 @@ func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, rese
 			m.step(DT)
 			P.render(DT, 1.0)
 			ok(
-				"item 35: her air dash plays breah_exdash as the whole pose (no shared roll under it)",
+				"item 35: her long dash plays breah_exdash as the whole pose (no shared roll under it)",
 				K.anim_id == "breah_exdash" and String(P.anim_s.get("dash_kind", "")) == "kit",
 				"anim %s kind %s roll %.2f" % [K.anim_id, str(P.anim_s.get("dash_kind")), P.roll_t]
 			)

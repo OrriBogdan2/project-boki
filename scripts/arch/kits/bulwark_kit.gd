@@ -740,10 +740,11 @@ func on_dash(use_ex: bool) -> bool:
 		m.fx.word(h.pos + Vector3(0, 2.3, 0), "SHIELD CHARGE", col_of(dd), false)
 		m.sfx("bulwark_charge", h.pos, -2.0)
 		return true
+	use_ex = use_ex and h.dashes < 1.0         # a charge in the air is the same 360 Smash (item 183)
 	if not spend_dash(use_ex):
 		return true
 	if use_ex:
-		# the long dash (in the air, or out of charges): Breaker lumbers in shoulder first, shoving foes aside
+		# the long dash (out of charges): Breaker lumbers in shoulder first, shoving foes aside
 		var de := float(h.cdat.get("ex_dist", 4.2))
 		travel(de, de / float(dd.get("lumber_speed", 14.0)), {"invuln": 0.1, "shove": true, "shove_kb": 6.0, "shove_dmg": 0.0, "trail": "dust"}, true)
 		st["last_dash"] = "lumber"
