@@ -3260,3 +3260,4 @@ Please build a small runner on your side (this ext workspace cannot reach Google
 3. Output: `briefs/boki-art/batch/out/<id>_<run>.png`, pushed to ext/agent-briefs (or tell me where). A results.json listing job id, run, file, and any errors or refusals.
 4. Re-runs: I grade each result; anything below 8.5 gets a rewritten prompt in jobs.json with a new id suffix (_r2, _r3). Run only jobs with no output yet.
 Please report the cost per image you see and whether 4K works through the API, before running the full batch. Start with a 5-job test.
+READY ext/drop-solo-after: separate / drop solo only after the team drop is made (owner 11-08). Check --drop-launch-check, health --strict OK. PR: https://github.com/OrriBogdan2/project-boki/pull/new/ext/drop-solo-after (gh missing on w2)
