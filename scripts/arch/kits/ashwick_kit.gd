@@ -157,7 +157,6 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 		m.fx.word(f.pos + Vector3(0, 2.3, 0), "ABLAZE", col, false)
 		m.fx.burst(f.pos + Vector3(0, 1.0, 0), col, 22, 4.0, 0.5, -3.0, 1.3)
 		m.sfx("as_ignite", f.pos, -3.0, 1.0)
-		net_ring(f.pos, 1.2, col)
 
 ## The Flashover fist pump; mid-roar the nozzle stays on the foe and only the off arm and the body move.
 func _stoke_pose() -> void:
@@ -408,7 +407,8 @@ func rmb_hold_tick(_t: float) -> void:
 	var rdf := rmb_def()
 	var ln := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)
 	AimKit.lane(
-		h, "rmb", {"len": ln, "width": 0.42, "col": Color("fff4e6"), "col2": BOLT_COL, "alpha": 0.9, "tip": true}
+		h, "rmb", {"len": ln, "width": float(rdf["size"]) * 2.0, "col": Color("fff4e6"), "col2": BOLT_COL,
+				"alpha": 0.9, "tip": true}
 	)
 
 func fire_rmb(c: Dictionary) -> void:
@@ -647,7 +647,7 @@ func _cloak_blast() -> void:
 	var shield_k := float(ed["rank3_shield_k"]) if rank("kin") >= 3 else 1.0
 	var r := float(ed["radius"])
 	fx.sunburst(h.pos, r, Color("ff5a1a"), Color("ffd060"), 0.3)        # no wider than the blast reaches
-	fx.scorch(h.pos, r * 0.75, 1.6)
+	fx.scorch(h.pos, r, 1.6)
 	fx.wave(h.pos, r, col, 0.3)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 6.0, 0.5, -2.0, 1.4)
 	for f in foes_in(h.pos, r):

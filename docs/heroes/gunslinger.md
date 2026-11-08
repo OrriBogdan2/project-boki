@@ -146,6 +146,24 @@ X is her own ultimate, Cinderfall (owner decision, SERVER_UPDATE6): the source's
 reference sheet's "Ultimate (on X)" section. It was never folded into another slot during the kit pass, so no
 slot changes. The Boki Merge is on its own key.
 
+## Ground shapes (telegraph audit)
+
+Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means gameplay, so every one drawn must be the true hit area. `tools/hero_combo_check.gd` and `tools/vv_ult_check.gd` assert drawn size = hit size.
+
+| Ability | Ground shape drawn | Hit | Seen by | Source read | Status |
+|---|---|---|---|---|---|
+| Rifle (LMB) | two thin arcs flanking her, r 1.25 m (firing brackets) | none (hitscan rounds) | her screen only | thin brackets while firing | kept: a tell on her body, not an area |
+| Burr Charge (RMB), in flight | none | 0.72 m wide shot, 10.5 m | - | a shell, no ground shape | ok |
+| Burr stuck (RMB), 0.9 s fuse | cone, 6.0 m long, 100 deg, pointing back at her | same cone (`cone_len`, `cone_deg`) | everyone locally | a cone back toward her | ok, asserted. Online the cone shows as a fixed 5 m fan (the net event has no length); a real fix needs a Net change, so it is a suggestion only |
+| Burr hit / stuck / detonation | none (was a 1.0, 1.6 and 1.8 m ring) | the cone above | - | no ring on the burr | removed: cosmetic rings that matched no hit |
+| Longneedle (E) charge | line 18 m long, 1.8 m wide narrowing to a core over 0.6 s | beam 18 m, 1.8 m wide, at 0.6 s | everyone locally | wide line narrowing to a core | ok, asserted |
+| Slipstep (dash) | none | none | - | none | ok |
+| Cinderfall (X) fall | disc r 3.4 m filling over 1.6 s, hot core 1.2 m, rivet ring closing onto r | 3.4 m, core 1.2 m, at 1.6 s | everyone locally | disc fills to the impact | ok, asserted |
+| Cinderfall impact | one ring at r 3.4 m | the disc | everyone | impact ring | fixed: was two rings at 1.3x and 0.7x r |
+| Cinderfall burn, 3 s | rim r 3.4 m fading | ticks inside 3.4 m | everyone locally | burning patch | ok |
+
+Suggestion (not built): carry the burr cone length over the network so remote players see the true 6 m cone.
+
 ## Engine notes
 - Kit `scripts/arch/kits/gunslinger_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd`; moves
   `scripts/match/kmoves_vv.gd`; rifle model `scripts/match/hero_arms_vv.gd`; sounds `tools/gen_sfx_vex.py`.

@@ -219,7 +219,7 @@ func _lay(a: Vector3, b: Vector3) -> void:
 	k.fx.lava(a - along * OVERLAP, b, float(x["trail_w"]), float(x["trail_t"]))
 	laid += 1
 	if laid % NET_EVERY == 0:
-		k.net_ring(b, float(x["trail_w"]) * 0.6, k.col_of(x))
+		k.net_ring(b, float(x["trail_w"]) * 0.5, k.col_of(x))
 		m.sfx("lw_trail", b, -6.0, 1.0)
 
 ## Every tick (0.3s): burn, slow and Char whoever stands in the carpet; the oldest pieces fade first.
@@ -272,7 +272,6 @@ func _liftoff_fx() -> void:
 	for i in RING_PUFFS:
 		var ang := TAU * float(i) / RING_PUFFS
 		k.fx.puff(at + Vector3(cos(ang) * r, 0.45, sin(ang) * r), LDFx.M_FLAME, Color.BLACK, Color.BLACK, 0.7, 0.4)
-	k.fx.scorch(at, r * 0.5, 1.0)
 	m.fx.burst(at + Vector3(0, 0.3, 0), Color("ff6a3a"), 26, 6.0, 0.45, 3.0, 1.2)
 	m.sfx("lw_jet", h.pos, -1.0, 1.0)
 	k.net_ring(at, r, k.col_of(x))

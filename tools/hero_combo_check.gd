@@ -622,6 +622,9 @@ func _gunslinger() -> void:
 	var ce := AimKit.entry(P, cone_id)
 	ok("RMB: the cone shows back toward you, for everyone",
 			not ce.is_empty() and bool(ce["all"]) and (ce["dir"] as Vector2).x < -0.9 and absf(float(ce["len"]) - 6.0) < 0.01)
+	ok("RMB: the cone drawn is the cone that hits (length %.1f, %.0f degrees)" % [bd["cone_len"], bd["cone_deg"]],
+			is_equal_approx(float(ce.get("len", 0.0)), float(bd["cone_len"]))
+			and is_equal_approx(float(ce.get("deg", 0.0)), float(bd["cone_deg"])), str(ce.get("deg", -1)))
 	ac.fresh(T)
 	T.teleport(home + Vector3(8, 0, 0))
 	ac.step(m, 0.05)
@@ -685,6 +688,8 @@ func _gunslinger() -> void:
 	ok("Longneedle: the line narrows over the cast (18m)",
 			w1 > 0.8 and w2 < w1 * 0.4 and absf(float(AimKit.entry(P, "e").get("len", 0.0)) - 18.0) < 0.01,
 			"%.2f -> %.2f" % [w1, w2])
+	ok("Longneedle: the line starts at the width of the beam that hits (%.2f m)" % K.beam_width(),
+			w1 <= K.beam_width() + 0.001 and w1 > K.beam_width() * 0.85, "%.2f" % w1)
 	ok("Longneedle: nothing before 0.6s", ac.dmg(T) < 0.5)
 	var px := P.pos.x
 	ac.step(m, 0.4)

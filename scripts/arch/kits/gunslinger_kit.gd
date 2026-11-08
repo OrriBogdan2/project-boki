@@ -512,7 +512,6 @@ func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 	m.fx.flash(at, HOT, 1.2, 0.1)
 	m.fx.burst(at, EMBER, 12, 6.0, 0.35, 2.0, 1.0, spray, 70.0)
 	m.sfx("vn_blast", at, -4.0)
-	net_ring(at, 1.0, EMBER)
 	var o := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"]}
 	victim.hurt(float(bd["hit_dmg"]) * power("sec"), h, o)
 	daze(victim, float(bd["cone_rattle"]))
@@ -532,7 +531,6 @@ func _stick(b: Dictionary, at: Vector3, wall: bool) -> void:
 	b["out"] = -(b["dir"] as Vector2)
 	m.sfx("gunslinger_grenade_thunk", at, -3.0)
 	fx().star(at, EMBER, HOT, 0.6, 0.12)
-	net_ring(at, 1.0, EMBER)
 
 func _detonate(b: Dictionary) -> void:
 	var bd := rmb_def()["burr"] as Dictionary
@@ -543,7 +541,6 @@ func _detonate(b: Dictionary) -> void:
 	var at: Vector3 = b["pos"]
 	rattles += 1
 	m.fx.flash(at, HOT, 1.6, 0.1)
-	fx().ring(ground(at), 1.8, EMBER, HOT, 0.35)
 	m.sfx("vn_blast", at, -1.0)
 	_cone(at, b["out"] as Vector2, bd, bool(b["wall"]))
 
@@ -554,7 +551,6 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 	fx().fan(ground(at), out, float(bd["cone_len"]), float(bd["cone_deg"]), EMBER, HOT, 0.35)
 	var spray := Vector3(out.x, 0.2, out.y)
 	m.fx.burst(at + Vector3(out.x, 0.4, out.y) * 1.5, EMBER, 18, 8.0, 0.4, 3.0, 1.4, spray, float(bd["cone_deg"]) * 0.5)
-	net_ring(at, 1.6, EMBER)
 	for f in m.foes_of(h.team):
 		if not f.hittable(): continue
 		if absf(f.pos.y - at.y) > 2.6: continue

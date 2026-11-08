@@ -457,7 +457,7 @@ func _burst(t: Ent) -> void:
 	# the flare: the disc snaps out bigger and brighter, then a root beam holds on each foe
 	lk().burst(
 			"flare", at,
-			{"col": Color("7a4aff"), "rim": Color("c9a0ff"), "r": rr * 1.5, "dur": 0.45, "pattern": 3.0})
+			{"col": Color("7a4aff"), "rim": Color("c9a0ff"), "r": rr, "dur": 0.45, "pattern": 3.0})
 	m.fx.burst(at + Vector3(0, 0.5, 0), Color("c9a0ff"), 26, 5.0, 0.6, 3.0, 1.2)
 	m.fx.burst(at + Vector3(0, 0.2, 0), col, 14, 3.5, 0.5, 6.0, 1.0)
 	m.sfx("tend_root", at, 0.0, 1.0)
@@ -813,9 +813,8 @@ func _call_end(done: bool) -> void:
 	KinBond.from_ult(h, "kill" if rescue else "hit", HeroUlt.cast_id(self))
 	var at := who.pos if not rescue else h.pos
 	# a rescue has its own revive banner, and the bond word lands on her now: no third word there
-	CareUtil.payoff(m, h, at, "" if rescue else "MENDED", Color("9cf07a"), "tend_arrive")
+	CareUtil.payoff(m, h, at, "" if rescue else "MENDED", Color("9cf07a"), "tend_arrive", false)
 	m.sfx("tender_cheer", h.pos, -3.0, 1.0)              # she cheers when her light mends someone
-	lk().burst("flare", at, {"col": Color("9cf07a"), "rim": Color("ffd27a"), "r": 1.8, "dur": 0.4, "pattern": 1.0})
 	lk().burst("rays", at, {"col": Color("b8ff9a"), "r": 0.9, "dur": 0.45})
 	play("mm_call_end")
 

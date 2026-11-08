@@ -224,6 +224,24 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
   out of the bellows while flying, and the carpet as pooled LDFx lava strips drawn with their own alpha-blended shader
   (`shaders/ld_lava.gdshader`), so the charred rim stays dark on bright ground.
 
+## Ground shapes (telegraph audit)
+
+Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means gameplay, so every one drawn must be the true hit area. `tools/ashwick_combo_check.gd` asserts drawn size = hit size.
+
+| Ability | Ground shape drawn | Hit | Seen by | Source read | Status |
+|---|---|---|---|---|---|
+| Flame Lance (LMB) | none | hose puffs, radius 0.25 to 1.1 m, 7 m | - | no ground shape | ok |
+| Cinder Shot (RMB) aim | lane 14 m long, 0.6 m wide | shot radius 0.3 m (0.6 m wide) | her screen | fixed-length lane | fixed: lane was 0.42 m wide; asserted |
+| Ablaze on hit | none (was a 1.2 m ring) | burn status | - | none | removed: cosmetic ring |
+| Cinder Shot fizzle | small ring 0.9 m at the end of the flight | none | everyone | small blue-white ring | kept: source shows it, a flight-end puff, not an area |
+| Furnace Cloak (E) | ring on him at r 4.5 m, scorch r 4.5 m | blast 4.5 m | everyone | ring shows the edge | fixed: scorch was 0.75x r; asserted |
+| Soot Ram (dash) | none | along the dash | - | none | ok |
+| Flue Flight (X) steer | lane, width 1.8 m, chevrons | carpet 1.8 m wide | her screen | steering line | ok |
+| Flue Flight carpet | ring segments, width 0.9 m radius (1.8 m) | 1.8 m wide | everyone | lava carpet | fixed: net ring was 0.6x width |
+| Flue Flight lift-off | ember ring r 2.2 m | burst 2.2 m | everyone | ember ring at lift-off (about 2.16 m) | kept (owner call recorded earlier); extra scorch removed |
+
+Suggestion (not built): none.
+
 ## Engine notes
 The hose is simulated on the match step (`scripts/arch/kits/ashwick_hose.gd`); a puff stops at a wall (`World.occupy`) and hurts
 only with line of sight from the puff. The burn uses the engine's own burn status (credit to Cinder); remote bodies get it through

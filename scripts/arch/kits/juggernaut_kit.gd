@@ -27,6 +27,7 @@ const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
 const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent
 const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
 const WAVE_FULL := Color("ffc23a")     # ... gold-hot at full charge
+const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
 const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
 
 var enraged_t := 0.0
@@ -553,7 +554,7 @@ func rmb_hold_tick(t: float) -> void:
 	var ld: Dictionary = sd["lunge"]
 	var feel := float(dash_feel()["dist"])        # the lane shows the fling travel() really makes
 	var lane := {"len": float(ld["dist"][1]) * feel, "len0": float(ld["dist"][0]) * feel, "k": k, "fill": k,
-			"width": 1.3, "col": LUNGE_RED, "col_full": LUNGE_FULL, "tip": true}
+			"width": lunge_w(), "col": LUNGE_RED, "col_full": LUNGE_FULL, "tip": true}
 	if warchain.hooked():
 		var to := warchain.anchor - h.pos
 		lane["dir"] = Vector2(to.x, to.z)
@@ -586,6 +587,10 @@ func perfect_window(t: float) -> int:
 ## "Now": the raised blade flashes white-hot at its tip and rings out.
 func _perfect_cue() -> void:
 	vfx("lunge_perfect")
+
+## The Lunge's true width: the lane drawn while it charges and the scorch it leaves are as wide as the contact test.
+func lunge_w() -> float:
+	return 2.0 * (h.r + LUNGE_REACH)
 
 func lunge_k(t: float) -> float:
 	var sd := rmb_def()
@@ -712,8 +717,9 @@ func _tick_slam(dt: float) -> void:
 	# the short magenta strike lane ahead of him, filling as the wind-up runs (everyone sees it)
 	var sl: Dictionary = rmb_def()["slam"]
 	var wk := 1.0 - clampf(float(slam_w["t"]) / float(rmb_def()["windup"]), 0.0, 1.0)
-	AimKit.lane(h, "slam",
-			{"len": float(sl["radius"]), "width": 1.9, "fill": wk, "col": SLASH_OUT, "all": true, "chevrons": 2})
+	AimKit.cone(h, "slam",
+			{"len": float(sl["radius"]), "deg": float(sl["angle"]), "inner": 0.0, "fill": wk, "col": SLASH_OUT,
+			"all": true})
 	HeroVfx.of(m).hold(h, "slam_wind", wk)
 	if float(slam_w["t"]) <= 0.0:
 		slam_w = {}
@@ -770,7 +776,7 @@ func _lunge(k: float, perfect: bool) -> void:
 	lunge = {"end": m.time + t * float(dash_feel()["time"]) + 0.02, "dir": dv, "k": k}
 	play("jug_lunge")
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "LUNGE", col_of(rmb_def()), false)
-	vfx("lunge_go", h.pos, dv, {"k": k, "len": dist * float(dash_feel()["dist"]), "perfect": perfect})
+	vfx("lunge_go", h.pos, dv, {"k": k, "len": dist * float(dash_feel()["dist"]), "w": lunge_w(), "perfect": perfect})
 	if perfect:
 		perfects += 1
 		AimKit.perfect(h, {"col": LUNGE_FULL})
@@ -779,7 +785,7 @@ func _tick_lunge() -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
 	var dv: Vector2 = lunge["dir"]
 	for f in m.foes_of(h.team):
-		if f.hittable() and h.flat_dist(f) < h.r + f.r + 0.6 and absf(f.pos.y - h.pos.y) < 1.6:
+		if f.hittable() and h.flat_dist(f) < h.r + f.r + LUNGE_REACH and absf(f.pos.y - h.pos.y) < 1.6:
 			var k := float(lunge["k"])
 			var was_chain: bool = lunge.get("chain", false)
 			lunge = {}
@@ -819,7 +825,7 @@ func _chain_lunge(k: float) -> void:
 	var dist := clampf(dv.length() - gap + 0.6, 2.0, float(e_def()["range"]) + 1.0)
 	var t := dist / (float(ld["speed"]) * 1.25)
 	chain_lunges += 1
-	vfx("chain_lunge", h.pos, dv.normalized(), {"len": dist})
+	vfx("chain_lunge", h.pos, dv.normalized(), {"len": dist, "w": lunge_w()})
 	warchain.spend()
 	# the whole way down the chain (travel() scales by the global dash feel; the chain sets the length)
 	var feel := dash_feel()
