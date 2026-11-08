@@ -2827,3 +2827,4 @@ READY ext/telegraph-audit-a 456a56d47 (Vex/Kael/Cinder/Meeko ground shapes drawn
 READY ext/telegraph-audit-b 20810cf25 (telegraph audit: Tenzo/Lace/Grimble/Neve drawn area == hit area, cosmetic rings removed, tables + asserts)
 READY ext/telegraph-audit-c 498b60d09 (Sparkle/Mossy/Sable/Motley ground telegraphs drawn at true hit size, cosmetic hit rings removed, drawn==hit asserts in the combo checks, per-ability tables in docs/heroes)
 READY ext/anim-time-motley ec4ec6e2b (Motley hover 0.3 m as the source, was half; timing check of his moves vs footage frames, all within a frame)
+READY ext/airdash-rule-audit a3a45b2af (air dash = ground dash for Hem, Tarek, Oath, Kael; 12-row table; parity 11/13 skipped)
