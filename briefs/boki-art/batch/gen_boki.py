@@ -32,6 +32,12 @@ def main():
     except ImportError:
         sys.exit("Missing packages. Run: python3 -m pip install --upgrade google-genai pillow")
 
+    import google.genai as _g
+    has_size = "image_size" in getattr(types.ImageConfig, "model_fields", {})
+    print(f"google-genai {getattr(_g, '__version__', '?')}, Python {sys.version.split()[0]}, 4K support: {has_size}")
+    if not has_size:
+        print("WARNING: this google-genai is too old for 4K. Images will come out at the default size.")
+        print("To fix: python3 -m pip install --upgrade 'google-genai>=1.50'  (needs Python 3.10+)\n")
     client = genai.Client()
     jobs = json.loads(JOBS.read_text())
     only = {s.strip() for s in a.only.split(",") if s.strip()}
@@ -57,7 +63,7 @@ def main():
                             response_modalities=["IMAGE"],
                             image_config=types.ImageConfig(
                                 aspect_ratio=job.get("aspect", "16:9"),
-                                image_size=a.size or job.get("size", "4K"),
+                                **({"image_size": a.size or job.get("size", "4K")} if has_size else {}),
                             ),
                         ),
                     )
