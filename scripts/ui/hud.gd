@@ -344,7 +344,7 @@ func _draw_world_labels() -> void:
 	_draw_truce_marks()
 	_draw_wisp_rings()
 	for h in m.hunters:
-		if h == m.player or h.out or h.extracted or not h.model or not h.model.visible or h.unseen:
+		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen:
 			continue
 		if cam.is_position_behind(h.position):
 			continue

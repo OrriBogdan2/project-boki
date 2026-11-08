@@ -3108,7 +3108,7 @@ func _anim_state(stretch: float) -> void:
 	s["dash_dir"] = roll_dir
 	s["dash_kind"] = _dash_anim_kind()
 	s["crouch"] = crouch_k
-	s["downed"] = downed
+	s["downed"] = false      # downed shows as a Wisp (HunterWisp)
 	s["dead"] = out
 	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["ledge"] = grap.size() > 0
@@ -3206,6 +3206,7 @@ func render(delta: float, alpha: float) -> void:
 	visible = (not out or WardenClips.dying(self)) and not extracted and not riding and not unseen
 	if not model:
 		return
+	HunterWisp.tick(self, delta)
 	if m.cam: model.basis = m.cam.char_basis(face, model.scale)     # leaned toward the camera (CamRig.char_lean)
 	else: model.rotation.y = face
 	if out and has_meta("fling"):
@@ -3304,7 +3305,7 @@ func render(delta: float, alpha: float) -> void:
 			see = lp.flat_dist(self) < 2.2 and int(m.time * 10.0) % 3 == 0
 		else:
 			see = int(m.time * 14.0) % 3 != 0
-	model.visible = see and not Hex.active(self)       # hexed: the critter stands in for the model
+	model.visible = see and not Hex.active(self) and not HunterWisp.hides(self)    # a critter or a Wisp stands in
 	ShieldLook.tick(self)
 	SideRings.tick(self)
 	var ring := model.get_node("TeamRing") as MeshInstance3D
