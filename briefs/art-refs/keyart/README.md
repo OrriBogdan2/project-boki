@@ -29,3 +29,16 @@
 - Edits, each a single change: minigun removed, crystal swapped for the heart (the cracks went white-hot in the same pass), duplicate upright blade removed.
 - Local restore: colours matched back to the original, then sharpened.
 - Rejected versions are in `explorations/`.
+
+## The Last Light (final)
+`keyart_last_light_final.jpg`
+
+**The shot:**
+- Mossy plants his figurehead shield against Motley, who lunges from the void in a storm of burning cards.
+- Neve readies her spear behind the shield, and Meeko's sun blazes.
+- Grimble cowers behind Mossy, clutching his loot.
+- Together with the other two pieces, this completes the key art for all 12 heroes.
+
+**How it was made:**
+- A single fresh generation (Nano Banana Pro, 16:9, 4K). Refs: front views of Mossy, Neve, Meeko, Motley and Grimble, plus Meeko's companions sheet.
+- Local pass: clarity and sharpening.
