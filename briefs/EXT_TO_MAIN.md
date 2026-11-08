@@ -2595,3 +2595,6 @@ READY ext/gameplay-media e6881d69f (gameplay media capture tool + encode script;
 - NO CHANGE NEEDED, Lace: ext/ravel-v2-model already builds the needle, recurve bow, stitched shoulder mask, spool belt with needles and hair pins (hem_pieces.py); no hem_v4 prop files remain. The sheet's needle shows one wrap, the model keeps the turnaround's three lashes. No props-ravel branch.
 - Fit check: the sheet props were already at the sheet's scale on these models (bow, needle, pistols, knives untouched). The only new geometry is Claire's cuffs (0.064 m radius, 0.03 m tube, matched to the boot top in the front_34 still).
 - Checks: warden-rig-json (gunslinger, rimewright, thief), warden-glb-check 186/0, clip-check, vex/claire/sable clip-live, hero-vfx-check OK, health --strict OK. --warden-model-check has one failure: thief 1.133x vs sheet 1.06x, identical on the unchanged base glb (not from this work).
+
+## 2026-11-08 deep (job 20261108-003051-a2): CLAIM props swap re-check (escalated from 20261107-213002-a2)
+- CLAIM: re-render and verify ext/props-vex, ext/props-claire, ext/props-sable, and the no-change calls for Grimble and Lace, against the new sheets. The earlier props_*.jpg Vex renders show the old v1 Vex (shorts, horn cannon), not the v2 model on the branch, so they are being replaced.
