@@ -49,6 +49,7 @@ const WEAPONS := {"thief": "arc_bolts", "archer": "longbow", "mage": "coilcaster
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_music("title")
+	Feedback.flush(self)                # a rating that could not be sent last time
 	Sfx.play_ambience("match")          # the wind
 	rng.seed = 2026
 	low = Settings.quality() == "low"
@@ -491,7 +492,7 @@ func _build_ui() -> void:
 	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
 	if not OS.has_feature("web"):
-		items.append(["Quit", func(): get_tree().quit(), "close"])
+		items.append(["Quit", func(): RateCard.gate(Overlay.root, get_tree().quit), "close"])
 	for it in items:
 		col.add_child(_menu_item(String(it[0]), it[1], String(it[2])))
 	var i := 0
