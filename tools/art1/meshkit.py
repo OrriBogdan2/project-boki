@@ -14,6 +14,7 @@ class Piece:
         self.uv = uvs                  # per-face list of per-corner (u, v), or None: unwrap later
         self.w = weights or {}
         self.room = room               # the ink shell's room here (0..1 of 2 cm, RIG_CONTRACT ink_room)
+        self.ref = None                # an open sheet's inside point for orient() (else its own centre)
 
     def rigid(self, bone):
         self.w = {bone: np.ones(len(self.v))}
@@ -23,6 +24,8 @@ class Piece:
         """Winds each connected part outward: from `ref` for an open sheet (a point inside the shape it lies on), from its
         own centre for a closed part. Corner UVs turn with the faces."""
         n = len(self.v)
+        if ref is None:
+            ref = self.ref
         par = list(range(n))
 
         def find(a):
