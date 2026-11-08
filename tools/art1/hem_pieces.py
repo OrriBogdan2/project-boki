@@ -28,7 +28,7 @@ GRIP_R = 0.0172
 GRIP_Z = 0.1                         # the red grip wrap's half length
 ARROW_LEN = 0.78
 # the crossed back needles (model x, z): eye top, tip; y behind the hair
-NEEDLE_TOP, NEEDLE_TIP, NEEDLE_Y = (-0.243, 1.8), (0.358, 0.75), -0.185
+NEEDLE_TOP, NEEDLE_TIP, NEEDLE_Y = (-0.243, 1.926), (0.358, 0.876), -0.185   # (z on her rig: hips at 0.987)
 EYE_LEN, EYE_W = 0.19, 0.044         # the eye's loop, length and half width
 NEEDLE_WRAPS = ((0.17, 0.33), (0.49, 0.61), (0.905, 0.925))      # along the needle, 0 eye .. 1 tip
 LASH_S = 0.405                       # where the two cross

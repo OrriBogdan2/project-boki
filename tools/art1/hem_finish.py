@@ -18,6 +18,7 @@ import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
+J = H.joints(RIG)
 WORK = os.path.dirname(os.path.abspath(OUT))
 ATLAS = 2048
 CARDS = 512
@@ -27,9 +28,9 @@ CELL = {H.SKIN: "#ded3d1", H.LID: "#bfaab8", H.THREAD: "#7a1230", H.BOW: "#2b212
 HEM_C, SMOKE_C = (0.0, 0.0, 0.62, 1.0), (0.64, 0.0, 1.0, 1.0)    # card cells (u0, v0, u1, v1)
 SLOTS = ["skin", "hair", "cloth", "leather", "metal"]
 MATS = [s + "-hem" for s in SLOTS] + list(CELL) + ["card-hem"]
-BELT_Z = 0.965                       # the spool belt's height on the fitted scan
+BELT_Z = J["hips"][2] + 0.104       # the spool belt's height on the fitted scan (the sheet's: 10 cm over the hips joint)
 SPOOL_X = (-0.15, -0.105, -0.06, 0.06, 0.105, 0.15)
-HEM_TOP = 0.56                       # z: the cards start tucked up inside the skirt's hem
+HEM_TOP = J["shin.R"][2] + 0.068    # z: the cards start tucked up inside the skirt's hem (just over the knee)
 HEM_N = 46                           # hanging strips round the skirt
 SLIT = 0.36                          # rad either side of the front: the slit, no fringe
 SKIRT_Z = (HEM_TOP - 0.04, BELT_Z - 0.06)    # z: the scan's skirt, between its hem and the belt
@@ -42,7 +43,6 @@ bpy.ops.wm.open_mainfile(filepath=SRC)
 sc = bpy.context.scene
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
 META = json.loads(sc["hem"])
-J = H.joints(RIG)
 
 gn = {g.index: g.name for g in low.vertex_groups}
 lo_co = np.array([v.co[:] for v in low.data.vertices])
@@ -178,7 +178,7 @@ slot = np.full(len(faces), "cloth", dtype=object)
 slot[(sat < 0.3) & (mx > 0.42)] = "skin"
 slot[(sat < 0.22) & (mx > 0.3) & (mx <= 0.42)] = "metal"
 slot[(mx > 0.45) & (sat < 0.5) & np.array([str(b).startswith(("thigh", "shin")) for b in dom])] = "skin"
-slot[dark & (legs | (fc[:, 2] < 0.98))] = "leather"              # the boots, the skirt and the belt: one plum look
+slot[dark & (legs | (fc[:, 2] < BELT_Z + 0.015))] = "leather"              # the boots, the skirt and the belt: one plum look
 slot[dark & on_head] = "hair"
 slot[(slot == "cloth") & np.array([str(b).startswith(("thigh", "shin")) for b in dom])] = "skin"    # the legs at the slit: no corset there
 for i, p in enumerate(me.polygons):
