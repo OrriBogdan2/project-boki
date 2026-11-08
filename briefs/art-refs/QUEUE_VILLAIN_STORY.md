@@ -24,7 +24,7 @@
 ## Items, in order
 
 ### 1. The Wyrmheart: LOCKED (owner, Nov 7, 20:34 ET)
-**Locked look:** the heart as it appears in the finished key art (`keyart/keyart_thief_view_final.jpg`, `keyart/keyart_face-off_final.jpg`).
+**Locked look:** the heart as it appears in the finished key art (`keyart/keyart_thief_view_final.jpg`, `keyart/keyart_faceoff_final.jpg`).
 - An anatomically real heart (aorta, arteries, chambers) made of smooth, glossy crimson glass.
 - A soft pink-red glow from deep inside, with bright glassy highlights.
 - **No gold veins and no crack.** The owner chose to keep the established look rather than the brief's gold filigree and crack.
