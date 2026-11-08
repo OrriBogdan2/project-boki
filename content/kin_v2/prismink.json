@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "prismink",
+	"name": "Prismink",
+	"theme": "prism",
+	"flavor": "Rainbow ink that splits light.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "ermink",
+		"stage": 2,
+		"from": "ermink",
+		"ink": "prism"
+	}
+}

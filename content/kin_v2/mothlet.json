@@ -1,0 +1,13 @@
+{
+	"grammar": 1,
+	"id": "mothlet",
+	"name": "Mothlet",
+	"theme": "lunar",
+	"flavor": "Fluffy owlet with tiny moth wings.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "mothlet",
+		"stage": 1
+	}
+}

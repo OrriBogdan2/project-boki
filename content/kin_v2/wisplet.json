@@ -7,6 +7,7 @@
 		"Luna moth"
 	],
 	"theme": "lunar",
+	"type2": "tempest",
 	"flavor": "A moonlit owl with soft moth wings. It flits on moondust and dazzles foes with silver light.",
 	"colors": {
 		"body": "#d9d4f2",
@@ -112,5 +113,11 @@
 		"temper": "Airy",
 		"desc": "Pale and faintly glowing. At night it floats a hair above the nest. Something airy is in here.",
 		"play": "Quick and slippery. Gusts foes away and flits out of reach."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "mothlet",
+		"stage": 2,
+		"from": "mothlet"
 	}
 }

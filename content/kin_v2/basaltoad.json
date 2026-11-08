@@ -7,6 +7,7 @@
 		"Castle rampart"
 	],
 	"theme": "stone",
+	"type2": "tide",
 	"flavor": "A toad with a castle wall on its back; sit behind it and nothing gets through, and it pulls stones out of itself to throw. Placid, heavy, a creature of habit; croaks once, deeply, when it disapproves.",
 	"colors": {
 		"body": "#4a4a50",
@@ -115,5 +116,10 @@
 		"temper": "Placid",
 		"desc": "Something placid is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "basaltoad",
+		"stage": 1
 	}
 }

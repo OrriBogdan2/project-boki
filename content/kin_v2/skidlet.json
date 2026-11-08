@@ -1,0 +1,13 @@
+{
+	"grammar": 1,
+	"id": "skidlet",
+	"name": "Skidlet",
+	"theme": "frost",
+	"flavor": "Fluffy heron chick wobbling on tiny skate blades.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "skidlet",
+		"stage": 1
+	}
+}

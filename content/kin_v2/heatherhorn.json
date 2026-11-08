@@ -7,6 +7,7 @@
 		"Stone cottage garden"
 	],
 	"theme": "bloom",
+	"type2": "wild",
 	"flavor": "A highland cow with a walled garden on its back; you ride sitting on the garden wall. Gentle and stubborn, grazes mid-fight; bellows proudly when you climb on.",
 	"colors": {
 		"body": "#b8643a",
@@ -119,5 +120,10 @@
 		"temper": "Gentle",
 		"desc": "Something gentle is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "heatherhorn",
+		"stage": 1
 	}
 }

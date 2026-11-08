@@ -1,0 +1,14 @@
+{
+	"grammar": 1,
+	"id": "wickapi",
+	"name": "Wickapi",
+	"theme": "shadow",
+	"type2": "ember",
+	"flavor": "Okapi fawn with one candle wick.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "wickapi",
+		"stage": 1
+	}
+}

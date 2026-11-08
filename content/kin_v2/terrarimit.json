@@ -1,0 +1,16 @@
+{
+	"grammar": 1,
+	"id": "terrarimit",
+	"name": "Terrarimit",
+	"theme": "tide",
+	"type2": "bloom",
+	"flavor": "Moves into a mossy terrarium.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "jarmit",
+		"stage": 2,
+		"from": "jarmit",
+		"ink": "bloom"
+	}
+}

@@ -1,0 +1,13 @@
+{
+	"grammar": 1,
+	"id": "tinbrock",
+	"name": "Tinbrock",
+	"theme": "ember",
+	"flavor": "Badger cub with a tin-cup snout and a hot stripe.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "tinbrock",
+		"stage": 1
+	}
+}

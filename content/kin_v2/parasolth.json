@@ -1,0 +1,13 @@
+{
+	"grammar": 1,
+	"id": "parasolth",
+	"name": "Parasolth",
+	"theme": "shadow",
+	"flavor": "Baby sloth, folded bone-rib arms like a closed umbrella.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "parasolth",
+		"stage": 1
+	}
+}

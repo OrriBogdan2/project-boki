@@ -7,6 +7,7 @@
 		"Knotted hemp rope"
 	],
 	"theme": "spore",
+	"type2": "wyrm",
 	"flavor": "A rope snake with mushroom caps growing from its knots; lay it across a path and whoever steps over it gets rooted. Quiet, thoughtful, an old soul; likes damp shade and long naps.",
 	"colors": {
 		"body": "#8a6a4a",
@@ -113,5 +114,10 @@
 		"temper": "Thoughtful",
 		"desc": "Something thoughtful is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "threadwyrm",
+		"stage": 1
 	}
 }

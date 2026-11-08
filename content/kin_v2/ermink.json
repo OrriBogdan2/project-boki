@@ -1,0 +1,118 @@
+{
+	"grammar": 1,
+	"id": "ermink",
+	"name": "Ermink",
+	"animals": [
+		"Stoat"
+	],
+	"theme": "wild",
+	"flavor": "A stoat whose tail is a calligraphy brush, its cream coat as blank as a fresh page. Dip its tail in an Ink and it becomes something new.",
+	"colors": {
+		"body": "#efe6d2",
+		"belly": "#fffaf0",
+		"glow": "#2b2b33"
+	},
+	"look": {
+		"ears": "none",
+		"body": "drop",
+		"tail": "wisp",
+		"feet": "paws",
+		"aura": "none"
+	},
+	"body": {
+		"size": "small",
+		"reach": 1.3,
+		"mass": 0.8,
+		"gait": {
+			"hop_rate": 10.0,
+			"hop_height": 0.06,
+			"pace": 1.05
+		}
+	},
+	"stats": {
+		"kin_hp": 3,
+		"kin_damage": 2,
+		"kin_speed": 13,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.6,
+		"loyalty": 0.6,
+		"temper": 0.4,
+		"curiosity": 0.9
+	},
+	"ai": {
+		"aggression": 0.45,
+		"loyalty": 0.55,
+		"caution": 0.65,
+		"role": "trickster"
+	},
+	"carry": {
+		"style": "shoulder",
+		"name": "Brushstroke",
+		"passives": [
+			{
+				"stat": "dodge_regen",
+				"amount": 0.25
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "pull",
+				"strength": 8
+			}
+		]
+	},
+	"active": "moon_swap",
+	"auto": "updraft",
+	"merge": "tempest",
+	"evolution": {
+		"root": "Ermi",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "quick, curious, finishes your sentences",
+		"syllables": [
+			"Er",
+			"mink"
+		]
+	},
+	"egg": {
+		"name": "Mystery Egg",
+		"temper": "???",
+		"desc": "Speckled, and strangely quiet. Nobody knows what's inside.",
+		"play": "Something that isn't any of the other three. You'll find out when it hatches."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "ermink",
+		"stage": 1
+	}
+}

@@ -7,6 +7,7 @@
 		"Forge bellows"
 	],
 	"theme": "ember",
+	"type2": "wild",
 	"flavor": "A cassowary whose head crest is a leather bellows; every stride pumps it and it blasts a gust of embers. Proud and territorial, loyal to its rider; wheezes the bellows as a warning before it charges.",
 	"colors": {
 		"body": "#2a2a2a",
@@ -116,5 +117,11 @@
 		"temper": "Fierce",
 		"desc": "Something fierce is in here.",
 		"play": "Gets in close and hits hard."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "bellowlet",
+		"stage": 2,
+		"from": "bellowlet"
 	}
 }

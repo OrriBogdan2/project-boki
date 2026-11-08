@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "chandelapi",
+	"name": "Chandelapi",
+	"theme": "shadow",
+	"type2": "ember",
+	"flavor": "Tall okapi crowned with a great candle chandelier.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "wickapi",
+		"stage": 3,
+		"from": "duskapi"
+	}
+}

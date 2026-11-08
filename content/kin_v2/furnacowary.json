@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "furnacowary",
+	"name": "Furnacowary",
+	"theme": "ember",
+	"type2": "titan",
+	"flavor": "Towering forge-bird, blast-furnace chest.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "bellowlet",
+		"stage": 3,
+		"from": "cindowary"
+	}
+}

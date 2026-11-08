@@ -7,6 +7,7 @@
 		"Smoked obsidian"
 	],
 	"theme": "shadow",
+	"type2": "lunar",
 	"flavor": "A snail whose shell is smoked obsidian glass. It drinks the light around it and leaves a trail of dusk behind.",
 	"colors": {
 		"body": "#3a3448",
@@ -114,5 +115,10 @@
 		"temper": "Private",
 		"desc": "Something private is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "gloamshell",
+		"stage": 1
 	}
 }

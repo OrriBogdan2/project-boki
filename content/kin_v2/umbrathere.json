@@ -7,6 +7,7 @@
 		"Ragged black umbrella"
 	],
 	"theme": "shadow",
+	"type2": "tempest",
 	"flavor": "A giant ground sloth with a ragged umbrella for a back; it opens it and your whole squad disappears underneath. Brooding and protective; shelters smaller Boki under its arms when it rains.",
 	"colors": {
 		"body": "#3a3040",
@@ -120,5 +121,11 @@
 		"temper": "Brooding",
 		"desc": "Something brooding is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "parasolth",
+		"stage": 2,
+		"from": "parasolth"
 	}
 }

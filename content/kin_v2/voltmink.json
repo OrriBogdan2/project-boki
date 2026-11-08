@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "voltmink",
+	"name": "Voltmink",
+	"theme": "storm",
+	"flavor": "Wire-bristle brush, zig-zag lightning strokes.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "ermink",
+		"stage": 2,
+		"from": "ermink",
+		"ink": "storm"
+	}
+}

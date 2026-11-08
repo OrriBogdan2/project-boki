@@ -7,6 +7,7 @@
 		"Cushion moss"
 	],
 	"theme": "bloom",
+	"type2": "titan",
 	"flavor": "A plump water bear wearing a cushion of moss. Dry it out and it curls into a pebble; one drop of water and it's back.",
 	"colors": {
 		"body": "#7a9a5a",
@@ -111,5 +112,10 @@
 		"temper": "Unbothered",
 		"desc": "Something unbothered is in here.",
 		"play": "Keeps you alive and patched up."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "mossgrade",
+		"stage": 1
 	}
 }

@@ -7,6 +7,7 @@
 		"Tuning fork"
 	],
 	"theme": "echo",
+	"type2": "tempest",
 	"flavor": "A hummingbird whose forked tail rings like a tuning fork. Its hum steadies your aim and rattles your foes.",
 	"colors": {
 		"body": "#3aa88a",
@@ -116,5 +117,10 @@
 		"temper": "Bright",
 		"desc": "Something bright is in here.",
 		"play": "Keeps you alive and patched up."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "thrumbird",
+		"stage": 1
 	}
 }

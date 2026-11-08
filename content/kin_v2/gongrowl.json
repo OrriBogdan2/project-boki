@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "gongrowl",
+	"name": "Gongrowl",
+	"theme": "echo",
+	"type2": "titan",
+	"flavor": "Roaring gibbon with a gong crest grown from its skull.",
+	"data_only": true,
+	"roster": {
+		"art": "locked",
+		"line": "gibbelle",
+		"stage": 2,
+		"from": "gibbelle"
+	}
+}

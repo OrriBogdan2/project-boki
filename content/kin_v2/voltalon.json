@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "voltalon",
+	"name": "Voltalon",
+	"theme": "storm",
+	"type2": "tempest",
+	"flavor": "Thunder falcon, coil talons, lightning crown.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "kestrike",
+		"stage": 3,
+		"from": "arcestrel"
+	}
+}

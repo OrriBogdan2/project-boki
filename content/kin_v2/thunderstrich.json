@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "thunderstrich",
+	"name": "Thunderstrich",
+	"theme": "storm",
+	"type2": "tempest",
+	"flavor": "Coil-necked storm ostrich crackling with lightning.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "fizzlet",
+		"stage": 3,
+		"from": "nimbostrich"
+	}
+}

@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "flarmink",
+	"name": "Flarmink",
+	"theme": "ember",
+	"flavor": "Flame-brush tail, fiery brushstroke coat.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "ermink",
+		"stage": 2,
+		"from": "ermink",
+		"ink": "ember"
+	}
+}

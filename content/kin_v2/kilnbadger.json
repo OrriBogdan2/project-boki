@@ -7,6 +7,7 @@
 		"Blacksmith's anvil"
 	],
 	"theme": "ember",
+	"type2": "gravity",
 	"flavor": "A honey badger with a red-hot anvil for a back; it headbutts you and the anvil rings. Fearless and grumpy; picks fights it cannot win and wins them.",
 	"colors": {
 		"body": "#2e2a2a",
@@ -116,5 +117,11 @@
 		"temper": "Fearless",
 		"desc": "Something fearless is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "tinbrock",
+		"stage": 2,
+		"from": "tinbrock"
 	}
 }

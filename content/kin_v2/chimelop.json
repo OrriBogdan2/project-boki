@@ -1,0 +1,16 @@
+{
+	"grammar": 1,
+	"id": "chimelop",
+	"name": "Chimelop",
+	"theme": "echo",
+	"type2": "lunar",
+	"flavor": "Graceful hare, chime-bell ears.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "zapple",
+		"stage": 2,
+		"from": "zapple",
+		"raised": "curious"
+	}
+}

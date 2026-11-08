@@ -7,6 +7,7 @@
 		"Leaf"
 	],
 	"theme": "swarm",
+	"type2": "bloom",
 	"flavor": "A leafcutter ant hauling a leaf ten times its size, with a column of tiny workers marching behind. It never stops working.",
 	"colors": {
 		"body": "#8a3a2a",
@@ -110,5 +111,10 @@
 		"temper": "Dutiful",
 		"desc": "Something dutiful is in here.",
 		"play": "Gets in close and hits hard."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "marchleaf",
+		"stage": 1
 	}
 }

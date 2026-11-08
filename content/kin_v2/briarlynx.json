@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "briarlynx",
+	"name": "Briarlynx",
+	"theme": "venom",
+	"type2": "bloom",
+	"flavor": "Great lynx, briar mane, thorn-whip tail.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "nettlynx",
+		"stage": 3,
+		"from": "thistlynx"
+	}
+}

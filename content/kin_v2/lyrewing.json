@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "lyrewing",
+	"name": "Lyrewing",
+	"theme": "echo",
+	"type2": "tempest",
+	"flavor": "Lyrebird whose tail is a harp of strings.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "thrumbird",
+		"stage": 2,
+		"from": "thrumbird"
+	}
+}

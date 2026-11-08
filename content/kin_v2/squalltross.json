@@ -7,6 +7,7 @@
 		"Patched ship sails"
 	],
 	"theme": "tempest",
+	"type2": "tide",
 	"flavor": "An albatross with patched ship sails for wings; grab the rigging under it and it carries you across the gap. Easygoing, fearless, a wanderer; restless when it has not seen the sea.",
 	"colors": {
 		"body": "#e8ecf0",
@@ -120,5 +121,11 @@
 		"temper": "Wandering",
 		"desc": "Something wandering is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "kerchick",
+		"stage": 3,
+		"from": "jibbatross"
 	}
 }

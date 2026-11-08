@@ -7,6 +7,7 @@
 		"Ship's anchor"
 	],
 	"theme": "gravity",
+	"type2": "tide",
 	"flavor": "A hornbill whose casque is a ship's anchor; it drops out of the sky like one and drags everything to it. Dignified and slow to trust; clacks its bill when it disagrees.",
 	"colors": {
 		"body": "#2e2e3a",
@@ -120,5 +121,10 @@
 		"temper": "Dignified",
 		"desc": "Something dignified is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "casquebill",
+		"stage": 1
 	}
 }

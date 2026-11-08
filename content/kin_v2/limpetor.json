@@ -7,6 +7,7 @@
 		"Riveted iron shield"
 	],
 	"theme": "stone",
+	"type2": "tide",
 	"flavor": "A giant limpet whose shell is a riveted iron shield; it clamps to the ground and the whole squad shoots from behind it. Stubborn as rock and proud of it; grudgingly fond of whoever hides behind it.",
 	"colors": {
 		"body": "#7a7a7a",
@@ -119,5 +120,10 @@
 		"temper": "Stubborn",
 		"desc": "Something stubborn is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "limpetor",
+		"stage": 1
 	}
 }

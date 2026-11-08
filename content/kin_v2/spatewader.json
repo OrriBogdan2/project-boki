@@ -7,6 +7,7 @@
 		"Wooden rain barrel"
 	],
 	"theme": "storm",
+	"type2": "tide",
 	"flavor": "A giant salamander with a rain barrel strapped on its back; your loot goes in the barrel, and a hard hit bursts it in a flash flood. Lazy and good-natured, dozes in puddles; comes alive in a storm.",
 	"colors": {
 		"body": "#4a4a3a",
@@ -119,5 +120,11 @@
 		"temper": "Lazy",
 		"desc": "Something lazy is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "bucketmander",
+		"stage": 2,
+		"from": "bucketmander"
 	}
 }

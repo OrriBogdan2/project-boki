@@ -7,6 +7,7 @@
 		"Disco ball"
 	],
 	"theme": "prism",
+	"type2": "gravity",
 	"flavor": "A pangolin covered in mirror tiles; curl it up and it is a disco ball that bounces every shot back. Timid but stubborn; curls up when spoken to sharply, unrolls for snacks.",
 	"colors": {
 		"body": "#d8d0e0",
@@ -115,5 +116,10 @@
 		"temper": "Timid",
 		"desc": "Something timid is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "nacrolin",
+		"stage": 1
 	}
 }

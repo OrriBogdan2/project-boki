@@ -3,21 +3,21 @@ extends Node3D
 ## Empty), then three eggs on a little island. Pick an egg, knock on the shell until it hatches, name what
 ## comes out; then your first Relic drifts to you (MaskMoment) and you head into the tutorial together.
 
-## The three starter eggs plus a mystery one. Names, tempers and blurbs come from each species'
-## "egg" block in content/kin/<id>.json, so every egg is named for its element (Venom Egg, ...).
+## The three starter eggs plus the mystery egg, which always hatches Ermink. Names, tempers and blurbs
+## come from each species' "egg" block in content/kin_v2/<id>.json, so every egg is named for its element
+## (Venom Egg, ...) and Ermink's is the Mystery Egg.
 const STARTERS := ["cindle", "puddlet", "burrlet"]
-const MYSTERY := {"species": "mystery", "name": "Mystery Egg", "temper": "???", "desc": "Speckled, and strangely quiet. Nobody knows what's inside.",
-	"play": "Something that isn't any of the other three. You'll find out when it hatches."}
+const MYSTERY := "ermink"
 
 static func starter_eggs() -> Array:
 	var out: Array = []
-	for sp in STARTERS:
+	for sp in STARTERS + [MYSTERY]:
 		var e: Dictionary = Data.egg_info(sp)
 		e["species"] = sp
+		e["mystery"] = sp == MYSTERY
 		for k in ["temper", "desc", "play"]:
 			if not e.has(k): e[k] = ""
 		out.append(e)
-	out.append(MYSTERY.duplicate())
 	return out
 
 const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
@@ -44,7 +44,7 @@ var root_ui: Control
 var bottom: VBoxContainer
 var title: Label
 var cam_from := Vector3(0, 3.6, 6.4)
-var egg_defs: Array = []      # EGGS with the mystery egg's species decided
+var egg_defs: Array = []      # starter_eggs()
 var look: Dictionary = {}
 var preview: Node3D
 var look_at_t := Vector3(0, 0.25, 0.5)
@@ -73,11 +73,6 @@ func _ready() -> void:
 	cam.look_at(Vector3(0, 0.6, 0))
 	_build_set()
 	egg_defs = starter_eggs()
-	var others: Array = Data.common_kin().filter(func(k): return not k in ["cindle", "puddlet", "burrlet"])
-	for d in egg_defs:
-		if d["species"] == "mystery":
-			d["species"] = others[randi() % others.size()] if others.size() > 0 else "cindle"
-			d["mystery"] = true
 	for i in egg_defs.size():
 		var d: Dictionary = egg_defs[i]
 		var sp: Dictionary = Data.KIN[d["species"]]

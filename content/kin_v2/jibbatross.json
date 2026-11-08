@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "jibbatross",
+	"name": "Jibbatross",
+	"theme": "tempest",
+	"type2": "tide",
+	"flavor": "Young albatross, jib-sail wings, hook tips.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "kerchick",
+		"stage": 2,
+		"from": "kerchick"
+	}
+}

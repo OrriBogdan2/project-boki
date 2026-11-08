@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "umbrink",
+	"name": "Umbrink",
+	"theme": "shadow",
+	"flavor": "Soaked jet-black, smoking brush.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "ermink",
+		"stage": 2,
+		"from": "ermink",
+		"ink": "shadow"
+	}
+}

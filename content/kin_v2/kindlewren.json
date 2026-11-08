@@ -7,6 +7,7 @@
 		"Ember coal"
 	],
 	"theme": "ember",
+	"type2": "tempest",
 	"flavor": "A cocky little wren that carries a live coal in its cocked-up tail. It darts in, scorches, and is gone.",
 	"colors": {
 		"body": "#7a4a32",
@@ -120,5 +121,10 @@
 		"temper": "Cheeky",
 		"desc": "Something cheeky is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "kindlewren",
+		"stage": 1
 	}
 }

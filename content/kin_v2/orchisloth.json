@@ -7,6 +7,7 @@
 		"Glass greenhouse"
 	],
 	"theme": "bloom",
+	"type2": "prism",
 	"flavor": "A sloth carrying a little glass greenhouse on its back with orchids inside; it opens the glass as a wall and the mist heals you. Gentle and dreamy; waters its orchids mid-fight.",
 	"colors": {
 		"body": "#9a8a6a",
@@ -111,5 +112,10 @@
 		"temper": "Gentle",
 		"desc": "Something gentle is in here.",
 		"play": "Keeps you alive and patched up."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "orchisloth",
+		"stage": 1
 	}
 }

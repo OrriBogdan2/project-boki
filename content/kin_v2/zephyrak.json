@@ -7,6 +7,7 @@
 		"Swift"
 	],
 	"theme": "tempest",
+	"type2": "wyrm",
 	"flavor": "A little sky serpent: a moray eel's long body with a swift's swept wings, crackling with static. Hatched from Stormcoil's egg.",
 	"colors": {
 		"body": "#2f6f9a",
@@ -114,5 +115,10 @@
 		"temper": "Wild",
 		"desc": "Light as a cloud and buzzing with static. Little sparks jump to your fingers. The Sky Serpent guarded it.",
 		"play": "Fast and electric. Spears through foes and arcs lightning."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "zephyrak",
+		"stage": 1
 	}
 }

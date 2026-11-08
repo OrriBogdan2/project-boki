@@ -7,6 +7,7 @@
 		"Thunderhead and copper coil"
 	],
 	"theme": "storm",
+	"type2": "tempest",
 	"flavor": "A thundercloud ostrich in rubber boots; ride it and your hair stands up. Skittish and fast, afraid of nothing but boredom; races anything that moves.",
 	"colors": {
 		"body": "#5a5a6a",
@@ -119,5 +120,11 @@
 		"temper": "Skittish",
 		"desc": "Something skittish is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "fizzlet",
+		"stage": 2,
+		"from": "fizzlet"
 	}
 }

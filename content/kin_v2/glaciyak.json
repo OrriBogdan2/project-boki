@@ -7,6 +7,7 @@
 		"Icebreaker prow"
 	],
 	"theme": "frost",
+	"type2": "titan",
 	"flavor": "A yak with an icebreaker's iron prow for horns; it ploughs through the snow and anything standing in it. Steady and warm-hearted; snorts frost when it laughs.",
 	"colors": {
 		"body": "#4a4440",
@@ -120,5 +121,11 @@
 		"temper": "Steady",
 		"desc": "Something steady is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "kayak",
+		"stage": 2,
+		"from": "kayak"
 	}
 }

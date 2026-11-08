@@ -1,0 +1,13 @@
+{
+	"grammar": 1,
+	"id": "zipling",
+	"name": "Zipling",
+	"theme": "shadow",
+	"flavor": "Tiny worm with a little zipper seam.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "zipling",
+		"stage": 1
+	}
+}

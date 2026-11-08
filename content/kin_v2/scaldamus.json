@@ -7,6 +7,7 @@
 		"Steam locomotive"
 	],
 	"theme": "ember",
+	"type2": "titan",
 	"flavor": "A hippo that is half steam engine: smokestack ears, a boiler belly, a cowcatcher jaw, and it charges like a runaway train. Lazy until crossed, then unstoppable; yawns steam at you to say it likes you.",
 	"colors": {
 		"body": "#6a4a4a",
@@ -120,5 +121,11 @@
 		"temper": "Lazy",
 		"desc": "Something lazy is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "teapotamus",
+		"stage": 3,
+		"from": "puffamus"
 	}
 }

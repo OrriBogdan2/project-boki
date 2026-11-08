@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "blossmink",
+	"name": "Blossmink",
+	"theme": "bloom",
+	"flavor": "Leaf-bristle brush, painted petals and vines.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "ermink",
+		"stage": 2,
+		"from": "ermink",
+		"ink": "bloom"
+	}
+}

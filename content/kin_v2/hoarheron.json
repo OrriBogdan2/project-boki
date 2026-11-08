@@ -7,6 +7,7 @@
 		"Ice skates"
 	],
 	"theme": "frost",
+	"type2": "tempest",
 	"flavor": "A heron on ice skates with an ice-pick beak; it glides in, stabs, glides out. Patient, severe, says little; approves of you only when you stand still.",
 	"colors": {
 		"body": "#9aa8b8",
@@ -121,5 +122,11 @@
 		"temper": "Patient",
 		"desc": "Something patient is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "skidlet",
+		"stage": 2,
+		"from": "skidlet"
 	}
 }

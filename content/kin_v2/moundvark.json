@@ -7,6 +7,7 @@
 		"Termite clay spire"
 	],
 	"theme": "swarm",
+	"type2": "stone",
 	"flavor": "An aardvark with a termite cathedral on its back; climb the spire and shoot from the belfry. Easy-going and nosy; talks to its termites more than to you.",
 	"colors": {
 		"body": "#a07a5a",
@@ -119,5 +120,10 @@
 		"temper": "Nosy",
 		"desc": "Something nosy is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "moundvark",
+		"stage": 1
 	}
 }

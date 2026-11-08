@@ -1,0 +1,16 @@
+{
+	"grammar": 1,
+	"id": "ringrove",
+	"name": "Ringrove",
+	"theme": "spore",
+	"type2": "bloom",
+	"flavor": "Huge calm elder, a fairy ring grove on its back, shelf-fungus armour.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "burrlet",
+		"stage": 3,
+		"from": "sporcupine",
+		"raised": "steadfast"
+	}
+}

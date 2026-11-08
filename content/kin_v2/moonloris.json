@@ -7,6 +7,7 @@
 		"Paper lantern"
 	],
 	"theme": "lunar",
+	"type2": "ember",
 	"flavor": "A slow loris that is a paper lantern: its belly glows, and when it is scared it floats up like a balloon. Soft-spoken, sleepy by day, wide awake at night; clings to you when frightened.",
 	"colors": {
 		"body": "#b8a890",
@@ -111,5 +112,10 @@
 		"temper": "Sleepy",
 		"desc": "Something sleepy is in here.",
 		"play": "Keeps you alive and patched up."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "moonloris",
+		"stage": 1
 	}
 }

@@ -7,6 +7,7 @@
 		"Bat"
 	],
 	"theme": "echo",
+	"type2": "shadow",
 	"flavor": "A long-eared hare with bat wings. It hears everything coming and fires ringing pulses of sound.",
 	"colors": {
 		"body": "#4a5aa8",
@@ -116,5 +117,10 @@
 		"temper": "Hyper",
 		"desc": "Deep blue and humming. Tap it and it taps back. Something restless is in here.",
 		"play": "Fast, loud and everywhere. Chains sound pulses between foes."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "zapple",
+		"stage": 1
 	}
 }

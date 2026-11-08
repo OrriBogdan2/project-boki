@@ -7,6 +7,7 @@
 		"Quartz geode"
 	],
 	"theme": "stone",
+	"type2": "prism",
 	"flavor": "A star-nosed mole whose back is a split geode full of quartz. It feels the ground shake long before you do.",
 	"colors": {
 		"body": "#5b4a5e",
@@ -113,5 +114,10 @@
 		"temper": "Shy",
 		"desc": "Something shy is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "glintmole",
+		"stage": 1
 	}
 }

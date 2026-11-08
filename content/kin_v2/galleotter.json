@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "galleotter",
+	"name": "Galleotter",
+	"theme": "tide",
+	"type2": "titan",
+	"flavor": "War-galley otter: oar spines down its sides, ram brow.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "oarlet",
+		"stage": 3,
+		"from": "oarter"
+	}
+}

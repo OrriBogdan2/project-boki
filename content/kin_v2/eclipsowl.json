@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "eclipsowl",
+	"name": "Eclipsowl",
+	"theme": "lunar",
+	"type2": "shadow",
+	"flavor": "Great owl, eclipse-ring facial disc, moth cloak wings.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "mothlet",
+		"stage": 3,
+		"from": "wisplet"
+	}
+}

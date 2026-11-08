@@ -1,0 +1,13 @@
+{
+	"grammar": 1,
+	"id": "kitlet",
+	"name": "Kitlet",
+	"theme": "wyrm",
+	"flavor": "Tiny serpent with paper-kite fins.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "kitlet",
+		"stage": 1
+	}
+}
