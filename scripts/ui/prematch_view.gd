@@ -2,9 +2,19 @@ extends Control
 ## The pre-match lobby screen (rules: Prematch): pick your Hunter, meet your squad, plan with text
 ## chat (and a voice hook), watch the countdown. At 0 the picks lock and the match loads.
 
+const TIMER_SIZE := 88        # px, the countdown digits
+const SAFE_FRAC := 0.04       # fraction of the window height kept clear on every side (title-safe)
+const PULSE_RATE := 0.012      # radians per ms of the last-seconds throb (about 2 beats a second)
+const PULSE_GROW := 0.12       # the digits swell by this much at the top of a beat
+const SAFE_MIN := 24          # px, the least margin at any window size
+
 var pm: Prematch
 var voice := VoiceChat.new()
 var timer_label: Label
+var note_label: Label
+var banner: VBoxContainer
+var _pad: MarginContainer
+var _last_sec := -1
 var hint: Label
 var grid: GridContainer
 var squad_box: VBoxContainer
@@ -23,13 +33,25 @@ func _ready() -> void:
 	bg.color = UI.BG
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
-	var pad := MarginContainer.new()
-	pad.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for side in ["left", "right", "top", "bottom"]:
-		pad.add_theme_constant_override("margin_" + side, 36)
-	add_child(pad)
-	var root := UI.vbox(14)
-	pad.add_child(root)
+	_pad = MarginContainer.new()
+	_pad.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(_pad)
+	resized.connect(_fit_safe_area)
+	_fit_safe_area()
+	var root := UI.vbox(10)
+	_pad.add_child(root)
+	banner = UI.vbox(0)
+	banner.alignment = BoxContainer.ALIGNMENT_CENTER
+	root.add_child(banner)
+	var caption := UI.label("PICKS LOCK IN", 20, UI.MUTED, UI.semi)
+	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	banner.add_child(caption)
+	timer_label = UI.label("", TIMER_SIZE, UI.INK, UI.big)
+	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	banner.add_child(timer_label)
+	note_label = UI.label("", 22, UI.GOOD, UI.semi)
+	note_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	banner.add_child(note_label)
 	var head := UI.hbox(20)
 	root.add_child(head)
 	var titles := UI.vbox(2)
@@ -39,8 +61,6 @@ func _ready() -> void:
 	titles.add_child(UI.title("Pick your Hunter", 34))
 	hint = UI.para("Your squad can see your pick. Picks lock when the timer ends.")
 	titles.add_child(hint)
-	timer_label = UI.label("", 56, UI.INK, UI.big)
-	head.add_child(timer_label)
 	var cols := UI.hbox(24)
 	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	root.add_child(cols)
@@ -97,6 +117,7 @@ func _process(delta: float) -> void:
 	_tick_label()
 	if pm.locked and not was:
 		hint.text = "Picks are locked. Loading in..."
+		note_label.text = "Time's up: %s locked in" % HunterViewer.display_name(pm.pick)
 		_fill_hunters()
 		chat_in.release_focus()
 	if go:
@@ -106,7 +127,29 @@ func _process(delta: float) -> void:
 func _tick_label() -> void:
 	var s := int(ceil(pm.left))
 	timer_label.text = "%d:%02d" % [s / 60, s % 60]
-	timer_label.add_theme_color_override("font_color", UI.BAD if pm.left <= 10.0 else UI.INK)
+	if s != _last_sec:
+		_last_sec = s
+		if pm.left > 0.0 and pm.left <= Prematch.TICK_FROM:
+			Sfx.play("click", null, 0.0, 0.0, 1.5 if pm.left <= Prematch.PULSE_FROM else 1.0)
+	_pulse(pm.left)
+
+## Digits warm to red below TICK_FROM and throb red below PULSE_FROM.
+func _pulse(left: float) -> void:
+	var beat := 0.0
+	if left <= Prematch.PULSE_FROM:
+		beat = 0.5 + 0.5 * sin(Time.get_ticks_msec() * PULSE_RATE)
+	var red := 0.0
+	if left <= Prematch.TICK_FROM:
+		red = 0.5 + 0.5 * beat if left <= Prematch.PULSE_FROM else 0.5
+	timer_label.add_theme_color_override("font_color", UI.INK.lerp(UI.BAD, red))
+	timer_label.pivot_offset = timer_label.size * 0.5
+	timer_label.scale = Vector2.ONE * (1.0 + PULSE_GROW * beat)
+
+## Keeps the whole screen inside a title-safe margin, so the countdown shows at every window size.
+func _fit_safe_area() -> void:
+	var m := maxi(SAFE_MIN, int(size.y * SAFE_FRAC))
+	for side in ["left", "right", "top", "bottom"]:
+		_pad.add_theme_constant_override("margin_" + side, m)
 
 func _unhandled_key_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.physical_keycode == KEY_V and not e.echo and not chat_in.has_focus():
