@@ -2823,3 +2823,4 @@ READY ext/anim-time-tenzo 5aafba874 (Tenzo timing parity, supersedes 231f91588: 
 READY ext/anim-time-sparkle 4c7b70c9c (Sparkle animation timing parity: tap Storm Rod throw beat at the launch, Skycall arm held to the snap, timing probe + doc table)
 READY ext/anim-time-sable 53f658240 (Sable animation timing: per-move blend-in so each release shows, dancer timing check, thief.md table)
 READY ext/body-hitbox-parity b9f481fa0 (hit radii set to source body sizes: Breaker 0.50, Kael 0.445, Tarek 0.412, Vex 0.400, Claire 0.362; table in ARCHETYPES; checks extended)
+READY ext/telegraph-audit-a 456a56d47 (Vex/Kael/Cinder/Meeko ground shapes drawn = hit, cosmetic rings removed, per-ability tables in docs/heroes, drawn=hit asserts in the 4 combo checks)
