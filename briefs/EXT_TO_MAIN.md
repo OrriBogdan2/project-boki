@@ -2641,3 +2641,5 @@ READY ext/ostra-v2-model 76f589389 (Motley v2 model from motley_v2_turnaround + 
 
 ## 2026-11-08 deep (job 20261108-020004-a4): CLAIM map regions + hot zone
 - CLAIM: every Hollow Crown region gets a landmark, its own terrain shape, cover pattern and a reason to go (docs/MAP_REGIONS.md), plus the per-match hot drop zone (better loot, drop map + minimap, bots weigh it). Branch ext/map-regions. ext/map-2x is not pushed yet (job 20261108-013001-a4 still building it), so this branches from origin/main on the 216 design grid that map-2x scales from; rebase onto ext/map-2x once it lands.
+## 2026-11-08 finder (job 20261108-021504-a4): CLAIM source utilities research
+- CLAIM: research every source map utility/consumable (effect, numbers, where sold), shop stock, region roles, hot drop zone and train; compare with content/utility/*.json; write docs/SOURCE_UTILITIES.md (table with Boki names + have/missing/differs, a fixed distinct stock per shop). Branch ext/source-utilities from origin/main. Unblocks ext/utilities-shops.
