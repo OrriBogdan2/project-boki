@@ -129,6 +129,7 @@ const CHECKS := {
 	"--build-hold-check": ["res://tools/build_hold_check.gd", "build_hold_check", null],
 	"--farm-tutorial-check": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--farm-spot-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
+	"--farm-place-check": ["res://tools/farm_place_check.gd", "farm_place_check", null],      # item 27, 28, 31 of PLAYTEST-1108
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],      # also --shots-dir=<dir>
 	"--economy-floor-check": ["res://tools/economy_floor_check.gd", "economy_floor_check", null],      # never stuck
