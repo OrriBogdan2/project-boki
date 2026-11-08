@@ -492,7 +492,7 @@ func _archer_combos() -> void:
 	P.inp["move"] = Vector2(-1, 0)
 	P.do_dash()
 	var in1 := K.spirit.passed
-	step(m, 1.5, func(): P.inp["move"] = Vector2(-1, 0))
+	step(m, 1.1, func(): P.inp["move"] = Vector2(-1, 0))
 	P.inp["move"] = Vector2.ZERO
 	ok(
 		"combo pin: Spirit Walk passes a raised terrace wall that stops a plain walk",
