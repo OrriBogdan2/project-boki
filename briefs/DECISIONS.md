@@ -370,3 +370,4 @@ New or rewritten stateful code (movement, ability phases, Boki AI, match flow, t
 - **Sex:** 50/50 for every Boki and every bred baby. Only chosen species get a separate female look (design rule 14); the rest show the sex icon only.
 - **Riding:** the rideable cap in the roster check is loosened (owner "ya loosen it"): any grown/final form whose size fits may be rideable.
 - Starters stay Vespyx (cindle), Prismander (puddlet), Mycroll (burrlet) plus the mystery egg (Ermink).
+- Female-look list (update, owner 11-08): starter lines + Ermink/Blossmink/Vespox, plus Bellowary, Gongibbon, Kestrike, Lunowl, Murmurling (real-animal sex differences). Chuggamus and Canvastross dropped. Rule 14 has the list.
