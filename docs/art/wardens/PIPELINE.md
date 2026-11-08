@@ -314,6 +314,14 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Cinder r3 A | 13:41 | 01a1a6c6-de62-7253-b0ea-05451a154e2d | meshy-7.1 | 3 edited views (front, side, back), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Dropped: squinting, mean face; small crest |
 | Cinder r3 B | 13:41 | 01a1a6c6-de84-7676-b5c3-08ac066b2720 | meshy-7.1 | as A, enhancement on | 40 | Kept: big round amber slit-pupil eyes, rounded feminine face, bigger crest (mouth closed: the grin painted from the head sheet) |
 
+### Ravel v2 (archer, ids stay hem), 2026-11-07 (103 credits)
+
+| Step | Task | Tool | Note | Credits | Result |
+|---|---|---|---|---|---|
+| Edits, round 1 (front, 3/4, side, back) | 01a1b4dd-db36-7626-91f8-222edbec0ae3, 01a1b4dd-db35-7626-ace0-dfe30ab1308f, 01a1b4dd-db36-75ed-a90e-6bcb011b7e3f, 01a1b4dd-db26-7291-a190-e62a25f7be1a | nano-banana-pro | ravel_v2_turnaround views, props out | with round 2: 63 | Back kept |
+| Edits, round 2 (front, 3/4, side) | 01a1b4df-6945-77bc-8768-d44a0b79612e, 01a1b4df-6936-743e-b5ba-506ac1a304a7, 01a1b4df-694c-752e-bb33-2586de65ac7a | nano-banana-pro | same, redone | | Kept |
+| Scan | 01a1b4e1-2a92-70ea-8e4b-c3b45a8a9543 | meshy-7.1 | the four kept views | 40 | Kept |
+
 ### Hem (archer, was Pin) stage 1, 2026-11-04 (balance 4921 before; 76 credits)
 | Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
 |---|---|---|---|---|---|---|
