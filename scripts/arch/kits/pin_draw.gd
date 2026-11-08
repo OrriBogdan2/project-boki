@@ -13,8 +13,11 @@ extends RefCounted
 ##   Supercharged. Nothing else: no V, no glints, no cursor ring or other UI. Supercharged ready: the body
 ##   flashes, a thick white line runs past the cursor to the shot's full range, the first foe under it
 ##   ringed at the feet. Overdrawn: it dims to a thin pale line.
-## - Perfect release: let go within perfect_t of a stage coming up: the next draw runs quick_k faster
-##   until its stage 1 (no extra damage), a brief gold fletch burst with a ring at the bow.
+## - Perfect release: let go within the perfect window (tuning.json lace.perfect_window_s) of a stage coming
+##   up: the next draw runs quick_k faster until its stage 1 (no extra damage), a brief gold fletch burst
+##   with a ring at the bow. While the window is open her body and bow carry a gold rim glow (the toon
+##   shaders' rim, set once on entry and put back on exit) with the stage's soft cue; a perfect release
+##   pulses that rim harder for a moment (the payoff flash).
 ## - Overdraw: held overdraw_t past the last stage, the arrow does overdraw_k of its damage.
 
 const LINE_A := 0.8            # the thin aim line's strength (a paler red, it has to show on grass at the match zoom)
@@ -39,6 +42,9 @@ var pending := ""              # the kind the next shot of ours gets skinned as
 var tgt: Ent = null            # the foe under the Supercharged line
 var perfect_now := false       # the arrow just loosed was a perfect release (its own move)
 var loosed_at := -9.0          # match time the last arrow left the string (a cancelled draw loosed nothing)
+var glow_on := false           # the perfect window's rim glow is on her body and bow
+var payoff_t := 0.0            # s left of the perfect release's rim pulse
+var _rim0 := {}                # material -> [rim_amount, rim_color] before the glow, to put back
 
 func _init(kit: ArcherKit) -> void:
 	k = kit
@@ -55,7 +61,13 @@ func stage_t() -> Vector2:
 	return Vector2(float((st[0] as Array)[0]), float((st[-1] as Array)[0]))
 
 func perfect_t() -> float:
-	return float(k.res_def().get("perfect_t", 0.15))
+	return float(Tuning.of("lace")["perfect_window_s"])
+
+## Is draw time t inside a stage's perfect window?
+func in_window(t: float) -> bool:
+	var s := stage_t()
+	var pt := perfect_t()
+	return (t >= s.x and t <= s.x + pt) or (t >= s.y and t <= s.y + pt)
 
 func over_t() -> float:
 	return stage_t().y + float(h.wpn.get("overdraw_t", 0.5))
@@ -87,7 +99,7 @@ func bonus(t: float) -> float:
 	pending = kind
 	last_kind = kind
 	if kind == "super": supers += 1
-	if (t >= s.x and t <= s.x + pt) or (t >= s.y and t <= s.y + pt):
+	if in_window(t):
 		_perfect()
 	return f
 
@@ -95,17 +107,33 @@ func _perfect() -> void:
 	perfects += 1
 	quick = true
 	perfect_now = true
+	payoff_t = float(Tuning.of("lace")["perfect_payoff_s"])
+	_rim(float(Tuning.of("lace")["perfect_payoff_rim"]))
 	k.fx.fletch_burst(bow_at(), 1.1, PinFx.GOLD, 0.13, 0.07, 1.0)
 	k.m.sfx("pin_perfect", h.pos, -3.0 if h.is_local() else -8.0, 1.25)
 
-func _sc() -> float:
-	return float(h.cdat.get("scale", 1.0))
+## The rim glow on her body and bow: on at `amount` (the toon rim, gold), off puts every material back.
+## Set only when it changes (a render-server call per material).
+func _rim(amount: float) -> void:
+	var on := amount > 0.0
+	if on and _rim0.is_empty():
+		for mt in h.mats:
+			if mt is ShaderMaterial:
+				_rim0[mt] = [mt.get_shader_parameter("rim_amount"), mt.get_shader_parameter("rim_color")]
+	for mt in _rim0:
+		if not is_instance_valid(mt):
+			continue
+		mt.set_shader_parameter("rim_amount", amount if on else _rim0[mt][0])
+		var gold := Color(String(Tuning.of("lace")["perfect_glow_col"]))
+		mt.set_shader_parameter("rim_color", gold if on else _rim0[mt][1])
+	glow_on = on
+	if not on:
+		_rim0.clear()
 
-## Where the draw cues sit: on the aim line just ahead of her, low (the camera looks down, so anything held
-## up at the bow hand would show beside the line instead of on it).
+## The bow's nock point: the model's bow anchor (HeroVfx "bow_root", riding the bow bone), where the Heavy
+## Shot and Starpiercer leave and where the bow's bursts sit.
 func bow_at() -> Vector3:
-	var d := h.aim_dir()
-	return h.pos + Vector3(d.x * 0.9, 0.25 * _sc(), d.y * 0.9)
+	return HeroVfx.of(k.m).anchor_pos(h, "bow_root")
 
 ## Every step: the stage tells, the reticle, the bow's own moves.
 func tick() -> void:
@@ -128,6 +156,7 @@ func tick() -> void:
 		_reticle(t, s, col)
 	elif was >= 0.0:
 		tgt = null
+	_glow(t, drawing)
 	if drawing and was < 0.0:
 		k.play("arc_draw")
 		k.m.sfx("pin_draw", h.pos, -9.0 if h.is_local() else -13.0)
@@ -142,6 +171,20 @@ func tick() -> void:
 		var loose_sfx := "pin_loose_super" if last_kind == "super" else "pin_loose"
 		k.m.sfx(loose_sfx, h.pos, -3.0 if h.is_local() else -7.0)
 	was = t
+
+## The rim glow: on her body and bow only while a perfect window is open, then the payoff pulse after a
+## perfect release runs out on its own.
+func _glow(t: float, drawing: bool) -> void:
+	if payoff_t > 0.0:
+		payoff_t -= Match.DT
+		if payoff_t <= 0.0:
+			_rim(0.0)
+		return
+	var want := drawing and in_window(t)
+	if want and not glow_on:
+		_rim(float(Tuning.of("lace")["perfect_glow_rim"]))
+	elif glow_on and not want:
+		_rim(0.0)
 
 ## Each release has its own move: a tap's snap, Empowered's loose, Supercharged's kick, a perfect's
 ## flourish, an overdrawn droop.
@@ -238,7 +281,9 @@ func _under_line(rng: float) -> Ent:
 			best = f
 	return best
 
-## A merge (or any hold drop) ends the draw: the reticle goes, the quick draw stays banked.
+## A merge (or any hold drop) ends the draw: the reticle and the glow go, the quick draw stays banked.
 func drop() -> void:
 	was = -1.0
 	tgt = null
+	payoff_t = 0.0
+	_rim(0.0)

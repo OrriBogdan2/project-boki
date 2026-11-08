@@ -1,8 +1,9 @@
 class_name ArcherKit
 extends ArchKit
 ## Hem (id archer, light; docs/heroes/archer.md, hero sheet pin.md). Spirit Walk (Shift), the Heavy Shot
-## (RMB, hold only: a charged arrow that knocks the first foe back and stuns it into a wall), Hail Wall (E, a curved arc of rain at the cursor distance), and on X
-## Starpiercer (level 6, PinUlt: three empowered piercing beams). R is the Merge.
+## (RMB, hold only: a charged arrow nocked on the bow that knocks the first foe back and stuns it into a wall,
+## leaving nothing behind), Hail Wall (E, a curved arc of rain at the cursor distance), and on X Starpiercer
+## (level 6, PinUlt: three piercing beams, the first the instant X is pressed). R is the Merge.
 ## The bow (PinDraw): hold to draw through two stages with a filling aim line and a perfect-timing circle; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
 ## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
@@ -47,7 +48,7 @@ func _tick(dt: float) -> void:
 	if pin_aim and rmb_down:
 		_heavy_tele()
 	if pin_aim and rmb_down and tells_visible():
-		needle.hold(h.position, h.aim_dir(), heavy_k(), float(h.cdat.get("scale", 1.0)), dt)
+		needle.hold(HeroVfx.of(m).anchor_pos(h, "nock"), h.aim_dir(), heavy_k(), float(h.cdat.get("scale", 1.0)), dt)
 	elif needle.visible:
 		needle.put_away()
 	if not rain.is_empty():
@@ -217,12 +218,12 @@ func rmb_hold_tick(t: float) -> void:
 
 const HEAVY_GOLD := Color("ff4a3a")      # (named for its old colour: red now)
 
-## The Heavy Shot held: a thick red bar out of the bow that
+## The Heavy Shot held: a thick red bar from the bow toward the cursor that
 ## grows to 2 body heights, the cursor ring filling (AimKit; own player).
 func _heavy_tele() -> void:
 	var hk := heavy_k()
-	AimKit.lane(h, "rmb_bar", {"len": 2.0 * AimKit.BH, "len0": 0.3, "k": hk, "width": 0.5, "fill": hk, "tip": true,
-		"col": HEAVY_GOLD, "col2": Color("fff0b0")})
+	AimKit.lane(h, "rmb_bar", {"from": draw.bow_at(), "len": 2.0 * AimKit.BH, "len0": 0.3, "k": hk, "width": 0.5,
+		"fill": hk, "tip": true, "col": HEAVY_GOLD, "col2": Color("fff0b0")})
 	AimKit.charge(h, hk, {"col": HEAVY_GOLD, "col2": Color("fff0b0")})
 	fx.bow_glint_at(draw.bow_at(), 1.0 if hk >= 0.99 else 0.0, HEAVY_GOLD)
 
@@ -254,7 +255,7 @@ func _drop_holds() -> void:
 	draw.drop()
 	spirit.end("merge")
 	if ult: ult.drop()
-	if anim_id in ["arc_draw", "arc_over", "arc_heavy_wind", "pin_roll", "pin_walk", "pin_ult_nock"]:
+	if anim_id in ["arc_draw", "arc_over", "arc_heavy_wind", "pin_roll", "pin_walk"]:
 		anim_id = ""
 
 func _drop_tele() -> void:
@@ -273,8 +274,9 @@ func fire_rmb(c: Dictionary) -> void:
 	play("arc_heavy")
 	_pin(aim(), clampf((float(c["t"]) - float(rmb_def()["hold"])) / maxf(0.05, float(pd["full"]) - float(rmb_def()["hold"])), 0.0, 1.0))
 
-## The Heavy Shot: a held, charged arrow (0.5s -> full at 1.1s) that stops on the first foe, knocks it back by
-## its charge and, driven into a wall within 3m, stuns (PINNED). Full charge is a heavy hit.
+## The Heavy Shot: a held, charged arrow (0.5s -> full at 1.1s) that leaves the bow's nock point, stops on the
+## first foe, knocks it back by its charge and, driven into a wall within 3m, stuns (PINNED). Full charge is a
+## heavy hit. It leaves nothing behind: no spent arrow, stake or scorch (the owner's 11-08 note).
 func _pin(a: Vector3, k: float) -> void:
 	var pd: Dictionary = rmb_def()["pin"]
 	var reach := heavy_reach()
@@ -283,8 +285,11 @@ func _pin(a: Vector3, k: float) -> void:
 	var push := lerpf(float(pd["push"][0]), float(pd["push"][1]), k)
 	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(pd["speed"]), "range": reach * (1.0 + 0.2 * k), "size": lerpf(0.2, 0.34, k)},
 		"effects": [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}]})
-	var dir := Vector2(a.x - h.pos.x, a.z - h.pos.z).normalized()
-	var extra := {"hit_extra": {"heavy": true}} if k >= 0.99 else {}
+	var bow := draw.bow_at()
+	var dir := Vector2(a.x - bow.x, a.z - bow.z).normalized()
+	var extra := {"muzzle": bow}
+	if k >= 0.99:
+		extra["hit_extra"] = {"heavy": true}
 	extra["on_foe"] = func(f: Ent, _c: Dictionary):
 		# the impact: a red-white burst, a white dust cloud as it's driven back, a white ring round it
 		var at := f.pos + Vector3(0, 1.0, 0)
@@ -301,7 +306,6 @@ func _pin(a: Vector3, k: float) -> void:
 		# driven into terrain within 3m: pinned (a stun)
 		if _wall_behind(f, dir, float(pd["wall"])):
 			pins += 1
-			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			if rank("sec") >= 3:
 				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge
@@ -313,8 +317,8 @@ func _pin(a: Vector3, k: float) -> void:
 					m.fx.dust(f.pos, 10))
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))
 	vfx("heavy_go", h.pos, dir, {"k": k, "len": reach * (1.0 + 0.2 * k)})
-	# the release burst sits on the aim line at the bow, bigger than any bow cue, and a screen kick along the shot
-	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, HEAVY_GOLD, 0.08, 0.14, 1.0, 5.0)
+	# the release burst sits at the bow, bigger than any bow cue, and a screen kick along the shot
+	fx.fletch_burst(bow, 1.4 + 0.8 * k, HEAVY_GOLD, 0.08, 0.14, 1.0, 5.0)
 	heavy_kicks += 1
 
 func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:
@@ -396,7 +400,8 @@ func _tick_rain(dt: float) -> void:
 	var stg := stage("e", {"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}, {"type": "slow", "duration": 0.8, "strength": float(ed["slow"])}]})
 	for f in inside:
-		KinExec.apply_foe(stg.effects, f, cx("e", "hail_wall", f.pos, {"at": f.pos}), f.pos, stg)
+		# (a tick: the hit reactions stay off, so the slow only takes speed: no squash, flinch or hold)
+		KinExec.apply_foe(stg.effects, f, cx("e", "hail_wall", f.pos, {"at": f.pos, "hit_extra": {"tick": true}}), f.pos, stg)
 		if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
 
 # ------------------------------------------------------------------ bots

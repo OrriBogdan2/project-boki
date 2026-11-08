@@ -277,12 +277,6 @@ def ult_cast():
     return pad(mix(swell, shim, chord), d)
 
 
-def ult_nock():
-    """A beam nocked: a short tight thread-stretch whine."""
-    d = 0.35
-    return pad(mix(stretch(0.3, 1200, 1900) * 0.9, at(click(0.002, 2000, 6000) * 0.4, 0.28)), d)
-
-
 def ult_beam(final):
     """A beam: a deep thread thrum and a cracking boom (the last one heavier, ringing longer)."""
     d = 1.3 if final else 0.75
@@ -373,7 +367,6 @@ def build():
     S.save_cat('pin_spirit', spirit(), 'cast')
     S.save_cat('pin_spirit_end', spirit_end(), 'cast')
     S.save_cat('pin_ult_cast', ult_cast(), 'cast')
-    S.save_cat('pin_ult_nock', ult_nock(), 'cast')
     S.save_cat('pin_ult_beam', ult_beam(False), 'impact')
     S.save_cat('pin_ult_final', ult_beam(True), 'impact')
     S.save_cat('archer_dash', dash(), 'dash')

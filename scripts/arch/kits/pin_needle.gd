@@ -1,16 +1,14 @@
 class_name PinNeedle
 extends Node3D
-## Lisette's Heavy Shot in her hands: an oversized silver needle nocked on the bow while she holds RMB, drawn
-## back as it charges, glowing red with the charge, its red thread trailing from the eye. World space along
-## the aim, at bow height, so it reads the same on any body and any pose. Everyone sees it (it's her wind-up).
-## The materials are the toon and glow shaders every Hunter already draws, so it adds no shader compile.
+## Lisette's Heavy Shot in her hands: a big silver needle nocked on the bow while she holds RMB, glowing red
+## with the charge, its red thread trailing from the eye. Its eye rides the model's nock anchor (her draw hand
+## on the v2 model, HeroVfx "nock"), so the animation's pull-back is the needle's; it points along the aim.
+## Everyone sees it (it's her wind-up). It is the only thing the Heavy Shot shows besides the shot itself:
+## nothing is left behind (the owner's 11-08 note). The materials are the toon and glow shaders every Hunter already
+## draws, so it adds no shader compile.
 
-const LENGTH := 2.6            # m, tip to eye (a loosed arrow is about 0.8)
+const LENGTH := 2.6            # m, tip to eye the meshes are built at (tuning.json needle_len_m scales it)
 const RADIUS := 0.09           # m at the eye end, so it holds at the match camera
-const HEIGHT := 1.12           # m above her feet, x her scale
-const NOCK_AT := 0.5           # m ahead of her where the bow holds it
-const DRAW_BACK := Vector2(0.35, 0.95)  # m the eye sits behind the bow: as nocked, fully drawn
-const NOCK_T := 0.12           # s to slide on
 const SHELL := 1.9             # x the shaft: the glow around it
 const SILVER := Color("e4ebf2")
 const THREAD_COL := Color("ff3a30")
@@ -29,7 +27,6 @@ var points: Array = []         # the thread's joints, world space, [0] at the ey
 var eye := Vector3.ZERO        # where the eye is now (world)
 var tip := Vector3.ZERO        # where the point is now (world)
 var charge := 0.0              # the charge shown, 0..1 (checks read it)
-var _in := 0.0                 # s since it was nocked
 
 func _init() -> void:
 	top_level = true
@@ -79,20 +76,19 @@ func _flat(mi: MeshInstance3D) -> MeshInstance3D:
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return mi
 
-## Every step while it's held: at `at` (her feet), along `dir`, charged `k` 0..1; `sc` is her scale.
-func hold(at: Vector3, dir: Vector2, k: float, sc: float, dt: float) -> void:
+## Every step while it's held: the eye at `nock` (the bow's nock point, world), along `dir`, charged `k` 0..1;
+## `sc` is her scale.
+func hold(nock: Vector3, dir: Vector2, k: float, sc: float, dt: float) -> void:
 	var nocking := not visible
 	visible = true
-	_in = 0.0 if nocking else _in + dt
 	charge = k
 	var d := Vector3(dir.x, 0, dir.y).normalized()
-	var slide := clampf(_in / NOCK_T, 0.0, 1.0)
-	var back := lerpf(DRAW_BACK.x, DRAW_BACK.y, k) * slide
-	eye = at + Vector3(0, HEIGHT * sc, 0) + d * (NOCK_AT - back)
-	tip = eye + d * LENGTH * sc
+	var len_k := float(Tuning.of("lace")["needle_len_m"]) / LENGTH * sc
+	eye = nock
+	tip = eye + d * LENGTH * len_k
 	global_position = eye
 	look_at(tip, Vector3.UP, false)
-	scale = Vector3.ONE * sc
+	scale = Vector3.ONE * len_k
 	var pulse := 0.1 * sin(Time.get_ticks_msec() * 0.018) if k >= 0.99 else 0.0
 	shell_mat.set_shader_parameter("color", Color(THREAD_COL, lerpf(GLOW_A.x, GLOW_A.y, k) + pulse))
 	steel.set_shader_parameter("albedo", SILVER.lerp(THREAD_COL, HOT_K * k))

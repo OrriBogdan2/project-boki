@@ -19,7 +19,6 @@
 		"arc_heavy_wind": {"clip": "heavy_wind", "hold_from": 1.1}, "arc_heavy": {"clip": "heavy"},
 		"arc_hail": {"clip": "hail", "upper": true},
 		"pin_roll": {"clip": "roll"}, "pin_walk": {"clip": "spirit", "hold_from": 0.2, "upper": true}, "pin_flick": {"clip": "flick"},
-		"pin_ult_cast": {"clip": "ult_cast", "upper": true}, "pin_ult_nock": {"clip": "ult_nock", "hold_from": 0.3, "upper": true},
 		"pin_ult_loose": {"clip": "ult_loose", "upper": true}, "pin_ult_final": {"clip": "ult_final", "upper": true},
 		"mf_xform": {"clip": "fusion"}
 	},

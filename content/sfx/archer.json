@@ -21,7 +21,6 @@
   "pin_spirit": "cast",
   "pin_spirit_end": "cast",
   "pin_ult_cast": "cast",
-  "pin_ult_nock": "cast",
   "pin_ult_beam": "impact",
   "pin_ult_final": "impact",
   "archer_dash": "dash",
@@ -54,7 +53,6 @@
   "pin_spirit",
   "pin_spirit_end",
   "pin_ult_cast",
-  "pin_ult_nock",
   "pin_ult_beam",
   "pin_ult_final"
  ],

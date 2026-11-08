@@ -10,7 +10,8 @@ extends Node3D
 ## - arrows: the look of each of her shots (Empowered green bolt, Supercharged white-teal beam, a dull
 ##   overdrawn shaft, the gold Impaling arrow with violet fins), each with its own trail, drawn
 ##   over the shot the match moves (the round's own sphere is shrunk away)
-## - spent arrows: one that lands with no hit stays stuck in the ground, thread attached, for 4 s
+## - spent arrows: one of the bow's arrows that lands with no hit stays stuck in the ground, thread attached,
+##   for 4 s (the Heavy Shot leaves nothing: owner 11-08)
 ## - the Rain of Arrows: the curved panels with fletch posts, a ground glow, arrows streaking down, blue
 ##   burn flames on foes inside
 ## - the Spirit Walk screen tint while she is inside something (her own screen only)
@@ -27,7 +28,6 @@ const WISP_T := 0.26
 const WISPS := 12
 const WISP_EVERY := 0.05
 const SPENT_T := 4.0           # s a spent arrow stays in the ground
-const STAKE_T := 7.0           # s the stake a wall pin leaves in the wall stays
 ## the Heavy Shot's arrow is this many times a normal arrow (the Empowered bolt is 1.0): unmistakable
 const HEAVY_SCALE := 6.0
 const ULT_WIDTH := 0.6          # m: Starpiercer's arrow head and trail, its hit width (2 x the 0.3 shot radius)
@@ -60,7 +60,6 @@ var tint: ColorRect = null
 var tint_k := 0.0
 var tint_want := 0.0
 var planted := 0               # spent arrows planted (checks)
-var staked := 0                # Heavy Shot stakes left in walls (checks)
 var fx_clock := 0.0            # the match time effects last advanced to
 
 func _init(hunter: Hunter) -> void:
@@ -278,7 +277,7 @@ func tick_shots() -> void:
 		var kind := String(e["kind"])
 		var at: Vector3 = e["pos"]
 		var hit := hits.any(func(hh): return (hh[0] as Vector3).distance_to(at) < 1.6)
-		if not hit and kind in ["tap", "arrow", "over", "heavy"]:
+		if not hit and kind in ["tap", "arrow", "over"]:
 			_plant(at, (e["s"]["vel"] as Vector2), kind)
 
 ## A spent needle stuck in the ground where the shot ended, its thread lying behind it, gone after SPENT_T.
@@ -300,25 +299,6 @@ func _plant(at: Vector3, v: Vector2, kind: String) -> void:
 	best["t"] = SPENT_T
 	planted += 1
 	HeroVfx.of(h.m).play(h, "needle_stuck", g, -v.normalized(), {"t": SPENT_T})
-
-## The Heavy Shot's stake: a wall pin leaves its big arrow standing in the wall at `at`, pointing along `dir`
-## (into the wall), for STAKE_T s.
-func stake(at: Vector3, dir: Vector2) -> void:
-	var best: Dictionary = spent[0]
-	for c in spent:
-		if float(c["t"]) <= 0.0:
-			best = c
-			break
-		if float(c["t"]) < float(best["t"]): best = c
-	var n: Node3D = best["node"]
-	_dress(n, "heavy")
-	(n.get_node("Trail") as Node3D).visible = false
-	n.global_position = at
-	n.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
-	n.visible = true
-	best["t"] = STAKE_T
-	staked += 1
-	star(at, 1.6, GOLD, 0.2, 0.0, PI * 0.25, 2.2)
 
 ## Her dash after-image: three green fletch streaks at hip, chest and shoulder height, lying along the way
 ## she faces and fading behind her (pooled, a set every WISP_EVERY s).
