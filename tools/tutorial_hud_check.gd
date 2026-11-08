@@ -6,8 +6,8 @@ extends RefCounted
 ##      showing (one fired at each step start waits and then shows) and no Boki bubble is up; the
 ##      hunter and the Boki are never under the banner; Pell (TutorialGuide) wears a beacon, stops you at
 ##      each new step in the dialogue box while the match holds, and flies ahead to the pad, chest and outpost
-##   3. the pill counter, the right click taught from its kit data, the Boki step by its state
-##   4. the lookout: every course stop is climbable from the one before it with plain movement
+##   3. eight steps, one short banner line each (the glide leg too), the pill counter, the Boki step by its state
+##   4. every course stop is climbable from the one before it with plain movement
 
 var bad := 0
 var m: Match
@@ -66,6 +66,9 @@ func _course() -> void:
 	var closed := not tu.intro and held_at < Tutorial.INTRO_T + 0.2
 	ok(closed, "the intro card closes by itself within %.1fs (%.2fs)" % [Tutorial.INTRO_T, held_at])
 	ok(bool(Save.d["tutorial"].get("tut_intro", false)), "and is remembered, so it only shows the first time")
+	var skip: Button = m.hud.get_node_or_null("TutSkip") if m.hud else null
+	ok(m.hud == null or (skip != null and skip.visible and skip.text.contains("Skip")),
+		"a Skip button is on screen from the start")
 	var t := 0.0
 	var last := -1
 	var step_t := 0.0
@@ -93,8 +96,9 @@ func _course() -> void:
 			if m.hud and not m.player.extracted:
 				m.hud.toast("check %d" % last, Color.WHITE)
 				asked += 1
-			texts[tu.id()] = tu.text
 			counters[tu.id()] = tu.progress_text()
+		if not texts.has(tu.stop_id()):
+			texts[tu.stop_id()] = tu.text      # (the dash step's glide leg has its own line)
 		step_t += Match.DT
 		if tu.pell.talking():
 			talk_at = m.time if talk_at < 0.0 else talk_at
@@ -116,14 +120,16 @@ func _course() -> void:
 		elif not m.hud.msgs.texts().is_empty():
 			shown_after += 1
 			m.hud.msgs.clear()
+	print("TUTHUD course %.1fs of play, %d steps" % [t, Tutorial.steps().size()])      # (the before/after timing)
 	ok(m.player.extracted, "the course still finishes")
 	var pl := tu.pell
 	ok(pl.beacon != null and pl.beacon.wants_arrow, "Pell wears a beacon (glow, name, edge arrow)")
-	var stops := ["move", "dash", "glide", "chest", "goexit"].all(func(x): return x in pl.talked)
-	ok(stops and pl.talked.size() >= 12, "Pell stops you before each new thing (%s)" % ", ".join(pl.talked))
+	var stops := Tutorial.steps().all(func(st): return String(st[0]) in pl.talked)
+	ok(stops and pl.talked.size() == Tutorial.steps().size(),
+		"Pell stops you before each new thing (%s)" % ", ".join(pl.talked))
 	ok(ran_in_talk == 0 and not_in_box == 0, "the match holds while Pell talks, in the dialogue box"
 		+ " (%d frames ran, %d without the box)" % [ran_in_talk, not_in_box])
-	var led := ["dash", "chest", "goexit"].all(func(x): return ahead.has(x))
+	var led := ["dash", "chest", "extract"].all(func(x): return ahead.has(x))
 	ok(led, "Pell flies ahead to the pad, the chest and the outpost (%s)" % str(ahead.keys()))
 	ok(toast_in_card == 0, "no toast shows while a banner is up (%d seen)" % toast_in_card)
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)
@@ -131,17 +137,12 @@ func _course() -> void:
 	ok(asked > 0 and shown_after > 0, "a toast fired during a banner waits and shows after it " + waited)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
+	ok(Tutorial.steps().size() == 8 and texts.size() == 9,
+		"8 steps, 9 banner lines with the glide leg (%s)" % str(texts.keys()))
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
 	var counts_ok: bool = String(counters.get("shoot", "")) == "0/3" and String(counters.get("sig", "")) == "0/2"
 	ok(counts_ok, "the pill counts hits and casts (%s)" % str(counters))
-	var ak: ArchKit = m.player.ak
-	if ak != null:
-		var hold := float(ak.rmb_def().get("hold", 0.0)) > 0.0
-		var why := "(%s hold %s)" % [ak.id, str(hold)]
-		ok(tu.rmb_has_hold() == hold, "the right click step follows the kit's hold variant " + why)
-		var line := String(texts.get("utility", ""))
-		ok(line.to_lower().contains("hold") == hold, "and its words say so ('%s')" % line)
 	var tl := String(texts.get("throw", ""))
 	ok(tl.contains("call") or tl.contains("send"), "the Boki step says whether to call back or send ('%s')" % tl)
 
@@ -170,7 +171,7 @@ func _under_banner() -> int:
 func _reach() -> void:
 	var tu: Tutorial = m.tut
 	var jump_apex := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV)
-	var order := ["land", "move", "dash", "exdash", "glide", "crouch", "pickup", "yard", "chest"]
+	var order := ["land", "move", "dash", "glide", "yard", "chest"]
 	var worst := 0.0
 	var worst_at := ""
 	for i in range(1, order.size()):
@@ -191,5 +192,3 @@ func _reach() -> void:
 			prev = y
 	var msg := "every walk between stops climbs at most 60%% of a jump (%.2fm of %.2fm, %s)"
 	ok(worst <= jump_apex * 0.6, msg % [worst, jump_apex, worst_at])
-	var cr := tu.stop("crouch")
-	ok(cr.y <= jump_apex * 0.6, "the lookout top is %.2fm up, under 60%% of a jump (%.2fm)" % [cr.y, jump_apex])

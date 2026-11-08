@@ -1,9 +1,9 @@
 class_name FarmSpotlight
 extends Control
 ## The tutorial spotlight: the screen darkens with a rounded cut-out round the one thing to do next (a bottom-bar
-## button and/or a Boki in the world), the cut-out flashes a few times with the hint beside it, then the dim eases
+## button), the cut-out flashes a few times with the hint beside it, then the dim eases
 ## to a light vignette and the ring keeps a soft pulse until the thing is clicked. FarmGuide drives it (sync, every
-## poll); a step asks for it with "spot" in farm_tutorial.json ({"hub": button id, "world": true}).
+## poll); a step asks for it with "spot" in farm_tutorial.json ({"hub": button id}).
 ## Only the opening beat swallows mouse clicks; after it nothing here takes a click, so the target is always clickable.
 ## A placing step ("tile" in its spot: the house, the trough) is modal instead: the screen stays dark and every click
 ## outside the cut-out does nothing, through three phases: the Build button, then the piece's tile on the build bar,
@@ -88,7 +88,7 @@ static func sync(home: Node, quiet: bool) -> void:
 		return
 	if phase == "tile" and home.hb.bar != null and home.hb.bar.tile_of(String(want["tile"])) == null:
 		home.guide.show_tile(String(want["tile"]))
-	if _rects(home, id, want, phase).is_empty():
+	if _rects(home, want, phase).is_empty():
 		return
 	_key = key
 	_node = FarmSpotlight.new(home, id, want, phase, not _seen.has(key))
@@ -132,9 +132,9 @@ static func _phase(home: Node, want: Dictionary) -> String:
 	var held := ("feeder_" if is_feeder else "") + String(hb.held.get("id", ""))
 	return "spot" if held == String(want["tile"]) else "tile"
 
-## The screen boxes to light: the named bottom-bar button, and the step's marker in the world (a Boki); in a
-## placing step the one thing for its phase (the button, the tile, the ground).
-static func _rects(home: Node, id: String, want: Dictionary, phase := "") -> Array[Rect2]:
+## The screen boxes to light: the named bottom-bar button; in a placing step the one thing for its phase (the
+## button, the tile, the ground).
+static func _rects(home: Node, want: Dictionary, phase := "") -> Array[Rect2]:
 	var out: Array[Rect2] = []
 	if phase == "tile":
 		var tile: Control = home.hb.bar.tile_of(String(want["tile"])) if home.hb.bar != null else null
@@ -146,10 +146,6 @@ static func _rects(home: Node, id: String, want: Dictionary, phase := "") -> Arr
 		if not cs.is_empty():
 			out.append(_ground_box(home.cam, cs))
 		return out
-	if bool(want.get("world", false)):
-		var box := _world_box(home, id)
-		if box.size.x > 0.0:
-			out.append(box)
 	var b: Control = home.hub_btns.get(String(want.get("hub", "")))
 	if b != null and is_instance_valid(b) and b.is_visible_in_tree():
 		out.append(b.get_global_rect())
@@ -170,16 +166,6 @@ static func _ground_box(cam: Camera3D, cells: Array) -> Rect2:
 	var box := Rect2(lo, hi - lo)
 	var grow := maxf(0.0, MODAL_MIN_PX - minf(box.size.x, box.size.y)) * 0.5
 	return box.grow(grow)
-
-static func _world_box(home: Node, id: String) -> Rect2:
-	var at: Vector3 = home.guide.target(id)
-	var cam: Camera3D = home.cam
-	if at.x == INF or cam.is_position_behind(at):
-		return Rect2()
-	var head := cam.unproject_position(at + Vector3.UP * BOKI_HEIGHT_M)
-	var feet := cam.unproject_position(at)
-	var tall := maxf(BOKI_MIN_PX, absf(feet.y - head.y))
-	return Rect2((head + feet) * 0.5 - Vector2(tall, tall) * 0.5, Vector2(tall, tall))
 
 func _init(home: Node, id: String, want: Dictionary, at_phase: String, with_beat: bool) -> void:
 	h = home
@@ -229,7 +215,7 @@ func _process(dt: float) -> void:
 		close()                  # the next part of a placing step: its spotlight starts now, not at the next poll
 		sync(h, h.guide.quiet)
 		return
-	_holes = _rects(h, step_id, spec, phase)
+	_holes = _rects(h, spec, phase)
 	if _holes.is_empty():
 		close()
 		return

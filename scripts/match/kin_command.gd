@@ -127,7 +127,6 @@ static func order(h: Hunter, id: String) -> bool:
 		KinMerge.end(h, "order")
 	var ok := KinFollow.set_cmd(k, id, tgt)
 	if ok:
-		if h.m.tut: h.m.tut.orders += 1
 		var what := {"chase": "chasing %s" % target_name(tgt), "guard": "guarding this spot", "return": "back on you", "follow": "at your side"}
 		say(h, "%s: %s" % [k.rec.get("name", "Your Boki"), what[id]], k.sp["color"])
 		h.m.fx.ring(k.pos, 1.2, Color(k.sp["color"], 0.8), 0.3)

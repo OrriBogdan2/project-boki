@@ -1,41 +1,13 @@
 {
- "doc": "The first-match tutorial (scripts/match/tutorial.gd). steps: [id, the one banner line]. detail: a plain-words second line under it (%X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step (the right click with a hold, the Boki starting out). labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down). cds: the share of its usual time every ability and dash cooldown takes here (0.25 = four times quicker); each is also ready again when a step starts, is retried or its action lands. need: how many times a step's action must land, shown as 1/3 on the pill.",
+ "doc": "The first-match tutorial (scripts/match/tutorial.gd), short (owner, Nov 8): eight steps, one banner line each. steps: [id, the line]. %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for part of a step (the glide half of the dash step, the Boki starting out). labels: the marker's caption per course stop or step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down). cds: the share of its usual time every ability and dash cooldown takes here (0.25 = four times quicker); each is also ready again when a step starts, is retried or its action lands. need: how many times a step's action must land, shown as 1/3 on the pill. The moves and rules the cut steps taught are one-time hints now (content/rules/hints.json).",
  "steps": [
   [
-   "land",
-   "Steer down to the meadow"
-  ],
-  [
    "move",
-   "Walk to the glowing beam"
+   "Land and walk to the glowing beam"
   ],
   [
    "dash",
    "Dash across the gap"
-  ],
-  [
-   "exdash",
-   "Jump, then dash in mid-air"
-  ],
-  [
-   "glide",
-   "Jump, then press %J again in the air and hold to glide"
-  ],
-  [
-   "crouch",
-   "Climb up, then hold to crouch"
-  ],
-  [
-   "pickup",
-   "Pick up the item"
-  ],
-  [
-   "gkey",
-   "Send %s out"
-  ],
-  [
-   "rank",
-   "You levelled up!"
   ],
   [
    "shoot",
@@ -46,68 +18,30 @@
    "Use %A on the group"
   ],
   [
-   "utility",
-   "Use %A"
-  ],
-  [
    "throw",
-   "Tap to send %s at the monster"
-  ],
-  [
-   "orders",
-   "Hold to give %s an order"
-  ],
-  [
-   "kin1",
-   "Watch %s use %A"
-  ],
-  [
-   "key",
-   "Grab the key"
-  ],
-  [
-   "chest",
-   "Open the chest with the key"
+   "Tap %T to send %s at the monster"
   ],
   [
    "fight",
    "Beat all the monsters"
   ],
   [
-   "goexit",
-   "Go to the outpost"
-  ],
-  [
-   "uplink",
-   "Capture the uplink mast"
-  ],
-  [
-   "defend",
-   "Defend the outpost"
+   "chest",
+   "Hold %F at the chest to open it"
   ],
   [
    "extract",
-   "Step into the light"
+   "Step into the light at the outpost"
   ]
  ],
- "detail": {
-  "gkey": "%T is your Boki button. Tap it to send %s at a monster. Tap again to call it back. Hold it to give orders.",
-  "rank": "Every level gives you a skill point (see the gold + by your level). Press %R to rank up %N. Your ultimate unlocks at level %U.",
-  "sig": "%X",
-  "key": "Chests are locked. Walk over the key to pick it up.",
-  "chest": "Chests need a key. Hold %F next to it to open it. This uses up the key.",
-  "uplink": "Stay inside the circle until it's yours. Step out and the capture slips back!",
-  "defend": "Stay inside the circle. Step out and the capture slips back!"
- },
  "alt": {
-  "utility_hold": "Tap, then hold, to use %A",
-  "throw_back": "Tap to call %s back",
-  "throw_send": "Tap again to send %s at the monster"
+  "glide": "Jump, then hold %G to glide across",
+  "throw_back": "Tap %T to call %s back",
+  "throw_send": "Tap %T again to send %s at the monster"
  },
  "need": {
   "shoot": 3,
   "sig": 2,
-  "utility": 2,
   "throw": 2
  },
  "cds": 0.25,
@@ -119,43 +53,41 @@
   "cd": 1.6
  },
  "labels": {
-  "land": "Land here",
   "move": "Walk here",
   "dash": "Dash across",
-  "exdash": "Air dash",
   "glide": "Glide here",
-  "crouch": "Lookout",
-  "pickup": "Item",
-  "key": "Key",
   "chest": "Chest",
-  "goexit": "Outpost",
-  "uplink": "Uplink",
-  "defend": "Outpost",
   "extract": "Lift"
  },
-	"pell_doc": "Pell, the guide (TutorialGuide): what it says when it stops you at the start of a step (one box page per line; the same %keys as the steps), and the portrait mood for steps that are not neutral.",
-	"pell": {
-		"move": ["I'm Pell. When the Heart broke, my soul was torn loose, and a Boki's light set me free.", "Follow me. I'll show you how a Hunter gets around up here."],
-		"dash": ["A gap! Dash to cross it. Run from the glowing pad and dash at the edge."],
-		"exdash": ["This one's wider. Jump first, then dash while you're in the air."],
-		"glide": ["Too far to dash. Jump, then hold %G to glide across. Wings help, trust me."],
-		"crouch": ["Climb the lookout, then crouch. Low and still, you can see much farther."],
-		"pickup": ["Hunters find gear lying about. Walk over it to pick it up."],
-		"gkey": ["%s fights with you. Press %T to send it at a monster, and again to call it back."],
-		"rank": ["You levelled up! Each level is a skill point. Spend it to make an ability stronger."],
-		"shoot": ["A Hollow beast. These are what the broken Heart leaves behind. %W it!"],
-		"sig": ["A whole group. That's what %A is for: line them up, then let it go."],
-		"utility": ["Your hunter has a trick of their own: %A. Try it on these two."],
-		"throw": ["That one spits from afar. Send %s at it!"],
-		"orders": ["%s listens. Hold %T and pick an order from the wheel."],
-		"kin1": ["Every Boki has a power of its own. Watch %s use %A."],
-		"key": ["Chests up here are locked. There's a key nearby. Grab it."],
-		"chest": ["Now the chest. Hold next to it to open it with the key."],
-		"fight": ["More of them! Beat them all, you and %s together."],
-		"goexit": ["The outpost is this way. That's where Hunters get off an island."],
-		"uplink": ["Capture the uplink mast. Stay in the circle until it's yours."],
-		"defend": ["They're coming for the outpost! Stay in the circle and hold it."],
-		"extract": ["You did it. Step into the light, and I'll see you below, Hunter."]
-	},
-	"pell_moods": {"fight": "warning", "defend": "warning", "rank": "happy", "extract": "happy"}
+ "pell_doc": "Pell, the guide (TutorialGuide): one short line when it stops you at the start of a step (the same %keys as the steps; the box closes itself after a few seconds), and the portrait mood for steps that are not neutral.",
+ "pell": {
+  "move": [
+   "I'm Pell. Follow me, Hunter!"
+  ],
+  "dash": [
+   "A gap! Run off the glowing pad and dash."
+  ],
+  "shoot": [
+   "A Hollow beast. %W it!"
+  ],
+  "sig": [
+   "A whole group: that's what %A is for."
+  ],
+  "throw": [
+   "That one spits from afar. Send %s at it!"
+  ],
+  "fight": [
+   "More of them! Beat them all, you and %s."
+  ],
+  "chest": [
+   "Here's a chest key. Open that chest!"
+  ],
+  "extract": [
+   "The lift is open. Step into the light!"
+  ]
+ },
+ "pell_moods": {
+  "fight": "warning",
+  "extract": "happy"
+ }
 }

@@ -5,7 +5,7 @@ extends RefCounted
 ## pauses play), a small banner at the top-centre for each new step that settles into a pill at the
 ## bottom-centre, a quiet check beside the pill, and the message lane in the top-right. Nothing sits in
 ## the middle of the screen, where the hunter, the Boki and the target are. While the banner is up other
-## popups (messages, Boki bubbles, the scout hint) wait.
+## popups (messages, Boki bubbles, the scout hint) wait. A Skip button sits left of the banner the whole run.
 
 const MINT := Color("8fe3c8")
 const GOLD := Color("f2c84a")
@@ -14,7 +14,8 @@ const BAR_H := 0.085        # of the screen height: the banner's height (the pil
 const SLIDE_T := 0.25       # s the banner takes to slide in
 const FADE_T := 0.3         # s it takes to hand over to the pill
 const PANEL := Color(0.04, 0.05, 0.08, 0.9)
-const DETAIL_K := 1.9       # a bar with a second line is this much taller
+const SKIP_W := 150.0       # px: the Skip button's width
+const SKIP_GAP := 14.0      # px between it and the banner
 
 ## The lanes: the banner, the pill, the check mark and the message column (Rect2 each), for a screen size.
 static func lanes(sz: Vector2) -> Dictionary:
@@ -41,13 +42,9 @@ static func draw(h, sz: Vector2) -> void:
 	if k < 1.0:
 		var slide := 1.0 - pow(1.0 - clampf(tu.card_t / SLIDE_T, 0.0, 1.0), 3.0)
 		var r: Rect2 = ln["banner"]
-		r.size.y *= DETAIL_K if tu.detail != "" else 1.0
 		r.position.y -= (1.0 - slide) * (r.end.y + 4.0)
 		_bar(h, r, tu, 1.0 - k, false)
 	var pr: Rect2 = ln["pill"]
-	if tu.detail != "":
-		pr.position.y -= pr.size.y * (DETAIL_K - 1.0)      # grows upward, clear of the HUD
-		pr.size.y *= DETAIL_K
 	_bar(h, pr, tu, k, true)
 	if k >= 1.0:
 		_pill_extras(h, pr, tu)
@@ -71,7 +68,7 @@ static func _bar(h, r: Rect2, tu: Tutorial, a: float, is_pill: bool) -> void:
 	h._panel(r, Color(PANEL.r, PANEL.g, PANEL.b, PANEL.a * a), 14)
 	if pulse > 0.0:
 		h.c.draw_rect(r, Color(MINT, 0.7 * pulse), false, 3.0)
-	var row := r.size.y / (DETAIL_K if tu.detail != "" else 1.0)     # the first line's height
+	var row := r.size.y
 	var mid := r.position.y + row * 0.5
 	var px := int(row * (0.46 if is_pill else 0.42))
 	var left := r.position.x + 14.0
@@ -91,27 +88,30 @@ static func _bar(h, r: Rect2, tu: Tutorial, a: float, is_pill: bool) -> void:
 	h._text(Vector2(left, mid + tpx * 0.36), tu.text, tpx, Color(GOLD, a), h.big)
 	if n != "":
 		h._text(Vector2(r.end.x - 14.0 - n_w, mid + px * 0.36), n, px, Color(MINT, a), h.big)
-	if tu.detail != "":
-		_detail(h, r, row, tu.detail, a)
 
-## The plain-words line under a step's line: wrapped to three lines in the space below it.
-static func _detail(h, r: Rect2, row: float, txt: String, a: float) -> void:
-	var w := TutorialText.wrap(h.big, txt, int(row * 0.27), r.size.x - 28.0, 3)
-	var y := r.position.y + row * 0.92
-	for ln in w["lines"]:
-		y += float(w["px"]) * 1.2
-		h._text(Vector2(r.position.x + 14.0, y), String(ln), int(w["px"]), Color(1, 1, 1, 0.88 * a), h.big)
-
-## The scout hint above the pill (not while the banner is up) and the outpost's defend bar under it.
+## The scout hint above the pill (not while the banner is up).
 static func _pill_extras(h, r: Rect2, tu: Tutorial) -> void:
 	var hint := tu.scout_hint()
 	if hint != "":
 		h._ctext(Vector2(r.get_center().x, r.position.y - 14.0), hint, int(r.size.y * 0.34), MINT, h.big)
-	if tu.id() in ["uplink", "defend"]:
-		var o := tu.outpost()
-		if not o.is_empty():
-			var br := Rect2(Vector2(r.position.x + 20.0, r.end.y + 6.0), Vector2(r.size.x - 40.0, 6.0))
-			h._bar(br, clampf(float(o["prog"]), 0.0, 1.0), ExitModels.UPLINK)
+
+## The Skip button, left of the banner for the whole run: it ends the tutorial at once, as finished
+## (the match's end marks it done, so nothing it gives is lost). Added by Tutorial.update once the Hud is up.
+static func add_skip(m: Match) -> Button:
+	var b := Button.new()
+	b.name = "TutSkip"
+	b.text = "Skip tutorial"
+	b.focus_mode = Control.FOCUS_NONE
+	b.anchor_left = 0.5 - BAR_W * 0.5
+	b.anchor_right = b.anchor_left
+	b.offset_left = -SKIP_W - SKIP_GAP
+	b.offset_right = -SKIP_GAP
+	b.anchor_top = 0.035
+	b.offset_bottom = 44.0
+	b.pressed.connect(func(): Practice.leave(m, true))
+	m.hud.add_child(b)
+	m.hud.ui_extra.append(b)       # (the mouse over it is not a shot)
+	return b
 
 ## The first-time intro: short, over a light dim, and the rest of the HUD stays away.
 static func _intro(h, sz: Vector2, tu: Tutorial) -> void:

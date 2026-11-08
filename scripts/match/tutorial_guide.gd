@@ -2,7 +2,8 @@ class_name TutorialGuide
 extends RefCounted
 ## Pell, the tutorial's guide: a freed soul, part bird and part person (a placeholder model until the art
 ## lands). At each step with a line for it (content/rules/tutorial.json "pell") it flies to you and says it
-## through the NPC dialogue box, and the match holds until you have read it (Tutorial.holding). Then it
+## through the NPC dialogue box, and the match holds until you have read it (Tutorial.holding), for
+## TALK_MAX_S at most. Then it
 ## flies on ahead to where the step wants you and waits there, glowing, with an edge arrow while it is
 ## off screen. Tutorial owns one as `pell`.
 
@@ -15,6 +16,7 @@ const TALK_AT := 2.4            # m in front of you it hovers to talk
 const TALK_REACH := 0.8         # m from its talking spot that counts as there
 const COME_MAX_S := 1.6         # s: it starts talking from wherever it is after this
 const BESIDE := Vector3(1.8, 0.0, 1.2)   # m: where it hovers when the step has nowhere to go (a fight)
+const TALK_MAX_S := 3.0         # s at most the match holds for one line: then the box closes by itself
 const TEST_READ_S := 0.5        # s of hold before the headless driver closes the box (TutorialDrive)
 const BOB_HZ := 1.3             # its hover's bob
 const BOB_M := 0.12
@@ -70,11 +72,12 @@ func tick(dt: float) -> void:
 		_face(p.pos if pos.distance_to(spot) < 0.5 else spot)
 	_pose(dt)
 
-## While the match holds for it (Tutorial.hold_wait): it bobs, and lets go once the box is gone.
+## While the match holds for it (Tutorial.hold_wait): it bobs, and lets go once the box is gone or
+## TALK_MAX_S has passed (nothing blocks the player for more than a few seconds).
 func hold(dt: float) -> void:
 	_held_t += dt
 	_pose(dt)
-	if not is_instance_valid(box) or box.is_queued_for_deletion():
+	if not is_instance_valid(box) or box.is_queued_for_deletion() or _held_t >= TALK_MAX_S:
 		close()
 
 ## The headless driver's "read it": closes the box after a moment of hold.
