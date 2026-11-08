@@ -173,8 +173,8 @@ static func pin_menu(h: Node, rec: Dictionary, reopen: Callable) -> OptionButton
 		var m := String(opt.get_item_metadata(i))
 		if m == "rest": Work.set_rest(rec, true)
 		else: Work.set_pin(rec, m)
-		if m != "" and m != "rest": FarmTaskGuide.picked(h, rec, m)
 		_drop(h, rec)
+		if m != "" and m != "rest": FarmTaskGuide.picked(h, rec, m)
 		Save.save_game()
 		reopen.call())
 	opt.tooltip_text = "Pin it to one kind of job, or keep it to resting"

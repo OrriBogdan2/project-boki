@@ -7,6 +7,7 @@ extends RefCounted
 
 const GOLD := Color("f2c84a")
 const PULSE := "TutPulse"
+const PICKED_SAY_S := 6.0      # s the "Off to work!" bubble stays up, long enough to close the page and see it
 
 static var _drop: OptionButton = null     # the job dropdown on the open Boki page (while this step is up)
 static var _job := ""                     # the best job for that Boki, in words
@@ -40,6 +41,15 @@ static func picked(h: Node, rec: Dictionary, job: String) -> void:
 		var nm := String(rec.get("name", "your Boki"))
 		var on_it := "%s is on %s now!" % [nm, Work.name_of(job)]
 		h._toast("Great, %s Press Done to carry on." % on_it)
+		_say_off(h, rec)
+
+## The Boki answers in the world, so closing the page shows it heading off (or waiting for work).
+static func _say_off(h: Node, rec: Dictionary) -> void:
+	var k: Dictionary = h._kin_entry(rec)
+	if k.is_empty() or h.hw == null:
+		return
+	var going: bool = h.hw.pick(k)
+	h._say(k, String(FarmTutorial.rules()["picked_say"]["go" if going else "wait"]), PICKED_SAY_S)
 
 ## The Care page's main button. While the tutorial still has the trough to set up, Feed is an ordinary button
 ## (feeding by hand is not the step) and the page's one filled, ringed button is Done once a job is set.

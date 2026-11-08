@@ -255,5 +255,9 @@
 		"pickaxe": "And a pickaxe for the rocks, too."
 	},
 	"gems_toast": "Hob gives you %d gems to buy seeds",
+	"picked_say": {
+		"go": "Off to work!",
+		"wait": "Ready when there's work!"
+	},
 	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect); spot: per hint stage, what FarmSpotlight lights up (hub: a bottom-bar button id, world: the step's marker in the world, a Boki). Each target gets its full dimmed beat once, then only a soft ring."
 }

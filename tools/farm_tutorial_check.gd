@@ -391,6 +391,9 @@ func _page_rules(home) -> void:
 	await main.get_tree().process_frame
 	ok(FarmTutorial.did("task") and Work.pin(rec) != "",
 			"picking a job sets it and finishes the step")
+	var k: Dictionary = home._kin_entry(rec)
+	var said := String((k["say"] as Label3D).text) if k.has("say") else ""
+	ok(FarmTutorial.rules()["picked_say"].values().has(said), "and the Boki says in the world that it's off to work")
 	var done := _page_button(home, "Done")
 	ok(done != null and done.theme_type_variation == "Primary" and done.get_node_or_null(FarmTaskGuide.PULSE) != null,
 			"then Done is the filled, ringed button")
