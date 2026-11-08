@@ -86,3 +86,4 @@ Local fix (15:40 ET): the edit returned the sheet unchanged, so the round silver
 
 ## Portrait fix (owner, Nov 8, 02:00 ET)
 `sable_v2_portrait.jpg` now has the master sheet's dark grey-black eye (it was violet), the violet pendant at mid-chest, and loose chains across her stomach. Nano Banana Pro, one change prompt (ref: master sheet). Saved at 4096² with a light de-banding filter and sharpening. The old version is `explorations/sable_v2_portrait_violet_eye.jpg`.
+- Alternate: `explorations/sable_v2_portrait_alt_both_eyes.jpg`, the same portrait with both dark eyes open (no wink). The owner prefers the wink.
