@@ -18,6 +18,7 @@ func run(main: Node) -> void:
 	view.setup(opts)
 	main.add_child(view)
 	var tree := main.get_tree()
+	await main.fade.reveal(0.01)      # the boot splash stays up when a tool opens a screen by hand
 	for m in MOMENTS:
 		view.pm.left = m[1]
 		for i in 20:
