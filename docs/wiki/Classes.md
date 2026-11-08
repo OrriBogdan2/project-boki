@@ -58,7 +58,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Molten Guard | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
 | [the Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
 | [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none (Boki Fusion) |
-| [the Snowglider](Class-Snowglider.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
+| [the Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
 | [the Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
 | [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
 | [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
@@ -77,7 +77,7 @@ A new save picks 1 of 1 starters (the Hired Gun) before the egg pick and plays t
 | [the Stone Seer](Class-Stone-Seer.md) | hard | Hit 3 enemies at once with one ability, 5 times, once 6 Hunters are open | 5 |
 | [the Red Stitch](Class-Red-Stitch.md) | easy | Stun 4 enemies | 4 |
 | [the Scrap King](Class-Scrap-King.md) | medium | Make it out carrying 8 items | 8 |
-| [the Snowglider](Class-Snowglider.md) | medium | Slow 20 enemies | 20 |
+| [the Snowglide](Class-Snowglide.md) | medium | Slow 20 enemies | 20 |
 | [the Storm Chaser](Class-Storm-Chaser.md) | medium | Stagger 6 monsters with abilities | 6 |
 | [the Barnacle Knight](Class-Barnacle-Knight.md) | medium | Knock down 2 hunters while under half health | 2 |
 | [the Silver Thief](Class-Silver-Thief.md) | medium | Land 12 hits while in the air | 12 |
@@ -118,10 +118,10 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Scrap King | Stun 10 enemies | 10 | Colourway: Rust and Brine |
 | the Scrap King | Open 10 chests | 10 | Title: Salvager |
 | the Scrap King | Bring 2 wild Boki home | 2 | Emote: Heave Ho |
-| the Snowglider | Slow 40 enemies | 40 | Colourway: Hoarfrost |
-| the Snowglider | Fly through 10 air rings | 10 | Glider: Frost Kite |
-| the Snowglider | Revive 2 teammates | 2 | Emote: Snow Angel |
-| the Snowglider | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
+| the Snowglide | Slow 40 enemies | 40 | Colourway: Hoarfrost |
+| the Snowglide | Fly through 10 air rings | 10 | Glider: Frost Kite |
+| the Snowglide | Revive 2 teammates | 2 | Emote: Snow Angel |
+| the Snowglide | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
 | the Storm Chaser | Stagger 10 monsters with abilities | 10 | Colourway: Storm Violet |
 | the Storm Chaser | Land 15 hits while in the air | 15 | Trail: Static |
 | the Storm Chaser | Fly through 12 air rings | 12 | Banner: Thunderhead |
