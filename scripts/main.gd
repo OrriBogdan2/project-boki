@@ -2383,8 +2383,8 @@ func _truce_check() -> void:
 	for k in 3000:
 		var g := m.world.random_ground()
 		var roomy := true
-		for dx in range(-8, 9, 2):
-			for dz in range(-4, 5, 2):
+		for dx in range(-8, 9):
+			for dz in range(-4, 5):
 				if m.world.is_void(g.x + dx, g.z + dz) or m.world.is_block(g.x + dx, g.z + dz) or absf(m.world.ground_at(g.x + dx, g.z + dz) - g.y) > 0.3: roomy = false
 		if roomy:
 			home = g; break
@@ -2435,6 +2435,9 @@ func _truce_check() -> void:
 	if answered == "no answer": ok = false; print("TCHECK FAIL no answer")
 	if not T.allied(0, 1):
 		print("TCHECK (making the truce by hand for the rest of the check)")
+		for h in m.hunters: h.ctrl = "idle"      # (a swing already under way would land on the new partner and break the truce)
+		run.call(1.0)
+		for h in m.hunters: h.ctrl = "bot"
 		T.make(0, 1)
 	for h in m.hunters: h.ai.erase("betray_at"); h.ai.erase("betray")
 	run.call(3.0)
