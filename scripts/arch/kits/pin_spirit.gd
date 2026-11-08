@@ -3,8 +3,8 @@ extends RefCounted
 ## Hem's Shift, Spirit Walk (hero sheet pin.md): a quick dodge roll the plain-dash way (ArchKit.dash_dir: the
 ## move direction, the aim when standing still or with the cursor setting), then "time" s walking as a
 ## spirit: rocks, trees, pillars and barriers don't stop her (Hunter.spirit_t; terrain cliffs and ledges
-## still do). Damage ends it. If it ends while she is inside something she loses "stuck_cost" Focus and
-## is put back where she last stood clear. While she is inside something her own screen goes dark blue.
+## still do). Damage ends it. If it ends while she is inside something she is put back where she
+## last stood clear. While she is inside something her own screen goes dark blue.
 
 var k: ArcherKit
 var h: Hunter
@@ -132,7 +132,7 @@ func tick(dt: float) -> void:
 	if t <= 0.0:
 		end("time")
 
-## Ends the walk (time, damage, a merge). Inside something: back to the entry point, Focus spent.
+## Ends the walk (time, damage, a merge). Inside something: back to the entry point.
 func end(why: String) -> void:
 	if t <= 0.0 and h.spirit_t <= 0.0:
 		return
@@ -142,7 +142,6 @@ func end(why: String) -> void:
 	k.fx.tint_to(0.0)
 	if blocked_here():
 		snap_backs += 1
-		k.add_res(-float(k.dash_def().get("stuck_cost", 30.0)))
 		h.teleport(entry)
 		h.vel = Vector3.ZERO
 		k.vfx("spirit_snap", entry)

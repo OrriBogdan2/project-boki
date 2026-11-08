@@ -16,13 +16,13 @@
 	"fantasy": "The hunter of high ground. Climbs, reads the field, pins people to walls.",
 	"silhouette": "the long weapon over the shoulder",
 	"card": {
-		"loop": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, then cash a full Focus in as a Deadeye.",
-		"role": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, then cash a full Focus in as a Deadeye.",
+		"loop": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover.",
+		"role": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover.",
 		"lmb": "Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw.",
 		"rmb": "Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls.",
 		"e": "Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing.",
 		"dash": "Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers.",
-		"passive": "Focus fills while you stand still or pin a foe; at full your next shot is a Deadeye. Hurt foes show through cover.",
+		"passive": "Hawk Sense: rivals under half health show through cover.",
 		"x": "Starpiercer (level 6): your next 3 shots need no draw and fly as big piercing arrows; the third can finish a foe.",
 		"weapons": {
 			"longbow": "Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw."
@@ -30,28 +30,18 @@
 	},
 	"signature": "longbow",
 	"resource": {
-		"id": "focus",
-		"name": "Focus",
-		"max": 100,
-		"kind": "meter",
-		"still_t": 1.4,
-		"sneak_t": 2.8,
-		"high_k": 1.5,
-		"run_drain": 60.0,
-		"hit_loss": 40.0,
-		"range_k": 0.2,
-		"pin_gain": 40.0,
-		"window": 1.2,
-		"pin_grace": 0.8,
-		"deadeye": 18.0,
+		"id": "hawk",
+		"name": "Hawk Sense",
+		"max": 1,
+		"kind": "none",
 		"col": "#d8ffb0",
 		"perfect_t": 0.15,
 		"sense_hp": 0.5,
 		"sense_r": 22.0
 	},
 	"passive": {
-		"name": "Focus",
-		"desc": "Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next arrow (drawn through its stages as always) flies 20% further, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m."
+		"name": "Hawk Sense",
+		"desc": "Rivals under half health are seen through cover within 22m."
 	},
 	"dash": {
 		"id": "spirit_walk",
@@ -64,8 +54,7 @@
 		"time": 2.8,
 		"time_rank3": 0.5,
 		"walk_k": 1.1,
-		"stuck_cost": 30.0,
-		"desc": "A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.",
+		"desc": "A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you are put back where you went in.",
 		"inside_boost": 0.33,
 		"ally_r": 6.0
 	},
@@ -182,8 +171,6 @@
 		"dash": "Rank 3: recharge 6s -> 4.2s; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too."
 	},
 	"tells": {
-		"half": "a faint lens glint",
-		"full": "a bright glint and a thin aim line; crosshairs over every rooted foe",
 		"dash_spent": "a green spirit shell over her while it lasts; dash pip dark"
 	}
 }

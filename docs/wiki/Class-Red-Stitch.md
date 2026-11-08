@@ -61,7 +61,7 @@ target eats the big shot. Spirit Walk carries her through rocks and barriers.
 | Signature weapon | Longbow (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The hunter of high ground. Climbs, reads the field, pins people to walls. |
 | Silhouette | the long weapon over the shoulder |
-| Resource | Focus (max 100) |
+| Resource | Hawk Sense (max 1) |
 
 ### Kit card
 
@@ -69,8 +69,8 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, then cash a full Focus in as a Deadeye. |
-| Passive: Focus | Focus fills while you stand still or pin a foe; at full your next shot is a Deadeye. Hurt foes show through cover. |
+| Loop | Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover. |
+| Passive: Hawk Sense | Hawk Sense: rivals under half health show through cover. |
 | Dash: Spirit Walk | Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers. |
 | LMB | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
 | RMB: Heavy Shot | Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls. |
@@ -80,9 +80,9 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Focus (passive).** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next arrow (drawn through its stages as always) flies 20% further, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m.
+**Hawk Sense (passive).** Rivals under half health are seen through cover within 22m.
 
-**Spirit Walk (dash, Shift, 9.5s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.
+**Spirit Walk (dash, Shift, 9.5s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you are put back where you went in.
 
 **Heavy Shot (RMB, 16s cooldown).**
 
@@ -108,8 +108,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Moment | Tell |
 |---|---|
-| Building up | a faint lens glint |
-| Armed / full | a bright glint and a thin aim line; crosshairs over every rooted foe |
 | Dash spent | a green spirit shell over her while it lasts; dash pip dark |
 
 <!-- /gen:kit -->
