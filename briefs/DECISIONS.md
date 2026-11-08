@@ -221,7 +221,7 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-07 (owner, via coordinator): "Mask" is renamed **Relic** in all player-facing text
 - The object still LOOKS like a mask: same models, icons and art. Only the name changes.
-- Lore framing: a Relic is the mask of a fallen Hero. Wearing one lets you fight as that Hunter. Only those with a Hunter's Relic can save our souls.
+- Lore framing: a Relic is the mask of a fallen Hunter. Wearing it takes on that Hunter's soul, so you fight as them. Only those with a Hunter's Relic can save our souls. (owner 11-08)
 - Scope: UI strings, tooltips, menus, loading tips, tutorial text, item names/descriptions, lore and codex, store and Steam copy, player-facing docs. (Lumi's "Mask relic" = her Relic; the "second-Mask pick" = the second-Relic pick.)
 - Internal identifiers (class names, enums, save keys, asset paths, network ids) stay unless trivial and safe; where they stay, a short comment notes that "mask" in code means "Relic" in game. This supersedes "Mask" as a player-facing word everywhere above.
 
