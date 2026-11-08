@@ -75,6 +75,7 @@ func _match() -> void:
 		added[k] = int(added.get(k, 0)) + 1)
 	Match.prof_on = true
 	Match.prof.clear()
+	Match.vprof.clear()
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
 	var fought := false
@@ -103,8 +104,51 @@ func _match() -> void:
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
 	var per := ks.slice(0, 10).map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / fl.size()])
 	print("BENCH match step sections (ms per frame): " + ", ".join(per))
+	var vk := Match.vprof.keys()
+	vk.sort_custom(func(a, b): return Match.vprof[a] > Match.vprof[b])
+	print("BENCH match visual sections (ms per frame): " + ", ".join(vk.slice(0, 8).map(
+		func(k): return "%s %.2f" % [k, Match.vprof[k] / 1000.0 / fl.size()])))
 	_meshes()
 	Match.prof_on = false
+	if "--bench-ablate" in OS.get_cmdline_user_args():
+		await _ablate()
+
+## --bench-ablate: what each script's _process and each engine node class's internal process costs, by
+## turning it off for a few frames (process ms, against a fresh reference each time).
+func _ablate() -> void:
+	var by := {}
+	for n in main.get_tree().root.find_children("*", "", true, false):
+		var k := ""
+		if n.get_script() != null and n.is_processing():
+			k = (n.get_script() as Script).resource_path.get_file()
+		elif n is AnimationMixer or n is CPUParticles3D or n is Skeleton3D or n is GPUParticles3D:
+			k = n.get_class()
+		if k != "":
+			if not by.has(k): by[k] = []
+			by[k].append(n)
+	var cost := {}
+	for k in by:
+		var ref := await _proc_ms(20)
+		for n in by[k]: _set_on(n, false)
+		cost[k] = ref - await _proc_ms(20)
+		for n in by[k]: if is_instance_valid(n): _set_on(n, true)
+	var ks := cost.keys()
+	ks.sort_custom(func(a, b): return cost[a] > cost[b])
+	print("BENCH ablate (script or class: nodes, ms saved off): " + ", ".join(ks.slice(0, 14).map(
+		func(k): return "%s: %d, %.2f" % [k, by[k].size(), cost[k]])))
+
+func _set_on(n: Node, on: bool) -> void:
+	if n.get_script() != null:
+		n.set_process(on)
+	else:
+		n.set_process_internal(on)
+
+func _proc_ms(frames: int) -> float:
+	var s := 0.0
+	for i in frames:
+		await main.get_tree().process_frame
+		s += Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
+	return s / frames
 
 ## Two rivals and a monster pack around the player, so the last part of the run is a fight.
 func _bring_fight(m: Match) -> void:
