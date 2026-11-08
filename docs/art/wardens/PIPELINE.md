@@ -510,6 +510,13 @@ cells. The tail's molten cracks (the side view) are a seeded random walk painted
 
 Prompts: art/wardens/src/sable_recipe.json. Build: tools/art1/sable_build.sh. Lessons: keep what must hold its place (the gem, the chains) in the scan and rebuild only what has to move. Previews lie close up: a 5x render of the mouth found the scan's stitches in three layers (paint, normal bake, the low mesh's folded crease) and only smoothing the mesh cleared them.
 
+### Kael v2 (owner redesign, briefs/art-refs/kael_v2/), 2026-11-07 (116 credits; balance 1778 before, 1662 after)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Kael v2 edits | 2026-11-07 00:33 | 01a1b36d-182c-749f-b0db-41b44d264551, 01a1b36d-183e-75bb-acc0-8b6a8b417638, 01a1b36d-1822-74e4-89ef-7c74be9c5e26, 01a1b36d-1824-7200-bc4a-793f3e037c46 | nano-banana-pro (image-to-image) | turnaround front, 3/4, left side, back (1:1): both wrist chains and the long sash tails out, nothing else | 36 | Kept |
+| Kael v2 body A | 00:34 | 01a1b36d-e2f4-72b0-8e19-805ca49be6e4 | meshy-7.1 | the 4 edited views + the same as texture refs; A-pose | 40 | Not used: the A-pose opened his fists and gloved the cursed hand black |
+| Kael v2 body B | 00:40 | 01a1b373-056a-72b0-823c-e82f2d1dd908 | meshy-7.1 | the same, no pose (`--pose ""`) | 40 | **Kept**: fists, the bare crimson hand, the scarf over the mouth |
+
 ## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
 No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.
 1. **Inspect** it in Blender: bones (names, parents, heads), each vertex group's bounds, loose parts, materials,

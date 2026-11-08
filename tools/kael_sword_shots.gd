@@ -1,12 +1,12 @@
 extends "res://tools/warden_shots.gd"
-## --kael-sword-check: Kael's held sword against his body in every pose (item 131b): its length as a fraction of
-## his height, where the hands sit on the hilt, and that the blade's FX anchors are still on the blade. Works
+## --kael-sword-check: Kael's skinned sword against his body in every pose (item 131b): its blade as a fraction of
+## his height, where the support hand sits on the hilt, and that the blade's FX anchors exist. Works
 ## headless. --kael-sword-shots --shots-dir=<dir>: the same poses in the renderer: match.png, hero.png, rmb_hold.png
 ## (four frames, front and side) and poses.png. Item 131b's before/after sheets are two runs of this.
 
-const WANT_FRAC := [0.3, 0.4]    # the owner's 0.60 of main's sword (0.34): pommel to tip against his height
-const ON_HILT := 0.1             # m: how far a gripping hand's bone may sit off the hilt
-const TIP_SLACK := 0.03          # m: the blade_tip FX anchor against the blade's real tip
+# guard to tip against his height: the v2 sheet and splash blade, 0.61 (DECISIONS: the size follows the splash)
+const WANT_FRAC := [0.5, 0.65]
+const GRIP_PER_BLADE := 0.25     # the hilt behind the guard per blade length (kael_pieces: 0.15 / 0.61)
 const SWORD_POSES := [["carried", {}], ["walk", {"vel": 2.0}], ["run", {"vel": 4.6}],
 	["LMB swing 1", {"kmove": "jug_slash_r", "kmove_t": 0.1}],
 	["LMB swing 2", {"kmove": "jug_slash_l", "kmove_t": 0.1}],
@@ -24,10 +24,6 @@ const SWORD_POSES := [["carried", {}], ["walk", {"vel": 2.0}], ["run", {"vel": 4
 	["Guard", {"kmove": "jug_guard", "kmove_t": 0.36}]]
 const SMOKE_FRAMES := 200
 const HOLDS := ["Lunge hold 0.10", "Lunge hold 0.28", "Lunge hold 0.45", "Lunge hold 1.20"]
-const POMMEL := Vector3(0, 0, 0.155)     # kael.glb's weapon mesh: pommel end, tip, guard (model units)
-const TIP := Vector3(0, 0, -0.62)
-const GUARD := Vector3(0, 0, -0.055)
-const HILT_END := Vector3(0, 0, 0.125)
 
 var fails := 0
 
@@ -62,65 +58,47 @@ func _step(i: int, st: Dictionary) -> void:
 		s["vel"] = fwd * float(st["vel"])
 	(anims[i][0] as HunterAnim).update(1.0 / 60.0, s)
 
-func _sword(h: Node3D) -> MeshInstance3D:
-	return h.get_node_or_null("Rig/Torso/Aim/Gun/" + WardenGlb.WEAPON) as MeshInstance3D
+## The skinned sword's FX empties on hand.R (kael.glb v2): the blade's root at the guard and its tip.
+func _blade(h: Node3D) -> Array:
+	var root := h.find_child("anchor_blade_root", true, false) as Node3D
+	return [root, h.find_child(WardenGlb.WEAPON_MUZZLE, true, false) as Node3D]
 
 func _measure() -> void:
 	var row := _row("juggernaut", 1)
 	var h := row[0] as Node3D
 	await _settle(4)
-	var w := _sword(h)
-	if w == null:
-		print("FAIL: no .glb sword in the Gun")
+	var bl := _blade(h)
+	if bl[0] == null or bl[1] == null:
+		print("FAIL: no anchor_blade_root / weapon_muzzle on the sword")
 		fails += 1
 		_clear()
 		return
-	# sole to the top of his hair, standing (the bind pose; anchor_head_top sits above the hair)
-	var box := (h.find_child("Body", true, false) as VisualInstance3D)
-	var hair := (h.find_child("Mane", true, false) as VisualInstance3D)
-	var tall := (hair.global_transform * hair.get_aabb()).end.y - (box.global_transform * box.get_aabb()).position.y
+	# sole to the top of his hair, standing (the bind pose; the mane is part of Body)
+	var box := h.find_child("Body", true, false) as VisualInstance3D
+	var aabb := box.global_transform * box.get_aabb()
+	var tall := aabb.end.y - aabb.position.y
 	var sk := WardenGlb.skeleton(h.get_node("Warden"))
-	var hip := (sk.global_transform * sk.get_bone_global_pose(sk.find_bone("hips")).origin).y
-	var shoulder := (sk.global_transform * sk.get_bone_global_pose(sk.find_bone("upper_arm.R")).origin).y
-	print("SWORD model scale %.3f, Gun scale %.3f, weapon scale %.3f, height %.3f m, hips %.3f m, shoulder %.3f m"
-			% [h.scale.y, anims[0][0].gun_scl, w.scale.x, tall, hip, shoulder])
-	var anchors := _vfx_anchors()
+	print("SWORD model scale %.3f, height %.3f m" % [h.scale.y, tall])
 	for p in SWORD_POSES:
 		_hold(0, p[1])
 		await tree.process_frame
 		await tree.process_frame
-		var x := w.global_transform
-		var whole := (x * POMMEL).distance_to(x * TIP)
-		var blade := (x * GUARD).distance_to(x * TIP)
-		var r := _hand_off(sk, x, "hand.R")
-		var l := _hand_off(sk, x, "hand.L")
-		var gun := w.get_parent() as Node3D
-		var a: Array = anchors.get("blade_tip", {}).get("gun", [0, 0, -0.53])
-		var tip_off := (gun.global_transform * Vector3(a[0], a[1], a[2])).distance_to(x * TIP)
-		print("SWORD %-16s sword %.3f m = %.3f of height, blade %.3f m, hand R %.3f L %.3f off the hilt, tip FX %.3f"
-				% [p[0], whole, whole / tall, blade, r, l, tip_off])
-		if whole / tall < WANT_FRAC[0] or whole / tall > WANT_FRAC[1]:
-			print("FAIL: %s sword is %.3f of his height" % [p[0], whole / tall])
-			fails += 1
-		if r > ON_HILT:
-			print("FAIL: %s right hand %.3f m off the hilt" % [p[0], r])
-			fails += 1
-		if tip_off > TIP_SLACK:
-			print("FAIL: %s blade_tip FX anchor %.3f m off the blade's tip" % [p[0], tip_off])
+		var root := (bl[0] as Node3D).global_position
+		var tip := (bl[1] as Node3D).global_position
+		var blade := root.distance_to(tip)
+		var hilt_end := root + (root - tip) * GRIP_PER_BLADE
+		var l := _hand_off(sk, root, hilt_end, "hand.L")
+		print("SWORD %-16s blade %.3f m = %.3f of height, hand L %.3f off the hilt"
+				% [p[0], blade, blade / tall, l])
+		if blade / tall < WANT_FRAC[0] or blade / tall > WANT_FRAC[1]:
+			print("FAIL: %s blade is %.3f of his height" % [p[0], blade / tall])
 			fails += 1
 	_clear()
 	await tree.process_frame
 
-func _vfx_anchors() -> Dictionary:
-	var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/vfx/juggernaut.json"))
-	return d.get("anchors", {})
-
 ## A hand bone's distance from the hilt's line (m).
-func _hand_off(sk: Skeleton3D, weapon_x: Transform3D, bone: String) -> float:
-	var bi := sk.find_bone(bone)
-	var at := sk.global_transform * sk.get_bone_global_pose(bi).origin
-	var a := weapon_x * GUARD
-	var b := weapon_x * HILT_END
+func _hand_off(sk: Skeleton3D, a: Vector3, b: Vector3, bone: String) -> float:
+	var at := sk.global_transform * sk.get_bone_global_pose(sk.find_bone(bone)).origin
 	return at.distance_to(Geometry3D.get_closest_point_to_segment(at, a, b))
 
 func _posed(names: Array, yaw: float) -> Array:

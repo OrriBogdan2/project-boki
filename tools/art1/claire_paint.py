@@ -1,7 +1,7 @@
-"""ART-1 Claire: the texel-space paint for the rebuilt pieces (recipe: kael_paint.py): arrays of texels (world position, normal, occlusion) to sRGB in 0..1."""
+"""ART-1 Claire: the texel-space paint for the rebuilt pieces (recipe: paintkit.py): arrays of texels (world position, normal, occlusion) to sRGB in 0..1."""
 import numpy as np
 from meshkit import norm, smooth
-from kael_paint import hexc, mix, fbm, lit, ramp
+from paintkit import hexc, mix, fbm, lit, ramp
 import claire_pieces as K
 
 HOT = np.array([1.0, 0.76, 0.44])        # hero_toon's glow key: these texels glow in the archetype's model_glow colours

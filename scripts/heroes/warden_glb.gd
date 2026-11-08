@@ -113,7 +113,6 @@ const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the fra
 ## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's data
 ## lists in "hide_while_chain" shrink away (item 76b.4), so one chain shows, never two.
 const CHAIN_OUT := "chain_out"
-const GRIP_L := "grip_l"                 # meta on a held weapon: warden_look "grip_l", read by HunterAnim
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
@@ -224,7 +223,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	if bool(WardenClips.data(art(arch)).get("skinned_weapon", false)):
 		_skinned_weapon(root)
 	else:
-		_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]), own)
+		_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]))
 	_hold_shield(root, glb)
 	sync.mood = WardenMood.make(root, glb, skel, art(arch))
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
@@ -315,7 +314,8 @@ static func _smoke(root: Node3D, own: Dictionary) -> void:
 	(at_anchor if at_anchor else weapon).add_child(p)
 
 ## A model's soft glow around what burns (warden_look.json "bloom": a list of {at: "weapon" or an anchor name,
-## color [r, g, b, a], size (m), count (along the weapon's length, from `from` of it), depth_test}): additive
+## color [r, g, b, a], size (m), count (along the weapon's length, or from the anchor to the anchor `to`
+## on the same bone: a skinned blade; from `from` of it), depth_test}): additive
 ## camera-facing puffs, so a white-hot blade core or a magma arm glows past its own edges like the art's bloom
 ## instead of reading as flat white paint. World-sized, so it shrinks with the model at the match camera.
 static func _bloom(root: Node3D, glb: Node3D, own: Dictionary) -> void:
@@ -350,7 +350,11 @@ static func _bloom(root: Node3D, glb: Node3D, own: Dictionary) -> void:
 				weapon.add_child(_bloom_quad(m, sz, p))
 		else:
 			var a := glb.find_child(at, true, false) as Node3D
-			if a:
+			if a == null:
+				continue
+			var to := glb.find_child(String(b.get("to", "")), true, false) as Node3D if b.has("to") else null
+			var n := int(b.get("count", 1)) if to else 1
+			for j in n:
 				# (on the root, following the anchor like the halos: the model's own surfaces stay toon-only)
 				var q := _bloom_quad(m, sz, Vector3.ZERO)
 				root.add_child(q)
@@ -358,6 +362,9 @@ static func _bloom(root: Node3D, glb: Node3D, own: Dictionary) -> void:
 				follow.name = "BloomFollow"
 				follow.update_scale = false
 				follow.update_rotation = false
+				if to:      # (both ride one bone: the step between them is fixed in the anchor's frame)
+					var step := (a.transform.affine_inverse() * to.transform).origin
+					follow.position = step * lerpf(float(b.get("from", 0.0)), 1.0, (j + 0.5) / n)
 				a.add_child(follow)
 				follow.remote_path = follow.get_path_to(q)
 
@@ -392,7 +399,7 @@ static func _puff() -> Texture2D:
 
 ## The .glb's own weapon (a mesh named WEAPON, modelled in the Gun node's space) goes into the hands in place
 ## of the procedural one; the Gun node and its Muzzle stay, so shots and grips are unchanged.
-static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vector3.ZERO, own := {}) -> void:
+static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vector3.ZERO) -> void:
 	var weapon := glb.find_child(WEAPON, true, false) as Node3D
 	var gun := root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 	if weapon == null or gun == null:
@@ -410,9 +417,6 @@ static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vect
 	seat.add_child(weapon)
 	# warden_look "weapon_scale", and "weapon_offset" (m, Gun space: seats the grip in the hand)
 	weapon.transform = Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * wscale), shift)
-	# warden_look "grip_l" (Gun space): the support hand's place on a hilt the hold's own "gl" would overshoot
-	if own.has("grip_l"):
-		weapon.set_meta(GRIP_L, Vector3(own["grip_l"][0], own["grip_l"][1], own["grip_l"][2]))
 	var off := weapon.find_child(WEAPON_OFF, true, false) as Node3D
 	if off:
 		var at := WardenGlb.model_xf(gun, off)
@@ -897,6 +901,9 @@ class Sync extends Node:
 			blade_root_bone = WardenSkeleton.find(skel, String(bl.get("root_bone", bl.get("bone", "hand.R"))))
 			gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 			muzzle = gun.get_node_or_null("Muzzle") as Node3D if gun else null
+		for ch in springs.chains:
+			var first := skel.get_bone_name(int(ch["ids"][0]))
+			ch["own_rest"] = Array(dd.get("hang_own_rest", [])).any(func(n): return first.begins_with(String(n)))
 		for b in dd.get("hide_while_chain", []):
 			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
@@ -1140,9 +1147,17 @@ class Springs:
 				var r: Transform3D = rest[j]
 				var a := inv * pts[j]
 				var from := ((rest[j + 1] as Transform3D).origin - r.origin).normalized()
+				if ch.get("own_rest", false):       # (data "hang_own_rest": the fist's turn doesn't twist it edge on)
+					r = skel.get_bone_global_rest(int(ids[j]))
+					from = (skel.get_bone_global_rest(int(ids[j + 1])).origin - r.origin).normalized()
 				var to := (inv * pts[j + 1] - a).normalized()
 				var c := from.dot(to)
-				var q := Quaternion(from, to) if c < 0.99999 and c > -0.999 else Quaternion.IDENTITY
+				var q := Quaternion.IDENTITY
+				if c <= -0.999:      # (a chain flipped end for end: Quaternion(from, to) has no answer there)
+					var side := Vector3.RIGHT if absf(from.x) < 0.9 else Vector3.FORWARD
+					q = Quaternion(from.cross(side).normalized(), PI)
+				elif c < 0.99999:
+					q = Quaternion(from, to)
 				skel.set_bone_global_pose(int(ids[j]), Transform3D(Basis(q) * r.basis, a))
 
 ## Props on an orbit (RIG_CONTRACT "Orbits"): a .glb node named orbit_<name> riding a bone carries unskinned

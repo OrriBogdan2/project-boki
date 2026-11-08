@@ -30,8 +30,8 @@ const WARDENS := {
 	"rimewright": {"hit_r": 0.38, "height": 1.08, "height_3d": 1.21, "width": [0.6, 1.25], "moves": "tm_"},
 	# (Cinder v2: her built lizard horns stand over her head; v1's fire-crest with its 1.14x is gone)
 	"ashwick": {"hit_r": 0.376, "height": 1.02, "height_3d": 1.08, "width": [0.7, 1.5], "moves": "as_"},
-	# (Kael: body size 1.06, owner Nov 4: 9% bigger; juggernaut.md's 1.12x was at 1.0)
-	"juggernaut": {"hit_r": 0.428, "height": 1.26, "height_3d": 1.19, "width": [1.0, 2.0], "moves": "jug"},
+	# (Kael: size 0.97 on his long-legged rig, the owner's height; height_3d: his wild mane over his head)
+	"juggernaut": {"hit_r": 0.428, "height": 1.26, "height_3d": 1.27, "width": [1.0, 2.0], "moves": "jug"},
 	# (Grimble: the head at his old height, the hoard towers over it)
 	"dredge": {"hit_r": 0.452, "height": 1.3, "height_3d": 1.49, "width": [1.3, 2.4], "moves": "dr_"},
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
