@@ -9,7 +9,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 
 | Weapon | Carried by | Weight | Damage | Fire interval | Magazine | Reload | Range | Notes |
 |---|---|---|---|---|---|---|---|---|
-| Arc Shots | Silver Thief | light | 13 | 0.45s | none | none | 12m | A spinning shot from alternating hands every 0.45s. It flies to your cursor (12m at most) and fizzles there if it hits nothing. |
+| Arc Shots | Silver Thief | light | 13 | 0.45s | none | none | 8.5m | A spinning shot from alternating hands every 0.45s. It flies to your cursor (8.5m at most) and fizzles there if it hits nothing. |
 | Burst Rifle | none | medium | 7 | 0.45s | 27 | 1.5s | 10.5m | Three rounds per pull. Accurate at range. |
 | Coilcaster | Storm Chaser | light | 12 | 0.648s | none | none | 13m | No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range. |
 | Torch Lance | Mad Pyromancer | heavy | 2.7 | 0.1s | none | none | 7m | Hold to hose fire 7m ahead: the stream trails behind a sweep, narrow at the nozzle and billowing at the end. No fuel: it roars as long as you hold. It builds Char; at full Char the foe goes Ablaze. |
