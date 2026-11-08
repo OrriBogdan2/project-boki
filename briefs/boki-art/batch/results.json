@@ -1,0 +1,112 @@
+[
+  {
+    "id": "chuggamus_r2",
+    "name": "Chuggamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chuggamus_r2_1.png",
+    "ok": false,
+    "error": "1 validation error for ImageConfig\nimage_size\n  Extra inputs are not permitted [type=extra_forbidden, input_value='4K', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+  },
+  {
+    "id": "chuggamus_r2",
+    "name": "Chuggamus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chuggamus_r2_2.png",
+    "ok": false,
+    "error": "1 validation error for ImageConfig\nimage_size\n  Extra inputs are not permitted [type=extra_forbidden, input_value='4K', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+  },
+  {
+    "id": "vespox_mid",
+    "name": "Vespox",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vespox_mid_1.png",
+    "ok": false,
+    "error": "1 validation error for ImageConfig\nimage_size\n  Extra inputs are not permitted [type=extra_forbidden, input_value='4K', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+  },
+  {
+    "id": "vespox_mid",
+    "name": "Vespox",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vespox_mid_2.png",
+    "ok": false,
+    "error": "1 validation error for ImageConfig\nimage_size\n  Extra inputs are not permitted [type=extra_forbidden, input_value='4K', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+  },
+  {
+    "id": "ringrove",
+    "name": "Ringrove",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ringrove_1.png",
+    "ok": false,
+    "error": "1 validation error for ImageConfig\nimage_size\n  Extra inputs are not permitted [type=extra_forbidden, input_value='4K', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/extra_forbidden"
+  },
+  {
+    "id": "chuggamus_r2",
+    "name": "Chuggamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chuggamus_r2_1.png",
+    "ok": true
+  },
+  {
+    "id": "chuggamus_r2",
+    "name": "Chuggamus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chuggamus_r2_2.png",
+    "ok": true
+  },
+  {
+    "id": "vespox_mid",
+    "name": "Vespox",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vespox_mid_1.png",
+    "ok": true
+  },
+  {
+    "id": "vespox_mid",
+    "name": "Vespox",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vespox_mid_2.png",
+    "ok": true
+  },
+  {
+    "id": "ringrove",
+    "name": "Ringrove",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ringrove_1.png",
+    "ok": true
+  },
+  {
+    "id": "ringrove",
+    "name": "Ringrove",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ringrove_2.png",
+    "ok": true
+  },
+  {
+    "id": "lanternmit",
+    "name": "Lanternmit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanternmit_1.png",
+    "ok": true
+  },
+  {
+    "id": "lanternmit",
+    "name": "Lanternmit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanternmit_2.png",
+    "ok": true
+  },
+  {
+    "id": "stormit",
+    "name": "Stormit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stormit_1.png",
+    "ok": true
+  },
+  {
+    "id": "stormit",
+    "name": "Stormit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stormit_2.png",
+    "ok": true
+  }
+]
