@@ -27,7 +27,7 @@ Brall's scale (slash 20 with tip +20, Execution Slam 70, Lunge 45, Obsidian Slam
 with tip 36, R 130) is kept as ratios: slash 8 (tip 16), Slam 26, Lunge 14 to 22, Meteor 18, Spin 18, Rampage 7
 with tip 14, Gilded Riposte 34 (the footage's 396 against a 94 slash, 4.2x; its 21.7s cooldown is about 2.3 Tether
 Chains, so ours is 22s against the Warchain's 9.5s). Rank 2 is the shared step (cooldown -10%, damage +15%); rank 3 carries the level 2-4
-specials. Data pass (SERVER_UPDATE7): the Meteor Drop has its own 9s slot (9s against the Smash's 2.5s, kept as the
+specials. Data pass (SERVER_UPDATE7): the Meteor Drop has its own 9s slot (the data's, against the Smash's 2.5s, kept as the
 ratio 3.6x of our 2s), 2.4s shorter at rank 3 (the -3s as a third of its cooldown); the Rampage tip no longer stuns into
 a wall; the Rampage starts on 2 charges and takes the third at rank 2; the Warchain loses its refund for the data's
 -2s three times (12.5% of its cooldown each, merged: 12.5% at rank 2, 37.5% at rank 3); every Smash gets +20% at rank 2 and
