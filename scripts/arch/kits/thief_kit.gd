@@ -14,9 +14,10 @@ extends ArchKit
 ##   Vault back with no cap (the payoff: T4, pay_cashin, RESET at her hand); a chain runs a routine of flips and
 ##   keeps fast Shift presses (ThiefChain). No ring or burst on the dash itself.
 ##   What other presses do during the cartwheel: content/dash_flow/thief.json (DashFlow).
-## - RMB, Bola: a 0.4s wind-up with the lane showing, then a kit-run Bola that grounds the first foe and
-##   slows it (the owner's call, on top of the source's Ground) and flies on (bouncing once off a wall); a second
-##   foe caught and both are stunned with bonus damage.
+## - RMB, Bola: thrown on the press (the owner's call: no wind-up), a kit-run Bola that grounds the first foe
+##   and slows it (the owner's call, on top of the source's Ground) and flies on; a second foe caught and both
+##   are stunned with bonus damage, and a wall after the first catch pins that foe: the same stun. With no
+##   catch yet it bounces once off a wall.
 ## - E, Shadow Knife: a dagger to the cursor that sticks in the first foe (slows) or lands; recast to blink
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
@@ -49,7 +50,6 @@ var haste_t := 0.0             # Vault's burst of speed (ends on the empowered h
 var mark_gap := {}             # target id -> time of its last Mark from us
 var pips := {}                 # target instance id -> {node, t: Ent}: the Mark pips over their head
 var knife := {}                # the stuck Shadow Knife: {target, pos, dir}
-var bola_cast := {}            # the Bola winding up, lane showing: {t}
 var bola := {}                 # the Bola in flight: {pos, dir, left, first, bounces, stg}
 var encore: ThiefUlt           # X, the ultimate
 var chain: ThiefChain          # the Vault loop: its routine of flips, the Shift presses it keeps
@@ -65,6 +65,7 @@ var primed_hits := 0           # (tests, demo)
 var bola_pairs := 0
 var bola_bounces := 0
 var bola_breaks := 0
+var bola_pins := 0              # Bolas that pinned their first foe on a wall
 var bolts := 0                 # bolts thrown
 var fizzles := 0               # bolts that ran out at the cursor
 var last_bolt_end := Vector3.ZERO
@@ -82,10 +83,8 @@ func _setup() -> void:
 func fx() -> DJFx:
 	return DJFx.of(m)
 
-## A Boki merge starting drops the Bola's wind-up and a running Encore (nothing fires, nothing is left
-## for after the merge). Hold fields: bola_cast, encore.st.
+## A Boki merge starting drops a running Encore (nothing is left for after the merge). Hold field: encore.st.
 func _drop_holds() -> void:
-	bola_cast = {}
 	encore.drop()
 
 # ------------------------------------------------------------------ X: Encore (ThiefUlt)
@@ -249,7 +248,6 @@ func _tick(dt: float) -> void:
 			var e: Array = mk[h.nid]
 			e[1] = float(e[1]) - dt
 			if float(e[1]) <= 0.0: mk.erase(h.nid)
-	if not bola_cast.is_empty(): _tick_bola_cast(dt)
 	if not bola.is_empty(): _tick_bola(dt)
 	encore.tick(dt)
 	_tick_vault(dt)
@@ -612,43 +610,13 @@ func on_knock(t: Hunter, mine: bool) -> void:
 # ------------------------------------------------------------------ RMB: Bola
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
-	if not bola_cast.is_empty() or not spend_rmb(): return
-	var bd: Dictionary = rmb_def()["bola"]
-	bola_cast = {"t": float(bd["cast"])}
-	play("thf_bola")                  # the whirl overhead through the wind-up, the sling at the end
-	m.sfx("dj_bola_whirl", h.pos, -4.0 if h.is_local() else -8.0, 1.0)
+	if not spend_rmb(): return
+	play("thf_bola")
+	_throw_bola()
 
 func lane_len() -> float:
 	var bd: Dictionary = rmb_def()["bola"]
 	return float(bd["range"]) + float(bd["after"]) + (float(bd["after_r3"]) if rank("sec") >= 3 else 0.0)
-
-## The wind-up: the lane (about 1 bh wide, 6 bh long) shows toward the cursor and follows your aim.
-func _tick_bola_cast(dt: float) -> void:
-	var bd: Dictionary = rmb_def()["bola"]
-	if busy():
-		bola_cast = {}
-		return
-	bola_cast["t"] = float(bola_cast["t"]) - dt
-	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
-	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw
-	AimKit.lane(h, "rmb",
-			{"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k,
-					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": 1.6})
-	_whirl_bola()
-	if float(bola_cast["t"]) <= 0.0:
-		bola_cast = {}
-		AimKit.hide(h, "rmb")
-		fx().unplace("bolaw%d" % h.get_instance_id())
-		_throw_bola()
-
-## The two weights whirling round the raised hand through the wind-up (everyone sees them).
-func _whirl_bola() -> void:
-	# over her head, where the raised hand circles (from above the hand itself hides under the hood)
-	var top := h.pos + Vector3(0, 2.0 * float(h.cdat.get("scale", 1.0)), 0)
-	var at := hand_pos(true).lerp(top, 0.6)
-	var spin: float = m.time * 24.0
-	fx().place("bolaw%d" % h.get_instance_id(), "bola", at, Vector2(cos(spin), sin(spin)), col_of(rmb_def()),
-			BOLA_CORD, 0.0, 0.0)
 
 func _throw_bola() -> void:
 	var bd: Dictionary = rmb_def()["bola"]
@@ -660,6 +628,9 @@ func _throw_bola() -> void:
 	bola = {"pos": h.pos + Vector3(dv.x * 0.5, 1.0, dv.y * 0.5), "dir": dv, "left": float(bd["range"]), "first": null,
 			"bounces": int(bd["bounces"]), "stg": stg}
 	m.sfx("dj_bola_throw", h.pos, -3.0, 1.0)
+	# the lane stays up for the flight, a strip with chevrons in the Bola's violet (the source's is white)
+	AimKit.lane(h, "rmb", {"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": 1.0,
+			"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": 1.6})
 	Feel.cast_sound(m, "projectile", "control", h.pos, h)
 	# the yellow flash of the throw
 	fx().star(h.pos + Vector3(dv.x * 0.6, 1.2, dv.y * 0.6), col_of(rmb_def()), 0.8, 0.12)
@@ -681,6 +652,11 @@ func _tick_bola(dt: float) -> void:
 	for i in steps:
 		var q := p + Vector3(dir.x, 0, dir.y) * step
 		if _walled(q):
+			var caught = bola["first"]
+			if caught != null and is_instance_valid(caught) and not (caught as Ent).dead:
+				_pin(caught as Ent)
+				_end_bola(p)
+				return
 			if int(bola["bounces"]) > 0:
 				# off the wall: flip whichever way took it in, keep what's left of its flight
 				if _walled(Vector3(q.x, q.y, p.z)): dir.x = -dir.x
@@ -728,6 +704,7 @@ func _walled(q: Vector3) -> bool:
 
 func _end_bola(at: Vector3) -> void:
 	bola = {}
+	AimKit.hide(h, "rmb")
 	fx().unplace("bola%d" % h.get_instance_id())
 	m.fx.burst(at, col_of(rmb_def()), 5, 2.0, 0.25, 6.0, 0.6)
 
@@ -766,10 +743,7 @@ func _tangle(f, other: Ent) -> void:
 	wrapped[other.get_instance_id()] = [other, _ground_t()]
 	var both: Array = [other]
 	if f != null and is_instance_valid(f) and not (f as Ent).dead: both.append(f)
-	for t in both:
-		t.hurt(float(bd["pair_dmg"]) * power("sec"), h,
-				{"src": "abil", "ab": "utility", "tags": ["utility", "bola"], "stun": float(bd["pair_stun"]),
-						"dr": true})
+	for t in both: _stun_hit(t)
 	add_mark(other, 1, true)
 	if rank("sec") >= 3 and both.size() == 2:
 		var pool := marks_on(both[0]) + marks_on(both[1])
@@ -782,6 +756,24 @@ func _tangle(f, other: Ent) -> void:
 	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("ff9be8"), 1.2, 0.3)
 	m.sfx("thief_bola_stun", mid, -2.0, 1.0)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
+
+## The Bola's stun and bonus damage, on each foe of a pair or on the one pinned to a wall.
+func _stun_hit(t: Ent) -> void:
+	var bd: Dictionary = rmb_def()["bola"]
+	t.hurt(float(bd["pair_dmg"]) * power("sec"), h,
+			{"src": "abil", "ab": "utility", "tags": ["utility", "bola"], "stun": float(bd["pair_stun"]), "dr": true})
+
+## The Bola meets a wall or tree after its first catch: that foe is pinned, stunned with the bonus damage.
+func _pin(f: Ent) -> void:
+	var col := col_of(rmb_def())
+	bola_pins += 1
+	_stun_hit(f)
+	var at: Vector3 = bola["pos"]
+	m.fx.bolt(at, f.pos + Vector3(0, 0.8, 0), col)
+	m.fx.word(f.pos + Vector3(0, 2.6, 0), "PINNED", col, true)
+	fx().star(f.pos + Vector3(0, 1.4, 0), Color("ff9be8"), 1.2, 0.3)
+	m.sfx("thief_bola_stun", f.pos, -2.0, 1.0)
+	net_bolt(at, f.pos + Vector3(0, 0.8, 0), col)
 
 # ------------------------------------------------------------------ E: Shadow Knife
 func in_e() -> bool:
@@ -920,7 +912,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sig"] = true
 		return
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and bola_cast.is_empty() and los and dist < lane_len() - 1.0:
+	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < lane_len() - 1.0:
 		# best when someone stands behind them along the throw (the Bola flies on and catches both)
 		var pair := false
 		var dv := h.dir_to(tgt)
@@ -929,8 +921,6 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		if pair or tgt is Hunter or randf() < 0.35:
 			h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 			h.inp["sec"] = true
-	if not bola_cast.is_empty():
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 	# Vault to empower the next bolt when it will land; cartwheel sideways across their aim
 	if int(h.slot_lv["dash"]) > 0 and primed_t <= 0.0 and h.dashes >= 1.0 and los and dist < float(h.wpn.get("range", 12.0)) - 1.0 and randf() < 0.3:
 		var side := h.dir_to(tgt).rotated(PI * 0.5 * (1.0 if randf() < 0.5 else -1.0))

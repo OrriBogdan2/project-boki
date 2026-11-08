@@ -57,7 +57,7 @@ func _beats() -> void:
 			flows)
 	var stance := ["thf_lmb_r", "thf_lmb_l", "thf_bola"].all(
 			func(mv: String) -> bool: return bool(KMovesDJ.MOVES[mv].get("stance", false)))
-	A.ok("dancer parity: the throws' and the Bola wind-up's legs are a stance, dropped at a run (legs keep running)",
+	A.ok("dancer parity: the throws' and the Bola's legs are a stance, dropped at a run (legs keep running)",
 			stance and HunterAnim.stance_leg_k(true, 1.0) == 0.0 and HunterAnim.stance_leg_k(true, 0.0) == 1.0)
 
 ## Held on a foe: a bolt every 0.45s, hands alternating, each one starting its own throw.

@@ -71,7 +71,7 @@ What the in-game kit card (K) says.
 | Loop | Ranged duelist: stay on one foe, cartwheel, and land the big shot. |
 | Passive: Marks | Each hit on the same foe adds a Mark: +10% damage, with no cap. Knocks heal you. |
 | Dash: Vault | Cartwheel a short way (much further from a jump). Your next shot is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back at once. |
-| RMB: Bola | A short wind-up, then a Bola down the lane: it grounds and slows the first foe and flies on. Catch a second and both are stunned. |
+| RMB: Bola | Throw a Bola down the lane at once: it grounds and slows the first foe and flies on. Catch a second foe, or a wall or tree, and the stun lands. |
 | E: Shadow Knife | Throw a dagger to your cursor or into a foe. Press E again to blink to it. |
 | Hunter ultimate: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge. |
 | Weapon: Arc Shots | Bolts from alternating hands every 0.45s. Each one lands at your cursor. |
@@ -84,7 +84,7 @@ What the in-game kit card (K) says.
 
 **Bola (RMB, 7s cooldown).**
 
-- *Tap:* A 0.4s wind-up with the lane showing (you keep aiming), then the Bola flies 7m: 5 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and slowed 30%, and the Bola flies on 3.8m (a crate it breaks counts as that first catch). It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).
+- *Tap:* Thrown the moment you press, 7m down the lane: 5 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and slowed 30%, and the Bola flies on 5.5m (a crate it breaks counts as that first catch). With no catch yet it bounces once off a wall. After the first foe, a second foe, a wall or a tree stuns: the Bola pins them for 0.9s and they take +13 (TANGLED; a pinned one shows PINNED).
 - *In the air:* Thrown from the air the same way.
 
 **Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (14m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press E again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
