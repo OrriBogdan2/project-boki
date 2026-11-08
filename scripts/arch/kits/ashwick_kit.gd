@@ -539,7 +539,7 @@ func _poof(dd: Dictionary, dir: Vector2) -> void:
 	var feel := dash_feel()
 	var air_t := float(dd["air_time"]) * float(feel["time"])
 	var air_dist := float(dd["air_dist"]) * float(feel["dist"])
-	travel(air_dist, air_t, {"invuln": 0.08, "trail": "", "dir": dir})
+	travel(float(dd["air_dist"]), float(dd["air_time"]), {"invuln": 0.08, "trail": "", "dir": dir})
 	h.roll_t = air_t
 	h.roll_speed = air_dist / air_t
 	play("lw_hop")

@@ -760,6 +760,11 @@ func _all() -> void:
 	P.ex_cd = 0.0
 	ak.aim_at(P, home + Vector3(9.0, 0, 0))
 	P.ak.on_dash(true)
+	ok(
+		"barge: the air pounce is 3.2 m x 1.35 x the dash feel once (3.7 m), same time as the ground",
+		absf(P.roll_t - dash_t) < 0.005 and absf(P.roll_speed * P.roll_t - one * 1.35) < 0.05,
+		"%.2f m in %.2fs, ground %.2f m in %.2fs" % [P.roll_speed * P.roll_t, P.roll_t, one, dash_t]
+	)
 	ak.step(m, dash_t + 0.02)
 	var air_quick := P.pos.x - home.x
 	ak.step(m, 0.3)

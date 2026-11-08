@@ -164,10 +164,11 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save wears Vex first (`s
 
 | Setting | Value |
 |---|---|
-| doc | Global feel for every hunter's dash (Shift), applied on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Owner, Nov 2: dashes were too fast and too far in general, Sparkle's should go further: its lane is drawn from its own numbers, so its distance is raised in content/archetypes/mage.json (4-7m to 5-8.5m) and only its time is scaled here. Dancer (thief) is taken off it: her Cartwheel is the source's measured one (owner review item 7: 4.5m in 0.48s on the ground, 8.4m over 0.95s from a jump), set as-is in content/archetypes/thief.json. |
+| doc | Global feel for every hunter's dash (Shift), applied on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Owner, Nov 2: dashes were too fast and too far in general, Sparkle's should go further: its lane is drawn from its own numbers, so its distance is raised in content/archetypes/mage.json (4-7m to 5-8.5m) and only its time is scaled here. Cinder (ashwick) is taken off it too: his Soot Ram is the source's measured ~3.4m in 0.33s and his poof 6.8m in 0.28s, set as-is in content/archetypes/ashwick.json (KIT_PARITY item 11). Dancer (thief) is taken off it: her Cartwheel is the source's measured one (owner review item 7: 4.5m in 0.48s on the ground, 8.4m over 0.95s from a jump), set as-is in content/archetypes/thief.json. |
 | default | {"dist": 0.85, "time": 1.15} |
 | mage | {"dist": 1.0, "time": 1.15} |
 | thief | {"dist": 1.0, "time": 1.0} |
+| ashwick | {"dist": 1.0, "time": 1.0} |
 
 ## equal (`content/rules/equal.json`)
 
