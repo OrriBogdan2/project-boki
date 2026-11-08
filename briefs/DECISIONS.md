@@ -297,3 +297,11 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 ## 2026-11-07 evening (owner): parity means QUALITY, not personality
 - "dont do parity with personality - i care quality parity on animations, art, etc - but our art is different and our characters are different."
 - Kits: mechanics parity stands. Animations/art: match the source game's polish (weight, timing, silhouette, loops), but poses, attitude, idles, emotes and looks come from OUR characters (archetype personality text, lore, owner art sheets). Never copy a source hero's pose or personality.
+
+## 2026-11-08 (owner): every expedition is a fight over the Heart (direction; prototype first)
+- The Blight closes toward the Heart's site each match (battle-royale pull to one center), so every match converges on it.
+- At the center the Heart charges a Heartspark (a shard of its red-orange LIGHT, not a piece of the Heart: lore stays "one Heart, one crack"). While it charges, everyone sees where it is.
+- When charged, anyone can take it. The carrier is revealed and slowed, and can only leave through a Heart Gate. Extracting with it pays big (rare eggs, evolution mats, bond/trust).
+- After a carrier extracts, the Heart goes on a COOLDOWN and then charges a new Heartspark (visible again), so one match can have several Heartspark fights.
+- Normal extraction stays open: leaving early with your own loot is still a valid choice (keeps extraction tension; no forced total loss, esp. on pet-loss tiers).
+- Variant to test later: "Heart Night", a top-tier/event mode where ONLY the Heartspark team can extract.
