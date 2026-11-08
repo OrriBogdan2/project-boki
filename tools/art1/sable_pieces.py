@@ -119,11 +119,11 @@ def pistol(side):
     BV = 0.052                              # the barrel's height over the fist
     # the barrel: octagonal, a ring at the breech and mid-way, flaring to a bell mouth
     us = [-0.030, 0.0, 0.11, 0.12, 0.13, 0.25, 0.30, 0.325, MUZZLE_U]
-    rs = [0.0255, 0.0235, 0.0225, 0.0265, 0.0225, 0.0215, 0.0265, 0.036, 0.041]
+    rs = [0.0235, 0.0218, 0.0208, 0.0245, 0.0208, 0.0199, 0.0245, 0.0334, 0.038]       # the bell mouth .038 (the sheet)
     out.append(sweep("barrel" + side, "metal-silver", [p(u, BV) for u in us], SEC8, np.array(rs), side_hint=x_, tip=False))
     # the mouth's glowing plug
     m0, m1 = p(MUZZLE_U - 0.012, BV), p(MUZZLE_U + 0.001, BV)
-    out.append(sweep("mouth" + side, "glow-rune", [m0, m1, m1 + (m1 - m0) * 0.01], SEC8, np.array([0.032, 0.032, 0.001]), side_hint=x_))
+    out.append(sweep("mouth" + side, "glow-rune", [m0, m1, m1 + (m1 - m0) * 0.01], SEC8, np.array([0.03, 0.03, 0.001]), side_hint=x_))
     # the ramrod under the barrel
     out.append(sweep("rod" + side, "metal-silver", [p(u, BV - 0.037) for u in (0.11, 0.25, 0.29, 0.30)], SEC6[::2], np.array([0.0055, 0.0055, 0.0085, 0.006]), side_hint=x_))
     # stock: the forestock under the barrel, the wrist through the fist, the swelling butt; flattened sideways
@@ -247,8 +247,8 @@ def braid():
     for i in range(rings):
         ph = i / 2.0
         fr = ph - np.floor(ph)
-        wd[i] = (0.034 - 0.008 * u[i]) * (0.86 + 0.14 * np.sin(fr * np.pi))      # a shallow pinch between lobes (deeper reads as beads)
-        offs[i] = (1 if int(ph) % 2 else -1) * 0.0095 * np.sin(fr * np.pi)
+        wd[i] = (0.034 - 0.008 * u[i]) * (0.92 + 0.08 * np.sin(fr * np.pi))      # a shallow pinch between lobes (deeper reads as beads)
+        offs[i] = (1 if int(ph) % 2 else -1) * 0.0075 * np.sin(fr * np.pi)
     t, s_, n_ = frames(path, (1, 0, 0))
     centre = path + s_ * offs[:, None]
     p = sweep("braid", "hair-braid", centre, SEC6, wd, side_hint=np.array([1.0, 0, 0]), depth=wd * 0.86)
@@ -440,8 +440,8 @@ def ball(name, c, r):
     return sweep(name, "metal-silver", path, SEC8, wd, side_hint=np.array([1.0, 0, 0]))
 
 
-# ---- the sheaths: a pair of knives on each hip, hilts up at the belt, the blades' moth-curved ends bare below the leather (turnaround). A knife is about a pistol's length on the sheet, ~0.39 at the rig's scale.
-KNIFE_TOP, KNIFE_TIP = np.array([0.172, 0.0, 0.955]), np.array([0.214, 0.0, 0.575])
+# ---- the sheaths: a pair of knives on each hip, hilts up at the belt, the blades' moth-curved ends bare below the leather (turnaround). A knife is a little over a pistol's half on the sheet, 0.34 at the rig's scale.
+KNIFE_TOP, KNIFE_TIP = np.array([0.172, 0.0, 0.955]), np.array([0.208, 0.0, 0.617])
 KNIFE_Y = (0.05, 0.002)                        # the outer pair's depth, then the second, set a little shorter
 
 

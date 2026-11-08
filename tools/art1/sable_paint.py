@@ -13,7 +13,7 @@ LEATHER = [hexc("#2a1d30"), hexc("#3b2a43"), hexc("#533c5e"), hexc("#73587f"), h
 LINING = [hexc("#2d1147"), hexc("#46196e"), hexc("#5f2595"), hexc("#7a35b5"), hexc("#9a55d2")]
 HAIR = [hexc("#8f8a9c"), hexc("#b6b2c2"), hexc("#d5d2dd"), hexc("#ecebf1"), hexc("#ffffff")]
 SKIN = [hexc("#5a5568"), hexc("#7d7889"), hexc("#a09bab"), hexc("#bcb8c6"), hexc("#d6d3de")]
-SILVER = [hexc("#3c3a47"), hexc("#5b5968"), hexc("#7b7a8a"), hexc("#9c9bab"), hexc("#c2c1cd")]      # a step under the sheet: the engine lifts metal
+SILVER = [hexc("#36343f"), hexc("#524f5f"), hexc("#707080"), hexc("#8e8d9d"), hexc("#b0afbd")]      # a step under the sheet: the engine lifts metal
 WOOD = [hexc("#2a140e"), hexc("#45231a"), hexc("#5e3322"), hexc("#7a4630"), hexc("#96603f")]        # the weapon sheet's walnut stock
 BRASS = [hexc("#4a3416"), hexc("#7a5a22"), hexc("#a9822f"), hexc("#cfa84a"), hexc("#eed283")]       # its guard, butt cap and frizzen
 FUZZ = [hexc("#6a5a80"), hexc("#857596"), hexc("#a08fb0"), hexc("#b9a9c6"), hexc("#d0c3da")]
@@ -208,7 +208,7 @@ def face_fix(c, p):
     c = mix(c, hexc("#2a2233"), smooth(0.0052, 0.0036, dm) * f)
     # the collar's violet that bled onto the neck, back to skin
     lum, sat = c.mean(1), (c.max(1) - c.min(1)) / np.maximum(c.max(1), 0.01)
-    c = mix(c, skin_ * 0.88, smooth(0.062, 0.05, ax) * smooth(1.385, 1.4, z_) * smooth(1.485, 1.47, z_) * smooth(-0.04, -0.02, p[:, 1]) * smooth(0.16, 0.24, sat))
+    c = mix(c, skin_ * 0.88, smooth(0.07, 0.056, ax) * smooth(1.38, 1.4, z_) * smooth(1.485, 1.47, z_) * smooth(-0.04, -0.02, p[:, 1]) * smooth(0.1, 0.2, sat))
     # behind the ears, where the buns were cut: the white scraps low on the collar go dark, higher up it is hair
     back = smooth(-0.03, -0.05, p[:, 1])
     c = mix(c, hexc("#2c2333"), smooth(1.46, 1.48, z_) * smooth(1.53, 1.52, z_) * back * smooth(0.3, 0.38, lum) * smooth(0.4, 0.3, sat))
