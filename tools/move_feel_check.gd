@@ -11,6 +11,7 @@ var m: Match
 var w: World
 var P: Hunter
 var flat := Vector3.ZERO        # a flat open spot (6m clear all round)
+const SOURCE_JUMP_V := 7.5      # m/s, [game data] JumpZVelocity 750 uu/s
 const DT := 1.0 / 60.0
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
 ## The framing is measured on one fixed body: the plain medium hunter (no Warden's shape or class size, so it
@@ -33,6 +34,7 @@ const T := {
 	"speed_heavy":             ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
 	"jump_input_frames":       ["<=", 1.0, "frames", "press to lift-off, same sim step"],
 	"jump_apex":               ["~", [1.2, 1.6], "m", "[game data] 1.9m; under 1.6 so jump + mantle stays below 4 terraces"],
+	"jump_speed_vs_source":    ["~", [0.85, 1.0], "x", "[game data] JumpZVelocity 7.5; ours 6.8 (terraces)"],
 	"jump_airtime":            ["~", [0.85, 1.05], "s", "[game data] JumpZVelocity 750 at gravity 1470 uu/s2: 1.02s"],
 	"air_carry_m":             [">=", 3.0, "m", "[game data] FallingLateralFriction 0.375: the run-up carries"],
 	"air_reverse_t":           ["~", [0.4, 0.75], "s", "[game data] AirControl 0.015, translated: steerable in one jump"],
@@ -263,15 +265,18 @@ func _jump() -> void:
 	_reset(flat)
 	var g0 := P.pos.y
 	P.inp["jump"] = true
-	var first := -1; var apex := 0.0; var air := 0.0
+	var first := -1; var apex := 0.0; var air := 0.0; var v0 := 0.0
 	for i in 120:
 		m.step(DT)
-		if first < 0 and P.vel.y > 0.0: first = i + 1
+		if first < 0 and P.vel.y > 0.0:
+			first = i + 1
+			v0 = P.vel.y
 		apex = maxf(apex, P.pos.y - g0)
 		if not P.grounded: air += DT
 		elif i > 2: break
 	rec("jump_input_frames", first)
 	rec("jump_apex", apex)
+	rec("jump_speed_vs_source", v0 / SOURCE_JUMP_V)
 	rec("jump_airtime", air)
 	_air_control()
 	# coyote time: step off over open air (the walk-off path sets coyote), press jump k frames later
