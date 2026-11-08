@@ -58,7 +58,7 @@ func thief(a) -> void:
 			A.dmg(T) >= 20.0 and K.marks_on(T) == 3, "took %.0f marks %d" % [A.dmg(T), K.marks_on(T)])
 	A.ok("dancer LMB: the aim line ends at the cursor, pale lilac",
 			AimKit.shown(P, "aim") and (AimKit.entry(P, "aim")["col"] as Color).is_equal_approx(ThiefKit.AIM_LILAC))
-	# a bolt with nothing in its way stops at the cursor and fizzles there; past range it stops at the weapon's range (8.5m, the source's 850 units)
+	# a bolt with nothing in its way stops at the cursor and fizzles there; past range it stops at 8.5m
 	var spot := home + Vector3(-4.0, 0, -3.0)
 	A.aim_at(P, spot)
 	P.fire_cd = 0.0
@@ -102,8 +102,9 @@ func thief(a) -> void:
 	var haste_after := K.haste_t
 	A.step(m, 0.6)
 	var ed := Vector2(K.last_bolt_end.x - P.pos.x, K.last_bolt_end.z - P.pos.z).length()
-	A.ok("dancer small mechanics: the empowered bolt flies 12% further (9.5m, the 850 -> 950 units); firing it ends the speed",
-			K.last_bolt_emp and absf(ed - rng * 1.12) < 0.9 and haste_after <= 0.0, "%.1f m haste %.2f" % [ed, haste_after])
+	A.ok("dancer small mechanics: the empowered bolt flies 12% further (9.5m); firing it ends the speed",
+			K.last_bolt_emp and absf(ed - rng * 1.12) < 0.9 and haste_after <= 0.0,
+			"%.1f m haste %.2f" % [ed, haste_after])
 	A.ok("dancer LMB: each bolt has its own pooled look",
 			DJFx.of(m).free_pools.has("ride_chakram") and DJFx.of(m).free_pools.has("puff"))
 	# Marks: +10% per Mark on bolts only, no cap
