@@ -50,3 +50,18 @@ This is the bar every Boki has to clear. It works alongside the judging rubric i
 ## Audit of the 29 new designs
 - **Elements:** Batch 1 mostly reads its theme already (Chuggamus ember, Lockatara titan, Umbrathere shadow, Mirrolin prism, Mycroll spore). From now on it is written into every prompt.
 - **Archetype gaps:** sleek/cool (only Skateron) and pretty (Bubblisk, Snuffapi). Heavy/round/tough and back-mounted designs are overrepresented: about 10 of 29 have the object on their back. Batch 3 (Kindlewren, Zephyrak, Lunowl, Selenfin, Vespyx) helps sleek and pretty. Any future redesign slot should go to sleek, pretty or fast.
+
+## Evolutions and uniqueness (owner question, Nov 8, 15:15 ET): not in this art pass
+Already in the game:
+- Evolution paths by affinity. Shared nodes fierce, curious, steadfast and swift unlock at level 4 and shift stats; their cosmetic is generic, e.g. fierce adds "horns" and a red tint. Paths are picked per Boki and tied to its personality, with evolved names ("Cind" + "fang").
+- Personality weights per species: bravery, loyalty, temper, curiosity.
+- Mutations: patches, glow marks, twin tail, crystals, stars, and the rare "shimmer".
+- A unique id and lineage per Boki, plus the hunter Fusion form.
+
+Art implication if the owner wants evolution trees that look different: the current turnarounds are the **base form**. Each affinity branch then exaggerates the same design along its own axis, so it stays one model with grown or swapped parts:
+- **Fierce:** bigger born-with weapon, teeth and spikes.
+- **Steadfast:** more armour, a bigger fused object.
+- **Swift:** leaner, longer limbs, swept shapes.
+- **Curious:** more element signature, like glow and growths.
+
+Mutations, defects and personality marks layer on top per individual (scars, a chipped horn, an oversized part, odd colours), which gives near-endless variety cheaply. True cross-species transformations (Digimon-style "becomes a different creature") each need a new model, so keep them for rare or legendary paths. This needs an owner decision and a spec with main before any art.
