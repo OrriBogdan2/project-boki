@@ -1,0 +1,120 @@
+{
+	"grammar": 1,
+	"id": "kilnbadger",
+	"name": "Anvilbrock",
+	"animals": [
+		"Honey badger",
+		"Blacksmith's anvil"
+	],
+	"theme": "ember",
+	"flavor": "A honey badger with a red-hot anvil for a back; it headbutts you and the anvil rings. Fearless and grumpy; picks fights it cannot win and wins them.",
+	"colors": {
+		"body": "#2e2a2a",
+		"belly": "#d8d0c0",
+		"glow": "#ff7a2a"
+	},
+	"look": {
+		"ears": "flame",
+		"body": "pear",
+		"tail": "stub",
+		"feet": "paws",
+		"aura": "embers"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 7.65,
+			"hop_height": 0.12,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_hp": 10,
+		"kin_damage": 3,
+		"kin_speed": 3,
+		"owner_armor": 2,
+		"owner_max_hp": 2
+	},
+	"personality": {
+		"bravery": 0.95,
+		"loyalty": 0.75,
+		"temper": 0.8,
+		"curiosity": 0.4
+	},
+	"ai": {
+		"aggression": 0.55,
+		"loyalty": 0.8,
+		"caution": 0.2,
+		"role": "tank"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Fired Hide",
+		"passives": [
+			{
+				"stat": "damage_reduction",
+				"amount": 0.1
+			},
+			{
+				"stat": "knockback_resist",
+				"amount": 0.4
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "damage",
+				"amount": 8,
+				"over": 3
+			}
+		]
+	},
+	"active": "slam",
+	"auto": "rock_guard",
+	"merge": "titan",
+	"evolution": {
+		"root": "Kiln",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "gruff, grumbles constantly",
+		"syllables": [
+			"Kiln",
+			"badger"
+		]
+	},
+	"egg": {
+		"name": "Kilnbadger Egg",
+		"temper": "Fearless",
+		"desc": "Something fearless is in here.",
+		"play": "Stands in front and soaks the hits."
+	}
+}

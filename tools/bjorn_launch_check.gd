@@ -410,14 +410,19 @@ func _lmb_parity() -> void:
 	m.step(DT)
 	P.inp["fire"] = false
 	var left_at := -1.0
+	var cadence := 0.0
 	for i in 20:
 		m.step(DT)
 		if left_at < 0.0 and String(K.mace.get("st", "")) == "fly":
 			left_at = m.time - t0
+			cadence = P.fire_cd
 	var wind := BulwarkKit.THROW_WIND
 	ok("bjorn parity LMB: the throw's wind-up, the hammer leaves his hand %.2f-0.15 s after the press (one frame)" %
 			wind, left_at >= wind and left_at <= 0.15 + 0.001 and K.anim_id == "bul_throw",
 		"left at %.3f anim %s" % [left_at, K.anim_id])
+	ok("bjorn parity LMB: the throw's cadence is the source card's 0.45 s (sheet: 175 out, 175 back)",
+		absf(float(K.lmb_def()["throw_rate"]) - 0.45) < 0.001 and cadence > 0.30 and cadence <= 0.45 + 0.001,
+		"throw_rate %s fire_cd %.3f" % [K.lmb_def()["throw_rate"], cadence])
 	await _rmb_parity(m, P, K, home)
 	await done(m)
 
