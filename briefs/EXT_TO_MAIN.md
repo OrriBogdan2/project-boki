@@ -2803,3 +2803,4 @@ READY ext/meeko-ult-cancels d4b9d81fd (Meeko Hearth Call cancels verified vs sou
 READY ext/meeko-carry-drop 6a773c049 (Meeko Carrier drop = source triggers: stun or damage past the shield; root/hex no longer drop; check covers triggers, non-triggers, 4s re-pick lock)
 READY ext/mossy-dash-refund 347408a2d (rank 3 dash refund already built; added DashReset cue + miss/rank1 asserts)
 READY ext/mossy-shield-bash edfaf87cf (Shift in the aegis's 0.1 s rise fires the Shield Charge, not the Spin Dash; the aegis-up bash also fires in the air; assert added, bulwark.md row fixed; --bulwark-combo-check 145 PASS/0 FAIL, --dash-flow-check 0 failures, health --strict OK, gen_wiki --check OK)
+READY ext/sable-lmb-range 5bd83bbc6 (Sable LMB to source: 8.5m range, 9.5m empowered, 37.5 m/s; combo check asserts range and flight time)
