@@ -2655,3 +2655,4 @@ READY ext/ostra-v2-model 76f589389 (Motley v2 model from motley_v2_turnaround + 
 
 ## 2026-11-08 build (job 20261108-023004-a4): CLAIM lore sync to LORE_MASKS
 - CLAIM: sync all lore, story and marketing text in the game repo to briefs/LORE_MASKS.md (five groups, current names, rewritten Hunter stories, relic table): docs/art/gen/stories, in-game Mask/codex/lore text, wiki generator lore fields, marketing copy. Display names only in player text; Cinder/Meeko relics + Grimble monocle wired as data. Lore only, no squad/matchmaking code. Branch ext/lore-factions from origin/main.
+READY ext/parity-kael-clips abacc4d18 (KIT_PARITY gap 1: Zedran/juggernaut plays the first Kael's 49 footage-timed clips on main's Kael model, sword skinned to hand.R; --clip-check asserts slam strike at footage 0158/0.6 s; supersedable by ext/kael-v2-model)
