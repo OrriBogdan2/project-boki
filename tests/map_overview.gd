@@ -13,7 +13,8 @@ func _ready() -> void:
 	add_child(w)
 	w.generate_authored(World.load_layout(_map_id()), 7)
 	w.build_meshes()
-	for lb in w.labels:
+	var ground := Array(OS.get_cmdline_user_args()).any(func(a): return String(a).begins_with("--map-ground="))
+	for lb in ([] if ground else w.labels):      # (eye-height shots: names through walls would clutter them)
 		var l := Label3D.new()
 		l.text = String(lb["name"])
 		l.font = UI.big; l.font_size = 64 if lb["kind"] == "poi" else 40; l.pixel_size = 0.06; l.outline_size = 16
