@@ -177,7 +177,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	m.free()
 
 ## Tenzo (source Tetra, docs/heroes/dolm.md timings): his punches run on the legs' stride, the LMB clips carry the
-## release beat the kit's delayed boulder uses, and the spine's clip outlasts the stone-row it is timed against.
+## release beat the kit's delayed boulder uses, and the spine's heave lands as its ridge finishes rising.
 func _tenzo(moves: Dictionary, lib: AnimationLibrary) -> void:
 	for k in ["breah_throw", "breah_wind", "breah_punch"]:
 		ok((moves[k] as Dictionary).get("upper", "") == "moving", "tarek: %s keeps walking under the fist" % k)
@@ -186,6 +186,14 @@ func _tenzo(moves: Dictionary, lib: AnimationLibrary) -> void:
 	ok(keys.any(func(kk): return absf(float((kk as Array)[0]) - rel) < 0.03),
 			"tarek: the throw's whip key sits at the boulder's release (%.2f s)" % rel)
 	ok(lib.get_animation("lmb_throw").length >= rel + 0.1, "tarek: the throw clip outlasts its release")
+	# the spine's heave (its last pose key) lands as the last rock stands: cracks + rise after the release
+	var xd: Dictionary = Arch.def("dolm")["x"]
+	var stand := float(xd["tell"]) + float(xd["rise"])
+	var spd := float((moves["breah_spine"] as Dictionary).get("speed", 1.0))
+	var sk: Array = (KMovesStone.MOVES["breah_spine"] as Dictionary)["keys"]
+	var heave := float((sk[sk.size() - 2] as Array)[0]) / spd
+	ok(absf(heave - stand) <= 0.1, "tarek: the spine heaves at %.2f s, the ridge stands at %.2f s" % [heave, stand])
+	ok(lib.get_animation("x_spine").length / spd >= stand, "tarek: the spine clip holds the hunch through the rise")
 
 ## Item 137: the hammer on the sheet is 0.79 of his height (breaker_FINAL_sheet, breaker_weapons), neutral size both.
 func _hammer_scale(w: Node, sk: Skeleton3D) -> void:
