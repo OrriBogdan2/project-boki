@@ -8,7 +8,7 @@ Rows are in the canonical Hunter order (owner Nov 7): use it wherever the game l
 |---|---|---|---|
 | 1 | gunslinger | Vex, the Hired Gun | (unchanged) |
 | 2 | juggernaut | Kael, the Unbroken | (unchanged) |
-| 3 | ashwick | Cinder, **the Flame Queen** | Cinder the Mad Pyromancer |
+| 3 | ashwick | Cinder, **the Ashen Kiss** (was the Flame Queen) | Cinder the Mad Pyromancer |
 | 4 | tender | **Meeko, the Dawnfox** | Pip the Little Lantern / Lumi |
 | 5 | dolm | **Tenzo**, the Stone Seer | Tarek the Cliff Runner / Kibo (K clash with Kael) |
 | 6 | archer | **Lace**, the Red Stitch | Ravyl / Ravel / Lisette / Hem / Pin |

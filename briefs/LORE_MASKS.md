@@ -67,7 +67,7 @@ Three relics change because their objects left the designs: **Cinder, Meeko and 
 
 **The Fallen Court**
 - **Kael, the Unbroken:** Malgrave's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain became his weapon. The Blight burned white-hot cracks into his sword arm (the Blight Cinder distilled, so he doesn't fully trust her). A demon lives in his blade and in his mind, and it must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off.
-- **Cinder, the Flame Queen:** Malgrave's court alchemist, ordered to distil the Wyrm's blood into fire. She drank it instead. Now fire answers her bare hands, and she no longer needs a tank, a flame-gun or goggles. She served the throne for years, and she wants it for herself. She is not mad, just certain.
+- **Cinder, the Ashen Kiss:** Malgrave's court alchemist, ordered to distil the Wyrm's blood into fire. She drank it instead. Now fire answers her bare hands, and she no longer needs a tank, a flame-gun or goggles. She served the throne for years, and she wants it for herself. She is not mad, just certain.
 - **Lace, the Red Stitch (was Hem):** Malgrave's royal mask-stitcher, who sewed the Hunters' selves into their Masks. She deserted and now hunts Malgrave's loyalists, leaving a red-threaded needle at every kill. Her own shadow came loose when she stitched her first Mask; it's only a wrong-looking shadow, not a pet.
 
 **The Protectors**

@@ -318,3 +318,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-08 (owner): Mossy is renamed Albert
 - **Albert, the Barnacle Knight** (was Mossy, before that Breaker; id `bulwark` unchanged). Nickname **Bert** in banter. Player text, voice lines and menus use Albert.
+
+## 2026-11-08 (owner): Cinder's title is "the Ashen Kiss"
+- **Cinder the Ashen Kiss** replaces "Cinder the Flame Queen" (display title only; id `ashwick`, design and kit unchanged). Wins over every "Flame Queen" above, in briefs, art indexes and game text. "Queen" is now Malgrave's alone.
