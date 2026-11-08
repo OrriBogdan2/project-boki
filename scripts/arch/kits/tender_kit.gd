@@ -363,7 +363,8 @@ func fire_rmb(c: Dictionary) -> void:
 
 func _seed_lane() -> void:
 	var sd := rmb_def()
-	var width := float(sd["seed"]["hit_r"]) * 2.0
+	# the seed's own width (its shot radius is half hit_r): the footage's lane is about 0.4 bh wide
+	var width := float(sd["seed"]["hit_r"])
 	AimKit.dotted(h, "rmb", {"len": float(sd["wind_lane"]), "width": width, "col": Color("e8f6c8")})
 
 ## Her share of run speed during the wind-up.
@@ -405,8 +406,9 @@ func _throw_seed() -> void:
 			h, start, dir * float(sd["speed"]), float(sd["dmg"]) * power("sec"), life, float(sd["hit_r"]) * 0.5,
 			col_of(rmb_def()), extra)
 	lk().skin(lk().last_shot(), "burr")
-	# the cast flare round her (about 1.5 bh across)
-	lk().burst("flare", h.pos, {"col": Color("9a6aff"), "rim": Color("ffd27a"), "r": 1.4, "dur": 0.25, "pattern": 3.0})
+	# the cast flare round her (about 1.5 bh across), riding her hop (footage: about 0.3 s in the air)
+	lk().burst("flare", h.pos, {
+		"col": Color("9a6aff"), "rim": Color("ffd27a"), "r": 1.4, "dur": 0.3, "pattern": 3.0, "ent": h})
 	m.fx.flash(start, Color("c8e07a"), 0.9, 0.08)
 	m.sfx("tend_seed", h.pos, -2.0, 1.0)
 
