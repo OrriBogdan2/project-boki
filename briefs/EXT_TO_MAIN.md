@@ -3179,3 +3179,11 @@ READY ext/leave-match-warning-1108 8a8f66a42 (off main d255acbee; not merged; no
 ## Nov 8 17:56: Gongibbon's evolution is named **Gongrowl** (evolutions/Gongrowl.jpg).
 
 READY ext/expedition-fps-1108 62ad7d14f (job 20261108-203037-a2, on main d255acbee; no gh on w2, PR: https://github.com/OrriBogdan2/project-boki/pull/new/ext/expedition-fps-1108). Expedition FPS, PARTIAL (targets not met). Profiled with the GDScript profiler at 30 Hunters, then fixed in order: Boki targeting, bot route/sight, Boki retarget, Hero anim LOD, far-Hunter render LOD, pickups, occupy, far-bot think stagger. Also: overlay hitch log (>33 ms), --perf-bench p99 gate (+15% vs tools/perf_baseline.json exits 1), content/rules/tuning.json (new, "perf"), docs/PERF.md. PC 4090 corrected bench: 30H avg 71.5->56.1, p99 104->93; 6H avg 33.1->28.3, p99 97.5->88.0, >33ms frames 1136->355. Mac M5 30H (old bench): Boki targeting alone avg -7.7, p99 -68. Bench fix: --perf-bench stepped twice a frame (old gate numbers ~2x script). Mac worker runs gl_compatibility; it broke ~21:50 (GodotBG.app Godot missing, rc 126). Visual trades are off on Ultra. Checks: health --strict, --check, bot-sanity, teammate, boki-moves, kin-loss, wallmove, warden-clips, clip-live, anim-lod (new), perf-overlay all 0 failures; kinbox 2 failures, same on main.
+
+## Nov 8 18:00 (owner decision): how branching finals are picked
+Four lines branch at their LAST evolution only: Mycroll, Vespyx, Prismander, Echolop (1 -> 1 -> 1 of 2, Echolop 1 -> 1 of 2). The final form is set by which trained stat (Training post: Power, Guard, Speed) is higher when it evolves:
+- Mycroll: Power -> Amanitusk, Guard -> Ringrove
+- Vespyx: Power -> Glaivyx, Speed -> Lashyx
+- Prismander: Guard -> Geodelotl, Speed -> Chandelotl
+- Echolop: Power -> Howlop, Speed -> Chimelop
+On a tie, the affinity path decides (fierce = Power, steadfast = Guard, swift = Speed). Show a lean hint on the Boki screen. Paths otherwise stay as stat flavour only and never pick forms. Ermink and Jarmit branch by Ink. Sex is separate: male and female looks apply to every form in the starter lines (either sex can reach either final).
