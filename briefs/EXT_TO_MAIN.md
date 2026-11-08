@@ -3110,3 +3110,6 @@ READY ext/keybinds-1108 1369ab73d (job 20261108-214554-a4): DECISIONS keybind ha
 
 ## 2026-11-08 build (job 20261108-220026-a4): CLAIM pick-countdown-30s-1108
 - CLAIM: DECISIONS "hunter-pick countdown 30s and impossible to miss": Prematch.DURATION 90 -> 30, big top-centre safe-area countdown in PrematchView, last-10s tick, last-5s red pulse, timeout locks default hunter with a visible note. Branch ext/pick-countdown-30s-1108 from origin/main (prematch lobby; expedition-pick-simplify touches the home hunter pick, not this screen).
+
+## 2026-11-08 feel (job 20261108-220037-a4): CLAIM tutorials-cut
+- CLAIM: DECISIONS "shorter tutorials; farming can be skipped or automated", tutorial half only (Auto-farm is NOT in this claim): match tutorial 22 -> ~8 steps, farm tutorial 12 -> ~5, dropped steps become one-time contextual hints (shared FirstTimeHint, saved), visible Skip on both. Branch ext/tutorials-cut from origin/main, building on READY ext/farm-tut-tools-cam / ext/tutorial-declutter where they apply.
