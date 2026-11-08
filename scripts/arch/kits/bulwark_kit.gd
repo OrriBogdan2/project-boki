@@ -745,7 +745,7 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex:
 		# the long dash (in the air, or out of charges): Breaker lumbers in shoulder first, shoving foes aside
 		var de := float(h.cdat.get("ex_dist", 4.2))
-		travel(de, de / float(dd.get("lumber_speed", 14.0)), {"invuln": 0.1, "shove": true, "shove_kb": 6.0, "shove_dmg": 0.0, "trail": "dust"}, true)
+		travel(de, de / float(dd.get("lumber_speed", 14.0)), {"invuln": 0.1, "shove": true, "shove_kb": 6.0, "shove_dmg": 0.0, "trail": "dust"})
 		st["last_dash"] = "lumber"
 		play("bul_lumber")
 		for i in 4:
@@ -755,7 +755,7 @@ func on_dash(use_ex: bool) -> bool:
 	var dist2 := float(dd["whirl"]) + (1.0 if rank("dash") >= 3 else 0.0)
 	var t2 := dist2 / float(dd["whirl_speed"])
 	var wd := dash_dir()
-	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd}, use_ex)
+	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd})
 	t2 *= float(dash_feel()["time"])          # the spin lands when the (feel-scaled) dash arrives
 	st["last_dash"] = "whirl"
 	play("bul_whirl")
