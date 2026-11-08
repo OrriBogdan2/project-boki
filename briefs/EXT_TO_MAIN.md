@@ -3096,3 +3096,6 @@ CLAIM vex-coin-palm-1108 (job 20261108-214542-a4): owner 11-08 Vex Burr Charge -
 
 ## 2026-11-08 deep (job 20261108-215224-a1): CLAIM perf-load-shaders-1108
 - CLAIM: DECISIONS "expedition performance is TOP priority", loading and hitches half only (frame time stays with perf-expedition-1108): shader precompile/pipeline cache, warm-up done once and cached, cut build.hunters, first-minute hitches. Branch ext/perf-load-shaders-1108 from origin/main.
+
+## 2026-11-08 feel (job 20261108-215340-a1): CLAIM ui-declutter audit
+- CLAIM: DECISIONS "UI is too much for a new player": audit only, no game code. Screenshots of every first-15-minute screen (title, farm, hunter pick, expedition start/fight/extract, pause, results), KEEP/LATER/CUT per element, target layouts, <=5 owner TASTE questions, overlap with expedition-screen-simplify, hud-reticle-sv, ui-void-masks, pause-menu, tutorials-cut. Output briefs/UI_DECLUTTER_PLAN.md on ext/agent-briefs.
