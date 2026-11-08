@@ -9,8 +9,8 @@ straight through them is a Blowout that gives your dash back at once.
 |  |  |
 |---|---|
 | Class title | Storm Chaser |
-| Base character | Ryzz, female |
-| Personality | Bold and revolutionary, with tattoos, a leather jacket and plenty of jewellery. She calls the lightning down and does not ask permission. |
+| Base character | Sparkle, female |
+| Personality | A street kid struck by the Wyrm's storm in the market square. The bolt took her right eye and left the storm inside her, burning hot pink. She climbs the highest spires to chase storms, throws lightning straight from her hands, and swears she'll give the Wyrm's bolt back to it someday. She has never told anyone she is also looking for Rink, the boy she lost in the storm. |
 
 <!-- /gen:profile -->
 
@@ -21,7 +21,7 @@ straight through them is a Blowout that gives your dash back at once.
 3. **Wirerun** (Shift): hold to stretch the lane from 4 to 7m, let go to streak. Shots pass through you and every foe you cross takes a hit. Through a Live foe it is a **Blowout** and the dash resets.
 4. **Coilshot** (RMB): hold to charge a heavy round that throws the first foe back. Into a wall or another foe, they are stunned. A hit on a hunter drops a charge mote; pick it up for your dash back.
 5. **Skycall** (E): mark a spot, and a moment later lightning flings everyone there along your aim and grounds them (no dashing). It steals a rival's mote too.
-6. A knock heals you for 15% of your health. There is no R: the Boki Merge takes that key.
+6. A knock heals you for 15% of your health. There is no R: the Boki Fusion takes that key.
 
 ## Combos and interactions
 

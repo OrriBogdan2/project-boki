@@ -1,4 +1,4 @@
-# Cliff Runner (base character Tarek; archetype id `dolm`, Medium; was "Dolm")
+# Stone Seer (base character Tenzo; archetype id `dolm`, Medium; was "Dolm")
 
 Internal note: the behaviour reference is the hero named in the Inspired-by table in docs/ARCHETYPES.md. Nothing below is
 player-facing; every name, number and word in the shipped game is our own (renames: Stonesight -> Tremor Sense, Landslide ->
@@ -69,7 +69,7 @@ the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glid
 | LMB damage ratios (LOW) | (c) | the charge scaling is ours (noted) |
 | X Basalt Spine, X auto-cast after 3 s (LOW) | (c) | documented; the 3 s cap keeps a forgotten hold from blocking the ult |
 | Hunter viewer moves (MED) | (b) | RMB `breah_crouch`, `breah_slam`; X `breah_spine_aim`, `breah_spine`; asserted |
-| Player-facing wiki name (MED) | (c) | the Tarek rename is main's (done there) |
+| Player-facing wiki name (MED) | (c) | the Tenzo rename is main's (done there) |
 | Self-shake (MED) | (c) | ext/no-shake |
 | Explosion/ring rule (n/a) | (a) | complies |
 
@@ -150,7 +150,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 - **Other moves:** RMB let go mid-hop: the slam lands with that hop and the chain ends there (crash and slam, as the old leap). Opening the
   glider, being downed or a merge drops the chain with no crash. Bots ride the whole chain.
 - **Cooldown:** the charge is spent at the press; the recharge waits for the chain's end (`_hold_charge` undoes the shared step).
-- **Anim ids:** `breah_hop` (each hop), `breah_skate` (the skid), `breah_leap_land` (the crash). ART-1 Tarek maps `breah_hop` -> `dash_hop` and `breah_skate` -> `dash_skate`.
+- **Anim ids:** `breah_hop` (each hop), `breah_skate` (the skid), `breah_leap_land` (the crash). ART-1 Tenzo maps `breah_hop` -> `dash_hop` and `breah_skate` -> `dash_skate`.
 - **Hooks for S3/S4 (placeholders use existing dust and sounds):** take-off `br_leap` at the feet; rock rise `br_rise`; touchdown `br_slam` (soft); crash `br_slam`; roll `br_roll`.
 
 ## Taller rocks (owner review item 67, Nov 4)
@@ -284,10 +284,10 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
   Strips: /home/boki/shots-s2/breah/review/breah_dash_ground_strip.png, breah_dash_air_strip.png.
 
 ## Rock ownership (owner review item 25)
-- A rock belongs to the Tarek who raised it (Stone Row, Basalt Spine): the wall's `by`. Only she climbs it: walking into
+- A rock belongs to the Tenzo who raised it (Stone Row, Basalt Spine): the wall's `by`. Only she climbs it: walking into
   its face (moving into it, no jump) lifts her at 5 m/s with her walk carried on, so she rises onto the top and walks
   over it in about half a second (asserted at most 0.6s). Everyone else, allies included, and every bot and Boki is
-  stopped by it as by a full wall, walking or jumping; another Tarek's rocks are a wall to her too. A body that lands on
+  stopped by it as by a full wall, walking or jumping; another Tenzo's rocks are a wall to her too. A body that lands on
   a rock from above still stands on it and can walk off.
 - This replaces the data pass's ally climb (the source lets allies hop friendly walls); the owner's call wins.
 - Code: StoneStand.top_for (the height a rock blocks the body moving now: its top for its caster, a full wall for others),

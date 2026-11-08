@@ -8,7 +8,7 @@ extends RefCounted
 ## the commit.
 
 const MIN_DRAG := 0.8        # m of cursor drag below which the tap default is used
-const TOWARD_COS := 0.64     # a drag within about 50 degrees of "to Ryzz" counts as pulling toward her
+const TOWARD_COS := 0.64     # a drag within about 50 degrees of "to Sparkle" counts as pulling toward her
 const ARROW_LEN := 1.3       # of the circle radius: the committed arrow inside the circle
 
 var kit: MageKit

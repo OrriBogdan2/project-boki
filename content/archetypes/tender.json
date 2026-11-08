@@ -1,9 +1,9 @@
 {
 	"id": "tender",
-	"title": "Little Lantern",
-	"base_name": "Pip",
+	"title": "Dawnfox",
+	"base_name": "Meeko",
 	"gender": "female",
-	"personality": "A brave little field medic, a fairy fox waist-high to a human.\nShe is afraid of the dark, and the lantern she carries holds a star she caught as a kid.",
+	"personality": "A fox-kit who kept the hearth of a Boki shelter alive through the night everything broke. The fire grew into a tiny sun that follows her, and a shy raincloud, the storm that tried to drown the hearth, came along too.\nShe heals through the two of them, and keeps them safe in a little glass globe.",
 	"role": "Tender",
 	"weight": "medium",
 	"plate_offset": 1.85,
@@ -18,8 +18,8 @@
 	},
 	"color": "#ffc46a",
 	"clip": {"lines": {"dash": "A quick hop, a long glide in the air.", "lmb": "Embers from both hands mark foes.", "rmb": "A seed that roots its target.", "e": "A healing ring for you and your team.", "x": "Tether a teammate and heal them as you go."}, "fx": {"e": "heal", "x": "tether"}},
-	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with lantern light, pins chasers with burr-seeds.",
-	"silhouette": "small: a tiny fairy fox medic with gold-veined wings, a leaf cape and a big glowing star lantern",
+	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds.",
+	"silhouette": "small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a raincloud floating beside her",
 	"card": {
 		"role": "Support medic: heals and carries the downed, roots whoever chases them.",
 		"loop": "Support medic: heals and carries the downed, roots whoever chases them.",
@@ -129,7 +129,7 @@
 		"toss_speed": 45.0,
 		"latch_r": 1.0,
 		"boost": 0.5,
-		"desc": "A 2.6m ring of lantern light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.",
+		"desc": "A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"
@@ -185,6 +185,6 @@
 		"every": 0.5,
 		"land_r": 0.9,
 		"self_when_solo": true,
-		"desc": "Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a lantern tether heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you."
+		"desc": "Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you."
 	}
 }

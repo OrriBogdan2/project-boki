@@ -165,7 +165,7 @@ static func open_bonus() -> Array:
 	c["fresh"] = ids.duplicate()
 	return ids
 
-## "Hem and Kael are open now" for starters opened and not yet announced ("" when none); marks them told.
+## "Vex and Kael are open now" for starters opened and not yet announced ("" when none); marks them told.
 static func take_fresh() -> String:
 	var c := state()
 	var names: Array = (c.get("fresh", []) as Array).map(func(a): return Arch.name_of(String(a)))

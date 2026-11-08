@@ -79,7 +79,7 @@ func _body_rows() -> void:
 	_pick_row("race", "Folk", Models.LOOK_RACES)
 	_note(String(Models.RACES[int(look["race"])]["desc"]))
 	_slider_rows("body")
-	_note("At home you're yourself. In a Mantle you take its Warden's shape and gender, with a little of you in it.")
+	_note("At home you're yourself. In a Mask you take its Hunter's shape and gender, with a little of you in it.")
 
 func _face_rows() -> void:
 	var presets := UI.hbox(6)
@@ -98,7 +98,7 @@ func _colour_rows() -> void:
 	_swatch_row("hair_col", "Hair colour", Models.LOOK_HAIR)
 	_swatch_row("eyes", "Eyes", PlayerLook.EYES)
 	_swatch_row("outfit", "Outfit", Models.OUTFIT_COLS)
-	_note("In a Mantle your colours only tint the Warden's own; its signature colours stay.")
+	_note("In a Mask your colours only tint the Hunter's own; its signature colours stay.")
 
 ## Yourself, or one of your Hunters' Mantles, on the preview.
 func _view_row() -> HBoxContainer:
@@ -109,7 +109,7 @@ func _view_row() -> HBoxContainer:
 		return row
 	var at := maxi(0, hunters.find(view))
 	var shown := String(hunters[at])
-	row.add_child(UI.choice(Arch.name_of(shown) if view != "" else "In a Mantle", view != "",
+	row.add_child(UI.choice(Arch.name_of(shown) if view != "" else "In a Mask", view != "",
 		func(): show_view(shown)))
 	if view != "" and hunters.size() > 1:
 		row.add_child(UI.icon_button("next", func(): show_view(String(hunters[(at + 1) % hunters.size()])),

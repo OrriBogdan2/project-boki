@@ -9,8 +9,8 @@ target eats the big shot. Spirit Walk carries her through rocks and barriers.
 |  |  |
 |---|---|
 | Class title | Red Stitch |
-| Base character | Lisette, female |
-| Personality | A cool, patient hunter in a dark cloak with a thread of red. She says little and watches everything. She picks the high ground, waits, and pins you to the wall. |
+| Base character | Lace, female |
+| Personality | Malgrave's royal mask-stitcher, who stitched the court's masks. She deserted and now hunts Malgrave's loyalists, leaving a red-threaded needle at every kill. Her own shadow came loose when she stitched her first Mask; it's only a wrong-looking shadow, not a pet. |
 
 <!-- /gen:profile -->
 

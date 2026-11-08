@@ -17,7 +17,7 @@
 		}
 	},
 	"into_dash": {
-		"lmb": {"mode": "fire", "source": "Owner item 51 names Lisette's draw: it carries through a dash. Neither the data (Myth: Greenwood Bow, Phase Walk) nor the footage (pin.md: Spirit Walk) shows the roll ending a draw, so Shift mid-draw rolls at once and the draw carries on."}
+		"lmb": {"mode": "fire", "source": "Owner item 51 names Lace's draw: it carries through a dash. Neither the data (Myth: Greenwood Bow, Phase Walk) nor the footage (pin.md: Spirit Walk) shows the roll ending a draw, so Shift mid-draw rolls at once and the draw carries on."}
 	},
 	"hold": {
 		"lmb": {

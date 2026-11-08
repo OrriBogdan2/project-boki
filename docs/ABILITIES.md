@@ -11,11 +11,11 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |
 |---|---|---|---|---|---|---|---|
 | **Thief** | light | Twin Blades | Vault | Marks | Bola | Shadow Knife (18s) | none (X is the Merge) |
-| **Lisette** | light | Longbow | Spirit Walk | Focus | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
-| **Ryzz** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
+| **Lace** | light | Longbow | Spirit Walk | Focus | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
+| **Sparkle** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
 | **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
 | **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
-| **Breaker** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
+| **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
 
 ### Thief (light)
 
@@ -29,7 +29,7 @@ _The cutpurse duelist. Sticks to one mark, flips past them, never lets go._
 - **E: Shadow Knife** (18s). Throw a dagger 12m that sticks in the first foe (8 damage, slowed 50% for 2.5s) or in a wall or the ground where it stops. Press E again to step to it at once; after 5s you step to it anyway.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, R, RMB, E, R, Q
 
-### Lisette (light)
+### Lace (light)
 
 _The warden of high ground. Climbs, reads the field, pins people to walls._
 
@@ -40,7 +40,7 @@ _The warden of high ground. Climbs, reads the field, pins people to walls._
 - **E: Hail Wall** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, E
 
-### Ryzz (light)
+### Sparkle (light)
 
 _The storm-kite runner. Charges you up shot by shot, then runs straight through you and comes out the other side with the dash back._
 
@@ -78,7 +78,7 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
 - **E: Warchain** (13s). Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 - Level-up order (bots too): Dash, RMB, E, RMB, Dash, R, RMB, E, R, Q
 
-### Breaker (heavy)
+### Mossy (heavy)
 
 _The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot._
 

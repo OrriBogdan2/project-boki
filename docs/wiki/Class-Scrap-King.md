@@ -1,6 +1,6 @@
 # Scrap King
 
-A harbour hauler in a brass diving helm. Reaches out with an abyssal hand, reels foes in, drops an anchor on them and
+A scavenger king with a bone hook for an arm and a hoard on his back. Reaches out with an abyssal hand, reels foes in, drops an anchor on them and
 grows with every knock.
 
 <!-- gen:profile -->
@@ -9,8 +9,8 @@ grows with every knock.
 |  |  |
 |---|---|
 | Class title | Scrap King |
-| Base character | Grimble, a robot |
-| Personality | A broken machine that leaks dark, corrupt energy. Its joints creak and its eyes flicker. Haunted and creepy, it drags a hook and keeps coming. |
+| Base character | Grimble, male |
+| Personality | A scavenger who crawled into Malgrave's vault after it woke and never came out poor again. The Blight sludge seeping through the vault mutated his right arm into a bruised-purple bone hook and spread purple veins up his chest. One eye is stitched shut; the other squints through a brass monocle at whatever he's pricing. His teeth are scrap metal, with one gold tooth. He carries his hoard on his back (chests, coins, bells, lanterns) and calls himself king of whatever's left. |
 
 <!-- /gen:profile -->
 

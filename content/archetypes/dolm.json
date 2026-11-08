@@ -1,9 +1,9 @@
 {
 	"id": "dolm",
-	"title": "Cliff Runner",
-	"base_name": "Tarek",
+	"title": "Stone Seer",
+	"base_name": "Tenzo",
 	"gender": "male",
-	"personality": "A young, nimble rock elementalist with a bandana tied over his eyes. He reads the ground by feel.\nQuiet and light on his feet, he moves stone like it is a dance partner.",
+	"personality": "A young cliff-runner, blind since birth, who ran messages along the cliff paths by the feel of the rock. When the Hollowing cracked the cliffs, the stone started answering him: three seeing-stones float around him and are his eyes.\nThe youngest of the crew and the calm one, he hears trouble through the ground before Vex sees it.",
 	"weight": "medium",
 	"color": "#d9a35b",
 	"fantasy": "The quarry-hand. Raises stone out of the ground, climbs it, then punches it into you.",
