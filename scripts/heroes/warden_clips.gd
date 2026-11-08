@@ -298,7 +298,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
 		var mv: Dictionary = moves[km]
-		var tt := float(s.get("kmove_t", 0.0))
+		# ("lead": the cock is skipped, so the hit pose lands on the kit's hit)
+		var tt := float(s.get("kmove_t", 0.0)) + float(mv.get("lead", 0.0))
 		# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 		if km != alt_km or tt < alt_t:
 			alt_on = not alt_on
