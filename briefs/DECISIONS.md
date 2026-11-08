@@ -393,3 +393,8 @@ Abilities you use twice (recasts: Ostra Brimseed pop, Tender Hearthlight throw, 
 ## 2026-11-08 owner (playtest): hunter-pick countdown 30s and impossible to miss
 - The pre-match lobby / pick-your-hunter countdown is **30 s** (was 90, scripts/match/prematch.gd DURATION; overlay text too). A tester had to resize his window to even see the 1:30 timer.
 - The timer is big, top centre, inside the safe area at every resolution and aspect (720p to ultrawide, windowed and small windows): "PICK YOUR HUNTER 0:30". Ticks each second for the last 10 s, pulses red in the last 5 s; if no pick by 0, your last/default hunter is locked in and the screen says so.
+
+## 2026-11-08 owner (playtest): expedition performance is TOP priority
+- A tester's PC can barely run the expedition. Even the owner's M5 Mac auto-picks "low" quality (40 ms a frame in the load benchmark), and the loading screen takes 16 s with 283 shader compiles.
+- Targets: a steady 60 fps on the M5 at medium, and 30+ fps on low-end PCs (integrated GPU) at low. Shaders precompiled or cached, so no hitches in the first minute. A "very low" preset that really is light (no shadows/SSAO/volumetrics, short draw distance, lower render scale, LOD/impostors, fewer particles).
+- Every perf change has to come with before/after real-GPU numbers from --perf-bench. Looks may drop on low presets but must not drop on high.
