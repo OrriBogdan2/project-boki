@@ -2607,3 +2607,4 @@ READY ext/gameplay-media e6881d69f (gameplay media capture tool + encode script;
 
 ## 2026-11-08 build-spec (job 20261108-011502-a4): relic pickup art spec
 - READY ext/relic-art-adds 88bab293d: docs/art/relics/RELIC_ART_SPEC.md, one 3D+2D pickup spec and a prompt for each of the 12 relics (round-3 locks applied). No model edits, no code, no checks needed.
+- READY ext/art-2d-swap f63c8b866 (2D art swap: splashes mage_splash.jpg + ostra_splash.jpg; portraits rimewright.jpg, ostra.jpg, bulwark.jpg, gunslinger.jpg, same names/paths; web WebP <400 KB in coord/site-art/: sparkle_splash, motley_splash, neve_portrait, motley_portrait, mossy_portrait, vex_portrait .webp for the owner to push. NOT yet verified: hero-select/splash screenshot is queued on jobq 20261108-010057-30604 (no GPU worker was running); look at that sheet before merging.)
