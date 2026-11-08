@@ -24,6 +24,7 @@ static func drop_locked(h: Hunter) -> bool:
 static func gate_drop(h: Hunter) -> void:
 	if not drop_locked(h):
 		return
+	DropLaunch.gate(h)               # item 163: locked into the squad launch, no keys at all
 	for key in DROP_KEYS:
 		if key != "jump" or not h.diving:
 			h.inp[key] = false

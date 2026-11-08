@@ -62,10 +62,10 @@ Nothing here comes from SUPERVIVE's files.
 | glide_open_hold_s (Space held from the jump) | 0.150s | 0.117s | <= 0.12s | tap/hold split |
 | glide_open_button_frames (glide button) | 6 | 1 | <= 1 | no tap ambiguity |
 | glide_catch_t (terminal fall to sink rate) | 0.383s | 0.150s | <= 0.2s | opens "instantly" |
-| glide_speed | 5.0 m/s | 6.5 m/s | 6.2–6.8 | owner: "feels weaker than SUPERVIVE"; between [footage] ~5 and [spec] 7–10 |
+| glide_speed | 6.5 m/s | 5.0 m/s | 4.5–5.5 | [game data] MaxGlide 500 uu/s (item 163: ours was "too fast and controllable") |
 | glide_sink | 2.2 m/s | 1.4 m/s | 1.2–1.6 | owner: "falls a bit faster"; [spec] 2–4 is an eyeball guess |
-| glide_turn90_t | 0.617s | 0.200s | <= 0.3s | [est] |
-| glide_reverse_t | 0.950s | 0.417s | <= 0.45s | [est] brake by steering back |
+| glide_turn90_t | 0.200s | 0.383s | 0.3–0.6s | [game data] GlideTargetXYForce: a force, so turns have inertia (item 163) |
+| glide_reverse_t | 0.417s | 0.600s | 0.45–0.8s | [game data] the same force brakes a reversal (item 163) |
 | glide_brake_ratio (10 m/s, 0.4s against vs let go) | 0.60 | 0.00 | <= 0.8 | brake stays |
 | reglide_frames / dashglide_reopen_frames | 1 / 1 | 1 / 1 | <= 1 | |
 | dashglide_open_speed (glider opened out of an air dash) | 6.9 m/s | 13.8 m/s | >= 12 | [wiki] momentum + speed |
