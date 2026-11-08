@@ -315,3 +315,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-08 (owner): the villain is a dragon queen
 - **Malgrave, the Undying Queen** (she/her) replaces Malgrave, the Undying King: same name (owner kept it after trying Vesperine and Veyl), now a dragon queen. Same story: queen of Solmere, the Wyrm in human shape, alive inside the cracked Heart. The owner is designing a female-looking mask for her (still the first mask, which every Hunter's Mask copies). Canon text: briefs/LORE_MASKS.md.
+
+## 2026-11-08 (owner): Mossy is renamed Albert
+- **Albert, the Barnacle Knight** (was Mossy, before that Breaker; id `bulwark` unchanged). Nickname **Bert** in banter. Player text, voice lines and menus use Albert.
