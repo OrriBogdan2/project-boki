@@ -65,26 +65,33 @@ Still open (shared, not done here):
 - Only five kits are data-driven (`content/vfx/`: archer, ashwick, juggernaut, rimewright, tender). The rest draw with
   `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`). Moving each to `HeroVfx` data is
   how a kit reaches the bar.
+- **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`), Motley's well dome, Meeko's seed and
+  ult discs and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
+  rim plus a soft inner falloff (alpha 0.25 or less at the centre), never a solid fill. Each kit sets these, so the fix
+  is per kit (backlog).
+- Motley's kit draws its well and orbs in indigo/violet, but his slot colours and signature are teal. The ostra item
+  moves them to teal. The alternative (keep void violet) would clash with Sable.
 
 ## Scorecard (worst first)
-Each axis is scored 1–5: R readability, S shape, L layering, T timing, Sc scale, C colour, Snd sound.
+Each axis is scored 1–5: R readability, S shape, L layering, T timing, Sc scale, C colour (before the shared fix), Snd
+sound. Scored from the `vfxq-before-*` strips (main d255acbee), except Lace (strip still queued; code read) and sound (code
+read; strips are silent).
 
-| # | Hunter | arch | R | S | L | T | Sc | C | Snd | total | main problem |
+| # | Hunter | arch | R | S | L | T | Sc | C | Snd | total | main problem (from the strip) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Tenzo | dolm | 1 | 2 | 1 | 2 | 3 | 2 | 3 | 14 | hard-coded `Fx` primitives in `dolm_kit`/`breah_*`, no HeroVfx data; was red (now cobalt here). Spine lane and slam are flat rings, the hop landing has no debris |
-| 2 | Motley | ostra | 2 | 2 | 1 | 2 | 2 | 2 | 3 | 14 | no HeroVfx data and no `Fx` calls in the kit; the look comes from the shared cast language only. Dash/LMB are owned by void-jester-dash-feel-1108 |
-| 3 | Grimble | dredge | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 16 | `ld_fx` primitives; hook chain is a beam with no weight; coin gold shares the stock flash gold |
-| 4 | Albert | bulwark | 2 | 2 | 2 | 2 | 3 | 2 | 4 | 17 | `bjorn_fx` piles of rings/flashes (9 calls); shield reads as a flat disc; hard-coded gold |
-| 5 | Sable | thief | 2 | 3 | 2 | 3 | 3 | 2 | 3 | 18 | `dj_fx` slashes are thin; blink has no in/out pair; flashes hard-coded gold, not violet |
-| 6 | Sparkle | mage | 3 | 2 | 2 | 3 | 3 | 2 | 3 | 18 | `vv_fx` bolts/orbs; recoloured to pink by sparkle-dash-feel-1108; ult lacks a hot core and afterglow |
-| 7 | Vex | gunslinger | 3 | 3 | 2 | 3 | 3 | 3 | 4 | 21 | `vv_fx` tracer and muzzle flashes; was ember orange through the shared layer, now lime; reload/E have no shape of their own |
-| 8 | Lace | archer | 3 | 3 | 3 | 3 | 3 | 3 | 2 | 20 | data-driven; was red `#e8483e` (Kael's red); thin arrow trails; few sounds |
-| 9 | Neve | rimewright | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; frost shards read; held beam needs a hot core and ice debris on the end |
-| 10 | Meeko | tender | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; heal and seed read, but the LMB pellet is small for its hitbox |
-| 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar. Polish: soft-particle ground clipping, hold-blade glow |
-| 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 27 | the bar. Polish: cleave sound transient, ult shockwave scale |
+| 1 | Tenzo | dolm | 2 | 2 | 1 | 2 | 3 | 1 | 3 | 14 | E telegraph is opaque orange discs; X is a thin red line and ring; everything red/orange (now cobalt on this branch); `breah_*` draws flat rings with no debris |
+| 2 | Motley | ostra | 2 | 2 | 1 | 2 | 2 | 2 | 3 | 14 | E and X are huge opaque indigo domes over the target; LMB hit is tiny; indigo vs teal signature |
+| 3 | Vex | gunslinger | 1 | 2 | 2 | 2 | 3 | 1 | 4 | 15 | LMB and held LMB show almost no tracer or muzzle flash; RMB crescents are pink; E/X are opaque brown scorch discs |
+| 4 | Grimble | dredge | 3 | 2 | 2 | 2 | 3 | 1 | 3 | 16 | pink pellets, teal E fan, orange RMB fan, purple hook chain: four colours, none gold; flat fans with no leading edge |
+| 5 | Meeko | tender | 2 | 2 | 2 | 3 | 3 | 1 | 4 | 17 | purple orbs, gold seed rings, cyan ult dome: no signature colour; hard-edged flat discs; Hearth Call barely reads |
+| 6 | Sable | thief | 2 | 2 | 2 | 3 | 3 | 3 | 3 | 18 | LMB hits nearly invisible; held LMB is a flat unlit purple box; X is pale grey discs |
+| 7 | Albert | bulwark | 3 | 3 | 2 | 3 | 3 | 2 | 4 | 20 | gold swing arcs read; dash dome is mint green; E is a flat gold box with dark cubes |
+| 8 | Sparkle | mage | 3 | 3 | 3 | 3 | 3 | 2 | 3 | 20 | lightning still cyan (old teal) next to pink orbs; X tints the whole screen purple |
+| 9 | Lace | archer | 3 | 3 | 3 | 3 | 3 | 3 | 2 | 20 | (code read) was red `#e8483e` like Kael; thin arrow trails; few sounds |
+| 10 | Neve | rimewright | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 26 | reads well (shards, shatter burst); the dash ice path is flat untextured boxes |
+| 11 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 27 | the bar: slash arcs, burning lanes, debris. Polish: cleave sound transient, ult shockwave scale |
+| 12 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: soft-particle ground clipping, hold-blade glow |
 
-The scores are **provisional**. They come from reading each kit's FX code plus Cinder and Kael from the owner playtest. The
-`vfxq-before/after-*` GPU strips are queued but did not run in this pass (the GPU PC was paused until 20:27 UTC, with 41
-jobs ahead). Re-score from the sheets when they land, and attach Tenzo's before/after (`vfxq-before-dolm`,
-`vfxq-after-dolm`) to the PR.
+Strips: the before sheets are jobq `vfxq-before-<arch>`, the after sheets `vfxq-after-<arch>`
+(`/home/boki/jobq/done/<id>/out/`). Tenzo's before/after pair is on branch `ext/vfx-quality-strips` (not for merge) and
+linked from PR #14.
