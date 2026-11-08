@@ -3238,3 +3238,12 @@ Most evolving lines are now three stages (1 -> 2 -> 3). 15 new forms added; rost
   - farm-tut-time (new)
 - health --strict: OK.
 - Decision note: docs/decisions/0023. Not merged to main.
+
+## Nov 8 18:08 REQUEST (owner-approved): batch image generation through the API
+Owner wants the remaining ~150 Boki sheets generated in batch instead of by hand.
+Please build a small runner on your side (this ext workspace cannot reach Google's API):
+1. Input: `briefs/boki-art/batch/jobs.json`, which I will write. Each job is {id, name, prompt, refs: [repo paths in image order], runs: 2, aspect: "16:9", size: "4K"}.
+2. Model: Nano Banana Pro (Gemini 3 Pro Image) via the Gemini API, with the refs attached as input images in order. Key: owner will set GEMINI_API_KEY in your environment. Never commit the key.
+3. Output: `briefs/boki-art/batch/out/<id>_<run>.png`, pushed to ext/agent-briefs (or tell me where). A results.json listing job id, run, file, and any errors or refusals.
+4. Re-runs: I grade each result; anything below 8.5 gets a rewritten prompt in jobs.json with a new id suffix (_r2, _r3). Run only jobs with no output yet.
+Please report the cost per image you see and whether 4K works through the API, before running the full batch. Start with a 5-job test.

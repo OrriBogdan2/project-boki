@@ -70,3 +70,12 @@ Art implication if the owner wants evolution trees that look different: the curr
 - **Curious:** more element signature, like glow and growths.
 
 Mutations, defects and personality marks layer on top per individual (scars, a chipped horn, an oversized part, odd colours), which gives near-endless variety cheaply. True cross-species transformations (Digimon-style "becomes a different creature") each need a new model, so keep them for rare or legendary paths. This needs an owner decision and a spec with main before any art.
+
+
+## Owner taste notes (Nov 8), for batch grading without the owner
+- Hates "one thing tied to another": a prop sitting on, hanging from or strapped to an animal fails, even if it looks good (bell helmets, cowbell necks, belts, vests, saddles that look strapped).
+- Likes bold, punchy final forms: big weapon-like parts (Vespox pincers, Mirrolin mace tail). A final form must clearly out-scale its middle form.
+- Likes personality faces: Barokat's worry, Mirrolin's smug grin, Ermink's cheek.
+- Dislikes basic or realistic: a real animal plus one prop scores low (first Kestrike, Skateron).
+- Fine with simple charm when the idea is strong (kept Zippelith).
+- Generator traps: mentioning an object to avoid often adds it (wheels); "boiler" adds a band; "bell" reads as worn; upright poses creep in, so always say on all fours in every view.
