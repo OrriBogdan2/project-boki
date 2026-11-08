@@ -658,7 +658,7 @@ func _ready_rest() -> void:
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
 	if not visit.is_empty():
-		pass
+		rows.append(f)
 	elif hb.needs_making():
 		hb.open_make_home()
 	elif not Save.d["tutorial"].get("home", false):
@@ -4213,9 +4213,10 @@ func _care_start(k: Dictionary) -> bool:
 func _care_feed(rec: Dictionary, f: String) -> void:
 	var k := _kin_entry(rec)
 	if not _care_start(k):
+		_toast("%s isn't out on the farm to feed" % rec["name"])
 		return
-	var have := int(Save.d["crops"].get(f, 0)) if Data.CROPS.has(f) else int(Save.d["items"].get(f, 0))
-	if have <= 0:
+	if Econ.pantry(f) <= 0:
+		_toast("You're out of %s" % Care.food_name(f).to_lower())
 		return
 	# it comes over to you and you put the food down in front of it
 	var at := ppos + Vector3(sin(pface) * -1.0, 0, cos(pface) * -1.0)
@@ -5046,9 +5047,9 @@ func _set_acc(rec: Dictionary, a: String) -> void:
 func _open_feed(rec: Dictionary) -> void:
 	var v := _new_panel("Feed %s" % rec["name"], 560)
 	var known: Array = rec["known"]
-	var any := false
+	var rows: Array = []     # lambdas copy plain locals, so the rows are counted through an Array
 	var row_for := func(f: String, n: int, desc: String) -> void:
-		any = true
+		rows.append(f)
 		var row := UI.hbox(10)
 		var info := UI.vbox(2); info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var tag := ""
@@ -5069,7 +5070,7 @@ func _open_feed(rec: Dictionary) -> void:
 			for af in Evo.AFF:
 				if Evo.AFF[af]["food"] == f: aff = "Grows it %s. " % String(Evo.AFF[af]["name"]).to_lower()
 			row_for.call(f, n, aff + "Fills it up.")
-	if not any:
+	if rows.is_empty():
 		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))
 
 func _open_train(rec: Dictionary) -> void:
