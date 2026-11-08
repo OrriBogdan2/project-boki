@@ -50,7 +50,7 @@ func tick(dt: float) -> void:
 	detect_t -= dt
 	if h.hob:
 		h.hob.tick(dt)
-	if detect_t <= 0.0:
+	if detect_t <= 0.0 and not h.npc_talk.is_open():      # the tutorial waits while someone talks
 		detect_t = 0.5
 		_poll()
 	_update_marker(dt)
