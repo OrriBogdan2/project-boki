@@ -14,6 +14,7 @@ const int M_RIBBON = 4;     // a mesh trail: UV.x head (0) to tail (1), UV.y acr
 const int M_BOLT = 6;       // a strip from A (UV.x 0) to B (1), facing the camera: lightning when jag > 0, a thread at 0
 const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core: UV across the quad
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
+const int M_DOME = 8;       // a shield's curved pane: UV.x round it (0.5 ahead), UV.y foot (0) to crown (1); life: its wear
 
 uniform int mode = 0;
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);    // the body of the look
@@ -23,7 +24,8 @@ uniform float life = 0.0;   // 0..1 through the look
 uniform float seed = 0.0;
 uniform float gain = 1.0;   // the viewer's share of it (HeroVfx.view_k: allies' effects sit dimmer)
 uniform int shape = 0;      // M_SCORCH: 0 disc, 1 lane, 2 cone
-uniform float arc = 1.0;    // M_SCORCH cone: half angle (rad). M_SKIRT: the share of the circle it covers
+uniform float arc = 1.0;    // M_SCORCH cone: half angle (rad). M_SKIRT, M_DOME: the share of the circle it covers
+uniform float flash = 0.0;  // M_DOME: a block or a push lighting the whole pane (0..2)
 uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures keep their size
 uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
@@ -218,6 +220,26 @@ vec4 vortex(vec2 uv) {
 	return vec4(c * fade, a);
 }
 
+// The shield: a clear curved pane with a halo along its rim, a sheen where it turns away from the eye (that is
+// what reads as curved) and a faint honeycomb of plates that cracks dark as it wears. The middle stays under 0.25
+// alpha so whoever stands behind it still shows; a block flashes the whole pane.
+vec4 dome(vec2 uv, float facing) {
+	float x = (uv.x - 0.5) / max(arc, 0.01) + 0.5;
+	if (x < 0.0 || x > 1.0) { return vec4(0.0); }
+	float edge = min(min(x, 1.0 - x) * 2.0, 1.0 - uv.y);
+	float halo = 1.0 - smoothstep(0.0, 0.16, edge);
+	float foot = 1.0 - smoothstep(0.0, 0.1, uv.y);
+	float sheen = pow(1.0 - facing, 2.0);
+	vec2 p = vec2(x * 10.0, uv.y * 3.5) + seed;
+	float seam = 1.0 - smoothstep(0.0, 0.09, cracks(p));
+	float wave = smoothstep(0.75, 1.0, sin((uv.y * 1.5 - TIME * 0.7) * 3.14159));   // a band of light climbing it
+	float broken = smoothstep(0.15, 0.9, life) * step(1.0 - life, h21(floor(p)));
+	float glow = halo * 1.1 + foot * 0.5 + sheen * 0.3 + seam * (0.1 + wave * 0.3) + flash * (0.25 + seam * 0.6);
+	float a = clamp(0.06 + glow * 0.55 + broken * seam * 0.7, 0.0, 1.0);
+	vec3 c = mix(col.rgb, col2.rgb, clamp(halo + flash * 0.5, 0.0, 1.0)) * glow;
+	return vec4(mix(c, col3.rgb, broken * seam), a);
+}
+
 void fragment() {
 	vec4 v;
 	if (mode == M_SWEEP) { v = sweep(UV); }
@@ -227,6 +249,7 @@ void fragment() {
 	else if (mode == M_BOLT) { v = bolt(UV); }
 	else if (mode == M_VORTEX) { v = vortex(UV); }
 	else if (mode == M_RIBBON) { v = ribbon(UV); }
+	else if (mode == M_DOME) { v = dome(UV, abs(dot(NORMAL, VIEW))); }
 	else { v = thread(UV); }
 	ALBEDO = v.rgb * gain;
 	ALPHA = v.a * gain;

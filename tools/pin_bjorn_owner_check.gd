@@ -502,9 +502,12 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 	ok("bjorn shield: a foe walking into the raised wall is pushed back at least its push distance",
 		K.pushes >= 1 and moved >= float(sd["push"]) - 0.05, "pushed %d moved %.2f" % [K.pushes, moved])
 	ok("bjorn shield: a push flashes the wall", K.fx.aegis_hit > 0.0 or K.fx.push_flash > 0.0 or K.pushes >= 1)
-	ok("bjorn shield: the wall is built of plates (solid, not a flat slab) and bigger",
-		K.fx.aegis.get_child_count() >= 30 and K.fx.AEGIS_H >= 1.3 * 1.3 - 0.01 and K.fx.aegis.visible,
-		"parts %d height %.2f" % [K.fx.aegis.get_child_count(), K.fx.AEGIS_H])
+	var dome: MeshInstance3D = K.fx.aegis
+	ok("bjorn shield: the wall is an ivory dome (HeroVfx shell) spanning the wall",
+		dome.visible
+		and (dome.material_override as ShaderMaterial).get_shader_parameter("mode") == HeroVfx.MODES["dome"]
+		and dome.scale.x * 2.0 * sin(deg_to_rad(53.0)) >= float(sd["len"]) - 0.1,
+		"radius %.2f" % dome.scale.x)
 	P.inp["sec_hold"] = false
 	step(m, 0.4)
 	ok("bjorn shield: lowered, the chevron is gone", not AimKit.shown(P, "aegis_push") and not K.fx.aegis.visible)
