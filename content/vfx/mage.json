@@ -1,0 +1,144 @@
+{
+	"palette": {
+		"main": "#ff5ab4", "hot": "#ffd6ee", "white": "#fff6fb", "deep": "#a8226a", "char": "#24101c",
+		"dust": "#c9b48a", "soot": "#6e5f50", "copper": "#e08a46"
+	},
+	"anchors": {
+		"rod_tip": {"body": [-0.7, 2.25, 0.3]}
+	},
+	"moves": {
+		"lmb": {"net": false, "fx": [
+			{"p": "flare", "size": 0.55, "grow": 1.3, "life": 0.1, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "bolt", "len": 1.4, "size": 0.45, "jag": 0.55, "life": 0.12, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "star", "n": 3, "speed": 1.4, "spread": 1.0, "life": 0.18, "size": 0.08,
+				"c": "main", "c2": "white", "c3": "deep"}
+		]},
+		"lmb_trail": {"net": false, "fx": [
+			{"p": "ribbon", "size": 0.42, "life": 2.0, "tail": 0.12, "wave": 0.12, "c": "deep", "c2": "main", "c3": "char"},
+			{"p": "ribbon", "size": 0.14, "life": 2.0, "tail": 0.08, "c": "main", "c2": "white", "c3": "deep"}
+		]},
+		"lmb_hit": {"net": false, "fx": [
+			{"p": "flare", "size": 0.75, "grow": 1.3, "life": 0.12, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "ember", "n": 8, "way": "back", "speed": 5.0, "spread": 0.6, "grav": 5.0, "drag": 1.5, "life": 0.24,
+				"size": 0.05, "stretch": 0.04, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "star", "n": 2, "speed": 0.5, "spread": 1.0, "life": 0.35, "size": 0.1, "c": "main", "c2": "white",
+				"c3": "deep"}
+		]},
+		"rmb_summon": {"net": false, "fx": [
+			{"p": "flare", "size": 0.7, "grow": 1.3, "life": 0.12, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "ember", "n": 6, "speed": 3.0, "spread": 1.0, "drag": 2.0, "life": 0.2, "size": 0.04, "stretch": 0.03,
+				"c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "star", "n": 4, "speed": 1.0, "spread": 1.0, "life": 0.3, "size": 0.09, "c": "main", "c2": "white",
+				"c3": "deep"}
+		]},
+		"rmb_hold": {"net": false, "fx": [
+			{"p": "ember", "at": "rod_tip", "n": 10, "speed": 3.0, "spread": 1.0, "drag": 2.5, "life": 0.16,
+				"size": 0.035, "stretch": 0.03, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "star", "at": "rod_tip", "n": 3, "speed": 0.4, "spread": 1.0, "life": 0.25, "size": 0.08,
+				"c": "main", "c2": "white", "c3": "deep"}
+		]},
+		"rmb_full": {"net": false, "fx": [
+			{"p": "flare", "y": 1.1, "size": 1.5, "grow": 1.2, "life": 0.14, "c": "hot", "c2": "white", "c3": "main"},
+			{"p": "star", "y": 1.1, "n": 8, "speed": 2.2, "spread": 1.0, "drag": 2.0, "life": 0.35, "size": 0.1,
+				"c": "main", "c2": "white", "c3": "deep"}
+		]},
+		"rmb_throw": {"net": false, "fx": [
+			{"p": "flare", "size": 0.9, "grow": 1.3, "life": 0.12, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "bolt", "len": 2.6, "size": 0.8, "jag": 0.45, "life": 0.16, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"rmb_trail": {"net": false, "fx": [
+			{"p": "ribbon", "size": 0.75, "life": 2.0, "tail": 0.14, "wave": 0.16, "c": "deep", "c2": "main", "c3": "char"},
+			{"p": "ribbon", "size": 0.24, "life": 2.0, "tail": 0.09, "c": "main", "c2": "white", "c3": "deep"}
+		]},
+		"rmb_hit": {"net": false, "fx": [
+			{"p": "flare", "y": 1.0, "size": 1.7, "grow": 1.3, "life": 0.16, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "skirt", "size": 2.2, "from": 0.3, "tall": 0.9, "life": 0.35, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "ember", "y": 1.0, "n": 18, "way": "fwd", "speed": 6.0, "spread": 0.8, "grav": 5.0, "drag": 1.2,
+				"life": 0.4, "size": 0.06, "stretch": 0.04, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "star", "y": 1.0, "n": 6, "speed": 1.2, "spread": 1.0, "drag": 1.5, "life": 0.6, "size": 0.1,
+				"c": "main", "c2": "white", "c3": "deep"},
+			{"p": "skirt", "when": "slam", "size": 1.6, "from": 0.4, "tall": 1.3, "life": 0.3, "c": "copper", "c2": "hot",
+				"c3": "char"},
+			{"p": "chunk", "when": "slam", "y": 0.4, "n": 6, "way": "up", "speed": 4.0, "spread": 0.6, "grav": 14.0,
+				"life": 0.6, "size": 0.1, "c": "soot", "c2": "copper", "c3": "char"}
+		]},
+		"e_place": {"fx": [
+			{"p": "flare", "y": 0.3, "size": 0.9, "grow": 1.3, "life": 0.12, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "star", "n": 8, "shape": "disc", "radius": "r", "way": "up", "speed": 0.6, "spread": 0.3, "life": 0.4,
+				"size": 0.09, "c": "main", "c2": "white", "c3": "deep"}
+		]},
+		"e_count": {"fx": [
+			{"p": "bolt", "y": 8.0, "rise": -8.0, "size": 0.3, "life": 0.9, "c": "deep", "c2": "main", "c3": "char"},
+			{"p": "ember", "n": 18, "shape": "gather", "radius": "r", "speed": 1.8, "life": 0.8, "burst": 0.0,
+				"size": 0.05, "stretch": 0.03, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "star", "n": 10, "shape": "disc", "radius": "r", "way": "up", "speed": 0.8, "spread": 0.2, "life": 0.8,
+				"burst": 0.0, "size": 0.08, "c": "main", "c2": "white", "c3": "deep"}
+		]},
+		"e_strike": {"fx": [
+			{"p": "bolt", "y": 9.0, "rise": -9.0, "size": 2.2, "jag": 0.55, "life": 0.32, "c": "main", "c2": "hot",
+				"c3": "deep"},
+			{"p": "bolt", "y": 9.0, "rise": -9.0, "size": 0.8, "jag": 0.35, "life": 0.22, "c": "hot", "c2": "white",
+				"c3": "main"},
+			{"p": "bolt", "y": 9.0, "rise": -9.0, "delay": 0.06, "size": 1.4, "jag": 0.65, "life": 0.22, "c": "main",
+				"c2": "hot", "c3": "deep"},
+			{"p": "flare", "y": 1.0, "size": 2.6, "grow": 1.3, "life": 0.16, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "skirt", "size": "r", "from": 0.3, "tall": 1.0, "life": 0.35, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "scorch", "size": "r", "life": 1.4, "c": "main", "c2": "hot", "c3": "char"},
+			{"p": "ember", "y": 0.4, "n": 26, "way": "up", "speed": 7.0, "spread": 0.8, "grav": 8.0, "drag": 1.0,
+				"life": 0.6, "size": 0.06, "stretch": 0.04, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "chunk", "y": 0.3, "n": 6, "way": "up", "speed": 4.5, "spread": 0.7, "grav": 14.0, "life": 0.6,
+				"size": 0.1, "c": "soot", "c2": "deep", "c3": "char"},
+			{"p": "star", "delay": 0.1, "n": 8, "shape": "disc", "radius": "r", "way": "up", "speed": 0.5, "spread": 0.4,
+				"life": 1.2, "burst": 0.4, "size": 0.1, "c": "main", "c2": "white", "c3": "deep"}
+		]},
+		"x_cast": {"fx": [
+			{"p": "bolt", "at": "h", "y": 7.0, "rise": -6.7, "size": 1.2, "jag": 0.5, "life": 0.22, "c": "main",
+				"c2": "hot", "c3": "deep"},
+			{"p": "flare", "at": "h", "y": 1.0, "size": 1.4, "grow": 1.3, "life": 0.14, "c": "main", "c2": "white",
+				"c3": "deep"},
+			{"p": "star", "at": "h", "y": 1.0, "n": 6, "speed": 1.5, "spread": 1.0, "drag": 1.5, "life": 0.4, "size": 0.1,
+				"c": "main", "c2": "white", "c3": "deep"}
+		]},
+		"x_rise": {"fx": [
+			{"p": "bolt", "y": 0.2, "rise": 5.0, "size": 1.0, "jag": 0.5, "life": 0.25, "c": "main", "c2": "hot",
+				"c3": "deep"},
+			{"p": "flare", "y": 0.3, "size": 1.6, "grow": 1.3, "life": 0.14, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "smoke", "y": 0.2, "n": 8, "shape": "disc", "radius": 1.0, "speed": 2.2, "spread": 0.6, "grav": -0.5,
+				"life": 0.8, "size": 0.35, "c": "dust", "c3": "soot", "near": true},
+			{"p": "chunk", "y": 0.2, "n": 8, "way": "up", "speed": 3.5, "spread": 0.8, "grav": 14.0, "life": 0.6,
+				"size": 0.08, "c": "dust", "c2": "soot", "c3": "char"}
+		]},
+		"x_hang": {"net": false, "fx": [
+			{"p": "ember", "at": "h", "y": 1.0, "n": 8, "radius": 0.5, "speed": 2.5, "spread": 1.0, "drag": 2.0,
+				"life": 0.22, "size": 0.04, "stretch": 0.03, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "star", "at": "h", "y": 1.0, "n": 4, "radius": 0.6, "speed": 0.6, "spread": 1.0, "life": 0.4,
+				"size": 0.09, "c": "main", "c2": "white", "c3": "deep"}
+		]},
+		"x_strike": {"fx": [
+			{"p": "bolt", "y": 12.0, "rise": -12.0, "size": 3.4, "jag": 0.55, "life": 0.4, "c": "main", "c2": "hot",
+				"c3": "deep"},
+			{"p": "bolt", "y": 12.0, "rise": -12.0, "size": 1.2, "jag": 0.3, "life": 0.26, "c": "hot", "c2": "white",
+				"c3": "main"},
+			{"p": "bolt", "y": 12.0, "rise": -12.0, "delay": 0.07, "size": 2.2, "jag": 0.7, "life": 0.3, "c": "main",
+				"c2": "hot", "c3": "deep"},
+			{"p": "flare", "y": 1.2, "size": 3.8, "grow": 1.3, "life": 0.2, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "skirt", "size": "r", "from": 0.25, "tall": 1.6, "life": 0.45, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "scorch", "size": "r", "life": 2.0, "c": "main", "c2": "hot", "c3": "char"},
+			{"p": "ember", "y": 0.3, "n": 40, "way": "up", "speed": 11.0, "spread": 0.75, "grav": 9.0, "drag": 0.8,
+				"life": 0.8, "size": 0.08, "stretch": 0.05, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "chunk", "y": 0.3, "n": 10, "way": "up", "speed": 6.0, "spread": 0.7, "grav": 14.0, "life": 0.8,
+				"size": 0.12, "c": "soot", "c2": "dust", "c3": "char"},
+			{"p": "smoke", "y": 0.4, "n": 6, "shape": "disc", "radius": "r", "radius_x": 0.6, "speed": 1.5, "spread": 0.6,
+				"grav": -1.0, "life": 1.4, "size": 0.45, "c": "dust", "c3": "soot", "near": true},
+			{"p": "star", "delay": 0.15, "n": 14, "shape": "disc", "radius": "r", "radius_x": 0.7, "way": "up",
+				"speed": 0.6, "spread": 0.5, "life": 1.6, "burst": 0.0, "size": 0.11, "c": "main", "c2": "white",
+				"c3": "deep"},
+			{"p": "ember", "delay": 0.2, "n": 16, "shape": "disc", "radius": 1.0, "way": "up", "speed": 2.5,
+				"spread": 0.5, "grav": -1.0, "life": 1.0, "burst": 0.0, "size": 0.05, "stretch": 0.03, "c": "main",
+				"c2": "hot", "c3": "deep"}
+		]},
+		"x_share": {"net": false, "fx": [
+			{"p": "bolt", "size": 0.6, "jag": 0.6, "life": 0.2, "c": "main", "c2": "hot", "c3": "deep"}
+		]}
+	}
+}

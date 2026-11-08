@@ -118,7 +118,7 @@ func _mage() -> void:
 	ok("LMB: the bolt reaches 13m with the cursor at 2m",
 			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 13.0) < 0.5,
 			"%.1f m" % (float(sd.get("life0", 0.0)) * (sd.get("vel", Vector2.ZERO) as Vector2).length()))
-	ok("LMB: the round is a jagged bolt (a pooled rider)", VVFx.of(m).riders.size() >= 1)
+	ok("LMB: the round trails crackling pink (HeroVfx lmb_trail)", int(HeroVfx.of(m).plays.get("lmb_trail", 0)) >= 1)
 	var a1 := K.anim_id
 	ac.step(m, 0.85)
 	_fire(m, P)
@@ -276,6 +276,10 @@ func _mage() -> void:
 	ok("Storm Rod: knocked about 1 body height on open ground", kb > 0.8 and kb < 3.0, "%.2f m" % kb)
 	ok("Storm Rod: an orb at the impact the moment it hits",
 			orb_fast and _flat(K.motes[0]["pos"], home + Vector3(5, 0, 0)) < 2.5)
+	var rod_looks := HeroVfx.of(m).plays
+	ok("Storm Rod: summoned, full, thrown with a trail and the hit, as her own looks (HeroVfx rmb_*)",
+			["rmb_summon", "rmb_hold", "rmb_full", "rmb_throw", "rmb_trail", "rmb_hit"].all(
+				func(mv): return int(rod_looks.get(mv, 0)) >= 1), str(rod_looks.keys()))
 	var rod_k1 := K.rod_rank_k()
 	var run_k1 := K.run_rank_k()
 	P.slot_lv["sec"] = 3
@@ -381,6 +385,9 @@ func _mage() -> void:
 	ok("Skycall: 1 Static (data), Grounded, dragged toward you",
 			K.spark_n(T) == 1 and KitStatus.grounded(T) and ac.dmg(T) >= 15.0 and T.pos.x < tx0 - 0.5,
 			"sparks %d moved %.1f" % [K.spark_n(T), T.pos.x - tx0])
+	var sky_looks := HeroVfx.of(m).plays
+	ok("Skycall: placed, counting down and striking as her own looks (HeroVfx e_place, e_count, e_strike)",
+			["e_place", "e_count", "e_strike"].all(func(mv): return int(sky_looks.get(mv, 0)) >= 1))
 	ac.step(m, 0.9)
 	ok("Skycall: the drag is a modest slide (about 3.4 m)",
 			absf((tx0 - T.pos.x) - 3.4) < 0.5, "%.1f m" % (tx0 - T.pos.x))

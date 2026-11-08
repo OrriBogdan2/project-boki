@@ -12,7 +12,6 @@ extends ArchKit
 
 const GLOW := Color("ffd6ee")        # the lightning's hot core: a near-white pink on the pink body
 const COPPER := Color("e08a46")
-const VIOLET := Color("3a1c8c")
 const DEEP_GOLD := Color("e0900a")   # the aim kit whitens its accent: this lands as a rich gold
 const PINK := Color("ff5ab4")        # the lightning's body: her signature pink (docs/VFX_QUALITY.md)
 const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
@@ -53,7 +52,7 @@ func _setup() -> void:
 	# her hand before _tick_lmb skins it: hide it just before that frame is drawn
 	RenderingServer.frame_pre_draw.connect(_hide_fresh_round)
 
-## Hides the stock orb of the round she just fired (the kit's jagged bolt is the round's look).
+## Hides the stock orb of the round she just fired until _tick_lmb has moved it to her fingertip (it is the bolt's head).
 func _hide_fresh_round() -> void:
 	if h == null or not is_instance_valid(h) or h.shot_n == last_shot:
 		return
@@ -246,11 +245,12 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or String(o.get("src", "")) == "burn":
 		return
 	if String(o.get("src", "")) == "shot" and not o.has("ab"):
+		vfx("lmb_hit", t.pos + Vector3(0, 1.0, 0), h.dir_to(t))       # splinters spray back toward her
 		add_spark(t)
 
 # ------------------------------------------------------------------ LMB: the finger gun
 ## A new finger bolt left the hand: alternate hands (the bolt starts at that hand), a twist, a crackle
-## at the fingertip and sparks at the feet; the round becomes a jagged bolt with a spark impact.
+## at the fingertip; the round is a hot head with a crackling pink trail (content/vfx/mage.json).
 func _tick_lmb() -> void:
 	var idle := wire.is_empty() and not rmb_down and run_t <= 0.0 and not ult.busy()
 	if h.is_local() and idle and not h.downed:
@@ -282,15 +282,14 @@ func _tick_lmb() -> void:
 	sd["prev"] = p
 	sd["start"] = p
 	play("mage_lmb_l" if left else "mage_lmb_r")
-	# a pink thrust from the shoulder to the fingertip, then (at the release key, 0.06 s) the fingertip
-	# crackles; pink sparks pop at her feet, a jagged bolt rides the round
-	var shoulder := h.position + Vector3(0, 1.25, 0) + Vector3(-d.y, 0, d.x) * (-0.2 if left else 0.2)
-	fx().smear(shoulder, shoulder + Vector3(d.x, 0, d.y) * 0.9, PINK, GLOW, 0.3, 0.12)
-	m.later(0.06, _fingertip.bind(left))
-	m.fx.spark(h.pos + Vector3(0, 0.1, 0), Vector3.UP, GLOW, 4, 3.0, 80.0, 0.2, 6.0, 0.7)
-	fx().ride(sd, "bolt", PINK, GLOW, 1.25, 0.6, _bolt_end.bind(h.pos))
+	var orb := sd.get("node") as Node3D
+	if orb != null and is_instance_valid(orb):
+		orb.global_position = p
+		orb.visible = true
+		HeroVfx.of(m).trail(h, "lmb_trail", orb)
+	m.later(0.06, _fingertip.bind(left))     # the release key of the point
 
-## The finger-gun release: arcs flung out of the pointing fingertip and a star on it.
+## The finger-gun release: a crackle flung out of the pointing fingertip along the aim.
 func _fingertip(left: bool) -> void:
 	if not is_instance_valid(h) or h.anim == null:
 		return
@@ -303,19 +302,7 @@ func _fingertip(left: bool) -> void:
 		var at := WardenGlb.anchor(h.model, "anchor_finger_L" if left else "weapon_muzzle")
 		if at != null:
 			tip = at.global_position
-	fx().crackle(tip, PINK, GLOW, 0.6, 4, 0.08)
-	fx().star(tip, PINK, GLOW, 0.75, 0.08)
-
-## Where a finger bolt ended: a fan of splinters sprays back toward the caster and a crackle.
-func _bolt_end(at: Vector3, vel: Vector2, from: Vector3) -> void:
-	var back := Vector2(from.x - at.x, from.z - at.z).normalized() if vel.length() > 0.1 else Vector2(0, 1)
-	for i in 4:
-		var a := (float(i) - 1.5) * 0.45 + fx().rng.randf_range(-0.15, 0.15)
-		var bd := back.rotated(a)
-		var ln := fx().rng.randf_range(0.5, 1.0)
-		var tip := at + Vector3(bd.x * ln, fx().rng.randf_range(0.0, 0.4), bd.y * ln)
-		fx().arc(at, tip, PINK, GLOW, 0.26, 0.12)
-	fx().star(at, PINK, GLOW, 0.6, 0.12)
+	vfx("lmb", tip, d)
 
 # ------------------------------------------------------------------ dash: Wirerun
 ## Her Shift has no long air dash (the HUD shows no segment for one): see on_dash.
@@ -544,9 +531,7 @@ func rmb_hold_tick(t: float) -> void:
 	var k := clampf(t / float(rmb_def()["hold"]), 0.0, 1.0)
 	if k >= 1.0 and not rod_full:
 		rod_full = true
-		# full: her whole body flashes white for a beat
-		m.fx.flash(h.position + Vector3(0, 1.0, 0), Color.WHITE, 1.6, 0.1)
-		m.fx.flash(h.position + Vector3(0, 1.6, 0), GLOW, 0.9, 0.08)
+		vfx("rmb_full")          # full: a white-hot flash on her body for a beat
 		AimKit.flare(h, {"col2": GLOW})
 		m.sfx("vv_rod_full", h.pos, -3.0)
 
@@ -557,11 +542,7 @@ func _summon_rod() -> void:
 	rod.visible = true
 	play("mage_rmb_hold")
 	_tick_rod()
-	# it arrives in her hand: a flash and a crackle off the tip
-	var tip := rod.global_position - rod.global_basis.z * 0.75
-	m.fx.flash(_rod_hand(), GLOW, 1.0, 0.08)
-	fx().crackle(tip, PINK, GLOW, 0.8, 5, 0.16)
-	fx().star(tip, PINK, GLOW, 1.0, 0.14)
+	vfx("rmb_summon", rod.global_position - rod.global_basis.z * 0.75)      # it arrives crackling off the tip
 	m.sfx("vv_rod_summon", h.pos, -3.0)
 
 func shows_charge_ball() -> bool:
@@ -601,9 +582,7 @@ func _tick_rod() -> void:
 		var up := (Vector3(d.x * 0.3, 1.0, d.y * 0.3) + out).normalized()
 		rod.global_position = _rod_hand() + up * 0.25
 		rod.look_at(rod.global_position + up, Vector3(d.x, 0, d.y))
-		if fx().rng.randf() < 0.35:
-			var tip := rod.global_position + up * 0.75
-			fx().arc(tip, tip + _jitter(0.35, -0.6, 0.2), PINK, GLOW, 0.22, 0.08)
+		HeroVfx.of(m).hold(h, "rmb_hold", k)          # the tip crackling
 	var lane := {"len": float(cd_["range"]), "width": 0.3, "rails": true, "chevrons": 4, "k": k}
 	lane["col"] = col_of(rmb_def())
 	lane["col_full"] = GLOW
@@ -654,17 +633,10 @@ func _coil(k: float) -> void:
 		if not done["hit"]:
 			done["hit"] = true
 			_coil_hit(f, dir, k)}))
-	var a := h.position + Vector3(dir.x * 0.6, 1.5, dir.y * 0.6)
+	vfx("rmb_throw", h.position + Vector3(dir.x * 0.6, 1.5, dir.y * 0.6), dir)
 	if shots.size() > n0 and shots[-1]["by"] == h:
-		fx().ride(shots[-1], "bolt", PINK, GLOW, 3.2, 0.7, func(at: Vector3, _v: Vector2): _rod_end(at))
-	else:
-		fx().arc(a, a + Vector3(dir.x, 0, dir.y) * rng, PINK, GLOW, 0.7, 0.2)
-	m.fx.flash(a, GLOW, 0.9, 0.08)
+		HeroVfx.of(m).trail(h, "rmb_trail", shots[-1].get("node"))
 	m.sfx("vv_rod_throw", h.pos, -1.0, 1.0 + 0.2 * (1.0 - k))
-
-func _rod_end(at: Vector3) -> void:
-	fx().star(at, PINK, GLOW, 1.0, 0.16)
-	m.fx.burst(at, GLOW, 14, 4.0, 0.35, 2.0, 1.4)
 
 func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 	if not is_instance_valid(f) or f.dead:
@@ -672,11 +644,6 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 	var cd_ := rmb_def()["coil"] as Dictionary
 	add_spark(f)
 	m.sfx("mage_rod_hit", f.pos, -2.0)
-	# the pale blast, a pink crackle and a shock ring round them
-	m.fx.flash(f.position + Vector3(0, 1.0, 0), GLOW, 1.6, 0.12)
-	m.fx.burst(f.position + Vector3(0, 1.0, 0), GLOW, 18, 4.5, 0.45, 1.0, 1.8)
-	fx().crackle(f.position + Vector3(0, 1.0, 0), PINK, GLOW, 1.0, 5, 0.18)
-	fx().ring(ground(f.pos), 2.2, PINK, GLOW, 0.35)
 	# thrown into a wall or another foe: stunned (so is the one it hits)
 	var reach := 1.6 + 1.4 * k
 	var other: Ent = null
@@ -684,13 +651,14 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		if o != f:
 			other = o
 			break
-	if other != null or terrain_behind(f, dir, reach):
+	var slammed := other != null or terrain_behind(f, dir, reach)
+	vfx("rmb_hit", ground(f.pos), dir, {"slam": slammed})        # the blast, a shock ring, sparks on through
+	if slammed:
 		slams += 1
 		var stn := float(cd_["stun"])
 		var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "slam"], "stun": stn, "dr": true}
 		f.hurt(0.1, h, slam)
 		m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 1.0, "SLAMMED", GLOW, false)   # over STUNNED
-		fx().ring(ground(f.pos), 1.6, GLOW, COPPER, 0.25)
 		m.sfx("ab_wall", f.pos, -2.0, 1.3)
 		if other != null:
 			other.hurt(0.1, h, slam.duplicate(true))
