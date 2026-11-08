@@ -1,0 +1,10 @@
+{
+	"_doc": "The one shared tuning file for movement, feel and performance numbers (owner 11-08). perf: expedition frame-time budget knobs (docs/PERF.md).",
+	"perf": {
+		"bot_replan_s": 0.1,
+		"boki_retarget_s": 0.2,
+		"hero_anim_near_m": 48.0,
+		"hero_anim_far_every": 2,
+		"hero_anim_off_every": 4
+	}
+}

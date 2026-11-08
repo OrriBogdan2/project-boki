@@ -348,6 +348,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		if a["stuck"] > 0.6:
 			a["hops"] = int(a.get("hops", 0)) + 1
 			h.ai.erase("wp")        # find a new way round next time
+			h.ai.erase("steer")
 			if _safe(m, h, move, 2.0) and randf() < 0.5 and int(a["hops"]) <= 2:
 				inp["jump"] = true
 			else:
@@ -480,6 +481,7 @@ func _revive_move(m: Match, h: Hunter, rv: Dictionary, dt: float) -> Vector2:
 		# no progress: pick the next reachable spot round them (on their level, open ground)
 		st["t"] = 0.0; st["best"] = 1e9
 		h.ai.erase("wp")
+		h.ai.erase("steer")
 		for k in 8:
 			var sd := (int(st["side"]) + 1 + k) % 8
 			var ang := TAU * sd / 8.0 + 0.3
@@ -932,15 +934,32 @@ func _path_dir(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 			return _steer(m, h, lk["take"])
 	return h.dir_to(goal)
 
-## Heads for a spot on this island, finding a way around walls when they're in the way.
+## s: how long a bot keeps its way to a goal (straight or the waypoint it picked) before it looks again
+var replan_s := float(Content.rules("tuning")["perf"]["bot_replan_s"])
+
+## Heads for a spot on this island, finding a way around walls when they're in the way. The way is
+## re-planned every replan_s (the line tests are the costliest part of a bot), the heading every step.
 func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 	var from := Vector2(h.pos.x, h.pos.z)
-	var to := Vector2(goal.x, goal.z)
-	if _clear_line(m, from, to):
+	var gt := Vector2i(int(floor(goal.x)), int(floor(goal.z)))
+	var st: Array = h.ai.get("steer", [])
+	if st.size() == 3 and st[0] == gt and m.time < float(st[1]):
+		return _head(h, goal, from, st[2])
+	var pick := _plan(m, h, goal, from, gt)
+	h.ai["steer"] = [gt, m.time + replan_s, pick]
+	return _head(h, goal, from, pick)
+
+## Straight at the goal (pick INF), or toward the waypoint picked.
+func _head(h: Hunter, goal: Vector3, from: Vector2, pick: Vector2) -> Vector2:
+	var d := pick - from
+	return d.normalized() if pick != Vector2.INF and d.length() > 0.05 else h.dir_to(goal)
+
+## The waypoint to walk at, or INF to walk straight at the goal.
+func _plan(m: Match, h: Hunter, goal: Vector3, from: Vector2, gt: Vector2i) -> Vector2:
+	if _clear_line(m, from, Vector2(goal.x, goal.z)):
 		h.ai.erase("wp")
 		h.ai.erase("nopath")
-		return h.dir_to(goal)
-	var gt := Vector2i(int(floor(goal.x)), int(floor(goal.z)))
+		return Vector2.INF
 	var wp: Dictionary = h.ai.get("wp", {})
 	if wp.is_empty() or wp["goal"] != gt or m.time - float(wp["t"]) > 2.0:
 		wp = {"goal": gt, "t": m.time, "path": _grid_path(m, Vector2i(int(floor(h.pos.x)), int(floor(h.pos.z))), gt)}
@@ -950,7 +969,7 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 		# no way there on foot: walking straight at it had the bot shuffle at a rim (or step off a
 		# terrace and climb back) until the 14 s give-up. Give up on it after a moment instead.
 		_no_path(m, h)
-		return h.dir_to(goal)
+		return Vector2.INF
 	h.ai.erase("nopath")
 	# aim for the furthest waypoint we can walk straight to
 	var pick: Vector2 = path[0]
@@ -960,8 +979,7 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 			break
 	while path.size() > 1 and from.distance_to(path[0]) < 0.6:
 		path.pop_front()
-	var d := pick - from
-	return d.normalized() if d.length() > 0.05 else h.dir_to(goal)
+	return pick
 
 const NO_PATH_GIVE_UP := 1.5     # seconds without a walkable path before a goal is banned for now
 
