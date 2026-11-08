@@ -3,7 +3,7 @@
 	"title": "Hired Gun",
 	"base_name": "Vex",
 	"gender": "female",
-	"personality": "A sharp, professional soldier in marine-style gear. She takes the contract and finishes the job.\nCalm under fire, and always has a plan for the way out.",
+	"personality": "A foundry kid who swept brass casings off Malgrave's war-foundry floors. A siege engine took her arm in the Hollowing, and the gatling she bolted to her shoulder is her right arm now.\nThe Skylands' most famous gun-for-hire, she keeps a tally mark for every bounty she cashed. Her loyalty is technically for sale, but she sticks with the crew.",
 	"weight": "medium",
 	"body": {"size": 0.855, "chest": 1.0, "hit_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
 	"color": "#ff9a5c",

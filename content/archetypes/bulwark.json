@@ -1,9 +1,9 @@
 {
 	"id": "bulwark",
-	"title": "Sunken Bulwark",
-	"base_name": "Breaker",
+	"title": "Barnacle Knight",
+	"base_name": "Mossy",
 	"gender": "male",
-	"personality": "A huge, warm-hearted northern ferryman in a fur-lined coat, carrying the frozen, iron-banded prow of his old ship as a shield.\nHe laughs easily and guards everyone near him. Small things are off: frost that never melts on him, and no breath in the cold.",
+	"personality": "A ferryman who carried refugees across the ice the night of the Hollowing and sank his own ship so they could reach shore. The sea remade him: his hull became his armour, his brass diving helmet never comes off, and the ship's compass is set in his chest, with the sea's cyan light glowing between the hull planks.\nHe doesn't remember his old name, only the children's faces. The teddy bear belonged to the last child he saved.",
 	"weight": "heavy",
 	"color": "#8fd0ff",
 	"body": {

@@ -10,7 +10,7 @@ every knock.
 |---|---|
 | Class title | The Unbroken |
 | Base character | Kael, male |
-| Personality | A proud champion in a spartan kit, mostly bare skin and gilded armour. He fights like the crowd is watching. He loves a duel and never backs down from one. |
+| Personality | Malgrave's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain became his weapon. The Blight burned white-hot cracks into his sword arm (the Blight Cinder distilled, so he doesn't fully trust her). A demon lives in his blade and in his mind and must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off. |
 
 <!-- /gen:profile -->
 

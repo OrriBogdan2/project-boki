@@ -1,4 +1,4 @@
-# Cliff Runner
+# Stone Seer
 
 The quarry-hand. Raise rocks out of the ground, stand on them and climb them, then punch them into the enemy. A slam that knocks resets itself.
 
@@ -7,9 +7,9 @@ The quarry-hand. Raise rocks out of the ground, stand on them and climb them, th
 
 |  |  |
 |---|---|
-| Class title | Cliff Runner |
-| Base character | Tarek, male |
-| Personality | A young, nimble rock elementalist with a bandana tied over his eyes. He reads the ground by feel. Quiet and light on his feet, he moves stone like it is a dance partner. |
+| Class title | Stone Seer |
+| Base character | Tenzo, male |
+| Personality | A young cliff-runner, blind since birth, who ran messages along the cliff paths by the feel of the rock. When the Hollowing cracked the cliffs, the stone started answering him: three seeing-stones float around him and are his eyes. The youngest of the crew and the calm one, he hears trouble through the ground before Vex sees it. |
 
 <!-- /gen:profile -->
 

@@ -1,4 +1,4 @@
-# Little Lantern
+# Dawnfox
 
 A lantern-carrying support. Pip keeps the squad on its feet: she heals with Hearthlight, carries
 downed friends out of danger and roots foes that chase them. She has no ultimate; R is your Boki's Merge.
@@ -8,9 +8,9 @@ downed friends out of danger and roots foes that chase them. She has no ultimate
 
 |  |  |
 |---|---|
-| Class title | Little Lantern |
-| Base character | Pip, female |
-| Personality | A brave little field medic, a fairy fox waist-high to a human. She is afraid of the dark, and the lantern she carries holds a star she caught as a kid. |
+| Class title | Dawnfox |
+| Base character | Meeko, female |
+| Personality | A fox-kit who kept the hearth of a Boki shelter alive through the night everything broke. The fire grew into a tiny sun that follows her, and a shy raincloud, the storm that tried to drown the hearth, came along too. She heals through the two of them, and keeps them safe in a little glass globe. |
 
 <!-- /gen:profile -->
 
@@ -54,8 +54,8 @@ downed friends out of danger and roots foes that chase them. She has no ultimate
 |---|---|
 | Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Ember Cast (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with lantern light, pins chasers with burr-seeds. |
-| Silhouette | small: a tiny fairy fox medic with gold-veined wings, a leaf cape and a big glowing star lantern |
+| Fantasy | The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds. |
+| Silhouette | small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a raincloud floating beside her |
 | Resource | Kindle (max 5) |
 
 ### Kit card
@@ -83,9 +83,9 @@ What the in-game kit card (K) says.
 
 - *Tap:* Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled.
 
-**Hearthlight (E, 11s cooldown).** A 2.6m ring of lantern light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.
+**Hearthlight (E, 11s cooldown).** A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.
 
-**Hearth Call (hunter ultimate, from level 6, 46s cooldown).** Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a lantern tether heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you.
+**Hearth Call (hunter ultimate, from level 6, 46s cooldown).** Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you.
 
 ### Ranks
 

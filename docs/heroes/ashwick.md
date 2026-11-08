@@ -1,4 +1,4 @@
-# Mad Pyromancer (base character Cinder; archetype `ashwick`, heavy; display name was Ashwick)
+# Flame Queen (base character Cinder; archetype `ashwick`, heavy; display name was Ashwick)
 
 Internal design doc. Source behaviour: the hero named in the Inspired-by table in docs/ARCHETYPES.md (traceability only; none of its
 names, text or looks appear in the game). Everything the player sees and hears is ours. The kitfix pass (Nov 2026) rebuilt the kit

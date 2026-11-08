@@ -1,4 +1,4 @@
-# Frost Siren
+# Snowglide
 
 An ice controller. Everything she hits Chills; her darts home onto whoever is under the cursor, her spear
 freezes where it lands, and her sliding wall of ice shoves foes where she wants them. She has no ultimate;
@@ -9,9 +9,9 @@ R is your Boki's Merge.
 
 |  |  |
 |---|---|
-| Class title | Frost Siren |
-| Base character | Claire, female |
-| Personality | A graceful ice skater who glides where others walk and leaves frost behind her. Elegant and playful, with a cold edge when crossed. |
+| Class title | Snowglide |
+| Base character | Neve, female |
+| Personality | The star show-skater of the winter canal festival. The night the ice broke she skated the festival crowd to safety, and the frost took her. She glides on the skates that saved them and fights with a candy-cane spear from the festival. |
 
 <!-- /gen:profile -->
 

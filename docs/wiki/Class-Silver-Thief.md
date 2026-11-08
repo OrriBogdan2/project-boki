@@ -10,7 +10,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 |---|---|
 | Class title | Silver Thief |
 | Base character | Sable, female |
-| Personality | Quick, quiet and light-fingered. She is never where you aimed, and she smiles when you miss. She steals the moment first and the loot second. |
+| Personality | The thief who reached the Wyrmheart in Malgrave's vault. Touching it woke the Wyrm and set off the Hollowing. Everyone has a reason to hate her, and she knows it. She's still after the treasure. |
 
 <!-- /gen:profile -->
 

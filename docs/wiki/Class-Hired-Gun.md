@@ -10,7 +10,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 |---|---|
 | Class title | Hired Gun |
 | Base character | Vex, female |
-| Personality | A sharp, professional soldier in marine-style gear. She takes the contract and finishes the job. Calm under fire, and always has a plan for the way out. |
+| Personality | A foundry kid who swept brass casings off Malgrave's war-foundry floors. A siege engine took her arm in the Hollowing, and the gatling she bolted to her shoulder is her right arm now. The Skylands' most famous gun-for-hire, she keeps a tally mark for every bounty she cashed. Her loyalty is technically for sale, but she sticks with the crew. |
 
 <!-- /gen:profile -->
 
