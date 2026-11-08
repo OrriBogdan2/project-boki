@@ -6,7 +6,7 @@ twelve, four in each weight class:
 
 - **Light:** [Lace](Class-Red-Stitch.md) (pin people, then the big shot), [Neve](Class-Snowglider.md) (skate on ice, chill foes, shelter the squad behind ice), [Sparkle](Class-Storm-Chaser.md) (load Sparks, then Wirerun through them) and [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset).
 - **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Meeko](Class-Dawnfox.md) (heal, carry the downed), [Tenzo](Class-Stone-Seer.md) (raise rocks, punch them into the fight) and [Motley](Class-Void-Jester.md) (swell, plant a seed, trade places).
-- **Heavy:** [Kael](Class-Unbroken.md) (rage, chain in, crush), [Cinder](Class-Ashen-Kiss.md) (build Char, flash foes over), [Grimble](Class-Scrap-King.md) (haul a foe in, drop the anchor) and [Mossy](Class-Barnacle-Knight.md) (block, then smash them into walls).
+- **Heavy:** [Kael](Class-Unbroken.md) (rage, chain in, crush), [Cinder](Class-Ashen-Kiss.md) (build Char, flash foes over), [Grimble](Class-Scrap-King.md) (haul a foe in, drop the anchor) and [Albert](Class-Barnacle-Knight.md) (block, then smash them into walls).
 
 The weight class sets health, speed, mass (how far hits push you) and how many dash charges you get.
 Everything else comes from the class kit.
