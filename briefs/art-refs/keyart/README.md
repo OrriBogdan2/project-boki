@@ -46,3 +46,4 @@
 - Local restore: colours matched back to the pre-edit base, then sharpened.
 - The earlier flat lineup version is in `explorations/`.
 - `keyart_faceoff_noheart.jpg`: the face-off with the Wyrmheart and its red glow removed (owner, Nov 8: the heart looked odd in the middle). One remove edit of `keyart_faceoff_final.jpg`, then a local LAB colour match and sharpen.
+- `keyart_faceoff_blade_throat.jpg` (owner's pick, Nov 8, 01:28 ET): the face-off with no heart and a full-length greatsword entering from the bottom-left corner (his hand off-screen), its point pressing just under her jaw by her throat while she grins. How it was made: a remove-blade change prompt on a reframed version, then add-blade change prompts (with a blade crop from Kael's v2 master sheet as reference), then a local LAB colour match to `keyart_faceoff_final.jpg` and sharpening. The earlier versions (`_final`, `_noheart`) are kept.
