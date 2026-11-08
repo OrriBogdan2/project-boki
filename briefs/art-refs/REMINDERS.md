@@ -9,9 +9,6 @@
   - **Sable splash fix:** make her aim at the men below, and shrink the jewel; it's so big it looks comical. DONE (Nov 8): new `sable_v2/sable_v2_splash.jpg` ("The Slip", a stealth steal; the jewel is now small), plus 3 alternates.
   - **Face-off, no-heart version (owner, Nov 7):** make an alt of `keyart/keyart_faceoff_final.jpg` with the Wyrmheart removed from between Kael and Vex; it looks odd in the middle. DONE (Nov 8): `keyart/keyart_faceoff_noheart.jpg`, then the new main `keyart/keyart_faceoff_blade_throat.jpg`; the originals are kept.
 
-## Queued for next session (owner, Nov 8, 03:00 ET)
-- **Grimble "The Leap" splash touch-up** (`grimble_v2/grimble_v2_splash.jpg`): give him a more worried face (panicked, clutching at the loot, not a gleeful grin), and bring him more into focus, i.e. bigger and sharper in the frame, with the chest and background a little softer. One fresh generation using the current splash as image 1 (to keep the scene) is likely needed, since this changes his size; a face-only change prompt is the fallback. Keep him on-model: no nose, three-lens loupe, metal and gold teeth.
-
 ## Ideas / future stuff (no schedule; owner, Nov 8: same low priority as skins)
 - **Auburn Knight hero pass** (owner, Nov 8: "not important at all"): a pass on heroes tied to the Auburn Knights, using `villain/auburn_knight_armor.jpg`. Future only.
 - **Skins** (incl. the Meeko plush-companion idea above): future only.

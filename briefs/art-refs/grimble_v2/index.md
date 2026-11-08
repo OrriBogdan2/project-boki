@@ -67,3 +67,6 @@ A local OpenCV inpaint plus smoothing removed the leftover nose on the third hea
 
 ## Splash v4: "The Leap" (owner, Nov 8, 01:49 ET)
 `grimble_v2_splash.jpg`: having shoved two bandits flat on the cliff edge, he dives off it through a gold-and-purple sunset. His purple slime arm stretches long down to a barnacle chest in the foreground, and the jagged bone hook punches through its lid in a purple splash of coins and gems. On-model: no nose, three-lens loupe, metal teeth, gauntlet, overloaded pack. Nano Banana Pro, fresh generation (refs: the standing cliff splash and the long-reach version), then a local contrast and sharpen. The previous standing version is `explorations/grimble_v2_splash_cliff_standing.jpg`.
+
+## Splash v5: "The Leap", shocked (owner, Nov 8, 05:03 ET)
+`grimble_v2_splash.jpg`: the same dive, now with a big shocked and panicked face (bulging eye behind the loupe, dropped jaw with the gold tooth, sweat drops, flailing gauntlet, loot spilling). The bandits and cliff are softly out of focus, so he is the focus. Nano Banana Pro, one fresh generation (ref: the previous Leap splash). Saved raw; a gentle vignette and sharpen pass made no visible improvement. The previous grinning version is `explorations/grimble_v2_splash_leap_grin.jpg`.
