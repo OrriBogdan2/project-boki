@@ -2830,3 +2830,4 @@ READY ext/anim-time-motley ec4ec6e2b (Motley hover 0.3 m as the source, was half
 READY ext/airdash-rule-audit a3a45b2af (air dash = ground dash for Hem, Tarek, Oath, Kael; 12-row table; parity 11/13 skipped)
 READY ext/vex-e-turn 27859acfe (hero_combo_check: zero Vex's velocity after the Longneedle aim test; fixes --gunslinger-combo-check with phys-150-botnav, mc-20261108-0430)
 READY ext/map-regions 15a8ebd57 (HudRefDemo: no rival stood in the void near an edge; fixes --hudref-check. Still red with this branch: --keys-check, --truce-check, --box-revive-check, see mc-20261108-0430 triage)
+READY ext/kit-parity-lock 76783a368 (--kit-parity-check + content/rules/kit_parity.json, 13 sourced D rows)
