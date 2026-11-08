@@ -118,6 +118,7 @@ func _enter() -> void:
 	ok(home.panel_open == "", "Enter on a full trough closes it")
 	# the real cause: the trough tile you just clicked keeps the keyboard focus, and a focused tile takes Enter
 	# (ui_accept) before the panel ever sees it
+	Save.d["items"]["kibble"] = 6
 	f["food"] = []
 	home.hb.toggle()
 	await _frames(2)
