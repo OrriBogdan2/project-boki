@@ -298,7 +298,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
 		var mv: Dictionary = moves[km]
-		var tt := float(s.get("kmove_t", 0.0))
+		# ("lead": the cock is skipped, so the hit pose lands on the kit's hit)
+		var tt := float(s.get("kmove_t", 0.0)) + float(mv.get("lead", 0.0))
 		# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 		if km != alt_km or tt < alt_t:
 			alt_on = not alt_on
@@ -306,9 +307,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		alt_t = tt
 		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
 		var length := lib.get_animation(clip).length
-		# ("lead": the clip runs this many s ahead of the move, its release beat on the kit's effect frame)
+		# (a lead clip holds its last frame rather than ending before the move does)
 		if mv.has("lead"):
-			tt = minf(tt + float(mv["lead"]), length - 0.001)
+			tt = minf(tt, length - 0.001)
 		if mv.has("hold_from") and root.has_meta(PHASE):
 			var start := float(mv["hold_from"])
 			tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
