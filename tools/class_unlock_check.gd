@@ -707,7 +707,7 @@ func _home(tree: SceneTree) -> void:
 	var cards: Array = []
 	_collect_meta(hm.panel_host, "arch", cards)
 	var locked_cards := cards.filter(func(c): return not ClassUnlock.is_open(String(c.get_meta("arch"))))
-	var tip_ok := locked_cards.all(func(c): return String(c.tooltip_text) == ClassUnlock.requirement(String(c.get_meta("arch"))))
+	var tip_ok := locked_cards.all(func(c): return c.tooltip_text == ClassUnlock.requirement(c.get_meta("arch")))
 	ok(cards.size() == Arch.ids().size() and locked_cards.size() >= 1 and tip_ok and _no_weight(hm.panel_host),
 			"the expedition panel: one card per Hunter, locked ones say how to unlock, no weight tabs")
 	ok(_texts(hm.panel_host).all(func(t): return not String(t).contains("LMB") and not String(t).contains("RMB")),
