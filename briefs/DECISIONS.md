@@ -373,7 +373,7 @@ New or rewritten stateful code (movement, ability phases, Boki AI, match flow, t
 - Female-look list (update, owner 11-08): starter lines + Ermink/Blossmink/Vespox, plus Bellowary, Gongibbon, Kestrike, Lunowl, Murmurling (real-animal sex differences). Chuggamus and Canvastross dropped. Rule 14 has the list.
 
 ## 2026-11-08 owner: ability names and visuals fit the hunter; more keybinds
-- **Vex (gunslinger):** Burr Charge is renamed **Coin Blast**: she flips/throws her coin (her relic, the first coin) and it bounces and blasts (same gameplay, new projectile model, VFX, name, HUD text, tutorials). Longneedle fires **from her hand** (finger-gun pose, green fire) instead of the rifle barrel and is renamed **Finger Gun** (coordinator's pick; alternatives Called Shot, Last Call).
+- **Vex (gunslinger):** Burr Charge is renamed **Coin Blast**: she flips/throws her coin (her relic, the first coin) and it bounces and blasts (same gameplay, new projectile model, VFX, name, HUD text, tutorials). Longneedle fires **from the open palm of her cyborg hand** (arm raised, palm out, a green-fire emitter glowing in the palm while it charges) instead of the rifle barrel, and is renamed **Palm Lance** (owner 11-08: not 'Finger Gun', it is long range).
 - **Every hunter:** ability names must make sense for that character and come from where the fantasy says (hand, weapon, relic, Boki). Audit job lists renames; coordinator applies the clear ones and sends the owner only the ones that are taste calls.
 - **Keybinds:** every action the game uses is rebindable in Controls (crouch, whistle, rotate and any missing ones), each ability icon shows its current key, plus new binds: an alternate key per action, mouse buttons 4/5 bindable, quick Boki command keys.
 
