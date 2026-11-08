@@ -3,6 +3,7 @@ extends Node
 ## planning map, the skyship ride, the jump, the glide down, landing and the first seconds on the
 ## ground), timing every drawn frame and failing if one in the start/drop/landing stretch stalls.
 ##   xvfb-run -a -s "-screen 0 1280x720x24" godot --rendering-driver opengl3 --audio-driver Dummy -- --hitch-check
+##   [--load-check | --load-check=home | --load-check=training]
 ##   [--hitch-out=/path/report.txt] [--hitch-squad=3] [--hitch-seed=4101] [--hitch-budget=ms] [--quality=...]
 ## Also runs headless (--headless): then nothing is drawn and only the script side is timed.
 ##
@@ -60,6 +61,7 @@ var squad := 3
 var load_only := false     # --load-check: stop at the reveal and judge the loading screen
 var home_only := false     # --load-check=home: the title-to-home swap instead (see _home_check)
 var trace := false
+var training := false      # --load-check=training: the Training Area's load instead of an expedition's
 var shots_dir := ""        # --load-shots=dir: a screenshot of the loading screen every half second (skews timings)
 var _shot_t := 0.0
 
@@ -73,6 +75,9 @@ func _ready() -> void:
 		if a.begins_with("--load-shots="): shots_dir = a.substr(13)
 		if a == "--load-check": load_only = true
 		if a == "--load-check=home": load_only = true; home_only = true
+		if a == "--load-check=training":
+			load_only = true
+			training = true
 	headless = DisplayServer.get_name() == "headless"
 	var adapter := RenderingServer.get_video_adapter_name().to_lower()
 	software = not headless and (adapter.contains("llvmpipe") or adapter.contains("softpipe") or adapter.contains("swiftshader") or adapter.contains("swrast"))
@@ -106,6 +111,11 @@ func _ready() -> void:
 		_home_check()
 		return
 	# "probe" keeps the loading screen and the warm-up, as a real expedition has them
+	if training:
+		var opts := {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": seed_v}
+		opts.merge({"no_drop": true, "autoplay": true, "probe": true})
+		Game.main.show_screen("match", opts)
+		return
 	Game.main.show_screen("match", {"teams": 6, "squad": squad, "tier": 0, "seed": seed_v, "autoplay": true, "probe": true, "god": true, "plan_t": 3.0})
 
 func _process(_delta: float) -> void:
@@ -369,7 +379,8 @@ func _finish_load() -> void:
 	var walls: Array = fl.map(func(f): return float(f["wall"]))
 	walls.sort()
 	if not walls.is_empty():
-		lines.append("LOAD frame ms p50 %.1f p95 %.1f max %.1f" % [walls[walls.size() / 2], walls[mini(walls.size() - 1, int(walls.size() * 0.95))], walls[-1]])
+		var p95: float = walls[mini(walls.size() - 1, int(walls.size() * 0.95))]
+		lines.append("LOAD frame ms p50 %.1f p95 %.1f max %.1f" % [walls[walls.size() / 2], p95, walls[-1]])
 	lines.append("LOAD spinner drew on %d of %d loading-screen frames" % [drawn, up])
 	var ranked := fl.duplicate()
 	ranked.sort_custom(func(a, b): return float(a["cpu" if cpu_only else "wall"]) > float(b["cpu" if cpu_only else "wall"]))
