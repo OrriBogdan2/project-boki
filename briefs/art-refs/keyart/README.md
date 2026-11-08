@@ -14,3 +14,16 @@
 - Local restore: purple cast neutralised and sharpened.
 
 `keyart_thief_view_wip.jpg` is the pre-restore checkpoint.
+
+## The Face-off (final)
+`keyart_faceoff_final.jpg`
+
+**The shot:**
+- Vex (left, fire behind her) and Kael (right, smoke behind him), shown from the chest up.
+- The glass Wyrmheart floats between them.
+- His greatsword rises from below, and its tip tips her chin up.
+- She grins at him, unafraid.
+
+**How it was made:**
+- A single fresh generation (Nano Banana Pro, 16:9, 4K). Refs: Vex's and Kael's front views, the sword crop from his master sheet, and an earlier face-off edit used for composition, faces and the heart.
+- Local pass: clarity and sharpening, with no colour change.
