@@ -181,6 +181,7 @@ func _dash_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 func _dry(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	P.fire_cd = 0.0
 	var run := {"t": 0.0, "dry_at": -1.0, "back_at": -1.0, "shots_dry": 0, "s": P.shot_n, "low": MAG, "reload": 0.0}
+	var clicks0 := int(HeroVfx.of(m).plays.get("reload", 0))
 	C.ac.step(m, 6.0, func():
 		C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
 		P.inp["fire"] = true
@@ -201,6 +202,8 @@ func _dry(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 			and P.reload_t == 0.0 and int(run["low"]) >= MAG - 1 and P.wpn.get("ammo", true),
 			"dry at %.2f, firing again %.2f s later with %d rounds; reload %.2f" % [run["dry_at"], gap, run["low"],
 					run["reload"]])
+	C.ok("Vex parity LMB: the dry drum clicks home once it is full (HeroVfx reload)",
+			int(HeroVfx.of(m).plays.get("reload", 0)) > clicks0)
 	C.ac.step(m, 1.5)
 
 ## The firing brackets: two arcs either side of her while she fires (your screen only), gone soon after.

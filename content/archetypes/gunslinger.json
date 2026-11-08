@@ -109,7 +109,6 @@
 			"ctrl_cap": "soft",
 			"guard": "add"
 		},
-		"linger": 0.75,
 		"recoil": 6.0
 	},
 	"x": {
