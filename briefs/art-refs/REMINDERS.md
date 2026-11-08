@@ -13,3 +13,6 @@
 - **Auburn Knight hero pass** (owner, Nov 8: "not important at all"): a pass on heroes tied to the Auburn Knights, using `villain/auburn_knight_armor.jpg`. Future only.
 - **Skins** (incl. the Meeko plush-companion idea above): future only.
 - **Corruption stages** (owner, Nov 8: "not even sure it's needed"): show what holding the Heart does to a hero, in three stages (just picked it up, powerful, almost consumed), with crimson crystal spreading up the arms and the eyes turning pink-red. Use it only if gameplay ends up needing it, e.g. a Heart-holder state or a skin line. No reminder.
+
+## Owner rule (Nov 8, 15:11 ET)
+Always paste prompts in the chat itself, never as prompt files. Each prompt lists its settings (model, image 1, ratio, resolution).
