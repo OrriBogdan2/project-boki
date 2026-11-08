@@ -352,7 +352,8 @@ func impact(kind: String, at: Vector3, s: Dictionary) -> void:
 		"ember":
 			m.fx.flash(at, Color("f2ffe8"), 0.6, 0.07)
 			m.fx.spark(at, back, Color("5fdc6a"), 8, 6.0, 70.0, 0.25, 6.0)
-			burst("star", at, {"col": Color("5fdc6a"), "rim": Color("f2ffe8"), "r": EMBER_HIT_R, "dur": 0.3, "glow": 1.0})
+			var hit_p := {"col": Color("5fdc6a"), "rim": Color("f2ffe8"), "r": EMBER_HIT_R, "dur": 0.3, "glow": 1.0}
+			burst("star", at, hit_p)
 		"shard":
 			m.fx.flash(at, Color("9af0ff"), 0.5, 0.06)
 			m.fx.spark(at, back, Color("6fd8f0"), 7, 7.0, 80.0, 0.22, 12.0, 0.9)
