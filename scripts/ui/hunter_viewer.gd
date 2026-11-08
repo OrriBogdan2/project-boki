@@ -76,6 +76,11 @@ static func display_name(hunter_id: String) -> String:
 	var base := HeroTitle.base_name(hunter_id)
 	return HeroTitle.label(base, hunter_id) if base != "" else Arch.name_of(hunter_id)
 
+## Just the Relic's name ("Tenzo"), or its title for a body with no base name.
+static func first_name(hunter_id: String) -> String:
+	var base := HeroTitle.base_name(hunter_id)
+	return base if base != "" else Arch.name_of(hunter_id)
+
 static func rules() -> Dictionary:
 	if _rules.is_empty():
 		var p = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))

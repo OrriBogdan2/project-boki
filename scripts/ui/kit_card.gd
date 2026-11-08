@@ -83,7 +83,10 @@ func _build() -> void:
 	var tv := VBoxContainer.new()
 	tv.add_theme_constant_override("separation", 2)
 	tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	tv.add_child(UI.label(Arch.name_of(arch), 34, col, UI.big))
+	var who := HeroTitle.base_name(arch)
+	tv.add_child(UI.label(who if who != "" else Arch.name_of(arch), 34, col, UI.big))
+	if who != "":
+		tv.add_child(UI.label(Arch.name_of(arch), 16, col.lightened(0.25), UI.semi))
 	var wn: Array = Arch.weapons(arch).map(func(w): return String(Data.weapon_stats(w).get("name", w)))
 	var wt := Arch.weight(arch).capitalize() if Arch.weight(arch) != "" else "Support"
 	tv.add_child(UI.label("  ·  ".join([wt] + wn), 16, UI.MUTED, UI.big))
