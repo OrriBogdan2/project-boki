@@ -234,7 +234,6 @@ func _throw_dart() -> void:
 		stats["darts"] += 1
 		_play_dart(heavy, side)
 	h.recoil = 0.4
-	h.muzzle_t = 0.05
 	h.reveal_t = maxf(h.reveal_t, 1.2)
 	h.idle_fire = 0.0
 	seq_next = m.time + float(wd.get("rate", 0.18))
