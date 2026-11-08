@@ -470,7 +470,7 @@ func _loud(L: Dictionary, at: Vector3, by: Hunter, text: String) -> void:
 func _call_guards(L: Dictionary, at: Vector3, n: int) -> void:
 	if m.net_on and not m.is_host:
 		return
-	var room := GUARD_CAP - _guards_alive(L)
+	var room := MobBudget.count(GUARD_CAP) - _guards_alive(L)
 	var pool: Array = ["skitter", "skitter", "spitter", "bomber"] + (["brute"] if m.tier >= 1 else [])
 	for i in mini(n, room):
 		var a := randf() * TAU

@@ -17,6 +17,8 @@ var kins: Array = []
 var mobs: Array = []
 var shots: Array = []
 var pickups: Array = []     # {pos, vel, kind:"gem"|"seed"|"tonic", v, key, node, t}
+var gem_pool := NodePool.new()
+var mob_spares := MobSpares.new()
 var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Beacons
 var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
@@ -725,6 +727,7 @@ func _start(o: Dictionary) -> void:
 	if DepthCues.k() > 0.0: add_child(DepthCues.new(self))
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
+	add_child(mob_spares)
 	brk = Breakables.new(self)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)
@@ -1394,6 +1397,7 @@ func _spawn_mobs() -> void:
 		# a camp in a biome region spawns from that region's table instead
 		var bcomp: Array = biomes.camp_comp(c) if biomes else []
 		if not bcomp.is_empty(): comp = bcomp
+		comp = MobBudget.trim(comp)
 		var made: Array = []
 		for kk in comp:
 			var q := p
@@ -2622,7 +2626,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false):
 		# a lair boss pays its gems out as a few big ones (fewer drops, each worth having); the rest scatter small
 		var gn := int(mb.md["gems"])
-		var big_n := BOSS_GEM_DROPS if mb is Boss else gn
+		var big_n := BOSS_GEM_DROPS if mb is Boss else MobBudget.gem_drops(gn)
 		for i in big_n:
 			drop("gem", mb.pos + Vector3(0, 0.6, 0), int(round(3 * float(T["loot"]) * float(gn) / float(big_n))))
 		if mb.md.get("stag", false) and not (mb is Boss) and rng.randf() < 0.6:
@@ -3013,15 +3017,16 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 		pid = "d%d" % drop_n
 	var n: Node3D
 	match kind_s:
-		"gem": n = Models.gem()
+		"gem": n = gem_pool.take(Models.gem)
 		"seed": n = Models.seed_bag(Data.CROPS[key]["color"])
 		"tonic": n = Models.tonic()
 		"armor": n = Models.armor_shard()
 		"key": n = ExitModels.rift_key()
 		"ckey": n = KeyModels.pickup()
 		_: n = UtilityBelt.pickup_model(kind_s) if UtilityBelt.is_item(kind_s) else Models.gem()
-	add_child(n)
+	if n.get_parent() == null: add_child(n)
 	n.position = at
+	if kind_s == "gem": n.scale = Vector3.ONE * MobBudget.gem_scale(v)
 	var a := randf() * TAU
 	var v0: Vector3 = vel0 if vel0 != null else Vector3(cos(a) * randf_range(1.5, 3.5), randf_range(4.0, 7.0), sin(a) * randf_range(1.5, 3.5))
 	pickups.append({"id": pid, "pos": at, "vel": v0, "kind": kind_s, "v": v, "key": key, "node": n, "t": 0.0})
@@ -3069,11 +3074,16 @@ func _update_pickups(dt: float) -> void:
 		n.position = pos + Vector3(0, sin(time * 3.0 + p["v"]) * 0.06, 0)
 		n.rotation.y += dt * 2.0
 		if pos.y < -12.0:
-			n.queue_free(); pickups.erase(p)
+			_release_pickup(p)
+
+## A pickup leaves the ground: a gem's node goes back to the pool, anything else is freed.
+func _release_pickup(p: Dictionary) -> void:
+	if p["kind"] == "gem": gem_pool.give(p["node"])
+	else: p["node"].queue_free()
+	pickups.erase(p)
 
 func _collect(h: Hunter, p: Dictionary) -> void:
-	p["node"].queue_free()
-	pickups.erase(p)
+	_release_pickup(p)
 	if net_on:
 		net_event(["take", p["id"]])
 	match p["kind"]:
@@ -5911,8 +5921,7 @@ func _net_ev(x, from: String) -> void:
 		"take", "gone":
 			for p in pickups:
 				if p["id"] == String(x[1]):
-					p["node"].queue_free()
-					pickups.erase(p)
+					_release_pickup(p)
 					break
 			if String(x[0]) == "take" and is_host:
 				net_event(["gone", String(x[1])])

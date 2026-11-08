@@ -707,7 +707,7 @@ func _waves(x: Dictionary, dt: float) -> void:
 	for mb in m.mobs:
 		if not mb.dead and int(mb.get_meta("exit", -1)) == int(x["i"]): alive += 1
 	var n := 2 if x.get("tut", false) else 2 + m.tier + (1 if int(x["waves"]) >= 2 else 0)
-	n = mini(n, WAVE_CAP - alive)
+	n = mini(MobBudget.count(n), MobBudget.count(WAVE_CAP) - alive)
 	x["waves"] = int(x["waves"]) + 1
 	if n <= 0:
 		return

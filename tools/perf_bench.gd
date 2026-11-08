@@ -95,6 +95,8 @@ func _match() -> void:
 		added.clear()
 		last = now
 	_summary("match", fl)
+	print("BENCH match monsters alive %d of %d, drops on the ground %d" % [
+		m.mobs.filter(func(x): return not x.dead).size(), m.mobs.size(), m.pickups.size()])
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
 	var per := ks.slice(0, 10).map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / fl.size()])
@@ -179,6 +181,8 @@ func _summary(part: String, fl: Array) -> void:
 	print("BENCH %s scene: draws %.0f, tris %.0fk, objects %.0f, nodes %.0f, emitters %d, lights %d, shadowed %d" % [
 		part, _avg(fl, "draws"), _avg(fl, "tris") / 1000.0, _avg(fl, "objs"), _avg(fl, "nodes"),
 		_count("GPUParticles3D") + _count("CPUParticles3D"), _count("Light3D"), _shadow_lights()])
+	var live := VfxBudget.live(main.get_tree().root)
+	print("BENCH %s particles on screen: %d (budget %d)" % [part, live, VfxBudget.LIMIT])
 	print("BENCH %s memory: textures %.0f MB, buffers %.0f MB" % [part,
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
