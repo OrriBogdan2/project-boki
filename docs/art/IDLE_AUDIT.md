@@ -25,7 +25,7 @@ No source hero's pose or attitude is copied.
 
 | # | Hunter | Main problem |
 |---|---|---|
-| 1 | Kael the Unbroken (`juggernaut`) | No clips at all: a procedural mannequin frozen in an A-stance |
+| 1 | Kael the Unbroken (`juggernaut`) | Reworked 2026-11-08 (ext/idle-juggernaut): was a frozen procedural mannequin |
 | 2 | Mossy the Barnacle Knight (`bulwark`) | Loop pop; 1.6 s stance; a shield wall hides the warm giant; the shield snaps up in 0.5 s |
 | 3 | Tenzo the Stone Seer (`dolm`) | 0.8 s stance: a 2.5 Hz hip jitter; the feet slide in the hand-off |
 | 4 | Cinder the Flame Queen (`ashwick`) | Arm locked straight out for the whole idle; built on the flamethrower the owner removed |
@@ -66,7 +66,7 @@ No source hero's pose or attitude is copied.
 
 Each target applies **quality** parity only. The attitude comes from the line quoted for that Hunter.
 
-### 1. Kael the Unbroken (`juggernaut`, art `kael`): procedural, frozen
+### 1. Kael the Unbroken (`juggernaut`, art `kael`): reworked 2026-11-08
 
 - **Source:** LORE_MASKS, which wins per DECISIONS: "grim, cold, never cocky"; kael_clips.py: "enormous, grim,
   economical". The archetype line "a proud champion... fights like the crowd is watching" is stale.
@@ -87,6 +87,14 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Nothing showy: stillness is his attitude.
 - **Work:** bake kael_clips.py (idle :39, stance :53) to the spec into the v2 .glb, and add
   `content/rules/warden_anim/kael.json` (loco idle/stance, `stance_after` 4.0) so WardenClips takes over.
+- **Done (2026-11-08, ext/idle-juggernaut):** kael_clips.py idle and stance rewritten to the spec on one planted base
+  (PLANT): weight on the back leg with soft knees, a 1.3 s weight shift that overshoots and settles, pelvis, chest, head
+  and hands offset 3 to 5 frames (LAG_*), two breaths per idle loop and three per stance loop on `x_breath` (3 %, a new
+  leaf under hips skinned to the rib cage by kael_retarget.py), the neck roll plus grip resettle once per idle loop and
+  the shoulder dip once per stance loop. Every curve is a whole number of cycles, so the seams measure 0.0x the limit.
+  The sword point sits 0.8 cm under the ground at the idle's first frame (kael_retarget.py prints it).
+  Strips: docs/art/gen/wardens/kael_idle_before.png and kael_idle_after.png (idle_front, stance_front f000 and f012,
+  live hand-off); stance_after 4.0 s.
 
 ### 2. Mossy the Barnacle Knight (`bulwark`, art `breaker`)
 
