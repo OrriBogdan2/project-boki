@@ -12,7 +12,7 @@
 		"x_fing2.R": "x_fing.R",
 		"x_thumb.L": "hand.L",
 		"x_thumb.R": "hand.R",
-		"x_fish": "spring_hangfish_2"
+		"x_fish": "spring_hangfish_2", "x_breath": "hips"
 	},
 	"blade": {
 		"root": "anchor_hammer_grip",
@@ -170,7 +170,7 @@
 		"downed": "sad",
 		"emote": "happy",
 		"hit": "angry",
-		"hit_t": 1.2,
+		"hit_t": 1.2, "glance": [1.5, 2.8, "happy"],
 		"companion": "x_fish",
 		"lure": "lure",
 		"flare_kmoves": [

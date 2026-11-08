@@ -115,6 +115,16 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - The capstan hammer rests on his shoulder. Same weight roll, slower.
 - **Seam:** derive every curve from the loop length (full cycles only) so `--clip-check` passes. Remove both
   `bulwark:*` entries from `STAND_OPEN`.
+- **Done (ext/idle-bulwark):** tools/art1/breaker_anims.py `idle_over` / `stance_over`.
+  - Idle 6 s: a sailor's roll (one cycle per 3 s, soft knees, the hip 2 cm up on each breath), two breaths on the
+    new `x_breath` bone (3 %, skinned to the rib cage by `anim_kit.add_breath`), pelvis 2 frames and head 4 frames
+    behind the body, the hands 6 frames behind. The hammer drum and the door's edge stay planted on the ground while
+    the body rolls over them.
+  - Fidget at 1.3 to 2.9 s: he turns and nods at the lure; `warden_anim/breaker.json` `"glance"` turns the porthole
+    eyes happy over that window while the idle alone plays (`WardenClips.idle_at`, `WardenMood.step`).
+  - Stance 8 s, not 6: the slower roll (one cycle per 4 s) has to close on the loop. The idle's feet, the door at
+    chest height angled out so the face shows, the hammer on the shoulder with one hitch per loop.
+  - Seams 0.0x the limit (`--clip-check`); before and after strips: jobq `--out shots_before` / `shots_after`.
 
 ### 3. Tenzo the Stone Seer (`dolm`, art `tarek`)
 
@@ -288,8 +298,7 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   every track;
 - each clip lasts at least 2 s (`STAND_MIN`).
 
-`STAND_OPEN` lists what is still open: `bulwark:idle`, `bulwark:stance`, `ostra:idle`, `ostra:stance` and
-`dolm:stance`. Open entries are reported, not failed. An entry that starts passing fails the run until it is removed,
+`STAND_OPEN` lists what is still open: `ostra:idle`, `ostra:stance` and `dolm:stance`. Open entries are reported, not failed. An entry that starts passing fails the run until it is removed,
 so each rework must delete its own entries.
 
 ## Verifying a rework

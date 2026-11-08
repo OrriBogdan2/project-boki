@@ -8,6 +8,7 @@ Space: model, facing +Y, right +X, up +Z (see sculpt_kit). Pose keys, all option
   gr grip target, in the torso's frame    gd haft direction, ga the block's long axis (or set "wr": wrist euler)
   sh left hand target                     sn shield face normal, su shield up
   fr, fl ankle targets in model space     fra, fla foot pitch (deg)     er, el elbow pole direction (torso frame)
+  breath: the rib cage's swell on x_breath (0.03 = 3 %), on a rig that has one (add_breath)
   eye "ease into this key": io (default), in (slow start), out (fast start, slow end), lin, snap"""
 import math
 
@@ -16,6 +17,7 @@ import numpy as np
 from mathutils import Euler, Matrix, Quaternion, Vector
 
 FPS = 30
+BREATH_AXES = (0.4, 1.0, 0.6)  # x_breath's swell per model axis (side, belly forward, up) for one unit of "breath"
 
 
 def qe(e):
@@ -76,6 +78,21 @@ class Rig:
         side = side.normalized() if side.length > 1e-4 else Vector((0, 1, 0))
         return a + dn * c + side * h, end
 
+    def torso(self, k):
+        """The torso's frame in pose k: where the waist is, and its rotation (model space)."""
+        Gr = qe(k.get("rot", (0, 0, 0)))
+        return Vector(k.get("pos", (0, 0, 0))) + Gr @ self.P["hips"], Gr @ qe(k.get("hips", (0, 0, 0)))
+
+    def to_world(self, k, p):
+        """A point given in pose k's torso frame (as gr and sh are), in model space."""
+        ph, H = self.torso(k)
+        return ph + H @ (Vector(p) - self.P["hips"])
+
+    def to_torso(self, k, w):
+        """A model-space point, in pose k's torso frame."""
+        ph, H = self.torso(k)
+        return tuple(self.P["hips"] + H.inverted() @ (Vector(w) - ph))
+
     def solve(self, k):
         """Global rotation deltas G (model frame) for every bone, from one evaluated pose k, -> {bone: quaternion D}, root pos."""
         G = {n: Quaternion() for n in self.b.keys()}
@@ -83,9 +100,9 @@ class Rig:
         rootp = Vector(k.get("pos", (0, 0, 0)))
         Gr = qe(k.get("rot", (0, 0, 0)))
         G["root"] = Gr
-        G["hips"] = Gr @ qe(k.get("hips", (0, 0, 0)))
-        ph = rootp + Gr @ self.P["hips"]
-        H = G["hips"]
+        ph, H = self.torso(k)
+        G["hips"] = H
+        G["x_breath"] = H
         tors = lambda p: ph + H @ (Vector(p) - self.P["hips"])
         tdir = lambda d: H @ Vector(d)
         G["head"] = H @ qe(k.get("head", (0, 0, 0)))
@@ -196,6 +213,7 @@ class Clips:
         names = [b for b in rig.b.keys() if not b.startswith("spring_") and b != "x_fish"]
         data = {b: np.empty((n, 4), np.float32) for b in names}
         loc = {"root": np.empty((n, 3), np.float32)}
+        swell = np.zeros(n, np.float32)
         kk = [(t, self.remap(p) if self.remap else p) for t, p in keys]
         for f in range(n):
             t = min(f / FPS, dur)
@@ -203,6 +221,7 @@ class Clips:
             if over:
                 over(t, pose)
             D, rp, _ = rig.solve(pose)
+            swell[f] = pose.get("breath", 0.0)
             for b in names:
                 q = D[b]
                 data[b][f] = (q.w, q.x, q.y, q.z)
@@ -215,7 +234,6 @@ class Clips:
                 if np.dot(q[f], q[f - 1]) < 0:
                     q[f] = -q[f]
         frames = np.arange(n, dtype=np.float32)
-        slot_bag = None
         for b in names:
             for i in range(4):
                 fc = act.fcurves.new('pose.bones["%s"].rotation_quaternion' % b, index=i, action_group=b)
@@ -226,14 +244,44 @@ class Clips:
                 fc.keyframe_points.foreach_set("co", co)
                 fc.keyframe_points.foreach_set("interpolation", np.ones(n, np.int32))     # LINEAR
                 fc.update()
-        for i in range(3):
-            fc = act.fcurves.new('pose.bones["root"].location', index=i, action_group="root")
+        curves = [('pose.bones["root"].location', i, "root", loc["root"][:, i]) for i in range(3)]
+        if swell.any():
+            curves += [('pose.bones["x_breath"].scale', i, "x_breath", 1.0 + swell * BREATH_AXES[i]) for i in range(3)]
+        for path, i, group, vals in curves:
+            fc = act.fcurves.new(path, index=i, action_group=group)
             fc.keyframe_points.add(n)
             co = np.empty(n * 2, np.float32)
             co[0::2] = frames
-            co[1::2] = loc["root"][:, i]
+            co[1::2] = vals
             fc.keyframe_points.foreach_set("co", co)
             fc.keyframe_points.foreach_set("interpolation", np.ones(n, np.int32))
             fc.update()
         self.lengths[name] = (n - 1) / FPS
         return act
+
+
+def add_breath(arm, head, weight):
+    """The rib cage's leaf bone x_breath under hips (IDLE_AUDIT "No chest"): a bone at head pointing +Y (its axes the
+    model's, so BREATH_AXES read in model space), and the hips-skinned vertices moved onto it by weight(model point)
+    (0..1, 1 where the chest swells whole). Run before Clips(arm); a rig that has one is left alone."""
+    if "x_breath" in arm.data.bones:
+        return
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = arm.data.edit_bones.new("x_breath")
+    eb.head = Vector(head)
+    eb.tail = Vector(head) + Vector((0, 0.15, 0))
+    eb.roll = 0.0
+    eb.parent = arm.data.edit_bones["hips"]
+    bpy.ops.object.mode_set(mode="OBJECT")
+    for o in bpy.data.objects:
+        if o.type != "MESH" or "hips" not in o.vertex_groups:
+            continue
+        hips = o.vertex_groups["hips"]
+        vg = o.vertex_groups.new(name="x_breath")
+        for v in o.data.vertices:
+            g = next((g for g in v.groups if g.group == hips.index), None)
+            w = weight(o.matrix_world @ v.co) * g.weight if g else 0.0
+            if w > 0.001:
+                hips.add([v.index], g.weight - w, "REPLACE")
+                vg.add([v.index], w, "REPLACE")

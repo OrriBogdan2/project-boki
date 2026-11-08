@@ -18,6 +18,17 @@ import anim_kit as A
 a = sys.argv[sys.argv.index("--") + 1:]
 OUT_BLEND, OUT_GLB = a[0], a[1]
 arm = bpy.data.objects["Armature"]
+
+
+def rib_cage(co):
+    """How much of the hull at co swells with a breath: the belly and chest, fading out above the legs and under the
+    helmet's rim."""
+    lo = min(max((co.z - 0.2) / 0.2, 0.0), 1.0)
+    hi = min(max((1.05 - co.z) / 0.2, 0.0), 1.0)
+    return lo * lo * (3 - 2 * lo) * hi * hi * (3 - 2 * hi)
+
+
+A.add_breath(arm, (0.0, 0.05, 0.55), rib_cage)
 C = A.Clips(arm)
 AX = float(C.rig.P["x_foot.R"].x)      # the ankle's rest x
 AZ = float(C.rig.P["x_foot.R"].z)
@@ -75,8 +86,111 @@ def breathe(period, amp=1.0):
     return f
 
 
-C.bake("idle", 3.2, [(0, CARRY), (3.2, {})], over=breathe(3.2, 1.0), loop=True)
-C.bake("stance", 1.6, [(0, STANCE), (1.6, {})], over=breathe(1.6, 1.3), loop=True)
+# ---------------------------------------------------------------------- standing (docs/art/IDLE_AUDIT.md, Mossy)
+# A warm giant at ease on a rolling deck. Every curve is whole cycles of its loop, so the seam closes. The weight rolls
+# first; the chest follows 2 frames later, the helmet 4, the hands 6. The anglerfish's springs pick the roll up.
+IDLE_T = 6.0        # s: one roll onto each foot (every 3 s), two breaths, one glance at the lure
+STANCE_T = 8.0      # s: the same roll, slower (a slower roll is a longer loop: whole cycles only)
+F = 1.0 / A.FPS
+SETTLE = 0.02       # m: the hull sunk onto soft knees (his legs are 0.14 long)
+FOLLOW = 0.4        # how far a planted prop's hand rides the body (the rest is the arm giving)
+HAFT = 0.45         # m from the grip to where the resting hammer's drum meets the ground
+EDGE = 0.22         # m from the door's grip down to its bottom edge
+
+
+def roll(t, period):
+    """The weight: +1 on the right foot, -1 on the left, holding at each and rolling between."""
+    return math.tanh(2.2 * math.sin(t / period * tau)) / math.tanh(2.2)
+
+
+def breath(t, period, n):
+    """0 out .. 1 in, n breaths per loop, drawn in quicker than let out."""
+    x = n * tau * t / period
+    return 0.5 - 0.5 * math.cos(x - 0.35 * math.sin(x))
+
+
+def bump(t, a, b, up, down):
+    """0 outside a..b, eased up over `up` s, held, eased down over `down` s: a beat inside the loop."""
+    u = min(max((t - a) / up, 0.0), 1.0) * min(max((b - t) / down, 0.0), 1.0)
+    return u * u * (3 - 2 * u)
+
+
+def body(t, period, sway, breaths, base):
+    """The pelvis, chest and head at t, on top of base: the roll leads, the chest trails 2 frames, the helmet 4 (it
+    swings back toward level a beat late, so the heavy dome sloshes)."""
+    def lean(tt):
+        return 2.5 * sway * roll(tt, period) + 1.2 * sway * roll(tt - 2 * F, period)
+    s, b2 = roll(t, period), breath(t - 2 * F, period, breaths)
+    p = dict(base)
+    add(p, "pos", (0.028 * sway * s, 0, -SETTLE + 0.008 * breath(t, period, breaths) - 0.004 * s * s))
+    add(p, "rot", (0, 2.5 * sway * s, -1.2 * sway * s))
+    add(p, "hips", (0.8 * b2, 1.2 * sway * roll(t - 2 * F, period), 0))
+    add(p, "head", (-0.6 * breath(t - 4 * F, period, breaths), 0.5 * lean(t - 4 * F) - lean(t), 0))
+    p["breath"] = 0.03 * b2
+    return p
+
+
+def planted(p, rest, then, grip, haft, reach):
+    """A prop resting on the ground (the hammer's drum, the door's edge): the hand rides the body FOLLOW of the way
+    6 frames late, and the prop pivots on its ground point. -> (the grip, its direction toward the ground point),
+    both in p's torso frame."""
+    g0 = C.rig.to_world(rest, grip)
+    foot = g0 + reach * (C.rig.torso(rest)[1] @ Vector(haft)).normalized()
+    g = g0.lerp(C.rig.to_world(then, grip), FOLLOW)
+    return C.rig.to_torso(p, g), tuple(C.rig.torso(p)[1].inverted() @ (foot - g).normalized())
+
+
+def trailing(p, then, keys):
+    """then's torso-frame targets and directions, held where its body was, in p's torso frame (the hands' overlap)."""
+    out = {}
+    H = C.rig.torso(p)[1].inverted() @ C.rig.torso(then)[1]
+    for k in keys:
+        out[k] = C.rig.to_torso(p, C.rig.to_world(then, then[k])) if k in ("gr", "sh") else tuple(H @ Vector(then[k]))
+    return out
+
+
+# The idle: the drum rests on the deck ahead of his right foot, the door stands on its edge against his left leg
+# with his hand on it, hatch outward. Once a loop he turns to the lure on his right and nods along as it bobs
+# (warden_anim/breaker.json "mood" "glance": the porthole eyes go happy for it).
+IDLE = merged(CARRY, sh=sl(0.06, 0.03, -0.44), sn=(-0.97, 0.22, 0.0), su=(0.18, 0.0, 1.0), el=(-0.9, -0.3, 0.1))
+GLANCE = (1.3, 2.9)     # s into the idle
+
+
+def idle_over(t, p):
+    p.update(body(t, IDLE_T, 1.0, 2, IDLE))
+    then = body(t - 6 * F, IDLE_T, 1.0, 2, IDLE)
+    rest = merged(IDLE, pos=(0, 0, -SETTLE))
+    p["gr"], p["gd"] = planted(p, rest, then, IDLE["gr"], IDLE["gd"], HAFT)
+    sh, down = planted(p, rest, then, IDLE["sh"], tuple(-x for x in IDLE["su"]), EDGE)
+    p["sh"], p["su"] = sh, tuple(-x for x in down)
+    p.update(trailing(p, rest, ["sn"]))
+    w = bump(t, *GLANCE, 0.35, 0.45)
+    nod = 0.5 - 0.5 * math.cos((t - GLANCE[0]) / (GLANCE[1] - GLANCE[0]) * 3 * tau)
+    add(p, "head", (-5.0 * w - 3.0 * w * nod, 7.0 * w, -24.0 * w))
+    wl = bump(t - 4 * F, *GLANCE, 0.35, 0.45)
+    add(p, "hips", (0, 1.5 * wl, -4.0 * wl))
+
+
+# The stance: the same feet, sunk a little lower. The door comes up to his chest off to his left, turned out so his
+# face stays open (a host in front of his crew, not a door shut), and the hammer rests on his right shoulder. Once a
+# loop he hitches it up and lets it settle.
+READY = merged(CARRY, rot=(-2, 0, -4), hips=(-3, 0, -3), head=(3, 0, 5),
+               gr=sp(0.05, 0.22, -0.15), gd=(0.3, -0.2, 0.93), ga=(0.95, 0.0, -0.31), er=(1.0, -0.2, -0.6), fing_r=1.0, thumb_r=1.0,
+               sh=sl(-0.12, 0.3, -0.38), sn=(-0.6, 0.8, 0.0), su=(0.0, 0.0, 1.0), el=(-0.9, -0.1, -0.5), fing_l=0.9, thumb_l=0.9)
+HITCH = (4.6, 5.8)      # s into the stance
+
+
+def stance_over(t, p):
+    p.update(body(t, STANCE_T, 0.7, 3, READY))
+    w = bump(t - 6 * F, *HITCH, 0.25, 0.8)
+    settle = 0.4 * math.sin((t - 6 * F - HITCH[0]) / (HITCH[1] - HITCH[0]) * 2 * tau) * w
+    then = body(t - 6 * F, STANCE_T, 0.7, 3, merged(READY, gr=sp(0.05, 0.22, -0.15 + 0.03 * (w + settle))))
+    p.update(trailing(p, then, ["gr", "gd", "ga", "sh", "sn", "su"]))
+    add(p, "head", (-2.0 * bump(t, *HITCH, 0.25, 0.8), 0, 4.0 * math.sin(t / STANCE_T * tau - 1.0)))
+
+
+C.bake("idle", IDLE_T, [(0, IDLE), (IDLE_T, {})], over=idle_over, loop=True)
+C.bake("stance", STANCE_T, [(0, READY), (STANCE_T, {})], over=stance_over, loop=True)
 
 
 # ---------------------------------------------------------------------- walk, run: a waddle, the whole hull rocking

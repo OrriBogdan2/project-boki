@@ -388,6 +388,13 @@ func step(dt: float) -> void:
 	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
 	_out(dt)
 
+## Where the idle clip is (s) while it alone shows (standing still, no move, stance, air or crouch), else -1: the
+## mood keys its once-a-loop fidget to it.
+func idle_at() -> float:
+	if still_t <= 0.0 or act_w > 0.0 or up_w > 0.0 or stance_w > 0.0 or air_w > 0.0 or crouch_w > 0.0:
+		return -1.0
+	return float(tree.get("parameters/loco/0/current_position"))
+
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it.
 ## "legs_heading" (Vex's slide, aims_in_dash): only the legs go: the hips take the turn back, so the torso

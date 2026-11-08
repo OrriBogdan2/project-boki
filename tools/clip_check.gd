@@ -17,8 +17,6 @@ const SEAM_M := 0.01           # and move it this far
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
-	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
-	"bulwark:stance": "head seam 4.2 deg, 1.6 s long",
 	"ostra:idle": "x_fing seams 11-13 deg",
 	"ostra:stance": "x_fing seams 12-16 deg",
 	"dolm:stance": "0.8 s long (a bounce, not a stance)",
@@ -185,6 +183,10 @@ func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			ok(not good, "%s: STAND_OPEN entry still needed" % key)
 		else:
 			ok(good, what)
+		var g: Array = dd.get("mood", {}).get("glance", [])
+		if clip == "idle" and not g.is_empty():
+			ok(g.size() == 3 and 0.0 <= float(g[0]) and float(g[0]) < float(g[1]) and float(g[1]) <= anim.length
+					and WardenMood.IDS.has(String(g[2])), "%s: the idle's glance %s falls inside its %.1f s" % [id, g, anim.length])
 
 func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	var worst := 0.0
