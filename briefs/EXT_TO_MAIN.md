@@ -3187,3 +3187,9 @@ Four lines branch at their LAST evolution only: Mycroll, Vespyx, Prismander, Ech
 - Prismander: Guard -> Geodelotl, Speed -> Chandelotl
 - Echolop: Power -> Howlop, Speed -> Chimelop
 On a tie, the affinity path decides (fierce = Power, steadfast = Guard, swift = Speed). Show a lean hint on the Boki screen. Paths otherwise stay as stat flavour only and never pick forms. Ermink and Jarmit branch by Ink. Sex is separate: male and female looks apply to every form in the starter lines (either sex can reach either final).
+
+## 2026-11-08 deep (job 20261108-223024-a3): READY ext/trios-10x3-1108
+- READY: ext/trios-10x3-1108 976b31f71 (off main d255acbee; no gh on w2, integrator opens the PR). Extraction is always 10 squads of 3: Data.SQUADS/SQUAD_SIZE/squad_opts() feed home's expedition (Solo/Duos/Trios tabs removed), the lobby (modes removed), the Demo match (was Duos), the loading line and perf_probe. The fixed match drops all 10 at the start (closest to the source game). Rolling sessions bring exactly 10 trios spread over their waves (Rolling.wave_share); POP/POP_MODE/--rolling-pop are removed. Decision 0022. No Net bump, no save change, no tuning numbers.
+- Checks: new --squad-format-check 0 fails (10x3, spawns 41 m apart min, 10 exits, 25 chests, 49 mobs); --rolling-check 0; --prematch-check 0; --arena-check 0; health --strict OK; gen_wiki --check OK. --title-check 8 FAIL, not verified against main (title.gd comment-only here). Headless 10x3 fresh-save sims seeds 5/9/21 ran to the end, 0 script errors; the autoplay squad was out early, the same as 10x2.
+- GPU (rp1-1, not Mac/PC) perf_probe 10x2 -> 10x3 wall avg ms: ride 102->133, drop 69->94, land 45->60, fight 55->60; load 31.7->34.2 s. Strip docs/art/match/trios_10x3_before_after.jpg.
+- Open (owner): chests per hunter fell 1.25 -> 0.83 (map-authored, world.gd frozen). Lobby with >30 peers puts the extra peers past team 10 (not capped).
