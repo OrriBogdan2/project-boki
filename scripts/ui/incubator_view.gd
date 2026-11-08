@@ -45,7 +45,7 @@ static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callabl
 		else: line += " You don't have one out on the farm."
 		v.add_child(UI.para(line, 12, UI.MUTED))
 	# the cradles
-	v.add_child(UI.section("Cradles  ·  %d/%d" % [Incubator.eggs().size(), Incubator.slots()], UI.FAINT.lightened(0.2)))
+	v.add_child(UI.section("Cradles  ·  %d/%d" % [Incubator.eggs().size(), Incubator.slots()]))
 	var grid := GridContainer.new(); grid.columns = 4
 	grid.add_theme_constant_override("h_separation", 10); grid.add_theme_constant_override("v_separation", 10)
 	v.add_child(grid)
@@ -75,7 +75,7 @@ static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callabl
 		lv.add_child(bb)
 		grid.add_child(lc)
 	# the shelf
-	v.add_child(UI.section("Waiting on the shelf  ·  %d" % q.size(), UI.FAINT.lightened(0.2)))
+	v.add_child(UI.section("Waiting on the shelf  ·  %d" % q.size()))
 	if q.is_empty():
 		v.add_child(UI.para("Nothing waiting. Eggs beyond your cradles wait here and go in as soon as one is free.", UI.T_SMALL, UI.MUTED))
 	var flow := HFlowContainer.new()

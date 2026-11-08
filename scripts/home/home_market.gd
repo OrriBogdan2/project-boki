@@ -221,8 +221,8 @@ func _vendor_card(g: Array) -> Control:
 	card.add_child(hr)
 	var icons := {"seed": "seed", "food": "heart", "tonic": "tonic", "acc": "paw", "furn": "home", "plots": "seed",
 		"coals": "dash", "incub_slot": "egg", "tool": "hammer"}
-	var sw := UI.badge("lock", UI.FAINT, 32.0, UI.R_CTRL)
-	if is_open: sw = UI.badge(String(icons.get(key.split(":")[0], "gem")), col, 32.0, UI.R_CTRL)
+	var sw := UI.badge("lock", UI.FAINT, 32.0)
+	if is_open: sw = UI.badge(String(icons.get(key.split(":")[0], "gem")), col, 32.0)
 	sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hr.add_child(sw)
 	var nv := UI.vbox(0)

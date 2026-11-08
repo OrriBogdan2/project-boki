@@ -131,7 +131,7 @@ static func icons(rec: Dictionary, px := 12.0, most := 3) -> Control:
 # ------------------------------------------------------------------ the kin's card
 ## The Work section on a kin's card: its elements, what it's doing, and its job settings.
 static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen: Callable) -> void:
-	parent.add_child(UI.section("Work elements", UI.FAINT.lightened(0.2)))
+	parent.add_child(UI.section("Work elements"))
 	parent.add_child(chips(rec, 22.0))
 	var k: Dictionary = h._kin_entry(rec) if h.has_method("_kin_entry") else {}
 	var doing := ""
