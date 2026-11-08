@@ -105,6 +105,6 @@ Headless results (`tests/weapons_sim.gd`, 4s of fire at a 1,050 HP dummy):
 | Rifle (held) | 141 DPS | 30 rounds, then a 1.8s reload |
 | Burst Rifle | 250 DPS while firing | 186 including reloads |
 | Longsword | 170 DPS | charged thrust: 160, 3.8m reach, narrow |
-| Shotgun | 120 DPS at 3m | spread grows to the 24° max after a few shots |
+| Shotgun | 120 DPS at 3m | 20° rested; each shot kicks it +10° (35° max) and it breathes back in about half a second |
 | Minigun | 208 DPS | first shot after a 0.7s spin-up |
 | Greatsword | 192 DPS | charged slam with sweet spot: 260 |

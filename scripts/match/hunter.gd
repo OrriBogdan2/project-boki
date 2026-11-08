@@ -1459,8 +1459,8 @@ func _tick_weapon(dt: float) -> void:
 		elif warm_t <= 0.0:
 			warm_t = 0.0
 			_release()
-	# per-shot bloom recovers once you've stopped firing for a beat
-	if wbloom > 0.0 and idle_fire > float(wpn["rate"]) + 0.2:
+	# per-shot bloom recovers once you've stopped firing for a beat (`bloom_wait` s; the shotgun breathes between shots)
+	if wbloom > 0.0 and idle_fire > float(wpn.get("bloom_wait", float(wpn["rate"]) + 0.2)):
 		wbloom = maxf(0.0, wbloom - float(wpn.get("bloom_recover", 20.0)) * dt)
 	if idle_fire > 0.35 or reload_t > 0.0:
 		sus_n = 0
