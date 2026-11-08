@@ -2,7 +2,7 @@
 
     cd tools && python3 gen_sfx_lisette.py      (then: godot --headless --import)
 
-Lisette was the Tyrant's seamstress: a needle bow strung with red thread, a spool quiver, scissors at
+Lisette was Malgrave's mask-stitcher: a needle bow strung with red thread, a spool quiver, scissors at
 her belt, a loose shadow that walks on its own. Her palette is plucked thread (Karplus-Strong strings,
 thin and silky, never a guitar), steel needles and shears, the spool's ratchet, cloth, and a breathy
 hollow shimmer for the shadow. Her voice is an adult woman's, cool and quiet, more breath than tone.
