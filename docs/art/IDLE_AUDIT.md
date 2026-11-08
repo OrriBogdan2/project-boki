@@ -135,6 +135,15 @@ Each target applies **quality** parity only. The attitude comes from the line qu
     figure-8.
   - Breath in the shoulders; no bounce faster than 1 Hz.
 - **Seam / length:** remove `dolm:stance` from `STAND_OPEN`.
+- **Done (ext/idle-dolm):**
+  - tarek_clips.py bakes both as 6 s loops on one set of feet (`FEET`). The weight shift, soft knees and right
+    heel lift are lagged by pelvis, torso, head and hands (`LAG`). The toe-tap fidget lands at 3.2 s,
+    and the hop answers it at 4.1 s.
+  - Breathing is a new leaf bone, `x_breath` under hips, skinned to the rib cage.
+  - The stones orbit in code (`Orbits`, warden_glb.gd), so the hop rides on a chin lift and a fist hop. Alternative, not
+    done: a clip event that bumps the orbit.
+  - Shots: before and after f000 and f012 match on the body. In live f012 to f013 the feet stay planted. tarek_clipcheck
+    finds no arm deeper than 2 cm in the chest. `LOOSE` and `STANCE`, used by the kit clips, are unchanged.
 
 ### 4. Cinder the Flame Queen (`ashwick`, art `cinder`)
 
@@ -288,8 +297,7 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   every track;
 - each clip lasts at least 2 s (`STAND_MIN`).
 
-`STAND_OPEN` lists what is still open: `bulwark:idle`, `bulwark:stance`, `ostra:idle`, `ostra:stance` and
-`dolm:stance`. Open entries are reported, not failed. An entry that starts passing fails the run until it is removed,
+`STAND_OPEN` lists what is still open: `bulwark:idle`, `bulwark:stance`, `ostra:idle`, `ostra:stance`. Open entries are reported, not failed. An entry that starts passing fails the run until it is removed,
 so each rework must delete its own entries.
 
 ## Verifying a rework
