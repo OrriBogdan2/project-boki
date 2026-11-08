@@ -22,6 +22,7 @@ def main():
     ap.add_argument("--push", action="store_true", help="git commit and push the new images")
     ap.add_argument("--only", default="", help="comma-separated job ids")
     ap.add_argument("--size", default=None, help="override size, e.g. 2K")
+    ap.add_argument("--watch", action="store_true", help="keep running: pull new jobs every minute, generate, push")
     a = ap.parse_args()
     if not os.environ.get("GEMINI_API_KEY"):
         sys.exit("GEMINI_API_KEY is not set. Run: export GEMINI_API_KEY=\"your key\"")
@@ -94,6 +95,20 @@ def main():
         subprocess.run(["git", "pull", "--rebase"], cwd=ROOT, check=True)
         subprocess.run(["git", "push"], cwd=ROOT, check=True)
         print("Pushed.")
+    elif not made:
+        print("Nothing new to generate.")
+
+def watch():
+    print("Watch mode: checking for new jobs every 60 s. Press Ctrl+C to stop.")
+    while True:
+        subprocess.run(["git", "pull", "--rebase", "--autostash", "-q"], cwd=ROOT)
+        rc = subprocess.run([sys.executable, __file__, "--push"] + [x for x in sys.argv[1:] if x != "--watch"], cwd=ROOT).returncode
+        if rc not in (0, None):
+            print("run exited with", rc)
+        time.sleep(60)
 
 if __name__ == "__main__":
-    main()
+    if "--watch" in sys.argv:
+        watch()
+    else:
+        main()
