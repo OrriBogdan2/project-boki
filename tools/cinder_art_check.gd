@@ -128,7 +128,7 @@ func run(main: Node) -> void:
 			heels_low = heels_low and (q as Vector3).y - P.pos.y < 0.3
 		spread = maxf(spread, (heels[0] as Vector3).distance_to(heels[1]))
 		tail_d = minf(tail_d, -(hv.anchor_pos(P, "tail") - P.pos).dot(fwd))
-		tail_behind = tail_behind and (hv.anchor_pos(P, "tail") - P.pos).dot(fwd) < -0.1   # (the v2 tail curls round her)
+		tail_behind = tail_behind and (hv.anchor_pos(P, "tail") - P.pos).dot(fwd) < -0.1   # (v2 tail curls)
 		var sk := P.model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 		var bi := sk.find_bone("jet.0")
 		jet_y = maxf(jet_y, sk.get_bone_pose_scale(bi).y)

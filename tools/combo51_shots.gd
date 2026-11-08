@@ -361,7 +361,8 @@ func _ashwick_item66() -> void:
 	)
 	await _go(3.1, held, marks)
 
-## Cinder, the Ashen Kiss (--combo51-part=queen): the LMB stream from her hands, and Flue Flight with fire from her heels
+## Cinder, the Ashen Kiss (--combo51-part=queen): the LMB stream from her hands, and Flue Flight
+## with fire from her heels
 ## and tail (briefs DECISIONS "Cinder the Flame Queen", retitled the Ashen Kiss).
 func _ashwick_queen() -> void:
 	var K: AshwickKit = P.ak
