@@ -57,7 +57,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;margin:0;text-wra
 <div class="wrap">
   <header>
     <h1>Boki Roster 100</h1>
-    <p class="sub">There are 50 species in the game today and 50 new forms in this pass. Each Boki has one or two types. Lines run 1 to 3 stages, and some final forms split by the path the Boki was raised on (fierce, steadfast, curious or swift).</p>
+    <p class="sub">There are 50 species in the game today and 50 new forms in this pass. Each Boki has one or two types. Lines run 1 to 3 stages, and some final forms split by the path the Boki was raised on (fierce, steadfast, curious or swift). Every Boki also comes in a male and a female look.</p>
   </header>
   <div class="stats" id="stats"></div>
   <div class="legend">
@@ -75,25 +75,23 @@ const NEWT=["Tide","Wyrm","Wild"];
 // status: L = art locked, T = in game, art to do or redo, N = new form
 const m=(n,t,s,w,p)=>({n,t,s,w,p});
 const G=[
- {g:"Starters",note:"three stages, final form branches",f:[
-  [m("Mycroll",["Spore"],"L","Hedgehog with mint toadstools"),m("Sporcupine",["Spore"],"N","Porcupine whose quills are mushroom stalks"),[m("Amanitusk",["Spore","Venom"],"N","Boar-sized, toxic red caps as spear quills, stem tusks","Fierce"),m("Ringrove",["Spore","Bloom"],"N","Huge calm elder, a fairy ring grove on its back, shelf-fungus armour","Steadfast")]],
-  [m("Vespyx",["Venom"],"L","Fox with scorpion tail and pincers (website art)"),m("Vespox",["Venom"],"N","Leaner fox, bigger pincers, longer sting tail"),[m("Glaivyx",["Venom","Titan"],"N","Armoured bruiser, sting grown into a scythe blade","Fierce"),m("Lashyx",["Venom","Shadow"],"N","Sleek speedster, whip tail with three stings","Swift")]],
+ {g:"Starters",note:"Hatchet is the mystery egg: it evolves four ways, one per path",f:[
+  [m("Hatchet",["Wild"],"N","Chick that never fully hatched: its speckled eggshell is part of its body"),[m("Cleavegg",["Wild","Titan"],"N","Shell's broken edge grows into an axe-blade crest","Fierce"),m("Bulwegg",["Wild","Stone"],"N","Shell grows into full domed armour","Steadfast"),m("Shardart",["Wild","Tempest"],"N","Shell splits into blade fins, a dart-fast runner","Swift"),m("Lumegg",["Wild","Lunar"],"N","Shell becomes a glowing lantern dome","Curious")]],
+  [m("Mycroll",["Spore"],"L","Hedgehog with mint toadstools"),m("Sporcupine",["Spore"],"L","Porcupine whose quills are mushroom stalks"),[m("Amanitusk",["Spore","Venom"],"N","Boar-sized, toxic red caps as spear quills, stem tusks","Fierce"),m("Ringrove",["Spore","Bloom"],"N","Huge calm elder, a fairy ring grove on its back, shelf-fungus armour","Steadfast")]],
+  [m("Vespyx",["Venom"],"L","Fox with scorpion tail and pincers (website art)"),m("Vespox",["Venom"],"L","Leaner fox, bigger pincers, longer sting tail. Male locked, female redo out"),[m("Glaivyx",["Venom","Titan"],"N","Armoured bruiser, sting grown into a scythe blade","Fierce"),m("Lashyx",["Venom","Shadow"],"N","Sleek speedster, whip tail with three stings","Swift")]],
   [m("Prismander",["Prism","Tide"],"T","Axolotl, crystal gills"),m("Glassolotl",["Prism","Tide"],"N","Glass-bodied axolotl, prism gills"),[m("Chandelotl",["Prism","Lunar"],"N","Gills become a crystal chandelier crown","Curious"),m("Geodelotl",["Prism","Stone"],"N","Heavy geode hide, crystal tail club","Steadfast")]]
  ]},
  {g:"Three-stage lines",f:[
-  [m("Teapotamus",["Ember","Tide"],"N","Hippo calf, copper teakettle body, spout tail"),m("Puffamus",["Ember"],"N","Young hippo, potbelly-stove body"),m("Chuggamus",["Ember","Titan"],"L","Hippo steam locomotive")],
-  [m("Kerchick",["Tempest","Tide"],"N","Albatross chick, handkerchief wings"),m("Jibbatross",["Tempest","Tide"],"N","Young albatross, jib-sail wings, hook tips"),m("Canvastross",["Tempest","Tide"],"L","Albatross with ship-sail wings, harpoon tips")],
+  [m("Teapotamus",["Ember","Tide"],"L","Hippo calf, copper teakettle body, spout tail"),m("Puffamus",["Ember"],"L","Young hippo, potbelly-stove body"),m("Chuggamus",["Ember","Titan"],"L","Hippo steam locomotive")],
+  [m("Kerchick",["Tempest","Tide"],"L","Albatross chick, handkerchief wings"),m("Jibbatross",["Tempest","Tide"],"N","Young albatross, jib-sail wings, hook tips"),m("Canvastross",["Tempest","Tide"],"L","Albatross with ship-sail wings, harpoon tips")],
   [m("Skidlet",["Frost"],"N","Fluffy heron chick wobbling on tiny skate blades"),m("Skateron",["Frost","Tempest"],"L","Heron on skate-blade feet (style pass later)"),m("Lanceron",["Frost","Tempest"],"N","Ice-armoured heron, beak an ice lance, blade feathers")],
   [m("Zipling",["Shadow"],"N","Tiny worm with a little zipper seam"),m("Zippelith",["Shadow","Stone"],"L","Worm with a zipper down its back"),m("Seamwyrm",["Shadow","Wyrm"],"N","Great dragon-worm, zipper splits open as its jaws")],
   [m("Glintmole",["Stone","Prism"],"T","Star-nosed mole with a quartz geode"),m("Geodemole",["Stone","Prism"],"N","Bigger mole, cracked-geode back"),m("Druzemole",["Stone","Prism"],"N","Giant, amethyst cavern for a back, crystal digging claws")],
-  [m("Kindlewren",["Ember","Tempest"],"T","Wren with an ember coal"),m("Embrook",["Ember","Tempest"],"N","Rook with a coal-bed back and cinder wings")],
-  [m("Rimeshrew",["Frost"],"T","Shrew dusted with hoarfrost"),m("Wolverime",["Frost","Titan"],"N","Frost-crusted wolverine, icicle claws")]
+  [m("Kindlewren",["Ember","Tempest"],"T","Wren with an ember coal"),m("Embrook",["Ember","Tempest"],"N","Rook with a coal-bed back and cinder wings")]
  ]},
- {g:"New-type lines",note:"Tide, Wyrm, Wild",f:[
+ {g:"New-type lines",note:"Tide and Wyrm (Wild comes from Hatchet)",f:[
   [m("Oarlet",["Tide"],"N","Otter pup, tail a little paddle"),m("Oarter",["Tide"],"N","Otter with oar-blade tail and oar spines"),m("Galleotter",["Tide","Titan"],"N","War-galley otter: oar spines down its sides, ram brow")],
-  [m("Kitlet",["Wyrm"],"N","Tiny serpent with paper-kite fins"),m("Ribbonwyrm",["Wyrm","Tempest"],"N","Long kite-tail dragon, ribbon streamers"),m("Dragonkite",["Wyrm","Tempest"],"N","Majestic sky dragon, kite-frame wings, crossbar spine")],
-  [m("Lidcoon",["Wild"],"N","Raccoon with a dented bin-lid shell"),m("Binbandit",["Wild"],"N","Big bin-bodied raccoon bruiser")],
-  [m("Kegpup",["Wild"],"N","Puppy with a little barrel chest"),m("Kegbernard",["Wild","Tide"],"N","Huge rescue dog, barrel-hooped chest, iron-hoop paws")]
+  [m("Kitlet",["Wyrm"],"N","Tiny serpent with paper-kite fins"),m("Ribbonwyrm",["Wyrm","Tempest"],"N","Long kite-tail dragon, ribbon streamers"),m("Dragonkite",["Wyrm","Tempest"],"N","Majestic sky dragon, kite-frame wings, crossbar spine")]
  ]},
  {g:"Two-stage: big Boki get a baby form",f:[
   [m("Bellowlet",["Ember"],"N","Cassowary chick, tiny squeezebox chest"),m("Bellowary",["Ember","Wild"],"L","Cassowary with forge-bellows chest, spur blades")],
@@ -107,7 +105,7 @@ const G=[
  ]},
  {g:"Two-stage: small Boki get a grown form",f:[
   [m("Anvilbrock",["Ember","Gravity"],"T","Honey badger forged like an anvil (redo out)"),m("Forgebrock",["Ember","Titan"],"N","Bigger forge badger, hammer-head paws, furnace chest")],
-  [m("Bubblisk",["Prism","Tide"],"T","Baby soap-bubble basilisk (redo out)"),m("Frothisk",["Prism","Tide"],"N","Sleek water-runner, foam frill, bubble-wand tail blade")],
+  [m("Bubblisk",["Prism","Tide"],"L","Baby soap-bubble basilisk, blowing a bubble"),m("Frothisk",["Prism","Tide"],"N","Sleek water-runner, foam frill, bubble-wand tail blade")],
   [m("Kestrike",["Storm","Tempest"],"T","Kestrel with copper lightning rod"),m("Arcestrel",["Storm","Tempest"],"N","Falcon with lightning-rod crest and coil talons")],
   [m("Marchleaf",["Swarm","Bloom"],"T","Leafcutter ant with a leaf"),m("Scythant",["Swarm","Bloom"],"N","Soldier ant, leaf-blade mandibles")],
   [m("Nettlynx",["Venom","Bloom"],"T","Lynx kitten with stinging nettle"),m("Thistlynx",["Venom","Bloom"],"N","Grown lynx, thistle mane, barbed ear tufts")],
@@ -125,7 +123,7 @@ const G=[
   [m("Murmurling",["Swarm","Echo"],"T","Starling with pan-pipes")],[m("Lodestick",["Gravity","Shadow"],"T","Stick insect with lodestone")],[m("Glomwort",["Spore","Venom"],"T","Slime mold puffball")],
   [m("Pipewurm",["Venom"],"T","Velvet worm with piping bag")],[m("Knotwyrm",["Spore","Wyrm"],"T","Slow worm with knotted rope")],[m("Gloamshell",["Shadow","Lunar"],"T","Snail with smoked obsidian shell")],
   [m("Mossgrade",["Bloom","Titan"],"T","Tardigrade with cushion moss")],[m("Selenfin",["Lunar","Tide"],"T","Hatchetfish with moonstone")],[m("Lanterloris",["Lunar","Ember"],"T","Slow loris with paper lantern")],
-  [m("Terrasloth",["Bloom","Prism"],"T","Sloth with glass greenhouse")]
+  [m("Terrasloth",["Bloom","Prism"],"T","Sloth with glass greenhouse")],[m("Rimeshrew",["Frost"],"T","Shrew dusted with hoarfrost")]
  ]}
 ];
 const all=[];G.forEach(g=>g.f.forEach(f=>f.forEach(x=>(Array.isArray(x)?x:[x]).forEach(y=>all.push(y)))));
