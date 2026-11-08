@@ -3129,3 +3129,9 @@ READY ext/keybinds-1108 65f6cc662 (job 20261108-220008-a3, deep; supersedes the 
 - Checks: --hero-vfx-check OK (incl. a new chain-hold test); --dredge-combo-check 95/0 (incl. dredge_ult); health --strict OK.
 - Strips: ext/vfx-dredge-strips f366fc98f (before_dredge_* / after_dredge_* for lmb, hold, rmb, hook, e, r). After render ran on rp1-1, whose ground grades yellow (other workers render green); a w2-pinned rerun (jobq 20261108-212434-08579, vfxq-after-dredge-w2) was still queued. No gh on w2: the integrator opens the PR and links them. Re-scored 16 -> 26 in docs/VFX_QUALITY.md.
 - Still open: slugs read small at match zoom; dash/barge after-images still LDFx; DEBT: Kael's Warchain is a second chain renderer (DJFx.chain).
+## 2026-11-08 feel (job 20261108-215340-a1): READY ui-declutter audit (plan only, no game code)
+- READY: briefs/UI_DECLUTTER_PLAN.md + 19 before shots in briefs/shots/ui-declutter/ (title, hatch/creator, tutorial HUD, results, farm arrival, Expedition panel, hunter pick, expedition HUD drop/start/fight/extract, pause farm+match).
+- Each element is marked KEEP / LATER(trigger) / TAB / CUT-MERGE, with an ASCII target per screen. HUD goes from ~13 groups to 5 (map+time, objective, squad, me, weapon).
+- Findings to act on: the match-start "Your kit" panel contradicts the locked UNLOCK slots; 2 arrival modals stack on the farm; the prematch squad column is clipped at 1920 with no countdown; Admin tools (F1) is visible to players in pause; 3-4 top-centre banners overlap during fight/extract.
+- Suggested jobs, in order: reveal-helper (share it with tutorials-cut FirstTimeHint), hud-declutter (new hud_reveal.gd; hud.gd is frozen), arrival-declutter (also farm-optional's away summary), menus-more (with pause-menu-1108 / expedition-pick-simplify), creator-trim.
+- 5 TASTE questions with defaults at the end of the plan; work can go ahead on the defaults.
