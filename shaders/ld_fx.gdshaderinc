@@ -8,14 +8,12 @@
 //   1 orb      a radial glow: a core (color2) inside a halo (color); `strength` scales the halo's cover
 //   2 comet    a streak along UV.x (0 = head), soft across UV.y, with a smoke tail (color2)
 //   3 crescent a blade arc swept by `progress`: UV.x along the sweep, UV.y from the edge inward
-//   4 sunburst a jagged burst of sharp rays thrown out over life (the Furnace Cloak, the barge, impacts)
-//   6 scorch   a cracked, glowing scorch disc that cools from orange to soot
 //   7 swirl    a ring of flame streaks rotating round the centre (Cinder's shield)
 //   8 links    a ring of chain links (Dredge Grounded while he reels)
 //   9 flame icon  a small teardrop flame (the burn pips over a foe)
 //  10 spiral   a stun spiral (Anchor Drop victims)
-//  11 wave     a ring that opens over life (the Anchor's landing ring, Cinder Shot's fizzle)
-//  12 dot      a round dot with a dark core (a slug hanging at its stop line)
+//  11 wave     a ring that opens over life (Cinder Shot's fizzle)
+//   else     a round dot with a dark core
 uniform vec4 color : source_color = vec4(1.0, 0.6, 0.2, 1.0);
 uniform vec4 color2 : source_color = vec4(1.0, 1.0, 0.8, 1.0);
 uniform float life = 0.0;
@@ -89,30 +87,6 @@ void ld_look(vec2 uv01, out vec3 body, out float alpha, out vec3 glow) {
 		body = mix(color2.rgb, color.rgb, edge);
 		alpha = clamp(edge + inner * n * 0.85, 0.0, 1.0) * trail * fade;
 		glow = color.rgb * edge * 0.35 * trail * fade;
-	} else if (mode == 4) {
-		float a = atan(uv.y, uv.x) / 6.2832 + 0.5 + seed;
-		float ray_i = floor(a * 14.0);
-		float ray_len = 0.55 + 0.45 * fract(sin(ray_i * 12.9898 + seed) * 43758.5453);
-		float tri = 1.0 - abs(fract(a * 14.0) - 0.5) * 2.0;
-		float teeth = 1.0 - abs(fract(a * 42.0) - 0.5) * 2.0;
-		float reach = 0.3 + 0.7 * smoothstep(0.0, 0.3, life);
-		float tip = reach * (0.32 + 0.68 * ray_len * pow(tri, 1.6)) + 0.05 * teeth * tri;
-		float cover = 1.0 - smoothstep(tip - 0.03, tip, d);
-		float disc = 1.0 - smoothstep(0.0, reach * 0.45, d);
-		float fade = 1.0 - smoothstep(0.45, 1.0, life);
-		float rim = smoothstep(tip * 0.55, tip, d);
-		body = mix(mix(color2.rgb, color.rgb, smoothstep(0.0, reach * 0.4, d)), color.rgb * 0.45, rim);
-		alpha = cover * fade * 0.92;
-		glow = color2.rgb * disc * disc * 0.5 * fade;
-	} else if (mode == 6) {
-		float n = vnoise(uv * 5.0 + seed);
-		float crack = 1.0 - smoothstep(0.0, 0.08, abs(fract(atan(uv.y, uv.x) * 1.4 + n * 0.6) - 0.5) * (0.4 + d));
-		float disc = 1.0 - smoothstep(0.55, 1.0, d + n * 0.2);
-		float fade = 1.0 - smoothstep(0.6, 1.0, life);
-		vec3 hot = mix(color.rgb, color2.rgb, smoothstep(0.0, 0.7, life));
-		body = mix(color2.rgb, hot, crack);
-		alpha = disc * (0.55 + 0.45 * crack) * fade;
-		glow = color.rgb * crack * disc * 0.4 * (1.0 - smoothstep(0.0, 0.6, life));
 	} else if (mode == 7) {
 		float a = atan(uv.y, uv.x);
 		float ring = 1.0 - smoothstep(0.0, 0.17, abs(d - 0.8));

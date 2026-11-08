@@ -1,0 +1,56 @@
+{
+	"palette": {"main": "ffc832", "hot": "fff0b0", "char": "3a2408", "smoke": "4a4038", "iron": "5a4a36", "brass": "e0a040"},
+	"anchors": {
+		"hand": {"nodes": ["anchor_claw"], "bone": "hand.R", "body": [0.25, 1.15, 0.45]},
+		"fist": {"bone": "hand.L", "off": [0.0, 0.08, 0.0], "body": [-0.25, 1.9, 0.2]},
+		"fists": {"body": [0.0, 1.1, 0.5]},
+		"feet": {"body": [0.0, 0.1, 0.0]}
+	},
+	"moves": {
+		"shot": {"fx": [{"p": "flare", "size": 1.2, "life": 0.12, "c": "main", "c2": "hot"},
+				{"p": "ember", "way": "fwd", "lift": 0.05, "n": 12, "speed": 10.0, "spread": 0.4, "grav": 6.0, "life": 0.22, "size": 0.05, "stretch": 0.07},
+				{"p": "smoke", "way": "fwd", "n": 3, "speed": 1.6, "spread": 0.6, "grav": -0.6, "life": 0.45, "size": 0.4, "near": true},
+				{"p": "coin", "way": "back", "lift": 1.5, "n": 2, "speed": 3.0, "spread": 0.4, "grav": 12.0, "life": 0.6, "size": 0.08, "c": "brass", "near": true}]},
+		"slug": {"fx": [{"p": "ribbon", "life": 1.0, "tail": 0.09, "size": 0.16, "c": "main", "c2": "hot"}]},
+
+		"hook_throw": {"fx": [{"p": "flare", "at": "hand", "size": 1.0, "life": 0.12, "c": "main", "c2": "hot"},
+				{"p": "ember", "at": "hand", "way": "fwd", "n": 10, "speed": 7.0, "spread": 0.3, "grav": 5.0, "life": 0.28, "size": 0.04, "stretch": 0.05}]},
+		"hook_chain": {"fx": [{"p": "chain", "at": "hand", "size": 0.24, "link": 0.24, "slack": 0.4, "c": "main", "c2": "hot", "c3": "char"}]},
+		"hook_bite": {"fx": [{"p": "flare", "size": 2.4, "life": 0.2, "c": "main", "c2": "hot"},
+				{"p": "sweep", "y": -0.4, "size": 1.3, "arc": 359, "life": 0.22, "c": "main", "c2": "hot"},
+				{"p": "coin", "n": 12, "speed": 6.0, "spread": 1.0, "grav": 13.0, "life": 0.8, "size": 0.1, "c": "main", "c2": "hot"},
+				{"p": "ember", "way": "back", "n": 18, "speed": 9.0, "spread": 0.5, "grav": 7.0, "life": 0.35, "size": 0.05, "stretch": 0.06},
+				{"p": "smoke", "n": 4, "speed": 1.2, "spread": 0.9, "grav": -0.5, "life": 0.6, "size": 0.5, "near": true}]},
+		"hook_snap": {"fx": [{"p": "flare", "size": 0.9, "life": 0.12, "c": "main", "c2": "hot"},
+				{"p": "ember", "n": 12, "speed": 5.0, "spread": 1.0, "grav": 10.0, "life": 0.35, "size": 0.045, "c": "hot", "stretch": 0.04}]},
+
+		"anchor_wind": {"fx": [{"p": "ember", "at": "fist", "shape": "gather", "radius": 0.9, "n": 18, "speed": 2.6, "drag": 0.0, "curl": 0.2, "life": 0.3, "size": 0.05, "c": "main", "c2": "hot"},
+				{"p": "ember", "at": "feet", "shape": "arc", "radius": "r", "arc": 110, "w": 0.35, "way": "up", "n": 22, "speed": 1.0, "spread": 0.2, "grav": -1.0, "life": 0.4, "size": 0.06, "c": "main", "c2": "hot"}]},
+		"anchor_slam": {"fx": [{"p": "sweep", "y": 0.5, "size": "r", "arc": 110, "life": 0.3, "c": "main", "c2": "hot", "tilt": 6},
+				{"p": "scorch", "shape": "cone", "size": "r", "arc": 110, "life": 1.4, "c": "brass", "c2": "hot", "c3": "char"},
+				{"p": "flare", "fwd": 1.1, "y": 0.4, "size": 2.4, "life": 0.18, "c": "main", "c2": "hot"},
+				{"p": "chunk", "fwd": 1.3, "way": "fwd", "lift": 1.0, "n": 14, "speed": 7.0, "spread": 0.5, "grav": 20.0, "drag": 0.2, "life": 0.7, "size": 0.13, "radius": 0.6, "c": "iron"},
+				{"p": "coin", "fwd": 1.5, "way": "fwd", "lift": 1.2, "n": 8, "speed": 5.0, "spread": 0.8, "grav": 13.0, "life": 0.8, "size": 0.1},
+				{"p": "ember", "fwd": 1.5, "y": 0.2, "way": "fwd", "lift": 0.4, "n": 20, "speed": 8.0, "spread": 0.6, "grav": 6.0, "life": 0.45, "size": 0.05, "stretch": 0.05},
+				{"p": "smoke", "fwd": 1.8, "y": 0.2, "n": 8, "speed": 1.4, "spread": 0.9, "grav": -0.6, "life": 1.0, "size": 0.7, "radius": 0.9, "near": true}]},
+		"anchor_dust": {"fx": [{"p": "skirt", "size": 1.8, "from": 0.3, "tall": 0.6, "life": 0.35, "c": "main", "c2": "hot"}]},
+		"quake": {"fx": [{"p": "scorch", "size": "r", "size_x": 0.7, "life": 1.4, "c": "brass", "c2": "hot", "c3": "char"},
+				{"p": "skirt", "size": "r", "from": 0.25, "tall": 1.4, "life": 0.45, "c": "main", "c2": "hot"},
+				{"p": "flare", "y": 0.5, "size": 3.2, "life": 0.22, "c": "main", "c2": "hot"},
+				{"p": "chunk", "y": 0.15, "n": 18, "speed": 8.0, "spread": 0.55, "grav": 22.0, "drag": 0.1, "life": 0.8, "size": 0.14, "radius": 1.0, "c": "iron"},
+				{"p": "coin", "y": 0.3, "n": 12, "speed": 6.0, "spread": 0.7, "grav": 13.0, "life": 0.9, "size": 0.1},
+				{"p": "ember", "y": 0.3, "n": 24, "speed": 8.0, "spread": 0.7, "grav": 5.0, "life": 0.6, "size": 0.06}]},
+
+		"broadside_charge": {"fx": [{"p": "ember", "at": "fists", "shape": "gather", "radius": 1.0, "n": 22, "speed": 3.0, "drag": 0.0, "curl": 0.3, "life": 0.3, "size": 0.05, "c": "main", "c2": "hot"},
+				{"p": "coin", "at": "fists", "radius": 0.25, "way": "up", "n": 4, "speed": 1.2, "spread": 0.6, "grav": -0.5, "life": 0.4, "size": 0.08, "near": true},
+				{"p": "ember", "at": "feet", "shape": "arc", "radius": "r", "arc": 105, "w": 0.4, "way": "up", "n": 24, "speed": 0.9, "spread": 0.2, "grav": -1.0, "life": 0.45, "size": 0.06, "c": "main", "c2": "hot"}]},
+		"broadside_wave": {"fx": [{"p": "sweep", "at": "h", "y": 0.5, "size": "r", "arc": 105, "life": 0.32, "c": "main", "c2": "hot", "tilt": 4},
+				{"p": "flare", "size": 2.6, "life": 0.2, "c": "main", "c2": "hot"},
+				{"p": "coin", "way": "fwd", "lift": 0.1, "n": 14, "speed": 20.0, "spread": 0.85, "grav": 4.0, "drag": 1.5, "life": 0.35, "size": 0.14},
+				{"p": "ember", "way": "fwd", "lift": 0.05, "n": 22, "speed": 17.0, "spread": 0.8, "grav": 3.0, "life": 0.3, "size": 0.05, "stretch": 0.08},
+				{"p": "smoke", "way": "fwd", "n": 6, "speed": 2.5, "spread": 0.8, "grav": -0.4, "life": 0.7, "size": 0.7, "near": true}]},
+		"broadside_hit": {"fx": [{"p": "flare", "y": 1.0, "size": 1.5, "life": 0.16, "c": "main", "c2": "hot"},
+				{"p": "coin", "y": 1.0, "n": 5, "speed": 4.0, "spread": 1.0, "grav": 12.0, "life": 0.6, "size": 0.09},
+				{"p": "ember", "y": 1.0, "n": 8, "speed": 6.0, "spread": 0.8, "grav": 6.0, "life": 0.3, "size": 0.05}]}
+	}
+}
