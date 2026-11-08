@@ -519,11 +519,17 @@ static func fetch(arch: String) -> void:
 		BackgroundWork.request(p)
 
 ## Starts reading the .glb files a match's build dresses (your Warden and your dealt squadmates', opts "mates"),
-## so they load on a loader thread while the world builds instead of in build.hunters.
+## so they load on a loader thread while the world builds instead of in build.hunters. A match with rival
+## squads (bots or other players) reads every Warden's: 30 Hunters use nearly all of them, and each read
+## on the main thread was 10-120 ms of build.hunters.
 static func fetch_for(opts: Dictionary) -> void:
 	fetch(String(opts.get("arch", Save.d.get("arch", ""))))
 	for mt in opts.get("mates", []):
 		fetch(String((mt as Dictionary).get("arch", "")))
+	var solo := ["tutorial", "duel", "arena"].any(func(k): return opts.get(k, false))
+	if not solo and int(opts.get("teams", 4)) > 1:
+		for a in Arch.ids():
+			fetch(String(a))
 
 ## Whether a Warden's model can be built without waiting on the disk (fetch() starts the read when it hasn't).
 static func fetched(arch: String) -> bool:

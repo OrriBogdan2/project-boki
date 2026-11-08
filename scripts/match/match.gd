@@ -270,6 +270,7 @@ func _start(o: Dictionary) -> void:
 	_stage_done_ms = 0.0
 	opts = o
 	WardenGlb.fetch_for(o)
+	if not ["tutorial", "duel", "arena"].any(func(k): return o.get(k, false)): BokiRig.fetch_common()
 	if o.get("tutorial", false): tut = Tutorial.new(self)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
