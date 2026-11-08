@@ -182,7 +182,7 @@ func _round2() -> void:
 	var stall := {"u": HomeLayout._next_uid(L), "id": "market_stall", "x": 41, "z": 29, "r": 0}
 	(L["deco"] as Array).append(stall)
 	home._sync_fixtures()
-	for id in ["axe", "chop", "house", "hammer", "task", "stone", "feed", "crop"]:
+	for id in ["chop", "house", "hammer", "task", "stone", "feed", "crop"]:
 		FarmTutorial.mark(id)
 	Save.d["gems"] = 0
 	home.guide.detect_t = 0.0

@@ -89,7 +89,8 @@ func _first_arrival() -> void:
 	await _shot("hob_1_calls_you_over", 0.3)
 	await _shot("hob_2_waves", 0.4)
 	await _wait(func(): return hob.chat.intro_t < 0.0, 20.0)
-	ok(hob.chat.frame(focus) == focus and is_equal_approx(home.cam.zoom_to, zoom0) and bool(Save.d["tutorial"].get("hob_intro", false)),
+	ok(hob.chat.frame(focus) == focus and is_equal_approx(home.cam.zoom_to, zoom0)
+			and bool(Save.d["tutorial"].get("hob_intro", false)),
 			"the wave ends, once, with the camera where it was")
 	# 3. talking
 	_stand_by(hob.node.position)
@@ -105,8 +106,9 @@ func _first_arrival() -> void:
 	ok(_texts(box).has(FarmBuilder.full_name()) and box.find_children("*", "TextureRect", true, false).size() > 0
 			and box.text.text == String(intro[0]["text"]), "his portrait, his name and his first line")
 	var talk_at: Vector3 = hob.chat.frame(home.ppos)
-	ok(is_equal_approx(home.cam.zoom_to, HobTalk.TALK_ZOOM) and talk_at.distance_to(home.ppos) <= 1.2,
-			"one gentle framing for the talk (zoom %.2f, focus %.1f m from you)" % [home.cam.zoom_to, talk_at.distance_to(home.ppos)])
+	var drawn_m := talk_at.distance_to(home.ppos)
+	ok(is_equal_approx(home.cam.zoom_to, HobTalk.TALK_ZOOM) and drawn_m <= 1.2,
+			"one gentle framing for the talk (zoom %.2f, focus %.1f m from you)" % [home.cam.zoom_to, drawn_m])
 	await _shot("hob_3_dialogue_box", 0.9)
 	for i in 4:      # (each line: one click finishes typing it, the next moves on)
 		box.advance()
@@ -121,7 +123,8 @@ func _first_arrival() -> void:
 	hob.chat.show_at = home.ppos + Vector3(HobTalk.SHOW_FAR_M + 8.0, 0, 0)
 	hob.chat.show_t = 1.2
 	var far_at: Vector3 = hob.chat.frame(home.ppos)
-	ok(far_at.x > talk_at.x + 2.0 and far_at.x < hob.chat.show_at.x - 4.0 and is_equal_approx(home.cam.zoom_to, HobTalk.TALK_ZOOM),
+	ok(far_at.x > talk_at.x + 2.0 and far_at.x < hob.chat.show_at.x - 4.0
+			and is_equal_approx(home.cam.zoom_to, HobTalk.TALK_ZOOM),
 			"only a far-off show drifts it, part of the way, with no zoom change")
 	hob.chat.show_t = -1.0
 	for i in intro.size() * 2:
