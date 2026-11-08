@@ -24,7 +24,7 @@ const SKY_KEYS := ["top", "mid", "horizon"]
 const SEA_KEYS := ["deep", "light", "glow"]
 ## How fast a camera move still creeps at its end, as a share of its average speed (eased, never a dead stop)
 const END_CREEP := 0.25
-const MANTLES_AT := 2.6        # s into THE SUNDERING: the Hunters' selves burst out of the Crown as Masks
+const MANTLES_AT := 2.6        # s into THE SUNDERING: the Hunters' selves burst out of the Crown as Relics
 
 var cam: Camera3D
 var env: Environment
@@ -37,7 +37,7 @@ var shots: Array = []
 var rng := RandomNumberGenerator.new()
 var pieces: Array = []          # the broken continent: {node, dir, fall, spin}
 var gliders: Array = []
-var boki: PrologueBoki          # THE MASKS' set (scripts/ui/prologue_boki.gd)
+var boki: PrologueBoki          # THE RELICS' set (scripts/ui/prologue_boki.gd)
 var broke := false
 var rumble := 0.0                # the roar and the fall: a faint camera rumble (RUMBLE_AMP), never a shake
 const RUMBLE_AMP := 0.08
@@ -131,13 +131,13 @@ func _shots() -> Array:
 				+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty.",
 			"cam": [[W + Vector3(-30, 22, 46), W + Vector3(0, 0, 0), W + Vector3(-36, 28, 56), W + Vector3(0, -6, 0), 3.6],
 				[W + Vector3(46, 4, 34), W + Vector3(0, -4, 0), W + Vector3(58, 10, 46), W + Vector3(0, -20, 0), 3.9]]},
-		{"chapter": "THE MASKS", "mood": "dawn", "tint": Color("ffe4b0"), "grade": 0.12, "event": "kin",
+		{"chapter": "THE RELICS", "mood": "dawn", "tint": Color("ffe4b0"), "grade": 0.12, "event": "kin",
 			"text": "Our only salvation became the cursed fossils we had tried to destroy:\n"
-				+ "Masks, each carrying the soul of a fallen Hunter of old.",
+				+ "Relics, the masks of fallen Heroes.\nOnly those who wear a Hero's Relic can save our souls.",
 			"cam": [[K + Vector3(0.2, 2.0, 7.6), K + Vector3(0.2, 0.9, -1.2), K + Vector3(0.25, 1.7, 6.4), K + Vector3(0.3, 0.85, -1.0), 3.1],
 				[K + Vector3(0.4, 0.55, 3.9), K + Vector3(0.4, 0.85, -0.3), K + Vector3(0.4, 0.55, 3.45), K + Vector3(0.4, 0.88, -0.3), 4.4]]},
 		{"chapter": "THE RACE", "mood": "deep", "tint": Color("b08aff"), "grade": 0.24, "event": "drop",
-			"text": "Put on a Mask, bond with a Boki, and hunt for the Wyrmheart:\n"
+			"text": "Put on a Relic, bond with a Boki, and hunt for the Wyrmheart:\n"
 				+ "one wish to remake the world, or rule it.\nEvery Hunter wants it. So does the Wyrm.",
 			"cam": [[D + Vector3(-6, 20, 14), D + Vector3(2, 4, -30), D + Vector3(-3, 16, 2), D + Vector3(8, -10, -52), 4.0],
 				[D + Vector3(-4, 14, -4), D + Vector3(14, -28, -70), D + Vector3(0, 11, -12), D + Vector3(18, -36, -82), 4.2]]},
@@ -297,7 +297,7 @@ func _fire(parent: Node3D, at: Vector3, size := 1.0) -> void:
 	sm.mesh = _blob(0.6, false)
 	parent.add_child(sm)
 
-## Specks drifting in a set's air (the Sundering's dust, the Mask rising): `box` half-extents in m, `radius` the
+## Specks drifting in a set's air (the Sundering's dust, the Relic rising): `box` half-extents in m, `radius` the
 ## speck radius in m, `rise` m/s² up (negative sinks), `glow` adds light instead of covering.
 func _drift(at: Vector3, box: Vector3, col: Color, n: int, radius: float, rise: float, glow: bool) -> CPUParticles3D:
 	var p := CPUParticles3D.new()
@@ -677,7 +677,7 @@ func _sundering(st: float, delta: float) -> void:
 			flash.color.a = maxf(flash.color.a, 0.3)
 			rumble = maxf(rumble, 0.35)
 
-## The fallen Hunters' selves scattering as Masks: a light of each Mask's colour bursts out of the Crown and
+## The fallen Hunters' selves scattering as Relics: a light of each Relic's colour bursts out of the Crown and
 ## flies off over the breaking isles.
 func _scatter_mantles() -> void:
 	var from: Vector3 = (pieces[0]["node"] as Node3D).position + Vector3(0, 10, 0)

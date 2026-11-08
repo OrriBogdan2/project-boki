@@ -1,5 +1,5 @@
 {
-	"desc": "Putting on a Mask (MaskBeat, scripts/ui/mask_beat.gd): build-up, the Mask rising to the face, a cut to black and silence, flashes of the fallen Hunter with a whisper, the snap back with an impact and a ripple of light, a pose, the name and title, and a sting. Times in seconds. 'full' is the first Mask (and every first time); 'short' is a later Mask on the farm. After the first one the player can skip.",
+	"desc": "Putting on a Relic (MaskBeat, scripts/ui/mask_beat.gd): build-up, the Relic rising to the face, a cut to black and silence, flashes of the fallen Hunter with a whisper, the snap back with an impact and a ripple of light, a pose, the name and title, and a sting. Times in seconds. 'full' is the first Mask (and every first time); 'short' is a later Mask on the farm. After the first one the player can skip.",
 	"full": {
 		"build_s": 1.2,
 		"rise_s": 1.4,
@@ -16,14 +16,14 @@
 		"reveal_s": 1.5,
 		"push_in": 0.6
 	},
-	"times_doc": "build_s: the world quiets, the camera eases in, swell and heartbeat. rise_s: the Mask lifts to the face in slow motion while a ghostly porcelain face flickers over yours. black_s: the hard silence after contact. memory_s: one entry per memory frame of the fallen Hunter (their painted art). reveal_s: the snap back to the end (pose, name and title, sting). push_in: how far the camera eases in (0..1 of the way to the face).",
+	"times_doc": "build_s: the world quiets, the camera eases in, swell and heartbeat. rise_s: the Relic lifts to the face in slow motion while a ghostly porcelain face flickers over yours. black_s: the hard silence after contact. memory_s: one entry per memory frame of the fallen Hunter (their painted art). reveal_s: the snap back to the end (pose, name and title, sting). push_in: how far the camera eases in (0..1 of the way to the face).",
 	"music_duck_db": -30.0,
 	"heart_gaps_s": [0.62, 0.5, 0.4, 0.32],
 	"punch_fov": 5.0,
 	"whispers": {
 		"gunslinger": "Another job. Another mark on the tally.",
 		"juggernaut": "The blade is hungry. Feed it, or it feeds on you.",
-		"archer": "Every Mask I sewed, I will cut loose.",
+		"archer": "Every mask I sewed, I will cut loose.",
 		"bulwark": "Hold on. The shore is close.",
 		"mage": "One day I give the storm back.",
 		"ashwick": "Bottled Blight. Drink up.",

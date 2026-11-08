@@ -1,4 +1,4 @@
-# Silver Thief
+# The Silver Thief
 
 A light duelist who picks one target and never lets go, from range. Every bolt marks them, every
 cartwheel empowers the next bolt, and landing that bolt gives the cartwheel straight back.
@@ -8,7 +8,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 
 |  |  |
 |---|---|
-| Class title | Silver Thief |
+| Class title | the Silver Thief |
 | Base character | Sable, female |
 | Personality | Quick, quiet and light-fingered. She is never where you aimed, and she smiles when you miss. She steals the moment first and the loot second. |
 

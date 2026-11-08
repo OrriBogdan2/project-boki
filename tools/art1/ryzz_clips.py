@@ -1,4 +1,4 @@
-"""ART-1 Ryzz's animation set (hand-keyed as targets, solved by posekit). Times match the kit: MOVES in scripts/match/kmoves_vv.gd and content/archetypes/mage.json.
+"""ART-1 Sparkle's animation set (hand-keyed as targets, solved by posekit). Times match the kit: MOVES in scripts/match/kmoves_vv.gd and content/archetypes/mage.json.
 Personality: cocky, light, all hip and wrist; hands-free: every attack is a finger gun with both thumbs up, she blows the smoke off after the good ones.
 Hands: G and LP are the wrists; BE/LBE are (index finger direction, thumb direction).
 Run: blender -b --python tools/art1/ryzz_clips.py -- <ryzz.blend> <out.glb> [clip,clip]"""

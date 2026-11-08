@@ -1,14 +1,14 @@
 extends RefCounted
 ## --prologue-check [--shots-dir=<dir>]: plays the prologue frame by frame (add --fixed-fps 60 for even strips) and
-## checks the five slides and the owner's lines for 3 and 4, that in THE MASKS every Boki and the hunter stay
+## checks the five slides and the owner's lines for 3 and 4, that in THE RELICS every Boki and the hunter stay
 ## inside the picture (between the letterbox bars) and never stand in each other, that the relic wakes,
 ## and that it ends on the hatch. With --shots-dir (under xvfb with a renderer) it also saves a 5-frame strip
 ## per slide (start, two key beats, middle, end) as <dir>/s<slide>_<n>.png with <dir>/captions.txt.
 
 const SUNDERING := "The Wyrm broke the land and stole our essence.\n" \
 	+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty."
-const MASKS := "Our only salvation became the cursed fossils we had tried to destroy:\n" \
-	+ "Masks, each carrying the soul of a fallen Hunter of old."
+const RELICS := "Our only salvation became the cursed fossils we had tried to destroy:\n" \
+	+ "Relics, the masks of fallen Heroes.\nOnly those who wear a Hero's Relic can save our souls."
 ## each slide's strip: [seconds in (from the end when negative, taken just before the wipe), caption]
 const STRIP := [
 	[[1.0, "start: the land whole at golden hour, a slow push in"], [2.6, "beat: the Crown on its isle"],
@@ -19,13 +19,13 @@ const STRIP := [
 		[3.5, "middle: cut wide, the sky reddening as it dives"], [4.6, "beat: fire on the towns, the frame shaking"],
 		[-0.2, "end: the Wyrm climbs away over the burning land"]],
 	[[1.0, "start: the burning land, the Wyrm circling"], [1.8, "beat: the land splits (flash, jolt, rocks)"],
-		[3.2, "middle: the Masks burst out of the Crown"], [4.4, "beat: cut low, the isles drifting apart in dust"],
+		[3.2, "middle: the Relics burst out of the Crown"], [4.4, "beat: cut low, the isles drifting apart in dust"],
 		[-0.2, "end: the isles sinking, rocks falling past"]],
 	[[1.0, "start: a hunter at sunrise, the first Boki out of the grass"],
 		[2.4, "beat: the lead Boki greets him, he kneels"],
 		[3.9, "middle: cut side-on, it rears up to nose the relic in his hands and it wakes"],
 		[5.4, "beat: the woken relic hangs glowing in Vex's colour between them"],
-		[-0.2, "end: the Boki jump for joy, the Mask rising off him"]],
+		[-0.2, "end: the Boki jump for joy, the Relic rising off him"]],
 	[[1.0, "start: behind the hunters gliding for the Heart"], [2.8, "beat: the Heart's beam ahead"],
 		[4.2, "middle: cut to the reveal over the isles"], [5.6, "beat: two eyes open far down in the clouds"],
 		[-0.2, "end: the Wyrm watching the race"]],
@@ -66,7 +66,7 @@ func run(m: Node) -> void:
 		return
 	ok(pr.shots.size() == 5, "five slides (%d)" % pr.shots.size())
 	ok(String(pr.shots[2]["text"]) == SUNDERING, "THE SUNDERING reads the owner's line")
-	ok(String(pr.shots[3]["text"]) == MASKS, "THE MASKS reads the owner's line")
+	ok(String(pr.shots[3]["text"]) == RELICS, "THE RELICS reads the owner's line")
 	await _captions_fit(pr, tree)
 	main.get_window().size = FRAME
 	await _play(pr, tree)
@@ -85,7 +85,7 @@ func run(m: Node) -> void:
 	RenderingServer.render_loop_enabled = true
 	tree.quit(1 if bad else 0)
 
-## Steps through the slides, taking the strip frames and watching THE MASKS's framing every frame.
+## Steps through the slides, taking the strip frames and watching THE RELICS's framing every frame.
 func _play(pr, tree: SceneTree) -> void:
 	var worst_gap := 99.0
 	var out_frames := 0
@@ -109,10 +109,10 @@ func _play(pr, tree: SceneTree) -> void:
 					if first_out == "":
 						first_out = ", first %s at %.1f s" % [out, pr.shot_t]
 			await _shot(i, n, pr)
-	ok(boki_frames > 100 and out_frames == 0, "THE MASKS: every Boki and the hunter stay inside the frame"
+	ok(boki_frames > 100 and out_frames == 0, "THE RELICS: every Boki and the hunter stay inside the frame"
 		+ " (%d of %d frames out%s)" % [out_frames, boki_frames, first_out])
-	ok(worst_gap >= BOKI_GAP, "THE MASKS: no Boki stands in the hunter or another Boki (closest %.2f m)" % worst_gap)
-	ok(pr.boki.relic_k > 0.9, "THE MASKS: the relic wakes (%.2f)" % pr.boki.relic_k)
+	ok(worst_gap >= BOKI_GAP, "THE RELICS: no Boki stands in the hunter or another Boki (closest %.2f m)" % worst_gap)
+	ok(pr.boki.relic_k > 0.9, "THE RELICS: the relic wakes (%.2f)" % pr.boki.relic_k)
 
 ## The least ground distance between any two Boki, or a Boki and the hunter, while they are out.
 func _boki_gap(pr) -> float:

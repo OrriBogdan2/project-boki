@@ -1,5 +1,5 @@
 extends RefCounted
-## --mage-combo-check / --gunslinger-combo-check: Ryzz's and Vex's kits against their reference
+## --mage-combo-check / --gunslinger-combo-check: Sparkle's and Vex's kits against their reference
 ## sheets and the owner notes (docs/heroes/mage.md and gunslinger.md, "Combinations"): where every shot
 ## and placement lands (max range vs cursor), the telegraph shown while aiming or holding (AimKit), the
 ## charge timings, and each payoff. Prints HCHECK PASS/FAIL and a DONE line.
@@ -90,7 +90,7 @@ func _growth() -> void:
 			d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01,
 			"L1 %.2f L10 %.2f" % [d1, d10])
 
-# ------------------------------------------------------------------ Ryzz
+# ------------------------------------------------------------------ Sparkle
 func _mage() -> void:
 	var r: Array = ac.setup("mage", 4.0, "", true)
 	var m: Match = r[0]
@@ -344,7 +344,7 @@ func _mage() -> void:
 	P.ak.use_e()
 	ok("Skycall: the circle drops at the cursor", not K.strikes.is_empty() and _flat(K.strikes[0]["at"], T.pos) < 0.3)
 	ac.step(m, 0.05)
-	ac.aim_at(P, T.pos + Vector3(-3.0, 0, 0))           # the drag: back toward Ryzz
+	ac.aim_at(P, T.pos + Vector3(-3.0, 0, 0))           # the drag: back toward Sparkle
 	ac.step(m, 0.55)
 	var ce := AimKit.entry(P, "e0")
 	ok("Skycall held 0.6s (data: hold and drag, release): still dragging, the arrow + a rim chevron on the circle",
@@ -465,7 +465,7 @@ func _mage() -> void:
 	T2.hp = 0.0
 	T2.downed = true
 	K.on_deal(T2, 5.0, {"src": "shot"})
-	ok("small: Ryzz's kit gives no Wirerun on a knock (the game-wide takedown reset is DashReset's)", P.dashes < 0.5)
+	ok("small: Sparkle's kit gives no Wirerun on a knock (the game-wide takedown reset is DashReset's)", P.dashes < 0.5)
 	T2.downed = false
 	T2.hp = T2.max_hp
 	T2.teleport(home + Vector3(30, 0, 0))
@@ -554,7 +554,7 @@ func _gunslinger() -> void:
 	var K: GunslingerKit = P.ak
 	var bd: Dictionary = K.rmb_def()["burr"]
 	T2.teleport(home + Vector3(30, 0, 0))
-	ok("Hired Gun: the display name", Arch.name_of("gunslinger") == "Hired Gun")
+	ok("Hired Gun: the display name", Arch.name_of("gunslinger") == "The Hired Gun")
 	# 1. LMB: to full range past the cursor, an ember tracer; Dazed = +90%, a gold crit number, no decay
 	P.teleport(home)
 	T.teleport(home + Vector3(30, 0, 8))
