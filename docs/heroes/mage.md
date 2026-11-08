@@ -79,6 +79,22 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 
 Charge orb: hovers 4s and adds Static to nobody (owner item 74). A Wirerun through it, or Skycall dragging it toward her within 9 m (it flies to her), picks it up and gives Wirerun back (owner items 71/74); any other Skycall fling is 6 m.
 
+## Telegraphs (audit C: every ground shape is gameplay, drawn at the hit's true size)
+
+Rule (DECISIONS, movement rules): a ring, disc or burst on the ground means gameplay. A lane is the corridor a foe's centre can be in to be hit (the shot or pass reach plus the foe's body each side); a circle is the data radius. Checked in `--mage-combo-check` (`tools/hero_combo_check.gd`).
+
+| Ability | Drawn | Hit (data) | Seen by | Now |
+|---|---|---|---|---|
+| LMB bolt | one thin sight line to 13 m | a shot | caster | not an area |
+| Storm Rod (RMB) | 13 m rail lane, 1.4 m wide (`2 x (ROD_SIZE 0.22 + hit radius 0.48)`) | projectile `size` 0.22 + the foe's hit radius | caster | was 0.3 m wide; the 2.2 m and 1.6 m rings on a rod hit and a wall slam are removed (impact feedback, not a hit area) |
+| Charge orb | pickup ring at `coil.mote_r` 1.1 m | 1.1 m pickup | spawn ring to all | was 1.4 m (and 1.0 m online) |
+| Wirerun (Shift) | rail lane `dash.width 0.9 + WIRE_PAD 0.6 + 4 x body radius` = 3.1 m wide; a 2.25 m ticked end ring (`dash.end_r`) | the dash pass: both bodies plus half `width + WIRE_PAD` | lane and end ring: caster only | was a 0.35 m lane; the end ring is a destination marker (the source draws it) with no hit, so foes no longer see it |
+| Skycall (E) | ring at `e.radius` 1.5 m, drag arrow | `foes_in(at, radius)` | all | true size; the dark scorch disc (0.9 x) sits inside the area; the arrow is the throw direction, not an area |
+| Kitefall (X) | 14.4 m range ring, an aim crown at the landing, the landing mark at `x.radius` 2.7 m | 2.7 m strike | range ring and landing mark: all; crown: caster | the crown was drawn at half (1.35 m) |
+
+Source-faithful, kept: the Wirerun end ring (source shows it), the Skycall circle for foes.
+Suggestion, not built (parity first): none.
+
 ## Combinations
 | Combination | What fires | Check |
 |---|---|---|

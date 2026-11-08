@@ -169,6 +169,11 @@ func _mage() -> void:
 	var de := AimKit.entry(P, "dash_end")
 	ok("Wirerun held: rails lane and the ticked end ring show",
 			AimKit.shown(P, "dash") and not de.is_empty() and bool(de["ticks"]) and absf(float(de["r"]) - 2.25) < 0.01)
+	var dd: Dictionary = K.dash_def()
+	var corridor := float(dd["width"]) + MageKit.WIRE_PAD + 4.0 * P.r
+	ok("Wirerun held: the lane is as wide as the run hits; the end ring is for her only",
+			absf(float(AimKit.entry(P, "dash")["width"]) - corridor) < 0.01 and not bool(de.get("all", false)),
+			"lane %.2f vs %.2f" % [float(AimKit.entry(P, "dash")["width"]), corridor])
 	ac.step(m, 0.45, func(): P.inp["dash_down"] = true; P.inp["move"] = Vector2(0, 1))
 	var e2 := _flat(K.wire.get("end", home), P.pos)
 	ok("Wirerun: length grows with the charge past the cursor (3m)", e1 < 10.0 and e2 > 11.5, "%.1f -> %.1f" % [e1, e2])
@@ -258,6 +263,9 @@ func _mage() -> void:
 	ok("Storm Rod held: a fixed 13m double-rail lane (no growth)",
 			absf(l1 - 13.0) < 0.01 and absf(l2 - 13.0) < 0.01 and bool(AimKit.entry(P, "rmb").get("rails", false)),
 			"%.1f / %.1f" % [l1, l2])
+	ok("Storm Rod held: the lane is as wide as the rod hits (its shot radius + a foe's hit radius a side)",
+			absf(float(AimKit.entry(P, "rmb").get("width", 0.0)) - 2.0 * (MageKit.ROD_SIZE + T.hit_radius())) < 0.01,
+			"width %.2f" % float(AimKit.entry(P, "rmb").get("width", 0.0)))
 	ok("Storm Rod full at 1s: the body flash", K.rod_full and K.charge_fulls >= 1)
 	var x0 := T.pos.x
 	P.inp["sec_hold"] = false

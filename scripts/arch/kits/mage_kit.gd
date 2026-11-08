@@ -18,6 +18,10 @@ const TEAL := Color("1fc6dc")        # the lightning's body: a saturated teal th
 const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
 const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
+## m: the Storm Rod's shot radius; its lane is drawn as wide as it hits (this + a foe's hit radius each side)
+const ROD_SIZE := 0.22
+## m: the run's hit width over the data's "width" (the dash pass counts both bodies on top)
+const WIRE_PAD := 0.6
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
 
 var sparks := {}               # foe id -> {e, n, t}
@@ -325,6 +329,11 @@ func grant_reset() -> void:
 	reset_dash_boost = true
 	reset_boost_t = float(dash_def()["reset_window"])
 
+## The Wirerun lane's drawn width: the corridor a foe's centre can be in to be crossed, for a foe of her size
+## (the dash pass: both bodies' radii plus half the run's hit width on each side).
+func wire_corridor() -> float:
+	return float(dash_def()["width"]) + WIRE_PAD + 4.0 * h.r
+
 ## Seconds to a full charge: the running one's, or the next one's.
 func wire_hold() -> float:
 	var dd := dash_def()
@@ -424,10 +433,10 @@ func _tick_wire(dt: float) -> void:
 	wire["end"] = end
 	wire["len"] = L
 	var full_len := float(dd["dist"][1]) * wire_reach()
-	var lane := {"len": full_len, "width": 0.35, "rails": true, "chevrons": 5, "fill": L / full_len, "col": col_of(dd)}
+	var lane := {"len": full_len, "width": wire_corridor(), "rails": true, "chevrons": 5, "fill": L / full_len,
+			"col": col_of(dd)}
 	AimKit.lane(h, "dash", lane)
 	var ring := {"at": end, "r": float(dd["end_r"]), "ticks": true, "star": true, "col": col_of(dd), "col2": GOLD}
-	ring["all"] = true
 	ring["hot"] = k * 0.6
 	AimKit.circle(h, "dash_end", ring)
 	AimKit.charge(h, k, {"col": col_of(dd), "col2": GOLD})
@@ -452,7 +461,7 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	last_dash_kind = "wire"
 	play("mage_dash_go")
 	var dmg := float(dd["dmg"]) * run_rank_k()
-	h.dash_pass = {"hit": {}, "w": float(dd["width"]) + 0.6, "kx": func(f: Ent): _wire_hit(f, dmg)}
+	h.dash_pass = {"hit": {}, "w": float(dd["width"]) + WIRE_PAD, "kx": func(f: Ent): _wire_hit(f, dmg)}
 	var b := a + Vector3(v.x, 0, v.y) * time
 	fx().arc(a, b, TEAL, GOLD, 1.1, time + 0.25)
 	fx().arc(a + Vector3(0, 0.3, 0), b + Vector3(0, 0.2, 0), GOLD, GOLD.lightened(0.5), 0.5, time + 0.15)
@@ -582,7 +591,8 @@ func _tick_rod() -> void:
 		if fx().rng.randf() < 0.35:
 			var tip := rod.global_position + up * 0.75
 			fx().arc(tip, tip + _jitter(0.35, -0.6, 0.2), TEAL, GOLD, 0.22, 0.08)
-	var lane := {"len": float(cd_["range"]), "width": 0.3, "rails": true, "chevrons": 4, "k": k}
+	var lane := {"len": float(cd_["range"]), "width": 2.0 * (ROD_SIZE + h.hit_radius()), "rails": true,
+			"chevrons": 4, "k": k}
 	lane["col"] = col_of(rmb_def())
 	lane["col_full"] = GOLD
 	AimKit.lane(h, "rmb", lane)
@@ -622,7 +632,7 @@ func _coil(k: float) -> void:
 	var push := lerpf(float(cd_["push"][0]), float(cd_["push"][1]), k)
 	last_push = push
 	dmg *= rod_rank_k()
-	var delivery := {"type": "projectile", "speed": float(cd_["speed"]), "range": rng, "size": 0.22}
+	var delivery := {"type": "projectile", "speed": float(cd_["speed"]), "range": rng, "size": ROD_SIZE}
 	var effects := [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}]
 	var stg := stage("rmb", {"delivery": delivery, "effects": effects})
 	var done := {"hit": false}
@@ -650,11 +660,10 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 	var cd_ := rmb_def()["coil"] as Dictionary
 	add_spark(f)
 	m.sfx("mage_rod_hit", f.pos, -2.0)
-	# the gold blast, a teal crackle and a shock ring round them
+	# the gold blast and a teal crackle on them
 	m.fx.flash(f.position + Vector3(0, 1.0, 0), GOLD, 1.6, 0.12)
 	m.fx.burst(f.position + Vector3(0, 1.0, 0), GOLD, 18, 4.5, 0.45, 1.0, 1.8)
 	fx().crackle(f.position + Vector3(0, 1.0, 0), TEAL, GOLD, 1.0, 5, 0.18)
-	fx().ring(ground(f.pos), 2.2, TEAL, GOLD, 0.35)
 	# thrown into a wall or another foe: stunned (so is the one it hits)
 	var reach := 1.6 + 1.4 * k
 	var other: Ent = null
@@ -668,7 +677,6 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "slam"], "stun": stn, "dr": true}
 		f.hurt(0.1, h, slam)
 		m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 1.0, "SLAMMED", GOLD, false)   # over STUNNED
-		fx().ring(ground(f.pos), 1.6, GOLD, COPPER, 0.25)
 		m.sfx("ab_wall", f.pos, -2.0, 1.3)
 		if other != null:
 			other.hurt(0.1, h, slam.duplicate(true))
@@ -694,9 +702,9 @@ func _drop_mote(at: Vector3) -> void:
 	var mote := {"pos": at, "t": float(cd_["mote_life"]), "node": n, "owner": h}
 	mote["arc"] = 0.0
 	motes.append(mote)
-	fx().ring(at, float(cd_["mote_r"]) + 0.3, GOLD, TEAL, 0.3)
+	fx().ring(at, float(cd_["mote_r"]), GOLD, TEAL, 0.3)
 	m.sfx("vv_orb", at, -5.0)
-	net_ring(at, 1.0, GOLD)
+	net_ring(at, float(cd_["mote_r"]), GOLD)
 
 ## A charge orb: a gold core in a teal shell wound with two teal bands (it spins), its own light; short
 ## arcs crackle off it in _tick_motes. Solid colours, so it reads gold and teal, not a white glow.

@@ -243,7 +243,7 @@ func _aim_tick() -> void:
 	leap["land"] = land_point()
 	var ring := {"at": from, "r": r, "ticks": true, "col": MageKit.GOLD, "col2": MageKit.GOLD, "all": true, "lw": 0.1}
 	AimKit.circle(h, "x_ring", ring)
-	var crown := {"at": leap["land"], "r": float(data()["radius"]) * 0.5, "ticks": true, "star": true}
+	var crown := {"at": leap["land"], "r": float(data()["radius"]), "ticks": true, "star": true}
 	crown.merge({"col": MageKit.GOLD, "col2": MageKit.TEAL, "hot": 0.5, "lw": 0.09})
 	AimKit.circle(h, "x_aim", crown)
 
