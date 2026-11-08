@@ -85,10 +85,7 @@ func _charge_curve() -> void:
 		float(at[1.4]["scale"]) / float(rows[0]["scale"]) >= 1.6 and float(at[1.4]["r"]) / float(rows[0]["r"]) >= 1.6,
 		"x%.2f" % (float(at[1.4]["r"]) / float(rows[0]["r"]))
 	)
-	var two_looks := rows.all(func(q):
-		var held_orb := float(q["k"]) >= KitLooks.ORB_HELD_K
-		return bool(q["orb"]) == held_orb and bool(q["shard"]) != held_orb
-			and String(q["sfx"]) == ("os_orb_hot" if held_orb else "os_orb"))
+	var two_looks := rows.all(_two_looks_ok)
 	ok(
 		"owner 11-08: a quick shot is the violet shard, a charged one (k >= 0.5) the void orb, each with its sound",
 		two_looks and bool(rows[0]["shard"]) and bool(at[1.4]["orb"])
@@ -96,6 +93,12 @@ func _charge_curve() -> void:
 	var full_x := float(at[1.4]["scale"]) / float(rows[0]["scale"])
 	ok("owner 11-08: the full void orb is drawn at least 1.8x a quick shot", full_x >= 1.8, "x%.2f" % full_x)
 	await done(m)
+
+## Owner 11-08: below ORB_HELD_K a row is the shard with os_orb, from it the void orb with os_orb_hot.
+func _two_looks_ok(q: Dictionary) -> bool:
+	var held_orb := float(q["k"]) >= KitLooks.ORB_HELD_K
+	var sound := "os_orb_hot" if held_orb else "os_orb"
+	return bool(q["orb"]) == held_orb and bool(q["shard"]) != held_orb and String(q["sfx"]) == sound
 
 ## Held, the fire rate never builds a charge: the stream stays plain orbs, so its damage is unchanged.
 func _held_fire() -> void:
