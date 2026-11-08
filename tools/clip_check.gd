@@ -2,8 +2,8 @@ extends RefCounted
 ## --clip-check: every Hero with hand-keyed clips (content/rules/warden_anim/<art>.json). Per Hero: the .glb stays in
 ## the tri budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the
 ## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
-## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop. Never
-## touches the save.
+## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop; the idle
+## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md). Never touches the save.
 
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
@@ -12,6 +12,17 @@ const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunsli
 const DT := 1.0 / 30.0
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
+const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
+const SEAM_M := 0.01           # and move it this far
+const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
+## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
+const STAND_OPEN := {
+	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
+	"bulwark:stance": "head seam 4.2 deg, 1.6 s long",
+	"ostra:idle": "x_fing seams 11-13 deg",
+	"ostra:stance": "x_fing seams 12-16 deg",
+	"dolm:stance": "0.8 s long (a bounce, not a stance)",
+}
 
 var bad := 0
 var holder: Node3D
@@ -75,6 +86,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 			missing.append(c)
 	ok(missing.is_empty(), "%s: the file's %d clips are in the .glb (missing %s)" % [id, named.size(), str(missing)])
 	_timings(id, dd, clips)
+	_standing(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
 	var shown := 0
@@ -138,6 +150,42 @@ func _sway(id: String, m: Node3D, sync: Node, dd: Dictionary) -> void:
 	m.position = Vector3.ZERO
 
 ## Each mapped kit move: its clip lasts as long as the move's keys (a held move: at least to its last key).
+## The idle and stance loops: the last key meets the first on every track (no pop at the loop), and the loop is
+## long enough to carry a breath. Entries in STAND_OPEN are reported, not failed.
+func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
+	for clip in ["idle", "stance"]:
+		var anim_name := String(dd.get("loco", {}).get(clip, clip))
+		if not clips.lib.has_animation(anim_name):
+			continue
+		var anim := clips.lib.get_animation(anim_name)
+		var worst := 0.0
+		var where := ""
+		for t in anim.get_track_count():
+			var n := anim.track_get_key_count(t)
+			if n < 2 or anim.track_get_key_time(t, n - 1) < anim.length - 0.001:
+				continue
+			var gap := 0.0
+			match anim.track_get_type(t):
+				Animation.TYPE_ROTATION_3D:
+					var q0: Quaternion = anim.track_get_key_value(t, 0)
+					gap = rad_to_deg(q0.angle_to(anim.track_get_key_value(t, n - 1))) / SEAM_DEG
+				Animation.TYPE_POSITION_3D:
+					var p0: Vector3 = anim.track_get_key_value(t, 0)
+					gap = p0.distance_to(anim.track_get_key_value(t, n - 1)) / SEAM_M
+			if gap > worst:
+				worst = gap
+				where = String(anim.track_get_path(t)).get_slice(":", 1)
+		var good := worst <= 1.0 and anim.length >= STAND_MIN
+		var what := "%s: %s loop seam %.1fx the limit (worst %s), %.1f s long (min %.1f)" % [
+				id, clip, worst, where if where != "" else "none", anim.length, STAND_MIN]
+		var key := "%s:%s" % [id, clip]
+		if STAND_OPEN.has(key):
+			var stale := " (now passes: drop it from STAND_OPEN)" if good else ""
+			print("CLIP open %s [%s]%s" % [what, STAND_OPEN[key], stale])
+			ok(not good, "%s: STAND_OPEN entry still needed" % key)
+		else:
+			ok(good, what)
+
 func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	var worst := 0.0
 	var where := ""
