@@ -59,7 +59,7 @@
 		"throw_dmg": 12.0,
 		"throw_range": 9.0,
 		"throw_speed": 24.0,
-		"throw_rate": 0.48,
+		"throw_rate": 0.45,
 		"recall_dmg": 12.0,
 		"recall_speed": 34.0,
 		"lie_t": 0.0,

@@ -462,14 +462,15 @@ func bjorn() -> void:
 	await done(m)
 	await _bjorn_abyss()
 
-## #10: the auto attack recovers 10-15% faster than before (0.55 s throw, 0.7 s swing, 0.25 s recall lock).
+## #10: the auto attack recovers 10-15% faster than before (0.7 s swing, 0.25 s recall lock). The throw moved on
+## to the source card's 0.45 s (parity item 12, PARITY FIRST), which is 18% under the old 0.55 s.
 func _bjorn_cadence(_m: Match, _P: Hunter, _T: Hunter, K: BulwarkKit) -> void:
 	var md := K.lmb_def()
 	var tr := float(md["throw_rate"])
 	var sr := float(md["smash_rate"])
 	var rl := float(md["recall_lock"])
-	ok("bjorn auto: the throw, the swing and the recall lock recover 10-15% faster",
-		tr <= 0.55 * 0.90 and tr >= 0.55 * 0.85 and sr <= 0.7 * 0.90 and sr >= 0.7 * 0.85 and rl <= 0.25 * 0.90
+	ok("bjorn auto: the throw is the source card's 0.45 s, the swing and the recall lock recover 10-15% faster",
+		absf(tr - 0.45) < 0.001 and sr <= 0.7 * 0.90 and sr >= 0.7 * 0.85 and rl <= 0.25 * 0.90
 			and rl >= 0.25 * 0.85,
 		"throw %.3f swing %.3f lock %.3f" % [tr, sr, rl])
 	var tail := 0.0
