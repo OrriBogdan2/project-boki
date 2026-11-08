@@ -166,16 +166,17 @@ def idle_over(t, p):
     p.update(trailing(p, rest, ["sn"]))
     w = bump(t, *GLANCE, 0.35, 0.45)
     nod = 0.5 - 0.5 * math.cos((t - GLANCE[0]) / (GLANCE[1] - GLANCE[0]) * 3 * tau)
-    add(p, "head", (-5.0 * w - 3.0 * w * nod, 7.0 * w, -24.0 * w))
+    add(p, "head", (-6.0 * w - 3.0 * w * nod, 10.0 * w, -15.0 * w))   # tipped toward it more than turned: the eyes stay in view
     wl = bump(t - 4 * F, *GLANCE, 0.35, 0.45)
     add(p, "hips", (0, 1.5 * wl, -4.0 * wl))
 
 
 # The stance: the same feet, sunk a little lower. The door comes up to his chest off to his left, turned out so his
-# face stays open (a host in front of his crew, not a door shut), and the hammer rests on his right shoulder. Once a
+# face stays open (a host in front of his crew, not a door shut), and the hammer rests on his right shoulder, its drum
+# up and forward of the lure that hangs behind it (straight up, it hid the fish). Once a
 # loop he hitches it up and lets it settle.
 READY = merged(CARRY, rot=(-2, 0, -4), hips=(-3, 0, -3), head=(3, 0, 5),
-               gr=sp(0.05, 0.22, -0.15), gd=(0.3, -0.2, 0.93), ga=(0.95, 0.0, -0.31), er=(1.0, -0.2, -0.6), fing_r=1.0, thumb_r=1.0,
+               gr=sp(0.05, 0.22, -0.15), gd=(0.35, 0.4, 0.85), ga=(0.92, 0.0, -0.38), er=(1.0, -0.2, -0.6), fing_r=1.0, thumb_r=1.0,
                sh=sl(-0.12, 0.3, -0.38), sn=(-0.6, 0.8, 0.0), su=(0.0, 0.0, 1.0), el=(-0.9, -0.1, -0.5), fing_l=0.9, thumb_l=0.9)
 HITCH = (4.6, 5.8)      # s into the stance
 
