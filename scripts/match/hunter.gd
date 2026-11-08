@@ -2359,17 +2359,8 @@ func _physics(dt: float) -> void:
 		glide_lift.hang_t = 0.0
 	wall_touch_t = maxf(0.0, wall_touch_t - dt)
 	wslam_t = maxf(0.0, wslam_t - dt)
-	# a hop onto a rock only when you meant it: you jumped (still rising) and you're pushing into it.
-	# Brushing a rock or a terrace while stepping down, falling or being knocked never throws you up
-	# onto it (that was the "random bounce").
-	# (ledge rise) terrain ledges are the ledge rise's now (_ledge_rise: your keys steer it); this hop
-	# is for rocks only
-	var push_in := rock_v
-	var wants: bool = (inp["move"] as Vector2).dot(push_in) > 0.2 if push_in.length() > 0.01 else false
-	if not grounded and not dropping and vel.y > 0.5 and wants and rock_b > 0.0 and rock_b < pos.y + 1.6 and mantle_cd <= 0.0 \
-			and rock_b - pos.y < World.BLOCK_H - 0.1 and m.time - kb_t > 0.4:
-		vel.y = sqrt(2.0 * H_GRAV * (rock_b - pos.y + 0.3))
-		mantle_cd = 0.45
+	# rocks, trees and walls are walls: no hop onto them (item 151; their tops were never ground, so a hop left
+	# you inside the clump). Terrain ledges are the ledge rise's (_ledge_rise).
 	StoneStand.climb(self, maxf(b1, b2))      # the caster walking into her own rock rises onto it
 	StoneStand.mover = null
 	var g := ground()
