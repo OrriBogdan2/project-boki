@@ -13,7 +13,7 @@ class_name Work
 ## the home island, and the stations are build-mode items in HomeLayout.CATALOG (cat "Work").
 ##
 ## On the save:
-##   rec["work_pin"]   an element: it only takes that kind of job ("" or missing: any)
+##   rec["work_pin"]   an element or a farm job (JOBS): it only takes that kind of job ("" or missing: any)
 ##   rec["work_rest"]  true: it never works
 ##   rec["overworked"] true while it's been worked without a break (cleared by a proper rest)
 ##   Save.d["work"]    {prio: {el: 0..3}, st: {deco uid: station state}, piles: [...], made: {what: n}}
@@ -140,8 +140,9 @@ static func bonus_why(rec: Dictionary) -> Dictionary:
 	if rec.get("farmhand", false) and not b.has("tide"): out["tide"] = "Farmhand"
 	return out
 
+## An element's name, or a farm job's (JOBS).
 static func name_of(el: String) -> String:
-	return String(ELEMENTS.get(el, {}).get("name", el.capitalize()))
+	return String(ELEMENTS.get(el, JOBS.get(el, {})).get("name", el.capitalize()))
 
 static func col_of(el: String) -> Color:
 	return ELEMENTS.get(el, {}).get("col", Color.WHITE)
@@ -179,7 +180,7 @@ static func pin(rec: Dictionary) -> String:
 	return String(rec.get("work_pin", ""))
 
 static func set_pin(rec: Dictionary, el: String) -> void:
-	if el == "" or not ELEMENTS.has(el): rec.erase("work_pin")
+	if not (ELEMENTS.has(el) or JOBS.has(el)): rec.erase("work_pin")
 	else: rec["work_pin"] = el
 	rec.erase("work_rest")
 
@@ -196,6 +197,44 @@ static func takes(rec: Dictionary, el: String) -> bool:
 		return false
 	var p := pin(rec)
 	return p == "" or p == el
+
+# ------------------------------------------------------------------ farm jobs (farming is optional)
+## The farm jobs a Boki can be put on, knack or not: the element its work counts as and the job
+## kinds (HomeWork) it covers. "opt_in": only a Boki put on it (or Auto-farm) does it.
+const JOBS := {
+	"chop": {"name": "Chop", "el": "timber", "kinds": ["chop", "log"]},
+	"mine": {"name": "Mine", "el": "stone", "kinds": ["break", "ore"]},
+	"water": {"name": "Water", "el": "tide", "kinds": ["water"]},
+	"harvest": {"name": "Harvest", "el": "forage", "kinds": ["harvest"]},
+	"replant": {"name": "Replant", "el": "bloom", "kinds": ["plant", "tend"]},
+	"cook": {"name": "Cook", "el": "ember", "kinds": ["bake"]},
+	"feed": {"name": "Feed others", "el": "haul", "kinds": ["stock"]},
+	"sell": {"name": "Sell", "el": "haul", "kinds": ["sell"], "opt_in": true},
+}
+
+## The farm job a job kind belongs to ("" for station-only work like the Spark Mill).
+static func job_of(kind: String) -> String:
+	for id in JOBS:
+		if kind in JOBS[id]["kinds"]: return id
+	return ""
+
+## Would it take this job (element and kind)? Put on a farm job: only that job's kinds. Free under
+## Auto-farm: any farm job. Otherwise its knacks, pin and the Job Board decide (takes).
+static func takes_kind(rec: Dictionary, el: String, kind: String) -> bool:
+	var p := pin(rec)
+	if JOBS.has(p):
+		return can_work(rec) and kind in JOBS[p]["kinds"]
+	var job := job_of(kind)
+	var auto: bool = p == "" and job != "" and FarmAuto.on() and can_work(rec) and prio(el) > 0
+	if job != "" and JOBS[job].get("opt_in", false):
+		return auto
+	return takes(rec, el) or auto
+
+## Does this Boki do this farm job while you're away? Station-assigned Boki only work their station.
+static func does(rec: Dictionary, job: String) -> bool:
+	if assigned(rec) >= 0 or not JOBS.has(job):
+		return false
+	return takes_kind(rec, String(JOBS[job]["el"]), String(JOBS[job]["kinds"][0]))
 
 # ------------------------------------------------------------------ the save
 static func ensure() -> Dictionary:
@@ -258,8 +297,8 @@ const ASSIGN := {
 	"seed_garden": {"slots": 1, "out": "seed", "secs": 240.0, "cap": 4, "need": true},
 	"kiln": {"slots": 1, "out": "coals", "secs": 150.0, "cap": 4, "wood": 3, "need": true},
 }
-## Away longer than this and the farm only counts this long (two hours).
-const AWAY_MAX := 7200.0
+## Away longer than this and the farm only counts this long (eight hours).
+const AWAY_MAX := 28800.0
 ## Under this, coming home isn't "away" (a building door, a quick menu).
 const AWAY_MIN := 30.0
 
@@ -303,6 +342,7 @@ static func catch_up(now := -1.0) -> Array:
 		return []
 	var away := minf(now - seen, AWAY_MAX)
 	var lines: Array = []
+	var put_on := {"lumber_camp": "chop", "quarry": "mine"}     # Boki on a farm job work the first such station
 	for s in HomeLayout.stations(Save.d):
 		var id := String(s["id"])
 		if not ASSIGN.has(id): continue
@@ -310,12 +350,13 @@ static func catch_up(now := -1.0) -> Array:
 		var u := int(s["e"]["u"])
 		var rate := 0.0
 		var who: Array = []
-		for r in crew(u):
+		for r in crew(u) + FarmAuto.crew(String(put_on.get(id, ""))):
 			if not can_work(r): continue
-			var lv := level(r, String(s["el"]))
+			var lv := maxi(level(r, String(s["el"])), 0 if assigned(r) >= 0 else 1)
 			if lv <= 0: continue
-			rate += speed(lv) * Care.iv_mult(r, "work")
+			rate += speed(lv) * Care.iv_mult(r, "work") * (1.0 if assigned(r) >= 0 else FarmAuto.EFF)
 			who.append(String(r["name"]))
+		put_on.erase(id)
 		if rate <= 0.0: continue
 		var st := station(u)
 		var acc := float(st.get("acc", 0.0)) + away * rate / float(cfg["secs"])
@@ -344,7 +385,7 @@ static func catch_up(now := -1.0) -> Array:
 				what = "%d Ember Coal%s (from %d wood)" % [n, "" if n == 1 else "s", n * int(cfg["wood"])]
 		count(String(cfg["out"]), n)
 		lines.append("+%s from the %s (%s worked it)" % [what, HomeLayout.CATALOG[id]["name"], " and ".join(who)])
-	return lines
+	return lines + FarmAuto.away(away)
 
 ## A common seed (never the rare ones), picked from k.
 static func common_seed(k: int) -> String:

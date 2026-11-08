@@ -137,7 +137,7 @@ static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen
 	var doing := ""
 	if h.get("hw") and not k.is_empty(): doing = h.hw.job_text(k)
 	var why := Work.why_not(rec)
-	var line := doing if doing != "" else (why if why != "" else ("Pinned to %s jobs" % Work.name_of(Work.pin(rec)) if Work.pin(rec) != "" else "Takes whatever it's best at"))
+	var line := doing if doing != "" else (why if why != "" else (job_label(Work.pin(rec)) if Work.pin(rec) != "" else "Takes whatever it's best at"))
 	if rec.get("overworked", false): line = "Overworked: let it rest"
 	var row := UI.hbox(8)
 	var dl := UI.label(line, 12, Color("ffb0a0") if rec.get("overworked", false) else UI.MUTED)
@@ -147,21 +147,30 @@ static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen
 	row.add_child(dl)
 	row.add_child(pin_menu(h, rec, reopen))
 	parent.add_child(row)
+	parent.add_child(auto_toggle(h, reopen))
 
-## A pin choice in words: "Sprout jobs only".
+## A pin choice in words: "Sprout jobs only", or a farm job: "Job: Harvest".
 static func job_label(el: String) -> String:
+	if Work.JOBS.has(el):
+		return "Job: %s" % Work.JOBS[el]["name"]
 	return "%s jobs only" % Work.name_of(el)
 
-## Whatever it's best at / Rest only / <Element> jobs only: one dropdown.
+## Whatever it's best at / Rest only / a farm job (any Boki) / <Element> jobs only for its other
+## knacks: one dropdown.
 static func pin_menu(h: Node, rec: Dictionary, reopen: Callable) -> OptionButton:
 	var opt := OptionButton.new()
 	opt.add_item("Whatever it's best at"); opt.set_item_metadata(0, "")
 	opt.add_item("Rest only"); opt.set_item_metadata(1, "rest")
 	var sel := 1 if rec.get("work_rest", false) else 0
+	var job_els := {}
+	for id in Work.JOBS: job_els[Work.JOBS[id]["el"]] = true
+	var picks: Array = Work.JOBS.keys()
 	for it in Work.list(rec):
-		opt.add_item(job_label(String(it[0])))
-		opt.set_item_metadata(opt.item_count - 1, String(it[0]))
-		if Work.pin(rec) == String(it[0]): sel = opt.item_count - 1
+		if String(it[0]) == "haul" or not job_els.has(it[0]): picks.append(String(it[0]))
+	for m in picks:
+		opt.add_item(job_label(m))
+		opt.set_item_metadata(opt.item_count - 1, m)
+		if Work.pin(rec) == m: sel = opt.item_count - 1
 	opt.select(sel)
 	opt.custom_minimum_size.x = 170
 	opt.add_theme_font_size_override("font_size", 13)
@@ -173,10 +182,25 @@ static func pin_menu(h: Node, rec: Dictionary, reopen: Callable) -> OptionButton
 		_drop(h, rec)
 		Save.save_game()
 		reopen.call())
-	opt.tooltip_text = "Pin it to one kind of job, or keep it to resting"
+	opt.tooltip_text = "Put it on one farm job (any Boki can), pin it to a knack, or keep it to resting"
 	opt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	FarmTaskGuide.mark_dropdown(opt, rec)
 	return opt
+
+## The Auto-farm switch: free Boki do whatever the farm needs, at FarmAuto.EFF of hand yield.
+static func auto_toggle(h: Node, reopen: Callable) -> CheckButton:
+	var cb := CheckButton.new()
+	cb.text = "Auto-farm"
+	cb.button_pressed = FarmAuto.on()
+	cb.tooltip_text = ("Free Boki water, harvest, replant, cook, feed and sell spare crops on their own, "
+			+ "also while you're away (up to %d hours). They make %d%% of what farming by hand does.") % [
+			int(Work.AWAY_MAX / 3600.0), int(FarmAuto.EFF * 100.0)]
+	cb.toggled.connect(func(v: bool):
+		FarmAuto.set_on(v)
+		if h.get("hw"): h.hw.scan()
+		Save.save_game()
+		reopen.call())
+	return cb
 
 static func _drop(h: Node, rec: Dictionary) -> void:
 	if h.get("hw") == null: return
@@ -192,6 +216,7 @@ static func open(h: Node) -> void:
 	hx.add_child(UI.chip("seed", "%d stone" % Work.mat("stone"), Work.col_of("stone"), "Stone: from Stone Boki at a Quarry"))
 	hx.add_child(UI.chip("gem", "%d scrap" % int(Save.d.get("scrap", 0)), Work.col_of("craft"), "Scrap: from Craft Boki at a Workbench"))
 	hx.add_child(UI.chip("heart", "%d kibble" % int(Save.d["items"].get("kibble", 0)), Work.col_of("ember"), "Kibble: from Ember Boki at the Hearth Oven"))
+	hx.add_child(auto_toggle(h, func(): open(h)))
 	UI.shell_tabs(v, ["Jobs", "Kin"], tab, func(t): tab = t; open(h))
 	var hw = h.hw
 	if tab == "Jobs":

@@ -37,15 +37,15 @@ const GARDEN_T := 150.0                 # seconds between seedlings at the Seed 
 const KILN_T := 70.0                    # seconds between firings at the Kiln (at home)
 
 ## Base seconds for each kind of job at level 1 (a level 4 kin takes under half).
-const TIME := {"grow": 8.0, "fire": 9.0, "water": 3.0, "plant": 4.0, "tend": 4.5, "harvest": 3.5, "chop": 9.0, "break": 9.0, "log": 6.5, "ore": 7.0,
+const TIME := {"sell": 3.0, "grow": 8.0, "fire": 9.0, "water": 3.0, "plant": 4.0, "tend": 4.5, "harvest": 3.5, "chop": 9.0, "break": 9.0, "log": 6.5, "ore": 7.0,
 	"bake": 7.0, "craft": 11.0, "build": 3.0, "power": 5.0, "chill": 5.0, "carry": 1.2, "stock": 1.5, "mend": 3.5, "brew": 14.0, "ranch": 22.0, "warm": 30.0}
 ## What each job is called on the hover card and the Job Board.
-const VERB := {"grow": "Raising seedlings", "fire": "Firing the kiln", "water": "Watering the %s", "plant": "Sowing a plot", "tend": "Tending the %s", "harvest": "Picking the %s",
+const VERB := {"sell": "Selling spare crops", "grow": "Raising seedlings", "fire": "Firing the kiln", "water": "Watering the %s", "plant": "Sowing a plot", "tend": "Tending the %s", "harvest": "Picking the %s",
 	"chop": "Felling a tree", "break": "Breaking a boulder", "log": "Splitting logs", "ore": "Mining rock", "bake": "Baking kibble",
 	"craft": "Crafting scrap", "build": "Building the %s", "power": "Cranking the Spark Mill", "chill": "Chilling the Cold Store", "carry": "Hauling %s to the chest",
 	"stock": "Filling a feeder", "mend": "Looking after %s", "brew": "Brewing a tonic", "ranch": "Ranching", "warm": "Warming the incubator"}
 ## The animation each job plays.
-const ANIM := {"grow": "dip", "fire": "shimmy", "water": "dip", "plant": "dip", "tend": "dip", "harvest": "dip", "chop": "hammer", "break": "hammer", "log": "hammer",
+const ANIM := {"sell": "lift", "grow": "dip", "fire": "shimmy", "water": "dip", "plant": "dip", "tend": "dip", "harvest": "dip", "chop": "hammer", "break": "hammer", "log": "hammer",
 	"ore": "hammer", "bake": "shimmy", "craft": "hammer", "build": "hammer", "power": "crank", "chill": "shimmy", "carry": "lift", "stock": "lift",
 	"mend": "sway", "brew": "sway", "ranch": "lounge", "warm": "sway"}
 
@@ -128,7 +128,7 @@ func _plot_jobs() -> void:
 			var ex := {"arr": arr, "i": i}
 			var key := "%s:%d" % [arr, i]
 			if pd["crop"] == "":
-				if _seed_pick() != "": _job("plant:" + key, "bloom", "plant", at, pp, ex)
+				if FarmAuto.seed_pick() != "": _job("plant:" + key, "bloom", "plant", at, pp, ex)
 				continue
 			var cd: Dictionary = Data.CROPS[pd["crop"]]
 			ex["what"] = String(cd["name"])
@@ -140,14 +140,6 @@ func _plot_jobs() -> void:
 				ex["stage"] = int(pd["stage"])
 				_job("tend:" + key, "bloom", "tend", at + Vector3(0.6, 0, -0.3), pp, ex)
 
-## The seed a Bloom kin sows: your most plentiful common seed (never the rare ones).
-func _seed_pick() -> String:
-	var best := ""; var bn := 0
-	for s in Data.CROPS:
-		if float(Data.CROPS[s].get("weight", 1.0)) < 1.0: continue
-		var n := int(Save.d["seeds"].get(s, 0))
-		if n > bn: bn = n; best = s
-	return best
 
 # ------------------------------------------------------------------ the wild round camps and quarries
 func _wild_jobs() -> void:
@@ -358,6 +350,8 @@ func _haul_jobs() -> void:
 	if to == Vector3.INF and h.spots["pot"].x < -100.0:
 		return      # no chest and no pot (a farm-start island early on): nowhere to take food from
 	var pick: Vector3 = to if to != Vector3.INF else h._seat({"rec": {"uid": "pantry"}}, h.spots["pot"], 1.3)
+	if FarmAuto.surplus() != "" and h.kins.any(func(o): return Work.takes_kind(o["rec"], "haul", "sell")):
+		_job("sell:pantry", "haul", "sell", pick, pick)
 	for f in Econ.feeders():
 		if Econ.fill(f) > int(Econ.fdef(f)["cap"]) / 2 or Econ._auto_food() == "":
 			continue
@@ -459,7 +453,10 @@ func best_job(k: Dictionary) -> Dictionary:
 		if not takes_job(rec, j): continue
 		var at: Vector3 = j["at"]
 		if _isle(at) != here and mine < 0: continue      # (an assigned kin goes over to its station)
-		var sc := Work.score(FarmSites.level(rec, j), maxi(Work.prio(el), 2) if mine >= 0 else Work.prio(el), Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length())
+		var put := mine >= 0 or Work.JOBS.has(Work.pin(rec))      # on a station or a farm job: keen whatever the board says
+		var keen := maxi(Work.prio(el), 2) if put else Work.prio(el)
+		var dist := Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length()
+		var sc := Work.score(maxi(FarmSites.level(rec, j), 1), keen, dist)
 		if sc > bs: bs = sc; best = j
 	return best
 
@@ -473,12 +470,12 @@ func takes_job(rec: Dictionary, j: Dictionary) -> bool:
 		return int(j.get("u", -1)) == mine and Work.can_work(rec) and Work.level(rec, String(j["el"])) > 0
 	if j.get("need", false):
 		return false
-	return Work.takes(rec, String(j["el"]))
+	return Work.takes_kind(rec, String(j["el"]), String(j.get("kind", "")))
 
 func take(k: Dictionary, j: Dictionary) -> void:
 	var J := j.duplicate()
 	J["phase"] = "go"; J["go_t"] = 0.0; J["vt"] = 1.0
-	J["lv"] = Work.level(k["rec"], String(J["el"]))
+	J["lv"] = maxi(Work.level(k["rec"], String(J["el"])), 1)
 	k["job"] = J
 	if String(J.get("kind", "")) != "build":
 		FarmTutorial.event("task")      # (a Boki that really starts working counts for the tutorial's job step)
@@ -505,7 +502,7 @@ func _valid(J: Dictionary) -> bool:
 			var arr := String(J["arr"]); var i := int(J["i"])
 			if i >= (Save.d[arr] as Array).size(): return false
 			var pd: Dictionary = Save.d[arr][i]
-			if J["kind"] == "plant": return pd["crop"] == "" and _seed_pick() != ""
+			if J["kind"] == "plant": return pd["crop"] == "" and FarmAuto.seed_pick() != ""
 			if pd["crop"] == "": return false
 			var grow := int(Data.CROPS[pd["crop"]]["grow"])
 			match String(J["kind"]):
@@ -514,6 +511,8 @@ func _valid(J: Dictionary) -> bool:
 				"tend": return int(pd["stage"]) < grow and float(pd.get("wt", 0.0)) > 0.0 and int(pd.get("tend", -1)) != int(pd["stage"])
 		"chop", "break":
 			return h.hb != null and h.hb.wild_t.has(int(J["tile"]))
+		"sell":
+			return FarmAuto.surplus() != ""
 		"carry":
 			return not _pile(int(J["pile"])).is_empty() or String(J["phase"]) == "to"
 		"stock":
@@ -714,7 +713,7 @@ func _finish(k: Dictionary, J: Dictionary) -> bool:
 			h.fx.burst(at + Vector3(0, 0.6, 0), Color("7ac8ff"), 12, 2.0)
 			Work.count("watered", 1)
 		"plant":
-			var sd := _seed_pick()
+			var sd := FarmAuto.seed_pick()
 			if sd == "": return false
 			var pd: Dictionary = Save.d[String(J["arr"])][int(J["i"])]
 			Save.d["seeds"][sd] = int(Save.d["seeds"][sd]) - 1
@@ -731,7 +730,9 @@ func _finish(k: Dictionary, J: Dictionary) -> bool:
 			h.fx.burst(at + Vector3(0, 0.6, 0), Color("8fd16a"), 10, 1.6)
 			Work.count("tended", 1)
 		"harvest":
+			var crop := String(Save.d[String(J["arr"])][int(J["i"])]["crop"])
 			var got: int = h._harvest(String(J["arr"]), int(J["i"]), "kin")
+			if got > 0 and FarmAuto.on(): got = FarmAuto.trim(crop, got)
 			if got > 0:
 				FarmSites.on_harvest(got)
 				var cname := String(J.get("what", "crop"))
@@ -792,6 +793,11 @@ func _finish(k: Dictionary, J: Dictionary) -> bool:
 			Work.station(int(J["u"]))["ready"] = Time.get_unix_time_from_system() + KILN_T
 			h.fx.burst(at + Vector3(0, 0.8, 0), Color("ff9a3a"), 14, 2.0)
 			produced(at, "+1 Ember Coal · %s at the Kiln" % nm, "ember", "")
+		"sell":
+			var sold := FarmAuto.sell(FarmAuto.SELL_LOAD)
+			if int(sold[0]) <= 0: return false
+			h._refresh_top()
+			produced(at, "Sold %d spare crops for %d gems · %s" % [sold[0], sold[1], nm], "haul", "")
 		"brew":
 			Save.add_item("tonic", 1)
 			Work.count("tonics", 1)

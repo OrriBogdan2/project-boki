@@ -273,7 +273,7 @@ func _vendor_sell(v: VBoxContainer) -> void:
 		if n <= 0: continue
 		sell_any = true
 		var sk: String = s
-		var gain := maxi(1, int(round(int(Data.CROPS[s]["price"]) * 0.4)))
+		var gain := FarmAuto.hand_gain(s)
 		var rc := UI.card(UI.CARD, 10, 12)
 		var row := UI.hbox(12)
 		rc.add_child(row)

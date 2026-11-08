@@ -51,6 +51,13 @@ takes each job, walks over, works (faster at higher levels) and leaves what it m
 - **The Job Board** sets a priority per job (Off, Low, Normal, High) and shows who's doing what. You
   can pin a Boki to one kind of job, keep it resting, or **assign** it to a station: an assigned Boki
   keeps working that station while you're away (up to a cap).
+- **Farm jobs:** you can put a Boki on any farm job (Chop, Mine, Water, Harvest, Replant, Cook, Feed
+  others, Sell) from its card or the Job Board. A Boki on a job does it even without the knack.
+- **Auto-farm** (a toggle on the Job Board and on each Boki's card) sends every free Boki to whatever
+  the farm needs: watering, harvesting, replanting, cooking, filling feeders and selling crops over 10
+  of a kind. Farming is never required, but Auto-farm makes 80% of what farming by hand does.
+- **While you were away:** stations, plots, the oven and the market keep going for up to 8 hours
+  with the Boki on those jobs (at the Auto-farm rate), and a note tells you what they made.
 - Hungry or worn-out Boki stop to eat and nap. One pushed too hard on a High-priority job with no
   breaks gets overworked and glum. Owls and bats work at night; the rest leave it for morning.
 - Boki asleep in the Boki Burrow never work.
