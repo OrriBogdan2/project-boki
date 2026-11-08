@@ -3,6 +3,7 @@ extends RefCounted
 ## no old personal name is a player-facing hero label (the base_name field is the one place it lives).
 
 const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tamsin", "Linwick", "Dredge",
+	"Hem", "Breaker", "Ryzz", "Pip", "Claire", "Tarek", "Lisette", "Mossy", "Ravel", "Snowglider",
 	"Moosh Moosh", "Burple", "Breah", "Ostra"]
 ## Words retired from player text (Hunter / Mask / the Empty / Fusion replace them; ids and code names may keep them).
 const RETIRED_TERMS := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|unmasked)\\b"
@@ -50,7 +51,7 @@ func _plain_text(data: Dictionary) -> String:
 	copy.erase("base_name")
 	return JSON.stringify(copy)
 
-## The first old personal name found in text once the class titles (Frost Siren ...) are taken out.
+## The first old personal name found in text once the class titles (Snowglide ...) are taken out.
 func _old_name_in(text: String) -> String:
 	var rest := text
 	for title in _all_titles():

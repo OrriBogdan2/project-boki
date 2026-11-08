@@ -57,7 +57,7 @@ func _breah() -> void:
 		step(m, 0.25)
 	ok(
 		"name: the display name is the class title",
-		Arch.name_of("dolm") == "Cliff Runner", Arch.name_of("dolm")
+		Arch.name_of("dolm") == "Stone Seer", Arch.name_of("dolm")
 	)
 	var card: Dictionary = K.d["card"]
 	ok(
