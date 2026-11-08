@@ -26,10 +26,11 @@
 		"kb": 5.0
 	},
 	"loss": {
-		"desc": "Losing a Boki (docs/decisions/0008). loss_min_tier: tiers below it are safe (your Boki goes home with you when you die); from it up, a Boki drops dazed when its hunter dies, guards the spot, and can be scanned by an enemy. bond_ping_s: seconds between map pings of the hunter carrying a captured Boki. guard_r: metres from the deathbox a dropped Boki stands.",
+		"desc": "Losing a Boki (docs/decisions/0008). loss_min_tier: tiers below it are safe (your Boki goes home with you when you die); from it up, a Boki drops dazed when its hunter dies, guards the spot, and can be scanned by an enemy. bond_ping_s: seconds between map pings of the hunter carrying a captured Boki. guard_r: metres from the deathbox a dropped Boki stands. leave_trust_loss: trust points (0-100) each Boki you brought loses when you leave a safe-tier expedition from the Esc menu (LeaveMatch; the Hollow and up leave it behind instead).",
 		"loss_min_tier": 2,
 		"bond_ping_s": 15.0,
-		"guard_r": 1.4
+		"guard_r": 1.4,
+		"leave_trust_loss": 6.0
 	},
 	"regen": {
 		"carried_pct_s": 0.06,

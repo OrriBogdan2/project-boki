@@ -129,8 +129,8 @@ func shot_demo(which: PackedStringArray) -> void:
 				PracticeHero.open(Practice.of(psc))      # the Hunters picker (class titles)
 		"confirm":
 			open_pause(ctx)
-			UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.",
-				"Leave", close)
+			var lw := LeaveMatch.warning(LeaveMatch.Kind.get(arg.to_upper(), LeaveMatch.Kind.DEEP), true)
+			UI.confirm(root, lw["head"], lw["body"], "Leave", close, arg != "practice")
 		"tooltip":
 			tab = "Controls"
 			open_settings()
@@ -259,11 +259,11 @@ func open_pause(where: String) -> void:
 		var leave := func():
 			close()
 			Practice.leave(m, tut)
+		var ask := func(): LeaveMatch.ask(root, m, leave)
 		if tut:
-			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
+			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", ask)
 		else:
-			var lb: Button = item.call("Leave match", "back", func():
-				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
+			var lb: Button = item.call("Leave match", "back", ask, "", "Danger")
 			lb.tooltip_text = "You lose what you carry"
 	else:
 		item.call("Save and go to the main menu", "home", func():
