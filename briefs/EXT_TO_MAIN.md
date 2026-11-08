@@ -2951,3 +2951,10 @@ READY ext/tutorial-prologue-rebased-rebased 7537e251d (supersedes ext/tutorial-p
 - Checks: --archer-combo-check 161/0, --check 0 failures, health --strict OK.
 
 READY ext/lace-tall-climb-rebased b3c955ab1 (supersedes: ext/lace-tall-climb 8b684f259; merged origin/main, archer.md conflict resolved keeping main's Focus cut; --check 0 failures, --archer-combo-check 161/0, health --strict OK)
+
+## 2026-11-08 build (job 20261108-164504-a2): READY ext/anim-quality-audit
+- READY ext/anim-quality-audit 9c9703ff1 (on origin/ext/release-integ-0243 87740413f; ships with 0.24.3). Owner 11-08: every Hunter's walk and arm use looks janky. Audit in docs/art/ANIM_QUALITY_AUDIT.md, before/after strips in docs/art/anim_audit/.
+- Shared fix: WardenGait (scripts/heroes/warden_gait.gd), a runtime layer after the AnimationTree: stretches the thighs, sets the loco rate from move speed over the clips' foot speed, counter-swings arms that paced their leg. Per-hero numbers in content/rules/warden_anim/*.json (`loco.stride`, `foot_mps`, `arm_swing`). Glbs not re-baked.
+- Run slide (share of move speed) before to after: archer 46 to 13, dolm 38 to 18, tender 62 to 17, thief 60 to 17, mage 42 to 9, juggernaut 27 to 12, dredge 28 to 12. Pacing arms fixed on 6 Heroes (counter -0.96..-0.65 to +0.39..+0.84).
+- New check: `--anim-audit` (tools/anim_audit.gd, registered; slide over 25 % or counter under 0.3 fails; ostra and rimewright exempt, no stepping legs) and `--anim-shots` (GPU strips). `--clip-check` 0 failures, health --strict OK.
+- Open (backlog items filed): ostra hover and T-pose arms, rimewright skate, dredge and juggernaut hip bob, T-posed or jumping attack arms, tender stride cap, held-weapon arms, idle to walk first-pose gaps.
