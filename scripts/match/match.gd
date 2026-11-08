@@ -615,11 +615,16 @@ func _warm_lights() -> Array:
 ## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
 static var prof_on := false
 static var prof := {}
+static var prof_top := ""         # the last step's costliest section and its us (the hitch log, PerfOverlay)
+static var prof_top_us := 0
 var _prof_t := 0
 func _prof(lbl: String) -> void:
 	if prof_on:
 		var now := Time.get_ticks_usec()
-		if _prof_t > 0 and lbl != "pre": prof[lbl] = int(prof.get(lbl, 0)) + now - _prof_t
+		if lbl == "pre": prof_top_us = 0
+		elif _prof_t > 0:
+			prof[lbl] = int(prof.get(lbl, 0)) + now - _prof_t
+			if now - _prof_t > prof_top_us: prof_top = lbl; prof_top_us = now - _prof_t
 		_prof_t = now
 
 ## Tooling (--hitch-check): microseconds per section of _process (the per-frame visuals).
