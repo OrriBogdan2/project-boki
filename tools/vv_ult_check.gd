@@ -415,6 +415,8 @@ func gunslinger() -> void:
 			AimKit.shown(P, "x1") and bool(disc.get("all", false)) and absf(disc_r - float(xd["radius"])) < 0.05
 			and absf(core_r - float(xd["core_r"])) < 0.05 and fill > 0.2,
 			"r %.1f core %.1f fill %.2f" % [disc_r, core_r, fill])
+	ok("Cinderfall: the disc is a lit rim over a see-through centre, not a solid sheet (docs/VFX_QUALITY.md)",
+			float(disc.get("alpha", 1.0)) <= 0.5 and int(HeroVfx.of(m).plays.get("x_cast", 0)) >= 1)
 	# he is free the whole time: he walks and the rifle works
 	var p0 := P.pos
 	ac.step(m, 0.4, func(): P.inp["move"] = Vector2(-1, 0))
@@ -428,6 +430,8 @@ func gunslinger() -> void:
 			absf(ac.dmg(T) - base * (1.0 + float(xd["core_k"]))) < 0.5 and absf(ac.dmg(T2) - base) < 0.5
 			and U.last.get("centre", 0) == 1,
 			"centre %.1f edge %.1f (base %.1f)" % [ac.dmg(T), ac.dmg(T2), base])
+	ok("Cinderfall: the shell streaks down and lands as its own look (HeroVfx x_shell, x_impact)",
+			int(HeroVfx.of(m).plays.get("x_shell", 0)) >= 1 and int(HeroVfx.of(m).plays.get("x_impact", 0)) >= 1)
 	var hit_share := float(KinBond.rules()["hit"])
 	ok("Cinderfall: the bond fills once for the impact (a hit)", is_equal_approx(_paid(P, id), hit_share),
 			"paid %.2f" % _paid(P, id))
