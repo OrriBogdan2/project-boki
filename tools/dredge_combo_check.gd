@@ -358,20 +358,35 @@ func _all() -> void:
 		"dredge: heavy, shotgun, 3 barge charges", P.wid == "shotgun" and P.cls == "heavy" and P.max_dashes() >= 3.0,
 		"%s %s" % [P.wid, P.cls]
 	)
-	# --- the scattergun: a shot every 0.5s, a tight fan, the spread's edge lines while firing, one line idle
+	# --- the scattergun: a shot every 0.5s; the spread's edge lines follow the real fan (fan_deg + bloom): each shot
+	# springs them wide, they breathe back in while fire is held, go brass once tight, and fold to one line at rest
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	ak.aim_at(P, home + Vector3(2.0, 0, 0))
 	var v0: int = K.volleys
-	var cone_seen := false
+	var g: DredgeGun = K.gun
+	var rest := float(P.wpn["fan_deg"])
+	var off := 0.0          # the drawn lines against the real fan, once the kick's spring has settled
+	var narrowed := 0.0     # how far the lines closed between two shots, fire held
+	var peak := 0.0
+	var bloom := 0.0
+	var kicked := 0.0       # the last time the bloom rose (a shot)
 	var tf := 0.0
-	while tf < 1.05:
-		P.inp["fire"] = true
+	var settled := 0.0      # s since the bloom settled after the release (the lines hold IDLE_T before they fold)
+	while tf < 3.0 and settled < 0.15:
+		P.inp["fire"] = tf < 1.05
+		settled = settled + ak.DT if tf >= 1.05 and P.wbloom <= 0.0 else 0.0
 		ak.aim_at(P, home + Vector3(2.0, 0, 0))
 		m.step(ak.DT)
 		tf += ak.DT
-		if AimKit.shown(P, "spread"): cone_seen = true
-	P.inp["fire"] = false
+		var deg := float(AimKit.entry(P, "spread").get("deg", 0.0)) if AimKit.shown(P, "spread") else 0.0
+		peak = maxf(peak, deg)
+		narrowed = maxf(narrowed, peak - deg) if P.inp["fire"] else narrowed
+		if P.wbloom > bloom + 0.5: kicked = tf
+		bloom = P.wbloom
+		if tf - kicked > 0.2 and AimKit.shown(P, "spread"):
+			off = maxf(off, absf(deg - (rest + P.wbloom)))
+		if m.time - g.shot_at < 0.02: peak = deg
 	var cone: Dictionary = AimKit.entry(P, "spread")
 	ok(
 		"gun: a shot every half second",
@@ -379,13 +394,20 @@ func _all() -> void:
 		"volleys %d in 1.05s" % (K.volleys - v0)
 	)
 	ok(
-		"gun: the spread's edge lines lie on the ground out to the slug range",
-		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 30.0 and float(cone.get("deg", 0.0)) <= 46.0,
-		"len %.1f deg %.0f" % [float(cone.get("len", 0.0)), float(cone.get("deg", 0.0))]
+		"gun: the spread's edge lines lie at the gun's real fan, out to the slug range",
+		AimKit.shown(P, "spread") and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and off < 2.0,
+		"len %.1f, %.1f deg off the real fan" % [float(cone.get("len", 0.0)), off]
 	)
+	ok("gun: fire held, the lines breathe back in between shots", narrowed >= 5.0, "closed %.1f deg" % narrowed)
 	ok("gun: each shot rocks the body back (dr_shot)", K.anim_id == "dr_shot")
-	ak.step(m, 1.0)
-	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
+	var col: Color = cone.get("col", Color.BLACK)
+	ok(
+		"gun: let go, the bloom settles to the rest fan and the lines go brass",
+		P.wbloom < 0.01 and absf(float(cone.get("deg", 0.0)) - rest) < 1.0 and col.is_equal_approx(DredgeGun.TIGHT_COL),
+		"bloom %.1f deg %.1f col %s" % [P.wbloom, float(cone.get("deg", 0.0)), col.to_html(false)]
+	)
+	ak.step(m, 0.8)
+	ok("gun: idle, the lines fold into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
 	P.ammo = int(P.wpn["mag"])
 	P.reload_t = 0.0
 	# --- Abyssal Hand reels a foe in

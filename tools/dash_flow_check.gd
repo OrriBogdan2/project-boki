@@ -80,8 +80,9 @@ func _heroes() -> Array:
 			return arg.get_slice("=", 1).split(",")
 	return Arch.ORDER
 
-func _on_used(caster: Node, _ability: String, slot: String) -> void:
-	if caster == hunter:
+## (a payoff, e.g. a reel's HAULED, rides the slot's signal but is a hit landing, not a cast)
+func _on_used(caster: Node, ability: String, slot: String) -> void:
+	if caster == hunter and not ability.ends_with("_payoff"):
 		cast_n[slot] = int(cast_n.get(slot, 0)) + 1
 
 func _slot(m: Match, hero: String, slot: String) -> void:
