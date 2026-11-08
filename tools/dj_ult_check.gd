@@ -240,6 +240,34 @@ func zedran(a) -> void:
 	A.ok("juggernaut X small mechanic: knocking a hunter with it resets it; the bond counts the knock (0.7)",
 			T.downed and U.resets == 1 and float(K.cd["x"]) <= 0.0 and absf(knock_paid - 0.7) < 0.001,
 			"cd %.1f bond %.2f" % [float(K.cd["x"]), knock_paid])
+	# the reset is for taking a hunter down: a hunter already down takes nothing from it, a plain hit resets nothing
+	A.step(m, 0.5)
+	A.fresh(T)
+	T.teleport(home + Vector3(2.6, 0, 0))
+	P.teleport(home)
+	A.aim_at(P, T.pos)
+	T.downed = true
+	T.hp = 0.0
+	T.down_hp = 500.0
+	K.cd["x"] = 0.0
+	var resets0 := U.resets
+	HunterKeys.ult_pressed(P)
+	A.step(m, 0.9)
+	A.ok("juggernaut X small mechanic: a hunter already knocked takes nothing, no kill, the cooldown keeps running",
+			U.last_dealt == 0.0 and U.resets == resets0 and float(K.cd["x"]) > 1.0,
+			"dealt %.0f resets %d cd %.1f" % [U.last_dealt, U.resets - resets0, float(K.cd["x"])])
+	A.step(m, 0.5)
+	A.fresh(T)
+	T.downed = false
+	T.teleport(home + Vector3(2.6, 0, 0))
+	P.teleport(home)
+	A.aim_at(P, T.pos)
+	K.cd["x"] = 0.0
+	HunterKeys.ult_pressed(P)
+	A.step(m, 0.9)
+	A.ok("juggernaut X small mechanic: a hit that leaves the hunter up resets nothing",
+			not T.downed and U.resets == resets0 and float(K.cd["x"]) > 1.0, "resets %d cd %.1f" % [U.resets - resets0,
+					float(K.cd["x"])])
 	A.ok("juggernaut X: its moves are keyed (guard, cleave)", ["jug_guard", "jug_riposte"]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	await A.done(m)
