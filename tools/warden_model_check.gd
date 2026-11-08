@@ -23,8 +23,8 @@ const WARDENS := {
 	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "thf_"},
 	"dolm": {"hit_r": 0.388, "height": 1.19, "width": [0.7, 1.5], "moves": "breah_"},     # (lean, the locs: his art)
 	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
-	# (Motley on his box: the hover came down to a hand's width, Nov 5, so his top is 0.14 m lower; the cards widen him)
-	"ostra": {"hit_r": 0.412, "height": 1.18, "height_3d": 1.2, "width": [0.5, 1.6], "moves": "ostra_"},
+	# (Motley's top counts his hover: 0.3 m, the source's (HOVER_H), puts it 0.1x over his box; the cards widen him)
+	"ostra": {"hit_r": 0.412, "height": 1.28, "height_3d": 1.3, "width": [0.5, 1.6], "moves": "ostra_"},
 	# (Claire, the final design: the hood and horns stand over her head; capelet and skirt widen the old slim build)
 	"rimewright": {"hit_r": 0.38, "height": 1.08, "height_3d": 1.21, "width": [0.6, 1.25], "moves": "tm_"},
 	# (Cinder's fire stands over her head)
