@@ -342,6 +342,15 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Tarek A | 09:10 | 01a1a5d2-9348-76b2-bd28-bb946e03b9b0 | meshy-7.1 | 3 edited views (front, side, back) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: blindfold, grin, chunky locs with copper beads, vest, sash, harness, both bracers, wrapped feet (the bracers' glowing cracks not painted: added as an emission layer) |
 
 ### Tarek stage 2 (2026-11-04): no Meshy runs (0 credits); the r3c recipe on the stage 1 scan, see art/wardens/tarek/IMPORT.md.
+### Tarek v2 runs, 2026-11-07 (briefs/art-refs/tarek_v2; balance 1246 before; 76 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Tarek v2 edit front | 14:03 | 01a1b652-093d-714f-99a2-8d093b662560 | nano-banana-pro (image-to-image) | turnaround crop to a clean A-pose sculpt render; eye stones, shards and ground out | 9 | Kept |
+| Tarek v2 edit 3/4 | 14:03 | 01a1b652-09c6-7549-9407-7b30491ea3ba | nano-banana-pro | same | 9 | Kept |
+| Tarek v2 edit side | 14:03 | 01a1b652-0972-74bc-9e5d-f18aa4fc9e84 | nano-banana-pro | same | 9 | Kept |
+| Tarek v2 edit back | 14:03 | 01a1b652-094a-74ae-b46b-53cba08be326 | nano-banana-pro | same | 9 | Kept |
+| Tarek v2 A | 14:04 | 01a1b652-f497-7289-b181-c5bcb2abfdae | meshy-7.1 | 4 edited views as images and texture refs, geometry 2k, texture 8k, PBR, no remesh, a-pose | 40 | **Kept** (first run): blindfold, locs with copper rings, huge stone left arm onto the chest, right gauntlet, prayer beads, cream wrap, orange sash, brown trousers, wrapped feet. The eye stones, shards, ground rings and jade glyph emission are scripted (tools/art1/tarek_scan.py) |
+
 ### Ostra stage 1 runs, 2026-11-04 (76 credits; balance 4327 after both Tarek and Ostra and the other fan-out agents)
 | Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
 |---|---|---|---|---|---|---|
