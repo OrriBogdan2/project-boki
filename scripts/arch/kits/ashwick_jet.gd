@@ -261,14 +261,14 @@ func _lava_at(f: Ent):
 	return null
 
 # ------------------------------------------------------------------ looks
-## A red-orange wall of flame about 1.2 bh round her feet, a scorch, embers and the roar of the tank jets
+## A red-orange wall of flame about 1.2 bh round her feet, a scorch, embers and the roar of the heel and tail fire
 ## (content/vfx "liftoff").
 func _liftoff_fx() -> void:
 	k.vfx("liftoff", k.ground(h.pos), null, {"r": float(xd()["burst_r"])})
 	m.sfx("lw_jet", h.pos, -1.0, 1.0)
 
-## The tank jets: two streams of flame from the fuel tank's chimneys, blown back and down, and their smoke
-## (content/vfx "jets", held while she flies).
+## The flight's lift: fire bursting from her heels and her tail, blown down behind her, and its smoke
+## (content/vfx "jets", held while she flies; owner 2026-11-07, no tank).
 func _jet_fx() -> void:
 	if k.tells_visible():
 		HeroVfx.of(m).hold(h, "jets")

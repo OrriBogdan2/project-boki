@@ -5,8 +5,9 @@
 	},
 	"anchors": {
 		"nozzle": {"nodes": ["anchor_flame", "weapon_muzzle"], "gun": [0.0, 0.02, -0.75], "body": [0.15, 0.9, 1.3]},
-		"tank_l": {"nodes": ["anchor_jet_0"], "bone": "hips", "off": [-0.13, 0.55, 0.24], "body": [-0.14, 1.15, -0.3]},
-		"tank_r": {"nodes": ["anchor_jet_1"], "bone": "hips", "off": [0.13, 0.55, 0.24], "body": [0.14, 1.15, -0.3]},
+		"heel_l": {"nodes": ["anchor_heel_l"], "body": [-0.14, 0.12, -0.1]},
+		"heel_r": {"nodes": ["anchor_heel_r"], "body": [0.14, 0.12, -0.1]},
+		"tail": {"nodes": ["anchor_tail"], "body": [0.0, 0.85, -0.5]},
 		"chest": {"nodes": ["anchor_chest"], "bone": "hips", "off": [0.0, 0.36, -0.1], "body": [0.0, 1.0, 0.1]}
 	},
 	"moves": {
@@ -158,13 +159,17 @@
 				"life": 1.3, "size": 0.44, "c": "smoke", "c3": "soot", "near": true}
 		]},
 		"jets": {"fx": [
-			{"p": "ember", "at": "tank_l", "n": 30, "way": "back", "lift": -0.9, "speed": 6.0, "spread": 0.1, "drag": 1.5,
+			{"p": "ember", "at": "heel_l", "n": 20, "way": "back", "lift": -0.9, "speed": 6.0, "spread": 0.1, "drag": 1.5,
 				"life": 0.32, "size": 0.16, "stretch": 0.03, "c": "main", "c2": "white", "c3": "red"},
-			{"p": "ember", "at": "tank_r", "n": 30, "way": "back", "lift": -0.9, "speed": 6.0, "spread": 0.1, "drag": 1.5,
+			{"p": "ember", "at": "heel_r", "n": 20, "way": "back", "lift": -0.9, "speed": 6.0, "spread": 0.1, "drag": 1.5,
 				"life": 0.32, "size": 0.16, "stretch": 0.03, "c": "main", "c2": "white", "c3": "red"},
-			{"p": "ember", "at": "tank_l", "n": 14, "speed": 0.4, "spread": 1.0, "life": 0.12, "size": 0.3,
+			{"p": "ember", "at": "tail", "n": 20, "way": "back", "lift": -0.9, "speed": 6.0, "spread": 0.1, "drag": 1.5,
+				"life": 0.32, "size": 0.16, "stretch": 0.03, "c": "main", "c2": "white", "c3": "red"},
+			{"p": "ember", "at": "heel_l", "n": 10, "speed": 0.4, "spread": 1.0, "life": 0.12, "size": 0.3,
 				"c": "hot", "c2": "white", "c3": "main"},
-			{"p": "ember", "at": "tank_r", "n": 14, "speed": 0.4, "spread": 1.0, "life": 0.12, "size": 0.3,
+			{"p": "ember", "at": "heel_r", "n": 10, "speed": 0.4, "spread": 1.0, "life": 0.12, "size": 0.3,
+				"c": "hot", "c2": "white", "c3": "main"},
+			{"p": "ember", "at": "tail", "n": 10, "speed": 0.4, "spread": 1.0, "life": 0.12, "size": 0.3,
 				"c": "hot", "c2": "white", "c3": "main"},
 			{"p": "smoke", "y": 0.5, "n": 12, "way": "back", "lift": 0.3, "speed": 2.5, "spread": 0.4, "drag": 1.0,
 				"grav": -1.2, "life": 1.1, "size": 0.39, "c": "smoke", "c3": "soot", "near": true}
