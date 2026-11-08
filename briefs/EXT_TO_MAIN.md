@@ -2622,3 +2622,4 @@ READY ext/parity-glide-dive 45f26a5b5 (KIT_PARITY item 18: glider dive, hold Ctr
 
 ## 2026-11-08 deep (job 20261108-014504-a4): CLAIM Training Grounds (escalated from 20261107-233002-a2)
 - CLAIM: finish ext/training-grounds: review the diff, rerun the checks in a fresh import, collect and look at the GPU top-down and ground-level shots, fix what they show.
+READY ext/parity-jump-flowrows 0f70d1a8a (item 20: jump speed pinned to source 7.5 in move-feel-check, 6.8 kept for terraces; unsourced flow rows marked [?] in KIT_PARITY.md)
