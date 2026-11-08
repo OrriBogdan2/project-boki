@@ -383,3 +383,9 @@ Abilities you use twice (recasts: Ostra Brimseed pop, Tender Hearthlight throw, 
 - An enemy carrying your mark/combo state shows a clear icon over it (what it is, time left) and a strong hit flash + sound when the payoff lands.
 - Recast presses are buffered (~0.15s) and the window never closes silently: the icon shows "expired".
 - Same visual language for every hunter; colours follow the hunter's ability colour.
+
+## 2026-11-08 owner: shorter tutorials; farming can be skipped or automated
+- **Match tutorial: 22 steps -> about 8.** Keep: land+move, dash+glide (one step), shoot, E ability, send your Boki, a fight, open a chest, extract. Everything else (exdash, crouch, pickup, G key, rank-up, utility, orders, key, uplink, defend, go-to-exit) becomes a one-line contextual hint the first time it matters, not a tutorial step. One banner line per step, no walls of text, nothing blocks you for more than a few seconds.
+- **Farm tutorial: 12 steps -> about 5.** Keep: chop a tree, place the house, feed your Boki, plant a crop, start an expedition. Stone, hammer, tasks, buy, sell and the hob become first-time hints or Goals-tracker entries. Tools are simply given.
+- Both tutorials always have a visible Skip, and a skipped player loses nothing they need (house placed, starting tools given).
+- **Farming is optional.** A player who doesn't want to farm can (a) put Boki on jobs (chop, mine, water, harvest, cook, sell) so the farm runs itself, including while away (offline progress, capped), and (b) turn on **Auto-farm** in the farm menu: one toggle that assigns idle Boki to the needed jobs, auto-harvests, replants, feeds and sells the surplus, at a small efficiency cost versus doing it by hand. Farming by hand stays the best yield, never required.
