@@ -319,6 +319,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		if _safe(m, h, dd, 1.2):
 			move = dd
 	inp["move"] = move
+	if StoneStand.hop_ahead(h, move):
+		inp["jump"] = true      # a teammate's rock in the way: hop it (Tenzo walks up his own; a foe's stops us)
 	if a.has("dash_dir"):
 		inp["move"] = a["dash_dir"]
 		a.erase("dash_dir")
