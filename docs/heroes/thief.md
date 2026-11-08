@@ -110,6 +110,39 @@ pass above.
 | RMB | throw | the bolas whirled overhead through the 0.4-0.6s lane [footage 0100-0101] | owner 121c: no wind-up, the Bola leaves on the press (the clip's whirl is unchanged) | the legs are a stance (walking, she keeps walking) |
 | Shift, E, X | | see the feel pass, the per-slot table and the small mechanics | | unchanged (already at the source's beats) |
 
+## Animation timing (ext/anim-time-sable)
+
+Every move of content/rules/warden_anim/sable.json measured in game: the kit's keyed time (KMovesDJ) drives the
+skinned clip, so wind-up start, release and recovery end are the kit's; what the clip adds is the blend in and out
+(`FADE` 0.1 s). [footage] is briefs/hero-ref/dancer.md at 5 fps (one frame = 0.2 s, so a release is only known to
+a frame); [game data] has no animation timings. "Shown" is the share of the move's clip on show (body weight times
+the new channel's crossfade) on a standing Sable at the move's first key, measured by `--dancer-combo-check`
+(tools/dancer_timing_check.gd, lines `dancer timing ...`).
+
+| Move | Source s | Ours before | Ours after |
+|---|---|---|---|
+| LMB throw (`thf_lmb_r/l`) | arm whipped out inside a 2-3 frame shot, a hit every 0.45 s [footage] | release 0.04 in the kit, but the clip was 25% shown at it (a 0.1 s blend in, twice, body and channel) | blend in 0.03: 100% shown at 0.04 |
+| Empowered LMB (`thf_primed`) | one big shot, same beat [footage] | 25% shown at 0.04 | 0.03: 100% |
+| Cartwheel (`thf_vault_r/l/f/b/twist`) | dash 0.37-0.57 s, 3 frames with recovery [footage] | 0.48 s in the kit (in the window), the crouch at 0.05 was 25% shown | 0.48 s; blend in 0.04: 100% at 0.05 |
+| Air Cartwheel (`thf_exdash`), landing (`thf_land`) | the same flick, then carried to the ground [footage] | 25% shown at their first key | 0.04 and 0.03: 100% |
+| Bola (`thf_bola`) | whirled through the 0.4-0.6 s lane, slung at its end [footage] | cast 0.4 s, sling at 0.42, whirl full by 0.1 | unchanged (already at the source) |
+| Knife (`thf_knife`) | dagger in the air one frame after the spin starts [footage] | released at 0.12; the spin (0.04-0.09) mostly hidden | blend in 0.04: spin on show; release 0.12 unchanged |
+| Encore ring (`thf_encore`) | ring grows 0.4 s [footage] | 0.4 s | unchanged |
+| Reset (`thf_reset`) | the heel-snap on the card, 0.4 s | 25% shown at 0.05 | blend in 0.04: 100% |
+
+Clip lengths against the kit's moves are within 0.06 s for every move (asserted), and the clips' peak motion lands on
+the kit's release frames (the lmb whip 0.00-0.03, the bola sling 0.37-0.40, the knife release 0.10-0.13), so no clip
+re-key is needed for the hit frames. The fade is a per-move `"fade"` in the clips file (default `FADE`), read by
+WardenClips on the way in only: the way out is unchanged.
+
+Clip re-keys the model would want (not done here: the GLB and tools/art1 are out of scope; for the
+ext/sable-v2-model branch): none for the hit frames. If its clips start with a settled pose, key the first pose of
+each move at 0.0 (the lmb whip, the vault crouch, the knife spin) so the blend has less to hide; with that the
+`"fade"` values in sable.json can go back to the default.
+
+Suggestions (ours, not built): a held LMB could cross-fade the two arms' clips on the release instead of the
+channel swap; a 0.03 s hit-stop on the empowered bolt.
+
 ## Per-slot table
 
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
