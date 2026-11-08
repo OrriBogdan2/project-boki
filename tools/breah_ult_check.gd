@@ -67,14 +67,13 @@ func _cast_and_rise() -> void:
 		"ult cast: a tap casts at once, the slam move plays, its own cooldown starts (45s)",
 		S.phase == "tell" and K.anim_id == "breah_spine" and absf(cd_now - 45.0) < 0.2, "cd %.1f" % cd_now
 	)
-	var crack: Dictionary = AimKit.entry(P, "x_cracks")
 	var across: bool = absf(S.axis.dot(Vector2(1, 0))) < 0.05
 	var at_cursor: bool = Vector2(S.center.x - home.x - 7.0, S.center.z - home.z).length() < 0.2
+	var lanes := int(HeroVfx.of(m).plays.get("spine_lane", 0))
 	ok(
-		"ult telegraph: the cracks show to everyone, at the cursor, across the aim, 12m, bent 25 degrees",
-		bool(crack.get("all", false)) and at_cursor and across and absf(float(crack.get("len", 0.0)) - 12.0) < 0.1
-			and absf(rad_to_deg(float(crack.get("bend", 0.0))) - 25.0) < 0.1,
-		"axis %s" % str(S.axis)
+		"ult telegraph: a crack under every rock to come (HeroVfx, sent to everyone), at the cursor, across the aim",
+		lanes == S.spots.size() and lanes >= 9 and at_cursor and across,
+		"lanes %d spots %d axis %s" % [lanes, S.spots.size(), str(S.axis)]
 	)
 	step(m, 1.0)
 	var first := S.first_rise_t - released
@@ -116,7 +115,12 @@ func _drag_slow_shove() -> void:
 	_press(m, P, home + Vector3(6, 0, 0), true)
 	ok("ult hold: X held aims (nothing cast yet), the crouch move holds", S.aiming() and K.anim_id == "breah_spine_aim")
 	var prev: Dictionary = AimKit.entry(P, "x")
-	ok("ult hold: the preview line with chevrons, yours only", AimKit.shown(P, "x") and not bool(prev.get("all", true)))
+	var bend := rad_to_deg(float(prev.get("bend", 0.0)))
+	var shape_ok := absf(float(prev.get("len", 0.0)) - 12.0) < 0.1 and absf(bend - 25.0) < 0.1
+	ok(
+		"ult hold: the preview line with chevrons, yours only, 12m bent 25 degrees",
+		AimKit.shown(P, "x") and not bool(prev.get("all", true)) and shape_ok
+	)
 	aim_at(P, home + Vector3(9, 0, 3))
 	step(m, 0.1)
 	var want := Vector2(3, 3).normalized()

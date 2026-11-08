@@ -378,10 +378,6 @@ func _breah() -> void:
 	)
 	P.inp["sec_hold"] = false
 	var hop := _hop(m, P, K)
-	var looks := KitLooks.of(m)
-	var slam_looks := ["burst", "shard", "crater"].all(
-		func(kind): return looks.timed.any(func(e): return e["kind"] == kind)
-	)
 	step(m, 0.3)
 	ok(
 		"rmb: the hop's slam lands once, at the foe it hopped to", K.slams == 1 and K.slam.hops == 1 and hop["x"] > hx,
@@ -406,9 +402,10 @@ func _breah() -> void:
 		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
 		"stun %.2f" % T.stun_t
 	)
+	var slams_looked := int(HeroVfx.of(m).plays.get("slam", 0))
 	ok(
-		"rmb: a molten starburst, rock chips flying, and the dark red crater lingering about 1s",
-		slam_looks and looks.timed.any(func(e): return e["kind"] == "crater")
+		"rmb: the slam plays its HeroVfx look once (the crack, the wall, the rock debris)", slams_looked == 1,
+		"looks %d" % slams_looked
 	)
 	var d_full := dmg(T)
 	reset.call()

@@ -277,8 +277,7 @@ func _touchdown() -> void:
 	st["left"] = maxf(float(d["window"]) - float(st["t"]), float(d["skid_min"]))
 	st["t"] = 0.0
 	k.play("breah_skate")
-	m.fx.dust(h.pos, 8)
-	m.sfx("br_slam", h.pos, -11.0, 1.5)
+	k.vfx("hop_land")
 	var dir: Vector2 = st["dir"]
 	h.vel.x = 0.0
 	h.vel.z = 0.0
@@ -326,8 +325,7 @@ func _crash() -> void:
 	chain_dist = Vector2(at.x - start_at.x, at.z - start_at.z).length()
 	k.leap_lands += 1
 	k.play("breah_leap_land")
-	m.fx.dust(at, 14)      # the hit area showed all through the flight: no ring or blast here
-	m.sfx("br_slam", at, -5.0, 1.15)
+	k.vfx("hop_crash", at)      # rock and dust only: the hit area showed all through the flight, no ring or blast
 	for f in k.foes_in(at, r, 2.0):
 		k.leap_hits += 1
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
@@ -352,7 +350,5 @@ func _landslide(at: Vector3, dir: Vector2) -> void:
 	var d := dd()
 	k.landslides += 1
 	var from := at + Vector3(dir.x * 0.9, 0.85, dir.y * 0.9)
-	m.fx.burst(from, Color("8f9cb8"), 14, 5.0, 0.4, 6.0, 1.2, Vector3(dir.x, 0.3, dir.y), 50.0)
-	m.fx.dust(from, 8)
+	k.vfx("landslide", from, dir)
 	k._fire_rock(from, dir, float(d["dmg"]) * k.power("dash"), "dash", "dashrock", float(d["rock_range"]))
-	m.sfx("br_roll", from, -3.0, 1.0)
