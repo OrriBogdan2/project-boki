@@ -376,3 +376,10 @@ New or rewritten stateful code (movement, ability phases, Boki AI, match flow, t
 - **Vex (gunslinger):** Burr Charge is renamed **Coin Blast**: she flips/throws her coin (her relic, the first coin) and it bounces and blasts (same gameplay, new projectile model, VFX, name, HUD text, tutorials). Longneedle fires **from her hand** (finger-gun pose, green fire) instead of the rifle barrel and is renamed **Finger Gun** (coordinator's pick; alternatives Called Shot, Last Call).
 - **Every hunter:** ability names must make sense for that character and come from where the fantasy says (hand, weapon, relic, Boki). Audit job lists renames; coordinator applies the clear ones and sends the owner only the ones that are taste calls.
 - **Keybinds:** every action the game uses is rebindable in Controls (crouch, whistle, rotate and any missing ones), each ability icon shows its current key, plus new binds: an alternate key per action, mouse buttons 4/5 bindable, quick Boki command keys.
+
+## 2026-11-08 owner: two-step abilities must be obvious and in your face
+Abilities you use twice (recasts: Ostra Brimseed pop, Tender Hearthlight throw, Bulwark hammer recall, Dolm Rock Hop, Rimewright Rimelock, Mage, every e_recast/r_recast/ult_recast/rmb_press_extra kit) and two-hit combos on enemies (a mark/Daze/stack then a payoff) are currently annoying and unclear. Rules:
+- While a recast is open: the ability icon pulses and shows big "<KEY> AGAIN" text with a shrinking timer ring; a matching world marker sits on the thing you'll trigger (the bomb, the ring, the hammer) with the same key; a short sound cue when it opens and a warning tick before it closes.
+- An enemy carrying your mark/combo state shows a clear icon over it (what it is, time left) and a strong hit flash + sound when the payoff lands.
+- Recast presses are buffered (~0.15s) and the window never closes silently: the icon shows "expired".
+- Same visual language for every hunter; colours follow the hunter's ability colour.
