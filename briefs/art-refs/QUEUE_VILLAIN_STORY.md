@@ -23,12 +23,17 @@
 
 ## Items, in order
 
-### 1. The Wyrmheart
-- **Status:** in progress; the look is locked.
-- **Look:** an anatomically real heart carved from one blood-red jewel, glowing from inside, with gold veins like filigree and one deep, jagged crack leaking red-orange light.
-- **Views:** front, side, back, and a close-up of the crack.
-- **Role:** the master reference for red, gold, crystal and glow in every later item.
-- **Starting point:** the glass anatomical heart from the Thief's View key art (`keyart/`). It still needs the gold filigree veins and the crack.
+### 1. The Wyrmheart: LOCKED (owner, Nov 7, 20:34 ET)
+**Locked look:** the heart as it appears in the finished key art (`keyart/keyart_thief_view_final.jpg`, `keyart/keyart_face-off_final.jpg`).
+- An anatomically real heart (aorta, arteries, chambers) made of smooth, glossy crimson glass.
+- A soft pink-red glow from deep inside, with bright glassy highlights.
+- **No gold veins and no crack.** The owner chose to keep the established look rather than the brief's gold filigree and crack.
+
+**Reference crop:** `villain/wyrmheart_ref_from_keyart.jpg`.
+
+**To do:** a laid-out multi-view sheet of this exact heart (front, side, back, top), with nothing added.
+
+**Colour master:** this heart is the master for red, crystal and glow in the later villain items.
 
 ### 2. Malgrave's Mask
 - **Look:** the first mask. Elegant, regal, red and gold: a beautiful, calm face with a faint wyrm hint (a scale pattern in the gold, slightly slit eye holes).
