@@ -687,7 +687,7 @@ func _ready() -> void:
 		var dm := Match.demo_opts()
 		dm.merge(opts, true)
 		show_screen("match", dm)
-	elif "--match" in args or opts.has("raid_demo") or opts.has("blight_demo") or opts.get("rolling", false):
+	elif "--match" in args or opts.has("raid_demo") or opts.has("blight_demo") or opts.has("heart_demo") or opts.get("rolling", false):
 		show_screen("match", opts)
 	elif "--duel" in args:
 		show_screen("match", Match.duel_opts())
