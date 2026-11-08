@@ -174,7 +174,7 @@ func _audit(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
 	var blinks0 := K.blinks
 	K.use_e()
 	A.step(m, 0.1)
-	A.ok("Sable audit: the blink leaves no ground ring (the afterimage chain and the puff stay)",
+	A.ok("Sable audit: the blink leaves no ground ring (the afterimage chain and its out/in bursts stay)",
 			K.blinks == blinks0 + 1 and m.fx.radial == radial0, "blinks +%d rings +%d" % [K.blinks - blinks0,
 					m.fx.radial - radial0])
 	A.fresh(T)

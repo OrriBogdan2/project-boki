@@ -58,7 +58,7 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 |---|---|---|
 | Plain bolt too weak, prime 3.5x (HIGH) | (a) / (b) | The empowered bolt is 2.34x (the data's +214 on 160): f6bb27c3 (dancer-feel). The plain bolt is now 13, up from 9 (the owner's "plain autos carry her", MAIN_TO_EXT 03:20; 137 in the footage at our ~1/10 scale). Assert `Sable audit: the plain bolt deals 13 ...` |
 | The mid-flip empowered shot has no body read (MED) | (b) | A bolt thrown mid-cartwheel now whips both blades out in a V (the cartwheel moves carry `"swing": 2`, the blade swing layered over the flip; 2b20e31f made the swing). The cartwheel is not cut short. Footage 0193. Assert `Sable audit: a bolt mid-flip goes empowered ...` |
-| Blink-arrival ring (MED) | (b) | Removed; the cyan afterimage chain and the puff stay. Assert `Sable audit: the blink leaves no ground ring` |
+| Blink-arrival ring (MED) | (b) | Removed; the violet afterimage chain and the out/in bursts (no ring) stay. Assert `Sable audit: the blink leaves no ground ring` |
 | Self shake on the empowered bolt, blink, Tangle (MED) | (a) / (c) | The empowered bolt's own `add_trauma` went in c7453578. `Feel.shake` and the punches belong to ext/no-shake (item 50); nothing added here |
 | Empowered extras: Shred, Marks, haste end (LOW) | (a) / (b) / (c) | Shred is gone (f6bb27c3). Marks: back to 2 on the empowered hit, the owner's spec (MAIN_TO_EXT 03:20, "keep 2 Marks"; the feel pass had made it 1). The speed boost ending on the empowered shot is the wiki's Quickflip rule (Small mechanics), kept. Assert `dancer empowered bolt: a big hit, 2 Marks ...` |
 | Bola's slow on Grounded (LOW) | (b) | Removed by the audit: the data's Ground is no dash or jump, no slow. Back by the owner's override (item 53): 30% for the Ground's 1.5s. Assert `dancer Bola: one foe caught is Grounded and slowed 30%` |
@@ -93,11 +93,11 @@ pass above.
 
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
-| LMB, Arc Bolts | hold | A spinning gold chakram from alternating hands every 0.45s, 34 m/s; it flies to the cursor (12m at most) and fizzles there in a blue-violet puff. A thin white aim line to the cursor with an arrow tick, gold while the next bolt is empowered | Arcslinger: the same, cursor-placed, 0.45s | Range 12m (the footage shows at least 7 bh); no magazine |
+| LMB, Arc Bolts | hold | A spinning pale-violet chakram with a violet tail from alternating hands every 0.45s, 34 m/s; a hit leaves a violet crescent slash with an afterglow; it flies to the cursor (12m at most) and fizzles there in a soft violet puff. A thin white aim line to the cursor with an arrow tick, gold while the next bolt is empowered | Arcslinger: the same, cursor-placed, 0.45s | Range 12m (the footage shows at least 7 bh); no magazine |
 | Passive, Marks | none | Every bolt that hits adds a Mark (no cap, 4s, refreshed; eight diamonds show): +10% bolt damage per Mark. A knock heals 15% on top of the shared 10% (25% in all) with a crimson star on the knocked and a green pillar on her | Malice: about +12% of a shot per consecutive hit, still climbing at 8; knock heal with a green pillar | Gold diamonds over the target keep the stack readable (ours) |
-| Dash, Vault | Shift | A 4.5m sideways cartwheel in 0.48s (the source's measured one, off the global dash feel) the way you move: a burst that peaks near 0.15s and runs down into the hasted run, a cyan and lilac arc traced by hands and feet, cyan streaks behind; +18% speed for 2s at most; the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 2.34x (Marks add flat), 2 Marks; landing it gives the Vault back at once; rank 2: the bonus +20%, rank 3: +40% in all and the speed boost half again as big | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
-| RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.4m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded and slowed 30% for 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
-| E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s) or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway; rank 3: sticking in a foe gives the Vault back | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
+| Dash, Vault | Shift | A 4.5m sideways cartwheel in 0.48s (the source's measured one, off the global dash feel) the way you move: a burst that peaks near 0.15s and runs down into the hasted run, a wide violet arc traced by hands and feet (twice, each with an afterglow), violet streaks behind; +18% speed for 2s at most; the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 2.34x (Marks add flat), 2 Marks; landing it gives the Vault back at once; rank 2: the bonus +20%, rank 3: +40% in all and the speed boost half again as big | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
+| RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.4m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded and slowed 30% for 1.5s with violet binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
+| E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s) or lands where you aimed; a white circle marks it; recast blinks you there through 5 violet afterimages, an out-burst where you left and an in-burst where you land; after 6s you step anyway; rank 3: sticking in a foe gives the Vault back | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
 | X, Encore | tap (level 6) | A violet ring grows round her from 2.3m to 5.4m (3 bh) over 0.4s, everyone sees it, then rides with her for 2s: she dances, and every 0.2s a blade leaves her hand at each foe inside (10 at most each): 4, and 6 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown. A blade landing on a rival hunter fills the bond (the best event of the cast counts) | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
 | Merge (its own key, `ultimate`) | tap | The Boki Merge | (n/a) | The Merge is the same for every hero |
 
@@ -109,7 +109,7 @@ pass above.
 - Ground Cartwheel: 4.5 m in 0.48 s with the measured speed curve; the long (air) dash is the same sideways cartwheel
   carried flat on its speed for 8.4 m over 0.95 s, ending where she lands (both off the global dash feel). From a jump it
   empowers the next bolt too (the source's Quickflip does; its dash -> LMB row in content/dash_flow/thief.json).
-- Her dashes leave her own cyan streaks and stars, not the shared after-image. No ring or burst on a dash or a
+- Her dashes leave her own violet streaks and stars, not the shared after-image. No ring or burst on a dash or a
   landing: the empowered bolt shows as a tight gold glint (a hot core and a turning four-point star) in the hand
   it will leave from, flaring as she lands; online viewers get a small ping at that hand.
 - Presses during the Cartwheel (content/dash_flow/thief.json, docs/heroes/dash_interactions.md): every slot
@@ -201,9 +201,11 @@ ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats 
 ## Look and sound (all ours)
 
 - Arc Bolts model: two dark ring blades with swept spikes and a gold inner edge (scripts/match/hero_arms_dj.gd).
-- Effects: scripts/arch/kits/dj_fx.gd and shaders/dj_fx.gdshader, every node pooled: the gold chakram and its
-  comet trail, the empowered blue chakram in a lightning streak, the fizzle puff, the Bola's two weights, the
-  dagger, the cyan afterimage chain, the knock star and heal pillar, the cartwheel arc.
+- Effects: the moments (bolt hits, fizzles, the Cartwheel arcs, the reset, the blink's bursts, the knife, Encore's
+  cast, throws and hits) are HeroVfx data in her violet, content/vfx/thief.json (docs/HERO_VFX.md); everyone sees
+  them. scripts/arch/kits/dj_fx.gd and shaders/dj_fx.gdshader keep the pooled projectile looks (the violet
+  chakram and its trail, the empowered blue chakram in a lightning streak, the Bola's two weights, the dagger),
+  the violet afterimage chain, the dash streaks, the knock star and heal pillar.
 - Sounds: tools/gen_sfx_sable.py (`dj_*`, `thief_*`), synthesized; set in content/sfx/thief.json.
 
 ## Engine notes
