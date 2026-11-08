@@ -22,3 +22,13 @@ and logs `gpu_ms`, window size and 3D scale.
 
 ## Numbers
 Before/after table: see READY entry for perf-expedition-1108 in EXT_TO_MAIN.md.
+
+## Before/after (pc-MRROBOTO, RTX 4070 SUPER, gl_compatibility, 2560x1440, 60 s, Hollow Crown)
+| preset | 3d scale before -> after | GPU ms before -> after | wall avg ms | p99 ms |
+|---|---|---|---|---|
+| medium | 1.00 -> 0.75 | 14.70 -> 11.56 (-21%) | 44.1 -> 44.6 | 82.2 -> 85.5 |
+| low | 0.80 -> 0.50 | 10.76 -> 7.77 (-28%) | 45.2 -> 42.1 | 94.3 -> 81.5 |
+| very low (new) | - -> 0.38 | - -> 6.25 | 42.6 | 93.5 |
+Wall time here is script-bound (match script ~23-25 ms, cost #2), so GPU savings show as headroom, not fps,
+until a2's script work lands. Mac (M5) numbers are missing: mac-Naruto-Founder fails every job since 21:44
+with rc 126 (`godot-nf`: GodotBG.app missing under the temp HOME). Rerun the pexp-* labels once it is fixed.
