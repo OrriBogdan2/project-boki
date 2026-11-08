@@ -393,8 +393,8 @@ func _archer_heavy() -> void:
 			P.inp["sec_hold"] = false
 		_aim(T.pos)
 	await _go(3.0, heavy, _sheet("heavy",
-			"RMB Heavy Shot: the bar (AimKit) and thread gathering, the big red needle (HEAVY_SCALE) with "
-			+ "its thick thread, the shove, the seam it leaves",
+			"RMB Heavy Shot: the bar from the bow (AimKit) and thread gathering, the needle on the nock, the big "
+			+ "red arrow (HEAVY_SCALE) with its thick thread, the shove; nothing left behind",
 			[0.6, 1.2, 1.33, 1.38, 1.44, 1.52, 1.7, 2.2, 2.9]), 3.0)
 	await _go(GAP)
 
@@ -433,11 +433,11 @@ func _archer_r() -> void:
 		if _at(t, 0.1):
 			K.cd["x"] = 0.0
 			K.cast_ult()
-		P.inp["fire"] = t > 0.6 and t < 0.66 or t > 1.6 and t < 1.66 or t > 2.6 and t < 2.66
+		P.inp["fire"] = t > 1.2 and t < 1.26 or t > 2.3 and t < 2.36
 		_aim(T.pos)
 	await _go(4.6, ult, _sheet("r",
-			"X Starpiercer: armed, a nock, the beam stitching a seam across the ground, the hit, the last and "
-			+ "deepest beam", [0.15, 0.3, 0.8, 0.95, 1.05, 1.3, 2.95, 3.1, 4.4]), 3.0)
+			"X Starpiercer: the first beam the frame X is pressed, the seam across the ground, the hit, two more "
+			+ "on the presses, the last and deepest beam", [0.1, 0.15, 0.3, 0.5, 1.2, 1.3, 2.3, 2.4, 3.2]), 3.0)
 	await _go(GAP)
 
 func _archer_voice() -> void:

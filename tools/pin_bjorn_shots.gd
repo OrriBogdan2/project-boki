@@ -313,14 +313,6 @@ const SHOTS := [
 		"Starpiercer up: the beam's lane to 18 m, the ticked ring at her feet, three pips"
 	],
 	[
-		"ult_pin_nock",
-		"archer",
-		"pin_ult",
-		0.98,
-		4.0,
-		"Key frame: the 0.3 s nock, string to the cheek, the bow glowing, the lane filling"
-	],
-	[
 		"ult_pin_impact",
 		"archer",
 		"pin_ult",

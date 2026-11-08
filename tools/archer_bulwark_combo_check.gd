@@ -126,6 +126,7 @@ func _archer_combos() -> void:
 		P.flash_t > 0.0 or K.draw.supers >= 0,
 		"flash %.2f" % P.flash_t
 	)
+	step(m, 0.2, func(): P.inp["fire"] = true; aim_at(P, T.pos))      # (past the 0.35 s perfect window)
 	P.inp["fire"] = false
 	step(m, 0.1)
 	ok("pin anim: a Supercharged release plays arc_super", K.anim_id == "arc_super", K.anim_id)
@@ -134,7 +135,7 @@ func _archer_combos() -> void:
 	T.teleport(home + Vector3(0, 0, 9.0))
 	T2.teleport(home + Vector3(0, 0, -9.0))
 	var cur := home + Vector3(6.0, 0, 0)
-	var e1 := _loose_after(m, P, 0.85, cur)
+	var e1 := _loose_after(m, P, 1.0, cur)      # (Empowered, past the 0.35 s perfect window)
 	ok(
 		"pin aim: an Empowered arrow lands at the cursor (6m)",
 		absf(e1 - 6.0) < 0.9 and K.draw.last_kind == "arrow",
@@ -210,7 +211,7 @@ func _archer_combos() -> void:
 		absf(K.move_k() * 0.7 - 0.85) < 0.01,
 		"move_k %.2f" % K.move_k()
 	)
-	step(m, 0.25, func(): P.inp["fire"] = true; aim_at(P, T.pos))
+	step(m, 0.35, func(): P.inp["fire"] = true; aim_at(P, T.pos))      # (let go past the 0.35 s window)
 	P.inp["fire"] = false
 	step(m, 0.6)
 	ok("pin: a draw without a perfect is back to normal speed", not K.draw.quick, "quick %s" % K.draw.quick)

@@ -107,9 +107,9 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		"visible %s dot %.2f" % [n.visible, Vector2(along.x, along.z).dot(d)])
 	ok("114 needle: oversized, over 2.5 times a loosed arrow", n.eye.distance_to(n.tip) >= 2.0,
 		"%.2f m" % n.eye.distance_to(n.tip))
-	var eye_ahead := func() -> float:
-		return Vector2(n.eye.x - P.position.x, n.eye.z - P.position.z).dot(d)
-	var eye0: float = eye_ahead.call()
+	var nock := HeroVfx.of(m).anchor_pos(P, "nock")
+	ok("114 needle: its eye rides the bow's nock point (the model's nock anchor), not a body offset",
+		n.eye.distance_to(nock) < 0.01, "eye %s nock %s" % [str(n.eye), str(nock)])
 	var glow0: float = n.shell_mat.get_shader_parameter("color").a
 	var end: Vector3 = n.points[-1]
 	var thread_back := Vector2(end.x - n.eye.x, end.z - n.eye.z).dot(d)
@@ -121,12 +121,11 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		free_v > 1.0 and absf(held_v / free_v - float(K.rmb_def()["pin"]["hold_move"])) < 0.08,
 		"free %.2f held %.2f" % [free_v, held_v])
 	step(m, 0.6, hold)
-	var eye1: float = eye_ahead.call()
 	var glow1: float = n.shell_mat.get_shader_parameter("color").a
 	var hot: Color = n.steel.get_shader_parameter("albedo")
-	ok("114 needle: it draws back and glows up with the charge, the silver going red-hot",
-		K.heavy_k() >= 0.99 and n.charge >= 0.99 and eye1 < eye0 - 0.2 and glow1 > glow0 + 0.3 and hot.r > hot.b + 0.3,
-		"eye %.2f -> %.2f glow %.2f -> %.2f k %.2f" % [eye0, eye1, glow0, glow1, K.heavy_k()])
+	ok("114 needle: it glows up with the charge, the silver going red-hot",
+		K.heavy_k() >= 0.99 and n.charge >= 0.99 and glow1 > glow0 + 0.3 and hot.r > hot.b + 0.3,
+		"glow %.2f -> %.2f k %.2f" % [glow0, glow1, K.heavy_k()])
 	ok("114 V: none in the Heavy Shot hold or the bow draw", clean and no_vee(m))
 	P.inp["sec_hold"] = false
 	m.step(DT)
@@ -302,10 +301,10 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	m.step(DT)
 	var flash := burst_node(K)
 	var at := flash.global_position if flash != null else Vector3(999, 0, 999)
-	ok("pin readout: the perfect release burst sits on the aim line at the bow, with no cursor star",
-		K.draw.perfect_now and flash != null and off_line(P.pos, d, at) < 0.05
+	ok("pin readout: the perfect release burst sits at the bow's nock point, with no cursor star",
+		K.draw.perfect_now and flash != null and at.distance_to(K.draw.bow_at()) < 0.6
 			and float(AimKit.reticle(P)["perfect"]) == 0.0,
-		"perfect %s off %.3f" % [K.draw.perfect_now, off_line(P.pos, d, at)])
+		"perfect %s off %.3f" % [K.draw.perfect_now, at.distance_to(K.draw.bow_at())])
 	step(m, 1.0)
 
 ## #5: the nock on the press, and one steady pull with no pose pop.
@@ -368,6 +367,9 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	aim_at(P, T.pos)
 	var kicks0 := K.heavy_kicks
 	var pins0 := K.pins
+	var spent0 := 0
+	for c in K.fx.spent:
+		if (c["node"] as Node3D).visible: spent0 += 1
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.8, rmb_at.bind(P, T.pos))
@@ -397,8 +399,8 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 		heavy >= 1 and lmb_kinds == 0 and node != null and not (node.get_node("Core") as Node3D).visible,
 		"heavy %d lmb %d" % [heavy, lmb_kinds])
 	var burst := burst_node(K)
-	ok("pin heavy: a release burst at the bow, on the aim line, wider than the bow cues, with a screen kick",
-		burst != null and off_line(P.pos, d, burst.global_position) < 0.05 and burst.scale.x >= 1.4
+	ok("pin heavy: a release burst at the bow's nock point, wider than the bow cues, with a screen kick",
+		burst != null and burst.global_position.distance_to(K.draw.bow_at()) < 0.6 and burst.scale.x >= 1.4
 			and K.heavy_kicks == kicks0 + 1,
 		"scale %.1f kicks %d" % [burst.scale.x if burst != null else 0.0, K.heavy_kicks - kicks0])
 	var flashed := 0.0
@@ -408,13 +410,13 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	ok("pin heavy: it pins the foe to the wall and the target flashes",
 		K.pins >= pins0 + 1 and T.stun_t > 0.5 and flashed > 0.0, "pins %d stun %.2f flash %.2f" % [K.pins - pins0,
 			T.stun_t, flashed])
-	ok("pin heavy: a stake stays in the wall after the pin", K.fx.staked >= 1, "stakes %d" % K.fx.staked)
-	step(m, 5.0)
+	step(m, 1.0)
 	var standing := 0
 	for c in K.fx.spent:
-		if float(c["t"]) > 0.5 and (c["node"] as Node3D).visible:
+		if (c["node"] as Node3D).visible:
 			standing += 1
-	ok("pin heavy: the stake is still standing 5 s later", standing >= 1, "standing %d" % standing)
+	ok("pin heavy: a wall pin leaves nothing in the wall or on the ground (the owner's 11-08 note)", standing <= spent0,
+		"standing %d, %d before" % [standing, spent0])
 
 func bjorn() -> void:
 	var r := setup("bulwark", 7.0, "", true)
