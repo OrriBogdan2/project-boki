@@ -9,8 +9,8 @@ extends RefCounted
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
 ## and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
-## (Blend2: moves that own the body). The action itself is two seekable channels crossfaded, so one move hands to the
-## next without a pop (item 32).
+## (Blend2: moves that own the body). The action, and the upper-body move, are each two seekable channels crossfaded,
+## so one move hands to the next without a pop (item 32).
 ##
 ## Data "crouch" (item 143): under air, a crouch layer (idle and a sneak ring) with a one-shot channel for the dip into
 ## and out of it. The game state's crouch (0..1) only says which way it is going; the layer has its own eased weight.
@@ -47,6 +47,9 @@ var alt_t := 0.0
 var cur := ""                # the clip on the live channel
 var chan := 0                # which channel is live, 0 or 1
 var xf := 0.0                # the crossfade between the channels (0: channel a)
+var cur_u := ""              # the clip on the live upper-body channel
+var chan_u := 0              # which upper-body channel is live, 0 or 1
+var xf_u := 0.0              # the crossfade between the upper-body channels (0: channel ua)
 var act_w := 0.0             # how much the action owns the body
 var up_w := 0.0              # how much it owns the upper body only
 var air_w := 0.0
@@ -235,11 +238,15 @@ func _build() -> AnimationNodeBlendTree:
 	for b in d.get("upper", []):
 		up.set_filter_path(_track(String(b)), true)
 	t.add_node("upper", up)
-	t.add_node("anim_u", _anim(String(lc["idle"])))
-	t.add_node("seek_u", AnimationNodeTimeSeek.new())
-	t.connect_node("seek_u", 0, "anim_u")
+	for ch in ["ua", "ub"]:
+		t.add_node("anim_" + ch, _anim(String(lc["idle"])))
+		t.add_node("seek_" + ch, AnimationNodeTimeSeek.new())
+		t.connect_node("seek_" + ch, 0, "anim_" + ch)
+	t.add_node("act_u", AnimationNodeBlend2.new())
+	t.connect_node("act_u", 0, "seek_ua")
+	t.connect_node("act_u", 1, "seek_ub")
 	t.connect_node("upper", 0, "air")
-	t.connect_node("upper", 1, "seek_u")
+	t.connect_node("upper", 1, "act_u")
 	t.add_node("full", AnimationNodeBlend2.new())
 	t.connect_node("full", 0, "upper")
 	t.connect_node("full", 1, "act")
@@ -354,8 +361,14 @@ func step(dt: float) -> void:
 	var proc := bool(want.get("proc", false))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
 	if not proc and bool(want.get("upper", false)):
-		_node("anim_u").animation = String(want["clip"])
-		_p("seek_u/seek_request", float(want.get("t", 0.0)))
+		var clip_u := String(want["clip"])
+		if clip_u != cur_u:
+			cur_u = clip_u
+			chan_u = 1 - chan_u
+			_node("anim_u" + "ab"[chan_u]).animation = clip_u
+			if up_w <= 0.0:
+				xf_u = float(chan_u)     # (from the legs: no old clip to fade out of)
+		_p("seek_u%s/seek_request" % "ab"[chan_u], float(want.get("t", 0.0)))
 		up_w = move_toward(up_w, 1.0, dt / FADE)
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 	elif not proc and want.has("clip"):
@@ -381,7 +394,9 @@ func step(dt: float) -> void:
 		if act_w <= 0.0 and up_w <= 0.0:
 			cur = ""
 	xf = move_toward(xf, float(chan), dt / FADE)
+	xf_u = move_toward(xf_u, float(chan_u), dt / float(want.get("fade", FADE)))
 	_p("act/blend_amount", xf)
+	_p("act_u/blend_amount", xf_u)
 	_p("upper/blend_amount", up_w)
 	_p("full/blend_amount", act_w)
 	_loco(s, dt)
