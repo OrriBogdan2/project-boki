@@ -300,8 +300,12 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-08 (owner): every expedition is a fight over the Heart (direction; prototype first)
 - The Blight closes toward the Heart's site each match (battle-royale pull to one center), so every match converges on it.
-- At the center the Heart charges a Heartspark (a shard of its red-orange LIGHT, not a piece of the Heart: lore stays "one Heart, one crack"). While it charges, everyone sees where it is.
+- At the center the Heart charges a Heartspark (a mote of its soft pink-red LIGHT, matching the key-art Heart; not a piece of the Heart: lore stays "one Heart, one crack", the crack unseen inside). While it charges, everyone sees where it is.
 - When charged, anyone can take it. The carrier is revealed and slowed, and can only leave through a Heart Gate. Extracting with it pays big (rare eggs, evolution mats, bond/trust).
 - After a carrier extracts, the Heart goes on a COOLDOWN and then charges a new Heartspark (visible again), so one match can have several Heartspark fights.
 - Normal extraction stays open: leaving early with your own loot is still a valid choice (keeps extraction tension; no forced total loss, esp. on pet-loss tiers).
 - Variant to test later: "Heart Night", a top-tier/event mode where ONLY the Heartspark team can extract.
+
+## 2026-11-08 (owner, Nov 7): Wyrmheart look and villain names locked
+- **Wyrmheart look = the key art:** an anatomically real heart (aorta, arteries, chambers) of smooth, glossy crimson glass with a soft pink-red inner glow. No gold veins, no visible crack. Applies to the in-game model, VFX, UI icons and lore text. Ref: briefs/art-refs/villain/wyrmheart_ref_from_keyart.jpg. Supersedes the gold-filigree/crack look in the v2 Wyrm art brief.
+- **Names:** Malgrave (the king/the Wyrm), Solmere (the kingdom), the Hollowing (the night of the fall), the Hollow (the pit). Retired in new text: the Tyrant, the Crown (as the kingdom), the Sundering, the hoard (now Malgrave's vault). Older entries above keep the old words as history; LORE_MASKS.md is current. The map name "The Hollow Crown" is unchanged.
