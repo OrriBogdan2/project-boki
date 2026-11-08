@@ -2,6 +2,8 @@
 scripts/match/kmoves_pair.gd and content/archetypes/ashwick.json (lmb spool 0.2, flight 1.8 s). Personality: she is having the best
 day of her life. Hips first, up on her toes, loose and quick; every blast is a treat; she laughs with her whole body.
 The long gun is carried like a spear: one fist on the wrap, the off hand on the chamber when it matters.
+The idle and stance (docs/art/IDLE_AUDIT.md) are authored with empty hands, fire from her hands (DECISIONS Nov 7: no weapons): she is
+not mad, just certain, and pleased with herself. The model still carries the flamethrower in the right fist until the v2 body.
 Run: blender -b --python tools/art1/cinder_clips.py -- <cinder.blend> <out.glb> [clip,clip]"""
 import sys, os, math
 import bpy
@@ -40,39 +42,157 @@ def C(name, dur, keys, loop=False, base=READY):
 END = {k: READY[k] for k in READY}
 
 
+TAU = 2 * math.pi
+H_HIPS = Vector(tuple(K.J("hips")))
+H_HAND_R = Vector(tuple(K.J("hand.R")))
+PIV = Vector((0.0, 0.0, K.HIPS_Z + 0.03))
+GRIP_OFF = Vector(tuple(K.GRIP_AT)) - H_HAND_R
+REST_R = frame_of(tuple(K.GUN_B), tuple(K.GUN_E))
+LAG_CHEST, LAG_HEAD, LAG_HAND, LAG_HAIR = 4 / 180, 8 / 180, 10 / 180, 14 / 180   # of the 6 s loop: 4, 8, 10, 14 frames
+# the idle's feet, the stance's too: weight on the left leg, the free right foot a little forward and up on its ball
+FEET = {"FL": (-0.09, 0.0, A_Z), "FR": (0.13, 0.07, A_Z + 0.025), "FLy": 0.25, "FRy": -0.22, "FLp": 0.0, "FRp": 0.3}
+
+
+def ss(x):
+    x = min(1.0, max(0.0, x))
+    return x * x * (3 - 2 * x)
+
+
+def bump(u, c, w):
+    """a smooth hump at c (half-width w) on the loop, zero away from it, so it closes the seam."""
+    d = abs((u - c + 0.5) % 1.0 - 0.5)
+    return 0.5 + 0.5 * math.cos(math.pi * d / w) if d < w else 0.0
+
+
+def window(u, a, b, c, d):
+    u %= 1.0
+    return ss((u - a) / (b - a)) * (1 - ss((u - c) / (d - c)))
+
+
+def breath(u, k=2):
+    """0 out .. 1 in, k breaths a loop; the in-breath quicker than the out (a phase warp that is itself periodic)."""
+    ph = (u * k) % 1.0
+    return 0.5 - 0.5 * math.cos(TAU * (ph + 0.07 * math.sin(TAU * ph)))
+
+
+def chest(p):
+    """the hips bone's (her whole torso's) turn and head after p's pelvis and torso, as the Solver places them."""
+    q_root = eul(p["prt"])
+    root_at = PIV + Vector(p["pel"]) - q_root @ PIV
+    return q_root @ eul(p["tor"]), q_root @ H_HIPS + root_at
+
+
+def on_chest(ch, at, fingers, palm):
+    """a hand placed in the chest's space (at: from the hips head, rest frame) -> world wrist, fingers, palm normal."""
+    q, hp = ch
+    return q @ Vector(at) + hp, q @ Vector(fingers).normalized(), q @ Vector(palm).normalized()
+
+
+def right_hand(p, w, fingers, palm):
+    """the empty right hand: fingers and palm normal -> the Solver's grip point and frame (the fist's rest: fingers down, palm in)."""
+    edge = fingers.cross(palm)
+    q_hand = frame_of(fingers, edge) @ REST_R.inverted()
+    p["G"], p["BE"] = tuple(w + q_hand @ GRIP_OFF), (tuple(fingers), tuple(edge))
+
+
+def turn(v, axis, a):
+    return Quaternion(Vector(axis).normalized(), a) @ Vector(v)
+
+
+def blend(a, b, t):
+    return tuple(a[i] + (b[i] - a[i]) * t for i in range(3))
+
+
+def idle_body(u):
+    """pelvis, then the chest 4 frames behind it, then the head 8 behind: a slow hip sway (one a loop) over the left leg,
+    two breaths, the look at her own flame (FID) and the hip settling after it."""
+    sw = lambda v: math.sin(TAU * v)
+    fid = lambda v: window(v, 0.40, 0.48, 0.63, 0.72)
+    rest = lambda v: bump(v, 0.79, 0.08)
+    vc, vh = u - LAG_CHEST, u - LAG_HEAD
+    p = {}
+    p["pel"] = (-0.035 + 0.009 * sw(u) - 0.006 * rest(u), 0.004 * math.sin(TAU * u + 1.0), -0.033 - 0.006 * (0.5 - 0.5 * sw(u)) - 0.005 * rest(u))
+    p["prt"] = (0.0, 0.12 + 0.03 * sw(u), 0.075 - 0.03 * sw(u) + 0.02 * rest(u))
+    p["tor"] = (-0.04 - 0.016 * breath(vc) + 0.04 * fid(vc), -0.1 + 0.02 * sw(vc) + 0.09 * fid(vc), -0.12 + 0.035 * sw(vc) - 0.015 * rest(vc))
+    p["hed"] = (-0.06 + 0.01 * breath(vh) + 0.2 * fid(vh), -0.04 + 0.07 * math.sin(TAU * vh + 2.0) * (1 - fid(vh)) + 0.2 * fid(vh),
+                0.08 - 0.025 * sw(vh) - 0.16 * fid(vh))
+    return p
+
+
 def idle(u):
-    a = math.sin(u * 2 * math.pi)
-    b = math.sin(u * 4 * math.pi)
+    """6 s. A loose S: her weight in her left hip, the right knee forward on the ball of the foot, chest proud, chin up.
+    The left hand rests at her collarbone, the right lies palm up at her hip rolling a little flame over its knuckles.
+    Once a loop the left hand leaves her collarbone and opens, the flame licks up her wrist, and she tips her head to it and smiles."""
+    u %= 1.0
     p = dict(READY)
-    p["pel"] = (0.022 + 0.01 * a, 0.0, -0.034 - 0.008 * b)
-    p["prt"] = (0.04, -0.14, 0.09 + 0.022 * a)
-    p["tor"] = (0.05 + 0.02 * b, 0.2, -0.1 - 0.018 * a)
-    p["hed"] = (-0.04 - 0.02 * b, -0.12 + 0.05 * math.sin(u * 2 * math.pi + 1), 0.12 + 0.04 * a)
-    g = READY["G"]
-    p["G"] = (g[0], g[1], g[2] - 0.006 * b)
-    p["LP"] = (-0.235 + 0.004 * a, 0.0, 0.875 - 0.006 * b)
-    p["lid"] = 1.0 if 0.30 < u < 0.33 or 0.72 < u < 0.745 else 0.08
-    p["fin"] = 0.15 * max(0.0, math.sin(u * 6 * math.pi)) ** 8
+    p.update(FEET)
+    p.update(idle_body(u))
+    p["Lw"] = 0.0
+    fid = window(u, 0.40, 0.48, 0.63, 0.72)
+    look = ss((u - 0.48) / 0.13)
+    ch = chest(idle_body(u - LAG_HAND))
+    # right: palm up, the wrist rolling the flame across the knuckles (3 rolls a loop), slower while she looks at the other one
+    k = 1 - 0.5 * fid
+    f0 = Vector((-0.3, 1.0, -0.38)).normalized()     # cupped low: the fist's gun angles at the ground, not aimed
+    fing = turn(f0, (0, 0, 1), 0.15 * k * math.sin(TAU * 3 * u + 1.2))
+    palm = turn((0, 0, 1), fing, 0.38 * k * math.sin(TAU * 3 * u))
+    w, fing, palm = on_chest(ch, (0.15, 0.19, 0.165 + 0.006 * math.sin(TAU * 3 * u - 0.6)), fing, palm)
+    right_hand(p, w, fing, palm)
+    # left: on the collarbone, two idle taps of the fingers; the fidget lifts it open in front of her chest and turns the wrist to her
+    at = blend((-0.07, 0.15, 0.42), (-0.13, 0.27, 0.33), fid)
+    settle = bump(u, 0.745, 0.04)
+    at = (at[0], at[1] - 0.006 * settle, at[2] - 0.014 * settle)
+    lf = Vector(blend((0.2, 1.0, 0.3), (0.15, 0.35, 1.0), look))
+    lp = Vector(blend((0.0, -0.15, 1.0), (0.05, -1.0, 0.25), look))
+    lf = Vector(blend((0.7, -0.15, 0.6), lf, fid))
+    lp = Vector(blend((0.0, -1.0, 0.0), lp, fid))
+    w, lf, lp = on_chest(ch, at, lf, lp)
+    p["LP"], p["LF"] = tuple(w), (tuple(lf), tuple(lp))
+    p["fing"] = 0.12 + 0.18 * (bump(u, 0.13, 0.025) + bump(u, 0.19, 0.025)) - 0.12 * fid + 0.1 * fid * look
+    # the face: heavy-lidded and pleased with herself; the smile is for the flame. Blinks at 0.18 and 0.9
+    smile = window(u - 0.04, 0.46, 0.52, 0.64, 0.74)
+    p["brow"] = -0.2 - 0.25 * smile
+    p["lid"] = 0.2 + 0.1 * smile
+    p["lid"] += (1.0 - p["lid"]) * max(bump(u, 0.18, 0.016), bump(u, 0.9, 0.016))
+    p["jaw"] = 0.03 + 0.09 * smile
+    # the living-fire hair: a flicker, and a toss 14 frames behind the head's turn
+    p["fin"] = 0.12 + 0.08 * math.sin(TAU * 3 * u) + 0.3 * window(u - LAG_HAIR, 0.40, 0.48, 0.63, 0.72)
+    p["breath"] = breath(u)
     return p
 
 
 def stance(u):
-    """The sheet's pose: the gun laid back on her shoulder, the free hand on her hip, the hip thrown out, chin up, delighted with herself."""
-    a = math.sin(u * 2 * math.pi)
-    b = math.sin(u * 4 * math.pi)
+    """6 s, on the idle's feet: both palms come up at hip height with a flame in each, and she moves her weight from hip to hip,
+    unhurried, holding at each side; the head scans behind the hips."""
+    u %= 1.0
+    sh = lambda v: 2 * ss(ss(0.5 - 0.5 * math.cos(TAU * v))) - 1          # -1 on the left hip .. +1 on the right, held at both
+    def body(v):
+        h, hc, hh = sh(v), sh(v - LAG_CHEST), sh(v - LAG_HEAD)
+        vh = v - LAG_HEAD
+        return {"pel": (-0.035 + 0.06 * (h + 1) / 2, 0.0, -0.033 - 0.012 * (1 - h * h)),
+                "prt": (0.0, 0.12 - 0.1 * (h + 1) / 2, 0.075 - 0.15 * (h + 1) / 2),
+                "tor": (-0.05 - 0.016 * breath(v - LAG_CHEST), -0.1 + 0.12 * (hc + 1) / 2, -0.12 + 0.24 * (hc + 1) / 2),
+                "hed": (-0.07 + 0.01 * breath(vh), 0.14 * math.sin(TAU * vh + 0.5), 0.08 - 0.15 * (hh + 1) / 2)}
     p = dict(READY)
-    p.update(SHOULDERED)
-    p["pel"] = (0.04 + 0.008 * a, 0.0, -0.03)
-    p["prt"] = (0.0, -0.2, 0.15)
-    p["tor"] = (0.0 - 0.015 * b, 0.32, -0.17)
-    p["hed"] = (-0.1, -0.2, 0.2 + 0.03 * a)
-    p["FL"], p["FR"] = (-0.075, 0.09, A_Z), (0.155, -0.07, A_Z)
-    p["FLy"], p["FRy"] = 0.42, -0.5
-    p["G"] = (0.2, 0.10 + 0.004 * a, 1.32 - 0.006 * b)
-    p["LP"] = (-0.225, 0.015, 0.88 - 0.004 * b)
-    p["fing"] = 0.25
-    p["brow"], p["lid"], p["jaw"] = -0.5, 0.14, 0.12
-    p["lid"] = 1.0 if 0.52 < u < 0.545 else 0.14
+    p.update(FEET)
+    p.update(body(u))
+    # the weight comes onto the right foot: its heel settles
+    h = (sh(u) + 1) / 2
+    p["FRp"] = 0.3 * (1 - h)
+    p["FR"] = (0.13, 0.07, A_Z + 0.025 * (1 - h))
+    p["Lw"] = 0.0
+    ch = chest(body(u - LAG_HAND))
+    fl = 0.12 * math.sin(TAU * 2 * u)
+    rf = turn(Vector((0.05, 1.0, -0.4)).normalized(), (0, 0, 1), 0.05 * math.sin(TAU * 2 * u + 1))
+    w, rf, rp = on_chest(ch, (0.2, 0.17, 0.14), rf, turn((0, 0, 1), rf, fl))
+    right_hand(p, w, rf, rp)
+    w, lf, lp = on_chest(ch, (-0.2, 0.17, 0.14 + 0.005 * math.sin(TAU * 2 * u + 2)), (-0.1, 1.0, 0.05), turn((0, 0, 1), (-0.1, 1.0, 0.05), -fl))
+    p["LP"], p["LF"] = tuple(w), (tuple(lf), tuple(lp))
+    p["fing"] = 0.35 + 0.12 * math.sin(TAU * 2 * u + 0.8)
+    p["brow"], p["jaw"] = -0.3, 0.06
+    p["lid"] = 0.18 + 0.82 * bump(u, 0.45, 0.016)
+    p["fin"] = 0.25 + 0.1 * math.sin(TAU * 3 * u)
+    p["breath"] = breath(u)
     return p
 
 
@@ -144,7 +264,7 @@ def crouch_set():
 
 
 def clips():
-    out = [FnClip("idle", 3.6, idle), FnClip("stance", 4.0, stance)]
+    out = [FnClip("idle", 6.0, idle), FnClip("stance", 6.0, stance)]
     out += crouch_set()
     for nm, sp, sk, stride, share, lift in (("walk", 2.2, 0.0, 0.42, 0.58, 0.075), ("run", 4.6, 1.0, 0.6, 0.37, 0.2)):
         T = 2 * stride / (share * sp)
@@ -261,7 +381,48 @@ def extras(P):
     lead = max(P["FL"][1], P["FR"][1], 0.0) * 1.15 + 0.5 * max(P["FL"][2] - A_Z, P["FR"][2] - A_Z, 0.0)
     o["skirt"] = (Quaternion((1, 0, 0), SKIRT_SIGN * (0.35 * P.get("skirt", 0.0) + min(lead, 0.6))), None)
     o["jaw"] = (Quaternion((1, 0, 0), JAW_SIGN * 0.2 * P.get("jaw", 0.0)), None)
+    # the breath: the rib cage swells about x_breath's head (keyed in every clip, still outside the idle and stance)
+    br = P.get("breath", 0.0)
+    o["x_breath"] = (None, None, (1 + BREATH_W * br, 1 + BREATH_H * br, 1 + BREATH_W * br))
     return o
+
+
+BREATH_W, BREATH_H = 0.04, 0.015
+BREATH_HEAD, BREATH_TAIL = (0.0, 0.0, 1.06), (0.0, 0.0, 1.26)
+
+
+def add_breath(arm):
+    """x_breath, a leaf under hips at the rib cage, and the rib cage's skin: a smooth share of the hips weight in a band
+    over the chest (z 1.0-1.32, |x| under 0.17, the back's surface forward: the tank stays on hips)."""
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = arm.data.edit_bones
+    b = eb.get("x_breath") or eb.new("x_breath")
+    inv = arm.matrix_world.inverted()
+    b.head, b.tail, b.roll = inv @ Vector(BREATH_HEAD), inv @ Vector(BREATH_TAIL), 0.0
+    b.parent, b.use_connect, b.use_deform = eb["hips"], False, True
+    bpy.ops.object.mode_set(mode="OBJECT")
+    for ob in bpy.data.objects:
+        if ob.type != "MESH" or ob.name in ("Src", "Low") or not any(m.type == "ARMATURE" and m.object == arm for m in ob.modifiers):
+            continue
+        hg = ob.vertex_groups.get("hips")
+        if hg is None:
+            continue
+        xg = ob.vertex_groups.get("x_breath") or ob.vertex_groups.new(name="x_breath")
+        n = 0
+        for v in ob.data.vertices:
+            w = next((g.weight for g in v.groups if g.group == hg.index), 0.0)
+            if w <= 0.0:
+                continue
+            q = ob.matrix_world @ v.co
+            f = ss((q.z - 1.0) / 0.08) * (1 - ss((q.z - 1.24) / 0.08)) * (1 - ss((abs(q.x) - 0.12) / 0.05)) * ss((q.y + 0.17) / 0.06)
+            if f <= 0.0:
+                continue
+            m = 0.85 * w * f
+            hg.add([v.index], w - m, "REPLACE")
+            xg.add([v.index], m, "REPLACE")
+            n += 1
+        print("x_breath", ob.name, n)
 
 
 LID_SIGN, SKIRT_SIGN, JAW_SIGN = 1.0, 1.0, -1.0
@@ -287,10 +448,16 @@ def bake_jets(arm, clip, act):
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:]
     bpy.ops.wm.open_mainfile(filepath=a[0])
+    for im in bpy.data.images:      # the finish saves paths from the Meshy dir (stage/c/atlas.png): found next to the .blend from anywhere else
+        alt = os.path.join(os.path.dirname(os.path.abspath(a[0])), os.path.basename(im.filepath))
+        if im.filepath and not im.packed_file and not os.path.exists(bpy.path.abspath(im.filepath)) and os.path.exists(alt):
+            im.filepath = alt
+            im.reload()
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
     rig = {"grip_rest": tuple(K.GRIP_AT), "blade_rest": tuple(K.GUN_B), "edge_rest": tuple(K.GUN_E), "pelvis": K.HIPS_Z + 0.03, "hilt_l": -K.FORE,
            "lhand": {"k": (0, 1, -0.15), "o": (-1, 0, 0), "palm": (-K.SH + 0.005, 0.0, K.HAND_Z - 0.05)}}
     bpy.context.scene.render.fps = FPS
+    add_breath(arm)
     sol = Solver(arm, rig)
     bpy.context.view_layer.objects.active = arm
     names = []
