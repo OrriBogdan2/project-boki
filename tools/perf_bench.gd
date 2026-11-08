@@ -17,6 +17,8 @@ var main: Node
 var secs := 60.0
 var farm_secs := 20.0
 var out_path := ""
+var teams := 3            # --bench-teams / --bench-squad: 10 trios is the Extraction budget (30 Hunters)
+var squad := 2
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -29,6 +31,8 @@ func run(main_node: Node) -> void:
 		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
+		if a.begins_with("--bench-teams="): teams = int(a.substr(14))
+		if a.begins_with("--bench-squad="): squad = int(a.substr(14))
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = VIEW
@@ -47,7 +51,7 @@ func run(main_node: Node) -> void:
 
 func _match() -> void:
 	var o := Match.demo_opts()
-	o.merge({"teams": 3, "squad": 2, "total": 6, "raid": "ash", "blight": true, "no_drop": true, "god": true,
+	o.merge({"teams": teams, "squad": squad, "total": teams * squad, "raid": "ash", "blight": true, "no_drop": true, "god": true,
 		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
