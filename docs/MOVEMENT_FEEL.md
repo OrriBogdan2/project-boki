@@ -156,7 +156,7 @@ Other checks:
   - Home uses the same rise (`Home._ledge_float`).
   - A deliberate pull still lands you on top: `Hunter.launch_to` to higher ground (an archer's Grapple onto a ledge, a leap up a cliff) flies a sure arc.
 - **Wall catch over the abyss:** below an island's lip, a wall 0.75m from your side catches you (elsewhere 0.4m), except near a sheer cliff. The abyss catch reach is 4.5m below the lip (was 3.5m). A sheer cliff right in front of you has nothing to hold, and its neighbours don't catch you through it.
-- **Rock hop:** jumping into a rock while pushing in still hops you onto it. Terrain ledges are the ledge rise's now.
+- **Rocks, trees and walls are walls** (item 151): a jump into one never lifts you over it (the old rock hop did, and dropped you into one-tile holes inside rock clumps). The generator never leaves ground sealed in by blockers (BlockPrune.fill_pockets), so nothing can land you in a hole you can't walk out of. Terrain ledges are the ledge rise's.
 - **Abyss:**
   - Hunters' point of no return is `World.ABYSS_DEPTH` + 7m: about 13m under the lip (was 6m). Monsters and the home keep the old depth.
   - As you sink, the local player's screen drains of colour, darkens, goes deep crimson and closes in with a vignette that beats with a heartbeat (`scripts/match/abyss_fx.gd`, a screen shader under the HUD). The HUD adds a heartbeat and a low rumble, and near the end a pulsing "HOLD GLIDE TO LIFT" / "CLIMB OUT".
