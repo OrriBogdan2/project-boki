@@ -535,7 +535,7 @@ def gen_maps():
 def gen_rules():
     tiers = gd_const("core/data.gd", "TIERS") or []
     loss_min = int((content("rules").get("boki_system") or {}).get("loss", {}).get("loss_min_tier", 2))
-    body = "## Expedition tiers\n\n" + table(["Tier", "Monsters", "Loot", "Wild Boki levels", "Unlocks after", "Boki at risk", "What happens"], [[t["name"], "x" + num(t["mob"]), "x" + num(t["loot"]), "%s to %s" % tuple(t["kin_lvl"]), "%s extractions" % t["unlock"], "no" if i < loss_min else "dropped dazed, can be scanned", t["desc"]] for i, t in enumerate(tiers)])
+    body = "## Expedition tiers\n\n" + table(["Tier", "Depth", "Monsters", "Loot", "Wild Boki levels", "Unlocks after", "Boki at risk", "What happens"], [[t["name"], t["depth"], "x" + num(t["mob"]), "x" + num(t["loot"]), "%s to %s" % tuple(t["kin_lvl"]), "%s extractions" % t["unlock"], "no" if i < loss_min else "dropped dazed, can be scanned", t["desc"]] for i, t in enumerate(tiers)])
     mt = gd_const("core/data.gd", "MATCH") or {}
     mc = gd_dict_comments("core/data.gd", "MATCH")
     if mt:
