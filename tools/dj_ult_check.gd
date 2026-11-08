@@ -58,7 +58,8 @@ func dancer(a) -> void:
 	var ring: Dictionary = AimKit.entry(P, "ult")
 	A.ok("dancer X: Encore casts; the ring everyone sees starts small and grows, a lit rim with no solid fill (its "
 			+ "burst is HeroVfx); the Vault comes back",
-			U.running() and AimKit.shown(P, "ult") and bool(ring.get("all", false)) and float(ring.get("fill", -1.0)) < 0.0
+			U.running() and AimKit.shown(P, "ult") and bool(ring.get("all", false))
+			and float(ring.get("fill", -1.0)) < 0.0
 			and int(HeroVfx.of(m).plays.get("encore", 0)) >= 1
 			and float(ring.get("r", 0.0)) < float(d["reach"]) * 0.6 and P.dashes >= P.max_dashes() - 0.01,
 			"r %.2f dashes %.2f" % [float(ring.get("r", 0.0)), P.dashes])
@@ -86,8 +87,9 @@ func dancer(a) -> void:
 	A.ok("dancer X: she dances from the first beat on", bool(beat["danced"]))
 	A.ok("dancer X: still running at 2.3s", U.running())
 	A.step(m, 0.5)
-	A.ok("dancer X: 2s of blades, 10 at most on each foe (each a violet hit); ends with a plain fade and the dance stops",
-			U.blades == 20 and int(HeroVfx.of(m).plays.get("encore_hit", 0)) >= 20 and not U.running() and not AimKit.shown(P, "ult") and K.anim_id != ThiefUlt.DANCE,
+	A.ok("dancer X: 2s of blades, 10 at most on each foe (each a violet hit); ends with a plain fade, the dance stops",
+			U.blades == 20 and int(HeroVfx.of(m).plays.get("encore_hit", 0)) >= 20 and not U.running()
+			and not AimKit.shown(P, "ult") and K.anim_id != ThiefUlt.DANCE,
 			"blades %d" % U.blades)
 	A.ok("dancer X small mechanic: the outer band hits harder and blights 6s; the inside doesn't blight",
 			U.rim_blades == 10 and A.dmg(T) > A.dmg(T2) * 1.3 and T.blight_t > 4.0 and T2.blight_t <= 0.0,

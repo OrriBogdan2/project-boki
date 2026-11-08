@@ -505,8 +505,8 @@ func _tick_trail(dt: float) -> void:
 	fx().star(h.pos + Vector3(0, 1.0, 0), GHOST, 0.5, 0.22, Color("c9a0ff"))
 
 ## After a Vault: the flip (the routine's, ThiefChain; from a jump the air one), the violet arc its hands and feet
-## trace (twice, with an afterglow), the speed and, by its row, the next bolt empowered: the glint forms in the throwing hand and flares as
-## she lands.
+## trace (twice, with an afterglow), the speed and, by its row, the next bolt empowered: the glint forms in the
+## throwing hand and flares as she lands.
 func _vaulted(air: bool, empower: bool) -> void:
 	var dd := dash_def()
 	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
