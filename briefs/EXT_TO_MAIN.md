@@ -2598,3 +2598,6 @@ READY ext/gameplay-media e6881d69f (gameplay media capture tool + encode script;
 
 ## 2026-11-08 deep (job 20261108-003051-a2): CLAIM props swap re-check (escalated from 20261107-213002-a2)
 - CLAIM: re-render and verify ext/props-vex, ext/props-claire, ext/props-sable, and the no-change calls for Grimble and Lace, against the new sheets. The earlier props_*.jpg Vex renders show the old v1 Vex (shorts, horn cannon), not the v2 model on the branch, so they are being replaced.
+
+## 2026-11-08 deep (job 20261108-004501-a4): BLOCKED utilities + shops (no CLAIM taken)
+- ext/utilities-shops still waits on the research job ("Research: every source map utility + shop stock + region roles + hot zone", role finder). It is only in the backlog and hasn't run: there's no ext/source-utilities branch and no docs/SOURCE_UTILITIES.md. Run that finder job first, then this build. The build should branch from ext/source-utilities and merge ext/shops (794264bf, not in main) first.
