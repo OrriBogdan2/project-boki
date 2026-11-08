@@ -70,6 +70,9 @@ func pin() -> void:
 		absf(float(K.cd["x"]) - float(xd["cooldown"])) < 0.1,
 		"%.1f" % float(K.cd["x"]))
 	ok("pin ult anim: the cast plays pin_ult_cast", K.anim_id == "pin_ult_cast", K.anim_id)
+	var cue: Dictionary = (HeroVfx.data("archer")["moves"]["ult_cast"]["sfx"] as Array)[0]
+	ok("pin ult sound: the cast cue plays for everyone on the map (no distance cut, loud for rivals too)",
+		HeroVfx.of(m).plays.get("ult_cast", 0) == 1 and cue["at"] == "all" and float(cue["other"]) >= float(cue["db"]))
 	ok("pin ult bond: nothing for the cast alone", best(P) <= 0.0 and P.ult < 0.01, "%.3f" % P.ult)
 	step(m, 0.1)
 	var lane := AimKit.entry(P, "x")
@@ -87,7 +90,17 @@ func pin() -> void:
 		K.anim_id == "pin_ult_nock" and K.ult.nock_t > 0.0 and float(AimKit.reticle(P).get("charge", 0.0)) > 0.0,
 		"%s nock %.2f" % [K.anim_id, K.ult.nock_t])
 	beam(m, P, K, T.pos)
-	step(m, 0.2)
+	m.step(DT)          # (the kit skins its new shot on its next step)
+	var flying := m.shots.filter(func(sh): return sh["by"] == P and String(sh["x"].get("ab", "")) == "ultimate")
+	ok("pin ult look: the shot is a travelling arrow (a skinned projectile at the data speed, not an instant lane)",
+		flying.size() == 1 and K.fx.live.size() == 1 and float(xd["speed"]) >= 80.0
+		and absf((flying[0]["vel"] as Vector2).length() - float(xd["speed"])) < 0.5,
+		"%d shots, %d arrows" % [flying.size(), K.fx.live.size()])
+	ok("pin ult look: nothing is hit the instant it is loosed", dmg(T) == 0.0 and dmg(T2) == 0.0)
+	step(m, 0.1)
+	ok("pin ult look: hits land after flight time (7m foe by 0.1s, the 16m foe still ahead of it)",
+		dmg(T) > 0.0 and dmg(T2) == 0.0, "took %.0f / %.0f" % [dmg(T), dmg(T2)])
+	step(m, 0.1)
 	var want := float(xd["dmg"]) * ap
 	ok("pin ult payoff: the beam pierces both foes, 16m out too (1.5x her Empowered range)",
 		dmg(T) > want * 0.6 and dmg(T2) > want * 0.9, "took %.0f / %.0f (want %.0f)" % [dmg(T), dmg(T2), want])

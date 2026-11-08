@@ -4,7 +4,9 @@ extends PanelContainer
 ## real model, side on) using the ability on a training dummy, with the kit's own move on the body, the
 ## effect in the ability's colour (shots, a thrown charge, a beam, a strike from above...), the hit
 ## sparks, the dummy's flinch and the damage. Under it the key (Settings.key_cap), the name and one
-## short line. Used by HunterViewer (the Masks screen, the Mask moments and the reveal).
+## short line. Used by HunterViewer (the Masks screen, the Mask moments and the reveal). Only a clip that is
+## playing builds its scene (one a frame: PreviewBuild) and renders; one out of focus holds a still frame, or
+## its ability's icon until it has played once.
 ##
 ##   add_child(AbilityClip.make("gunslinger", "rmb", Vector2(230, 130)))
 
@@ -16,6 +18,7 @@ const MELEE_AT := Vector3(0.55, 0.0, 0.0)  # where a melee Hunter stands to swin
 const LINE_CHARS := 64         # the fallback line's length, cut at a word
 ## The effect each delivery reads as (an archetype's "clip" block can name its own per slot in "fx").
 const FX_BY_DELIVERY := {"projectile": "bolt", "cone": "cone", "zone": "zone", "wall": "wall"}
+static var _paren: RegEx        # "(...)" asides cut from a fallback line, compiled once
 
 var id := ""
 var slot := ""
@@ -23,11 +26,14 @@ var stage_size := Vector2(230, 130)
 var fx := ""
 var t := 0.0
 var col := Color.WHITE
+var playing := true            # play() sets it: the clip in focus plays, the others hold still
 var vp: SubViewport
 var model: Node3D
 var anim: HunterAnim
 var dummy: Node3D
 var _cam: Camera3D
+var _view: TextureRect
+var _still: Control            # the ability's icon on the empty stage until the clip is built
 var _moves: Array = []
 var _melee := false
 var _parts := {}               # the effect's meshes, made once and shown or hidden each frame
@@ -71,8 +77,9 @@ static func line_for(hunter_id: String, ability: String) -> String:
 	if own != "":
 		return own
 	var text := String(HunterViewer.slot_info(hunter_id, ability)["line"])
-	var paren := RegEx.create_from_string("\\s*\\([^)]*\\)")
-	text = paren.sub(text, "", true)
+	if _paren == null:
+		_paren = RegEx.create_from_string("\\s*\\([^)]*\\)")
+	text = _paren.sub(text, "", true)
 	if text.find(": ") >= 0 and text.find(": ") < 30:
 		text = text.substr(text.find(": ") + 2)
 	for stop in [". ", "; "]:
@@ -113,19 +120,40 @@ func _stage() -> Control:
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vp = SubViewport.new()
 	vp.own_world_3d = true
-	vp.msaa_3d = Viewport.MSAA_4X
-	vp.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
+	vp.msaa_3d = Viewport.MSAA_2X
+	vp.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	holder.add_child(vp)
-	var tex := TextureRect.new()
-	tex.texture = vp.get_texture()
-	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tex.stretch_mode = TextureRect.STRETCH_SCALE
-	tex.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	holder.add_child(tex)
+	_view = TextureRect.new()
+	_view.texture = vp.get_texture()
+	_view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_view.stretch_mode = TextureRect.STRETCH_SCALE
+	_view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_view.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_view.visible = false
+	holder.add_child(_view)
+	var info := HunterViewer.slot_info(id, slot)
+	_still = CenterContainer.new()
+	_still.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_still.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_still.add_child(UI.IconDot.new(String(info["icon"]), col, stage_size.y * 0.32))
+	holder.add_child(_still)
 	holder.resized.connect(func(): _fit(holder))
-	_build_world()
 	return holder
+
+## Plays the clip (its scene is built on a later frame the first time) or holds it on a still frame.
+func play(on: bool) -> void:
+	playing = on
+	if model:
+		vp.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE if on else SubViewport.UPDATE_ONCE
+
+## Builds the clip's scene now (the playing clip does it on its own turn; checks call it to step a clip by hand).
+func build() -> void:
+	if model:
+		return
+	_build_world()
+	_still.queue_free()
+	_view.visible = true
+	vp.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE if playing else SubViewport.UPDATE_ONCE
 
 ## The viewport renders at the screen's real pixels (the UI may be scaled up), so the clip stays sharp.
 func _fit(holder: Control) -> void:
@@ -155,10 +183,7 @@ func _build_world() -> void:
 	rim.light_energy = 0.8
 	vp.add_child(rim)
 	_floor()
-	model = Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", Unmasked.mask_look(), id)
-	var ring := model.get_node_or_null("TeamRing")
-	if ring:
-		(ring as Node3D).visible = false
+	model = PreviewBuild.model(id)
 	model.rotation.y = -PI / 2.0
 	vp.add_child(model)
 	anim = HunterAnim.new(model)
@@ -292,8 +317,10 @@ func _hit_times() -> Array:
 
 # ------------------------------------------------------------------ playing it
 func _process(dt: float) -> void:
-	dt = minf(dt, 0.1)
-	tick(dt)
+	if model == null and playing and PreviewBuild.turn(id):
+		build()
+	if playing:
+		tick(minf(dt, 0.1))
 
 ## One step of the clip (also stepped straight by checks).
 func tick(dt: float) -> void:

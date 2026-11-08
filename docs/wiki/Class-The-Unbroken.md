@@ -10,7 +10,7 @@ every knock.
 |---|---|
 | Class title | The Unbroken |
 | Base character | Kael, male |
-| Personality | A proud champion in a spartan kit, mostly bare skin and gilded armour. He fights like the crowd is watching. He loves a duel and never backs down from one. |
+| Personality | Malgrave's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain became his weapon. The Blight burned white-hot cracks into his sword arm (the Blight Cinder distilled, so he doesn't fully trust her). A demon lives in his blade and in his mind and must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off. |
 
 <!-- /gen:profile -->
 
@@ -28,7 +28,7 @@ every knock.
 5. **Warchain** (E): hook a foe or a wall, then press E again to pull yourself in.
 6. **Gilded Riposte** (X, from level 6): a 0.65s gold guard where nothing hurts or stuns you, then you lunge
    into an upward cleave through the strip ahead and heal 80% of what it deals. Each hit you block makes it
-   harder; a knock with it makes it ready again. The Boki Merge has its own key.
+   harder; a knock with it makes it ready again. The Boki Fusion has its own key.
 
 ## Combos and interactions
 
@@ -73,7 +73,7 @@ What the in-game kit card (K) says.
 | Loop | Melee bruiser: get in, chain them close, and finish the wounded. |
 | Passive: Rage | Damage fills Rage. Full, you're Enraged: more damage, faster dashes and cooldowns. Knocks heal you. |
 | Dash: Rampage | Two charges (a third at rank 2) of a short dash attack the way you face. Its tip hits twice as hard. |
-| RMB: Smash | Tap: a heavy slam, harder on the wounded; knock someone it hit and your ultimate is ready again. Hold as long as you like: charge, then fling yourself forward; let go as the raised blade flashes to fling further. In the air: slam down at your cursor. |
+| RMB: Smash | Tap: a heavy slam, harder on the wounded; knock someone it hit and your ultimate is ready again. Hold as long as you like: charge, then fling yourself forward; let go as the levelled blade flashes to fling further. In the air: slam down at your cursor. |
 | E: Warchain | Throw a chain at a foe or a wall. Press E again to be hauled to it; look aside to swing out that way. |
 | Hunter ultimate: Gilded Riposte | Guard for 0.65s, taking nothing, then lunge into a cleave that heals you; a knock with it resets it. |
 | Weapon: Greatsword | Wide slashes, harder at the tip. Hold to throw a Searing Wave: the longer you hold, the bigger, longer and harder it is. |
@@ -82,13 +82,13 @@ What the in-game kit card (K) says.
 
 **Rage (passive).** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
 
-**Rampage (dash, Shift, 10.4s cooldown).** A short crouch, then a dash attack of about 4m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
+**Rampage (dash, Shift, 10.4s cooldown).** A quick dash attack of about 4m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
 
 **Smash (RMB, 2s cooldown).**
 
 - *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Its sweet spot, the far tip dead ahead, hits 40% harder. Knock a hunter within 2s of hitting them with it and the Gilded Riposte is ready again.
-- *Hold:* Lunge: the blade raised over your head (the lane grows ahead of you, magenta and flashing at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. At full the raised blade flashes white once a second: let go on the flash for 20% more distance. You can jump while you charge. Strike nothing and the cooldown doubles.
-- *In the air:* Meteor Drop: a disc shows under your cursor (5m at most). Press and you hang over it for a beat, the blade raised (everyone sees where you'll land), then dive onto it: a 2.6m burst, 18 and slow 40% for 1.5s; the inner ring (1.2m) takes +50% and is stunned 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back.
+- *Hold:* Lunge: the blade levelled ahead at the aim, low and ready (the lane grows ahead of you, magenta and flashing at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. At full the levelled blade flashes white once a second: let go on the flash for 20% more distance. You can jump while you charge. Strike nothing and the cooldown doubles.
+- *In the air:* Meteor Drop: a disc shows under your cursor (5m at most). Press and you hang over it for a beat, the blade raised (everyone sees where you'll land), then slam straight down onto it: a 2.6m burst, 18 and slow 40% for 1.5s; the inner ring (1.2m) takes +50% and is stunned 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back.
 - *During E:* With the Warchain: press while it pulls you, or as you arrive, for a Cinder Spin at once (2.6m, 18, blights 4s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); charge while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 
 **Warchain (E, 12.8s cooldown).** Throw a chain 13m: it hooks the first foe (8 damage) or bites a wall, and holds for 5s while you move, paying out up to 24m and holding taut there. Press E again to be hauled to it: look aside (a held direction stacks) to swing out in an arc and land beside or past it, back away first to slingshot in faster, Shift or jump to break off (a jump keeps the speed), and you arrive still moving. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.

@@ -113,9 +113,13 @@ const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the fra
 ## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's data
 ## lists in "hide_while_chain" shrink away (item 76b.4), so one chain shows, never two.
 const CHAIN_OUT := "chain_out"
+const GRIP_L := "grip_l"                 # meta on a held weapon: warden_look "grip_l", read by HunterAnim
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
+## .glb path -> its scene, kept once read: a preview freed and built again (the Masks screens) would otherwise
+## read the file from disk again, 0.3-1.5 s a Warden
+static var _scenes := {}
 static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
 static var _gloss_m: ShaderMaterial
 static var _measuring := false  # building that neutral model: no .glb on it
@@ -195,7 +199,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	if _measuring or not uses_model(arch):
 		return
 	var rest := neutral_rest(arch)
-	var scene := load(path(arch)) as PackedScene
+	var scene := _scene(arch)
 	var glb: Node3D = scene.instantiate() as Node3D if scene else null
 	var skel := skeleton(glb)
 	var bad: Array = WardenSkeleton.mismatches(skel, rest, extra_bones(arch)) if skel else ["no armature"]
@@ -223,7 +227,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	if bool(WardenClips.data(art(arch)).get("skinned_weapon", false)):
 		_skinned_weapon(root)
 	else:
-		_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]))
+		_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]), own)
 	_hold_shield(root, glb)
 	sync.mood = WardenMood.make(root, glb, skel, art(arch))
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
@@ -390,7 +394,7 @@ static func _puff() -> Texture2D:
 
 ## The .glb's own weapon (a mesh named WEAPON, modelled in the Gun node's space) goes into the hands in place
 ## of the procedural one; the Gun node and its Muzzle stay, so shots and grips are unchanged.
-static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vector3.ZERO) -> void:
+static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vector3.ZERO, own := {}) -> void:
 	var weapon := glb.find_child(WEAPON, true, false) as Node3D
 	var gun := root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 	if weapon == null or gun == null:
@@ -408,6 +412,9 @@ static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vect
 	seat.add_child(weapon)
 	# warden_look "weapon_scale", and "weapon_offset" (m, Gun space: seats the grip in the hand)
 	weapon.transform = Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * wscale), shift)
+	# warden_look "grip_l" (Gun space): the support hand's place on a hilt the hold's own "gl" would overshoot
+	if own.has("grip_l"):
+		weapon.set_meta(GRIP_L, Vector3(own["grip_l"][0], own["grip_l"][1], own["grip_l"][2]))
 	var off := weapon.find_child(WEAPON_OFF, true, false) as Node3D
 	if off:
 		var at := WardenGlb.model_xf(gun, off)
@@ -496,6 +503,32 @@ static func extra_skeleton(root: Node3D) -> Skeleton3D:
 	if root == null or not bool(root.get_meta("glb", false)):
 		return null
 	return skeleton(root.get_node_or_null("Warden"))
+
+## Starts reading a Warden's .glb on a loader thread, so the build that needs it later doesn't wait on the disk.
+static func fetch(arch: String) -> void:
+	var p := path(arch)
+	if not uses_model(arch) or _scenes.has(p):
+		return
+	if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+		BackgroundWork.request(p)
+
+## Whether a Warden's model can be built without waiting on the disk (fetch() starts the read when it hasn't).
+static func fetched(arch: String) -> bool:
+	fetch(arch)
+	var p := path(arch)
+	return not uses_model(arch) or _scenes.has(p) \
+			or ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_IN_PROGRESS
+
+## Whether the Warden's neutral rig rest is known yet (else the next build measures it first: a build of its own).
+static func has_rest(arch: String) -> bool:
+	return _neutral.has(arch) or not uses_model(arch)
+
+static func _scene(arch: String) -> PackedScene:
+	var p := path(arch)
+	if not _scenes.has(p):
+		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
+		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
+	return _scenes[p] as PackedScene
 
 ## A Warden's variant bones: the code table above, plus its art's data file (content/rules/warden_anim/<art>.json).
 static func extra_bones(arch: String) -> Dictionary:

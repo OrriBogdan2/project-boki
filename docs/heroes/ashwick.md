@@ -1,4 +1,6 @@
-# Mad Pyromancer (base character Cinder; archetype `ashwick`, heavy; display name was Ashwick)
+# Flame Queen (base character Cinder; archetype `ashwick`, heavy; display name was Ashwick)
+
+Lore sync (Nov 2026): Cinder is the court alchemist who drank the Wyrm's blood and pours fire from her bare hands. The goggles, apron and fuel tank in the notes below describe the model and gear code as built; the art pass that removes them is pending, and no player text mentions them.
 
 Internal design doc. Source behaviour: the hero named in the Inspired-by table in docs/ARCHETYPES.md (traceability only; none of its
 names, text or looks appear in the game). Everything the player sees and hears is ours. The kitfix pass (Nov 2026) rebuilt the kit
@@ -206,6 +208,37 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
 | Flashover payoff, a knock | `lw_stoke`, `lw_stoke_lance` (mid-roar) | the off fist punches up over his head, a lean back, a bounce; mid-roar the nozzle stays on the foe and the hold goes on |
 | Plain jump / landing | `lw_jump`, `lw_land` | a quick crouch and a springy tuck; a light squash |
 | Flue Flight (X) | `lw_jet` (held), `lw_land` | a crouch as the ember ring bursts (0.08s), then he springs up and leans into the jet, the free arm swept back to the bellows strap, the nozzle held low (the gun hand stays on it), legs trailing; on landing a squash onto his feet |
+
+## Animation timing
+Measured against the footage (briefs/hero-ref/linwick.md on ext/agent-briefs, a frame = 0.2 s) and the kit's own timings; "ours" is
+the kit move's key (kmoves_pair.gd) the .glb clip is seeked to (clip length = the table's last key). Fixed here: the ram's
+squash now plays on the hit frame (ashwick_kit.gd `RAM_IMPACT_KEY`) and the run clip plays at 1.8x its planted-foot rate
+(cinder.json `loco.cadence`, warden_clips.gd `_loco`). Checked by `--ashwick-combo-check` (timing rows, the ram row).
+| Move | Source (s) | Ours before | Ours after |
+|---|---|---|---|
+| Torch Lance wind-up (pilot to roar) | 0.2 (1 frame), body barely moves | spool 0.2 = `as_lance` kick key 0.2, feet set at 0.1 | same |
+| Torch Lance release | stops at once, no recovery | stream snuffs ≤ 0.08, `as_lance_end` recoil 0.3 | same |
+| Cinder Shot | lane held ~0.4 (the player's hold), then a quick arm thrust, bolt on that frame | `as_aim` hold (settled 0.12), release: bolt at once, `as_shot` thrust key 0.06, done 0.48 | same |
+| Soot Ram travel | 3.4 m in 0.33, front-loaded, no wind-up | 2.9 m in 0.32 (dash_feel 0.85/1.15 of 3.4/0.28), `as_leap` coil 0.0 while already moving, stretched 0.06 | same |
+| Soot Ram into a foe (3 m) | reaches in ~0.12, knocked back and upright within ~0.1 | hit at 0.20 (the 2.9 m / 0.32 s dash_feel ram, under half a frame off), but the clip stayed stretched to 0.36, upright 0.42, done 0.55 (+0.35 after the hit) | squash on the hit frame, upright +0.06, done +0.19 |
+| Soot Ram, no foe | upright at once after the slide | squash 0.36, upright 0.42, done 0.55 | same |
+| Furnace Cloak | ring + arms 1 frame then blast; owner item 11: instant on press, 0.15-0.25 flare | blast on press, ring 0.18, `as_cloak` arms wide 0.13, done 0.24 | same |
+| Flue Flight lift-off | ember ring at 0.1, flying by 0.2 | ring on press, `lw_jet` crouch 0.08, flight pose 0.22 | same |
+| Flue Flight flight | 1.3-1.4 (owner item 20: 1.8) | 1.8 | same |
+| Flue Flight landing | no visible squash or dust | `lw_land` squash 0.36 + dust | same (re-key listed below) |
+| Run cadence (footfall) | every 0.15-0.2 | every 0.35 (0.7 s cycle at 4.65 m/s) | every 0.19 (cadence 1.8) |
+| Stop / turn | instant | loco blend 12/s (every warden) | same |
+| Stoke, hop, jump, hit, death | no source footage | our beats | same |
+
+Clip re-keys the model needs (tools/art1/cinder_clips.py, not edited here; the data above plays them at the kit's time):
+- `run_*`: author the stride for the cadence (stride ~0.33 m, cycle ~0.38 s) so the feet plant at 1.8x; until then each step slides ~0.27 m.
+- `jet_land`: shorter and lighter (~0.2 s, little squash): the source lands without a visible squash.
+- `cloak`: put the arms-wide peak on the blast frame (0.0-0.05) rather than 0.13, so the pose and the blast land together.
+
+Suggestions (not built, parity first): the 0.4 s lane in the footage may be a cast time rather than the player's hold;
+the landing dust (ashwick_jet.gd `_land`) is ours, not the source's; a per-hero stop blend (loco_pos 12/s is shared by
+every warden) would give the source's instant stop; remote views keep the old ram timing when a hit re-times
+`anim_at` by less than ArchKit's 0.3 s re-time tolerance (the hit frame is 0.23 s earlier, under it).
 
 ## Look and sound
 - Effects: `scripts/arch/kits/ld_fx.gd` (pooled; `shaders/ld_fx.gdshader` draws each look's body alpha-blended so colour and

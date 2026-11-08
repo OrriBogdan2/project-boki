@@ -1,6 +1,6 @@
 {
 	"group": "bulwark",
-	"name": "Breaker",
+	"name": "Mossy",
 	"script": "tools/gen_sfx_breaker.py",
 	"sounds": {
 		"bjorn_throw": "fire",

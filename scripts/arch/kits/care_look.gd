@@ -6,8 +6,8 @@ extends RefCounted
 ##   root beam, the lantern plus, the rising rays, the Hearthlight disc with its floating lantern, Kindle
 ##   foot glow, and her dash's ember motes.
 ##   Claire: the ice shard, the skate beam, the star-headed spear (thrown, and held while aiming), the
-##   slow-zone flake with its crystal, the detonation dome, the Shatter spikes, the frost shell, the
-##   frost glow, the skate's ice trail, her air dash's frost streaks and the Rink Wall's ice pillars.
+##   slow-zone flake with its crystal, the Shatter spikes, the frost shell, the frost glow, the skate's
+##   ice plates, her air dash's frost streaks and the Rink Wall's ice pillars.
 ## Three shaders of our own: shaders/care_disc.gdshader, care_ice.gdshader, care_glow.gdshader.
 ## Shots: skin(s, kind) hides the shared round (its drawn radius only; the hit radius is unchanged) and
 ## rides a pooled node on it; when the shot ends the node goes back and the kind's impact plays.
@@ -209,13 +209,6 @@ func _build(kind: String) -> Node3D:
 			_off(Models.part(n, Models.sphere(0.07, 8), orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO))
 			_off(Models.part(n, Models.sphere(0.14, 8), orb_mat(Color("ff8a3c", 0.4)), Vector3.ZERO))
 			_tail(n, 0.08, 0.7, Color("ffb347", 0.8))
-		"dome":
-			_off(Models.part(
-					n, Models.sphere(1.0, 16), Models.glow_mat(Color("dffcff", 0.5)), Vector3.ZERO,
-					Vector3(1, 0.7, 1)))
-			_off(Models.part(
-					n, Models.sphere(0.94, 16), ice_mat(Color("bff7ef"), 0.25, 0.2), Vector3.ZERO,
-					Vector3(1, 0.7, 1)))
 		"spikes":
 			# Shatter: a starburst of ice spikes thrown up round the foe
 			for i in 12:
@@ -243,11 +236,6 @@ func _build(kind: String) -> Node3D:
 			_off(Models.part(
 					n, Models.box(1.0, 0.05, 0.7), ice_mat(Color("bff7ef"), 0.7, 0.35, Color("e8ffff")),
 					Vector3(0, 0.04, 0)))
-		"chip":
-			# one ice chip of the skate trail
-			_off(Models.part(
-					n, Models.crystal(0.07, 0.26, 4), ice_mat(Color("bff7ef"), 0.8, 0.3), Vector3(0, 0.08, 0),
-					Vector3.ONE, Vector3(0.6, 0, 0.4)))
 		"wall":
 			_build_wall(n)
 	root.add_child(n)
@@ -454,9 +442,6 @@ func _style(e: Dictionary, k: float) -> void:
 		"flare", "star":
 			n.scale = Vector3.ONE * r * lerpf(0.4, 1.0, sqrt(k))
 			_disc(n, col, p.get("rim", col.lightened(0.5)), fade, float(p.get("pattern", 0.0)), -1.0, k * 2.0)
-		"dome":
-			n.scale = Vector3.ONE * r * lerpf(0.3, 1.0, _out_back(clampf(k * 3.0, 0.0, 1.0)))
-			_tint(n, col, fade)
 		"spikes":
 			# up fast, hold, then sink back into the ground
 			var up := clampf(k * 7.0, 0.0, 1.0)
@@ -474,8 +459,6 @@ func _style(e: Dictionary, k: float) -> void:
 			n.scale = Vector3.ONE * lerpf(
 					0.4, 1.0, _out_back(clampf(k * 6.0, 0.0, 1.0))) * (1.0 - 0.3 * smoothstep(0.8, 1.0, k))
 			_tint(n, col, 1.0 - smoothstep(0.8, 1.0, k))
-		"chip":
-			n.scale = Vector3.ONE * (1.0 - k)
 		"slab":
 			var dv4: Vector2 = p.get("dir", Vector2(0, -1))
 			n.rotation = Vector3(0, atan2(-dv4.x, -dv4.y), 0)

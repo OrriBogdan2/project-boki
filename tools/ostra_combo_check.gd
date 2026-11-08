@@ -343,6 +343,10 @@ func _ostra() -> void:
 		"e: a full pop hits up to 3.5x an early one", late > early * 2.5 and K.pops >= 2,
 		"early %.1f late %.1f" % [early, late]
 	)
+	ok(
+		"e: a full pop is 3.5x the base 12.5 (source peak)", absf(late - 12.5 * 3.5) < 1.0,
+		"late %.2f vs %.2f" % [late, 12.5 * 3.5]
+	)
 	ok("data: the pop does not ground what it catches", not KitStatus.grounded(T))
 	ok("anim: the pop plays ostra_pop", K.anim_id == "ostra_pop")
 	# the data: "reactivate to detonate": left alone at full size it waits for the recast, then the Collapse
@@ -495,6 +499,29 @@ func _ostra() -> void:
 	A.queue_free()
 	m.hunters.erase(A)
 	P.slot_lv["dash"] = 1
+	# ---- upgrade parity (docs/heroes/ostra.md): the source's tier II / III+IV numbers per slot
+	var op: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["sec"] = rk
+		P.slot_lv["dash"] = rk
+		P.slot_lv["kin"] = rk
+		op.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), K.power("sec"), K.dash_def()["cd"] * K.dash_k(),
+				K.e_def()["cooldown"] * K.cd_k("kin"), K.power("kin"), K.power("dash")])
+	P.slot_lv["sec"] = 1
+	P.slot_lv["dash"] = 1
+	P.slot_lv["kin"] = 1
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.05
+	ok("upgrade parity: Shard Snap cooldown 10 -> 8.5 -> 7 and damage +20% / +40%",
+			near.call(op[1][0], 8.5) and near.call(op[2][0], 7.0)
+			and near.call(float(op[1][1]) / float(op[0][1]), 1.2)
+			and near.call(float(op[2][1]) / float(op[0][1]), 1.4), str(op))
+	ok("upgrade parity: Lantern Trade recharge 9.5 -> 8 -> 6.5, no damage step",
+			near.call(op[1][2], 8.0) and near.call(op[2][2], 6.5)
+			and near.call(float(op[2][5]) / float(op[0][5]), 1.0), str(op))
+	ok("upgrade parity: Brimseed cooldown 10 -> 10 -> 8 and damage +10% / +20%",
+			near.call(op[1][3], 10.0) and near.call(op[2][3], 8.0)
+			and near.call(float(op[1][4]) / float(op[0][4]), 1.1)
+			and near.call(float(op[2][4]) / float(op[0][4]), 1.2), str(op))
 	# ---- merge start drops every hold
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0))
