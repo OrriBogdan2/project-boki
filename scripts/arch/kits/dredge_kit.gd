@@ -690,6 +690,10 @@ func _air_barge(dd: Dictionary, dir: Vector2, keep_pose: bool) -> void:
 	if not keep_pose: play("dr_pounce")
 	m.sfx("dr_hop", h.pos, -3.0, 1.0)
 
+## The air pounce is its own slot (source: Brute Dash (Air), 12.5s, 2s less per rank), apart from the ground charges.
+func long_dash_cd() -> float:
+	return super.long_dash_cd() - float(dash_def()["air"]["rank_cut"]) * float(rank("dash") - 1)
+
 ## The barge's end: he arrives planted (the class carry would slide a heavy on after each quick shove).
 func _tick_stop(dt: float) -> void:
 	stop_t -= dt
