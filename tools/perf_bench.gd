@@ -56,7 +56,8 @@ func run(main_node: Node) -> void:
 
 ## 1 when the match p99 regressed past P99_SLACK of the baseline for this setup, else 0.
 func _gate() -> int:
-	var key := "%s|%dx%d|%s|%ds" % [RenderingServer.get_video_adapter_name(), teams, squad, Settings.quality(), int(secs)]
+	var key := "%s|%dx%d|%s|%ds" % [RenderingServer.get_video_adapter_name(), teams, squad, Settings.quality(),
+		int(secs)]
 	var base = JSON.parse_string(FileAccess.get_file_as_string(BASELINE)) if FileAccess.file_exists(BASELINE) else {}
 	if not (base is Dictionary and base.has(key)):
 		print("BENCH GATE no baseline for '%s'" % key)
@@ -68,7 +69,8 @@ func _gate() -> int:
 
 func _match() -> void:
 	var o := Match.demo_opts()
-	o.merge({"teams": teams, "squad": squad, "total": teams * squad, "raid": "ash", "blight": true, "no_drop": true, "god": true,
+	o.merge({"teams": teams, "squad": squad, "total": teams * squad, "raid": "ash", "blight": true, "no_drop": true,
+		"god": true,
 		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
@@ -111,8 +113,8 @@ func _match() -> void:
 		fl.append(_frame("match", fl.size(), (now - last) / 1000.0, script_ms))
 		var wall: float = fl[-1]["wall"]
 		if fl.size() > 30 and wall > SLOW_MS and wall > 2.0 * _avg(fl.slice(-31, -1), "wall"):
-			print("BENCH hitch t=%.2f %.0f ms (script %.1f, top %s %.1f, render cpu %.1f), new nodes: %s" % [m.time, wall,
-				script_ms, Match.prof_top, Match.prof_top_us / 1000.0, fl[-1]["rcpu"],
+			print("BENCH hitch t=%.2f %.0f ms (script %.1f, top %s %.1f, render cpu %.1f), new nodes: %s" % [
+				m.time, wall, script_ms, Match.prof_top, Match.prof_top_us / 1000.0, fl[-1]["rcpu"],
 				added])
 		added.clear()
 		last = now
@@ -239,7 +241,8 @@ func _summary(part: String, fl: Array) -> void:
 	if part == "match": match_p99 = p99
 	var sc99 := float(sc[int((sc.size() - 1) * 0.99)])
 	print("BENCH %s: %d frames, wall avg %.1f ms, p99 %.1f ms (1%% low %.1f fps), %d frames over %d ms" % [part,
-		fl.size(), _avg(fl, "wall"), p99, 1000.0 / maxf(low, 0.001), w.filter(func(x): return x > SLOW_MS).size(), SLOW_MS])
+		fl.size(), _avg(fl, "wall"), p99, 1000.0 / maxf(low, 0.001), w.filter(func(x): return x > SLOW_MS).size(),
+		SLOW_MS])
 	print("BENCH %s cpu: match script avg %.2f ms p99 %.2f ms, process %.2f ms, hud %.2f ms, render cpu %.2f ms" % [
 		part, _avg(fl, "script"), sc99, _avg(fl, "proc"), _avg(fl, "hud"), _avg(fl, "rcpu")])
 	print("BENCH %s scene: draws %.0f, tris %.0fk, objects %.0f, nodes %.0f, emitters %d, lights %d, shadowed %d" % [
@@ -293,4 +296,5 @@ func _meshes() -> void:
 		em[key] = int(em.get(key, 0)) + 1
 	var ek := em.keys()
 	ek.sort_custom(func(a, b): return em[a] > em[b])
-	print("BENCH CPU particle emitters (parent/name: count): " + ", ".join(ek.slice(0, 10).map(func(k): return "%s: %d" % [k, em[k]])))
+	print("BENCH CPU particle emitters (parent/name: count): " + ", ".join(ek.slice(0, 10).map(
+		func(k): return "%s: %d" % [k, em[k]])))

@@ -23,7 +23,8 @@ func run(main_node: Node) -> void:
 	for want in ["fps", "1% low", "draws", "tris", "script", "step ms"]:
 		ok(lbl.text.contains(want), "it lists %s (%s)" % [want, lbl.text.replace("\n", " | ")])
 	lbl.tick("full", 0.05)
-	ok(lbl._hitches[0].begins_with("hitch 50 ms: render"), "a 50 ms frame is logged as a hitch ('%s')" % lbl._hitches[0])
+	var hl := lbl._hitches[0]
+	ok(hl.begins_with("hitch 50 ms: render"), "a 50 ms frame is logged as a hitch ('%s')" % hl)
 	Settings.set_v("show_fps", 1, false)
 	await main.get_tree().create_timer(0.6).timeout
 	var alone := lbl.visible and not lbl.text.contains("draws") and not Match.prof_on

@@ -624,7 +624,9 @@ func _prof(lbl: String) -> void:
 		if lbl == "pre": prof_top_us = 0
 		elif _prof_t > 0:
 			prof[lbl] = int(prof.get(lbl, 0)) + now - _prof_t
-			if now - _prof_t > prof_top_us: prof_top = lbl; prof_top_us = now - _prof_t
+			if now - _prof_t > prof_top_us:
+				prof_top = lbl
+				prof_top_us = now - _prof_t
 		_prof_t = now
 
 ## Tooling (--hitch-check): microseconds per section of _process (the per-frame visuals).

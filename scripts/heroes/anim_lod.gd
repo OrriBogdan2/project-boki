@@ -1,5 +1,5 @@
 class_name AnimLod
-## Animation level of detail (owner 11-08, expedition fps): a Hero's rig off screen or far from the camera
+## Animation level of detail for expedition frame rate: a Hero's rig off screen or far from the camera
 ## updates its bones every few frames, catching up on the time it skipped (Boki and monsters do the same in
 ## Match._process). Numbers: content/rules/tuning.json "perf"; off on Ultra (Settings.QUALITY "anim_lod").
 

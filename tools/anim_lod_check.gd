@@ -24,8 +24,10 @@ func run(main_node: Node) -> void:
 	var behind := cam.global_position + cam.global_basis.z * 10.0
 	var far := cam.global_position - cam.global_basis.z * (float(perf["hero_anim_near_m"]) + 20.0)
 	ok(AnimLod.every(m.player.pos, vp) == 1, "your Hero, on screen and near: every frame")
-	ok(AnimLod.every(far, vp) == int(perf["hero_anim_far_every"]), "far on screen: every %d" % perf["hero_anim_far_every"])
-	ok(AnimLod.every(behind, vp) == int(perf["hero_anim_off_every"]), "off screen: every %d" % perf["hero_anim_off_every"])
+	var far_n := int(perf["hero_anim_far_every"])
+	var off_n := int(perf["hero_anim_off_every"])
+	ok(AnimLod.every(far, vp) == far_n, "far on screen: every %d" % far_n)
+	ok(AnimLod.every(behind, vp) == off_n, "off screen: every %d" % off_n)
 	var sync := m.player.model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
 	ok(sync != null, "the arena Hero has a rig")
 	if sync:
