@@ -92,7 +92,9 @@ The deliverable is now **one iconic armour set** worn by all of them, designed f
 - **Views:** a turnaround of a basic knight, to show how they dress in this form.
 - **Follow-up:** schedule a later pass for every hero associated with the Auburn Knights.
 
-### 6. Solmere before the fall
+### 6. Solmere before the fall: LOCKED (owner, Nov 8, 00:25 ET)
+Palette: pearl and pink, matching the Queen. Throne room: `villain/solmere_throne_room.jpg`, a pearl serpent throne coiled into an infinity loop, a rose window and gold serpent columns, with the knights. Skyline: `villain/solmere_skyline.jpg`, with the mask-topped palace tower, the lake bridge and the rose gardens. Vault alternate: `villain/explorations/solmere_throne_room_vault_D.jpg`. Note: both are 2000×2000 squares, not 16:9 4K.
+
 - **Look:** the golden kingdom on solid ground, with red banners, and the palace with the throne room and vault.
 - **Deliverables:** two wide environment paintings, one of the city skyline and one of the throne room.
 
