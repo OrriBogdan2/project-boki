@@ -50,7 +50,13 @@
 
 **Explorations:** `villain/explorations/mask_option_*` (round 1) and `mask_r2_*` (round 2).
 
-**LORE CHANGE (owner, Nov 7):** the villain is now the **Wyrm Queen**, not a king. Item 3 becomes the Masked Queen. Her name is still to be confirmed: Malgrave, or a new name.
+**LORE CHANGE (owner, Nov 7):** the villain is now the **Wyrm Queen**, not a king. Item 3 becomes the Masked Queen. Name confirmed by main (Nov 7, 21:04 ET): **Malgrave**, as a queen. Vesperine and Veyl were reverted.
+
+**Conflict with main's guide:** main's lore guide describes the mask as glossy red with gold trim, half-closed eyes, a faint knowing smile, slit eye holes with a pink-red glow, two small gold horn tips, and plainer than the Hunter masks. The owner locked the white porcelain Blood Tears mask instead. Main's guide needs updating to the locked mask (or the owner revisits the choice).
+
+**Queen and dragon notes from main:**
+- **The queen:** very tall, slender, still. Long dark-red hair worn up under a crown of thin gold horn spires. A deep red gown with gold scale armour plates, and a very long train flowing like a tail. Gold claw rings on every finger. Scales at her collarbone and wrists, and her shadow is a dragon's. Red and gold only.
+- **The dragon:** long and graceful, like a serpent or swan. Horns that match the crown. Crimson scales with the mask's gold pattern repeated on them, and eyes with the Heart's pink-red glow. Wings that glow like stained glass. A deep scar on her chest from Kael's sword.
 
 ### 3. Malgrave, the Masked King (human form)
 - **Look:** very tall, slender, impossibly graceful and ageless, wearing the mask from item 2.
