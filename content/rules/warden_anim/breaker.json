@@ -1,5 +1,5 @@
 {
-	"doc": "Mossy's hand-keyed clips (art/wardens/breaker/breaker.glb) and which game state plays which (scripts/heroes/warden_clips.gd).",
+	"doc": "Albert's hand-keyed clips (art/wardens/breaker/breaker.glb) and which game state plays which (scripts/heroes/warden_clips.gd).",
 	"skinned_weapon": true,
 	"extra_bones": {
 		"x_weapon": "hand.R",

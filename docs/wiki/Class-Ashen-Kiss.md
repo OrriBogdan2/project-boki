@@ -1,4 +1,4 @@
-# The Flame Queen
+# The Ashen Kiss
 
 A flue sweep in a sooty top hat with a bellows pack. Hoses foes down with fire until they Flash over, rams them
 head first, and hits back harder after every knock.
@@ -8,9 +8,9 @@ head first, and hits back harder after every knock.
 
 |  |  |
 |---|---|
-| Class title | the Flame Queen |
+| Class title | the Ashen Kiss |
 | Base character | Cinder, female |
-| Personality | A salamander-folk alchemist with charcoal skin split by glowing magma, fin ears, hair of living fire and a long burning tail. She wears cracked goggles, a corset and a shredded apron, hauls a tank of liquid fire on her back, and she is delighted by every fire she starts. |
+| Personality | Malgrave's court alchemist, ordered to distil the Wyrm's blood into fire. She drank it instead, and now fire answers her bare hands. She served the throne for years, and she wants it for herself. She is not mad, just certain. |
 
 <!-- /gen:profile -->
 
@@ -48,8 +48,8 @@ head first, and hits back harder after every knock.
 |---|---|
 | Body | 193 health, 4.4 m/s, 2 dash charges |
 | Signature weapon | Torch Lance (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The flue sweep. Hoses foes down with fire until they blaze, rams them head first, and hits back harder after every knock. |
-| Silhouette | the blazing hair, the copper tank of fire on her back and the long burning tail |
+| Fantasy | The court alchemist. Pours fire from her bare hands until foes blaze, rams them head first, and hits back harder after every knock. |
+| Silhouette | the blazing hair, the long burning tail and bare hands wreathed in fire |
 | Resource | Char (max 31) |
 
 ### Kit card
@@ -64,7 +64,7 @@ What the in-game kit card (K) says.
 | RMB: Cinder Shot | Hold to aim, release: a cinder that flies its full 14m, slows the foe and spreads the burn. |
 | E: Furnace Cloak | On the press, a blast of heat round you drags nearby foes in and wraps you in a fire shield. |
 | Hunter ultimate: Flue Flight | Flue Flight (level 6): fly toward the cursor and steer, laying a lava carpet that slows and burns; press it again to land. Your lance is off while you fly. |
-| Weapon: Torch Lance | Hold to hose fire 7m ahead; the stream trails behind a sweep and hits harder on a burning foe and chips its health. |
+| Weapon: Torch Lance | Hold to pour fire 7m ahead; the stream trails behind a sweep and hits harder on a burning foe and chips its health. |
 
 ### Abilities in full
 
