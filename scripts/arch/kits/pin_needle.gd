@@ -18,7 +18,7 @@ const THREAD_SEG := 0.26       # m each
 const THREAD_R := 0.07         # m half width (holds at the match camera)
 const THREAD_DROOP := 1.2      # m/s it sags behind the eye
 const GLOW_A := Vector2(0.1, 0.85)  # the shell's alpha at no charge and full
-const HOT_K := 0.7             # how far the steel itself reddens at full charge
+const HOT_K := 0.7             # how far the steel itself turns orchid at full charge
 
 var shell: MeshInstance3D
 var shell_mat: ShaderMaterial
