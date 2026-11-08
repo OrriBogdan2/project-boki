@@ -96,10 +96,15 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return
 	var pd: Dictionary = d["passive"]
 	# the knock or the kill on a Chilled foe: they Shatter a beat later
-	if t.hp <= 0.0 and chilled(t) and (t is Hunter or t is Mob):
+	var felled: bool = t.hp <= 0.0 and (t is Hunter or t is Mob)
+	if felled and not chilled(t):
+		return     # nothing to Shatter, and a knocked foe isn't Chilled afterwards (a later dart would Shatter it)
+	if felled:
 		var at := t.pos
+		var delay := float(pd.get("splinter_delay", 0.4))
+		lk().burst("shell", at, {"dur": delay + 0.05})     # the frost shell closes over them: the tell
 		m.later(
-				float(pd.get("splinter_delay", 0.4)),
+				delay,
 				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), t))
 		chill.erase(t.get_instance_id())
 		return

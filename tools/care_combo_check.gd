@@ -1351,6 +1351,40 @@ func rimewright() -> void:
 	ok(
 			"tm passive: knocking a Chilled foe Shatters them after a beat",
 			T.downed and K.splinter_log > s1 and T2.hp < hh, "downed %s" % str(T.downed))
+	var want: float = float(K.d["passive"]["splinter_dmg"]) * K.power("passive")
+	ok(
+			"tm passive: the knock's Shatter deals the data's damage to the neighbour (and Chills them)",
+			hh - T2.hp >= want - 0.5 and K.chilled(T2), "neighbour -%.1f, data %.1f" % [hh - T2.hp, want])
+	# --- no Chill, no Shatter: knocking an unchilled foe only knocks
+	K.chill.erase(T2.get_instance_id())
+	K.fan_hits.clear()
+	# off to the side, clear of the downed foe
+	var ahead := (T.pos - P.pos).normalized().rotated(Vector3.UP, PI / 2.0)
+	T2.teleport(P.pos + ahead * 5.0)
+	T2.hp = 1.0       # one dart fells them, so nothing has Chilled them first
+	step(m, 0.05)
+	var s2 := K.splinter_log
+	sc.aim_at(P, T2.pos)
+	P.inp["fire"] = true
+	step(m, 0.8)
+	P.inp["fire"] = false
+	step(m, 0.8)
+	ok(
+			"tm passive: knocking a foe that is not Chilled does not Shatter", T2.downed and K.splinter_log == s2,
+			"downed %s, shatters %d" % [str(T2.downed), K.splinter_log - s2])
+	# --- Chill lasts 4 s, and a new hit refreshes it to the full 4 s
+	T.downed = false
+	T.hp = T.max_hp
+	K.add_chill(T)
+	step(m, 3.0)
+	var lasts_3 := K.chilled(T)
+	K.add_chill(T)
+	step(m, 3.0)
+	var refreshed := K.chilled(T)
+	step(m, 1.2)
+	ok(
+			"tm passive: Chill lasts 4s and a new hit refreshes it",
+			float(K.d["passive"]["chill_t"]) == 4.0 and lasts_3 and refreshed and not K.chilled(T))
 	await _free(m)
 	# --- Skate: darts fly straight and thick at normal damage; she carries on over a ledge; the stride move loops
 	r = sc.setup("rimewright", 6.0)
