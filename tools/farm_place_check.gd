@@ -130,7 +130,7 @@ func _enter() -> void:
 
 # ------------------------------------------------------------------ the placing spotlight
 func _modal() -> void:
-	var home = await _tutorial_home(["axe", "chop", "stone"])
+	var home = await _tutorial_home(["chop"])
 	ok(FarmTutorial.current() == "house" and FarmTutorial.stage("house") == "place",
 		"the house step is up (%s)" % FarmTutorial.current())
 	await _poll(home)
@@ -158,7 +158,7 @@ func _modal() -> void:
 			"the cut-out is exactly that tile")
 	ok(n.get_index() == n.get_parent().get_child_count() - 1, "the spotlight sits above the build bar")
 	var placed := HomeLayout.fixtures(Save.d, "house").size() + HomeLayout.fixtures(Save.d, "site").size()
-	var before := HomeLayout.ensure(Save.d)["deco"].size()
+	var before: int = HomeLayout.ensure(Save.d)["deco"].size()
 	await _click(Vector2(12, 12))
 	await _frames(3)
 	ok(home.hb.held.is_empty() and Save.d["layout"]["deco"].size() == before, "a click elsewhere does nothing")
@@ -189,7 +189,7 @@ func _modal() -> void:
 	home.queue_free()
 	await _frames(2)
 	# the trough, the same way
-	home = await _tutorial_home(["axe", "chop", "stone", "house", "hammer", "task"])
+	home = await _tutorial_home(["chop", "house"])
 	ok(FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
 		"the trough step is up (%s)" % FarmTutorial.current())
 	await _poll(home)
@@ -219,7 +219,7 @@ func _relic() -> void:
 	for st in FarmTutorial.steps():
 		if st["id"] != "expedition":
 			FarmTutorial.mark(st["id"])
-	ok(FarmTutorial.active() and not home.hob.chat.offer_due(), "11 of 12 steps: still no relic")
+	ok(FarmTutorial.active() and not home.hob.chat.offer_due(), "every step but the last: still no relic")
 	# quit mid-tutorial and come back
 	Save.save_game()
 	var json := JSON.stringify(Save.d)
@@ -232,7 +232,7 @@ func _relic() -> void:
 	home._close_panel()
 	ok(FarmTutorial.active() and not home.hob.chat.offer_due(), "reloaded mid-tutorial: still no relic")
 	FarmTutorial.mark("expedition")
-	ok(not FarmTutorial.active() and home.hob.chat.offer_due(), "all 12 steps done: the relic is offered")
+	ok(not FarmTutorial.active() and home.hob.chat.offer_due(), "all steps done: the relic is offered")
 	home.queue_free()
 	await _frames(2)
 

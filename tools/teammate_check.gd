@@ -384,13 +384,12 @@ func _tutorial() -> void:
 		var tu: Tutorial = m.tut
 		var id := tu.id()
 		steps_seen[id] = true
-		if id == "pickup" and fell_t < 0.0:
+		if id == "shoot" and fell_t < 0.0:
 			fell_t = t
 			m.player.teleport(Vector3(70.0, 0.0, 30.0))      # off every island: a fall
 		elif fell_t > 0.0 and not back_ok and t - fell_t < 12.0:
 			back_ok = m.player.grounded and m.player.flat_dist(tu.respawn()) < 6.0
-		var goes_somewhere := id in ["move", "dash", "exdash", "glide", "crouch", "pickup", "chest", "goexit", "uplink",
-			"defend", "extract"]
+		var goes_somewhere := id in ["move", "dash", "chest", "extract"]
 		if tu.step == last_step and goes_somewhere and tu.target == Vector3.INF:
 			no_marker += 1
 		if goes_somewhere and tu.target != Vector3.INF and tu._beams.is_empty():
@@ -405,8 +404,8 @@ func _tutorial() -> void:
 	var mk := "the marker and its beam are up on every destination step frame (%d without, %d no beam)"
 	ok(no_marker == 0 and beam_miss == 0, mk % [no_marker, beam_miss])
 	ok(back_ok, "a fall into the void puts you back at the last stop")
-	var need := ["crouch", "pickup", "kin1", "glide"].all(func(s): return steps_seen.has(s))
-	ok(need, "the course has the crouch, pick-up, glide and watch stops (%s)" % str(steps_seen.keys()))
+	var need := Tutorial.steps().all(func(st): return steps_seen.has(String(st[0])))
+	ok(need and steps_seen.size() == 8, "the course runs all eight steps (%s)" % str(steps_seen.keys()))
 	ok(hints.keys().filter(func(x): return String(x).begins_with("tut_")).size() >= 6, "a hint in its own voice for each step")
 	ok(hints.has("demo_dash") and hints.has("demo_jump"), "it shows you a dash and a jump")
 

@@ -4,41 +4,28 @@
  "size": 80,
  "seed": 77,
  "calm": true,
- "notes": "The tutorial course, one island per skill: a landing meadow, a dash gap, a ledge (jump plus air dash), a long wind crossing to glide, a low lookout rise, one step up (crouch to scout the range island), a range island for the fights and the chest, and the walled outpost isle. 'course' holds each step's stop: at = the marker's spot, pad = the glowing edge to leave from, pos for the rest. No rocks, no hazards, nothing random.",
+ "notes": "The tutorial course, short (owner, Nov 8): a landing meadow, a dash gap to a small isle, a wind crossing to glide to the range island (the fights and the chest), and the walled outpost isle over a bridge. 'course' holds each step's stop: at = the marker's spot, pad = the glowing edge to leave from. No rocks, no hazards, nothing random.",
  "islands": [
-  {"id": "meadow", "name": "Landing Meadow", "role": "grove", "region": 0, "poi": [13, 15], "noise": 0.06, "biome": "meadow", "danger": 0, "no_rocks": true, "drop": true,
-   "shapes": [{"circle": [13, 15], "r": 9, "lv": 0}], "sheer": []},
-  {"id": "dash", "name": "Dash Isle", "role": "grove", "region": 0, "poi": [32, 15], "noise": 0.04, "biome": "meadow", "danger": 0, "no_rocks": true,
-   "shapes": [{"circle": [32, 15], "r": 5.5, "lv": 0}], "sheer": []},
-  {"id": "ledge", "name": "Ledge Isle", "role": "grove", "region": 0, "poi": [49, 15], "noise": 0.04, "biome": "meadow", "danger": 0, "no_rocks": true,
-   "shapes": [{"circle": [49, 15], "r": 6, "lv": 1}], "sheer": []},
-  {"id": "glide", "name": "Lookout Isle", "role": "grove", "region": 0, "poi": [56, 46], "noise": 0.04, "biome": "meadow", "danger": 0, "no_rocks": true,
-   "shapes": [{"circle": [56, 46], "r": 8, "lv": 0}, {"circle": [58, 47], "r": 3.6, "lv": 1}], "sheer": []},
-  {"id": "range", "name": "Training Range", "role": "grove", "region": 0, "poi": [28, 55], "noise": 0.05, "biome": "meadow", "danger": 0, "no_rocks": true,
-   "shapes": [{"circle": [28, 55], "r": 10, "lv": 0}], "sheer": []},
-  {"id": "gate", "name": "Gate Isle", "role": "grove", "region": 0, "poi": [27, 73], "noise": 0.04, "biome": "meadow", "danger": 0, "no_rocks": true,
-   "shapes": [{"circle": [27, 73], "r": 6, "lv": 0}], "sheer": [],
-   "walls": [{"box": [23, 69, 31, 77], "gates": ["n"], "gate_w": 3}]}
+  {"id": "meadow", "name": "Landing Meadow", "role": "grove", "region": 0, "poi": [13, 15], "noise": 0.06, "biome": "meadow", "danger": 0, "no_rocks": true, "drop": true, "shapes": [{"circle": [13, 15], "r": 9, "lv": 0}], "sheer": []},
+  {"id": "dash", "name": "Dash Isle", "role": "grove", "region": 0, "poi": [32, 15], "noise": 0.04, "biome": "meadow", "danger": 0, "no_rocks": true, "shapes": [{"circle": [32, 15], "r": 5.5, "lv": 0}], "sheer": []},
+  {"id": "range", "name": "Training Range", "role": "grove", "region": 0, "poi": [32, 41], "noise": 0.05, "biome": "meadow", "danger": 0, "no_rocks": true, "shapes": [{"circle": [32, 41], "r": 10, "lv": 0}], "sheer": []},
+  {"id": "gate", "name": "Gate Isle", "role": "grove", "region": 0, "poi": [32, 61], "noise": 0.04, "biome": "meadow", "danger": 0, "no_rocks": true, "shapes": [{"circle": [32, 61], "r": 6, "lv": 0}], "sheer": [], "walls": [{"box": [28, 57, 36, 65], "gates": ["n"], "gate_w": 3}]}
  ],
  "bridges": [
-  {"name": "Range Bridge", "a": "range", "b": "glide", "from": [37, 52], "to": [49, 47], "r": 1.8},
-  {"name": "Gate Bridge", "a": "range", "b": "gate", "from": [28, 64], "to": [27, 69], "r": 1.6}
+  {"name": "Gate Bridge", "a": "range", "b": "gate", "from": [32, 50], "to": [32, 56], "r": 1.6}
  ],
- "winds": [["ledge", "glide"]],
+ "winds": [["dash", "range"]],
  "pads": [],
  "updrafts": [],
- "outposts": [[27, 73, 1]],
+ "outposts": [[32, 61, 1]],
  "chokepoints": [],
  "glides": [],
  "course": {
   "land": {"at": [13, 15]},
   "move": {"at": [19.5, 15]},
   "dash": {"at": [32, 15], "pad": [21.4, 15]},
-  "exdash": {"at": [49, 15], "pad": [36.6, 15]},
-  "glide": {"at": [56, 44], "pad": [50, 20.2]},
-  "crouch": {"at": [58, 47]},
-  "pickup": {"at": [23, 53]},
-  "yard": {"at": [28, 55]},
-  "chest": {"at": [35.5, 58]}
+  "glide": {"at": [32, 35], "pad": [32, 19.8]},
+  "yard": {"at": [32, 41]},
+  "chest": {"at": [39, 44]}
  }
 }

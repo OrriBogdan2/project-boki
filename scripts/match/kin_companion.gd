@@ -604,7 +604,7 @@ func _tut_tick() -> void:
 			m.kin_bark(k, txt, "tut", 4.0 if txt.length() < 60 else 7.0)
 		if to != Vector3.INF:
 			look = to; look_t = 2.0
-			pose = "growl" if id in ["shoot", "throw", "kin1", "fight"] else "point"
+			pose = "growl" if id in ["shoot", "throw", "fight"] else "point"
 			pose_t = 1.6
 	# showing you how: a dash, a jump
 	guide["demo_t"] = float(guide["demo_t"]) - 0.4
@@ -612,7 +612,7 @@ func _tut_tick() -> void:
 		guide["demo_t"] = 3.6
 		match id:
 			"dash": demo = {"kind": "dash", "t": 0.0, "dir": aim_dir()}
-			"glide", "exdash": demo = {"kind": "jump", "t": 0.0, "dir": aim_dir()}
+			"glide": demo = {"kind": "jump", "t": 0.0, "dir": aim_dir()}
 			"move": demo = {"kind": "hop", "t": 0.0, "dir": aim_dir()}
 		if demo.size() > 0:
 			history.append({"t": m.time, "cat": "demo_" + String(demo["kind"]), "pri": 0})

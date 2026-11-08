@@ -1,11 +1,11 @@
 class_name FarmTutorial
 extends RefCounted
-## The guided farm tutorial (content/rules/farm_tutorial.json; the screen side is FarmGuide). Short steps
-## on a new farm: axe, chop trees, mine rocks, house, hammer, a job for your Boki, feed, crop (by the water),
-## buy a seed, sell a crop, meet Hob, head out.
+## The guided farm tutorial (content/rules/farm_tutorial.json; the screen side is FarmGuide). Five short
+## steps on a new farm: chop trees, place the house, feed, grow a crop, head out. What the cut steps taught
+## (stone, hammer, a job, the Market, Hob) is a one-time hint now (FarmHints, FirstTimeHint).
 ## State is Save.d.tutorial.ft:
 ##   did      step id -> true for the steps done
-##   done / skipped   finished, or skipped (nothing is granted or taken away)
+##   done / skipped   finished, or skipped (a skip still gets the house, the starter food and the end gems)
 ##   gift     the starter food was handed out
 ## Old saves never see it: the v8 migration marks them done, and so does tutorial.day1_done (the flag
 ## every test save and the new-game shortcuts already set).
@@ -47,9 +47,8 @@ static func did(id: String) -> bool:
 static func done_count() -> int:
 	return steps().filter(func(s): return did(String(s["id"]))).size()
 
-## Can this step be the active one yet? Its "needs" are done; the last step waits for everything;
-## "after_built" waits for the house to stand (a pinned Boki would stop building); without the
-## free_order option each step also waits for the one before it.
+## Can this step be the active one yet? Its "needs" are done; the last step waits for everything; without
+## the free_order option each step also waits for the one before it.
 static func available(id: String) -> bool:
 	var list := steps()
 	for i in list.size():
@@ -59,8 +58,6 @@ static func available(id: String) -> bool:
 		var before := list.slice(0, i)
 		if bool(def.get("needs_all", false)) or not bool(option("free_order")):
 			return before.all(func(s): return did(String(s["id"])))
-		if bool(def.get("after_built", false)) and not house_built():
-			return false
 		return (def.get("needs", []) as Array).all(func(n): return did(String(n)))
 	return false
 
@@ -87,15 +84,11 @@ static func current() -> String:
 static func stage(id: String) -> String:
 	match id:
 		"house":
-			return "wait" if not FarmHob.house_entry().is_empty() else "place"
+			return "place"
 		"feed":
 			return "fill" if not Econ.feeders().is_empty() else "place"
 		"crop":
 			return _crop_stage()
-		"buy", "sell":
-			return "stall" if not HomeLayout.fixtures(Save.d, "stall").is_empty() else "bar"
-		"task":
-			return "page" if FarmTaskGuide.page_up() else "go"
 	return "go"
 
 static func _crop_stage() -> String:
@@ -117,11 +110,11 @@ static func hint_text(id: String) -> String:
 	if s.is_empty():
 		return ""
 	var raw := String((s["hints"] as Dictionary).get(stage(id), ""))
-	var txt := FarmTaskGuide.fill(raw).replace("{build}", Settings.key_cap("build"))
+	var txt := raw.replace("{build}", Settings.key_cap("build"))
 	txt = txt.replace("{house_cost}", FarmSites.cost_text(FarmSites.build_cost("house")))
 	return txt.replace("{interact}", Settings.key_cap("interact")).replace("{details}", Settings.key_cap("details"))
 
-## What the spotlight lights for this step's current stage: {"hub": bar button id, "world": true}, or {}.
+## What the spotlight lights for this step's current stage: {"hub": bar button id}, or {}.
 static func spot(id: String) -> Dictionary:
 	return (step_def(id).get("spot", {}) as Dictionary).get(stage(id), {})
 
@@ -130,15 +123,18 @@ static func world_text(id: String) -> String:
 	return "" if s.is_empty() else String((s["world"] as Dictionary).get(stage(id), ""))
 
 # ------------------------------------------------------------------ progress
-## A thing happened on the farm: swing (a hammer), task (a Boki pinned to a job), hob (talked), portal.
+## A thing happened on the farm: swing (a hammer), task (a Boki pinned to a job), hob (talked), buy, sell,
+## portal. The portal is the last step; the rest were steps once and are one-time hints now, so doing the
+## thing means its hint is no longer needed (FirstTimeHint).
 static func event(what: String) -> void:
+	var hint := {"swing": "hammer", "task": "task", "hob": "hob", "buy": "buy", "sell": "sell"}
+	if hint.has(what):
+		FirstTimeHint.mark(String(hint[what]))
 	if not active():
 		return
-	var ids := {"swing": "hammer", "task": "task", "hob": "hob", "portal": "expedition", "buy": "buy", "sell": "sell"}
-	var id := ids.get(what, "") as String
 	detect()
-	if id != "" and available(id):
-		mark(id)
+	if what == "portal" and available("expedition"):
+		mark("expedition")
 
 ## Looks at the farm for steps that need no hook. A later step done means the earlier ones are too.
 static func detect() -> void:
@@ -146,17 +142,11 @@ static func detect() -> void:
 		return
 	var cost := FarmSites.build_cost("house")
 	var wood := int(cost.get("wood", 0))
-	var stone := int(cost.get("stone", 0))
 	if FarmSites.have("wood") >= wood and wood > 0:
 		mark("chop")
-	if FarmSites.have("stone") >= stone and stone > 0:
-		mark("stone")
 	if not FarmHob.house_entry().is_empty():
 		mark("chop")
-		mark("stone")
 		mark("house")
-	if house_built():
-		mark("hammer")
 	if Econ.feeders().any(func(f): return Econ.fill(f) > 0):
 		mark("feed")
 	if Progress.stat("harvested") > 0 and not HomeLayout.fixtures(Save.d, "farm").is_empty():
@@ -181,23 +171,14 @@ static func finish() -> int:
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	return gems
 
-## Skipping: nothing granted or taken. (FarmGuide puts the house down as a site when none is.)
-static func skip() -> void:
-	var st := state()
-	st["done"] = true
-	st["skipped"] = true
+## Skipping loses nothing a player needs: the starter food and the end gems are given (FarmGuide.skip also
+## puts the house up). Returns the gems granted.
+static func skip() -> int:
+	give_food()
+	var gems := finish()
+	state()["skipped"] = true
 	Save.save_game()
-
-## The buy step: enough gems for one seed, so nobody is stuck at the stall. Returns the gems added.
-static func give_seed_gems() -> int:
-	if not bool(option("market_gems")):
-		return 0
-	var cheapest := 1000000
-	for c in Data.CROPS:
-		cheapest = mini(cheapest, int(Data.CROPS[c]["price"]))
-	var add := maxi(0, cheapest - int(Save.d["gems"]))
-	Save.d["gems"] = int(Save.d["gems"]) + add
-	return add
+	return gems
 
 ## Starter food for the trough, once, when the tutorial's feeding step is reached.
 static func give_food() -> void:
