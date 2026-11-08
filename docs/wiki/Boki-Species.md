@@ -15,6 +15,7 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 | [Vespyx](#vespyx) | Fox + Scorpion | Venom | small | bruiser | Starter egg |
 | [Bellowary](#bellowary) | Cassowary + Forge bellows | Ember | large | bruiser | Wild, nest eggs |
 | [Snuffapi](#snuffapi) | Okapi + Brass candelabra | Shadow | large | trickster | Wild, nest eggs |
+| [Ermink](#ermink) | Stoat | Wild | small | trickster | Wild, nest eggs |
 | [Frigatee](#frigatee) | Manatee + Antique icebox | Frost | large | support | Wild, nest eggs |
 | [Gongibbon](#gongibbon) | Gibbon + Bronze temple bell | Echo | medium | controller | Wild, nest eggs |
 | [Prowyak](#prowyak) | Yak + Icebreaker prow | Frost | large | tank | Wild, nest eggs |
@@ -79,6 +80,7 @@ A Boki's type is its theme in the grammar: it colours its abilities and decides 
 | Tempest | Canvastross, Zephyrak |
 | Titan | Cairnback, Lockatara |
 | Venom | Vespyx, Nettlynx, Pipewurm |
+| Wild | Ermink |
 
 ## Rampartoad
 
@@ -238,6 +240,26 @@ _Okapi + Brass candelabra_ (`duskapi`). An okapi with a candelabra for horns; sn
 
 - E ability: **Moon Swap** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.
 - Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
+- Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Ermink
+
+_Stoat_ (`ermink`). A stoat whose tail is a calligraphy brush, its cream coat as blank as a fresh page. Dip its tail in an Ink and it becomes something new.
+
+|  |  |
+|---|---|
+| Type | Wild |
+| Body | small, reach 1.3, mass 0.8; about 30 cm, 0.3 kg on average |
+| Stat points | Health 3, Damage 2, Speed 13, owner_move_speed 2 |
+| Personality | bravery 0.6, loyalty 0.6, temper 0.4, curiosity 0.9 |
+| Fighting style | trickster; aggression 0.45, loyalty 0.55, caution 0.65 |
+| Rides | shoulder (Brushstroke) |
+| Farm work | Craft 3, Forage 2, Mend 1 |
+| Egg | Mystery Egg: Speckled, and strangely quiet. Nobody knows what's inside. |
+
+- E ability: **Moon Swap** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.
+- Auto ability (it casts this on its own): **Moonlift** (14s cooldown). On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
 - Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
@@ -1082,3 +1104,83 @@ _Moray eel + Swift_ (`zephyrak`). A little sky serpent: a moray eel's long body 
 - Auto ability (it casts this on its own): **Storm Arc** (10s cooldown, range 7m). On its own, Zephyrak crackles a bolt at the nearest foe that jumps to two more.
 - Bond ultimate (merge): **Stormwing** (10s). Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Fuse again calls a thunderhead down on everyone near.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Not in the game yet
+
+In the roster (docs/boki/ROSTER.md) with no model yet, so they never spawn.
+
+| Boki | Type | Evolves from |
+|---|---|---|
+| Amanitusk | Spore / Venom | Sporcupine |
+| Arcestrel | Storm / Tempest | Kestrike |
+| Bellowlet | Ember | - |
+| Blossmink | Bloom | Ermink |
+| Briarlynx | Venom / Bloom | Thistlynx |
+| Bucketmander | Storm / Tide | - |
+| Chandelapi | Shadow / Ember | Snuffapi |
+| Chandelotl | Prism / Lunar | Glassolotl |
+| Chimelop | Echo / Lunar | Echolop |
+| Cisternmander | Storm / Tide | Barrelmander |
+| Coolatee | Frost / Tide | - |
+| Dragonkite | Wyrm / Tempest | Ribbonwyrm |
+| Dreadnoyak | Frost / Titan | Prowyak |
+| Dribbara | Bloom / Tide | - |
+| Druzemole | Stone / Prism | Geodemole |
+| Eclipsowl | Lunar / Shadow | Lunowl |
+| Embrook | Ember / Tempest | Kindlewren |
+| Fizzlet | Storm | - |
+| Flarmink | Ember | Ermink |
+| Forgebrock | Ember / Titan | Anvilbrock |
+| Frothisk | Prism / Tide | Bubblisk |
+| Furnacowary | Ember / Titan | Bellowary |
+| Galleotter | Tide / Titan | Oarter |
+| Geodelotl | Prism / Stone | Glassolotl |
+| Geodemole | Stone / Prism | Glintmole |
+| Geysirbara | Bloom / Tide | Soakybara |
+| Glaciatee | Frost / Tide | Frigatee |
+| Glaivyx | Venom / Titan | Vespox |
+| Glassolotl | Prism / Tide | Prismander |
+| Gongrowl | Echo / Titan | Gongibbon |
+| Howlop | Echo / Shadow | Echolop |
+| Jarmit | Tide | - |
+| Jibbatross | Tempest / Tide | Kerchick |
+| Kayak | Frost / Tide | - |
+| Kerchick | Tempest / Tide | - |
+| Kitlet | Wyrm | - |
+| Lanceron | Frost / Tempest | Skateron |
+| Lanternmit | Tide / Ember | Jarmit |
+| Lashyx | Venom / Shadow | Vespox |
+| Latchling | Titan / Gravity | - |
+| Lunink | Lunar | Ermink |
+| Lyrewing | Echo / Tempest | Thrumbird |
+| Mothlet | Lunar | - |
+| Oarlet | Tide | - |
+| Oarter | Tide | Oarlet |
+| Parasolth | Shadow | - |
+| Prismink | Prism | Ermink |
+| Puffamus | Ember | Teapotamus |
+| Pyrraven | Ember / Tempest | Embrook |
+| Reapant | Swarm / Bloom | Scythant |
+| Ribbonwyrm | Wyrm / Tempest | Kitlet |
+| Rimink | Frost | Ermink |
+| Ringrove | Spore / Bloom | Sporcupine |
+| Rippmink | Tide | Ermink |
+| Scythant | Swarm / Bloom | Marchleaf |
+| Seamwyrm | Shadow / Wyrm | Zippelith |
+| Skidlet | Frost | - |
+| Sporcupine | Spore | Mycroll |
+| Stormit | Tide / Storm | Jarmit |
+| Teapotamus | Ember / Tide | - |
+| Terrarimit | Tide / Bloom | Jarmit |
+| Thistlynx | Venom / Bloom | Nettlynx |
+| Thunderstrich | Storm / Tempest | Boltstrich |
+| Tidalisk | Prism / Tide | Frothisk |
+| Tinbrock | Ember | - |
+| Umbrink | Shadow | Ermink |
+| Vaultara | Titan / Gravity | Lockatara |
+| Vespox | Venom | Vespyx |
+| Voltalon | Storm / Tempest | Arcestrel |
+| Voltmink | Storm | Ermink |
+| Wickapi | Shadow / Ember | - |
+| Wyrmink | Wyrm | Ermink |
+| Zipling | Shadow | - |
