@@ -826,7 +826,7 @@ func open_admin() -> void:
 	add.call("Partner +1 level", func():
 		var k := Save.active_kin()
 		if not k.is_empty():
-			k["level"] = int(k["level"]) + 1
+			Evo.level_up(k)
 			Game._evolve(k, {}))
 	add.call("Partner full trust", func():
 		var k := Save.active_kin()
