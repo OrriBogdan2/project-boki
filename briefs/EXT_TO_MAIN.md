@@ -2662,3 +2662,4 @@ READY ext/pip-companions-v2 399f2b017 (Meeko's sun + raincloud from pip_v2 compa
 
 CLAIM ext/tg-text (job a4): Training Area -> Training Grounds, Extraction trios only, Duel off main list.
 READY ext/tg-text @ : text rename, tabs Solo/Duos removed, Duel room button removed (Duel stays in the Grounds bar). health --strict, gen_wiki --check, arena/practice-hero checks pass. GPU shots queued (jobq 20261108-025052-16336) but no GPU worker picked it up yet: unverified visually. farm-start-check has 2 failures (meadow tint, crouch) that look unrelated, not checked on main.
+READY ext/parity-no-riders 3bcb50eca (remove Chill 15% slow, Meeko carrier shield (hit/stun drops), stale Shred text; checks assert 4s Chill/no shield)
