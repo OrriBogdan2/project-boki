@@ -3270,3 +3270,5 @@ READY ext/drop-solo-after: separate / drop solo only after the team drop is made
 
 ## 2026-11-08 feel (job 20261108-231051-a1): CLAIM hud-reveal-1108
 - CLAIM: DECISIONS "UI is too much for a new player", UI_DECLUTTER_PLAN jobs 1+2 (reveal-helper + hud-declutter, §8 expedition HUD): a reveal system (HUD elements register a reveal trigger, the save remembers what was revealed, old saves see everything, Settings "Show full HUD" for veterans), HUD gating via a new hud_reveal.gd. Branch ext/hud-reveal-1108 off origin/main, stacked on READY ext/tutorials-cut 37dc18d84 so Reveal extends its FirstTimeHint (one helper, one save key set). Not in this claim: arrival-declutter, menus-more, creator-trim.
+## 2026-11-08 deep (job 20261108-231141-a4): CLAIM Boki 3D: Mycroll (burrlet) from the owner's new concept sheet
+- CLAIM: BOKI_50_DESIGNS 'Mycroll (`burrlet`)' UPGRADE from the owner's sheet briefs/art-refs/boki/burrlet_turnaround.png (76b19a34c): sheet check, then rebuild the model via tools/art1 + Meshy, keeping rig, clip set, anchors and kit wiring. Branch ext/boki-burrlet-v2 from origin/main.
