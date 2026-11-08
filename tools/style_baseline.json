@@ -33,7 +33,7 @@
 },
 "scripts/arch/kits/archer_kit.gd": {
 "long_line": 12,
-"semicolon": 1,
+"semicolon": 2,
 "shadow": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
@@ -181,12 +181,12 @@
 "semicolon": 1
 },
 "scripts/core/settings.gd": {
-"long_line": 15,
+"long_line": 16,
 "nested_ternary": 1,
 "semicolon": 4
 },
 "scripts/core/sfx.gd": {
-"long_line": 5,
+"long_line": 6,
 "semicolon": 3,
 "shadow": 3
 },
@@ -253,9 +253,9 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 209,
+"long_line": 211,
 "nested_ternary": 29,
-"semicolon": 247,
+"semicolon": 248,
 "shadow": 3
 },
 "scripts/home/home_build.gd": {
@@ -389,7 +389,7 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 387,
+"long_line": 388,
 "nested_ternary": 7,
 "semicolon": 407,
 "shadow": 3
@@ -426,7 +426,7 @@
 "scripts/match/arena.gd": {
 "long_line": 22,
 "nested_ternary": 2,
-"semicolon": 36
+"semicolon": 37
 },
 "scripts/match/arena_demo.gd": {
 "long_line": 2
@@ -494,11 +494,11 @@
 "semicolon": 5
 },
 "scripts/match/exit_models.gd": {
-"long_line": 23,
-"semicolon": 43
+"long_line": 25,
+"semicolon": 47
 },
 "scripts/match/exits.gd": {
-"long_line": 30,
+"long_line": 33,
 "nested_ternary": 1,
 "semicolon": 20
 },
@@ -581,6 +581,7 @@
 },
 "scripts/match/kin_companion.gd": {
 "long_line": 8,
+"nested_ternary": 1,
 "semicolon": 15
 },
 "scripts/match/kin_downed.gd": {
@@ -666,7 +667,7 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 281,
+"long_line": 282,
 "nested_ternary": 12,
 "semicolon": 276,
 "shadow": 3
@@ -830,7 +831,7 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 190,
+"long_line": 191,
 "nested_ternary": 39,
 "semicolon": 52,
 "shadow": 2
@@ -854,7 +855,7 @@
 "semicolon": 3
 },
 "scripts/ui/kin_reveal.gd": {
-"long_line": 4,
+"long_line": 5,
 "semicolon": 15,
 "shadow": 2
 },
@@ -889,9 +890,9 @@
 "shadow": 1
 },
 "scripts/ui/prologue.gd": {
-"long_line": 22,
+"long_line": 24,
 "nested_ternary": 1,
-"semicolon": 34,
+"semicolon": 40,
 "shadow": 1
 },
 "scripts/ui/reset_pop.gd": {
@@ -904,9 +905,9 @@
 "shadow": 1
 },
 "scripts/ui/scenery.gd": {
-"long_line": 6,
+"long_line": 8,
 "nested_ternary": 1,
-"semicolon": 4,
+"semicolon": 8,
 "shadow": 1
 },
 "scripts/ui/session_row.gd": {
@@ -914,9 +915,9 @@
 "semicolon": 1
 },
 "scripts/ui/title.gd": {
-"long_line": 21,
+"long_line": 22,
 "nested_ternary": 2,
-"semicolon": 39
+"semicolon": 41
 },
 "scripts/ui/ui.gd": {
 "long_line": 25,
@@ -1184,7 +1185,7 @@
 "semicolon": 11
 },
 "tools/teammate_check.gd": {
-"long_line": 28,
+"long_line": 29,
 "semicolon": 24
 },
 "tools/title_check.gd": {
