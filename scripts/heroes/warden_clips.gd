@@ -292,8 +292,6 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			return {"proc": true}
 	if bool(s.get("dead", false)) and st.has("dead"):
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
-	if bool(s.get("downed", false)) and st.has("downed"):
-		return {"clip": st["downed"], "t": -1.0}
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
