@@ -62,6 +62,8 @@ Still open (shared, not done here):
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
 - `pin_draw.gd` defaults to `#e8483e`.
+- Sparkle (ext/vfx-mage) draws LMB, RMB, E and X from `content/vfx/mage.json`; `vv_fx` keeps her Wirerun, Static marker,
+  orbs and the Grounded shackle.
 - Only five kits are data-driven (`content/vfx/`: archer, ashwick, juggernaut, rimewright, tender). The rest draw with
   `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`). Moving each to `HeroVfx` data is
   how a kit reaches the bar.
@@ -86,7 +88,7 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | 6 | Meeko | tender | 2 | 2 | 2 | 3 | 3 | 1 | 4 | 17 | purple orbs, gold seed rings, cyan ult dome: no signature colour; hard-edged flat discs; Hearth Call barely reads |
 | 7 | Sable | thief | 2 | 2 | 2 | 3 | 3 | 3 | 3 | 18 | LMB hits nearly invisible; held LMB is a flat unlit purple box; X is pale grey discs |
 | 8 | Albert | bulwark | 3 | 3 | 2 | 3 | 3 | 2 | 4 | 20 | gold swing arcs read; dash dome is mint green; E is a flat gold box with dark cubes |
-| 9 | Sparkle | mage | 3 | 3 | 3 | 3 | 3 | 2 | 3 | 20 | lightning still cyan (old teal) next to pink orbs; X tints the whole screen purple |
+| 9 | Sparkle | mage | 3 | 4 | 4 | 4 | 4 | 4 | 3 | 26 | was 20 (3/3/3/3/3/2/3). After (ext/vfx-mage, `vfxq-after-mage`, `vfxq-after-mage-lmb2`; before `vfxq-before-mage-reel`, same reel `tools/vfx_reel/mage.gd`; pairs on ext/vfx-mage-strips): all pink (#ff5ab4 body, #ffd6ee core) via content/vfx/mage.json; the range-wide dark violet disc under the Kitefall hang (the purple screen) is gone; Kitefall strikes as a white-hot core bolt inside a wide pink one, a flare, a shock wall and scorch the size of its 2.7 m hit, debris and a settling spark afterglow; Skycall the same at 1.5 m with a gathering countdown; the Storm Rod has a tip crackle, a trail and a shock-ring hit. Left: the finger bolt trail still reads thin at match zoom; Grounded draws a flat orange disc under the target (shared status look); sounds unchanged |
 | 10 | Neve | rimewright | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 26 | reads well (shards, shatter burst); the dash ice path is flat untextured boxes |
 | 11 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 27 | the bar: slash arcs, burning lanes, debris. Polish: cleave sound transient, ult shockwave scale |
 | 12 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: soft-particle ground clipping, hold-blade glow |
