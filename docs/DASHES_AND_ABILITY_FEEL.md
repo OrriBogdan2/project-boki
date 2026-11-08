@@ -13,7 +13,7 @@ It follows the archetype model in `docs/ARCHETYPES.md`:
 - the **weight class** (light, medium, heavy) sets dash **charges, recharge, air dash and mass**;
 - the **archetype** (Thief, Archer, Mage, Gunslinger, Juggernaut, Bulwark) sets the dash's **shape
   and input**;
-- the **kin** adds its `dodge_rider` (KIN_GRAMMAR.md) on top.
+- the **kin** adds nothing: dodge riders are retired (§3.4).
 
 Until archetypes ship, the three current class dashes stay as they are. Phase Step grows into the
 Thief's Flicker, Combat Roll into the Gunslinger's Slide Reload, and Shoulder Charge into the
@@ -295,7 +295,9 @@ and context-targeted. Six different inputs, so no two archetype dashes play alik
 - Distances never grow with rank (ABILITIES.md rule). Ranks cut the recharge only.
 - Protection stays short: at most 0.16s, or partial (shots only, front only). No full-invulnerability dash.
 
-### 3.4 How kin riders hook into each shape
+### 3.4 How kin riders hook into each shape (RETIRED)
+
+> **Retired (owner decision 2026-11-05, item 129; DECISIONS.md):** Boki dash riders are removed. Dashes are purely the hero's own; a Boki acts only through its own abilities. Kept for history only. `--boki-dash-check` asserts no Boki changes a dash.
 
 General rules, so any rider, including a community one, maps onto any shape:
 
@@ -310,7 +312,9 @@ General rules, so any rider, including a community one, maps onto any shape:
 Riders are priced in Phase 3 like any other part. A rider can't change a dash's input, charges or
 protection. Those belong to the archetype and weight class.
 
-### 3.5 Every archetype + kin dash
+### 3.5 Every archetype + kin dash (RETIRED)
+
+> **Retired (owner decision 2026-11-05, item 129; DECISIONS.md):** Boki dash riders are removed. Dashes are purely the hero's own; a Boki acts only through its own abilities. Kept for history only. `--boki-dash-check` asserts no Boki changes a dash.
 
 Riders today (content/kin_v2):
 

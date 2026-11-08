@@ -1,7 +1,7 @@
 {
 	"doc": "Cinder's hand-keyed clips (art/wardens/cinder/cinder.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Times are the kit's (kmoves_pair.gd). loco.cadence: the run clip plays 1.8x its planted-foot rate (the source scurries, a footfall every 0.15-0.2 s; docs/heroes/ashwick.md, Animation timing).",
 	"skinned_weapon": true,
-	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "fin.L": "head", "fin.R": "head", "jaw": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R", "jet.0": "hips", "jet.1": "hips"},
+	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "jaw": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "fingers.R": "hand.R", "thumb.R": "hand.R", "foot.L": "shin.L", "foot.R": "shin.R", "jet.0": "foot.R", "jet.1": "foot.L"},
 	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
 	"loco": {
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
@@ -25,5 +25,5 @@
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
-	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "lid.R", "jaw", "fin.L", "fin.R"]
+	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "fingers.R", "thumb.R", "brow.L", "brow.R", "lid.L", "lid.R", "jaw"]
 }
