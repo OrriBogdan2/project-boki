@@ -15,3 +15,9 @@ Albert (bulwark), one strip per changed part (rmb = the aegis, e = Mending Groun
 
 - before_bulwark_{rmb,e,r}.png: main d255acbee (jobq vfxq-before-bulwark 20261108-180332-10750)
 - after_bulwark_{rmb,e,r}.png: ext/vfx-bulwark 751593c7e (jobq vfxq-after-bulwark 20261108-225956-21016)
+
+Kael (juggernaut), X (Gilded Riposte), 3x3 frames at 0.2 0.42 0.77 0.86 0.89 0.93 0.98 1.1 2.0s (the cleave lands
+at ~0.85s; the 0.89s frame shows the crescent), both rendered on worker rp1-1 with the same reel times:
+
+- before_juggernaut_r.png: ext/vfx-quality-base 9a9bb3b79 + the reel times (jobq kael-polish-before-r2 20261108-230148-18573)
+- after_juggernaut_r.png: ext/vfx-kael-polish 2500aca86 (jobq kael-polish-after-r2 20261108-225704-00644)
