@@ -314,8 +314,9 @@ func _hint_card(text: String, width: float, font_px := 16) -> PanelContainer:
 	UI.set_card_border(card, Color(UI.GOLD, 0.7), 2)
 	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var lbl := UI.label(text, font_px, UI.INK, UI.semi)
-	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lbl.custom_minimum_size.x = width
+	if width > 0.0:      # (wrapping with no width set squeezes it to one letter a line)
+		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		lbl.custom_minimum_size.x = width
 	card.add_child(lbl)
 	return card
 

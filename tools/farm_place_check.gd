@@ -263,6 +263,11 @@ func _hunger() -> void:
 	var home = await _home()
 	var rec: Dictionary = Save.active_kin()
 	rec["starve"] = 24.0 * 3600.0
+	Care.ensure(rec)
+	rec["needs"]["food"] = 5.0               # a day without food: an empty belly (not "full right now")
+	var crops: Array = Data.CROPS.keys()
+	rec["likes"]["food"] = crops[0]          # likes are seeded from the random uid: pin them so kibble is never
+	rec["likes"]["hates"] = crops[1]         # the hated food (refused) nor the loved one (fills more)
 	Save.d["items"]["kibble"] = 5
 	ok(HungerGate.meals_needed(rec) == 2, "24 h of starving: two meals (%d)" % HungerGate.meals_needed(rec))
 	home._confirm_start()
