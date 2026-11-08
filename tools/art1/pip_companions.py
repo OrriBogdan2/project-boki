@@ -268,12 +268,13 @@ def face_patch(name, body, cell_half, centre):
                 grid[i, j] = bm.verts.new(hit + nrm * DECAL_LIFT)
     for j in range(n):
         for i in range(n):
-            q = [grid.get(k) for k in ((i, j), (i + 1, j), (i + 1, j + 1), (i, j + 1))]
+            ring = ((i, j), (i, j + 1), (i + 1, j + 1), (i + 1, j))      # (clockwise from the front, +Y: x runs left on screen)
+            q = [grid.get(k) for k in ring]
             if None in q:
                 continue
             f = bm.faces.new(q)
-            for lp, (a, b) in zip(f.loops, ((i, j), (i + 1, j), (i + 1, j + 1), (i, j + 1))):
-                lp[uv].uv = (a / n, b / n)
+            for lp, (a, b) in zip(f.loops, ring):
+                lp[uv].uv = (1 - a / n, b / n)
     ob = new_obj(name, bm)
     ob.data.polygons.foreach_set("use_smooth", [True] * len(ob.data.polygons))
     return ob
@@ -348,7 +349,7 @@ def main():
     img = build_atlas()
     img.filepath_raw, img.file_format = faces_png, "PNG"
     img.save()
-    mats = {"sun": flat_mat("glow-sun", (1.0, 0.70, 0.18)), "cloud": flat_mat("skin-cloud", (0.93, 0.93, 1.0), 0.5),
+    mats = {"sun": flat_mat("cloth-sun", (1.0, 0.70, 0.14)), "cloud": flat_mat("skin-cloud", (0.93, 0.93, 1.0), 0.5),
             "drop": flat_mat("ice-drop", (0.60, 0.78, 0.98), 0.15),
             "fsun": face_mat("eyes-mood_sun", img), "fcloud": face_mat("eyes-mood_cloud", img)}
     sun, cloud, dr = sun_body(), cloud_body(), drops()

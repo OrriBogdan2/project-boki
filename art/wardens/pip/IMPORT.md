@@ -1,7 +1,7 @@
 # Pip (tender; was Moosh Moosh / Burple): import note, ART-1 rebuild (2026-11-05, items 76b + 108)
 
 `pip.glb`: head and body are Meshy scans fitted to the rig in Blender; arms, hands, eye domes and wings are scripted; the sun and raincloud companions are built by tools/art1/pip_companions.py. 14,811 triangles with the companions (S1's budget: 15k, weapon included).
-Materials: skin-fur, cloth-body, leather-body (the body's own 2048 colour, normal, emission), skin-face (the head's own 2048 colour, normal, emission), skin-hand, card-wing, glow-sun, skin-cloud, ice-drop (flat colours), eyes-mood_sun / eyes-mood_cloud (the 2048x1024 face atlas, 4x2 cells).
+Materials: skin-fur, cloth-body, leather-body (the body's own 2048 colour, normal, emission), skin-face (the head's own 2048 colour, normal, emission), skin-hand, card-wing, cloth-sun, skin-cloud, ice-drop (flat colours), eyes-mood_sun / eyes-mood_cloud (the 2048x1024 face atlas, 4x2 cells).
 
     # credits: 36 (image edits) + 40 (body) + 40 (head); requests and outputs in ~/meshy/pip_f
     B=~/tools/blender-4.5.15-linux-x64/blender
