@@ -353,3 +353,6 @@ Extraction matches are ALWAYS squads of 3 and ALWAYS 10 teams (30 hunters); bots
 
 ## 2026-11-08 owner: real matches HAVE air control
 Match movement must have strong WASD air control (at least as good as the farm today); the old "[game data] low air control" choice is overruled. One movement model everywhere (movement-air-core-1108).
+
+## 2026-11-08 coordinator (owner asked): explicit state machines
+New or rewritten stateful code (movement, ability phases, Boki AI, match flow, tutorials, UI flows) uses ONE explicit state per machine (enum + single state var + guarded transition table + enter/exit + debug readout), not scattered bools and *_t timers. Pattern and ranked migration plan: briefs/STATE_MACHINES.md (job state-machines-audit-1108). Locomotion goes first, inside movement-air-core-1108. Kit/ability-phase migration waits until the wave-2 kit jobs merge, to avoid conflicts.
