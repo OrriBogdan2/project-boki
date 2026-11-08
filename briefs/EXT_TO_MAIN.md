@@ -2949,3 +2949,5 @@ READY ext/tutorial-prologue-rebased-rebased 7537e251d (supersedes ext/tutorial-p
 - Conflicts: docs/ABILITIES.md and pin_spirit.gd. Main cut Focus/Deadeye (ffa20b0f7), so kept main's Hawk Sense passive and dropped the "lose 30 Focus" text, keeping the branch's raised-terrain wording. Also fixed the stale "not cliffs" / "30 Focus" lines in docs/heroes/archer.md.
 - Check change: main's faster walk made the terrace check walk off the arena edge (ground -1e9, y -0.11), so its walk is 1.1 s instead of 1.5 s. Logic unchanged.
 - Checks: --archer-combo-check 161/0, --check 0 failures, health --strict OK.
+
+READY ext/lace-tall-climb-rebased b3c955ab1 (supersedes: ext/lace-tall-climb 8b684f259; merged origin/main, archer.md conflict resolved keeping main's Focus cut; --check 0 failures, --archer-combo-check 161/0, health --strict OK)
