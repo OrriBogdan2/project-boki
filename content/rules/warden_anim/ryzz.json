@@ -3,7 +3,7 @@
 	"skinned_weapon": true,
 	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "mouth.L": "head", "mouth.R": "head", "gum": "head", "foot.L": "shin.L", "foot.R": "shin.R",
 		"index.L": "hand.L", "index2.L": "index.L", "curl.L": "hand.L", "curl2.L": "curl.L", "thumb.L": "hand.L", "index.R": "hand.R", "index2.R": "index.R", "curl.R": "hand.R", "curl2.R": "curl.R", "thumb.R": "hand.R",
-		"rod.0": "hips", "rod.1": "hips", "rod.2": "hips", "rod.3": "hips", "rodlit.0": "rod.0", "rodlit.1": "rod.1", "rodlit.2": "rod.2", "rodlit.3": "rod.3", "arc.0": "hips", "arc.1": "hips"},
+		"rod.0": "hips", "rod.1": "hips", "rod.2": "hips", "rod.3": "hips", "rodlit.0": "rod.0", "rodlit.1": "rod.1", "rodlit.2": "rod.2", "rodlit.3": "rod.3"},
 	"blade": {"root": "anchor_gun_R", "tip": "weapon_muzzle"},
 	"loco": {
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,

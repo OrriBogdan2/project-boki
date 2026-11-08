@@ -18,8 +18,8 @@ const WARDENS := {
 	"archer": {"hit_r": 0.392, "height": 0.98, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
 	# gunslinger: Vex is slim and her minigun hugs her hip
 	"gunslinger": {"hit_r": 0.416, "height": 1.04, "width": [0.5, 1.15], "moves": "gunslinger_"},   # (slim)
-	# (slim and long-legged; height_3d: her rods stand over the head)
-	"mage": {"hit_r": 0.4, "height": 1.04, "height_3d": 1.11, "width": [0.6, 1.3], "moves": "mage_"},
+	# (slim and long-legged; height_3d: her v2 rods stand a hand over the head)
+	"mage": {"hit_r": 0.4, "height": 1.04, "height_3d": 1.06, "width": [0.6, 1.3], "moves": "mage_"},
 	# (Sable's moth antennae stand ~0.3 m over her head, as on the master sheet)
 	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "thf_"},
 	# (lean; height_3d: the v2 locs hang down, no piled crown over the head)
