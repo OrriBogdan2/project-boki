@@ -59,8 +59,21 @@ MAX_NODES, because cross-island trips on the bigger land ran out of nodes.
   | 2x before, 40 | 88.1 / 45.2 | 204.7 / 25.1 | 39.0 | 11.7 | 10.6 |
   | 2x after, 40 | 75.6 / 39.0 | 155.2 / 17.0 | 41.1-44.1 | 14.6-18.7 | 8.4 |
   | 2x after, 30 | 65.9 / 31.8 | 127.7 / 13.8 | 35.8 | 12.4 | 7.2 |
+  | 2x flat2, 40 | 75.9 / 39.6 | 155.2 / 16.8 | 43.1 | 17.4 | 8.5 |
+  | 2x flat2, 30 | 64.5 / 30.7 | 120.9 / 12.6 | 36.2 | 12.7 | 6.8 |
+  | 2x flat2, 20 | 50.2 / 24.1 | 99.3 / 10.5 | 35.5 | 12.5 | 5.6 |
 
   Not flat at either size. Most of the rest is per-hunter sim on the bigger land and map rendering, not
   one hotspot. So the 2x land stays, capped at 30 (Data.MATCH_PLAYERS); that is ~25% fewer hunters per
   m² than the 20-hunter map had. warm_up counts frames, so it follows the box's frame time (11.7 to 18.7 s
   on near-identical code). Alternatives not taken: keep 40 (fight 76 ms), or go back to 20 on 2x land.
+- Second flat pass (flat2 rows): far awake monsters step at 20 Hz (Mob.FAR_M), shots check only the props
+  in reach (Breakables.near), far pickups don't spin (Wpicks), truce offers spaced by squad count, and
+  aboard the sky ship rival plates draw only within 5 m (LabelCull.RIDE_M). Fight mobs 3.6 -> 2.3 ms a
+  step at 30; the rest is within run-to-run noise, so the cap stays at 30. The 20-hunter row is the
+  finding: the same code with the same hunter count costs 2.3x the script time on the 2x land (fight
+  24.1 vs 10.6 ms; hunters 5.6 vs 2.6, Boki 3.8 vs 1.3, bots 3.3 vs 1.0 ms a step). The gap is per-entity
+  cost that grows with the land, not the hunter count: the next pass should profile what a hunter, a Boki
+  and a bot step ask of the world (ground, walls, line of sight, grass, path grids) on the 2x map against
+  the old one, rather than trim more systems. Load: build.hunters is 42 model builds in a 30-hunter
+  session (12 are the planning screen's Wardens); see docs/DEBT.md for the split.
