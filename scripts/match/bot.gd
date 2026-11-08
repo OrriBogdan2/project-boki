@@ -663,8 +663,6 @@ func _choose(m: Match, h: Hunter) -> void:
 			continue
 		if m.truce and m.truce.holds(h, o):
 			continue
-		if o is Hunter and not m.can_see(h.team, o):
-			continue
 		var d := h.flat_dist(o)
 		# early on bots farm monsters and only fight hunters who come close or shoot them
 		var provoked: bool = h.last_hit_by == o or (o is Hunter and h.last_hit_by == o.kin)
@@ -676,6 +674,8 @@ func _choose(m: Match, h: Hunter) -> void:
 		if bounty: reach += 5.0        # (a rolling session: a hunter with a bounty on them is worth going after)
 		if d > reach or absf(o.pos.y - h.pos.y) > 3.0:
 			continue
+		if o is Hunter and not m.can_see(h.team, o):
+			continue      # (after the range test: seeing asks every hunter of the team)
 		if not m.world.los(h.pos, o.pos, h.pos.y + 0.95) and d > 4.0:
 			continue
 		var s: float = 20.0 - d + (6.0 if o == a["tgt"] else 0.0) - o.hp * 0.03 + (5.0 if bounty else 0.0)
@@ -934,6 +934,7 @@ func _path_dir(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 			return _steer(m, h, lk["take"])
 	return h.dir_to(goal)
 
+const WP_LOOK := 16               # waypoints (1 m tiles) ahead a bot tries to walk straight to
 ## s: how long a bot keeps its way to a goal (straight or the waypoint it picked) before it looks again
 var replan_s := float(Content.rules("tuning")["perf"]["bot_replan_s"])
 
@@ -971,9 +972,9 @@ func _plan(m: Match, h: Hunter, goal: Vector3, from: Vector2, gt: Vector2i) -> V
 		_no_path(m, h)
 		return Vector2.INF
 	h.ai.erase("nopath")
-	# aim for the furthest waypoint we can walk straight to
+	# aim for the furthest waypoint we can walk straight to, of the next WP_LOOK (it re-plans as it goes)
 	var pick: Vector2 = path[0]
-	for i in range(path.size() - 1, -1, -1):
+	for i in range(mini(path.size(), WP_LOOK) - 1, -1, -1):
 		if _clear_line(m, from, path[i]):
 			pick = path[i]
 			break
