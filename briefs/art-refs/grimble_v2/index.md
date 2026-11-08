@@ -61,3 +61,6 @@ Canon check: no nose, three-lens loupe and metal teeth with a gold tooth intact.
 
 ## Nose removed on the grumpy head (owner, Nov 7, 15:50 ET)
 A local OpenCV inpaint plus smoothing removed the leftover nose on the third head (grumpy) of `grimble_v2_master_sheet.jpg`. All three heads now match the canon: no nose.
+
+## Splash v3: "Cliff Heist" (owner, Nov 8, 01:40 ET)
+`grimble_v2_splash.jpg` rebuilds his original cliff splash with the v2 design. On a sky-high cliff edge, his purple slime arm's jagged bone hook punches through the lid of a barnacle chest in the foreground, which tumbles into the abyss in a purple splash of coins and gems. One bandit flips upside down behind him and another recoils. The design is on-model: no nose, three-lens loupe, metal and gold teeth, gauntlet. How it was made: Nano Banana Pro, fresh generations (refs: v2 turnaround, then the previous pick), then a local sharpen. The old splash is `explorations/grimble_v2_splash_reeling_boy_old.jpg`. A "3x stretched arm" variant is being tried; it replaces this one only if the owner prefers it.

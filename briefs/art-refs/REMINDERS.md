@@ -6,7 +6,7 @@
 - **Villain/story reference set** (owner, Nov 7): queued in `QUEUE_VILLAIN_STORY.md`. Start it only after the current hero key art (the Thief's View and the face-off) is done. Show 4 options per item and wait for the owner's pick.
 - **Auburn Knight hero pass** (owner, Nov 7): after the Auburn Knight reference (villain set item 5), do a pass on every hero associated with the Auburn Knights.
 - **Queued after the villain/dragon set** (owner, Nov 7, 22:41 ET):
-  - **Grimble splash redo:** rebuild his original splash (the cool view) with his new purple slime bone-hook arm. The current splash isn't clear enough.
+  - **Grimble splash redo:** rebuild his original splash (the cool view) with his new purple slime bone-hook arm. The current splash isn't clear enough. DONE (Nov 8): `grimble_v2/grimble_v2_splash.jpg` (Cliff Heist).
   - **Sable splash fix:** make her aim at the men below, and shrink the jewel; it's so big it looks comical. DONE (Nov 8): new `sable_v2/sable_v2_splash.jpg`.
   - **Face-off, no-heart version (owner, Nov 7):** make an alt of `keyart/keyart_faceoff_final.jpg` with the Wyrmheart removed from between Kael and Vex; it looks odd in the middle. DONE (Nov 8): `keyart/keyart_faceoff_noheart.jpg`; the original is kept.
 
