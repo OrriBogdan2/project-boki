@@ -1337,7 +1337,13 @@ func rimewright() -> void:
 	step(m, 0.5)
 	# --- Shatter on a knock (Chilled foe)
 	T.hp = 8.0
+	T.slow_t = 0.0
 	K.add_chill(T)
+	step(m, 0.1)
+	ok(
+			"tm passive: Chill is 4 s and shatter only, no slow of ours (the source has none)",
+			K.chilled(T) and float(Arch.def("rimewright")["passive"]["chill_t"]) == 4.0 and T.slow_t <= 0.0,
+			"slow_t %.2f" % T.slow_t)
 	T2.teleport(T.pos + Vector3(1.5, 0, 0))
 	T2.hp = T2.max_hp
 	step(m, 0.05)

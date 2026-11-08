@@ -66,7 +66,7 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Support medic: heals and carries the downed, roots whoever chases them. |
-| Passive: Carrier | Carrier: run into a downed teammate to carry up to 2 behind a shield. |
+| Passive: Carrier | Carrier: run into a downed teammate to carry up to 2; a hit or a stun drops them. |
 | Dash: Relay Step | Relay Step: a quick hop where you move; in the air, a long floaty glide. |
 | LMB | Ember Cast: hold to push embers from alternating hands; they fly past the cursor and each hit on a foe adds Kindle. |
 | RMB: Burrseed | Burrseed: a 1s wind-up, then the seed flies at the cursor; it sticks to a foe and roots them 0.7s later. |
@@ -76,7 +76,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Carrier (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Carrier shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If the shield breaks or you're stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
+**Carrier (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
 
 **Relay Step (dash, Shift, 7s cooldown).** A quick skip about 3.6m where you move; in the air, a long floaty glide of about 13m (its own 14s cooldown).
 
