@@ -170,18 +170,35 @@ func _mob_stand_ins() -> Node3D:
 			continue
 		holder.add_child(Models.mob(k))
 	# and the kit effect libraries' own shaders, which a kit's first cast built mid-play (LDFx on the bench's
-	# ride, a 200 ms frame); DJFx draws its own stand-ins (DashPace.rehearse)
-	var quad := QuadMesh.new()
-	for lib: Script in [LDFx, VVFx]:
+	# ride, a 200 ms frame; CareLook, HeroVfx a second after landing); DJFx draws its own (DashPace.rehearse).
+	# A library's particle shaders run in an emitter drawn with each of its spatial shaders.
+	for lib: Script in [LDFx, VVFx, CareLook, UltLook, HeroVfx]:
+		var spatial: Array[Shader] = []
+		var particles: Array[Shader] = []
 		for v in lib.get_script_constant_map().values():
-			if v is Shader and (v as Shader).get_mode() == Shader.MODE_SPATIAL:
-				var mi := MeshInstance3D.new()
-				mi.mesh = quad
-				var mt := ShaderMaterial.new()
-				mt.shader = v
-				mi.material_override = mt
-				holder.add_child(mi)
+			if v is Shader and (v as Shader).get_mode() == Shader.MODE_SPATIAL: spatial.append(v)
+			elif v is Shader and (v as Shader).get_mode() == Shader.MODE_PARTICLES: particles.append(v)
+		for sh in spatial:
+			var mi := MeshInstance3D.new()
+			mi.mesh = _fx_quad(sh)
+			holder.add_child(mi)
+			for ps in particles:
+				var p := GPUParticles3D.new()
+				p.amount = 1
+				p.visibility_aabb = AABB(Vector3(-4, -4, -4), Vector3(8, 8, 8))
+				var pm := ShaderMaterial.new()
+				pm.shader = ps
+				p.process_material = pm
+				p.draw_pass_1 = _fx_quad(sh)
+				holder.add_child(p)
 	return holder
+
+func _fx_quad(sh: Shader) -> QuadMesh:
+	var q := QuadMesh.new()
+	var mt := ShaderMaterial.new()
+	mt.shader = sh
+	q.material = mt
+	return q
 
 const MOB_DEPTH := -600.0      # m: under every island and the void floor, so no view draws them
 
@@ -340,6 +357,11 @@ static func _key(gi: GeometryInstance3D) -> String:
 		kind += "%d%d%d" % [mm.transform_format, int(mm.use_colors), int(mm.use_custom_data)]
 	elif gi is CPUParticles3D:
 		mesh = (gi as CPUParticles3D).mesh
+	elif gi is GPUParticles3D:
+		# its process shader is compiled too, the first time it emits
+		var gp := gi as GPUParticles3D
+		mesh = gp.draw_pass_1
+		kind += ">" + _mat_key(gp.process_material)
 	elif gi is Label3D or gi is Sprite3D:
 		var sb := gi as GeometryInstance3D
 		var parts: Array = [kind, sb.get("billboard"), sb.get("shaded"), sb.get("double_sided"),
@@ -435,6 +457,13 @@ func _proxy(src: Node3D) -> Node3D:
 		for ch in px.get_children(): ch.free()
 		px.visible = true
 		if px is Label3D: (px as Label3D).text = "0123456789!"
+		if px is GPUParticles3D:
+			var gq := px as GPUParticles3D
+			gq.amount = mini(gq.amount, 4)
+			gq.local_coords = true
+			gq.one_shot = false
+			gq.emitting = true
+			gq.preprocess = maxf(gq.preprocess, 0.2)
 		if px is CPUParticles3D:
 			var cp := px as CPUParticles3D
 			cp.amount = mini(cp.amount, 4)
@@ -444,7 +473,7 @@ func _proxy(src: Node3D) -> Node3D:
 			cp.preprocess = maxf(cp.preprocess, 0.2)
 	if px == null:
 		return null
-	if not (src is CPUParticles3D or src is Label3D or src is Sprite3D):
+	if not (src is CPUParticles3D or src is GPUParticles3D or src is Label3D or src is Sprite3D):
 		px.material_override = gsrc.material_override
 		px.material_overlay = gsrc.material_overlay
 	px.cast_shadow = gsrc.cast_shadow
