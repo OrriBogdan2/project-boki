@@ -269,6 +269,7 @@ func _start(o: Dictionary) -> void:
 	PerfLog.reset()
 	_stage_done_ms = 0.0
 	opts = o
+	WardenGlb.fetch_for(o)
 	if o.get("tutorial", false): tut = Tutorial.new(self)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
