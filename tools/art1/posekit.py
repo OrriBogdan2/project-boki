@@ -237,7 +237,7 @@ def two_bone(a, c, l1, l2, pole):
 
 
 def bake(arm, clip, solver, extras):
-    """One clip into an action: every contract bone keyed each frame. extras(params) -> {bone: (rot quat or None, loc)}."""
+    """One clip into an action: every contract bone keyed each frame. extras(params) -> {bone: (rot quat or None, loc or None[, scale])}."""
     act = bpy.data.actions.new(clip.name)
     act.use_fake_user = True
     arm.animation_data_create()
@@ -264,7 +264,7 @@ def bake(arm, clip, solver, extras):
         loc = R0["root"].inverted() @ (root_at - solver.H0["root"])
         pbs["root"].location = loc
         pbs["root"].keyframe_insert("location", frame=f)
-        for b, (q, l) in extras(P).items():
+        for b, (q, l, *s) in extras(P).items():
             pb = pbs[b]
             pb.rotation_mode = "QUATERNION"
             if q is not None:
@@ -273,5 +273,8 @@ def bake(arm, clip, solver, extras):
             if l is not None:
                 pb.location = l
                 pb.keyframe_insert("location", frame=f)
+            if s:
+                pb.scale = s[0]
+                pb.keyframe_insert("scale", frame=f)
     arm.animation_data.action = None
     return act

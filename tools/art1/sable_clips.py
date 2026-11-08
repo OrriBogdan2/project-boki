@@ -3,6 +3,7 @@ where you aimed and she smiles when you miss: weight on one hip, one brow up, th
 Space: Z up, she faces +Y, her right is +X. G/BE the right pistol (grip, barrel direction + lock's top), GL/BL the left; "flip" (pitch forward, yaw left, roll right) turns the whole solved body about the pelvis.
 Run: blender -b --python tools/art1/sable_clips.py -- <sable.blend> <out.glb> [clip,clip]"""
 import sys, os, math
+from functools import partial
 import bpy
 import numpy as np
 from mathutils import Vector, Quaternion
@@ -129,41 +130,152 @@ def C(name, dur, keys, loop=False, base=READY):
 END = dict(READY)
 
 
+# ---------------------------------------------------------------------- idle, stance (docs/art/IDLE_AUDIT.md, Sable)
+# Quick, quiet, light: off balance on purpose, the weight on one leg and the other on its toe. Both loops stand on the same
+# FEET, so the 0.5 s hand-off into the stance never slides them. Every curve is whole cycles of its loop, or a beat that
+# starts and ends inside it, so the seam closes. Parts follow one another: the pelvis leads, the chest, head and hands
+# trail it by LAG seconds.
+IDLE_T = 5.0                     # s: the weight over and back, a glance, the twirl
+STANCE_T = 6.0                   # s: two slow sways, the left pistol turned over and hidden away
+LAG = dict(pelvis=0.0, chest=0.1, head=0.2, hands=0.3)
+BALL, BALL_DOWN = 0.11, A_Z - 0.015      # m: the ball of her foot ahead of the ankle, and below it
+FEET = dict(FL=(-0.06, 0.1, A_Z), FR=(0.11, -0.04, A_Z), FLy=0.3, FRy=-0.45)
+TOE_DEG = 26.0                   # deg: the free foot's heel off the ground, on its toe
+TWIRL_DIP = (0.03, 0.05, 0.05)   # m: the right hand's flick up and forward for the twirl
+
+
+def ring(t, period):
+    return t % period
+
+
+def plateau(t, period, a, b, c, d):
+    """0 before a, eases up to 1 by b, holds, eases back to 0 from c to d."""
+    t = ring(t, period)
+    u = min(1.0, max(0.0, (t - a) / (b - a))) if t < c else 1.0 - min(1.0, max(0.0, (t - c) / (d - c)))
+    return u * u * (3 - 2 * u)
+
+
+def snap(t, period, a, b, c, d):
+    """A plateau whose rise is quick and lands hard (ease out); the fall is slow."""
+    t = ring(t, period)
+    if a < t < b:
+        return 1 - (1 - (t - a) / (b - a)) ** 3
+    return plateau(t, period, a, b, c, d)
+
+
+def bump(t, period, a, b):
+    """0 outside a..b, one smooth hill inside it."""
+    t = ring(t, period)
+    return math.sin(math.pi * (t - a) / (b - a)) ** 2 if a < t < b else 0.0
+
+
+def settle(t, period, a, dur):
+    """The overshoot after a move lands at a: one swing past, then still."""
+    u = (ring(t, period) - a) / dur
+    return math.sin(math.pi * u) * (1 - u) if 0 < u < 1 else 0.0
+
+
+def cyc(t, period, k, ph=0.0):
+    return math.sin(TAU * k * t / period + ph)
+
+
+def on_toe(p, side, deg):
+    """The heel up deg off the ground, the foot rolled onto its planted ball: the ankle swings up and forward round it."""
+    a = math.radians(deg)
+    fwd = BALL * (1 - math.cos(a)) + BALL_DOWN * math.sin(a)
+    up = BALL * math.sin(a) - BALL_DOWN * (1 - math.cos(a))
+    yaw = p["F%sy" % side]
+    x, y, z = p["F" + side]
+    p["F" + side] = (x - fwd * math.sin(yaw), y + fwd * math.cos(yaw), z + up)
+    p["F%sp" % side] = a
+
+
+def shift(p, w, lag_w):
+    """Weight w: 0 on her right leg (the hip thrown out right), 1 over on her left. lag_w: the same, a beat late per part."""
+    wp, wc, wh, wa = (lag_w[k] for k in ("pelvis", "chest", "head", "hands"))
+    p["pel"] = (0.04 - 0.07 * wp, 0.025 * wp, -0.04 - 0.012 * math.sin(math.pi * wp))
+    p["prt"] = (0.03, 0.09 - 0.14 * wp, -0.07 + 0.12 * wp)
+    p["tor"] = (0.02, -0.14 + 0.17 * wc, 0.06 - 0.1 * wc)
+    p["hed"] = (0.02, 0.08 - 0.12 * wh, -0.07 + 0.08 * wh)
+    drag = 0.03 * (wc - wa)        # the hanging hands swing behind the shift and catch up
+    for k, x0 in (("G", 0.24), ("GL", -0.24)):
+        _, y, z = p[k]
+        p[k] = (x0 + 0.035 - 0.06 * wa + drag, y + 0.02 * wa, z)
+    on_toe(p, "L", TOE_DEG * (1 - w))
+    on_toe(p, "R", 0.6 * TOE_DEG * w)
+
+
+def breathe(p, t, period, k, amp):
+    """k breaths a loop: the rib cage swells on x_breath, the shoulders lift the hands, the head counters."""
+    b = 0.5 - 0.5 * cyc(t, period, k, math.pi / 2)
+    lag = 0.5 - 0.5 * cyc(t - LAG["hands"], period, k, math.pi / 2)
+    p = off(p, pel=(0, 0, 0.002 * b), tor=(-0.015 * b, 0, 0), hed=(0.012 * b, 0, 0), G=(0, 0, 0.005 * lag), GL=(0, 0, 0.005 * lag))
+    p["breath"] = amp * b
+    return p
+
+
+def idle_weight(t):
+    """0 on the right leg, held; over to the left from 1.9 s, held through the twirl; back from 3.9 s; each with a settle."""
+    return plateau(t, IDLE_T, 1.9, 2.5, 3.9, 4.5) + 0.12 * settle(t, IDLE_T, 2.5, 0.45) - 0.1 * settle(t, IDLE_T, 4.5, 0.45)
+
+
 def idle(u):
-    """Weight on the back hip, a slow sway; a pistol's muzzle ticks like a finger on a table; a side glance and a blink."""
-    a, b = math.sin(u * TAU), math.cos(u * TAU)
-    p = dict(READY)
-    p["pel"] = (0.012 + 0.012 * a, 0.0, -0.03 - 0.005 * math.sin(u * 2 * TAU))
-    p["prt"] = (0.03, 0.09 + 0.02 * a, -0.03 - 0.02 * a)
-    p["tor"] = (0.02 + 0.01 * b, -0.14 - 0.02 * a, 0.04 + 0.015 * a)
-    gl = math.exp(-((u - 0.6) / 0.09) ** 2)
-    p["hed"] = (0.02 - 0.03 * gl, 0.08 - 0.32 * gl, -0.06 + 0.05 * gl)
-    tick = max(0.0, math.sin(u * TAU * 4)) ** 8 * (1 if u < 0.3 else 0)
-    p["G"] = (0.24, 0.12, 0.845 + 0.004 * a)
-    p["BE"] = PR(-14, -34 + 8 * tick)
-    p["GL"] = (-0.24, 0.09, 0.83 - 0.004 * a)
-    p["lid"] = 1.0 if 0.28 < u < 0.31 or 0.84 < u < 0.865 else 0.22
-    p["smile"] = 0.75 + 0.2 * gl
-    p["cock"] = 0.5 + 0.4 * gl
+    """She waits on her right leg, the left foot on its toe; snaps a glance at something on her left and holds it; shifts
+    over to the left, and there, once a loop, twirls the right pistol a full turn round her trigger finger and back into
+    her grip, a sleight of hand with a sly look; then back onto the right leg."""
+    t = u * IDLE_T
+    p = dict(READY, **FEET)
+    shift(p, idle_weight(t), {k: idle_weight(t - lag) for k, lag in LAG.items()})
+    p = breathe(p, t, IDLE_T, 2, 0.02)
+    # the glance: the head snaps round to her left and holds, the chest follows late; a blink on the turn
+    g = snap(t, IDLE_T, 0.55, 0.72, 1.45, 1.95) + 0.1 * settle(t, IDLE_T, 0.72, 0.3)
+    p = off(p, hed=(-0.03 * g, 0.36 * g, 0.05 * g))
+    p = off(p, tor=(0, 0.06 * snap(t - LAG["chest"], IDLE_T, 0.55, 0.8, 1.45, 1.95), 0))
+    # the twirl: a flick up of the hand (2.8), one turn round the trigger finger (2.9 to 3.35), the catch and its settle
+    flick = bump(t, IDLE_T, 2.72, 3.5)
+    p = off(p, G=tuple(v * flick for v in TWIRL_DIP))
+    p = off(p, G=(0, 0, -0.025 * bump(t, IDLE_T, 3.33, 3.62)))
+    p["BE"] = PR(-14, -34 + 22 * flick - 8 * settle(t, IDLE_T, 3.35, 0.35))
+    s = min(1.0, max(0.0, (ring(t, IDLE_T) - 2.9) / 0.45))
+    p["twirl"] = TAU * s * s * (3 - 2 * s) if s < 1.0 else 0.0
+    look = plateau(t, IDLE_T, 2.7, 2.9, 3.35, 3.6)
+    p = off(p, hed=(0.12 * look, -0.08 * look, 0.04 * look))
+    # the face: a blink with the glance and one after the twirl; the brow and the smile come up when she has done it
+    p["lid"] = 1.0 if 0.52 < ring(t, IDLE_T) < 0.6 or 3.75 < ring(t, IDLE_T) < 3.83 else 0.22
+    sly = plateau(t, IDLE_T, 3.35, 3.55, 4.2, 4.8)
+    p["cock"] = 0.5 + 0.45 * sly + 0.2 * g
+    p["smile"] = 0.75 + 0.25 * sly + 0.1 * g
     return p
 
 
 def stance(u):
-    """Item 52, the master's pose: the right pistol raised by her shoulder, muzzle to the sky, the left hanging loose along the leg, the hip thrown, chin down and that smile."""
-    a, b = math.sin(u * TAU), math.cos(u * TAU)
-    p = dict(READY)
-    p["pel"] = (0.03 + 0.006 * a, 0.0, -0.04)
-    p["prt"] = (0.02, 0.2, -0.07)
-    p["tor"] = (0.0 + 0.01 * a, -0.26, 0.09)
-    p["hed"] = (0.1 + 0.015 * b, 0.26, -0.1)
-    p["G"] = (0.27, 0.12 + 0.004 * a, 1.36 + 0.006 * b)
-    p["BE"] = PR(-10, 74, (0.0, -1.0, 0.25))
-    p["GL"] = (-0.27, 0.03, 0.84)
-    p["BL"] = PR(6, -78, (0.0, 1.0, 0.1))
-    p["FL"], p["FR"] = (-0.10, 0.11, A_Z), (0.13, -0.05, A_Z)
-    p["FLy"], p["FRy"] = 0.2, -0.55
-    p["lid"] = 1.0 if 0.52 < u < 0.55 else 0.3
-    p["smile"], p["brow"], p["cock"] = 1.0, 0.15, 0.8
+    """Ready, a crouch lower on the same feet, the weight held on the right leg: the right pistol up by her shoulder,
+    muzzle to the sky (item 52, the master's pose). The left hand turns its pistol over and over at her thigh, a trinket
+    walked over the knuckles, then flicks it out of sight behind her hip and brings it back with a smile."""
+    t = u * STANCE_T
+    p = dict(READY, **FEET)
+    sway = {k: cyc(t - lag, STANCE_T, 1) for k, lag in LAG.items()}
+    w = 0.08 + 0.08 * sway["pelvis"]
+    shift(p, w, {k: 0.08 + 0.08 * v for k, v in sway.items()})
+    p = off(p, pel=(0.01, -0.01, -0.03))
+    p = off(p, prt=(0.05, 0.1, 0))
+    p = off(p, tor=(0.0, -0.12 - 0.02 * sway["chest"], 0.03))
+    p = off(p, hed=(0.08, 0.18 + 0.03 * sway["head"], -0.04))
+    p = breathe(p, t, STANCE_T, 2, 0.025)
+    p["G"] = (0.27, 0.12 + 0.006 * sway["hands"], 1.36 + 0.008 * cyc(t - LAG["hands"], STANCE_T, 2))
+    p["BE"] = PR(-10, 74 + 3 * sway["hands"], (0.0, -1.0, 0.25))
+    # the trinket: three turns of the wrist over 0.6 to 2.4 s, then the flick behind the hip (2.6), hidden, back by 5.4
+    turn = math.sin(TAU * 1.5 * (ring(t, STANCE_T) - 0.6) / 1.8) * plateau(t, STANCE_T, 0.5, 0.8, 2.2, 2.5)
+    hide = plateau(t, STANCE_T, 2.5, 2.8, 4.7, 5.4) + 0.08 * settle(t, STANCE_T, 2.8, 0.4)
+    gl = (-0.26 + 0.08 * hide, 0.05 - 0.19 * hide, 0.86 + 0.02 * turn * (1 - hide) + 0.04 * hide)
+    p["GL"] = tuple(v + 0.005 * sway["hands"] * (i == 1) for i, v in enumerate(gl))
+    fr = frame_of(*PR(10 + 140 * hide, -60 - 15 * hide, (-hide, 1.0 - hide, 0.1)))   # tucked down behind her hip, gone
+    p["BL"] = Quaternion(fr @ Vector((1, 0, 0)), math.radians(70) * turn) @ fr
+    look = plateau(t, STANCE_T, 0.5, 0.9, 2.3, 2.9)
+    p = off(p, hed=(0.16 * look, 0.12 * look, 0.06 * look))
+    sly = plateau(t, STANCE_T, 2.7, 3.0, 4.6, 5.3)
+    p["lid"] = 1.0 if 3.0 < ring(t, STANCE_T) < 3.08 else 0.3 - 0.08 * sly
+    p["smile"], p["brow"], p["cock"] = 0.85 + 0.15 * sly, 0.15, 0.6 + 0.3 * sly
     return p
 
 
@@ -270,7 +382,7 @@ def crouch_set():
 
 
 def clips():
-    out = [FnClip("idle", 4.2, idle), FnClip("stance", 4.0, stance)]
+    out = [FnClip("idle", IDLE_T, idle), FnClip("stance", STANCE_T, stance)]
     out += crouch_set()
     for nm, sk, stride, lift, T in (("walk", 0.0, 0.42, 0.03, 0.95), ("run", 1.0, 0.86, 0.1, 0.62)):
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
@@ -403,10 +515,14 @@ def clips():
     return out
 
 
-def extras(P):
+def extras(P, twirl_rest=Quaternion()):
+    """The face, the breath and the twirl. twirl_rest: x_twirl's rest frame (its key turns the pistol round the
+    lateral axis X of the rest pose)."""
     if not P:
         return {}
-    out = {}
+    br, tw = P.get("breath", 0.0), Quaternion((1, 0, 0), P.get("twirl", 0.0))
+    out = {"x_breath": (None, None, (1.0 + BREATH_OUT * br, 1.0 + br, 1.0 + BREATH_OUT * br)),
+           "x_twirl": (twirl_rest.inverted() @ tw @ twirl_rest, None)}
     b = P.get("brow", 0.0)
     l = P.get("lid", 0.2)
     sm = P.get("smile", 0.5)
@@ -422,6 +538,77 @@ def extras(P):
     return out
 
 
+BREATH_C = (0.0, 0.0, 1.16)       # m, the rib cage's centre (hips at 0.86, shoulders at 1.34)
+BREATH_R = (0.15, 0.13, 0.17)     # m, its half sizes: the skin outside moves with hips alone
+BREATH_CORE = 0.55                # of the half sizes: fully on x_breath inside this
+BREATH_OUT = 0.6                  # x_breath's swell out through the ribs, against its rise up the bone
+
+
+def leaf(arm, name, parent, head, tail):
+    """A new leaf bone under parent, unless the blend has it."""
+    if name in arm.data.bones:
+        return False
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = arm.data.edit_bones.new(name)
+    eb.head, eb.tail = head, tail
+    eb.parent = arm.data.edit_bones[parent]
+    bpy.ops.object.mode_set(mode="OBJECT")
+    return True
+
+
+def add_leaves(arm, body):
+    """x_breath under hips at the bottom of the rib cage, with the rib cage's skin moved onto it (an ellipsoid round the
+    chest, full inside BREATH_CORE, nothing at its rim), so a scale on it swells the chest; and x_twirl under hand.R at
+    the breech, with the right pistol's pieces moved onto it (every mesh island wholly on hand.R but the glove and the
+    fingers), so it turns round her trigger finger."""
+    if leaf(arm, "x_breath", "hips", (0, 0, 1.0), (0, 0, 1.2)):
+        hips, xb = body.vertex_groups["hips"], body.vertex_groups.new(name="x_breath")
+        for v in body.data.vertices:
+            w = next((g.weight for g in v.groups if g.group == hips.index), 0.0)
+            r = math.sqrt(sum(((v.co[i] - BREATH_C[i]) / BREATH_R[i]) ** 2 for i in range(3)))
+            k = min(1.0, max(0.0, (1.0 - r) / (1.0 - BREATH_CORE)))
+            k = w * k * k * (3 - 2 * k)
+            if k > 1e-3:
+                hips.add([v.index], w - k, "REPLACE")
+                xb.add([v.index], k, "REPLACE")
+    pivot = bpy.data.objects["anchor_blade_root"].matrix_world.translation
+    if leaf(arm, "x_twirl", "hand.R", pivot, pivot + Vector((0, 0, -0.08))):
+        bpy.context.view_layer.update()
+        for n in ("anchor_blade_root", "weapon_muzzle"):   # the Gun and its Muzzle spin with it
+            o = bpy.data.objects[n]
+            mw = o.matrix_world.copy()
+            o.parent, o.parent_type, o.parent_bone = arm, "BONE", "x_twirl"
+            bpy.context.view_layer.update()
+            o.matrix_world = mw
+        hand, xt = body.vertex_groups["hand.R"], body.vertex_groups.new(name="x_twirl")
+        me = body.data
+        root = list(range(len(me.vertices)))
+
+        def find(i):
+            while root[i] != i:
+                root[i] = root[root[i]]
+                i = root[i]
+            return i
+        for e in me.edges:
+            root[find(e.vertices[0])] = find(e.vertices[1])
+        mats = {}
+        for f in me.polygons:
+            mats.setdefault(find(f.vertices[0]), set()).add(me.materials[f.material_index].name)
+        isl = {}
+        for v in me.vertices:
+            w = next((g.weight for g in v.groups if g.group == hand.index), 0.0)
+            i = isl.setdefault(find(v.index), {"vs": [], "w": 1.0, "z": 9.0})
+            i["vs"].append(v.index)
+            i["w"], i["z"] = min(i["w"], w), min(i["z"], v.co.z)
+        for r, i in isl.items():
+            m = mats.get(r, set())
+            glove = m == {"leather-dark"} and i["z"] > pivot.z
+            if i["w"] > 0.99 and "skin-face" not in m and not glove:
+                hand.remove(i["vs"])
+                xt.add(i["vs"], 1.0, "ADD")
+
+
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:]
     bpy.ops.wm.open_mainfile(filepath=a[0])
@@ -429,14 +616,16 @@ if __name__ == "__main__":
     rig = {"grip_rest": tuple(K.grip("R")), "grip_l": tuple(K.grip("L")), "blade_rest": tuple(K.B_REST), "edge_rest": tuple(K.U_REST), "pelvis": K.HIPS_Z, "hilt_l": 0.1,
            "lhand": {"k": (0, 1, 0), "o": (-1, 0, 0), "palm": tuple(K.grip("L"))}}
     bpy.context.scene.render.fps = FPS
+    add_leaves(arm, bpy.data.objects["Body"])
     sol = TwinSolver(arm, rig)
+    twirl = partial(extras, twirl_rest=arm.data.bones["x_twirl"].matrix_local.to_quaternion())
     bpy.context.view_layer.objects.active = arm
     names = []
     wanted = a[2].split(",") if len(a) > 2 and a[2] else None
     for c in clips():
         if wanted and c.name not in wanted:
             continue
-        bake(arm, c, sol, extras)
+        bake(arm, c, sol, twirl)
         names.append((c.name, round(c.dur, 3)))
     print("clips", len(names), names)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.splitext(a[1])[0] + "_anim.blend")

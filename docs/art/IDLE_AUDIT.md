@@ -237,6 +237,20 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Fidget once per loop: she spins the pistol back into its holster grip, a sleight of hand.
 - **Target stance (6 s):**
   - The same feet, a crouch lower. Her free hand rolls a coin or trinket across the knuckles, then it vanishes.
+- **Done (ext/idle-thief):**
+  - sable_clips.py bakes a 5 s idle and a 6 s stance on one set of feet (`FEET`): the weight rides the right leg with
+    the left on its toe, then shifts across and back. Pelvis, chest, head and hands lag it (`LAG`); the knees stay soft.
+    The head snaps left at 0.55 s and holds; every curve runs whole cycles of its loop.
+  - The spin: a new leaf bone `x_twirl` under hand.R at the breech carries the right pistol (the glove and fingers stay
+    on the hand). It turns once at 2.9 to 3.35 s while the hand flicks and dips to catch it. `anchor_blade_root` and
+    `weapon_muzzle` ride it, so sable.json's blade names `x_twirl` and the Muzzle follows the spin.
+  - The stance keeps the raised right pistol, a crouch lower on the idle's feet. There is no coin prop and there are no
+    finger bones, so the left hand turns its pistol over at the thigh three times, tucks it down behind her hip (2.5 to
+    4.7 s), and brings it back. Alternative, not done: a coin on a leaf bone plus finger bones.
+  - Breathing is a new leaf bone, `x_breath` under hips, skinned to the rib cage (as Tenzo).
+  - Shots (jobq out, thief): before 20261108-103248-04987 (GPU), after 20261108-103902-16439 (GPU) and
+    20261108-103626-27127 (Xvfb, 60 frames: the spin frame by frame). f000 and f012 match on the body; in `live/` the
+    idle hands over to the stance with the feet planted. The other 45 clips re-bake key for key.
 
 ### 10. Vex the Hired Gun (`gunslinger`, art `vex`)
 

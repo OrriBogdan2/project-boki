@@ -1,8 +1,8 @@
 {
 	"doc": "Sable's hand-keyed clips (art/wardens/sable/sable.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Twin flintlocks, one skinned to each hand; the Vault's flips and the Encore dance run on the kit's own clock.",
 	"skinned_weapon": true,
-	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "mouth.L": "head", "mouth.R": "head", "foot.L": "shin.L", "foot.R": "shin.R"},
-	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
+	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "mouth.L": "head", "mouth.R": "head", "foot.L": "shin.L", "foot.R": "shin.R", "x_breath": "hips", "x_twirl": "hand.R"},
+	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle", "bone": "x_twirl"},
 	"loco": {
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
@@ -24,5 +24,5 @@
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["thf_lmb_r", 0.45], ["thf_lmb_l", 0.45], ["thf_vault_r", 0.48], ["thf_primed", 0.3], ["thf_vault_f", 0.48], ["thf_lmb_r", 0.3], ["thf_vault_twist", 0.48], ["thf_bola", 0.75], ["thf_knife", 0.45], ["thf_encore", 0.4], ["thf_encore_dance", 1.6], ["thf_reset", 0.4]],
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
-	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"]
+	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R", "x_twirl"]
 }
