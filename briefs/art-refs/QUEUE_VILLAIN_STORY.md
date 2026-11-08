@@ -81,7 +81,12 @@ She will become a playable character eventually. Make a turnaround (`malgrave_tu
   - A deep scar where Kael wounded him.
 - **Views:** a turnaround plus a head close-up, with a tiny human figure for scale.
 
-### 5. An Auburn Knight
+### Status (Nov 8, 00:08 ET): the Queen's art is DONE (items 1 to 4: the heart, the mask, the human form with turnaround, splash and portrait, the hybrid and the dragon).
+
+### 5. The Auburn Knights: owner redirect (Nov 8, 00:08 ET)
+The deliverable is now **one iconic armour set** worn by all of them, designed from the Queen's look. **Lore: there are always exactly 7 Auburn Knights.** This replaces the basic-knight turnaround below.
+
+### 5 (original brief). An Auburn Knight
 - **Look:** the dress of the king's guard: red-and-gold plate, a red cloak and banner, and the Solmere crest.
 - **Views:** a turnaround of a basic knight, to show how they dress in this form.
 - **Follow-up:** schedule a later pass for every hero associated with the Auburn Knights.

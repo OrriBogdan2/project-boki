@@ -2766,3 +2766,6 @@ The alternates (outfits, splashes and a portrait) are in villain/malgrave_alts/ 
   - bulwark.json: it drops the bulk. Keep the bulk to keep the owner's narrowing.
   - lineup_shot/check_registry: the same style wraps; take either.
   - warden_model_check thief/ashwick height_3d: its v2 models changed those. Re-measure after merging both: run --warden-model-check and set height_3d to the new 3D model rows.
+
+## 2026-11-08 00:12 ET (art + lore): the Queen's art is done; Auburn Knights direction
+The Queen's art set is complete; see the note above. Next is the Auburn Knights, with one iconic armour set based on her look and shared by all of them. New lore from the owner: **there are always exactly 7 Auburn Knights.** Please add this to the lore files.
