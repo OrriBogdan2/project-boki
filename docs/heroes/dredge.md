@@ -228,3 +228,17 @@ Holds dropped on a merge (`_drop_holds`): `wind`, `dive`, `flying`, `hook_sd`, `
 and `broadside.blast` (Brass Broadside's charge and waves).
 Dash flow (item 32): `content/dash_flow/dredge.json`; LMB waits for the lunge's end, the rest fire from it; Shift barges at once out of everything (item 51): out of the slam's wind-up the raised fist rides the barge and slams where it arrives, out of the air smash the pounce goes and the smash drops from where it ends, out of the Broadside the charge and waves follow him. Only a jump is refused from the hook's throw to the end of the reel (owner item 31, the source's Grounded while reeling: `into_jump.rmb`).
 The slugs are ordinary shots (`Match.spawn_shot` with a `kx` callback for the hit). No new sync shape.
+
+## Telegraph audit (owner rules: a ring, disc or burst on the ground means gameplay; a telegraph shows the true hit area)
+Branch `ext/telegraph-audit-b`. Drawn = what AimKit/fx draws; Hit = the number the kit tests; Enemy sees = other players see the tell (`all`, hostile-tinted, local; a remote machine only gets the `net_ring` echo, see Engine notes). The `telegraph == hit` asserts are in `tools/dredge_combo_check.gd`, `tools/dredge_ult_check.gd` (`--dredge-combo-check`).
+
+| Ability | Shape | Drawn | Hit | Timing | Enemy sees | Source read | Action |
+|---|---|---|---|---|---|---|---|
+| LMB scattergun | cone edges | edge lines out to the slug range (6.3 m), deg = fan + bloom | the slug spread | while firing | owner only | two edge lines | kept |
+| RMB Abyssal Hand | none | no ground shape | a projectile (11.5 m) | | | | chain ring at his feet while he reels kept: the source shows it as the Grounded status |
+| Shift Barge | none | no area (brass puffs, turf clods) | the barge hit | | | | nothing area-shaped to remove |
+| E Anchor (ground) | cone | r 3.0, 110 deg, fills over the wind-up | the slam cone, same radius/angle | wind-up, flash 0.2 s on the hit | yes (`all`) | cone in front | matched (already asserted); the 1.8 m dust wave and the 2.1 m scorch disc (cone mid-point) are removed, the fist scorch stays; remote echo is a `net_ring` 1.8 (0.6 x r) |
+| E Anchor (air) | circle | landing ring r 3.2 while falling, chain ring | `quake_r` 3.2 burst | the fall | yes (`all`) | landing ring | matched; assert drawn r == `quake_r`; the 1.9 m inner wave and the 1.9 m scorch are removed, the sunburst is now the full 3.2 |
+| X Brass Broadside | fan | 105 deg, grows to 5.9 m over the 1.1 s charge, then flashes at full size | slugs fan 105 deg to range 5.9 | 1.1 s charge, 2 waves 0.6 s apart | yes (`all`) | white-pink fan growing | matched; assert deg == `fan_deg`, len <= `range`. Remote echo is a 2.95 m `net_ring` |
+
+Suggestion (not built): the remote machines only get rings, so the Anchor cone and Broadside fan are seen as a round ring there; a Net cone message would show the true shape.

@@ -94,12 +94,13 @@ static func carried_tick(m: Node, o: Hunter) -> bool:
 	return true
 
 ## The support pair's payoff moment: a big word, rings, a flash, hitstop-grade shake and its own sound.
-static func payoff(m: Node, h: Hunter, at: Vector3, word: String, col: Color, snd: String) -> void:
+static func payoff(m: Node, h: Hunter, at: Vector3, word: String, col: Color, snd: String, rings := true) -> void:
 	if word != "":
 		m.fx.word(at + Vector3(0, 2.7, 0), word, col, true)
-	m.fx.ring(at, 2.4, col, 0.38)
-	m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
+	if rings:
+		m.fx.ring(at, 2.4, col, 0.38)
+		m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
 	m.fx.burst(at + Vector3(0, 1.1, 0), col, 36, 7.5, 0.65, 8.0, 1.3)
 	m.fx.flash(at + Vector3(0, 1.0, 0), col.lightened(0.4), 1.3, 0.1)
 	if snd != "": m.sfx(snd, at, 0.0, 1.0)
-	if h.ak: h.ak.net_ring(at, 2.4, col)
+	if rings and h.ak: h.ak.net_ring(at, 2.4, col)

@@ -73,9 +73,11 @@ func pin() -> void:
 	ok("pin ult bond: nothing for the cast alone", best(P) <= 0.0 and P.ult < 0.01, "%.3f" % P.ult)
 	step(m, 0.1)
 	var lane := AimKit.entry(P, "x")
-	ok("pin ult telegraph: the beam's lane out to 18m and the crosshair ring at her feet",
-		AimKit.shown(P, "x") and AimKit.shown(P, "x_ring") and absf(float(lane.get("len", 0.0)) - 18.0) < 0.1,
-		"lane %s ring %s" % [str(lane.get("len")), AimKit.shown(P, "x_ring")])
+	ok("pin ult telegraph: the beam's lane out to 18m and no ground ring (the beam is the hit area)",
+		AimKit.shown(P, "x") and not AimKit.shown(P, "x_ring")
+		and absf(float(lane.get("len", 0.0)) - 18.0) < 0.1
+		and absf(float(lane.get("width", 0.0)) - float(xd.get("width", 0.5))) < 0.01,
+		"lane %s w %s" % [str(lane.get("len")), str(lane.get("width"))])
 	# a press nocks (0.3s, its own held move, the cursor ring filling), then the beam pierces both
 	T.teleport(home + Vector3(7, 0, 0))
 	T2.teleport(home + Vector3(16, 0, 0))

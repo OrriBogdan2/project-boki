@@ -1443,6 +1443,9 @@ func rimewright() -> void:
 			"tm RMB: held, the landing ring sits on the cursor; she gathers the spear between her palms at her chest",
 			AimKit.shown(P, "rmb") and ra.distance_to(Vector2(cur.x, cur.z)) < 0.2 and K.anim_id == "tm_spear_aim"
 				and K.lk().showing("spear_prop") and K._spear_at(0.0).distance_to(chest) < 0.01)
+	ok(
+			"telegraph == hit: the held landing ring is the detonation's damage radius (drawn r == burst_r)",
+			absf(float(ring.get("r", 0.0)) - float(K.rmb_def()["lance"]["burst_r"])) < 0.01, str(ring.get("r")))
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
 	step(m, 1.0 / 60.0)
@@ -1487,6 +1490,11 @@ func rimewright() -> void:
 			not K.zones.is_empty() and Vector2(zat.x - cur.x, zat.z - cur.z).length() < 1.0,
 			"off %.2f" % Vector2(zat.x - cur.x, zat.z - cur.z).length())
 	step(m, 0.2)
+	var zring: Dictionary = AimKit.entry(P, "zone%d" % int(K.zones[0]["id"])) if not K.zones.is_empty() else {}
+	ok(
+			"telegraph == hit: the zone's ring everyone sees is the detonation radius, the disc its slow radius",
+			bool(zring.get("all", false)) and absf(float(zring.get("r", 0.0)) - float(ld["burst_r"])) < 0.01
+			and float(ld["zone_r"]) < float(ld["burst_r"]), str(zring.get("r")))
 	ok(
 			"tm RMB: two charges on a 10.2 s cooldown",
 			K.rmb_charges() == 2 and K.cd["rmb"] > 9.0 and K.cd["rmb"] <= 10.2, "cd %.2f" % K.cd["rmb"])

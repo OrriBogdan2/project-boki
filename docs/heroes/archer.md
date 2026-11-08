@@ -178,3 +178,16 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>` (scripts/match/arena_demo.gd
 
 ## Payoff
 Deadeye: gold second hit with T4 hitstop and shake, its own sound, "DEADEYE" word and `pin_deadeye`. Pins say "PINNED"; knocks say "RUN DOWN".
+
+## Telegraph audit (owner rules: a ring, disc or burst on the ground means gameplay; a telegraph shows the true hit area)
+Branch `ext/telegraph-audit-b`. Drawn = what AimKit/fx draws; Hit = the number the kit tests; Enemy sees = other players see the tell (`all`, hostile-tinted, local; a remote machine only gets the `net_ring` echo, see Engine notes). The `telegraph == hit` asserts are in `tools/archer_bulwark_combo_check.gd` (`--archer-combo-check`), `tools/pin_bjorn_ult_check.gd`.
+
+| Ability | Shape | Drawn | Hit | Timing | Enemy sees | Source read | Action |
+|---|---|---|---|---|---|---|---|
+| LMB draw | line | thin line to the cursor, `draw_tgt` 0.85 ring on the target, `draw_mark` 0.22 | arrow is a projectile; the rings mark the target/draw stage only | the draw | owner only | thin line | kept (reticle, not a ground area); the 1.3 m `net_ring` on reaching Supercharged is removed |
+| RMB Heavy Shot | lane | `rmb_bar` lane, length grows with the draw | the needle's flight | the draw | owner only | red needle path | kept |
+| Shift Spirit Walk | none | no area | no hit | | | | nothing drawn |
+| E Hail Wall | arc wall | radius = cursor distance (2-9 m), 120 deg, 1.8 m deep, 7 panels | `AimMode.in_arc(radius, 120 deg, width 1.8)` (+ body r) | 0.35 s tell, then 4.4 s of rain | yes (`all`) | arc of arrows | matched; assert drawn radius/deg/thick == the rain's |
+| X Starpiercer | lane | 18 m x 0.5 m, fills with the 0.3 s nock | pierce beam 18 m, width 0.5 | the nock | owner only | beam line | kept; the 0.9 m `x_ring` crosshair ring at her feet is removed (cosmetic) and the check asserts the lane width == data |
+
+Suggestion (not built): the beam lane could be `all` so a foe sees the nock; the source shows no enemy tell for the empowered window, so it stays owner-only.

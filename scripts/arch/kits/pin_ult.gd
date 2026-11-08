@@ -100,7 +100,6 @@ func tick(dt: float) -> void:
 	var nk := clampf(nock_t / float(x.get("nock", 0.3)), 0.0, 1.0) if nock_t >= 0.0 else 0.0
 	AimKit.lane(h, "x", {"len": float(x.get("range", 18.0)), "width": float(x.get("width", 0.5)), "tip": true,
 		"col": RED, "col2": CORE, "k": nk, "fill": nk, "hot": nk})
-	AimKit.circle(h, "x_ring", {"self": true, "r": 0.9, "ticks": true, "star": true, "col": RED})
 	if nock_t >= 0.0:
 		AimKit.charge(h, nk, {"col": RED, "col2": CORE})
 	_tells(true)
@@ -111,7 +110,6 @@ func end() -> void:
 	window = 0.0
 	nock_t = -1.0
 	AimKit.hide(h, "x")
-	AimKit.hide(h, "x_ring")
 	_tells(false)
 
 ## A Boki merge: the nock and the empowered window both end with no beam.

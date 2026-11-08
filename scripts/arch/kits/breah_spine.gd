@@ -118,7 +118,6 @@ func _erupt() -> void:
 		var p: Vector3 = s["at"]
 		k.m.fx.burst(p + Vector3(0, 0.2, 0), Color("ff7a2a"), 5, 3.0, 0.3, 4.0, 0.9)
 		k.m.fx.spark(p, Vector3.UP, Color("ffb347"), 3, 3.0, 30.0, 0.2, 2.0, 0.8)
-	k.net_ring(center, 1.2, CRACK_COL)
 
 ## The ridge's line as an AimKit.span: the data's length and bend, bowing away from him.
 func _span_p(extra: Dictionary) -> Dictionary:

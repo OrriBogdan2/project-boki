@@ -197,6 +197,11 @@ func _breah() -> void:
 		AimKit.shown(P, "e_tell0") and bool(AimKit.entry(P, "e_tell0").get("all", false)) and rocks(m).size() == 0,
 		"rocks %d" % rocks(m).size()
 	)
+	ok(
+		"telegraph == hit: each Stone Row flash is the rock's footprint (drawn r == half its length)",
+		absf(float(AimKit.entry(P, "e_tell0").get("r", 0.0)) - float(K.rock_def()["len"]) * 0.5) < 0.01,
+		str(AimKit.entry(P, "e_tell0").get("r"))
+	)
 	step(m, 0.25)
 	var rs := rocks(m)
 	var along: Array = rs.map(func(w): return K.rock_mid(w).x - home.x)
@@ -341,6 +346,12 @@ func _breah() -> void:
 			(e1.get("at", Vector2.ZERO) as Vector2).x - (home.x + 2.5)
 		) < 0.3,
 		str(e1.get("at"))
+	)
+	ok(
+		"telegraph == hit: the slam circle and sweet spot are the radius and core the slam hits (drawn r == hit r)",
+		absf(float(e1.get("r", 0.0)) - K.slam.radius(float(e1.get("fill", 0.0)))) < 0.01
+			and absf(float(e1.get("core", 0.0)) - K.slam.core(float(e1.get("fill", 0.0)))) < 0.01,
+		"%s %s fill %s" % [e1.get("r"), e1.get("core"), e1.get("fill")]
 	)
 	ok("rmb hold: she can walk slowly while charging", absf(K.move_k() - 0.55) < 0.01, "%.2f" % K.move_k())
 	ok("anim: the charge is a crouch (breah_crouch)", K.anim_id == "breah_crouch")
@@ -1005,6 +1016,11 @@ func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Cal
 	ok(
 		"dash: the landing spot shows for everyone through the hop",
 		AimKit.shown(P, "leap") and bool(AimKit.entry(P, "leap").get("all", false))
+	)
+	ok(
+		"telegraph == hit: the hop's landing circle is its landing hit radius (drawn r == land_r)",
+		absf(float(AimKit.entry(P, "leap").get("r", 0.0)) - float(K.hop.dd()["land_r"])) < 0.01,
+		str(AimKit.entry(P, "leap").get("r"))
 	)
 	var peak := [0.0]
 	var skid := [false]

@@ -40,7 +40,6 @@ const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dar
 const SLAB_GAP := 0.06         # s between ice plates under the skate
 const SLAB_LEAD := 0.5         # m ahead of her middle a plate forms (under the leading blade)
 const SLAB_LIFE := 3.0         # s a plate stays before it fades (the owner's "a few seconds")
-const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 body heights)
 const PUSH_T := 0.1           # s from letting go of RMB to the release: both palms drive forward (tm_spear)
 const SPEAR_ARC := 0.25        # m the driven spear's low flight bows above the line from her palms to the ground
 const SPEAR_AHEAD := 0.9       # m in front of her chest of the spear's head end; its shaft runs back to her palms
@@ -124,9 +123,10 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	splinter_log += 1
 	var col := res_col()
-	CareUtil.payoff(m, h, at, "SHATTER", col, "rime_splinter")
-	lk().burst("spikes", at, {"r": SHATTER_R, "dur": 0.7})
-	var ring := {"col": Color("3fc8e0"), "rim": Color("bff7ff"), "r": SHATTER_R, "dur": 0.35, "pattern": 2.0}
+	CareUtil.payoff(m, h, at, "SHATTER", col, "rime_splinter", false)
+	net_ring(at, r, col)
+	lk().burst("spikes", at, {"r": r, "dur": 0.7})
+	var ring := {"col": Color("3fc8e0"), "rim": Color("bff7ff"), "r": r, "dur": 0.35, "pattern": 2.0}
 	lk().burst("flare", at, ring)
 	m.fx.spark(at + Vector3(0, 0.8, 0), Vector3.UP, Color("6fe0f0"), 18, 8.0, 180.0, 0.35, 8.0, 1.1)
 	play_soft("tm_shatter")
@@ -556,7 +556,7 @@ func rmb_hold_tick(t: float) -> void:
 	AimKit.circle(
 			h, "rmb",
 			{
-				"range": float(ld["range"]), "r": float(ld["zone_r"]), "ticks": true, "star": true,
+				"range": float(ld["range"]), "r": float(ld["burst_r"]), "ticks": true, "star": true,
 				"col": Color("dffcff")})
 	if not spear_aim:
 		spear_aim = true
@@ -639,7 +639,7 @@ func _spear_land(at0: Vector3) -> void:
 	var at := ground(at0)
 	zone_n += 1
 	zones.append({"at": at, "left": float(ld["delay"]), "total": float(ld["delay"]), "id": zone_n})
-	lk().burst("spikes", at, {"r": 1.1, "dur": 0.35})
+	lk().burst("spikes", at, {"r": float(ld["impact_r"]), "dur": 0.35})
 	m.fx.burst(at + Vector3(0, 0.3, 0), Color("bff7ef"), 18, 4.0, 0.4, 8.0, 1.0)
 	m.fx.burst(at + Vector3(0, 0.4, 0), Color(0.9, 1.0, 1.0, 0.6), 10, 1.2, 0.8, -1.0, 2.2)      # the chill puff
 	m.sfx("rime_zone", at, -1.0, 0.85)
@@ -1045,11 +1045,11 @@ func _rime_crash(k: float) -> void:
 	last_stunned = stunned
 	stats["crashes"] += 1
 	ulk().burst("pillar", h.pos, {"r": 1.4, "dur": 0.5})
-	ulk().burst("spikes", h.pos, {"r": 3.6, "dur": 0.55})
+	ulk().burst("spikes", h.pos, {"r": radius, "dur": 0.55})
 	ulk().burst("flare", at, {"col": Color("9fe0ff"), "rim": Color("bff7ef"), "r": radius, "dur": 0.35, "pattern": 4.0})
 	m.fx.spark(h.pos + Vector3(0, 1.0, 0), Vector3.UP, Color("dffcff"), 26, 9.0, 180.0, 0.4, 8.0, 1.2)
 	m.sfx("rime_crash", at, 1.0, 1.0)
-	CareUtil.payoff(m, h, h.pos, "", col_of(xd), "")      # the words go on the frozen foes; hers is the bond's
+	CareUtil.payoff(m, h, h.pos, "", col_of(xd), "", false)      # the words go on the frozen foes; hers is the bond's
 	play("tm_rime_crash")
 	_rime_clear()
 

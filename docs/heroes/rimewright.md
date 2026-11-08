@@ -155,3 +155,18 @@ Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|heavy|shatter|payoff|sk
 - The wall is the shared `Verbs.add_wall` (blocking, the touch shove); the kit grows it, slides it, carries foes on its face and draws it.
 - Dash flow (item 32): the skate is her dash for `DashFlow` (`in_dash()`); `content/dash_flow/rimewright.json` says LMB fires from it as beams (`variant: beam`, read by `fires_in_dash` and the dart throw), RMB/E/Q/X fire, in the air too (item 62); the statue's slide out of a skate counts as the skate going on, so skate -> X is a "fire" with carry (item 64).
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.
+
+## Telegraph audit (owner rules: a ring, disc or burst on the ground means gameplay; a telegraph shows the true hit area)
+Branch `ext/telegraph-audit-b`. Drawn = what AimKit/fx draws; Hit = the number the kit tests; Enemy sees = other players see the tell (`all`, hostile-tinted, local; a remote machine only gets the `net_ring` echo, see Engine notes). The `telegraph == hit` asserts are in `tools/care_combo_check.gd`, `tools/care_ult_check.gd` (`--rimewright-combo-check`).
+
+| Ability | Shape | Drawn | Hit | Timing | Enemy sees | Source read | Action |
+|---|---|---|---|---|---|---|---|
+| LMB darts | none | no ground shape (the aim line only) | projectiles | | | | nothing area-shaped |
+| Shift Skate | none | no area; on rank 3 the ice span over the Abyss is the real bridge (1.6 x 3.6) | the bridge | | | ice path | kept (it is gameplay) |
+| RMB Ice Spear (hold) | circle at the cursor | was r 2.2 (slow zone), now r 2.7 | detonation 60 dmg in 2.7 | the hold | owner only | landing ring | fixed to the damage radius; assert drawn r == `burst_r`. Alternative: keep 2.2 (the source's ring is the slow zone) |
+| RMB spear landing | disc + dashed ring | disc r 2.2 (slow 35%), dashed ring r 2.7 filling over 1.8 s | slow 2.2, detonation 2.7, landing hit 1.2 | 1.8 s | yes (`all`) | slow-zone ring then a dome | matched; assert the ring everyone sees == `burst_r`; the landing spikes now use `impact_r` 1.2 (was 1.1) |
+| E Rink Wall | lane | path to the cursor, 4.5 m wide at the full width | the wall slides 4.5-16.2 m and widens 1.8 to 4.5 | 0.2 s tell, then it slides | yes (`all`) | narrow block that slides | drawn at the full width, so it overstates the first metres; kept (a lane has one width) |
+| X Rimelock | circle | r 7.2, fills over 3.5 s | stun radius 7.2 (line of sight) | 3.5 s | yes (`all`) | disc of 4 body heights | matched; the check now reads the radius from the data; the crash spikes use 7.2 (was 3.6) |
+| Passive Shatter | disc | spikes and flare now r = the hit (2.4 on 8 darts, 3.0 on a knock) | `splinter(.., r)` | 0.4 s after | local fx + `net_ring` r | ice starburst | was a fixed 2.7 plus 2.4 and 1.0 rings; now one true ring |
+
+`CareUtil.payoff` gained a `rings` flag; Neve passes false and draws her own true-size ring (Meeko keeps the shared rings, out of scope). Suggestion (not built): the wall's lane could draw the widening wedge.

@@ -303,6 +303,14 @@ func _archer_combos() -> void:
 		) < 0.3 and bool(AimKit.entry(P, "e").get("all", false)),
 		str(AimKit.entry(P, "e").get("radius"))
 	)
+	var arc := AimKit.entry(P, "e")
+	ok(
+		"telegraph == hit: the Hail Wall arc is the rain's own arc (drawn radius, degrees and thickness == hit)",
+		absf(float(arc.get("radius", 0.0)) - float(K.rain.get("radius", -1.0))) < 0.01
+			and absf(float(arc.get("deg", 0.0)) - K._arc_deg()) < 0.01
+			and absf(float(arc.get("thick", 0.0)) - float(K.e_def()["width"])) < 0.01,
+		str(arc.get("radius"))
+	)
 	ok("archer anim: Hail Wall plays arc_hail", K.anim_id == "arc_hail", K.anim_id)
 	step(m, 1.6, func(): K.res = 0.0)
 	ok(

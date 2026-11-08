@@ -75,6 +75,12 @@ func _charge_and_waves() -> void:
 		bool(fan.get("all", false)) and absf(float(fan.get("deg", 0.0)) - 105.0) < 0.5 and len_b > len_a + 0.5,
 		"len %.1f -> %.1f" % [len_a, len_b]
 	)
+	ok(
+		"telegraph == hit: the fan ends at the slugs' range (drawn len <= x.range) and shows the same 105 degrees",
+		len_b <= float(K.x_def()["range"]) + 0.01
+			and absf(float(fan.get("deg", 0.0)) - float(K.x_def()["fan_deg"])) < 0.01,
+		"len %.2f of %s" % [len_b, K.x_def()["range"]]
+	)
 	var charge_k := P.flat_dist(p0) / 0.6 / maxf(0.01, run_v)
 	ok(
 		"ult: he walks slowly through the charge (about 30% of his speed)",

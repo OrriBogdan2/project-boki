@@ -511,7 +511,6 @@ func _anchor() -> void:
 	var fist := ground(h.pos + Vector3(dd.x, 0, dd.y) * 1.1)
 	fx.crescent(h.pos + Vector3(0, 0.25, 0), dd, float(ed["angle"]), float(ed["radius"]), ANCHOR_COL, IRON, 0.25)
 	fx.scorch(fist, 1.6, 1.4, Color("8a7a66"), Color("2a241e"))          # cracked ground under the fist
-	fx.scorch(at, float(ed["radius"]) * 0.7, 1.2, Color("6a5e50"), Color("2a241e"))
 	fx.orb(fist + Vector3(0, 0.3, 0), BRASS, BRASS_HOT, 1.2, 0.08)
 	m.fx.burst(fist + Vector3(0, 0.2, 0), Color("c8b8a0"), 18, 5.0, 0.45, 10.0, 1.3, Vector3(dd.x, 0.8, dd.y), 70.0)
 	AimKit.cone(h, "e_hit", slam_tell(1.0).merged({"dur": 0.2, "alpha": 0.7}, true))
@@ -523,12 +522,11 @@ func _anchor() -> void:
 	lock_until = m.time + float(dash_def()["lock_t"])
 	net_ring(at, float(ed["radius"]) * 0.6, col_of(ed))
 
-## The dust cloud a beat after the slam, over the area it hit.
+## The dust cloud a beat after the slam, over the area it hit (dust only: no ring that is not the hit area).
 func _anchor_dust(at: Vector3) -> void:
 	if not is_instance_valid(h):
 		return
 	m.fx.dust(at, 26)
-	fx.wave(ground(at), 1.8, ANCHOR_COL, 0.35, Color(IRON, 0.5))
 
 ## The Anchor's stun: +0.1s a rank, and rank 3 adds its own 0.2s.
 func _stun_t() -> float:
@@ -627,9 +625,7 @@ func _quake(at: Vector3, fell: float) -> void:
 	var d2 := h.aim_dir()
 	fx.anchor_drop(at + Vector3(d2.x, 0, d2.y) * 0.6, 0.0, 1.0)
 	fx.wave(at, r, ANCHOR_COL, 0.45, Color(IRON, 0.5))
-	fx.wave(at, r * 0.6, BRASS, 0.3)
-	fx.sunburst(at, r * 0.9, BRASS, BRASS_HOT, 0.35)
-	fx.scorch(at, r * 0.6, 1.2, Color("ffb040"), Color("3a3020"))
+	fx.sunburst(at, r, BRASS, BRASS_HOT, 0.35)
 	m.fx.dust(at, 34)
 	play("dr_quake")
 	m.sfx("dr_quake", at, 0.0, 1.0)

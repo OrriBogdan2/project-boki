@@ -604,6 +604,7 @@ func _all() -> void:
 	var q0 := K.quakes
 	P.ak.use_e()
 	var land_seen := false
+	var land_r := 0.0
 	var anchor_seen := false
 	var vy := 0.0
 	var te := 0.0
@@ -611,7 +612,9 @@ func _all() -> void:
 		ak.step(m, ak.DT)
 		te += ak.DT
 		vy = minf(vy, P.vel.y)
-		if AimKit.shown(P, "e_land"): land_seen = true
+		if AimKit.shown(P, "e_land"):
+			land_seen = true
+			land_r = float(AimKit.entry(P, "e_land").get("r", 0.0))
 		if K.fx.shown("dive_anchor%d" % P.get_instance_id()): anchor_seen = true
 	var high: float = ak.dmg(T) - hp0
 	ok(
@@ -619,6 +622,10 @@ func _all() -> void:
 		"vy %.1f drift %.2f" % [vy, P.pos.x - home.x]
 	)
 	ok("air smash: the landing ring shows while you fall, the anchor falls with you", land_seen and anchor_seen)
+	ok(
+		"telegraph == hit: the air smash's landing ring is its quake radius (drawn r == quake_r)",
+		absf(land_r - float(K.e_def()["quake_r"])) < 0.01, "%.2f" % land_r
+	)
 	ok(
 		"air smash: it lands where you land, a ring of damage and stun",
 		K.quakes == q0 + 1 and high > 0.0 and T.stun_t > 0.5, "quakes %d stun %.2f" % [K.quakes - q0, T.stun_t]
