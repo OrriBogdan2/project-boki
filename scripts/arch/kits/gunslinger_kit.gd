@@ -33,6 +33,9 @@ const TUBE_BELL := "launcher_muzzle" # on the swinging launcher: over and forwar
 const TUBE_SWING := 0.1              # s from the press to the bell coming forward
 const BRACKET_R := 1.25              # m: the firing brackets either side of her (footage: about 0.7 bh)
 const BRACKET_DEG := 56.0            # each bracket's arc
+const TAP_EASE := "gunslinger_tap"      # tuning.json dash_ease keys: the tap skid's ease in and out
+const SLIDE_EASE := "gunslinger_slide"  # ... and the hold slide's
+const FADED_LOOK := 0.4               # share of full size a round reads at once the string has decayed to its floor
 const SPIN_REST := 0.5               # s without a round before the next string winds the barrels up again
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
@@ -201,8 +204,9 @@ func _tick_lmb() -> void:
 	for i in range(shots.size() - 1, -1, -1):
 		var sd: Dictionary = shots[i]
 		if sd["by"] == h and not (sd["x"] as Dictionary).has("src"):
-			fx().ride(sd, "tracer", EMBER, HOT, 2.6, 0.18, _round_end)
-			fx().star(sd["pos"], BRONZE, HOT, 0.75, 0.06)
+			var look := _faded_look(sd)
+			fx().ride(sd, "tracer", EMBER, HOT, 2.6 * look, 0.18 * look, _round_end.bind(look))
+			fx().star(sd["pos"], BRONZE, HOT, 0.75 * look, 0.06)
 			break
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
 		play("gunslinger_lmb")
@@ -240,9 +244,18 @@ func _tick_mag(dt: float) -> void:
 	refill_part -= float(add)
 	h.ammo = mini(mag, h.ammo + add)
 
-func _round_end(at: Vector3, vel: Vector2) -> void:
+func _round_end(at: Vector3, vel: Vector2, look: float) -> void:
 	var d := Vector3(-vel.x, 0.4, -vel.y).normalized() if vel.length() > 0.1 else Vector3.UP
-	m.fx.spark(at, d, EMBER, 3, 5.0, 50.0, 0.14, 8.0, 0.7)
+	m.fx.spark(at, d, EMBER, 3, 5.0, 50.0, 0.14, 8.0, 0.7 * look)
+
+## How big this round's tracer, muzzle flash and impact read: 1 at full damage, FADED_LOOK at the weapon's
+## sustained floor (the rounds after the first ten), so a long string visibly thins and a pause makes it full again.
+func _faded_look(sd: Dictionary) -> float:
+	var loss := float(h.wpn.get("sustain_loss", 0.0))
+	if loss <= 0.0:
+		return 1.0
+	var faded := clampf((1.0 - float((sd["x"] as Dictionary).get("sus_k", 1.0))) / loss, 0.0, 1.0)
+	return lerpf(1.0, FADED_LOOK, faded)
 
 # ------------------------------------------------------------------ dash: Slipstep
 func on_dash(use_ex: bool) -> bool:
@@ -270,7 +283,7 @@ func on_dash(use_ex: bool) -> bool:
 	if not spend_dash(false):
 		return true
 	var start := h.position
-	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"])})
+	travel(float(dd["roll"]), float(dd["roll_t"]) * Loco.dash_time_k(TAP_EASE), {"invuln": float(dd["invuln"])})
 	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0}
 	play("gunslinger_dash")
 	# where it began: her ember after-image standing there (0.6 s), dust, and two faint skid streaks.
@@ -303,17 +316,16 @@ func _slide_end() -> void:
 	last_dash_kind = String(st["last_dash"])
 	slide = {}
 
-## A tap: a skid that starts fast and bleeds off to a run over roll_t, covering `roll` m (you shoot
-## through it); the speed falls linearly from the peak that covers the distance.
+## A tap: a skid covering `roll` m (you shoot through it) that eases in and out over roll_t, a little
+## longer and with a lower peak (tuning.json dash_ease, owner 11-08 item 10).
 func _skid(t: float, dd: Dictionary) -> void:
 	var feel := dash_feel()                 # the global dash feel, as travel() applies it
-	var dur := float(dd["roll_t"]) * float(feel["time"])
+	var base_t := float(dd["roll_t"]) * float(feel["time"])
+	var dur := base_t * Loco.dash_time_k(TAP_EASE)
 	if t >= dur:
 		_slide_end()
 		return
-	var run := float(h.cdat["speed"])
-	var peak := 2.0 * float(dd["roll"]) * float(feel["dist"]) / dur - run
-	h.roll_speed = lerpf(peak, run, t / dur)
+	h.roll_speed = float(dd["roll"]) * float(feel["dist"]) / base_t * Loco.dash_k(TAP_EASE, t / dur)
 
 func _tick_slide(dt: float) -> void:
 	var dd := dash_def()
@@ -342,13 +354,12 @@ func _tick_slide(dt: float) -> void:
 		_skid(t, dd)
 		return
 	var st_t := t - float(slide["t0"])
-	var dur := float(dd["slide_t"])
+	var dur := float(dd["slide_t"]) * Loco.dash_time_k(SLIDE_EASE)
 	if not held("dash") or st_t >= dur or h.stun_t > 0.0 or h.root_t > 0.0:
 		_slide_end()
 		return
-	var k := 1.0 - st_t / dur
 	h.roll_t = maxf(h.roll_t, dt * 1.5)
-	h.roll_speed = float(dd["slide"]) / dur * (0.5 + k)
+	h.roll_speed = float(dd["slide"]) / float(dd["slide_t"]) * Loco.dash_k(SLIDE_EASE, st_t / dur)
 	h.inv_t = 0.0
 
 # ------------------------------------------------------------------ RMB: Burr Charge

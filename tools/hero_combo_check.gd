@@ -753,10 +753,10 @@ func _gunslinger() -> void:
 	var early := _flat(P.pos, home)
 	ac.step(m, 0.15)
 	var skidding := not K.slide.is_empty()
-	ac.step(m, 0.25)
+	ac.step(m, 0.4)
 	var total := _flat(P.pos, home)
-	ok("Slipstep tap: a ~0.5s skid that bleeds off (front-loaded past an even pace, still going at 0.3s)",
-			skidding and early > total * 0.35 and total > 3.6 and total < 5.6, "%.1f of %.1f m" % [early, total])
+	ok("Slipstep tap: a ~0.65s skid that eases in (slow at 0.15s) and is still going at 0.3s",
+			skidding and early < total * 0.2 and total > 3.6 and total < 5.6, "%.1f of %.1f m" % [early, total])
 	P.inp["move"] = Vector2(0, 1)
 	ok("Slipstep: along the keys, not the cursor",
 			P.pos.z - home.z > 3.0 and absf(P.pos.x - home.x) < 1.0,

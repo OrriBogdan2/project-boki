@@ -43,6 +43,7 @@
 		"icon": "dash",
 		"col": "#ffc89a",
 		"cd": 8.5,
+		"charges": 1,
 		"tap_t": 0.18,
 		"roll": 4.8,
 		"roll_t": 0.45,
@@ -50,7 +51,7 @@
 		"slide": 7.0,
 		"slide_t": 0.55,
 		"hold_cost": 0.4,
-		"desc": "Tap: a 4.8m skid that bleeds off over 0.45s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.",
+		"desc": "Tap: a 4.8m skid that eases in and out over about 0.65s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.",
 		"air_k": 0.667
 	},
 	"rmb": {

@@ -95,6 +95,7 @@
 		"icon": "cleave",
 		"col": "#cfe8ff",
 		"cd": 8.0,
+		"charges": 1,
 		"whirl": 3.5,
 		"whirl_speed": 20.5,
 		"whirl_kb": 7.0,
