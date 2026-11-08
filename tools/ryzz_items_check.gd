@@ -52,11 +52,11 @@ func _item_70() -> void:
 	ok("items 70, 116: autos every 0.648 s, bolt speed 37",
 			is_equal_approx(float(wpn["rate"]), 0.648)
 			and is_equal_approx(float(wpn["speed"]), 37.0), "%s %s" % [wpn["rate"], wpn["speed"]])
-	ok("item 70: Wirerun 7.5 to 13 m at 40 m/s, hold 0.6 s", is_equal_approx(float(dash["dist"][0]), 7.5)
-			and is_equal_approx(float(dash["dist"][1]), 13.0) and is_equal_approx(float(dash["speed"]), 40.0)
-			and is_equal_approx(float(dash["hold"]), 0.6))
-	ok("item 70: the lane preview scales with the charge (full hold = 13 m)",
-			is_equal_approx(K.wire_len(0.6), 13.0) and is_equal_approx(K.wire_len(0.0), 7.5))
+	ok("item 70 (11-08 retune): Wirerun 7 to 11 m at 34 m/s, hold 0.9 s", is_equal_approx(float(dash["dist"][0]), 7.0)
+			and is_equal_approx(float(dash["dist"][1]), 11.0) and is_equal_approx(float(dash["speed"]), 34.0)
+			and is_equal_approx(float(dash["hold"]), 0.9))
+	ok("item 70: the lane preview scales with the charge (full hold = 11 m)",
+			is_equal_approx(K.wire_len(0.9), 11.0) and is_equal_approx(K.wire_len(0.0), 7.0))
 	var text := String(Arch.def("mage")["card"]["weapons"]["coilcaster"])
 	ok("items 70, 116: the card says every 0.65s", text.contains("every 0.65s"), text)
 	_park()
