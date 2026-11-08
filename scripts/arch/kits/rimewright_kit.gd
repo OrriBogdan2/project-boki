@@ -149,10 +149,6 @@ func _tick(dt: float) -> void:
 		if float(e["left"]) <= 0.0 or t == null or t.dead:
 			chill.erase(key)
 			continue
-		var ck := float(d["passive"].get("chill_slow", 0.15))
-		if t.slow_t <= 0.0:
-			t.slow_k = ck
-		t.slow_t = maxf(t.slow_t, 0.25)
 	for key in fan_hits.keys():
 		var e2: Dictionary = fan_hits[key]
 		e2["left"] = float(e2["left"]) - dt

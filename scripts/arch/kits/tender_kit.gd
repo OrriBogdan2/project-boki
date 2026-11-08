@@ -222,10 +222,9 @@ func _tick_carry(dt: float) -> void:
 	var cs := carrying()
 	if not cs.is_empty():
 		carry_t += dt
-		if h.stun_t > 0.0 or h.root_t > 0.0 or Hex.active(h) or h.shield <= 0.01:
+		if h.stun_t > 0.0 or h.root_t > 0.0 or Hex.active(h):
 			drop_all(true)
 			return
-		h.shield_t = maxf(h.shield_t, 2.0)      # the Carrier shield stays up while you carry
 		var down := bool(h.inp.get(SETDOWN, false))
 		if down and not setdown_was:
 			drop_all(false)
@@ -246,6 +245,11 @@ func _tick_carry(dt: float) -> void:
 			break
 		pick_up(o)
 
+## Taking damage drops whoever you carry, with the lock.
+func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
+	if dmg > 0.0 and not carrying().is_empty():
+		drop_all(true)
+
 func _foes_near(r: float) -> bool:
 	for f in m.foes_of(h.team):
 		if f is Hunter and h.flat_dist(f) < r:
@@ -253,10 +257,7 @@ func _foes_near(r: float) -> bool:
 	return false
 
 func pick_up(o: Hunter) -> void:
-	var pd: Dictionary = d["passive"]
 	CareUtil.set_carry(m, o, h.nid)
-	h.shield = float(pd.get("shield", 40.0)) + float(pd.get("shield_lv", 6.0)) * float(maxi(0, h.lvl - 1))
-	h.shield_t = 999.0
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CARRY", res_col(), false)
 	m.sfx("tend_pickup", h.pos, -2.0, 1.0)
 	play("mm_pickup")
@@ -270,8 +271,6 @@ func drop_all(broken: bool) -> void:
 		CareUtil.set_carry(m, o, "")
 		m.displace.teleport(o, Vector3(h.pos.x, h.pos.y, h.pos.z) + Vector3(0.9, 0, 0))
 		o.vel = Vector3.ZERO
-	h.shield = 0.0
-	h.shield_t = 0.0
 	lock_t = maxf(lock_t, 1.5)          # set down: not picked straight back up
 	if broken:
 		lock_t = float(d["passive"].get("lock", 4.0))

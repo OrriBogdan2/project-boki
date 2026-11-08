@@ -1059,7 +1059,7 @@ a Shadow Knife sticking in a foe resets Vault (levels 2-4); Shadow Knife rank 3:
 the cooldown, 50% in a foe (level 3). (Jackpot used to have its own rank 2; as a Mark trigger it has no
 ranks.)
 
-- Loop: shoot one target (Marks stack) -> Vault -> the Primed hit (+2 Marks, Shred) resets Vault ->
+- Loop: shoot one target (Marks stack) -> Vault -> the Primed hit (+2 Marks) resets Vault ->
   Vault again. Bola into two for the stun; the fifth Mark pays out Jackpot, which keeps every Mark alive
   and hands you a free Vault to carry on.
 - Tells: gold diamonds over the target (spinning faster as they stack, a jingle at 5); a gold glint and
@@ -1100,7 +1100,7 @@ pose, sound and VFX.
 | Juggernaut | rooted / Grounded -> E | no chain; a stun on you breaks a chain (its cooldown starts) | wiki (patch notes) |
 | Juggernaut | Enraged (full Rage) | +15% damage, +20% cooldown speed (every Smash, the chain), +12% dash recharge | wiki |
 | Juggernaut | Searing Wave hits | fill Rage 3x as fast | wiki |
-| Thief | Vault -> weapon hit | **Primed**: +10, 2 Marks, Shred; Vault resets; the speed boost ends | wiki |
+| Thief | Vault -> weapon hit | **Primed**: +10, 2 Marks; Vault resets; the speed boost ends | wiki |
 | Thief | Shadow Knife in a foe (rank 3) | Vault resets; 50% of the Knife's cooldown back (25% in a wall) | wiki (levels 3-4) |
 | Thief | Shadow Knife -> E (or wait 5s) | step to the knife (the arrival pose) | wiki |
 | Thief | Bola catches two (rank 3) | both foes' Marks pool | wiki (levels 3-4) |
