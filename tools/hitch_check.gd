@@ -366,6 +366,10 @@ func _finish_load() -> void:
 			up += 1
 			if sp > prev: drawn += 1
 		prev = sp
+	var walls: Array = fl.map(func(f): return float(f["wall"]))
+	walls.sort()
+	if not walls.is_empty():
+		lines.append("LOAD frame ms p50 %.1f p95 %.1f max %.1f" % [walls[walls.size() / 2], walls[mini(walls.size() - 1, int(walls.size() * 0.95))], walls[-1]])
 	lines.append("LOAD spinner drew on %d of %d loading-screen frames" % [drawn, up])
 	var ranked := fl.duplicate()
 	ranked.sort_custom(func(a, b): return float(a["cpu" if cpu_only else "wall"]) > float(b["cpu" if cpu_only else "wall"]))
