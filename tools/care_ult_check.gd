@@ -197,9 +197,9 @@ func rimewright() -> void:
 		"rimes +%d" % (int(K.stats["rimes"]) - rimes0))
 	step(m, 0.25)
 	var ring: Dictionary = AimKit.entry(P, "x")
-	ok("tm X: sealed in, the 4 bh rink shown to everyone, the cast move", not K.rime.is_empty()
-		and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 7.2) < 0.05
-		and K.ulk().showing("rink") and K.ulk().showing("bud") and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
+	ok("tm X: sealed in, the 8.3 m rink (the source's 4 bh + 15%) shown to everyone, the cast move",
+		not K.rime.is_empty() and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 8.3) < 0.05
+		and K.ulk().showing("rink") and K.icb().active() and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
 	ok("tm X: its own cooldown (80 s, game data) starts on the cast, no bond for the cast",
 		absf(float(K.cd["x"]) - 80.0) < 0.5
 		and _bond_kind(K) == "")
@@ -236,6 +236,43 @@ func rimewright() -> void:
 	await _free(m)
 	await _rime_recasts()
 	await _rime_sight_and_cap()
+	await _rime_ice_body()
+
+
+## Her body becomes ice while sealed: the model's own materials trade for the ice shader, a frost front
+## climbing from the feet over snap_t; ending it thaws the front back down and gives the materials back.
+func _rime_ice_body() -> void:
+	var r: Array = sc.setup("rimewright", 4.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	var parts: Array = P.model.find_children("*", "MeshInstance3D", true, false)
+	var body: MeshInstance3D = null
+	for n in parts:
+		if IceBody.is_body(n as MeshInstance3D):
+			body = n
+			break
+	var was: Material = body.material_override if body.material_override else body.get_surface_override_material(0)
+	var skin: Material = body.get_active_material(0)
+	_press(P, m)
+	step(m, 0.05)
+	var ice := K.icb()
+	var now: Material = body.get_active_material(0)
+	ok("tm X: on the cast her body's materials trade for the ice shader (no shell), the front still climbing",
+		ice.active() and ice.k < 0.9 and now is ShaderMaterial and (now as ShaderMaterial).shader == IceBody.SHADER
+		and (now as ShaderMaterial).next_pass == (skin as ShaderMaterial).next_pass,
+		"k %.2f, %d surfaces" % [ice.k, ice.mats.size()])
+	step(m, 0.3)
+	ok("tm X: all ice within snap_t, every surface of the model", ice.frozen() and ice.mats.size() == ice.swaps.size()
+		and ice.mats.size() >= 1, "%d surfaces" % ice.mats.size())
+	_press(P, m)
+	step(m, 0.05)
+	ok("tm X: ending it thaws the front back down", ice.active() and ice.thawing and ice.k < 0.95, "k %.2f" % ice.k)
+	step(m, 0.3)
+	ok("tm X: thawed, her own materials are back on every surface", not ice.active()
+		and body.get_active_material(0) == skin
+		and (body.material_override if body.material_override else body.get_surface_override_material(0)) == was)
+	await _free(m)
 
 
 ## X again: early (before the last 0.75 s) just breaks the shell; late cracks it open at two thirds.
