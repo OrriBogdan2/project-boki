@@ -12,7 +12,7 @@ Owner direction: a mix of 2-stage and 3-stage lines, like the classic games, som
 | 3-stage lines | Chuggamus, Canvastross (big: two baby forms before them); Gongibbon, Lockatara, Zippelith (middle stage); Kindlewren, Glintmole, Rimeshrew (base) | 16 |
 | 2-stage, big species get a baby form | Bellowary, Snuffapi, Frigatee, Prowyak, Soakybara, Buckleron, Spirevark, Boltstrich, Gravadillo, Barrelmander, Umbrathere | 11 |
 | 2-stage, small/medium species get a grown form | Rampartoad, Skateron, Kestrike, Anvilbrock, Marchleaf, Murmurling, Mirrolin, Nettlynx, Bubblisk, Thrumbird, Lunowl | 11 |
-| 2-stage with a branching final form | Echolop, Glintmole (adds 1 each beyond its line), plus Kindlewren | 3 |
+| Branching extras | Echolop (2-stage, two grown forms by path: 2), Glintmole (its 3rd stage splits two ways: +1) | 3 |
 | Single stage | Cairnback, Hivara, Zephyrak (rares); Effigeetle, Crofthorn, Lodestick, Glomwort, Pipewurm, Knotwyrm, Gloamshell, Mossgrade, Selenfin, Barokat, Lanterloris, Anchorbill, Terrasloth | 0 |
 
 Total new: 9 + 16 + 11 + 11 + 3 = 50.
