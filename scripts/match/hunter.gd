@@ -242,6 +242,7 @@ var pack_cap := 6
 var backpack := 0              # the backpack tier worn (Backpacks): 0 is the Pouch everyone has
 var swap_hold := false
 var dash_at := -9.0           # when the last dash started, for perfect dodges
+var jump_at := -9.0           # when you last jumped off the ground (AirLimits: a move from before it is over)
 var dodged := false        # F has to be let go between weapon swaps
 var lives := 1                # comes back this many times minus one before it's really out
 var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
@@ -817,6 +818,7 @@ func do_jump() -> void:
 		glide_handoff(roll_dir, roll_speed)         # (movefeel) dash, jump, glide carries the dash
 	if grounded or coyote > 0.0:
 		vel.y = JUMP_V * (float((kin as Kin).ks.mount.get("jump", 1.0)) if mounted() else 1.0)
+		jump_at = m.time
 		grounded = false
 		coyote = 0.0
 		m.sfx("jump", pos, -6.0)
@@ -920,7 +922,8 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float
 
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down and not (ak != null and ak.no_glide())
+		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down \
+		and not (ak != null and ak.no_glide()) and not AirLimits.glide_locked(self)
 
 func _open_glider() -> void:
 	gliding = true
@@ -1133,6 +1136,7 @@ func do_dash() -> void:
 		m.blight.noise(pos, "dash", self)     # a dash is loud enough for the Blight nearby
 	if ak:
 		# the archetype's dash shape: it spends its own charge (or the long air dash) itself
+		ak.dash_press_at = m.time      # its moves from here are the dash's (AirLimits)
 		ak.on_dash(use_ex)
 		return
 	if use_ex:
@@ -2009,17 +2013,13 @@ func sim(dt: float) -> void:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
+	AirLimits.gate_drop(self)        # the opening drop: steering only (item 162)
 	KinDowned.commit(self)           # carrying your Boki: Shift or interact puts it down; no jump, glide or firing
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
 	# gloves need no point: Gloves
 	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
 		_gate(gk[0], gk[1], gk[2])
-	if dropping and not grounded and ctrl != "bot":
-		for bk in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "gear1", "gear2"]:
-			if inp.get(bk, false):
-				_break_drop()
-				break
 	if not downed and not dropping and not out:
 		gain_xp(dt * 1.2)       # a slow trickle, so a careful run still levels
 	_tick_base(dt)
@@ -2494,25 +2494,10 @@ func _deploy() -> void:
 	m.sfx("glide", pos, -2.0)
 	_glider_sfx("open")
 
-## The opening drop ends early when you press an ability, gear or a heal mid-air: the glider folds
-## and you fall free with the speed you had, so you can dive, pull up and drink or cast on the way
-## down. You lose the drop's protection (you can be hit from then on) and land like any other fall.
-func _break_drop() -> void:
-	if not dropping or grounded:
-		return
-	dropping = false
-	diving = false
-	gliding = false
-	glide_fuel = 1.0
-	glide_cd = 0.25
-	_glider_sfx("close")
-
-## Using a heal in the air: out of the drop if you were in it, and the glider folds (it can't be
-## held while you drink; holding glide again opens it after a beat and spills what's left).
+## Using a heal in the air: the glider folds (it can't be held while you drink; holding glide again
+## opens it after a beat and spills what's left). The opening drop never gets here (AirLimits).
 func _fold_for_action() -> void:
-	if dropping:
-		_break_drop()
-	elif gliding:
+	if gliding and not dropping:
 		gliding = false
 		glide_cd = maxf(glide_cd, 0.4)
 		_glider_sfx("close")
@@ -2585,7 +2570,8 @@ func _update_glide(dt: float) -> void:
 			glide_fuel = maxf(0.0, glide_fuel - dt * hk / (glide_max * (1.0 + gear_stat("heat"))))
 		if not dropping:
 			stats["glide_t"] = float(stats.get("glide_t", 0.0)) + dt
-	elif want and can and air_t >= (0.0 if inp.get("glide_btn", false) else GLIDE_ENGAGE) and not gliding:
+	elif want and can and air_t >= (0.0 if inp.get("glide_btn", false) else GLIDE_ENGAGE) \
+			and not AirLimits.glide_locked(self):
 		# hold Space in the air and the glider opens a beat after you leave the ground (the glide
 		# button opens it at once: there's no tap-to-jump to tell apart)
 		gliding = true
