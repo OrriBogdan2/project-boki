@@ -220,7 +220,7 @@ func thief(a) -> void:
 	K.haste_t = 0.0
 	P.teleport(home)
 	T.teleport(home + Vector3(6.0, 0, 0))
-	# RMB: a 0.4s wind-up with the lane showing, then the Bola grounds the first, flies on, tangles a second
+	# RMB: the Bola leaves on the press (no wind-up), grounds the first, flies on, tangles a second
 	A.fresh(T)
 	A.fresh(T2)
 	T.teleport(home + Vector3(4.0, 0, 0))
@@ -230,13 +230,12 @@ func thief(a) -> void:
 	K.cd["rmb"] = 0.0
 	A.aim_at(P, T.pos)
 	A.tap(m, P)
-	A.step(m, 0.2)
 	var bl: Dictionary = AimKit.entry(P, "rmb")
-	A.ok("dancer RMB: the lane shows through the 0.4s wind-up (about 1 bh by 6 bh), nothing thrown yet",
-			AimKit.shown(P, "rmb") and absf(float(bl.get("len", 0.0)) - 10.8) < 0.1 and K.bola.is_empty()
+	A.ok("dancer RMB: instant release, the Bola is in flight on the press with its lane (7m + 5.5m past the first)",
+			not K.bola.is_empty() and AimKit.shown(P, "rmb") and absf(float(bl.get("len", 0.0)) - 12.5) < 0.1
 			and A.dmg(T) <= 0.0,
-			"len %.1f" % float(bl.get("len", 0.0)))
-	A.step(m, 0.6)
+			"len %.1f flying %s" % [float(bl.get("len", 0.0)), not K.bola.is_empty()])
+	A.step(m, 0.8)
 	A.ok("dancer RMB: Bola grounds the first, flies on, tangles two (stun)",
 			K.bola_pairs == 1 and KitStatus.grounded(T) and KitStatus.grounded(T2) and T.stun_t > 0.0
 			and T2.stun_t > 0.0 and A.dmg(T) >= 15.0,
@@ -265,6 +264,20 @@ func thief(a) -> void:
 	A.tap(m, P)
 	A.step(m, 0.9)
 	A.ok("dancer Bola: bounces off a wall", K.bola_bounces == 1, "bounces %d" % K.bola_bounces)
+	# ... a foe caught first and then the wall: that foe is pinned (stunned, +13), the Bola stops
+	A.fresh(T)
+	T.teleport(home + Vector3(-4.0, 0, 0))
+	P.teleport(home)
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	var bounces0 := K.bola_bounces
+	A.aim_at(P, home + Vector3(-6.0, 0, 0))
+	A.tap(m, P)
+	A.step(m, 0.8)
+	A.ok("dancer Bola: foe + wall = stun (pinned, bonus damage, no bounce)",
+			K.bola_pins == 1 and K.bola_bounces == bounces0 and K.bola.is_empty() and T.stun_t > 0.0
+			and KitStatus.grounded(T) and A.dmg(T) >= 18.0,
+			"pins %d stun %.2f dmg %.0f bounces %d" % [K.bola_pins, T.stun_t, A.dmg(T), K.bola_bounces - bounces0])
 	# small mechanic: a crate counts as the Bola's first catch (it breaks and flies on its after-distance)
 	A.step(m, 1.0)
 	P.teleport(home)
@@ -378,7 +391,7 @@ func _move_len(mv: String) -> float:
 	return float(keys[-1][0])
 
 ## Item 32: a bolt pressed mid-cartwheel goes at once, empowered, and the cartwheel isn't cut; Shift in the Bola's
-## wind-up cartwheels and the Bola still flies; the dagger's blink ends a cartwheel.
+## cartwheel doesn't hold the Bola back; the dagger's blink ends a cartwheel.
 func _dancer_dash_flow(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
 	K.primed_t = 0.0
 	K.haste_t = 0.0
@@ -405,15 +418,13 @@ func _dancer_dash_flow(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector
 	K.cd["rmb"] = 0.0
 	P.dashes = P.max_dashes()
 	A.tap(m, P)
-	A.step(m, 0.1)
 	P.inp["move"] = Vector2(0, 1)
 	P.do_dash()
-	var wound := not K.bola_cast.is_empty() and P.roll_t > 0.0
-	var thrown := [false]
-	A.step(m, 0.4, func(): thrown[0] = thrown[0] or not K.bola.is_empty())
+	var thrown := not K.bola.is_empty()
+	A.step(m, 0.4)
 	P.inp["move"] = Vector2.ZERO
-	A.ok("dancer RMB -> dash (into_dash row: fire): Shift in the wind-up cartwheels, the Bola still flies",
-			wound and thrown[0], "wound %s thrown %s" % [wound, thrown[0]])
+	A.ok("dancer RMB -> dash (into_dash row: fire): the Bola is already away, Shift cartwheels",
+			thrown and P.roll_t > 0.0, "thrown %s roll %.2f" % [thrown, P.roll_t])
 	A.step(m, 1.0)
 	P.teleport(home)
 	K.cd["e"] = 0.0
@@ -1152,24 +1163,6 @@ func merge_holds() -> void:
 	A.ok("merge hold jug: the charged Lunge does not go and no Smash charge is spent",
 			K.lunge.is_empty() and not K.rmb_down and K.ch_rmb >= chg, "charges %.1f of %.1f" % [K.ch_rmb, chg])
 	A.ok("merge hold jug: an armed Haul Slam is dropped", K.haul.is_empty() and K.haul_slams == 0)
-	await A.done(m)
-	# ---- Sable: the Bola's wind-up stops when a merge starts (a running Encore: tools/dj_ult_check.gd)
-	r = A.setup("thief", 4.0, "cindle")
-	m = r[0]
-	P = r[1]
-	T = r[2]
-	var TK: ThiefKit = P.ak
-	P.ult = 1.0
-	P.merge_cd = 0.0
-	A.aim_at(P, T.pos)
-	TK.ch_rmb = 1.0
-	TK.cd["rmb"] = 0.0
-	A.tap(m, P)
-	A.ok("merge hold dancer: the Bola is winding up", not TK.bola_cast.is_empty())
-	KinMerge.cast(P)
-	A.step(m, 0.8)
-	A.ok("merge hold dancer: the wound-up Bola is not thrown",
-			TK.bola_cast.is_empty() and TK.bola.is_empty() and not KitStatus.grounded(T) and not AimKit.shown(P, "rmb"))
 	await A.done(m)
 	# ---- Juggernaut: a Meteor Drop diving when a merge starts doesn't land
 	r = A.setup("juggernaut", 4.0, "cindle")
