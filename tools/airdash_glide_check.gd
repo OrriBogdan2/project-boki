@@ -2,6 +2,8 @@ extends RefCounted
 ## --airdash-glide-check: an air dash straight into a glide keeps its speed, for every hunter. The
 ## glider must open with at least KEEP of the dash's exit speed (its speed on the last step of the dash),
 ## where the exit speed counts only up to the fastest a dash can hand the glider (Hunter.GLIDE_BOOST_MAX).
+## A kit with a no-carry DashExit rule (Sparkle's Wirerun) is held the other way round: its glider opens
+## at no more than the rule's cap x run speed, with nothing of the dash handed on.
 
 const KEEP := 0.7
 const HEIGHT := 40.0
@@ -70,10 +72,17 @@ func run(main: Node) -> void:
 		var r := _air_dash(m)
 		var exit_speed: float = r["exit"]
 		var open_speed: float = r["open"]
-		var counted := minf(exit_speed, Hunter.GLIDE_BOOST_MAX)
-		ok(open_speed >= counted * KEEP,
-			"%s: dash exit %.1f m/s, glide opens at %.1f m/s (%.0f%%)" % [arch, exit_speed, open_speed,
-			100.0 * open_speed / maxf(0.01, exit_speed) if exit_speed > 0.0 else 0.0])
+		var rule := DashExit.rule(m.player)
+		if rule.is_empty():
+			var counted := minf(exit_speed, Hunter.GLIDE_BOOST_MAX)
+			ok(open_speed >= counted * KEEP,
+				"%s: dash exit %.1f m/s, glide opens at %.1f m/s (%.0f%%)" % [arch, exit_speed, open_speed,
+				100.0 * open_speed / maxf(0.01, exit_speed) if exit_speed > 0.0 else 0.0])
+		else:
+			var cap: float = m.player.base_speed * float(rule["cap"]) + 0.05
+			ok(open_speed > 0.0 and open_speed <= cap,
+				"%s: no-carry dash exit %.1f m/s, glide opens at %.1f m/s (cap %.1f)" % [arch, exit_speed,
+				open_speed, cap])
 		m.queue_free()
 		await main.get_tree().process_frame
 	print("AIRGLIDE DONE, failures: %d" % bad)
