@@ -279,6 +279,12 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - The hook taps his leg.
 - **Target stance (6 s):**
   - The same feet. He pulls a coin, squints at it through the loupe, bites it, and pockets it.
+- **Done (ext/idle-dredge):** tools/art1/grimble_clips.py `idle` and `stance` on READY's feet.
+  - Idle: the weight goes from foot to foot, with the chest, head, hands and hoard trailing it by 0.1 to 0.4 s. Once a loop he taps the hook on his thigh three times with a grin.
+  - Stance: he digs into the hoard over his left shoulder, holds the coin up and turns his loupe to it, bites it, grins, then pockets it at his hip with a pat.
+  - x_breath breathes twice per loop.
+  - The scrap hand is rigid on `hand.L` (its fingers have no skin), so the claw tips hold the "coin", and the hand is kept beside the face rather than in front of the snout. Alternative: a coin prop.
+  - Shots (jobq --idle-shots, 12 frames): before 20261108-112025-20904 (HEAD a98d8d38c), after 20261108-111649-20258, under /home/boki/jobq/done/<id>/out/dredge. After: f012 matches f000 (feet, hook, hoard); the hook tap reads at f007-f008; the stance coin reaches the loupe and the bite at f004-f009. live/ hands idle into stance without a pop. f000-f001 in both show the lanterns' spring settling from rest: a warm-up artifact of the harness, not the seam.
 
 ## The check
 
