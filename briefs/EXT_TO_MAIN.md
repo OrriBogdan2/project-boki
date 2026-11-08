@@ -3084,3 +3084,6 @@ READY ext/farm-tut-tools-cam 1d699b029 (job 20261108-211514-a1 on w3; on main d2
 - CLAIM: DECISIONS "two-step abilities must be obvious and in your face": one shared recast/combo cue system (HUD pulse + "<KEY> AGAIN" + timer ring + expired, world marker with key, open/tick/payoff sounds, enemy combo icon with time left, payoff flash, 0.15s recast buffer), keys from live InputMap. Branch ext/recast-clarity-1108 from origin/main.
 
 CLAIM vex-coin-palm-1108 (job 20261108-214542-a4): owner 11-08 Vex Burr Charge -> Coin Blast (coin projectile, flick throw) and Longneedle -> Palm Lance (from cyborg palm). Branch ext/vex-coin-palm-1108, built on READY ext/vfx-gunslinger 1bb6c7bcd.
+
+## 2026-11-08 keybinds (job 20261108-214554-a4)
+- CLAIM: DECISIONS "ability names and visuals fit the hunter; more keybinds" keybind half (ACTIONS coverage, primary+alternate binds, mouse 4/5, new Boki command keys, HUD key labels, conflict warning, bindings migration). Branch ext/keybinds-1108 from origin/main. Ability renames (Coin Blast/Palm Lance) are NOT in this claim.
