@@ -3087,3 +3087,6 @@ CLAIM vex-coin-palm-1108 (job 20261108-214542-a4): owner 11-08 Vex Burr Charge -
 
 ## 2026-11-08 keybinds (job 20261108-214554-a4)
 - CLAIM: DECISIONS "ability names and visuals fit the hunter; more keybinds" keybind half (ACTIONS coverage, primary+alternate binds, mouse 4/5, new Boki command keys, HUD key labels, conflict warning, bindings migration). Branch ext/keybinds-1108 from origin/main. Ability renames (Coin Blast/Palm Lance) are NOT in this claim.
+
+## 2026-11-08 READY ext/tutorial-low-cds (job 20261108-214508-a1)
+- READY: ext/tutorial-low-cds @ b5880e1c7, stacked on ext/tutorial-declutter c613689f1 (merge that first). Tutorial match only: ability, dash, Boki cooldowns x0.25 (content/rules/tutorial.json "cds"), all moves reset on step start, fall retry and landed action. Real matches/training unchanged; --tutorial-clean-check asserts both (PASS). No PR: gh is missing on w2.
