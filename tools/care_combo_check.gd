@@ -614,7 +614,43 @@ func _late_homing() -> void:
 	ok(
 			"tm Shift: her ice trail lasts a few seconds (plates still down 2 s after the skate), skate cd 13 s (data)",
 			slabs >= 3 and absf(P.dash_regen() - 13.0) < 0.01, "%d plates, cd %.1f s" % [slabs, P.dash_regen()])
+	var dart_dmg := float(P.wpn["dmg"])
 	await _free(m)
+	var caught := await _skate_past_dummy(Vector3(3.0, 0, -5.0), Vector3(3.0, 0, 0), true)
+	ok(
+			"tm Shift: skating past a dummy that walks on, beams aimed 1.5 m off it curve onto it late",
+			caught >= dart_dmg * 3.0, "%.0f damage" % caught)
+	var missed := await _skate_past_dummy(Vector3(4.0, 0, -12.0), Vector3.ZERO, false)
+	ok("tm Shift: a dummy far off the line of fire (12 m aside) is never hit: no hard lock", missed < 0.01,
+			"%.0f damage" % missed)
+
+## Skates +x firing at a dummy placed `at` from her and walking at `vel` (m/s); the cursor stays 1.5 m ahead of the
+## dummy when `track`, else dead ahead of her. Returns the damage the dummy took.
+func _skate_past_dummy(at: Vector3, vel: Vector3, track: bool) -> float:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[3]
+	T.teleport(P.pos + at)
+	step(m, 0.05)
+	var hp0 := T.hp
+	P.dashes = 1.0
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	for i in 36:
+		T.teleport(T.pos + vel / 60.0)
+		sc.aim_at(P, T.pos + Vector3(1.5, 0, 0) if track else P.pos + Vector3(8.0, 0, 0))
+		P.inp["fire"] = true
+		step(m, 1.0 / 60.0)
+	P.inp["fire"] = false
+	P.inp["dash_down"] = false
+	step(m, 0.4)
+	var dealt := hp0 - T.hp
+	await _free(m)
+	return dealt
 
 ## Owner 19:50: the further the spear goes, the longer it travels; it always starts at her, never at the target.
 func _spear_travel() -> void:
