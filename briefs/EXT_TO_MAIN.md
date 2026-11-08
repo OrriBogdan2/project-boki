@@ -2801,3 +2801,4 @@ GPU shots ext/kael-v2-integ 36c5f7ea7 (also covers release-integ-0243, same Kael
 READY ext/rank-parity-c 29ce1049f (Sparkle, Mossy, Sable, Motley rank 2/3 follow the source's Upg: lines; per-slot rank_cd/rank_dmg, docs tables, asserts; ults unchanged)
 READY ext/meeko-ult-cancels d4b9d81fd (Meeko Hearth Call cancels verified vs source: tether snaps visibly, final elimination drops the channel, check per cancel case, tender.md)
 READY ext/meeko-carry-drop 6a773c049 (Meeko Carrier drop = source triggers: stun or damage past the shield; root/hex no longer drop; check covers triggers, non-triggers, 4s re-pick lock)
+READY ext/mossy-dash-refund 347408a2d (rank 3 dash refund already built; added DashReset cue + miss/rank1 asserts)
