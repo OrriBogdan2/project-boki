@@ -121,6 +121,26 @@ Asserted in `--tender-combo-check` ("mm dashes: Elluna's cooldowns ...", "mm das
 | Hearthlight runs out: the last heal blooms, no blast | `_hearth_end`, `_bloom` | "mm E: the light's last heal blooms (heals, no ring, blast or shake; a quiet chime)" |
 | A merge start ends Hearth Call (no pull, no bond; `hearth_call`) | `_drop_holds`, `ArchKit.drop_holds` | "mm merge: drop_holds ends Hearth Call" |
 
+## Animation timing (Nov 8, frame check against the footage)
+Source = briefs/hero-ref/mooshmoosh.md (5 fps frames, 0.2 s each; the 30 fps crops for the LMB, 716.3-717.6 s). Ours = the clip's beat in `pip.glb` (`tools/art1/pip_clips.py`, equal to the kit's `KMovesCare` beats) against the frame the kit's effect fires (always the move's t 0). "Gap" is how far the visible release came after the effect. One footage frame is 0.2 s, so only the LMB crop can resolve these.
+
+| Move | Source (s) | Ours before: beat, gap | Ours after (`lead`, gap) |
+|---|---|---|---|
+| LMB `mm_shot_r/l` | wind 0.07, release 0.03-0.07, hold 0.1, recover 0.2-0.3 | hand out 0.08; ember leaves 0.08 early; hold to 0.18, end 0.42 | lead 0.06: gap 0.02, hold 0.12, end 0.36 (cadence 0.4 unchanged) |
+| LMB Empowered `mm_shot_emp` | no frame split | push 0.14, gap 0.14 | lead 0.10: gap 0.04 |
+| RMB wind-up `mm_seed_aim` | telegraph about 1 s (f116-120) | fixed 1.0 s | no change |
+| RMB throw `mm_seed` | hop about 0.3 s up, both arms pushed, flare on her | push 0.07, seed 0.07 early; airborne 0.05-0.32 (0.27 s) | lead 0.06: gap 0.01 |
+| RMB root delay | 0.6 s (f123 to f126) | 0.7 s | no change (data says 0.6-0.8) |
+| E lit `mm_hearth` | both arms up about 0.3 s (f195) | arms up 0.18, plus orb at 0: 0.18 early; up about 0.25 s | lead 0.15: gap 0.03 |
+| E toss `mm_toss` | zone lands within 1 frame | `toss_speed` 45 | no change |
+| X cast `mm_call` | plus bursts at the thrust | thrust 0.10, burst at 0 | lead 0.08: gap 0.02 |
+| Shift skip `mm_skip` | ground dash never seen clean | 0.24 covers the 0.2 s dash | no change |
+| Air glide `mm_float` | takeoff 0-0.07, streak 0.07-0.25, float 0.25-0.8, touchdown 0.1, total 0.8-1.1 | tuck 0.06-0.26, float 0.26-0.85, touchdown 0.95-1.05 | no change (on the source's beats) |
+| Walk or run cycle | about 0.57 s at 4.7 m/s (low confidence: top-down view, notes disagree on the stride) | `run_*` clips 0.4 s at 4.55 m/s | not changed, see suggestions |
+
+The fix is the new `lead` key in `warden_anim/pip.json` (`WardenClips._pick`): the clip is read that many seconds ahead of the kit's move clock, clamped at its last pose, so the release beat lands on the effect. No clip was re-keyed and no kit constant changed. Asserted in `--tender-combo-check` ("mm clips: each release beat ...", "mm LMB: the hand releases within the source's 0.07 s wind ...").
+Suggestions (not built): slow the run cycle toward 0.5 s once the owner supplies a clean walk clip; the footage list in mooshmoosh.md section 6 names the clips that would settle it.
+
 ## Animation moves
 The moves live in `scripts/match/kmoves_care.gd` (`KMovesCare.MOVES`, read by `HunterAnim.km_sample`). The kit plays them with `play()` for abilities, or `play_soft()` for procs (it waits for the current move to finish). She holds nothing (HunterAnim hold `palm`), so both hands are free and every move keys them (`fl` / `fr`).
 
