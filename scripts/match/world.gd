@@ -164,8 +164,8 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	# never reported as 0, which means "free": a ground-level island, top 0, blocks from below too.
 	# It used to read as open air, so bodies under the lip slid in under ground-level islands.)
 	var hit := false
-	for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
-		var g := ground_at(x + o.x, z + o.y)
+	for o in OCC_RING:
+		var g := ground_at(x + o.x * r, z + o.y * r)
 		if g > y + STEP:
 			worst = maxf(worst, g)
 			hit = true
@@ -177,6 +177,8 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 			return -1.0
 	return 0.0
 
+const OCC_RING: Array[Vector2] = [Vector2(0, 0), Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1),
+	Vector2(0.7, 0.7), Vector2(-0.7, 0.7), Vector2(0.7, -0.7), Vector2(-0.7, -0.7)]     # occupy's ground samples, x body radius
 const BLOCK_BODY := 0.7      # a body's radius against rocks, trees and walls, as a share of its radius
 const BLOCK_SKIN := 0.004    # push_out_blocks leaves this much room, so the spot it gives is free
 
