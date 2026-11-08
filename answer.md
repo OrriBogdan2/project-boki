@@ -15,3 +15,5 @@ Branch ext/no-natural-death-1108. No tuning numbers touched (no movement/feel nu
 | dead-by-neglect revives weak | done | grave with rec, bare old grave, a "lost" grave (stays); idempotent second run |
 | economy-check, kinbox, economy-floor, work-check | done | all 0 failures (econ test updated: no death, sick instead) |
 | fresh save / Training Area / GPU clip | n/a | check runs on a fresh save; no visible change except the "came back" notice, so no clip |
+
+Note: "suite-fast" is not a defined command on this tree (`jobq submit -- --suite-fast` only launched the game and timed out, rc=124, no failures); I ran the checks above directly plus `python3 tools/health.py --strict` (OK).
