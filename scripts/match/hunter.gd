@@ -246,7 +246,7 @@ var dodged := false        # F has to be let go between weapon swaps
 var lives := 1                # comes back this many times minus one before it's really out
 var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
 var ak: ArchKit = null        # the archetype's kit at run time
-var shot_range_k := 1.0       # the next shot's range (a full Focus: +20%)
+var shot_range_k := 1.0       # the next shot's range (an idle gun's first ember: +40%)
 var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
 var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees and barriers don't stop you while > 0
@@ -1490,10 +1490,6 @@ func fire() -> void:
 		m.sfx("cloak", pos, -8.0)
 	idle_fire = 0.0
 	reveal_t = maxf(reveal_t, 1.2)
-	if float(wpn.get("warmup", 0.0)) > 0.0 and ak and ak.has_method("take_focus_shot") and ak.take_focus_shot():
-		shot_range_k = 1.2          # a full Focus: aimed at once, further
-		_release()
-		return
 	if float(wpn.get("warmup", 0.0)) > 0.0:
 		# the sniper winds up with its laser showing, then fires
 		warm_t = float(wpn["warmup"])

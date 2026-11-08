@@ -1,15 +1,12 @@
 class_name ArcherKit
 extends ArchKit
-## Hem (id archer, light; docs/heroes/archer.md, hero sheet pin.md). Spirit Walk (Shift), Focus, the Heavy Shot
+## Hem (id archer, light; docs/heroes/archer.md, hero sheet pin.md). Spirit Walk (Shift), the Heavy Shot
 ## (RMB, hold only: a charged arrow that knocks the first foe back and stuns it into a wall), Hail Wall (E, a curved arc of rain at the cursor distance), and on X
 ## Starpiercer (level 6, PinUlt: three empowered piercing beams). R is the Merge.
 ## The bow (PinDraw): hold to draw through two stages with a filling aim line and a perfect-timing circle; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
 ## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
-##
-## The loop: pins and standing still feed Focus -> full Focus arms the Deadeye (a lens glint and
-## a thin aim line everyone sees, crosshairs over every pinned foe) -> the next arrow (drawn through its
-## stages as always) into a rooted or stunned foe is a Deadeye: a gold payoff hit with T4 hitstop.
+## Passive: Hawk Sense (hurt rivals are seen through cover). No resource meter: the old Focus and Deadeye were invented.
 
 var rain := {}                 # the live Hail Wall: {a, b, t, tick, patter, tele}
 var draw: PinDraw             # the bow's stages, reticle, perfect release and overdraw
@@ -20,15 +17,6 @@ var perfects: int:
 	get: return draw.perfects if draw else 0
 var pin_aim := false           # the Heavy Shot is being held (the needle on the bow and its growing bar show)
 var needle: PinNeedle          # the Heavy Shot's needle while it's held
-var high_t := 0.0              # re-checks high ground now and then
-var on_high := false
-var loosed := 0.0              # a Focus shot is in the air until this time (its hit can be a Deadeye)
-var pin_until := {}            # foe instance id -> [ent, time]: rooted or stunned (plus a short grace)
-var armed_at := -9.0           # the last "DEADEYE READY" pop (rate-limited)
-var was_full := false
-var glint: Node3D = null       # the lens glint at the bow and the thin aim line (full Focus)
-var reticles := {}             # foe instance id -> node: crosshairs over pinned foes while Deadeye is armed
-var deadeyes := 0              # Deadeyes landed (tests, demo)
 var sense_t := 0.0
 var pins := 0                  # wall pins landed (tests)
 var heavy_kicks := 0           # Heavy Shot releases that kicked the screen (tests)
@@ -47,105 +35,15 @@ func _setup() -> void:
 	self_nodes.append(ult)
 	spirit = PinSpirit.new(self)
 
-func full_ready() -> bool:
-	return res >= res_max() - 0.01
-
-func res_text() -> String:
-	return "READY" if full_ready() else "%d" % int(res)
-
-func ready_label() -> String:
-	return "DEADEYE READY" if full_ready() else ""
-
-## Focus from play (a Hem): the out-of-combat clock doesn't apply to Focus.
-func add_focus(v: float) -> void:
-	add_res(v)
-
-## A full Focus is spent on the next shot (a bow's arrow, or a warmup weapon's shot aimed at once), with +20%
-## range (Hunter.fire reads it). The shot stays "loosed" for a moment: if it hits a pinned foe it's a Deadeye.
-func take_focus_shot() -> bool:
-	if res < res_max() - 0.01:
-		return false
-	res = 0.0
-	was_full = false
-	loosed = m.time + float(res_def().get("window", 1.2))
-	var d := h.aim_dir()
-	vfx("focus_shot", h.pos, d)
-	return true
-
-## A rooted or stunned foe (anyone's root counts), or one that was a moment ago.
-func pinned(t: Ent) -> bool:
-	if t == null or not is_instance_valid(t) or t.dead:
-		return false
-	if t.root_t > 0.0 or t.stun_t > 0.0:
-		return true
-	var e: Array = pin_until.get(t.get_instance_id(), [])
-	return not e.is_empty() and float(e[1]) > m.time
-
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
-	if t == null or t.team == h.team:
-		return
-	if String(o.get("src", "")) == "shot" and not o.has("ab"):
+	if t != null and t.team != h.team and String(o.get("src", "")) == "shot" and not o.has("ab"):
 		_arrow_hit(t)
-	if loosed <= 0.0:
-		return
-	if String(o.get("src", "")) != "shot" or o.has("ab"):
-		return
-	loosed = 0.0
-	if pinned(t):
-		var tgt := t
-		m.later(0.02, func(): if is_instance_valid(h) and is_instance_valid(tgt) and not tgt.dead: _deadeye(tgt))
-
-## Deadeye: the Focus shot found a pinned foe. A second, gold hit (a payoff: T4 hitstop, a crit), the
-## arrow's line drawn in gold, its own sound, the T4 shake and a camera punch along the shot.
-func _deadeye(t: Ent) -> void:
-	var rd := res_def()
-	var dir := h.dir_to(t)
-	var gold := Color("ffe27a")
-	var opts := {"src": "abil", "ab": "utility", "tags": ["utility", "deadeye"], "payoff": true, "crit": true, "kb": dir * 5.0}
-	t.hurt(float(rd.get("deadeye", 18.0)) * power("sec"), h, opts)
-	deadeyes += 1
-	play("pin_deadeye")
-	vfx("deadeye", t.pos, dir, {"len": h.flat_dist(t)})
-	m.fx.own_look = true
-	payoff_fx(t.pos, "DEADEYE", gold, "pay_deadeye", dir, t)
-	m.fx.own_look = false
-	CombatBus.ability_used.emit(h, "deadeye", "secondary")
 
 func _tick(dt: float) -> void:
-	var rd := res_def()
-	high_t -= dt
-	if high_t <= 0.0:
-		high_t = 0.5
-		on_high = _high_ground()
-	var still: bool = h.grounded and Vector2(h.vel.x, h.vel.z).length() < 0.6 and h.roll_t <= 0.0
-	var k := float(rd.get("high_k", 1.5)) if on_high else 1.0
-	if still:
-		add_res(res_max() / float(rd.get("still_t", 1.4)) * k * dt)
-	elif h.crouch:
-		add_res(res_max() / float(rd.get("sneak_t", 2.8)) * k * dt)
-	elif h.grounded and Vector2(h.vel.x, h.vel.z).length() > 2.5:
-		add_res(-float(rd.get("run_drain", 60.0)) * dt)
-	if loosed > 0.0 and m.time > loosed:
-		loosed = 0.0
-	# pinned foes: rooted or stunned now, and for a short grace after (the Deadeye can still land)
-	var grace := float(rd.get("pin_grace", 0.8))
-	for f in m.foes_of(h.team):
-		if (f.root_t > 0.0 or f.stun_t > 0.0) and h.flat_dist(f) < 24.0:
-			pin_until[f.get_instance_id()] = [f, m.time + grace]
-	for key in pin_until.keys():
-		if float(pin_until[key][1]) <= m.time or not is_instance_valid(pin_until[key][0]): pin_until.erase(key)
-	var full := full_ready()
-	if full and not was_full and m.time - armed_at > 2.5:
-		armed_at = m.time
-		armed_fx("", "")       # (the glint, the aim line and the crosshair label say it; no word every refill)
-	was_full = full
 	sense_t -= dt
 	if sense_t <= 0.0:
 		sense_t = 0.3
 		_sense_injured()
-	_tick_glint(dt)
-	_tick_reticles()
-	net_pulse(dt, full)
 	if pin_aim and rmb_down:
 		_heavy_tele()
 	if pin_aim and rmb_down and tells_visible():
@@ -209,11 +107,7 @@ func draw_rate() -> float:
 	return draw.rate()
 
 ## Hunter._loose asks once per arrow: where it goes and its damage factor (PinDraw.bonus).
-## A full Focus is spent on the arrow loosed (the draw runs its stages as always): +20% range, and it can be a
-## Deadeye.
 func draw_bonus(t: float) -> float:
-	if take_focus_shot():
-		h.shot_range_k = 1.2
 	return draw.bonus(t)
 
 ## Our shots the match just spawned get Hem's own look (PinFx): the bow's arrows by the kind PinDraw
@@ -245,106 +139,9 @@ func _sense_injured() -> void:
 		if f is Hunter and not f.dead and hurt_enough and h.flat_dist(f) < float(rd.get("sense_r", 22.0)):
 			f.reveal_t = maxf(f.reveal_t, 0.4)
 
-func _high_ground() -> bool:
-	var gy: float = m.world.ground_at(h.pos.x, h.pos.z)
-	var lower := 0
-	for i in 8:
-		var a := TAU * i / 8.0
-		var q := h.pos + Vector3(cos(a), 0, sin(a)) * 3.0
-		var g: float = m.world.ground_at(q.x, q.z)
-		if g <= World.VOID + 1.0 or g < gy - 0.9: lower += 1
-	return lower >= 3
-
-## The Focus tell on the hunter (everyone sees it): a gold fletch glint at the bow that grows from 50,
-## and at 100 swells and pulses with a light and a thin aim line along the shot.
-func _tick_glint(_dt: float) -> void:
-	var f := res_frac()
-	if glint == null or not is_instance_valid(glint):
-		glint = own_node()
-		var star := MeshInstance3D.new()
-		star.name = "Star"
-		star.mesh = KitMeshes.quad(1.0, 1.0)
-		star.material_override = KitShaders.mat("rosette", Color("ffd84a"), true)
-		KitShaders.param(star, "leaves", 4.0)
-		star.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		glint.add_child(star)
-		var lt := OmniLight3D.new()
-		lt.name = "Light"
-		lt.light_color = res_col()
-		lt.omni_range = 2.6
-		glint.add_child(lt)
-		var line := MeshInstance3D.new()
-		line.name = "Line"
-		line.mesh = Models.box(0.05, 0.03, 1.0)
-		line.material_override = Models.glow_mat(Color(Color("ffe27a"), 0.55))
-		line.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		glint.add_child(line)
-	var show := tells_visible() and f >= 0.5
-	glint.visible = show
-	if not show:
-		return
-	var d := h.aim_dir()
-	glint.global_position = h.position + Vector3(d.x * 0.55, 1.3 * float(h.cdat.get("scale", 1.0)), d.y * 0.55)
-	var full := full_ready()
-	var star := glint.get_node("Star") as MeshInstance3D
-	var pulse := 0.5 + 0.5 * sin(m.time * 12.0)
-	star.scale = Vector3.ONE * ((0.7 + 0.2 * pulse) if full else lerpf(0.25, 0.5, (f - 0.5) * 2.0))
-	(glint.get_node("Light") as OmniLight3D).light_energy = (1.8 + pulse) if full else 0.0
-	var line := glint.get_node("Line") as MeshInstance3D
-	line.visible = full
-	if full:
-		var reach := 15.0 * (1.0 + float(res_def().get("range_k", 0.2)))
-		line.scale = Vector3(1.0, 1.0, reach)
-		line.position = Vector3(d.x, 0, d.y) * reach * 0.5 + Vector3(0, -0.2, 0)
-		line.rotation = Vector3(0.0, atan2(d.x, d.y), 0.0)
-
-## Crosshairs over every pinned foe while the Deadeye is armed: "this one is about to take it".
-func _tick_reticles() -> void:
-	var want := {}
-	if full_ready() and tells_visible():
-		for key in pin_until:
-			var t: Ent = pin_until[key][0]
-			if is_instance_valid(t) and not t.dead and h.flat_dist(t) < 18.0:
-				want[key] = t
-	for key in reticles.keys():
-		if not want.has(key) or not is_instance_valid(reticles[key]):
-			if is_instance_valid(reticles[key]): (reticles[key] as Node3D).queue_free()
-			reticles.erase(key)
-	for key in want:
-		var t: Ent = want[key]
-		if not reticles.has(key):
-			var n := Node3D.new()
-			n.top_level = true
-			var ring := MeshInstance3D.new()
-			ring.mesh = Models.flat_quad(1.3)
-			ring.material_override = Models.ring_mat(Color(Color("ffe27a"), 0.95), 0.1)
-			ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			n.add_child(ring)
-			for i in 4:
-				var tick := MeshInstance3D.new()
-				tick.mesh = Models.box(0.08, 0.04, 0.32)
-				tick.material_override = Models.glow_mat(Color(Color("ffe27a"), 1.0))
-				var a := TAU * i / 4.0
-				tick.position = Vector3(sin(a), 0, cos(a)) * 0.72
-				tick.rotation.y = a
-				n.add_child(tick)
-			m.add_child(n)
-			reticles[key] = n
-		var rn: Node3D = reticles[key]
-		rn.global_position = t.position + Vector3(0, (2.6 if t is Hunter else 1.9), 0)
-		rn.rotation.y = m.time * 2.5
-		rn.scale = Vector3.ONE * (1.0 + 0.12 * sin(m.time * 10.0))
-
-func teardown() -> void:
-	for key in reticles:
-		if is_instance_valid(reticles[key]): (reticles[key] as Node3D).queue_free()
-	reticles = {}
-	super.teardown()
-
 func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
-	if dmg > 0.5:
-		add_res(-float(res_def().get("hit_loss", 40.0)))
-		if spirit.active(): spirit.end("hit")
+	if dmg > 0.5 and spirit.active():
+		spirit.end("hit")
 
 ## One of the bow's arrows hit: the spent-arrow pool skips it; a Supercharged one bursts in a teal X-star.
 func _arrow_hit(t: Ent) -> void:
@@ -488,7 +285,6 @@ func _pin(a: Vector3, k: float) -> void:
 	var dir := Vector2(a.x - h.pos.x, a.z - h.pos.z).normalized()
 	var extra := {"hit_extra": {"heavy": true}} if k >= 0.99 else {}
 	extra["on_foe"] = func(f: Ent, _c: Dictionary):
-		add_focus(float(res_def().get("pin_gain", 40.0)))
 		# the impact: a red-white burst, a white dust cloud as it's driven back, a white ring round it
 		var at := f.pos + Vector3(0, 1.0, 0)
 		fx.note_hit(f.pos)
@@ -501,12 +297,11 @@ func _pin(a: Vector3, k: float) -> void:
 			if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(e_def()["blight"]) + 1.5))
 			vfx("cremate", f.pos, dir)
 			m.fx.word(f.pos + Vector3(0, 2.4, 0), "CREMATED", Color("8ac8ff"), false)
-		# driven into terrain within 3m: pinned (a stun), and the shot lines up: full Focus
+		# driven into terrain within 3m: pinned (a stun)
 		if _wall_behind(f, dir, float(pd["wall"])):
 			pins += 1
 			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
-			add_focus(res_max())
 			if rank("sec") >= 3:
 				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge
 			var wall_k := lerpf(float(pd["wall_floor"]), 1.0, k)       # an early-release pin pays too
@@ -608,16 +403,11 @@ func _tick_rain(dt: float) -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	# Deadeye armed and someone pinned in range: loose it at them
-	if full_ready() and los and dist < 15.0 and pinned(tgt):
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
-		h.inp["fire"] = true
-		return
 	# Hail Wall across their path (lead them a little), from mid range
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < float(e_def()["reach"]) + 1.0 and dist > 3.0 and randf() < 0.35:
 		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * 0.4; h.inp["sig"] = true; return
-	# a full Heavy Shot first: a wall pin feeds Focus for the Deadeye
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 13.0 and not pinned(tgt):
+	# a full Heavy Shot first, unless they are already pinned
+	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 13.0 and tgt.stun_t <= 0.0:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
 		bot_hold["rmb"] = float(rmb_def()["pin"]["full"]) + 0.1

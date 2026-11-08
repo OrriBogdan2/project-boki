@@ -1921,7 +1921,7 @@ func _draw_crosshair(p: Hunter) -> void:
 	if p.wpn.has("tighten_from_deg") and p.spin > 0.0:
 		spread += lerpf(12.0, 0.0, clampf(p.spun_t / float(p.wpn.get("tighten_time", 1.5)), 0.0, 1.0))
 	Reticle.draw(c, mp, spread)
-	if p.ak:
+	if p.ak and p.ak.has_meter():
 		# the archetype resource as an arc hugging the crosshair
 		var rf := p.ak.res_frac()
 		var rc := p.ak.res_col()

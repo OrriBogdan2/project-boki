@@ -35,7 +35,7 @@ func _archer() -> void:
 	var K: ArcherKit = P.ak
 	await _reset(9.0)
 	var hold := func(t: float):
-		K.res = 0.0              # (no Focus: a full Focus is drawn at once)
+		K.res = 0.0              # (keep the resource empty)
 		P.inp["fire"] = t < 1.0
 		if t >= 0.4 and t < 0.4 + DT:
 			P.do_dash()

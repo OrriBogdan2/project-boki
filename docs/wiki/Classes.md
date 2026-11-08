@@ -52,7 +52,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
 | [Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
-| [Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
+| [Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Hawk Sense | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
 | [Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
 | [Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Fusion) |
 | [The Unbroken](Class-The-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Fusion) |

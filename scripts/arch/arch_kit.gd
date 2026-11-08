@@ -71,6 +71,8 @@ func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
 func res_max() -> float: return float(res_def().get("max", 100.0))
+## false when the passive has no meter (Hawk Sense)
+func has_meter() -> bool: return String(res_def().get("kind", "")) != "none"
 func res_col() -> Color: return Color(String(res_def().get("col", "#ffffff")))
 func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff")))
 

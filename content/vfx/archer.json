@@ -23,8 +23,6 @@
 		"fire_ult": {"net": false, "fx": [{"p": "ribbon", "follow": true, "life": 1.2, "tail": 0.14, "size": 0.5, "wave": 0.1, "c": "thread", "c2": "silver"}]},
 		"fire_heavy": {"net": false, "fx": [{"p": "ribbon", "follow": true, "life": 1.2, "tail": 0.3, "size": 0.5, "wave": 0.18, "c": "thread", "c2": "silver"}]},
 
-		"focus_shot": {"sfx": [{"n": "rail", "db": -9, "pitch": 1.7}],
-			"fx": [{"p": "flare", "at": "bow_root", "size": 1.0, "life": 0.12, "c": "silver", "c2": "white"}]},
 		"arrow_hit": {"fx": [{"p": "flare", "y": 1.0, "size": 0.9, "life": 0.12, "c": "thread", "c2": "silver"},
 				{"p": "ember", "y": 1.0, "way": "back", "n": 8, "speed": 5.0, "spread": 0.5, "grav": 8.0, "life": 0.28, "size": 0.035, "stretch": 0.04, "c": "silver", "c2": "white", "near": true}]},
 		"super_hit": {"sfx": [{"n": "pin_super_hit", "db": -2}],
@@ -82,8 +80,6 @@
 			"fx": [{"p": "flare", "y": 1.0, "size": 2.2, "life": 0.22, "c": "thread", "c2": "silver"},
 				{"p": "flare", "y": 1.0, "size": 3.2, "life": 0.28, "c": "thread", "c2": "silver", "when": "last"},
 				{"p": "ember", "y": 1.0, "way": "fwd", "n": 22, "speed": 9.0, "spread": 0.45, "grav": 5.0, "life": 0.42, "size": 0.05, "stretch": 0.05, "c": "silver", "c2": "white"},
-				{"p": "thread", "len": 1.8, "w": 0.7, "life": 1.5, "c": "thread", "c2": "thread"}]},
-		"deadeye": {"fx": [{"p": "scorch", "at": "h", "shape": "lane", "stitch": true, "len": "len", "w": 0.6, "life": 0.9, "c": "gold", "c2": "white"},
-				{"p": "ember", "y": 1.0, "way": "fwd", "n": 20, "speed": 9.0, "spread": 0.3, "life": 0.36, "size": 0.05, "stretch": 0.05, "c": "gold", "c2": "white"}]}
+				{"p": "thread", "len": 1.8, "w": 0.7, "life": 1.5, "c": "thread", "c2": "thread"}]}
 	}
 }
