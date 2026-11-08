@@ -5,7 +5,8 @@ extends RefCounted
 const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tamsin", "Linwick", "Dredge",
 	"Moosh Moosh", "Burple", "Breah", "Ostra",
 	"Breaker", "Lisette", "Ravel", "Claire", "Tarek", "Pip", "Frost Siren", "Cliff Runner",
-	"Ryzz", "Ravyl", "Kibo", "Magic Fox", "Snowglider", "Sunken Bulwark"]
+	"Ryzz", "Ravyl", "Kibo", "Magic Fox", "Snowglider", "Sunken Bulwark",
+	"Mossy", "Hem", "Flame Queen", "Undying Queen"]
 ## Words retired from player text (Hunter / Relic / the Empty / Fusion replace them; ids and code names may keep them).
 const RETIRED_TERMS := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|unmasked|masks?)\\b"
 const CANONICAL_ORDER := [
@@ -61,7 +62,7 @@ func _plain_text(data: Dictionary) -> String:
 	copy.erase("base_name")
 	return JSON.stringify(copy)
 
-## The first old personal name found in text once the class titles (Frost Siren ...) are taken out.
+## The first old personal name found in text once the class titles (Snowglide ...) are taken out.
 func _old_name_in(text: String) -> String:
 	var rest := text
 	for title in _all_titles():
