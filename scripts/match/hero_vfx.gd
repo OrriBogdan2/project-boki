@@ -587,6 +587,7 @@ func _burst(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vector2
 		node.visible = false
 		return
 	node.global_transform = Transform3D(Basis.IDENTITY, p)
+	_seat(node, p)
 	node.one_shot = true
 	node.explosiveness = float(layer.get("burst", 1.0))
 	node.restart()
@@ -641,6 +642,7 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 			node.visible = false
 			continue
 		node.global_transform = Transform3D(Basis.IDENTITY, _where(layer, h, o.get("at", h.pos), aim))
+		_seat(node, node.global_position)
 		node.one_shot = false
 		node.explosiveness = 0.0
 		node.emitting = true
@@ -663,12 +665,19 @@ func _tick_holds() -> void:
 				var node := lay["node"] as GPUParticles3D
 				var base: Vector3 = hunter.pos if e["at"] == null else e["at"]
 				node.global_position = _where(lay["layer"], hunter, base, aim)
+				_seat(node, node.global_position)
 				_reaim(node, lay["layer"], aim)
 			else:
 				_draw_string(lay, hunter)
 
 ## A hold's emitter turned to the aim now, so a stream along it follows a sweep (the particles already out keep
 ## their own way, as a hose's fire does).
+## The ground under `at` for an emitter's motes: they land on it and fade into it (none over the void).
+func _seat(p: GPUParticles3D, at: Vector3) -> void:
+	var g: float = m.world.ground_at(at.x, at.z)
+	(p.process_material as ShaderMaterial).set_shader_parameter("floor_y", g)
+	((p.draw_pass_1 as QuadMesh).material as ShaderMaterial).set_shader_parameter("floor_y", g)
+
 func _reaim(p: GPUParticles3D, layer: Dictionary, aim: Vector2) -> void:
 	if String(layer.get("way", "up")) == "up" or layer.get("shape") == "arc":
 		return

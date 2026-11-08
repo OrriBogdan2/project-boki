@@ -52,6 +52,10 @@ the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_ha
 - **Budget:** `MAX_LIVE` GPU particles alive in a match, `POOL` nodes per kind, the quality preset's `fx` thins particles,
   past `LOD_NEAR` the `near` layers drop and particles halve, past `LOD_FAR` nothing draws. No per-ability lights. Looks
   last at most 2.2 s, flares at most 4 m, swirls at most 4.5 m (checked).
+- **Ground:** each emitter knows the ground under it (`_seat`, `World.ground_at`). A falling particle lands and skids
+  instead of sinking, and every particle fades out over its last 0.15 m above the ground (a soft particle by height, so
+  it works on gl_compatibility too). The ground is the one under the emitter, so a spark that flies off a terrace edge
+  lands on the upper terrace's height.
 - **No stall on first cast:** `prewarm(at)` (called from `Match.warm_up`) holds up one node of every kind, particles
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
