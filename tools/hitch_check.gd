@@ -224,8 +224,10 @@ func _next_phase() -> void:
 var _pack_done := false
 func _bring_pack() -> void:
 	var P: Hunter = m.player
-	var kinds: Array = Data.MOBS.keys().filter(func(k): return not Data.MOBS[k].get("boss", false)
-			and not Data.MOBS[k].get("ward", false))
+	var kinds: Array = []
+	for k in Data.MOBS:
+		if not Data.MOBS[k].get("boss", false) and not Data.MOBS[k].get("ward", false):
+			kinds.append(k)
 	for i in kinds.size():
 		var a := TAU * i / kinds.size()
 		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 7.0, [], 1.0, 0.5, 6.0)
