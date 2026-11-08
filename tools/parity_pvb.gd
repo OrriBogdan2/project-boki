@@ -56,7 +56,6 @@ func pin() -> void:
 	step(m, 0.3)
 	P.inp["move"] = Vector2(0, 1)
 	var east := func():
-		K.res = 0.0
 		aim_at(P, _at_angle(P, home, 0.0))
 	var run_v := _speed(m, P, 0.4, east)
 	P.inp["fire"] = true
@@ -64,7 +63,6 @@ func pin() -> void:
 	ok("parity pin: drawing she walks slower (footage f111-116), about 0.7 of her run",
 		draw_v < run_v * 0.8 and draw_v > run_v * 0.55, "%.1f of %.1f m/s" % [draw_v, run_v])
 	var north := func():
-		K.res = 0.0
 		aim_at(P, _at_angle(P, home, -90.0))
 	step(m, 0.1, north)
 	ok("parity pin: mid-draw the body turns to a moved cursor at once (the source turns throughout)",
