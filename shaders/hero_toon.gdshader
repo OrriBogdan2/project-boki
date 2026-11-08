@@ -52,7 +52,7 @@ uniform float top_light = 0.0;     // surfaces facing up (what the match camera 
 // a painted atlas (WardenGlb) at the match camera (~23 m): its colours this much brighter and richer, fading in
 // from 8 to 18 m away (close-ups keep the paint's own values)
 uniform float far_lift = 0.0;
-// the emission layer brighter and more saturated at the match camera (8 to 18 m away; a Warden's own look: Ryzz's
+// the emission layer brighter and more saturated at the match camera (8 to 18 m away; a Warden's own look: Sparkle's
 // pink scar, charm and piping pop against her blacks at match zoom)
 uniform float far_emit = 0.0;
 // a painted atlas (WardenGlb) carries the art's own colours, and the scene's light leans cool: its ambient (Look:
@@ -112,14 +112,14 @@ uniform float part_grad = 0.0;
 uniform float crease = 0.0;
 uniform float edge_dark = 0.0;
 uniform int surface = 0;
-// a painted emission layer on a .glb's atlas (Ryzz's lightning veins and hair crackle, Tarek's bracer cracks):
+// a painted emission layer on a .glb's atlas (Sparkle's lightning veins and hair crackle, Tarek's bracer cracks):
 // its texture x emit, crackling over time by emit_flicker (0 steady .. 1 strobing along the body)
 uniform bool use_emit = false;
 uniform sampler2D emit_tex : source_color, filter_linear_mipmap, repeat_disable;
 uniform float emit = 0.0;
 uniform float emit_flicker = 0.0;
 // the emission layer's colour (WardenGlb, the archetype's "model_glow" core; alpha 0: the layer's own painted colour):
-// the layer is then a mask, and its texels' paint takes the colour too, so the glow can change without a rebake (Ryzz)
+// the layer is then a mask, and its texels' paint takes the colour too, so the glow can change without a rebake (Sparkle)
 uniform vec4 emit_tint : source_color = vec4(1.0, 1.0, 1.0, 0.0);
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
@@ -170,7 +170,7 @@ void fragment() {
 		emit_c = texture(emit_tex, UV).rgb;
 		if (emit_tint.a > 0.0) {
 			float ek = max(emit_c.r, max(emit_c.g, emit_c.b));
-			// (a yellow piece keeps its own colour: Ryzz's hazard bands glow faintly as painted)
+			// (a yellow piece keeps its own colour: Sparkle's hazard bands glow faintly as painted)
 			float yel = smoothstep(0.08, 0.2, min(emit_c.r, emit_c.g) - emit_c.b);
 			c = mix(c, emit_tint.rgb, smoothstep(0.2, 0.7, ek) * 0.85 * (1.0 - yel));
 			emit_c = mix(emit_tint.rgb * ek, emit_c, yel);

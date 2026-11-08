@@ -1,47 +1,43 @@
 {
- "doc": "Claire (rimewright): RECIPE_95 spec (docs/art/wardens/RECIPE_95.md). python3 tools/meshy/recipe.py art/wardens/src/claire_recipe.json <steps>. Stage-1 inputs (front, side, back edits; no 3/4: it lacks the spear) and Meshy run A are in PIPELINE.md's run log.",
+ "doc": "Claire (rimewright) v2: the ART-1 build (tools/art1/claire_build.sh; docs/art/wardens/PIPELINE.md). The owner's v2 redesign (briefs/art-refs/claire_v2: nivi_v2_turnaround.jpg, nivi_v2_main_design.jpg): rabbit ears, a braid, a small puff tail; no horns, wings or devil tail. The scan carries the body, face, scarf wrap, sleeves, sash, skirt and skates; the ears, braid, tail, hands, blades and spear are built pieces. Task ids and credits are in PIPELINE.md's run log.",
  "name": "claire",
  "arch": "rimewright",
- "tag": "b3",
- "raw": "~/meshy/claire",
+ "tag": "v2",
+ "raw": "~/meshy/claire_v2",
  "art": {
-  "ref": "origin/ext/imagegen",
-  "turnaround": "docs/art/gen/wardens_r2/claire_turnaround.webp",
-  "side": "docs/art/gen/wardens_r2/claire_side.webp",
-  "portrait": "docs/art/gen/wardens_r2/claire_portrait.webp",
-  "face": "docs/art/gen/wardens_r2/claire_face.webp",
-  "head_sheet": "docs/art/gen/wardens_r2/claire_head_sheet.webp",
-  "spear_sheet": "docs/art/gen/wardens_r2/claire_spear_sheet.webp"
+  "ref": "origin/ext/agent-briefs",
+  "turnaround": "briefs/art-refs/claire_v2/nivi_v2_turnaround.jpg",
+  "design": "briefs/art-refs/claire_v2/nivi_v2_main_design.jpg"
+ },
+ "edits_common": "Edit this 3D character sculpt render of a youthful young woman in a relaxed A-pose. Keep her body, pose, proportions, arm positions, face, big pale ice-blue eyes, rosy cheeks, the fluffy white cheek fur tufts, the white fluffy fur sleeves and fur wrist cuffs, the lilac gloves, the icy-blue skating leotard, the red-and-white candy-cane sash with its bow at her hip, the candy-cane hair bow, the light blue scarf wrapped round her neck, the white skates with candy-cane laces and fluffy fur cuffs, all colours, the lighting and the flat light grey background exactly the same, and keep the framing and scale exactly the same. Make ONLY these changes: (1) remove both tall white rabbit ears completely, the candy-cane hair bow stays pinned on the silver hair where it was; (2) remove the long braid and its snowflake clasp completely, her silver hair ends as a soft shoulder-length bob; paint what the braid hid (leotard, sash, skirt, background) to match; (3) remove the two long trailing ends of the scarf that hang down to her knees completely, only the short wrap round her neck stays; (4) remove the small round white tail completely; (5) remove the ice blades under the skates, the plain sole stays; (6) the sheer see-through skirt becomes an opaque soft frosted pale ice-blue chiffon skirt of the same shape and length, nothing shows through it. Nothing else changes, nothing floats in the background.",
+ "edits": {
+  "front": "This is her front view.",
+  "tq": "This is her three-quarter front view.",
+  "side": "This is her right side view: the scarf end hanging behind her and the tail are gone.",
+  "back": "This is her back view: the scarf ends hanging down her back, the snowflake clasp and the tail are gone; the back of her leotard and the frosted skirt show."
+ },
+ "use": {
+  "front": "e_front",
+  "tq": "e_tq2",
+  "side": "e_side",
+  "back": "e_back"
  },
  "meshy": {
   "order": [
    "front",
+   "tq",
    "side",
    "back"
   ],
   "variants": {
-   "B3_off": {
-    "enhance": "off"
-   },
-   "B3_on": {
-    "enhance": "on"
+   "A": {
+    "ultra_mode": true,
+    "hd_texture": true
    }
   },
-  "keep": "B3_off"
+  "keep": "A"
  },
- "bake": "art/wardens/src/claire_bake.json",
- "fit": "art/wardens/src/claire_fit.json",
+ "build": "tools/art1/claire_build.sh source",
  "combo_check": "--rimewright-combo-check",
- "demo_at": "-4.5,0",
- "edits": {
-  "front": "Edit this character concept art (a front view). Make exactly these changes: 1) Remove BOTH dark ram horns completely: show the top of her head covered by her smooth dark hair and the grey background where the horns were; her pointed elf ears stay. 2) Remove BOTH long dark pigtails that hang in front of her shoulders and chest, and their ice-crystal ties: all her hair falls BEHIND her shoulders, down her back; show her bare shoulders, collarbones, neck, the faceted ice-crystal top and the ribbon wraps where the pigtails were. Nothing dark hangs in front of her body or over her arms. Keep everything else exactly the same: the same young frost demoness figure-skater, her sweet blushing face, big glowing pale-blue eyes, rosy cheeks and pointed elf ears, the small ice-crystal hair clips at her temples, her pale blue-white skin with faint frost runes, the faceted ice-crystal top, the frozen ribbon wraps, the skirt of jagged ice petals, the sheer frosty legs, the white lace-up figure skates with clear ice blades pointing forward, both arms hanging relaxed with open hands, all colours, the painted art style and line work, the framing, scale and position of the figure, and the plain light grey background. She has exactly two arms and two hands. (then a second pass from that image: her hair falls entirely behind her back; shoulders, collarbones and upper arms clear of hair)",
-  "side": "Edit this character concept art (a side view). Make exactly these changes: 1) Remove BOTH dark ram horns completely: show the top of her head covered by her smooth dark hair and the grey background where the horns were; her pointed elf ears stay. 2) Remove the long dark pigtail that hangs in front of her shoulder and chest, and its ice-crystal tie: her hair falls only BEHIND her shoulder, down her back; show her bare shoulder, upper arm, the ice-crystal top and her chest where it was. Keep everything else exactly the same: the same young frost demoness figure-skater, her sweet blushing face, big glowing pale-blue eyes, rosy cheeks and pointed elf ears, the small ice-crystal hair clips at her temples, her pale blue-white skin with faint frost runes, the faceted ice-crystal top, the frozen ribbon wraps, the skirt of jagged ice petals, the sheer frosty legs, the white lace-up figure skates with clear ice blades pointing forward, both arms hanging relaxed with open hands, all colours, the painted art style and line work, the framing, scale and position of the figure, and the plain light grey background. She has exactly two arms and two hands.",
-  "back": "Edit this character concept art (a back view). Make exactly these changes: 1) Remove BOTH dark ram horns completely: show the top of her head covered by her smooth dark hair and the grey background where the horns were; her pointed elf ears stay. Her long dark wavy hair still falls down her back to between her shoulder blades. Keep everything else exactly the same: the same young frost demoness figure-skater, her sweet blushing face, big glowing pale-blue eyes, rosy cheeks and pointed elf ears, the small ice-crystal hair clips at her temples, her pale blue-white skin with faint frost runes, the faceted ice-crystal top, the frozen ribbon wraps, the skirt of jagged ice petals, the sheer frosty legs, the white lace-up figure skates with clear ice blades pointing forward, both arms hanging relaxed with open hands, all colours, the painted art style and line work, the framing, scale and position of the figure, and the plain light grey background. She has exactly two arms and two hands."
- },
- "edit_source": "the stage-1 edits (edit_front/side/back: spear, wings and tail out, arms hanging) edited again: horns and front pigtails out (b3)",
- "use": {
-  "front": "edit4_front",
-  "side": "edit3_side",
-  "back": "edit3_back"
- }
+ "demo_at": "-4.5,0"
 }

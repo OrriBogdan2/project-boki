@@ -66,26 +66,6 @@
 			}
 		]
 	},
-	"dodge_rider": {
-		"name": "Prism Decoy",
-		"on_start": [
-			{
-				"delivery": {
-					"type": "burst",
-					"origin": "owner",
-					"radius": 0
-				},
-				"effects": [
-					{
-						"type": "signature",
-						"id": "decoy",
-						"target": "owner",
-						"duration": 1.8
-					}
-				]
-			}
-		]
-	},
 	"active": "prism_wall",
 	"auto": "refraction",
 	"merge": "tidal_shell",

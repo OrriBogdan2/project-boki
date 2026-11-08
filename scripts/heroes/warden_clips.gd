@@ -299,8 +299,6 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			return {"proc": true}
 	if bool(s.get("dead", false)) and st.has("dead"):
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
-	if bool(s.get("downed", false)) and st.has("downed"):
-		return {"clip": st["downed"], "t": -1.0}
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
@@ -331,7 +329,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			up = Vector2(vel.x, vel.z).length() >= STILL
 		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
-			"legs_heading": bool(mv.get("legs_heading", false))}
+				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	if bool(s.get("reviving", false)) and st.has("reviving"):
@@ -386,14 +384,14 @@ func step(dt: float) -> void:
 			_p("rate_%s/scale" % live, 0.0)
 		else:
 			_p("rate_%s/scale" % live, 1.0)
-		act_w = move_toward(act_w, 1.0, dt / FADE)
+		act_w = move_toward(act_w, 1.0, dt / float(want.get("fade", FADE)))
 		up_w = move_toward(up_w, 0.0, dt / FADE)
 	else:
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
 		if act_w <= 0.0 and up_w <= 0.0:
 			cur = ""
-	xf = move_toward(xf, float(chan), dt / FADE)
+	xf = move_toward(xf, float(chan), dt / float(want.get("fade", FADE)))
 	xf_u = move_toward(xf_u, float(chan_u), dt / float(want.get("fade", FADE)))
 	_p("act/blend_amount", xf)
 	_p("act_u/blend_amount", xf_u)
