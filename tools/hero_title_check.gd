@@ -67,7 +67,7 @@ func _lore_check() -> void:
 	var banned := RegEx.create_from_string("(?i)goggles|\\btank\\b|\\bhose")
 	ok(banned.search(cinder) == null, "Cinder: no goggles, tank or hose")
 	var meeko := _plain_text(Arch.def("tender")) + JSON.stringify(lore["hunters"]["tender"])
-	ok(not meeko.to_lower().contains("lantern"), "Meeko: no lantern")
+	ok(not meeko.replace("lantern_crook", "").to_lower().contains("lantern"), "Meeko: no lantern (her weapon id aside)")
 
 ## The class JSON as text with the base-character fields removed: the rest is shown to players.
 func _plain_text(data: Dictionary) -> String:
