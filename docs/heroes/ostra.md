@@ -1,4 +1,4 @@
-# Void Jester (base character Motley; archetype id `ostra`, Medium)
+# Motley the Void Jester (archetype id `ostra`, Medium)
 
 Internal note: the behaviour reference is the hero named in the Inspired-by table in docs/ARCHETYPES.md. Nothing below is
 player-facing; every name, number and word in the shipped game is our own (renames: Swap -> Lantern Trade, Void Snap -> Shard
