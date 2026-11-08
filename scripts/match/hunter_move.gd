@@ -1,8 +1,8 @@
 class_name HunterMove
 extends RefCounted
 ## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the ground stop, dash exit, air,
-## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json ([game data]: SUPERVIVE's
-## movement settings, uu converted to metres).
+## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
+## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
 
 static var _rules: Dictionary = _load()
 static var _phys: Dictionary = _rules["physics"]
