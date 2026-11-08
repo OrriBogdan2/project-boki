@@ -35,6 +35,12 @@ static func _load() -> void:
 				push_warning("KinLib: skipping %s/%s.json (%d grammar errors; run --grammar-check)" % [folder_of[kind], id, rep.errors.size()])
 				continue
 			out[kind][id] = raw[kind][id]
+	# data-only species (no model yet) stay in the roster but are never spawned
+	out["stubs"] = {}
+	for id in out["kin"].keys():
+		if (out["kin"][id] as KinSpec).data_only:
+			out["stubs"][id] = out["kin"][id]
+			out["kin"].erase(id)
 	# a kin whose slots point at a skipped file is skipped too
 	for id in out["kin"].keys():
 		var k: KinSpec = out["kin"][id]
@@ -65,6 +71,16 @@ static func kin_ids() -> Array:
 	ids.sort()
 	return ids
 
+## Every species in the roster: the live kin plus the data-only ones.
+static func roster_ids() -> Array:
+	var ids: Array = lib()["kin"].keys() + lib()["stubs"].keys()
+	ids.sort()
+	return ids
+
+## A roster species' spec, live or data-only.
+static func entry(id: String) -> KinSpec:
+	return lib()["kin"].get(id, lib()["stubs"].get(id, null))
+
 static func merge_of(species_id: String) -> MergeSpec:
 	var k := kin(species_id)
 	return merge(k.merge) if k else null
@@ -77,7 +93,7 @@ static func species(id: String) -> Dictionary:
 		return {}
 	var c: Dictionary = k.colors
 	var out := {
-		"name": k.display_name, "type": k.theme, "theme": k.theme,
+		"name": k.display_name, "type": k.theme, "theme": k.theme, "type2": k.type2,
 		"color": Color(String(c.get("body", "#ffffff"))), "belly": Color(String(c.get("belly", "#ffffff"))),
 		"glow": Color(String(c.get("glow", c.get("body", "#ffffff")))),
 		"hp": k.stat("kin_hp"), "dmg": k.stat("kin_damage"), "speed": k.stat("kin_speed"), "range": k.reach,
