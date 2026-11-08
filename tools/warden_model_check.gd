@@ -16,7 +16,8 @@ const EPS := 0.0005
 const WARDENS := {
 	"bulwark": {"hit_r": 0.46, "height": 1.5, "height_3d": 1.9, "width": [1.3, 5.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.392, "height": 0.98, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
-	"gunslinger": {"hit_r": 0.416, "height": 1.04, "width": [0.7, 1.3], "moves": "gunslinger_"},   # (slim)
+	# gunslinger: Vex is slim and her minigun hugs her hip
+	"gunslinger": {"hit_r": 0.416, "height": 1.04, "width": [0.5, 1.15], "moves": "gunslinger_"},   # (slim)
 	# (slim and long-legged; height_3d: her rods stand over the head)
 	"mage": {"hit_r": 0.4, "height": 1.04, "height_3d": 1.11, "width": [0.6, 1.3], "moves": "mage_"},
 	# (Sable's moth antennae stand ~0.3 m over her head, as on the master sheet)
