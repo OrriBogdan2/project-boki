@@ -14,7 +14,9 @@ const GLIDE_CATCH := 60.0        # the canopy brakes a terminal fall to its sink
 const JUMP_V := 6.8
 const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
-const GROUND_DECEL := 110.0      # [spec] stop in ~0.05s, ~0.1m of slide (was 90)
+const GROUND_DECEL := 22.2       # [game data] BrakingDecelerationWalking 2220 uu/s^2 (item 150)
+const GROUND_FRICTION := 2.0     # [game data] GroundFriction 1.0 x braking factor 2: a let-go stops in ~0.38 m
+const GROUND_SHED := 110.0       # no keys: speed over a run (a dash, a step, a knock) sheds this fast (kit distances)
 const GROUND_OVERSPEED := 30.0   # how fast dash or pad speed bleeds off on the ground
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by HunterMove.air_steer)
 const AIR_DECEL := 9.0           # let go on a ledge rise and you mostly stop
@@ -847,11 +849,17 @@ static func glide_fall(_speed: float) -> float:
 	return GLIDE_SINK
 
 ## Momentum-preserving acceleration (the Supervive feel): under the wanted speed, move toward it;
-## over it (a dash, a pad, a knockback) bleed the extra off slowly while still steering.
-static func accel2(cur: Vector2, wish: Vector2, accel: float, decel: float, over_decel: float, dt: float) -> Vector2:
+## over it (a dash, a pad, a knockback) bleed the extra off slowly while still steering. With no keys:
+## speed over `run` sheds at `shed`, then `friction` (a share of the speed per second) and a constant `decel`
+## brake the walk, as UE does.
+static func accel2(cur: Vector2, wish: Vector2, accel: float, decel: float, over_decel: float, dt: float,
+		friction := 0.0, shed := 0.0, run := 0.0) -> Vector2:
 	var mx := wish.length()
 	if mx < 0.001:
-		return cur.move_toward(Vector2.ZERO, decel * dt)
+		var cs0 := cur.length()
+		if shed > 0.0 and cs0 > run + 0.05:
+			return cur * (maxf(run, cs0 - shed * dt) / cs0)
+		return (cur * maxf(0.0, 1.0 - friction * dt)).move_toward(Vector2.ZERO, decel * dt)
 	var cs := cur.length()
 	if cs > mx:
 		var wd := wish / mx
@@ -2218,7 +2226,8 @@ func _physics(dt: float) -> void:
 		# near-instant on the ground; in the air you steer well but momentum carries
 		if grounded:
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
-			hv = accel2(hv, mv * spd, ground_accel * grip, GROUND_DECEL * grip, GROUND_OVERSPEED * grip, dt)
+			hv = accel2(hv, mv * spd, ground_accel * grip, GROUND_DECEL * grip, GROUND_OVERSPEED * grip, dt,
+					GROUND_FRICTION * grip, GROUND_SHED * grip, spd)
 		elif glide_off_t < FEATHER_KEEP and not dropping:
 			# (feathering) just after letting go of the glider you keep its speed and steering
 			var gsf := GLIDE_SPEED * (1.0 + gear_stat("glide_speed"))
