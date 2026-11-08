@@ -3113,3 +3113,6 @@ READY ext/keybinds-1108 1369ab73d (job 20261108-214554-a4): DECISIONS keybind ha
 
 ## 2026-11-08 feel (job 20261108-220037-a4): CLAIM tutorials-cut
 - CLAIM: DECISIONS "shorter tutorials; farming can be skipped or automated", tutorial half only (Auto-farm is NOT in this claim): match tutorial 22 -> ~8 steps, farm tutorial 12 -> ~5, dropped steps become one-time contextual hints (shared FirstTimeHint, saved), visible Skip on both. Branch ext/tutorials-cut from origin/main, building on READY ext/farm-tut-tools-cam / ext/tutorial-declutter where they apply.
+
+## 2026-11-08 deep (job 20261108-220048-a4): CLAIM farm-optional-1108
+- CLAIM: DECISIONS "shorter tutorials; farming can be skipped or automated", farming-optional half only (Boki on every farm job, capped offline progress + 'while you were away' summary, Auto-farm toggle at ~80% hand yield, save bump + migration). Tutorial step cuts are NOT in this claim. Branch ext/farm-optional-1108 from origin/main.
