@@ -297,6 +297,21 @@ func _mage() -> void:
 	ok("Wirerun through an orb: picked up, no Static, the dash is back",
 			K.orb_bursts == ob0 + 1 and K.spark_n(T) == 0 and P.dashes >= P.max_dashes(),
 			"picked %d sparks %d dashes %.2f" % [K.orb_bursts - ob0, K.spark_n(T), P.dashes])
+	# 7b. walking over a resting orb picks it up too and resets the dash; one a few metres off stays
+	P.teleport(home)
+	ac.step(m, 0.1)
+	P.dashes = 0.0
+	K.motes.clear()
+	K.motes.append({"pos": home + Vector3(4, 0, 0), "t": 4.0, "node": K.own_node(), "owner": P})
+	ac.step(m, 0.2)
+	ok("Orb: out of reach it stays, the dash stays spent", K.motes.size() == 1 and P.dashes < 1.0,
+			"orbs %d dashes %.2f" % [K.motes.size(), P.dashes])
+	P.teleport(home + Vector3(4, 0, 0))
+	ob0 = K.orb_bursts
+	ac.step(m, 0.2)
+	ok("Walking over an orb: picked up, the dash is back",
+			K.orb_bursts == ob0 + 1 and K.motes.is_empty() and P.dashes >= P.max_dashes(),
+			"picked %d orbs %d dashes %.2f" % [K.orb_bursts - ob0, K.motes.size(), P.dashes])
 	# 8. Storm Rod into a wall: stun; into another foe: both stunned
 	ac.fresh(T)
 	K.sparks.clear()
