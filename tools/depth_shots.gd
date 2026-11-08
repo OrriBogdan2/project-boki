@@ -5,13 +5,13 @@ extends RefCounted
 ##   depth_a_edge   standing a metre from a cliff edge over the abyss
 ##   depth_b_step   at the top of a terrace step, a hunter on the lower tier
 ##   depth_c_low    the same step from below, looking up at a hunter on the upper tier
-##   depth_d_shots  the top of the step again with shots flying out over the lower tier (their drop shadows)
+##   depth_d_shots  the top of the step again with shots flying along the ledge (their drop shadows)
 ## --cues=off draws them with the height cues off, for the before shots (names get a "before_" prefix).
 
 const DT := 1.0 / 60.0
 const SETTLE := 0.5     # s of match time before each capture
-const SHOTS := 4        # shots in the string of the shots capture
-const SHOT_SPEED := 2.0 # m/s of those shots (slow, so they are still over the lower tier at the capture)
+const SHOTS := 5        # shots in the string of the shots capture
+const SHOT_SPEED := 2.0 # m/s of those shots (slow, so they are still in frame at the capture)
 
 var main: Node
 var m: Match
@@ -37,7 +37,7 @@ func run(main_node: Node) -> void:
 	await _shoot("depth_b_step", step[0], step[1], step[2])
 	var low: Vector2i = step[0] + step[1] * 2
 	await _shoot("depth_c_low", low, -step[1], step[0] - step[1])
-	await _shoot("depth_d_shots", step[0], step[1], step[2], step[1])
+	await _shoot("depth_d_shots", step[0], step[1], step[2], Vector2i(-step[1].y, step[1].x))
 	print("DEPTHSHOTS in %s" % dir)
 	main.get_tree().quit(0)
 
@@ -65,9 +65,9 @@ func _shoot(file: String, tile: Vector2i, d: Vector2i, foe_tile: Vector2i, fire 
 	var foe: Hunter = m.hunters.filter(func(x): return x != P)[0]
 	var fy := w.ground_at(foe_tile.x + 0.5, foe_tile.y + 0.5)
 	if fy > -1e8: foe.teleport(Vector3(foe_tile.x + 0.5, fy, foe_tile.y + 0.5))
-	if fire != Vector2i.ZERO:      # a string of shots leaving along `fire`, out over the lower tier
+	if fire != Vector2i.ZERO:      # a string of shots leaving along `fire`
 		for k in range(1, SHOTS + 1):
-			var at := P.pos + Vector3(fire.x, 0.0, fire.y) * (0.5 + k * 0.9) + Vector3(0, 1.2, 0)
+			var at := P.pos + Vector3(fire.x, 0.0, fire.y) * (1.0 + k * 1.1) + Vector3(0, 1.2, 0)
 			m.spawn_shot(P, at, Vector2(fire) * SHOT_SPEED, 1.0, 5.0, 0.12, Color("ffd66b"))
 	var t := 0.0
 	while t < SETTLE:
