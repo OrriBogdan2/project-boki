@@ -181,6 +181,9 @@ slot[(mx > 0.45) & (sat < 0.5) & np.array([str(b).startswith(("thigh", "shin")) 
 slot[dark & (legs | (fc[:, 2] < BELT_Z + 0.015))] = "leather"              # the boots, the skirt and the belt: one plum look
 slot[dark & on_head] = "hair"
 slot[(slot == "cloth") & np.array([str(b).startswith(("thigh", "shin")) for b in dom])] = "skin"    # the legs at the slit: no corset there
+# the scan's own painted shoulder mask (red seams read as cloth): plain porcelain under the 3D one
+under_mask = (dom == "upper_arm.L") & (np.linalg.norm(fc - (J["upper_arm.L"] + H.MASK_OUT), axis=1) < 0.12) & np.isin(slot, ("skin", "cloth"))
+slot[under_mask] = "skin"
 for i, p in enumerate(me.polygons):
     p.material_index = MATS.index(fsrc[i]) if i >= N_LOW else MATS.index(slot[i] + "-hem")
 print("slots", {s: int((slot[:N_LOW] == s).sum()) for s in SLOTS})
@@ -209,8 +212,7 @@ def class_bake():
     0.5 the rest, 0 no island), G its height / 2."""
     skirt = (slot == "leather") & ~legs & (fc[:, 2] > SKIRT_Z[0]) & (fc[:, 2] < SKIRT_Z[1])
     cls = np.where((slot == "skin") & ~on_head, 1.0, np.where(skirt, 0.75, 0.5))
-    under_mask = (slot == "skin") & (dom == "upper_arm.L") & (np.linalg.norm(fc - (J["upper_arm.L"] + H.MASK_OUT), axis=1) < 0.1)
-    cls[under_mask] = 0.9                                            # the scan's own painted mask: splotches
+    cls[under_mask] = 0.9
     cls[N_LOW:] = 0.5
     lv = np.zeros(len(me.loops), int)
     me.loops.foreach_get("vertex_index", lv)
