@@ -78,7 +78,8 @@ func run(m: Node) -> void:
 	for i in mini(pr.shots.size(), NAMES.size()):
 		var text := String(pr.shots[i]["text"])
 		var missing: Array = NAMES[i].filter(func(w): return not text.contains(w))
-		ok(missing.is_empty() and not text.contains("twelve") and not text.contains("Tyrant"), "%s names %s" % [CHAPTERS[i], ", ".join(NAMES[i])])
+		var clean := not text.contains("twelve") and not text.contains("Tyrant")
+		ok(missing.is_empty() and clean, "%s names %s" % [CHAPTERS[i], ", ".join(NAMES[i])])
 	await _captions_fit(pr, tree)
 	main.get_window().size = FRAME
 	await _play(pr, tree)
