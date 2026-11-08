@@ -2420,6 +2420,7 @@ func _new_panel(title_txt: String, width := 520.0, scroll := false) -> VBoxConta
 		var old_sc := _panel_scroll()
 		if old_sc: keep_scroll = old_sc.scroll_vertical
 	_close_panel()
+	get_viewport().gui_release_focus()      # a clicked build tile kept the focus and took Enter from the panel
 	var pb := UI.scroll_panel(title_txt, width, _close_panel, "Close", scroll)
 	var p: PanelContainer = pb[0]
 	var v: VBoxContainer = pb[1]

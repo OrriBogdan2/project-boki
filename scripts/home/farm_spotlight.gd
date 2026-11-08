@@ -24,10 +24,7 @@ const CORNER_PX := 14
 const SOFT_PULSE_HZ := 0.8       # pulses per second once settled
 const BOKI_HEIGHT_M := 1.7       # m, how tall the cut-out round a Boki is
 const BOKI_MIN_PX := 64.0        # px, the smallest cut-out round a Boki (one far off)
-const DIM_MODAL := 0.72          # alpha of the dark in a placing step
-const SOFT_MODAL_PX := 60.0      # px the dark takes to build up outside the cut-out
-const MODAL_PULSE_HZ := 1.2      # ring pulses per second in a placing step
-const MODAL_RAMP_S := 0.2        # s the dark takes to come in
+## A placing step's feel (dim alpha, soft_px, pulse_hz, ramp_s, fade_s) lives in tuning.json "farm_spotlight".
 const MODAL_MIN_PX := 56.0       # px, the smallest cut-out (one tile of ground is small on screen)
 const CARD_GAP_PX := 24.0        # px between the cut-out and the hint card
 const CARD_WIDTH_PX := 340.0
@@ -271,7 +268,7 @@ func fade_out() -> void:
 		if phase == "spot" and h.hb != null:
 			h.hb.debug_m = Vector2.INF
 	var tw := create_tween()
-	tw.tween_property(self, "modulate:a", 0.0, 0.2)
+	tw.tween_property(self, "modulate:a", 0.0, float(Tuning.of("farm_spotlight")["fade_s"]))
 	tw.tween_callback(queue_free)
 
 ## 0 in the opening beat, easing to 1 as it settles (always 1 for a target that already had its beat).
@@ -283,9 +280,10 @@ func _settle() -> float:
 ## Sets the dim, the ring and the card for the moment: flashing in the beat, a soft pulse after.
 func _look(settle: float) -> void:
 	if modal:
-		var pulse := 0.5 + 0.5 * sin(TAU * MODAL_PULSE_HZ * age)
-		_mat.set_shader_parameter("dim", DIM_MODAL * clampf(age / MODAL_RAMP_S, 0.0, 1.0))
-		_mat.set_shader_parameter("soft", SOFT_MODAL_PX)
+		var tune := Tuning.of("farm_spotlight")
+		var pulse := 0.5 + 0.5 * sin(TAU * float(tune["pulse_hz"]) * age)
+		_mat.set_shader_parameter("dim", float(tune["dim"]) * clampf(age / float(tune["ramp_s"]), 0.0, 1.0))
+		_mat.set_shader_parameter("soft", float(tune["soft_px"]))
 		_ring_a = lerpf(0.55, 1.0, pulse)
 		_ring_pad = RING_PAD_PX + FLASH_GROW_PX * pulse
 		_place_card()
