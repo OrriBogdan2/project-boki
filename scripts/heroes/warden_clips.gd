@@ -424,8 +424,11 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
-	var gait := lerpf(walk, run, clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
-	_p("loco_rate/scale", clampf(spd / gait, 0.6, 1.5) if spd >= STILL else 1.0)
+	var run_share := clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0)
+	var gait := lerpf(walk, run, run_share)
+	# ("cadence": the run clip's rate over its planted-foot 1.0, for a hero whose source scurries)
+	var rate := clampf(spd / gait, 0.6, 1.5) * lerpf(1.0, float(lc.get("cadence", 1.0)), run_share)
+	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)
