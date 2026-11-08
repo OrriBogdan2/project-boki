@@ -8,14 +8,14 @@
 	},
 	"moves": {
 		"lmb": {"net": false, "fx": [
-			{"p": "flare", "size": 0.55, "grow": 1.3, "life": 0.1, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "flare", "size": 0.38, "grow": 1.3, "life": 0.08, "c": "main", "c2": "white", "c3": "deep"},
 			{"p": "bolt", "len": 1.4, "size": 0.45, "jag": 0.55, "life": 0.12, "c": "main", "c2": "hot", "c3": "deep"},
 			{"p": "star", "n": 3, "speed": 1.4, "spread": 1.0, "life": 0.18, "size": 0.08,
 				"c": "main", "c2": "white", "c3": "deep"}
 		]},
 		"lmb_trail": {"net": false, "fx": [
-			{"p": "ribbon", "size": 0.42, "life": 2.0, "tail": 0.12, "wave": 0.12, "c": "deep", "c2": "main", "c3": "char"},
-			{"p": "ribbon", "size": 0.14, "life": 2.0, "tail": 0.08, "c": "main", "c2": "white", "c3": "deep"}
+			{"p": "ribbon", "size": 0.62, "life": 2.0, "tail": 0.14, "wave": 0.16, "c": "deep", "c2": "main", "c3": "char"},
+			{"p": "ribbon", "size": 0.2, "life": 2.0, "tail": 0.09, "c": "main", "c2": "white", "c3": "deep"}
 		]},
 		"lmb_hit": {"net": false, "fx": [
 			{"p": "flare", "size": 0.75, "grow": 1.3, "life": 0.12, "c": "main", "c2": "white", "c3": "deep"},
