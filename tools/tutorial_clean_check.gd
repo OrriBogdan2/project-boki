@@ -26,7 +26,8 @@ func run(mn: Node) -> void:
 	for kind in ["real", "training"]:
 		var other := Match.new()
 		main.add_child(other)
-		other.start({"training": kind == "training", "no_drop": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0})
+		var o := {"training": kind == "training", "no_drop": true, "teams": 1, "squad": 1, "tier": 0}
+		other.start(o)
 		other.set_process(false)
 		var cd := _cd_after(other, 1.0)
 		ok(cd > 8.9, "%s match: the same cooldown has %.1f s left after 1 s" % [kind, cd])
