@@ -9,7 +9,7 @@ The jester on a spring, floating over his box. Stuns from range, drops a growing
 |---|---|
 | Class title | the Void Jester |
 | Base character | Motley, male |
-| Personality | Malgrave's court jester. He laughed the night the Hunters were sealed, so Malgrave sealed him in his own jester mask. The man behind it fell into the Void and came back as a jack-in-the-box: a jester on a brass spring, rising from a hovering box. He steals his victims' laughter, his bells ring only when he swaps, and he belongs to no one. |
+| Personality | Malgrave's court jester. He laughed the night the Hunters were sealed, so Malgrave sealed him in a toy box and threw it into the Void. He came back as a jack-in-the-box: a jester on a brass spring, rising from a hovering box. He steals his victims' laughter, his bells ring only when he swaps, and he belongs to no one. |
 
 <!-- /gen:profile -->
 

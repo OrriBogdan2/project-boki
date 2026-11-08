@@ -10,7 +10,7 @@ target eats the big shot. Spirit Walk carries her through rocks and barriers.
 |---|---|
 | Class title | the Red Stitch |
 | Base character | Lace, female |
-| Personality | Malgrave's royal mask-stitcher, who stitched the court's masks. She deserted and now hunts Malgrave's loyalists, leaving a red-threaded needle at every kill. Her own shadow came loose when she stitched her first Relic; it's only a wrong-looking shadow, not a pet. |
+| Personality | Malgrave's royal seamstress, who stitched the fallen into the court's Relics. She deserted and now hunts Malgrave's loyalists, leaving a red-threaded needle at every kill. Her own shadow came loose when she stitched her first Relic; it's only a wrong-looking shadow, not a pet. |
 
 <!-- /gen:profile -->
 
