@@ -45,7 +45,7 @@ static func did(id: String) -> bool:
 	return bool((state()["did"] as Dictionary).get(id, false))
 
 static func done_count() -> int:
-	return (state()["did"] as Dictionary).size()
+	return steps().filter(func(s): return did(String(s["id"]))).size()
 
 ## Can this step be the active one yet? Its "needs" are done; the last step waits for everything;
 ## "after_built" waits for the house to stand (a pinned Boki would stop building); without the
@@ -147,15 +147,11 @@ static func detect() -> void:
 	var cost := FarmSites.build_cost("house")
 	var wood := int(cost.get("wood", 0))
 	var stone := int(cost.get("stone", 0))
-	if HomeGather.has_tool("axe"):
-		mark("axe")
 	if FarmSites.have("wood") >= wood and wood > 0:
-		mark("axe")
 		mark("chop")
-	if HomeGather.has_tool("pickaxe") and FarmSites.have("stone") >= stone and stone > 0:
+	if FarmSites.have("stone") >= stone and stone > 0:
 		mark("stone")
 	if not FarmHob.house_entry().is_empty():
-		mark("axe")
 		mark("chop")
 		mark("stone")
 		mark("house")
@@ -171,7 +167,7 @@ static func mark(id: String) -> void:
 	if bool((st["did"] as Dictionary).get(id, false)) or step_def(id).is_empty():
 		return
 	st["did"][id] = true
-	if (st["did"] as Dictionary).size() >= steps().size():
+	if done_count() >= steps().size():
 		finish()
 	Save.save_game()
 
@@ -191,15 +187,6 @@ static func skip() -> void:
 	st["done"] = true
 	st["skipped"] = true
 	Save.save_game()
-
-## The tool a step hands over when it comes up (its "gives_tool"; the Market still sells it later).
-## Returns the tool's id if it was handed over just now, else "".
-static func give_step_tool(id: String) -> String:
-	var tool := String(step_def(id).get("gives_tool", ""))
-	if tool == "" or not bool(option("free_tools")) or HomeGather.has_tool(tool):
-		return ""
-	HomeGather.give_tool(tool)
-	return tool
 
 ## The buy step: enough gems for one seed, so nobody is stuck at the stall. Returns the gems added.
 static func give_seed_gems() -> int:

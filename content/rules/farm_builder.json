@@ -26,14 +26,14 @@
 		"call": "Hey! Over here!",
 		"call_offer": "Got a minute?",
 		"call_every_s": 9.0,
-		"intro_pan_s": 1.5,
-		"show_s": 1.6,
+		"intro_s": 2.7,
+		"show_s": 2.4,
 		"intro": [
 			{"text": "There you are! I'm Hob Brackenridge. I build things.", "pose": "wave"},
 			{"text": "This is your farm now. A bit bare, but we'll fix that."},
 			{"text": "That's the market stall. Sell what you grow, buy seeds.", "show": "stall"},
 			{"text": "First you need a house. That spot over there will do nicely.", "show": "house"},
-			{"text": "A house needs wood. Here, take an axe and chop a tree.", "show": "tree"}
+			{"text": "A house needs wood. Your axe will do: chop a tree.", "show": "tree"}
 		],
 		"offer": [
 			{"text": "By the way... I see you found a {mask} Relic."},
@@ -51,6 +51,6 @@
 		},
 		"build_menu": "Open the build menu",
 		"bye": "Bye",
-		"shows_doc": "A line's show: stall, house (the house or its spot), tree (the nearest tree), portal. Hob points at it and the camera looks for show_s seconds, then comes back."
+		"shows_doc": "A line's show: stall, house (the house or its spot), tree (the nearest tree), portal. Hob points at it for show_s seconds; the camera only drifts there (and back) when it is too far to be on screen."
 	}
 }

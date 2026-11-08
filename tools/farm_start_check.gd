@@ -158,7 +158,10 @@ func run(m: Node) -> void:
 	# ---------------------------------------------------------------- 4. chopping and mining
 	var hg: HomeGather = home.hg
 	home._close_panel()      # the welcome
-	Save.d["tools"] = []
+	ok(HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe")
+			and HomeGather.shop_goods().all(func(g): return int(g[3]) < 0 and String(g[6]) == "yours"),
+			"a new farm starts with the axe and the pickaxe, and the market lists them as yours, not for sale")
+	Save.d["tools"] = []      # (from here: a save from before, with no tools)
 	Save.d["mats"] = {"wood": 0, "stone": 0}
 	var ti: int = hg.nearest_wild(home.spots["house"], "tree")
 	ok(ti >= 0, "there are wild trees to chop")

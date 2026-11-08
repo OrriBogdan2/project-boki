@@ -169,21 +169,17 @@ func _tutorial_rules() -> void:
 	_stats()
 	ok(FarmTutorial.active() and FarmTutorial.current() == "hob", "a new farm starts with Hob calling you over")
 	FarmTutorial.event("hob")
-	ok(FarmTutorial.did("hob") and FarmTutorial.current() == "axe", "talking to him moves it on to the axe")
+	ok(HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe") and FarmTutorial.step_def("axe").is_empty(),
+			"a new farm starts with the axe and the pickaxe in hand: no step hands them over")
+	ok(FarmTutorial.did("hob") and FarmTutorial.current() == "chop", "talking to him moves it on to chopping")
 	ok(not FarmTutorial.available("house") and not FarmTutorial.available("expedition"),
 			"the house waits for the wood, the last step for all")
-	ok(FarmTutorial.give_step_tool("axe") == "axe" and HomeGather.has_tool("axe") and FarmTutorial.give_step_tool("axe") == "",
-			"the tutorial hands over the axe once (free_tools)")
-	FarmTutorial.detect()
-	ok(FarmTutorial.did("axe") and FarmTutorial.current() == "chop", "owning an axe finishes step 1: chop a tree")
 	Work.add_mat("wood", int(FarmSites.build_cost("house")["wood"]))
 	FarmTutorial.detect()
 	ok(FarmTutorial.did("chop") and FarmTutorial.current() == "stone",
 			"enough wood for the house finishes chopping; the rocks are next")
-	ok(FarmTutorial.give_step_tool("stone") == "pickaxe" and HomeGather.has_tool("pickaxe"),
-			"the rock step hands over a pickaxe")
-	ok(FarmTutorial.hint_text("stone").contains("stone") and FarmTutorial.world_text("stone") != "",
-			"it says what stone is for and marks a rock")
+	ok(FarmTutorial.hint_text("stone").contains("pickaxe") and FarmTutorial.world_text("stone") != "",
+			"it teaches the pickaxe and marks a rock")
 	ok(not FarmTutorial.available("house"), "the house waits until its stone is in hand too")
 	Work.add_mat("stone", int(FarmSites.build_cost("house")["stone"]))
 	FarmTutorial.detect()
@@ -272,9 +268,9 @@ func _tutorial_rules() -> void:
 	var untouched: bool = int(Save.d["gems"]) == g1 and JSON.stringify(Save.d["items"]) == inv1
 	ok(not FarmTutorial.active() and FarmTutorial.current() == "" and FarmTutorial.state()["skipped"] and untouched,
 		"skipping ends the prompts and grants or takes nothing")
-	var steps_ok := FarmTutorial.steps().size() == 12
+	var steps_ok := FarmTutorial.steps().size() == 11
 	steps_ok = steps_ok and FarmTutorial.steps().all(func(s): return not (s["hints"] as Dictionary).is_empty())
-	ok(steps_ok, "twelve steps, each with its hints")
+	ok(steps_ok, "eleven steps, each with its hints")
 	ok(not bool(FarmTutorial.option("skippable")),
 			"the owner's decision: the farm tutorial is not skippable (a data option)")
 	for key in ["tracker_replaces_day1", "player_swing", "end_gems", "free_order", "skippable"]:

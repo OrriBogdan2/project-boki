@@ -8,10 +8,9 @@
 		"skippable": false,
 		"house_cost_in": "farm_build.json build.house (wood and stone, spent as it goes up, and swings of labour)",
 		"free_order": true,
-		"free_tools": true,
 		"market_gems": true
 	},
-	"options_doc": "tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: holding the interact key near a site hammers (hold it: a hammer beat every HunterTool.TOOLS.hammer.period seconds), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and the rest can come in any order (meeting Hob comes first: he calls you over) (false: strictly in the listed order). skippable: shows a Skip button (the owner says the farm tutorial cannot be skipped on a new save). free_tools: a step with gives_tool hands that tool over (the axe, the pickaxe); the Market still sells them later. market_gems: the buy step tops the gems up to one seed's price so nobody gets stuck.",
+	"options_doc": "tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: holding the interact key near a site hammers (hold it: a hammer beat every HunterTool.TOOLS.hammer.period seconds), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and the rest can come in any order (meeting Hob comes first: he calls you over) (false: strictly in the listed order). skippable: shows a Skip button (the owner says the farm tutorial cannot be skipped on a new save). market_gems: the buy step tops the gems up to one seed's price so nobody gets stuck.",
 	"house_spot": {
 		"from": "landing",
 		"x": 0.0,
@@ -23,23 +22,9 @@
 	"build_wait_s": 30,
 	"steps": [
 		{
-			"id": "axe",
-			"needs": [
-				"hob"
-			],
-			"title": "Get an axe",
-			"hints": {
-				"go": "Here, take this axe. Trees give wood, and wood builds things."
-			},
-			"world": {
-				"go": ""
-			},
-			"gives_tool": "axe"
-		},
-		{
 			"id": "chop",
 			"needs": [
-				"axe"
+				"hob"
 			],
 			"title": "Chop trees for the house",
 			"hints": {
@@ -56,12 +41,11 @@
 			],
 			"title": "Mine rocks for the house",
 			"hints": {
-				"go": "Rocks give stone. Take this pickaxe and hold {interact} at a rock."
+				"go": "Rocks give stone. Hold {interact} at a rock to mine it with your pickaxe."
 			},
 			"world": {
 				"go": "Mine this rock"
 			},
-			"gives_tool": "pickaxe",
 			"gets": "stone"
 		},
 		{
@@ -250,14 +234,10 @@
 		},
 		"per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."
 	},
-	"tool_toasts": {
-		"axe": "Hob hands you an axe.",
-		"pickaxe": "And a pickaxe for the rocks, too."
-	},
 	"gems_toast": "Hob gives you %d gems to buy seeds",
 	"picked_say": {
 		"go": "Off to work!",
 		"wait": "Ready when there's work!"
 	},
-	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect); spot: per hint stage, what FarmSpotlight lights up (hub: a bottom-bar button id, world: the step's marker in the world, a Boki). Each target gets its full dimmed beat once, then only a soft ring."
+	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gets: a material that finishes the step (detect); spot: per hint stage, what FarmSpotlight lights up (hub: a bottom-bar button id, world: the step's marker in the world, a Boki). Each target gets its full dimmed beat once, then only a soft ring."
 }
