@@ -3217,6 +3217,19 @@ and green flashes on these moves replaced from the palette. Strips: ext/vfx-qual
 145/0 (20261108-230336-16461), health --strict OK. Left: the Shield Slam isn't in the reel (needs 50 Guard); LMB and dash
 still gold/orange in BjornFx; his model hides the dome's upper half at reel zoom.
 
+## 2026-11-08 feel (job 20261108-223039-a4, w2): READY vfx-cinder-polish
+READY ext/vfx-cinder-polish 89e74c9cb (stacked on ext/vfx-quality-base 9a9bb3b79: merge that first; no PR, gh is not on w2:
+https://github.com/OrriBogdan2/project-boki/compare/ext/vfx-quality-base...ext/vfx-cinder-polish). Cinder polish to the
+bar (docs/VFX_QUALITY.md, 28 -> 30). Embers: every HeroVfx emitter is seated on World.ground_at under it; a falling mote
+lands and skids instead of sinking, and every mote fades over its last 0.15 m above the ground (a soft particle by
+height, so gl_compatibility draws it too; shared, so all data-driven kits get it). Hold: an orange palm heat glow builds
+over 0.8 s of Torch Lance roaring and cools over 0.8 s after release. +63/-3 lines, no new files. Strips:
+ext/vfx-cinder-strips a75b62127 (shots/vfx-cinder/ashwick_<part>_before_after.png, top before / bottom after; jobq
+20261108-230336-16150 / 20261108-230640-12961). Checks: --ashwick-combo-check 121 PASS (new heat rise/cool checks),
+--hero-vfx-check OK (new "motes land on the ground"), health --strict OK. Note: ext/vfx-bulwark also edits
+hero_vfx.gd; my edits are three _seat() calls and one new func, so a conflict should be small. Left: the ground fix is
+subtle at reel zoom; Cinder Shot's pink-red body is off her orange signature (C stays 4).
+
 ## Nov 8 18:07 (owner): three stages is now the default
 Most evolving lines are now three stages (1 -> 2 -> 3). 15 new forms added; roster is 124 (ROSTER_100.html). Still two stages: Parasolth/Umbrathere, Thrumbird/Lyrewing, Gongibbon/Gongrowl, Echolop (branching), Ermink and Jarmit (Ink). 23 single-stage. Suggested level mapping: stage 2 at Grown (level 8), stage 3 at Elder (level 16). Please flag how many 3D models you can realistically take; 2D sheets are cheap.
 
