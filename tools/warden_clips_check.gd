@@ -9,7 +9,7 @@ extends RefCounted
 const DT := 1.0 / 60.0
 const MAX_TRIS := 15000         # S1: weapon and shield included
 const GRIP_TOL := 0.03          # m: the weapon's bone stays this close to where the hand holds it
-const PREFIX := {"breaker": ["bulwark", "bul_"]}
+const PREFIX := {"breaker": ["bulwark", "bul_"], "tarek": ["dolm", "breah_"]}
 const SKIP := ["bul_smash_late"]
 
 var bad := 0
@@ -50,7 +50,9 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	for k in moves:
 		want.append(String((moves[k] as Dictionary)["clip"]))
 	var lc: Dictionary = cfg["loco"]
-	want.append_array([lc["idle"], lc["stance"], cfg["land"]["clip"], cfg["weapon_out"]["clip"]])
+	want.append_array([lc["idle"], lc["stance"], cfg["land"]["clip"]])
+	if cfg.has("weapon_out"):
+		want.append(cfg["weapon_out"]["clip"])
 	want.append_array((lc["walk"] as Dictionary).values())
 	want.append_array((lc["run"] as Dictionary).values())
 	want.append_array([cfg["air"]["rise"], cfg["air"]["fall"], cfg["air"]["glide"]])
@@ -94,10 +96,13 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	for i in 40:
 		_play(m, an, sync, run_st, 1)
 		far = maxf(far, sk.get_bone_global_pose(foot).origin.distance_to(idle_f))
-	ok(far > 0.1, "%s: the run blend moves the feet (%.2f m)" % [art_name, far])
+	if art_name == "breaker":      # Tenzo's legs are rigid parts, not these bones
+		ok(far > 0.1, "%s: the run blend moves the feet (%.2f m)" % [art_name, far])
 	# every move: changes the pose, the weapon bone stays on the hand
 	var wp := WardenSkeleton.find(sk, "x_weapon")
-	var rest_off := (sk.get_bone_global_rest(hand).affine_inverse() * sk.get_bone_global_rest(wp)).origin
+	var rest_off := Vector3.ZERO
+	if wp >= 0:
+		rest_off = (sk.get_bone_global_rest(hand).affine_inverse() * sk.get_bone_global_rest(wp)).origin
 	var worst := 0.0
 	var worst_mv := ""
 	var still: Array = []
@@ -122,8 +127,13 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			still.append(k)
 		_play(m, an, sync, st, 12)
 	ok(still.is_empty(), "%s: each move's clip moves the hand (%s)" % [art_name, str(still)])
-	ok(worst <= GRIP_TOL, "%s: the weapon stays in the hand in every move (worst %.3f m, %s)"
-			% [art_name, worst, worst_mv])
+	if art_name == "breaker":      # Tenzo's fists are skinned in the body, nothing to keep in a hand
+		ok(worst <= GRIP_TOL, "%s: the weapon stays in the hand in every move (worst %.3f m, %s)"
+				% [art_name, worst, worst_mv])
+	if art_name == "tarek":
+		_tenzo(moves, lib)
+		m.free()
+		return
 	if art_name == "breaker":
 		_whirl(m, an, sync, sk, st)
 	# the weapon: one drawn; hidden when out of the hand; anchors on it
@@ -165,6 +175,17 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			tris += mesh.surface_get_array_index_len(si) / 3
 	ok(tris <= MAX_TRIS, "%s: %d triangles, the budget %d" % [art_name, tris, MAX_TRIS])
 	m.free()
+
+## Tenzo (source Tetra, docs/heroes/dolm.md timings): his punches run on the legs' stride, the LMB clips carry the
+## release beat the kit's delayed boulder uses, and the spine's clip outlasts the stone-row it is timed against.
+func _tenzo(moves: Dictionary, lib: AnimationLibrary) -> void:
+	for k in ["breah_throw", "breah_wind", "breah_punch"]:
+		ok((moves[k] as Dictionary).get("upper", "") == "moving", "tarek: %s keeps walking under the fist" % k)
+	var rel := float(Arch.def("dolm")["lmb"]["boulder"]["release"])
+	var keys: Array = (KMovesStone.MOVES["breah_throw"] as Dictionary)["keys"]
+	ok(keys.any(func(kk): return absf(float((kk as Array)[0]) - rel) < 0.03),
+			"tarek: the throw's whip key sits at the boulder's release (%.2f s)" % rel)
+	ok(lib.get_animation("lmb_throw").length >= rel + 0.1, "tarek: the throw clip outlasts its release")
 
 ## Item 137: the hammer on the sheet is 0.79 of his height (breaker_FINAL_sheet, breaker_weapons), neutral size both.
 func _hammer_scale(w: Node, sk: Skeleton3D) -> void:

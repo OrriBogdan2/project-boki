@@ -205,7 +205,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 | Slam resets on knock or kill | wiki | yes | removed in the data pass: the owner's tooltip data has no reset |
 | Allies hop over friendly rock walls by jumping against them | wiki (Rockwave), patch 1.01 | no | not built: the owner wants only the rock's own caster to climb it (review item 25 overrides the source and the data pass's ally climb); allies and foes are stopped, walking or jumping |
 | Tetraform: tap places it across the aim; hold and drag sets the angle | card (patch 1.01 notes), wiki | yes (ult f35-f44) | built on X; asserted `ult drag: ...` |
-| Tetraform rocks spawn after a short delay, centre-out, and slow nearby foes | card, wiki | yes (ult f45-f55) | built: 0.2s cracks, 0.4s rise, 35% slow 1s; asserted `ult beats: ...`, `ult: the rise slows ...` |
+| Tetraform rocks spawn after a short delay, centre-out, and slow nearby foes | card, wiki | yes (ult f45-f55) | built: 0.2s cracks, 0.8s rise (source: wall done by ~1.0s), 35% slow 1s; asserted `ult beats: ...`, `ult: the rise slows ...` |
 | Tetraform over the abyss makes temporary terrain | card, wiki | yes (guide 161-169s) | built as rocks, not tiles (owner, Nov 2026, reversing item 15): over the abyss the ridge's rocks are ground you can stand on while they last |
 | Tetraform can't be used to leave the arena bounds | patch 1.04 notes | no | built by placement: rocks only on legal ground (HeroZones.fits) |
 | Punched Tetraform rocks launch like any rock (Rocksweeping) | card, guide | yes | built (the punch sweep takes ult rocks); asserted |
@@ -248,6 +248,30 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 - Bond: the source sheet suggests 0.3 per slowed hunter and +0.15 per rock hit, capped at 0.8. The amounts are the main
   session's (KinBond.from_ult kinds hit/knock/kill, best event per cast), so a slowed hunter or a ridge rock hit inside 4s of
   the rise counts as a land of the matching kind.
+
+## Animation timing parity (ext/anim-time-tenzo)
+Measured in game against `briefs/hero-ref/breah.md` (one frame = 0.2 s; the file's "4 fps" line is a typo, INBOX and the task say 5). The GLB clips are baked copies of the `KMOVES` keys and the kit seeks them 1:1 (`kmove_t`), so a clip beat always equals the kit beat; the gaps were in what the kit did against the beat. Asserted in `--dolm-combo-check` (boulder release, spine rise) and `--warden-clips-check` (clip mapping, release key).
+
+| Move | Source (s) | Ours before | Ours after | Note |
+|---|---|---|---|---|
+| LMB tap: press to boulder leaving the hand | whip then release, under 0.2 | 0 (shot spawned on the press; clip whip at 0.13) | 0.13 (`lmb.boulder.release`) | fixed; cooldown and the 0.6 s cadence start on the press |
+| LMB tap: clip length | n/a | 0.4 | 0.4 | unchanged, recovery is the kit's `rate` |
+| LMB hold to release | 0.6 | tap 0.28 / full 0.9, impact at the release | same | the charge length is ours (owner parity pass), kept |
+| LMB moves with a fist out | walks while the fist recovers | clip took the whole body | `upper: "moving"` on `breah_throw`, `breah_wind`, `breah_punch` | fixed: legs keep the stride while moving, fist plays on top |
+| RMB charge | 0.8 to 1.2 | 0.45 (cap) | 0.45 | owner item 61 overrides |
+| RMB hop | 1 frame or less (about 0.2) | 0.6 arc | 0.6 | owner item 61; suggestion: a shorter hop |
+| RMB crater scorch | about 1.0 | 1.0 | 1.0 | ok |
+| Shift Rock Hop | about 0.4 | 0.3 per hop | 0.3 | owner item 111; inside one frame |
+| Shift roll range | 5 to 6 body heights (about 9 to 11 m) | 6 m | 6 | owner item 111; suggestion: a longer roll |
+| E Stone Row: flash to rocks | 0.2 | tell 0.2, clip slam 0.18 | same | ok |
+| X Spine: rocks rise (first to last) | about 0.8, wall done by 1.0 | 0.4 | 0.8 (`x.rise`) | fixed |
+| Blend in / out | not resolvable at 0.2 s a frame | 0.1 / 0.16 | same | left |
+
+Not in scope: the locked forward slam (owner item 61b) is not merged.
+
+Clip re-key the model needs (the unmerged `origin/ext/tarek-v2-model` rebuilds the GLB; this branch does not touch it):
+- `x_spine`: the baked heave sits at 0.55 to 0.7 s, written for the 0.4 s rise. With the 0.8 s rise the last rock stands at 1.0 s: hold the hunch to about 0.95 and move the heave to about 1.0 (the clip must then be at least 1.04 s).
+- `lmb_throw`: no re-key; its whip is at 0.13 and now matches the release.
 
 ## Animation moves (KMovesStone)
 | Ability | Moves | Strip |
