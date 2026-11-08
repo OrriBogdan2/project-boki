@@ -379,8 +379,6 @@ def gen_boki():
         body += table(["", ""], info)
         body += "\n\n- E ability: " + ability_line(k.get("active", ""))
         body += "\n- Auto ability (it casts this on its own): " + ability_line(k.get("auto", ""))
-        dr = k.get("dodge_rider")
-        if dr: body += "\n- On your dash: **%s**" % dr.get("name", "")
         mg = MERGE.get(k.get("merge", ""), {})
         if mg: body += "\n- Bond ultimate (merge): **%s** (%ss). %s" % (mg.get("name", ""), num(mg.get("duration", "")), mg.get("flavor", ""))
         paths = []

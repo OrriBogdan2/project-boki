@@ -27,12 +27,12 @@ func _init(kit: ArcherKit) -> void:
 func active() -> bool:
 	return t > 0.0
 
-func start(use_ex: bool) -> void:
+func start() -> void:
 	var dd := k.dash_def()
 	var dir := k.dash_dir()
 	var roll := float(dd.get("roll", 3.5))
 	var rt := float(dd.get("roll_t", 0.24))
-	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll"}, use_ex)
+	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll"})
 	k.play("pin_roll")
 	t = walk_time() + rt
 	total = t
