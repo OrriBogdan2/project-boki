@@ -42,7 +42,7 @@ func _ready() -> void:
 	_pad = MarginContainer.new()
 	_pad.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(_pad)
-	resized.connect(_fit_safe_area)
+	get_viewport().size_changed.connect(_fit_safe_area)
 	var root := UI.vbox(10)
 	_pad.add_child(root)
 	banner = UI.vbox(0)
@@ -152,13 +152,14 @@ func _pulse(left: float) -> void:
 ## Keeps the whole screen inside a title-safe margin, so the countdown shows at every window size:
 ## smaller windows get smaller digits, two Hunter columns and a narrower squad column.
 func _fit_safe_area() -> void:
-	var m := maxi(SAFE_MIN, int(size.y * SAFE_FRAC))
+	var win := get_viewport_rect().size
+	var m := maxi(SAFE_MIN, int(win.y * SAFE_FRAC))
 	for side in ["left", "right", "top", "bottom"]:
 		_pad.add_theme_constant_override("margin_" + side, m)
-	var narrow := size.x < NARROW_W
+	var narrow := win.x < NARROW_W
 	grid.columns = 2 if narrow else 3
 	side_col.custom_minimum_size.x = SIDE_NARROW if narrow else SIDE_WIDE
-	timer_label.add_theme_font_size_override("font_size", clampi(int(size.y * DIGITS_FRAC), DIGITS_MIN, TIMER_SIZE))
+	timer_label.add_theme_font_size_override("font_size", clampi(int(win.y * DIGITS_FRAC), DIGITS_MIN, TIMER_SIZE))
 
 func _unhandled_key_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.physical_keycode == KEY_V and not e.echo and not chat_in.has_focus():
