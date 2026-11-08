@@ -2785,3 +2785,4 @@ Everything is in briefs/art-refs/villain/:
 - Solmere: solmere_skyline.jpg and solmere_throne_room.jpg, in pearl and pink (the city matches the Queen)
 - the Heart's Chamber: hearts_chamber.jpg
 Corruption stages stay parked until the Nov 28 reminder. Next on the art side: the Grimble splash redo, the Sable splash fix, and the face-off without the heart.
+READY ext/models-v2-integ 5ec44812f (supersedes: ext/ryzz-v2-model 6355dee78, ext/grimble-v2-model 54df2f18a, ext/grimble-hook-arm-v2 315cdf2af, ext/claire-v2-model 7b2165a7c, ext/props-claire c34a78032, ext/tarek-v2-model fa5c036a8, ext/ostra-v2-model 76f589389, ext/pip-companions-v2 399f2b017, ext/vfx-pip-rebased 93b5e23fe, ext/vfx-pip, ext/fix-albert-blade-clip b23758516; on ext/mc-20261108-0030; skipped: breaker-v2-model (no READY), props-sable (contains sable-v2-model, owned by another integ); warden-model 157/0, clip-check 0, check 0, hero-combo 304/0, health --strict OK)
