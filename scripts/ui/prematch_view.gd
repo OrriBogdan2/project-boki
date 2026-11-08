@@ -4,6 +4,11 @@ extends Control
 
 const TIMER_SIZE := 88        # px, the countdown digits
 const SAFE_FRAC := 0.04       # fraction of the window height kept clear on every side (title-safe)
+const NARROW_W := 1240         # px, below this width the Hunter grid drops to two columns
+const SIDE_WIDE := 380         # px, the squad and chat column
+const SIDE_NARROW := 300       # px, the same column in a narrow window
+const DIGITS_FRAC := 0.1       # countdown digit size as a fraction of the window height
+const DIGITS_MIN := 48         # px, the smallest countdown digits
 const PULSE_RATE := 0.012      # radians per ms of the last-seconds throb (about 2 beats a second)
 const PULSE_GROW := 0.12       # the digits swell by this much at the top of a beat
 const SAFE_MIN := 24          # px, the least margin at any window size
@@ -17,6 +22,7 @@ var _pad: MarginContainer
 var _last_sec := -1
 var hint: Label
 var grid: GridContainer
+var side_col: VBoxContainer
 var squad_box: VBoxContainer
 var chat_log: VBoxContainer
 var chat_scroll: ScrollContainer
@@ -37,7 +43,6 @@ func _ready() -> void:
 	_pad.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(_pad)
 	resized.connect(_fit_safe_area)
-	_fit_safe_area()
 	var root := UI.vbox(10)
 	_pad.add_child(root)
 	banner = UI.vbox(0)
@@ -69,12 +74,10 @@ func _ready() -> void:
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	cols.add_child(sc)
 	grid = GridContainer.new()
-	grid.columns = 3
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	sc.add_child(grid)
-	var side_col := UI.vbox(12)
-	side_col.custom_minimum_size = Vector2(380, 0)
+	side_col = UI.vbox(12)
 	cols.add_child(side_col)
 	side_col.add_child(UI.section("Your squad"))
 	squad_box = UI.vbox(6)
@@ -101,6 +104,7 @@ func _ready() -> void:
 	talk_btn.button_up.connect(func(): _talk(false))
 	side_col.add_child(talk_btn)
 	_talk(false)
+	_fit_safe_area()
 	_fill_hunters()
 	_fill_squad()
 	_tick_label()
@@ -145,11 +149,16 @@ func _pulse(left: float) -> void:
 	timer_label.pivot_offset = timer_label.size * 0.5
 	timer_label.scale = Vector2.ONE * (1.0 + PULSE_GROW * beat)
 
-## Keeps the whole screen inside a title-safe margin, so the countdown shows at every window size.
+## Keeps the whole screen inside a title-safe margin, so the countdown shows at every window size:
+## smaller windows get smaller digits, two Hunter columns and a narrower squad column.
 func _fit_safe_area() -> void:
 	var m := maxi(SAFE_MIN, int(size.y * SAFE_FRAC))
 	for side in ["left", "right", "top", "bottom"]:
 		_pad.add_theme_constant_override("margin_" + side, m)
+	var narrow := size.x < NARROW_W
+	grid.columns = 2 if narrow else 3
+	side_col.custom_minimum_size.x = SIDE_NARROW if narrow else SIDE_WIDE
+	timer_label.add_theme_font_size_override("font_size", clampi(int(size.y * DIGITS_FRAC), DIGITS_MIN, TIMER_SIZE))
 
 func _unhandled_key_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.physical_keycode == KEY_V and not e.echo and not chat_in.has_focus():
