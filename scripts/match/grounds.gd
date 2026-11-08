@@ -8,6 +8,7 @@ extends RefCounted
 
 const ACT_R := 1.5            # [m] how close you stand to use a pedestal
 const SHOW_R := 6.5           # [m] a pedestal's name is drawn inside this
+const PED_GLOW := 0.3          # pedestal emission: a faint glow that keeps its colour under bloom (0.9 washed to white)
 const FALL_Y := -12.0         # [m] below this you fell off the map: back to the start (the abyss kills at -17)
 const KIND_COL := {
 	"arch": "ffb454", "kin": "8fe3c8", "gear": "c9a0ff", "item": "ff8a7a", "bot": "ff6a6a", "clear": "9aa0b4",
@@ -104,10 +105,10 @@ func _mat(col: Color) -> StandardMaterial3D:
 	var key := col.to_html()
 	if not _mats.has(key):
 		var sm := StandardMaterial3D.new()
-		sm.albedo_color = col.darkened(0.15)
+		sm.albedo_color = col
 		sm.emission_enabled = true
 		sm.emission = col
-		sm.emission_energy_multiplier = 0.9
+		sm.emission_energy_multiplier = PED_GLOW
 		_mats[key] = sm
 	return _mats[key]
 

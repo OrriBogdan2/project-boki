@@ -46,7 +46,8 @@ func run(main_node: Node) -> void:
 			if seen.has(s["kind"]):
 				continue
 			seen[s["kind"]] = true
-			P.teleport((s["c"] as Vector3) + Vector3(0, 0.5, 6.0))
+			var c: Vector3 = s["c"]
+			P.teleport(Vector3(c.x, m.world.ground_at(c.x, c.z + 1.5), c.z + 1.5))      # in the ring, on the perch
 			P.vel = Vector3.ZERO
 			await _ground("perch_" + String(s["kind"]))
 			if s["kind"] == "arch":
