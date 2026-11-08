@@ -1,7 +1,5 @@
 {
 	"desc": "Hob Brackenridge, the farm's builder (docs/decisions/0011-farm-builder-tutorial.md). He stands by the house; press interact to talk. Blueprints with a level or milestone in farm_build.json unlock for real only once Hob has drawn them up, so a level-up or milestone makes a 'new blueprints' toast and a mark over his head. Everything with no entry there is on offer from the start.",
-	"name": "Hob Brackenridge",
-	"short": "Hob",
 	"stand": {"along": 2.4, "side": 4.2, "desc": "Metres in front of the house centre and to its right, so he never blocks the door."},
 	"talk_reach": 2.4,
 	"hint_more": "Talk to Hob for more",

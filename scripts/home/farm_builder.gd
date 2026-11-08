@@ -10,11 +10,12 @@ extends RefCounted
 static func rules() -> Dictionary:
 	return Content.rules("farm_builder")
 
+## His names live with every NPC's in npc_talk.json.
 static func short_name() -> String:
-	return String(rules()["short"])
+	return String(Content.rules("npc_talk")["speakers"]["hob"]["short"])
 
 static func full_name() -> String:
-	return String(rules()["name"])
+	return String(Content.rules("npc_talk")["speakers"]["hob"]["name"])
 
 ## The saved state, made (or upgraded from a legacy marker) on the first look.
 static func state() -> Dictionary:

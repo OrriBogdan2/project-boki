@@ -10,12 +10,14 @@ var h
 var node: Node3D = null
 var mark: Label3D = null
 var arm: Node3D = null
+var beacon: NpcBeacon = null
 var t := 0.0
 var poll_t := 0.0
 var site_u := -1                 # the construction site you are hammering (deco uid)
 var pos := Vector3.INF
 
 const SITE_REACH := 2.2     # m beyond the site's half-size you can keep hammering from
+const MARK_Y := 2.95        # model units: the "!" floats here, over his name tag
 
 func _init(home) -> void:
 	h = home
@@ -52,6 +54,7 @@ func sync() -> void:
 	if not is_instance_valid(node):
 		node = _make_model()
 		h.add_child(node)
+		beacon = NpcBeacon.attach(node, "hob")
 	node.position = pos
 	var e := house_entry()
 	var face: Vector3 = HomeLayout.facing(int(e.get("r", 0)))
@@ -65,12 +68,15 @@ func tick(dt: float) -> void:
 	if arm:
 		var tapping := fmod(t, 7.0) < 2.8
 		arm.rotation.x = -0.9 + (maxf(0.0, sin(t * 2.2)) * 0.9 if tapping else 0.0)
+	var has_news := FarmBuilder.pending().size() > 0
 	if mark:
-		mark.visible = FarmBuilder.pending().size() > 0
-		mark.position.y = 2.75 + sin(t * 3.0) * 0.08
+		mark.visible = has_news
+		mark.position.y = MARK_Y + sin(t * 3.0) * 0.08
+	beacon.lit = String(h.interact.get("kind", "")) == "hob"
 	poll_t -= dt
 	if poll_t <= 0.0:
 		poll_t = 1.0
+		beacon.wants_arrow = has_news or FarmTutorial.current() == "hob"
 		if FarmBuilder.toast_due():
 			h._toast(String(rules()["toast"]))
 			Sfx.play("unlock", node.position, -8.0)
@@ -166,23 +172,23 @@ func live() -> Dictionary:
 	var period := HunterTool.period("hammer")
 	return {"u": site_u, "k": clampf(h.tw.swing_t / (period * HunterTool.IMPACT), 0.0, 1.0)}
 
+## Talking to him: his line and the blueprints he drew up, in the dialogue box, with a button on to the build menu.
 func talk() -> void:
 	var first := not bool(FarmBuilder.state().get("met", false))
 	var ids := FarmBuilder.draw_up()
 	Save.save_game()
 	FarmTutorial.event("hob")
-	var v: VBoxContainer = h._new_panel(FarmBuilder.full_name(), 540)
-	UI.subtitle(v, "Builder")
-	v.add_child(UI.para(FarmBuilder.line_for(ids, first), UI.T_BODY + 1, UI.INK))
+	var glad := first or not ids.is_empty()
+	var lines := [{"text": FarmBuilder.line_for(ids, first), "mood": "happy" if glad else "neutral"}]
 	if not ids.is_empty():
 		var names: Array = ids.map(func(i): return FarmUnlocks.name_of(String(i)))
-		v.add_child(UI.para("New blueprints: " + ", ".join(names), UI.T_BODY, UI.GOLD))
+		lines.append({"text": "New blueprints: " + ", ".join(names) + ".", "mood": "happy"})
 	else:
-		v.add_child(UI.para(String(rules()["menu_hint_empty"]), UI.T_SMALL, UI.MUTED))
-	UI.footer_primary(v, "Open the build menu", func():
+		lines.append({"text": String(rules()["menu_hint_empty"]), "mood": "neutral"})
+	h.npc_talk.open("hob", node, lines, "Open the build menu", func():
 		h._close_panel()
 		if h.hb and not h.hb.active:
-			h.hb.toggle(), 200)
+			h.hb.toggle())
 	if h.guide:
 		h.guide.refresh()
 
@@ -215,28 +221,28 @@ func _make_model() -> Node3D:
 	belt.height = 0.1
 	_part(belt, Color("2e2118"), Vector3(0, 0.72, 0), root)
 	var head := SphereMesh.new()
-	head.radius = 0.28
-	head.height = 0.56
-	_part(head, Color("e8bf98"), Vector3(0, 1.7, 0), root)
+	head.radius = 0.34
+	head.height = 0.68
+	_part(head, Color("e8bf98"), Vector3(0, 1.76, 0), root)
 	var brim := CylinderMesh.new()
-	brim.top_radius = 0.6
-	brim.bottom_radius = 0.6
-	brim.height = 0.05
-	_part(brim, Color("4a3220"), Vector3(0, 1.9, 0), root)
+	brim.top_radius = 0.68
+	brim.bottom_radius = 0.68
+	brim.height = 0.06
+	_part(brim, Color("4a3220"), Vector3(0, 2.02, 0), root)
 	var crown := CylinderMesh.new()
-	crown.top_radius = 0.24
-	crown.bottom_radius = 0.32
-	crown.height = 0.26
-	_part(crown, Color("4a3220"), Vector3(0, 2.02, 0), root)
+	crown.top_radius = 0.28
+	crown.bottom_radius = 0.37
+	crown.height = 0.3
+	_part(crown, Color("4a3220"), Vector3(0, 2.16, 0), root)
 	var band := CylinderMesh.new()
-	band.top_radius = 0.325
-	band.bottom_radius = 0.325
-	band.height = 0.06
-	_part(band, Color("e7b53c"), Vector3(0, 1.94, 0), root)
+	band.top_radius = 0.375
+	band.bottom_radius = 0.375
+	band.height = 0.07
+	_part(band, Color("e7b53c"), Vector3(0, 2.07, 0), root)
 	var beard := SphereMesh.new()
-	beard.radius = 0.22
-	beard.height = 0.36
-	_part(beard, Color("d8d4cc"), Vector3(0, 1.5, -0.14), root)
+	beard.radius = 0.25
+	beard.height = 0.4
+	_part(beard, Color("d8d4cc"), Vector3(0, 1.54, -0.17), root)
 	var shoulders := BoxMesh.new()
 	shoulders.size = Vector3(1.1, 0.22, 0.4)
 	_part(shoulders, Color("8f3220"), Vector3(0, 1.3, 0), root)
@@ -252,15 +258,6 @@ func _make_model() -> Node3D:
 	var head_h := BoxMesh.new()
 	head_h.size = Vector3(0.14, 0.14, 0.3)
 	_part(head_h, Color("8a8f98"), Vector3(0, 0, -0.8), arm)
-	var nm := Label3D.new()
-	nm.text = FarmBuilder.full_name()
-	nm.font_size = 40
-	nm.pixel_size = 0.0085
-	nm.outline_size = 12
-	nm.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	nm.no_depth_test = true
-	nm.position = Vector3(0, 2.45, 0)
-	root.add_child(nm)
 	mark = Label3D.new()
 	mark.text = "!"
 	mark.font_size = 90
@@ -269,7 +266,7 @@ func _make_model() -> Node3D:
 	mark.modulate = UI.GOLD
 	mark.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	mark.no_depth_test = true
-	mark.position = Vector3(0, 2.75, 0)
+	mark.position = Vector3(0, MARK_Y, 0)
 	mark.visible = false
 	root.add_child(mark)
 	return root
