@@ -1,0 +1,20 @@
+{
+ "id": "omen_draught",
+ "name": "Omen Draught",
+ "short": "Omen",
+ "icon": "clock",
+ "col": "c0a0ff",
+ "use": "drink",
+ "cd": 3.0,
+ "max": 2,
+ "bring": [
+  1,
+  1,
+  2
+ ],
+ "price": 40,
+ "desc": "Drink for 1s: for 30s your squad sees every Blight Warden and where the Blight is gathering.",
+ "time": 1.0,
+ "heal": 0.0,
+ "omen": 30.0
+}

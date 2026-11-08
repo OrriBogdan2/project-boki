@@ -1,0 +1,29 @@
+{
+ "id": "blight_flask",
+ "name": "Blight Flask",
+ "short": "Blight",
+ "icon": "burst",
+ "col": "7a4a9a",
+ "use": "fx",
+ "cd": 3.0,
+ "max": 2,
+ "bring": [
+  1,
+  1,
+  2
+ ],
+ "price": 50,
+ "desc": "Smashes into a patch of Blight at the spot you aim at: rivals in it burn and slow for 25s.",
+ "effects": [
+  {
+   "type": "zone",
+   "at": "aim",
+   "radius": 4.5,
+   "time": 25.0,
+   "every": 1.0,
+   "dmg": 6.0,
+   "slow": 1.0,
+   "color": "#8a4aba"
+  }
+ ]
+}

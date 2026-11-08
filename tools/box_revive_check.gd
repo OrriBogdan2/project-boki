@@ -69,6 +69,9 @@ func run(main: Node) -> void:
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
+	for k in m.kins.filter(func(x): return x.team == -1):
+		k.queue_free()
+		m.kins.erase(k)
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO

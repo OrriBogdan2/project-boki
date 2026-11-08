@@ -6,12 +6,17 @@
  "col": "8ff0c8",
  "use": "pad",
  "cd": 2.0,
- "max": 3,
+ "max": 2,
  "bring": [
   1,
   2,
-  3
+  2
  ],
  "price": 35,
- "desc": "Set down a pad. Anyone who steps on it is launched high. Lasts 20s."
+ "desc": "Set down a pad. After 2s it launches anyone who steps on it, high. It lasts 30s, or 10s after its first use.",
+ "arm": 2.0,
+ "life": 30.0,
+ "after": 10.0,
+ "push": 6.0,
+ "lift": 17.0
 }

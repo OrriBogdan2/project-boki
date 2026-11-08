@@ -1,0 +1,33 @@
+{
+ "id": "thorn_wall",
+ "name": "Thorn Wall",
+ "short": "Thorn",
+ "icon": "wall",
+ "col": "7fd06a",
+ "use": "fx",
+ "cd": 3.0,
+ "max": 5,
+ "bring": [
+  1,
+  2,
+  3
+ ],
+ "price": 40,
+ "desc": "Raises a wall of thorns in front of you for 20s. Rivals who touch it are cut and slowed.",
+ "effects": [
+  {
+   "type": "wall",
+   "at": "front",
+   "dist": 2.0,
+   "length": 6.0,
+   "hp": 200.0,
+   "time": 20.0,
+   "block": "enemy",
+   "color": "#7fd06a",
+   "touch": {
+    "dmg": 10.0,
+    "slow": 1.0
+   }
+  }
+ ]
+}
