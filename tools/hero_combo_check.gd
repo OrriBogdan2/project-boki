@@ -544,6 +544,57 @@ func _mage() -> void:
 	fails += ac.fails
 
 # ------------------------------------------------------------------ Vex
+## Items 144 and 144b: the Longneedle's aim locks at the press and turns at a capped rate, so a flick across the
+## screen moves the beam at most cap x charge time while a small adjustment still lands; the camera push-out
+## scales with the aim distance (none close in, the full 25% at the 18 m range).
+func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
+	var ed: Dictionary = K.e_def()
+	var cap_deg: float = float(ed["turn_deg_s"]) * float(ed["charge"])
+	var east := Vector2(1, 0)
+	var charge := func(aim_from: Vector3, aim_to: Vector3, mid: float) -> Array:
+		K.cd["e"] = 0.0
+		P.teleport(home)
+		ac.step(m, 0.1)
+		ac.aim_at(P, home + aim_from)
+		P.ak.use_e()
+		ac.step(m, 0.05)
+		ac.aim_at(P, home + aim_to)
+		ac.step(m, mid)
+		var held := rad_to_deg(absf(P.aim_dir().angle_to(east)))
+		var cursor := Vector2(P.inp["aim"].x - P.pos.x, P.inp["aim"].z - P.pos.z)     # from where she stands
+		ac.step(m, 0.7 - mid)
+		return [held, cursor]
+	var mid_deg: float = float(charge.call(Vector3(8, 0, 0), Vector3(-8, 0, 0), 0.2)[0])
+	var flick_deg := rad_to_deg(absf(K.needle_dir.angle_to(east)))
+	ok("Longneedle: the line shows the lagging aim, not the cursor, through the charge",
+			mid_deg > 5.0 and mid_deg < cap_deg * 0.6, "%.1f deg after 0.2 s" % mid_deg)
+	ok("Longneedle: a 180-degree flick at the press moves the beam at most %.0f degrees" % cap_deg,
+			K.needle.is_empty() and flick_deg <= cap_deg + 2.0 and flick_deg >= cap_deg * 0.7, "%.1f deg" % flick_deg)
+	var cursor: Vector2 = charge.call(Vector3(8, 0, 0), Vector3(8, 0, 2), 0.2)[1]
+	var nudge_deg := rad_to_deg(absf(K.needle_dir.angle_to(cursor)))
+	ok("Longneedle: a small tracking adjustment still lands on the cursor", nudge_deg <= 1.0,
+			"%.2f deg off" % nudge_deg)
+	var cam: CamRig = m.cam
+	var push := func(at_m: float) -> Array:
+		K.cd["e"] = 0.0
+		P.teleport(home)
+		ac.step(m, 0.1)
+		ac.aim_at(P, home + Vector3(at_m, 0, 0))
+		P.ak.use_e()
+		ac.step(m, 0.3)
+		var out := [cam.cast_zoom, cam.cast_pan.length()]
+		ac.step(m, 0.4)
+		return out
+	var near: Array = push.call(3.0)
+	ok("Longneedle: an aim at 3 m leaves the camera alone", float(near[0]) < 0.005 and float(near[1]) < 0.05,
+			"zoom %.3f, pan %.2f m" % near)
+	var mid: Array = push.call(11.0)
+	var far: Array = push.call(18.0)
+	ok("Longneedle: the push-out ramps with the aim distance, the full 25% at 18 m",
+			float(mid[0]) > 0.05 and float(mid[0]) < 0.2 and absf(float(far[0]) - float(ed["view_zoom"])) < 0.005
+			and float(far[1]) > 1.0,
+			"11 m zoom %.3f; 18 m zoom %.3f, pan %.2f m" % [mid[0], far[0], far[1]])
+
 func _gunslinger() -> void:
 	var r: Array = ac.setup("gunslinger", 5.0, "", true)
 	var m: Match = r[0]
@@ -724,6 +775,7 @@ func _gunslinger() -> void:
 	ac.step(m, 0.2)
 	ok("Longneedle: a stun cancels the charge", K.needle.is_empty() and ac.dmg(T) < 0.5)
 	P.stun_t = 0.0
+	_gunslinger_needle_aim(m, P, K, home)
 	# 6. Slipstep: goes where you move (not the aim), you fire through a tap too
 	P.teleport(home)
 	ac.step(m, 0.3)

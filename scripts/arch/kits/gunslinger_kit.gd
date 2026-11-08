@@ -9,8 +9,8 @@ extends ArchKit
 ## or the ground at the end: a cone shows back toward you for its fuse, then blasts, shoving
 ## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +90% to a Dazed foe, in big
 ## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
-## shooting. Longneedle: stand still while the line narrows, then a long beam through walls. A knock
-## gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
+## shooting. Longneedle: stand still while the line narrows, the aim turning only so fast, then a long beam
+## through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
 
 const EMBER := Color("ff9a5c")
 const HOT := Color("fff1c8")
@@ -19,6 +19,7 @@ const BRONZE := Color("b9732f")
 const SMOKE := Color("d9c2a8")       # the Longneedle's recoil smoke ring: warm, not white
 const SCRAPE := Color("6b4a2e")      # the slide's dust scrape under her
 const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
+const PUSH_EASE := 10.0              # 1/s; the view push-out follows the aim distance, settling in ~0.3 s, no jumps
 const SKID_LEN := 2.2                # m, the faint streaks at a slide's start
 const SKID_SPREAD := 0.28            # m off the path's centre line
 const SKID_WIDTH := 0.1
@@ -38,7 +39,7 @@ const SPIN_REST := 0.5               # s without a round before the next string 
 var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, wall, fuse, fuse0, range, out, y0}
 var burr_pool: Array = []      # their nodes, reused
-var needle := {}               # Longneedle's charge: {t}
+var needle := {}               # Longneedle's charge: {t, dir (the turn-capped aim), push (0..1 of the view push-out)}
 var knocked := {}
 var direct_hits := 0           # Burr Charges that struck a foe (tests)
 var rattles := 0               # Burr Charges that blew (tests)
@@ -577,7 +578,7 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 func cast_e() -> bool:
 	if not needle.is_empty(): return false
 	var ed := e_def()
-	needle = {"t": 0.0}
+	needle = {"t": 0.0, "dir": h.aim_dir(), "push": _push_want()}
 	e_t = float(ed["charge"]) + 0.1
 	m.sfx("vn_ion_charge", h.pos, -3.0)
 	play("gunslinger_e")
@@ -599,27 +600,53 @@ func _end_needle() -> void:
 	e_t = 0.0
 	AimKit.hide(h, "e")
 
+## While the Longneedle charges she aims along the capped line, not the cursor (ZERO otherwise: free).
+func aim_lock() -> Vector2:
+	return needle.get("dir", Vector2.ZERO)
+
 func _tick_needle(dt: float) -> void:
 	var ed := e_def()
 	needle["t"] = float(needle["t"]) + dt
 	if h.downed or h.stun_t > 0.0 or Hex.active(h):
 		_end_needle()
 		return
+	_turn_needle(dt)
 	var k := clampf(float(needle["t"]) / float(ed["charge"]), 0.0, 1.0)
 	# a bright wide line drawn full length at once, narrowing to a thin core as the cast completes
 	var wide := beam_width()
 	var lane := {"len": float(ed["range"]), "width": wide, "width_to": wide * 0.12, "k": k, "all": true}
 	lane.merge({"col": EMBER, "col2": HOT})
 	AimKit.lane(h, "e", lane)
+	needle["push"] = lerpf(float(needle["push"]), _push_want(), 1.0 - exp(-PUSH_EASE * dt))
 	if h.is_local() and m.cam:
-		m.cam.cast_view(h.aim_dir(), float(ed["view_zoom"]), float(ed["range"]))     # (only the caster's camera)
+		var push := float(needle["push"])
+		m.cam.cast_view(h.aim_dir(), float(ed["view_zoom"]) * push, float(ed["range"]) * push)   # (the caster's camera)
 	AimKit.charge(h, k, {"col": EMBER, "col2": HOT})
 	# an ember orb swells at the muzzle through the cast
 	if int(m.time * 20.0) != int((m.time - dt) * 20.0):
 		fx().star(_muzzle(h.aim_dir()), EMBER, HOT, 0.35 + 0.6 * k, 0.07)
 	if float(needle["t"]) >= float(ed["charge"]) + 0.03:          # (a beat at full so the full tick plays)
+		_fire_needle()                                              # along the capped aim, so before the lock lifts
 		_end_needle()
-		_fire_needle()
+
+## The locked aim turns toward the cursor at the data's capped rate (deg/s): a flick across the screen can't drag it.
+func _turn_needle(dt: float) -> void:
+	var want := _cursor()
+	if want.length() < 0.05:
+		return
+	var cur: Vector2 = needle["dir"]
+	var step := deg_to_rad(float(e_def()["turn_deg_s"])) * dt
+	needle["dir"] = cur.rotated(clampf(cur.angle_to(want), -step, step)).normalized()
+
+## The cursor relative to her on the ground: where she wants to aim, as against the capped aim she holds.
+func _cursor() -> Vector2:
+	var a: Vector3 = h.inp["aim"]
+	return Vector2(a.x - h.pos.x, a.z - h.pos.z)
+
+## How much of the view push-out this aim distance asks for: none inside view_near_m, all of it at full range.
+func _push_want() -> float:
+	var ed := e_def()
+	return smoothstep(float(ed["view_near_m"]), float(ed["range"]), _cursor().length())
 
 ## Where the Longneedle leaves the rifle: ahead of her at the barrel's height.
 func _muzzle(d: Vector2) -> Vector3:
