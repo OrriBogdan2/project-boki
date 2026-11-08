@@ -85,6 +85,7 @@ She will become a playable character eventually. Make a turnaround (`malgrave_tu
 
 ### 5. The Auburn Knights: owner redirect (Nov 8, 00:08 ET)
 The deliverable is now **one iconic armour set** worn by all of them, designed from the Queen's look. **Lore: there are always exactly 7 Auburn Knights.** This replaces the basic-knight turnaround below.
+**LOCKED (owner, Nov 8, 00:14 ET):** `villain/auburn_knight_armor.jpg`. The helm has a porcelain mask face (her gold scale crest and crimson swirls, pink-red eyes) and a white-and-pink feather plume. The plate is crimson with pearl-white panels and gold trim, with rose pauldrons, a white rose on the breastplate and a pearl scale skirt. A crimson cape with a pearl lining. A white kite shield with a gold serpent crest, and a gold-hilted dueling sword. Explorations: `explorations/auburn_knight_armor_A.jpg`, and `_B_twin_serpent_shield.jpg` (its twin-serpent infinity crest could replace the shield crest later).
 
 ### 5 (original brief). An Auburn Knight
 - **Look:** the dress of the king's guard: red-and-gold plate, a red cloak and banner, and the Solmere crest.

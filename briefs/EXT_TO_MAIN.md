@@ -2770,3 +2770,6 @@ The alternates (outfits, splashes and a portrait) are in villain/malgrave_alts/ 
 ## 2026-11-08 00:12 ET (art + lore): the Queen's art is done; Auburn Knights direction
 The Queen's art set is complete; see the note above. Next is the Auburn Knights, with one iconic armour set based on her look and shared by all of them. New lore from the owner: **there are always exactly 7 Auburn Knights.** Please add this to the lore files.
 READY ext/lace-tall-climb 8b684f259 (Lace tall-ledge climb was already built via climb_tall; added combo-check asserts Lace climbs a double-high ledge and Vex cannot, archer doc rows fixed)
+
+## 2026-11-08 00:16 ET (art): Auburn Knight armour LOCKED
+briefs/art-refs/villain/auburn_knight_armor.jpg is the shared armour of the 7 Auburn Knights. Their helms have faces made from the Queen's porcelain mask, with glowing pink-red eyes. The plate is crimson and pearl with gold trim and rose motifs. The shield is white with a gold serpent crest, and they carry gold-hilted dueling swords.
