@@ -389,3 +389,7 @@ Abilities you use twice (recasts: Ostra Brimseed pop, Tender Hearthlight throw, 
 - **Farm tutorial: 12 steps -> about 5.** Keep: chop a tree, place the house, feed your Boki, plant a crop, start an expedition. Stone, hammer, tasks, buy, sell and the hob become first-time hints or Goals-tracker entries. Tools are simply given.
 - Both tutorials always have a visible Skip, and a skipped player loses nothing they need (house placed, starting tools given).
 - **Farming is optional.** A player who doesn't want to farm can (a) put Boki on jobs (chop, mine, water, harvest, cook, sell) so the farm runs itself, including while away (offline progress, capped), and (b) turn on **Auto-farm** in the farm menu: one toggle that assigns idle Boki to the needed jobs, auto-harvests, replants, feeds and sells the surplus, at a small efficiency cost versus doing it by hand. Farming by hand stays the best yield, never required.
+
+## 2026-11-08 owner (playtest): hunter-pick countdown 30s and impossible to miss
+- The pre-match lobby / pick-your-hunter countdown is **30 s** (was 90, scripts/match/prematch.gd DURATION; overlay text too). A tester had to resize his window to even see the 1:30 timer.
+- The timer is big, top centre, inside the safe area at every resolution and aspect (720p to ultrawide, windowed and small windows): "PICK YOUR HUNTER 0:30". Ticks each second for the last 10 s, pulses red in the last 5 s; if no pick by 0, your last/default hunter is locked in and the screen says so.
