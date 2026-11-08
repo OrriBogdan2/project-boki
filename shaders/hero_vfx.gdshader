@@ -231,13 +231,13 @@ vec4 dome(vec2 uv, float facing) {
 	float foot = 1.0 - smoothstep(0.0, 0.1, uv.y);
 	float sheen = pow(1.0 - facing, 2.0);
 	vec2 p = vec2(x * 10.0, uv.y * 3.5) + seed;
-	float seam = 1.0 - smoothstep(0.0, 0.09, cracks(p));
+	float joint = 1.0 - smoothstep(0.0, 0.09, cracks(p));
 	float wave = smoothstep(0.75, 1.0, sin((uv.y * 1.5 - TIME * 0.7) * 3.14159));   // a band of light climbing it
 	float broken = smoothstep(0.15, 0.9, life) * step(1.0 - life, h21(floor(p)));
-	float glow = halo * 1.1 + foot * 0.5 + sheen * 0.3 + seam * (0.1 + wave * 0.3) + shine * (0.25 + seam * 0.6);
-	float a = clamp(0.06 + glow * 0.55 + broken * seam * 0.7, 0.0, 1.0);
+	float glow = halo * 1.1 + foot * 0.5 + sheen * 0.3 + joint * (0.1 + wave * 0.3) + shine * (0.25 + joint * 0.6);
+	float a = clamp(0.06 + glow * 0.55 + broken * joint * 0.7, 0.0, 1.0);
 	vec3 c = mix(col.rgb, col2.rgb, clamp(halo + shine * 0.5, 0.0, 1.0)) * glow;
-	return vec4(mix(c, col3.rgb, broken * seam), a);
+	return vec4(mix(c, col3.rgb, broken * joint), a);
 }
 
 void fragment() {
