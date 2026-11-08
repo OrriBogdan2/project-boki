@@ -391,13 +391,6 @@ func move_k() -> float:
 	return k
 
 # ------------------------------------------------------------------ RMB: Heavy Shot
-## The Heavy Shot's cooldown drops by a flat "cd_per_rank" seconds a rank; the other slots keep the shared rule.
-func cd_k(slot: String) -> float:
-	if slot != "sec":
-		return super.cd_k(slot)
-	var cut := float(rmb_def().get("cd_per_rank", 3.0)) * float(rank("sec") - 1)
-	return 1.0 - cut / float(rmb_def()["cooldown"])
-
 ## The press always starts a draw (in the air too): the Heavy Shot has no tap and no air variant.
 func press_rmb() -> void:
 	if busy():

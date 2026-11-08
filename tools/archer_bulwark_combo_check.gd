@@ -364,7 +364,30 @@ func _archer_combos() -> void:
 		) < 0.01,
 		"cds %s reaches %s" % [str(cds), str(reaches)]
 	)
+	# upgrade parity (docs/heroes/archer.md): damage and the other two slots
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.05
+	var up: Array = []
 	P.slot_lv["sec"] = 1
+	P.slot_lv["kin"] = 1
+	var p1 := K.power("sec")
+	var pk1 := K.power("kin")
+	for rk in [1, 2, 3]:
+		P.slot_lv["sec"] = rk
+		P.slot_lv["dash"] = rk
+		P.slot_lv["kin"] = rk
+		up.append([
+			K.power("sec") / p1, K.power("kin") / pk1,
+			K.dash_def()["cd"] * K.dash_k(), K.e_def()["cooldown"] * K.cd_k("kin"),
+		])
+	ok("upgrade parity: Heavy Shot damage +20% / +40%", near.call(up[1][0], 1.2) and near.call(up[2][0], 1.4), str(up))
+	ok("upgrade parity: Spirit Walk recharge 9.5 -> 8.5 -> 7.5",
+			near.call(up[0][2], 9.5) and near.call(up[1][2], 8.5) and near.call(up[2][2], 7.5), str(up))
+	ok("upgrade parity: Hail Wall cooldown 15 -> 13 -> 9 and damage +30% / +60%",
+			near.call(up[1][3], 13.0) and near.call(up[2][3], 9.0)
+			and near.call(up[1][1], 1.3) and near.call(up[2][1], 1.6), str(up))
+	P.slot_lv["sec"] = 1
+	P.slot_lv["dash"] = 1
+	P.slot_lv["kin"] = 1
 	# Hail Wall, then a hold-only RMB: the old tap-snare root is gone
 	K.cd["e"] = 0.0
 	step(m, 5.0)

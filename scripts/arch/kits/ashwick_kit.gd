@@ -644,7 +644,7 @@ func _cloak_blast() -> void:
 	blasts += 1
 	var col := col_of(ed)
 	var hit := 0
-	var shield_k := float(ed["rank3_shield_k"]) if rank("kin") >= 3 else 1.0
+	var shield_k := rank_k("rank_shield", "kin", 1.0)
 	var r := float(ed["radius"])
 	fx.sunburst(h.pos, r, Color("ff5a1a"), Color("ffd060"), 0.3)        # no wider than the blast reaches
 	fx.scorch(h.pos, r * 0.75, 1.6)
