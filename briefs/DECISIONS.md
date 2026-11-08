@@ -347,3 +347,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - Boki do not die of neglect for now (flag natural_death: false): hungry/sick/weak at worst, recover with care. Non-neglect losses unchanged.
 - Hunter ability colours: Vex = green fire, Sparkle = pink, Tenzo = blue; every Hunter's abilities are colour-coded to them.
 - Movement: air control as SUPERVIVE (accelerate toward input, strong counter-steer, drag above cap, never overwrite air velocity); glide start adds no speed; Shift cancels into glide instantly for every Hunter. All movement/feel numbers in one tuning file.
+
+## 2026-11-08 owner: Extraction is always trios, 10 teams
+Extraction matches are ALWAYS squads of 3 and ALWAYS 10 teams (30 hunters); bots fill missing slots. No duo or solo extraction. Job extraction-trios-10-1108.
