@@ -62,7 +62,7 @@ const PLANT_LEAN := 0.25
 ## the aegis wall: radius (m), half its arc (rad), height (m) and how far its top leans out (m); its chord is
 ## about the wall's 4.2 m, its height 30% over the old slab's
 const RISE_T := 0.2
-const AEGIS_OUT := 0.3         # m the dome's foot stands past the wall line, so his body doesn't hide it
+const AEGIS_OUT := 0.3         # m the dome's foot stands past the wall line (his body hid it)
 const PUSH_FLASH_T := 0.2
 
 var h: Hunter
@@ -363,7 +363,8 @@ func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
 
 # ------------------------------------------------------------------ the aegis
 ## Follows the raised shield (the verbs wall dict): its node is hidden and his dome drawn over it, the curve's
-## centre behind the wall's midpoint so its apex stands AEGIS_OUT past the wall line. `hurt` 0..1 cracks it; `armed` pulses it.
+## centre behind the wall's midpoint so its apex stands AEGIS_OUT past the wall line. `hurt` 0..1 cracks it;
+## `armed` pulses it.
 func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 	var nd: Node3D = w.get("node")
 	if nd and is_instance_valid(nd):
@@ -375,8 +376,8 @@ func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 	var dome := _aegis()
 	var c := mid + dir * (AEGIS_OUT - aegis_size.x)
 	dome.visible = true
-	var size := Vector3(aegis_size.x, aegis_size.y * rise_k, aegis_size.z)
-	dome.global_transform = Transform3D(Basis(Vector3.UP, atan2(dir.x, dir.y)) * Basis.from_scale(size),
+	var extent := Vector3(aegis_size.x, aegis_size.y * rise_k, aegis_size.z)
+	dome.global_transform = Transform3D(Basis(Vector3.UP, atan2(dir.x, dir.y)) * Basis.from_scale(extent),
 		Vector3(c.x, float(w["y"]) + 0.02, c.y))
 	KitShaders.param(dome, "life", hurt)
 	var pulse := 0.3 + 0.2 * sin(Time.get_ticks_msec() * 0.012) if armed else 0.0
