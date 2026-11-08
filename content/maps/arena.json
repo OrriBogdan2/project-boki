@@ -1,26 +1,12 @@
-{
- "id": "arena",
- "name": "The Arena",
- "size": 52,
- "seed": 31,
- "notes": "The practice arena: one round floor ringed by low ruin walls with four gates, four 2x2 stone blocks to slam people into, a raised dais on the north side for high ground, two patches of tall grass, and a small bench islet to the south across a short bridge (where the generator puts spawn points; the arena itself teleports you to the floor). No monsters, chests or breakables are spawned on it.",
- "islands": [
-  {"id": "floor", "name": "The Arena", "role": "grove", "region": 0, "poi": [26, 26], "noise": 0.04, "biome": "meadow", "danger": 0, "no_rocks": true,
-   "shapes": [{"circle": [26, 26], "r": 14, "lv": 0}, {"rect": [21, 13, 31, 17], "lv": 1}],
-   "sheer": [],
-   "walls": [{"ring": [26, 26], "r": 12.2, "gates": 4, "gate_w": 3.5}],
-   "rocks": [[20, 20, 21, 21], [31, 20, 32, 21], [20, 31, 21, 32], [31, 31, 32, 32]],
-   "bush": [[16, 30, 1.6], [36, 30, 1.6]]},
-  {"id": "bench", "name": "Bench", "role": "grove", "region": 1, "poi": [26, 47], "noise": 0.04, "biome": "meadow", "danger": 0, "no_rocks": true,
-   "shapes": [{"circle": [26, 47], "r": 4.2, "lv": 0}], "sheer": []}
- ],
- "bridges": [
-  {"name": "Bench Bridge", "a": "floor", "b": "bench", "from": [26, 39], "to": [26, 44], "r": 1.4}
- ],
- "winds": [],
- "pads": [],
- "updrafts": [],
- "outposts": [],
- "chokepoints": [],
- "glides": []
-}
+
+ {"id":"arena","name":"Training Grounds","size":144,"seed":31,"notes":"The Training Grounds (--arena): the old Training Room (walled ring, dummies, sparring bot) in the middle of a big open floor, a duel ring to the east, and five sky perches (Hunters, Gear, Belt items, Bots, Boki) reached by one-way pads and left by gliding. Pads fire up; glide back down.","islands":[
+ {"id":"floor","name":"Training Grounds","role":"grove","region":0,"poi":[72,72],"noise":0.04,"biome":"meadow","danger":0,"no_rocks":true,"shapes":[{"circle":[72,72],"r":31,"lv":0},{"rect":[67,59,77,63],"lv":1}],"sheer":[],"walls":[{"ring":[72,72],"r":12.2,"gates":4,"gate_w":3.5},{"ring":[93,72],"r":6.2,"gates":2,"gate_w":3.0}],"rocks":[[66,66,67,67],[77,66,78,67],[66,77,67,78],[77,77,78,78],[50,50,51,51],[94,50,95,51],[50,94,51,95],[94,94,95,95]],"bush":[[62,76,1.6],[82,76,1.6],[48,72,2.0],[96,90,2.0],[56,92,2.0],[90,52,2.0]]},
+ {"id":"bench","name":"Bench","role":"grove","region":0,"poi":[72,113],"noise":0.05,"biome":"meadow","danger":0,"no_rocks":true,"shapes":[{"circle":[72,113],"r":4.2,"lv":0}],"sheer":[]},
+ {"id":"hunters","name":"Hunter Loft","role":"perch","region":0,"poi":[72.0,22.0],"noise":0.05,"biome":"storm","danger":0,"no_rocks":true,"shapes":[{"circle":[72.0,22.0],"r":7,"lv":11}],"sheer":[],"perch":true},
+ {"id":"gear","name":"Gear Loft","role":"perch","region":0,"poi":[119.6,56.5],"noise":0.05,"biome":"ember","danger":0,"no_rocks":true,"shapes":[{"circle":[119.6,56.5],"r":10,"lv":12}],"sheer":[],"perch":true},
+ {"id":"items","name":"Belt Loft","role":"perch","region":0,"poi":[101.4,112.5],"noise":0.05,"biome":"bloom","danger":0,"no_rocks":true,"shapes":[{"circle":[101.4,112.5],"r":7,"lv":13}],"sheer":[],"perch":true},
+ {"id":"bots","name":"Bot Pen","role":"perch","region":0,"poi":[42.6,112.5],"noise":0.05,"biome":"gloom","danger":0,"no_rocks":true,"shapes":[{"circle":[42.6,112.5],"r":6.5,"lv":11}],"sheer":[],"perch":true},
+ {"id":"boki","name":"Boki Roost","role":"perch","region":0,"poi":[24.4,56.5],"noise":0.05,"biome":"frost","danger":0,"no_rocks":true,"shapes":[{"circle":[24.4,56.5],"r":6.5,"lv":12}],"sheer":[],"perch":true}],
+"bridges":[{"name":"Bench Bridge","a":"floor","b":"bench","from":[72,101],"to":[72,109],"r":1.4}],"winds":[],
+"pads":[["floor","hunters","up"],["floor","gear","up"],["floor","items","up"],["floor","bots","up"],["floor","boki","up"]],"updrafts":[],"outposts":[],"chokepoints":[],"glides":[["hunters","floor"],["gear","floor"],["items","floor"],["bots","floor"],["boki","floor"],["hunters","gear"],["gear","items"],["items","bots"],["bots","boki"],["boki","hunters"]],
+"grounds":{"home":[72.5,79.5],"bot":[72.5,65.5],"dummies":[["still",69.5,72.5,"light"],["strafe",75.5,72.0,"medium"],["heavy",76.2,68.8,"heavy"]],"duel":[93,72],"stations":[{"kind":"arch","at":[72.0,22.0],"ring":4.6,"island":"hunters"},{"kind":"gear","at":[119.6,56.5],"ring":7.4,"island":"gear"},{"kind":"item","at":[101.4,112.5],"ring":4.8,"island":"items"},{"kind":"bot","at":[42.6,112.5],"ring":4.4,"island":"bots"},{"kind":"kin","at":[24.4,56.5],"ring":4.6,"island":"boki"}]}}

@@ -57,6 +57,7 @@ func pin() -> void:
 	_pin_draw_pose(m, P, T, K)
 	_pin_heavy(m, P, T, K, home, lv)
 	_pin_dash(m, P, T, K)
+	_pin_two_charges(m, P, K, home)
 	await done(m)
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var bad: int = await flow.combos_of(main, "archer")
@@ -462,14 +463,15 @@ func bjorn() -> void:
 	await done(m)
 	await _bjorn_abyss()
 
-## #10: the auto attack recovers 10-15% faster than before (0.55 s throw, 0.7 s swing, 0.25 s recall lock).
+## #10: the auto attack recovers 10-15% faster than before (0.7 s swing, 0.25 s recall lock). The throw moved on
+## to the source card's 0.45 s (parity item 12, PARITY FIRST), which is 18% under the old 0.55 s.
 func _bjorn_cadence(_m: Match, _P: Hunter, _T: Hunter, K: BulwarkKit) -> void:
 	var md := K.lmb_def()
 	var tr := float(md["throw_rate"])
 	var sr := float(md["smash_rate"])
 	var rl := float(md["recall_lock"])
-	ok("bjorn auto: the throw, the swing and the recall lock recover 10-15% faster",
-		tr <= 0.55 * 0.90 and tr >= 0.55 * 0.85 and sr <= 0.7 * 0.90 and sr >= 0.7 * 0.85 and rl <= 0.25 * 0.90
+	ok("bjorn auto: the throw is the source card's 0.45 s, the swing and the recall lock recover 10-15% faster",
+		absf(tr - 0.45) < 0.001 and sr <= 0.7 * 0.90 and sr >= 0.7 * 0.85 and rl <= 0.25 * 0.90
 			and rl >= 0.25 * 0.85,
 		"throw %.3f swing %.3f lock %.3f" % [tr, sr, rl])
 	var tail := 0.0
@@ -697,8 +699,8 @@ func _mode(hero: String, slot: String, in_air: bool) -> String:
 ## #32 / #35 for Hem: a press during the roll is carried, RMB / E / X work at once; item 51: a draw carries
 ## through a dash (Shift mid-draw rolls at once).
 func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
-	ok("pin dash table: LMB buffers, RMB / E / X fire, a draw carries through a dash",
-		_mode("archer", "lmb", false) == "buffer" and _mode("archer", "lmb", true) == "buffer"
+	ok("pin dash table: LMB, RMB / E / X fire (the source is silent), a draw carries through a dash",
+		_mode("archer", "lmb", false) == "fire" and _mode("archer", "lmb", true) == "fire"
 		and _mode("archer", "rmb", false) == "fire" and _mode("archer", "e", false) == "fire"
 		and _mode("archer", "x", false) == "fire"
 		and DashFlow.into_dash_of("archer", "lmb").get("mode") == "fire"
@@ -715,7 +717,7 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		P.inp["fire"] = true
 		m.step(DT)
 	step(m, 0.8, _let_go.bind(P))
-	ok("pin dash > LMB: a tap during the roll is not lost, the arrow goes when the roll ends",
+	ok("pin dash > LMB: a tap during the roll draws and looses (no buffering)",
 		rolling and K.draw.loosed_at > loosed0, "rolling %s loosed %.2f -> %.2f" % [rolling, loosed0, K.draw.loosed_at])
 	step(m, 1.0)
 	P.dashes = P.max_dashes()
@@ -732,6 +734,46 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	step(m, 0.5)
 	ok("pin dash > RMB and E: both start during the dash", rolling and rmb_ok and e_ok, "rmb %s e %s" % [rmb_ok, e_ok])
 	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.28, "pin_flick": 0.22})
+
+## Owner item 146: Spirit Walk has 2 charges (the HUD slot too); a third press waits for the recharge.
+func _pin_two_charges(m: Match, P: Hunter, K: ArcherKit, home: Vector3) -> void:
+	step(m, 1.0)
+	K.spirit.end("time")
+	P.dashes = P.max_dashes()
+	P.slot_lv["dash"] = 1
+	var info := P.slot_info("dash")
+	var got := "max %s info %s/%s" % [P.max_dashes(), info["charges"], info["max_charges"]]
+	ok("pin dash: 2 charges, both on the HUD slot (data roll 4 m)",
+		int(P.max_dashes()) == 2 and int(info["charges"]) == 2 and int(info["max_charges"]) == 2
+		and absf(float(K.dash_def()["roll"]) - 4.0) < 0.001, got)
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.inp["move"] = Vector2(-1, 0)
+	P.inp["fire"] = false
+	aim_at(P, home + Vector3(-6, 0, 0))
+	var x0 := P.pos.x
+	P.do_dash()
+	step(m, 0.4)
+	var d1 := x0 - P.pos.x
+	K.spirit.end("time")
+	var left := P.slot_info("dash")
+	P.do_dash()
+	step(m, 0.4)
+	K.spirit.end("time")
+	var both := "left %s dashes %.2f roll %.1f m" % [left["charges"], P.dashes, d1]
+	ok("pin dash: two presses back to back both roll; the first goes about 4 m",
+		P.dashes < 0.1 and int(left["charges"]) == 1 and d1 > 3.5, both)
+	var x1 := P.pos.x
+	P.do_dash()
+	step(m, 0.4)
+	var third := x1 - P.pos.x
+	var waits: bool = not K.spirit.active() and P.dashes < 1.0 and K.st.get("last_dash") == "flick"
+	var seen := "moved %.1f dashes %.2f" % [third, P.dashes]
+	ok("pin dash: the third press is only the shared long dash", waits, seen)
+	step(m, float(K.dash_def()["cd"]) + 0.5, func(): P.inp["move"] = Vector2.ZERO)
+	var back := int(floor(P.dashes + 0.001))
+	ok("pin dash: after the recharge one charge is back", back == 1, "dashes %.2f" % P.dashes)
+	P.inp["move"] = Vector2.ZERO
 
 ## into_dash.x for Mossy: Shift while planted for Faultline isn't lost, it goes when the plant ends.
 func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:

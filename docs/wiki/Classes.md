@@ -4,9 +4,9 @@ A class is a whole character: its own dash, a passive with a resource it builds,
 click), a right-click ability with several variants, a utility on E and an ultimate on R. There are
 twelve, four in each weight class:
 
-- **Light:** [Lace](Class-Red-Stitch.md) (pin people, then the big shot), [Neve](Class-Snowglide.md) (skate on ice, chill foes, shelter the squad behind ice), [Sparkle](Class-Storm-Chaser.md) (load Sparks, then Wirerun through them) and [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset).
+- **Light:** [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset), [Lace](Class-Red-Stitch.md) (pin people, then the big shot), [Sparkle](Class-Storm-Chaser.md) (load Sparks, then Wirerun through them) and [Neve](Class-Snowglide.md) (skate on ice, chill foes, shelter the squad behind ice).
 - **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Meeko](Class-Dawnfox.md) (heal, carry the downed), [Tenzo](Class-Stone-Seer.md) (raise rocks, punch them into the fight) and [Motley](Class-Void-Jester.md) (swell, plant a seed, trade places).
-- **Heavy:** [Kael](Class-Unbroken.md) (rage, chain in, crush), [Cinder](Class-Flame-Queen.md) (build Char, flash foes over), [Grimble](Class-Scrap-King.md) (haul a foe in, drop the anchor) and [Mossy](Class-Barnacle-Knight.md) (block, then smash them into walls).
+- **Heavy:** [Kael](Class-The-Unbroken.md) (rage, chain in, crush), [Mossy](Class-Barnacle-Knight.md) (block, then smash them into walls), [Grimble](Class-Scrap-King.md) (haul a foe in, drop the anchor) and [Cinder](Class-Flame-Queen.md) (build Char, flash foes over).
 
 The weight class sets health, speed, mass (how far hits push you) and how many dash charges you get.
 Everything else comes from the class kit.
@@ -32,7 +32,7 @@ own when you send it out (G), and adds a little of its type to your kit: each cl
 their strength (35% on RMB, 30% on E and the dash, 50% on R). Hard control from a socket is capped. An
 empty socket gives +10% to that ability's main number instead.
 
-**R is the Merge** for every class. When your **bond meter** is full, press it and you and your Boki
+**R is the Fusion** for every class. When your **bond meter** is full, press it and you and your Boki
 become one for a while: you wear its look, and your abilities change by its type and power (its merge
 form, see [Boki species](Boki-Species.md)). The class's own ultimate is held back for now.
 
@@ -59,10 +59,10 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [the Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
 | [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none (Boki Fusion) |
 | [the Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
-| [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
-| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
 | [the Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
+| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
 | [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
+| [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
 
 ### How Hunters unlock
 
@@ -78,10 +78,10 @@ A new save picks 1 of 1 starters (the Hired Gun) before the egg pick and plays t
 | [the Red Stitch](Class-Red-Stitch.md) | easy | Stun 4 enemies | 4 |
 | [the Scrap King](Class-Scrap-King.md) | medium | Make it out carrying 8 items | 8 |
 | [the Snowglide](Class-Snowglide.md) | medium | Slow 20 enemies | 20 |
-| [the Void Jester](Class-Void-Jester.md) | hard | Knock down 3 hunters while fused with your Boki, once 8 Hunters are open | 3 |
-| [the Barnacle Knight](Class-Barnacle-Knight.md) | medium | Knock down 2 hunters while under half health | 2 |
 | [the Storm Chaser](Class-Storm-Chaser.md) | medium | Stagger 6 monsters with abilities | 6 |
+| [the Barnacle Knight](Class-Barnacle-Knight.md) | medium | Knock down 2 hunters while under half health | 2 |
 | [the Silver Thief](Class-Silver-Thief.md) | medium | Land 12 hits while in the air | 12 |
+| [the Void Jester](Class-Void-Jester.md) | hard | Knock down 3 hunters while fused with your Boki, once 8 Hunters are open | 3 |
 
 ### Mastery
 
@@ -122,23 +122,23 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Snowglide | Fly through 10 air rings | 10 | Glider: Frost Kite |
 | the Snowglide | Revive 2 teammates | 2 | Emote: Snow Angel |
 | the Snowglide | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
+| the Storm Chaser | Stagger 10 monsters with abilities | 10 | Colourway: Storm Violet |
+| the Storm Chaser | Land 15 hits while in the air | 15 | Trail: Static |
+| the Storm Chaser | Fly through 12 air rings | 12 | Banner: Thunderhead |
+| the Storm Chaser | Your Boki lands 50 hits | 50 | Title: Live Wire |
+| the Barnacle Knight | Revive 3 teammates | 3 | Colourway: Oathsteel |
+| the Barnacle Knight | Knock 8 enemies into walls | 8 | Emote: Shield Rap |
+| the Barnacle Knight | Make it out after being knocked down | 1 | Title: Still Standing |
+| the Barnacle Knight | Open 6 chests | 6 | Banner: Iron Oath |
+| the Silver Thief | Land 25 hits while in the air | 25 | Colourway: Midnight Silk |
+| the Silver Thief | Stun 6 enemies | 6 | Emote: Twirl |
+| the Silver Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
+| the Silver Thief | Knock down a hunter while fused | 1 | Glider: Dusk Moth |
 | the Void Jester | Knock down 4 hunters while fused | 4 | Skin: Void Bloom |
 | the Void Jester | Stun 15 enemies | 15 | Trail: Lantern Motes |
 | the Void Jester | Make it out carrying 8 items | 8 | Title: Swapkeeper |
 | the Void Jester | Fly through 15 air rings | 15 | Glider: Lantern Moth |
 | the Void Jester | Revive 3 teammates | 3 | Banner: Tidelight |
-| the Barnacle Knight | Revive 3 teammates | 3 | Colourway: Oathsteel |
-| the Barnacle Knight | Knock 8 enemies into walls | 8 | Emote: Shield Rap |
-| the Barnacle Knight | Make it out after being knocked down | 1 | Title: Still Standing |
-| the Barnacle Knight | Open 6 chests | 6 | Banner: Iron Oath |
-| the Storm Chaser | Stagger 10 monsters with abilities | 10 | Colourway: Storm Violet |
-| the Storm Chaser | Land 15 hits while in the air | 15 | Trail: Static |
-| the Storm Chaser | Fly through 12 air rings | 12 | Banner: Thunderhead |
-| the Storm Chaser | Your Boki lands 50 hits | 50 | Title: Live Wire |
-| the Silver Thief | Land 25 hits while in the air | 25 | Colourway: Midnight Silk |
-| the Silver Thief | Stun 6 enemies | 6 | Emote: Twirl |
-| the Silver Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
-| the Silver Thief | Knock down a hunter while fused | 1 | Glider: Dusk Moth |
 
 ### Run levels
 

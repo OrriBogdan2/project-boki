@@ -211,6 +211,33 @@ def wname(wid):
 def kname(kid):
     return KIN2.get(kid, {}).get("name", kid)
 
+# ------------------------------------------------------------------ lore
+LORE = load_json(os.path.join(ROOT, "content", "rules", "lore.json"))
+
+def hunter_name(aid):
+    return "%s, the %s" % (ARCH[aid]["base_name"], ARCH[aid]["title"])
+
+def gen_lore():
+    """The Lore page and one story file per Hunter (docs/art/gen/stories/<id>.md, for the art and voice passes)."""
+    home = {a: f for f in LORE["factions"] for a in f["hunters"]}
+    fac = table(["Faction", "Hunters", "What binds them", "What they would wish for"],
+                [[f["name"], ", ".join(ARCH[a]["base_name"] for a in f["hunters"]), f["binds"], f["wish"]] for f in LORE["factions"]])
+    relics = table(["Hunter", "Relic", "Why this one", "Status"],
+                   [[hunter_name(a), r["name"], r["why"], r["status"]] for a in ARCH_ORDER if a in ARCH
+                    for r in [LORE["hunters"][a]["relic"]]])
+    body = "\n\n".join("> " + t for t in LORE["premise"])
+    body += "\n\nFactions are lore only (voice lines, banter, key art): a squad in a match stays free-pick.\n\n### Factions\n\n" + fac
+    body += "\n\n### Relics\n\nEach fallen Hunter's self is held in the object they were most bound to. Wearing it gives you their face, form and memories. "
+    body += "A relic marked proposed is still waiting for the owner's OK.\n\n" + relics
+    body += "\n\n### Banter pairs\n\n" + "\n".join("- " + b for b in LORE["banter"])
+    page("Lore.md", "Lore", body, ["content/rules/lore.json", "content/archetypes"])
+    for aid in ARCH_ORDER:
+        if aid not in ARCH: continue
+        d, r = ARCH[aid], LORE["hunters"][aid]["relic"]
+        text = "%s\n# %s\n\n_Class: %s. Faction: %s._\n\n%s\n\n**Relic:** %s. %s (%s)" % (
+            NOTE, hunter_name(aid), aid, home[aid]["name"], d["personality"].replace("\n", "\n\n"), r["name"], r["why"], r["status"])
+        write(aid + ".md", text, os.path.join(ROOT, "docs", "art", "gen", "stories"))
+
 # ------------------------------------------------------------------ classes
 def the(title):
     """A title shown on its own carries "the" (titles are stored without it)."""
@@ -384,8 +411,6 @@ def gen_boki():
         body += table(["", ""], info)
         body += "\n\n- E ability: " + ability_line(k.get("active", ""))
         body += "\n- Auto ability (it casts this on its own): " + ability_line(k.get("auto", ""))
-        dr = k.get("dodge_rider")
-        if dr: body += "\n- On your dash: **%s**" % dr.get("name", "")
         mg = MERGE.get(k.get("merge", ""), {})
         if mg: body += "\n- Bond ultimate (merge): **%s** (%ss). %s" % (mg.get("name", ""), num(mg.get("duration", "")), mg.get("flavor", ""))
         paths = []
@@ -556,6 +581,7 @@ def gen_rules():
         body += table(["Rule", "Value", "Meaning"], [[k, num(v), lc.get(k, "")] for k, v in lr.items()])
     rules = content("rules")
     for rid, r in rules.items():
+        if rid == "lore": continue   # the Lore page
         body += "\n\n## %s (`content/rules/%s.json`)\n\n%s\n\n" % ({"bond": "Bond meter", "kin_ai": "How Boki fight"}.get(rid, rid), rid, r.get("desc", ""))
         body += table(["Setting", "Value"], [[k, num(v) if not isinstance(v, (dict, list)) else json.dumps(v)] for k, v in r.items() if k != "desc"])
     co = content("combos")
@@ -715,7 +741,7 @@ def gen_dash_flow():
 
 # ------------------------------------------------------------------ main
 def main():
-    for f in (gen_classes, gen_boki, gen_gear, gen_maps, gen_rules, gen_farm, gen_controls, gen_dash_flow):
+    for f in (gen_classes, gen_lore, gen_boki, gen_gear, gen_maps, gen_rules, gen_farm, gen_controls, gen_dash_flow):
         try:
             f()
         except Exception as e:  # report and keep going: one broken table shouldn't hide the rest

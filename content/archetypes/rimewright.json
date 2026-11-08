@@ -3,11 +3,11 @@
 	"title": "Snowglide",
 	"base_name": "Neve",
 	"gender": "female",
-	"personality": "A graceful ice skater who glides where others walk and leaves frost behind her.\nElegant and playful, with a cold edge when crossed.",
+	"personality": "The star show-skater of the winter canal festival. The night the ice broke she skated the festival crowd to safety, and the frost took her.\nShe glides on the skates that saved them and fights with a candy-cane spear from the festival.",
 	"role": "Rimewright",
 	"weight": "light",
 	"body": {
-		"size": 1.15,
+		"size": 1.014,
 		"bulk": 1.0,
 		"hit_r": 0.38,
 		"head": 0.6,

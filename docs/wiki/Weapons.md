@@ -9,10 +9,10 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 
 | Weapon | Carried by | Weight | Damage | Fire interval | Magazine | Reload | Range | Notes |
 |---|---|---|---|---|---|---|---|---|
-| Arc Shots | the Silver Thief | light | 13 | 0.45s | none | none | 12m | A spinning shot from alternating hands every 0.45s. It flies to your cursor (12m at most) and fizzles there if it hits nothing. |
+| Arc Shots | the Silver Thief | light | 13 | 0.45s | none | none | 8.5m | A spinning shot from alternating hands every 0.45s. It flies to your cursor (8.5m at most) and fizzles there if it hits nothing. |
 | Burst Rifle | none | medium | 7 | 0.45s | 27 | 1.5s | 10.5m | Three rounds per pull. Accurate at range. |
 | Coilcaster | the Storm Chaser | light | 12 | 0.648s | none | none | 13m | No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range. |
-| Torch Lance | the Flame Queen | heavy | 2.7 | 0.1s | none | none | 7m | Hold to hose fire 7m ahead: the stream trails behind a sweep, narrow at the nozzle and billowing at the end. No fuel: it roars as long as you hold. It builds Char; at full Char the foe goes Ablaze. |
+| Torch Lance | the Flame Queen | heavy | 2.7 | 0.1s | none | none | 7m | Hold to pour fire from your hand 7m ahead: the stream trails behind a sweep, narrow at the palm and billowing at the end. It burns as long as you hold. It builds Char; at full Char the foe goes Ablaze. |
 | Greatsword | the Unbroken | heavy | 11 | 0.5s | none | none | 3.4m | A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far. |
 | Hoar Fan | the Snowglide | light | 4 | 0.18s | none | none | 10m | A folding fan of ice slats. Hold for a barrage of slow ice darts (one every 0.18s) that fly out along your aim and curve in onto the foe nearest your cursor toward the end of their flight: four darts, then three large ones that hit twice as hard, fly faster and reach further, and round again. Eight on one foe Shatter them. While skating they fly as fast, thick beams that home in the same way. |
 | Ember Cast | the Dawnfox | medium | 8 | 0.4s | none | none | 12m | Nothing held: she pushes an ember out of one hand, then the other, every 0.4s; it flies its full 12m, past the cursor. Embers Kindle what they hit (up to 5); hold fire for a second and the next one flies 40% further. |

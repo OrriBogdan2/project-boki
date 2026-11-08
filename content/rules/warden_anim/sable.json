@@ -1,5 +1,5 @@
 {
-	"doc": "Sable's hand-keyed clips (art/wardens/sable/sable.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Twin flintlocks, one skinned to each hand; the Vault's flips and the Encore dance run on the kit's own clock.",
+	"doc": "Sable's hand-keyed clips (art/wardens/sable/sable.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Twin flintlocks, one skinned to each hand; the Vault's flips and the Encore dance run on the kit's own clock. A move's fade key is its blend-in (default 0.1 s): the quick ones (whip, flip, knife) read from their first key.",
 	"skinned_weapon": true,
 	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "mouth.L": "head", "mouth.R": "head", "foot.L": "shin.L", "foot.R": "shin.R"},
 	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
@@ -13,12 +13,12 @@
 	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "fall"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
-		"thf_lmb_r": {"clip": "lmb_r", "upper": "moving"}, "thf_lmb_l": {"clip": "lmb_l", "upper": "moving"}, "thf_primed": {"clip": "primed", "upper": "moving"},
-		"thf_vault_r": {"clip": "vault_r"}, "thf_vault_l": {"clip": "vault_l"}, "thf_vault_f": {"clip": "vault_f"}, "thf_vault_b": {"clip": "vault_b"}, "thf_vault_twist": {"clip": "vault_twist"},
-		"thf_exdash": {"clip": "exdash", "hold_from": 0.46}, "thf_land": {"clip": "land_v"},
-		"thf_bola": {"clip": "bola", "upper": "moving"}, "thf_knife": {"clip": "knife"}, "thf_arrive": {"clip": "arrive"},
+		"thf_lmb_r": {"clip": "lmb_r", "upper": "moving", "fade": 0.03}, "thf_lmb_l": {"clip": "lmb_l", "upper": "moving", "fade": 0.03}, "thf_primed": {"clip": "primed", "upper": "moving", "fade": 0.03},
+		"thf_vault_r": {"clip": "vault_r", "fade": 0.04}, "thf_vault_l": {"clip": "vault_l", "fade": 0.04}, "thf_vault_f": {"clip": "vault_f", "fade": 0.04}, "thf_vault_b": {"clip": "vault_b", "fade": 0.04}, "thf_vault_twist": {"clip": "vault_twist", "fade": 0.04},
+		"thf_exdash": {"clip": "exdash", "hold_from": 0.46, "fade": 0.04}, "thf_land": {"clip": "land_v", "fade": 0.03},
+		"thf_bola": {"clip": "bola", "upper": "moving"}, "thf_knife": {"clip": "knife", "fade": 0.04}, "thf_arrive": {"clip": "arrive"},
 		"thf_encore": {"clip": "encore"}, "thf_encore_dance": {"clip": "encore_dance", "hold_from": 0.0, "upper": "moving"},
-		"thf_reset": {"clip": "reset", "upper": "moving"}, "thf_flourish": {"clip": "flourish", "upper": "moving"},
+		"thf_reset": {"clip": "reset", "upper": "moving", "fade": 0.04}, "thf_flourish": {"clip": "flourish", "upper": "moving"},
 		"mf_xform": {"clip": "fusion"}
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},

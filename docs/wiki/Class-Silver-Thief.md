@@ -10,7 +10,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 |---|---|
 | Class title | the Silver Thief |
 | Base character | Sable, female |
-| Personality | Quick, quiet and light-fingered. She is never where you aimed, and she smiles when you miss. She steals the moment first and the loot second. |
+| Personality | The thief who reached the Wyrmheart in Malgrave's vault. Touching it woke the Wyrm and set off the Hollowing. Everyone has a reason to hate her, and she knows it. She's still after the treasure. |
 
 <!-- /gen:profile -->
 
@@ -25,7 +25,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
    and flies on; catch a second and both are stunned. It bounces once off a wall.
 5. **Encore** (X, from level 6): a violet ring grows round you and rides with you; for 2s blades fly at every
    foe inside it, harder from its outer edge (which also blights them), and the Vault comes back. Landing it
-   on a rival hunter fills your bond meter a long way. The Boki Merge has its own key.
+   on a rival hunter fills your bond meter a long way. The Boki Fusion has its own key.
 
 ## Combos and interactions
 
@@ -71,7 +71,7 @@ What the in-game kit card (K) says.
 | Loop | Ranged duelist: stay on one foe, cartwheel, and land the big shot. |
 | Passive: Marks | Each hit on the same foe adds a Mark: +10% damage, with no cap. Knocks heal you. |
 | Dash: Vault | Cartwheel a short way (much further from a jump). Your next shot is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back at once. |
-| RMB: Bola | A short wind-up, then a Bola down the lane: it grounds and slows the first foe and flies on. Catch a second and both are stunned. |
+| RMB: Bola | Throw a Bola down the lane at once: it grounds and slows the first foe and flies on. Catch a second foe, or a wall or tree, and the stun lands. |
 | E: Shadow Knife | Throw a dagger to your cursor or into a foe. Press E again to blink to it. |
 | Hunter ultimate: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge. |
 | Weapon: Arc Shots | Bolts from alternating hands every 0.45s. Each one lands at your cursor. |
@@ -84,7 +84,7 @@ What the in-game kit card (K) says.
 
 **Bola (RMB, 7s cooldown).**
 
-- *Tap:* A 0.4s wind-up with the lane showing (you keep aiming), then the Bola flies 7m: 5 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and slowed 30%, and the Bola flies on 3.8m (a crate it breaks counts as that first catch). It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).
+- *Tap:* Thrown the moment you press, 7m down the lane: 5 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and slowed 30%, and the Bola flies on 5.5m (a crate it breaks counts as that first catch). With no catch yet it bounces once off a wall. After the first foe, a second foe, a wall or a tree stuns: the Bola pins them for 0.9s and they take +13 (TANGLED; a pinned one shows PINNED).
 - *In the air:* Thrown from the air the same way.
 
 **Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (14m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press E again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
@@ -97,9 +97,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 7s -> 6.3s, damage +15%. | cooldown 7s -> 5.6s, damage +30%; flies 1m further after the first foe, and two foes caught pool their Marks. |
-| Dash (Shift) | recharge 4.5s -> 3.8s per charge; the empowered bonus +20%. | recharge 4.5s -> 3.2s; the empowered bonus +40% in all, and the speed boost is half again as big. |
-| E | cooldown 15s -> 13.5s, damage +15%. | cooldown 15s -> 12s, damage +30%; sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back. |
+| RMB | damage +50%. | cooldown 7s -> 4.8s, damage +50%; flies 1m further after the first foe, and two foes caught pool their Marks. |
+| Dash (Shift) | the empowered bonus +20%. | the empowered bonus +40% in all, and the speed boost is half again as big. |
+| E | cooldown 15s -> 10.7s. | cooldown 10.7s; sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 

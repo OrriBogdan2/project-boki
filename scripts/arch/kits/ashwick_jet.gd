@@ -12,14 +12,11 @@ const OVERLAP := 0.45           # m each piece reaches back over the last, so th
 const NET_EVERY := 3            # carpet pieces between two rings sent to other players' games
 const STEER_LEAD := 1.0         # m the heading lane runs past where the flight will end
 const LAVA_DY := 1.6            # m above the carpet a body still stands in it
-const RING_PUFFS := 10          # flame puffs standing round the lift-off ring
 const FOOTING := 0.05           # s: the low flight counts as footing for a jump (Hunter.coyote) while it runs
-const JET_ANCHORS := ["anchor_jet_0", "anchor_jet_1"]   # the tank's two exhaust stacks on the model
 
 var k: AshwickKit
 var h: Hunter
 var m: Node
-var stacks: Array = []          # the model's stack anchors (Node3D), once it has them
 var flight := {}                # hold: the flight under way {t, dir, speed, last, set_v}
 var trail: Array = []           # carpet pieces: {a, b, until}
 var tick_acc := 0.0
@@ -138,7 +135,7 @@ func _fly(dt: float) -> void:
 	if Vector2(p.x - (flight["last"] as Vector3).x, p.z - (flight["last"] as Vector3).z).length() >= LAY_STEP:
 		_lay(flight["last"], p)
 		flight["last"] = p
-	_jet_fx(dir)
+	_jet_fx()
 	var left := speed * maxf(0.0, float(flight["t"])) + STEER_LEAD
 	AimKit.lane(h, "x_steer", {"dir": dir, "len": left, "width": float(x["trail_w"]), "chevrons": 3,
 		"col": k.col_of(x), "alpha": 0.75})
@@ -203,7 +200,7 @@ func _land() -> void:
 	h.vel.z *= 0.3
 	AimKit.hide(h, "x_steer")
 	k.play("lw_land")
-	m.fx.dust(h.pos, 10)
+	k.vfx("land")
 	m.sfx("lw_jet_land", h.pos, -3.0, 1.0)
 
 # ------------------------------------------------------------------ the carpet
@@ -219,7 +216,10 @@ func _lay(a: Vector3, b: Vector3) -> void:
 	k.fx.lava(a - along * OVERLAP, b, float(x["trail_w"]), float(x["trail_t"]))
 	laid += 1
 	if laid % NET_EVERY == 0:
-		k.net_ring(b, float(x["trail_w"]) * 0.6, k.col_of(x))
+		# the last few pieces as one charred lane: other players' games see the carpet by it
+		var from: Vector3 = trail[-NET_EVERY]["a"] if trail.size() >= NET_EVERY else a
+		var span := Vector2(b.x - from.x, b.z - from.z)
+		k.vfx("carpet", from, span.normalized(), {"len": span.length(), "w": float(x["trail_w"])})
 		m.sfx("lw_trail", b, -6.0, 1.0)
 
 ## Every tick (0.3s): burn, slow and Char whoever stands in the carpet; the oldest pieces fade first.
@@ -244,7 +244,7 @@ func _burn(dt: float) -> void:
 		HeroUlt.landed(k, f)
 	for t in trail:
 		if randf() < 0.35 and k.tells_visible():
-			m.fx.burst((t["b"] as Vector3) + Vector3(0, 0.2, 0), Color("ff8a3a"), 2, 1.5, 0.4, -3.0, 1.2)
+			k.vfx("carpet_embers", t["b"])
 
 ## The carpet piece this body stands in, or null.
 func _lava_at(f: Ent):
@@ -261,45 +261,14 @@ func _lava_at(f: Ent):
 	return null
 
 # ------------------------------------------------------------------ looks
-## A red-orange ember ring about 1.2 bh round his feet (a solid ring of flame puffs over a deep red wave, so
-## it holds on bright grass), a jagged burst and the roar of the bellows jet.
+## A red-orange wall of flame about 1.2 bh round her feet, a scorch, embers and the roar of the heel and tail fire
+## (content/vfx "liftoff").
 func _liftoff_fx() -> void:
-	var x := xd()
-	var r := float(x["burst_r"])
-	var at := k.ground(h.pos)
-	k.fx.wave(at, r, Color("d8281a"), 0.4, Color(Color("ff8a2a"), 0.7))
-	k.fx.sunburst(at + Vector3(0, 0.3, 0), r * 0.75, Color("ff4a1a"), Color("ffc040"), 0.3)
-	for i in RING_PUFFS:
-		var ang := TAU * float(i) / RING_PUFFS
-		k.fx.puff(at + Vector3(cos(ang) * r, 0.45, sin(ang) * r), LDFx.M_FLAME, Color.BLACK, Color.BLACK, 0.7, 0.4)
-	k.fx.scorch(at, r * 0.5, 1.0)
-	m.fx.burst(at + Vector3(0, 0.3, 0), Color("ff6a3a"), 26, 6.0, 0.45, 3.0, 1.2)
+	k.vfx("liftoff", k.ground(h.pos), null, {"r": float(xd()["burst_r"])})
 	m.sfx("lw_jet", h.pos, -1.0, 1.0)
-	k.net_ring(at, r, k.col_of(x))
 
-## The tank's two exhaust stacks: a hot core on each (the model's anchor_jet_*; its flight clip stretches
-## their flames) and embers blown down behind her. With no model: one core at her back.
-func _jet_fx(dir: Vector2) -> void:
-	if not k.tells_visible():
-		return
-	var cores := jet_points(dir)
-	var down := Vector3(-dir.x * 0.6, -1.0, -dir.y * 0.6).normalized()
-	for at in cores:
-		k.fx.orb(at, Color("ff9a3a"), Color("fff4c0"), 0.55 / sqrt(float(cores.size())), 0.06)
-		var embers := 2 if cores.size() == 1 else 1
-		m.fx.burst(at, Color("ff7a2a"), embers, 4.0, 0.3, 2.0, 0.9, down, 25.0)
-
-## Where the jets burn: each stack's mouth on the model, else the one point at her back.
-func jet_points(dir: Vector2) -> Array:
-	if stacks.is_empty() and h.model:
-		for nm in JET_ANCHORS:
-			var a := WardenGlb.anchor(h.model, nm)
-			if a:
-				stacks.append(a)
-	var out: Array = []
-	for a in stacks:
-		if is_instance_valid(a) and (a as Node3D).is_inside_tree():
-			out.append((a as Node3D).global_position)
-	if out.is_empty():
-		out.append(h.pos + Vector3(0, 1.1, 0) - Vector3(dir.x, 0, dir.y) * 0.45)
-	return out
+## The flight's lift: fire bursting from her heels and her tail, blown down behind her, and its smoke
+## (content/vfx "jets", held while she flies; owner 2026-11-07, no tank).
+func _jet_fx() -> void:
+	if k.tells_visible():
+		HeroVfx.of(m).hold(h, "jets")

@@ -2,9 +2,10 @@ class_name PinSpirit
 extends RefCounted
 ## Hem's Shift, Spirit Walk (hero sheet pin.md): a quick dodge roll the plain-dash way (ArchKit.dash_dir: the
 ## move direction, the aim when standing still or with the cursor setting), then "time" s walking as a
-## spirit: rocks, trees, pillars and barriers don't stop her (Hunter.spirit_t; terrain cliffs and ledges
-## still do). Damage ends it. If it ends while she is inside something she loses "stuck_cost" Focus and
-## is put back where she last stood clear. While she is inside something her own screen goes dark blue.
+## spirit: rocks, trees, pillars, barriers and raised terrain don't stop her (Hunter.spirit_t; the data's
+## Phase Walk rolls "through a pillar and the raised-platform wall"). Damage ends it. If it ends while she
+## is inside something she loses "stuck_cost" Focus and is put back where she last stood clear. While she
+## is inside something her own screen goes dark blue.
 
 var k: ArcherKit
 var h: Hunter
@@ -27,12 +28,12 @@ func _init(kit: ArcherKit) -> void:
 func active() -> bool:
 	return t > 0.0
 
-func start(use_ex: bool) -> void:
+func start() -> void:
 	var dd := k.dash_def()
 	var dir := k.dash_dir()
 	var roll := float(dd.get("roll", 3.5))
 	var rt := float(dd.get("roll_t", 0.24))
-	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll"}, use_ex)
+	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll"})
 	k.play("pin_roll")
 	t = walk_time() + rt
 	total = t
@@ -106,7 +107,7 @@ func tick_orbs(dt: float) -> void:
 
 func blocked_here() -> bool:
 	var w: World = k.m.world
-	if w.is_block(h.pos.x, h.pos.z):
+	if w.is_block(h.pos.x, h.pos.z) or w.ground_at(h.pos.x, h.pos.z) > h.pos.y + World.STEP:
 		return true
 	return not w.dyn_walls.is_empty() and Verbs.wall_blocks(w.dyn_walls, h.pos.x, h.pos.z, h.r * 0.6, h.pos.y) > 0.0
 

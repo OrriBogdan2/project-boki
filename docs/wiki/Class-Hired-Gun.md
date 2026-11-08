@@ -10,7 +10,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 |---|---|
 | Class title | the Hired Gun |
 | Base character | Vex, female |
-| Personality | A sharp, professional soldier in marine-style gear. She takes the contract and finishes the job. Calm under fire, and always has a plan for the way out. |
+| Personality | A foundry kid who swept brass casings off Malgrave's war-foundry floors. A siege engine took her arm in the Hollowing, and the gatling she bolted to her shoulder is her right arm now. The Skylands' most famous gun-for-hire, she keeps a tally mark for every bounty she cashed. Her loyalty is technically for sale, but she sticks with the crew. |
 
 <!-- /gen:profile -->
 
@@ -21,7 +21,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 3. **Longneedle** (E): stand still for 0.6s while a wide line narrows to a thin core, then fire a heavy beam through cover and everyone in its line, your view pulled out along it. A Dazed hunter hit is Skewered. Each hunter hit takes 30% off its cooldown. The recoil shoves you back a step.
 4. **Slipstep** (Shift): tap to skid, hold to slide; it goes where you move and you keep shooting. Let go early for part of it back. In the air a tap slides two thirds as far.
 5. **Hot Streak** (passive): a knock gives Slipstep back and heals a quarter of your health. Abilities that land add a little lifesteal (Fever).
-6. There is no R: the Boki Merge takes that key.
+6. There is no R: the Boki Fusion takes that key.
 
 ## Combos and interactions
 
@@ -77,7 +77,7 @@ What the in-game kit card (K) says.
 - *Tap:* Tap RMB: it fires from the launcher on her arm-cannon on the press. The charge flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.
 - *Resource full:* Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer.
 
-**Longneedle (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core, tracking your aim while your view pulls out along it. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
+**Longneedle (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and turns toward your aim at 90 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
 
 **Cinderfall (hunter ultimate, from level 6, 42s cooldown).** Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3 every 0.5s and a 30% slow to anyone standing in it. You move and shoot freely the whole time. Landing the impact on an enemy hunter fills your Boki bond; the burn does not.
 

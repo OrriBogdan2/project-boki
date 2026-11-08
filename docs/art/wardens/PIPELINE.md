@@ -314,6 +314,14 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Cinder r3 A | 13:41 | 01a1a6c6-de62-7253-b0ea-05451a154e2d | meshy-7.1 | 3 edited views (front, side, back), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Dropped: squinting, mean face; small crest |
 | Cinder r3 B | 13:41 | 01a1a6c6-de84-7676-b5c3-08ac066b2720 | meshy-7.1 | as A, enhancement on | 40 | Kept: big round amber slit-pupil eyes, rounded feminine face, bigger crest (mouth closed: the grin painted from the head sheet) |
 
+### Ravel v2 (archer, ids stay hem), 2026-11-07 (103 credits)
+
+| Step | Task | Tool | Note | Credits | Result |
+|---|---|---|---|---|---|
+| Edits, round 1 (front, 3/4, side, back) | 01a1b4dd-db36-7626-91f8-222edbec0ae3, 01a1b4dd-db35-7626-ace0-dfe30ab1308f, 01a1b4dd-db36-75ed-a90e-6bcb011b7e3f, 01a1b4dd-db26-7291-a190-e62a25f7be1a | nano-banana-pro | ravel_v2_turnaround views, props out | with round 2: 63 | Back kept |
+| Edits, round 2 (front, 3/4, side) | 01a1b4df-6945-77bc-8768-d44a0b79612e, 01a1b4df-6936-743e-b5ba-506ac1a304a7, 01a1b4df-694c-752e-bb33-2586de65ac7a | nano-banana-pro | same, redone | | Kept |
+| Scan | 01a1b4e1-2a92-70ea-8e4b-c3b45a8a9543 | meshy-7.1 | the four kept views | 40 | Kept |
+
 ### Hem (archer, was Pin) stage 1, 2026-11-04 (balance 4921 before; 76 credits)
 | Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
 |---|---|---|---|---|---|---|
@@ -334,6 +342,15 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Tarek A | 09:10 | 01a1a5d2-9348-76b2-bd28-bb946e03b9b0 | meshy-7.1 | 3 edited views (front, side, back) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: blindfold, grin, chunky locs with copper beads, vest, sash, harness, both bracers, wrapped feet (the bracers' glowing cracks not painted: added as an emission layer) |
 
 ### Tarek stage 2 (2026-11-04): no Meshy runs (0 credits); the r3c recipe on the stage 1 scan, see art/wardens/tarek/IMPORT.md.
+### Tarek v2 runs, 2026-11-07 (briefs/art-refs/tarek_v2; balance 1246 before; 76 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Tarek v2 edit front | 14:03 | 01a1b652-093d-714f-99a2-8d093b662560 | nano-banana-pro (image-to-image) | turnaround crop to a clean A-pose sculpt render; eye stones, shards and ground out | 9 | Kept |
+| Tarek v2 edit 3/4 | 14:03 | 01a1b652-09c6-7549-9407-7b30491ea3ba | nano-banana-pro | same | 9 | Kept |
+| Tarek v2 edit side | 14:03 | 01a1b652-0972-74bc-9e5d-f18aa4fc9e84 | nano-banana-pro | same | 9 | Kept |
+| Tarek v2 edit back | 14:03 | 01a1b652-094a-74ae-b46b-53cba08be326 | nano-banana-pro | same | 9 | Kept |
+| Tarek v2 A | 14:04 | 01a1b652-f497-7289-b181-c5bcb2abfdae | meshy-7.1 | 4 edited views as images and texture refs, geometry 2k, texture 8k, PBR, no remesh, a-pose | 40 | **Kept** (first run): blindfold, locs with copper rings, huge stone left arm onto the chest, right gauntlet, prayer beads, cream wrap, orange sash, brown trousers, wrapped feet. The eye stones, shards, ground rings and jade glyph emission are scripted (tools/art1/tarek_scan.py) |
+
 ### Ostra stage 1 runs, 2026-11-04 (76 credits; balance 4327 after both Tarek and Ostra and the other fan-out agents)
 | Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
 |---|---|---|---|---|---|---|
@@ -464,6 +481,39 @@ Breaker total: 6 tasks, 116 credits (the body's two attempts used).
 | Breaker r3 edits | 13:20-13:30 | edit_front (9:16, dropped: clipped arms), edit_front2, edit_side, edit_back, edit_tq (dropped: a copy of the front) | nano-banana-pro | breaker_front: hammer and shield out, arms down; the r3 side/back redrawn in the new outfit | 45 | front2, side (teddy painted out), back kept |
 | Breaker C | 13:31 | 01a1a688-d08d-74e2-9e69-9015055e4130 | meshy-7.1 | front, side, back edited; texture refs the same; 2k, meshy-7 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the art's bare belly, sash, skirt, bare feet, braids, closed fists |
 | Breaker D | 13:31 | 01a1a688-d0b4-738f-bed8-df735492629b | meshy-7.1 | as C, enhancement on | 40 | Dropped: open splayed hands |
+
+### Vex v2 (owner redesign, briefs/art-refs/vex_v2/), 2026-11-06 (152 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Vex v2 edits | 2026-11-06 22:30 | 01a1b2f1-9b7c-76c2-9965-5dbb9d092ec8, 01a1b2f1-9b8c-72af-bc57-28fe07f1ad44, 01a1b2f1-9b7e-711a-b374-825bfdeed92d | nano-banana-pro (image-to-image) | turnaround front, left profile, back (1:1): bald, minigun and coin chain out, a plain right forearm | 27 | Kept (the back view swapped which forearm is brass: both forearms are cut, harmless) |
+| Vex v2 head sheet | 22:30 | 01a1b2f1-9b7a-7456-bb3c-352dd6ee979c | nano-banana-pro | the turnaround's three heads + the sheet's smirk head -> a 4-view head turnaround (16:9) | 9 | Kept, then split per view |
+| Vex v2 head views | 22:38 | 01a1b2f3-0b5c-7152-9017-d0750031fd4b, 01a1b2f3-0b39-7199-b772-db2031ff0596, 01a1b2f3-0b45-7313-af74-aec96bc55bd3, 01a1b2f3-0b6c-74b4-8f02-f0adb9ff2a14 | nano-banana-pro | each view of the head sheet redrawn alone at 1:1 (the sheet is 1376 px wide) | 36 | Kept |
+| Vex v2 body | 22:38 | 01a1b2f3-0ba1-76e8-9810-46951086bee6 | meshy-7.1 | the 3 edited views + the same as texture refs; A-pose, defaults | 40 | **Kept** |
+| Vex v2 head | 22:45 | 01a1b2f3-b897-7037-ac35-70264cddd250 | meshy-7.1 | the 4 head views, no pose | 40 | **Kept** |
+
+### Ryzz v2 (owner redesign, briefs/art-refs/ryzz_v2/), 2026-11-07 (76 credits; balance 1662 before, 1586 after)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Ryzz v2 edits | 2026-11-07 02:03 | 01a1b3be-8841-747d-bb1c-1de43c334ba5, 01a1b3be-8852-77ae-a033-6fa8f3789bbc, 01a1b3be-8843-718b-8706-843fe25430f9, 01a1b3be-8864-7710-a23f-6368f9ee53a0 | nano-banana-pro (image-to-image) | turnaround front, 3/4, left side, back (square, padded): both pigtails and ties, the backpack, its four rods and the cables out, nothing else | 36 | Kept (the back edit drew a bolt on the top's back; the pack covers it) |
+| Ryzz v2 body A | 02:09 | 01a1b3c6-90cd-7085-afba-c79e7c229a5f | meshy-7.1 | the 4 edited views (2x lanczos) + the same as texture refs; A-pose | 40 | **Kept** |
+
+Ryzz v2 notes: the v1 tools (ryzz_source/pieces/finish/clips) rebuilt for v2. Scripted: the long blue-to-pink pigtails on
+the spring chains (crimson ties), the copper pack (a deep box, two low coil springs, the bolt painted as the glow key), the
+four rods in sockets on its top, the black cables to the gloves, the hands, gum and nose ring. The pink arcs and the
+lightning ball are VFX (the arc meshes and `arc.*` bones are gone). The fishnet is the scan's paint on her right leg. The face is
+the turnaround's front view projected by its eyes and mouth (`~/meshy/ryzz_v2/ref/front_full.png`). The tied jacket hangs
+from the pelvis as v1's skirt did; the thighs under it stay (the jacket is open at the front).
+
+### Grimble v2 (owner redesign, briefs/art-refs/grimble_v2/), 2026-11-07 (76 credits; balance 1586 before, 1510 after)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Grimble v2 edits | 2026-11-07 04:33 | 01a1b448-33c3-71c5-88e2-4498de4e57f0, 01a1b448-339e-773e-8604-2af0645042da, 01a1b448-33be-77c3-91ea-8a8c18b7962c | nano-banana-pro (image-to-image) | the FINAL turnaround's front, left side, back (square, padded, neighbours masked): the hoard, coins, straps, blunderbuss, loupe and all the sludge out | 27 | Front and back kept; the side drew his hidden right arm with a small hook |
+| Grimble v2 side, again | 04:34 | 01a1b449-0e66-7513-a76f-f33b5af3b191 | nano-banana-pro | as above, "the right arm is hidden behind his body: do not draw it" | 9 | Kept |
+| Grimble v2 body A | 04:34 | 01a1b449-7821-711a-949a-7959663e2266 | meshy-7.1 | the 3 edited views + the same as texture refs; A-pose | 40 | **Kept**: no nose, the bone hook to the ground, the gauntlet, the spurs and veins |
+
+Grimble v2 notes: one body scan replaces v1's body, head and hoard scans. grimble_source.py fits it (the limbs keep the scan's spread,
+the rig's joint heights; past a bone's ends the scan's own scale). The hoard, bells, lanterns, blunderbuss and junk ball are v1's sculpt;
+the loupe is scripted; the face's squint, teeth and gums and the glowing veins are paint fixes (grimble_paint.scan_face, vein_key).
 
 ## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
 No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.

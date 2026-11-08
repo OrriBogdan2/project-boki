@@ -81,6 +81,7 @@ func tow(e: Ent, by: Ent, p: Dictionary) -> Dictionary:
 	var rec := {"e": e, "by": by, "p": p, "left": float(p["dur"]), "t": 0.0, "v": Vector2.ZERO, "gone": 0.0,
 		"mirror": e.remote, "hauled": 0}
 	tows.append(rec)
+	if by: DashReset.note(e, by)      # being hauled is crowd control: it counts toward an assist
 	if e.remote:
 		_send(["tow", e.nid, by.nid if by else "", p])
 	elif p.get("unroll", false) and e is Hunter:

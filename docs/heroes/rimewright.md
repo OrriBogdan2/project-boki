@@ -25,7 +25,7 @@ Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Cele
 | Slot | Source | Ours before | Ours now | Asserted (`--rimewright-combo-check`) |
 |---|---|---|---|---|
 | LMB rhythm | hold: a barrage of semi-homing darts, then 3 larger darts at its end (double damage, faster, longer range) [data]; about one dart per 0.2s, no visible pattern at 5 fps [footage] | a steady stream of identical darts | 4 plain, then 3 large (x2 damage, x1.5 speed, x1.3 reach), round again; 0.18s cadence | `tm LMB: the source's barrage ...`, `... one dart every 0.18 s` |
-| LMB tracking | darts curve onto the cursor area [footage 0027-0066]; skating, she turns to face the cursor and fires straight thick beams at it [footage 0239-0245] | the same | the same; asserted while skating with the cursor swung round: the next beam leaves within 1 degree of it | `tm Shift: skating, the beams track the cursor ...`, `... curve back onto the foe` |
+| LMB tracking | darts curve onto the cursor area [footage 0027-0066]; skating, she turns to face the cursor and fires thick beams that leave straight at it and home in late (owner, Nov 7) [footage 0239-0245] | the same | the same; asserted while skating with the cursor swung round: the next beam leaves within 1 degree of it | `tm Shift: skating, the beams track the cursor ...`, `... curve back onto the foe`, `skating, beams aimed 1.5 m off a foe home in late (bend over 5 deg)` |
 | LMB animation | thrown from the hands while walking or skating [footage] | alternating one-hand flicks, a two-hand drive while skating | the same, plus a bigger two-handed fling for the 3 large darts (`tm_dart_heavy`, 0.04 wind, 0.08 fling, 0.18) | `tm LMB: darts alternate hands ...` |
 | RMB | lands at the cursor, slow zone, detonation 1.8-2s later [footage]; owner 19:50: a push, the spear emerges from her and travels out | an overhand throw from the raised hand | the two-palm push, travel time = distance / 18 m/s | `tm RMB: ...` (7 rows) |
 | E | wall: both hands pushed forward [footage] | the arms flung up and out | both palms shoved out low and wide as the ice erupts | (animation only; the tell timing is asserted) |
@@ -50,7 +50,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 | Passive: Chill's 15% slow (not in the data) | LOW | (c) | kept as our readability choice (a Chilled foe has to read as Chilled) |
 | Knock Shatter 30 vs about 37 | LOW | (b) | ec88bfc0: 37 |
 | E wall touch slow (not in the data) | LOW | (c) | kept: it is how the sliding wall reads as carrying foes; noted here |
-| Stale wiki link / name | MED | (a) | f1c1a91c (Class-Claire.md, Classes.md, sidebar) |
+| Stale wiki link / name | MED | (a) | f1c1a91c (Class-Neve.md, Classes.md, sidebar) |
 | "Merge stays on R" in this doc | MED | (b) | fixed in the table above |
 | Self screen shake | MED | (c) | ext/no-shake owns it; nothing added here (the spear's cast shake was removed in acd818b3) |
 | Body size 1.3 vs 1.1-1.15 | LOW | (c) | the concept heights (item 46) set it; not this branch's call |
@@ -143,6 +143,28 @@ The skate leaves a ribbon of ice chips, ice plates under her blades (CareLook "s
 
 Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|heavy|shatter|payoff|skatefire|rmb|e|dash|air|walk|pose|ultaim|ultkey|ult|ultskate|skateult> --arena-shot=<dir>/x.png [--care-close]`.
 
+## Animation timing (parity against the footage)
+Source: `briefs/hero-ref/tamsin.md` (one frame 0.2 s; the ult strip 0.1 s), measured in game by `tools/rimewright_anim_check.gd` (rows `anim ...` in `--rimewright-combo-check`). "Pose lag" is how late the clip's hit pose (flick, sling, thrust, palms out, stamp) lands after the kit's hit. Before the fix the kit hit at the move's start while the clip was still cocking, so the pose trailed it by the whole cock. Now `claire.json` gives each such move a `lead` (s of the clip skipped), so the pose lands on the hit; the GLB is untouched.
+
+| Move | Source (s) | Ours before | Ours after |
+|---|---|---|---|
+| Dart (LMB) | one every 0.15-0.2 | 0.18 s; pose 0.07 s late | 0.18 s; pose on the shot |
+| Large dart | same stream | pose 0.08 s late | pose on the shot |
+| Skating beam | same stream | pose 0.08 s late | pose on the shot |
+| Spear (RMB) | palms out, then flight | release 0.10 s = pose key | unchanged |
+| Spear detonation | 1.8-2.0 after landing | 1.82 s | unchanged |
+| Clench (the burst) | on the detonation | pose 0.10 s late | pose on the burst |
+| Wall tell | 0.2 sparkle, then it erupts | 0.22 s; shove 0.05 s late | 0.22 s; shove on the eruption |
+| Freeze (Wall recast) | on the press | pose 0.13 s late | pose on the stamp |
+| Skate push-off / stop | full speed within 0.2; stop 0.1-0.2 | 0.18 s / 0.03 s | unchanged |
+| Rink snap | 0.2 (f25 -> f27) | 0.2 s | unchanged |
+| Auto-crash | 3.2-3.5 | 3.52 s | unchanged |
+| Crash to recovery | 0.4 (f57 -> f61) | clip 0.4 s | unchanged |
+
+Kept from the owner, over the footage: spear flight time grows with distance (18 m/s), the wall stands 4.5 s with travel +50%, the ult holds 3.5 s.
+
+Model re-key wishes (GLB / `tools/art1`, not done here): the flick, sling and thrust keys could sit at 0 so `lead` goes away; `spear_aim` reaches the gathered pose at 0.12 s but the prop is full size at `SPEAR_FORM_T` 0.3 s; the wall shove key 0.27 would ideally be 0.2 (the eruption); `rime_crash` holds its recovery pose to 0.4 s though she is free from 0 s. Suggestion, not built: the footage frees her at f61, 0.4 s after the burst, ours at the burst.
+
 ## Look and sound
 - Pooled looks (`care_look.gd`, shaders `care_ice`, `care_disc`, `care_glow`, all mixed rather than additive so they keep their colour on bright ground): the ice dart (an ice-blue four-sided crystal with dark teal edges, tip first, with a frost streak), the 0.3 m skating beam with its cyan core, the star-headed spear (held in her hand while aiming, then thrown) with its long pale-cyan trail, the slow-zone flake disc with its spinning crystal, the detonation dome, the Shatter spikes, the ice shell, the frost glow, the skate's ice chips, and the Rink Wall's ice pillars (the shared wall node is hidden). Rimelock (`UltLook`, `ult_look.gd`): the rink (care_disc pattern 4: a ragged ice edge and a crack network whose glow is the countdown, a fringe of crystals), her frost bud, the light pillar and the ice block on each stunned foe; the shard burst reuses the Shatter spikes.
 - The Hoar Fan model: nine bone slats with long ice-crystal tips, a frosted web and a teal tassel.
@@ -154,4 +176,4 @@ Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|heavy|shatter|payoff|sk
 - X: main's `HunterKeys.ult_pressed` takes the `hunter_ult` key (the level gate) and calls the kit's `cast_ult`, which returns `HeroUlt.press(self, _start_rime)` (the ult's own cooldown in `cd["x"]`, the recast, a cast id); the kit also overrides `has_ult`, `ult_running`, `ult_recast`. Numbers are under `"x"` in `content/archetypes/rimewright.json`. Invulnerability is the hunter's `inv_t`, the root its `root_t`.
 - The wall is the shared `Verbs.add_wall` (blocking, the touch shove); the kit grows it, slides it, carries foes on its face and draws it.
 - Dash flow (item 32): the skate is her dash for `DashFlow` (`in_dash()`); `content/dash_flow/rimewright.json` says LMB fires from it as beams (`variant: beam`, read by `fires_in_dash` and the dart throw), RMB/E/Q/X fire, in the air too (item 62); the statue's slide out of a skate counts as the skate going on, so skate -> X is a "fire" with carry (item 64).
-- Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.
+- Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check` (with the `anim` timing rows), `--warden-clips-check`. `WardenClips._pick` adds a kmove's `lead` to the kit's `kmove_t`.

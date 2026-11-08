@@ -269,11 +269,11 @@ func open_pause(where: String) -> void:
 		item.call("Save and go to the main menu", "home", func():
 			Save.save_game()
 			close()
-			Game.goto("title"))
+			RateCard.gate(root, func(): Game.goto("title")))
 	if not OS.has_feature("web"):
 		var q: Button = item.call("Save and quit the game", "close", func():
 			Save.save_game()
-			get_tree().quit(), "", "Ghost")
+			RateCard.gate(root, get_tree().quit), "", "Ghost")
 		q.add_theme_color_override("font_color", UI.MUTED)
 	res.grab_focus.call_deferred()
 
@@ -323,6 +323,7 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger and your health. Chatty: everything it notices")
 	if admin_allowed():
 		_group(v, "Admin")
+		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 90 s lobby before each expedition. Off: plain loading")
 		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (F1)")
 
 func _tab_controls(v: VBoxContainer) -> void:
@@ -396,7 +397,7 @@ func _tab_video(v: VBoxContainer) -> void:
 		"Top right. The overlay adds frame time, draw calls, triangles and script costs")
 	var modelled: Array = Arch.ORDER.filter(WardenGlb.has_model)
 	if not modelled.is_empty():
-		_group(v, "Warden models")
+		_group(v, "Hunter models")
 		for a in modelled:
 			var hint := "Off: the simpler built-in model. From the next match or Hunter swap"
 			var r := _row(v, String(WardenGlb.ART[a]).capitalize(), hint)
@@ -410,6 +411,7 @@ func _tab_video(v: VBoxContainer) -> void:
 func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")
 	_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05, "Menus and the HUD, on top of fitting your window")
+	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
 	_group(v, "Comfort")
 	_slider(v, "Screen shake", "screen_shake", 0.0, 1.0, 0.05, "Only big hits on you shake the view; 0 turns it off")
 	_toggle(v, "Fewer flashes", "reduce_flashes", "Softer full-screen flashes when you're hit or level up")

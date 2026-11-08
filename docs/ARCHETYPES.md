@@ -164,14 +164,14 @@ kin part overpowered.
 
 New optional KinSpec field:
 `"infusion": {"hit": {...}, "ctrl": {...}, "guard": {...}, "util": {...}, "mod": [{...}, ...], "move": "blink"}`.
-If a kin leaves it out, it's **derived from the kin's current E active and rider**:
+If a kin leaves it out, it's **derived from the kin's current E active** (dodge riders are retired, owner 2026-11-05: dashes are the hero's own):
 
 1. `hit` ← the first damage effect with `over` > 0, or a damage-category mark.
 2. `ctrl` ← the first control effect.
 3. `guard` ← the first sustain effect.
 4. `util` ← the first utility effect.
-5. `mod` ← the active's modifiers in order, then the dodge rider's modifiers.
-6. `move` ← `dodge_rider.as`.
+5. `mod` ← the active's modifiers in order.
+6. `move`: retired with the dodge riders (no kin changes how you dash).
 
 The six kin today:
 

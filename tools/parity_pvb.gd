@@ -104,7 +104,7 @@ func _pin_audit(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: ArcherKit, home: 
 		float(K.dash_def()["cd"]) == 9.5 and float(K.e_def()["cooldown"]) == 15.0
 		and float(K.x_def()["cooldown"]) == 60.0)
 	ok("audit pin: no knock heal and no instant Focus draw in the kit data",
-		not K.res_def().has("knock_heal") and not pd.has("pierce") and float(pd["wall_floor"]) > 0.0)
+		not K.res_def().has("knock_heal") and not pd.has("pierce"))
 	fresh(T)
 	fresh(T2)
 	P.teleport(home)

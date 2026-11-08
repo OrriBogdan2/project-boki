@@ -132,7 +132,9 @@ func _tutorial_rules() -> void:
 	Save.d = _new_save()
 	var L := HomeLayout.ensure(Save.d)
 	_stats()
-	ok(FarmTutorial.active() and FarmTutorial.current() == "axe", "a new farm starts the tutorial on the axe")
+	ok(FarmTutorial.active() and FarmTutorial.current() == "hob", "a new farm starts with Hob calling you over")
+	FarmTutorial.event("hob")
+	ok(FarmTutorial.did("hob") and FarmTutorial.current() == "axe", "talking to him moves it on to the axe")
 	ok(not FarmTutorial.available("house") and not FarmTutorial.available("expedition"),
 			"the house waits for the wood, the last step for all")
 	ok(FarmTutorial.give_step_tool("axe") == "axe" and HomeGather.has_tool("axe") and FarmTutorial.give_step_tool("axe") == "",
@@ -154,8 +156,8 @@ func _tutorial_rules() -> void:
 	var house_hint := FarmTutorial.hint_text("house")
 	ok(house_hint.contains(FarmSites.cost_text(FarmSites.build_cost("house"))) and not house_hint.contains("{"),
 			"the house hint names what it costs: %s" % house_hint)
-	FarmTutorial.event("hob")
-	ok(not FarmTutorial.did("hob"), "doing a later step early does not count")
+	FarmTutorial.event("swing")
+	ok(not FarmTutorial.did("hammer"), "doing a later step early does not count")
 	var site := _add_house(L, true)
 	FarmTutorial.detect()
 	ok(FarmTutorial.did("house") and FarmTutorial.current() == "hammer",
@@ -168,9 +170,8 @@ func _tutorial_rules() -> void:
 	var feed_hint := FarmTutorial.hint_text("feed")
 	var has_key := feed_hint.contains(Settings.key_cap("build")) and not feed_hint.contains("{")
 	ok(FarmTutorial.stage("feed") == "place" and has_key, "the hint names the real key, no leftovers")
-	FarmTutorial.event("hob")
 	ok(FarmTutorial.did("hob") and FarmTutorial.current() == "feed",
-			"free order: meeting Hob first is fine, the prompt stays on the first step left")
+			"free order: the prompt stays on the first step left")
 	site.erase("site")
 	ok(FarmTutorial.available("task") and FarmTutorial.current() == "task",
 			"once the house stands the job step is next")
@@ -337,15 +338,26 @@ func _home(kin_count: int):
 	Save.d = _new_save(kin_count)
 	HomeLayout.ensure(Save.d)
 	_stats()
+	return await _ready_home()
+
+## A Home with its interface built (its meshes build over a few frames; slower on a software rasterizer).
+func _ready_home():
 	var home = await main._hb_home()
+	var t0 := Time.get_ticks_msec()
+	while home.panel_host == null and Time.get_ticks_msec() - t0 < 60000:
+		await main.get_tree().process_frame
 	home._close_panel()
 	return home
 
 func _world() -> void:
 	var home = await _home(1)
-	ok(home.guide != null and home.hob != null and home.hob.node == null, "no Hob before there is a house")
-	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_lbl.text.contains("axe"),
+	var stall := HomeLayout.deco_center(HomeLayout.fixtures(Save.d, "stall")[0])
+	ok(home.guide != null and home.hob != null and is_instance_valid(home.hob.node)
+			and Vector2(home.hob.pos.x - stall.x, home.hob.pos.z - stall.z).length() < 4.0,
+			"Hob waits by the market stall from the start")
+	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_lbl.text.contains("Hob"),
 			"the first prompt is on screen: %s" % home.guide.hint_lbl.text)
+	FarmTutorial.event("hob")
 	ok(home.get("day1_box") == null, "the old first-day card is gone")
 	var g0 := int(Save.d["gems"])
 	var house_cost := FarmSites.build_cost("house")
@@ -353,10 +365,11 @@ func _world() -> void:
 	ok(int(Save.d["gems"]) == g0 and Work.mat("wood") == 0 and Work.mat("stone") == 0,
 			"marking it out is free: nothing is spent yet")
 	home._sync_fixtures()
-	ok(is_instance_valid(home.hob.node), "Hob turns up once the house is down")
 	var hc: Vector3 = HomeLayout.deco_center(_entry("house"))
 	var hd: float = Vector2(home.hob.pos.x - hc.x, home.hob.pos.z - hc.z).length()
-	ok(hd > 3.0 and hd < 8.0, "he stands near the house, not on it (%.1f m)" % hd)
+	ok(is_instance_valid(home.hob.node) and hd > 3.0 and hd < 8.0,
+			"while the house goes up he works beside it, not on it (%.1f m)" % hd)
+	home.hob.node.position = home.hob.pos      # (he walks over from the stall)
 	var w: World = home.world
 	ok(not w.is_void(home.hob.pos.x, home.hob.pos.z), "on solid ground")
 	# talking
@@ -385,8 +398,8 @@ func _world() -> void:
 	ok(is_instance_valid(home.guide.tracker) and home.guide.tracker.get_parent() == home.root_ui,
 			"the Goals card is on screen")
 	home.hob.talk()
-	ok(home.panel_open == "Hob Brackenridge" and FarmTutorial.did("hob"),
-			"talking opens his panel and ticks the meet-Hob step")
+	ok(home.panel_open == HobTalk.TALK and home.hob.chat.talking() and FarmTutorial.did("hob"),
+			"talking opens the talk box face to face")
 	home._close_panel()
 	# the build menu
 	home.hb.toggle()
@@ -428,8 +441,7 @@ func _world() -> void:
 	Save.d = JSON.parse_string(js)
 	ok(FarmTutorial.did("house") and FarmTutorial.did("hob") and not FarmTutorial.did("feed"),
 			"after save and load the tutorial is where it was")
-	home = await main._hb_home()
-	home._close_panel()
+	home = await _ready_home()
 	ok(is_instance_valid(home.hob.node), "Hob is there again")
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -552,14 +564,16 @@ func _farm2() -> void:
 	L["water"].clear()
 	Save.d["gems"] = 100
 	home.hb.take("river")
-	var line: Array = []
-	for x in range(36, 42): line.append(Vector2i(x, 27))
+	var line := _free_row(home.hb, 6)
+	ok(not line.is_empty(), "found an open row for a channel")
 	home.hb.cells = line
 	home.hb._check_cells()
 	var placed: bool = home.hb.place_held()
 	ok(placed and (L["water"] as Dictionary).size() == line.size() and int(Save.d["gems"]) == 100 - 2 * line.size(),
 			"dragging a river puts water on every tile of the channel for %d gems" % (2 * line.size()))
-	ok(FarmWater.near_cells(Save.d, [Vector2i(38, 29)]) and not FarmWater.near_cells(Save.d, [Vector2i(38, 35)]), "and a patch beside it is near water")
+	var mid: Vector2i = line[2] if line.size() > 2 else Vector2i.ZERO
+	var beside := FarmWater.near_cells(Save.d, [mid + Vector2i(0, 2)])
+	ok(beside and not FarmWater.near_cells(Save.d, [mid + Vector2i(0, 8)]), "and a patch beside it is near water")
 	home.hb.toggle()
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -576,6 +590,19 @@ func _note_text(hb) -> String:
 func _note_col(hb) -> Color:
 	var l := _note_label(hb)
 	return l.modulate if l else Color.WHITE
+
+## `n` tiles in a row that can all be built on (the wild land comes from the save's random island seed, so
+## no fixed row is open every run).
+func _free_row(hb, n: int) -> Array:
+	var p := HomeLayout.LANDING
+	for dz in range(-12, 13):
+		for dx in range(-12, 13):
+			var row: Array = []
+			for i in n:
+				row.append(Vector2i(int(p.x) + dx + i, int(p.z) + dz))
+			if row.all(func(c): return hb.cell_reason(c) == "") and hb.keeps_paths([], row):
+				return row
+	return []
 
 func _free_cells(hb, sz: Vector2i) -> Array:
 	var p := HomeLayout.LANDING

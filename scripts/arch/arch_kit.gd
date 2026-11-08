@@ -77,13 +77,23 @@ func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff
 func rank(slot: String) -> int:
 	return h.ability_level(slot)
 
-## +15% damage per rank (Effects.level_k) on top of the hunter's own damage multiplier and the
-## ability power their level gives (LevelGrowth.ap).
+## A hero's own multiplier for one slot at its rank: JSON `<table>` {slot: [rank 1, rank 2, rank 3]}
+## (rank_dmg, rank_cd, rank_shield; the source's upgrades, see docs/heroes). `shared` when the hero has no row.
+func rank_k(table: String, slot: String, shared: float) -> float:
+	var row: Array = d.get(table, {}).get(slot, [])
+	return float(row[clampi(rank(slot) - 1, 0, row.size() - 1)]) if not row.is_empty() else shared
+
+## The hero's rank damage (rank_dmg, else +15% a rank: Effects.level_k) on top of the hunter's own damage
+## multiplier and the ability power their level gives (LevelGrowth.ap).
 func power(slot: String) -> float:
-	return m.dmg_mult(h) * Effects.level_k({"level": rank(slot)}) * LevelGrowth.ap(h)
+	return m.dmg_mult(h) * rank_k("rank_dmg", slot, Effects.level_k({"level": rank(slot)})) * LevelGrowth.ap(h)
 
 func cd_k(slot: String) -> float:
-	return h.rank_cd_k(slot)
+	return rank_k("rank_cd", slot, h.rank_cd_k(slot))
+
+## The dash recharge multiplier at the dash rank (rank_cd.dash, else 15% faster a rank past the first).
+func dash_k() -> float:
+	return rank_k("rank_cd", "dash", 1.0 - 0.15 * float(rank("dash") - 1))
 
 func rmb_charges() -> int: return int(rmb_def().get("charges", 1))
 
@@ -204,6 +214,8 @@ func _r_end() -> void: pass
 ## A cast holds the caster still (no walking or jumping); aim_lock() is the facing it keeps (ZERO: free to turn).
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
+## A move that keeps the glider shut while it runs.
+func no_glide() -> bool: return false
 
 func busy() -> bool:
 	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
@@ -469,9 +481,9 @@ func dash_feel() -> Dictionary:
 		_dash_feel = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/dash_feel.json"))
 	return _dash_feel.get(id, _dash_feel["default"])
 
-## A travelling dash of a given length and time (the Effects dash, so perfect dodges, riders and
-## the dash buffer all work as before).
-func travel(dist: float, t: float, extra := {}, use_ex := false) -> void:
+## A travelling dash of a given length and time (the Effects dash, so perfect dodges and the dash
+## buffer all work as before). The hero's own: no Boki changes it (DECISIONS 2026-11-05, --boki-dash-check).
+func travel(dist: float, t: float, extra := {}) -> void:
 	var feel := dash_feel()
 	dist *= float(feel["dist"])
 	t *= float(feel["time"])
@@ -479,41 +491,8 @@ func travel(dist: float, t: float, extra := {}, use_ex := false) -> void:
 	for k in extra:
 		e[k] = extra[k]
 	Effects.run([e], h, {"slot": "dodge", "ability": String(dash_def().get("id", "dash")), "level": rank("dash")})
-	h._dash_rider(use_ex)
 	Feel.dash_sound(m, id, h.pos, h)
 	CombatBus.ability_used.emit(h, String(dash_def().get("id", "dash")), "dodge")
-
-## The kin's dodge rider on a dash that doesn't travel (a blink, a zip, a leap): on_start at the
-## departure, on_pass on foes within 1m of the line (the streak rule), on_end at the arrival
-## (DASHES §3.4). Returns the rider's repeat and as fields for the shape to interpret.
-func rider_points(from: Vector3, to: Vector3) -> Dictionary:
-	var out := {"repeat": null, "as": ""}
-	var k: Kin = h.kin
-	if k == null or k.dead or k.ks == null or k.ks.dodge_rider.is_empty():
-		return out
-	var rd: Dictionary = k.ks.dodge_rider
-	var cx := KinExec.make_cx(m, h, k, h, h.inp.get("aim", to), m.dmg_mult(h) * Effects.level_k({"level": rank("dash")}), "dodge", "rider_" + k.species)
-	var dir := Vector2(to.x - from.x, to.z - from.z)
-	dir = dir.normalized() if dir.length() > 0.05 else h.aim_dir()
-	if not (rd.get("on_start", []) as Array).is_empty():
-		var c1 := cx.duplicate(); c1["at"] = from; c1["dir"] = dir
-		KinExec.run_stages(rd["on_start"], c1)
-	if not (rd.get("on_pass", []) as Array).is_empty():
-		var a2 := Vector2(from.x, from.z); var b2 := Vector2(to.x, to.z)
-		for f in m.foes_of(h.team):
-			var fp := Vector2(f.pos.x, f.pos.z)
-			if fp.distance_to(Geometry2D.get_closest_point_to_segment(fp, a2, b2)) < 1.0 + f.r and absf(f.pos.y - from.y) < 2.0:
-				KinExec.apply_foe(rd["on_pass"], f, cx, from)
-		m.fx.bolt(from + Vector3(0, 0.8, 0), to + Vector3(0, 0.8, 0), Hunter._rider_color(k.ks))
-	if not (rd.get("on_end", []) as Array).is_empty():
-		var c2 := cx.duplicate(); c2["at"] = to; c2["dir"] = dir
-		KinExec.run_stages(rd["on_end"], c2)
-	for md in rd.get("modifiers", []):
-		if (md as PartSpec).type == "repeat": out["repeat"] = md
-	out["as"] = String(rd.get("as", "dash"))
-	var th := String(Data.KIN.get(k.species, {}).get("type", ""))
-	Feel.sound(m, "sweet", th, from, h)
-	return out
 
 # ------------------------------------------------------------------ infusion and the grammar
 ## The kin's infusion, or {} with no kin able to fight.
@@ -837,10 +816,11 @@ func _tick_knocks() -> void:
 
 ## A rival we hit in the last 5s was knocked (mine: our blow did it; else an assist).
 func on_knock(_t: Hunter, _mine: bool) -> void: pass
-func fires_in_dash() -> bool: return false
+## The weapon fires in this hero's dash when its LMB row says "fire" (DashFlow); a kit with its own dash overrides.
+func fires_in_dash() -> bool: return String(flow.row("lmb")["mode"]) == "fire"
 ## The body and weapon stay on the cursor through this dash, the legs alone following it (item 109). False: she
 ## turns along the dash. A kit that fires mid-dash answers true, or the gun points away from its own rounds.
-func aims_in_dash() -> bool: return false
+func aims_in_dash() -> bool: return fires_in_dash()
 ## In this hero's dash right now, as DashFlow sees it (a kit with its own dash state overrides this).
 func in_dash() -> bool: return h.roll_t > 0.0 and h.move_kind == "dash"
 ## s left in that dash (0 when not in one); a kit that overrides in_dash() overrides this too.
