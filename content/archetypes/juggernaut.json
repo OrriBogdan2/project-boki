@@ -8,7 +8,7 @@
 	"color": "#ff8a6a",
 	"clip": {"lines": {"dash": "Charge through foes; the tip hits hardest.", "lmb": "Wide greatsword slashes.", "rmb": "A heavy slam. Hold to charge it.", "e": "Chain a foe or a wall, then haul yourself in.", "x": "Guard, then lunge into a healing cleave."}, "fx": {"x": "swing"}},
 	"plate_offset": 2.75,
-	"body": {"size": 1.06, "head": 0.62, "legs": 1.55, "neck": -0.02, "build": 0.95, "hit_r": 0.428},
+	"body": {"size": 1.097, "head": 0.62, "legs": 1.55, "neck": -0.02, "build": 0.95, "hit_r": 0.428},
 	"model_glow": {"core": "#fffaf0", "edge": "#f2d48a", "strength": 2.4},
 	"fantasy": "The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.",
 	"silhouette": "the horned pauldrons",

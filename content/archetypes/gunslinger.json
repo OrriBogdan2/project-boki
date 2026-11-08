@@ -5,7 +5,7 @@
 	"gender": "female",
 	"personality": "A sharp, professional soldier in marine-style gear. She takes the contract and finishes the job.\nCalm under fire, and always has a plan for the way out.",
 	"weight": "medium",
-	"body": {"size": 0.855, "chest": 1.0, "hit_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
+	"body": {"size": 0.893, "chest": 1.0, "hit_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
 	"color": "#ff9a5c",
 	"clip": {"lines": {"dash": "Skid or slide, and keep shooting.", "lmb": "Full-auto rifle. Dazed foes take 90% more.", "rmb": "Fire the charge from your cannon; its blast Dazes.", "e": "Stand still, then fire a beam through walls.", "x": "Call a burning shell down on the cursor.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}},
 	"model_glow": {"core": "#3dff3a", "edge": "#2fd24a", "strength": 1.5},
