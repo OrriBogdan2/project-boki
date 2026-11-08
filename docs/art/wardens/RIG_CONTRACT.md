@@ -64,6 +64,7 @@ one or hangs it on another parent. They are skinned like the rest and follow the
 (the loader never writes them), and only that Warden's kit poses them, on their rest, with
 `WardenGlb.pose_extra(model, bone, rot, scale)` (`rot` about the bone's head, its axis in model space as the model
 rests; a zero scale hides what rides the bone). On a procedural model the call does nothing.
+- **Motley** (`ostra`, art `ostra`): `x_breath` (under `hips`), the rib cage's swell, keyed as scale by every clip (tools/art1/anim_kit.py `add_breath`, the pose key `breath`).
 - **Grimble** (`dredge`, art id unchanged): declared in content/rules/warden_anim/dredge.json (`extra_bones`): `hook`, `gun`, `hoard`, `ball`, face and hand bones. See art/wardens/dredge/IMPORT.md.
 
 The kit moves (`kmoves_*.gd`) only key channels on these nodes (`p` pitch, `y` yaw, `r` roll, `lift`, `sq`

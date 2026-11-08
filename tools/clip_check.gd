@@ -19,8 +19,6 @@ const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as
 const STAND_OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
 	"bulwark:stance": "head seam 4.2 deg, 1.6 s long",
-	"ostra:idle": "x_fing seams 11-13 deg",
-	"ostra:stance": "x_fing seams 12-16 deg",
 	"dolm:stance": "0.8 s long (a bounce, not a stance)",
 }
 

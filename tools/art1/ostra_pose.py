@@ -7,6 +7,7 @@ from mathutils import Matrix, Quaternion, Vector
 
 SPINE_FR = 1.0
 FINGERS = ("1", "2", "3", "4")
+BREATH_AXES = (0.4, 1.0, 0.6)  # x_breath's swell per model axis (side, chest forward, up) for one unit of "breath"
 
 # what a clip's keys start from: every channel, so any key can leave any channel out and hold its last value
 NEUTRAL = {
@@ -20,6 +21,8 @@ NEUTRAL = {
     "cR": 0.25, "cL": 0.25,     # curl 0 straight .. 1 claw shut
     "sR": 0.3, "sL": 0.3,       # spread 0 .. 1
     "wR": 0.0, "wL": 0.0,       # a ripple through the fingers (radians)
+    "wph": 0.0,                 # the ripple's phase (radians; ostra_anim runs it, a loop's closes on the seam)
+    "breath": 0.0,              # the rib cage's swell on x_breath (0.03 = 3 %)
     "jaw": 0.0,                 # degrees open
     "brow": 0.0,                # -1 scowl .. 1 raised
     "browd": 0.0,               # + cocks his right brow, - his left
@@ -110,7 +113,7 @@ class Rig:
         Bh = rh.inverted() @ rf @ Af.inverted() @ Ah
         return Bu, Bf, Bh
 
-    def fingers(self, side, curl, spread, wave, t):
+    def fingers(self, side, curl, spread, wave, ph):
         """-> {bone: B}"""
         s = "R" if side > 0 else "L"
         out = {}
@@ -120,7 +123,7 @@ class Rig:
             b = "x_fing%sb.%s" % (nm, s)
             yd = norm(self.tail[a] - self.head[a])
             ax = norm(np.cross(yd, palm))      # curling turns the finger toward the palm
-            c = curl + wave * math.sin(t * 7.0 + i * 1.3)
+            c = curl + wave * math.sin(ph + i * 1.3)
             sp = (i - 1.5) * spread * 0.16
             q1 = Quaternion(Vector(ax), c * 1.05) @ Quaternion(Vector(palm), sp * -side)
             q2 = Quaternion(Vector(ax), c * 1.2)
@@ -133,7 +136,7 @@ class Rig:
         out[b] = self.about(b, Quaternion(Vector(ax), curl * 0.9))
         return out
 
-    def solve(self, P, t):
+    def solve(self, P):
         """a pose dict -> {bone: (B quaternion, translation or None, scale or None)}"""
         out = {}
         b = max(P["body"], 0.02)
@@ -144,7 +147,7 @@ class Rig:
             out["upper_arm." + s] = (Bu, None, None)
             out["forearm." + s] = (Bf, None, None)
             out["hand." + s] = (Bh, None, None)
-            for k, v in self.fingers(side, P["c" + s], P["s" + s], P["w" + s], t).items():
+            for k, v in self.fingers(side, P["c" + s], P["s" + s], P["w" + s], P["wph"]).items():
                 out[k] = (v, None, None)
         out["x_jaw"] = (self.about("x_jaw", Quaternion((1, 0, 0), math.radians(-P["jaw"]))), None, None)
         for side, s in ((1, "R"), (-1, "L")):
@@ -163,6 +166,7 @@ class Rig:
         out["x_smoke"] = (self.about("x_smoke", Quaternion((0, 0, 1), math.radians(P["smoke"] * 220.0))), None, Vector((sm, sm, sm)))
         v = min(max(P["body"], 0.02), 1.0)         # (the void goes down into the box with him)
         out["x_void"] = (Quaternion(), None, Vector((v, v, v)))
+        out["x_breath"] = (Quaternion(), None, Vector([1.0 + P["breath"] * a for a in BREATH_AXES]))
         fn = max(P["fan"], 0.02)
         out["x_fan"] = (Quaternion(), None, Vector((fn, fn, fn)))
         return out

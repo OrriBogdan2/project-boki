@@ -10,6 +10,13 @@ ORB_UP = {"hR": (0.31, 0.20, 1.05), "fR": (0.05, 0.75, 0.65), "pR": (-0.25, -0.4
 FAN_UP = {"hL": (-0.30, 0.18, 1.10), "fL": (-0.25, 0.25, 0.95), "pL": (0.15, -0.95, 0.2), "eL": (-1.0, -0.6, -0.5), "cL": 0.55, "sL": 0.6}
 STILL = dict(ORB_UP, **FAN_UP, spine=(8.0, -5.0, 2.0), head=(-14.0, 6.0, 12.0), brow=-0.5, cheek=0.3, lid=0.3)
 
+# standing on the spring (the idle): the right hand low and loose at his side, the deck held low in the left, the fan to the front
+LOOSE = dict(STILL, hR=(0.25, 0.10, 0.94), fR=(0.25, 0.35, -0.9), pR=(-0.9, 0.2, 0.0), eR=(1.0, -0.6, -0.2), cR=0.35, sR=0.4,
+             hL=(-0.25, 0.16, 1.00), fL=(-0.2, 0.55, 0.8), eL=(-1.0, -0.6, -0.2), cL=0.5)
+# the stance: sunk lower into the box, the deck worked between both hands (stance_add moves them), the grin wider
+SHUFFLE = dict(LOOSE, hR=(0.30, 0.24, 1.12), fR=(-0.3, 0.8, 0.2), pR=(-0.7, 0.0, -0.7), eR=(1.0, -0.6, -0.4), cR=0.3, hL=(-0.28, 0.22, 1.06),
+               spine=(14.0, -6.0, 0.0), head=(-20.0, 6.0, 8.0), brow=-1.0, cheek=0.6, lift=(0.0, 0.02, -0.06))
+
 # leaning out, both hands in it
 READY = dict(STILL, hR=(0.26, 0.32, 1.12), hL=(-0.26, 0.28, 1.14), spine=(18.0, -8.0, 0.0), head=(-22.0, 8.0, 8.0), brow=-1.0, cheek=0.6, lift=(0.0, 0.03, -0.05), box=(3.0, 0.0))
 
@@ -25,23 +32,89 @@ LIMP = {"hR": (0.2, 0.07, 0.82), "hL": (-0.2, 0.07, 0.82), "fR": (0.05, 0.1, -1.
         "cR": 0.3, "cL": 0.3, "sR": 0.2, "sL": 0.2, "eR": (1.0, -0.5, 0.0), "eL": (-1.0, -0.5, 0.0)}
 
 
-def breath(P, t, period, amp=0.6):
-    s = P["spine"]
-    P["spine"] = (s[0] + amp * math.sin(t / period * TAU), s[1], s[2])
+def loop_curve(pts):
+    """a closed curve through (phase, value) points, phase 0 first and under 1: Catmull-Rom across the seam too, so the
+    end meets the start in value and slope. -> f(phase), any phase (wraps)"""
+    n = len(pts)
+
+    def at(k):          # point k, wrapping, its phase unrolled past the seam
+        return pts[k % n][0] + k // n, pts[k % n][1]
+
+    def slope(k):
+        (a, va), (b, vb) = at(k - 1), at(k + 1)
+        return (vb - va) / (b - a)
+
+    def f(x):
+        x %= 1.0
+        k = max(i for i in range(n) if pts[i][0] <= x)
+        (a, va), (b, vb) = at(k), at(k + 1)
+        h, s = b - a, (x - a) / (b - a)
+        return ((2 * s ** 3 - 3 * s ** 2 + 1) * va + (s ** 3 - 2 * s ** 2 + s) * h * slope(k)
+                + (3 * s ** 2 - 2 * s ** 3) * vb + (s ** 3 - s ** 2) * h * slope(k + 1))
+    return f
+
+
+# one bob on the spring, -1 wound down: compress, a beat wound, the release flung past, a wobble settling, the hang
+SPRING = loop_curve([(0.0, 0.0), (0.09, -0.5), (0.16, -0.95), (0.21, -1.0), (0.29, 0.5), (0.38, -0.25), (0.47, 0.1), (0.56, -0.03),
+                     (0.68, 0.0), (0.84, 0.02)])
+# the stance's shuffle, on the same bob: the hands meet as the spring winds (1 together), part in an arc as it lets go
+TOGETHER = loop_curve([(0.0, 0.0), (0.05, 0.12), (0.15, 0.9), (0.2, 1.0), (0.24, 0.96), (0.33, 0.25), (0.4, -0.06), (0.5, 0.0), (0.75, 0.02)])
+FAN_OPEN = loop_curve([(0.0, 1.0), (0.12, 0.6), (0.19, 0.32), (0.24, 0.32), (0.31, 1.1), (0.38, 0.96), (0.46, 1.0)])
+
+IDLE_LEN, IDLE_BOB = 5.0, 2.5       # s: the idle loop, one bob on the spring (two a loop)
+STANCE_LEN, STANCE_BOB = 6.0, 3.0   # s: the stance loop, one bob and one shuffle (two a loop)
+
+
+def bob(t, period, frames=0):
+    """the spring's bob at t, frames (30 fps) late: each part down the chain answers it later"""
+    return SPRING((t - frames / 30.0) / period)
+
+
+def settle_on_spring(P, t, period, lift, sway):
+    """the overlap chain on one bob: the box leads, the pelvis rides the spring, the chest 3 frames late, the head 5,
+    the hands 7 and 8 (in the torso's frame, so their lag is their own bob less the hips'); a weight shift side to side
+    over the spring once a loop (the spring's soft knees); a breath per bob on x_breath, out as it winds, in on the hang"""
+    u = t / (period * 2)
+    side = math.sin(u * TAU)
+    b = P["box"]
+    P["box"] = (b[0] - 1.2 * bob(t, period, -2), b[1] + 0.8 * math.sin(u * TAU + 0.4))
     l = P["lift"]
-    P["lift"] = (l[0], l[1], l[2] + 0.006 * math.sin(t / period * TAU * 2))
+    P["lift"] = (l[0] + 0.010 * sway * side, l[1], l[2] + lift * bob(t, period))
+    s = P["spine"]
+    P["spine"] = (s[0] - 3.0 * bob(t, period, 3), s[1] + 2.0 * math.sin(u * TAU + 1.0), s[2] + 2.5 * sway * math.sin(u * TAU - 0.25))
+    h = P["head"]
+    P["head"] = (h[0] - 4.5 * bob(t, period, 5), h[1], h[2] - 1.5 * sway * math.sin(u * TAU - 0.6))
+    for hand, frames in (("hR", 7), ("hL", 8)):
+        x, y, z = P[hand]
+        P[hand] = (x + 0.006 * sway * math.sin(u * TAU - 0.9), y, z + lift * (bob(t, period, frames) - bob(t, period)))
+    P["breath"] = 0.03 * (0.5 - 0.5 * math.cos((t / period - 0.45) * TAU))
 
 
 def idle_add(P, t):
-    breath(P, t, 3.2)
-    P["wR"] = 0.1
-    P["wL"] = 0.06
+    """on the spring, hands low; the right drums one finger after another through each hang (12 ripples a loop)"""
+    settle_on_spring(P, t, IDLE_BOB, 0.022, 1.0)
+    v = (t / IDLE_BOB) % 1.0
+    P["wR"] = 0.16 * (0.5 - 0.5 * math.cos((v - 0.55) / 0.45 * TAU)) if v > 0.55 else 0.0
+    P["wL"] = 0.04
+    P["wph"] = t / IDLE_LEN * 12 * TAU
 
 
 def stance_add(P, t):
-    breath(P, t, 2.0, 0.7)
-    P["wR"] = 0.18
-    P["wL"] = 0.1
+    """sunk lower on the spring, shuffling: the left brings the deck up to the right in an arc, squares it as the spring
+    winds, and the cards spring back open as the left sweeps away and down; the head watches, a few frames late"""
+    settle_on_spring(P, t, STANCE_BOB, 0.016, 0.6)
+    w = t / STANCE_BOB
+    for hand, far, meet, frames in (("hR", (0.30, 0.24, 1.12), (0.07, 0.30, 1.16), 0), ("hL", (-0.28, 0.22, 1.06), (-0.04, 0.28, 1.10), 1)):
+        g = TOGETHER(w - frames / (30.0 * STANCE_BOB))
+        x, y, z = P[hand]
+        P[hand] = tuple(c + (m - f) * g for c, f, m in zip((x, y, z), far, meet))
+        P[hand] = (P[hand][0], P[hand][1], P[hand][2] + 0.24 * g * (1 - g))
+    P["fan"] = FAN_OPEN(w - 2 / (30.0 * STANCE_BOB))
+    g = TOGETHER(w - 4 / (30.0 * STANCE_BOB))
+    h = P["head"]
+    P["head"] = (h[0] + 6.0 * g, h[1] + 4.0 * g, h[2])
+    s = P["spine"]
+    P["spine"] = (s[0], s[1] + 3.0 * g, s[2])
 
 
 def laugh(a, rate=11.0, t0=0.0, t1=99.0):
@@ -139,16 +212,20 @@ def creep(box, shift):
 
 CLIPS = {
     # ---------------------------------------------------------------- loco: the box goes first, tilting toward the way he moves; the body rides late
-    "idle": {"len": 3.2, "base": STILL, "add": idle_add, "loop": True, "keys": [
+    # the jester on his spring. Fidget once a loop: the head tilts over too far, past natural, holds, and snaps back with
+    # the grin as the spring lets go (2.95 s); its keys rest everywhere else, so the seam closes
+    "idle": {"len": IDLE_LEN, "base": LOOSE, "add": idle_add, "loop": True, "keys": [
         (0.0, {}),
-        (1.3, {}),
-        # a jack's tick: the head snapped over, held, snapped back, the grin wider
-        (1.42, {"head": (-14.0, -10.0, -9.0), "brow": -0.2, "cheek": 0.7}, "snap"),
-        (2.3, {"head": (-12.0, -8.0, -10.0)}),
-        (2.42, {"head": (-14.0, 6.0, 12.0), "brow": -0.5, "cheek": 0.3}, "snap"),
-        (3.2, {}),
+        (1.55, {}),
+        (2.55, {"head": (-10.0, 14.0, 40.0), "brow": 0.3, "cheek": 0.15, "lid": 0.0}, "in"),
+        (2.95, {"head": (-11.0, 15.0, 43.0)}),
+        (3.05, {"head": (-18.0, 2.0, -2.0), "brow": -0.8, "cheek": 1.0, "jaw": 7.0, "lid": 0.4}, "snap"),
+        (3.45, {"head": (-14.0, 7.0, 15.0), "jaw": 2.0}),
+        (3.8, {"head": LOOSE["head"], "jaw": 0.0}),
+        (4.4, {"brow": LOOSE["brow"], "cheek": LOOSE["cheek"], "lid": LOOSE["lid"]}),
+        (IDLE_LEN, {}),
     ]},
-    "stance": {"len": 2.0, "base": READY, "add": stance_add, "loop": True, "keys": [(0.0, {}), (2.0, {})]},
+    "stance": {"len": STANCE_LEN, "base": SHUFFLE, "add": stance_add, "loop": True, "keys": [(0.0, {}), (STANCE_LEN, {})]},
     "walk_f": {"len": 1.4, "loop": True, "base": loco((9.0, 0.0), (4.0, -4.0, 2.0), (0.0, -0.03, -0.03), head=(-18.0, 4.0, 8.0)), "add": wobble(1.4, 2.5, 2.0, 0.012), "keys": [(0.0, {}), (1.4, {})]},
     "walk_b": {"len": 1.4, "loop": True, "base": loco((-9.0, 0.0), (10.0, -4.0, 0.0), (0.0, 0.03, -0.03), head=(-12.0, 2.0, 10.0)), "add": wobble(1.4, 2.5, 2.0, 0.012), "keys": [(0.0, {}), (1.4, {})]},
     "walk_l": {"len": 1.4, "loop": True, "base": loco((3.0, -9.0), (6.0, 8.0, 6.0), (0.03, 0.0, -0.03)), "add": wobble(1.4, 2.0, 2.5, 0.012), "keys": [(0.0, {}), (1.4, {})]},

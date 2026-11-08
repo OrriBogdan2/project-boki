@@ -11,6 +11,8 @@ script in Blender on the shared armature; id and files stay `ostra`. Under the 1
   `x_void` (the void tail goes into the box with him), `x_smoke` (the smoke wound on the spring, scaled to nothing in every still). `hips` sits at the
   top of the spring: the spring is a blend of x_box and hips, so moving the hips compresses it. Clips key the hips' position and scale (`offset_bones`):
   a scale of 0.02 with the lid shut is "down in the box" (the arrive, the emote, the death).
+  `x_breath` (under `hips`, added by `anim_kit.add_breath` at export; the chest between waist and ruff) swells the rib cage, keyed as scale
+  (the pose key `breath`). The fingers' ripple runs on the pose key `wph`; a loop rounds it to whole turns, so the seam closes.
 - **Normal map:** `ostra_normal.jpg`, made from the paint's own relief (`ostra_paint.normal_map`): plank gaps, grain, folds, pleats. hero_toon `use_nrm`, `normal_k` per slot in warden_look.json.
 - **Face:** an emissive texture on a dished plane inside the hood (`tools/art1/ostra_mask.py`, to briefs/art-refs/ostra_head.png), tipped up 16 degrees for the match camera; `x_jaw`,
   `x_brow.*`, `x_cheek.*` bend the grin and slits.

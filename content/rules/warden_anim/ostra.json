@@ -3,7 +3,7 @@
 	"skinned_weapon": true,
 	"rig_root": true,
 	"offset_bones": ["hips"],
-	"extra_bones": {"x_box": "root", "x_boxlid": "x_box", "x_crank": "x_box", "x_smoke": "x_box", "x_void": "x_box", "x_fan": "hand.L", "x_jaw": "head", "x_brow.L": "head", "x_brow.R": "head", "x_cheek.L": "head", "x_cheek.R": "head"},
+	"extra_bones": {"x_box": "root", "x_boxlid": "x_box", "x_crank": "x_box", "x_smoke": "x_box", "x_void": "x_box", "x_fan": "hand.L", "x_jaw": "head", "x_brow.L": "head", "x_brow.R": "head", "x_cheek.L": "head", "x_cheek.R": "head", "x_breath": "hips"},
 	"blade": {"root": "anchor_orb", "tip": "weapon_muzzle", "bone": "hand.R"},
 	"sway": {"bone": "hips", "stiff": 70.0, "damp": 7.0, "gain": 0.009, "max": 0.45, "tumble_hz": 0.35, "swirl_m": 0.13, "clear_m": 0.5, "clear_orbit": "orbit_cards"},
 	"loco": {

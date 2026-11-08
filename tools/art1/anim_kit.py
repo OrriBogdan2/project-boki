@@ -237,3 +237,30 @@ class Clips:
             fc.update()
         self.lengths[name] = (n - 1) / FPS
         return act
+
+
+def add_breath(arm, head, weight):
+    """The rib cage's leaf bone x_breath under hips (IDLE_AUDIT "No chest"): a bone at head pointing +Y (its axes the
+    model's, so BREATH_AXES read in model space), and the hips-skinned vertices moved onto it by weight(model point)
+    (0..1, 1 where the chest swells whole). Run before Clips(arm); a rig that has one is left alone."""
+    if "x_breath" in arm.data.bones:
+        return
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = arm.data.edit_bones.new("x_breath")
+    eb.head = Vector(head)
+    eb.tail = Vector(head) + Vector((0, 0.15, 0))
+    eb.roll = 0.0
+    eb.parent = arm.data.edit_bones["hips"]
+    bpy.ops.object.mode_set(mode="OBJECT")
+    for o in bpy.data.objects:
+        if o.type != "MESH" or "hips" not in o.vertex_groups:
+            continue
+        hips = o.vertex_groups["hips"]
+        vg = o.vertex_groups.new(name="x_breath")
+        for v in o.data.vertices:
+            g = next((g for g in v.groups if g.group == hips.index), None)
+            w = weight(o.matrix_world @ v.co) * g.weight if g else 0.0
+            if w > 0.001:
+                hips.add([v.index], g.weight - w, "REPLACE")
+                vg.add([v.index], w, "REPLACE")
