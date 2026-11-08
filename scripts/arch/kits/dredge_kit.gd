@@ -515,6 +515,7 @@ func _tick_wind(dt: float) -> void:
 		AimKit.hide(h, "e_tell")
 		return
 	h.face = atan2(-slam_dir.x, -slam_dir.y)
+	_hop(ed, float(ed["windup"]) - wind)
 	var k := 1.0 - wind / float(ed["windup"])
 	AimKit.cone(h, "e_tell", slam_tell(k))
 	if tells_visible():
@@ -523,6 +524,18 @@ func _tick_wind(dt: float) -> void:
 		wind = 0.0
 		AimKit.hide(h, "e_tell")
 		_anchor()
+
+## The hop of the footage's second frame (0222): he springs about one body height forward along the locked slam
+## direction, `hop` metres over `hop_t` seconds from `hop_from` seconds into the wind-up, so the fist lands on the
+## far end of it. Skipped mid-barge or in the air (the barge and the dive own the motion there).
+func _hop(ed: Dictionary, t: float) -> void:
+	if float(ed["hop"]) <= 0.0 or t < float(ed["hop_from"]) or t >= float(ed["hop_from"]) + float(ed["hop_t"]):
+		return
+	if not h.grounded or h.roll_t > 0.0:
+		return
+	var v: Vector2 = slam_dir * (float(ed["hop"]) / float(ed["hop_t"]))
+	h.vel.x = v.x
+	h.vel.z = v.y
 
 ## The slam's telegraph at fill `k`: the same cone (radius, angle, locked direction) the slam hits.
 func slam_tell(k: float) -> Dictionary:
@@ -724,11 +737,15 @@ func _air_barge(dd: Dictionary, dir: Vector2, keep_pose: bool) -> void:
 	var feel := dash_feel()
 	var air_t := float(dd["time"]) * float(feel["time"])
 	var air_dist := float(dd["dist"]) * float(dd["air_k"]) * float(feel["dist"])
-	travel(air_dist, air_t, {"invuln": 0.08, "trail": "", "dir": dir}, true)
+	travel(air_dist, air_t, {"invuln": 0.08, "trail": "", "dir": dir})
 	h.roll_t = air_t
 	h.roll_speed = air_dist / air_t
 	if not keep_pose: play("dr_pounce")
 	m.sfx("dr_hop", h.pos, -3.0, 1.0)
+
+## The air pounce is its own slot (source: Brute Dash (Air), 12.5s, 2s less per rank), apart from the ground charges.
+func long_dash_cd() -> float:
+	return super.long_dash_cd() - float(dash_def()["air"]["rank_cut"]) * float(rank("dash") - 1)
 
 ## The barge's end: he arrives planted (the class carry would slide a heavy on after each quick shove).
 func _tick_stop(dt: float) -> void:

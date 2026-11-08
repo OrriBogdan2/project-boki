@@ -69,30 +69,6 @@
 			}
 		]
 	},
-	"dodge_rider": {
-		"name": "Spore Puff",
-		"on_start": [
-			{
-				"delivery": {
-					"type": "zone",
-					"origin": "owner",
-					"radius": 1.5,
-					"duration": 2,
-					"every": 0.5
-				},
-				"effects": [
-					{
-						"type": "damage",
-						"amount": 2
-					},
-					{
-						"type": "slow",
-						"duration": 0.7
-					}
-				]
-			}
-		]
-	},
 	"active": "puffcap_mines",
 	"auto": "thorn_patch",
 	"merge": "thornwake",

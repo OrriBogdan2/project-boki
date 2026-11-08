@@ -1,0 +1,124 @@
+{
+	"grammar": 1,
+	"id": "casquebill",
+	"name": "Anchorbill",
+	"animals": [
+		"Hornbill",
+		"Ship's anchor"
+	],
+	"theme": "gravity",
+	"flavor": "A hornbill whose casque is a ship's anchor; it drops out of the sky like one and drags everything to it. Dignified and slow to trust; clacks its bill when it disagrees.",
+	"colors": {
+		"body": "#2e2e3a",
+		"belly": "#e8e0d0",
+		"glow": "#b48cff",
+		"wing": "#3a3a4a"
+	},
+	"look": {
+		"ears": "horn",
+		"body": "drop",
+		"tail": "wisp",
+		"feet": "none",
+		"aura": "pebbles"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_hp": 6,
+		"kin_damage": 2,
+		"kin_speed": 6,
+		"owner_max_hp": 3,
+		"owner_shield": 3
+	},
+	"personality": {
+		"bravery": 0.7,
+		"loyalty": 0.7,
+		"temper": 0.35,
+		"curiosity": 0.4
+	},
+	"ai": {
+		"aggression": 0.5,
+		"loyalty": 0.65,
+		"caution": 0.45,
+		"role": "controller"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Heavy Head",
+		"on_shot": {
+			"effects": [
+				{
+					"type": "slow",
+					"duration": 0.6
+				}
+			]
+		},
+		"passives": [
+			{
+				"stat": "glide",
+				"amount": 0.15
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "pull",
+				"strength": 8
+			}
+		]
+	},
+	"active": "slam",
+	"auto": "echolocate",
+	"merge": "titan",
+	"evolution": {
+		"root": "Casque",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "dignified, formal",
+		"syllables": [
+			"Casque",
+			"bill"
+		]
+	},
+	"egg": {
+		"name": "Casquebill Egg",
+		"temper": "Dignified",
+		"desc": "Something dignified is in here.",
+		"play": "Pins foes down and breaks up their pushes."
+	}
+}
