@@ -3,7 +3,7 @@ extends RefCounted
 ## expedition (6 Hunters in squads of 2 with their Boki, the ash storm, the Blight, outposts and a lair
 ## on the map, a fight: two rivals and a monster pack brought to you), then a farm run. Every frame is
 ## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
-## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
+## frame over 33 ms and 2x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
@@ -24,7 +24,6 @@ var squad := 2
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
-const HITCH_MS := 100.0
 const SLOW_MS := 33.0               # a frame over this counts as a hitch in the summary (under 30 fps)
 const BASELINE := "res://tools/perf_baseline.json"
 const P99_SLACK := 1.15             # the gate: match p99 may be at most 15% over the baseline
@@ -105,15 +104,15 @@ func _match() -> void:
 			_bring_fight(m)
 			fought = true
 		var t0 := Time.get_ticks_usec()
-		m.step(DT)
-		m._process(DT)
+		m._process(DT)        # one frame as the game runs it: one DT step, then the visuals (it stepped twice before)
 		var script_ms := (Time.get_ticks_usec() - t0) / 1000.0
 		await main.get_tree().process_frame
 		var now := Time.get_ticks_usec()
 		fl.append(_frame("match", fl.size(), (now - last) / 1000.0, script_ms))
 		var wall: float = fl[-1]["wall"]
-		if fl.size() > 30 and wall > HITCH_MS and wall > 3.0 * _avg(fl.slice(-31, -1), "wall"):
-			print("BENCH hitch t=%.2f %.0f ms (script %.1f), new nodes: %s" % [m.time, wall, script_ms,
+		if fl.size() > 30 and wall > SLOW_MS and wall > 2.0 * _avg(fl.slice(-31, -1), "wall"):
+			print("BENCH hitch t=%.2f %.0f ms (script %.1f, top %s %.1f, render cpu %.1f), new nodes: %s" % [m.time, wall,
+				script_ms, Match.prof_top, Match.prof_top_us / 1000.0, fl[-1]["rcpu"],
 				added])
 		added.clear()
 		last = now
@@ -286,3 +285,12 @@ func _meshes() -> void:
 	ks.sort_custom(func(a, b): return by[a][1] > by[b][1])
 	var top := ks.slice(0, 12).map(func(k): return "%s: %d, %.1fk, %d" % [k, by[k][0], by[k][1] / 1000.0, by[k][2]])
 	print("BENCH heaviest meshes (name: instances, total tris k, shadow casters): " + ", ".join(top))
+	var em := {}
+	for n in main.get_tree().root.find_children("*", "CPUParticles3D", true, false):
+		var p := n as CPUParticles3D
+		var key := "%s/%s%s" % [String(p.get_parent().name).rstrip("0123456789@"), String(p.name).rstrip("0123456789@"),
+			"" if p.emitting and p.is_visible_in_tree() else " (idle)"]
+		em[key] = int(em.get(key, 0)) + 1
+	var ek := em.keys()
+	ek.sort_custom(func(a, b): return em[a] > em[b])
+	print("BENCH CPU particle emitters (parent/name: count): " + ", ".join(ek.slice(0, 10).map(func(k): return "%s: %d" % [k, em[k]])))
