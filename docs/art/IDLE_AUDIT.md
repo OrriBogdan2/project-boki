@@ -225,6 +225,25 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Fidget once per loop: a small toe-pick tap that leaves frost, then a half spin on one blade back to rest.
 - **Target stance (6 s):**
   - The same feet. The spear twirls once and lowers to a ready angle, with a cool smirk.
+- **Done (ext/idle-rimewright):**
+  - claire_clips.py bakes both as 6 s loops on one set of feet (`FEET`: the weight on the left blade, the right toe
+    pick tucked behind). `life()` is the shared edge-sway (two shifts a loop with an overshoot and a hold), lagged by
+    pelvis, torso, head and hands (`LAG`), plus the breath and a blink. The pelvis sits over the left blade with a
+    soft knee; the free hip drops and the torso and head counter it.
+  - Idle: the spear lies across her shoulders behind the hood, the right hand draped over it, the left resting on the
+    shaft. At 2.9 s the toe pick taps twice while she glances down at it; at 3.9 s she turns one full spin on the left
+    blade (`turned()` rotates every world target about it) with an overshoot settle. A full turn, not the half of the
+    spec, so the loop closes facing front; the frost is a VFX hook the clips do not carry.
+  - Stance: the same feet, the spear at a low ready across her, a smirk at the right corner (`smirk` in extras). At
+    1.2 s it lifts to her chest and twirls one full turn round the forearm (`TWIRL_AXIS`) while the left arm opens for
+    balance, then lowers and the left hand re-catches the hilt.
+  - Breathing is a new leaf bone, `x_breath` under hips, skinned to the rib cage (289 verts), keyed as a 2.5 % scale,
+    two breaths a loop. posekit.bake takes the scale as an optional third item.
+  - Shots (`--idle-shots --wardens=rimewright --frames=12`): before, jobq 20261108-103813-06781 (a `git archive` of
+    the base commit, since the tree already had the new rules); after, 20261108-111745-02791. Idle and stance f000
+    against f012 differ by a mean of 2.0 to 2.4 per channel, the before's own seam being 1.7; a mid-loop control
+    frame is 11. The live hand-off f012 to f013 keeps the feet planted. The bake resolves the atlas from the blend's
+    own folder (the first bake from the tree's cwd exported the model white).
 
 ### 9. Sable the Silver Thief (`thief`, art `sable`)
 
