@@ -8,9 +8,8 @@ var panels: HudPanels
 var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
-var hit_t := 0.0
+var ret := ReticleHud.new()      # the cursor reticle, its aim arcs and the hit confirm
 var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
-var hit_crit := false
 var hurt_t := 0.0
 var msgs := MsgLane.new()      # every short message on screen: toasts, level-ups, hints
 var minimap: ImageTexture
@@ -91,7 +90,7 @@ func _process(delta: float) -> void:
 	if full_map and full_map.is_open and full_map.auto and not (m.skydrop and m.skydrop.planning):
 		full_map.close()      # the ship's off: the planning map steps aside
 	_tick_wheel()
-	hit_t = maxf(0.0, hit_t - delta)
+	ret.tick(delta)
 	_hud_tick(delta)
 	plates.tick(delta)
 	panels.tick(delta)
@@ -102,12 +101,8 @@ func _process(delta: float) -> void:
 	c.queue_redraw()
 	cursor.queue_redraw()
 
-var hit_armor := false
-
 func hitmarker(crit: bool, armor := false) -> void:
-	hit_t = 0.14
-	hit_crit = crit
-	hit_armor = armor
+	ret.hit(crit, armor)
 
 var flash_t := 0.0
 var flash_col := Color.WHITE
@@ -1917,58 +1912,19 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 
 func _draw_crosshair(p: Hunter) -> void:
 	var mp := c.get_local_mouse_position()
-	# the reticle (the player's style) opens with per-shot bloom and the minigun's spread
-	var spread := p.recoil * 4.0 + p.wbloom * 1.2
-	if p.wpn.has("tighten_from_deg") and p.spin > 0.0:
-		spread += lerpf(12.0, 0.0, clampf(p.spun_t / float(p.wpn.get("tighten_time", 1.5)), 0.0, 1.0))
-	Reticle.draw(c, mp, spread)
+	ret.draw(c, p, mp, m.time)
 	if p.ak and p.ak.has_meter():
-		# the archetype resource as an arc hugging the crosshair
-		var rf := p.ak.res_frac()
-		var rc := p.ak.res_col()
-		c.draw_arc(mp, Reticle.RES_R, PI * 1.62, PI * 1.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
-		if rf > 0.0:
-			c.draw_arc(mp, Reticle.RES_R, PI * 1.62, PI * 1.62 + PI * 0.76 * rf, 24, Color(rc, 0.95 if p.ak.tell == "full" else 0.7), 3.0 if p.ak.tell == "full" else 2.0, true)
-		# the payoff is armed (DEADEYE, FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the arc
+		# the payoff is armed (DEADEYE, FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the resource arc
 		var rl := p.ak.ready_label()
 		if rl != "":
 			var pk := 0.5 + 0.5 * sin(m.time * 9.0)
-			_ctext(mp + Vector2(0, Reticle.RES_R + 16.0), rl, 13, Color(rc.lightened(0.2), 0.75 + 0.25 * pk), big)
+			_ctext(mp + Vector2(0, Reticle.t("res_r") + 16.0), rl, 13, Color(p.ak.res_col().lightened(0.2), 0.75 + 0.25 * pk), big)
 	# aiming at a truce partner: a reminder before you break it
 	if m.truce and not m.truce.pacts.is_empty():
 		var ph: Hunter = m.truce.partner_at(p.inp["aim"], p.team)
 		if ph and not ph.unseen:
 			_flag(mp + Vector2(-58, 30), 0.7, Color("f4f1e6"))
 			_ctext(mp + Vector2(6, 36), "Truce with %s  ·  shooting breaks it" % ph.pname, 13, Color("f4f1e6"), big)
-	var ck := p.charge_k()
-	if ck > 0.0:
-		# a sword's charge: fills, then flashes when it's ready to release
-		var full := ck >= 1.0
-		_arc(mp, Reticle.CHARGE_R, ck, Color("fff3b0") if not full or int(m.time * 10.0) % 2 == 0 else Color.WHITE, 4.0 if full else 3.0)
-	elif p.warm_t > 0.0:
-		_arc(mp, Reticle.CHARGE_R, 1.0 - p.warm_t / maxf(0.01, float(p.wpn.get("warmup", 0.6))), p.wpn["color"], 3.0)
-	elif p.wpn.has("spin_up") and p.spin > 0.0 and p.spin < 1.0:
-		_arc(mp, Reticle.CHARGE_R, p.spin, Color("ffb34d"), 3.0)
-	elif p.wpn.get("melee", false):
-		pass
-	elif p.reload_t > 0.0:
-		_arc(mp, Reticle.CHARGE_R, 1.0 - p.reload_t / float(p.wpn["reload"]), Color("ffe7a8"), 3.0)
-	else:
-		# ammo left, as a thin ring that empties as you fire
-		var af := float(p.ammo) / maxf(1.0, float(p.wpn["mag"]))
-		c.draw_arc(mp, Reticle.AMMO_R, PI * 0.62, PI * 0.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
-		c.draw_arc(mp, Reticle.AMMO_R, PI * 0.62, PI * 0.62 + PI * 0.76 * af, 24, Color(1, 1, 1, 0.75) if af > 0.25 else Color(HP_LOW, 0.9), 2.0, true)
-	if hit_t > 0.0:
-		var hc := Color("ffd23f") if hit_crit else Color.WHITE
-		if hit_armor: hc = ARMOR_COL if not hit_crit else Color("cfefff")
-		# a sharp X that snaps out and settles: bigger and bolder on crits, dark-edged so it reads
-		# over bright effects
-		var k := hit_t / 0.14
-		var s := (11.0 if not hit_crit else 15.0) + (1.0 - k) * 3.0 + k * k * 4.0
-		var w := 3.0 if not hit_crit else 4.0
-		for d in [Vector2(1, 1), Vector2(-1, 1), Vector2(1, -1), Vector2(-1, -1)]:
-			c.draw_line(mp + d * 5.0, mp + d * s, Color(0.05, 0.03, 0.08, 0.65 * minf(1.0, k * 2.0)), w + 2.0)
-			c.draw_line(mp + d * 5.0, mp + d * s, Color(hc, minf(1.0, k * 2.5)), w)
 
 func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))

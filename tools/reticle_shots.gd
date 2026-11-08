@@ -2,6 +2,8 @@ extends RefCounted
 ## Review screenshots in a live match (xvfb with a renderer), into --shots-dir=<dir>:
 ##   --reticle-shots: the reticle in three styles (the default and two custom ones), each as the full frame
 ##     and a 3x crop round the cursor
+##   --reticle-hunters-shots: every Hunter in the Training Area (title-screen Arena), the reticle at rest, mid-bloom,
+##     on a hit and on a crit, as one 3x crop round the cursor per hunter (a row of four per hunter)
 ##   --ping-shots: your ping on an enemy (red, "Enemy") and a teammate's loot ping off screen (edge arrow),
 ##     with the minimap
 ## Never touches the save; the settings it sets live in the run's own XDG_DATA_HOME.
@@ -28,7 +30,10 @@ func run(main_node: Node, what: String) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true})
+	var opts := {"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true}
+	if what == "hunters":
+		opts = Match.arena_opts()
+	await m.start(opts)
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)      # (the screen fade from start-up still covers the view)
@@ -41,6 +46,8 @@ func run(main_node: Node, what: String) -> void:
 			h.ctrl = "idle"
 	if what == "ping":
 		await _pings()
+	elif what == "hunters":
+		await _hunters()
 	else:
 		await _reticles()
 	main.get_tree().quit(0)
@@ -57,6 +64,30 @@ func _reticles() -> void:
 		crop.resize(CROP.x * 3, CROP.y * 3, Image.INTERPOLATE_NEAREST)
 		crop.save_png(dir.path_join(String(st[0]) + "_zoom.png"))
 		print("RETICLESHOTS %s" % st[0])
+
+## Each Hunter, picked in the Training Area: rest, bloom, hit, crit; one strip per hunter and the cursor
+## full frame of the first. Hits go through the HUD the way real ones do (hitmarker), a beat before the shot.
+func _hunters() -> void:
+	Settings.reset_all()
+	Settings.set_v("tips", false)
+	var strip_w := CROP.x * 3 * 4
+	for id in Arch.ids():
+		m.arena.set_arch(String(id), Arch.signature(String(id)))
+		var tiles := []
+		for st in ["rest", "bloom", "hit", "crit"]:
+			m.player.recoil = 1.0 if st == "bloom" else 0.0
+			if st == "hit" or st == "crit":
+				m.hud.hitmarker(st == "crit")
+			var img := await _frame(2 if st.begins_with("hit") or st == "crit" else 12)
+			var c := Vector2i(Vector2(img.get_size()) * AT)
+			var crop := img.get_region(Rect2i(c - CROP / 2, CROP))
+			crop.resize(CROP.x * 3, CROP.y * 3, Image.INTERPOLATE_NEAREST)
+			tiles.append(crop)
+		var strip := Image.create(strip_w, CROP.y * 3, false, Image.FORMAT_RGBA8)
+		for i in tiles.size():
+			strip.blit_rect(tiles[i], Rect2i(Vector2i.ZERO, tiles[i].get_size()), Vector2i(i * CROP.x * 3, 0))
+		strip.save_png(dir.path_join("hunter_%s.png" % id))
+		print("RETICLESHOTS hunter_%s" % id)
 
 func _pings() -> void:
 	var P := m.player
@@ -86,9 +117,9 @@ func _level_spot(at: Vector3, offsets: Array) -> Vector3:
 	return at + offsets[0]
 
 ## A few frames with the cursor held at AT, then the frame as an image.
-func _frame() -> Image:
+func _frame(frames := 20) -> Image:
 	var vp := main.get_viewport()
-	for i in 20:
+	for i in frames:
 		vp.warp_mouse(vp.get_visible_rect().size * AT)
 		await main.get_tree().process_frame
 	return vp.get_texture().get_image()

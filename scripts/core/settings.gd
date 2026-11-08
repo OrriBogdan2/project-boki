@@ -18,7 +18,7 @@ const DEFAULTS := {
 	# how keys behave (Controls)
 	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false,
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
-	"reticle_shape": "default", "reticle_size": 1.0, "reticle_col": "white", "reticle_alpha": 1.0,
+	"reticle_shape": "default", "reticle_size": 1.0, "reticle_col": "hunter", "reticle_alpha": 1.0,
 	"reticle_outline": true,
 	# camera
 	"depth_cues": true, "cam_style": "supervive", "cam_follow": "supervive", "cam_lead": 1.0,

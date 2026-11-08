@@ -5,7 +5,7 @@ extends Control
 ## - full-charge flare: on reaching full, a ring that snaps out and fades plus a 4-point glint (0.28 s);
 ## - perfect-window star: a gold 4-point star with a soft ring, held for one footage frame (0.12 s).
 
-const R := 26.0           # px: the charge ring's radius, outside the HUD's ammo and resource arcs (Reticle.RES_R)
+const R := 26.0           # px: the charge ring's radius, outside the HUD's ammo and resource arcs (Reticle "res_r")
 const FLARE_T := 0.28     # s: the full-charge flare
 const PERFECT_T := 0.12   # s: the perfect-window star (one 5 fps footage frame, enough to register)
 
@@ -35,23 +35,26 @@ func _draw() -> void:
 	var col: Color = r["col"]
 	var k := float(r["k"])
 	if k >= 0.0 and float(d.m.time) - float(r["t"]) <= AimDraw.KEEP:
-		draw_arc(mp, R, 0.0, TAU, 40, Color(0, 0, 0, 0.3), 3.0, true)
+		var w := Reticle.t("arc_w")
+		draw_arc(mp, R, 0.0, TAU, 40, Color(0, 0, 0, Reticle.t("track_a")), w + 1.6, true)
 		if k > 0.0:
 			var full := k >= 1.0
-			draw_arc(mp, R, -PI * 0.5, -PI * 0.5 + TAU * minf(1.0, k), 40, Color(col.lerp(Color.WHITE, 0.4 if full else 0.0), 0.95 if full else 0.75), 3.0 if full else 2.0, true)
+			var fill := Color(col.lerp(Color.WHITE, 0.4), 0.95) if full else Color(col, 0.8)
+			draw_arc(mp, R, -PI * 0.5, -PI * 0.5 + TAU * minf(1.0, k), 40, fill, Reticle.t("arc_w_full") if full else w, true)
 	var ft := float(r["flare"])
 	if ft > 0.0:
 		var t := 1.0 - ft / FLARE_T            # 0 -> 1 over the flare
 		var e := 1.0 - pow(1.0 - t, 3.0)        # out-cubic
 		var fc: Color = r["fcol"]
-		draw_arc(mp, R + 4.0 + e * 16.0, 0.0, TAU, 40, Color(fc.lerp(Color.WHITE, 0.5), 0.9 * (1.0 - t)), 2.5, true)
+		var ring := Color(fc.lerp(Color.WHITE, 0.5), 0.9 * (1.0 - t))
+		draw_arc(mp, R + 4.0 + e * 16.0, 0.0, TAU, 40, ring, Reticle.t("arc_w"), true)
 		_star(mp, 10.0 + 8.0 * (1.0 - t), Color(fc.lerp(Color.WHITE, 0.7), 0.95 * (1.0 - t)), PI * 0.25)
 	var pt := float(r["perfect"])
 	if pt > 0.0:
 		var pc: Color = r["pcol"]
 		var a := 1.0                            # a flash: full strength for its whole (short) life, then gone
 		draw_circle(mp, 20.0, Color(pc, 0.18 * a))
-		draw_arc(mp, 20.0, 0.0, TAU, 40, Color(pc, 0.7 * a), 2.0, true)
+		draw_arc(mp, 20.0, 0.0, TAU, 40, Color(pc, 0.7 * a), Reticle.t("arc_w"), true)
 		_star(mp, 23.0, Color(0.1, 0.06, 0.0, 0.35 * a), 0.0, 1.5)
 		_star(mp, 20.0, Color(pc.lerp(Color.WHITE, 0.25), a), 0.0)
 

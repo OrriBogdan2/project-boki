@@ -55,6 +55,10 @@ static func label(id: String) -> String:
 static func color(id: String) -> Color:
 	return Color(String(def(id).get("color", "#ffffff")))
 
+## The accent of this Hunter's reticle (its "reticle" colour when it has one, else its colour).
+static func reticle_color(id: String) -> Color:
+	return Color(String(def(id).get("reticle", def(id).get("color", "#ffffff"))))
+
 ## The two archetypes of a weight class.
 static func of_class(cls: String) -> Array:
 	return ids().filter(func(a): return weight(a) == cls)
