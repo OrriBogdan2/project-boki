@@ -14,9 +14,7 @@ const GLIDE_CATCH := 60.0        # the canopy brakes a terminal fall to its sink
 const JUMP_V := 6.8
 const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
-const GROUND_DECEL := 22.2       # [game data] BrakingDecelerationWalking 2220 uu/s^2 (item 150)
-const GROUND_FRICTION := 2.0     # [game data] GroundFriction 1.0 x braking factor 2: a let-go stops in ~0.38 m
-const GROUND_SHED := 110.0       # no keys: speed over a run (a dash, a step, a knock) sheds this fast (kit distances)
+const GROUND_SHED := 110.0       # m/s^2, no keys: speed over a run (kit step, knock) sheds this fast
 const GROUND_OVERSPEED := 30.0   # how fast dash or pad speed bleeds off on the ground
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by HunterMove.air_steer)
 const AIR_DECEL := 9.0           # let go on a ledge rise and you mostly stop
@@ -51,8 +49,6 @@ const WALL_CATCH_REACH := 0.75   # (movefeel) over the abyss below a lip, a wall
 const ABYSS_GLIDE_ROOM := 1.5    # a glider with heat left (lifting you out) gets this much more room
 const MANTLE_RISE := 14.0        # [footage] a deep mantle returns to the top in ~0.8s
 const EX_DASH_CD := 12.5         # the long dash: in the air, or with the short one on cooldown
-const DASH_CARRY_GROUND := 0.15   # (was 0.35) out of a dash you stop almost dead: snappy, no slide
-const DASH_CARRY_AIR := 0.3      # (was 0.75, which slid you ~15m+ in the air)
 const SPIKE_STUN := 0.7         # [wiki] stun when a spiked glider hits the ground (docs/EXPEDITION_SPEC.md)
 const SPIKE_DMG := 8.0
 const DASH_SPEED := 19.0      # m/s: the base dash (owner: 23 felt too fast); 19 x 0.19s = 3.6m
@@ -857,14 +853,10 @@ static func glide_fall(_speed: float) -> float:
 ## over it (a dash, a pad, a knockback) bleed the extra off slowly while still steering. With no keys:
 ## speed over `run` sheds at `shed`, then `friction` (a share of the speed per second) and a constant `decel`
 ## brake the walk, as UE does.
-static func accel2(cur: Vector2, wish: Vector2, accel: float, decel: float, over_decel: float, dt: float,
-		friction := 0.0, shed := 0.0, run := 0.0) -> Vector2:
+static func accel2(cur: Vector2, wish: Vector2, accel: float, decel: float, over_decel: float, dt: float) -> Vector2:
 	var mx := wish.length()
 	if mx < 0.001:
-		var cs0 := cur.length()
-		if shed > 0.0 and cs0 > run + 0.05:
-			return cur * (maxf(run, cs0 - shed * dt) / cs0)
-		return (cur * maxf(0.0, 1.0 - friction * dt)).move_toward(Vector2.ZERO, decel * dt)
+		return cur.move_toward(Vector2.ZERO, decel * dt)
 	var cs := cur.length()
 	if cs > mx:
 		var wd := wish / mx
@@ -1541,7 +1533,7 @@ func _lunge(dist: float) -> void:
 	# while you're holding a direction)
 	var d2 := aim_dir()
 	var moving := (inp["move"] as Vector2).length() > 0.1
-	var want := sqrt(2.0 * (GROUND_OVERSPEED if moving else GROUND_DECEL) * dist * k + (base_speed * base_speed if moving else 0.0))
+	var want := sqrt(2.0 * (GROUND_OVERSPEED if moving else GROUND_SHED) * dist * k + (base_speed * base_speed if moving else 0.0))
 	var hv := Vector2(vel.x, vel.z)
 	var along := hv.dot(d2)
 	hv += d2 * (maxf(along, want) - along)
@@ -2187,8 +2179,7 @@ func _physics(dt: float) -> void:
 		if not dash_pass.is_empty():
 			_pass_along()
 		if roll_t <= 0.0:
-			# out of a dash you keep some of its speed: a little on the ground, most in the air
-			hv = roll_dir * roll_speed * (DASH_CARRY_GROUND if grounded else DASH_CARRY_AIR)
+			hv = HunterMove.dash_exit(roll_dir * roll_speed, spd)     # no hard stop: the run carries on
 			glide_handoff(roll_dir, roll_speed)     # (movefeel) open the glider now and it keeps the burst
 			_last_burst = {}
 	elif fly_t > 0.0:
@@ -2229,11 +2220,13 @@ func _physics(dt: float) -> void:
 				in_current = true
 				vel.y = move_toward(vel.y, 9.0, 45.0 * dt)     # (movefeel) grabs you harder (was 30: 0.33s to climb)
 	else:
-		# near-instant on the ground; in the air you steer well but momentum carries
-		if grounded:
+		# near-instant on the ground (and in a kit's hover); a jump keeps its run-up
+		if grounded or (ak != null and ak.hovering()):
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
-			hv = accel2(hv, mv * spd, ground_accel * grip, GROUND_DECEL * grip, GROUND_OVERSPEED * grip, dt,
-					GROUND_FRICTION * grip, GROUND_SHED * grip, spd)
+			if (mv * spd).length() >= 0.001:
+				hv = accel2(hv, mv * spd, ground_accel * grip, 0.0, GROUND_OVERSPEED * grip, dt)
+			else:
+				hv = HunterMove.brake(hv, spd, grip, dt)
 		elif glide_off_t < FEATHER_KEEP and not dropping:
 			# (feathering) just after letting go of the glider you keep its speed and steering
 			var gsf := GLIDE_SPEED * (1.0 + gear_stat("glide_speed"))

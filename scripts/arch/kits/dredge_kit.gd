@@ -141,6 +141,9 @@ func extra_dashes() -> float: return 1.0
 func can_shoot() -> bool:
 	return fire_ok() and fuse.is_empty() and pull.is_empty() and dive.is_empty() and not broadside.running()
 
+func hovering() -> bool:
+	return broadside.running() or hook_hold != null
+
 func move_k() -> float:
 	if broadside.running():
 		return broadside.move_k()           # a slow walk through the charge and the waves

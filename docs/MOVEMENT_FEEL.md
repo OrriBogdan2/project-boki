@@ -45,8 +45,8 @@ Nothing here comes from SUPERVIVE's files.
 |---|---|---|---|---|
 | ground_input_frames | 1 | 1 | <= 1 step | press acts the same step |
 | ground_t95 (to 95% run speed) | 0.083s | 0.067s | <= 0.07s | [spec] 0.05–0.1s |
-| ground_stop_t | 0.050s | 0.167s | 0.12-0.25s | [game data] SV braking 22.2 m/s2 + friction 2 (item 150) |
-| ground_stop_dist | 0.075m | 0.305m | 0.2-0.5m | [game data] the same stop (item 150) |
+| ground_stop_t | 0.067s | 0.167s | 0.12–0.25s | [game data] braking 22.2 m/s² + friction 2/s (SV ~0.18s) |
+| ground_stop_dist | 0.10m | 0.31m | 0.2–0.5m | [game data] SV slides ~0.38–0.49m |
 | ground_reverse_t (180 degrees) | 0.150s | 0.117s | <= 0.12s | [spec] crisp |
 | ground_turn90_t | 0.100s | 0.083s | <= 0.09s | [spec] crisp |
 | speed light / medium / heavy | 5.2 / 5.0 / 4.73 | same | class data | KINFALL_CLASSES |
@@ -54,7 +54,9 @@ Nothing here comes from SUPERVIVE's files.
 | jump_apex | 1.28m | 1.52m | 1.2–1.6m | [game data] 1.9m, held under 1.6 for the terrace grammar |
 | jump_airtime | 0.633s | 0.900s | 0.85–1.05s | [game data] 1.02s |
 | air_carry_m (let go at take-off) | n/a | 3.4m | >= 3.0m | [game data] FallingLateralFriction 0.375 |
-| air_reverse_t | n/a | 0.52s | 0.4–0.75s | [game data] AirControl 0.015, translated |
+| air_reverse_dv (keys reversed for a whole jump) | n/a | 0.63 m/s | 0.5–1.1 m/s | [game data] AirControl 0.015 |
+| dash_exit_run (speed as a dash ends / run speed) | 0.15x | 1.0x | 0.95–1.05x | [game data] no hard stop |
+| dash_exit_slide_m (let go out of a dash) | ~0.02m | 0.33m | 0.2–0.5m | [game data] the walking stop |
 | coyote_frames | 7 | 7 | >= 6 | FeelConfig 0.1s |
 | jump_buffer_frames | 6 | 7 | >= 7 | FeelConfig 0.12s |
 | freefall_1s_depth | 6.37m | 7.20m | 6.8–8m | [game data] 14.7 m/s² capped at 12 m/s ([footage] ~8m) |

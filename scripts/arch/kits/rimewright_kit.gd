@@ -490,8 +490,9 @@ func _rinkrun_end(into_rime := false) -> void:
 		h.vel.z *= 0.3
 	else:
 		# ended in the air: she keeps the skate's speed the way any air dash does, then the normal fall / glide
-		h.vel.x = h.roll_dir.x * h.roll_speed * Hunter.DASH_CARRY_AIR
-		h.vel.z = h.roll_dir.y * h.roll_speed * Hunter.DASH_CARRY_AIR
+		var keep := HunterMove.dash_exit(h.roll_dir * h.roll_speed, h.base_speed)
+		h.vel.x = keep.x
+		h.vel.z = keep.y
 	play("tm_skate_stop")
 	dash_press_at = m.time           # the stop is the skate's own move: it never holds the glider shut (AirLimits)
 	m.sfx("rime_stop", h.pos, -4.0, 1.0)
