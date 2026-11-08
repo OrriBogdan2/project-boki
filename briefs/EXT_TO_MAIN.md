@@ -2623,3 +2623,18 @@ READY ext/parity-glide-dive 45f26a5b5 (KIT_PARITY item 18: glider dive, hold Ctr
 ## 2026-11-08 deep (job 20261108-014504-a4): CLAIM Training Grounds (escalated from 20261107-233002-a2)
 - CLAIM: finish ext/training-grounds: review the diff, rerun the checks in a fresh import, collect and look at the GPU top-down and ground-level shots, fix what they show.
 READY ext/parity-jump-flowrows 0f70d1a8a (item 20: jump speed pinned to source 7.5 in move-feel-check, 6.8 kept for terraces; unsourced flow rows marked [?] in KIT_PARITY.md)
+
+## 2026-11-08 deep (job 20261107-213004-a4): READY Motley v2 model
+READY ext/ostra-v2-model 76f589389 (Motley v2 model from motley_v2_turnaround + master sheet: sheet palette (magenta-violet/plum doublet, lilac ruff+gloves, bronze spring, mauve box), spades front/back + diamonds on the sides, near-cube box, crank mesh gone (x_crank bone + anchor_crank kept for the clips), no belt, one button column, longer tails, broad flat void ribbon, head 0.87x, ruff 0.85x; same armature/anchors/FX points/clips/kit; 13750 tris, one 2048 atlas. Checks: rig-json unchanged, warden-model/glb/clips, hero, hero-combo, hero-vfx, ostra-combo, motley-live, health --strict all pass. GPU before/after: briefs/art-refs/motley_v2/ingame/)
+| Fidelity (FIDELITY_CHECKLIST Motley) | |
+|---|---|
+| jester upper body on a brass spring from a card-suit box | ✅ |
+| hovering box, no feet/legs, silent glide | ✅ (clips unchanged, motley-live passes) |
+| starry void face, glowing grin | ✅ |
+| chaotic swirl of burning cards | ✅ (orbit cards unchanged) |
+| ult ground void vortex | ✅ (kit unchanged) |
+| spring compresses on the dash | ✅ (motley-live) |
+| weapon scale+fit: no weapon, palms cast, fan = deck | ✅ |
+| v2 palette / suits / no crank | ✅ |
+| head size as small as the sheet | ❌ 0.87x of v1 (sheet ~0.65x): kept larger for the match-camera grin and the line-up height check (1.167x vs 1.20x, tol 0.04) |
+| box panel tone | ❌ reads lighter/pinker under the toon light than the sheet's dusty mauve |
