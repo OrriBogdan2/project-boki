@@ -44,7 +44,6 @@ func _ready() -> void:
 		if a == "--rolling": opts["rolling"] = true      # a rolling 30-minute session (scripts/match/rolling.gd)
 		if a.begins_with("--join-wave="): opts["rolling"] = true; opts["join_wave"] = int(a.substr(12))
 		if a.begins_with("--join-at="): opts["rolling"] = true; opts["join_at"] = float(a.substr(10))
-		if a.begins_with("--rolling-pop="): opts["rolling_pop"] = a.substr(14)     # what the 24-40 hunters count: at_once (default) or total (Rolling.POP_MODE)
 		if a.begins_with("--rolling-demo="): opts["rolling"] = true; opts["rolling_demo"] = a.substr(15); opts["plan_t"] = 0.4; opts["raid"] = "clear"    # screenshots (Rolling.demo)
 		if a == "--record": Record.set_level(1)            # start in recording mode (F10 cycles it)
 		if a.begins_with("--record="): Record.set_level(int(a.substr(9)))    # --record=2: with the HUD hidden

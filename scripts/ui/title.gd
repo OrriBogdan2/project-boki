@@ -484,7 +484,7 @@ func _build_ui() -> void:
 	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
 	items.append(["Arena", func(): Game.start_match(Match.arena_opts()), "knock"])
 	if has:
-		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
+		# one click to a match made for filming: a trio whose bot squadmate leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
 		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
 	if Net.available():

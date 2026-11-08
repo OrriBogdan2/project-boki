@@ -7,8 +7,6 @@ var status: Label
 var ready_btn: Button
 var start_btn: Button
 var is_ready := false
-var mode := "ffa"
-var mode_btns := {}
 
 func setup(o: Dictionary) -> void:
 	opts = o
@@ -31,22 +29,10 @@ func _ready() -> void:
 	v.add_child(list_box)
 	v.add_child(UI.spacer(2))
 	v.add_child(UI.section("Teams"))
-	var modes := UI.hbox(2)
-	var track := PanelContainer.new()
-	track.add_theme_stylebox_override("panel", UiFrame.sunk(UI.WELL, UI.R_SMALL + 5).padded(3, 3))
-	track.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	track.add_child(modes)
-	for m in [["ffa", "Everyone for themselves"], ["duo", "Teams of 2"], ["trio", "Teams of 3"]]:
-		var key: String = m[0]
-		var b := UI.button(m[1], func(): mode = key; _refresh_modes())
-		mode_btns[key] = b
-		modes.add_child(b)
-	v.add_child(track)
-	v.add_child(UI.para("Empty spots are filled with bots, up to 4 squads. Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front."))
+	v.add_child(UI.para("%d squads of %d. Empty spots are filled with bots. Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front." % [Data.SQUADS, Data.SQUAD_SIZE]))
 	ready_btn = UI.button("I'm ready", _toggle_ready, 160, "check")
 	UI.footer(v).add_child(ready_btn)
 	start_btn = UI.footer_primary(v, "Start the match", _start, 220, "portal")
-	_refresh_modes()
 	Net.peers_changed.connect(_refresh)
 	Net.message.connect(_on_msg)
 	Net.start()
@@ -65,10 +51,6 @@ func _exit_tree() -> void:
 		Net.peers_changed.disconnect(_refresh)
 	if Net.message.is_connected(_on_msg):
 		Net.message.disconnect(_on_msg)
-
-func _refresh_modes() -> void:
-	for k in mode_btns:
-		mode_btns[k].theme_type_variation = "SegOn" if k == mode else "Seg"
 
 func _announce() -> void:
 	var k := Save.active_kin()
@@ -120,7 +102,7 @@ func _refresh() -> void:
 func _start() -> void:
 	if Net.mode == "":
 		return
-	var squad: int = {"ffa": 1, "duo": 2, "trio": 3}[mode]
+	var squad := Data.SQUAD_SIZE
 	var ids: Array = []
 	for id in Net.peers:
 		var p: Dictionary = Net.peers[id]
@@ -136,8 +118,7 @@ func _start() -> void:
 		if id == Net.me:
 			p = Net.my_presence
 		roster.append({"peer": id, "team": i / squad, "name": p.get("name", "Hunter"), "arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
-	var teams := maxi(int(ceil(float(ids.size()) / squad)), int(ceil(Data.MATCH_PLAYERS / float(squad))))
-	var d := {"mid": "%d" % (Time.get_ticks_msec() % 100000000), "seed": randi(), "host": Net.me, "roster": roster, "teams": mini(teams, 20), "squad": squad, "tier": int(opts.get("tier", 0))}
+	var d := {"mid": "%d" % (Time.get_ticks_msec() % 100000000), "seed": randi(), "host": Net.me, "roster": roster, "teams": Data.SQUADS, "squad": squad, "tier": int(opts.get("tier", 0))}
 	Net.lobby_emit("start", d)
 	_go(d)
 

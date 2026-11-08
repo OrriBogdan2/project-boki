@@ -4862,16 +4862,18 @@ var player_engaged := false
 func demo_shielded(e: Ent) -> bool:
 	return e != null and e == player and bool(opts.get("demo_match", false)) and not player_engaged and Bot.fresh(self, e)
 
-## The Demo match (title screen): a real Duos expedition set up for filming. A fixed map roll, clear
+## The Demo match (title screen): a real expedition set up for filming. A fixed map roll, clear
 ## weather, no Blight, normal rivals (who leave you be for a minute after you land), on the Dusk Isles (the first tier where a Boki can be lost: one in
 ## a deathbox goes to whoever loots it); your bot squadmate leads the drop to land you between a live boss
 ## lair and an outpost uplink (_demo_drop). It plays on your save like any expedition (what you bring
 ## can be lost, what you extract is kept).
 const DEMO_SEED := 5
 static func demo_opts() -> Dictionary:
-	return {"teams": Data.MATCH_PLAYERS / 2, "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 1, "seed": DEMO_SEED,
-		"raid": "clear", "blight": false, "fresh_t": Settings.DEMO_FRESH_T, "demo_match": true,
-		"live_lair": "The Thornhive"}     # (the Hollow Crown: the Thornhive and Thornwood's uplink share an island)
+	# (the Hollow Crown: the Thornhive and Thornwood's uplink share an island)
+	var o := Data.squad_opts()
+	o.merge({"tier": 1, "seed": DEMO_SEED, "raid": "clear", "blight": false, "fresh_t": Settings.DEMO_FRESH_T,
+		"demo_match": true, "live_lair": "The Thornhive"})
+	return o
 
 ## The Arena: a compact practice map with dummies, a sparring bot and the kit card (scripts/match/arena.gd).
 static func arena_opts(arch_id := "") -> Dictionary:

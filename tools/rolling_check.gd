@@ -39,19 +39,18 @@ func _static() -> void:
 	var got := {}
 	for t in want: got[t] = Rolling.floor_at(float(t))
 	ok(want.keys().all(func(t): return got[t] == want[t]), "level floor = min(5, 1 + minutes/4): %s" % str(got))
-	ok(Rolling.squads_for(0, 3) == 4 and Rolling.squads_for(30, 3) == 2 and Rolling.squads_for(40, 3) == 2, "a wave is 2-4 trios: 4 into an empty map, 2 into a full one")
-	ok(Rolling.wave_hunters(0) == 12 and Rolling.wave_hunters(36) == 6, "6-12 hunters a wave, fewer as the map fills (%d at 0, %d at 36)" % [Rolling.wave_hunters(0), Rolling.wave_hunters(36)])
-	ok(Rolling.POP_MODE in ["at_once", "total"], "the 24-40 target reads as \"%s\" (owner question: at once or over the session)" % Rolling.POP_MODE)
-	# the other reading: the whole session brings 24-40 hunters in all, shared over the waves
-	var tot_ok := true; var tot_rng := Vector2i(999, 0)
+	# the fixed format (owner 11-08): every session brings Data.SQUADS trios in all, spread over its waves
+	var sum_ok := true; var size_ok := true; var share := Vector2i(99, 0)
 	for sd in range(1, 21):
-		var r := _plan_only(sd, {"squad": 3, "rolling_pop": "total", "join_wave": 0})
+		var r := _plan_only(sd, {"squad": 1, "join_wave": 0})
 		var sum := 0
-		for i in r.waves.size():
-			sum += r.wave_squads(i, 0) * 3 if i > 0 else int(r.waves[0]["n"]) * 3
-		tot_rng = Vector2i(mini(tot_rng.x, sum), maxi(tot_rng.y, sum))
-		if sum < Rolling.POP.x - 6 or sum > Rolling.POP.y + 6: tot_ok = false
-	ok(tot_ok, "--rolling-pop=total: a session brings about 24-40 hunters in all (trios, 20 seeds: %d-%d)" % [tot_rng.x, tot_rng.y])
+		for w in r.waves:
+			sum += int(w["n"])
+			share = Vector2i(mini(share.x, int(w["n"])), maxi(share.y, int(w["n"])))
+		if sum != Data.SQUADS: sum_ok = false
+		if r.size != Data.SQUAD_SIZE: size_ok = false
+	ok(sum_ok, "every session brings %d squads in all (20 seeds; %d-%d a wave)" % [Data.SQUADS, share.x, share.y])
+	ok(size_ok, "squads are always trios, whatever squad size is asked for")
 
 # ------------------------------------------------------------------ 2. the plan: waves and the cut-off
 func _plan_only(seed_v: int, o: Dictionary) -> Rolling:
@@ -83,16 +82,16 @@ func _schedule() -> void:
 	ok(n_min >= 7 and n_max <= 12, "%d-%d waves a session" % [n_min, n_max])
 	ok(joins.size() >= 5, "you're put in a random wave, not one you pick (40 sessions joined %d different waves)" % joins.size())
 	var late := _plan_only(5, {"squad": 3, "join_wave": 99})
-	ok(late.join_i == late.waves.size() - 1 and late.waves_left() == 0, "joining the last wave: nobody comes after you")
+	ok(int(late.waves[late.join_i]["n"]) > 0 and late.waves_left() == 0, "joining the last wave that flies: nobody comes after you")
 	var at := _plan_only(5, {"squad": 3, "join_at": 700.0})
 	ok(float(at.waves[at.join_i]["t"]) <= 700.0 and (at.join_i == at.waves.size() - 1 or float(at.waves[at.join_i + 1]["t"]) > 700.0), "join_at picks the wave that's leaving then (%s)" % Rolling.fmt(at.t0))
-	# who's out there when you join: the model keeps the map in its 24-40 band once the session's going
+	# who's out there when you join: some of the session's earlier squads, never more than its 10x3
 	var pops: Array = []
 	for sd in range(1, 21):
 		var r2 := _plan_only(sd, {"squad": 3, "join_wave": 6})
 		pops.append(r2._model_alive_at(r2.t0))
 	pops.sort()
-	ok(int(pops[pops.size() / 2]) >= 16 and int(pops[-1]) <= 44, "joining around 15:00 there are ~%d hunters already out (range %d-%d)" % [int(pops[pops.size() / 2]), int(pops[0]), int(pops[-1])])
+	ok(int(pops[pops.size() / 2]) >= 6 and int(pops[-1]) <= Data.MATCH_PLAYERS, "joining around 15:00 there are ~%d hunters already out (range %d-%d)" % [int(pops[pops.size() / 2]), int(pops[0]), int(pops[-1])])
 
 # ------------------------------------------------------------------ 3. a session joined part-way through
 func _session(main: Node) -> void:
@@ -130,7 +129,7 @@ func _session(main: Node) -> void:
 			kin_ok = false; print("ROLLING kin start: %s riding=%s %s/%s" % [h.pname, h.riding, k.state, k.cmd])
 	ok(kin_ok and kin_n >= 8, "late joiners and the earlier arrivals start with their active Boki following, none on a shoulder (%d Boki)" % kin_n)
 	var mine: Array = m.hunters.filter(func(h): return h.riding)
-	ok(m.player.riding and mine.size() == int(R.waves[4]["n"]) * 3 and int(R.waves[4]["n"]) >= 2 and int(R.waves[4]["n"]) <= 4, "your wave: you and %d others on the skyship (%d squads)" % [mine.size() - 1, int(R.waves[4]["n"])])
+	ok(m.player.riding and mine.size() == int(R.waves[4]["n"]) * 3 and int(R.waves[4]["n"]) >= 1, "your wave: you and %d others on the skyship (%d squads)" % [mine.size() - 1, int(R.waves[4]["n"])])
 	var open_chests := m.chests.filter(func(c): return c["open"]).size()
 	ok(open_chests > 0, "the map is picked over: %d of %d chests already open" % [open_chests, m.chests.size()])
 	if m.blight:
