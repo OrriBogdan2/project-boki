@@ -1115,6 +1115,7 @@ func _spawn_hunters() -> void:
 		spots = rolling.spots_along(ship, n_teams)
 	var total := int(opts.get("total", 999))
 	var made := 0
+	var mates: Array = opts.get("mates", [])
 	for t in n_teams:
 		var base: Vector3 = spots[t % spots.size()] if spots.size() > 0 else world.random_ground()
 		for s in squad:
@@ -1158,20 +1159,29 @@ func _spawn_hunters() -> void:
 					_apply_treat(player.kin)
 				_start_drop(player, at)
 				continue
-			var h := make_bot(t, at, names)
+			var mate: Dictionary = mates[s - 1] if t == 0 and s > 0 and s <= mates.size() else {}
+			var h := make_bot(t, at, names, mate)
 			_start_drop(h, at)
 
-## A rival bot hunter for squad t, standing at `at` (the drop is up to the caller).
-func make_bot(t: int, at: Vector3, names: Array) -> Hunter:
+## A rival bot hunter for squad t, standing at `at` (the drop is up to the caller). `mate`: your
+## squadmate the lobby dealt ({name, arch}, see Prematch.deal_mates), else a random one.
+func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 	var bk := bot_kit()
-	var bname: String = names.pop_back() if names.size() > 0 else "Bot"
+	var bname := "Bot"
+	if not mate.is_empty():
+		bname = String(mate["name"])
+		bk["arch"] = String(mate["arch"])
+	elif names.size() > 0:
+		bname = names.pop_back()
 	var brec := bot_kin_record()
 	# a rival who's holding one of your lost kin may be out here with it
 	var held := _held_for_match(t)
 	if not held.is_empty():
 		bname = String(held["holder"])
 		brec = (held["rec"] as Dictionary).duplicate(true)
-	var h := make_hunter(next_id("b"), t, "", bname, "bot", brec, at, bk, bot_kin_record() if rng.randf() < 0.6 else {})
+	var cls := Arch.weight(String(bk.get("arch", "")))
+	var own_kin := bot_kin_record() if rng.randf() < 0.6 else {}
+	var h := make_hunter(next_id("b"), t, cls, bname, "bot", brec, at, bk, own_kin)
 	if not held.is_empty() and h.kin:
 		(h.kin as Kin).lost_uid = String(brec.get("uid", ""))
 		(h.kin as Kin).lost_from = "you"
