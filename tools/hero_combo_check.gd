@@ -564,7 +564,6 @@ func _gunslinger() -> void:
 	var T2: Hunter = r[3]
 	var home: Vector3 = r[4]
 	var K: GunslingerKit = P.ak
-	var bd: Dictionary = K.rmb_def()["burr"]
 	T2.teleport(home + Vector3(30, 0, 0))
 	ok("Hired Gun: the display name", Arch.name_of("gunslinger") == "The Hired Gun")
 	# 1. LMB: to full range past the cursor, an ember tracer; Dazed = +90%, a gold crit number, no decay
@@ -610,78 +609,15 @@ func _gunslinger() -> void:
 			"%s, %d in flight" % [K.anim_id, K.burrs.size()])
 	P.inp["sec_hold"] = false
 	m.step(DT)
-	# 3a. a direct hit: the foe on the line is hurt and Dazed on the spot, the charge is spent, no cone
+	# 3a. a hit: the foe on the line is hurt and Dazed on the spot, the charge is spent
 	ac.step(m, 0.2)
-	ok("RMB direct hit: damage + Dazed, no cone, the charge is spent",
-			K.direct_hits == 1 and ac.dmg(T) >= 20.0 and KitStatus.rattled(T) and K.rattles == 0 and K.burrs.is_empty(),
-			"took %.1f hits %d rattles %d burrs %d" % [ac.dmg(T), K.direct_hits, K.rattles, K.burrs.size()])
+	ok("RMB hit: damage + Dazed, the charge is spent, a small green burst",
+			K.direct_hits == 1 and ac.dmg(T) >= 20.0 and KitStatus.rattled(T) and K.fizzles == 0 and K.burrs.is_empty()
+			and int(HeroVfx.of(m).plays.get("rmb_hit", 0)) == 1,
+			"took %.1f hits %d fizzles %d burrs %d" % [ac.dmg(T), K.direct_hits, K.fizzles, K.burrs.size()])
 	var rifle := {"src": "shot"}
 	ok("RMB direct hit: the Dazed foe takes the rifle's +90%", is_equal_approx(K.outgoing(T, 10.0, rifle), 19.0))
-	# 3b. thrown with the foe off the lane: it lands at the lane's end on the ground, shows the cone, blasts
-	ac.fresh(T)
-	KitStatus.clear_rattled(T)
-	T.teleport(home + Vector3(4, 0, 6))
-	K.cd["rmb"] = 0.0
-	K.ch_rmb = 1.0
-	P.teleport(home)
-	ac.step(m, 0.1)
-	P.inp["aim"] = home + Vector3(2.0, 0.9, 0)
-	ac.tap(m, P)
-	ac.step(m, 0.5)
-	var b0: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
-	ok("RMB: sticks on the ground at the lane's end",
-			not b0.is_empty() and float(b0["fuse"]) >= 0.0 and not bool(b0["wall"]) and absf(_flat(b0["pos"], home) - 10.5) < 1.2,
-			"at %.1f" % (_flat(b0.get("pos", home), home)))
-	var cone_id := ("burr%d" % (b0["node"] as Node3D).get_instance_id()) if not b0.is_empty() else ""
-	var ce := AimKit.entry(P, cone_id)
-	ok("RMB: the cone shows back toward you, for everyone",
-			not ce.is_empty() and bool(ce["all"]) and (ce["dir"] as Vector2).x < -0.9 and absf(float(ce["len"]) - 6.0) < 0.01)
-	ac.fresh(T)
-	T.teleport(home + Vector3(8, 0, 0))
-	ac.step(m, 0.05)
-	var tx := T.pos.x
-	ac.step(m, 1.0)
-	ok("RMB ground cone: damage + Dazed + shoved toward you",
-			ac.dmg(T) >= 12.0 and KitStatus.rattled(T) and T.pos.x < tx - 1.5,
-			"took %.0f moved %.1f" % [ac.dmg(T), T.pos.x - tx])
-	ok("RMB: 0.9s fuse", is_equal_approx(float(bd["fuse"]), 0.9))
-	# 4. on a wall: sticks, the cone back out, a hunter shoved into more terrain is stunned (no cooldown shave)
-	ac.fresh(T)
-	KitStatus.clear_rattled(T)
-	P.teleport(home)
-	T.teleport(home + Vector3(7.0, 0, 1.5))
-	ac.step(m, 0.1)
-	T.inv_t = 0.0
-	for z in range(-3, 4):
-		_wall(m, home + Vector3(9.5, 0, z))
-	for z in [1, 2]:
-		_wall(m, home + Vector3(5.5, 0, z))
-	P.inp["aim"] = home + Vector3(9.5, 0.9, 0.0)
-	K.cd["rmb"] = 0.0
-	K.ch_rmb = 1.0
-	var ws0 := K.wall_slams
-	ac.fresh(T2)
-	KitStatus.clear_rattled(T2)
-	T2.teleport(home + Vector3(7.0, 0, -1.5))
-	ac.step(m, 0.1)
-	T2.inv_t = 0.0
-	ac.tap(m, P)
-	ac.step(m, 0.5)
-	var bw: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
-	ok("RMB on a wall: sticks to the wall", not bw.is_empty() and bool(bw["wall"]), str(bw.get("pos", "")))
-	ac.step(m, 1.1)
-	ok("RMB wall cone: a second foe in the cone is hurt and Dazed too",
-			KitStatus.rattled(T2) and ac.dmg(T2) >= 12.0, "took %.0f at %s" % [ac.dmg(T2), str(T2.pos - home)])
-	ok("RMB wall cone: hits, Dazes, shoves into terrain = stun, the cooldown is not shaved",
-			ac.dmg(T) >= 12.0 and KitStatus.rattled(T) and K.wall_slams == ws0 + 1 and float(K.cd["rmb"]) > 6.5 * 0.7,
-			"took %.0f slams %d cd %.1f" % [ac.dmg(T), K.wall_slams - ws0, float(K.cd["rmb"])])
-	var longer := KitStatus.rattled_left(T) - KitStatus.rattled_left(T2)
-	ok("RMB wall slam: the walled foe is Dazed longer (the data), 0.6s past the cone's Daze",
-			absf(longer - float(bd["wall_daze"])) < 0.1, "%.2f s longer" % longer)
-	for z in range(-3, 4):
-		_unwall(m, home + Vector3(9.5, 0, z))
-	for z in [1, 2]:
-		_unwall(m, home + Vector3(5.5, 0, z))
+	_coin_misses(m, P, K, T, T2, home)
 	# 5. Palm Lance: stand still, a full-width line narrowing over 0.6s, the beam at 0.6, recoil back a step
 	ac.fresh(T)
 	KitStatus.clear_rattled(T)
@@ -903,3 +839,53 @@ func _gunslinger() -> void:
 			K.needle.is_empty() and K.e_t == 0.0 and K.skewers == sk1 and ac.dmg(T) == took1)
 	await ac.done(m)
 	fails += ac.fails
+
+## Owner 11-08 item 12: only a hit counts. The lane's end and a wall are a quiet fizzle: no damage, no Daze, no area,
+## nothing left behind, no reset or refund. A monster on the line is a hit like a Hunter.
+func _coin_misses(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, T2: Hunter, home: Vector3) -> void:
+	ac.fresh(T)
+	ac.fresh(T2)
+	KitStatus.clear_rattled(T)
+	T.teleport(home + Vector3(10.5, 0, 1.8))        # just off the lane's end: the old blast would have caught it
+	T2.teleport(home + Vector3(8.0, 0, -2.0))
+	P.teleport(home)
+	ac.step(m, 0.1)
+	P.inp["aim"] = home + Vector3(2.0, 0.9, 0)
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	var fizzles0 := K.fizzles
+	var hits0 := K.direct_hits
+	var puffs0 := int(HeroVfx.of(m).plays.get("rmb_fizzle", 0))
+	ac.tap(m, P)
+	ac.step(m, 1.5)
+	var quiet: bool = ac.dmg(T) == 0.0 and ac.dmg(T2) == 0.0 and not KitStatus.rattled(T) and not KitStatus.rattled(T2)
+	ok("RMB at the lane's end: a quiet fizzle, no damage, no Daze, nothing left",
+			K.fizzles == fizzles0 + 1 and K.direct_hits == hits0 and quiet and K.burrs.is_empty()
+			and int(HeroVfx.of(m).plays.get("rmb_fizzle", 0)) == puffs0 + 1,
+			"fizzles %d took %.0f / %.0f" % [K.fizzles - fizzles0, ac.dmg(T), ac.dmg(T2)])
+	ok("RMB miss: no reset or refund", not K.rmb_ready() and float(K.cd["rmb"]) > 6.5 * 0.5,
+			"charges %.2f cd %.1f" % [K.ch_rmb, float(K.cd["rmb"])])
+	# a wall: the coin stops on it; the foe behind it is untouched
+	ac.fresh(T)
+	T.teleport(home + Vector3(8.0, 0, 0))
+	for z in range(-2, 3):
+		_wall(m, home + Vector3(5.5, 0, z))
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	ac.aim_at(P, T.pos)
+	ac.tap(m, P)
+	ac.step(m, 1.0)
+	ok("RMB on a wall: a fizzle, the foe behind it untouched",
+			K.fizzles == fizzles0 + 2 and ac.dmg(T) == 0.0 and not KitStatus.rattled(T) and K.burrs.is_empty(),
+			"fizzles %d took %.0f" % [K.fizzles - fizzles0, ac.dmg(T)])
+	for z in range(-2, 3):
+		_unwall(m, home + Vector3(5.5, 0, z))
+	# a monster on the line is a foe the coin strikes (it picks from Match.foes_of: Hunters, Boki and monsters)
+	T.teleport(home + Vector3(30, 0, 8))
+	var mob: Mob = m.spawn_mob("brute", home + Vector3(5.0, 0, 0))
+	var lane_y := Vector3(0, 1.3, 0)
+	var struck := K._burr_victim(home + lane_y, mob.pos + Vector3(2.0, 0, 0) + lane_y)
+	ok("RMB: a monster on the line is struck like a Hunter", struck == mob, str(struck))
+	m.mobs.erase(mob)
+	mob.queue_free()
+	ac.step(m, 0.1)

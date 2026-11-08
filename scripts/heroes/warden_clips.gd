@@ -77,6 +77,7 @@ var crouch_clip := ""        # the dip playing ("" none: turned round mid-dip, t
 var crouch_seek := 0.0       # s into it
 var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
+var warps := {}              # kit move -> [[s into the move, s into its clip], ...] (tuning.json "clip_warp")
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -101,6 +102,7 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 	var c := WardenClips.new()
 	if not c._setup(model, glb, sk, dd, players[0]):
 		return null
+	c.warps = Tuning.of("clip_warp").get(art_name, {})
 	return c
 
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
@@ -296,7 +298,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
 		var mv: Dictionary = moves[km]
-		var tt := float(s.get("kmove_t", 0.0))
+		var tt := _warped(warps.get(km, []), float(s.get("kmove_t", 0.0)))
 		# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 		if km != alt_km or tt < alt_t:
 			alt_on = not alt_on
@@ -339,6 +341,19 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "upper": true}
 	return {}
+
+## A kit move's time on its clip: the clip retimed through the knots (a longer wind-up, a snappier release) with
+## no rebake; past the last knot it runs on at its own speed.
+static func _warped(knots: Array, tt: float) -> float:
+	if knots.is_empty():
+		return tt
+	for i in range(1, knots.size()):
+		var a: Array = knots[i - 1]
+		var b: Array = knots[i]
+		if tt < float(b[0]):
+			return lerpf(float(a[1]), float(b[1]), (tt - float(a[0])) / (float(b[0]) - float(a[0])))
+	var last: Array = knots[-1]
+	return float(last[1]) + tt - float(last[0])
 
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})

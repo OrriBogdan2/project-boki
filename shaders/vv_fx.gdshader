@@ -101,16 +101,6 @@ void fragment() {
 		float head = (1.0 - smoothstep(0.0, 0.12, uv.x)) * (1.0 - smoothstep(0.0, 0.8, d));
 		body_a = shaft * (1.0 - uv.x) * k;
 		glow = color2.rgb * head * k;
-	} else if (mode == 6) {
-		float front = 0.15 + 0.85 * sqrt(life);
-		float band = 1.0 - smoothstep(0.0, 0.12, abs(uv.y - front));
-		float fill = (1.0 - smoothstep(front - 0.02, front, uv.y)) * 0.45 * k;
-		float spikes = pow(abs(sin(uv.x * 31.4 + seed)), 12.0) * smoothstep(front * 0.5, front, uv.y);
-		spikes *= 1.0 - smoothstep(front, front + 0.1, uv.y);
-		float side = 1.0 - smoothstep(0.0, 0.04, min(uv.x, 1.0 - uv.x));
-		float edge = side * (1.0 - smoothstep(front, front + 0.02, uv.y));
-		body_a = clamp(band + fill + edge * 0.6, 0.0, 1.0) * k;
-		glow = color2.rgb * spikes * 1.5 * k;
 	} else if (mode == 8) {
 		// a hot core, a coloured body, and a shimmering edge band in color3
 		float d = abs(uv.y - 0.5) * 2.0;

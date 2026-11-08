@@ -476,6 +476,16 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## tuning (`content/rules/tuning.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The one shared file for movement and feel numbers (owner 2026-11-08). One section per system; each value says its unit in its key or note. Read through Tuning.of(section). |
+| vex | {"_note": "Vex's feel (GunslingerKit, GunslingerUlt). E: how far the Palm Lance pulls the view out, from how far away the cursor is (m from her): a hair point-blank, a little at mid range, the archetype's whole view_zoom only when far; eased at zoom_ease per s, never snapped. R: the shot leaves the barrel at x_fire_s on her clip (the gameplay cast is still on the tap); the shake felt by those near the landing grows with what it hit.", "e_zoom_near_m": 4.0, "e_zoom_near_k": 0.04, "e_zoom_mid_m": 9.0, "e_zoom_mid_k": 0.3, "e_zoom_far_m": 15.0, "e_zoom_ease": 6.0, "x_fire_s": 0.2, "x_shake": 0.35, "x_shake_per_hit": 0.15, "x_shake_centre": 0.3} |
+| clip_warp | {"_note": "WardenClips: a kit move's clip retimed with no rebake, per art name and kit move: [s into the move, s into the clip] knots.", "vex": {"gunslinger_x": [[0.0, 0.0], [0.2, 0.1], [0.24, 0.14], [0.46, 0.3], [0.9, 0.6]], "gunslinger_rmb": [[0.0, 0.0], [0.045, 0.07], [0.16, 0.2], [0.38, 0.5]]}} |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 

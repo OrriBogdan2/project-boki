@@ -12,7 +12,6 @@ extends Node3D
 ##   ring     an expanding ring with spark needles (arrivals, shock rings, the slide's start ring)
 ##   disc     a dark filled disc with a crackling rim and veins (Skycall's area, the slide's scrape)
 ##   star     a camera-facing 4-point crackle (fingertip, muzzle)
-##   fan      a flat blast sector (the grenade's cone)
 ##   swirl    spinning comma arcs riding on a target (Dazed)
 ##   shackle  crackling rings spinning round a target (Grounded by the drag)
 ##   trail    immediate style: a swoosh following a moving point (a hand through its move)
@@ -26,7 +25,6 @@ const M_RING := 2
 const M_DISC := 3
 const M_STAR := 4
 const M_TRACER := 5
-const M_FAN := 6
 const M_SWIRL := 7
 const M_BEAM := 8
 const POOL_CAP := 28           # nodes per kind at most; past it the oldest is taken back
@@ -49,7 +47,6 @@ var made := 0                  # nodes made so far (tests: it stops growing once
 var _ribbon: ArrayMesh
 var _col: ArrayMesh
 var _quad: PlaneMesh
-var _fans := {}
 
 static func of(match_node: Node) -> VVFx:
 	if match_node.has_meta("vv_fx"):
@@ -165,27 +162,6 @@ func _quad_mesh() -> PlaneMesh:
 		_quad.size = Vector2(2, 2)
 	return _quad
 
-## A flat sector in XZ along -Z, `deg` wide, radius 1: UV.x across, UV.y apex (0) to rim (1).
-func _fan_mesh(deg: float) -> ArrayMesh:
-	var key := int(round(deg))
-	if _fans.has(key):
-		return _fans[key]
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var n := 16
-	var sweep := deg_to_rad(deg)
-	for i in n:
-		var u0 := float(i) / n
-		var u1 := float(i + 1) / n
-		var a0 := -sweep * 0.5 + sweep * u0
-		var a1 := -sweep * 0.5 + sweep * u1
-		var rim0 := Vector3(sin(a0), 0, -cos(a0))
-		var rim1 := Vector3(sin(a1), 0, -cos(a1))
-		_tri(st, [Vector3.ZERO, rim0, rim1], [Vector2(0.5, 0), Vector2(u0, 1), Vector2(u1, 1)])
-	var mesh := st.commit()
-	_fans[key] = mesh
-	return mesh
-
 ## Lays a ribbon node from a to b, `width` wide.
 static func _lay(n: Node3D, a: Vector3, b: Vector3, width: float) -> void:
 	var v := b - a
@@ -276,15 +252,6 @@ func star(at: Vector3, col: Color, col2: Color, across := 0.4, dur := 0.12) -> v
 	n.scale = Vector3.ONE * across
 	n.rotation = Vector3(PI * 0.5, 0, 0)
 	_play(n, "star", dur)
-
-## A flat blast sector from `at` along `dir`, `length` long and `deg` wide; the front runs out over `dur`.
-func fan(at: Vector3, dir: Vector2, length: float, deg: float, col: Color, col2: Color, dur := 0.3) -> void:
-	var n := _take("fan%d" % int(round(deg)), func(): return _mi(_fan_mesh(deg), _mat(M_FAN)))
-	_look(n, col, col2)
-	n.global_position = at + Vector3(0, 0.12, 0)
-	n.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
-	n.scale = Vector3(length, 1.0, length)
-	_play(n, "fan", dur)
 
 ## Spinning comma arcs on the ground round a target, for `dur` (Dazed).
 func swirl(target: Ent, col: Color, col2: Color, dur := 1.2, r := 0.9) -> void:

@@ -7,15 +7,15 @@
 	"weight": "medium",
 	"body": {"size": 0.893, "chest": 1.0, "hit_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
 	"color": "#b8f03c",
-	"clip": {"lines": {"dash": "Skid or slide, and keep shooting.", "lmb": "Full-auto rifle. Dazed foes take 90% more.", "rmb": "Flick your big coin; its blast Dazes.", "e": "Stand still, palm out, then fire a beam through walls.", "x": "Call a burning shell down on the cursor.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}},
+	"clip": {"lines": {"dash": "Skid or slide, and keep shooting.", "lmb": "Full-auto rifle. Dazed foes take 90% more.", "rmb": "Flick your big coin; a hit Dazes.", "e": "Stand still, palm out, then fire a beam through walls.", "x": "Call a burning shell down on the cursor.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}},
 	"model_glow": {"core": "#3dff3a", "edge": "#2fd24a", "strength": 1.5},
-	"fantasy": "The ember-rifle skirmisher. Flicks her big coin off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with a lance of green fire from her open palm.",
+	"fantasy": "The ember-rifle skirmisher. Flicks her big coin into a foe to Daze them for her rifle, slides around while still shooting, and finishes with a lance of green fire from her open palm.",
 	"silhouette": "the long scarf streaming behind, the bandolier across the chest, the brass cyborg hand and the long-shrouded rifle",
 	"card": {
-		"loop": "Mid-range rifleman: Daze a foe with the coin's cone, then shred them while it lasts.",
+		"loop": "Mid-range rifleman: Daze a foe with a coin hit, then shred them while it lasts.",
 		"dash": "Slipstep: tap to skid, hold to slide further; you can shoot the whole time and it goes where you move, not where you aim.",
 		"passive": "Hot Streak: knocking a hunter down gives Slipstep back. An ability that lands gives you a little lifesteal for a few seconds.",
-		"rmb": "Coin Blast: tap to flick your big coin from your cyborg hand along your aim. A direct hit hurts and Dazes the foe. Where it meets a wall or the ground it blasts a cone back at you, hurting and Dazing everyone in it.",
+		"rmb": "Coin Blast: tap to flick your big coin from your cyborg hand along your aim. Only a hit counts: it hurts and Dazes the foe it strikes. A wall or the end of its range is a fizzle.",
 		"e": "Palm Lance: raise your open palm and stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it.",
 		"x": "Cinderfall (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall.",
 		"weapons": {
@@ -65,19 +65,11 @@
 			"speed": 26.0,
 			"range": 10.5,
 			"lane_w": 0.72,
-			"fuse": 0.9,
-			"cone_len": 6.0,
-			"cone_deg": 100.0,
 			"hit_dmg": 22.0,
-			"cone_dmg": 16.0,
-			"cone_rattle": 1.4,
-			"push": 11.0,
-			"wall_stun": 0.7,
-			"wall_daze": 0.6
+			"daze": 1.4
 		},
 		"variants": {
-			"tap": "Tap RMB: she flicks the coin from her cyborg hand on the press. It flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.",
-			"full": "Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer."
+			"tap": "Tap RMB: she flicks the coin from her cyborg hand on the press. It flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes (a Hunter, a Boki or a monster): 22 damage and Dazed 1.4s. A coin that meets a wall or runs out of range just fizzles: no damage, no blast, and the cooldown still runs."
 		},
 		"sockets": {
 			"hit": "add",

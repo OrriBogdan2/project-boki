@@ -9,7 +9,7 @@ Palette: signature lime `#b8f03c` with pale-lime hot cores, deep green and white
 `content/vfx/gunslinger.json` (docs/HERO_VFX.md). Payoff word: SKEWERED.
 
 ## Kit card (L picker)
-- Role: Mid-range rifleman: Daze a foe with the coin's cone, then shred them while it lasts.
+- Role: Mid-range rifleman: Daze a foe with a coin hit, then shred them while it lasts.
 - LMB, RMB, E, Shift, passive and the ultimate: one plain line each in `content/archetypes/gunslinger.json` `card`
   (the ultimate's line is `card.x`; the kit card's last tile shows it on the hunter-ultimate key).
 
@@ -46,7 +46,6 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 | LMB magazine and refill (MED) | (a) | 3ad081dd: 30 rounds, refilling at 40/s after 0.35s off the trigger. Assert `Vex parity LMB: a 30-round drum ...` |
 | Dazed's 35% slow (MED) | (b) | Removed from KitStatus "rat": the data's Daze is only extra rifle and Railgun damage. Assert `Vex audit: Dazed is a damage window only` |
 | Dash-flow sources and into_dash rows (MED) | (a) / (b) | Sources: 731ca7b9, from the dash-buffering finding. into_dash: all "fire" (item 51: every move combos with Shift), measured: Shift in the Palm Lance charge slides and the beam fires; Shift right after the tapped Coin Blast slides at once. Assert `Vex audit: Shift in the Palm Lance charge ...`. Jump rows: DashFlow has no jump rows; jumping already keeps every hold |
-| Wall slam: Dazed longer (LOW) | (b) | `wall_daze` 0.6s on top of the cone's 1.4s (data: "Dazed longer and Stunned"). Assert `RMB wall slam: the walled foe is Dazed longer` |
 | RMB cooldown and damage (LOW) | (c) | 6.5s follows the footage (5.4s at level 9) at our pace; the data's 9s is level 1. Owner pacing call, unchanged |
 | Shift cooldown (LOW) | (c) | 8.5s sits between the data (11.5) and the footage (7.5) |
 | Air dash barrel roll; LMB during it (LOW) | (b) | `fires_in_dash` reads the dash's LMB row (fire), so the rifle keeps going through the air roll too. The roll itself is ours (the source never shows an air dash). Assert `Vex audit: the rifle fires through her air roll` |
@@ -80,7 +79,7 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
 | Slot | Input | Aim | What it does | Telegraph / reticle | Move (KMovesVV) | Sound |
 |---|---|---|---|---|---|---|
 | LMB Quill Rifle | hold | max range (11 m) past the cursor, `"aim": "max"` | auto rifle, a 30-round drum that refills fast whenever the trigger rests (no reload; run dry, it fires again once full, about 1.1s); a string loses half its punch over 10 rounds; a Dazed foe takes +90% in big gold numbers and the string doesn't decay | the aim line runs to full range; two firing brackets either side of her; a lime tracer with a white core (`shot_trail`), a muzzle flash the size of the gatling's mouth (`shot`), a spark on each hit (`shot_hit`); a dry drum clicks home with brass and a `vn_cock` (`reload`) | `gunslinger_lmb` (shouldered, the gun kicks per round) | `vn_rifle` |
-| RMB Coin Blast | tap, flicked from her cyborg hand on the press (owner items: no hold; 11-08: the coin is thrown) | max range, a fixed 10.5 m line along the aim | goes off on the first foe it strikes (22 damage, Dazed 1.4s, no cone); otherwise it flies the lane and sticks to a wall or the ground at the lane's end; a 6 m, 100° cone back toward you for 0.9s, then the blast on everyone in it: 16, a big shove along the cone, Dazed 1.4s; a hunter shoved into more terrain is stunned 0.7s | while held: a white lane with an arrow tip, foes inside it marked with a magenta ring; when stuck: the filling cone (everyone sees it); the blast front and a Dazed swirl | `gunslinger_rmb_hold` (low at the hip), `gunslinger_rmb` (a sidearm side toss) | `vn_cock`, `vn_throw`, `gunslinger_grenade_thunk`, `vn_blast` |
+| RMB Coin Blast | tap, flicked from her cyborg hand on the press (owner items: no hold; 11-08: the coin is thrown) | max range, a fixed 10.5 m line along the aim | goes off on the first foe it strikes, a Hunter, a Boki or a monster (22 damage, Dazed 1.4s); a wall or the lane's end is a quiet fizzle: no damage, no area, no reset or refund (owner 11-08 item 12) | while held: a white lane with an arrow tip, foes inside it marked with a magenta ring; when stuck: the filling cone (everyone sees it); the blast front and a Dazed swirl | `gunslinger_rmb_hold` (low at the hip), `gunslinger_rmb` (a sidearm side toss) | `vn_cock`, `vn_throw`, `gunslinger_grenade_thunk`, `vn_blast` |
 | Shift Slipstep | tap / hold | where you move, not the aim | tap 4.8 m skid, hold 7 m slide that is owed 40% more cooldown (the kit-data pass: no refund for releasing early); you shoot through either; an air tap slides 2/3 of the hold distance | none (a white ring and an ember afterimage at the start) | `gunslinger_dash` (feet first, leaning back, rifle up); with no charge in the air `gunslinger_dash_ex` | `vn_slide` |
 | E Palm Lance | press, stand still 0.6s | direction, a fixed 18 m line through terrain; the line follows the cursor until the shot, and the beam goes exactly along it | a 1.8 m wide beam (0.9 m either side, was 0.5: item 68) through everything in line: 36, +20% on a Dazed foe, a Dazed hunter is Skewered (payoff); a hunter hit takes 20% off the cooldown (rank 3: 30% for every hunter hit); the recoil shoves you back a step | a wide bright line narrowing to a thin core over the cast (everyone sees it); cursor charge ring; lime sparks drawn into the muzzle (`e_charge`); the shot is a taut needle of light, deep-green body and white core, shedding sparks along its length, with a muzzle bloom and recoil smoke (`e_fire`, `e_hit`) | `gunslinger_e` (brace, recoil overshoot, settle) | `vn_ion_charge`, `vn_ion_fire`, `hero_skewer` |
 | Passive Hot Streak | | | a knock gives Slipstep back (the takedown heal is DashReset's 5%, the kit adds none); an ability that lands lights Fever (one flat 6% lifesteal, 3.5s) | one pip over the bar; a column and ring on a knock | `gunslinger_knock` (rifle spun up) | `vn_stim` |
@@ -90,7 +89,6 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
 ## Combinations
 | Combination | What fires | Check |
 |---|---|---|
-| Grenade past a foe, ground cone back over them | Dazed, shoved toward you | `--gunslinger-combo-check` |
 | Dazed foe + rifle | +90%, gold numbers, no decay | `--gunslinger-combo-check` |
 | Dazed foe + Palm Lance | +20%, Skewered on a hunter | `--gunslinger-combo-check` |
 | Grenade on a wall, foe shoved into terrain | stun, the cooldown is untouched | `--gunslinger-combo-check` |
@@ -98,7 +96,7 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
 | Slipstep while firing | rounds keep going, the slide follows the keys | `--gunslinger-combo-check` |
 | Knock | Slipstep back, no kit heal; rank 3 resets the grenade | `--gunslinger-combo-check` |
 | Stun during the Palm Lance cast, or a Boki merge | cast cancelled, nothing fires | `--gunslinger-combo-check` |
-| Coin Blast cone (Dazed, shoved toward you), then Cinderfall on them | a slowed foe in the disc is hard to get out in 1.6 s | `--gunslinger-combo-check` (disc, impact, slow) |
+| Coin Blast hit (Dazed), then Cinderfall on them | a slowed foe in the disc is hard to get out in 1.6 s | `--gunslinger-combo-check` (disc, impact, slow) |
 | Cinderfall on an enemy hunter, then the Merge | the impact fills the bond (KinBond.from_ult, a hit); the merge straight after never one-shots a full-health light hunter | `--gunslinger-combo-check` (burst) |
 | Stepping off the disc | no damage and no bond | `--gunslinger-combo-check` |
 
@@ -122,7 +120,7 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
 | The caster keeps moving after the cast | reference sheet | jump pad at f103 | yes: "Vex moves and can shoot while it falls" |
 
 ## Assumptions (the video is silent or the owner overrode it; the owner can correct these)
-- **Owner rule (1103 playtest):** a direct hit on a hunter hurts and Dazes them; the grenade no longer passes through people. A wall or the ground at the lane's end still gives the cone, which Dazes everyone in it. Dazed raises the rifle by 90% and Palm Lance by 20% (the source's reference ratios).
+- **Owner rule (1103 playtest):** a direct hit on a hunter hurts and Dazes them; the grenade no longer passes through people. Owner 11-08: only a hit counts; a wall or the lane's end is a quiet fizzle (the cone, the fuse and the wall slam are gone). Dazed raises the rifle by 90% and Palm Lance by 20% (the source's reference ratios).
 - RMB is a tap (owner item 112: no hold): on the press, ground or air, no lane first. Owner order 2026-11-08: the projectile is her big coin, a chunky gold coin with a green-fire rim that flips as it flies, flicked from the cyborg (left) hand with a throw beat (clip `rmb`, 0.07 s to release). It leaves from her palm: the `palm` anchor (`hand.L` + the `palm_emitter` offset, read off the live pose; a point by her left side on a model without the bone). The small trick coin on the `coin` bone stays in her hand.
 - E (Palm Lance, was Longneedle, owner 2026-11-08): the arm comes up, palm out (clip `e`), a green-fire emitter burns in the palm through the charge (`e_charge` at the `palm` anchor) and the line and beam leave the palm. Hits still test from her feet along the aim, as before.
 - **The drum, with no reload in the game (owner decision 23:45 UTC):** the data gives Ghost's rifle a 30-round
@@ -158,3 +156,10 @@ slot changes. The Boki Merge is on its own key.
 - Merge cleanup: `_drop_holds()` ends `needle` and `slide`. Cinderfall
   has no hold or channel (a tap, then the shell is out), so it adds nothing there.
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=gunslinger`.
+
+## Green fire (owner 11-08 items 13-16)
+- Her signature fire is green: the palette's `fire` (#5dff45) for the flame bodies, `hot`/`white` for the heat at their core, `deep` for the cooling edge, in `content/vfx/gunslinger.json`. Weight runs R > E > RMB.
+- RMB: a green flash off her fingers (`rmb_flick`), a short two-ribbon trail on the coin (`rmb_trail`), a small green burst on a hit (`rmb_hit`), a quiet puff of smoke and a few dim embers where a miss stops (`rmb_fizzle`). Her clip is retimed to release by 0.045 s (`clip_warp` in `content/rules/tuning.json`).
+- E: the same green fire, smaller than R: a three-layer beam (deep body, green flame, white-hot core), a palm flash, a flame line of embers rising along the beam, smoke on each hit. The view pulls out by how far away the cursor is (tuning `vex` `e_zoom_*`): a hair point-blank, a little at mid range, the whole `view_zoom` only past 15 m, eased.
+- R (Cinderfall): the clip is retimed to a 0.2 s wind-up, a snap kick and a slow 0.9 s recovery (`clip_warp`); the green muzzle flash, sparks and smoke wait for the kick (`x_fire_s`; the cast and the landing time are still the tap's). The shell falls as a flickering green fireball with a white-hot heart, a three-ribbon flame trail, embers and smoke (`x_fall`, `x_shell`). The landing: a green and white-hot flash, a wide late burst of green light, the flame wall, the scorch, rising embers, debris and smoke, a heavier layered boom. Hit-stop: the dead-centre hit holds the frame for her too (a payoff); the shake felt by those near the landing grows with what it hit (`x_shake*`).
+

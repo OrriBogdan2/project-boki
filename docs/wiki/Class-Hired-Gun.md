@@ -48,7 +48,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 |---|---|
 | Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Quill Rifle (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The ember-rifle skirmisher. Flicks her big coin off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with a lance of green fire from her open palm. |
+| Fantasy | The ember-rifle skirmisher. Flicks her big coin into a foe to Daze them for her rifle, slides around while still shooting, and finishes with a lance of green fire from her open palm. |
 | Silhouette | the long scarf streaming behind, the bandolier across the chest, the brass cyborg hand and the long-shrouded rifle |
 | Resource | Fever (max 1) |
 
@@ -58,10 +58,10 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Mid-range rifleman: Daze a foe with the coin's cone, then shred them while it lasts. |
+| Loop | Mid-range rifleman: Daze a foe with a coin hit, then shred them while it lasts. |
 | Passive: Hot Streak | Hot Streak: knocking a hunter down gives Slipstep back. An ability that lands gives you a little lifesteal for a few seconds. |
 | Dash: Slipstep | Slipstep: tap to skid, hold to slide further; you can shoot the whole time and it goes where you move, not where you aim. |
-| RMB: Coin Blast | Coin Blast: tap to flick your big coin from your cyborg hand along your aim. A direct hit hurts and Dazes the foe. Where it meets a wall or the ground it blasts a cone back at you, hurting and Dazing everyone in it. |
+| RMB: Coin Blast | Coin Blast: tap to flick your big coin from your cyborg hand along your aim. Only a hit counts: it hurts and Dazes the foe it strikes. A wall or the end of its range is a fizzle. |
 | E: Palm Lance | Palm Lance: raise your open palm and stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it. |
 | Hunter ultimate: Cinderfall | Cinderfall (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall. |
 | Weapon: Quill Rifle | Full-auto rifle out to full range. Long strings lose punch; Dazed foes take 90% more (big gold numbers). |
@@ -74,8 +74,7 @@ What the in-game kit card (K) says.
 
 **Coin Blast (RMB, 6.5s cooldown).**
 
-- *Tap:* Tap RMB: she flicks the coin from her cyborg hand on the press. It flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.
-- *Resource full:* Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer.
+- *Tap:* Tap RMB: she flicks the coin from her cyborg hand on the press. It flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes (a Hunter, a Boki or a monster): 22 damage and Dazed 1.4s. A coin that meets a wall or runs out of range just fizzles: no damage, no blast, and the cooldown still runs.
 
 **Palm Lance (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core, tracking your aim while your view pulls out along it. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
 

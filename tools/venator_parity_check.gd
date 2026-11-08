@@ -26,6 +26,7 @@ func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> voi
 	_rifle_pose()
 	_coin_throw(m, P, K, T, home)
 	_needle(m, P, K, T, home)
+	_needle_zoom(m, P, K, home)
 	_audit(m, P, K, T, home)
 	P.inp["fire"] = false
 	P.inp["move"] = Vector2.ZERO
@@ -312,7 +313,7 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 	T.teleport(home + Vector3(9.0, 0, off))
 	P.teleport(home)
 	C.ac.step(m, 0.3)
-	var east := home + Vector3(10.0, 0, 0)
+	var east := home + Vector3(17.0, 0, 0)          # far: the whole view pull (it scales with distance)
 	C.ac.aim_at(P, east)
 	cam.cast_k = 0.0
 	var hits0 := K.needle_hits
@@ -361,6 +362,59 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 	P.ctrl = was
 	C.ok("Vex item 68: anyone else's cast leaves the camera alone", quiet)
 	C.ac.step(m, 0.3)
+
+## Owner 11-08 item 13: the Palm Lance's view pull scales with how far away the cursor is: a hair point-blank, a
+## little at mid range, the whole pull only when far; a cursor jump eases the view, it never snaps.
+func _needle_zoom(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
+	var cam: CamRig = m.cam
+	var full := float(K.e_def()["view_zoom"])
+	var at := func(d: float) -> float: return GunslingerKit.needle_zoom_k(d)
+	C.ok("Vex 11-08: the E view pull by cursor distance (2m a hair, 9m a little, 16m all of it)",
+			at.call(2.0) <= 0.05 and at.call(9.0) > 0.15 and at.call(9.0) < 0.5 and at.call(16.0) >= 0.999,
+			"%.2f %.2f %.2f" % [at.call(2.0), at.call(9.0), at.call(16.0)])
+	var widest := {}
+	for d in [2.0, 16.0]:
+		P.teleport(home)
+		C.ac.step(m, 0.3)
+		C.ac.aim_at(P, home + Vector3(d, 0, 0))
+		K.cd["e"] = 0.0
+		K.use_e()
+		var w := 1.0
+		while not K.needle.is_empty():
+			cam.follow(P.pos, C.DT, false)
+			m.step(C.DT)
+			w = maxf(w, cam.cast_wide())
+		widest[d] = w
+		_settle_view(m, P)
+	C.ok("Vex 11-08: point-blank the view barely moves, far it pulls out the whole way",
+			float(widest[2.0]) < 1.0 + full * 0.08 and float(widest[16.0]) >= 1.0 + full * 0.9,
+			"x%.3f near, x%.3f far" % [widest[2.0], widest[16.0]])
+	# the cursor jumps from point-blank to far mid-cast: the view eases out, no frame jumps more than 1/6 of the pull
+	_settle_view(m, P)
+	P.teleport(home)
+	C.ac.aim_at(P, home + Vector3(2.0, 0, 0))
+	K.cd["e"] = 0.0
+	K.use_e()
+	var last := cam.cast_wide()
+	var jump := 0.0
+	var steps := 0
+	while not K.needle.is_empty():
+		if steps == 10:
+			C.ac.aim_at(P, home + Vector3(16.0, 0, 0))
+		cam.follow(P.pos, C.DT, false)
+		m.step(C.DT)
+		jump = maxf(jump, absf(cam.cast_wide() - last))
+		last = cam.cast_wide()
+		steps += 1
+	C.ok("Vex 11-08: a cursor jump eases the E view, never a snap", jump < full / 6.0 and last > 1.0 + full * 0.3,
+			"biggest step %.3f, x%.3f at the shot" % [jump, last])
+	_settle_view(m, P)
+
+## Runs the camera (the check's match doesn't) until the last cast's pull has let go.
+func _settle_view(m: Match, P: Hunter) -> void:
+	for i in int(0.6 / C.DT):
+		m.cam.follow(P.pos, C.DT, false)
+		m.step(C.DT)
 
 ## Her plain walk (move held down the screen, not firing), in m/s; she is still walking when it returns.
 func _walk_speed(m: Match, P: Hunter) -> float:

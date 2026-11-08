@@ -3,11 +3,9 @@ extends ArchKit
 ## Vex (archetype id "gunslinger", medium): the ember-rifle skirmisher. docs/heroes/gunslinger.md
 ## has the per-slot table, the assumptions and the research notes (briefs/hero-ref/venator.md, owner notes).
 ##
-## Loop: tap RMB and she flicks the Coin Blast, her big coin, from her cyborg left hand along the aim. A direct hit
-## on a foe damages and Dazes it ("rat" Rattled in code) on the spot.
-## Otherwise it flies its 10.5 m and sticks where it meets a wall
-## or the ground at the end: a cone shows back toward you for its fuse, then blasts, shoving
-## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +90% to a Dazed foe, in big
+## Loop: tap RMB and she flicks the Coin Blast, her big coin, from her cyborg left hand along the aim. Only a hit
+## counts: a foe (Hunter, Boki or mob) it strikes is damaged and Dazed ("rat" Rattled in code) on the spot; terrain or
+## the end of its 10.5 m is a quiet fizzle (no damage, no area, no refund). The rifle does +90% to a Dazed foe, in big
 ## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
 ## shooting. Palm Lance: stand still, the left palm raised, while the line narrows, then a long beam out of the palm
 ## through walls. A knock
@@ -35,20 +33,18 @@ const BRACKET_DEG := 56.0            # each bracket's arc
 const SPIN_REST := 0.5               # s without a round before the next string winds the barrels up again
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
-## Coin Blasts in flight or stuck (id "burr"): {pos, dir, t, node, wall, fuse, fuse0, range, out, y0, spin}.
+## Coin Blasts in flight (id "burr"): {pos, dir, t, node, range, y0, g0, spin}.
 var burrs: Array = []
 var burr_pool: Array = []      # their nodes, reused
 var needle := {}               # the Palm Lance's charge: {t}
 var knocked := {}
 var direct_hits := 0           # Coin Blasts that struck a foe (tests)
-var rattles := 0               # Coin Blasts that blew (tests)
+var fizzles := 0               # Coin Blasts that met terrain or ran out (tests)
 var dazed_hits := 0            # rifle rounds on a Dazed foe (tests)
 var skewers := 0               # Palm Lance payoffs
 var needle_hits := 0
 var needle_dir := Vector2.ZERO # tests: the line the last Palm Lance fired along
-var wall_slams := 0
 var last_dash_kind := ""
-var last_cone := {}            # tests: {at, dir, wall}
 var last_shot := 0
 var flicks := 0                # tests: coins flicked from the hand
 var last_flick := Vector3.ZERO # tests: where the last one left
@@ -370,17 +366,14 @@ func fire_rmb(c: Dictionary) -> void:
 	n.scale = Vector3.ONE
 	var at := palm_at()
 	n.global_position = at
-	var burr := {"pos": at, "dir": d, "t": 0.0, "node": n, "wall": false, "fuse": -1.0, "fuse0": float(bd["fuse"]),
-			"spin": 0.0}
-	burr["range"] = float(bd["range"])
-	burr["y0"] = at.y
-	burr["g0"] = ground(h.pos).y
+	var burr := {"pos": at, "dir": d, "t": 0.0, "node": n, "range": float(bd["range"]), "y0": at.y,
+			"g0": ground(h.pos).y, "spin": 0.0}
 	burrs.append(burr)
 	play("gunslinger_rmb")
 	flicks += 1
 	last_flick = at
-	fx().star(at, LIME, HOT, 0.35, 0.08)          # green fire off her fingers as the coin leaves
-	m.sfx("vn_throw", h.pos, -3.0)
+	vfx("rmb_flick", at, d)                       # a green muzzle flash off her fingers as the coin leaves
+	HeroVfx.of(m).trail(h, "rmb_trail", n)        # its short green-fire trail
 
 ## Her cyborg left palm where the clip has it now (the "palm" anchor in content/vfx/gunslinger.json: a point on
 ## hand.L, read off the skeleton's pose), else a fixed point by her left shoulder.
@@ -411,20 +404,6 @@ func _tick_burrs(dt: float) -> void:
 	var bd := rmb_def()["burr"] as Dictionary
 	for b in burrs.duplicate():
 		var n: Node3D = b["node"]
-		if float(b["fuse"]) >= 0.0:
-			# stuck: pulses faster, the cone shows back toward the thrower for everyone
-			b["fuse"] = float(b["fuse"]) - dt
-			var k := 1.0 - float(b["fuse"]) / float(b["fuse0"])
-			if is_instance_valid(n):
-				n.global_position = b["pos"]
-				n.scale = Vector3.ONE * (1.0 + 0.35 * sin(m.time * lerpf(10.0, 44.0, k)))
-			var cone := {"from": b["pos"], "dir": b["out"], "len": float(bd["cone_len"]), "deg": float(bd["cone_deg"])}
-			cone.merge({"fill": k, "all": true, "col": LIME, "col2": HOT, "hot": k})
-			AimKit.cone(h, "burr%d" % n.get_instance_id(), cone)
-			if float(b["fuse"]) <= 0.0:
-				burrs.erase(b)
-				_detonate(b)
-			continue
 		var p: Vector3 = b["pos"]
 		var dir: Vector2 = b["dir"]
 		b["t"] = float(b["t"]) + dt
@@ -440,20 +419,14 @@ func _tick_burrs(dt: float) -> void:
 			_direct_hit(b, victim, flat)
 			continue
 		var ledge: bool = m.world.ground_at(flat.x, flat.z) > float(b["g0"]) + 0.6
-		var walled: bool = m.world.is_block(flat.x, flat.z) or ledge
-		if walled:
-			_stick(b, p, true)
-		elif dist >= float(b["range"]):
-			_stick(b, ground(flat) + Vector3(0, 0.2, 0), false)       # the ground at the lane's end
-		else:
-			b["pos"] = flat
-			var back := Vector3(dir.x, 0, dir.y) * 0.35
-			fx().smear(p - back, flat, DEEP, HOT, 0.3, 0.2)      # the green-fire smear behind it (joined up)
-			if int(b["t"] * 60.0) % 3 == 0:
-				m.fx.burst(flat, LIME, 3, 0.6, 0.25, 0.0, 0.7)
+		if m.world.is_block(flat.x, flat.z) or ledge or dist >= float(b["range"]):
+			burrs.erase(b)
+			_fizzle(b, p)
+			continue
+		b["pos"] = flat
 		b["spin"] = float(b["spin"]) + dt * COIN_FLIP
 		if is_instance_valid(n):
-			n.global_position = b["pos"]
+			n.global_position = flat
 			n.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
 			(n.get_node("Spin") as Node3D).rotation.x = float(b["spin"])
 
@@ -480,78 +453,30 @@ func _burr_victim(from: Vector3, to: Vector3) -> Ent:
 			best = f
 	return best
 
-## A direct hit: it hurts and Dazes the foe it struck and is spent, with no cone.
+## A hit: it hurts and Dazes the foe it struck and is spent.
 func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 	var bd := rmb_def()["burr"] as Dictionary
 	var n: Node3D = b["node"]
 	if is_instance_valid(n):
 		n.visible = false
 	direct_hits += 1
-	var dir: Vector2 = b["dir"]
-	var spray := Vector3(-dir.x, 0.2, -dir.y)
-	m.fx.flash(at, HOT, 1.2, 0.1)
-	m.fx.burst(at, LIME, 12, 6.0, 0.35, 2.0, 1.0, spray, 70.0)
-	m.sfx("vn_blast", at, -4.0)
-	net_ring(at, 1.0, LIME)
+	vfx("rmb_hit", at, -(b["dir"] as Vector2))       # a small green burst back off the foe
 	var o := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"]}
 	victim.hurt(float(bd["hit_dmg"]) * power("sec"), h, o)
-	daze(victim, float(bd["cone_rattle"]))
+	daze(victim, float(bd["daze"]))
 
 ## Dazed: the foe takes more from the rifle and the Palm Lance (rattle_k in the data) and is slowed.
 func daze(foe: Ent, seconds: float) -> void:
 	KitStatus.apply(foe, "rat", seconds)
 	fx().swirl(foe, LIME, HOT, seconds)
 
-## It meets a wall (or the ground at the lane's end) and sticks: the cone points back the way it came.
-func _stick(b: Dictionary, at: Vector3, wall: bool) -> void:
-	var bd := rmb_def()["burr"] as Dictionary
-	b["pos"] = at
-	b["wall"] = wall
-	b["fuse"] = float(bd["fuse"])
-	b["fuse0"] = float(bd["fuse"])
-	b["out"] = -(b["dir"] as Vector2)
-	m.sfx("gunslinger_grenade_thunk", at, -3.0)
-	fx().star(at, LIME, HOT, 0.6, 0.12)
-	net_ring(at, 1.0, LIME)
-
-func _detonate(b: Dictionary) -> void:
-	var bd := rmb_def()["burr"] as Dictionary
+## Terrain or the lane's end: the coin is spent with a quiet puff where it stopped, and nothing else happens.
+func _fizzle(b: Dictionary, at: Vector3) -> void:
 	var n: Node3D = b["node"]
 	if is_instance_valid(n):
 		n.visible = false
-		AimKit.hide(h, "burr%d" % n.get_instance_id())
-	var at: Vector3 = b["pos"]
-	rattles += 1
-	m.fx.flash(at, HOT, 1.6, 0.1)
-	fx().ring(ground(at), 1.8, LIME, HOT, 0.35)
-	m.sfx("vn_blast", at, -1.0)
-	_cone(at, b["out"] as Vector2, bd, bool(b["wall"]))
-
-## The blast: a cone back out of the stick point, shoving everything in it along the cone (toward the
-## thrower) and Dazing it; a hunter shoved into more terrain is stunned.
-func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
-	last_cone = {"at": at, "dir": out, "wall": wall}
-	fx().fan(ground(at), out, float(bd["cone_len"]), float(bd["cone_deg"]), LIME, HOT, 0.35)
-	var spray := Vector3(out.x, 0.2, out.y)
-	m.fx.burst(at + Vector3(out.x, 0.4, out.y) * 1.5, LIME, 18, 8.0, 0.4, 3.0, 1.4, spray, float(bd["cone_deg"]) * 0.5)
-	net_ring(at, 1.6, LIME)
-	for f in m.foes_of(h.team):
-		if not f.hittable(): continue
-		if absf(f.pos.y - at.y) > 2.6: continue
-		if not AimMode.in_cone(at, out, float(bd["cone_len"]), float(bd["cone_deg"]), f.pos, 0.3, f.r): continue
-		var to := Vector2(f.pos.x - at.x, f.pos.z - at.z)
-		var away := (out * 0.6 + to.normalized() * 0.4).normalized() if to.length() > 0.2 else out
-		var o := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "kb": away * float(bd["push"])}
-		o["lift"] = 2.0
-		f.hurt(float(bd["cone_dmg"]) * power("sec"), h, o)
-		daze(f, float(bd["cone_rattle"]))         # the training dummy too
-		if f is Hunter and terrain_behind(f, away, 2.4):
-			wall_slams += 1
-			var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "stun": float(bd["wall_stun"])}
-			slam["dr"] = true
-			f.hurt(0.1, h, slam)
-			daze(f, float(bd["cone_rattle"]) + float(bd["wall_daze"]))     # the data: walled, "Dazed longer"
-			m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 2.0, "WALLED", LIME, false)   # over DAZED
+	fizzles += 1
+	vfx("rmb_fizzle", at, b["dir"] as Vector2)
 
 # ------------------------------------------------------------------ E: Palm Lance
 func cast_e() -> bool:
@@ -592,13 +517,31 @@ func _tick_needle(dt: float) -> void:
 	lane.merge({"col": LIME, "col2": HOT})
 	AimKit.lane(h, "e", lane)
 	if h.is_local() and m.cam:
-		m.cam.cast_view(h.aim_dir(), float(ed["view_zoom"]), float(ed["range"]))     # (only the caster's camera)
+		_needle_view(ed, dt)
 	AimKit.charge(h, k, {"col": LIME, "col2": HOT})
 	HeroVfx.of(m).hold(h, "e_charge", k)          # green fire gathering in her raised palm through the cast
 	if float(needle["t"]) >= float(ed["charge"]) + 0.03:          # (a beat at full so the full tick plays)
 		_end_needle()
 		_fire_needle()
 
+## The view pulls out along the line by how far away the cursor is (only the caster's camera): a hair point-blank,
+## a little at mid range, the whole view_zoom only when far. The share eases toward that, so moving the cursor
+## never snaps the view.
+func _needle_view(ed: Dictionary, dt: float) -> void:
+	var want := needle_zoom_k(h.flat_dist(h.inp.get("aim", h.pos)))
+	var k := float(needle.get("view", want))
+	k = lerpf(k, want, 1.0 - exp(-float(Tuning.of("vex")["e_zoom_ease"]) * dt))
+	needle["view"] = k
+	m.cam.cast_view(h.aim_dir(), float(ed["view_zoom"]) * k, float(ed["range"]) * k)
+
+## The share of the Palm Lance's view pull at a cursor `dist` m away (tuning.json "vex"): 0..1.
+static func needle_zoom_k(dist: float) -> float:
+	var t := Tuning.of("vex")
+	var near := float(t["e_zoom_near_m"])
+	var mid := float(t["e_zoom_mid_m"])
+	if dist <= mid:
+		return lerpf(float(t["e_zoom_near_k"]), float(t["e_zoom_mid_k"]), smoothstep(near, mid, dist))
+	return lerpf(float(t["e_zoom_mid_k"]), 1.0, smoothstep(mid, float(t["e_zoom_far_m"]), dist))
 
 ## The beam's full width in m: what it hits, so the line, the beam and the hit all agree.
 func beam_width() -> float:
@@ -671,7 +614,6 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["sig"] = true
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 10.0 and dist > 2.0 and randf() < 0.4:
-		# throw it past them so the cone comes back over them
 		h.inp["aim"] = aimp
 		h.inp["sec"] = true
 		return

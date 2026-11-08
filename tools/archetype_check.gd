@@ -389,7 +389,7 @@ func _gunslinger() -> void:
 	K.on_deal(T, 100.0, {"src": "shot"})
 	ok("venator passive: Fever heals 6% off damage", absf(P.hp - hp0 - 6.0) < 0.5, "healed %.1f" % (P.hp - hp0))
 	K.res = 0.0
-	# Coin Blast: thrown at a foe, it goes off on them (damage + Dazed, no cone); walls and the ground give the cone
+	# Coin Blast: thrown at a foe, it goes off on them (damage + Dazed); walls and the lane's end fizzle
 	fresh(T); T2.teleport(home + Vector3(12, 0, 0)); P.teleport(home); T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	tap(m, P)
 	step(m, 1.6)

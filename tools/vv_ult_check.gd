@@ -406,7 +406,18 @@ func gunslinger() -> void:
 			U.casts == 1 and U.shells.size() == 1 and is_equal_approx(float(K.cd["x"]), float(xd["cooldown"])))
 	ok("Cinderfall: it lands exactly at the cursor", not s.is_empty() and hc._flat(s["at"], t_at) < 0.1)
 	ok("Cinderfall: the rifle goes straight up (gunslinger_x)", K.anim_id == "gunslinger_x")
-	ac.step(m, 0.5)
+	var fire_s := float(Tuning.of("vex")["x_fire_s"])
+	var flash_early := int(HeroVfx.of(m).plays.get("x_cast", 0))
+	ac.step(m, fire_s + 0.03)
+	ok("Cinderfall 11-08: the green-fire shot waits for her wind-up (x_fire_s), then fires once",
+			flash_early == 0 and int(HeroVfx.of(m).plays.get("x_cast", 0)) == 1, "%d before" % flash_early)
+	var warp: Array = Tuning.of("clip_warp")["vex"]["gunslinger_x"]
+	ok("Cinderfall 11-08: her clip's kick lands on the fire key (clip 0.1 s at x_fire_s), the clip ends by 0.9 s",
+			is_equal_approx(WardenClips._warped(warp, fire_s), 0.1) and WardenClips._warped(warp, 0.9) >= 0.6 - 0.001)
+	var shake := [GunslingerUlt.shake_power(0, 0), GunslingerUlt.shake_power(1, 0), GunslingerUlt.shake_power(2, 1)]
+	ok("Cinderfall 11-08: the landing shake grows with what it hit (edge, then dead centre), capped",
+			shake[0] < shake[1] and shake[1] < shake[2] and shake[2] <= 1.0, str(shake))
+	ac.step(m, 0.5 - fire_s - 0.03)
 	var disc := AimKit.entry(P, "x1")
 	var disc_r := float(disc.get("r", 0))
 	var core_r := float(disc.get("core", 0))
