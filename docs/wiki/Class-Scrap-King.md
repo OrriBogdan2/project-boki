@@ -1,6 +1,6 @@
 # Scrap King
 
-A harbour hauler in a brass diving helm. Reaches out with an abyssal hand, reels foes in, drops an anchor on them and
+A scavenger king with a bone hook for an arm and a hoard on his back. Reaches out with an abyssal hand, reels foes in, drops an anchor on them and
 grows with every knock.
 
 <!-- gen:profile -->

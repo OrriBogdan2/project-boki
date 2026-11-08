@@ -1,4 +1,6 @@
-# Dawnfox (base character Pip; `tender`, a small support on medium stats)
+# Dawnfox (base character Meeko; `tender`, a small support on medium stats)
+
+Lore sync (Nov 2026): Meeko is a fox-kit with a tiny sun and a raincloud beside her, kept in a glass globe; she carries no lantern. Lantern wording below is the old design and the sound-set names (`tender_lantern_chime`) are file ids.
 
 Internal design doc (was "Linnet"; the id and file names stay `tender`). Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (gameplay only; nothing of its names, look or text is used in the game). The fidelity pass (ext/kitfix-moosh-tamsin) worked from the footage reference sheet (`briefs/hero-ref/mooshmoosh.md`), the public wiki page and the owner's notes. Scale: 1 body height (bh) = 1.8 m.
 

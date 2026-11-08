@@ -25,7 +25,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
    and flies on; catch a second and both are stunned. It bounces once off a wall.
 5. **Encore** (X, from level 6): a violet ring grows round you and rides with you; for 2s blades fly at every
    foe inside it, harder from its outer edge (which also blights them), and the Vault comes back. Landing it
-   on a rival hunter fills your bond meter a long way. The Boki Merge has its own key.
+   on a rival hunter fills your bond meter a long way. The Boki Fusion has its own key.
 
 ## Combos and interactions
 

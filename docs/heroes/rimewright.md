@@ -1,4 +1,4 @@
-# Snowglide (base character Claire; `rimewright`, light ice controller)
+# Snowglide (base character Neve; `rimewright`, light ice controller)
 
 Internal design doc. Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (gameplay only). The fidelity pass (ext/kitfix-moosh-tamsin) worked from the footage reference sheet (`briefs/hero-ref/tamsin.md`), the public wiki page and the owner's notes. Scale: 1 bh = 1.8 m.
 
@@ -46,11 +46,11 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 | Spear impact 4 single-target vs a 156 small AoE + slow (data) | MED | (b) | ec88bfc0: 18 (156 : 35 darts) and a short slow within 1.2 m where it lands; the detonation stays the big hit (owner item 13); `tm RMB: the landing hits a small area ...` |
 | Invented 0.5 s root on the detonation | MED | (b) | ec88bfc0: no root (data: damage + slow); the ice shell stays as the look; `tm RMB: it detonates ... no root` |
 | X cd 47 s vs 80 s (data) | MED | (b) | ec88bfc0: 80 s; `tm X: its own cooldown (80 s, game data) ...` |
-| RMB cd 10.2 s vs 12 s | LOW | (c) | kept: the data pass scaled it by our wall (17 s vs the source's 20 s); every Claire cooldown would have to move together |
+| RMB cd 10.2 s vs 12 s | LOW | (c) | kept: the data pass scaled it by our wall (17 s vs the source's 20 s); every Neve cooldown would have to move together |
 | Passive: Chill's 15% slow (not in the data) | LOW | (c) | kept as our readability choice (a Chilled foe has to read as Chilled) |
 | Knock Shatter 30 vs about 37 | LOW | (b) | ec88bfc0: 37 |
 | E wall touch slow (not in the data) | LOW | (c) | kept: it is how the sliding wall reads as carrying foes; noted here |
-| Stale wiki link / name | MED | (a) | f1c1a91c (Class-Claire.md, Classes.md, sidebar) |
+| Stale wiki link / name | MED | (a) | f1c1a91c (Class-Neve.md, Classes.md, sidebar) |
 | "Merge stays on R" in this doc | MED | (b) | fixed in the table above |
 | Self screen shake | MED | (c) | ext/no-shake owns it; nothing added here (the spear's cast shake was removed in acd818b3) |
 | Body size 1.3 vs 1.1-1.15 | LOW | (c) | the concept heights (item 46) set it; not this branch's call |

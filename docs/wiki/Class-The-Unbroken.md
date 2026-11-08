@@ -28,7 +28,7 @@ every knock.
 5. **Warchain** (E): hook a foe or a wall, then press E again to pull yourself in.
 6. **Gilded Riposte** (X, from level 6): a 0.65s gold guard where nothing hurts or stuns you, then you lunge
    into an upward cleave through the strip ahead and heal 80% of what it deals. Each hit you block makes it
-   harder; a knock with it makes it ready again. The Boki Merge has its own key.
+   harder; a knock with it makes it ready again. The Boki Fusion has its own key.
 
 ## Combos and interactions
 

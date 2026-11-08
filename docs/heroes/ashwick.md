@@ -1,5 +1,7 @@
 # Flame Queen (base character Cinder; archetype `ashwick`, heavy; display name was Ashwick)
 
+Lore sync (Nov 2026): Cinder is the court alchemist who drank the Wyrm's blood and pours fire from her bare hands. The goggles, apron and fuel tank in the notes below describe the model and gear code as built; the art pass that removes them is pending, and no player text mentions them.
+
 Internal design doc. Source behaviour: the hero named in the Inspired-by table in docs/ARCHETYPES.md (traceability only; none of its
 names, text or looks appear in the game). Everything the player sees and hears is ours. The kitfix pass (Nov 2026) rebuilt the kit
 against the reference sheet made from gameplay footage (kept outside the repo) and the wiki's fine print.

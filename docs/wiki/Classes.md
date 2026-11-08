@@ -4,9 +4,9 @@ A class is a whole character: its own dash, a passive with a resource it builds,
 click), a right-click ability with several variants, a utility on E and an ultimate on R. There are
 twelve, four in each weight class:
 
-- **Light:** [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset), [Lisette](Class-Red-Stitch.md) (pin people, then the big shot), [Ryzz](Class-Storm-Chaser.md) (load Sparks, then Wirerun through them) and [Claire](Class-Snowglide.md) (skate on ice, chill foes, shelter the squad behind ice).
-- **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Pip](Class-Dawnfox.md) (heal, carry the downed), [Tarek](Class-Stone-Seer.md) (raise rocks, punch them into the fight) and [Motley](Class-Void-Jester.md) (swell, plant a seed, trade places).
-- **Heavy:** [Kael](Class-The-Unbroken.md) (rage, chain in, crush), [Breaker](Class-Barnacle-Knight.md) (block, then smash them into walls), [Grimble](Class-Scrap-King.md) (haul a foe in, drop the anchor) and [Cinder](Class-Flame-Queen.md) (build Char, flash foes over).
+- **Light:** [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset), [Lace](Class-Red-Stitch.md) (pin people, then the big shot), [Sparkle](Class-Storm-Chaser.md) (load Sparks, then Wirerun through them) and [Neve](Class-Snowglide.md) (skate on ice, chill foes, shelter the squad behind ice).
+- **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Meeko](Class-Dawnfox.md) (heal, carry the downed), [Tenzo](Class-Stone-Seer.md) (raise rocks, punch them into the fight) and [Motley](Class-Void-Jester.md) (swell, plant a seed, trade places).
+- **Heavy:** [Kael](Class-The-Unbroken.md) (rage, chain in, crush), [Mossy](Class-Barnacle-Knight.md) (block, then smash them into walls), [Grimble](Class-Scrap-King.md) (haul a foe in, drop the anchor) and [Cinder](Class-Flame-Queen.md) (build Char, flash foes over).
 
 The weight class sets health, speed, mass (how far hits push you) and how many dash charges you get.
 Everything else comes from the class kit.
@@ -32,7 +32,7 @@ own when you send it out (G), and adds a little of its type to your kit: each cl
 their strength (35% on RMB, 30% on E and the dash, 50% on R). Hard control from a socket is capped. An
 empty socket gives +10% to that ability's main number instead.
 
-**R is the Merge** for every class. When your **bond meter** is full, press it and you and your Boki
+**R is the Fusion** for every class. When your **bond meter** is full, press it and you and your Boki
 become one for a while: you wear its look, and your abilities change by its type and power (its merge
 form, see [Boki species](Boki-Species.md)). The class's own ultimate is held back for now.
 

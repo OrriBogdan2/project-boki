@@ -21,7 +21,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 3. **Longneedle** (E): stand still for 0.6s while a wide line narrows to a thin core, then fire a heavy beam through cover and everyone in its line, your view pulled out along it. A Dazed hunter hit is Skewered. Each hunter hit takes 30% off its cooldown. The recoil shoves you back a step.
 4. **Slipstep** (Shift): tap to skid, hold to slide; it goes where you move and you keep shooting. Let go early for part of it back. In the air a tap slides two thirds as far.
 5. **Hot Streak** (passive): a knock gives Slipstep back and heals a quarter of your health. Abilities that land add a little lifesteal (Fever).
-6. There is no R: the Boki Merge takes that key.
+6. There is no R: the Boki Fusion takes that key.
 
 ## Combos and interactions
 

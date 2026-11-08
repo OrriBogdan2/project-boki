@@ -36,7 +36,7 @@ hot, char), `near` (dropped past LOD_NEAR). Sounds: `n`, `db`, `other` (extra dB
 `"anchors"` in the data names points on the Hero. Each resolves in order: `nodes` (empties on the .glb, e.g.
 `anchor_blade_tip`, or `weapon_muzzle`), `gun` (a point in the Gun node's space), `body` ([side, up, forward] from the feet along
 the aim), with `hand` r / l between them for a point that rides a hand bone. So a look works on today's model and picks the new anchors up when a model ships them. `docs/RIG_STANDARD.md` lists
-the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_hand`, `anchor_feet` when present, Lisette
+the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_hand`, `anchor_feet` when present, Lace
 `anchor_nock`, `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`.
 
 ## Rules
