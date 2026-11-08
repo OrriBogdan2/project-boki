@@ -31,7 +31,7 @@
 
 **Reference crop:** `villain/wyrmheart_ref_from_keyart.jpg`.
 
-**To do:** a laid-out multi-view sheet of this exact heart (front, side, back, top), with nothing added.
+**Sheet (Nov 7, 20:43 ET):** `villain/wyrmheart_sheet.jpg` shows front, 3/4, back and top views, with the strongest inner glow (matching the key art). Alt: `villain/wyrmheart_sheet_alt.jpg`. Nano Banana Pro, new generation, 16:9, 4K; ref: the heart crop from the key art.
 
 **Colour master:** this heart is the master for red, crystal and glow in the later villain items.
 
