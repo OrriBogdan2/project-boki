@@ -5,7 +5,7 @@ shared armature, the ids and file names kept. Raw files in ~/meshy/ravel_v2 (nev
 the pieces on flat cells at its right edge) and a 512x256 RGBA card atlas (`hem_cards.png`). No normal map. Slots: skin, hair, cloth (corset), leather (skirt, belt, boots, bow), metal, card.
 
 Scripted (tools/art1/hem_pieces.py): the closed bow hand, the bow (1.6 m), the two back needles (1.21 m, 0.67 of her height, as on the sheet) lashed in an X,
-severed strings, thread spools and pins on the belt, bun pins, the arrow, and her eyelids (`eyelids`: a shell per eye on `lid.R`/`lid.L`, pivot 13 mm under
+severed strings, thread spools and pins on the belt, bun pins, the lit red strings round her right hand (`hand_strings`: three loops and two tails, glow slot, rigid on `hand.R`), the arrow, and her eyelids (`eyelids`: a shell per eye on `lid.R`/`lid.L`, pivot 13 mm under
 the painted eye, that comes out over it when a clip turns the bone down; open it hides in the face but for its dark lash rim). Cards (hem_finish.py): the frayed
 thread hem, on the skirt chains, and the smoke at her hair's ends (dark root to grey-violet).
 

@@ -23,7 +23,7 @@ ATLAS = 2048
 CARDS = 512
 UNIQ_W = 0.94                        # the scan's islands' share of the atlas width; the flat cells sit to its right
 CELL = {H.SKIN: "#ded3d1", H.LID: "#bfaab8", H.THREAD: "#7a1230", H.BOW: "#2b2129", H.BOW_HI: "#4a3a48", H.STEEL: "#b4b3bd", H.STEEL_DK: "#5d5b66",
-        H.PIN: "#cfcdd5", "leather-vane": "#a5835c"}
+        H.PIN: "#cfcdd5", H.GLOWT: "#ff2a50", "leather-vane": "#a5835c"}
 HEM_C, SMOKE_C = (0.0, 0.0, 0.62, 1.0), (0.64, 0.0, 1.0, 1.0)    # card cells (u0, v0, u1, v1)
 SLOTS = ["skin", "hair", "cloth", "leather", "metal"]
 MATS = [s + "-hem" for s in SLOTS] + list(CELL) + ["card-hem"]
@@ -68,7 +68,7 @@ def belt_at(x):
     return p, np.array((p[0], p[1] * 2.0, 0.0)) / max(np.hypot(p[0], p[1] * 2.0), 1e-6)
 
 
-pieces = H.fist(J) + H.rigid(H.spools(belt_at, SPOOL_X), "hips") + H.rigid(H.back_needle(1) + H.back_needle(-1) + H.lash() + H.strings(), "hips") + H.rigid(H.bun_pins(BUN), "head") + H.rigid(H.shoulder_mask(J), "upper_arm.L")
+pieces = H.fist(J) + H.rigid(H.spools(belt_at, SPOOL_X), "hips") + H.rigid(H.back_needle(1) + H.back_needle(-1) + H.lash() + H.strings(), "hips") + H.rigid(H.bun_pins(BUN), "head") + H.rigid(H.hand_strings(J), "hand.R") + H.rigid(H.shoulder_mask(J), "upper_arm.L")
 pieces += H.rigid(H.eyelids(EYE_C["R"]), "lid.R") + H.rigid(H.eyelids(EYE_C["L"]), "lid.L")
 verts, faces, fsrc, vw, rooms = [], [], [], [], []
 for co, d in zip(lo_co, lo_w):
