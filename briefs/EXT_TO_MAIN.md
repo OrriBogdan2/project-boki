@@ -3264,3 +3264,6 @@ READY ext/drop-solo-after: separate / drop solo only after the team drop is made
 
 ## 2026-11-08 deep (job 20261108-231105-a4): CLAIM roster-109
 - CLAIM: DECISIONS "roster of 109, evolution, sex, Inks": species registry matches ROSTER_100.html array G (109), themes tide/wyrm/wild in KinParts.THEMES, optional second type, data-only content/kin_v2 entries for missing species (not spawnable without a model), roster_check TARGET_TOTAL 109 + loosened rideable cap, Ermink replaces Hatchet as the mystery egg. Branch ext/roster-109 from origin/main.
+
+## 2026-11-08 deep (job 20261108-231116-a4): CLAIM evolution-rules-1108
+- CLAIM: DECISIONS "roster of 109, evolution, sex, Inks", evolution half: rewrite evo.gd (level cap 100, per-species evolve level in data, conditions level/item (Inks)/trade, art gate: never evolve into a form whose .glb + BokiRig FRAME row is missing), save VERSION bump + migration, bred-baby sex 50/50 test, Ink drops (type boss + rare wild). ext/roster-109-registry not on origin, so built on the existing species data. Branch ext/evolution-rules-1108 from origin/main.
