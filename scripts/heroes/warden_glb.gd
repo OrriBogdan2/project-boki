@@ -203,6 +203,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	_hide_body(root)
 	glb.name = "Warden"
 	root.add_child(glb)
+	_narrow(glb, float(Arch.body(arch).get("bulk", 1.0)))
 	var sync := Sync.new()
 	sync.name = "Sync"
 	sync.setup(root, skel, rest)
@@ -248,6 +249,14 @@ static func misfits(arch: String) -> Array:
 		if not bad.is_empty():
 			push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [p, str(bad)])
 	return _misfits[p]
+
+## The body's "bulk" (Mossy 0.8): the model's meshes are narrowed on x and z, not the root, which would shear
+## the blade turning in the hand.
+static func _narrow(glb: Node3D, bulk: float) -> void:
+	if bulk == 1.0:
+		return
+	for mi in glb.find_children("*", "MeshInstance3D", true, false):
+		(mi as MeshInstance3D).scale = Vector3(bulk, 1.0, bulk)
 
 ## Small pieces the match camera only sees as speckle (warden_look "far_hide": node names, Tarek's beads and fist
 ## shards) are drawn only up to FAR_HIDE_D from the camera; close-ups keep them.
