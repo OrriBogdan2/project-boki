@@ -103,7 +103,7 @@
 			"clip": "dash_short"
 		},
 		"bul_lumber": {
-			"clip": "dash_air"
+			"clip": "dash_air", "air_clip": "dash_air", "ground_clip": "dash_short"
 		},
 		"bul_crush": {
 			"clip": "crush",

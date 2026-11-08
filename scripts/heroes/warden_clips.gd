@@ -44,6 +44,7 @@ var lib: AnimationLibrary
 var alt_on := false          # this play of a move takes its "alt" clip
 var alt_km := ""
 var alt_t := 0.0
+var from_air := false        # this play of the move started off the ground ("air_clip", "ground_clip")
 var cur := ""                # the clip on the live channel
 var chan := 0                # which channel is live, 0 or 1
 var xf := 0.0                # the crossfade between the channels (0: channel a)
@@ -300,25 +301,12 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 		if km != alt_km or tt < alt_t:
 			alt_on = not alt_on
+			from_air = not bool(s.get("grounded", true))
 		alt_km = km
 		alt_t = tt
-		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
-		var length := lib.get_animation(clip).length
-		if mv.has("hold_from") and root.has_meta(PHASE):
-			var start := float(mv["hold_from"])
-			tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
-		elif tt >= length:
-			if not mv.has("hold_from"):
-				return {}
-			var from := float(mv["hold_from"])
-			tt = from + fmod(tt - from, maxf(length - from, 0.01)) if length > from + 0.02 else length - 0.001
-		# ("upper": true, or "moving": the legs keep walking only while he walks)
-		var up = mv.get("upper", false)
-		if up is String:
-			var vel: Vector3 = s.get("vel", Vector3.ZERO)
-			up = Vector2(vel.x, vel.z).length() >= STILL
-		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
-				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
+		if not (from_air and mv.has("air_clip") and _air_over(s)):
+			return _move(mv, s, tt)
+		km = ""             # an air dash gives way to the glide or the landing below
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	if bool(s.get("reviving", false)) and st.has("reviving"):
@@ -339,6 +327,32 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "upper": true}
 	return {}
+
+## A kit move's clip at tt. "ground_clip" / "air_clip": the clip when the move starts on the ground / in the air
+## (a dash picks its look by where it was pressed; the kit's timing, hitbox and distance stay the same).
+func _move(mv: Dictionary, s: Dictionary, tt: float) -> Dictionary:
+	var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
+	clip = String(mv.get("air_clip" if from_air else "ground_clip", clip))
+	var length := lib.get_animation(clip).length
+	if mv.has("hold_from") and root.has_meta(PHASE):
+		var start := float(mv["hold_from"])
+		tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
+	elif tt >= length:
+		if not mv.has("hold_from"):
+			return {}
+		var from := float(mv["hold_from"])
+		tt = from + fmod(tt - from, maxf(length - from, 0.01)) if length > from + 0.02 else length - 0.001
+	# ("upper": true, or "moving": the legs keep walking only while he walks)
+	var up = mv.get("upper", false)
+	if up is String:
+		var vel: Vector3 = s.get("vel", Vector3.ZERO)
+		up = Vector2(vel.x, vel.z).length() >= STILL
+	return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
+			"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
+
+## An air-started move is over once he lands or opens the glider: the clip fades into the land or glide pose.
+static func _air_over(s: Dictionary) -> bool:
+	return bool(s.get("grounded", true)) or bool(s.get("gliding", false))
 
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})

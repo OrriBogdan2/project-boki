@@ -88,7 +88,7 @@
 			"clip": "lunge"
 		},
 		"dr_pounce": {
-			"clip": "pounce"
+			"clip": "pounce", "air_clip": "pounce"
 		},
 		"dr_flex": {
 			"clip": "flex",

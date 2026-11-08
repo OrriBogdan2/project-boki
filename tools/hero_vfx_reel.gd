@@ -13,7 +13,7 @@ extends "res://tools/combo51_shots.gd"
 const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
 	"dredge": ["hook"]}
-const GENERIC := ["lmb", "rmb", "dash", "e", "r"]
+const GENERIC := ["lmb", "rmb", "dash", "airdash", "e", "r"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
@@ -121,6 +121,21 @@ func _part_rmb() -> void:
 		P.inp["sec_hold"] = t > 0.1 and t < 0.5
 		_aim(T.pos)
 	await _go(2.4, cast, _sheet("rmb", "RMB at the dummy", [0.15, 0.25, 0.35, 0.5, 0.65, 0.8, 1.0, 1.4, 2.0]), 2.0)
+	await _go(GAP)
+
+## The dash pressed on the ground, then pressed at the top of a jump: the two looks side by side (owner 11-08 item 17).
+func _part_airdash() -> void:
+	await _reset(6.0)
+	var dash := func(t: float):
+		P.inp["jump"] = t >= 1.3 and t < 1.3 + DT
+		if _at(t, 0.15) or _at(t, 1.6):
+			P.inp["move"] = Vector2(1, 0) if t < 1.0 else Vector2(-1, 0)
+			P.do_dash()
+		if (t > 0.3 and t < 1.5) or t > 1.8:
+			P.inp["move"] = Vector2.ZERO
+		_aim(T.pos)
+	await _go(3.2, dash, _sheet("airdash", "Shift on the ground, then Shift at the top of a jump",
+			[0.2, 0.35, 0.6, 1.62, 1.7, 1.8, 1.9, 2.1, 2.6]), 2.5)
 	await _go(GAP)
 
 func _part_dash() -> void:

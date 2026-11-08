@@ -18,7 +18,7 @@
 		"gunslinger_lmb": {"clip": "lmb", "upper": "moving"},
 		"gunslinger_rmb": {"clip": "rmb", "upper": "moving"},
 		"gunslinger_dash": {"clip": "dash", "legs_heading": true},
-		"gunslinger_dash_ex": {"clip": "dash_ex"},
+		"gunslinger_dash_ex": {"clip": "dash_ex", "air_clip": "dash_ex"},
 		"gunslinger_e": {"clip": "e"},
 		"gunslinger_x": {"clip": "x"},
 		"gunslinger_knock": {"clip": "knock", "upper": "moving"},

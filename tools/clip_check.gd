@@ -113,7 +113,9 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 func _named(dd: Dictionary) -> Array:
 	var out: Array = []
 	for mv in (dd.get("kmoves", {}) as Dictionary).values():
-		out.append(mv["clip"])
+		for k in ["clip", "air_clip", "ground_clip"]:
+			if mv.has(k):
+				out.append(mv[k])
 	var lc: Dictionary = dd.get("loco", {})
 	out.append(lc.get("idle"))
 	out.append(lc.get("stance"))
