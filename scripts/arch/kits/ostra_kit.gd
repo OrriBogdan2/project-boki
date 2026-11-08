@@ -74,6 +74,13 @@ func can_shoot() -> bool: return not well.locked and super.can_shoot()
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)
 func ready_label() -> String: return "SWOLLEN" if is_swollen() else ""
 func e_recastable() -> bool: return not seed.is_empty()
+## RecastCue: the seed is the marker; "WAIT" through the 0.3s minimum (a press there is buffered).
+func recast_window() -> Dictionary:
+	var w := super()
+	if not w.is_empty():
+		w["at"] = seed["pos"]
+		w["armed"] = float(seed["t"]) >= float(e_def()["min_recast"])
+	return w
 
 func _hand(up := 1.15) -> Vector3:
 	var d := h.aim_dir()
@@ -578,6 +585,7 @@ func e_recast() -> bool:
 		return false
 	if float(seed["t"]) < float(e_def()["min_recast"]):
 		early_pops += 1
+		buffer_recast("e")
 		return true
 	_pop(true)
 	e_t = 0.0

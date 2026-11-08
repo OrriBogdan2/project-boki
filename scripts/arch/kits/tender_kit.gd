@@ -477,6 +477,14 @@ func cast_e() -> bool:
 func e_recastable() -> bool:
 	return not hearth.is_empty() and not bool(hearth.get("tossed", false))
 
+## RecastCue: the light is the marker; left alone it flares by itself (no "EXPIRED").
+func recast_window() -> Dictionary:
+	var w := super()
+	if not w.is_empty():
+		w["at"] = hearth_center()
+		w["auto"] = true
+	return w
+
 ## E again: the light is thrown to the cursor (clamped to its reach) almost at once.
 func e_recast() -> bool:
 	if hearth.is_empty() or hearth.get("tossed", false):

@@ -14,6 +14,7 @@ extends ArchKit
 
 var chill := {}                # target instance id -> {t: Ent, left: float}
 var fan_hits := {}             # target instance id -> {n: int, left: float, t: Ent}
+const FAN_HOLD := 3.0          # s a foe's Fan stacks last after its last fan hit
 var darts: Array = []          # homing shards in flight: {s: Dictionary, side: float, passed}
 var dart_n := 0                # darts thrown (alternates the bow side and the hand)
 var seq_next := 0.0            # when the next dart may leave
@@ -108,9 +109,9 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if String(o.get("ab", "")) == "fan":
 		m.sfx("rimewright_dart_hit", t.pos, -5.0, 1.0)
 		var key := t.get_instance_id()
-		var e: Dictionary = fan_hits.get(key, {"n": 0, "left": 3.0, "t": t})
+		var e: Dictionary = fan_hits.get(key, {"n": 0, "left": FAN_HOLD, "t": t})
 		e["n"] = int(e["n"]) + 1
-		e["left"] = 3.0
+		e["left"] = FAN_HOLD
 		e["t"] = t
 		fan_hits[key] = e
 		if int(e["n"]) >= int(pd.get("fan_hits", 8)):
@@ -744,8 +745,39 @@ func _raise_wall(dir: Vector2, travel_d: float) -> void:
 func e_recastable() -> bool:
 	return not wall.is_empty() and bool(wall.get("sliding", false))
 
+## RecastCue: E while the wall slides (it stops by itself at the end), then X in Rimelock's late crack window
+## (earlier, X only breaks the shell, so the cue shows from the window on; left alone it cracks at full).
+func recast_window() -> Dictionary:
+	if e_recastable():
+		var w: Dictionary = wall["w"]
+		var mid := ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
+		var slide := float(wall["slide_t"])
+		return RecastCue.window("e", slide - float(wall["t"]), slide, Vector3(mid.x, h.pos.y, mid.y), true, true)
+	if not rime.is_empty():
+		var xd := x_def()
+		var left := float(xd["hold"]) - float(rime["t"])
+		if left <= float(xd["late"]):
+			return RecastCue.window("x", left, float(xd["late"]), rime["at"], true, true)
+	return {}
+
+## RecastCue's badges: Chill (a knock on it Shatters) and the Fan stacks toward the burst.
+func combo_marks(out: Array) -> void:
+	super(out)
+	var pd: Dictionary = d["passive"]
+	for key in chill:
+		var c: Dictionary = chill[key]
+		if is_instance_valid(c["t"]):
+			out.append(RecastCue.mark(c["t"], 0, float(c["left"]), float(pd.get("chill_t", 4.0)), "CHILL", true))
+	for key in fan_hits:
+		var f: Dictionary = fan_hits[key]
+		if is_instance_valid(f["t"]):
+			var n := int(f["n"])
+			var full := n >= int(pd.get("fan_hits", 8)) - 1
+			out.append(RecastCue.mark(f["t"], n, float(f["left"]), FAN_HOLD, "FAN", full))
+
 func e_recast() -> bool:
 	if not wall_cast.is_empty():
+		buffer_recast("e")
 		return true          # still in its tell
 	if wall.is_empty() or not bool(wall["sliding"]):
 		return true

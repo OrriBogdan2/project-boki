@@ -535,6 +535,12 @@ func extra_dashes() -> float:
 
 ## Shift on the ground starts a Rock Hop chain (breah_hop.gd); a press inside a chain is its next hop, wherever
 ## he is. In the air it is his long dash.
+## RecastCue: Shift again chains the next hop (a press in the air waits for the rock).
+func recast_window() -> Dictionary:
+	if not hop.chaining() or int(hop.st["n"]) >= int(hop.dd()["hops"]):
+		return {}
+	return RecastCue.window("dash", hop.left(), maxf(hop.left(), float(hop.dd()["window"])), h.pos)
+
 func on_dash(use_ex: bool) -> bool:
 	if hop.chaining():
 		hop.press()
