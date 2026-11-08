@@ -30,7 +30,15 @@ SEG = [("hull", "hull_bot", "hull_top", 0.3, "hips")]
 TJ = {"hull_bot": np.array((0, 0, 0.16)), "hull_top": np.array((0, 0, 0.9))}
 HC = np.array(J["hull_c"])                # the scan's hull: centre and half sizes (scan_joints.json, read off the grid renders)
 HR = np.array(J["hull_r"])
-HS = np.array((0.419, 0.392, 0.376)) / HR  # its half sizes on the rig: 1.1 wide to tall, so bulk 0.8 lands on the art's 0.9
+HS = np.array((0.419, 0.392, 0.376)) / HR  # its half sizes on the rig (before the taper)
+WAIST_X, SHOULDER_X, DEPTH_Y = 0.55, 1.0, 0.7    # owner 11-08: slimmer, not a ball: x scale at the hips and at the shoulders, and the depth scale
+
+
+def hull_scale(P):
+    """Per-vert scale of the hull: narrow at the waist, broad at the shoulders (a smoothstep over its height), and shallower front to back."""
+    t = np.clip(((P[:, 2] - HC[2]) / HR[2] * 0.5 + 0.5 - 0.2) / 0.45, 0, 1)
+    t = t * t * (3 - 2 * t)
+    return HS * np.stack((WAIST_X + (SHOULDER_X - WAIST_X) * t, np.full(len(P), DEPTH_Y), np.ones(len(P))), 1)
 for s in "RL":
     TJ["shoulder." + s], TJ["elbow." + s], TJ["wrist." + s] = rj("upper_arm." + s), rj("forearm." + s), rj("hand." + s)
     TJ["hip." + s], TJ["knee." + s] = rj("thigh." + s), rj("shin." + s)
@@ -84,7 +92,7 @@ def fit(P):
     Q = np.zeros_like(P)
     for i, (nm, j0, j1, rad, _) in enumerate(SEG):
         if nm == "hull":
-            Q += W[:, i, None] * ((P - HC) * HS + (0, 0, 0.53))
+            Q += W[:, i, None] * ((P - HC) * hull_scale(P) + (0, 0, 0.53))
             continue
         p0, p1, q0, q1 = SJ[j0], SJ[j1], TJ[j0], TJ[j1]
         ln = np.linalg.norm(p1 - p0)

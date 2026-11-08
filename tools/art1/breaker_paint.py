@@ -337,20 +337,25 @@ TABLE = {"fist": p_fist, "helmet": p_helmet, "collar": p_collar, "dial": p_dial,
          "sail": p_sail, "drum": p_drum, "door": p_door_art, "fish": p_fish, "lure": p_lure, "rope": p_rope}
 
 
+def tame_warm(col, key):
+    """Every warm texel that is not the key, below the glow key and browner (the turnaround's wood is brown, not red)."""
+    warm = (col[:, 0] - col[:, 2] > 0.1) & ~key
+    r = np.minimum(col[:, 0], 0.41)
+    col[:, 0] = np.where(warm, r, col[:, 0])
+    col[:, 1] = np.where(warm, np.maximum(col[:, 1], r * 0.66), col[:, 1])
+    col[:, 2] = np.where(warm, np.maximum(col[:, 2], r * 0.42), col[:, 2])
+    return col
+
+
 def key_scan(col):
     """The scan's paint for a keyed material: its teal light on the key, every other warm texel below it."""
     out = hot(col)
-    k = np.abs(out - KEY).sum(1) < 0.12
-    warm = (out[:, 0] - out[:, 2] > 0.1) & ~k
-    out[:, 0] = np.where(warm, np.minimum(out[:, 0], 0.41), out[:, 0])
-    return out
+    return tame_warm(out, np.abs(out - KEY).sum(1) < 0.12)
 
 
 def paint(name, p, n, ctx):
     col = np.clip(TABLE[name](p, n, ctx), 0, 1)
     # on a keyed material any bright warm texel glows (hero_toon glow_key): only the real key may stay that bright
     if ctx["part"]["slot"] in ("scan", "wood"):
-        key = np.abs(col - KEY).sum(1) < 0.12
-        warm = (col[:, 0] - col[:, 2] > 0.1) & ~key
-        col[:, 0] = np.where(warm, np.minimum(col[:, 0], 0.41), col[:, 0])
+        col = tame_warm(col, np.abs(col - KEY).sum(1) < 0.12)
     return col

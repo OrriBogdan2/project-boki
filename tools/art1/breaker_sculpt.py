@@ -18,7 +18,7 @@ F = np.float32
 # labels
 WOOD, IRON, RIVET, BRASS, MOSS, BARN, GLASS = 1, 2, 3, 4, 5, 6, 7
 HULL_C = (0.0, 0.0, 0.53)
-HULL_R = (0.41, 0.39, 0.37)      # a full round hull, 1.1 wide to tall as the master sheet
+HULL_R = (0.34, 0.27, 0.37)       # the collar's hull: the scan's chest, slimmed to a bruiser's shoulders (breaker_scan.py hull_scale)
 HELM_C = (0.0, 0.03, 0.88)
 HELM_R = (0.235, 0.205, 0.21)      # a round dome sunk in the collar (mossy_v2_turnaround, 298 px/m at 1600 wide)
 PORT_C = (0.0, 0.905)
@@ -148,7 +148,7 @@ def helmet():
     f.d = np.maximum(f.d, 0.745 - f.grid()[2])
     cl = Field((-0.56, -0.48, 0.64), (0.56, 0.48, 0.86), 0.0035)
     x, y, z = cl.grid()
-    r = np.sqrt((x / 0.34) ** 2 + (y / 0.3) ** 2)
+    r = np.sqrt((x / 0.3) ** 2 + (y / 0.24) ** 2)
     # it lies on the hull, a dipped plate round the helmet
     hz = HULL_C[2] + HULL_R[2] * np.sqrt(np.maximum(1.0 - (x / HULL_R[0]) ** 2 - (y / HULL_R[1]) ** 2, 0.02))
     top = hz + 0.022
