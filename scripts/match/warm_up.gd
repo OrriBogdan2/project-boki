@@ -56,10 +56,12 @@ func run(progress := Callable()) -> void:
 	var t0 := Time.get_ticks_msec()
 	var batch_cb := func(f: float) -> void:
 		if progress.is_valid(): progress.call(0.7 * f)
+	var mob_warm := _mob_stand_ins()
 	var aim_warm := _aim_stand_in()      # (item 94c: the aim kit's one material draws only once somebody aims)
 	var batched: bool = await _batches(batch_cb, seen)
 	var t_first := Time.get_ticks_msec()
 	if is_instance_valid(aim_warm): aim_warm.queue_free()
+	mob_warm.queue_free()
 	if not batched:
 		return
 	var shown: Array = []
@@ -150,6 +152,39 @@ const FRAME_MS := 45.0
 
 ## The stand-ins of warm_up, a batch a frame, each batch drawn once under each light setup.
 ## False if the match went away meanwhile.
+## A mob kind's model is built when the first one spawns: a fight's pack mid-play compiled its materials
+## then (a 400 ms frame on the bench at t=8 s). One model of each kind of roaming mob not in the match yet,
+## out of sight below the map, so its materials join the stand-ins. (Bosses and wards are placed at build.)
+## Also one quad per kit effect shader (below).
+func _mob_stand_ins() -> Node3D:
+	var have := {}
+	for mb in m.mobs:
+		if is_instance_valid(mb): have[(mb as Mob).mkind] = true
+	var holder := Node3D.new()
+	holder.name = "WarmMobs"
+	m.add_child(holder)
+	holder.position = Vector3(0, MOB_DEPTH, 0)
+	for k in Data.MOBS:
+		var md: Dictionary = Data.MOBS[k]
+		if have.has(k) or md.get("boss", false) or md.get("ward", false):
+			continue
+		holder.add_child(Models.mob(k))
+	# and the kit effect libraries' own shaders, which a kit's first cast built mid-play (LDFx on the bench's
+	# ride, a 200 ms frame); DJFx draws its own stand-ins (DashPace.rehearse)
+	var quad := QuadMesh.new()
+	for lib: Script in [LDFx, VVFx]:
+		for v in lib.get_script_constant_map().values():
+			if v is Shader and (v as Shader).get_mode() == Shader.MODE_SPATIAL:
+				var mi := MeshInstance3D.new()
+				mi.mesh = quad
+				var mt := ShaderMaterial.new()
+				mt.shader = v
+				mi.material_override = mt
+				holder.add_child(mi)
+	return holder
+
+const MOB_DEPTH := -600.0      # m: under every island and the void floor, so no view draws them
+
 ## The aim kit (AimKit: every kit's aim lines, rings and the Hem draw's fill line and perfect circle) draws one
 ## ImmediateMesh that is empty until a Hunter aims, so the scan below never sees its material and the first
 ## aim after landing compiled its shader mid-play. A one-triangle mesh with the same material and vertex
