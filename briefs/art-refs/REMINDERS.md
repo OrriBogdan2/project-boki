@@ -8,7 +8,7 @@
 - **Queued after the villain/dragon set** (owner, Nov 7, 22:41 ET):
   - **Grimble splash redo:** rebuild his original splash (the cool view) with his new purple slime bone-hook arm. The current splash isn't clear enough.
   - **Sable splash fix:** make her aim at the men below, and shrink the jewel; it's so big it looks comical.
-  - **Face-off, no-heart version (owner, Nov 7):** make an alt of `keyart/keyart_faceoff_final.jpg` with the Wyrmheart removed from between Kael and Vex; it looks odd in the middle. A single remove edit, then restore colour and sharpness locally. Keep the current version too.
+  - **Face-off, no-heart version (owner, Nov 7):** make an alt of `keyart/keyart_faceoff_final.jpg` with the Wyrmheart removed from between Kael and Vex; it looks odd in the middle. DONE (Nov 8): `keyart/keyart_faceoff_noheart.jpg`; the original is kept.
 
 ## Ideas (no schedule; maybe someday)
 - **Corruption stages** (owner, Nov 8: "not even sure it's needed"): show what holding the Heart does to a hero, in three stages (just picked it up, powerful, almost consumed), with crimson crystal spreading up the arms and the eyes turning pink-red. Use it only if gameplay ends up needing it, e.g. a Heart-holder state or a skin line. No reminder.

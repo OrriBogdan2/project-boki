@@ -45,3 +45,4 @@
 - Edits: Grimble made to cower, Neve turned to aim at Motley, then Grimble's face and loupe fixed. The loupe came out with 2 lenses, not 3.
 - Local restore: colours matched back to the pre-edit base, then sharpened.
 - The earlier flat lineup version is in `explorations/`.
+- `keyart_faceoff_noheart.jpg`: the face-off with the Wyrmheart and its red glow removed (owner, Nov 8: the heart looked odd in the middle). One remove edit of `keyart_faceoff_final.jpg`, then a local LAB colour match and sharpen.
