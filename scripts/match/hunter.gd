@@ -27,7 +27,7 @@ const GLIDE_TURN_FAST := 0.45    # ...down to this share of GLIDE_TURN at the bo
 const GLIDE_BRAKE := 36.0        # steering more than GLIDE_BRAKE_DEG against your heading brakes this hard
 const GLIDE_BRAKE_DEG := 115.0
 const GLIDE_GRAV := 14.0
-const GLIDE_ENGAGE := 0.1        # hold Space this long in the air before the glider opens (a tap is a jump); was 0.15
+const GLIDE_ENGAGE := 0.1        # scripted input only (checks, demos): hold glide this long in the air and it opens. A player's keys never hold-open it (glide_press_only)
                                  # (the dedicated glide button, Mouse 5, opens it at once)
 ## The abyss lift [wiki: "a rapid upward impulse to ground level, then a rapid deceleration"], scaled
 ## by how deep you are (owner: "pull you up faster based on how low in the abyss you are"): a gentle
@@ -87,7 +87,7 @@ var wid := "rifle"
 var wpn: Dictionary = {}
 var ctrl := "bot"             # local | bot | remote
 var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": false, "jump": false,
-	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false, "util4": false, "glide": false, "ult": false,
+	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false, "util4": false, "glide": false, "glide_press_only": false, "ult": false,
 	"sec": false, "sec_hold": false, "crouch": false, "gear1": false, "gear2": false, "swap": false}
 var base_speed := 5.4
 var ground_accel := GROUND_ACCEL     # per hunter (HunterMove)
@@ -926,6 +926,11 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float
 		return minf(vy + acc * dt, maxf(top, vy))
 	return move_toward(vy, maxf(depth * ABYSS_BRAKE_GAIN, ABYSS_LIP_VY), ABYSS_BRAKE * dt)
 
+## Real keys only open the glider with a fresh press in the air (a second Space, or the glide button); this stays
+## true while that press is held, so a fold (heal, dash, a knock) re-opens it, and clears on release or landing.
+var _glide_armed := false
+var _glide_btn_held := false
+
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
 		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down \
@@ -933,6 +938,7 @@ func can_glide() -> bool:
 
 func _open_glider() -> void:
 	gliding = true
+	_glide_armed = true
 	grounded = false
 	# unfolding catches the air: a slow start gets carried up to cruising speed
 	var hv := Vector2(vel.x, vel.z)
@@ -2549,6 +2555,7 @@ func _update_glide(dt: float) -> void:
 	_auto_glide_held = inp.get("glide", false)
 	if auto_glide and (glide_press or downed or out or (grounded and air_t <= 0.0 and vel.y <= 0.0)):
 		auto_glide = false
+		_glide_armed = _glide_armed or (glide_press and not grounded)
 	# an overheated glider scorches you while it stays open
 	if gliding and not dropping and glide_fuel <= 0.001 and not downed:
 		heat_burn += dt * max_hp * 0.035      # an overheated glider burns ~3.5% of your health a second (was a token 4/s)
@@ -2559,6 +2566,10 @@ func _update_glide(dt: float) -> void:
 	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
 		and m.time - kb_t > 0.4 and pad.is_empty() and not shot_down
 	var want: bool = inp.get("glide", false) or auto_glide
+	var btn_down: bool = inp.get("glide_btn", false)
+	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held and can)) and bool(inp.get("glide", false)) and not grounded
+	_glide_btn_held = btn_down
+	var hold_opens: bool = auto_glide or _glide_armed or not inp.get("glide_press_only", false)
 	if gliding and not _handoff.is_empty() and want and can:
 		_take_glide_handoff()       # (movefeel) a burst that ended with the glider still open
 	if gliding:
@@ -2575,10 +2586,10 @@ func _update_glide(dt: float) -> void:
 			glide_fuel = maxf(0.0, glide_fuel - dt * hk / (glide_max * (1.0 + gear_stat("heat"))))
 		if not dropping:
 			stats["glide_t"] = float(stats.get("glide_t", 0.0)) + dt
-	elif want and can and air_t >= (0.0 if inp.get("glide_btn", false) else GLIDE_ENGAGE) \
+	elif want and can and hold_opens and air_t >= (0.0 if btn_down else GLIDE_ENGAGE) \
 			and not AirLimits.glide_locked(self):
-		# hold Space in the air and the glider opens a beat after you leave the ground (the glide
-		# button opens it at once: there's no tap-to-jump to tell apart)
+		# a fresh press in the air opened it (_glide_armed) and it is still held, or a pad's auto-glide, or scripted
+		# input: the glider opens. Space held since the jump never gets here (glide_press_only)
 		gliding = true
 		_take_glide_handoff()
 		if below_lip:
