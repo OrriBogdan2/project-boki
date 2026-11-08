@@ -335,6 +335,7 @@ func _draw_world_labels() -> void:
 	var cam := m.cam
 	LabelCull.begin()        # (item 94: anything off screen or far away isn't laid out)
 	ReviveHud.world_labels(self)       # deathboxes and revive beacons
+	HeartHud.world_labels(self)        # the Heart, its Heartspark and Gate
 	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
 	if m.tut and m.tut.target != Vector3.INF and m.player and not m.player.out:
@@ -698,6 +699,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.lairs:
 		_draw_map_lairs(inner, to_map, on_map, riding)
 	ReviveHud.minimap(self, inner, to_map, on_map)
+	HeartHud.minimap(self, inner, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
 		for cnd in m.spawn_plan.cands:
@@ -1903,6 +1905,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"chest": prog = it["chest"]["prog"]
 			"exit": prog = float(it["x"]["hold"].get(p.nid, 0.0)) / float(it["need"]) if it.has("need") else 0.0
 			"lair": prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
+			"heart": prog = float(it.get("prog", 0.0))
 		var s: String = it["label"]
 		var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
 		_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))

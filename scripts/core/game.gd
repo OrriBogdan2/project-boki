@@ -181,6 +181,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 			KinBox.route_new(nk)      # the farm if there's room; a repeat species goes to the Kin Burrow
 			Care.dex_got(nk)
 			out["caught"].append(nk)
+	if won: Heart.settle(r, out)   # the Heartspark's rare egg and materials (heart.gd)
 	Equal.settle_belt(r)       # the utility you brought and found comes home with you, or is gone (equal.gd)
 	Backpacks.settle(r)        # and the backpack you wore out
 	var treat: String = d.get("treat", "")

@@ -19,6 +19,7 @@ var shots: Array = []
 var pickups: Array = []     # {pos, vel, kind:"gem"|"seed"|"tonic", v, key, node, t}
 var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Beacons
+var heart: Heart            # the Heart, its Heartspark and Gate (null when the match has none)
 var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
 var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (host / offline)
 var shrines: Array = []     # {pos, used, prog, node}
@@ -769,6 +770,9 @@ func _start(o: Dictionary) -> void:
 		skytrain.setup(self)
 	await _slice()
 	Beacons.place(self)
+	if Heart.enabled(opts):
+		heart = Heart.new(self)
+		heart.setup()
 	await _slice()
 	if not opts.get("arena", false):
 		await _spawn_breakables()
@@ -4222,6 +4226,8 @@ func step(dt: float) -> void:
 		SeeThrough.demo(self, String(opts["see_demo"]))
 	if opts.has("exit_demo") and exits and player and not player.dropping:
 		exits.demo(String(opts["exit_demo"]))
+	if opts.has("heart_demo") and heart and player and not player.dropping:
+		heart.demo(String(opts["heart_demo"]))
 	if (opts.get("raid_demo", false) or opts.get("chest_demo", false) or has_meta("stairs_demo")) and hud and not hud.guide_hidden:
 		Settings.v["tips"] = false          # (screenshots of a raid condition: no tutorial cards)
 		hud.guide_hidden = true
@@ -4330,6 +4336,7 @@ func step(dt: float) -> void:
 	Life.tick_stomps(self, dt)
 	_tick_chase()
 	Beacons.tick(self, dt)
+	if heart: heart.tick(dt)
 	if not net_on:
 		_watch_death()
 	_update_dex(dt)
@@ -4687,6 +4694,10 @@ func _update_interact(dt: float) -> void:
 		if lairs:
 			var lx := lairs.interact_for(h)
 			if not lx.is_empty() and (best.is_empty() or not String(best.get("kind", "")) in ["revive", "finish", "boxrev", "loot", "catch", "exit"]): best = lx
+		# 7. the Heart: take the Heartspark, leave through the Heart Gate with it
+		if heart:
+			var hx := heart.interact_for(h)
+			if not hx.is_empty() and (best.is_empty() or hx.has("act")): best = hx
 		if h == player:
 			interact = best
 		if best.is_empty() or not want:
@@ -4745,6 +4756,9 @@ func _update_interact(dt: float) -> void:
 				if xa in ["call", "start"]: h.set_hold("console")
 				elif xa in ["open", "enter"]: h.set_hold("key")
 				exits.hold(h, best, dt)
+			"heart":
+				h.set_hold("key")
+				heart.hold(h, best, dt)
 			"lair":
 				if String(best.get("what", "")) == "rune": h.set_hold("rune")
 				lairs.hold(h, best, dt)
@@ -5294,11 +5308,13 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 		return
 	h.extracted = true
 	h.downed = false
+	var hb: Dictionary = heart.pay(h) if heart and how == "heart" else {}      # the Heartspark's reward bundle
+	if heart: heart.on_leave(h, how)
 	if not h.stomp.is_empty(): Life.end_stomp(self, h, "extract")
 	cancel_abilities(h)
 	if net_on and not h.remote:
 		net_event(["ext", h.nid])
-	var col: Color = {"skiff": ExitModels.DOCK, "hatch": ExitModels.HATCH, "uplink": ExitModels.UPLINK}.get(how, Color("8fe3c8"))
+	var col: Color = {"skiff": ExitModels.DOCK, "hatch": ExitModels.HATCH, "uplink": ExitModels.UPLINK, "heart": Heart.COL}.get(how, Color("8fe3c8"))
 	sfx("portal", h.pos, -4.0 if how == "hatch" else 0.0, 1.3)
 	fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 5.0, 0.8, -4.0)
 	Juice.extract(self, h, col)
@@ -5310,6 +5326,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 		if h.kin and h.kin.state != "downed":
 			BokiChatter.say(self, h.kin, "extract")
 		result = {"extracted": true, "why": "extracted", "how": how, "where": where}
+		if not hb.is_empty(): result["heart"] = hb
 		_end_soon(1.6)
 		if opts.get("tut_test", false):
 			print("TUT DONE extracted by %s at %s, t=%.1f" % [how, where, time])
@@ -5822,6 +5839,8 @@ func _net_ev(x, from: String) -> void:
 			if exits: exits.net_in(x)
 		"bcn":
 			Beacons.net_in(self, x)
+		"ht":
+			if heart: heart.net_in(x)
 		"emo":
 			var eh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if truce and eh: truce.emote(eh, String(x[2]), true)
