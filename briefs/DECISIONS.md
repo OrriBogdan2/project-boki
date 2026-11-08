@@ -361,3 +361,12 @@ New or rewritten stateful code (movement, ability phases, Boki AI, match flow, t
 - The 3 starter eggs (cindle, puddlet, burrlet) stay front and obvious.
 - The mystery egg is a BLACK egg, set in a basket at the back of the hatch scene, somewhat hidden so players discover it and try it.
 - Its pool: many early creatures, rares included (not just the 3 starters), with a higher chance of cool mutations at birth than starters.
+
+## 2026-11-08 owner: roster of 109, evolution, sex, Inks (wins over older roster/evolution lines)
+- **Roster = the 109 species in briefs/boki-art/ROSTER_100.html (array G is the truth).** Ermink replaces Hatchet as the mystery egg; Jarmit is a rare (Tide) from Rare Eggs that branches with Inks into Lanternmit/Stormit/Terrarimit. The owner makes ~200 sheets a day and reviews them; the first 50-100 with approved art are earmarked for the first release.
+- **Types:** the theme list gains **tide, wyrm, wild** (element table in BOKI_DESIGN_RULES.md). A species may have a second type (from G).
+- **Evolution:** level cap 100. Each species has its OWN evolution level (no fixed "every 4 levels"). Some evolve by item (Inks, others later) or by trade, like the familiar monster-collecting rules. **A Boki never evolves into a form whose art (model) is not in the game yet;** it waits, and evolves once the art ships.
+- **Inks** (Ember, Tide, Bloom, Storm, Frost, Shadow, Lunar, Prism, Wyrm): drop from that type's boss, plus rare wild drops.
+- **Sex:** 50/50 for every Boki and every bred baby. Only chosen species get a separate female look (design rule 14); the rest show the sex icon only.
+- **Riding:** the rideable cap in the roster check is loosened (owner "ya loosen it"): any grown/final form whose size fits may be rideable.
+- Starters stay Vespyx (cindle), Prismander (puddlet), Mycroll (burrlet) plus the mystery egg (Ermink).

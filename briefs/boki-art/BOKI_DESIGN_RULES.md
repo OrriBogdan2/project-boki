@@ -14,7 +14,7 @@ This is the bar every Boki has to clear. It works alongside the judging rubric i
 10. **Buildable and readable in game.** Models are about 5k triangles, seen from a distance. Use chunky parts and no thin floating bits (ropes, wires, ribbons, lace).
 11. **One render style.** Soft hand-painted shading with a thin clean outline, matching style_refs (the website's Vespyx and Mycroll). No thick cartoon outlines or flat cel shading.
 13. **The idea runs through the whole body (owner, Nov 8).** If the object shows up in one place, its material and shapes must repeat everywhere else: the same bone, metal or stone in the claws, spine, tail and face. A design should never read as one thing tied to another. Example: Umbrathere's umbrella ribs are its arm and finger bones, not a canopy bolted to its back.
-14. **Male and female forms (owner, Nov 8).** Every species has a male and a female look. They differ in a few features: build (heavier or slimmer), crest, horn or tail shape, the size of their signature part, and colour (cooler or warmer, e.g. blue vs pink tints). Light human-coded cues are allowed sometimes, not always: a softer or sharper face, a lighter colourway, tufts or lashes on a few species (owner's reference: the two Vespox sheets). The difference is small on babies and clear on final forms. Still off limits: an upright, person-like stance for either sex, and human body shapes (chests, hips).
+14. **Male and female looks on chosen species only (owner, Nov 8; replaces "every species").** Sex is 50/50 for every Boki in the game, but only these species get a second (female) look: Ermink, Blossmink (pair done), the starter lines' grown and final forms (Sporcupine, Amanitusk, Ringrove, Vespox, Glaivyx, Lashyx, Glassolotl, Chandelotl, Geodelotl), Chuggamus and Canvastross. Every other species uses one look for both sexes. The existing sheet is the male look. The two looks differ in a few features: build (heavier or slimmer), crest, horn or tail shape, the size of the signature part, and colour (cooler or warmer). Light human-coded cues are allowed sometimes: a softer or sharper face, a lighter colourway, tufts or lashes. Still off limits: an upright, person-like stance and human body shapes (chests, hips).
 12. **Things to avoid:** more than one idea, a realistic animal with a prop on it, backpack syndrome (an object sat on its back with no change to the animal), accessories, particles and glow everywhere, and any franchise name in a prompt.
 
 ## Elements: how each theme must read
@@ -35,6 +35,9 @@ This is the bar every Boki has to clear. It works alongside the judging rubric i
 | swarm | honeycomb patterns, many small repeated parts or tiny companions, amber gold |
 | titan | huge heavy armour plates engraved with ancient gold runes |
 | tempest | wind-swept streamers, swirl markings, sky blue and white |
+| tide | flowing water fins, wave-curl crests, foam-white tips, sea blue-green |
+| wyrm | dragon traits: small horns, scale plates, a ridge of spines, old gold and deep crimson |
+| wild | plain natural fur, feathers or hide in earthy colours; no elemental effects, the one idea carries it |
 
 ## Archetypes: shape language
 | Archetype | Shapes |
