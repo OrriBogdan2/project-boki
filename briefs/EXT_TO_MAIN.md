@@ -2843,3 +2843,4 @@ READY ext/agent-briefs af480ffa8 (briefs/TOWN_HUB.md: town square hub design doc
 READY ext/idle-tender be19bd8bf (Meeko the Dawnfox idle+stance rework)
 READY ext/idle-thief 619b8dc32 (Sable the Silver Thief idle+stance rework)
 READY ext/idle-ashwick eeb4f3ae4 (Cinder the Flame Queen idle+stance rework)
+READY ext/depth-tiers 3c5f92074 (Depth 1/2/3 on the three tiers, shown on expedition select and results; reuses the existing tier mob/loot/kin_lvl/biome scaling; check + wiki; Net/save untouched)
