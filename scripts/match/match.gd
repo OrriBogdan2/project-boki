@@ -1835,26 +1835,6 @@ func _pickup_label(h: Hunter, wp: Dictionary) -> String:
 		return "Press %s to pack %s  (%s)  ·  %s" % [k, nm, fill, Loot.sub_of(it)]
 	return "Backpack full (%s)  ·  %s to swap something out for %s" % [fill, k, nm]
 
-func _update_wpicks(dt: float) -> void:
-	for wp in wpicks:
-		var n: Node3D = wp["node"]
-		var sp: Node3D = n.get_node("Spin")
-		sp.rotation.y += dt * 1.6
-		sp.position.y = 0.7 + sin(time * 2.4 + float(wp["pos"].x)) * 0.08
-	# tunings are taken by walking over them; bots also grab gear that beats what they wear
-	for h in hunters:
-		if h.out or h.downed or h.dropping or h.riding or h.remote:
-			continue
-		for wp in wpicks:
-			if wp.has("val") or h.flat_dist(wp["pos"]) >= 1.4 or absf(h.pos.y - float(wp["pos"].y)) >= 1.0:
-				continue
-			if wp.has("tune") and (h.flat_dist(wp["pos"]) < 1.1 or h.ctrl == "bot"):
-				take_pick(h, wp)
-				break
-			if wp.has("gear") and h.ctrl == "bot" and GearDrops.bot_wants(h, String(wp["gear"]), int(wp["rar"])):
-				take_pick(h, wp)
-				break
-
 ## Air rings: anyone flying through one gets thrown forward along their own heading, the glider
 ## pops open and gets a little fuel back, so a chain of rings carries you across a long gap.
 func _update_rings(dt: float) -> void:
@@ -3166,6 +3146,7 @@ func _update_shots(dt: float) -> void:
 		var hit := false
 		var sx: Dictionary = s["x"]
 		var near := _shot_targets(s, p, step.length() + float(s["r"]) + HIT_SLACK)      # once a step, not per 0.25 m
+		var nbrk := Breakables.near(breaks, p, step.length() + float(s["r"]) + Breakables.HIT_R)
 		for i in n:
 			p += step / n
 			if sx.has("lob"):
@@ -3211,7 +3192,7 @@ func _update_shots(dt: float) -> void:
 			elif vr == "bounce":
 				p = s["pos"]
 				hit = true; break
-			var bh := _shot_break(s, p)
+			var bh := _shot_break(s, p, nbrk)
 			if not bh.is_empty():
 				if not s["x"].get("cos", false) and not s["x"].has("boom") and not s["x"].get("mob", false):
 					brk.hit(bh, s["by"])
@@ -3296,9 +3277,10 @@ func shot_band(e: Ent) -> Vector2:
 	var fy := shot_stance_y(e)
 	return Vector2(fy - 0.45, fy + top + 0.9)
 
-func _shot_break(s: Dictionary, p: Vector3) -> Dictionary:
-	for b in breaks:
-		if not b["dead"] and absf(p.y - (float(b["pos"].y) + 0.4)) < 0.75 and Vector2(b["pos"].x - p.x, b["pos"].z - p.z).length() < 0.36 + float(s["r"]):
+## (`cands`: Breakables.near for this step; the whole list was most of a 2x match's shot time.)
+func _shot_break(s: Dictionary, p: Vector3, cands: Array) -> Dictionary:
+	for b in cands:
+		if not b["dead"] and absf(p.y - (float(b["pos"].y) + 0.4)) < 0.75 and Vector2(b["pos"].x - p.x, b["pos"].z - p.z).length() < Breakables.HIT_R + float(s["r"]):
 			return b
 	return {}
 
@@ -4338,7 +4320,7 @@ func step(dt: float) -> void:
 	_prof("shots")
 	_update_pickups(dt)
 	BeltKeys.tick(self)      # a full belt beside a key: the swap prompt (bots make room)
-	_update_wpicks(dt)
+	Wpicks.update(self, dt)
 	PerkOrbs.update(self, dt)
 	_update_gear_fx(dt)
 	_update_pads(dt)

@@ -166,6 +166,9 @@ func sim(dt: float) -> void:
 		net_follow(dt)
 		_net_telegraph()
 		return
+	dt = _far_step(dt)
+	if dt <= 0.0:
+		return
 	if _napping(dt):
 		return
 	cd -= dt
@@ -291,6 +294,26 @@ func _napping(dt: float) -> bool:
 		_nap = NAP_CHECK
 		_asleep = not _anyone_near()
 	return _asleep
+
+## An awake monster more than FAR_M from the local player, after nothing within FAR_M of them, steps
+## every FAR_EVERY sim steps with the skipped time added in, as SimLod does for the bots (a camp a far
+## squad woke fights it at 20 Hz on both sides; nobody sees it). Mid-air it keeps every step (a lunge or
+## a fall at 50 ms hops could miss the ground). Offline only: a server has no local player.
+const FAR_M := 45.0          # m (3D) from the local player before an awake monster slows down (SimLod.FAR_M)
+const FAR_EVERY := 3         # sim steps per monster step when far (60 Hz -> 20 Hz)
+var _far_dt := 0.0           # s banked while skipping
+func _far_step(dt: float) -> float:
+	var me: Hunter = m.player
+	if me == null or me.out or me.extracted or not grounded:
+		_far_dt = 0.0
+		return dt
+	var near_me: bool = pos.distance_squared_to(me.pos) <= FAR_M * FAR_M or (tgt != null and tgt.flat_dist(me) <= FAR_M)
+	_far_dt += dt
+	if not near_me and (SimLod.step_n() + get_instance_id()) % FAR_EVERY != 0:
+		return 0.0
+	var out := _far_dt
+	_far_dt = 0.0
+	return out
 
 func _anyone_near() -> bool:
 	var r2 := NAP_M * NAP_M

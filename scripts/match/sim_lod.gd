@@ -28,6 +28,10 @@ const THINK_FAR_K := 2.0   # how much longer such a bot waits between picking go
 
 static var _n := 0             # sim steps planned (staggers the bots' slots)
 
+## The sim step being planned (Mob staggers its far monsters on it too).
+static func step_n() -> int:
+	return _n
+
 ## Once per sim step, before the bots think: sets each bot's step time for this step (0 = skip).
 static func plan(m: Match, dt: float) -> void:
 	_n += 1
