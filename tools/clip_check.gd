@@ -5,11 +5,17 @@ extends RefCounted
 ## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop. Never
 ## touches the save.
 
-const TRI_BUDGET := 15000
+const GLB_CHECK := preload("res://tools/warden_glb_check.gd")     # (its tri budget and the Heroes over it)
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
-	"ostra": "ostra"}
+	"ostra": "ostra", "juggernaut": "kael"}
 const DT := 1.0 / 30.0
+## The source footage's beats (docs/hero-ref, 5 fps: a frame is 0.2 s): the clip's strike, the frame the sword hand
+## moves fastest, lands in [from, to] s. Kael (juggernaut.md): the slam winds up three frames (0155-0157) and strikes
+## at 0158, 0.6 s in (a frame either way); a slash is a frame of wind-up and one of swing, all in 0.4 s; the riposte
+## strikes in the frame the guard ends.
+const FOOTAGE := {"juggernaut": {"slam": [0.4, 0.8], "slash_r": [0.0, 0.4], "slash_l": [0.0, 0.4],
+	"riposte": [0.0, 0.2]}}
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
 
@@ -67,7 +73,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 			continue
 		for si in mesh.get_surface_count():
 			tris += (mesh.surface_get_arrays(si)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
-	ok(tris > 0 and tris <= TRI_BUDGET, "%s: %d tris, weapon included (budget %d)" % [id, tris, TRI_BUDGET])
+	var cap: int = GLB_CHECK.TRIS_OVER.get(id, GLB_CHECK.TRIS_MAX)
+	ok(tris > 0 and tris <= cap, "%s: %d tris, weapon included (budget %d)" % [id, tris, cap])
 	var missing: Array = []
 	var named: Array = _named(dd)
 	for c in named:
@@ -96,6 +103,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
+	await _footage(id, m, sync, clips)
 	m.free()
 
 func _named(dd: Dictionary) -> Array:
@@ -210,6 +218,32 @@ func _sliders(id: String, sync: Node) -> void:
 	var stays := float(sync.get("root").get_meta(WardenClips.DEATH_T, 0.0))
 	ok(not (clips.d.get("states", {}) as Dictionary).has("dead") or stays > 0.0,
 			"%s: a knocked-out Hero stays on screen for its death clip" % id)
+
+## Each footage-timed clip strikes on the source's frame (FOOTAGE).
+func _footage(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
+	var hand := m.get_node(String(WardenGlb.BONES["hand.R"])) as Node3D
+	var beats: Dictionary = FOOTAGE.get(id, {})
+	for clip in beats:
+		var length := clips.lib.get_animation(String(clip)).length
+		clips.force = {"clip": String(clip), "t": 0.0}
+		for k in 10:      # (settled on its first pose: not the jump from the clip before)
+			sync.call("_process", DT)
+		await holder.get_tree().process_frame
+		var last := Vector3.INF
+		var peak := [0.0, -1.0]
+		var t := 0.0
+		while t < length:
+			clips.force = {"clip": String(clip), "t": t}
+			sync.call("_process", DT)
+			await holder.get_tree().process_frame
+			if last != Vector3.INF and hand.global_position.distance_to(last) > peak[0]:
+				peak = [hand.global_position.distance_to(last), t - DT * 0.5]
+			last = hand.global_position
+			t += DT
+		var win: Array = beats[clip]
+		ok(peak[1] >= float(win[0]) and peak[1] <= float(win[1]), "%s: %s strikes at %.2f s (the footage: %.1f-%.1f s)"
+				% [id, clip, peak[1], float(win[0]), float(win[1])])
+	clips.force = {}
 
 ## Moves handed over as the game does, the state fed frame by frame. A strike is meant to snap, so a pop is the hand
 ## moving further in a frame than the clip alone moves it there: that excess stays small against the Hero's height.

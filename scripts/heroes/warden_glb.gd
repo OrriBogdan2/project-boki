@@ -313,7 +313,8 @@ static func _smoke(root: Node3D, own: Dictionary) -> void:
 	(at_anchor if at_anchor else weapon).add_child(p)
 
 ## A model's soft glow around what burns (warden_look.json "bloom": a list of {at: "weapon" or an anchor name,
-## color [r, g, b, a], size (m), count (along the weapon's length, from `from` of it), depth_test}): additive
+## color [r, g, b, a], size (m), count (along the weapon's length, or from the anchor to the anchor `to`
+## on the same bone: a skinned blade; from `from` of it), depth_test}): additive
 ## camera-facing puffs, so a white-hot blade core or a magma arm glows past its own edges like the art's bloom
 ## instead of reading as flat white paint. World-sized, so it shrinks with the model at the match camera.
 static func _bloom(root: Node3D, glb: Node3D, own: Dictionary) -> void:
@@ -348,7 +349,11 @@ static func _bloom(root: Node3D, glb: Node3D, own: Dictionary) -> void:
 				weapon.add_child(_bloom_quad(m, sz, p))
 		else:
 			var a := glb.find_child(at, true, false) as Node3D
-			if a:
+			if a == null:
+				continue
+			var to := glb.find_child(String(b.get("to", "")), true, false) as Node3D if b.has("to") else null
+			var n := int(b.get("count", 1)) if to else 1
+			for j in n:
 				# (on the root, following the anchor like the halos: the model's own surfaces stay toon-only)
 				var q := _bloom_quad(m, sz, Vector3.ZERO)
 				root.add_child(q)
@@ -356,6 +361,9 @@ static func _bloom(root: Node3D, glb: Node3D, own: Dictionary) -> void:
 				follow.name = "BloomFollow"
 				follow.update_scale = false
 				follow.update_rotation = false
+				if to:      # (both ride one bone: the step between them is fixed in the anchor's frame)
+					var step := (a.transform.affine_inverse() * to.transform).origin
+					follow.position = step * lerpf(float(b.get("from", 0.0)), 1.0, (j + 0.5) / n)
 				a.add_child(follow)
 				follow.remote_path = follow.get_path_to(q)
 
@@ -892,6 +900,9 @@ class Sync extends Node:
 			blade_root_bone = WardenSkeleton.find(skel, String(bl.get("root_bone", bl.get("bone", "hand.R"))))
 			gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 			muzzle = gun.get_node_or_null("Muzzle") as Node3D if gun else null
+		for ch in springs.chains:
+			var first := skel.get_bone_name(int(ch["ids"][0]))
+			ch["own_rest"] = Array(dd.get("hang_own_rest", [])).any(func(n): return first.begins_with(String(n)))
 		for b in dd.get("hide_while_chain", []):
 			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
@@ -1135,9 +1146,17 @@ class Springs:
 				var r: Transform3D = rest[j]
 				var a := inv * pts[j]
 				var from := ((rest[j + 1] as Transform3D).origin - r.origin).normalized()
+				if ch.get("own_rest", false):       # (data "hang_own_rest": the fist's turn doesn't twist it edge on)
+					r = skel.get_bone_global_rest(int(ids[j]))
+					from = (skel.get_bone_global_rest(int(ids[j + 1])).origin - r.origin).normalized()
 				var to := (inv * pts[j + 1] - a).normalized()
 				var c := from.dot(to)
-				var q := Quaternion(from, to) if c < 0.99999 and c > -0.999 else Quaternion.IDENTITY
+				var q := Quaternion.IDENTITY
+				if c <= -0.999:      # (a chain flipped end for end: Quaternion(from, to) has no answer there)
+					var side := Vector3.RIGHT if absf(from.x) < 0.9 else Vector3.FORWARD
+					q = Quaternion(from.cross(side).normalized(), PI)
+				elif c < 0.99999:
+					q = Quaternion(from, to)
 				skel.set_bone_global_pose(int(ids[j]), Transform3D(Basis(q) * r.basis, a))
 
 ## Props on an orbit (RIG_CONTRACT "Orbits"): a .glb node named orbit_<name> riding a bone carries unskinned

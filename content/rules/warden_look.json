@@ -627,7 +627,8 @@
 		},
 		"bloom": [
 			{
-				"at": "weapon",
+				"at": "anchor_blade_root",
+				"to": "weapon_muzzle",
 				"color": [
 					1.0,
 					0.93,
@@ -639,7 +640,8 @@
 				"from": 0.3
 			},
 			{
-				"at": "weapon",
+				"at": "anchor_blade_root",
+				"to": "weapon_muzzle",
 				"color": [
 					1.0,
 					0.97,
@@ -680,8 +682,7 @@
 				],
 				"size": 0.2
 			}
-		],
-		"weapon_scale": 0.85
+		]
 	},
 	"dredge": {
 		"painted": {"gloss": 0.0, "sheen": 0.0, "desat": 0.1, "light_neutral_warm": 0.5, "top_light": 0.12, "rim_far": 0.3, "rim_far_color": [0.72, 0.95, 0.72]},

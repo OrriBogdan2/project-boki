@@ -70,3 +70,13 @@ docs/art/wardens/PIPELINE.md.
   lower at the front than the nape (kael_parts.collar).
 - **Mane:** 36 wider locks (roots lying flat on the scalp, turning out to hang), five spring chains.
 - **Blade:** faint zigzag crack lines inside the white-hot core.
+
+## Clips (2026-11-08, KIT_PARITY gap 1)
+- **Clips:** the first Kael's 49 hand-keyed clips (ext/art1-kael-2, tools/art1/kael_clips.py, timed to the footage
+  frames and the kit's jug_* keys) ported by bone name with tools/art1/kael_retarget.py: rotations as they are (both
+  rigs share every rest rotation), the root's motion scaled to the shorter legs (hips 0.651 m, the first's 0.878);
+  content/rules/warden_anim/kael.json maps the kit moves. `--clip-check` asserts the slam strikes on footage frame 0158
+  (0.6 s) and a slash inside its two frames.
+- **Greatsword:** the `weapon` mesh is skinned whole to hand.R along the first Kael's blade (its guard on
+  `anchor_blade_root`, its point on `weapon_muzzle`, both new under hand.R), at the size it was held (x1.21), so
+  the clips swing it; warden_look `weapon_scale` goes and the blade's bloom runs root to point.
