@@ -13,12 +13,12 @@ const FORMS_MIN := 3           # Evo forms every grown-farm Boki has (DemoQuick.
 
 var main: Node
 var fails := 0
-var n := 0
+var count := 0
 var shots := ""
 
-func ok(name: String, cond: bool, info := "") -> void:
-	n += 1
-	printerr("DEMOQ %-52s %s  %s" % [name, "PASS" if cond else "FAIL", info])
+func ok(what: String, cond: bool, info := "") -> void:
+	count += 1
+	printerr("DEMOQ %-52s %s  %s" % [what, "PASS" if cond else "FAIL", info])
 	if not cond: fails += 1
 
 func run(main_node: Node) -> void:
@@ -34,7 +34,7 @@ func run(main_node: Node) -> void:
 		Game.goto("title")
 		await main.get_tree().process_frame
 		ok("%s: the real save is back on the title" % id, is_same(Save.d, real) and Save.no_write)
-	print("DEMOQ DONE, %d checks, failures: %d" % [n, fails])
+	print("DEMOQ DONE, %d checks, failures: %d" % [count, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
 func _pacing() -> void:
@@ -95,7 +95,8 @@ func _expedition(m: Match) -> void:
 	ok("expedition: you as %s" % DemoQuick.YOU, String(m.player.arch) == DemoQuick.YOU, String(m.player.arch))
 
 func _farm(h: Node) -> void:
-	ok("farm: no tutorial", bool(Save.d["tutorial"].get("home", false)) and bool(Save.d["tutorial"].get("day1_done", false)))
+	var tut: Dictionary = Save.d["tutorial"]
+	ok("farm: no tutorial", bool(tut.get("home", false)) and bool(tut.get("day1_done", false)))
 	var low: Array = []
 	for r in Save.d["roster"]:
 		if (r.get("forms", []) as Array).size() < FORMS_MIN: low.append(r["name"])
@@ -122,7 +123,8 @@ func _watch(id: String, scr: Node) -> void:
 			played = true
 			scr.call("_looks_good")
 			scr.set("auto_warm", true)
-			scr.call("_pick", 0); scr.call("_pick", 0)
+			scr.call("_pick", 0)
+			scr.call("_pick", 0)
 	var wall := (last - t0) / 1e6
 	print("DEMOQ FPS %s: %.1f fps avg over %.0f s, worst frame %.1f ms" % [id, frames / wall, wall, worst / 1000.0])
 

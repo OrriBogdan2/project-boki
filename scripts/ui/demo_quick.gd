@@ -55,7 +55,9 @@ static func _swap(d: Dictionary) -> void:
 ## The Demo match (Match.demo_opts) with every seat filled by showcase Hunters, straight in (no lobby).
 static func expedition_opts() -> Dictionary:
 	var o := Match.demo_opts()
-	o["arch"] = YOU; o["cls"] = Arch.weight(YOU); o["weapon"] = Arch.signature(YOU)
+	o["arch"] = YOU
+	o["cls"] = Arch.weight(YOU)
+	o["weapon"] = Arch.signature(YOU)
 	o["bot_archs"] = SHOWCASE
 	o["mates"] = [{"name": String(Names.BOT[0]), "arch": MATE}]
 	return o
