@@ -100,7 +100,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 | A knock on a Chilled foe Shatters them | "knocking a Chilled foe Shatters them after a beat" |
 | Skate: the push-off, straight beams at normal damage, the stride loop, over a ledge, the hockey stop and refund; rank 3 lays ice over the Abyss | the "tm Shift" rows |
 | Ice Spear: ring at the cursor while held, lands there, slows and Chills in the zone, detonates at 1.8s with a freeze; two charges on 10.2s; rank 3 hits 45% harder | the "tm RMB" rows |
-| Rink Wall: the tell, erupts narrow ahead in her look, widens while sliding, shoves, stops at the cursor, freezes on E, stops shots | the six "tm E" rows |
+| Rink Wall: the tell, erupts narrow ahead in her look, widens while sliding, shoves, stops at the cursor, freezes on E, stops shots | the seven "tm E" rows (the slab row checks the solid sheet) |
 | The wall gives teammates nothing | `--support-check` "Rink Wall: no squad shield or heal" |
 | A merge start ends the skate, the spear aim and a wall still in its tell | "drop_holds ends the skate, the spear aim and the wall's tell" |
 | Rimelock: sealed, rink for everyone, stacking slow, countdown, crash with the ice-block stun, late and early recasts, line of sight | the "tm X" rows |

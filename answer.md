@@ -33,7 +33,7 @@ and slow the small darts to roughly the footage's stream.
 | Recast freeze | 6 s | 6 s | same | match |
 | Foes touched | pushed along | shoved | same | match |
 | Blocks shots | yes | yes | yes | match |
-| Look | solid translucent ice sheet, flashes when hit | a row of leaning pillars on a frosted footing, see-through gaps | the pillars plus a solid ice slab between them, lit from inside, flashing on a block | look stays ours; source quality |
+| Look | solid translucent ice sheet, flashes when hit | a row of leaning pillars on a frosted footing, see-through gaps | a solid ice slab (2.2 m tall, 0.5 m deep, lit from inside, flashing on a block) is now the body of the wall, the pillars slimmer crystals on top of it, so the sheet reads from the gameplay camera | look stays ours; source quality |
 
 Alternative not taken: travel 10.8 m / life 3 s (source parity) against owner item 13.
 

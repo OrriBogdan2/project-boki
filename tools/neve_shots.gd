@@ -6,9 +6,13 @@ extends RefCounted
 const DT := 1.0 / 60.0
 const WALL_FRAMES := [0.1, 0.3, 0.6, 1.2, 2.0, 3.0, 3.8]      # s after the E press
 const RIME_FRAMES := [0.05, 0.12, 0.25, 0.8, 2.0, 3.3, 3.55, 3.7]  # s after the X press (crash at 3.5)
+const WALL_AT := 7.0            # m ahead the cursor sits for the wall: in frame at gameplay zoom
+const RIME_ZOOM := 0.45         # camera zoom for the Rimelock frames: close enough to see her body
+const WALL_ZOOM := 0.55         # camera zoom for the wall frames: the slab and pillars readable
 
 var main: Node
 var out := ""
+var look := Vector3.ZERO      # the camera's focus, from her feet: toward the wall for the wall frames
 
 
 func run(main_node: Node) -> void:
@@ -32,7 +36,10 @@ func run(main_node: Node) -> void:
 	T.ctrl = "idle"
 	for f in 20:
 		await _step(m, P)
-	var cur := P.pos + Vector3(9.0, 0, 0)
+	m.cam.zoom = WALL_ZOOM
+	m.cam.zoom_to = WALL_ZOOM
+	look = Vector3(WALL_AT * 0.7, 0, 0)
+	var cur := P.pos + Vector3(WALL_AT, 0, 0)
 	P.inp["aim"] = cur + Vector3(0, 0.9, 0)
 	P.inp["aim_y"] = cur.y
 	P.inp["sig"] = true
@@ -46,6 +53,9 @@ func run(main_node: Node) -> void:
 	for f in 30:
 		await _step(m, P)
 	P.inp["move"] = Vector2.ZERO
+	m.cam.zoom = RIME_ZOOM
+	m.cam.zoom_to = RIME_ZOOM
+	look = Vector3.ZERO
 	HunterKeys.ult_pressed(P)
 	await _step(m, P)
 	await _shots(m, P, RIME_FRAMES, "rime")
@@ -79,5 +89,5 @@ func _clear_view(m: Match, P: Hunter) -> void:
 func _step(m: Match, P: Hunter) -> void:
 	m.step(DT)
 	P.render(DT, 1.0)
-	m.cam.snap(P.pos)
+	m.cam.snap(P.pos + look)
 	await main.get_tree().process_frame
