@@ -323,8 +323,9 @@ func warm_up(progress := Callable()) -> void:
 
 ## Stand-ins drawn in the first batch of warm_up; later batches grow while a batch's frames stay
 ## cheap and shrink when one costs more than WARM_FRAME_MS over a plain frame (a first draw is
-## where a GPU compiles a shader). Only how many frames the warm-up takes depends on it.
-const WARM_BATCH := 8
+## where a GPU compiles a shader), down to one. Only how many frames the warm-up takes depends on
+## it. Starts small: from a cold shader cache a batch of 8 was a 400-560 ms frame on an RTX 4070 (item 33).
+const WARM_BATCH := 2
 const WARM_FRAME_MS := 45.0
 
 ## The stand-ins of warm_up, a batch a frame, each batch drawn once under each light setup.
@@ -351,19 +352,21 @@ func _warm_aim_stand_in() -> MeshInstance3D:
 	return mi
 
 func _warm_batches(progress: Callable, seen: Dictionary) -> bool:
+	# the camera sees only the stand-ins meanwhile (their own render layer), from the scan on: the
+	# first frames back in 3D drew the whole map with every shader compiling at once (item 33: a
+	# 4-5 s frame on an RTX 4090). The lights, shadows and environment that pick a shader's variant
+	# are all still there.
+	var keep_mask := cam.cull_mask
+	cam.cull_mask = WARM_LAYER
 	var list: Array = await _warm_sources(seen)
 	if not is_inside_tree():
 		return false
 	if list.is_empty():
+		cam.cull_mask = keep_mask
 		return true
 	var basis := cam.global_transform.basis
 	var front := cam.global_position - basis.z * 6.0
 	var wl := _warm_lights()
-	# the camera sees only the stand-ins meanwhile (their own render layer): the lights, shadows and
-	# environment that pick a shader's variant are all still there, but each batch's frame no longer
-	# draws the whole map again
-	var keep_mask := cam.cull_mask
-	cam.cull_mask = WARM_LAYER
 	# (a camera culls lights by their layers too: every light joins the stand-ins' layer meanwhile,
 	# or they'd all draw unlit)
 	var lights := find_children("*", "Light3D", true, false)
@@ -416,7 +419,7 @@ func _warm_batches(progress: Callable, seen: Dictionary) -> bool:
 		progress.call(float(i) / list.size())
 		var extra := worst - plain
 		if extra > WARM_FRAME_MS:
-			n = maxi(4, n / 2)
+			n = maxi(1, n / 2)
 		elif extra < WARM_FRAME_MS * 0.4:
 			n = mini(n * 2, 512)
 	await get_tree().process_frame
@@ -695,6 +698,7 @@ func _start(o: Dictionary) -> void:
 	if not Data.BOT_DIFF.has(bot_diff):
 		bot_diff = Data.auto_bot_diff(tier, int(Save.d.get("extracts", 0)), o.get("tutorial", false) or o.get("training", false))
 	bot_cfg = Data.BOT_DIFF[bot_diff]
+	WardenWarm.fetch(self)      # the Wardens' .glb reads run while the map builds
 	_build_env()
 	music_dir = MusicDir.new()
 	music_dir.start(self)
@@ -754,6 +758,7 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.systems")
 	await _spawn_pads_and_exits()
 	await _stage("build.pads_exits")
+	await WardenWarm.measure(self)
 	await _spawn_hunters()
 	if tut: tut.setup()
 	await _stage("build.hunters")
