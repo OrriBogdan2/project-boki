@@ -89,4 +89,11 @@ Local fix (15:40 ET): the edit returned the sheet unchanged, so the round silver
 - Alternate: `explorations/sable_v2_portrait_alt_both_eyes.jpg`, the same portrait with both dark eyes open (no wink). The owner prefers the wink.
 - **Fix 3 (Nov 8, 02:12 ET):** the chest now matches the master sheet. The criss-cross lacing is gone, the coat hangs open, loose silver chains swag across her stomach, and the violet pendant lies flat on her skin between her breasts on a V chain. Two change prompts (ref: a torso crop from the master sheet), then a local LAB colour match (0.6) to the pre-edit splash and sharpening. The previous laced version is `explorations/sable_v2_splash_laced_chest.jpg`.
 - Colour (Nov 8, 02:14 ET): a local LAB pass reduced the purple cast on the room and people, with strongly coloured accents (coat trim, gems, smoke, moths) protected.
-- Pending (Nov 8, 02:31 ET): the owner wants the "dodge" combat shot kept as an alternate splash (`explorations/sable_v2_splash_alt_dodge_raw.jpg`, untouched). Touch it up and promote it to `sable_v2_splash_alt_dodge.jpg` once the main splash (the stealth "slip" concept) is picked.
+
+## Splash v4: "The Slip" (owner, Nov 8, 02:33 ET)
+The flying shot read as a random flip, so the owner wanted a nimble, stealthy rogue moment. Fresh generations from clean references only (master sheet, portrait), with the scene described in words; this fixed the soft, over-edited look.
+- `sable_v2_splash.jpg` (MAIN): she slips out of the shadows on a rope and lifts the glowing gem from a strongbox on a shelf behind a laughing card gang (orc, knight, thieves) who are turned to their table, in their blind spot. She winks and does a "shh" to the viewer.
+- `sable_v2_splash_alt_perch.jpg`: she sits on the rope beside the shelf, "shh" and wink, with the gang at the table.
+- `sable_v2_splash_alt_upside_down.jpg`: she hangs upside down over the table, lifting the gem.
+- `sable_v2_splash_alt_dodge.jpg`: the combat alternate. A sword sweeps under her, the orc grabs at air, a dagger flies past, and she snatches the gem while firing back.
+All four: Nano Banana Pro, fresh generation, then a local light de-noise, contrast and colour lift, and sharpening. The previous flying splash is `explorations/sable_v2_splash_flying_old.jpg`.
