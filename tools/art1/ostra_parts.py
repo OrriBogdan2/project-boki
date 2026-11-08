@@ -12,7 +12,7 @@ HEAD_Z = 1.442
 HIPS_Z = 0.756
 SKIRT_Z = 0.826
 NECK = np.array((0.0, 0.0, 1.44))
-HEAD_K = 0.72       # the head and hat 0.72 of v1's (the sheet's is ~0.65; kept larger so the grin reads at the match camera and he stands the line-up's 1.20x a hunter, warden_model_check)
+HEAD_K = 0.82       # the head and hat 0.82 of v1's (the sheet's is ~0.65; kept larger so the grin reads at the match camera and he stands the line-up's 1.20x a hunter, warden_model_check)
 
 
 def headpt(p):
@@ -284,7 +284,7 @@ def lining(P):
     return Part("lining", "void-body", V, F, ST, rigid("hips", len(V)), "lining", (64, 64))
 
 
-TAILS = ((33, 0.58, 0.50), (92, 0.70, 0.52), (152, 0.60, 0.49), (-152, 0.60, 0.49), (-92, 0.70, 0.52), (-33, 0.58, 0.50))
+TAILS = ((33, 0.58, 0.50), (92, 0.64, 0.52), (152, 0.60, 0.49), (-152, 0.60, 0.49), (-92, 0.64, 0.52), (-33, 0.58, 0.50))
 
 
 def tails():
@@ -476,7 +476,7 @@ def hood():
 def horn(side):
     """a floppy horn, rising then drooping to its bell, swinging on a spring chain"""
     n = "R" if side > 0 else "L"
-    pts = np.array(((0.05, -0.05, 1.78), (0.115, -0.06, 1.865), (0.2, -0.07, 1.885), (0.275, -0.07, 1.82), (0.32, -0.06, 1.72), (0.338, -0.05, 1.61), (0.34, -0.045, 1.56)))
+    pts = np.array(((0.05, -0.05, 1.78), (0.115, -0.06, 1.93), (0.2, -0.07, 1.96), (0.275, -0.07, 1.89), (0.32, -0.06, 1.72), (0.338, -0.05, 1.61), (0.34, -0.045, 1.56)))
     pts[:, 0] *= side
     path = resample(headpt(pts), 22)
     t = np.linspace(0, 1, 22)
