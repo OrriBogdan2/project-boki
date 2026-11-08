@@ -19,6 +19,7 @@ var cd := {"rmb": 0.0, "e": 0.0, "r": 0.0, "x": 0.0}
 var ch_rmb := 1.0              # RMB charges
 var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
+var exit_ease := {}            # DashExit: a no-carry dash easing down to run speed {t, cap, ease}
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
 var r_t := 0.0                 # R's window left
@@ -123,6 +124,8 @@ func locks_glide() -> bool: return false            # a move AirLimits can't see
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 ## Does this kit have the class long dash (Shift in the air)? The HUD shows its segment only then.
 func has_long_dash() -> bool: return true
+## How this kit's dash hands its speed on: {} = the shared carry; {"cap", "ease"} = none (see DashExit).
+func dash_exit() -> Dictionary: return {}
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_block(_dmg: float, _by) -> void: pass
@@ -193,6 +196,7 @@ func tick(dt: float) -> void:
 			_r_end()
 	res_wait = maxf(0.0, res_wait - dt)
 	_tick_knocks()
+	DashExit.settle(h, dt)
 	_tick(dt)
 	_tells(dt)
 	_tick_charge(dt)

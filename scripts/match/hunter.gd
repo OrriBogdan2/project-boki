@@ -814,10 +814,10 @@ func do_jump() -> void:
 		return
 	if roll_t > 0.0 and grounded and move_kind == "dash":
 		# jump out of a dash: the dash ends and you keep about half its speed into the jump
-		var keep := roll_dir * roll_speed * DASH_JUMP_CARRY
+		var keep := DashExit.jump_keep(self, roll_dir * roll_speed * DASH_JUMP_CARRY)
 		roll_t = 0.0
 		vel.x = keep.x; vel.z = keep.y
-		glide_handoff(roll_dir, roll_speed)         # (movefeel) dash, jump, glide carries the dash
+		DashExit.handoff(self, roll_dir, roll_speed)         # (movefeel) dash, jump, glide carries the dash
 	if grounded or coyote > 0.0:
 		vel.y = JUMP_V * (float((kin as Kin).ks.mount.get("jump", 1.0)) if mounted() else 1.0)
 		jump_at = m.time
@@ -977,7 +977,7 @@ func _hand_off_ended_dash() -> void:
 	if roll_t > 0.0 or _last_burst.is_empty():
 		return
 	if not grounded:
-		glide_handoff(_last_burst["dir"], _last_burst["speed"])
+		DashExit.handoff(self, _last_burst["dir"], _last_burst["speed"])
 	_last_burst = {}
 
 ## The glider just opened (or is open): spend a fresh handoff on a speed burst along its heading.
@@ -2176,8 +2176,8 @@ func _physics(dt: float) -> void:
 		if not dash_pass.is_empty():
 			_pass_along()
 		if roll_t <= 0.0:
-			hv = HunterMove.dash_exit(roll_dir * roll_speed, spd)     # no hard stop: the run carries on
-			glide_handoff(roll_dir, roll_speed)     # (movefeel) open the glider now and it keeps the burst
+			hv = DashExit.leave(self, roll_dir * roll_speed, spd)     # no hard stop: the run carries on
+			DashExit.handoff(self, roll_dir, roll_speed)     # (movefeel) open the glider now and it keeps the burst
 			_last_burst = {}
 	elif fly_t > 0.0:
 		fly_t -= dt

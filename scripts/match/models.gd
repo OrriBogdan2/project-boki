@@ -1707,7 +1707,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			for k in 6:
 				part(gun, cyl(0.062, 0.062, 0.022, 12), cop, Vector3(0, 0.0, -0.06 - k * 0.075), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			part(gun, cyl(0.075, 0.05, 0.07, 12), cop, Vector3(0, 0.0, -0.5), Vector3.ONE, Vector3(PI / 2, 0, 0))
-			part(gun, sphere(0.045, 10), glow.call(Color("9ff5e0")), Vector3(0, 0.0, -0.55))
+			part(gun, sphere(0.045, 10), glow.call(Color("ff8fd0")), Vector3(0, 0.0, -0.55))
 			part(gun, box(0.09, 0.05, 0.16), m_acc, Vector3(0, 0.05, 0.06))
 			grip.call(-0.02, 0.15)
 		"quill_rifle":
