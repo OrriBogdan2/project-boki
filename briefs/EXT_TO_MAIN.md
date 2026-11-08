@@ -2965,3 +2965,4 @@ READY ext/lace-tall-climb-rebased b3c955ab1 (supersedes: ext/lace-tall-climb 8b6
 - Checks: `--warden-glb-check` 183/0, `--warden-model-check` 157/0, health --strict OK. tender height_3d 0.66 to 0.76 (taller ears; body unchanged).
 - GPU stills v1 vs v2: docs/art/wardens/meeko_v2_vs_v1_closeup.jpg and meeko_v2_vs_v1_full.jpg.
 - Judgement calls: v2 colours more saturated (deeper magenta legs and hands, per the design); apron bone stays in the rig with zero weights; the lantern mesh is removed (bones stay). Alternative to the height change: shrink the head.
+READY ext/anim-time-cinder-rebased 940d54f27 (supersedes ext/anim-time-cinder 584aa5241; job 20261108-170008-a4. Merged origin/main d255acbee; one conflict, docs/art/wardens/CLIPS.md loco line: kept main's hide_while_chain line plus the branch's loco.cadence text. Checks: --ashwick-combo-check 123/0, --check 0, health --strict OK)
