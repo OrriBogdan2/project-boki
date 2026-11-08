@@ -124,7 +124,7 @@ Each target applies **quality** parity only. The attitude comes from the line qu
     eyes happy over that window while the idle alone plays (`WardenClips.idle_at`, `WardenMood.step`).
   - Stance 8 s, not 6: the slower roll (one cycle per 4 s) has to close on the loop. The idle's feet, the door at
     chest height angled out so the face shows, the hammer on the shoulder with one hitch per loop.
-  - Seams 0.0x the limit (`--clip-check`); before and after strips: jobq `--out shots_before` / `shots_after`.
+  - Seams 0.0x the limit (`--clip-check`); before and after strips: jobq 20261108-101015-16725 / 20261108-102808-26692 (`shots_before` / `shots_after`).
 
 ### 3. Tenzo the Stone Seer (`dolm`, art `tarek`)
 
