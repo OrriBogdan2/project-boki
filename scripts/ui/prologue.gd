@@ -133,7 +133,7 @@ func _shots() -> Array:
 				[W + Vector3(46, 4, 34), W + Vector3(0, -4, 0), W + Vector3(58, 10, 46), W + Vector3(0, -20, 0), 3.9]]},
 		{"chapter": "THE RELICS", "mood": "dawn", "tint": Color("ffe4b0"), "grade": 0.12, "event": "kin",
 			"text": "Our only salvation became the cursed fossils we had tried to destroy:\n"
-				+ "Relics, the masks of fallen Heroes.\nOnly those who wear a Hunter's Relic can save our souls.",
+				+ "Relics, the masks of fallen Hunters.\nOnly those who wear a Hunter's Relic can save our souls.",
 			"cam": [[K + Vector3(0.2, 2.0, 7.6), K + Vector3(0.2, 0.9, -1.2), K + Vector3(0.25, 1.7, 6.4), K + Vector3(0.3, 0.85, -1.0), 3.1],
 				[K + Vector3(0.4, 0.55, 3.9), K + Vector3(0.4, 0.85, -0.3), K + Vector3(0.4, 0.55, 3.45), K + Vector3(0.4, 0.88, -0.3), 4.4]]},
 		{"chapter": "THE RACE", "mood": "deep", "tint": Color("b08aff"), "grade": 0.24, "event": "drop",
