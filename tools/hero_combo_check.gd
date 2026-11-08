@@ -271,15 +271,35 @@ func _mage() -> void:
 	ok("Storm Rod: knocked about 1 body height on open ground", kb > 0.8 and kb < 3.0, "%.2f m" % kb)
 	ok("Storm Rod: an orb at the impact the moment it hits",
 			orb_fast and _flat(K.motes[0]["pos"], home + Vector3(5, 0, 0)) < 2.5)
-	var rod_k1 := K.rod_rank_k()
-	var run_k1 := K.run_rank_k()
-	P.slot_lv["sec"] = 3
 	P.slot_lv["dash"] = 3
-	ok("Rank 3: the Storm Rod throw hits +50% and Wirerun's own hit doubles (rank 1: both 1.0)",
-			rod_k1 == 1.0 and run_k1 == 1.0 and is_equal_approx(K.rod_rank_k(), 1.5) and is_equal_approx(K.run_rank_k(), 2.0),
-			"%.2f %.2f" % [K.rod_rank_k(), K.run_rank_k()])
+	ok("Rank 3: Wirerun's own hit doubles (rank 1: 1.0)", is_equal_approx(K.run_rank_k(), 2.0), "%.2f" % K.run_rank_k())
+	P.slot_lv["dash"] = 1
+	# upgrade parity (docs/heroes/mage.md): the source's tier II / III+IV numbers per slot
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.05
+	var up: Array = []
+	P.slot_lv["sec"] = 1
+	P.slot_lv["kin"] = 1
+	var pb1 := K.power("sec")
+	var pk1 := K.power("kin")
+	for rk in [1, 2, 3]:
+		P.slot_lv["sec"] = rk
+		P.slot_lv["dash"] = rk
+		P.slot_lv["kin"] = rk
+		up.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), K.dash_def()["cd"] * K.dash_k(),
+				K.e_def()["cooldown"] * K.cd_k("kin"),
+				K.power("sec") / pb1, K.power("dash"), K.power("kin") / pk1])
+	ok("upgrade parity: Storm Rod cooldown 8 -> 7.2 -> 6.4 and damage +20% / +90%",
+			near.call(up[1][0], 7.2) and near.call(up[2][0], 6.4)
+			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.9), str(up))
+	ok("upgrade parity: Wirerun recharge 8 -> 7.33 -> 6.67, no shared damage step",
+			near.call(up[1][1], 7.33) and near.call(up[2][1], 6.67)
+			and near.call(up[1][4], up[0][4]) and near.call(up[2][4], up[0][4]), str(up))
+	ok("upgrade parity: Skycall cooldown 10.5 -> 10.5 -> 7.9 and damage +25% / +50%",
+			near.call(up[1][2], 10.5) and near.call(up[2][2], 7.875)
+			and near.call(up[1][5], 1.25) and near.call(up[2][5], 1.5), str(up))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
+	P.slot_lv["kin"] = 1
 	# 7. the orb adds no Static on its own (item 74); a Wirerun through it picks it up and gives the dash back
 	ac.fresh(T)
 	K.sparks.clear()
