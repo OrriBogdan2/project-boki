@@ -34,7 +34,7 @@ func _part_r_void() -> void:
 			P.ak.cast_ult()
 		_aim(over + Vector3(d.x, 0, d.y) * 6.0)
 	await _go(8.2, cast, _sheet("r_void", "R pressed falling over the abyss: the floor, its warning, the crumble",
-		[0.1, 0.14, 0.2, 0.35, 1.0, 5.0, 6.5, 7.4, 8.0]), 2.5)
+		[0.1, 0.14, 0.2, 0.35, 1.0, 5.0, 6.5, 7.4, 8.0], func(): return P.position + Vector3(0, 0.9, 0)), 2.5)
 	await _go(GAP)
 
 ## A straight abyss edge near home: solid ground behind it, open abyss for 4m past it.
