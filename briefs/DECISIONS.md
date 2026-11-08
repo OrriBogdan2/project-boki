@@ -403,3 +403,36 @@ Abilities you use twice (recasts: Ostra Brimseed pop, Tender Hearthlight throw, 
 - Testers say there's too much on screen and it's hard to understand. Rule: **show only what's needed right now**. The new-player HUD has health, abilities with keys, the objective and the timer. Everything else (minimap detail, ranks, kin orders, relic/economy counters, stat panels) appears only when it first matters, or when you hold Tab or an info key.
 - One-line plain-English labels, no jargon before it's explained, one highlighted "what to do next" prompt, and no more than about 5 HUD groups at once. Menus get the same treatment: fewer buttons, with advanced options behind "More".
 - Applies to the HUD, the hunter pick screen, the farm, the pause menu and the results screen. It works together with the shorter-tutorials and two-step-ability decisions.
+
+## 2026-11-08 owner: performance pass, industry-standard (extends the expedition-perf decision above)
+Owner: the gaming PC does better, but the map needs a hard cleanup and we should use every standard technique game studios use.
+Every hunter has a Boki, so a 30-player expedition is about 60 animated characters plus monsters and VFX. Budget for that.
+- **Budgets (enforced by --perf-bench and a new --perf-budget-check):**
+  - draw calls under 1500, visible tris under 1.5M, active lights casting shadows ≤ 2, VFX particles under 4k on screen;
+  - monsters alive near the player capped by preset;
+  - target 60 fps M5 medium, 30+ iGPU low, no frame over 50 ms after warm-up.
+- **Map:**
+  - cut clutter/prop density hard (aim -50% instances);
+  - MultiMesh for grass/rocks/props;
+  - LODs (Godot auto mesh LOD + visibility ranges/HLOD for far props);
+  - occlusion culling (baked OccluderInstance3D);
+  - merge static meshes and share materials (fewer materials = fewer draw calls);
+  - bake lighting (LightmapGI or baked ambient) instead of realtime GI; SDFGI/SSR/SSIL/volumetric fog off below high.
+- **Characters and Boki:**
+  - Boki and far hunters get animation LOD (lower update rate off-screen and far away);
+  - simple shaders and no shadows at distance;
+  - companion AI ticks at 10 Hz when not in combat;
+  - bots far away also tick slower.
+- **Monsters and pickups:**
+  - fewer monsters (lower spawn caps, especially at low/very low);
+  - pool and reuse nodes, no runtime instancing in fights;
+  - fewer loose artifacts/pickups on the ground (merge into fewer, bigger drops).
+- **Shaders:**
+  - use Godot's ubershader / pipeline precompile at load (no first-use hitch);
+  - fewer shader variants;
+  - a cheap unshaded fallback at very low.
+- **Shadows/post:**
+  - shorter directional shadow distance, 2 cascades at medium, 1 at low, none at very low;
+  - MSAA off by default; TAA/FXAA or FSR 2 upscaling with a render-scale option (default 0.77 at low).
+- **Other:** physics tick capped, distant collision simplified, texture compression (VRAM-compressed, mipmaps), streaming of far content.
+- **Proof:** --perf-bench before/after on a real GPU (M5 + PC + rp1) for each change, numbers posted in READY.
