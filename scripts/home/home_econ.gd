@@ -454,7 +454,13 @@ func open_feeder(f: Dictionary) -> void:
 	v.add_child(UI.label(("Hungry now: " + ", ".join(hungry)) if not hungry.is_empty() else "Nobody's hungry right now.", 13, Color("ffb070") if not hungry.is_empty() else UI.GOOD))
 	# filling it
 	var row0 := UI.hbox(8)
-	var fill_b := UI.primary("Fill it up", func():
+	# Enter always does the useful thing: fill it, and when it is already full, close the panel. It never sits
+	# on a disabled button (PLAYTEST-1108 item 28), and filling it puts you back in the world like every action.
+	var full := Econ.room_in(f) <= 0
+	var fill_b := UI.primary("Done" if full else "Fill it up", func():
+		if full:
+			h._close_panel()
+			return
 		var got := 0
 		while Econ.room_in(f) > 0:
 			var key := Econ._auto_food()
@@ -463,10 +469,12 @@ func open_feeder(f: Dictionary) -> void:
 		refresh_feeder(f)
 		Sfx.play("pickup", null, -6.0)
 		Save.save_game()
-		if got == 0: h._toast("Nothing in your pantry to put in (buy kibble, or harvest)")
-		open_feeder(f), 160)
-	fill_b.disabled = Econ.room_in(f) <= 0
-	fill_b.tooltip_text = "Fills it with kibble and everyday crops from your pantry (never treats or rare crops)"
+		if got == 0:
+			h._toast("Nothing in your pantry to put in (buy kibble, or harvest)")
+			open_feeder(f)
+		else:
+			h._close_panel(), 160)
+	fill_b.tooltip_text = "Done" if full else "Fills it with kibble and everyday crops from your pantry (never treats or rare crops)"
 	UI.footer(v).add_child(fill_b)
 	UI.with_key(fill_b, "Enter")
 	(v.get_meta("shell") as Control).set_meta("primary", fill_b)
@@ -578,14 +586,10 @@ func _notice(title: String, lines: Array) -> void:
 		lb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(lb)
 
-## Why your partner can't come out (starving too long), or "".
-func refuse_reason() -> String:
+## Is your partner too weak from hunger to come out? (HungerGate says how many meals it needs.)
+func partner_too_weak() -> bool:
 	var ak := Save.active_kin()
-	if ak.is_empty():
-		return ""
-	if Care.starve_h(ak) >= Care.STARVE["refuse"]:
-		return "%s is too weak from hunger to come. Feed it (or fill a feeder) first, or pick another partner." % ak["name"]
-	return ""
+	return not ak.is_empty() and HungerGate.meals_needed(ak) > 0
 
 # ------------------------------------------------------------------ the graveyard
 func open_graveyard() -> void:

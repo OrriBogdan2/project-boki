@@ -3093,7 +3093,7 @@ func _open_kin(rec: Dictionary) -> void:
 		pb.tooltip_text = why
 	else:
 		ft.add_child(UI.button("Dress", func(): _open_wear(rec), 0, "paw"))
-		UI.footer_primary(v, "Feed", func(): _open_feed(rec), 110, "seed")
+		FarmTaskGuide.care_footer(v, func(): _open_feed(rec), func(): _close_panel())
 	# roles: quiet links on the left
 	if not partner:
 		fl.add_child(UI.ghost("Make partner", func():
@@ -3457,15 +3457,8 @@ func _start_duel() -> void:
 
 ## Before a run where kin can be lost, say so plainly and make the player confirm.
 func _confirm_start() -> void:
-	var weak := hecon.refuse_reason()
-	if weak != "":
-		var wv := _new_panel("Too hungry to go", 560)
-		var wl := UI.label(weak, 15, UI.INK); wl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		wv.add_child(wl)
-		var wr := UI.hbox(10)
-		wr.add_child(UI.primary("Feed it", func(): _open_feed(Save.active_kin()), 160))
-		wr.add_child(UI.button("Back", _open_expedition, 140))
-		wv.add_child(wr)
+	if hecon.partner_too_weak():
+		_new_panel("Too hungry to go", 560).add_child(HungerGate.new(self, _confirm_start, _open_expedition))
 		return
 	var td: Dictionary = Data.TIERS[exp_tier]
 	if not KinLoss.at_risk(exp_tier):
