@@ -2773,3 +2773,4 @@ READY ext/lace-tall-climb 8b684f259 (Lace tall-ledge climb was already built via
 
 ## 2026-11-08 00:16 ET (art): Auburn Knight armour LOCKED
 briefs/art-refs/villain/auburn_knight_armor.jpg is the shared armour of the 7 Auburn Knights. Their helms have faces made from the Queen's porcelain mask, with glowing pink-red eyes. The plate is crimson and pearl with gold trim and rose motifs. The shield is white with a gold serpent crest, and they carry gold-hilted dueling swords.
+READY ext/dash-refresh-assist 398f4a9c5 (item 159: knock/assist dash refresh in DashReset, multi-charge +1, softer assist cue, knock_refresh opt-out, decision 0019)
