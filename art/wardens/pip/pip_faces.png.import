@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://chc73wftmxpke"
-path="res://.godot/imported/tarek_atlas.jpg-0fbe9c171d9fd20370da256638411d9f.ctex"
+uid="uid://cdjupot62pxcx"
+path="res://.godot/imported/pip_faces.png-36812ee9553cdaa4b347b4df6850df4f.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "31553d2122357ffdd456979941d73dff"
+"md5": "a227b5df57ad2c141604348403e3de44"
 }
 
 [deps]
 
-source_file="res://art/wardens/tarek/tarek_atlas.jpg"
-dest_files=["res://.godot/imported/tarek_atlas.jpg-0fbe9c171d9fd20370da256638411d9f.ctex"]
+source_file="res://art/wardens/pip/pip_faces.png"
+dest_files=["res://.godot/imported/pip_faces.png-36812ee9553cdaa4b347b4df6850df4f.ctex"]
 
 [params]
 
