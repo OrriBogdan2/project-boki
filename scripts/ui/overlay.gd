@@ -395,18 +395,6 @@ func _tab_video(v: VBoxContainer) -> void:
 	_toggle(v, "Shadows", "shadows")
 	_choice(v, "Frame rate", "show_fps", [[0, "Hidden"], [1, "Frame rate"], [2, "Performance overlay"]], Callable(),
 		"Top right. The overlay adds frame time, draw calls, triangles and script costs")
-	var modelled: Array = Arch.ORDER.filter(WardenGlb.has_model)
-	if not modelled.is_empty():
-		_group(v, "Hunter models")
-		for a in modelled:
-			var hint := "Off: the simpler built-in model. From the next match or Hunter swap"
-			var r := _row(v, String(WardenGlb.ART[a]).capitalize(), hint)
-			var cb := CheckButton.new()
-			cb.text = "3D model"
-			cb.button_pressed = WardenGlb.uses_model(a)
-			cb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			cb.toggled.connect(func(on): WardenGlb.set_model(a, on))
-			r.add_child(cb)
 
 func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")

@@ -157,18 +157,19 @@ static func variant(nm: String) -> String:
 static func has_model(arch: String) -> bool:
 	return arch != "" and ResourceLoader.exists(path(arch))
 
-## A Warden is drawn from its .glb when it has one, unless the player set it to procedural.
-static func uses_model(arch: String) -> bool:
-	return has_model(arch) and String((Settings.get_v(SETTING) as Dictionary).get(arch, "3d")) != "procedural"
+## Archetypes that checks and tools force onto the procedural model (session only, never saved).
+static var _forced_procedural := {}
 
-## The player's pick for one Warden: true for its 3D model, false for the procedural one.
+## A Warden is always drawn from its .glb when it has one.
+static func uses_model(arch: String) -> bool:
+	return has_model(arch) and not _forced_procedural.has(arch)
+
+## Tools and checks only: true for the 3D model, false forces the procedural one for this session.
 static func set_model(arch: String, on: bool) -> void:
-	var picks: Dictionary = (Settings.get_v(SETTING) as Dictionary).duplicate()
 	if on:
-		picks.erase(arch)
+		_forced_procedural.erase(arch)
 	else:
-		picks[arch] = "procedural"
-	Settings.set_v(SETTING, picks)
+		_forced_procedural[arch] = true
 
 ## The .glb's armature, or null.
 static func skeleton(glb: Node) -> Skeleton3D:
