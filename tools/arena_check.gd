@@ -427,4 +427,4 @@ func _loadout() -> void:
 		)
 	)
 	var src := FileAccess.get_file_as_string("res://scripts/home/home.gd")
-	ok("expedition panel uses KitCard.strip", src.contains("KitCard.strip(cur_a"))
+	ok("expedition panel shows no ability strip", not src.contains("KitCard.strip("))
