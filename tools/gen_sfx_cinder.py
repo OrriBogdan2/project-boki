@@ -1,4 +1,4 @@
-"""Cinder's sounds (id ashwick, the Flame Queen): a flame lance fed from a fuel tank on her back, a
+"""Cinder's sounds (id ashwick, the Ashen Kiss): a flame lance fed from a fuel tank on her back, a
 bellows that blows her about, and a voice a little cracked by the Blight she drank.
 
     cd tools && python3 gen_sfx_cinder.py      (then: godot --headless --import)
