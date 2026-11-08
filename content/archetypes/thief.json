@@ -5,7 +5,7 @@
 	"gender": "female",
 	"personality": "The thief who reached the Wyrmheart in Malgrave's vault. Touching it woke the Wyrm and set off the Hollowing.\nEveryone has a reason to hate her, and she knows it. She's still after the treasure.",
 	"weight": "light",
-	"color": "#c9a0ff",
+	"color": "#9a5cff",
 	"plate_offset": 2.15,
 	"body": {"size": 1.059, "head": 0.6, "legs": 2.04, "torso": 0.96, "shoulder": 0.92, "hit_r": 0.384},
 	"fantasy": "The duelist. Sticks to one mark from range, cartwheels past them, never lets go.",
