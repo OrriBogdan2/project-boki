@@ -7,6 +7,8 @@ extends RefCounted
 ## mid-jump (jump rows), the move pressed in its recovery (into_dash / into_jump rows: acts within 0.1 s unless
 ## the row is an exception), and a hold carried through the move and let go there (hold rows). Every exception
 ## row needs a reason and a source; the list per hero prints at the end (the hero agents' worklist).
+## The buffer window (DashFlow.BUFFER_S): per hero, one held press meets a stun as its ground dash ends; a stun
+## inside the window still lets it go off, one outside it has it replayed into the stun (its slot denies it).
 ## It walks DashFlow.SLOTS for every hero, so rows added later are covered. --dash-flow-check=<id>,<id> runs only
 ## those heroes. Never touches the save.
 
@@ -20,6 +22,7 @@ var skipped := 0
 var cast_n := {}                # CombatBus slot name -> casts by the hunter under test
 var hunter: Hunter
 var wait_s := 0.0               # how long after the dash's end a buffered press went off
+var windowed := false           # this hero's window trials ran (one buffer slot per hero)
 
 func ok(cond: bool, what: String) -> void:
 	print("DASHFLOW %s %s" % ["ok  " if cond else "FAIL", what])
@@ -47,6 +50,7 @@ func combos_of(main: Node, hero: String) -> int:
 func _hero(main: Node, hero: String, rows: bool) -> int:
 	Save.no_write = true
 	CombatBus.ability_used.connect(_on_used)
+	windowed = false
 	for slot in DashFlow.SLOTS:
 		var m := _match(main, hero)
 		if rows:
@@ -90,6 +94,24 @@ func _slot(m: Match, hero: String, slot: String) -> void:
 			var at_end_same: bool = late and (got in ["fire", "cancel"] or next_step) and want in ["fire", "cancel"]
 			var waited := " %.2fs after the dash" % wait_s if got == "buffer" else ""
 			ok(got == want or at_end_same, "%s: %s%s (row: %s)" % [what, got, waited, want])
+			if not late and not in_air and want == "buffer" and got == "buffer" and not windowed:
+				windowed = true
+				_window(m, hero, slot, wait_s)
+
+## The buffer window: the hunter is stunned the step its ground dash ends. Stunned for half of BUFFER_S, the held
+## press goes off once the stun lifts (plus the kit's own delay, `base_wait`); stunned for twice BUFFER_S, it is
+## replayed into the stun at the window's end and the slot denies it, so nothing goes off: "lost" by this trial's
+## reading, the press spent with its deny cue rather than kept forever.
+func _window(m: Match, hero: String, slot: String, base_wait: float) -> void:
+	var inside := DashFlow.BUFFER_S * 0.5
+	var got := _trial(m, slot, false, false, inside)
+	ok(got == "buffer" and wait_s <= inside + base_wait + Match.DT * 1.5,
+			"%s ground dash -> %s, stunned %.2fs at its end (inside the %.2fs window): %s, %.2fs after the dash" % [
+			hero, slot, inside, DashFlow.BUFFER_S, got, wait_s])
+	var outside := DashFlow.BUFFER_S * 2.0
+	got = _trial(m, slot, false, false, outside)
+	ok(got == "lost", "%s ground dash -> %s, stunned %.2fs at its end (outside the window): %s (want lost)" % [
+			hero, slot, outside, got])
 
 ## A fresh training match as `hero` on a flat patch, every slot open, a glove on Q, level 10.
 func _match(main: Node, hero: String) -> Match:
@@ -186,8 +208,9 @@ func _goes_idle(m: Match, slot: String, in_air: bool) -> bool:
 
 ## One press during one dash: "fire" (went off mid-dash), "cancel" (went off at once and the dash stopped),
 ## "buffer" (held, then went off once the dash was over: a kit's own recovery after its dash can delay it), "lost",
-## or "n/a" (no dash DashFlow sees).
-func _trial(m: Match, slot: String, in_air: bool, late: bool) -> String:
+## or "n/a" (no dash DashFlow sees). `stun` > 0 stuns the hunter for that long the step the dash ends (the
+## window trials).
+func _trial(m: Match, slot: String, in_air: bool, late: bool, stun := 0.0) -> String:
 	_ready_up(m)
 	if in_air:
 		_lift()
@@ -215,6 +238,7 @@ func _trial(m: Match, slot: String, in_air: bool, late: bool) -> String:
 		var dashing := hunter.ak.in_dash()
 		if not dashing and ended < 0:
 			ended = i
+			hunter.stun_t = maxf(hunter.stun_t, stun)
 		m.step(Match.DT)
 		hunter.inp["fire"] = false      # DashFlow's replayed LMB is a tap: let go, or a hold-to-charge weapon charges
 		if _went_off(before, slot):
