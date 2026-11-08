@@ -185,8 +185,9 @@ func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			ok(good, what)
 		var g: Array = dd.get("mood", {}).get("glance", [])
 		if clip == "idle" and not g.is_empty():
-			ok(g.size() == 3 and 0.0 <= float(g[0]) and float(g[0]) < float(g[1]) and float(g[1]) <= anim.length
-					and WardenMood.IDS.has(String(g[2])), "%s: the idle's glance %s falls inside its %.1f s" % [id, g, anim.length])
+			var fits := g.size() == 3 and 0.0 <= float(g[0]) and float(g[0]) < float(g[1])
+			fits = fits and float(g[1]) <= anim.length and WardenMood.IDS.has(String(g[2]))
+			ok(fits, "%s: the idle's glance %s falls inside its %.1f s" % [id, g, anim.length])
 
 func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	var worst := 0.0
