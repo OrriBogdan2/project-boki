@@ -350,3 +350,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-08 owner: Extraction is always trios, 10 teams
 Extraction matches are ALWAYS squads of 3 and ALWAYS 10 teams (30 hunters); bots fill missing slots. No duo or solo extraction. Job extraction-trios-10-1108.
+
+## 2026-11-08 owner: real matches HAVE air control
+Match movement must have strong WASD air control (at least as good as the farm today); the old "[game data] low air control" choice is overruled. One movement model everywhere (movement-air-core-1108).
