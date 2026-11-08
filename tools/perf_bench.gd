@@ -5,7 +5,8 @@ extends RefCounted
 ## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
 ## frame over 33 ms and 2x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
-##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium] [--bench-stress]
+## --bench-stress: the 60-actor load (10 trios = 30 Hunters, every Boki kept out beside its Hunter, no fight).
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 ## The gate: a match p99 over P99_SLACK times the one recorded for this adapter, load, quality and length in
 ## tools/perf_baseline.json exits 1 (BENCH GATE FAIL). Record a new baseline by editing that file from a run.
@@ -21,6 +22,8 @@ var farm_secs := 20.0
 var out_path := ""
 var teams := 3            # --bench-teams / --bench-squad: 10 trios is the Extraction budget (30 Hunters)
 var squad := 2
+var stress := false       # --bench-stress: 30 Hunters with all 30 Boki out, nothing brought to you
+const STRESS_OUT_S := 2.0           # s between sends: a Boki back on its Hunter's shoulder is sent out again
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -38,6 +41,10 @@ func run(main_node: Node) -> void:
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
 		if a.begins_with("--bench-teams="): teams = int(a.substr(14))
 		if a.begins_with("--bench-squad="): squad = int(a.substr(14))
+	stress = "--bench-stress" in OS.get_cmdline_user_args()
+	if stress:
+		teams = 10
+		squad = 3
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = VIEW
@@ -56,8 +63,8 @@ func run(main_node: Node) -> void:
 
 ## 1 when the match p99 regressed past P99_SLACK of the baseline for this setup, else 0.
 func _gate() -> int:
-	var key := "%s|%dx%d|%s|%ds" % [RenderingServer.get_video_adapter_name(), teams, squad, Settings.quality(),
-		int(secs)]
+	var key := "%s|%dx%d%s|%s|%ds" % [RenderingServer.get_video_adapter_name(), teams, squad,
+		" stress" if stress else "", Settings.quality(), int(secs)]
 	var base = JSON.parse_string(FileAccess.get_file_as_string(BASELINE)) if FileAccess.file_exists(BASELINE) else {}
 	if not (base is Dictionary and base.has(key)):
 		print("BENCH GATE no baseline for '%s'" % key)
@@ -97,7 +104,9 @@ func _match() -> void:
 	Match.vprof.clear()
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
-	var fought := false
+	var fought := stress
+	var out_at := 0.0
+	var boki_out := 0
 	var P: Hunter = m.player
 	P.max_hp *= 20.0      # the fight must not end the run: "god" stops nothing once a rival stomps you
 	while is_instance_valid(m) and m.time < secs:
@@ -105,6 +114,9 @@ func _match() -> void:
 		if not fought and m.time >= FIGHT_AT:
 			_bring_fight(m)
 			fought = true
+		if stress and m.time >= out_at:
+			out_at = m.time + STRESS_OUT_S
+			boki_out = _boki_out(m)
 		var t0 := Time.get_ticks_usec()
 		m._process(DT)        # one frame as the game runs it: one DT step, then the visuals (it stepped twice before)
 		var script_ms := (Time.get_ticks_usec() - t0) / 1000.0
@@ -119,6 +131,8 @@ func _match() -> void:
 		added.clear()
 		last = now
 	_summary("match", fl)
+	if stress:
+		print("BENCH stress: %d Hunters, %d Boki out at the last send" % [m.hunters.size(), boki_out])
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
 	var per := ks.slice(0, 10).map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / fl.size()])
@@ -181,6 +195,19 @@ func _bring_fight(m: Match) -> void:
 		var a := TAU * i / MOBS.size()
 		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 6.0, [], 1.0, 0.5, 6.0)
 		m.spawn_mob(MOBS[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+
+## --bench-stress: sends every Hunter's shouldered Boki out beside it; returns how many are out.
+func _boki_out(m: Match) -> int:
+	var n := 0
+	for k in m.kins:
+		var kn := k as Kin
+		if kn.owner_h == null or kn.dead:
+			continue
+		if kn.state == "shoulder":
+			kn.throw_to(kn.owner_h.pos + Vector3(2.5, 0.0, 1.5))
+		elif kn.state == "active":
+			n += 1
+	return n
 
 func _farm() -> void:
 	Game.goto("home")
