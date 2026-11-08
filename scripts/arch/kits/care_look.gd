@@ -2,9 +2,8 @@ class_name CareLook
 extends RefCounted
 ## Pooled looks of the support pair (docs/heroes/tender.md, docs/heroes/rimewright.md): every node is
 ## built once per kind and kept hidden when free, so a held LMB never creates nodes per shot.
-##   Pip: the ember comet and its swirl, the burr orb, the Burrseed root disc, light column and
-##   root beam, the lantern plus, the rising rays, the Hearthlight disc with its floating lantern, Kindle
-##   foot glow, and her dash's ember motes.
+##   Pip: the starlit comet, the burr orb, the Burrseed root disc, light column and root beam, the lantern
+##   plus, the Hearthlight disc with its floating lantern and the Kindle foot glow.
 ##   Claire: the ice shard, the skate beam, the star-headed spear (thrown, and held while aiming), the
 ##   slow-zone flake with its crystal, the Shatter spikes, the frost shell, the frost glow, the skate's
 ##   ice plates, her air dash's frost streaks and the Rink Wall's ice pillars.
@@ -98,13 +97,13 @@ func _build(kind: String) -> Node3D:
 	n.name = kind
 	match kind:
 		"ember":
-			# the ember: a 0.52 m teardrop comet head with a hot core, a strong orange halo and a wide 2 m amber
-			# tail, so it reads in flight at gameplay zoom and not only on impact
+			# a mote of her lantern's star: a 0.52 m teardrop comet head of soft gold with a near-white core, a
+			# pastel pink halo and a wide 2 m gold tail, so it reads in flight at gameplay zoom (starlight, not fire)
 			var head := Models.sphere(0.26, 12)
-			_off(Models.part(n, head, orb_mat(Color("ff8a1c", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.7)))
-			_off(Models.part(n, Models.sphere(0.12, 8), orb_mat(Color("ffe08a", 1.0)), Vector3(0, 0, -0.08)))
-			_off(Models.part(n, Models.sphere(0.46, 10), orb_mat(Color("ff6a1c", 0.5)), Vector3.ZERO))
-			_tail(n, 0.5, 2.0, Color("ff9a2a", 1.0))
+			_off(Models.part(n, head, orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.7)))
+			_off(Models.part(n, Models.sphere(0.12, 8), orb_mat(Color("fff6dc", 1.0)), Vector3(0, 0, -0.08)))
+			_off(Models.part(n, Models.sphere(0.46, 10), orb_mat(Color("f6a6c8", 0.5)), Vector3.ZERO))
+			_tail(n, 0.5, 2.0, Color("ffe0a0", 1.0))
 		"burr":
 			# a spiky green burr that tumbles, a fluff halo and a pale seed-down tail
 			var sp := Node3D.new()
@@ -155,37 +154,20 @@ func _build(kind: String) -> Node3D:
 			# the short white frost streak rides on the tail, so it is hidden with it while the spear is held
 			var streak_mat := orb_mat(Color("e8ffff", 0.8))
 			_off(Models.part(spear_tail, Models.box(0.04, 0.04, 0.5), streak_mat, Vector3(0, 0, 0.6)))
-		"swirl":
-			# the thin warm ring that whips round the casting hand for a beat
-			var pm := PlaneMesh.new()
-			pm.size = Vector2(2, 2)
-			_off(Models.part(
-					n, pm, Models.ring_mat(Color("ffb347", 0.95), 0.08), Vector3.ZERO, Vector3.ONE,
-					Vector3(PI * 0.5, 0, 0)))
-			_off(Models.part(
-					n, pm, Models.ring_mat(Color("ffe6b0", 0.7), 0.05), Vector3.ZERO, Vector3.ONE * 0.7,
-					Vector3(PI * 0.5, 0, 0.6)))
 		"plus":
 			# the lantern plus: a big soft glowing cross with a halo
 			var gc := Color("9cf07a")
 			_off(Models.part(n, Models.box(0.32, 1.2, 0.12), orb_mat(Color(gc, 0.9)), Vector3.ZERO))
 			_off(Models.part(n, Models.box(1.2, 0.32, 0.12), orb_mat(Color(gc, 0.9)), Vector3.ZERO))
 			_off(Models.part(n, Models.sphere(0.75, 12), orb_mat(Color(gc.lightened(0.3), 0.3)), Vector3.ZERO))
-		"rays", "column", "beam_root":
-			# upright light planes (rays rise round her; a column falls over a foe; the root beam holds)
-			var cnt := 6 if kind == "rays" else 3
-			for i in cnt:
+		"column", "beam_root":
+			# upright light planes (a column falls over a foe; the root beam holds)
+			for i in 3:
 				var pm2 := PlaneMesh.new()
-				pm2.size = Vector2(0.18 if kind == "rays" else 1.0, 3.0)
-				var mi := _off(Models.part(
-						n, pm2, glow_mat(Color(1, 1, 1, 0.8), 0.0 if kind != "rays" else 1.0), Vector3.ZERO))
-				var a3 := TAU * i / cnt
-				if kind == "rays":
-					mi.position = Vector3(cos(a3) * 0.75, 1.5, sin(a3) * 0.75)
-					mi.rotation = Vector3(PI * 0.5, -a3, 0)
-				else:
-					mi.position = Vector3(0, 1.5, 0)
-					mi.rotation = Vector3(PI * 0.5, a3 * 0.5 + PI * 0.25, 0)
+				pm2.size = Vector2(1.0, 3.0)
+				var mi := _off(Models.part(n, pm2, glow_mat(Color(1, 1, 1, 0.8), 0.0), Vector3.ZERO))
+				mi.position = Vector3(0, 1.5, 0)
+				mi.rotation = Vector3(PI * 0.5, TAU * i / 3.0 * 0.5 + PI * 0.25, 0)
 		"disc", "flare", "zone", "kindle", "hearth":
 			var pm3 := PlaneMesh.new()
 			pm3.size = Vector2(2, 2)
@@ -209,6 +191,13 @@ func _build(kind: String) -> Node3D:
 			_off(Models.part(n, Models.sphere(0.07, 8), orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO))
 			_off(Models.part(n, Models.sphere(0.14, 8), orb_mat(Color("ff8a3c", 0.4)), Vector3.ZERO))
 			_tail(n, 0.08, 0.7, Color("ffb347", 0.8))
+		"dome":
+			_off(Models.part(
+					n, Models.sphere(1.0, 16), Models.glow_mat(Color("dffcff", 0.5)), Vector3.ZERO,
+					Vector3(1, 0.7, 1)))
+			_off(Models.part(
+					n, Models.sphere(0.94, 16), ice_mat(Color("bff7ef"), 0.25, 0.2), Vector3.ZERO,
+					Vector3(1, 0.7, 1)))
 		"spikes":
 			# Shatter: a starburst of ice spikes thrown up round the foe
 			for i in 12:
@@ -371,8 +360,8 @@ func impact(kind: String, at: Vector3, s: Dictionary) -> void:
 	var back := Vector3(-d2.x, 0.4, -d2.y)
 	match kind:
 		"ember":
-			m.fx.flash(at, Color("ffb347"), 0.6, 0.07)
-			m.fx.spark(at, back, Color("ffc46a"), 8, 6.0, 70.0, 0.25, 6.0)
+			m.fx.flash(at, Color("fff0c0"), 0.6, 0.07)
+			m.fx.spark(at, back, Color("ffd27a"), 8, 6.0, 70.0, 0.25, 6.0)
 			burst("star", at, {"col": Color("9a6aff"), "rim": Color("e0c8ff"), "r": 0.8, "dur": 0.22})
 		"shard":
 			m.fx.flash(at, Color("9af0ff"), 0.5, 0.06)
@@ -422,18 +411,9 @@ func _style(e: Dictionary, k: float) -> void:
 	var pop := _out_back(clampf(k * 4.0, 0.0, 1.0))
 	var fade := 1.0 - smoothstep(0.55, 1.0, k)
 	match String(e["fx"]):
-		"swirl":
-			n.scale = Vector3.ONE * r * lerpf(0.5, 1.15, sqrt(k))
-			var dv: Vector2 = p.get("dir", Vector2(0, -1))
-			n.rotation = Vector3(0, atan2(-dv.x, -dv.y), 0)
-			_tint(n, col, fade)
 		"plus":
 			n.scale = Vector3.ONE * r * pop
 			n.rotation.y = k * 1.2
-			_tint(n, col, fade)
-		"rays":
-			n.scale = Vector3(r, lerpf(0.3, 1.0, sqrt(k)), r)
-			n.position.y = (e["at"] as Vector3).y + k * 0.8
 			_tint(n, col, fade)
 		"column", "beam_root":
 			var w := r * (1.0 if String(e["fx"]) == "column" else 0.45)
@@ -465,13 +445,6 @@ func _style(e: Dictionary, k: float) -> void:
 			var forms := lerpf(0.6, 1.0, clampf(k * 15.0, 0.0, 1.0))          # frozen in under the blade at once
 			n.scale = Vector3(r * forms, 1.0, r * forms)
 			_tint(n, Color.WHITE, 1.0 - smoothstep(0.3, 1.0, k))
-		"mote":
-			# lies back along the dash (a mote drifts up a little), shrinking as it fades
-			var dv2: Vector2 = p.get("dir", Vector2(0, -1))
-			n.rotation = Vector3(0, atan2(-dv2.x, -dv2.y), 0)
-			n.global_position = (e["at"] as Vector3) + Vector3(0, 0.8 * k, 0)
-			n.scale = Vector3.ONE * r * (1.0 - 0.6 * k)
-			_tint(n, Color.WHITE, 1.0 - k)
 		_:
 			n.scale = Vector3.ONE * r
 			_tint(n, col, fade)
