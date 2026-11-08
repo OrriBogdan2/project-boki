@@ -1,8 +1,7 @@
 """ART-1 Kael v2, stage B: join, unwrap, bake the scan's paint, the curse veins' emission, the alpha cards, skin, export.
 One 2048 colour atlas (the scan's paint; the scripted pieces on flat cells at its right edge), a 2048 emission map (the
 curse veins on his right arm and chest: model_glow core tints it), a small RGBA card atlas (the shawl's torn hem and the
-sash tails). The armature is the contract's (kael_rig.json) plus the spring chains the game already knows (mane, the
-cuffs' hang chains). The sword (kael_pieces.sword) is joined to the body, skinned to hand.R: the clips carry it (docs/art/wardens/CLIPS.md).
+sash tails). The armature is the contract's (kael_rig.json) plus the mane's spring chains the game already knows. The sword (kael_pieces.sword) is joined to the body, skinned to hand.R: the clips carry it (docs/art/wardens/CLIPS.md).
 Run: blender -b --factory-startup --python tools/art1/kael_finish.py -- <source.blend> <rig.json> <out.glb>"""
 import sys, os, json, math
 import bpy, bmesh
@@ -23,12 +22,12 @@ WORK = os.path.dirname(os.path.abspath(OUT))
 ATLAS = 2048
 CARDS = 512
 UNIQ_W = 0.94                        # the scan's islands' share of the atlas width; the flat cells sit to its right
-CELL = {"metal-chain": "#77737b", "metal-sword": "#c9c1c9", "metal-sword_edge": "#ebe6ec", "metal-sword_dk": "#857e88",
+CELL = {"metal-sword": "#c9c1c9", "metal-sword_edge": "#ebe6ec", "metal-sword_dk": "#857e88",
         "leather-grip": "#7e1b25", "glow-sword": "#ffffff"}
 # card cells (u0, v0, u1, v1) in the card atlas: the sash tail, the shawl's crimson hem, its bone hem
 SASH_C, HEM_RED_C, HEM_BONE_C = (0.0, 0.0, 0.34, 1.0), (0.35, 0.0, 0.66, 1.0), (0.67, 0.0, 1.0, 1.0)
 SLOTS = ["skin", "hair", "cloth", "leather", "metal"]
-MATS = [s + "-kael" for s in SLOTS] + ["metal-chain", "card-kael"]
+MATS = [s + "-kael" for s in SLOTS] + ["card-kael"]
 CURSE_BONES = ("upper_arm.R", "forearm.R", "hand.R")   # the sword arm (the scan draws the curse on the left)
 ARM_OFF = 0.06                       # m from the upper arm's bone: further out is the shawl
 TORSO_R = (0.2, 0.135)               # m, the torso's skin ellipse (x, y) round the spine: outside it is the shawl
@@ -42,18 +41,7 @@ sc = bpy.context.scene
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
 
 
-def wrist_pieces():
-    out, pts = [], {}
-    for side, chain in (("L", "spring_hangcuff"), ("R", "spring_hangwarchain")):
-        pc, p = K.wrist_chain(side, (chain + "_0", chain + "_1"))
-        out.append(pc)
-        pts[side] = p
-    return out, pts
-
-
-chains, chain_pts = wrist_pieces()
-
-# ---- one mesh: the scan's low mesh, then the chains
+# ---- one mesh: the scan's low mesh
 verts, faces, fsrc, vw, rooms = [], [], [], [], []
 gn = {g.index: g.name for g in low.vertex_groups}
 for v in low.data.vertices:
@@ -63,15 +51,6 @@ for v in low.data.vertices:
 for p in low.data.polygons:
     faces.append(list(p.vertices))
     fsrc.append(None)
-for pc in chains:
-    base = len(verts)
-    for i, v in enumerate(pc.v):
-        verts.append(tuple(v))
-        vw.append({b: float(w[i]) for b, w in pc.w.items() if w[i] > 0.005})
-        rooms.append(pc.room)
-    for f in pc.f:
-        faces.append([base + i for i in f])
-        fsrc.append(pc.mat)
 N_LOW = len(low.data.polygons)
 me = bpy.data.meshes.new("Body")
 me.from_pydata(verts, [], faces)
@@ -418,10 +397,6 @@ top = WK.bone_head(rig, "head").z + 0.1
 for nm, x, y in (("back", 0.0, -0.12), ("l", -0.1, -0.04), ("r", 0.1, -0.04), ("fl", -0.07, 0.04), ("fr", 0.08, 0.05)):
     ln = 0.11 if nm in ("back", "l", "r") else 0.03
     spring("spring_mane_" + nm, [(x, y, top - ln * i) for i in range(6)], "head")
-for side, chain, n in (("L", "spring_hangcuff", 3), ("R", "spring_hangwarchain", 6)):
-    p0, p1, p2 = chain_pts[side]
-    pts = [p0, p1, p2] + [p2 + (0, 0, -0.085 * k) for k in range(1, n - 1)]
-    spring(chain, pts[:n + 1], "hand." + side)
 bpy.ops.object.mode_set(mode="OBJECT")
 ob.parent = arm
 md = ob.modifiers.new("arm", "ARMATURE")

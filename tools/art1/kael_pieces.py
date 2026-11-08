@@ -12,7 +12,6 @@ from meshkit import Piece, norm, sweep, chain_along
 RIG = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "art", "wardens", "src", "kael_rig.json")))
 CROWN = RIG["land"]["crown"]                  # his height, model metres
 GUN_M = 1.42 * 0.85                           # model metres per Gun metre (heavy Gun scale x the owner's 0.85, Nov 4)
-HAND = {sd: np.array([x, -z, y]) for sd, (x, y, z) in ((sd, RIG["bones"]["hand." + sd]["head"]) for sd in "RL")}     # Blender frame
 
 
 def gun(frac):
@@ -147,18 +146,6 @@ def sword_matrix(fist):
     e = e if e[2] > 0 else -e
     m = np.column_stack([-e, GRIP_DIR, np.cross(GRIP_DIR, e)]) * GUN_M
     return m, np.asarray(fist, float) - m @ np.array([0.0, GUARD_Y - GRIP_L / 2, 0.0])
-
-
-def wrist_chain(side, bones):
-    """A short iron chain hanging from the cuff's outer edge to mid-thigh, on two hang bones (WardenGlb.Springs)."""
-    sx = 1.0 if side == "R" else -1.0
-    top = HAND[side] + np.array([sx * 0.045, 0.0, 0.02])
-    path = [top + (0, 0, -0.17 * k / 5) + (sx * 0.006 * np.sin(k), 0.004 * k, 0) for k in range(6)]
-    pc = chain_along("cuffchain" + side, path, step=0.032, ln=0.038, wid=0.021, th=0.0056)
-    pc.mat = "metal-chain"
-    k = np.clip((top[2] - pc.v[:, 2]) / 0.17, 0, 1)
-    pc.w = {bones[0]: 1.0 - k, bones[1]: k}
-    return pc, [top, top + (0, 0, -0.085), top + (0, 0, -0.17)]
 
 
 def card(name, path, width, side_hint, v_rect, weights):

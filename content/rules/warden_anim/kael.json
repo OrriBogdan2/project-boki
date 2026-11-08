@@ -1,11 +1,5 @@
 {
 	"doc": "Kael v2's clips (art/wardens/kael/kael.glb: the first Kael's 49 hand-keyed clips retargeted by tools/art1/kael_retarget.py) and which game state plays which (scripts/heroes/warden_clips.gd). One file per Hero, so ART-1 branches never touch shared code.",
-	"hide_while_chain": [
-		"spring_hangwarchain_0"
-	],
-	"hang_own_rest": [
-		"spring_hangwarchain"
-	],
 	"loco": {
 		"idle": "idle",
 		"stance": "stance",
