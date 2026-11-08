@@ -8,7 +8,7 @@ Pick it from the Expedition menu at home: your class, your Boki, a **tier** and 
 - **Tiers:** the Meadow (Boki are never lost), the Dusk Isles (opens after 2 extractions) and the
   Hollow (after 5). Higher tiers have tougher monsters, more loot, rarer Boki and real risk to your
   Boki. See [Rules](Rules.md#expedition-tiers) and [Boki](Boki.md#losing-a-boki).
-- **Modes:** Solo (20 hunters), Duos (10 squads of two), Trios (7 squads of three). Bots fill the lobby.
+- **Format:** always 10 squads of three (30 hunters). Bots fill every spot no player takes; there is no solo or duo queue.
 - **One life.** Health and armor don't regenerate. Tonics (1) heal and armor kits (2) repair armor.
 - **Clock.** A match runs 6 minutes, then the islands fall.
 
@@ -185,8 +185,8 @@ The Arena, training, the tutorial and the duel room are always clear.
 
 ## The Demo match
 
-On the title screen once you have a save: a real expedition set up for showing the game. Duos with a
-bot squadmate, on the Dusk Isles (so a Boki in a deathbox can be lost), on a fixed map roll with clear
+On the title screen once you have a save: a real expedition set up for showing the game. A trio with bot
+squadmates, on the Dusk Isles (so a Boki in a deathbox can be lost), on a fixed map roll with clear
 weather and no Blight. Rivals leave you alone for a minute after you land, and your squadmate leads
 the drop to land you between a live boss lair and an uplink outpost. It plays on your save like any
 expedition: what you bring can be lost, and what you extract is kept. **Settings > Demo** applies the

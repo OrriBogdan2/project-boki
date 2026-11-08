@@ -10,7 +10,7 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
 
 - **New game / Continue.** A new game starts with a short story, then your first egg.
 - **Arena.** Every Hunter against dummies and a sparring bot. No save needed. See [Arena and training](Arena-and-Training.md).
-- **Demo match** (once you have a save). A ready-made Duos expedition with a bot squadmate, clear
+- **Demo match** (once you have a save). A ready-made expedition with bot squadmates, clear
   weather and no Blight. See [Expeditions](Expeditions.md#the-demo-match).
 - **Play with friends** (when online play is available), **Save files**, **Settings**, **Quit**.
 
@@ -27,8 +27,8 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
    build mode (B): the house (90), a crop patch (30) and the cooking pot (20), then the market stall
    when you like. See [The farm](The-Farm.md).
 5. **Your first expedition.** Open **Expedition** from the hub bar (or the signpost by the portal).
-   Pick your Hunter, the Boki you bring, the tier (the Meadow first: your Boki can't be lost there) and
-   a mode: Solo (20 hunters), Duos (10 squads of two) or Trios (7 squads of three).
+   Pick your Hunter, the Boki you bring and the tier (the Meadow first: your Boki can't be lost there).
+   Every expedition is 10 squads of three; bots fill your squad and the rest.
 
 ## Things worth knowing early
 

@@ -571,7 +571,8 @@ def gen_rules():
     if mt:
         # only the keys the game still reads (the rest of Data.MATCH predates Life.R and the exits)
         live = [k for k in ("length", "down_hp") if k in mt]
-        rows = [["players", num(gd_const("core/data.gd", "MATCH_PLAYERS") or "?"), "hunters in an expedition (solos, duos or trios)"]]
+        rows = [["squads", num(gd_const("core/data.gd", "SQUADS") or "?"), "squads in every expedition"],
+                ["squad size", num(gd_const("core/data.gd", "SQUAD_SIZE") or "?"), "hunters a squad (always trios)"]]
         rows += [[k, num(mt[k]), mc.get(k, "")] for k in live]
         body += "\n\n## Match\n\n" + table(["Setting", "Value", "Meaning"], rows)
     lr = gd_const("match/life.gd", "R") or {}
