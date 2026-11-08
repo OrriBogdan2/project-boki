@@ -8,7 +8,7 @@ extends RefCounted
 const SUNDERING := "The Hollowing broke the land into the floating Skylands,\nand the Wyrm stole our essence.\n" \
 	+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty."
 const MASKS := "Our only salvation became the cursed fossils we had tried to destroy:\n" \
-	+ "Masks, each carrying the soul of a fallen Hunter of old."
+	+ "Hunter's Relics, each carrying the soul of a fallen Hunter of old."
 ## each slide's strip: [seconds in (from the end when negative, taken just before the wipe), caption]
 const STRIP := [
 	[[1.0, "start: the land whole at golden hour, a slow push in"], [2.6, "beat: the Crown on its isle"],
@@ -66,7 +66,7 @@ func run(m: Node) -> void:
 		return
 	ok(pr.shots.size() == 5, "five slides (%d)" % pr.shots.size())
 	ok(String(pr.shots[2]["text"]) == SUNDERING, "THE HOLLOWING reads the owner's line")
-	ok(String(pr.shots[3]["text"]) == MASKS, "THE MASKS reads the owner's line")
+	ok(String(pr.shots[3]["text"]) == MASKS, "THE RELICS reads the owner's line")
 	await _captions_fit(pr, tree)
 	main.get_window().size = FRAME
 	await _play(pr, tree)

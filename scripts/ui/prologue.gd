@@ -131,13 +131,13 @@ func _shots() -> Array:
 				+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty.",
 			"cam": [[W + Vector3(-30, 22, 46), W + Vector3(0, 0, 0), W + Vector3(-36, 28, 56), W + Vector3(0, -6, 0), 3.6],
 				[W + Vector3(46, 4, 34), W + Vector3(0, -4, 0), W + Vector3(58, 10, 46), W + Vector3(0, -20, 0), 3.9]]},
-		{"chapter": "THE MASKS", "mood": "dawn", "tint": Color("ffe4b0"), "grade": 0.12, "event": "kin",
+		{"chapter": "THE RELICS", "mood": "dawn", "tint": Color("ffe4b0"), "grade": 0.12, "event": "kin",
 			"text": "Our only salvation became the cursed fossils we had tried to destroy:\n"
-				+ "Masks, each carrying the soul of a fallen Hunter of old.",
+				+ "Hunter's Relics, each carrying the soul of a fallen Hunter of old.",
 			"cam": [[K + Vector3(0.2, 2.0, 7.6), K + Vector3(0.2, 0.9, -1.2), K + Vector3(0.25, 1.7, 6.4), K + Vector3(0.3, 0.85, -1.0), 3.1],
 				[K + Vector3(0.4, 0.55, 3.9), K + Vector3(0.4, 0.85, -0.3), K + Vector3(0.4, 0.55, 3.45), K + Vector3(0.4, 0.88, -0.3), 4.4]]},
 		{"chapter": "THE RACE", "mood": "deep", "tint": Color("b08aff"), "grade": 0.24, "event": "drop",
-			"text": "Put on a Mask, bond with a Boki, and hunt for the Wyrmheart:\n"
+			"text": "Take up a Hunter's Relic, bond with a Boki, and hunt for the Wyrmheart:\n"
 				+ "one wish to remake the world, or rule it.\nEvery Hunter wants it. So does Malgrave.",
 			"cam": [[D + Vector3(-6, 20, 14), D + Vector3(2, 4, -30), D + Vector3(-3, 16, 2), D + Vector3(8, -10, -52), 4.0],
 				[D + Vector3(-4, 14, -4), D + Vector3(14, -28, -70), D + Vector3(0, 11, -12), D + Vector3(18, -36, -82), 4.2]]},
