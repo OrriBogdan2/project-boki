@@ -55,10 +55,13 @@ func _find_material(root: Node, shader_file: String) -> ShaderMaterial:
 			return found
 	return null
 
+func _on_ground(disc: MeshInstance3D, ground_y: float) -> bool:
+	return absf(disc.global_position.y - (ground_y + DepthCues.LIFT)) < 0.001
+
 func _check_ledge_light(m: Match) -> void:
 	var terrain := _find_material(m.world, "terrain.gdshader")
-	ok(terrain != null and float(terrain.get_shader_parameter("depth_k")) == 1.0, "terrain shader has the ledge light on (depth_k 1)")
-	ok(terrain != null and terrain.shader.code.contains("depth_cues("), "terrain shader carries the cliff shading and lip light")
+	ok(terrain != null and float(terrain.get_shader_parameter("depth_k")) == 1.0, "terrain ledge light on (depth_k 1)")
+	ok(terrain != null and terrain.shader.code.contains("depth_cues("), "terrain shader has the cliff shading and lip")
 	var w := m.world
 	var ledges := 0
 	for z in range(1, w.h - 1):
@@ -70,7 +73,8 @@ func _check_ledge_light(m: Match) -> void:
 
 func _check_abyss(m: Match) -> void:
 	var clouds := _find_material(m.world, "clouds.gdshader")
-	ok(clouds != null and is_equal_approx(float(clouds.get_shader_parameter("abyss_dim")), DepthCues.ABYSS_DIM), "abyss cloud sea is dimmed to %.2f" % DepthCues.ABYSS_DIM)
+	var dim := float(clouds.get_shader_parameter("abyss_dim")) if clouds != null else 1.0
+	ok(is_equal_approx(dim, DepthCues.ABYSS_DIM), "abyss cloud sea is dimmed to %.2f" % DepthCues.ABYSS_DIM)
 
 func _check_hunter_discs(m: Match, dc: DepthCues) -> void:
 	dc._process(0.0)
@@ -83,7 +87,7 @@ func _check_hunter_discs(m: Match, dc: DepthCues) -> void:
 			continue
 		live += 1
 		var y := m.world.ground_at(h.global_position.x, h.global_position.z)
-		ok(absf(disc.global_position.y - (y + DepthCues.LIFT)) < 0.001, "hunter %d's disc lies on the ground (y %.2f)" % [i, y])
+		ok(_on_ground(disc, y), "hunter %d's disc lies on the ground (y %.2f)" % [i, y])
 	ok(live > 0, "at least one hunter's disc is visible on the ground")
 
 func _check_shot_discs(m: Match, dc: DepthCues) -> void:
@@ -97,8 +101,9 @@ func _check_shot_discs(m: Match, dc: DepthCues) -> void:
 	var per_frame := float(Time.get_ticks_usec() - t0) / FRAMES
 	var shown := dc._shot_discs.filter(func(d): return d.visible)
 	ok(shown.size() == SHOTS, "one visible disc per flying shot (%d of %d)" % [shown.size(), SHOTS])
-	ok(shown.all(func(d): return absf(d.global_position.y - (ground + DepthCues.LIFT)) < 0.001), "every shot's disc lies on the ground under it (y %.2f)" % ground)
-	ok(per_frame <= BUDGET_US, "discs cost %.0f us per frame for %d hunters + %d shots (budget %.0f)" % [per_frame, m.hunters.size(), SHOTS, BUDGET_US])
+	ok(shown.all(func(d): return _on_ground(d, ground)), "every shot's disc lies on the ground (y %.2f)" % ground)
+	var note := "discs: %.0f us/frame, %d hunters + %d shots" % [per_frame, m.hunters.size(), SHOTS]
+	ok(per_frame <= BUDGET_US, "%s (budget %.0f)" % [note, BUDGET_US])
 	var warm := dc.get_child_count()
 	dc._process(0.0)
 	ok(dc.get_child_count() == warm, "no nodes added once warmed up")

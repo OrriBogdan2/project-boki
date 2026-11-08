@@ -2,8 +2,9 @@ class_name DepthCues
 extends Node3D
 ## Height readability (briefs/CAMERA_DEPTH.md), behind Settings "depth_cues". Purely visual: it draws a
 ## soft shadow disc on the ground straight under every hunter and every flying shot, at the ground's own
-## height, so a body at a ledge or a shot in the air reads as high above what is below it. The ground itself gets its share in
-## shaders/terrain.gdshader (cliff faces darker toward their foot, a lit cliff lip), fed by k().
+## height, so a body at a ledge or a shot in the air reads as high above what is below it. The ground
+## itself gets its share in shaders/terrain.gdshader (cliff faces darker toward their foot, a lit cliff
+## lip), fed by k().
 
 const DISC := 2.0       # m, shadow disc diameter at the feet (a hunter's body is ~0.8 m wide)
 const LIFT := 0.04      # m, above the ground so the disc does not z-fight
@@ -42,9 +43,9 @@ func _disc_material(strength: float) -> ShaderMaterial:
 	mat.set_shader_parameter("strength", strength)
 	return mat
 
-func _disc_mesh(size: float) -> QuadMesh:
+func _disc_mesh(width: float) -> QuadMesh:
 	var mesh := QuadMesh.new()
-	mesh.size = Vector2(size, size)
+	mesh.size = Vector2(width, width)
 	mesh.orientation = PlaneMesh.FACE_Y
 	return mesh
 
