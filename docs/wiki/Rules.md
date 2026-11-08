@@ -223,8 +223,6 @@ Hob Brackenridge, the farm's builder (docs/decisions/0011-farm-builder-tutorial.
 
 | Setting | Value |
 |---|---|
-| name | Hob Brackenridge |
-| short | Hob |
 | stand | {"along": 2.4, "side": 4.2, "desc": "Metres in front of the house centre and to its right, so he never blocks the door."} |
 | talk_reach | 2.4 |
 | hint_more | Talk to Hob for more |
@@ -402,6 +400,34 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | types | {"venom": {"style": "nova", "parts": ["fangs", "tail", "crest"], "word": "VENOM", "rider": {"burn": 5.0, "burn_for": 3.0}, "dash": {"dmg": 8.0, "burn": 4.0, "burn_for": 3.0}}, "spore": {"style": "bloom", "parts": ["crest", "plates", "halo"], "word": "SPORE", "rider": {"slow_k": 0.25, "slow_s": 1.6}, "dash": {"dmg": 6.0, "slow_k": 0.3, "slow_s": 1.4}}, "gravity": {"style": "quake", "parts": ["plates", "spikes", "halo"], "word": "GRAVITY", "rider": {"kb": -3.5}, "dash": {"dmg": 10.0, "kb": -4.0}}, "prism": {"style": "prism", "parts": ["crest", "halo", "wings"], "word": "PRISM", "rider": {"chain": 0.35}, "dash": {"dmg": 8.0, "chain": 0.35}}, "lunar": {"style": "spiral", "parts": ["halo", "wings", "crest"], "word": "LUNAR", "rider": {"leech": 0.06}, "dash": {"dmg": 6.0, "leech": 0.06}}, "echo": {"style": "storm", "parts": ["antennae", "crest", "wings"], "word": "ECHO", "rider": {"chain": 0.3}, "dash": {"dmg": 8.0, "chain": 0.3}}, "ember": {"style": "pillar", "parts": ["horns", "crest", "tail"], "word": "EMBER", "rider": {"burn": 7.0, "burn_for": 2.5}, "dash": {"dmg": 10.0, "burn": 6.0, "burn_for": 2.5}}, "frost": {"style": "bloom", "parts": ["spikes", "crest", "halo"], "word": "FROST", "rider": {"slow_k": 0.35, "slow_s": 1.8}, "dash": {"dmg": 6.0, "slow_k": 0.4, "slow_s": 1.6}}, "storm": {"style": "storm", "parts": ["wings", "crest", "antennae"], "word": "STORM", "rider": {"chain": 0.4}, "dash": {"dmg": 9.0, "chain": 0.4}}, "stone": {"style": "quake", "parts": ["plates", "horns", "spikes"], "word": "STONE", "rider": {"kb": 4.5}, "dash": {"dmg": 12.0, "kb": 5.0}}, "bloom": {"style": "bloom", "parts": ["crest", "wings", "halo"], "word": "BLOOM", "rider": {"leech": 0.07}, "dash": {"dmg": 5.0, "leech": 0.07}}, "shadow": {"style": "spiral", "parts": ["horns", "wings", "tail"], "word": "SHADOW", "rider": {"slow_k": 0.2, "slow_s": 1.2, "leech": 0.04}, "dash": {"dmg": 8.0, "slow_k": 0.25, "slow_s": 1.2}}, "titan": {"style": "quake", "parts": ["horns", "plates", "spikes"], "word": "TITAN", "rider": {"kb": 5.5}, "dash": {"dmg": 14.0, "kb": 6.0}}, "swarm": {"style": "storm", "parts": ["antennae", "wings", "spikes"], "word": "SWARM", "rider": {"burn": 3.5, "burn_for": 2.0, "chain": 0.25}, "dash": {"dmg": 6.0, "burn": 3.0, "burn_for": 2.0}}, "tempest": {"style": "storm", "parts": ["wings", "crest", "halo"], "word": "TEMPEST", "rider": {"chain": 0.45}, "dash": {"dmg": 9.0, "chain": 0.45}}, "none": {"style": "nova", "parts": ["crest", "halo", "plates"], "word": "MERGE", "rider": {"kb": 2.0}, "dash": {"dmg": 6.0, "kb": 2.0}}} |
 | shell_base | {"light": 80, "medium": 110, "heavy": 150} |
 | shell_note | hp of the shell every merge gives on top of your own health (docs/decisions/0003): by weight class; a form multiplies it with `shell_k` in its file. Damage hits the shell first; when it breaks the merge ends and the ultimate is lost. |
+
+## npc_talk (`content/rules/npc_talk.json`)
+
+How every NPC talks (NpcDialogue, NpcBeacon, FarmTalk): a box at the bottom with a front-facing portrait, a name plate and text that types out, a '...' bubble before the first line, a voice blip per few letters, and the camera easing in on the speaker's head. A speaker's painted portraits, when they land, go at 'portrait' with {mood} for neutral, happy or warning; until then the box shows a close-up rendered from the speaker's model.
+
+| Setting | Value |
+|---|---|
+| type_cps | 42 |
+| type_cps_desc | Letters per second the text types out at. |
+| dots_s | 0.7 |
+| dots_s_desc | Seconds the '...' bubble shows before the first line. |
+| pause_s | {".": 0.22, "!": 0.22, "?": 0.22, ",": 0.1} |
+| pause_s_desc | Extra seconds the typing holds after these letters, so sentences breathe. |
+| blip_every | 2 |
+| blip_every_desc | A voice blip every this many letters (spaces and punctuation are silent). |
+| blip_db | -14 |
+| cam_zoom | 0.5 |
+| cam_zoom_desc | The camera's zoom while someone talks (the farm's own is about 0.9). |
+| cam_ease | 3 |
+| cam_ease_desc | 1/s: how fast the camera eases onto the speaker and back. |
+| cam_lift | 1.6 |
+| cam_lift_desc | Metres the view slides toward the camera, so the speaker sits above the box instead of behind it. |
+| arrow_margin | 46 |
+| arrow_margin_desc | Pixels in from the screen edge that the off-screen arrow sits. |
+| moods | {"neutral": "a9b0bf", "happy": "f2c84a", "warning": "ff6a5a"} |
+| moods_desc | The portrait frame's colour per expression (and the expressions a line may ask for). |
+| speakers_desc | Each NPC: name, short (the edge arrow's label), role (under the name), voice_hz (blip pitch), head and tag (m above the feet: the camera's aim and the name tag), portrait_at and portrait_dist (m: the rendered close-up's aim height and distance), glow (outline colour). |
+| speakers | {"hob": {"name": "Hob Brackenridge", "short": "Hob", "role": "Builder", "voice_hz": 150.0, "head": 2.2, "tag": 3.2, "portrait": "res://art/portraits/hob_{mood}.png", "portrait_at": 2.0, "portrait_dist": 2.2, "glow": "ffd79a"}} |
 
 ## perk_orbs (`content/rules/perk_orbs.json`)
 
