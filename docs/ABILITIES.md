@@ -1,6 +1,6 @@
 # Project Boki abilities
 
-Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/abilities/*.json` (class dashes, weapon RMBs) and `content/gear/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities, dodge riders and merges (E, its auto active, the Shift rider and the Merge) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.
+Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/abilities/*.json` (class dashes, weapon RMBs) and `content/gear/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities and merges (E, its auto active and the Merge) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.
 
 This file is generated from the JSON by a script; the descriptions are the one-liners players see in the kit panel (K) and on hover.
 
@@ -11,11 +11,11 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |
 |---|---|---|---|---|---|---|---|
 | **Thief** | light | Twin Blades | Vault | Marks | Bola | Shadow Knife (18s) | none (X is the Merge) |
-| **Lisette** | light | Longbow | Spirit Walk | Focus | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
-| **Ryzz** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
+| **Lace** | light | Longbow | Spirit Walk | Focus | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
+| **Sparkle** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
 | **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
 | **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
-| **Breaker** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
+| **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
 
 ### Thief (light)
 
@@ -29,18 +29,18 @@ _The cutpurse duelist. Sticks to one mark, flips past them, never lets go._
 - **E: Shadow Knife** (18s). Throw a dagger 12m that sticks in the first foe (8 damage, slowed 50% for 2.5s) or in a wall or the ground where it stops. Press E again to step to it at once; after 5s you step to it anyway.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, R, RMB, E, R, Q
 
-### Lisette (light)
+### Lace (light)
 
 _The warden of high ground. Climbs, reads the field, pins people to walls._
 
 - **Passive: Focus.** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next shot is Supercharged or aimed at once, with +20% range, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m. A knock heals 18.
-- **Shift: Spirit Walk** (6s a charge). A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.
+- **Shift: Spirit Walk** (6s a charge). A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars, ability barriers and raised terrain don't stop you; you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.
 - **RMB: Heavy Shot** (16s):
   - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
 - **E: Hail Wall** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, E
 
-### Ryzz (light)
+### Sparkle (light)
 
 _The storm-kite runner. Charges you up shot by shot, then runs straight through you and comes out the other side with the dash back._
 
@@ -78,7 +78,7 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
 - **E: Warchain** (13s). Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 - Level-up order (bots too): Dash, RMB, E, RMB, Dash, R, RMB, E, R, Q
 
-### Breaker (heavy)
+### Mossy (heavy)
 
 _The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot._
 
@@ -116,19 +116,6 @@ Each class has its own dodge verb. Grounded with a charge, Shift does the class 
 | Light | **Phase Step** (3.6m) | 1 / 6.5s | Light: a short, very fast phase. Shots pass straight through you for the whole step. In the air, or on cooldown, Shift does the long dash. |
 | Medium | **Combat Roll** (3.4m) | 1 / 9.0s | Medium: a quick roll that slips a third of a magazine in on the way. Roll through a hit as it lands for a perfect dodge: your next shots crit. |
 | Heavy | **Shoulder Charge** (3.1m) | 2 / 12.0s | Heavy: a short charge nothing can knock back (2 charges). Anyone you run into is bowled aside, and slammed into a wall they're stunned 1.2s. |
-
-### Kin dodge riders
-
-The kin you brought adds a rider to every class dodge (`dodge_rider` in `content/kin_v2/<id>.json`).
-
-| Kin | Rider | What it adds |
-|---|---|---|
-| Mycroll | **Spore Puff** | where you start: zone 1.5m: 2 damage, slow |
-| Vespyx | **Venom Trail** | what you pass through: 3 damage, 12 damage over 3s, blight 3s |
-| Gravadillo | **Gravity Wake** | where you stop: burst 3.5m: pull |
-| Prismander | **Prism Decoy** | where you start: burst 0m: decoy |
-| Lunowl | **Moon Blink** | the dodge is an instant blink |
-| Echolop | **Echo Step** | a second, shorter dodge a beat later |
 
 ## RMB: weapon signature abilities (no archetype)
 
@@ -174,14 +161,13 @@ Passive gloves (no Q, stats only): **Bastion Plate** (Heavy plate: lots of armor
 
 ## E, the kin's own ability, and the merge
 
-Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (G), a dodge rider and a merge (the Merge key, X by default, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.
+Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (G) and a merge (the Merge key, X by default, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.
 
 ### Mycroll (Hedgehog + Toadstool, shoulder)
 
 - **E: Puffcap Mines** (trap, 10s): Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - **Auto: Spore Patch** (zone, 11s): On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - **Throw (C)**: stuns what it hits; also root.
-- **Shift rider: Spore Puff**
 - **Merge: Sporewake** (8s): Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 
 ### Cairnback (Tortoise + Ibex, mount)
@@ -196,7 +182,6 @@ Each kin has one E ability (`active`), an auto active it uses by itself (`auto`)
 - **E: Stinger Hook** (projectile, 8s): Vespyx lashes its tail 8m: the first foe it stings is dragged back to it, poisoned, blighted (healing halved) and stunned 0.3s.
 - **Auto: Stinger Dash** (dash, 9s): On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
 - **Throw (C)**: stuns what it hits; also 15 damage over 3s.
-- **Shift rider: Venom Trail**
 - **Merge: Venom Mantle** (7s): Vespyx fuses onto you as venomous armor for 7s: 20% more damage, and your shots poison and burst.
 
 ### Hivara (Honeybee + Praying mantis, shoulder)
@@ -211,7 +196,6 @@ Each kin has one E ability (`active`), an auto active it uses by itself (`auto`)
 - **E: Gravity Slam** (leap, 9s): Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
 - **Auto: Mass Guard** (wall, 12s): When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
 - **Throw (C)**: stuns what it hits; also push.
-- **Shift rider: Gravity Wake**
 - **Merge: Heavy Star** (10s): Gravadillo folds into you as a heavy star for 10s. Slam with the left button, roll through foes with the right, drag them in with E, then Merge again brings the whole sky down.
 
 ### Prismander (Axolotl, shoulder)
@@ -219,7 +203,6 @@ Each kin has one E ability (`active`), an auto active it uses by itself (`auto`)
 - **E: Prism Wall** (wall, 10s): Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
 - **Auto: Refraction** (burst, 12s): When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
 - **Throw (C)**: stuns what it hits; also slow.
-- **Shift rider: Prism Decoy**
 - **Merge: Prism Shell** (10s): Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Merge again shatters the shell outward.
 
 ### Lunowl (Owl + Luna moth, perch)
@@ -227,7 +210,6 @@ Each kin has one E ability (`active`), an auto active it uses by itself (`auto`)
 - **E: Moon Swap** (projectile, 10s): Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.
 - **Auto: Moonlift** (burst, 14s): On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
 - **Throw (C)**: stuns what it hits; also push.
-- **Shift rider: Moon Blink**
 - **Merge: Eclipse** (7s): Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
 
 ### Echolop (Hare + Bat, shoulder)
@@ -235,7 +217,6 @@ Each kin has one E ability (`active`), an auto active it uses by itself (`auto`)
 - **E: Echo Chain** (beam, 7s): A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
 - **Auto: Echolocate** (burst, 14s): On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
 - **Throw (C)**: stuns what it hits; also stun.
-- **Shift rider: Echo Step**
 - **Merge: Resonance** (6s): Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
 
 ### Zephyrak (Moray eel + Swift, shoulder)
@@ -253,8 +234,8 @@ Several verbs appear in more than one element, tuned to fit it:
 - **Wall**: Barrier Glove (stone, blocks shots and bodies both ways), Bracewall (energy, follows your aim, yours pass through), Mass Guard (gravity plate, raised for you when you're shot), Prism Wall (crystal, reflects shots).
 - **Reflect**: Mirror Glove (all-round bubble), Riposte (frontal, parries melee), Refraction (prism, auto when hurt), Prism Wall (reflecting wall).
 - **Slam / knock-up**: Earthshatter (hunter leap), Gravity Slam (kin meteor that pulls in first), Fissure Glove (a line eruption), Vortex Glove (pull then pop).
-- **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits), Moon Swap (lunar: trade places), Lunar dash rider.
-- **Trap / zone**: Tripwire Mine (root + reveal), Puffcap Mines (spore triangle), Spore Patch (spore cloud), Spore dash rider.
+- **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits), Moon Swap (lunar: trade places).
+- **Trap / zone**: Tripwire Mine (root + reveal), Puffcap Mines (spore triangle), Spore Patch (spore cloud).
 
 ## Readability
 

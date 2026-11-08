@@ -14,7 +14,9 @@ const GLIDE_CATCH := 60.0        # the canopy brakes a terminal fall to its sink
 const JUMP_V := 6.8
 const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
-const GROUND_DECEL := 110.0      # [spec] stop in ~0.05s, ~0.1m of slide (was 90)
+const GROUND_DECEL := 22.2       # [game data] BrakingDecelerationWalking 2220 uu/s^2 (item 150)
+const GROUND_FRICTION := 2.0     # [game data] GroundFriction 1.0 x braking factor 2: a let-go stops in ~0.38 m
+const GROUND_SHED := 110.0       # no keys: speed over a run (a dash, a step, a knock) sheds this fast (kit distances)
 const GROUND_OVERSPEED := 30.0   # how fast dash or pad speed bleeds off on the ground
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by HunterMove.air_steer)
 const AIR_DECEL := 9.0           # let go on a ledge rise and you mostly stop
@@ -197,6 +199,7 @@ var wall_touch_t := 0.0       # touching a wall in the air: a jump kicks off it
 var wall_n := Vector2.ZERO
 var wall_moves := WallMoves.new()      # wall kick and wall bounce
 var glide_lift := GlideLift.new()      # the abyss lift's spring and float, ledge catch timing
+var glide_dive := GlideDive.new()      # the glider's plunge while crouch is held under it
 var wslam_t := 0.0
 var wallstun := 0.0           # how long the next wall slam stuns (Haymaker makes it longer)
 var land_t := 0.0
@@ -222,7 +225,7 @@ var perks: Array = []           # perks picked up this expedition, one entry per
 var ult := 0.0                # the bond meter, 0..1: R calls your kin's bond ultimate at 1
 var crit_t := 0.0             # shots crit while this runs (Blink)
 var phase_t := 0.0            # Light's Phase Step: shots pass through you while this runs
-var dash_pass := {}           # a kin rider on the dash: what it does to foes you pass through {hit, opts}
+var dash_pass := {}           # a grammar dash or a kit dash: what it does to foes you pass through {hit, opts}
 var abil_charge := {}         # holding a charge-up weapon ability (Rail Charge): {t}
 var charge: Dictionary = {}   # Ram
 var idle_fire := 0.0
@@ -249,7 +252,7 @@ var ak: ArchKit = null        # the archetype's kit at run time
 var shot_range_k := 1.0       # the next shot's range (a full Focus: +20%)
 var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
-var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees and barriers don't stop you while > 0
+var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees, barriers and terrain don't stop you while > 0
 var nth_n := 0                # shots since the weapon's "every Nth" bonus
 
 
@@ -369,12 +372,12 @@ func accent() -> Color:
 
 func max_dashes() -> float:
 	var base := float(dodge_def.charges) if dodge_def else float(cdat["dashes"])
-	return base + float(int(owner_stat("dodge_charges"))) + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
+	return base + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
 
 func dash_regen() -> float:
 	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)
 	var base := float(ak.dash_def().get("cd", 9.0)) if ak else (dodge_def.cooldown if dodge_def else DASH_REGEN)
-	return base * (1.0 - 0.15 * float(maxi(0, int(slot_lv.get("dash", 1)) - 1))) * (1.0 - minf(0.9, owner_stat("dodge_regen") + gear_stat("dodge")))
+	return base * (ak.dash_k() if ak else 1.0 - 0.15 * float(maxi(0, int(slot_lv.get("dash", 1)) - 1))) * (1.0 - minf(0.9, owner_stat("dodge_regen") + gear_stat("dodge")))
 
 ## Right click is always your weapon's ability, as left click is its attack.
 func _kit_from_weapon() -> void:
@@ -847,11 +850,17 @@ static func glide_fall(_speed: float) -> float:
 	return GLIDE_SINK
 
 ## Momentum-preserving acceleration (the Supervive feel): under the wanted speed, move toward it;
-## over it (a dash, a pad, a knockback) bleed the extra off slowly while still steering.
-static func accel2(cur: Vector2, wish: Vector2, accel: float, decel: float, over_decel: float, dt: float) -> Vector2:
+## over it (a dash, a pad, a knockback) bleed the extra off slowly while still steering. With no keys:
+## speed over `run` sheds at `shed`, then `friction` (a share of the speed per second) and a constant `decel`
+## brake the walk, as UE does.
+static func accel2(cur: Vector2, wish: Vector2, accel: float, decel: float, over_decel: float, dt: float,
+		friction := 0.0, shed := 0.0, run := 0.0) -> Vector2:
 	var mx := wish.length()
 	if mx < 0.001:
-		return cur.move_toward(Vector2.ZERO, decel * dt)
+		var cs0 := cur.length()
+		if shed > 0.0 and cs0 > run + 0.05:
+			return cur * (maxf(run, cs0 - shed * dt) / cs0)
+		return (cur * maxf(0.0, 1.0 - friction * dt)).move_toward(Vector2.ZERO, decel * dt)
 	var cs := cur.length()
 	if cs > mx:
 		var wd := wish / mx
@@ -920,7 +929,7 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float
 
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down
+		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down and not (ak != null and ak.no_glide())
 
 func _open_glider() -> void:
 	gliding = true
@@ -1146,7 +1155,6 @@ func do_dash() -> void:
 		dashes -= 1.0
 	var effs: Array = dodge_def.effects if dodge_def else [{"type": "dash", "speed": DASH_SPEED, "time": DASH_TIME, "invuln": 0.14}]
 	Effects.run(effs, self, {"slot": "dodge", "ability": dodge_def.id if dodge_def else "dash", "level": ability_level("dash")})
-	_dash_rider(use_ex)
 	CombatBus.ability_used.emit(self, dodge_def.id if dodge_def else "dash", "dodge")
 
 ## The theme of the kin you brought ("venom", "lunar"...). Cosmetic only: it tints, never rules.
@@ -1154,77 +1162,6 @@ func kin_element() -> String:
 	if kin == null or (kin as Kin).dead:
 		return ""
 	return String(Data.KIN.get((kin as Kin).species, {}).get("type", ""))
-
-## Your kin's dodge rider for the HUD: {name, desc, color} ({} when it has none).
-func dash_rider() -> Dictionary:
-	var k: Kin = kin
-	if k == null or k.dead or k.ks == null or k.ks.dodge_rider.is_empty():
-		return {}
-	return {"name": String(k.ks.dodge_rider.get("name", "")), "desc": KinText.rider(k.ks), "color": _rider_color(k.ks).to_html(false)}
-
-static func _rider_color(ks: KinSpec) -> Color:
-	var r: Dictionary = ks.dodge_rider
-	if not (r.get("on_pass", []) as Array).is_empty(): return KinRules.effects_color(r["on_pass"])
-	for key in ["on_start", "on_end"]:
-		for st in r.get(key, []):
-			if not (st as StageSpec).effects.is_empty(): return KinRules.effects_color((st as StageSpec).effects)
-	return KinRules.cat_color("utility")
-
-## The kin adds a rider to every class dodge (KinSpec dodge_rider, run by KinExec): effects on what
-## you dodge through, stages where you start and where you stop, an echo, or a blink.
-func _dash_rider(ex: bool) -> void:
-	dash_pass = {}
-	var k: Kin = kin
-	if k == null or k.dead or k.ks == null or k.ks.dodge_rider.is_empty():
-		return
-	var rd: Dictionary = k.ks.dodge_rider
-	var col := _rider_color(k.ks)
-	var cx := KinExec.make_cx(m, self, k, self, inp.get("aim", pos), m.dmg_mult(self) * Effects.level_k({"level": ability_level("dash")}), "dodge", "rider_" + k.species)
-	if String(rd.get("as", "dash")) == "blink" and not ex and grounded:
-		# no travel at all, you're simply there
-		var dist := roll_speed * roll_t
-		roll_t = 0.0
-		var best := pos
-		var kk := dist + 0.4
-		while kk > 0.5:
-			var q := pos + Vector3(roll_dir.x, 0, roll_dir.y) * kk
-			if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
-				best = Vector3(q.x, m.world.ground_at(q.x, q.z), q.z); break
-			kk -= 0.5
-		m.fx.ghost(position, face, col, float(cdat["scale"]))
-		teleport(best)
-		vel.x = roll_dir.x * 3.0; vel.z = roll_dir.y * 3.0
-		phase_t = maxf(phase_t, 0.15)
-	if not (rd.get("on_start", []) as Array).is_empty():
-		var c1 := cx.duplicate(); c1["at"] = pos; c1["dir"] = roll_dir
-		KinExec.run_stages(rd["on_start"], c1)
-	if not (rd.get("on_pass", []) as Array).is_empty():
-		var on_pass: Array = rd["on_pass"]
-		dash_pass = {"hit": {}, "kx": func(f: Ent) -> void: KinExec.apply_foe(on_pass, f, cx, pos)}
-	if not (rd.get("on_end", []) as Array).is_empty():
-		var tt := maxf(0.02, roll_t)
-		var on_end: Array = rd["on_end"]
-		m.later(tt, func():
-			if is_instance_valid(self) and not dead and not out:
-				var c2 := cx.duplicate(); c2["at"] = pos; c2["dir"] = roll_dir
-				KinExec.run_stages(on_end, c2))
-	for md in rd.get("modifiers", []):
-		if (md as PartSpec).type != "repeat" or ex:
-			continue
-		var d0 := roll_dir
-		var spd0 := roll_speed
-		var t0 := roll_t
-		var pr: Dictionary = (md as PartSpec).params
-		for i in int(pr["count"]):
-			m.later(t0 + float(pr["delay"]) * float(i + 1) + t0 * float(i), func():
-				if is_instance_valid(self) and not dead and not out and not downed and stun_t <= 0.0 and roll_t <= 0.0:
-					roll_dir = d0
-					roll_speed = spd0
-					roll_t = t0 * float(pr["falloff"])
-					move_kind = "dash"
-					inv_t = maxf(inv_t, roll_t)
-					m.fx.dash_trail(self)
-					m.sfx("dash", pos, -6.0, 1.4))
 
 var roll_speed := DASH_SPEED
 var wedged_t := 0.0
@@ -1243,7 +1180,7 @@ func _occ(x: float, z: float, guard: bool) -> float:
 	if st.walk_deck(Vector3(x, pos.y, z), r) > World.VOID + 1.0:
 		return 0.0
 	if not st.on_deck(pos):
-		return m.world.occupy(x, z, r, pos.y, guard)
+		return m.world.occupy(x, z, r, pos.y, guard, spirit_t > 0.0)
 	var b: float = m.world.occupy(x, z, r, pos.y, false)
 	if b == 0.0 and guard:
 		var g: float = m.world.ground_at(x, z)
@@ -1307,7 +1244,7 @@ func dash_with(e: Dictionary) -> void:
 	if not (ak and ak.own_dash_trail()):
 		m.fx.dash_trail(self)          # the shared puff and ring; a kit with its own trail draws no ring
 
-## A kin rider (or a grammar dash you perform): what you dash through gets its effects.
+## A grammar dash you perform (or a kit's dash that hits): what you dash through gets its effects.
 func _pass_along() -> void:
 	for f in m.foes_of(team):
 		if dash_pass.is_empty(): return
@@ -1812,10 +1749,9 @@ func slot_info(slot: String) -> Dictionary:
 				"cd_max": runner.cd_max("utility"), "charges": runner.charges("utility"), "max_charges": d.charges, "verb": d.verb, "ready": runner.is_ready("utility"), "charge": charge_frac()}, true)
 		"dash", "dodge":
 			var d: AbilityDef = dodge_def
-			var rd := dash_rider()
 			var dmax := max_dashes()
 			out.merge({"name": d.display_name if d else "Dash", "short": (d.short if d else "Dash"), "icon": d.icon if d else "dash", "col": d.color if d else Color("bfe6ff"),
-				"desc": (d.desc if d else "") + (("  " + String(rd.get("desc", ""))) if not rd.is_empty() else ""), "rider": String(rd.get("name", "")),
+				"desc": d.desc if d else "",
 				"cd": (1.0 - fposmod(dashes, 1.0)) * dash_regen() if dashes < dmax - 0.001 else 0.0, "cd_max": dash_regen(), "charges": int(floor(dashes)), "max_charges": int(dmax),
 				"verb": d.verb if d else "dash", "ready": dashes >= 1.0}, true)
 		"gear", "gear0", "q", "gear1", "v":
@@ -2268,7 +2204,7 @@ func _physics(dt: float) -> void:
 		# drifts on when you let go of the keys
 		var gs := (GLIDE_SPEED * 0.5 if glide_fuel <= 0.001 else GLIDE_SPEED) * (1.0 + gear_stat("glide_speed"))
 		gs += glide_lift.swoop
-		hv = glide_steer(hv, mv * gs, gs, dt)
+		hv = glide_dive.steer(hv, mv * gs, gs, dt) if glide_dive.on else glide_steer(hv, mv * gs, gs, dt)
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
 			gs = DIVE_SPEED if diving else DROP_SPEED
@@ -2294,7 +2230,8 @@ func _physics(dt: float) -> void:
 		# near-instant on the ground; in the air you steer well but momentum carries
 		if grounded:
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
-			hv = accel2(hv, mv * spd, ground_accel * grip, GROUND_DECEL * grip, GROUND_OVERSPEED * grip, dt)
+			hv = accel2(hv, mv * spd, ground_accel * grip, GROUND_DECEL * grip, GROUND_OVERSPEED * grip, dt,
+					GROUND_FRICTION * grip, GROUND_SHED * grip, spd)
 		elif glide_off_t < FEATHER_KEEP and not dropping:
 			# (feathering) just after letting go of the glider you keep its speed and steering
 			var gsf := GLIDE_SPEED * (1.0 + gear_stat("glide_speed"))
@@ -2322,6 +2259,8 @@ func _physics(dt: float) -> void:
 			vel.y = DropFeel.fall_vy(vel.y, sink, DIVE_VY_RATE if diving else DROP_VY_RATE, pos.y - ground(), dt)
 			if drop_follow != null and m.skydrop:
 				vel.y = m.skydrop.follow_vy(self)
+		elif glide_dive.on:
+			vel.y = glide_dive.fall_vy(vel.y, dt)
 		else:
 			sink = glide_lift.sink(self, sink)     # high over the ground: pulled down, the drop becomes speed
 			if vel.y < -sink:
@@ -2435,20 +2374,13 @@ func _physics(dt: float) -> void:
 		glide_lift.hang_t = 0.0
 	wall_touch_t = maxf(0.0, wall_touch_t - dt)
 	wslam_t = maxf(0.0, wslam_t - dt)
-	# a hop onto a rock only when you meant it: you jumped (still rising) and you're pushing into it.
-	# Brushing a rock or a terrace while stepping down, falling or being knocked never throws you up
-	# onto it (that was the "random bounce").
-	# (ledge rise) terrain ledges are the ledge rise's now (_ledge_rise: your keys steer it); this hop
-	# is for rocks only
-	var push_in := rock_v
-	var wants: bool = (inp["move"] as Vector2).dot(push_in) > 0.2 if push_in.length() > 0.01 else false
-	if not grounded and not dropping and vel.y > 0.5 and wants and rock_b > 0.0 and rock_b < pos.y + 1.6 and mantle_cd <= 0.0 \
-			and rock_b - pos.y < World.BLOCK_H - 0.1 and m.time - kb_t > 0.4:
-		vel.y = sqrt(2.0 * H_GRAV * (rock_b - pos.y + 0.3))
-		mantle_cd = 0.45
+	# rocks, trees and walls are walls: no hop onto them (item 151; their tops were never ground, so a hop left
+	# you inside the clump). Terrain ledges are the ledge rise's (_ledge_rise).
 	StoneStand.climb(self, maxf(b1, b2))      # the caster walking into her own rock rises onto it
 	StoneStand.mover = null
 	var g := ground()
+	if spirit_t > 0.0 and g > pos.y + World.STEP:
+		g = minf(last_gy, pos.y)     # Phase Walk inside terrain: her floor is the one she walked in on
 	if grounded and g < pos.y - 0.05:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
@@ -2536,7 +2468,7 @@ func abyss_kill_y() -> float:
 ## Islands are solid all the way down: if anything (a pull, a drag, a shove) has left you inside an
 ## island's column below its top, you're put back beside it, or on top when the top is in reach.
 func _unclip() -> void:
-	if grounded or pad.size() > 0 or grap.size() > 0:
+	if grounded or pad.size() > 0 or grap.size() > 0 or spirit_t > 0.0:
 		return
 	var w: World = m.world
 	var g: float = w.ground_at(pos.x, pos.z)
@@ -2558,6 +2490,10 @@ func _unclip() -> void:
 	if safe_pos != Vector3.INF:
 		teleport(safe_pos)
 		vel = Vector3.ZERO
+
+## Falling with the canopy folded: the opening skydive, or the glider's dive.
+func plunging() -> bool:
+	return diving or glide_dive.on
 
 ## The skydive ends: the glider snaps open and the fall slows right down.
 func _deploy() -> void:
@@ -2609,6 +2545,7 @@ var air_t := 0.0                # time since you left the ground
 func _update_glide(dt: float) -> void:
 	air_t = 0.0 if grounded else air_t + dt
 	glide_lift.tick(self, dt)
+	glide_dive.tick(self, dt)
 	if dropping:
 		# the opening drop: the glider stays open until you land, or until you sink below the islands
 		gliding = not grounded
@@ -3187,13 +3124,13 @@ func _anim_state(stretch: float) -> void:
 	var s := anim_s
 	s["vel"] = vel; s["face"] = face
 	s["grounded"] = grounded and pad.is_empty()
-	s["gliding"] = gliding and not diving
-	s["diving"] = diving
+	s["gliding"] = gliding and not plunging()
+	s["diving"] = plunging()
 	s["rolling"] = roll_t > 0.0
 	s["dash_dir"] = roll_dir
 	s["dash_kind"] = _dash_anim_kind()
 	s["crouch"] = crouch_k
-	s["downed"] = downed
+	s["downed"] = false      # downed shows as a Wisp (HunterWisp)
 	s["dead"] = out
 	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["ledge"] = grap.size() > 0
@@ -3291,6 +3228,7 @@ func render(delta: float, alpha: float) -> void:
 	visible = (not out or WardenClips.dying(self)) and not extracted and not riding and not unseen
 	if not model:
 		return
+	HunterWisp.tick(self, delta)
 	if m.cam: model.basis = m.cam.char_basis(face, model.scale)     # leaned toward the camera (CamRig.char_lean)
 	else: model.rotation.y = face
 	if out and has_meta("fling"):
@@ -3368,7 +3306,7 @@ func render(delta: float, alpha: float) -> void:
 			m.fx.dust(pos, 2)
 			Juice.footstep(self)
 	# (the rig's squash, the skydive and lying downed are posed by HunterAnim)
-	glide_k = move_toward(glide_k, 1.0 if gliding and not diving else 0.0, delta * (7.0 if gliding else 9.0))
+	glide_k = move_toward(glide_k, 1.0 if gliding and not plunging() else 0.0, delta * (7.0 if gliding else 9.0))
 	var gl: Node3D = torso.get_node("Glider")
 	gl.visible = glide_k > 0.02
 	if gl.visible:
@@ -3389,7 +3327,7 @@ func render(delta: float, alpha: float) -> void:
 			see = lp.flat_dist(self) < 2.2 and int(m.time * 10.0) % 3 == 0
 		else:
 			see = int(m.time * 14.0) % 3 != 0
-	model.visible = see and not Hex.active(self)       # hexed: the critter stands in for the model
+	model.visible = see and not Hex.active(self) and not HunterWisp.hides(self)    # a critter or a Wisp stands in
 	ShieldLook.tick(self)
 	SideRings.tick(self)
 	var ring := model.get_node("TeamRing") as MeshInstance3D

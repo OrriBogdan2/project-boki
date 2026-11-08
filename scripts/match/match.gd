@@ -722,6 +722,7 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.generate")
 	await world.build_meshes()
 	RaidLook.tune_world(world, raid)
+	if DepthCues.k() > 0.0: add_child(DepthCues.new(self))
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	brk = Breakables.new(self)
@@ -1114,6 +1115,7 @@ func _spawn_hunters() -> void:
 		spots = rolling.spots_along(ship, n_teams)
 	var total := int(opts.get("total", 999))
 	var made := 0
+	var mates: Array = opts.get("mates", [])
 	for t in n_teams:
 		var base: Vector3 = spots[t % spots.size()] if spots.size() > 0 else world.random_ground()
 		for s in squad:
@@ -1157,20 +1159,29 @@ func _spawn_hunters() -> void:
 					_apply_treat(player.kin)
 				_start_drop(player, at)
 				continue
-			var h := make_bot(t, at, names)
+			var mate: Dictionary = mates[s - 1] if t == 0 and s > 0 and s <= mates.size() else {}
+			var h := make_bot(t, at, names, mate)
 			_start_drop(h, at)
 
-## A rival bot hunter for squad t, standing at `at` (the drop is up to the caller).
-func make_bot(t: int, at: Vector3, names: Array) -> Hunter:
+## A rival bot hunter for squad t, standing at `at` (the drop is up to the caller). `mate`: your
+## squadmate the lobby dealt ({name, arch}, see Prematch.deal_mates), else a random one.
+func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 	var bk := bot_kit()
-	var bname: String = names.pop_back() if names.size() > 0 else "Bot"
+	var bname := "Bot"
+	if not mate.is_empty():
+		bname = String(mate["name"])
+		bk["arch"] = String(mate["arch"])
+	elif names.size() > 0:
+		bname = names.pop_back()
 	var brec := bot_kin_record()
 	# a rival who's holding one of your lost kin may be out here with it
 	var held := _held_for_match(t)
 	if not held.is_empty():
 		bname = String(held["holder"])
 		brec = (held["rec"] as Dictionary).duplicate(true)
-	var h := make_hunter(next_id("b"), t, "", bname, "bot", brec, at, bk, bot_kin_record() if rng.randf() < 0.6 else {})
+	var cls := Arch.weight(String(bk.get("arch", "")))
+	var own_kin := bot_kin_record() if rng.randf() < 0.6 else {}
+	var h := make_hunter(next_id("b"), t, cls, bname, "bot", brec, at, bk, own_kin)
 	if not held.is_empty() and h.kin:
 		(h.kin as Kin).lost_uid = String(brec.get("uid", ""))
 		(h.kin as Kin).lost_from = "you"
@@ -2156,6 +2167,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
+	DashReset.note(target, credit)
 	if target is Hunter and target != credit:
 		(target as Hunter).dmg_taken += d
 		if by is Blight: kstat["bl_dmg"] = float(kstat.get("bl_dmg", 0.0)) + d
@@ -2229,7 +2241,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
 		credit.knocks += 1
-		# the knock reward: a dash back (all charges) and a small heal (DashReset), armor and XP
+		# the knock reward: a dash refresh for the knocker and assisters, a small heal (DashReset), armor and XP
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
@@ -2346,6 +2358,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		_lose_life(h, by, why)
 		return
 	cancel_abilities(h)
+	if h.ak: h.ak.drop_holds()      # an out hunter's kit no longer ticks: a channel (Hearth Call) would hang on
 	h.out = true
 	h.downed = false
 	if net_on and not h.remote:
@@ -4267,7 +4280,7 @@ func step(dt: float) -> void:
 			KinCommand.tap(player)
 		KinCommand.apply_pick(player)
 	_prof("pre")
-	SimLod.plan(self, dt)           # far, calm bots step at 20 Hz (decision 0019)
+	SimLod.plan(self, dt)           # far, calm bots step at 20 Hz (decision 0022)
 	for h in hunters:
 		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted and SimLod.step_dt(h, dt) > 0.0:
 			bot_brain.tick(self, h, SimLod.step_dt(h, dt))
@@ -5797,9 +5810,9 @@ func _net_ev(x, from: String) -> void:
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
+				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
 				if by == player:
 					player.knocks += 1
-					DashReset.takedown(player, who)
 					_reward_moment(who.pos)
 				_check_team(player.team if player else -9)
 		"out":
@@ -5807,9 +5820,9 @@ func _net_ev(x, from: String) -> void:
 			if who is Hunter and not who.out:
 				var by: Ent = ents_by_id.get(String(x[2]), null)
 				who.out = true
+				if by is Hunter: DashReset.takedown(by, who)
 				if by == player:
 					player.kills += 1
-					DashReset.takedown(player, who)
 				add_feed(out_text(who.pname, String(x[3])))
 				if who.kin:
 					who.kin.dead = true

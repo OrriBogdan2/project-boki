@@ -90,6 +90,7 @@ func run(main: Node) -> void:
 	ok(jet.start(), "Flue Flight lifts off")
 	var spread := 0.0
 	var stowed := true
+	var jets_near := true
 	var jet_y := 0.0
 	var fr := 0
 	while jet.running() and fr < 200:
@@ -97,10 +98,11 @@ func run(main: Node) -> void:
 		fr += 1
 		if fr < 30:
 			continue
-		var pts := jet.jet_points(P.aim_dir())
-		if pts.size() != 2:
-			stowed = false
-			continue
+		var hv := HeroVfx.of(m)
+		var pts := [hv.anchor_pos(P, "tank_l"), hv.anchor_pos(P, "tank_r")]
+		for q in pts:
+			var rel: Vector3 = (q as Vector3) - P.pos
+			jets_near = jets_near and Vector2(rel.x, rel.z).length() < 0.8
 		spread = maxf(spread, (pts[0] as Vector3).distance_to(pts[1]))
 		var sk := P.model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 		var bi := sk.find_bone("jet.0")
@@ -108,6 +110,7 @@ func run(main: Node) -> void:
 		if kit.nozzle().distance_to(P.pos + Vector3(P.aim_dir().x, 0, P.aim_dir().y) * 1.0) < 0.2:
 			stowed = false
 	ok(spread > 0.06, "two jets, one on each stack (%.2f m apart)" % spread)
+	ok(jets_near, "both jets leave from the anchor_jet nodes on the body")
 	ok(jet_y > 2.0, "the clip stretches the stacks' flames in flight (x%.1f)" % jet_y)
 	ok(stowed, "the nozzle is stowed, not held out, in flight")
 	print("CINDERART_DONE fails=%d" % bad)

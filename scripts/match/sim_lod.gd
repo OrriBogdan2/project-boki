@@ -1,5 +1,5 @@
 class_name SimLod
-## Far, calm bots run at a third of the sim rate (decision 0019).
+## Far, calm bots run at a third of the sim rate (decision 0022).
 ##
 ## The 2x Hollow Crown holds 40 hunters, most of them roaming or fighting far from the one human
 ## playing offline. A bot more than FAR_M from the local player, on the ground, with nothing urgent

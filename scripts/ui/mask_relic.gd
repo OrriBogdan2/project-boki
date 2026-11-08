@@ -3,7 +3,8 @@ extends Node3D
 ## A Mask as a thing in the world (lore: briefs/LORE_MASKS.md): a cracked porcelain face, mended with gold,
 ## that carries a fallen Hunter's soul, glowing in its Hunter's colour and trailing motes as it drifts. It
 ## bobs where it hovers and turns to face whoever it is drifting toward. Used by the Mask moments
-## (MaskMoment: the first Mask after naming your Boki; MaskOffer: the second at the farm portal).
+## (MaskMoment: the first Mask after naming your Boki; HobOffer: the second, from Hob on the farm). MaskBeat
+## puts it on.
 
 const BOB_HZ := 0.35           # bobs a second
 const BOB_M := 0.06            # m up and down
@@ -30,8 +31,8 @@ func _ready() -> void:
 	add_child(plate)
 	var porcelain := Models.shiny(Color("f4efe6"), 0.7)
 	porcelain.set_shader_parameter("glow", 0.25)      # it gives off a little light of its own
-	Models.part(plate, _plate_mesh(), porcelain, Vector3.ZERO)
-	var aura := Models.part(plate, _plate_mesh(), Models.toon(col.lightened(0.1), false, 1.6), Vector3(0, 0, 0.03),
+	Models.part(plate, plate_mesh(), porcelain, Vector3.ZERO)
+	var aura := Models.part(plate, plate_mesh(), Models.toon(col.lightened(0.1), false, 1.6), Vector3(0, 0, 0.03),
 			Vector3(1.14, 1.1, 1.0))      # a rim of the Hunter's colour round the face
 	aura.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var dark := Models.toon(Color("1a1424"), false)
@@ -59,17 +60,16 @@ func _ready() -> void:
 	hover_at = position
 	scale = Vector3.ONE * FLOAT_SCALE
 
-## The Hunter's own relic on the plate: Vex's brass eye, else a band of the Hunter's colour across the brow.
+## The Hunter's own relic on the plate: Vex's gold coin, else a band of the Hunter's colour across the brow.
 func _accent(col: Color) -> void:
 	if id == "gunslinger":
-		var brass := Models.shiny(Color("c79a4a"), 0.85)
-		var eye := _on_plate(0.36, 0.14, 0.012)
-		var ring := TorusMesh.new()
-		ring.inner_radius = 0.034
-		ring.outer_radius = 0.05
-		Models.part(plate, ring, brass, eye, Vector3.ONE, Vector3(PI / 2, 0, 0))
-		var lens := Models.toon(col.lightened(0.2), false, 1.6)
-		Models.part(plate, Models.sphere(0.03, 12), lens, eye, Vector3(1, 1, 0.5))
+		var coin := CylinderMesh.new()
+		coin.top_radius = 0.05
+		coin.bottom_radius = 0.05
+		coin.height = 0.012
+		coin.radial_segments = 20
+		var at := _on_plate(0.36, 0.14, 0.012)
+		Models.part(plate, coin, Models.shiny(Color("e0b040"), 0.9), at, Vector3.ONE, Vector3(PI / 2, 0, 0))
 		return
 	for k in 7:
 		var at := _on_plate(-0.6 + 0.2 * k, 0.45 - 0.05 * absf(k - 3), 0.006)
@@ -82,7 +82,7 @@ func _on_plate(x: float, y: float, lift: float) -> Vector3:
 	return Vector3(sin(th) * cos(ph), sin(ph), -cos(th) * cos(ph)) * (PLATE_R + lift) + Vector3(0, 0, PLATE_R)
 
 ## The porcelain plate: a curved face, broad at the brow, narrowing to the chin, centred on the origin.
-static func _plate_mesh() -> ArrayMesh:
+static func plate_mesh() -> ArrayMesh:
 	var fn := func(u: float, v: float) -> Vector3:
 		var ph := lerpf(0.75, -0.95, v)
 		var narrow := (1.0 - 0.38 * smoothstep(-0.2, -0.95, ph)) * (1.0 - 0.32 * smoothstep(0.3, 0.75, ph))

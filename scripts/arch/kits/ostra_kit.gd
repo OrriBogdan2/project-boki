@@ -600,7 +600,7 @@ func _pop(hit: bool) -> void:
 		return
 	pops += 1
 	play("ostra_pop")
-	var mult := 1.0 + (float(ed["dmg_max_k"]) - 0.5) * k
+	var mult := 1.0 + (float(ed["dmg_max_k"]) - 1.0) * k
 	var dmg := float(ed["dmg"]) * mult * power("kin")
 	# an implosion: the rim snaps inward to a bright point, then dark shards fly out
 	for i in 3:

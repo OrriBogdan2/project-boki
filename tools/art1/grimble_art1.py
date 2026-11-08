@@ -2,7 +2,7 @@
   blender -b --factory-startup --python tools/art1/grimble_art1.py -- WORK
 Shapes: grimble_sculpt.py; paint: grimble_paint.py. Budget: 20k triangles, hoard and weapons included. The hook is skinned on bone
 `hook` (hand.R), the blunderbuss on `gun` (a swivel on root), the hoard on `hoard`, the junk ball on `ball` (shrunk into the sack at
-rest, the roll scales it up). Method: tools/art1/hem_art1.py."""
+rest, the roll scales it up). Method: tools/art1/hem_finish.py."""
 import math
 import os
 import sys
