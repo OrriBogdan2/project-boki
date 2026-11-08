@@ -2611,3 +2611,4 @@ READY ext/gameplay-media e6881d69f (gameplay media capture tool + encode script;
 
 ## 2026-11-08 deep (job 20261108-013001-a4): CLAIM Hollow Crown 2x
 - CLAIM: The Hollow Crown to ~2x land (one SIZE constant, ~305), landmarks/shops/chests/key carriers/extractions/drops scaled, sky train as a winding fast-travel loop to every region, jump-pad-only floating islands removed, squads per match raised to keep squads/m² flat (matchmaker, server, bot backfill). Branch ext/map-2x.
+READY ext/parity-glide-dive 45f26a5b5 (KIT_PARITY item 18: glider dive, hold Ctrl under the glider: 32.5 m/s at 35 m/s², steer 0.25, cancel 3.5 m, 10 s timeout, all [game data]; the key is ours, the source names none; move-feel-check dive_* assert them, 0 failures; health --strict, style, gen_wiki --check ok; decision 0019)
