@@ -321,3 +321,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-08 (owner): Cinder's title is "the Ashen Kiss"
 - **Cinder the Ashen Kiss** replaces "Cinder the Flame Queen" (display title only; id `ashwick`, design and kit unchanged). Wins over every "Flame Queen" above, in briefs, art indexes and game text. "Queen" is now Malgrave's alone.
+
+## 2026-11-08 (owner): the villain's title is "the Beloved"
+- **Malgrave, the Beloved** replaces "Malgrave, the Undying Queen" ("Undying" gave the ending away). It is what Solmere called its ageless, beautiful queen while she fed on them. She is drawn as strikingly attractive (owner's art). Wins over every "Undying Queen/King" above.

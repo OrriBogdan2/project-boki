@@ -1,4 +1,4 @@
-# Malgrave, the Undying Queen: look guide (Nov 8, starting point for the owner's art)
+# Malgrave, the Beloved: look guide (Nov 8, starting point for the owner's art)
 
 Story in one line: an ancient dragon who ruled Solmere for 300 years as an ageless, beautiful queen behind the first mask. She hid her soul in the Wyrmheart and fed it her people. Kael wounded her, her body died in the Hollowing, and she lives on inside the cracked Heart.
 
