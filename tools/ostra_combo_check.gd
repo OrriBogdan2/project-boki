@@ -4,6 +4,8 @@ extends "res://tools/hero_pair_check.gd"
 ## (Shift never travels on its own, keeps his height, one Snap charge that visibly stuns the training
 ## dummy), the small mechanics, the merge-start drops, and that every move, sound and look exists.
 
+const TIME := preload("res://tools/ostra_anim_time_check.gd")        # his move timing against the footage frames
+
 func run(main_node: Node) -> void:
 	main = main_node
 	await _ostra()
@@ -296,6 +298,7 @@ func _ostra() -> void:
 	)
 	# item 17: he drifts slowly while the lantern flies, keeps his height over the abyss
 	await _hover(m, P, T, home, K)
+	TIME.new(self).run(m, P, K, T, home)
 	_far_cast(m, P, home, K)
 	reset.call()
 	K.swollen_t = 5.0
