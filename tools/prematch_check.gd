@@ -33,9 +33,9 @@ func run(main: Node) -> void:
 func _countdown() -> void:
 	var pm := Prematch.new(EXPEDITION.duplicate())
 	ok(Prematch.DURATION == 30.0 and pm.left == 30.0, "the lobby starts at 30 seconds")
-	pm.tick(30.0)
-	ok(is_equal_approx(pm.left, 60.0) and not pm.locked, "30 s later 60 s are left, picks still open")
-	pm.tick(59.9)
+	pm.tick(10.0)
+	ok(is_equal_approx(pm.left, 20.0) and not pm.locked, "10 s later 20 s are left, picks still open")
+	pm.tick(19.9)
 	ok(not pm.locked, "0.1 s before the end picks are still open")
 	pm.tick(0.2)
 	ok(pm.left == 0.0 and pm.locked, "at 0 the timer stops and picks lock")
@@ -118,7 +118,7 @@ func _screen(main: Node) -> void:
 	ok(view.grid.get_child_count() == Arch.ids().size(), "the screen shows every Hunter")
 	ok(view.squad_box.get_child_count() == 2, "the screen shows your squad")
 	ok(view.timer_label.text == "0:30", "the screen counts down from 0:30 (%s)" % view.timer_label.text)
-	var ink := view.timer_label.get_theme_color("font_color")
+	var ink: Color = view.timer_label.get_theme_color("font_color")
 	ok(view.note_label.text == "" and ink == UI.INK, "30 s out: plain digits, no note")
 	view.pm.left = 4.0
 	view._tick_label()
@@ -130,8 +130,8 @@ func _screen(main: Node) -> void:
 	view.pm.pick = "bulwark"
 	view.pm.left = 0.0
 	view._process(0.0)
-	ok(view.pm.locked and view.timer_label.text == "0:00", "at 0 the countdown reads 0:00 and the pick locks")
-	var note: String = view.note_label.text
 	ok(view.pm.locked and view.timer_label.text == "0:00", "at 0 the digits read 0:00 and the pick locks")
+	var note: String = view.note_label.text
+	ok(note.contains("locked in") and note.contains(HunterViewer.display_name("bulwark")), "the note names the pick")
 	view.set_process(false)
 	view.queue_free()
