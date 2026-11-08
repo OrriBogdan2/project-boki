@@ -124,6 +124,9 @@ func run(main: Node) -> void:
 	var shot := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): shot = a.substr(12)
+	if shot != "" and main.fade:
+		main.fade.reveal(0.05)          # the boot splash covers the window until the title would reveal it
+		await tree.create_timer(0.35).timeout
 	Overlay.tab = "Controls"
 	Overlay.open_settings()
 	for i in 20: await tree.process_frame
