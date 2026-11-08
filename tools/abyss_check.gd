@@ -25,6 +25,19 @@ func ok(cond: bool, what: String) -> void:
 	if not cond: bad += 1
 
 ## Grabbable rim tiles with open sky below and beside them: [{at, dir, top, ex, ez}] (dir points out).
+## The lowest island rock (IslandDepth) of the rim tile behind edge e and its two neighbours along
+## the rim (the tiles a body just off that edge can touch).
+func _rock_bottom(e: Dictionary, ww: World) -> float:
+	var dir: Vector2 = e["dir"]
+	var c := Vector2(e["ex"], e["ez"]) - dir * 0.3
+	var lo := 0.0
+	for s in [-1.0, 0.0, 1.0]:
+		var t := c + Vector2(dir.y, dir.x) * s
+		var i := ww.idx(int(floor(t.x)), int(floor(t.y)))
+		if ww.kind[i] != World.T_VOID:
+			lo = minf(lo, ww.under_heights()[i])
+	return lo
+
 func _edges(n: int, sheer := false) -> Array:
 	var out: Array = []
 	var seen := {}
@@ -79,7 +92,7 @@ func _ref(p: Vector3) -> float:
 
 ## Inside an island's column: over ground, but well below its top.
 func _inside(e: Ent) -> float:
-	if w.is_void(e.pos.x, e.pos.z): return 0.0
+	if w.is_void(e.pos.x, e.pos.z) or IslandDepth.below(w, e.pos): return 0.0      # (under an island's rock is open air)
 	var g := w.ground_at(e.pos.x, e.pos.z)
 	return maxf(0.0, g - e.pos.y - 0.3)
 
@@ -137,7 +150,7 @@ func run(main: Node) -> void:
 	var lv0 := edges.filter(func(e): return float(e["top"]) < 0.05).size()
 	print("ACHECK %d test rims (%d at ground level), lowest top %.1f" % [edges.size(), lv0, w.lowest_top() if w.has_method("lowest_top") else 0.0])
 	# ---------------------------------------------------------------- 1. just below the lip
-	for depth in [0.8, 1.8, 2.7]:
+	for depth in [0.8, 1.8, 2.7, 5.5]:      # 5.5: an island's tall side catches you well past 4.5m
 		var n := 0; var good := 0; var clip := 0.0; var times: Array = []
 		for e in edges:
 			var dir: Vector2 = e["dir"]; var top: float = e["top"]
@@ -159,11 +172,13 @@ func run(main: Node) -> void:
 		kn += 1
 		if r["mantled"] and r["landed"]: kgood += 1
 	ok(kgood == kn, "knocked into an island's side from below, no keys: climbed %d of %d" % [kgood, kn])
-	# ---------------------------------------------------------------- 3. too deep: slide, then the abyss
+	# ---------------------------------------------------------------- 3. below the rock: the abyss
+	# (the island's side catches you as far down as its rock reaches, IslandDepth; start under the rim's rock)
 	var dn := 0; var dgood := 0; var worst_drop := 0.0; var worst_t := 0.0; var stuck := 0; var grabbed := 0
 	for e in edges:
 		var dir: Vector2 = e["dir"]; var top: float = e["top"]
-		_reset(Vector3(e["ex"] + dir.x * (h.r + 0.6), top - (Hunter.MANTLE_REACH_ABYSS + 0.1), e["ez"] + dir.y * (h.r + 0.6)), Vector3(0, -4.0, 0))
+		var rock := _rock_bottom(e, w) - IslandDepth.HEAD - 1.5     # (head well under it: no underside to catch either)
+		_reset(Vector3(e["ex"] + dir.x * (h.r + 0.6), rock, e["ez"] + dir.y * (h.r + 0.6)), Vector3(0, -4.0, 0))
 		h.last_gy = top
 		var r := _run(6.0, func(_t): h.inp["move"] = -dir)
 		dn += 1
@@ -172,8 +187,9 @@ func run(main: Node) -> void:
 		worst_drop = maxf(worst_drop, _ref(Vector3(e["ex"], top, e["ez"])) - float(r["low"]))
 		worst_t = maxf(worst_t, float(r["t"]))
 		stuck = maxi(stuck, int(r["stuck"]))
-	ok(grabbed == 0, "%.1fm below the lip: no ledge grab (%d grabbed)" % [Hunter.MANTLE_REACH_ABYSS + 0.1, grabbed])
-	ok(dgood == dn and worst_drop < KILL_DEPTH + 1.0 and worst_t < 2.4, "below the grab reach the abyss takes you: %d of %d, deepest %.1fm below the lowest lip around, within %.2fs" % [dgood, dn, worst_drop, worst_t])
+	ok(grabbed == 0, "below the rim's rock: no ledge grab (%d grabbed)" % grabbed)
+	ok(dgood == dn and worst_drop < KILL_DEPTH + 1.0 and worst_t < 2.4,
+			"below the rock the abyss takes you: %d of %d, deepest %.1fm below the lowest lip around, within %.2fs" % [dgood, dn, worst_drop, worst_t])
 	ok(stuck < 6, "sliding down the face never snags (longest hang %d frames)" % stuck)
 	# a plain walk off the edge: how far below the lip before the abyss
 	var e0: Dictionary = edges[0]
@@ -395,7 +411,7 @@ func _home(main: Node) -> void:
 	var climbed := 0; var lost := 0; var lost_low := 0.0; var inside := 0.0; var n := 0; var grabbed_deep := 0
 	for e in edges:
 		var dir: Vector2 = e["dir"]; var top: float = e["top"]
-		for depth in [1.0, 2.2, 4.5]:
+		for depth in [1.0, 2.2, 4.5, top - _rock_bottom(e, hm.world) + IslandDepth.HEAD + 1.5]:
 			for dash in [false, true]:
 				n += 1
 				hm.climb = {}
@@ -404,19 +420,22 @@ func _home(main: Node) -> void:
 				hm.safe_at = Vector3(e["at"].x, 0, e["at"].z) - Vector3(dir.x, 0, dir.y) * 3.0
 				if dash: hm.start_dash(-dir, Hunter.DASH_SPEED, Hunter.DASH_TIME)
 				var low: float = hm.py; var did_climb := false; var back := false
+				var deep: bool = depth >= 5.0
 				for i in 240:
-					_press(-dir)
+					# below the rock, falling past it (keys in would carry you under to its taper)
+					_press(Vector2.ZERO if deep else -dir)
 					var before: Vector3 = hm.ppos
 					hm._move_player(DT)
 					if not hm.climb.is_empty() or not hm.lfl.is_empty(): did_climb = true
 					if hm.ppos.distance_to(hm.safe_at) < 0.01 and before.distance_to(hm.safe_at) > 0.5:
 						back = true; break
 					low = minf(low, hm.py)
-					if not hm.world.is_void(hm.ppos.x, hm.ppos.z) and hm.world.ground_at(hm.ppos.x, hm.ppos.z) > hm.py + 0.3 and hm.climb.is_empty() and hm.lfl.is_empty():
+					var open_air := IslandDepth.below(hm.world, Vector3(hm.ppos.x, hm.py, hm.ppos.z))
+					if not hm.world.is_void(hm.ppos.x, hm.ppos.z) and not open_air and hm.world.ground_at(hm.ppos.x, hm.ppos.z) > hm.py + 0.3 and hm.climb.is_empty() and hm.lfl.is_empty():
 						inside = maxf(inside, hm.world.ground_at(hm.ppos.x, hm.ppos.z) - hm.py)
 					if did_climb and hm.climb.is_empty() and hm.lfl.is_empty() and hm.pvy == 0.0 and absf(hm.py - top) < 0.05: break
 				_press(Vector2.ZERO)
-				if depth < 3.6:
+				if not deep:
 					if did_climb and absf(hm.py - top) < 0.05 and not hm.world.is_void(hm.ppos.x, hm.ppos.z): climbed += 1
 					else:
 						var ins: Array = []
@@ -426,10 +445,11 @@ func _home(main: Node) -> void:
 					if did_climb: grabbed_deep += 1
 					if back: lost += 1
 					lost_low = maxf(lost_low, top - low)
-	var near_n := n * 2 / 3
+	var near_n := n * 3 / 4
 	ok(climbed == near_n, "home: caught the island's side from below and pulled up %d of %d" % [climbed, near_n])
-	ok(grabbed_deep == 0 and lost == n - near_n and lost_low < World.ABYSS_DEPTH + Hunter.ABYSS_EXTRA + 2.0, "home: deeper, you slide off and the wind sets you back at the same point of no return as out there: %d of %d, deepest %.1fm" % [lost, n - near_n, lost_low])
-	ok(inside < 0.05, "home: never inside or under the island (deepest %.2fm)" % inside)
+	ok(grabbed_deep == 0 and lost == n - near_n and lost_low < World.ABYSS_DEPTH + Hunter.ABYSS_EXTRA + 2.0,
+			"home: below the rock, falling past it, the wind sets you back at the same point of no return as out there: %d of %d, deepest %.1fm" % [lost, n - near_n, lost_low])
+	ok(inside < 0.05, "home: never inside the island's rock (deepest %.2fm)" % inside)
 	# walking toward the farm island's edge takes you over it
 	var hw := 0
 	for e in edges.slice(0, 4):

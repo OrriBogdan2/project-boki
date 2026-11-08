@@ -67,7 +67,12 @@ func _reset(at: Vector3, v := Vector3.ZERO, grounded := false) -> void:
 
 # ---------------------------------------------------------------- 1. rims over the void
 func _rims() -> void:
-	var tried := 0; var good := 0; var clip := 0; var worst := 0.0; var durs: Array = []
+	var tried := 0
+	var good := 0
+	var clip := 0
+	var worst := 0.0
+	var durs: Array = []
+	var late: Array = []
 	for downed_case in [false, true]:
 		for trial in 12:
 			# find an edge: a ground tile next to the void
@@ -88,19 +93,25 @@ func _rims() -> void:
 			tried += 1
 			var top := w.ground_at(at.x, at.z)
 			# hanging in the air just off the edge, 2.5m below the lip, pushing back toward the island
-			# (the side of an island catches you up to Hunter.MANTLE_REACH_ABYSS below its lip; see --abyss-check)
+			# (the side of an island catches you as far down as its rock reaches; see --abyss-check)
 			var edge_x := at.x; var edge_z := at.z
 			while not w.is_void(edge_x + dir.x * 0.25, edge_z + dir.y * 0.25):
 				edge_x += dir.x * 0.25; edge_z += dir.y * 0.25
 			_reset(Vector3(edge_x + dir.x * (h.r + 0.6), top - 2.5, edge_z + dir.y * (h.r + 0.6)), Vector3(0, -2.0, 0))
 			h.downed = downed_case
 			h.last_gy = top
-			var t := 0.0; var floated := false; var landed := false; var t_m := 0.0
+			var t := 0.0
+			var floated := false
+			var landed := false
+			var t_m := 0.0
+			var y_m := 0.0
 			while t < 3.0:
 				h.inp["move"] = -dir
 				m.step(DT); t += DT
 				if h.mantling():
-					if not floated: t_m = t
+					if not floated:
+						t_m = t
+						y_m = h.pos.y
 					floated = true
 					# inside the cliff: standing below solid ground that's under you
 					var gh := w.ground_at(h.pos.x, h.pos.z)
@@ -108,11 +119,14 @@ func _rims() -> void:
 						clip += 1; worst = maxf(worst, gh - h.pos.y)
 				if floated and not h.mantling() and h.grounded:
 					landed = absf(h.pos.y - top) < 0.6
-					durs.append(snappedf(t - t_m, 0.01))
+					# (a body that missed the rim and was caught lower down the island's tall side, IslandDepth,
+					# floats further than 2.5m: its time isn't this float's; it's listed apart)
+					if top - y_m < 3.6: durs.append(snappedf(t - t_m, 0.01))
+					else: late.append(snappedf(top - y_m, 0.1))
 					break
 			if floated and landed: good += 1
 	h.downed = false
-	print("MCHECK rims: climb times %s" % str(durs))
+	print("MCHECK rims: climb times %s; caught lower down the side (m below the top) %s" % [str(durs), str(late)])
 	ok(tried > 0 and good == tried, "below a rim over the void, pushing in: floated up and landed on top %d of %d (half as a downed wisp)" % [good, tried])
 	ok(clip == 0, "never inside the cliff while floating (%d frames, worst %.2fm)" % [clip, worst])
 	var slow := 0.0
