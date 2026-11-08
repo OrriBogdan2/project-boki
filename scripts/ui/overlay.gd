@@ -436,7 +436,7 @@ func _tab_demo(v: VBoxContainer) -> void:
 	_choice(v, "Blight", "demo_blight", [[true, "On"], [false, "Off"]])
 	var fresh := [["normal", "Normal (%d s)" % int(Bot.FRESH_T)], ["long", "Longer (%d s)" % int(Settings.DEMO_FRESH_T)]]
 	_choice(v, "Bots leave you be after landing", "demo_fresh", fresh)
-	_toggle(v, "All masks open (offline only)", "demo_all_masks", "Every Mask is pickable. Unlocks are untouched")
+	_toggle(v, "All Relics open (offline only)", "demo_all_masks", "Every Relic is pickable. Unlocks are untouched")
 	_note(v, "These apply from the next match you start, offline only. Online matches play the host's rules.")
 
 ## Settings > Gameplay > Reticle: the aiming reticle's shape (with a preview), size, colour, opacity and outline.

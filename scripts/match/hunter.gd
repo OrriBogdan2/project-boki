@@ -1634,7 +1634,7 @@ func _emit_shot() -> void:
 		extra["farf"] = [rng * float(wpn.get("far_start", 0.6)), float(wpn["far_mult"]), rng]
 	if AimMode.take(self) == AimMode.CURSOR:
 		life = AimMode.dist(self, rng) / spd      # lands at the cursor, clamped to range (scripts/match/aim/aim_mode.gd)
-	if wpn.get("pierce", false):      # through everyone in line (Ryzz's bolts)
+	if wpn.get("pierce", false):      # through everyone in line (Sparkle's bolts)
 		extra["pierce"] = true
 		extra["hitset"] = {}
 	if wpn.has("boom"):

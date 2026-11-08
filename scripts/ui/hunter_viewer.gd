@@ -1,12 +1,12 @@
 class_name HunterViewer
 extends PanelContainer
-## The Hunter viewer (docs/decisions/0005): one Mask, shown rather than described. On top its face, name
+## The Hunter viewer (docs/decisions/0005): one Relic, shown rather than described. On top its face, name
 ## and title and what it brings (health, dashes, weapon). Below, the real model on a slow turntable in its
 ## own SubViewport (it powers up while you hold to unlock it: HoldUnlock drives power() and burst()), and
 ## beside it every ability shown working in its own clip (AbilityClip: the ability used on a dummy, with
 ## its key and one short line). Only the clip in focus plays (the first, or the one under the mouse), and the
-## models are built one a frame (PreviewBuild). The passive and the Boki Fusion are one line each. Used on the Masks
-## screen (HomeClasses), the Mask moments and the reveal. Kit move lists: content/rules/hunter_viewer.json.
+## models are built one a frame (PreviewBuild). The passive and the Boki Fusion are one line each. Used on the Relics
+## screen (HomeClasses), the Relic moments and the reveal. Kit move lists: content/rules/hunter_viewer.json.
 ##
 ##   var v := HunterViewer.make("thief", Vector2(220, 300))
 ##   v.slot_changed.connect(func(slot): ...)
@@ -71,13 +71,10 @@ static func key_for(slot: String) -> String:
 		return "auto"
 	return Settings.key_cap(String(SLOT_ACTIONS[slot]))
 
-## "Vex, the Hired Gun": the Mask's name and title (a title starting with "The" keeps one "the").
+## "Vex the Hired Gun": the Relic's name and title (the shared HeroTitle form).
 static func display_name(hunter_id: String) -> String:
-	var title := Arch.name_of(hunter_id)
-	if title.begins_with("The "):
-		title = title.substr(4)
 	var base := HeroTitle.base_name(hunter_id)
-	return "%s, the %s" % [base, title] if base != "" else title
+	return HeroTitle.label(base, hunter_id) if base != "" else Arch.name_of(hunter_id)
 
 static func rules() -> Dictionary:
 	if _rules.is_empty():
@@ -119,7 +116,7 @@ func _ready() -> void:
 	set_meta("hunter_viewer", id)
 	slots = slots_for(id)
 	_cols = UI.hbox(14)
-	if stage_size != Vector2.ZERO:      # (the Mask moment shows the Hunter in the world instead)
+	if stage_size != Vector2.ZERO:      # (the Relic moment shows the Hunter in the world instead)
 		_cols.add_child(_stage(Arch.color(id)))
 	_rebuild_body()
 
@@ -182,7 +179,7 @@ func _rebuild_body() -> void:
 	_cols.add_child(right)
 	select(0)
 
-## The face, "Vex, the Hired Gun" and what it brings. No story or gender here: the clips do the talking.
+## The face, "Vex the Hired Gun" and what it brings. No story or gender here: the clips do the talking.
 func _header(col: Color) -> Control:
 	var head := UI.hbox(12)
 	head.add_child(ClassCard.portrait(id, PORTRAIT_PX))

@@ -7,7 +7,7 @@ The blind cliff-runner whose seeing-stones answer him. Raise rocks out of the gr
 
 |  |  |
 |---|---|
-| Class title | Stone Seer |
+| Class title | the Stone Seer |
 | Base character | Tenzo, male |
 | Personality | A young cliff-runner, blind since birth, who ran messages along the cliff paths by the feel of the rock. When the Hollowing cracked the cliffs, the stone started answering him: three seeing-stones float around him and are his eyes. The youngest of the crew and the calm one, he hears trouble through the ground before Vex sees it. |
 

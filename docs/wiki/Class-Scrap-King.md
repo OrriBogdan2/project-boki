@@ -8,7 +8,7 @@ grows with every knock.
 
 |  |  |
 |---|---|
-| Class title | Scrap King |
+| Class title | the Scrap King |
 | Base character | Grimble, male |
 | Personality | A scavenger who crawled into Malgrave's vault after it woke and never came out poor again. The Blight sludge seeping through the vault mutated his right arm into a bruised-purple bone hook and spread purple veins up his chest. One eye is stitched shut; the other squints through a brass monocle at whatever he's pricing. His teeth are scrap metal, with one gold tooth. He carries his hoard on his back (chests, coins, bells, lanterns) and calls himself king of whatever's left. |
 

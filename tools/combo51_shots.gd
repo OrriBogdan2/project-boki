@@ -1,11 +1,11 @@
 extends "res://tools/breah_shots.gd"
 ## --combo51-shots --shots-dir=<dir> --combo51-hero=<id>: owner item 51's new combos as strips (the Breah
 ## rig's 3-wide grid of crops round the hero, tools/breah_shots.gd) in a live Arena match, under xvfb with a
-## renderer: archer|mage|dolm (Lisette, Ryzz, Tarek) and juggernaut|dredge|ashwick (Kael, Grimble, Cinder).
+## renderer: archer|mage|dolm (Lisette, Sparkle, Tarek) and juggernaut|dredge|ashwick (Kael, Grimble, Cinder).
 ## <dir>/captions.txt gets "file: caption" per file.
-## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Ryzz, Tarek: the audit's strips) or Kael's
-## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS), "acc" (Kael's
-## accuracy points as frame runs, acc_<name>_<n>), or Cinder's "item66" (LMB held through Flue Flight).
+## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Sparkle, Tarek: the audit's strips) or Kael's
+## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS), Cinder's
+## "item66" (LMB held through Flue Flight), or "acc" (Kael's accuracy points as frame runs, acc_<name>_<n>).
 
 const LONG := 30                # m of flat ground the chain strips need, east of the spot
 const LONG_PARTS := ["chain", "acc"]   # parts shot on an expedition map instead of the Arena
@@ -22,7 +22,7 @@ func run(main_node: Node) -> void:
 			who = arg.substr(15)
 		if arg.begins_with("--combo51-part="):
 			part = arg.substr(15)
-	hero_name = Arch.name_of(who).to_lower()
+	hero_name = Arch.bare_title(who).to_lower()
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
 	await Callable(self, "_%s" % (who if part == "" else who + "_" + part)).call()
@@ -62,7 +62,7 @@ func _archer() -> void:
 	)
 	await _go(1.4, air, air_marks)
 
-## Ryzz: Kitefall's crouch into a Wirerun, then the launch from where it ended; the crouch into a jump.
+## Sparkle: Kitefall's crouch into a Wirerun, then the launch from where it ended; the crouch into a jump.
 func _mage() -> void:
 	P.lvl = 6
 	await _reset(9.0)
@@ -73,7 +73,7 @@ func _mage() -> void:
 		P.inp["dash_down"] = t >= 0.05 and t < 0.35
 	var marks := _strip(
 		"combo_kitefall_shift_strip",
-		"Ryzz (item 51): Kitefall's crouch; Shift in it charges the Wirerun at once; the streak; out of it the"
+		"Sparkle (item 51): Kitefall's crouch; Shift in it charges the Wirerun at once; the streak; out of it the"
 			+ " crouch starts over; she launches from where the run ended; up, the ring round the new spot",
 		[0.03, 0.2, 0.42, 0.62, 0.8, 1.0]
 	)
@@ -85,14 +85,14 @@ func _mage() -> void:
 	var jump := func(t: float): P.inp["jump"] = t >= 0.05 and t < 0.05 + DT
 	var jmarks := _strip(
 		"combo_kitefall_jump_strip",
-		"Ryzz (item 51): Kitefall's crouch; a jump in it goes at once; the crouch finishing mid-jump; the launch"
+		"Sparkle (item 51): Kitefall's crouch; a jump in it goes at once; the crouch finishing mid-jump; the launch"
 			+ " from that height (no drop first); climbing; hanging",
 		[0.03, 0.12, 0.25, 0.36, 0.5, 0.75]
 	)
 	await _go(0.8, jump, jmarks)
 	await _go(2.2)
 
-## Ryzz items 71-73: the committed Skycall arrow, an orb pulled to her (the flash), Kitefall's Static arcs.
+## Sparkle items 71-73: the committed Skycall arrow, an orb pulled to her (the flash), Kitefall's Static arcs.
 func _mage_items() -> void:
 	var K: MageKit = P.ak
 	var at_t := func(): return T.position + Vector3(0, 0.9, 0)
@@ -479,7 +479,7 @@ func _mage_audit() -> void:
 		P.inp["e_down"] = t < 0.6
 	var at_t := func(): return T.position + Vector3(0, 0.9, 0)
 	var marks := [
-		[0.45, "full", "audit_skycall_held", "Ryzz Skycall held (audit: the data's hold, drag, release): the drag"
+		[0.45, "full", "audit_skycall_held", "Sparkle Skycall held (audit: the data's hold, drag, release): the drag"
 			+ " arrow follows the cursor back toward her, the rim chevron points it; nothing commits while E is held",
 			at_t],
 		[0.9, "full", "audit_skycall_count", "Released at 0.6s: committed, the pillar narrows over the 0.8s countdown",

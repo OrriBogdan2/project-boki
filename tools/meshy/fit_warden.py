@@ -2415,7 +2415,7 @@ def hair_spring(ob, arm, hs):
 
 
 def emit_art(ob, img, el):
-    """An emission mask projected from the art (Ryzz's pink scar, choker charm, corset piping and forearm veins: the
+    """An emission mask projected from the art (Sparkle's pink scar, choker charm, corset piping and forearm veins: the
     scan paints them as plain pink, the art draws them as neon). In Meshy's frame, before the fit (the mesh still
     stands as the front view does), every texel of a face in one of `boxes` that faces the camera (normal -Y) gets
     its surface point, which the front view's registration puts on the art: `image`, `px_per_m`, `col_at` / `row_at`
@@ -2497,7 +2497,7 @@ def emit_art(ob, img, el):
 
 def paint_art(ob, img, pa):
     """The art painted over the finished atlas by an orthographic front projection with its own registration
-    (Ryzz's face from the head sheet, which draws it at 3.5x the front view's pixels): in Meshy's frame, before the
+    (Sparkle's face from the head sheet, which draws it at 3.5x the front view's pixels): in Meshy's frame, before the
     fit, every texel of a face on one of `slots` inside `box` [x0, x1, z0, z1] that faces the camera (normal -Y)
     takes the art's pixel at col = col_at + x * kx, row = row_at - z * ky, blended by `k` and feathered over
     `feather` m from the box's edges; art pixels in a `keep` hsv range (the art's hair) leave the scan's own."""
@@ -2566,7 +2566,7 @@ spec_emit_atlas = []
 
 
 def net_paint(ob, img, nt):
-    """A fishnet over skin (Ryzz's thighs; the scan paints it as a tan blur): skin texels of faces in `box` (Meshy
+    """A fishnet over skin (Sparkle's thighs; the scan paints it as a tan blur): skin texels of faces in `box` (Meshy
     frame) darkened along a diamond lattice in surface space, lines `line` m wide every `pitch` m on the two
     diagonals of (x or y, z), to `colour`."""
     w, h = img.size
@@ -2629,7 +2629,7 @@ def emit_attach(ob, img, mask, parts=()):
         mask = mask.reshape(h, f, w, f, 3).mean(axis=(1, 3))
     ea = spec_emit_atlas[0] if spec_emit_atlas else None
     if ea:
-        # (pieces that glow in their own painted colour, not the Warden's glow colour: Ryzz's hazard bands, a faint
+        # (pieces that glow in their own painted colour, not the Warden's glow colour: Sparkle's hazard bands, a faint
         # yellow that the match camera's far_emit lifts so they read at distance; the shader keeps yellow untinted)
         px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)[..., :3]
         hh, ss, vv = _hsv_px(px)
@@ -3756,7 +3756,7 @@ def main():
             if got:
                 parts.append(got)
     if spec.get("scripted"):
-        # a Warden's own scripted pieces (tools/meshy/<module>.py build(): Ryzz's pigtails and back rods)
+        # a Warden's own scripted pieces (tools/meshy/<module>.py build(): Sparkle's pigtails and back rods)
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import importlib
         parts += importlib.import_module(spec["scripted"]["module"]).build(ob, arm, rig, K, spec["scripted"])

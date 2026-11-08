@@ -1,4 +1,4 @@
-"""ART-1 Ryzz: the rebuilt pieces as data (head and face, hair, pigtails, hands, the lightning rig, gum).
+"""ART-1 Sparkle: the rebuilt pieces as data (head and face, hair, pigtails, hands, the lightning rig, gum).
 Blender frame: Z up, she faces +Y, her right hand is +X. Budget: 15k tris with the scan body. See /home/boki/shots-s2/art1/STYLE_NOTES.md."""
 import numpy as np
 from meshkit import (Piece, catmull, norm, smooth, sweep, sd_ell, sd_cap, smin, smax, rot_about, frames)

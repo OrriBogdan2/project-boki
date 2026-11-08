@@ -8,7 +8,7 @@ straight through them is a Blowout that gives your dash back at once.
 
 |  |  |
 |---|---|
-| Class title | Storm Chaser |
+| Class title | the Storm Chaser |
 | Base character | Sparkle, female |
 | Personality | A street kid struck by the Wyrm's storm in the market square. The bolt took her right eye and left the storm inside her, burning hot pink. She climbs the highest spires to chase storms, throws lightning straight from her hands, and swears she'll give the Wyrm's bolt back to it someday. She has never told anyone she is also looking for Rink, the boy she lost in the storm. |
 

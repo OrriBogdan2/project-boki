@@ -1,4 +1,4 @@
-"""ART-1 Ryzz, stage A: the Meshy scan of the owner's v2 A-pose turnaround (pigtails, backpack, rods and cables edited out) -> the contract's rest pose.
+"""ART-1 Sparkle, stage A: the Meshy scan of the owner's v2 A-pose turnaround (pigtails, backpack, rods and cables edited out) -> the contract's rest pose.
 Recipe: kael_source.py / claire_source.py. Her own: the tied jacket hangs from the pelvis as a skirt, its hem following the thighs a little; hands rebuilt.
 Run: blender -b --factory-startup --python tools/art1/ryzz_source.py -- <scan.glb> <rig.json> <out.blend>"""
 import sys, os, json

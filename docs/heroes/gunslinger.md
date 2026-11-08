@@ -1,4 +1,4 @@
-# Hired Gun (base character Vex; archetype id `gunslinger`, Medium; was Marlowe)
+# Vex the Hired Gun (archetype id `gunslinger`, Medium; was Marlowe)
 
 Internal design note (may cite the source for traceability; nothing in the game does).
 Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (reference

@@ -1,4 +1,4 @@
-# Dawnfox (base character Meeko; `tender`, a small support on medium stats)
+# Meeko the Dawnfox (`tender`, a small support on medium stats)
 
 Lore sync (Nov 2026): Meeko is a fox-kit with a tiny sun and a raincloud beside her, kept in a glass globe; she carries no lantern. Lantern wording below is the old design and the sound-set names (`tender_lantern_chime`) are file ids.
 

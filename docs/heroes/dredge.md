@@ -1,4 +1,4 @@
-# Scrap King (base character Grimble; archetype `dredge`, heavy)
+# Grimble the Scrap King (archetype `dredge`, heavy)
 
 Internal design doc. Source behaviour: the hero named in the Inspired-by table in docs/ARCHETYPES.md (traceability only; none of its names, text
 or looks appear in the game). Everything the player sees and hears is ours. The kitfix pass (Nov 2026) rebuilt the kit against the reference

@@ -5,7 +5,7 @@ extends RefCounted
 ## get their dash (Shift) back: a one-charge dash refills, a multi-charge dash gains one charge, and the
 ## long-dash cooldown clears. Only the knocker heals a little. Mobs and bosses don't count, and a hero whose
 ## dash data says "knock_refresh": false is left out. Match.knock, eliminate and _lose_life call takedown();
-## Match.on_damage (and damage-free CC) calls note(). The hero-specific resets (a Ryzz blowout, a Vex
+## Match.on_damage (and damage-free CC) calls note(). The hero-specific resets (a Sparkle blowout, a Vex
 ## vault, a knife in a foe) call cue() so every "dash is back" gives the same feedback to the one who got
 ## it: the reset sound (Sfx.play_reset_cue) and a pop on the HUD's Shift icon.
 

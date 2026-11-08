@@ -245,7 +245,7 @@ func _all() -> void:
 	ok(
 		"linwick: heavy, Torch Lance, 2 ram charges",
 		P.wid == "flamethrower" and P.cls == "heavy" and P.max_dashes() >= 2.0
-			and Arch.name_of("ashwick") == "Flame Queen",
+			and Arch.name_of("ashwick") == "The Flame Queen",
 		"%s %s %s" % [P.wid, P.cls, Arch.name_of("ashwick")]
 	)
 	# --- no fuel (the source's flamethrower has none, and nothing reloads): held past the old 8s tank, it still roars

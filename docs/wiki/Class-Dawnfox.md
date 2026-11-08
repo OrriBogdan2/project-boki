@@ -8,7 +8,7 @@ downed friends out of danger and roots foes that chase them. She has no ultimate
 
 |  |  |
 |---|---|
-| Class title | Dawnfox |
+| Class title | the Dawnfox |
 | Base character | Meeko, female |
 | Personality | A fox-kit who kept the hearth of a Boki shelter alive through the night everything broke. The fire grew into a tiny sun that follows her, and a shy raincloud, the storm that tried to drown the hearth, came along too. She heals through the two of them, and keeps them safe in a little glass globe. |
 

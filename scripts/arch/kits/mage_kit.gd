@@ -1,6 +1,6 @@
 class_name MageKit
 extends ArchKit
-## Ryzz (archetype id "mage", light): the storm-kite runner. docs/heroes/mage.md has the per-slot
+## Sparkle (archetype id "mage", light): the storm-kite runner. docs/heroes/mage.md has the per-slot
 ## table, the assumptions and the research notes (briefs/hero-ref/vireo.md, owner playtest notes).
 ##
 ## Loop: finger bolts (1 Static each, every 0.8s, out to full range), Storm Rod and Skycall (2) load

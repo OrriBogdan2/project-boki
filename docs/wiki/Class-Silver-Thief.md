@@ -1,4 +1,4 @@
-# Silver Thief
+# The Silver Thief
 
 A light duelist who picks one target and never lets go, from range. Every bolt marks them, every
 cartwheel empowers the next bolt, and landing that bolt gives the cartwheel straight back.
@@ -8,7 +8,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 
 |  |  |
 |---|---|
-| Class title | Silver Thief |
+| Class title | the Silver Thief |
 | Base character | Sable, female |
 | Personality | The thief who reached the Wyrmheart in Malgrave's vault. Touching it woke the Wyrm and set off the Hollowing. Everyone has a reason to hate her, and she knows it. She's still after the treasure. |
 

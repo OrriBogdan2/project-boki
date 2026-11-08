@@ -1,4 +1,4 @@
-# Flame Queen (base character Cinder; archetype `ashwick`, heavy; display name was Ashwick)
+# Cinder the Flame Queen (archetype `ashwick`, heavy; display name was Ashwick)
 
 Lore sync (Nov 2026): Cinder is the court alchemist who drank the Wyrm's blood and pours fire from her bare hands. The goggles, apron and fuel tank in the notes below describe the model and gear code as built; the art pass that removes them is pending, and no player text mentions them.
 

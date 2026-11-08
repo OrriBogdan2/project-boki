@@ -8,7 +8,7 @@ head first, and hits back harder after every knock.
 
 |  |  |
 |---|---|
-| Class title | Flame Queen |
+| Class title | the Flame Queen |
 | Base character | Cinder, female |
 | Personality | Malgrave's court alchemist, ordered to distil the Wyrm's blood into fire. She drank it instead, and now fire answers her bare hands. She served the throne for years, and she wants it for herself. She is not mad, just certain. |
 

@@ -354,7 +354,7 @@ func _spawn_bot() -> void:
 	if bot_mode == "off":
 		return
 	var diff := "medium"
-	bot = m.make_hunter(m.next_id("spar"), TEAM, Arch.weight(bot_arch), "Sparring " + Arch.name_of(bot_arch), "bot", m.bot_kin_record(), bot_at, {"arch": bot_arch, "weapon": Arch.signature(bot_arch)})
+	bot = m.make_hunter(m.next_id("spar"), TEAM, Arch.weight(bot_arch), "Sparring " + Arch.name_of(bot_arch, true), "bot", m.bot_kin_record(), bot_at, {"arch": bot_arch, "weapon": Arch.signature(bot_arch)})
 	bot.ai = m.bot_brain.new_mind(m.rng, float(Data.BOT_DIFF[diff]["skill"]), Data.BOT_DIFF[diff])
 	bot.lives = 99
 	bot.tonics = 0

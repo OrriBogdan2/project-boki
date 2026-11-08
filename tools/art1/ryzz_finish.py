@@ -1,4 +1,4 @@
-"""ART-1 Ryzz, stage C: rebuilt pieces + the fitted scan -> join, unwrap, paint, skin, export. Budget 15k tris, 8 surfaces.
+"""ART-1 Sparkle, stage C: rebuilt pieces + the fitted scan -> join, unwrap, paint, skin, export. Budget 15k tris, 8 surfaces.
 Run: blender -b --factory-startup --python tools/art1/ryzz_finish.py -- <source.blend> <rig.json> <out.glb>"""
 import sys, os, json, math
 sys.stdout.reconfigure(line_buffering=True)
