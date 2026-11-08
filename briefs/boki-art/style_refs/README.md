@@ -19,3 +19,6 @@ The game is more violent than a typical creature collector, so the Boki can be m
 
 The style block now reads:
 "Creature-collector monster design with an edge: an endearing but dangerous fantasy creature that blends a real animal with an object or element, with simplified bold shapes, a slightly oversized head, big readable features, a clear iconic silhouette and a strong personality, plus some bite: sharp teeth, claws, armour or blade-like parts grown into its body. Stylised and toy-like, not realistic anatomy or realistic fur and feathers. Clearly an animal, not a humanoid: no clothes, no human posing, no holding weapons in its hands. It must look like it belongs in the same game as the creatures in image 1."
+
+## Style ref v2 (Nov 8, 15:10 ET)
+`boki_style_ref_v2.png` shows three keepers on the pale grey sheet background: Mycroll (cute), Lockatara (tough, grumpy, titan) and Chuggamus (tough, steampunk, ember). It replaces boki_style_ref_2d.png as image 1. Why: the website crops have a dark background, which is the likely cause of the dark floor and ghost reflections in about a third of the results, and both are the same cute small archetype, which pulled every face toward big chibi eyes. The new ref shows range within one style.

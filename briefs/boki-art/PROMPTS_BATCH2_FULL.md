@@ -1,6 +1,6 @@
 # Boki Batch 2: full prompts (v4: element and archetype)
 
-Settings for every prompt: Nano Banana Pro, new generation. Image 1 is boki_style_ref_2d.png. 16:9, 4K, 2 runs each.
+Settings for every prompt: Nano Banana Pro, new generation. Image 1 is boki_style_ref_v2.png. 16:9, 4K, 2 runs each.
 
 ## 11. Bubblisk (prism, pretty)
 
