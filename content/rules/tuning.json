@@ -1,0 +1,12 @@
+{
+	"_doc": "The one shared file for movement and feel numbers (owner 2026-11-08). One section per system; each value says its unit in its key or note. Read through Tuning.of(section).",
+	"lace": {
+		"_note": "Lace's bow feel (PinDraw, PinNeedle): the perfect-release window after each draw stage, the rim glow on her body and bow while it is open, the payoff pulse on a perfect release, and the Heavy Shot's needle.",
+		"perfect_window_s": 0.35,
+		"perfect_glow_rim": 1.2,
+		"perfect_glow_col": "ffd36a",
+		"perfect_payoff_rim": 2.4,
+		"perfect_payoff_s": 0.16,
+		"needle_len_m": 2.4
+	}
+}

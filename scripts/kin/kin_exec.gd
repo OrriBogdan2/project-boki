@@ -105,6 +105,8 @@ static func _telegraph(m: Node, at: Vector3, r: float, col: Color, t: float) -> 
 static func _origin(st: StageSpec, cx: Dictionary) -> Vector3:
 	if cx.has("at_fixed"):
 		return cx["at_fixed"]
+	if cx.has("muzzle"):
+		return cx["muzzle"]
 	var d := st.delivery
 	var caster: Ent = cx["caster"]
 	match String(d.params.get("origin", "caster")):
@@ -236,7 +238,10 @@ static func _projectile(st: StageSpec, cx: Dictionary) -> void:
 		var a := atan2(dir.y, dir.x) + (fan * (float(i) / float(n - 1) - 0.5) if n > 1 else 0.0)
 		var dv := Vector2(cos(a), sin(a))
 		var lead := 0.6 if unit else 0.2
+		# (cx "muzzle": the exact point the shot leaves, a weapon's mouth that follows the animation)
 		var start := Vector3(from.x + dv.x * lead, y, from.z + dv.y * lead)
+		if cx.has("muzzle"):
+			start = cx["muzzle"]
 		_shoot(st, cx, start, dv, spd, rng, size, col, {"hits": 0, "bounce": int(bounce.params["count"]) if bounce else 0, "seen": {}}, hits)
 	if not cx.get("silent", false):
 		m.sfx("throw", from, -3.0, 1.15)

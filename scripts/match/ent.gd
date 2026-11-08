@@ -144,8 +144,9 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	hp -= d
 	last_hit_by = by
 	flash_t = 0.12
-	freeze_t = 0.05 if d >= 10.0 else 0.03
-	squash = 0.1
+	if not opts.get("tick", false):       # a zone's periodic tick: no hit squash or hold, only the flash
+		freeze_t = 0.05 if d >= 10.0 else 0.03
+		squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
 		if "knock_steer" in self:
 			set("knock_steer", float(opts.get("kbi", 0.3)))
