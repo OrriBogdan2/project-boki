@@ -78,6 +78,8 @@ var cres_t := 0.0
 var swirl: MeshInstance3D
 var swirl_t := 0.0
 var aegis: MeshInstance3D      # the dome over the raised wall (HeroVfx shell, made on the first raise)
+var aegis_size := Vector3.ONE  # its radius and height from the data (m)
+var rise_k := 1.0              # 0..1 how far it has risen out of the ground
 var aegis_hit := 0.0
 var rise_t := 0.0
 var push_flash := 0.0
@@ -370,10 +372,11 @@ func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 	var mid := (a + b) * 0.5
 	var dir := Vector2(mid.x - h.pos.x, mid.y - h.pos.z).normalized()
 	var dome := _aegis()
-	var c := mid - dir * dome.scale.x
+	var c := mid - dir * aegis_size.x
 	dome.visible = true
-	dome.global_position = Vector3(c.x, float(w["y"]) + 0.02, c.y)
-	dome.rotation = Vector3(0, atan2(dir.x, dir.y), 0)
+	var size := Vector3(aegis_size.x, aegis_size.y * rise_k, aegis_size.z)
+	dome.global_transform = Transform3D(Basis(Vector3.UP, atan2(dir.x, dir.y)) * Basis.from_scale(size),
+		Vector3(c.x, float(w["y"]) + 0.02, c.y))
 	KitShaders.param(dome, "life", hurt)
 	var pulse := 0.3 + 0.2 * sin(Time.get_ticks_msec() * 0.012) if armed else 0.0
 	KitShaders.param(dome, "shine", aegis_hit * 1.5 + pulse)
@@ -382,6 +385,7 @@ func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 func _aegis() -> MeshInstance3D:
 	if aegis == null:
 		aegis = HeroVfx.of(h.m).shell(h, "aegis")
+		aegis_size = aegis.scale
 		aegis.reparent(self)
 		aegis.top_level = true
 		aegis.visible = false
@@ -395,8 +399,8 @@ func aegis_hide() -> void:
 ## The wall comes up: the dome rises out of the ground in a puff of dust.
 func aegis_rise(at: Vector3) -> void:
 	rise_t = RISE_T
-	var dome := _aegis()
-	dome.scale.y = dome.scale.x * 0.05
+	rise_k = 0.05
+	_aegis()
 	h.m.fx.dust(at, 14)
 	HeroVfx.of(h.m).play(h, "aegis_rise", at, h.aim_dir())
 
@@ -444,10 +448,10 @@ func _process(_delta: float) -> void:
 	if aegis_hit > 0.0:
 		aegis_hit = maxf(0.0, aegis_hit - delta * 5.0)
 	push_flash = maxf(0.0, push_flash - delta)
-	if rise_t > 0.0 and aegis:
+	if rise_t > 0.0:
 		rise_t = maxf(0.0, rise_t - delta)
 		var u := 1.0 - rise_t / RISE_T
-		aegis.scale.y = aegis.scale.x * lerpf(0.05, 1.0, 1.0 - pow(1.0 - u, 3.0))
+		rise_k = lerpf(0.05, 1.0, 1.0 - pow(1.0 - u, 3.0))
 	if beacon.visible:
 		_stand_beacon()
 	_tick_wakes(delta)

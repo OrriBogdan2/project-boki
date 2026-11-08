@@ -506,8 +506,8 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 	ok("bjorn shield: the wall is an ivory dome (HeroVfx shell) spanning the wall",
 		dome.visible
 		and (dome.material_override as ShaderMaterial).get_shader_parameter("mode") == HeroVfx.MODES["dome"]
-		and dome.scale.x * 2.0 * sin(deg_to_rad(53.0)) >= float(sd["len"]) - 0.1,
-		"radius %.2f" % dome.scale.x)
+		and K.fx.aegis_size.x * 2.0 * sin(deg_to_rad(53.0)) >= float(sd["len"]) - 0.1,
+		"radius %.2f" % K.fx.aegis_size.x)
 	P.inp["sec_hold"] = false
 	step(m, 0.4)
 	ok("bjorn shield: lowered, the chevron is gone", not AimKit.shown(P, "aegis_push") and not K.fx.aegis.visible)
