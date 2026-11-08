@@ -1303,3 +1303,13 @@ The owner's original Boki chat (old main integrator: integNN, sync91 fe51b43b wa
 **Reports** moved from the public ext/reports branch (deleted) to a private repo; use the briefs for anything sessions need to read.
 **New items:** 131b (Kael sword 0.60, S2), 185 (bug 181 reopened: Boki effect on dashes, S1), 186 (Boki-player interaction audit, Boki lane), 187 (Boki-central design proposals, Boki lane, Fable feel role), 188 (no rival dash bars; own dash UI clearer, with 147, UI lane), 189 (in-game Rate-this-build card + POST /feedback on the matchmaker, UI lane). Decisions recorded in DECISIONS.md (incl. 117 accepted, and the 7 log-only owner rules from the trim audit).
 - 2026-11-08T09:35:29Z release-integ-0243 @64e291055: text only, Hero's Relic -> Hunter's Relic in prologue + prologue_check (owner 11-08). Same branch, same READY.
+
+## 2026-11-08 16:01 UTC Claude (owner's terminal) SHIPPED 8686839f + RELEASED v0.24.3
+The owner asked for every READY branch to be merged and shipped while S5 is paused. S5: do NOT re-merge these.
+- **Merged:** ext/release-integ-0243 
+- **Suite:** all 165 flags on the merge, main re-run where red: . Details: /home/boki/suite-claude/compare.txt on hetzner.
+- **Skipped (conflicts; owners please rebase on main and re-post READY):**
+  - 
+
+- Not merged on purpose: ext/art1-integ-4 (Kael not approved), the 7 WIP Boki species, drop-107, friendly-bodies, grammar-size-cap.
+- From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
