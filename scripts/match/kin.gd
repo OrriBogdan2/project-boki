@@ -573,7 +573,7 @@ func unbench() -> void:
 # ------------------------------------------------------------------ simulation
 func sim(dt: float) -> void:
 	prev = pos
-	if dead:
+	if dead or dt <= 0.0:          # (0: its far, calm hunter's off step, SimLod)
 		return
 	if state == "away":
 		# your hunter is dead and waiting on a revive: the kin keeps out of sight until then

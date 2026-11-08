@@ -37,23 +37,9 @@ static func fresh(m: Match, o: Ent) -> bool:
 const STAY_GOALS := ["yard", "board", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon"]
 const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
 
-## A bot this far from the local player, with no target and nothing urgent on (a revive, a lair, an exit),
-## decides every FAR_EVERY sim steps (20 Hz) instead of every step, with the skipped time added in; its
-## last inputs carry on in between. A big match has most of its bots roaming far away: item 94, script
-## time grew with the Hunter count. (Fights and revives stay every step: at 20 Hz they turned in place.)
-const FAR_M := 45.0            # m from the local player
-const FAR_EVERY := 3           # sim steps per decision when that far
-
+## Far, calm bots are stepped at 20 Hz by SimLod (think and sim together), not here.
 func tick(m: Match, h: Hunter, dt: float) -> void:
-	var a := h.ai
-	var acc := float(a.get("far_dt", 0.0)) + dt
-	var me := m.player
-	var busy: bool = a.get("tgt") != null or String(a.get("goal_kind", "")) in URGENT_GOALS
-	if me != null and not me.out and not busy and h.flat_dist(me) > FAR_M and acc < dt * FAR_EVERY - dt * 0.5:
-		a["far_dt"] = acc
-		return
-	a["far_dt"] = 0.0
-	think(m, h, acc)
+	think(m, h, dt)
 
 func think(m: Match, h: Hunter, dt: float) -> void:
 	var a := h.ai
@@ -919,29 +905,45 @@ func _path_dir(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 	return h.dir_to(goal)
 
 ## Heads for a spot on this island, finding a way around walls when they're in the way.
+## The plan (straight line or tile path) is cached per goal tile: walls don't move, so the
+## straight-line test reruns only every LINE_RECHECK_S, and a path is walked by pulling the
+## aim forward one waypoint at a time instead of re-testing every waypoint every step.
+const LINE_RECHECK_S := 0.3    # s between straight-line re-tests toward the same goal tile
+const PATH_REPLAN_S := 2.0     # s before a tile path is rebuilt (others may have moved the bot)
+const PULL_PER_STEP := 3       # waypoints the aim may advance per sim step (caps line tests)
 func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 	var from := Vector2(h.pos.x, h.pos.z)
-	var to := Vector2(goal.x, goal.z)
-	if _clear_line(m, from, to):
-		h.ai.erase("wp")
-		return h.dir_to(goal)
 	var gt := Vector2i(int(floor(goal.x)), int(floor(goal.z)))
 	var wp: Dictionary = h.ai.get("wp", {})
-	if wp.is_empty() or wp["goal"] != gt or m.time - float(wp["t"]) > 2.0:
-		wp = {"goal": gt, "t": m.time, "path": _grid_path(m, Vector2i(int(floor(h.pos.x)), int(floor(h.pos.z))), gt)}
+	var fresh: bool = wp.is_empty() or wp["goal"] != gt
+	if fresh or (wp.has("line") and m.time - float(wp["t"]) > LINE_RECHECK_S):
+		if _clear_line(m, from, Vector2(goal.x, goal.z)):
+			h.ai["wp"] = {"goal": gt, "t": m.time, "line": true}
+			return h.dir_to(goal)
+		fresh = true
+	elif wp.has("line"):
+		return h.dir_to(goal)
+	if fresh or m.time - float(wp["t"]) > PATH_REPLAN_S:
+		var at := Vector2i(int(floor(h.pos.x)), int(floor(h.pos.z)))
+		wp = {"goal": gt, "t": m.time, "aim": 0, "path": _grid_path(m, at, gt)}
 		h.ai["wp"] = wp
 	var path: Array = wp["path"]
 	if path.is_empty():
 		return h.dir_to(goal)
-	# aim for the furthest waypoint we can walk straight to
-	var pick: Vector2 = path[0]
-	for i in range(path.size() - 1, -1, -1):
-		if _clear_line(m, from, path[i]):
-			pick = path[i]
-			break
+	# drop waypoints already reached, then pull the aim to the furthest one in clear sight
+	var aim := int(wp["aim"])
 	while path.size() > 1 and from.distance_to(path[0]) < 0.6:
 		path.pop_front()
-	var d := pick - from
+		aim -= 1
+	aim = clampi(aim, 0, path.size() - 1)
+	var pulls := 0
+	while aim + 1 < path.size() and pulls < PULL_PER_STEP and _clear_line(m, from, path[aim + 1]):
+		aim += 1
+		pulls += 1
+	if pulls == 0 and aim > 0 and not _clear_line(m, from, path[aim]):
+		aim = 0                  # pushed off the line: fall back to the next waypoint
+	wp["aim"] = aim
+	var d: Vector2 = (path[aim] as Vector2) - from
 	return d.normalized() if d.length() > 0.05 else h.dir_to(goal)
 
 func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:

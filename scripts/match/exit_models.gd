@@ -175,7 +175,10 @@ static func hatch() -> Node3D:
 	var lid := Node3D.new(); lid.name = "Lid"; root.add_child(lid)
 	Models.part(lid, Models.cyl(0.8, 0.84, 0.12, 14), iron, Vector3(0, 0.27, 0))
 	for k in [-0.35, 0.35]:
-		Models.part(lid, Models.box(1.5, 0.05, 0.14), Models.toon(Color("6a6878")), Vector3(0, 0.34, k))
+		# flat on the disc (which casts): a thin strap's shadow is invisible, and turned 45 deg it
+		# measures under the caster size (--perf-throttle-check)
+		var strap := Models.part(lid, Models.box(1.5, 0.05, 0.14), Models.toon(Color("6a6878")), Vector3(0, 0.34, k))
+		strap.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	if Flora.v2():
 		# a domed boss, rivets round the rim and on the straps
 		var rv := Models.toon(Color("8a8898"))

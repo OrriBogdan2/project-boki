@@ -1997,6 +1997,9 @@ func launch_to(target: Vector3, t: float) -> void:
 
 # ------------------------------------------------------------------ simulation
 func sim(dt: float) -> void:
+	if dt <= 0.0:
+		prev = pos                  # a far, calm bot's off step (SimLod)
+		return
 	Hex.tick(self, dt)
 	prev = pos
 	if out or extracted:

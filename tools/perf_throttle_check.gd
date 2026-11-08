@@ -1,7 +1,9 @@
 extends RefCounted
 ## --perf-throttle-check, item 94's script throttles: an idle monster with nobody within Mob.NAP_M stops
-## simulating and wakes when a Hunter comes close; a bot further than Bot.FAR_M from the local player decides
-## and roaming decides every Bot.FAR_EVERY steps (the skipped time added in), a near one every step.
+## simulating and wakes when a Hunter comes close; a bot further than SimLod.FAR_M from the local player, on
+## the ground, roaming or fighting something as far off, thinks and simulates every SimLod.EVERY steps (the
+## skipped time added in); a near one, one fighting near the player or just hit by them, every step; its
+## Boki steps with it.
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
@@ -67,25 +69,52 @@ func _far_bots() -> void:
 	ok(b != null, "setup: a bot")
 	if b == null:
 		return
-	var brain := Bot.new()
-	b.teleport(m.player.pos + Vector3(Bot.FAR_M + 15.0, 0, 0))
+	b.teleport(m.player.pos + Vector3(SimLod.FAR_M + 15.0, 0, 0))
+	b.grounded = true
 	b.ai["tgt"] = null
 	b.ai["goal_kind"] = "roam"
-	var thinks := 0
-	for i in Bot.FAR_EVERY * 4:
-		var before := float(b.ai["dash_cd"])
-		brain.tick(m, b, Match.DT)
-		if float(b.ai["dash_cd"]) != before:
-			thinks += 1
-	ok(thinks == 4, "far away it decides every %d steps (%d decisions)" % [Bot.FAR_EVERY, thinks])
+	var every := SimLod.EVERY
+	ok(_lod_steps(b, every * 4) == [4, every * 4], "far and calm it steps every %d sim steps, losing no time" % every)
+	var kin: Kin = null
+	for k in m.kins:
+		if k.owner_h == b:
+			kin = k
+	if kin:
+		kin.state = "active"
+		kin.cmd = "follow"
+		kin.target = null
+		ok(SimLod.kin_dt(kin, Match.DT) == SimLod.step_dt(b, Match.DT), "its Boki on follow steps with it")
+	var far_foe: Ent = null
+	for mb in m.mobs:
+		if mb.flat_dist(m.player) > SimLod.FAR_M:
+			far_foe = mb
+			break
+	b.ai["tgt"] = far_foe
+	var far_runs: int = _lod_steps(b, every * 2)[0] if far_foe else -1
+	ok(far_runs == 2, "fighting something far off it still steps every %d" % every)
+	b.ai["tgt"] = m.player
+	ok(_lod_steps(b, 6)[0] == 6, "fighting the player (or anything near them) it steps every step")
+	b.ai["tgt"] = null
+	b.last_hit_by = m.player
+	b.hurt_at = m.time
+	ok(_lod_steps(b, 6)[0] == 6, "just hit by the player it steps every step")
+	b.hurt_at = -9.0
 	b.teleport(m.player.pos + Vector3(5.0, 0, 0))
-	thinks = 0
-	for i in 6:
-		var before := float(b.ai["dash_cd"])
-		brain.tick(m, b, Match.DT)
-		if float(b.ai["dash_cd"]) != before:
-			thinks += 1
-	ok(thinks == 6, "near the player it decides every step (%d of 6)" % thinks)
+	b.grounded = true
+	ok(_lod_steps(b, 6)[0] == 6, "near the player it steps every step")
+
+## Plans n sim steps; returns [steps the bot ran, sim steps of time it was given].
+func _lod_steps(b: Hunter, n: int) -> Array:
+	var runs := 0
+	var got := -float(b.ai.get("lod_dt", 0.0))   # time banked before, and after, counts as given
+	for i in n:
+		SimLod.plan(m, Match.DT)
+		var sd := SimLod.step_dt(b, Match.DT)
+		if sd > 0.0:
+			runs += 1
+			got += sd
+	got += float(b.ai.get("lod_dt", 0.0))
+	return [runs, roundi(got / Match.DT)]
 
 ## The world box of a mesh: its longest side in metres.
 func _world_size(gi: GeometryInstance3D) -> float:
@@ -131,7 +160,7 @@ func _shadows() -> void:
 		if _under(g, Hunter) or _under(g, Kin) or g is MultiMeshInstance3D:
 			continue
 		if _world_size(g) < lim:
-			var k := "%s/%s" % [_nm(g.get_parent()), _nm(g)]
+			var k := "%s/%s/%s" % [_nm(g.get_parent().get_parent()), _nm(g.get_parent()), _nm(g)]
 			bad[k] = int(bad.get(k, 0)) + 1
 	ok(bad.is_empty(), "no mesh under %.1f m casts outside Hunters and Boki bodies (%d casters; small ones: %s)"
 		% [lim, n_cast, str(bad).left(1500)])
