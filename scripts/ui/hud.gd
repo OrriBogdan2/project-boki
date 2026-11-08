@@ -370,7 +370,7 @@ func _draw_world_labels() -> void:
 		var to: Hunter = h.base_to
 		if to and is_instance_valid(to) and not cam.is_position_behind(to.position):
 			var tsp := cam.unproject_position(to.position + Vector3(0, 3.0, 0))
-			_ctext(tsp, "%s incoming" % h.pname.substr(0, 10), 12, Color("8fe3c8"), big)
+			_ctext(tsp, "%s incoming" % h.pname.substr(0, 14), 12, Color("8fe3c8"), big)
 			c.draw_arc(cam.unproject_position(to.position + Vector3(0, 0.1, 0)), 22.0, 0, TAU, 32, Color(0.56, 0.89, 0.78, 0.4 + 0.3 * sin(m.time * 8.0)), 2.0, true)
 	for mb in m.mobs:
 		if mb.dead or not mb.visible or cam.is_position_behind(mb.position):
