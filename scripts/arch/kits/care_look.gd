@@ -245,6 +245,10 @@ func _build_wall(n: Node3D) -> void:
 	var foot := _off(Models.part(
 			n, Models.box(1.0, 0.35, 0.8), ice_mat(Color("dffcff"), 0.45, 0.1), Vector3(0, 0.17, 0)))
 	foot.name = "Foot"
+	# the solid sheet of ice between the pillars: the barricade itself, lit from inside, flashing on a block
+	var slab := _off(Models.part(
+			n, Models.box(1.0, 1.7, 0.24), ice_mat(Color("8fe4ea"), 0.5, 0.2, Color("e8ffff")), Vector3(0, 0.85, 0)))
+	slab.name = "Slab"
 	var pm := PlaneMesh.new()
 	pm.size = Vector2(1.0, 1.6)
 	var mist := _off(Models.part(n, pm, disc_mat(Color("bff7ef", 0.5), Color("e8ffff", 0.6), 2.0), Vector3(0, 0.05, 0)))
@@ -545,6 +549,10 @@ func _place_wall(n: Node3D, p: Dictionary) -> void:
 		(pl.material_override as ShaderMaterial).set_shader_parameter("glow", 0.15 + 0.8 * hit + 0.25 * (1.0 - rise))
 	var ft := n.get_node_or_null("Foot") as MeshInstance3D
 	if ft: ft.scale = Vector3(ln, maxf(0.05, rise), 1.0)
+	var slab := n.get_node_or_null("Slab") as MeshInstance3D
+	if slab:
+		slab.scale = Vector3(maxf(0.1, ln - 0.2), maxf(0.05, rise), 1.0)
+		(slab.material_override as ShaderMaterial).set_shader_parameter("glow", 0.2 + 1.2 * hit)
 	var mist := n.get_node_or_null("Mist") as MeshInstance3D
 	if mist:
 		mist.scale = Vector3(ln + 0.8, 1.0, 1.0)
