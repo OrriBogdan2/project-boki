@@ -99,6 +99,11 @@ func _far_bots() -> void:
 	b.hurt_at = m.time
 	ok(_lod_steps(b, 6)[0] == 6, "just hit by the player it steps every step")
 	b.hurt_at = -9.0
+	b.ai["goal_kind"] = "box"
+	ok(_lod_steps(b, every * 2)[0] == 2, "walking to a box far off it still steps every %d" % every)
+	b.ai["goal_kind"] = "board"
+	ok(_lod_steps(b, 6)[0] == 6, "boarding something that moves it steps every step")
+	b.ai["goal_kind"] = "roam"
 	b.teleport(m.player.pos + Vector3(5.0, 0, 0))
 	b.grounded = true
 	ok(_lod_steps(b, 6)[0] == 6, "near the player it steps every step")

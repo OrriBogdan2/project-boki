@@ -17,6 +17,11 @@ const FAR_M := 45.0       # m from the local player (flat) before a bot may slow
 const EVERY := 3          # sim steps per bot step when far and calm (60 Hz -> 20 Hz)
 const HIT_CALM_S := 1.5   # s after the player (or their Boki) hit it before it counts as far again
 const TRAIN_CALM_S := 1.5 # s after standing on a train car (the car carries it; keep physics exact)
+## Bot goals kept at the full rate: boarding or riding moving things and scripted lair moments, where
+## a 50 ms step could miss a platform or a lever. Walking to a box, a Boki or a downed mate is not one
+## of them (Bot.URGENT_GOALS is about not flip-flopping goals; its timers get the banked time).
+const FULL_RATE_GOALS := ["board", "lift", "yard", "hum", "beacon", "lair_fight", "lair_escape", "lair_lever",
+	"lair_updraft"]
 
 static var _n := 0             # sim steps planned (staggers the bots' slots)
 
@@ -63,7 +68,7 @@ static func _calm(m: Match, h: Hunter, me: Hunter) -> bool:
 	if m.skytrain and m.time - float(m.skytrain.ride_t.get(h, -9.0)) < TRAIN_CALM_S:
 		return false
 	var a := h.ai
-	if String(a.get("goal_kind", "")) in Bot.URGENT_GOALS:
+	if String(a.get("goal_kind", "")) in FULL_RATE_GOALS:
 		return false
 	var t = a.get("tgt")
 	if is_instance_valid(t) and t is Ent and (t as Ent).flat_dist(me) <= FAR_M:

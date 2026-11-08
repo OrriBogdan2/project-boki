@@ -26,6 +26,19 @@ MAX_NODES, because cross-island trips on the bigger land ran out of nodes.
 ## Consequences
 - Net.VERSION 0.25.0 (match size and map change). No save change.
 - Matchmaker trio slots should follow the 40-player size on the matchmaker branch (follow-up).
-- TEAM_COLORS has 20 entries, so solo colours repeat at 40 (follow-up).
+- TEAM_COLORS has 40 entries (the 20 added are deeper, hue-nudged shades), so a 40-solo match repeats none.
+- Perf at 40 hunters. Offline, `SimLod` (scripts/match/sim_lod.gd) steps a bot (think and sim) every 3rd
+  step with the skipped time added, when it is more than 45 m from the player, on the ground, not on a
+  moving or scripted goal, not fighting anything near the player and not just hit by them. Its Boki
+  follows its rate. Far bot-vs-bot fights count (both sides at 20 Hz), and far things already redraw
+  every 4th frame. `Bot._steer` caches its line test and grid path, and pulls its aim forward instead
+  of replanning every step. Bots skip the interact prompt scans nobody reads, and spawn-plan reveal
+  groups hunters by team and bounds `sees` by range. `--perf-throttle-check` covers SimLod.
+  Headless at 40 (box loaded, relative only): fight 74 -> 56 ms wall (script 48 -> 32), ride
+  286 -> 137 ms (worst frame 2363 -> ~390). Same map and session at 20/30/40 hunters: fight script
+  19/31/32 ms, load 11.7/13.0/13.8 s. So 30 hunters saves little now, and 40 stays (squads per m2 level).
+- Load still grows with the hunter count: each hunter model takes ~120 ms (GPU box) to build, and a
+  Warden with a 3D model builds the whole procedural body first, then hides it (docs/DEBT.md).
+  Alternative not taken: 30 hunters (loses squads-per-area parity for ~0.8 s).
 - The generator now fails a rock over the void, and `sc_rocks` moves touching rocks as one group so
   an L-shaped boulder doesn't split under the scale.
