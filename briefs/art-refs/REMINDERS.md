@@ -6,3 +6,6 @@
 - **Villain/story reference set** (owner, Nov 7): queued in `QUEUE_VILLAIN_STORY.md`. Start it only after the current hero key art (the Thief's View and the face-off) is done. Show 4 options per item and wait for the owner's pick.
 - **Corruption stages (Vex)** (owner, Nov 7): item 8 of the villain set. Parked with chromas and skins; not a priority. A reminder is scheduled for about 3 weeks out.
 - **Auburn Knight hero pass** (owner, Nov 7): after the Auburn Knight reference (villain set item 5), do a pass on every hero associated with the Auburn Knights.
+- **Queued after the villain/dragon set** (owner, Nov 7, 22:41 ET):
+  - **Grimble splash redo:** rebuild his original splash (the cool view) with his new purple slime bone-hook arm. The current splash isn't clear enough.
+  - **Sable splash fix:** make her aim at the men below, and shrink the jewel; it's so big it looks comical.
