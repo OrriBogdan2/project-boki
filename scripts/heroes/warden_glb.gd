@@ -113,7 +113,6 @@ const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the fra
 ## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's data
 ## lists in "hide_while_chain" shrink away (item 76b.4), so one chain shows, never two.
 const CHAIN_OUT := "chain_out"
-const GRIP_L := "grip_l"                 # meta on a held weapon: warden_look "grip_l", read by HunterAnim
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
@@ -224,7 +223,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	if bool(WardenClips.data(art(arch)).get("skinned_weapon", false)):
 		_skinned_weapon(root)
 	else:
-		_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]), own)
+		_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]))
 	_hold_shield(root, glb)
 	sync.mood = WardenMood.make(root, glb, skel, art(arch))
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
@@ -399,7 +398,7 @@ static func _puff() -> Texture2D:
 
 ## The .glb's own weapon (a mesh named WEAPON, modelled in the Gun node's space) goes into the hands in place
 ## of the procedural one; the Gun node and its Muzzle stay, so shots and grips are unchanged.
-static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vector3.ZERO, own := {}) -> void:
+static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vector3.ZERO) -> void:
 	var weapon := glb.find_child(WEAPON, true, false) as Node3D
 	var gun := root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 	if weapon == null or gun == null:
@@ -417,9 +416,6 @@ static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vect
 	seat.add_child(weapon)
 	# warden_look "weapon_scale", and "weapon_offset" (m, Gun space: seats the grip in the hand)
 	weapon.transform = Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * wscale), shift)
-	# warden_look "grip_l" (Gun space): the support hand's place on a hilt the hold's own "gl" would overshoot
-	if own.has("grip_l"):
-		weapon.set_meta(GRIP_L, Vector3(own["grip_l"][0], own["grip_l"][1], own["grip_l"][2]))
 	var off := weapon.find_child(WEAPON_OFF, true, false) as Node3D
 	if off:
 		var at := WardenGlb.model_xf(gun, off)
