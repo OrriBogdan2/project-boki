@@ -50,7 +50,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 | Passive: Chill's 15% slow (not in the data) | LOW | (c) | kept as our readability choice (a Chilled foe has to read as Chilled) |
 | Knock Shatter 30 vs about 37 | LOW | (b) | ec88bfc0: 37 |
 | E wall touch slow (not in the data) | LOW | (c) | kept: it is how the sliding wall reads as carrying foes; noted here |
-| Stale wiki link / name | MED | (a) | f1c1a91c (Class-Claire.md, Classes.md, sidebar) |
+| Stale wiki link / name | MED | (a) | f1c1a91c (Class-Neve.md, Classes.md, sidebar) |
 | "Merge stays on R" in this doc | MED | (b) | fixed in the table above |
 | Self screen shake | MED | (c) | ext/no-shake owns it; nothing added here (the spear's cast shake was removed in acd818b3) |
 | Body size 1.3 vs 1.1-1.15 | LOW | (c) | the concept heights (item 46) set it; not this branch's call |

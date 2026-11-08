@@ -1,7 +1,7 @@
 extends Node3D
 ## The prologue: a short animated telling of how the Skylands came to be, before your first egg.
 ## Five shots, each a little set far apart from the others, with a line of story under letterbox bars:
-##   1. the land whole  2. the Wyrm wakes  3. the Sundering  4. the Boki  5. hunters race for the Wyrmheart
+##   1. the land whole  2. the Wyrm wakes  3. the Hollowing  4. the Boki  5. hunters race for the Wyrmheart
 ## then the PROJECT BOKI title card. Each shot is one or two eased camera moves (a new move is a cut), its own
 ## light (MOODS) and its own action. Space or a click moves on; holding Esc skips it all.
 
@@ -24,7 +24,7 @@ const SKY_KEYS := ["top", "mid", "horizon"]
 const SEA_KEYS := ["deep", "light", "glow"]
 ## How fast a camera move still creeps at its end, as a share of its average speed (eased, never a dead stop)
 const END_CREEP := 0.25
-const MANTLES_AT := 2.6        # s into THE SUNDERING: the Hunters' selves burst out of the Crown as Relics
+const MANTLES_AT := 2.6        # s into THE HOLLOWING: the Hunters' selves burst out of the Crown as Relics
 
 var cam: Camera3D
 var env: Environment
@@ -119,14 +119,14 @@ func _shots() -> Array:
 	var D: Vector3 = SETS["drop"]
 	var out := [
 		{"chapter": "BEFORE THE FALL", "mood": "gold", "tint": Color("ffd27a"), "grade": 0.16,
-			"text": "The Skylands were once ruled by a great deity:\na Tyrant on the Crown who never aged.",
+			"text": "Once, the sky held one great land, Solmere,\nruled by Malgrave, a queen who never aged.",
 			"cam": [[W + Vector3(-70, 22, 80), W + Vector3(0, 2, 0), W + Vector3(-54, 17, 62), W + Vector3(0, 3, 0), 3.4],
 				[W + Vector3(-16, 8, 18), W + Vector3(0, 5.0, 0), W + Vector3(-13, 7, 14.5), W + Vector3(0, 5.6, 0), 3.4]]},
 		{"chapter": "THE WAKING", "mood": "gold", "tint": Color("ff5a3a"), "grade": 0.3, "event": "wyrm",
-			"text": "He was the Wyrm in human shape.\nThe night a thief reached its heart, it woke.",
+			"text": "She was the Wyrm in human shape.\nThe night a thief reached its heart, it woke.",
 			"cam": [[W + Vector3(-22, 12, 26), W + Vector3(18, 6, -30), W + Vector3(-20, 11, 23), W + Vector3(20, 10, -30), 3.0],
 				[W + Vector3(12, 7, 40), W + Vector3(8, 9, -10), W + Vector3(10, 8, 42), W + Vector3(-16, 9, 10), 4.0]]},
-		{"chapter": "THE SUNDERING", "mood": "fire", "tint": Color("d0406a"), "grade": 0.34, "event": "break",
+		{"chapter": "THE HOLLOWING", "mood": "fire", "tint": Color("d0406a"), "grade": 0.34, "event": "break",
 			"text": "The Wyrm broke the land and stole our essence.\n"
 				+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty.",
 			"cam": [[W + Vector3(-30, 22, 46), W + Vector3(0, 0, 0), W + Vector3(-36, 28, 56), W + Vector3(0, -6, 0), 3.6],
@@ -297,7 +297,7 @@ func _fire(parent: Node3D, at: Vector3, size := 1.0) -> void:
 	sm.mesh = _blob(0.6, false)
 	parent.add_child(sm)
 
-## Specks drifting in a set's air (the Sundering's dust, the Relic rising): `box` half-extents in m, `radius` the
+## Specks drifting in a set's air (the Hollowing's dust, the Relic rising): `box` half-extents in m, `radius` the
 ## speck radius in m, `rise` m/s² up (negative sinks), `glow` adds light instead of covering.
 func _drift(at: Vector3, box: Vector3, col: Color, n: int, radius: float, rise: float, glow: bool) -> CPUParticles3D:
 	var p := CPUParticles3D.new()
@@ -349,7 +349,7 @@ func _mood(a: String, b := "", k := 0.0) -> void:
 	sun.light_color = (m["sun"] as Color).lerp(n["sun"], k)
 	sun.light_energy = lerpf(float(m["sun_e"]), float(n["sun_e"]), k)
 
-## The land whole burning: k from its golden evening (0) to the red of the Sundering (1).
+## The land whole burning: k from its golden evening (0) to the red of the Hollowing (1).
 func _burn(k: float) -> void:
 	_mood("gold", "fire", k)
 
@@ -615,7 +615,7 @@ func _events(ev: String, st: float, delta: float) -> void:
 		"wyrm":
 			_waking(st, delta)
 		"break":
-			_sundering(st, delta)
+			_hollowing(st, delta)
 		"kin":
 			boki.play(st, delta)
 		"drop":
@@ -641,7 +641,7 @@ func _waking(st: float, delta: float) -> void:
 		Sfx.play("boom", null, -14.0, 0.1, 1.4)
 
 ## The Wyrm circles while the land splits: a flash and a jolt, the isles drift apart and sink, rocks tumble.
-func _sundering(st: float, delta: float) -> void:
+func _hollowing(st: float, delta: float) -> void:
 	wyrm.breath.emitting = false
 	var ang := 5.3 - st * 0.42      # rad: from the far side of the land, round away from both camera moves
 	var W: Vector3 = SETS["whole"]

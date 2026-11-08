@@ -13,6 +13,7 @@ const CANONICAL_ORDER := [
 	"gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer",
 	"dredge", "rimewright", "mage", "bulwark", "thief", "ostra",
 ]
+const RELIC_STATUS := ["locked", "proposed"]
 const GENDERS := ["male", "female", "robot"]
 
 var bad := 0
@@ -53,8 +54,32 @@ func run(main: Node) -> void:
 		var shown_name := HunterViewer.display_name(id)
 		ok(shown_name.begins_with(HeroTitle.base_name(id) + " the ") and not shown_name.contains("the The"),
 				"%s shows as '%s', with no gender line" % [id, shown_name])
+	_lore_check()
 	print("HEROTITLE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## content/rules/lore.json: every class sits in exactly one faction and has a relic with a known status, and its
+## text uses no old name or retired term; Cinder carries no goggles, tank or flamethrower, Meeko no lantern.
+func _lore_check() -> void:
+	var lore = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/lore.json"))
+	ok(typeof(lore) == TYPE_DICTIONARY, "lore.json parses")
+	if typeof(lore) != TYPE_DICTIONARY:
+		return
+	ok(lore["factions"].size() == 5, "five factions")
+	for id in Arch.ids():
+		var homes: int = lore["factions"].filter(func(f): return f["hunters"].has(id)).size()
+		ok(homes == 1, "%s sits in exactly one faction (%d)" % [id, homes])
+		var relic: Dictionary = lore["hunters"].get(id, {}).get("relic", {})
+		var known: bool = RELIC_STATUS.has(relic.get("status", "")) and String(relic.get("name", "")) != ""
+		ok(known, "%s has a relic with a status" % id)
+	var text := JSON.stringify(lore)
+	ok(_old_name_in(text) == "", "lore.json: no old name (%s)" % _old_name_in(text))
+	ok(RegEx.create_from_string(RETIRED_TERMS).search(text) == null, "lore.json: no retired term")
+	var cinder := _plain_text(Arch.def("ashwick")) + JSON.stringify(lore["hunters"]["ashwick"])
+	var banned := RegEx.create_from_string("(?i)goggles|\\btank\\b|\\bhose")
+	ok(banned.search(cinder) == null, "Cinder: no goggles, tank or hose")
+	var meeko := _plain_text(Arch.def("tender")) + JSON.stringify(lore["hunters"]["tender"])
+	ok(not meeko.replace("lantern_crook", "").to_lower().contains("lantern"), "Meeko: no lantern (her weapon id aside)")
 
 ## The class JSON as text with the base-character fields removed: the rest is shown to players.
 func _plain_text(data: Dictionary) -> String:

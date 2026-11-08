@@ -276,7 +276,7 @@ func _skylands() -> void:
 		root.rotation.y = rr.randf() * TAU
 		root.add_child(isl)
 		add_child(root)
-		# shards that broke away in the Sundering drift underneath
+		# shards that broke away in the Hollowing drift underneath
 		for k in (3 if not low else 1):
 			var sh := Flora.node("rock", "storm", k % 3, r * rr.randf_range(0.18, 0.32))
 			sh.position = Vector3(rr.randf_range(-r, r), -r * rr.randf_range(0.8, 1.8), rr.randf_range(-r, r))

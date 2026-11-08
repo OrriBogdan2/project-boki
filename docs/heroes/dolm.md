@@ -69,7 +69,7 @@ the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glid
 | LMB damage ratios (LOW) | (c) | the charge scaling is ours (noted) |
 | X Basalt Spine, X auto-cast after 3 s (LOW) | (c) | documented; the 3 s cap keeps a forgotten hold from blocking the ult |
 | Hunter viewer moves (MED) | (b) | RMB `breah_crouch`, `breah_slam`; X `breah_spine_aim`, `breah_spine`; asserted |
-| Player-facing wiki name (MED) | (c) | the Tarek rename is main's (done there) |
+| Player-facing wiki name (MED) | (c) | the Tenzo rename is main's (done there) |
 | Self-shake (MED) | (c) | ext/no-shake |
 | Explosion/ring rule (n/a) | (a) | complies |
 

@@ -60,17 +60,16 @@ func _ready() -> void:
 	hover_at = position
 	scale = Vector3.ONE * FLOAT_SCALE
 
-## The Hunter's own relic on the plate: Vex's brass eye, else a band of the Hunter's colour across the brow.
+## The Hunter's own relic on the plate: Vex's gold coin, else a band of the Hunter's colour across the brow.
 func _accent(col: Color) -> void:
 	if id == "gunslinger":
-		var brass := Models.shiny(Color("c79a4a"), 0.85)
-		var eye := _on_plate(0.36, 0.14, 0.012)
-		var ring := TorusMesh.new()
-		ring.inner_radius = 0.034
-		ring.outer_radius = 0.05
-		Models.part(plate, ring, brass, eye, Vector3.ONE, Vector3(PI / 2, 0, 0))
-		var lens := Models.toon(col.lightened(0.2), false, 1.6)
-		Models.part(plate, Models.sphere(0.03, 12), lens, eye, Vector3(1, 1, 0.5))
+		var coin := CylinderMesh.new()
+		coin.top_radius = 0.05
+		coin.bottom_radius = 0.05
+		coin.height = 0.012
+		coin.radial_segments = 20
+		var at := _on_plate(0.36, 0.14, 0.012)
+		Models.part(plate, coin, Models.shiny(Color("e0b040"), 0.9), at, Vector3.ONE, Vector3(PI / 2, 0, 0))
 		return
 	for k in 7:
 		var at := _on_plate(-0.6 + 0.2 * k, 0.45 - 0.05 * absf(k - 3), 0.006)
