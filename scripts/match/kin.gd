@@ -822,7 +822,7 @@ func _sim_active(dt: float) -> void:
 		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
 			target = brain.pick_target() if m.time >= look_at_t else null
 			if target == null and m.time >= look_at_t:
-				look_at_t = m.time + RETARGET_S       # nothing to fight: look again in a moment, not every step
+				look_at_t = m.time + RETARGET_S * rng.randf_range(0.75, 1.25)    # nothing to fight: look again soon
 	var wish := Vector2.ZERO
 	var spd := speed * slow_mult(0.6) * (1.3 if haste_t > 0.0 else 1.0)
 	if root_t > 0.0 or stun_t > 0.0:

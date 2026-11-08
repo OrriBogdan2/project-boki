@@ -49,7 +49,9 @@ func tick(m: Match, h: Hunter, dt: float) -> void:
 	var acc := float(a.get("far_dt", 0.0)) + dt
 	var me := m.player
 	var busy: bool = a.get("tgt") != null or String(a.get("goal_kind", "")) in URGENT_GOALS
-	if me != null and not me.out and not busy and h.flat_dist(me) > FAR_M and acc < dt * FAR_EVERY - dt * 0.5:
+	# (each far bot on its own step of the FAR_EVERY: all of them deciding on the same step was a spike)
+	var off_beat := (int(m.time / Match.DT) + h.get_instance_id()) % FAR_EVERY != 0
+	if me != null and not me.out and not busy and h.flat_dist(me) > FAR_M and off_beat and acc < dt * FAR_EVERY:
 		a["far_dt"] = acc
 		return
 	a["far_dt"] = 0.0
