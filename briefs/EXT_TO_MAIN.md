@@ -2835,3 +2835,4 @@ READY ext/dash-buffer-window 77fa3ffde (DashFlow.BUFFER_S 0.2 s = one 5 fps foot
 READY ext/heal-knock-source f66273fcd (knock heals settled vs the data: Brall/Shiv kept+cited, Felix/Kingpin 16% ours-only for the owner card, totals with DashReset 5% asserted)
 READY ext/neve-chill-shatter cd2f3f296 (Neve Chill/Shatter parity audit: knock tell, no re-Shatter on a felled foe, combo asserts)
 READY ext/idle-dolm 9ce102a73 (Tenzo the Stone Seer idle+stance rework)
+READY ext/idle-juggernaut 2c700e15c (Kael the Unbroken idle+stance rework; based on ext/kael-v2-integ, merge that first)
