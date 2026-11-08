@@ -220,7 +220,7 @@ ultimate (now the X cooldown).
 ## Body and movement (hero sheet "Body, scale and movement feel")
 
 - Model about 1.12 of a medium (`body.size` 0.95 on the heavy build), hunched: about 0.35 rad run lean;
-  hit radius 0.428 (`body.hit_r`, docs/HITBOX_SIZE.md).
+  hit radius 0.445 (`body.hit_r`, docs/HITBOX_SIZE.md).
 - Nameplate height 2.75 m (`body.plate`, `Arch.plate_y`).
 - Rampage: a 0.15 s crouch (planted), then 4.5 m in 0.3 s, then a low recovery with the blade dragging
   (keys end at 0.9 s). Its after-images are his own orange flame streaks.

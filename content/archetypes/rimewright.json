@@ -9,7 +9,7 @@
 	"body": {
 		"size": 1.15,
 		"bulk": 1.0,
-		"hit_r": 0.38,
+		"hit_r": 0.362,
 		"head": 0.6,
 		"legs": 2.04,
 		"torso": 0.96,

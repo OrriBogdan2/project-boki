@@ -14,23 +14,23 @@ const EPS := 0.0005
 ## scale and movement feel"), its width against a medium (from, to), and the prefix of its keyed moves.
 ## height_3d: the 3D model's top where something stands over the head the procedural one doesn't have.
 const WARDENS := {
-	"bulwark": {"hit_r": 0.46, "height": 1.5, "height_3d": 1.9, "width": [1.3, 5.2], "moves": "bul_"},
+	"bulwark": {"hit_r": 0.5, "height": 1.5, "height_3d": 1.9, "width": [1.3, 5.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.392, "height": 0.98, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
-	"gunslinger": {"hit_r": 0.416, "height": 1.04, "width": [0.7, 1.3], "moves": "gunslinger_"},   # (slim)
+	"gunslinger": {"hit_r": 0.4, "height": 1.04, "width": [0.7, 1.3], "moves": "gunslinger_"},   # (slim)
 	# (slim and long-legged; height_3d: her rods stand over the head)
 	"mage": {"hit_r": 0.4, "height": 1.04, "height_3d": 1.11, "width": [0.6, 1.3], "moves": "mage_"},
 	# (Sable's moth antennae stand ~0.3 m over her head, as on the master sheet)
 	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "thf_"},
-	"dolm": {"hit_r": 0.388, "height": 1.19, "width": [0.7, 1.5], "moves": "breah_"},     # (lean, the locs: his art)
+	"dolm": {"hit_r": 0.412, "height": 1.19, "width": [0.7, 1.5], "moves": "breah_"},     # (lean, the locs: his art)
 	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
 	# (Motley on his box: the hover came down to a hand's width, Nov 5, so his top is 0.14 m lower; the cards widen him)
 	"ostra": {"hit_r": 0.412, "height": 1.18, "height_3d": 1.2, "width": [0.5, 1.6], "moves": "ostra_"},
 	# (Claire, the final design: the hood and horns stand over her head; capelet and skirt widen the old slim build)
-	"rimewright": {"hit_r": 0.38, "height": 1.08, "height_3d": 1.21, "width": [0.6, 1.25], "moves": "tm_"},
+	"rimewright": {"hit_r": 0.362, "height": 1.08, "height_3d": 1.21, "width": [0.6, 1.25], "moves": "tm_"},
 	# (Cinder's fire stands over her head)
 	"ashwick": {"hit_r": 0.376, "height": 1.02, "height_3d": 1.14, "width": [0.7, 1.5], "moves": "as_"},
 	# (Kael: body size 1.06, owner Nov 4: 9% bigger; juggernaut.md's 1.12x was at 1.0)
-	"juggernaut": {"hit_r": 0.428, "height": 1.26, "height_3d": 1.19, "width": [1.0, 2.0], "moves": "jug"},
+	"juggernaut": {"hit_r": 0.445, "height": 1.26, "height_3d": 1.19, "width": [1.0, 2.0], "moves": "jug"},
 	# (Grimble: the head at his old height, the hoard towers over it)
 	"dredge": {"hit_r": 0.452, "height": 1.3, "height_3d": 1.49, "width": [1.3, 2.4], "moves": "dr_"},
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)

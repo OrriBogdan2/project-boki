@@ -1227,3 +1227,24 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 | `rimewright` | Claire, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
 | `dolm` | Tarek | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
 | `ostra` | Motley | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |
+
+## Body and hitbox parity (item 46 follow-up, Nov 8)
+
+Each hero's height and breadth against the source hero's footage sheet (`briefs/hero-ref/<file>.md`, "Body, scale and movement feel"; the data in `briefs/supervive-data` has no per-hero hitbox, only one bot agent radius 0.43 m for all). Source index `S = height x sqrt(width)`, both against a medium; `hit_r = standard x clamp(1 + 0.5 (S - 1), 0.85, 1.15)`. A hit radius changed only where it was off by 0.015 m or more (footage error is about 5-10%). **No art mesh was rescaled** (every Warden has an art branch); the model height is the true height from `--warden-model-check`, so the art follow-ups are listed. DECISIONS wins: Breaker's model is 1.5x and his hitbox the heavy class's 0.50 m.
+
+| Archetype | Source (file) | Source height x / width x | Model height before = after | `hit_r` before | `hit_r` after | Note |
+|---|---|---|---|---|---|---|
+| bulwark | Oath (bjorn) | 1.15 / 2.0 | 1.50 | 0.460 | **0.500** | DECISIONS: model 1.5x, hitbox 0.50 m (past the item-46 cap) |
+| dredge | Kingpin (dredge) | 1.17-1.2 / 1.5 | 1.30 | 0.452 | 0.452 | at the high end already (cap 0.46) |
+| juggernaut | Brall (juggernaut) | 1.12 / 1.3 | 1.26 | 0.428 | **0.445** | hunched; model 1.26 vs 1.12: art follow-up (Kael, stature carried as a hunch) |
+| gunslinger | Ghost (venator) | 1.0 / 1.0 | 1.04 | 0.416 | **0.400** | the source's medium reference |
+| ostra | Void (ostra) | 1.0 with hover / 1.0 | 1.18 | 0.412 | 0.412 | within 0.012; model 1.18 is owner's "bigger, menacing" (size 0.9, Nov 4) |
+| mage | Joule (vireo) | 0.96 / 1.15 (shoulders) | 1.04 | 0.400 | 0.400 | model 8% over: art follow-up (Ryzz) |
+| archer | Myth (pin) | 0.98 / 1.0 | 0.98 | 0.392 | 0.392 | matches |
+| dolm | Tetra (breah) | 0.97 / 1.2 (fists excluded) | 1.19 | 0.388 | **0.412** | model is lean and 1.19 tall vs short and blocky: art follow-up (Tarek) |
+| thief | Shiv (dancer) | 0.96 / 0.9 | 0.95 | 0.384 | 0.384 | matches |
+| rimewright | Celeste (tamsin) | 1.15 / 0.5 | 1.08 | 0.380 | **0.362** | tall but half a medium wide; size 1.15 already matches (Neve) |
+| ashwick | Felix (linwick) | 0.90 / 1.0 (pack) | 1.02 | 0.376 | 0.376 | model 13% over: art follow-up (Cinder; flame excluded) |
+| tender | Elluna (mooshmoosh) | 0.70 / 1.0 | 0.60 | 0.340 | 0.340 | at the floor; model 0.6 vs 0.70 is item 108's owner shrink |
+
+`--hitbox-size-check` asserts each `hit_r` equals the value above (Breaker's band top is 1.25 by DECISIONS); `--warden-model-check` freezes the same radii.
