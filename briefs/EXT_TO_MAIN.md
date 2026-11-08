@@ -2989,3 +2989,13 @@ READY ext/ui-void-masks cba1da1f5 (PR #15, job 20261108-174509-a4). Owner 11-08:
 READY ext/glide-no-hold faf4819d0 (PR #16, job 20261108-180003-a2). Owner 11-08 repeat bug: holding Space never opens the glider. With player keys the glider opens only from a fresh press in the air (second Space, glide button press) or a pad/updraft auto-glide; a press-opened glider re-opens after heal/dash/knock folds while still held. Home islands too. New --glide-hold-check; move-feel, glider-heat, airdash-glide, air-limits, wallmove, airheal, bulwark-combo green; health --strict OK. Bots and scripted inputs keep the hold path. No merge.
 
 READY ext/feed-kibble-fix 84c719736 (PR #17, job 20261108-183514-a1). BLOCKER, owner 11-08 0.24.3 playtest: "nothing to feed it" with bought kibble, cannot go on expedition. Cause: _open_feed set `any = true` inside a lambda (GDScript copies locals), so the empty-label always showed (the feed rows were there). Fixed with an Array; _care_feed now toasts why it refuses. Market buy, pantry and trough all read the same Save.d items/crops, and the too-weak gate opens the same panel. New --feed-check (fresh save and trough save: buy kibble, panel lists it, feed, gate lifts; fails on old code). health --strict OK, economy-floor-check OK. --market-check is flaky on random book outcomes (fails on main too). No suite-fast tool exists in the repo.
+
+READY ext/void-jester-dash a45fb9e95 (PR #18, job 20261108-180824-a4; on main d255acbee). Owner 11-08 Void Jester (ostra):
+- Trade: violet #c65cff/magenta #ff3fd0 with void smoke and a masked dark-glass lantern; dash col #b8f5ea to #c65cff.
+- Trade look 1.3x, visual only (the catch rings stay at 1.5 m).
+- New os_swap_lob as a dash sound (whoosh, reversed whisper, glass sting), RMS -21.6 vs dashes -21.1.
+- Drift fly_slow 0.30 to 0.35 (+17%; the source gives no value; alternative 0.36).
+- LMB: tap is a small violet shard, from half charge a void orb (magenta rim, smoke tail) at x1.9, with a hand tell and os_orb_hot on release; numbers unchanged.
+- Checks: --ostra-combo-check 195/0, dash-dir/dash-aim/motley-live/zone/practice-hero/sfx-set/hero-vfx 0 failures, health --strict OK.
+- Before/after sheet: docs/heroes/media/void_jester_dash_before_after.jpg (local xvfb render; GPU jobs 20261108-181852-19157 and -184012-06953 still queued, PC paused).
+- Not merged.
