@@ -1,0 +1,4 @@
+{
+	"desc": "What neglect does to a Boki (Care starve clock, Econ.revive_neglected). natural_death false: a Boki you forget, however long (offline catch-up included), gets hungry, then weak, then sick, and stops there; it never dies and recovers with food and rest. true: the old rule, a Boki dies after Care.STARVE['dead'] hours of nothing to eat. Losing a Boki to another squad in a match is not neglect and is not affected.",
+	"natural_death": false
+}
