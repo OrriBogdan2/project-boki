@@ -329,6 +329,15 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | recall_cooldown | 1 |
 | swap_cooldown | 3 |
 
+## kit_parity (`content/rules/kit_parity.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| about | Sourced kit numbers the audit (briefs/specs/kit-audit) marks as matching the source. --kit-parity-check fails when content/archetypes/<hero>.json drifts outside tolerance. How to add a row: docs/ARCHETYPES.md, 'Kit parity lock'. |
+| rows | [{"hero": "gunslinger", "slot": "passive", "field": "resource.vamp", "value": 0.06, "tol": 0.0, "evidence": "D Ghost Combat Rush: +6% Omnivamp (supervive_kits.md)"}, {"hero": "gunslinger", "slot": "passive", "field": "resource.wait", "value": 3.5, "tol": 0.0, "evidence": "D Ghost Combat Rush: for 3.5s (supervive_kits.md)"}, {"hero": "gunslinger", "slot": "E", "field": "e.shave", "value": 0.2, "tol": 0.0, "evidence": "D Arcane Railgun: hitting a hunter reduces CD by 20%"}, {"hero": "gunslinger", "slot": "E", "field": "e.shave_rank3", "value": 0.3, "tol": 0.0, "evidence": "D Arcane Railgun upg IV: -30% CD per target hit"}, {"hero": "gunslinger", "slot": "E", "field": "e.rattle_k", "value": 0.2, "tol": 0.0, "evidence": "D Arcane Railgun: +20% dmg vs Dazed"}, {"hero": "gunslinger", "slot": "X", "field": "x.zone_t", "value": 3.0, "tol": 0.0, "evidence": "D Summon Napalm: 3s fire zone"}, {"hero": "mage", "slot": "RMB", "field": "rmb.rank3_mult", "value": 1.5, "tol": 0.0, "evidence": "D Voltaic Spear upg IV: +50% dmg"}, {"hero": "thief", "slot": "E", "field": "e.time", "value": 6.0, "tol": 0.0, "evidence": "D Farstep Dagger: after 6s Shiv MUST teleport back"}, {"hero": "thief", "slot": "E", "field": "e.refund_wall", "value": 0.25, "tol": 0.0, "evidence": "D Farstep Dagger upg: refund 25% CD on hitting terrain"}, {"hero": "thief", "slot": "E", "field": "e.refund_foe", "value": 0.5, "tol": 0.0, "evidence": "D Farstep Dagger upg: doubled (50%) on enemies"}, {"hero": "rimewright", "slot": "RMB", "field": "rmb.charges", "value": 2, "tol": 0.0, "evidence": "D Cryo Spear: 2 charges"}, {"hero": "dredge", "slot": "X", "field": "x.waves", "value": 2, "tol": 0.0, "evidence": "D Slugwave: two waves"}, {"hero": "juggernaut", "slot": "RMB", "field": "rmb.slam.dmg", "per": "lmb.dmg", "value": 3.0, "tol": 0.35, "evidence": "D Execution Slam 130 vs Caldera 43 = 3.0x (audit: 26/8 fine)"}] |
+
 ## level_growth (`content/rules/level_growth.json`)
 
 
