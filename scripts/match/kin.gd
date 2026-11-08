@@ -24,6 +24,9 @@ var speed := 6.5
 var atk_cd := 0.0
 var lunge_t := 0.0
 var target: Ent = null
+## s between looks for a foe while it has none (tuning.json "perf"; a beat under a reaction time)
+static var RETARGET_S := float(Content.rules("tuning")["perf"]["boki_retarget_s"])
+var look_at_t := 0.0            # match time of its next look for a foe
 var chase_stall := 0.0          # seconds spent chasing a target without getting any closer (a ledge, a wall in the way)
 ## Where you threw it: it holds that spot (guarding it) until there's a reason to come back
 ## (you recall it, you go out of leash range, you glide off, it gets hurt). INF when not holding.
@@ -817,7 +820,9 @@ func _sim_active(dt: float) -> void:
 		elif cmd == "chase" and chase_target != null:
 			target = chase_target
 		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
-			target = brain.pick_target()
+			target = brain.pick_target() if m.time >= look_at_t else null
+			if target == null and m.time >= look_at_t:
+				look_at_t = m.time + RETARGET_S       # nothing to fight: look again in a moment, not every step
 	var wish := Vector2.ZERO
 	var spd := speed * slow_mult(0.6) * (1.3 if haste_t > 0.0 else 1.0)
 	if root_t > 0.0 or stun_t > 0.0:
