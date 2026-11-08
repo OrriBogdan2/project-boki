@@ -16,6 +16,8 @@ hollow shimmer for the shadow. Her voice is an adult woman's, cool and quiet, mo
   pin_overdraw                   held too long: a dull falling creak
   pin_super_hit (2 takes)        the Supercharged hit
   pin_heavy / pin_heavy_hit      the Heavy Shot loosed / landing and pinning (3 takes)
+  pin_heavy_full / pin_heavy_burst  the Heavy Shot drawn full / its charged release crack
+  pin_arrow_hit (3 takes)        an Empowered or tap arrow landing
   pin_hail / pin_rain / pin_patter  Hail Wall: arrows up, the rain falling, one arrow striking (3 takes)
   pin_spirit / pin_spirit_end    Spirit Walk: the roll into her shadow / stepping back out
   pin_ult_cast/_nock/_beam/_final  Starpiercer
@@ -212,6 +214,32 @@ def heavy_hit(i):
     return pad(mix(thunk, at(fo(quiver, 0.3) * 0.3, 0.01), grit, sub(70, 45, 0.3, 0.05) * 0.3), d)
 
 
+def heavy_full():
+    """The Heavy Shot drawn full: the thread hums taut under a bright needle ping (the draw's ready cue)."""
+    d = 0.6
+    hum = fo(S.sweep(220, 233, 0.55) * env(N(0.55), 0.03, 0.2), 0.4) * 0.35
+    ping = fo(S.chime(2349, 0.5, 0.14, ((1.0, 1.0), (2.76, 0.3), (5.4, 0.1))), 0.4) * 0.7
+    return pad(mix(hum, ping, stretch(0.3, 760, 980) * 0.3), d)
+
+
+def heavy_burst():
+    """The charged release: a sharp crack off the bow, a bass punch and the thread's tearing snap."""
+    d = 0.6
+    crk = mix(click(0.003, 2200, 8500) * 1.4, crack(0.25, 1200, 7000, 0.01) * 2.0)
+    punch = kick(170, 50, 0.45, 0.01, 0.06, 2.8) * 0.7
+    snap = at(swoosh(0.3, 3000, 900, 2.5, 0.7, 1.0) * 0.5, 0.01)
+    return lpf(pad(mix(crk, soft(punch, 1), snap, sub(65, 40, 0.4, 0.07) * 0.35), d), 9500)
+
+
+def arrow_hit(i):
+    """An Empowered or tap arrow landing: a short needle thunk and a thread's tick."""
+    d = 0.32
+    thunk = mix(click(0.002, 2000, 7000) * 1.2, kick(260 + 15 * i, 110, 0.18, 0.006, 0.025, 2.0) * 0.55,
+                crack(0.12, 1500, 5500, 0.008) * 1.2)
+    tick = at(fo(ring((3322 + 80 * i, 4980), 0.2, (0.12, 0.06), (0.08, 0.05)), 0.4), 0.005)
+    return pad(mix(thunk, tick), d)
+
+
 # ------------------------------------------------------------------ E: Hail Wall
 def hail():
     """A flight of arrows swishing up: several plucks and swooshes staggered."""
@@ -382,6 +410,14 @@ def build():
     S.takes_cat('archer_hurt', hurt, 3, 'grunt')
     S.save_cat('archer_down', down(), 'grunt')
     S.save_cat('archer_death', death(), 'grunt')
+    build_vfx_pass()
+
+
+def build_vfx_pass():
+    """The VFX-quality pass's sounds (docs/VFX_QUALITY.md), written on their own so the older takes stay as shipped."""
+    S.save_cat('pin_heavy_full', heavy_full(), 'cast')
+    S.save_cat('pin_heavy_burst', heavy_burst(), 'fire')
+    S.takes_cat('pin_arrow_hit', arrow_hit, 3, 'impact')
 
 
 if __name__ == '__main__':
