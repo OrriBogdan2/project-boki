@@ -2870,3 +2870,5 @@ READY ext/stuck-integ-950a5444 c3b547945 (supersedes: ext/cinder-flame-queen c3f
 - Checks: --depth-cue-check 0 failures, health --strict OK. Full suite / hitch NOT run (usage).
 - NOT merged with ext/misc-ready-integ: that READY already contains c1a744831, so merging it would turn this branch into the 8-branch integration. `git merge-tree` of this branch with it is clean (no conflicts), so merge round 3 on top of it directly.
 
+READY ext/utilities-shops e94360ee6
+- 18 source utilities as content/utility/*.json (+ scripts/match/utility_more.gd), a fixed stock per shop from content/rules/shops.json (same every match), merges ext/shops. Net.VERSION 0.25.0. --shops-check 53/53, box-revive/equal checks 0 failures, health --strict OK, gen_wiki --check OK. Shop panel with 11 perk-shop rows not viewed on a GPU.
