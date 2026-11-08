@@ -59,7 +59,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 | Signature weapon | War Hammer & Aegis (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot. |
 | Silhouette | the frozen prow shield and the long ice-cased oar |
-| Resource | Guard (max 100) |
+| Resource | none |
 
 ### Kit card
 
@@ -68,7 +68,7 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them. |
-| Passive: Guard | Blocking builds Guard (50 turns your Shield Charge into a Shield Slam); knocking a foe into a wall or another foe stuns it. |
+| Passive: Crushed | Knocking a foe into a wall or another foe stuns it. |
 | Dash: 360 Smash | 360 Smash: a short dash that ends in one spinning hit around you; with the aegis up, a Shield Charge (its own 6s cooldown). |
 | LMB | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you. |
 | RMB: Aegis | Hold to raise your aegis and block shots from the front. With it up, Shift is a Shield Charge on its own cooldown. |
@@ -87,7 +87,6 @@ What the in-game kit card (K) says.
 - *Hold:* Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; LMB with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, Shift is the Shield Charge on this slot's 6s cooldown.
 - *Tap:* A tap only raises and lowers the aegis; the Bash is the Shield Charge on the dash key.
 - *In the air:* Shield Surf: hold to block from the front while gliding.
-- *Resource full:* Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
 
 **Mending Ground (E, 12s cooldown).** A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 
@@ -109,8 +108,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Moment | Tell |
 |---|---|
-| Building up | three rune pips over the helm light at 33 / 66 / 100 Guard |
-| Armed / full | a gold crest light and a hotter aegis; a 0.3s flare before a Slam |
 | Dash spent | dash pips dark |
 
 <!-- /gen:kit -->

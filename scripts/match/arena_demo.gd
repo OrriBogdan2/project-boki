@@ -75,9 +75,7 @@ const ANIM_DEMO := {
 	"bul_ult_slam": ["bulwark", "tower_shield", [0.86, 0.91, 1.2, 1.5, 1.8]],
 	"bul_guard": ["bulwark", "tower_shield", [0.5, 0.56, 0.62, 0.7, 0.9, 1.2]],
 	"bul_crush": ["bulwark", "tower_shield", [0.5, 0.58, 0.64, 0.72, 0.85, 1.05]],
-	"bul_slamshield": ["bulwark", "tower_shield", [0.5, 0.62, 0.76, 0.84, 0.95, 1.2]],
 	"bul_break": ["bulwark", "tower_shield", [0.5, 0.54, 0.58, 0.68, 0.85, 1.1]],
-	"bul_armed": ["bulwark", "tower_shield", [0.5, 0.55, 0.6, 0.68, 0.76, 0.86]],
 	"bul_lumber": ["bulwark", "tower_shield", [0.5, 0.56, 0.62, 0.72, 0.85, 1.05]],
 }
 
@@ -342,8 +340,9 @@ static func tick(A: Arena, dt: float) -> void:
 			if _at(t, dt, 0.25): # raise the shield
 				P.ak.bot_hold["rmb"] = 0.95 if w == "crushed" else 3.0
 				P.ak.press_rmb()
-			# (blocked fire becomes Guard)
-			if t > 0.3 and t < 1.2: P.ak.add_guard(dt * 70.0)
+			if w == "crushed" and _at(t, dt, 0.7):
+				P.dashes = P.max_dashes()
+				P.do_dash()
 			if w == "bulwark":
 				at_t = 1.6
 			else:
@@ -503,16 +502,6 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 				K.cd["rmb"] = 0.0
 				K.set("lock_t", 0.0)
 				K.press_rmb()
-		"bul_slamshield":
-			K.res = maxf(K.res, 60.0)
-			if _at(t, dt, 0.3):
-				K.ch_rmb = 1.0
-				K.cd["rmb"] = 0.0
-				K.bot_hold["rmb"] = 3.0
-				K.press_rmb()
-			if _at(t, dt, 0.7):
-				P.dashes = P.max_dashes()
-				P.do_dash()
 	P.inp["fire"] = fire
 
 ## The X ultimates' strips: Starpiercer cast at 0.5 (its beams from a press at 0.5 after a cast at 0.3, the
