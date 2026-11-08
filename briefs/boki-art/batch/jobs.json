@@ -1,0 +1,58 @@
+[
+  {
+    "id": "chuggamus_r2",
+    "name": "Chuggamus",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game: an endearing but dangerous creature built from one clear idea, a real animal fused with an object so that the object is part of its body, and the idea runs through the whole body: the object's material and shapes repeat across its body, never one thing sitting on, hanging from or strapped to another. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. Clearly an animal: no clothes, no human posture, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Do not copy image 1's creatures, faces or colours. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A huge, round, barrel-shaped hippo whose hide has turned into a steam engine: its skin is made of curved black iron plates with rows of brass rivets, following the round shape of its body like armour scales, with no bands or straps around it anywhere. Hot orange light glows in the seams between the plates. A short, wide iron smokestack grows from the top of its head between its small ears, puffing a little steam. Its four thick, stumpy legs are iron cylinders like pistons, ending in round, flat hippo feet with brass toenails. Its huge lower jaw is a heavy iron cowcatcher grille, and two big ivory tusks curve up beside it like battering rams. A round firebox door with a glowing grate is set into its chest. Face: small, brass-rimmed porthole eyes and a stubborn, unstoppable glare, steam snorting from its nostrils. Main colours: black iron and plum grey, with a brass and furnace-orange accent. Avoid: a band or belt around its middle, a separate tank on its back, anything rolling under its feet, rails, smoke clouds. Element: ember, shown clearly by the glowing orange seams and firebox. Archetype: tough: huge, wide and heavy, low and unstoppable.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "vespox_mid",
+    "name": "Vespox",
+    "refs": [
+      "briefs/boki-art/style_refs/vespyx_2d_ref.png",
+      "briefs/boki-art/evolutions/Glaivyx.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the middle evolution between the small creature in image 1 and the big final form in image 2: the same species and family, keeping the face shape, lime-green eyes, lavender and plum colours, scorpion tail and pincers so anyone can tell all three are related, but clearly in between: noticeably bigger and older than image 1, and clearly smaller, lighter and less armoured than image 2, like a lanky teenager. Do not copy either image's pose, and ignore image 1's dark background. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. A stylised animal, not a realistic one, with simple bold shapes, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite grown out of its body, never held or strapped on. The idea runs through the whole body, never one thing tied to another. Clearly an animal: no clothes, no standing upright, nothing held. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A lanky young fox on long, slightly gangly legs, on all four legs in every view, in an eager, playful hunting stance, with big ears and a fluffy lavender coat. Its front legs end in small, newly grown plum scorpion pincers, about the size of its paws. Its segmented plum tail is longer than in image 1 but still slim, curling up over its back to a single hooked sting with a small glowing lime-green bulb. Only a few small chitin plates show: on its ear tips, its shoulders and a short row down its spine. Face: bright, cocky lime-green eyes and a mischievous, toothy grin with one fang. Main colours: lavender and plum, with a lime-green accent. Avoid: heavy armour, huge pincers, multiple stings, standing upright, wings, blush. Element: venom, shown by a drop of lime-green venom on its sting. Archetype: fast and cheeky: lean, springy and forward-leaning.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "ringrove",
+    "name": "Ringrove",
+    "refs": [
+      "briefs/boki-art/evolutions/Sporcupine.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1: the same species and family, keeping its face shape, teal eyes, mushroom-stalk quills and core idea so anyone can tell at a glance they are related, but much bigger, calmer and more ancient, with its own new silhouette. Do not copy image 1's pose, and ignore image 1's background. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. A stylised animal, not a realistic one, with simple bold shapes, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite grown out of its body, never held or strapped on. The idea runs through the whole body, never one thing tied to another. Clearly an animal: no clothes, no standing upright, nothing held. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A huge, slow, elder porcupine on four legs with a broad, rounded back that has become a living forest floor: a perfect fairy ring of tall mint-teal mushrooms stands in a circle on its back, with soft moss, ferns and tiny caps growing inside the ring. Its outer quills have become thick, spear-tipped stalks pointing outward around the ring like a palisade. Wide shelf fungus forms armour plates on its flanks and cheeks, and moss covers its heavy legs and big digging claws. Gentle glowing spores float above the ring. Face: wise, half-closed teal eyes under mossy brows and a calm, protective smile. Main colours: mossy brown and cream, with a mint-teal and soft green accent. Avoid: a tree on its back, a house, standing upright, a rider. Element: spore and bloom, shown by the glowing fairy ring, moss and drifting spores. Archetype: tough and majestic: huge, wide and slow.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "lanternmit",
+    "name": "Lanternmit",
+    "refs": [
+      "briefs/boki-art/evolutions/Jarmit.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is an evolved form of the hermit crab in image 1: the same species, keeping its big round black eyes on stalks, coral-orange body, glass-edged claw and gentle face, but bigger and stronger, and it has moved out of its glass jar into a new home that has grown onto its body. Do not copy image 1's pose, and ignore image 1's background. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. A stylised animal, not a realistic one, with simple bold shapes, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite grown out of its body, never held or strapped on. The idea runs through the whole body, never one thing tied to another. Clearly an animal: no clothes, no standing upright, nothing held. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A sturdy hermit crab living inside an old brass oil lantern grown onto its back: the lantern's glass panes are fused to its shell, a warm living flame burns inside where its soft body curls around it, and the lantern's domed brass cap and ring handle form a crest on top. Brass plates with little vent holes cover its legs, its big claw is a heavy brass-and-glass pincer glowing orange at the edge, and soot darkens the tips of its legs. Face: big round eyes on stalks with warm amber reflections and a proud, cosy smile. Main colours: coral orange and old brass, with a flame-orange accent. Avoid: a held lantern, a candle, a rope handle, fire breath. Element: ember, shown by the flame glowing through the lantern glass and a few rising sparks. Archetype: tough and cute: chunky, rounded and heavy-clawed.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "stormit",
+    "name": "Stormit",
+    "refs": [
+      "briefs/boki-art/evolutions/Jarmit.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is an evolved form of the hermit crab in image 1: the same species, keeping its big round black eyes on stalks, coral-orange body, glass-edged claw and gentle face, but bigger and stronger, and it has moved out of its glass jar into a new home that has grown onto its body. Do not copy image 1's pose, and ignore image 1's background. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. A stylised animal, not a realistic one, with simple bold shapes, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite grown out of its body, never held or strapped on. The idea runs through the whole body, never one thing tied to another. Clearly an animal: no clothes, no standing upright, nothing held. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A wiry, twitchy hermit crab living inside a tall, narrow glass bottle grown onto its back, tilted up like a lightning rod: inside swirls a tiny dark thundercloud crackling with lightning, and thick copper wire coils wrap the bottle's neck and run down into its shell. Its legs are banded with copper, its big claw is a sharp copper-tipped glass pincer sparking at the tips, and its eye stalks end in little copper rings. Face: wide, startled eyes with yellow sparks and a jittery, toothy grin. Main colours: coral orange and storm grey, with a copper and electric-yellow accent. Avoid: a cork, a label, a held bottle. Element: storm, shown by lightning inside the bottle and sparks between its claws. Archetype: fast: lean, tall and twitchy.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  }
+]
