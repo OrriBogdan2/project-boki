@@ -9,9 +9,10 @@ extends RefCounted
 ## Each squad has a drop leader (the person in it, else its first member). The leader decides when to
 ## jump; the rest of the squad jumps with them and glides down in formation behind the leader (their
 ## gliders track the leader's with a fixed offset, so they keep control of nothing but "separate").
-## The leader can pass the lead to a squadmate (P, or click a name on the map). Anyone who isn't the
-## leader can separate (Z) to jump or steer on their own. Bots follow the leader by default and some
-## break off near the ground to land a little apart.
+## The leader can pass the lead to a squadmate (P, or click a name on the map). Separating (Z) is only
+## possible once the squad's drop is made (the leader has jumped): from then on anyone who isn't the
+## leader can break off to steer their own way, picking another landing point or gliding out early.
+## Bots follow the leader by default and some break off near the ground to land a little apart.
 
 const PLAN_T := 8.0
 const FOLLOW_GAIN := 5.0      # 1/s: how hard a follower closes the gap to its slot
@@ -134,9 +135,6 @@ func _depart() -> void:
 		if hp != Vector3.INF:
 			_set_land(l, hp)
 		m.plan_jump(l, l.ai.get("land", l.pos))
-	for h in m.hunters:
-		if h.ctrl == "bot" and h.drop_solo and h.riding:
-			m.plan_jump(h, h.ai.get("land", h.pos))
 
 func _set_land(h: Hunter, at: Vector3) -> void:
 	h.ai["land"] = at
@@ -223,9 +221,12 @@ func pass_lead(h: Hunter, to: Hunter = null, from_net := false) -> bool:
 			m.plan_jump(to, to.ai.get("land", to.pos))
 	return true
 
-## Break away from the squad's drop: you jump and steer on your own.
+## Break away from the squad's drop and steer on your own. Refused until the drop is made: while the
+## leader is still aboard (a remote machine's message is trusted, it checked on its own side).
 func separate(h: Hunter, from_net := false) -> bool:
 	if is_lead(h) or h.drop_solo or not (h.riding or h.dropping) or not DropLaunch.can_separate(h):
+		return false
+	if waits(h) and not from_net:
 		return false
 	h.drop_solo = true
 	h.drop_follow = null
@@ -234,8 +235,6 @@ func separate(h: Hunter, from_net := false) -> bool:
 		m.net_event(["dsep", h.nid])
 	if h == m.player and m.hud:
 		m.hud.toast_small("Dropping solo", Color("8fd8ff"))
-	if h.riding and h.ctrl == "bot" and not h.remote:
-		m.plan_jump(h, h.ai.get("land", h.pos))
 	return true
 
 ## The leader just jumped: everyone still following jumps with them and takes a slot behind.

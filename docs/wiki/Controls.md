@@ -31,7 +31,7 @@ ability in a match; **R** turns a piece in build mode and reloads in a match.
 | B | Base to a teammate (squads): a 3s channel; moving, attacking or any hit breaks it; you arrive weakened for 3s; 40s cooldown |
 | Y (hold) | Emote wheel, including the truce offer |
 | M | Full map; click to ping |
-| P / Z | During the drop: pass the drop lead / separate from your squad |
+| P / Z | During the drop: pass the drop lead / separate from your squad (after the leader jumps) |
 | Tab | Scoreboard |
 | I | Inventory and backpack |
 | Esc | Menu: settings, controls, save files |

@@ -689,7 +689,7 @@ func _side(c: Control, sz: Vector2) -> void:
 			keys = [["jump", "Jump (the squad jumps with you)" if p.riding else "Glider: you steer the squad"], ["pass_lead", "Pass the lead"]]
 		elif p.drop_solo:
 			keys = [["jump", "Jump" if p.riding else "Glide on your own"]]
-		else:
+		elif not m.skydrop.waits(p):
 			keys = [["separate", "Separate and drop solo"]]
 		for kk in keys:
 			var cap := Settings.key_cap(String(kk[0]))

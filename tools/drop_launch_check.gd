@@ -7,6 +7,8 @@ extends RefCounted
 ##  3. Separate is refused before SEPARATE_AFTER_S.
 ##  4. When the lock ends everyone breaks off on their own and their glider opens.
 ##  5. A Separate after SEPARATE_AFTER_S breaks that member off at once, glider open.
+##  6. Drop-solo gate: Separate is refused for everyone aboard until the team drop is made (the leader has
+##     jumped), allowed after, and a member who breaks off early and steers lands inside the glide reach.
 
 const FORMATION_M := 9.0         # m: the widest drop slot and some slack
 const HEADING_DOT := 0.95        # the launch keeps the ship's heading this closely, whatever the keys say
@@ -113,6 +115,40 @@ func _early_separate() -> void:
 	m.step(Match.DT)
 	ok(not DropLaunch.locked(f) and not f.diving, "a Separate breaks you off at once, glider open")
 
+## Separate before the drop is refused (the player as follower, and a bot); after it, it works and the
+## early solo glider comes down within the reach its height allows.
+func _solo_gate() -> void:
+	await _start()
+	if m.skydrop == null:
+		return
+	var P: Hunter = m.player
+	var bot: Hunter = null
+	for h: Hunter in m.hunters:
+		if h.team == P.team and h != P and h.ctrl == "bot":
+			bot = h
+	ok(bot != null, "a squad bot to lead the drop")
+	if bot == null:
+		return
+	m.skydrop.leads[P.team] = bot
+	ok(not m.skydrop.separate(P) and not P.drop_solo, "solo is refused before the drop (player)")
+	ok(not m.skydrop.separate(bot, false), "solo is refused for the leader")
+	m.ship_jump(bot)
+	ok(bot.dropping and P.dropping, "the drop is made: the leader and the follower are out")
+	ok(not m.skydrop.separate(P), "solo waits out the first %.1f s of the launch" % DropLaunch.SEPARATE_AFTER_S)
+	for i in int((DropLaunch.SEPARATE_AFTER_S + 0.1) / Match.DT):
+		m.step(Match.DT)
+	ok(m.skydrop.separate(P) and P.drop_solo, "solo is allowed after the drop is made")
+	var from := Vector2(P.pos.x, P.pos.z)
+	var reach := maxf(0.0, (P.pos.y + 1.0) / Hunter.DROP_FALL * Hunter.DROP_SPEED)
+	var t := 0.0
+	while P.dropping and t < 40.0:
+		P.inp["move"] = Vector2.LEFT
+		m.step(Match.DT)
+		t += Match.DT
+	var went := from.distance_to(Vector2(P.pos.x, P.pos.z))
+	var what := "the early solo lands %.0f m away, inside the %.0f m glide reach" % [went, reach]
+	ok(not P.dropping and went <= reach + 1.0, what)
+
 func _clear(h: Hunter) -> void:
 	for k in ["jump", "dash", "glide", "glide_btn"]:
 		h.inp[k] = false
@@ -123,6 +159,7 @@ func run(mn: Node) -> void:
 	Save.no_write = true
 	await _locked_flight()
 	await _early_separate()
+	await _solo_gate()
 	if m:
 		m.queue_free()
 	print("LAUNCH DONE, failures: %d" % bad)

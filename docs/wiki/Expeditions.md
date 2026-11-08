@@ -18,7 +18,7 @@ The match opens with a short **planning phase**: the full map is up and everyone
 want to land (bots ping too). Then the skyship crosses the map.
 
 - Your squad has a **drop leader**. The leader jumps and the rest of the squad follows in formation.
-  **P** passes the lead to a squadmate (or click a name on the map); **X** separates you to drop alone.
+  **P** passes the lead to a squadmate (or click a name on the map); **Z** separates you to drop alone, but only once the squad's drop is made (the leader has jumped).
 - After jumping you glide down; a ring on the ground shows where you'd land. Anyone still aboard at
   the far side is dropped.
 - Flying low over a rolled spawn spot on the way down scouts it for your squad (see below).

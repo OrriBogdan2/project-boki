@@ -1284,7 +1284,7 @@ func ship_jump(h: Hunter, force := false) -> void:
 		return
 	if not force and skydrop and skydrop.waits(h):
 		if h == player and hud:
-			hud.toast_small("%s leads the drop  ·  %s to go solo" % [skydrop.leader(h.team).pname, Settings.key_cap("separate")], Color("ffd27a"))
+			hud.toast_small("%s leads the drop  ·  you jump with them" % skydrop.leader(h.team).pname, Color("ffd27a"))
 		return
 	h.riding = false
 	var off := Vector3(rng.randf_range(-0.8, 0.8), 0, rng.randf_range(-0.8, 0.8))
