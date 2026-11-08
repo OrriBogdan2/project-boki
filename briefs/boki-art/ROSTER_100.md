@@ -19,3 +19,30 @@ Total new: 9 + 16 + 11 + 11 + 3 = 50.
 
 ## Prompt batches (10 per message, posted in chat)
 1. Mycroll line (Sporcupine, Amanitusk, Ringrove), Vespyx line (Vespox, Glaivyx, Lashyx), Chuggamus line (Teapotamus, Puffamus), Canvastross line (Kerchick, Jibbatross)
+
+## Types (owner, Nov 8): match the full classic range, one or two types per Boki, no type chart
+
+Proposal awaiting owner OK. 15 existing themes map onto 15 of the 18 classic types; 3 new themes fill the gaps.
+
+| Classic type | Boki theme |
+|---|---|
+| Fire | Ember |
+| Grass | Bloom |
+| Electric | Storm |
+| Ice | Frost |
+| Poison | Venom |
+| Bug | Swarm |
+| Flying | Tempest |
+| Rock + Ground | Stone |
+| Ghost + Dark | Shadow |
+| Psychic | Lunar |
+| Fairy | Prism |
+| Steel / magnet | Gravity |
+| Fighting | Titan |
+| Water | **Tide (new)** |
+| Dragon | **Wyrm (new)** |
+| Normal | **Wild (new)** |
+| (own) fungus | Spore |
+| (own) sound | Echo |
+
+Main: needs a secondary type field on species, and the three new themes. Roster rebalance: about 14 of the 50 new forms become new Tide, Wyrm and Wild lines; the other ~36 are evolutions of existing species.
