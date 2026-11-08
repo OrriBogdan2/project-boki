@@ -66,6 +66,9 @@
 - **Inhuman hint:** something subtly inhuman, such as too-long fingers or a train shaped like a tail.
 - **Views (turnaround):** front, side, back, three-quarter.
 
+### 3b. Malgrave hero set (owner, Nov 7, 23:40 ET)
+She will become a playable character eventually. Make a turnaround (`malgrave_turnaround.jpg`), a splash (`malgrave_splash.jpg`, 16:9, 4K) and a portrait (`malgrave_portrait.jpg`, 1:1, 4K), in the same formats as the hero splashes and portraits. Then the dragon form, then the rest of the villain set.
+
 ### 4. The Wyrm (true form)
 - **Look:** an ancient, huge dragon.
   - Its scale pattern repeats the gold design of the mask.
