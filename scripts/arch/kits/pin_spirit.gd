@@ -119,7 +119,9 @@ func tick(dt: float) -> void:
 	inside = blocked_here()
 	if inside and not was_in:
 		_drop_orb(entry)
-	if k.anim_id == "pin_roll" and k.m.time - k.anim_at > 0.4:
+	# footage 655.55-655.65: the roll goes straight into the crouched walk, no landing beat, so the walk's pose
+	# takes over the moment the travel ends (roll_t) and the roll clip's standing tail (0.24-0.36) never shows
+	if k.anim_id == "pin_roll" and k.m.time - k.anim_at >= float(k.dash_def().get("roll_t", 0.24)):
 		k.play("pin_walk")
 	if inside:
 		passed += 1

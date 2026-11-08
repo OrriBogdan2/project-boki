@@ -59,7 +59,7 @@ Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (
 | Shift | tap | Spirit Walk: a 3 m dodge roll (0.28 s, invulnerable; the footage's 0.27 s) that flows straight into the crouched spirit run, then 2.8 s walking 10% faster through rocks, trees, pillars and ability barriers (not cliffs); rank 3: 0.5 s longer, 33% faster inside something (fading over the walk), allies within 6 m walk too. Damage ends it; ending inside something costs 30 Focus and puts her back where she went in. Her screen tints dark blue while inside; a green shell over her | Spirit Walk: dodge roll, 2.8 s through walls and objects; damage ends it; ending inside a wall costs 30 mana and teleports back | Mana is Focus here. Cooldown 6 s on our charge system instead of the source's mana gate |
 | Shift | long dash | In the air or out of charges: a 4.2 m flick with a sideways tumble (`pin_flick`) and a green streak | (base dash) | Our per-hero base dash variant |
 | E | tap | Hail Wall: lobbed up (0.35 s, everyone sees the arc), then 4.4 s of rain on an arc round her, 120 degrees, at the cursor distance (2-9 m), 1.8 m deep: 5 per 0.5 s, slow 35%, blight (healing barely takes) with blue burn flames. Seven translucent green panels with fletch posts, a ground glow, arrows streaking down | Rain of Arrows: an arc concentric to the hunter, about 120 degrees, at the cursor distance, about 4.4 s | Cooldown 9 s (source 8.3 s with RMB 9 s: the same ratio to our RMB) |
-| X | tap (level 6) | Starpiercer: no cast lock; the next 3 bow shots within 6 s need no draw. Each LMB press nocks 0.3 s, then looses a big arrow (head as wide as its hit, a red thread trail, 90 m/s so 18 m takes 0.2 s like the source's beam) that pierces every foe to 18 m (1.5x Empowered), knocks back 4 and strips 10 armor: 18, 18, then 25 on the last, which finishes a hunter it leaves under 12%. Cooldown 36 s. Telegraph: the arrow's lane and a ticked ring at her feet; three pips and a glowing bow everyone sees; the cast sound carries the whole map | Primal Forces: next 3 shots empowered (no charge, 6 s, piercing, longer range, knockback, armor shred, the final shot executes) | Damage scaled down from the source's ratio (a beam is about a Supercharged arrow there; here 0.3x, final 1.39x the beam as the source's 1.41x) so the ult then a merge never takes a full-health light hunter down. Deadeye stays: it is the Focus payoff on a rooted foe, not a three-shot window, so nothing is unfolded |
+| X | tap (level 6) | Starpiercer: no cast lock; the next 3 bow shots within 6 s need no draw. Each LMB press nocks 0.5 s, then looses a big arrow (head as wide as its hit, a red thread trail, 90 m/s so 18 m takes 0.2 s like the source's beam) that pierces every foe to 18 m (1.5x Empowered), knocks back 4 and strips 10 armor: 18, 18, then 25 on the last, which finishes a hunter it leaves under 12%. Cooldown 36 s. Telegraph: the arrow's lane and a ticked ring at her feet; three pips and a glowing bow everyone sees; the cast sound carries the whole map | Primal Forces: next 3 shots empowered (no charge, 6 s, piercing, longer range, knockback, armor shred, the final shot executes) | Damage scaled down from the source's ratio (a beam is about a Supercharged arrow there; here 0.3x, final 1.39x the beam as the source's 1.41x) so the ult then a merge never takes a full-health light hunter down. Deadeye stays: it is the Focus payoff on a rooted foe, not a three-shot window, so nothing is unfolded |
 | R | - | the Boki Merge | - | R is the Merge for every hero |
 
 ## Assumptions (the footage is silent; the owner can correct these)
@@ -76,7 +76,7 @@ Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (
 - Not built: the double-wall climb (no heightmap equivalent) and Hail Wall damaging wisps (our downed hunters take no ability damage).
 - Starpiercer: the beam is stopped by walls and terrain (the source pierces "destructibles"; ours has no destructible walls on the shot line), and a breakable prop ends it.
 - Starpiercer: the cooldown starts on the cast; unused shots are lost when the 6 s run out; a merge ends the window.
-- Starpiercer: each beam nocks for 0.3 s (the footage shows a short draw; the fine print says no charge) and the next nock waits 0.6 s, so all three fit the window at about 0.9 s each.
+- Starpiercer: each beam nocks for 0.5 s (the footage shows a 0.4-0.8 s draw; the fine print says no charge) and the next nock waits 1.0 s: 1.5 s a shot like the footage (f48/f63/f78), all three inside the 6 s window.
 - Starpiercer's execute is "finish a hunter left under 12% of max health" (the card's "execution damage" isn't defined anywhere we found).
 - Starpiercer beams don't spend Focus and can't be Deadeyes (the two payoffs stay separate).
 - "Inside something" means a rock, tree or pillar tile, or a movement-blocking ability barrier; terrain cliffs and ledges are never passable.
@@ -164,6 +164,36 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 | Payoffs / procs | `pin_deadeye`, `pin_rundown` | locked low with the bow thrust out; a pumped fist and skip |
 | X (Starpiercer), 10 fps beats | `pin_ult_cast`, `pin_ult_nock` (held), `pin_ult_loose`, `pin_ult_final` | a one-frame flash with the bow swept across the chest; string to the cheek, sunk low; a one-frame kick back with the hand flung behind; the last one lifts her off her feet into a hard crouch |
 Strips: `--arena-demo=anim_<id> --arena-shot=<png>` (scripts/match/arena_demo.gd ANIM_DEMO).
+
+## Animation timing (Nov 8: parity pass against the 5 fps footage; 10 fps for the ult)
+Measured offline through `WardenClips` (hem.glb clips seeked to the kit's own move clock, `kmove_t`; blend in 0.1 s,
+blend out to locomotion 0.16 s, under one footage frame) and in `--archer-combo-check`. "Hit" is the release or contact
+key, "end" when the hand settles. Source times from briefs/hero-ref/pin.md (one frame = 0.2 s).
+
+| Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
+|---|---|---|---|---|
+| `arc_draw` | pose up within one frame, held [f102-107] | 0.05 nock / stages 0.6, 1.15 / held from 1.15 (clip FULL 1.25) | same | matches (the hold loops the last 0.1 s) |
+| `arc_tap` `arc_loose` | release a 1-frame snap, little recoil [f69] | snap 0.04-0.05 / settled 0.36-0.43 | same | matches (the snap sits inside the 0.1 s blend) |
+| `arc_super` | body flash and a harder kick [f167-169] | kick 0.05, hip back 0.3 / 0.6 | same | matches |
+| `arc_perfect` `arc_over_loose` | one-frame star / a drooping release | 0.06 / 0.55 (overshoot to 0.6) | same | matches |
+| `arc_over` | held 0.4-0.6 s past Supercharged | from 1.65 s of draw, shakes every 0.08 s | same | matches (0.5 s past) |
+| `arc_heavy_wind` | charge pose from the hold start [f264] | pose at 0.15 s of hold, clip full-draw at 1.25 (charge full 1.1) | clip on the hold's clock: full-draw and full charge both at 1.1 | fixed; asserted |
+| `arc_heavy` | release frame f268, hit f271 | release 0.06 / 0.6 | same | matches |
+| `arc_hail` | lob f456, rain f458 | raise 0.12, lob 0.33-0.36, rain at tell 0.35 / 0.6 | same | matches |
+| `pin_roll` | 0.27 s roll, peak at 0.13, straight into the crouched walk [655.55-655.65] | peak 0.2, clip stands up 0.24-0.36, walk pose only from 0.4 | hands to `pin_walk` at roll_t 0.24 (the standing tail never shows) | fixed; asserted |
+| `pin_walk` | crouched run | hold from 0.2 | same | matches |
+| `pin_flick` `pin_deadeye` | not in the footage | 0.17 / 0.43; 0.45 / 0.73 | same | no source |
+| `pin_ult_cast` | flash f33 (0.1 s) | flash 0.1, swept 0.25 / 0.45 | same | matches |
+| `pin_ult_nock` | a 0.4-0.8 s draw a shot | nock 0.3 (held from 0.3) | nock 0.5 | fixed; asserted |
+| `pin_ult_loose` `pin_ult_final` | 1.5 s a shot [f48/f63/f78] | release 0.1 / 0.5-0.65, next nock at 0.9 | recover 1.0: beam to beam 1.5 s | fixed; asserted |
+| `mf_xform` | - | 0.33 / 0.8 | same | no source |
+
+Clip re-keys for the model (tools/art1/hem_clips.py, on the unmerged ravel-v2 rebuild; none needed for parity now):
+- `roll`: its last key (0.36 standing READY) could end in the crouched walk pose; the kit now hides it either way.
+- `heavy_wind`: HW at 1.1 is right once the clip runs on the hold's clock (done kit-side, no re-key).
+
+Suggestions (ours, not built): the release snap keys (0.04-0.06 s) land inside the 0.1 s blend-in, so the string hand
+snap is about half weight on screen; a 0.05 s FADE for `arc_tap`/`arc_loose`/`arc_super` would show the full snap.
 
 ## Engine notes
 - Kit: `scripts/arch/kits/archer_kit.gd` (wiring), `pin_draw.gd` (draw stages, reticle, perfect, overdraw), `pin_spirit.gd` (Spirit Walk), `pin_fx.gd` (pooled effects), `pin_needle.gd` (the Heavy Shot's held needle), `kit_shaders.gd` / `kit_meshes.gd` (our shaders and meshes), `scripts/match/pin_bjorn_weapons.gd` (the recurve bow model), `scripts/match/kmoves_pin_bjorn.gd` (moves). Data: `content/archetypes/archer.json`, `content/weapons/longbow.json` (`draw`, `overdraw_t`, `overdraw_k`, `quick_k`, `aim`).

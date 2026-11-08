@@ -413,6 +413,7 @@ func rmb_hold_tick(t: float) -> void:
 	if t > float(rmb_def()["hold"]) and not pin_aim:
 		# the Heavy Shot's draw: the needle on the bow, a red bar growing from it (its own creak)
 		play("arc_heavy_wind")
+		anim_at = m.time - t          # on the hold's clock: the clip's full-draw key (1.1) lands with "full" (1.1)
 		pin_aim = true
 		m.sfx("pin_heavy_draw", h.pos, -6.0 if h.is_local() else -10.0)
 		_heavy_tele()
