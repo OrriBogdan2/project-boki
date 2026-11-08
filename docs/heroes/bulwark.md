@@ -122,7 +122,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | Ult: planted for the wind-up and slam, the lane shown first | sheet | confirms (f25-f31) | built | `bjorn ult cast: planted`, `bjorn ult telegraph` |
 | Ult: a crack stays about 10 s | sheet | confirms (f43-f71) | built: slows 20% | `bjorn ult small: the scar ...` |
 | Ult: interrupted by a stun in the wind-up | ours | - | built | `bjorn ult small: a stun in the wind-up interrupts it` |
-| Dash hits refund Shield Bash (rank 4) | in-game data | - | built at rank 3 (our last rank): a 360 Smash that hits refunds the Shield Charge | `combo bulwark: rank 3, a 360 Smash that hits refunds the Shield Charge` |
+| Dash hits refund Shield Bash (rank 4) | in-game data | - | built at rank 3 (our last rank): a 360 Smash that hits refunds the Shield Charge, with the dash-reset cue (sound and Shift pop) when a charge or cooldown was spent | `combo bulwark: rank 3, a 360 Smash that hits refunds the Shield Charge`, `combo bulwark: dash refund, rank 3 miss / rank 1 hit` |
 
 ## Kit data pass (SERVER_UPDATE7, in-game data wins over the footage)
 | Item | Before | After | Conversion |

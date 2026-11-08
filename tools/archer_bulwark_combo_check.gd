@@ -941,6 +941,28 @@ func _bulwark_combos() -> void:
 		K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0,
 		"charges %.1f cd %.1f" % [K.ch_rmb, float(K.cd["rmb"])]
 	)
+	# the refund gives the dash-reset cue; a miss (dashing away) and rank 1 (a hit) refund nothing
+	var cues: Array = []
+	var on_cue := func(_h, src): cues.append(src)
+	CombatBus.dash_reset_cue.connect(on_cue)
+	for refund_case in [["rank 3 hit", 3, 1.0, true], ["rank 3 miss", 3, -1.0, false], ["rank 1 hit", 1, 1.0, false]]:
+		step(m, 1.0)
+		reset.call()
+		P.slot_lv["dash"] = int(refund_case[1])
+		K.ch_rmb = 0.0
+		K.cd["rmb"] = 4.0
+		cues.clear()
+		P.inp["move"] = Vector2(float(refund_case[2]), 0)
+		P.do_dash()
+		step(m, 0.4)
+		P.inp["move"] = Vector2.ZERO
+		var refunded: bool = K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0
+		ok(
+			"combo bulwark: dash refund, %s: refunded %s, cue %s" % [refund_case[0], refund_case[3], refund_case[3]],
+			refunded == refund_case[3] and (cues == ["dash_hit"]) == refund_case[3],
+			"charges %.1f cd %.1f cues %s" % [K.ch_rmb, float(K.cd["rmb"]), cues]
+		)
+	CombatBus.dash_reset_cue.disconnect(on_cue)
 	P.slot_lv["dash"] = 1
 	# Guard at 50: the Shield Charge ends in a Shield Slam (stun 0.6, spends the Guard)
 	step(m, 1.0)
