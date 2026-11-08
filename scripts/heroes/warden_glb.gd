@@ -1029,6 +1029,7 @@ class Springs:
 	const FOLD := 0.75          # radians a folded wing tips back about the side axis through its root
 	const TUCK := 0.8           # and turns in behind the back about the vertical
 	const FLARE := 1.15         # radians a flared wing swings out to her side about the front-back axis
+	const HIDDEN := 0.01        # a chain root's keyed scale under this is out of view: the springs leave it to the clip
 	var skel: Skeleton3D
 	var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}
 	var fold := 0.0             # how far the wing chains are folded (1) or flared (-1) (WING_FOLD)
@@ -1072,6 +1073,12 @@ class Springs:
 		wind_t += dt
 		for ch in chains:
 			var ids: Array = ch["ids"]
+			# (a chain its clip keys to no scale is out of view, Meeko's lantern in her idle and stance: left to
+			# the clip, and back at rest when it shows again; a fade in or out keeps the clip's scale)
+			var shown := skel.get_bone_pose_scale(int(ids[0]))
+			if shown.x < HIDDEN:
+				ch["pts"] = PackedVector3Array()
+				continue
 			var par := skel.get_bone_parent(int(ids[0]))
 			# each joint riding the parent rigidly: its rest relative to the parent's
 			var base := skel.get_bone_global_pose(par) * skel.get_bone_global_rest(par).affine_inverse()
@@ -1138,7 +1145,7 @@ class Springs:
 				var to := (inv * pts[j + 1] - a).normalized()
 				var c := from.dot(to)
 				var q := Quaternion(from, to) if c < 0.99999 and c > -0.999 else Quaternion.IDENTITY
-				skel.set_bone_global_pose(int(ids[j]), Transform3D(Basis(q) * r.basis, a))
+				skel.set_bone_global_pose(int(ids[j]), Transform3D(Basis(q) * r.basis * Basis.from_scale(shown), a))
 
 ## Props on an orbit (RIG_CONTRACT "Orbits"): a .glb node named orbit_<name> riding a bone carries unskinned
 ## props (Tarek's three seeing-stones round his head, each built facing out from the orbit's centre). Each frame

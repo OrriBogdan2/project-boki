@@ -31,7 +31,7 @@ No source hero's pose or attitude is copied.
 | 4 | Cinder the Flame Queen (`ashwick`) | Arm locked straight out for the whole idle; built on the flamethrower the owner removed |
 | 5 | Sparkle the Storm Chaser (`mage`) | "Never quite still" stands frozen for 5 s; the gum pops |
 | 6 | Motley the Void Jester (`ostra`) | Finger pop of 11 to 16 deg at every loop; T-pose arms; the stance has no body keys |
-| 7 | Meeko the Dawnfox (`tender`) | Idle and stance built on the lantern that DECISIONS dropped |
+| 7 | Meeko the Dawnfox (`tender`) | Done Nov 8 (ext/idle-tender): no lantern, weight shift, breath, strap hug |
 | 8 | Neve the Snowglide (`rimewright`) | Toy-soldier pike stance, feet together; no skater weight |
 | 9 | Sable the Silver Thief (`thief`) | Square, locked knees; the stance only raises the pistol |
 | 10 | Vex the Hired Gun (`gunslinger`) | Locked knees and a dead pelvis, but the coin flip is a real signature |
@@ -209,6 +209,17 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - The same feet. She hugs her satchel strap and rises onto her toes to look ahead.
 - **Note:** the model swap waits for her final master sheet (DECISIONS). The rework edits only the clips on the
   current model and hides the lantern by keying it out of view. If companion bones exist by then, leave them unkeyed.
+- **Done (Nov 8, ext/idle-tender):** tools/art1/pip_clips.py `CALM`/`STAND`, pip.glb re-exported, model untouched.
+  - Idle 5.0 s: weight shifts foot to foot on soft knees, the head and shoulders trailing the hips (`LAG`). Ear flick
+    and a held glance over her shoulder (the tail curls in), then a deep breath and she squares up. Paws at her chest.
+  - Stance 6.0 s: the idle's feet. She hugs her satchel strap, rises onto her toes to look ahead, settles, sighs.
+  - Breathing on a new leaf bone `x_breath` under `hips` (chest weights, 1 to 3 % scale).
+  - The lantern (`spring_hanglantern_0`) is keyed to scale 0.001 in idle and stance and 1 in every other clip;
+    `WardenGlb.Springs` skips a chain whose root is under `HIDDEN`. Its light and halo (warden_look.json
+    `anchor_hang_lantern`) ride that chain, so the halo shrinks away while she stands.
+  - Shots, rows idle front/side, stance front/side (f000, f003, f006, f009, f012), live: before
+    [tender_before.jpg](idle/tender_before.jpg), after [tender_after.jpg](idle/tender_after.jpg). f000 against f012
+    match on the keyed body; the tail tip and wings differ in both because the runtime springs settle from spawn.
 
 ### 8. Neve the Snowglide (`rimewright`, art `claire`)
 

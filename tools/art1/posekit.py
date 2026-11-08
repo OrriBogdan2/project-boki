@@ -237,7 +237,7 @@ def two_bone(a, c, l1, l2, pole):
 
 
 def bake(arm, clip, solver, extras):
-    """One clip into an action: every contract bone keyed each frame. extras(params) -> {bone: (rot quat or None, loc)}."""
+    """One clip into an action: every contract bone keyed each frame. extras(params) -> {bone: (rot quat or None, loc or None[, scale or None])}."""
     act = bpy.data.actions.new(clip.name)
     act.use_fake_user = True
     arm.animation_data_create()
@@ -247,8 +247,6 @@ def bake(arm, clip, solver, extras):
     names = [b for b in ("root", "hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R",
                          "thigh.L", "shin.L", "foot.L", "thigh.R", "shin.R", "foot.R") if b in pbs]
     R0, Par = solver.R0, {}
-    for b in names + list(extras({}).keys() if False else []):
-        pass
     for f in range(n):
         t = clip.dur * f / (n - 1)
         P = clip.sample(t)
@@ -264,7 +262,9 @@ def bake(arm, clip, solver, extras):
         loc = R0["root"].inverted() @ (root_at - solver.H0["root"])
         pbs["root"].location = loc
         pbs["root"].keyframe_insert("location", frame=f)
-        for b, (q, l) in extras(P).items():
+        for b, v in extras(P).items():
+            q, l = v[0], v[1]
+            sc = v[2] if len(v) > 2 else None
             pb = pbs[b]
             pb.rotation_mode = "QUATERNION"
             if q is not None:
@@ -273,5 +273,8 @@ def bake(arm, clip, solver, extras):
             if l is not None:
                 pb.location = l
                 pb.keyframe_insert("location", frame=f)
+            if sc is not None:
+                pb.scale = sc
+                pb.keyframe_insert("scale", frame=f)
     arm.animation_data.action = None
     return act

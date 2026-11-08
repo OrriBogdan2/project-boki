@@ -50,20 +50,39 @@ func run(main: Node) -> void:
 	var rest := _emit(P)
 	K.cast_e()
 	var peak := rest
+	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
+	var bi := sk.find_bone("spring_hanglantern_0")
+	var lit := 0.0
 	for f in 90:
 		_frame(m, P)
 		seen[clips.cur] = true
 		peak = maxf(peak, _emit(P))
+		if clips.cur == "hearth":
+			lit = maxf(lit, sk.get_bone_pose_scale(bi).x)
 		await main.get_tree().process_frame
 	ok(seen.has("hearth"), "Hearthlight plays its clip (%s)" % str(seen.keys()))
 	ok(rest > 0.0 and peak > rest * 1.5,
 			"the constellations brighten while she heals (%.2f -> %.2f)" % [rest, peak])
-	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
-	var bi := sk.find_bone("spring_hanglantern_0")
 	var a := sk.get_bone_global_pose(bi).origin
 	var b := sk.get_bone_global_pose(sk.find_bone("spring_hanglantern_1")).origin
 	var down := (b - a).normalized().dot(Vector3.DOWN)
 	ok(down > 0.6, "the lantern hangs (%.2f of straight down)" % down)
+	# standing she holds nothing yet: the idle keys the lantern out of view and breathes on x_breath
+	# (docs/art/IDLE_AUDIT.md 7)
+	ok(lit > 0.9, "the lantern shows in her Hearthlight (scale %.2f)" % lit)
+	var hidden := 1.0
+	var chest := Vector2(INF, -INF)
+	var xb := sk.find_bone("x_breath")
+	for f in 150:
+		_frame(m, P)
+		# (standing: the idle, or the stance)
+		if clips.act_w < 0.01 and clips.up_w < 0.01 and clips.loco_pos.length() < 0.01:
+			hidden = minf(hidden, sk.get_bone_pose_scale(bi).x)
+			var s := sk.get_bone_pose_scale(xb).x if xb >= 0 else 1.0
+			chest = Vector2(minf(chest.x, s), maxf(chest.y, s))
+		await main.get_tree().process_frame
+	ok(hidden < WardenGlb.Springs.HIDDEN, "standing, the lantern is out of view (scale %.3f)" % hidden)
+	ok(chest.y - chest.x > 0.003, "she breathes while she stands (x_breath %.3f..%.3f)" % [chest.x, chest.y])
 	P.lives = 1
 	m.eliminate(P, T, "finished")
 	var dead_seen := false

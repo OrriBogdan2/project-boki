@@ -1,6 +1,7 @@
 """Pip's animation set (hand-keyed as targets, solved by posekit). Times are the kit's: the "mm_" table in scripts/match/kmoves_care.gd and
-content/archetypes/tender.json. Personality: a brave little field medic, afraid of the dark. Quick, light steps, big ears, everything leans on
-the lantern: she keeps it close, checks the dark over her shoulder, and when she must she thrusts it out like a shield. She weighs nothing: a
+content/archetypes/tender.json. Personality: a brave little field medic, afraid of the dark. Quick, light steps, big ears; in a fight everything leans
+on the lantern: she thrusts it out like a shield. Standing she holds nothing yet (IDLE_AUDIT 7): the lantern is keyed out of view
+(LANTERN_OUT) and her paws are her own: at her chest, on her satchel strap. She weighs nothing: a
 hit throws the ears first, a landing is a bounce.
 The lantern hangs from her right fist on spring_hanglantern_* (the runtime's hang chain), so the right hand is posed as a hook: G is the ring's
 pivot, BE the way the fingers point. The left hand is free; "Lh" turns it from the chest's frame.
@@ -47,26 +48,32 @@ def C(name, dur, keys, loop=False, base=READY):
 END = {k: v for k, v in READY.items()}
 
 
-# ---- idle: the lantern held close, a slow breath; she checks the dark over her left shoulder, then her right, and takes a small breath of courage
-def idle(u):
-    s = math.sin(u * 2 * math.pi)
-    c = math.cos(u * 2 * math.pi)
-    p = dict(READY)
-    p["pel"] = (0.004 * c, 0.0, -0.022 - 0.007 * s)
-    p["tor"] = (0.05 + 0.03 * s, 0.06, 0.02)
-    look = -1.0 * bump(u, 0.16, 0.36) + 0.8 * bump(u, 0.50, 0.68)
-    p["hed"] = (-0.06 - 0.02 * s, -0.10 + 0.72 * look * -1, 0.03 - 0.08 * look)
-    p["ear"] = 0.14 * abs(look)
-    p["earL"] = 0.5 * bump(u, 0.17, 0.25) - 0.35 * bump(u, 0.84, 0.9)
-    p["earR"] = 0.5 * bump(u, 0.54, 0.62)
-    p["brow"] = -0.25 - 0.6 * abs(look)
-    p["lid"] = -0.08 * abs(look) + (0.95 if 0.42 < u < 0.455 or 0.90 < u < 0.93 else 0.0)
-    g = READY["G"]
-    lift = 0.03 * abs(look)
-    p["G"] = (g[0] - 0.03 * abs(look), g[1] + 0.02 * abs(look), g[2] + 0.008 * s + lift)
-    p["LP"] = (-0.20, 0.205, 0.745 + 0.008 * s)
-    p["wfl"] = 0.03
-    return p
+LANTERN_OUT = 0.001     # spring_hanglantern_0's scale in the idle and stance: the lantern out of view (no lantern yet, IDLE_AUDIT 7), a hair over 0 so the bone stays invertible
+BREATH_AT = (0.0, 0.03, 0.85)   # m, x_breath's head: the middle of her rib cage, which a scale on it fills out
+IDLE_T, STANCE_T = 5.0, 6.0     # s: a loop long enough for the fidget to read once and settle (clip-check: 2 s at least)
+CALM = dict(READY)
+CALM.update({
+    "pel": (0.0, 0.0, -0.03), "prt": (0.02, 0.0, 0.0), "tor": (0.07, 0.0, 0.0), "hed": (-0.04, 0.0, 0.08),
+    "G": (0.045, 0.25, 0.84), "BE": be((0.0, 0.34, -0.94), (-1.0, 0.1, 0.03)), "LP": (-0.05, 0.245, 0.83), "Lh": (0.0, -1.35, 0.35),
+    "FL": (-0.095, 0.02, A), "FR": (0.10, -0.01, A), "FLy": -0.05, "FRy": 0.04,
+    "brow": -0.2, "ear": -0.03, "fing": 0.5, "wing": -0.04, "wfl": 0.035, "wfq": 1.6, "tailc": -0.15, "breath": 0.0, "lantern": LANTERN_OUT,
+})
+
+
+def cyc(keys, u):
+    """A loop's curve through (u, value) keys, eased between them and wrapping from the last key round to the first, so it closes."""
+    u %= 1.0
+    n = len(keys)
+    for i in range(n):
+        ua, va = keys[i]
+        ub, vb = keys[(i + 1) % n]
+        if i == n - 1:
+            ub += 1.0
+        uu = u if u >= ua else u + 1.0
+        if ua <= uu < ub:
+            x = (uu - ua) / (ub - ua)
+            return va + (vb - va) * x * x * (3 - 2 * x)
+    return keys[0][1]
 
 
 def bump(u, a, b):
@@ -76,31 +83,84 @@ def bump(u, a, b):
     return math.sin(x * math.pi) ** 2
 
 
-# ---- the signature stance: both paws round the lantern, hugged to her chest; eyes dart at the dark; a deep breath, and she lifts it high
+def add(v, d, k=1.0):
+    return tuple(a + k * b for a, b in zip(v, d))
+
+
+# ---- idle (IDLE_AUDIT 7): small and shy, paws at her chest, soft knees, her weight drifting foot to foot; the pelvis leads and the chest,
+# head and paws follow it frames late. Her fidget, once a loop: an ear flicks, she glances over her left shoulder at the dark (the tail
+# curls round her leg, the paws clutch), turns back, takes one deep breath and squares up, brave, then softens
+IW = [(0.0, -0.5), (0.12, -0.5), (0.26, 0.55), (0.36, 0.55), (0.45, 1.0), (0.6, 0.9), (0.72, 0.0), (0.86, -0.5)]   # +1: on her right foot
+LOOK = [(0.0, 0.0), (0.37, 0.0), (0.43, 1.0), (0.56, 1.0), (0.63, 0.0)]
+BRAVE = [(0.0, 0.0), (0.62, 0.0), (0.70, 1.0), (0.77, 1.0), (0.88, 0.0)]
+LAG = (0.027, 0.053, 0.073)     # of the loop (4, 8, 11 frames at 5 s): chest, head, paws behind the pelvis
+
+
+def idle(u):
+    p = dict(CALM)
+    w = [cyc(IW, u - d) for d in (0.0,) + LAG]
+    look = [cyc(LOOK, u - d) for d in (0.0, 0.025, 0.045, 0.06, 0.09)]     # head first, then chest, root, paws, tail
+    brave = [cyc(BRAVE, u - d) for d in (0.0,) + LAG]
+    br = 0.012 * (0.5 - 0.5 * math.cos(u * 3 * 2 * math.pi)) * (1 - bump(u, 0.6, 0.84)) + 0.03 * bump(u, 0.6, 0.84)
+    p["breath"] = br
+    p["pel"] = (0.016 * w[0], 0.0, -0.03 - 0.005 * w[0] * w[0] + 0.012 * brave[0])
+    p["prt"] = (0.02 - 0.03 * brave[0], 0.06 * look[2], -0.04 * w[0])
+    p["tor"] = (0.07 - 0.25 * br - 0.06 * brave[1] + 0.03 * look[1], 0.3 * look[1], 0.06 * w[1])
+    p["hed"] = (-0.04 - 0.09 * brave[2] - 0.05 * look[0], 0.95 * look[0], 0.08 - 0.04 * w[2] - 0.1 * look[0] - 0.06 * brave[2])
+    scare = look[3]
+    for key in ("G", "LP"):
+        p[key] = add(add(add(CALM[key], (0.0, 0.0, 0.25 * br)), (0.012 if key == "LP" else -0.012, 0.0, 0.04), scare), (0.0, 0.01, -0.025), brave[3])
+    p["G"] = add(p["G"], (0.008 * w[3], 0.0, 0.0))
+    p["LP"] = add(p["LP"], (0.008 * w[3], 0.0, 0.0))
+    p["fing"] = 0.5 + 0.4 * scare - 0.15 * brave[3]
+    p["ear"] = -0.03 + 0.35 * look[1] - 0.12 * brave[1]
+    p["earL"] = 0.5 * bump(u, 0.34, 0.40) - 0.3 * bump(u, 0.90, 0.95)
+    p["earR"] = 0.3 * bump(u, 0.15, 0.2)
+    p["brow"] = -0.2 - 0.7 * look[0] + 0.5 * brave[0]
+    p["lid"] = 0.95 * bump(u, 0.12, 0.15) + 0.9 * bump(u, 0.63, 0.70) - 0.1 * look[0]
+    p["tailc"] = -0.15 - 0.75 * look[4] + 0.08 * math.sin(u * 2 * math.pi)
+    p["wing"] = -0.04 - 0.08 * scare + 0.14 * brave[1]
+    return p
+
+
+# ---- the stance (IDLE_AUDIT 7), on the idle's feet: she hugs her satchel strap with both paws and rises on her toes to peer ahead, holds
+# there looking, comes down with a little settle, and lets out the breath she was holding
+STAND = dict(CALM)
+STAND.update({"G": (0.06, 0.24, 0.80), "LP": (-0.09, 0.22, 0.93), "Lh": (-0.2, -1.2, 0.6), "fing": 0.8, "wfq": 1.5})
+UP_T = [(0.0, 0.0), (0.18, 0.0), (0.30, 1.0), (0.58, 1.0), (0.68, 0.0)]
+TOE = 0.07       # m, ankle to the ball of her foot (TIPTOE's)
+TOE_PITCH = 0.5  # rad the heels lift at the top
+
+
 def stance(u):
-    p = dict(READY)
-    s = math.sin(u * 2 * math.pi)
-    hug = 1.0 - bump(u, 0.52, 0.92)
-    high = bump(u, 0.55, 0.9)
-    p["pel"] = (0.0, 0.0, -0.05 + 0.03 * high)
-    p["prt"] = (0.08 - 0.1 * high, 0.0, 0.0)
-    p["tor"] = (0.14 - 0.26 * high, 0.0, 0.0)
-    dart = math.sin(u * 2 * math.pi * 3) * hug
-    p["hed"] = (0.12 * hug - 0.2 * high, 0.34 * dart, 0.0)
-    p["G"] = (0.075 + 0.28 * high, 0.19 + 0.04 * high, 0.905 + 0.42 * high)
-    p["BE"] = be((0.0, 0.1, -1.0))
-    p["LP"] = (-0.13 - 0.1 * high, 0.20 - 0.02 * high, 0.90 - 0.16 * high)
-    p["Lh"] = (-1.1 + 0.6 * high, 0.9, 0.0)
-    p["fing"] = 0.8 - 0.4 * high
-    p["ear"] = 0.55 * hug
-    p["earL"] = 0.25 * max(dart, 0)
-    p["earR"] = 0.25 * max(-dart, 0)
-    p["brow"] = -0.9 * hug + 0.6 * high
-    p["lid"] = -0.12 * hug + (0.95 if 0.48 < u < 0.52 else 0.0)
-    p["FL"], p["FR"] = (-0.105, 0.03, A), (0.11, 0.0, A)
-    p["FLy"], p["FRy"] = 0.3, -0.34
-    p["wing"] = 0.22 * high - 0.1 * hug
-    p["wfl"] = 0.03 + 0.1 * high
+    p = dict(STAND)
+    up = [cyc(UP_T, u - d) for d in (0.0, 0.02, 0.04, 0.06)]       # feet, chest, head, paws
+    settle = bump(u, 0.66, 0.80)
+    sigh = bump(u, 0.74, 0.92)
+    br = 0.01 * (0.5 - 0.5 * math.cos(u * 4 * 2 * math.pi)) * (1 - sigh) + 0.02 * bump(u, 0.16, 0.36) - 0.01 * sigh
+    p["breath"] = br + 0.01
+    pit = TOE_PITCH * up[0]
+    rise = crouchkit.on_toes(0.0, A, TOE, pit)
+    p["FLp"] = p["FRp"] = pit
+    p["FL"] = (CALM["FL"][0], CALM["FL"][1], A + rise)
+    p["FR"] = (CALM["FR"][0], CALM["FR"][1], A + rise)
+    sway = math.sin(u * 2 * math.pi)
+    p["pel"] = (0.008 * sway, 0.01 * up[0], -0.03 + rise + 0.01 * up[0] - 0.012 * settle)
+    scan = 0.22 * math.sin((u - 0.3) / 0.28 * 2 * math.pi) * bump(u, 0.28, 0.6) ** 0.5
+    p["prt"] = (0.02 + 0.03 * up[0], 0.0, -0.025 * sway)
+    p["tor"] = (0.07 - 0.2 * br - 0.04 * up[1] + 0.04 * sigh, 0.3 * scan, 0.03 * sway)
+    p["hed"] = (-0.04 - 0.12 * up[2] + 0.06 * sigh, 0.7 * scan, 0.08 * (1 - up[2]) - 0.02 * sway)
+    for key in ("G", "LP"):
+        p[key] = add(STAND[key], (0.0, 0.0, 0.25 * br - 0.015 * sigh + 0.015 * up[3]))
+    p["ear"] = -0.03 - 0.15 * up[1] + 0.1 * sigh
+    p["earR"] = 0.4 * bump(u, 0.42, 0.47)
+    p["earL"] = 0.3 * bump(u, 0.05, 0.1)
+    p["brow"] = -0.2 + 0.25 * up[0] - 0.15 * sigh
+    p["lid"] = -0.08 * up[2] + 0.95 * bump(u, 0.50, 0.53) + 0.4 * sigh
+    p["wing"] = -0.04 + 0.1 * up[1]
+    p["wfl"] = 0.035 + 0.03 * up[1]
+    p["tailc"] = -0.15 + 0.1 * up[1] + 0.06 * math.sin(u * 2 * math.pi)
+    p["skirt"] = 0.05 * up[1]
     return p
 
 
@@ -204,7 +264,7 @@ LHAND_PUSH = (-1.45, 0.0, 0.0)     # fingers forward, the palm out
 
 
 def clips():
-    out = [FnClip("idle", 4.2, idle), FnClip("stance", 5.0, stance)]
+    out = [FnClip("idle", IDLE_T, idle), FnClip("stance", STANCE_T, stance)]
     out += crouch_set()
     for nm, sp, T in (("walk", 0.45, 0.62), ("run", 1.0, 0.40)):
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
@@ -382,18 +442,62 @@ class Extras:
         out["apron"] = (Quaternion((1, 0, 0), 0.8 * P.get("skirt", 0.0)), None)
         # the tail keeps level while the body pitches: it lies on the ground when she falls, never stands on end
         qh, r0 = self.sol.last["hips"], self.sol.R0["tail"]
-        qw = qh.slerp(Quaternion(), P.get("tailw", 0.65))
+        qw = Quaternion((0, 0, 1), P.get("tailc", 0.0)) @ qh.slerp(Quaternion(), P.get("tailw", 0.65))     # tailc: curled round her left leg (-)
         out["tail"] = ((r0.inverted() @ qh.inverted() @ qw @ r0).normalized(), None)
         f = P.get("fing", 0.35)
         out["fingers.L"] = (Quaternion((0, 0, 1), -1.15 * f), None)
         out["thumb.L"] = (Quaternion((0, 0, 1), -0.6 * f), None)
+        b = P.get("breath", 0.0)        # the rib cage filling out: wide and deep (bone x, z), a little tall (y, the bone's length)
+        out["x_breath"] = (None, None, Vector((1 + b, 1 + 0.3 * b, 1 + b)))
+        k = P.get("lantern", 1.0)
+        out["spring_hanglantern_0"] = (None, None, Vector((k, k, k)))
         return out
+
+
+def ramp(x, a, b):
+    t = min(max((x - a) / (b - a), 0.0), 1.0)
+    return t * t * (3 - 2 * t)
+
+
+def add_breath(arm):
+    """x_breath, once: a leaf under hips in her rib cage, which takes the chest's share of the hips weight (front-heavy, none at the
+    waist, shoulders or neck), so a scale on it is her breathing (IDLE_AUDIT 7). Geometry and every other weight stay as they are."""
+    if "x_breath" in arm.data.bones:
+        return
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = arm.data.edit_bones.new("x_breath")
+    eb.head, eb.tail, eb.roll = Vector(BREATH_AT), Vector(BREATH_AT) + Vector((0, 0, 0.1)), 0.0
+    eb.parent = arm.data.edit_bones["hips"]
+    eb.use_deform = True
+    bpy.ops.object.mode_set(mode="OBJECT")
+    inv = arm.matrix_world.inverted()
+    moved = 0
+    for ob in bpy.data.objects:
+        if ob.type != "MESH" or "hips" not in ob.vertex_groups:
+            continue
+        hg = ob.vertex_groups["hips"]
+        xg = ob.vertex_groups.new(name="x_breath")
+        m = inv @ ob.matrix_world
+        for v in ob.data.vertices:
+            w = next((g.weight for g in v.groups if g.group == hg.index), 0.0)
+            if w <= 0.0 or sum(1 for g in v.groups if g.weight > 0.0) >= 4:     # (a glTF skin takes 4 influences: no fifth)
+                continue
+            c = m @ v.co
+            share = 0.85 * ramp(c.z, 0.66, 0.76) * (1 - ramp(c.z, 0.94, 1.04)) * (1 - ramp(abs(c.x), 0.12, 0.2)) * (0.5 + 0.5 * ramp(c.y, -0.08, 0.14))
+            if share * w < 1e-3:
+                continue
+            hg.add([v.index], w * (1 - share), "REPLACE")
+            xg.add([v.index], w * share, "REPLACE")
+            moved += 1
+    print("x_breath", moved, "verts")
 
 
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:]
     bpy.ops.wm.open_mainfile(filepath=a[0])
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
+    add_breath(arm)
     grip = tuple(K.GRIP)
     rig = {"grip_rest": grip, "blade_rest": (0, 0, -1), "edge_rest": (0, 1, 0), "pelvis": float(K.J["hips"][2]), "hilt_l": 0.05, "dz": SZ - 1.072, "ankle": A, "ankle_keys": A,
            "lhand": {"k": (0, 1, 0), "o": (1, 0, 0), "palm": (-SH, 0, K.WRIST_Z - 0.05)}}
