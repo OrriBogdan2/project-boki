@@ -58,7 +58,7 @@ as the next pass. The frost bud is gone from `ult_look.gd`.
 
 ## Checks
 
-`--rimewright-combo-check`: 94 checks, 0 failures (new: the 8.3 m rink, carry 6.3 m, the ice body's swap,
+`--rimewright-combo-check`: 95 checks, 0 failures (new: the wall slab row, the 8.3 m rink, carry 6.3 m, the ice body's swap,
 freeze, thaw and restore on every surface).
 
 ## Clips
