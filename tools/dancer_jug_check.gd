@@ -289,7 +289,8 @@ func thief(a) -> void:
 	T.hurt(10.0, P, {"src": "shot"})
 	A.step(m, 0.1)
 	A.ok("dancer passive: a knock heals (20% in all), star + pillar",
-			T.downed and K.knocks_seen >= 1 and P.hp >= php + P.max_hp * 0.19 and DJFx.of(m).free_pools.has("pillar")
+			T.downed and K.knocks_seen >= 1 and absf(P.hp - (php + P.max_hp * 0.2)) < P.max_hp * 0.01
+			and DJFx.of(m).free_pools.has("pillar")
 			and DJFx.of(m).free_pools.has("star"),
 			"hp %.0f -> %.0f" % [php, P.hp])
 	A.fresh(T)
@@ -768,6 +769,17 @@ func juggernaut(a) -> void:
 			"x cd %.1f resets %d" % [float(K.cd["x"]), K.slam_resets])
 	A.ok("juggernaut passive: a knock heals 20% of their health",
 			K.knock_healed >= minf(0.19 * T.max_hp, 0.9 * P.max_hp), "healed %.0f of %.0f" % [K.knock_healed, T.max_hp])
+	# the data has the heal, not the number (20% is ours); the takedown reset adds 5% of his own health
+	T.max_hp = 400.0
+	P.hp = 20.0
+	var kh0 := K.knock_healed
+	K.on_knock(T, true)
+	A.ok("juggernaut passive: the kit's knock heal is exactly 20% of the knocked hunter's max health",
+			absf(P.hp - 100.0) < 0.5 and absf(K.knock_healed - kh0 - 80.0) < 0.5,
+			"hp %.1f healed %.1f" % [P.hp, K.knock_healed - kh0])
+	DashReset.takedown(P, T)
+	A.ok("juggernaut passive: the takedown reset adds its own 5% of his health, once, on top of the knock heal",
+			absf(P.hp - (100.0 + P.max_hp * DashReset.HEAL)) < 0.5, "hp %.1f of %.1f" % [P.hp, P.max_hp])
 	# audit (data: "knocking an enemy resets Volcanic Rebuke"): a plain body hit then a knock resets it too
 	A.step(m, 1.0)
 	T.downed = false

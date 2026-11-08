@@ -79,7 +79,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--ash
 | X lift-off ring | LOW | (b) | the ember puffs and wave stay (footage f25); the AimKit disc shown to everyone is gone (it hit nothing). "ult cast: lifts off in its ember puffs, no aim disc" |
 | X aim / recast | ok | (c) | matches |
 | Passive Flashover | ok | (c) | matches |
-| Passive knock heal and ram charge | LOW | (c) | wiki-only (no tooltip line); kept, flagged as ours in "Assumptions" |
+| Passive knock heal and ram charge | LOW | (c) | the data has no knock heal (Felix's card; the one ram charge back is sourced, SERVER_UPDATE6 patch note); the 16% heal is ours-only, kept, listed on the owner card, see "Assumptions" |
 | Dash -> ability rows | MED | (a) | the hose keeps its hold through the ram (item 51, 15ca4857); the ground dash -> LMB buffer text corrected per ext/dash-buffer-source (26bcd138) |
 
 ## Ultimate on X: Flue Flight
@@ -128,6 +128,8 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - The ram can't be steered once it starts and has no wind-up; it goes toward the cursor (the footage shows the cursor side).
 - The pull of the cloak reaches the whole 4.5m ring and needs line of sight; dragged foes stop at walls.
 - The shield's size follows the wiki numbers (the footage doesn't show them); it lasts 3s.
+- The knock heal (16% of his max health) is ours-only: the data's Felix passive has no heal. It stacks on purpose with the shared
+  takedown reset (DashReset, 5%), 21% in all; "passive: the knock heal is 16%..." and "...21% in all" assert both.
 - Ablaze lasts 3s on its own; a fresh stoke refreshes it.
 - The hose has no fuel and nothing reloads (the source shows no fuel bar; no reload exists in the game). The 0.35s relight gap and the self-slow after release are the only limits.
 - The pilot flame is cyan in our palette too (it reads as cool against warm fire); the burn pips use our own flame shape.

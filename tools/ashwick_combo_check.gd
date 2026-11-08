@@ -591,6 +591,12 @@ func _all() -> void:
 		float(K.cd["e"]) <= 0.0 and K.resets >= 1 and P.hp > P.max_hp * 0.6,
 		"cd %.1f hp %.0f" % [float(K.cd["e"]), P.hp]
 	)
+	# the kit's heal is ours-only (the data has none): 16% of max health; the takedown reset adds its own 5%
+	ok("passive: the knock heal is 16% of max health (ours-only, the data has none)",
+		absf(P.hp - P.max_hp * 0.66) < 0.5, "hp %.1f of %.1f" % [P.hp, P.max_hp])
+	DashReset.takedown(P, T)
+	ok("passive: with the takedown reset's 5% a knock heals 21% in all, no more",
+		absf(P.hp - P.max_hp * 0.71) < 0.5, "hp %.1f of %.1f" % [P.hp, P.max_hp])
 	# --- rank 3: the cloak's shield is 30% bigger on top of the rank's own gain; Cinder Shot holds two charges
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))

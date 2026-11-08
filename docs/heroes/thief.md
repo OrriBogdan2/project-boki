@@ -94,7 +94,7 @@ pass above.
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
 | LMB, Arc Bolts | hold | A spinning gold chakram from alternating hands every 0.45s, 34 m/s; it flies to the cursor (12m at most) and fizzles there in a blue-violet puff. A thin white aim line to the cursor with an arrow tick, gold while the next bolt is empowered | Arcslinger: the same, cursor-placed, 0.45s | Range 12m (the footage shows at least 7 bh); no magazine |
-| Passive, Marks | none | Every bolt that hits adds a Mark (no cap, 4s, refreshed; eight diamonds show): +10% bolt damage per Mark. A knock heals 15% on top of the shared 10% (25% in all) with a crimson star on the knocked and a green pillar on her | Malice: about +12% of a shot per consecutive hit, still climbing at 8; knock heal with a green pillar | Gold diamonds over the target keep the stack readable (ours) |
+| Passive, Marks | none | Every bolt that hits adds a Mark (no cap, 4s, refreshed; eight diamonds show): +10% bolt damage per Mark. A knock heals 15% on top of the shared 5% (20% in all; an assist heals 25%) with a crimson star on the knocked and a green pillar on her | Malice: about +12% of a shot per consecutive hit, still climbing at 8; knock heal with a green pillar | Gold diamonds over the target keep the stack readable (ours) |
 | Dash, Vault | Shift | A 4.5m sideways cartwheel in 0.48s (the source's measured one, off the global dash feel) the way you move: a burst that peaks near 0.15s and runs down into the hasted run, a cyan and lilac arc traced by hands and feet, cyan streaks behind; +18% speed for 2s at most; the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 2.34x (Marks add flat), 2 Marks; landing it gives the Vault back at once; rank 2: the bonus +20%, rank 3: +40% in all and the speed boost half again as big | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
 | RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.4m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded and slowed 30% for 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
 | E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s) or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway; rank 3: sticking in a foe gives the Vault back | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
@@ -160,7 +160,8 @@ and asserted in `--dancer-combo-check` / `--kit-combo-check`.
 | LMB keeps firing during the ult, and she moves freely with the ring attached | wiki R, gamerblurb | yes (ult f41-f47) | Built; asserted |
 | The ult resets Cartwheel (the wiki: dashes while active) | in-game card, wiki R | yes (0193) | Built as the Vault back on the cast; asserted |
 | The ult's numbers grow with rank (rank 2: damage, cooldown) | wiki R levels | n/a | Not built: the X ultimates have no ranks (HeroUlt); its damage grows with level through ability power |
-| A knock or assist heals 25% | wiki passive | yes (0063) | Built; asserted |
+| A knock heals (the data: "heal when you knock an enemy", Shiv; no number) | owner's game data [D] | yes (0063) | Built: 15% (ours) plus the shared 5% = 20%, asserted exactly |
+| An assist heals 25% | wiki only; the data has no assist heal | no | Built; ours-only, listed on the owner card |
 
 ## Combinations
 
@@ -180,7 +181,7 @@ All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `-
 | X, then Vault and bolts | she walks and shoots through it, the ring rides along | `dancer X small mechanic: she walks and fires freely, the ring moves with her` |
 | X with a foe in the outer band | harder blades and a 6s blight | `dancer X small mechanic: the outer band hits harder and blights 6s; ...` |
 | X, then a merge | Encore ends, no blade after | `merge hold dancer: Encore's blades stop and its ring goes` |
-| Knock or assist | heal (25% in all), star and pillar | `dancer passive: a knock heals (25% in all), star + pillar` |
+| Knock or assist | heal (20% in all), star and pillar | `dancer passive: a knock heals (20% in all), star + pillar` |
 
 ## Animation moves
 
