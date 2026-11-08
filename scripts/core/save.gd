@@ -73,6 +73,7 @@ func fresh() -> Dictionary:
 		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
 		"active": "",
 		"roster": [],
+		"tools": ["axe", "pickaxe"],   # a new farm starts with both (HomeGather); the Market sells them to older saves
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
 		"items": {"tonic": 1},

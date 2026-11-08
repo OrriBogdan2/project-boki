@@ -8,19 +8,22 @@ extends RefCounted
 ##   - once the house is down and the second Mask is on offer (ClassUnlock.second_pending): "By the way..." and
 ##     the pick of three (HobOffer); taking one plays the short Mask moment (MaskBeat)
 ##   - otherwise: blueprints he drew up (FarmBuilder), then the build menu or goodbye
-## When a line is about something (a "show"), he points at it and the camera looks there for a moment. On the
-## first arrival the camera also swings over to him for a moment while he waves and calls you over.
+## When a line is about something (a "show"), he points at it. The camera holds ONE framing for the whole
+## talk (a soft ease in at the start and out at the end); it only drifts toward a "show" that is too far to
+## be on screen. On the first arrival he waves and calls you over without moving the camera.
 
 const TALK := "Hob"            # Home.panel_open while you talk: you stand still and no prompt shows
-const TALK_ZOOM := 0.8         # the home camera's zoom while you talk (Home.HOME_ZOOM after)
-const EASE_S := 0.6            # s the camera takes to swing over to him and back on the first arrival
-const FACE_K := 0.45           # how far the camera's focus moves from you toward him while you talk
+const TALK_ZOOM := 1.05        # the home camera's zoom while you talk, a little closer (Home.HOME_ZOOM after)
+const FACE_K := 0.3            # how far the camera's focus moves from you toward him while you talk
+const SHOW_FAR_M := 9.0        # m from the talk framing past which a "show" is off screen and the camera drifts to it
+const SHOW_PAN_K := 0.5        # how far toward that far "show" it drifts (half way: it stays in view)
+const SHOW_EASE_S := 0.9       # s the drift to a far "show" takes, and the drift back
 
 var hob: FarmHob
 var box: TalkBox = null
 var offer: HobOffer = null
-var intro_t := -1.0            # s into the first-arrival camera swing, -1 when none
-var show_t := -1.0             # s into a line's look at something, -1 when none
+var intro_t := -1.0            # s into the first-arrival wave and call, -1 when none
+var show_t := -1.0             # s into a line's pointing at something, -1 when none
 var show_at := Vector3.INF
 
 func _init(owner_hob: FarmHob) -> void:
@@ -32,7 +35,7 @@ func rules() -> Dictionary:
 func talking() -> bool:
 	return box != null and is_instance_valid(box)
 
-## Talking, or swinging the camera over on the first arrival (he holds his own pose then).
+## Talking, or waving on the first arrival (he holds his own pose then).
 func busy() -> bool:
 	return talking() or intro_t >= 0.0
 
@@ -190,7 +193,7 @@ func tick(dt: float) -> void:
 				hob.node.pose = "talk"
 	_intro(dt)
 
-## The first arrival: once the screen is clear, the camera swings over to him while he waves and calls you over.
+## The first arrival: once the screen is clear, he waves and calls you over (the camera stays put).
 func _intro(dt: float) -> void:
 	var h = hob.h
 	if intro_t < 0.0:
@@ -201,32 +204,27 @@ func _intro(dt: float) -> void:
 			return
 		tut["hob_intro"] = true
 		intro_t = 0.0
-		h.cam.zoom_to = TALK_ZOOM
 		hob.node.pose = "wave"
 		hob.node.face_to = h.ppos
 		hob.node.shout(String(rules()["call"]))
 		Sfx.play("ping", hob.node.position, -6.0)
 		return
 	intro_t += dt
-	if intro_t > float(rules()["intro_pan_s"]) + EASE_S * 2.0:
+	if intro_t > float(rules()["intro_s"]):
 		intro_t = -1.0
-		h.cam.zoom_to = h.HOME_ZOOM
 
-## The camera's focus: on you, drawn toward Hob while you talk (and toward what he points at), and over to him
-## on the first arrival.
+## The camera's focus: on you, drawn a little toward Hob while you talk, and softly toward a "show" that is too
+## far away to be on screen.
 func frame(focus: Vector3) -> Vector3:
 	if not is_instance_valid(hob.node):
 		return focus
-	var him := Vector3(hob.node.position.x, focus.y, hob.node.position.z)
 	var at := focus
-	if intro_t >= 0.0:
-		var hold := float(rules()["intro_pan_s"])
-		var k := smoothstep(0.0, EASE_S, intro_t) * (1.0 - smoothstep(EASE_S + hold, EASE_S * 2.0 + hold, intro_t))
-		at = focus.lerp(him, k)
-	elif talking() or offer != null:
-		at = focus.lerp(him, FACE_K)
+	if talking() or offer != null:
+		at = focus.lerp(Vector3(hob.node.position.x, focus.y, hob.node.position.z), FACE_K)
 	if show_t >= 0.0 and show_at.x != INF:
-		var span := float(rules()["show_s"])
-		var k := smoothstep(0.0, 0.4, show_t) * (1.0 - smoothstep(span - 0.4, span, show_t))
-		at = at.lerp(Vector3(show_at.x, focus.y, show_at.z), k)
+		var there := Vector3(show_at.x, focus.y, show_at.z)
+		if there.distance_to(at) > SHOW_FAR_M:
+			var span := float(rules()["show_s"])
+			var k := smoothstep(0.0, SHOW_EASE_S, show_t) * (1.0 - smoothstep(span - SHOW_EASE_S, span, show_t))
+			at = at.lerp(there, k * SHOW_PAN_K)
 	return at
