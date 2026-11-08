@@ -1,6 +1,6 @@
 extends "res://tools/clip_shots.gd"
 ## --anim-shots --shots-dir=<dir> [--wardens=a,b] [--frames=8] [--size=240]: every Hunter's walk, run, idle and two
-## attacks at the match camera, for the animation audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
+## attacks at the match camera (--close: a side view at hip height, to read the arms and feet), for the animation audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
 ## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
 ## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
 ## forced).
@@ -29,11 +29,13 @@ func run(main: Node) -> void:
 	var out := ""
 	var ids: Array = Arch.ORDER.duplicate()
 	var frames := 8
+	var close := false
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
 		if a.begins_with("--frames="): frames = int(a.substr(9))
 		if a.begins_with("--size="): frame_px = int(a.substr(7))
+		if a == "--close": close = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -41,7 +43,10 @@ func run(main: Node) -> void:
 	_stage(main)
 	cam.fov = 8.0
 	cam.position = Vector3(0, 21.0, 9.4)
-	cam.look_at(Vector3(0, 0.8, 0))
+	if close:
+		cam.fov = 14.0
+		cam.position = Vector3(0, 1.0, 12.0)
+	cam.look_at(Vector3(0, 0.8 if not close else 1.0, 0))
 	_posts()
 	for id in ids:
 		await _hunter(String(id), out.path_join(String(id)), frames)
