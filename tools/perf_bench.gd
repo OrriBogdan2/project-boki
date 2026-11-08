@@ -7,6 +7,8 @@ extends RefCounted
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
+## The gate: a match p99 over P99_SLACK times the one recorded for this adapter, load, quality and length in
+## tools/perf_baseline.json exits 1 (BENCH GATE FAIL). Record a new baseline by editing that file from a run.
 
 const DT := 1.0 / 60.0
 const VIEW := Vector2i(640, 360)     # small window: a software rasterizer's fill time; counts are the same
@@ -23,6 +25,10 @@ var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
 const HITCH_MS := 100.0
+const SLOW_MS := 33.0               # a frame over this counts as a hitch in the summary (under 30 fps)
+const BASELINE := "res://tools/perf_baseline.json"
+const P99_SLACK := 1.15             # the gate: match p99 may be at most 15% over the baseline
+var match_p99 := 0.0
 var vp: RID
 
 func run(main_node: Node) -> void:
@@ -47,7 +53,19 @@ func run(main_node: Node) -> void:
 	if out_path != "":
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
 		if fa: fa.store_string("\n".join(rows) + "\n")
-	main.get_tree().quit()
+	main.get_tree().quit(_gate())
+
+## 1 when the match p99 regressed past P99_SLACK of the baseline for this setup, else 0.
+func _gate() -> int:
+	var key := "%s|%dx%d|%s|%ds" % [RenderingServer.get_video_adapter_name(), teams, squad, Settings.quality(), int(secs)]
+	var base = JSON.parse_string(FileAccess.get_file_as_string(BASELINE)) if FileAccess.file_exists(BASELINE) else {}
+	if not (base is Dictionary and base.has(key)):
+		print("BENCH GATE no baseline for '%s'" % key)
+		return 0
+	var cap := float(base[key]["p99"]) * P99_SLACK
+	print("BENCH GATE %s: match p99 %.1f ms, cap %.1f (baseline %.1f +15%%)" % [
+		"PASS" if match_p99 <= cap else "FAIL", match_p99, cap, float(base[key]["p99"])])
+	return 0 if match_p99 <= cap else 1
 
 func _match() -> void:
 	var o := Match.demo_opts()
@@ -219,9 +237,10 @@ func _summary(part: String, fl: Array) -> void:
 	var sc: Array = fl.map(func(f): return float(f["script"]))
 	sc.sort()
 	var p99 := float(w[int((w.size() - 1) * 0.99)])
+	if part == "match": match_p99 = p99
 	var sc99 := float(sc[int((sc.size() - 1) * 0.99)])
-	print("BENCH %s: %d frames, wall avg %.1f ms, p99 %.1f ms (1%% low %.1f fps)" % [part, fl.size(), _avg(fl, "wall"),
-		p99, 1000.0 / maxf(low, 0.001)])
+	print("BENCH %s: %d frames, wall avg %.1f ms, p99 %.1f ms (1%% low %.1f fps), %d frames over %d ms" % [part,
+		fl.size(), _avg(fl, "wall"), p99, 1000.0 / maxf(low, 0.001), w.filter(func(x): return x > SLOW_MS).size(), SLOW_MS])
 	print("BENCH %s cpu: match script avg %.2f ms p99 %.2f ms, process %.2f ms, hud %.2f ms, render cpu %.2f ms" % [
 		part, _avg(fl, "script"), sc99, _avg(fl, "proc"), _avg(fl, "hud"), _avg(fl, "rcpu")])
 	print("BENCH %s scene: draws %.0f, tris %.0fk, objects %.0f, nodes %.0f, emitters %d, lights %d, shadowed %d" % [
