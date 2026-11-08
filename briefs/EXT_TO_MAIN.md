@@ -2719,3 +2719,6 @@ Malgrave's human form is locked by the owner. The main design is briefs/art-refs
 
 ## 2026-11-07 23:45 ET (art): CORRECTION to the Malgrave lock above
 The owner picked D, not B, as the main design. briefs/art-refs/villain/malgrave_human.jpg is now D: a plunging pearl silk halter gown, a crimson scale belt, crimson rose-patterned thigh-high heeled boots, a white feather mantle at her elbows, gold claws, a confident smile and the infinity-loop tail behind her. The feather-crest version moved to malgrave_human_alt_crest.jpg as an iconic alternate. The other two alternates are unchanged. MALGRAVE_QUEEN_LOOK.md is updated.
+
+## 2026-11-07 23:50 ET (art): Malgrave final pick (supersedes the two notes above)
+The main design is briefs/art-refs/villain/malgrave_human.jpg, option I: Malgrave seated cross-legged on her own coiled pearl-white serpent tail. She wears a plunging pearl silk halter gown, crimson rose-patterned thigh-high heeled boots, a white feather mantle and gold claws. Three alternates are kept in the same folder. malgrave_human_alt_standing.jpg (D) is the same outfit standing and is the reference for her model. malgrave_human_alt_silk.jpg (H) is a second, more revealing outfit. malgrave_human_alt_crest.jpg (B) has a feather crest and an iconic silhouette. MALGRAVE_QUEEN_LOOK.md is updated.

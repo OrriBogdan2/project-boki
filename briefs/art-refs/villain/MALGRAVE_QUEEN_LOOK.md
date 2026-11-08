@@ -19,19 +19,18 @@ File: `villain/malgrave_mask.jpg`.
 ## Human form: LOCKED (owner, Nov 7, 23:36 ET)
 This section overrides everything below where they conflict.
 
-**Main design:** `malgrave_human.jpg` (option D, Nov 7).
-- **The tail:** her pearl-white serpent tail (fine scales, crimson fin ridge) loops into a huge infinity sign behind her. This is her signature silhouette, the "Undying Queen". Keep it in every pose where it fits.
-- **The gown:** a clinging pearl-white silk halter gown with a neckline plunging to her navel, a crimson scale belt at her tiny waist, and a slit to the hip.
+**Main design:** `malgrave_human.jpg` (option I, owner Nov 7, 23:38 ET; the sexiest version).
+- **Pose:** she sits on the coils of her own pearl-white serpent tail (fine scales, crimson fin ridge) with her legs crossed. The loops of her tail around her form a throne and an infinity sign; this is her signature "Undying Queen" silhouette.
+- **The gown:** a clinging pearl-white silk halter gown with a neckline plunging to her navel, open at the sides, with a crimson scale belt at her tiny waist.
 - **Legs:** crimson rose-patterned thigh-high heeled boots.
-- **Mantle:** a white feather mantle tipped in pink, draped at her elbows like folded wings.
+- **Mantle:** a white feather mantle at her elbows.
 - **Hands:** gold claw tips.
-- **Pose:** a confident, radiant smile; one hand on her hip, the other lifting her skirt.
-- **Body:** the owner likes this body type best. In B she reads heavier.
+- **Expression:** a sly, inviting smile, with one clawed hand at her collarbone.
 
-**Alternates:**
-- **Alternate pose:** `malgrave_human_alt_throne.jpg` (option I). She sits on her own coils with her legs crossed, in the same gown and boots.
+**Alternates (all kept):**
+- **Standing:** `malgrave_human_alt_standing.jpg` (option D). The same gown and boots, standing with one hand on her hip and the other lifting her skirt, with the infinity tail behind her. Use this as the standing reference for the turnaround and in-game model.
 - **Second outfit:** `malgrave_human_alt_silk.jpg` (option H). She reclines on her coils in two crossed silk bands with a sheer pink skirt. This is the most revealing version.
-- **Iconic alternate:** `malgrave_human_alt_crest.jpg` (option B). A feather crest fans out behind her head, with sheer pooling sleeves and a full infinity tail. Use it for the crest idea only; her body here is heavier than the locked one.
+- **Iconic:** `malgrave_human_alt_crest.jpg` (option B). A feather crest fans out behind her head, with sheer pooling sleeves and a full infinity tail. Her body reads heavier here, so use it for the crest idea only.
 
 **Character:** she is not visibly evil. She wants to look as radiant, good and desirable as possible: adored, gracious and angelic, in pearl white, blush pink and crimson.
 
@@ -43,7 +42,7 @@ This section overrides everything below where they conflict.
 - The halo (the owner thinks it looks dumb).
 - The stacked gold neck rings (the owner hates them).
 
-**Next:** a turnaround of the main design (D).
+**Next:** a turnaround, built from the standing alternate (D), since the main design is seated.
 
 ## Human form: direction (owner, Nov 7; superseded by the lock above)
 
