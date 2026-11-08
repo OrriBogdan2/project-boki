@@ -2805,3 +2805,9 @@ READY ext/mossy-dash-refund 347408a2d (rank 3 dash refund already built; added D
 READY ext/mossy-shield-bash edfaf87cf (Shift in the aegis's 0.1 s rise fires the Shield Charge, not the Spin Dash; the aegis-up bash also fires in the air; assert added, bulwark.md row fixed; --bulwark-combo-check 145 PASS/0 FAIL, --dash-flow-check 0 failures, health --strict OK, gen_wiki --check OK)
 READY ext/sable-lmb-range 5bd83bbc6 (Sable LMB to source: 8.5m range, 9.5m empowered, 37.5 m/s; combo check asserts range and flight time)
 READY ext/sable-bola-instant b31c26641 (Sable Bola: instant release, wall/tree after first catch stuns; combo-check, health, wiki pass)
+
+## 2026-11-08 02:36 ET (art): hero and key art updates tonight
+- Key art. The Kael/Vex face-off has a new main, keyart/keyart_faceoff_blade_throat.jpg: no heart, and a full-length greatsword from off-screen with its point under her jaw. The older face-offs are kept. keyart/keyart_last_light_final.jpg is v2: cleaner, and Motley's cards now burn purple, stuck in Albert's shield and fanned in his hand.
+- Grimble. grimble_v2/grimble_v2_splash.jpg is now "The Leap": he dives off a sky cliff, and his stretched bone-hook arm pierces a falling chest.
+- Sable. sable_v2/sable_v2_splash.jpg is now "The Slip": she steals the gem from behind a laughing card gang with a wink and a "shh". There are three alternates (_alt_perch, _alt_upside_down, _alt_dodge). sable_v2_portrait.jpg now has her master-sheet dark eyes and pendant.
+- Ideas list (no schedule): corruption stages. The Nov 28 reminder was cancelled by the owner.
