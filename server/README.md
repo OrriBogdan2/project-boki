@@ -37,7 +37,7 @@ All bodies are JSON. The client's `Net.VERSION` must equal the version the match
 | `DELETE /queue/<ticket>` | | `{"state": "gone"}` (leaves the queue; a ticket that already has a match leaves its slot to a bot) |
 
 Queues: duel is 1v1 (2 slots), arena 4v4 (8 slots), trio is extraction in teams of 3 (`TRIO_SLOTS`,
-default 12). A match starts as soon as the line holds a full match of humans, or when the oldest ticket
+default 24). A match starts as soon as the line holds a full match of humans, or when the oldest ticket
 has waited the fill timeout (20 s duel and trio, 30 s arena); bots fill the rest, at least one human is
 in. `party` lists the names of friends who queued their own tickets; tickets that name each other land
 on the same team when there is room (a party larger than a team is split).
@@ -77,7 +77,7 @@ with stdout piped, and:
 | `SERVER_VERSION` | probe | the build's Net.VERSION when `--version` isn't supported |
 | `PORT_MIN`, `PORT_MAX` | `7777`, `7799` | UDP match ports |
 | `FILL_TIMEOUT_DUEL`, `_ARENA`, `_TRIO` | `20`, `30`, `20` | seconds before bots fill a match |
-| `TRIO_SLOTS` | `12` | players per extraction match |
+| `TRIO_SLOTS` | `24` | players per extraction match (8 trios on the 2x Hollow Crown) |
 | `TOKEN_TTL_S` | `60` | an unused token's lifetime |
 | `READY_TIMEOUT_S` | `30` | how long a server may take to print `ready` |
 | `TOKENS_DIR` | `/run/boki` | where tokens files are written (0600) |
