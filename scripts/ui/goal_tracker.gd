@@ -92,7 +92,7 @@ static func build() -> PanelContainer:
 	var rows := lines()
 	if rows.is_empty():
 		return null
-	var box := UI.card(Color(0.06, 0.07, 0.11, 0.86), 14, 14)
+	var box := UI.card(Color(UI.NIGHT, 0.86), 14, 14)
 	UI.set_card_border(box, Color(1, 1, 1, 0.07), 1)
 	box.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	box.offset_left = -316

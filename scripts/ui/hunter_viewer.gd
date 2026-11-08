@@ -142,7 +142,7 @@ func set_hunter(hunter_id: String) -> void:
 	fx.get_parent().get_child(0).queue_redraw()
 
 func _frame(col: Color) -> StyleBox:
-	return UI.frame(Color(0.05, 0.045, 0.08, 0.96), 14, Color(col, 0.45), 1, 14, 12)
+	return UI.frame(Color(UI.NIGHT, 0.96), 14, Color(col, 0.45), 1, 14, 12)
 
 func _rebuild_body() -> void:
 	if _body:
@@ -310,7 +310,7 @@ func select(i: int) -> void:
 		var row: Control = rows[j]
 		if row is AbilityClip:
 			var edge := Color(col, 0.95) if j == slot_i else Color(col, 0.35)
-			row.add_theme_stylebox_override("panel", UI.frame(Color(0.04, 0.035, 0.07, 0.96), 10, edge, 1, 6, 6))
+			row.add_theme_stylebox_override("panel", UI.frame(Color(UI.NIGHT, 0.96), 10, edge, 1, 6, 6))
 			(row as AbilityClip).play(j == slot_i)
 	slot_changed.emit(current_slot())
 

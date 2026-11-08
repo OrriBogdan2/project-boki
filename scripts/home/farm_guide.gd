@@ -139,7 +139,7 @@ func _site_progress() -> String:
 	return "%d/%d swings" % [int(e["site"]["got"]), int(e["site"]["need"])]
 
 func _make_hint() -> void:
-	hint_box = UI.card(Color(0.06, 0.07, 0.11, 0.9), 10, 14)
+	hint_box = UI.card(Color(UI.NIGHT, 0.9), 10, 14)
 	UI.set_card_border(hint_box, Color(UI.GOLD, 0.5), 1)
 	hint_box.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	hint_box.grow_horizontal = Control.GROW_DIRECTION_BOTH

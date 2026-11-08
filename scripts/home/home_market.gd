@@ -214,7 +214,7 @@ func _vendor_card(g: Array) -> Control:
 	var is_open := Progress.unlocked(key)
 	var cost: int = g[3]
 	var col: Color = Color(g[4])
-	var card := UI.card(UI.CARD if is_open else Color(0.1, 0.11, 0.15, 0.9), 10, 12)
+	var card := UI.card(UI.CARD if is_open else Color(UI.NIGHT_HI, 0.9), 10, 12)
 	card.custom_minimum_size = Vector2(404, 0)
 	card.tooltip_text = String(g[2]) + ("" if is_open else "\n" + Progress.req_text(key))
 	var hr := UI.hbox(10)
