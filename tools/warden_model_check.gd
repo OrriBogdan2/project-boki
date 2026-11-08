@@ -19,17 +19,17 @@ const WARDENS := {
 	"archer": {"hit_r": 0.392, "height": 1.07, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
 	# gunslinger: Vex is slim and her minigun hugs her hip
 	"gunslinger": {"hit_r": 0.416, "height": 1.09, "width": [0.5, 1.15], "moves": "gunslinger_"},   # (slim)
-	# (slim and long-legged; height_3d: her rods stand over the head)
-	"mage": {"hit_r": 0.4, "height": 1.08, "height_3d": 1.18, "width": [0.6, 1.3], "moves": "mage_"},
+	# (slim and long-legged; height_3d: her v2 rods stand a hand over the head)
+	"mage": {"hit_r": 0.4, "height": 1.08, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "mage_"},
 	# (Sable's moth antennae stand ~0.3 m over her head, as on the master sheet)
 	"thief": {"hit_r": 0.384, "height": 0.98, "height_3d": 1.18, "width": [0.6, 1.3], "moves": "thf_"},
-	# (lean, the locs: his art)
-	"dolm": {"hit_r": 0.388, "height": 1.09, "height_3d": 1.15, "width": [0.7, 1.5], "moves": "breah_"},
+	# (lean; height_3d: the v2 locs hang down, no piled crown over the head)
+	"dolm": {"hit_r": 0.388, "height": 1.09, "height_3d": 1.08, "width": [0.7, 1.5], "moves": "breah_"},
 	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
 	# (Motley on his box: the hover came down to a hand's width, Nov 5, so his top is 0.14 m lower; the cards widen him)
 	"ostra": {"hit_r": 0.412, "height": 1.18, "height_3d": 1.2, "width": [0.5, 1.6], "moves": "ostra_"},
-	# (Claire, the final design: the hood and horns stand over her head; capelet and skirt widen the old slim build)
-	"rimewright": {"hit_r": 0.38, "height": 0.96, "height_3d": 1.06, "width": [0.6, 1.25], "moves": "tm_"},
+	# (Claire, the v2 design: the ears stand over her head; at the chart's 0.96x she is slim, as Vex)
+	"rimewright": {"hit_r": 0.38, "height": 0.96, "height_3d": 1.06, "width": [0.5, 1.25], "moves": "tm_"},
 	# (Cinder's fire stands over her head; the chart's taller Cinder is wider by as much)
 	"ashwick": {"hit_r": 0.376, "height": 1.16, "height_3d": 1.33, "width": [0.7, 1.75], "moves": "as_"},
 	# (Kael: body size 1.06, owner Nov 4: 9% bigger; juggernaut.md's 1.12x was at 1.0)
