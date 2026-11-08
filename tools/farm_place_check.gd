@@ -11,6 +11,7 @@ extends RefCounted
 
 var bad := 0
 var main: Node
+var shots := ""
 
 func ok(cond: bool, what: String) -> void:
 	print("FPLACE %s %s" % ["ok  " if cond else "FAIL", what])
@@ -20,6 +21,11 @@ func ok(cond: bool, what: String) -> void:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--shots-dir="):
+			shots = String(a).substr(12)
+	if shots != "":
+		DirAccess.make_dir_recursive_absolute(shots)
 	if main.fade:
 		main.fade.reveal(0.05)
 	main.get_tree().root.size = Vector2i(1280, 720)
@@ -138,9 +144,11 @@ func _modal() -> void:
 	await main.get_tree().create_timer(0.5).timeout
 	ok(n._mat.get_shader_parameter("dim") >= FarmSpotlight.DIM_MODAL - 0.01,
 		"everything else is dark (%.2f)" % n._mat.get_shader_parameter("dim"))
+	await _shot("place_1_build_button", 0.2)
 	home.hb.toggle()
 	await _poll(home)
 	n = FarmSpotlight._node
+	await _shot("place_2_house_tile", 0.6)
 	ok(FarmSpotlight.showing() and n.phase == "tile", "step 2: in build mode, the House tile is lit")
 	var tile: Control = home.hb.bar.tile_of("house")
 	var tile_r := Rect2()
@@ -163,6 +171,7 @@ func _modal() -> void:
 	ok(String(home.hb.held.get("id", "")) == "house" and FarmSpotlight.showing() and n.phase == "spot",
 		"step 3: the House is in hand, the spot is lit")
 	var cells: Array = home.guide.place_cells()
+	await _shot("place_3_the_spot", 0.6)
 	ok(not cells.is_empty() and home.hb.debug_m != Vector2.INF,
 		"the ghost sits on the target (%d tiles)" % cells.size())
 	var hole := Rect2(n._holes[0].position + n.global_position, n._holes[0].size)
@@ -237,6 +246,7 @@ func _hunger() -> void:
 	home._confirm_start()
 	await _frames(2)
 	var gate := _find_gate(home)
+	await _shot("hunger_1_needs_two", 0.3)
 	ok(gate != null and home.panel_open == "Too hungry to go", "the Too hungry panel is up with the gate")
 	ok(_texts(gate).any(func(t): return t.contains("needs 2 more meals")),
 		"it says exactly what it needs: %s" % [_texts(gate)])
@@ -245,6 +255,7 @@ func _hunger() -> void:
 	ok(feed != null and not feed.disabled, "a Feed button is right there")
 	feed.pressed.emit()
 	await _frames(2)
+	await _shot("hunger_2_one_meal_left", 0.2)
 	ok(_texts(gate).any(func(t): return t.contains("needs 1 more meal.")), "one meal in: the count drops live")
 	ok(home.panel_open == "Too hungry to go", "the panel is still the same one")
 	rec["needs"]["food"] = 10.0
@@ -299,3 +310,9 @@ func _button(n: Node, starts: String) -> Button:
 		if r != null:
 			return r
 	return null
+
+func _shot(file: String, secs: float) -> void:
+	if shots == "":
+		return
+	await main.get_tree().create_timer(secs).timeout
+	main.get_viewport().get_texture().get_image().save_png(shots.path_join(file + ".png"))
