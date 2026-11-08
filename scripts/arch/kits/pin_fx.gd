@@ -33,7 +33,7 @@ const HEAVY_SCALE := 6.0
 const ULT_WIDTH := 0.6          # m: Starpiercer's arrow head and trail, its hit width (2 x the 0.3 shot radius)
 const THREAD := Color("e04aff")     # her signature orchid (archetypes/archer.json "color"): thread, trails, glows
 const PALE := Color("f4c8ff")       # the pale half of her orchid: heads and hot cores
-const DEEP := Color("8a1aa8")       # the deep shade of her orchid: the Heavy Shot's shaft, the overdrawn trail
+const DEEP := Color("8a1aa8")       # the deep shade of her orchid: the overdrawn trail
 const GOLD := Color("ffc02a")       # the perfect-release cue only (a timing signal, not her body colour)
 const SILVER := Color("dfe6f0")     # her needles
 const FLETCH := Color("c8b48c")     # the feathers
@@ -151,7 +151,7 @@ const LOOK := {
 	"super": [Color.WHITE, Color.WHITE, THREAD, Color(THREAD, 0.95), 5.0, 0.4, 1.35],
 	"over": [Color("8fa0b4"), Color("c0c8d4"), Color("7a6a58"), Color(DEEP, 0.4), 1.0, 0.1, 0.9],
 	"ult": [Color.WHITE, Color.WHITE, THREAD, Color(THREAD, 0.95), 5.0, ULT_WIDTH, 5.0],
-	"heavy": [DEEP, PALE, THREAD, Color(THREAD, 1.0), 7.0, 0.9, HEAVY_SCALE],
+	"heavy": [THREAD, PALE, THREAD, Color(THREAD, 1.0), 7.0, 0.9, HEAVY_SCALE],
 }
 
 func _dress(n: Node3D, kind: String) -> void:

@@ -319,7 +319,7 @@ func _pin(a: Vector3, k: float) -> void:
 	vfx("heavy_go", h.pos, dir, {"k": k, "len": reach * (1.0 + 0.2 * k)})
 	# the release burst's pale fletch core sits on the aim line at the bow, bigger than any bow cue (heavy_go
 	# layers the orchid body, sweep and sparks round it), and a screen kick along the shot
-	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, PinFx.PALE, 0.08, 0.14, 1.0, 5.0)
+	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, PinFx.PALE, 0.06, 0.06, 1.0, 5.0)
 	heavy_kicks += 1
 
 func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:
