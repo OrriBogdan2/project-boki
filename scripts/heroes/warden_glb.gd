@@ -260,7 +260,8 @@ static func _smoke(root: Node3D, own: Dictionary) -> void:
 		var a := (mi as MeshInstance3D).get_aabb()
 		box = a if box.size == Vector3.ZERO else box.merge(a)
 	if at_anchor:
-		box = AABB(Vector3.ONE * -0.2, Vector3.ONE * 0.4)
+		var half := float(sm.get("box", 0.2))
+		box = AABB(Vector3.ONE * -half, Vector3.ONE * half * 2.0)
 	var p := CPUParticles3D.new()
 	p.name = "Smoke"
 	p.amount = int(sm.get("amount", 16))

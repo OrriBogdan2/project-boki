@@ -482,6 +482,20 @@ Breaker total: 6 tasks, 116 credits (the body's two attempts used).
 | Vex v2 body | 22:38 | 01a1b2f3-0ba1-76e8-9810-46951086bee6 | meshy-7.1 | the 3 edited views + the same as texture refs; A-pose, defaults | 40 | **Kept** |
 | Vex v2 head | 22:45 | 01a1b2f3-b897-7037-ac35-70264cddd250 | meshy-7.1 | the 4 head views, no pose | 40 | **Kept** |
 
+### Cinder v2 (Flame Queen, titled the Ashen Kiss), 2026-11-07 (balance 1322 before; 76 credits)
+| Task | Id | Model | Credits | Result |
+|---|---|---|---:|---|
+| edit front / side / back / 3-4 | 01a1b628-26fa-714e / 26b8-73d2 / 26e2-7241 / 26ef-728a | nano-banana-pro | 36 | No tank, hose, goggles: kept |
+| scan | 01a1b62a-16b7-739b-81ce-e1fee79ab44c | multi-image-to-3d | 40 | Kept |
+
+The scan welded her forearm shards to her hip plates (read as wings once the arms moved):
+`cinder_source.py part_arms` cuts every face joining an arm to the body under the armpit and caps both sides. Raw files in
+`~/meshy/cinder_v2`, rebuilt by `build.sh` there from `tools/art1/cinder_*.py`.
+A tail near the floor: `Springs.FLOOR_UP` holds joints up from the *posed* root, so leave the stance's root drop as well.
+The scan's horns came out as short wedges (cat ears from the front): `cinder_finish.py tuck_horns` presses them to the crown and
+`cinder_pieces.py horns` sweeps the sheet's curved horns over them, rigid on the head, painted in their own strip under the atlas's flat
+cells. The tail's molten cracks (the side view) are a seeded random walk painted into the tail strip of both the atlas and the emit map.
+
 ## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
 No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.
 1. **Inspect** it in Blender: bones (names, parents, heads), each vertex group's bounds, loose parts, materials,

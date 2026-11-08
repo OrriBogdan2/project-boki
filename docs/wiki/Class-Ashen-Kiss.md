@@ -1,6 +1,6 @@
 # The Ashen Kiss
 
-A flue sweep in a sooty top hat with a bellows pack. Hoses foes down with fire until they Flash over, rams them
+A lizard-folk fire queen who casts fire from her bare hands. Pours it on foes until they Flash over, rams them
 head first, and hits back harder after every knock.
 
 <!-- gen:profile -->
@@ -10,7 +10,7 @@ head first, and hits back harder after every knock.
 |---|---|
 | Class title | the Ashen Kiss |
 | Base character | Cinder, female |
-| Personality | A salamander-folk alchemist with charcoal skin split by glowing magma, fin ears, hair of living fire and a long burning tail. She carries no weapon: her hands are the weapon. She wears obsidian shards and horns, glowing magma cracks brightening as she casts, and she is delighted by every fire she starts. |
+| Personality | A lizard-folk fire queen with scaled grey-violet skin, lizard horns, hair of living fire and a long flame-tipped tail. She wears living obsidian shards split by glowing magma, casts fire from her bare hands, and she is delighted by every fire she starts. |
 
 <!-- /gen:profile -->
 
@@ -49,7 +49,7 @@ head first, and hits back harder after every knock.
 | Body | 193 health, 4.4 m/s, 2 dash charges |
 | Signature weapon | Torch Lance (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The flue sweep. Pours fire from her hands on foes until they blaze, rams them head first, and hits back harder after every knock. |
-| Silhouette | the living-fire hair, the horns, the obsidian shards and the long flame-tipped tail |
+| Silhouette | the horns, the ember-tipped hair, the obsidian shards and the long flame-tipped tail |
 | Resource | Char (max 31) |
 
 ### Kit card

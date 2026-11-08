@@ -2,26 +2,24 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwaoh2jd87arl"
-path.bptc="res://.godot/imported/cinder_head.jpg-7758f57c7f7e14f3419aff1281f76344.bptc.ctex"
-path.astc="res://.godot/imported/cinder_head.jpg-7758f57c7f7e14f3419aff1281f76344.astc.ctex"
+uid="uid://b8jmbbfuaybjn"
+path="res://.godot/imported/cinder_emit.jpg-3bfdee817f1592957a1b4c739085c72b.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
-"md5": "3cae1f4e67d5fddee66c07b5db70a6f2"
+"md5": "83be62e4369bc76e6e6e8be6a80a6ed9"
 }
 
 [deps]
 
-source_file="res://art/wardens/cinder/cinder_head.jpg"
-dest_files=["res://.godot/imported/cinder_head.jpg-7758f57c7f7e14f3419aff1281f76344.bptc.ctex", "res://.godot/imported/cinder_head.jpg-7758f57c7f7e14f3419aff1281f76344.astc.ctex"]
+source_file="res://art/wardens/cinder/cinder_emit.jpg"
+dest_files=["res://.godot/imported/cinder_emit.jpg-3bfdee817f1592957a1b4c739085c72b.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
