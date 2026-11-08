@@ -16,7 +16,7 @@ const EXPIRED_T := 0.9         # s "EXPIRED" stays on the slot
 const RAN_OUT := 0.12          # s: a window that vanished with less than this left ran out (more: it was used)
 const POP_T := 0.45            # s the payoff flash on a foe's badge lasts
 const BADGE_GAP := 72.0        # px between two badges on one foe
-const BADGE_UP := 4.3          # m above the foe's feet: over its nameplate and HP bar, not under them
+const BADGE_UP := 5.3          # m above the foe's feet: clear over its nameplate and HP bar (they draw later)
 const PILL_PAD := 7.0           # px of dark backdrop either side of the slot's big text
 const HOT := Color("ff5a4a")
 const DIM := Color(0.6, 0.6, 0.66)
@@ -156,7 +156,7 @@ static func _marker(H: Node, sp: Vector2, w: Dictionary, col: Color) -> void:
 	_label(H, sp + Vector2(0, 36.0), word, 12, col.lerp(Color.WHITE, 0.4))
 
 ## A foe's combo badge: the count (or a dot) in the kit's colour, a ring for the time left, the name and seconds
-## under it; gold and pulsing once the payoff is ready.
+## over it; gold and pulsing once the payoff is ready.
 static func _badge(H: Node, sp: Vector2, mk: Dictionary, col: Color) -> void:
 	var c: Control = H.c
 	var ready := bool(mk.get("ready", false))
@@ -169,4 +169,4 @@ static func _badge(H: Node, sp: Vector2, mk: Dictionary, col: Color) -> void:
 	if n > 0:
 		H._ctext(sp + Vector2(0, 6.0), str(n), 17, Color(0.05, 0.05, 0.08), H.big)
 	var txt := "%s %.1f" % [String(mk["label"]), float(mk["left"])]
-	_label(H, sp + Vector2(0, r + 17.0), txt, 13, tint.lerp(Color.WHITE, 0.3))
+	_label(H, sp + Vector2(0, -r - 8.0), txt, 13, tint.lerp(Color.WHITE, 0.3))
