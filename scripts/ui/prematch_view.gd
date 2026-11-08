@@ -4,7 +4,7 @@ extends Control
 
 const TIMER_SIZE := 88        # px, the countdown digits
 const SAFE_FRAC := 0.04       # fraction of the window height kept clear on every side (title-safe)
-const NARROW_W := 1240         # px, below this width the Hunter grid drops to two columns
+const NARROW_W := 1400         # logical px (the UI scales to 1240x720), below this the Hunter grid has two columns
 const SIDE_WIDE := 380         # px, the squad and chat column
 const SIDE_NARROW := 300       # px, the same column in a narrow window
 const DIGITS_FRAC := 0.1       # countdown digit size as a fraction of the window height
