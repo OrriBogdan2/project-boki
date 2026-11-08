@@ -62,29 +62,30 @@ Still open (shared, not done here):
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
 - `pin_draw.gd` defaults to `#e8483e`.
-- Only five kits are data-driven (`content/vfx/`: archer, ashwick, juggernaut, rimewright, tender). The rest draw with
-  `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`). Moving each to `HeroVfx` data is
-  how a kit reaches the bar.
+- Six kits are data-driven (`content/vfx/`: archer, ashwick, dolm, juggernaut, rimewright, tender). The rest draw with
+  `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`). Moving each to `HeroVfx` data is how a kit
+  reaches the bar. Tenzo's punch, boulder and launched-rock bursts (`dolm_kit`) still draw `Fx` rings.
 
 ## Scorecard (worst first)
 Each axis is scored 1–5: R readability, S shape, L layering, T timing, Sc scale, C colour, Snd sound.
 
 | # | Hunter | arch | R | S | L | T | Sc | C | Snd | total | main problem |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Tenzo | dolm | 1 | 2 | 1 | 2 | 3 | 2 | 3 | 14 | hard-coded `Fx` primitives in `dolm_kit`/`breah_*`, no HeroVfx data; was red (now cobalt here). Spine lane and slam are flat rings, the hop landing has no debris |
-| 2 | Motley | ostra | 2 | 2 | 1 | 2 | 2 | 2 | 3 | 14 | no HeroVfx data and no `Fx` calls in the kit; the look comes from the shared cast language only. Dash/LMB are owned by void-jester-dash-feel-1108 |
-| 3 | Grimble | dredge | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 16 | `ld_fx` primitives; hook chain is a beam with no weight; coin gold shares the stock flash gold |
-| 4 | Albert | bulwark | 2 | 2 | 2 | 2 | 3 | 2 | 4 | 17 | `bjorn_fx` piles of rings/flashes (9 calls); shield reads as a flat disc; hard-coded gold |
-| 5 | Sable | thief | 2 | 3 | 2 | 3 | 3 | 2 | 3 | 18 | `dj_fx` slashes are thin; blink has no in/out pair; flashes hard-coded gold, not violet |
-| 6 | Sparkle | mage | 3 | 2 | 2 | 3 | 3 | 2 | 3 | 18 | `vv_fx` bolts/orbs; recoloured to pink by sparkle-dash-feel-1108; ult lacks a hot core and afterglow |
-| 7 | Vex | gunslinger | 3 | 3 | 2 | 3 | 3 | 3 | 4 | 21 | `vv_fx` tracer and muzzle flashes; was ember orange through the shared layer, now lime; reload/E have no shape of their own |
-| 8 | Lace | archer | 3 | 3 | 3 | 3 | 3 | 3 | 2 | 20 | data-driven; was red `#e8483e` (Kael's red); thin arrow trails; few sounds |
-| 9 | Neve | rimewright | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; frost shards read; held beam needs a hot core and ice debris on the end |
-| 10 | Meeko | tender | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; heal and seed read, but the LMB pellet is small for its hitbox |
+| 1 | Motley | ostra | 2 | 2 | 1 | 2 | 2 | 2 | 3 | 14 | no HeroVfx data and no `Fx` calls in the kit; the look comes from the shared cast language only. Dash/LMB are owned by void-jester-dash-feel-1108 |
+| 2 | Grimble | dredge | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 16 | `ld_fx` primitives; hook chain is a beam with no weight; coin gold shares the stock flash gold |
+| 3 | Albert | bulwark | 2 | 2 | 2 | 2 | 3 | 2 | 4 | 17 | `bjorn_fx` piles of rings/flashes (9 calls); shield reads as a flat disc; hard-coded gold |
+| 4 | Sable | thief | 2 | 3 | 2 | 3 | 3 | 2 | 3 | 18 | `dj_fx` slashes are thin; blink has no in/out pair; flashes hard-coded gold, not violet |
+| 5 | Sparkle | mage | 3 | 2 | 2 | 3 | 3 | 2 | 3 | 18 | `vv_fx` bolts/orbs; recoloured to pink by sparkle-dash-feel-1108; ult lacks a hot core and afterglow |
+| 6 | Vex | gunslinger | 3 | 3 | 2 | 3 | 3 | 3 | 4 | 21 | `vv_fx` tracer and muzzle flashes; was ember orange through the shared layer, now lime; reload/E have no shape of their own |
+| 7 | Lace | archer | 3 | 3 | 3 | 3 | 3 | 3 | 2 | 20 | data-driven; was red `#e8483e` (Kael's red); thin arrow trails; few sounds |
+| 8 | Neve | rimewright | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; frost shards read; held beam needs a hot core and ice debris on the end |
+| 9 | Meeko | tender | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; heal and seed read, but the LMB pellet is small for its hitbox |
+| 10 | Tenzo | dolm | 3 | 3 | 4 | 3 | 4 | 4 | 3 | 24 | re-scored 11-08 from strips (ext/vfx-dolm): slam, RMB charge, hop landings and Basalt Spine are HeroVfx data (`content/vfx/dolm.json`): crack crater, wall, rock debris, crack lanes. Left: punch, boulder and launched-rock bursts in `dolm_kit` still draw `Fx` rings |
 | 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar. Polish: soft-particle ground clipping, hold-blade glow |
 | 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 27 | the bar. Polish: cleave sound transient, ult shockwave scale |
 
-The scores are **provisional**. They come from reading each kit's FX code plus Cinder and Kael from the owner playtest. The
+Tenzo's row is scored from the strips (before: `vfxq-before-dolm` main and `vfxq-after-dolm` the base branch; after:
+`vfx-dolm-after`, job 20261108-201123-26722). The other scores are **provisional**. They come from reading each kit's FX code plus Cinder and Kael from the owner playtest. The
 `vfxq-before/after-*` GPU strips are queued but did not run in this pass (the GPU PC was paused until 20:27 UTC, with 41
-jobs ahead). Re-score from the sheets when they land, and attach Tenzo's before/after (`vfxq-before-dolm`,
-`vfxq-after-dolm`) to the PR.
+jobs ahead). Re-score from the sheets when they land. Tenzo's before/after sheets are on branch
+`ext/vfx-dolm-shots` (`vfx/dolm/{main,base,after}/dolm_<part>.png`).
