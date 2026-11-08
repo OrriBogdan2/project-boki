@@ -772,13 +772,15 @@ func _sim_fly_home(dt: float) -> void:
 			owner_h.m.fx.burst(pos, sp["color"], 8, 2.0)     # (the merge was lost on the way: it just lands)
 
 func walkable_to(p: Vector3) -> bool:
+	if absf(p.y - pos.y) >= 2.0:
+		return false
 	var d := Vector2(p.x - pos.x, p.z - pos.z)
 	var n := int(d.length() / 0.6) + 1
 	for i in range(1, n + 1):
 		var q := Vector2(pos.x, pos.z) + d * (float(i) / n)
 		if m.world.is_void(q.x, q.y):
 			return false
-	return absf(p.y - pos.y) < 2.0
+	return true
 
 func _sim_active(dt: float) -> void:
 	if owner_h and (owner_h.out or owner_h.extracted):

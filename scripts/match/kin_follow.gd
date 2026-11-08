@@ -52,12 +52,12 @@ static func owner_focus(k: Kin) -> Ent:
 	var aim: Vector3 = o.inp["aim"]
 	var best: Ent = null
 	var bd := 3.0
+	var near := _r("engage_range") + 4.0
 	for f in k.m.foes_of(k.team):
-		if f.dead or not f.hittable() or Shrubling.hidden(f) or f.flat_dist(o) > _r("engage_range") + 4.0:
-			continue
 		var d := Vector2(f.pos.x - aim.x, f.pos.z - aim.z).length()
-		if d < bd:
-			bd = d; best = f
+		if d >= bd or f.dead or not f.hittable() or Shrubling.hidden(f) or f.flat_dist(o) > near:
+			continue
+		bd = d; best = f
 	return best
 
 ## How far it may be from you before it hops back, by order.
