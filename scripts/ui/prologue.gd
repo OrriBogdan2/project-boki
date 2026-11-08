@@ -1,7 +1,7 @@
 extends Node3D
 ## The prologue: a short animated telling of how the Skylands came to be, before your first egg.
 ## Five shots, each a little set far apart from the others, with a line of story under letterbox bars:
-##   1. the land whole  2. the Wyrm wakes  3. the Sundering  4. the Boki  5. hunters race for the Wyrmheart
+##   1. the land whole  2. the Wyrm wakes  3. the Hollowing  4. the Boki  5. hunters race for the Wyrmheart
 ## then the PROJECT BOKI title card. Each shot is one or two eased camera moves (a new move is a cut), its own
 ## light (MOODS) and its own action. Space or a click moves on; holding Esc skips it all.
 
@@ -24,7 +24,7 @@ const SKY_KEYS := ["top", "mid", "horizon"]
 const SEA_KEYS := ["deep", "light", "glow"]
 ## How fast a camera move still creeps at its end, as a share of its average speed (eased, never a dead stop)
 const END_CREEP := 0.25
-const MANTLES_AT := 2.6        # s into THE SUNDERING: the Hunters' selves burst out of the Crown as Masks
+const MANTLES_AT := 2.6        # s into THE HOLLOWING: the Hunters' selves burst out of the keep as Masks
 
 var cam: Camera3D
 var env: Environment
@@ -119,15 +119,15 @@ func _shots() -> Array:
 	var D: Vector3 = SETS["drop"]
 	var out := [
 		{"chapter": "BEFORE THE FALL", "mood": "gold", "tint": Color("ffd27a"), "grade": 0.16,
-			"text": "The Skylands were once ruled by a great deity:\na Tyrant on the Crown who never aged.",
+			"text": "Once, the sky held one great land, Solmere,\nruled by Malgrave, the Beloved, a queen who never aged.",
 			"cam": [[W + Vector3(-70, 22, 80), W + Vector3(0, 2, 0), W + Vector3(-54, 17, 62), W + Vector3(0, 3, 0), 3.4],
 				[W + Vector3(-16, 8, 18), W + Vector3(0, 5.0, 0), W + Vector3(-13, 7, 14.5), W + Vector3(0, 5.6, 0), 3.4]]},
 		{"chapter": "THE WAKING", "mood": "gold", "tint": Color("ff5a3a"), "grade": 0.3, "event": "wyrm",
-			"text": "He was the Wyrm in human shape.\nThe night a thief reached its heart, it woke.",
+			"text": "She was the Wyrm in human shape.\nThe night a thief reached its heart, it woke.",
 			"cam": [[W + Vector3(-22, 12, 26), W + Vector3(18, 6, -30), W + Vector3(-20, 11, 23), W + Vector3(20, 10, -30), 3.0],
 				[W + Vector3(12, 7, 40), W + Vector3(8, 9, -10), W + Vector3(10, 8, 42), W + Vector3(-16, 9, 10), 4.0]]},
-		{"chapter": "THE SUNDERING", "mood": "fire", "tint": Color("d0406a"), "grade": 0.34, "event": "break",
-			"text": "The Wyrm broke the land and stole our essence.\n"
+		{"chapter": "THE HOLLOWING", "mood": "fire", "tint": Color("d0406a"), "grade": 0.34, "event": "break",
+			"text": "The Hollowing broke the land into the floating Skylands,\nand the Wyrm stole our essence.\n"
 				+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty.",
 			"cam": [[W + Vector3(-30, 22, 46), W + Vector3(0, 0, 0), W + Vector3(-36, 28, 56), W + Vector3(0, -6, 0), 3.6],
 				[W + Vector3(46, 4, 34), W + Vector3(0, -4, 0), W + Vector3(58, 10, 46), W + Vector3(0, -20, 0), 3.9]]},
@@ -138,7 +138,7 @@ func _shots() -> Array:
 				[K + Vector3(0.4, 0.55, 3.9), K + Vector3(0.4, 0.85, -0.3), K + Vector3(0.4, 0.55, 3.45), K + Vector3(0.4, 0.88, -0.3), 4.4]]},
 		{"chapter": "THE RACE", "mood": "deep", "tint": Color("b08aff"), "grade": 0.24, "event": "drop",
 			"text": "Put on a Mask, bond with a Boki, and hunt for the Wyrmheart:\n"
-				+ "one wish to remake the world, or rule it.\nEvery Hunter wants it. So does the Wyrm.",
+				+ "one wish to remake the world, or rule it.\nEvery Hunter wants it. So does Malgrave.",
 			"cam": [[D + Vector3(-6, 20, 14), D + Vector3(2, 4, -30), D + Vector3(-3, 16, 2), D + Vector3(8, -10, -52), 4.0],
 				[D + Vector3(-4, 14, -4), D + Vector3(14, -28, -70), D + Vector3(0, 11, -12), D + Vector3(18, -36, -82), 4.2]]},
 	]
