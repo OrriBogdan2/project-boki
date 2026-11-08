@@ -3219,3 +3219,22 @@ still gold/orange in BjornFx; his model hides the dome's upper half at reel zoom
 
 ## Nov 8 18:07 (owner): three stages is now the default
 Most evolving lines are now three stages (1 -> 2 -> 3). 15 new forms added; roster is 124 (ROSTER_100.html). Still two stages: Parasolth/Umbrathere, Thrumbird/Lyrewing, Gongibbon/Gongrowl, Echolop (branching), Ermink and Jarmit (Ink). 23 single-stage. Suggested level mapping: stage 2 at Grown (level 8), stage 3 at Elder (level 16). Please flag how many 3D models you can realistically take; 2D sheets are cheap.
+
+## READY ext/tutorials-cut @ 37dc18d84 (2026-11-08): shorter tutorials
+- Match tutorial is 8 steps (was 22) and the farm tutorial is 5 (was 11). Each step shows one banner line.
+- The cut steps became one-time hints (FirstTimeHint, content/rules/hints.json). Shown once, then saved.
+- Save v12 stores the seen hints; the 11->12 migration marks hints seen for players who finished the old tutorials.
+- Both tutorials have a visible Skip, and skipping costs the player nothing. Pell's talk holds the game for at most 3 s.
+- Timings (headless, driven play): match 91.1 s -> 41.9 s; farm 117.4 s -> 63.2 s.
+- Checks, all passing with 0 failures:
+  - tutorial-hud
+  - tutorial-clean
+  - farm-tutorial
+  - farm-place
+  - hob
+  - teammate
+  - drop-feel
+  - first-time-hint (new)
+  - farm-tut-time (new)
+- health --strict: OK.
+- Decision note: docs/decisions/0023. Not merged to main.
