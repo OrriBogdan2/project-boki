@@ -3073,3 +3073,6 @@ READY ext/lace-playtest-1108 b79ec35c5 (job 20261108-204524-a2 on w2; on main d2
 
 
 ## Nov 8 16:41 (art, owner): Ermink line gets female looks on all ten forms (Ermink + nine Ink forms), consistent with the whole-line rule. Blossmink's green sheet stays the male; the pink one is the female.
+
+
+## Nov 8 16:42 (art, owner): reversal. Ermink's line gets NO female looks (Ermink + nine Ink forms, one look each). Blossmink is the pink sheet only. Ignore the 16:41 note.
