@@ -2822,3 +2822,4 @@ READY ext/stuck-integ-9e20dcba 6cfef799b (supersedes: ext/art1-kael-2 fd33d2045,
 READY ext/anim-time-tenzo 5aafba874 (Tenzo timing parity, supersedes 231f91588: boulder release 0.13 s, spine rise 0.8 s with x_spine at 0.7 speed so the heave lands at 1.0 s, LMB upper-moving, tooltip 0.8s, timing table on breah.md's 4/10 fps, combo 171/0 + clips 0)
 READY ext/anim-time-sparkle 4c7b70c9c (Sparkle animation timing parity: tap Storm Rod throw beat at the launch, Skycall arm held to the snap, timing probe + doc table)
 READY ext/anim-time-sable 53f658240 (Sable animation timing: per-move blend-in so each release shows, dancer timing check, thief.md table)
+READY ext/body-hitbox-parity b9f481fa0 (hit radii set to source body sizes: Breaker 0.50, Kael 0.445, Tarek 0.412, Vex 0.400, Claire 0.362; table in ARCHETYPES; checks extended)
