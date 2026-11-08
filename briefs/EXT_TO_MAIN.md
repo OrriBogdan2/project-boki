@@ -3267,3 +3267,6 @@ READY ext/drop-solo-after: separate / drop solo only after the team drop is made
 
 ## 2026-11-08 deep (job 20261108-231116-a4): CLAIM evolution-rules-1108
 - CLAIM: DECISIONS "roster of 109, evolution, sex, Inks", evolution half: rewrite evo.gd (level cap 100, per-species evolve level in data, conditions level/item (Inks)/trade, art gate: never evolve into a form whose .glb + BokiRig FRAME row is missing), save VERSION bump + migration, bred-baby sex 50/50 test, Ink drops (type boss + rare wild). ext/roster-109-registry not on origin, so built on the existing species data. Branch ext/evolution-rules-1108 from origin/main.
+
+## 2026-11-08 feel (job 20261108-231051-a1): CLAIM hud-reveal-1108
+- CLAIM: DECISIONS "UI is too much for a new player", UI_DECLUTTER_PLAN jobs 1+2 (reveal-helper + hud-declutter, §8 expedition HUD): a reveal system (HUD elements register a reveal trigger, the save remembers what was revealed, old saves see everything, Settings "Show full HUD" for veterans), HUD gating via a new hud_reveal.gd. Branch ext/hud-reveal-1108 off origin/main, stacked on READY ext/tutorials-cut 37dc18d84 so Reveal extends its FirstTimeHint (one helper, one save key set). Not in this claim: arrival-declutter, menus-more, creator-trim.
