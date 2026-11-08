@@ -48,3 +48,9 @@ Proposal awaiting owner OK. 15 existing themes map onto 15 of the 18 classic typ
 Main: needs a secondary type field on species, and the three new themes. Roster rebalance: about 14 of the 50 new forms become new Tide, Wyrm and Wild lines; the other ~36 are evolutions of existing species.
 
 ## Final roster (Nov 8): see ROSTER_100.html in this folder (data array `G`). Owner approved Tide, Wyrm, Wild. Supersedes the count table above: 14 art locked, 36 in game with art to do, 50 new forms, 3 new-type lines + Wild x2.
+
+## Male and female forms (owner, Nov 8)
+Boki get male and female looks, mostly on evolved forms (see design rule 14). This adds work: about one extra sheet per evolved form. Main: Boki have no sex field today (only hero archetypes have `gender`). It needs one rolled at hatch, saved with uid and lineage, and a second model or material per form that differs.
+
+## Locked evolution sheets (briefs/boki-art/evolutions/)
+Kerchick A, Puffamus A, Teapotamus A, Sporcupine B, Vespox male B. Vespox female is provisional (stands upright like a person; redo on all fours posted).

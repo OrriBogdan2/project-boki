@@ -14,6 +14,7 @@ This is the bar every Boki has to clear. It works alongside the judging rubric i
 10. **Buildable and readable in game.** Models are about 5k triangles, seen from a distance. Use chunky parts and no thin floating bits (ropes, wires, ribbons, lace).
 11. **One render style.** Soft hand-painted shading with a thin clean outline, matching style_refs (the website's Vespyx and Mycroll). No thick cartoon outlines or flat cel shading.
 13. **The idea runs through the whole body (owner, Nov 8).** If the object shows up in one place, its material and shapes must repeat everywhere else: the same bone, metal or stone in the claws, spine, tail and face. A design should never read as one thing tied to another. Example: Umbrathere's umbrella ribs are its arm and finger bones, not a canopy bolted to its back.
+14. **Male and female forms (owner, Nov 8).** Most species get a male and a female look, differing in one or two animal features: build (heavier or slimmer), crest, horn or tail shape, markings, the size of their signature part. The difference grows on evolution: small or none on babies, clear on final forms. Never human gender cues: no eyelashes, lips, blush, chests or hips, and never a more upright, person-like stance for one of them.
 12. **Things to avoid:** more than one idea, a realistic animal with a prop on it, backpack syndrome (an object sat on its back with no change to the animal), accessories, particles and glow everywhere, and any franchise name in a prompt.
 
 ## Elements: how each theme must read
