@@ -1,14 +1,15 @@
-# Pip (tender; was Moosh Moosh / Burple): import note, ART-1 rebuild (2026-11-05, items 76b + 108)
+# Pip / Meeko (tender; was Moosh Moosh / Burple): import note, ART-1 rebuild (2026-11-05, items 76b + 108), v2 model (2026-11-08)
 
 `pip.glb`: head and body are Meshy scans fitted to the rig in Blender; arms, hands, eye domes and wings are scripted; the sun and raincloud companions are built by tools/art1/pip_companions.py. 14,811 triangles with the companions (S1's budget: 15k, weapon included).
 Materials: skin-fur, cloth-body, leather-body (the body's own 2048 colour, normal, emission), skin-face (the head's own 2048 colour, normal, emission), skin-hand, card-wing, cloth-sun, skin-cloud, ice-drop (flat colours), eyes-mood_sun / eyes-mood_cloud (the 2048x1024 face atlas, 4x2 cells).
 
-    # credits: 36 (image edits) + 40 (body) + 40 (head); requests and outputs in ~/meshy/pip_f
+    # credits: 36 (image edits) + 40 (body) + 40 (head); requests and outputs in ~/meshy/meeko_v2
     B=~/tools/blender-4.5.15-linux-x64/blender
-    $B -b --factory-startup --python tools/art1/pip_head_scan.py -- ~/meshy/pip_f/head/run1/glb.glb WORK 6000   # head: fit, decimate, bake
-    $B -b --factory-startup --python tools/art1/pip_source.py -- ~/meshy/pip_f/run1/glb.glb WORK 6200           # body: fit, arms and head cut, tail swung up, bake
-    tools/art1/pip_build.sh WORK            # pip_art1.py (assembly, atlas), pip_clips.py (posekit.py), copies, imports
+    $B -b --factory-startup --python tools/art1/pip_head_scan.py -- ~/meshy/meeko_v2/head/glb.glb WORK 6000   # head: fit, decimate, bake
+    $B -b --factory-startup --python tools/art1/pip_source.py -- ~/meshy/meeko_v2/runA/glb.glb WORK 6200      # body: fit, arms and head cut, tail swung up, bake
+    tools/art1/pip_build.sh WORK            # pip_art1.py (assembly, atlas), pip_clips.py (posekit.py), pip_companions.py, copies, imports
 
+- **Meeko v2 (2026-11-08):** the owner's locked redesign (briefs/art-refs/pip_v2/meeko_v2_turnaround): capelet with a heart brooch, wicker satchel and a pouch on a strap, deeper magenta legs and hands, taller ears with the bandage, goggles with flowers, bigger eyes, constellations on the face and arms. Only the two scans changed; the rig, clips (45), sun and raincloud, FX points, scripted arms, hands, lids, wings and the lantern's hidden bones are as before. The capelet is body cloth; its back hem rides spring_capeback_0..3 (the old leaf mantle's chain, shorter); the apron bone stays in the rig with no weights. 116 credits (docs/art/wardens/PIPELINE.md "Meeko v2"). Her height with the ears is 0.76x a medium hunter (was 0.66; the body is 0.60 as before), warden_model_check's height_3d.
 - **Refs:** briefs/art-refs/pip_head.png (head scan, eye size), pip_turnaround.png edited with the wings out (body scan), pip_FINAL_sheet.png, pip_props.png. Portrait and splash stay on the portraits lane.
 - **Owner notes 11:40:** eyes are the scan's paint at pip_head.png's size (about 13% of the head's width). Scan beat the scripted head and body (both kept in git history, eff09bcc); scripted arms and hands stay because the rig hangs them where the A-pose scan cannot.
 - **Proportions (tender.json body):** legs 0.98, torso 1.02, shoulder 1.12, neck -0.036: rig fitted to the scan. size 0.68 and hit_r 0.34 (item 108) unchanged. Clips key the hands through posekit's `dz`.
