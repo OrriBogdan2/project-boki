@@ -17,7 +17,7 @@ Raw files under ~/meshy/<name>/ (never in git). <id> is the archetype (gunslinge
 **Branch:** merge ext/warden-vex-r3 into your paused branch and keep your own generic fixes, which this branch does not
 have: Cinder's Models.hunter bulky-folk `legs` fix (origin/ext/warden-meshy-cinder), Pin's own-Mag tag in
 `--warden-glb-check` (ext/warden-meshy-pin), Zedran's weapon ground clearance and crack-glow (ext/warden-meshy-zedran),
-Ryzz's emissive layer `use_emit`/`emit_tex` (ext/warden-meshy-ryzz). Already here: Cinder's `slot_rules` and
+Sparkle's emissive layer `use_emit`/`emit_tex` (ext/warden-meshy-ryzz). Already here: Cinder's `slot_rules` and
 `fit_weights` (same code), Zedran's `--warden-rig-json` skip of an emptied Mag.
 
 0. **Gate:** the owner approved the Warden's round-2 art and IMG has its turnaround and side view (02:40 rule).
@@ -411,18 +411,18 @@ warden_look.json `pip`, the tender stance's left paw out. IMPORT.md "Stage 2".
 r3c (09:00-10:30) and r3d (11:25-13:30) used no Meshy credits: every change is in the fit spec, the parts tools, the
 paint-over, the shared look (16c18b4f) and warden_look.json. Recipe: RECIPE_95.md.
 
-### Ryzz (mage) stage 1 runs, 2026-11-04 (locked art: ext/imagegen 93a2757f wardens_r3/ryzz_* + RYZZ_KIT.md; 94 credits)
+### Sparkle (mage) stage 1 runs, 2026-11-04 (locked art: ext/imagegen 93a2757f wardens_r3/ryzz_* + RYZZ_KIT.md; 94 credits)
 | Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
 |---|---|---|---|---|---|---|
-| Ryzz edit front | 11:04 | 01a1a63a-9e79-721b-beba-f3deb7492a53 | nano-banana-pro (image-to-image) | 9:16 crop of ryzz_front; pigtails, ties and back rods out (two small knots left) | 9 | Kept |
-| Ryzz edit 3/4 | 11:04 | 01a1a63a-9e7c-7527-b013-d7921d97ef1e | nano-banana-pro | as front, plus hand off the hip and the gum bubble out | 9 | Dropped: the hand stayed on the hip |
-| Ryzz edit side | 11:04 | 01a1a63a-9e8a-7453-a039-308472d82679 | nano-banana-pro | as front, plus the jacket off the shoulders (RYZZ_KIT), far arm hidden | 9 | Dropped for side 2: it opened the scarred eye |
-| Ryzz edit back | 11:04 | 01a1a63a-9e78-7242-afc4-9b2c4cbf1d01 | nano-banana-pro | as front, floor shadow out | 9 | Kept (a small green bolt it drew on the corset painted out, tools/meshy/ryzz_prep.py) |
-| Ryzz edit 3/4 b | 11:07 | 01a1a63c-7713-74fc-b16f-417e5e79d363 | nano-banana-pro | the 3/4 edit again: the arm down | 9 | Dropped: arm down, but it opened the scarred (right) eye; the run went without a 3/4 |
-| Ryzz edit side 2 | 11:08 | 01a1a63e-4f65-738b-bed8-418d5d0d53ff | nano-banana-pro | the side edit: the scarred eye closed | 9 | Kept |
-| Ryzz body A | 11:09 | 01a1a640-5b8c-7749-a3ef-7f535b835d75 | meshy-7.1 | edited front, side 2, back (padded square) as images and texture refs; geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** (one body run): the wink and fern scar on her RIGHT eye, freckles, choker and bolt charm, the keyhole corset, off-shoulder jacket, chain belt, hazard bands |
+| Sparkle edit front | 11:04 | 01a1a63a-9e79-721b-beba-f3deb7492a53 | nano-banana-pro (image-to-image) | 9:16 crop of ryzz_front; pigtails, ties and back rods out (two small knots left) | 9 | Kept |
+| Sparkle edit 3/4 | 11:04 | 01a1a63a-9e7c-7527-b013-d7921d97ef1e | nano-banana-pro | as front, plus hand off the hip and the gum bubble out | 9 | Dropped: the hand stayed on the hip |
+| Sparkle edit side | 11:04 | 01a1a63a-9e8a-7453-a039-308472d82679 | nano-banana-pro | as front, plus the jacket off the shoulders (RYZZ_KIT), far arm hidden | 9 | Dropped for side 2: it opened the scarred eye |
+| Sparkle edit back | 11:04 | 01a1a63a-9e78-7242-afc4-9b2c4cbf1d01 | nano-banana-pro | as front, floor shadow out | 9 | Kept (a small green bolt it drew on the corset painted out, tools/meshy/ryzz_prep.py) |
+| Sparkle edit 3/4 b | 11:07 | 01a1a63c-7713-74fc-b16f-417e5e79d363 | nano-banana-pro | the 3/4 edit again: the arm down | 9 | Dropped: arm down, but it opened the scarred (right) eye; the run went without a 3/4 |
+| Sparkle edit side 2 | 11:08 | 01a1a63e-4f65-738b-bed8-418d5d0d53ff | nano-banana-pro | the side edit: the scarred eye closed | 9 | Kept |
+| Sparkle body A | 11:09 | 01a1a640-5b8c-7749-a3ef-7f535b835d75 | meshy-7.1 | edited front, side 2, back (padded square) as images and texture refs; geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** (one body run): the wink and fern scar on her RIGHT eye, freckles, choker and bolt charm, the keyhole corset, off-shoulder jacket, chain belt, hazard bands |
 
-Ryzz notes (stage 1, docs/art/wardens/PIPELINE.md recipe; no hand polish):
+Sparkle notes (stage 1, docs/art/wardens/PIPELINE.md recipe; no hand polish):
 - **Pieces built by script** (tools/meshy/ryzz_parts.py, fit spec `scripted`, called by fit_warden.py through
   `build()`): the SHORT pigtails (owner: long twin tails read as a famous character) as chunky tapered locks with
   zigzag ends, blue to pink, out of a copper-coil tie on each of the scan's hair knots, on 3-bone `spring_pigtail_L/R`

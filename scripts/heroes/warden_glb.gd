@@ -777,7 +777,7 @@ static func _glow_colours(m: ShaderMaterial, arch: String, tag: String) -> void:
 	if g.has("strength"):
 		m.set_shader_parameter("glow", float(g["strength"]))
 
-## The emission layer in the archetype's "model_glow" core colour (Ryzz's pink scar, charm, piping and veins): the
+## The emission layer in the archetype's "model_glow" core colour (Sparkle's pink scar, charm, piping and veins): the
 ## layer is a mask then, so the colour can change without a rebake.
 static func _emit_colour(m: ShaderMaterial, arch: String) -> void:
 	var g: Dictionary = Arch.def(arch).get("model_glow", {}) if arch != "" else {}

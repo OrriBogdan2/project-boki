@@ -4,8 +4,8 @@ extends RefCounted
 ## around, turns to look at you and bounces, all inside 2.5 s after the pop, and the shell throws no bursts, rings or flashes. The closer look after
 ## it (KinReveal) has no flash, rays, fanfare or rarity colours: the Boki finds you and calls to you,
 ## and only then can it be named. A shimmer shows as a faint sparkle on the Boki itself, a rare one
-## gets a plain provenance line. Then the first Mask (MaskMoment): after naming the Boki, with no pick, Vex's
-## Mask drifts to you, "Put on the Mask" (the interact key) puts it on and you become her; a short look at her
+## gets a plain provenance line. Then the first Relic (MaskMoment): after naming the Boki, with no pick, Vex's
+## Relic drifts to you, "Put on the Relic" (the interact key) puts it on and you become her; a short look at her
 ## ability clips fits a 1280x720 screen (1920x1080 scales to the same layout). Never touches the real save.
 
 var bad := 0
@@ -117,7 +117,7 @@ func run(m: Node) -> void:
 	print("HATCH CHECK DONE, failures: %d" % bad)
 	tree.quit()
 
-# ---------------------------------------------------------------- 3. the first Mask
+# ---------------------------------------------------------------- 3. the first Relic
 func _first_mask(tree: SceneTree) -> void:
 	tree.root.size = Vector2i(1280, 720)      # (the smallest screen we lay out for; 1920x1080 scales to it)
 	Save.d = Save.fresh()
@@ -127,31 +127,31 @@ func _first_mask(tree: SceneTree) -> void:
 	main.add_child(hx)
 	for i in 4: await tree.process_frame
 	hx._looks_good()
-	ok(hx.stage == "pick" and ClassUnlock.needs_starters(), "the eggs come before any Mask (stage %s)" % hx.stage)
+	ok(hx.stage == "pick" and ClassUnlock.needs_starters(), "the eggs come before any Relic (stage %s)" % hx.stage)
 	var kin := Models.kin("cindle", {"level": 1})
 	hx.add_child(kin)
 	hx.kin_node = kin
 	hx.chosen = 0
 	hx._finish("cindle", "Ember", "Orri", true)
 	var moments: Array = hx.get_children().filter(func(c): return c is MaskMoment)
-	ok(hx.stage == "mask" and moments.size() == 1, "naming the Boki leads into the Mask moment, not the match")
+	ok(hx.stage == "mask" and moments.size() == 1, "naming the Boki leads into the Relic moment, not the match")
 	if moments.is_empty():
 		hx.queue_free()
 		return
 	var moment: MaskMoment = moments[0]
 	ok(Arch.of_save() == "gunslinger" and ClassUnlock.open_ids() == ["gunslinger"] and Save.d["roster"].size() == 1,
-		"your first Mask is Vex, with your new Boki (%s)" % Arch.of_save())
+		"your first Relic is Vex, with your new Boki (%s)" % Arch.of_save())
 	var t0 := Time.get_ticks_msec()
 	while moment.phase != "wait" and Time.get_ticks_msec() - t0 < 10000:
 		await tree.process_frame
 	var head := (moment.you.get_node("Rig/Torso/HeadPivot") as Node3D).global_position
 	ok(moment.phase == "wait" and moment.relic.global_position.distance_to(head) < 1.5,
-		"Vex's Mask drifts in from the crystal and waits by your face")
+		"Vex's Relic drifts in from the crystal and waits by your face")
 	ok(absf(moment.kin.global_position.y) < 0.05 and moment.kin.position.distance_to(MaskMoment.BOKI_AT) < 0.1,
 		"your Boki stands beside you")
 	var words := _texts(moment.prompt)
 	ok(words.has(MaskMoment.BUTTON) and words.has(Settings.key_cap("interact")) and not str(words).contains("Take"),
-		"one button: Put on the Mask, with the interact key (%s)" % str(words))
+		"one button: Put on the Relic, with the interact key (%s)" % str(words))
 	var press := InputEventAction.new()
 	press.action = "interact"
 	press.pressed = true
@@ -161,15 +161,15 @@ func _first_mask(tree: SceneTree) -> void:
 		await tree.process_frame
 	for i in 6: await tree.process_frame
 	ok(moment.phase == "intro" and String(moment.you.get_meta("arch")) == "gunslinger",
-		"the Mask goes on and you become Vex")
+		"the Relic goes on and you become Vex")
 	var viewer := moment.intro.find_children("*", "HunterViewer", true, false)
 	var clips := moment.intro.find_children("*", "AbilityClip", true, false)
 	ok(viewer.size() == 1 and _texts(moment.intro).has(HunterViewer.display_name("gunslinger"))
-		and HunterViewer.display_name("gunslinger") == "Vex, the Hired Gun", "then Vex, the Hired Gun")
+		and HunterViewer.display_name("gunslinger") == "Vex the Hired Gun", "then Vex the Hired Gun")
 	ok(clips.size() == HunterViewer.CLIP_SLOTS.size(), "with a clip for each ability (%d)" % clips.size())
 	var gender := RegEx.create_from_string("(?i)\\b(female|male|she|her|he|his|woman|man)\\b")
 	var said: Array = _texts(moment.intro).filter(func(t): return gender.search(String(t)) != null)
-	ok(said.is_empty(), "no gender or pronouns in the Mask's info (%s)" % str(said))
+	ok(said.is_empty(), "no gender or pronouns in the Relic's info (%s)" % str(said))
 	await tree.create_timer(0.6).timeout      # (the panel's pop-in has settled)
 	var screen := Rect2(Vector2.ZERO, Vector2(1280, 720))
 	screen = screen.intersection(moment.intro.get_viewport().get_visible_rect())

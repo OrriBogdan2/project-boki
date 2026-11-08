@@ -8,7 +8,7 @@ every knock.
 
 |  |  |
 |---|---|
-| Class title | The Unbroken |
+| Class title | the Unbroken |
 | Base character | Kael, male |
 | Personality | A proud champion in a spartan kit, mostly bare skin and gilded armour. He fights like the crowd is watching. He loves a duel and never backs down from one. |
 

@@ -1,4 +1,4 @@
-# Hired Gun
+# The Hired Gun
 
 The ember-rifle skirmisher. A spiked charge bounced off a wall or the ground blasts a cone back over a
 foe and Dazes them, and the rifle and one long needle of light do the rest.
@@ -8,7 +8,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 
 |  |  |
 |---|---|
-| Class title | Hired Gun |
+| Class title | the Hired Gun |
 | Base character | Vex, female |
 | Personality | A sharp, professional soldier in marine-style gear. She takes the contract and finishes the job. Calm under fire, and always has a plan for the way out. |
 

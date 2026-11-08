@@ -1,7 +1,7 @@
 extends RefCounted
 ## --empty-shots --shots-dir=<dir>: review screenshots of the Empty creator (Male / Female, three heights,
-## builds, hollow styles), the Masks viewer and the first-Mask moment (xvfb with a renderer). Add
-## --only=creator|viewer|mask|second|shroud|feet|farm to take one group (second: the farm's second-Mask offer by
+## builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer). Add
+## --only=creator|viewer|mask|second|shroud|feet|farm to take one group (second: the farm's second-Relic offer by
 ## the portal; shroud: the creator from front, side and back, the aura levels and shroud styles; feet: the soles
 ## at the shortest and tallest height, standing and walking; farm: the Empty at home from every side and above).
 

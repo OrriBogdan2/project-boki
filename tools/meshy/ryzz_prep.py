@@ -1,4 +1,4 @@
-"""(Ryzz) Meshy inputs from the edited views (pigtails, ties and rods out; side eye closed), each padded to a
+"""(Sparkle) Meshy inputs from the edited views (pigtails, ties and rods out; side eye closed), each padded to a
 square on its own grey; the small green bolt the back edit invented on the corset painted pink by hand.
   <blender python> -I tools/meshy/ryzz_prep.py tools/meshy ~/meshy/ryzz"""
 import sys, os

@@ -1,4 +1,4 @@
-# Storm Chaser (base character Ryzz; archetype id `mage`, Light)
+# Sparkle the Storm Chaser (archetype id `mage`, Light)
 
 Internal design note. This file may name the source hero for traceability; nothing in the game does.
 Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (reference
@@ -124,7 +124,7 @@ Charge orb: hovers 4s and adds Static to nobody (owner item 74). A Wirerun throu
 - Static lasts 4.5s, refreshed by every hit.
 - Wirerun: a stun, root or Grounded mid-hold cancels it and the charge stays spent (cooldown started on the press); a Boki merge refunds it.
 - An airborne Shift with a charge is a Wirerun too (height held); with no charge left it is the plain air dash.
-- Skycall: press places, holding E drags (up to 1 s), the release commits; a tap drags away from Ryzz.
+- Skycall: press places, holding E drags (up to 1 s), the release commits; a tap drags away from Sparkle.
 - She can move while firing bolts and holding the rod (the footage only shows her standing).
 - Momentum: the drift during the Wirerun hold bleeds off at 6 m/s², and whatever is left is added to the streak.
 - Kitefall: the footage shows no auto-land; ours comes down at the cursor after 1.7 s of hanging (about 2 s in

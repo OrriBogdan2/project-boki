@@ -1,5 +1,5 @@
 extends "res://tools/pin_bjorn_ult_check.gd"
-## Owner playtest items of 2026-11-03 for Hem and Breaker (briefs/OWNER_REVIEW_1103.md #5, #6, #10, #29, #30),
+## Owner playtest items of 2026-11-03 for Hem and Mossy (briefs/OWNER_REVIEW_1103.md #5, #6, #10, #29, #30),
 ## run from --archer-combo-check and --bulwark-combo-check (tools/archer_bulwark_combo_check.gd adds the
 ## counts). Prints AKCHECK lines like --archetype-check.
 
@@ -73,7 +73,7 @@ func ready_bow(P: Hunter) -> void:
 	P.reload_t = 0.0
 	P.draw_t = -1.0
 
-## No aim shape of Lisette's is a V, in any hold.
+## No aim shape of Lace's is a V, in any hold.
 func no_vee(m: Match) -> bool:
 	for e in AimKit.layer(m).entries.values():
 		if String((e as Dictionary).get("kind", "")) == "vee":
@@ -251,7 +251,7 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var from: Vector2 = ve.get("from", Vector2(-99, -99))
 	var full := (ve.get("to", Vector2.ZERO) as Vector2).distance_to(from)
 	var filled := (fe.get("to", Vector2.ZERO) as Vector2).distance_to(fe.get("from", Vector2.ZERO))
-	ok("pin readout: the line leaves Lisette along the aim line and the fill grows out of its start",
+	ok("pin readout: the line leaves Lace along the aim line and the fill grows out of its start",
 		String(ve.get("kind", "")) == "line" and String(fe.get("kind", "")) == "line"
 		and off_line(P.pos, d, Vector3(from.x, P.pos.y, from.y)) < 0.01
 		and (fe.get("from", Vector2.ZERO) as Vector2).distance_to(from) < 0.01,
@@ -302,7 +302,7 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var le := AimKit.entry(P, "draw")
 	var to: Vector2 = le.get("to", Vector2.ZERO)
 	var cursor := Vector2(T.pos.x - P.pos.x, T.pos.z - P.pos.z).length()
-	ok("pin readout: full draw runs one line from Lisette along the aim line, past the cursor, to max range",
+	ok("pin readout: full draw runs one line from Lace along the aim line, past the cursor, to max range",
 		String(le.get("kind", "")) == "line" and to.distance_to(le.get("from", Vector2.ZERO)) > cursor + 3.0
 		and off_line(P.pos, d, Vector3(to.x, P.pos.y, to.y)) < 0.05,
 		"len %.1f cursor %.1f" % [to.distance_to(le.get("from", Vector2.ZERO)), cursor])
@@ -403,7 +403,7 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	step(m, 0.8, rmb_at.bind(P, T.pos))
 	var bar := AimKit.entry(P, "rmb_bar")
 	var d := P.aim_dir()
-	ok("pin heavy: the telegraph while held is a thick gold lane with a tip, from Lisette along the aim line",
+	ok("pin heavy: the telegraph while held is a thick gold lane with a tip, from Lace along the aim line",
 		AimKit.shown(P, "rmb_bar") and not AimKit.shown(P, "rmb_v") and float(bar.get("width", 0.0)) >= 0.45
 		and bool(bar.get("tip", false)) and (bar.get("dir", Vector2.ZERO) as Vector2).distance_to(d) < 0.01,
 		"width %.2f tip %s" % [float(bar.get("width", 0.0)), str(bar.get("tip"))])
@@ -733,7 +733,7 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	ok("pin dash > RMB and E: both start during the dash", rolling and rmb_ok and e_ok, "rmb %s e %s" % [rmb_ok, e_ok])
 	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.28, "pin_flick": 0.22})
 
-## into_dash.x for Breaker: Shift while planted for Faultline isn't lost, it goes when the plant ends.
+## into_dash.x for Mossy: Shift while planted for Faultline isn't lost, it goes when the plant ends.
 func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:
 	step(m, 1.5)
 	P.lvl = 6
@@ -755,7 +755,7 @@ func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:
 		"held %s last %s dashes %.2f" % [held_back, str(K.st.get("last_dash")), P.dashes])
 	step(m, 2.5)
 
-## #32 / #35 for Breaker.
+## #32 / #35 for Mossy.
 func _bjorn_dash(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -> void:
 	ok("bjorn dash table: LMB buffers, RMB / E fire, a held swing is kept through a dash (item 51)",
 		_mode("bulwark", "lmb", false) == "buffer" and _mode("bulwark", "lmb", true) == "buffer"

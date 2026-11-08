@@ -1,4 +1,4 @@
-# Mad Pyromancer
+# The Flame Queen
 
 A flue sweep in a sooty top hat with a bellows pack. Hoses foes down with fire until they Flash over, rams them
 head first, and hits back harder after every knock.
@@ -8,7 +8,7 @@ head first, and hits back harder after every knock.
 
 |  |  |
 |---|---|
-| Class title | Mad Pyromancer |
+| Class title | the Flame Queen |
 | Base character | Cinder, female |
 | Personality | A salamander-folk alchemist with charcoal skin split by glowing magma, fin ears, hair of living fire and a long burning tail. She wears cracked goggles, a corset and a shredded apron, hauls a tank of liquid fire on her back, and she is delighted by every fire she starts. |
 

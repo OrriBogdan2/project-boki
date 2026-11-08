@@ -1,5 +1,5 @@
 extends "res://tools/archetype_check.gd"
-## The parity pass (the owner's 18:45 request, briefs-s2/PARITY_BRIEF.md) for Hem, Ryzz and Breah: each LMB's
+## The parity pass (the owner's 18:45 request, briefs-s2/PARITY_BRIEF.md) for Hem, Sparkle and Breah: each LMB's
 ## tracking (the aim and the body follow the cursor during the attack, also while walking), its timing and cadence,
 ## its range and projectile speed against the source (game data, then the footage at 5 fps), and each move's beats.
 ## Runs from each hero's combo check (--archer-combo-check, --mage-combo-check, --dolm-combo-check), which adds n
@@ -127,7 +127,7 @@ func _pin_audit(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: ArcherKit, home: 
 	ok("audit pin: the Heavy Shot stops on the first foe (data: one target, a knockback; no pierce)",
 		dmg(T) > 10.0 and dmg(T2) == 0.0, "%.0f / %.0f" % [dmg(T), dmg(T2)])
 
-# ------------------------------------------------------------------ Ryzz: the finger bolts
+# ------------------------------------------------------------------ Sparkle: the finger bolts
 func vireo() -> void:
 	var r := setup("mage", 7.0)
 	var m: Match = r[0]

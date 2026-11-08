@@ -1,4 +1,4 @@
-# Scrap King
+# The Scrap King
 
 A harbour hauler in a brass diving helm. Reaches out with an abyssal hand, reels foes in, drops an anchor on them and
 grows with every knock.
@@ -8,7 +8,7 @@ grows with every knock.
 
 |  |  |
 |---|---|
-| Class title | Scrap King |
+| Class title | the Scrap King |
 | Base character | Grimble, a robot |
 | Personality | A broken machine that leaks dark, corrupt energy. Its joints creak and its eyes flicker. Haunted and creepy, it drags a hook and keeps coming. |
 

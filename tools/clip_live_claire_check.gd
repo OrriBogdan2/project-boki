@@ -1,5 +1,5 @@
 extends RefCounted
-## --clip-live-claire-check: Claire's clips through the real match code, as --clip-live-check does for Kael: a Match,
+## --clip-live-claire-check: Neve's clips through the real match code, as --clip-live-check does for Kael: a Match,
 ## the kit's own keys and the render path. She wears her clips with one weapon drawn; the darts, the skate (start,
 ## stride, stop) and a skating beam play their clips, and her aim stays on the cursor while she fires on the skate
 ## (item 109); the spear's hold and push play theirs; a knock-out plays the death clip on screen.
@@ -57,7 +57,7 @@ func run(main: Node) -> void:
 	var T: Hunter = r[2]
 	var seen := {}
 	_run(m, P, 10, seen)
-	ok(_clips(P) != null, "Claire wears her clips in a match")
+	ok(_clips(P) != null, "Neve wears her clips in a match")
 	ok(_shown(P) == 0, "one weapon drawn (%d procedural pieces)" % _shown(P))
 	A.aim_at(P, T.pos)
 	P.inp["fire"] = true

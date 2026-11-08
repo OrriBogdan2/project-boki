@@ -1,5 +1,5 @@
-"""Ryzz's (mage) pieces built in Blender by script on the fitted Meshy body (tools/meshy/fit_warden.py `scripted`;
-docs/art/wardens/PIPELINE.md "Ryzz"), from the locked art (ext/imagegen docs/art/gen/wardens_r3/ryzz_* + RYZZ_KIT.md):
+"""Sparkle's (mage) pieces built in Blender by script on the fitted Meshy body (tools/meshy/fit_warden.py `scripted`;
+docs/art/wardens/PIPELINE.md "Sparkle"), from the locked art (ext/imagegen docs/art/gen/wardens_r3/ryzz_* + RYZZ_KIT.md):
 
 - pigtails(): the SHORT twin pigtails (owner: long twin tails read as a famous existing character): one copper-coil
   tie on each of the scan's hair knots, then a bunch of chunky tapered locks that flick up and out and fall in a

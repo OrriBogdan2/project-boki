@@ -7,7 +7,7 @@ extends RefCounted
 ## or the challenge it still needs. Rules and numbers: content/rules/class_unlock.json, logic:
 ## ClassUnlock. (Internal names keep "class": the file, the save key and the ids.)
 
-const TITLE := "Masks"
+const TITLE := "Relics"
 const RANK := ["ready", "open", "progress", "locked"]
 const TILE_W := 140.0          # px, one Hunter tile
 const TILE_COLS := 3
@@ -106,12 +106,12 @@ static func _actions(home: Node, id: String, viewer: HunterViewer) -> Control:
 	match ClassUnlock.status(id):
 		"open":
 			if id == Arch.of_save():
-				var pl := UI.label("You're playing %s. Your expeditions start with it." % Arch.name_of(id),
+				var pl := UI.label("You're playing %s. Your expeditions start with it." % Arch.name_of(id, true),
 						UI.T_SMALL, UI.GOOD, UI.semi)
 				pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 				box.add_child(pl)
 			else:
-				var b := UI.primary("Play %s" % Arch.name_of(id), func(): HomeHero.pick(home, id), 260)
+				var b := UI.primary("Play %s" % Arch.name_of(id, true), func(): HomeHero.pick(home, id), 260)
 				b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 				box.add_child(b)
 		"ready":
