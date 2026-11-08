@@ -51,7 +51,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Fusion) |
+| [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Coin Blast | Palm Lance | none (Boki Fusion) |
 | [the Unbroken](Class-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Fusion) |
 | [the Ashen Kiss](Class-Ashen-Kiss.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Fusion) |
 | [the Dawnfox](Class-Dawnfox.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none (Boki Fusion) |

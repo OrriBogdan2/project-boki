@@ -177,10 +177,11 @@ def clips():
     kick = dict(base, BE=aim(0, 4.5), UA=(-18, -44), tor=(0.08, -0.14, 0.0), GS=spin * 0.3)
     out.append(C("lmb", 0.55, [(0.0, base), (0.025, kick, "out"), (0.09, dict(base, GS=spin * 0.75)), (0.12, dict(base, GS=spin)), (0.3, dict(base, GS=spin * 3.2)), (0.55, dict(READY, GS=spin * 4), "smooth")]))
 
-    # ---- RMB: tap: the launcher is over and forward from the press, the grenade thumps out of the bell, the kick rides up the arm, the pipe swings home
-    r0 = dict(BRACE, BE=aim(0, 7), UA=(-20, -36), LN=1.0, LP=(-0.24, 0.24, 1.08), LQ=(0.5, 0, 0), brow=0.6, lid=0.25, FL=(-0.14, 0.24, A_Z))
-    r1 = dict(r0, BE=aim(0, 19), UA=(-14, -24), tor=(-0.06, -0.14, 0.0), hed=(-0.1, 0.12, 0.0), pel=(0.0, -0.05, -0.12))
-    out.append(C("rmb", 0.5, [(0.0, r0), (0.05, r1, "out"), (0.13, dict(r1, BE=aim(0, 14))), (0.32, dict(r0, BE=aim(0, 4), LN=0.9)), (0.5, dict(READY, LN=0.0))]))
+    # ---- RMB Coin Blast: tap: the coin hand is cocked by the shoulder at the press, flicks it out along the aim by 0.07 (fingers forward and open, palm in), follows through, home by 0.5;
+    # the cannon hangs low out of the throw
+    r0 = dict(CARRY, LP=(-0.3, 0.0, 1.22), LQ=(2.2, 0, 0), fing=0.85, tor=(0.0, 0.12, -0.03), hed=(-0.08, 0.12, 0.0), brow=0.6, lid=0.2, FL=(-0.14, 0.2, A_Z))
+    r1 = dict(r0, LP=(-0.16, 0.48, 1.3), LQ=(-1.8, 0, 0), fing=0.0, tor=(0.1, -0.22, -0.03), hed=(-0.12, -0.08, 0.0), pel=(0.012, 0.04, -0.08))
+    out.append(C("rmb", 0.5, [(0.0, r0), (0.07, r1, "out"), (0.2, dict(r1, LP=(-0.12, 0.5, 1.22), LQ=(-1.5, 0, 0), fing=0.05)), (0.5, READY)]))
 
     # ---- Slipstep: her slide. On the legs' own heading (runtime: legs_heading) she drops feet first, the lead leg out, the back knee folded under, the left hand trailing on the ground; the torso
     # stays up and the cannon stays on the aim
@@ -191,11 +192,13 @@ def clips():
     t0 = dict(ON_AIM, prt=(0.0, 0.0, 0.0), FL=(-0.1, 0.0, A_Z + 0.35), FR=(0.12, 0.05, A_Z + 0.42), FLp=-0.8, FRp=-0.8, LP=(-0.18, 0.1, 1.2), pel=(0, 0, 0.1))
     out.append(C("dash_ex", 0.5, [(0.0, dict(READY, **ON_AIM)), (0.05, t0), (0.22, dict(t0, prt=(0.0, 0.0, 6.283))), (0.36, dict(READY, **ON_AIM, prt=(0, 0, 6.283), pel=(0, 0, -0.14))), (0.5, dict(READY, prt=(0, 0, 6.283)))]))
 
-    # ---- Longneedle: 0.6 s of charge braced deep, the left hand on the sleeve, chin down the barrel; the beam at 0.6 throws her chest back and she settles by 1.05
-    e0 = dict(BRACE, BE=aim(0, 1), UA=(-14, -38), LP=(0.11, 0.42, 1.06), LQ=(1.2, -0.6, 0), pel=(0, -0.05, -0.2), prt=(0.22, 0.18, 0), tor=(0.26, -0.2, 0), hed=(-0.32, 0.16, 0.06), brow=1.0, lid=0.42, fing=0.75)
-    e1 = dict(e0, pel=(0, -0.07, -0.22), tor=(0.3, -0.2, 0), BE=aim(0, 0))
-    e2 = dict(e0, BE=aim(0, 13), UA=(-8, -24), pel=(0, -0.16, -0.08), prt=(-0.12, 0.12, 0), tor=(-0.34, -0.1, 0), hed=(-0.05, 0.1, 0), LP=(-0.34, 0.1, 1.2), LQ=(0.3, 0, 0), brow=-0.2, lid=0.05, fing=0.1)
-    out.append(C("e", 1.05, [(0.0, READY), (0.15, e0), (0.58, e1), (0.65, e2, "out"), (0.8, dict(e2, BE=aim(0, 4), tor=(-0.05, -0.1, 0), pel=(0, -0.08, -0.1))), (1.05, READY)]))
+    # ---- E Palm Lance: the cyborg left arm up by 0.15, the open palm square to the aim (LQ solved on the hips frame: fingers up and a little forward, palm out), the cannon
+    # hanging; 0.6 s of charge pressing the palm out; the beam at 0.6 kicks the palm up and back, she settles by 1.05. The hips keep READY's turn (pel y and prt turn the LQ frame) so the palm stays square
+    PALM = (0.018, -1.402, 2.892)
+    e0 = dict(READY, LP=(-0.12, 0.38, 1.38), LQ=PALM, fing=0.0, pel=(0.012, 0.0, -0.08), hed=(-0.12, 0.1, 0.03), brow=1.0, lid=0.4)
+    e1 = dict(e0, LP=(-0.12, 0.43, 1.38), pel=(0.012, 0.02, -0.1))
+    e2 = dict(e0, LP=(-0.13, 0.28, 1.46), pel=(0.012, 0.0, -0.06), hed=(0.05, 0.1, 0.03), brow=-0.2, lid=0.05)
+    out.append(C("e", 1.05, [(0.0, READY), (0.15, e0), (0.58, e1), (0.65, e2, "out"), (0.8, dict(e2, LP=(-0.13, 0.34, 1.41), pel=(0.012, 0.0, -0.08))), (1.05, READY)]))
 
     # ---- Cinderfall: the cannon snapped straight up by 0.1, the shot squashes her, held a beat, back on her aim by 0.6
     x0 = dict(BRACE, BE=aim(0, 78), UA=(-6, 28), pel=(0, -0.03, -0.06), tor=(-0.14, -0.12, -0.08), hed=(-0.34, 0.1, 0), LP=(-0.3, 0.14, 1.2), brow=0.8, lid=0.1)

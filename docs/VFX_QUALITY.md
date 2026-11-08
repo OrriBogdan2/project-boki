@@ -64,7 +64,7 @@ Still open (shared, not done here):
 - `pin_draw.gd` defaults to `#e8483e`.
 - Six kits are data-driven (`content/vfx/`: archer, ashwick, gunslinger, juggernaut, rimewright, tender). The rest draw
   with `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`); Vex still uses `vv_fx` for her
-  slide echoes, the Burr Charge's cone and smear, and the Dazed swirl. Moving each to `HeroVfx` data is
+  slide echoes, the Coin Blast's cone and smear, and the Dazed swirl. Moving each to `HeroVfx` data is
   how a kit reaches the bar.
 - **Opaque zone fills** (seen in the strips): Vex's X scorch (`VvFx.disc`, fixed on ext/vfx-gunslinger), Motley's well dome, Meeko's seed and
   ult discs and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit

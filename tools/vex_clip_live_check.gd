@@ -1,11 +1,15 @@
 extends RefCounted
 ## --vex-clip-live-check: Vex's clips through the real match code (see --clip-live-check for Kael): her clips
 ## are on and no procedural gun shows; the slide's legs turn to the dash while the cannon arm stays on the aim
-## (aims_in_dash); a tapped RMB swings the launcher forward; LMB plays; a knock-out plays the death clip.
+## (aims_in_dash); a tapped RMB flicks the coin hand out; E raises the open palm; LMB plays; a knock-out plays
+## the death clip.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
 const AIM_OFF := 0.3           # rad: how far the cannon may sit off the aim mid slide
+const FLICK := 0.2             # m: how far past rest the coin hand reaches along her facing
+const PALM_UP := 1.2           # m: the raised palm above her feet while Palm Lance charges
+const PALM_OUT := 0.25         # m: the palm ahead of her while Palm Lance charges
 
 var A
 var bad := 0
@@ -86,23 +90,47 @@ func run(main: Node) -> void:
 	ok(frames > 0 and worst <= AIM_OFF, "the cannon stays on the aim through the slide (worst %.2f rad)" % worst)
 	for f in 60:
 		_frame(m, [P])
-	# RMB tap: the fixed firing point is found and sits ahead of her on the aim, right at the press
-	var fire := WardenGlb.anchor(P.model, "launcher_fire")
-	ok(fire != null and WardenGlb.anchor(P.model, "launcher_muzzle") != null, "the launcher's two FX points are found")
-	if fire:
-		var ahead := (fire.global_position - P.model.global_position).dot(P.model.global_transform.basis.z * -1.0)
-		print("LIVE launcher_fire %.2f m along her facing at rest" % ahead)
-	var lb := sk.find_bone("launcher")
-	var rest_q := sk.get_bone_pose_rotation(lb)
+	# RMB tap: Coin Blast is flicked from her cyborg hand: the palm emitter is found and goes out ahead of her
+	var palm := WardenGlb.anchor(P.model, "palm_emitter")
+	ok(palm != null, "the palm emitter (Coin Blast, Palm Lance) is found")
+	# (the hand's BoneAttachment3D follows the skeleton when the tree draws; this check steps by hand)
+	var at := func() -> Vector3:
+		sk.force_update_all_bone_transforms()
+		var ba := palm.get_parent() as BoneAttachment3D
+		return sk.global_transform * sk.get_bone_global_pose(ba.bone_idx) * palm.transform.origin - P.pos
+	var fwd := func() -> float:
+		var a := P.aim_dir()
+		return (at.call() as Vector3).dot(Vector3(a.x, 0, a.y)) if palm else 0.0
+	var up := func() -> float:
+		return (at.call() as Vector3).y if palm else 0.0
+	var rest_ahead: float = fwd.call()
 	seen.clear()
 	P.inp["sec"] = true
-	var swung := 0.0
+	var flick := -9.0
 	for f in 30:
 		_frame(m, [P])
 		seen[_clips(P).cur] = true
-		swung = maxf(swung, sk.get_bone_pose_rotation(lb).angle_to(rest_q))
+		flick = maxf(flick, fwd.call() - rest_ahead)
+	P.inp["sec"] = false
 	ok(seen.has("rmb"), "a tapped RMB plays its clip")
-	ok(swung > 2.4, "the launcher swings forward for the throw (%.2f rad)" % swung)
+	ok(flick > FLICK, "the coin hand flicks out ahead of her (%.2f m past rest %.2f m)" % [flick, rest_ahead])
+	# E: Palm Lance charges from the raised open palm, out in front at chest height
+	for f in 60:
+		_frame(m, [P])
+	seen.clear()
+	K.cd["e"] = 0.0
+	K.use_e()
+	var high := 0.0
+	var out := 0.0
+	for f in 30:
+		_frame(m, [P])
+		seen[_clips(P).cur] = true
+		if not K.needle.is_empty():
+			high = maxf(high, up.call())
+			out = maxf(out, fwd.call())
+	ok(seen.has("e"), "Palm Lance plays its clip")
+	ok(high > PALM_UP and out > PALM_OUT,
+			"the palm is raised and out for the charge (%.2f m up, %.2f m ahead)" % [high, out])
 	# LMB
 	seen.clear()
 	for f in 60:

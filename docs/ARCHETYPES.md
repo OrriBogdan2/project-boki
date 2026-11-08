@@ -1205,7 +1205,7 @@ other four kits; a kit with no `"r"` in its JSON refuses the press.
 
 The Mage (medium, Hex/Runes) and the Gunslinger (Chambers/Called Shot) kits are replaced by two new
 heroes under the same ids: **Sparkle** (id `mage`, now Light: Sparks, Wirerun, Coilshot, Skycall) and **Vex**
-(id `gunslinger`, Medium: Fever, Slipstep, Burr Charge, Longneedle). Neither has an R (the Boki Merge owns it).
+(id `gunslinger`, Medium: Fever, Slipstep, Coin Blast, Palm Lance). Neither has an R (the Boki Merge owns it).
 The old Mage and Gunslinger sections above are history. Per-slot tables, research notes and combinations:
 `docs/heroes/mage.md` and `docs/heroes/gunslinger.md`; combos are checked by `--mage-combo-check` and
 `--gunslinger-combo-check`. `Hex` (scripts/arch/hex.gd) is no longer used by a kit.

@@ -12,6 +12,7 @@ const BURN := "burn"
 const DROP_T := 0.8              # s: the shell is seen falling for the last part of the fall
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
 const DISC_ALPHA := 0.45         # the countdown disc's fill share: a lit rim over a see-through centre, never a sheet
+const BRONZE := Color("b9732f")   # the shell's metal (a material, not an effect)
 
 var kit: GunslingerKit
 var shells: Array = []         # {at, t, phase, node, tick, n}
@@ -52,16 +53,33 @@ func cast() -> bool:
 	kit.net_ring(at, float(xd["radius"]), GunslingerKit.LIME)
 	return true
 
-## The shell: a big Burr Charge with its spikes out, made once and reused.
+## The shell: a big spiked charge, made once and reused.
 func _take_node() -> Node3D:
 	for n in pool:
 		if is_instance_valid(n) and not (n as Node3D).visible:
 			(n as Node3D).visible = true
 			return n
-	var nn := kit._burr_mesh()
+	var nn := _shell_mesh()
 	nn.scale = Vector3.ONE * 2.6
 	pool.append(nn)
 	return nn
+
+## A bronze ball with a lime heart and eight hot spikes (Cinderfall's own; Coin Blast flies a coin).
+func _shell_mesh() -> Node3D:
+	var n := kit.own_node()
+	Models.part(n, Models.sphere(0.15, 12), Models.shiny(BRONZE, 0.6))
+	Models.part(n, Models.cyl(0.155, 0.155, 0.06, 14), Models.toon(Color("2b2a33"), false, 0.0))
+	var heart := Models.part(n, Models.sphere(0.07, 8), kit.solid_mat(GunslingerKit.LIME), Vector3(0, 0.1, 0.1))
+	heart.name = "Glow"
+	for i in 8:
+		var a := TAU * i / 8.0
+		var out := Vector3(cos(a), sin(i * 2.1) * 0.5, sin(a)).normalized()
+		var spike := Models.part(n, Models.crystal(0.04, 0.17, 4), kit.solid_mat(GunslingerKit.HOT), out * 0.17)
+		var up := Vector3.UP if absf(out.y) < 0.95 else Vector3.RIGHT
+		spike.look_at_from_position(spike.position, spike.position * 2.0, up)
+	for ch in n.get_children():
+		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return n
 
 # ------------------------------------------------------------------ per step
 func tick(dt: float) -> void:

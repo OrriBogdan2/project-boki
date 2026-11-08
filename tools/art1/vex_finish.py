@@ -635,7 +635,7 @@ A = dict(VC.empties())
 A.update({"anchor_head_top": ("head", (0, VH.HC[1], VH.TOP + 0.03)), "anchor_chest": ("hips", (0, 0.12, VC.J("upper_arm.R")[2] - 0.1)),
           "anchor_eye_glow": ("head", EYE_M), "anchor_lens": ("head", EYE_M),
           "anchor_spine": ("hips", (0, -0.14, VC.J("upper_arm.R")[2] - 0.2)), "anchor_coin": ("coin", tuple(parts["coin"])),
-          "anchor_left_hand": ("hand.L", tuple(VA.WR + np.array([0, 0, -0.1]))), "anchor_pack": ("hips", (-0.1, -0.13, VC.J("upper_arm.R")[2] - 0.05))})
+          "anchor_left_hand": ("hand.L", tuple(VA.WR + np.array([0, 0, -0.1]))), "palm_emitter": ("hand.L", tuple(VA.WR + np.array([0.04, 0, -0.075]))), "anchor_pack": ("hips", (-0.1, -0.13, VC.J("upper_arm.R")[2] - 0.05))})
 for nm, (bn, at) in A.items():
     e = bpy.data.objects.new(nm, None)
     bpy.context.scene.collection.objects.link(e)

@@ -389,7 +389,7 @@ func _gunslinger() -> void:
 	K.on_deal(T, 100.0, {"src": "shot"})
 	ok("venator passive: Fever heals 6% off damage", absf(P.hp - hp0 - 6.0) < 0.5, "healed %.1f" % (P.hp - hp0))
 	K.res = 0.0
-	# Burr Charge: thrown at a foe, it goes off on them (damage + Dazed, no cone); walls and the ground give the cone
+	# Coin Blast: thrown at a foe, it goes off on them (damage + Dazed, no cone); walls and the ground give the cone
 	fresh(T); T2.teleport(home + Vector3(12, 0, 0)); P.teleport(home); T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	tap(m, P)
 	step(m, 1.6)
@@ -398,10 +398,10 @@ func _gunslinger() -> void:
 	ok("venator RMB: the hit fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
 	var base := K.outgoing(T, 10.0, {"src": "shot"})
 	ok("venator Dazed: rifle +90%", is_equal_approx(base, 19.0), "%.1f" % base)
-	# Longneedle: charge, then a piercing beam
+	# Palm Lance: charge, then a piercing beam
 	fresh(T); KitStatus.clear_rattled(T); K.cd["e"] = 0.0; aim_at(P, T.pos)
 	P.ak.use_e()
-	ok("venator E: Longneedle winds up slowed", not K.needle.is_empty() and K.move_k() < 1.0)
+	ok("venator E: Palm Lance winds up slowed", not K.needle.is_empty() and K.move_k() < 1.0)
 	step(m, 0.5)
 	var early := dmg(T)
 	step(m, 0.6)
@@ -625,7 +625,7 @@ func _feel() -> void:
 	var st3 := StageSpec.parse({"delivery": {"type": "leap", "range": 7, "time": 0.5}}, "", GrammarReport.new())
 	ok("feel: leap flight counts", Feel.missing_windup(st3) <= 0.0)
 	# archetype tells meet the floors
-	ok("feel: Skycall and Longneedle show a lane or ring before they land", float(Arch.def("mage")["e"]["delay"]) >= 0.5 and float(Arch.def("gunslinger")["e"]["charge"]) >= 0.5)
+	ok("feel: Skycall and Palm Lance show a lane or ring before they land", float(Arch.def("mage")["e"]["delay"]) >= 0.5 and float(Arch.def("gunslinger")["e"]["charge"]) >= 0.5)
 	ok("feel: Arrow Rain tell >= soft floor", float(Arch.def("archer")["e"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
 	ok("feel: the Bola and Warchain are projectiles (dodgeable)", String(Arch.def("thief")["rmb"]["delivery"]) == "projectile" and float(Arch.def("thief")["rmb"]["bola"]["speed"]) <= 34.0 and String(Arch.def("juggernaut")["e"]["delivery"]) == "projectile")
 	ok("feel: Wirerun shows its lane while it grows", float(Arch.def("mage")["dash"]["hold"]) >= 0.3)
