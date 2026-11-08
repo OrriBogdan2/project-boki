@@ -332,3 +332,9 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 - 2026-11-08 (owner: "just do it yourself"): **Pip stays as the default Boki pet name** (a Boki name now, not a hero). **Relic rule adopted:** a relic need not be on the hero's 3D model; it is the object found in the world and shows in the relic pickup, menus, splash and lore art.
 - 2026-11-08 (owner: "yes"): **Skylands = the name for the broken land after the Hollowing.** Before it was Solmere, one kingdom on solid ground; the Wyrm's waking broke it into floating islands. Malgrave is not defeated (alive in the Hollow; beating her is the end goal). Beast-folk 'always lived in Solmere's lands'. Wins over earlier wording; LORE_MASKS.md has the text.
 - 2026-11-08 (owner): the phrase is **"Hunter's Relic"**, not "Hero's Relic", everywhere players read it (prologue, tooltips, lore, store copy).
+
+## 2026-11-08 (owner): new canonical Hunter order
+- Canonical Hunter order (everywhere the game lists all Hunters: hero select, Relics/collection, wiki, docs, Model Room, website). Supersedes the 2026-11-07 order above:
+  1 Vex, 2 Albert, 3 Neve, 4 Kael, 5 Cinder, 6 Tenzo, 7 Sparkle, 8 Grimble, 9 Meeko, 10 Sable, 11 Lace, 12 Motley.
+- Ids (scripts/arch/arch.gd ORDER, scripts/match/hero_kit.gd ARCH_ORDER): gunslinger, bulwark, rimewright, juggernaut, ashwick, dolm, mage, dredge, tender, thief, archer, ostra.
+- Display order only. The post-tutorial pick offer (Kael, Cinder, Meeko) is unchanged unless the owner says otherwise.
