@@ -164,14 +164,14 @@ kin part overpowered.
 
 New optional KinSpec field:
 `"infusion": {"hit": {...}, "ctrl": {...}, "guard": {...}, "util": {...}, "mod": [{...}, ...], "move": "blink"}`.
-If a kin leaves it out, it's **derived from the kin's current E active and rider**:
+If a kin leaves it out, it's **derived from the kin's current E active** (dodge riders are retired, owner 2026-11-05: dashes are the hero's own):
 
 1. `hit` ← the first damage effect with `over` > 0, or a damage-category mark.
 2. `ctrl` ← the first control effect.
 3. `guard` ← the first sustain effect.
 4. `util` ← the first utility effect.
-5. `mod` ← the active's modifiers in order, then the dodge rider's modifiers.
-6. `move` ← `dodge_rider.as`.
+5. `mod` ← the active's modifiers in order.
+6. `move`: retired with the dodge riders (no kin changes how you dash).
 
 The six kin today:
 
@@ -891,7 +891,7 @@ follow the same shape, through shared helpers in `ArchKit` (`armed_fx`, `payoff_
 - **Sounds:** `pay_deadeye`, `pay_flashpoint`, `pay_called`, `pay_slam`, synthesized by
   `tools/sfx_combat.py` (appended last, so no other sound changes).
 
-### Archer: Lisette -> Focus -> Deadeye (on a Myth-style hunter-archer baseline)
+### Archer: Lace -> Focus -> Deadeye (on a Myth-style hunter-archer baseline)
 
 Owner direction (Nov 1): a hold-to-charge bow with stages you feel, a wall of falling arrows on E,
 three empowered arrows on R. Mechanics only; names, numbers and art are ours.
@@ -1199,10 +1199,10 @@ theirs. Rather than drop the wiki's ultimates, each is folded into the kit where
 assert each combination. The class-ultimate framework (`ArchKit.use_r`, `class_ults`) stays for the
 other four kits; a kit with no `"r"` in its JSON refuses the press.
 
-## Hero rebuild: Ryzz (mage) and Vex (gunslinger), Nov 1
+## Hero rebuild: Sparkle (mage) and Vex (gunslinger), Nov 1
 
 The Mage (medium, Hex/Runes) and the Gunslinger (Chambers/Called Shot) kits are replaced by two new
-heroes under the same ids: **Ryzz** (id `mage`, now Light: Sparks, Wirerun, Coilshot, Skycall) and **Vex**
+heroes under the same ids: **Sparkle** (id `mage`, now Light: Sparks, Wirerun, Coilshot, Skycall) and **Vex**
 (id `gunslinger`, Medium: Fever, Slipstep, Burr Charge, Longneedle). Neither has an R (the Boki Merge owns it).
 The old Mage and Gunslinger sections above are history. Per-slot tables, research notes and combinations:
 `docs/heroes/mage.md` and `docs/heroes/gunslinger.md`; combos are checked by `--mage-combo-check` and
@@ -1219,11 +1219,11 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 | `juggernaut` | Juggernaut | [Brall](https://supervive.wiki.gg/wiki/Brall) | Ported ability by ability (Kits2 above) |
 | `archer` | Archer | [Myth](https://supervive.wiki.gg/wiki/Myth) | Accuracy pass: `docs/heroes/archer.md` |
 | `bulwark` | Bulwark | [Oath](https://supervive.wiki.gg/wiki/Oath) | Accuracy pass: `docs/heroes/bulwark.md` |
-| `mage` | Ryzz | [Joule](https://supervive.wiki.gg/wiki/Joule) | `docs/heroes/mage.md` |
+| `mage` | Sparkle | [Joule](https://supervive.wiki.gg/wiki/Joule) | `docs/heroes/mage.md` |
 | `gunslinger` | Vex | [Ghost](https://supervive.wiki.gg/wiki/Ghost) | `docs/heroes/gunslinger.md` |
 | `ashwick` | Cinder (was Ashwick) | [Felix](https://supervive.wiki.gg/wiki/Felix) | `docs/heroes/ashwick.md` |
 | `dredge` | Grimble | [Kingpin](https://supervive.wiki.gg/wiki/Kingpin) | `docs/heroes/dredge.md` |
-| `tender` | Pip, the Tender | [Elluna](https://supervive.wiki.gg/wiki/Elluna) | `docs/heroes/tender.md` |
-| `rimewright` | Claire, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
-| `dolm` | Tarek | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
+| `tender` | Meeko, the Tender | [Elluna](https://supervive.wiki.gg/wiki/Elluna) | `docs/heroes/tender.md` |
+| `rimewright` | Neve, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
+| `dolm` | Tenzo | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
 | `ostra` | Motley | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |

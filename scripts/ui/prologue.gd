@@ -151,13 +151,13 @@ func _shots() -> Array:
 				[V + Vector3(-1.8, 0.7, 3.4), V + Vector3(0.9, 0.5, 1.2), V + Vector3(-1.4, 0.6, 2.9), V + Vector3(0.9, 0.6, 1.2),
 					3.0]]},
 		{"chapter": "THE HOLLOWING", "mood": "fire", "tint": Color("d0406a"), "grade": 0.34, "event": "break",
-			"text": "The souls she had eaten burst free and flung Solmere into the sky,\n"
+			"text": "The souls she had eaten burst free and flung Solmere into the sky: the Skylands.\n"
 				+ "and the cracked Heart sank into the Hollow below. Malgrave lives on inside it.",
 			"cam": [[W + Vector3(-30, 22, 46), W + Vector3(0, 0, 0), W + Vector3(-36, 28, 56), W + Vector3(0, -6, 0), 3.6],
 				[W + Vector3(46, 4, 34), W + Vector3(0, -4, 0), W + Vector3(58, 10, 46), W + Vector3(0, -20, 0), 3.6]]},
 		{"chapter": "THE DESCENT", "mood": "deep", "tint": Color("ff7a8a"), "grade": 0.24, "event": "drop",
-			"text": "The Hunters who went down after it left only their Masks behind.\n"
-				+ "Put one on, bond with a Boki, and drop in. Every Hunter wants the Heart. So does Malgrave.",
+			"text": "The Hunters who went down after it left only their Relics behind.\n"
+				+ "Take up a Hunter's Relic, bond with a Boki, and drop in. Every Hunter wants the Heart. So does Malgrave.",
 			"cam": [[D + Vector3(-6, 20, 14), D + Vector3(2, 4, -30), D + Vector3(-3, 16, 2), D + Vector3(8, -10, -52), 3.6],
 				[D + Vector3(-4, 14, -4), D + Vector3(14, -28, -70), D + Vector3(0, 11, -12), D + Vector3(18, -36, -82), 3.8]]},
 	]
@@ -340,7 +340,7 @@ func _fire(parent: Node3D, at: Vector3, size := 1.0) -> void:
 	sm.mesh = _blob(0.6, false)
 	parent.add_child(sm)
 
-## Specks drifting in a set's air (the Sundering's dust, the Mask rising): `box` half-extents in m, `radius` the
+## Specks drifting in a set's air (the Hollowing's dust, the Mask rising): `box` half-extents in m, `radius` the
 ## speck radius in m, `rise` m/s² up (negative sinks), `glow` adds light instead of covering.
 func _drift(at: Vector3, box: Vector3, col: Color, n: int, radius: float, rise: float, glow: bool) -> CPUParticles3D:
 	var p := CPUParticles3D.new()
@@ -392,7 +392,7 @@ func _mood(a: String, b := "", k := 0.0) -> void:
 	sun.light_color = (m["sun"] as Color).lerp(n["sun"], k)
 	sun.light_energy = lerpf(float(m["sun_e"]), float(n["sun_e"]), k)
 
-## The land whole burning: k from its golden evening (0) to the red of the Sundering (1).
+## The land whole burning: k from its golden evening (0) to the red of the Hollowing (1).
 func _burn(k: float) -> void:
 	_mood("gold", "fire", k)
 
@@ -659,7 +659,7 @@ func _events(ev: String, st: float, delta: float) -> void:
 		"wyrm":
 			_waking(st, delta)
 		"break":
-			_sundering(st, delta)
+			_hollowing(st, delta)
 		"mask":
 			vault.mask(st)
 		"theft":
@@ -687,7 +687,7 @@ func _waking(st: float, delta: float) -> void:
 		Sfx.play("boom", null, -14.0, 0.1, 1.4)
 
 ## The Wyrm circles while the land splits: a flash and a jolt, the isles drift apart and sink, rocks tumble.
-func _sundering(st: float, delta: float) -> void:
+func _hollowing(st: float, delta: float) -> void:
 	wyrm.breath.emitting = false
 	var ang := 5.3 - st * 0.42      # rad: from the far side of the land, round away from both camera moves
 	var W: Vector3 = SETS["whole"]

@@ -10,7 +10,7 @@ extends RefCounted
 const CHAPTERS := ["SOLMERE", "THE MASK", "THE UPRISING", "THE THIEF", "THE HOLLOWING", "THE DESCENT"]
 ## words each panel's line must carry (the round 5 locks: the kingdom, the queen, the guard, the thief)
 const NAMES := [["Solmere", "Malgrave"], ["mask", "Wyrmheart"], ["Kael", "Auburn Knights", "Wyrm"], ["Sable", "Heart"],
-	["Hollow", "Heart"], ["Masks", "Boki", "Heart"]]
+	["Hollow", "Skylands", "Heart"], ["Relics", "Hunter's Relic", "Boki", "Heart"]]
 const RUN_S := Vector2(38.0, 46.0)      # s: the panels' own time, the brief's ~45 s less the fades and title card
 const FADE_S := 0.7                     # s: Prologue's fade between panels (_advance)
 ## each panel's strip: [seconds in (from the end when negative, taken just before the wipe), caption]
@@ -78,7 +78,7 @@ func run(m: Node) -> void:
 	for i in mini(pr.shots.size(), NAMES.size()):
 		var text := String(pr.shots[i]["text"])
 		var missing: Array = NAMES[i].filter(func(w): return not text.contains(w))
-		ok(missing.is_empty() and not text.contains("twelve"), "%s names %s" % [CHAPTERS[i], ", ".join(NAMES[i])])
+		ok(missing.is_empty() and not text.contains("twelve") and not text.contains("Tyrant"), "%s names %s" % [CHAPTERS[i], ", ".join(NAMES[i])])
 	await _captions_fit(pr, tree)
 	main.get_window().size = FRAME
 	await _play(pr, tree)

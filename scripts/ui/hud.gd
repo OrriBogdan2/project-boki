@@ -344,7 +344,7 @@ func _draw_world_labels() -> void:
 	_draw_truce_marks()
 	_draw_wisp_rings()
 	for h in m.hunters:
-		if h == m.player or h.out or h.extracted or not h.model or not h.model.visible or h.unseen:
+		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen:
 			continue
 		if cam.is_position_behind(h.position):
 			continue
@@ -698,6 +698,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.lairs:
 		_draw_map_lairs(inner, to_map, on_map, riding)
 	ReviveHud.minimap(self, inner, to_map, on_map)
+	if m.biomes: m.biomes.hot.minimap(self, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
 		for cnd in m.spawn_plan.cands:
@@ -1824,7 +1825,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		if ud: lines.append([Settings.key_caps("ultimate"), ud.display_name + " (Fusion)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Fusion: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
 		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	var dsi := p.slot_info("dash")
-	lines.append([Settings.key_cap("dash"), String(dsi["name"]) + ((" + " + String(dsi["rider"])) if String(dsi.get("rider", "")) != "" else ""), String(dsi["desc"]), dsi["col"]])
+	lines.append([Settings.key_cap("dash"), String(dsi["name"]), String(dsi["desc"]), dsi["col"]])
 	lines.append_array(GripHud.kit_lines(p))
 	var w := 356.0
 	# each row: the key and name, then the description wrapped to the panel
@@ -2256,9 +2257,6 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append([dd.display_name if dd else "Dash", dd.color if dd else Color("bfe6ff")])
 			out.append(["Dodge  ·  %s" % Settings.key_cap("dash"), MUTED, 12])
 			out.append([dd.desc if dd else "A quick burst the way you're moving.", INK, 14])
-			var rd := p.dash_rider()
-			if not rd.is_empty():
-				out.append([String(rd.get("name", "")) + ":  " + String(rd.get("desc", "")), Color(String(rd.get("color", "#ffffff"))), 13])
 			out.append(["%d of %d charges. One comes back every %s." % [int(floor(p.dashes)), int(p.max_dashes()), _secs(p.dash_regen())], MUTED, 13])
 		"util1", "util2", "util3", "util4": out = BeltHud.tip(p, int(id.substr(4)) - 1)
 		"armor_level": out = ArmorHud.tip(p)

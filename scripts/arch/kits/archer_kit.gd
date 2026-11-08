@@ -368,14 +368,17 @@ func on_dash(use_ex: bool) -> bool:
 	if ex:
 		# the long dash (in the air, or out of charges): Hem's own flick and tumble with her fletch
 		# after-images (no bursts on a dash); 19 m/s, the base dash speed
-		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"}, true)
+		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"})
 		play("pin_flick")
 		vfx("flick")
 		st["last_dash"] = "flick"
 		return true
 	CombatBus.ability_used.emit(h, "spirit_walk", "dodge")
-	spirit.start(use_ex)
+	spirit.start()
 	return true
+
+## The dash's data "charges" (2, owner item 146) over the light class's one.
+func extra_dashes() -> float: return float(dash_def().get("charges", 1)) - float(h.cdat["dashes"])
 
 ## While walking as a spirit she moves quicker; at rank 3 inside something she starts faster still and
 ## that fades with the walk. A draw right after a perfect release slows her less (wiki: perfect shots ease
@@ -410,7 +413,7 @@ func press_rmb() -> void:
 	rmb_ctx = {"air": false, "e": in_e(), "r": false, "full": full_ready()}
 
 func rmb_hold_tick(t: float) -> void:
-	if t > 0.15 and not pin_aim:
+	if t > float(rmb_def()["hold"]) and not pin_aim:
 		# the Heavy Shot's draw: the needle on the bow, a red bar growing from it (its own creak)
 		play("arc_heavy_wind")
 		pin_aim = true
@@ -509,8 +512,7 @@ func _pin(a: Vector3, k: float) -> void:
 			add_focus(res_max())
 			if rank("sec") >= 3:
 				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge
-			var wall_k := lerpf(float(pd["wall_floor"]), 1.0, k)       # an early-release pin pays too
-			f.hurt(float(pd.get("wall_dmg", 12.0)) * wall_k * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "pin"], "heavy": true})
+			f.hurt(float(pd["wall_mult"]) * dmg * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "pin"], "heavy": true})
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:
 					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})

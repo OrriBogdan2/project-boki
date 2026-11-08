@@ -889,7 +889,7 @@
 "shadow": 1
 },
 "scripts/ui/prologue.gd": {
-"long_line": 22,
+"long_line": 23,
 "nested_ternary": 1,
 "semicolon": 34,
 "shadow": 1
@@ -1074,7 +1074,7 @@
 "semicolon": 3
 },
 "tools/kill_reset_check.gd": {
-"long_line": 8,
+"long_line": 7,
 "semicolon": 6
 },
 "tools/kin_regen_check.gd": {

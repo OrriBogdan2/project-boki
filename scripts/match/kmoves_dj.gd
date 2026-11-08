@@ -7,12 +7,15 @@ extends RefCounted
 
 const MOVES := {
 	# ---------------------------------------------------------------- Juggernaut
-	# the Searing Wave let go: the raised blade carves down and forward, a long low lunge after it
+	# the Searing Wave let go: a flat side swing from his right across to his left at waist height,
+	# the hips turning through it, the weight stepping into it
 	"jug_wave": {"keys": [
-		[0.0, {"blade": Vector3(0.0, 2.6, 0.0), "bw": 1.0, "p": 0.2}],
-		[0.1, {"blade": Vector3(0.0, -0.9, 0.0), "bw": 1.0, "rad": 0.6, "p": -0.5, "lw": 1.0,
-				"legs": [1.0, -1.0, -0.6, -0.3], "sq": 0.2}],
-		[0.32, {"blade": Vector3(0.0, -0.8, 0.0), "bw": 0.8, "p": -0.35, "lw": 0.8, "legs": [0.8, -0.9, -0.5, -0.3]}],
+		[0.0, {"blade": Vector3(-1.9, 0.1, 0.0), "bw": 1.0, "rad": 0.5, "y": 0.9, "p": 0.1, "lw": 1.0,
+				"legs": [0.8, -1.2, -0.45, -0.8], "sq": 0.2}],
+		[0.1, {"blade": Vector3(1.5, 0.0, 0.0), "bw": 1.0, "rad": 0.75, "y": -0.95, "p": -0.35, "lw": 1.0,
+				"legs": [1.0, -1.0, -0.6, -0.3], "sq": -0.1}],
+		[0.32, {"blade": Vector3(1.7, 0.05, 0.0), "bw": 0.8, "y": -0.7, "p": -0.25, "lw": 0.8,
+				"legs": [0.8, -0.9, -0.5, -0.3]}],
 		[0.6, {}]]},
 	# Finishing Slam (footage 0155-0158): 0.6s of wind-up, the blade cocked low behind and the body
 	# coiled, rising onto the front foot, the strike at 0.6 (the hit), then a heavy recovery
@@ -27,19 +30,19 @@ const MOVES := {
 		[0.85, {"blade": Vector3(1.2, -0.4, 1.4), "bw": 0.9, "rad": 0.55, "p": -0.45, "y": -0.5, "lw": 1.0,
 				"legs": [1.0, -0.8, -0.6, -0.3]}],
 		[1.15, {}]]},
-	# the Lunge, held (the sword over his head as long as RMB is held): he sinks onto the loaded back leg as the
-	# blade swings up and over, then holds it high overhead, the tip laid back, leaning into the aim
+	# the Lunge, held as long as RMB is held, ready to lunge: he sinks onto the loaded
+	# back leg and levels the blade forward at the aim, leaning in behind it
 	"jug_lunge_wind": {"hold": true, "keys": [
 		[0.0, {}],
-		[0.1, {"blade": Vector3(-0.4, 1.1, 0.3), "bw": 1.0, "rad": 0.35, "p": 0.15, "y": 0.4, "sq": 0.12, "lift": -0.05,
-				"lw": 1.0, "legs": [0.8, -1.3, -0.5, -0.7]}],
-		[0.28, {"blade": Vector3(0.0, 1.85, 0.0), "bw": 1.0, "rad": 0.4, "p": -0.12, "y": 0.2, "sq": 0.28,
+		[0.1, {"blade": Vector3(-0.3, 0.6, 0.2), "bw": 1.0, "rad": 0.35, "p": -0.05, "y": 0.4, "sq": 0.12,
+				"lift": -0.05, "lw": 1.0, "legs": [0.8, -1.3, -0.5, -0.7]}],
+		[0.28, {"blade": Vector3(0.0, 0.2, 0.0), "bw": 1.0, "rad": 0.5, "p": -0.3, "y": 0.2, "sq": 0.28,
 				"lift": -0.16, "lw": 1.0, "legs": [1.0, -1.6, -0.6, -1.0]}],
-		[0.45, {"blade": Vector3(0.0, 2.0, 0.0), "bw": 1.0, "rad": 0.42, "p": -0.18, "y": 0.2, "sq": 0.3, "lift": -0.18,
-				"lw": 1.0, "legs": [1.05, -1.7, -0.65, -1.05]}]]},
-	# ... let go: the overhead blade chops down and out ahead as he drives forward, then the follow-through
+		[0.45, {"blade": Vector3(0.0, 0.15, 0.0), "bw": 1.0, "rad": 0.55, "p": -0.35, "y": 0.2, "sq": 0.3,
+				"lift": -0.18, "lw": 1.0, "legs": [1.05, -1.7, -0.65, -1.05]}]]},
+	# ... let go: the levelled blade drives out ahead as he goes, then the follow-through
 	"jug_lunge": {"keys": [
-		[0.0, {"blade": Vector3(0.0, 2.0, 0.0), "bw": 1.0, "rad": 0.42, "p": -0.25, "y": 0.2, "sq": 0.2, "lw": 1.0,
+		[0.0, {"blade": Vector3(0.0, 0.15, 0.0), "bw": 1.0, "rad": 0.55, "p": -0.35, "y": 0.2, "sq": 0.2, "lw": 1.0,
 				"legs": [0.9, -1.5, -0.55, -0.9]}],
 		[0.08, {"blade": Vector3(0.0, -0.05, 0.0), "bw": 1.0, "rad": 0.75, "p": -0.55, "y": -0.35, "lw": 1.0,
 				"legs": [1.15, -0.7, -0.75, -0.2], "sq": -0.2}],
@@ -48,16 +51,16 @@ const MOVES := {
 		[0.6, {}]]},
 	# Meteor Drop, the hang and the dive (footage 0261-0288: the rise, a slash at the top, a steep drive): he
 	# rocks back and hauls the blade up overhead with the knees tucked, turning once as he gathers (0.2s hang),
-	# then pitches over head-first, the blade driven down ahead of him and the legs stretched out behind; that
-	# dive pose holds until he hits the ground
+	# then drops upright and straight down, the blade driven point-down under him and the legs
+	# straight; that pose holds until he hits the ground
 	"jug_meteor": {"hold": true, "keys": [
 		[0.0, {"p": 0.1, "sq": 0.1, "lw": 1.0, "legs": [0.9, -1.3, 0.7, -1.1]}],
 		[0.08, {"blade": Vector3(0.0, 2.9, 0.0), "bw": 1.0, "rad": 0.4, "p": 0.4, "fx": 0.35, "fy": -3.14, "sq": -0.15,
 				"lift": 0.12, "lw": 1.0, "legs": [1.3, -1.9, 1.2, -1.8]}],
 		[0.2, {"blade": Vector3(0.0, 3.0, 0.0), "bw": 1.0, "rad": 0.45, "p": 0.45, "fx": 0.5, "fy": -6.283, "sq": 0.2,
 				"lift": 0.08, "lw": 1.0, "legs": [1.35, -2.0, 1.25, -1.9]}],
-		[0.3, {"blade": Vector3(0.0, -1.3, 0.0), "bw": 1.0, "rad": 0.7, "p": -0.7, "fx": -0.75, "fy": -6.283,
-				"sq": -0.35, "lift": 0.05, "lw": 1.0, "legs": [-0.3, -0.2, -0.8, -0.2]}]]},
+		[0.3, {"blade": Vector3(0.0, -1.45, 0.0), "bw": 1.0, "rad": 0.6, "p": -0.2, "fx": 0.0, "fy": -6.283,
+				"sq": -0.35, "lift": 0.05, "lw": 1.0, "legs": [0.1, -0.2, -0.1, -0.2]}]]},
 	# ... the landing (0288-0300): slammed down onto the knees, the blade buried ahead, the deepest squash of
 	# the six; a bounce as the weight settles, then 0.5s rising from the crouch with the blade dragged low
 	"jug_meteor_land": {"keys": [
@@ -75,19 +78,15 @@ const MOVES := {
 	# recovery with the blade dragging behind him (up by 0.9)
 	"jug_dash": {"keys": [
 		[0.0, {}],
-		[0.07, {"blade": Vector3(0.0, 2.4, 0.0), "bw": 1.0, "p": 0.12, "y": 0.4, "sq": 0.3, "lift": -0.14, "lw": 1.0,
-				"legs": [0.9, -1.5, -0.4, -0.9]}],
-		[0.15, {"blade": Vector3(0.0, 2.6, 0.0), "bw": 1.0, "p": 0.18, "y": 0.5, "sq": 0.36, "lift": -0.18, "lw": 1.0,
-				"legs": [1.0, -1.6, -0.45, -1.0]}],
-		[0.21, {"blade": Vector3(0.0, -0.1, 0.0), "bw": 1.0, "rad": 0.4, "p": -0.7, "y": 0.4, "sq": -0.3, "lw": 1.0,
+		[0.05, {"blade": Vector3(0.0, 0.5, 0.0), "bw": 1.0, "rad": 0.4, "p": 0.1, "y": 0.45, "sq": 0.3, "lift": -0.14,
+				"lw": 1.0, "legs": [0.9, -1.5, -0.4, -0.9]}],
+		[0.09, {"blade": Vector3(0.0, -0.1, 0.0), "bw": 1.0, "rad": 0.75, "p": -0.7, "y": 0.2, "sq": -0.3, "lw": 1.0,
 				"legs": [1.15, -0.6, -0.85, -0.15]}],
-		[0.38, {"blade": Vector3(0.0, 0.0, 0.0), "bw": 1.0, "rad": 0.85, "p": -0.65, "y": -0.3, "sq": -0.25, "lw": 1.0,
+		[0.2, {"blade": Vector3(0.0, 0.0, 0.0), "bw": 1.0, "rad": 0.85, "p": -0.65, "y": -0.3, "sq": -0.25, "lw": 1.0,
 				"legs": [1.15, -0.6, -0.8, -0.15]}],
-		[0.5, {"blade": Vector3(-1.2, -0.4, 1.4), "bw": 1.0, "rad": 0.4, "p": -0.35, "sq": 0.28, "lift": -0.14,
-				"lw": 1.0, "legs": [0.95, -1.45, -0.4, -0.95]}],
-		[0.78, {"blade": Vector3(-1.1, -0.4, 1.3), "bw": 0.9, "rad": 0.35, "p": -0.25, "sq": 0.18, "lift": -0.08,
-				"lw": 0.9, "legs": [0.8, -1.2, -0.35, -0.8]}],
-		[0.9, {}]]},
+		[0.28, {"blade": Vector3(-1.2, -0.4, 1.4), "bw": 1.0, "rad": 0.4, "p": -0.35, "sq": 0.2, "lift": -0.1,
+				"lw": 1.0, "legs": [0.95, -1.3, -0.4, -0.8]}],
+		[0.42, {}]]},
 	# Warchain: the chain hand cocked back, then flung out ahead; the body twists into it
 	"jug_chain": {"keys": [
 		[0.0, {}],
@@ -419,11 +418,11 @@ const MOVES := {
 		[0.1, {"y": 0.95, "p": -0.35, "sq": -0.18, "lw": 1.0, "legs": [1.1, -0.65, -0.75, -0.25]}],
 		[0.24, {"y": 0.80, "p": -0.22, "sq": 0.05, "lw": 0.9, "legs": [1.0, -0.8, -0.6, -0.35], "lift": -0.04}],
 		[0.45, {}]]},
-	# the Searing Wave held: the blade dragged up behind the head, the body leaning back, coiling
+	# the Searing Wave held: the blade drawn back flat past his right hip, the body coiling round
 	"jug_wave_wind": {"hold": true, "keys": [
 		[0.0, {}],
-		[0.25, {"blade": Vector3(0.0, 2.4, 0.0), "bw": 1.0, "p": 0.3, "sq": 0.18, "lift": -0.06, "lw": 1.0,
-				"legs": [0.7, -1.2, -0.4, -0.7]}],
-		[0.7, {"blade": Vector3(0.0, 2.7, 0.0), "bw": 1.0, "p": 0.38, "sq": 0.25, "lift": -0.1, "lw": 1.0,
-				"legs": [0.8, -1.3, -0.45, -0.8]}]]},
+		[0.25, {"blade": Vector3(-1.6, 0.1, 0.0), "bw": 1.0, "rad": 0.45, "y": 0.7, "p": 0.1, "sq": 0.18, "lift": -0.06,
+				"lw": 1.0, "legs": [0.7, -1.2, -0.4, -0.7]}],
+		[0.7, {"blade": Vector3(-1.9, 0.1, 0.0), "bw": 1.0, "rad": 0.5, "y": 0.9, "p": 0.1, "sq": 0.25, "lift": -0.1,
+				"lw": 1.0, "legs": [0.8, -1.3, -0.45, -0.8]}]]},
 }

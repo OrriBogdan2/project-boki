@@ -190,7 +190,12 @@ func _priority() -> void:
 	m.chests.append({"pos": cat, "open": false, "prog": 0.0, "node": n, "free": true})
 	var T: Hunter = m.make_hunter("T", 5, "medium", "Rival", "idle", {}, P.pos + Vector3(-8, 0, 0.5))
 	T.max_hp = 1e5; T.hp = 1e5
+	# start quiet: a map chest called during _fresh() leaves its gap and cooldown running, and by the time
+	# they end the Boki has knocked the rival inside the on-screen range where "behind" isn't said
 	k.comp.history.clear()
+	k.comp.gap_t = 0.0
+	k.comp.cds.clear()
+	k.comp.seen.clear()
 	var t := 0.0
 	while t < 22.0:
 		P.inp["aim"] = P.pos + Vector3(5, 0.9, 0)
