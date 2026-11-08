@@ -3,9 +3,9 @@ extends Node
 ## Your first Relic, after you name your Boki and before the tutorial (no pick: Vex is the only one). An
 ## in-world beat on the hatch island: the camera frames you, one of the Empty, with your new Boki; the light
 ## goes down and Vex's Relic drifts out of the heart-crystal toward you, glowing and trailing motes; your Boki
-## hops and looks up at it. "Put on the Relic" (the interact key): it lifts to your hollow face, flickers, a
-## flash, and you are mostly Vex (Unmasked.blend). Then a short look at what Vex does (HunterViewer: her
-## ability clips) and `finished` sends you on to the tutorial.
+## hops and looks up at it. "Put on the Relic" (the interact key) plays the put-on beat (MaskBeat), and you are
+## mostly Vex (Unmasked.blend). Then a short look at what Vex does (HunterViewer: her ability clips) and
+## `finished` sends you on to the tutorial.
 # "mask" in code = "Relic" in game, owner 2026-11-07
 
 signal finished
@@ -36,7 +36,6 @@ var phase := ""                                  # arrive | wait | put | intro
 var ui: CanvasLayer
 var prompt: Control
 var intro: Control
-var flash: ColorRect
 var go_button: Button
 var _anim: HunterAnim
 var _cam_to := CAM_YOU
@@ -77,11 +76,6 @@ func _build_ui() -> void:
 	ui = CanvasLayer.new()
 	ui.layer = 20
 	add_child(ui)
-	flash = ColorRect.new()
-	flash.color = Color(1, 1, 1, 0)
-	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ui.add_child(flash)
 
 ## The light goes down and the Relic leaves the crystal, drifting to wait in front of your face.
 func _arrive() -> void:
@@ -137,58 +131,18 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif phase == "intro" and go_button and event.is_action_pressed("ui_accept"):
 		_go()
 
-## The put-on beat: the Relic lifts to your hollow face, flickers, a flash, and the Hunter settles in.
+## The put-on beat (MaskBeat): the Relic rises to your hollow face, a cut to black, the fallen Hunter, and you
+## stand as them.
 func put_on() -> void:
 	if phase != "wait":
 		return
 	phase = "put"
 	if prompt:
 		prompt.queue_free()
-	Sfx.play("whoosh")
-	beat(relic, you, flash, func(model: Node3D):
+	MaskBeat.play(relic, you, func(model: Node3D):
 		you = model
 		_anim = HunterAnim.new(you)
-		get_tree().create_timer(1.0).timeout.connect(_show_intro))
-
-## The put-on beat on any body in the world (also the farm's second Relic): the relic flies to the face and
-## settles on it, flickers like a ghostly face over yours, the screen flashes white, and `body` becomes the
-## Hunter (about 90%: Unmasked.blend). done(new_model) gets the Hunter's model, standing where you stood. With
-## `swap` off (the farm, where you stay yourself) the body stays and done gets it back.
-static func beat(mask: MaskRelic, body: Node3D, white: ColorRect, done: Callable, swap := true) -> void:
-	var head := (body.get_node("Rig/Torso/HeadPivot") as Node3D).global_position
-	var front := -body.global_basis.z.normalized()
-	mask.bobbing = false
-	mask.face_to = head + front * 3.0
-	var tw := mask.create_tween()
-	tw.tween_property(mask, "global_position", head + front * 0.27 * body.scale.y, 0.45)\
-			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-	tw.parallel().tween_property(mask, "scale", Vector3.ONE * body.scale.y * 1.1, 0.45)
-	for k in 4:
-		tw.tween_callback(func(): mask.plate.visible = not mask.plate.visible)
-		tw.tween_interval(0.07)
-	tw.tween_callback(func():
-		white.color.a = 0.85
-		white.create_tween().tween_property(white, "color:a", 0.0, 0.6)
-		Sfx.play("unlock")
-		mask.queue_free()
-		if not swap:
-			done.call(body)
-			return
-		var hunter: String = mask.id
-		var model := Models.hunter(Arch.weight(hunter), Data.TEAM_COLORS[0], Arch.signature(hunter), "",
-				Unmasked.mask_look(), hunter)
-		Unmasked.blend(model)
-		var ring := model.get_node_or_null("TeamRing")
-		if ring: (ring as Node3D).visible = false
-		model.position = body.position
-		model.rotation = body.rotation
-		var settle := model.scale
-		model.scale = settle * 1.08
-		body.get_parent().add_child(model)
-		body.queue_free()
-		model.create_tween().tween_property(model, "scale", settle, 0.5)\
-				.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		done.call(model))
+		get_tree().create_timer(0.4).timeout.connect(_show_intro))
 
 ## What Vex does: her ability clips beside her, and on to the tutorial.
 func _show_intro() -> void:

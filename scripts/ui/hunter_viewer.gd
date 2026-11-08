@@ -4,7 +4,8 @@ extends PanelContainer
 ## and title and what it brings (health, dashes, weapon). Below, the real model on a slow turntable in its
 ## own SubViewport (it powers up while you hold to unlock it: HoldUnlock drives power() and burst()), and
 ## beside it every ability shown working in its own clip (AbilityClip: the ability used on a dummy, with
-## its key and one short line). The passive and the Boki Fusion are one line each. Used on the Relics
+## its key and one short line). Only the clip in focus plays (the first, or the one under the mouse), and the
+## models are built one a frame (PreviewBuild). The passive and the Boki Fusion are one line each. Used on the Relics
 ## screen (HomeClasses), the Relic moments and the reveal. Kit move lists: content/rules/hunter_viewer.json.
 ##
 ##   var v := HunterViewer.make("thief", Vector2(220, 300))
@@ -130,10 +131,11 @@ func set_hunter(hunter_id: String) -> void:
 	add_theme_stylebox_override("panel", _frame(col))
 	set_meta("hunter_viewer", id)
 	_rebuild_body()
-	if model == null:
+	if pivot == null:
 		return
-	model.queue_free()
-	_build_model()
+	if model:
+		model.queue_free()
+		model = null
 	rim.light_color = col.lerp(Color.WHITE, 0.35)
 	glow.light_color = col.lerp(Color.WHITE, 0.2)
 	plinth.albedo_color = col.darkened(0.55)
@@ -168,6 +170,7 @@ func _rebuild_body() -> void:
 		var slot := String(s)
 		var row: Control = AbilityClip.make(id, slot, clip_size) if slot in CLIP_SLOTS else _line(slot, col)
 		row.set_meta("slot", slot)
+		row.mouse_entered.connect(select.bind(rows.size()))
 		rows.append(row)
 		(grid if slot in CLIP_SLOTS else lines).add_child(row)
 	# the one-line abilities fill the grid's last gap when there is one, else go under it
@@ -263,7 +266,6 @@ func _build_world(col: Color) -> void:
 	vp.add_child(rim)
 	pivot = Node3D.new()
 	vp.add_child(pivot)
-	_build_model()
 	var floor_disc := MeshInstance3D.new()      # a low plinth so the feet stand on something
 	var cm := CylinderMesh.new()
 	cm.top_radius = 0.75
@@ -285,18 +287,14 @@ func _build_world(col: Color) -> void:
 	cam = Camera3D.new()
 	cam.fov = 30.0
 	vp.add_child(cam)
-	_aim_camera()
 	cam.current = true
 
-## The Hunter's model on the turntable, standing at ease in its signature stance.
+## The Hunter's model on the turntable, standing at ease in its signature stance (built on its PreviewBuild turn).
 func _build_model() -> void:
-	model = Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", Unmasked.mask_look(), id)
-	var ring := model.get_node_or_null("TeamRing")
-	if ring: (ring as Node3D).visible = false
+	model = PreviewBuild.model(id)
 	pivot.add_child(model)
 	anim = HunterAnim.new(model)
-	if cam:
-		_aim_camera()
+	_aim_camera()
 
 func _aim_camera() -> void:
 	var s := model.scale.y
@@ -313,6 +311,7 @@ func select(i: int) -> void:
 		if row is AbilityClip:
 			var edge := Color(col, 0.95) if j == slot_i else Color(col, 0.35)
 			row.add_theme_stylebox_override("panel", UI.frame(Color(0.04, 0.035, 0.07, 0.96), 10, edge, 1, 6, 6))
+			(row as AbilityClip).play(j == slot_i)
 	slot_changed.emit(current_slot())
 
 func current_slot() -> String:
@@ -320,13 +319,16 @@ func current_slot() -> String:
 
 # ------------------------------------------------------------------ playing it
 func _process(dt: float) -> void:
-	dt = minf(dt, 0.1)
-	if model == null or anim == null:
+	if model == null and pivot != null and PreviewBuild.turn(id):
+		_build_model()
+	if model == null:
 		return
-	tick(dt)
+	tick(minf(dt, 0.1))
 
 ## One step of the stage (also driven straight by the unlock check): the turntable, and the power-up.
 func tick(dt: float) -> void:
+	if model == null:
+		return
 	spin_t += dt
 	pivot.rotation.y += dt * float(rules().get("turn_rate", 0.45)) * (1.0 - power_k)
 	var s := {"fired": 99.0, "face": 0.0, "grounded": true, "wid": Arch.signature(id)}

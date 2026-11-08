@@ -3,7 +3,8 @@ extends Node3D
 ## A Relic as a thing in the world (lore: briefs/LORE_MASKS.md): a cracked porcelain face, mended with gold,
 ## that carries a fallen Hunter's soul, glowing in its Hunter's colour and trailing motes as it drifts. It
 ## bobs where it hovers and turns to face whoever it is drifting toward. Used by the Relic moments
-## (MaskMoment: the first Relic after naming your Boki; MaskOffer: the second at the farm portal).
+## (MaskMoment: the first Relic after naming your Boki; HobOffer: the second, from Hob on the farm). MaskBeat
+## puts it on.
 # "mask" in code = "Relic" in game, owner 2026-11-07
 
 const BOB_HZ := 0.35           # bobs a second
@@ -31,8 +32,8 @@ func _ready() -> void:
 	add_child(plate)
 	var porcelain := Models.shiny(Color("f4efe6"), 0.7)
 	porcelain.set_shader_parameter("glow", 0.25)      # it gives off a little light of its own
-	Models.part(plate, _plate_mesh(), porcelain, Vector3.ZERO)
-	var aura := Models.part(plate, _plate_mesh(), Models.toon(col.lightened(0.1), false, 1.6), Vector3(0, 0, 0.03),
+	Models.part(plate, plate_mesh(), porcelain, Vector3.ZERO)
+	var aura := Models.part(plate, plate_mesh(), Models.toon(col.lightened(0.1), false, 1.6), Vector3(0, 0, 0.03),
 			Vector3(1.14, 1.1, 1.0))      # a rim of the Hunter's colour round the face
 	aura.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var dark := Models.toon(Color("1a1424"), false)
@@ -82,7 +83,7 @@ func _on_plate(x: float, y: float, lift: float) -> Vector3:
 	return Vector3(sin(th) * cos(ph), sin(ph), -cos(th) * cos(ph)) * (PLATE_R + lift) + Vector3(0, 0, PLATE_R)
 
 ## The porcelain plate: a curved face, broad at the brow, narrowing to the chin, centred on the origin.
-static func _plate_mesh() -> ArrayMesh:
+static func plate_mesh() -> ArrayMesh:
 	var fn := func(u: float, v: float) -> Vector3:
 		var ph := lerpf(0.75, -0.95, v)
 		var narrow := (1.0 - 0.38 * smoothstep(-0.2, -0.95, ph)) * (1.0 - 0.32 * smoothstep(0.3, 0.75, ph))
