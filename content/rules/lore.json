@@ -2,15 +2,15 @@
 	"doc": "Lore data, synced to briefs/LORE_MASKS.md. Factions are lore only (voice lines, banter, key art, the wiki): squads in a match stay free-pick. A Hunter's story is its class file's \"personality\" (content/archetypes). relics: the found object that holds a fallen Hunter's self; status \"proposed\" is waiting for the owner's OK, so settling one is a one-line edit of that word. tools/gen_wiki.py writes the Lore page and docs/art/gen/stories from this file.",
 	"premise": [
 		"The Wyrm came, and stole our essence. In time, humans, beasts and skyfolk alike were born without faces. We became a new race: the Empty.",
-		"Our only salvation became the cursed fossils we once tried to destroy: Masks, each carrying the soul of a fallen Hunter of old.",
+		"Our only salvation became the cursed fossils we once tried to destroy: Relics, each carrying the soul of a fallen Hunter of old.",
 		"Malgrave, the queen who ruled Solmere and never aged, was the Wyrm in human shape. The night a thief reached its heart, it woke and broke the land."
 	],
 	"factions": [
 		{"id": "odd_jobs", "name": "The Odd Jobs", "hunters": ["gunslinger", "mage", "dolm"],
-			"binds": "The young, scrappy ones who grew up with nothing in the ruins after the Hollowing and look out for each other. Vex is the first Mask players meet, so this is the first crew they meet.",
+			"binds": "The young, scrappy ones who grew up with nothing in the ruins after the Hollowing and look out for each other. Vex is the first Relic players meet, so this is the first crew they meet.",
 			"wish": "A world where nobody has to scrape by."},
 		{"id": "fallen_court", "name": "The Fallen Court", "hunters": ["juggernaut", "ashwick", "archer"],
-			"binds": "Malgrave's arena champion, her court alchemist and her mask-stitcher. They knew her best and know what she really is, which makes them the most dangerous crew. They don't trust each other.",
+			"binds": "Malgrave's arena champion, her court alchemist and her Relic-stitcher. They knew her best and know what she really is, which makes them the most dangerous crew. They don't trust each other.",
 			"wish": "Each wants something different: Kael freedom from the demon, Cinder the throne, Lace the last loyalist dead."},
 		{"id": "hearthguard", "name": "The Hearthguard", "hunters": ["bulwark", "rimewright", "tender"],
 			"binds": "The ones who saved people the night everything broke.",
@@ -36,7 +36,7 @@
 		"dolm": {"relic": {"name": "A seeing-stone", "why": "One of the three stones that float around him. It is how he sees the world.", "status": "locked"}},
 		"juggernaut": {"relic": {"name": "His broken chain", "why": "The shackle he tore out of the arena wall, bound to the demon blade.", "status": "locked"}},
 		"ashwick": {"relic": {"name": "The empty vial of Wyrm's blood", "why": "She drank what she was told to distil. An ember still glows at the bottom of the vial.", "status": "proposed"}},
-		"archer": {"relic": {"name": "The stitched porcelain mask", "why": "She sewed it from the masks she once made.", "status": "locked"}},
+		"archer": {"relic": {"name": "The stitched porcelain Relic", "why": "She sewed it from the Relics she once made.", "status": "locked"}},
 		"bulwark": {"relic": {"name": "The ship's compass", "why": "Set in his chest now. It led his refugees home across the ice.", "status": "locked"}},
 		"rimewright": {"relic": {"name": "Her ice skates", "why": "The night she skated the festival crowd to safety.", "status": "locked"}},
 		"tender": {"relic": {"name": "A glass globe of sun and rain", "why": "It holds her little sun and her raincloud. The shelter's last fire, kept alive all night.", "status": "proposed"}},

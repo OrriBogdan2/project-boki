@@ -3,8 +3,8 @@
 
 _Class: archer. Faction: The Fallen Court._
 
-Malgrave's royal mask-stitcher, who stitched the court's masks. She deserted and now hunts Malgrave's loyalists, leaving a red-threaded needle at every kill.
+Malgrave's royal Relic-stitcher, who stitched the court's Relics. She deserted and now hunts Malgrave's loyalists, leaving a red-threaded needle at every kill.
 
-Her own shadow came loose when she stitched her first Mask; it's only a wrong-looking shadow, not a pet.
+Her own shadow came loose when she stitched her first Relic; it's only a wrong-looking shadow, not a pet.
 
-**Relic:** The stitched porcelain mask. She sewed it from the masks she once made. (locked)
+**Relic:** The stitched porcelain Relic. She sewed it from the Relics she once made. (locked)

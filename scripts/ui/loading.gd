@@ -41,7 +41,7 @@ const TIPS := [
 ]
 ## A line of the world's story shown under the tip (our own words; the canon is briefs/LORE_MASKS.md).
 const LORE := [
-	"Everyone born since the Sundering is born without a face. We call ourselves the Empty.",
+	"Everyone born since the Hollowing is born without a face. We call ourselves the Empty.",
 	"A Mask holds the soul of a Hunter who stood against the Wyrm. Wear one and you remember what a self feels like.",
 	"The Tyrant never aged, and never forgot the hoard. Under the Crown, it was always the Wyrm.",
 	"The Blight is the Wyrm's blood. It sours stone, grass and sky, and it follows whoever is loudest.",
