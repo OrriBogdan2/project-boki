@@ -312,3 +312,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-08 (owner): no mid-match joining
 - Every expedition is one fight over the Heart with the Blight closing in, so everyone drops at the start. **Rolling sessions (squads dropping in waves, late-joiner levelling, join snapshots) are cut.** Remove the `--rolling*`/`--join-*` code path, rolling_check/rolling_sim tools and suite entries; keep anything the normal match also uses (per-squad fresh-lander grace stays only if the normal drop uses it). Bots still backfill squads before the drop.
+
+## 2026-11-08 (owner): the villain is a dragon queen
+- **Vesperine, the Undying Queen** (she/her) replaces Malgrave, the Undying King. Same story: queen of Solmere, the Wyrm in human shape, alive inside the cracked Heart. The owner is designing a female-looking mask for her (still the first mask, which every Hunter's Mask copies). Canon text: briefs/LORE_MASKS.md. Other name options offered: Malvessa, Scarlath.
