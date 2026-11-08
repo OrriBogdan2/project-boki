@@ -3274,3 +3274,20 @@ READY ext/drop-solo-after: separate / drop solo only after the team drop is made
 - CLAIM: BOKI_50_DESIGNS 'Mycroll (`burrlet`)' UPGRADE from the owner's sheet briefs/art-refs/boki/burrlet_turnaround.png (76b19a34c): sheet check, then rebuild the model via tools/art1 + Meshy, keeping rig, clip set, anchors and kit wiring. Branch ext/boki-burrlet-v2 from origin/main.
 
 READY (update, supersedes the pending-proof line above) ext/pick-countdown-30s-1108 45ca2bc6a (job 20261108-220026-a4). Proof is in: real-GPU shots at 1024x600, 1280x720, 1920x1080, 2560x1440, 3440x1440 (full / red / locked each) in docs/shots/pick-countdown/ on the branch; the countdown is top-centre and visible at all five. The 1024x600 shot exposed a pre-existing overflow (3 Hunter columns + squad column wider than the 1240-logical-px UI), so below 1400 logical px the grid now has 2 columns, the squad column is 300 px, and the digits scale with window height; layout reads the viewport, not the content's min size. --prematch-check 0 failures, health --strict OK; full suite not run. Not merged.
+
+## 2026-11-08 deep (job 20261108-215224-a1): READY perf-load-shaders-1108
+- READY ext/perf-load-shaders-1108 41c2cead8 (off origin/main, 6 commits, not merged). Loading and hitches only; no perf-expedition-1108 files touched.
+- What: WarmUp moves out of match.gd into scripts/match/warm_up.gd. WarmStamp (scripts/match/warm_stamp.gd) records what the warm-up drew. The next launch on the same build/GPU/settings skips those stand-ins while the engine's shader and pipeline caches still hold them, so the warm-up is drawn once per machine. The keys name shaders by code hash, so they are stable across launches. New stand-ins: every roaming mob kind; the LDFx/VVFx/CareLook/UltLook/HeroVfx shaders; GPU particle emitters plus their process shaders. WardenRest bakes the Wardens' neutral rig rests (build.hunters no longer poses rigs at build time). Your and your mates' .glb are fetched at build start.
+- rp1-0 RTX 4090, Forward+ Vulkan, --hitch-check (each jobq run is a cold first launch; launch 2 = --warm-twice):
+
+| | main | branch launch 1 | branch launch 2 |
+|---|---|---|---|
+| loading | 35.0 s | 36.6 s (noisy pod: 33.2-36.7) | 25.7 s |
+| worst loading frame | 4173 ms | 4423 ms | 764 ms |
+| build.warm_up | 8552 ms | 9391 ms | 4124 ms |
+| build.hunters | 9165 ms (bench 6076) | 8302 ms (bench 3793) | 5454 ms |
+| shader compiles after the reveal | at least 5 (ld_fx/glow, care_glow/disc, hero_vfx: 140-200 ms render frames, seen before the stand-ins) | 1 (an 86 ms frame, 8 ms render) | 0 |
+| start / landing stall | 217 / 81 ms | 167 / 86 ms | 70 / 80 ms |
+
+- Checks on 41c2cead8: --check 0 failures; --warm-stamp-check 8/8 (new); --warden-rest-check 12/12 (new); --warden-glb-check ok; health --strict OK. --load-check headless FAILs with "23 slow frames", the same count as main headless (CPU-only host).
+- NOT met / open: (1) No M5/Mac number at all. Every Mac job (mac-Naruto-Founder) ends rc 126 "GodotBG.app ... No such file" (HOME is redirected, infra; broken for every team since ~21:44). Also Godot 4.6 Metal keeps no pipeline cache, so on Metal the stamp is never trusted and the warm-up runs every launch (docs/DEBT.md). (2) Remaining first-minute frames >50 ms on rp1-0 are sim catch-up (bots/kins, "+700 ms x6" steps), with 0 compiles: perf-expedition-1108's. (3) A pack of new mob kinds costs one ~400 ms instancing frame ("other"); mob pooling is not done. (4) --perf-bench autoplay skips the loading screen and so the warm-up: its in-play compiles are not what players see.
