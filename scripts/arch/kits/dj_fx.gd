@@ -1,8 +1,9 @@
 class_name DJFx
 extends Node3D
 ## Sable's and Juggernaut's own effects, pooled (one node per match, DJFx.of(m)): projectile looks that
-## ride on a shot (or on a kit-run projectile), four-point stars, fizzle puffs, heal pillars, two-tone
-## crescents, afterimage chains, and per-frame chains (the Warchain, the Bola cord). Every node is made
+## ride on a shot (or on a kit-run projectile), four-point stars, heal pillars, dash streaks, afterimage
+## chains, and per-frame chains (the Warchain, the Bola cord). Sable's hits, swooshes, blink and Encore are
+## HeroVfx data (content/vfx/thief.json). Every node is made
 ## once and reused; nothing is created per frame. One set of looks (shaders/dj_fx.gdshaderinc, a mode per
 ## look) drawn alpha blended (dj_fx_mix.gdshader) so colour and darkness hold on bright ground; only glows
 ## (cores, the lightning) are additive (dj_fx.gdshader).
@@ -13,7 +14,6 @@ const M_STAR := 0
 const M_PILLAR := 1
 const M_COMET := 2
 const M_CRESCENT := 3
-const M_PUFF := 4
 const M_LINKS := 5
 const M_BOLT := 6
 const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
@@ -263,30 +263,11 @@ func streak(at: Vector3, dir: Vector2, length: float, width: float, col: Color, 
 	n.basis = Basis.looking_at(-back.normalized(), Vector3.UP)
 	_play(n, "streak", col, col2, dur, Vector3(width, width, length))
 
-## A soft ring that opens and fades where a bolt ran out (at the cursor).
-func puff(at: Vector3, col: Color, sz := 0.6, dur := 0.3, speck := Color.WHITE) -> void:
-	var n := _fx("puff", M_PUFF, _quad_mesh(), true)
-	n.global_position = at
-	_play(n, "puff", col, speck, dur, Vector3.ONE * sz)
-
 ## A column of light rising on someone (the knock heal).
 func pillar(at: Vector3, col: Color, height := 3.2, radius := 0.55, dur := 0.7) -> void:
 	var n := _fx("pillar", M_PILLAR, _column(), false)
 	n.global_position = at
 	_play(n, "pillar", col, Color(1, 1, 1, 1), dur, Vector3(radius, height, radius))
-
-## A two-tone blade arc in front of `at` facing `dir` (outer edge `col`, inner fill `col2`), swept over
-## `dur`. `tilt` turns it about the facing (PI/2: a vertical arc, the Cartwheel's swoosh).
-func crescent(at: Vector3, dir: Vector2, arc_deg: float, reach: float, col: Color, col2: Color, dur := 0.22,
-		tilt := 0.0, sweep := 1.6) -> void:
-	var key := "cres%d" % int(round(arc_deg))
-	var n := _take(key, func(): return _mi(_crescent_mesh(arc_deg), _mat(M_CRESCENT, col, col2))) as MeshInstance3D
-	n.global_position = at
-	var d3 := Vector3(dir.x, 0, dir.y)
-	if d3.length() < 0.01: d3 = Vector3.FORWARD
-	n.basis = Basis.looking_at(d3.normalized(), Vector3.UP) * Basis(Vector3.FORWARD, tilt)
-	_play(n, key, col, col2, dur, Vector3.ONE * reach)
-	live[-1]["sweep"] = sweep
 
 ## A chain of afterimages from `from` to `to` (Sable's step to the dagger): `count` copies, the
 ## nearest to the start fading first.
@@ -541,8 +522,7 @@ func _process(delta: float) -> void:
 				mt.set_shader_parameter("life", u)
 			_:
 				mt.set_shader_parameter("life", u)
-				if e.has("sweep"): mt.set_shader_parameter("progress", minf(1.0, u * float(e["sweep"])))
-				elif String(e["kind"]) == "star": n.scale = (e["s0"] as Vector3) * (0.6 + 0.6 * sqrt(u))
+				if String(e["kind"]) == "star": n.scale = (e["s0"] as Vector3) * (0.6 + 0.6 * sqrt(u))
 		if u >= 1.0:
 			n.visible = false
 			live.erase(e)
