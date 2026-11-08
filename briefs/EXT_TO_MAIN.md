@@ -3204,3 +3204,15 @@ ahead and 4.3m across a 1.8m strip). jug_riposte: the cut lands on the strike (0
 edge, +18 dB over its swish (was +4 dB, 14 ms rise). New assert in dj_ult_check (crescent fits strip). Reel: Kael's X sheet
 frames now sit on the land. Strips: ext/vfx-quality-strips fe7f988e5 (before/after_juggernaut_r.png, both on rp1-1).
 Checks: --juggernaut-combo-check 184/0 (jobq 20261108-225317-00777), health --strict OK. Left: LMB slash sound has no hard edge.
+
+## 2026-11-08 feel (job 20261108-220436-a4, w2): READY vfx-bulwark
+READY ext/vfx-bulwark f612a5702 (stacked on ext/vfx-quality-base 9a9bb3b79: merge that first; no PR, gh is not on w2:
+https://github.com/OrriBogdan2/project-boki/compare/ext/vfx-quality-base...ext/vfx-bulwark). Albert to the bar
+(docs/VFX_QUALITY.md, 20 -> 25). His shield, Shield Slam, Mending Ground (E) and Faultline (X) are HeroVfx data in ivory
+(content/vfx/bulwark.json); bjorn_fx/bjorn_ult lose the plate wall, bash fan, green column/disc, flood, streak and basalt
+slabs (net -58 lines). The aegis is a clear ivory dome with a rim halo, a sheen and cracks as it wears (new HeroVfx "dome"
+look; shell() takes any surface kind; a hold can follow a moving point; HeroVfx.pal for kit telegraphs). Hard-coded gold
+and green flashes on these moves replaced from the palette. Strips: ext/vfx-quality-strips 308f7fd02
+(before/after_bulwark_{rmb,e,r}.png). Checks: --hero-vfx-check OK (jobq 20261108-223526-05181), --bulwark-combo-check
+145/0 (20261108-230336-16461), health --strict OK. Left: the Shield Slam isn't in the reel (needs 50 Guard); LMB and dash
+still gold/orange in BjornFx; his model hides the dome's upper half at reel zoom.
