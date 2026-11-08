@@ -77,13 +77,24 @@ func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff
 func rank(slot: String) -> int:
 	return h.ability_level(slot)
 
-## +15% damage per rank (Effects.level_k) on top of the hunter's own damage multiplier and the
-## ability power their level gives (LevelGrowth.ap).
+## A hero's own multiplier for one slot at its rank: JSON `<table>` {slot: [rank 1, rank 2, rank 3]}
+## (rank_dmg, rank_cd, rank_shield; the source's upgrades, see docs/heroes). `shared` when the hero has no row.
+## `key` names the row when it is not the slot's (rank_cd.air follows the dash rank).
+func rank_k(table: String, slot: String, shared: float, key := "") -> float:
+	var row: Array = d.get(table, {}).get(key if key != "" else slot, [])
+	return float(row[clampi(rank(slot) - 1, 0, row.size() - 1)]) if not row.is_empty() else shared
+
+## The hero's rank damage (rank_dmg, else +15% a rank: Effects.level_k) on top of the hunter's own damage
+## multiplier and the ability power their level gives (LevelGrowth.ap).
 func power(slot: String) -> float:
-	return m.dmg_mult(h) * Effects.level_k({"level": rank(slot)}) * LevelGrowth.ap(h)
+	return m.dmg_mult(h) * rank_k("rank_dmg", slot, Effects.level_k({"level": rank(slot)})) * LevelGrowth.ap(h)
 
 func cd_k(slot: String) -> float:
-	return h.rank_cd_k(slot)
+	return rank_k("rank_cd", slot, h.rank_cd_k(slot))
+
+## The dash recharge multiplier at the dash rank (rank_cd.dash, else 15% faster a rank past the first).
+func dash_k() -> float:
+	return rank_k("rank_cd", "dash", 1.0 - 0.15 * float(rank("dash") - 1))
 
 func rmb_charges() -> int: return int(rmb_def().get("charges", 1))
 
@@ -432,10 +443,11 @@ func _bond_tell() -> void:
 	m.sfx("bond", h.pos, -2.0, 1.2)
 
 # ------------------------------------------------------------------ dash helpers
-## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's.
+## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's;
+## a hero's `rank_cd.air` row shortens it by dash rank.
 func long_dash_cd() -> float:
 	var air: Dictionary = dash_def().get("air", {})
-	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD)))
+	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD))) * rank_k("rank_cd", "dash", 1.0, "air")
 
 ## Spends a dash charge (or the long air dash). False when neither is there.
 func spend_dash(use_ex: bool) -> bool:

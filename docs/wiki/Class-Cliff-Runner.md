@@ -68,9 +68,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 11s -> 9.9s, damage +15%. | cooldown 11s -> 8.8s, damage +30%; slamming a foe or a rock gives a shield of 18, up to 4 stacks. |
-| Dash (Shift) | recharge 12s -> 10.2s per charge. | recharge 12s -> 8.4s; a second charge, and each hop goes a third further. |
-| E | cooldown 12.5s -> 11.3s, rocks hit +15%. | cooldown 12.5s -> 10s; an extra row of rocks behind the first. |
+| RMB | cooldown 11s -> 10s, damage +24%. | cooldown 11s -> 9s, damage +48%; slamming a foe or a rock gives a shield of 18, up to 4 stacks. |
+| Dash (Shift) | recharge 12s -> 10s per charge. | recharge 12s -> 10s; a second charge, and each hop goes a third further. |
+| E | cooldown 12.5s -> 11.5s. | cooldown 12.5s -> 10s; an extra row of rocks behind the first. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).
 

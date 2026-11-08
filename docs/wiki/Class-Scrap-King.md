@@ -86,9 +86,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 12s -> 10.8s. | cooldown 12s -> 9.6s; hitting a foe takes half of it off. |
-| Dash (Shift) | recharge 10s -> 8.5s per charge. | recharge 10s -> 7s; pellet hits trim 0.25s off the recharge, and a dash resets the gun's spread. |
-| E | cooldown 7s -> 6.3s, damage +15%, stun +0.1s. | cooldown 7s -> 5.6s, damage +30%, stun +0.2s; double damage on a foe over the abyss and +0.2s stun more. |
+| RMB | cooldown 12s -> 10.3s. | cooldown 12s -> 8.7s; hitting a foe takes half of it off. |
+| Dash (Shift) | recharge 10s -> 8.2s per charge. | recharge 10s -> 6.4s; pellet hits trim 0.25s off the recharge, and a dash resets the gun's spread. |
+| E | cooldown 7s -> 5.5s, damage +20%, stun +0.1s. | cooldown 7s -> 4.1s, damage +40%, stun +0.4s in all (0.1s a rank, 0.2s more); double damage on a foe over the abyss. |
 
 **Suggested level-up order** (what bots follow): RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > Glove (Q).
 

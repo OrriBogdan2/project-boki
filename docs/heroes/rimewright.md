@@ -19,6 +19,17 @@ Body (`body` in rimewright.json): the final design (art/wardens/claire/IMPORT.md
 
 Scaling: light, HP 124. Ratios kept from the footage: dart 35 -> 4, Shatter 529 (15x) -> 60, skating darts x1.6 (56/35), spear detonation 584 (about 1.1x a Shatter) -> 60. Cooldown ratio Skate : Wall kept at 1 : 2 (8.3 : 16.7) -> 8.5 : 17. Rimelock: cooldown 47s against the Wall's 17 (source card 45.8 : 16.7). Its crash is 40 (10 darts, two thirds of a Shatter) instead of the footage's 17 darts (607 / 35): with 68 the crash straight into a merge and the Titan form's ultimate knocked a full-health medium hunter, which the owner's burst rule forbids. `--rimewright-combo-check` "burst:" asserts it (50 + 82 = 132 of 145 at level 6, no armor).
 
+## Ranks: upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
+The shared step (cooldown -10%, damage +15%, dash recharge 15% faster a rank) no longer applies to Neve: each slot reads
+`rank_cd` / `rank_dmg` in the JSON, and a slot the source gives no such upgrade stays at 1.0. Source: Celeste, `Upg:` lines.
+The ult keeps its own ranks (X has 1-2); its source upgrades (+40% damage, -10s cooldown / -10s cooldown) are not built here.
+
+| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
+|---|---|---|---|
+| RMB Ice Spear | +15% damage, -1.75s cooldown x2, +45% detonation damage | cooldown 9.2s / 8.2s, damage +15% / +30% | cooldown 8.7s / 7.2s, damage +15% / +30%, detonation +45% at 3 |
+| Shift Skate | -1.5s recharge x2, ice islands when dashing over the Abyss | 11.05s / 9.1s, ice at 3 | 11.5s / 10s, ice at 3 (held 5s) |
+| E Rink Wall | -2.5s cooldown x2, +1000 wall HP | cooldown 15.3s / 13.6s, damage +15% / +30%, wall tougher at 3 | cooldown 14.9s / 12.75s, no rank damage, wall +40 HP at 3 (the source's +1000 sits on a base we do not know) |
+
 ## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
 Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Celeste), [footage] = briefs/hero-ref/tamsin.md (5 fps).
 
@@ -42,7 +53,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 | LMB stops homing while skating (owner 23:55: home toward the END of the flight, also skating) | HIGH | (b) | e5c73480: darts and skating beams fly out near the aim and turn in over 35-70% of the way; `tm LMB: a dart flies out straight ...`, `tm Shift: skating, beams aimed 1.5 m off a foe still home in late ...` |
 | 3 heavy darts at the end of the burst (data) | MED | (a) | f6250bd1; `tm LMB: the source's barrage ...` |
 | Ice trail 1.2 s vs "a few seconds" | MED | (b) | ec88bfc0: plates last 3 s; `tm Shift: her ice trail lasts a few seconds ...`. The trail does nothing in play (the data and footage show no gameplay on it) |
-| Skate cd 8.5 s vs 13 s (data) | MED | (b) | ec88bfc0: 13 s (ranks 11 / 9.1 s); the owner's early-release refund stays; asserted in the same row |
+| Skate cd 8.5 s vs 13 s (data) | MED | (b) | ec88bfc0: 13 s (ranks 11.5 / 10 s, see Ranks: upgrade parity); the owner's early-release refund stays; asserted in the same row |
 | Spear impact 4 single-target vs a 156 small AoE + slow (data) | MED | (b) | ec88bfc0: 18 (156 : 35 darts) and a short slow within 1.2 m where it lands; the detonation stays the big hit (owner item 13); `tm RMB: the landing hits a small area ...` |
 | Invented 0.5 s root on the detonation | MED | (b) | ec88bfc0: no root (data: damage + slow); the ice shell stays as the look; `tm RMB: it detonates ... no root` |
 | X cd 47 s vs 80 s (data) | MED | (b) | ec88bfc0: 80 s; `tm X: its own cooldown (80 s, game data) ...` |

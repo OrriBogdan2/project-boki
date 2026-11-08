@@ -17,6 +17,17 @@ Body: a very small hunter (`body` in tender.json; legs 0.98, torso 1.02, shoulde
 
 Scaling: HP 145 (medium). Hearth Call heals 35 over 5s (7/s, about a quarter of a medium health bar); cooldown 46s against Hearthlight's 11s (source card 41.6 : 10). Ratios kept: an ember is 8, rising to about 11.6 at 5 Kindle (+45%; footage 64 -> 93). The seed burst is 32 (4x an ember). Hearthlight is 10 + 22 per squadmate. Cooldown ratio: Burrseed 10.5s against Hearthlight 11s (the data's 11.5 : 12).
 
+## Ranks: upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
+The shared step (cooldown -10%, damage +15%, dash recharge 15% faster a rank) no longer applies to Meeko: each slot reads
+`rank_cd` / `rank_dmg` in the JSON, and a slot the source gives no such upgrade stays at 1.0. Source: Elluna, `Upg:` lines.
+The ult keeps its own ranks (X has 1-2); its source upgrades (+25% heal, -5s cooldown x2) are not built here.
+
+| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
+|---|---|---|---|
+| RMB Burrseed | +40% damage, +0.3s root, 200% blast radius, -3s cooldown, +50% AP ratio on the delayed hit | cooldown 9.45s / 8.4s, damage +15% / +30%, root and radius at 3 | cooldown 10.5s / 7.8s (the -3s scaled to our 10.5s), damage +40% / +40% (seed 9 -> 12.6, burst 32 -> 44.8), root 1.1s -> 1.4s and burst 2.2m -> 4.4m at 3 (AP ratio not modelled) |
+| Shift Relay Step | -0.75s recharge (-1.5s air) x2, the air dash refreshes on picking up a wisp | 5.95s / 4.9s, air 11.9s / 9.8s | 6.25s / 5.5s, air 12.5s / 11s, wisp refresh at 3 |
+| E Hearthlight | +22.5% / +27.5% healing, -3s cooldown, the thrown light's boost doubled for 1s | cooldown 9.9s / 8.8s, healing +15% / +30% | cooldown 11s / 8.25s, healing +22.5% / +50% (ring 10 -> 12.3 -> 15, bloom 22 -> 27 -> 33), thrown boost 100% instead of 50% at 3 |
+
 ## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
 Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Elluna), [footage] = briefs/hero-ref/mooshmoosh.md.
 
@@ -42,7 +53,7 @@ Every Moosh Moosh row of briefs/specs/kit-audit/cinder_dredge_moosh.md section 3
 | No steering in the glide (owner: air control) | MED | (b) | 99f79210: the move keys bend the heading at 3 rad/s (`dash.air.steer`); `mm air dash: the move keys steer the glide ...` |
 | Ground dash numbers can't be found ("copy Elluna") | MED | (a) | 89edfb96: the measured hunter ground dash (2 bh in 0.2 s), flagged as an owner clip in the dash table |
 | Dash cooldowns | ok | (a) | b0106659: 7 s / 14 s (data) |
-| Burrseed cd 8 s vs about 10.5 s (data ratio to E) | MED | (b) | 99f79210: 10.5 s (ranks 9.5 / 8.4 s); `mm RMB: Burrseed 10.5 s ...` |
+| Burrseed cd 8 s vs about 10.5 s (data ratio to E) | MED | (b) | 99f79210: 10.5 s (ranks 10.5 / 7.8 s, see Ranks: upgrade parity); `mm RMB: Burrseed 10.5 s ...` |
 | Hearth Call heals her instead of the downed ally (data: an ally or Wisp) | MED | (b) | 99f79210: it heals the downed teammate's bleed-out pool (`wisp_k`); `mm X: the tether heals the downed teammate ...` (care ult check) |
 | Hearthlight self_k 0.33 (not in the data) | LOW | (c) | kept, noted: healing yourself fully would make her solo-unkillable |
 | Ember Cast magazine 18 and a 15% slow while firing | LOW | (b) | 99f79210: no magazine (99) and no firing slow; `mm LMB: Ember Cast has no magazine ...` |

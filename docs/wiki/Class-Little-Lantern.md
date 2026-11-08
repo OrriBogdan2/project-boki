@@ -93,9 +93,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 10.5s -> 9.5s, damage +15%. | cooldown 10.5s -> 8.4s, damage +30%; the roots last 0.3s longer and the burst is twice as wide. |
-| Dash (Shift) | recharge 7s -> 6s per charge. | recharge 7s -> 4.9s; picking up a teammate refreshes your long air dash. |
-| E | cooldown 11s -> 9.9s, healing +15%. | cooldown 11s -> 8.8s, healing +30%; the thrown light's healing boost is 100% instead of 50%. |
+| RMB | damage +40% (seed 9 -> 12.6, burst 32 -> 44.8). | cooldown 10.5s -> 7.8s, damage +40%; the roots last 0.3s longer (1.1s -> 1.4s) and the burst is twice as wide (2.2m -> 4.4m). |
+| Dash (Shift) | recharge 7s -> 6.25s; the air glide 14s -> 12.5s. | recharge 7s -> 5.5s; the air glide 14s -> 11s; picking up a teammate refreshes your long air dash. |
+| E | healing +22.5% (ring 10 -> 12.3, bloom 22 -> 27). | cooldown 11s -> 8.3s, healing +50% (ring 10 -> 15, bloom 22 -> 33); the thrown light's healing boost is 100% instead of 50%. |
 
 **Suggested level-up order** (what bots follow): E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > Glove (Q).
 

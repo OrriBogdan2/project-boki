@@ -7,6 +7,7 @@ extends "res://tools/hero_pair_check.gd"
 func run(main_node: Node) -> void:
 	main = main_node
 	await _breah()
+	await _ranks()
 	var ult_check = load("res://tools/breah_ult_check.gd").new()
 	await ult_check.ult(main)
 	n += ult_check.n
@@ -22,6 +23,32 @@ func run(main_node: Node) -> void:
 	fails += parity.fails
 	print("PAIRCHECK dolm DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Upgrade parity (docs/heroes/dolm.md): per rank [RMB cooldown, dash recharge, E cooldown, RMB power, E power, charges]
+## against the source's tier II / III+IV numbers.
+func _ranks() -> void:
+	var r := setup("dolm", 5.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: DolmKit = P.ak
+	var up: Array = []
+	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	var ps := K.power("sec")
+	var pk := K.power("kin")
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		up.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), P.dash_regen(), K.e_def()["cooldown"] * K.cd_k("kin"),
+				K.power("sec") / ps, K.power("kin") / pk, P.max_dashes()])
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
+	ok("upgrade parity: Quakefall cooldown 11 -> 10 -> 9, damage +24% / +48% (+50 a tier on ~208)",
+			near.call(up[1][0], 10.0) and near.call(up[2][0], 9.0)
+			and near.call(up[1][3], 1.24) and near.call(up[2][3], 1.48), str(up))
+	ok("upgrade parity: Rock Hop recharge 12 -> 10 -> 10, a second charge only at rank 3",
+			near.call(up[1][1], 10.0) and near.call(up[2][1], 10.0)
+			and up[1][5] == up[0][5] and up[2][5] == up[0][5] + 1.0, str(up))
+	ok("upgrade parity: Stone Row cooldown 12.5 -> 11.5 -> 10 and no rank damage",
+			near.call(up[1][2], 11.5) and near.call(up[2][2], 10.0) and up[1][4] == 1.0 and up[2][4] == 1.0, str(up))
+	await done(m)
 
 func _breah() -> void:
 	var r := setup("dolm", 5.0)
@@ -621,8 +648,8 @@ func _breah() -> void:
 		"shield %.0f" % P.shield
 	)
 	ok(
-		"data rank 3: a second charge, recharging in 8.4s (12s x 0.7 on the shared rank step)",
-		P.max_dashes() == 2.0 and absf(P.dash_regen() - 8.4) < 0.05,
+		"data rank 3: a second charge, recharging in 10s (the source's tier III, 12s -> 10s)",
+		P.max_dashes() == 2.0 and absf(P.dash_regen() - 10.0) < 0.05,
 		"charges %.0f regen %.2f" % [P.max_dashes(), P.dash_regen()]
 	)
 	reset.call()

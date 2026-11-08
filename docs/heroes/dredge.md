@@ -10,6 +10,17 @@ Sources (gameplay facts only, written in our own words):
 - The footage reference sheet (frames kept on the local machine): timing, aiming, telegraphs, animation beats.
 - Owner notes: E in the air smashes straight down with the anchor (sync61 playtest); the grab goes through rocks (Nov 2 relay).
 
+## Ranks: upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
+The shared step (cooldown -10%, damage +15%, dash recharge 15% faster a rank) no longer applies to Grimble: each slot reads
+`rank_cd` / `rank_dmg` in the JSON, and a slot the source gives no such upgrade stays at 1.0. Source: Kingpin, `Upg:` lines.
+The ult keeps its own ranks (X has 1-2); its source upgrades (+20% damage, -5s cooldown x2) are not built here.
+
+| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
+|---|---|---|---|
+| RMB Abyssal Hand | -2.5s cooldown x2, -50% cooldown on an enemy hit | 10.8s / 9.6s, half off on a hit at 3 | 10.3s / 8.7s, half off on a hit at 3 |
+| Shift Barge | -1.25s recharge x2, a dash resets bloom, shots cut the recharge | 8.5s / 7s, bloom reset and trim at 3 | 8.2s / 6.4s, bloom reset and 0.25s trim per pellet hit at 3 (the source's separate air slot is not built) |
+| E Anchor Drop | +20% damage, -2.5s cooldown, +0.1s stun x2, then +100% damage over the Abyss, +0.2s stun | cooldown 6.3s / 5.6s, damage +15% / +30%, stun +0.1s / +0.4s | cooldown 5.5s / 4.1s, damage +20% / +40%, stun +0.1s / +0.4s, double damage over the Abyss at 3 |
+
 ## Scaling
 Source hero 1531 HP against our heavy 193 HP: damage about x0.13. The data pass (SERVER_UPDATE7, owner's tooltip data) copies
 durations and counts as they are (the 0.2s stun step, the 50% cooldown cut, the +100% over the abyss) and leaves the damage
@@ -29,11 +40,9 @@ and cooldown numbers that already follow the ratios below. Numbers follow the so
 | X, Brass Broadside (ult, level 6) | tap | a 1.1s charge while a 105 degree, 5.9m fan grows on the ground in front (everyone sees it; it is the exact area, and it turns with his aim), then two waves 0.6s apart; he walks at 30% speed through the charge and 20% while the waves go (`x.charge_move`, `x.fire_move`, through `CastHold`), always turning to the cursor of six heavy brass slugs each (real shots): 4 a slug and Anti-Heal 3s. Point blank all twelve land, at 4.6m two a wave. A stun in the charge stops it (back in 8s). 21s | one press, two waves 0.6s apart, 6 slugs each with Anti-Heal, a fan telegraph, planted | 4 a slug, no back bonus: the burst cap (see Ult) |
 | R | | the Boki Merge (not a hero ability) | | |
 
-Rank 2 / 3: -10% cooldown steps (barge -15%). Rank 3 specials follow the source's last tier: the Abyssal Hand takes half its
-cooldown off when it hits a foe; the barge's pellet hits trim 0.25s off the recharge and a dash resets the gun's spread; the
-Anchor does double damage on a foe over the abyss and adds 0.2s of stun (on top of its +15% damage and +0.1s stun a rank).
-Mismatch: the source's tiers 2 and 3 are each -2.5s on the Abyssal Hand (-1.25s on the barge, -2.5s +20% damage +0.1s stun on the
-Anchor), and ours has one shared step, so rank 3 stands for the source's tiers 3 and 4 together.
+Rank 2 / 3: the source's upgrades (see Ranks: upgrade parity): Hand -2.5s a tier, barge -1.25s a tier, Anchor -2.5s, +20% damage and
++0.1s stun a tier. Rank 3 stands for the source's tiers 3 and 4: the Hand takes half its cooldown off on a foe, the barge's pellet
+hits trim 0.25s and a dash resets the spread, the Anchor does double damage on a foe over the abyss and adds 0.2s of stun.
 
 ## Parity pass (owner 18:45, PARITY_BRIEF)
 
