@@ -1922,7 +1922,7 @@ func _draw_crosshair(p: Hunter) -> void:
 	if p.wpn.has("tighten_from_deg") and p.spin > 0.0:
 		spread += lerpf(12.0, 0.0, clampf(p.spun_t / float(p.wpn.get("tighten_time", 1.5)), 0.0, 1.0))
 	Reticle.draw(c, mp, spread)
-	if p.ak:
+	if p.ak and p.ak.has_res():
 		# the archetype resource as an arc hugging the crosshair
 		var rf := p.ak.res_frac()
 		var rc := p.ak.res_col()
@@ -2170,8 +2170,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 	if id == "r":
 		out.append(["Unlocks at level %d, rank 2 at %d. " % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
 	if id == "sec":
-		var rd := p.ak.res_def()
-		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12])
+		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(p.ak.res_col(), 0.9), 12])
 	out.append(["Cooldown %s%s" % [_secs(float(si["cd_max"])), ("  ·  ready in %s" % _secs(float(si["cd"]))) if float(si["cd"]) > 0.0 else "  ·  ready"], MUTED, 13])
 	return out
 
