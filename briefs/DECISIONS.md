@@ -341,3 +341,9 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-08 (owner, repeated): holding Space NEVER opens the glider
 - Glide opens only on a double press: jump, then press Space again in the air and hold. Holding Space from the jump (or holding it while doing anything else, e.g. LMB on Albert) must never glide, no matter how long it is held. Supersedes GLIDE_ENGAGE hold-to-glide. Jump-pad and updraft auto-glides are unchanged.
+
+## 2026-11-08 (owner playtest list)
+- ONE practice space, named **the Training Area** (based on the title-screen "Arena"); the separate farm training area merges into it. The name **"Arena" is reserved** for a future 4v4 team mode; don't use it for anything else.
+- Boki do not die of neglect for now (flag natural_death: false): hungry/sick/weak at worst, recover with care. Non-neglect losses unchanged.
+- Hunter ability colours: Vex = green fire, Sparkle = pink, Tenzo = blue; every Hunter's abilities are colour-coded to them.
+- Movement: air control as SUPERVIVE (accelerate toward input, strong counter-steer, drag above cap, never overwrite air velocity); glide start adds no speed; Shift cancels into glide instantly for every Hunter. All movement/feel numbers in one tuning file.
