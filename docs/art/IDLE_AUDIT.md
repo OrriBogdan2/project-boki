@@ -172,6 +172,19 @@ Each target applies **quality** parity only. The attitude comes from the line qu
 - **Target stance (6 s):**
   - The same feet. Finger guns at nobody, a head tilt, then she drops into a lean on the staff. The bubble grows and
     pops on a beat, not at the loop end.
+- **Done (ext/idle-mage):** tools/art1/ryzz_clips.py `idle` / `stance` (`stand`, `shift`, `bounce`, `snap`, `bubble`).
+  - No staff: the model carries a rack of four rods on her back (the audit's "staff" was the rack's silhouette), so the
+    staff swing became the rack: it rattles (`fan`) after each weight shift and its tips flare (`lit`) on the snap. The
+    stance lean is into her right hip with the right hand on it.
+  - Idle 5 s: the weight goes to the left foot at 2.0 s and back at 4.0 s (a shift with an anticipation and an
+    overshoot, soft knees through it), the chest 3 frames, the head 5 and the hands 6 behind the pelvis; a toe bounce
+    on a 1 Hz beat that rests on beats 3 and 5; two breaths on the new `x_breath` bone (2.5 %, skinned to the rib
+    cage by `posekit.add_breath`). Fidget: the finger snap with a spark at 1.0 to 1.7 s, the bubble from 2.8 s, pops at
+    3.7 s, back in her cheek by 4.2 s.
+  - Stance 6 s: both finger guns up at 0 to 0.5 s with a double tap at 0.84 and 1.2 s, a head tilt and a wink, down
+    at 1.8 s into the hip lean (to 2.5 s, held, released at 5.2 to 5.8 s); the bubble pops on the 4th beat (4.0 s).
+    The idle's feet, the bounce under the lean at 60 %.
+  - Before and after strips: jobq `20261108-102502-32621` (shots_before) / `20261108-111456-30639` (shots_after).
 
 ### 6. Motley the Void Jester (`ostra`, art `ostra`)
 

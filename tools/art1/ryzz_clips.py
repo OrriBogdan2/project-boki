@@ -8,7 +8,7 @@ import numpy as np
 from mathutils import Vector, Quaternion
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
+from posekit import Clip, FnClip, Solver, bake, add_breath, ang_dir as D, at, eul, lerp, FPS, frame_of, BREATH_AXES
 import ryzz_pieces as K
 import crouchkit
 
@@ -47,32 +47,144 @@ def C(name, dur, keys, loop=False, base=READY):
     return Clip(name, dur, [(k[0], qz(k[1])) + tuple(k[2:]) for k in keys], qz(base), loop)
 
 
-def idle(u):
-    """Never quite still: her weight rolls from one hip to the other, the shoulders answering, a head tilt, a toe tap on the off beat."""
-    a = math.sin(u * 2 * math.pi)
-    b2 = math.sin(u * 4 * math.pi + 0.6)
+IDLE_T, STANCE_T = 5.0, 6.0            # s: the standing loops; every curve below runs whole cycles of them, so the seams close (--clip-check)
+BEAT = 1.0                             # s: her inner beat; the toe bounce and the gum pop sit on it
+BREATH = 0.025                         # x_breath swell (2.5 %) at a full breath
+LAG = {"tor": 0.10, "hed": 0.17, "hand": 0.20, "rack": 0.10}      # s: the chest, head, hands and rod rack answer the pelvis this much later
+IDLE_SHIFTS = ((0.40, 0.54), (0.80, 0.94))                        # u: the weight goes to the left foot, then back to the right
+
+
+def ss(x):
+    x = max(0.0, min(1.0, x))
+    return x * x * (3 - 2 * x)
+
+
+def shift(x):
+    """A weight shift 0..1 over x: a small anticipation back, the move, an overshoot that settles; flat at both ends."""
+    x = max(0.0, min(1.0, x))
+    return ss(x) - 0.25 * math.sin(2 * math.pi * x) * math.sin(math.pi * x) ** 2 * x
+
+
+def weight(u, windows=IDLE_SHIFTS):
+    """0: the weight on the right foot, 1: on the left. A hold, a shift over each window, a hold; closed at the seam."""
+    u %= 1.0
+    (a0, a1), (b0, b1) = windows
+    return shift((u - a0) / (a1 - a0)) - shift((u - b0) / (b1 - b0))
+
+
+def dip(u, windows=IDLE_SHIFTS):
+    """The knees soften through a shift: 0..1, peaking mid-move."""
+    u %= 1.0
+    return max(math.sin(math.pi * (u - a) / (b - a)) ** 2 if a <= u <= b else 0.0 for a, b in windows)
+
+
+def bounce(u, dur, skip=()):
+    """The toe bounce on the beat: a hop in the first 60 % of a beat, a rest after it; nothing on the skipped beats."""
+    t = (u % 1.0) * dur
+    i, b = int(t // BEAT), (t % BEAT) / BEAT
+    return 0.0 if i in skip or b > 0.6 else math.sin(math.pi * b / 0.6) ** 2
+
+
+def breath(u, dur, period):
+    """0..1, in on the first half; dur is a whole number of periods."""
+    return 0.5 - 0.5 * math.cos(2 * math.pi * (u % 1.0) * dur / period)
+
+
+def blink(u, at, w=0.025):
+    """The lids: 0.12 open, shut and open again over a window w wide round each u in at."""
+    k = max((1 - abs(u - a) / w for a in at if abs(u - a) < w), default=0.0)
+    return 0.12 + 0.88 * k
+
+
+def mix(p, q, k):
+    """p toward the keys of q by k (BE/LBE: both frame vectors)."""
+    for n, b in q.items():
+        a = p[n]
+        p[n] = (lerp(a[0], b[0], k), lerp(a[1], b[1], k)) if n in ("BE", "LBE") else lerp(a, b, k)
+
+
+def stand(u, dur, s, s_tor, s_hed, s_hand, knee, bo, br):
+    """The standing body: the weight s (0 right .. 1 left) on the pelvis, the chest, head and hands on their own lagged copies,
+    the knees softened by knee, the toe bounce bo (heels up, the body with them), the breath br in the chest, head and hands."""
     p = dict(READY)
-    p["pel"] = (0.024 + 0.036 * a, 0.0, -0.026 - 0.006 * b2)
-    p["prt"] = (0.03, -0.1 + 0.07 * a, -0.05 - 0.12 * a)        # the hip rolls over the leg she stands on
-    p["tor"] = (0.012 * b2, 0.14 - 0.07 * a, 0.05 + 0.1 * a)    # the shoulders go the other way
-    p["hed"] = (0.02 - 0.015 * b2, -0.08 + 0.05 * math.sin(u * 2 * math.pi + 1.0), 0.09 - 0.05 * a)
-    p["G"] = (0.215 + 0.022 * a, 0.05, 1.0 - 0.01 * b2)
-    p["LP"] = (-0.235 + 0.022 * a, 0.055, 0.985 + 0.01 * b2)
-    tap = max(0.0, math.sin((u - 0.66) / 0.2 * math.pi)) if 0.66 < u < 0.86 else 0.0
-    p["FR"] = (0.115, -0.06, A_Z + 0.022 * tap)
-    p["FRp"] = 0.32 * tap
-    p["lidL"] = p["lidR"] = 1.0 if 0.60 < u < 0.63 else 0.12
+    p["pel"] = (0.022 - 0.044 * s, 0.0, -0.022 - 0.014 * knee + 0.012 * bo)
+    p["prt"] = (0.03, -0.1 + 0.2 * s, -0.07 + 0.14 * s)
+    p["tor"] = (-0.012 * br, 0.14 - 0.28 * s_tor, 0.05 - 0.1 * s_tor)
+    p["hed"] = (0.02 - 0.015 * br, -0.08 + 0.16 * s_hed, 0.09 - 0.18 * s_hed)
+    p["G"] = (0.215 - 0.03 * s_hand, 0.05 + 0.03 * (s_hand - s), 1.0 + 0.004 * br)
+    p["LP"] = (-0.235 - 0.03 * s_hand, 0.055 + 0.03 * (s_hand - s), 0.985 + 0.004 * br)
+    p["FL"], p["FR"] = (-0.085, 0.09, A_Z + 0.016 * bo), (0.115, -0.06, A_Z + 0.016 * bo)
+    p["FLp"] = p["FRp"] = 0.18 * bo
+    p["breath"] = br
     return p
 
 
+def snap(p, u, t0, t1):
+    """The right hand comes up by the shoulder, the fingers snap (the hand closes to the gun on the beat) and the rods spark, the hand drops."""
+    if not t0 < u < t1:
+        return
+    x = (u - t0) / (t1 - t0)
+    lift = ss(x / 0.3) * (1 - ss((x - 0.6) / 0.4))
+    mix(p, {"G": (0.26, 0.2, 1.27), "BE": aim(-20, 55), "tor": (p["tor"][0], p["tor"][1] - 0.06, p["tor"][2]), "brow": 0.6}, lift)
+    p["gunR"] = ss((x - 0.44) / 0.03) * (1 - ss((x - 0.6) / 0.4))
+    p["lit"] = 0.4 * math.sin(math.pi * ss((x - 0.44) / 0.14)) ** 2
+
+
+def bubble(p, u, t0, t_pop, t1):
+    """She blows a bubble from t0; it pops at t_pop (the gum snaps to a scrap, both eyes shut); it is back in her cheek by t1."""
+    if t0 <= u < t_pop:
+        x = (u - t0) / (t_pop - t0)
+        p["gum"] = 0.72 + 0.6 * x ** 1.5
+        p["smile"], p["brow"] = 0.7 - 0.5 * ss(x * 3), 0.15 + 0.15 * x
+        p["lidL"] = p["lidR"] = 0.12 + 0.2 * ss(x * 3)
+        p["hed"] = (p["hed"][0] - 0.05 * ss(x * 3), p["hed"][1], p["hed"][2])
+    elif t_pop <= u < t1:
+        x = (u - t_pop) / (t1 - t_pop)
+        p["gum"] = 0.05 + 0.67 * ss((x - 0.3) / 0.7)
+        p["lidL"] = p["lidR"] = max(p["lidL"], 0.8 * (1 - ss(x / 0.25)))
+        p["smile"] = 1.0 - 0.3 * ss(x)
+
+
+def idle(u):
+    """Never quite still: a cocked hip, the weight shifted left and back once per loop (pelvis first, chest, head and hands after),
+    a toe bounce to an inner beat with a hold, the rod rack rattling after each shift; once per loop a finger snap with a spark and a bubble that pops."""
+    T, skip = IDLE_T, (2, 4)
+    s_tor, s_hed, s_hand = (weight(u - LAG[k] / T) for k in ("tor", "hed", "hand"))
+    p = stand(u, T, weight(u), s_tor, s_hed, s_hand, dip(u), bounce(u, T, skip), breath(u, T, 2.5))
+    p["fan"] = 0.5 * abs(weight(u - LAG["rack"] / T) - weight(u - 2 * LAG["rack"] / T))
+    p["skirt"] = 0.15 * bounce(u - 0.07 / T, T, skip)
+    p["lidL"] = p["lidR"] = blink(u, (0.12, 0.48))
+    snap(p, u, 0.20, 0.34)
+    bubble(p, u, 0.56, 0.74, 0.84)
+    return p
+
+
+GUNS = dict(BOTH_UP, tor=(-0.03, 0.14, 0.05), smile=1.0, brow=0.4)
+LEAN = {"pel": (0.045, -0.01, -0.04), "prt": (0.02, -0.12, -0.11), "tor": (-0.03, 0.18, 0.1), "hed": (0.03, -0.1, 0.16),
+        "G": (0.2, 0.0, 0.93), "BE": ((-0.2, 0.8, -0.55), (-0.1, -0.6, -0.8)), "LP": (-0.25, 0.03, 0.98), "smile": 0.9, "brow": 0.2}
+
+
 def stance(u):
-    """Her signature: both finger guns cocked at the shoulders, one hip out, the bubble big. She blows it till it pops."""
-    a = math.sin(u * 2 * math.pi)
-    p = dict(READY)
-    p.update({"pel": (0.05, 0.0, -0.03), "prt": (0.02, -0.16, -0.12), "tor": (0.0, 0.2, 0.13), "hed": (0.06, -0.12, 0.12),
-              "G": (0.25, 0.14, 1.31 - 0.006 * a), "BE": aim(-24, 22), "LP": (-0.25, 0.15, 1.29 - 0.006 * a), "LBE": aim(24, 22), "gunR": 1.0, "gunL": 1.0,
-              "FL": (-0.05, 0.11, A_Z), "FR": (0.13, -0.08, A_Z), "FLy": 0.0, "FRy": -0.45, "smile": 1.0, "brow": 0.3})
-    p["gum"] = 0.72 + 0.6 * u if u < 0.92 else 0.1
+    """Her signature, once per loop: both finger guns come up and double-tap at nobody, a head tilt and a wink, then she drops them and
+    leans back into her right hip with a hand on it; the bubble grows and pops on the 4th beat. The idle's feet; the weight stays right.
+    Both loops run free under the 0.5 s cross-fade, so the body stays near the idle's the whole way: same feet, hands low outside the guns."""
+    T, skip = STANCE_T, (0, 2, 4)
+    lean = lambda v: ss((v % 1.0 - 0.30) / 0.12) * (1 - ss((v % 1.0 - 0.86) / 0.10))
+    guns = ss(u / 0.08) * (1 - ss((u - 0.30) / 0.12))
+    l = lean(u)
+    p = stand(u, T, 0.0, 0.0, 0.0, 0.0, 0.0, bounce(u, T, skip) * (1 - 0.4 * l), breath(u, T, 3.0))
+    mix(p, GUNS, guns)
+    tap = max((1 - ss((u - t) / 0.05)) if t <= u < t + 0.05 else 0.0 for t in (0.14, 0.20))
+    mix(p, {"BE": aim(-14, 48), "LBE": aim(14, 48)}, tap)
+    p["tor"] = (p["tor"][0] - 0.03 * tap, p["tor"][1], p["tor"][2])
+    tilt = 0.16 * ss((u - 0.10) / 0.06) * (1 - ss((u - 0.30) / 0.12))
+    p["hed"] = (p["hed"][0], p["hed"][1], p["hed"][2] + tilt)
+    mix(p, LEAN, l)
+    p["fan"] = 0.4 * abs(lean(u - LAG["rack"] / T) - lean(u - 2 * LAG["rack"] / T))
+    p["skirt"] = 0.15 * bounce(u - 0.07 / T, T, skip)
+    p["lidL"] = p["lidR"] = blink(u, (0.08, 0.86))
+    p["lidR"] = max(p["lidR"], ss((u - 0.19) / 0.02) * (1 - ss((u - 0.29) / 0.03)))
+    bubble(p, u, 0.50, 4.0 / T, 0.80)
     return p
 
 
@@ -155,7 +267,7 @@ def crouch_set():
 
 
 def clips():
-    out = [FnClip("idle", 4.0, idle), FnClip("stance", 5.0, stance)]
+    out = [FnClip("idle", IDLE_T, idle), FnClip("stance", STANCE_T, stance)]
     out += crouch_set()
     for nm, ang in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
         out.append(FnClip("walk_" + nm, 0.92, gait(0.45, ang)))
@@ -266,6 +378,11 @@ CURL_AX = {"R": (0, 0, 1), "L": (0, 0, -1)}
 EXTRA_SCALE = []
 
 
+def rib_cage(p):
+    """How much of the chest a hips-skinned point is (x_breath's weight): the torso from the waist to the collar, not the arms."""
+    return ss((p.z - 1.12) / 0.1) * ss((1.43 - p.z) / 0.06) * ss((0.23 - abs(p.x)) / 0.06)
+
+
 def scale_keys(arm, clip, n):
     """Bone scale channels the pose solver doesn't write: the gum, the rods' glow sleeves, the arcs' flicker; and each rod's fan."""
     pbs = arm.pose.bones
@@ -275,6 +392,8 @@ def scale_keys(arm, clip, n):
         g = max(0.03, P.get("gum", 1.0))
         pbs["gum"].scale = (g, g, g)
         pbs["gum"].keyframe_insert("scale", frame=f)
+        pbs["x_breath"].scale = tuple(1.0 + BREATH * P.get("breath", 0.0) * ax for ax in BREATH_AXES)
+        pbs["x_breath"].keyframe_insert("scale", frame=f)
         lit = P.get("lit", 0.0)
         fl = 1.0 + 3.0 * lit * (0.92 + 0.08 * math.sin(f * 2.4))
         fan = P.get("fan", 0.0)
@@ -304,10 +423,15 @@ def scale_keys(arm, clip, n):
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:]
     bpy.ops.wm.open_mainfile(filepath=a[0])
+    for im in bpy.data.images:  # the finish stage saves the atlas paths relative to build.sh's cwd; anywhere else (jobq) they fail to load and the export drops the textures
+        if not im.has_data and not im.packed_file:
+            im.filepath = os.path.join(os.path.dirname(os.path.abspath(a[0])), os.path.basename(im.filepath))
+            im.reload()
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
     rig = {"grip_rest": tuple(K.wrist_at(1.0)), "blade_rest": (0, 0, -1), "edge_rest": (0, 1, 0), "pelvis": 0.84, "hilt_l": 0.08,
            "lhand": {"k": (0, 1, 0), "o": (-1, 0, 0), "palm": tuple(K.wrist_at(-1.0))}}
     bpy.context.scene.render.fps = FPS
+    add_breath(arm, (0, -0.08, 1.24), rib_cage)
     sol = RSolver(arm, rig)
     bpy.context.view_layer.objects.active = arm
     names = []
