@@ -398,3 +398,8 @@ Abilities you use twice (recasts: Ostra Brimseed pop, Tender Hearthlight throw, 
 - A tester's PC can barely run the expedition. Even the owner's M5 Mac auto-picks "low" quality (40 ms a frame in the load benchmark), and the loading screen takes 16 s with 283 shader compiles.
 - Targets: a steady 60 fps on the M5 at medium, and 30+ fps on low-end PCs (integrated GPU) at low. Shaders precompiled or cached, so no hitches in the first minute. A "very low" preset that really is light (no shadows/SSAO/volumetrics, short draw distance, lower render scale, LOD/impostors, fewer particles).
 - Every perf change has to come with before/after real-GPU numbers from --perf-bench. Looks may drop on low presets but must not drop on high.
+
+## 2026-11-08 owner (playtest): UI is too much for a new player
+- Testers say there's too much on screen and it's hard to understand. Rule: **show only what's needed right now**. The new-player HUD has health, abilities with keys, the objective and the timer. Everything else (minimap detail, ranks, kin orders, relic/economy counters, stat panels) appears only when it first matters, or when you hold Tab or an info key.
+- One-line plain-English labels, no jargon before it's explained, one highlighted "what to do next" prompt, and no more than about 5 HUD groups at once. Menus get the same treatment: fewer buttons, with advanced options behind "More".
+- Applies to the HUD, the hunter pick screen, the farm, the pause menu and the results screen. It works together with the shorter-tutorials and two-step-ability decisions.
