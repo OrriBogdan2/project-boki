@@ -55,7 +55,7 @@ var bubbles: Array = []     # {ent, text, t, cat}
 var interact := {}          # what F would do right now for the local player
 var paused := false
 var duel: Duel = null
-var arena: Arena = null   # the Arena (opts "arena") or the training area's practice tools
+var arena: Arena = null   # the Arena (opts "arena") or the Training Grounds's practice tools
 var shot_n := 0          # the duel room: you and one sparring bot (opts "duel")
 var slowmo := 0.0
 var slow_k := 0.35
@@ -4840,7 +4840,7 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 		PerkOrbs.drop(self, "shrine", sh["pos"], 0, h)      # one or two perk orbs by the shrine
 
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
-# ---- training area
+# ---- Training Grounds
 ## [id, what to do, the action whose key it uses ("" for none)]
 const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then hold Mouse 5 or Space in the air to glide", "jump"],
 	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
@@ -5409,7 +5409,7 @@ func _finish() -> void:
 			Overlay.closed.disconnect(_on_menu_closed)
 		Overlay.close()
 	if opts.get("training", false):
-		# nothing from the training area carries over
+		# nothing from the Training Grounds carries over
 		Game.goto("home")
 		return
 	var r := result.duplicate()
