@@ -1,0 +1,6 @@
+dolm_lmb.png: LMB at the dummy
+dolm_hold.png: LMB held at the dummy
+dolm_rmb.png: RMB at the dummy
+dolm_dash.png: Shift
+dolm_e.png: E at the dummy
+dolm_r.png: R, the ultimate
