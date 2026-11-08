@@ -338,3 +338,6 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
   1 Vex, 2 Albert, 3 Neve, 4 Kael, 5 Cinder, 6 Tenzo, 7 Sparkle, 8 Grimble, 9 Meeko, 10 Sable, 11 Lace, 12 Motley.
 - Ids (scripts/arch/arch.gd ORDER, scripts/match/hero_kit.gd ARCH_ORDER): gunslinger, bulwark, rimewright, juggernaut, ashwick, dolm, mage, dredge, tender, thief, archer, ostra.
 - Display order only. The post-tutorial pick offer (Kael, Cinder, Meeko) is unchanged unless the owner says otherwise.
+
+## 2026-11-08 (owner, repeated): holding Space NEVER opens the glider
+- Glide opens only on a double press: jump, then press Space again in the air and hold. Holding Space from the jump (or holding it while doing anything else, e.g. LMB on Albert) must never glide, no matter how long it is held. Supersedes GLIDE_ENGAGE hold-to-glide. Jump-pad and updraft auto-glides are unchanged.
