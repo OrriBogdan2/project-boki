@@ -31,7 +31,7 @@
 		"vamp": 0.06,
 		"wait": 3.5,
 		"rattle_k": 0.9,
-		"col": "#ff9a5c"
+		"col": "#d8ff7a"
 	},
 	"passive": {
 		"name": "Hot Streak",
@@ -41,7 +41,7 @@
 		"id": "slipstep",
 		"name": "Slipstep",
 		"icon": "dash",
-		"col": "#ffc89a",
+		"col": "#e6ffb0",
 		"cd": 8.5,
 		"tap_t": 0.18,
 		"roll": 4.8,
@@ -58,7 +58,7 @@
 		"name": "Burr Charge",
 		"short": "Burr",
 		"icon": "skypierce",
-		"col": "#ffb36a",
+		"col": "#c8f560",
 		"cooldown": 6.5,
 		"charges": 1,
 		"burr": {
@@ -91,7 +91,7 @@
 		"name": "Longneedle",
 		"short": "Needle",
 		"icon": "haymaker",
-		"col": "#ffe0a0",
+		"col": "#eaffa8",
 		"cooldown": 11.5,
 		"charge": 0.6,
 		"self_slow": 1.0,
@@ -115,7 +115,7 @@
 		"name": "Cinderfall",
 		"short": "Fall",
 		"icon": "earthshatter",
-		"col": "#ff7a3c",
+		"col": "#b8f03c",
 		"cooldown": 42.0,
 		"range": 14.0,
 		"radius": 3.4,
