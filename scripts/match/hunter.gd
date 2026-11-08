@@ -105,6 +105,9 @@ var coyote := 0.0
 var jump_buf := 0.0
 var fly_t := 0.0
 var mantle_cd := 0.0
+var carry_v := 0.0             # m/s: how fast you were just going (MantleCarry, item 185b)
+var carry_dir := Vector2.ZERO
+var carry_mini := {}           # a mantle's held speed just after the lip (MantleCarry)
 ## The ledge rise (SUPERVIVE's ledge float): {lip, n (into the wall), t, max_t, at, face (start
 ## point), g0 (glide held when it began), downed, win (timing window opened)}. See _ledge_rise.
 var lfloat := {}
@@ -2227,6 +2230,7 @@ func _physics(dt: float) -> void:
 			hv = accel2(hv, mv * spd, AIR_ACCEL, AIR_DECEL, AIR_OVERSPEED, dt)
 		else:
 			hv = HunterMove.air_steer(self, hv, mv * spd, dt)     # [game data] low air control: a jump keeps its run-up
+	hv = MantleCarry.step(self, hv, dt)
 	vel.x = hv.x; vel.z = hv.y
 	update_lip()
 	wall_moves.carry(self, mv, dt)
@@ -2610,9 +2614,12 @@ func _try_ledge_grab(dt: float) -> void:
 		# (or, over the abyss, thrown into its side: the shove counts as the push)
 		if mv.length() < 0.3:
 			var shoved := over_void() or gliding or glide_off_t < FEATHER_KEEP     # thrown or glided into the face
-			if not shoved or wall_hit_v.length() < 2.0:
+			if shoved and wall_hit_v.length() >= 2.0:
+				mv = wall_hit_v.normalized()
+			elif carry_v >= MantleCarry.PUSH_SPEED:
+				mv = MantleCarry.heading(self, mv)       # flying in with momentum is a push (item 185b)
+			else:
 				return
-			mv = wall_hit_v.normalized()
 		reach = r + 0.4
 	var void_here := over_void()
 	if not grounded and mv.length() > 0.3:
@@ -2651,9 +2658,13 @@ func _try_ledge_grab(dt: float) -> void:
 				continue
 			# (movefeel) over the abyss below a lip, steering mostly along a wall still counts as pushing
 			# into it (up to ~78 degrees off straight in): SUPERVIVE rarely lets a wall-hugger sink under
-			# an island. Elsewhere the ledge rise wants a real push (LRISE_PUSH, ~60 degrees)
-			if not grounded and (toward.length() > 0.01 and toward.normalized().dot(mv.normalized()) < (0.2 if void_here and last_gy - pos.y > 0.3 else LRISE_PUSH)):
-				continue
+			# an island. Elsewhere the ledge rise wants keys or momentum into it, up to ~60 degrees off (MantleCarry)
+			if not grounded and toward.length() > 0.01:
+				if void_here and last_gy - pos.y > 0.3:
+					if toward.normalized().dot(mv.normalized()) < 0.2:
+						continue
+				elif not MantleCarry.pushing(self, toward, mv):
+					continue
 			if not grounded and not void_here:
 				# off the void, only a wall you're heading into and that rises above where you last stood:
 				# hopping down a terrace must not float you back up it
@@ -2677,6 +2688,7 @@ func _try_ledge_grab(dt: float) -> void:
 		"shove": (inp["move"] as Vector2).length() < 0.3,     # thrown into the side with no keys: it carries you over
 		"kb0": kb_t,                                          # (a fresh knock ends the rise; the one that threw you here doesn't)
 		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
+		"v_in": carry_v,                                      # the speed you came in with comes over the top (item 185b)
 		"max_t": clampf((float(best["gz"]) - pos.y) / LRISE_SPEED, 0.1, 0.9) * (1.35 if downed else 1.0) + 0.3}
 	vel.y = maxf(vel.y, LRISE_MIN)
 	grounded = false
@@ -2693,10 +2705,10 @@ func _try_ledge_grab(dt: float) -> void:
 ## and the wall itself (World.occupy) is all that holds you to the face while you push into it.
 ## Over the top you pop up a little toward wherever you're holding. Moving off the face, a dash, a
 ## fresh glide press, a stun or a knock end it. A jump during the rise flings you (_ledge_fling).
+const LRISE_PUSH := MantleCarry.APPROACH_DOT     # home.gd's ledge rise reads this (keys this far into the wall)
 const LRISE_SPEED := 14.0      # [footage] a deep mantle returns to the top in ~0.8s (was MANTLE_RISE)
 const LRISE_MIN := 4.0         # never slower than this near the top
 const LRISE_POP := 2.6         # [est] up speed as you clear the lip with no jump (a ~0.25m pop)
-const LRISE_PUSH := 0.5        # keys at least this far into the wall (dot, ~60 degrees) to start a rise
 const LRISE_OFF := 0.9         # moved this far out from the face: you've let go
 const LRISE_WINDOW := 0.6      # [est] the fling window: the last this-many metres below the top (~0.12s)
 const FLING_HEIGHT := 0.9     # [est] a fling timed in the window peaks this high over the top...
@@ -2735,6 +2747,7 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 			var short := HunterMove.mantle_launch(base_speed) - hv.dot(n)
 			if short > 0.0:
 				hv += n * short
+		hv = MantleCarry.exit(self, hv, n, mv, float(lf.get("v_in", 0.0)))
 		vel.x = hv.x; vel.z = hv.y
 		mantle_cd = 0.3
 		return true
@@ -2761,6 +2774,10 @@ func _face_near(lip: float) -> bool:
 			if Vector2(ex - pos.x, ez - pos.z).length() <= rr:
 				return true
 	return false
+
+func teleport(p: Vector3) -> void:
+	super(p)
+	MantleCarry.forget(self)
 
 ## A jump during a ledge rise: in the window near the top, a strong fling (higher, faster, a whoosh);
 ## earlier, a weaker one. Either way toward the keys you hold (or up and onto the ledge with none).
