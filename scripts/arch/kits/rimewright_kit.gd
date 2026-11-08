@@ -4,7 +4,7 @@ extends ArchKit
 ## plays: ice damage, control and a wall, no healing or shields for the squad.
 ## Passive Hoarfrost: damage Chills; a knock on a Chilled foe, or 8 darts on one foe, Shatters them.
 ## LMB Ice Dart: hold for a steady stream of slow homing shards that bow out and curve onto the foe
-## nearest the cursor; while skating they fly straight and thick. RMB Ice Spear: hold to
+## nearest the cursor; while skating they fly as thick beams that home the same way. RMB Ice Spear: hold to
 ## see the landing ring, let go: it lands at the cursor, leaves a slow zone and detonates 1.8s later.
 ## Shift Skate (hold). E Rink Wall: a 0.2s tell, then a narrow block of ice that slides toward the
 ## cursor, widening, shoving foes; E again freezes it. X Rimelock (level 6): sealed in ice, invulnerable,
