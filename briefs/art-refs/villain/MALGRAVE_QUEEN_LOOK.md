@@ -1,5 +1,7 @@
 # Malgrave, the Beloved: look guide (Nov 8, starting point for the owner's art)
 
+**Title (owner, Nov 8):** Malgrave, **the Beloved** (replaces "the Undying Queen"). It is what Solmere called her while she fed on them.
+
 Story in one line: an ancient dragon who ruled Solmere for 300 years as an ageless, beautiful queen behind the first mask. She hid her soul in the Wyrmheart and fed it her people. Kael wounded her, her body died in the Hollowing, and she lives on inside the cracked Heart.
 
 ## Her mask: LOCKED (owner, Nov 7, 23:07 ET)
@@ -20,7 +22,7 @@ File: `villain/malgrave_mask.jpg`.
 This section overrides everything below where they conflict.
 
 **Main design:** `malgrave_human.jpg` (option I, owner Nov 7, 23:38 ET; the sexiest version).
-- **Pose:** she sits on the coils of her own pearl-white serpent tail (fine scales, crimson fin ridge) with her legs crossed. The loops of her tail around her form a throne and an infinity sign; this is her signature "Undying Queen" silhouette.
+- **Pose:** she sits on the coils of her own pearl-white serpent tail (fine scales, crimson fin ridge) with her legs crossed. The loops of her tail around her form a throne and an infinity sign; this is her signature silhouette (the infinity loop: she never dies).
 - **The gown:** a clinging pearl-white silk halter gown with a neckline plunging to her navel, open at the sides, with a crimson scale belt at her tiny waist.
 - **Legs:** crimson rose-patterned thigh-high heeled boots.
 - **Mantle:** a white feather mantle at her elbows.
