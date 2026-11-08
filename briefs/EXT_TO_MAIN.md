@@ -2813,3 +2813,5 @@ READY ext/sable-bola-instant b31c26641 (Sable Bola: instant release, wall/tree a
 - Ideas list (no schedule): corruption stages. The Nov 28 reminder was cancelled by the owner.
 READY ext/anim-time-meeko 5a6864ab4 (Meeko clip lead: release beats land on effect frames, timing table, combo check)
 READY ext/anim-time-tenzo 231f91588 (Tenzo timing parity: boulder release 0.13 s, spine rise 0.8 s, LMB upper-moving, doc table, combo + clips checks)
+
+READY ext/agent-briefs ac70b1d38 (briefs/plans/INTRO_VIDEO_PLAN.md: 15-shot 81 s AI intro plan for the owner to make on his Mac; Flow/Veo 3.1 + Nano Banana Pro primary, Kling 3.0 fallback; prologue.gd video path described, not built)
