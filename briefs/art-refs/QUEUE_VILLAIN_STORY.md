@@ -35,9 +35,22 @@
 
 **Colour master:** this heart is the master for red, crystal and glow in the later villain items.
 
-### 2. Malgrave's Mask
-- **Look:** the first mask. Elegant, regal, red and gold: a beautiful, calm face with a faint wyrm hint (a scale pattern in the gold, slightly slit eye holes).
-- **Views:** front, three-quarter, side, and back/inside.
+### 2. The Wyrm Queen's Mask: LOCKED (owner, Nov 7, 21:03 ET)
+`villain/wyrm_queen_mask.jpg` (option "Blood Tears"). Views: front, 3/4, side and inside.
+
+**Look:**
+- Smooth white porcelain with a serene, feminine face.
+- Gold dragon-scale panels at the temples, with gold filigree framing the face.
+- Glossy crimson tear-swirls flowing down from both eyes, and a crimson swirl crest on the brow.
+- Full glossy crimson lips and painted lashes; the eye holes read black.
+
+**Lore:** porcelain makes it the original of every Hunter's Mask, and the crimson ties it to the Wyrmheart.
+
+**How it was made:** Nano Banana Pro, new generation, 16:9, 4K. Ref: the earlier porcelain option.
+
+**Explorations:** `villain/explorations/mask_option_*` (round 1) and `mask_r2_*` (round 2).
+
+**LORE CHANGE (owner, Nov 7):** the villain is now the **Wyrm Queen**, not a king. Item 3 becomes the Masked Queen. Her name is still to be confirmed: Malgrave, or a new name.
 
 ### 3. Malgrave, the Masked King (human form)
 - **Look:** very tall, slender, impossibly graceful and ageless, wearing the mask from item 2.
