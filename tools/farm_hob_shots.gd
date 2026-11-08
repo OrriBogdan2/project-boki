@@ -93,7 +93,8 @@ func run(m: Node, out_dir: String) -> void:
 	await _shot("05_new_blueprints_toast", "Farm level 2: the toast points at Hob, a gold mark floats over him", true)
 	# 5. his panel
 	home.hob.talk()
-	await _shot("06_hob_panel", "Talking to Hob: his line and the blueprints he drew up")
+	await main.get_tree().create_timer(3.5).timeout
+	await _shot("06_hob_panel", "Talking to Hob: the dialogue box (his portrait, name plate, typed line), the camera on him")
 	home._close_panel()
 	# 6. the Goals card with some progress
 	ClassUnlock.choose_starters(ClassUnlock.starters().slice(0, ClassUnlock.picks_needed()))
