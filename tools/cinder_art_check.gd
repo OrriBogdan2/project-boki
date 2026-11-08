@@ -6,7 +6,8 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const NEAR := 0.04              # m: FX to the visible nozzle
-const REACH_OFF := 0.14         # m: the braced nozzle's forward reach off the kit's old NOZZLE
+const REACH_OFF := 0.14         # m: the braced nozzle's forward reach off the kit's NOZZLE, scaled to her body
+const NOZZLE_SIZE := 1.067      # her body size when the kit's NOZZLE was set (the model's reach grows with the size)
 
 var A
 var bad := 0
@@ -81,8 +82,9 @@ func run(main: Node) -> void:
 	ok(worst < NEAR, "through the hose the FX stay on the gun's tip (worst %.3f m)" % worst)
 	var reach := fwd_sum / maxf(1.0, float(n))
 	print("CINDERART braced tip: fwd %.3f up %.3f right %.3f" % [reach, up_sum / n, right_sum / n])
-	ok(absf(reach - AshwickKit.NOZZLE.x) < REACH_OFF, "the braced nozzle reaches %.2f m ahead (kit %.2f m)"
-			% [reach, AshwickKit.NOZZLE.x])
+	var kit_reach := AshwickKit.NOZZLE.x * float(Arch.body("ashwick")["size"]) / NOZZLE_SIZE
+	ok(absf(reach - kit_reach) < REACH_OFF, "the braced nozzle reaches %.2f m ahead (kit %.2f m at her size)"
+			% [reach, kit_reach])
 	ok(kit.hose.emitted > 0, "the stream ran (%d puffs)" % kit.hose.emitted)
 	for f in 40:
 		_frame(m, P)
