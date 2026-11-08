@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
 import imgio
 
 STEEL = [hexc("#222329"), hexc("#3f4148"), hexc("#61636c"), hexc("#868992"), hexc("#b0b3ba")]
+BARREL = [hexc("#4b4e56"), hexc("#7d8089"), hexc("#a9acb4"), hexc("#cfd1d6"), hexc("#eeeff2")]  # the sheet's polished barrels
 BLACKM = [hexc("#141417"), hexc("#26262b"), hexc("#3b3b42"), hexc("#585862"), hexc("#7a7a86")]
 BRASS = [hexc("#3d2a14"), hexc("#6e4c26"), hexc("#a07842"), hexc("#c9a266"), hexc("#ead3a2")]    # the sheet's worn brass
 # the gun's stickers (vex_v2_weapon_sheet): (shape, s, angle round the axis from outward toward the top, half size along s, half size

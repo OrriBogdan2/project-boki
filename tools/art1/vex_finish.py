@@ -483,7 +483,8 @@ paint(lambda n: n == "lidUL", lambda p, n, ao: mix(SKIN(p, n, ao), hexc("#2a2024
 paint(lambda n: n.startswith("ebrow"), lambda p, n, ao: np.broadcast_to(hexc("#2b3a35"), p.shape).copy())
 paint(lambda n: n in ("cuff", "receiver", "drum", "gband52"), P.gun_brass)
 paint(lambda n: n in ("bullet", "coin", "wristband", "robopanel", "robofore", "palm", "thumbL", "elbowball") or n.startswith(("braidtie", "hipcoin", "finger")), P.brass)
-paint(lambda n: n.startswith(("boss", "gcollar", "gspindle", "gband41", "barrel", "drumface", "chain")), P.steel)
+paint(lambda n: n.startswith(("boss", "drumface", "chain")), P.steel)
+paint(lambda n: n.startswith(("gcollar", "gspindle", "gband41", "barrel")), lambda p, n, ao: P.steel(p, n, ao, P.BARREL))
 paint(lambda n: n.startswith(("elbowcap", "fpad", "thumbpad")), lambda p, n, ao: P.steel(p, n, ao, P.BLACKM))
 paint(lambda n: n == "gren0", lambda p, n, ao: ramp(np.clip(lit(n, ao) * 1.12, 0, 1), [hexc("#2c3a14"), hexc("#55702a"), hexc("#86a843"), hexc("#b9d77a")]))
 
