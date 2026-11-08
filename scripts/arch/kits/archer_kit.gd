@@ -377,6 +377,9 @@ func on_dash(use_ex: bool) -> bool:
 	spirit.start(use_ex)
 	return true
 
+## The dash's data "charges" (2, owner item 146) over the light class's one.
+func extra_dashes() -> float: return float(dash_def().get("charges", 1)) - float(h.cdat["dashes"])
+
 ## While walking as a spirit she moves quicker; at rank 3 inside something she starts faster still and
 ## that fades with the walk. A draw right after a perfect release slows her less (wiki: perfect shots ease
 ## the self-slow). Holding the Heavy Shot slows her hard (pin.hold_move of her speed).

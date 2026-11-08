@@ -21,7 +21,7 @@
 		"lmb": "Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw.",
 		"rmb": "Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls.",
 		"e": "Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing.",
-		"dash": "Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers.",
+		"dash": "Spirit Walk (2 charges): a dodge roll, then 2.8s walking through rocks, trees and barriers.",
 		"passive": "Focus fills while you stand still or pin a foe; at full your next shot is a Deadeye. Hurt foes show through cover.",
 		"x": "Starpiercer (level 6): your next 3 shots need no draw and fly as piercing beams; the third can finish a foe.",
 		"weapons": {
@@ -59,13 +59,14 @@
 		"icon": "vanish",
 		"col": "#ff6a72",
 		"cd": 9.5,
-		"roll": 3.5,
+		"charges": 2,
+		"roll": 4.0,
 		"roll_t": 0.24,
 		"time": 2.8,
 		"time_rank3": 0.5,
 		"walk_k": 1.1,
 		"stuck_cost": 30.0,
-		"desc": "A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.",
+		"desc": "Two charges. A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.",
 		"inside_boost": 0.33,
 		"ally_r": 6.0
 	},
@@ -180,7 +181,7 @@
 	"rank_next": {
 		"sec": "Rank 3: cooldown 16s -> 10s, damage +30%; flies 3m farther and a wall stun gives a dash charge.",
 		"kin": "Rank 3: cooldown 9s -> 7.2s, damage +30%; the Hail Wall is 30% wider.",
-		"dash": "Rank 3: recharge 6s -> 4.2s; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too."
+		"dash": "Rank 3: recharge 9.5s -> 6.7s per charge; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too."
 	},
 	"tells": {
 		"half": "a faint lens glint",

@@ -57,6 +57,7 @@ func pin() -> void:
 	_pin_draw_pose(m, P, T, K)
 	_pin_heavy(m, P, T, K, home, lv)
 	_pin_dash(m, P, T, K)
+	_pin_two_charges(m, P, K, home)
 	await done(m)
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var bad: int = await flow.combos_of(main, "archer")
@@ -732,6 +733,46 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	step(m, 0.5)
 	ok("pin dash > RMB and E: both start during the dash", rolling and rmb_ok and e_ok, "rmb %s e %s" % [rmb_ok, e_ok])
 	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.28, "pin_flick": 0.22})
+
+## Owner item 146: Spirit Walk has 2 charges (the HUD slot too); a third press waits for the recharge.
+func _pin_two_charges(m: Match, P: Hunter, K: ArcherKit, home: Vector3) -> void:
+	step(m, 1.0)
+	K.spirit.end("time")
+	P.dashes = P.max_dashes()
+	P.slot_lv["dash"] = 1
+	var info := P.slot_info("dash")
+	var got := "max %s info %s/%s" % [P.max_dashes(), info["charges"], info["max_charges"]]
+	ok("pin dash: 2 charges, both on the HUD slot (data roll 4 m)",
+		int(P.max_dashes()) == 2 and int(info["charges"]) == 2 and int(info["max_charges"]) == 2
+		and absf(float(K.dash_def()["roll"]) - 4.0) < 0.001, got)
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.inp["move"] = Vector2(-1, 0)
+	P.inp["fire"] = false
+	aim_at(P, home + Vector3(-6, 0, 0))
+	var x0 := P.pos.x
+	P.do_dash()
+	step(m, 0.4)
+	var d1 := x0 - P.pos.x
+	K.spirit.end("time")
+	var left := P.slot_info("dash")
+	P.do_dash()
+	step(m, 0.4)
+	K.spirit.end("time")
+	var both := "left %s dashes %.2f roll %.1f m" % [left["charges"], P.dashes, d1]
+	ok("pin dash: two presses back to back both roll; the first goes about 4 m",
+		P.dashes < 0.1 and int(left["charges"]) == 1 and d1 > 3.5, both)
+	var x1 := P.pos.x
+	P.do_dash()
+	step(m, 0.4)
+	var third := x1 - P.pos.x
+	var waits: bool = not K.spirit.active() and P.dashes < 1.0 and K.st.get("last_dash") == "flick"
+	var seen := "moved %.1f dashes %.2f" % [third, P.dashes]
+	ok("pin dash: the third press is only the shared long dash", waits, seen)
+	step(m, float(K.dash_def()["cd"]) + 0.5, func(): P.inp["move"] = Vector2.ZERO)
+	var back := int(floor(P.dashes + 0.001))
+	ok("pin dash: after the recharge one charge is back", back == 1, "dashes %.2f" % P.dashes)
+	P.inp["move"] = Vector2.ZERO
 
 ## into_dash.x for Breaker: Shift while planted for Faultline isn't lost, it goes when the plant ends.
 func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:
