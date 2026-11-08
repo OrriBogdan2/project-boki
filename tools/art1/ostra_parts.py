@@ -12,7 +12,7 @@ HEAD_Z = 1.442
 HIPS_Z = 0.756
 SKIRT_Z = 0.826
 NECK = np.array((0.0, 0.0, 1.44))
-HEAD_K = 0.87       # v2 sheet: the head and hat 0.87 of v1's (the sheet's is ~0.65; kept larger so the grin reads at the match camera and he stands the line-up's 1.20x a hunter, warden_model_check)
+HEAD_K = 0.72       # the head and hat 0.72 of v1's (the sheet's is ~0.65; kept larger so the grin reads at the match camera and he stands the line-up's 1.20x a hunter, warden_model_check)
 
 
 def headpt(p):
@@ -284,7 +284,7 @@ def lining(P):
     return Part("lining", "void-body", V, F, ST, rigid("hips", len(V)), "lining", (64, 64))
 
 
-TAILS = ((33, 0.50, 0.62), (92, 0.58, 0.66), (152, 0.52, 0.63), (-152, 0.52, 0.63), (-92, 0.58, 0.66), (-33, 0.50, 0.62))
+TAILS = ((33, 0.58, 0.50), (92, 0.70, 0.52), (152, 0.60, 0.49), (-152, 0.60, 0.49), (-92, 0.70, 0.52), (-33, 0.58, 0.50))
 
 
 def tails():
@@ -426,7 +426,7 @@ def face():
     for f in F:
         corners.append([(pu[i] * 0.5 + 0.5, 0.5 - pv[i] * 0.5) for i in f])
     au = np.abs(pu)
-    top, bot = -0.32 + 0.52 * (au / 0.80) ** 2.4, -0.72 + 0.92 * (au / 0.80) ** 2.2
+    top, bot = -0.26 + 0.50 * (au / 0.86) ** 2.3, -0.76 + 0.92 * (au / 0.86) ** 2.1
     mid = top + (bot - top) * 0.5
     jaw = M.sm(mid + 0.02, mid - 0.06, pv) * M.sm(1.0, 0.7, au)
     W = {"x_jaw": jaw}
@@ -441,7 +441,7 @@ def face():
 def hood():
     """the cap's skull: a bag from the oval round the face to the back of the head"""
     C = headpt(HEAD_C)
-    R = np.array((0.15, 0.17, 0.215)) * HEAD_K
+    R = np.array((0.135, 0.17, 0.225)) * HEAD_K
     n = 44
     loop = []
     for k in range(n):
@@ -495,7 +495,7 @@ def chain_w(prefix, t, bones, start, parent):
     return {b: w / np.maximum(tot, 1e-6) for b, w in W.items()}
 
 
-RUFF_K = 0.85       # v2 sheet: the ruff a little narrower than v1's, with the smaller head
+RUFF_K = 0.80       # v2 sheet: the ruff a little narrower than v1's, with the smaller head
 
 
 def ruff():
