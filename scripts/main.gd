@@ -3242,7 +3242,8 @@ func _bot_sanity() -> void:
 				if h.roll_t > float(s["roll"]) + 0.05:
 					s["dashes"] = int(s["dashes"]) + 1
 				s["roll"] = h.roll_t
-				if h.hit_marker() == "ring" and not h.gliding:
+				# (a ledge rise is a climb up a wall, not hanging in the air: it doesn't count)
+				if h.hit_marker() == "ring" and not h.gliding and h.lfloat.is_empty():
 					s["ring"] = float(s["ring"]) + Match.DT
 				s["t"] = float(s["t"]) + Match.DT
 				if float(s["t"]) >= WIN:
