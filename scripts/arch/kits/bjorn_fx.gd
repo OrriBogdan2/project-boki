@@ -376,7 +376,7 @@ func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 	dome.rotation = Vector3(0, atan2(dir.x, dir.y), 0)
 	KitShaders.param(dome, "life", hurt)
 	var pulse := 0.3 + 0.2 * sin(Time.get_ticks_msec() * 0.012) if armed else 0.0
-	KitShaders.param(dome, "flash", aegis_hit * 1.5 + pulse)
+	KitShaders.param(dome, "lit", aegis_hit * 1.5 + pulse)
 
 ## The dome, made on first use: a HeroVfx shell, kept with these effects so it goes when they do.
 func _aegis() -> MeshInstance3D:

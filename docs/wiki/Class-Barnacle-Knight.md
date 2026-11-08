@@ -16,7 +16,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 ## How it plays
 
-1. **Hold RMB** to raise his **aegis**, a curved gold shield: it has its own health, regenerates, and
+1. **Hold RMB** to raise his **aegis**, a curved ivory dome: it has its own health, regenerates, and
    blocks from the front while you walk slower. Damage it blocks becomes **Guard**.
 2. Let go (or tap) to **Bash**. At 50 Guard the Bash is a **Shield Slam** that stuns.
 3. **Tap LMB** to throw the hammer where your cursor is (up to 9m): it stays planted under a gold
@@ -27,7 +27,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
    they're **Crushed**: stunned, and you heal.
 6. **360 Smash** (Shift): a short dash, then one spinning hit all round you; with the aegis up it's a
    **Shield Charge**, invulnerable for its length.
-7. **Mending Ground** (E): a green light comes down on your planted hammer (or on you), then heals
+7. **Mending Ground** (E): a column of light comes down on your planted hammer (or on you), then heals
    allies there and mends your aegis.
 
 ## Combos and interactions
@@ -72,7 +72,7 @@ What the in-game kit card (K) says.
 | Dash: 360 Smash | 360 Smash: a short dash that ends in one spinning hit around you; with the aegis up, a Shield Charge (its own 6s cooldown). |
 | LMB | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you. |
 | RMB: Aegis | Hold to raise your aegis and block shots from the front. With it up, Shift is a Shield Charge on its own cooldown. |
-| E: Mending Ground | A green light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst. |
+| E: Mending Ground | A column of light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst. |
 | Hunter ultimate: Faultline | Faultline (level 6): plant, slam, and the ground erupts down a long lane, throwing every foe on it up. |
 | Weapon: War Hammer & Aegis | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you. |
 
@@ -84,12 +84,12 @@ What the in-game kit card (K) says.
 
 **Aegis (RMB, 6s cooldown).**
 
-- *Hold:* Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
+- *Hold:* Raise the aegis: a curved ivory dome with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
 - *Tap:* A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.
 - *In the air:* Shield Surf: hold to block from the front while gliding.
 - *Resource full:* Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
 
-**Mending Ground (E, 12s cooldown).** A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
+**Mending Ground (E, 12s cooldown).** A column of light comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 
 **Faultline (hunter ultimate, from level 6, 40s cooldown).** Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%.
 

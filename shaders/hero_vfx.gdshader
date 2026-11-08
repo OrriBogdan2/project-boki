@@ -25,7 +25,7 @@ uniform float seed = 0.0;
 uniform float gain = 1.0;   // the viewer's share of it (HeroVfx.view_k: allies' effects sit dimmer)
 uniform int shape = 0;      // M_SCORCH: 0 disc, 1 lane, 2 cone
 uniform float arc = 1.0;    // M_SCORCH cone: half angle (rad). M_SKIRT, M_DOME: the share of the circle it covers
-uniform float flash = 0.0;  // M_DOME: a block or a push lighting the whole pane (0..2)
+uniform float lit = 0.0;    // M_DOME: a block or a push lighting the whole pane (0..2)
 uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures keep their size
 uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
@@ -234,9 +234,9 @@ vec4 dome(vec2 uv, float facing) {
 	float seam = 1.0 - smoothstep(0.0, 0.09, cracks(p));
 	float wave = smoothstep(0.75, 1.0, sin((uv.y * 1.5 - TIME * 0.7) * 3.14159));   // a band of light climbing it
 	float broken = smoothstep(0.15, 0.9, life) * step(1.0 - life, h21(floor(p)));
-	float glow = halo * 1.1 + foot * 0.5 + sheen * 0.3 + seam * (0.1 + wave * 0.3) + flash * (0.25 + seam * 0.6);
+	float glow = halo * 1.1 + foot * 0.5 + sheen * 0.3 + seam * (0.1 + wave * 0.3) + lit * (0.25 + seam * 0.6);
 	float a = clamp(0.06 + glow * 0.55 + broken * seam * 0.7, 0.0, 1.0);
-	vec3 c = mix(col.rgb, col2.rgb, clamp(halo + flash * 0.5, 0.0, 1.0)) * glow;
+	vec3 c = mix(col.rgb, col2.rgb, clamp(halo + lit * 0.5, 0.0, 1.0)) * glow;
 	return vec4(mix(c, col3.rgb, broken * seam), a);
 }
 
