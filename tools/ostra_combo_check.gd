@@ -236,6 +236,10 @@ func _ostra() -> void:
 		).distance_to(Vector2(T.pos.x, T.pos.z)) < 0.6 and K.swap.is_empty(),
 		str(se.get("b"))
 	)
+	ok(
+		"telegraph: the aimed landing circle is the Trade's pull radius",
+		absf(float(se.get("r", 0.0)) - float(K.dash_def()["radius"])) < 0.01, "r %.2f" % float(se.get("r", 0.0))
+	)
 	ok("anim: aiming Shift plays ostra_swap_aim", K.anim_id == "ostra_swap_aim")
 	P.inp["dash_down"] = false
 	m.step(DT)
@@ -243,6 +247,10 @@ func _ostra() -> void:
 	ok(
 		"dash: let go = the lantern is lobbed (in flight, both ends shown to all)",
 		not K.swap.is_empty() and AimKit.shown(P, "swap_fly") and bool(AimKit.entry(P, "swap_fly").get("all", false))
+	)
+	ok(
+		"telegraph: the flying Trade's two circles are the Trade's pull radius",
+		absf(float(AimKit.entry(P, "swap_fly").get("r", 0.0)) - float(K.dash_def()["radius"])) < 0.01
 	)
 	ok("item 35: a ground Trade plays his underhand lob, ostra_swap", K.anim_id == "ostra_swap")
 	var t_cast := m.time
@@ -335,6 +343,10 @@ func _ostra() -> void:
 	ok(
 		"e: the seed grows for 6.5s to 3.2m", K.seed_k() >= 0.99 and absf(K.seed_radius() - 3.2) < 0.05,
 		"k %.2f r %.2f" % [K.seed_k(), K.seed_radius()]
+	)
+	ok(
+		"telegraph: the seed's circle is drawn at its pop radius",
+		absf(float(AimKit.entry(P, "seed").get("r", 0.0)) - K.seed_radius()) < 0.01
 	)
 	K.e_recast()
 	step(m, 0.2)

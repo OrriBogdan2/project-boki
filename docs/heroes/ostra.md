@@ -97,6 +97,20 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 2 (audited on 
 | Self screen shake | MED | (c) | ext/no-shake owns it |
 | RMB, passive, items 17 and 42 | n/a | (a) | matched in the audit |
 
+## Telegraphs (audit C: every ground shape is gameplay, drawn at the hit's true size)
+
+Rule (DECISIONS, movement rules): a ring, disc or burst on the ground means gameplay; drawn size is the data size. Checked in `--ostra-combo-check` (`tools/ostra_combo_check.gd`, `tools/ostra_ult_check.gd`).
+
+| Ability | Drawn | Hit (data) | Seen by | Now |
+|---|---|---|---|---|
+| Snap (RMB) | rail lane `rmb.snap.width` 0.7 m | the snap's width | caster | already true |
+| Lantern Trade (Shift) | aim: a circle at the landing, `dash.radius` 1.5 m; in flight: a circle at each end, 1.5 m | bodies within 1.5 m of the lantern's spot swap | aim: caster; flight: all | the cast also pulsed a 1.5 m ring at each end; removed (duplicated the markers) |
+| Swollen (a full Brimseed) | the pink flash only | a buff | all | the 2.2 m and 1.2 m rings under him are removed (they marked no hit) |
+| Brimseed (E) | a circle at `seed_radius()` (up to `e.rmax` 3.2 m, swollen 4.2 m), dashed until full | the pop, `foes_in(p, radius)` | all | a pop drew three shrinking rings; now one at the pop radius |
+| Nightwell (X) | the dome at `x.r` 3.6 m (swollen 5.1 m) filling over `x.tell` 1.0 s, then the disc | the well | all | the closing ring at 0.4 x the radius is removed (a reset, not a hit) |
+
+Suggestion, not built: the rank 3 ally shield (`dash.ally_r` 3.0 m) has no ground shape; a ring at 3.0 m would tell allies the area.
+
 ## Combinations (`--ostra-combo-check`, tools/ostra_combo_check.gd; placement in `--zone-check`)
 | Combo | Result | Asserted by |
 |---|---|---|

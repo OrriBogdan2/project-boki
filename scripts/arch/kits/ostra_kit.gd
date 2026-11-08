@@ -90,8 +90,6 @@ func add_swell(v: float) -> void:
 		swells += 1
 		armed_fx("SWOLLEN", "")
 		play("ostra_empower")
-		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.2, Color("4a1068"), 0.45)      # the vortex disc under him
-		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, PINK, 0.3)
 		m.fx.flash(h.pos + Vector3(0, 1.0, 0), PINK, 1.6, 0.1)
 		m.sfx("os_empower", h.pos, -2.0, 1.0)
 
@@ -290,8 +288,6 @@ func _swap_cast() -> void:
 	}
 	swap_peak = 0.0
 	play(swap_move())
-	m.fx.ring(h.pos, float(dd["radius"]), TEAL, 0.35)
-	m.fx.ring(land, float(dd["radius"]), VOID_COL, 0.35)
 	m.sfx("os_swap_lob", h.pos, -3.0, 1.0)
 	net_bolt(h.pos + Vector3(0, 1.2, 0), land + Vector3(0, 0.6, 0), Color("b8f5ea"))
 	CombatBus.ability_used.emit(h, String(dd.get("id", "swap")), "dodge")
@@ -602,10 +598,8 @@ func _pop(hit: bool) -> void:
 	play("ostra_pop")
 	var mult := 1.0 + (float(ed["dmg_max_k"]) - 0.5) * k
 	var dmg := float(ed["dmg"]) * mult * power("kin")
-	# an implosion: the rim snaps inward to a bright point, then dark shards fly out
-	for i in 3:
-		var rr := rad * (1.0 - 0.3 * i)
-		m.later(0.04 * i, func(): m.fx.ring(p, rr, VOID_COL if i < 2 else Color("f2eaff"), 0.12))
+	# an implosion: the rim (the hit area) snaps shut, then dark shards fly out
+	m.fx.ring(p, rad, VOID_COL, 0.12)
 	m.fx.burst(p + Vector3(0, 0.8, 0), VOID_COL, int(14 + 22 * k), -5.0, 0.35, 0.0, 1.2)
 	m.later(
 		0.12,

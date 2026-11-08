@@ -193,5 +193,4 @@ func _close() -> void:
 	for rec in draws:
 		k.m.displace.stop(rec)
 	draws = []
-	k.m.fx.ring(center, radius * 0.4, DISC_COL, 0.2)
 	k.m.fx.burst(center + Vector3(0, 0.3, 0), Color("2a0a3a"), 10, -3.0, 0.3, 0.0, 0.9)
