@@ -2663,3 +2663,15 @@ READY ext/pip-companions-v2 399f2b017 (Meeko's sun + raincloud from pip_v2 compa
 CLAIM ext/tg-text (job a4): Training Area -> Training Grounds, Extraction trios only, Duel off main list.
 READY ext/tg-text @ : text rename, tabs Solo/Duos removed, Duel room button removed (Duel stays in the Grounds bar). health --strict, gen_wiki --check, arena/practice-hero checks pass. GPU shots queued (jobq 20261108-025052-16336) but no GPU worker picked it up yet: unverified visually. farm-start-check has 2 failures (meadow tint, crouch) that look unrelated, not checked on main.
 READY ext/parity-no-riders 3bcb50eca (remove Chill 15% slow, Meeko carrier shield (hit/stun drops), stale Shred text; checks assert 4s Chill/no shield)
+
+READY ext/hero-names 5e42b4b58 (player-visible hero names/titles synced to LORE_MASKS + DECISIONS; ids, files and folders unchanged; --import, hero-title/portrait/archetype/dolm/ashwick/tender checks 0 FAIL, health --strict OK)
+| id | old -> new base_name | old -> new title (content/archetypes) |
+|---|---|---|
+| bulwark | Breaker -> Albert | Sunken Bulwark -> Barnacle Knight |
+| mage | Ryzz -> Sparkle | Storm Chaser (same) |
+| archer | Lisette -> Lace | Red Stitch (same) |
+| dolm | Tarek -> Tenzo | Cliff Runner -> Stone Seer |
+| rimewright | Claire -> Neve | Frost Siren -> Snowglide (DECISIONS Nov 7 evening: Snowglide, not Snowglider) |
+| tender | Pip -> Meeko | Little Lantern -> Dawnfox |
+| ashwick | Cinder (same) | Mad Pyromancer -> Flame Queen |
+Also: content/sfx/{bulwark,mage,archer,dolm,rimewright,tender}.json "name"; tools/weapon_audit.gd, warden_stance_shots.gd labels; portrait_check, breah/ashwick/care combo checks assert the new names/titles; hero_title_check OLD_NAMES now retires Hem, Breaker, Ryzz, Pip, Claire, Tarek, Lisette, Mossy, Ravel, Snowglider. Not touched: code comments, tools/gen_sfx_*.py docstrings, Boki kin nicknames "Pip" (a pet name, not the hero). Overlaps ext/lore-factions (also edits the class files): expect a trivial conflict in the title/base_name lines.
