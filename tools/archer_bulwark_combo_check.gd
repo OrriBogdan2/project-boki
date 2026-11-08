@@ -15,6 +15,8 @@ func run(main_node: Node) -> void:
 	own.main = main_node
 	var launch = load("res://tools/bjorn_launch_check.gd").new()
 	launch.main = main_node
+	var atime = load("res://tools/bjorn_anim_time_check.gd").new()
+	atime.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		await ult.pin()
@@ -25,8 +27,9 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	n += ult.n + own.n + launch.n
-	fails += ult.fails + own.fails + launch.fails
+		await atime.anim_time()
+	n += ult.n + own.n + launch.n + atime.n
+	fails += ult.fails + own.fails + launch.fails + atime.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 

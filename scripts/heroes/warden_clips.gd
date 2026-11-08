@@ -319,8 +319,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		if up is String:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			up = Vector2(vel.x, vel.z).length() >= STILL
-		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
-			"legs_heading": bool(mv.get("legs_heading", false))}
+		return {"clip": clip, "t": tt, "upper": up, "fade": float(mv.get("fade", FADE)),
+			"heading": bool(mv.get("heading", false)), "legs_heading": bool(mv.get("legs_heading", false))}
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	if bool(s.get("reviving", false)) and st.has("reviving"):
@@ -348,11 +348,12 @@ func step(dt: float) -> void:
 	if want.is_empty():
 		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
 	var proc := bool(want.get("proc", false))
+	var fade := float(want.get("fade", FADE))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
 	if not proc and bool(want.get("upper", false)):
 		_node("anim_u").animation = String(want["clip"])
 		_p("seek_u/seek_request", float(want.get("t", 0.0)))
-		up_w = move_toward(up_w, 1.0, dt / FADE)
+		up_w = move_toward(up_w, 1.0, dt / fade)
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 	elif not proc and want.has("clip"):
 		var clip := String(want["clip"])
@@ -369,14 +370,14 @@ func step(dt: float) -> void:
 			_p("rate_%s/scale" % live, 0.0)
 		else:
 			_p("rate_%s/scale" % live, 1.0)
-		act_w = move_toward(act_w, 1.0, dt / FADE)
+		act_w = move_toward(act_w, 1.0, dt / fade)
 		up_w = move_toward(up_w, 0.0, dt / FADE)
 	else:
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
 		if act_w <= 0.0 and up_w <= 0.0:
 			cur = ""
-	xf = move_toward(xf, float(chan), dt / FADE)
+	xf = move_toward(xf, float(chan), dt / fade)
 	_p("act/blend_amount", xf)
 	_p("upper/blend_amount", up_w)
 	_p("full/blend_amount", act_w)
