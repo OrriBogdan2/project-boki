@@ -111,6 +111,7 @@ func run(main: Node) -> void:
 	var spread := 0.0
 	var heels_low := true
 	var tail_behind := true
+	var tail_d := 9.0
 	var jet_y := 0.0
 	var stowed := true
 	var puffs := kit.hose.emitted
@@ -126,7 +127,8 @@ func run(main: Node) -> void:
 		for q in heels:
 			heels_low = heels_low and (q as Vector3).y - P.pos.y < 0.3
 		spread = maxf(spread, (heels[0] as Vector3).distance_to(heels[1]))
-		tail_behind = tail_behind and (hv.anchor_pos(P, "tail") - P.pos).dot(fwd) < -0.2
+		tail_d = minf(tail_d, -(hv.anchor_pos(P, "tail") - P.pos).dot(fwd))
+		tail_behind = tail_behind and (hv.anchor_pos(P, "tail") - P.pos).dot(fwd) < -0.1   # (the v2 tail curls round her)
 		var sk := P.model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 		var bi := sk.find_bone("jet.0")
 		jet_y = maxf(jet_y, sk.get_bone_pose_scale(bi).y)
@@ -134,7 +136,7 @@ func run(main: Node) -> void:
 			stowed = false
 	ok(spread > 0.06, "two jets, one on each heel (%.2f m apart)" % spread)
 	ok(heels_low, "the lift burns from her heels (at her feet)")
-	ok(tail_behind, "the tail's fire burns behind her")
+	ok(tail_behind, "the tail's fire burns behind her (at least %.2f m)" % tail_d)
 	ok(jet_y > 2.0, "the clip stretches the heels' flames in flight (x%.1f)" % jet_y)
 	ok(kit.hose.emitted == puffs, "no stream of fire runs in flight")
 	ok(stowed, "the fire is off her hand in flight")
