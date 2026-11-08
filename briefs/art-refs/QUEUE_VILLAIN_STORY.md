@@ -104,7 +104,7 @@ Palette: pearl and pink, matching the Queen. Throne room: `villain/solmere_thron
 - **Look:** the bottom of the Hollow: a vast dark cavern of broken kingdom rubble where the cracked Heart floats, glowing, with relics and soul-light drifting upward.
 - **Deliverable:** a wide environment painting.
 
-### 8. Corruption stages (parked)
+### 8. Corruption stages: moved to the ideas list (owner, Nov 8). Not scheduled; see `REMINDERS.md` → Ideas.
 - **Status:** not now. It is parked with chromas and skins, and a reminder is set for about 3 weeks out.
 - **Subject:** what holding the Heart does to a Hunter, using Vex as the example.
 - **Layout:** three stages side by side: just picked it up, powerful, and almost consumed.

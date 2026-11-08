@@ -4,9 +4,11 @@
 - **Lumi/Meeko chromas** (Nov 7): 11 chroma sheets still need AI isolation edits (`pip_v2/chromas_source/README.md`). Note: those chromas were made with the lantern design; redo them once her final design is locked.
 - **Chromas parked** (owner, Nov 7): Meeko and Nivi chromas are not a focus. Keep the existing chroma sheets in their folders as future reference only.
 - **Villain/story reference set** (owner, Nov 7): queued in `QUEUE_VILLAIN_STORY.md`. Start it only after the current hero key art (the Thief's View and the face-off) is done. Show 4 options per item and wait for the owner's pick.
-- **Corruption stages (ALL heroes; owner, Nov 8)** (first noted Nov 7 with Vex as the example): item 8 of the villain set. Plan: lock the 3-stage look on one hero first, then apply it to every hero. Parked with chromas and skins; not a priority. A reminder is scheduled for about 3 weeks out.
 - **Auburn Knight hero pass** (owner, Nov 7): after the Auburn Knight reference (villain set item 5), do a pass on every hero associated with the Auburn Knights.
 - **Queued after the villain/dragon set** (owner, Nov 7, 22:41 ET):
   - **Grimble splash redo:** rebuild his original splash (the cool view) with his new purple slime bone-hook arm. The current splash isn't clear enough.
   - **Sable splash fix:** make her aim at the men below, and shrink the jewel; it's so big it looks comical.
   - **Face-off, no-heart version (owner, Nov 7):** make an alt of `keyart/keyart_faceoff_final.jpg` with the Wyrmheart removed from between Kael and Vex; it looks odd in the middle. A single remove edit, then restore colour and sharpness locally. Keep the current version too.
+
+## Ideas (no schedule; maybe someday)
+- **Corruption stages** (owner, Nov 8: "not even sure it's needed"): show what holding the Heart does to a hero, in three stages (just picked it up, powerful, almost consumed), with crimson crystal spreading up the arms and the eyes turning pink-red. Use it only if gameplay ends up needing it, e.g. a Heart-holder state or a skin line. No reminder.
