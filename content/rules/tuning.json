@@ -1,0 +1,17 @@
+{
+	"_doc": "The one shared file for movement and feel numbers (owner 2026-11-08). One section per system; each value says its unit in its key or note. Read through Tuning.of(section).",
+	"islands": {
+		"_note": "Sky island undersides and the deep climb (IslandDepth): the rock under every island (match maps, farm, Training Area) drops rim + cliff_m (a tall, near-sheer outer wall a falling body brushes past and can catch) + taper below the top, the taper reaching deep_base_m + deep_per_reach x (tiles from coast to the middle), clamped to deep_min_m..deep_max_m, at the middle; taper_pow under 1 keeps the sides tall and steep near the coast. ledge_every_m: a shelf every this many metres down the side, the last ledge_riser share of each band being its steep riser. catch_depth_m: over the abyss, a body against an island's side (or just under it) catches it this far below the lip (the abyss takes you at 17.5 m). rise_max_s: the longest a deep climb lasts. under_reach_m: rock this far over your head (an underside you glide under) still catches you.",
+		"cliff_m": 5.0,
+		"deep_base_m": 8.0,
+		"deep_per_reach": 1.3,
+		"deep_min_m": 12.0,
+		"deep_max_m": 40.0,
+		"taper_pow": 0.5,
+		"ledge_every_m": 3.0,
+		"ledge_riser": 0.45,
+		"catch_depth_m": 18.0,
+		"rise_max_s": 1.6,
+		"under_reach_m": 1.0
+	}
+}

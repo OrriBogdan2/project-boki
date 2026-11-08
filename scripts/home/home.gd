@@ -1048,7 +1048,6 @@ var safe_at := Vector3(38.0, 0, 34.5)
 var glider_node: MeshInstance3D = null
 const HOME_ZOOM := 1.2         # the camera on arriving home: midway between close (0.8) and the widest the wheel goes (1.6)
 const MANTLE := 1.5            # ledges this far above your feet pop you up when you jump at them
-const MANTLE_ABYSS := 3.5   # falling past an island's side, you catch its edge from this far below (pinned: the expedition reach grew to 4.5 in movefeel)
 const FALL_RESPAWN := -40.0    # (a backstop: the abyss takes you a few metres under the island, World.abyss_floor)
 ## (movefeel) The Settings camera at home too, so you can try it here: the style's angle and lens and
 ## your follow mode. The farm keeps its own wider framing (the same ground across as the old home
@@ -1152,7 +1151,7 @@ func start_dash(dir: Vector2, speed: float, time: float) -> void:
 
 ## The ground under a point: its terrace height, or World.VOID over the sky.
 func _ground_h(x: float, z: float) -> float:
-	return world.ground_at(x, z)
+	return World.VOID if IslandDepth.below(world, Vector3(x, py, z)) else world.ground_at(x, z)     # under the rock: open air
 
 func _move_player(d: float) -> void:
 	if not climb.is_empty():
@@ -1253,6 +1252,12 @@ func _move_player(d: float) -> void:
 		else:
 			pvy = maxf(pvy - GRAV * d, -HunterMove.fall_max)
 		py += pvy * d
+		var rk := IslandDepth.clear(world, Vector3(ppos.x, py, ppos.z), lfl, 0.38, pvy)      # under, into or up the island's rock
+		if rk != Vector3.INF:
+			pvy = minf(pvy, 0.0) if rk.y < py else pvy
+			ppos = Vector3(rk.x, ppos.y, rk.z)
+			py = rk.y
+			gh = _ground_h(ppos.x, ppos.z)
 		if gh > World.VOID + 1.0 and py <= gh:
 			lfl = {}
 			if py < gh - 0.6:
@@ -1470,7 +1475,7 @@ func _move_kin(d: float) -> void:
 func _mantle(x: float, z: float, top: float, air: bool) -> bool:
 	if not air or top <= 0.0:
 		return false
-	var reach := MANTLE_ABYSS if py < -0.2 else MANTLE
+	var reach := IslandDepth.catch_depth() if py < -0.2 else MANTLE
 	if top - py > reach:
 		return false
 	# touching an island's rim with your side, from below: there's no ground under (x, z)
@@ -1515,7 +1520,7 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 	var n: Vector2 = lfl["n"]
 	var glide_now := Input.is_action_pressed("glide")
 	var off := (Vector2(ppos.x, ppos.z) - (lfl["at"] as Vector2)).dot(-n) > Hunter.LRISE_OFF
-	if off or gliding or dash_t > 0.0 or float(lfl["t"]) > 1.2 or Vector2(ppos.x, ppos.z).distance_to(lfl["at"]) > 2.0 			or (glide_now and Input.is_action_just_pressed("glide")):
+	if off or gliding or dash_t > 0.0 or float(lfl["t"]) > IslandDepth.rise_max_s() or Vector2(ppos.x, ppos.z).distance_to(lfl["at"]) > 2.0 			or (glide_now and Input.is_action_just_pressed("glide")):
 		lfl = {}
 		return false
 	var left: float = float(lfl["lip"]) + 0.12 - py

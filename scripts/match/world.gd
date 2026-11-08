@@ -160,13 +160,14 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	var bt := 0.0 if ghost else _block_hit(x, z, r * BLOCK_BODY - BLOCK_SKIN, y)
 	if bt > 0.0:
 		return bt
-	# an island is solid all the way down: below its top, its whole column is a wall. (A wall is
-	# never reported as 0, which means "free": a ground-level island, top 0, blocks from below too.
-	# It used to read as open air, so bodies under the lip slid in under ground-level islands.)
+	# an island is solid from its top down to its rocky underside (IslandDepth): beside it that column
+	# is a wall, under it is open air. (A wall is never reported as 0, which means "free": a
+	# ground-level island, top 0, blocks from below too.)
 	var hit := false
+	var ud := under_heights()
 	for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
 		var g := ground_at(x + o.x, z + o.y)
-		if g > y + STEP:
+		if g > y + STEP and ud[idx(int(floor(x + o.x)), int(floor(z + o.y)))] < y + IslandDepth.HEAD:
 			worst = maxf(worst, g)
 			hit = true
 	if hit:
@@ -1121,7 +1122,13 @@ const Landmarks := preload("res://scripts/match/landmarks.gd")
 var landmarks = null
 var _deco: Node3D = null
 var _rims: Array = []               # grassy rim spots from the terrain mesher, for the grass fringe
-var under := PackedFloat32Array()   # per tile: the height of the island's rocky underside (visual only)
+var under := PackedFloat32Array()   # per tile: the height of the island's rocky underside (IslandDepth)
+
+## Per tile: how far down each island's rock reaches (worked out once, from the tiles).
+func under_heights() -> PackedFloat32Array:
+	if under.size() != w * h:
+		under = IslandDepth.fill(self)
+	return under
 
 ## While a match builds under the loading screen: called after each step, then a frame draws.
 var stage_cb := Callable()
@@ -1148,19 +1155,19 @@ func build_meshes() -> void:
 	# big maps: the ground in 32-tile chunks, so only what's on screen (and in each shadow cascade)
 	# draws. A map's ground looks the same every match, so a later match reuses it (_mesh_cache).
 	var tkey := _terrain_key()
+	under = IslandDepth.fill(self)      # the tiles may have changed since it was last worked out
 	var parts: Array
 	var tm = null
 	if _mesh_cache.has(tkey):
 		var hit: Array = _mesh_cache[tkey]
-		parts = hit[0]; under = (hit[1] as PackedFloat32Array).duplicate(); _rims = (hit[2] as Array).duplicate()
+		parts = hit[0]; _rims = (hit[1] as Array).duplicate()
 	else:
 		var keep := _visual_seed_begin()
 		tm = TerrainMesh.new(self)
 		parts = (await tm.build_chunked(32)) if w > 96 else [[Vector2i.ZERO, await tm.build()]]
 		_visual_seed_end(keep)
-		under = tm.under
 		_rims = tm.rims
-		_cache_put(tkey, [parts, under.duplicate(), _rims.duplicate()])
+		_cache_put(tkey, [parts, _rims.duplicate()])
 	await _stage("world.terrain")
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)

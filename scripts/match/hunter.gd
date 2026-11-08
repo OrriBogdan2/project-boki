@@ -2459,7 +2459,7 @@ func abyss_kill_y() -> float:
 ## Islands are solid all the way down: if anything (a pull, a drag, a shove) has left you inside an
 ## island's column below its top, you're put back beside it, or on top when the top is in reach.
 func _unclip() -> void:
-	if grounded or pad.size() > 0 or grap.size() > 0:
+	if grounded or pad.size() > 0 or grap.size() > 0 or IslandDepth.unclip(self):
 		return
 	var w: World = m.world
 	var g: float = w.ground_at(pos.x, pos.z)
@@ -2591,7 +2591,7 @@ func _update_glide(dt: float) -> void:
 # back up onto it, the way Supervive does it. Walking into a step up a few terraces high does
 # the same after a short push. Getting launched hard still carries you past the edge.
 func _try_ledge_grab(dt: float) -> void:
-	if not lfloat.is_empty() or grap.size() > 0 or pad.size() > 0 or fly_t > 0.0 or charge.size() > 0 or dropping or shot_down or pos.y < last_gy - 14.0 \
+	if not lfloat.is_empty() or grap.size() > 0 or pad.size() > 0 or fly_t > 0.0 or charge.size() > 0 or dropping or shot_down or pos.y < last_gy - IslandDepth.catch_depth() \
 			or stun_t > 0.0 or root_t > 0.0 or Hex.active(self):
 		push_t = 0.0
 		return
@@ -2640,7 +2640,7 @@ func _try_ledge_grab(dt: float) -> void:
 		if w.inb(fi.x, fi.y) and w.sheer.has(w.idx(fi.x, fi.y)) and w.ground_at(fr.x, fr.y) > pos.y + World.STEP:
 			return
 	if not grounded and void_here and last_gy - pos.y > 0.3:
-		max_rise = MANTLE_REACH_ABYSS      # deep in the abyss, any island wall you touch springs you back up
+		max_rise = IslandDepth.catch_depth()      # deep in the abyss, any island rock you touch springs you back up
 		# (movefeel) and a wall a short step away catches you too: falling at full speed just off a
 		# face while steering along it used to slip past (wall-hug check: 15 of 40 at 3m down)
 		reach = r + WALL_CATCH_REACH
@@ -2655,7 +2655,7 @@ func _try_ledge_grab(dt: float) -> void:
 			if not w.inb(x, z) or w.kind[w.idx(x, z)] != World.T_GROUND:
 				continue
 			# a smooth sheer cliff (authored maps) has nothing to hold: you can't catch it from the air
-			if not grounded and w.sheer.has(w.idx(x, z)):
+			if not grounded and (w.sheer.has(w.idx(x, z)) or not IslandDepth.touches(w, w.idx(x, z), pos)):
 				continue
 			var gz := w.level[w.idx(x, z)] * World.LEVEL
 			var dz := gz - pos.y
@@ -2699,7 +2699,7 @@ func _try_ledge_grab(dt: float) -> void:
 		"kb0": kb_t,                                          # (a fresh knock ends the rise; the one that threw you here doesn't)
 		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
 		"v_in": carry_v,                                      # the speed you came in with comes over the top (item 185b)
-		"max_t": clampf((float(best["gz"]) - pos.y) / LRISE_SPEED, 0.1, 0.9) * (1.35 if downed else 1.0) + 0.3}
+		"max_t": clampf((float(best["gz"]) - pos.y) / LRISE_SPEED, 0.1, IslandDepth.rise_max_s()) * (1.35 if downed else 1.0) + 0.3}
 	vel.y = maxf(vel.y, LRISE_MIN)
 	grounded = false
 	grap = {}
@@ -2733,7 +2733,7 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 		lf["g0"] = false
 	var off := (Vector2(pos.x, pos.z) - (lf["at"] as Vector2)).dot(-n) > LRISE_OFF
 	# (a teleport; or you've slid along past the end of the face, so there's nothing beside you to rise up)
-	var drift := Vector2(pos.x, pos.z).distance_to(lf.get("last", Vector2(pos.x, pos.z))) > 1.5 or not _face_near(float(lf["lip"]))
+	var drift := Vector2(pos.x, pos.z).distance_to(lf.get("last", Vector2(pos.x, pos.z))) > 1.5 or not (_face_near(float(lf["lip"])) or IslandDepth.on_face(m.world, pos, n, r))
 	lf["last"] = Vector2(pos.x, pos.z)
 	if off or drift or gliding or downed != bool(lf["downed"]) or out or roll_t > 0.0 or stun_t > 0.0 or kb_t > float(lf.get("kb0", kb_t)) \
 			or fly_t > 0.0 or grounded or dropping or float(lf["t"]) > float(lf["max_t"]) or (glide_now and not bool(lf["g0"])):

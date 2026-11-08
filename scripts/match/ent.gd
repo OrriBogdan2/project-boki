@@ -80,7 +80,7 @@ func hit_y() -> float:
 
 func over_void() -> bool:
 	if not m.world.is_void(pos.x, pos.z):
-		return false
+		return IslandDepth.below(m.world, pos)      # under an island's rock there's only the abyss below
 	var st = m.get("skytrain")
 	if st and st.deck_y(pos, 3.0) > World.VOID + 1.0:
 		return false
