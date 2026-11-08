@@ -2847,3 +2847,4 @@ READY ext/depth-tiers 3c5f92074 (Depth 1/2/3 on the three tiers, shown on expedi
 READY ext/idle-mage 9d6d41c02 (Sparkle the Storm Chaser idle+stance rework)
 READY ext/tutorial-prologue 4347c61b8 (six-panel storybook prologue of origin v3, ~49 s skippable, then Pell the guide: flies ahead, stops you in the dialogue box before each new step, decision 0020; based on ext/tutorial-dialogue, merge that first; --teammate-check rival-callout FAIL is pre-existing on the base)
 READY ext/idle-rimewright 6d2e7ca54 (Neve the Snowglide idle+stance rework)
+READY ext/idle-dredge b3fdeeeff (Grimble the Scrap King idle+stance rework; based on ext/grimble-v2-model, merge that first; adds x_breath to dredge.json and posekit.py Loop)
