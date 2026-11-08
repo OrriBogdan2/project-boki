@@ -721,9 +721,12 @@ func on_dash(use_ex: bool) -> bool:
 		play("bul_short")
 		m.sfx("bjorn_spin", h.pos, -6.0, 0.9)
 		return true
-	if not wall.is_empty() and h.grounded:
-		# Shield Charge (into_dash.rmb): behind the raised shield, on its own cooldown (the RMB
-		# slot's), invulnerable for its length, a heavier knock; with 50 Guard it ends in a Shield Slam
+	if wall.is_empty() and rmb_down and lock_t <= 0.0 and shield_hp > 5.0:
+		_raise()          # Shift while the aegis is still rising: it is up now, the bash goes
+	if not wall.is_empty():
+		# Shield Charge (into_dash.rmb): behind the raised shield, on the ground or riding it in the air (Shield
+		# Surf), on its own cooldown (the RMB slot's), invulnerable for its length, a heavier knock; with 50
+		# Guard it ends in a Shield Slam
 		if not spend_rmb(): return true
 		var dist := float(dd["charge"]) + (1.0 if rank("dash") >= 3 else 0.0)
 		var t := dist / float(dd["charge_speed"])
