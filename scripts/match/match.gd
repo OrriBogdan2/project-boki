@@ -2169,6 +2169,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
+	DashReset.note(target, credit)
 	if target is Hunter and target != credit:
 		(target as Hunter).dmg_taken += d
 		if by is Blight: kstat["bl_dmg"] = float(kstat.get("bl_dmg", 0.0)) + d
@@ -2242,7 +2243,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
 		credit.knocks += 1
-		# the knock reward: a dash back (all charges) and a small heal (DashReset), armor and XP
+		# the knock reward: a dash refresh for the knocker and assisters, a small heal (DashReset), armor and XP
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
@@ -2359,6 +2360,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		_lose_life(h, by, why)
 		return
 	cancel_abilities(h)
+	if h.ak: h.ak.drop_holds()      # an out hunter's kit no longer ticks: a channel (Hearth Call) would hang on
 	h.out = true
 	h.downed = false
 	if net_on and not h.remote:
@@ -5817,9 +5819,9 @@ func _net_ev(x, from: String) -> void:
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
+				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
 				if by == player:
 					player.knocks += 1
-					DashReset.takedown(player, who)
 					_reward_moment(who.pos)
 				_check_team(player.team if player else -9)
 		"out":
@@ -5827,9 +5829,9 @@ func _net_ev(x, from: String) -> void:
 			if who is Hunter and not who.out:
 				var by: Ent = ents_by_id.get(String(x[2]), null)
 				who.out = true
+				if by is Hunter: DashReset.takedown(by, who)
 				if by == player:
 					player.kills += 1
-					DashReset.takedown(player, who)
 				add_feed(out_text(who.pname, String(x[3])))
 				if who.kin:
 					who.kin.dead = true

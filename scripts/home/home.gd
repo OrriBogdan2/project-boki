@@ -3368,7 +3368,7 @@ func _open_expedition() -> void:
 		right.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Black Market holds the unclaimed ones).", 12, UI.FAINT))
 	# the way out: practice on the left, go on the right
 	var fl := UI.footer_left(v)
-	fl.add_child(UI.ghost("Arena", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
+	fl.add_child(UI.ghost("Training Grounds", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
 	fl.add_child(UI.ghost("Training area", _start_training, 0, "jump"))
 	fl.add_child(UI.ghost("Duel room", _start_duel, 0, "knock"))
 	if Net.available():

@@ -28,6 +28,8 @@ const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange 
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
+# s into as_leap: the squash key; a hit earlier jumps the move there (source: knocked back within 0.1 s)
+const RAM_IMPACT_KEY := 0.36
 const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull_speed, stopping gap m away)
 const TONGUE_EVERY := 2                # flame ticks between two tongues licking off the stream
 const LICK_EVERY := 3                  # flame ticks between two scorches where the stream's end licks the ground
@@ -613,6 +615,8 @@ func _bash_impact(f: Ent) -> void:
 	bash["hit"] = true
 	bash_hits += 1
 	h.roll_t = 0.0                  # the dash stops on the foe
+	if anim_id == "as_leap":
+		anim_at = minf(anim_at, m.time - RAM_IMPACT_KEY)      # the squash on the hit frame, not at the full ram
 	var dir: Vector2 = bash["dir"]
 	# and he bounces back a little off them
 	h.vel.x = -dir.x * float(dd["recoil"])

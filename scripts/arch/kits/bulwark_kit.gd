@@ -723,9 +723,12 @@ func on_dash(use_ex: bool) -> bool:
 		play("bul_short")
 		m.sfx("bjorn_spin", h.pos, -6.0, 0.9)
 		return true
-	if not wall.is_empty() and h.grounded:
-		# Shield Charge (into_dash.rmb): behind the raised shield, on its own cooldown (the RMB
-		# slot's), invulnerable for its length, a heavier knock; with 50 Guard it ends in a Shield Slam
+	if wall.is_empty() and rmb_down and lock_t <= 0.0 and shield_hp > 5.0:
+		_raise()          # Shift while the aegis is still rising: it is up now, the bash goes
+	if not wall.is_empty():
+		# Shield Charge (into_dash.rmb): behind the raised shield, on the ground or riding it in the air (Shield
+		# Surf), on its own cooldown (the RMB slot's), invulnerable for its length, a heavier knock; with 50
+		# Guard it ends in a Shield Slam
 		if not spend_rmb(): return true
 		var dist := float(dd["charge"]) + (1.0 if rank("dash") >= 3 else 0.0)
 		var t := dist / float(dd["charge_speed"])
@@ -779,7 +782,9 @@ func _spin_hit(wd: Vector2) -> void:
 	spins += 1
 	knock_until = m.time + 0.25
 	if rank("dash") >= 3 and not foes_in(h.pos, r).is_empty():
-		ch_rmb = float(rmb_charges())          # rank 3: hitting foes with the dash refunds the Shield Charge
+		# rank 3: hitting foes with the dash refunds the Shield Charge (cue only when something was spent)
+		if ch_rmb < float(rmb_charges()) or float(cd["rmb"]) > 0.0: DashReset.cue(h, "dash_hit")
+		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
 	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})

@@ -23,12 +23,16 @@ its worth is the escape and the Static) knocks back about 1 bh and adds 1 Static
 source's 37.5 s at our pace, 42 s. Ranges use 1 body
 height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 7.5 to 13 m (owner item 70; not scaled by the dash feel), Skycall circle 1.5 m radius.
 
-## Ranks (kit data pass)
-Rank 2 is the shared step (cooldown -10%, damage +15%). Rank 3 is the hero's own: Storm Rod throw +50% damage
-(`rmb.rank3_mult`; the source's rank IV is +50%), Wirerun's own hit doubles (`dash.rank3_mult`; the source's rank IV is
-+100% on the non-passive dash damage, so the Blowout does not grow), Skycall cooldown -3s. The source has three
-upgrades before the last one (+20% damage and -1s on the spear, -0.75s on Surge, +25% on the strike); our rank system has
-one shared step and one special, so those collapse into the shared step.
+## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
+Source: Joule, `Upg:` lines. Cooldown cuts keep the source's fraction of its own cooldown (ours stay as the owner set them);
+damage steps add up. Numbers live in `rank_cd` / `rank_dmg` (the shared 10% / 15% step is not used). The ultimate takes no
+upgrade in our kit (the source's R: +50% impact damage -7.5s, then -7.5s; our X has a fixed cooldown), so it is not changed.
+
+| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
+|---|---|---|---|
+| RMB Storm Rod | +20% damage, -1s x2; tier IV +50% damage | 7.2s / 6.4s, damage +15% / +30%, then x1.5 on top (x1.95) | 7.2s / 6.4s, damage +20% / +90% (+40%, +50% on top) |
+| Shift Wirerun | -0.75s x2; tier IV +100% non-passive dash damage | 7.2s / 6.4s, damage +15% / +30% on the Blowout and run | 7.3s / 6.7s; no shared damage step; the run's own hit x2 at 3 (Blowout unchanged) |
+| E Skycall | +25% x2; tier IV -3s | 9.5s / 5.4s (3s off the shared 8.4s), damage +15% / +30% | 10.5s / 7.9s (a quarter off, the source's 3 of 12), damage +25% / +50% |
 
 ## Parity pass (owner 18:45: animation and ability parity, LMB first)
 Source vs ours per slot; [data] = the game data, [footage] = hero-ref/vireo.md at 5 fps. Asserted in `--mage-combo-check`

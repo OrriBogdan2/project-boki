@@ -1,5 +1,5 @@
 {
-	"doc": "Cinder's hand-keyed clips (art/wardens/cinder/cinder.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Times are the kit's (kmoves_pair.gd).",
+	"doc": "Cinder's hand-keyed clips (art/wardens/cinder/cinder.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Times are the kit's (kmoves_pair.gd). loco.cadence: the run clip plays 1.8x its planted-foot rate (the source scurries, a footfall every 0.15-0.2 s; docs/heroes/ashwick.md, Animation timing).",
 	"skinned_weapon": true,
 	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "jaw": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "fingers.R": "hand.R", "thumb.R": "hand.R", "foot.L": "shin.L", "foot.R": "shin.R", "jet.0": "foot.R", "jet.1": "foot.L"},
 	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
@@ -7,7 +7,7 @@
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
-		"walk_speed": 2.2, "run_speed": 4.6
+		"walk_speed": 2.2, "run_speed": 4.6, "cadence": 1.8
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
 	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "hop"},

@@ -602,7 +602,7 @@ func _infusion() -> void:
 	var r := setup("thief", 6.0, "cindle")
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	tap(m, P)
-	step(m, 0.8)          # (the Bola's 0.4s wind-up with the lane, then its flight)
+	step(m, 0.8)          # (the Bola's flight)
 	ok("infusion runtime: Bola + poison", T.burn_t > 0.0, "burn %.1f" % T.burn_t)
 	await done(m)
 	r = setup("mage", 5.0, "puddlet")

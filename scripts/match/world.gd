@@ -146,7 +146,7 @@ func abyss_floor(x: float, z: float, last := INF) -> float:
 
 ## Can a body of radius r stand at (x,z) with feet at y?
 ## Returns 0 if free, the blocking height if a wall or rock is in the way, -1 if the edge guard stops it.
-## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees and ability barriers don't block, terrain still does.
+## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers and terrain don't block, only the edge guard does.
 func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false) -> float:
 	var worst := 0.0
 	if not dyn_walls.is_empty() and not ghost:
@@ -164,11 +164,12 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	# never reported as 0, which means "free": a ground-level island, top 0, blocks from below too.
 	# It used to read as open air, so bodies under the lip slid in under ground-level islands.)
 	var hit := false
-	for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
-		var g := ground_at(x + o.x, z + o.y)
-		if g > y + STEP:
-			worst = maxf(worst, g)
-			hit = true
+	if not ghost:
+		for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
+			var g := ground_at(x + o.x, z + o.y)
+			if g > y + STEP:
+				worst = maxf(worst, g)
+				hit = true
 	if hit:
 		return maxf(worst, WALL_MIN)
 	if guard:
@@ -2268,7 +2269,7 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		islands.append({"c": cen, "r": sqrt(cells.size() / PI), "base": 0, "cells": cells, "role": String(D.get("role", "grove")),
 			"form": "authored", "fdir": Vector2.RIGHT, "name": String(D.get("name", "")), "id": String(D["id"]),
 			"region_fixed": int(D.get("region", 0)), "poi_at": poi, "drop": bool(D.get("drop", false)), "sheer_arcs": D.get("sheer", []),
-			"biome": String(D.get("biome", "")), "danger": int(D.get("danger", 0)), "perch": bool(D.get("perch", false)), "extras": D.get("extras", [])})
+			"biome": String(D.get("biome", "")), "danger": int(D.get("danger", 0)), "perch": bool(D.get("perch", false)), "extras": D.get("extras", []), "landmark": D.get("landmark")})
 		if String(D.get("biome", "")) != "":
 			var bj := load_biome(String(D["biome"]))
 			if bj.has("colors"):

@@ -71,7 +71,7 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover. |
 | Passive: Hawk Sense | Hawk Sense: rivals under half health show through cover. |
-| Dash: Spirit Walk | Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers. |
+| Dash: Spirit Walk | Spirit Walk (2 charges): a dodge roll, then 2.8s walking through rocks, trees and barriers. |
 | LMB | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
 | RMB: Heavy Shot | Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls. |
 | E: Hail Wall | Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing. |
@@ -82,7 +82,7 @@ What the in-game kit card (K) says.
 
 **Hawk Sense (passive).** Rivals under half health are seen through cover within 22m.
 
-**Spirit Walk (dash, Shift, 9.5s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you are put back where you went in.
+**Spirit Walk (dash, Shift, 9.5s cooldown).** Two charges. A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you are put back where you went in.
 
 **Heavy Shot (RMB, 16s cooldown).**
 
@@ -99,7 +99,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
 | RMB | cooldown 16s -> 13s, damage +15%. | cooldown 16s -> 10s, damage +30%; flies 3m farther and a wall stun gives a dash charge. |
-| Dash (Shift) | recharge 9.5s -> 8.1s per charge. | recharge 6s -> 4.2s; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
+| Dash (Shift) | recharge 9.5s -> 8.1s per charge. | recharge 9.5s -> 6.7s per charge; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
 | E | cooldown 15s -> 12.8s, damage +15%. | cooldown 9s -> 7.2s, damage +30%; the Hail Wall is 30% wider. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > E.

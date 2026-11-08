@@ -212,7 +212,7 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 		"dash":
 			var sd: Dictionary = d["dash"]
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "dash")), "col": Color(String(sd.get("col", "#ffffff"))),
-				"tag": "%s charge%s · %ss" % [_charges(a), "" if _charges(a) == "1" else "s", KinText.n(float(sd.get("cd", 9.0)))], "line": String(cd.get("dash", sd.get("desc", "")))}, true)
+				"tag": "%s charge%s · %ss" % [_charges(a, sd), "" if _charges(a, sd) == "1" else "s", KinText.n(float(sd.get("cd", 9.0)))], "line": String(cd.get("dash", sd.get("desc", "")))}, true)
 			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "dash")
 		"passive":
 			var rd: Dictionary = d.get("resource", {})
@@ -339,8 +339,8 @@ static func _how(variants: Array) -> String:
 	var ways := variants.filter(func(k): return k in ["tap", "hold", "air"]).map(func(k): return String(k).capitalize())
 	return " / ".join(ways) + (" only" if ways.size() == 1 else "")
 
-static func _charges(a: String) -> String:
-	return str(int(Data.CLASSES.get(Arch.weight(a), {}).get("dashes", 1)))
+static func _charges(a: String, sd: Dictionary) -> String:
+	return str(int(sd.get("charges", Data.CLASSES.get(Arch.weight(a), {}).get("dashes", 1))))
 
 static func _wstat(st: Dictionary) -> String:
 	if st.get("melee", false):

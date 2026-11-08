@@ -212,7 +212,8 @@ func _tick_carry(dt: float) -> void:
 	var cs := carrying()
 	if not cs.is_empty():
 		carry_t += dt
-		if h.stun_t > 0.0 or h.root_t > 0.0 or Hex.active(h):
+		# the source's triggers: a stun, or damage (no ours-only shield, owner 2026-11-07); a root or hex holds
+		if h.stun_t > 0.0:
 			drop_all(true)
 			return
 		var down := bool(h.inp.get(SETDOWN, false))
@@ -783,8 +784,7 @@ func _call_end(done: bool) -> void:
 		ult_look.drop("tether")
 	if not done or who == null:
 		stats["broken"] += 1
-		m.fx.word(h.pos + Vector3(0, 2.4, 0), "BROKEN", Color("ff8a6a"), false)
-		m.sfx("knock", h.pos, -8.0, 1.5)
+		_call_snap(who)
 		if anim_id == "mm_call_hold":
 			anim_id = ""
 		return
@@ -801,6 +801,16 @@ func _call_end(done: bool) -> void:
 	m.sfx("tender_cheer", h.pos, -3.0, 1.0)              # she cheers when her light mends someone
 	vfx("mended", at)
 	play("mm_call_end")
+
+
+## The tether snaps where everyone can see it: coral sparks at her hand and at the far end, and the word.
+func _call_snap(who: Hunter) -> void:
+	var snap := Color("ff8a6a")
+	m.fx.burst(CareUtil.hand_at(h, false), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
+	if who != null:
+		m.fx.burst(who.pos + Vector3(0, 1.1, 0), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
+	m.fx.word(h.pos + Vector3(0, 2.4, 0), "BROKEN", snap, false)
+	m.sfx("knock", h.pos, -8.0, 1.5)
 
 
 ## Pulls a downed teammate to her side and stands them up (Displace and the "rev" event: an online
