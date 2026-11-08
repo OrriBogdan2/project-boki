@@ -422,6 +422,17 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | shell_base | {"light": 80, "medium": 110, "heavy": 150} |
 | shell_note | hp of the shell every merge gives on top of your own health (docs/decisions/0003): by weight class; a form multiplies it with `shell_k` in its file. Damage hits the shell first; when it breaks the merge ends and the ultimate is lost. |
 
+## mystery_egg (`content/rules/mystery_egg.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The black mystery egg in the hatch scene (MysteryEgg, scripts/ui/mystery_egg.gd). pool: every small and medium wild species of docs/boki/ROSTER_50.md (no starters, no boss kin, no large or rideable ones) with its roster rarity. weights: how many tickets a species of that rarity gets in the draw (a rare one is 6x less likely than a common one). mutation_mult: the hatchling's roll on Mutations' base odds (x5 is about 1 in 4 with a mutation; the starter eggs don't roll). |
+| weights | {"common": 6, "uncommon": 3, "rare": 1} |
+| mutation_mult | 5 |
+| pool | {"wisplet": "common", "zapple": "common", "kindlewren": "common", "glintmole": "common", "rimeshrew": "common", "mossgrade": "common", "gloamshell": "common", "marchleaf": "common", "glomwort": "common", "sentrikat": "common", "basaltoad": "common", "murmurling": "common", "kestrike": "uncommon", "nettlynx": "uncommon", "thrumbird": "uncommon", "lodestick": "uncommon", "opalisk": "uncommon", "kilnbadger": "uncommon", "hoarheron": "uncommon", "orchisloth": "uncommon", "caecilith": "uncommon", "velvorm": "uncommon", "gibbelle": "uncommon", "moonloris": "uncommon", "threadwyrm": "uncommon", "selenfin": "rare", "casquebill": "rare", "nacrolin": "rare", "tuatrune": "rare"} |
+
 ## perk_orbs (`content/rules/perk_orbs.json`)
 
 

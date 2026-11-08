@@ -17,9 +17,10 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
 ## Your first hour
 
 1. **The story.** A short animated prologue about how Malgrave, the Wyrm in a queen's shape, broke Solmere. Hold Esc to skip it.
-2. **Your first egg.** Three starter eggs sit on a little island, plus a mystery egg:
-   the Venom Egg (Vespyx), the Prism Egg (Prismander), the Spore Egg (Mycroll), and a Mystery Egg
-   that hides one of the other common species. Pick one, keep it warm until it hatches, and name it.
+2. **Your first egg.** Three starter eggs sit up front on a little island: the Venom Egg (Vespyx),
+   the Prism Egg (Prismander) and the Spore Egg (Mycroll). Look around the back for a black egg in
+   a basket: it can hatch almost any early wild species (rarely a rare one) and is more likely than
+   the starters to hatch with a mutation. Pick one, knock until it hatches, and name it.
 3. **First Flight.** A short tutorial on three small islands: steer your landing, walk, dash, glide,
    long-dash in the air, shoot, use your E, have your Boki use its ability, throw your Boki at a
    monster, open a chest, then start an outpost's uplink and hold its yard until the lift opens.
