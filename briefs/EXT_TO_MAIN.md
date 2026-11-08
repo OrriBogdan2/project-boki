@@ -2619,3 +2619,6 @@ READY ext/parity-glide-dive 45f26a5b5 (KIT_PARITY item 18: glider dive, hold Ctr
 - GPU (RTX 4070 SUPER, jobq): old arena start spot wall 5.04 ms / gpu 1.21 / draws 474 / tris 337k; Grounds start wall 5.29 / gpu 1.32 / draws 451 / tris 413k; on a perch wall 4.30 / gpu 1.46 / draws 357 / tris 171k. Within the old arena's budget.
 - NOT DONE: I could not look at the top-down and ground-level shots. The GPU job wrote them to /tmp/gs_new on worker pc-MRROBOTO; a re-run that collects them (`--out gs_out`) is job 20261108-002945-07258, still queued (worker idle for 70+ min). Owner: please look at its out dir before merging.
 - Alternative not taken: building on the generated "training" island instead of the `--arena` map.
+
+## 2026-11-08 deep (job 20261108-014504-a4): CLAIM Training Grounds (escalated from 20261107-233002-a2)
+- CLAIM: finish ext/training-grounds: review the diff, rerun the checks in a fresh import, collect and look at the GPU top-down and ground-level shots, fix what they show.
