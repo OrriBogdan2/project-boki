@@ -3116,3 +3116,9 @@ READY ext/keybinds-1108 1369ab73d (job 20261108-214554-a4): DECISIONS keybind ha
 
 ## 2026-11-08 deep (job 20261108-220048-a4): CLAIM farm-optional-1108
 - CLAIM: DECISIONS "shorter tutorials; farming can be skipped or automated", farming-optional half only (Boki on every farm job, capped offline progress + 'while you were away' summary, Auto-farm toggle at ~80% hand yield, save bump + migration). Tutorial step cuts are NOT in this claim. Branch ext/farm-optional-1108 from origin/main.
+
+## 2026-11-08 feel (job 20261108-214520-a4): READY ext/vfx-thief (Sable VFX to the bar)
+- READY: ext/vfx-thief (on ext/vfx-quality-base). Sable's bolt hits, Cartwheel arcs, empowered reset, blink, knife and Encore moved from DJFx to HeroVfx data (content/vfx/thief.json) in violet #9a5cff: bolt hits are a violet crescent slash with an afterglow; the Cartwheel arcs are wider (1.5 m) with an afterglow; the blink has an out-burst and an in-burst (no ring, so the audit holds); gold flashes are gone (the empowered glint, gold aim line and Mark diamonds stay gold because the card text names them). Encore ring: a lit rim, no fill front. Knife runs with run_own. DJFx.puff/crescent deleted. 12 files, +165/-128.
+- Checks: --hero-vfx-check OK; --dancer-combo-check 127/0 (incl. dj_ult, parity); health --strict OK.
+- Strips: ext/vfx-quality-strips 4450a19e5 (before_thief_*.png / after_thief_*.png; jobq vfxq-before-thief, vfxq-before-thief-blink, vfxq-after-thief-2). No gh on w2: the integrator opens the PR and links them. Re-scored 18 -> 25 in docs/VFX_QUALITY.md.
+- Still open: Encore blade hits are small against the 5.4 m ring; the ring's wash still tints sand; the dash streaks are still DJFx.
