@@ -465,6 +465,15 @@ Breaker total: 6 tasks, 116 credits (the body's two attempts used).
 | Breaker C | 13:31 | 01a1a688-d08d-74e2-9e69-9015055e4130 | meshy-7.1 | front, side, back edited; texture refs the same; 2k, meshy-7 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the art's bare belly, sash, skirt, bare feet, braids, closed fists |
 | Breaker D | 13:31 | 01a1a688-d0b4-738f-bed8-df735492629b | meshy-7.1 | as C, enhancement on | 40 | Dropped: open splayed hands |
 
+### Vex v2 (owner redesign, briefs/art-refs/vex_v2/), 2026-11-06 (152 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Vex v2 edits | 2026-11-06 22:30 | 01a1b2f1-9b7c-76c2-9965-5dbb9d092ec8, 01a1b2f1-9b8c-72af-bc57-28fe07f1ad44, 01a1b2f1-9b7e-711a-b374-825bfdeed92d | nano-banana-pro (image-to-image) | turnaround front, left profile, back (1:1): bald, minigun and coin chain out, a plain right forearm | 27 | Kept (the back view swapped which forearm is brass: both forearms are cut, harmless) |
+| Vex v2 head sheet | 22:30 | 01a1b2f1-9b7a-7456-bb3c-352dd6ee979c | nano-banana-pro | the turnaround's three heads + the sheet's smirk head -> a 4-view head turnaround (16:9) | 9 | Kept, then split per view |
+| Vex v2 head views | 22:38 | 01a1b2f3-0b5c-7152-9017-d0750031fd4b, 01a1b2f3-0b39-7199-b772-db2031ff0596, 01a1b2f3-0b45-7313-af74-aec96bc55bd3, 01a1b2f3-0b6c-74b4-8f02-f0adb9ff2a14 | nano-banana-pro | each view of the head sheet redrawn alone at 1:1 (the sheet is 1376 px wide) | 36 | Kept |
+| Vex v2 body | 22:38 | 01a1b2f3-0ba1-76e8-9810-46951086bee6 | meshy-7.1 | the 3 edited views + the same as texture refs; A-pose, defaults | 40 | **Kept** |
+| Vex v2 head | 22:45 | 01a1b2f3-b897-7037-ac35-70264cddd250 | meshy-7.1 | the 4 head views, no pose | 40 | **Kept** |
+
 ## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
 No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.
 1. **Inspect** it in Blender: bones (names, parents, heads), each vertex group's bounds, loose parts, materials,
