@@ -266,6 +266,28 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Fidget once per loop: she draws a red thread taut between two fingers and lets it go.
 - **Target stance (6 s):**
   - The same feet. The bow comes up loosely across the body and an arrow is nocked, not drawn.
+- **Done (ext/idle-archer):**
+  - hem_clips.py bakes the idle and the stance at 6 s on the READY feet; `_stand` is what both share: the weight goes
+    onto the front-left foot and back once a loop (6.5 cm across, 4.5 cm forward) with the pelvis leading and the chest,
+    head and hands 3, 6 and 9 frames behind (`LAG`), a pelvis dip at the middle of the shift (soft knees) and the free
+    knee turned in (`FLk`/`FRk`).
+  - Idle: holds, then one head turn of 29 deg from 2.4 to 2.9 s that the shoulders follow 4 frames later, back from
+    4.8 s. Fidget at 3.1 to 4.8 s: still looking away, she lifts the bow a hand's width, takes its string between two
+    fingers, pulls it taut (the draw target `dr` at 0.07) and lets it go; the hand returns to the hip. Two blinks.
+  - Stance: the bow up loosely across her (`NOCKED`), an arrow on the string, not drawn, brows down. A slower weight
+    shift, a 25 deg head scan the shoulders and then the bow follow, and at 3.4 to 4.3 s she takes up the string a
+    little and lets it settle.
+  - Breathing: a new leaf bone, `x_breath` under hips (posekit `add_breath`, 291 verts of the rib cage), 2 % with two
+    breaths per loop; the chest pitch, the head and the bow hand breathe with it a few frames apart.
+  - Every curve is a `_beat` (out, hold, back) or a whole number of sine periods, and lags wrap through `_at`, so the
+    seam closes: clip-check reads 0.0x the limit on both loops.
+  - Shots (jobq out): before 20261108-112239-02892 (a worktree at the base commit: the first before job,
+    20261108-105004-15029, was claimed after the new .glb was in the tree), after 20261108-110549-06393.
+    - idle_front: f000 and f012 match; f005 to f006 hold the head turn; f008 has the bow lifted and the hand on the
+      string, f009 the hand coming back to the hip.
+    - stance_front: the bow across her with the arrow nocked from f000; f005 to f007 the head scan the bow follows.
+    - live: the feet stay planted through f019; the idle hands the stance over between f012 and f013 with no pop.
+  - Alternative, not done: a thread between the fingers as its own mesh. The string of the bow is the thread.
 
 ### 12. Grimble the Scrap King (`dredge`, art `dredge`)
 

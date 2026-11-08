@@ -65,6 +65,7 @@ one or hangs it on another parent. They are skinned like the rest and follow the
 `WardenGlb.pose_extra(model, bone, rot, scale)` (`rot` about the bone's head, its axis in model space as the model
 rests; a zero scale hides what rides the bone). On a procedural model the call does nothing.
 - **Grimble** (`dredge`, art id unchanged): declared in content/rules/warden_anim/dredge.json (`extra_bones`): `hook`, `gun`, `hoard`, `ball`, face and hand bones. See art/wardens/dredge/IMPORT.md.
+- **Lace** (`archer`, art `hem`): declared in content/rules/warden_anim/hem.json (`extra_bones`): the bow, arrow, face and hand bones, and `x_breath` under `hips` (the rib cage's breathing, a 2 % scale in the idle and stance).
 
 The kit moves (`kmoves_*.gd`) only key channels on these nodes (`p` pitch, `y` yaw, `r` roll, `lift`, `sq`
 squash, `fx`/`fy`/`fz` whole-body turns, `legs` [hip, knee, hip, knee], `fl`/`fr` free-hand targets, `gp` weapon

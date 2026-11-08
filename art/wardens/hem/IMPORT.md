@@ -12,6 +12,11 @@ relief normal map. Slots: skin, hair, cloth, leather, metal, glow.
     $B -b --factory-startup --python tools/art1/hem_art1.py -- WORK source.blend scan_base.png head.blend head_base.png edit_face/image0.png
     $B -b --python tools/art1/hem_clips.py -- WORK/hem_art1.blend WORK/hem.glb
 
+WORK is gone from the box (2026-11-08). The clips now bake from the last baked blend, with its textures packed:
+`~/meshy/hem/w3/hem_anim.blend` (hem_clips.py drops the old actions first and adds `x_breath` if it is missing).
+
+    $B -b --python tools/art1/hem_clips.py -- ~/meshy/hem/w3/hem_anim.blend stage/hem.glb
+
 Traps this model hit: weld a scan in its own pose (fitted, the arms hang through the hips and get sewn to them); sample arm and body paint separately for the same reason; never ABF a scan
 (a chart folds over itself and paints the wrong place; smart project does not); Meshy winds faces inward, and Cycles hides what the game culls; every vertex needs a weight in a Decimate group.
 - **Design (owner, Nov 5; Lisette, the Red Stitch; id and files stay):** model briefs/art-refs/lisette_turnaround_apose.png, outfit and
