@@ -2745,3 +2745,13 @@ READY ext/feel-integ bed04e50b (release integration on ext/mc-20261108-0030 88b1
 - Checks:
   - Passing: --check 0, health --strict OK, move-feel 0, dash-flow 0 (14 skipped), cinder-art 0, clip-check 0, hero-combo 304/0, ashwick-combo 119/0.
   - warden-model-check FAIL: only the "stands Nx a medium hunter" height lines, for 8 heroes. The base 88b1ac50e already fails the same lines and more (Cinder's width too, which is now fixed). This is not caused by this branch.
+
+## 2026-11-08 00:10 ET (art): Malgrave full set DONE
+Everything is in briefs/art-refs/villain/:
+- malgrave_human.jpg: the main design, seated on her coils
+- malgrave_turnaround.jpg: front, 3/4, side and back
+- malgrave_splash.jpg: enthroned on her coils with the court kneeling, and her shadow on the floor is the dragon's
+- malgrave_portrait.jpg: 1:1
+- malgrave_hybrid.jpg: horns, the dragon's wings, scales and the X scar
+- malgrave_dragon.jpg: a pearl-white serpent wyrm with feather-to-crimson-membrane wings, a porcelain mask face-plate and the X scar from Kael's sword, looping into an infinity sign, with a knight for scale
+The alternates (outfits, splashes and a portrait) are in villain/malgrave_alts/ (see its README). The owner says she will become a playable character eventually. The owner also says the Heart should not be a prop she shows off; it can become an ability later.
