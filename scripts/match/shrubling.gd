@@ -212,7 +212,8 @@ func _flee(dt: float, sr: Dictionary) -> Vector2:
 			_dive(sr)
 			return Vector2.ZERO
 	repath -= dt
-	if repath <= 0.0 or hide_at == Vector3.INF:
+	# (nobody chasing: it keeps its plan rather than dithering between two patches each repath)
+	if hide_at == Vector3.INF or (repath <= 0.0 and (threat != null or path.size() <= 1)):
 		repath = float(sr["repath_s"])
 		_pick_hide()
 	var dir := _follow_path()
@@ -272,7 +273,7 @@ func _pick_hide() -> void:
 	scored.sort_custom(func(a, b): return float(a[0]) > float(b[0]))
 	for i in mini(3, scored.size()):
 		var tile: Vector3 = scored[i][1]
-		var p := KinPath.find(m.world, pos, tile, 12)
+		var p := KinPath.find(m.world, pos, tile, 12, true)
 		if not p.is_empty():
 			hide_at = tile
 			path = p
@@ -286,7 +287,7 @@ func _follow_path() -> Vector2:
 		path.pop_front()
 	var pick: Vector2 = path[0]
 	for i in range(mini(path.size() - 1, 3), 0, -1):
-		if KinPath.clear_line(m.world, from, path[i]):
+		if KinPath.clear_line(m.world, from, path[i], r, true):
 			pick = path[i]
 			break
 	var d := pick - from

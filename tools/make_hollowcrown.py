@@ -8,14 +8,15 @@ readable, works out bridge ends from the island outlines, checks the layout (lai
 on open ground, ramps landing where they should), prints the cover share per biome and can draw a
 preview: python3 tools/make_hollowcrown.py --preview out.png. Never edit the JSON by hand.
 
-Layout (216 x 216 tiles = metres, north up, heights in terraces of 0.8 m):
+Layout (drawn on the 216 DESIGN grid; scale_layout() spreads it over SIZE x SIZE tiles = metres, so
+the map is ~2x the land at SIZE 305; north up, heights in terraces of 0.8 m):
 
                   [Highwatch]           outer isles: lv 0, quiet landings, docks / uplinks
      [Larkhollow]   [  Frostgate  ]--   mid ring:    lv 2, one raised plateau each (lv 6)
           |          ||  Gate Span  [Stormcrown Gaol]   core: lv 4, the Throne at lv 8
      [Cinder ]   [ THE CROWN ]=====/
      [Steps  ]   [  (Throne) ]   [Stormbreak]
-          \\ Ash   ||Bramble  * Shardfall (perch, lv 10)
+          \\ Ash   ||Bramble
      [Ashen Gaol] [ Thornwood ]------[Duskmoor]
      [Saltmere]
 
@@ -51,10 +52,14 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
   bridges             {name, a, b, from, to, r}; ends at different heights get a flight (+)
   glides              [a, b] or (+) {a, b, take:[x,z], land:[x,z], name}: glide routes for bots
   pads, updrafts, winds, docks, outposts, hatches, lairs, spawn_points: as Skyreach
+  train (+)           {cars, speed, dwell, pier_below, path:[[x,z],...] (a closed winding loop, splined
+                      from TRAIN_WAY), stations:[[x,z]] (points on the path), names}: the sky train
 """
 import json, math, os, random, sys
 
-SIZE = 216
+SIZE = 305          # the map's side in tiles (= metres): the one number to change to grow the map
+DESIGN = 216        # the grid every coordinate below is written on; scale_layout() maps it onto SIZE
+K = SIZE / DESIGN
 LEVEL = 0.8
 
 def poly(pts, lv=0, **k):
@@ -91,7 +96,7 @@ islands = [
                 dict(line=[99, 112, 101, 112]), dict(line=[115, 112, 117, 112]),
                 dict(line=[86, 101, 86, 103]), dict(line=[86, 113, 86, 115]),
                 dict(line=[130, 101, 130, 103]), dict(line=[130, 113, 130, 115])],
-         rocks=rocks((84, 88, 85, 89), (130, 88, 131, 89), (85, 126, 86, 127), (129, 126, 130, 127)),
+         rocks=rocks((86, 90, 87, 91), (130, 88, 131, 89), (85, 126, 86, 127), (129, 126, 130, 127)),
          landings=[],
          chests=[[108, 108], [84, 108], [132, 108]],
          camps=[[94, 88, "heavy"], [122, 128, "heavy"]],
@@ -102,7 +107,7 @@ islands = [
     dict(id="gaol_ne", name="Stormcrown Gaol", role="camp", region=0, biome="storm", danger=2, poi=[157, 79], noise=0.05,
          shapes=[poly([(146, 56), (164, 52), (172, 60), (170, 78), (158, 85), (146, 79), (142, 66)], 4)],
          sheer=[[200, 260]],
-         rocks=rocks((147, 81, 149, 81)),
+         rocks=rocks((149, 79, 151, 79)),
          chests=[[164, 79]], camps=[], breakables=[[150, 78, "pot"], [151, 79, "pot"]],
          wardens=[[160, 81]], traps=[]),
     dict(id="gaol_sw", name="Ashen Gaol", role="camp", region=0, biome="ember", danger=2, poi=[56, 162], noise=0.05,
@@ -210,17 +215,37 @@ islands = [
          chests=[[38, 186]],
          camps=[], breakables=[[18, 176, "pot"], [19, 176, "pot"]],
          wardens=[]),
-    # ---- Shardfall: a high shard of rock over the south-east gap (lv 10). A one-way launch pad from
-    # Stormbreak or the updraft beside it takes you up; from there you glide down onto the Crown,
-    # Thornwood or Stormbreak. A rich chest and the best view of the Thornhive and the Crown's south.
-    dict(id="shard", name="Shardfall", role="perch", region=0, biome="gloom", danger=2, poi=[148, 144], noise=0.03, perch=True,
-         shapes=[circle(148, 144, 4.6, 10)], sheer=[], chests=[[148, 144]]),
 ]
 
 BY = {d["id"]: d for d in islands}
 
+# The second wave: what the doubled map adds to each island (same design grid), so chests, camps,
+# landings and exits per square metre stay about where the 216 m map had them. Every pick fills ground
+# that scaling opened up: a far corner, the other side of a plateau, the stretch between two landmarks.
+MORE = {
+    "crown": dict(chests=[[98, 89], [118, 128]], camps=[[86, 118, "heavy"]],
+                  breakables=[[132, 96, "crate"], [133, 96, "pot"]], wardens=[[90, 98]], traps=[[108, 128]]),
+    "gaol_ne": dict(chests=[[147, 62]]),
+    "gaol_sw": dict(chests=[[48, 150]]),
+    "frostgate": dict(chests=[[94, 30], [100, 62]], camps=[[80, 48, "heavy"]], landings=[[110, 28], [118, 62], [74, 46]],
+                      breakables=[[78, 52, "crate"], [79, 52, "pot"]], weapons=[[120, 60]], wardens=[[120, 27]]),
+    "cinder": dict(chests=[[30, 100], [46, 93]], camps=[[34, 110, "heavy"]], landings=[[28, 84], [54, 112], [36, 116]],
+                   breakables=[[46, 123, "barrel"]], wardens=[[62, 94]], traps=[[30, 80]]),
+    "storm": dict(chests=[[190, 110], [160, 136]], camps=[[160, 116, "heavy"]], landings=[[158, 104], [190, 120], [166, 94]],
+                  breakables=[[188, 106, "crate"], [189, 106, "keg"]]),
+    "thorn": dict(chests=[[88, 184], [132, 184]], camps=[[116, 158, "heavy"]], landings=[[96, 186], [138, 166], [90, 160]],
+                  wild=[[90, 176]], breakables=[[124, 154, "crate"], [125, 154, "pot"]], wardens=[[130, 158]]),
+    "lark": dict(chests=[[44, 18]], camps=[[40, 20, "normal"]], landings=[[48, 26], [28, 14]], breakables=[[22, 18, "pot"]]),
+    "highwatch": dict(chests=[[172, 30]], camps=[[194, 16, "normal"]], landings=[[200, 34], [186, 28]],
+                      breakables=[[200, 32, "keg"]]),
+    "duskmoor": dict(chests=[[194, 192]], camps=[[200, 176, "normal"]], landings=[[176, 172], [176, 200]]),
+    "saltmere": dict(chests=[[20, 196]], camps=[[36, 192, "normal"]], landings=[[14, 180], [40, 180]]),
+}
+for _iid, _more in MORE.items():
+    for _k, _pts in _more.items(): BY[_iid].setdefault(_k, []).extend(_pts)
+
 regions = [
-    dict(id="crown", name="The Crown", biome="gloom", islands=["crown", "gaol_ne", "gaol_sw", "shard"],
+    dict(id="crown", name="The Crown", biome="gloom", islands=["crown", "gaol_ne", "gaol_sw"],
          purpose="Contested core: the vault on the Throne, two boss Gaols, the richest loot and the most Blight. "
                  "Every route in is a bridge or a glide over open air."),
     dict(id="frostgate", name="Frostgate", biome="frost", islands=["frostgate"],
@@ -228,7 +253,7 @@ regions = [
     dict(id="cinder", name="Cinder Steps", biome="ember", islands=["cinder"],
          purpose="Western forge country: the Kilns overlook the Crown's west face; the Ash Bridge to the Ashen Gaol."),
     dict(id="storm", name="Stormbreak", biome="storm", islands=["storm"],
-         purpose="Eastern tableland with the shrine on the Shrine Table; launch pad up to Shardfall."),
+         purpose="Eastern tableland with the shrine on the Shrine Table; Storm Halt (sky train) off its east rim."),
     dict(id="thorn", name="Thornwood", biome="bloom", islands=["thorn"],
          purpose="Southern wood: tall grass ambushes, the Boki nest, the Thornhive lair and its uplink."),
     dict(id="lark", name="Larkhollow", biome="meadow", islands=["lark"], purpose="Quiet NW landing with a skiff dock."),
@@ -283,16 +308,16 @@ def bridge(name, a, b, p0, p1, r, dig=2.5):
 
 # Bridges: the core's four ways in (axis-aligned where the ends differ in height, so the bridge
 # carries a straight flight), then the ring roads out to the outer isles.
-bridges = [
-    bridge("Gate Span", "frostgate", "crown", (108, 60), (108, 90), 2.2),
-    bridge("Bramble Span", "thorn", "crown", (108, 156), (108, 128), 1.6),
-    bridge("Gaol Walk", "crown", "gaol_ne", (130, 89), (150, 79), 1.4),
-    bridge("Ash Walk", "crown", "gaol_sw", (86, 127), (70, 142), 1.4),
-    bridge("Ash Bridge", "cinder", "gaol_sw", (54, 122), (54, 140), 1.6),
-    bridge("Lark Road", "lark", "frostgate", (50, 30), (82, 30), 1.6),
-    bridge("Watch Road", "highwatch", "frostgate", (172, 30), (138, 30), 1.6),
-    bridge("Moor Steps", "storm", "duskmoor", (176, 140), (176, 172), 1.6),
-    bridge("Salt Road", "saltmere", "thorn", (40, 182), (84, 182), 1.4),
+BRIDGES = [
+    ("Gate Span", "frostgate", "crown", (108, 60), (108, 90), 2.2),
+    ("Bramble Span", "thorn", "crown", (108, 156), (108, 128), 1.6),
+    ("Gaol Walk", "crown", "gaol_ne", (130, 89), (150, 79), 1.4),
+    ("Ash Walk", "crown", "gaol_sw", (86, 127), (70, 142), 1.4),
+    ("Ash Bridge", "cinder", "gaol_sw", (54, 122), (54, 140), 1.6),
+    ("Lark Road", "lark", "frostgate", (50, 30), (82, 30), 1.6),
+    ("Watch Road", "highwatch", "frostgate", (172, 30), (138, 30), 1.6),
+    ("Moor Steps", "storm", "duskmoor", (176, 140), (176, 172), 1.6),
+    ("Salt Road", "saltmere", "thorn", (40, 182), (84, 182), 1.4),
 ]
 
 # Glide routes (bots take them; players can glide anywhere). Gaps are edge to edge, measured below.
@@ -311,13 +336,7 @@ glides = [
     dict(a="gaol_sw", b="saltmere", take=[50, 160], land=[38, 174]),
     dict(a="duskmoor", b="thorn", take=[170, 182], land=[142, 176]),
     dict(a="thorn", b="duskmoor", take=[144, 176], land=[172, 182]),
-    # down from Shardfall (one way)
-    dict(a="shard", b="crown", take=[145, 141], land=[128, 126]),
-    dict(a="shard", b="thorn", take=[147, 147], land=[136, 166]),
-    dict(a="shard", b="storm", take=[151, 141], land=[164, 136]),
 ]
-pads = [["storm", "shard", True]]
-updrafts = [dict(at=[141, 150], top=10)]
 
 lairs = [
     dict(id="eyrie", name="Stormcrown Eyrie", boss="serpent", island="gaol_ne", at=[157, 66], half=7, gate="s", entry=["dial", "runes"]),
@@ -326,25 +345,215 @@ lairs = [
 ]
 # exits: skiff docks on the quiet NW/SE isles (pointing out to open sky), walled uplink outposts on
 # the NE/SW isles and in Thornwood (each a short run from a boss lair), rift hatches in the ring.
-docks = [[15, 30, -1, 0], [201, 184, 1, 0]]
-outposts = [[190, 26, 1], [26, 186, 1], [92, 178, 1]]
-hatches = [[124, 92], [100, 36], [36, 82], [182, 98], [118, 158]]
+docks = [[15, 30, -1, 0], [201, 184, 1, 0], [24, 200, 0, 1], [96, 27, 0, -1]]
+outposts = [[190, 26, 1], [26, 186, 1], [92, 178, 1], [188, 193, 1], [30, 108, 1]]
+hatches = [[124, 92], [100, 36], [36, 82], [182, 98], [118, 158], [166, 132], [124, 186], [92, 120]]
 
 spawn_points = {
-    "rare_kin": dict(pick=[3, 3], points=[[30, 30, "Larkhollow"], [192, 22, "Highwatch"], [192, 190, "Duskmoor"],
+    "rare_kin": dict(pick=[5, 5], points=[[30, 30, "Larkhollow"], [192, 22, "Highwatch"], [192, 190, "Duskmoor"],
                                           [20, 182, "Saltmere"], [94, 176, "Nest Glade"], [82, 50, "Rimefield"],
                                           [32, 104, "Forge Yard"], [186, 124, "Stormbreak"]]),
-    "vault": dict(pick=[2, 2], points=[[128, 46, "Frostgate Keep"], [42, 70, "The Kilns"], [178, 116, "Shrine Table"],
+    "vault": dict(pick=[3, 3], points=[[128, 46, "Frostgate Keep"], [42, 70, "The Kilns"], [178, 116, "Shrine Table"],
                                        [104, 164, "Thornwood"], [86, 112, "The Crown"]]),
-    "cache": dict(pick=[4, 4], points=[[40, 22, "Larkhollow"], [182, 28, "Highwatch"], [184, 192, "Duskmoor"],
+    "cache": dict(pick=[7, 7], points=[[40, 22, "Larkhollow"], [182, 28, "Highwatch"], [184, 192, "Duskmoor"],
                                        [30, 180, "Saltmere"], [104, 44, "Frostgate"], [54, 108, "Cinder Steps"],
                                        [184, 108, "Stormbreak"], [120, 182, "Thornwood"], [132, 118, "The Crown"],
-                                       [166, 70, "Stormcrown Gaol"]]),
-    "boss": dict(pick=[2, 2], points=[[157, 66, "Stormcrown Eyrie"], [60, 150, "The Sunken Forge"], [127, 172, "The Thornhive"]]),
+                                       [166, 70, "Stormcrown Gaol"], [96, 58, "Frostgate"], [162, 132, "Stormbreak"],
+                                       [90, 182, "Thornwood"], [30, 96, "Cinder Steps"]]),
+    "boss": dict(pick=[3, 3],     # all three lairs live: twice the hunters (40) on twice the land
+                 points=[[157, 66, "Stormcrown Eyrie"], [60, 150, "The Sunken Forge"], [127, 172, "The Thornhive"]]),
 }
 
-# ------------------------------------------------------------------ a tile model, for checks and the preview
+# ------------------------------------------------------------------ onto the real grid
+def sc(v):
+    return round(v * K)
+
+def sc_pt(p):
+    return [sc(p[0]), sc(p[1])] + list(p[2:])
+
+def sc_shape(S):
+    S = dict(S)
+    if "poly" in S: S["poly"] = [[round(x * K, 1), round(z * K, 1)] for x, z in S["poly"]]
+    if "circle" in S: S["circle"] = [round(v * K, 1) for v in S["circle"]]; S["r"] = round(S["r"] * K, 1)
+    return S
+
+def sc_ramp(R):
+    """A flight keeps its width and its step count; its top lands where the scaled plateau rim is."""
+    dx, dz = DIRS[R["dir"]]; n = (R["to"] - R["from"]) * R.get("run", 1)
+    top = (sc(R["at"][0] + dx * n), sc(R["at"][1] + dz * n))
+    return dict(R, at=[top[0] - dx * n, top[1] - dz * n])
+
+def sc_cluster(pts):
+    """Groves and crate piles keep their shape: each cluster of three moves with its first piece."""
+    out = []
+    for i, p in enumerate(pts):
+        a = pts[i - i % 3]
+        out.append([sc(a[0]) + p[0] - a[0], sc(a[1]) + p[1] - a[1]])
+    return out
+
+def sc_rect(R):
+    """A boulder keeps its size; its corner moves."""
+    return [sc(R[0]), sc(R[1]), sc(R[0]) + R[2] - R[0], sc(R[1]) + R[3] - R[1]]
+
+def sc_rocks(rects):
+    """Boulders that touch (corners too) are one piece: they move together, by their first one's offset,
+    so an authored L stays an L (scaled corners one by one, it split into posts)."""
+    out = []
+    for i, R in enumerate(rects):
+        for j in range(i):
+            Q = rects[j]
+            if R[0] <= Q[2] + 1 and Q[0] <= R[2] + 1 and R[1] <= Q[3] + 1 and Q[1] <= R[3] + 1:
+                dx, dz = out[j][0] - Q[0], out[j][1] - Q[1]
+                out.append([R[0] + dx, R[1] + dz, R[2] + dx, R[3] + dz]); break
+        else:
+            out.append(sc_rect(R))
+    return out
+
+def sc_wall(W):
+    W = dict(W)
+    for k in ("line", "box"):
+        if k in W: W[k] = [sc(v) for v in W[k]]
+    return W
+
+POINT_KEYS = ("landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps", "areas")
+
+def scale_layout():
+    """Everything above is drawn on the DESIGN grid; this maps it onto SIZE (one constant to grow the map).
+    Land, gaps and distances scale; things with a body (stairs, boulders, groves, lairs, bridge widths) keep their size."""
+    for d in islands:
+        d["poi"] = sc_pt(d["poi"])
+        d["shapes"] = [sc_shape(S) for S in d["shapes"]]
+        d["ramps"] = [sc_ramp(R) for R in d.get("ramps", [])]
+        d["walls"] = [sc_wall(W) for W in d.get("walls", [])]
+        d["rocks"] = sc_rocks(d.get("rocks", []))
+        for k in ("trees", "crates"):
+            if k in d: d[k] = sc_cluster(d[k])
+        for k in POINT_KEYS:
+            if k in d: d[k] = [sc_pt(p) for p in d[k]]
+        if "shrine" in d: d["shrine"] = sc_pt(d["shrine"])
+    for G in glides:
+        G["take"] = sc_pt(G["take"]); G["land"] = sc_pt(G["land"])
+    for L in lairs: L["at"] = sc_pt(L["at"])
+    for lst in (docks, outposts, hatches):
+        lst[:] = [sc_pt(e) for e in lst]
+    for sp in spawn_points.values(): sp["points"] = [sc_pt(p) for p in sp["points"]]
+    bridges[:] = [bridge(n, a, b, sc_pt(p0), sc_pt(p1), r) for n, a, b, p0, p1, r in BRIDGES]
+
 DIRS = {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}
+bridges = []
+scale_layout()
+
+
+# ------------------------------------------------------------------ the sky train
+# The map's fast travel: a winding, irregular loop out through the void channels toward the outer isles
+# (BIGGER_MAP.md), clockwise from the Lark Halt, with a stop in every region. Waypoints are on the design
+# grid; the loop is a closed Catmull-Rom spline through them, written out every TRAIN_PT metres.
+# SkyTrain runs legs at speed/1.5 on average (it eases in and out) and waits `dwell` s at each stop.
+TRAIN_PT = 2.0          # m between written path points (TrainRoute resamples every 0.5 m)
+TRAIN_CLEAR = 3.4       # m: between stops the track keeps this far from any ground but a bridge (else it dives under a rim)
+PIER_REACH = 8.0        # m: a stop's pier (along the track's normal) reaches ground within this on one side (TrainRoute looks out to 16.7 m)
+STOP_BRIDGE = 11.0      # m: a stop keeps this clear of bridges (the deck dives 4.6 m under one over ~8 m, never at a pier)
+RUN_SPEED = 4.55        # m/s: the fastest frame on foot (content/rules/hunter_move.json "speed")
+TRAIN_WAY = [(52, 44), (62, 26), (74, 14), (108, 19), (140, 13), (164, 19), (157, 34), (155, 46), (168, 49),
+             (179, 58), (175, 70), (184, 86), (200, 98), (197, 110), (203, 124), (198, 140), (192, 154), (186, 161),
+             (176, 157), (158, 162), (156, 180), (146, 198), (112, 195), (80, 197), (56, 199), (51, 188),
+             (52, 176), (43, 167), (40, 157), (42, 146), (34, 134), (18, 118), (21, 96), (18, 74), (22, 56), (40, 52)]
+TRAIN_STOPS = [((52, 44), "Lark Halt"), ((108, 19), "Frost Halt"), ((164, 19), "Watch Halt"), ((175, 70), "Eyrie Halt"),
+               ((197, 110), "Storm Halt"), ((186, 161), "Moor Halt"), ((112, 195), "Bramble Halt"), ((43, 167), "Salt Halt"),
+               ((42, 146), "Ash Halt"), ((21, 96), "Cinder Halt")]
+train = dict(cars=4, speed=12.0, dwell=6.0, pier_below=5, path=[], stations=[], names=[n for _, n in TRAIN_STOPS])
+
+def _spline(W, step):
+    """Closed Catmull-Rom through the scaled waypoints, sampled about every `step` m."""
+    P = [(x * K, z * K) for x, z in W]; n = len(P); out = []
+    for i in range(n):
+        p0, p1, p2, p3 = P[i - 1], P[i], P[(i + 1) % n], P[(i + 2) % n]
+        L = math.hypot(p2[0] - p1[0], p2[1] - p1[1]); m = max(1, int(L / step))
+        for j in range(m):
+            t = j / m; t2 = t * t; t3 = t2 * t
+            out.append(tuple(round(0.5 * (2 * p1[c] + (-p0[c] + p2[c]) * t + (2 * p0[c] - 5 * p1[c] + 4 * p2[c] - p3[c]) * t2
+                                        + (-p0[c] + 3 * p1[c] - 3 * p2[c] + p3[c]) * t3), 1) for c in (0, 1)))
+    return out
+
+def lay_train():
+    train["path"] = [list(p) for p in _spline(TRAIN_WAY, TRAIN_PT)]
+    for (x, z), _ in TRAIN_STOPS:      # each stop snaps onto the loop
+        q = min(train["path"], key=lambda p: math.hypot(p[0] - x * K, p[1] - z * K))
+        train["stations"].append(list(q))
+
+def _arc(path):
+    s = [0.0]
+    for i in range(1, len(path) + 1):
+        a, b = path[i - 1], path[i % len(path)]; s.append(s[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
+    return s
+
+def _walk(lv, start):
+    """Metres on foot from a tile to every tile (land and bridges; stairs and terraces cost nothing extra)."""
+    import heapq
+    dist = {start: 0.0}; q = [(0.0, start)]
+    while q:
+        d, p = heapq.heappop(q)
+        if d > dist.get(p, 1e9): continue
+        for dx in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                nq = (p[0] + dx, p[1] + dz)
+                if nq == p or nq not in lv: continue
+                nd = d + (1.4142 if dx and dz else 1.0)
+                if nd < dist.get(nq, 1e9): dist[nq] = nd; heapq.heappush(q, (nd, nq))
+    return dist
+
+def check_train(lv, owner):
+    """The loop clears the land between stops, every stop has ground for a pier, and riding from one stop
+    to the next beats running it (on foot over land and bridges; no glides)."""
+    probs = []; rows = []
+    path = train["path"]; arc = _arc(path); L = arc[-1]
+    idx = [path.index(st) for st in train["stations"]]
+    s_st = [arc[i] for i in idx]
+    land = [p for p, l in lv.items() if l != -2]
+    grid = {}
+    for p in land: grid.setdefault((p[0] // 8, p[1] // 8), []).append(p)
+    def nearest_land(x, z, r):
+        best = (1e9, None)
+        for gx in range(int(x - r) // 8, int(x + r) // 8 + 1):
+            for gz in range(int(z - r) // 8, int(z + r) // 8 + 1):
+                for p in grid.get((gx, gz), []):
+                    d = math.hypot(p[0] + 0.5 - x, p[1] + 0.5 - z)
+                    if d < best[0]: best = (d, p)
+        return best
+    for i, (x, z) in enumerate(path):
+        if min(abs((arc[i] - s + L / 2) % L - L / 2) for s in s_st) < 6.0: continue
+        d, p = nearest_land(x, z, TRAIN_CLEAR)
+        if d < TRAIN_CLEAR: probs.append("train at %s within %.1f m of %s ground" % ((x, z), d, owner[p]))
+    ground_at = []
+    for st, nm, k in zip(train["stations"], train["names"], idx):
+        a, b = path[k - 1], path[(k + 1) % len(path)]
+        f = math.hypot(b[0] - a[0], b[1] - a[1]); nx, nz = (b[1] - a[1]) / f, -(b[0] - a[0]) / f
+        hit = None
+        for t in range(int(1.7 * 2), int(PIER_REACH * 2) + 1):     # out along the normal, either side, like TrainRoute
+            for sgn in (1, -1):
+                q = (int(st[0] + nx * sgn * t / 2), int(st[1] + nz * sgn * t / 2))
+                if hit is None and q in lv and lv[q] != -2 and lv[q] < train["pier_below"]: hit = (q, t / 2)
+        if hit is None: probs.append("stop %s: no ground for a pier within %.0f m" % (nm, PIER_REACH))
+        ground_at.append(hit[0] if hit else None); rows.append((nm, owner.get(hit[0], "?") if hit else "-", hit[1] if hit else 0))
+    for st, nm in zip(train["stations"], train["names"]):      # (a bridge this near would pull the deck down at the pier)
+        if any(l == -2 and math.hypot(p[0] + 0.5 - st[0], p[1] + 0.5 - st[1]) < STOP_BRIDGE for p, l in lv.items()):
+            probs.append("stop %s within %.0f m of a bridge" % (nm, STOP_BRIDGE))
+    reached = {next(r["id"] for r in regions if owner.get(p) in r["islands"]) for p in ground_at if p}
+    for r in regions:
+        if r["id"] not in reached: probs.append("the train doesn't stop in %s" % r["name"])
+    legs = []
+    for i in range(len(s_st)):
+        j = (i + 1) % len(s_st)
+        ride = ((s_st[j] - s_st[i]) % L) / train["speed"] * 1.5 + train["dwell"]
+        a, b = ground_at[i], ground_at[j]
+        run = _walk(lv, a).get(b, float("inf")) / RUN_SPEED if a and b else float("inf")
+        legs.append((train["names"][i], train["names"][j], ride, run))
+        if ride >= run: probs.append("riding %s -> %s (%.0f s) doesn't beat running it (%.0f s)" % (legs[-1][:3] + (run,)))
+    return probs, rows, legs, L
+
+lay_train()
+
+# ------------------------------------------------------------------ a tile model, for checks and the preview
 
 def rasterize():
     lv = {}; owner = {}; stairs = {}
@@ -393,6 +602,9 @@ def check(lv, owner, stairs):
     for d in islands:
         for k in ["landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps"]:
             for p in d.get(k, []): ground(p, "%s.%s" % (d["id"], k))
+        for R in d.get("rocks", []):      # a boulder half over the void is clipped to a post
+            if any((x, z) not in lv for x in range(R[0], R[2] + 1) for z in range(R[1], R[3] + 1)):
+                probs.append("%s rock %s over the void" % (d["id"], R))
     for L in lairs:
         cx, cz = L["at"]; h = L["half"]
         lvs = set(); own = set()
@@ -456,6 +668,10 @@ def preview(path, lv, owner, stairs):
         dr.rectangle([o[0] * S - 5, o[1] * S - 5, o[0] * S + 5, o[1] * S + 5], outline=(120, 200, 255), width=2)
     for G in glides:
         dr.line([G["take"][0] * S, G["take"][1] * S, G["land"][0] * S, G["land"][1] * S], fill=(255, 255, 120), width=1)
+    P = train["path"]
+    dr.line([c * S for q in P + P[:1] for c in q], fill=(255, 150, 60), width=2)
+    for q in train["stations"]:
+        dr.ellipse([q[0] * S - 6, q[1] * S - 6, q[0] * S + 6, q[1] * S + 6], fill=(255, 150, 60))
     img.save(path)
 
 def gap(a, b, owner):
@@ -797,6 +1013,8 @@ def main():
     lv, owner, stairs = rasterize()
     C = place_cover(lv, owner, stairs)
     probs = check(lv, owner, stairs)
+    tp, stops, legs, loop = check_train(lv, owner)
+    probs += tp
     for b, share, tg in cover_report(C, lv, owner):
         print('cover %-7s %5.1f %%  (target %.1f-%.1f %%)' % (b, share * 100, tg[0] * 100, tg[1] * 100))
     print('cover patches', len(C.patches), 'clumps', sum(len(p['clumps']) for p in C.patches))
@@ -808,13 +1026,16 @@ def main():
         preview(sys.argv[sys.argv.index("--preview") + 1], lv, owner, stairs)
     for G in glides[::2]: print("glide %-10s -> %-10s gap %.1f m" % (G["a"], G["b"], G["gap"]))
     for B in bridges: print("bridge %-13s span %.1f m" % (B["name"], B["span"]))
+    print("train loop %.0f m, %d stops, a lap %.0f s" % (loop, len(stops), sum(l[2] for l in legs)))
+    for (nm, isl, d), (a, b, ride, run) in zip(stops, legs):
+        print("train %-12s (%-9s pier %4.1f m) -> %-12s ride %3.0f s, run %s" % (nm, isl, d, b, ride, "%.0f s" % run if run < 1e9 else "no way on foot"))
     out = dict(id="hollowcrown", name="The Hollow Crown", size=SIZE, seed=5150, hand=True,
                notes="Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). "
                      "A raised core (the Crown, its Throne and two boss Gaols), a ring of four regions each with one "
                      "plateau reached by stairs, and four quiet outer isles with the exits. Nothing is placed by dice "
                      "except what the match rolls: which spawn points, lairs and camps are live, loot, the Blight, weather.",
-               regions=regions, islands=islands, bridges=bridges, glides=glides, pads=pads, updrafts=updrafts,
-               winds=[], docks=docks, outposts=outposts, hatches=hatches, lairs=lairs, spawn_points=spawn_points)
+               regions=regions, islands=islands, bridges=bridges, glides=glides, pads=[], updrafts=[],
+               winds=[], train=train, docks=docks, outposts=outposts, hatches=hatches, lairs=lairs, spawn_points=spawn_points)
     path = os.path.join(os.path.dirname(__file__), "..", "content", "maps", "hollowcrown.json")
     with open(path, "w") as f:
         json.dump(out, f, indent=1)

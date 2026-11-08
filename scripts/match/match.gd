@@ -4290,9 +4290,10 @@ func step(dt: float) -> void:
 			KinCommand.tap(player)
 		KinCommand.apply_pick(player)
 	_prof("pre")
+	SimLod.plan(self, dt)           # far, calm bots step at 20 Hz (decision 0021)
 	for h in hunters:
-		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted:
-			bot_brain.tick(self, h, dt)
+		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted and SimLod.step_dt(h, dt) > 0.0:
+			bot_brain.tick(self, h, SimLod.step_dt(h, dt))
 	Capture.tick(self, dt)          # a running scan roots its hunter, after the bots have decided
 	_prof("bots")
 	if skytrain: skytrain.tick(dt)
@@ -4307,7 +4308,7 @@ func step(dt: float) -> void:
 		arena.after_think()
 		arena.tick(dt)
 	_prof("train")
-	for h in hunters: h.sim(dt)
+	for h in hunters: h.sim(SimLod.step_dt(h, dt))
 	_prof("hunters")
 	if opts.get("autoplay", false) and int(time * 60.0) % 15 == 0:
 		for h in hunters:
@@ -4317,7 +4318,7 @@ func step(dt: float) -> void:
 			h.set_meta("hist", hist)
 	if skydrop: skydrop.tick(dt)
 	_prof("drop")
-	for k in kins: k.sim(dt)
+	for k in kins: k.sim(SimLod.kin_dt(k, dt))
 	_prof("kins")
 	for mb in mobs: mb.sim(dt)
 	if blight: blight.tick(dt)
@@ -4672,6 +4673,9 @@ func _update_interact(dt: float) -> void:
 		if not want:
 			h.set_meta("loot_hold", false)
 			h.set_meta("box_broke", false)
+			if h != player:              # nobody reads a bot's prompt: skip the scans (40 hunters)
+				if exits: exits.let_go(h)
+				continue
 		# 2. scan a knocked-out wild kin (Capture; not in training: practice kin go home with nobody)
 		if best.is_empty() and not opts.get("training", false):
 			for k in kins:
