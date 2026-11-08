@@ -212,6 +212,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	sync.use_clips(glb, art(arch))
+	sync.square_blade = float(Arch.body(arch).get("bulk", 1.0)) != 1.0
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
 	_lights(glb, look(art(arch)))
@@ -862,6 +863,7 @@ class Sync extends Node:
 	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
+	var square_blade := false     # a body "bulk" narrows the root on x and z only: unshear the blade (_square_blade)
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -1001,6 +1003,8 @@ class Sync extends Node:
 	func apply_blade() -> void:
 		if blade_tip == null or blade_root == null or gun == null or not gun.is_inside_tree():
 			return
+		if square_blade:
+			_square_blade()
 		# (from the bone, not the attachment nodes: those update after the skeleton does, a frame late)
 		var hand := skel.global_transform * skel.get_bone_global_pose(blade_bone)
 		var a := skel.global_transform * skel.get_bone_global_pose(blade_root_bone) * blade_root.position
@@ -1011,6 +1015,16 @@ class Sync extends Node:
 		gun.global_transform = Transform3D(Basis.looking_at(b - a, up), a)
 		if muzzle:
 			muzzle.global_position = b
+
+	## A root scaled on x and z only (body "bulk": Mossy) shears a blade turning in the hand, which then stretches
+	## and shrinks. The blade bone's world basis is made square again at the skeleton's height scale (its size along
+	## the root's up axis, which the shear leaves alone), so it never builds on last frame's pose. A bone pose cannot
+	## hold a shear, so a little is left (under 2 cm on Mossy's blade, --clip-check).
+	func _square_blade() -> void:
+		var pose := skel.get_bone_global_pose(blade_bone)
+		var k := (skel.global_basis.transposed() * root.global_basis.y.normalized()).length()
+		pose.basis = skel.global_basis.inverse() * ((skel.global_basis * pose.basis).orthonormalized() * k)
+		skel.set_bone_global_pose(blade_bone, pose)
 
 ## Hanging pieces on bone chains (RIG_CONTRACT "Spring chains"): bones named spring_<name>_<i>, each the next
 ## one's parent, the first a child of a contract bone (a braid hangs from the head). Each chain is a rope of its
