@@ -2,7 +2,8 @@ extends RefCounted
 ## --tutorial-clean-check: the tutorial course has nothing random on it. After the build the only chest
 ## is the one the tutorial places, and no crates, pots, shrines, wild kin or mobs are out; the world
 ## makes no spots for them. Then a scripted run of the whole course: the scripted chest opens and the
-## course never brings any wild kin or extra chest or breakable.
+## course never brings any wild kin or extra chest or breakable. And the tutorial's cooldowns run four times
+## quicker, while a training match's do not.
 
 var bad := 0
 var main: Node
@@ -19,7 +20,15 @@ func run(mn: Node) -> void:
 	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
 	m.set_process(false)
 	_built(m)
+	var tut_cd := _cd_after(m, 1.0)
+	ok(tut_cd < 6.5, "tutorial: a 10 s air-dash cooldown has %.1f s left after 1 s" % tut_cd)
 	_run_course(m)
+	var real := Match.new()
+	main.add_child(real)
+	real.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0})
+	real.set_process(false)
+	var real_cd := _cd_after(real, 1.0)
+	ok(real_cd > 8.9, "training: the same cooldown has %.1f s left after 1 s" % real_cd)
 	print("TUTCLEAN DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -33,6 +42,16 @@ func _built(m: Match) -> void:
 	var wild := m.kins.filter(func(k): return k.is_wild()).size()
 	ok(wild == 0, "no wild kin (%d)" % wild)
 	ok(m.mobs.is_empty(), "no mobs before the course asks for them (%d)" % m.mobs.size())
+
+## Seconds left on a 10 s air-dash cooldown after `secs` of play.
+func _cd_after(m: Match, secs: float) -> float:
+	if m.tut:
+		m.tut.ack()          # (past the intro card, where the match waits, and the first step's own reset)
+		m.step(Match.DT)
+	m.player.ex_cd = 10.0
+	for i in int(secs / Match.DT):
+		m.step(Match.DT)
+	return m.player.ex_cd
 
 func _run_course(m: Match) -> void:
 	var t := 0.0
