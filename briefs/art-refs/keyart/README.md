@@ -15,5 +15,17 @@
 
 `keyart_thief_view_wip.jpg` is the pre-restore checkpoint.
 
-## The Face-off (in progress)
-The mirrored fresh generation (Vex on the left) was rejected by the owner (Nov 7, 19:29 ET); it is in `explorations/keyart_faceoff_mirrored_rejected.jpg`. The chosen direction is the painterly edit lineage: Kael on the left, Vex on the right, the glass heart between them, and the greatsword under her chin. The blade still needs to extend off the right edge of the frame, then a final restore.
+## The Face-off (final)
+`keyart_faceoff_final.jpg`
+
+**The shot:**
+- Kael (left, fire behind him) and Vex (right, smoke and silhouettes behind her), shown from the chest up.
+- The glass Wyrmheart floats between them.
+- His greatsword, with white-hot cracks, angles up from his fist, and its tip rests under her chin.
+- She grins up at him, unafraid. Her choker, coin, shoulder and tally marks are all visible.
+
+**How it was made:**
+- Base: the original face-off generation (Nano Banana Pro, 16:9, 4K).
+- Edits, each a single change: minigun removed, crystal swapped for the heart (the cracks went white-hot in the same pass), duplicate upright blade removed.
+- Local restore: colours matched back to the original, then sharpened.
+- Rejected versions are in `explorations/`.
