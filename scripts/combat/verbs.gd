@@ -21,7 +21,9 @@ const WALL_TH := 0.32      # half thickness of a barrier
 const WALL_H := 2.3
 const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bearer reads through it
 const BRIDGE_RISE_DROP := 0.6   # m below its place a rising span's slabs start (add_bridge e.rise)
-const BRIDGE_SHAKE := 0.07      # m: a crumble-warned span's shake at the very end
+const BRIDGE_SHAKE := 0.14      # m: a crumble-warned span's shake at the very end
+const BRIDGE_CRACK_W := 0.11    # m: the width of its warning cracks
+const BRIDGE_PUFF_GAP := 0.3    # s between the grit puffs spilling off it while it warns
 const BRIDGE_SHAKE_HZ := 9.0    # its shake's speed (cycles per second)
 const BRIDGE_FALL := 3.0        # m the slabs drop as it crumbles
 const BRIDGE_FALL_T := 0.45     # s: ...over this long
@@ -284,19 +286,23 @@ func _bridge_warn(tz: Dictionary, n: Node3D) -> void:
 	n.position = Vector3(sin(ph) * a, sin(ph * 1.7 + 1.3) * a * 0.5, sin(ph * 1.3 + 2.1) * a)
 	if n.get_node_or_null("Cracks") == null:
 		_bridge_cracks(n, tz)
+	if float(m.time) - float(tz.get("puff_at", -9.0)) >= BRIDGE_PUFF_GAP:
+		tz["puff_at"] = float(m.time)
+		m.fx.dust(_bridge_mid(tz), 4 + int(6.0 * k))      # grit spilling off it, more toward the end
 
 func _bridge_cracks(n: Node3D, tz: Dictionary) -> void:
 	var cracks := Node3D.new()
 	cracks.name = "Cracks"
 	n.add_child(cracks)
-	var mat := Models.glow_mat(Color((tz["col"] as Color).lightened(0.6), 0.95))
+	var mat := Models.glow_mat(Color((tz["col"] as Color).lightened(0.85), 1.0))
 	var w: World = m.world
 	for td in tz["tiles"]:
 		var i := int(td[0])
-		var c := Vector3(i % w.w + 0.5, w.level[i] * World.LEVEL + 0.01, i / w.w + 0.5)
-		var crack := Models.part(cracks, Models.box(0.05, 0.02, 1.1), mat, c)
-		crack.rotation.y = float(i % 7) * 0.45
-		crack.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var c := Vector3(i % w.w + 0.5, w.level[i] * World.LEVEL + 0.015, i / w.w + 0.5)
+		for j in 2:      # two crossed cracks a slab, wide enough to read at the match camera
+			var crack := Models.part(cracks, Models.box(BRIDGE_CRACK_W, 0.02, 1.15), mat, c)
+			crack.rotation.y = float(i % 7) * 0.45 + j * 1.7
+			crack.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.sfx("br_crack", _bridge_mid(tz), -6.0, 0.9)
 
 ## The middle of a span (its middle tile's centre, on its top).
