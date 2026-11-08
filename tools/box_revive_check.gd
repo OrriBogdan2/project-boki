@@ -29,7 +29,7 @@ func _run(sec: float) -> void:
 func _spot(h: Hunter, at: Vector3) -> void:
 	h.teleport(at)
 	h.vel = Vector3.ZERO
-	# the Boki comes along (left behind, a heavy species walks through its Hunter to the heel and shoves them off the box)
+	# the Boki comes along: left behind, a heavy one walks through its Hunter to the heel and shoves them off
 	if h.kin != null and h.kin.state == "active":
 		h.kin.teleport(at + Vector3(1.0, 0, 0.7))
 
