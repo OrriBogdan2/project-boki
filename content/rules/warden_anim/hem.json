@@ -1,7 +1,7 @@
 {
 	"doc": "Hem's hand-keyed clips (art/wardens/hem/hem.glb) and which game state plays which (scripts/heroes/warden_clips.gd). The bow is skinned on bow (hand.L); the nocked arrow is the separate piece on the arrow bone, standing in the spool quiver while it is not on the string.",
 	"skinned_weapon": true,
-	"extra_bones": {"foot.L": "shin.L", "foot.R": "shin.R", "lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "fing_a1.R": "hand.R", "fing_a2.R": "fing_a1.R", "fing_b1.R": "hand.R", "fing_b2.R": "fing_b1.R", "thumb1.R": "hand.R", "thumb2.R": "thumb1.R", "bow": "hand.L", "bow_t": "bow", "bow_b": "bow", "bow_s": "bow", "arrow": "hips"},
+	"extra_bones": {"foot.L": "shin.L", "foot.R": "shin.R", "lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "fing_a1.R": "hand.R", "fing_a2.R": "fing_a1.R", "fing_b1.R": "hand.R", "fing_b2.R": "fing_b1.R", "thumb1.R": "hand.R", "thumb2.R": "thumb1.R", "bow": "hand.L", "bow_t": "bow", "bow_b": "bow", "bow_s": "bow", "arrow": "hips", "x_breath": "hips"},
 	"blade": {"root": "anchor_bow_root", "tip": "weapon_muzzle", "bone": "bow"},
 	"loco": {
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,

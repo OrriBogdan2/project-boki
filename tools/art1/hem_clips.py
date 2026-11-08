@@ -1,9 +1,9 @@
 """ART-1 Hem's animation set (keyed as targets, solved here on tools/art1/posekit.py). Times match the kit's kmove tables
 (scripts/match/kmoves_pin_bjorn.gd) and longbow.json: the draw is one steady pull to Supercharged (1.15 s, no pose pop at
 Empowered, 0.6 s) so it reads with item 55b's filling line; the perfect-timing circle has no pose of its own.
-Personality: cold, poised, economical, feet planted; every release is a flick, not a heave. She stands with a hand on
-her hip, chin up. The bow never leaves her left hand. Tasteful: confidence, not display.
-Run: blender -b --python tools/art1/hem_clips.py -- <hem_art1.blend> <out.glb> [clip,clip]"""
+Personality: cool, patient, economical, feet planted; every release is a flick, not a heave. Standing, she watches: long holds,
+one deliberate head turn, a hand on her hip, chin up, and a thread tested between two fingers. The bow never leaves her left hand.
+Run: blender -b --python tools/art1/hem_clips.py -- <hem_art1.blend or the last *_anim.blend> <out.glb> [clip,clip]"""
 import math
 import os
 import sys
@@ -16,7 +16,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
 import hem_sculpt as H
 import crouchkit
-from posekit import Clip, FnClip, Solver, ang_dir as D, frame_of, two_bone
+from posekit import Clip, FnClip, Solver, add_breath, ang_dir as D, frame_of, lerp, two_bone
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 J = H.joints(os.path.join(REPO, "art/wardens/src/hem_rig.json"))
@@ -100,7 +100,8 @@ class HemSolver(Solver):
         for side, key in (("L", "FL"), ("R", "FR")):
             Hp = D_root(H0["thigh." + side])
             yaw = P.get(key + "y", 0.0)
-            pole = Quaternion((0, 0, 1), yaw) @ Vector((0.16 * (1 if side == "R" else -1), 1, 0.15))
+            # (key + "k": where the knee points, when not along the foot: a free knee turned in)
+            pole = Quaternion((0, 0, 1), P.get(key + "k", yaw)) @ Vector((0.16 * (1 if side == "R" else -1), 1, 0.15))
             qt, qs = self.leg_ik(side, Hp, Vector(P[key]), pole, q_root)
             Q["thigh." + side], Q["shin." + side] = qt, qs
             Q["foot." + side] = Quaternion((0, 0, 1), yaw) @ Quaternion((1, 0, 0), P.get(key + "p", 0.0))
@@ -117,39 +118,138 @@ def _eul(p):
     return Quaternion((0, 0, 1), p[1]) @ Quaternion((1, 0, 0), -p[0]) @ Quaternion((0, 1, 0), p[2])
 
 
-# ---- idle and the signature stance
-def _breath(p, a):
-    p["pel"] = (p["pel"][0], p["pel"][1], p["pel"][2] - 0.004 * a)
-    p["tor"] = (p["tor"][0] + 0.016 * a, p["tor"][1], p["tor"][2])
-    p["G"] = (p["G"][0], p["G"][1], p["G"][2] - 0.004 * a)
+# ---- idle and the signature stance (docs/art/IDLE_AUDIT.md, Lace the Red Stitch)
+STAND = 6.0                                     # s: the idle and the stance loop, long enough for one fidget and two breaths
+BREATH = 0.02                                   # x_breath's swell at the top of a breath (2 %)
+BREATH_OUT = 0.6                                # the swell out through the ribs, against its rise up the bone
+BREATH_C, BREATH_R = (0.0, 0.01, 1.14), (0.17, 0.13, 0.13)   # m: the rib cage's centre and half sizes (hips 0.78, shoulders 1.28)
+LAG = {"pel": 0.0, "tor": 0.1, "hed": 0.2, "hand": 0.3}     # s behind the weight shift: the pelvis leads, the rest follows
+FOLLOW = 4 / FPS                                # s: the shoulders turn this long after the head
+SHIFT = (-0.065, 0.045)                         # m: the pelvis moves this far onto the front foot
+KNEE_IN = 0.22                                  # rad: the free leg's knee turns in this far
+HP0 = (READY["pel"][0], READY["pel"][1], 0.777 + READY["pel"][2])   # the hips' origin in the rest stance
+YAW0 = READY["prt"][1] + READY["tor"][1]
+
+
+def _step(u, a, b):
+    """0 before a, 1 after b, a smoothstep between (loop phases)."""
+    k = min(1.0, max(0.0, (u - a) / (b - a)))
+    return k * k * (3 - 2 * k)
+
+
+def _beat(u, a, b, c, d):
+    """A move that goes out between a and b, holds, and comes back between c and d; 0 outside, so the loop closes."""
+    return _step(u, a, b) - _step(u, c, d)
+
+
+def _at(u, lag):
+    """The loop phase `lag` s earlier; it wraps, so a lagged curve still closes on the seam."""
+    return (u - lag / STAND) % 1.0
+
+
+def _blink(u, t):
+    return 0.92 * _beat(u, t, t + 0.012, t + 0.02, t + 0.045)
+
+
+def _turned(point, yaw, hp):
+    """A point that rides the hips: turned about the hips' origin hp by the body's yaw change."""
+    return tuple(Vector(hp) + Quaternion((0, 0, 1), yaw - YAW0) @ (Vector(point) - Vector(HP0)))
+
+
+def _stand(p, u, shift):
+    """What every standing loop shares: the weight going onto the front foot and back once (shift = (out, in) phases)
+    with the pelvis leading and the chest, head and hands trailing, soft knees, and two breaths on the rib cage."""
+    a, b = shift
+    w = {k: _beat(_at(u, s), a, a + 0.16, b, b + 0.16) for k, s in LAG.items()}
+    dip = 4 * w["pel"] * (1 - w["pel"])
+    p["pel"] = (0.036 + SHIFT[0] * w["pel"], 0.006 + SHIFT[1] * w["pel"], -0.052 - 0.008 * dip)
+    p["prt"] = (0.08, 0.10 + 0.06 * w["pel"], -0.070 + 0.12 * w["pel"])
+    p["FLk"] = READY["FLy"] - KNEE_IN * (1 - w["pel"])
+    p["FRk"] = READY["FRy"] + KNEE_IN * w["pel"]
+    br = {k: math.sin(4 * math.pi * _at(u, s) - math.pi / 2) for k, s in (("tor", 0.0), ("hed", FOLLOW), ("hand", 0.3))}
+    p["breath"] = BREATH * (0.5 + 0.5 * br["tor"])
+    p["tor"] = (p["tor"][0] - 0.008 * br["tor"], p["tor"][1], 0.11 - 0.09 * w["tor"])
+    p["hed"] = (p["hed"][0] + 0.006 * br["hed"], p["hed"][1], -0.04 - 0.03 * w["hed"])
+    p["w"], p["br"] = w, br
     return p
+
+
+def _nock_hand(p):
+    """The right hand on the string: fingers toward the bow's belly, the palm toward the bow hand (as at full draw)."""
+    BA, BS = Vector(p["BA"]), Vector(p["BS"])
+    return tuple(-BS), tuple(BS.cross(BA).normalized())
+
+
+THREAD = {"G": (-0.16, 0.20, 0.90), "BA": n3((-0.45, 0.45, 0.77)), "BS": n3((0.80, -0.20, 0.58)), "Rpole": (1.0, -0.5, -0.1)}
 
 
 def idle(u):
-    a, b = math.sin(u * 2 * math.pi), math.cos(u * 2 * math.pi)
-    p = _breath(dict(READY), a)
-    p["hed"] = (-0.22 - 0.012 * a, -0.10 + 0.06 * math.sin(u * 2 * math.pi + 1.0), -0.04)
-    p["prt"] = (0.08, 0.10 + 0.012 * a, -0.070 + 0.012 * b)
-    p["pel"] = (0.036 + 0.006 * b, p["pel"][1], p["pel"][2])
-    p["fing"] = 0.45 + 0.08 * math.sin(u * 4 * math.pi)     # the claws tap on her hip
-    p["lid"] = 1.0 if 0.46 < u < 0.49 else 0.08
+    """Watching. Long holds; the weight goes onto the front foot and back; one deliberate head turn the shoulders
+    follow four frames later; and once a loop, still looking away, she lifts the bow a little, draws its thread taut
+    between two fingers and lets it go: a seamstress testing her thread."""
+    p = _stand(dict(READY), u, (0.20, 0.76))
+    w, br = p["w"], p["br"]
+    h = _beat(u, 0.40, 0.49, 0.80, 0.90)
+    hs = 0.35 * _beat(_at(u, FOLLOW), 0.40, 0.49, 0.80, 0.90)
+    p["hed"] = (p["hed"][0] + 0.04 * h, -0.10 + 0.50 * h, p["hed"][2])
+    p["tor"] = (p["tor"][0], 0.10 + 0.14 * hs, p["tor"][2])
+    yaw = p["prt"][1] + p["tor"][1]
+    hp = (p["pel"][0], p["pel"][1], 0.777 + p["pel"][2])
+    # the thread: reach, pull taut, hold, a flick back, the hand returns to the hip
+    r = _beat(u, 0.52, 0.58, 0.73, 0.80)
+    taut = _step(u, 0.58, 0.64) * (1 - _step(u, 0.69, 0.705))
+    held = _step(u, 0.56, 0.60) * (1 - _step(u, 0.69, 0.705))
+    for k in ("G", "BA", "BS", "Rpole"):
+        p[k] = lerp(READY[k], THREAD[k], r)
+    p["BA"], p["BS"] = n3(p["BA"]), n3(p["BS"])
+    rd, rp = _nock_hand(p)
+    p["RD"], p["RP"] = n3(lerp(READY["RD"], rd, r)), n3(lerp(READY["RP"], rp, r))
+    p["Rw"], p["dr"] = r, 0.07 * taut
+    p["pin"], p["fing"] = 0.25 + 0.60 * held, 0.45 + 0.15 * held - 0.15 * r * (1 - held)
+    # the bow hand breathes with the chest and trails the weight; the hip hand rides the hip
+    lag_w = w["hand"]
+    p["G"] = (p["G"][0] + SHIFT[0] * 0.8 * lag_w, p["G"][1] + SHIFT[1] * 0.8 * lag_w, p["G"][2] + 0.003 * br["hand"])
+    p["RF"] = _turned(READY["RF"], yaw, hp)
+    p["lid"] = 0.08 + _blink(u, 0.495) + _blink(u, 0.905)
+    del p["w"], p["br"]
     return p
 
 
-STANCE = {"pel": (0.012, 0.02, -0.045), "prt": (0.08, 0.20, -0.03), "tor": (0.14, 0.14, 0.03), "hed": (-0.22, -0.30, 0.04),
-          "FL": (-0.15, 0.13, A_Z), "FR": (0.12, -0.06, A_Z), "FLy": 0.40, "FRy": -0.24,
-          "G": (-0.30, 0.26, 0.70), "BA": n3((-0.20, 0.70, 0.68)), "BS": n3((0.96, 0.24, 0.12)), "Lpole": (-1.0, -0.4, -0.3),
-          "brow": 0.55, "lid": 0.24}
+NOCKED = dict(READY, **{
+    "pel": (0.010, 0.028, -0.055), "prt": (0.08, 0.18, -0.03), "tor": (0.12, 0.12, 0.03), "hed": (-0.20, -0.26, 0.02),
+    # the bow up loosely across the body, an arrow on the string, not drawn
+    "G": (-0.13, 0.26, 0.98), "BA": n3((-0.38, 0.18, 0.91)), "BS": n3((0.33, -0.93, 0.32)),
+    "Lpole": (-1.0, -0.3, -0.4), "Rpole": (1.0, -0.6, -0.3),
+    "Rw": 1.0, "ar": 1.0, "dr": 0.0, "fing": 0.6, "pin": 0.8, "brow": 0.55, "lid": 0.22,
+})
+NOCKED["RD"], NOCKED["RP"] = _nock_hand(NOCKED)
 
 
 def stance(u):
-    """Weight forward, the bow low and ready at her side, head level and turned, sizing you up; a hand on her hip (item 114)."""
-    a = math.sin(u * 2 * math.pi)
-    p = dict(READY)
-    p.update(STANCE)
-    p = _breath(p, a)
-    p["hed"] = (-0.22 - 0.015 * a, -0.30 + 0.06 * math.sin(u * 2 * math.pi + 2.0), 0.04)
-    p["lid"] = 1.0 if 0.7 < u < 0.73 else 0.24
+    """Sizing you up on the idle's feet: the bow up loosely across her, an arrow nocked and not drawn. The same slow
+    weight shift and breath, one head turn the shoulders and the bow follow, and once a loop she takes up the string a
+    little and lets it settle, feeling its tension."""
+    p = _stand(dict(NOCKED), u, (0.15, 0.70))
+    w, br = p["w"], p["br"]
+    p["pel"] = (p["pel"][0] - 0.026, p["pel"][1] + 0.022, p["pel"][2] - 0.003)
+    p["prt"] = (p["prt"][0], p["prt"][1] + 0.08, p["prt"][2] + 0.04)
+    p["tor"] = (p["tor"][0] + 0.02, p["tor"][1] + 0.02, p["tor"][2] - 0.08)
+    h = _beat(u, 0.38, 0.50, 0.78, 0.90)
+    hs = 0.35 * _beat(_at(u, FOLLOW), 0.38, 0.50, 0.78, 0.90)
+    p["hed"] = (p["hed"][0] + 0.03 * h, -0.26 + 0.44 * h, p["hed"][2] + 0.06)
+    p["tor"] = (p["tor"][0], p["tor"][1] + 0.14 * hs, p["tor"][2])
+    yaw = p["prt"][1] + p["tor"][1]
+    hp = (p["pel"][0], p["pel"][1], 0.777 + p["pel"][2])
+    # the bow rides the shoulders' turn and the weight, a beat behind
+    hb = 0.35 * _beat(_at(u, 0.3), 0.38, 0.50, 0.78, 0.90)
+    G = _turned(NOCKED["G"], NOCKED["prt"][1] + 0.08 + NOCKED["tor"][1] + 0.02 + 0.14 * hb, hp)
+    p["G"] = (G[0] + SHIFT[0] * 0.6 * w["hand"], G[1] + SHIFT[1] * 0.6 * w["hand"], G[2] + 0.003 * br["hand"])
+    p["BA"] = n3(Quaternion((0, 0, 1), 0.14 * hb) @ Vector(NOCKED["BA"]))
+    p["BS"] = n3(Quaternion((0, 0, 1), 0.14 * hb) @ Vector(NOCKED["BS"]))
+    p["RD"], p["RP"] = _nock_hand(p)
+    p["dr"] = 0.06 * _beat(u, 0.56, 0.64, 0.70, 0.72)
+    p["lid"] = 0.22 + _blink(u, 0.51) + _blink(u, 0.91)
+    del p["w"], p["br"]
     return p
 
 
@@ -230,7 +330,7 @@ def crouch_set():
 
 
 def clips():
-    out = [F("idle", 3.6, idle), F("stance", 4.6, stance)]
+    out = [F("idle", STAND, idle), F("stance", STAND, stance)]
     out += crouch_set()
     wk, rn = 1.04, 0.66
     for n, h in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
@@ -375,6 +475,8 @@ def extras_for(sol):
             out["arrow"] = (q.normalized(), R0["arrow"].inverted() @ p)
         else:
             out["arrow"] = (Quaternion(), Vector())
+        br = P.get("breath", 0.0)
+        out["x_breath"] = (None, None, Vector((1.0 + BREATH_OUT * br, 1.0 + br, 1.0 + BREATH_OUT * br)))
         return out
     return fn
 
@@ -401,7 +503,7 @@ def bake(arm, clip, sol, extras):
             pb.keyframe_insert("rotation_quaternion", frame=f)
         pbs["root"].location = sol.R0["root"].inverted() @ (root_at - sol.H0["root"])
         pbs["root"].keyframe_insert("location", frame=f)
-        for b, (q, l) in extras(P).items():
+        for b, (q, l, *sc) in extras(P).items():
             pb = pbs[b]
             if q is not None:
                 pb.rotation_quaternion = q
@@ -409,6 +511,9 @@ def bake(arm, clip, sol, extras):
             if l is not None:
                 pb.location = l
                 pb.keyframe_insert("location", frame=f)
+            if sc:
+                pb.scale = sc[0]
+                pb.keyframe_insert("scale", frame=f)
     arm.animation_data.action = None
     return act
 
@@ -416,7 +521,10 @@ def bake(arm, clip, sol, extras):
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:]
     bpy.ops.wm.open_mainfile(filepath=a[0])
+    for old in list(bpy.data.actions):     # a re-bake may start from the last *_anim.blend
+        bpy.data.actions.remove(old)
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
+    add_breath(arm, bpy.data.objects["hem"], BREATH_C, BREATH_R)
     sol = HemSolver(arm, bpy.context.scene["pinch"])
     bpy.context.scene.render.fps = FPS       # (the exporter times keys by the scene: at its default 24 fps every clip ran 25% long)
     bpy.context.view_layer.objects.active = arm
