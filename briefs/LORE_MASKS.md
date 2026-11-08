@@ -49,7 +49,7 @@ Three relics change because their objects left the designs: **Cinder, Meeko and 
 | Lace (archer) | the stitched porcelain mask | literal: she sewed it from the masks she once made | keep (alt: the red-threaded needle) |
 | Grimble (dredge) | **his brass monocle** | he has priced every treasure in the hoard through it | LOCKED Nov 7 (owner) |
 | Neve (rimewright) | her ice skates | the night she skated the festival to safety | keep |
-| Sparkle (mage) | the lightning rod from the top of the spire where her friend fell | where the storm struck them both | keep (story revised Nov 7) |
+| Sparkle (mage) | the lightning rod from the top of the spire where the boy she loved fell (her unspoken love; owner Nov 8) | where the storm struck them both | keep (story revised Nov 7) |
 | Mossy (bulwark) | the ship's compass, now set in his chest | it led his refugees home across the ice | keep |
 | Sable (thief) | her moth-wing knife | in her hand when she touched the Wyrmheart | LOCKED Nov 7 (owner; design has no domino mask) |
 | Motley (ostra) | his hovering card box | the Tyrant locked him in it and threw it into the Void | LOCKED Nov 7 (owner; story changed from mask to box) |
