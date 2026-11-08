@@ -10,6 +10,7 @@ var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
 const VPARITY := preload("res://tools/venator_parity_check.gd")   # Vex against the source (the parity pass)
+const VTIME := preload("res://tools/vex_anim_time_check.gd")        # her move timing against the footage frames
 
 func ok(name_: String, cond: bool, info := "") -> void:
 	n += 1
@@ -866,6 +867,7 @@ func _gunslinger() -> void:
 	T.hp = T.max_hp
 	P.slot_lv["sec"] = 1
 	VPARITY.new(self).run(m, P, K, T, home)
+	VTIME.new(self).run(m, P, K, T, home)
 	# 8. a Boki merge mid-hold: the Longneedle charge goes with nothing fired
 	ac.fresh(T)
 	P.teleport(home)

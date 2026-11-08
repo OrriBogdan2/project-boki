@@ -99,6 +99,7 @@ func _tick(dt: float) -> void:
 	_tick_brackets()
 	_tick_echo(dt)
 	_tick_trail()
+	_tick_walk_off()
 	self_pips(int(res_def()["max"]), int(floor(res + 0.01)), false, dt, PIP_LIFT, 0.65)
 
 func own_dash_trail() -> bool:
@@ -112,6 +113,22 @@ func shows_charge_ball() -> bool:
 
 ## Moves whose hand leaves an ember swoosh: [hand, from s, to s].
 const TRAILS := {"gunslinger_knock": ["r", 0.0, 0.25]}
+const SLIDE_KEY := 0.45              # s: the dash clip's last slide key (vex.json "dash", low from 0.08): a held slide
+                                     # keeps the clip there, so she stands up as the skid ends, not mid-skid
+const WALK_OFF := {"gunslinger_dash": 0.0, "gunslinger_e": 0.8}   # s into the move its hit is past: the dash's
+                                     # from the skid's end, the Longneedle's once its shove has played
+const OVER := 2.0                    # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
+                                     # is over to the clips (the kit's anim_id is read as long as it is set)
+
+## Walking out of a move's recovery (the slide's stand-up, the Longneedle's settle): the legs are hers again and
+## the walk blends in (WardenClips.FADE_LOCO) in place of the clip's stand-still pose, the source's Ghost walking off.
+## (Clearing anim_id would not do: the published anim state keeps the last kmove until another move plays.)
+func _tick_walk_off() -> void:
+	if not WALK_OFF.has(anim_id) or not slide.is_empty() or not needle.is_empty() or not h.grounded:
+		return
+	var walking := (h.inp.get("move", Vector2.ZERO) as Vector2).length() > 0.5
+	if walking and float(m.time) - anim_at >= float(WALK_OFF[anim_id]):
+		anim_at = float(m.time) - OVER        # the move reads as over: past its clip, the body goes back to the legs
 
 func _tick_trail() -> void:
 	var tr: Array = TRAILS.get(anim_id, [])
@@ -356,6 +373,8 @@ func _tick_slide(dt: float) -> void:
 		return
 	var k := 1.0 - st_t / dur
 	h.roll_t = maxf(h.roll_t, dt * 1.5)
+	if anim_id == "gunslinger_dash":
+		anim_at = maxf(anim_at, float(m.time) - SLIDE_KEY)   # the clip stays low on its slide key while she slides
 	h.roll_speed = float(dd["slide"]) / dur * (0.5 + k)
 	h.inv_t = 0.0
 
