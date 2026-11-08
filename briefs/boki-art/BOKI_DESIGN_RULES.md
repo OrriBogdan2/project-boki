@@ -13,6 +13,7 @@ This is the bar every Boki has to clear. It works alongside the judging rubric i
 9. **The design explains the ability.** Soakybara's pool heals, Zippelith's seam lets it tunnel, Chuggamus's cowcatcher rams.
 10. **Buildable and readable in game.** Models are about 5k triangles, seen from a distance. Use chunky parts and no thin floating bits (ropes, wires, ribbons, lace).
 11. **One render style.** Soft hand-painted shading with a thin clean outline, matching style_refs (the website's Vespyx and Mycroll). No thick cartoon outlines or flat cel shading.
+13. **The idea runs through the whole body (owner, Nov 8).** If the object shows up in one place, its material and shapes must repeat everywhere else: the same bone, metal or stone in the claws, spine, tail and face. A design should never read as one thing tied to another. Example: Umbrathere's umbrella ribs are its arm and finger bones, not a canopy bolted to its back.
 12. **Things to avoid:** more than one idea, a realistic animal with a prop on it, backpack syndrome (an object sat on its back with no change to the animal), accessories, particles and glow everywhere, and any franchise name in a prompt.
 
 ## Elements: how each theme must read
