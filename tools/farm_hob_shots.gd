@@ -94,7 +94,8 @@ func run(m: Node, out_dir: String) -> void:
 	# 5. his panel
 	home.hob.talk()
 	await main.get_tree().create_timer(3.5).timeout
-	await _shot("06_hob_panel", "Talking to Hob: the dialogue box (his portrait, name plate, typed line), the camera on him")
+	await _shot("06_hob_panel",
+		"Talking to Hob: the dialogue box (his portrait, name plate, typed line), the camera on him")
 	home._close_panel()
 	# 6. the Goals card with some progress
 	ClassUnlock.choose_starters(ClassUnlock.starters().slice(0, ClassUnlock.picks_needed()))

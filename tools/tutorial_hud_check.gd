@@ -4,7 +4,8 @@ extends RefCounted
 ##      height, no two lanes (banner, pill, check, toasts, intro) intersect, none sits in the middle
 ##   2. a scripted run of the whole course (the driver, with a Boki): while the banner is up no toast is
 ##      showing (one fired at each step start waits and then shows) and no Boki bubble is up; the
-##      hunter and the Boki are never under the banner
+##      hunter and the Boki are never under the banner; Pell (TutorialGuide) wears a beacon, stops you at
+##      each new step in the dialogue box while the match holds, and flies ahead to the pad, chest and outpost
 ##   3. the pill counter, the right click taught from its kit data, the Boki step by its state
 ##   4. the lookout: every course stop is climbable from the one before it with plain movement
 
@@ -76,6 +77,10 @@ func _course() -> void:
 	var under := 0
 	var texts := {}
 	var counters := {}
+	var talk_at := -1.0
+	var ran_in_talk := 0
+	var not_in_box := 0
+	var ahead := {}
 	while t < 600.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
@@ -91,6 +96,17 @@ func _course() -> void:
 			texts[tu.id()] = tu.text
 			counters[tu.id()] = tu.progress_text()
 		step_t += Match.DT
+		if tu.pell.talking():
+			talk_at = m.time if talk_at < 0.0 else talk_at
+			ran_in_talk += int(m.time != talk_at)
+			not_in_box += int(not is_instance_valid(tu.pell.box) or tu.pell.box.get_parent() != m.hud)
+		else:
+			talk_at = -1.0
+			var g := tu._lead_goal(tu.id())
+			var to_g := func(at: Vector3): return Vector2(g.x - at.x, g.z - at.z).length()
+			var near: bool = g != Vector3.INF and to_g.call(tu.pell.pos) < 2.5
+			if near or g != Vector3.INF and to_g.call(tu.pell.pos) < to_g.call(m.player.pos) - 1.0:
+				ahead[tu.id()] = true
 		if m.hud == null:
 			continue
 		if tu.card_up():
@@ -101,6 +117,14 @@ func _course() -> void:
 			shown_after += 1
 			m.hud.msgs.clear()
 	ok(m.player.extracted, "the course still finishes")
+	var pl := tu.pell
+	ok(pl.beacon != null and pl.beacon.wants_arrow, "Pell wears a beacon (glow, name, edge arrow)")
+	var stops := ["move", "dash", "glide", "chest", "goexit"].all(func(x): return x in pl.talked)
+	ok(stops and pl.talked.size() >= 12, "Pell stops you before each new thing (%s)" % ", ".join(pl.talked))
+	ok(ran_in_talk == 0 and not_in_box == 0, "the match holds while Pell talks, in the dialogue box"
+		+ " (%d frames ran, %d without the box)" % [ran_in_talk, not_in_box])
+	var led := ["dash", "chest", "goexit"].all(func(x): return ahead.has(x))
+	ok(led, "Pell flies ahead to the pad, the chest and the outpost (%s)" % str(ahead.keys()))
 	ok(toast_in_card == 0, "no toast shows while a banner is up (%d seen)" % toast_in_card)
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)
 	var waited := "(%d asked, %d shown)" % [asked, shown_after]

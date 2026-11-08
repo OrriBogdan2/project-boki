@@ -32,6 +32,18 @@
 			"portrait_at": 2.0,
 			"portrait_dist": 2.2,
 			"glow": "ffd79a"
+		},
+		"pell": {
+			"name": "Pell",
+			"short": "Pell",
+			"role": "Freed soul, your guide",
+			"voice_hz": 420.0,
+			"head": 1.4,
+			"tag": 2.1,
+			"portrait": "res://art/portraits/pell_{mood}.png",
+			"portrait_at": 1.15,
+			"portrait_dist": 2.4,
+			"glow": "9fd8ff"
 		}
 	}
 }

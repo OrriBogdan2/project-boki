@@ -364,7 +364,6 @@ func _tutorial() -> void:
 	main.add_child(m)
 	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
 	m.set_process(false)
-	var led := {}
 	var hints := {}
 	var t := 0.0
 	var last_step := -1
@@ -385,8 +384,6 @@ func _tutorial() -> void:
 			m.player.teleport(Vector3(70.0, 0.0, 30.0))      # off every island: a fall
 		elif fell_t > 0.0 and not back_ok and t - fell_t < 12.0:
 			back_ok = m.player.grounded and m.player.flat_dist(tu.respawn()) < 6.0
-		if m.player.kin and (m.player.kin.comp.leading() or m.player.kin.comp.guide.get("to", Vector3.INF) != Vector3.INF and m.player.kin.seen_pos().distance_to(m.player.kin.comp.guide["to"]) < 2.2):
-			led[id] = true
 		var goes_somewhere := id in ["move", "dash", "exdash", "glide", "crouch", "pickup", "chest", "goexit", "uplink",
 			"defend", "extract"]
 		if tu.step == last_step and goes_somewhere and tu.target == Vector3.INF:
@@ -398,14 +395,13 @@ func _tutorial() -> void:
 			cards += 1
 	for e in m.player.kin.comp.history:
 		hints[String(e["cat"])] = true
-	print("  tutorial: %.0fs, led on %s, hints %s" % [t, str(led.keys()), str(hints.keys().filter(func(x): return String(x).begins_with("tut_") or String(x).begins_with("demo_")))])
+	print("  tutorial: %.0fs, hints %s" % [t, str(hints.keys().filter(func(x): return String(x).begins_with("tut_") or String(x).begins_with("demo_")))])
 	ok(m.player.extracted, "the tutorial still finishes (extracted at %.0fs)" % t)
 	var mk := "the marker and its beam are up on every destination step frame (%d without, %d no beam)"
 	ok(no_marker == 0 and beam_miss == 0, mk % [no_marker, beam_miss])
 	ok(back_ok, "a fall into the void puts you back at the last stop")
 	var need := ["crouch", "pickup", "kin1", "glide"].all(func(s): return steps_seen.has(s))
 	ok(need, "the course has the crouch, pick-up, glide and watch stops (%s)" % str(steps_seen.keys()))
-	ok(led.has("chest") and led.has("goexit"), "it leads you to (or gets to) the chest and the outpost")
 	ok(hints.keys().filter(func(x): return String(x).begins_with("tut_")).size() >= 6, "a hint in its own voice for each step")
 	ok(hints.has("demo_dash") and hints.has("demo_jump"), "it shows you a dash and a jump")
 

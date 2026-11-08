@@ -131,5 +131,30 @@
   "uplink": "Uplink",
   "defend": "Outpost",
   "extract": "Lift"
- }
+ },
+	"pell_doc": "Pell, the guide (TutorialGuide): what it says when it stops you at the start of a step (one box page per line; the same %keys as the steps), and the portrait mood for steps that are not neutral.",
+	"pell": {
+		"move": ["I'm Pell. When the Heart broke, my soul was torn loose, and a Boki's light set me free.", "Follow me. I'll show you how a Hunter gets around up here."],
+		"dash": ["A gap! Dash to cross it. Run from the glowing pad and dash at the edge."],
+		"exdash": ["This one's wider. Jump first, then dash while you're in the air."],
+		"glide": ["Too far to dash. Jump, then hold %G to glide across. Wings help, trust me."],
+		"crouch": ["Climb the lookout, then crouch. Low and still, you can see much farther."],
+		"pickup": ["Hunters find gear lying about. Walk over it to pick it up."],
+		"gkey": ["%s fights with you. Press %T to send it at a monster, and again to call it back."],
+		"rank": ["You levelled up! Each level is a skill point. Spend it to make an ability stronger."],
+		"shoot": ["A Hollow beast. These are what the broken Heart leaves behind. %W it!"],
+		"sig": ["A whole group. That's what %A is for: line them up, then let it go."],
+		"utility": ["Your hunter has a trick of their own: %A. Try it on these two."],
+		"throw": ["That one spits from afar. Send %s at it!"],
+		"orders": ["%s listens. Hold %T and pick an order from the wheel."],
+		"kin1": ["Every Boki has a power of its own. Watch %s use %A."],
+		"key": ["Chests up here are locked. There's a key nearby. Grab it."],
+		"chest": ["Now the chest. Hold next to it to open it with the key."],
+		"fight": ["More of them! Beat them all, you and %s together."],
+		"goexit": ["The outpost is this way. That's where Hunters get off an island."],
+		"uplink": ["Capture the uplink mast. Stay in the circle until it's yours."],
+		"defend": ["They're coming for the outpost! Stay in the circle and hold it."],
+		"extract": ["You did it. Step into the light, and I'll see you below, Hunter."]
+	},
+	"pell_moods": {"fight": "warning", "defend": "warning", "rank": "happy", "extract": "happy"}
 }
