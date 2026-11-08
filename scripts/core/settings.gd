@@ -45,13 +45,13 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 ##   over the sea  ·  shafts: light shafts into the void  ·  fx: particle amounts (x)
 const QUALITY := {
 	"low": {"name": "Low", "msaa": 0, "shadows": false, "scale": 0.8, "lod": 4.0, "grass": 0.4, "draw": 0.6, "shadow_k": 0.7, "splits": 1, "soft": 0,
-		"ssao": false, "glow": false, "clouds": 0, "shafts": false, "fx": 0.45, "volfog": false},
+		"ssao": false, "glow": false, "clouds": 0, "shafts": false, "fx": 0.45, "volfog": false, "anim_lod": true},
 	"medium": {"name": "Medium", "msaa": 2, "shadows": true, "scale": 1.0, "lod": 2.0, "grass": 0.7, "draw": 0.8, "shadow_k": 0.8, "splits": 2, "soft": 1,
-		"ssao": false, "glow": true, "clouds": 1, "shafts": true, "fx": 0.7, "volfog": false},
+		"ssao": false, "glow": true, "clouds": 1, "shafts": true, "fx": 0.7, "volfog": false, "anim_lod": true},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "scale": 1.0, "lod": 1.0, "grass": 1.0, "draw": 1.0, "shadow_k": 1.0, "splits": 4, "soft": 3,
-		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0, "volfog": true},
+		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0, "volfog": true, "anim_lod": true},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "scale": 1.0, "lod": 0.5, "grass": 1.0, "draw": 1.6, "shadow_k": 1.35, "splits": 4, "soft": 4,
-		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0, "volfog": true},
+		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0, "volfog": true, "anim_lod": false},
 }
 const QUALITY_ORDER := ["low", "medium", "high", "ultra"]
 
