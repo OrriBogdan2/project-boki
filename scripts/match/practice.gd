@@ -38,7 +38,7 @@ static func attach(match_node: Match) -> Practice:
 	p._build_bar()
 	return p
 
-## The bar's entries: [id, label, icon, open, key cap]. The Arena and the training area share a loadout
+## The bar's entries: [id, label, icon, open, key cap]. The Arena and the Training Grounds share a loadout
 ## menu (L), the Duel room has its setup menu (B).
 func items() -> Array:
 	var out: Array = [["hero", "Masks", "swap", func(): PracticeHero.toggle(self), Settings.key_cap("hero")]]

@@ -440,7 +440,7 @@ func _ready_rest() -> void:
 				get_tree().create_timer(0.3).timeout.connect(func():
 					var before := sc.scroll_vertical
 					if "--no-keep-scroll" in dbg: set_meta("no_keep_scroll", true)
-					exp_mode = "duo" if exp_mode != "duo" else "trio"
+					Save.d["exp_rolling"] = not Save.d.get("exp_rolling", false)
 					_open_expedition()
 					get_tree().create_timer(0.5).timeout.connect(func():
 						var sc2 := _panel_scroll()
@@ -3281,7 +3281,6 @@ func _send_chat() -> void:
 
 # ---- expedition
 var exp_cls := ""
-var exp_mode := "solo"
 var exp_tier := 0
 var exp_seed := 0          # the next expedition's seed, rolled when the panel opens: its raid condition shows as a forecast
 
@@ -3348,13 +3347,7 @@ func _open_expedition() -> void:
 		right.add_child(tc)
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Match"))
-	var mode_names := {"solo": "Solo", "duo": "Duos", "trio": "Trios"}
-	var mode_keys := {"Solo": "solo", "Duos": "duo", "Trios": "trio"}
-	var mtabs := UI.tabs(["Solo", "Duos", "Trios"], mode_names[exp_mode], func(nm): exp_mode = mode_keys[nm]; _open_expedition(), {}, 96)
-	for tb in mtabs.get_child(0).get_children():
-		tb.tooltip_text = {"solo": "20 hunters, every one for themselves", "duo": "10 squads of two", "trio": "7 squads of three"}[mode_keys[String(tb.get_meta("tab"))]]
-	right.add_child(mtabs)
-	right.add_child(UI.label({"solo": "20 hunters, every one for themselves", "duo": "10 squads of two", "trio": "7 squads of three"}[exp_mode], UI.T_SMALL, UI.MUTED))
+	right.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
 	# the session: today's fixed match, or a rolling 30-minute session you join part-way through
 	# (scripts/match/rolling.gd; the fixed match stays the default until the owner switches it)
 	var rolling_on: bool = Save.d.get("exp_rolling", false)
@@ -3374,9 +3367,7 @@ func _open_expedition() -> void:
 		right.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Black Market holds the unclaimed ones).", 12, UI.FAINT))
 	# the way out: practice on the left, go on the right
 	var fl := UI.footer_left(v)
-	fl.add_child(UI.ghost("Arena", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
-	fl.add_child(UI.ghost("Training area", _start_training, 0, "jump"))
-	fl.add_child(UI.ghost("Duel room", _start_duel, 0, "knock"))
+	fl.add_child(UI.ghost("Training Grounds", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
 	if Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
@@ -3455,12 +3446,6 @@ func _start_training() -> void:
 	Save.save_game()
 	Game.start_match({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242})
 
-## The duel room: you against one sparring bot you set up yourself.
-func _start_duel() -> void:
-	Save.d["cls"] = Data.class_of_save()
-	Save.save_game()
-	Game.start_match(Match.duel_opts())
-
 ## Before a run where kin can be lost, say so plainly and make the player confirm.
 func _confirm_start() -> void:
 	var weak := hecon.refuse_reason()
@@ -3501,10 +3486,7 @@ func _start_match() -> void:
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
 	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
-	var o := {"teams": Data.MATCH_PLAYERS, "squad": 1}
-	match exp_mode:
-		"duo": o = {"teams": Data.MATCH_PLAYERS / 2, "squad": 2}
-		"trio": o = {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
+	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
 	o["total"] = Data.MATCH_PLAYERS
 	if Save.d.get("exp_rolling", false):
 		o["rolling"] = true      # the session sizes its own waves (Rolling.plan)

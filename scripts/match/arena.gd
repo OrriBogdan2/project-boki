@@ -1,6 +1,6 @@
 class_name Arena
 extends RefCounted
-## The Arena (opts "arena", map content/maps/arena.json) and the training area's practice tools
+## The Arena (opts "arena", map content/maps/arena.json) and the Training Grounds's practice tools
 ## (opts "training": the same controller in its "practice" layout, on the training island).
 ##
 ## What it gives you:
@@ -375,7 +375,7 @@ func _build_ui() -> void:
 	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.position.y = 10 if layout == "arena" else 70     # (the training area's banner sits at the top)
+	hint.position.y = 10 if layout == "arena" else 70     # (the Training Grounds's banner sits at the top)
 	hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	root.add_child(hint)
 	meter = UI.label("", 15, UI.INK, UI.big)
