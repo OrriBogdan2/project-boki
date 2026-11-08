@@ -324,3 +324,7 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 ## 2026-11-08 (owner): the villain's title is "the Beloved"
 - **Malgrave, the Beloved** replaces "Malgrave, the Undying Queen" ("Undying" gave the ending away). It is what Solmere called its ageless, beautiful queen while she fed on them. She is drawn as strikingly attractive (owner's art). Wins over every "Undying Queen/King" above.
+
+## 2026-11-08: hunter sex (from the lore cards; use these pronouns everywhere)
+- Male (he/him): Kael, Albert/Mossy (bulwark), Grimble, Motley, Tenzo.
+- Female (she/her): Cinder, Lace, Neve, Meeko, Sable, Vex, Sparkle. Villain: Malgrave (she/her).
