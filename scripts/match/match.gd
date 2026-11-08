@@ -722,6 +722,7 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.generate")
 	await world.build_meshes()
 	RaidLook.tune_world(world, raid)
+	if DepthCues.k() > 0.0: add_child(DepthCues.new(self))
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	brk = Breakables.new(self)

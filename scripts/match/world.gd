@@ -1173,6 +1173,7 @@ func build_meshes() -> void:
 	mat.set_shader_parameter("height_tex", tm.height_texture())
 	mat.set_shader_parameter("map_size", Vector2(w, h))
 	mat.set_shader_parameter("use_ao", true)
+	mat.set_shader_parameter("depth_k", DepthCues.k())
 	mat.set_shader_parameter("paint2", 1.0 if Flora.v2() else 0.0)
 	if Flora.on():
 		var bt := _biome_textures()
