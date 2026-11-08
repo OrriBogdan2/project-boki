@@ -40,7 +40,8 @@ Rubric, 2 points each: (1) idea fused through the whole body, (2) silhouette tha
 | Puffamus | 7.5 | belt-like band; wait for new Chuggamus | redo |
 | Glaivyx | 9.0 | the locked Vespox redo, promoted to the Fierce final (owner) | keep |
 | Barokat | 8.5 | redo A: worried face, funnel ears, vane tail | keep |
-| Gongibbon | 7.5 | redos 1-2: bell reads as a helmet, then hung on its neck | redo 3: gong-disc throat |
+| Gongibbon | 8.5 | chest-gong redo A, cropped to its clean row: calm monk, gong chest, mallet tail | keep (base) |
+| Gongibbon evolution (crest gong, name TBD) | 8.5 | crest redo A: skull-crest gong, roaring, bronze knuckles | keep (replaces Carillangutan) |
 | Skateron | 8.5 | redo B: skater pose, ice blades, smug face | keep |
 | Vespox | - | new middle form needed, smaller than both finals | new prompt out |
 | Kestrike | 8.5 | redo B: round, copper-spike crest, copper rod tail | keep |
