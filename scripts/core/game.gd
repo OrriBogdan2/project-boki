@@ -64,7 +64,7 @@ func _setup_input() -> void:
 	_key("fire", [], MOUSE_BUTTON_LEFT)
 	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your archetype's right-click ability (its variants: tap, hold, air...)
 	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the archetype's ability, Shift the archetype's
-	# dash, Space jump and glide (Mouse 5 glides too), Q your active glove, E the archetype's utility,
+	# dash, Space jump and glide, Q your active glove, E the archetype's utility,
 	# R the hunter's ultimate, X Fuse with your Boki (a full bond meter), G send out / call back your Boki
 	# (hold G for the order wheel; the Boki casts its own ability), middle mouse ping, 1-4 the belt, F interact.
 	_key("signature", [KEY_E])                # the archetype's utility (E)
@@ -78,12 +78,15 @@ func _setup_input() -> void:
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
 	_key("throw", [KEY_G])                    # send your kin out to fight on its own, or recall it
 	_key("ping", [], MOUSE_BUTTON_MIDDLE)     # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
+	_key("ping", [], MOUSE_BUTTON_XBUTTON1)   # Mouse 4 pings too
+	_key("kin_attack", [KEY_K])               # Boki order: attack my target (the Chase order)
+	_key("kin_return", [KEY_N])               # Boki order: come back to me (the Return order)
+	_key("kin_hold", [KEY_L])                 # Boki order: hold this position (the Guard order)
 	_key("base", [KEY_B])                     # base to a teammate: a 3s channel (squads only)
 	_key("swap_kin", [])                      # one kin per expedition now; kept so old code paths compile
-	_key("dash", [KEY_SHIFT])
+	_key("dash", [KEY_SHIFT], MOUSE_BUTTON_XBUTTON2)     # Mouse 5 (the front side button) dashes too
 	_key("jump", [KEY_SPACE])
-	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # hold Mouse 5 (the front side button) in the air to glide, like holding Space; never jumps
-	_key("glide", [], MOUSE_BUTTON_XBUTTON1)  # Mouse 4 glides too (not advertised)
+	_key("glide", [])                         # a spare glide button, unbound: holding jump in the air glides
 	_key("hunter_ult", [KEY_R])               # the hunter's own ultimate (level 6, see ArchKit.cast_ult)
 	_key("ultimate", [KEY_X])                 # Fuse with your Boki (level 6, a full bond meter); X again releases
 	_key("util1", [KEY_1])                    # utility belt slot 1 (a tonic to start)

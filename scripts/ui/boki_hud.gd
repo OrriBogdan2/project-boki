@@ -278,6 +278,8 @@ static func order_tip(H, p: Hunter) -> Array:
 	out.append(["Boki  ·  %s  ·  now: %s" % [Settings.key_cap("throw"), String(KinFollow.NAMES.get(k.cmd, "Follow"))], H.MUTED, 12])
 	out.append([("Tap: Sic, your Boki dives on the cursor from above" if k.carry_style() == "perch" else "Tap: Sic, your Boki leaps at the cursor") + ". Whatever it hits is stunned, and your shots crit stunned foes. Tap while it is away to call it back.", H.INK, 14])
 	out.append(["Hold and flick: up Chase (stick to a foe), right Guard (hold this spot), down Return (back on you), left Follow (at your side).", H.INK, 14])
+	var quick := "Quick orders  ·  %s attack my target  ·  %s come back  ·  %s hold position"
+	out.append([quick % ["kin_attack", "kin_return", "kin_hold"].map(Settings.key_cap), H.MUTED, 12])
 	if k.ks and not k.ks.throw_effects.is_empty():
 		out.append(["Its Sic also: " + KinText.effects(k.ks.throw_effects), KinRules.effects_color(k.ks.throw_effects), 13])
 	if k.ks:

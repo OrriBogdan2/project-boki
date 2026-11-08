@@ -337,8 +337,9 @@ func _tab_controls(v: VBoxContainer) -> void:
 			"fire", "secondary", "gear1", "gear2", "signature", "throw", "hunter_ult", "ultimate",
 			"util1", "util2", "util3", "util4", "base",
 		]],
+		["Boki orders", ["kin_attack", "kin_return", "kin_hold"]],
 		["Squad and map", ["ping", "map", "scores", "emote", "pass_lead", "separate"]],
-		["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
+		["At home", ["interact", "play", "talk", "details", "whistle", "inventory", "hero"]]]
 	var named := {}
 	for a in Settings.ACTIONS:
 		named[String(a[0])] = String(a[1])
@@ -501,6 +502,11 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 		b.tooltip_text = ("Main key" if slot == 0 else "Second key") + ": click, then press a key or mouse button"
 		if code == "" and slot == 1:
 			b.modulate = Color(1, 1, 1, 0.55)
+		var shared := Settings.conflicts_of_code(code, an)
+		if not shared.is_empty():
+			b.modulate = Color("ff8a7a")
+			var names := shared.map(func(c): return _action_name(String(c[0])))
+			b.tooltip_text = "Also used by: %s. Both fire on one press." % ", ".join(names)
 		b.pressed.connect(func():
 			listening = an
 			listening_slot = slot
@@ -517,6 +523,11 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 		x.modulate.a = 1.0 if code != "" else 0.25
 		cell.add_child(x)
 		r.add_child(cell)
+
+func _action_name(an: String) -> String:
+	for a in Settings.ACTIONS:
+		if a[0] == an: return String(a[1])
+	return an
 
 func _bind_text(code: String, slot: int) -> String:
 	if code != "":
@@ -588,12 +599,10 @@ func _finish_rebind(ev: InputEvent) -> void:
 		_show_settings()
 		return
 	# already someone else's key: say whose, and offer to swap (they get what this slot had)
-	var named := {}
-	for a in Settings.ACTIONS: named[String(a[0])] = String(a[1])
 	var other: String = cf[0][0]; var oslot: int = cf[0][1]
 	var mine: String = Settings.slots(an)[slot]
 	var key_txt := Settings.code_text(Settings.ev_code(ev))
-	var oname := "\"%s\"" % named.get(other, other)
+	var oname := "\"%s\"" % _action_name(other)
 	var txt := "%s is already the key for %s.\nSwap them (%s gets %s), or use it for both?" % [key_txt, oname, oname, Settings.code_text(mine) if mine != "" else "no key"]
 	_show_settings()
 	var layer := UI.confirm(root, "Key already in use", txt, "Swap", func():

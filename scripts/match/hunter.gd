@@ -28,7 +28,7 @@ const GLIDE_BRAKE := 36.0        # steering more than GLIDE_BRAKE_DEG against yo
 const GLIDE_BRAKE_DEG := 115.0
 const GLIDE_GRAV := 14.0
 const GLIDE_ENGAGE := 0.1        # hold Space this long in the air before the glider opens (a tap is a jump); was 0.15
-                                 # (the dedicated glide button, Mouse 5, opens it at once)
+                                 # (the optional glide button opens it at once)
 ## The abyss lift [wiki: "a rapid upward impulse to ground level, then a rapid deceleration"], scaled
 ## by how deep you are (owner: "pull you up faster based on how low in the abyss you are"): a gentle
 ## lift just under the lip, a hard surge from deep down. See abyss_lift_vy (the match and home both use it).
