@@ -377,7 +377,8 @@ func _archer_miss() -> void:
 		P.inp["fire"] = fmod(t, 0.9) < 0.04 and t < 1.9
 		_aim(off + Vector3(0, 0, 1.6 * floor(t / 0.9)))
 	await _go(4.6, shots, _sheet("miss",
-			"Missed needles stay stuck in the ground with their orchid threads attached, 4 s, swaying, then they run out",
+			"Missed needles stay stuck in the ground with their orchid threads attached, 4 s, swaying, "
+			+ "then they run out",
 			[0.1, 0.3, 0.6, 1.2, 2.0, 2.8, 3.6, 4.2, 4.5], func() -> Vector3: return off), 3.0)
 	await _go(GAP)
 
