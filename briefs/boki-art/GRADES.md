@@ -33,16 +33,16 @@ Rubric, 2 points each: (1) idea fused through the whole body, (2) silhouette tha
 | Prismink | 8.0 | upright, mostly a recolour | redo |
 | Oarlet | 8.0 | generic otter plus paddle | redo |
 | Amanitusk | 8.0 | realistic boar | redo |
-| Lashyx | 7.5 | owner: reads smaller and weaker than Vespox, not a final form | redo from new Vespox |
+| Lashyx | 8.5 | redo A: smoky legs, triple-blade sting, armoured; reads as final next to a smaller Vespox | keep |
 | Bellowary | 7.5 | realistic turkey head, strapped saddle | redo (batch 1) |
 | Prismander | 9.0 | redo D: faceted crystal body, prism gills, glass tail blade; re-laid from 5 views | keep |
 | Zippelith | 8.5 | owner regrade: the simple glossy blob is its charm | keep (Zipling must look clearly different) |
 | Puffamus | 7.5 | belt-like band; wait for new Chuggamus | redo |
-| Vespox (male) | 9.0 | redo: big venom pincers, on all fours, armoured; re-laid from 2x2 | keep |
+| Glaivyx | 9.0 | the locked Vespox redo, promoted to the Fierce final (owner) | keep |
 | Barokat | 8.5 | redo A: worried face, funnel ears, vane tail | keep |
 | Gongibbon | 7.5 | redos 1-2: bell reads as a helmet, then hung on its neck | redo 3: gong-disc throat |
 | Skateron | 8.5 | redo B: skater pose, ice blades, smug face | keep |
-| Vespox (female) | 6.5 | upright | redo already out |
+| Vespox | - | new middle form needed, smaller than both finals | new prompt out |
 | Kestrike | 8.5 | redo B: round, copper-spike crest, copper rod tail | keep |
 
 Female sheets for Bellowary and Gongibbon are on hold until their redos are locked.
