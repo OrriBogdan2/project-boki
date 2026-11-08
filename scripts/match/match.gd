@@ -3885,8 +3885,8 @@ func step(dt: float) -> void:
 		if net_on:
 			Net.tick(dt)
 		return
-	if tut and tut.intro:
-		tut.intro_wait(dt)      # (the intro card: the match waits for a key or two seconds)
+	if tut and tut.holding():
+		tut.hold_wait(dt)      # (the intro card or Pell's talk: the match waits)
 		return
 	time += dt
 	if Game.god and player and not player.out:

@@ -1,0 +1,49 @@
+{
+	"desc": "How every NPC talks (NpcDialogue, NpcBeacon, FarmTalk): a box at the bottom with a front-facing portrait, a name plate and text that types out, a '...' bubble before the first line, a voice blip per few letters, and the camera easing in on the speaker's head. A speaker's painted portraits, when they land, go at 'portrait' with {mood} for neutral, happy or warning; until then the box shows a close-up rendered from the speaker's model.",
+	"type_cps": 42,
+	"type_cps_desc": "Letters per second the text types out at.",
+	"dots_s": 0.7,
+	"dots_s_desc": "Seconds the '...' bubble shows before the first line.",
+	"pause_s": {".": 0.22, "!": 0.22, "?": 0.22, ",": 0.1},
+	"pause_s_desc": "Extra seconds the typing holds after these letters, so sentences breathe.",
+	"blip_every": 2,
+	"blip_every_desc": "A voice blip every this many letters (spaces and punctuation are silent).",
+	"blip_db": -14.0,
+	"cam_zoom": 0.5,
+	"cam_zoom_desc": "The camera's zoom while someone talks (the farm's own is about 0.9).",
+	"cam_ease": 3.0,
+	"cam_ease_desc": "1/s: how fast the camera eases onto the speaker and back.",
+	"cam_lift": 1.6,
+	"cam_lift_desc": "Metres the view slides toward the camera, so the speaker sits above the box instead of behind it.",
+	"arrow_margin": 46,
+	"arrow_margin_desc": "Pixels in from the screen edge that the off-screen arrow sits.",
+	"moods": {"neutral": "a9b0bf", "happy": "f2c84a", "warning": "ff6a5a"},
+	"moods_desc": "The portrait frame's colour per expression (and the expressions a line may ask for).",
+	"speakers_desc": "Each NPC: name, short (the edge arrow's label), role (under the name), voice_hz (blip pitch), head and tag (m above the feet: the camera's aim and the name tag), portrait_at and portrait_dist (m: the rendered close-up's aim height and distance), glow (outline colour).",
+	"speakers": {
+		"hob": {
+			"name": "Hob Brackenridge",
+			"short": "Hob",
+			"role": "Builder",
+			"voice_hz": 150.0,
+			"head": 2.2,
+			"tag": 3.2,
+			"portrait": "res://art/portraits/hob_{mood}.png",
+			"portrait_at": 2.0,
+			"portrait_dist": 2.2,
+			"glow": "ffd79a"
+		},
+		"pell": {
+			"name": "Pell",
+			"short": "Pell",
+			"role": "Freed soul, your guide",
+			"voice_hz": 420.0,
+			"head": 1.4,
+			"tag": 2.1,
+			"portrait": "res://art/portraits/pell_{mood}.png",
+			"portrait_at": 1.15,
+			"portrait_dist": 2.4,
+			"glow": "9fd8ff"
+		}
+	}
+}

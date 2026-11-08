@@ -421,6 +421,34 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | shell_base | {"light": 80, "medium": 110, "heavy": 150} |
 | shell_note | hp of the shell every merge gives on top of your own health (docs/decisions/0003): by weight class; a form multiplies it with `shell_k` in its file. Damage hits the shell first; when it breaks the merge ends and the ultimate is lost. |
 
+## npc_talk (`content/rules/npc_talk.json`)
+
+How every NPC talks (NpcDialogue, NpcBeacon, FarmTalk): a box at the bottom with a front-facing portrait, a name plate and text that types out, a '...' bubble before the first line, a voice blip per few letters, and the camera easing in on the speaker's head. A speaker's painted portraits, when they land, go at 'portrait' with {mood} for neutral, happy or warning; until then the box shows a close-up rendered from the speaker's model.
+
+| Setting | Value |
+|---|---|
+| type_cps | 42 |
+| type_cps_desc | Letters per second the text types out at. |
+| dots_s | 0.7 |
+| dots_s_desc | Seconds the '...' bubble shows before the first line. |
+| pause_s | {".": 0.22, "!": 0.22, "?": 0.22, ",": 0.1} |
+| pause_s_desc | Extra seconds the typing holds after these letters, so sentences breathe. |
+| blip_every | 2 |
+| blip_every_desc | A voice blip every this many letters (spaces and punctuation are silent). |
+| blip_db | -14 |
+| cam_zoom | 0.5 |
+| cam_zoom_desc | The camera's zoom while someone talks (the farm's own is about 0.9). |
+| cam_ease | 3 |
+| cam_ease_desc | 1/s: how fast the camera eases onto the speaker and back. |
+| cam_lift | 1.6 |
+| cam_lift_desc | Metres the view slides toward the camera, so the speaker sits above the box instead of behind it. |
+| arrow_margin | 46 |
+| arrow_margin_desc | Pixels in from the screen edge that the off-screen arrow sits. |
+| moods | {"neutral": "a9b0bf", "happy": "f2c84a", "warning": "ff6a5a"} |
+| moods_desc | The portrait frame's colour per expression (and the expressions a line may ask for). |
+| speakers_desc | Each NPC: name, short (the edge arrow's label), role (under the name), voice_hz (blip pitch), head and tag (m above the feet: the camera's aim and the name tag), portrait_at and portrait_dist (m: the rendered close-up's aim height and distance), glow (outline colour). |
+| speakers | {"hob": {"name": "Hob Brackenridge", "short": "Hob", "role": "Builder", "voice_hz": 150.0, "head": 2.2, "tag": 3.2, "portrait": "res://art/portraits/hob_{mood}.png", "portrait_at": 2.0, "portrait_dist": 2.2, "glow": "ffd79a"}, "pell": {"name": "Pell", "short": "Pell", "role": "Freed soul, your guide", "voice_hz": 420.0, "head": 1.4, "tag": 2.1, "portrait": "res://art/portraits/pell_{mood}.png", "portrait_at": 1.15, "portrait_dist": 2.4, "glow": "9fd8ff"}} |
+
 ## perk_orbs (`content/rules/perk_orbs.json`)
 
 
@@ -488,6 +516,9 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | need | {"shoot": 3, "sig": 2, "utility": 2, "throw": 2} |
 | mob | {"hp": 5.0, "scale": 1.4, "dmg": 0.1, "windup": 1.8, "cd": 1.6} |
 | labels | {"land": "Land here", "move": "Walk here", "dash": "Dash across", "exdash": "Air dash", "glide": "Glide here", "crouch": "Lookout", "pickup": "Item", "key": "Key", "chest": "Chest", "goexit": "Outpost", "uplink": "Uplink", "defend": "Outpost", "extract": "Lift"} |
+| pell_doc | Pell, the guide (TutorialGuide): what it says when it stops you at the start of a step (one box page per line; the same %keys as the steps), and the portrait mood for steps that are not neutral. |
+| pell | {"move": ["I'm Pell. When the Heart broke, my soul was torn loose, and a Boki's light set me free.", "Follow me. I'll show you how a Hunter gets around up here."], "dash": ["A gap! Dash to cross it. Run from the glowing pad and dash at the edge."], "exdash": ["This one's wider. Jump first, then dash while you're in the air."], "glide": ["Too far to dash. Jump, then hold %G to glide across. Wings help, trust me."], "crouch": ["Climb the lookout, then crouch. Low and still, you can see much farther."], "pickup": ["Hunters find gear lying about. Walk over it to pick it up."], "gkey": ["%s fights with you. Press %T to send it at a monster, and again to call it back."], "rank": ["You levelled up! Each level is a skill point. Spend it to make an ability stronger."], "shoot": ["A Hollow beast. These are what the broken Heart leaves behind. %W it!"], "sig": ["A whole group. That's what %A is for: line them up, then let it go."], "utility": ["Your hunter has a trick of their own: %A. Try it on these two."], "throw": ["That one spits from afar. Send %s at it!"], "orders": ["%s listens. Hold %T and pick an order from the wheel."], "kin1": ["Every Boki has a power of its own. Watch %s use %A."], "key": ["Chests up here are locked. There's a key nearby. Grab it."], "chest": ["Now the chest. Hold next to it to open it with the key."], "fight": ["More of them! Beat them all, you and %s together."], "goexit": ["The outpost is this way. That's where Hunters get off an island."], "uplink": ["Capture the uplink mast. Stay in the circle until it's yours."], "defend": ["They're coming for the outpost! Stay in the circle and hold it."], "extract": ["You did it. Step into the light, and I'll see you below, Hunter."]} |
+| pell_moods | {"fight": "warning", "defend": "warning", "rank": "happy", "extract": "happy"} |
 
 ## warden_look (`content/rules/warden_look.json`)
 

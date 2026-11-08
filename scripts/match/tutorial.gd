@@ -5,13 +5,10 @@ extends RefCounted
 ## The steps, their words and the headless driver (TutorialDrive) live here and next door, not in Match.
 ## What the player sees is drawn by TutorialHud: a small banner at the top for each new step that
 ## settles into a pill, a pulse when they stall, a quiet check when a step is done; the marker (beam,
-## arrow) is here and in the Hud. Nothing but the first intro card ever pauses play.
+## arrow) is here and in the Hud. Pell, the guide who flies ahead and stops you before each new thing, is
+## TutorialGuide. Only the first intro card and Pell's talks ever pause play.
 
 ## Steps: content/rules/tutorial.json. Steps a kit can't do are skipped (applies()).
-## Whether your Boki runs ahead for this step (to a pad before a gap, or to the goal).
-static func leads(sid: String) -> bool:
-	return sid in WALK_LEAD or sid in GAP_STEPS
-
 static func steps() -> Array:
 	return Content.rules("tutorial")["steps"]
 
@@ -78,11 +75,13 @@ var fight_n := 0
 var _course: Dictionary = {}
 var _beams: Array = []
 var _pads: Array = []
+var pell: TutorialGuide
 
 func _init(match_node: Match) -> void:
 	m = match_node
 	intro = not match_node.opts.get("tut_test", false) and not Save.d["tutorial"].get("tut_intro", false)
 	_course = World.load_layout("tutorial").get("course", {})
+	pell = TutorialGuide.new(self)
 
 # ------------------------------------------------------------------ the course
 ## A course stop's ground position (INF when the stop isn't in the table). key: "at" or "pad".
@@ -104,6 +103,7 @@ func setup() -> void:
 	for id in GAP_STEPS:
 		_add_pad(id)
 	last_stop = stop("land")
+	pell.build()
 
 func _add_pad(id: String) -> void:
 	var pad := stop(id, "pad")
@@ -194,8 +194,9 @@ func update(dt: float) -> void:
 	_point(sid)
 	_stall(dt)
 	_props()
+	pell.tick(dt)
 	if p.kin and p.kin.comp:
-		p.kin.comp.tut(sid, _lead_goal(sid))
+		p.kin.comp.tut(sid, goal(sid))
 	if wait > 0.0:
 		wait -= dt
 		return
@@ -310,6 +311,7 @@ func _enter() -> void:
 		"uplink", "defend", "extract":
 			pass
 	_words()
+	pell.begin(sid)
 
 ## The tutorial starts with every ability open, so a level-up is given once for real: the pop, the chime and
 ## a skill point (the gold + by the level ring), spent with Alt + the ability's key.
@@ -524,7 +526,7 @@ func goal(sid: String) -> Vector3:
 			return o["pos"] if not o.is_empty() else Vector3.INF
 	return Vector3.INF
 
-## Where your Boki runs ahead to: the glowing pad before a gap, else the goal itself.
+## Where Pell flies ahead to: the glowing pad before a gap, else the goal itself.
 func _lead_goal(sid: String) -> Vector3:
 	if sid in GAP_STEPS:
 		return stop(sid, "pad")
@@ -684,10 +686,17 @@ func respawn() -> Vector3:
 func on_hit() -> void:
 	hits += 1
 
-## The first-time intro card waits for a key or INTRO_T seconds, and the match waits with it.
-func intro_wait(dt: float) -> void:
+## The match waits: for the first-time intro card, or while Pell talks.
+func holding() -> bool:
+	return intro or pell.talking()
+
+## The intro card waits for a key or INTRO_T seconds; Pell, for you to read its line.
+func hold_wait(dt: float) -> void:
 	for k in m.pending_input:
 		m.pending_input[k] = false
+	if not intro:
+		pell.hold(dt)
+		return
 	intro_t += dt
 	if intro_t >= INTRO_T:
 		ack()
