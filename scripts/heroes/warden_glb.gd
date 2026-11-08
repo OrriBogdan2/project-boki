@@ -110,8 +110,8 @@ const SHIELD := "shield"        # a shield modelled in the left hand's Shield no
 ## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide, Sable's flips and Encore).
 const WING_FOLD := "wing_fold"
 const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
-## Root meta a kit sets while a runtime piece of the weapon is out (Grimble's stretched hook arm): the bones the Hero's
-## data lists in "hide_while_chain" shrink away (item 76b.4), so one hook shows, never two.
+## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air, Grimble's stretched hook
+## arm): the bones the Hero's data lists in "hide_while_chain" shrink away (item 76b.4), so one shows, never two.
 const CHAIN_OUT := "chain_out"
 const GRIP_L := "grip_l"                 # meta on a held weapon: warden_look "grip_l", read by HunterAnim
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
