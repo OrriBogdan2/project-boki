@@ -70,7 +70,9 @@
 She will become a playable character eventually. Make a turnaround (`malgrave_turnaround.jpg`), a splash (`malgrave_splash.jpg`, 16:9, 4K) and a portrait (`malgrave_portrait.jpg`, 1:1, 4K), in the same formats as the hero splashes and portraits. Then the dragon form, then the rest of the villain set.
 **Scope (owner, Nov 7, 23:48 ET):** her main design gets a turnaround (done: `villain/malgrave_turnaround.jpg`), a splash and a portrait. The hybrid form and the dragon form get one picture each (`malgrave_hybrid.jpg`, `malgrave_dragon.jpg`), with no splash, portrait or turnaround. The alternates in `malgrave_alts/` get nothing more for now.
 
-### 4. The Wyrm (true form)
+### 4. The Wyrm (true form): LOCKED (owner, Nov 7, 23:53 ET)
+`villain/malgrave_dragon.jpg`: a long pearl-white serpent body with no arms, pearl feathered wings turning into glowing crimson membrane, a crimson fin ridge, a porcelain mask face-plate with a gold crest, a dark-crimson mane, a glowing X scar from Kael's sword, and the body looping into an infinity sign. A tiny knight stands beside her for scale. Alternate: `villain/malgrave_alts/alt_dragon_arms_headshot.jpg` (the best head close-up). Hybrid: v1 is in `villain/explorations/malgrave_hybrid_v1_C.jpg`; the owner wants a more dragon-like redo.
+
 - **Look:** an ancient, huge dragon.
   - Its scale pattern repeats the gold design of the mask.
   - Deep red body.
