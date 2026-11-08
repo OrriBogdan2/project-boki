@@ -57,7 +57,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;margin:0;text-wra
 <div class="wrap">
   <header>
     <h1>Boki Roster 100</h1>
-    <p class="sub">There are 50 species in the game today and 50 new forms in this pass. Each Boki has one or two types. Lines run 1 to 3 stages, and some final forms split by the path the Boki was raised on (fierce, steadfast, curious or swift). Every Boki also comes in a male and a female look.</p>
+    <p class="sub">The 50 species in the game today, plus the new forms from this pass. Each Boki has one or two types. Lines run 1 to 3 stages, and some final forms split by the path the Boki was raised on (fierce, steadfast, curious or swift). Every Boki also comes in a male and a female look.</p>
   </header>
   <div class="stats" id="stats"></div>
   <div class="legend">
@@ -75,8 +75,8 @@ const NEWT=["Tide","Wyrm","Wild"];
 // status: L = art locked, T = in game, art to do or redo, N = new form
 const m=(n,t,s,w,p)=>({n,t,s,w,p});
 const G=[
- {g:"Starters",note:"Hatchet is the mystery egg: it evolves four ways, one per path",f:[
-  [m("Hatchet",["Wild"],"N","Chick that never fully hatched: its speckled eggshell is part of its body"),[m("Cleavegg",["Wild","Titan"],"N","Shell's broken edge grows into an axe-blade crest","Fierce"),m("Bulwegg",["Wild","Stone"],"N","Shell grows into full domed armour","Steadfast"),m("Shardart",["Wild","Tempest"],"N","Shell splits into blade fins, a dart-fast runner","Swift"),m("Lumegg",["Wild","Lunar"],"N","Shell becomes a glowing lantern dome","Curious")]],
+ {g:"Starters",note:"Ermink is the mystery egg: it evolves nine ways, one per Ink",f:[
+  [m("Ermink",["Wild"],"L","Stoat whose tail is a calligraphy brush, cream coat like a blank page"),[m("Flarmink",["Ember"],"N","Flame-brush tail, fiery brushstroke coat","Ember Ink"),m("Rippmink",["Tide"],"N","Otter-sleek, wave strokes, webbed paws","Tide Ink"),m("Blossmink",["Bloom"],"N","Leaf-bristle brush, painted petals and vines","Bloom Ink"),m("Voltmink",["Storm"],"N","Wire-bristle brush, zig-zag lightning strokes","Storm Ink"),m("Rimink",["Frost"],"N","Icicle brush, frost-lace strokes, long and sleek","Frost Ink"),m("Umbrink",["Shadow"],"N","Soaked jet-black, smoking brush","Shadow Ink"),m("Lunink",["Lunar"],"N","Silver ink, crescent strokes, moth-feather ears","Lunar Ink"),m("Prismink",["Prism"],"N","Rainbow ink that splits light","Prism Ink"),m("Wyrmink",["Wyrm"],"N","Long, serpentine ink-dragon stoat","Wyrm Ink")]],
   [m("Mycroll",["Spore"],"L","Hedgehog with mint toadstools"),m("Sporcupine",["Spore"],"L","Porcupine whose quills are mushroom stalks"),[m("Amanitusk",["Spore","Venom"],"N","Boar-sized, toxic red caps as spear quills, stem tusks","Fierce"),m("Ringrove",["Spore","Bloom"],"N","Huge calm elder, a fairy ring grove on its back, shelf-fungus armour","Steadfast")]],
   [m("Vespyx",["Venom"],"L","Fox with scorpion tail and pincers (website art)"),m("Vespox",["Venom"],"L","Leaner fox, bigger pincers, longer sting tail. Male locked, female redo out"),[m("Glaivyx",["Venom","Titan"],"N","Armoured bruiser, sting grown into a scythe blade","Fierce"),m("Lashyx",["Venom","Shadow"],"N","Sleek speedster, whip tail with three stings","Swift")]],
   [m("Prismander",["Prism","Tide"],"T","Axolotl, crystal gills"),m("Glassolotl",["Prism","Tide"],"N","Glass-bodied axolotl, prism gills"),[m("Chandelotl",["Prism","Lunar"],"N","Gills become a crystal chandelier crown","Curious"),m("Geodelotl",["Prism","Stone"],"N","Heavy geode hide, crystal tail club","Steadfast")]]
@@ -115,6 +115,9 @@ const G=[
   [m("Gongibbon",["Echo"],"L","Gibbon with a temple-bell torso"),m("Carillangutan",["Echo","Titan"],"N","Orangutan with a bell-tower back")],
   [m("Lockatara",["Titan","Gravity"],"L","Tuatara with padlock shackle"),m("Vaultara",["Titan","Gravity"],"N","Huge tuatara with a vault-door shell")]
  ]},
+ {g:"Rare branching line",note:"Jarmit moves into a new container per Ink",f:[
+  [m("Jarmit",["Tide"],"L","Hermit crab living in a glass jar"),[m("Lanternmit",["Tide","Ember"],"N","Moves into an oil lantern","Ember Ink"),m("Stormit",["Tide","Storm"],"N","Moves into a coil-wrapped storm bottle","Storm Ink"),m("Terrarimit",["Tide","Bloom"],"N","Moves into a mossy terrarium","Bloom Ink")]]
+ ]},
  {g:"Single-stage",note:"rares and complete designs",f:[
   [m("Cairnback",["Titan","Stone"],"T","Tortoise and ibex (rare)")],[m("Hivara",["Swarm","Titan"],"T","Honeybee and mantis (rare)")],[m("Zephyrak",["Tempest","Wyrm"],"T","Moray eel and swift (rare)")],
   [m("Effigeetle",["Stone","Swarm"],"L","Goliath beetle with a marble-face shell")],[m("Barokat",["Storm","Wild"],"L","Meerkat with barometer belly")],[m("Mirrolin",["Prism","Gravity"],"L","Pangolin with mirror tiles")],
@@ -127,10 +130,10 @@ const G=[
  ]}
 ];
 const all=[];G.forEach(g=>g.f.forEach(f=>f.forEach(x=>(Array.isArray(x)?x:[x]).forEach(y=>all.push(y)))));
-const tag={L:"Art locked",T:"Art to do",N:"New"},cls={L:"locked",T:"todo",N:"new"};
+const tag={L:"Art locked",T:"Art to do",N:"New"};const _p=1,cls={L:"locked",T:"todo",N:"new"};
 let sel=null;
 function card(x){const d=document.createElement("div");d.className="mon "+cls[x.s];
- d.innerHTML=`<div class="top"><span class="nm">${x.n}</span><span class="tag">${tag[x.s]}</span></div><div class="types">${x.t.map(t=>`<span class="t" style="--c:${TYPES[t]}">${t}</span>`).join("")}</div><div class="what">${x.w}</div>${x.p?`<div class="path">${x.p} path</div>`:""}`;return d}
+ d.innerHTML=`<div class="top"><span class="nm">${x.n}</span><span class="tag">${tag[x.s]}</span></div><div class="types">${x.t.map(t=>`<span class="t" style="--c:${TYPES[t]}">${t}</span>`).join("")}</div><div class="what">${x.w}</div>${x.p?`<div class="path">${/Ink$/.test(x.p)?"Evolves with "+x.p:x.p+" path"}</div>`:""}`;return d}
 function render(){const L=document.getElementById("list");L.innerHTML="";
  G.forEach(g=>{const fams=g.f.filter(f=>!sel||f.flat().some(y=>y.t.includes(sel)));if(!fams.length)return;
   const s=document.createElement("section");s.className="group";
