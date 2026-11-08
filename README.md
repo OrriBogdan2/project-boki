@@ -1,0 +1,1 @@
+Before/after shots for ext/creator-sex-distinct (not for merge). before: main d255acbee; after: ext/creator-sex-distinct 59701cf8f. GPU jobs 20261108-224159-24302 (before), 20261108-224204-22229 (after), --empty-shots --only=sex.
