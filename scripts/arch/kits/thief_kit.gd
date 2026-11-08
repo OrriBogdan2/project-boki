@@ -630,9 +630,10 @@ func _tick_bola_cast(dt: float) -> void:
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
-	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw
+	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw.
+	# Its width is the catch corridor for a foe of her own size (a catch is within "reach" of the foe's body)
 	AimKit.lane(h, "rmb",
-			{"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k,
+			{"len": lane_len(), "width": 2.0 * (float(bd["reach"]) + h.r), "chevrons": 4, "tip": true, "fill": k,
 					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": 1.6})
 	_whirl_bola()
 	if float(bola_cast["t"]) <= 0.0:
@@ -706,7 +707,8 @@ func _tick_bola(dt: float) -> void:
 					break
 		for o in m.foes_of(h.team):
 			if o == first or not o.hittable(): continue
-			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < o.r + 0.45 and absf(o.pos.y + 0.9 - p.y) < 1.6:
+			var catch_r: float = o.r + float(bd["reach"])
+			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < catch_r and absf(o.pos.y + 0.9 - p.y) < 1.6:
 				if first == null:
 					_wrap(o)
 					bola["first"] = o

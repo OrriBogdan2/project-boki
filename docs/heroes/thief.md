@@ -162,6 +162,19 @@ and asserted in `--dancer-combo-check` / `--kit-combo-check`.
 | The ult's numbers grow with rank (rank 2: damage, cooldown) | wiki R levels | n/a | Not built: the X ultimates have no ranks (HeroUlt); its damage grows with level through ability power |
 | A knock or assist heals 25% | wiki passive | yes (0063) | Built; asserted |
 
+## Telegraphs (audit C: every ground shape is gameplay, drawn at the hit's true size)
+
+Rule (DECISIONS, movement rules): a ring, disc or burst on the ground means gameplay; drawn size is the data size. Checked in `--dancer-combo-check` (`tools/dancer_jug_check.gd`, `tools/dj_ult_check.gd`).
+
+| Ability | Drawn | Hit (data) | Seen by | Now |
+|---|---|---|---|---|
+| Bola (RMB) | a chevron lane the Bola's `range` long and `2 x (bola.reach 0.45 + body radius)` wide | the flight catches a foe within `bola.reach` of its body | caster | was a 1.4 m `lane_w`; the hit's 0.45 was a magic number in code, now `bola.reach` |
+| Grounded | two yellow binding rings round the foe | status marker, no area | all | kept (the source shows the rings) |
+| Knife (E) | the dagger's arrival circle, 1.6 m | the blink's arrival point | caster | kept (source arrival marker), no hit area |
+| Encore (X) | the ring from `x.r0` 2.3 to `x.reach` 5.4 m over `x.grow`, and a dashed outer band at `x.rim` 0.75 of it | a blade at every foe inside; the outer band hits harder | all | the ring swelled 2 percent on each beat, so it was briefly bigger than the hit; now exactly `radius()`. The band is the real rim threshold |
+
+Suggestion, not built: the source's knife ring is about 1.5 bh (2.7 m) across; ours is 1.6 m.
+
 ## Combinations
 
 All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `--dancer-combo-check`

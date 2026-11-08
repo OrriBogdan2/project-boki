@@ -207,6 +207,9 @@ func thief(a) -> void:
 			AimKit.shown(P, "rmb") and absf(float(bl.get("len", 0.0)) - 10.8) < 0.1 and K.bola.is_empty()
 			and A.dmg(T) <= 0.0,
 			"len %.1f" % float(bl.get("len", 0.0)))
+	A.ok("dancer RMB: the lane is drawn as wide as the catch (twice the Bola's reach + a body radius of her size)",
+			absf(float(bl.get("width", 0.0)) - 2.0 * (float(K.rmb_def()["bola"]["reach"]) + P.r)) < 0.01,
+			"width %.2f" % float(bl.get("width", 0.0)))
 	A.step(m, 0.6)
 	A.ok("dancer RMB: Bola grounds the first, flies on, tangles two (stun)",
 			K.bola_pairs == 1 and KitStatus.grounded(T) and KitStatus.grounded(T2) and T.stun_t > 0.0

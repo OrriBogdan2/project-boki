@@ -20,7 +20,6 @@ const ORBIT_R := 0.9                   # m
 const DANCE := "thf_encore_dance"
 const DANCED_OVER := ["thf_lmb_r", "thf_lmb_l"]   # her plain throws don't break the dance (the bolts still fly)
 const PULSE_FADE := 7.0                # per s: how fast a beat's pulse leaves the ring
-const PULSE_R := 0.02                  # of the radius: the ring's swell on a beat
 
 var k: ThiefKit
 var st := {}                           # running: {t, next, n, hits: {foe id: blades landed}}
@@ -100,11 +99,11 @@ func _keep_dancing(d: Dictionary) -> void:
 		k.anim_at = k.m.time - into
 
 ## The ring everyone sees: it grows out from her, then rides with her; a dashed line marks the outer band. It
-## brightens and swells a little on every beat.
+## brightens a little on every beat (its size never changes: it is the hit area).
 func _draw_ring(d: Dictionary) -> void:
 	var gk := clampf(float(st["t"]) / float(d["grow"]), 0.0, 1.0)
 	var r := radius()
-	AimKit.circle(k.h, "ult", {"self": true, "r": r * (1.0 + PULSE_R * pulse), "col": RING_COL, "col2": RIM_COL,
+	AimKit.circle(k.h, "ult", {"self": true, "r": r, "col": RING_COL, "col2": RIM_COL,
 			"all": true, "ticks": true, "fill": (0.3 + 0.1 * pulse) * gk, "alpha": 1.2 + 0.8 * pulse})
 	AimKit.circle(k.h, "ult_rim", {"self": true, "r": r * float(d["rim"]), "col": Color(RIM_COL, 0.7), "all": true,
 			"dashed": true, "alpha": 0.7})

@@ -66,14 +66,19 @@ func dancer(a) -> void:
 	A.ok("dancer X: the ring reaches 3 bh at 0.4s, with the outer band dashed; no blade before it",
 			absf(float(AimKit.entry(P, "ult")["r"]) - float(d["reach"])) < 0.15 and AimKit.shown(P, "ult_rim")
 			and U.blades == 0 and _owed(P) == 0.0, "r %.2f" % float(AimKit.entry(P, "ult")["r"]))
-	var beat := {"at": [], "n": U.beat, "pulse": 0.0, "danced": true}
+	var beat := {"at": [], "n": U.beat, "pulse": 0.0, "danced": true, "r_off": 0.0}
 	A.step(m, 1.9, func():
 		if U.beat > int(beat["n"]):
 			beat["n"] = U.beat
 			(beat["at"] as Array).append(m.time)
 			beat["pulse"] = maxf(float(beat["pulse"]), float(AimKit.entry(P, "ult").get("alpha", 0.0)))
+			beat["r_off"] = maxf(float(beat["r_off"]), absf(float(AimKit.entry(P, "ult")["r"]) - U.radius()))
+			var rim_off := absf(float(AimKit.entry(P, "ult_rim")["r"]) - U.radius() * float(d["rim"]))
+			beat["r_off"] = maxf(float(beat["r_off"]), rim_off)
 		if float(U.st.get("t", 0.0)) > 0.45:
 			beat["danced"] = bool(beat["danced"]) and K.anim_id == ThiefUlt.DANCE)
+	A.ok("dancer X: the ring and its dashed outer band are drawn at exactly the hit radius on every beat",
+			(beat["at"] as Array).size() > 0 and float(beat["r_off"]) < 0.001, "off %.4f" % float(beat["r_off"]))
 	var gaps: Array = beat["at"]
 	var even := true
 	for i in range(1, gaps.size()):
