@@ -2675,3 +2675,9 @@ READY ext/hero-names 5e42b4b58 (player-visible hero names/titles synced to LORE_
 | tender | Pip -> Meeko | Little Lantern -> Dawnfox |
 | ashwick | Cinder (same) | Mad Pyromancer -> Flame Queen |
 Also: content/sfx/{bulwark,mage,archer,dolm,rimewright,tender}.json "name"; tools/weapon_audit.gd, warden_stance_shots.gd labels; portrait_check, breah/ashwick/care combo checks assert the new names/titles; hero_title_check OLD_NAMES now retires Hem, Breaker, Ryzz, Pip, Claire, Tarek, Lisette, Mossy, Ravel, Snowglider. Not touched: code comments, tools/gen_sfx_*.py docstrings, Boki kin nicknames "Pip" (a pet name, not the hero). Overlaps ext/lore-factions (also edits the class files): expect a trivial conflict in the title/base_name lines.
+
+## 2026-11-08 imagegen: villain art status (Malgrave, the Undying Queen)
+- Wyrmheart: LOCKED to the key-art look (glossy crimson glass, pink-red glow, no gold, no crack). Sheet: briefs/art-refs/villain/wyrmheart_sheet.jpg.
+- Mask: LOCKED by the owner as white porcelain "Blood Tears" (briefs/art-refs/villain/wyrm_queen_mask.jpg), NOT the red-lacquer draft. MALGRAVE_QUEEN_LOOK.md's mask section is updated to match; please carry it into LORE_MASKS / the lore page. Hunter masks are porcelain because they copy hers.
+- Human form: 4 turnaround options in progress (owner: seductive hourglass figure, fully and formally dressed). True form follows after the owner's pick.
+- Noted: Mossy is now Albert, the Barnacle Knight (id bulwark); new art files use "albert".

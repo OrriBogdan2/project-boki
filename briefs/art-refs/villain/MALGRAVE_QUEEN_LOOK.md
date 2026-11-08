@@ -2,12 +2,13 @@
 
 Story in one line: an ancient dragon who ruled Solmere for 300 years as an ageless, beautiful queen behind the first mask. She hid her soul in the Wyrmheart and fed it her people. Kael wounded her, her body died in the Hollowing, and she lives on inside the cracked Heart.
 
-## Her mask (the first mask; every Hunter's Mask copies it)
-- A calm, beautiful woman's face, eyes half-closed, a faint knowing smile. Serene, never angry. The horror is how peaceful it looks.
-- Porcelain-smooth red lacquer with gold trim. Fine gold scale pattern across the brow and cheekbones, fading out toward the chin.
-- Eye holes are slightly slit, like a dragon's pupil. Nothing visible behind them but a soft pink-red glow (the same glow as the Heart).
-- Two short swept-back gold horn tips rise from the mask's top edge and read as part of a crown.
-- Simpler than the Hunter Masks: Hunters copied it and added their own marks, so hers is the clean original.
+## Her mask: LOCKED by the owner (Nov 7; reconfirmed Nov 8, overriding the red-lacquer draft)
+File: `villain/wyrm_queen_mask.jpg` (option "Blood Tears").
+- A serene, beautiful woman's face in smooth white porcelain, with crimson lips and dark eye holes.
+- Gold dragon-scale panels at the temples, and gold filigree framing the face.
+- Glossy crimson tear-swirls flowing down from both eyes, and a crimson swirl crest on the brow.
+- Why porcelain: every Hunter's Mask is porcelain because they copy hers. The crimson ties it to the Wyrmheart.
+- The earlier red-lacquer description (horn tips, slit eyes with a glow) is superseded. Any glow behind the eye holes uses the Heart's pink-red.
 
 ## Human form (the queen)
 - Very tall (about a head taller than Kael), slender, ageless, impossibly graceful. Long neck, upright and still.
@@ -32,4 +33,5 @@ Story in one line: an ancient dragon who ruled Solmere for 300 years as an agele
 
 ## Must / must not
 - Must: female, beautiful and calm, unmistakably royal, unmistakably dragon underneath. Red and gold. Same glow colour as the Heart.
+- Owner (Nov 7): she has a very seductive figure (full hourglass) because she chose the most alluring human form to rule, but she is fully and formally dressed like a queen at court, seductive through presence, not exposure.
 - Must not: monstrous or snarling in human form; skimpy armour; a copy of any existing game's dragon queen.
