@@ -24,7 +24,7 @@ Rubric, 2 points each: (1) idea fused through the whole body, (2) silhouette tha
 | Ermink | 8.0 | upright in 3 views | exception proposed: nine forms built on it |
 | Bubblisk | 8.0 | no bite | redo |
 | Canvastross | 8.0 | stiff vertical wings, strapped saddle | redo |
-| Chuggamus | 8.0 | boiler reads as a strapped band | redo (batch 1) |
+| Chuggamus | 7.5 | redo still has the band, plus wheels | redo 2: riveted plate hide, piston legs, no band |
 | Lunowl | 8.0 | pretty but no edge | redo |
 | Mirrolin | 8.0 | tiny in frame, weak face | redo (batch 1) |
 | Murmurling | 8.0 | realistic bird plus pipes | redo |
@@ -35,10 +35,10 @@ Rubric, 2 points each: (1) idea fused through the whole body, (2) silhouette tha
 | Amanitusk | 8.0 | realistic boar | redo |
 | Lashyx | 8.5 after edit | strong silhouette; pincers lost | one edit adds pincers back |
 | Bellowary | 7.5 | realistic turkey head, strapped saddle | redo (batch 1) |
-| Prismander | 7.5 | real axolotl plus crystals | redo (batch 1) |
+| Prismander | 9.0 | redo D: faceted crystal body, prism gills, glass tail blade; re-laid from 5 views | keep |
 | Zippelith | 8.5 | owner regrade: the simple glossy blob is its charm | keep (Zipling must look clearly different) |
 | Puffamus | 7.5 | belt-like band; wait for new Chuggamus | redo |
-| Vespox (male) | 7.5 | upright front and back | redo (batch 1) |
+| Vespox (male) | 9.0 | redo: big venom pincers, on all fours, armoured; re-laid from 2x2 | keep |
 | Barokat | 7.0 | dial reads as held | redo (batch 1) |
 | Gongibbon | 7.0 | bell reads as a skirt, humanoid stance | redo (batch 1) |
 | Skateron | 6.5 | realistic heron plus props | redo (batch 1) |
