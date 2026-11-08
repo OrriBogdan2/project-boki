@@ -40,10 +40,9 @@ files in ~/meshy/kael_v2/ (never in git; `build.sh` there reruns everything). Ru
   empties weapon_muzzle (tip), anchor_blade_mid and anchor_blade_root sit on hand.R along the blade.
 - **Clips:** 49, retargeted from the v1 glb (origin/ext/art1-kael-2) by bone name with `tools/art1/kael_retarget.py`
   (shared bones keep their rest rotations; translation tracks take the rest-translation delta; v1 spring and
-  renamed bones are dropped, the game's spring chains drive them; dash is padded to the kit's 0.9 s). Config:
-  content/rules/warden_anim/kael.json (`fade` on jug_wave_wind, jug_lunge_wind). Several clips were authored for
-  kit 113 (levelled lunge, side-swing wave, upright meteor, 0.42 s dash), which is not on main yet; they run on
-  main's older poses and want a re-fit when kit 113 lands. Checked by `--clip-check` (juggernaut in OWN_MODELS).
+  renamed bones are dropped, the game's spring chains drive them; dash ends at kit 113's 0.42 s keys). Config:
+  content/rules/warden_anim/kael.json (`fade` on jug_wave_wind, jug_lunge_wind). The clips were authored for
+  kit 113 (levelled lunge, side-swing wave, upright meteor, 0.42 s dash), which the game now runs. Checked by `--clip-check` (juggernaut in OWN_MODELS).
 - **Armature:** the contract's plus the spring chains of v1 (mane x5, hangcuff, hangwarchain); the anchors of v1
   kept (anchor_head_top, anchor_chest, anchor_arm_*), no anchor_blade_tip (weapon_muzzle is the tip). 12.6k triangles
   in all (body 11.7k, sword 0.9k).

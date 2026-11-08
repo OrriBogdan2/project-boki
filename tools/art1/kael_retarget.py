@@ -13,7 +13,6 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from glb_add_clips import read, write
 
-PAD = {"dash": 0.9}     # clip: the length the kit's move keys run to (the first kit's dash was 0.42 s, this one holds its recovery): the last pose holds
 NCOMP = {"SCALAR": 1, "VEC3": 3, "VEC4": 4}
 
 
@@ -60,14 +59,11 @@ def main(old_p, new_p, out_p):
             path = ch["target"]["path"]
             t = get(oj, ob, sm["input"]).copy()
             v = get(oj, ob, sm["output"]).copy()
-            if an["name"] in PAD and t[-1] < PAD[an["name"]]:
-                t = np.append(t, np.float32(PAD[an["name"]]))
-                v = np.vstack([v, v[-1:]])
-            if (an["name"] in PAD, sm["input"]) not in times:
-                times[(an["name"] in PAD, sm["input"])] = put(nj, nb, t, "SCALAR")
+            if sm["input"] not in times:
+                times[sm["input"]] = put(nj, nb, t, "SCALAR")
             if path == "translation":
                 v += (n_rest[nm][0] - o_rest[nm][0]).astype(np.float32)
-            out["samplers"].append({"input": times[(an["name"] in PAD, sm["input"])], "output": put(nj, nb, v, "VEC4" if path == "rotation" else "VEC3"),
+            out["samplers"].append({"input": times[sm["input"]], "output": put(nj, nb, v, "VEC4" if path == "rotation" else "VEC3"),
                                     "interpolation": sm.get("interpolation", "LINEAR")})
             out["channels"].append({"sampler": len(out["samplers"]) - 1, "target": {"node": nid[nm], "path": path}})
         nj["animations"].append(out)
