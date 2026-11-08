@@ -309,6 +309,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		if mv.has("hold_from") and root.has_meta(PHASE):
 			var start := float(mv["hold_from"])
 			tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
+		elif mv.has("hold_at") and tt >= float(mv["hold_at"]) and tt < float(mv["hold_until"]):
+			tt = float(mv["hold_at"])          # (a pose held while the kit waits: Skycall's raised arm to its snap)
 		elif tt >= length:
 			if not mv.has("hold_from"):
 				return {}
