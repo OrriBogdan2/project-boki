@@ -96,4 +96,4 @@ The flying shot read as a random flip, so the owner wanted a nimble, stealthy ro
 - `sable_v2_splash_alt_perch.jpg`: she sits on the rope beside the shelf, "shh" and wink, with the gang at the table.
 - `sable_v2_splash_alt_upside_down.jpg`: she hangs upside down over the table, lifting the gem.
 - `sable_v2_splash_alt_dodge.jpg`: the combat alternate. A sword sweeps under her, the orc grabs at air, a dagger flies past, and she snatches the gem while firing back.
-All four: Nano Banana Pro, fresh generation, then a local light de-noise, contrast and colour lift, and sharpening. The previous flying splash is `explorations/sable_v2_splash_flying_old.jpg`.
+All four: Nano Banana Pro, fresh generation, saved raw (no touch-up). A sharpen and colour pass was tried but made them crunchier, so the raws were kept. The previous flying splash is `explorations/sable_v2_splash_flying_old.jpg`.
