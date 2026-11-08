@@ -9,6 +9,8 @@ extends RefCounted
 const ACT_R := 1.5            # [m] how close you stand to use a pedestal
 const SHOW_R := 6.5           # [m] a pedestal's name is drawn inside this
 const PED_GLOW := 0.3          # pedestal emission: a faint glow that keeps its colour under bloom (0.9 washed to white)
+const PED_GAP := 1.5           # [m] least gap between two pedestals; a full ring goes on in a smaller one
+const RING_STEP := 1.6         # [m] from one ring of pedestals to the next one in
 const FALL_Y := -12.0         # [m] below this you fell off the map: back to the start (the abyss kills at -17)
 const KIND_COL := {
 	"arch": "ffb454", "kin": "8fe3c8", "gear": "c9a0ff", "item": "ff8a7a", "bot": "ff6a6a", "clear": "9aa0b4",
@@ -91,15 +93,20 @@ func build() -> void:
 	_layer.add_child(prompt)
 	m.add_child(_layer)
 
-## One ring of pedestals round a perch's middle, one per id of the kind.
+## Rings of pedestals round a perch's middle, one per id of the kind: the outer ring first,
+## then smaller ones when a ring would put them closer than PED_GAP.
 func _ring(kind: String, c: Vector3, r: float) -> void:
 	var ids := ids_for(kind)
-	var n := ids.size()
-	for i in n:
-		var ang := -PI / 2.0 + TAU * float(i) / float(n)
-		var p := c + Vector3(cos(ang), 0, sin(ang)) * r
-		p.y = m.world.ground_at(p.x, p.z)
-		_pedestal(kind, String(ids[i]), p, c)
+	var done := 0
+	while done < ids.size() and r > PED_GAP:
+		var n := mini(ids.size() - done, int(PI / asin(PED_GAP / (2.0 * r))))
+		for i in n:
+			var ang := -PI / 2.0 + TAU * float(i) / float(n)
+			var p := c + Vector3(cos(ang), 0, sin(ang)) * r
+			p.y = m.world.ground_at(p.x, p.z)
+			_pedestal(kind, String(ids[done + i]), p, c)
+		done += n
+		r -= RING_STEP
 
 func _mat(col: Color) -> StandardMaterial3D:
 	var key := col.to_html()
