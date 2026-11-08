@@ -2840,3 +2840,4 @@ READY ext/idle-ostra 2a99a0912 (Motley the Void Jester idle+stance rework; based
 READY ext/idle-gunslinger fa16ce7ef (Vex the Hired Gun idle+stance rework)
 READY ext/idle-bulwark 53c963ec5 (Mossy the Barnacle Knight idle+stance rework)
 READY ext/agent-briefs af480ffa8 (briefs/TOWN_HUB.md: town square hub design doc only, low priority; no code; defaults picked: cap 32/soft 24 relay rooms, tst/tpro/tsay topics batched 10 Hz, L3 tabs + Mask Hall in town, tutorial town phase after the 2nd Mask)
+READY ext/idle-tender be19bd8bf (Meeko the Dawnfox idle+stance rework)
