@@ -3216,3 +3216,6 @@ and green flashes on these moves replaced from the palette. Strips: ext/vfx-qual
 (before/after_bulwark_{rmb,e,r}.png). Checks: --hero-vfx-check OK (jobq 20261108-223526-05181), --bulwark-combo-check
 145/0 (20261108-230336-16461), health --strict OK. Left: the Shield Slam isn't in the reel (needs 50 Guard); LMB and dash
 still gold/orange in BjornFx; his model hides the dome's upper half at reel zoom.
+
+## Nov 8 18:07 (owner): three stages is now the default
+Most evolving lines are now three stages (1 -> 2 -> 3). 15 new forms added; roster is 124 (ROSTER_100.html). Still two stages: Parasolth/Umbrathere, Thrumbird/Lyrewing, Gongibbon/Gongrowl, Echolop (branching), Ermink and Jarmit (Ink). 23 single-stage. Suggested level mapping: stage 2 at Grown (level 8), stage 3 at Elder (level 16). Please flag how many 3D models you can realistically take; 2D sheets are cheap.
