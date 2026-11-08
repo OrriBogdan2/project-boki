@@ -131,7 +131,7 @@ static func _phase(home: Node, want: Dictionary) -> String:
 	var hb: HomeBuild = home.hb
 	if hb == null or not hb.active:
 		return "hub"
-	var is_feeder := not hb.held.is_empty() and hb.held["kind"] == "feeder"
+	var is_feeder: bool = not hb.held.is_empty() and hb.held["kind"] == "feeder"
 	var held := ("feeder_" if is_feeder else "") + String(hb.held.get("id", ""))
 	return "spot" if held == String(want["tile"]) else "tile"
 
