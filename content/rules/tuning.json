@@ -5,6 +5,7 @@
 		"boki_retarget_s": 0.2,
 		"hero_anim_near_m": 48.0,
 		"hero_anim_far_every": 2,
-		"hero_anim_off_every": 4
+		"hero_anim_off_every": 4,
+		"bot_belt_s": 0.1
 	}
 }

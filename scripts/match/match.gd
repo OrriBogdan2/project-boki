@@ -2046,7 +2046,8 @@ func ground_grip(p: Vector3) -> float:
 func foes_of(team: int) -> Array:
 	var out: Array = []
 	for h in hunters:
-		if h.team != team and h.hittable() and not h.downed:
+		# (Hunter.hittable written out: foes_of runs many times a step and the call cost more than the test)
+		if h.team != team and not h.dead and not h.out and not h.extracted and not h.riding and not h.downed:
 			out.append(h)
 	for k in kins:
 		if k.dead or k.is_wild():
@@ -4663,6 +4664,13 @@ func _update_interact(dt: float) -> void:
 				best = {"kind": "finish", "ent": o, "label": "Hold %s to stomp %s  (you'll be locked in)" % [Settings.key_cap("interact"), o.pname], "col": Color("ff8a6a")}
 		if not want or best.get("kind", "") != "finish":
 			h.finish_t = 0.0
+		if not want and h != player:
+			# a bot that isn't pressing interact: nothing to prompt, so the scans below wait for the press
+			h.box_t = 0.0
+			h.set_meta("loot_hold", false)
+			h.set_meta("box_broke", false)
+			if exits: exits.interact_for(h)      # (lets go of a dock or hatch hold)
+			continue
 		# 1b. deathboxes: bring a teammate back while their soul is there, or take everything
 		if best.is_empty():
 			for b in boxes:

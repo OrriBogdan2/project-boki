@@ -173,8 +173,9 @@ func t(k: String) -> float:
 func is_wild() -> bool:
 	return owner_h == null
 
+const HITTABLE_STATES := ["active", "flying", "returning", "reviving", "wild"]     # (a const: hittable runs hundreds of times a step)
 func hittable() -> bool:
-	return not dead and state in ["active", "flying", "returning", "reviving", "wild"] and not (state == "flying" and fly.get("leap", false))
+	return not dead and state in HITTABLE_STATES and not (state == "flying" and fly.get("leap", false))
 
 func mass() -> float:
 	var g := float(giant.get("scale", 1.0)) if not giant.is_empty() else 1.0
