@@ -51,7 +51,8 @@ func run(progress := Callable()) -> void:
 				break
 		break
 	if m.player: m.player.warm_marker()      # and the hit-marker balloon over a Hunter
-	var seen := {}
+	var seen := WarmStamp.warm_keys()      # what an earlier launch drew and the disk caches still hold
+	var stamped := seen.size()
 	var t0 := Time.get_ticks_msec()
 	var batch_cb := func(f: float) -> void:
 		if progress.is_valid(): progress.call(0.7 * f)
@@ -123,7 +124,9 @@ func run(progress := Callable()) -> void:
 	m.cam.fov = keep[1]
 	m.cam.far = keep[2]
 	var t_end := Time.get_ticks_msec()
-	PerfLog.note("warm-up ms: stand-ins %d, views %d, late %d" % [t_first - t0, t_views - t_first, t_end - t_views])
+	PerfLog.note("warm-up ms: stand-ins %d, views %d, late %d (%d of %d keys warm from the stamp)"
+			% [t_first - t0, t_views - t_first, t_end - t_views, stamped, seen.size()])
+	WarmStamp.save(seen)
 	PerfLog.mark("build.warm_up")
 	# the benchmark: a few frames of the opening view
 	var times: Array = []
@@ -272,7 +275,7 @@ func _sources(seen: Dictionary) -> Array:
 		if n is Skeleton3D:
 			# skinned meshes run a skinning shader of their own, first when one is drawn: a copy of
 			# one rig of each make (its meshes follow it, their skeleton path is relative)
-			var sk := "skel:" + ",".join(n.get_children().filter(func(c): return c is MeshInstance3D).map(_mesh_id))
+			var sk := "skel:" + ",".join(n.get_children().filter(func(c): return c is MeshInstance3D).map(_key))
 			if not seen.has(sk) and seen.size() < 2000:
 				seen[sk] = true
 				list.append(n)
@@ -306,7 +309,7 @@ static func _key(gi: GeometryInstance3D) -> String:
 		var sb := gi as GeometryInstance3D
 		var parts: Array = [kind, sb.get("billboard"), sb.get("shaded"), sb.get("double_sided"),
 				sb.get("no_depth_test"), sb.get("fixed_size"),
-			sb.get("alpha_cut"), sb.get("texture_filter"), sb.get("transparent"), sb.material_override]
+			sb.get("alpha_cut"), sb.get("texture_filter"), sb.get("transparent"), _mat_key(sb.material_override)]
 		return str(parts)
 	else:
 		return ""
@@ -336,7 +339,7 @@ static func _mat_key(mt: Material) -> String:
 	var s := ""
 	if mt is ShaderMaterial:
 		var sh: Shader = (mt as ShaderMaterial).shader
-		s = "sh%d" % (sh.get_instance_id() if sh else 0)
+		s = "sh" + _code_hash(sh)
 	elif mt is BaseMaterial3D:
 		# the generated shader depends on its switches and modes and on which textures are set,
 		# not on colours and amounts
@@ -435,5 +438,12 @@ func _lights() -> Array:
 	return [o, sp]
 
 
-static func _mesh_id(mi: MeshInstance3D) -> String:
-	return str(mi.mesh.get_instance_id() if mi.mesh else 0)
+## A shader by its code (the same on every launch, unlike its instance id: WarmStamp keeps these keys).
+static var _code_hashes := {}
+static func _code_hash(sh: Shader) -> String:
+	if sh == null:
+		return "0"
+	var id := sh.get_instance_id()
+	if not _code_hashes.has(id):
+		_code_hashes[id] = sh.code.md5_text().substr(0, 12)
+	return _code_hashes[id]
