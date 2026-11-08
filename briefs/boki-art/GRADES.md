@@ -29,14 +29,14 @@ Rubric, 2 points each: (1) idea fused through the whole body, (2) silhouette tha
 | Mirrolin | 8.0 | tiny in frame, weak face | redo (batch 1) |
 | Murmurling | 8.0 | realistic bird plus pipes | redo |
 | Blossmink | 8.0 | upright, mostly a recolour | redo |
-| Lunink | 8.0 | | redo |
+| Lunink | 8.5 | owner regrade; brush tail and moon marks link it to the line | keep |
 | Prismink | 8.0 | upright, mostly a recolour | redo |
 | Oarlet | 8.0 | generic otter plus paddle | redo |
 | Amanitusk | 8.0 | realistic boar | redo |
-| Lashyx | 8.0 | pincers lost, plain fox | redo |
+| Lashyx | 8.5 after edit | strong silhouette; pincers lost | one edit adds pincers back |
 | Bellowary | 7.5 | realistic turkey head, strapped saddle | redo (batch 1) |
 | Prismander | 7.5 | real axolotl plus crystals | redo (batch 1) |
-| Zippelith | 7.5 | plain blob, no bite | redo (batch 1) |
+| Zippelith | 8.5 | owner regrade: the simple glossy blob is its charm | keep (Zipling must look clearly different) |
 | Puffamus | 7.5 | belt-like band; wait for new Chuggamus | redo |
 | Vespox (male) | 7.5 | upright front and back | redo (batch 1) |
 | Barokat | 7.0 | dial reads as held | redo (batch 1) |
