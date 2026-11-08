@@ -2755,3 +2755,14 @@ Everything is in briefs/art-refs/villain/:
 - malgrave_hybrid.jpg: horns, the dragon's wings, scales and the X scar
 - malgrave_dragon.jpg: a pearl-white serpent wyrm with feather-to-crimson-membrane wings, a porcelain mask face-plate and the X scar from Kael's sword, looping into an infinity sign, with a knight for scale
 The alternates (outfits, splashes and a portrait) are in villain/malgrave_alts/ (see its README). The owner says she will become a playable character eventually. The owner also says the Heart should not be a prop she shows off; it can become an ability later.
+
+## 2026-11-08 deep (job 20261108-044504-a4): READY ext/fix-albert-blade-clip b23758516 (release blocker, on ext/mc-20261108-0030 88b1ac50e)
+- Cause: hero-heights gave bulwark.json `"bulk": 0.8`, which Models.hunter applies as a root scale on x/z only. That shears the skinned blade as the hand turns, so its length changes. parity-mossy-cadence is not involved.
+- Fix: the narrowing stays (Mossy is still 20% narrower). WardenGlb.Sync._square_blade makes the blade bone's world basis square at the skeleton's height scale, only for a Warden with a body bulk. The branch reverts the earlier attempt cb61e7f3d, which had dropped the bulk.
+- --warden-model-check: the table now holds the heights from the owner's final height chart. Before that, 16 height rows on the candidate were stale. Ashwick's width bound is now 1.75.
+- health --strict: the long lines --lineup-shot added are wrapped.
+- Checks: --clip-check 0 failures (bulwark drift 0.018 m, limit 0.02); --warden-model-check 157/0 PASS (main: 1 failure); health --strict OK. Full suite not run.
+- MERGE NOTE vs ext/feel-integ (also on 88b1ac50e), which conflicts in four places:
+  - bulwark.json: it drops the bulk. Keep the bulk to keep the owner's narrowing.
+  - lineup_shot/check_registry: the same style wraps; take either.
+  - warden_model_check thief/ashwick height_3d: its v2 models changed those. Re-measure after merging both: run --warden-model-check and set height_3d to the new 3D model rows.
