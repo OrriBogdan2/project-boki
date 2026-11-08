@@ -3024,3 +3024,5 @@ READY ext/neve-lmb-celeste 7e6a64d74 (PR #22, job 20261108-180821-a2; on main d2
 READY ext/grimble-stretch d6e54648c
 
 READY ext/ui-void-masks-2 153acf74e (job 20261108-200012-a4; based on ext/ui-void-masks cba1da1f5, merge that first). Void & Masks follow-ups: UI.GLASS violet glass + neon edge on hub bar and Goals card (no more grey over grass), pink section headers (UI.PINK), tilted stamp tags, jagged black UI.badge, VoidPortrait (starfield + teal cracks) on the Boki page. Neon shader glow (item 3) not done: optional, the 3 polyline passes stay. Checks: --uipolish-check 30/0, health --strict OK; 15 shots at 1280x720 and 3840x2160 via --void-ui-shots (local xvfb, readable; not committed). GPU queue was 50 deep so rendered locally. Not merged.
+
+READY ext/hunter-screen-name PR #24: hunter kit card shows name (Tenzo) big, title subtitle; picker chips use names. Screenshot briefs/shots/hunter_name_after.png. No merge.
