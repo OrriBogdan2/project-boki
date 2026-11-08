@@ -3093,3 +3093,6 @@ CLAIM vex-coin-palm-1108 (job 20261108-214542-a4): owner 11-08 Vex Burr Charge -
 
 ## 2026-11-08 deep (job 20261108-215219-a4): CLAIM perf-expedition-1108 (TOP priority)
 - CLAIM: DECISIONS "expedition performance is TOP priority": profile the expedition (--perf-bench breakdown), top 10 costs in briefs/PERF_AUDIT.md, fix the biggest (LOD/visibility ranges, MultiMesh, shadows, lights, particles, per-frame scripts, physics, AI by distance), real quality presets incl. "very low" + render scale (FSR) per preset, saner auto-detect. Branch ext/perf-expedition-1108 from origin/main.
+
+## 2026-11-08 deep (job 20261108-215224-a1): CLAIM perf-load-shaders-1108
+- CLAIM: DECISIONS "expedition performance is TOP priority", loading and hitches half only (frame time stays with perf-expedition-1108): shader precompile/pipeline cache, warm-up done once and cached, cut build.hunters, first-minute hitches. Branch ext/perf-load-shaders-1108 from origin/main.
