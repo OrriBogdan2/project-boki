@@ -114,20 +114,36 @@ static func col(spec: String, team: Color, hero: Color) -> Color:
 
 ## The canopy mesh for a skin: a smooth, billowing sheet (arched across the span, cambered front to
 ## back like a real paraglider cell), two-sided, with normals from the curve so it shades softly.
-static var _meshes := {}
+## The sheet is built once per skin with each vertex's colour as weights of the skin's three colours
+## (red = cloth, green = stripe, blue = edge: every pattern is a blend of them), and each Hunter's copy
+## only mixes its own colours in (a bot's random outfit made every canopy a fresh 12 ms build).
+static var _sheets := {}
 static func mesh(id: String, team: Color, hero: Color) -> ArrayMesh:
-	var key := "%s|%s|%s" % [id, team.to_html(), hero.to_html()]
-	if _meshes.has(key):
-		return _meshes[key]
-	var am := _build(id, team, hero)
-	_meshes[key] = am
-	return am
-
-static func _build(id: String, team: Color, hero: Color) -> ArrayMesh:
+	if not _sheets.has(id):
+		_sheets[id] = _build(id).surface_get_arrays(0)
 	var g := get_skin(id)
 	var cloth := col(g["cloth"], team, hero)
 	var stripe := col(g["stripe"], team, hero)
 	var edge := col(g["edge"], team, hero)
+	var arrs: Array = (_sheets[id] as Array).duplicate()
+	var w: PackedColorArray = arrs[Mesh.ARRAY_COLOR]
+	var cs := PackedColorArray()
+	cs.resize(w.size())
+	for i in w.size():
+		var k := w[i]
+		var c := cloth * k.r + stripe * k.g + edge * k.b
+		c.a = (cloth.a * k.r + stripe.a * k.g + edge.a * k.b) / maxf(k.r + k.g + k.b, 0.001)
+		cs[i] = c
+	arrs[Mesh.ARRAY_COLOR] = cs
+	var am := ArrayMesh.new()
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
+	return am
+
+static func _build(id: String) -> ArrayMesh:
+	var g := get_skin(id)
+	var cloth := Color(1, 0, 0)
+	var stripe := Color(0, 1, 0)
+	var edge := Color(0, 0, 1)
 	var shape := String(g["shape"])
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
