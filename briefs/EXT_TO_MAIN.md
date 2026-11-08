@@ -3015,3 +3015,7 @@ READY ext/farm-tut-batch-1108 1c2b08ca2+e8b276b10 (PR #20, job 20261108-180818-a
 - Re-ran `godot -- --anim-audit` (the gait gate): 12 Hunters, FAIL 0, numbers match docs/art/ANIM_QUALITY_AUDIT.md (run slide 9-23 %, counter-swing +0.39..+0.91; ostra and rimewright exempt, backlogged).
 - e70ec15cb: `--anim-shots --close` (side camera at hip height to read arms and feet); docs/art/anim_audit/.gdignore so the doc strips are not imported/exported by Godot.
 - Not done: close-up before/after render (jobq 20261108-175055-02515) still queued; the GPU worker took nothing after 18:39. Match-camera before/after strips are in the doc.
+
+## 2026-11-08 14:30 ET (art): Boki Prompt Pack. Mycroll keeps the website design (owner)
+- **Mycroll (burrlet):** the owner rejects the pack's Batch 3 redesign (one big toadstool cap worn as a hinged lid). Keep the website card design: a cream-faced hedgehog with soft brown quills, many small glowing mint-green spotted toadstools growing from its back, and one larger toadstool on the tail tip. The ref is briefs/boki-art/style_refs/mycroll_2d_ref.png. The 3D model should be rebuilt to match it (it currently reads blue/pink and blocky). I'm making his clean turnaround with the owner and will upload it to the pack's Mycroll card.
+- **Style reference for the whole pack:** the owner's website Boki art (Vespyx and Mycroll), saved in briefs/boki-art/style_refs/. It replaces the Glintmole 3D render as image 1, because the render pulls the outputs toward a 3D look on green grass.
