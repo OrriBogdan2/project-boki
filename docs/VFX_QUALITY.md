@@ -62,7 +62,7 @@ Still open (shared, not done here):
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
 - `pin_draw.gd` defaults to `#e8483e`.
-- Only five kits are data-driven (`content/vfx/`: archer, ashwick, juggernaut, rimewright, tender). The rest draw with
+- Only six kits are data-driven (`content/vfx/`: archer, ashwick, dredge, juggernaut, rimewright, tender). The rest draw with
   `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`). Moving each to `HeroVfx` data is
   how a kit reaches the bar.
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`), Motley's well dome, Meeko's seed and
@@ -81,7 +81,7 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | 1 | Tenzo | dolm | 2 | 2 | 1 | 2 | 3 | 1 | 3 | 14 | E telegraph is opaque orange discs; X is a thin red line and ring; everything red/orange (now cobalt on this branch); `breah_*` draws flat rings with no debris |
 | 2 | Motley | ostra | 2 | 2 | 1 | 2 | 2 | 2 | 3 | 14 | E and X are huge opaque indigo domes over the target; LMB hit is tiny; indigo vs teal signature |
 | 3 | Vex | gunslinger | 1 | 2 | 2 | 2 | 3 | 1 | 4 | 15 | LMB and held LMB show almost no tracer or muzzle flash; RMB crescents are pink; E/X are opaque brown scorch discs |
-| 4 | Grimble | dredge | 3 | 2 | 2 | 2 | 3 | 1 | 3 | 16 | pink pellets, teal E fan, orange RMB fan, purple hook chain: four colours, none gold; flat fans with no leading edge |
+| 4 | Grimble | dredge | 3 | 2 | 2 | 2 | 3 | 1 | 3 | 16 | pink pellets, teal E fan, orange RMB fan, purple hook chain: four colours, none gold; flat fans with no leading edge. **After (ext/vfx-dredge): 26**, see below |
 | 5 | Lace | archer | 2 | 3 | 2 | 3 | 3 | 1 | 2 | 16 | tap needle and threads are hair-thin red lines; Heavy Shot is a flat red pinwheel and arrow sprite; X beam reads but is Kael's red; few sounds |
 | 6 | Meeko | tender | 2 | 2 | 2 | 3 | 3 | 1 | 4 | 17 | purple orbs, gold seed rings, cyan ult dome: no signature colour; hard-edged flat discs; Hearth Call barely reads |
 | 7 | Sable | thief | 2 | 2 | 2 | 3 | 3 | 3 | 3 | 18 | LMB hits nearly invisible; held LMB is a flat unlit purple box; X is pale grey discs |
@@ -90,6 +90,20 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | 10 | Neve | rimewright | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 26 | reads well (shards, shatter burst); the dash ice path is flat untextured boxes |
 | 11 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 27 | the bar: slash arcs, burning lanes, debris. Polish: cleave sound transient, ult shockwave scale |
 | 12 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: soft-particle ground clipping, hold-blade glow |
+
+### Grimble after (ext/vfx-dredge): 26
+| R | S | L | T | Sc | C | Snd | total |
+|---|---|---|---|---|---|---|---|
+| 4 | 4 | 4 | 4 | 3 | 4 | 3 | 26 (+10) |
+
+LMB, hold, hook/RMB, E and X now play `content/vfx/dredge.json` through HeroVfx, all in coin gold with white/pale cores.
+The hook is a gold chain of links (HeroVfx's new hold-only `chain` layer): it pays out slack and swaying, is yanked
+taut and glowing on the bite (a burst of coins, sparks and a flash on the target) and again on each haul, and throws
+sparks as it snaps back. The E and X telegraphs are gold; sparks rise along the cone's edge through the wind-up and
+charge, and each slam or wave ends in a gold sweep that burns away, a flash, debris and coins. Kept from LDFx: the bone
+hook (now a gold rim), the ghost anchor, the reel's chain ring, the stun spirals and the barge (dash not in scope).
+Sound is unchanged (3). Scale stays 3: the slugs read as small pale-gold dots with thin trails at match
+zoom; a gold body on sand or autumn ground has less contrast than on grass (the dark rims and char carry it).
 
 Strips: the before sheets are jobq `vfxq-before-<arch>`, the after sheets `vfxq-after-<arch>`
 (`/home/boki/jobq/done/<id>/out/`). Tenzo's before/after pair is on branch `ext/vfx-quality-strips` (not for merge) and
