@@ -59,7 +59,7 @@ func _skate_feel() -> void:
 	ok(
 			"tm Shift: she steers the skate into a curve (not a snap) with ice spraying off the edge",
 			K.rinkrunning() and turned > 60.0 and rad_to_deg(absf(Vector2(1, 0).angle_to(early))) < 40.0
-				and K.lk().live.filter(func(e): return String(e["kind"]) == "chip").size() >= 4,
+				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2,
 			"turned %.0f deg" % turned)
 	ok(
 			"tm Shift: LMB keeps firing (straight beams) the whole skate",
@@ -1392,9 +1392,10 @@ func rimewright() -> void:
 	step(m, 0.15)
 	var skate_v := Vector2(P.vel.x, P.vel.z).length()
 	ok(
-			"tm Shift: full skating speed (dash.speed) within about 0.2 s, with a ribbon of ice chips",
+			"tm Shift: full skating speed (dash.speed) within about 0.2 s, laying a frost trail (ice plates, frost)",
 			absf(skate_v - float(K.dash_def()["speed"])) < 0.6
-				and K.lk().live.filter(func(e): return String(e["kind"]) == "chip").size() >= 4,
+				and K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size() >= 4
+				and int(HeroVfx.of(m).plays.get("skate_frost", 0)) >= 1,
 			"%.1f m/s" % skate_v)
 	step(m, 0.55)
 	ok("tm Shift: the stride move loops while skating (off the step she is on the air stride)",
