@@ -4,7 +4,7 @@ Internal design note. This file may name the source hero for traceability; nothi
 Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (reference
 sheet: briefs/hero-ref/vireo.md, from gameplay footage; owner playtest notes override the footage).
 Our hero is an original character, the storm-kite runner: flight goggles, a cropped jacket, copper
-coils at both wrists and a copper rod mast flying a pennant. Palette: teal and hot pink lightning, copper rod (the lightning, orbs and Static marks are teal + pink; not yellow). Payoff word: BLOWOUT.
+coils at both wrists and a copper rod mast flying a pennant. Palette: hot pink lightning (#ff5ab4 body, #ffd6ee core, docs/VFX_QUALITY.md), copper rod (the lightning, bolts, orbs and Static marks are all her pink since 11-08: not teal, not yellow; only the Kitefall ult keeps gold). Payoff word: BLOWOUT.
 
 ## Kit card (L picker)
 - Role: Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.
@@ -21,7 +21,7 @@ source ratio spear : Surge : javelin = 7 : 6.7 : 9.2, at our pace 8 : 8 : 10.5. 
 landing is 40 + 22%, seen at about 115, so about 1 bolt at our scale; it is held at 22, 1.8 bolts, because
 its worth is the escape and the Static) knocks back about 1 bh and adds 1 Static. Its cooldown follows the
 source's 37.5 s at our pace, 42 s. Ranges use 1 body
-height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 7.5 to 13 m (owner item 70; not scaled by the dash feel), Skycall circle 1.5 m radius.
+height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 7 to 11 m (owner item 70, trimmed 11-08: too far; its time is scaled by the dash feel, its length is not), Skycall circle 1.5 m radius.
 
 ## Ranks (kit data pass)
 Rank 2 is the shared step (cooldown -10%, damage +15%). Rank 3 is the hero's own: Storm Rod throw +50% damage
@@ -42,7 +42,7 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/vireo.md a
 | LMB range and speed | always to max range (about 7.5 bh) past the cursor, about 18 bh/s [footage]; one target [data] | 13 m past the cursor, 37 m/s, stops on the first foe (audit fix) | matches; asserted |
 | RMB spear | hold, summoned spear by the shoulder, body flash at full, overarm throw; fixed lane [footage] | Storm Rod: the same beats, fixed 13 m lane | matches |
 | E Lightning Strike | place, then pick the pull direction; 0.8 s countdown; Grounded slide [footage] | Skycall: place, hold and drag, release (audit: was a 0.3 s flick), 0.8 s countdown, slide and Grounded 1.5 s | matches |
-| Shift Surge | hold crouch, a streak at a constant ~32 m/s (ours: 40 m/s, owner item 70), an arrival burst [footage] | Wirerun: the same; **the arrival ring and spark spray and the press flash are gone** (owner: no rings or bursts on dashes; the hits are along the way), a dust puff instead | owner rule over footage |
+| Shift Surge | hold crouch, a streak at a constant ~32 m/s (ours: 34 m/s building from 35% over 0.15 s, owner item 70 then 11-08: 40 wound up too fast), an arrival burst [footage] | Wirerun: the same; **the arrival ring and spark spray and the press flash are gone** (owner: no rings or bursts on dashes; the hits are along the way), a dust puff instead | owner rule over footage |
 | X Eye of the Storm | launch, hang, reactivate to crash at the cursor [footage] | Kitefall: the same | matches |
 
 ## Audit (Nov 3 23:40)
@@ -69,12 +69,12 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 ## Per-slot table
 | Slot | Input | Aim | What it does | Telegraph / reticle | Move (KMovesVV) | Sound |
 |---|---|---|---|---|---|---|
-| LMB Coilcaster (finger gun) | hold, 0.8s per bolt | max range (13 m) past the cursor, `"aim": "max"` | a jagged bolt from the fingertip, left hand then right; stops on the first foe (data); 1 Static per hit | a thin line through the cursor to full range with an arrow tick (always up) | `mage_lmb_l` / `mage_lmb_r`: twist, arm flung out, snap, settle | `vv_bolt` |
+| LMB Coilcaster (finger gun) | hold, 0.8s per bolt | max range (13 m) past the cursor, `"aim": "max"` | a crackle from the fingertip, left hand then right, the bolt a hot head with a crackling pink trail; stops on the first foe (data); 1 Static per hit | a thin line through the cursor to full range with an arrow tick (always up) | `mage_lmb_l` / `mage_lmb_r`: twist, arm flung out, snap, settle | `vv_bolt` |
 | RMB Storm Rod | hold, release (full at 1.0s, throws itself at 1.2s, 0.33s minimum) | max range, a fixed 13 m lane | summons a copper rod; the throw knocks the first foe back about 1 bh (stun on a wall or another foe), 1 Static, leaves a charge orb at the impact at once | double-rail lane with chevrons for the whole hold; cursor charge ring; a white body flash and flare at full | `mage_rmb_hold` (rod by the shoulder), `mage_rmb` (overarm) | `vv_rod_summon`, `vv_rod_full`, `vv_rod_throw` |
-| Shift Wirerun | hold, release (full at 0.6s, auto at 0.9s) | direction from the cursor, length from the charge only | the charge is spent on the press; while held you can't steer, you keep your height and your momentum drifts you; release: a lightning streak (shots pass through) that carries the drift; every foe crossed takes 10, a 4-Static foe takes double and Blowout, Wirerun back at once (the only early reset) | rails to max range, a big ticked end ring with a star sliding out (everyone sees the ring); cursor charge ring | `mage_dash` (crouch), `mage_dash_go` (stretched streak), `mage_dash_land` (re-form, overshoot); air press with no charge: `mage_dash_ex` tumble | `vv_surge_charge`, `vv_surge_go` |
-| E Skycall | press, hold and drag, release (data) | at the cursor (11 m) | drops a circle; while E is held (up to 1 s) the drag follows the cursor from the circle (toward you pulls in, away throws out; a tap = away); the release commits it, then 0.8s countdown; lightning: 20, 1 Static (data), everyone inside slid about 3.4 m along the ground that way (peak 6.2 m/s, easing to a stop over 1.1 s) and Grounded 1.5s; flings orbs (steals a rival's) | ticked circle with a rim chevron + a drag arrow during the flick; then a dark violet disc with a crackling copper rim and a narrowing pillar (everyone sees it) | `mage_e` (one-arm sweep, snap down) | `vv_sky_place`, `vv_sky_count`, `vv_sky_strike` |
+| Shift Wirerun | hold, release (full at 0.9s, auto at 1.2s) | direction from the cursor, length from the charge only | the charge is spent on the press; while held you can't steer, you keep your height and your momentum drifts you; release: a lightning streak (shots pass through) that builds over 0.15 s and carries the drift, then ends at run speed (DashExit: capped at 1.5x run, eased down over 0.25 s, no glide handoff); every foe crossed takes 10, a 4-Static foe takes double and Blowout, Wirerun back at once (the only early reset) | rails to max range, a big ticked end ring with a star sliding out (everyone sees the ring); cursor charge ring | `mage_dash` (crouch), `mage_dash_go` (stretched streak), `mage_dash_land` (re-form, overshoot); no tumble: spent, Shift is denied | `vv_surge_charge`, `vv_surge_go` |
+| E Skycall | press, hold and drag, release (data) | at the cursor (11 m) | drops a circle; while E is held (up to 1 s) the drag follows the cursor from the circle (toward you pulls in, away throws out; a tap = away); the release commits it, then 0.8s countdown; lightning: 20, 1 Static (data), everyone inside slid about 3.4 m along the ground that way (peak 6.2 m/s, easing to a stop over 1.1 s) and Grounded 1.5s; flings orbs (steals a rival's) | ticked circle with a rim chevron + a drag arrow during the flick; then sparks gathering in the circle under a thin bolt from the sky (everyone sees it) | `mage_e` (one-arm sweep, snap down) | `vv_sky_place`, `vv_sky_count`, `vv_sky_strike` |
 | Passive Static | | | hits add Static (4 max, 4.5s); a marker over the head shows pips and the count, with sparks on the body that grow per stack; the 4th calls a sky bolt (Live) | marker, sky bolt, arcs to the ground while Live | `mage_live` (finger flicked to the sky) | `vv_static_full`, `hero_blowout` |
-| X Kitefall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m; she is free to attack at once; 42 s cooldown | a gold range ring with ticks round the take-off (everyone sees it) over a dark violet disc with a gold rim, gold crackle on the rim; a small gold crown (ticked ring and star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
+| X Kitefall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m; she is free to attack at once; 42 s cooldown | a pale range ring with ticks round the take-off (everyone sees it; no fill under it), a pink bolt up her climb and sparks round her while she hangs; a small crown (ticked ring and star) at the landing spot (hers); a filled landing circle for 0.2 s before the strike (everyone); then a white-hot core bolt inside a wide pink one from the sky, a flare, a shock wall and a scorch the size of the hit, debris, and pink sparks settling for 1.5 s (content/vfx/mage.json) | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
 | R / T | | | the Boki Merge (the Boki system's key, see below) | | | |
 
 Charge orb: hovers 4s and adds Static to nobody (owner item 74). Walking over it, a Wirerun through it, or Skycall dragging it toward her within 9 m (it flies to her), picks it up and gives Wirerun back (owner items 71/74); any other Skycall fling is 6 m.
@@ -85,6 +85,9 @@ Charge orb: hovers 4s and adds Static to nobody (owner item 74). Walking over it
 | 3 bolts + Storm Rod / Skycall | the 4th Static: sky bolt, Live | `--mage-combo-check` |
 | Wirerun through a Live foe | double hit + Blowout, Static spent, Wirerun back | `--mage-combo-check` |
 | Wirerun through a foe under 4 Static | plain hit, no reset | `--mage-combo-check` |
+| Shift spent (ground, air, buffered mid-run) | denied: no class dodge, no tumble | `--sparkle-dash-check` |
+| Wirerun then jump + glide held | 0.3 s after it ends she is at run speed (glider cruise at most), peak at most 1.5x run | `--sparkle-dash-check` |
+| Storm Rod held | 82% pace after 0.3 s | `--sparkle-dash-check` |
 | Storm Rod, then an orb next to the foe | the orb adds no Static (it is only a pickup) | `--mage-combo-check` |
 | Walking over a resting orb | picks it up, the dash is back; an orb out of reach stays | `--mage-combo-check` |
 | Wirerun through an orb | 2 Static on everyone near it, no reset | `--mage-combo-check` |
@@ -124,10 +127,11 @@ Charge orb: hovers 4s and adds Static to nobody (owner item 74). Walking over it
 - Orbs: 4s life, no Static (item 74); a pickup that refunds Wirerun, as the source data says (items 71/74 replace the older owner rule that only a Live foe resets it).
 - Static lasts 4.5s, refreshed by every hit.
 - Wirerun: a stun, root or Grounded mid-hold cancels it and the charge stays spent (cooldown started on the press); a Boki merge refunds it.
-- An airborne Shift with a charge is a Wirerun too (height held); with no charge left it is the plain air dash.
+- An airborne Shift with a charge is a Wirerun too (height held). Spent, Shift does nothing but the deny cue, on the ground or in the air: she never has the class dodge or the long air dash (`--sparkle-dash-check`).
 - Skycall: press places, holding E drags (up to 1 s), the release commits; a tap drags away from Sparkle.
 - She can move while firing bolts and holding the rod (the footage only shows her standing).
-- Momentum: the drift during the Wirerun hold bleeds off at 6 m/s², and whatever is left is added to the streak.
+- Momentum: the drift during the Wirerun hold bleeds off at 6 m/s², and whatever is left is added to the streak. The streak hands none of its speed on: a jump or glide out of it starts from run speed (`scripts/match/dash_exit.gd`).
+- Storm Rod: holding RMB slows her 18%, ramping in over 0.3 s (4.65 to 3.81 m/s); the throw clears it.
 - Kitefall: the footage shows no auto-land; ours comes down at the cursor after 1.7 s of hanging (about 2 s in
   the air with the climb), the sheet's build note. The 0.3 s crouch is not invulnerable (a fair window to punish
   it); the climb, the hang and the drop are. She hangs over the take-off spot (no drifting). The attack key also
@@ -143,7 +147,8 @@ reference sheet's "Ultimate (on X)" section. It was never folded into another sl
 slot changes. R reloads and the Boki Merge is on its own key (T by default).
 
 ## Engine notes
-- Kit `scripts/arch/kits/mage_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd` + `shaders/vv_fx.gdshader`;
+- Kit `scripts/arch/kits/mage_kit.gd`; LMB, Storm Rod, Skycall and Kitefall looks are HeroVfx data
+  (`content/vfx/mage.json`); the Wirerun, Static marker, orbs and Grounded shackle are pooled `scripts/arch/kits/vv_fx.gd`;
   moves `scripts/match/kmoves_vv.gd`; the finger-gun hold `"finger"` in `HunterAnim.HOLDS`; the wrist
   coil `scripts/match/hero_arms_vv.gd`; sounds `tools/gen_sfx_ryzz.py` listed in `VVSfx.NAMES` and content/sfx/mage.json.
 - Telegraphs and cursor states through AimKit (docs/AIMKIT.md). No Net change.

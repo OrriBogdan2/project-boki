@@ -81,12 +81,6 @@ const MOVES := {
 		[0.14, {"p": 0.12, "lift": 0.06, "sq": -0.2, "fl": Vector3(-0.3, 0.2, 0.0), "hw": 0.6}],
 		[0.42, {}]]},
 	# the air dash (her base dash variant): a tumble forward with the arms tucked
-	"mage_dash_ex": {"keys": [
-		[0.00, {"sq": 0.2, "legs": [0.6, -1.0, 0.5, -0.9], "lw": 0.6}],
-		[0.05, {"fx": -1.5, "sq": -0.2, "legs": TUCK, "lw": 1.0, "fl": Vector3(0.1, -0.2, -0.25), "hw": 1.0}],
-		[0.2, {"fx": -6.283, "legs": TUCK, "lw": 1.0, "fl": Vector3(0.1, -0.2, -0.25), "hw": 1.0}],
-		[0.36, {"fx": -6.283, "sq": 0.3, "lift": -0.08}],
-		[0.5, {"fx": -6.283}]]},
 	# Skycall: the left arm sweeps out toward the spot, then flicks up high through the 0.3 s flick window
 	# (the drag is being picked) and stays raised through the 0.8 s countdown (mage_e_snap brings it down)
 	"mage_e": {"keys": [

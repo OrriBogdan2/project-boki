@@ -118,7 +118,9 @@ func _mage() -> void:
 	ok("LMB: the bolt reaches 13m with the cursor at 2m",
 			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 13.0) < 0.5,
 			"%.1f m" % (float(sd.get("life0", 0.0)) * (sd.get("vel", Vector2.ZERO) as Vector2).length()))
-	ok("LMB: the round is a jagged bolt (a pooled rider)", VVFx.of(m).riders.size() >= 1)
+	ok("LMB: the round trails crackling pink (HeroVfx lmb_trail, drawing)",
+			int(HeroVfx.of(m).plays.get("lmb_trail", 0)) >= 1 and HeroVfx.of(m).ribbons.size() >= 2,
+			"%d ribbons" % HeroVfx.of(m).ribbons.size())
 	var a1 := K.anim_id
 	ac.step(m, 0.85)
 	_fire(m, P)
@@ -169,18 +171,24 @@ func _mage() -> void:
 	var de := AimKit.entry(P, "dash_end")
 	ok("Wirerun held: rails lane and the ticked end ring show",
 			AimKit.shown(P, "dash") and not de.is_empty() and bool(de["ticks"]) and absf(float(de["r"]) - 2.25) < 0.01)
-	ac.step(m, 0.45, func(): P.inp["dash_down"] = true; P.inp["move"] = Vector2(0, 1))
+	var dd: Dictionary = K.dash_def()
+	var d_min := float(dd["dist"][0])
+	var d_max := float(dd["dist"][1])
+	ac.step(m, float(dd["hold"]) - 0.1, func(): P.inp["dash_down"] = true; P.inp["move"] = Vector2(0, 1))
 	var e2 := _flat(K.wire.get("end", home), P.pos)
-	ok("Wirerun: length grows with the charge past the cursor (3m)", e1 < 10.0 and e2 > 11.5, "%.1f -> %.1f" % [e1, e2])
+	ok("Wirerun: length grows with the charge past the cursor (3m)", e1 < d_min + 1.0 and e2 > d_max - 0.3,
+			"%.1f -> %.1f" % [e1, e2])
 	ok("Wirerun held: your keys don't move you", _flat(P.pos, home) < 0.3, "moved %.2f" % _flat(P.pos, home))
 	P.inp["move"] = Vector2.ZERO
 	P.inp["dash_down"] = false
-	ac.step(m, 0.7)
-	ok("Wirerun: a full hold streaks at least 12.5 m", _flat(P.pos, home) >= 12.5, "%.1f m" % _flat(P.pos, home))
-	var short_v := 7.5 / K.run_time(7.5)
-	var long_v := 13.0 / K.run_time(13.0)
-	ok("Wirerun: a constant speed (40 m/s under the global dash feel), so a short run is quicker",
-			absf(short_v - long_v) < 0.5 and long_v > 31.0 and long_v < 46.0, "%.1f / %.1f m/s" % [short_v, long_v])
+	ac.step(m, 0.8)
+	var ran := _flat(P.pos, home)
+	ok("Wirerun: a full hold streaks its full length (11 m)", ran >= d_max - 0.5 and ran < d_max + 1.0, "%.1f m" % ran)
+	var short_v := d_min / K.run_time(d_min)
+	var long_v := d_max / K.run_time(d_max)
+	var want_v := float(dd["speed"]) / float(K.dash_feel()["time"])
+	ok("Wirerun: a constant speed (34 m/s under the global dash feel), so a short run is quicker",
+			absf(short_v - long_v) < 0.5 and absf(long_v - want_v) < 0.5, "%.1f / %.1f m/s" % [short_v, long_v])
 	# 4. height holds while charging in the air; drift carries into the run
 	P.teleport(home)
 	ac.step(m, 0.2)
@@ -270,6 +278,10 @@ func _mage() -> void:
 	ok("Storm Rod: knocked about 1 body height on open ground", kb > 0.8 and kb < 3.0, "%.2f m" % kb)
 	ok("Storm Rod: an orb at the impact the moment it hits",
 			orb_fast and _flat(K.motes[0]["pos"], home + Vector3(5, 0, 0)) < 2.5)
+	var rod_looks := HeroVfx.of(m).plays
+	ok("Storm Rod: summoned, full, thrown with a trail and the hit, as her own looks (HeroVfx rmb_*)",
+			["rmb_summon", "rmb_hold", "rmb_full", "rmb_throw", "rmb_trail", "rmb_hit"].all(
+				func(mv): return int(rod_looks.get(mv, 0)) >= 1), str(rod_looks.keys()))
 	var rod_k1 := K.rod_rank_k()
 	var run_k1 := K.run_rank_k()
 	P.slot_lv["sec"] = 3
@@ -375,6 +387,9 @@ func _mage() -> void:
 	ok("Skycall: 1 Static (data), Grounded, dragged toward you",
 			K.spark_n(T) == 1 and KitStatus.grounded(T) and ac.dmg(T) >= 15.0 and T.pos.x < tx0 - 0.5,
 			"sparks %d moved %.1f" % [K.spark_n(T), T.pos.x - tx0])
+	var sky_looks := HeroVfx.of(m).plays
+	ok("Skycall: placed, counting down and striking as her own looks (HeroVfx e_place, e_count, e_strike)",
+			["e_place", "e_count", "e_strike"].all(func(mv): return int(sky_looks.get(mv, 0)) >= 1))
 	ac.step(m, 0.9)
 	ok("Skycall: the drag is a modest slide (about 3.4 m)",
 			absf((tx0 - T.pos.x) - 3.4) < 0.5, "%.1f m" % (tx0 - T.pos.x))
@@ -436,8 +451,8 @@ func _mage() -> void:
 	# dash animation: Wirerun and Slipstep keep their own moves, none shared
 	var dm := HunterAnim.km_def("mage_dash_go")
 	var dg := HunterAnim.km_def("gunslinger_dash")
-	ok("dash anim: Wirerun and Slipstep each have their own move; neither is a shared roll",
-			not dm.is_empty() and not dg.is_empty() and not HunterAnim.km_def("mage_dash_ex").is_empty()
+	ok("dash anim: Wirerun and Slipstep each have their own move, neither a shared roll (Sparkle has no tumble)",
+			not dm.is_empty() and not dg.is_empty() and HunterAnim.km_def("mage_dash_ex").is_empty()
 			and not HunterAnim.km_def("gunslinger_dash_ex").is_empty() and not K.dash_def().is_empty())
 	# small mechanics (the wiki's fine print, docs/heroes/mage.md "Small mechanics")
 	ac.fresh(T)

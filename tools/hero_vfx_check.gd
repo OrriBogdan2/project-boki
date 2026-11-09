@@ -270,6 +270,8 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 		V.play(P, "all", P.pos, Vector2.RIGHT)
 	ok(V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of every kind stays at the live cap (%d)" % V.live_n)
 	_clear(V)
+	var sky := V._bolt_end({"rise": -9.0}, P, P.pos + Vector3(0, 9, 0), Vector2.RIGHT, {})
+	ok(sky.distance_to(P.pos) < 0.001, "a bolt with a negative rise strikes straight down from its height")
 	var sk := WardenGlb.skeleton(P.model.get_node_or_null("Warden"))
 	var palm := V.anchor_pos(P, "palm")
 	if sk != null:

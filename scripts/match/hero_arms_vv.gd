@@ -18,15 +18,15 @@ static func build(gun: Node3D, weapon: String, m_gun: Material, m_dark: Material
 	return false
 
 ## A finger gun: nothing held. A copper coil wound round the wrist with three bright windings, the index
-## finger pointed straight out of the fist and a teal spark at its tip (the Muzzle sits there).
+## finger pointed straight out of the fist and a pink spark at its tip (the Muzzle sits there).
 static func _coilcaster(gun: Node3D, m_dark: Material) -> void:
 	var copper := Models.shiny(Color("c8793c"), 0.8)
-	var tip := Models.toon(Color("2fd8e8"), false, 1.8)
+	var tip := Models.toon(Color("ff5ab4"), false, 1.8)
 	for k in 4:
 		var winding := Models.cyl(0.058, 0.058, 0.018, 12)
 		Models.part(gun, winding, copper, Vector3(0, 0.0, 0.07 + k * 0.03), Vector3.ONE, X_AXIS)
 	Models.part(gun, Models.cyl(0.05, 0.05, 0.1, 10), m_dark, Vector3(0, 0, 0.11), Vector3.ONE, X_AXIS)
-	Models.part(gun, Models.box(0.012, 0.012, 0.1), Models.toon(Color("7ff0ff"), false, 1.2), Vector3(0.05, 0.0, 0.11))
+	Models.part(gun, Models.box(0.012, 0.012, 0.1), Models.toon(Color("ff8fd0"), false, 1.2), Vector3(0.05, 0.0, 0.11))
 	Models.part(gun, Models.box(0.026, 0.026, 0.11), m_dark, Vector3(0, 0.01, -0.07))
 	Models.part(gun, Models.sphere(0.03, 8), tip, Vector3(0, 0.01, -0.13))
 	Models.part(gun, Models.crystal(0.014, 0.08, 4), tip, Vector3(0, 0.01, -0.17), Vector3.ONE, -X_AXIS)

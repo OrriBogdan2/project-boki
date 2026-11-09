@@ -513,12 +513,15 @@ func _ribbon(layer: Dictionary, h: Hunter, o: Dictionary) -> void:
 			"width": _num(layer, "size", o, 0.4), "wave": float(layer.get("wave", 0.0)),
 			"follow": o.get("follow") if layer.get("follow", false) else null, "pts": []})
 
-## Where a bolt ends: the kit's `o.to`, else a named anchor ("to"), else `len` metres along the aim.
+## Where a bolt ends: the kit's `o.to`, else a named anchor ("to"), else `rise` metres straight up (negative: a
+## strike from the sky, with `y` its height), else `len` metres along the aim.
 func _bolt_end(layer: Dictionary, h: Hunter, from: Vector3, dir: Vector2, o: Dictionary) -> Vector3:
 	if o.get("to") is Vector3:
 		return o["to"]
 	if layer.has("to"):
 		return anchor_pos(h, String(layer["to"]))
+	if layer.has("rise"):
+		return from + Vector3(0, float(layer["rise"]), 0)
 	var ln := _num(layer, "len", o, 3.0)
 	return from + Vector3(dir.x, 0, dir.y) * ln
 
