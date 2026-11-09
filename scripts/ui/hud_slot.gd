@@ -72,11 +72,11 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 			HudStyle.ctext(c, ctr + Vector2(0, fs * 0.36), t, fs, tcol, 6)
 			H.slot_text[id] = t
 	if max_ch > 1:
-		var pw := minf(10.0, (rect.size.x - 12.0) / float(max_ch) - 2.0)
+		var pw := minf(12.0, (rect.size.x - 12.0) / float(max_ch) - 2.0)   # the dash slot's row: clear of the key pill
 		var px := ctr.x - (pw * max_ch + 2.0 * (max_ch - 1)) * 0.5
 		var fills: Array = []
 		for i in max_ch:
-			var pr := Rect2(Vector2(px + i * (pw + 2.0), rect.end.y - 7.0), Vector2(pw, 3.0))
+			var pr := Rect2(Vector2(px + i * (pw + 2.0), rect.end.y - DashSlot.PIP_Y), Vector2(pw, DashSlot.PIP_H))
 			var fill := clampf(charges - float(i), 0.0, 1.0)
 			c.draw_rect(pr.grow(1.0), HudStyle.SHADE_EDGE)
 			c.draw_rect(pr, Color(1, 1, 1, 0.18))
