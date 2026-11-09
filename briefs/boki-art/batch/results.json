@@ -35164,5 +35164,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_thistlynx_lc_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_barokat_pick",
+    "name": "Barokat",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_barokat_pick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_teapotamus_pick",
+    "name": "Teapotamus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_teapotamus_pick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_nettlynx_pick",
+    "name": "Nettlynx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_nettlynx_pick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_maulangler",
+    "name": "Maulangler",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_maulangler_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_domeleon",
+    "name": "Domeleon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_domeleon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_domeleon",
+    "name": "Domeleon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_domeleon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chandelotl_pick",
+    "name": "Chandelotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_chandelotl_pick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chandelotl_pick",
+    "name": "Chandelotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_chandelotl_pick_2.jpg",
+    "ok": true
   }
 ]
