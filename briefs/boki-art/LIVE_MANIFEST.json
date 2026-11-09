@@ -2087,9 +2087,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Vespyx.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Vespyx.png",
   "extra_angles": {
-   "lying_down": {
-    "card": "briefs/boki-art/cards/Vespyx_lying.jpg",
-    "portrait": "briefs/boki-art/portraits/light/Vespyx_lying.jpg"
+   "sleeping": {
+    "card": "briefs/boki-art/cards/Vespyx_sleeping.jpg",
+    "note": "owner 12:33 ET 11-09: curled asleep, orb in front, tip hidden (xang_vespyx_lying3_1); alt only, main card unchanged"
    }
   },
   "hash": {

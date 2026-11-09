@@ -279,3 +279,11 @@ Owner (chat 12:30), for the Bokidex:
 
 ### 11-09 12:33 ET COORD -> ART
 11-09 COORD -> ART: ack. Building an Alts section on every Bokidex page, fed from LIVE_MANIFEST extra_angles (Vespyx, Mycroll now; new ones appear automatically on the next sync). Vespyx main card unchanged; Gongrowl keeps its current hero until cardx/cardy/px land. Tell me which orb-in-front run once he picks and add it to extra_angles.
+
+### 11-09 12:34 ET ART -> COORD
+Owner (chat 12:33):
+- Vespyx alt: the curled-asleep image (orb in front, tip hidden) is now the Vespyx alt in LIVE_MANIFEST: extra_angles.sleeping = cards/Vespyx_sleeping.jpg. It replaces the old lying_down alt, which was the image this redo improved; that file stays in the repo. The main card is unchanged.
+- Line change: Marchleaf now BRANCHES into two T2s, each with its own T3:
+  - Leaf route: Marchleaf > Scythant > new final (3 concepts queued, c_scythant_t3n1-3; name after the owner picks).
+  - Ninja route: Marchleaf > compact ninja ant (new T2, from c_reapant_w8_1 with a bit more green) > Reapant (new grown-up final, c_reapant_t3n1-3).
+  - The current Reapant art becomes the ninja route's T2 design, so that T2 needs a new name. Proposals: Shinobant, Duskant, Masquant. Please file the branch in the dex and pass it to main with game data when the art lands.

@@ -85,3 +85,8 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 ## 11:05 ET 11-09: OWNER REVIEW of the Bokidex (via coordinator), batch 1
 | 67 | #4/#6/#17/#26: designs we don't have yet (Coolatee, Druzemole, Scythant, Jibbatross) | 3 directions each; picks Coolatee b2_3, Druzemole b3_4, Scythant b1_2, Jibbatross b1_1 -> sheet + card + portrait; alternatives on the A/B page | GENERATING |
 | 68 | #28 Galleotter: lying-back otter-in-a-galley, not the sea serpent | Card + portrait back on the galley design, hero rebuilt (11:23 ET) | DONE |
+
+## 12:30 ET 11-09: owner round-3 notes (chat)
+| 69 | Vespyx curled up: option 1 (orb in front, tip hidden) as an ALT; keep the current main card. Add an "alt" part to every Bokidex page | cards/Vespyx_sleeping.jpg = manifest extra_angles.sleeping; alts section requested from coordinator | DONE (dex: coordinator) |
+| 70 | Gongrowl: face the camera more, stand up higher, beat its chest more aggressively | gongrowl_cardx/cardy + portrait_gongrowl_px (prompt drops the card rules that blocked front-facing and upright poses) | GENERATING |
+| 71 | Reapant: likes the compact one and Scythant; both read as T2s. Make two evolutions with different T3s | Marchleaf branches: Scythant > new leaf-route final (c_scythant_t3n1-3); compact ninja (greener, c_reapant_t2g) > new Reapant final (c_reapant_t3n1-3) | GENERATING |
