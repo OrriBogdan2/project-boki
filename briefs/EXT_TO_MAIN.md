@@ -5533,3 +5533,44 @@ READY ext/garden-base-life-main ebde0fac5 (garden base life; from origin/main, s
 READY ext/garden-nook 13e40763a (Nook lean and friend gate)
 READY ext/ui-safe-area a75769391 (stacked on READY ext/prematch-declutter-rebased 8f1ccd06a, merge that first; SafeArea margin 12 logical px + HUD rect registry, --safe-area-check 0 failures over hud drop/ground, pick, pause, results, farm, expedition x 1280x720/1920x1080/2560x1440/2560x1080/1024x640; fixed: Boki corner badge was at x=0, locked-slot tag touched the resource bar, drop map overlapped the squad cards; hudref, tutorial-hud 0 failures, health --strict OK, gen_wiki --check OK; CONTACT SHEET PENDING: GPU shots queued behind ~55 jobs as jobq 20261109-120736-19340, -120740-22772, -120743-32103, -120746-31590, -120749-20983, out shots_<WxH>/<WxH>_<screen>.png, not yet viewed)
 READY ext/kael-lunge-length b4ffaa6ed (Kael footage gaps 3 and 6 closed: Lunge 4.5 to 5.4 m (2.5 to 3 bh [F], was 4.5 to 7.5; owner's charge growth and +20% perfect release kept) and Rampage 3.6 m in 0.2 s (2 bh [F], was 4.5 m x 0.85 feel); no length in [D]; juggernaut.json holds the numbers, juggernaut taken off content/rules/dash_feel.json like ashwick/thief; asserted in --juggernaut-combo-check 191/0 (data + open-ground travel; the 7.5 literal in the miss test now reads the data), hero-combo 304/0, health --strict OK, gen_wiki regenerated (Class-Unbroken, Rules). STACKED on READY ext/gaps-juggernaut b4f362a74: merge it first. Frames not on rpc1: [F] numbers are the sheet's bh reads. Alternative not taken: keep 7.5 m full fling per the owner's 'fling far')
+READY ext/tutorial-idle-check 19a355ea6 (--tutorial-idle-check: 10 s of doing nothing at each match step (22) and farm step (12): banner or Boki lead by 8 s, marker kept, nag inside the window; 0 failures (it failed on most steps before the fixes) (NAG_T 15 -> 8, a monster walking up no longer counts as progress, a hit/cast resets the stall, nag pulse cleared per step, marker no longer hides when a monster is within 6 m, gkey points at its monster, key step sends a new key if it fell away, --tut-test alone now starts the tutorial); on main d255acbee. tutorial.gd conflicts by one line (_refresh(p)) with ext/tutorial-low-cds be2507ed3, so a STACKED copy is ext/tutorial-idle-check-stacked 5eb5d26dc on it (needs ext/tutorial-declutter c613689f1 first): take that one if low-cds merges first; both pass --tutorial-idle-check, --tut-test, --farm-tutorial-check, --tutorial-hud-check, health --strict, gen_wiki --check. KEY_WAIT_T 60 s and RANK_WAIT_T 60 s left as they are: with a nag every 8 s they never wait in silence, and a shorter key wait would strand the chest step. Not fixed: gkey, throw, orders and rank end by themselves for an idle player (the Boki fights on its own / no skill point to spend). Farm marker is a world label only (no beam or edge arrow); steps with a menu as the guide (axe, feed.place, crop.patch_dry) show the hint line only. Per-step table below)
+
+| match step | hint by | Boki | nag at | marker | note |
+|---|---|---|---|---|---|
+| land | 0.0 s | - | never | kept | ends by itself at 3.7 s |
+| move | 0.0 s | lead | 8.0 | kept |  |
+| dash | 0.0 s | lead | 8.0 | kept |  |
+| exdash | 0.0 s | lead | 8.0 | kept |  |
+| glide | 0.0 s | lead | 8.0 | kept |  |
+| crouch | 0.0 s | says | 8.0 | kept |  |
+| pickup | 0.0 s | lead | 8.0 | kept |  |
+| gkey | 0.0 s | says | never | kept | ends by itself at 3.1 s |
+| rank | 0.0 s | - | never | n/a | ends by itself at 1.5 s |
+| shoot | 0.0 s | says | 8.0 | kept |  |
+| sig | 0.0 s | says | 8.0 | kept |  |
+| utility | 0.0 s | says | 8.0 | kept |  |
+| throw | 0.0 s | - | never | kept | ends by itself at 0.6 s |
+| orders | 0.0 s | - | never | n/a | ends by itself at 0.6 s |
+| kin1 | 0.0 s | says | 8.0 | kept |  |
+| key | 0.0 s | lead | never | kept | ends by itself at 2.8 s |
+| chest | 0.0 s | lead | 8.0 | kept |  |
+| fight | 0.0 s | says | 8.0 | kept |  |
+| goexit | 0.0 s | lead | 8.0 | kept |  |
+| uplink | 0.0 s | says | 8.3 | kept |  |
+| defend | 0.0 s | says | 8.0 | kept |  |
+| extract | 0.0 s | - | never | kept | ends by itself at 0.0 s |
+
+| farm step.stage | hint by | marker |
+|---|---|---|
+| hob.go | 0.1 s | kept |
+| axe.go | 0.1 s | n/a |
+| chop.go | 0.1 s | kept |
+| stone.go | 0.1 s | kept |
+| house.place | 0.1 s | kept |
+| house.wait | 0.1 s | kept |
+| hammer.go | 0.1 s | kept |
+| task.go | 0.1 s | kept |
+| feed.place | 0.1 s | n/a |
+| crop.patch | 0.1 s | kept |
+| buy.stall | 0.1 s | kept |
+| sell.stall | 0.1 s | kept |
