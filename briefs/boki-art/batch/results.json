@@ -20261,5 +20261,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/relic_kael_w30_4.jpg",
     "ok": true
+  },
+  {
+    "id": "bubblisk_card",
+    "name": "Bubblisk (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bubblisk_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bubblisk_card",
+    "name": "Bubblisk (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bubblisk_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_e_w30",
+    "name": "Flarmink",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/flarmink_e_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "buckleron_card",
+    "name": "Buckleron (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/buckleron_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "buckleron_card",
+    "name": "Buckleron (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/buckleron_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cairnback_card",
+    "name": "Cairnback (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cairnback_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "cairnback_card",
+    "name": "Cairnback (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cairnback_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "canvastross_card",
+    "name": "Canvastross (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/canvastross_card_1.jpg",
+    "ok": true
   }
 ]
