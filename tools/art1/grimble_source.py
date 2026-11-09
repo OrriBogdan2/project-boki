@@ -22,7 +22,7 @@ from meshkit import smooth
 WORK = sys.argv[sys.argv.index("--") + 1]
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 F = np.float32
-BODY_TRIS = 7800
+BODY_TRIS = int(os.environ.get("GRIMBLE_BODY_TRIS", 7800))     # the revamp builds 17.8k (25k with the rest)
 SRC_FACES = 350000
 SOLE = -0.950
 # the scan's joints: flipped to face +Y, his right +X, z from the sole; measured on the grids (~/meshy/tools/grid.py)

@@ -22,12 +22,14 @@ import grimble_paint as P
 import grimble_sculpt as G
 import hem_sdf as S
 import imgio
+from paintkit import clean_normal
 import warden_kit as K
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 WORK = sys.argv[sys.argv.index("--") + 1]
-MESHY = os.path.expanduser("~/meshy/grimble_v2")     # grimble_source.py's output (never in git)
+MESHY = os.environ.get("GRIMBLE_SRC", os.path.expanduser("~/meshy/grimble_v2"))     # grimble_source.py's output (never in git)
 ATLAS = 2048
+NRM_CAGE, NRM_RAY = 0.003, 0.008      # m: the normal bake cage's extrusion, its ray's reach (cinder_finish)
 GAUNTLET_CUFF = 0.82          # (m) the gauntlet's cuff top on the fitted left forearm
 F = np.float32
 
@@ -321,6 +323,52 @@ def fist(ob):
     return hv[hv[:, 2] < hv[:, 2].min() + 0.06].mean(0).astype(F)
 
 
+def bake_normal(bd, scan_px):
+    """The dense scan's surface (src_A.npz) baked as a tangent-space normal map on the game mesh; the sculpted parts stay flat."""
+    d = np.load(os.path.join(MESHY, "src_A.npz"))
+    me = bpy.data.meshes.new("Src")
+    me.from_pydata(d["v"].tolist(), [], d["f"].tolist())
+    me.polygons.foreach_set("use_smooth", np.ones(len(me.polygons), bool))
+    me.update()
+    src = bpy.data.objects.new("Src", me)
+    bpy.context.scene.collection.objects.link(src)
+    src.data.materials.append(bpy.data.materials.new("src"))
+    img = bpy.data.images.new("bake_normal", ATLAS, ATLAS)
+    img.colorspace_settings.name = "Non-Color"
+    for mt in bd.data.materials:
+        nt = mt.node_tree
+        t = nt.nodes.new("ShaderNodeTexImage")
+        t.image = img
+        nt.nodes.active = t
+    sc = bpy.context.scene
+    sc.render.engine = "CYCLES"
+    sc.cycles.device = "CPU"
+    sc.cycles.samples = 16
+    bk = sc.render.bake
+    bk.use_selected_to_active, bk.cage_extrusion, bk.max_ray_distance, bk.normal_space = True, NRM_CAGE, NRM_RAY, "TANGENT"
+    bpy.ops.object.select_all(action="DESELECT")
+    src.select_set(True)
+    bd.select_set(True)
+    bpy.context.view_layer.objects.active = bd
+    bpy.ops.object.bake(type="NORMAL", use_clear=True, margin=12)
+    bk.use_selected_to_active = False
+    bpy.data.objects.remove(src)
+    px = np.array(img.pixels[:], F).reshape(ATLAS, ATLAS, 4)
+    px[~scan_px, :3] = (0.5, 0.5, 1.0)
+    print("normal baked, wrong hits flattened %.4f" % clean_normal(px[..., :3]), flush=True)
+    img.pixels.foreach_set(px.ravel())
+    img.name = "normal"
+    img.filepath_raw = os.path.join(WORK, "normal.png")
+    img.file_format = "PNG"      # lossless (JPEG bends a normal by 4 degrees on average); the engine compresses it (RG)
+    img.save()
+    for mt in bd.data.materials:
+        nt = mt.node_tree
+        b = nt.nodes["Principled BSDF"]
+        nm = nt.nodes.new("ShaderNodeNormalMap")
+        nt.links.new(nt.nodes.active.outputs[0], nm.inputs["Color"])
+        nt.links.new(nm.outputs[0], b.inputs["Normal"])
+
+
 def main():
     t0 = time.time()
     K.reset()
@@ -487,6 +535,7 @@ def main():
             rgb = np.clip(rgb * (0.86 + 0.40 * P.form(nn))[:, None] * 1.4, 0, 1)
             body_px = m.copy()
             body_px[idx[0][P.face_mask(pts)], idx[1][P.face_mask(pts)]] = False      # (the gums are purple, not veins)
+            p["px"] = m
             p["tri_slot"] = tri_slots(scan_rgb(nm[-1], vs[tri].mean(1).astype(F)), iron_tris(ob, tri))
         elif nm == "lens":
             rgb = np.tile(P.rgb("2fd878"), (len(pts), 1))
@@ -597,6 +646,10 @@ def main():
     # ----------------------------------------------------- materials (one atlas), slots, join
     image = bpy.data.images.load(png)
     image.name = "atlas"
+    image.pixels[0]          # (loads it before it moves)
+    image.filepath_raw = os.path.join(WORK, "atlas.jpg")     # (the glb keeps each image's format: the atlas JPEG, the normal map PNG)
+    image.file_format = "JPEG"
+    image.save()
     mats = {}
 
     def mat(slot):
@@ -651,6 +704,7 @@ def main():
     bpy.ops.object.join()
     bd = bpy.context.view_layer.objects.active
     bd.name = bd.data.name = "grimble"
+    bake_normal(bd, next(p["px"] for p in parts if "px" in p))
     bd.parent = arm
     md = bd.modifiers.new("Armature", "ARMATURE")
     md.object = arm

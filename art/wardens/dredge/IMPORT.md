@@ -1,14 +1,15 @@
 # Grimble, the Scrap King (id and files stay `dredge`): import note, v2 (the owner's locked redesign, 2026-11-07)
 
 `dredge.glb`: one Meshy scan of the v2 turnaround fitted to the rig (body, head, bone-hook arm, gauntlet), v1's sculpted hoard,
-bells, lanterns, blunderbuss and junk ball on top, the loupe scripted, and 40 clips keyed as targets. Budget: <= 15k triangles
-with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, brass, glow. Raw files in ~/meshy/grimble_v2 (never in git).
+bells, lanterns, blunderbuss and junk ball on top, the loupe scripted, and 40 clips keyed as targets. Budget: <= 25k triangles
+with everything (24.9k; the body 17.8k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, brass, glow. Raw files in ~/meshy/grimble_v2 (never in git).
 
     godot --headless --path . --import                   # once in a fresh worktree
     godot --headless --path . -- --warden-rig-json --warden=dredge --out=res://art/wardens/src/dredge_rig.json
     # ~/meshy/grimble_v2: edit.sh (the turnaround's front, left and back with the hoard, blunderbuss, loupe and sludge edited out), then
     #   meshy_task.py create runA in/front.png in/left.png in/back.png --texture-refs (same)
     ~/meshy/grimble_v2/build.sh source                   # grimble_source.py -> grimble_art1.py -> grimble_clips.py; INSTALL=1 copies the glb here
+    # revamp (owner 11-09): GRIMBLE_BODY_TRIS=17800, and GRIMBLE_SRC=<dir> builds in a stage dir (runA linked in) without touching the shipped raw files
 
 - **Art:** briefs/art-refs/grimble_v2/ (ext/agent-briefs): grimble_v2_turnaround.jpg (FINAL) and grimble_v2_master_sheet.jpg; index.md's
   "Canon notes for 3D and animation" win. No nose or nostrils; a three-lens brass loupe over his right eye; the left eye a smug squint.
@@ -30,3 +31,5 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
 - **FX points:** weapon_muzzle, anchor_gun_root, anchor_claw, anchor_hook_tip, anchor_fist, anchor_ball, anchor_coins, anchor_hoard_top,
   anchor_lamp_r/l, anchor_head_top, anchor_eye (the big lens), anchor_chest.
 - **Import:** remove_immutable_tracks=false, LODs on, VRAM atlas with mipmaps.
+- **Normal map (revamp 11-09):** grimble_art1.bake_normal bakes the dense scan (src_A.npz, geometry only) onto the body as a 2048 tangent-space
+  map; the sculpted hoard, gear and chains stay flat. The atlas ships as JPEG, the normal map as PNG. `*_normal.png.import`: `compress/mode=2`, `compress/normal_map=1` (RG); the normal map shades at warden_look's `normal_k` (1.0). Before/after renders: docs/art/wardens/revamp/dredge/.
