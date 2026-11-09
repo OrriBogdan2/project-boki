@@ -18,7 +18,7 @@ extends RefCounted
 ##   hot     float   0..1, brightens toward white (full charge); lanes and Vs go hot by themselves at k = 1
 ##   lw      float   m, the rim width (0.06)
 ##   all     bool    foes and allies see it too (an area someone must dodge); default false = your own
-##                   aim only. A foe's shows lerped toward the hostile rim colour.
+##                   aim only. Its rim then takes the side colour (SideColor); the fill keeps `col`.
 ##   dur     float   s, how long it stays without a refresh (default 0.1)
 ##   fletch  float   lines and Vs only: 0 = plain; > 0 feathers the line with barbs swept back toward
 ##                   the hunter (Hem's draw), this big

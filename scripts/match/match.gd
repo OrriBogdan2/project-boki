@@ -3114,7 +3114,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		mi.material_override.set_shader_parameter("color", vis_col)
 		var halo := mi.get_node_or_null("Halo") as MeshInstance3D
 		if halo:
-			halo.material_override.set_shader_parameter("color", Color(vis_col.lightened(0.2), float(look[2])))
+			halo.material_override.set_shader_parameter("color", Color(look[3] as Color, float(look[2])))
 		mi.scale = Vector3.ONE * vis_size
 		if not Oomph.legacy: vr = vis_size * 0.5
 		mi.global_position = at

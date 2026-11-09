@@ -451,11 +451,13 @@ func cone(at: Vector3, d: Vector2, length: float, col: Color) -> void:
 		burst(at + Vector3(d.x, 0.5, d.y) * (0.5 + i * 1.2), col, 12, 6.0, 0.4, 4.0, 1.4, Vector3(d.x, 0.2, d.y), 25.0)
 
 # ---- telegraphs
-func _tele_mesh(col: Color, shape: int) -> MeshInstance3D:
+## `side`: the thin outer edge in whose-it-is colour (SideColor); alpha 0 (the default) draws none.
+func _tele_mesh(col: Color, shape: int, side: Color) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	var mat := ShaderMaterial.new()
 	mat.shader = TELEGRAPH
 	mat.set_shader_parameter("color", col)
+	mat.set_shader_parameter("side", side)
 	mat.set_shader_parameter("shape", shape)
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -463,14 +465,15 @@ func _tele_mesh(col: Color, shape: int) -> MeshInstance3D:
 	teles.append(mi)
 	return mi
 
-func telegraph_circle(at: Vector3, radius: float, col: Color) -> Node3D:
-	var mi := _tele_mesh(col, 0)
+func telegraph_circle(at: Vector3, radius: float, col: Color, side := Color(0, 0, 0, 0)) -> Node3D:
+	var mi := _tele_mesh(col, 0, side)
 	mi.mesh = Models.flat_quad(radius * 2.0)
 	mi.global_position = at + Vector3(0, 0.07, 0)
 	return mi
 
-func telegraph_rect(at: Vector3, d: Vector2, length: float, width: float, col: Color) -> Node3D:
-	var mi := _tele_mesh(col, 1)
+func telegraph_rect(at: Vector3, d: Vector2, length: float, width: float, col: Color,
+		side := Color(0, 0, 0, 0)) -> Node3D:
+	var mi := _tele_mesh(col, 1, side)
 	var pm := PlaneMesh.new(); pm.size = Vector2(width, length)
 	mi.mesh = pm
 	mi.set_meta("len", length)

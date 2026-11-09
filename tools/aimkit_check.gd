@@ -160,7 +160,7 @@ func _seen(m: Match, P: Hunter, T: Hunter) -> void:
 	L.rebuild()
 	ok("seen: a foe's aim telegraph isn't drawn for you", AimKit.shown(T, "aim") and L.built == 1)
 	var e: Dictionary = AimKit.entry(T, "slam")
-	ok("seen: their \"all\" area is drawn, in their own colour", L.built == 1 and (e["col"] as Color).is_equal_approx(AimKit.hero_col(T)))
+	ok("seen: their \"all\" area is drawn, in their own colour, rimmed in the foe colour", L.built == 1 and (e["col"] as Color).is_equal_approx(AimKit.hero_col(T)) and e.get("side") == SideColor.FOE)
 	AimKit.clear(T)
 	L.rebuild()
 	ok("clear: drops one hunter's set only", not AimKit.shown(T, "slam") and L.built == 0)

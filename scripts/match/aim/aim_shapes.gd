@@ -27,8 +27,9 @@ static func _fill(e: Dictionary, k := 1.0) -> Color:
 	var c: Color = e["col"]
 	return Color(c, FILL_A * k * float(e["alpha"]))
 
+## The rim: the hero's colour on your own aim, the side colour (SideColor) on an area others see too.
 static func _rim(e: Dictionary, k := 1.0) -> Color:
-	var c: Color = (e["col"] as Color).lerp(Color.WHITE, 0.55 * float(e["hot"]))
+	var c: Color = (e.get("side", e["col"]) as Color).lerp(Color.WHITE, 0.55 * float(e["hot"]))
 	return Color(c, minf(1.0, (RIM_A + 0.35 * float(e["hot"])) * k * float(e["alpha"])))
 
 static func _hot(e: Dictionary, k := 1.0) -> Color:

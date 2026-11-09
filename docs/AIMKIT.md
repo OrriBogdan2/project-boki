@@ -61,7 +61,7 @@ Common params (every shape):
 | `alpha` | 1.0 | overall strength. 1 is the quiet default; don't go above about 1.4 |
 | `hot` | 0 | 0..1, brightens toward white. Lanes, Vs and sweet circles go hot by themselves at `k >= 1` |
 | `lw` | 0.06 | rim width in m |
-| `all` | false | foes and allies see it too. A foe's is tinted toward the hostile rim colour. Default: only your own player sees it (aim reticles) |
+| `all` | false | foes and allies see it too. Its rim takes the side colour (SideColor: you, ally, foe); the fill keeps `col`. Default: only your own player sees it (aim reticles) |
 | `dur` | 0.1 | seconds it stays without a refresh |
 
 Directions are flat `Vector2(x, z)`, the same as `h.aim_dir()`. Points are `Vector3`. Every shape sits

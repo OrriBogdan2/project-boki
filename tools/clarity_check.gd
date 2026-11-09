@@ -1,9 +1,9 @@
 extends RefCounted
 ## --clarity-check: the one colour rule and the downed picture. In a 2v2: your ring is the "you" colour,
 ## your teammate's the ally colour and both rivals' the foe colour, and every Boki's ring matches its
-## Hunter's. With your teammate knocked: their bleed-out drains, their Boki's status icon says what it
-## is doing (pulling them up, down too, defending) and only your squad's Boki get tethers. Never touches
-## the save.
+## Hunter's, and a Vex telegraph or shot keeps Vex's fill with a side-coloured edge. With your teammate
+## knocked: their bleed-out drains, their Boki's status icon says what it is doing (pulling them up,
+## down too, defending) and only your squad's Boki get tethers. Never touches the save.
 
 const DT := 1.0 / 60.0
 
@@ -45,6 +45,7 @@ func run(main: Node) -> void:
 		if h.kin:
 			ok(_same(SideRings.shown((h.kin as Kin).ring), want), "%s's Boki ring matches its Hunter" % h.pname)
 			ok(SideColor.of(m, h.kin) == want, "%s's Boki takes its Hunter's colour" % h.pname)
+	_cues(m, ally, foes[0])
 	# ---------------------------------------------------------------- 2. the downed teammate
 	ally.teleport(P.pos + Vector3(8.0, 0, 0))        # nobody in reach to pick them up: the bleed-out runs
 	for f: Hunter in foes:
@@ -78,6 +79,35 @@ func run(main: Node) -> void:
 		ok(f.kin == null or not tethered.has(f.kin), "%s's Boki: no tether" % f.pname)
 	print("CLARITY done, %d failures" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The side cue: the same Vex telegraph (ArchKit ring, AimKit area) and shot from your teammate and from
+## a rival: the same fill, edged in the ally colour and the foe colour.
+func _cues(m: Match, ally: Hunter, foe: Hunter) -> void:
+	var vex := Arch.color("gunslinger")
+	var edge := {}
+	var fill := {}
+	for h: Hunter in [ally, foe]:
+		var tele := h.ak.tele_circle(h.pos, 2.0, vex, 1.0) as MeshInstance3D
+		var mat := tele.material_override as ShaderMaterial
+		fill[h] = mat.get_shader_parameter("color")
+		edge[h] = mat.get_shader_parameter("side")
+		m.fx.end_telegraph(tele)
+	ok(_same(fill[ally], fill[foe]) and _same(fill[ally], vex), "an ally's and a rival's Vex ring keep Vex's fill")
+	var edges: bool = _same(edge[ally], SideColor.ALLY) and _same(edge[foe], SideColor.FOE)
+	ok(edges, "their edges: the ally and the foe colour")
+	for h: Hunter in [ally, foe]:
+		AimKit.circle(h, "cue", {"self": true, "all": true, "col": vex})
+	AimKit.layer(m).rebuild()
+	var ea := AimKit.entry(ally, "cue")
+	var ef := AimKit.entry(foe, "cue")
+	var rims: bool = _same(ea.get("side", vex), SideColor.ALLY) and _same(ef.get("side", vex), SideColor.FOE)
+	ok(_same(ea["col"], ef["col"]) and rims, "an AimKit area: the same fill, ally and foe rims")
+	AimKit.clear(ally)
+	AimKit.clear(foe)
+	var la: Array = Oomph.shot_look(m, ally, vex, 0.2)
+	var lf: Array = Oomph.shot_look(m, foe, vex, 0.2)
+	var halos: bool = _same(la[3], SideColor.ALLY) and _same(lf[3], SideColor.FOE)
+	ok(_same(lf[0], vex) and halos, "a Vex shot: Vex's bolt, its halo in the side colour")
 
 func _run(m: Match, secs: float) -> void:
 	var t := 0.0
