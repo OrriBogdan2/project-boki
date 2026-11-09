@@ -1,0 +1,9 @@
+{
+	"desc": "Branching evolution lines whose two finals are alternate forms of ONE Field Book entry (owner decision 2026-11-08, GAME_RULES_NOV8.md). Each pair is two species ids; the first is the entry's number and default face. A species id that is not in the game yet is skipped, so the entry exists as soon as either form does.",
+	"pairs": [
+		["amanitusk", "ringrove"],
+		["glaivyx", "lashyx"],
+		["geodelotl", "chandelotl"],
+		["howlop", "chimelop"]
+	]
+}
