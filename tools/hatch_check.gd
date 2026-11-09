@@ -168,7 +168,7 @@ func _polish(tree: SceneTree, hx) -> void:
 	card.undo()
 	card.undo()
 	ok(card.look == before, "undo is one step: a second Undo does nothing")
-	var names := PackedStringArray(CreatorCard.PRESETS.keys())
+	var names: Array = CreatorCard.PRESETS.keys()
 	ok(names.size() == 6 and names.all(func(nm): return _find_button(card, nm) != null), "6 starter presets in More")
 	var sex: int = card.look["gender"]
 	_find_button(card, names[2]).pressed.emit()
@@ -182,7 +182,7 @@ func _polish(tree: SceneTree, hx) -> void:
 	wheel.pressed = true
 	for i in 8: hx._unhandled_input(wheel)
 	for i in 30: await tree.process_frame
-	ok(hx.zoom == 1.0 and hx.cam.position.z < CreatorCam.FAR_CAM.z - 1.0, "the wheel zooms in to the face")
+	ok(hx.zoom == 1.0 and hx.cam_to.z < CreatorCam.FAR_CAM.z - 1.0, "the wheel zooms in to the face")
 
 func _all(n: Node, pred: Callable) -> Array:
 	var out: Array = [n] if pred.call(n) else []
