@@ -46917,5 +46917,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_lurklet_gap_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_lockatara_gap",
+    "name": "Lockatara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lockatara_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lockatara_gap",
+    "name": "Lockatara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lockatara_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lockatara_gap",
+    "name": "Lockatara (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lockatara_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_malletary_gap",
+    "name": "Malletary (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_malletary_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lurklet_gap",
+    "name": "Lurklet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lurklet_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_malletary_gap",
+    "name": "Malletary (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_malletary_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lurklet_gap",
+    "name": "Lurklet (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lurklet_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_maulangler_gap",
+    "name": "Maulangler (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_maulangler_gap_3.jpg",
+    "ok": true
   }
 ]
