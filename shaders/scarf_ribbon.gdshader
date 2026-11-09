@@ -19,7 +19,7 @@ void fragment() {
 	float cut = smoothstep(0.0, 0.08, pow(to_tip, 0.6) - across);
 	float edge = 1.0 - smoothstep(0.88, 1.0, across);
 	float thin = 1.0 - smoothstep(fade_from, 1.0, UV.x) * 0.55;
-	float tint = smoothstep(0.15, 1.0, UV.x);
+	float tint = smoothstep(0.1, 0.8, UV.x);
 	float fold = sin(UV.y * 6.2832 * folds + UV.x * 3.0 + seed);
 	vec3 c = mix(root_col.rgb, tip_col.rgb, tint) * (0.9 + fold * 0.08);
 	float rim = pow(1.0 - clamp(abs(dot(NORMAL, VIEW)), 0.0, 1.0), 3.0);

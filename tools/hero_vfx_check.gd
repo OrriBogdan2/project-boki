@@ -356,6 +356,10 @@ func _scarf(main: Node) -> void:
 		ok(tail.pts[0].distance_to(roots[j]) < 0.001, "a tail's root follows the anchor as she moves")
 		var trail := tail.pts[0].x - tail.pts[-1].x
 		ok(trail > ln * 0.4, "running at 6 m/s it streams behind her (%.2f m back)" % trail)
+	Sfx.listener = P.pos + Vector3(HeroVfx.LOD_FAR * 2.0, 0.0, 0.0)
+	S.tick(1.0 / 60.0)
+	ok(w.tails.all(func(t: HeroScarf.Tail): return t.node.visible), "your own scarf shows past the LOD listener")
+	Sfx.listener = P.pos
 	Settings.v["quality"] = HeroScarf.OFF_PRESET
 	S.tick(1.0 / 60.0)
 	ok(w.tails.all(func(t: HeroScarf.Tail): return not t.node.visible), "off at the Low preset")

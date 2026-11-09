@@ -122,9 +122,10 @@ func _check(h: Hunter) -> void:
 func _shown(h: Hunter) -> bool:
 	if h.model == null or not h.model.is_visible_in_tree():
 		return false
-	if h.unseen and h != fx.m.get("player"):
-		return false
-	return fx.lod_at(h.pos) > 0.0
+	# your own scarf always shows (the LOD listener is the camera's focus, which can lag behind a fast skate)
+	if h == fx.m.get("player"):
+		return true
+	return not h.unseen and fx.lod_at(h.pos) > 0.0
 
 func _node() -> MeshInstance3D:
 	if not _free.is_empty():
