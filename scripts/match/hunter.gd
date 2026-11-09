@@ -39,8 +39,6 @@ const MANTLE_REACH_ABYSS := 4.5  # below an island's lip over the abyss, its sid
 const WALL_CATCH_REACH := 0.75   # (movefeel) over the abyss below a lip, a wall this far from your side catches you (elsewhere 0.4)
 const ABYSS_GLIDE_ROOM := 1.5    # a glider with heat left (lifting you out) gets this much more room
 const EX_DASH_CD := 12.5         # the long dash: in the air, or with the short one on cooldown
-const SPIKE_STUN := 0.7         # [wiki] stun when a spiked glider hits the ground (docs/EXPEDITION_SPEC.md)
-const SPIKE_DMG := 8.0
 const DASH_SPEED := 19.0      # m/s: the base dash (owner: 23 felt too fast); 19 x 0.19s = 3.6m
 const DASH_TIME := 0.19       # s
 const DASH_REGEN := 2.2
@@ -498,11 +496,8 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 			glide_fuel = maxf(glide_fuel, 0.02)      # monsters can't spike
 		elif was <= 0.001 or glide_fuel <= 0.001:
 			spiked = true
-			_shot_down()
-			# spiking someone cools your own glider
-			if by is Hunter and (by as Hunter).gliding: (by as Hunter).glide_fuel = minf(1.0, (by as Hunter).glide_fuel + 0.5)
-			if by is Hunter: (by as Hunter).add_stat("spikes")
-			elif by is Kin and (by as Kin).owner_h: (by as Kin).owner_h.add_stat("spikes")
+			GlideSpike.shoot_down(self)
+			GlideSpike.credit(by)
 	var d := dmg
 	if ctrl == "local" and m.opts.get("tutorial", false):
 		d *= 0.35
@@ -734,17 +729,6 @@ func _render_balloon(delta: float) -> void:
 		var len := maxf(0.05, position.y + 0.1 - at.y)
 		string.position = Vector3(0, len * 0.5, 0)
 		string.scale = Vector3(1, len, 1)
-
-func _shot_down() -> void:
-	gliding = false
-	glide_cd = 2.5
-	shot_down = true
-	stun_t = maxf(stun_t, 0.35)
-	vel = Vector3(vel.x * 0.3, minf(vel.y, -6.0), vel.z * 0.3)
-	m.fx.burst(pos + Vector3(0, 1.8, 0), Color("ff9a5a"), 14, 3.0, 0.45, 6.0, 0.8)
-	m.sfx("knock", pos, -2.0, 1.3)
-	if ctrl == "local" and m.hud:
-		m.hud.toast_small("GLIDER SHOT DOWN", Color("ff9a5a"))
 
 ## Knockback is a clean, predictable shove: it sets your speed along its direction (it doesn't
 ## stack with whatever you were doing), you slide for a fixed moment without control, and it never
@@ -2304,12 +2288,7 @@ func _physics(dt: float) -> void:
 				diving = false
 				m.on_drop_landed(self)
 			if shot_down:
-				# spiked onto the ground [wiki]: a 0.7s stun and a little extra damage
-				shot_down = false
-				stun_t = maxf(stun_t, SPIKE_STUN)
-				hurt(SPIKE_DMG, last_hit_by, {"src": "fall"})
-				m.fx.dust(pos, 12)
-				m.fx.ring(pos + Vector3(0, 0.05, 0), 1.6, Color(1.0, 0.6, 0.4, 0.6), 0.3)
+				GlideSpike.land(self)
 			if fv < -11.0 or cur > spd * 1.3:
 				m.fx.dust(pos, 6)
 				squash = 0.15
