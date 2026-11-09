@@ -1,7 +1,7 @@
 extends RefCounted
 ## --training-area-shots --shots-dir=<dir> (GPU): the Training Area as the title screen opens it
-## (Match.arena_opts with no Hunter, then each one picked in place, Arena.set_arch): <dir>/hunter_<id>.png,
-## every Hunter close up at 3/4 front;
+## (Match.arena_opts with no Hunter, then each one picked in place, Arena.set_arch): <dir>/hunter_<id>_front|back.png,
+## every Hunter from both sides;
 ## <dir>/overview.png from high above; <dir>/clip/f000.png ... a slow flyover (ffmpeg it into a clip). Runs on older
 ## trees too (the before shots of the 11-08 merge: the old 52 m Arena map).
 
@@ -24,6 +24,8 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	await m.start(Match.arena_opts())
 	if m.hud: m.hud.visible = false
+	for c in main.find_children("*", "CanvasLayer", true, false):
+		if c != fade: (c as CanvasLayer).visible = false      # (the practice bar, toasts)
 	cam = Camera3D.new()
 	cam.fov = 40.0
 	m.add_child(cam)
@@ -35,10 +37,14 @@ func run(main: Node) -> void:
 		for i in 45: await tree.process_frame
 		cam.current = true
 		var at := P.global_position + Vector3(0, 1.0, 0)
-		var fwd := Vector3(sin(P.face), 0, cos(P.face))
-		cam.global_position = at + fwd.rotated(Vector3.UP, 0.7) * 3.4 + Vector3(0, 0.6, 0)
-		cam.look_at(at)
-		await _grab(out.path_join("hunter_%s.png" % a))
+		var fwd := P.model.global_transform.basis.z
+		fwd.y = 0.0
+		fwd = fwd.normalized() if fwd.length() > 0.01 else Vector3.BACK
+		for side in ["front", "back"]:
+			var dir := -fwd if side == "front" else fwd      # (a model looks down its -Z)
+			cam.global_position = at + dir.rotated(Vector3.UP, 0.5) * 4.6 + Vector3(0, 0.9, 0)
+			cam.look_at(at)
+			await _grab(out.path_join("hunter_%s_%s.png" % [a, side]))
 	var big := m.world.layout_id == "training"
 	var mid := Vector3(55, 0, 38) if big else Vector3(26, 0, 26)
 	cam.global_position = mid + (Vector3(0, 70, 62) if big else Vector3(0, 38, 34))
