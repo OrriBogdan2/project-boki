@@ -133,6 +133,44 @@ Stump Shove, the Boki base's second minigame (briefs/design/GARDEN.md section 5.
 | gems_doc | Gems to you when your backed Boki wins, or for any other bout. |
 | card_s | 6 |
 
+## base_volley (`content/rules/base_volley.json`)
+
+Spark Volley, the Boki base's fourth minigame (briefs/design/GARDEN.md section 5.4, scripts/home/base_volley.gd). Only with farm_build.json base_mode on. Two Boki bat a glowing seed over a log, first to to_win points; a miss gives the other side the point. You back your partner and call one spike on the training drill's bar. Units: seconds, joy and trust are 0-100 points.
+
+| Setting | Value |
+|---|---|
+| to_win | 5 |
+| base_return | 0.7 |
+| base_doc | Chance a Boki returns a seed hit by an equal Boki. The real chance is base_return times its own strength over the hitter's, kept between min_return and max_return. |
+| min_return | 0.25 |
+| max_return | 0.92 |
+| speed_per_point | 0.005 |
+| focus_per_point | 0.005 |
+| stats_doc | Strength = (1 + Speed points x speed_per_point) x (1 + Focus points x focus_per_point): Speed gets it under the seed, Focus reads where it goes. Half a percent a point each, like the match bonus. |
+| mood | [0.92, 1.08] |
+| mood_doc | Strength multiplier at joy 0 and at joy 100 (linear in between). |
+| trust_max | 1.05 |
+| trust_doc | Strength multiplier at trust 100 (linear from 1.0 at trust 0). |
+| edge | 1.08 |
+| edge_doc | Strength multiplier for a Boki whose species theme beats the other's (the 'beats' table of content/rules/base_shove.json, so there is one element table). |
+| spike | {"great": 0.3, "good": 0.6, "miss": 1.0} |
+| spike_doc | Your one call: the backed Boki's next hit is a spike and the other side's chance to return it is multiplied by this. |
+| serve_s | 0.8 |
+| fly_s | 0.75 |
+| spike_fly_s | 0.4 |
+| point_s | 1.1 |
+| max_s | 150 |
+| max_doc | A match still going at this many seconds goes to the side ahead (the server on a tie). |
+| energy | 8 |
+| energy_doc | Each player spends this much energy (BaseRace.entrants only picks rested Boki). |
+| win_joy | 12 |
+| win_trust | 3 |
+| lose_joy | -8 |
+| gems_win | 4 |
+| gems_ran | 1 |
+| gems_doc | Gems to you when your backed Boki wins, or for any other match. |
+| card_s | 6 |
+
 ## boki_lines (`content/rules/boki_lines.json`)
 
 What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words in one bubble (punctuation and symbols don't count); act_words = the most words in one action, which a young Boki says after its name; bubble_s = seconds a bubble stays up; cooldown_s = seconds a Boki waits between lines (a trigger marked direct answers something you did and skips the wait); no_repeat = how many of its own last lines a Boki never repeats; min_lines = the fewest general lines a trigger may have; grown_stage = the speech stage (Care.speech) from which a Boki says lines instead of its name. tones = how a young Boki says its name, by feeling ({A} first syllable, {a} lower, {b} second syllable, {F} full name, {f} lower, {U} upper; KinSpeak.fill). sounds = noises a tone may use besides the name. alias = old trigger names that share another's lines. triggers: feel (a tone), word (the one word a stage-1 Boki adds), acts (what it does), lines._ (anyone) and lines.<element> (extra lines for a Boki of that element, the species' type).
