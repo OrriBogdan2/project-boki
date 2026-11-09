@@ -4313,3 +4313,9 @@ ART proofhop 8.4 briefs/boki-art/batch/out/c_proofhop_r_w28_1.jpg kind=concept s
 ART fizzlet 8.33 briefs/boki-art/batch/out/fizzlet_e2_w28_2.jpg kind=turnaround status=owner-review panel=8.3/8.3/8.4
 ART relic albert briefs/boki-art/relics/Albert.jpg grade 8.53/10
 ART scoopsy 8.43 briefs/boki-art/batch/out/ta_scoopsy_1.jpg kind=turnaround status=owner-review panel=8.3/8.5/8.5
+
+## 04:56 ET 11-09 — READY: Bellowary portrait redo (owner 8.3 "needs a bit more oomph")
+Same locked design (turnaround), new charging sprint pose: low forward lean, neck thrust out, spur blades forward, wings flared, chest bellows pumped and glowing, beak nozzle blazing, fierce grin. Jobs portrait_bellowary_oomph (fresh from turnaround) and _oomphe (edit of the old portrait), 3 runs each. Rating feed: gen bellowary-1109045508 (redo of bellowary-1-art). Pick replaces portraits/Bellowary.jpg once the owner passes it.
+ART bellowary - briefs/boki-art/batch/out/portrait_bellowary_oomph_3.jpg kind=portrait status=owner-review
+ART bellowary - briefs/boki-art/batch/out/portrait_bellowary_oomphe_2.jpg kind=portrait status=owner-review
+ART bellowary - briefs/boki-art/batch/out/portrait_bellowary_oomph_1.jpg kind=portrait status=owner-review
