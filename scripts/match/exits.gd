@@ -222,7 +222,8 @@ func active_for(team: int) -> Dictionary:
 			return x
 	return {}
 
-func _cap(s: float) -> String:
+## Seconds as m:ss (never below 0).
+static func cap(s: float) -> String:
 	s = maxf(0.0, s)
 	return "%d:%02d" % [int(s) / 60, int(s) % 60]
 
@@ -246,7 +247,7 @@ func interact_for(h: Hunter) -> Dictionary:
 				match String(x["state"]):
 					"idle":
 						if m.time < float(x["open_at"]):
-							best = {"label": "The skiff dock opens in %s" % _cap(float(x["open_at"]) - m.time)}
+							best = {"label": "The skiff dock opens in %s" % cap(float(x["open_at"]) - m.time)}
 						elif m.time >= float(x["close_at"]):
 							best = {"label": "This dock has closed"}
 						else:
@@ -276,7 +277,7 @@ func interact_for(h: Hunter) -> Dictionary:
 				match String(x["state"]):
 					"idle":
 						if m.time < float(x["open_at"]):
-							best = {"label": "The uplink comes online in %s" % _cap(float(x["open_at"]) - m.time)}
+							best = {"label": "The uplink comes online in %s" % cap(float(x["open_at"]) - m.time)}
 						else:
 							best = {"act": "start", "need": START_HOLD, "label": "Hold %s to start the uplink  ·  monsters will attack the outpost" % key}
 					"charging": best = {"label": "Uplink %d%%  ·  hold the yard (more of you charge it faster)%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else crew_text(int(x.get("crew", 0)))]}
@@ -799,70 +800,25 @@ func live(x: Dictionary) -> bool:
 		"outpost": return x["state"] in ["charging", "open"] or startable(x)
 	return false
 
-## The line under the minimap: what the exits are doing, from your point of view.
+## The line under the minimap: what the docks are doing.
 func clock_line() -> Array:
 	var p := m.player
 	if p == null or list.is_empty():
 		return ["", Color.WHITE]
-	var mine := active_for(p.team)
-	if not mine.is_empty():
-		match String(mine["state"]):
-			"called": return ["SKIFF CALLED %s" % _cap(mine["t"]), ExitModels.DOCK]
-			"boarding": return ["SKIFF BOARDING %s" % _cap(mine["t"]), ExitModels.DOCK]
-			"charging":
-				if mine.get("draining", false):
-					# (short: it sits between the clock and your level under the minimap)
-					return ["DRAINING %s" % _cap(drain_left(mine)), ExitModels.UPLINK.lerp(Color.WHITE, 0.25 + 0.25 * sin(m.time * 7.0))]
-				if mine["contested"]:
-					return ["CONTESTED %d%%" % int(mine["prog"] * 100.0), Color("ff8a6a")]
-				return [("UPLINK %d%%%s" % [int(mine["prog"] * 100.0), (" x%s" % String.num(crew_rate(int(mine.get("crew", 0))), 1)) if int(mine.get("crew", 0)) > 1 else ""]), ExitModels.UPLINK]
-			"open": return ["LIFT OPEN %s" % _cap(mine["t"]), ExitModels.UPLINK]
 	var docks := of_kind("dock")
 	var first := 1e9
 	for d in docks: first = minf(first, float(d["open_at"]))
 	if not docks.is_empty() and m.time < first:
-		return ["DOCKS IN %s" % _cap(first - m.time), Color(0.75, 0.75, 0.8)]
+		return ["DOCKS IN %s" % cap(first - m.time), Color(0.75, 0.75, 0.8)]
 	var open_docks := docks.filter(func(d): return d["state"] != "closed")
 	var next_close := 1e9
 	for d in open_docks:
 		if float(d["close_at"]) < 1e8: next_close = minf(next_close, float(d["close_at"]))
 	if next_close - m.time < 45.0:
-		return ["DOCK CLOSES %s" % _cap(next_close - m.time), Color("ffcf8a")]
+		return ["DOCK CLOSES %s" % cap(next_close - m.time), Color("ffcf8a")]
 	if not docks.is_empty():
 		return ["%d DOCK%s OPEN" % [open_docks.size(), "" if open_docks.size() == 1 else "S"], ExitModels.DOCK]
 	return ["EXITS OPEN", Color("8fe3c8")]
-
-## The big status line in the middle of the screen while you're in the middle of an exit, or {}.
-func status_for(p: Hunter) -> Dictionary:
-	if p == null or p.out or p.extracted:
-		return {}
-	for x in list:
-		match String(x["kind"]):
-			"dock":
-				if x["state"] == "boarding" and on_deck(x, p):
-					return {"text": "Aboard  ·  casting off in %ds" % int(ceil(x["t"])), "prog": 1.0 - float(x["t"]) / BOARD_T, "col": ExitModels.DOCK}
-				if x["state"] == "called" and int(x["team"]) == p.team and p.flat_dist(x["berth"]) < 16.0:
-					return {"text": "Skiff inbound  ·  %s" % _cap(x["t"]), "prog": 1.0 - float(x["t"]) / CALL_T, "col": ExitModels.DOCK}
-			"hatch":
-				if x["state"] == "unlocking" and p.flat_dist(x["pos"]) < 16.0:
-					var mine_h := int(x.get("team", -1)) == p.team
-					return {"text": ("Rift hatch opening  ·  %ds" if mine_h else "A rival's rift hatch opening  ·  %ds") % int(ceil(float(x["t"]))), "prog": 1.0 - float(x["t"]) / HATCH_UNLOCK_T, "col": ExitModels.HATCH}
-				if x["state"] == "open" and p.flat_dist(x["pos"]) < 12.0:
-					return {"text": "Rift hatch open  ·  drop through  ·  %d of %d left" % [int(x["uses"]), HATCH_USES], "prog": float(x["uses"]) / HATCH_USES, "col": ExitModels.HATCH}
-			"outpost":
-				if x["state"] == "charging" and in_yard(x, p):
-					var mine: bool = int(x["team"]) == p.team
-					var t := "Uplink %d%%" % int(x["prog"] * 100.0)
-					if x["contested"]: t += "  ·  CONTESTED: clear the yard"
-					elif not mine: t += "  ·  a rival's uplink: hold the yard to take it"
-					elif int(x.get("crew", 0)) > 1: t += crew_text(int(x["crew"]))
-					else: t += "  ·  bring your squad: more of you charge it faster"
-					return {"text": t, "prog": float(x["prog"]), "col": Color("ff8a6a") if x["contested"] or not mine else ExitModels.UPLINK}
-				if x["state"] == "charging" and int(x["team"]) == p.team and x.get("draining", false) and p.flat_dist(x["pos"]) < 80.0:
-					# our uplink with nobody in its yard: the charge running out, and how long it has
-					return {"text": "Uplink draining  ·  %d%%  ·  back to the yard: %s" % [int(x["prog"] * 100.0), _cap(drain_left(x))], "prog": float(x["prog"]),
-						"col": ExitModels.UPLINK.lerp(Color.WHITE, 0.2 + 0.2 * sin(m.time * 7.0))}
-	return {}
 
 # ------------------------------------------------------------------ for bots
 ## Where a bot heading home should go, and what it's doing there: [pos, goal kind] or [].

@@ -928,14 +928,13 @@ func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
 		var ph := fmod(m.time * 1.2, 1.0)
 		c.draw_arc(pv, (8.0 + ph * 8.0) * k, 0, TAU, 24, Color(col, 0.8 * (1.0 - ph)), 2.0, true)
 
-## Over each exit nearby: its name and what it's doing. Your squad's own exit (a skiff you called, an
-## uplink you're charging) gets a waypoint from anywhere on the map.
+## Over each exit nearby: its name and what it's doing (the exit in the ExtractWidget keeps just its name).
 func _draw_exit_labels() -> void:
 	if m.exits == null or m.player == null or m.player.out or m.player.extracted:
 		return
 	var cam := m.cam
 	var p: Hunter = m.player
-	var mine: Dictionary = m.exits.active_for(p.team)
+	var shown: Dictionary = ExtractWidget.state(m, p).get("x", {})
 	for x in m.exits.list:
 		var at: Vector3 = x["pos"]
 		var col: Color = Exits.color_of(x)
@@ -968,11 +967,8 @@ func _draw_exit_labels() -> void:
 		if d < reach and not cam.is_position_behind(at) and not prompted:
 			var lp := cam.unproject_position(at + Vector3(0, 3.4 if x["kind"] != "hatch" else 1.6, 0))
 			_ctext(lp, String(x["name"]), 13, col, big)
-			if line != "":
+			if line != "" and not is_same(x, shown):
 				_ctext(lp + Vector2(0, 17), line, 12 if st not in ["boarding", "open", "unlocking"] else 16, INK if st not in ["boarding", "open", "unlocking"] else col, big)
-		if is_same(x, mine) and d > 7.0 and not m.opts.get("tutorial", false):
-			var tgt: Vector3 = x.get("berth", at)
-			_draw_waypoint(tgt, "Skiff" if x["kind"] == "dock" else ("Hatch" if x["kind"] == "hatch" else ("Lift" if st == "open" else "Uplink")), col)
 
 ## A small arrow on the minimap's edge pointing at something off the map.
 func _edge_arrow(inner: Rect2, from: Vector2, to: Vector2, col: Color) -> void:
@@ -1892,7 +1888,7 @@ func _draw_perks(sz: Vector2, p: Hunter) -> void:
 func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 	var it := m.interact
 	var y := TutorialHud.prompt_y(self, sz)
-	if not it.is_empty():
+	if not it.is_empty() and not ExtractWidget.covers_prompt(m, it):
 		var prog := 0.0
 		match it["kind"]:
 			"revive": prog = it["ent"].revive
@@ -1910,10 +1906,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 		_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
 		if prog > 0.0:
 			_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
-	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
-	if not st.is_empty():
-		_ctext(Vector2(sz.x * 0.5, sz.y * 0.2), String(st["text"]), 24, st["col"], big)
-		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.2 + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])
+	ExtractWidget.draw(self, sz)
 
 func _draw_crosshair(p: Hunter) -> void:
 	var mp := c.get_local_mouse_position()

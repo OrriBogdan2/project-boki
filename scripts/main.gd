@@ -2143,9 +2143,9 @@ func _extract_check() -> void:
 	P.teleport(hp + Vector3(0.2, 0, 0.1))
 	run.call(m, 4.0, func(): P.inp["interact"] = true)
 	P.inp["interact"] = false
-	var st: Dictionary = m.exits.status_for(P)
-	print("EXCHECK hatch: 4s on: state=%s %.1fs left, player extracted=%s, HUD: %s" % [hx["state"], float(hx["t"]), P.extracted, st.get("text", "")])
-	if P.extracted or hx["state"] != "unlocking" or not String(st.get("text", "")).contains("opening"): ok = false; print("EXCHECK FAIL hatch entered before it opened")
+	var st: Dictionary = ExtractWidget.state(m, P)
+	print("EXCHECK hatch: 4s on: state=%s %.1fs left, player extracted=%s, HUD: %s" % [hx["state"], float(hx["t"]), P.extracted, st.get("left", "")])
+	if P.extracted or hx["state"] != "unlocking" or not String(st.get("left", "")).contains("Opens in"): ok = false; print("EXCHECK FAIL hatch entered before it opened")
 	P.teleport(hp + Vector3(1.4, 0, 0.0))
 	while hx["state"] == "unlocking" and m.time - t0 < 15.0: run.call(m, Match.DT)
 	print("EXCHECK hatch: opened after %.1fs, %d uses" % [m.time - t0, int(hx.get("uses", 0))])
@@ -2293,10 +2293,10 @@ func _extract_check() -> void:
 	var d0 := float(o["prog"])
 	run.call(m, 3.0, calm.bind(m))
 	var d1 := float(o["prog"])
-	var ust: Dictionary = m.exits.status_for(P)
+	var ust: Dictionary = ExtractWidget.state(m, P)
 	var drain_rate := (d0 - d1) / 3.0 * Exits.UPLINK_DECAY_T
-	print("EXCHECK uplink decay: nobody in the yard: %d%% -> %d%% in 3s (x%.2f of a full drain in %ds); '%s'" % [int(d0 * 100), int(d1 * 100), drain_rate, int(Exits.UPLINK_DECAY_T), String(ust.get("text", ""))])
-	if not o.get("draining", false) or absf(drain_rate - 1.0) > 0.05 or not String(ust.get("text", "")).contains("draining"): ok = false; print("EXCHECK FAIL uplink decay")
+	print("EXCHECK uplink decay: nobody in the yard: %d%% -> %d%% in 3s (x%.2f of a full drain in %ds); '%s'" % [int(d0 * 100), int(d1 * 100), drain_rate, int(Exits.UPLINK_DECAY_T), String(ust.get("left", ""))])
+	if not o.get("draining", false) or absf(drain_rate - 1.0) > 0.05 or not String(ust.get("left", "")).contains("Runs dry"): ok = false; print("EXCHECK FAIL uplink decay")
 	# back in the yard it charges again
 	P.teleport(o["pos"] + Vector3(0.6, 0, 0.6)); P.set_meta("pin", P.pos)
 	run.call(m, 1.0, calm.bind(m))
@@ -2325,6 +2325,7 @@ func _extract_check() -> void:
 	print("EXCHECK docks: %d close during the match, %d still open near the end; a call now takes %.0fs" % [closing, still.size(), m.exits.call_time()])
 	if still.size() != 1 or m.exits.call_time() > 10.0: ok = false; print("EXCHECK FAIL closing")
 	done.call(m)
+	ok = ExtractWidgetCheck.run(self) and ok
 	print("EXCHECK ", "PASS" if ok else "FAIL")
 	get_tree().quit()
 
