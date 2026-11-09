@@ -21,7 +21,15 @@
 		"dive_accel": 35.0,
 		"dive_steer": 0.25,
 		"dive_cancel_h": 3.5,
-		"dive_timeout": 10.0
+		"dive_timeout": 10.0,
+"heat_doc": "Glider heat. Tags: [D] game data, [F] footage, [O] owner, [est] ours where the source is locked (supervive_physics.md lists GliderHeatInboundDamageCoefficient, GliderFullHeatInboundDamageCoefficient and the overheat penalty effects, values not decoded). glide_heat_s [F]: seconds of level glide over the abyss before the heat ring turns hot (Tom Kick's guide, ~14 s; was our 9). lift_heat [F]: heat rate while the glider lifts you out of the abyss, x a level glide (Zik's drill: a ~1 s lift from 8 m deep burns a quarter to a third). lift_tap_heat [est]: the lift's first Hunter.FEATHER_TAP seconds (the wiki's quick impulse) heat at this x instead. hit_heat [est]: a hit on a glider heats it by this x its damage share of a knock (250 of 1,050 is 30%). overheat_burn [est]: share of max health an overheated, open glider burns a second. overheat_speed [est]: glide speed share while overheated. overheat_lift [O] DECISIONS: an overheated glider still lifts you out of the abyss at this share of the full lift.",
+"glide_heat_s": 14.0,
+"lift_heat": 4.0,
+"lift_tap_heat": 1.0,
+"hit_heat": 3.0,
+"overheat_burn": 0.035,
+"overheat_speed": 0.5,
+"overheat_lift": 0.5
 	},
 	"default": {"speed": 4.55, "accel": 54.0},
 	"bulwark": {"speed": 4.85, "accel": 47.0},

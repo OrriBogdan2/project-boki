@@ -59,7 +59,6 @@ const LEDGE_CD := 0.45
 const FLOAT_SPEED := 12.0
 const GLIDE_FALL := 1.7
 const GLIDE_SPEED := 5.0       # [game data] MaxGlide 500 uu/s (item 163: "too fast and controllable"; was 6.5)
-const GLIDE_TIME := 9.0        # (owner: "lasts too long, not punishing enough") was 14s of level glide before the heat ring turns hot
 const GLIDE_DRAG := 1.6         # speed lost per second while gliding (more when going fast)
 const GLIDE_MAX := 15.0
 # The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
@@ -211,7 +210,7 @@ var wall_hit_v := Vector2.ZERO  # this step's speed into an island side that sto
 var lip_y := 0.0               # that edge's height: where your balloon floats
 var heat_burn := 0.0
 var in_current := false        # riding a wind road or an updraft: the glider doesn't heat up
-var glide_max := GLIDE_TIME
+var glide_max := HunterMove.glide_heat_s   # seconds of level glide before overheating (x glide_cap)
 var glide_cd := 0.0
 var glide_k := 0.0             # how far the glider is unfolded, for the model
 var _auto_glide_held := true   # (glide held last frame: auto_glide ends on a fresh press, not a held key)
@@ -285,7 +284,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	# the belt issue and the equal pack size (Equal.pack_slots)
 	UtilityBelt.issue(self)
 	pack_cap = Equal.base_pack()
-	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
+	glide_max = HunterMove.glide_heat_s * float(cdat.get("glide_cap", 1.0))
 	base_speed = cdat["speed"]
 	runner = AbilityRunner.new(self)
 	ak = ArchKit.make(self, arch) if arch != "" else null
@@ -323,7 +322,7 @@ func reclass(c: String, a: String, w := "") -> void:
 	max_hp = float(cdat["hp"]) + kin_hp_added; hp = max_hp
 	LevelGrowth.reset(self)      # your levels' health comes along to the new class
 	max_armor = round(float(cdat["hp"]) * ARMOR_DUR); armor = max_armor; base_armor = max_armor
-	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
+	glide_max = HunterMove.glide_heat_s * float(cdat.get("glide_cap", 1.0))
 	base_speed = cdat["speed"]
 	dodge_def = Content.class_dodge(cls)
 	arch = Arch.fix(a, cls)
@@ -500,8 +499,9 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	var spiked := false
 	if gliding and not dropping and dmg > 0.0 and opts.get("src", "") not in ["fall", "burn", "heat"]:
 		var was := glide_fuel
-		# a knock's worth of damage (250 of 1,050) would burn 30% of the glider; hits drain it 3x
-		glide_fuel = maxf(0.0, glide_fuel - 3.0 * dmg * (0.30 / 34.5) / float(cdat.get("glide_cap", 1.0)))
+		# a knock's worth of damage (250 of 1,050) would burn 30% of the glider, times hit_heat
+		var knock_share := dmg * (0.30 / 34.5) / float(cdat.get("glide_cap", 1.0))
+		glide_fuel = maxf(0.0, glide_fuel - HunterMove.hit_heat * knock_share)
 		hit_heat_t = 1.0
 		if is_local() and m.hud and m.hud.has_method("glider_hit"):
 			m.hud.glider_hit(was - glide_fuel)
@@ -907,8 +907,7 @@ static func glide_steer(hv: Vector2, wish: Vector2, gs: float, dt: float) -> Vec
 ## holding. Numbers in docs/MOVEMENT_FEEL.md; measured by --move-feel-check (feather_*).
 const FEATHER_KEEP := 0.6      # [est] seconds after closing the glider that its speed and steering carry
 const FEATHER_MIN := 0.05      # [est] the glider reopens with this much heat room left (was 0.15)
-const FEATHER_TAP := 0.3       # [est] an abyss lift's first this-many seconds are its quick impulse...
-const FEATHER_TAP_HEAT := 1.0  # [est] ...heating like a level glide; held past it, the full 4x
+const FEATHER_TAP := 0.3       # [est] an abyss lift's quick first seconds, heating at lift_tap_heat
 var glide_off_t := 9.0         # seconds since the glider closed in the air (9 = long ago / on the ground)
 var lift_t := 0.0              # seconds of the current abyss lift (feathering taps stay in the cheap part)
 
@@ -2191,7 +2190,8 @@ func _physics(dt: float) -> void:
 	elif gliding:
 		# the glider keeps the speed you bring into it (a dash or a pad into a glide carries) and
 		# drifts on when you let go of the keys
-		var gs := (GLIDE_SPEED * 0.5 if glide_fuel <= 0.001 else GLIDE_SPEED) * (1.0 + gear_stat("glide_speed"))
+		var hot_k := HunterMove.overheat_speed if glide_fuel <= 0.001 else 1.0
+		var gs := GLIDE_SPEED * hot_k * (1.0 + gear_stat("glide_speed"))
 		gs += glide_lift.swoop
 		hv = glide_dive.steer(hv, mv * gs, gs, dt) if glide_dive.on else glide_steer(hv, mv * gs, gs, dt)
 		if dropping:
@@ -2244,7 +2244,7 @@ func _physics(dt: float) -> void:
 	elif gliding and not dropping and below_lip:      # overheated: still lifts, at half strength, while it burns
 		# below ground level over the abyss the glider lifts you hard, then brakes near the top.
 		# Let go just before ground level to carry the lift up as height (feathering)
-		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt, 1.0 if glide_fuel > 0.001 else 0.5)
+		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt, 1.0 if glide_fuel > 0.001 else HunterMove.overheat_lift)
 		glide_lift.hang_t = GlideLift.HANG_T
 	elif gliding:
 		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
@@ -2551,7 +2551,7 @@ func _update_glide(dt: float) -> void:
 		auto_glide = false
 	# an overheated glider scorches you while it stays open
 	if gliding and not dropping and glide_fuel <= 0.001 and not downed:
-		heat_burn += dt * max_hp * 0.035      # an overheated glider burns ~3.5% of your health a second (was a token 4/s)
+		heat_burn += dt * max_hp * HunterMove.overheat_burn     # a share of your health a second
 		if heat_burn >= 20.0:                  # (in ~20-damage ticks, ~2 a second: not a stream of numbers)
 			heat_burn -= 20.0
 			hurt(20.0, null, {"src": "heat"})
@@ -2571,7 +2571,8 @@ func _update_glide(dt: float) -> void:
 			# [footage] ~1s of lift burns a quarter; (feathering) a short tap's impulse costs less
 			var lifting := below_lip and lip_y - pos.y > 0.3 and vel.y > 0.0
 			lift_t = lift_t + dt if lifting else 0.0
-			var hk := ((FEATHER_TAP_HEAT if lift_t <= FEATHER_TAP else 4.0) if lifting else 1.0) * (2.0 if hit_heat_t > 0.0 else 1.0)
+			var lift_k := HunterMove.lift_tap_heat if lift_t <= FEATHER_TAP else HunterMove.lift_heat
+			var hk := (lift_k if lifting else 1.0) * (2.0 if hit_heat_t > 0.0 else 1.0)
 			glide_fuel = maxf(0.0, glide_fuel - dt * hk / (glide_max * (1.0 + gear_stat("heat"))))
 		if not dropping:
 			stats["glide_t"] = float(stats.get("glide_t", 0.0)) + dt
