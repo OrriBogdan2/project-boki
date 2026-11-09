@@ -30,6 +30,7 @@ const SPENT_T := 4.0           # s a spent arrow stays in the ground
 const STAKE_T := 7.0           # s the stake a wall pin leaves in the wall stays
 ## the Heavy Shot's arrow is this many times a normal arrow (the Empowered bolt is 1.0): unmistakable
 const HEAVY_SCALE := 6.0
+const ULT_WIDTH := 0.6          # m: Starpiercer's arrow head and trail, its hit width (2 x the 0.3 shot radius)
 const GREEN := Color("ff5a4e")      # (named for its old colour: Hem is red now, owner Nov 4)
 const TEAL := Color("ffb0a0")       # (the light half of her red)
 const GOLD := Color("ffc02a")
@@ -149,7 +150,7 @@ const LOOK := {
 	"arrow": [SILVER, Color.WHITE, FLETCH, Color(1.0, 0.16, 0.22, 0.6), 2.4, 0.07, 1.0],
 	"super": [Color.WHITE, Color.WHITE, THREAD, Color(1.0, 0.2, 0.26, 0.9), 5.0, 0.3, 1.35],
 	"over": [Color("8fa0b4"), Color("c0c8d4"), Color("7a6a58"), Color(0.6, 0.12, 0.16, 0.35), 1.0, 0.04, 0.9],
-	"ult": [Color.WHITE, Color.WHITE, THREAD, Color(1.0, 0.2, 0.26, 0.9), 5.0, 0.3, 2.4],
+	"ult": [Color.WHITE, Color.WHITE, THREAD, Color(1.0, 0.2, 0.26, 0.9), 5.0, ULT_WIDTH, 5.0],
 	"heavy": [Color("e02a2a"), TEAL, GREEN, Color(1.0, 0.25, 0.2, 0.95), 7.0, 0.9, HEAVY_SCALE],
 }
 

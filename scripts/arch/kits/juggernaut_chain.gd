@@ -91,7 +91,8 @@ func _throw() -> void:
 	var h := k.h
 	state = "throwing"
 	e_pressed_at = -9.0
-	k.play("jug_chain")
+	if k.slam_w.is_empty() and k.lunge.is_empty():      # a heavy move keeps its own body (E goes on top of it)
+		k.play("jug_chain")
 	var stg := k.stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]),
 			"range": float(ed["range"]), "size": 0.22, "rope": true},
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}]})
@@ -166,7 +167,7 @@ func pull() -> void:
 	var h := k.h
 	k.start_e_cd()
 	state = "pulling"
-	if k.busy() or h.root_t > 0.0:
+	if (k.busy() and k.riposte.move_k() > 0.0) or h.root_t > 0.0:
 		_stop("stopped", false)
 		return
 	k.arm_haul()
@@ -183,7 +184,7 @@ func pull() -> void:
 	pull_t = dist / pull_speed + 0.5
 	h.dash_with({"type": "dash", "speed": pull_speed, "time": pull_t, "kind": "rush", "dir": pull_dir,
 			"invuln": 0.0})
-	if k.anim_id != "jug_haul_wind": k.play("jug_reel")
+	if k.anim_id != "jug_haul_wind" and not k.riposte.running(): k.play("jug_reel")
 	k.vfx("chain_pull", h.pos, pull_dir)
 	k.last_e = "reel"
 
@@ -235,6 +236,8 @@ func _arced(dir: Vector2, to: Vector2, step: float, most: float) -> Vector2:
 
 ## Each step (before the hunter moves).
 func tick(dt: float) -> void:
+	if k.h.model:
+		k.h.model.set_meta(WardenGlb.CHAIN_OUT, state != "ready")      # (the arm's chain is the one in the air: 76b)
 	match state:
 		"hooked": _tick_hooked(dt)
 		"pulling": _tick_pull(dt)
@@ -381,6 +384,11 @@ func _tick_pull(dt: float) -> void:
 	var a := h.pos + Vector3(0, 1.0, 0)
 	k.fx().chain(_fx_id(), a, at + Vector3(0, 1.0 if target != null else 0.6, 0), 0.0, HOT, DARK, 0.16, _bow(steer))
 	_draw_preview()
+
+## Him to the anchor, flat.
+func to_anchor() -> Vector2:
+	var at := _anchor_now()
+	return Vector2(at.x - k.h.pos.x, at.z - k.h.pos.z)
 
 func _anchor_now() -> Vector3:
 	return target.pos if target != null and is_instance_valid(target) else anchor

@@ -17,7 +17,8 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
   keep their shape. The hunch stays: the head and neck keep the scan's lean ahead of the hips, and all of the head rides `head`.
 - **Right arm:** the bone hook IS the arm. Everything past the right wrist rides bone `hook` (hand.R); the crescent, which curls in by his
   right shin, is split from the leg by place (a capsule round the leg's core). It reaches the ground at rest, as on the sheet (the crescent's lowest edge rides the right foot).
-  anchor_claw and anchor_hook_tip sit on its tip: the kit's abyssal arm reaches out from there. The arm never hides (no `hide_while_chain`).
+  anchor_claw and anchor_hook_tip sit on its tip: the kit's abyssal arm reaches out from there. While the kit's arm is stretched out, bone `hook` shrinks away (`hide_while_chain`): the kit draws the hook at the arm's end, so anchor_claw
+  collapses to the wrist and the stretched arm grows from there; it is back when the arm snaps back.
 - **Left hand:** the scan's gauntlet, rigid on hand.L; fingers.L, fingers2.L and thumb.L stay for the clips, unweighted. anchor_fist on its knuckles.
 - **Face (grimble_paint.scan_face):** the scan's blurred paint fixed: a heavy lid over the left eye (the squint), silver scrap-metal teeth,
   the gold tooth, purple gums. The loupe is scripted (sculpt monocle(), three glowing lens discs, the gold chain on spring_hangmono).

@@ -1,6 +1,6 @@
 {
  "group": "mage",
- "name": "Ryzz",
+ "name": "Sparkle",
  "script": "tools/gen_sfx_ryzz.py",
  "sounds": {
   "vv_bolt": "fire",

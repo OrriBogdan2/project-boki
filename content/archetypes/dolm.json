@@ -1,13 +1,14 @@
 {
 	"id": "dolm",
-	"title": "Cliff Runner",
-	"base_name": "Tarek",
+	"title": "Stone Seer",
+	"base_name": "Tenzo",
 	"gender": "male",
-	"personality": "A young, nimble rock elementalist with a bandana tied over his eyes. He reads the ground by feel.\nQuiet and light on his feet, he moves stone like it is a dance partner.",
+	"personality": "A young cliff-runner, blind since birth, who ran messages along the cliff paths by the feel of the rock. When the Hollowing cracked the cliffs, the stone started answering him: three seeing-stones float around him and are his eyes.\nThe youngest of the crew and the calm one, he hears trouble through the ground before Vex sees it.",
 	"weight": "medium",
 	"color": "#d9a35b",
 	"fantasy": "The quarry-hand. Raises stone out of the ground, climbs it, then punches it into you.",
-	"silhouette": "the stone shoulder and the huge molten-cracked fists",
+	"silhouette": "the huge stone left arm, the stone gauntlet and the three floating eye stones",
+	"model_glow": {"core": "#5ce6b8", "edge": "#2fc2b4"},
 	"card": {
 		"role": "Brawler and builder: raises rocks to climb and hide behind, then punches them into the enemy.",
 		"loop": "Brawler and builder: raises rocks to climb and hide behind, then punches them into the enemy.",
@@ -19,7 +20,7 @@
 		"passive": "Molten Guard: punching your own rocks gives you a shield. Tremor Sense: sneak to see enemies in a cone ahead through walls; it widens as you sneak.",
 		"weapons": {"rubble_fists": "Tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies."}
 	},
-	"body": {"size": 0.8, "build": 1.08, "head": 0.8, "legs": 2.9, "arms": 1.5, "neck": -0.02, "hit_r": 0.388},
+	"body": {"size": 0.752, "build": 1.08, "head": 0.8, "legs": 2.9, "arms": 1.5, "neck": -0.02, "hit_r": 0.388},
 	"signature": "rubble_fists",
 	"resource": {"id": "rocks", "name": "Rocks", "max": 6, "kind": "count", "col": "#d9a35b"},
 	"passive": {"name": "Molten Guard", "len": 16.0, "deg": [25.0, 40.0], "grow": 2.0, "guard": {"shield": 18.0, "cap": 4, "t": 6.0},
