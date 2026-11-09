@@ -177,6 +177,12 @@ func mass() -> float:
 	var g := float(giant.get("scale", 1.0)) if not giant.is_empty() else 1.0
 	return (ks.mass if ks else 0.8) * g * g
 
+## The Boki body's layer, in one place for every species: it bumps rivals, mobs and other Boki, never a hunter
+## on its own team, so it can't change a player's movement, dash or control (DECISIONS 2026-11-06;
+## docs/BOKI_IDENTITY.md "Never in the way"). Shots carry the same mask in Match._shot_targets and foes_of.
+func bumps(o: Ent) -> bool:
+	return not (o is Hunter and o.team == team)
+
 ## How it's carried: "shoulder", "perch" or "mount" (KinSpec carry.style).
 func carry_style() -> String:
 	return ks.carry_style if ks else "shoulder"

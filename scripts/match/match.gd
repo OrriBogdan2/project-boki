@@ -4435,7 +4435,7 @@ func _separate() -> void:
 		near.sort()
 		for j in near:
 			var b: Ent = bodies[j]
-			if absf(a.pos.y - b.pos.y) > 1.0:
+			if absf(a.pos.y - b.pos.y) > 1.0 or not a.bumps(b) or not b.bumps(a):
 				continue
 			var d := Vector2(b.pos.x - a.pos.x, b.pos.z - a.pos.z)
 			var mind := a.r + b.r

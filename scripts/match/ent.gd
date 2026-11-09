@@ -101,6 +101,10 @@ func alive() -> bool:
 func hittable() -> bool:
 	return not dead
 
+## Does this body push against o's body (Match._separate)? Everything bumps everything; a Boki's body narrows it.
+func bumps(_o: Ent) -> bool:
+	return true
+
 ## Generic damage. opts: kb (Vector2 impulse), lift, crit, src ("shot","kin","mob","boom","fall"), burn, slow, root
 func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if dead or dmg <= 0.0:
