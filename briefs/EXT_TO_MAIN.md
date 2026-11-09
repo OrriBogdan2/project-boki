@@ -4595,3 +4595,5 @@ Both starters HAVE turnarounds; please make sure the Vespyx and Mycroll entries 
 ART vespyx 8.43 briefs/boki-art/turnarounds/Vespyx.jpg kind=turnaround
 ART mycroll 8.5 briefs/boki-art/turnarounds/Mycroll.jpg kind=turnaround
 New canon hero cards for both (framed like the rest of the set) are being made now; they replace the main image when ready.
+
+READY ext/no-dash-bursts-audit 9ef878c5f (no ring/disc/burst on dashes, landings, wall moves, mantles, resets; --move-fx-check)
