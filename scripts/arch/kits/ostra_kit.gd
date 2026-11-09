@@ -503,11 +503,18 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	m.sfx("os_snap_hit", at, -2.0, 1.0)
 
 # ------------------------------------------------------------------ E: Brimseed
+## Where a ground cast (the seed, the well) starts: his feet, or the floor under him in a jump, a fall or a
+## glide. The source gives Void's E and R no ground-only rule (Tetra's wall has one), so height changes nothing.
+func cast_from() -> Vector3:
+	var g: float = m.world.ground_at(h.pos.x, h.pos.z)
+	return h.pos if h.grounded or g <= World.VOID + 1.0 else Vector3(h.pos.x, g, h.pos.z)
+
 func cast_e() -> bool:
 	var ed := e_def()
-	var pw := HeroZones.walk(m, h.pos, aim(), float(ed["reach"]))
+	var from := cast_from()
+	var pw := HeroZones.walk(m, from, aim(), float(ed["reach"]))
 	var p: Vector3 = pw["pos"]
-	if not pw["ok"] or not HeroZones.fits(m, p, h.pos.y, false):
+	if not pw["ok"] or not HeroZones.fits(m, p, from.y, false):
 		seed_denied += 1
 		if h.is_local() and m.hud: m.hud.toast_small("No ground to plant on", col_of(ed))
 		return false

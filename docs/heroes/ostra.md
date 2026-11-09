@@ -97,6 +97,19 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 2 (audited on 
 | Self screen shake | MED | (c) | ext/no-shake owns it |
 | RMB, passive, items 17 and 42 | n/a | (a) | matched in the audit |
 
+## In the air (parity pass `ext/air-cast-b`: what each slot does mid-jump, mid-fall and out of a glide)
+
+Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and in an open glide, on a flat floor; the glider column is what the glider did over the next 0.6 s with the glide key held. The glider never *opens* during an ability animation (owner 162b; `--air-limits-check`) and an open one is never folded by that rule. Where the source is silent the slot works as on the ground (DECISIONS: the source decides these interactions; owner item 51). LMB while the glider is open fires nothing for every Hunter (`Hunter.can_fire`); the source does not document attacking while gliding (docs/WEAPON_FIRING_DATA.md, [gap]), so that is left as it is.
+
+| Slot | Mid-jump / mid-fall | Out of a glide | Source |
+|---|---|---|---|
+| LMB | orbs fire as on the ground | no shot, glider stays open | gap (no air or glide rule) |
+| RMB Shard Snap | the same cast | the same cast, glider stays open | [D] Void: no air rule |
+| Shift Lantern Trade | the same lob in its air version (`ostra_swap_air`): he drifts at 30% speed at his height until it lands, no dash roll | the same lob, glider stays open | [D] "lob a projectile that swaps you"; owner dash note (hover) |
+| E Brimseed | the same cast: the seed is planted on the floor under the cursor (a fix of this pass: it was refused unless the floor was within 0.9 m of his height) | the same, glider stays open | [D] Void: no ground-only rule (Tetra's wall has one) |
+| X Nightwell | the same cast, the well opens on the floor at the cursor (same fix) | the same, glider stays open | [D] Void: no ground-only rule |
+| Over the abyss | E and X are still refused with no floor under him (the cast has nowhere to start) | same | ours; the source is silent |
+
 ## Combinations (`--ostra-combo-check`, tools/ostra_combo_check.gd; placement in `--zone-check`)
 | Combo | Result | Asserted by |
 |---|---|---|

@@ -50,7 +50,7 @@ func is_open() -> bool: return phase == "open"
 func start() -> bool:
 	if running():
 		return false
-	var pw := HeroZones.walk(k.m, k.h.pos, k.aim(), float(xd()["range"]))
+	var pw := HeroZones.walk(k.m, k.cast_from(), k.aim(), float(xd()["range"]))
 	if not pw["ok"]:
 		denied += 1
 		if k.h.is_local() and k.m.hud:

@@ -297,6 +297,7 @@ func _ostra() -> void:
 	# item 17: he drifts slowly while the lantern flies, keeps his height over the abyss
 	await _hover(m, P, T, home, K)
 	_far_cast(m, P, home, K)
+	_air_cast(m, P, home, K)
 	reset.call()
 	K.swollen_t = 5.0
 	ok("combo: Swollen Trade is quicker", absf(K.swap_time() - 1.25) < 0.01, "%.2f" % K.swap_time())
@@ -827,6 +828,31 @@ func _far_cast(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 	P.dashes = P.max_dashes()
 	step(m, 0.5)
 	_knock_in_flight(m, P, home, K)
+
+## docs/heroes/ostra.md "In the air": the seed and the well are cast from a jump, a fall or a glide, planted on the
+## floor under him (the source has no ground-only rule for Void's E and R, unlike Tetra's wall).
+func _air_cast(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
+	var gy: float = m.world.ground_at(home.x + 5.0, home.z)
+	for gliding in [false, true]:
+		var how := "glide" if gliding else "jump"
+		K._drop_holds()
+		P.teleport(home + Vector3(0, 3.0, 0))
+		P.vel = Vector3.ZERO
+		P.grounded = false
+		P.gliding = gliding
+		P.lvl = 6
+		K.cd["e"] = 0.0
+		K.e_t = 0.0
+		aim_at(P, home + Vector3(5.0, 0, 0))
+		var planted := K.cast_e() and absf(K.seed["pos"].y - gy) < 0.1
+		ok("air %s: the seed is planted on the floor at the cursor" % how, planted)
+		K._pop(false)
+		K.cd["x"] = 0.0
+		ok("air %s: the well opens at the cursor on the floor" % how, K.cast_ult() and absf(K.well.center.y - gy) < 0.1)
+		K._drop_holds()
+		K.well._close()
+	P.gliding = false
+	step(m, 0.5)
 
 ## The hover holds his height, not his place: a knock while the lantern flies still shoves him.
 func _knock_in_flight(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:

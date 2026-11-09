@@ -73,6 +73,18 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | X | tap (level 6) | Faultline: planted 0.4 s with the hammer overhead while a 16 m lane of four cells, 4 m long and 4.5 m wide, shows to everyone; the slam sends the fissure racing down the lane, striking each foe on it once (4, stun 0.5), then the ground erupts cell by cell (0.15 s apart) and throws each foe once (18, slowed 50% for 1.5 s). A wall or ledge stops it; it runs on over a drop or the abyss (drawn at his height). A glowing scar stays 10 s and slows foes on it 20%. A stun in the wind-up interrupts it (cooldown back to 8 s). He is planted only for the wind-up and the slam (0.6 s); from there he walks at full speed while the lane erupts where it was cast. Cooldown 40 s (0.8 x the data's 50 s) | Earthshatter / Abyssalbreaker: a fissure down a lane, a small first hit with a brief stun, cascading eruptions with a heavy slow, blocked by walls, a lingering crack | Lane 2.5 bh wide and 8.9 bh long, as the sheet. Eruption 1.5x the throw (source 1.2x) |
 | R | - | the Boki Merge | - | R is the Merge for every hero. No slot held a folded Earthshatter, so nothing is unfolded |
 
+## In the air (parity pass `ext/air-cast-b`: what each slot does mid-jump, mid-fall and out of a glide)
+
+Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and in an open glide, on a flat floor; the glider column is what the glider did over the next 0.6 s with the glide key held. The glider never *opens* during an ability animation (owner 162b; `--air-limits-check`) and an open one is never folded by that rule. Where the source is silent the slot works as on the ground (DECISIONS: the source decides these interactions; owner item 51). LMB while the glider is open fires nothing for every Hunter (`Hunter.can_fire`); the source does not document attacking while gliding (docs/WEAPON_FIRING_DATA.md, [gap]), so that is left as it is.
+
+| Slot | Mid-jump / mid-fall | Out of a glide | Source |
+|---|---|---|---|
+| LMB hammer | the throw as on the ground; a held charge carries through a jump and swings in the air with no step (owner #51) | no shot, glider stays open | owner #51; gap for the glide |
+| RMB Aegis | the guard goes up in the air as on the ground | the guard goes up, glider stays open | [D] Oath: no air rule |
+| Shift | the air version: the lumbering shove (`bul_lumber`), the class long dash | the glider folds for the shove; a held glide key reopens it as it ends | [D] Oath: only Spin Dash, no air slot; footage shows no air dash (kept) |
+| E Mending Ground | the same cast | the same cast, glider stays open | [D] Oath: no air rule |
+| X Faultline | the same wind-up and slam where he is | the same, glider stays open; after the slam or a 360 spin a 0.3 s glider lock | [D] Oath: no air rule; wiki patch 05.02.25 (wind-down frames) |
+
 ## Assumptions (the footage is silent; the owner can correct these)
 - He can walk while spinning the hammer (55% speed), as before; the footage only shows him standing.
 - The perfect window starts at full charge and lasts 0.18 s (owner default); held past it the swing is a normal one; nothing goes off until he lets go (the sheet shows a 2.6 s hold). Let go in the air, a normal swing takes no step (he keeps his speed) and a perfect one still launches him (owner #51: "pair it together").

@@ -116,6 +116,18 @@ pass above.
   fires mid-flip (a bolt held through it goes at once, empowered); a move it starts waits out the flip, so the
   cartwheel is never cut short; the dagger's recast blink ends the cartwheel.
 
+## In the air (parity pass `ext/air-cast-b`: what each slot does mid-jump, mid-fall and out of a glide)
+
+Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and in an open glide, on a flat floor; the glider column is what the glider did over the next 0.6 s with the glide key held. The glider never *opens* during an ability animation (owner 162b; `--air-limits-check`) and an open one is never folded by that rule. Where the source is silent the slot works as on the ground (DECISIONS: the source decides these interactions; owner item 51). LMB while the glider is open fires nothing for every Hunter (`Hunter.can_fire`); the source does not document attacking while gliding (docs/WEAPON_FIRING_DATA.md, [gap]), so that is left as it is.
+
+| Slot | Mid-jump / mid-fall | Out of a glide | Source |
+|---|---|---|---|
+| LMB | bolts fire as on the ground | no shot, glider stays open | gap (no air or glide rule) |
+| RMB Bola | the same throw; a foe caught is Grounded (no dash, jump or glide) | the same, glider stays open | [D] Shiv: "Ground the target" |
+| Shift Vault | the air version: the same sideways cartwheel carried 8.4 m in 0.95 s (`thf_exdash`); from a jump it empowers the next bolt too | the glider folds for the cartwheel and a held glide key reopens it as it ends | [D] Shiv Quickflip; [F] 0129-0143 (air Cartwheel) |
+| E Shadow Knife | the same throw; the recast blink ends a cartwheel | the same, glider stays open | [D] Shiv: no air rule |
+| X Encore | the same ring and blades | the same, glider stays open | [D] Shiv: no air rule |
+
 ## Assumptions (where the footage is silent; easy to change in content/archetypes/thief.json)
 
 1. **Trickshot input:** a fixed 0.4s cast with the lane, not a hold-and-release. The lane follows the aim during the cast.

@@ -144,6 +144,18 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
   heavy squash (`dr_land`); the idle fidgets are a shoulder roll, a neck crack and a stretch. His barge leaves dark iron
   after-images with a brass rim instead of the shared pill.
 
+## In the air (parity pass `ext/air-cast-b`: what each slot does mid-jump, mid-fall and out of a glide)
+
+Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and in an open glide, on a flat floor; the glider column is what the glider did over the next 0.6 s with the glide key held. The glider never *opens* during an ability animation (owner 162b; `--air-limits-check`) and an open one is never folded by that rule. Where the source is silent the slot works as on the ground (DECISIONS: the source decides these interactions; owner item 51). LMB while the glider is open fires nothing for every Hunter (`Hunter.can_fire`); the source does not document attacking while gliding (docs/WEAPON_FIRING_DATA.md, [gap]), so that is left as it is.
+
+| Slot | Mid-jump / mid-fall | Out of a glide | Source |
+|---|---|---|---|
+| LMB | the shotgun fires as on the ground | no shot, glider stays open | gap (no air or glide rule) |
+| RMB Abyssal Hand | the same throw; his height is held while the arm flies and he reels (owner item 31) | the same throw, glider stays open | [D] Kingpin: no air rule; owner item 31 |
+| Shift | his own air slot: the Barge becomes the pounce (`dr_pounce`), 35% further, its own cooldown beside the ground charges | the glider folds for the pounce and a held glide key opens it again as the pounce ends | [D] "Air Dash, Brute Dash (Air) (12.5s, 10): separate airborne dash slot" |
+| E Anchor Drop | a different air version: a straight-down smash (from 1.2 m up; lower is the ground slam), height adds up to +50% damage | the smash folds the glider; a held glide key reopens it when the smash ends | [D] "slam fist down" + owner note (smash straight down) |
+| X Brass Broadside | the same charge and two volleys; he keeps falling meanwhile | the same cast, glider stays open | [D] Kingpin: no air rule |
+
 ## Combinations (all scripted in `--dredge-combo-check`)
 | Do this | You get | Asserted by (check line) |
 |---|---|---|

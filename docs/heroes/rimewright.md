@@ -92,6 +92,18 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 - **Rimelock and Shift (owner item 27):** the source data says nothing about dashing out, so Shift ends it the way X again does (a late press still cracks it open at two thirds) and starts the skate at once at full speed. She is rooted while sealed, so the speed she carries out is the skate's own; any planar speed she still had (a knock) is kept for 0.5s. In the air the skate starts at once (item 62).
 - **Rimelock and the bond:** `HeroUlt.landed` for each hunter the crash stuns; the cast pays once, for its best event ("hit", "knock" if a hunter went down, "kill" if one was eliminated), through `KinBond.from_ult` with one cast id per cast. Monsters pay nothing (the shared base counts hunters only). The sheet's 0.4 per hunter up to 0.8 is replaced by the main session's per-cast amounts (boki_system.json). An early break pays nothing.
 
+## In the air (parity pass `ext/air-cast-b`: what each slot does mid-jump, mid-fall and out of a glide)
+
+Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and in an open glide, on a flat floor; the glider column is what the glider did over the next 0.6 s with the glide key held. The glider never *opens* during an ability animation (owner 162b; `--air-limits-check`) and an open one is never folded by that rule. Where the source is silent the slot works as on the ground (DECISIONS: the source decides these interactions; owner item 51). LMB while the glider is open fires nothing for every Hunter (`Hunter.can_fire`); the source does not document attacking while gliding (docs/WEAPON_FIRING_DATA.md, [gap]), so that is left as it is.
+
+| Slot | Mid-jump / mid-fall | Out of a glide | Source |
+|---|---|---|---|
+| LMB | darts fire as on the ground | no shot, glider stays open | gap (no air or glide rule) |
+| RMB Ice Spear | the same cast | the same cast, glider stays open | [D] Celeste: no air rule |
+| Shift Skate | no separate air dash: the same held skate starts at once and carries on through the air (`tm_skate_air`) | the skate folds the glider; a held glide key opens it again when the skate ends | owner item 62; [D] Celeste: "HOLD to skate", no air rule |
+| E Rink Wall | the same cast | the same cast, glider stays open | [D] Celeste: no air rule |
+| X Rimelock | the same cast; she is sealed and invulnerable | the glider folds and stays shut while sealed ("NO GLIDE"); Shift or X again frees it | [D] Celeste: invulnerable, no glide rule; owner item 65 |
+
 ## Combinations
 | Interaction | Check (`--rimewright-combo-check` unless noted) |
 |---|---|
