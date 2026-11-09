@@ -107,6 +107,15 @@ const T := {
 	# measures 6.56% where the old reference, the default medium Warden at plain size, measured 6.07%, so the
 	# range moved up by that 0.46; the camera did not change)
 	"hunter_screen_pct":       ["~", [5.45, 6.65], "%", "medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames; feelfix leans characters back 20 deg toward the camera, which shortens the straight-up measure from ~6.9% to ~5.5%)"],
+	"face_turn90_stand_t":     ["<=", 0.034, "s", "[footage] Felix turns on the spot in 1-2 frames at 60 fps; Ghost, Myth, Brall 'at once'"],
+	"face_turn180_stand_t":    ["<=", 0.034, "s", "[footage] the same flip the other way"],
+	"face_turn90_run_t":       ["<=", 0.034, "s", "[footage] running: the upper body turns to the cursor at once"],
+	"face_turn180_run_t":      ["<=", 0.034, "s", "[footage] running"],
+	"face_turn90_fire_t":      ["<=", 0.034, "s", "[footage] walking while firing (Ghost 0007-0023)"],
+	"face_turn180_fire_t":     ["<=", 0.034, "s", "[footage] firing"],
+	"face_turn90_glide_t":     ["<=", 0.034, "s", "[est] gliding: no footage, same rule as the ground"],
+	"face_turn180_glide_t":    ["<=", 0.034, "s", "[est] gliding"],
+	"face_run_legs_deg":       [">=", 45.0, "deg", "[footage] the legs follow the travel direction while the body holds the cursor (Ghost, Myth)"],
 	"hunter_feet_below_pct":   ["~", [1.5, 5.0], "%", "feet below the screen centre, as a share of screen height (camcal: ~3% in gameplay frames)"],
 }
 
@@ -203,6 +212,7 @@ func run(main: Node) -> void:
 	flat = _flat_spot(6.5)
 	print("MFEEL flat spot %s" % str(flat))
 	_ground()
+	_facing()
 	_jump()
 	_glide()
 	_glide_dive()
@@ -219,6 +229,49 @@ func run(main: Node) -> void:
 	_e2e()
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
+# ---------------------------------------------------------------- facing
+## The body snaps onto the cursor in every state ([footage]: Ghost, Myth and Brall turn the upper body to the cursor
+## "at once" and the legs follow the travel direction; Felix turns on the spot within 1-2 frames at 60 fps). A cursor
+## flip of 90 and 180 degrees standing, running, firing on the run and gliding: steps until the body is within 1 degree.
+func _facing() -> void:
+	var aim0: Vector3 = P.inp["aim"]
+	for state in ["stand", "run", "fire", "glide"]:
+		for deg in [90.0, 180.0]:
+			_reset(flat, state != "glide")
+			if state == "glide":
+				P.teleport(flat + Vector3(0, 12, 0))
+				P.gliding = true
+				P.inp["glide"] = true
+			if state != "stand": P.inp["move"] = Vector2(1, 0)
+			_aim_at(0.0)
+			_steps(6)
+			_aim_at(deg)
+			var n := 99
+			for i in 30:
+				P.inp["fire"] = state == "fire"
+				m.step(DT)
+				var want := atan2(-P.aim_dir().x, -P.aim_dir().y)
+				if absf(angle_difference(P.face, want)) < deg_to_rad(1.0):
+					n = i + 1
+					break
+			rec("face_turn%d_%s_t" % [int(deg), state], n * DT)
+	# running square to the cursor (kept square: the cursor moves with her), the body holds the cursor and
+	# the legs turn toward the travel direction
+	_reset(flat)
+	P.inp["move"] = Vector2(1, 0)
+	for i in 60:
+		_aim_at(0.0)
+		m.step(DT)
+		P.render(DT, 0.0)
+	rec("face_run_legs_deg", rad_to_deg(absf(P.anim.legs_yaw)))
+	_clear_inp()
+	P.inp["aim"] = aim0
+
+## The cursor 10 m from the hunter, `deg` clockwise (seen from above) of straight ahead (-z).
+func _aim_at(deg: float) -> void:
+	var d := Vector2(0, -1).rotated(deg_to_rad(deg))
+	P.inp["aim"] = P.pos + Vector3(d.x * 10.0, 0.0, d.y * 10.0)
 
 # ---------------------------------------------------------------- ground
 func _ground() -> void:

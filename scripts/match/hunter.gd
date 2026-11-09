@@ -23,6 +23,7 @@ const GLIDE_ACCEL := 16.25       # [game data] GlideTargetXYForce 162,500 / UE's
 const GLIDE_DECEL := 1.4         # let go of the keys and the glider drifts on, a long soft coast
 const GLIDE_OVERSPEED := 1.1     # extra glide momentum bleeds off slowly: a dash into a glide carries for seconds
 const GLIDE_TURN := 420.0        # deg/s the glider turns at cruise speed (90 degrees in ~0.2s); wider arcs when fast
+const FACE_TURN := 5400.0        # deg/s the body turns onto the cursor: 180 degrees in 2 sim steps ([footage] Felix turns on the spot in 1-2 frames at 60 fps; Ghost, Myth and Brall "at once"; docs/MOVEMENT_FEEL.md Facing)
 const GLIDE_TURN_FAST := 0.45    # ...down to this share of GLIDE_TURN at the boost cap
 const GLIDE_BRAKE := 36.0        # steering more than GLIDE_BRAKE_DEG against your heading brakes this hard
 const GLIDE_BRAKE_DEG := 115.0
@@ -2090,7 +2091,7 @@ func sim(dt: float) -> void:
 	if roll_t > 0.0 and not (ak and ak.aims_in_dash()):
 		want = atan2(-roll_dir.x, -roll_dir.y)
 	if not (ak and ak.face_locked()):
-		face = lerp_angle(face, want, minf(1.0, dt * 20.0))
+		face = rotate_toward(face, want, deg_to_rad(FACE_TURN) * dt)
 
 func pad_launch(to: Vector3) -> void:
 	var d := Vector2(to.x - pos.x, to.z - pos.z).length()
