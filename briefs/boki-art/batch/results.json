@@ -41009,5 +41009,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/eclipsowl_card9_1.jpg",
     "ok": true
+  },
+  {
+    "id": "lanceron_card9",
+    "name": "Lanceron (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanceron_card9_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_card9",
+    "name": "Eclipsowl (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/eclipsowl_card9_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanceron_card9",
+    "name": "Lanceron (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lanceron_card9_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanceron_card9",
+    "name": "Lanceron (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanceron_card9_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_card9",
+    "name": "Eclipsowl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eclipsowl_card9_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pyrraven_card9",
+    "name": "Pyrraven (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pyrraven_card9_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pyrraven_card9",
+    "name": "Pyrraven (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pyrraven_card9_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "thunderstrich_card9",
+    "name": "Thunderstrich (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/thunderstrich_card9_3.jpg",
+    "ok": true
   }
 ]
