@@ -17510,5 +17510,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/lanternmit_e_w29_4.jpg",
     "ok": true
+  },
+  {
+    "id": "lanternmit_e_w29",
+    "name": "Lanternmit",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lanternmit_e_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_r3_w29",
+    "name": "Mothlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mothlet_r3_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_r3_w29",
+    "name": "Mothlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mothlet_r3_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_r3_w29",
+    "name": "Mothlet",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mothlet_r3_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f_e_w29",
+    "name": "Murmurling (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/murmurling_f_e_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f_e_w29",
+    "name": "Murmurling (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/murmurling_f_e_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f_e_w29",
+    "name": "Murmurling (female)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/murmurling_f_e_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f_e_w29",
+    "name": "Murmurling (female)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/murmurling_f_e_w29_4.jpg",
+    "ok": true
   }
 ]
