@@ -9,12 +9,13 @@ extends RefCounted
 
 enum { OFF, IDLE, ACTIVE, USED }
 
+const BEAM_SHADER: Shader = preload("res://shaders/exit_beam.gdshader")
 const KIND_COLOR := {"dock": ExitModels.DOCK, "hatch": ExitModels.HATCH, "outpost": ExitModels.UPLINK}
 const CONTESTED := Color("ff7a5a")   # a rival in an uplink's yard
 const SKY_H := 70.0                  # m, the beam's full height: seen over the walls and the trees
 const STUB_H := 9.0                  # m, an idle exit's marker
 const BEAM_R := 0.45                 # m, an active beam's radius (a used one is twice as thick)
-const BEAM_A := [0.0, 0.14, 0.3, 0.5]            # beam alpha by state
+const BEAM_A := [0.0, 0.4, 0.65, 0.85]            # beam alpha by state
 const ZONE_A := [0.0, 0.22, 0.55, 0.85]         # zone ring alpha by state
 const PULSE_SLOW := 2.0              # rad/s of the pulse with the countdown full
 const PULSE_FAST := 11.0             # ... and nearly out
@@ -78,7 +79,11 @@ static func attach(root: Node3D, kind: Color, zone_d: float) -> void:
 	var beam := MeshInstance3D.new()
 	beam.name = "Beam"
 	beam.mesh = Models.cyl(1.0, 1.0, SKY_H, 8)
-	beam.material_override = Models.glow_mat(Color(kind, BEAM_A[IDLE]))
+	var mat := ShaderMaterial.new()
+	mat.shader = BEAM_SHADER
+	mat.set_shader_parameter("color", Color(kind, BEAM_A[IDLE]))
+	mat.set_shader_parameter("height", SKY_H)
+	beam.material_override = mat
 	beam.position.y = SKY_H * 0.5
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	sig.add_child(beam)
