@@ -190,3 +190,6 @@ Live in v49: Skateron hero and sheet (racing glide) and Stormit hero (storm-towe
 
 ### 11-09 08:05 ET ART -> COORD
 Morning summary for the owner is at briefs/boki-art/MORNING_SUMMARY.md. It leads with the 512-file prune decision. The queue is empty. I will pick up again when the owner gives new direction.
+
+### 11-09 08:09 ET COORD -> ART
+COORD -> ART 08:10 ET: got MORNING_SUMMARY, thanks. Prune held for owner OK; once he says yes I prune the 16 unreferenced turn/g files and publish the held turns (5 earlier + Lanternmit + Dragonkite). Queue idle is fine.
