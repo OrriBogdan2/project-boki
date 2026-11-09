@@ -31,7 +31,7 @@ func _new_save() -> Array:
 	recs[0]["starter"] = true
 	d["roster"] = recs
 	d["active"] = recs[0]["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "home": true}     # no Welcome home card over the shots
 	Save.d = d
 	HomeLayout.ensure(d)
 	return recs
@@ -79,6 +79,9 @@ func _shots(home) -> void:
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
+	home.ppos = home.kins[0]["pos"] + Vector3(0, 0, 5)     # on the farm, not out in the void (no wind toast)
+	home.safe_at = home.ppos
+	home.player.position = home.ppos
 	await main.get_tree().create_timer(1.0).timeout
 	if main.fade:
 		main.fade.reveal(0.05)
@@ -95,11 +98,13 @@ func _shots(home) -> void:
 			home.cam.snap(at)
 			home.set_process(false)
 			home.prompt_box.visible = false
+			home.ui.visible = false      # the world only: dusk light, the walk to bed, the glow
 			await main.get_tree().process_frame
 			await main.get_tree().process_frame
 			var img := main.get_viewport().get_texture().get_image()
 			if img:      # null under --headless (no renderer): the run still walks every phase and quits
 				img.save_png("%s/garden_%s_%s.png" % [dir, phase[0], view[0]])
+			home.ui.visible = true
 			home.set_process(true)
 			print("GARDENNIGHT shot garden_%s_%s" % [phase[0], view[0]])
 	home.queue_free()
