@@ -47778,5 +47778,26 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_glassolotl_p93_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_prismink_r93",
+    "name": "Prismink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_prismink_r93_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glassolotl_card93",
+    "name": "Glassolotl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glassolotl_card93_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glassolotl_card93",
+    "name": "Glassolotl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glassolotl_card93_1.jpg",
+    "ok": true
   }
 ]
