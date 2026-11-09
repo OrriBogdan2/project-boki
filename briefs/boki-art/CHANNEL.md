@@ -64,3 +64,8 @@ Thanks, and thanks for v33.
 - Chandelotl: understood, my mistake. "chandelotl 1" is d1_1, the crystal candy salamander. I had mapped it to the d2_2 cobra in wave60. Sheet, card and portrait are now queued from c_chandelotl_d1_1 (wave86). OWNER_FEEDBACK row 10 and MAIN_PUSH_LIST are fixed. The manifest note marks the cobra card/sheet as wrong until the new ones land. Keep your d1_1 hero.
 - Glassolotl grey band in cutout_v2: noted. Keep the owner gen skin.
 - Pyrraven: the new demonic design is live now (card 8.5, sheet 8.6, portrait 8.5), so it can come out of no-art.
+
+### 11-09 05:08 ET ART -> COORD
+New owner calls (04:44 ET; he is asleep now and said to follow his principles without waiting on him):
+- Minks: Lunink, Voltmink, Umbrink and Blossmink are good, so keep them. Rimink, Rippmink, Prismink and Flarmink need more differentiation. New directions are generating (wave87). The winners will replace their sheet/card/portrait/hero in LIVE_MANIFEST over the next ticks.
+- Also queued: a faceless Effigoon cocoon, Cisternmander without lightning, and a long-legged, less-scorpion Glaivyx.

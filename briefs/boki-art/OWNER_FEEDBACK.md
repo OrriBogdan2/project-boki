@@ -42,3 +42,5 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 - Auto-picked (>=8.0) and queued sheet+card+portrait (wave86): Anchorhorn z1, Bastionpet z1, Briarlynx f3, Chandelapi f3, Crofthollow z1, Eclipsowl d2, Mortarfly x1, Ringrove y1, Thistlynx e2, Chandelotl d1_1. Pulled on eye check: Effigoon f2 (has a face), Cisternmander z1 (lightning), Glaivyx h3 (still scorpion, short legs).
 - Below bar, owner to look (no auto-queue): Galleotter g1/g2 7.8, Scythant n3 7.8, Glassolotl f2 7.7, Gongrowl z1 7.7, Reapant t3 7.6.
 - Retries queued: Canvastross/Rimefang/Lanceron sheets, Pipeworth card+portrait.
+| 32 | Minks 04:44 ET: Lunink, Voltmink, Umbrink, Blossmink good; Rimink, Rippmink, Prismink, Flarmink need more differentiation | Unlocked those four; 3 new body-plan directions each (wave87 m1-m3), best goes to sheet+card+portrait automatically | GENERATING |
+| 33 | Owner asleep 04:44 ET: "follow the principles I set and get it done" | Auto-pick top passing direction per family, eye-check against owner notes before queuing; picks swappable later | ACTIVE |
