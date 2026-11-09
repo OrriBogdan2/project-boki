@@ -22858,5 +22858,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_glacione_w31_2.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_ermink_w31",
+    "name": "Ermink (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_ermink_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_ermink_w31",
+    "name": "Ermink (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_ermink_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glacione_w31",
+    "name": "Glacione",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ta_glacione_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_flarmink_w31",
+    "name": "Flarmink (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_flarmink_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_ermink_w31",
+    "name": "Ermink (new stance)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/stance_ermink_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_flarmink_w31",
+    "name": "Flarmink (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_flarmink_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_flarmink_w31",
+    "name": "Flarmink (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_flarmink_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_ermink_w31",
+    "name": "Ermink (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_ermink_w31_3.jpg",
+    "ok": true
   }
 ]
