@@ -25245,5 +25245,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/skateron_card2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "snuffapi_card2",
+    "name": "Snuffapi (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/snuffapi_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "snuffapi_card2",
+    "name": "Snuffapi (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/snuffapi_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "soakybara_card2",
+    "name": "Soakybara (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/soakybara_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "thrumbird_card2",
+    "name": "Thrumbird (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/thrumbird_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "soakybara_card2",
+    "name": "Soakybara (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/soakybara_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "thrumbird_card2",
+    "name": "Thrumbird (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/thrumbird_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "zephyrak_card2",
+    "name": "Zephyrak (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/zephyrak_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "zephyrak_card2",
+    "name": "Zephyrak (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/zephyrak_card2_2.jpg",
+    "ok": true
   }
 ]
