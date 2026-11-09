@@ -106,7 +106,7 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 | LMB | 7 slugs, bloom [D] | Seven-slug blast, bloom | match |
 | RMB | Arm pierces terrain, pulls first target, 18 s [D] | 11.5 m through terrain, reel, 20% braced shuffle, cd 12 | match; 0.67x cd |
 | Q | none | glove | ours |
-| E | Slam, stun, dunk, 12 s [D] | Windup .38, r 3, stun 1.1, cd 7, no Grounded (removed 11-09, the source dunk is the abyss bonus) | match; **0.58x cd** |
+| E | Slam, stun, dunk, 12 s [D] | Windup .38, r 3, stun 1.3 (footage 1.2-1.4, no data value), cd 7, no Grounded (removed 11-09, the source dunk is the abyss bonus) | match; **0.58x cd** |
 | R | Two waves, 36 s [D] | Charge 1.1, 2 waves, cd 21 | match; **0.58x cd** |
 | Dash | One every 7 s; own air slot 12.5 s [D] | 3 chained, cd 10, air shares slot, air range scaled twice (3.1 m, single 3.7 m) | differ (owner); air slot missing (gap 13) |
 | Passive | Stacks of max HP [D] | Salvage 10, +2.5%, lose 1 on down | match |

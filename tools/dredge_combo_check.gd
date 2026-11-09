@@ -644,7 +644,7 @@ func _all() -> void:
 		K.last_quake_k > 1.4 and K.last_quake_k < 1.55, "k %.2f" % K.last_quake_k
 	)
 	ok(
-		"anchor rank 3: stun 1.5s (+0.1 a rank, and the rank's own +0.2)", absf(K._stun_t() - 1.5) < 0.01,
+		"anchor rank 3: stun 1.7s (+0.1 a rank, and the rank's own +0.2)", absf(K._stun_t() - 1.7) < 0.01,
 		"stun %.2f" % K._stun_t()
 	)
 	P.slot_lv["kin"] = 1
