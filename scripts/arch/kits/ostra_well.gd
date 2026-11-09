@@ -161,6 +161,8 @@ func _tick_open(dt: float) -> void:
 func _tick_catch(left: float) -> void:
 	ticks += 1
 	var dmg := float(xd()["tick_dmg"]) * k.power("x")
+	if swollen:
+		k.m.brk.hit_around(center + Vector3(0, 0.4, 0), radius, k.h)    # Empowered ticks are Explosive
 	for f in k.foes_in(center, radius):
 		if not k.m.world.los(center + Vector3(0, 0.6, 0), f.pos + Vector3(0, 0.6, 0), center.y + 0.6):
 			continue
