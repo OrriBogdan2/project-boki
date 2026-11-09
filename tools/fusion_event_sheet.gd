@@ -4,7 +4,7 @@ extends RefCounted
 ## on grass and on dark ground. <dir>/fe_<look>_<ground>.png is a strip per look: top row the enter (R pressed),
 ## bottom row the release and its afterglow, cropped round the hunter. Scores: docs/FUSION_EVENT.md.
 
-var slow := 0.3                            # Engine.time_scale while capturing (--slow=: a software renderer needs ~0.05)
+var slow := 0.3                            # Engine.time_scale while capturing (--slow=0.1 on a software renderer)
 const CROP := 440                          # px: the square cut round the hunter
 const ENTER_AT := [0.04, 0.25, 0.46, 0.6, 1.0]       # s after R (the form is live at 0.7)
 const RELEASE_AT := [0.1, 0.5, 1.5, 3.2, 5.0]        # s after the release (afterglow lasts 3, the rest 6)
@@ -13,14 +13,16 @@ const DARK := Color("14121a")
 var main: Node
 var m: Match
 
-## The species to show per look: id -> species (the first of each type with no form file; the kit forms by their own species).
+## One species per look: the first of each type with no form file, and one for each kit form.
 func _looks() -> Dictionary:
 	var out := {}
 	for id in Data.KIN:
 		var ms := KinLib.merge_of(String(id))
 		if ms == null:
 			continue
-		var key := "form_" + ms.id if not Content.merge_form(ms.id).is_empty() else String(Data.KIN[id].get("type", "none"))
+		var key := String(Data.KIN[id].get("type", "none"))
+		if not Content.merge_form(ms.id).is_empty():
+			key = "form_" + ms.id
 		if not out.has(key):
 			out[key] = String(id)
 	return out

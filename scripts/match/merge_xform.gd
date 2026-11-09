@@ -1,27 +1,36 @@
 class_name MergeXform
 extends RefCounted
 ## The transformation and everything that books-ends a merge (docs/decisions/0003). ~0.7s, invulnerable:
-##   0.00  anticipation: the Boki leaps up into a light spiral in the form's colour, a ~60 ms time dip
-##   0.45  contact: white flash, a ground shockwave, the camera punches, the silhouette pops in (MergeLook, ease-out-back)
+##   0.00  anticipation: the Boki leaps up into a light spiral and a type accent in the form's colour, a ~60 ms time dip
+##   0.45  contact: white flash, a light column, the camera punches, the silhouette pops in (MergeLook, ease-out-back)
 ##   0.70  the form is live (KinMerge._go_live)
-## Separation plays it backwards for a beat: the shell peels, a burst of shards, the Boki springs out beside you.
+## Separation plays it backwards for a beat: the shell peels, the type accent rises, the Boki springs out beside you.
 ## The spiral is ONE particle node per hunter, reused for every merge (no per-frame spawning). Other games see the
 ## same moments from the "merge" event (the start) and the form appearing in the hunter snapshot (the contact).
 
 const HITSTOP := 0.06           # s: the time dip when the Boki starts to leap in
 const SPIRAL := "MergeSpiral"
+const ENTER_COLUMN := 2.4       # m: the light column that starts the leap
+const CONTACT_COLUMN := 5.0     # m (x form size): the tall column when the form pops in
+const RELEASE_COLUMN := 3.0     # m: the column when the form lets go
 const SOUND_RANGE_DB := 4.0     # the transformation is louder than a normal ability: rivals hear it at range
 
 static func _snd(form: Dictionary) -> Dictionary:
 	var d: Dictionary = form["def"]
 	return d.get("sound", {"xform": "ult", "pitch": 1.0, "ult": "boom"})
 
+## The Boki type whose accent this Fusion plays: the species' own, else the form's ("kit" for a kit form).
+static func type_of(h: Hunter, form: Dictionary) -> String:
+	if h.kin != null and is_instance_valid(h.kin):
+		return String((h.kin as Kin).sp.get("type", ""))
+	return String(form.get("type", ""))
+
 static func begin(h: Hunter, form: Dictionary) -> void:
 	var m := h.m
 	var col: Color = form["glow"]
 	var sn := _snd(form)
 	spiral(h, col, true)
-	m.fx.ring(h.pos, 2.2, Color(col, 0.8), 0.45)
+	KinTypeFx.fusion(m.fx, type_of(h, form), h.pos, col, ENTER_COLUMN)
 	m.sfx("charge", h.pos, SOUND_RANGE_DB - 6.0, 0.8)
 	m.sfx(String(sn["xform"]), h.pos, SOUND_RANGE_DB - 6.0, float(sn["pitch"]) * 0.8)
 	if h.is_local():
@@ -36,7 +45,7 @@ static func contact(h: Hunter, form: Dictionary) -> void:
 	var col: Color = form["glow"]
 	var sn := _snd(form)
 	MergeLook.attach(h, form, true)
-	pop_fx(m, h.pos, form)
+	pop_fx(m, h.pos, form, type_of(h, form))
 	m.sfx(String(sn["xform"]), h.pos, SOUND_RANGE_DB, float(sn["pitch"]))
 	m.sfx("ult", h.pos, SOUND_RANGE_DB - 2.0, float(sn["pitch"]))
 	m.shake(0.7, h.pos)
@@ -46,22 +55,18 @@ static func contact(h: Hunter, form: Dictionary) -> void:
 			m.hud.flash(col, 0.25)
 	h.squash = 0.35
 
-## The look of the moment, for everyone: white flash, shockwave rings, shards in the form's colours.
-static func pop_fx(m: Match, at: Vector3, form: Dictionary) -> void:
+## The look of the moment, for everyone: a white flash, a tall light column and the type's accent (no ring).
+static func pop_fx(m: Match, at: Vector3, form: Dictionary, ty: String) -> void:
 	var col: Color = form["glow"]
 	m.fx.flash(at + Vector3(0, 1.0, 0), Color.WHITE, 2.6, 0.12)
-	m.fx.ring(at, 3.4 * float(form["size"]), Color(Color.WHITE, 0.9), 0.35)
-	m.fx.ring(at, 5.0 * float(form["size"]), Color(col, 0.8), 0.5)
-	m.fx.burst(at + Vector3(0, 1.0, 0), col, 26, 6.0, 0.55)
+	KinTypeFx.fusion(m.fx, ty, at, col, CONTACT_COLUMN * float(form["size"]))
 	m.fx.spark(at + Vector3(0, 1.0, 0), Vector3.UP, Color(col).lerp(Color.WHITE, 0.5), 18, 8.0, 180.0, 0.4, 6.0, 1.2)
-	m.fx.dust(at, 10)
 
 ## The weak surge has no Boki to fly in: just the flash.
 static func flash_only(m: Match, at: Vector3, form: Dictionary) -> void:
 	var col: Color = form["glow"]
 	m.fx.flash(at + Vector3(0, 1.0, 0), Color.WHITE, 1.8, 0.1)
-	m.fx.ring(at, 3.0, Color(col, 0.8), 0.4)
-	m.fx.burst(at + Vector3(0, 1.0, 0), col, 14, 4.0, 0.4)
+	m.fx.spark(at + Vector3(0, 1.0, 0), Vector3.UP, col, 10, 5.0, 180.0, 0.4, 4.0, 1.0)
 
 ## The merge is over: the shell peels (backwards pop), shards fly, the Boki springs out (KinMerge calls merge_pop).
 static func separate(h: Hunter, form: Dictionary, why: String) -> void:
@@ -80,8 +85,7 @@ static func separate(h: Hunter, form: Dictionary, why: String) -> void:
 		if h.is_local() and m.hud:
 			m.hud.toast_small("SHELL BROKEN", col)
 	else:
-		m.fx.ring(h.pos, 3.0, Color(col, 0.8), 0.35)
-		m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 18, 5.0, 0.5)
+		KinTypeFx.fusion(m.fx, type_of(h, form), h.pos, col, RELEASE_COLUMN)
 		m.sfx("recall", h.pos, -2.0, 1.3)
 	spiral(h, col, false)
 	KinNet.event(m, "merge_end", h, h.pos, why)
@@ -164,7 +168,7 @@ static func on_event(m: Match, at: Vector3, form: Dictionary, h: Hunter) -> void
 	var sn := _snd(form)
 	if h != null:
 		spiral(h, col, true)
-	m.fx.ring(at, 2.2, Color(col, 0.8), 0.45)
+	KinTypeFx.fusion(m.fx, String(form.get("type", "")), at, col, ENTER_COLUMN)
 	m.sfx("charge", at, SOUND_RANGE_DB - 6.0, 0.8)
 	m.sfx(String(sn["xform"]), at, SOUND_RANGE_DB - 6.0, float(sn["pitch"]) * 0.8)
 
@@ -172,7 +176,7 @@ static func on_event(m: Match, at: Vector3, form: Dictionary, h: Hunter) -> void
 static func on_remote_look(h: Hunter, form: Dictionary) -> void:
 	var m := h.m
 	var sn := _snd(form)
-	pop_fx(m, h.pos, form)
+	pop_fx(m, h.pos, form, type_of(h, form))
 	m.sfx(String(sn["xform"]), h.pos, SOUND_RANGE_DB, float(sn["pitch"]))
 	m.shake(0.4, h.pos)
 

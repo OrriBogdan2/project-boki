@@ -57,6 +57,11 @@ func run(main: Node) -> void:
 	var bi0 := fx.bi
 	KinTypeFx.play(fx, "none", Vector3.ZERO, Vector2.RIGHT)
 	ok(fx.bi == bi0 and fx.si == si0 + 1, "an unknown type plays nothing")
+	rings0 = fx.rings.size()
+	for ty: String in KinTypeFx.LOOKS:
+		KinTypeFx.fusion(fx, ty, Vector3.ZERO, Color.WHITE, 3.0)
+	ok(fx.rings.size() == rings0, "a Fusion moment of any type draws no ground ring")
+	ok(fx.si > si0 + 1, "a Fusion moment plays streaks, even for the ring-only Sound type")
 	fx.queue_free()
 	await _cast_test(main)
 	print("KINTYPEFX DONE, failures: ", bad)
