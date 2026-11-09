@@ -288,8 +288,8 @@ func apply(k: String) -> void:
 				DisplayServer.window_set_mode(want)
 		"vsync":
 			if not OS.has_feature("web"):
-				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if v[k] else DisplayServer.VSYNC_DISABLED)
-		"max_fps": Engine.max_fps = int(v[k])
+				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if Record.vsync(v[k]) else DisplayServer.VSYNC_DISABLED)
+		"max_fps": Engine.max_fps = Record.frame_cap(int(v[k]))
 		"msaa":
 			var m := int(v[k])
 			get_tree().root.msaa_3d = Viewport.MSAA_4X if m >= 4 else (Viewport.MSAA_2X if m >= 2 else Viewport.MSAA_DISABLED)
