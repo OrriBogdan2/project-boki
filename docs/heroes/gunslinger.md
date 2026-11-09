@@ -140,6 +140,38 @@ Clip re-keys for origin/ext/vex-v2-model (not done here: the GLB and tools/art1 
 | Cinderfall on an enemy hunter, then the Merge | the impact fills the bond (KinBond.from_ult, a hit); the merge straight after never one-shots a full-health light hunter | `--gunslinger-combo-check` (burst) |
 | Stepping off the disc | no damage and no bond | `--gunslinger-combo-check` |
 
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
+d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
+line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both
+(ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
+and the attack key does nothing from a glide (`Hunter.can_fire`).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| E Longneedle, wind-up (0.6 s, standing still) | LMB | not shown: the rifle is braced through the cast bar, no round seen leaving | both: the rifle fires through the charge (3 rounds in 0.3 s) and the beam still goes | unsettled | [F] 0164-0169 |
+| E wind-up | RMB | not shown | both: the grenade leaves, the beam still goes | unsettled | |
+| E wind-up | jump | not shown (he stands still, no jump pressed in the clip) | both: a 0.9 m hop, the charge goes on (walking is 0 in the cast) | unsettled | [F] 555.8-556.4 s |
+| E wind-up | X | not shown | ignored, not buffered (`GunslingerUlt.cast` refuses while the needle charges) | unsettled | |
+| E wind-up | glide | not shown | the glider opens, the charge goes on | unsettled | |
+| E recovery (about 0.4 s after the recoil) | any | not shown | the cast is over at the beam: everything goes at once | unsettled | [F] 0170 |
+| X Cinderfall, after the shot (shell falling 1.6 s) | walk, jump, LMB | free: he walks and takes a jump pad while it falls | free: she moves, jumps and shoots | match | [F] ult f103 |
+| X | E, RMB | not shown | both | unsettled | |
+| LMB held (the string) | RMB, E, X | not shown | both: the string goes on through each | unsettled | |
+| LMB held | jump | not shown (he fires while walking) | both | unsettled | [F] 0007-0023 |
+| RMB (the launcher shot) | any | owner item 112: a tap, no hold and no throw, so there is no wind-up to cancel | instant: everything goes at once | owner | OWNER_REVIEW_1103 112 |
+| Glide | LMB | not shown | ignored | unsettled | |
+| Glide | RMB, E, X | not shown | each goes (RMB as its air variant) | unsettled | |
+
+Fixes made: none. No pair has a source frame or line that disagrees with ours. Timing note (not a cancel): the
+wiki's Railgun reads "Charge for 0.8s"; ours is the footage's 0.6 s cast bar (a later patch than the clip, or the
+level-9 hunter).
+
 ## Small mechanics
 | Mechanic | Source | Footage | Built and checked |
 |---|---|---|---|
