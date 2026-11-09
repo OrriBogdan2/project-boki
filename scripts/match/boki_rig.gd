@@ -4,7 +4,8 @@ extends Node
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
 ## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever
 ## the body does. A match hit ("hit" meta) is a flinch layer on Flex over whatever clip runs; a downed Boki
-## (kstate "faint") lies in the sleep clip with its eyes shut.
+## (kstate "faint") lies in the sleep clip at DOWN_SPEED with its eyes shut, then a quick hop
+## clip for GETUP_S when it comes round: no clip of its own is baked (docs/art/kin/RIGGED_BOKI.md).
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
@@ -100,6 +101,8 @@ const FRAME := {
 		"marks": {"left flank": Vector3(-0.105, 0.2, 0.05), "right flank": Vector3(0.105, 0.2, 0.05),
 			"back": Vector3(0, 0.3, 0.05), "chest": Vector3(0, 0.26, -0.14)}},
 }
+const DOWN_SPEED := 0.6       # x: the sleep clip's pace while knocked out, a slow breath
+const GETUP_S := 0.3          # s: the hop it springs up with when it comes round
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
 const WALK_SPEED := 0.5       # m/s: below this it stands
@@ -172,6 +175,7 @@ var _shot := ""
 var _hit_left := 0.0           # s of the flinch still asked for
 var _hit_k := 0.0              # the flinch layer, 0..1
 var _hit_was := false
+var _was_down := false
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
@@ -304,9 +308,14 @@ func _pick_clip(dt: float) -> void:
 	_hit_was = hit
 	_hit_left -= dt
 	_hit_k = move_toward(_hit_k, 1.0 if _hit_left > 0.0 else 0.0, HIT_RATE * dt)
+	var down := String(root.get_meta("kstate", "")) == "faint"
+	if _was_down and not down:
+		_shot = "hop"
+		_shot_left = GETUP_S
+	_was_down = down
 	var want := _state_clip()
 	set_clip(want)
-	player.speed_scale = 1.0
+	player.speed_scale = DOWN_SPEED if down else 1.0
 	if want == "run":
 		player.speed_scale = clampf(_speed / RUN_STRIDE, 0.7, 1.6)
 	elif want == "walk" or want == "carry":

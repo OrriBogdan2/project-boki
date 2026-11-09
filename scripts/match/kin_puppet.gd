@@ -11,7 +11,8 @@ extends Node
 ##
 ## It reads a few metas on the kin root, all optional:
 ##   "dazed" (bool) "happy" (bool) "hit" (bool, being hit: a jolt) "pulse" (set to Time msec when an ability goes off)
-##   "kstate": "" | "attack" (lunging) | "sleep" | "faint" (downed, lies as asleep) | "perch" (riding a shoulder)
+##   "kstate": "" | "attack" (lunging) | "sleep" | "perch" (riding a shoulder) | "faint" (downed: slumped, eyes
+##   shut, slow breath; a quick spring back up when the state ends)
 ##   "quirk" (Unique: its idle habit, played now and then while it stands still) "girth" (width)
 ##   "pose": body language in a match (KinCompanion): "growl" (low, ears back, tail up, shivering),
 ##   "guard", "alert" (tall, ears up), "point" (leaning in, a paw up), "whine" (ears and tail down),
@@ -32,6 +33,8 @@ var air := 0.0
 var happy_k := 0.0
 var perch_k := 0.0
 var hit_was := false    # the "hit" meta last frame: a hit on the kin itself jolts it like a flinch
+var down_k := 0.0       # 0..1 knocked out (kstate "faint"), in and out within DOWN_RATE
+var getup_k := 0.0      # 1 at the moment it comes round, down to 0: the spring back up
 
 var root: Node3D
 var body: Node3D
@@ -71,6 +74,17 @@ var quirk_t := 3.0     # until the next time it does its habit
 var quirk_k := 0.0     # 1 at the start of one, down to 0
 var pose_last := ""
 var pz := {"sy": 1.0, "sz": 1.0, "rx": 0.0, "rz": 0.0, "ear": 0.0, "tail": 0.0, "leg": 0.0, "shiver": 0.0}
+const DOWN_RATE := 16.0    # 1/s the knocked-out pose eases at: 96% in 0.2 s
+const GETUP_S := 0.3       # s of the spring back to its feet
+const DOWN_BREATH := Vector2(1.4, 0.05)     # rad/s and size of the slow breath while knocked out
+## How each body plan lies when knocked out: sy flattens it, sx widens it, rx drops the head, rz leans it.
+const DOWN_T := {
+	"quad": {"sy": 0.82, "sx": 1.06, "rx": 0.32, "rz": 0.0},
+	"biped": {"sy": 0.84, "sx": 1.06, "rx": 0.42, "rz": 0.12},
+	"flyer": {"sy": 0.86, "sx": 1.08, "rx": 0.25, "rz": 0.1},
+	"serpent": {"sy": 0.88, "sx": 1.06, "rx": 0.2, "rz": 0.1},
+	"blob": {"sy": 0.72, "sx": 1.14, "rx": 0.0, "rz": 0.0},
+}
 const POSE_T := {
 	"growl": {"sy": 0.86, "rx": 0.2, "ear": 0.45, "tail": -0.6, "shiver": 1.0},
 	"guard": {"sy": 1.02, "rx": 0.08, "ear": 0.4, "tail": -0.7, "shiver": 0.4},
@@ -174,12 +188,21 @@ func _process(dt: float) -> void:
 	var ks := String(root.get_meta("kstate", ""))
 	var ek := 1.0 - exp(-8.0 * dt)
 	att_k = lerpf(att_k, 1.0 if ks == "attack" else 0.0, 1.0 - exp(-18.0 * dt))
-	sleep_k = lerpf(sleep_k, 1.0 if ks in ["sleep", "faint"] else 0.0, 1.0 - exp(-3.0 * dt))
+	sleep_k = lerpf(sleep_k, 1.0 if ks == "sleep" else 0.0, 1.0 - exp(-3.0 * dt))
 	perch_k = lerpf(perch_k, 1.0 if ks == "perch" else 0.0, ek)
 	happy_k = lerpf(happy_k, 1.0 if happy else 0.0, ek)
+	var was_down := down_k
+	down_k = lerpf(down_k, 1.0 if ks == "faint" else 0.0, 1.0 - exp(-DOWN_RATE * dt))
+	if was_down > 0.5 and ks != "faint" and getup_k <= 0.0:
+		getup_k = 1.0
+		sq_v += 3.0
+		ear_v -= 5.0
+	getup_k = maxf(0.0, getup_k - dt / GETUP_S)
+	var lie_k := maxf(sleep_k, down_k)      # curled up, legs tucked, wings folded: asleep or knocked out
 	air = lerpf(air, clampf(vy * 0.4, -1.0, 1.0), 1.0 - exp(-10.0 * dt))
 	gait += dt * (4.0 + move_k * 12.0 + happy_k * 4.0)
 	var breathe := sin(t * (2.2 - sleep_k * 1.0) + phase) * (0.018 + sleep_k * 0.03) * (1.0 - move_k)
+	breathe = lerpf(breathe, sin(t * DOWN_BREATH.x + phase) * DOWN_BREATH.y, down_k)
 	var sx := 1.0 + sq * 0.6 + swell + breathe * 0.5
 	var sy := 1.0 - sq + swell * 0.6 + breathe
 	var sz := 1.0
@@ -205,7 +228,7 @@ func _process(dt: float) -> void:
 		"flyer":
 			# hovering: a slow bob, tipped forward when it flies along
 			off.y += 0.07 + sin(t * 2.6 + phase) * 0.035 * (1.0 - sleep_k) * (1.0 - perch_k)
-			off.y *= (1.0 - sleep_k) * (1.0 - perch_k)
+			off.y *= (1.0 - lie_k) * (1.0 - perch_k)
 			rx -= 0.22 * move_k
 			rz += sin(t * 1.7 + phase) * 0.05 * (1.0 - move_k)
 		"serpent":
@@ -213,14 +236,14 @@ func _process(dt: float) -> void:
 			ry += sin(gait * 0.8) * (0.12 + move_k * 0.12)
 			rz += sin(gait * 0.8 + 1.2) * 0.08
 			off.y += 0.06 + sin(t * 2.0 + phase) * 0.04
-			off.y *= (1.0 - sleep_k) * (1.0 - perch_k)
+			off.y *= (1.0 - lie_k) * (1.0 - perch_k)
 		_:
 			# a blob jiggles, wobbling after every bounce
 			sx += sin(t * 9.0 + phase) * 0.02 * move_k
 			rz += sin(gait * 0.5) * 0.08 * move_k
 	# its own habit (Unique quirk), now and then while it stands about
 	if quirk != "":
-		var idle := (1.0 - move_k) * (1.0 - sleep_k) * (1.0 - att_k) * (0.0 if dazed else 1.0)
+		var idle := (1.0 - move_k) * (1.0 - lie_k) * (1.0 - att_k) * (0.0 if dazed else 1.0)
 		quirk_t -= dt * idle
 		if quirk_t <= 0.0:
 			quirk_t = 4.0 + fposmod(t * 7.31 + phase * 3.0, 5.0)
@@ -272,6 +295,15 @@ func _process(dt: float) -> void:
 	rz += sleep_k * 0.25
 	rx += sleep_k * 0.1
 	off.y -= sleep_k * 0.03
+	# knocked out: slumped by its body plan, then a quick stretch and spring as it gets up
+	var dn: Dictionary = DOWN_T[plan]
+	sy *= lerpf(1.0, float(dn["sy"]), down_k)
+	sx *= lerpf(1.0, float(dn["sx"]), down_k)
+	rx += float(dn["rx"]) * down_k
+	rz += float(dn["rz"]) * down_k
+	var up := sin(getup_k * PI)
+	sy += up * 0.12
+	off.y += up * 0.08
 	flex.scale = Vector3(sx * girth, sy, sx * sz * lerpf(1.0, girth, 0.5))
 	flex.position = flex_base + off
 	# a lean into a dizzy wobble
@@ -292,7 +324,7 @@ func _process(dt: float) -> void:
 	var shut := sin(blink_k * PI)
 	if dazed:
 		shut = maxf(shut, 0.7 + sin(t * 3.0) * 0.1)
-	elif sleep_k > 0.5:
+	elif lie_k > 0.5:
 		shut = 1.0
 	elif happy:
 		shut = maxf(shut, 0.45)
@@ -305,10 +337,10 @@ func _process(dt: float) -> void:
 	if tail:
 		var rate := 3.0 + move_k * 9.0 + (6.0 if happy else 0.0)
 		var amp := 0.18 + move_k * 0.25 + (0.25 if happy else 0.0)
-		if dazed or sleep_k > 0.5:
+		if dazed or lie_k > 0.5:
 			rate = 1.2; amp = 0.05
 		tail.rotation.y = sin(t * rate + phase) * amp
-		tail.rotation.x = lerpf(tail.rotation.x, (0.5 if dazed else -0.1 * move_k + float(pz["tail"])), 1.0 - exp(-6.0 * dt))
+		tail.rotation.x = lerpf(tail.rotation.x, (0.5 if dazed else -0.1 * move_k + float(pz["tail"]) + 0.45 * down_k), 1.0 - exp(-6.0 * dt))
 	# ears: spring that flops on landing, perks on a cast, twitches now and then
 	if ears:
 		twitch_t -= dt
@@ -316,7 +348,7 @@ func _process(dt: float) -> void:
 			twitch_t = _idle_rng.randf_range(2.0, 5.0)
 			twitch = 1.0
 		twitch = maxf(0.0, twitch - dt * 6.0)
-		var droop := 0.35 if dazed else 0.0
+		var droop := 0.35 if dazed else 0.45 * down_k
 		ears.rotation.x = clampf(ear_flop * 0.12, -0.5, 0.5) + droop + float(pz["ear"])
 		ears.rotation.z = sin(twitch * PI * 2.0) * 0.12
 	# legs: a trot that speeds up with it (diagonal pairs together), a gallop when running (front
@@ -333,7 +365,7 @@ func _process(dt: float) -> void:
 			"flyer":
 				a = 0.35 + sin(t * 3.0 + i) * 0.1
 		a += att_k * (-0.5 if i < 2 else 0.3)
-		a = lerpf(a, -0.9 if i < 2 else 0.9, sleep_k)
+		a = lerpf(a, -0.9 if i < 2 else 0.9, lie_k)
 		if i == 0: a -= float(pz["leg"]) * 0.9      # a paw up, pointing
 		legs[i].rotation.x = a
 	# wings: a slow flutter at rest, quick beats when it moves; flyers beat fast all the time,
@@ -345,9 +377,9 @@ func _process(dt: float) -> void:
 		if plan in ["flyer", "serpent"]:
 			rate = 16.0 + move_k * 10.0; amp = 0.45 + move_k * 0.2
 		rate += absf(air) * 10.0
-		amp = lerpf(amp, 0.05, maxf(sleep_k, perch_k * 0.6))
+		amp = lerpf(amp, 0.05, maxf(lie_k, perch_k * 0.6))
 		var flap := sin(t * rate + phase) * amp
-		wings[i].rotation.z = side * (flap - 0.1 - sleep_k * 0.4)
+		wings[i].rotation.z = side * (flap - 0.1 - lie_k * 0.4)
 	if spin:
 		spin.rotation.y += dt * (1.2 + move_k * 2.0)
 	# stars circling the head while dazed

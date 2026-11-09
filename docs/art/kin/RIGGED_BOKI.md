@@ -53,9 +53,9 @@ crossfade; the flinch eases in over 0.125 s). `--boki-state-check --shots-dir=<d
 | attack, ability | match | `kstate` attack, `pulse` | `attack`, `ability` |
 | perch | match | `kstate` perch | `idle` (the shoulder pose is on `Kin`) |
 | hit | match | `hit` (`Kin.flash_t`), or pose `flinch` (its hunter hit) | flinch layer on Flex over the running clip: rocks back, squats, sad face; eases in and out |
-| faint | match | `kstate` faint (downed) | `sleep` with the eyes shut, laid over by `Kin` |
+| faint | match | `kstate` faint (downed) | `sleep` at 0.6x (a slow breath) with the eyes shut, rolled onto its side by `Kin` (`KinDowned.LIE_ROLL`); on revive the `hop` clip for 0.3 s as the get-up, then idle. No clip of its own is baked: a dedicated `down` clip per species is the alternative |
 
-The 29 primitive species (`KinPuppet`): idle, walk, run, attack (`att_k`), nap and faint (`sleep_k`), perch (`perch_k`),
+The 29 primitive species (`KinPuppet`): idle, walk, run, attack (`att_k`), nap (`sleep_k`), faint (`down_k`: a per-plan slump `DOWN_T`, eyes shut, slow breath, limbs tucked, and a 0.3 s spring `getup_k` on revive; `--kin-downed-check`), perch (`perch_k`),
 play (`happy_k`), hit (a squash-and-ears jolt on the "hit" meta, as on its hunter's flinch; checked per species). They have no eat or pet pose beyond Home's chew squash and the joy wiggle.
 
 Checks and review: `--boki-rig-check`; `--boki-rig-shots --shots-dir=<dir>`, then `tools/boki/review_gifs.sh <dir>`.
