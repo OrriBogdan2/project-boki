@@ -56,7 +56,7 @@ body (not in the air, a crouch, or a move that owns the body):
 Data `"free_arm": {clip: "L"|"R"}` (content/rules/warden_anim/<art>.json) names the arm a move leaves unused. While that
 clip plays, its upper arm, forearm and hand ease (10/s) to their idle rotation over whatever the clip keys, so the free arm
 hangs relaxed instead of standing out. A runtime layer, like the gait: the glbs are not re-baked (no Blender on this worker; the
-clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot) and `tender` (seed, shot_r).
+clip sources in tools/art1 are unchanged). Done for `juggernaut` (slam, meteor: the sword stays in the right hand as on his v2 splash, the off arm hangs; `t_free` 33 % to 0 and free-hand travel 1.7 to 0.8 and 1.0 to 0.3 body heights; `haulslam` keeps its arms, the chain hand), `ashwick` (lance, shot), `dredge` (throw, shot) and `tender` (seed, shot_r).
 `--anim-audit` reports `t_free` (share of frames the free arm is raised 60 degrees or more and sideways) next to `t_pose`
 (either arm); `t_pose` stays up where the weapon arm itself reaches out.
 
@@ -130,7 +130,7 @@ posts scroll at the move speed).
 **Kael (`juggernaut`)**
 1. Feet slid 27 % at a run, 53 % at a walk (fixed: 12 %, 25 %); the left arm paced with its leg (counter -0.65, fixed to +0.84).
 2. Hip bob 16 cm at a run (10 % of his height); not changed.
-3. The slam flings the free arm 1.7 body heights and holds an arm out for 29 to 46 %.
+3. The slam flung the off arm 1.7 body heights and held an arm out for 29 to 46 % (fixed for `slam` and `meteor` with `free_arm`: off arm 0.8 and 0.3 body heights, out 0 % of the clip; the sword arm still raises for the swing, `t_pose` 46 % to 33 %).
 
 ![juggernaut walk and run, before and after](anim_audit/juggernaut.jpg)
 

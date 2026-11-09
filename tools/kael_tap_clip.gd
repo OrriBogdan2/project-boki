@@ -44,7 +44,8 @@ func _case(c: String, out: String) -> void:
 			m.step(Match.DT)
 		await _frame(m)
 		m.get_viewport().get_texture().get_image().save_png(out.path_join("f%03d.png" % n))
-	print("KCLIP %s %d frames, foe took %.0f, vel %s -> %s" % [c, FRAMES, A.dmg(T), K.riposte.vel_before, K.riposte.vel_after])
+	print("KCLIP %s %d frames, foe took %.0f, vel %s -> %s" % [c, FRAMES, A.dmg(T),
+			K.riposte.vel_before, K.riposte.vel_after])
 	m.queue_free()
 	await main.get_tree().process_frame
 
