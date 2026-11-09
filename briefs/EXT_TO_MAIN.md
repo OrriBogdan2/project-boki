@@ -5400,3 +5400,4 @@ READY ext/status-body-looks bfddc6570 (body looks for burning, Chill, slow, stun
 READY ext/parity-cc-lockouts 123ec0cb8 (CC lockout table and fixes)
 READY ext/parity-iframes 583b7cfd4 (invulnerable windows to source)
 READY ext/edge-knock-parity 0286f0cf (bots no longer held at the rim by a shove; --abyss-check asserts hard-knock glider timing and the half-strength overheated lift; edge-knock source table in MOVEMENT_FEEL)
+READY ext/parity-ability-speeds-b 1398826f9 (ability projectile speeds B)
