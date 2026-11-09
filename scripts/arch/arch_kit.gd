@@ -341,7 +341,6 @@ func _fuse_start(bond: bool) -> void:
 	var T := float(fuse["T"])
 	h.cast_at = m.time; h.cast_slot = "ult"
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), String(rd.get("name", "")).to_upper(), col, true)
-	tele_circle(h.pos, 2.4, col, T)
 	m.fx.ring(h.pos, 0.8, Color(col, 0.9), T)
 	m.sfx("charge", h.pos, 0.0 if h.is_local() else -2.0, 0.55)
 	m.sfx("skill", h.pos, -3.0, 0.6)
@@ -373,6 +372,7 @@ func _tick_fuse(dt: float) -> void:
 		return
 	# energy gathers inward, faster and brighter toward the end
 	var k := 1.0 - float(fuse["t"]) / maxf(0.01, float(fuse["T"]))
+	AimKit.circle(h, "fuse", {"self": true, "r": 2.4, "all": true, "col": col, "fill": k})
 	fuse["fx"] = float(fuse["fx"]) - dt
 	if float(fuse["fx"]) <= 0.0:
 		fuse["fx"] = 0.05
@@ -628,31 +628,6 @@ func ground(p: Vector3) -> Vector3:
 	var g: float = m.world.ground_at(p.x, p.z)
 	return Vector3(p.x, g if g > World.VOID + 1.0 else p.y, p.z)
 
-## A filling ground circle everyone sees; enemies get the hostile rim. Returns the node.
-func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(c, 0.9))
-	var tw := tele.create_tween()
-	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
-	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
-	return tele
-
-## A filling lane (dash arrows, beams, charge lines).
-func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(c, 0.9))
-	if t > 0.0:
-		var tw := tele.create_tween()
-		tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
-		tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
-	return tele
-
 ## The out-of-combat clock: building or spending the resource keeps it from decaying.
 func touch_res(wait := -1.0) -> void:
 	res_wait = maxf(res_wait, float(res_def().get("wait", 3.0)) if wait < 0.0 else wait)
@@ -843,8 +818,7 @@ func e_payoff_ready() -> bool: return false
 
 ## Frees what this kit hung on the hunter (Hunter.set_arch calls it before swapping kits).
 func teardown() -> void:
-	var ring: Node3D = chg.get("ring")
-	if ring and is_instance_valid(ring): m.fx.end_telegraph(ring)
+	AimKit.hide(h, "charge_ring")
 	chg = {}
 	for n in self_nodes:
 		if is_instance_valid(n): (n as Node).queue_free()
@@ -1064,16 +1038,11 @@ func _tick_charge(dt: float) -> void:
 		var rc := col
 		var p = m.get("player")
 		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
-		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
-		chg["ring"] = ring
 		if charge_orb():
 			chg["glow"] = _charge_ball(col)
 		net_ring(h.pos, 0.8, rc)            # remote players: "they're winding something up"
 	chg["k"] = k
-	var ring2: Node3D = chg.get("ring")
-	if ring2 and is_instance_valid(ring2):
-		ring2.global_position = h.pos + Vector3(0, 0.07, 0)
-		m.fx.telegraph_progress(ring2, k)
+	AimKit.circle(h, "charge_ring", {"self": true, "r": 1.15 * float(h.cdat.get("scale", 1.0)), "all": true, "col": col, "fill": k})
 	var g2: Node3D = chg.get("glow")
 	if g2 and is_instance_valid(g2):
 		var d := h.aim_dir()
@@ -1108,8 +1077,7 @@ func _charge_full_tick(col: Color) -> void:
 func _charge_release() -> void:
 	var k := float(chg.get("k", 0.0))
 	charge_last = k
-	var ring: Node3D = chg.get("ring")
-	if ring and is_instance_valid(ring): m.fx.end_telegraph(ring)
+	AimKit.hide(h, "charge_ring")
 	var g: Node3D = chg.get("glow")
 	if g and is_instance_valid(g):
 		self_nodes.erase(g)
