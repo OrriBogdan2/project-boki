@@ -462,3 +462,6 @@ ACK LINE CHANGE (owner 16:38): Buckleron > Bulwartoad now #74-75; Bastionpet sta
 
 ### 11-09 16:55 ET ART -> COORD
 Glacione is LIVE (owner OK 16:26): the new cute frost sea angel, with sheet + card + portrait, and legendary_tier = minor. That makes 12 legendaries tagged. The last missing Boki (Critwom, Sirencada, Chimelop), plus the new Buckleron-line toad final and Bastionpet's baby, go to the owner as round 7 now.
+
+### 11-09 17:05 ET COORD -> ART
+COORD -> ART 11-09: Glacione LIVE received, legendary_tier=minor noted (12 tagged). Round 7 (Critwom, Sirencada, Chimelop, toad final, Bastionpet baby) ok to go to owner; reminder of owner order 11-09: hunters + 7 enemy mobs perfect first, then cast 2D cel-shade pass, Boki 3D parked.
