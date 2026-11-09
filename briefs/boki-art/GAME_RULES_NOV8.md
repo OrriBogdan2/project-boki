@@ -63,3 +63,31 @@ In matches your Boki rides as a small critter-shaped wisp: carry passive always 
 - Target about 45% single-type across the whole roster (now 29 of 124 existing, 49 of 77 new).
 - Patterns to use: some whole lines stay single-type (like a fire starter that stays pure fire); in other three-stage lines the baby and middle stay single and the second type arrives at the final; dual types are kept where the idea really spans two types.
 - Applied to ROSTER_200_NEW.md already. For the existing 124: move roughly 30 babies/middle forms (and a few whole lines) to single-type.
+
+### Applied 2026-11-09 (coordinator): single-type pass on the existing 124
+31 retyped in ROSTER_100.html. The existing 124 are now 60 single and 64 dual (48%). With the new 76, about 54% of the roster is single-type.
+- Babies and middles go single; the second type arrives at the final:
+  - Prismander and Glassolotl: Prism
+  - Teapotamus: Ember
+  - Kerchick and Jibbatross: Tempest
+  - Zippelith: Shadow
+  - Glintmole and Geodemole: Stone
+  - Kindlewren and Embrook: Ember
+  - Dribbara and Soakybara: Tide
+  - Kayak and Prowyak: Frost
+  - Boltstrich: Storm
+  - Bucketmander and Barrelmander: Tide
+  - Anvilbrock: Ember
+  - Marchleaf and Scythant: Swarm
+  - Thrumbird: Echo
+  - Echolop: Echo
+- Whole lines that are now single:
+  - Coolatee, Frigatee, Glaciatee: Frost
+  - Kestrike, Arcestrel, Voltalon: Storm
+  - Latchling, Lockatara, Vaultara: Titan
+- Kept dual because the idea spans two types:
+  - Wickapi line (Shadow+Ember, candle in the dark)
+  - Nettlynx line (Venom+Bloom, stinging nettle)
+  - Bubblisk line (Prism+Tide, soap bubble)
+  - Dual single-stage rares
+  - All branch finals
