@@ -42549,5 +42549,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_effigoon_f2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_galleotter_g1",
+    "name": "Galleotter (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_galleotter_g1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_galleotter_g2",
+    "name": "Galleotter (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_galleotter_g2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_galleotter_g2",
+    "name": "Galleotter (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_galleotter_g2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_scythant_n2",
+    "name": "Scythant (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_scythant_n2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_galleotter_g3",
+    "name": "Galleotter (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_galleotter_g3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_galleotter_g3",
+    "name": "Galleotter (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_galleotter_g3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_scythant_n2",
+    "name": "Scythant (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_scythant_n2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_galleotter_g3",
+    "name": "Galleotter (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_galleotter_g3_4.jpg",
+    "ok": true
   }
 ]
