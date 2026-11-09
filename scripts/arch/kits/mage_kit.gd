@@ -149,6 +149,13 @@ func add_spark(f: Ent, n := 1) -> void:
 	elif int(s["n"]) > was:
 		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(s["n"]))     # the zap climbs with each stack
 
+func combo_read(f: Ent) -> Dictionary:
+	var s = sparks.get(f.get_instance_id())
+	if s == null:
+		return {}
+	return {"icon": "shock", "n": int(s["n"]), "max": int(res_def()["max"]), "left": float(s["t"]),
+			"total": float(res_def()["dur"])}
+
 func clear_sparks(f: Ent) -> void:
 	var key := f.get_instance_id()
 	if sparks.has(key):
@@ -495,6 +502,7 @@ func _blowout(f: Ent) -> void:
 	var dmg := (float(rd["blow_dmg"]) + float(rd["blow_pct"]) * f.max_hp) * power("dash")
 	clear_sparks(f)
 	blowouts += 1
+	ComboMark.payoff(m, h, f)
 	f.hurt(dmg, h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "blowout"], "payoff": true, "crit": true})
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0

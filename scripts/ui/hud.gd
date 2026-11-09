@@ -1606,27 +1606,7 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 		bounty_marker(c, Vector2(sp.x, sp.y - 34), 1.15)
 		_ctext(Vector2(sp.x, sp.y - 48), "BOUNTY  ·  LV %d" % h.lvl, 11, Color("ffb64a"), big)
 	if not h.downed:
-		_draw_marks(Vector2(sp.x, sp.y - 28), h)
-
-## A Thief's Marks over their target's head: pips, and a pulsing purse at 3 (both sides see them).
-func _draw_marks(at: Vector2, e: Ent) -> void:
-	if not e.has_meta("marks"):
-		return
-	var best := 0
-	for k in (e.get_meta("marks") as Dictionary):
-		var mk: Array = e.get_meta("marks")[k]
-		if float(mk[1]) > 0.0: best = maxi(best, int(mk[0]))
-	if best <= 0:
-		return
-	var gold := Color("ffd23f")
-	for i in 3:
-		var pc := at + Vector2((i - 1) * 11.0, 0)
-		c.draw_circle(pc, 4.6, Color(0, 0, 0, 0.6))
-		c.draw_circle(pc, 3.6, gold if i < best else Color(1, 1, 1, 0.2))
-	if best >= 3:
-		var pulse := 0.5 + 0.5 * sin(m.time * 9.0)
-		c.draw_circle(at + Vector2(0, -12), 7.0 + pulse * 2.0, Color(gold, 0.85))
-		_ctext(at + Vector2(0, -8), "$", 11, Color(0.15, 0.1, 0.0), big)
+		ComboMark.draw(c, Vector2(sp.x, sp.y - 34), m.player, h, m.time)
 
 ## Little icons for what's happening to someone: stunned, rooted, slowed, burning, shielded, braced.
 func _status_row(at: Vector2, e: Ent) -> void:

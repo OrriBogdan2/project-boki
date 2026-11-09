@@ -156,12 +156,20 @@ func add_fever(n := 1) -> void:
 	res = minf(res_max(), res + float(n))
 	touch_res(float(res_def()["wait"]))
 
+func combo_read(t: Ent) -> Dictionary:
+	if not KitStatus.rattled(t):
+		return {}
+	var bd := rmb_def()["burr"] as Dictionary
+	return {"icon": "concussion", "n": 0, "max": 0, "left": KitStatus.rattled_left(t),
+			"total": float(bd["cone_rattle"]) + float(bd["wall_daze"])}
+
 ## Dazed foes take +90% from the rifle: a crit-style big gold number, and the string's decay pauses.
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	if t is Hunter or t is Mob:
 		if String(o.get("src", "")) == "shot" and not o.has("ab") and KitStatus.rattled(t):
 			o["crit"] = true
 			dazed_hits += 1
+			ComboMark.payoff(m, h, t)
 			h.sus_n = maxi(0, h.sus_n - 1)
 			return dmg * (1.0 + float(res_def()["rattle_k"]))
 	return dmg
@@ -656,7 +664,9 @@ func _fire_needle() -> void:
 		var rat := KitStatus.rattled(f)
 		var dmg: float = dmg0 * ((1.0 + float(ed["rattle_k"])) if rat else 1.0)
 		var o := {"src": "abil", "ab": "k1", "tags": ["k1", "needle"]}
-		if rat and f is Hunter: o["payoff"] = true
+		if rat:
+			ComboMark.payoff(m, h, f)
+			o["payoff"] = f is Hunter
 		f.hurt(dmg, h, o)
 		needle_hits += 1
 		m.fx.burst(f.pos + Vector3(0, 1.0, 0), EMBER, 14, 5.0, 0.3)

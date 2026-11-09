@@ -836,6 +836,9 @@ var self_nodes: Array = []     # nodes this kit hangs on the hunter (freed by te
 var spips := {}                # the kit's own pips over the hunter's head (Chambers, Guard steps)
 var _pulse_t := 0.0
 
+## The combo state this kit has on `t`, for the overhead tag (ComboMark): {} or {icon, n, max, left, total}.
+func combo_read(_t: Ent) -> Dictionary: return {}
+
 ## The crosshair label while the kit's payoff is armed ("" = none).
 func ready_label() -> String: return ""
 ## The payoff lives on E (the Mage's Flashpoint): the E slot gets the gold dot.

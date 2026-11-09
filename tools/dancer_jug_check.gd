@@ -18,6 +18,7 @@ func run(main_node: Node, who := "all") -> void:
 	A.main = main_node
 	if who in ["all", "thief"]:
 		await thief(A)
+		await load("res://tools/combo_mark_check.gd").new().run(A.ok, A, "thief")
 	if who in ["all", "juggernaut"]:
 		await juggernaut(A)
 	await combos(A)

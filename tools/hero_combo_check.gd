@@ -23,6 +23,7 @@ func run(main_node: Node, who: String) -> void:
 	var ults: RefCounted = load("res://tools/vv_ult_check.gd").new(self)
 	if who == "mage":
 		await _mage()
+		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "mage")
 		await _growth()
 		await ults.mage()
 		await load("res://tools/ryzz_items_check.gd").new().run(self, ac)
@@ -33,6 +34,7 @@ func run(main_node: Node, who: String) -> void:
 		fails += parity.fails
 	else:
 		await _gunslinger()
+		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "gunslinger")
 		await ults.gunslinger()
 	print("HCHECK DONE %s, %d checks, failures: %d" % [who, n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
