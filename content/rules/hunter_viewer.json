@@ -1,5 +1,5 @@
 {
-	"desc": "The Hunter viewer (HunterViewer: the Masks screen, the Mask moments, the reveal). Each ability plays in its own clip (AbilityClip): the real model uses it on a training dummy. `moves`: per Hunter and slot, the kit moves (any kit move table, HunterAnim.km_def) played back to back in the clip, the same ids the kits play. A slot with no entry falls back to the weapon swing or shots (lmb), the class dodge (dash) or a cast pose (rmb, e, x). --hunter-unlock-check fails on an id that no longer exists, so a kit rename shows up here.",
+	"desc": "The Hunter viewer (HunterViewer: the Relics screen, the Relic moments, the reveal). Each ability plays in its own clip (AbilityClip): the real model uses it on a training dummy. `moves`: per Hunter and slot, the kit moves (any kit move table, HunterAnim.km_def) played back to back in the clip, the same ids the kits play. A slot with no entry falls back to the weapon swing or shots (lmb), the class dodge (dash) or a cast pose (rmb, e, x). --hunter-unlock-check fails on an id that no longer exists, so a kit rename shows up here.",
 	"turn_rate": 0.45,
 	"turn_rate_desc": "rad/s the viewer's turntable spins",
 	"moves": {

@@ -211,14 +211,46 @@ def wname(wid):
 def kname(kid):
     return KIN2.get(kid, {}).get("name", kid)
 
+# ------------------------------------------------------------------ lore
+LORE = load_json(os.path.join(ROOT, "content", "rules", "lore.json"))
+
+def hunter_name(aid):
+    return "%s, the %s" % (ARCH[aid]["base_name"], ARCH[aid]["title"])
+
+def gen_lore():
+    """The Lore page and one story file per Hunter (docs/art/gen/stories/<id>.md, for the art and voice passes)."""
+    home = {a: f for f in LORE["factions"] for a in f["hunters"]}
+    fac = table(["Faction", "Hunters", "What binds them", "What they would wish for"],
+                [[f["name"], ", ".join(ARCH[a]["base_name"] for a in f["hunters"]), f["binds"], f["wish"]] for f in LORE["factions"]])
+    relics = table(["Hunter", "Relic", "Why this one", "Status"],
+                   [[hunter_name(a), r["name"], r["why"], r["status"]] for a in ARCH_ORDER if a in ARCH
+                    for r in [LORE["hunters"][a]["relic"]]])
+    body = "\n\n".join("> " + t for t in LORE["premise"])
+    body += "\n\nFactions are lore only (voice lines, banter, key art): a squad in a match stays free-pick.\n\n### Factions\n\n" + fac
+    body += "\n\n### Relics\n\nEach fallen Hunter's self is held in the object they were most bound to. Wearing it gives you their face, form and memories. "
+    body += "A relic marked proposed is still waiting for the owner's OK.\n\n" + relics
+    body += "\n\n### Banter pairs\n\n" + "\n".join("- " + b for b in LORE["banter"])
+    page("Lore.md", "Lore", body, ["content/rules/lore.json", "content/archetypes"])
+    for aid in ARCH_ORDER:
+        if aid not in ARCH: continue
+        d, r = ARCH[aid], LORE["hunters"][aid]["relic"]
+        text = "%s\n# %s\n\n_Class: %s. Faction: %s._\n\n%s\n\n**Relic:** %s. %s (%s)" % (
+            NOTE, hunter_name(aid), aid, home[aid]["name"], d["personality"].replace("\n", "\n\n"), r["name"], r["why"], r["status"])
+        write(aid + ".md", text, os.path.join(ROOT, "docs", "art", "gen", "stories"))
+
 # ------------------------------------------------------------------ classes
+def the(title):
+    """A title shown on its own carries "the" (titles are stored without it)."""
+    return "the " + title
+
+
 def class_page_name(aid):
     return "Class-" + ARCH[aid]["title"].replace(" ", "-")
 
 def class_profile(d):
     gender = "a robot" if d["gender"] == "robot" else d["gender"]
     return table(["", ""], [
-        ["Class title", d["title"]],
+        ["Class title", the(d["title"])],
         ["Base character", "%s, %s" % (d["base_name"], gender)],
         ["Personality", d["personality"].replace("\n", " ")],
     ])
@@ -232,7 +264,7 @@ def gen_classes():
         d = ARCH.get(aid)
         if not d: continue
         cs = CLASSES.get(d["weight"], {})
-        rows.append([link(class_page_name(aid), d["title"]), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
+        rows.append([link(class_page_name(aid), the(d["title"])), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
                      d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Fusion)"])
     cu = json.load(open(os.path.join(ROOT, "content", "rules", "class_unlock.json"), encoding="utf-8"))
     kinds = cu["reward_kinds"]
@@ -244,12 +276,12 @@ def gen_classes():
         when = "starter, else " if aid in cu["starters"] else ""
         after = ", once %d Hunters are open" % ch["after"] if ch.get("after") else ""
         if not ch:
-            cu_rows.append([link(class_page_name(aid), ARCH[aid]["title"]), "starter", "pick at the start, or after your first expedition", "-"])
+            cu_rows.append([link(class_page_name(aid), the(ARCH[aid]["title"])), "starter", "pick at the start, or after your first expedition", "-"])
         else:
-            cu_rows.append([link(class_page_name(aid), ARCH[aid]["title"]), when + ch.get("tier", "?"), ch.get("text", "") + after, num(ch.get("target", "?"))])
+            cu_rows.append([link(class_page_name(aid), the(ARCH[aid]["title"])), when + ch.get("tier", "?"), ch.get("text", "") + after, num(ch.get("target", "?"))])
         for g in cu["mastery"].get(aid, []):
-            m_rows.append([ARCH[aid]["title"], g["text"], num(g["target"]), "%s: %s" % (kinds.get(g["reward"]["kind"], g["reward"]["kind"]), g["reward"]["name"])])
-    starters = ", ".join(ARCH[a]["title"] for a in cu["starters"] if a in ARCH)
+            m_rows.append([the(ARCH[aid]["title"]), g["text"], num(g["target"]), "%s: %s" % (kinds.get(g["reward"]["kind"], g["reward"]["kind"]), g["reward"]["name"])])
+    starters = ", ".join(the(ARCH[a]["title"]) for a in cu["starters"] if a in ARCH)
     unlock = "### How Hunters unlock\n\nA new save picks %d of %d starters (%s) before the egg pick and plays the tutorial as it. The other starters open after your first expedition. " % (cu["starter_picks"], len(cu["starters"]), starters)
     unlock += "Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for %s, and letting go early cancels it. " % secs(cu.get("hold_s", 1.6))
     unlock += "Tiers: easy is %s, medium %s, hard %s. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.\n\n" % (cu["tiers"]["easy"], cu["tiers"]["medium"], cu["tiers"]["hard"])
@@ -379,8 +411,6 @@ def gen_boki():
         body += table(["", ""], info)
         body += "\n\n- E ability: " + ability_line(k.get("active", ""))
         body += "\n- Auto ability (it casts this on its own): " + ability_line(k.get("auto", ""))
-        dr = k.get("dodge_rider")
-        if dr: body += "\n- On your dash: **%s**" % dr.get("name", "")
         mg = MERGE.get(k.get("merge", ""), {})
         if mg: body += "\n- Bond ultimate (merge): **%s** (%ss). %s" % (mg.get("name", ""), num(mg.get("duration", "")), mg.get("flavor", ""))
         paths = []
@@ -452,7 +482,7 @@ def gen_gear():
     rows = []
     for wid, w in WEAPONS.items():
         p = w.get("primary", {})
-        users = [ARCH[a]["title"] for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
+        users = [the(ARCH[a]["title"]) for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
         rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", secs(p["reload"]) if "reload" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
     body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Kael's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
     body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)
@@ -551,6 +581,7 @@ def gen_rules():
         body += table(["Rule", "Value", "Meaning"], [[k, num(v), lc.get(k, "")] for k, v in lr.items()])
     rules = content("rules")
     for rid, r in rules.items():
+        if rid == "lore": continue   # the Lore page
         body += "\n\n## %s (`content/rules/%s.json`)\n\n%s\n\n" % ({"bond": "Bond meter", "kin_ai": "How Boki fight"}.get(rid, rid), rid, r.get("desc", ""))
         body += table(["Setting", "Value"], [[k, num(v) if not isinstance(v, (dict, list)) else json.dumps(v)] for k, v in r.items() if k != "desc"])
     co = content("combos")
@@ -753,7 +784,7 @@ def gen_dash_flow():
 
 # ------------------------------------------------------------------ main
 def main():
-    for f in (gen_classes, gen_boki, gen_gear, gen_maps, gen_rules, gen_farm, gen_controls, gen_dash_flow):
+    for f in (gen_classes, gen_lore, gen_boki, gen_gear, gen_maps, gen_rules, gen_farm, gen_controls, gen_dash_flow):
         try:
             f()
         except Exception as e:  # report and keep going: one broken table shouldn't hide the rest

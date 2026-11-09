@@ -11,6 +11,8 @@ const int M_SCORCH = 1;     // the ground burning: UV across the quad
 const int M_SKIRT = 2;      // a wall of flame: UV.x round it, UV.y foot (0) to top (1)
 const int M_FLARE = 3;      // a ragged burst, facing the camera
 const int M_RIBBON = 4;     // a mesh trail: UV.x head (0) to tail (1), UV.y across
+const int M_BOLT = 6;       // a strip from A (UV.x 0) to B (1), facing the camera: lightning when jag > 0, a thread at 0
+const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core: UV across the quad
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
 
 uniform int mode = 0;
@@ -24,6 +26,8 @@ uniform int shape = 0;      // M_SCORCH: 0 disc, 1 lane, 2 cone
 uniform float arc = 1.0;    // M_SCORCH cone: half angle (rad). M_SKIRT: the share of the circle it covers
 uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures keep their size
 uniform bool billboard = false;
+uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
+uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
 
 void vertex() {
@@ -178,12 +182,50 @@ vec4 ribbon(vec2 uv) {
 	return vec4(ramp(heat) * a, a * mix(0.95, 0.35, uv.x));
 }
 
+vec4 bolt(vec2 uv) {
+	// the strike flickers to a new path a few times a second; a thread (jag 0) is a clean taut line. The strip is
+	// wide and the line thin inside it, so a jagged strike has room to wander.
+	float tick = floor(TIME * 18.0 + seed * 7.0);
+	float wander = (fbm3(vec2(uv.x * 5.0 + tick * 3.1, seed)) - 0.5) * 2.4 * jag;
+	wander += (h21(vec2(floor(uv.x * 14.0), tick + seed)) - 0.5) * 0.5 * jag;     // sharp kinks
+	wander *= sin(3.14159 * uv.x);                       // pinned at both ends
+	float off = abs(uv.y * 2.0 - 1.0 - wander);
+	float thin = jag > 0.0 ? 0.07 : 0.16;
+	float grow = smoothstep(0.0, 0.12, life) * 1.2;          // runs out from A
+	float reach = 1.0 - smoothstep(grow - 0.1, grow, uv.x);
+	float fade = 1.0 - smoothstep(0.45, 1.0, life);
+	float core = (1.0 - smoothstep(thin * 0.5, thin, off)) * reach * fade;
+	float halo = (1.0 - smoothstep(thin, thin * 4.0, off)) * reach * fade * 0.6;
+	float flick = jag > 0.0 ? 0.7 + 0.3 * step(0.5, h21(vec2(tick, seed))) : 1.0;
+	vec3 c = col.rgb * halo + mix(col2.rgb, vec3(1.0), 0.5) * core;
+	return vec4(c * flick, clamp(core + halo * 0.5, 0.0, 1.0) * flick);
+}
+
+vec4 vortex(vec2 uv) {
+	vec2 p = uv * 2.0 - 1.0;
+	float d = length(p);
+	float ang = atan(p.y, p.x);
+	// spiral arms pulled inward: angle bent by distance, turning over time
+	float sw = ang + d * 5.0 - TIME * spin * 6.28;
+	float arms = fbm3(vec2(sw * 1.6 + seed, d * 3.0 - TIME * spin));
+	float open = smoothstep(0.0, 0.25, life);
+	float fade = 1.0 - smoothstep(0.65, 1.0, life);
+	float edge = 1.0 - smoothstep(0.75 * open, 0.98 * open, d + (arms - 0.5) * 0.25);
+	float streak = smoothstep(0.45, 0.75, arms) * edge;
+	float hole = 1.0 - smoothstep(0.0, 0.32, d);                // the dark core
+	float a = clamp(streak * 0.85 + hole * 0.75 + edge * 0.12, 0.0, 1.0) * fade;
+	vec3 c = mix(col.rgb, col2.rgb, smoothstep(0.6, 0.9, arms) * (1.0 - hole)) * streak + col3.rgb * hole;
+	return vec4(c * fade, a);
+}
+
 void fragment() {
 	vec4 v;
 	if (mode == M_SWEEP) { v = sweep(UV); }
 	else if (mode == M_SCORCH) { v = scorch(UV); }
 	else if (mode == M_SKIRT) { v = skirt(UV); }
 	else if (mode == M_FLARE) { v = flare(UV); }
+	else if (mode == M_BOLT) { v = bolt(UV); }
+	else if (mode == M_VORTEX) { v = vortex(UV); }
 	else if (mode == M_RIBBON) { v = ribbon(UV); }
 	else { v = thread(UV); }
 	ALBEDO = v.rgb * gain;

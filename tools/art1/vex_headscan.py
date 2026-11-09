@@ -15,10 +15,8 @@ SRC, SCAN, OUT = a[0], a[1], a[2]
 HEAD_TRIS = 5000
 # the head scan, its own metres (flipped to face +Y, her right +X), read on grid_h_front / grid_h_right
 EYE_Z, CHIN_Z, NAPE_Y, NAPE_Z = float(os.environ.get("H_EYE", 1.25)), float(os.environ.get("H_CHIN", 0.88)), float(os.environ.get("H_NAPE_Y", -0.2)), float(os.environ.get("H_NAPE_Z", 0.75))
-FACE_Y = float(os.environ.get("H_FACE_Y", 0.3))        # the nose bridge's y
 AXIS_X = float(os.environ.get("H_AXIS_X", 0.0))
 T_EYE, T_CHIN = VH.EYE_Z, VH.GRID_CHIN + 0.003
-HEAD_K = 0.295                       # scan metres -> rig: skull height as the body scan's head
 bpy.ops.wm.open_mainfile(filepath=SRC)
 bpy.ops.import_scene.gltf(filepath=SCAN)
 ms = [o for o in bpy.context.selected_objects if o.type == "MESH"]
@@ -37,7 +35,8 @@ co = co @ mw[:3, :3].T + mw[:3, 3]
 src.matrix_world = Matrix.Identity(4)
 P = np.stack([-co[:, 0], -co[:, 1], co[:, 2]], 1)
 print("head scan", n, P.min(0).round(3), P.max(0).round(3))
-s = HEAD_K
+s = (T_EYE - T_CHIN) / (EYE_Z - CHIN_Z)                  # scan metres -> rig: the eye line to the chin as the rig's
+FACE_Y = P[(np.abs(P[:, 0] - AXIS_X) < 0.03) & (np.abs(P[:, 2] - EYE_Z) < 0.02)][:, 1].max()        # the nose bridge's y
 # her face's front on the body scan's
 bo = bpy.data.objects["Src"]
 bc = np.zeros(len(bo.data.vertices) * 3)

@@ -487,8 +487,9 @@ func _smash() -> void:
 	var heavier := 1.0 if perfect else 0.0
 	m.sfx("bjorn_slam", h.pos, lerpf(-4.0, 0.0, k) + 2.0 * heavier, lerpf(1.1, 0.85, k) - 0.1 * heavier)
 
-## The normal swing's step: "carry" m (more with the charge) over CARRY_T, on the ground only, then a short
-## wind-down before the glider can open. Let go in the air or in a dash, the swing rides the move he's in.
+## The normal swing's step: "carry" m in all (more with the charge; the dash over CARRY_T plus its exit
+## slide), on the ground only, then a short wind-down before the glider can open. Let go in the air or in
+## a dash, the swing rides the move he's in.
 func _carry(dv: Vector2, k: float) -> void:
 	play("bul_smash")
 	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
@@ -496,6 +497,7 @@ func _carry(dv: Vector2, k: float) -> void:
 		return
 	var cr: Array = lmb_def().get("carry", [1.5, 1.8])
 	var carry := lerpf(float(cr[0]), float(cr[1]), k)
+	carry -= HunterMove.slide(minf(carry / CARRY_T, h.base_speed * HunterMove.dash_exit_run))
 	h.dash_with({"type": "dash", "speed": carry / CARRY_T, "time": CARRY_T, "invuln": 0.0, "dir": dv, "trail": "dust"})
 	step_until = m.time + CARRY_T
 
@@ -746,7 +748,7 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex:
 		# the long dash (out of charges): Breaker lumbers in shoulder first, shoving foes aside
 		var de := float(h.cdat.get("ex_dist", 4.2))
-		travel(de, de / float(dd.get("lumber_speed", 14.0)), {"invuln": 0.1, "shove": true, "shove_kb": 6.0, "shove_dmg": 0.0, "trail": "dust"}, true)
+		travel(de, de / float(dd.get("lumber_speed", 14.0)), {"invuln": 0.1, "shove": true, "shove_kb": 6.0, "shove_dmg": 0.0, "trail": "dust"})
 		st["last_dash"] = "lumber"
 		play("bul_lumber")
 		for i in 4:
@@ -756,7 +758,7 @@ func on_dash(use_ex: bool) -> bool:
 	var dist2 := float(dd["whirl"]) + (1.0 if rank("dash") >= 3 else 0.0)
 	var t2 := dist2 / float(dd["whirl_speed"])
 	var wd := dash_dir()
-	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd}, use_ex)
+	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd})
 	t2 *= float(dash_feel()["time"])          # the spin lands when the (feel-scaled) dash arrives
 	st["last_dash"] = "whirl"
 	play("bul_whirl")
