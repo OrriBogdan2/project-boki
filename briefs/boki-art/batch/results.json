@@ -22690,5 +22690,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_glazolm_w31_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_glazolm_w31",
+    "name": "Glazolm (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glazolm_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glazolm_w31",
+    "name": "Glazolm (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glazolm_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_loafhopper_w31",
+    "name": "Loafhopper (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_loafhopper_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_loafhopper_w31",
+    "name": "Loafhopper (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_loafhopper_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sundormouse_w31",
+    "name": "Sundormouse (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_sundormouse_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sundormouse_w31",
+    "name": "Sundormouse (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_sundormouse_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog_w31",
+    "name": "Bullsfrog (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sundormouse_w31",
+    "name": "Sundormouse (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_sundormouse_w31_2.jpg",
+    "ok": true
   }
 ]
