@@ -78,6 +78,11 @@
 			"world": {
 				"place": "Your house goes here",
 				"wait": "Building..."
+			},
+			"spot": {
+				"place": {
+					"hub": "build"
+				}
 			}
 		},
 		{
@@ -106,6 +111,11 @@
 			"world": {
 				"go": "Your Boki"
 			},
+			"spot": {
+				"go": {
+					"world": true
+				}
+			},
 			"after_built": true
 		},
 		{
@@ -121,6 +131,11 @@
 			"world": {
 				"place": "",
 				"fill": "Fill the trough"
+			},
+			"spot": {
+				"place": {
+					"hub": "build"
+				}
 			}
 		},
 		{
@@ -145,6 +160,14 @@
 				"grow": "Growing",
 				"pick": "Pick it"
 			},
+			"spot": {
+				"patch": {
+					"hub": "build"
+				},
+				"patch_dry": {
+					"hub": "build"
+				}
+			},
 			"waits": [
 				"grow"
 			]
@@ -162,6 +185,11 @@
 			"world": {
 				"stall": "Market stall",
 				"bar": ""
+			},
+			"spot": {
+				"bar": {
+					"hub": "shop"
+				}
 			}
 		},
 		{
@@ -178,6 +206,11 @@
 			"world": {
 				"stall": "Sell here",
 				"bar": ""
+			},
+			"spot": {
+				"bar": {
+					"hub": "shop"
+				}
 			}
 		},
 		{
@@ -222,5 +255,9 @@
 		"pickaxe": "And a pickaxe for the rocks, too."
 	},
 	"gems_toast": "Hob gives you %d gems to buy seeds",
-	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect)."
+	"picked_say": {
+		"go": "Off to work!",
+		"wait": "Ready when there's work!"
+	},
+	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect); spot: per hint stage, what FarmSpotlight lights up (hub: a bottom-bar button id, world: the step's marker in the world, a Boki). Each target gets its full dimmed beat once, then only a soft ring."
 }
