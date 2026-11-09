@@ -14,6 +14,7 @@ const HOLD := {"archer": 0.7}      # s of LMB held before the release (a drawn b
 const DIFF := 0.08                 # a pixel channel change that counts as the shot's (0..1)
 const HOT := 0.8                   # the darkest channel of a core pixel (0..1: near white)
 const AWAY := Vector3(0, 0, 400)   # m: where a shot is parked for the frame without it
+const AIM_AT := 16.0               # m to the target: far enough that a fast bolt is still flying when measured
 
 var main: Node
 var m: Match
@@ -73,7 +74,7 @@ func _hero(hero: String, P: Hunter, home: Vector3, out: String, res: int) -> voi
 	P.vel = Vector3.ZERO
 	for i in 30:
 		m.step(DT)      # the new kit settles (its cooldowns and holds start clean)
-	var T: Hunter = m.make_hunter("T", 5, "medium", "Target", "idle", {}, home + Vector3(9.0, 0, 0), {"arch": "none"})
+	var T: Hunter = m.make_hunter("T", 5, "medium", "Target", "idle", {}, home + Vector3(AIM_AT, 0, 0), {"arch": "none"})
 	T.max_hp = 10000.0
 	T.hp = T.max_hp
 	var found := {}
@@ -92,9 +93,13 @@ func _hero(hero: String, P: Hunter, home: Vector3, out: String, res: int) -> voi
 		lines.append("shotsize|%s|%d|no projectile||" % [hero, res])
 		print("SHOTSIZE %-10s %dp no projectile" % [hero, res])
 	else:
-		for i in 4:
-			if m.shots.has(found): m.step(DT)
-		await _measure(hero, found, out, res)
+		for i in 2:
+			if m.shots.has(found): m.step(DT)      # clear of the muzzle flash
+		if m.shots.has(found):
+			await _measure(hero, found, out, res)
+		else:
+			lines.append("shotsize|%s|%d|ended before measured||" % [hero, res])
+			print("SHOTSIZE %-10s %dp ended before measured" % [hero, res])
 	m.hunters.erase(T)
 	T.queue_free()
 	await main.get_tree().process_frame
