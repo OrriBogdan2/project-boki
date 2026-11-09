@@ -129,7 +129,7 @@ func _impact(s: Dictionary) -> void:
 	var dmg := float(xd["dmg"]) * power()
 	var n := 0
 	var centre := 0
-	for f in kit.foes_in(at, r, 2.6):
+	for f in kit.foes_in(at, r):
 		var core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= core_r + f.r * 0.5
 		var o := {"src": "abil", "ab": "ult", "tags": ["ult", "cinderfall"], "crit": core}
 		f.hurt(dmg * (1.0 + float(xd["core_k"]) if core else 1.0), h, o)
@@ -177,7 +177,7 @@ func _burn_tick(s: Dictionary, dt: float) -> void:
 
 func _zone_hit(at: Vector3, r: float, xd: Dictionary) -> void:
 	var dmg := float(xd["tick_dmg"]) * power()
-	for f in kit.foes_in(at, r, 2.6):
+	for f in kit.foes_in(at, r):
 		var o := {"src": "abil", "ab": "ult", "tags": ["ult", "cinder_zone"], "slow": float(xd["slow_t"])}
 		o["slow_k"] = float(xd["slow"])
 		f.hurt(dmg, kit.h, o)

@@ -188,7 +188,7 @@ func _shield_push() -> void:
 		var q := Geometry2D.get_closest_point_to_segment(p, a, b)
 		var reach: float = f.r + Verbs.WALL_TH + PUSH_REACH
 		var key: int = f.get_instance_id()
-		var in_front: bool = (p - q).dot(n) > 0.0 and absf(f.pos.y - float(wall["y"])) < 2.2
+		var in_front: bool = (p - q).dot(n) > 0.0 and AimMode.in_reach(float(wall["y"]), f.pos.y)
 		var gap_ok: bool = m.time - float(pushed_at.get(key, -9.0)) >= float(sd.get("push_gap", 0.6))
 		if in_front and p.distance_to(q) < reach and gap_ok:
 			pushed_at[key] = m.time
@@ -480,7 +480,7 @@ func _smash() -> void:
 		_carry(dv, k)
 	fx.slam(dv, k)
 	m.fx.dust(h.pos + Vector3(dv.x, 0, dv.y) * 1.6, 8 + int(10 * k))
-	for f in foes_in(h.pos + Vector3(dv.x, 0, dv.y) * 1.2, float(md["smash_reach"]), 2.2):
+	for f in foes_in(h.pos + Vector3(dv.x, 0, dv.y) * 1.2, float(md["smash_reach"])):
 		_impact_trail(f, dv, k)
 		if perfect:
 			Feel.hitstop(m, h, f, dmg, {"melee": true, "heavy": true, "payoff": true})

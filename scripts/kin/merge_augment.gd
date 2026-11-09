@@ -237,7 +237,7 @@ static func _tick_dash(h: Hunter, dsh: Dictionary, dt: float) -> void:
 		if hit.has(f) or f.dead or not f.hittable():
 			continue
 		var fp := Vector2(f.pos.x, f.pos.z)
-		if fp.distance_to(Geometry2D.get_closest_point_to_segment(fp, a2, b2)) > float(d["width"]) + f.r or absf(f.pos.y - h.pos.y) > 2.2:
+		if fp.distance_to(Geometry2D.get_closest_point_to_segment(fp, a2, b2)) > float(d["width"]) + f.r or not AimMode.in_reach(h.pos.y, f.pos.y):
 			continue
 		hit[f] = true
 		var o := {"src": "abil", "ab": "form_dash", "tags": ["form", "dash"], "dr": true}

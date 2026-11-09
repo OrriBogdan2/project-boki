@@ -52,6 +52,15 @@ static func ground(m: Node, p: Vector3) -> Vector3:
 	return Vector3(p.x, g if g > World.VOID + 1.0 else p.y, p.z)
 
 # ------------------------------------------------------------------ membership (flat, XZ)
+## The height rule for every ability shape (docs/COMBAT.md): a body is in reach when its feet are within this
+## of the shape's own level (m): two tiers (World.LEVEL, the mantle ledge) plus a jump's slack. A wall's top
+## (3 m and up) is out, so a cliff face ends a shape the way it ends a walk.
+const REACH_Y := 2.2
+
+## Are two feet heights in each other's reach (the shape's level and the body's)?
+static func in_reach(shape_y: float, body_y: float) -> bool:
+	return absf(body_y - shape_y) < REACH_Y
+
 ## Inside a lane of `length` x `width` starting at `from` along `dir` (the AimKit.lane footprint).
 static func in_lane(from: Vector3, dir: Vector2, length: float, width: float, p: Vector3, pad := 0.0) -> bool:
 	var v := Vector2(p.x - from.x, p.z - from.z)

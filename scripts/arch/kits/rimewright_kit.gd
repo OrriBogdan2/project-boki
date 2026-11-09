@@ -813,7 +813,7 @@ func _tick_wall(dt: float) -> void:
 ## Displace pushes it at the wall's speed until the wall stops (a player online, on their own game).
 func _carry(w: Dictionary, dir: Vector2, speed: float) -> void:
 	for f in m.foes_of(h.team):
-		if f.dead or absf(f.pos.y - float(w["y"])) > 2.0 or carried.has(f.get_instance_id()):
+		if f.dead or not AimMode.in_reach(float(w["y"]), f.pos.y) or carried.has(f.get_instance_id()):
 			continue
 		var p2 := Vector2(f.pos.x, f.pos.z)
 		var off := p2 - Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])

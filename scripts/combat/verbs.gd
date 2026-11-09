@@ -428,7 +428,7 @@ func tick(dt: float) -> void:
 		if not touch.is_empty():
 			for f in m.foes_of(int(w["team"])):
 				var c2 := Geometry2D.get_closest_point_to_segment(Vector2(f.pos.x, f.pos.z), w["a"], w["b"])
-				if Vector2(f.pos.x, f.pos.z).distance_to(c2) < f.r + 0.5 and absf(f.pos.y - float(w["y"])) < 2.0:
+				if Vector2(f.pos.x, f.pos.z).distance_to(c2) < f.r + 0.5 and AimMode.in_reach(float(w["y"]), f.pos.y):
 					var key: String = str(f.get_instance_id())
 					if float(w["touched"].get(key, -9.0)) > m.time - 0.6:
 						continue
@@ -491,7 +491,7 @@ func tick(dt: float) -> void:
 			continue
 		var at: Vector3 = tr["at"]
 		for f in m.foes_of(int(tr["team"])):
-			if f.flat_dist(at) < float(tr["r"]) + f.r and absf(f.pos.y - at.y) < 1.5 and f.hittable():
+			if f.flat_dist(at) < float(tr["r"]) + f.r and AimMode.in_reach(at.y, f.pos.y) and f.hittable():
 				var c3: Dictionary = (tr["ctx"] as Dictionary).duplicate()
 				c3["at"] = at
 				c3["target"] = f

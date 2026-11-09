@@ -311,7 +311,7 @@ func _tick_skid(dt: float) -> void:
 ## A landing's nudge: a small shove, no damage.
 func _nudge() -> void:
 	var d := dd()
-	for f in k.foes_in(h.pos, float(d["land_r"]), 2.0):
+	for f in k.foes_in(h.pos, float(d["land_r"])):
 		var away := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z)
 		away = away.normalized() if away.length() > 0.05 else h.aim_dir()
 		m.displace.knock(f, away * float(d["shove_kb"]), 0.0)
@@ -328,7 +328,7 @@ func _crash() -> void:
 	k.play("breah_leap_land")
 	m.fx.dust(at, 14)      # the hit area showed all through the flight: no ring or blast here
 	m.sfx("br_slam", at, -5.0, 1.15)
-	for f in k.foes_in(at, r, 2.0):
+	for f in k.foes_in(at, r):
 		k.leap_hits += 1
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 		away = away.normalized() if away.length() > 0.05 else h.aim_dir()

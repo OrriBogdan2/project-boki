@@ -210,10 +210,10 @@ static func _deliver(st: StageSpec, cx: Dictionary) -> void:
 		"blink": _blink(st, cx)
 		"summon": _summon(st, cx)
 
-static func _foes_near(cx: Dictionary, at: Vector3, r: float, dy := 2.2) -> Array:
+static func _foes_near(cx: Dictionary, at: Vector3, r: float) -> Array:
 	var out: Array = []
 	for f in cx["m"].foes_of(int(cx["team"])):
-		if f.hittable() and Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < dy:
+		if f.hittable() and Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and AimMode.in_reach(at.y, f.pos.y):
 			out.append(f)
 	return out
 
@@ -344,7 +344,8 @@ static func _cone(st: StageSpec, cx: Dictionary) -> void:
 	var foes: Array = []
 	for f in m.foes_of(int(cx["team"])):
 		var to := Vector2(f.pos.x - from.x, f.pos.z - from.z)
-		if f.hittable() and to.length() < r + f.r and (to.length() < 0.6 or to.normalized().dot(dir) > cosv) and absf(f.pos.y - from.y) < 2.2:
+		var in_arc: bool = to.length() < 0.6 or to.normalized().dot(dir) > cosv
+		if f.hittable() and to.length() < r + f.r and in_arc and AimMode.in_reach(from.y, f.pos.y):
 			foes.append(f)
 	var hit := _hit(st.effects, st, foes, cx, from, r)
 	for f in hit:
@@ -376,7 +377,7 @@ static func _beam_once(st: StageSpec, cx: Dictionary, share: float) -> void:
 		var aim: Vector3 = cx.get("aim", from)
 		var best: Ent = null; var bd := 1e9
 		for f in m.foes_of(int(cx["team"])):
-			if not f.hittable() or Vector2(f.pos.x - from.x, f.pos.z - from.z).length() > rng + f.r or absf(f.pos.y - from.y) > 3.0:
+			if not f.hittable() or Vector2(f.pos.x - from.x, f.pos.z - from.z).length() > rng + f.r or not AimMode.in_reach(from.y, f.pos.y):
 				continue
 			var d := Vector2(f.pos.x - aim.x, f.pos.z - aim.z).length()
 			if d < bd: bd = d; best = f
@@ -385,7 +386,7 @@ static func _beam_once(st: StageSpec, cx: Dictionary, share: float) -> void:
 	var a2 := Vector2(from.x, from.z); var b2 := a2 + dir * rng
 	var cand: Array = []
 	for f in m.foes_of(int(cx["team"])):
-		if not f.hittable() or absf(f.pos.y - from.y) > 2.4: continue
+		if not f.hittable() or not AimMode.in_reach(from.y, f.pos.y): continue
 		var fp := Vector2(f.pos.x, f.pos.z)
 		var c := Geometry2D.get_closest_point_to_segment(fp, a2, b2)
 		if fp.distance_to(c) < half + f.r:
@@ -440,7 +441,7 @@ static func _zone(st: StageSpec, cx: Dictionary) -> void:
 	var tick := func(at2: Vector3, _z: Dictionary) -> void:
 		if not is_instance_valid(cx["caster"]): return
 		var c2 := cx.duplicate(); c2["hits"] = {"n": 0}
-		_hit(st.effects, st, _foes_near(cx, at2, r, 2.0), c2, at2, r)
+		_hit(st.effects, st, _foes_near(cx, at2, r), c2, at2, r)
 	var end := func(at2: Vector3) -> void:
 		if is_instance_valid(cx["caster"]): _then(st, "on_end", cx, at2, cx.get("dir", Vector2.ZERO))
 	m.fields.add_kx(cx["caster"], at, r, float(p["duration"]), float(p["every"]), _color(st), tick, end)
@@ -455,7 +456,7 @@ static func _aura(st: StageSpec, cx: Dictionary) -> void:
 	var tick := func(at2: Vector3, _z: Dictionary) -> void:
 		if not is_instance_valid(cx["caster"]): return
 		var c2 := cx.duplicate(); c2["hits"] = {"n": 0}
-		_hit(st.effects, st, _foes_near(cx, at2, r, 2.0), c2, at2, r)
+		_hit(st.effects, st, _foes_near(cx, at2, r), c2, at2, r)
 	var end := func(at2: Vector3) -> void:
 		if is_instance_valid(cx["caster"]): _then(st, "on_end", cx, at2, Vector2.ZERO)
 	m.fields.add_kx(cx["caster"], u.pos, r, float(p["duration"]), float(p["every"]), _color(st), tick, end, u)
@@ -475,7 +476,7 @@ static func _summon(st: StageSpec, cx: Dictionary) -> void:
 		var tick := func(at2: Vector3, _z: Dictionary) -> void:
 			if not is_instance_valid(cx["caster"]): return
 			var c2 := cx.duplicate(); c2["hits"] = {"n": 0}
-			_hit(st.effects, st, _foes_near(cx, at2, r, 2.0), c2, at2, r)
+			_hit(st.effects, st, _foes_near(cx, at2, r), c2, at2, r)
 		var end := func(at2: Vector3) -> void:
 			if is_instance_valid(cx["caster"]): _then(st, "on_end", cx, at2, Vector2.ZERO)
 		m.fields.add_kx(cx["caster"], q, r, float(p["duration"]), float(p["every"]), _color(st), tick, end, cx["caster"] if sprite else null, "sprite" if sprite else "totem")
@@ -673,7 +674,7 @@ static func _linger(st: StageSpec, cx: Dictionary, at: Vector3) -> void:
 	var tick := func(at2: Vector3, _z: Dictionary) -> void:
 		if not is_instance_valid(cx["caster"]): return
 		var c2 := cx.duplicate(); c2["hits"] = {"n": 0}; c2["k"] = float(cx.get("k", 1.0)) * str_k
-		_hit(effs, null, _foes_near(cx, at2, r, 2.0), c2, at2, r, false)
+		_hit(effs, null, _foes_near(cx, at2, r), c2, at2, r, false)
 	m.fields.add_kx(cx["caster"], _ground(m, at, at.y), r, float(lg.params["duration"]), float(lg.params["every"]), Color(KinRules.effects_color(effs), 0.8), tick, Callable())
 
 # ------------------------------------------------------------------ effects

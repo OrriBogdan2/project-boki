@@ -245,7 +245,7 @@ func _foes_in(i: int) -> Array:
 	var a: Vector3 = cells[i]
 	var out: Array = []
 	for f in k.m.foes_of(h.team):
-		if not f.hittable() or absf(f.pos.y - a.y) > 2.5:
+		if not f.hittable() or not AimMode.in_reach(a.y, f.pos.y):
 			continue
 		if AimMode.in_lane(a, dir, cell_len(), float(xd().get("width", 4.0)), f.pos, f.r):
 			out.append(f)
@@ -263,7 +263,7 @@ func _tick_scar(dt: float) -> void:
 	var length := float(scar["len"])
 	var slow := float(x.get("scar_slow", 0.2))
 	for f in k.m.foes_of(h.team):
-		if not f.hittable() or absf(f.pos.y - a.y) > 1.5:
+		if not f.hittable() or not AimMode.in_reach(a.y, f.pos.y):
 			continue
 		if AimMode.in_lane(a, dir, length, float(x.get("scar_w", 1.4)), f.pos):
 			f.slow_k = maxf(f.slow_k, slow) if f.slow_t > 0.0 else slow

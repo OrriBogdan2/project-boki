@@ -201,7 +201,7 @@ func slam(c: float, at_feet: bool) -> void:
 	m.sfx("br_slam", at, 0.0, 1.0)
 	k.net_ring(at, r, Color("ff5a2a"))
 	var gained := false
-	for f in k.foes_in(at, r, 3.2):
+	for f in k.foes_in(at, r):
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 		away = away.normalized() if away.length() > 0.05 else h.aim_dir()
 		var in_core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= cr + f.r

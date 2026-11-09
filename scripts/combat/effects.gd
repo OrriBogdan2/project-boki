@@ -246,7 +246,7 @@ static func _hit_opts(e: Dictionary, ctx: Dictionary, kb: Vector2, caster: Node)
 	return o
 
 static func _hits(f: Ent, at: Vector3, r: float) -> bool:
-	return Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < 2.2
+	return Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and AimMode.in_reach(at.y, f.pos.y)
 
 static func _heal(t: Node, n: float) -> void:
 	if t is Hunter:
@@ -332,7 +332,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			if caster is Hunter: AbilityFx.cast(m, caster, "cone", caster.pos, d, col, {"radius": r})
 			for f in m.foes_of(caster.team):
 				var to := Vector2(f.pos.x - caster.pos.x, f.pos.z - caster.pos.z)
-				if to.length() < r + f.r and (to.length() < 0.6 or to.normalized().dot(d) > arc) and absf(f.pos.y - caster.pos.y) < 2.2:
+				if to.length() < r + f.r and (to.length() < 0.6 or to.normalized().dot(d) > arc) and AimMode.in_reach(caster.pos.y, f.pos.y):
 					f.hurt(float(e.get("dmg", 0.0)) * pw, caster, _hit_opts(e, ctx, d * float(e.get("kb", 0.0)), caster))
 		"chain":
 			var from: Vector3 = owner_of(caster).pos if String(e.get("from", "")) == "owner" else caster.pos
@@ -365,7 +365,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			m.fx.ring(at, r, col, 0.4)
 			for f in m.foes_of(caster.team):
 				var rel := Vector2(at.x - f.pos.x, at.z - f.pos.z)
-				if rel.length() < r + f.r and rel.length() > 0.4 and absf(f.pos.y - at.y) < 2.5:
+				if rel.length() < r + f.r and rel.length() > 0.4 and AimMode.in_reach(at.y, f.pos.y):
 					m.displace.knock(f, rel.normalized() * float(e.get("strength", 6.0)) * clampf(rel.length() / r + 0.3, 0.4, 1.0), 1.0)
 		"zone":
 			var at := _where(e, caster, ctx, "aim")

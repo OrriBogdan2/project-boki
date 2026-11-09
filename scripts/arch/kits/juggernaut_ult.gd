@@ -143,7 +143,7 @@ func _land(d: Dictionary) -> void:
 	k.vfx("riposte_land", from, dir, {"len": float(d["len"]), "w": float(d["width"])})
 	last_dealt = 0.0
 	for f in k.m.foes_of(h.team):
-		if not f.hittable() or absf(f.pos.y - from.y) > 2.0:
+		if not f.hittable() or not AimMode.in_reach(from.y, f.pos.y):
 			continue
 		if not AimMode.in_lane(from, dir, float(d["len"]), float(d["width"]), f.pos, f.r):
 			continue

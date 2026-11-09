@@ -599,7 +599,7 @@ func aim_at(reach: float) -> Vector3:
 	if g > World.VOID + 1.0: p.y = g
 	return p
 
-func foes_in(at: Vector3, r: float, dy := 2.2) -> Array:
+func foes_in(at: Vector3, r: float, dy := AimMode.REACH_Y) -> Array:
 	var out: Array = []
 	for f in m.foes_of(h.team):
 		if f.hittable() and Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < dy:

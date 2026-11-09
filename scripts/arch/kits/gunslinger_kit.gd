@@ -549,7 +549,7 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 	net_ring(at, 1.6, EMBER)
 	for f in m.foes_of(h.team):
 		if not f.hittable(): continue
-		if absf(f.pos.y - at.y) > 2.6: continue
+		if not AimMode.in_reach(at.y, f.pos.y): continue
 		if not AimMode.in_cone(at, out, float(bd["cone_len"]), float(bd["cone_deg"]), f.pos, 0.3, f.r): continue
 		var to := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 		var away := (out * 0.6 + to.normalized() * 0.4).normalized() if to.length() > 0.2 else out
@@ -652,7 +652,7 @@ func _fire_needle() -> void:
 		var along := v.dot(d)
 		if along < 0.0 or along > L + f.r: continue
 		if absf(v.cross(d)) > float(ed["width"]) + f.r: continue
-		if absf(f.pos.y - h.pos.y) > 2.6: continue
+		if not AimMode.in_reach(h.pos.y, f.pos.y): continue
 		var rat := KitStatus.rattled(f)
 		var dmg: float = dmg0 * ((1.0 + float(ed["rattle_k"])) if rat else 1.0)
 		var o := {"src": "abil", "ab": "k1", "tags": ["k1", "needle"]}

@@ -364,7 +364,7 @@ func cast_e() -> bool:
 
 func _in_rain(f: Ent) -> bool:
 	var ed := e_def()
-	return AimMode.in_arc(rain["center"], rain["d"], float(rain["radius"]), _arc_deg(), float(ed["width"]), f.pos, f.r) and absf(f.pos.y - (rain["c"] as Vector3).y) < 2.5
+	return AimMode.in_arc(rain["center"], rain["d"], float(rain["radius"]), _arc_deg(), float(ed["width"]), f.pos, f.r) and AimMode.in_reach((rain["c"] as Vector3).y, f.pos.y)
 
 func _tick_rain(dt: float) -> void:
 	var ed := e_def()
