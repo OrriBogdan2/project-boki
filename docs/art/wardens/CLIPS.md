@@ -35,6 +35,6 @@ timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoo
 5. It plays the move in the Training Area (the Arena) with the dummy 6 m out, one frame per 0.2 s from the press.
 6. `--hold=<s>` sets how long the key stays down (an LMB is held through the move; the rest are a tap). `--footage-dir=<dir>` is where `footage/` lives.
 7. The sheet is `shots/<hero>_<slot>.jpg`: ours on the top row, footage frames a..b below, six per row, labelled `+seconds`.
-8. Footage is the centre half of its frame, ours the centre of the match view, both on the hero.
+8. Both are close crops on the hero: the footage's centre half, and ours a few metres round him toward the dummy.
 9. Compare by eye: wind-up, contact frame, recovery. Note the frame where ours is early or late and fix the clip's key times.
-10. Demos: `docs/art/parity_strip/` (Vex LMB, Kael RMB tap). Owner notes in briefs/DECISIONS.md win over the footage.
+10. Demos: `docs/art/parity_strip/` (`vex_lmb.jpg` frames 7-18 of venator_ghost, `kael_rmb.jpg` the RMB tap, frames 152-161). Owner notes in briefs/DECISIONS.md win over the footage.

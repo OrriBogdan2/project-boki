@@ -11,9 +11,10 @@ extends "res://tools/combo51_shots.gd"
 const FPS := 5.0                 # the footage's frame rate
 const COLS := 6                  # frames per row; a long move wraps into more row pairs
 const TILE := Vector2i(320, 180) # px of each frame on the sheet
-const VIEW_CROP := Vector2i(640, 360)    # px of our render round the hero, the footage's centre crop matches it
+const VIEW_CROP := Vector2i(480, 270)    # px of our render round the hero and the dummy
+const AHEAD := 2.5               # m toward the dummy the crop is centred, so the shots show
 const TAP := 0.1                 # s a tapped key stays down
-const LABEL_H := 18              # px of the time strip under each tile
+const LABEL_H := 24              # px of the time strip under each tile
 const FOOTAGE := {"gunslinger": "venator_ghost", "juggernaut": "juggernaut", "archer": "pin", "mage": "vireo",
 	"bulwark": "bjorn", "dolm": "breah", "thief": "dancer", "dredge": "dredge", "ashwick": "linwick",
 	"tender": "mooshmoosh", "rimewright": "tamsin", "ostra": "ostra"}      # our id -> footage/<folder>
@@ -47,6 +48,8 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
 	P.lvl = 6
+	if m.hud:
+		m.hud.guide_hidden = true      # (the kit card would sit over the hero)
 	for k in P.slot_lv:
 		P.slot_lv[k] = 3
 	await _reset(6.0)
@@ -91,7 +94,9 @@ func _drive(t: float) -> void:
 ## (one frame of ours: the centre of the view, hero in the middle)
 func _take(_kind: String, _file: String, _caption: String, _focus: Callable) -> void:
 	var img := main.get_viewport().get_texture().get_image()
-	shots.append(_crop(img, P.position + Vector3(0, 0.9, 0), VIEW_CROP, 1.0))
+	var toward := Vector3(T.position.x - P.position.x, 0, T.position.z - P.position.z).normalized()
+	var at := P.position + toward * AHEAD + Vector3(0, 0.9, 0)
+	shots.append(_crop(img, at, VIEW_CROP, 1.0))
 
 func _footage(n: int) -> Image:
 	var path := footage_dir.path_join("footage/%s/frames/%04d.jpg" % [FOOTAGE[who], n])
