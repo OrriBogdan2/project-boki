@@ -469,3 +469,5 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - **Breeding (mating) is a main path.** Pair two Boki, and the offspring inherit traits from both parents.
 - **Playable without extraction.** A player can enjoy the game only raising, breeding and competing with Boki. Extraction stays the other main path, and the two feed each other: expedition loot changes Boki, and raised and bred Boki are better partners on runs. Clans later: some members extract, some stay home and raise and breed.
 - This replaces "Frozen: farm-builder depth" for the garden. Builder, crop and economy depth is cut back, not grown. Design brief: briefs/design/GARDEN.md (coming). Until it's approved, don't start new farm-economy work.
+
+- 2026-11-09 (owner): Geodemole has TWO approved versions of the same Boki: intact (art geodemole-3-art) and broken/cracked-geode (geodemole-r-3-art). Keep both; 3D/kits treat the broken one as a second form (e.g. damaged/evolved state), not a redo or reject.
