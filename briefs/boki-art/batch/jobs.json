@@ -1,5 +1,38 @@
 [
   {
+    "id": "c_prismander_a",
+    "name": "Prismander (direction A)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a starter baby axolotl of the Crystal and Water types. Look: A round baby axolotl made of glossy hard rock candy: its feathery gills are three short rock-candy sugar-crystal sticks on each side, its body a translucent swirled boiled-sweet with a candy-cane stripe spiralling down its tail, and a few sugar-crystal clusters along its spine. It is a baby starter: small, round, big head, short stubby legs, very appealing and simple enough to read as a tiny icon. Face: huge, happy dark eyes and a wide open-mouth grin. Colours: strawberry pink and clear sugar white, with a mint-green swirl accent. Avoid: a lollipop stick, a wrapper, held candy, a busy design, many spikes, rainbow effects, sparkles.",
+    "size": "2K"
+  },
+  {
+    "id": "c_prismander_b",
+    "name": "Prismander (direction B)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a starter baby axolotl of the Crystal and Water types. Look: A round baby axolotl whose whole body is a stained-glass window: bold dark lead lines divide its skin into a few big coloured glass panes, its gills are six glass petals in different colours, and light glows softly through the panes. It is a baby starter: small, round, big head, short stubby legs, very appealing and simple enough to read as a tiny icon. Face: big, curious glossy eyes and a small cheeky smile. Colours: cobalt blue, rose and amber glass panes, with dark lead-line outlines. Avoid: a window frame, a church, a mosaic of tiny tiles, a busy design, many spikes, rainbow effects, sparkles.",
+    "size": "2K"
+  },
+  {
+    "id": "c_prismander_c",
+    "name": "Prismander (direction C)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a starter baby axolotl of the Crystal and Water types. Look: A round baby axolotl made of frosted sea glass worn smooth by the tide: soft frosted translucent skin with a few rounded sea-glass pebble patches, short smooth sea-glass shard gills, and a flat paddle tail like a polished piece of beach glass. It is a baby starter: small, round, big head, short stubby legs, very appealing and simple enough to read as a tiny icon. Face: big, sleepy-happy eyes and a soft little smile. Colours: frosted seafoam green and pale aqua, with a cobalt blue pebble accent. Avoid: sharp crystals, shells, sand, a bottle, a busy design, many spikes, rainbow effects, sparkles.",
+    "size": "2K"
+  },
+  {
     "id": "ta_vespyx",
     "name": "Vespyx",
     "refs": [
