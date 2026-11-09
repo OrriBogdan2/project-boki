@@ -47197,5 +47197,54 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_voltmink_gap_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_zipling_gap",
+    "name": "Zipling (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_zipling_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_voltmink_gap",
+    "name": "Voltmink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_voltmink_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zipling_gap",
+    "name": "Zipling (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_zipling_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_voltmink_gap",
+    "name": "Voltmink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_voltmink_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_truffapir_gap",
+    "name": "Truffapir (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_truffapir_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_truffapir_gap",
+    "name": "Truffapir (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_truffapir_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zipling_gap",
+    "name": "Zipling (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_zipling_gap_3.jpg",
+    "ok": true
   }
 ]
