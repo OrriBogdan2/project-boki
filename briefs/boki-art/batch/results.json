@@ -39882,5 +39882,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_rimeshrew_r2_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_rimeshrew_r3",
+    "name": "Rimeshrew (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_rimeshrew_r3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimeshrew_r3",
+    "name": "Rimeshrew (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_rimeshrew_r3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimekit_b1",
+    "name": "Rimekit (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_rimekit_b1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimeshrew_r3",
+    "name": "Rimeshrew (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_rimeshrew_r3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimekit_b1",
+    "name": "Rimekit (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_rimekit_b1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimeshrew_r3",
+    "name": "Rimeshrew (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_rimeshrew_r3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimekit_b1",
+    "name": "Rimekit (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_rimekit_b1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimekit_b1",
+    "name": "Rimekit (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_rimekit_b1_4.jpg",
+    "ok": true
   }
 ]
