@@ -28,6 +28,9 @@ func run(main_node: Node) -> void:
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
+	var fade = main.get("fade")
+	if dir != "" and fade != null:
+		await fade.reveal(0.01)      # the boot splash stays up when a check starts the match by hand
 	await _cycle()
 	print("BOKIBOX %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)

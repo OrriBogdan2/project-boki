@@ -119,7 +119,7 @@ static func summon_view(s: KinSummon) -> Array:
 static func stolen(m, p: Hunter) -> bool:
 	if p != m.player:
 		return false
-	return m.player_lost.any(func(L): return L["holder"] != null and (L["holder"] as Hunter).team != p.team)
+	return m.player_lost.any(func(L): return is_instance_valid(L["holder"]) and (L["holder"] as Hunter).team != p.team)
 
 static func summon_ring(H, p: Hunter, r: Rect2) -> void:
 	var k: Kin = p.kin
