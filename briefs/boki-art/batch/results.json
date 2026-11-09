@@ -39098,5 +39098,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_lyrewing_l4_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_lyrewing_l4",
+    "name": "Lyrewing (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lyrewing_l4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lyrewing_l4",
+    "name": "Lyrewing (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lyrewing_l4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lyrewing_l3",
+    "name": "Lyrewing (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_lyrewing_l3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lyrewing_l3",
+    "name": "Lyrewing (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lyrewing_l3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lyrewing_l2",
+    "name": "Lyrewing (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_lyrewing_l2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lyrewing_l3",
+    "name": "Lyrewing (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lyrewing_l3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lyrewing_l3",
+    "name": "Lyrewing (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lyrewing_l3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parasolth_p2",
+    "name": "Parasolth (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_parasolth_p2_1.jpg",
+    "ok": true
   }
 ]
