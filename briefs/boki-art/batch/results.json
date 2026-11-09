@@ -26239,5 +26239,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_stance2_voltmink_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance2_snuffapi",
+    "name": "Snuffapi (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_snuffapi_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_snuffapi",
+    "name": "Snuffapi (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_snuffapi_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_sporcupine",
+    "name": "Sporcupine (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_sporcupine_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_voltmink",
+    "name": "Voltmink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_voltmink_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_frigatee",
+    "name": "Frigatee (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_frigatee_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_frigatee",
+    "name": "Frigatee (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_frigatee_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_prowyak",
+    "name": "Prowyak (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_prowyak_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_prowyak",
+    "name": "Prowyak (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_prowyak_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_prowyak",
+    "name": "Prowyak (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_prowyak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_puffamus",
+    "name": "Puffamus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_puffamus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_lockatara",
+    "name": "Lockatara (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_lockatara_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_frigatee",
+    "name": "Frigatee (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_frigatee_2.jpg",
+    "ok": true
   }
 ]
