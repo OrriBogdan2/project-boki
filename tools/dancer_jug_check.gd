@@ -311,6 +311,7 @@ func thief(a) -> void:
 	A.step(m, 6.1)
 	A.ok("dancer E: waiting 6s steps you to it anyway",
 			P.flat_dist(T) < 1.8 and K.knife.is_empty(), "dist %.1f" % P.flat_dist(T))
+	_knife_in_barriers(m, A, P, T, K, home)
 	# a knock heals a fifth (15% passive, 5% from the takedown reset) in all; the crimson star and the green pillar
 	P.hp = P.max_hp * 0.5
 	var php := P.hp
@@ -376,6 +377,56 @@ func _dancer_dash_moves(K: ThiefKit) -> void:
 func _move_len(mv: String) -> float:
 	var keys: Array = KMovesDJ.MOVES[mv]["keys"]
 	return float(keys[-1][0])
+
+## E into a placed barrier (a Verbs wall: rock, ice, shield): the dagger sticks, rides it, drops under it when it
+## breaks, the 6s return stays, and the blink lands beside it on her side, never inside.
+func _knife_in_barriers(m, A, P, T, K, home: Vector3) -> void:
+	T.teleport(home + Vector3(0, 0, 9.0))
+	var wd := {"time": 30.0, "hp": 500.0, "move": true, "length": 4.0}
+	var at := home + Vector3(5.0, 0, 0)
+	var w: Dictionary = m.verbs.add_wall(T, at, Vector2(1, 0), wd, 1.0)
+	P.teleport(home)
+	K.cd["e"] = 0.0
+	A.aim_at(P, at + Vector3(0, 0.9, 0))
+	P.ak.use_e()
+	A.step(m, 0.4)
+	A.ok("dancer E: the dagger sticks to a barrier it hits, on her side of it",
+			K.knife.get("wall") == w and K.knife.get("target") == null and P.pos.x < at.x
+			and absf((K.knife["pos"] as Vector3).x - at.x) < 0.7 and AimKit.shown(P, "knife"),
+			"knife %s" % str(K.knife.get("pos", Vector3.ZERO)))
+	var z0: float = (K.knife["pos"] as Vector3).z
+	w["a"] += Vector2(2.0, 3.0)
+	w["b"] += Vector2(2.0, 3.0)
+	A.step(m, 0.1)
+	var kp: Vector3 = K.knife["pos"]
+	A.ok("dancer E: the stuck dagger rides its barrier when it moves",
+			K.knife.get("wall") == w and absf(kp.z - z0 - 3.0) < 0.1
+			and absf(kp.x - at.x - 2.0) < 0.7, "moved %.2f" % (kp.z - z0))
+	A.step(m, 6.0)
+	var near := Geometry2D.get_closest_point_to_segment(Vector2(P.pos.x, P.pos.z), w["a"], w["b"])
+	var gap := Vector2(P.pos.x, P.pos.z).distance_to(near)
+	A.ok("dancer E: after 6s the return puts her beside it on her side, never inside",
+			K.knife.is_empty() and P.pos.x < at.x + 2.0 and gap >= float(w["th"]) + P.r
+			and m.world.occupy(P.pos.x, P.pos.z, P.r, P.pos.y, false) == 0.0, "gap %.2f" % gap)
+	m.verbs.clear()
+	# it breaks (here: runs out) with the dagger in it: the dagger lies on the ground under it
+	w = m.verbs.add_wall(T, at, Vector2(1, 0), {"time": 0.5, "hp": 500.0, "move": true, "length": 4.0}, 1.0)
+	P.teleport(home)
+	K.cd["e"] = 0.0
+	A.aim_at(P, at + Vector3(0, 0.9, 0))
+	P.ak.use_e()
+	A.step(m, 0.4)
+	var stuck: bool = K.knife.get("wall") == w
+	A.step(m, 0.4)
+	A.ok("dancer E: the barrier broke: the dagger drops to the ground under it",
+			stuck and not m.verbs.walls.has(w) and not K.knife.is_empty() and not K.knife.has("wall")
+			and absf((K.knife["pos"] as Vector3).y - m.world.ground_at(at.x, at.z)) < 0.05
+			and absf((K.knife["pos"] as Vector3).x - at.x) < 0.7, "knife %s" % str(K.knife.get("pos", Vector3.ZERO)))
+	P.ak.use_e()
+	m.step(A.DT)
+	A.ok("dancer E: ... and she steps to it", K.knife.is_empty()
+			and Vector2(P.pos.x - at.x, P.pos.z - at.z).length() < 1.5)
+	m.verbs.clear()
 
 ## Item 32: a bolt pressed mid-cartwheel goes at once, empowered, and the cartwheel isn't cut; Shift in the Bola's
 ## wind-up cartwheels and the Bola still flies; the dagger's blink ends a cartwheel.
