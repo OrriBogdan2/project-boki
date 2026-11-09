@@ -49654,5 +49654,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_vaultara_x3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_reapant_w4",
+    "name": "Reapant (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_reapant_w4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w4",
+    "name": "Reapant (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_reapant_w4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w4",
+    "name": "Reapant (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reapant_w4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w4",
+    "name": "Reapant (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_reapant_w4_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "chuggamus_card99",
+    "name": "Chuggamus (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chuggamus_card99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chuggamus_card99",
+    "name": "Chuggamus (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chuggamus_card99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geysirbara_card99",
+    "name": "Geysirbara (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geysirbara_card99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chuggamus_card99",
+    "name": "Chuggamus (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/chuggamus_card99_3.jpg",
+    "ok": true
   }
 ]
