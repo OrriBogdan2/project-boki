@@ -4785,3 +4785,7 @@ ART stormit 8.4 briefs/boki-art/cards/Stormit.jpg kind=card
 READY ext/anim-time-kael bfe9512dc (Kael clip retime: 'lead' key in WardenClips, four Kael leads so each strike frame lands on the kit's hit, kael_anim_check asserts in --juggernaut-combo-check, timing table in docs/heroes/juggernaut.md)
 READY ext/kit-parity-refresh-1 4791eb5c9 (docs/KIT_PARITY.md: Vex, Kael, Lace, Cinder, Meeko, Tenzo re-checked on main d255acbee, canon names, closing shas, pending branches; doc only; 6 combo checks 0 fail, health --strict, gen_wiki --check OK)
 READY ext/menus-more e4c3b9694 (menus behind More)
+
+## 02:37 ET 11-09 — OWNER: NO 3D IN THE BOKIDEX (repeat of 23:28, still not done)
+Owner 02:36: "there are 7 3d boki in the audit and that's it - i don't want any 3d ones." Please remove every kind=boki3d item from the
+Bokidex audit, Edit Room and review queue (and stop importing new 3D renders there). 2D art only (sheets, cards, portraits, concepts).
