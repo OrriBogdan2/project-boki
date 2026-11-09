@@ -70045,5 +70045,12 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_sphinxblight_r5_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_sphinxblight_r5",
+    "name": "Sphinxblight (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_sphinxblight_r5_2.jpg",
+    "ok": true
   }
 ]
