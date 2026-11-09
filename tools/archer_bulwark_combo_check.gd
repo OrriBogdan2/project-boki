@@ -881,6 +881,10 @@ func _bulwark_combos() -> void:
 		"dash %s crushes %d stun %.2f" % [str(K.st.get("last_dash")), K.crushes - c0, T.stun_t]
 	)
 	ok(
+		"combo bulwark: a Crush stuns 1.0 s (footage: Knockout label up about 1 s), not the old 0.5",
+		T.stun_t > 0.5 and T.stun_t <= 1.0, "stun left %.2f" % T.stun_t
+	)
+	ok(
 		"combo bulwark: the Shield Charge spends no dash charge and has its own 6 s cooldown",
 		dashes_spent < 0.2 and absf(charge_cd - 6.0) < 0.4 and K.ch_rmb < 1.0,
 		"dashes spent %.2f cd %.1f charges %.1f" % [dashes_spent, charge_cd, K.ch_rmb]
