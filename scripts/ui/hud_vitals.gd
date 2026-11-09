@@ -72,7 +72,7 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 		var nxt: Color = Hunter.ARMOR_TIERS[p.armor_tier + 1][1]
 		c.draw_rect(Rect2(Vector2(x0, ar.end.y + 2), Vector2(w, 1)), Color(0, 0, 0, 0.35))
 		c.draw_rect(Rect2(Vector2(x0, ar.end.y + 2), Vector2(w * p.armor_frac(), 1)), Color(nxt, 0.9))
-	if p.ak:
+	if p.ak and p.ak.has_meter():
 		H._draw_res_bar(x0, ar.end.y + 4, w, p)
 	_hidden_tag(H, sz, p)
 

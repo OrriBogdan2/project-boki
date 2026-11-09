@@ -344,7 +344,7 @@ func _draw_world_labels() -> void:
 	_draw_truce_marks()
 	_draw_wisp_rings()
 	for h in m.hunters:
-		if h == m.player or h.out or h.extracted or not h.model or not h.model.visible or h.unseen:
+		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen:
 			continue
 		if cam.is_position_behind(h.position):
 			continue
@@ -1030,7 +1030,8 @@ func _keycap(center: Vector2, key: String, col: Color) -> void:
 
 ## One ability slot (HudSlot draws it; BokiHud's slots come through here too).
 func _ab_slot(id: String, rect: Rect2, icon: String, key: String, col: Color, cd_frac: float, cd_secs: float, ready: bool, charges := -1, max_ch := 0, label := "") -> void:
-	HudSlot.ab_slot(self, id, rect, icon, key, col, cd_frac, cd_secs, ready, charges, max_ch, label)
+	var on := ready and not AirLimits.drop_locked(m.player)      # greyed through the opening drop
+	HudSlot.ab_slot(self, id, rect, icon, key, col, cd_frac, cd_secs, on, charges, max_ch, label)
 
 var guide_hidden := false
 var abyss_pulse := 0.0
@@ -1236,7 +1237,7 @@ func r_lock_text(p: Hunter) -> String:
 
 ## One ability in the row, aware of run levels (HudSlot.skill_slot).
 func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1, mx := 0) -> void:
-	HudSlot.skill_slot(self, slot, id, r, icon, key, col, cdf, cds, ready, ch, mx)
+	HudSlot.skill_slot(self, slot, id, r, icon, key, col, cdf, cds, ready and not AirLimits.drop_locked(m.player), ch, mx)
 
 ## Your kin, perched on the top corner of your portrait: its face, a health ring and its state.
 func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
@@ -1824,7 +1825,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		if ud: lines.append([Settings.key_caps("ultimate"), ud.display_name + " (Fusion)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Fusion: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
 		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	var dsi := p.slot_info("dash")
-	lines.append([Settings.key_cap("dash"), String(dsi["name"]) + ((" + " + String(dsi["rider"])) if String(dsi.get("rider", "")) != "" else ""), String(dsi["desc"]), dsi["col"]])
+	lines.append([Settings.key_cap("dash"), String(dsi["name"]), String(dsi["desc"]), dsi["col"]])
 	lines.append_array(GripHud.kit_lines(p))
 	var w := 356.0
 	# each row: the key and name, then the description wrapped to the panel
@@ -1921,7 +1922,7 @@ func _draw_crosshair(p: Hunter) -> void:
 	if p.wpn.has("tighten_from_deg") and p.spin > 0.0:
 		spread += lerpf(12.0, 0.0, clampf(p.spun_t / float(p.wpn.get("tighten_time", 1.5)), 0.0, 1.0))
 	Reticle.draw(c, mp, spread)
-	if p.ak:
+	if p.ak and p.ak.has_meter():
 		# the archetype resource as an arc hugging the crosshair
 		var rf := p.ak.res_frac()
 		var rc := p.ak.res_col()
@@ -2256,9 +2257,6 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append([dd.display_name if dd else "Dash", dd.color if dd else Color("bfe6ff")])
 			out.append(["Dodge  ·  %s" % Settings.key_cap("dash"), MUTED, 12])
 			out.append([dd.desc if dd else "A quick burst the way you're moving.", INK, 14])
-			var rd := p.dash_rider()
-			if not rd.is_empty():
-				out.append([String(rd.get("name", "")) + ":  " + String(rd.get("desc", "")), Color(String(rd.get("color", "#ffffff"))), 13])
 			out.append(["%d of %d charges. One comes back every %s." % [int(floor(p.dashes)), int(p.max_dashes()), _secs(p.dash_regen())], MUTED, 13])
 		"util1", "util2", "util3", "util4": out = BeltHud.tip(p, int(id.substr(4)) - 1)
 		"armor_level": out = ArmorHud.tip(p)
