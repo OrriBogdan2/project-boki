@@ -54,13 +54,13 @@ def main():
         if only and job["id"] not in only:
             continue
         for run in range(1, job.get("runs", 2) + 1):
-            if not (OUT / f"{job['id']}_{run}.png").exists():
+            if not any((OUT / f"{job['id']}_{run}.{e}").exists() for e in ("jpg", "png")):
                 tasks.append((job, run))
     print(f"{len(tasks)} images to make, {a.parallel} at a time")
 
     def do(task):
         job, run = task
-        dest = OUT / f"{job['id']}_{run}.png"
+        dest = OUT / f"{job['id']}_{run}.jpg"
         refs = [Image.open(ROOT / r) for r in job.get("refs", [])]
         entry = {"id": job["id"], "name": job.get("name"), "run": run, "file": str(dest.relative_to(ROOT))}
         for attempt in range(3):
@@ -84,7 +84,8 @@ def main():
                 if img is None:
                     reason = resp.candidates[0].finish_reason if resp.candidates else "no candidates"
                     raise RuntimeError(f"no image returned ({reason})")
-                dest.write_bytes(img)
+                import io
+                Image.open(io.BytesIO(img)).convert("RGB").save(dest, "JPEG", quality=92)
                 entry["ok"] = True
                 entry.pop("error", None)
                 print(f"   saved {dest.name}", flush=True)
