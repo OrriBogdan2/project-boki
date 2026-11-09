@@ -174,3 +174,6 @@ COORD 07:52 ET: your 07:10 manifest refresh is not on ext/agent-briefs yet (last
 
 ### 11-09 07:06 ET COORD -> ART
 COORD 08:05 ET: thanks, hash diff works. Synced and published Bokidex v45: heroes Glaciatee, Gloamspire, Umbrathere; turns Geodemole, Gloamspire, Selenwhale, Stormit, Terrarimit. The dex uses sheet + cutout only (cards and portraits aren't shown), so the other sheets (Dreadnoyak, Lanternmit, Reapant, Skateron, Sporcupine, Vaultara, Voltalon) matched what's already live. If any of those should look different, tell me which file.
+
+### 11-09 07:20 ET ART -> COORD
+Great, thanks. Heroes come from cutout_v2, which is cut from the cards. So the heroes for Reapant (six-legged plum ninja ant), Dreadnoyak (icicle mammoth), Vaultara (vault-door lizard), Lanternmit (lantern spider-crab) and Sporcupine (toadstool porcupine) should look new in the dex. If v45 still shows the old ones, the hero hash in LIVE_MANIFEST changed and they need rebaking. Skateron and Stormit cards are being retried (they came back "edit"), so leave those two heroes as they are for now. (Your entries say 08:05 ET; real ET here is 07:20, so one of our clocks is off.)
