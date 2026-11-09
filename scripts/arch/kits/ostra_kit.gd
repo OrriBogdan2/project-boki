@@ -520,7 +520,8 @@ func cast_e() -> bool:
 		"pos": p, "t": 0.0, "grow": grow, "rmax": rmax, "sid": sid, "vis": vis, "burn": 0.0, "from": _hand(),
 		"col": null
 	}
-	e_t = grow + float(ed["hold_full"])
+	# no timer: the source lists none, so the recast window stays open until he pops it or goes down
+	e_t = INF
 	play("ostra_seed")
 	m.sfx("os_seed", p, -3.0, 1.0)
 	if (m.net_on or HeroZones.capture) and not h.remote:
@@ -563,12 +564,6 @@ func _tick_seed(dt: float) -> void:
 			for f in foes_in(seed["pos"], seed_radius()):
 				f.hurt(float(ed["burn"]) * float(ed["burn_every"]) * power("kin"), h, {"src": "abil", "ab": "e"})
 	if h.downed:
-		_pop(false)
-
-## The source detonates only on the recast: a seed left at full size this long (e.hold_full) fizzles out
-## with no damage, so it can't be parked forever.
-func _e_end() -> void:
-	if not seed.is_empty():
 		_pop(false)
 
 ## E again pops it, from 0.3s after the plant (a press before that is eaten, so a double tap can't

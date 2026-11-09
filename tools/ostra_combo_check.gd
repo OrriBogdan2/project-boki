@@ -365,10 +365,27 @@ func _ostra() -> void:
 	)
 	reset.call()
 	K.cd["e"] = 0.0
-	var hp_fizz := T.hp
-	K.cast_e()
-	step(m, float(K.e_def()["grow"]) + float(K.e_def()["hold_full"]) + 0.2)
-	ok("e: left unpopped at full size for 10s it fizzles out harmlessly", K.seed.is_empty() and T.hp >= hp_fizz)
+	var hp_idle := T.hp
+	K.use_e()
+	var cd_cast := float(K.cd["e"])
+	step(m, float(K.e_def()["grow"]) + 60.0)
+	ok(
+		"e: no fizzle: a full seed left a whole minute is still there at full size, harmless",
+		not K.seed.is_empty() and K.seed_k() >= 0.99 and T.hp >= hp_idle and K.e_recastable(),
+		"seed %s k %.2f" % [not K.seed.is_empty(), K.seed_k()]
+	)
+	ok(
+		"e: the cooldown starts on the plant (it has run out by the minute, the pop is not waited for)",
+		cd_cast > 0.0 and float(K.cd["e"]) <= 0.0 and K.in_e(),
+		"cd at plant %.1f now %.1f" % [cd_cast, float(K.cd["e"])]
+	)
+	ok("e: the data lists no timer: no hold_full cap in the def", not K.e_def().has("hold_full"))
+	ok("e: a merge does not take the waiting seed", _merge(P) and not K.seed.is_empty())
+	step(m, 2.0)
+	P.downed = true
+	K._tick(0.016)
+	P.downed = false
+	ok("e: going down ends the seed with no damage", K.seed.is_empty() and T.hp >= hp_idle and not K.in_e())
 	# Snap > seed > pop: the combo the kit is built around
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0))

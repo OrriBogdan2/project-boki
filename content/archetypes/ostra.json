@@ -121,7 +121,7 @@
 		"dmg_max_k": 3.5,
 		"burn": 8.2,
 		"burn_every": 0.5,
-		"desc": "Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, and waits there for you: press E again (from 0.3s) to pop it. Left unpopped 10s at full size, it fizzles out harmlessly. Damage 12.5 up to 3.5 times that by how long it grew. Swollen: larger and quicker.",
+		"desc": "Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, and waits there for you: press E again (from 0.3s) to pop it. It stays at full size until you pop it. Damage 12.5 up to 3.5 times that by how long it grew. Swollen: larger and quicker.",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",
@@ -131,8 +131,7 @@
 		"grow_swollen_k": 0.75,
 		"min_recast": 0.3,
 		"drop": 0.25,
-		"tell_k": 0.68,
-		"hold_full": 10.0
+		"tell_k": 0.68
 	},
 	"x": {
 		"name": "Nightwell",
