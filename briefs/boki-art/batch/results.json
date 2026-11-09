@@ -9061,5 +9061,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_pinster_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_scoopsy",
+    "name": "Scoopsy (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_scoopsy_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_scoopsy",
+    "name": "Scoopsy (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_scoopsy_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_clinkpede",
+    "name": "Clinkpede (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_clinkpede_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_clinkpede",
+    "name": "Clinkpede (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_clinkpede_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pagodito",
+    "name": "Pagodito (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pagodito_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grammite",
+    "name": "Grammite (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_grammite_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reelacine",
+    "name": "Reelacine (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_reelacine_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_proofhop",
+    "name": "Proofhop (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_proofhop_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pagodito",
+    "name": "Pagodito (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pagodito_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pagodito",
+    "name": "Pagodito (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pagodito_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grammite",
+    "name": "Grammite (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_grammite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_proofhop",
+    "name": "Proofhop (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_proofhop_1.jpg",
+    "ok": true
   }
 ]
