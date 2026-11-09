@@ -238,12 +238,12 @@ Hob Brackenridge, the farm's builder (docs/decisions/0011-farm-builder-tutorial.
 
 ## farm_tutorial (`content/rules/farm_tutorial.json`)
 
-The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Short, one prompt at a time, not skippable on a new save (owner, Nov 3 DECISIONS.md). Every owner-confirmable choice is under 'options' so it is a one-line change.
+The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Short, one prompt at a time, always with a visible Skip (owner, Nov 8 DECISIONS.md: a skipped player still gets the house, the tools and the starter food). Every owner-confirmable choice is under 'options' so it is a one-line change.
 
 | Setting | Value |
 |---|---|
-| options | {"tracker_replaces_day1": true, "player_swing": true, "crop_stage_s": 6, "end_gems": 30, "skippable": false, "house_cost_in": "farm_build.json build.house (wood and stone, spent as it goes up, and swings of labour)", "free_order": true, "free_tools": true, "market_gems": true} |
-| options_doc | tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: holding the interact key near a site hammers (hold it: a hammer beat every HunterTool.TOOLS.hammer.period seconds), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and the rest can come in any order (meeting Hob comes first: he calls you over) (false: strictly in the listed order). skippable: shows a Skip button (the owner says the farm tutorial cannot be skipped on a new save). free_tools: a step with gives_tool hands that tool over (the axe, the pickaxe); the Market still sells them later. market_gems: the buy step tops the gems up to one seed's price so nobody gets stuck. |
+| options | {"tracker_replaces_day1": true, "player_swing": true, "crop_stage_s": 6, "end_gems": 30, "skippable": true, "house_cost_in": "farm_build.json build.house (wood and stone, spent as it goes up, and swings of labour)", "free_order": true, "free_tools": true, "market_gems": true} |
+| options_doc | tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: holding the interact key near a site hammers (hold it: a hammer beat every HunterTool.TOOLS.hammer.period seconds), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and the rest can come in any order (meeting Hob comes first: he calls you over) (false: strictly in the listed order). skippable: shows a Skip button (the owner wants it always there). free_tools: a step with gives_tool hands that tool over (the axe, the pickaxe); the Market still sells them later. market_gems: the buy step tops the gems up to one seed's price so nobody gets stuck. |
 | house_spot | {"from": "landing", "x": 0.0, "z": -7.0} |
 | start_food | {"kibble": 3} |
 | build_wait_s | 30 |

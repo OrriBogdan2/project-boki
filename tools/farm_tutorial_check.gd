@@ -227,21 +227,21 @@ func _tutorial_rules() -> void:
 			"the portal ends it with one reward of %d gems" % reward)
 	FarmTutorial.event("hob")
 	ok(int(Save.d["gems"]) == g_end + reward, "nothing is granted twice")
-	# skipping grants and takes nothing
+	# skipping takes nothing and hands over the tools and the starter food at once
 	Save.d = _new_save()
 	L = HomeLayout.ensure(Save.d)
 	_stats()
 	var g1 := int(Save.d["gems"])
-	var inv1 := JSON.stringify(Save.d["items"])
 	FarmTutorial.skip()
-	var untouched: bool = int(Save.d["gems"]) == g1 and JSON.stringify(Save.d["items"]) == inv1
-	ok(not FarmTutorial.active() and FarmTutorial.current() == "" and FarmTutorial.state()["skipped"] and untouched,
-		"skipping ends the prompts and grants or takes nothing")
+	var kept: bool = int(Save.d["gems"]) == g1 and HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe")
+	ok(not FarmTutorial.active() and FarmTutorial.current() == "" and FarmTutorial.state()["skipped"] and kept
+			and int(Save.d["items"].get("kibble", 0)) == int(FarmTutorial.rules()["start_food"]["kibble"]),
+		"skipping ends the prompts, takes nothing, and hands over the axe, the pickaxe and the food")
 	var steps_ok := FarmTutorial.steps().size() == 12
 	steps_ok = steps_ok and FarmTutorial.steps().all(func(s): return not (s["hints"] as Dictionary).is_empty())
 	ok(steps_ok, "twelve steps, each with its hints")
-	ok(not bool(FarmTutorial.option("skippable")),
-			"the owner's decision: the farm tutorial is not skippable (a data option)")
+	ok(bool(FarmTutorial.option("skippable")),
+			"the owner's decision (Nov 8): the farm tutorial always has a Skip (a data option)")
 	for key in ["tracker_replaces_day1", "player_swing", "end_gems", "free_order", "skippable"]:
 		ok(FarmTutorial.rules()["options"].has(key), "option '%s' is data" % key)
 	# a test save that says the first day is done never sees it
