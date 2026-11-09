@@ -30,7 +30,7 @@
 				"c": "frost", "c2": "hot"}
 		]},
 		"dart_trail": {"fx": [
-			{"p": "ribbon", "size": 0.18, "life": 2.0, "tail": 0.12, "c": "main", "c2": "hot", "c3": "deep"}
+			{"p": "ribbon", "size": 0.18, "life": 2.0, "tail": 0.2, "c": "main", "c2": "hot", "c3": "deep"}
 		]},
 		"beam_trail": {"fx": [
 			{"p": "ribbon", "size": 0.4, "life": 2.0, "tail": 0.18, "c": "frost", "c2": "hot", "c3": "main"}

@@ -10,10 +10,12 @@ extends CareLook
 
 const FRINGE := 18            # crystals round the rink's edge
 const PETALS := 6             # ice petals of the frost bud
+const LANCES := 34            # long ice shards of the crash
+const BUD_OPEN := 1.0         # rad the petals lean outward before the bud closes over her
 
 
 func _build(kind: String) -> Node3D:
-	if not kind in ["tether", "rink", "frostbud", "pillar", "block"]:
+	if not kind in ["tether", "rink", "frostbud", "pillar", "lances", "block"]:
 		return super._build(kind)
 	made += 1
 	var n := Node3D.new()
@@ -27,8 +29,10 @@ func _build(kind: String) -> Node3D:
 			_build_bud(n)
 		"pillar":
 			var col := Models.cyl(1.0, 1.0, 1.0, 16)
-			_off(Models.part(n, col, glow_mat(Color("bfeaff", 0.75), 1.0), Vector3(0, 0.5, 0)))
-			_off(Models.part(n, col, glow_mat(Color("dff6ff", 0.9), 1.0), Vector3(0, 0.5, 0), Vector3(0.35, 1, 0.35)))
+			_off(Models.part(n, col, glow_mat(Color("8ae6ff", 0.6), 1.0), Vector3(0, 0.5, 0)))
+			_off(Models.part(n, col, glow_mat(Color("f4ffff", 1.0), 1.0), Vector3(0, 0.5, 0), Vector3(0.4, 1, 0.4)))
+		"lances":
+			_build_lances(n)
 		"block":
 			_off(Models.part(n, Models.box(1.0, 2.0, 1.0), ice_mat(Color("bfeeff"), 0.55, 0.35), Vector3(0, 1.0, 0)))
 			var cap := _off(Models.part(
@@ -70,7 +74,8 @@ func _build_rink(n: Node3D) -> void:
 		c.rotation = Vector3(0.35 * cos(float(i) * 1.9), a, 0.45 * sin(a))
 
 
-## Six long curved ice petals leaning in over her and meeting above the head, round a cold core glow.
+## Six curved ice petals standing round her and closing over her head, round a cold core glow. Sized to
+## her body (about 1.9 m tall, 0.6 m across the foot), unlike the 7.2 m rink round it.
 func _build_bud(n: Node3D) -> void:
 	for i in PETALS:
 		var a := TAU * i / PETALS
@@ -79,13 +84,21 @@ func _build_bud(n: Node3D) -> void:
 		p.rotation = Vector3(0, a, 0)
 		n.add_child(p)
 		var blade := _off(Models.part(
-				p, Models.crystal(0.24, 2.5, 5), ice_mat(Color("aee8ff"), 0.55, 0.3), Vector3(0, 1.15, 0.62)))
-		blade.rotation = Vector3(-0.42, 0, 0)
-		var tip := _off(Models.part(
-				p, Models.crystal(0.1, 0.7, 4), ice_mat(Color("e8ffff"), 0.8, 0.6), Vector3(0, 0.25, 0.75)))
-		tip.rotation = Vector3(0.9, 0, 0)
-	var glow := _off(Models.part(n, Models.capsule(0.5, 1.9), glow_mat(Color("9fe0ff", 0.28)), Vector3(0, 1.0, 0)))
+				p, Models.crystal(0.17, 1.9, 5), ice_mat(Color("aee8ff"), 0.6, 0.3), Vector3(0, 0.95, 0.42)))
+		blade.rotation = Vector3(-0.35, 0, 0)
+	var glow := _off(Models.part(n, Models.capsule(0.4, 1.6), glow_mat(Color("9fe0ff", 0.25)), Vector3(0, 0.85, 0)))
 	glow.name = "Core"
+
+
+## Long thin ice shards thrown out and up from the crash, each at its own angle and length.
+func _build_lances(n: Node3D) -> void:
+	for i in LANCES:
+		var yaw := float(i) * 2.399963                    # golden angle: an even, unpatterned spread
+		var pitch := deg_to_rad(18.0 + 52.0 * absf(sin(float(i) * 1.7)))
+		var mi := _off(Models.part(
+				n, Models.crystal(0.07, 1.0, 4), ice_mat(Color("8ae6ff"), 0.97, 0.3, Color("f4ffff")), Vector3.ZERO))
+		mi.set_meta("dir", Vector3(cos(yaw) * cos(pitch), sin(pitch), sin(yaw) * cos(pitch)))
+		mi.set_meta("ln", 0.55 + 0.45 * absf(sin(float(i) * 3.1)))
 
 
 # ------------------------------------------------------------------ timed one-offs
@@ -100,6 +113,20 @@ func _style(e: Dictionary, k: float) -> void:
 			n.scale = Vector3(r * (1.0 - 0.6 * k), 14.0, r * (1.0 - 0.6 * k))
 			n.position.y = (e["at"] as Vector3).y + (1.0 - fall) * 10.0
 			_tint(n, Color.WHITE, 1.0 - smoothstep(0.4, 1.0, k))
+		"lances":
+			# flung out fast and slowing, each shard pointing along its flight, then fading
+			var reach := float(p.get("r", 1.0))
+			var out := 1.0 - pow(1.0 - clampf(k * 1.6, 0.0, 1.0), 3.0)
+			var grow := clampf(k * 8.0, 0.0, 1.0)
+			for c in n.get_children():
+				var mi := c as MeshInstance3D
+				if mi == null: continue
+				var dv: Vector3 = mi.get_meta("dir")
+				var ln := float(mi.get_meta("ln"))
+				var long := reach * 0.7 * ln * grow
+				mi.position = dv * (reach * 0.6 * ln * out + long * 0.5) + Vector3(0, -3.0 * k * k, 0)
+				mi.basis = Basis(Quaternion(Vector3.UP, dv)).scaled(Vector3(1, long, 1))
+			_tint(n, Color.WHITE, 1.0 - smoothstep(0.5, 1.0, k))
 		"block":
 			n.scale = Vector3.ONE * lerpf(0.5, 1.0, _out_back(clampf(k * 8.0, 0.0, 1.0)))
 			_tint(n, Color.WHITE, 1.0 - smoothstep(0.85, 1.0, k))
@@ -129,8 +156,11 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 			_place_rink(n, p)
 		"frostbud":
 			var grow := _out_back(clampf(float(p.get("k", 1.0)), 0.0, 1.0))
-			n.scale = Vector3(grow, maxf(0.05, grow), grow)
+			n.scale = Vector3.ONE * maxf(0.05, grow)
 			n.rotation.y = m.time * 0.3
+			for c in n.get_children():
+				if c.name.begins_with("Petal"):
+					(c as Node3D).rotation.x = (1.0 - minf(grow, 1.0)) * BUD_OPEN
 
 
 func _place_tether(n: Node3D, from: Vector3, p: Dictionary) -> void:
@@ -156,7 +186,7 @@ func _place_rink(n: Node3D, p: Dictionary) -> void:
 		_disc(disc.get_parent() as Node3D, Color("7fd8ff"), Color("e8ffff"), float(p.get("a", 1.0)), 4.0, -1.0, 0.0)
 		var sm := disc.material_override as ShaderMaterial
 		sm.set_shader_parameter("crack", crack)
-		sm.set_shader_parameter("fill", 0.7 + 0.5 * crack)
+		sm.set_shader_parameter("fill", 0.3 + 0.4 * crack)
 	var fringe := n.get_node_or_null("Fringe") as Node3D
 	if fringe == null:
 		return

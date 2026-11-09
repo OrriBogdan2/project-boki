@@ -1024,8 +1024,8 @@ func _rime_crash(k: float) -> void:
 		HeroUlt.landed(self, f)      # the cast's best event (hit, knock, kill) pays the bond once
 	last_stunned = stunned
 	stats["crashes"] += 1
-	ulk().burst("pillar", h.pos, {"r": 1.4, "dur": 0.5})
-	ulk().burst("spikes", h.pos, {"r": 3.6, "dur": 0.55})
+	ulk().burst("pillar", h.pos, {"r": 1.3, "dur": 0.8})
+	ulk().burst("lances", h.pos + Vector3(0, 0.3, 0), {"r": 5.0, "dur": 0.75})
 	vfx("rime_crash", h.pos, null, {"r": radius})
 	m.sfx("rime_crash", at, 1.0, 1.0)
 	play("tm_rime_crash")
