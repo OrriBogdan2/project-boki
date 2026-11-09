@@ -35,10 +35,6 @@ const KNIFE_VIOLET := Color("b07aff")  # the dagger's arrival circle
 const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
-## The ground Cartwheel's speed over its run (time share, speed as a share of its average): a quick burst
-## that peaks near 0.15s and runs down into the hasted run by the landing (the sheet's measured curve).
-const VAULT_CURVE := [[0.0, 0.4], [0.3, 1.9], [1.0, 0.55]]
-const VAULT_MEAN := 1.2025         # the mean of VAULT_CURVE, so the distance stays the data's
 const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
 const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
 const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
@@ -434,7 +430,8 @@ func on_dash(use_ex: bool) -> bool:
 		h.vel.y = maxf(h.vel.y, 0.0)
 	else:
 		var dist := float(dd["air_dist"] if air else dd["dist"])
-		travel(dist, float(dd["air_time"] if air else dd["time"]), {"invuln": float(dd["invuln"]), "phase": 0.3})
+		var tt := float(dd["air_time"] if air else dd["time"])
+		travel(dist, tt, {"invuln": float(dd["invuln"]), "phase": 0.3, "curved": not air})
 	vault = {"t": 0.0, "dur": h.roll_t, "speed": h.roll_speed, "air": air}
 	_vaulted(air, _empowers(use_ex))
 	return true
@@ -446,7 +443,8 @@ func _empowers(use_ex: bool) -> bool:
 		return false
 	return String(DashFlow.row_of(id, "lmb", not h.grounded)["variant"]) == "empowered"
 
-## The Cartwheel's speed curve on the ground; from the air it holds its speed and ends where she lands.
+## The Cartwheel's run: on the ground its speed is ArchKit's fitted curve (content/rules/dash_feel.json "thief");
+## from the air it holds its speed and ends where she lands.
 func _tick_vault(dt: float) -> void:
 	if vault.is_empty():
 		return
@@ -455,11 +453,8 @@ func _tick_vault(dt: float) -> void:
 	if u >= 1.0 or h.roll_t <= 0.0:
 		_vault_over()
 		return
-	if bool(vault["air"]):
-		if h.grounded and float(vault["t"]) > 0.12:
-			h.roll_t = 0.0
-		return
-	h.roll_speed = float(vault["speed"]) * HunterMove.dash_k(VAULT_CURVE, u) / VAULT_MEAN
+	if bool(vault["air"]) and h.grounded and float(vault["t"]) > 0.12:
+		h.roll_t = 0.0
 
 ## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
 ## a low crouch.

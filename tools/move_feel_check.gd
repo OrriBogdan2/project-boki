@@ -48,7 +48,17 @@ const T := {
 	"dash_curve_juggernaut_peak_k":   ["~", [1.6, 1.8], "x", "[footage] Brall peak 17.1 m/s, mean 9.8 (fit 1.73)"],
 	"dash_curve_archer_peak_u":       ["~", [0.36, 0.52], "", "[footage] Myth roll peaks 0.15s into 0.33s"],
 	"dash_curve_archer_peak_k":       ["~", [1.7, 1.95], "x", "[footage] Myth peak 18.4 m/s, mean 9.9 (fit 1.86)"],
+	"dash_curve_bulwark_peak_u":      ["~", [0.4, 0.6], "", "[footage] Oath Smash peaks 0.17s into 0.33s"],
+	"dash_curve_bulwark_peak_k":      ["~", [1.12, 1.3], "x", "[footage] Oath peak 530 px/s, mean 436"],
+	"dash_curve_bulwark_exit_k":      ["~", [0.62, 0.8], "x", "[footage] Oath slides on into the spin (fit 0.66)"],
+	"dash_curve_thief_peak_u":        ["~", [0.28, 0.44], "", "[footage] Shiv peaks in the 3rd-4th 1/15s of 8"],
+	"dash_curve_thief_peak_k":        ["~", [1.7, 1.9], "x", "[footage] Shiv peak 415 px/s, mean 235"],
+	"dash_curve_thief_exit_k":        ["~", [0.22, 0.4], "x", "[footage] Shiv runs down into the run (fit 0.25)"],
+	"dash_curve_tender_air_dist":     ["~", [0.9, 1.1], "x", "Meeko's glide: dash.air.dist 13.3m (footage 11-15)"],
+	"dash_curve_tender_air_time":     ["~", [0.9, 1.08], "x", "[footage] Elluna air dash 0.8-1.1s (0.95)"],
+	"dash_curve_tender_air_exit_k":   ["~", [0.4, 0.65], "x", "[footage] floats out at 40-65% of the burst"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
+	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed and the walk takes it"],
 	"coyote_frames":           [">=", 6.0, "frames", "FeelConfig coyote_time 0.1s (walked off a rim over the void)"],
 	"jump_buffer_frames":      [">=", 7.0, "frames", "FeelConfig jump_buffer 0.12s (7 steps)"],
@@ -617,7 +627,7 @@ func _dash_exit() -> void:
 func _dash_curves() -> void:
 	var kit_was := P.arch
 	var cls_was := P.cls
-	for id in ["gunslinger", "juggernaut", "archer"]:
+	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief"]:
 		P.reclass(Arch.weight(id), id)
 		_reset(flat + Vector3(-3.0, 0, 0))
 		P.inp["move"] = Vector2(1, 0)
@@ -643,9 +653,39 @@ func _dash_curves() -> void:
 		var peak := speeds.max() as float
 		rec("dash_curve_%s_peak_u" % id, (speeds.find(peak) + 0.5) / speeds.size())
 		rec("dash_curve_%s_peak_k" % id, peak / mean)
-		rec("dash_curve_dist", (P.pos.x - x0) / (float(dd.get("roll", dd.get("dist"))) * float(feel["dist"])))
+		var want := float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
+		rec("dash_curve_dist", (P.pos.x - x0) / want)
 		rec("dash_curve_exit_run", _hv(P).length() / P.base_speed)
+		if id in ["bulwark", "thief"]:
+			# the kit's own time and the speed the curve ends on (its last step against the dash's mean)
+			var t := float(dd["whirl"]) / float(dd["whirl_speed"]) if id == "bulwark" else float(dd["time"])
+			t *= float(feel["time"])
+			rec("dash_curve_time", speeds.size() * DT / t)
+			rec("dash_curve_%s_exit_k" % id, float(speeds[-1]) / (want / t))
+	_tender_glide()
 	P.reclass(cls_was, kit_was)
+
+## Meeko's air dash is her kit's own measured curve (tender.json dash.air: ramp, burst, float-out): from a
+## height, so it ends on time rather than on a touchdown; its distance, time and the speed it floats out at.
+func _tender_glide() -> void:
+	P.reclass(Arch.weight("tender"), "tender")
+	_reset(flat + Vector3(-6.0, 4.0, 0), false)
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	var speeds: Array[float] = []
+	var x0 := P.pos.x
+	for i in 120:
+		var was_rolling := P.roll_t > 0.0
+		m.step(DT)
+		P.inp["dash"] = false
+		if P.roll_t > 0.0: speeds.append(P.roll_speed)
+		if was_rolling and P.roll_t <= 0.0:
+			break
+	var air: Dictionary = P.ak.dash_def()["air"]
+	print("MFEEL dash curve: tender air, %d steps, top %.1f" % [speeds.size(), speeds.max()])
+	rec("dash_curve_tender_air_dist", (P.pos.x - x0) / float(air["dist"]))
+	rec("dash_curve_tender_air_time", speeds.size() * DT / float(air["time"]))
+	rec("dash_curve_tender_air_exit_k", float(speeds[-1]) / float(speeds.max()))
 
 ## Owner rule: explosions are for blasts that do something. A plain dash on the ground and one in the air spawn
 ## no particle burst and no ring (Fx.radial), only a dust puff and after-images.
