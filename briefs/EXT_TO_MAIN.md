@@ -4572,3 +4572,4 @@ ART zippelith 8.47 briefs/boki-art/turnarounds/Zippelith.jpg kind=turnaround pan
 ART driftpup 8.47 briefs/boki-art/concepts/Driftpup.jpg kind=concept
 
 ## 02:20 ET 11-09 — art session: Driftpup withdrawn (owner 01:36: no otter, ray is boring). Ignore the 'ART driftpup' line above; a land-animal sea-glass Boki (lamb/koala/red panda) is being made instead.
+READY ext/overlay-typed-calls f2da08d28 (overlay.gd dynamic calls 35 -> 3; 32 lambda .call now typed methods, Match via is-check; 3 has_method kept for Home/Interior screens, no class_name)
