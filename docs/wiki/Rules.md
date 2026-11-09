@@ -43,14 +43,6 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
-## base_mode (`content/rules/base_mode.json`)
-
-The Boki base (briefs/design/GARDEN.md, a draft for owner approval). base_mode: true turns on what changes the current farm: foods lean a Boki by their type (content/rules/lean.json). Off by default; the old four-affinity meals stay as they are.
-
-| Setting | Value |
-|---|---|
-| base_mode | False |
-
 ## boki_lines (`content/rules/boki_lines.json`)
 
 What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words in one bubble (punctuation and symbols don't count); act_words = the most words in one action, which a young Boki says after its name; bubble_s = seconds a bubble stays up; cooldown_s = seconds a Boki waits between lines (a trigger marked direct answers something you did and skips the wait); no_repeat = how many of its own last lines a Boki never repeats; min_lines = the fewest general lines a trigger may have; grown_stage = the speech stage (Care.speech) from which a Boki says lines instead of its name. tones = how a young Boki says its name, by feeling ({A} first syllable, {a} lower, {b} second syllable, {F} full name, {f} lower, {U} upper; KinSpeak.fill). sounds = noises a tone may use besides the name. alias = old trigger names that share another's lines. triggers: feel (a tone), word (the one word a stage-1 Boki adds), acts (what it does), lines._ (anyone) and lines.<element> (extra lines for a Boki of that element, the species' type).
@@ -214,7 +206,7 @@ The farm building pass (docs/decisions/0004-farm-building.md). Farm level is poi
 | Setting | Value |
 |---|---|
 | base_mode | False |
-| base_mode_doc | GARDEN.md section 8: true shrinks the farm to the Boki base. Build mode shows only Buildings, Garden and Island; no axe, pickaxe or wild chopping; no work stations, wild or haul jobs (Boki knacks still run the plot, mend and incubator chores); no Exchange, Sell tab, tools or crop-chain goods at the market. Nothing is deleted: false changes nothing, and saves are untouched either way. |
+| base_mode_doc | GARDEN.md section 8: true shrinks the farm to the Boki base. Build mode shows only Buildings, Garden and Island; no axe, pickaxe or wild chopping; no work stations, wild or haul jobs (Boki knacks still run the plot, mend and incubator chores); no Exchange, Sell tab, tools or crop-chain goods at the market; meals lean a Boki by the food's type (content/rules/lean.json, Lean) instead of the four affinities. Nothing is deleted: false changes nothing, and saves are untouched either way. |
 | points | {"extracts": 3.0, "bosses": 6.0, "caught": 2.0, "hatched": 2.0, "harvested": 0.25, "built": 2.0, "fb_built": 2.0} |
 | points_doc | Farm points = sum(stat * weight). 'built' counts the lot buildings you built, 'fb_built' the buildings Boki finished on the farm. |
 | levels | [0, 6, 16, 30, 48, 70] |

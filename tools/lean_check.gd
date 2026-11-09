@@ -1,5 +1,5 @@
 extends RefCounted
-## --lean-check: food lean by type (scripts/core/lean.gd, content/rules/base_mode.json + lean.json). Every
+## --lean-check: food lean by type (scripts/core/lean.gd, farm_build.json base_mode + lean.json). Every
 ## food has a type and every type's part is a real one. base_mode is off by default and then Evo.eat is
 ## the old four-affinity lean. With it on, 3 Fire snacks (Emberberry) to a fresh Prismander (puddlet) raise
 ## its fire lean, shift its tint, show a mark after one meal, and its next form grows the Fire part (horns).
@@ -73,8 +73,8 @@ func run(main: Node) -> void:
 	_data()
 	ok(not Lean.on() and Evo.eat(Save.new_kin("puddlet"), "emberberry") == "fierce",
 		"base_mode is off by default and meals lean the old way")
-	Content._cache["rules/base_mode"] = {"base_mode": true}
+	FarmUnlocks.rules()["base_mode"] = true
 	_raise()
-	Content._cache.erase("rules/base_mode")
+	FarmUnlocks.rules()["base_mode"] = false
 	print("LEAN DONE, failures: %d" % bad)
 	main.get_tree().quit()

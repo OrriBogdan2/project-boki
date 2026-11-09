@@ -13,7 +13,7 @@ func run(m: Node) -> void:
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	Save.no_write = true
-	Content._cache["rules/base_mode"] = {"base_mode": true}
+	FarmUnlocks.rules()["base_mode"] = true
 	var rec := Save.new_kin(species, "Prisma")
 	var steps := [0, 1, 2]
 	var sheet := _strip(steps.size() + 1)

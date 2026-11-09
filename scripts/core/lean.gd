@@ -1,5 +1,5 @@
 class_name Lean
-## The base's food lean (briefs/design/GARDEN.md section 3, lever 1). With content/rules/base_mode.json on,
+## The base's food lean (briefs/design/GARDEN.md section 3, lever 1). With base_mode on (FarmUnlocks, farm_build.json),
 ## every food has one of the 18 types (content/rules/lean.json) and its meals lean a Boki to that type
 ## (rec["lean"], one key per type): the body takes the type's tint (Evo.dress), a few flecks of its colour
 ## show over the head within a meal or two (mark), and the next form grows the type's part (grow_part).
@@ -9,7 +9,7 @@ static func rules() -> Dictionary:
 	return Content.rules("lean")
 
 static func on() -> bool:
-	return bool(Content.rules("base_mode").get("base_mode", false))
+	return FarmUnlocks.base_mode()
 
 ## The type a meal of food f leans a Boki to: "" when it has none (Normal food never leans).
 static func key_of(f: String) -> String:
