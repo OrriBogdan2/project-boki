@@ -935,6 +935,7 @@ class Sync extends Node:
 		for ch in springs.chains:
 			var first := skel.get_bone_name(int(ch["ids"][0]))
 			ch["own_rest"] = Array(dd.get("hang_own_rest", [])).any(func(n): return first.begins_with(String(n)))
+		springs.tune(dd.get("springs", {}))
 		for b in dd.get("hide_while_chain", []):
 			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
@@ -1073,11 +1074,15 @@ class Sync extends Node:
 ## rigidly (firmer at the root than at the tip; a spring_hang_* chain toward straight down from its root), and
 ## keeps its links' lengths, so a braid trails behind a run,
 ## swings out of a turn and settles when she stands. The last bone is the tip (no skin of its own).
+## A Hero's data "springs" tunes a chain by its name's start: {"pull": [root, tip], "damp", "limit": radians a
+## link may bend off its rest line, "limit_in": and toward the bone it hangs from, the body} (docs/art/
+## secondary_motion/README.md; --spring-settle-check).
 class Springs:
 	const PREFIX := "spring_"
 	const PULL := 0.2           # the share of the way back to the rest shape per 1/60 s, at the root
 	const PULL_TIP := 0.07      # and at the tip
 	const DAMP := 0.84          # the velocity kept per 1/60 s
+	const LIMIT := PI          # radians a link may bend off its rest line (PI: free)
 	const WIND := 0.09          # m: how far a scarf tail's tip ripples at rest
 	const FLOOR_CHAIN := PREFIX + "scarftail_tail"     # a tail lies on the ground, not through it (the feet's height)
 	const FLOOR_UP := 0.04      # m its joints stay over the model's origin
@@ -1110,10 +1115,24 @@ class Springs:
 				# root, not riding its parent: Kael's Warchain hangs from his fist whichever way the arm points;
 				# a "wing" chain folds back while the Warden skates, WING_FOLD)
 				chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array(),
+					"pull": Vector2(PULL, PULL_TIP), "damp": DAMP, "limit": LIMIT, "limit_in": LIMIT,
 					"hang": skel.get_bone_name(bi).begins_with(PREFIX + "hang"),
 					"wing": skel.get_bone_name(bi).begins_with(PREFIX + "wing"),
 					"wind": skel.get_bone_name(bi).begins_with(PREFIX + "scarftail"),
 					"floor": skel.get_bone_name(bi).begins_with(FLOOR_CHAIN)})
+
+	## A Hero's data "springs": {chain name start: {"pull": [root, tip], "damp", "limit"}} on the chains it names.
+	func tune(data: Dictionary) -> void:
+		for ch in chains:
+			var first := skel.get_bone_name(int(ch["ids"][0]))
+			for key in data:
+				if first.begins_with(String(key)):
+					var t: Dictionary = data[key]
+					var pull: Array = t.get("pull", [PULL, PULL_TIP])
+					ch["pull"] = Vector2(float(pull[0]), float(pull[1]))
+					ch["damp"] = float(t.get("damp", DAMP))
+					ch["limit"] = float(t.get("limit", LIMIT))
+					ch["limit_in"] = float(t.get("limit_in", ch["limit"]))
 
 	func _spring(bi: int) -> bool:
 		return skel.get_bone_name(bi).begins_with(PREFIX)
@@ -1167,21 +1186,40 @@ class Springs:
 			if pts.size() != n or pts[0].distance_to(want[0]) > 1.5:      # (the first frame, or a teleport)
 				pts = want.duplicate()
 				prev = want.duplicate()
+			var tune: Vector2 = ch["pull"]
+			var keep := pow(float(ch["damp"]), k)
 			for i in range(1, n):
 				var p := pts[i]
-				var v := (p - prev[i]) * pow(DAMP, k)
+				var v := (p - prev[i]) * keep
 				prev[i] = p
 				p += v
-				var pull := lerpf(PULL, PULL_TIP, float(i) / float(n - 1))
+				var pull := lerpf(tune.x, tune.y, float(i) / float(n - 1))
 				if bool(ch["wing"]) and fold < -0.3:
 					pull = lerpf(pull, 1.0, 0.85)      # (flared through a flip: the wing turns with her, no twist)
 				pts[i] = p.lerp(want[i], 1.0 - pow(1.0 - pull, k))
 			pts[0] = want[0]
 			prev[0] = want[0]
+			var limit: float = ch["limit"]
+			var limit_in: float = ch["limit_in"]
+			var hold := xf * skel.get_bone_global_pose(par).origin      # (the body side: the bone it hangs from)
 			for i in range(1, n):
 				var d := pts[i] - pts[i - 1]
-				var ln := want[i].distance_to(want[i - 1])
-				pts[i] = pts[i - 1] + d.normalized() * ln if d.length() > 1e-5 else want[i]
+				var line := want[i] - want[i - 1]
+				var ln := line.length()
+				d = d.normalized() * ln if d.length() > 1e-5 else line
+				var most := limit
+				if limit_in < limit:
+					var inward := (hold - pts[i - 1]).slide(line.normalized()).normalized()
+					most = lerpf(limit, limit_in, maxf(d.slide(line.normalized()).normalized().dot(inward), 0.0))
+				if d.angle_to(line) > most:
+					# (bent past its limit: back onto the cone round its rest line, so a braid can't swing into her)
+					var bend := line.cross(d)
+					if bend.length_squared() < 1e-10:
+						bend = line.cross(Vector3.RIGHT if absf(line.normalized().x) < 0.9 else Vector3.FORWARD)
+					var held := line.rotated(bend.normalized(), most)
+					prev[i] += held - d        # (the limit stops it; it doesn't throw it back past its rest)
+					d = held
+				pts[i] = pts[i - 1] + d
 				if ch["floor"]:
 					pts[i].y = maxf(pts[i].y, xf.origin.y + FLOOR_UP)
 			ch["pts"] = pts

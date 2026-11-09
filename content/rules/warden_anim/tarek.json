@@ -1,5 +1,8 @@
 {
 	"doc": "Tenzo's hand-keyed clips (art/wardens/tarek/tarek.glb) and which game state plays which (scripts/heroes/warden_clips.gd). His weapon is his fists: the rock bracers and hands are skinned in the body, the Gun node follows the right fist (blade).",
+	"springs": {
+		"spring_locs": {"pull": [0.16, 0.05], "damp": 0.7, "limit": 0.8, "limit_in": 0.05}
+	},
 	"skinned_weapon": true,
 	"legs_rigid": true,
 	"extra_bones": {

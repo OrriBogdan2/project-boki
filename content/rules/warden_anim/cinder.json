@@ -1,5 +1,8 @@
 {
 	"doc": "Cinder's hand-keyed clips (art/wardens/cinder/cinder.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Times are the kit's (kmoves_pair.gd).",
+	"springs": {
+		"spring_scarftail_hair": {"pull": [0.2, 0.06], "damp": 0.7, "limit": 0.5, "limit_in": 0.0}
+	},
 	"skinned_weapon": true,
 	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "jaw": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "fingers.R": "hand.R", "thumb.R": "hand.R", "foot.L": "shin.L", "foot.R": "shin.R", "jet.0": "foot.R", "jet.1": "foot.L"},
 	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},

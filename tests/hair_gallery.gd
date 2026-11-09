@@ -1,10 +1,17 @@
 extends Node3D
 ## Every race with every one of its head styles (hair, fur, crystals, leaves, crests, feathers), one
 ## race per row. Run with -- --hair-gallery (add --hair-col=N for another colour). check() is the
-## headless --hair-check: every race x style must grow something visible on the head.
+## headless --hair-check: every race x style must grow something visible on the head. With --settle: the
+## v2 Heroes' spring chains (hair, braids, tails) through a dash stop, a landing and a turn (tools/settle_shots.gd).
+
+var settle: RefCounted        # (--settle: the strips' recorder, kept while it films)
 
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
+	if "--settle" in args:
+		settle = load("res://tools/settle_shots.gd").new()
+		settle.run(get_parent())
+		return
 	if "--class-lineup" in args:
 		_class_lineup()
 		return
