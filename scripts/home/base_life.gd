@@ -92,10 +92,11 @@ func step(d: float) -> void:
 	night = sin((h.day_t - 0.25) * TAU) < -0.2      # the farm's own night test (home.gd _move_kin)
 	for k in h.kins:
 		machine(k)       # every machine first: a newcomer looks for Boki that have one
+	var first_look := _seen.is_empty()      # the Boki already here when the base loads are not newcomers
 	for k in h.kins:
 		var uid := String(k["rec"]["uid"])
 		if not _seen.has(uid):
-			if not _seen.is_empty():
+			if not first_look:
 				_arrived(k)
 			_seen[uid] = true
 	for k in h.kins:

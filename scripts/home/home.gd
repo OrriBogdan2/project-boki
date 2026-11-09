@@ -604,6 +604,7 @@ func _ready_rest() -> void:
 			Save.no_write = true
 			var fw := a.substr(12) if a.length() > 12 else "empty"
 			get_tree().create_timer(0.6).timeout.connect(func(): hg.demo(fw))
+		if a == "--base-demo": get_tree().create_timer(0.3).timeout.connect(func(): BaseDemo.new().stage(self))
 		if a.begins_with("--kinbox-demo"):
 			# test: a full farm and three pages in the Kin Burrow, then the box, a mutation lineup or a details card
 			KinBoxView.demo_roster()

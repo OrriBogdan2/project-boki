@@ -110,6 +110,9 @@ func _ready() -> void:
 				if String(a2).begins_with("--farm-seed="): fseed = int(String(a2).substr(12))
 			Save.no_write = true
 			Save.d = HomeGather.demo_save(a.substr(12) if a.length() > 12 else "empty", fseed)
+		if a == "--base-demo":      # a made-up base to show (GARDEN.md 9.8), never the real save
+			Save.no_write = true
+			Save.d = BaseDemo.save()
 		if a.begins_with("--test-kin="):
 			# test: a save with one kin "species:level:trust", ready to play at home
 			var tk := a.substr(11).split(":")
