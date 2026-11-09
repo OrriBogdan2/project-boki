@@ -52,7 +52,7 @@ step so it redraws). Screen (fixed): `docs/shots/garden_fresh/before_02_hob_call
 
 ### 4. High, fixed: two leads at arrival
 Once the Welcome card closed, the camera swung to Hob, who shouted "Hey! Over here!" while step 1 said "Your Boki".
-Screen (before the fix): `docs/shots/garden_fresh/before_02_hob_calls.png`, "Hey! Over here!" over Hob. Fix: `HobTalk._intro` skips the call-over in base mode;
+Screen (before the fix): `docs/shots/garden_fresh/before_02_hob_calls.png`, "Hey! Over here!" over Hob. Fix: `HobTalk._intro` skips the camera swing and `FarmHob._call_out` skips the shout every 9 s in base mode (the post-fix shot `after_02_boki_only.png` was taken before the shout fix);
 the run asserts it. The Boki is the only lead.
 
 ### 5. Medium, fixed: the last step names a button that does not exist

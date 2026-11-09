@@ -23,7 +23,7 @@ var shots := ""
 var seen: Dictionary = {}      # jargon word -> the step it first showed in
 var gaps: Array = []
 var shot_n := 0
-var hob_swung := false      # the camera swung over to Hob (he calls you) while the Boki was the first step
+var hob_swung := false      # Hob called out or the camera swung over to him while the Boki was the lead
 
 func ok(cond: bool, what: String) -> void:
 	print("GFR %s %s" % ["ok  " if cond else "FAIL", what])
@@ -129,7 +129,7 @@ func idle(step: String, secs: float) -> void:
 	while t < secs:
 		await main.get_tree().create_timer(SAMPLE_S).timeout
 		t += SAMPLE_S
-		hob_swung = hob_swung or float(home.hob.chat.intro_t) >= 0.0
+		hob_swung = hob_swung or float(home.hob.chat.intro_t) >= 0.0 or home.hob.node.bubble.visible
 		var g := guidance()
 		var told: bool = g["card"] != "" or g["tutorial_on_screen"] or g["marker"] != "" or g["cue"] != ""
 		quiet = 0.0 if told else quiet + SAMPLE_S
@@ -196,7 +196,7 @@ func play() -> void:
 	var intro: Array = Content.rules("farm_builder")["talk"][intro_key]
 	note("HOB intro (talk, first time): %s" % str(intro.map(func(l): return l["text"])))
 	await idle("hob-quiet", 4.0)
-	ok(not hob_swung, "Hob does not pull the camera over while the first step is your Boki")
+	ok(not hob_swung, "Hob neither calls you over nor pulls the camera while your Boki is the lead")
 	var first_step: bool = FarmTutorial.current() in ["meet", "eat"]
 	ok(first_step and guidance()["marker"] != "", "after the card: the first step is marked")
 	# 1 meet: the marker says "Your Boki", the line says walk up
