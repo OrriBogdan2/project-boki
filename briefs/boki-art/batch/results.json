@@ -31811,5 +31811,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_stance3_lunowl_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance3_lunowl",
+    "name": "Lunowl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_lunowl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_eclipsowl",
+    "name": "Eclipsowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_eclipsowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_echolop",
+    "name": "Echolop (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_echolop_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_eclipsowl",
+    "name": "Eclipsowl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_eclipsowl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_eclipsowl",
+    "name": "Eclipsowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_eclipsowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_echolop",
+    "name": "Echolop (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_echolop_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_echolop",
+    "name": "Echolop (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_echolop_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_gongibbon",
+    "name": "Gongibbon (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_gongibbon_1.jpg",
+    "ok": true
   }
 ]
