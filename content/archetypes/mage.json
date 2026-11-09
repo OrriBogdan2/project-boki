@@ -90,7 +90,7 @@
 			"mote_r": 1.1
 		},
 		"variants": {
-			"tap": "Let go early (it still takes 0.3s to summon): 18 damage and a short knock, flying the full 13m lane.",
+			"tap": "Let go early (it still takes 0.33s to summon): 18 damage and a short knock, flying the full 13m lane.",
 			"hold": "Hold to 1s (your body flashes when it's full; at 1.2s it throws itself): 30 damage and about 1.8m of knockback. Thrown into a wall or another foe they're stunned 0.8s. Every foe hit leaves a charge orb at the impact: a pickup that gives Wirerun back when you run through it or Skycall pulls it to you. It adds no Static."
 		},
 		"sockets": {
