@@ -5325,3 +5325,4 @@ READY ext/cooldown-start-parity ef38f084b (Cooldown start section in docs/KIT_PA
 READY ext/consumable-parity 8e174b790 (tonic 1.0 s, no slow, flat 42 HP from the Vive Brew; use time/slow/heal into item data; docs/CONSUMABLES.md; kit amount, Vulnerable 1.2 vs 2x, dash/stun cancels left for the owner; airheal/equal/raid/gear/backpack/move-feel pass, health --strict OK)
 READY ext/dead-kmoves eb4ac2578 (--dead-kmoves-check; cut dead ostra_flurry mapping+table, stale pin_deadeye refs; Mossy rows left until guardcut merges)
 READY ext/telegraph-one-system f24474927 (ArchKit fuse + charge ring on AimKit, tele_circle/tele_lane deleted, -32 net lines in arch_kit; Fx.telegraph_* kept: non-kit users remain, DEBT updated)
+READY ext/air-cast-a c5f1e3899 (In the air tables for Vex, Kael, Lace, Cinder, Meeko, Tenzo; --air-limits-check asserts them; no gameplay change; six combo checks 0 failures, air-limits 0, health --strict OK, gen_wiki --check OK)
