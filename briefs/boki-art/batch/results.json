@@ -26575,5 +26575,131 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/thunderstrich_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "reapant_card",
+    "name": "Reapant (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/reapant_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fizzlet_card",
+    "name": "Fizzlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fizzlet_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kayak_card",
+    "name": "Kayak (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kayak_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_card",
+    "name": "Mothlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mothlet_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kayak_card",
+    "name": "Kayak (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kayak_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_card",
+    "name": "Mothlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mothlet_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrasloth_card",
+    "name": "Terrasloth (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/terrasloth_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "wickapi_card",
+    "name": "Wickapi (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/wickapi_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "wickapi_card",
+    "name": "Wickapi (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/wickapi_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrasloth_card",
+    "name": "Terrasloth (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrasloth_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog_w32",
+    "name": "Bullsfrog (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_w32",
+    "name": "Chimelop (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chimelop_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog_w32",
+    "name": "Bullsfrog (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_w32",
+    "name": "Chimelop (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chimelop_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog_w32",
+    "name": "Bullsfrog (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bladypus_w32",
+    "name": "Bladypus (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bladypus_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_e_w32",
+    "name": "Cetorgan (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_e_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_e_w32",
+    "name": "Cetorgan (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_e_w32_2.jpg",
+    "ok": true
   }
 ]
