@@ -1022,7 +1022,7 @@ func _process(delta: float) -> void:
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
 	_apply_cam_settings()
-	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
+	var focus := GardenCard.framed(Vector3(ppos.x, minf(py, 0.0), ppos.z), d)
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
 	_see_through()
 	_abyss_tint(d)
@@ -2972,6 +2972,8 @@ func _open_kin(rec: Dictionary) -> void:
 	var sp: Dictionary = Data.KIN[rec["species"]]
 	Evo.ensure(rec)
 	Care.ensure(rec)
+	var glance := GardenCard.glance()      # base mode: one glance, the tabs are behind "More"
+	if glance: kin_tab = "Care"
 	var col: Color = Shiny.body(rec)
 	var partner: bool = rec["uid"] == Save.d.get("active", "")
 	var rare_pre := Mutations.prefix(rec)
@@ -2979,7 +2981,7 @@ func _open_kin(rec: Dictionary) -> void:
 	var v := _new_panel(("%s the %s%s" % [rec["name"], kpre, Evo.form_name(rec)]) if kpre != "" else Data.kin_title(String(rec["name"]), Evo.form_name(rec)), 820)
 	UI.hold(v, KIN_CARD_H)
 	UI.title_icon(v, UI.sex_icon(rec, 22.0))
-	UI.subtitle(v, "Level %d  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
+	if not glance: UI.subtitle(v, "Level %d  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
 	var hx := UI.head_extra(v)
 	if partner: hx.add_child(UI.tag("Partner", UI.ACCENT))
 	elif Match.TWO_KIN and rec["uid"] == Save.d.get("active2", ""): hx.add_child(UI.tag("Second", UI.TEAL))
@@ -2989,7 +2991,7 @@ func _open_kin(rec: Dictionary) -> void:
 		var mt := UI.tag(Mutations.name_of(mid), UI.MUTED)      # plain: rarity shows on the Boki itself
 		mt.tooltip_text = Mutations.perk_text(mid)
 		hx.add_child(mt)
-	UI.shell_tabs(v, ["Care", "Training", "Growth", "About"], kin_tab, func(t): kin_tab = t; _open_kin(rec))
+	if not glance: UI.shell_tabs(v, ["Care", "Training", "Growth", "About"], kin_tab, func(t): kin_tab = t; _open_kin(rec))
 	var row := func(parent: Control, label_txt: String, frac: float, c: Color, right := "", lw := 92.0) -> void:
 		var r := UI.hbox(10)
 		var l := UI.label(label_txt, UI.T_SMALL, UI.MUTED); l.custom_minimum_size.x = lw
@@ -3000,12 +3002,13 @@ func _open_kin(rec: Dictionary) -> void:
 		rl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		r.add_child(rl)
 		parent.add_child(r)
+	if glance: GardenCard.build(self, rec, v)
 	var cols := UI.hbox(UI.GAP_BIG + 10)
 	v.add_child(cols)
 	var c1 := UI.vbox(8); c1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var c2 := UI.vbox(8); c2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cols.add_child(c1); cols.add_child(c2)
-	match kin_tab:
+	match "" if glance else kin_tab:
 		"About":
 			# what makes it itself, and where it came from (AboutView: Unique and Save.register)
 			c1.add_child(UI.section("Who it is", UI.FAINT.lightened(0.2)))
@@ -3081,9 +3084,11 @@ func _open_kin(rec: Dictionary) -> void:
 				c1.add_child(UI.kv("Parents", "%s and %s" % [rec["parents"][0], rec["parents"][1]]))
 	# looking after it: the care actions as one row, Feed first
 	var ft := UI.footer(v)
+	if GardenCard.on(): ft.add_child(UI.ghost("Less" if GardenCard.more else "More", func(): GardenCard.more = not GardenCard.more; _open_kin(rec)))
 	var fl := UI.hbox(4)
 	v.add_child(UI.spacer(2))
 	var roles := UI.hbox(6)
+	roles.visible = not glance
 	roles.add_child(UI.label("Role", UI.T_SMALL, UI.FAINT))
 	roles.add_child(fl)
 	v.add_child(roles)
