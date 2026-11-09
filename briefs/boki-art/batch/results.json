@@ -49094,5 +49094,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_seamwyrm_x2_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_furnacowary_x1",
+    "name": "Furnacowary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_x1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_furnacowary_x1",
+    "name": "Furnacowary (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_x1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_furnacowary_x1",
+    "name": "Furnacowary (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_x1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_furnacowary_x1",
+    "name": "Furnacowary (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_x1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_furnacowary_x2",
+    "name": "Furnacowary (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_x2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_furnacowary_x2",
+    "name": "Furnacowary (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_x2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_furnacowary_x2",
+    "name": "Furnacowary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_x2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_furnacowary_x2",
+    "name": "Furnacowary (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_x2_4.jpg",
+    "ok": true
   }
 ]
