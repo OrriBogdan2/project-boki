@@ -86,7 +86,6 @@
 			"max_hold": 3.0,
 			"hold_move": 0.38
 		},
-		"cd_per_rank": 3.0,
 		"variants": {
 			"hold": "Heavy Shot: hold to draw a great needle on the bow (full at 1.1s; you move at 38% speed while you hold) and let go to loose it: 16 -> 30 damage, push 6 -> 12, stops on the first foe; driven into a wall within 3m it hits again for about 5 times the shot (80 -> 148 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing."
 		},
@@ -155,21 +154,11 @@
 		"dash",
 		"kin"
 	],
-	"rank3": {
-		"sec": "Heavy Shot flies 3m farther; a wall stun gives a dash charge",
-		"dash": "Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading) and allies near you walk with you",
-		"kin": "the Hail Wall is 30% wider"
-	},
-	"rank2": {
-		"sec": "Rank 2: cooldown 16s -> 13s, damage +15%.",
-		"dash": "Rank 2: recharge 9.5s -> 8.1s per charge.",
-		"kin": "Rank 2: cooldown 15s -> 12.8s, damage +15%."
-	},
-	"rank_next": {
-		"sec": "Rank 3: cooldown 16s -> 10s, damage +30%; flies 3m farther and a wall stun gives a dash charge.",
-		"kin": "Rank 3: cooldown 9s -> 7.2s, damage +30%; the Hail Wall is 30% wider.",
-		"dash": "Rank 3: recharge 6s -> 4.2s; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too."
-	},
+	"rank_cd": {"sec": [1, 0.8125, 0.625], "dash": [1, 0.8947, 0.7895], "kin": [1, 0.8667, 0.6]},
+	"rank_dmg": {"sec": [1, 1.2, 1.4], "dash": [1, 1, 1], "kin": [1, 1.3, 1.6]},
+	"rank3": {"sec": "Heavy Shot flies 3m farther; a wall stun gives a dash charge", "dash": "Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading) and allies near you walk with you", "kin": "the Hail Wall is 30% wider"},
+	"rank2": {"sec": "Rank 2: cooldown 16s -> 13s, damage +20%.", "dash": "Rank 2: recharge 9.5s -> 8.5s per charge.", "kin": "Rank 2: cooldown 15s -> 13s, damage +30%."},
+	"rank_next": {"sec": "Rank 3: cooldown 16s -> 10s, damage +40%; flies 3m farther and a wall stun gives a dash charge.", "kin": "Rank 3: cooldown 15s -> 9s, damage +60%; the Hail Wall is 30% wider.", "dash": "Rank 3: recharge 9.5s -> 7.5s per charge; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too."},
 	"tells": {
 		"dash_spent": "a green spirit shell over her while it lasts; dash pip dark"
 	}
