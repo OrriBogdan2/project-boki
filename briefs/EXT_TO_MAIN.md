@@ -5407,3 +5407,4 @@ READY ext/parity-passives-b 278596890 (passive numbers B)
 READY ext/revive-source-numbers 6c27f4f57 (second source pass: no base revive/stomp seconds published anywhere, footage timing is an owner task on hetzner; wiki's full heal on a finished execute recorded as unbuilt; decision 0022 and DEATH_AND_REVIVE updated; life/revive/box-revive/wisp checks 0 failures, health --strict OK, gen_wiki --check OK; worker rpc1)
 
 READY ext/parity-status-stacking bafa3ff4c (status stacking rules)
+READY ext/parity-dot-ticks d211db733 (DoT tick parity)
