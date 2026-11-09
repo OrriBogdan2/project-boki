@@ -39,6 +39,8 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
  "kit_files": ["gunslinger_ult.gd"], "replaces": ["vn_rifle", "..."],
  "reach": {"gunslinger_fire": 45}, "loops": ["gunslinger_spin"]}
 ```
+**Movement by weight** (`content/sfx/move.json`, `tools/gen_sfx_move.py`): `jump_`, `land_` and `kick_` (wall hop) in `light`/`medium`/`heavy`, plus `glide_open_heavy`, picked by `HeroSfx.weighted` from the `weight` of `content/archetypes/<id>.json`. Landing volume follows the fall speed (`HeroSfx.land_db`); the class shifts it a few dB. The old shared `jump`/`land` stay as the fallback.
+
 `--sfx-set-check` asserts: every listed sound has its file(s); every take is within 3 dB of its category and under the ceiling; a Hunter set has hurt/down/death, dash, steps on all four surfaces, a `fire` sound and its signature list; `HeroSfx` picks them up; every literal `m.sfx("...")` in that Hunter's kit (`<arch>_kit.gd` plus its `kit_files`) names a sound that exists. `replaces` lists old-name files the set regenerated. `reach` (metres, 22-80) makes a heavy sound carry past the usual 22 m, so you hear a carry coming (past 9 m it plays through the muffled bus, so the low end is what carries); `Sfx` reads it from every set at start. Each sound under `loops` must repeat seamlessly.
 
 ## Playing and buses

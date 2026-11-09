@@ -1,0 +1,17 @@
+{
+ "group": "move",
+ "name": "Movement by weight",
+ "script": "tools/gen_sfx_move.py",
+ "sounds": {
+  "jump_light": "step",
+  "jump_medium": "step",
+  "jump_heavy": "step",
+  "land_light": "step",
+  "land_medium": "step",
+  "land_heavy": "step",
+  "kick_light": "step",
+  "kick_medium": "step",
+  "kick_heavy": "step",
+  "glide_open_heavy": "step"
+ }
+}

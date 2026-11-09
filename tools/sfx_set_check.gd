@@ -6,6 +6,8 @@ extends RefCounted
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
+##   7. jump, land and wall kick exist for every weight class an archetype has, HeroSfx.weighted picks them,
+##      a heavy hunter's glider open has its own layer, and a landing gets louder the faster the fall
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ## Reads the files only; never touches the save.
@@ -33,6 +35,7 @@ func run(main: Node) -> void:
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
 	_fallback()
+	_weighted()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -172,3 +175,25 @@ func _data(path: String) -> PackedByteArray:
 			return b.slice(i + 8, i + 8 + chunk)
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
+
+## 7. Movement by weight: every archetype's class has its variants and gets them; louder landings from faster falls.
+func _weighted() -> void:
+	var picked := []
+	var missing := []
+	for arch in Arch.ids():
+		var h := Hunter.new()
+		h.arch = arch
+		for kind in ["jump", "land", "kick"]:
+			var want := "%s_%s" % [kind, Arch.weight(arch)]
+			if HeroSfx.weighted(h, kind, "") != want:
+				missing.append("%s/%s" % [arch, want])
+		picked.append(HeroSfx.weighted(h, "glide_open", "") != "")
+		h.free()
+	ok(missing.is_empty(), "every Hunter gets jump, land and kick in its weight class (missing %s)" % [missing])
+	var heavies := Arch.ids().filter(func(a): return Arch.weight(a) == "heavy").size()
+	ok(picked.count(true) == heavies, "only the heavy class has the heavier glider open")
+	var db := [HeroSfx.land_db(4.0), HeroSfx.land_db(10.0), HeroSfx.land_db(20.0)]
+	ok(db[0] < db[1] and db[1] < db[2], "a landing is louder the faster the fall %s dB" % [db])
+	var plain := Hunter.new()
+	ok(HeroSfx.weighted(plain, "jump", "jump") == "jump", "no class: the shared jump")
+	plain.free()
