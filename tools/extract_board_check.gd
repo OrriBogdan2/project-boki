@@ -23,6 +23,8 @@ func ok(cond: bool, what: String) -> void:
 
 func _frame(m: Match, h: Hunter) -> void:
 	m.step(DT)
+	if shots != "":
+		m.cam.snap(h.pos)
 	h.render(DT, 1.0)
 	var sync: Node = h.model.get_node("Warden/Sync")
 	sync.set_process(false)
@@ -57,6 +59,8 @@ func run(main: Node) -> void:
 		if a.begins_with("--shots-dir="):
 			shots = a.substr(12)
 			DirAccess.make_dir_recursive_absolute(shots)
+			if main.get("fade") != null:
+				main.fade.reveal(0.01)      # (past the title's fade)
 	A = load("res://tools/archetype_check.gd").new()
 	A.main = main
 	for arch in ARCHS:
