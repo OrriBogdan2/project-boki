@@ -184,4 +184,6 @@ CLIPS = {
     "chop": (1.1, True, crew(chop_mouth, 2, 0.01)),
     "mine": (1.0, True, crew(mine_mouth, 2, 0.01)),
 }
+import boki_react
+CLIPS.update(boki_react.react())
 HIDE_AT = {"prop_berry": (0, 0.14, 0.4)}

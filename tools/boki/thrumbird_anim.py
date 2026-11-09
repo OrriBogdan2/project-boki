@@ -296,4 +296,20 @@ CLIPS = {"idle": (IDLE_S, True, idle), "walk": (WALK_S, True, walk), "run": (RUN
          "tend": (TEND_S, True, tend), "attack": (ATTACK_S, False, attack), "ability": (ABILITY_S, False, ability),
          "sleep": (SLEEP_S, True, sleep), "eat": (EAT_S, True, eat), "chop": (WORK_S, True, chop),
          "mine": (WORK_S, True, mine)}
+import boki_react
+
+
+def _win(p, t, a):
+    buzz(p, t, 8, 0.42 * a)
+
+
+def _sulk(p, t, a):
+    crest(p, -0.2)
+
+
+def _push(p, t, a):
+    crest(p, 0.3)
+
+
+CLIPS.update(boki_react.react(hop=1.0, slump=0.9, brace=0.8, extra_win=_win, extra_sulk=_sulk, extra_push=_push))
 HIDE_AT = {"prop_berry": (0, -0.3, 0.47)}     # off, it waits under the ground

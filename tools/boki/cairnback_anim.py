@@ -155,4 +155,6 @@ CLIPS.update({
     "chop": (1.1, True, cairn_rocks(chop_mouth)),
     "mine": (1.0, True, cairn_rocks(mine_mouth)),
 })
+import boki_react
+CLIPS.update({n: (sec, lp, cairn_rocks(fn)) for n, (sec, lp, fn) in boki_react.react().items()})
 HIDE_AT = {"prop_berry": (0, 0.14, 0.40), "prop_stone": (0, -0.1, 0)}

@@ -283,4 +283,6 @@ CLIPS = {"idle": (4.0, True, idle), "walk": (1.0, True, walk), "run": (0.5, True
          "pet": (2.4, True, pet), "carry": (1.1, True, carry), "tend": (1.3, True, tend),
          "attack": (0.8, False, attack), "ability": (1.6, False, ability), "sleep": (3.6, True, sleep),
          "eat": (2.0, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}
+import boki_react
+CLIPS.update(boki_react.react())
 HIDE_AT = {"prop_berry": (0, 0.16, 0.62), "prop_lode": (0, -0.34, 0.5)}

@@ -350,4 +350,20 @@ CLIPS = {"idle": (3.0, True, idle), "walk": (0.6, True, walk), "run": (0.42, Tru
          "pet": (2.4, True, pet), "carry": (0.66, True, carry), "tend": (1.2, True, tend),
          "attack": (0.7, False, attack), "ability": (1.1, False, ability), "sleep": (3.6, True, sleep),
          "eat": (2.0, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}
+import boki_react
+
+
+def _win(p, t, a):
+    buzz(p, t, 5, 0.5, 0.4 * a)
+
+
+def _sulk(p, t, a):
+    wings(p, lift=-0.1)
+
+
+def _push(p, t, a):
+    wings(p, 0.12, flick=0.2)
+
+
+CLIPS.update(boki_react.react(hop=1.2, slump=0.9, brace=0.8, extra_win=_win, extra_sulk=_sulk, extra_push=_push))
 HIDE_AT = {"prop_berry": (0, 0.2, 0.28)}
