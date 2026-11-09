@@ -4973,5 +4973,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_forgebrock_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_gravadillo",
+    "name": "Gravadillo (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gravadillo_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kindlewren",
+    "name": "Kindlewren (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_kindlewren_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glintmole",
+    "name": "Glintmole (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glintmole_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glintmole",
+    "name": "Glintmole (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glintmole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_geysirbara",
+    "name": "Geysirbara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_geysirbara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kindlewren",
+    "name": "Kindlewren (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kindlewren_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_galleotter",
+    "name": "Galleotter (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_galleotter_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravadillo",
+    "name": "Gravadillo (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gravadillo_2.jpg",
+    "ok": true
   }
 ]
