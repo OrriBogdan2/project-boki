@@ -30033,5 +30033,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_reelacine_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_torpecone",
+    "name": "Torpecone",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_torpecone_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_tootle",
+    "name": "Tootle",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_tootle_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_sarcobra",
+    "name": "Sarcobra",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_sarcobra_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_sarcobra",
+    "name": "Sarcobra",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_sarcobra_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_tootle",
+    "name": "Tootle",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_tootle_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_torpecone",
+    "name": "Torpecone",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_torpecone_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_sundormouse",
+    "name": "Sundormouse",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_sundormouse_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_sundormouse",
+    "name": "Sundormouse",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_sundormouse_2.jpg",
+    "ok": true
   }
 ]
