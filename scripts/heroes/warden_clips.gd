@@ -63,6 +63,8 @@ var hit_seen := 99.0
 var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
+var card := 0                # loco "legs_turn": the run clip the legs play (0 f, 1 l, 2 b, 3 r)
+var legs_goal := 0.0         # rad: and how far the legs turn off it toward the move
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
 var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
@@ -383,7 +385,8 @@ func step(dt: float) -> void:
 		_crouch(s, dt)
 	tree.advance(dt)
 	var legs := bool(want.get("legs_heading", false))
-	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
+	var head := bool(want.get("heading", false))
+	_turn_to_heading(s, head or legs, legs or (not head and legs_goal != 0.0), dt)
 	_out(dt)
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
@@ -392,7 +395,7 @@ func step(dt: float) -> void:
 ## and the arm on the aim keep their pose.
 func _turn_to_heading(s: Dictionary, on: bool, legs_only: bool, dt: float) -> void:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
-	var goal := 0.0
+	var goal := legs_goal * (1.0 - act_w) * (1.0 - crouch_w)     # (a full-body move or the sneak ring owns the legs)
 	if on and Vector2(vel.x, vel.z).length() > HEADING_MIN:
 		goal = wrapf(atan2(-vel.x, -vel.z) - float(s.get("face", 0.0)), -PI, PI)
 		goal = clampf(goal, -LEGS_MAX, LEGS_MAX) if legs_only else clampf(goal, -HEADING_MAX, HEADING_MAX)
@@ -422,6 +425,10 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var k := clampf(spd / run, 0.0, 1.0) if spd >= STILL else 0.0
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
+	legs_goal = 0.0
+	var lim := float(lc.get("legs_turn", 0.0))
+	if lim > 0.0 and k > 0.0 and bool(s.get("grounded", true)):
+		goal = _legs_card(atan2(-vel.x, -vel.z) - face, lim) * k
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
 	var gait := lerpf(walk, run, clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
@@ -444,6 +451,18 @@ func _loco(s: Dictionary, dt: float) -> void:
 			land_t = 0.0
 		air_t = 0.0
 	was_air = not grounded
+
+## Loco "legs_turn" (rad): the legs run on the nearest one of the four run clips and turn the rest of the way toward
+## the move, as the source's legs follow the travel while the upper body aims; two run clips blended on a diagonal
+## step out of phase and skate. It keeps a clip until the turn passes lim, so a move on the line does not flicker.
+## yaw: the move off the facing, the heading turn's sign. Sets legs_goal, returns the blend position's direction.
+func _legs_card(yaw: float, lim: float) -> Vector2:
+	var off := wrapf(yaw - card * PI * 0.5, -PI, PI)
+	if absf(off) > lim:
+		card = posmod(roundi(wrapf(yaw, -PI, PI) / (PI * 0.5)), 4)
+		off = wrapf(yaw - card * PI * 0.5, -PI, PI)
+	legs_goal = off
+	return Vector2(-sin(card * PI * 0.5), cos(card * PI * 0.5))
 
 ## The crouch layer: the dip plays as the state turns, the weight eases, the sneak ring follows the velocity.
 func _crouch(s: Dictionary, dt: float) -> void:

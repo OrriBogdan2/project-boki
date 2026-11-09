@@ -47,7 +47,7 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.0,
-		"run_speed": 4.8
+		"run_speed": 4.8, "legs_turn": 1.0
 	},
 	"air": {
 		"rise": "jump",

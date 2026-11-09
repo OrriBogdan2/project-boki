@@ -1,5 +1,6 @@
 extends RefCounted
-## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]:
+## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]
+## [--strafe=<kmove>]:
 ## a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png...,
 ## and with --turn a turntable in <dir>/turntable/. Needs a renderer. ffmpeg makes the GIFs and sheets.
 
@@ -96,10 +97,33 @@ func run(main: Node) -> void:
 			clips.force = {"clip": anim_name, "t": t}
 			sync.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--strafe="):
+			await _strafe(model, sync, clips, out, a.substr(9), fps)
 	if OS.get_cmdline_user_args().has("--moods"):
 		await _moods(model, sync, clips, out)
 	print("CLIP_SHOTS_DONE")
 	tree.quit()
+
+## --strafe=<kmove>: the live legs at full stick in each of AnimStrafeCheck's directions, facing -Z with that move
+## held mid-clip on the upper body: <dir>/strafe_<d>/f000.png...
+func _strafe(model: Node3D, sync: Node, clips: WardenClips, out: String, km: String, fps: float) -> void:
+	var checker := preload("res://tools/anim_strafe_check.gd")
+	var mv: Dictionary = clips.d.get("kmoves", {}).get(km, {})
+	var half := clips.lib.get_animation(String(mv["clip"])).length * 0.5 if mv.has("clip") else 0.0
+	for nm in checker.DIRS:
+		var dir := out.path_join("strafe_" + String(nm))
+		DirAccess.make_dir_recursive_absolute(dir)
+		var s := {"vel": checker.DIRS[nm] * checker.SPEED, "face": 0.0, "grounded": true}
+		if half > 0.0:
+			s.merge({"kmove": km, "kmove_t": half})
+		model.set_meta(WardenClips.STATE, s)
+		for k in 30:
+			sync.call("_process", 1.0 / 30.0)
+		for i in 8:
+			sync.call("_process", 1.0 / fps)
+			await _grab(dir.path_join("f%03d.png" % i))
+	model.set_meta(WardenClips.STATE, {})
 
 func _grab(path: String) -> void:
 	await RenderingServer.frame_post_draw
