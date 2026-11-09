@@ -70164,5 +70164,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/glacione_card108_2.jpg",
     "ok": true
+  },
+  {
+    "id": "style_lurklet_a",
+    "name": "Lurklet (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_lurklet_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_shinobant_a",
+    "name": "Shinobant (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_shinobant_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_seamwyrm_a",
+    "name": "Seamwyrm (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_seamwyrm_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_soakybara_a",
+    "name": "Soakybara (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_soakybara_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_lockatara_a",
+    "name": "Lockatara (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_lockatara_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_seamwyrm_a",
+    "name": "Seamwyrm (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_seamwyrm_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_shinobant_a",
+    "name": "Shinobant (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_shinobant_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_kitlet_a",
+    "name": "Kitlet (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_kitlet_a_2.jpg",
+    "ok": true
   }
 ]
