@@ -139,14 +139,40 @@ func _shots() -> void:
 	home.player.position = mid + Vector3(0, 0, -5.0)
 	home.ppos = home.player.position
 	home.cam.snap(mid)
-	await main.get_tree().create_timer(1.0).timeout
+	await _hold(1.0)
 	await _save("garden_1_six_moods.png")
-	await main.get_tree().create_timer(4.0).timeout
-	await _save("garden_2_faded.png")
-	home.ppos = home.kins[5]["pos"] + Vector3(0, 0, -1.8)
+	home.cam.zoom_to = 0.55
+	home.cam.zoom = 0.55
+	home.cam.snap(mid)
+	await _hold(0.3)
+	await _save("garden_2_close.png")
+	home.cam.zoom_to = 1.0
+	home.cam.zoom = 1.0
+	home.cam.snap(mid)
+	await _hold(4.0)
+	await _save("garden_3_faded.png")
+	home.ppos = home.kins[0]["pos"] + Vector3(-1.5, 0, 0)
 	home.player.position = home.ppos
-	await main.get_tree().create_timer(0.8).timeout
-	await _save("garden_3_walk_near.png")
+	await _hold(0.8)
+	await _save("garden_4_walk_near.png")
+
+## Lets the garden run for `secs` while the six Boki stay on their marks, free and in their feeling
+## (the shots show the bubbles, not the wandering).
+func _hold(secs: float) -> void:
+	var marks: Array = home.kins.map(func(k): return k["pos"])
+	var end := Time.get_ticks_msec() + int(secs * 1000.0)
+	while Time.get_ticks_msec() < end:
+		for i in 6:
+			var k: Dictionary = home.kins[i]
+			k["pos"] = marks[i]
+			k["goal"] = marks[i]
+			k["t"] = 600.0
+			(k["node"] as Node3D).position = marks[i]
+			for busy in ["nap_t", "say_t", "hold_t"]:
+				k[busy] = 0.0
+			if i in [3, 4]:
+				k["mood_ev_t"] = KinMood.EVENT_S
+		await main.get_tree().process_frame
 
 func _save(file: String) -> void:
 	await main.get_tree().process_frame

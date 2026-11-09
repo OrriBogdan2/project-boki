@@ -18,6 +18,7 @@ const RIM := {"hungry": UI.ACCENT, "sleepy": UI.INFO, "play": UI.TEAL, "happy": 
 	"sulk": UI.MUTED, "cross": UI.BAD}
 const DISC := Color("1c1824")        # bubble face: a warm night, like UI.SURFACE but opaque
 const ICON_Z := -0.1                 # icons float just in front of the face (toward the camera)
+const SIZE := 1.3                    # whole bubble scale: big enough to read from the garden camera
 
 ## A win or a loss from a Boki minigame: the bubble answers with happy or sulking for a while.
 static func react(k: Dictionary, won: bool) -> void:
@@ -98,9 +99,9 @@ static func _pose(home: Node, k: Dictionary, shown: bool, dt: float, now: float)
 		return
 	for f in RIM:
 		(bub.get_node(f) as Node3D).visible = f == String(k["mood"])
-	bub.position = Vector3(0.0, 1.55 + sin(now * 2.2) * 0.04, 0)
+	bub.position = Vector3(0.0, 1.65 + sin(now * 2.2) * 0.04, 0)
 	bub.look_at(home.cam.global_position, Vector3.UP)
-	bub.scale = Vector3.ONE * grow
+	bub.scale = Vector3.ONE * (grow * SIZE)
 
 ## The bubble: a dark rounded face and, per feeling, a rim in its colour with its icon on it.
 static func bubble() -> Node3D:
