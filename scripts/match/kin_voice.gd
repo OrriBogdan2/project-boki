@@ -92,7 +92,7 @@ const TUT_HINT := {
 	"glide": ["Jump, then glide! Watch me!", "(hops high and spreads out, showing you)"],
 	"exdash": ["Jump, then dash in the air!", "(leaps and darts forward in the air)"],
 	"shoot": ["A monster! Get it!", "(growls at the monster)"],
-	"utility": ["Use your power! Right click!", "(watches your hands, tail going)"],
+	"utility": ["Use your power! Press %S!", "(watches your hands, tail going)"],
 	"orders": ["Hold %T and tell me what to do!", "(sits up, ears forward, waiting for orders)"],
 	"sig": ["Press %E for %N! Line them all up, then fire!", "(bounces, ready for the group)"],
 	"gkey": ["Press %T and I'll charge in! Again and I'm back.", "(wiggles, waiting for the button)"],

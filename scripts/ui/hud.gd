@@ -2156,7 +2156,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 			return out
 	var si := p.slot_info(id)
 	var r_name := "Ultimate (%s)" % Settings.key_cap("hunter_ult")
-	var slot_names := {"sec": "Right click", "k1": "Utility (E)", "r": r_name, "dash": "Dash"}
+	var slot_names := {"sec": "Right click", "k1": "Utility", "r": r_name, "dash": "Dash"}
 	var slot_name: String = slot_names[id]
 	var key: String = {"sec": "secondary", "k1": "signature", "r": "hunter_ult", "dash": "dash"}[id]
 	out.append([String(si["name"]), si["col"]])

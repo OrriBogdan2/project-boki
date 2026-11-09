@@ -65,14 +65,14 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | A / Left | Move left | `left` | yes |
 | D / Right | Move right | `right` | yes |
 | Left click | Weapon attack | `fire` | yes |
-| Right click | Hunter ability (right click) | `secondary` | yes |
-| E | Hunter utility (E) | `signature` | yes |
+| Right click | Hunter ability | `secondary` | yes |
+| E | Hunter utility | `signature` | yes |
 | F | Use, scan, revive, pet | `interact` | yes |
 | 2 | Utility belt slot 2 (an armor kit to start) | `util2` | yes |
 | 3 | Utility belt slot 3 | `util3` | yes |
 | 4 | Utility belt slot 4 | `util4` | yes |
 | Q | Glove 1 | `gear1` | yes |
-| V | Glove 2 (in a match; V plays fetch at home) | `gear2` | yes |
+| V | Glove 2 (in a match) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
 | G | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
 | Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too) | `ping` | yes |

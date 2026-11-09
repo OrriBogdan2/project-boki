@@ -2287,7 +2287,7 @@ func _build_ui() -> void:
 	# bottom centre: the few keys you need to get about
 	var hint_box := UI.glass(6, 12)
 	hint_box.modulate.a = 0.85
-	var keys := UI.key_hints([["W A S D", "walk"], ["Space", "jump"], [Settings.key_cap("interact"), "use"], [Settings.key_cap("whistle"), "whistle"], [Settings.key_cap("build"), "build"], ["Esc", "menu"]], 12, Color(1, 1, 1, 0.78))
+	var keys := LiveKeyRow.make(func(): return [[Settings.move_caps(" "), "walk"], [Settings.key_cap("jump"), "jump"], [Settings.key_cap("interact"), "use"], [Settings.key_cap("whistle"), "whistle"], [Settings.key_cap("build"), "build"], ["Esc", "menu"]])
 	hint_box.add_child(keys)
 	hint = UI.label("", 14, UI.INK)     # kept for code that still sets hint text; the key row replaces it
 	hint.visible = false

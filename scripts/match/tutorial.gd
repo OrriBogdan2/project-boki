@@ -17,7 +17,7 @@ static func steps() -> Array:
 
 const KEYS := {"land": "move", "move": "move", "dash": "dash", "exdash": "dash", "crouch": "crouch",
 	"pickup": "interact", "shoot": "fire", "sig": "signature", "utility": "secondary", "throw": "throw",
-	"orders": "throw", "chest": "interact", "uplink": "interact", "gkey": "throw"}
+	"orders": "throw", "chest": "interact", "uplink": "interact", "gkey": "throw", "glide": "jump"}
 ## Which course stop a finished step leaves you at (a fall puts you back there).
 const STOP_AFTER := {"land": "land", "move": "move", "dash": "dash", "exdash": "exdash", "glide": "glide",
 	"crouch": "crouch", "pickup": "yard"}
@@ -592,7 +592,7 @@ func _words() -> void:
 	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(sid, "")), m.player))
 	key_cap = ""
 	if sid in ["land", "move"]:
-		key_cap = _wasd()
+		key_cap = Settings.move_caps()
 	elif sid == "rank":
 		key_cap = TutorialText.rank_combo()
 	elif KEYS.has(sid):
@@ -620,13 +620,9 @@ func _fill(txt: String) -> String:
 	if p.kin:
 		kname = String(p.kin.rec.get("name", kname))
 	txt = txt.replace("%W", "Swing at" if p.wpn.get("melee", false) else "Shoot")
-	txt = txt.replace("%J", Settings.key_cap("jump")).replace("%G", Settings.key_cap("glide"))
+	txt = txt.replace("%J", Settings.key_cap("jump"))
 	txt = txt.replace("%E", Settings.key_cap("signature")).replace("%T", Settings.key_cap("throw"))
 	return txt.replace("%A", an).replace("%s", kname)
-
-func _wasd() -> String:
-	var caps: Array = ["up", "left", "down", "right"].map(func(a): return Settings.key_cap(a))
-	return "".join(caps)
 
 ## Flat distance from the player to a spot.
 func _dist(at: Vector3) -> float:

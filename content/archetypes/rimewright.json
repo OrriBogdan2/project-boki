@@ -25,7 +25,7 @@
 		"loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
 		"lmb": "Ice Dart: hold for a barrage of slow darts that curve onto the foe at your cursor; every fifth to seventh is a large one.",
 		"rmb": "Ice Spear: pushed out to the cursor, it hits and slows where it lands, then bursts 1.8s later.",
-		"e": "Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it.",
+		"e": "Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; use it again to freeze it.",
 		"dash": "Skate: hold the dash key to skate where you move; your darts fly straight and thick.",
 		"passive": "Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them.",
 		"weapons": {
