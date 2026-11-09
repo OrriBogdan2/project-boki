@@ -50942,5 +50942,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_dragonkite_rx_2.jpg",
     "ok": true
+  },
+  {
+    "id": "stormit_cardx",
+    "name": "Stormit (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stormit_cardx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skateron_px",
+    "name": "Skateron (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_px_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "skateron_cardx",
+    "name": "Skateron (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/skateron_cardx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "skateron_cardx",
+    "name": "Skateron (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/skateron_cardx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skateron_px",
+    "name": "Skateron (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_px_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "skateron_cardx",
+    "name": "Skateron (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/skateron_cardx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stormit_cardx",
+    "name": "Stormit (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stormit_cardx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stormit_cardx",
+    "name": "Stormit (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stormit_cardx_2.jpg",
+    "ok": true
   }
 ]
