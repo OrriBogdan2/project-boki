@@ -44033,5 +44033,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_canvastross_p83_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_canvastross_p83",
+    "name": "Canvastross (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glintmole_p83",
+    "name": "Glintmole (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glintmole_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrathere_card83",
+    "name": "Umbrathere (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/umbrathere_card83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrathere_card83",
+    "name": "Umbrathere (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/umbrathere_card83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glintmole_p83",
+    "name": "Glintmole (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glintmole_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrathere_card83",
+    "name": "Umbrathere (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/umbrathere_card83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_canvastross_p83",
+    "name": "Canvastross (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_p83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gloamspire_p83",
+    "name": "Gloamspire (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gloamspire_p83_3.jpg",
+    "ok": true
   }
 ]
