@@ -275,7 +275,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | The ult heals for a share of the damage dealt (80% on the newer card) | wiki R, in-game card | n/a | Built (80%); asserted |
 | No heal while anti-healed | wiki patch 08.21.2024 | n/a | Built through blight (healing barely takes); asserted |
 | No jumping during the ult | wiki patch 08.21.2024 | yes (planted f33-f38) | Built: planted, no jump; asserted |
-| Knocking a hunter with the ult resets it | wiki R, in-game card | yes (ult f99-f101) | Built; asserted |
+| Killing a living enemy with the ult resets it (data: "Killing a living enemy with it resets its CD"; footage: reusable at once after the kill) | wiki R, in-game card | yes (ult f99-f101) | Built: the cleave's own hit takes a hunter down (our lethal hit is a knock, the source's kill): cooldown to 0 at once, no other window. A plain hit resets nothing; a hunter already down takes nothing from it; a monster or a wisp resets nothing. Shared path: `HeroUlt.landed` names the result, `HeroUlt.reset` clears the cooldown; asserted |
 | A sweet-spot Execution Slam knock resets the ult | wiki RMB | n/a | Built (within 2s of the sweet spot); asserted |
 | No reset from monsters or wisps | wiki patch 22.01.25 | n/a | Built: hunters only |
 | He lunges about 1 bh into the strike | footage ult f39 | yes | Built (1.8m); asserted |
