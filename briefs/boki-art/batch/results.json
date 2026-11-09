@@ -30145,5 +30145,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_gramofrill_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_gramofrill",
+    "name": "Gramofrill (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gramofrill_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dreadmonite",
+    "name": "Dreadmonite (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_dreadmonite_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dreadmonite",
+    "name": "Dreadmonite (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_dreadmonite_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gramofrill",
+    "name": "Gramofrill (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gramofrill_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_snapler",
+    "name": "Snapler (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_snapler_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dreadmonite",
+    "name": "Dreadmonite (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_dreadmonite_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dreadmonite",
+    "name": "Dreadmonite (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_dreadmonite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sandwidow",
+    "name": "Sandwidow (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_sandwidow_1.jpg",
+    "ok": true
   }
 ]
