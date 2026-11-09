@@ -100,9 +100,13 @@ Scores after:
 
 `--react-audit`: 12 Hunters, FAIL 0 (29 lines before the fixes).
 
-Not done: the clip scripts in tools/art1 (`breaker_anims.py`, `hem_clips.py`, `claire_clips.py`, `sable_clips.py`,
-`ryzz_clips.py`) still hold the old keys; a Blender rebuild of those models must re-apply the five edits above
-(docs/DEBT.md). Mossy's `root` hit keys are still in the clip, harmless in the upper-body path.
+The clip scripts in tools/art1 (`breaker_anims.py`, `hem_clips.py`, `claire_clips.py`, `sable_clips.py`,
+`ryzz_clips.py`) hold the same five edits since ext/art1-clip-port, and the re-bake is checked (Blender 4.5.15,
+2026-11-09): `hit_f` and `hit_b` baked from each script, copied into the model with `glb_add_clips.py`, then
+`--react-audit` gives 12 Hunters FAIL 0, with read, settle and head travel within 0.01 of the table above. The same
+bake from the old scripts gives FAIL 10 (Mossy reads 0.01, the four light Hunters settle in 0.33 to 0.37 s).
+Sources: breaker `~/art1-breaker-v2/breaker_art1.blend`, the rest `~/meshy/<ravel_v2|claire_v2|sable_v2|ryzz_v2_hair>/stage/c/<model>.blend`.
+Mossy's `root` hit keys are still in the clip, harmless in the upper-body path.
 
 ## Before and after strips
 
