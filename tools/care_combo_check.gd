@@ -879,6 +879,7 @@ func tender() -> void:
 			AimKit.shown(P, "rmb")
 			and String(lane.get("kind", "")) == "dotted"
 			and absf(float(lane.get("len", 0.0)) - float(K.rmb_def()["wind_lane"])) < 0.1
+			and is_equal_approx(float(lane.get("width", 0.0)), 2.0 * float(K.rmb_def()["seed"]["hit_r"]))
 			and K.anim_id == "mm_seed_aim"
 			and absf(K.move_k() - float(K.rmb_def()["wind_move"])) < 0.01,
 			"%s len %.1f %s k %.2f" % [
@@ -918,6 +919,7 @@ func tender() -> void:
 			AimKit.shown(P, bid)
 			and bool(tele.get("all", false))
 			and absf(float(tele.get("r", 0.0)) - 2.2) < 0.05
+			and is_equal_approx(float(tele.get("r", 0.0)), K.burst_radius())
 			and K.lk().showing(bid),
 			"r %.2f" % float(tele.get("r", 0.0)))
 	var rooted_early := T.root_t > 0.0
