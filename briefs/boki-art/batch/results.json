@@ -14899,5 +14899,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/pyrraven_r2_w28_4.jpg",
     "ok": true
+  },
+  {
+    "id": "rimink_r_w28",
+    "name": "Rimink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rimink_r_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_r_w28",
+    "name": "Rimink",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rimink_r_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_r_w28",
+    "name": "Rimink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rimink_r_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "skidlet_card_w28",
+    "name": "Skidlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/skidlet_card_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "skidlet_card_w28",
+    "name": "Skidlet (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/skidlet_card_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "skidlet_card_w28",
+    "name": "Skidlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/skidlet_card_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_r_w28",
+    "name": "Rimink",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rimink_r_w28_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "thistlynx_r_w28",
+    "name": "Thistlynx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/thistlynx_r_w28_1.jpg",
+    "ok": true
   }
 ]
