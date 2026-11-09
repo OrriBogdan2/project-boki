@@ -34,6 +34,8 @@ static func tip(p: Hunter, k: int) -> Array:
 	var out: Array = []
 	var key := Settings.key_cap(UtilityBelt.KEYS[k])
 	var s: Dictionary = p.belt[k]
+	if s.is_empty():           # the slot emptied under the cursor (last one used): no tip
+		return out
 	var id := String(s["id"])
 	var d := UtilityBelt.def(id)
 	out.append([UtilityBelt.name_of(id), UtilityBelt.col_of(id)])
