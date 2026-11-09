@@ -17,3 +17,9 @@ for _k,(_view,_b,_f) in enumerate(_G,1):
         "Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. "
         f"ONE creature only, full body, {_view}, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. "
         +CORE+LESSONS+desc(_b+" Do NOT repeat the baby's round head, big round eyes, gentle smile or low left-facing crawl. One clear idea, few parts.",_f,"candy pink, red and mint stripes, with rainbow crystal glints","the baby's face and pose, a left-facing crawl, held objects, other creatures",'prism','majestic'))})
+# 04:53 ET owner: extra poses. Vespyx lying down with its tail curled around itself (venom bead still visible);
+# Mycroll tipped over a bit in a cute pose.
+SPECS.append({'id':'vespyx_card89','name':'Vespyx (hero card, lying down)','refs':[_C+'Vespyx.jpg',SRA],'runs':4,'aspect':'1:1','size':'2K','prompt':CARD('Vespyx','baby','lying down curled up, its segmented scorpion tail wrapped most of the way around its body but not fully, so the glowing green venom bead at the tip rests in clear view beside its face')})
+P('vespyx_p89','Vespyx',_C+'Vespyx.jpg','lying down curled up with its scorpion tail wrapped most of the way around itself, the green venom bead clearly visible near its face')
+SPECS.append({'id':'mycroll_card89','name':'Mycroll (hero card, tipped over)','refs':[_C+'Mycroll.jpg',SRA],'runs':4,'aspect':'1:1','size':'2K','prompt':CARD('Mycroll','baby','tipped over onto its side a little, round and wobbly like it just rolled, paws in the air and its mushroom caps squished, looking up with a sheepish cute smile')})
+P('mycroll_p89','Mycroll',_C+'Mycroll.jpg','tipped over onto its side a little, paws in the air, looking up with a sheepish cute smile')
