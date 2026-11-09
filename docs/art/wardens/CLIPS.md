@@ -21,6 +21,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
+- No wall clip: a wall kick or bounce keeps the air's rise or fall, and `WardenWall` (`scripts/heroes/warden_wall.gd`) plants
+  the nearer foot on the wall over it, for every Hero (docs/art/WALL_POSE_AUDIT.md).
 
 ## The tree
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek

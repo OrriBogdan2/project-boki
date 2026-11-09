@@ -34,11 +34,17 @@ const BOUNCE_WINDOW := 0.25     # s to steer before ordinary air control returns
 const BOUNCE_DUST := 3          # dust puffs
 const FX_OFFSET := 0.3          # m the spark sits in front of the wall face
 const FX_HEIGHT := 0.8          # m above the feet
+const POSE_HOLD := 0.35         # s a kick or bounce keeps a foot on the wall face (the plant and push, WardenWall)
+const FACE_STEP := 0.1          # m between the probes that find the wall face for that foot (then halved 4 times)
 
 static var scuffs := 0          # (tests) hop scuffs played
 var bounce_t := 0.0
 var _rebound := Vector2.ZERO
 var _rebound_speed := 0.0
+var _pose_ev := 0               # kicks and bounces so far: each new one plants a foot (anim_state)
+var _pose_t := -99.0            # Match.time of the last
+var _pose_at := Vector3.ZERO    # where it met the wall face, at the feet's height
+var _pose_n := Vector2.ZERO     # that face's outward normal
 
 ## Landing ends a rebound.
 func land() -> void:
@@ -59,6 +65,7 @@ func try_kick(h: Hunter) -> bool:
 	else:
 		var rise := pow(maxf(h.vel.y, 0.0), 2.0) / (2.0 * Hunter.H_GRAV) + KICK_RISE
 		h.vel.y = sqrt(2.0 * Hunter.H_GRAV * rise)
+	_met_wall(h)
 	h.wall_touch_t = 0.0
 	# no glider until the rise is done, so a held jump keeps the kick's height
 	h.glide_cd = maxf(h.glide_cd, h.vel.y / Hunter.H_GRAV)
@@ -107,6 +114,7 @@ func hit(h: Hunter, hit_v: Vector2, wall_top: float) -> void:
 		bounce_t = BOUNCE_WINDOW
 		_rebound = out
 		_rebound_speed = out.length()
+	_met_wall(h)
 	h.m.sfx("land", h.pos, BOUNCE_VOL, BOUNCE_PITCH)
 	h.m.fx.burst(_fx_at(h), Color("ffe9b0"), 8, 3.0, 0.25, 4.0, 0.8)
 	h.m.fx.dust(h.pos, BOUNCE_DUST)
@@ -122,6 +130,33 @@ func carry(h: Hunter, keys: Vector2, dt: float) -> void:
 	_rebound = (_rebound + keys * BOUNCE_STEER * dt).limit_length(_rebound_speed)
 	h.vel.x = _rebound.x
 	h.vel.z = _rebound.y
+
+## What the plant and push (WardenWall) reads: the last kick or bounce, how long ago, and the wall face it met.
+func anim_state(h: Hunter, s: Dictionary) -> void:
+	s["wall_ev"] = _pose_ev
+	s["wall_age"] = h.m.time - _pose_t
+	s["wall_at"] = _pose_at
+	s["wall_n"] = _pose_n
+
+## The contact frame of a kick or bounce: where the wall face is, straight in along wall_n.
+func _met_wall(h: Hunter) -> void:
+	_pose_ev += 1
+	_pose_t = h.m.time
+	_pose_n = h.wall_n
+	var d := 0.0
+	while d < h.r + FACE_REACH and not _solid(h, d + FACE_STEP):
+		d += FACE_STEP
+	var step := FACE_STEP
+	for i in 4:
+		step *= 0.5
+		if not _solid(h, d + step):
+			d += step
+	_pose_at = h.pos - Vector3(h.wall_n.x, 0.0, h.wall_n.y) * (d + step)
+
+func _solid(h: Hunter, d: float) -> bool:
+	var p := Vector2(h.pos.x, h.pos.z) - h.wall_n * d
+	var w: World = h.m.world
+	return w.is_block(p.x, p.y) or w.ground_at(p.x, p.y) >= h.pos.y + FACE_RISE
 
 func _fx_at(h: Hunter) -> Vector3:
 	return h.pos + Vector3(-h.wall_n.x * FX_OFFSET, FX_HEIGHT, -h.wall_n.y * FX_OFFSET)
