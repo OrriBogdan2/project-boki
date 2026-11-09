@@ -258,6 +258,8 @@ func _all() -> void:
 		"lance: a sweep bends the stream (old fire keeps its own heading)", east >= 3 and north >= 1,
 		"still east %d, new north %d" % [east, north]
 	)
+	var heat_id := "heat%d" % P.get_instance_id()
+	ok("lance: her palm glows with heat while it roars", K.fx.shown(heat_id) and K.heat > 0.0, "heat %.2f" % K.heat)
 	P.inp["fire"] = false
 	ak.step(m, 0.15)
 	var live := 0
@@ -275,6 +277,9 @@ func _all() -> void:
 		"emitted +%d" % (K.hose.emitted - em0)
 	)
 	P.inp["fire"] = false
+	ak.step(m, AshwickKit.HEAT_COOL)
+	var cooled: bool = not K.fx.shown(heat_id) and K.heat == 0.0
+	ok("lance: the heat glow cools off after she lets go", cooled, "heat %.2f" % K.heat)
 	# --- Char builds into Ablaze, then Flashover
 	reset.call()
 	var aim_t := func(): P.inp["fire"] = true

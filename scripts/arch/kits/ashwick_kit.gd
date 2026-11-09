@@ -25,6 +25,10 @@ const SKULL_COL := Color("ff6a2a")
 const PIP_COL := Color("ff9a3a")
 const PILOT_CORE := Color("c8f8ff")
 const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange that holds on yellow grass
+const HEAT_CORE := Color("ffd23a")     # the heat glow's core (her vfx palette "hot"); its body is SHIELD_COL
+const HEAT_RISE := 0.8                 # s of roaring before her palm glows at full heat
+const HEAT_COOL := 0.8                 # s it takes to cool from full heat once the fire stops
+const HEAT_SIZE := 1.2                 # the heat glow's scale at full heat (the pilot flame is 0.4)
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
@@ -52,6 +56,7 @@ var relight_t := 0.0            # the lance can't relight until this runs out (0
 var was_held := false
 var hose_paused := false        # the lance held through a dash: the stream is out, it roars again as the dash ends
 var ember_t := 0.0
+var heat := 0.0                 # 0..1: how hot her palm glows, building while the lance roars
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
@@ -244,6 +249,7 @@ func _tick_tells(dt: float) -> void:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		var big := 1.0 + (1.2 if was_held and spool < float(lmbd()["spool"]) else 0.0)
 		fx.place("pilot%d" % h.get_instance_id(), "pilot", tip(), FLAME_CYAN, PILOT_CORE, 0.4 * fl * big)
+	_heat_glow(dt, vis)
 	ember_t -= dt
 	if ember_t <= 0.0:
 		ember_t = 0.35
@@ -273,6 +279,20 @@ func _tick_tells(dt: float) -> void:
 				"pipg%d" % key, "glow", top + Vector3(0, -0.05, 0), Color("ff4a1a"), Color("ff9a3a"),
 				0.75 + 0.08 * sin(m.time * 9.0)
 			)
+
+## The heat in her palm: an orange glow that builds over HEAT_RISE of roaring and cools after she lets go.
+func _heat_glow(dt: float, vis: bool) -> void:
+	var roaring := was_held and spool >= float(lmbd()["spool"])
+	if roaring:
+		heat = minf(1.0, heat + dt / HEAT_RISE)
+	else:
+		heat = maxf(0.0, heat - dt / HEAT_COOL)
+	var id := "heat%d" % h.get_instance_id()
+	if heat <= 0.0 or not vis or jet.running():
+		fx.unplace(id)
+		return
+	var flicker := 0.9 + 0.1 * sin(m.time * 23.0)
+	fx.place(id, "glow", tip(), SHIELD_COL, HEAT_CORE, HEAT_SIZE * heat * flicker, 0.0, heat)
 
 ## Shown burn stage over a foe: 0, 1 (Ablaze, one pip) or 3 (Flashover, three pips) (tests).
 func pips_on(f: Ent) -> int:

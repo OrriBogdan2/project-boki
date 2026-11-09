@@ -200,6 +200,9 @@ func _budget(V: HeroVfx, P: Hunter) -> void:
 func _holds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	V.hold(P, "enraged")
 	ok(V.holds.size() == 1 and V.live_n > 0, "a hold starts emitting")
+	var em: GPUParticles3D = V.holds.values()[0]["layers"][0]["node"]
+	var floor_y: float = (em.process_material as ShaderMaterial).get_shader_parameter("floor_y")
+	ok(is_equal_approx(floor_y, m.world.ground_at(P.pos.x, P.pos.z)), "its motes land on the ground under it")
 	var n0 := V.live_n
 	V.hold(P, "enraged")
 	ok(V.live_n == n0, "asking again keeps the one emitter")
