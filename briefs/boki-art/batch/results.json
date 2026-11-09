@@ -68757,5 +68757,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/dreadnoyak_card107_3.jpg",
     "ok": true
+  },
+  {
+    "id": "howlop_card107",
+    "name": "Howlop (hero card, new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/howlop_card107_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadnoyak_card107",
+    "name": "Dreadnoyak (hero card, new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_card107_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx_card107",
+    "name": "Briarlynx (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/briarlynx_card107_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop_card107",
+    "name": "Howlop (hero card, new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/howlop_card107_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadnoyak_card107",
+    "name": "Dreadnoyak (hero card, new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_card107_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx_card107",
+    "name": "Briarlynx (hero card, new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/briarlynx_card107_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lodestaff_card107",
+    "name": "Lodestaff (hero card, new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lodestaff_card107_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "morelossus_card107",
+    "name": "Morelossus (hero card, new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/morelossus_card107_1.jpg",
+    "ok": true
   }
 ]
