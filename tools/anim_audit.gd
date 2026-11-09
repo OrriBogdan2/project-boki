@@ -261,6 +261,7 @@ func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: 
 	var fr := _clip_frames(sync, clips, sk, clip, 24)
 	var path := {"L": 0.0, "R": 0.0}
 	var out_frames := 0
+	var out_side := {"L": 0, "R": 0}
 	var jump := 0.0
 	for i in fr.size():
 		for side in ["L", "R"]:
@@ -268,12 +269,15 @@ func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: 
 				var step := ((fr[i]["hand." + side] as Vector3) - (fr[i - 1]["hand." + side] as Vector3)).length()
 				path[side] += step
 				jump = maxf(jump, step)
+		for side in ["L", "R"]:
+			out_side[side] += int(_t_posed(fr[i], side))
 		if _t_posed(fr[i], "L") or _t_posed(fr[i], "R"):
 			out_frames += 1
 	var weapon := "R" if path["R"] >= path["L"] else "L"
+	var free: String = "L" if weapon == "R" else "R"
 	var length := clips.lib.get_animation(clip).length
-	return {"length": length, "weapon_hand": weapon, "weapon_travel": path[weapon] / hgt,
-			"free_travel": path["L" if weapon == "R" else "R"] / hgt, "t_pose": float(out_frames) / fr.size(),
+	return {"length": length, "weapon_hand": weapon, "t_free": float(out_side[free]) / fr.size(), "weapon_travel": path[weapon] / hgt,
+			"free_travel": path[free] / hgt, "t_pose": float(out_frames) / fr.size(),
 			"jump": jump / hgt}
 
 func _t_posed(p: Dictionary, side: String) -> bool:

@@ -3,6 +3,7 @@
 	"skinned_weapon": true,
 	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "jaw": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "fingers.R": "hand.R", "thumb.R": "hand.R", "foot.L": "shin.L", "foot.R": "shin.R", "jet.0": "foot.R", "jet.1": "foot.L"},
 	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
+	"free_arm": {"lance": "L", "shot": "L"},
 	"loco": {
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
