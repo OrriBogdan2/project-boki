@@ -114,3 +114,7 @@ turnarounds keep the concept's stance instead of a neutral stand, and existing l
 - 134 owner decisions: 52 approved, 67 redo, 16 rejected. The owner approved 16 images the critics had rejected (7.0-7.9) and sent back several the critics scored 9.0, so the critics are not a reliable proxy for his taste.
 - Owner approval is final: approved sheets are promoted to evolutions/ or turnarounds/ (old kept as *_old.jpg) and their fix/redesign/stance jobs are dropped (batch/owner_locked.json, specs_zzzz_locked.py).
 - Owner-review tier lowered to no veto + three-critic average >= 8.0, so more reaches the owner; auto-approve (8.5 rule) unchanged.
+
+## Fast lane (owner 02:22 ET 11-09: "speed up the critics so I can see all the art fixes")
+- Cards, portraits, stance redos, turnarounds of passed concepts and fix rounds: ONE critic (fast lane, groups of ~15 run in parallel). 8.5+ no veto = live; 8.0+ no veto = owner queue.
+- New-species concepts and redesigns keep the three-critic panel.
