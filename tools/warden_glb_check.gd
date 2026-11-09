@@ -36,7 +36,11 @@ const MOTION_BONES := ["hips", "thigh.L", "shin.L", "thigh.R", "shin.R", "upper_
 const OWN_MOTION := 0.05       # rad: two Wardens' idle or run joint angles differ by more than this on average
 const TRIS_MAX := 15000         # the game budget (RIG_CONTRACT "Budget"): tools/blender/decimate_warden.py
 ## Over the budget until an art pass: Kael's mane (14.5k of hair cards) breaks when decimated, so it is kept whole.
-const TRIS_OVER := {"juggernaut": 24000}
+const TRIS_OVER := {"juggernaut": 24000, "tender": TRIS_REVAMP, "mage": TRIS_REVAMP, "thief": TRIS_REVAMP,
+	"dolm": TRIS_REVAMP, "gunslinger": TRIS_REVAMP}
+## Triangles: the revamp budget (~25k with a baked 2048 normal map, face, hands and weapon kept dense;
+## RIG_CONTRACT "Budget"); 25.5k leaves the builds' 1-2% decimation spread above the 25k aim.
+const TRIS_REVAMP := 25500
 
 var bad := 0
 var n := 0
