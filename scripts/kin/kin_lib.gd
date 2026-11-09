@@ -13,6 +13,13 @@ extends RefCounted
 ## Everything here is data in, data out: nothing named in a file is loaded or called.
 
 const ROOT := "res://content"
+## A species' theme as its standard type (DECISIONS 2026-11-08 22:29). The type picks the cast cue k_<type>.
+const TYPE_OF_THEME := {"ember": "fire", "bloom": "grass", "storm": "electric", "frost": "ice", "venom": "poison",
+	"swarm": "bug", "tempest": "flying", "stone": "rock", "titan": "steel", "lunar": "fairy", "prism": "crystal",
+	"shadow": "dark", "echo": "sound", "gravity": "psychic", "spore": "spore"}
+## The 19 standard types (DECISIONS 2026-11-10: Shadow split into Ghost and Dark); each has a cast cue k_<type>.
+const TYPES := ["normal", "fire", "water", "grass", "spore", "electric", "ice", "rock", "psychic", "flying", "dragon",
+	"dark", "ghost", "poison", "bug", "steel", "fairy", "crystal", "sound"]
 
 static var _lib := {}
 static var _reports := {}
@@ -59,6 +66,12 @@ static func merge(id: String) -> MergeSpec:
 
 static func node(id: String) -> EvolutionNode:
 	return lib()["evolution"].get(id, null)
+
+## The cast cue of a theme or type: k_<type>. An old theme goes through TYPE_OF_THEME (shadow is dark); a type
+## id is its own cue, so a species already moved to ghost or dark has no gap.
+static func cue_of(theme: String) -> String:
+	var type := String(TYPE_OF_THEME.get(theme, theme))
+	return "k_" + (type if TYPES.has(type) else "normal")
 
 static func kin_ids() -> Array:
 	var ids: Array = lib()["kin"].keys()
