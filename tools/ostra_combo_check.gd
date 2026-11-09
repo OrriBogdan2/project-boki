@@ -4,6 +4,8 @@ extends "res://tools/hero_pair_check.gd"
 ## (Shift never travels on its own, keeps his height, one Snap charge that visibly stuns the training
 ## dummy), the small mechanics, the merge-start drops, and that every move, sound and look exists.
 
+const TIME := preload("res://tools/ostra_anim_time_check.gd")        # his move timing against the footage frames
+
 func run(main_node: Node) -> void:
 	main = main_node
 	await _ostra()
@@ -245,6 +247,13 @@ func _ostra() -> void:
 		not K.swap.is_empty() and AimKit.shown(P, "swap_fly") and bool(AimKit.entry(P, "swap_fly").get("all", false))
 	)
 	ok("item 35: a ground Trade plays his underhand lob, ostra_swap", K.anim_id == "ostra_swap")
+	m.step(DT)
+	var lantern: Dictionary = KitLooks.of(m).held.get("os_star", {})
+	ok(
+		"owner 11-08: the Trade's lantern is drawn 1.3x (TRADE_LOOK_K), the catch circle stays dash.radius",
+		not lantern.is_empty() and absf((lantern["n"] as Node3D).scale.x - OstraKit.TRADE_LOOK_K) < 0.001
+			and absf(float(AimKit.entry(P, "swap_fly").get("r", 0.0)) - float(K.dash_def()["radius"])) < 0.001
+	)
 	var t_cast := m.time
 	var done_at := [0.0]
 	step(m, 2.0, func(): if K.swaps == 1 and done_at[0] == 0.0: done_at[0] = m.time)
@@ -296,6 +305,7 @@ func _ostra() -> void:
 	)
 	# item 17: he drifts slowly while the lantern flies, keeps his height over the abyss
 	await _hover(m, P, T, home, K)
+	TIME.new(self).run(m, P, K, T, home)
 	_far_cast(m, P, home, K)
 	reset.call()
 	K.swollen_t = 5.0
@@ -499,6 +509,29 @@ func _ostra() -> void:
 	A.queue_free()
 	m.hunters.erase(A)
 	P.slot_lv["dash"] = 1
+	# ---- upgrade parity (docs/heroes/ostra.md): the source's tier II / III+IV numbers per slot
+	var op: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["sec"] = rk
+		P.slot_lv["dash"] = rk
+		P.slot_lv["kin"] = rk
+		op.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), K.power("sec"), K.dash_def()["cd"] * K.dash_k(),
+				K.e_def()["cooldown"] * K.cd_k("kin"), K.power("kin"), K.power("dash")])
+	P.slot_lv["sec"] = 1
+	P.slot_lv["dash"] = 1
+	P.slot_lv["kin"] = 1
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.05
+	ok("upgrade parity: Shard Snap cooldown 10 -> 8.5 -> 7 and damage +20% / +40%",
+			near.call(op[1][0], 8.5) and near.call(op[2][0], 7.0)
+			and near.call(float(op[1][1]) / float(op[0][1]), 1.2)
+			and near.call(float(op[2][1]) / float(op[0][1]), 1.4), str(op))
+	ok("upgrade parity: Lantern Trade recharge 9.5 -> 8 -> 6.5, no damage step",
+			near.call(op[1][2], 8.0) and near.call(op[2][2], 6.5)
+			and near.call(float(op[2][5]) / float(op[0][5]), 1.0), str(op))
+	ok("upgrade parity: Brimseed cooldown 10 -> 10 -> 8 and damage +10% / +20%",
+			near.call(op[1][3], 10.0) and near.call(op[2][3], 8.0)
+			and near.call(float(op[1][4]) / float(op[0][4]), 1.1)
+			and near.call(float(op[2][4]) / float(op[0][4]), 1.2), str(op))
 	# ---- merge start drops every hold
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0))
@@ -713,8 +746,8 @@ func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var speed := drift / (float(ticks[0]) * DT)
 	var fly_slow := float(K.dash_def()["fly_slow"])
 	ok(
-		"item 75: in flight he drifts at dash.fly_slow (0.3) of his run speed",
-		flying and run_speed > 1.0 and absf(fly_slow - 0.3) < 0.001
+		"item 75 + owner 11-08: in flight he drifts at dash.fly_slow (0.35, +17%) of his run speed",
+		flying and run_speed > 1.0 and absf(fly_slow - 0.35) < 0.001
 			and absf(speed / run_speed - fly_slow) < 0.03,
 		"%.2f of %.2f (data %.2f)" % [speed, run_speed, fly_slow]
 	)

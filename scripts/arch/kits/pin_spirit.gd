@@ -2,9 +2,10 @@ class_name PinSpirit
 extends RefCounted
 ## Hem's Shift, Spirit Walk (hero sheet pin.md): a quick dodge roll the plain-dash way (ArchKit.dash_dir: the
 ## move direction, the aim when standing still or with the cursor setting), then "time" s walking as a
-## spirit: rocks, trees, pillars and barriers don't stop her (Hunter.spirit_t; terrain cliffs and ledges
-## still do). Damage ends it. If it ends while she is inside something she is put back where she
-## last stood clear. While she is inside something her own screen goes dark blue.
+## spirit: rocks, trees, pillars, barriers and raised terrain don't stop her; she climbs a ledge face and
+## drops off the far side (Hunter.spirit_t; data: Phase Walk rolls through the raised wall).
+## Damage ends it. If it ends while she is inside a rock or barrier she is put back where she last stood clear;
+## in a ledge she is set on top of it. While she is inside something her own screen goes dark blue.
 
 var k: ArcherKit
 var h: Hunter
@@ -32,7 +33,7 @@ func start() -> void:
 	var dir := k.dash_dir()
 	var roll := float(dd.get("roll", 3.5))
 	var rt := float(dd.get("roll_t", 0.24))
-	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll"})
+	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll", "curved": true})
 	k.play("pin_roll")
 	t = walk_time() + rt
 	total = t
@@ -60,7 +61,7 @@ func _share_with_allies() -> void:
 		var walk := walk_time()
 		x.spirit_t = walk
 		granted.append([x, walk])
-		k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 12, 3.0, 0.3)
+		k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
 
 ## Rank 3: extra move speed while inside something that fades to nothing as the walk runs out (the physics
 ## data's +150 on a 455 base speed is the 0.33 in "inside_boost").
@@ -72,7 +73,7 @@ func inside_boost() -> float:
 ## Walking into something leaves a spirit orb at the entry: anyone else who touches it (ally or foe) walks
 ## as a spirit too, for the same time (wiki: Phase Walk's phase orb).
 func _drop_orb(at: Vector3) -> void:
-	var n := KitMeshes.inst(k.fx, Models.sphere(0.3, 12), KitShaders.mat("star", PinFx.GREEN))
+	var n := KitMeshes.inst(k.fx, Models.sphere(0.3, 12), KitShaders.mat("star", PinFx.THREAD))
 	n.visible = true
 	n.global_position = at + Vector3(0, 0.9, 0)
 	n.scale = Vector3.ONE * 1.4
@@ -94,7 +95,7 @@ func tick_orbs(dt: float) -> void:
 				var walk := walk_time()
 				x.spirit_t = walk
 				granted.append([x, walk])
-				k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 12, 3.0, 0.3)
+				k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
 	for g in granted.duplicate():
 		var x: Hunter = g[0]
 		g[1] = float(g[1]) - dt
@@ -104,9 +105,11 @@ func tick_orbs(dt: float) -> void:
 		else:
 			x.spirit_t = float(g[1])
 
-func blocked_here() -> bool:
+## terrain: a ledge face still above her feet counts (the walk dims her screen); at the end it does not,
+## she is set on top of it instead (end).
+func blocked_here(terrain := true) -> bool:
 	var w: World = k.m.world
-	if w.is_block(h.pos.x, h.pos.z):
+	if w.is_block(h.pos.x, h.pos.z) or (terrain and w.ground_at(h.pos.x, h.pos.z) > h.pos.y + World.STEP):
 		return true
 	return not w.dyn_walls.is_empty() and Verbs.wall_blocks(w.dyn_walls, h.pos.x, h.pos.z, h.r * 0.6, h.pos.y) > 0.0
 
@@ -140,7 +143,12 @@ func end(why: String) -> void:
 	h.spirit_t = 0.0
 	k.fx.aura_on(0.0)
 	k.fx.tint_to(0.0)
-	if blocked_here():
+	var top: float = k.m.world.ground_at(h.pos.x, h.pos.z)
+	if top > h.pos.y + World.STEP and not blocked_here(false):
+		h.pos.y = top      # ended mid-climb in a ledge: she stands on top of it, never inside terrain
+		h.vel.y = 0.0
+		h.grounded = true
+	if blocked_here(false):
 		snap_backs += 1
 		h.teleport(entry)
 		h.vel = Vector3.ZERO

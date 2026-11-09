@@ -105,8 +105,8 @@ func run(m: Node) -> void:
 	var hc := _spot(hb, land + Vector3(0, 0, -8))
 	hb.cells = hc; hb._check_cells(); hb._draw_cells()
 	var green := hc.size() == 15 and hb.ghost_ok
-	for mi in hb.ghost_cells.get_children():
-		if mi is MeshInstance3D and ((mi as MeshInstance3D).material_override as StandardMaterial3D).albedo_color.g < 0.9: green = false
+	for mi in hb.ghost_cells.get_children():      # (the redraw frees the old cells at the end of the frame)
+		if mi is MeshInstance3D and not mi.is_queued_for_deletion() and ((mi as MeshInstance3D).material_override as StandardMaterial3D).albedo_color.g < 0.9: green = false
 	ok(green, "on open meadow it tints green")
 	var g0 := int(Save.d["gems"])
 	ok(hb.place_held() and int(Save.d["gems"]) == g0 and FarmSites.is_site(HomeLayout.of(Save.d)["deco"][-1]),
@@ -214,14 +214,14 @@ func run(m: Node) -> void:
 	for k in home.kins: k["pos"] = HomeLayout.LANDING
 	var n_back: int = hb.regrow_due(Time.get_unix_time_from_system() + 4000.0)
 	ok(n_back >= 1 and hb.wild_t.has(ti) and w.is_block(ti % w.w + 0.5, ti / w.w + 0.5), "later, the tree grows back where it stood (%d came back)" % n_back)
-	# the Training Grounds isle is gone: no island of its own, and the Esc menu opens the training area instead
+	# the Training Grounds isle is gone: no island of its own, and the Esc menu opens the Grounds instead
 	ok(home.world.island_id(40.0, 56.0) != "training", "the farm has no Training Grounds isle")
 	var was: Node = main.get("current")
 	main.set("current", home)
 	Overlay.open_pause("home")
 	await main.get_tree().process_frame
 	var btns: Array = Overlay.host.find_children("*", "Button", true, false)
-	ok(btns.any(func(b): return (b as Button).text.contains("Training area")), "the farm's Esc menu has Training area")
+	ok(btns.any(func(b): return (b as Button).text.contains("Training Grounds")), "the Esc menu has Grounds")
 	Overlay.close()
 	main.set("current", was)
 	var cl := -1

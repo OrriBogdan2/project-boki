@@ -205,3 +205,61 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   `AimKit.entry(h, id)` for the length, width, k or radius you expect.
 - **The old helpers.** `ArchKit.tele_circle` and `tele_lane` (one tweened node per telegraph) still work.
   Move your kit's calls to AimKit as you touch them (docs/DEBT.md).
+
+## 5. Cursor past max range: source rule vs ours (parity audit, 2026-11-09)
+
+Three outcomes: **clamp** (lands at the cursor, at most max range), **full** (always flies the whole range
+in the aim direction) or **refuse** (no cast). Source = the hero-ref sheet on `ext/agent-briefs`
+(`briefs/hero-ref/<id>.md`) and the wiki rows in `docs/heroes/<id>.md`. Ours = `AimMode` and the kit.
+"?" = the sources don't record it (the footage never aimed past range), so ours is a guess.
+Shared rule, fixed in this audit: **a ground-placed zone, nuke or lob lands exactly at the cursor with no
+minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blank click still travels.
+
+| Hunter (sheet) | Slot | Source rule | Ours | Verdict |
+|---|---|---|---|---|
+| Lace (pin) | LMB stage 1 | clamp; lands at the cursor | clamp, 12 m | match |
+| | LMB stage 2 | full, past the cursor, longer range | full, 16 m | match |
+| | RMB Heavy Shot | skillshot toward the cursor; range ? | full, 14 m | match (?) |
+| | E Hail Wall | arc at the cursor distance, clamped | clamp 2..9 m radius | match (the 2 m floor is ours) |
+| | X Starpiercer | beam, fixed length | full, 18 m | match |
+| Cinder (linwick) | LMB | stream runs its full length | full, 7 m | match |
+| | RMB Cinder Shot | sheet: one miss ended near the cursor (?); owner note: always full | full, 14 m | owner note, kept |
+| | Shift | toward the cursor, stops on impact | fixed dash along the aim | match |
+| | X Flue Flight | flies forward along the aim | fixed flight, steers with the aim | match |
+| Albert (bjorn) | LMB throw | clamp; lands at the cursor, max range ? (seen to 7 bh = 12.6 m) | clamp, 2.5..9 m (owner: 2.5 m floor) | match on the rule; **9 m is below the 12.6 m seen, left for the owner** |
+| | E | at the planted hammer, not the cursor | the hammer | match |
+| | R | lane along the aim, not cursor-clamped | full lane | match |
+| | Shift | fixed-length dash, not to the cursor | fixed | match |
+| Tenzo (breah) | LMB boulder | cursor or max range: **unrecorded** | full, 11 m | ? (sheet open question) |
+| | RMB slam | a short hop ahead toward the cursor | fixed hop | match |
+| | Shift Rock Hop | toward the cursor, length ? | clamp, 1.2..2.4 m a hop (owner item) | owner note |
+| | X Basalt Spine | centre at the cursor, clamped | clamp 11 m, **now no minimum** | fixed |
+| Grimble (dredge) | LMB | fixed range, does not stop at the cursor | full | match |
+| | RMB Grasp | full range, to the first foe | full, 11.5 m | match |
+| | R | cone, fixed | fixed | match |
+| Vex (venator) | LMB | full, past the cursor | full | match |
+| | RMB Burr | along the aim to max range, not the cursor | full, 10.5 m | match |
+| | E Longneedle | fixed long lane | full, 18 m | match |
+| | X Mini Nuke | cursor-placed | clamp 14 m, **now no minimum** | fixed |
+| Kael (juggernaut) | LMB blast | full, past the cursor | full, by charge | match |
+| | RMB Meteor Drop | cursor-placed, clamped about 5 m | clamp 5 m, no minimum | match |
+| | E Warchain | hook toward the cursor, length ? | full, 13 m | match (?) |
+| Sparkle (vireo) | LMB, RMB | full range | full | match |
+| | E Skycall | ground spot at the cursor | clamp 11 m, **now no minimum** | fixed |
+| | X Kitefall | at the cursor, clamped inside a ring | clamp 14.4 m, backed off to standable ground | match |
+| Motley (ostra) | LMB, RMB Snap | full, past the cursor | full | match |
+| | Shift Swap | lands at the cursor (lob) | clamp 12 m, no minimum | match |
+| | E Brimseed | at the cursor | clamp 9 m; refuses with no ground | match (?) |
+| | X Nightwell | at the cursor, clamped (10 m) | clamp 10 m; refuses with no ground | match |
+| Neve (tamsin) | LMB darts | homing toward the cursor | full, homing | match |
+| | RMB Ice Spear | lands at the cursor | clamp 1.5..12 m | match (the 1.5 m floor is ours) |
+| | E Rink Wall | slides toward the cursor and stops there | clamp 4.5..16.2 m | match |
+| Meeko (mooshmoosh) | LMB, RMB | full range | full | match |
+| | E Hearth | thrown to the cursor | clamp 9 m, no minimum | match |
+| Sable (dancer) | LMB | ends at the cursor, clamped | clamp 1.5..12 m | match |
+| | RMB Bola | fixed-length lane toward the cursor | fixed | match |
+| | E Shadow Knife | skillshot; with no target lands at the cursor or the end of range | clamp 14 m | match (?) |
+
+Left alone, for the owner: Albert's throw range (9 m against 12.6 m seen), Lace's 2 m arc floor and Neve's
+1.5 m spear floor (our minimums, source unknown), and the Tenzo boulder, Kael hook and Sable dagger rules the
+footage never settles. `ArchKit.aim_at` (a second cursor clamp nothing called) is gone.

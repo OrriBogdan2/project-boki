@@ -37,7 +37,7 @@ func _init(species: String, rec := {}) -> void:
 		var what := String(head[0]) if not head.is_empty() else ""
 		var lines := [what, "Fill the bond meter, then press %s to fuse" % Settings.key_caps("ultimate")]
 		_add(ud.display_name, "bond", BOND_COL, lines, true)
-	tip = UI.card(Color(0.06, 0.06, 0.08, 0.96), 12, 10)
+	tip = UI.card(Color(UI.NIGHT, 0.96), 12, 10)
 	UI.set_card_border(tip, UI.LINE, 1)
 	tip.top_level = true
 	tip.mouse_filter = Control.MOUSE_FILTER_IGNORE

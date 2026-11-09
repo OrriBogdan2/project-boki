@@ -15,10 +15,6 @@ extends RefCounted
 static func rules() -> Dictionary:
 	return Content.rules("boki_system")
 
-## R runs the classes' own ultimate (ArchKit.use_r) instead of the Merge. Off: R is the Merge for every class.
-static func class_ults() -> bool:
-	return bool(rules().get("class_ults", false))
-
 ## The G key, polled every frame for the local player. Returns "tap" on the frame a short press is released,
 ## else "". A press held past g_hold_s opens the wheel (KinWheel), and letting go picks. `blocked`: a menu
 ## or map is up (the press is ignored).

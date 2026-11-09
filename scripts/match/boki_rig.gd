@@ -9,7 +9,8 @@ extends Node
 const PATH := "res://art/kin/%s/%s.glb"
 ## Where the eyes and the top of the head sit (m), per species: what KinModels.build returns for the accessories.
 ## "hip" is the height its legs hold it at, which the limb roll stretches: 0 for a Boki without legs. One that "hover"s
-## gets a soft shadow on the ground under it.
+## gets a soft shadow on the ground under it. "coat" overrides COAT_LOOK (a matte skin: less fresnel, rim and top
+## light, no sheen).
 const FRAME := {
 	"cindle": {"head": Vector3(0, 0.45, -0.34), "top": 0.72, "carry": Vector3(0, 0.3, -0.34),
 		"ear_tip": Vector3(0.218, 0.838, -0.081), "tail_tip": Vector3(0, 0.77, 0.10), "tip_bone": "tail7", "hip": 0.22,
@@ -65,6 +66,11 @@ const FRAME := {
 		"ear_tip": Vector3(0.16, 0.72, -0.3), "tail_tip": Vector3(0, 0.21, 0.4), "tip_bone": "tail2", "hip": 0.17,
 		"marks": {"left flank": Vector3(-0.145, 0.26, 0.15), "right flank": Vector3(0.145, 0.26, 0.15),
 			"back": Vector3(0, 0.39, 0.16), "chest": Vector3(0, 0.24, -0.14)}},
+	"caecilith": {"head": Vector3(0, 0.465, -0.263), "top": 0.555, "carry": Vector3(0, 0.17, 0.09),
+		"ear_tip": Vector3(0.059, 0.535, -0.13), "tail_tip": Vector3(0, 0.027, 0.234), "tip_bone": "tail6", "hip": 0.0,
+		"coat": {"fres": 0.15, "rim_amount": 0.1, "top_light": 0.1, "sheen": 0.0},
+		"marks": {"left flank": Vector3(-0.09, 0.225, -0.126), "right flank": Vector3(0.09, 0.225, -0.126),
+			"back": Vector3(0, 0.27, -0.03), "chest": Vector3(0, 0.225, -0.22)}},
 	"glomwort": {"head": Vector3(0, 0.26, -0.22), "top": 0.42, "carry": Vector3(0, 0.5, 0.08),
 		"ear_tip": Vector3(0.085, 0.42, 0.07), "tail_tip": Vector3(0, 0.12, 0.28), "tip_bone": "hips", "hip": 0.0,
 		"marks": {"left flank": Vector3(-0.21, 0.13, 0.04), "right flank": Vector3(0.21, 0.13, 0.04),
@@ -172,11 +178,29 @@ var _look_to := Vector2.ZERO
 var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
+var _flinch := KinFlinch.new()
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
 static func has(kin_id: String) -> bool:
 	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
+
+## Starts reading every common species' model on a loader thread (a match's start: bots' and wild Boki), so the
+## builds take them ready instead of each species' first build reading its .glb on the main thread (~60 ms).
+static func fetch_common() -> void:
+	for sp in Data.common_kin():
+		var p := PATH % [sp, sp]
+		if has(String(sp)) and not _scenes.has(p) \
+				and ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+			BackgroundWork.request(p)
+
+static var _scenes := {}       # path -> PackedScene, kept so a species' next build doesn't read it again
+static func _scene(kin_id: String) -> PackedScene:
+	var p := PATH % [kin_id, kin_id]
+	if not _scenes.has(p):
+		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
+		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
+	return _scenes[p] as PackedScene
 
 ## The work clip for a farm Boki (home's kin dictionary, its "job"), or "" when it isn't doing one.
 static func work_clip(k: Dictionary) -> String:
@@ -192,7 +216,7 @@ static func work_clip(k: Dictionary) -> String:
 ## Adds the model and its driver under `flex`; `c` is KinModels' material set. Returns the head frame, as
 ## KinModels.build.
 static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array) -> Dictionary:
-	var model_root := (load(PATH % [kin_id, kin_id]) as PackedScene).instantiate() as Node3D
+	var model_root := _scene(kin_id).instantiate() as Node3D
 	model_root.name = "Rig"
 	flex_node.add_child(model_root)
 	var rig := BokiRig.new()
@@ -216,6 +240,7 @@ func _ready() -> void:
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
+	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_copy_coat()
 	set_clip("idle")
 
@@ -249,17 +274,19 @@ func _process(dt: float) -> void:
 	player.active = seen
 	if not seen:
 		return
+	_flinch.update(root, dt)
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
 	_face_step(dt)
 
-## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll stays.
+## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
+## the jolt of a hit (KinFlinch) stay.
 func _keep_flex() -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	flex.rotation = Vector3.ZERO
-	flex.scale = Vector3(girth, 1.0, lerpf(1.0, girth, 0.5))
-	flex.position = Vector3(0, _flex_y, 0)
+	flex.rotation = _flinch.rot
+	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide)
+	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
 		body.rotation = Vector3.ZERO          # home's work poses swing Body: here the clip does the swinging
@@ -392,8 +419,9 @@ func _material_for(src: Material, c: Dictionary, mats: Array) -> Material:
 	m.set_shader_parameter("albedo_tex", (src as BaseMaterial3D).albedo_texture)
 	for k in WardenGlb.PAINTED:
 		m.set_shader_parameter(k, WardenGlb.PAINTED[k])
-	for k in COAT_LOOK:
-		m.set_shader_parameter(k, COAT_LOOK[k])
+	var look: Dictionary = COAT_LOOK.merged(FRAME[species].get("coat", {}), true)
+	for k in look:
+		m.set_shader_parameter(k, look[k])
 	m.set_shader_parameter("rim_color", (c["body"] as ShaderMaterial).get_shader_parameter("rim_color"))
 	if id == "boki_coat":
 		_coat = m

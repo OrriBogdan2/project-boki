@@ -46,7 +46,7 @@ Touch the side of an island while you're falling (or gliding) and you float back
 ## How a run works
 
 - **Farm.** Plant seeds and water them (F): a watered plant grows a stage every 90 seconds while you're home, and every expedition grows everything a stage too. Rain waters for you, and one Boki can be your farmhand. A plant watered every stage gives a bigger harvest and a seed back. Crops become tonics, treats, snacks, a level for your partner (Starfruit), or gems at the stall.
-- **Training area.** From the expedition menu: a safe island with target dummies and a checklist for every button.
+- **Training Grounds.** From the expedition menu: a safe island with target dummies and a checklist for every button.
 - **Expedition.** Pick a class (Light, Medium, Heavy), a tier (Meadow, Dusk Isles, Hollow) and a mode. Every match is PvPvE: rival squads, monsters, wild Boki, chests. Three ways out: call a sky-skiff at a dock on an outer landing (loud: monsters and rivals come, hold out about 45 seconds, then board in a 12-second window; docks close one by one late in the match), open a rift hatch with a scarce Rift Key (instant and quiet, lost to your deathbox if you die), or start an outpost's uplink and hold the yard until its lift opens. One life, and health and armor don't come back on their own (tonics and armor kits do). At 6:00 the islands fall.
 - **Down, dead and back (Supervive's rules, docs/DEATH_AND_REVIVE.md).** At 0 health you become a wisp: you crawl, can't be shot, and bleed out in 15s. A teammate standing on you brings you back in 4s at a third of your health (more teammates are faster); an enemy standing on you drains you four times as fast, and holding F executes you in 3s. Your Boki pulls you up too (8s) and goes after anyone who comes to stomp you. Knock the last standing member of a squad and the whole squad is out. Knocking someone heals you a little and gives a dash back. When you die, everything you carry goes in a deathbox where you fell: for 90s a teammate can hold F there for 5s to bring you back at half health with your loot, and anyone can hold F to take what's in it. Revive beacons (green pillars, six per map, single use) bring back every dead or downed teammate after 6s of standing on one: full health, nothing you carried, and 12s of -25% damage. Two squads on a beacon pause it. While you're dead the camera follows a teammate; once nobody's left to bring you back, the expedition's over.
 - **The drop.** Expeditions happen on a big map. Everyone starts aboard the skyship as it crosses the islands: press Space to jump when you're over the spot you want, then glide down. A ring on the ground shows where you'd land. Anyone still aboard at the far side gets dropped.
@@ -92,7 +92,7 @@ Code: `scripts/core/care.gd`, `scripts/core/kin_speak.gd`, the raising section o
 
 ## The Boki's mind
 
-Code: `scripts/match/kin.gd`, `scripts/match/kin_voice.gd`, `scripts/core/bridge.gd`.
+Code: `scripts/match/kin.gd`, `scripts/core/bridge.gd`.
 
 - **Traits.** Bravery, loyalty, temper and curiosity, seeded per species and varied per Boki. They drift with experience.
 - **Trust** (0 to 100). It rises when you extract together, chat, pet and feed. It falls when you throw the Boki into danger while it's hurt, or when you lose.
@@ -131,12 +131,12 @@ The soundtrack is original folk-style music written as note data in `tools/compo
 
 ## Adding content
 
-Boki (the Boki grammar, `content/*_v2`, see `docs/KIN_GRAMMAR.md`), abilities, weapons, class dodges, combos and the bond and Boki-AI tuning are JSON files under `content/`. Drop in a new file and the game picks it up; see `CONTENT.md`. `tests/kin_gallery.tscn` (F6 in the editor) shows every Boki side by side, and `tests/combat_sandbox.tscn` drops you in the training area to try a kit.
+Boki (the Boki grammar, `content/*_v2`, see `docs/KIN_GRAMMAR.md`), abilities, weapons, class dodges, combos and the bond and Boki-AI tuning are JSON files under `content/`. Drop in a new file and the game picks it up; see `CONTENT.md`. `tests/kin_gallery.tscn` (F6 in the editor) shows every Boki side by side, and `tests/combat_sandbox.tscn` drops you in the Training Grounds to try a kit.
 
 ## Project layout
 
 ```
-content/         kin (kin_v2, abilities_v2, merges_v2, evolution_v2), abilities, weapons, classes, combos, rules (JSON, no code needed)
+content/         kin (kin_v2, abilities_v2, merges_v2, evolution_v2), hunter_abilities, weapons, classes, combos, rules (JSON, no code needed)
 scripts/combat/  the combat systems: CombatBus signals, AbilityRunner, Effects, KinTactics (kin AI), Bond, Combos, Ultimate, Fields
 scripts/core/    data.gd (all tuning), save.gd, game.gd, ransom.gd, sfx.gd, bridge.gd, net.gd, social.gd, evo.gd
 scripts/match/   match.gd, world.gd, hunter.gd, kin.gd, mob.gd, bot.gd, fx.gd, cam.gd, models.gd

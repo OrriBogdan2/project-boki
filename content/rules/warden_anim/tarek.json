@@ -7,7 +7,8 @@
 		"foot.R": "shin.R",
 		"jaw": "head",
 		"lip.L": "head",
-		"lip.R": "head"
+		"lip.R": "head",
+		"x_breath": "hips"
 	},
 	"blade": {
 		"root": "anchor_wrist_R",
@@ -30,9 +31,9 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 5.0
+		"run_speed": 5.0, "stride": [1.5, 1.2], "foot_mps": [1.51, 5.16], "arm_swing": {"L": 0.5, "R": 0.5}
 	},
-	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.16},
 	"air": {
 		"rise": "jump",
 		"fall": "fall",
@@ -46,14 +47,17 @@
 	},
 	"kmoves": {
 		"breah_throw": {
-			"clip": "lmb_throw"
+			"clip": "lmb_throw",
+			"upper": "moving"
 		},
 		"breah_wind": {
 			"clip": "lmb_wind",
+			"upper": "moving",
 			"hold_from": 0.24
 		},
 		"breah_punch": {
-			"clip": "lmb_punch"
+			"clip": "lmb_punch",
+			"upper": "moving"
 		},
 		"breah_crouch": {
 			"clip": "rmb_gather",
@@ -80,7 +84,9 @@
 			"clip": "dash_land"
 		},
 		"breah_exdash": {
-			"clip": "dash_air"
+			"clip": "dash_air",
+			"heading": true,
+			"turn_max": 3.2
 		},
 		"breah_raise": {
 			"clip": "e_row"
@@ -93,7 +99,8 @@
 			"hold_from": 0.12
 		},
 		"breah_spine": {
-			"clip": "x_spine"
+			"clip": "x_spine",
+			"speed": 0.7
 		},
 		"mf_xform": {
 			"clip": "fuse"

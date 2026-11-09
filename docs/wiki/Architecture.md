@@ -95,7 +95,7 @@ launcher project handles Discord login and updates. See [Networking](Networking.
 ## Repository layout
 
 ```
-content/     game data (JSON): archetypes, classes, kin, kin_v2, abilities, abilities_v2, merges_v2,
+content/     game data (JSON): archetypes, classes, kin, kin_v2, hunter_abilities, abilities_v2, merges_v2,
              evolution_v2, mutations, gloves, weapons, maps, biomes, combos, rules
 scripts/     the game (see Code map)
 scenes/      main.tscn

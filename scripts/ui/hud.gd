@@ -343,6 +343,7 @@ func _draw_world_labels() -> void:
 	_draw_lair_labels()
 	_draw_truce_marks()
 	_draw_wisp_rings()
+	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the combo badges on foes
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen:
 			continue
@@ -370,7 +371,7 @@ func _draw_world_labels() -> void:
 		var to: Hunter = h.base_to
 		if to and is_instance_valid(to) and not cam.is_position_behind(to.position):
 			var tsp := cam.unproject_position(to.position + Vector3(0, 3.0, 0))
-			_ctext(tsp, "%s incoming" % h.pname.substr(0, 10), 12, Color("8fe3c8"), big)
+			_ctext(tsp, "%s incoming" % h.pname.substr(0, 14), 12, Color("8fe3c8"), big)
 			c.draw_arc(cam.unproject_position(to.position + Vector3(0, 0.1, 0)), 22.0, 0, TAU, 32, Color(0.56, 0.89, 0.78, 0.4 + 0.3 * sin(m.time * 8.0)), 2.0, true)
 	for mb in m.mobs:
 		if mb.dead or not mb.visible or cam.is_position_behind(mb.position):
@@ -534,7 +535,7 @@ func _draw_top(sz: Vector2) -> void:
 			return      # (recording: no training banner or checklist)
 		var rr := Rect2(Vector2(sz.x * 0.5 - 220, 12), Vector2(440, 54))
 		_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)
-		_ctext(Vector2(sz.x * 0.5, 34), "TRAINING AREA", 12, Color("8fe3c8"))
+		_ctext(Vector2(sz.x * 0.5, 34), "TRAINING GROUNDS", 12, Color("8fe3c8"))
 		_ctext(Vector2(sz.x * 0.5, 56), "Nothing can hurt you here  ·  Esc to leave", 15, INK)
 		# the checklist: only what's left (up to six), with a count; H folds it away
 		var all_rows: Array = m.train_rows()
@@ -562,6 +563,7 @@ func _draw_top(sz: Vector2) -> void:
 	if m.tut:
 		TutorialHud.draw(self, sz)
 		return
+	if m.guide: m.guide.draw(self, sz)
 	# top right, as in Supervive: squads left, your kills, your knocks, your gems
 	var teams := {}
 	for h in m.hunters:
@@ -698,6 +700,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.lairs:
 		_draw_map_lairs(inner, to_map, on_map, riding)
 	ReviveHud.minimap(self, inner, to_map, on_map)
+	if m.biomes: m.biomes.hot.minimap(self, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
 		for cnd in m.spawn_plan.cands:
@@ -1202,6 +1205,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	x += s + gap
 	var di := p.slot_info("dash")
 	DashSlot.row_slot(self, Rect2(Vector2(x, y), Vector2(s, s)), p)
+	RecastCue.slot(self, p, "dash", Rect2(Vector2(x, y), Vector2(s, s)))
 	if di.get("full", false):
 		# the payoff lives on the dash (the Thief's Primed shot into 3 Marks): the same gold dot
 		c.draw_circle(Vector2(x, y) + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
@@ -1213,7 +1217,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	if ei.get("full", false):
 		# the payoff lives on E (the Mage's Flashpoint): the same gold dot as the right click's
 		c.draw_circle(er.position + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
-	if float(ei.get("up", 0.0)) > 0.0:
+	if not RecastCue.slot(self, p, "e", er) and float(ei.get("up", 0.0)) > 0.0:
 		c.draw_arc(er.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * clampf(float(ei["up"]) / maxf(0.1, float(p.ak.e_def().get("time", 5.0))), 0.0, 1.0), 32, Color(ei["col"], 0.9), 3.0, true)
 	x += s + gap
 	# X: the hero's own ultimate (the Merge sits on the right: GripHud)
@@ -1264,7 +1268,7 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 	var st := ""
 	match k.state:
 		"shoulder":
-			st = ({"mount": "riding", "perch": "perched"}.get(k.carry_style(), "on shoulder") if k.cmd == "return" else "carried") if k.settle >= 1.0 else "settling"
+			st = ({"mount": "at your side", "perch": "perched"}.get(k.carry_style(), "on shoulder") if k.cmd == "return" else "carried") if k.settle >= 1.0 else "settling"
 			if not k.giant.is_empty(): st = "GIANT"
 			elif k.carry_style() == "mount" and p.gliding: st = "curled up"
 		"flying", "flying_home": st = "in the air"
@@ -1288,6 +1292,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12, Color(rc, 0.45), 1)
 	hover_spots.append([r, "weapon"])
 	BokiHud.aug_mark(self, p, Rect2(r.position + Vector2(6, 4), Vector2(18, 18)), "lmb")
+	RecastCue.slot(self, p, "lmb", Rect2(r.position + Vector2(14, 8), Vector2(52, 52)))      # the recall (Bulwark)
 	c.draw_rect(Rect2(r.position + Vector2(0, 10), Vector2(3, r.size.y - 20)), rc)
 	Icons.draw(c, p.wid, r.position + Vector2(40, 34), 26.0, Color(rc, 0.9))
 	var wn := String(p.wpn["name"]).to_upper()
@@ -1606,27 +1611,7 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 		bounty_marker(c, Vector2(sp.x, sp.y - 34), 1.15)
 		_ctext(Vector2(sp.x, sp.y - 48), "BOUNTY  ·  LV %d" % h.lvl, 11, Color("ffb64a"), big)
 	if not h.downed:
-		_draw_marks(Vector2(sp.x, sp.y - 28), h)
-
-## A Thief's Marks over their target's head: pips, and a pulsing purse at 3 (both sides see them).
-func _draw_marks(at: Vector2, e: Ent) -> void:
-	if not e.has_meta("marks"):
-		return
-	var best := 0
-	for k in (e.get_meta("marks") as Dictionary):
-		var mk: Array = e.get_meta("marks")[k]
-		if float(mk[1]) > 0.0: best = maxi(best, int(mk[0]))
-	if best <= 0:
-		return
-	var gold := Color("ffd23f")
-	for i in 3:
-		var pc := at + Vector2((i - 1) * 11.0, 0)
-		c.draw_circle(pc, 4.6, Color(0, 0, 0, 0.6))
-		c.draw_circle(pc, 3.6, gold if i < best else Color(1, 1, 1, 0.2))
-	if best >= 3:
-		var pulse := 0.5 + 0.5 * sin(m.time * 9.0)
-		c.draw_circle(at + Vector2(0, -12), 7.0 + pulse * 2.0, Color(gold, 0.85))
-		_ctext(at + Vector2(0, -8), "$", 11, Color(0.15, 0.1, 0.0), big)
+		ComboMark.draw(c, Vector2(sp.x, sp.y - 34), m.player, h, m.time)
 
 ## Little icons for what's happening to someone: stunned, rooted, slowed, burning, shielded, braced.
 func _status_row(at: Vector2, e: Ent) -> void:
@@ -2029,7 +2014,7 @@ func _draw_scores(sz: Vector2) -> void:
 	for h in hs:
 		var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
 		c.draw_rect(Rect2(Vector2(r.position.x + 12, y - 14), Vector2(4, 18)), tc)
-		_text(Vector2(r.position.x + 22, y), HeroTitle.of_hunter(h), 15, INK if h != m.player else GOLD)
+		_text(Vector2(r.position.x + 22, y), h.pname, 15, INK if h != m.player else GOLD)
 		if h.kin: _text(Vector2(r.position.x + 260, y), Data.KIN[h.kin.species]["name"], 14, Data.KIN[h.kin.species]["color"])
 		_text(Vector2(r.position.x + 392, y), str(h.knocks), 15)
 		_text(Vector2(r.position.x + 456, y), str(int(h.dmg_done)), 15)
@@ -2076,13 +2061,13 @@ func _draw_overhead(p: Hunter) -> void:
 		_arc(rc, 8.0, rf, Color("ffe7a8"), 3.0)
 		_ctext(sp + Vector2(0, 33), "RELOADING", 11, Color("ffe7a8"), big)
 	if p.drink_t > 0.0:
-		var df := 1.0 - p.drink_t / Hunter.DRINK_TIME
+		var df := 1.0 - p.drink_t / UtilityUse.channel("tonic", "time")
 		var dc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(dc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(dc, 8.0, df, Color("8ff0a0"), 3.0)
 		_ctext(sp + Vector2(0, 33 if p.reload_t <= 0.0 else 46), "DRINKING", 11, Color("8ff0a0"), big)
 	if p.kit_t > 0.0:
-		var kf := 1.0 - p.kit_t / Hunter.KIT_TIME
+		var kf := 1.0 - p.kit_t / UtilityUse.channel("armor_kit", "time")
 		var kc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(kc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(kc, 8.0, kf, ARMOR_COL, 3.0)
@@ -2170,8 +2155,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 	if id == "r":
 		out.append(["Unlocks at level %d, rank 2 at %d. " % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
 	if id == "sec":
-		var rd := p.ak.res_def()
-		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12])
+		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(p.ak.res_col(), 0.9), 12])
 	out.append(["Cooldown %s%s" % [_secs(float(si["cd_max"])), ("  ·  ready in %s" % _secs(float(si["cd"]))) if float(si["cd"]) > 0.0 else "  ·  ready"], MUTED, 13])
 	return out
 
@@ -2561,10 +2545,12 @@ func open_loot(b: Dictionary) -> void:
 	Sfx.play("ui_open", null, -10.0)
 	_build_loot()
 	if loot_panel: UI.pop_in(loot_panel)
+	if pack_panel: UI.pop_in(pack_panel)
 
 func close_loot() -> void:
 	loot_open = null
 	_close_hold()
+	close_pack()
 	if loot_panel and is_instance_valid(loot_panel):
 		loot_panel.queue_free()
 	loot_panel = null
@@ -2591,19 +2577,33 @@ func open_hold(row: Dictionary) -> void:
 		return
 	var b: Dictionary = loot_open
 	var hi := int(row["i"])
+	close_pack()
 	var swap := func(mi: int): if LootFull.swap_held(m, m.player, b, hi, mi): _hold_done()
 	var drop := func(mi: int): if LootFull.drop_for_held(m, m.player, b, hi, mi): _hold_done()
-	loot_hold = LootHold.build(m.player, (b["pack"] as Array)[hi], swap, drop, _close_hold)
+	loot_hold = LootHold.build(m.player, (b["pack"] as Array)[hi], swap, drop, _dismiss_hold)
 	add_child(loot_hold)
 	UI.pop_in(loot_hold)
 	await get_tree().process_frame
 	if is_instance_valid(loot_hold) and loot_panel:
-		loot_hold.position = Vector2(maxf(8.0, loot_panel.position.x - loot_hold.size.x - 12.0), loot_panel.position.y)
+		var vs := loot_hold.get_viewport_rect().size
+		loot_hold.position = Vector2(vs.x - loot_hold.size.x - 16.0, loot_panel.position.y)    # where your inventory was
 
 func _close_hold() -> void:
 	if loot_hold and is_instance_valid(loot_hold):
 		loot_hold.queue_free()
 	loot_hold = null
+
+## The hold window's own close: your inventory comes back beside the box.
+func _dismiss_hold() -> void:
+	_close_hold()
+	if loot_open != null:
+		_open_pack_beside()
+
+## Your inventory at the right edge with the deathbox to its left, so you can compare as you take.
+func _open_pack_beside() -> void:
+	pack_sig = ""
+	_build_pack()
+	if pack_panel: UI.pop_in(pack_panel)
 
 func _hold_done() -> void:
 	if (loot_open as Dictionary).get("empty", false):
@@ -2631,6 +2631,8 @@ func _build_loot() -> void:
 	sb.shadow_color = Color(0, 0, 0, 0.5); sb.shadow_size = 18
 	pc.add_theme_stylebox_override("panel", sb)
 	var v := UI.vbox(6); pc.add_child(v)
+	var tip := InvTip.new(pc)
+	pc.add_child(tip)
 	var o: Hunter = b["owner"]
 	var head := UI.hbox(8); v.add_child(head)
 	head.add_child(Icons.Glyph.new("gem", bc, 18.0))
@@ -2686,6 +2688,9 @@ func _build_loot() -> void:
 			row.add_child(Icons.Glyph.new("gem", Color(GOLD, 0.8), 12.0))
 			row.add_child(vt)
 		var itc: Dictionary = it
+		var gear_it := InvText.box_gear(b, it)
+		if not gear_it.is_empty():
+			tip.attach(rp, func(): return InvText.compare(p, gear_it))
 		var verb := "Take"
 		if it["key"] == "gear": verb = "Swap"
 		elif not fit: verb = "Full"
@@ -2720,11 +2725,13 @@ func _build_loot() -> void:
 	pc.custom_minimum_size.x = 430
 	add_child(pc)
 	loot_panel = pc
-	# to the right of centre, clear of your hunter and the ability bar
+	if not pack_open():
+		_open_pack_beside()
+	# left of your inventory, which sits at the right edge
 	await get_tree().process_frame
 	if is_instance_valid(pc):
 		var vs := pc.get_viewport_rect().size
-		pc.position = Vector2(vs.x * 0.5 + 90.0, maxf(90.0, vs.y * 0.5 - pc.size.y * 0.5 - 40.0))
+		pc.position = Vector2(vs.x - 16.0 - LootHold.WIDTH - 12.0 - pc.size.x, maxf(90.0, vs.y * 0.5 - pc.size.y * 0.5 - 40.0))
 
 # ------------------------------------------------------------------ the backpack and the swap window
 ## The backpack (I): what you're carrying home, each with Equip (weapons and gloves go in your hands,
@@ -2792,6 +2799,7 @@ func _scroll_rows(v: VBoxContainer) -> Array:
 func _fit_panel(pc: PanelContainer, sc: ScrollContainer, rows: VBoxContainer) -> void:
 	pc.position = Vector2(-10000, 0)     # out of sight until it's sized
 	await get_tree().process_frame
+	await get_tree().process_frame      # wrapping labels settle their height one frame after they get a width
 	if not is_instance_valid(pc):
 		return
 	var vs := pc.get_viewport_rect().size
@@ -2873,47 +2881,29 @@ func close_pack() -> void:
 	pack_panel = null
 
 func _pack_state(p: Hunter) -> String:
-	return str(p.pack.map(func(it): return it.get("uid", ""))) + p.wid + p.welem + str(p.gear) + str(p.pack_cap) + str(p.caught.size())
+	var belt := str(p.belt.map(func(s): return [s.get("id", ""), s.get("n", 0)]))
+	return str(p.pack.map(func(it): return it.get("uid", ""))) + p.wid + p.welem + str(p.gear) + str(p.pack_cap) \
+		+ str(p.caught.size()) + belt + str(p.perks)
 
 func _build_pack() -> void:
 	if pack_panel and is_instance_valid(pack_panel):
 		pack_panel.queue_free()
 	var p: Hunter = m.player
 	pack_sig = _pack_state(p)
-	var pb := _item_panel("Backpack", INK, 470)
+	var pb := _item_panel("Inventory", INK, LootHold.WIDTH)
 	var pc: PanelContainer = pb[0]; var v: VBoxContainer = pb[1]; var head: HBoxContainer = pb[2]
 	head.add_child(_pack_chip(p))
 	var cl := UI.button("✕", func(): close_pack(), 36); cl.flat = true
 	head.add_child(cl)
-	v.add_child(UI.label("Wearing", 12, MUTED, UI.caps))
-	for g in p.gear:
-		if not (g as Dictionary).is_empty():
-			v.add_child(_item_row(Loot.gear(String(g["id"]), int(g["rar"])), []))
-	v.add_child(UI.label("Carrying home  ·  extract to keep it all", 12, MUTED, UI.caps))
-	var sl := _scroll_rows(v)
-	var rows: VBoxContainer = sl[1]
-	if p.pack.is_empty():
-		rows.add_child(UI.label("Nothing yet. Gear and treasure you pick up go here.", 13, MUTED))
-	for i in p.pack.size():
-		var idx := i
-		var it: Dictionary = p.pack[i]
-		var bts: Array = []
-		if String(it.get("t", "")) == "gear":
-			bts.append(["Wear", func(): Pack.use_from_pack(m, m.player, idx); _build_pack(), true])
-		bts.append(["Drop", func(): Pack.drop_from_pack(m, m.player, idx); _build_pack()])
-		rows.add_child(_item_row(it, bts))
-	for k in p.pack_cap - p.pack.size():
-		if k >= 3: break
-		var empty := UI.card(Color(1, 1, 1, 0.03), 6, 9)
-		empty.custom_minimum_size.y = 30
-		empty.add_child(UI.label("empty slot", 12, Color(MUTED, 0.6)))
-		rows.add_child(empty)
-	CaptureHud.pack_section(self, v, p, func(): _build_pack())       # the capsules in your box, with Release
-	var hint := UI.label("%s or Esc to close  ·  bigger backpacks at your armory" % Settings.key_cap("inventory"), 12, MUTED)
+	var sl := LoadoutPanel.fill(m, pc, v, func(): _build_pack())
+	if loot_open == null:
+		CaptureHud.pack_section(self, v, p, func(): _build_pack())       # the capsules in your box, with Release
+	var hint := UI.para(LoadoutPanel.HINT, 12)
+	hint.custom_minimum_size.x = LootHold.WIDTH - 28.0
 	v.add_child(hint)
 	add_child(pc)
 	pack_panel = pc
-	_fit_panel(pc, sl[0], rows)
+	_fit_panel(pc, sl[0], sl[1])
 
 ## Closes the windows when they stop making sense (you went down, walked off, or it's gone).
 func _pack_tick() -> void:

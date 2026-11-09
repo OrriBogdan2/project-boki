@@ -25,6 +25,8 @@ func run(main_node: Node) -> void:
 	await _dash_moves()
 	await _glide_wins()
 	await _parity_gun()
+	await load("res://tools/dredge_timing_check.gd").new(ak, ok).run()
+	await _ranks()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
@@ -141,8 +143,10 @@ func _slam_tell() -> void:
 	var reach := float(ed["radius"])
 	# aim straight along +x; one foe inside the edge of the cone, one just past it (outside the angle)
 	ak.aim_at(P, home + Vector3(5.0, 0, 0))
-	T.teleport(home + Vector3(cos(half - 0.25), 0, sin(half - 0.25)) * (reach - 0.4))
-	T2.teleport(home + Vector3(cos(half + 0.35), 0, sin(half + 0.35)) * (reach - 0.4))
+	var in_off := Vector3(cos(half - 0.25), 0, sin(half - 0.25)) * (reach - 0.4)
+	var out_off := Vector3(cos(half + 0.35), 0, sin(half + 0.35)) * (reach - 0.4)
+	T.teleport(home + in_off)
+	T2.teleport(home + out_off)
 	ak.fresh(T)
 	ak.fresh(T2)
 	K.cd["e"] = 0.0
@@ -159,11 +163,16 @@ func _slam_tell() -> void:
 			and fill_mid > 0.3 and fill_mid < 0.8 and ak.dmg(T) == 0.0,
 		"len %.1f deg %.0f fill %.2f" % [float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), fill_mid]
 	)
-	ak.step(m, 0.3)
+	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
+	while K.wind > 0.03:
+		ak.step(m, ak.DT)
+	T.teleport(P.pos + in_off)
+	T2.teleport(P.pos + out_off)
+	ak.step(m, 0.1)
 	ok(
 		"anchor tell: the slam hits inside the drawn cone and nothing outside it",
 		K.anchors == 1 and ak.dmg(T) > 10.0 and ak.dmg(T2) == 0.0 and not AimKit.shown(P, "e_tell"),
-		"inside %.0f, outside %.0f" % [ak.dmg(T), ak.dmg(T2)]
+		"inside %.0f, outside %.0f (anchors %d)" % [ak.dmg(T), ak.dmg(T2), K.anchors]
 	)
 	await ak.done(m)
 
@@ -388,6 +397,32 @@ func _all() -> void:
 	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
 	P.ammo = int(P.wpn["mag"])
 	P.reload_t = 0.0
+	# --- a volley fired at zero bloom shreds armor (content gun.armor_k); a spread one does not
+	var wear := []
+	var armor0: float = T.armor
+	var max_armor0: float = T.max_armor
+	for bloom0 in [0.0, 9.0]:
+		reset.call()
+		T.teleport(home + Vector3(0, 0, 1.6))
+		T.max_armor = 50.0
+		T.armor = 50.0
+		var hp0: float = T.hp
+		P.wbloom = bloom0
+		P.ammo = int(P.wpn["mag"])
+		ak.aim_at(P, T.pos)
+		P.inp["fire"] = true
+		ak.step(m, 0.1)
+		P.inp["fire"] = false
+		ak.step(m, 0.5)
+		wear.append([T.max_armor - T.armor, hp0 - T.hp])
+	T.armor = armor0
+	T.max_armor = max_armor0
+	ok(
+		"gun: zero bloom wears armor %.0f%% faster than a spread volley" % (float(K.gun_def()["armor_k"]) * 100.0),
+		K.armor_shreds > 0 and wear[1][1] > 0.0 and wear[0][1] > 0.0
+		and (wear[0][0] / wear[0][1]) > (wear[1][0] / wear[1][1]) * 1.5,
+		"tight armor %.1f hp %.1f, spread armor %.1f hp %.1f" % [wear[0][0], wear[0][1], wear[1][0], wear[1][1]]
+	)
 	# --- Abyssal Hand reels a foe in
 	reset.call()
 	ak.tap(m, P)
@@ -446,8 +481,8 @@ func _all() -> void:
 	var early_dmg: float = ak.dmg(T) - hp0
 	ak.step(m, 0.2)
 	ok(
-		"anchor: planted, the damage lands on the slam frame (~0.38s), not at the cast",
-		early == 0 and early_dmg == 0.0 and K.anchors == 1 and P.flat_dist(at0) < 0.3,
+		"anchor: hops ~1 bh forward, the damage lands on the slam frame (~0.38s), not at the cast",
+		early == 0 and early_dmg == 0.0 and K.anchors == 1 and P.flat_dist(at0) > 0.8 and P.flat_dist(at0) < 2.0,
 		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, P.flat_dist(at0)]
 	)
 	ok(
@@ -502,6 +537,21 @@ func _all() -> void:
 	)
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 4, hz + dz)] = lv
+	# --- owner rule (DECISIONS Kits): the Hand passes walls and cliffs, but a placed wall stops it
+	reset.call()
+	var wall_def := {"length": 8.0, "hp": 999.0, "time": 30.0, "block": "all"}
+	var wall: Dictionary = m.verbs.add_wall(T, home + Vector3(4.0, 0, 0), Vector2(-1, 0), wall_def, 1.0)
+	var dm0: float = ak.dmg(T)
+	var gw0 := K.grapples
+	ak.tap(m, P)
+	ak.step(m, 0.6)
+	ok(
+		"placed wall: stops the Abyssal Hand, no hook and no damage behind it",
+		K.pull.is_empty() and ak.dmg(T) <= dm0 and K.grapples == gw0,
+		"grapples +%d took %.1f" % [K.grapples - gw0, ak.dmg(T) - dm0]
+	)
+	m.verbs.walls.erase(wall)
+	if is_instance_valid(wall.get("node")): (wall["node"] as Node).queue_free()
 	# --- rocks: the hook flies over a rock and the foe is dragged over it
 	reset.call()
 	for dz in range(-1, 2):
@@ -891,6 +941,31 @@ func _all() -> void:
 	)
 	m.queue_free()
 	await main.get_tree().process_frame
+
+## Upgrade parity (docs/heroes/dredge.md): per rank [RMB cd, dash recharge, E cd, E power, E stun] against the source's
+## tier II / III+IV numbers.
+func _ranks() -> void:
+	var r: Array = ak.setup("dredge", 9.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: DredgeKit = P.ak
+	var up: Array = []
+	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	var pk := K.power("kin")
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		var cd_e: float = K.e_def()["cooldown"] * K.cd_k("kin")
+		up.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), P.dash_regen(), cd_e, K.power("kin") / pk, K._stun_t()])
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
+	ok("upgrade parity: Abyssal Hand cooldown 12 -> 10.3 -> 8.7 (-2.5s twice on the source's 18)",
+			near.call(up[1][0], 10.33) and near.call(up[2][0], 8.67), str(up))
+	ok("upgrade parity: Barge recharge 10 -> 8.2 -> 6.4 (-1.25s twice on the source's 7)",
+			near.call(up[1][1], 8.21) and near.call(up[2][1], 6.43), str(up))
+	ok("upgrade parity: Anchor cooldown 7 -> 5.5 -> 4.1, damage +20% / +40%, stun +0.1 / +0.4",
+			near.call(up[1][2], 5.54) and near.call(up[2][2], 4.08)
+			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4)
+			and near.call(up[1][4] - up[0][4], 0.1) and near.call(up[2][4] - up[0][4], 0.4), str(up))
+	await ak.done(m)
 
 ## Parity pass (docs/heroes/dredge.md): the hold-to-fire gun against the footage (0040-0080): he walks between
 ## shots (at the shared firing walk), each volley is fanned on the cursor's direction at its shot, the slugs stop

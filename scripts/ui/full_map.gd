@@ -186,6 +186,8 @@ func draw(sz: Vector2) -> void:
 	hud.mm_circ = saved
 	_spawns(c, team, kk)
 	ReviveHud.full_map(self)
+	if m.biomes:
+		m.biomes.hot.full_map(self, kk)
 	_lair_alerts(c)
 	_ship(c)
 	_wave_ships(c)

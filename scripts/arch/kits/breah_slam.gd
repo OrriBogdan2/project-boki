@@ -87,19 +87,19 @@ func hold_tick(t: float) -> void:
 		h, "rmb",
 		{
 			"at": center(), "r": radius(c), "k": c, "fill": c, "core0": float(sd()["core"][0]),
-			"core1": float(sd()["core"][1]), "all": true, "col": Color("ff5a2a"), "col2": Color("ffd24a")
+			"core1": float(sd()["core"][1]), "all": true, "col": Color("3a7cff"), "col2": Color("d8ecff")
 		}
 	)
-	AimKit.charge(h, c, {"col": DolmKit.MOLTEN, "col2": Color("ffe2a0")})
+	AimKit.charge(h, c, {"col": DolmKit.COBALT, "col2": Color("d8ecff")})
 	var looks := KitLooks.of(k.m)
 	var dd := h.aim_dir()
 	for side in [-1.0, 1.0]:
 		var at := h.pos + Vector3(dd.x * 0.3 - dd.y * 0.32 * side, 0.75, dd.y * 0.3 + dd.x * 0.32 * side)
-		var hot := DolmKit.MOLTEN.lerp(Color("ffc23a"), c)
+		var hot := DolmKit.COBALT.lerp(Color("9ad0ff"), c)
 		looks.hold_on("br_slamfist%d" % int(side), "mote", h, at, 0.8 + 1.0 * c, hot)
 	if fmod(k.m.time, 0.12) < 1.0 / 60.0:
 		k.m.fx.spark(
-			h.pos + Vector3(0, 0.2, 0), Vector3.UP, DolmKit.MOLTEN, int(2 + 4 * c), 2.0 + 2.0 * c, 70.0, 0.3, -2.0, 0.8
+			h.pos + Vector3(0, 0.2, 0), Vector3.UP, DolmKit.COBALT, int(2 + 4 * c), 2.0 + 2.0 * c, 70.0, 0.3, -2.0, 0.8
 		)
 	# jump while charging: leap forward, the circle rides along
 	if not leapt and was_ground and not h.grounded and h.vel.y > 0.5:
@@ -191,15 +191,15 @@ func slam(c: float, at_feet: bool) -> void:
 	var r := radius(c)
 	var cr := core(c)
 	var dmg := lerpf(float(s["dmg"][0]), float(s["dmg"][1]), c) * k.power("sec")
-	m.fx.ring(at, cr, Color("ffb020"), 0.22)
-	m.fx.burst(at + Vector3(0, 0.3, 0), Color(1.0, 0.45, 0.1, 0.9), int(16 + 20 * c), 6.0 + 3.0 * c, 0.6, 8.0, 1.3)
+	m.fx.ring(at, cr, Color("9ad0ff"), 0.22)
+	m.fx.burst(at + Vector3(0, 0.3, 0), Color(0.23, 0.49, 1.0, 0.9), int(16 + 20 * c), 6.0 + 3.0 * c, 0.6, 8.0, 1.3)
 	m.fx.spark(
-		at + Vector3(0, 0.2, 0), Vector3.UP, Color("ffb347"), int(10 + 10 * c), 9.0 + 4.0 * c, 75.0, 0.35, 14.0, 1.3
+		at + Vector3(0, 0.2, 0), Vector3.UP, Color("9ad0ff"), int(10 + 10 * c), 9.0 + 4.0 * c, 75.0, 0.35, 14.0, 1.3
 	)
-	m.fx.flash(at + Vector3(0, 0.5, 0), Color("ff8a2c"), 0.6 + 0.3 * c, 0.08)
+	m.fx.flash(at + Vector3(0, 0.5, 0), Color("9ad0ff"), 0.6 + 0.3 * c, 0.08)
 	KitLooks.of(m).impact(at, r, c, float(s["scorch_t"]))
 	m.sfx("br_slam", at, 0.0, 1.0)
-	k.net_ring(at, r, Color("ff5a2a"))
+	k.net_ring(at, r, Color("3a7cff"))
 	var gained := false
 	for f in k.foes_in(at, r, 3.2):
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
@@ -216,12 +216,12 @@ func slam(c: float, at_feet: bool) -> void:
 			if m.world.is_void(f.pos.x, f.pos.z): d2 += float(s["dunk_void"])
 			o.erase("lift")
 			k.dunks += 1
-			m.fx.word(f.pos + Vector3(0, 2.0, 0), "DUNKED", Color("ffb36a"), true)
-			m.fx.beam(f.pos, f.pos + Vector3(0, 6.0, 0), Color("ffe08a"), 0.5, 0.3)
+			m.fx.word(f.pos + Vector3(0, 2.0, 0), "DUNKED", Color("9ad0ff"), true)
+			m.fx.beam(f.pos, f.pos + Vector3(0, 6.0, 0), Color("d8ecff"), 0.5, 0.3)
 		f.hurt(d2, h, o)
 		if in_core: KitLooks.of(m).crown(f, float(o["stun"]))
 		if air:
-			m.displace.spike(f, -22.0)      # spiked down (after the hit, which would lift it)
+			m.displace.spike(f, -22.0, h)      # spiked down (after the hit, which would lift it)
 		gained = true
 	for w in m.verbs.walls.duplicate():
 		if not k.launchable(w): continue

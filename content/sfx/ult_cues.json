@@ -1,0 +1,37 @@
+{
+ "group": "ult_cues",
+ "name": "Ultimate cast cues",
+ "script": "tools/gen_sfx_ult_cues.py",
+ "sounds": {
+  "archer_ult_cue": "signature",
+  "ashwick_ult_cue": "signature",
+  "bulwark_ult_cue": "signature",
+  "dolm_ult_cue": "signature",
+  "dredge_ult_cue": "signature",
+  "gunslinger_ult_cue": "signature",
+  "juggernaut_ult_cue": "signature",
+  "mage_ult_cue": "signature",
+  "ostra_ult_cue": "signature",
+  "rimewright_ult_cue": "signature",
+  "tender_ult_cue": "signature",
+  "thief_ult_cue": "signature",
+  "ult_tag_ally": "cast",
+  "ult_tag_foe": "cast"
+ },
+ "reach": {
+  "archer_ult_cue": 60,
+  "ashwick_ult_cue": 60,
+  "bulwark_ult_cue": 60,
+  "dolm_ult_cue": 60,
+  "dredge_ult_cue": 60,
+  "gunslinger_ult_cue": 60,
+  "juggernaut_ult_cue": 60,
+  "mage_ult_cue": 60,
+  "ostra_ult_cue": 60,
+  "rimewright_ult_cue": 60,
+  "tender_ult_cue": 60,
+  "thief_ult_cue": 60,
+  "ult_tag_ally": 60,
+  "ult_tag_foe": 60
+ }
+}

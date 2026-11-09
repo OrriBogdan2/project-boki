@@ -108,6 +108,10 @@ static func accept(p: Dictionary) -> Dictionary:
 	Evo.ensure(rec)
 	rec["forms"] = (c["forms"] as Array).duplicate()
 	for a in c["aff"]: rec["aff"][a] = c["aff"][a]
+	var ev := Evo.try_evolve(rec, "trade")      # some lines evolve when traded (content/rules/evolve.json)
+	if not ev.is_empty():
+		ev["text"] = Evo.describe(ev, rec)
+		rec["pending_evo"] = [ev]
 	if c.has("acc"): rec["acc"] = c["acc"]
 	rec["trust"] = 25.0           # a new keeper: it doesn't know you yet
 	rec["raised_by"] = [giver]

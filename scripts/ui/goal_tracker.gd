@@ -92,13 +92,11 @@ static func build() -> PanelContainer:
 	var rows := lines()
 	if rows.is_empty():
 		return null
-	var box := UI.card(Color(0.06, 0.07, 0.11, 0.86), 14, 14)
-	UI.set_card_border(box, Color(1, 1, 1, 0.07), 1)
+	var box := UI.glass(12, 14, 0.5)
 	box.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	box.offset_left = -316
 	box.offset_right = -16
 	box.offset_top = 14
-	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var v := UI.vbox(7)
 	box.add_child(v)
 	v.add_child(UI.section(String(cfg()["title"])))

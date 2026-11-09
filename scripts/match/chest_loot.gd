@@ -44,8 +44,8 @@ static func drop(m: Match, h: Hunter, c: Dictionary, from_net: bool) -> void:
 	# a crate on the sky train pops its loot gently, so it lands on the car and rides along
 	var soft = Vector3(randf_range(-0.8, 0.8), 4.5, randf_range(-0.8, 0.8)) if c.has("ride") else null
 	var gems: Array = r["gems"]
-	for i in randi_range(int(gems[0]), int(gems[1])):
-		m.drop("gem", at + Vector3(0, 0.8, 0), int(round(float(r["gem_base"]) * float(m.T["loot"]))), "", "", soft)
+	DropMerge.gems(m, at + Vector3(0, 0.8, 0), randi_range(int(gems[0]), int(gems[1])),
+			int(round(float(r["gem_base"]) * float(m.T["loot"]))), soft)
 	if randf() < float(r["seed_odds"]):
 		m.drop("seed", at + Vector3(0, 0.8, 0), randi_range(1, 2), Data.pick_seed(), "", soft)
 	if not from_net:

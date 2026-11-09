@@ -21,11 +21,12 @@
 		"shoulder": 1.12,
 		"neck": -0.036
 	},
-	"color": "#ffc46a",
+	"color": "#5fdc6a",
 	"clip": {"lines": {"dash": "A quick hop, a long glide in the air.", "lmb": "Embers from both hands mark foes.", "rmb": "A seed that roots its target.", "e": "A healing ring for you and your team.", "x": "Tether a teammate and heal them as you go."}, "fx": {"e": "heal", "x": "tether"}},
 	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds.",
 	"silhouette": "small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a little moon circling her",
 	"card": {
+		"role_word": "Medic",
 		"role": "Support medic: heals and carries the downed, roots whoever chases them.",
 		"loop": "Support medic: heals and carries the downed, roots whoever chases them.",
 		"lmb": "Ember Cast: hold to push embers from alternating hands; they fly past the cursor and each hit on a foe adds Kindle.",
@@ -55,7 +56,7 @@
 	},
 	"passive": {
 		"name": "Carrier",
-		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
+		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
 		"max": 2,
 		"pick_r": 1.1,
 		"pick_speed": 0.6,
@@ -153,21 +154,11 @@
 		"dash",
 		"gear"
 	],
-	"rank3": {
-		"sec": "the roots last 0.3s longer and the burst is twice as wide",
-		"dash": "picking up a teammate refreshes your long air dash",
-		"kin": "the thrown light's healing boost is 100% instead of 50%"
-	},
-	"rank2": {
-		"sec": "Rank 2: cooldown 10.5s -> 9.5s, damage +15%.",
-		"dash": "Rank 2: recharge 7s -> 6s per charge.",
-		"kin": "Rank 2: cooldown 11s -> 9.9s, healing +15%."
-	},
-	"rank_next": {
-		"sec": "Rank 3: cooldown 10.5s -> 8.4s, damage +30%; the roots last 0.3s longer and the burst is twice as wide.",
-		"kin": "Rank 3: cooldown 11s -> 8.8s, healing +30%; the thrown light's healing boost is 100% instead of 50%.",
-		"dash": "Rank 3: recharge 7s -> 4.9s; picking up a teammate refreshes your long air dash."
-	},
+	"rank_cd": {"sec": [1, 1, 0.7391], "dash": [1, 0.8929, 0.7857], "kin": [1, 1, 0.75], "air": [1, 0.8929, 0.7857]},
+	"rank_dmg": {"sec": [1, 1.4, 1.4], "dash": [1, 1, 1], "kin": [1, 1.225, 1.5]},
+	"rank3": {"sec": "the roots last 0.3s longer and the burst is twice as wide", "dash": "picking up a teammate refreshes your long air dash", "kin": "the thrown light's healing boost is 100% instead of 50%"},
+	"rank2": {"sec": "Rank 2: damage +40% (seed 9 -> 12.6, burst 32 -> 44.8).", "dash": "Rank 2: recharge 7s -> 6.25s; the air glide 14s -> 12.5s.", "kin": "Rank 2: healing +22.5% (ring 10 -> 12.3, bloom 22 -> 27)."},
+	"rank_next": {"sec": "Rank 3: cooldown 10.5s -> 7.8s, damage +40%; the roots last 0.3s longer (1.1s -> 1.4s) and the burst is twice as wide (2.2m -> 4.4m).", "dash": "Rank 3: recharge 7s -> 5.5s; the air glide 14s -> 11s; picking up a teammate refreshes your long air dash.", "kin": "Rank 3: cooldown 11s -> 8.3s, healing +50% (ring 10 -> 15, bloom 22 -> 33); the thrown light's healing boost is 100% instead of 50%."},
 	"tells": {
 		"half": "ember sparks over the foes she has Kindled, one per stack",
 		"full": "a foe at 5 Kindle burns bright; a stuck Burrseed shows its violet disc under them, filling, for everyone",

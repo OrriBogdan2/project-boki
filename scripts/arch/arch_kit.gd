@@ -21,6 +21,10 @@ var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
+const RECAST_BUFFER := 0.15    # s an early recast press waits for its window (DECISIONS 2026-11-08 two-step abilities)
+const RECAST_LEAD := 0.5       # s after a cast in which a cooldown-denied E counts as an early recast (buffered; the buzz only if none opens)
+var recast_buf := {}           # slot -> s an early recast press still waits
+var cue := {}                  # RecastCue's state for the local hunter (the open window, expiry, the marks shown)
 var r_t := 0.0                 # R's window left
 var bonded := false            # the R running now was bonded
 var dash_t := -1.0             # how long Shift has been held for a hold dash (-1: not holding)
@@ -72,21 +76,33 @@ func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
 func res_max() -> float: return float(res_def().get("max", 100.0))
-## false when the passive has no meter (Hawk Sense)
-func has_meter() -> bool: return String(res_def().get("kind", "")) != "none"
-func res_col() -> Color: return Color(String(res_def().get("col", "#ffffff")))
+## false when the passive has no meter (Hawk Sense) or there is no resource at all
+## (Breaker: his passive is a Crushed stun)
+func has_meter() -> bool: return d.has("resource") and String(res_def().get("kind", "")) != "none"
+func res_col() -> Color: return Color(String(res_def().get("col", d["passive"].get("col", "#ffffff"))))
 func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff")))
 
 func rank(slot: String) -> int:
 	return h.ability_level(slot)
 
-## +15% damage per rank (Effects.level_k) on top of the hunter's own damage multiplier and the
-## ability power their level gives (LevelGrowth.ap).
+## A hero's own multiplier for one slot at its rank: JSON `<table>` {slot: [rank 1, rank 2, rank 3]}
+## (rank_dmg, rank_cd, rank_shield; the source's upgrades, see docs/heroes). `shared` when the hero has no row.
+## `key` names the row when it is not the slot's (rank_cd.air follows the dash rank).
+func rank_k(table: String, slot: String, shared: float, key := "") -> float:
+	var row: Array = d.get(table, {}).get(key if key != "" else slot, [])
+	return float(row[clampi(rank(slot) - 1, 0, row.size() - 1)]) if not row.is_empty() else shared
+
+## The hero's rank damage (rank_dmg, else +15% a rank: Effects.level_k) on top of the hunter's own damage
+## multiplier and the ability power their level gives (LevelGrowth.ap).
 func power(slot: String) -> float:
-	return m.dmg_mult(h) * Effects.level_k({"level": rank(slot)}) * LevelGrowth.ap(h)
+	return m.dmg_mult(h) * rank_k("rank_dmg", slot, Effects.level_k({"level": rank(slot)})) * LevelGrowth.ap(h)
 
 func cd_k(slot: String) -> float:
-	return h.rank_cd_k(slot)
+	return rank_k("rank_cd", slot, h.rank_cd_k(slot))
+
+## The dash recharge multiplier at the dash rank (rank_cd.dash, else 15% faster a rank past the first).
+func dash_k() -> float:
+	return rank_k("rank_cd", "dash", 1.0 - 0.15 * float(rank("dash") - 1))
 
 func rmb_charges() -> int: return int(rmb_def().get("charges", 1))
 
@@ -118,6 +134,27 @@ func r_recast() -> bool: return false                # R pressed while it runs (
 func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
+## The open recast for RecastCue, {} when none: {slot: e|x|dash|lmb, left, total (s), at (the world marker),
+## armed (false while a press is still eaten), auto (it fires itself at the end: no "EXPIRED")}. The base reports E while it's up and e_recastable().
+func recast_window() -> Dictionary:
+	if e_t > 0.0 and e_recastable():
+		return RecastCue.window("e", e_t, float(e_def().get("time", e_t)), e_recast_at())
+	return {}
+func e_recast_at() -> Vector3: return h.pos           # where E's recast acts (the knife, the seed, the ring)
+## The foes carrying this kit's mark/stack/Daze, for RecastCue's badge: appends {e, n, left, total, label, ready}.
+## The base reports the Boki combo setups (Combos) this hunter or its Boki put on a foe.
+func combo_marks(out: Array) -> void:
+	for f in m.foes_of(h.team):
+		for id in f.marks:
+			var mk: Dictionary = f.marks[id]
+			var left := float(mk["until"]) - float(m.time)
+			if mk["owner"] == h and left > 0.0:
+				out.append(RecastCue.mark(f, 0, left, float(mk["window"]), "COMBO", true))
+## A recast press from the buffer (RecastCue's ~0.15s): the slot's own press again.
+func recast_now(slot_id: String) -> void:
+	match slot_id:
+		"e": use_e()
+		"x": cast_ult()
 func gate_inputs() -> void: pass                    # a kit drops the presses it locks out
 func locks_glide() -> bool: return false            # a move AirLimits can't see from the shared state (a dive)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
@@ -194,8 +231,28 @@ func tick(dt: float) -> void:
 	res_wait = maxf(0.0, res_wait - dt)
 	_tick_knocks()
 	_tick(dt)
+	if not curved.is_empty(): _tick_curve(dt)
 	_tells(dt)
 	_tick_charge(dt)
+	_tick_recast(dt)
+
+## An early recast press waits RECAST_BUFFER for its window to open (armed), then goes; the local hunter's cues.
+func _tick_recast(dt: float) -> void:
+	if not recast_buf.is_empty():
+		var w := recast_window()
+		for slot_id in recast_buf.keys():
+			recast_buf[slot_id] = float(recast_buf[slot_id]) - dt
+			if String(w.get("slot", "")) == slot_id and bool(w.get("armed", true)):
+				recast_buf.erase(slot_id)
+				recast_now(slot_id)
+			elif float(recast_buf[slot_id]) <= 0.0:
+				recast_buf.erase(slot_id)
+				if slot_id in ["e", "x"]: h._ab_feedback("k1" if slot_id == "e" else "x", "deny")     # it never opened
+	if h.is_local():
+		RecastCue.track(self, dt)
+
+func buffer_recast(slot_id: String) -> void:
+	recast_buf[slot_id] = RECAST_BUFFER
 
 func held(which: String) -> bool:
 	match which:
@@ -273,7 +330,10 @@ func use_e() -> void:
 	if e_t > 0.0 and e_recast():
 		return
 	if float(cd["e"]) > 0.0:
-		h._ab_feedback("k1", "deny")
+		if float(e_def().get("cooldown", 14.0)) * cd_k("kin") - float(cd["e"]) < RECAST_LEAD:
+			buffer_recast("e")         # just cast: an E before the recast opens (the knife still flying) waits
+		else:
+			h._ab_feedback("k1", "deny")
 		return
 	if cast_e():
 		cd["e"] = float(e_def().get("cooldown", 14.0)) * cd_k("kin")
@@ -442,10 +502,11 @@ func _bond_tell() -> void:
 	m.sfx("bond", h.pos, -2.0, 1.2)
 
 # ------------------------------------------------------------------ dash helpers
-## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's.
+## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's;
+## a hero's `rank_cd.air` row shortens it by dash rank.
 func long_dash_cd() -> float:
 	var air: Dictionary = dash_def().get("air", {})
-	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD)))
+	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD))) * rank_k("rank_cd", "dash", 1.0, "air")
 
 ## Spends a dash charge (or the long air dash). False when neither is there.
 func spend_dash(use_ex: bool) -> bool:
@@ -472,6 +533,7 @@ func dash_dir() -> Vector2:
 	return move.normalized()
 
 static var _dash_feel := {}
+var curved := {}               # the plain dash on its hero's fitted speed curve: {t0, speed, curve, at}
 
 ## The global dash feel for this hunter (content/rules/dash_feel.json): {dist, time} multipliers.
 func dash_feel() -> Dictionary:
@@ -480,7 +542,9 @@ func dash_feel() -> Dictionary:
 	return _dash_feel.get(id, _dash_feel["default"])
 
 ## A travelling dash of a given length and time (the Effects dash, so perfect dodges and the dash
-## buffer all work as before). The hero's own: no Boki changes it (DECISIONS 2026-11-05, --boki-dash-check).
+## buffer all work as before). extra "curved": the hero's measured ground dash, which then runs on its
+## dash_feel "curve" (docs/decisions/0025) instead of a constant speed. The hero's own: no Boki changes it
+## (DECISIONS 2026-11-05, --boki-dash-check).
 func travel(dist: float, t: float, extra := {}) -> void:
 	var feel := dash_feel()
 	dist *= float(feel["dist"])
@@ -489,8 +553,20 @@ func travel(dist: float, t: float, extra := {}) -> void:
 	for k in extra:
 		e[k] = extra[k]
 	Effects.run([e], h, {"slot": "dodge", "ability": String(dash_def().get("id", "dash")), "level": rank("dash")})
+	var curve: Array = feel.get("curve", [])
+	var on_curve := bool(extra.get("curved", false)) and not curve.is_empty() and h.roll_t > 0.0
+	curved = {"t0": h.roll_t, "speed": h.roll_speed, "curve": curve, "at": h.dash_at} if on_curve else {}
 	Feel.dash_sound(m, id, h.pos, h)
 	CombatBus.ability_used.emit(h, String(dash_def().get("id", "dash")), "dodge")
+
+## The curved dash this step: the dash's mean speed times its curve at the middle of the step. A new
+## dash (dash_at moved) or the dash ending drops it; the hand-over is HunterMove.dash_exit's.
+func _tick_curve(dt: float) -> void:
+	if h.roll_t <= 0.0 or h.dash_at != float(curved["at"]):
+		curved = {}
+		return
+	var u := 1.0 - (h.roll_t - dt * 0.5) / float(curved["t0"])
+	h.roll_speed = float(curved["speed"]) * HunterMove.dash_k(curved["curve"], u)
 
 # ------------------------------------------------------------------ infusion and the grammar
 ## The kin's infusion, or {} with no kin able to fight.
@@ -571,6 +647,7 @@ static func _clamp_parts(sd: Dictionary) -> void:
 ## A cast context with this hunter as caster and owner, the kin as the kin.
 func cx(slot: String, ability: String, aim: Vector3, extra := {}) -> Dictionary:
 	var c := KinExec.make_cx(m, h, h.kin, h, aim, power({"rmb": "sec", "e": "kin", "r": "ult"}.get(slot, slot)), {"rmb": "utility", "e": "k1", "r": "ult"}.get(slot, slot), ability)
+	c["hero_col"] = Arch.color(id)
 	for k in extra:
 		c[k] = extra[k]
 	return c
@@ -590,17 +667,6 @@ func run_own(st_: StageSpec, c: Dictionary) -> void:
 # ------------------------------------------------------------------ helpers
 func aim() -> Vector3:
 	return h.inp.get("aim", h.pos)
-
-## The aim point clamped to a reach, on the ground.
-func aim_at(reach: float) -> Vector3:
-	var a := aim()
-	var dv := Vector2(a.x - h.pos.x, a.z - h.pos.z)
-	if dv.length() > reach:
-		dv = dv.normalized() * reach
-	var p := Vector3(h.pos.x + dv.x, h.pos.y, h.pos.z + dv.y)
-	var g: float = m.world.ground_at(p.x, p.z)
-	if g > World.VOID + 1.0: p.y = g
-	return p
 
 func foes_in(at: Vector3, r: float, dy := 2.2) -> Array:
 	var out: Array = []
@@ -663,14 +729,14 @@ func touch_res(wait := -1.0) -> void:
 func add_res(v: float) -> void:
 	res = clampf(res + v, 0.0, res_max())
 
-## The resource tell (§3.2): a subtle glow at 50%, an aura and a short sting at full that
+## The resource tell (§3.2): a subtle glow at 50%, the body glow, an aura and a short sting at full that
 ## enemies within 12-25m can hear. Also the Bonded R tell (kin glow and motes while bond is full).
 func _tells(dt: float) -> void:
 	var f := res_frac()
 	var t := "full" if f >= 0.999 or full_ready() else ("half" if f >= 0.5 else "")
 	if t == "full" and tell != "full":
 		m.sfx("unlock", h.pos, -6.0 if h.is_local() else -3.0, 1.6)
-		m.fx.ring(h.pos, 1.6, res_col(), 0.35)
+		if not h.unseen and h.visible: m.fx.body_glow(h.pos, res_col())     # coming full: the body glow, no ground ring
 	tell = t
 	bonded_glow = int(h.slot_lv.get("ult", 0)) > 0 and h.ult >= 1.0 and h.kin != null and not (h.kin as Kin).dead
 	fx_t -= dt
@@ -839,6 +905,10 @@ var self_nodes: Array = []     # nodes this kit hangs on the hunter (freed by te
 var spips := {}                # the kit's own pips over the hunter's head (Chambers, Guard steps)
 var _pulse_t := 0.0
 
+## The combo state this kit has on `t`, for the overhead tag (ComboMark): {} or {icon, n, max, left, total}, plus
+## an optional lift (px up) when the kit already draws its own marker there.
+func combo_read(_t: Ent) -> Dictionary: return {}
+
 ## The crosshair label while the kit's payoff is armed ("" = none).
 func ready_label() -> String: return ""
 ## The payoff lives on E (the Mage's Flashpoint): the E slot gets the gold dot.
@@ -904,16 +974,13 @@ func net_pulse(dt: float, on: bool, r := 1.1) -> void:
 		_pulse_t = 1.1
 		net_ring(h.pos, r, res_col())
 
-## The payoff becoming armed: a word over the hunter, a ring, the ready ping (the owner's slot pings
-## too); everyone online gets the ring.
+## The payoff becoming armed: a word over the hunter, the body glow, the ready ping (the owner's slot pings too).
 func armed_fx(word: String, slot := "sec") -> void:
 	var rc := res_col()
 	if word != "": m.fx.word(h.pos + Vector3(0, 2.5, 0), word, rc, false)
-	m.fx.ring(h.pos, 1.5, rc, 0.3)
-	m.fx.burst(h.pos + Vector3(0, 1.3, 0), rc, 14, 3.0, 0.4, -2.0, 1.0)
+	m.fx.body_glow(h.pos, rc)
 	m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 	if h.is_local() and slot != "": h._ab_feedback(slot, "ready")
-	net_ring(h.pos, 1.5, rc)
 
 ## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): the named word, a double ring, a
 ## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
@@ -929,6 +996,7 @@ func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector
 	m.sfx("crit", at, -7.0, 0.85)
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.12)
+	RecastCue.payoff(self, victim)
 	net_ring(at, 2.4, col)
 	net_bolt(at + Vector3(0, 0.2, 0), at + Vector3(0, 3.6, 0), col)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
@@ -1097,15 +1165,14 @@ func _tick_charge(dt: float) -> void:
 		charge_fulls += 1
 		_charge_full_tick(col)
 
-## Fully charged: a bright ping, a flash at the hand, a ring; everyone online gets the ring.
+## Fully charged: a bright ping, a flash at the hand and the body glow.
 func _charge_full_tick(col: Color) -> void:
 	var v: Array = CHARGE_VOICE.get(id, ["click", 0.8, 1.8])
 	m.sfx("ab_ready", h.pos, -3.0 if h.is_local() else -7.0, float(v[2]) * 0.6)
 	m.sfx(String(v[0]), h.pos, -4.0, float(v[2]) * 1.15)
 	var d := h.aim_dir()
 	m.fx.flash(h.pos + Vector3(d.x * 0.6, 1.05, d.y * 0.6), col.lightened(0.4), 0.9, 0.08)
-	m.fx.ring(h.pos, 1.5, Color(col, 0.95), 0.22)
-	net_ring(h.pos, 1.5, col)
+	m.fx.body_glow(h.pos, col)
 
 ## Let go: the ring and glow go, and the release punches in proportion to the charge.
 func _charge_release() -> void:

@@ -78,7 +78,7 @@ What the in-game kit card (K) says.
 
 **Furnace Cloak (E, 10.5s cooldown).** On the press, a blast of heat round you (4.5m, the ring shows its edge): 7 damage, 16 Char and Anti-Heal for 3s, and foes in sight are dragged toward you (walls stop them). Hit anyone and you wear a swirling 3s shield of 6.4% health plus 5.1% per foe. A knock resets it.
 
-**Flue Flight (hunter ultimate, from level 6, 36s cooldown).** Lift off in a ring of embers and fly 1.8s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. The Cinder Shot and the Furnace Cloak work mid-flight, but the stream of fire does not (the key is ignored until you land), and a knockback (or Shift) speeds you up. The carpet never forms over the abyss. 36s.
+**Flue Flight (hunter ultimate, from level 6, 36s cooldown).** Lift off in a ring of embers and fly 1.8s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. In the flight only the Furnace Cloak works (no stream of fire, Cinder Shot, Shift, gloves or items: the keys are ignored until you land), and a knockback speeds you up. The carpet never forms over the abyss. 36s.
 
 ### Ranks
 
@@ -86,9 +86,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 7s -> 6.3s, damage +15%. | cooldown 7s -> 5.6s, damage +30%; a second charge. |
-| Dash (Shift) | recharge 9s -> 7.65s per charge. | recharge 9s -> 6.3s, damage +30% and +4.3; a hit gives +16% speed and a shield of 11.6% health for 2s. |
-| E | cooldown 10.5s -> 9.45s, damage and shield +15%. | cooldown 10.5s -> 8.4s, damage and shield +30%, and the shield +30% more. |
+| RMB | cooldown 7s -> 5.8s, damage +25%. | cooldown 7s -> 4.7s, damage +50%; a second charge. |
+| Dash (Shift) | recharge 9s -> 8.25s per charge. | recharge 9s -> 7.5s per charge, +4.3 damage; a hit gives +16% speed and a shield of 11.6% health for 2s. |
+| E | cooldown 10.5s -> 8.9s, damage and shield +25%. | cooldown 10.5s -> 7.3s, damage +50% and shield +80% (the last rank adds 30% of the shield on top of the 50%). |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
 

@@ -11,23 +11,24 @@
 			"cloud": {"calm": 4, "happy": 5, "angry": 7, "determined": 4, "cry": 7, "sleepy": 6, "shy": 4, "sad": 7}
 		}
 	},
+	"free_arm": {"seed": "R", "shot_r": "L"},
 	"loco": {
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
-		"walk_speed": 2.2, "run_speed": 4.55
+		"walk_speed": 2.2, "run_speed": 4.55, "stride": [1.5, 1.5], "foot_mps": [0.93, 3.04], "arm_swing": {"L": 0.5}
 	},
-	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 0.66},
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "float"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
-		"mm_shot_r": {"clip": "shot_r", "upper": "moving"}, "mm_shot_l": {"clip": "shot_l", "upper": "moving"}, "mm_shot_emp": {"clip": "shot_emp", "upper": "moving"},
-		"mm_seed_aim": {"clip": "seed_aim", "fit": 0.35, "upper": "moving"}, "mm_seed": {"clip": "seed", "upper": "moving"},
-		"mm_hearth": {"clip": "hearth", "upper": "moving"}, "mm_toss": {"clip": "toss", "upper": "moving"},
+		"mm_shot_r": {"clip": "shot_r", "lead": 0.06, "upper": "moving"}, "mm_shot_l": {"clip": "shot_l", "lead": 0.06, "upper": "moving"}, "mm_shot_emp": {"clip": "shot_emp", "lead": 0.1, "upper": "moving"},
+		"mm_seed_aim": {"clip": "seed_aim", "fit": 0.35, "upper": "moving"}, "mm_seed": {"clip": "seed", "lead": 0.06, "upper": "moving"},
+		"mm_hearth": {"clip": "hearth", "lead": 0.15, "upper": "moving"}, "mm_toss": {"clip": "toss", "upper": "moving"},
 		"mm_skip": {"clip": "skip", "heading": true}, "mm_float": {"clip": "float", "heading": true},
 		"mm_pickup": {"clip": "pickup"}, "mm_flare": {"clip": "flare", "upper": "moving"},
 		"mm_tug": {"clip": "tug", "upper": true}, "mm_kindled": {"clip": "kindled", "upper": true},
-		"mm_call": {"clip": "call", "upper": true}, "mm_call_hold": {"clip": "call_hold", "hold_from": 0.0, "upper": true}, "mm_call_end": {"clip": "call_end", "upper": true},
+		"mm_call": {"clip": "call", "lead": 0.08, "upper": true}, "mm_call_hold": {"clip": "call_hold", "hold_from": 0.0, "upper": true}, "mm_call_end": {"clip": "call_end", "upper": true},
 		"mf_xform": {"clip": "fusion"}
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
