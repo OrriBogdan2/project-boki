@@ -72,3 +72,11 @@ Still differs (KIT_PARITY gap 1, docs/heroes/juggernaut.md):
 - LMB combo and hold fireblast, the passive (Rage, heal on knock): match.
 By eye (footage 60 to 455 next to the reel): the source's chain is a thick yellow-and-black striped rope with a marker ring on the target; ours is a thin dotted line in the sampled frames. Retaliation in the source ends in a large green burst with a red slash flare; at the sampled reel frames I caught only the guard, so check the R part for the cleave. His glow is white-hot by owner note (not orange as in the source's hot red).
 
+## Sparkle the Storm Chaser (`mage`, source Ryzz / Joule): [mage.mp4](mage.mp4)
+Still differs (KIT_PARITY, docs/heroes/mage.md):
+- LMB: bolt .648 s, range 13, no pierce; the source is .8 s with Static on hit (owner items 70, 116 keep ours).
+- Dash: 40 m/s vs about 32 (owner), pass damage 20, reset on Blowout, cd 8 vs 9. Dash to LMB and X buffer rows (gap 9); 5 flow rows unsourced `[?]`.
+- RMB cd 8 vs 10 (0.8x); R hover 1.7 s, cd 42 vs 60 (0.7x); E drag aim built, cd 10.5 vs 12. Mechanics match.
+- Not built: Lightning Strike launching Wisps (no wisps), Static detonation restoring mana (no mana).
+By eye (footage 20 to 380 next to the reel): the source's Eye of the Storm is a large amber ring with a glowing centre and the hunter in the sky; ours is a pink dome that fills about the whole arena at the match camera, so the size is similar but the look is a filled dome, not a ring. The source's Javelin is a thin yellow lance and Spear a white-yellow bolt with a spark; ours is hot pink on a thin line (our palette, on purpose). In the sampled frames the dash shows only a faint streak.
+
