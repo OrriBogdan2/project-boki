@@ -48,6 +48,28 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Speed boost | Quickflip gives one (rank IV makes it +50% bigger) [game data]; +15-20% for about 1-1.5s after a Cartwheel [footage] | +18% for 2s at most, ended by firing the empowered bolt | unchanged |
 | Dash -> shot rhythm | 0193: the Cartwheel and the empowered shot leave on the same frame (mid-flip); 0137 -> 0143: up after the flip, the gold line, the shot about 1s later; the loop about 1.4s (0187 -> 0194) [footage] | fires mid-flip (row `fire`); a click while the last bolt still cooled was lost | the same, and a click while the bolt cools (mid-flip too) is kept for one bolt's interval and goes the moment it can; two empowered hits fit inside 1.4s with LMB held |
 
+## Footage gaps, Nov 9 re-check
+
+The 11 ranked rows of `briefs/hero-ref/dancer.md` section 5, marked on main d255acbee. Closed rows cite the code or commit; assert lines are in `--dancer-combo-check` (tools/dancer_jug_check.gd unless noted). Nothing was built in this pass: no row is open, and every file a build would touch (`thief_kit.gd`, `thief.json`, `dancer_jug_check.gd`) is changed by an in-flight Sable branch (ext/sable-bola-instant-rebased, ext/sable-lmb-range, ext/sable-dagger-barriers, ext/combo-marks-a, ext/recast-marker-a, ext/cooldown-parity-verify).
+
+| # | Gap | State on main | Where |
+|---|---|---|---|
+| 1 | Ranged alternating-hand bolt to the cursor | closed; range and speed in flight | `signature` arc_bolts, `content/weapons/arc_bolts.json` (8a96ece26, 028fb2995); "dancer parity: ... a bolt every 0.45s, hands alternating". Range 12 m and 34 m/s against the source's 8.5 m and 37.5 m/s: ext/sable-lmb-range 5bd83bbc6 |
+| 2 | Aim line ends at the cursor, gold empowered line | closed | `ThiefKit._tick_aim_line`: pale lilac line to the cursor with an arrow tick; solid thick gold plus glow while `primed_t > 0`; "dancer LMB: the aim line ends at the cursor", "dancer dash: the aim line turns solid gold, thick, with a glow while empowered" |
+| 3 | Passive stacks visible, no cap | closed | Marks have no cap and no per-hit gap; eight gold diamonds over the target with a count; +10% of a bolt per Mark (the data's +16 on 160, over the footage's 12% estimate); "dancer passive: Marks have no cap (22 after 20 more), eight diamonds show" |
+| 4 | Empowered shot is the one big next bolt | closed | 2.34x on the bolt itself, not a second hit (f6bb27c3, feel pass above); "dancer empowered bolt: a big hit, 2 Marks" |
+| 5 | Dash and cooldown numbers | closed; pacing in flight | Vault 4.5 s, Bola 7 s, Knife 15 s (the footage cards). Cartwheel is 4.5 m in 0.48 s, the measured one, not the sheet's 2.4 m (owner review 1103 item 7, feel pass table). ext/cooldown-parity-verify 2be9877c2 moves them to the data's 5 / 13 / 28 s: an owner pacing call, not taken here |
+| 6 | Vault is a sideways cartwheel with an arc | closed | `thf_vault_l/r` for every direction, cyan and lilac arc traced by hands and feet; no ring or burst on the dash (DECISIONS: no bursts or rings on dashes; OWNER_REVIEW_1103 item 8); "dancer dash (item 8): no ring on the cartwheel or its landing" |
+| 7 | Bola cast window and lane | closed | `bola.cast` 0.4, `range` 7, the lane follows the aim during the wind-up (`bola_cast`, `_tick_bola_cast`, `lane_len`); "dancer RMB: the lane shows through the 0.4s wind-up" |
+| 8 | Bola bounces off terrain | closed once; wall as second target in flight | `_tick_bola` reflects `dir` once and keeps `left`; "dancer Bola: bounces off a wall". Whether a wall after the first catch stuns: ext/sable-bola-instant-rebased 2024f0105 (yes) |
+| 9 | Grounded tell | closed | yellow binding rings (two, one dashed) round each Grounded foe, drawn for everyone (`wrapped`, `_tick_wrapped`); "dancer RMB: yellow binding rings on the Grounded (everyone sees them)" |
+| 10 | Phantom Dagger teleport | closed | the recast blinks through 5 cyan afterimages along the line (`e.ghosts` 5, `fx.ghosts`); the 6 s step is the wiki's rule; no ground ring (Sable audit); "dancer E recast: a blink to it with an afterimage chain" |
+| 11 | R / Jackpot left in the data | closed | `r` removed from thief.json (13c4b3724); her ultimate is X, Encore (e152b31d6, 66a640653) |
+
+Rows 12 and 13 (not in the top 11): knock feedback is closed (`KNOCK_STAR` crimson star on the knocked, green pillar on her, `on_knock`); no audio in the footage, n/a.
+
+Suggestions for the owner (not built): the pacing set in row 5 (4.5 / 7 / 15 s from the footage cards against 5 / 13 / 28 s from the data); and whether the Bola's bounce off a wall should be the second catch (row 8, in flight).
+
 ## Audit (Nov 3 23:40)
 
 The kit audit (briefs/specs/kit-audit/vex_vireo_sable.md, Sable rows, against main 200effce), row by row: (a) already
