@@ -813,7 +813,7 @@
 "long_line": 2
 },
 "scripts/ui/hatch.gd": {
-"long_line": 30,
+"long_line": 29,
 "nested_ternary": 2,
 "semicolon": 66
 },
