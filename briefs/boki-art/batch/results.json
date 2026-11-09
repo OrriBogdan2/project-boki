@@ -51453,5 +51453,12 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/eclipsowl_cardb_4.jpg",
     "ok": true
+  },
+  {
+    "id": "eclipsowl_cardb",
+    "name": "Eclipsowl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/eclipsowl_cardb_1.jpg",
+    "ok": true
   }
 ]
