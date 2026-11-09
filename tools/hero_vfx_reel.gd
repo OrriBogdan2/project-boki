@@ -292,7 +292,7 @@ func _juggernaut_r() -> void:
 	await _go(2.7, ult, _sheet("r",
 			"X, Gilded Riposte: the gold guard, a blocked hit, the cleave up through the strip, the "
 			+ "gold scorch and embers",
-			[0.2, 0.42, 0.6, 0.77, 0.84, 0.92, 1.05, 1.5, 2.5]), 1.5)
+			[0.2, 0.42, 0.77, 0.86, 0.89, 0.93, 0.98, 1.1, 2.0]), 1.5)
 	await _go(GAP)
 
 func _juggernaut_rage() -> void:
