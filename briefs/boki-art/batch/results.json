@@ -1764,5 +1764,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/thrumbird_1.png",
     "ok": true
+  },
+  {
+    "id": "thrumbird",
+    "name": "Thrumbird",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/thrumbird_2.png",
+    "ok": true
+  },
+  {
+    "id": "nettlynx",
+    "name": "Nettlynx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/nettlynx_2.png",
+    "ok": true
+  },
+  {
+    "id": "echolop",
+    "name": "Echolop",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/echolop_1.png",
+    "ok": true
+  },
+  {
+    "id": "rimeshrew",
+    "name": "Rimeshrew",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rimeshrew_2.png",
+    "ok": true
+  },
+  {
+    "id": "rimeshrew",
+    "name": "Rimeshrew",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rimeshrew_1.png",
+    "ok": true
+  },
+  {
+    "id": "echolop",
+    "name": "Echolop",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/echolop_2.png",
+    "ok": true
+  },
+  {
+    "id": "cairnback",
+    "name": "Cairnback",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cairnback_1.png",
+    "ok": true
+  },
+  {
+    "id": "cairnback",
+    "name": "Cairnback",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cairnback_2.png",
+    "ok": true
   }
 ]
