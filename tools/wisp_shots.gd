@@ -4,12 +4,13 @@ extends RefCounted
 ##   wisp_0_hero      standing, before the knock
 ##   wisp_1_pop_a     the pop-in, first frames (flash and ring)
 ##   wisp_2_pop_b     the pop-in settling (puff, Wisp small)
-##   wisp_3_idle      the Wisp bobbing, the hero gone
-##   wisp_4_moving    the Wisp drifting: leaning, trailing
-##   wisp_5_mate      a teammate's Wisp beside the player's
-##   wisp_6_revive_a  the revive: the Wisp brightens, the hero small
-##   wisp_7_revive_b  the hero scaling up
-##   wisp_8_hero      the hero back at full size
+##   wisp_3_idle      the Wisp floating low with a steady glow, the hero gone
+##   wisp_4_moving    the Wisp hanging back behind the moving hunter, leaning back
+##   wisp_5_settle    the hunter stopped, the Wisp still catching up
+##   wisp_6_mate      a teammate's Wisp beside the player's
+##   wisp_7_revive_a  the revive: the Wisp brightens, the hero small
+##   wisp_8_revive_b  the hero scaling up
+##   wisp_9_hero      the hero back at full size
 ## <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
@@ -37,21 +38,23 @@ func run(main_node: Node) -> void:
 	await _go(0.1)
 	_take("wisp_2_pop_b", "Pop-in settling: the puff drifts off, the Wisp grows to size")
 	await _go(0.5)
-	_take("wisp_3_idle", "The Wisp idling: bob and flicker, the hero model is hidden")
+	_take("wisp_3_idle", "The Wisp idling low: round outline, team rim, white core, steady glow, the hero hidden")
 	await _go(0.5, Vector3(0.05, 0, 0.03))
-	_take("wisp_4_moving", "The Wisp drifting: it leans into the move and sheds a trail")
+	_take("wisp_4_moving", "The Wisp hangs back behind the moving hunter and leans back, slow and heavy")
+	await _go(0.2)
+	_take("wisp_5_settle", "The hunter stopped: the Wisp is still settling back over the hunter")
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
 	mate.teleport(P.pos + Vector3(2.0, 0, 0.0))
 	m.knock(mate, foe, {})
 	await _go(0.5)
-	_take("wisp_5_mate", "A teammate's Wisp beside yours (the default look, tinted by team)")
+	_take("wisp_6_mate", "A teammate's Wisp beside yours (the default look, tinted by team)")
 	m.revive_hunter(P, null)
 	await _go(0.08)
-	_take("wisp_6_revive_a", "Revive: the Wisp brightens as the hero pops back in, small and squashed")
+	_take("wisp_7_revive_a", "Revive: the Wisp brightens as the hero pops back in, small and squashed")
 	await _go(0.12)
-	_take("wisp_7_revive_b", "The hero scaling up, the Wisp fading")
+	_take("wisp_8_revive_b", "The hero scaling up, the Wisp fading")
 	await _go(0.6)
-	_take("wisp_8_hero", "The hero back at full size, no Wisp")
+	_take("wisp_9_hero", "The hero back at full size, no Wisp")
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for l in lines:
 		f.store_line(l)
