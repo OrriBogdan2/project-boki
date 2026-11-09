@@ -7,12 +7,14 @@ const DT := 1.0 / 60.0
 const SIZE := 300
 const LIFT_AT := [0.0, 0.14, 0.28, 0.45, 0.62, 0.8]      # s after the press
 const CHEST_AT := 0.5          # s into the chest hold
-const CAM_DIST := 4.2
-const CAM_HEIGHT := 1.1
+const CAM_DIST := 3.4          # in head heights
+const CAM_HEIGHT := 0.5        # of the head height: the look point over the feet
+const CAM_RISE := 0.7          # the camera sits above, looking down past the grass
 const YAW := -2.4              # rad: three-quarter front
 
 var tree: SceneTree
 var cam: Camera3D
+var vp: SubViewport            # its own view of the match world: no HUD in the strip
 
 func _frame(m: Match, h: Hunter) -> void:
 	m.step(DT)
@@ -23,7 +25,10 @@ func _frame(m: Match, h: Hunter) -> void:
 
 func _grab() -> Image:
 	await RenderingServer.frame_post_draw
-	return tree.root.get_texture().get_image()
+	await RenderingServer.frame_post_draw
+	var img := vp.get_texture().get_image()
+	img.convert(Image.FORMAT_RGBA8)      # the viewport's own format differs per renderer
+	return img
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -37,8 +42,6 @@ func run(main: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
-	main.get_window().size = Vector2i(SIZE, SIZE)
-	main.get_viewport().size = Vector2i(SIZE, SIZE)
 	var A = load("res://tools/archetype_check.gd").new()
 	A.main = main
 	var cols := LIFT_AT.size() + 2
@@ -47,17 +50,31 @@ func run(main: Node) -> void:
 		var r: Array = A.setup(String(ids[row]), 11.0, "", true)
 		var m: Match = r[0]
 		var h: Hunter = r[1]
+		vp = SubViewport.new()
+		vp.size = Vector2i(SIZE, SIZE)
+		vp.world_3d = main.get_viewport().world_3d
+		vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		main.add_child(vp)
 		cam = Camera3D.new()
-		m.add_child(cam)
-		cam.fov = 30.0
+		vp.add_child(cam)
+		cam.fov = 26.0
 		cam.make_current()
 		h.face = YAW
+		for g in m.find_children("*", "MultiMeshInstance3D", true, false):
+			if String(g.name).begins_with("Grass") or String(g.name).begins_with("Bushes"):
+				g.visible = false     # the strip shows knees and hands, not the lawn in front of them
 		for f in 40:
 			_frame(m, h)
 			await tree.process_frame
 		var c := 0
-		var look := h.global_position + Vector3(0, CAM_HEIGHT, 0)
-		cam.global_position = look + Vector3(sin(YAW), 0.1, cos(YAW)) * CAM_DIST
+		var sk := h.model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+		var tall := maxf((sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "head")).origin).y - h.global_position.y, 0.8)
+		var look := h.global_position + Vector3(0, CAM_HEIGHT * tall, 0)
+		var fwd := -h.model.global_transform.basis.z      # in front of the face, whichever way the model's front is
+		if h.model.global_transform.basis.z.dot(Vector3(sin(YAW), 0, cos(YAW))) > 0.0:
+			fwd = -fwd
+		fwd = fwd.rotated(Vector3.UP, 0.6)                 # three-quarter
+		cam.global_position = look + (fwd + Vector3(0, CAM_RISE, 0)) * CAM_DIST * tall
 		cam.look_at(look)
 		var t := 0.0
 		h.set_hold("lift", HunterAnim.LIFT_T)
@@ -84,6 +101,7 @@ func run(main: Node) -> void:
 			_frame(m, h)
 		await tree.process_frame
 		strip.blit_rect(await _grab(), Rect2i(0, 0, SIZE, SIZE), Vector2i(SIZE * c, SIZE * row))
+		vp.queue_free()
 		m.queue_free()
 	strip.save_png(out.path_join("interact_strip.png"))
 	print("INTERACT_SHOTS_DONE")
