@@ -62961,5 +62961,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_anchorhorn_n3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_anchorhorn_n2",
+    "name": "Anchorhorn (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_anchorhorn_n2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_anchorhorn_n3",
+    "name": "Anchorhorn (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_anchorhorn_n3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_anchorhorn_n2",
+    "name": "Anchorhorn (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_anchorhorn_n2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_anchorhorn_n1",
+    "name": "Anchorhorn (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_anchorhorn_n1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_anchorhorn_n2",
+    "name": "Anchorhorn (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_anchorhorn_n2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_anchorhorn_n3",
+    "name": "Anchorhorn (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_anchorhorn_n3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_anchorhorn_n2",
+    "name": "Anchorhorn (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_anchorhorn_n2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_spanglin_n1",
+    "name": "Spanglin (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_spanglin_n1_1.jpg",
+    "ok": true
   }
 ]
