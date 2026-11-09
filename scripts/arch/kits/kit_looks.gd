@@ -13,7 +13,7 @@ extends Node3D
 ##   footrock   the slab under Tarek's foot through a Rock Hop (held)
 ##   orb        Motley's Gravity Orb: a violet glass teardrop with a magenta tail; skin_orb grows and
 ##              brightens it with its charge
-##   spear      Shard Snap: a long bundle of dark violet crystal prisms with bright rims
+##   spear      Shard Snap: a long bundle of near-black crystal prisms with sea-teal rims
 ## Lingering: aura (Ostra's Swollen sphere), crown (stun stars over a head), burst and crater (Tarek's slam:
 ## a molten starburst, then a dark red cracked crater), shard (a rock chip flying off an impact), column (the
 ## grown seed's light), mote (a coloured glow at a hand: Tarek's fists, Ostra's charge), dark (the Snap's
@@ -107,11 +107,11 @@ func _build(kind: String) -> Node3D:
 			Models.part(n, lump(0.13), rock_mat(0.7, vis_rng.randf() * 10.0), Vector3.ZERO, Vector3(1.0, 0.7, 1.3))
 		"column":
 			Models.part(
-				n, Models.cyl(0.35, 0.55, 6.0, 16), glass_mat(Color("20003a"), Color("b06bff"), 0.75, 0.3),
+				n, Models.cyl(0.35, 0.55, 6.0, 16), glass_mat(Color("06231f"), Color("2ee6c0"), 0.75, 0.3),
 				Vector3(0, 3.0, 0)
 			)
 		"well_dome":
-			Models.part(n, Models.sphere(1.0, 24), glass_mat(Color("0a2440"), Color("a8e4ff"), 0.45, 0.1), Vector3.ZERO)
+			Models.part(n, Models.sphere(1.0, 24), glass_mat(Color("041a17"), Color("b8fff0"), 0.45, 0.1), Vector3.ZERO)
 			Models.part(
 				n,
 				Models.sphere(0.3, 16),
@@ -156,8 +156,8 @@ func _build_footrock(n: Node3D) -> void:
 	Models.part(n, Models.box(0.42, 0.04, 0.86), top, Vector3(0, 0.01, 0))
 	Models.part(n, Models.box(0.3, 0.12, 0.7), Models.glow_mat(Color("ff7a2a")), Vector3(0, -0.17, 0))
 
-## Ostra's shots: dark violet glass with bright rims, each with its own length and tail (the tail points
-## back along the flight, -Z being forward after look_at).
+## Ostra's shots: dark glass with bright rims (the orb violet, the Snap spear sea teal), each with its own
+## length and tail (the tail points back along the flight, -Z being forward after look_at).
 func _build_void_shot(n: Node3D, kind: String) -> void:
 	match kind:
 		"orb":
@@ -179,7 +179,7 @@ func _build_void_shot(n: Node3D, kind: String) -> void:
 				var off := Vector3(cos(a), sin(a), 0.0) * (0.0 if i == 0 else 0.2)
 				var len_ := 2.7 if i == 0 else 2.0
 				Models.part(
-					b, PrismMesh.new(), glass_mat(Color("240838"), Color("d8a8ff"), 1.0, 0.85),
+					b, PrismMesh.new(), glass_mat(Color("06100f"), Color("2ee6c0"), 1.0, 0.85),
 					off + Vector3(0, 0, 0.15 * float(i % 2)), Vector3(0.26, len_, 0.26), Vector3(-PI * 0.5, 0, a)
 				)
 
@@ -276,14 +276,14 @@ func _build_star(n: Node3D) -> void:
 		)
 	Models.part(n, Models.sphere(0.08, 8), Models.glow_mat(Color("d8c8ff")), Vector3.ZERO)
 
-## Ostra's Nightwell, radius 1 (scaled to the well): a dark violet disc, four spiral arms of light turning
+## Ostra's Nightwell, radius 1 (scaled to the well): a near-black disc, four sea-teal spiral arms turning
 ## on it, small black orbs riding the rim, and a pink core shown when she cast it Swollen.
 func _build_well(n: Node3D) -> void:
-	Models.part(n, Models.cyl(1.0, 1.0, 0.03, 32), shade_mat(Color(0.14, 0.03, 0.3, 0.88)), Vector3.ZERO)
+	Models.part(n, Models.cyl(1.0, 1.0, 0.03, 32), shade_mat(Color(0.02, 0.06, 0.06, 0.9)), Vector3.ZERO)
 	var spin := Node3D.new()
 	spin.name = "Spin"
 	n.add_child(spin)
-	var arm_mat := shade_mat(Color(0.7, 0.36, 1.0, 0.95))
+	var arm_mat := shade_mat(Color(0.18, 0.9, 0.75, 0.95))
 	for arm in 4:
 		for j in 6:
 			var u := float(j + 1) / 6.0
@@ -328,7 +328,7 @@ func pooled(kind: String) -> int:
 # ------------------------------------------------------------------ shot skins
 ## Dresses a Match shot in a skin (the shot dictionary spawn_shot just appended). The shared sphere goes
 ## back to Match's pool at once, so it can't be drawn under ours.
-func skin(s: Dictionary, kind: String) -> void:
+func skin(s: Dictionary, kind: String) -> Node3D:
 	var sn = s.get("node")
 	if sn != null and is_instance_valid(sn):
 		(sn as Node3D).visible = false
@@ -336,6 +336,7 @@ func skin(s: Dictionary, kind: String) -> void:
 	var n := _take(kind)
 	n.global_position = s["pos"]
 	live.append({"s": s, "n": n, "kind": kind, "t": 0.0, "trail": 0.0, "last": s["pos"]})
+	return n
 
 ## The last shot `by` fired, dressed (weapon shots the kit didn't spawn itself).
 func skin_last(by: Ent, kind: String) -> bool:
@@ -382,7 +383,7 @@ func _trail(e: Dictionary, p: Vector3, back: Vector3) -> void:
 			var col := Color(0.9, 0.3 + 0.4 * k, 0.9, 0.7)
 			fx.burst(p, col, 1 + roundi(k * 2.0), 0.6, 0.25, 0.0, 0.9 + 0.6 * k, back, 15.0)
 		"spear":
-			fx.burst(p, Color(0.5, 0.2, 0.8, 0.8), 2, 1.5, 0.25, 0.0, 1.0, back, 20.0)
+			fx.burst(p, Color(0.18, 0.9, 0.75, 0.8), 2, 1.5, 0.25, 0.0, 1.0, back, 20.0)
 
 func _impact(e: Dictionary, p: Vector3) -> void:
 	var fx: Fx = m.fx

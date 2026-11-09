@@ -1,7 +1,7 @@
 class_name OstraWell
 extends RefCounted
 ## Ostra's ultimate on X, Nightwell (HeroUlt): tap X to set a well at the cursor (clamped, on ground short of
-## walls). A pale dome of its exact size shows to everyone for 1.0s, then it opens into a turning violet
+## walls). A pale dome of its exact size shows to everyone for 1.0s, then it opens into a turning void
 ## disc for 3.5s: every foe inside (or who walks in) is stunned until it closes and drawn to its centre,
 ## taking a small tick every 0.1s. Allies pass through untouched. Ostra is locked in the cast pose for the dome
 ## (data x.tell, Void's 1.0s telegraph): no moving, no other abilities or attacks, and no turning once the short
@@ -11,8 +11,7 @@ extends RefCounted
 ## (HeroUlt.landed), paid on the catch, never per tick. Its looks hang on the match, not on Ostra, so a
 ## merge or a knock on his doesn't take the placed well down.
 
-const DOME_COL := Color("a8e4ff")
-const DISC_COL := Color("b06bff")
+const DOME_COL := Color("b8fff0")      # the telegraph's rim: pale sea teal (the body is OstraKit.SEA)
 const PINK := Color("ff4fd8")
 const TICK := 0.1                       # s between damage ticks
 const HOLD_R := 0.25                    # m from the centre where a caught body stops being drawn in
@@ -121,7 +120,7 @@ func unlock(go_dash := true, move := "ostra_well_end") -> void:
 func _tick_tell(dt: float) -> void:
 	phase_t += dt
 	var tell := float(xd()["tell"])
-	var accent := PINK if swollen else DISC_COL
+	var accent := PINK if swollen else OstraKit.DEEP
 	AimKit.circle(k.h, "x", {
 		"at": center, "r": radius, "fill": phase_t / tell, "all": true, "col": DOME_COL, "col2": accent,
 		"ticks": true,
@@ -139,8 +138,7 @@ func _open() -> void:
 	opens += 1
 	unlock(true, "ostra_well_snap")
 	k.m.sfx("os_well_hum", center, -3.0, 1.0)
-	k.m.fx.flash(center + Vector3(0, 0.6, 0), Color("e8d8ff"), 1.4, 0.1)
-	k.m.fx.ring(center, radius, DISC_COL, 0.25)
+	k.vfx("well_open", center, null, {"r": radius})
 
 func _tick_open(dt: float) -> void:
 	phase_t += dt
@@ -193,5 +191,4 @@ func _close() -> void:
 	for rec in draws:
 		k.m.displace.stop(rec)
 	draws = []
-	k.m.fx.ring(center, radius * 0.4, DISC_COL, 0.2)
-	k.m.fx.burst(center + Vector3(0, 0.3, 0), Color("2a0a3a"), 10, -3.0, 0.3, 0.0, 0.9)
+	k.vfx("well_close", center, null, {"r": radius})

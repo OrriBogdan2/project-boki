@@ -18,7 +18,8 @@ scripted parts go in `tools/vfx_reel/<arch>.gd`, otherwise the generic set plays
 - `HeroVfx.pal(arch, "key")`: a palette colour for the kit's own telegraphs and areas (AimKit lanes, rings), so they
   match its looks.
 - `HeroVfx.of(m).trail(h, "move", node)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
-  is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges.
+  is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges. A pooled skin
+  (`KitLooks.skin(shot, kind)`, which returns the skin node) is followed the same way; its return to the pool hides it.
 - `run_own(stage, cx)` (ArchKit) in place of `run`: the stage's rules run, the shared cast language (AbilityFx, KinExec's rings,
   cones and delivery sounds) stays out, so only the Hero's own look shows.
 
