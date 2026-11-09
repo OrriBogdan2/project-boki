@@ -34,10 +34,14 @@ Reelacine, Malletary and Gilabacus stay ordinary rares (not legendary). That lea
 ## Open questions
 1. How many boss areas does the game have? Not in the art briefs; main knows. Boss legendaries should match it (one per area).
 2. ~~Blight legendaries: corrupted versions or new designs?~~ Owner 14:39 ET: new creatures, not Blight versions of existing legendaries.
-3. Do Pavonazar, Ghoulamari and Glacione move from rare to Minor legendary, or should Minor be all-new designs?
+3. ~~Do Pavonazar, Ghoulamari and Glacione become Minor?~~ Owner 14:42 ET: yes, they are the Minor legendaries.
 4. Catch rules per tier (can bosses and ultras be caught, once per match, and so on): game design, owner and main.
 
 ## Art next steps (on owner OK)
 - Concepts for the 5 new slots, 3 directions each, through the A/B page.
 - Each tier gets its scale and stance in the card prompt (boss: arena-scale and planted; ultra: colossal with an aura; blight: Blight palette).
-- LIVE_MANIFEST.json gets a "tier" field (minor / boss / ultra / blight) on each legendary, so the dex and main can show and use it.
+- LIVE_MANIFEST.json gets a "legendary_tier" field (minor / boss / ultra / blight) on each legendary, so the dex and main can show and use it.
+
+## Status 11-09
+- "legendary_tier" is set in LIVE_MANIFEST for Glaciammoth (boss), Sarcobra (boss) and Hydrangor (ultra); the others get it when their art lands.
+- Concepts for the 5 new slots are queued (c_leg_minor/boss/ultra/blight1/blight2_n1-3), 3 directions each, for the owner's A/B pick.

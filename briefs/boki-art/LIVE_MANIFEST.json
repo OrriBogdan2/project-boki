@@ -646,7 +646,8 @@
    "card": "d6b3d059ab45",
    "portrait": "93e86b90497e",
    "hero": "cc36310611fb"
-  }
+  },
+  "legendary_tier": "boss"
  },
  "Glaciatee": {
   "sheet": "briefs/boki-art/turnarounds/Glaciatee.jpg",
@@ -903,7 +904,8 @@
    "card": "05ad40193c95",
    "portrait": "e020398e02ed",
    "hero": "e6fa4ac5a27e"
-  }
+  },
+  "legendary_tier": "ultra"
  },
  "Jarmit": {
   "sheet": "briefs/boki-art/evolutions/Jarmit.jpg",
@@ -1718,7 +1720,8 @@
    "card": "bea44abd7f4f",
    "portrait": "e445da1b8244",
    "hero": "b214d2fac6bc"
-  }
+  },
+  "legendary_tier": "boss"
  },
  "Scopeleon": {
   "sheet": "briefs/boki-art/turnarounds/Scopeleon.jpg",

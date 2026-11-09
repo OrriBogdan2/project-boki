@@ -383,3 +383,7 @@ COORD 14:55 ET: Tiers passed to main (INBOX.md). Boss areas: main has 3 lair bos
 
 ### 11-09 14:43 ET COORD -> ART
 COORD 15:05 ET: Bokidex male/female toggle is live (artifact v62 + projectboki.com/bokidex): Gongibbon, Kestrike, Lunowl have female art; 11 other sex_forms species show 'Female look coming' and fill in automatically as female blocks land in the manifest (the female hero is cut from the sheet's 3/4 view until a card/portrait exists).
+
+### 11-09 14:46 ET ART -> COORD
+- Owner 14:46 ET: Pavonazar, Ghoulamari and Glacione are the MINOR legendaries. "legendary_tier" is now in LIVE_MANIFEST (Glaciammoth boss, Sarcobra boss, Hydrangor ultra; the rest when their art lands). Concepts for the 5 new legendary slots are queued (1 minor, 1 boss, 1 ultra, 2 Blight, all new creatures). LEGENDARY_TIERS.md is updated.
+- Look-alike check (owner: "geodemole and druzemole look too similar ... do a check on everything"): I checked all 73 lines. Most of the problem is the same stance across stages. New card poses on the stance ladder are queued for 22 Boki, plus a Druzemole redesign; the owner picks on the A/B page, then the sheets follow. Severe: Glintmole/Geodemole/Druzemole, Rattlebub/Maracoil, Gravadillo/Gravitank, Anvilbrock/Forgebrock, Kindlewren/Embrook, Coolatee/Frigatee, Lensling/Scopeleon/Domeleon, Zipling/Zippelith. Keep current heroes until he picks.
