@@ -94,3 +94,29 @@ Owner ratings are below the 8.5 bar; redo each with the same rules and grading, 
 - **Voltmink** (owner 7.0): should look calm and cool, in a relaxed pose (not tense or aggressive).
 - **Teapotamus** (owner 7.1): no note. Push appeal and silhouette up to 8.5 (idea fused through the body, readable face).
 Current renders: projectboki Bokidex / site assets/img/boki2d/<name>-1200.webp.
+
+## 2026-11-09 coordinator -> art: THE BLIGHT (context for every Spore Boki, Blight art and future corrupted forms)
+Read this before any Spore-type Boki, any Blight enemy, map-edge or corrupted-variant art. Background, not a new batch.
+- **What it is:** the Blight is the Wyrm's blood. Malgrave and the Wyrm are the same villain. When Sable the thief touched
+  the Wyrmheart in Malgrave's vault, the Wyrm woke and the Hollowing began; its blood seeps out of the vault and across the
+  sky islands as the Blight. In every match the Blight closes in toward the Heart's site (the battle-royale ring), and it
+  grows stronger at the outer edge of the map and at night.
+- **Its look (already canon on Grimble and Kael; match it):** bruised purple and purple-black. Sludge that drips and pools,
+  purple veins spreading under skin, bone spurs growing along the vein paths, swollen purple gums. Where it burns, it
+  leaves white-hot cracks (Kael's arm). Not green slime, not generic zombie rot: it is dragon blood, rich and dangerous,
+  with a faint inner glow.
+- **What it does to living things:** it hollows them out. The Empty are people the Wyrm emptied. Blight creatures (Hollow
+  Fliers, armored Husks that break cover, the Walker) are shells driven by it. Keep the early game weak-looking; the scary
+  ones come later.
+- **Spore type = the Blight's type (owner idea 11-09, design pass pending):** Spore Boki are the ones the Blight touches,
+  fungal, more toxic, "corrupted" (a bit like shadow or corrupted forms in other creature games). For Spore species now:
+  keep them appealing and on the 8.5 bar first, then use the Blight palette as an accent, e.g. purple-black gills, veined
+  caps, a faint glow in the spores, small bone-spur quills. Don't make them gross or sad; they should look like they
+  could thrive in it. Later there may be "Blighted" variants of other Boki (same species, corrupted look) and a combined
+  corruption + Auburn pass (art-refs/REMINDERS.md, Nov 29). Don't start those yet.
+- **Tone:** dark fantasy edge on a bright, toylike world. The Blight is the one truly menacing color in the game. Use it
+  sparingly so it reads instantly.
+- **Type names changed (owner final, 11-08 22:29 ET):** Spore stays Spore. Old names in older briefs map to the
+  new ones: Ember=Fire, Tide=Water, Bloom=Grass, Storm=Electric, Frost=Ice, Stone=Rock, Gravity=Psychic,
+  Tempest=Flying, Wyrm=Dragon, Shadow=Dark, Venom=Poison, Swarm=Bug, Titan=Steel, Wild=Normal, Lunar=Fairy, Prism=Crystal,
+  Echo=Sound. Table: boki-art/GAME_RULES_NOV8.md.
