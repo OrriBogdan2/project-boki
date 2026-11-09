@@ -21542,5 +21542,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/gravadillo_card_1.jpg",
     "ok": true
+  },
+  {
+    "id": "gravadillo_card",
+    "name": "Gravadillo (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gravadillo_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hivara_card",
+    "name": "Hivara (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hivara_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_boltstrich",
+    "name": "Boltstrich (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_boltstrich_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "hivara_card",
+    "name": "Hivara (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hivara_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kestrike_card",
+    "name": "Kestrike (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kestrike_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kestrike_card",
+    "name": "Kestrike (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kestrike_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kindlewren_card",
+    "name": "Kindlewren (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kindlewren_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kindlewren_card",
+    "name": "Kindlewren (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kindlewren_card_1.jpg",
+    "ok": true
   }
 ]
