@@ -8587,5 +8587,27 @@
     "aspect": "1:1",
     "prompt": "Edit image 1: keep the same meerkat creature, its upright pose, its worried face with big dark eye patches, its brass trumpet ears and the brass barometer dial on its belly, in the same soft hand-painted style with a clean, fairly thin dark outline. Image 2 is only a style reference: never copy its creatures. Make all of these changes. 1) Remove the rain cloud and raindrops above its head completely: nothing floating above it. 2) Head: a short brass lightning-rod spike grows from the top of its head, with a round glass bulb at the tip glowing soft yellow, like an anglerfish lure. It grows out of the head as part of its body, not worn: no hat, helmet or band. 3) More colourful, with strong contrast: rich saturated golden-saffron yellow fur on its back, head, arms, legs and tail, and a clearly brighter, cleaner creamy-white belly, chest, muzzle and inner arms, with a crisp, clearly visible border between the yellow and the white; deep storm-blue-grey eye patches and a few storm-blue-grey stripes across its back; polished warm brass with small teal verdigris accents; the barometer needle glowing yellow. 4) Tail: longer, curled into an elegant question-mark curve, striped golden-yellow and storm-blue-grey, ending in a brass lightning-rod tip with a glowing yellow glass bulb. No ring or band on the tail. Keep it centred, filling about 85 percent of the square, on a plain flat pale grey background, no effects, no shadow, no text.",
     "size": "2K"
+  },
+  {
+    "id": "portrait_bellowary_oomph",
+    "name": "Bellowary",
+    "refs": [
+      "briefs/boki-art/turnarounds/Bellowary.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes, brass chimney crest, brass nozzle beak, pleated leather bellows chest, wattles, bronze spur blades and every detail, nothing added or removed. Show it once, full body. Pose with real oomph, the opposite of standing still: charging forward in a fast, aggressive sprint, body tilted low and forward, neck stretched forward like a striking bird, one leg driving off the ground and the other leg kicked high in front, its huge bronze sickle spur blades thrust forward and catching the light, wings half-flared back from the body. Its bellows chest is pumped up full and fiery, the glow between the leather folds bright orange-yellow, the brass nozzle beak blazing at the tip, one short burst of dark smoke from the chimney crest trailing back from the speed. Face: fierce, cocky battle grin, eyes narrowed with determination, looking ahead past the viewer. A natural three-quarter view at eye level, slightly low so it looks big and powerful, with a bold, readable silhouette full of energy and attitude. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, rich saturated colour and strong contrast between the soot-black feathers and the hot orange glow, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views."
+  },
+  {
+    "id": "portrait_bellowary_oomphe",
+    "name": "Bellowary",
+    "refs": [
+      "briefs/boki-art/portraits/Bellowary.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style: the same brass chimney crest, brass nozzle beak, blue neck, red wattles, pleated leather bellows chest, soot-black feathers and bronze spur blades. Only change the pose and energy. Pose with real oomph, the opposite of standing still: charging forward in a fast, aggressive sprint, body tilted low and forward, neck stretched forward like a striking bird, one leg driving off the ground and the other leg kicked high in front, its huge bronze sickle spur blades thrust forward and catching the light, wings half-flared back from the body. Its bellows chest is pumped up full and fiery, the glow between the leather folds bright orange-yellow, the brass nozzle beak blazing at the tip, one short burst of dark smoke from the chimney crest trailing back from the speed. Face: fierce, cocky battle grin, eyes narrowed with determination, looking ahead past the viewer. A natural three-quarter view at eye level, slightly low so it looks big and powerful, with a bold, readable silhouette full of energy and attitude. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, rich saturated colour and strong contrast between the soot-black feathers and the hot orange glow, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views."
   }
 ]
