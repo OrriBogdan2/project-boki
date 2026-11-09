@@ -232,5 +232,5 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
-- The network protocol. Movement runs on the owning machine, and remote hunters still use `net_follow`.
+- The network protocol. Movement runs on the owning machine; remote hunters are drawn from a snapshot buffer (`NetInterp`, decision 0022).
 - Landing performance (branch `landhitch`).

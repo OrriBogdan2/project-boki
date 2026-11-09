@@ -45,6 +45,7 @@ var last_hit_by: Ent = null
 var net_pos := Vector3.ZERO
 var net_vel := Vector3.ZERO
 var net_t := -1.0
+var interp: NetInterp = null     # a remote Hunter's snapshot queue (it glides on it instead of the chase below)
 var net_seen := 0.0
 
 func setup(match_node: Node, id: String) -> void:
@@ -322,9 +323,13 @@ func tick_status(dt: float) -> void:
 			if hp <= 0.0:
 				_on_zero(burn_by, {"src": "burn"})
 
-## Proxies glide toward the last position their owner reported.
+## Proxies glide toward the last position their owner reported (a remote Hunter: along NetInterp).
 func net_follow(dt: float) -> void:
 	prev = pos
+	if interp:
+		pos = interp.sample(dt, m.time)
+		vel = interp.vel
+		return
 	if net_t < 0.0:
 		return
 	var age := clampf(m.time - net_t, 0.0, 0.25)

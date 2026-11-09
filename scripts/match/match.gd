@@ -5631,7 +5631,7 @@ func _net_state(data: Array, from: String) -> void:
 			e = _net_make(it)
 			if e == null:
 				continue
-		_net_apply(e, it)
+		_net_apply(e, it, t_host)
 	if t_host >= 0.0 and from == Net.host and absf(t_host - time) > 0.5:
 		time = t_host
 
@@ -5688,7 +5688,7 @@ func _net_make(it: Array) -> Ent:
 			return mb
 	return null
 
-func _net_apply(e: Ent, it: Array) -> void:
+func _net_apply(e: Ent, it: Array, t_sent := -1.0) -> void:
 	e.net_pos = Vector3(it[2], it[3], it[4])
 	e.net_t = time
 	match String(it[0]):
@@ -5724,6 +5724,7 @@ func _net_apply(e: Ent, it: Array) -> void:
 			ArchKit.apply_net_move(h, it)
 			GripNet.apply_hunter(h, it)       # gloves, their cooldowns and the bond meter (the overhead row)
 			HunterNet.apply(h, it)
+			NetInterp.feed(h, time, t_sent)
 		"k":
 			var k: Kin = e
 			k.face = it[5]; k.hp = it[6]; k.max_hp = it[7]
