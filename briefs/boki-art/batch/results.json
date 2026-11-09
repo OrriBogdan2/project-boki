@@ -27653,5 +27653,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/sporcupine_card2_w32_3.jpg",
     "ok": true
+  },
+  {
+    "id": "rimink_r_w32",
+    "name": "Rimink",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rimink_r_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrarimit_e_w32",
+    "name": "Terrarimit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/terrarimit_e_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrarimit_e_w32",
+    "name": "Terrarimit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrarimit_e_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrarimit_e_w32",
+    "name": "Terrarimit",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/terrarimit_e_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrarimit_e_w32",
+    "name": "Terrarimit",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/terrarimit_e_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidalisk_card2_w32",
+    "name": "Tidalisk (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tidalisk_card2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidalisk_card2_w32",
+    "name": "Tidalisk (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tidalisk_card2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidalisk_card2_w32",
+    "name": "Tidalisk (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/tidalisk_card2_w32_3.jpg",
+    "ok": true
   }
 ]
