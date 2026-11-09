@@ -28,6 +28,8 @@ const DARK_INK := Color(0.14, 0.06, 0.15)           # text on accent and parchme
 const NIGHT := Color(0.075, 0.045, 0.12)             # dark glass over the world (hint rows, trackers, bars)
 const NIGHT_HI := Color(0.12, 0.08, 0.17)           # a locked or closed card on a panel
 const PARCHMENT := Color("e4d3b0")                  # info strips and title tabs (dark ink on it)
+const PINK := Color("f08ad8")                       # section headers: the pink spaced caps
+const GLASS := Color(0.16, 0.07, 0.26, 0.9)         # violet glass over the world: stays purple over green grass
 const NEON_A := Color("3fe0d0")                     # the neon edge runs teal (left)...
 const NEON_B := Color("ff3fd0")                     # ...to magenta (right)
 
@@ -125,7 +127,7 @@ static func key_hints(pairs: Array, size := 13, col := Color(1, 1, 1, 0.75)) -> 
 	return row
 
 ## A small spaced-out heading for a group of things in a menu (the "eyebrow").
-static func section(text: String, col := Color("c9a2e6")) -> Label:
+static func section(text: String, col := PINK) -> Label:
 	var l := Label.new()
 	l.text = text.to_upper()
 	l.add_theme_font_override("font", caps if caps else body)
@@ -158,6 +160,7 @@ static func title(text: String, size := 34, col := INK) -> Label:
 
 # ---------------------------------------------------------------- buttons
 ## Buttons whose label says "go back" play the falling pair instead of the tap.
+const STAMP_TILT := 2.5      # degrees a stamp leans
 const HOVER_GROW := 1.03     # a pointed-at button's scale
 const BACK_WORDS := {"Back": "ui_back", "Close": "ui_back", "Cancel": "ui_back", "✕": "ui_back",
 	"Leave it  (Esc)": "ui_back"}
@@ -453,14 +456,19 @@ static func chip(icon: String, txt: String, col := INK, tip := "", size := 14) -
 	h.add_child(l)
 	return c
 
-## A small coloured tag ("Rare", "Equipped", "Locked").
+## A rubber stamp for a state ("Rare", "Equipped", "Locked"): inked caps in a torn outline, set a
+## little crooked (the tilt follows the word, so a row of stamps doesn't all lean the same way).
 static func tag(txt: String, col: Color) -> PanelContainer:
 	var c := PanelContainer.new()
-	c.add_theme_stylebox_override("panel", frame(Color(col, 0.16), R_SMALL, Color(0, 0, 0, 0), 0, 7, 2, 0.0))
+	var f := UiTorn.make(Color(col, 0.12), 1.2)
+	f.edge = Color(col, 0.75)
+	f.padded(8, 2)
+	c.add_theme_stylebox_override("panel", f)
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	c.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var l := label(txt.to_upper(), 11, col.lightened(0.15), caps)
-	c.add_child(l)
+	c.rotation_degrees = STAMP_TILT * (1.0 if txt.length() % 2 == 0 else -1.0)
+	c.resized.connect(func(): c.pivot_offset = c.size * 0.5)
+	c.add_child(label(txt.to_upper(), 11, col.lightened(0.15), caps))
 	return c
 
 ## Fades and lifts a panel in, so menus open instead of just appearing (about 200 ms).
@@ -494,10 +502,11 @@ static func set_card_border(p: PanelContainer, col: Color, w := 2) -> void:
 	sb.edge_w = w
 	p.add_theme_stylebox_override("panel", sb)
 
-## Dark glass for things that float over the world (prompts, hint rows, the hub bar, hover cards).
-static func glass(pad := 10, rad := 14) -> PanelContainer:
+## Violet glass for things that float over the world (prompts, hint rows, the hub bar, hover cards);
+## `glow_k` lights a neon edge on the ones that stay on screen (the hub bar, the Goals card).
+static func glass(pad := 10, rad := 14, glow_k := 0.0) -> PanelContainer:
 	var p := PanelContainer.new()
-	var sb := UiTorn.make(Color(0.06, 0.035, 0.1, 0.84), 2.5)
+	var sb := UiTorn.make(GLASS, 2.5, glow_k)
 	sb.rad = rad
 	sb.shadow = 10
 	sb.edge = Color(0.75, 0.6, 1.0, 0.12)
@@ -1040,12 +1049,12 @@ static func confirm(host: Control, head: String, text: String, yes_txt: String, 
 	no.grab_focus.call_deferred()
 	return layer
 
-## A round tinted badge with an icon (a confirm box's warning, an empty state's mark).
-static func badge(icon: String, col: Color, px := 44.0, rad := R_PILL) -> PanelContainer:
+## A jagged black mask badge with a coloured icon (a confirm box's warning, a row's mark).
+static func badge(icon: String, col: Color, px := 44.0) -> PanelContainer:
 	var b := PanelContainer.new()
-	var f := UiFrame.raised(Color(col, 0.16), rad)
-	f.edge = Color(col, 0.4)
-	f.lit = 0.08
+	var f := UiTorn.make(Color(0.04, 0.02, 0.07, 0.95), px * 0.07)
+	f.edge = Color(col, 0.55)
+	f.tilt = icon.length()
 	b.add_theme_stylebox_override("panel", f.padded(px * 0.24, px * 0.24))
 	b.add_child(IconDot.new(icon, col, px * 0.52))
 	b.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
