@@ -113,7 +113,8 @@ func _check(_main: Node, stage: Dictionary) -> void:
 	ok(facing_before > 1.0 and facing_after < 0.15, "a Boki nearby turns to watch " + turned)
 	var ratio := m.grown.x / m.base.x
 	var want := float(m.fresh.get_meta("evo_scale", 1.0)) / float(m.old.get_meta("evo_scale", 1.0))
-	ok(ratio > 1.1 and absf(ratio - want) < 0.01, "the hatchling ends at its grown size, home's own scale (%.2fx), no snap" % ratio)
+	var grew := ratio > 1.1 and absf(ratio - want) < 0.01
+	ok(grew, "the hatchling ends at its grown size, home's own scale (%.2fx), no snap" % ratio)
 	m.finish()
 	var gone: bool = m.light.is_queued_for_deletion() and m.old.is_queued_for_deletion()
 	ok(not _washed(m.fresh) and gone, "the wash and light come off, the old model goes")
