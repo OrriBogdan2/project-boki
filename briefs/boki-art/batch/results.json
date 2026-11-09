@@ -42157,5 +42157,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_glaivyx_h2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_glaivyx_h2",
+    "name": "Glaivyx (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_h2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_h3",
+    "name": "Glaivyx (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_h3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_h1",
+    "name": "Glaivyx (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_h1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_h2",
+    "name": "Glaivyx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_h2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pyrraven_o81",
+    "name": "Pyrraven",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pyrraven_o81_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_h3",
+    "name": "Glaivyx (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_h3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_o1",
+    "name": "Glaivyx (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_o1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_o1",
+    "name": "Glaivyx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_o1_3.jpg",
+    "ok": true
   }
 ]
