@@ -125,7 +125,7 @@ def grown_parts():
 
 
 # ---------------------------------------------------------------- coat
-HIDE = hexc("7a5f6e")       # plum grey, the sheet's hide
+HIDE = hexc("82748a")       # the sheet's mauve grey, a touch cooler: the game's warm light reddens it
 LILAC = hexc("4a3644")      # brows
 LID = HIDE
 INK = hexc("1c1218")
@@ -137,16 +137,26 @@ GLOW = hexc("ffa040")
 HORN_A = hexc("d8b070")      # brass, for grown parts
 HORN_B = hexc("8a6a3a")
 HORN_C = hexc("2a2226")
-HIDE_GRADE = 0.6            # how far Meshy's pinker hide is pulled to the sheet's plum grey
+LUM = np.array([0.3, 0.55, 0.15])
 
 
 def paint_body(q):
-    col = model().colour(q)
-    # the hide is the pink-violet: blue over green; brass, orange cracks and black iron keep Meshy's colours
-    pink = sat((col[:, 2] - col[:, 1]) / 0.06) * sat((col[:, 0] - col[:, 2]) / 0.02 + 1)
-    lum = col @ np.array([0.3, 0.55, 0.15])
-    graded = HIDE[None] * (lum / (HIDE @ np.array([0.3, 0.55, 0.15])))[:, None] * 0.92
-    return mixc(col, np.clip(graded, 0, 1), HIDE_GRADE * pink)
+    return grade(model().colour(q))
+
+
+def grade(col):
+    """Meshy's texture, regraded to the sheet: its pink-red hide goes to mauve grey, its pinkish brass to gold, its red
+    cracks to orange; the black iron is kept."""
+    r, g, b = col[:, 0], col[:, 1], col[:, 2]
+    lum = col @ LUM
+    hot = sat((r - g) / 0.25 - 1) * sat((r - 0.55) / 0.15)          # bright red cracks
+    brass = sat((g / np.maximum(r, 1e-3) - 0.68) / 0.05) * sat((g - b - 0.03) / 0.05) * sat((lum - 0.4) / 0.08)
+    hide = sat((r - g) / 0.04) * sat((0.75 - r) / 0.1) * (1 - hot) * (1 - brass)
+    out = mixc(col, np.clip(HIDE[None] * (lum / (HIDE @ LUM))[:, None] * 1.02, 0, 1), hide)
+    gold = np.stack([r, np.maximum(g, 0.76 * r), 0.5 * r], 1)
+    out = mixc(out, np.clip(gold, 0, 1), brass)
+    orange = np.stack([np.maximum(r, 0.9), np.maximum(g, 0.5 * np.maximum(r, 0.9)), b * 0.5], 1)
+    return mixc(out, np.clip(orange, 0, 1), hot)
 
 
 def paint_piece(pc, q, nn, prim):
