@@ -4,7 +4,7 @@
 	"name": "Refraction",
 	"short": "Mirror",
 	"flavor": "When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.",
-	"theme": "prism",
+	"theme": "crystal",
 	"tier": 1,
 	"from": "owner",
 	"cooldown": 12,

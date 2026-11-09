@@ -3,7 +3,7 @@
 	"id": "tempest",
 	"name": "Eclipse",
 	"flavor": "Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.",
-	"theme": "lunar",
+	"theme": "fairy",
 	"duration": 7,
 	"passives": [
 		{

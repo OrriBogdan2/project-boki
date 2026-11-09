@@ -1158,7 +1158,7 @@ func do_dash() -> void:
 	Effects.run(effs, self, {"slot": "dodge", "ability": dodge_def.id if dodge_def else "dash", "level": ability_level("dash")})
 	CombatBus.ability_used.emit(self, dodge_def.id if dodge_def else "dash", "dodge")
 
-## The theme of the kin you brought ("venom", "lunar"...). Cosmetic only: it tints, never rules.
+## The theme of the kin you brought ("poison", "fairy"...). Cosmetic only: it tints, never rules.
 func kin_element() -> String:
 	if kin == null or (kin as Kin).dead:
 		return ""

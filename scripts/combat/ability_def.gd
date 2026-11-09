@@ -18,7 +18,7 @@ extends Resource
 ## Readability and AI:
 @export var short := ""                # the one or two word name on the HUD slot ("Hook", "Barrier")
 @export var verb := ""                 # what it does, as one word: hook, wall, reflect, slam, trap... (docs, bots)
-@export var element := ""              # venom, prism, spore, echo, gravity, lunar, or "" for a hunter's own
+@export var element := ""              # poison, crystal, spore, sound, psychic, fairy, or "" for a hunter's own
 @export var bot: Dictionary = {}       # when a bot hunter uses it: {when: in_range|under_fire|clumped|edge|hurt|gap|always, min, max}
 @export var charge: Dictionary = {}    # hold to charge: {time, min} (ctx.charge 0..1 feeds "charged" numbers)
 @export var aim: Array = []            # override the aim indicator: [kind, reach, size]

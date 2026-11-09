@@ -4,7 +4,7 @@
 	"name": "Mass Guard",
 	"short": "Plate",
 	"flavor": "When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).",
-	"theme": "gravity",
+	"theme": "psychic",
 	"tier": 1,
 	"from": "owner",
 	"cooldown": 12,

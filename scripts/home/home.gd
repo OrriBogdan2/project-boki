@@ -5100,8 +5100,8 @@ func _personality(rec: Dictionary) -> Dictionary:
 	var h := absi(String(rec.get("uid", rec.get("name", ""))).hash())
 	var typ := String(Data.KIN.get(rec.get("species", ""), {}).get("type", ""))
 	# [hop rate, hop height, pace]: heavy kinds plod, light ones skip
-	var gait: Array = {"gravity": [5.5, 0.06, 0.82], "spore": [7.0, 0.11, 0.9], "lunar": [4.5, 0.2, 0.95],
-		"prism": [11.0, 0.09, 1.12], "venom": [9.5, 0.05, 1.06], "echo": [8.0, 0.16, 1.0]}.get(typ, [9.0, 0.14, 1.0])
+	var gait: Array = {"psychic": [5.5, 0.06, 0.82], "spore": [7.0, 0.11, 0.9], "fairy": [4.5, 0.2, 0.95],
+		"crystal": [11.0, 0.09, 1.12], "poison": [9.5, 0.05, 1.06], "sound": [8.0, 0.16, 1.0]}.get(typ, [9.0, 0.14, 1.0])
 	var quirks := ["spin", "sniff", "hop", "sit", "look", "wiggle"]
 	return {
 		"speed": float(gait[2]) * lerpf(0.86, 1.18, (brave + hot) * 0.5) * (0.94 + float(h % 13) * 0.01),

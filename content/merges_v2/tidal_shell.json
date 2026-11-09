@@ -3,7 +3,7 @@
 	"id": "tidal_shell",
 	"name": "Prism Shell",
 	"flavor": "Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Fuse again shatters the shell outward.",
-	"theme": "prism",
+	"theme": "crystal",
 	"duration": 10,
 	"passives": []
 }

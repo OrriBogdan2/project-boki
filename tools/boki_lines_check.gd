@@ -161,7 +161,7 @@ func _stages() -> void:
 	var grown_line := BokiLines.say(grown, "crop_ready", t + 20.0)
 	ok("a grown Boki says real lines", BokiLines.grown_pool(BokiLines.trigger("crop_ready"),
 			BokiLines.element_of("cindle")).has(grown_line), grown_line)
-	ok("its element adds flavour lines", BokiLines.grown_pool(BokiLines.trigger("rain"), "lunar").size()
+	ok("its element adds flavour lines", BokiLines.grown_pool(BokiLines.trigger("rain"), "fairy").size()
 			> BokiLines.grown_pool(BokiLines.trigger("rain"), "").size())
 
 ## True if, outside the action in brackets, every word is a piece of the species' name, a sound, or

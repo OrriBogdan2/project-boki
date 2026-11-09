@@ -4,7 +4,7 @@
 	"name": "Boulder Heave",
 	"short": "Heave",
 	"flavor": "Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.",
-	"theme": "titan",
+	"theme": "steel",
 	"tier": 1,
 	"from": "kin",
 	"range": 8,

@@ -4,7 +4,7 @@
 	"name": "Stinger Dash",
 	"short": "Lunge",
 	"flavor": "On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.",
-	"theme": "venom",
+	"theme": "poison",
 	"tier": 1,
 	"from": "kin",
 	"range": 7,
