@@ -1708,5 +1708,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/snuffapi_1.png",
     "ok": true
+  },
+  {
+    "id": "snuffapi",
+    "name": "Snuffapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/snuffapi_2.png",
+    "ok": true
+  },
+  {
+    "id": "boltstrich",
+    "name": "Boltstrich",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/boltstrich_2.png",
+    "ok": true
+  },
+  {
+    "id": "barrelmander",
+    "name": "Barrelmander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/barrelmander_1.png",
+    "ok": true
+  },
+  {
+    "id": "marchleaf",
+    "name": "Marchleaf",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/marchleaf_2.png",
+    "ok": true
+  },
+  {
+    "id": "nettlynx",
+    "name": "Nettlynx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/nettlynx_1.png",
+    "ok": true
+  },
+  {
+    "id": "barrelmander",
+    "name": "Barrelmander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/barrelmander_2.png",
+    "ok": true
+  },
+  {
+    "id": "marchleaf",
+    "name": "Marchleaf",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/marchleaf_1.png",
+    "ok": true
+  },
+  {
+    "id": "thrumbird",
+    "name": "Thrumbird",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/thrumbird_1.png",
+    "ok": true
   }
 ]
