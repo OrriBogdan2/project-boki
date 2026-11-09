@@ -4401,3 +4401,11 @@ PR: https://github.com/OrriBogdan2/project-boki/pull/new/ext/boki-caecilith-v3
 - Merge note: ext/boki3d-tuatrune moves the Meshy loader to `tools/boki/meshy_body.py`. When the two meet, carry `self.raw`, `reshape()` and `source()` over into it (or call reshape after the load).
 
 READY ext/grimble-stretch-v2-rebased 88c75bf31 (supersedes ext/grimble-stretch-v2 ba158402c: same Grimble skin-stretch fix (skin_relax.reweigh, rebaked dredge.glb, --stretch-check) with origin/main d255acbee merged in; the merge was clean, no conflicts against current main (the reported conflicts in dredge.glb, grimble_clips.py, skin_relax.py did not occur; main only added release.yml + net.gd since the branch base); worst stretch still 2.48 run_l (non-gating; --stretch-check dredge has 40 clips over 1.3, as in the original READY); --check 0 failures, --clip-check --wardens=dredge 0, health --strict OK; job 20261109-052119-a1)
+
+## 01:15 ET 11-09 — art session: PRISMANDER DIRECTION PICK (owner's call, owner 00:27 "Prismander should be more interesting")
+Three new looks for the starter; please show them together on the Prismander entry so the owner can pick one (A rock candy, B stained glass, C sea glass). The current Prismander stays until he picks; Glassolotl/Chandelotl/Geodelotl get redone in the picked direction.
+ART prismander 0 briefs/boki-art/batch/out/c_prismander_a_2.jpg kind=concept status=owner-pick note=direction-A-rock-candy
+ART prismander 0 briefs/boki-art/batch/out/c_prismander_b_2.jpg kind=concept status=owner-pick note=direction-B-stained-glass
+ART prismander 0 briefs/boki-art/batch/out/c_prismander_c_1.jpg kind=concept status=owner-pick note=direction-C-sea-glass
+(The 0 is a placeholder, not a grade: show "pick one", no score.)
+Note: the art session's clone moved (disk full) — same branch, same paths, nothing lost.
