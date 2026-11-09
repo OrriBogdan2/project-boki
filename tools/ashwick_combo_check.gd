@@ -579,6 +579,12 @@ func _all() -> void:
 		"dmg %.0f char %.0f blight %.1f shield %.1f" % [ak.dmg(T), K.char_of(T), T.blight_t, P.shield]
 	)
 	ok(
+		"cloak: Anti-Heal 3s and a shield of 6.4% + 5.1% per foe hit of max health, 3s (wiki: Heat Shield)",
+		T.blight_t > 2.0 and T.blight_t <= 3.0 and absf(P.shield - P.max_hp * 0.115) < 0.5
+			and P.shield_t > 1.5 and P.shield_t <= 3.0,
+		"blight %.1f shield %.2f of %.2f t %.1f" % [T.blight_t, P.shield, P.max_hp * 0.115, P.shield_t]
+	)
+	ok(
 		"cloak: foes in sight are dragged toward you", P.flat_dist(T) < 2.6 and K.pulled >= 1,
 		"dist %.1f" % P.flat_dist(T)
 	)
