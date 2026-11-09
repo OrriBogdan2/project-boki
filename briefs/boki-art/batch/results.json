@@ -48436,5 +48436,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_gongrowl_p96_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_reapant_w3",
+    "name": "Reapant (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_reapant_w3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w2",
+    "name": "Reapant (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reapant_w2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w3",
+    "name": "Reapant (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_reapant_w3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lodestaff_e1",
+    "name": "Lodestaff (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_lodestaff_e1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w2",
+    "name": "Reapant (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_reapant_w2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w1",
+    "name": "Reapant (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reapant_w1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w1",
+    "name": "Reapant (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_reapant_w1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w1",
+    "name": "Reapant (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_reapant_w1_2.jpg",
+    "ok": true
   }
 ]
