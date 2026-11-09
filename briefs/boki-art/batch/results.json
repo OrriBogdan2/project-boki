@@ -20478,5 +20478,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/glintmole_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "gilabacus_card",
+    "name": "Gilabacus (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gilabacus_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glintmole_card",
+    "name": "Glintmole (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glintmole_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frigatee_card",
+    "name": "Frigatee (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/frigatee_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gloamshell_card",
+    "name": "Gloamshell (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gloamshell_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glomwort_card",
+    "name": "Glomwort (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glomwort_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glomwort_card",
+    "name": "Glomwort (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glomwort_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongibbon_card",
+    "name": "Gongibbon (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gongibbon_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gloamshell_card",
+    "name": "Gloamshell (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gloamshell_card_1.jpg",
+    "ok": true
   }
 ]
