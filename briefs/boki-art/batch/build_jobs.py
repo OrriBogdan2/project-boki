@@ -17,7 +17,7 @@ ELEM={
 'tempest':'tempest, shown clearly by wind-swept streamers and sky-blue swirl markings',
 'stone':'stone, shown clearly by rough rock plates, cracks and pebbles',
 'shadow':'shadow, shown clearly by inky black edges that fade into smoke, with a violet glow',
-'spore':'spore, shown clearly by drifting pale spore puffs and softly glowing spots',
+'spore':'spore, the type the Blight touches: still appealing and healthy-looking, with the Blight palette only as a small accent (purple-black gills or vein lines on its caps, a faint purple inner glow in its spores, a few small bone-spur quills), never green slime, never gross, rotting or sad',
 'prism':'prism, shown clearly by glassy crystal facets that throw rainbow glints',
 'lunar':'lunar, shown clearly by a soft pale moonlight glow and crescent markings',
 'echo':'echo, shown clearly by gold sound rings rippling out from its body',

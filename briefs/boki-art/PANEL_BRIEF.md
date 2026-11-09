@@ -22,3 +22,8 @@ Pass = no veto, every seat >= 8.0, average >= 8.5, and at least two seats pick t
 ## Concept-first jobs (owner OK 22:14)
 - Ids starting `c_` are single square CONCEPT images of new species (design in ROSTER_200_NEW.md, found by name). Judge the DESIGN only: concept surprise, idea through the body, silhouette, appeal and face, uniqueness, stage logic (later stages: image 2 is the approved earlier form; it must be a fundamental change). Layout is not judged beyond "one creature, full body, centred".
 - Ids starting `ta_` are turnaround sheets made from an approved concept (refs[0]): pass only if it matches the concept exactly and is a clean single row of four views.
+
+## The Blight (coordinator brief 11-09, INBOX_IMG.md "THE BLIGHT")
+- Blight look: bruised purple / purple-black sludge, purple veins under skin, bone spurs along the veins, white-hot cracks where it burns, faint inner glow. Not green slime, not zombie rot.
+- Spore-type Boki: appealing first (8.5 bar), Blight palette only as an accent (purple-black gills or vein lines, faint purple glow in spores, small bone-spur quills). Gross, sad or rotting = reject. Green slime on a Spore Boki = note it.
+- Purple-black is the game's one menacing colour: flag non-Spore, non-Dark Boki that lean heavily on purple-black.

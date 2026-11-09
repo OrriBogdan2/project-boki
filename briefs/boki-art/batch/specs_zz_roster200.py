@@ -34,5 +34,13 @@ def TA(name,concept_path):
                 "every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: "
                 "front, three-quarter, side and back, the same size, standing or crawling naturally like an animal, neutral pose, "
                 "plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.")})
+SPORE_NOTE=(' If this is a Spore-type creature: keep it appealing, and use the Blight palette only as a small accent '
+ '(purple-black gills or vein lines, a faint purple inner glow in its spores, a few small bone-spur quills); never green slime, never gross or rotting.')
+_TYPES={m.group(1):m.group(2) for m in _re.finditer(r'^(?:### |## \d+\. )([A-Z][A-Za-z]+)[^\n]*·\s*([A-Za-z ,]+?)\s*(?:\(|$)',_R200,_re.M)}
 _FIRST=[n for n,d in ROSTER200.items() if d['stage'].startswith('1 of') or d['stage'] in ('single','rare') or 'of' not in d['stage']]
 for _n in _FIRST: CQ(_n)
+
+for _x in SPECS:
+    if _x['id'].startswith('c_'):
+        _nm=_x['name'].split(' (')[0]
+        if 'Spore' in _TYPES.get(_nm,'') and SPORE_NOTE not in _x['prompt']: _x['prompt']+=SPORE_NOTE
