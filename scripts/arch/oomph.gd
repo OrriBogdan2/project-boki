@@ -79,8 +79,7 @@ static func shot_look(m: Node, by: Ent, col: Color, size: float) -> Array:
 	var halo := 0.28
 	var p = m.get("player")
 	if p and by.team != p.team:
-		vis_col = col.lerp(Color("ff5a3a"), 0.35)
-		vis_col.a = 1.0
+		vis_col = Color(col.lightened(0.1), 1.0)     # (the shooter's own colour: enemy reads by size and halo)
 		vis_size *= 1.3
 		halo = 0.4
 	elif p:
