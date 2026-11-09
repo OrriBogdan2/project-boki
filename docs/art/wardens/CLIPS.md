@@ -26,3 +26,15 @@ Hero live in `tools/art1/` (Kael is the pilot).
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
 channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
 timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
+
+## Parity strip: our move beside the footage (`--parity-strip`, tools/parity_strip.gd)
+1. Get the footage folder: `git fetch origin ext/hero-ref-footage && git checkout origin/ext/hero-ref-footage -- footage/<folder>` (folders in its README; Vex is `venator_ghost`). Don't commit it.
+2. Pick the frame range of the move in `briefs/hero-ref/<sheet>.md` (frame N = video second base + (N-1)/5, 5 fps). Start on the press.
+3. Run: `jobq submit --needs gpu --tree <tree> --out shots -- --parity-strip --hero=gunslinger --slot=lmb --frames=7-18 --shots-dir=shots`.
+4. `--hero` is our archetype id; `--slot` is lmb, rmb, e, x (ultimate) or dash; `--frames=a-b` sets the length (5 fps, so 12 frames = 2.4 s).
+5. It plays the move in the Training Area (the Arena) with the dummy 6 m out, one frame per 0.2 s from the press.
+6. `--hold=<s>` sets how long the key stays down (an LMB is held through the move; the rest are a tap). `--footage-dir=<dir>` is where `footage/` lives.
+7. The sheet is `shots/<hero>_<slot>.jpg`: ours on the top row, footage frames a..b below, six per row, labelled `+seconds`.
+8. Footage is the centre half of its frame, ours the centre of the match view, both on the hero.
+9. Compare by eye: wind-up, contact frame, recovery. Note the frame where ours is early or late and fix the clip's key times.
+10. Demos: `docs/art/parity_strip/` (Vex LMB, Kael RMB tap). Owner notes in briefs/DECISIONS.md win over the footage.
