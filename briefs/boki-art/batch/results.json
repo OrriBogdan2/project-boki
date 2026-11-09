@@ -22634,5 +22634,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_bladypus_w31_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_chimelop_w31",
+    "name": "Chimelop (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chimelop_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bladypus_w31",
+    "name": "Bladypus (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bladypus_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bladypus_w31",
+    "name": "Bladypus (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bladypus_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bladypus_w31",
+    "name": "Bladypus (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_bladypus_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_w31",
+    "name": "Chimelop (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chimelop_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_loafhopper_w31",
+    "name": "Loafhopper (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_loafhopper_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glazolm_w31",
+    "name": "Glazolm (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glazolm_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glazolm_w31",
+    "name": "Glazolm (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glazolm_w31_2.jpg",
+    "ok": true
   }
 ]
