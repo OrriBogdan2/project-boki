@@ -5732,3 +5732,4 @@ READY ext/parity-downed-numbers daad5a0f5 (docs/DOWNED.md source-vs-ours table f
 READY ext/ui-base-hud 467239ce8 (supersedes e46107664: --base-hud-shots now reveals past the boot splash (the e46107664 shots were only the splash); same HUD code, MERGED ext/garden-base-mode 08480be92 and ext/garden-away-card b0d474805 (carries ext/arrival-declutter f0414bdea): merge those first; --base-hud-check 0 fail, --farm-tutorial-check 0 fail, --farm-start-check 1 fail 'open meadow it tints green' (also on origin/main), health --strict OK, gen_wiki --check OK; 1280/1920 shots NOT reviewed: rpc1 disk full, rerun --base-hud-shots --shots-dir=<d> --size=WxH)
 READY ext/<branch> <sha> (<what>)
 READY ext/<branch> <sha> (<what>)
+READY ext/<branch> <sha> (<what>)
