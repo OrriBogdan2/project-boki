@@ -2900,5 +2900,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/glassolotl_r_2.jpg",
     "ok": true
+  },
+  {
+    "id": "chandelotl_r",
+    "name": "Chandelotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelotl_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "zipling_r",
+    "name": "Zipling",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/zipling_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "zipling_r",
+    "name": "Zipling",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/zipling_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelotl_r",
+    "name": "Chandelotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelotl_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter",
+    "name": "Oarter",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/oarter_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_seamwyrm",
+    "name": "Seamwyrm (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_seamwyrm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter",
+    "name": "Oarter",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/oarter_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_r",
+    "name": "Anchorbill",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anchorbill_r_1.jpg",
+    "ok": true
   }
 ]
