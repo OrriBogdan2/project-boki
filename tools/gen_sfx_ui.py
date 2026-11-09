@@ -133,6 +133,31 @@ def charge(i):
     high = S.sweep(660, 1040, d) * u ** 1.5
     return finish(mix(low * 0.5, high * 0.2, pluck(NOTE['G5'], d, 0.4, 0.2) * 0.15 * u), 3000)
 
+# ---------------------------------------------------------------- capture and extraction cues
+def capture(i):
+    """A Boki scanned and kept: a quick rising triad, a held top note and a soft sparkle."""
+    j = jit(i, 0.01)
+    notes = [at(pluck(NOTE[n] * j, 0.4, 0.08), 0.06 * k) for k, n in enumerate(['E5', 'G5', 'C6'])]
+    top = at(mix(pluck(NOTE['E6'] * j, 0.8, 0.22), pluck(NOTE['G5'] * j, 0.8, 0.22) * 0.5), 0.2)
+    spark = at(S.chime(NOTE['C6'] * 2, 0.7, 0.25, ((1.0, 0.6), (2.76, 0.18))) * 0.2, 0.22)
+    return finish(room(mix(*notes, top, spark), 0.8), 5400)
+
+
+def extract_start(i):
+    """An extraction begins (skiff called, hatch unlocking, uplink on): rising open notes over a breath."""
+    j = jit(i, 0.01)
+    breath = swell(True, 0.5, 400, 2200) * 0.3
+    return finish(room(mix(breath, pluck(NOTE['C5'] * j, 0.5, 0.12), at(pluck(NOTE['G5'] * j, 0.6, 0.16), 0.12),
+                           at(pluck(NOTE['D6'] * j, 0.7, 0.2), 0.26)), 0.7), 4200)
+
+
+def extract_fail(i):
+    """An extraction is lost (the uplink shut off, the call dropped): a slow falling trio, muted."""
+    j = jit(i, 0.01)
+    notes = [at(S.sweep(f * 1.04, f, 0.3) * env(N(0.3), 0.004, 0.12) + 0.2 * pluck(f * 2, 0.3, 0.05, 0.3), 0.14 * k)
+             for k, f in enumerate([NOTE['A4'] * j, NOTE['E4'] * j, 196 * j])]
+    return finish(room(mix(*notes), 0.5), 1900)
+
 
 # ---------------------------------------------------------------- write
 def main():
@@ -150,6 +175,9 @@ def main():
     S.save_cat('level_up', level_up(0), 'ui')
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
+    S.takes_cat('ui_capture', capture, 2, 'ui')
+    S.takes_cat('ui_extract_start', extract_start, 2, 'ui')
+    S.takes_cat('ui_extract_fail', extract_fail, 2, 'ui')
 
 
 if __name__ == '__main__':

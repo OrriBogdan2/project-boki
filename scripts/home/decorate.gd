@@ -230,7 +230,7 @@ func place() -> bool:
 	if held.is_empty():
 		return false
 	if not ghost_ok:
-		Sfx.play("ui_deny", null, -12.0)
+		UiSfx.error(-12.0)
 		room._toast(String(room.why))
 		return false
 	var id := String(held["id"])

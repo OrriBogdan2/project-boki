@@ -21,7 +21,8 @@ func _init(market: HomeMarket) -> void:
 ## After an action: say how it went and redraw the tab.
 func _done(r: Dictionary, good_text: String) -> void:
 	m.say(good_text if r["ok"] else String(r["why"]), r["ok"])
-	Sfx.play("pickup" if r["ok"] else "ui_deny")
+	if r["ok"]: Sfx.play("pickup")
+	else: UiSfx.error(0.0)
 	m.h._refresh_top()
 	m.open()
 

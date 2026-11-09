@@ -208,6 +208,8 @@ static func complete(m, h: Hunter, k: Kin) -> void:
 	_send(m, "scan_done", h, k, 1.0)
 	_pop(m, h, k)
 	m._catch(h, k)
+	if h.is_local():
+		UiSfx.captured()
 
 ## Release a capsule from your box. The Boki goes free (it is not put back in the world).
 static func release(m, h: Hunter, idx: int) -> bool:
