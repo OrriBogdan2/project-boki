@@ -48366,5 +48366,19 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_spanglin_p95_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_spanglin_p95",
+    "name": "Spanglin (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_spanglin_p95_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_spanglin_p95",
+    "name": "Spanglin (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_spanglin_p95_1.jpg",
+    "ok": true
   }
 ]
