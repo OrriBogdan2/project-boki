@@ -10062,5 +10062,75 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_ermink_p_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_zippelith_p",
+    "name": "Zippelith (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_zippelith_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glassolotl_p",
+    "name": "Glassolotl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glassolotl_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f_e",
+    "name": "Murmurling (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/murmurling_f_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter_e",
+    "name": "Oarter",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/oarter_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f_e",
+    "name": "Murmurling (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/murmurling_f_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunowl_f_e",
+    "name": "Lunowl (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lunowl_f_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunowl_f_e",
+    "name": "Lunowl (female)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lunowl_f_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f_e",
+    "name": "Murmurling (female)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/murmurling_f_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter_e",
+    "name": "Oarter",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/oarter_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_r3",
+    "name": "Mothlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mothlet_r3_1.jpg",
+    "ok": true
   }
 ]
