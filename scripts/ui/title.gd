@@ -528,6 +528,14 @@ func _build_ui() -> void:
 	keys.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	keys.offset_right = -28; keys.offset_top = -44; keys.offset_bottom = -16
 	root.add_child(keys)
+	var try_card := TryCard.build()
+	if try_card:
+		try_card.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		try_card.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		try_card.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		try_card.offset_right = -28; try_card.offset_bottom = -112
+		root.add_child(try_card)
+		UI.pop_in(try_card, 1.6)
 	b1.grab_focus()
 
 ## The menu's item labels in order (the main button first): read by --title-check.

@@ -1,0 +1,10 @@
+{
+	"_doc": "The 'What to try today' card on the title screen (scripts/ui/try_card.gd). Change `id` with each new ask: a card the player has dismissed stays hidden until its id changes. Keep it to three lines. Names are display names; the full list is in docs/TESTER_GUIDE.md.",
+	"id": "2026-11-09",
+	"title": "What to try today",
+	"lines": [
+		"Play one full first match as Vex, from the drop to the exit.",
+		"Try Kael, Lace and Cinder in the Arena.",
+		"Leave a note on the rate card when you quit."
+	]
+}
