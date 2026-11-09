@@ -27,4 +27,6 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 22 | Starters: cut the two branch finals | Lashyx + Amanitusk cut; new single finals (Glaivyx 8 dirs, Mycroll final 6 all-new dirs); main asked to update rules/data | GENERATING |
 | 23 | Vespox colours should match the line | Unlocked; recolour edits of sheet, card, portrait to Vespyx plum palette | GENERATING |
 | 24 | Barrelmander / Cisternmander: lose the lightning cloud, new gimmick | 3 line-wide gimmicks (hydro water-wheel, battery, charged-water spigots) for all 3 stages; Cisternmander made a real step up | GENERATING |
+| 25 | Pyrraven art -> Embrook; bigger demonic t3 | Done for Embrook (live); 6 demonic Pyrraven directions | Embrook LIVE; Pyrraven GENERATING |
+| 26 | Terrasloth + Parasolth both sloths -> Terrasloth becomes another animal | 5 greenhouse directions on unused animals | GENERATING |
 | 21 | 66 Bokidex items marked "redo" | Each has a newer attempt or is in this list; re-check every tick | ONGOING |
