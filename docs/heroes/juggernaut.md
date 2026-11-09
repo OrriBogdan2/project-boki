@@ -100,6 +100,26 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--jug
 | Tall-ledge climb doc | LOW | (b) | the "Not built" row now says built (hunter_move.json `climb_tall`) |
 | Docs drift (steer 6 vs 7) | LOW | (a) | the Warchain table now matches the data (1ae768d5) |
 
+## Footage gaps, Nov 9 re-check
+
+The 11 ranked gaps of `briefs/hero-ref/juggernaut.md` (section 4) against main d255acbee. "data" means our numbers
+follow the game data at rank 1 while the footage hunter is level 9. Asserts are `--juggernaut-combo-check`
+("juggernaut footage gap N: ..." plus the rows named).
+
+| # | Gap | Status | Where |
+|---|---|---|---|
+| 1 | Doomfall unreachable, the Smash payoff dead | closed | e152b31d6, db19aeb64: the Gilded Riposte on X (guard, then a strike strip: the source's Retaliation); any Slam hit then a knock within 2 s readies it (`_reset_riposte`; "juggernaut Smash: a knock after any Slam hit ..."). In flight: ext/kael-ult-reset (the kill reset through HeroUlt), ext/kael-tap-ult-1108 |
+| 2 | Lunge has no lane | closed | 028fb2995: `rmb_hold_tick` lane, red to magenta at full (`col_full`), the `lunge_hit` burst and slash; asserted now (gap 2 rows) |
+| 3 | Lunge length (source ~5 m flat, 559 to 771) | open | ours 4.5 to 7.5 m (+20% on a perfect release), 14 to 20 (1.43x, the ratio matches); the reach growth is ours |
+| 4 | Execution Slam telegraph and target | closed | 028fb2995: the red outline under 35% while RMB is ready, a 4 m magenta strike lane through the wind-up (source ~4.3 m); asserted now (gap 4 rows) |
+| 5 | Air Slam cursor-placed | closed | 7cea43a2e (`JuggernautDrop.point`): the purple disc at the cursor (5 m at most), the slam lands there |
+| 6 | Quick Dash: 3 charges, ~3.6 m | open (part) | charges: data (2, the third at rank 2, 854d35900 / SERVER_UPDATE7), asserted ("2 Rampage charges at rank 1 and 3 at rank 2"); the 4.5 m length against ~3.6 m is open |
+| 7 | Slash look | closed | 028fb2995: 175 degree two-tone crescents that alternate, the white star on tip hits (`slash_tip`) |
+| 8 | Hold-blast charge tell | closed | 028fb2995: the "wave" ring round the body fills (`_tick_tells`) |
+| 9 | Warchain look | closed | 8a96ece26 / 7cea43a2e: the zig-zag orange chain in flight, straight striped links once attached, 5 s tether that pays out as you move |
+| 10 | Knock feedback | closed | 028fb2995 (`on_knock`): the red KO star over them, the green heal column on Kael, the red tint for you; asserted now (gap 10 row) |
+| 11 | Cooldowns (RMB 1.2 s, chain 9.4 s) | data | RMB 2.0 s, chain 12.8 s at rank 1 (the data's 16 s at the kit's 0.8x, 8 s at rank 3); the footage hunter is level 9 |
+
 ## Warchain: the state machine
 
 The owner's review (items 21 and 22) asked for the source's level of control on E. Sources, by precedence:

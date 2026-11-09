@@ -534,6 +534,8 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut RMB tap: the strike lane shows through the wind-up (everyone sees it)",
 			AimKit.shown(P, "slam") and bool(lane.get("all", false)) and absf(float(lane.get("len", 0.0)) - 4.0) < 0.1,
 			str(lane.get("len", -1)))
+	A.ok("juggernaut footage gap 4: the Slam's strike lane is magenta (0154-0158)",
+			lane.get("col", Color.BLACK) == JuggernautKit.SLASH_OUT, str(lane.get("col", "")))
 	A.step(m, 0.4)
 	A.ok("juggernaut RMB tap: Finishing Slam winds up, then lands",
 			winding and early <= 0.0 and A.dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
@@ -550,6 +552,8 @@ func juggernaut(a) -> void:
 	m.step(A.DT)
 	A.ok("juggernaut RMB ready: the wounded (under 35%) are outlined red",
 			AimKit.shown(P, "exec%d" % T.get_instance_id()))
+	A.ok("juggernaut footage gap 4: the execute outline is red (0154)",
+			AimKit.entry(P, "exec%d" % T.get_instance_id()).get("col", Color.BLACK) == JuggernautKit.EXEC_RED)
 	A.tap(m, P)
 	A.step(m, 0.7)
 	A.ok("juggernaut RMB tap: +50% under 35%, no sweet spot up close",
@@ -568,6 +572,7 @@ func juggernaut(a) -> void:
 	A.step(m, 0.5, func(): P.inp["sec_hold"] = true)
 	var ln: Dictionary = AimKit.entry(P, "rmb")
 	var k_mid := float(ln.get("fill", -1.0))
+	var col_mid: Color = ln.get("col", Color.BLACK)
 	A.ok("juggernaut RMB hold: the lane grows with the charge (and the wind-up pose plays)",
 			AimKit.shown(P, "rmb") and k_mid > 0.2 and k_mid < 1.0 and K.anim_id == "jug_lunge_wind"
 			and not K.lunge_full,
@@ -580,12 +585,20 @@ func juggernaut(a) -> void:
 			K.lunge_full and float(AimKit.entry(P, "rmb").get("fill", 0.0)) >= 1.0
 			and float(AimKit.reticle(P)["flare"]) > 0.0,
 			"full %s" % K.lunge_full)
+	var col_full: Color = AimKit.entry(P, "rmb").get("col", Color.BLACK)
+	A.ok("juggernaut footage gap 2: the Lunge lane is red while charging, magenta at full (0126)",
+			col_mid == JuggernautKit.LUNGE_RED and col_full == JuggernautKit.LUNGE_FULL,
+			"%s -> %s" % [col_mid, col_full])
+	var hits0 := int(HeroVfx.of(m).plays.get("lunge_hit", 0))
 	P.inp["sec_hold"] = false
 	m.step(A.DT)
 	A.step(m, 0.5)
 	A.ok("juggernaut RMB hold: release flings you forward into them",
 			K.last_variant == "hold" and A.dmg(T) >= 18.0 and P.flat_dist(home) > 3.5,
 			"took %.0f moved %.1f" % [A.dmg(T), P.flat_dist(home)])
+	var hits := int(HeroVfx.of(m).plays.get("lunge_hit", 0)) - hits0
+	A.ok("juggernaut footage gap 2: the Lunge contact plays its burst and slash once (0127)", hits == 1,
+			"plays +%d" % hits)
 	A.step(m, 3.2)
 	P.teleport(home)
 	A.fresh(T)
@@ -768,6 +781,8 @@ func juggernaut(a) -> void:
 			"x cd %.1f resets %d" % [float(K.cd["x"]), K.slam_resets])
 	A.ok("juggernaut passive: a knock heals 20% of their health",
 			K.knock_healed >= minf(0.19 * T.max_hp, 0.9 * P.max_hp), "healed %.0f of %.0f" % [K.knock_healed, T.max_hp])
+	A.ok("juggernaut footage gap 10: a knock shows the red KO star, Kael's green heal column, a red tint (0454)",
+			_knock_look(m, P, T), "hud flash %s" % [m.hud.flash_col if m.hud else "none"])
 	# audit (data: "knocking an enemy resets Volcanic Rebuke"): a plain body hit then a knock resets it too
 	A.step(m, 1.0)
 	T.downed = false
@@ -793,6 +808,19 @@ func juggernaut(a) -> void:
 	await A.done(m)
 	await ZFEEL.new().run(A)
 	await ULT.new().zedran(A)
+
+
+## Kael's knock feedback live now: the red star over the knocked foe, the green heal column on him and,
+## for the local player, the red screen tint.
+func _knock_look(m: Match, P: Hunter, T: Hunter) -> bool:
+	var star := false
+	var pillar := false
+	for e in DJFx.of(m).live:
+		var at: Vector3 = (e["node"] as Node3D).global_position
+		star = star or (e["kind"] == "star" and Vector2(at.x - T.pos.x, at.z - T.pos.z).length() < 0.5)
+		pillar = pillar or (e["kind"] == "pillar" and Vector2(at.x - P.pos.x, at.z - P.pos.z).length() < 0.5)
+	var tint: bool = m.hud != null and m.hud.flash_col.r > 0.9 and m.hud.flash_col.g < 0.2
+	return star and pillar and tint
 
 
 # ------------------------------------------------------------------ cross-ability combinations (--kit-combo-check)
