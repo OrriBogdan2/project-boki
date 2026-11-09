@@ -73,7 +73,8 @@ func _number_sizes() -> void:
 		sizes.keys(), outlines.keys()])
 	var small: Label3D = m.fx.nums[-3]["node"]
 	var big: Label3D = m.fx.nums[-2]["node"]
-	ok(big.pixel_size > small.pixel_size * 1.3, "a big crit is drawn bigger (%.4f vs %.4f)" % [big.pixel_size, small.pixel_size])
+	ok(big.pixel_size > small.pixel_size * 1.3, "a big crit is drawn bigger (%.4f vs %.4f)" % [
+		big.pixel_size, small.pixel_size])
 
 func _mob_naps() -> void:
 	var mb: Mob = null
