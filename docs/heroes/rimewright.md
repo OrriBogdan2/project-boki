@@ -32,6 +32,24 @@ Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Cele
 | Shift | hold to skate, about 10-11 m/s, full speed in 0.2s, stop in 0.1-0.2s [footage] | 11.5 m/s, 0.2s ramp | unchanged (at parity) | `tm Shift: ...` |
 | X | rooted and invulnerable 3.2-3.5s, then the crash [footage] | as the source, plus the owner's skate carry | unchanged | `tm X: ...` |
 
+## Footage gaps, Nov 9 re-check
+The 10 ranked gaps of briefs/hero-ref/tamsin.md section 4, marked on main d255acbee. `--rimewright-combo-check` 90/0 on main. Open rows are in files the in-flight Neve branches change (rimewright_kit.gd, rimewright.json), so nothing was built.
+
+| # | Gap | Status on main | Evidence |
+|---|---|---|---|
+| 1 | LMB pattern | closed: no pause; the 4 + 3 large barrage is the game data's, kept over the 5 fps footage | 74447a97b, f6250bd1; "a steady stream, one dart every 0.18 s with no pause", "the source's barrage" |
+| 2 | Homing strength and shape | closed: bowed darts turn in late (up to 12 rad/s) onto the foe nearest the cursor | e5c73480c; "the bowed darts curve back onto the foe". In flight, asserts only: ext/neve-dart-homing, ext/parity-neve-skate-home |
+| 3 | Shatter payoff size | closed: `fan_splinter` 60 = 15x a 4 dart, 2.7 m spike starburst, frost glow grows per dart | 74447a97b; "the frost glow on the foe shows the stacks", "8 darts on one foe Shatter them" (-60). In flight, not this row: ext/neve-chill-shatter (knock tell) |
+| 4 | Spear lands at the cursor, long delay | closed: lands at the clamped cursor, slow zone with a spinning crystal, detonates 1.8 s later as the big hit (18 landing, 60 detonation) | 74447a97b; owner items 13/28 (a palm push at 18 m/s instead of the footage's 45 m/s); the "tm RMB" rows |
+| 5 | Ice Wall spawn and growth | closed: 1.8 m block erupts 1 bh ahead, widens to 4.5 m while it slides, shoves foes, stops shots. Owner override: travel +50% (up to 16.2 m, 3.6 s) and it stands 4.5 s, not the footage's about 3 s | OWNER_REVIEW_1103 item 13; the "tm E" rows. The freeze recast is the wiki's. In flight, look only: ext/neve-lmb-celeste |
+| 6 | Darts while skating | open: straight beams (done), but normal damage; the footage shows 56 vs 35 (1.6x), the wiki says 2x, the tooltip data has no bonus. Removed in the data pass | "darts while skating are straight beams at normal damage". Fix is in rimewright_kit.gd and rimewright.json, both in flight |
+| 7 | Skate over edges | closed: the skate goes on over a ledge | "she skates on over a ledge" |
+| 8 | Cooldowns | skate closed (13 s, the data); open: wall 17 s vs 20 s (data) / 16.7 s (card), spear 10.2 s vs 12 s. Both are the data pass's 0.85x scaling, against the PARITY FIRST default of source cooldowns. Owner call | rimewright.json is in flight |
+| 9 | Aim line | closed: the thin aim line is always up (shared with every hunter, `Match.aim_line`) | "the thin aim line to the cursor is always up" |
+| 10 | Rink Wall cast tell | closed: a 0.2 s sparkle at her feet, the path shown to all, then the wall | "tm E: a 0.2 s tell first" |
+
+Suggestions, not built: restore the 1.6x skating dart damage (row 6) if the owner wants footage over the data; set wall 20 s and spear 12 s for strict parity (row 8).
+
 ## Audit (Nov 3 23:40)
 Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on main 200effce) against this branch. (a) done on the branch, (b) fixed now, (c) not applicable or disagree.
 
@@ -81,7 +99,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 
 ## Assumptions
 - **Dart range:** the darts curve to the cursor and fly on to 10m when nothing is there to home on.
-- **Dart pattern:** the footage's uniform stream wins over the wiki's older "ends with 3 larger darts" (the sheet ranks it gap 1; the footage is newer).
+- **Dart pattern:** the game data's barrage wins (f6250bd1): no pause, 4 plain then 3 large darts, round again. The footage at 5 fps showed no visible pattern (the sheet ranks it gap 1).
 - **Ice Spear:** 2 charges with a 10.2s recharge (the source's 12s, scaled by our wall's 17s against its 20s; the card's 0.3s is read as the cast time). Its direct hit is small; the detonation is the big hit. The ice-encased look after it is a 0.5s freeze plus a 1.5s ice shell. The wiki's near/far slow-versus-damage split is dropped in favour of the footage's slow zone.
 - **Rink Wall:** it slides until its middle reaches the cursor (4.5 to 16.2m of travel, +50% by the owner) and stands 4.5s in all; the freeze recast is the wiki's (6s).
 - **Body and movement (not in the footage):** she has **no separate air dash**: Shift is the skate everywhere, and in the air (owner item 62, replacing item 12's buffer to the landing) it starts at once and skates through the air (see the Skate row). Her **plain jump** is the shared one; her **idle** is the shared idle with her skater's stance (one leg back, arms out, a slight lean). The sheet asks for a ~0.15s stop on release: the stop keeps the shared 30% carry (about 0.1-0.2s to rest).
