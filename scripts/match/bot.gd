@@ -548,7 +548,6 @@ func _crawl(m: Match, h: Hunter) -> void:
 		mv = Vector2.ZERO
 	h.inp["move"] = mv
 
-## Right click: the weapon's utility, used when a target is in reach.
 const EARLY_RELEASE := 0.55    # a rookie bot lets go of a charge at this share of the perfect hold
 
 ## A rookie bot's kit use stays plain: a charge is let go early, and an E, R or ultimate that is already
@@ -557,7 +556,7 @@ const EARLY_RELEASE := 0.55    # a rookie bot lets go of a charge at this share 
 func _plain_kit(h: Hunter, holds: Dictionary) -> void:
 	var ak: ArchKit = h.ak
 	for k in ak.bot_hold:
-		if float(ak.bot_hold[k]) > float(holds[k]):
+		if float(ak.bot_hold[k]) > float(holds.get(k, 0.0)):
 			ak.bot_hold[k] = float(ak.bot_hold[k]) * EARLY_RELEASE
 	if ak.e_t > 0.0 and ak.e_recastable():
 		h.inp["sig"] = false
@@ -575,6 +574,7 @@ func _in_others_fight(m: Match, h: Hunter, o: Hunter) -> bool:
 			return true
 	return false
 
+## Right click: the weapon's utility, used when a target is in reach.
 func _use_sec(m: Match, h: Hunter, tgt: Ent) -> void:
 	var a := h.ai
 	# holding a charge-up (Rail Charge): keep holding until it's ready, then let go
