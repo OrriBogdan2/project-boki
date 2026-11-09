@@ -31531,5 +31531,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_stance3_glaivyx_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance3_glaivyx",
+    "name": "Glaivyx (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_glaivyx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_glaivyx",
+    "name": "Glaivyx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_glaivyx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_rimink",
+    "name": "Rimink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_rimink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_rimink",
+    "name": "Rimink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_rimink_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_rimink",
+    "name": "Rimink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_rimink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_lashyx",
+    "name": "Lashyx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_lashyx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_lashyx",
+    "name": "Lashyx (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_lashyx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_skidlet",
+    "name": "Skidlet (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_skidlet_3.jpg",
+    "ok": true
   }
 ]
