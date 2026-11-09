@@ -46973,5 +46973,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_maulangler_gap_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_medushroom_gap",
+    "name": "Medushroom (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_medushroom_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_malletary_gap",
+    "name": "Malletary (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_malletary_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_maulangler_gap",
+    "name": "Maulangler (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_maulangler_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_medushroom_gap",
+    "name": "Medushroom (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_medushroom_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_maulangler_gap",
+    "name": "Maulangler (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_maulangler_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_medushroom_gap",
+    "name": "Medushroom (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_medushroom_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_morelossus_gap",
+    "name": "Morelossus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_morelossus_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_reelacine_gap",
+    "name": "Reelacine (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_reelacine_gap_1.jpg",
+    "ok": true
   }
 ]
