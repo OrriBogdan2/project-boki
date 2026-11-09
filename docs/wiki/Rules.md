@@ -344,6 +344,22 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | half_from | 7 |
 | half_k | 0.5 |
 
+## low_hp (`content/rules/low_hp.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The low-health heartbeat and the red screen-edge pulse that goes with it (scripts/ui/low_hp_cue.gd), for the local player only. Health share = (health + armour) / (max health + max armour). It starts when the share falls below `start_share`, beats faster the lower it goes (`bpm_start` at the line, `bpm_empty` at 0) and stops the moment the share is back above the line, or you are downed or out. `volume_db` is the beat's level; `duck_db` is how much quieter it gets while `duck_voices` or more other sounds are playing (a fight). `edge_alpha` is the strongest edge red; `edge_calm` scales it when Settings > Accessibility > Fewer flashes is on. |
+| start_share | 0.25 |
+| bpm_start | 66 |
+| bpm_empty | 120 |
+| volume_db | -6 |
+| duck_db | -9 |
+| duck_voices | 6 |
+| edge_alpha | 0.09 |
+| edge_calm | 0.3 |
+
 ## mantle_look (`content/rules/mantle_look.json`)
 
 The Relic look (docs/decisions/0011-mantle-look.md). In a match a Relic wearer looks like the class's original Hunter (`wardens`: gender, folk, face, hair, palette; the class's gear and silhouette come from the archetype), nudged by the player's own person (Save look, PlayerLook). Each slider (0..1, 0.5 = neutral) moves its model factor by at most `sliders.<key>.clamp` either way (a Hunter's own `clamp` block overrides it); at home the player is their own person, with `own_k` times that range and their own colours. Each colour pick pulls the Hunter's colour `pull` of the way in HSV, never more than `hue` / `sat` / `val` (a Warden's `tint` block overrides it), so signature colours stay. Hitboxes never read any of this. `presets` set the face sliders as a starting point. Gender is the base character's (OWNER_REVIEW item 39; 'robot' builds on the male body).

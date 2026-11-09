@@ -1,0 +1,8 @@
+{
+ "group": "health",
+ "name": "Health",
+ "script": "tools/gen_sfx_health.py",
+ "sounds": {"heartbeat": "ui"},
+ "signature": [],
+ "replaces": []
+}

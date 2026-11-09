@@ -374,6 +374,7 @@ func _tab_audio(v: VBoxContainer) -> void:
 	_group(v, "Sounds")
 	var cues := [["a", "Rising bells"], ["b", "Bell with a glide"], ["c", "Soft whoomp and ping"]]
 	_choice(v, "Ability ready again", "reset_cue", cues, func(): Sfx.play_reset_cue(), "Plays when a kill resets your cooldowns")
+	_toggle(v, "Low-health heartbeat", "low_hp_pulse", "A soft heartbeat, faster as you near down")
 	_group(v, "Window")
 	_toggle(v, "Mute when the window isn't focused", "mute_unfocused")
 

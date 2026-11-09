@@ -23,7 +23,7 @@ const DEFAULTS := {
 	# camera
 	"depth_cues": true, "cam_style": "supervive", "cam_follow": "supervive", "cam_lead": 1.0,
 	# sounds
-	"reset_cue": "a",
+	"reset_cue": "a", "low_hp_pulse": true,
 	# accessibility
 	"screen_shake": 0.3, "reduce_flashes": false,
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)

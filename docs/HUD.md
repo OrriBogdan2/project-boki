@@ -15,6 +15,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `dash_slot.gd` | the dash as a normal ability slot (Shift): a pip per charge filling as it recharges, a countdown for the next one, a flash and tick when one returns, a diamond for the air dash; one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
 | `outpost_glyph.gd` | an outpost on the minimap and full map: footing, mast, banner in the holder's colour, beacon filling with the charge |
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the ally alerts, never overlapping, repeats merged ("x3"), at most 3 at once, the most important first, short lives; world labels under a card fade back (`yield_label`). Check: `--msg-queue-check` |
+| `low_hp_cue.gd` (`LowHpCue`, one on `hud.lowhp`) | the local player's "one hit from down" cue: while (health + armour) / (max health + max armour) is under `start_share` in `content/rules/low_hp.json` (0.25), a soft heartbeat plays, faster the lower the share, and the screen edge glows red on each beat (five thin rings, no widget, calmed by Fewer flashes). Stops on a heal over the line, down or out. Check: `--sfx-set-check` |
 | `hudref_demo.gd` | `--hudref-demo=plates|fight|busy` screenshot scenes |
 
 Rules of the look:

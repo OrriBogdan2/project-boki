@@ -41,6 +41,9 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 ```
 `--sfx-set-check` asserts: every listed sound has its file(s); every take is within 3 dB of its category and under the ceiling; a Hunter set has hurt/down/death, dash, steps on all four surfaces, a `fire` sound and its signature list; `HeroSfx` picks them up; every literal `m.sfx("...")` in that Hunter's kit (`<arch>_kit.gd` plus its `kit_files`) names a sound that exists. `replaces` lists old-name files the set regenerated. `reach` (metres, 22-80) makes a heavy sound carry past the usual 22 m, so you hear a carry coming (past 9 m it plays through the muffled bus, so the low end is what carries); `Sfx` reads it from every set at start. Each sound under `loops` must repeat seamlessly.
 
+## Low-health heartbeat
+`heartbeat` (`tools/gen_sfx_health.py`, set `content/sfx/health.json`) plays through `LowHpCue` (`scripts/ui/low_hp_cue.gd`) for the local player only, via `Sfx.play`, one beat at a time so the rate can follow health. Line, rate, level and duck depth are in `content/rules/low_hp.json`; it ducks by `duck_db` while `Sfx.busy_voices()` is at least `duck_voices` (a fight). Toggle: Settings > Audio > Low-health heartbeat (`low_hp_pulse`). `--sfx-set-check` asserts it starts under the line, speeds up, and stops on heal, down or out.
+
 ## Playing and buses
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.

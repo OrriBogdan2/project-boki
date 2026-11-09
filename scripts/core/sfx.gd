@@ -372,6 +372,14 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
 
+## How many pool voices are playing right now: a fight is many at once (the low-health heartbeat ducks under it).
+func busy_voices() -> int:
+	var n := 0
+	for p in players:
+		if p.playing:
+			n += 1
+	return n
+
 ## A free voice from the pool, so a new sound doesn't cut one that's still ringing (the oldest if all are busy).
 func _voice(pos) -> AudioStreamPlayer:
 	var p: AudioStreamPlayer = null
