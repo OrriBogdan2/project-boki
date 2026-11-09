@@ -51628,5 +51628,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_reapant_w8_2.jpg",
     "ok": true
+  },
+  {
+    "id": "gongrowl_cardc",
+    "name": "Gongrowl (hero card, action)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_cardc",
+    "name": "Gongrowl (hero card, action)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardc_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_pc",
+    "name": "Gongrowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_pc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_cardc",
+    "name": "Vespox (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vespox_cardc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_cardc",
+    "name": "Vespox (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/vespox_cardc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_pc",
+    "name": "Gongrowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_pc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_cardc",
+    "name": "Vespox (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vespox_cardc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vespox_pc",
+    "name": "Vespox (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_vespox_pc_1.jpg",
+    "ok": true
   }
 ]
