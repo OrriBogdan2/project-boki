@@ -56,7 +56,9 @@ var music_name := ""
 var amb: AudioStreamPlayer
 var amb_name := ""
 var music_bus := 0
-var _duck_fx: AudioEffectAmplify     # the Music bus's ducking stage (see duck)
+var _duck_fx: Array[AudioEffectAmplify] = []     # the Music and Ambience buses' ducking stages (see duck)
+var cue_db := {}            # sound -> dB the mix pass adds (content/rules/sfx_cues.json, tools/loudness_report.py)
+var duck_rules := {}        # content/rules/sfx_mix.json "duck": depths, holds and the way back
 var _duck_tw: Tween
 
 func _ready() -> void:
@@ -86,6 +88,7 @@ func _ready() -> void:
 		elif takes.size() > 1:
 			streams[n] = takes
 	_load_reach()
+	_load_mix()
 	for i in POOL:
 		var p := AudioStreamPlayer.new()
 		p.bus = "SFX"
@@ -102,6 +105,13 @@ func _load_reach() -> void:
 		if d is Dictionary:
 			for sname in (d as Dictionary).get("reach", {}):
 				sound_reach[sname] = float(d["reach"][sname])
+
+## The mix pass (docs/AUDIO.md): per-cue dB to land each category on its loudness target, and the ducking rules.
+func _load_mix() -> void:
+	var cues = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_cues.json"))
+	cue_db = (cues as Dictionary).get("cues", {})
+	var rules = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_mix.json"))
+	duck_rules = (rules as Dictionary).get("duck", {})
 
 ## The effects on the buses: SFX gets a soft compressor, a little room and a limiter; far-away sounds
 ## are low-passed on their way into it; the master has a last safety limiter.
@@ -142,8 +152,10 @@ func _setup_mix() -> void:
 	side.release_ms = 350.0
 	AudioServer.add_bus_effect(music_bus, side)
 	# the music ducks under big moments on its own bus, so it works for one track or for layers
-	_duck_fx = AudioEffectAmplify.new()
-	AudioServer.add_bus_effect(music_bus, _duck_fx)
+	for bn in ["Music", "Ambience"]:
+		var fx := AudioEffectAmplify.new()
+		AudioServer.add_bus_effect(AudioServer.get_bus_index(bn), fx)
+		_duck_fx.append(fx)
 	var mlim2 := AudioEffectHardLimiter.new()
 	mlim2.ceiling_db = -1.5
 	AudioServer.add_bus_effect(music_bus, mlim2)
@@ -221,17 +233,30 @@ func play_ambience(name: String) -> void:
 	amb.play()
 	create_tween().tween_property(amb, "volume_db", -14.0, 2.0)
 
-## Softens the music for a moment, e.g. under a big slow-motion beat (eased, never a sudden drop).
+## Softens the music and the ambience for a moment, e.g. under a big slow-motion beat or an enemy ult
+## (eased in fast, held for `seconds`, back in duck_rules["back_s"], never a sudden drop).
 func duck(seconds: float, depth_db := -8.0) -> void:
-	if _duck_fx == null:
+	if _duck_fx.is_empty():
 		return
 	if _duck_tw and _duck_tw.is_valid():
 		_duck_tw.kill()
+	var from := _duck_fx[0].volume_db
+	var to := minf(depth_db, from)
 	var tw := create_tween()
 	_duck_tw = tw
-	tw.tween_property(_duck_fx, "volume_db", minf(depth_db, _duck_fx.volume_db), 0.18).set_trans(Tween.TRANS_SINE)
+	tw.tween_method(_set_duck, from, to, float(duck_rules["attack_s"])).set_trans(Tween.TRANS_SINE)
 	tw.tween_interval(seconds)
-	tw.tween_property(_duck_fx, "volume_db", 0.0, 0.8).set_trans(Tween.TRANS_SINE)
+	tw.tween_method(_set_duck, to, 0.0, float(duck_rules["back_s"])).set_trans(Tween.TRANS_SINE)
+
+## A dip for something loud at pos (kind "ult" or "knock", the depth and hold in content/rules/sfx_mix.json),
+## only when it is within hearing of the camera.
+func duck_for(kind: String, pos: Vector3) -> void:
+	if Vector2(pos.x - listener.x, pos.z - listener.z).length() <= float(duck_rules["range_m"]):
+		duck(float(duck_rules[kind + "_hold_s"]), float(duck_rules[kind + "_db"]))
+
+func _set_duck(db: float) -> void:
+	for fx in _duck_fx:
+		fx.volume_db = db
 
 # ------------------------------------------------------------------ layered music
 ## The expedition's score is four stems of one piece (tools/compose.py LAYERS), all playing in step;
@@ -398,7 +423,7 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	if sname.contains("step_"): gap = 25         # footsteps: several people can walk at once
 	if now - int(last_played.get(sname, -1000)) < gap:
 		return
-	var v := vol_db + _distance_db(pos, float(sound_reach.get(sname, 0.0))) + (BLAST_DB if sname in BLAST else 0.0)
+	var v := vol_db + float(cue_db.get(sname, 0.0)) + _distance_db(pos, float(sound_reach.get(sname, 0.0))) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
 		return
 	var times: Array = recent.get(sname, [])
@@ -464,7 +489,7 @@ func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 
 	p.bus = "SFX"
 	add_child(p)
 	var carry := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
-	loops[key] = {"p": p, "pos": pos, "vol": vol_db, "reach": carry}
+	loops[key] = {"p": p, "pos": pos, "vol": vol_db + float(cue_db.get(sname, 0.0)), "reach": carry}
 	if st == null:
 		return
 	if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:

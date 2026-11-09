@@ -49,6 +49,7 @@ func run(main_node: Node) -> void:
 	ok(once.is_empty(), "a one-shot of a looping file does not loop (%d looping pool voices)" % once.size())
 	Sfx.loop_start("boxhum_check", "revive_hum", P.pos)       # (as a deathbox revive does, keyed)
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
+	await _duck_check(m)
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -64,6 +65,41 @@ func run(main_node: Node) -> void:
 	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Ducking: a rival's ult cast in earshot dips the music and ambience buses;
+## a knock in earshot dips them too; the dip is gone again after the hold and about a second.
+func _duck_check(m: Match) -> void:
+	var P: Hunter = m.player
+	var rival: Hunter = null
+	for h: Hunter in m.hunters:
+		if h != P and h.team != P.team and rival == null: rival = h
+	ok(rival != null, "setup: a rival Hunter to cast")
+	if rival == null:
+		return
+	Sfx.listener = P.pos
+	rival.pos = P.pos + Vector3(8, 0, 0)
+	var mus := Sfx._duck_fx[0]
+	CombatBus.ability_used.emit(rival, "check_x", "ultimate")
+	await main.get_tree().create_timer(0.4).timeout
+	var rules: Dictionary = Sfx.duck_rules
+	var amb: AudioEffectAmplify = Sfx._duck_fx[1]
+	var depth := float(rules["ult_db"])
+	ok(mus.volume_db <= depth + 0.5 and amb.volume_db <= depth + 0.5,
+		"a rival's ult dips the score and the ambience (%.1f / %.1f dB, rule %.1f)"
+		% [mus.volume_db, amb.volume_db, depth])
+	var back := float(rules["ult_hold_s"]) + float(rules["back_s"]) + 0.3
+	await main.get_tree().create_timer(back).timeout
+	ok(mus.volume_db > -0.5 and amb.volume_db > -0.5,
+		"...and both are back about a second after the cast (%.1f dB)" % mus.volume_db)
+	rival.pos = P.pos + Vector3(float(rules["range_m"]) + 20.0, 0, 0)
+	CombatBus.ability_used.emit(rival, "check_x", "ultimate")
+	await main.get_tree().create_timer(0.4).timeout
+	ok(mus.volume_db > -0.5, "a rival's ult out of earshot does not duck (%.1f dB)" % mus.volume_db)
+	rival.pos = P.pos + Vector3(8, 0, 0)
+	Juice.knock(m, rival, P)
+	await main.get_tree().create_timer(0.3).timeout
+	ok(mus.volume_db < -3.0, "a knock call in earshot dips them (%.1f dB)" % mus.volume_db)
+	await main.get_tree().create_timer(float(rules["knock_hold_s"]) + float(rules["back_s"]) + 0.3).timeout
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0

@@ -464,6 +464,15 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | beacon_hear_m | 120 |
 | _beacon_hear_m | how far the beacon's alarm loop carries; the notice itself reaches every player on the map |
 
+## sfx_cues (`content/rules/sfx_cues.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | dB added per cue in Sfx.play (and loops, beds): written by tools/loudness_report.py --write from content/rules/sfx_mix.json; edit the rules, not this file. |
+| cues | {"ab_leap": -3.0, "ab_plant": 1.0, "ab_ready": -5.0, "ab_shield_hit": 0.5, "ab_throw": -3.0, "archer_dash": -5.0, "archer_step_stone": 2.5, "archer_step_wood": 2.5, "armor_hit": 0.5, "ashwick_dash": -4.0, "ashwick_death": -2.5, "ashwick_step_stone": 2.5, "bjorn_bash": 3.0, "bjorn_catch": 1.0, "bjorn_plant": 0.5, "bjorn_purify_burst": -4.5, "bjorn_shield_up": 3.0, "bjorn_ult_slam": 0.5, "boki_work": 2.5, "br_crumble": 3.0, "br_punch": 1.0, "br_roll": -5.0, "br_sense": 3.0, "br_shove": 2.0, "br_slam": 0.5, "break_metal": 2.0, "break_wood": 2.5, "build": 2.0, "bulwark_dash": -4.0, "bulwark_hurt": 3.0, "bulwark_step_grass": 3.0, "bulwark_step_snow": 3.0, "bulwark_step_stone": 3.0, "bulwark_step_wood": 3.0, "charge": 3.0, "click": 3.0, "cloak": 3.0, "crit": -2.5, "dash": -3.5, "dj_blade": -3.5, "dj_bola_wrap": -2.0, "dj_knife_throw": -2.5, "dolm_dash": -3.5, "dolm_step_grass": 2.5, "dolm_step_stone": 3.0, "dolm_step_wood": 2.5, "dr_anchor": 0.5, "dr_anchor_wind": -2.0, "dr_blast": 0.5, "dr_hop": -5.0, "dr_quake": 0.5, "dr_reel": -2.5, "dredge_coin_jingle": -2.0, "dredge_dash": -4.5, "dredge_death": -4.5, "dredge_down": -4.0, "dredge_hurt": -2.0, "dredge_pickup": -3.5, "dredge_step_grass": 2.0, "dredge_step_snow": 2.0, "dredge_step_stone": 2.5, "drip": -6.5, "extract_ok": -2.5, "fall": -6.0, "glide": -4.0, "grab": 3.0, "gunslinger_dash": -6.0, "gunslinger_grenade_thunk": 1.0, "gunslinger_step_stone": 2.5, "gunslinger_step_wood": 2.5, "hero_blowout": -2.0, "hit": 1.0, "jug_lunge_hit": 0.5, "jug_reel": -2.0, "jug_slam_hit": 0.5, "jug_slam_wind": -3.5, "juggernaut_enrage": -2.5, "juggernaut_step_grass": 3.0, "juggernaut_step_stone": 3.0, "juggernaut_step_wood": 3.0, "k_echo": 3.0, "key_get": -4.5, "kill": -3.5, "lw_bash_hit": 2.0, "lw_bolt": 3.0, "lw_hop": -3.5, "lw_jet_land": -3.0, "lw_roar": -4.0, "mage_bubble_pop": 0.5, "mage_dash": -6.5, "mage_rod_hit": 0.5, "mage_step_stone": 3.0, "mage_step_wood": 2.5, "os_pop": 0.5, "os_snap": 3.0, "os_swap": -3.5, "os_swap_lob": -2.0, "os_well_hum": 0.5, "ostra_dash": -5.0, "ostra_hurt": 2.0, "ostra_music_box": -2.5, "pay_cashin": -2.5, "pay_collapse": -2.5, "pay_flashpoint": -4.0, "pay_rage": -3.5, "pickup": 3.0, "pin_hail": -3.5, "pin_loose": -3.0, "pin_loose_super": -3.0, "pin_perfect": -2.5, "pin_rain": -6.0, "pin_stage": -2.5, "pin_ult_nock": -2.0, "plant": 3.0, "rail": 3.0, "reload": 3.0, "reset_a": -6.0, "reset_b": -4.5, "revive_done": -4.0, "rime_freeze": -3.0, "rime_lance": 2.5, "rime_spear_aim": -2.0, "rime_wall": 0.5, "rimewright_chime": -2.5, "rimewright_dash": -6.5, "rimewright_death": -3.0, "rimewright_hurt": -2.5, "rimewright_skate_scrape": -11.0, "rimewright_step_stone": 3.0, "rustle": -7.0, "scan_pop": -2.0, "shield": 2.0, "smg": 1.0, "splash": -6.0, "squeak": -7.5, "step_snow_1": -2.5, "step_snow_2": -2.5, "step_snow_3": -3.0, "swap": 3.0, "swim": -5.5, "tend_arrive": -4.0, "tend_ember_emp": -2.5, "tend_flare": -2.5, "tend_hop": -5.0, "tend_kindled": -2.5, "tend_land": -8.0, "tend_seed_aim": -3.0, "tender_cheer": -3.5, "tender_dash": -5.5, "tender_death": -3.0, "tender_step_grass": 3.0, "tender_step_stone": 3.0, "tender_step_wood": 2.5, "thief_dash": -5.0, "thief_flintlock_crack": 0.5, "thief_step_stone": 2.0, "thief_step_wood": 2.0, "thump": 3.0, "train_hit": -2.5, "unlock": -2.5, "v_bomber_1": 2.5, "v_bomber_2": 2.5, "v_bomber_3": 2.5, "v_glimmer_1": 3.0, "v_glimmer_2": 3.0, "v_glimmer_3": 3.0, "v_skitter_1": 3.0, "v_skitter_2": 3.0, "v_skitter_3": 3.0, "v_spitter_1": 2.5, "v_spitter_2": 2.5, "v_spitter_3": 2.5, "vn_cock": -2.0, "vn_nuke_burn": 1.5, "vn_nuke_fall": -7.0, "vn_nuke_fire": -2.5, "vn_rifle": 0.5, "vn_slide": -5.5, "vv_rod_summon": 0.5, "vv_rod_throw": -2.5, "vv_sky_place": 1.5, "vv_ult_hum": 2.5, "vv_ult_rise": -4.0, "warn": -2.5, "whoosh": -3.0, "zap": 2.0} |
+
 ## sfx_levels (`content/rules/sfx_levels.json`)
 
 
@@ -475,6 +484,24 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | tolerance_db | 3 |
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
+
+## sfx_mix (`content/rules/sfx_mix.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The mix pass (docs/AUDIO.md). targets: integrated loudness (LUFS, BS.1770) per category; a cue outside +-tolerance_lu gets a dB in content/rules/sfx_cues.json (tools/loudness_report.py --write), at most max_trim_db down / max_boost_db up, boosts never past peak_db. match: first regex that hits a cue name wins; skip: cues mixed by their own scene; report_only: measured but not trimmed (the beds play at -14 dB in Sfx.play_ambience, so the target is the bed's own level). duck: Sfx.duck under an enemy ult cast and a knock callout (music and ambience dip, come back in back_s). |
+| tolerance_lu | 2 |
+| max_trim_db | 12 |
+| max_boost_db | 3 |
+| peak_db | -1 |
+| targets | {"weapon": -19.5, "ability": -19.5, "impact": -20.0, "boki": -20.0, "voice": -21.0, "move": -25.5, "ui": -23.5, "ambience": -20.5} |
+| report_only | ["ambience"] |
+| skip | ["^mask_"] |
+| default | ability |
+| match | [["ambience", "^amb_"], ["ui", "^(ui_\|click\|hover\|ping\|unlock\|reset_\|level_up\|key_get\|lock_rattle\|ab_ready\|warn\|build)"], ["boki", "^(boki_\|kin\|k_\|bond\|tend_(call\|arrive\|pickup)\|revive)"], ["voice", "^(v_\|die_\|hurt$\|.*_(hurt\|down\|death)$\|.*_(cheer\|roar)$\|lw_roar)"], ["move", "(^\|_)(step\|dash\|jump\|land\|glide\|hover\|swim\|splash\|whoosh\|fall\|rustle\|squeak\|drip\|hop\|slide\|roll\|skate_scrape)"], ["weapon", "^(smg\|rifle\|shotgun\|sniper\|rail\|reload\|swipe\|cleave\|throw)$\|^vn_(rifle\|cock\|ion_fire\|nuke_fire)\|_(cock\|flintlock_crack\|twang\|loose\|draw\|shot\|spinup)$\|^pin_(draw\|loose\|heavy_draw\|overdraw)"], ["impact", "(^\|_)(hit\|crit\|kill\|knock\|knock_confirm\|impact\|boom\|thump\|crash\|slam\|break\|bash\|punch\|crunch\|clang\|stick\|crack\|burst\|blast)(_\|$)\|^(armor_\|break_\|die)"]] |
+| duck | {"range_m": 45.0, "ult_db": -9.0, "ult_hold_s": 0.7, "knock_db": -6.0, "knock_hold_s": 0.35, "attack_s": 0.12, "back_s": 1.0} |
 
 ## tutorial (`content/rules/tutorial.json`)
 

@@ -32,9 +32,25 @@ func run(main: Node) -> void:
 			_check_set("res://content/sfx/" + f)
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
+	_cue_table()
 	_fallback()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The mix pass's cue table (content/rules/sfx_cues.json): every named sound has a file and the dB is a sane trim.
+func _cue_table() -> void:
+	var mix = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_mix.json"))
+	var cues: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_cues.json"))["cues"]
+	var off := []
+	for sname in cues:
+		var db := float(cues[sname])
+		if _takes(String(sname)).is_empty() or db < -float(mix["max_trim_db"]) or db > float(mix["max_boost_db"]):
+			off.append(sname)
+	ok(not cues.is_empty() and off.is_empty(),
+		"the cue table: %d sounds on file, each within the trim/boost caps %s" % [cues.size(), off])
+	var d: Dictionary = mix["duck"]
+	var dips := float(d["ult_db"]) < 0.0 and float(d["knock_db"]) < 0.0
+	ok(dips and float(d["back_s"]) <= 1.2, "the ducking rules dip and come back in about a second")
 
 func _check_set(path: String) -> void:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))

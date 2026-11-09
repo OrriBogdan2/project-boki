@@ -14,11 +14,18 @@ var last_done := 0.0
 var started := false
 
 func start(m: Match) -> void:
+	CombatBus.ability_used.connect(_ult_duck.bind(m))
 	if m.tier >= 2:
 		Sfx.play_music("hollow")
 		return
 	started = true
 	Sfx.play_layers("match", {"calm": 1.0, "drive": 0.0, "boss": 0.0, "extract": 0.0})
+
+## A rival's ultimate going off (the wind-up, the cast, or an X ult) dips the score and the beds, so the cast reads.
+func _ult_duck(caster: Node, _ability: String, slot: String, m: Match) -> void:
+	var rival := caster as Hunter
+	if rival != null and slot in ["ult_fuse", "ult", "ultimate"] and m.player != null and rival.team != m.player.team:
+		Sfx.duck_for("ult", rival.pos)
 
 ## Ambience by place, every quarter second: wind howling up from the abyss as you near an edge (or
 ## glide over it), the creak and grit of the old ruins among their walls, and now and then a

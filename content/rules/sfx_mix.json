@@ -1,0 +1,21 @@
+{
+ "_doc": "The mix pass (docs/AUDIO.md). targets: integrated loudness (LUFS, BS.1770) per category; a cue outside +-tolerance_lu gets a dB in content/rules/sfx_cues.json (tools/loudness_report.py --write), at most max_trim_db down / max_boost_db up, boosts never past peak_db. match: first regex that hits a cue name wins; skip: cues mixed by their own scene; report_only: measured but not trimmed (the beds play at -14 dB in Sfx.play_ambience, so the target is the bed's own level). duck: Sfx.duck under an enemy ult cast and a knock callout (music and ambience dip, come back in back_s).",
+ "tolerance_lu": 2.0,
+ "max_trim_db": 12.0,
+ "max_boost_db": 3.0,
+ "peak_db": -1.0,
+ "targets": {"weapon": -19.5, "ability": -19.5, "impact": -20.0, "boki": -20.0, "voice": -21.0, "move": -25.5, "ui": -23.5, "ambience": -20.5},
+ "report_only": ["ambience"],
+ "skip": ["^mask_"],
+ "default": "ability",
+ "match": [
+  ["ambience", "^amb_"],
+  ["ui", "^(ui_|click|hover|ping|unlock|reset_|level_up|key_get|lock_rattle|ab_ready|warn|build)"],
+  ["boki", "^(boki_|kin|k_|bond|tend_(call|arrive|pickup)|revive)"],
+  ["voice", "^(v_|die_|hurt$|.*_(hurt|down|death)$|.*_(cheer|roar)$|lw_roar)"],
+  ["move", "(^|_)(step|dash|jump|land|glide|hover|swim|splash|whoosh|fall|rustle|squeak|drip|hop|slide|roll|skate_scrape)"],
+  ["weapon", "^(smg|rifle|shotgun|sniper|rail|reload|swipe|cleave|throw)$|^vn_(rifle|cock|ion_fire|nuke_fire)|_(cock|flintlock_crack|twang|loose|draw|shot|spinup)$|^pin_(draw|loose|heavy_draw|overdraw)"],
+  ["impact", "(^|_)(hit|crit|kill|knock|knock_confirm|impact|boom|thump|crash|slam|break|bash|punch|crunch|clang|stick|crack|burst|blast)(_|$)|^(armor_|break_|die)"]
+ ],
+ "duck": {"range_m": 45.0, "ult_db": -9.0, "ult_hold_s": 0.7, "knock_db": -6.0, "knock_hold_s": 0.35, "attack_s": 0.12, "back_s": 1.0}
+}

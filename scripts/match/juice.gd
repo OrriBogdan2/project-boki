@@ -111,6 +111,8 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	HeroVfx.of(m).play(h, "downed", h.pos, h.aim_dir())
 	if credit == m.player and h != m.player:
 		m.sfx("knock_confirm", null, -6.0)
+	if h != m.player:
+		Sfx.duck_for("knock", h.pos)         # (your own knock ducks in Match.knock)
 
 ## Someone taken out for good (Match.eliminate): their light goes up in a column of sparks.
 static func kill(m: Match, h: Hunter, credit: Ent) -> void:
