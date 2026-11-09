@@ -68,7 +68,7 @@ var chapter_lbl: Label
 var pips: HBoxContainer
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	if then_go == "hatch" and Save.d["tutorial"].get("prologue", false):
 		set_process(false)
 		set_process_unhandled_input(false)

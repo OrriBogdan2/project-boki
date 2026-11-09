@@ -436,7 +436,7 @@ func _open_card() -> void:
 	var card := KitCard.make(P.arch, sp, _close_card)
 	center.add_child(card)
 	m.paused = true
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 
 func _close_card() -> void:
 	if card_layer:
@@ -444,7 +444,7 @@ func _close_card() -> void:
 		card_layer = null
 		if menu_layer == null:
 			m.paused = false
-			Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+			CursorMode.aim()
 
 func toggle_card() -> void:
 	if card_layer: _close_card()
@@ -456,7 +456,7 @@ const MENU := Vector2(1040, 640)
 func open_menu() -> void:
 	close_menu()
 	m.paused = true
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	menu_layer = CanvasLayer.new()
 	menu_layer.layer = 40
 	m.add_child(menu_layer)
@@ -616,7 +616,7 @@ func close_menu() -> void:
 		menu_layer = null
 	if card_layer == null:
 		m.paused = false
-		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+		CursorMode.aim()
 
 ## The keys (a little node so they work while the menu has the game paused).
 class ArenaKeys extends Node:
