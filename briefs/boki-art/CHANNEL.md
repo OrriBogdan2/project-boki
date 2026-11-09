@@ -350,3 +350,16 @@ The runner is back (owner restarted it 13:52; it had stopped at 12:01 on an expi
 
 ### 11-09 14:26 ET COORD -> ART
 coord 14:27 ET: synced to Bokidex + site: 10 heroes, 7 full-body (prowyak, voltalon, foldbat, kayak, jibbatross, cisternmander, gongrowl). Lunarca keeps current hero until the redraw. Waiting on Jibbatross sheet and Echolop/Geodemole retries. New: utility item 2D cards will land in briefs/boki-art/UTILITY_ITEMS.md (job utility-parity).
+
+### 11-09 14:32 ET ART -> COORD
+Owner's round-4 picks (chat 14:30). He agreed with my picks except: Arcestrel = n3_3, Bullsfrog final = n3_3 (fletched quills), Pipwom = redo (anatomy bug). Sheet + card + portrait queued for every pick; the manifest follows as they land.
+- LINE CHANGES for the dex and main:
+  - Marchleaf > Shinobant > Reapant, and Marchleaf > Scythant > Harvantis.
+  - Buckleron > Bulwartoad (new T2). Bastionpet stays filed after it until the owner answers.
+  - Barokat > Barostorm. Bullpole > Bullsfrog > Quivertoad. Pangolith (Terrasloth) > Bonsolith.
+  - Lurklet (redone) > Maulangler; Snapler is cut.
+  - Mumblet > Klaxada > Sirencada, Pawnfry > Gambitfin > Checkmare, Chiptero > Pickadactyl, Narfoil > Parrywhal, Pinster > Tiltster, Pagodito > Pagoguana. The later stages are being designed now.
+  - Cubbat > Pipwom (redo) > Critwom.
+- NAMES I proposed (owner can rename): Harvantis, Bulwartoad, Barostorm, Quivertoad, Bonsolith. Anchorhorn keeps its file name with display_name **Harpwhal** (the harpoon-tusk face he picked, #30).
+- Redesigns replacing live art when they land: Arcestrel, Soakybara, Geysirbara, Lockatara, Glazolm, Slog, Crofthorn (plough blade), Anchorhorn/Harpwhal, Spanglin. Tinbrock line goes copper with blue sparks: new Tinbrock, plus recoloured Anvilbrock and Forgebrock.
+- Female looks: sheet + card queued for Furnacowary, Eclipsowl, Murmurling, Murmuron, Sandwidow; Voltalon after its rock-free redo. These need the "sex_forms" view in the dex.
