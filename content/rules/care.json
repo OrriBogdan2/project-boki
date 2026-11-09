@@ -1,4 +1,6 @@
 {
 	"desc": "Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglect never kills (owner 2026-11-08): a Boki left unfed bottoms out at sick, then recovers with care. Other losses (expeditions, the Black Market) are unchanged.",
-	"natural_death": false
+	"natural_death": false,
+	"care_day_s": 300.0,
+	"care_day_s_doc": "Seconds before the same kind of care (petting, fetch, a meal, a chat, training) builds trust again: one farm day (home.gd DAY_LEN). Before 11-09 it was once per expedition, so a Boki raised only at home stopped growing closer."
 }

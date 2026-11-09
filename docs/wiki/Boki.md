@@ -76,7 +76,8 @@ sentences, and a grown, Devoted Boki talks freely.
   (content/rules/care.json `natural_death`); regular meals bring it back. Feeders prevent it.
 - **Care.** Pet (F), play fetch (V), talk (T); the details card (C) has Feed, Brush, Bath, Nap, Train,
   Dress and Pair. Every Boki loves one food, refuses another and has a favourite pastime: you find
-  out by trying, and the card remembers.
+  out by trying, and the card remembers. Each kind of care builds a little trust once a farm day
+  (5 minutes), so a Boki raised only at home still grows close.
 - **Training.** Power, Guard, Speed and Focus, trained at the Training post with a three-round timing
   drill. A happy Boki learns faster; a tired one won't train.
 - **Life stages.** Hatchling, Youngling (level 4), Grown (8), Elder (16).

@@ -132,6 +132,8 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | Setting | Value |
 |---|---|
 | natural_death | False |
+| care_day_s | 300 |
+| care_day_s_doc | Seconds before the same kind of care (petting, fetch, a meal, a chat, training) builds trust again: one farm day (home.gd DAY_LEN). Before 11-09 it was once per expedition, so a Boki raised only at home stopped growing closer. |
 
 ## chest_keys (`content/rules/chest_keys.json`)
 

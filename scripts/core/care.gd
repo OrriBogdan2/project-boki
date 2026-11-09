@@ -109,6 +109,8 @@ static func ensure(rec: Dictionary) -> void:
 	if not rec.has("ivs") or typeof(rec["ivs"]) != TYPE_DICTIONARY:
 		rec["ivs"] = ivs_from_uid(String(rec.get("uid", "x")))     # old saves: fixed by the kin's id
 	Unique.ensure(rec)          # its inborn size, looks and habits (old saves: fixed by the kin's id)
+	for old in ["pet_m", "played", "fed_m", "trained_m", "talked"]:
+		rec.erase(old)              # the old once-per-expedition care stamps (now care_day)
 
 static func need(rec: Dictionary, n: String) -> float:
 	ensure(rec)
@@ -217,6 +219,16 @@ static func fed(rec: Dictionary) -> void:
 		var st := maxf(0.0, float(rec["starve"]) - 4.0 * 3600.0)
 		if st > 0.0: rec["starve"] = st
 		else: rec.erase("starve")
+
+## True once a farm day (care.json care_day_s) for each kind of care, and stamps it: the
+## gate on how much trust looking after it at home builds.
+static func care_day(rec: Dictionary, kind: String) -> bool:
+	var now := Time.get_unix_time_from_system()
+	var days: Dictionary = rec.get_or_add("care_day", {})
+	if now - float(days.get(kind, 0.0)) < float(Content.rules("care")["care_day_s"]):
+		return false
+	days[kind] = now
+	return true
 
 ## Overall condition, 0 to 100.
 static func condition(rec: Dictionary) -> float:

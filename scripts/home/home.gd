@@ -45,7 +45,6 @@ var chat_kin: Dictionary = {}
 var chat_input: LineEdit
 var chat_busy := false
 var emote_labels: Array = []
-var pet_done := {}
 
 var lots := {}                 # building id -> {node, built}
 var visit: Dictionary = {}     # when visiting someone: their island snapshot (see Social.publish_profile)
@@ -2801,8 +2800,7 @@ func _pet_kin(k: Dictionary) -> void:
 	_emote(k, "♥", true)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
 	Sfx.play("kin_happy", null, -4.0, 0.12, Unique.voice(rec))
-	if pet_done.get(rec["uid"], -1) != int(Save.d["matches"]):
-		pet_done[rec["uid"]] = int(Save.d["matches"])
+	if Care.care_day(rec, "petted"):
 		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
 		Save.save_game()
 		_say(k, BokiLines.say(rec, "petted"))
@@ -2863,8 +2861,7 @@ func _fetch_step(k: Dictionary, d: float) -> void:
 				Care.change(rec, "energy", -6.0)
 				Care.change(rec, "clean", -4.0)
 				if loves_fetch and Care.discover(rec, "play"): _toast("%s loves playing fetch" % rec["name"])
-				if int(rec.get("played", -1)) != int(Save.d["matches"]):
-					rec["played"] = int(Save.d["matches"])
+				if Care.care_day(rec, "played"):
 					Save.remember(rec, "played", "played fetch with you on the farm", 1.5)
 					Save.save_game()
 	if f["life"] <= 0.0:
@@ -3265,9 +3262,8 @@ func _send_chat() -> void:
 		var loves_chat: bool = rec["likes"]["play"] == "chat"
 		Care.change(rec, "joy", 6.0 if loves_chat else 2.0)
 		if loves_chat and Care.discover(rec, "play"): _toast("%s loves chatting with you" % rec["name"])
-		# talking builds a little trust, once per match
-		if int(rec.get("talked", -1)) != int(Save.d["matches"]):
-			rec["talked"] = int(Save.d["matches"])
+		# talking builds a little trust, once a farm day
+		if Care.care_day(rec, "talked"):
 			Save.remember(rec, "talked", "had a chat with you at home", 2.0)
 			Save.save_game()
 			if Bridge.ai_ok and rec["uid"] == Save.d.get("active", "") and not rec.has("lines"):
@@ -4283,8 +4279,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		_say(k, BokiLines.say(rec, "fed"))
 	if res.get("hungry", false):
 		Save.remember(rec, "fed", "was fed when it was hungry", 2.0)
-	elif int(rec.get("fed_m", -1)) != int(Save.d["matches"]):
-		rec["fed_m"] = int(Save.d["matches"])
+	elif Care.care_day(rec, "fed"):
 		Save.remember(rec, "fed", "was fed %s by you" % Care.food_name(f).to_lower(), 1.0)
 	Save.save_game()
 	_refresh_top()
@@ -4506,8 +4501,7 @@ func _finish_training() -> void:
 	Care.change(rec, "joy", 4.0 if (train["results"] as Array).has("great") else -2.0)
 	var aff: String = {"power": "fierce", "guard": "steadfast", "speed": "swift", "focus": "curious"}[stat]
 	Evo.add(rec, aff, 2.0)
-	if int(rec.get("trained_m", -1)) != int(Save.d["matches"]):
-		rec["trained_m"] = int(Save.d["matches"])
+	if Care.care_day(rec, "trained"):
 		Save.remember(rec, "trained", "trained %s with you at the yard" % String(Care.STATS[stat]["name"]).to_lower(), 1.0)
 	Save.save_game()
 	_toast("+%d %s  (%d of %d)" % [gained, Care.STATS[stat]["name"], int(rec["stats"][stat]), Care.stat_cap(rec)] if gained > 0 else "No gain this time. Try again after a rest")

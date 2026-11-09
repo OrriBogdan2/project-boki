@@ -325,8 +325,7 @@ func _pet_kin(k: Dictionary) -> void:
 		k["pet_ok"] = now_s + 20.0
 		Care.change(rec, "joy", 12.0 if loves_pet else 5.0)
 	if loves_pet and Care.discover(rec, "play"): _toast("%s loves scratches" % rec["name"])
-	if int(rec.get("pet_m", -1)) != int(Save.d["matches"]):
-		rec["pet_m"] = int(Save.d["matches"])
+	if Care.care_day(rec, "petted"):
 		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
 	Save.save_game()
 
