@@ -14,6 +14,7 @@ extends ArchKit
 const PAY := "COLLAPSE"
 const TEAL := Color("7fe0d0")
 const VOID_COL := Color("b06bff")
+const BUF_S := 0.15             # s: a Trade press this close to the landing is kept (DECISIONS: recast buffer)
 const PINK := Color("ff4fd8")
 const GROUND_HAZARDS := ["hazard", "lava", "spore", "toxic", "molten"]
 const ORB_FULL_COL := Color("efd4ff")      # the orb's shot colour at full charge (what other games draw)
@@ -33,6 +34,7 @@ var seed: Dictionary = {}      # {pos, t, grow, rmax, sid, vis, burn, col}
 var sid_n := 0
 var swap: Dictionary = {}      # in flight: {t, T, land, cast, from (where he is now), hold (CastHold)}
 var swap_aim := -1.0           # Shift held to aim the Trade (-1: not aiming)
+var swap_buf := false          # a press in the flight's last BUF_S: the next Trade starts as this one lands
 var snap: Dictionary = {}      # the Snap's wind-up: {t, T}
 var snap_rec := 0.0            # s of recovery left after a release (still slowed)
 var well: OstraWell            # X: Nightwell
@@ -253,6 +255,11 @@ func in_dash() -> bool:
 func dash_left() -> float:
 	return float(swap["t"]) if not swap.is_empty() else super.dash_left()
 
+## While a Trade is aimed or in flight a press does nothing (one in its last BUF_S waits for the landing),
+## so a second charge (Second Wind) shows dark until then instead of lit and eaten.
+func dash_held_off() -> bool:
+	return not swap.is_empty() or swap_aim >= 0.0
+
 ## Shift: hold to see both ends (where you are, where the lantern lands at the cursor), let go to lob.
 ## A tap lobs at once. It never travels by itself, so a press in the air or with no charge never sends
 ## him off in some other direction: it waits for the next charge.
@@ -261,6 +268,7 @@ func on_dash(_use_ex: bool) -> bool:
 		well.press_dash()
 		return true
 	if not swap.is_empty() or swap_aim >= 0.0:
+		swap_buf = swap_buf or (not swap.is_empty() and float(swap["t"]) <= BUF_S)
 		return true
 	if h.dashes < 1.0:
 		denied_swaps += 1
@@ -372,6 +380,9 @@ func _swap_end(go: bool) -> void:
 	AimKit.hide(h, "swap_fly")
 	for key in ["os_star", "os_sigil_from", "os_sigil_to"]:
 		KitLooks.of(m).release(key)
+	if go and swap_buf and h.dashes >= 1.0:
+		swap_aim = 0.0              # the buffered press: a tap, so it lobs on the next step
+	swap_buf = false
 	if not go:
 		return
 	swaps += 1

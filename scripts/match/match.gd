@@ -87,6 +87,7 @@ var _later: Array = []     # [due time, Callable]: delayed ability steps, on mat
 
 ## Run cb after `delay` seconds of match time: delayed effects, echoes, landing blasts. Unlike a
 ## SceneTree timer it pauses with the match, keeps step with headless sims and dies with the match.
+## One a replaced kit left (a class change mid-whirl) is dropped: its nodes are freed, calling it crashed.
 func later(delay: float, cb: Callable) -> void:
 	_later.append([time + maxf(0.0, delay), cb])
 
@@ -98,6 +99,8 @@ func _run_later() -> void:
 		if float(it[0]) <= time: due.append(it)
 	for it in due:
 		_later.erase(it)
+		var kit = (it[1] as Callable).get_object()
+		if kit is ArchKit and is_instance_valid((kit as ArchKit).h) and (kit as ArchKit).h.ak != kit: continue
 		(it[1] as Callable).call()
 var _bond_cb: Callable
 var _combo_cb: Callable

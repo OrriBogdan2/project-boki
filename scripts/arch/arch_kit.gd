@@ -714,7 +714,7 @@ func slot_info(slot: String) -> Dictionary:
 			var dmax := h.max_dashes()
 			var owed := floorf(maxf(h.dashes, 0.0)) + 1.0 - h.dashes        # charges owed: over 1 after a long slide
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
-				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
+				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0 and not dash_held_off(), "full": dash_payoff_ready()}, true)
 	return out
 
 func e_recastable() -> bool: return false
@@ -774,6 +774,8 @@ func shows_charge_ball() -> bool: return true
 func dodge_anim() -> String: return ""
 ## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 2).
 func extra_dashes() -> float: return 0.0
+## True while a press of a charged dash would do nothing (Sable's Trade in flight): the slot reads dark.
+func dash_held_off() -> bool: return false
 
 ## A shot dodged through this hero's dash (kits that feed on it override).
 func on_perfect_dodge() -> void: pass

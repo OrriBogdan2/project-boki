@@ -622,6 +622,10 @@ a relay process, this game joined through `tools/udp_delay.py` at 100 ms +- 20 m
 presses LMB, RMB, E, R and dash on the first step each slot shows ready: 0 refusals (2026-11-09). What did read
 as a dropped press there was a stun from a training bot or Boki landing just before the press, which is a real
 refusal; the check parks them and fails if anything stuns the player during a press.
+One slot did light and then eat the press: Sable's dash with a second charge (Second Wind) read ready while the
+Trade was in flight, when a press does nothing. It now reads dark until the lantern lands (`ArchKit.dash_held_off`),
+and a press in the flight's last 0.15 s (`OstraKit.BUF_S`, the DECISIONS recast buffer) lobs the next Trade as it
+lands. Admin god mode refills every dash each step, so checks run with it off.
 
 ---
 

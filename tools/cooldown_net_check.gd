@@ -6,6 +6,8 @@ extends RefCounted
 ## dark and light again, and presses on the first step it shows ready (the HUD slot's `ready`; LMB has no
 ## slot, so the weapon's can_fire and fire_cd). A refusal is the HUD's deny shake, or nothing starting
 ## within BUFFER_S (an attack, a cast, a charge, a dash). Cooldowns are cut to WAIT_S once the kit is idle.
+## Then two rows: Sable with Second Wind (the slot is dark while the Trade flies, a press in its last 0.15 s
+## is kept) and a class change mid-whirl (Mossy's pending spin is dropped, it used to crash). God mode is off.
 ## Lines: CDNET ok|FAIL <what>, then CDNET DONE.
 
 const GODOT := "/usr/local/bin/godot"
@@ -37,6 +39,7 @@ func ok(cond: bool, what: String, info := "") -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
+	Game.god = false            # mod mode (an owner's settings) refills every dash each step
 	Engine.max_fps = 60
 	var port := 7990 + OS.get_process_id() % 60
 	var res := ProjectSettings.globalize_path("res://")
@@ -53,6 +56,8 @@ func run(main_node: Node) -> void:
 		await _settle()             # nothing of the last kit may still be due when the class changes
 		for slot in SLOTS:
 			await _slot(arch, slot)
+	await _trade_second_wind()
+	await _class_change_mid_whirl()
 	_finish()
 
 func _finish() -> void:
@@ -153,6 +158,45 @@ func _prime(slot: String) -> bool:
 		if await _press_frames(slot, 0.6) >= 0 or not _shown_ready(slot):
 			return true
 	return false
+
+## Sable with Second Wind (two charges): while the Trade flies the slot reads dark (a press then does
+## nothing), and a press in its last BUF_S goes off as the lantern lands.
+func _trade_second_wind() -> void:
+	await _settle()
+	_kit("ostra", Vector3(5.0, 0, 0))
+	var P := m.player
+	var K: OstraKit = P.ak
+	P.perks.append("secondwind")
+	P.dashes = P.max_dashes()
+	await _press_frames("dash", 0.6)
+	for i in 10:
+		if not K.swap.is_empty(): break
+		await _run(DT)
+	var lit_mid := false
+	var flew := 0
+	while not K.swap.is_empty() and float(K.swap["t"]) > K.BUF_S - 0.05:
+		lit_mid = lit_mid or _shown_ready("dash")
+		flew += 1
+		await _run(DT)
+	ok(flew > 30 and not lit_mid and P.dashes >= 1.0, "Sable + Second Wind: the dash slot is dark in flight",
+		"%d steps in flight, charges %.2f" % [flew, P.dashes])
+	var n0 := K.swaps
+	_aim(Vector3(0, 0, 5.0))
+	var f := await _press_frames("dash", 0.3)
+	ok(f >= 0 and K.swaps == n0 + 1, "Sable + Second Wind: a press just before the landing lobs the next Trade",
+		"steps %d, landed %d" % [f, K.swaps - n0])
+	P.perks.erase("secondwind")
+
+## Mossy's whirl lands its spin later (Match.later); a class change before then frees his kit's nodes, and
+## that pending hit used to crash the game. It is dropped now. (A crash ends the run with no DONE line.)
+func _class_change_mid_whirl() -> void:
+	await _settle()
+	_kit("bulwark", Vector3(5, 0, 0))
+	await _press_frames("dash", 0.02)
+	var due := m._later.size()
+	_kit("ostra", Vector3(5, 0, 0))
+	await _run(1.0)
+	ok(due > 0 and m._later.is_empty(), "a class change mid-whirl drops Mossy's pending spin", "%d pending" % due)
 
 ## Presses and lets go after one step (RMB: held through the window, then let go). Returns the steps from
 ## the press to the first sign it was taken (0: that same step), or -1 for the HUD's deny or nothing at all.
