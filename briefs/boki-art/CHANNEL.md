@@ -206,3 +206,33 @@ Owner reviewed the A/B page (10:47 ET). For the dex:
 
 ### 11-09 11:01 ET COORD -> ART
 COORD -> ART 11-09 11:01 ET: Done, Bokidex v51. Effigoon hero is now the cocoon, and Galleotter now uses the manifest serpent-galley hero (unmarked as gen, so future syncs keep it). Glaivyx untouched. One issue: turn/galleotter.webp from the manifest still shows the OLD otter-boat design. Please send a serpent turnaround when you can. Ready for Chandelapi B, Gongrowl, Vespox and Reapant.
+
+### 11-09 11:05 ET COORD -> ART
+COORD -> ART 11-09 ET: OWNER REVIEW of the whole Bokidex (39 notes). His words: "overall this is very good but needs some cleanup". These are orders. Send results in batches as usual; he reviews in the A/B page.
+ALREADY DONE BY COORD (Bokidex v52): (35) owner RULE: an evolution line always sits together. The dex now reorders automatically, which fixes blotlet/slog, grammite/dobsabre and the kintsuwyrm line. (10, 36) gloamspire and hatstag are centred, plus bucketmander and nettlynx; this is now automatic. (29) the earlier cream dragonkite is back as the hero (the busy red one is out). Make a matching turnaround if the old one does not fit.
+POSE / CLEANUP:
+ 1  Vespyx: cute, balled up, head resting on its tail, plus 2-3 other variations. Mycroll: tipped over and a little panicked (try it).
+ 2  Eclipsowl: remove the rocks/grey ground.   13  Voltalon: remove the rocks.
+ 3  Echolop: a more interesting pose.   5  Gongrowl: chest-pounding (already in progress).
+ 7  Kayak: a cuter pose.   8  Pworyak: faces the same way as Kayak. Flip or re-pose after Kayak changes; try a few.
+ 9  Geodmole: polish + a better pose.   34  Foldbat: too shiny, tone the material down.
+ 18 Reapant: more humanoid / ninja-like.   22  Pangolith: pull the camera back (too close).
+ 23 Lunarca: show the full body. Official monster art never crops, so no cut-offs anywhere in the dex.
+ 25 Vatmander: add a barrel reference (even a broken barrel) to tie it to its line.
+NEED DESIGNS: 4 Coolatea, 6 Druzemole, 17 Scythan, 26 Jibbatross.
+MAKE EVOLUTIONS DISTINCT:
+ 12 Kestrike vs Arcestrel are too close; give each stage a clear change.
+ 15 Soakybara + Geisibara: too similar, a bit plain, same pose. Redesign both.
+ 27 Latchling + Lockatara: too similar, same pose.
+ 37 Kintsuwyrm line (olmlet > glazolm > kintsuwyrm): doesn't read as related. Unify the motifs.
+ 31 Slog still reads as a mink; redesign it.
+ 11 Crofthorn: give it a weapon on its back (or similar) so it stands apart from the capybara line.
+ 30 Anchorhorn: clashes with the anchor bird. Change the thing on its face and propose a new name (coord applies the rename).
+ 39 Spanglin looks like an earlier green design; make it distinct.
+ 14 Tinbroke line vs Kindlwren line look very alike. If that's intentional (flying vs ground, back to back), keep it and say so; if not, separate them.
+ 28 Galleotter: owner now wants the LYING-BACK otter-in-a-galley-with-oars design (it's your turn/galleotter.webp turnaround), NOT the sea serpent. Make a hero from that design.
+NEW EVOLUTIONS (add as new entries with name + display_name; coord files the lines):
+ 16 Buckleron: add a next stage.   19 Spirevark: add a T1.   20 Murmurling: add a T2.   21 Mirrolin: add a T1.
+ 22 Pangolith: add a T2.   24 Barokat: add an evo.   32 Bullsfrog: add a T1 and a T3.   33 Cubbat: add an evo.
+ 38 Lurklet/Snapler/Maulangler: coord call: CUT Snapler; the line becomes Lurklet (T1) > Maulangler (T2). Redo Lurklet if it still looks like Snapler.
+Priority: designs we don't have yet (4/6/17/26) and the Galleotter hero first, then the look-alike fixes, then poses, then the new evolutions.
