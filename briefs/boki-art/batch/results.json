@@ -64809,5 +64809,26 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_jibbatross_pc_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_jibbatross_pc",
+    "name": "Jibbatross (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_jibbatross_pc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_px",
+    "name": "Gongrowl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_px_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jibbatross_pc",
+    "name": "Jibbatross (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_jibbatross_pc_2.jpg",
+    "ok": true
   }
 ]
