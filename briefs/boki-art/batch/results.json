@@ -1932,5 +1932,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/gravadillo_2.png",
     "ok": true
+  },
+  {
+    "id": "lodestick",
+    "name": "Lodestick",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lodestick_1.png",
+    "ok": true
+  },
+  {
+    "id": "lodestick",
+    "name": "Lodestick",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lodestick_2.png",
+    "ok": true
+  },
+  {
+    "id": "glomwort",
+    "name": "Glomwort",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glomwort_1.png",
+    "ok": true
+  },
+  {
+    "id": "pipewurm",
+    "name": "Pipewurm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pipewurm_2.png",
+    "ok": true
+  },
+  {
+    "id": "knotwyrm",
+    "name": "Knotwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/knotwyrm_1.png",
+    "ok": true
+  },
+  {
+    "id": "glomwort",
+    "name": "Glomwort",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glomwort_2.png",
+    "ok": true
+  },
+  {
+    "id": "pipewurm",
+    "name": "Pipewurm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pipewurm_1.png",
+    "ok": true
+  },
+  {
+    "id": "gloamshell",
+    "name": "Gloamshell",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gloamshell_1.png",
+    "ok": true
   }
 ]
