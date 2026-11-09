@@ -20205,5 +20205,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/barokat_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "barrelmander_card",
+    "name": "Barrelmander (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/barrelmander_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bathilus_card",
+    "name": "Bathilus (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bathilus_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bathilus_card",
+    "name": "Bathilus (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bathilus_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_card",
+    "name": "Bellowary (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bellowary_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_card",
+    "name": "Bellowary (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowary_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "boltstrich_card",
+    "name": "Boltstrich (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/boltstrich_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "boltstrich_card",
+    "name": "Boltstrich (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/boltstrich_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_kael_w30",
+    "name": "Relic: Kael",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/relic_kael_w30_4.jpg",
+    "ok": true
   }
 ]
