@@ -1,0 +1,572 @@
+[
+{
+"id": "bellowary_f2_w28",
+"pick": 1,
+"avg": 8.23,
+"seats": [
+8.1,
+8.3,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"EDIT: remove the smoke above the crest and keep run 1 otherwise.",
+"EDIT: run 1, carry the blue skin up into the crest base and add bony ridges so the casque grows from the skull",
+"EDIT: run 1, blend the crest's lower third into blue skull skin and bone texture so only the flared top stays brass-toned."
+],
+"veto": []
+},
+{
+"id": "portrait_barokat_pe_w28",
+"pick": 1,
+"avg": 7.63,
+"seats": [
+8.1,
+7.4,
+7.4
+],
+"decision": "new",
+"fixes": [
+"EDIT: remove the cloud and rain drops and turn the body 30 degrees toward the viewer.",
+"EDIT: run 3, remove the rain cloud entirely and rotate body 30 degrees with head toward viewer",
+"EDIT: run 2, remove the floating cloud entirely and turn the body 30 degrees with the head toward the viewer."
+],
+"veto": [
+"fix not landed: cloud kept, body still front-on",
+"fix not landed: cloud still present in every run"
+]
+},
+{
+"id": "portrait_bellowary_pe_w28",
+"pick": 4,
+"avg": 7.1,
+"seats": [
+7.2,
+7.3,
+6.8
+],
+"decision": "new",
+"fixes": [
+"Re-portrait from the redo sheet (bellowary_f2_w28 style casque grown into skull plates), 3/4 view with head tilt, no smoke or glow.",
+"New portrait from the approved redo sheet: 3/4 head tilt, no smoke or glow, casque grown from the skull",
+"Regenerate from the fixed Bellowary sheet with a 3/4 pose, head tilted, casque grown as bone, no smoke or glow."
+],
+"veto": [
+"brass casque still reads as a worn helmet; smoke not removed",
+"fix not landed: smoke kept in all runs, nozzle glow in 1-3",
+"casque reads as a brass helmet; smoke kept; runs 1-3 keep nozzle glow"
+]
+},
+{
+"id": "portrait_boltstrich_pe_w28",
+"pick": 2,
+"avg": 7.73,
+"seats": [
+7.6,
+7.7,
+7.9
+],
+"decision": "new",
+"fixes": [
+"New prompt: stylised big-eyed ostrich with a storm-cloud body, copper coils grown as neck feathers not rings, 3/4 view.",
+"EDIT: run 3, restore ref colours and turn the copper bands into grown copper feather/scale markings",
+"EDIT: run 2, make the copper coils grow out of the skin as raised ridges rather than wrapped wire."
+],
+"veto": []
+},
+{
+"id": "portrait_canvastross_pe_w28",
+"pick": 4,
+"avg": 7.67,
+"seats": [
+7.6,
+7.8,
+7.6
+],
+"decision": "new",
+"fixes": [
+"New prompt: stylised big-eyed albatross with canvas-membrane wings grown from the arm, 3/4 flying pose head toward viewer, short frayed canvas edges, filling the square.",
+"EDIT: run 4, turn the head and body toward the viewer and paint the streamers as the same canvas colour torn from the trailing edge, fewer and shorter",
+"New prompt: three-quarter flight with head turned toward the viewer, wing trailing edge torn into short canvas strips of the same cream cloth, no separate blue ribbons."
+],
+"veto": [
+"streamers still read as separate ribbons; runs 1-2 keep the clamped frame"
+]
+},
+{
+"id": "portrait_crofthorn_pe_w28",
+"pick": 3,
+"avg": 8.03,
+"seats": [
+7.7,
+8.3,
+8.1
+],
+"decision": "edit",
+"fixes": [
+"EDIT: turn head and chest toward the viewer so both eyes show and set background to #E8E8EE.",
+"EDIT: run 2, set background to flat #E8E8EE",
+"EDIT: run 3, set the background to flat pale grey #E8E8EE and turn the body a little more toward the viewer."
+],
+"veto": []
+},
+{
+"id": "portrait_echolop_pe_w28",
+"pick": 3,
+"avg": 8.13,
+"seats": [
+7.9,
+8.3,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"EDIT: restore ref saturation and contrast, keep run 3's face, #E8E8EE.",
+"EDIT: run 3, warm the fur back to ref purple",
+"EDIT: run 1, restore the ref's saturation on the wings and ears."
+],
+"veto": []
+},
+{
+"id": "portrait_ermink_pe_w28",
+"pick": 1,
+"avg": 7.93,
+"seats": [
+7.9,
+8.2,
+7.7
+],
+"decision": "edit",
+"fixes": [
+"EDIT: set background to flat pale grey #E8E8EE and lower the front paws toward the floor in a forward lean.",
+"EDIT: run 1, lighten the background to #E8E8EE and drop it to all fours with the head toward the viewer",
+"New prompt: Ermink on all fours in a low playful stoat crouch, head turned toward viewer, small ink brush tip, flat pale grey background."
+],
+"veto": [
+"fix not landed: still upright on hind legs, not on all fours"
+]
+},
+{
+"id": "portrait_frigatee_pe_w28",
+"pick": 2,
+"avg": 7.97,
+"seats": [
+8.1,
+8.0,
+7.8
+],
+"decision": "edit",
+"fixes": [
+"EDIT: turn the head and front of the body toward the viewer with a gentle tilt.",
+"EDIT: run 2, turn body to gentle 3/4 with the face toward the viewer",
+"EDIT: run 2, turn the head toward the viewer so both eyes show and turn the body to a gentle 3/4."
+],
+"veto": []
+},
+{
+"id": "portrait_glintmole_pe_w28",
+"pick": 1,
+"avg": 7.5,
+"seats": [
+8.0,
+7.3,
+7.2
+],
+"decision": "new",
+"fixes": [
+"EDIT: lower the body further onto all fours and remove the ground scratch marks.",
+"New prompt: low on all fours in a digging crouch, claws forward, head toward viewer",
+"New prompt: mole on all fours in a low digging crouch, crystal claws forward, head toward viewer, no debris."
+],
+"veto": [
+"upright stance kept; all-fours digging crouch not landed",
+"fix not landed: still upright person-like stance"
+]
+},
+{
+"id": "portrait_gongibbon_pe_w28",
+"pick": 1,
+"avg": 8.07,
+"seats": [
+8.0,
+8.2,
+8.0
+],
+"decision": "edit",
+"fixes": [
+"EDIT: stylise the face (bigger glossy eyes, calm smug monk look) and add a slight head tilt.",
+"EDIT: run 1, set background to #E8E8EE and turn head slightly toward a 3/4",
+"EDIT: run 3, set flat pale grey background and soften the face to a cocky half-smile."
+],
+"veto": []
+},
+{
+"id": "portrait_gravadillo_pe_w28",
+"pick": 3,
+"avg": 7.47,
+"seats": [
+7.6,
+7.5,
+7.3
+],
+"decision": "new",
+"fixes": [
+"EDIT: turn the body 30 degrees toward the viewer and shrink the creature so the horn has margin.",
+"EDIT: run 3, rotate to a clear 30-degree 3/4 with margin around the horn",
+"New prompt: clear 30-degree 3/4 with the head toward the viewer, margin around the horn, flat pale grey background."
+],
+"veto": [
+"fix not landed: still side-on",
+"fix not landed: still pure side profile"
+]
+},
+{
+"id": "portrait_jarmit_pe_w28",
+"pick": 3,
+"avg": 7.87,
+"seats": [
+8.1,
+7.8,
+7.7
+],
+"decision": "new",
+"fixes": [
+"EDIT: raise the front claw in a small wave, tilt the eyestalks left, set background to #E8E8EE.",
+"EDIT: run 3, raise the front claw in a little wave and rotate eyestalks and face toward the viewer",
+"EDIT: run 3, raise the front claw in a small wave and turn the face and eyestalks toward the viewer."
+],
+"veto": [
+"fix not landed: no claw wave, face barely turned",
+"fix not landed: no claw wave, face not turned further toward viewer"
+]
+},
+{
+"id": "portrait_kerchick_pe_w28",
+"pick": 1,
+"avg": 7.7,
+"seats": [
+7.8,
+7.7,
+7.6
+],
+"decision": "new",
+"fixes": [
+"EDIT: turn the head toward the viewer so both eyes show and set background to #E8E8EE.",
+"EDIT: run 1, turn head and chest toward the viewer so both eyes show",
+"New prompt: 3/4 view with head turned toward the viewer so both eyes show, flat pale grey background."
+],
+"veto": [
+"fix not landed: still side profile, one eye"
+]
+},
+{
+"id": "portrait_kestrike_pe_w28",
+"pick": 1,
+"avg": 8.2,
+"seats": [
+8.3,
+8.2,
+8.1
+],
+"decision": "edit",
+"fixes": [
+"EDIT: merge the chest coil into the feathers as a copper marking.",
+"EDIT: run 1, sink the copper coil into the chest feathers as a grown marking",
+"EDIT: run 1, turn the chest coil into raised copper-coloured feather markings."
+],
+"veto": []
+},
+{
+"id": "portrait_knotwyrm_pe_w28",
+"pick": 2,
+"avg": 8.27,
+"seats": [
+8.2,
+8.4,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"EDIT: set background to flat pale grey #E8E8EE.",
+"None needed; ship run 1",
+"EDIT: run 2, set the background to exact flat pale grey #E8E8EE."
+],
+"veto": []
+},
+{
+"id": "portrait_lanterloris_pe_w28",
+"pick": 1,
+"avg": 8.2,
+"seats": [
+8.1,
+8.2,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"EDIT: blend the lantern ribs into the fur at the shoulders and hips so it reads grown.",
+"EDIT: run 1, blend fur into the lantern ribs at the shoulders and hips",
+"EDIT: run 1, make the tail base grow smoothly into the bud with no binding."
+],
+"veto": []
+},
+{
+"id": "portrait_marchleaf_pe_w28",
+"pick": 3,
+"avg": 7.53,
+"seats": [
+7.7,
+7.6,
+7.3
+],
+"decision": "new",
+"fixes": [
+"New prompt: 3/4 view with head toward viewer, curious tilt, one front leg raised mid-march, flat #E8E8EE.",
+"EDIT: run 3, rotate body 30 degrees toward viewer with head turned and set background to #E8E8EE",
+"New prompt: 3/4 view with head turned toward viewer, one front leg lifted mid-march, curious look, flat pale grey background."
+],
+"veto": [
+"fix not landed: still side-on, no 3/4 turn",
+"fix not landed: still side profile, no marching step, no head turn"
+]
+},
+{
+"id": "portrait_mossgrade_pe_w28",
+"pick": 1,
+"avg": 8.23,
+"seats": [
+8.0,
+8.3,
+8.4
+],
+"decision": "edit",
+"fixes": [
+"EDIT: set background to #E8E8EE and add a slight head tilt toward the viewer.",
+"EDIT: run 1, set background to #E8E8EE",
+"EDIT: run 1, set the background to exact flat pale grey #E8E8EE."
+],
+"veto": []
+},
+{
+"id": "portrait_oarlet_pe_w28",
+"pick": 2,
+"avg": 8.13,
+"seats": [
+7.8,
+8.3,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"New prompt: stylised big-eyed otter with an oar-blade tail grown from wood-grain fur, remove the drips, #E8E8EE.",
+"None needed beyond background check; ship run 2",
+"EDIT: run 1, reduce the water drips to two or three."
+],
+"veto": []
+},
+{
+"id": "portrait_pipewurm_pe_w28",
+"pick": 1,
+"avg": 7.87,
+"seats": [
+7.8,
+7.9,
+7.9
+],
+"decision": "new",
+"fixes": [
+"EDIT: restore run 1 saturation on run 2 and set background to #E8E8EE.",
+"EDIT: run 1, keep the fleshy blend but add metal rivet rings and a flared pipe rim at the snout tip so the pipe idea still reads",
+"EDIT: run 1, remove the floor droplets, keep only a tiny drip, set the background to flat pale grey."
+],
+"veto": []
+},
+{
+"id": "portrait_prowyak_pe_w28",
+"pick": 2,
+"avg": 7.7,
+"seats": [
+7.5,
+7.9,
+7.7
+],
+"decision": "new",
+"fixes": [
+"EDIT: enlarge and stylise the eyes further and fuse the plough plate into the horns as one piece.",
+"EDIT: run 2, enlarge the icy eyes and grow the prow plate from the horns and skull",
+"New prompt: prow grown as a keratin ice-plate from the skull with no rivets, bigger glossy icy eyes, softer stylised fur."
+],
+"veto": []
+},
+{
+"id": "portrait_rimeshrew_pe_w28",
+"pick": 2,
+"avg": 7.5,
+"seats": [
+7.6,
+7.6,
+7.3
+],
+"decision": "new",
+"fixes": [
+"New prompt: 3/4 view with head toward viewer, bigger glossy eyes and a sly grin, #E8E8EE.",
+"EDIT: run 2, rotate body 30 degrees toward viewer with head turned and a less hostile face",
+"New prompt: 3/4 view with the head toward the viewer, cheeky grin instead of a snarl, flat pale grey background."
+],
+"veto": [
+"fix not landed: body not turned toward viewer",
+"fix not landed: body not turned toward viewer"
+]
+},
+{
+"id": "portrait_ringrove_pe_w28",
+"pick": 1,
+"avg": 7.9,
+"seats": [
+7.8,
+7.9,
+8.0
+],
+"decision": "edit",
+"fixes": [
+"EDIT: stylise the face with bigger glossy eyes and a wise smile.",
+"EDIT: run 2, give it a warmer wise half-smile and lift the head toward the viewer",
+"EDIT: run 3, turn the head toward the viewer and simplify the stake and moss detail."
+],
+"veto": []
+},
+{
+"id": "portrait_skateron_pe_w28",
+"pick": 3,
+"avg": 7.37,
+"seats": [
+7.5,
+7.3,
+7.3
+],
+"decision": "new",
+"fixes": [
+"New prompt: stylised big-eyed heron, body 30 degrees toward viewer with both eyes, smug glide lean on one skate, #E8E8EE.",
+"New prompt: 3/4 glide lean with chest and head turned toward viewer so both eyes show",
+"New prompt: 3/4 view, chest and head turned toward the viewer with both eyes visible, smug glide lean on one skate."
+],
+"veto": [
+"fix not landed: still strict side profile, one eye",
+"fix not landed: still pure side profile, one eye"
+]
+},
+{
+"id": "portrait_soakybara_p2_w28",
+"pick": 3,
+"avg": 8.23,
+"seats": [
+8.2,
+8.3,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"EDIT: set background to #E8E8EE on run 3.",
+"EDIT: run 3, set background to #E8E8EE",
+"EDIT: run 3, set the background to flat pale grey #E8E8EE."
+],
+"veto": []
+},
+{
+"id": "portrait_teapotamus_p_w28",
+"pick": 2,
+"avg": 7.77,
+"seats": [
+7.8,
+7.6,
+7.9
+],
+"decision": "new",
+"fixes": [
+"New prompt: hippo body that IS a copper pot (one continuous rounded copper back, lid knob grown as crest, spout as tail), 3/4 view, no steam.",
+"EDIT: run 3, blend the copper pot rim into hippo skin with no seam at the neck and remove the remaining orange glow line",
+"New prompt: hippo body IS the copper pot (belly curve = pot curve), lid knob grown as a crest from the back, spout as the tail, 3/4 pose with head toward viewer."
+],
+"veto": []
+},
+{
+"id": "c_sundormouse",
+"decision": "new",
+"pick": null,
+"avg": 0,
+"fixes": [
+"every run had a faded ghost copy of the creature; draw exactly ONE creature"
+],
+"veto": []
+},
+{
+"id": "c_malletary_r_w28",
+"decision": "new",
+"pick": null,
+"avg": 0,
+"fixes": [
+"the feet held separate blocks or hammers and one run had a hood; the toes themselves must swell into blocky iron hammer-heads, nothing held, nothing worn"
+],
+"veto": []
+},
+{
+"id": "chimelop_r2_w28",
+"decision": "new",
+"pick": null,
+"avg": 0,
+"fixes": [
+"every run was a reskin of Echolop; it needs a completely new body plan and pose"
+],
+"veto": []
+},
+{
+"id": "wickapi_r2_w28",
+"decision": "new",
+"pick": null,
+"avg": 0,
+"fixes": [
+"every run was the parent shrunk, or had ghost candle copies; it must be a chibi bean-bodied fawn lying tucked with a wax dome forehead, no candle shape, no copies"
+],
+"veto": []
+},
+{
+"id": "bucketmander_r_w28",
+"decision": "new",
+"pick": null,
+"avg": 0,
+"fixes": [
+"every run pasted a second creature under the sheet; show exactly ONE creature, four views in one row"
+],
+"veto": []
+},
+{
+"id": "galleotter_r_w28",
+"decision": "new",
+"pick": null,
+"avg": 0,
+"fixes": [
+"every run was Oarlet wearing a boat hull; the otter body itself must be the hull, nothing worn, no cockpit"
+],
+"veto": []
+},
+{
+"id": "chandelapi_r2_w28",
+"decision": "new",
+"pick": null,
+"avg": 0,
+"fixes": [
+"every run kept Snuffapi body plan with bigger antlers; it must float on its front legs with the rear dissolving into smoke and a drooping swan neck"
+],
+"veto": []
+},
+{
+"id": "rimink_r_w28",
+"decision": "new",
+"pick": null,
+"avg": 0,
+"fixes": [
+"every run was Ermink recoloured and sitting upright with a worn ice collar; long low stoat on all fours, ruff grown as frozen bristles"
+],
+"veto": []
+}
+]

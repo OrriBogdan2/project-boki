@@ -4289,3 +4289,14 @@ ART geodemole 8.43 briefs/boki-art/batch/out/geodemole_e_3.jpg kind=turnaround s
 ART lunowl 8.4 briefs/boki-art/batch/out/lunowl_f_e_3.jpg kind=turnaround status=owner-review panel=8.3/8.5/8.4
 ART kindlewren 8.43 briefs/boki-art/batch/out/portrait_kindlewren_pe_1.jpg kind=portrait status=owner-review panel=8.5/8.4/8.4
 ART rippmink 8.37 briefs/boki-art/batch/out/rippmink_e_2.jpg kind=turnaround status=owner-review panel=8.3/8.4/8.4
+
+## 00:08 ET 11-09 — art session: round 28 results, group s7 (portraits/cards)
+Pass: Prismander portrait, Skidlet hero card (cards/). Owner review: Lunowl card, Glomwort/Kitlet/Nettlynx/Ribbonwyrm/Zipling portraits. Portrait edits that asked for a pose turn did not land (an edit can't rotate a pose), so those are now fresh portraits from the sheet (_w29).
+ART lunowl 8.37 briefs/boki-art/batch/out/lunowl_card_w28_2.jpg kind=card status=owner-review panel=8.5/8.3/8.3
+ART glomwort 8.37 briefs/boki-art/batch/out/portrait_glomwort_pe_w28_3.jpg kind=portrait status=owner-review panel=8.3/8.5/8.3
+ART kitlet 8.43 briefs/boki-art/batch/out/portrait_kitlet_pe_w28_1.jpg kind=portrait status=owner-review panel=8.5/8.3/8.5
+ART nettlynx 8.33 briefs/boki-art/batch/out/portrait_nettlynx_pe_w28_3.jpg kind=portrait status=owner-review panel=8.4/8.3/8.3
+ART prismander 8.53 briefs/boki-art/portraits/light/Prismander.jpg kind=portrait panel=8.6/8.5/8.5
+ART ribbonwyrm 8.37 briefs/boki-art/batch/out/portrait_ribbonwyrm_pe_w28_1.jpg kind=portrait status=owner-review panel=8.3/8.4/8.4
+ART zipling 8.4 briefs/boki-art/batch/out/portrait_zipling_p_w28_1.jpg kind=portrait status=owner-review panel=8.4/8.4/8.4
+ART skidlet 8.5 briefs/boki-art/cards/Skidlet.jpg kind=card panel=8.5/8.4/8.6

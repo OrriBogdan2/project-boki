@@ -407,6 +407,11 @@
   {
    "id": "relic_sable",
    "grade": 8.6
+  },
+  {
+   "id": "skidlet_card_w28",
+   "pick": 2,
+   "grade": 8.5
   }
  ],
  "rerolled": [
@@ -819,6 +824,10 @@
   {
    "id": "portrait_mirrolin_pe",
    "grade": 8.6
+  },
+  {
+   "id": "portrait_prismander_pe_w28",
+   "grade": 8.53
   }
  ],
  "retired": [
