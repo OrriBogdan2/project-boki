@@ -22354,5 +22354,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_prowyak_pe_w30_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_oarlet_pe_w30",
+    "name": "Oarlet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_oarlet_pe_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_oarlet_pe_w30",
+    "name": "Oarlet (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_oarlet_pe_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prowyak_pe_w30",
+    "name": "Prowyak (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_pe_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipewurm_pe_w30",
+    "name": "Pipewurm (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_pipewurm_pe_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gilabacus",
+    "name": "Gilabacus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gilabacus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prowyak_pe_w30",
+    "name": "Prowyak (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_pe_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_olmlet",
+    "name": "Olmlet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_olmlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bathilus",
+    "name": "Bathilus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bathilus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bathilus",
+    "name": "Bathilus (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_bathilus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gilabacus",
+    "name": "Gilabacus (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gilabacus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_olmlet",
+    "name": "Olmlet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_olmlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gilabacus",
+    "name": "Gilabacus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gilabacus_2.jpg",
+    "ok": true
   }
 ]
