@@ -2,14 +2,15 @@ extends RefCounted
 ## --wisp-shots --shots-dir=<dir>: review frames for the downed Wisp (docs/decisions/0019), in a live match
 ## under xvfb with a renderer. The player is knocked, drifts, then is revived:
 ##   wisp_0_hero      standing, before the knock
-##   wisp_1_pop_a     the pop-in, first frames (flash and ring)
-##   wisp_2_pop_b     the pop-in settling (puff, Wisp small)
+##   wisp_1_fall_a    the fall, first frames (the hero plays its hit clip)
+##   wisp_2_fall_b    mid-fall
+##   wisp_2_fall_c    the last frames of the fall: the Wisp fading in over the hero
 ##   wisp_3_idle      the Wisp bobbing, the hero gone
 ##   wisp_4_moving    the Wisp drifting: leaning, trailing
 ##   wisp_5_mate      a teammate's Wisp beside the player's
-##   wisp_6_revive_a  the revive: the Wisp brightens, the hero small
-##   wisp_7_revive_b  the hero scaling up
-##   wisp_8_hero      the hero back at full size
+##   wisp_6_rise_a    the revive: the Wisp brightens, the hero starts the rise
+##   wisp_7_rise_b    the hero getting up
+##   wisp_8_hero      the hero back up
 ## <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
@@ -33,9 +34,11 @@ func run(main_node: Node) -> void:
 	m.knock(P, foe, {})
 	P.down_hp = 1e6
 	await _go(0.07)
-	_take("wisp_1_pop_a", "Pop-in, first frames: the flash and the ring where the hero was")
-	await _go(0.1)
-	_take("wisp_2_pop_b", "Pop-in settling: the puff drifts off, the Wisp grows to size")
+	_take("wisp_1_fall_a", "The fall, first frames: the hero plays its hit clip")
+	await _go(0.12)
+	_take("wisp_2_fall_b", "Mid-fall: the hero is still on screen")
+	await _go(0.13)
+	_take("wisp_2_fall_c", "End of the fall: the Wisp fades in over the hero, who hides next")
 	await _go(0.5)
 	_take("wisp_3_idle", "The Wisp idling: bob and flicker, the hero model is hidden")
 	await _go(0.5, Vector3(0.05, 0, 0.03))
@@ -47,11 +50,11 @@ func run(main_node: Node) -> void:
 	_take("wisp_5_mate", "A teammate's Wisp beside yours (the default look, tinted by team)")
 	m.revive_hunter(P, null)
 	await _go(0.08)
-	_take("wisp_6_revive_a", "Revive: the Wisp brightens as the hero pops back in, small and squashed")
+	_take("wisp_6_rise_a", "Revive: the Wisp brightens and the hero starts the rise")
 	await _go(0.12)
-	_take("wisp_7_revive_b", "The hero scaling up, the Wisp fading")
+	_take("wisp_7_rise_b", "The hero getting up, the Wisp fading")
 	await _go(0.6)
-	_take("wisp_8_hero", "The hero back at full size, no Wisp")
+	_take("wisp_8_hero", "The hero back up, no Wisp")
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for l in lines:
 		f.store_line(l)
