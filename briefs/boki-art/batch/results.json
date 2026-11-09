@@ -35332,5 +35332,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/barokat_card5_1.jpg",
     "ok": true
+  },
+  {
+    "id": "umbrink_card5",
+    "name": "Umbrink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/umbrink_card5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "nettlynx_card5",
+    "name": "Nettlynx (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/nettlynx_card5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_card5",
+    "name": "Sporcupine (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sporcupine_card5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_card5",
+    "name": "Sporcupine (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sporcupine_card5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "teapotamus_card5",
+    "name": "Teapotamus (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/teapotamus_card5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "teapotamus_card5",
+    "name": "Teapotamus (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/teapotamus_card5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrink_card5",
+    "name": "Umbrink (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/umbrink_card5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_card5",
+    "name": "Sporcupine (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sporcupine_card5_2.jpg",
+    "ok": true
   }
 ]
