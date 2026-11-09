@@ -4,8 +4,9 @@ extends RefCounted
 ## stay-at-home Boki keeps growing closer; repeating the same care in one day adds no trust and no
 ## duplicate memory; old saves drop the once-per-expedition stamps. Fetch trains Speed. Meals lean
 ## its colour on the spot (Evo.eat, Evo.lean) and the last few meals decide it. A new bond rank
-## plays its moment once (KinBondMoment); the rank a Boki arrives with doesn't. Never touches the
-## real save.
+## plays its moment once (KinBondMoment); the rank a Boki arrives with doesn't. Home after an hour
+## away, it runs over to say hello (KinWelcome); after a minute it doesn't. Never touches the real
+## save.
 
 var bad := 0
 var main: Node
@@ -93,14 +94,32 @@ func _meals_lean(home, k: Dictionary) -> void:
 	ok(Evo.eat(rec, "kibble") == "" and String(Evo.lean(Save.new_kin("cindle"))[0]) == "",
 		"plain food leaves the lean alone, and a new Boki has none")
 
+## Home after an hour away: it notices you, runs over and says hello. A minute away: nothing.
+func _welcome(home, k: Dictionary) -> void:
+	k["pos"] = home.ppos + Vector3(7.0, 0, 0)
+	(k["node"] as Node3D).position = k["pos"]
+	await main.get_tree().create_timer(KinWelcome.START_S + 0.2).timeout
+	var noticed: bool = k.has("called_t") and k.has("welcome")
+	for i in 200:
+		if not k.has("called_t"): break
+		home._move_kin(0.05)
+	var dist := Vector2(k["pos"].x - home.ppos.x, k["pos"].z - home.ppos.z).length()
+	var said: bool = k.has("say") and (k["say"] as Label3D).visible
+	ok(noticed and dist < 2.1 and said, "home after an hour away it runs over and says hello (%.1f m)" % dist)
+	KinWelcome.start(home, 60.0)
+	await main.get_tree().create_timer(KinWelcome.START_S + 0.2).timeout
+	ok(not k.has("called_t"), "back from a minute in a menu: no rush")
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
 	_old_save_stamps()
 	var rec := _new_save()
+	rec["needs_t"] = Time.get_unix_time_from_system() - 3600.0
 	var home = await main._hb_home()
 	var k: Dictionary = home._kin_entry(rec)
 	ok(not k.is_empty(), "the Boki is out on the farm")
+	await _welcome(home, k)
 	KinBondMoment.tick(home)
 	ok(home.panel_open == "" and int(rec.get("bond_seen", -1)) == Care.bond_index(rec),
 		"the rank it arrives with is where it starts: no moment (%s)" % Care.bond(rec)[1])

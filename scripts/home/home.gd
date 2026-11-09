@@ -1333,6 +1333,8 @@ func _move_kin(d: float) -> void:
 					k["hold_t"] = 1.4; k["joy_t"] = 0.9; k["t"] = randf_range(2.5, 4.0)
 					_emote(k, "♥" if float(k["rec"]["trust"]) > 55.0 else "♪")
 					Sfx.play("kin_happy", k["pos"], -10.0, 0.15, Unique.voice(k["rec"]))
+					if k.has("welcome"): _say(k, BokiLines.say(k["rec"], "greet"))
+				k.erase("welcome")
 		var pos: Vector3 = k["pos"]
 		var rec: Dictionary = k["rec"]
 		var trust := float(rec["trust"])
@@ -4012,6 +4014,7 @@ func _setup_care() -> void:
 	if not visit.is_empty():
 		return
 	# the time you were away: needs drift, kin eat from the feeders, and hungry ones may starve
+	KinWelcome.start(self, KinWelcome.away_secs())      # and they run over to say hello
 	hecon.away = Econ.catch_up_all()
 	# nobody is left with no Boki: a stray turns up (Lifeline; the toast is in home_notices.gd)
 	var floor_ev := Lifeline.check()
