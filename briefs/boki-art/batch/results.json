@@ -7024,5 +7024,68 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_frothisk_r_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_geysirbara_r",
+    "name": "Geysirbara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_geysirbara_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mossgrade_r",
+    "name": "Mossgrade (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_mossgrade_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glintmole_r",
+    "name": "Glintmole (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glintmole_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravadillo_r",
+    "name": "Gravadillo (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gravadillo_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kindlewren_r",
+    "name": "Kindlewren (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_kindlewren_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mossgrade_r",
+    "name": "Mossgrade (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_mossgrade_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kindlewren_r",
+    "name": "Kindlewren (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kindlewren_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_latchling_r",
+    "name": "Latchling (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_latchling_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_knotwyrm_r",
+    "name": "Knotwyrm (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_knotwyrm_r_2.jpg",
+    "ok": true
   }
 ]
