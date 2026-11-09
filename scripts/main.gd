@@ -693,7 +693,7 @@ func _ready() -> void:
 		_open_arena("")
 	elif "--training" in args:
 		show_screen("match", {"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": "--no-drop" in args, "perk_demo": "--perk-demo" in args})
-	elif "--tutorial" in args:
+	elif "--tutorial" in args or "--tut-test" in args:
 		show_screen("match", {"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "tut_test": "--tut-test" in args})
 	elif args.is_empty() or "--title" in args:
 		show_screen("title", {})
