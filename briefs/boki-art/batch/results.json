@@ -33260,5 +33260,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/maracoil_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "nymphane_card",
+    "name": "Nymphane (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/nymphane_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "nymphane_card",
+    "name": "Nymphane (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/nymphane_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "malletary_card",
+    "name": "Malletary (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/malletary_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "morelkin_card",
+    "name": "Morelkin (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/morelkin_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "morelkin_card",
+    "name": "Morelkin (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/morelkin_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "maracoil_card",
+    "name": "Maracoil (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/maracoil_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffuse_card",
+    "name": "Puffuse (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/puffuse_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "reelacine_card",
+    "name": "Reelacine (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/reelacine_card_1.jpg",
+    "ok": true
   }
 ]
