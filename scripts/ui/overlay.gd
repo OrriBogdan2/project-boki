@@ -618,7 +618,7 @@ func open_dex(spk: String) -> void:
 	dex_open = spk
 	var v := _page("dex", "Field Book", 760)
 	UI.hold(v, INV_H + 58.0)        # the inventory's height (a sub-page has no tab row, so its body is taller)
-	DexView.detail(v, spk, get_tree())
+	DexView.detail(v, spk, get_tree(), open_dex)
 
 func open_inventory() -> void:
 	var v := _page("inventory", "Inventory", 760)
