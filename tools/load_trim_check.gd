@@ -72,15 +72,16 @@ func _bodies(main: Node) -> void:
 	if not WardenGlb.will_dress(a):
 		_ok("Vex is drawn from her .glb", false)
 		return
-	var m := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[0], Arch.signature(a), "", PlayerLook.random(), a)
+	var look := PlayerLook.random()      # (one look for both Hunters below: the same glider skin)
+	var m := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[0], Arch.signature(a), "", look, a)
 	main.add_child(m)
 	_ok("a .glb Warden keeps its rig nodes", RIG.all(func(p): return m.has_node(p)))
 	_ok("a .glb Warden keeps no hidden loose parts (%d)" % _loose(m), _loose(m) == 0)
-	var m2 := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[1], Arch.signature(a), "", PlayerLook.random(), a)
+	var m2 := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[1], Arch.signature(a), "", look, a)
 	var g1 := _glider_meshes(m)
 	var g2 := _glider_meshes(m2)
 	_ok("a glider is its canopy and its strings", g1.size() == 2 and g2.size() == 2)
-	var shared := g1[1] == g2[1] and g1[0] != g2[0]
+	var shared: bool = g1[1] == g2[1] and g1[0] != g2[0]
 	_ok("Hunters share the strings' mesh, each paints its own canopy", shared)
 	m.free()
 	m2.free()
