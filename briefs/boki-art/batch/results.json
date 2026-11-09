@@ -22193,5 +22193,89 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_frigatee_pe_w30_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_pe_w30",
+    "name": "Gongibbon (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_pe_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frigatee_pe_w30",
+    "name": "Frigatee (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_frigatee_pe_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_pe_w30",
+    "name": "Gongibbon (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_pe_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_pe_w30",
+    "name": "Gongibbon (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_pe_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kerchick_pe_w30",
+    "name": "Kerchick (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_kerchick_pe_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_marchleaf_pe_w30",
+    "name": "Marchleaf (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_pe_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanterloris_pe_w30",
+    "name": "Lanterloris (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lanterloris_pe_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanterloris_pe_w30",
+    "name": "Lanterloris (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_lanterloris_pe_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kerchick_pe_w30",
+    "name": "Kerchick (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kerchick_pe_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravadillo_pe_w30",
+    "name": "Gravadillo (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gravadillo_pe_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravadillo_pe_w30",
+    "name": "Gravadillo (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_gravadillo_pe_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanterloris_pe_w30",
+    "name": "Lanterloris (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lanterloris_pe_w30_2.jpg",
+    "ok": true
   }
 ]
