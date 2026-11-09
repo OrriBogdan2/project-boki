@@ -51572,5 +51572,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_reapant_w10_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_reapant_w8",
+    "name": "Reapant (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_reapant_w8_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_cardc",
+    "name": "Gongrowl (hero card, action)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w8",
+    "name": "Reapant (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_reapant_w8_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_vespox_pc",
+    "name": "Vespox",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_vespox_pc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w9",
+    "name": "Reapant (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reapant_w9_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_cardc",
+    "name": "Gongrowl (hero card, action)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "xang_mycroll_fallen",
+    "name": "Mycroll (extra angle, fallen over)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/xang_mycroll_fallen_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w8",
+    "name": "Reapant (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_reapant_w8_2.jpg",
+    "ok": true
   }
 ]
