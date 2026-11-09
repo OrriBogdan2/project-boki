@@ -69429,5 +69429,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/sphinxblight_card108_1.jpg",
     "ok": true
+  },
+  {
+    "id": "sphinxblight_card108",
+    "name": "Sphinxblight (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sphinxblight_card108_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cindermaw_card108",
+    "name": "Cindermaw (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/cindermaw_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "aurostag_card108",
+    "name": "Aurostag (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/aurostag_card108_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "aurostag_card108",
+    "name": "Aurostag (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/aurostag_card108_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cindermaw_card108",
+    "name": "Cindermaw (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cindermaw_card108_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "cindermaw_card108",
+    "name": "Cindermaw (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cindermaw_card108_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "aurostag_card108",
+    "name": "Aurostag (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/aurostag_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_vespyx_a",
+    "name": "Vespyx (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_vespyx_a_1.jpg",
+    "ok": true
   }
 ]
