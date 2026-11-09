@@ -390,6 +390,7 @@ func _grab(f: Ent, ally := false) -> void:
 	grapples += 1
 	if rank("sec") >= 3 and not ally:
 		cd["rmb"] = float(cd["rmb"]) * (1.0 - float(rdf["refund"]))
+		ResetCue.play(h, "dredge_hook_refund")
 	var wisp: bool = f is Hunter and (f as Hunter).downed
 	ally = ally or wisp           # a wisp caught head-on is reeled in like an ally: no stun, no Grounded
 	# the reel (Displace: a player online is hauled on their own game, the same way); wisps it scooped on the

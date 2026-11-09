@@ -52,8 +52,6 @@ Last updated: 2026-11-02 18:40 ET, sync69.
   4. Unpack the worst-reading files (packed `;` lines, nested ternaries, history comments) and lock in each with `style_lint.py --update`.
   5. Split match.gd and hud.gd once the hunter rebuilds settle.
 
-- A reset cue of our own (dash reset, kill reset), modelled on the feel of the owner's reference clip.
-
 - Stormwing: the wings render too large and float off the body.
 - Merge forms for the other six Boki (Vespyx, Hivara, Echolop, Lunowl, Mycroll, Cairnback), each with a signature twist: contagion, swarm, echo, gravity well, spore field, rune walls.
 - Simtest seed 5 ends "team wiped" instead of extracting (truce-betrayal behaviour; the smoke test shouldn't depend on it).

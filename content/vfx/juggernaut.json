@@ -138,7 +138,6 @@
 				{"p": "smoke", "y": 0.9, "n": 8, "speed": 1.6, "spread": 0.9, "grav": -0.6, "life": 0.8, "size": 0.65, "radius": 0.4, "c": "gold", "c3": "gold_char", "near": true}]},
 		"riposte_heal": {"sfx": [{"n": "juggernaut_heal", "db": -6}],
 			"fx": [{"p": "ember", "at": "feet", "shape": "disc", "radius": 0.7, "way": "up", "n": 22, "speed": 4.0, "spread": 0.1, "grav": -2.0, "life": 0.6, "size": 0.05, "c": "heal", "c2": "gold_hot"}]},
-		"riposte_reset": {"sfx": [{"n": "unlock", "db": -4, "pitch": 1.4}]},
 
 		"enrage": {"sfx": [{"n": "juggernaut_enrage", "db": 0}],
 			"fx": [{"p": "flare", "at": "chest", "size": 3.0, "life": 0.3, "c": "red", "c2": "hot"},

@@ -566,7 +566,7 @@ func _primed_hit(t: Ent) -> void:
 	h.dashes = h.max_dashes()
 	h.ex_cd = 0.0
 	chain.on_reset()
-	DashReset.cue(h)
+	ResetCue.play(h, "thief_empowered_hit")
 	_reset_fx(t)
 	m.later(0.06, func(): if is_instance_valid(h): play("thf_reset"))
 
@@ -815,9 +815,9 @@ func _stick(f: Ent, at: Vector3) -> void:
 	e_t = float(ed["time"])
 	if rank("kin") >= 3:
 		cd["e"] = float(cd["e"]) * (1.0 - float(ed["refund_foe"] if f else ed["refund_wall"]))
-	if f and rank("kin") >= 3:
+	if f and rank("kin") >= 3 and h.dashes < h.max_dashes():
 		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
-		DashReset.cue(h)
+		ResetCue.play(h, "thief_knife_foe")
 	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("ffcf5a"), 0.8, 0.2)
 	m.sfx("thief_knife_stick", at, -6.0, 1.0)
 	net_ring(at, 0.8, col_of(ed))

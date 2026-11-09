@@ -57,8 +57,9 @@ func start() -> void:
 	k.m.sfx("dj_encore", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
 	k.m.later(float(d["grow"]), func(): if running(): k.m.sfx("dj_encore_whirr", h.pos, -6.0, 1.0))
 	k.net_ring(h.pos, float(d["reach"]), RING_COL)
-	h.dashes = h.max_dashes()             # the source's info card: it resets the cartwheel
-	DashReset.cue(h)
+	if h.dashes < h.max_dashes():
+		h.dashes = h.max_dashes()         # the source's info card: it resets the cartwheel
+		ResetCue.play(h, "thief_encore")
 
 ## The cast ends (its time ran out, a merge, a knock): nothing more flies.
 func drop() -> void:

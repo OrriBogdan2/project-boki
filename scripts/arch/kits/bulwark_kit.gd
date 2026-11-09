@@ -778,9 +778,10 @@ func _spin_hit(wd: Vector2) -> void:
 	var r := float(dd.get("spin_r", 2.2))
 	spins += 1
 	knock_until = m.time + 0.25
-	if rank("dash") >= 3 and not foes_in(h.pos, r).is_empty():
+	if rank("dash") >= 3 and ch_rmb < rmb_charges() and not foes_in(h.pos, r).is_empty():
 		ch_rmb = float(rmb_charges())          # rank 3: hitting foes with the dash refunds the Shield Charge
 		cd["rmb"] = 0.0
+		ResetCue.play(h, "bulwark_whirl_hit")
 	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
 	fx.smash_ring(h.pos)

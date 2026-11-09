@@ -1002,7 +1002,7 @@ var ready_flash := {}      # slot id -> time left on its flash
 var slot_text := {}        # slot id -> the countdown it shows now (HudSlot; checks read it)
 var slot_fx := {}          # slot id -> {kind: "cast"|"deny", t}: a pop when a press lands, a red shake when it can't
 
-## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red; "reset" (it just came back) swells it with a ring.
+## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red; "reset" (a reset handed it back: ResetCue) flashes it bright.
 func ability_feedback(id: String, kind: String) -> void:
 	slot_fx[id] = {"kind": kind, "t": 0.0}
 var hurt_dirs: Array = []  # {ang, t}

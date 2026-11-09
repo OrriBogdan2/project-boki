@@ -448,6 +448,18 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | face | {"bulwark": [0.52, 0.29], "archer": [0.39, 0.38], "juggernaut": [0.49, 0.33], "thief": [0.42, 0.38], "mage": [0.52, 0.46], "dolm": [0.47, 0.37], "ostra": [0.44, 0.47], "ashwick": [0.55, 0.33], "gunslinger": [0.41, 0.32], "tender": [0.49, 0.41], "rimewright": [0.42, 0.47], "dredge": [0.41, 0.44]} |
 | splash | {"bulwark": [0.49, 0.19], "archer": [0.35, 0.36], "juggernaut": [0.58, 0.3], "thief": [0.7, 0.19], "mage": [0.55, 0.22], "dolm": [0.57, 0.32], "ostra": [0.71, 0.25], "ashwick": [0.52, 0.27], "rimewright": [0.64, 0.23], "dredge": [0.73, 0.25], "gunslinger": [0.64, 0.19], "tender": [0.23, 0.32]} |
 
+## reset_cue (`content/rules/reset_cue.json`)
+
+The one reset cue (ResetCue, scripts/match/reset_cue.gd): whenever a condition hands an ability back (a takedown, an empowered hit, a knock), the hunter who got it sees a short bright flash on that HUD slot (ResetPop), a small glint on their body and hears the reset sound (the Settings variant). A teammate's reset shows only the glint, silent and no HUD; a rival's shows nothing. 'paths' lists every reset in the game by id and the HUD slots it flashes (dash = Shift, sec = RMB, k1 = E, x = R). A path missing here is an error in --kill-reset-check. Times in seconds, sizes in metres.
+
+| Setting | Value |
+|---|---|
+| assist_softer_db | 6 |
+| sound_gap_ms | 90 |
+| glint | {"color": "#fff6dc", "size": 0.3, "time": 0.12, "height": 1.35} |
+| slot_flash | {"time": 0.32, "swell": 0.12, "white": 0.75, "white_calm": 0.28, "edge_grow": 6.0} |
+| paths | {"takedown": ["dash"], "assist": ["dash"], "thief_empowered_hit": ["dash"], "thief_knife_foe": ["dash"], "thief_encore": ["dash"], "mage_blowout": ["dash"], "mage_mote": ["dash"], "ashwick_knock_ram": ["dash"], "ashwick_knock_e": ["k1"], "juggernaut_riposte_knock": ["x"], "juggernaut_slam_knock": ["x"], "gunslinger_knock": ["sec"], "gunslinger_needle_shave": ["k1"], "bulwark_whirl_hit": ["sec"], "archer_wall_pin": ["dash"], "dredge_hook_refund": ["sec"], "tender_carry": ["dash"]} |
+
 ## revive (`content/rules/revive.json`)
 
 

@@ -3,7 +3,7 @@ extends RefCounted
 ## One ability or item slot on the bottom bar: the frame (HudStyle.slot_frame), the icon, and while
 ## it isn't ready a dimmed icon, a dark sweep over the part still cooling (clipped to the slot) and
 ## a big countdown in the middle; charge pips along the bottom edge, the key on a pill under it, a
-## pop when a press lands, a red shake when it can't, a ring when it comes back, and ResetPop's swell
+## pop when a press lands, a red shake when it can't, a ring when it comes back, and ResetPop's flash
 ## when a reset hands it straight back. skill_slot adds
 ## run levels on top: locked (padlock, UNLOCK when a point can open it, LV 6 on R), rank pips over
 ## it, and a gold + to spend a point (RankMarks; click it or Alt + the key). Hud._ab_slot /
@@ -21,7 +21,7 @@ static var shown_keys := {}    # slot id -> the key cap last drawn under it (che
 static func decay(H, delta: float) -> void:
 	for id in H.slot_fx.keys():
 		H.slot_fx[id]["t"] = float(H.slot_fx[id]["t"]) + delta
-		if float(H.slot_fx[id]["t"]) > ResetPop.LEN: H.slot_fx.erase(id)
+		if float(H.slot_fx[id]["t"]) > maxf(ResetPop.length(), DENY_T): H.slot_fx.erase(id)
 	for id in H.ready_flash.keys():
 		H.ready_flash[id] = float(H.ready_flash[id]) - delta
 		if float(H.ready_flash[id]) <= 0.0: H.ready_flash.erase(id)
@@ -49,7 +49,7 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 	var ctr := rect.get_center()
 	H.hover_spots.append([rect, id])
 	var was: bool = H.ready_was.get(id, true)
-	if ready and not was:
+	if ready and not was and sfx_d.get("kind", "") != "reset":      # a reset has its own flash
 		H.ready_flash[id] = READY_FLASH
 	H.ready_was[id] = ready
 	var cooling := cd_frac > 0.0 and cd_secs > 0.0 and not ready

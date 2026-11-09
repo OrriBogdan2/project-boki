@@ -178,7 +178,7 @@ func _reset() -> void:
 	resets += 1
 	k.cd["x"] = 0.0
 	k.m.fx.word(k.h.pos + Vector3(0, 2.6, 0), "RIPOSTE READY", GOLD, true)
-	k.vfx("riposte_reset")
+	ResetCue.play(k.h, "juggernaut_riposte_knock")
 
 ## A hit arriving during the guard: blocked (no damage, no crowd control). A fall into the abyss still
 ## counts. Returns true when it was blocked.

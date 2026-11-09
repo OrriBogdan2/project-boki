@@ -425,6 +425,7 @@ func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> 
 	T.hp = 0.0
 	T.downed = true
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
+	DashReset.takedown(P, T)          # the knock's dash refill is the game-wide rule's, as Match.knock calls it
 	var knocked := P.dashes >= 1.0
 	C.ac.step(m, 0.5, watch)
 	T.downed = false

@@ -303,8 +303,9 @@ func _pin(a: Vector3, k: float) -> void:
 			pins += 1
 			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
-			if rank("sec") >= 3:
+			if rank("sec") >= 3 and h.dashes < h.max_dashes():
 				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge
+				ResetCue.play(h, "archer_wall_pin")
 			f.hurt(float(pd["wall_mult"]) * dmg * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "pin"], "heavy": true})
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:

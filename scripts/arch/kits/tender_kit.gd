@@ -251,8 +251,9 @@ func pick_up(o: Hunter) -> void:
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CARRY", res_col(), false)
 	m.sfx("tend_pickup", h.pos, -2.0, 1.0)
 	play("mm_pickup")
-	if rank("dash") >= 3:
+	if rank("dash") >= 3 and h.ex_cd > 0.0:
 		h.ex_cd = 0.0
+		ResetCue.play(h, "tender_carry")
 	if h.is_local() and m.hud:
 		m.hud.toast_small("Carrying %s  ·  %s sets down" % [o.pname, Settings.key_cap(SETDOWN)], res_col())
 

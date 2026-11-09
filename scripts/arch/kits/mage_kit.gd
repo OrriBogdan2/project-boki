@@ -506,7 +506,7 @@ func _blowout(f: Ent) -> void:
 	for i in 3:
 		var a := TAU * i / 3.0
 		fx().pillar(me + Vector3(cos(a) * 0.55, 0, sin(a) * 0.55), COPPER, PINK, 3.2, 0.22, 1.2, false)
-	DashReset.cue(h)
+	ResetCue.play(h, "mage_blowout")
 
 # ------------------------------------------------------------------ RMB: Storm Rod
 func rmb_charge_full() -> float:
@@ -769,7 +769,7 @@ func _fly_mote(mt: Dictionary, dt: float) -> void:
 			_grab_mote(mt)
 
 ## An orb in her hands (Skycall pulled it in) or under her Wirerun: the dash is back at once, with the
-## usual reset cue (the chime and the Shift icon) and a flash on her. It adds Static to nobody.
+## usual reset cue (ResetCue: the chime, the Shift flash and the glint on her). It adds Static to nobody.
 func _grab_mote(mt: Dictionary) -> void:
 	orb_bursts += 1
 	var was_spent := h.dashes < h.max_dashes()
@@ -777,9 +777,7 @@ func _grab_mote(mt: Dictionary) -> void:
 	h.dash_buf = 0.0
 	if was_spent:
 		grant_reset()
-		m.fx.flash(h.position + Vector3(0, 1.0, 0), PINK, 2.4, 0.16)
-		m.fx.flash(h.position + Vector3(0, 1.6, 0), TEAL, 0.9, 0.08)
-		DashReset.cue(h, "orb")
+		ResetCue.play(h, "mage_mote")
 	_free_mote(mt, false)
 
 ## Wirerun through an orb picks it up like a hand does.

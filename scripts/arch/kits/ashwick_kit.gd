@@ -186,9 +186,11 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	if h.dashes < h.max_dashes():
 		h.dashes = minf(h.max_dashes(), floorf(h.dashes) + 1.0)     # a knock gives back one ram charge, never more
 		st["knock_charges"] = int(st.get("knock_charges", 0)) + 1
+		ResetCue.play(h, "ashwick_knock_ram")
 	if float(cd["e"]) > 0.0:
 		cd["e"] = 0.0
 		resets += 1
+		ResetCue.play(h, "ashwick_knock_e")
 		m.fx.word(h.pos + Vector3(0, 2.8, 0), "CLOAK READY", col_of(e_def()), true)
 		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the word and the sound)
 		if h.is_local(): h._ab_feedback("k1", "ready")

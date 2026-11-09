@@ -4,9 +4,11 @@ extends RefCounted
 ## past max); a teammate who hit the victim in the last 4 s refreshes too (no heal, the softer "assist"
 ## cue), a stale or idle teammate doesn't; a 2-charge dash gains exactly one charge; a hero whose dash
 ## data opts out gets nothing; killing a mob changes nothing; a bot gets it too but only the local hunter
-## gets the cue (the CombatBus.dash_reset_cue event, the Shift icon pop and the sound); a knock on a teammate counts for
-## nothing; the hero-specific resets (DashReset.cue) fire the same event; the cue variants all exist and
-## the setting picks between them. Never touches the save.
+## gets the cue (ResetCue: the CombatBus.reset_cue event, the Shift flash and the sound); a knock on a
+## teammate counts for nothing; the hero-specific resets fire the same event and flash the HUD slots
+## content/rules/reset_cue.json names, a teammate's reset is silent; every ResetCue.play path in scripts/
+## is in the rules and every rules path is used; the cue variants all exist and the setting picks between
+## them. Never touches the save.
 
 var bad := 0
 var cues: Array = []
@@ -39,7 +41,7 @@ func run(main: Node) -> void:
 	var far := m.world.random_ground()
 	for o in m.hunters:
 		if o != P: o.teleport(far)
-	CombatBus.dash_reset_cue.connect(func(h, src): cues.append([h, src]))
+	CombatBus.reset_cue.connect(func(h, src): cues.append([h, src]))
 	var f1: Hunter = foes[0]
 	var f2: Hunter = foes[1]
 	var mates: Array = m.hunters.filter(func(o): return o != P and o.team == P.team)
@@ -104,12 +106,20 @@ func run(main: Node) -> void:
 	DashReset.takedown(P, P)
 	ok(P.dashes < 0.5 and cues.size() == n0, "(f) no reset for a takedown on yourself")
 
-	# (g) the hero resets give the same cue
+	# (g) the hero resets give the same cue, on the HUD slots the rules name; a teammate's or rival's is silent
 	n0 = cues.size()
-	DashReset.cue(P)
-	ok(cues.size() == n0 + 1 and cues[-1][1] == "hero", "(g) a hero-specific reset fires the same event")
-	DashReset.cue(bot if bot != null else f2)
-	ok(cues.size() == n0 + 1, "(g) and only for the local hunter")
+	if m.hud: m.hud.slot_fx.clear()
+	ResetCue.play(P, "ashwick_knock_ram")
+	ResetCue.play(P, "ashwick_knock_e")
+	ok(cues.size() == n0 + 2 and cues[-1][1] == "ashwick_knock_e", "(g) a hero-specific reset fires the same event")
+	var flashed: Array = []
+	if m.hud: flashed = m.hud.slot_fx.keys().filter(func(id): return m.hud.slot_fx[id]["kind"] == "reset")
+	flashed.sort()
+	ok(flashed == ["dash", "k1"], "(g) each flashes its own HUD slot (Shift and E: %s)" % str(flashed))
+	ResetCue.play(mates[0], "takedown")
+	ResetCue.play(bot if bot != null else f2, "takedown")
+	ok(cues.size() == n0 + 2, "(g) and only for the local hunter")
+	_paths_match()
 
 	# (h) the variants: three streams, the setting picks one, default a
 	ok(Settings.DEFAULTS["reset_cue"] == "a", "(h) the default variant is a")
@@ -132,6 +142,28 @@ func run(main: Node) -> void:
 	m.queue_free()
 	print("KILLRESET DONE, failures: %d" % bad)
 	main.get_tree().quit()
+
+## (g) every literal ResetCue.play path in scripts/ is a rules path, and every rules path is played somewhere.
+func _paths_match() -> void:
+	var used := {"takedown": true, "assist": true}      # DashReset passes these two through a variable
+	var stray: Array = []
+	var re := RegEx.create_from_string("ResetCue\\.play\\([^,]+, \"([a-z0-9_]+)\"\\)")
+	for path in _gd_files("res://scripts"):
+		for hit in re.search_all(FileAccess.get_file_as_string(path)):
+			used[hit.get_string(1)] = true
+			if ResetCue.slots(hit.get_string(1)).is_empty(): stray.append(hit.get_string(1))
+	var unused: Array = ResetCue.rules()["paths"].keys().filter(func(k): return not used.has(k))
+	ok(used.size() >= 16 and stray.is_empty() and unused.is_empty(),
+			"(g) the reset paths in code and in reset_cue.json match (%d; not in the rules %s, never played %s)"
+			% [used.size(), stray, unused])
+
+func _gd_files(dir: String) -> Array:
+	var out: Array = []
+	for f in DirAccess.get_files_at(dir):
+		if f.ends_with(".gd"): out.append(dir + "/" + f)
+	for d in DirAccess.get_directories_at(dir):
+		out.append_array(_gd_files(dir + "/" + d))
+	return out
 
 ## (i)-(l) the assist rule, the one-charge rule for multi-charge dashes and the per-hero opt-out.
 func _assists(m: Match, P: Hunter, mates: Array, foes: Array) -> void:
