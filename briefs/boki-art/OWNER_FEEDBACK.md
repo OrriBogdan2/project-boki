@@ -57,3 +57,4 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 44 | Line audit batch 2 | wave98: Lanternmit, Stormit, Terrarimit, Sporcupine, Geodemole, Skateron, Dragonkite redesign concepts; stance jobs for redesigned Boki dropped | GENERATING |
 | 45 | Line-audit picks | wave99: Chuggamus, Furnacowary, Geysirbara, Seamwyrm, Voltalon, + new Lodestaff -> sheet/card/portrait | GENERATING |
 | 46 | Line audit batch 3 | wave100: planted-pose cards for Glaciatee, Lyrewing, Umbrathere, Lanternlong, Knotwyrm; new concepts for Gloamspire and Selenwhale | GENERATING |
+| 47 | Audit batch 2 picks | wave9zz: 10 Boki -> sheet/card/portrait (incl. Reapant six-legged plum ninja ant) | GENERATING |
