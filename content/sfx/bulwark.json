@@ -37,5 +37,6 @@
 	"kit_files": ["bjorn_ult.gd"],
 	"replaces": ["bjorn_throw", "bjorn_recall", "bjorn_catch", "bjorn_plant", "bjorn_spin", "bjorn_glint", "bjorn_slam",
 		"bjorn_shield_up", "bjorn_block", "bjorn_break", "bjorn_bash", "bjorn_whirl", "bjorn_purify",
-		"bjorn_purify_burst", "bjorn_ult_wind", "bjorn_ult_slam", "bjorn_ult_rumble", "bjorn_ult_crackle"]
+		"bjorn_purify_burst", "bjorn_ult_wind", "bjorn_ult_slam", "bjorn_ult_rumble", "bjorn_ult_crackle"],
+  "ult_cue": "bjorn_ult_wind"
 }

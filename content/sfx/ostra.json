@@ -30,5 +30,6 @@
 	"signature": ["ostra_music_box", "ostra_spring_boing"],
 	"kit_files": ["ostra_well.gd"],
 	"replaces": ["os_orb", "os_orb_hot", "os_prime", "os_snap_wind", "os_snap", "os_snap_hit", "os_swap_lob", "os_swap",
-		"os_seed", "os_pop", "os_empower", "os_well", "os_well_hum"]
+		"os_seed", "os_pop", "os_empower", "os_well", "os_well_hum"],
+  "ult_cue": "os_well"
 }

@@ -31,5 +31,6 @@
  "kit_files": ["breah_slam.gd", "breah_spine.gd"],
  "signature": ["dolm_rock_crunch"],
  "replaces": ["br_throw", "br_boulder_hit", "br_wind", "br_punch", "br_launch", "br_burst", "br_sense", "br_rise",
-  "br_leap", "br_slam", "br_shove", "br_roll", "br_crack", "br_raise", "br_spine"]
+  "br_leap", "br_slam", "br_shove", "br_roll", "br_crack", "br_raise", "br_spine"],
+  "ult_cue": "br_spine"
 }

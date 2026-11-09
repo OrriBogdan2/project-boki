@@ -31,5 +31,6 @@
  "kit_files": ["thief_ult.gd"],
  "signature": ["thief_flintlock_crack", "dj_bolt", "thief_cock"],
  "replaces": ["dj_bolt", "dj_fizzle", "dj_bola_whirl", "dj_bola_throw", "dj_bola_wrap", "dj_knife_throw", "dj_blink",
-  "dj_heal", "dj_encore", "dj_encore_whirr", "dj_blade", "dj_encore_hit"]
+  "dj_heal", "dj_encore", "dj_encore_whirr", "dj_blade", "dj_encore_hit"],
+  "ult_cue": "dj_encore"
 }

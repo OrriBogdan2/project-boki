@@ -30,5 +30,6 @@
  "signature": ["lw_roar", "ashwick_tank_hiss"],
  "kit_files": ["ashwick_jet.gd"],
  "replaces": ["lw_pilot", "lw_roar", "lw_bolt", "lw_bolt_hit", "as_ignite", "lw_blaze", "lw_bash", "lw_bash_hit",
-  "lw_hop", "lw_shield", "lw_jet", "lw_jet_land", "lw_trail"]
+  "lw_hop", "lw_shield", "lw_jet", "lw_jet_land", "lw_trail"],
+  "ult_cue": "lw_jet"
 }

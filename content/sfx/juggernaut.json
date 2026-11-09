@@ -35,5 +35,6 @@
  "kit_files": ["juggernaut_chain.gd", "juggernaut_drop.gd", "juggernaut_ult.gd"],
  "signature": ["juggernaut_chain_rattle", "juggernaut_blade_hiss", "juggernaut_enrage"],
  "replaces": ["jug_slash", "jug_wave", "jug_charge", "jug_full", "jug_slam_wind", "jug_slam_hit", "jug_lunge_hit",
-  "jug_drop", "jug_meteor", "jug_chain", "jug_taut", "jug_reel", "jug_guard", "jug_ting", "jug_riposte"]
+  "jug_drop", "jug_meteor", "jug_chain", "jug_taut", "jug_reel", "jug_guard", "jug_ting", "jug_riposte"],
+  "ult_cue": "jug_guard"
 }

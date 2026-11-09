@@ -30,5 +30,6 @@
  "signature": ["dredge_coin_jingle", "dredge_junk_clatter", "dredge_pickup"],
  "kit_files": ["dredge_blast.gd"],
  "replaces": ["dr_shot", "dr_throw", "dr_grab", "dr_reel", "dr_anchor_wind", "dr_anchor", "dr_dive", "dr_quake", "dr_barge",
-  "dr_hop", "dr_blast_charge", "dr_blast"]
+  "dr_hop", "dr_blast_charge", "dr_blast"],
+  "ult_cue": "dr_blast_charge"
 }

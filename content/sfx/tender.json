@@ -33,5 +33,6 @@
  "signature": ["tender_lantern_chime", "tender_cheer"],
  "kit_files": ["care_util.gd"],
  "replaces": ["tend_ember", "tend_ember_emp", "tend_kindled", "tend_seed_aim", "tend_seed", "tend_stick", "tend_root",
-  "tend_hearth", "tend_toss", "tend_land", "tend_flare", "tend_hop", "tend_pickup", "tend_call", "tend_call_hum", "tend_arrive"]
+  "tend_hearth", "tend_toss", "tend_land", "tend_flare", "tend_hop", "tend_pickup", "tend_call", "tend_call_hum", "tend_arrive"],
+  "ult_cue": "tend_call"
 }

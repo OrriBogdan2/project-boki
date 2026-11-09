@@ -36,5 +36,6 @@
 		"rime_shard", "rime_beam", "rime_spear_aim", "rime_lance", "rime_zone", "rime_burst", "rime_splinter",
 		"rime_wall_tell", "rime_wall", "rime_freeze", "rime_lock", "rime_creak", "rime_crash", "rime_crack",
 		"rime_stop"
-	]
+	],
+  "ult_cue": "rime_lock"
 }

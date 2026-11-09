@@ -62,5 +62,6 @@
   "pin_draw.gd",
   "pin_spirit.gd",
   "pin_ult.gd"
- ]
+ ],
+  "ult_cue": "pin_ult_cast"
 }

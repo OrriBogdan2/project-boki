@@ -46,5 +46,6 @@
  ],
  "kit_files": [
   "gunslinger_ult.gd"
- ]
+ ],
+  "ult_cue": "vn_nuke_fire"
 }

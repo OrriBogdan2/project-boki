@@ -35,6 +35,8 @@ const BLAST_DB := -7.0
 const BLAST_PEAK_DB := -6.0
 ## Distance falloff: full volume within NEAR metres, then a gentle roll-off; muffled beyond FAR.
 const NEAR := 3.5
+const ULT_REACH := 45.0     # m: another hunter's ultimate cast is heard out to here, then silence (hear_range is 22)
+const ULT_DB := 6.0         # dB over the cast's own mix: above fire and impacts (heavy_impact is 3.5 dB over cast)
 const FAR := 9.0
 var skip: Array = []      # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
 var last_take := {}
@@ -46,6 +48,7 @@ var next := 0
 var listener := Vector3.ZERO   # set by the camera each frame
 var hear_range := 22.0
 var sound_reach := {}       # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
+var ult_cues := {}          # archetype -> the cast sound its ultimate is heard by (content/sfx/<group>.json "ult_cue")
 var last_played := {}
 var rng := RandomNumberGenerator.new()
 
@@ -61,13 +64,14 @@ var _duck_tw: Tween
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	for bn in ["Music", "SFX", "Ambience", "SFXFar"]:
+	for bn in ["Music", "SFX", "Ambience", "SFXFar", "SFXCue"]:
 		AudioServer.add_bus()
 		var bi := AudioServer.bus_count - 1
 		AudioServer.set_bus_name(bi, bn)
 		AudioServer.set_bus_send(bi, "SFX" if bn == "SFXFar" else "Master")
 	music_bus = AudioServer.get_bus_index("Music")
 	_setup_mix()
+	CombatBus.ability_used.connect(_on_ability_used)
 	for i in 2:
 		var mp := AudioStreamPlayer.new(); mp.bus = "Music"; mp.volume_db = -80.0
 		add_child(mp); music.append(mp)
@@ -102,6 +106,8 @@ func _load_reach() -> void:
 		if d is Dictionary:
 			for sname in (d as Dictionary).get("reach", {}):
 				sound_reach[sname] = float(d["reach"][sname])
+			if d.has("ult_cue"):
+				ult_cues[String(d["group"])] = String(d["ult_cue"])
 
 ## The effects on the buses: SFX gets a soft compressor, a little room and a limiter; far-away sounds
 ## are low-passed on their way into it; the master has a last safety limiter.
@@ -129,6 +135,11 @@ func _setup_mix() -> void:
 	var lp := AudioEffectLowPassFilter.new()
 	lp.cutoff_hz = 1800.0
 	AudioServer.add_bus_effect(far, lp)
+	# a rival's ultimate cue skips the SFX compressor, so your own fire does not press it down
+	var cue := AudioServer.get_bus_index("SFXCue")
+	var cue_lp := AudioEffectLowPassFilter.new()
+	cue_lp.cutoff_hz = 4000.0
+	AudioServer.add_bus_effect(cue, cue_lp)
 	var mlim := AudioEffectHardLimiter.new()
 	mlim.ceiling_db = -0.5
 	AudioServer.add_bus_effect(0, mlim)
@@ -411,19 +422,47 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	recent[sname] = times
 	last_played[sname] = now
 	var p := _voice(pos)
-	var st = streams[sname]
-	if st is Array:
-		# a different take from last time
-		var arr: Array = st
-		var i := rng.randi_range(0, arr.size() - 1)
-		if arr.size() > 1 and i == int(last_take.get(sname, -1)):
-			i = (i + 1) % arr.size()
-		last_take[sname] = i
-		st = arr[i]
-	p.stream = _once(st)
+	p.stream = _once(_take(sname))
 	p.volume_db = v
 	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
 	p.play()
+
+## How loud (dB, 0 = the file as mixed) a rival's ultimate cue is dist metres from the listener,
+## or NAN past ULT_REACH.
+func ult_cue_db(dist: float) -> float:
+	return ULT_DB + _distance_db(listener + Vector3(dist, 0.0, 0.0), ULT_REACH)
+
+## The rule for every kit: when another hunter (a rival or a teammate; never the local one, whose cast keeps its
+## own mix) casts its ultimate, its cast sound is heard from the caster out to ULT_REACH, on the SFXCue bus
+## (no compressor, so your own fire does not duck it) and outside the stacking and repeat limits.
+func _on_ability_used(caster: Node, _id: String, slot: String) -> void:
+	if not (caster is Hunter) or slot != "ultimate" and slot != "ult":
+		return
+	var h := caster as Hunter
+	if h.is_local() or not ult_cues.has(h.arch):
+		return
+	var sname := String(ult_cues[h.arch])
+	var v := ult_cue_db(Vector2(h.pos.x - listener.x, h.pos.z - listener.z).length())
+	if is_nan(v) or not ensure(sname):
+		return
+	var p := _voice(h.pos)
+	p.bus = "SFXCue"
+	p.stream = _once(_take(sname))
+	p.volume_db = v
+	p.pitch_scale = 1.0
+	p.play()
+
+## The stream to play for a sound: its one file, or a different take from last time.
+func _take(sname: String) -> AudioStream:
+	var st = streams[sname]
+	if not (st is Array):
+		return st
+	var arr: Array = st
+	var i := rng.randi_range(0, arr.size() - 1)
+	if arr.size() > 1 and i == int(last_take.get(sname, -1)):
+		i = (i + 1) % arr.size()
+	last_take[sname] = i
+	return arr[i]
 
 ## A pool voice is never reused while it plays, so a looping file sent through play() would sound
 ## forever, past the match and into the farm: owner item 103, the Boki rescue's revive_hum. One-shots

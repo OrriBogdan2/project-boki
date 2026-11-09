@@ -52,5 +52,6 @@
  "kit_files": [
   "mage_sky.gd",
   "mage_ult.gd"
- ]
+ ],
+  "ult_cue": "vv_ult_rise"
 }
