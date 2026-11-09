@@ -6,7 +6,7 @@ big map of floating islands. Get out with what you found, or lose what you broug
 Pick it from the Expedition menu at home: your class, your Boki, a **tier** and a **mode**.
 
 - **Tiers:** the Meadow (Boki are never lost), the Dusk Isles (opens after 2 extractions) and the
-  Hollow (after 5). Higher tiers have tougher monsters, more loot, rarer Boki and real risk to your
+  Hollow (after 5). Each tier is a depth toward the bottom of the world (Depth 1, 2, 3; shown on the Expedition menu and the results screen). Deeper tiers have tougher monsters, more loot, rarer Boki and real risk to your
   Boki. See [Rules](Rules.md#expedition-tiers) and [Boki](Boki.md#losing-a-boki).
 - **Modes:** Solo (20 hunters), Duos (10 squads of two), Trios (7 squads of three). Bots fill the lobby.
 - **One life.** Health and armor don't regenerate. Tonics (1) heal and armor kits (2) repair armor.
