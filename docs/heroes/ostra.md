@@ -181,7 +181,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 | Empowered: radius 350 -> 500 (and a June patch made Empowered really enlarge it) | card, patch notes (June 25) | yes (f89-f101) | built: 3.6m -> 5.1m when cast Swollen; asserted |
 | Void is held for the cast, then acts freely while it holds | footage | yes (f23-f33 cast, f50 shooting) | built (owner 18:20, replacing item 16's full lock): locked for the 1.0s dome, free once it opens; asserted `lock: ...`, `release: ...` |
 | Allies unaffected; it never breaks allied destructibles (patch) | sheet, patch notes (June 25) | | built: foes only; it hurts no walls at all |
-| Empowered damage is Explosive (175 a tick to destructibles) | wiki | no | not built: our destructibles are walls that take shot damage; a well tick is not a shot (owner question) |
+| Empowered damage is Explosive (175 a tick to destructibles) | wiki | no | built for props: a Swollen well's ticks break crates and pots and light kegs in its radius (a plain well does not); asserted. Placed walls are unchanged (they take no well damage) |
 | It closes with no explosion | footage | yes (f66) | built |
 
 ## Moving while casting (RMB and E)
