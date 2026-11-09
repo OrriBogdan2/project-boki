@@ -60,3 +60,7 @@ Auto-fail at batch stage: anything upright or person-like, any strap/belt/band/v
 - Owner calibration anchors: Sporcupine 7.9, Teapotamus 7.1, Voltmink 7.0.
 - 8.0-8.4 with one or two fixable details -> an edit job on that image (cheaper, keeps what works). Below 8.0 -> a new prompt.
 - ART lines for rejects: `ART <id> reject <path> grade=<x.x>` (the grade is an extra 5th field; passes keep `ART <id> <grade> <path>`).
+
+## Uniqueness (owner, 2026-11-08 21:24 ET)
+- No Boki may feel like a copy of another unless it is its own evolution; evolutions must still be distinct enough to be interesting.
+- Every pass is checked against a contact sheet of the whole approved roster. Same base animal + same main idea (or same animal + silhouette + palette) as a Boki from another line = reject, naming the look-alike.
