@@ -17,6 +17,7 @@ var sig := ""
 var t := 0.0
 var detect_t := 0.0
 var asking := false
+var stay_shown := false      # the base's last step offers Stay beside Skip
 var quiet := false      # set while you talk to Hob: the card, the goal line and the world prompts step aside
 var tree_t := 0.0
 var tree_at := Vector3.INF
@@ -72,7 +73,9 @@ func _poll() -> void:
 	var was_done := bool(FarmTutorial.state()["done"])
 	if FarmTutorial.active():
 		FarmTutorial.detect()
-		if FarmTutorial.current() == "feed":
+		if FarmTutorial.current() == "meet" and _near_boki():
+			FarmTutorial.event("meet")
+		if FarmTutorial.current() in ["feed", "eat"]:
 			FarmTutorial.give_food()
 		var cur := FarmTutorial.current()
 		var tool := FarmTutorial.give_step_tool(cur) if cur != "" and h.panel_open == "" else ""
@@ -101,6 +104,14 @@ func _poll() -> void:
 func hint_visible() -> bool:
 	return is_instance_valid(hint_box)
 
+## Is the player next to their Boki (the base's first step)?
+func _near_boki() -> bool:
+	var ke: Dictionary = h._kin_entry(Save.active_kin())
+	if ke.is_empty():
+		return false
+	var at: Vector3 = ke["node"].position
+	return Vector2(h.ppos.x - at.x, h.ppos.z - at.z).length() < float(FarmTutorial.rules()["base"]["near"])
+
 func _refresh_hint() -> void:
 	var id := FarmTutorial.current()
 	if id == "":
@@ -109,6 +120,8 @@ func _refresh_hint() -> void:
 	if not is_instance_valid(hint_box):
 		_make_hint()
 		hint_box.visible = not quiet
+	if (id == "out") != stay_shown:
+		_skip_buttons()
 	var s := FarmTutorial.hint_text(id)
 	if id == "house" and FarmTutorial.stage(id) == "wait":
 		s = "%s (%s)" % [s, _site_progress()]
@@ -156,7 +169,10 @@ func _make_hint() -> void:
 func _skip_buttons() -> void:
 	for c in skip_row.get_children():
 		c.queue_free()
-	if not bool(FarmTutorial.option("skippable")):
+	stay_shown = FarmTutorial.base() and FarmTutorial.current() == "out"
+	if stay_shown:
+		skip_row.add_child(UI.button(String(FarmTutorial.rules()["stay_label"]), func(): FarmTutorial.event("stay"), 0))
+	if not FarmTutorial.skippable():
 		return
 	if not asking:
 		skip_row.add_child(UI.button(String(FarmTutorial.rules()["skip_label"]), func():
@@ -170,11 +186,14 @@ func _skip_buttons() -> void:
 		_skip_buttons(), 0))
 
 ## Skips the tutorial: nothing is taken; the house is put down as a site if it isn't, with the materials it
-## needs handed over so it can still be built.
+## needs handed over so it can still be built. In the base a toy is put down instead.
 func skip() -> void:
 	asking = false
 	FarmTutorial.skip()
-	if FarmHob.house_entry().is_empty():
+	if FarmTutorial.base():
+		if FarmTutorial.toy_spot().x == INF:
+			place_toy()
+	elif FarmHob.house_entry().is_empty():
 		place_house()
 		FarmSites.refund(FarmSites.build_cost("house"))
 	_clear_hint()
@@ -189,14 +208,23 @@ func house_spot() -> Vector3:
 ## Puts the house down as a construction site on the free ground nearest the suggested spot (marking it
 ## out costs nothing; the materials are spent as it goes up).
 func place_house() -> bool:
+	return _place("house", house_spot())
+
+## The base's skip: a toy near the landing, from the inventory so it costs nothing.
+func place_toy() -> bool:
+	var id := String(FarmTutorial.rules()["base"]["skip_toy"])
+	var inv: Dictionary = h.hb.L()["inv"]
+	inv[id] = int(inv.get(id, 0)) + 1
+	return _place(id, HomeLayout.LANDING + Vector3(3, 0, -3))
+
+func _place(id: String, p: Vector3) -> bool:
 	var hb: HomeBuild = h.hb
 	var was_active := hb.active
 	if not was_active:
 		hb.active = true
-	hb.take("house")
+	hb.take(id)
 	var found := false
-	var p := house_spot()
-	var sz := HomeLayout.size_of("house", 0)
+	var sz := HomeLayout.size_of(id, 0)
 	for rad in 24:
 		for k in 24:
 			var a := float(k) / 24.0 * TAU
@@ -240,12 +268,14 @@ func target(id: String) -> Vector3:
 				return _water_spot()      # the patch goes by the water
 			var planted: bool = not h.plots.is_empty() and FarmTutorial.stage(id) != "patch_dry"
 			return h.plots[0].position if planted else Vector3.INF
-		"task":
+		"task", "meet", "eat":
 			var ke: Dictionary = h._kin_entry(Save.active_kin())
 			return (ke["node"] as Node3D).position if not ke.is_empty() else Vector3.INF
+		"toy":
+			return FarmTutorial.toy_spot()
 		"hob":
 			return h.hob.pos
-		"expedition":
+		"expedition", "out":
 			return h.spots["portal"]
 	return Vector3.INF
 
