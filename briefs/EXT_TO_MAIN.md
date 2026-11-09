@@ -5595,3 +5595,4 @@ NOTE (job 20261109-124854-a1, rpc1, escalated from 20261109-122307-a1): ext/gard
 READY ext/level-pace d0960b1c4 (XP gains to level_growth.json xp; median L2/4/6/10 37/61/126/376 s -> 43/71/209/548 s over 3x30-hunter sims; docs/LEVEL_PACE.md)
 READY ext/recast-hud-cue 1fd9f80fb (recast cue: ArchKit.recast_left/recast_slot + RecastCue pulse, shrinking ring and big KEY AGAIN on the ability bar for every recast kit; --recast-cue-check 27/27)
 READY ext/sfx-boki-types feedefebb (Boki type cast cues)
+READY ext/levelup-vfx 394fa3fee (level-up cue)
