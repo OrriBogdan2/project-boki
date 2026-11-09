@@ -1,0 +1,123 @@
+{
+	"grammar": 1,
+	"id": "murmurling",
+	"name": "Murmurling",
+	"animals": [
+		"Starling",
+		"Pan-pipes"
+	],
+	"theme": "swarm",
+	"flavor": "A starling with pan-pipes for a tail; every note it plays flies off as another tiny bird. Sociable, noisy, lonely in a second; mimics your footsteps.",
+	"colors": {
+		"body": "#2a3a4a",
+		"belly": "#c8d0e0",
+		"glow": "#9ae0ff",
+		"wing": "#3a4a6a"
+	},
+	"look": {
+		"ears": "bolt",
+		"body": "drop",
+		"tail": "wisp",
+		"feet": "none",
+		"aura": "spores"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_hp": 3,
+		"kin_damage": 3,
+		"kin_speed": 12,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.6,
+		"loyalty": 0.6,
+		"temper": 0.45,
+		"curiosity": 0.8
+	},
+	"ai": {
+		"aggression": 0.7,
+		"loyalty": 0.45,
+		"caution": 0.3,
+		"role": "skirmisher"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Flock",
+		"passives": [
+			{
+				"stat": "fire_rate",
+				"amount": 0.15
+			},
+			{
+				"stat": "reload",
+				"amount": 0.15
+			},
+			{
+				"stat": "glide",
+				"amount": 0.15
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "slow",
+				"duration": 1.0
+			}
+		]
+	},
+	"active": "hive_swarm",
+	"auto": "echolocate",
+	"merge": "hive_crown",
+	"evolution": {
+		"root": "Murmu",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "mimic, repeats your words back",
+		"syllables": [
+			"Murmu",
+			"rling"
+		]
+	},
+	"egg": {
+		"name": "Murmurling Egg",
+		"temper": "Sociable",
+		"desc": "Something sociable is in here.",
+		"play": "Fast, darting and always on the move."
+	}
+}

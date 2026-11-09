@@ -28,7 +28,7 @@ No source hero's pose or attitude is copied.
 | 1 | Kael the Unbroken (`juggernaut`) | No clips at all: a procedural mannequin frozen in an A-stance |
 | 2 | Mossy the Barnacle Knight (`bulwark`) | Loop pop; 1.6 s stance; a shield wall hides the warm giant; the shield snaps up in 0.5 s |
 | 3 | Tenzo the Stone Seer (`dolm`) | 0.8 s stance: a 2.5 Hz hip jitter; the feet slide in the hand-off |
-| 4 | Cinder the Flame Queen (`ashwick`) | Arm locked straight out for the whole idle; built on the flamethrower the owner removed |
+| 4 | Cinder the Ashen Kiss (`ashwick`) | Arm locked straight out for the whole idle; built on the flamethrower the owner removed |
 | 5 | Sparkle the Storm Chaser (`mage`) | "Never quite still" stands frozen for 5 s; the gum pops |
 | 6 | Motley the Void Jester (`ostra`) | Finger pop of 11 to 16 deg at every loop; T-pose arms; the stance has no body keys |
 | 7 | Meeko the Dawnfox (`tender`) | Done Nov 8 (ext/idle-tender): no lantern, weight shift, breath, strap hug |
@@ -136,7 +136,7 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Breath in the shoulders; no bounce faster than 1 Hz.
 - **Seam / length:** remove `dolm:stance` from `STAND_OPEN`.
 
-### 4. Cinder the Flame Queen (`ashwick`, art `cinder`)
+### 4. Cinder the Ashen Kiss (`ashwick`, art `cinder`)
 
 - **Source:** DECISIONS (Nov 7): "no weapons, fire from her hands", obsidian outfit, living-fire hair, a flame-tipped
   tail. The archetype ("salamander-folk alchemist... goggles") is stale.

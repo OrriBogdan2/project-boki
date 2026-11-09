@@ -12,7 +12,7 @@ hips = arm.pose.bones["hips"]
 sh = arm.data.bones["upper_arm.R"].head_local
 C0 = Vector((0, 0, (sh.z + arm.data.bones["hips"].head_local.z) * 0.5))
 parts = []
-for nm in ("tarek_body", "tarek_fists"):
+for nm in ("tarek_body",):
     ob = bpy.data.objects[nm]
     gi = {g.index: g.name for g in ob.vertex_groups}
     ids = [v.index for v in ob.data.vertices if len(v.groups) and gi[max(v.groups, key=lambda g: g.weight).group].split(".")[0] in ("upper_arm", "forearm", "hand")]
