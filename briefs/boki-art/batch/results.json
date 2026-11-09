@@ -48660,5 +48660,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_gongrowl_p96_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_p96",
+    "name": "Gongrowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_p96_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "moundlet_card",
+    "name": "Moundlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/moundlet_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "spanglin_card",
+    "name": "Spanglin (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/spanglin_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmuron_card",
+    "name": "Murmuron (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/murmuron_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "moundlet_card",
+    "name": "Moundlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/moundlet_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "spanglin_card",
+    "name": "Spanglin (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/spanglin_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_p96",
+    "name": "Gongrowl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_p96_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmuron_card",
+    "name": "Murmuron (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/murmuron_card_2.jpg",
+    "ok": true
   }
 ]
