@@ -26,9 +26,11 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `scripts/match/boki_dna.gd` | Inborn proportions, ear and tail shapes, birthmark (`Unique.dress` calls it) |
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |
 
-Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend. Faces (`BokiRig.FACES`): neutral,
+Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend, and for minigame results
+win (once), sulk and push (loops; `tools/boki/boki_react.py`, tuned per species). Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
-`dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
+`dazed` (as for `KinPuppet`), plus `kwork`, `kact` (also `win`, `sulk`, `push`, set by the Dash and
+the Stump Shove) and `face`.
 
 Props (axe, pick, berry) are part of the skinned mesh on their own bones, collapsed in every clip that doesn't use
 them; a prop named in the species' `GLOW_PIECES` wears the glow (Lunowl's dazzle over its eye-spots). Materials:

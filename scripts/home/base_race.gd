@@ -216,6 +216,7 @@ var runners: Array = []        # the home's kin entries, in run order
 var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
+var held: Array = []           # the winner and the loser, kept on the spot until the card goes
 
 func _init(home) -> void:
 	h = home
@@ -349,6 +350,9 @@ func tick(d: float) -> void:
 		card_t -= d
 		if card_t <= 0.0 and is_instance_valid(card):
 			card.queue_free()
+		if card_t <= 0.0:
+			let_go(held)
+			held = []
 	if run == null:
 		return
 	run.step(d)
@@ -391,6 +395,7 @@ func _end(finished: bool) -> void:
 		_card(res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
+		held = hold(h, res)
 		Save.save_game()
 	run = null
 	runners = []
@@ -407,6 +412,30 @@ func _card(res: Dictionary) -> void:
 		["%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], 14, UI.MUTED],
 		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]])
 	card_t = float(rules()["card_s"])
+
+## Plays a BokiRig clip (win, sulk, push; "" stops it) on a kin's Boki: rigged ones only, the rest ignore it.
+static func act(k: Dictionary, which: String) -> void:
+	var n := k["node"] as Node3D
+	if which == "":
+		n.remove_meta("kact")
+	else:
+		n.set_meta("kact", which)
+
+## The result of a minigame ({win, lose}): the winner shows it, the loser sulks, both stay put until `let_go`.
+static func hold(home, res: Dictionary) -> Array:
+	var ks: Array = []
+	for who in [["win", "win"], ["lose", "sulk"]]:
+		var k: Dictionary = home._kin_entry(res[who[0]])
+		k["busy"] = true
+		act(k, who[1])
+		ks.append(k)
+	return ks
+
+static func let_go(ks: Array) -> void:
+	for k in ks:
+		k["busy"] = false
+		k["t"] = 1.5
+		act(k, "")
 
 ## A minigame's result card at the top of the screen: rows of [text, size, colour]. Shared with the Stump Shove.
 static func result_card(home, rows: Array) -> Control:

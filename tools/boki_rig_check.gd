@@ -11,7 +11,7 @@ const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"nettlynx", "thrumbird"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
-	"tend"]
+	"tend", "win", "sulk", "push"]
 const SHAPES := ["blink", "closed", "happy", "sad", "sleepy", "angry", "m_smile", "m_frown", "m_snarl", "m_chomp",
 	"m_o"]
 const MAX_TRIS := 5000         # Boki and props (S1's perf rule)
@@ -87,6 +87,15 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	ok(_clip_for(rig, "kstate", "sleep") == "sleep", "kstate sleep sleeps")
 	ok(_clip_for(rig, "kwork", "chop") == "chop", "kwork picks a work clip")
 	ok(_clip_for(rig, "kact", "pet") == "pet", "kact pet")
+	for c in ["sulk", "push", "win"]:
+		ok(_clip_for(rig, "kact", c) == c, "kact %s" % c)
+	rig.root.set_meta("kact", "win")
+	rig._pick_clip(0.016)
+	rig.player.stop()
+	rig._pick_clip(0.016)
+	ok(rig.clip != "win", "a win plays once, then it hops or idles")
+	rig.root.remove_meta("kact")
+	ok(rig.player.get_animation("win").loop_mode == Animation.LOOP_NONE, "win does not loop")
 	ok(BokiRig.work_clip({}) == "", "no job, no work clip")
 	ok(BokiRig.work_clip({"job": {"phase": "work", "kind": "ore"}}) == "mine", "an ore job mines")
 	ok(BokiRig.work_clip({"job": {"phase": "to", "kind": "chop"}}) == "carry", "taking it home carries")

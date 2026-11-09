@@ -124,6 +124,7 @@ var pair: Array = []           # the home's kin entries: a, b
 var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
+var held: Array = []           # the winner and the loser, kept on the spot until the card goes
 
 func _init(home) -> void:
 	h = home
@@ -176,6 +177,7 @@ func use() -> void:
 	pair = ks.slice(0, 2)
 	for k in pair:
 		k["busy"] = true
+		BaseRace.act(k, "push")
 	var back := maxi(0, [pair[0]["rec"], pair[1]["rec"]].find(Save.active_kin()))
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new())
 	run.rng.randomize()
@@ -206,6 +208,9 @@ func tick(d: float) -> void:
 		card_t -= d
 		if card_t <= 0.0 and is_instance_valid(card):
 			card.queue_free()
+		if card_t <= 0.0:
+			BaseRace.let_go(held)
+			held = []
 	if run == null:
 		return
 	run.step(d)
@@ -234,12 +239,14 @@ func _end(finished: bool) -> void:
 	for k in pair:
 		k["busy"] = false
 		k["t"] = 1.5
+		BaseRace.act(k, "")
 	bar.close()
 	stump.rotation.z = 0.0
 	if finished:
 		_card(res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
+		held = BaseRace.hold(h, res)
 		Save.save_game()
 	run = null
 	pair = []
