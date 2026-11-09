@@ -8,10 +8,13 @@ extends RefCounted
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
+##   7. every belt item but the keys has its own row in content/rules/belt_sfx.json (cues named for the item,
+##      files on disk, a channelled item also loop/end/cancel) and utility_use.gd plays no stock cue
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
+const STOCK := ["heal", "build", "cloak", "ping", "throw", "pickup", "shield", "skill"]   # shared cues the belt used
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 
@@ -33,6 +36,7 @@ func run(main: Node) -> void:
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
 	_fallback()
+	_belt()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -133,6 +137,27 @@ func _fallback() -> void:
 	var got := [HeroSfx.of(h, "dash", "dash"), HeroSfx.of(h, "hurt", "")]
 	h.free()
 	ok(got == ["dash", ""], "no set: the shared dash, and no voice line (%s)" % [got])
+
+## 7. Every belt item has its own cues (BeltSfx), none of them a stock one.
+func _belt() -> void:
+	var rows := BeltSfx.items()
+	var seen := {}
+	var wrong := []
+	for id in UtilityBelt.ids():
+		if UtilityBelt.is_key(id):
+			continue
+		var kinds := ["start"] + (["loop", "end", "cancel"] if UtilityUse.use_of(id) in ["drink", "repair"] else [])
+		for kind in kinds:
+			var c := BeltSfx.cue(id, kind)
+			if c != "belt_%s_%s" % [id, kind] or c in STOCK or seen.has(c) or _takes(c).is_empty():
+				wrong.append("%s %s '%s'" % [id, kind, c])
+			seen[c] = true
+		if (rows.get(id, {}) as Dictionary).size() != kinds.size():
+			wrong.append("%s has the wrong set of cues" % id)
+	ok(wrong.is_empty(), "belt: %d items with their own start/loop/end/cancel cues %s" % [rows.size(), wrong])
+	var src := FileAccess.get_file_as_string("res://scripts/match/utility_use.gd")
+	var stock_left := STOCK.filter(func(c): return src.contains('sfx("%s"' % c))
+	ok(stock_left.is_empty(), "belt: utility_use.gd plays no stock cue %s" % [stock_left])
 
 func _takes(sname: String) -> Array:
 	var out := []

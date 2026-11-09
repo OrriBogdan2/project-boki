@@ -43,6 +43,15 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## belt_sfx (`content/rules/belt_sfx.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Belt item sounds (BeltSfx, docs/AUDIO.md), keyed by belt item id (content/utility): start = played at the Hunter when the item is used; loop = held while it channels (tonic, armor_kit); end = the channel finished; cancel = the channel was spilt (hit, stunned, rolled). Keys (rift_key, chest_key) have their own sounds in BeltKeys. --sfx-set-check asserts every other belt item is here with no shared stock cue. |
+| items | {"tonic": {"start": "belt_tonic_start", "loop": "belt_tonic_loop", "end": "belt_tonic_end", "cancel": "belt_tonic_cancel"}, "armor_kit": {"start": "belt_armor_kit_start", "loop": "belt_armor_kit_loop", "end": "belt_armor_kit_end", "cancel": "belt_armor_kit_cancel"}, "medkit": {"start": "belt_medkit_start"}, "jump_pad": {"start": "belt_jump_pad_start"}, "scanner": {"start": "belt_scanner_start"}, "shield_cell": {"start": "belt_shield_cell_start"}, "smoke": {"start": "belt_smoke_start"}, "stim": {"start": "belt_stim_start"}} |
+
 ## boki_lines (`content/rules/boki_lines.json`)
 
 What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words in one bubble (punctuation and symbols don't count); act_words = the most words in one action, which a young Boki says after its name; bubble_s = seconds a bubble stays up; cooldown_s = seconds a Boki waits between lines (a trigger marked direct answers something you did and skips the wait); no_repeat = how many of its own last lines a Boki never repeats; min_lines = the fewest general lines a trigger may have; grown_stage = the speech stage (Care.speech) from which a Boki says lines instead of its name. tones = how a young Boki says its name, by feeling ({A} first syllable, {a} lower, {b} second syllable, {F} full name, {f} lower, {U} upper; KinSpeak.fill). sounds = noises a tone may use besides the name. alias = old trigger names that share another's lines. triggers: feel (a tone), word (the one word a stage-1 Boki adds), acts (what it does), lines._ (anyone) and lines.<element> (extra lines for a Boki of that element, the species' type).

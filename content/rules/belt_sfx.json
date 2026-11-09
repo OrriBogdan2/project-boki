@@ -1,0 +1,13 @@
+{
+ "_doc": "Belt item sounds (BeltSfx, docs/AUDIO.md), keyed by belt item id (content/utility): start = played at the Hunter when the item is used; loop = held while it channels (tonic, armor_kit); end = the channel finished; cancel = the channel was spilt (hit, stunned, rolled). Keys (rift_key, chest_key) have their own sounds in BeltKeys. --sfx-set-check asserts every other belt item is here with no shared stock cue.",
+ "items": {
+  "tonic": {"start": "belt_tonic_start", "loop": "belt_tonic_loop", "end": "belt_tonic_end", "cancel": "belt_tonic_cancel"},
+  "armor_kit": {"start": "belt_armor_kit_start", "loop": "belt_armor_kit_loop", "end": "belt_armor_kit_end", "cancel": "belt_armor_kit_cancel"},
+  "medkit": {"start": "belt_medkit_start"},
+  "jump_pad": {"start": "belt_jump_pad_start"},
+  "scanner": {"start": "belt_scanner_start"},
+  "shield_cell": {"start": "belt_shield_cell_start"},
+  "smoke": {"start": "belt_smoke_start"},
+  "stim": {"start": "belt_stim_start"}
+ }
+}
