@@ -167,6 +167,7 @@ static func mark(id: String) -> void:
 	if bool((st["did"] as Dictionary).get(id, false)) or step_def(id).is_empty():
 		return
 	st["did"][id] = true
+	TutFunnel.leave("farm", id)
 	if (st["did"] as Dictionary).size() >= steps().size():
 		finish()
 	Save.save_game()
@@ -183,6 +184,7 @@ static func finish() -> int:
 
 ## Skipping: nothing granted or taken. (FarmGuide puts the house down as a site when none is.)
 static func skip() -> void:
+	TutFunnel.skip("farm")
 	var st := state()
 	st["done"] = true
 	st["skipped"] = true

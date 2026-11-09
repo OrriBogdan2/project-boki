@@ -165,6 +165,8 @@ func applies(sid: String) -> bool:
 func update(dt: float) -> void:
 	var p := m.player
 	if p == null or p.extracted:
+		if p != null and id() == "extract":
+			TutFunnel.leave("match", "extract")      # leaving is the last step, and it ends the match
 		return
 	if step < 0:
 		step = 0
@@ -177,6 +179,7 @@ func update(dt: float) -> void:
 	if p.kin and p.kin.state == "downed":
 		p.kin.down_t = minf(p.kin.down_t, 0.5)     # (a Boki that got knocked out here comes round at once)
 	t += dt
+	TutFunnel.tick("match", dt)
 	card_t += dt
 	done_t = maxf(0.0, done_t - dt)
 	flash_t = maxf(0.0, flash_t - dt)
@@ -200,6 +203,7 @@ func update(dt: float) -> void:
 		_words()
 
 func _finish(sid: String) -> void:
+	TutFunnel.leave("match", sid)
 	if sid == "orders" and m.player.kin:
 		KinFollow.set_cmd(m.player.kin, "follow", null)      # (back to walking beside you, so it can lead on)
 	if STOP_AFTER.has(sid):
@@ -237,6 +241,7 @@ func _enter() -> void:
 	need_back = false
 	used0 = p.used.duplicate()
 	skills0 = p.kin.st_skills if p.kin else 0
+	TutFunnel.enter("match", sid)
 	match sid:
 		"pickup":
 			var at := stop("pickup")
@@ -529,6 +534,7 @@ func _stall(dt: float) -> void:
 		best_d = 1e9 if target == Vector3.INF else _dist(target)
 		nag_t = 2.5
 		flash_t = 2.5
+		TutFunnel.hint("match")
 		if m.player.kin and m.player.kin.comp:
 			m.player.kin.comp.nag()
 

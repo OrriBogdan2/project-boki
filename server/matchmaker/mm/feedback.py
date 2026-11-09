@@ -4,7 +4,9 @@ import os
 import threading
 import time
 
-MAX_FEEDBACK = 2048   # bytes of request body
+MAX_FEEDBACK = 4096   # bytes of request body (the tutorial funnel is about 1.5 KB of it)
+MAX_STEPS = 40        # steps per tutorial track in the funnel
+ENDS = ("", "done", "skip")
 SCORE_KEYS = ("combat", "boki", "onboarding", "look")
 _lock = threading.Lock()
 
@@ -29,6 +31,23 @@ def validate(body) -> str:
     m = body.get("minutes_played")
     if isinstance(m, bool) or not isinstance(m, (int, float)) or not 0 <= m <= 100000:
         return "minutes_played"
+    return _funnel_problem(body.get("funnel", {}))
+
+
+def _funnel_problem(fun) -> str:
+    """{track: {step id: [entered s, finished s or -1, idle s, hints, end]}}: small numbers, no free text."""
+    if not isinstance(fun, dict) or len(fun) > 4:
+        return "funnel"
+    for steps in fun.values():
+        if not isinstance(steps, dict) or len(steps) > MAX_STEPS:
+            return "funnel"
+        for sid, r in steps.items():
+            if not isinstance(sid, str) or not 0 < len(sid) <= 24 or not isinstance(r, list) or len(r) != 5:
+                return "funnel"
+            if any(isinstance(n, bool) or not isinstance(n, int) or not -1 <= n <= 10_000_000 for n in r[:4]):
+                return "funnel"
+            if r[4] not in ENDS:
+                return "funnel"
     return ""
 
 
@@ -36,6 +55,8 @@ def store(path: str, body: dict) -> None:
     """Append the validated payload plus a server timestamp as one JSON line."""
     rec = {"received": int(time.time()), "version": body["version"], "player": body["player"],
            "scores": body["scores"], "note": body.get("note", ""), "minutes_played": body["minutes_played"]}
+    if body.get("funnel"):
+        rec["funnel"] = body["funnel"]
     with _lock:
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         with open(path, "a", encoding="utf-8") as f:

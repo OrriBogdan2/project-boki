@@ -152,6 +152,7 @@ const CHECKS := {
 	"--shield-check": ["res://tools/shield_check.gd", "shield_check", null],      # shields never hide a Hunter
 	"--clarity-shots": ["res://tools/clarity_shots.gd", "clarity_shots", null],      # 2v2, one down, --shots-dir=
 	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],      # item 189
+	"--tut-funnel-check": ["res://tools/tut_funnel_check.gd", "tut_funnel_check", null],      # per-step tutorial numbers
 	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],      # colour rule, downed, Boki
 	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],      # docs/boki/ROSTER_50.md stubs
 	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],      # the 50 lined up

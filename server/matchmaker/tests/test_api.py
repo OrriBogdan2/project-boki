@@ -53,6 +53,17 @@ class ApiTest(unittest.TestCase):
         with open(self.fb, encoding="utf-8") as f:
             self.assertEqual(len(f.read().splitlines()), len(lines))   # rejects store nothing
 
+    def test_feedback_funnel(self):
+        base = {"version": VERSION, "player": "Ana", "scores": {"combat": 7, "boki": 9, "onboarding": 4, "look": 10},
+                "note": "", "minutes_played": 12.5}
+        fun = {"match": {"land": [0, 4, 1, 0, "done"], "move": [4, -1, 9, 1, ""]}, "farm": {"axe": [0, 3, 0, 0, "skip"]}}
+        self.assertEqual(self.call("POST", "/feedback", dict(base, funnel=fun)), (200, {"ok": True}))
+        with open(self.fb, encoding="utf-8") as f:
+            self.assertEqual(json.loads(f.read().splitlines()[-1])["funnel"], fun)
+        for broken in ({"match": {"land": [0, 4, 1, 0, "bye"]}}, {"match": {"land": [0, 4, 1]}},
+                       {"match": {"land": [0, 4.5, 1, 0, ""]}}, {"match": {"x" * 30: [0, 1, 0, 0, ""]}}):
+            self.assertEqual(self.call("POST", "/feedback", dict(base, funnel=broken))[0], 400)
+
     def test_health(self):
         status, out = self.call("GET", "/health")
         self.assertEqual(status, 200)

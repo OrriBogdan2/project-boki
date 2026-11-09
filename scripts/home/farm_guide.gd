@@ -57,6 +57,8 @@ func tick(dt: float) -> void:
 	if not h.visit.is_empty():
 		return
 	t += dt
+	if FarmTutorial.active():
+		TutFunnel.tick("farm", dt)
 	detect_t -= dt
 	if h.hob:
 		h.hob.tick(dt)
@@ -75,6 +77,7 @@ func _poll() -> void:
 		if FarmTutorial.current() == "feed":
 			FarmTutorial.give_food()
 		var cur := FarmTutorial.current()
+		TutFunnel.enter("farm", cur, FarmTutorial.stage(cur) if cur != "" else "")
 		var tool := FarmTutorial.give_step_tool(cur) if cur != "" and h.panel_open == "" else ""
 		if tool != "":
 			h._toast(String(FarmTutorial.rules()["tool_toasts"].get(tool, "")))

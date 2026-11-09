@@ -52,7 +52,7 @@ func run(main: Node) -> void:
 	var same := scores.keys().all(func(k): return int(b["scores"][k]) == int(scores[k]))
 	ok(b["version"] == Net.VERSION and same and b["note"] == "fun", "payload has version, scores and note")
 	ok(b["minutes_played"] >= 10.0 and String(b["player"]) != "", "payload has minutes_played and player")
-	ok(JSON.stringify(b).length() < 2048, "payload fits the 2 KB limit")
+	ok(JSON.stringify(b).length() < 4096, "payload fits the 4 KB limit")
 	DirAccess.remove_absolute(Feedback.path)
 	print("RATECARD DONE, failures: ", bad)
 	main.get_tree().quit()

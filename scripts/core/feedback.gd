@@ -3,7 +3,8 @@ extends RefCounted
 ## The "Rate this build" card's data (item 189): minutes played per game version, which versions were
 ## answered or skipped, and the answers not yet delivered. Kept in user://feedback.json, apart from the
 ## save, so it needs no save migration. Answers go to POST /feedback on the matchmaker; if that fails
-## they stay queued and flush() sends them on the next launch.
+## they stay queued and flush() sends them on the next launch. It also holds the tutorial funnel
+## (TutFunnel: time, idle, hints and skip or quit per tutorial step) for the current version, sent with each answer.
 
 const FILE := "user://feedback.json"
 const URL := "http://boki-us-1:8080/feedback"
@@ -43,6 +44,15 @@ static func minutes() -> float:
 static func due() -> bool:
 	return not _load()["done"].has(Net.VERSION) and minutes() >= MIN_MINUTES
 
+## The tutorial funnel kept for this version (track -> step -> numbers; see TutFunnel).
+static func funnel() -> Dictionary:
+	return _load().get("funnel", {}).get(Net.VERSION, {})
+
+static func set_funnel(data: Dictionary) -> void:
+	var st := _load()
+	st["funnel"] = {Net.VERSION: data}      # older versions' numbers are dropped
+	_save(st)
+
 ## Marks this version answered (or skipped) so the card never shows again for it.
 static func finish() -> void:
 	var st := _load()
@@ -54,8 +64,12 @@ static func finish() -> void:
 static func submit(host: Node, scores: Dictionary, note: String) -> void:
 	var st := _load()
 	var who := "%s (%s)" % [Save.d.get("name", "Hunter"), Save.d.get("profile", {}).get("id", "?")]
-	st["queue"].append({"version": Net.VERSION, "player": who.left(64), "scores": scores,
-			"note": note.left(NOTE_MAX), "minutes_played": snappedf(minutes(), 0.1)})
+	var body := {"version": Net.VERSION, "player": who.left(64), "scores": scores,
+			"note": note.left(NOTE_MAX), "minutes_played": snappedf(minutes(), 0.1)}
+	var funnel := TutFunnel.payload()
+	if not funnel.is_empty():
+		body["funnel"] = funnel
+	st["queue"].append(body)
 	_save(st)
 	flush(host)
 
