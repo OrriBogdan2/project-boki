@@ -23,6 +23,7 @@ const FADE := 0.1            # s: one clip into the next, and into or out of an 
 const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
 const FALL_FADE := 0.05      # s: into the fall or the rise clip (quick: the down is a hit)
+const FALL_OF_DEATH := 0.75  # of the death clip the fall plays, up to lying down (states.fall_of_death: per Hero)
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
@@ -90,7 +91,7 @@ static func data(art_name: String) -> Dictionary:
 ## Clips for this model, or null when the .glb brought none.
 ## A hunter just eliminated whose Hero has a death clip: it stays visible until the clip has played.
 static func dying(h: Hunter) -> bool:
-	if not h.out or h.model == null or String(h.get_meta("died_why", "")) == "abyss":
+	if not h.out or h.model == null or String(h.get_meta("died_why", "")) == "abyss" or HunterWisp.went_out_as_wisp(h):
 		return false
 	return h.m.time - float(h.get_meta("died_at", -99.0)) < float(h.model.get_meta(DEATH_T, 0.0))
 
@@ -294,9 +295,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	if bool(s.get("dead", false)) and st.has("dead"):
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
 	var fall := float(s.get("fall", -1.0))
-	var hit_clip := String((st.get("hit", {}) as Dictionary).get("front", ""))
-	if fall >= 0.0 and hit_clip != "":      # the fall to a Wisp and the rise back: the hit clip stretched over it
-		return {"clip": hit_clip, "t": fall * lib.get_animation(hit_clip).length, "fade": FALL_FADE}
+	if fall >= 0.0 and st.has("dead"):      # the fall to a Wisp and the rise back: the collapse of the death clip
+		var part := float(st.get("fall_of_death", FALL_OF_DEATH))
+		return {"clip": st["dead"], "t": fall * part * lib.get_animation(st["dead"]).length, "fade": FALL_FADE}
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):

@@ -1,15 +1,17 @@
 extends RefCounted
 ## --downed-anim-check: going down reads before the Wisp (docs/decisions/0019-downed-wisp.md). For all 12 Heroes,
-## a knock plays the hero's hit clip as a 0.3-0.4 s fall with the hero still on screen, the Wisp fades in on the last
-## frames and only then does the hero hide; a revive plays the clip back as a short rise, no pop. The downed timers
+## a knock plays the collapse of the hero's death clip as a 0.3-0.6 s fall, the head dropping at least a quarter,
+## with the hero still on screen, the Wisp fades in on the last frames and only then does the hero hide; a revive
+## plays the clip back as a short rise, no pop. A Wisp that bleeds out takes no body with it.
 ## and the Wisp's round look are not touched. A remote-driven Hunter plays the same (it follows `downed` alone).
 ## Prints PASS/FAIL. Never touches the save.
 
 const DT := 1.0 / 60.0
 const FALL_MIN := 0.3        # s: the shortest fall that still reads
-const FALL_MAX := 0.4        # s: the longest before it drags
+const FALL_MAX := 0.6        # s: the longest before it drags
+const DROP_MIN := 0.25       # of the standing head height the fall must lower the head by (Breaker kneels: -30%)
 const RISE_MAX := 0.4        # s
-const PER_HERO := 10         # checks one Hero runs: a script error must not pass as an empty run
+const PER_HERO := 11         # checks one Hero runs: a script error must not pass as an empty run
 
 var bad := 0
 var ran := 0
@@ -33,7 +35,8 @@ func run(main_node: Node) -> void:
 		_hero(String(a), m.player, false)
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == m.player.team and x != m.player)[0]
 	_hero("remote", mate, true)
-	ok(ran >= PER_HERO * (Arch.ids().size() + 1), "every check ran (%d)" % ran)
+	_bleed_out(m.hunters.filter(func(x): return x.team != m.player.team)[1])
+	ok(ran >= PER_HERO * (Arch.ids().size() + 1) + 2, "every check ran (%d)" % ran)
 	print("DOWNEDANIM %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -56,6 +59,28 @@ func _clip_of(h: Hunter) -> String:
 	var clips := h.model.get_node("Warden/Sync").get("clips") as WardenClips
 	return clips.cur if clips else ""
 
+## A Wisp that bleeds out takes no body with it: the hero does not reappear to play the death clip.
+func _bleed_out(h: Hunter) -> void:
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != h.team)[0]
+	m.knock(h, foe, {})
+	h.down_hp = 1e6
+	for i in 60:
+		_frame()
+	ok(HunterWisp.mode_of(h) == HunterWisp.ON, "[bleed out] the Wisp stands in")
+	m.eliminate(h, foe, "bled out")
+	var shown := false
+	for i in 120:
+		_frame()
+		shown = shown or h.visible
+	ok(not shown and HunterWisp.mode_of(h) == HunterWisp.SNUFFED, "[bleed out] the Wisp breaks and no body shows")
+
+func _head_y(h: Hunter) -> float:
+	for sk in h.model.find_children("*", "Skeleton3D", true, false):
+		var b := (sk as Skeleton3D).find_bone("head")
+		if b >= 0:
+			return ((sk as Skeleton3D).global_transform * (sk as Skeleton3D).get_bone_global_pose(b)).origin.y - h.pos.y
+	return 0.0
+
 func _fade_of(h: Hunter) -> float:
 	var mats: Array = HunterWisp.node_of(h).get_meta("mats", [])
 	return float((mats[0] as ShaderMaterial).get_shader_parameter("fade"))
@@ -70,8 +95,9 @@ func _hero(id: String, h: Hunter, remote: bool) -> void:
 	for i in 10:
 		_frame()
 	var states: Dictionary = WardenClips.data(WardenGlb.art(h.arch)).get("states", {})
-	var hit := String((states.get("hit", {}) as Dictionary).get("front", ""))
-	ok(hit != "" and h.model.visible, tag + "up: the hero shows and has a hit clip (%s)" % hit)
+	var hit := String(states.get("dead", ""))
+	var head_up := _head_y(h)
+	ok(hit != "" and h.model.visible, tag + "up: the hero shows and has a death clip (%s)" % hit)
 	m.knock(h, foe, {})
 	h.down_hp = 1e6
 	h.remote = remote
@@ -82,6 +108,7 @@ func _hero(id: String, h: Hunter, remote: bool) -> void:
 	var last_k := -1.0
 	var fade_early := false
 	var fade_end := 0.0
+	var head_low := head_up
 	while t < 0.6 and HunterWisp.mode_of(h) != HunterWisp.ON:
 		_frame()
 		t += DT
@@ -92,12 +119,14 @@ func _hero(id: String, h: Hunter, remote: bool) -> void:
 		fall_up = fall_up and k >= last_k
 		last_k = k
 		shown_t = t
+		head_low = minf(head_low, _head_y(h))
 		if t < 0.2:
 			fade_early = fade_early or _fade_of(h) > 0.05
 		fade_end = _fade_of(h)
 	_frame()
 	ok(shown_t >= FALL_MIN - DT and shown_t <= FALL_MAX + DT, tag + "the hero stays up for the fall (%.2f s)" % shown_t)
-	ok(fall_clip and fall_up, tag + "it plays the hit clip, forward")
+	ok(fall_clip and fall_up, tag + "it plays the death clip, forward")
+	ok(head_low <= head_up * (1.0 - DROP_MIN), tag + "the body goes down: head %.2f -> %.2f m" % [head_up, head_low])
 	ok(not fade_early and fade_end > 0.5, tag + "the Wisp fades in on the last frames only (end %.2f)" % fade_end)
 	ok(not h.model.visible and HunterWisp.node_of(h) != null, tag + "then the hero hides and the Wisp stands in")
 	ok(h.downed and not h.out, tag + "still downed, not out: the fall only paints")

@@ -15,7 +15,7 @@
 			"bob_hz": 1.1,
 			"lean": 0.5,
 			"stretch": 0.18,
-			"pop_in": {"time": 0.35, "fade": 0.12, "ring": 1.4, "burst": 14, "sfx": "scan_pop"},
+			"pop_in": {"time": 0.5, "fade": 0.15, "ring": 1.4, "burst": 14, "sfx": "scan_pop"},
 			"pop_out": {"time": 0.3, "ring": 1.8, "burst": 18, "sfx": "revive"},
 			"snuff": {"burst": 24, "sfx": "hit"}
 		}

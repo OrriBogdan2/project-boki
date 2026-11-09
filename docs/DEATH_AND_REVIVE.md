@@ -14,7 +14,7 @@ ALIVE ──0 HP──► DOWNED (wisp) ──bleeds out / executed / team wiped
 
 | Step | Rule | Value | Source |
 |---|---|---|---|
-| Knocked | 0 HP with a teammate still up → you become a **wisp** (the hero falls over 0.35 s and a glowing Wisp fades in, docs/decisions/0019; a revive plays a short rise): drift slowly, can't attack, dash, jump or glide, and can't be shot | crawl at 40% speed | [wiki] "heavily slowed" / [est] |
+| Knocked | 0 HP with a teammate still up → you become a **wisp** (the hero collapses over 0.5 s (the fall of its death clip, docs/ANIM_QUALITY.md) and a glowing Wisp fades in, docs/decisions/0019; a revive plays a short rise): drift slowly, can't attack, dash, jump or glide, and can't be shot | crawl at 40% speed | [wiki] "heavily slowed" / [est] |
 | Bleed-out | Wisp drains on its own | **15s** | [patch] |
 | Ally revive | A teammate standing on your wisp fills the revive bar and pauses the drain; extra teammates speed it up | **4s**, back at 25% HP | [wiki] "a few seconds" / [est] |
 | Stomp | An enemy standing on a wisp drains it faster, pins it (it crawls at 40% of its normal wisp speed) and blocks the revive. Clear signal on both sides: pulsing red ring under the wisp, red fast-draining bar on its nameplate and squad frame, a crushing thud, "Standing on <name>" for the stomper, "<name> is on you!" plus a red screen-edge pulse for the wisp | ×2.5 drain, ×0.4 speed | [design] |

@@ -3,17 +3,18 @@ extends RefCounted
 ## A downed Hunter shows as a Wisp instead of the hero (docs/decisions/0019-downed-wisp.md). Purely
 ## presentation: it follows Hunter.downed and Hunter.out and changes nothing about timers, speed, revive
 ## or targeting. Per hunter, tick() runs a small state machine:
-##   hero --down--> fall (the hero plays its hit clip stretched over pop_in.time; the Wisp fades in on the
-##                   last pop_in.fade s, then the hero hides and the Wisp puffs)
+##   hero --down--> fall (the hero plays the collapse of its death clip over pop_in.time; the Wisp fades in on
+##                   the last pop_in.fade s, then the hero hides and the Wisp puffs)
 ##                   -> on (bob, flicker, lean and trail when moving)
 ##   on --revive--> rise (the Wisp brightens and fades while the hero plays the same clip backwards over
 ##                  pop_out.time) -> hero
-##   on --bleed out or executed--> snuffed (the Wisp breaks into sparks)
+##   on --bleed out or executed--> snuffed (the Wisp breaks into sparks; the body does not come back)
 ## The look (colours, effects, timing) is WispLook's data. State lives in the hunter's meta "wisp".
 
 const IN := "in"
 const ON := "on"
 const OUT := "out"
+const SNUFFED := "snuffed"    # the Wisp broke: the hero stays gone while the Hunter is out
 const LEAN_RATE := 8.0        # 1/s: how fast the tilt and stretch follow the speed
 const MOVE_SPEED := 0.8       # m/s above which the Wisp counts as moving (starts the trail)
 const FULL_LEAN_SPEED := 6.0  # m/s at which the lean and stretch are full
@@ -53,6 +54,10 @@ static func fall_k(h: Hunter) -> float:
 static func node_of(h: Hunter) -> Node3D:
 	return _state(h)["node"] as Node3D
 
+## True when the Hunter went out as a Wisp (or while falling to one): no body drops where the Wisp was.
+static func went_out_as_wisp(h: Hunter) -> bool:
+	return h.out and String(_state(h)["mode"]) in [IN, ON, SNUFFED]
+
 static func mode_of(h: Hunter) -> String:
 	return String(_state(h)["mode"])
 
@@ -66,6 +71,9 @@ static func _state(h: Hunter) -> Dictionary:
 static func _advance(h: Hunter, st: Dictionary) -> void:
 	var mode := String(st["mode"])
 	var look: Dictionary = st["look"]
+	if mode == SNUFFED and not h.out:      # brought back from out: the hero shows again
+		st["mode"] = ""
+		mode = ""
 	if h.out and (mode == IN or mode == ON):
 		_snuff(h, st)
 	elif h.downed and not h.out and (mode == "" or mode == OUT):
@@ -121,7 +129,7 @@ static func _snuff(h: Hunter, st: Dictionary) -> void:
 	h.m.fx.burst(at, _team_col(h).lightened(0.4), int(spec["burst"]), 5.0, 0.7, 4.0, 1.0)
 	h.m.sfx(String(spec["sfx"]), h.position, -8.0)
 	_free_node(st)
-	st["mode"] = ""
+	st["mode"] = SNUFFED
 
 static func _finish(st: Dictionary) -> void:
 	_free_node(st)
