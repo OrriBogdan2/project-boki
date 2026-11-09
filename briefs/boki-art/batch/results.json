@@ -50487,5 +50487,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_dreadnoyak_pz_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_dreadnoyak_pz",
+    "name": "Dreadnoyak (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_dreadnoyak_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_geodemole_pz",
+    "name": "Geodemole (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_geodemole_pz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_geodemole_pz",
+    "name": "Geodemole (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_geodemole_pz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanternmit_pz",
+    "name": "Lanternmit (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lanternmit_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dreadnoyak_pz",
+    "name": "Dreadnoyak (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_dreadnoyak_pz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanternmit_pz",
+    "name": "Lanternmit (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lanternmit_pz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_geodemole_pz",
+    "name": "Geodemole (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_geodemole_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skateron_pz",
+    "name": "Skateron (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_pz_3.jpg",
+    "ok": true
   }
 ]
