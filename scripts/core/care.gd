@@ -82,6 +82,10 @@ const FOODS := {
 	"sweetbun": {"name": "Sweet bun", "col": Color("f6c6a0"), "food": 18.0, "joy": 18.0, "price": 14, "desc": "A treat. Makes any Boki happy."},
 	"tonicbrew": {"name": "Pep brew", "col": Color("8ff0a0"), "food": 6.0, "joy": 4.0, "energy": 35.0, "price": 18, "desc": "Wakes a tired Boki right up."},
 }
+const LEAN_HEAD_START := 0.5     # share of the stronger parent's lean a hatchling starts with
+const UNSTABLE_JOY := 35.0       # joy (0-100) an unstable mix hatches with: it needs a day of care
+const CLASHES := [["ember", "frost"], ["storm", "stone"], ["bloom", "venom"], ["shadow", "lunar"]]
+const TEMPER_CLASH := 0.5        # temper gap (0-1) at which two parents' tempers clash
 const PLAYS := ["fetch", "brush", "bath", "chat", "pet"]
 const PLAY_NAMES := {"fetch": "playing fetch", "brush": "being brushed", "bath": "baths", "chat": "chatting", "pet": "scratches"}
 
@@ -485,7 +489,44 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 		"gen": maxi(int((a.get("lineage", {}) as Dictionary).get("gen", 0)), int((b.get("lineage", {}) as Dictionary).get("gen", 0))) + 1}
 	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
 	ensure(baby)
+	_inherit_habits(baby, a, b, rng)
+	if unstable_mix(a, b): baby["needs"]["joy"] = UNSTABLE_JOY
+	var lean := stronger(a, b).get("lean", {}) as Dictionary
+	if not lean.is_empty():
+		baby["lean"] = {}
+		for el in lean: baby["lean"][el] = float(lean[el]) * LEAN_HEAD_START
 	return baby
+
+## How much a kin leans toward an element in all (rec["lean"]; older records have none: 0).
+static func lean_total(rec: Dictionary) -> float:
+	var t := 0.0
+	for el in rec.get("lean", {}): t += float(rec["lean"][el])
+	return t
+
+## The parent with the stronger lean (a on a tie), whose lean the baby gets a head start from.
+static func stronger(a: Dictionary, b: Dictionary) -> Dictionary:
+	return b if lean_total(b) > lean_total(a) else a
+
+## Clashing elements or tempers: the baby hatches low on joy and needs a day of care.
+static func unstable_mix(a: Dictionary, b: Dictionary) -> bool:
+	var ta := String(Data.KIN.get(a["species"], {}).get("theme", ""))
+	var tb := String(Data.KIN.get(b["species"], {}).get("theme", ""))
+	for c in CLASHES:
+		if (c[0] == ta and c[1] == tb) or (c[0] == tb and c[1] == ta): return true
+	return absf(float(a["traits"].get("temper", 0.5)) - float(b["traits"].get("temper", 0.5))) >= TEMPER_CLASH
+
+## One habit from each parent: the favourite food from one, the favourite play from the other.
+static func _inherit_habits(baby: Dictionary, a: Dictionary, b: Dictionary, rng: RandomNumberGenerator) -> void:
+	ensure(a)
+	ensure(b)
+	var a_food := rng.randf() < 0.5
+	var pf: Dictionary = a if a_food else b
+	var pp: Dictionary = b if a_food else a
+	var likes: Dictionary = baby["likes"]
+	var food := String(pf["likes"]["food"])
+	if String(likes["hates"]) == food: likes["hates"] = likes["food"]
+	likes["food"] = food
+	likes["play"] = pp["likes"]["play"]
 
 ## Rare Eggs no longer use the breeding nest: they hatch on the Incubator (scripts/core/incubator.gd).
 ## Kept for older callers: puts shelf eggs into free incubator cradles. True if any went in.

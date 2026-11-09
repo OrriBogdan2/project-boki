@@ -106,9 +106,11 @@ it, and its number among its kind.
   backpack to make room) and comes home with you only if you **extract**. It never joins the fight: you
   always have exactly one active Boki. Every Boki you glimpse is written into the **Field Book**, with
   where you saw it.
-- **Breeding.** Two Boki at level 5 with a Close bond, rested from their last egg, can leave an egg in
-  the **Nesting Nook**. It hatches after your next expedition, or in about ten minutes at home. The
-  baby mixes its parents' personalities, takes 3 of its 5 IVs from them, and can inherit a mutation.
+- **Breeding.** Two Grown Boki who are friends and rested from their last egg can leave an egg in
+  the **Nesting Nook** (one egg at a time). It hatches after your next expedition, or in about ten
+  minutes at home. The baby mixes its parents' personalities, takes 3 of its 5 IVs from them, can
+  inherit a mutation, gets a head start on the stronger parent's lean, and takes a favourite food from
+  one parent and a favourite play from the other. A clashing pair hatches low on joy.
 - **Rare Eggs.** Each lair boss guards a Rare Egg (see [Expeditions](Expeditions.md#boss-lairs)).
   Bring it home and it goes into the **Incubator** by the Nook (5 cradles, up to 8 bought). It warms
   for 2 expeditions or about 8 minutes at home; an Ember Boki at the brazier doubles that, and Ember

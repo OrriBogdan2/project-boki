@@ -4520,13 +4520,7 @@ func _finish_training() -> void:
 
 # ---- eggs: two kin who are close leave an egg in the nest; you hatch and name it
 func _can_pair(rec: Dictionary) -> String:
-	if not Save.d.get("egg", {}).is_empty(): return "There's already an egg in the nest"
-	if int(rec["level"]) < 5: return "Needs to be level 5"
-	if float(rec["trust"]) < 50.0: return "Needs a Close bond (trust 50)"
-	if int(rec.get("bred_m", -99)) > int(Save.d["matches"]) - 3: return "Needs a few more expeditions' rest"
-	if KinBox.full(): return "Your farm and the Boki Burrow are full"
-	if not Save.d.get("egg", {}).is_empty(): return "There's already an egg in the nest"
-	return ""
+	return NookRules.can_pair(rec)
 
 ## The Nesting Nook: every kin as a picture, ready ones first. Click one to see its IVs (what it was
 ## born with); pick two who are ready and they leave an egg in the nest. With two picked, the side
@@ -4565,7 +4559,7 @@ func _open_nook() -> void:
 	var ready_n := roster.filter(func(o): return _can_pair(o) == "").size()
 	UI.subtitle(v, ("There's a %s in the nest. It hatches after your next expedition, or in about ten minutes at home." % _egg_label()) if egg_in
 		else "Pick two Boki who are close. They leave an egg that mixes their personalities and takes some of their IVs.")
-	UI.head_extra(v).add_child(UI.chip("egg", "%d ready" % ready_n, UI.GOOD if ready_n >= 2 else UI.MUTED, "Boki who can pair now: level 5, a Close bond, rested"))
+	UI.head_extra(v).add_child(UI.chip("egg", "%d ready" % ready_n, UI.GOOD if ready_n >= 2 else UI.MUTED, "Boki who can pair now: Grown and rested"))
 	# picked first, then the ready ones, then the rest; higher levels first
 	var rank := func(o) -> int: return 0 if nook_pick.has(o["uid"]) else (1 if _can_pair(o) == "" else 2)
 	roster.sort_custom(func(x, y):
@@ -4616,7 +4610,7 @@ func _open_nook() -> void:
 			var a := Save.kin(String(nook_pick[0])); var b := Save.kin(String(nook_pick[1]))
 			nook_pick = []; nook_view = ""
 			_make_egg(a, b), 200, "egg")
-		pr.disabled = nook_pick.size() < 2
+		pr.disabled = nook_pick.size() < 2 or NookRules.pair_why(Save.kin(String(nook_pick[0])), Save.kin(String(nook_pick[1]))) != ""
 		pr.tooltip_text = "" if nook_pick.size() == 2 else "Pick %d more" % (2 - nook_pick.size())
 
 ## One kin in the Nook: its picture, name, kind and level, rare marks, whether it's ready, its IVs.
@@ -4765,8 +4759,7 @@ func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
 	dv.add_child(IvView.heading())
 	dv.add_child(IvView.compare(a, b, 100.0))
 	dv.add_child(IvView.pass_on(a, b))
-	var sp_line := UI.para("The egg will be a %s or a %s, with a blend of their personalities." % [Data.KIN[a["species"]]["name"], Data.KIN[b["species"]]["name"]] if a["species"] != b["species"] else "The egg will be a %s, with a blend of their personalities." % Data.KIN[a["species"]]["name"], 12, UI.MUTED)
-	dv.add_child(sp_line)
+	NookRules.preview(dv, a, b)
 	var br := UI.hbox(8)
 	br.add_child(UI.ghost("Clear picks", func(): nook_pick = []; _open_nook()))
 	dv.add_child(br)
@@ -4777,7 +4770,7 @@ func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
 	if egg_in:
 		dv.add_child(UI.para("The nest is taken until this egg hatches. You can still look through your Boki's IVs.", UI.T_SMALL, UI.INK))
 	else:
-		dv.add_child(UI.para("Pick two Boki who are ready: level 5, a Close bond, and rested from their last egg. The egg hatches after your next expedition, or in about ten minutes at home.", UI.T_SMALL, UI.INK))
+		dv.add_child(UI.para("Pick two Boki who are ready: Grown, friends, and rested from their last egg. The egg hatches after your next expedition, or in about ten minutes at home.", UI.T_SMALL, UI.INK))
 	dv.add_child(UI.spacer(4))
 	dv.add_child(IvView.heading())
 	dv.add_child(UI.para(Care.IV_EXPLAIN, UI.T_SMALL, UI.MUTED))
@@ -4794,7 +4787,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	# which parent it takes after is settled now, so the egg can wear that element's name and colour
 	var esp: String = rec["species"] if randf() < 0.5 else ok["species"]
 	Save.d["egg"] = {"a": rec["uid"], "b": ok["uid"], "sp": esp, "m": int(Save.d["matches"]) + 1, "t": Time.get_unix_time_from_system() + 600.0}
-	rec["bred_m"] = int(Save.d["matches"]); ok["bred_m"] = int(Save.d["matches"])
+	rec["bred_t"] = Time.get_unix_time_from_system(); ok["bred_t"] = rec["bred_t"]
 	Save.remember(rec, "egg", "had an egg with %s" % ok["name"], 2.0)
 	Save.remember(ok, "egg", "had an egg with %s" % rec["name"], 2.0)
 	Save.save_game()
