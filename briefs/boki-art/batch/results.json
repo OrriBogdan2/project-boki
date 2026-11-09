@@ -3387,5 +3387,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_zephyrak_2.jpg",
     "ok": true
+  },
+  {
+    "id": "mossgrade_r",
+    "name": "Mossgrade",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mossgrade_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "latchling_r",
+    "name": "Latchling",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/latchling_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ribbonwyrm_r",
+    "name": "Ribbonwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pipewurm_r",
+    "name": "Pipewurm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pipewurm_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lodestick_r",
+    "name": "Lodestick",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lodestick_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lodestick_r",
+    "name": "Lodestick",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lodestick_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mossgrade_r",
+    "name": "Mossgrade",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mossgrade_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pipewurm_r",
+    "name": "Pipewurm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pipewurm_r_1.jpg",
+    "ok": true
   }
 ]
