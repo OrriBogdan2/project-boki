@@ -37964,5 +37964,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_glaciatee_s5_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_lunowl_m1",
+    "name": "Lunowl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lunowl_m1",
+    "name": "Lunowl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lunowl_m2",
+    "name": "Lunowl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lunowl_m1",
+    "name": "Lunowl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lunowl_m1",
+    "name": "Lunowl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lunowl_m2",
+    "name": "Lunowl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lunowl_m2",
+    "name": "Lunowl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lunowl_m4",
+    "name": "Lunowl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m4_3.jpg",
+    "ok": true
   }
 ]
