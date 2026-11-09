@@ -111,4 +111,4 @@ Rename every type to the plain, standard name (18 types):
 | Shadow | Dark | | Prism | Crystal |
 | Venom | Poison | | Spore | Spore (kept) |
 | Echo | Sound | | Gravity | Psychic |
-Applied in ROSTER_200_NEW.md (headers and tables). Main: rename in game data, the in-game Bokidex, the website Bokidex and ROSTER_100. Type matchups are not part of this change.
+**This supersedes the coordinator's 03:29 UTC mapping** (which merged Spore into Grass and used Gravity=Ground, Lunar=Ghost, Prism=Fairy, Echo=Psychic): the owner's final answer to the art session at 22:29 ET is the table above, 18 types with Spore kept. Applied in ROSTER_200_NEW.md (headers and tables). Main: rename in game data, the in-game Bokidex, the website Bokidex and ROSTER_100. Type matchups are not part of this change.
