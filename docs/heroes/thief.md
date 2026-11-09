@@ -103,7 +103,7 @@ pass above.
 
 ## Body and movement (hero sheet "Body, scale and movement feel")
 
-- Model about 0.95 of a medium (`body.size` 1.11 on the light build); hit radius 0.384 (`body.hit_r`, docs/HITBOX_SIZE.md).
+- Model about 1.6 m tall (`body.size` 1.059 since the owner's Nov 7 height retarget; the footage's 0.95 of a medium was 1.11); hit radius 0.384 (`body.hit_r`, docs/HITBOX_SIZE.md).
 - Nameplate height 2.15 m (`body.plate`; read by the HUD through `Arch.plate_y`).
 - Runs pitched far forward (about 0.57 rad at a run).
 - Ground Cartwheel: 4.5 m in 0.48 s with the measured speed curve; the long (air) dash is the same sideways cartwheel
@@ -221,3 +221,43 @@ ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats 
   Sounds: `dj_encore` (the ring opening), `dj_encore_whirr` (the 2s it runs), `dj_encore_hit` (a blade landing).
 - The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on X it duplicated the
   ultimate, so the passive is back to the source's (Marks ramp the bolts, knocks heal).
+
+## Parity verify, Nov 9
+
+Every row of Sable (`thief`) on origin/main d255acbee against docs/KIT_PARITY.md, this file, `briefs/hero-ref/dancer.md`,
+`briefs/supervive-data/supervive_kits.md` and the owner notes in `briefs/DECISIONS.md` (owner notes win).
+Verdicts: **match**, **differ (owner)**, **regressed**, **open**. `thief_kit.gd` is `K`, `thief_ult.gd` is `U`,
+`thief.json` is `J`, `arc_bolts.json` is `W`, `dash_flow/thief.json` is `D`. Checks on main: `--dancer-combo-check` 126/0,
+`--hero-combo-check` 304/0, `--dash-flow-check` 0, `--warden-clips-check` 0, `--clip-check` 0 (run on a clean data dir:
+on the shared dev save the Boki dodge patch fails 6 Vault asserts, which is the save, not Sable).
+
+| Row | Source | Main | file:line | Verdict |
+|---|---|---|---|---|
+| LMB | bolt 160, 0.45 s, to the cursor, 1 stack | 13 dmg, 0.45 s, cursor-placed, 34 m/s, 12 m | W:9-13, K:271 | match; range and speed unconfirmed (held; `ext/sable-lmb-range` has 8.5 m, 37.5 m/s) |
+| LMB empowered | +214 on 160 (2.34x), +12% range, reset on the hit | bolt + 1.34 bolts, 13.4 m, 2 Marks | J:17, K:563 | match; 2 Marks differ (owner, MAIN_TO_EXT 03:20) |
+| RMB Bola | 46 + Ground; two foes: +94 and Stun; 13 s | 5, Grounded 1.5 s and slowed 30%, flies on 3.8 m, bounces once, pair +13 and stun 0.9, cd 7 | J:20, K:605-760 | differ (owner): 30% slow (item 53), pace 0.54x of 13 s (footage card 6.7 s) |
+| RMB Mark | no stack from the Bola | the first foe gets 1 Mark | K:732 | open (in flight: `ext/sable-marks-resets`) |
+| Q | none | glove | - | ours (the shared slot) |
+| E Dagger | 6 s forced return, recast early, 20 s @IV | 14 m, sticks or lands, 50% slow 2.5 s, 6 s then she steps, cd 15 | J:24, K:792-890 | match; cd 0.75x of @IV (footage card 15 s) |
+| E Mark | no stack from the dagger | a foe it sticks in gets 1 Mark | K:803 | open (in flight: `ext/sable-marks-resets`) |
+| E forced return | she MUST teleport back at 6 s | `_step_to_knife` clears the dagger and returns (K:859) when `busy()` (stunned, downed): a stun at second 6 loses the return | K:853-860 | open (not fixed: `thief_kit.gd` is changed by four unmerged Sable branches) |
+| E on a barrier | sticks to any surface, shields too | hunters, monsters, ground; not placed barriers | K:792-810 | open (in flight: `ext/sable-dagger-barriers`) |
+| R Encore | ring, 69 per shot, +48 near the edge, 2 s, resets Quickflip, 50 s | ring 2.3 to 5.4 m in 0.4 s, 10 blades of 4, 6 from the rim, resets the Vault, cd 24 | J:27, U:60, U:149-185 | match; cd 0.48x of 50 s (held; footage card 23.1 s) |
+| R rim Anti-Heal | footage ult f121: the outer band Anti-Heals 6 s | rim blade blights 6 s | J:27, U:171 | open (in flight: `ext/parity-antiheal` removes it; the data has no Anti-Heal on her) |
+| Dash | Quickflip, empowers the next shot, 5 s @IV | Cartwheel 4.5 m / 0.48 s, air 8.4 m / 0.95 s, +18% speed 2 s, cd 4.5, off the global dash feel | J:17, dash_feel.json:5, K:423 | match |
+| Passive | +16 a LMB hit, stacking, heal on a knock | +10% of a bolt (+1.3 on 13) a hit, no cap, 4 s refreshed, knock heals 25% in all, star and pillar | J:15-16, K:543-558, K:590 | match |
+| Shred | none | gone | K:13 (comment only), no other hit in scripts or content | match |
+| Reset | only on an empowered hit | `_primed_hit` only; a miss is spent; Encore and rank 3 Knife also give the Vault back (both in the data) | K:405-420, K:563-571, U:60 | match |
+| Anim | footage poses | 17 moves, all with a clip in the 44 clips of `sable.glb` | clip-check | match (timing in flight: `ext/anim-time-sable-rebased`) |
+| Clips | | warden-clips-check 0, clip-check 0 | | match |
+| Cancels | | a Vault mid-Bola or mid-throw lets the move finish; the dagger recast ends the cartwheel; a merge drops the Bola and Encore; stun or down clears the Bola cast | K:605-650 (K:620), K:853-865, U:64 | match (asserted in the dancer checks) |
+| Dash flow lmb | the dash empowers the next Arcslinger, mid-flip, ground and air | `fire` + `empowered`, ground and air; `into_dash` fire | D:5, D:12, D:20 | match (data, footage 0187-0193) |
+| Dash flow rmb, e, x, q | data and footage silent (x: Fusillade resets Quickflip, she moves freely) | `fire`, all six ground/air rows and `into_dash` rmb, e, q | D:6-9, D:13-16, D:21-24 | open: unsourced rows kept as the kit's default, not guessed; x rows sourced (D:8, D:23) |
+| Body | 0.95 of a medium | `body.size` 1.059 (owner retarget, ~1.6 m), hit_r 0.384 | J:10 | differ (owner); the Body section above is corrected |
+
+**Fixed:** none in code. Every row I could change (K, U, J, W, D) is in a file an unmerged Sable branch changes
+(`sable-marks-resets`, `sable-dagger-barriers`, `sable-lmb-range`, `sable-bola-instant`, `parity-antiheal`), so by the task's
+rule they stay. The one edit is the stale body size above.
+**Order to merge:** `sable-marks-resets` (Bola and Knife Marks), `sable-lmb-range`, `sable-dagger-barriers`, `parity-antiheal`.
+**Ours, for the owner:** the forced return should still go when she is stunned at second 6 (move the `busy()` test in
+`_step_to_knife` to the blink only).
