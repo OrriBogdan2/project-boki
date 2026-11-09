@@ -18329,5 +18329,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ermink_card_1.jpg",
     "ok": true
+  },
+  {
+    "id": "dragonkite_card",
+    "name": "Dragonkite (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dragonkite_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_card",
+    "name": "Chandelapi (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelapi_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_card",
+    "name": "Arcestrel (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/arcestrel_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "dragonkite_card",
+    "name": "Dragonkite (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dragonkite_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "geysirbara_card",
+    "name": "Geysirbara (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geysirbara_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glassolotl_card",
+    "name": "Glassolotl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glassolotl_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "forgebrock_card",
+    "name": "Forgebrock (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/forgebrock_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_card",
+    "name": "Galleotter (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/galleotter_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "forgebrock_card",
+    "name": "Forgebrock (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/forgebrock_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_card",
+    "name": "Flarmink (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/flarmink_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glassolotl_card",
+    "name": "Glassolotl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glassolotl_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_card",
+    "name": "Flarmink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/flarmink_card_1.jpg",
+    "ok": true
   }
 ]
