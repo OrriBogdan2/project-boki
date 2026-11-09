@@ -30,6 +30,7 @@ Nothing here comes from SUPERVIVE's files.
 - **Ledges [footage] and the owner's description:** in the air, touching the side of ground above you while moving into it floats you up. Falling players who touch an island wall spring back onto it, even from a full second deep, in about 0.8s. The owner adds that there's no climb animation: you gain upward momentum, you can fling yourself a little in any direction with WASD, and a well-timed input or jump gives a better fling. The game never takes control.
 - **Feathering:** players tap the glider on and off. The owner points to a video about Nidhogg. The public wiki and guide pages we could read (supervive.wiki.gg Gliding, Abyss) don't describe it, so every feathering number here is [est]. [footage] says heat keeps climbing across repeated drop-and-lift cycles and only really cools on the ground.
 - **Ground movement [spec]:** near-instant acceleration and deceleration (a 0.05–0.1s ramp). Camera follow smoothing is 0.08–0.15s.
+- **Slopes [game data]:** WalkableFloorAngle is 50°, and the hero blueprint leaves UE's MaxStepHeight at its default 0.45 m. UE keeps your horizontal speed on any walkable slope and holds your feet to the floor down it; nothing in the data (or the 5 fps footage) scales speed with the grade, so that is [?]. Our steepest ground is a flight (one 0.8 m terrace over one tile, 38.7°), so the slide-off above 50° has no case here.
 - **Not published:**
   - Jump height or arc.
   - Glide turn rate.
@@ -49,6 +50,10 @@ Nothing here comes from SUPERVIVE's files.
 | ground_stop_dist | 0.10m | 0.31m | 0.2–0.5m | [game data] SV slides ~0.38–0.49m |
 | ground_reverse_t (180 degrees) | 0.150s | 0.117s | <= 0.12s | [spec] crisp |
 | ground_turn90_t | 0.100s | 0.083s | <= 0.09s | [spec] crisp |
+| slope_speed_ratio_min (10/20/35° ramps up, down, across; the map's flights) | 0.926x (35° down), 0.943x (flights) | 1.000x | 0.97–1.03x | [game data] UE keeps the horizontal speed on a walkable slope |
+| slope_air_frames (hop frames down a slope, over its crest, up a flight) | 49 (35° down), 31 (flight up), 0 at 10/20° | 0 | 0 | [game data] MaxStepHeight 0.45 m: `World.STEP` was 0.32, and the ground could drop only 5 cm a tick before a fall |
+| slope_stop_dist (let-go on a slope, shortest–longest) | 0.27–1.33 m | 0.31 m | 0.2–0.5 m | [game data] the same walking brake (the 1.33 m was a let-go in the air, hopping down 35°) |
+| slope_flight_deg (the map's steepest ground) | 38.7° | 38.7° | <= 50° | [game data] WalkableFloorAngle 50 |
 | speed light / medium / heavy | 5.2 / 5.0 / 4.73 | same | class data | KINFALL_CLASSES |
 | jump_input_frames | 1 | 1 | <= 1 | |
 | jump_apex | 1.28m | 1.52m | 1.2–1.6m | [game data] 1.9m, held under 1.6 for the terrace grammar |
