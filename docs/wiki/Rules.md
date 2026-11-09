@@ -256,6 +256,24 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | gems_toast | Hob gives you %d gems to buy seeds |
 | steps_doc | needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect). |
 
+## fav_food (`content/rules/fav_food.json`)
+
+A Boki's favourite food (GARDEN.md lever 3, FavFood). Rolled once from its type and its strongest personality trait; a baby takes a parent's at breeding. Hidden until the first time you feed it. Feeding it gives a little extra trust and joy, a few times a day.
+
+| Setting | Value |
+|---|---|
+| type_share | 0.65 |
+| type_doc | Chance the roll follows the Boki's type (by_type); otherwise it follows its strongest trait (by_trait). |
+| by_type | {"ember": "emberberry", "frost": "tidebloom", "bloom": "puffcorn", "storm": "tonicbrew", "stone": "sunroot", "gravity": "sunroot", "titan": "sunroot", "shadow": "glowcap", "lunar": "glowcap", "venom": "glowcap", "echo": "mindmint", "prism": "mindmint", "spore": "mindmint", "swarm": "sweetbun", "tempest": "tonicbrew"} |
+| by_trait | {"bravery": "emberberry", "loyalty": "puffcorn", "temper": "sunroot", "curiosity": "glowcap"} |
+| default | kibble |
+| inherit | 0.7 |
+| inherit_doc | Chance a baby takes one parent's favourite (picked 50/50) instead of rolling its own. |
+| trust | 2 |
+| joy | 8 |
+| daily_cap | 3 |
+| _units | trust: points (0 to 100) on top of normal feeding. joy: points (0 to 100) on top of the usual favourite joy. daily_cap: favourite feedings per Boki per calendar day (UTC) that give the bonus; more feedings still feed it. |
+
 ## gear (`content/rules/gear.json`)
 
 

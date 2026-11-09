@@ -171,7 +171,8 @@ func run(m: Node) -> void:
 		var old := String(old_ids[nm])
 		if r["ivs"] != Care.ivs_from_uid(old): kept = false
 		if r["dna"] != Unique.roll(Unique.legacy_seed(old)): kept = false
-		var probe := {"uid": old}
+		# the favourite food also follows type and personality (FavFood)
+		var probe := {"uid": old, "species": r["species"], "traits": r["traits"]}
 		Care.ensure(probe)
 		if r["likes"] != probe["likes"]: kept = false
 	ok(kept, "IVs, tastes and looks are the ones the old id gave (nothing about a kin changes)")

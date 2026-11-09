@@ -4277,6 +4277,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		Sfx.play("kin_happy", null, -2.0, 0.1)
 		_say(k, BokiLines.say(rec, "fed_fav"))
 		if res["new"]: _toast("%s loves %s!" % [nm, Care.food_name(f)])
+		elif float(res.get("trust", 0.0)) > 0.0: _toast("%s trusts you a little more" % nm)
 	else:
 		_emote(k, "♪")
 		Sfx.play("kin_happy", null, -8.0)

@@ -105,6 +105,7 @@ static func ensure(rec: Dictionary) -> void:
 		rec["likes"] = {"food": love, "hates": hate, "play": PLAYS[r.randi() % PLAYS.size()]}
 	if not rec.has("known"):
 		rec["known"] = []          # which of food / hates / play you've found out
+	FavFood.settle(rec)        # its favourite food comes from its type and personality
 	if not rec.has("ivs") or typeof(rec["ivs"]) != TYPE_DICTIONARY:
 		rec["ivs"] = ivs_from_uid(String(rec.get("uid", "x")))     # old saves: fixed by the kin's id
 	Unique.ensure(rec)          # its inborn size, looks and habits (old saves: fixed by the kin's id)
@@ -347,6 +348,7 @@ static func feed(rec: Dictionary, f: String) -> Dictionary:
 		joy += 22.0
 		fill *= Unique.FAV_FILL       # its favourite food: a little more filling too
 		out["new"] = discover(rec, "food")
+		out["trust"] = FavFood.bonus(rec)
 	var was := need(rec, "food")
 	change(rec, "food", fill)
 	change(rec, "joy", joy)
@@ -485,6 +487,7 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 		"gen": maxi(int((a.get("lineage", {}) as Dictionary).get("gen", 0)), int((b.get("lineage", {}) as Dictionary).get("gen", 0))) + 1}
 	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
 	ensure(baby)
+	FavFood.inherit(baby, a, b, rng)
 	return baby
 
 ## Rare Eggs no longer use the breeding nest: they hatch on the Incubator (scripts/core/incubator.gd).
