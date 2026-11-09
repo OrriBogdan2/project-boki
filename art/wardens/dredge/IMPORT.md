@@ -29,4 +29,11 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
 - **Junk ball:** on bone `ball`, shrunk inside the sack at rest; dash clips scale it up round him.
 - **FX points:** weapon_muzzle, anchor_gun_root, anchor_claw, anchor_hook_tip, anchor_fist, anchor_ball, anchor_coins, anchor_hoard_top,
   anchor_lamp_r/l, anchor_head_top, anchor_eye (the big lens), anchor_chest.
+- **Skin stretch (`godot --headless -- --stretch-check --wardens=dredge`):** the scan fit's capsule weights leaked wherever the scan
+  fused parts (arms hanging against the torso, the claw along the right shin), so edges stretched up to 26x in a clip (25.9 throw).
+  grimble_clips.py now calls tools/art1/skin_relax.reweigh() before the export: Blender bone-heat weights on the body, solved on a clean
+  body-only copy of the mesh; no vertex follows an APART limb (arm vs leg, a forearm vs the other arm); the faces where two such limbs
+  touch are ripped apart (about 20 edges: claw|shin, claw|foot). Nothing is deleted. Worst now 2.5 (run_l), idle 1.7; about 30 edges over 2.
+  Still over the 1.3 target: in-bone stretch at the hump, hips and shoulders on big bends. The rig's joints are the game's contract
+  (WardenSkeleton.mismatches, REST_TOL); the scan's elbows and head sit 10-26 cm off them, which is most of what is left.
 - **Import:** remove_immutable_tracks=false, LODs on, VRAM atlas with mipmaps.
