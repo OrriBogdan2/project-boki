@@ -70,7 +70,6 @@ var grave_c := Vector3(50.0, 0, 32.0)
 var grave_r := 0
 var burrow_r := 0
 var _fx_sig := ""
-var away_work: Array = []          # lines: what assigned Boki made while you were away
 var tw := ToolWork.new()           # your tool swing: axe, pickaxe, hammer (tool_work.gd)
 var hg: HomeGather = null           # chopping wild trees and mining boulders with your tools (home_gather.gd)
 
@@ -3029,6 +3028,7 @@ func _open_kin(rec: Dictionary) -> void:
 			c2.add_child(UI.kv("Won't eat", Care.food_name(lk["hates"]) if known.has("hates") else "???", UI.INK if known.has("hates") else UI.FAINT))
 			c2.add_child(UI.kv("Favourite game", Care.PLAY_NAMES[lk["play"]] if known.has("play") else "???", UI.INK if known.has("play") else UI.FAINT))
 			c2.add_child(UI.para("Feed it, play with it and talk to it to find out more.", 12, UI.FAINT))
+			CareJournal.card(rec, c2)
 			c2.add_child(UI.spacer(2))
 			WorkView.card_section(self, rec, c2, func(): _open_kin(rec))
 			var mem: Array = rec.get("memory", [])
@@ -4013,12 +4013,9 @@ func _setup_care() -> void:
 	HomeNotices.toast_stray(self, floor_ev)
 	HomeNotices.show_migration(self)       # the one-time list of what the equal-footing save update converted
 	# what Boki assigned to stations made while you were away (Work.catch_up)
-	away_work = Work.catch_up()
-	if not away_work.is_empty():
-		get_tree().create_timer(1.2).timeout.connect(func():
-			if is_instance_valid(self) and is_inside_tree():
-				_show_when_free(away_work)
-				_refresh_top())
+	var away_lines: Array = Work.catch_up() + CareJournal.arrival()
+	if not away_lines.is_empty():
+		_show_when_free(away_lines)      # the one "While you were away" card (the work and the journal)
 	Care.dex_sync()
 	_refresh_nest()
 
