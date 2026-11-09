@@ -5,7 +5,7 @@ extends RefCounted
 ## second headless game, the guest (--displace-net-check=guest), through the queue wrapper. Both build the
 ## same flat training strip; the host plays each ability first on a local bot, then on the guest's hunter,
 ## and the guest reports where its own game put it. Cinder's cloak pull, Grimble's reel, Motley's Trade,
-## Ryzz's Skycall drag, Breaker's shield push; Kael's Warchain pulls Kael to the player (not the player).
+## Sparkle's Skycall drag, Mossy's shield push; Kael's Warchain pulls Kael to the player (not the player).
 ## Then the hit path: a hazard striking on both games hurts the player once; a knock's wall stun, a burn's
 ## length and a slow's strength reach the player's own game.
 ## Lines: DISPNET ok|FAIL <what>; the guest prints DISPNET guest pid=<pid>.
@@ -95,8 +95,8 @@ func _host() -> void:
 	ok(DK.arrivals == 2 and DK.pull.is_empty(),
 		"Grimble's reel: on the player too it ends as an arrival (HAULED), reel let go", "arrivals %d" % DK.arrivals)
 	await _case(G, B, "ostra", Vector3(8.0, 0, 0), _ostra, 2.2, "Motley's Trade")
-	await _case(G, B, "mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Ryzz's Skycall drag", "slide")
-	await _case(G, B, "bulwark", Vector3(1.7, 0, 0), _bjorn, 1.2, "Breaker's shield push", "push")
+	await _case(G, B, "mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Sparkle's Skycall drag", "slide")
+	await _case(G, B, "bulwark", Vector3(1.7, 0, 0), _bjorn, 1.2, "Mossy's shield push", "push")
 	await _zedran(G)
 	await _hazard(G, B)
 	await _knock_extras(G, B)
@@ -188,7 +188,7 @@ func _vireo(t: Hunter) -> void:
 	_aim(at)
 	m.player.ak.use_e()
 	await _run(0.05)
-	_aim(at + Vector3(-3.0, 0, 0))          # the flick: back toward Ryzz
+	_aim(at + Vector3(-3.0, 0, 0))          # the flick: back toward Sparkle
 	await _run(0.1)
 
 func _bjorn(t: Hunter) -> void:
