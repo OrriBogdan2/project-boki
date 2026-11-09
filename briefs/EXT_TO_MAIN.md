@@ -5784,3 +5784,4 @@ READY ext/feel-first-cast-warm 27d6f01f4 (first-cast warm: kit effect pools fill
 - health.py --strict OK, gen_wiki.py --check OK (47 unchanged). Diff vs main: 19 files +257/-8.
 - NOT done / open: Gunslinger RMB (8 pipelines, 15 Hunter-made shot meshes) and Mage RMB (6 pipelines) still compile on some pods (0 on rp2-0): Hunter-made round meshes, shader side. Per-cast nodes still made every cast (Dolm cracks ~57, Tender/Rimewright Q looks) are DEBT (FxPool, ext/perf-fight-pools). Only the local Hunter's echoes are copied at load. rpc1's disk hit 100% at ~16:36 (not this job's files).
 READY ext/<branch> <sha> (<what>)
+READY ext/<branch> <sha> (<what>)
