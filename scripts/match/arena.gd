@@ -9,6 +9,7 @@ extends RefCounted
 ## - practice dummies (real hunters, so Marks, carries, wall slams and every ability work on them):
 ##   one that stands and watches you (its station sign, F, switches it Still / Strafe / Dodge), one that strafes, a heavy one by a pillar to slam into; each
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
+## - a goal line over each station with a tick when you have done it once (StationGoals, content/rules/station_goals.json; Esc: Hide goals)
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
 ## - a reset (Backspace; X is the hero ultimate), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
 ## - a quick swap without leaving: 2-9 pick one of the first eight archetypes (the loadout lists all); L opens the loadout (archetype, weapon,
@@ -46,6 +47,7 @@ var layout := "arena"          # (one layout since 11-08: the separate "practice
 var home := Vector3.ZERO       # where you start (and reset to)
 var dummies: Array = []        # {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet, mv: DummyMove}
 var station_label: Label3D = null
+var goals: StationGoals = null
 var bot: Hunter = null
 var bot_mode := "off"
 var bot_arch := "gunslinger"
@@ -85,6 +87,7 @@ func setup(match_node: Match, which: String) -> void:
 	CombatBus.hit_landed.connect(_cb)
 	_build_ui()
 	_sign()
+	goals = StationGoals.new(self)
 	keys_node = ArenaKeys.new(self)
 	m.add_child(keys_node)
 	if m.hud:
@@ -135,6 +138,7 @@ func _on_hit(by, t, d, _tags) -> void:
 			dm["total"] = float(dm["total"]) + float(d)
 			dm["last"] = float(d)
 			dm["quiet"] = 0.0
+			goals.hit(String(dm["name"]))
 	if t == bot or dummies.any(func(x): return x["h"] == t):
 		hits_all.append([m.time, float(d)])
 		dealt += float(d)
@@ -236,6 +240,7 @@ func tick(dt: float) -> void:
 			P.hp = P.max_hp
 	if Input.is_action_just_pressed("interact") and not m.paused and not P.downed and P.flat_dist(_arena_point(STATION)) < STATION_R:
 		cycle_dummy()
+	goals.tick()
 	_update_ui()
 	ArenaDemo.tick(self, dt)      # (screenshot tooling only, --arena-demo)
 
@@ -410,6 +415,7 @@ func _update_ui() -> void:
 	var P: Hunter = m.player
 	var lines := "%s   DPS %d   ·   dealt %d" % [Arch.name_of(P.arch).to_upper() if P.ak else "", int(round(dps_of(hits_all, m.time))), int(round(dealt))]
 	lines += "\nBot: %s   ·   Cooldowns: %s   ·   Ult: %s" % [BOT_NAMES[bot_mode], "OFF" if cd_off else "on", "on" if ult_on else "locked"]
+	lines += "\nGoals: %d / %d" % [goals.done_count(), goals.rows.size()]
 	if meter.text != lines:
 		meter.text = lines
 

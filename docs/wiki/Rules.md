@@ -491,6 +491,15 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## station_goals (`content/rules/station_goals.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | One plain goal line per Training Area station (scripts/match/station_goals.gd). id: the save key. text: the goal ({throw} {interact} {jump} become the player's key caps). at: [x, z] map tiles, where the goal floats (omit for the duel pad); lift: metres above the ground. kind: hits (who: the dummy's name, need: how many hits), mode (the station dummy is set to the mode in 'mode'), slam (the player wall-slams a foe near 'at'), stand (on the ground inside rect [x0, z0, x1, z1]), dash (mid-dash inside rect), train (the checklist's step 'step' is done), duel (entering the duel room). Nothing blocks you: a goal only shows a tick. |
+| goals | [{"id": "strafe", "text": "Hit the strafing dummy 5 times", "at": [29.5, 26.0], "lift": 4.4, "kind": "hits", "who": "Strafer", "need": 5}, {"id": "dodge", "text": "Press {interact} at the sign until the dummy dodges", "at": [20.2, 28.0], "lift": 3.2, "kind": "mode", "mode": "dodge"}, {"id": "slam", "text": "Slam the heavy dummy into the pillar", "at": [30.2, 22.8], "lift": 4.4, "kind": "slam", "r": 8.0}, {"id": "range", "text": "Hit the far 35 m dummy", "at": [78.5, 26.5], "lift": 4.4, "kind": "hits", "who": "35 m", "need": 1}, {"id": "jump", "text": "Jump onto the 1.6 m ledge", "at": [59.0, 47.0], "lift": 3.2, "kind": "stand", "rect": [60, 40, 63, 48]}, {"id": "mantle", "text": "Climb onto the 2.4 m ledge", "at": [63.0, 47.0], "lift": 3.2, "kind": "stand", "rect": [64, 40, 67, 48]}, {"id": "dash", "text": "Dash through the gap", "at": [66.5, 47.0], "lift": 3.2, "kind": "dash", "rect": [64, 40, 71, 48]}, {"id": "glide", "text": "Glide to the far island: jump, then press {jump} again", "at": [73.5, 47.0], "lift": 3.2, "kind": "stand", "rect": [81, 40, 84, 48]}, {"id": "boki", "text": "Summon your Boki: press {throw}", "at": [23.3, 34.7], "lift": 3.2, "kind": "train", "step": "throw"}, {"id": "crate", "text": "Break a crate", "at": [27.5, 41.0], "lift": 3.2, "kind": "train", "step": "smash"}, {"id": "duel", "text": "Step on the glowing pad, press {interact}: the duel room", "lift": 2.2, "kind": "duel"}] |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 

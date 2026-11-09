@@ -28,6 +28,7 @@ var _test_cast := -1.0
 
 func setup(match_node: Match) -> void:
 	m = match_node
+	StationGoals.mark_duel()      # the Training Area's last goal
 	diff = String(Settings.get_v("bot_diff")) if Data.BOT_DIFF.has(String(Settings.get_v("bot_diff"))) else "medium"
 	arch = String(Arch.ids()[randi() % Arch.ids().size()])
 	weapon = ""
