@@ -63633,5 +63633,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_gambitfin_gp_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_gambitfin_gp",
+    "name": "Gambitfin (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gambitfin_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pipwom_gp",
+    "name": "Pipwom (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pipwom_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gambitfin_gp",
+    "name": "Gambitfin (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gambitfin_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pipwom_gp",
+    "name": "Pipwom (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_pipwom_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hourachnid_gp",
+    "name": "Hourachnid (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_hourachnid_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pipwom_gp",
+    "name": "Pipwom (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pipwom_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gambitfin_gp",
+    "name": "Gambitfin (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_gambitfin_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hourachnid_gp",
+    "name": "Hourachnid (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_hourachnid_gp_4.jpg",
+    "ok": true
   }
 ]
