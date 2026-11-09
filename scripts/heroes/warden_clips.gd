@@ -64,6 +64,7 @@ var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
+var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
 var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
 var weapon_bi := -1          # "weapon_bone": the bone a thrown weapon hides on
@@ -133,6 +134,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.tree_root = _build()
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
+	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
 	_setup_out()
 	return true
 
@@ -382,6 +384,8 @@ func step(dt: float) -> void:
 	if d.has("crouch"):
 		_crouch(s, dt)
 	tree.advance(dt)
+	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
+	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
 	_out(dt)
@@ -408,6 +412,10 @@ func _turn_to_heading(s: Dictionary, on: bool, legs_only: bool, dt: float) -> vo
 		var hb := WardenSkeleton.find(skel, "hips")
 		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
 
+func _moving(s: Dictionary) -> bool:
+	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	return Vector2(vel.x, vel.z).length() >= STILL
+
 func _loco(s: Dictionary, dt: float) -> void:
 	var lc: Dictionary = d["loco"]
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
@@ -418,14 +426,13 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var fw := Vector2(-sin(face), -cos(face))
 	var rt := Vector2(cos(face), -sin(face))
 	var run := float(lc.get("run_speed", 4.6))
-	var walk := float(lc.get("walk_speed", 2.2))
 	var k := clampf(spd / run, 0.0, 1.0) if spd >= STILL else 0.0
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
-	var gait := lerpf(walk, run, clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
-	_p("loco_rate/scale", clampf(spd / gait, 0.6, 1.5) if spd >= STILL else 1.0)
+	var rate := gait.plan(spd, lc)
+	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)
