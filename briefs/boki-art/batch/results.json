@@ -71956,5 +71956,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/rd2_pagoguana_v2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "rd2_vaultara_v2",
+    "name": "Vaultara (redesign concept, round 2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd2_vaultara_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd2_domeleon_v2",
+    "name": "Domeleon (redesign concept, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd2_domeleon_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd2_barrelmander_v2",
+    "name": "Barrelmander (redesign concept, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd2_barrelmander_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd2_vaultara_v2",
+    "name": "Vaultara (redesign concept, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd2_vaultara_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd2_bucketmander_v2",
+    "name": "Bucketmander (redesign concept, round 2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd2_bucketmander_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd2_vaultara_v2",
+    "name": "Vaultara (redesign concept, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd2_vaultara_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd2_pagoguana_v2",
+    "name": "Pagoguana (redesign concept, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd2_pagoguana_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd2_bucketmander_v2",
+    "name": "Bucketmander (redesign concept, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd2_bucketmander_v2_2.jpg",
+    "ok": true
   }
 ]
