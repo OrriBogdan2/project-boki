@@ -353,6 +353,14 @@ const SHOTS := [
 		"Key frame: the slam, gold light flooding the near cell, the streak setting off"
 	],
 	[
+		"ult_bjorn_stun",
+		"bulwark",
+		"bjorn_ult",
+		0.95,
+		3.0,
+		"The racing fissure stuns the target: stun stars over its head"
+	],
+	[
 		"ult_bjorn_impact",
 		"bulwark",
 		"bjorn_ult",

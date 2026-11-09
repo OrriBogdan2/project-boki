@@ -53,14 +53,14 @@ func _init(kit: BulwarkKit) -> void:
 
 func _ready() -> void:
 	for i in MAX_CELLS:
-		var column := KitMeshes.inst(self, KitMeshes.pillar(0.75, 1.0, 1.0), KitShaders.mat("panel", GOLD, true))
+		var column := KitMeshes.inst(self, KitMeshes.pillar(0.4, 1.0, 1.0), KitShaders.mat("panel", GOLD, true))
 		var seam := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", GOLD, true))
 		KitShaders.param(seam, "tail", 0.0)
 		_slabs.append({"column": column, "seam": seam, "t": 0.0})
 	var streak_mat := KitShaders.mat("streak", Color(1.0, 0.75, 0.35), true)
 	_streak = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), streak_mat)
 	_flood = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("panel", GOLD))
-	_crack = KitMeshes.inst(self, KitMeshes.crack(0.16, 0.4, 16), KitShaders.mat("streak", AimKit.hero_col(h), true))
+	_crack = KitMeshes.inst(self, KitMeshes.crack(0.3, 0.45, 16), KitShaders.mat("streak", AimKit.hero_col(h), true))
 	KitShaders.param(_crack, "tail", 0.0)
 
 func xd() -> Dictionary:
@@ -155,7 +155,7 @@ func tick(dt: float) -> void:
 func _telegraph() -> void:
 	var done := float(erupted) / cells.size()
 	AimKit.lane(h, "x", {"from": origin, "dir": dir, "len": trail_len(), "width": float(xd().get("width", 4.0)),
-		"all": true, "col2": GOLD, "fill": done, "hot": done * 0.6, "dur": 0.15})
+		"all": true, "col2": GOLD, "fill": done, "hot": done * 0.6, "lw": 0.14, "alpha": 1.6, "dur": 0.15})
 	AimKit.entry(h, "x")["y"] = _trail_y(origin + Vector3(dir.x, 0, dir.y) * trail_len() * 0.5)
 
 func _interrupt() -> void:
@@ -311,7 +311,7 @@ func _glow_crack() -> void:
 	var col := GOLD
 	if phase == "wind":
 		heat = clampf(t / float(xd().get("windup", 0.4)), 0.0, 1.0)
-		power = lerpf(0.5, 2.4, heat * heat)
+		power = lerpf(0.8, 3.0, heat * heat)
 		col = AimKit.hero_col(h).lerp(GOLD, heat)
 	elif phase == "":
 		power = (1.0 + 0.35 * sin(Time.get_ticks_msec() * 0.012)) * clampf(float(scar.get("t", 0.0)), 0.0, 1.0)
@@ -338,6 +338,6 @@ func _tick_slabs(delta: float) -> void:
 		column.global_position = at
 		column.rotation = Vector3(0, atan2(-dir.y, dir.x), 0)
 		column.scale = Vector3(cell_len() * 0.5, COLUMN_H * rise, w * 0.5)
-		KitShaders.param(column, "power", 1.6 * clampf(left / 0.6, 0.0, 1.0))
+		KitShaders.param(column, "power", 2.4 * clampf(left / 0.6, 0.0, 1.0))
 		_place_flat(seam, at + Vector3(0, 0.1, 0), Vector2(cell_len() * 0.95, w * 0.85))
 		KitShaders.param(seam, "power", 2.2 * left)
