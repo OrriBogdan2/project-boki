@@ -9362,5 +9362,82 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_hydrangor_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_glaciammoth",
+    "name": "Glaciammoth (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glaciammoth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hydrangor",
+    "name": "Hydrangor (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_hydrangor_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan",
+    "name": "Cetorgan (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_p",
+    "name": "Barokat (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barrelmander_p",
+    "name": "Barrelmander (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barrelmander_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bubblisk_p",
+    "name": "Bubblisk (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bubblisk_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barrelmander_p",
+    "name": "Barrelmander (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barrelmander_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bubblisk_p",
+    "name": "Bubblisk (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bubblisk_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_p",
+    "name": "Bellowary (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_p",
+    "name": "Bellowary (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_boltstrich_p",
+    "name": "Boltstrich (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_boltstrich_p_2.jpg",
+    "ok": true
   }
 ]
