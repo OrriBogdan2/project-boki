@@ -49990,5 +49990,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/glaciatee_card100_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_selenwhale_x1",
+    "name": "Selenwhale (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_selenwhale_x1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternlong_card100",
+    "name": "Lanternlong (hero card, planted)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanternlong_card100_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_selenwhale_x1",
+    "name": "Selenwhale (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_selenwhale_x1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciatee_card100",
+    "name": "Glaciatee (hero card, planted)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glaciatee_card100_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "knotwyrm_card100",
+    "name": "Knotwyrm (hero card, planted)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/knotwyrm_card100_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gloamspire_x1",
+    "name": "Gloamspire (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gloamspire_x1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_card100",
+    "name": "Lyrewing (hero card, planted)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lyrewing_card100_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternlong_card100",
+    "name": "Lanternlong (hero card, planted)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lanternlong_card100_3.jpg",
+    "ok": true
   }
 ]
