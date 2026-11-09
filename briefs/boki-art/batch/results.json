@@ -36200,5 +36200,33 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_umbrink_u2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_barokat_cloud",
+    "name": "Barokat (cloud halo edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_barokat_cloud_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barokat_cloud",
+    "name": "Barokat (cloud halo edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_barokat_cloud_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barokat_cloud",
+    "name": "Barokat (cloud halo edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_barokat_cloud_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barokat_cloud",
+    "name": "Barokat (cloud halo edit)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_barokat_cloud_4.jpg",
+    "ok": true
   }
 ]
