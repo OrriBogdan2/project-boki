@@ -9,7 +9,8 @@ extends Node
 const PATH := "res://art/kin/%s/%s.glb"
 ## Where the eyes and the top of the head sit (m), per species: what KinModels.build returns for the accessories.
 ## "hip" is the height its legs hold it at, which the limb roll stretches: 0 for a Boki without legs. One that "hover"s
-## gets a soft shadow on the ground under it.
+## gets a soft shadow on the ground under it. "coat" overrides COAT_LOOK (a matte skin: less fresnel, rim and top
+## light, no sheen).
 const FRAME := {
 	"cindle": {"head": Vector3(0, 0.45, -0.34), "top": 0.72, "carry": Vector3(0, 0.3, -0.34),
 		"ear_tip": Vector3(0.218, 0.838, -0.081), "tail_tip": Vector3(0, 0.77, 0.10), "tip_bone": "tail7", "hip": 0.22,
@@ -65,8 +66,9 @@ const FRAME := {
 		"ear_tip": Vector3(0.16, 0.72, -0.3), "tail_tip": Vector3(0, 0.21, 0.4), "tip_bone": "tail2", "hip": 0.17,
 		"marks": {"left flank": Vector3(-0.145, 0.26, 0.15), "right flank": Vector3(0.145, 0.26, 0.15),
 			"back": Vector3(0, 0.39, 0.16), "chest": Vector3(0, 0.24, -0.14)}},
-	"caecilith": {"head": Vector3(0, 0.46, -0.25), "top": 0.56, "carry": Vector3(0, 0.17, 0.09),
-		"ear_tip": Vector3(0.054, 0.53, -0.13), "tail_tip": Vector3(0, 0.027, 0.234), "tip_bone": "tail6", "hip": 0.0,
+	"caecilith": {"head": Vector3(0, 0.465, -0.263), "top": 0.555, "carry": Vector3(0, 0.17, 0.09),
+		"ear_tip": Vector3(0.059, 0.535, -0.13), "tail_tip": Vector3(0, 0.027, 0.234), "tip_bone": "tail6", "hip": 0.0,
+		"coat": {"fres": 0.15, "rim_amount": 0.1, "top_light": 0.1, "sheen": 0.0},
 		"marks": {"left flank": Vector3(-0.09, 0.225, -0.126), "right flank": Vector3(0.09, 0.225, -0.126),
 			"back": Vector3(0, 0.27, -0.03), "chest": Vector3(0, 0.225, -0.22)}},
 	"glomwort": {"head": Vector3(0, 0.26, -0.22), "top": 0.42, "carry": Vector3(0, 0.5, 0.08),
@@ -396,8 +398,9 @@ func _material_for(src: Material, c: Dictionary, mats: Array) -> Material:
 	m.set_shader_parameter("albedo_tex", (src as BaseMaterial3D).albedo_texture)
 	for k in WardenGlb.PAINTED:
 		m.set_shader_parameter(k, WardenGlb.PAINTED[k])
-	for k in COAT_LOOK:
-		m.set_shader_parameter(k, COAT_LOOK[k])
+	var look: Dictionary = COAT_LOOK.merged(FRAME[species].get("coat", {}), true)
+	for k in look:
+		m.set_shader_parameter(k, look[k])
 	m.set_shader_parameter("rim_color", (c["body"] as ShaderMaterial).get_shader_parameter("rim_color"))
 	if id == "boki_coat":
 		_coat = m
