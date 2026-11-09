@@ -2179,7 +2179,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		if not credit.remote and target.team != credit.team and src != "burn":
 			Bond.add(credit, d / 320.0)        # (the merge meter: overcharge and the Bond IV apply there)
 		if not credit.remote and target.team != credit.team and not (target is Hunter and (target as Hunter).downed):
-			credit.gain_xp(d * (0.6 if target is Hunter else 0.35))
+			credit.gain_xp(d * LevelGrowth.xp("per_dmg_hunter" if target is Hunter else "per_dmg_monster"))
 			var lv: int = credit.armor_gain(d * (1.0 if target is Hunter else 0.33))
 			if lv >= 0:
 				_armor_up(credit)
@@ -2246,7 +2246,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
-			credit.gain_xp(90.0)
+			credit.gain_xp(LevelGrowth.xp("knock"))
 		add_feed("%s knocked %s" % [HeroTitle.of_hunter(credit), HeroTitle.of_hunter(h)])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)

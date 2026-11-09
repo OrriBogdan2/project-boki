@@ -709,7 +709,7 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 		if h.out or h.extracted or not inside(L, h.pos, 4.0):
 			continue
 		var share := 1.0 if killer and h.team == killer.team else (0.5 if float(b.damage_by.get(h.team, 0.0)) > b.max_hp * 0.1 else 0.2)
-		h.gain_xp(260.0 * share)
+		h.gain_xp(LevelGrowth.xp("lair_boss") * share)
 	if killer and not killer.remote:
 		killer.add_stat("bosses")
 		PerkOrbs.drop(m, "boss", b.pos, 0, killer)      # a fan of three perk orbs
