@@ -6,7 +6,8 @@ extends RefCounted
 ##      showing (one fired at each step start waits and then shows) and no Boki bubble is up; the
 ##      hunter and the Boki are never under the banner; Pell (TutorialGuide) wears a beacon, stops you at
 ##      each new step in the dialogue box while the match holds, and flies ahead to the pad, chest and outpost
-##   3. eight steps, one short banner line each (the glide leg too), the pill counter, the Boki step by its state
+##   3. eight steps, one short banner line each (the glide leg too), the pill counter, the summon beat's banner
+##      swaps (ask, out, called back early, ask again), its detail lines and the cooldown reset after a recall
 ##   4. every course stop is climbable from the one before it with plain movement
 
 var bad := 0
@@ -84,6 +85,9 @@ func _course() -> void:
 	var ran_in_talk := 0
 	var not_in_box := 0
 	var ahead := {}
+	var sum_lines: Array = []
+	var sum_details := {}
+	var early_cd_ok := false
 	while t < 600.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
@@ -100,6 +104,12 @@ func _course() -> void:
 		if not texts.has(tu.id()):
 			texts[tu.id()] = tu.text
 		step_t += Match.DT
+		if tu.id() == "summon":
+			if sum_lines.is_empty() or sum_lines[-1] != tu.text:
+				sum_lines.append(tu.text)
+			sum_details[tu.detail] = true
+			var ks: KinSummon = m.player.kin.summon
+			early_cd_ok = early_cd_ok or (tu.sm.early and not ks.out() and ks.cd <= 0.0)
 		if tu.pell.talking():
 			talk_at = m.time if talk_at < 0.0 else talk_at
 			ran_in_talk += int(m.time != talk_at)
@@ -143,23 +153,44 @@ func _course() -> void:
 	var counts_ok: bool = String(counters.get("shoot", "")) == "" and String(counters.get("sig", "")) == ""
 	ok(counts_ok, "one kill and one cast need no counter (%s)" % str(counters))
 	_gap_help_and_downed(tu)
-	var tl := String(texts.get("throw", ""))
-	ok(tl.contains("call") or tl.contains("send"), "the Boki step says whether to call back or send ('%s')" % tl)
+	_summon_banners(sum_lines, sum_details, early_cd_ok)
 
-## Two falls on the gap step bring the plain help line; a downed Boki never passes the Boki step.
+## Beat 5: the banner reads ask, out, called back early; the detail lines and the cooldown reset all showed.
+func _summon_banners(lines: Array, details: Dictionary, early_cd_ok: bool) -> void:
+	var nm := String(m.player.kin.rec.get("name", "your Boki"))
+	var s: KinSummon = m.player.kin.summon
+	var ask := "Press %s to summon %s" % [Settings.key_cap("summon"), nm]
+	var want := [ask, "%s is out! %d seconds" % [nm, roundi(s.dur)], "That calls it back early. Try letting it stay."]
+	ok(lines.size() >= 3 and lines.slice(0, 3) == want, "the summon banner swaps: ask, out, early (%s)" % str(lines))
+	var has := func(key: String) -> bool:
+		return details.has(m.tut.fill(String(Content.rules("tutorial")["detail"][key])))
+	var closed: bool = has.call("summon_back") or has.call("summon_knocked")
+	ok(has.call("summon") and has.call("summon_warn") and closed,
+		"the detail line asks, warns at %d s and closes the window (%s)" % [TutorialSummon.WARN_S, str(details.keys())])
+	ok(early_cd_ok, "calling it back early resets the cooldown")
+	var short: float = KinSummon.times(m.player.kin.ks).y * float(Content.rules("tutorial")["summon_cd_mult"])
+	ok(is_equal_approx(s.cd_base, short), "the ring's cooldown here is the shortened one (%d s)" % roundi(s.cd_base))
+
+## Two falls on the gap step bring the plain help line; a downed Boki or Hunter never passes the summon beats.
 func _gap_help_and_downed(tu: Tutorial) -> void:
 	var ids := Tutorial.steps().map(func(st): return String(st[0]))
 	tu.step = ids.find("dash")
 	tu.falls = 2
 	tu._words()
 	ok(tu.text.begins_with("Just jump"), "two falls on the gap step show the plain help ('%s')" % tu.text)
-	tu.step = ids.find("throw")
-	tu.falls = 0
-	tu.recalled = false
-	tu.need_back = false
-	tu.throws0 = m.player.kin.st_throws
+	var sm := tu.sm
+	sm.phase = TutorialSummon.ENDED
+	sm.bright = true
+	sm.second = true
+	sm.wave2 = true
 	m.player.kin.state = "downed"
-	ok(not tu._is_done("throw"), "a downed Boki does not pass the Boki step")
+	var none := func() -> bool: return not tu._is_done("summon", 99.0) and not tu._is_done("fight")
+	ok(none.call(), "a downed Boki passes neither summon beat")
+	m.player.kin.state = "shoulder"
+	m.player.downed = true
+	ok(none.call(), "a downed Hunter passes neither summon beat")
+	m.player.downed = false
+	ok(tu._is_done("summon", 99.0) and tu._is_done("fight"), "both pass once nobody is down (the guard is why)")
 
 ## Frames where the hunter or the Boki sit under the banner (at the screen sizes it is built for).
 func _under_banner() -> int:

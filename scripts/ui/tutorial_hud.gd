@@ -48,6 +48,7 @@ static func draw(h, sz: Vector2) -> void:
 	_bar(h, pr, tu, k, true)
 	if k >= 1.0:
 		_pill_extras(h, pr, tu)
+		_detail(h, pr, tu)
 	if tu.done_t > 0.0:
 		_check(h, ln["check"], tu.done_t / Tutorial.DONE_T)
 
@@ -94,6 +95,17 @@ static func _pill_extras(h, r: Rect2, tu: Tutorial) -> void:
 	var hint := tu.scout_hint()
 	if hint != "":
 		h._ctext(Vector2(r.get_center().x, r.position.y - 14.0), hint, int(r.size.y * 0.34), MINT, h.big)
+
+## The plain line under the pill (the summon beats): wraps to two lines on its own panel.
+static func _detail(h, r: Rect2, tu: Tutorial) -> void:
+	if tu.detail == "":
+		return
+	var px := int(r.size.y * 0.3)
+	var sz: Vector2 = h.big.get_multiline_string_size(tu.detail, HORIZONTAL_ALIGNMENT_CENTER, r.size.x * 1.3, px)
+	var box := Rect2(Vector2(r.get_center().x - sz.x * 0.5 - 12.0, r.end.y + 8.0), sz + Vector2(24.0, 12.0))
+	h._panel(box, PANEL, 10)
+	h.c.draw_multiline_string(h.big, box.position + Vector2(12.0, 6.0 + px * 0.85), tu.detail,
+		HORIZONTAL_ALIGNMENT_CENTER, sz.x, px, -1, Color(1, 1, 1, 0.92))
 
 ## The Skip button, left of the banner for the whole run: it ends the tutorial at once, as finished
 ## (the match's end marks it done, so nothing it gives is lost). Added by Tutorial.update once the Hud is up.

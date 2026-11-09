@@ -14,7 +14,7 @@ static func steps() -> Array:
 	return Content.rules("tutorial")["steps"]
 
 const KEYS := {"move": "move", "dash": "dash", "glide": "glide", "shoot": "fire", "sig": "signature",
-	"throw": "throw", "chest": "interact"}
+	"summon": "summon", "fight": "summon", "chest": "interact"}
 ## Which course stop a finished step leaves you at (a fall puts you back there).
 const STOP_AFTER := {"move": "move", "dash": "glide"}
 const PADS := ["dash", "glide"]      # course stops left from a glowing pad on one island, landed on the next
@@ -53,14 +53,12 @@ var target := Vector3.INF    # where the marker points (INF for none)
 var label := ""
 var last_stop := Vector3.INF # where a fall puts you back
 var used0 := {}
-var throws0 := 0
-var recalled := false        # the Boki came back (it started out)
-var need_back := false
-var fight_n := 0
+var detail := ""             # the plain line under the pill (the summon beats)
 var _course: Dictionary = {}
 var _beams: Array = []
 var _pads: Array = []
 var pell: TutorialGuide
+var sm: TutorialSummon       # the two summon beats
 var skip_btn: Button = null    # the Skip button (TutorialHud.add_skip), once the Hud is there
 
 func _init(match_node: Match) -> void:
@@ -68,6 +66,7 @@ func _init(match_node: Match) -> void:
 	intro = not match_node.opts.get("tut_test", false) and not Save.d["tutorial"].get("tut_intro", false)
 	_course = World.load_layout("tutorial").get("course", {})
 	pell = TutorialGuide.new(self)
+	sm = TutorialSummon.new(self)
 
 # ------------------------------------------------------------------ the course
 ## A course stop's ground position (INF when the stop isn't in the table). key: "at" or "pad".
@@ -145,7 +144,7 @@ func applies(sid: String) -> bool:
 	var p := m.player
 	match sid:
 		"sig": return p.ak != null or (p.kin != null and p.kin.runner != null and p.kin.runner.has_slot("k1"))
-		"throw": return p.kin != null
+		"summon": return p.kin != null and p.kin.summon != null
 	return true
 
 ## Called by Match every step.
@@ -173,7 +172,7 @@ func update(dt: float) -> void:
 	if m.hud:
 		m.hud.msgs.hold = card_up()      # messages wait while the banner is up
 	var sid := id()
-	var done := _is_done(sid)
+	var done := _is_done(sid, dt)
 	_quicken(p, dt)
 	if got != got_seen:
 		got_seen = got
@@ -262,24 +261,17 @@ func _enter() -> void:
 	got_seen = 0
 	falls = 0
 	_refresh(p)
-	recalled = false
-	need_back = false
+	sm.begin()
 	used0 = p.used.duplicate()
 	match sid:
 		"shoot":
 			kills = 0
-			_foes(["skitter"])
+			foes(["skitter"])
 		"sig":
-			_foes(["skitter", "skitter", "skitter"])
-		"throw":
-			if p.kin:
-				throws0 = p.kin.st_throws
-			_foes(["spitter"])
+			foes(["skitter", "skitter", "skitter"])
 		"fight":
 			kills = 0
-			var left := _live_foes()      # (one may be left from the Boki step: it joins the fight)
-			_foes((["skitter", "spitter", "skitter"] as Array).slice(mini(left, 3)), true)
-			fight_n = _live_foes()
+			sm.start_pack()
 		"chest":
 			if p.chest_keys == 0:
 				KeyChest.give(p, 1)      # (the key is handed over: finding one is a hint now)
@@ -305,8 +297,8 @@ func _open_lift() -> void:
 		m.exits.open_now(o, m.player.team)
 
 ## Brings monsters in near the player for a step (only if none are left, unless topping up).
-func _foes(kinds: Array, top_up := false) -> void:
-	if not top_up and _live_foes() > 0:
+func foes(kinds: Array, top_up := false) -> void:
+	if not top_up and live_foes() > 0:
 		return
 	var i := 0
 	for kd in kinds:
@@ -315,7 +307,7 @@ func _foes(kinds: Array, top_up := false) -> void:
 			_tank(m.spawn_mob(kd, at))
 		i += 1
 
-func _live_foes() -> int:
+func live_foes() -> int:
 	return m.mobs.filter(func(x): return not x.dead).size()
 
 ## Keeps a monster around for the shooting steps (another comes if it falls off).
@@ -353,7 +345,7 @@ func spot(dist: float, ang0: float) -> Vector3:
 				return Vector3(floor(x) + 0.5, w.ground_at(x, z), floor(z) + 0.5)
 	return Vector3.INF
 
-func _is_done(sid: String) -> bool:
+func _is_done(sid: String, dt := 0.0) -> bool:
 	var p := m.player
 	var near := func(r: float) -> bool: return p.grounded and _dist(stop(stop_id())) < r
 	match sid:
@@ -377,32 +369,10 @@ func _is_done(sid: String) -> bool:
 			_keep_foe("skitter")
 			got = int(p.used.get("k1", 0)) - int(used0.get("k1", 0))
 			return got >= need
-		"throw":
-			_keep_foe("spitter")
-			return p.kin == null or _throw_done()
-		"fight": return kills >= fight_n and not m.mobs.any(func(x): return not x.dead)
+		"summon": return sm.summon_done(dt)
+		"fight": return sm.pack_done()
 		"chest": return m.chests.any(func(c): return c.get("tut", false) and c["open"])
 	return false      # (extract: the match ends when you step into the light)
-
-## The Boki step: call it back first when it is out (a tap would call it back), then send it. A Boki
-## beside you or on your shoulder just gets sent. Counts the call back and the send.
-func _throw_done() -> bool:
-	var k: Kin = m.player.kin
-	if k.st_throws == throws0:
-		if throw_recalls():
-			need_back = true
-		elif need_back:
-			recalled = true
-	got = int(recalled) + int(k.st_throws > throws0)
-	need = 2 if need_back else 1
-	return got >= need
-
-## Would a G tap call the Boki back right now (it is out or fighting) rather than send it?
-func throw_recalls() -> bool:
-	var k: Kin = m.player.kin
-	if k == null or k.state not in ["active", "returning"]:
-		return false
-	return KinCommand.is_away(m.player, k) or KinCommand.is_engaged(k)
 
 # ------------------------------------------------------------------ the marker
 ## The outpost the course ends at (the map's).
@@ -416,14 +386,16 @@ func outpost() -> Dictionary:
 func goal(sid: String) -> Vector3:
 	match sid:
 		"move", "dash": return stop(stop_id())
-		"shoot", "sig", "throw", "fight":
+		"shoot", "sig", "summon", "fight":
 			var best: Ent = null
 			var bd := 1e9
 			for mb in m.mobs:
 				if not mb.dead and m.player.flat_dist(mb) < bd:
 					bd = m.player.flat_dist(mb)
 					best = mb
-			return best.pos if best else stop("yard")
+			if best:
+				return best.pos
+			return Vector3.INF if sid == "summon" else stop("yard")
 		"chest":
 			for c in m.chests:
 				if c.get("tut", false):
@@ -449,7 +421,7 @@ func _point(sid: String) -> void:
 	var at := goal(sid)
 	if at == Vector3.INF or m.player.out:
 		return
-	var foe_step := sid in ["shoot", "sig", "throw", "fight"]
+	var foe_step := sid in ["shoot", "sig", "summon", "fight"]
 	if foe_step and Vector2(at.x - m.player.pos.x, at.z - m.player.pos.z).length() <= 6.0:
 		return
 	target = at
@@ -520,14 +492,11 @@ func _words() -> void:
 		line = String(alt["land"])
 	elif sid == "dash" and falls >= 2:
 		line = String(alt["gap_help"])
-	elif sid == "throw" and not recalled and (need_back or throw_recalls()):
-		line = String(alt["throw_back"])
-	elif sid == "throw" and need_back:
-		line = String(alt["throw_send"])
-	text = _fill(line)
+	elif sid in ["summon", "fight"] and sm.alt_key(sid) != "":
+		line = String(alt[sm.alt_key(sid)])
+	text = fill(line)
+	detail = sm.detail if sid in ["summon", "fight"] else ""
 	need = int(Content.rules("tutorial")["need"].get(sid, 0))
-	if sid == "throw":
-		need = 2 if need_back or throw_recalls() else 1
 	key_cap = ""
 	if sid == "move":
 		key_cap = _wasd()
@@ -539,7 +508,7 @@ func progress_text() -> String:
 	return "%d/%d" % [mini(got, need), need] if need > 1 else ""
 
 ## The player's own keys, Boki name and ability names in a line.
-func _fill(txt: String) -> String:
+func fill(txt: String) -> String:
 	var p := m.player
 	var an := ""
 	if p.ak != null:

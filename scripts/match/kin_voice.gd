@@ -92,7 +92,7 @@ const TUT_HINT := {
 	"shoot": ["A monster! Get it!", "(growls at the monster)"],
 	"sig": ["Press %E for %N! Line them all up, then fire!", "(bounces, ready for the group)"],
 	"fight": ["Together! Get them all!", "(bristles, ready to fight)"],
-	"throw": ["Throw me! I'm ready!", "(crouches on your shoulder, ready to jump)"],
+	"summon": ["Summon me! I'm ready!", "(glows brighter on your shoulder, ready to burst out)"],
 	"chest": ["A chest! Open it with the key you got!", "(runs to a chest and paws at the lock)"],
 	"extract": ["We did it! Into the light!", "(bounces toward the light)"],
 }

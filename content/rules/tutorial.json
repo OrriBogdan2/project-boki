@@ -1,5 +1,5 @@
 {
- "doc": "The first-match tutorial (scripts/match/tutorial.gd), short (owner, Nov 8): eight steps, one banner line each. steps: [id, the line]. %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for part of a step (steering the drop before the walk, the gap step after two falls, the Boki starting out). labels: the marker's caption per course stop or step. mob: how the tutorial's monsters differ from real ones (a little tougher and bigger, damage and attack tempo down; the first one dies to one magazine). cds: the share of its usual time every ability and dash cooldown takes here (0.25 = four times quicker); each is also ready again when a step starts, is retried or its action lands. need: how many times a step's action must land (shoot: monsters beaten, sig: casts), shown as 1/3 on the pill when more than one. The moves and rules the cut steps taught are one-time hints now (content/rules/hints.json).",
+ "doc": "The first-match tutorial (scripts/match/tutorial.gd), short (owner, Nov 8): eight steps, one banner line each. steps: [id, the line]. %W swing or shoot, %J jump, %G glide, %E the E key, %T the Summon key, %D its summon seconds, %C its cooldown seconds, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for part of a step (steering the drop before the walk, the gap step after two falls, the Boki starting out). labels: the marker's caption per course stop or step. mob: how the tutorial's monsters differ from real ones (a little tougher and bigger, damage and attack tempo down; the first one dies to one magazine). cds: the share of its usual time every ability and dash cooldown takes here (0.25 = four times quicker); each is also ready again when a step starts, is retried or its action lands. summon_cd_mult: the share of its usual time the Boki's summon cooldown takes here (the number on the ring is this one, so nothing lies). detail: the plain line under the pill for the summon beats (TutorialSummon). need: how many times a step's action must land (shoot: monsters beaten, sig: casts), shown as 1/3 on the pill when more than one. The moves and rules the cut steps taught are one-time hints now (content/rules/hints.json).",
  "steps": [
   [
    "move",
@@ -18,12 +18,12 @@
    "Use %A on the group"
   ],
   [
-   "throw",
-   "Tap %T to send %s at the monster"
+   "summon",
+   "Press %T to summon %s"
   ],
   [
    "fight",
-   "Beat all the monsters"
+   "Beat the pack. Summon when bright"
   ],
   [
    "chest",
@@ -37,13 +37,14 @@
  "alt": {
   "land": "Steer down to the meadow",
   "gap_help": "Just jump and hold %G. The wind carries you.",
-  "throw_back": "Tap %T to call %s back",
-  "throw_send": "Tap %T again to send %s at the monster"
+  "summon_out": "%s is out! %D seconds",
+  "summon_rest": "%s is resting",
+  "summon_early": "That calls it back early. Try letting it stay.",
+  "pack_wait": "Wait for the bright ring, then press %T"
  },
  "need": {
   "shoot": 1,
-  "sig": 1,
-  "throw": 2
+  "sig": 1
  },
  "cds": 0.25,
  "mob": {
@@ -74,11 +75,11 @@
   "sig": [
    "A whole group: that's what %A is for."
   ],
-  "throw": [
-   "That one spits from afar. Send %s at it!"
+  "summon": [
+   "Press %T and %s bursts out to fight!"
   ],
   "fight": [
-   "More of them! Beat them all, you and %s."
+   "A whole pack! Fight on, and call %s again when its ring is bright."
   ],
   "chest": [
    "Here's a chest key. Open that chest!"
@@ -90,5 +91,13 @@
  "pell_moods": {
   "fight": "warning",
   "extract": "happy"
+ },
+ "summon_cd_mult": 0.33,
+ "detail": {
+  "summon": "%s bursts out and fights for %D seconds. Watch the ring.",
+  "summon_warn": "Almost time. %s is getting tired.",
+  "summon_back": "Back to a light. %s rests now.",
+  "summon_knocked": "%s got beaten and flew back to you. It needs a longer rest.",
+  "fight": "Dim light means %s is resting (%C seconds). Bright means ready."
  }
 }
