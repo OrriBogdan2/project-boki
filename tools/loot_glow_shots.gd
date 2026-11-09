@@ -41,6 +41,7 @@ func run(main_node: Node) -> void:
 	_take("loot_stone", "The same row on a grey stone slab")
 	slab.queue_free()
 	var canopy := _plate(at + Vector3(0, 4.5, -1.0), 18.0, 0.3, Color("303030"))
+	canopy.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 	await _go(0.6)
 	_take("loot_shadow", "The same row under a canopy, in its shadow")
 	canopy.queue_free()
@@ -79,7 +80,10 @@ func _plate(at: Vector3, side: float, thick: float, col: Color) -> MeshInstance3
 	var bm := BoxMesh.new()
 	bm.size = Vector3(side, thick, side)
 	mi.mesh = bm
-	mi.material_override = Models.toon(col, false)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = col
+	mat.roughness = 1.0
+	mi.material_override = mat
 	mi.position = at + Vector3(0, thick * 0.5, 0)
 	m.add_child(mi)
 	return mi

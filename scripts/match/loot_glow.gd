@@ -11,13 +11,13 @@ extends RefCounted
 const LOOKS := [
 	{"halo_r": 0.7, "halo_a": 0.3, "pillar_h": 0.0, "pillar_a": 0.0},
 	{"halo_r": 0.75, "halo_a": 0.36, "pillar_h": 0.0, "pillar_a": 0.0},
-	{"halo_r": 0.85, "halo_a": 0.42, "pillar_h": 2.6, "pillar_a": 0.34},
-	{"halo_r": 0.95, "halo_a": 0.48, "pillar_h": 3.2, "pillar_a": 0.42},
-	{"halo_r": 1.05, "halo_a": 0.55, "pillar_h": 3.8, "pillar_a": 0.5},
+	{"halo_r": 0.85, "halo_a": 0.42, "pillar_h": 2.6, "pillar_a": 0.45},
+	{"halo_r": 0.95, "halo_a": 0.48, "pillar_h": 3.2, "pillar_a": 0.55},
+	{"halo_r": 1.05, "halo_a": 0.55, "pillar_h": 3.8, "pillar_a": 0.65},
 ]
 const HALO_Y := 0.7            # m above the ground: the height the token spins at
 const PILLAR_SHADER := preload("res://shaders/loot_pillar.gdshader")
-const PILLAR_R := Vector2(0.12, 0.3)    # m: top and bottom radius of a pillar
+const PILLAR_R := Vector2(0.2, 0.42)    # m: top and bottom radius of a pillar
 const SEGMENTS := 10
 
 static var _shared := {}       # tier -> {halo, halo_mat, pillar, pillar_mat}

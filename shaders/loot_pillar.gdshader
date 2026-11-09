@@ -11,5 +11,5 @@ void vertex() {
 void fragment() {
 	float rim = mix(0.55, 1.0, abs(dot(NORMAL, VIEW)));
 	ALBEDO = color.rgb;
-	ALPHA = clamp(color.a * 1.8 * pow(1.0 - up, 1.3) * rim, 0.0, 1.0);
+	ALPHA = clamp(color.a * 1.8 * pow(1.0 - up, 0.8) * rim, 0.0, 1.0);
 }
