@@ -26925,5 +26925,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_maracoil_w32_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_morelkin_n_w32",
+    "name": "Morelkin (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_morelkin_n_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_maracoil_w32",
+    "name": "Maracoil (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_maracoil_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_morelkin_n_w32",
+    "name": "Morelkin (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_morelkin_n_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nymphane_n_w32",
+    "name": "Nymphane (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_nymphane_n_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_morelkin_n_w32",
+    "name": "Morelkin (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_morelkin_n_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nymphane_n_w32",
+    "name": "Nymphane (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_nymphane_n_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nymphane_n_w32",
+    "name": "Nymphane (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_nymphane_n_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nymphane_n_w32",
+    "name": "Nymphane (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_nymphane_n_w32_4.jpg",
+    "ok": true
   }
 ]
