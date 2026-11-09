@@ -32532,5 +32532,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_eclipsowl_stance_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_forgebrock_stance",
+    "name": "Forgebrock",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_forgebrock_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_anvilbrock_stance",
+    "name": "Anvilbrock",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_anvilbrock_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_eclipsowl_stance",
+    "name": "Eclipsowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_eclipsowl_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chuggamus_stance",
+    "name": "Chuggamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_chuggamus_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chuggamus_stance",
+    "name": "Chuggamus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_chuggamus_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_barrelmander_stance",
+    "name": "Barrelmander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_barrelmander_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_forgebrock_stance",
+    "name": "Forgebrock",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_forgebrock_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glintmole_stance",
+    "name": "Glintmole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_glintmole_stance_2.jpg",
+    "ok": true
   }
 ]
