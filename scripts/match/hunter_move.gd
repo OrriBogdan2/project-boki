@@ -63,6 +63,23 @@ static func brake(hv: Vector2, run: float, grip: float, dt: float) -> Vector2:
 static func dash_exit(dash_v: Vector2, run: float) -> Vector2:
 	return dash_v.limit_length(run * dash_exit_run)
 
+## The step a dash runs out in moves at the dash's velocity for the `left` seconds the dash still had and at
+## `exit_v` for the rest, so a dash covers its distance at any step size (it used to drop its last part step,
+## up to 15% of a dash at 30 fps). Returns that step's mean velocity and sets h.dash_end_k, the factor
+## settle_dash_end scales it by to leave the hunter at exit_v once the step has moved.
+static func dash_end_step(h: Hunter, dash_v: Vector2, exit_v: Vector2, left: float, dt: float) -> Vector2:
+	var step_v := exit_v.lerp(dash_v, clampf(left / dt, 0.0, 1.0))
+	h.dash_end_k = exit_v.length() / step_v.length() if step_v.length() > 0.001 else 1.0
+	return step_v
+
+## After the step has moved: a dash that ran out in it leaves at its exit velocity (what a wall took stays off).
+static func settle_dash_end(h: Hunter) -> void:
+	if h.dash_end_k <= 0.0:
+		return
+	h.vel.x *= h.dash_end_k
+	h.vel.z *= h.dash_end_k
+	h.dash_end_k = 0.0
+
 ## Metres a let-go at v0 m/s slides on flat ground under brake() (dv/dt = -friction*v - brake_decel):
 ## a kit step with a measured total takes this off its dash so the slide doesn't add to it.
 static func slide(v0: float) -> float:
@@ -82,6 +99,14 @@ static func air_steer(h: Hunter, hv: Vector2, wish: Vector2, dt: float) -> Vecto
 	if kept.length() > wish.length():
 		return kept.move_toward(wish.normalized() * kept.length(), steer)
 	return kept.move_toward(wish, steer)
+
+## Gravity for a step in the air, capped at fall_cap. The step moves at its mean vertical speed (the half of
+## the speed change the position integration in Hunter._physics misses is added here), so a jump's apex and
+## a fall's depth are the same at any step size.
+static func fall(h: Hunter, dt: float) -> void:
+	var vy := maxf(h.vel.y - Hunter.H_GRAV * dt, -fall_cap(h))
+	h.pos.y += 0.5 * (h.vel.y - vy) * dt
+	h.vel.y = vy
 
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
 ## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's

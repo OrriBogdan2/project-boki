@@ -97,6 +97,7 @@ var fire_cd := 0.0
 var dashes := 2.0
 var roll_t := 0.0
 var roll_dir := Vector2.ZERO
+var dash_end_k := 0.0           # the step a dash ran out in: its velocity is scaled by this once it has moved (HunterMove)
 var inv_t := 0.0
 var coyote := 0.0
 var jump_buf := 0.0
@@ -1467,7 +1468,7 @@ func _tick_weapon(dt: float) -> void:
 	if not strike_at_end.is_empty():
 		if roll_t > 0.0 and not downed and stun_t <= 0.0:
 			# the lunge curves to follow your aim
-			roll_dir = roll_dir.slerp(aim_dir(), minf(1.0, dt * 6.0)).normalized()
+			roll_dir = roll_dir.slerp(aim_dir(), 1.0 - exp(-6.32 * dt)).normalized()     # (10% a 60 Hz step, at any step)
 		else:
 			var st: Dictionary = strike_at_end
 			strike_at_end = {}
@@ -2090,7 +2091,7 @@ func sim(dt: float) -> void:
 	if roll_t > 0.0 and not (ak and ak.aims_in_dash()):
 		want = atan2(-roll_dir.x, -roll_dir.y)
 	if not (ak and ak.face_locked()):
-		face = lerp_angle(face, want, minf(1.0, dt * 20.0))
+		face = lerp_angle(face, want, 1.0 - exp(-24.33 * dt))     # (a third of the way a 60 Hz step, at any step)
 
 func pad_launch(to: Vector3) -> void:
 	var d := Vector2(to.x - pos.x, to.z - pos.z).length()
@@ -2175,8 +2176,8 @@ func _physics(dt: float) -> void:
 			_shove_along()
 		if not dash_pass.is_empty():
 			_pass_along()
-		if roll_t <= 0.0:
-			hv = HunterMove.dash_exit(roll_dir * roll_speed, spd)     # no hard stop: the run carries on
+		if roll_t <= 0.0:     # no hard stop: the run carries on, from the part of the step the dash had left
+			hv = HunterMove.dash_end_step(self, hv, HunterMove.dash_exit(hv, spd), roll_t + dt, dt)
 			glide_handoff(roll_dir, roll_speed)     # (movefeel) open the glider now and it keeps the burst
 			_last_burst = {}
 	elif fly_t > 0.0:
@@ -2269,7 +2270,7 @@ func _physics(dt: float) -> void:
 	elif roll_t > 0.0 and not grounded and not dropping:
 		vel.y = ak.dash_vy(dt) if ak else 0.0          # an air dash holds your height (a skate sinks)
 	elif not grounded:
-		vel.y = maxf(vel.y - H_GRAV * dt, -HunterMove.fall_cap(self))
+		HunterMove.fall(self, dt)
 	# a person walks straight off an island's edge and falls (then the glider and the abyss rules
 	# take over); only bots keep an edge guard, so walking can't carry one into the abyss by accident
 	var guard := ctrl == "bot" and grounded and roll_t <= 0.0 and hv.length() <= spd * 1.25
@@ -2371,6 +2372,7 @@ func _physics(dt: float) -> void:
 	# you inside the clump). Terrain ledges are the ledge rise's (_ledge_rise).
 	StoneStand.climb(self, maxf(b1, b2))      # the caster walking into her own rock rises onto it
 	StoneStand.mover = null
+	HunterMove.settle_dash_end(self)
 	var g := ground()
 	if grounded and g < pos.y - 0.05:
 		grounded = false
