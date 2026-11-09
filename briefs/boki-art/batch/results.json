@@ -33372,5 +33372,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_bladypus_full_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_bladypus_full",
+    "name": "Bladypus (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_bladypus_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bladypus_full",
+    "name": "Bladypus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bladypus_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sundormouse_card",
+    "name": "Sundormouse (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sundormouse_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "torpecone_card",
+    "name": "Torpecone (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/torpecone_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tootle_card",
+    "name": "Tootle (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tootle_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "torpecone_card",
+    "name": "Torpecone (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/torpecone_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tootle_card",
+    "name": "Tootle (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tootle_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_fawngus_full",
+    "name": "Fawngus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_fawngus_full_1.jpg",
+    "ok": true
   }
 ]
