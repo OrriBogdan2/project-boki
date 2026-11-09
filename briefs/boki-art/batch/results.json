@@ -31083,5 +31083,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_glaivyx_full_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_full",
+    "name": "Gongrowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_howlop_full",
+    "name": "Howlop (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_howlop_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_full",
+    "name": "Gongrowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_full",
+    "name": "Gongrowl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_howlop_full",
+    "name": "Howlop (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_howlop_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_howlop_full",
+    "name": "Howlop (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_howlop_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lashyx_full",
+    "name": "Lashyx (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lashyx_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lashyx_full",
+    "name": "Lashyx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lashyx_full_2.jpg",
+    "ok": true
   }
 ]
