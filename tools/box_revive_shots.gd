@@ -2,6 +2,8 @@ extends RefCounted
 ## --box-revive-shots --shots-dir=<dir>: review screenshots for box revives and beacons
 ## (docs/decisions/0018), in a live extraction match under xvfb with a renderer:
 ##   boxes_world      a teammate's box (their colour, face and name) beside a rival's (red)
+##   boxes_beams      the same boxes: a Legendary beam on the left, a Common one on the right
+##   boxes_emptied    the right box emptied: its beam off and its rim dimmed
 ##   boxes_minimap    the same two on the minimap (a crop of the top left)
 ##   boxes_full_map   the same two on the full map, zoomed in
 ##   revive_ring      bringing the teammate back: the ring round the box and over the reviver
@@ -36,6 +38,7 @@ func run(main_node: Node) -> void:
 	main.get_tree().quit(0)
 
 func _setup() -> void:
+	Settings.v["quality"] = "low"       # the beams have to read on the lowest preset
 	m = Match.new()
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
@@ -93,6 +96,13 @@ func _boxes() -> void:
 	P.inp["aim"] = home + Vector3(0, 0.9, -4)
 	await _go(1.0)
 	_take("boxes_world", "A teammate's box (left: their squad colour, face, name, soul timer) and a rival's (red)")
+	_give_gear(Life.box_of(m, B), 4)
+	await _go(0.3)
+	_take("boxes_beams", "Beam by best item: Legendary gold over the teammate's box (squad rim),"
+		+ " a short Common one over the rival's (red rim)")
+	_empty(Life.box_of(m, E))
+	await _go(0.3)
+	_take("boxes_emptied", "The rival's box emptied: beam off, rim dimmed; the teammate's still burns")
 	_crop_take("boxes_minimap", Rect2i(0, 0, 250, 250), 2.0, "The minimap: the teammate's box in their colour"
 		+ " (bright rim: it can still be revived), the rival's in red, beacons as mint diamonds")
 	m.hud.full_map.open()
@@ -102,6 +112,17 @@ func _boxes() -> void:
 	await _go(0.3)
 	_take("boxes_full_map", "The full map, zoomed in: the teammate's box with their name, the rival's in red")
 	m.hud.full_map.close()
+
+func _give_gear(b: Dictionary, rar: int) -> void:
+	b["gear"] = [{"id": Gear.ALL.keys()[0], "rar": rar}]
+	Life._settle_box(b)
+
+func _empty(b: Dictionary) -> void:
+	b["gems"] = 0
+	b["seeds"] = {}
+	for k in ["caught", "belt", "gear", "pack"]:
+		b[k] = []
+	Life._settle_box(b)
 
 func _ring() -> void:
 	var b := Life.box_of(m, _mate())

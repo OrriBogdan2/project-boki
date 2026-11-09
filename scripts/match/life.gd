@@ -227,6 +227,7 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 	m.add_child(n)
 	b["node"] = n
 	_mark_owner(m, b)
+	BoxBeam.refresh(b)
 	m.boxes.append(b)
 	return b
 
@@ -251,6 +252,7 @@ static func _mark_owner(m: Match, b: Dictionary) -> void:
 	ring.material_override = Models.ring_mat(col, 0.12)
 	ring.position.y = 0.05
 	n.add_child(ring)
+	n.set_meta("owner_col", col)
 
 ## Your latest box (an earlier one from before a revive can't bring you back any more).
 static func box_of(m: Match, h: Hunter) -> Dictionary:
@@ -457,6 +459,7 @@ static func _refresh_box(b: Dictionary) -> void:
 		lid.rotation.x = -1.1
 	var glow: Node3D = n.get_node_or_null("Glow")
 	if glow: glow.visible = not b["empty"]
+	BoxBeam.refresh(b)
 
 ## A teammate brought you back at your box: half health, and whatever's still in it.
 static func box_revive(m: Match, b: Dictionary, by: Hunter) -> void:

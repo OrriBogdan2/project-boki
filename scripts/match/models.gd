@@ -2597,8 +2597,6 @@ static func deathbox(col: Color) -> Node3D:
 	if own:
 		root.remove_child(own); own.free()      # a deathbox glows in its value colour, not a chest's
 	var g := Node3D.new(); g.name = "Glow"; root.add_child(g)
-	var beam := part(g, cyl(0.12, 0.24, 5.0, 10), glow_mat(Color(col, 0.3)), Vector3(0, 2.5, 0))
-	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ring := MeshInstance3D.new(); ring.mesh = flat_quad(1.6)
 	ring.material_override = ring_mat(col, 0.1); ring.position.y = 0.04
 	g.add_child(ring)

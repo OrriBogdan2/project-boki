@@ -90,6 +90,7 @@ func run(main: Node) -> void:
 	_moves(B, C)
 	_beacon(A, B, C, foe)
 	_bot(B, C, home)
+	_beam(m.hunters.filter(func(x): return x.team != A.team and x != foe)[0])
 	print("BOX REVIVE CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -153,6 +154,34 @@ func _hits(B: Hunter, C: Hunter, foe: Hunter) -> void:
 	var took := _channel(C, B, 15.0) - Match.DT * 2.0
 	ok(not B.out and absf(took - need) < 0.15,
 		"pressed again it starts over and takes the full %.1fs (%.2fs)" % [need, took])
+
+## The beam names the best item left in a box, the rim says whose it was, an empty box goes dark.
+func _beam(R: Hunter) -> void:
+	_spot(R, m.world.random_ground())
+	m.eliminate(R, null, "finished")
+	var bx := Life.box_of(m, R)
+	var beam := BoxBeam.beam_of(bx)
+	var rim := (bx["node"] as Node3D).get_node_or_null("OwnerRing") as MeshInstance3D
+	ok(beam != null and beam.visible and BoxBeam.best_tier(bx) == 0, "a box with nothing rare shows a Common beam")
+	bx["gear"] = [{"id": Gear.ALL.keys()[0], "rar": 3}]
+	bx["pack"] = [Loot.valuable("crown_shard")]
+	Life._settle_box(bx)
+	ok(BoxBeam.best_tier(bx) == 4, "the beam takes the best item's rarity (Legendary)")
+	ok(beam.position.y * 2.0 > BoxBeam.HEIGHT_M[0] and rim != null, "a better find makes a taller beam")
+	var rim_col: Color = (rim.material_override as ShaderMaterial).get_shader_parameter("color")
+	ok(Color(rim_col, 1.0) == Life.owner_col(m, bx), "a rival's box has the red rim")
+	bx["gear"] = []
+	bx["pack"] = []
+	bx["gems"] = 0
+	bx["seeds"] = {}
+	bx["caught"] = []
+	bx["belt"] = []
+	bx["keys"] = 0
+	bx["chest_keys"] = 0
+	bx["backpack"] = Backpacks.POUCH
+	Life._settle_box(bx)
+	var dim: float = (rim.material_override as ShaderMaterial).get_shader_parameter("color").a
+	ok(bx["empty"] and not beam.visible and dim < rim_col.a, "an emptied box: beam off, rim dimmed")
 
 func _moves(B: Hunter, C: Hunter) -> void:
 	_spot(B, C.pos + Vector3(2.5, 0, 0))
