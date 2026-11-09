@@ -21,6 +21,7 @@ const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 ## speed, and the arms swing against their legs at least this much (-1: with, +1: against; reach-weighted).
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
+const MAX_FREE := 0.1        # a move with data "free_arm" keeps that arm out for at most this share of the clip
 const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
@@ -83,6 +84,11 @@ func _hero(main: Node, id: String) -> void:
 		if weapon == "":
 			weapon = row["attacks"][nm]["weapon_hand"]
 	row["weapon_hand"] = weapon
+	for nm in row["attacks"]:
+		if clips.d.get("free_arm", {}).has(nm) and row["attacks"][nm]["t_free"] > MAX_FREE:
+			print("FAIL %s %s: the free arm stands out for %d%% of the clip (limit %d%%)" % [id, nm,
+					round(100.0 * row["attacks"][nm]["t_free"]), round(100.0 * MAX_FREE)])
+			bad += 1
 	rows[id] = row
 	var top: Dictionary = live[str(SPEEDS[2])]
 	print("AUDIT %-10s H %.2f run: slide %.2f m/s (%d%%) clip %.2f m/s arms %.2f bob %.1f cm peaks %d" % [id, hgt,
