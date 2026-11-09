@@ -15,6 +15,8 @@ func run(main_node: Node) -> void:
 	own.main = main_node
 	var launch = load("res://tools/bjorn_launch_check.gd").new()
 	launch.main = main_node
+	if both:
+		load("res://tools/damage_ratio_check.gd").run(self)
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		await ult.pin()
