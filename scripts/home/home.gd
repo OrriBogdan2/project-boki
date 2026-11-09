@@ -1034,11 +1034,10 @@ func _process(delta: float) -> void:
 			elif Input.is_action_just_pressed("talk"): _open_chat(interact["k"]["rec"])
 			elif Input.is_action_just_pressed("details"): _open_kin(interact["k"]["rec"])
 
-# ---- moving at home: walk, jump, dash (Shift, your class's dodge) and glide (hold Space in the air).
+# ---- moving at home: walk, jump, dash (Shift, your class's dodge) and glide (press Space again in the air).
 # py is your feet's height (terraces are 0.8 each). Off the edge you can glide over to another isle;
 # drop into the sky and the wind sets you back down where you last stood.
 var gliding := false
-var glide_hold := 0.0
 var dash_t := 0.0
 var dash_v := Vector2.ZERO
 var dash_charges := 2.0
@@ -1226,17 +1225,15 @@ func _move_player(d: float) -> void:
 			unstick()
 	gh = _ground_h(ppos.x, ppos.z)
 	air = py > gh + 0.001 or pvy > 0.0
-	# jump; in the air, a second press (or holding Space, or the glide key) opens the glider
+	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
 	var jump_now := can_act and Input.is_action_just_pressed("jump")
 	if jump_now and not air:
 		pvy = water.breach(JUMP_V) if water.swimming else JUMP_V      # from deep water: a kick up and out
 		air = true
-		glide_hold = 0.0
 		Sfx.play("jump", null, -12.0)
 	elif air and can_act:
 		var holding := Input.is_action_pressed("jump") or Input.is_action_pressed("glide")
-		glide_hold = glide_hold + d if holding else 0.0
-		if not gliding and dash_t <= 0.0 and ((jump_now and lfl.is_empty()) or Input.is_action_just_pressed("glide") or (lfl.is_empty() and holding and glide_hold > Hunter.GLIDE_ENGAGE and pvy < 2.0)):
+		if not gliding and dash_t <= 0.0 and ((jump_now and lfl.is_empty()) or Input.is_action_just_pressed("glide")):
 			gliding = true
 			Sfx.play("whoosh", null, -10.0, 0.1, 0.8)
 		elif gliding and not holding:
@@ -1529,7 +1526,6 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 		if hv.dot(dir) < spd: hv += dir * (spd - hv.dot(dir))
 		pvel = Vector3(hv.x, 0, hv.y)
 		pvy = sqrt(2.0 * GRAV * (maxf(0.0, left) + (Hunter.FLING_HEIGHT if timed else Hunter.FLING_EARLY_HEIGHT)))
-		glide_hold = 0.0
 		Sfx.play("whoosh" if timed else "jump", null, -8.0, 0.1, 1.3)
 		return true
 	if left <= 0.0:
