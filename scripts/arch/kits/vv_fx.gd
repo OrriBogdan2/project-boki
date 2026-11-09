@@ -65,15 +65,17 @@ static func of(match_node: Node) -> VVFx:
 	return n
 
 ## The loading screen's rehearsal (ArchKit.warm_fx, from Match.warm_up): one of every kind played for a blink at
-## `at`, so the first cast makes no node, mesh or material mid-fight and warm_up's scan draws them all. The local
-## Hunter's after-images are copied now too (ECHO_CAP of them, a dash leaves 7): the first dash built 391 meshes.
+## `at`, so the first cast makes no node, mesh or material mid-fight and warm_up's scan draws them all. The Hunter's
+## after-images are copied now too (ECHO_CAP of them, a dash leaves 7): his first dash built 391 meshes.
 ## mark_pips: the Static marker's pip count (it is built for one count), 0 for a kit with no marker.
-func prewarm(at: Vector3, who: Hunter, mark_pips := 0) -> void:
+## deep: arcs and smears the kit strings up in one frame (a Coil hit, a flying burr), one pooled node each.
+func prewarm(at: Vector3, who: Hunter, mark_pips := 0, deep := 1) -> void:
 	var b := at + Vector3.RIGHT
 	var w := Color.WHITE
-	arc(at, b, w, w, 0.5, WARM_T)
+	for i in deep:
+		arc(at, b, w, w, 0.5, WARM_T)
+		smear(at, b, w, w, 0.3, WARM_T)
 	beam(at, b, w, w, 0.9, WARM_T)
-	smear(at, b, w, w, 0.3, WARM_T)
 	pillar(at, w, w, 6.0, 0.9, WARM_T)
 	ring(at, 1.0, w, w, WARM_T)
 	disc(at, 1.0, w, w, WARM_T)
@@ -84,8 +86,7 @@ func prewarm(at: Vector3, who: Hunter, mark_pips := 0) -> void:
 	if mark_pips > 0:
 		marker("warm", who, 1, mark_pips, w, w, 2.0)
 		unmark("warm")
-	if who.is_local():
-		for i in ECHO_CAP: echo(who, w, WARM_T)
+	for i in ECHO_CAP: echo(who, w, WARM_T)
 
 # ------------------------------------------------------------------ pool
 func _mat(mode: int, bb := false) -> ShaderMaterial:
