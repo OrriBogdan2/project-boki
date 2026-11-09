@@ -9810,5 +9810,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_mycroll_p_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_nettlynx_p",
+    "name": "Nettlynx (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_nettlynx_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipewurm_p",
+    "name": "Pipewurm (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pipewurm_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_murmurling_p",
+    "name": "Murmurling (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_murmurling_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_murmurling_p",
+    "name": "Murmurling (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_murmurling_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rampartoad_p",
+    "name": "Rampartoad (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rampartoad_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenfin_p",
+    "name": "Selenfin (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_selenfin_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_p",
+    "name": "Rimeshrew (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenfin_p",
+    "name": "Selenfin (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_selenfin_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_snuffapi_p",
+    "name": "Snuffapi (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_snuffapi_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove_p",
+    "name": "Ringrove (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_p",
+    "name": "Rimeshrew (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skateron_p",
+    "name": "Skateron (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_p_2.jpg",
+    "ok": true
   }
 ]
