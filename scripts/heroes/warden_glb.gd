@@ -215,6 +215,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	sync.use_clips(glb, art(arch))
+	sync.pals = PipOrbit.make(root, glb, skel, art(arch))     # (before _toon and the mood: they dress its pieces)
 	sync.square_blade = float(Arch.body(arch).get("bulk", 1.0)) != 1.0
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
@@ -898,6 +899,7 @@ class Sync extends Node:
 	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
 	var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
 	var mood: WardenMood          # a face on glass and a hanging companion, when the art has them
+	var pals: PipOrbit            # Meeko's sun and moon circling her
 	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
@@ -979,6 +981,8 @@ class Sync extends Node:
 		orbits.step(dt)
 		if mood:
 			mood.step(dt)
+		if pals:
+			pals.step(dt)
 		if sway:
 			sway.tumble(dt, orbits.pivots)
 		if bool(root.get_meta(CHAIN_OUT, false)):
