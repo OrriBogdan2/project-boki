@@ -10874,5 +10874,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_kitlet_pe_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_kindlewren_pe",
+    "name": "Kindlewren (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kindlewren_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kitlet_pe",
+    "name": "Kitlet (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kitlet_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_knotwyrm_pe",
+    "name": "Knotwyrm (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_knotwyrm_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunowl_pe",
+    "name": "Lunowl (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lunowl_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_knotwyrm_pe",
+    "name": "Knotwyrm (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_knotwyrm_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanterloris_pe",
+    "name": "Lanterloris (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lanterloris_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanterloris_pe",
+    "name": "Lanterloris (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lanterloris_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunowl_pe",
+    "name": "Lunowl (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lunowl_pe_2.jpg",
+    "ok": true
   }
 ]
