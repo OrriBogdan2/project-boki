@@ -1,7 +1,8 @@
 class_name BotRamp
 extends RefCounted
 ## Gentler backfill bots for a new player (DECISIONS 11-08: an Extraction is always 10 trios, bots
-## fill the empty slots). Over the first RAMP_MATCHES finished matches the bots' knobs (aim, reaction,
+## fill the empty slots). Over the first RAMP_MATCHES finished Extractions (the save's "ramp_n"; the
+## tutorial match doesn't count) the bots' knobs (aim, reaction,
 ## damage, trigger time, abilities, chase) climb from the Easy profile to the tier's normal one:
 ## match 1 is pure Easy, the 4th is normal. For the first RAMP_MATCHES matches the bots also hold
 ## their ultimates for the first NO_ULT_S seconds. Bots only: humans are never touched.
@@ -27,8 +28,23 @@ static func cfg(base: Dictionary, matches: int) -> Dictionary:
 static func matches_for(opts: Dictionary) -> int:
 	var roster: Array = (opts.get("net", {}) as Dictionary).get("roster", [])
 	if roster.is_empty():
-		return int(Save.d.get("matches", 0))
+		return played()
 	var n := RAMP_MATCHES
 	for r in roster:
 		n = mini(n, int((r as Dictionary).get("matches", RAMP_MATCHES)))
 	return n
+
+## Finished real Extractions: the tutorial match and training never count.
+static func played() -> int:
+	return int(Save.d.get("ramp_n", Save.d.get("matches", 0)))
+
+## Counts a finished match for the ramp (Game.apply_result).
+static func count(r: Dictionary) -> void:
+	if not r.get("tutorial", false):
+		Save.d["ramp_n"] = played() + 1
+
+## A save from before the ramp has no "ramp_n": its finished matches stand in, so a veteran stays a
+## veteran. Keyed by its own field, like FarmBuilder.migrate.
+static func migrate(data: Dictionary) -> void:
+	if not data.has("ramp_n"):
+		data["ramp_n"] = int(data.get("matches", 0))

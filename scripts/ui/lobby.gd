@@ -78,7 +78,7 @@ func _announce() -> void:
 	if arch != Arch.of_save():
 		cls = Arch.weight(arch)
 		weapon = Arch.signature(arch)
-	Net.set_presence({"name": Save.d.get("name", "Hunter"), "cls": cls, "weapon": weapon, "arch": arch, "ready": is_ready, "lobby": 1, "matches": int(Save.d.get("matches", 0)),
+	Net.set_presence({"name": Save.d.get("name", "Hunter"), "cls": cls, "weapon": weapon, "arch": arch, "ready": is_ready, "lobby": 1, "matches": BotRamp.played(),
 		"kin": {"species": k.get("species", "cindle"), "level": int(k.get("level", 1)), "name": k.get("name", "Boki"), "traits": k.get("traits", {}), "trust": float(k.get("trust", 50))}})
 
 func _toggle_ready() -> void:

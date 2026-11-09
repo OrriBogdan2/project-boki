@@ -80,6 +80,7 @@ func fresh() -> Dictionary:
 		"plots": _empty_plots(4),
 		"plot_cap": 4,
 		"matches": 0,
+		"ramp_n": 0,          # finished Extractions, for gentler backfill bots early on (BotRamp)
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
 		"tutorial": {},
@@ -436,6 +437,7 @@ func load_from(p: String) -> void:
 		if not migrate(parsed):
 			return
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
+	BotRamp.migrate(parsed)
 	for k in parsed:
 		d[k] = parsed[k]
 	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked

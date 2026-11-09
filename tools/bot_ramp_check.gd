@@ -49,9 +49,20 @@ func _profiles() -> void:
 func _online_and_save() -> void:
 	Save.d = Save.fresh()
 	ok(BotRamp.matches_for({}) == 0, "a fresh save counts 0 matches")
+	Save.d.erase("ramp_n")
 	Save.d.erase("matches")
 	ok(BotRamp.matches_for({}) == 0, "a save with no count reads as brand new")
-	Save.d["matches"] = 40
+	BotRamp.count({"tutorial": true})
+	ok(BotRamp.played() == 0, "the tutorial match does not use up a gentle match")
+	BotRamp.count({"extracted": false})
+	ok(BotRamp.played() == 1, "a finished real Extraction counts, won or lost")
+	var old := {"v": 5, "matches": 7}
+	BotRamp.migrate(old)
+	ok(int(old["ramp_n"]) == 7, "an old save's matches carry over, so a veteran stays a veteran")
+	var cur := {"matches": 9, "ramp_n": 2}
+	BotRamp.migrate(cur)
+	ok(int(cur["ramp_n"]) == 2, "a save that has the count keeps it")
+	Save.d["ramp_n"] = 40
 	var net := {"net": {"roster": [{"matches": 40}, {"matches": 1}, {"matches": 12}]}}
 	ok(BotRamp.matches_for(net) == 1, "online: the host's view of the newest human sets the ramp")
 	net = {"net": {"roster": [{"matches": 40}, {"matches": 12}, {"name": "old client"}]}}
@@ -60,7 +71,7 @@ func _online_and_save() -> void:
 
 func _start(matches: int, o := {}) -> Match:
 	Save.d = Save.fresh()
-	Save.d["matches"] = matches
+	Save.d["ramp_n"] = matches
 	var m := Match.new()
 	main.add_child(m)
 	var opts := {"teams": 3, "squad": 3, "tier": 1, "length": 1e9, "seed": 11, "no_drop": true, "autoplay": true}
