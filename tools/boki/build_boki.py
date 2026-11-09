@@ -42,7 +42,8 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "mossgrade": ("mossgrade", "mossgrade", "mossgrade_anim"),
          "nettlynx": ("nettlynx", "nettlynx", "nettlynx_anim"),
          "thrumbird": ("thrumbird", "thrumbird", "thrumbird_anim"),
-         "caecilith": ("zippelith", "zippelith", "zippelith_anim")}
+         "caecilith": ("zippelith", "zippelith", "zippelith_anim"),
+         "scaldamus": ("chuggamus", "chuggamus", "chuggamus_anim")}
 creature = paint = anim = None
 ATLAS_PX = 2048
 GROWN_K = 0.22         # most Boki show one or two grown parts; all of them hide in every tri count
