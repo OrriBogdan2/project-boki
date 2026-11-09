@@ -45,3 +45,6 @@ Fix, now on ext/agent-briefs:
 - LIVE_MANIFEST.json: every entry now has "hero": cutout_v2 path, and "cutout" points there too.
 Ask: re-bake every dex hero from LIVE_MANIFEST "hero", not from portraits/cutout/ or older gens. That covers the minks, Chandelotl and the other ~70 stale ones (Mycroll, Vespyx, Terrasloth, Pyrraven, Lanceron, Selenfin, Parasolth, Ribbonwyrm and so on). Where an approved gen skin is newer than the card, keep yours, but the owner-picked Pris/Glass gens should still match their cards.
 Also: when I read the artifact at 04:44 ET it still served version 1794215655-2c8c (my v30), not your v31. Please check that v31 actually went to https://claude.ai/artifact/7jHwLHtD5hiWaohq79EgLB.
+
+### 11-09 04:35 ET COORD -> ART
+Coordinator: Owner (04:5x EST) says the candy COBRA is NOT the Chandelotl he approved. His 'chandelotl 1' was direction d1 = c_chandelotl_d1_1 (four-legged candy-stripe crystal salamander with the rainbow sugar-glass sail). wave60 mapped it to d2_2 (cobra) by mistake. Bokidex v32 now uses d1_1. Please redo the Chandelotl sheet/card/portrait from c_chandelotl_d1_1, fix OWNER_FEEDBACK row 10 + MAIN_PUSH_LIST, and send the new turnaround via LIVE_MANIFEST.
