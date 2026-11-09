@@ -131,7 +131,7 @@ func add_mark(t: Ent, n := 1, force := false) -> void:
 ## Filling the diamonds over the target chimes. Marks have no cap, so they keep climbing past it.
 func _on_marks(t: Ent, had: int, c: int) -> void:
 	if had < pip_count() and c >= pip_count():
-		m.sfx("unlock", t.pos, -6.0, 1.7)
+		m.sfx("thief_pip_chime", t.pos, -6.0)
 
 func clear_marks(t: Ent) -> void:
 	var mk: Dictionary = t.get_meta("marks", {})
@@ -582,7 +582,7 @@ func _reset_fx(t: Ent) -> void:
 	var at_hand := hand_pos(hand == 1)
 	fx().star(at_hand, Color.WHITE, 1.4, 0.28, GHOST)
 	m.fx.word(at_hand + Vector3(0, 0.7, 0), "RESET", GHOST, false)
-	m.sfx("pay_cashin", at, -2.0, 1.0)
+	m.sfx("thief_reset_chime", at, -2.0)
 	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
@@ -680,7 +680,7 @@ func _tick_bola(dt: float) -> void:
 				bola["bounces"] = int(bola["bounces"]) - 1
 				bola_bounces += 1
 				m.fx.spark(p, Vector3.UP, col_of(rmb_def()), 8, 6.0, 70.0)
-				m.sfx("click", p, -5.0, 1.4)
+				m.sfx("thief_bola_ricochet", p, -5.0)
 				continue
 			_end_bola(p)
 			return
@@ -882,7 +882,7 @@ func _shadow_step(tgt: Ent) -> void:
 	_blink(ground(at))
 	var dv := Vector2(tgt.pos.x - h.pos.x, tgt.pos.z - h.pos.z)
 	if dv.length() > 0.05: h.face = atan2(-dv.x, -dv.y)
-	m.sfx("swipe", h.pos, -4.0, 1.9)
+	m.sfx("thief_shadowstep", h.pos, -4.0)
 
 ## The blink: a near-instant jump with a chain of cyan afterimages from where she was to where she lands.
 func _blink(to: Vector3) -> void:

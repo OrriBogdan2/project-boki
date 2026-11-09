@@ -304,6 +304,13 @@ def death():
     return pad(mix(fo(lpf(v, 5500), 0.4), exhale, fo(wind), sputter), 1.8)
 
 
+# ------------------------------------------------------------------ ion needle end
+def skewer():
+    """The ion needle pinning a target: a thin hard crack, a short metallic ring and a low thud."""
+    return mix(crack(0.04, 3000, 10000, 0.012) * 0.8, S.fm(1500, 2.3, 5.0, 0.3, 0.12) * 0.6,
+               kick(220, 70, 0.3, 0.03, 0.09) * 0.8)
+
+
 def build():
     S.takes_cat('vn_rifle', rifle, 3, 'fire')
     S.save_cat('gunslinger_spinup', spinup(), 'signature')
@@ -325,6 +332,7 @@ def build():
     S.takes_cat('gunslinger_hurt', hurt, 3, 'grunt')
     S.save_cat('gunslinger_down', down(), 'grunt')
     S.save_cat('gunslinger_death', death(), 'grunt')
+    S.save_cat('gunslinger_skewer', skewer(), 'impact')
 
 
 if __name__ == '__main__':

@@ -667,7 +667,7 @@ func _fire_needle() -> void:
 				# the word rides up the screen, clear of the damage number on the body
 				payoff_fx(f.pos, "", EMBER, "", h.dir_to(f), f)
 				m.fx.word(f.pos + Vector3(0, 2.7, 0) + fx().screen_up() * 1.3, "SKEWERED", EMBER, true)
-				m.sfx("hero_skewer", f.pos, 0.0)
+				m.sfx("gunslinger_skewer", f.pos, 0.0)
 	if hits > 0:
 		var maxcd := float(ed["cooldown"]) * cd_k("kin")
 		var cut := float(ed["shave"])

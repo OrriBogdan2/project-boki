@@ -31,7 +31,9 @@
 		"bulwark_step_snow": "step",
 		"bulwark_hurt": "grunt",
 		"bulwark_down": "grunt",
-		"bulwark_death": "grunt"
+		"bulwark_death": "grunt",
+		"bulwark_ready": "cast",
+		"bulwark_interrupt": "impact"
 	},
 	"signature": ["bulwark_hammer_clang", "bulwark_hull_creak"],
 	"kit_files": ["bjorn_ult.gd"],

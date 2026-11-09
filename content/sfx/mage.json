@@ -27,7 +27,8 @@
   "mage_step_snow": "step",
   "mage_hurt": "grunt",
   "mage_down": "grunt",
-  "mage_death": "grunt"
+  "mage_death": "grunt",
+  "mage_rod_slam": "impact"
  },
  "signature": [
   "mage_zap",

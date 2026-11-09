@@ -668,7 +668,7 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		f.hurt(0.1, h, slam)
 		m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 1.0, "SLAMMED", PINK, false)   # over STUNNED
 		fx().ring(ground(f.pos), 1.6, PINK, COPPER, 0.25)
-		m.sfx("ab_wall", f.pos, -2.0, 1.3)
+		m.sfx("mage_rod_slam", f.pos, -2.0)
 		if other != null:
 			other.hurt(0.1, h, slam.duplicate(true))
 			add_spark(other)

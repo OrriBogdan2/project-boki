@@ -28,7 +28,10 @@
   "tender_step_snow": "step",
   "tender_hurt": "grunt",
   "tender_down": "grunt",
-  "tender_death": "grunt"
+  "tender_death": "grunt",
+  "tender_drop": "impact",
+  "tender_hearth_snuff": "cast",
+  "tender_tether_snap": "impact"
  },
  "signature": ["tender_lantern_chime", "tender_cheer"],
  "kit_files": ["care_util.gd"],

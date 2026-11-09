@@ -24,7 +24,8 @@
   "gunslinger_step_snow": "step",
   "gunslinger_hurt": "grunt",
   "gunslinger_down": "grunt",
-  "gunslinger_death": "grunt"
+  "gunslinger_death": "grunt",
+  "gunslinger_skewer": "impact"
  },
  "signature": [
   "gunslinger_spinup",

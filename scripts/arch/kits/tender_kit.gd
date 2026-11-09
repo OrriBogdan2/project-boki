@@ -265,7 +265,7 @@ func drop_all(broken: bool) -> void:
 	if broken:
 		lock_t = float(d["passive"].get("lock", 4.0))
 		m.fx.word(h.pos + Vector3(0, 2.4, 0), "DROPPED", Color("ff8a6a"), false)
-		m.sfx("knock", h.pos, -4.0, 1.2)
+		m.sfx("tender_drop", h.pos, -4.0)
 
 # ------------------------------------------------------------------ dash: Relay Step
 func on_dash(use_ex: bool) -> bool:
@@ -604,7 +604,7 @@ func _hearth_end(flare: bool, word: String) -> void:
 				_mend(o, amt * (float(ed.get("self_k", 0.33)) if o == h else 1.0))
 	else:
 		m.fx.word(c + Vector3(0, 2.0, 0), word, Color("ff8a6a"), false)
-		m.sfx("knock", c, -6.0, 1.4)
+		m.sfx("tender_hearth_snuff", c, -4.0)
 	lk().drop("hearth")
 	hearth = {}
 	e_t = 0.0
@@ -784,7 +784,7 @@ func _call_end(done: bool) -> void:
 	if not done or who == null:
 		stats["broken"] += 1
 		m.fx.word(h.pos + Vector3(0, 2.4, 0), "BROKEN", Color("ff8a6a"), false)
-		m.sfx("knock", h.pos, -8.0, 1.5)
+		m.sfx("tender_tether_snap", h.pos, -5.0)
 		if anim_id == "mm_call_hold":
 			anim_id = ""
 		return

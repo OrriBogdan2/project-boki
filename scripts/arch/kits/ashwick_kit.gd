@@ -168,7 +168,7 @@ func _flashover_fx(f: Ent) -> void:
 	m.fx.word(f.pos + Vector3(0, 2.7, 0), "FLASHOVER", col, true)
 	vfx("flashover", f.pos)
 	m.sfx("lw_blaze", f.pos, 0.0, 1.0)
-	m.sfx("crit", f.pos, -7.0, 0.85)
+	m.sfx("ashwick_flashover", f.pos, -4.0)
 	if h.is_local() and m.hud:
 		m.hud.flash(col, 0.12)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
@@ -680,7 +680,7 @@ func _cloak_blast() -> void:
 		h.shield = maxf(h.shield, h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k)
 		h.shield_t = float(ed["shield_t"])
 		st["shield_on"] = true
-		m.sfx("shield", h.pos, -5.0, 0.9)
+		m.sfx("ashwick_cloak_shield", h.pos, -4.0)
 
 # ------------------------------------------------------------------ X: Flue Flight
 func cast_ult() -> bool: return HeroUlt.press(self, jet.start)

@@ -26,7 +26,8 @@
   "dolm_step_grass": "step",
   "dolm_step_stone": "step",
   "dolm_step_wood": "step",
-  "dolm_step_snow": "step"
+  "dolm_step_snow": "step",
+  "dolm_glide_fold": "cast"
  },
  "kit_files": ["breah_slam.gd", "breah_spine.gd"],
  "signature": ["dolm_rock_crunch"],

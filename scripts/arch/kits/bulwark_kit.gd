@@ -441,7 +441,7 @@ func _hold_tell() -> void:
 		fx.full_flare()
 		AimKit.flare(h, {"col2": Color("fff1c0")})
 		m.sfx("bjorn_glint", h.pos, -3.0 if h.is_local() else -8.0)
-		m.sfx("click", h.pos, -2.0 if h.is_local() else -9.0, 1.6)
+		m.sfx("bulwark_ready", h.pos, -2.0 if h.is_local() else -9.0)
 
 ## Charge 0..1 of the Crushing Blow being held.
 func smash_k() -> float:
