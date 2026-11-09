@@ -133,7 +133,7 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | Ult: the final shot hits harder and executes; shots shred armor | [wiki](https://supervive.wiki.gg/wiki/Myth), card text | final number not legible | built: 25 vs 18, execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
 | Ult: she walks and dodges between shots | sheet | confirms (walks f50-f62) | built: no slow, Spirit Walk keeps the shots | `pin ult small: she can move...`, `... Spirit Walk between shots keeps them` |
 | Ult: a wall stops the beam | ours | - | built | `pin ult small: a wall stops the beam` |
-| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | not built: our downed hunters aren't hit by ability damage (Assumptions) | - |
+| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | not built: needs a downed branch in Hunter.hurt, magnitude unknown; see docs/specs/DOWNED_ABILITIES.md rule 2 | - |
 
 ## Kit data pass (SERVER_UPDATE7, in-game data wins over the footage)
 | Item | Before | After | Conversion |
