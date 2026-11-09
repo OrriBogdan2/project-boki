@@ -5490,3 +5490,4 @@ READY ext/garden-away-card b0d474805 (journal + one away card, stacked on READY 
 
 READY ext/duel-ring-online 4b27b61bc (Training Grounds duel ring: Find a duel online queue with searching and Cancel, Fight a bot; no friend button as no 1v1 invite exists; built on ext/training-area-1108 and ext/servers, neither on main)
 READY ext/online-displace-100ms 86dc2ae7a (--online-displace-check: 7 Hunter-moving abilities measured with 100 ms delay through a headless relay + 2 games, docs/ONLINE_FEEL.md; no double move, ends agree; gap: Sparkle crash steps 4-5.7 m on the other game, in DEBT.md)
+READY ext/bot-kit-use-b a2dc282d1 (bots use Sparkle's Skycall drag and Kitefall strike, Meeko's Hearthlight throw, Lace's Starpiercer, Motley's lantern lead; tools/bot_kit_use.gd + docs/BOT_KIT_USE.md counts)
