@@ -27,7 +27,7 @@ const WARDENS := {
 	"dolm": {"hit_r": 0.388, "height": 1.09, "height_3d": 1.08, "width": [0.7, 1.5], "moves": "breah_"},
 	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
 	# (Motley's top counts his hover: 0.3 m, the source's (HOVER_H), puts it 0.1x over his box; the cards widen him)
-	"ostra": {"hit_r": 0.412, "height": 1.28, "height_3d": 1.3, "width": [0.5, 1.6], "moves": "ostra_"},
+	"ostra": {"hit_r": 0.412, "height": 1.28, "height_3d": 1.26, "width": [0.5, 1.6], "moves": "ostra_"},
 	# (Claire, the v2 design: the ears stand over her head; at the chart's 0.96x she is slim, as Vex)
 	"rimewright": {"hit_r": 0.38, "height": 0.96, "height_3d": 1.06, "width": [0.5, 1.25], "moves": "tm_"},
 	# (Cinder v2: her built lizard horns stand over her head; the chart's taller Cinder is wider by as much)
