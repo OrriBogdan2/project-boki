@@ -887,7 +887,7 @@ func produced(at: Vector3, text: String, el: String, _what: String) -> void:
 	feed(text, Work.col_of(el), el)
 
 func feed(text: String, col: Color, el := "") -> void:
-	if h.root_ui == null:
+	if h.root_ui == null or FarmUnlocks.base_mode():
 		return
 	if not is_instance_valid(feed_box):
 		feed_box = UI.vbox(4)
