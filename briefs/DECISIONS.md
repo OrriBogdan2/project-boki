@@ -486,3 +486,8 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - Owner (11-09 ~10 PM EST): "first i want to get the hunters (and enemy mobs) perfect", then "a fable agent doing cel-shading and edits on the whole cast once its done - then we can do the 3d modeling".
 - Order: (1) the 12 hunters (v95 lane) and the 7 enemy mobs (skitter, spitter, brute, warden, bomber, sentinel, glimmer) are brought to final quality first; (2) once the 2D Boki art is complete, one Fable-judged cel-shade + edit pass over the whole Boki cast for consistency; (3) only then Boki 3D (Meshy recipe study and batch). Boki-to-3D work (Meshy pilot, "replace primitive Boki with Meshy") is HELD until step 3; don't start new Boki 3D jobs.
 - Animation: keep our Blender rig-contract clips; Meshy/Mixamo/Uthana clips only as tested candidates, not production defaults (coordinator test pending).
+
+## 2026-11-09 ~10:40 PM EST owner: approval gates + mob sheets + animation now
+- GATES (owner approves each step, nobody advances on their own): hunters -> mobs -> Boki. Boki are approved in BATCHES OF 30.
+- Mobs get turnaround sheets in one consistent format for all mobs (docs/art/mobs/TURNAROUND_SPEC.md). Reference SUPERVIVE PvE creatures for readability/function only, never designs/names/art; extra or different archetypes welcome.
+- Animation: replaces the 11-09 "animation stays on rig-contract clips" line. Coordinator runs an animation-quality lane now (hunters first): AI auto-rig + motion pilots vs current clips, judged by Fable. Rig contract stays the integration target.
