@@ -55,6 +55,13 @@ func _flat(a: Dictionary, b: Dictionary) -> float:
 	return Vector2(a["pos"].x - b["pos"].x, a["pos"].z - b["pos"].z).length()
 
 ## The check's farm: five Boki gathered in one spot, Ash and Crag friends, Moss grumpy.
+## All the farm Boki within a few metres of one spot on the home island.
+func _gather(home) -> void:
+	var center: Vector3 = home.world.random_ground(0)
+	for k in home.kins:
+		k["pos"] = home.world.free_spot_near(center + Vector3(randf_range(-3, 3), 0, randf_range(-3, 3)), [], 0.8)
+		(k["node"] as Node3D).position = k["pos"]
+
 func _setup() -> Node:
 	Save.no_write = true
 	seed(21)
@@ -65,10 +72,7 @@ func _setup() -> Node:
 	Care.change(recs[2], "joy", -100.0)            # Moss is grumpy
 	var home = await main._hb_home()
 	home.ppos = Vector3(-500, 0, -500)       # you are away
-	var center: Vector3 = home.world.random_ground(0)
-	for k in home.kins:
-		k["pos"] = home.world.free_spot_near(center + Vector3(randf_range(-3, 3), 0, randf_range(-3, 3)), [], 0.8)
-		(k["node"] as Node3D).position = k["pos"]
+	_gather(home)
 	return home
 
 ## --garden-night-shots: the same farm at dusk (Boki walking to bed) and at night (a pile asleep, Pip and Wisp
@@ -79,6 +83,17 @@ func _shots(home) -> void:
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
+	# a slow GPU worker is still building the farm in slices here: wait for it and its five Boki, then place them
+	var waited := 0.0
+	while (home.building or home.kins.size() < 5) and waited < 120.0:
+		await main.get_tree().create_timer(0.5).timeout
+		waited += 0.5
+	print("GARDENNIGHT farm ready after %.1f s (%d kins)" % [waited, home.kins.size()])
+	if home.kins.is_empty():
+		push_error("GARDENNIGHT no Boki on the farm, no shots")
+		main.get_tree().quit(1)
+		return
+	_gather(home)
 	home.ppos = home.kins[0]["pos"] + Vector3(0, 0, 5)     # on the farm, not out in the void (no wind toast)
 	home.safe_at = home.ppos
 	home.player.position = home.ppos
