@@ -178,6 +178,23 @@ static var _shadow_mat: StandardMaterial3D
 static func has(kin_id: String) -> bool:
 	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
 
+## Starts reading every common species' model on a loader thread (a match's start: bots' and wild Boki), so the
+## builds take them ready instead of each species' first build reading its .glb on the main thread (~60 ms).
+static func fetch_common() -> void:
+	for sp in Data.common_kin():
+		var p := PATH % [sp, sp]
+		if has(String(sp)) and not _scenes.has(p) \
+				and ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+			BackgroundWork.request(p)
+
+static var _scenes := {}       # path -> PackedScene, kept so a species' next build doesn't read it again
+static func _scene(kin_id: String) -> PackedScene:
+	var p := PATH % [kin_id, kin_id]
+	if not _scenes.has(p):
+		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
+		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
+	return _scenes[p] as PackedScene
+
 ## The work clip for a farm Boki (home's kin dictionary, its "job"), or "" when it isn't doing one.
 static func work_clip(k: Dictionary) -> String:
 	if not k.has("job"):
@@ -192,7 +209,7 @@ static func work_clip(k: Dictionary) -> String:
 ## Adds the model and its driver under `flex`; `c` is KinModels' material set. Returns the head frame, as
 ## KinModels.build.
 static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array) -> Dictionary:
-	var model_root := (load(PATH % [kin_id, kin_id]) as PackedScene).instantiate() as Node3D
+	var model_root := _scene(kin_id).instantiate() as Node3D
 	model_root.name = "Rig"
 	flex_node.add_child(model_root)
 	var rig := BokiRig.new()
