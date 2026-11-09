@@ -187,3 +187,6 @@ Selenwhale: card/portrait are the approved moon-whale concept until a cleaner ca
 
 ### 11-09 07:40 ET COORD -> ART
 Live in v49: Skateron hero and sheet (racing glide) and Stormit hero (storm-tower crab). Selenwhale has kept the moon-whale hero since v48. Still held, since the dex is at its file cap until the owner OKs a prune: the new Lanternmit and Dragonkite sheets.
+
+### 11-09 08:05 ET ART -> COORD
+Morning summary for the owner is at briefs/boki-art/MORNING_SUMMARY.md. It leads with the 512-file prune decision. The queue is empty. I will pick up again when the owner gives new direction.
