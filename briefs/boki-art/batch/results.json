@@ -70500,5 +70500,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_chimelop_n1_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_chimelop_n2",
+    "name": "Chimelop (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chimelop_n2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sirencada_gp",
+    "name": "Sirencada (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_sirencada_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sirencada_gp",
+    "name": "Sirencada (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_sirencada_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_n3",
+    "name": "Chimelop (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chimelop_n3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_n1",
+    "name": "Chimelop (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chimelop_n1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_n2",
+    "name": "Chimelop (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chimelop_n2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_n1",
+    "name": "Chimelop (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chimelop_n1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_n2",
+    "name": "Chimelop (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chimelop_n2_2.jpg",
+    "ok": true
   }
 ]
