@@ -66,7 +66,8 @@ over the surface. A pond's deep middle is `swim_depth` (1 m, wade.json) deep und
 same name wins over the built one. `--boki-rig-check` has the 1 m and puddle rows, `--wade-check` a Zapple paddling
 across a stream; `--boki-swim-shots` draws three species afloat (GPU). Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
-`dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
+`dazed` (as for `KinPuppet`), plus `kwork`, `kact` (also `win`, `sulk`, `push`, set by the Dash and
+the Stump Shove) and `face`.
 
 Wild Boki in a match (`KinWildPose` sets the `pose` meta, `BokiRig.LAYER` answers it with a layer on Flex over the clip,
 bent per body plan by `BODY_FEEL`; no clip is baked, the same for every species): wandering is the walk clip; the first
