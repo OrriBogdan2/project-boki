@@ -64,6 +64,9 @@ func _hunter(main: Node, ak: String, glove: String) -> void:
 	if glove != "": P.gear[0] = {"id": glove, "rar": 1}
 	var T: Hunter = m.make_hunter("T", 5, "medium", "Target", "idle", {}, P.pos + Vector3(TARGET_DIST, 0, 0), {"arch": "none"})
 	T.max_hp = 1e6; T.hp = T.max_hp
+	for i in 15:      # the yard keeps 4 dummies up, one every 2 s: all of them before measuring
+		if m.mobs.filter(func(x): return not x.dead).size() >= 4: break
+		await _frames(m, P, T, SETTLE * 2, "")
 	var times: Array = await _frames(m, P, T, SETTLE * 2, "")
 	times.sort()
 	var med: float = times[times.size() / 2]
@@ -75,8 +78,10 @@ func _hunter(main: Node, ak: String, glove: String) -> void:
 			if m.hud: m.hud.slot_fx.clear()
 			hit = false
 			made.clear()
+			var pipes := DashPace.pipelines()
 			var w: float = (await _frames(m, P, T, WINDOW, s)).max()
-			if pass_i == 0: first[s] = [w, _went(m), _summary()]
+			pipes = DashPace.pipelines() - pipes
+			if pass_i == 0: first[s] = [w, _went(m), "%d pipelines; %s" % [pipes, _summary()]]
 			else: rep[s] = minf(float(rep.get(s, w)), w)
 			await _frames(m, P, T, SETTLE, "")
 	tree.node_added.disconnect(_made)
@@ -89,12 +94,15 @@ func _row(ak: String, s: String, went: String, med: float, f: float, rep: float,
 	var cost := f - rep
 	var hitch := cost > SPIKE_MS and f - med > SPIKE_MS
 	if hitch: bad += 1
-	rows.append([ak, s, went, med, f, rep, cost, ("FAIL made: " + what) if hitch else "ok"])
+	rows.append([ak, s, went, med, f, rep, cost, ("FAIL: " + what) if hitch else "ok"])
 
+## Counts a node that entered the tree, by its kind and the nearest scripted node above it (who made it).
 func _made(n: Node) -> void:
 	var key := n.get_class()
 	if n.get_script(): key = String((n.get_script() as Script).resource_path.get_file())
-	if n.scene_file_path != "": key = n.scene_file_path.get_file()
+	var up := n.get_parent()
+	while up and up.get_script() == null: up = up.get_parent()
+	if up: key += "@" + String((up.get_script() as Script).resource_path.get_file().get_basename())
 	made[key] = int(made.get(key, 0)) + 1
 
 ## The nodes a window added, most first (for a FAIL line: what to pool or warm).
@@ -112,12 +120,11 @@ func _went(m: Match) -> String:
 	return "deny" if kinds.has("deny") else "-"
 
 ## Steps `n` frames (a step and a drawn frame each), pressing `slot` on the first, and returns each
-## frame's wall time in ms. Monsters are cleared so only the kit makes things.
+## frame's wall time in ms. The yard's dummies can't die, so only the kit makes things.
 func _frames(m: Match, P: Hunter, T: Hunter, n: int, slot: String) -> Array:
 	var out: Array = []
 	for i in n:
-		for mb in m.mobs: mb.queue_free()
-		m.mobs.clear()
+		for mb in m.mobs: mb.hp = mb.max_hp      # (the yard's dummies don't hit back; one that died would respawn mid-window)
 		P.inp["aim"] = T.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = T.pos.y
 		P.dashes = P.max_dashes()
 		P.gear_cd[0] = 0.0

@@ -38,7 +38,7 @@ static func rehearse(m: Match) -> void:
 		fx.telegraph_rect(at, Vector2.UP, 3.0, 1.0, Color.WHITE)]
 	HeroVfx.of(m).prewarm(at)
 	DJFx.of(m).prewarm(at)
-	var built := _pipelines()
+	var built := pipelines()
 	var quiet := 0
 	var frames := 0
 	while frames < REHEARSE_MAX and quiet < REHEARSE_QUIET:
@@ -46,7 +46,7 @@ static func rehearse(m: Match) -> void:
 		if not m.is_inside_tree():
 			return
 		frames += 1
-		var now := _pipelines()
+		var now := pipelines()
 		quiet = quiet + 1 if now == built else 0
 		built = now
 	for mark: Node3D in marks:
@@ -54,7 +54,8 @@ static func rehearse(m: Match) -> void:
 	HeroVfx.of(m).prewarm_end()
 	DJFx.of(m).prewarm_end()
 
-static func _pipelines() -> int:
+## Render pipelines compiled so far in this process (the three Forward+ counters).
+static func pipelines() -> int:
 	return RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SURFACE) \
 		+ RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW) \
 		+ RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SPECIALIZATION)
