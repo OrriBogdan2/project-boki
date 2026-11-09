@@ -2067,5 +2067,390 @@
     "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make this the female form of the same species: slightly slimmer and more graceful, a softer, warmer or paler colour tint, a different crest, ear or tail shape, and a smaller or more elegant version of its signature part. Keep the same face shape, idea, pose type and number of views, and keep it an animal, never standing like a person, no human body shapes. Do not add anything else.",
     "aspect": "16:9",
     "size": "4K"
+  },
+  {
+    "id": "portrait_barokat",
+    "name": "Barokat (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barokat.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_barrelmander",
+    "name": "Barrelmander (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_boltstrich",
+    "name": "Boltstrich (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Boltstrich.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_echolop",
+    "name": "Echolop (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Echolop.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_effigeetle",
+    "name": "Effigeetle (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Effigeetle.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_ermink",
+    "name": "Ermink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Ermink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_flarmink",
+    "name": "Flarmink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Flarmink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_glaivyx",
+    "name": "Glaivyx (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Glaivyx.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_gongibbon",
+    "name": "Gongibbon (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Gongibbon.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_gongrowl",
+    "name": "Gongrowl (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Gongrowl.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_jarmit",
+    "name": "Jarmit (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Jarmit.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_kerchick",
+    "name": "Kerchick (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Kerchick.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_kestrike",
+    "name": "Kestrike (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Kestrike.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_kitlet",
+    "name": "Kitlet (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Kitlet.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_lashyx",
+    "name": "Lashyx (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Lashyx.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_lockatara",
+    "name": "Lockatara (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Lockatara.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_lunink",
+    "name": "Lunink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Lunink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_mirrolin",
+    "name": "Mirrolin (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Mirrolin.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_mycroll",
+    "name": "Mycroll (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Mycroll.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_prismander",
+    "name": "Prismander (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Prismander.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_puffamus",
+    "name": "Puffamus (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Puffamus.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_rimink",
+    "name": "Rimink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Rimink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_rippmink",
+    "name": "Rippmink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Rippmink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_skateron",
+    "name": "Skateron (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Skateron.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_snuffapi",
+    "name": "Snuffapi (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Snuffapi.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_soakybara",
+    "name": "Soakybara (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Soakybara.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_spirevark",
+    "name": "Spirevark (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Spirevark.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_sporcupine",
+    "name": "Sporcupine (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Sporcupine.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_teapotamus",
+    "name": "Teapotamus (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Teapotamus.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_umbrathere",
+    "name": "Umbrathere (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Umbrathere.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_umbrink",
+    "name": "Umbrink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Umbrink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_voltmink",
+    "name": "Voltmink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Voltmink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_wyrmink",
+    "name": "Wyrmink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Wyrmink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_zippelith",
+    "name": "Zippelith (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Zippelith.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: in a lively three-quarter pose that shows off its signature part. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "jibbatross",
+    "name": "Jibbatross",
+    "refs": [
+      "briefs/boki-art/turnarounds/Canvastross.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the middle form of the creature in image 1's family: the same species, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but bigger and older with its own new silhouette, and clearly not yet a final form. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A lean, upright young albatross, two thirds the size of image 1, standing with its wings half spread: each wing a single triangular jib sail of patched canvas grown between two dark wooden bones, the leading edge ending in a curved iron hook, a short stiff canvas tail and a long hooked beak. It must look clearly different from image 1 at a glance: a different size, a different silhouette and a more developed version of its object, never a copy of image 1. Face: droopy gold eyes in dark patches and a cocky young-deckhand scowl. Main colours: white and canvas cream, with an iron-grey accent. Avoid: a saddle, ropes, a mast, looking like image 1. Element: tempest, shown clearly by wind-swept streamers and sky-blue swirl markings. Archetype: fast: lean and forward-leaning, with swept-back shapes.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
   }
 ]
