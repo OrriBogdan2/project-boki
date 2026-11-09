@@ -54,8 +54,37 @@ func run(m: Node, mode := "") -> void:
 	_tracker_rules()
 	await _world()
 	await _farm2()
+	await _base_mode()
 	print("FTUT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+# ------------------------------------------------------------------ 5. base_mode (GARDEN.md section 8)
+func _base_mode() -> void:
+	var home = await _home(1)
+	var rules: Dictionary = FarmUnlocks.rules()
+	ok(rules["base_mode"] == false and not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+	home.hb.toggle()
+	var off: Array = home.hb._tabs()
+	var kept: bool = off.has("Work") and off.has("Upgrades") and home.hmk.tabs().has("Exchange")
+	ok(kept and HomeGather.shop_goods().size() == 2,
+			"off: Work and Upgrades tabs, axe and pickaxe, the Exchange all stay")
+	rules["base_mode"] = true
+	ok(home.hb._tabs() == ["Buildings", "Garden", "Island"],
+			"on: build mode shows only Base, Garden and Island: %s" % str(home.hb._tabs()))
+	var tools_on: Array = home.hmk._farm_goods().filter(func(g): return String(g[0]).begins_with("tool:"))
+	ok(HomeGather.shop_goods().is_empty() and tools_on.is_empty(), "on: no axe or pickaxe at the market")
+	ok(not home.hmk.tabs().has("Exchange"), "on: no Exchange tab")
+	var wild: Array = (home.hb.wild_t as Dictionary).keys()
+	var w: World = home.world
+	var tree_at := Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5, int(wild[0]) / w.w + 0.5)
+	ok(home.hg.find(tree_at).is_empty(), "on: wild trees and boulders are not choppable")
+	home.hw.scan()
+	var econ_kinds := ["chop", "break", "log", "ore", "carry", "stock"]
+	ok(not home.hw.jobs.any(func(j): return econ_kinds.has(String(j["kind"]))), "on: no wild, station or haul jobs")
+	rules["base_mode"] = false
+	home.hb.toggle()
+	home.queue_free()
+	await main.get_tree().process_frame
 
 # ------------------------------------------------------------------ 1. Hob
 func _hob_rules() -> void:

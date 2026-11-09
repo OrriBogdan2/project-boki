@@ -43,6 +43,56 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## base_race (`content/rules/base_race.json`)
+
+The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/home/base_race.gd). Only with farm_build.json base_mode on. 2 to 4 Boki run one lap of a short loop next to the Training post; you back your partner and cheer with the training drill's timing bar at three marks. Units: metres, seconds, metres a second; joy and trust are 0-100 points, bonds -1..1.
+
+| Setting | Value |
+|---|---|
+| stretches | [{"kind": "straight", "len": 6.0, "mult": 1.0}, {"kind": "water", "len": 3.0, "mult": 0.7}, {"kind": "climb", "len": 6.0, "mult": 0.65}, {"kind": "jump", "len": 3.0, "mult": 0.9}] |
+| stretches_doc | One lap, in order, laid out as a 6 x 3 m loop. 'mult' is everyone's pace on that stretch (swimming and climbing are slow). The three marks are the ends of the first three stretches. |
+| pace | 1.1 |
+| pace_doc | m/s on a straight for a Boki with no Speed points and joy 50. |
+| speed_per_point | 0.015 |
+| speed_per_point_doc | Each trained Speed point (Care stats) adds this much pace, as a fraction. |
+| mood | [0.85, 1.1] |
+| mood_doc | Pace multiplier at joy 0 and at joy 100 (linear in between): a glum Boki drags its feet. |
+| swim_per_tide | 0.12 |
+| swim_per_tide_doc | The water stretch: +this fraction of pace per level of the Tide knack (Work, 1-4). A Boki's rec['lean']['water'] (GARDEN 9.1, 0..1) counts as 4 levels at 1.0 once leans exist. |
+| glide | 1.45 |
+| glide_doc | The jump stretch: a winged species (its look has wings) glides the gap at this times the pace; rec['lean']['flying'] blends toward it. |
+| wobble | 0.1 |
+| wobble_doc | Each stretch every runner's pace is rolled within +-this fraction, so the fastest Boki is likely, not certain, to win. |
+| cheer | {"great": 1.15, "good": 1.07, "miss": 1.0} |
+| cheer_doc | Your backed Boki's pace on the next stretch after each mark's press. |
+| friend_at | 0.4 |
+| rival_at | -0.4 |
+| bonds_doc | rec['bonds'][uid] at or above friend_at: friends; at or below rival_at: rivals. |
+| friend_near | 1.2 |
+| friend_pull | 0.6 |
+| friend_doc | Friends within friend_near m of each other run side by side: each one's pace moves this fraction of the way to the other's. |
+| bump_near | 0.6 |
+| bump_slow | 0.5 |
+| bump_s | 0.7 |
+| bump_doc | Rivals within bump_near m bump once a stretch: both run at bump_slow times the pace for bump_s seconds. |
+| lane | 0.45 |
+| lane_doc | m between lanes. |
+| min_energy | 20 |
+| energy | 10 |
+| energy_doc | A Boki needs min_energy to race and spends this much running. |
+| win_joy | 15 |
+| win_trust | 3 |
+| lose_joy | -10 |
+| gems_win | 6 |
+| gems_ran | 2 |
+| gems_doc | Gems to you when your backed Boki wins, or for any other race. |
+| rival_step | 0.15 |
+| friend_step | 0.05 |
+| close_s | 0.6 |
+| result_doc | The last one home and the winner grow apart by rival_step; two non-rivals home within close_s of each other grow closer by friend_step. |
+| card_s | 6 |
+| card_s_doc | s the result card stays up. |
+
 ## boki_lines (`content/rules/boki_lines.json`)
 
 What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words in one bubble (punctuation and symbols don't count); act_words = the most words in one action, which a young Boki says after its name; bubble_s = seconds a bubble stays up; cooldown_s = seconds a Boki waits between lines (a trigger marked direct answers something you did and skips the wait); no_repeat = how many of its own last lines a Boki never repeats; min_lines = the fewest general lines a trigger may have; grown_stage = the speech stage (Care.speech) from which a Boki says lines instead of its name. tones = how a young Boki says its name, by feeling ({A} first syllable, {a} lower, {b} second syllable, {F} full name, {f} lower, {U} upper; KinSpeak.fill). sounds = noises a tone may use besides the name. alias = old trigger names that share another's lines. triggers: feel (a tone), word (the one word a stage-1 Boki adds), acts (what it does), lines._ (anyone) and lines.<element> (extra lines for a Boki of that element, the species' type).
@@ -195,6 +245,8 @@ The farm building pass (docs/decisions/0004-farm-building.md). Farm level is poi
 
 | Setting | Value |
 |---|---|
+| base_mode | False |
+| base_mode_doc | GARDEN.md section 8: true shrinks the farm to the Boki base. Build mode shows only Buildings, Garden and Island; no axe, pickaxe or wild chopping; no work stations, wild or haul jobs (Boki knacks still run the plot, mend and incubator chores); no Exchange, Sell tab, tools or crop-chain goods at the market. Nothing is deleted: false changes nothing, and saves are untouched either way. |
 | points | {"extracts": 3.0, "bosses": 6.0, "caught": 2.0, "hatched": 2.0, "harvested": 0.25, "built": 2.0, "fb_built": 2.0} |
 | points_doc | Farm points = sum(stat * weight). 'built' counts the lot buildings you built, 'fb_built' the buildings Boki finished on the farm. |
 | levels | [0, 6, 16, 30, 48, 70] |
