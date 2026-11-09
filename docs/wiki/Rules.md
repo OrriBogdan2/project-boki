@@ -93,6 +93,46 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 | card_s | 6 |
 | card_s_doc | s the result card stays up. |
 
+## base_shove (`content/rules/base_shove.json`)
+
+Stump Shove, the Boki base's second minigame (briefs/design/GARDEN.md section 5.2, scripts/home/base_shove.gd). Only with farm_build.json base_mode on. Two Boki push on a stump from opposite sides until one is shoved off balance; you back your partner and press once, timed on the training drill's bar. Units: seconds, stump balance -1..1 (a side wins at its own end), joy and trust are 0-100 points.
+
+| Setting | Value |
+|---|---|
+| push | 1 |
+| push_doc | Push force of a Boki with no Power points, before mood, trust and the type edge. |
+| power_per_point | 0.005 |
+| guard_per_point | 0.005 |
+| stats_doc | Each trained Power point adds this fraction to its push; each Guard point adds this fraction to its hold (half a percent a point, like the match bonus); 20 points are worth about the 10% type edge. A side's push against the other's hold is push / hold, so the drift is attacker over defender both ways. |
+| mood | [0.92, 1.08] |
+| mood_doc | Push multiplier at joy 0 and at joy 100 (linear in between). |
+| trust_max | 1.05 |
+| trust_doc | Push multiplier at trust 100 (linear from 1.0 at trust 0). |
+| edge | 1.1 |
+| edge_doc | Push multiplier for a Boki whose species theme beats the other's in 'beats' (a 10% edge, never both ways). |
+| beats | {"ember": ["frost", "bloom", "swarm"], "frost": ["storm", "tempest", "gravity"], "bloom": ["stone", "echo", "spore"], "stone": ["ember", "venom", "shadow"], "storm": ["swarm", "prism", "titan"], "shadow": ["lunar", "prism", "echo"], "lunar": ["spore", "venom", "gravity"], "venom": ["bloom", "swarm", "tempest"]} |
+| beats_doc | Species themes (content/kin_v2 'theme'); a theme missing from this table has no edge either way. |
+| rate | 1 |
+| rate_doc | Balance moved a second for a net push of 1.0 (push over hold, one side minus the other). |
+| wobble | 0.7 |
+| wobble_s | 0.5 |
+| wobble_doc | Every wobble_s seconds each side's push is rolled within +-wobble, so the stronger Boki is likely, not certain, to win. |
+| max_s | 30 |
+| max_doc | A bout still level at this many seconds goes to whoever has the stump leaning their way. |
+| shove | {"great": 1.15, "good": 1.07, "miss": 1.0} |
+| shove_s | 1.5 |
+| shove_doc | Your one timed press: your backed Boki's push is multiplied by this for shove_s seconds. |
+| min_energy | 20 |
+| energy | 8 |
+| energy_doc | A Boki needs min_energy to push and spends this much. |
+| win_joy | 12 |
+| win_trust | 3 |
+| lose_joy | -8 |
+| gems_win | 4 |
+| gems_ran | 1 |
+| gems_doc | Gems to you when your backed Boki wins, or for any other bout. |
+| card_s | 6 |
+
 ## boki_lines (`content/rules/boki_lines.json`)
 
 What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words in one bubble (punctuation and symbols don't count); act_words = the most words in one action, which a young Boki says after its name; bubble_s = seconds a bubble stays up; cooldown_s = seconds a Boki waits between lines (a trigger marked direct answers something you did and skips the wait); no_repeat = how many of its own last lines a Boki never repeats; min_lines = the fewest general lines a trigger may have; grown_stage = the speech stage (Care.speech) from which a Boki says lines instead of its name. tones = how a young Boki says its name, by feeling ({A} first syllable, {a} lower, {b} second syllable, {F} full name, {f} lower, {U} upper; KinSpeak.fill). sounds = noises a tone may use besides the name. alias = old trigger names that share another's lines. triggers: feel (a tone), word (the one word a stage-1 Boki adds), acts (what it does), lines._ (anyone) and lines.<element> (extra lines for a Boki of that element, the species' type).

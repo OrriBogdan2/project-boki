@@ -246,7 +246,7 @@ func place() -> void:
 			span.x = TRACK_W
 		bm.size = span
 		strip.mesh = bm
-		strip.material_override = _mat(STRETCH_COL[String(st[i]["kind"])])
+		strip.material_override = mat(STRETCH_COL[String(st[i]["kind"])])
 		strip.position = (a + b) * 0.5 - post.position + Vector3(0, _ground(a) + 0.02, 0)
 		post.add_child(strip)
 
@@ -257,18 +257,18 @@ func _post_model() -> void:
 	cm.bottom_radius = 0.08
 	cm.height = 1.6
 	pole.mesh = cm
-	pole.material_override = _mat(Color("8a6a4a"))
+	pole.material_override = mat(Color("8a6a4a"))
 	pole.position = Vector3(0, _ground(post.position) + 0.8, 0)
 	post.add_child(pole)
 	var flag := MeshInstance3D.new()
 	var fm := BoxMesh.new()
 	fm.size = Vector3(0.6, 0.36, 0.03)
 	flag.mesh = fm
-	flag.material_override = _mat(UI.ACCENT)
+	flag.material_override = mat(UI.ACCENT)
 	flag.position = Vector3(0.32, _ground(post.position) + 1.4, 0)
 	post.add_child(flag)
 
-func _mat(c: Color) -> StandardMaterial3D:
+static func mat(c: Color) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.albedo_color = c
 	return m
@@ -291,7 +291,7 @@ func label() -> String:
 	return "Start a Dash (back %s)" % Save.active_kin().get("name", "your partner")
 
 ## Up to 4 rested Boki out on the base, your partner first.
-func _entrants() -> Array:
+func entrants() -> Array:
 	var R := rules()
 	var out: Array = []
 	var ak := Save.active_kin()
@@ -306,7 +306,7 @@ func _entrants() -> Array:
 	return out.slice(0, 4)
 
 func use() -> void:
-	var ks := _entrants()
+	var ks := entrants()
 	if ks.size() < 2:
 		h._toast("The Dash needs two rested Boki out on the base")
 		return
@@ -396,21 +396,27 @@ func _end(finished: bool) -> void:
 	runners = []
 
 func _card(res: Dictionary) -> void:
+	var win: Dictionary = res["win"]
+	var lose: Dictionary = res["lose"]
+	var why := " for backing the winner" if res["backed_won"] else ""
 	if is_instance_valid(card):
 		card.queue_free()
+	card = result_card(h, [
+		["%s wins the Dash!" % win["name"], 18, UI.ACCENT_HI],
+		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
+		["%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], 14, UI.MUTED],
+		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]])
+	card_t = float(rules()["card_s"])
+
+## A minigame's result card at the top of the screen: rows of [text, size, colour]. Shared with the Stump Shove.
+static func result_card(home, rows: Array) -> Control:
 	var c := UI.card(Color(0.06, 0.07, 0.1, 0.92), 14, 14)
 	c.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	c.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	c.offset_top = 90
 	var v := UI.vbox(6)
 	c.add_child(v)
-	var win: Dictionary = res["win"]
-	var lose: Dictionary = res["lose"]
-	v.add_child(UI.label("%s wins the Dash!" % win["name"], 18, UI.ACCENT_HI))
-	v.add_child(UI.label("%s is beaming (+joy, +trust)" % win["name"], 14))
-	v.add_child(UI.label("%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], 14, UI.MUTED))
-	var why := " for backing the winner" if res["backed_won"] else ""
-	v.add_child(UI.label("+%d gems%s" % [res["gems"], why], 14, UI.GOLD))
-	h.root_ui.add_child(c)
-	card = c
-	card_t = float(rules()["card_s"])
+	for r in rows:
+		v.add_child(UI.label(r[0], r[1], r[2]))
+	home.root_ui.add_child(c)
+	return c

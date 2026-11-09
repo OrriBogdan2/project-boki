@@ -52,6 +52,7 @@ var visit: Dictionary = {}     # when visiting someone: their island snapshot (s
 var visit_id := ""
 var petted := {}
 var hrace: BaseRace = null       # the Dash's race post and loop (base_race.gd), base_mode only
+var hshove: BaseShove = null     # the Stump Shove's stump (base_shove.gd), base_mode only
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
@@ -142,7 +143,9 @@ func _ready() -> void:
 		get_viewport().disable_3d = true
 		PerfLog.frame_drawn()
 	hecon = HomeEcon.new(self)
-	if FarmUnlocks.base_mode() and visit.is_empty(): hrace = BaseRace.new(self)
+	if FarmUnlocks.base_mode() and visit.is_empty():
+		hrace = BaseRace.new(self)
+		hshove = BaseShove.new(self)
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -282,6 +285,7 @@ func _sync_fixtures() -> void:
 	if hecon and visit.is_empty():
 		hecon.move_graveyard()
 	if hrace: hrace.place()
+	if hshove: hshove.place()
 	if is_instance_valid(nest): nest.position = NEST_AT
 	var cap: int = int(Save.d["plot_cap"]) if visit.is_empty() else (_d()["plots"] as Array).size()
 	if str(_plot_spots(cap)) != _fx_sig:
@@ -323,6 +327,7 @@ func _ready_rest() -> void:
 	var dbg := OS.get_cmdline_user_args()
 	_fixture_spots()
 	if hrace: hrace.place()
+	if hshove: hshove.place()
 	# a few trees around the rim of every island, kept away from paths, lots and bridges
 	world.add_trees_on_rim(54)
 	var keep_clear: Array = [[36, 34, 40, 44], [42, 28, 50, 40], [41, 20, 47, 26], [22, 28, 28, 32], [46, 26, 62, 30], [27, 23, 31, 30], [32, 41, 36, 47]]
@@ -1017,6 +1022,7 @@ func _process(delta: float) -> void:
 	_care_tick(d)
 	if hecon: hecon.tick(d)
 	if hrace: hrace.tick(d)
+	if hshove: hshove.tick(d)
 	_update_bubbles(d)
 	_train_process(d)
 	if hb: hb.tick(d)
@@ -2000,6 +2006,7 @@ func _find_interact() -> void:
 	if p2.distance_to(Vector2(YARD_AT.x, YARD_AT.z)) < 1.6 and best.is_empty():
 		best = {"kind": "yard"}
 	if hrace and best.is_empty(): best = hrace.find(p2)
+	if hshove and best.is_empty(): best = hshove.find(p2)
 	if hecon:
 		var hb: Dictionary = hecon.find(p2, bd if not best.is_empty() else 9.0)
 		if not hb.is_empty(): best = hb
@@ -2147,6 +2154,7 @@ func _label_for(it: Dictionary) -> String:
 		"egg": return ("Help the %s hatch!" if _egg_ready() else "Warm the %s") % _egg_label()
 		"yard": return "Train your partner"
 		"race": return hrace.label()
+		"shove": return hshove.label()
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2183,6 +2191,7 @@ func _use(it: Dictionary) -> void:
 			if not ak.is_empty(): _open_train(ak)
 		"nook": _open_nook()
 		"race": hrace.use()
+		"shove": hshove.use()
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
@@ -2209,7 +2218,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		hb.toggle()
 		get_viewport().set_input_as_handled()
 		return
-	if hrace and hrace.input(event):
+	if (hrace and hrace.input(event)) or (hshove and hshove.input(event)):
 		get_viewport().set_input_as_handled()
 		return
 	if not train.is_empty():
