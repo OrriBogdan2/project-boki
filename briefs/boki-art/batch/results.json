@@ -41849,5 +41849,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_maulangler_full_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_maulangler_full",
+    "name": "Maulangler (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_maulangler_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_morelossus_full",
+    "name": "Morelossus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_morelossus_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_morelossus_full",
+    "name": "Morelossus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_morelossus_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_maulangler_full",
+    "name": "Maulangler (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_maulangler_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_phonodrake_full",
+    "name": "Phonodrake (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_phonodrake_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_phonodrake_full",
+    "name": "Phonodrake (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_phonodrake_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_morelossus_full",
+    "name": "Morelossus (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_morelossus_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_phonodrake_full",
+    "name": "Phonodrake (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_phonodrake_full_3.jpg",
+    "ok": true
   }
 ]
