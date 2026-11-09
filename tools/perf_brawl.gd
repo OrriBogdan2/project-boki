@@ -51,7 +51,6 @@ func run(b, main: Node, secs: float) -> void:
 		var before := _sections()
 		var pipes := _pipelines()
 		var t0 := Time.get_ticks_usec()
-		m.step(DT)
 		m._process(DT)
 		var script_ms := (Time.get_ticks_usec() - t0) / 1000.0
 		await main.get_tree().process_frame
