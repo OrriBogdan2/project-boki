@@ -41457,5 +41457,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_lunowl_p79_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_lanceron_p79",
+    "name": "Lanceron (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lanceron_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_p79",
+    "name": "Eclipsowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_p79",
+    "name": "Eclipsowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunowl_p79",
+    "name": "Lunowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lunowl_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_p79",
+    "name": "Eclipsowl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_p79_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanceron_p79",
+    "name": "Lanceron (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lanceron_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanceron_p79",
+    "name": "Lanceron (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lanceron_p79_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pyrraven_p79",
+    "name": "Pyrraven (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pyrraven_p79_2.jpg",
+    "ok": true
   }
 ]
