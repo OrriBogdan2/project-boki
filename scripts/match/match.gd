@@ -2271,7 +2271,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	_check_team(h.team)
 
 func freeze_frame(t: float) -> void:
-	hitstop = maxf(hitstop, t)
+	hitstop += Feel.spend(player, maxf(0.0, t - hitstop), time)     # every caller shares the cap (Feel.HS_CAP)
 
 ## Armor went up a tier: a coloured ring for everyone to see, and a callout for you.
 func _armor_up(h: Hunter) -> void:

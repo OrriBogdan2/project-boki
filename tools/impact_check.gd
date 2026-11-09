@@ -8,7 +8,9 @@ extends RefCounted
 ##   3. while the body is frozen its pose holds (the strike frame), then it plays on;
 ##   4. chip hits don't replay the hit clip (a rifle stream would look stun-locked); a staggering hit plays it;
 ##   5. a knockback shows the hit pose for as long as the shove slides the body;
-##   6. a stun shows the stun clip, even over a move the kit was playing.
+##   6. a stun shows the stun clip, even over a move the kit was playing;
+##   7. offline, every freeze of the whole game (a hit's, an armor break's, a parry's...) shares the player's cap:
+##      at most Feel.HS_CAP in any Feel.HS_WINDOW.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -84,6 +86,20 @@ func _flat(m: Match, P: Hunter) -> Vector3:
 	P.teleport(home); P.vel = Vector3.ZERO
 	return home
 
+## Three 0.07 s freezes a few steps apart (each drained before the next, as the running game does): the first in
+## full, all three within Feel.HS_CAP.
+func _cap(m: Match) -> void:
+	var got := []
+	for i in 3:
+		m.hitstop = 0.0
+		m.freeze_frame(0.07)
+		got.append(m.hitstop)
+		m.step(DT)
+	var total := float(got[0]) + float(got[1]) + float(got[2])
+	ok(is_equal_approx(float(got[0]), 0.07) and total <= Feel.HS_CAP + 0.0001,
+			"three 0.07 s freezes inside %.1f s hold %.3f s in all (cap %.2f): %s" % [Feel.HS_WINDOW, total, Feel.HS_CAP, str(got)])
+	m.hitstop = 0.0
+
 func _settle(m: Match, hs: Array, n: int) -> void:
 	for i in n:
 		_frame(m, hs)
@@ -105,6 +121,8 @@ func _hero(main: Node, hero: String) -> void:
 		x.armor = 0.0; x.max_armor = 0.0
 	var hs := [V, A]
 	_settle(m, hs, 30)
+	if hero == Arch.ORDER[0]:
+		_cap(m)
 	var c := _clips(V)
 	ok(c != null, "%s: wears its clips" % hero)
 	if c == null:

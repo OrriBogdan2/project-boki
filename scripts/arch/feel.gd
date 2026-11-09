@@ -192,7 +192,6 @@ static func hitstop(m: Node, by: Ent, target: Ent, d: float, o: Dictionary) -> i
 		var want := tt if target == p else (ta if melee else 0.0)
 		# a payoff you land (Cash In, a wall slam, a spike) freezes you too, even from range
 		if t >= 4 and by == p: want = maxf(want, float(HITSTOP[t][0]) * k)
-		want = _spend(p, want, now)
 		if want > 0.0: m.freeze_frame(want)
 		# your ranged hits never freeze you (Capcom), but the body you (or your Boki) hit still holds for its tier
 		if target and target != p: target.freeze_t = maxf(target.freeze_t, tt)
@@ -201,7 +200,10 @@ static func hitstop(m: Node, by: Ent, target: Ent, d: float, o: Dictionary) -> i
 		if by and melee: by.freeze_t = maxf(by.freeze_t, ta)
 	return t
 
-static func _spend(p: Ent, want: float, now: float) -> float:
+## How much of a `want` s freeze the player may still take: at most HS_CAP in any HS_WINDOW, whatever asked for it.
+static func spend(p: Ent, want: float, now: float) -> float:
+	if p == null or want <= 0.0:
+		return maxf(want, 0.0)
 	var b: Array = _budget.get(p.get_instance_id(), [now, 0.0])
 	if now - float(b[0]) > HS_WINDOW:
 		b = [now, 0.0]
