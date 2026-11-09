@@ -217,6 +217,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 		sync.wall.heavy = Arch.weight(arch) == "heavy"
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
+	WardenMerge.merge_equal(glb)
 	_lights(glb, look(art(arch)))
 	_far_hide(glb, look(art(arch)))
 	root.set_meta("mats", mats)
