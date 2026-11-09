@@ -26,6 +26,13 @@ func _data() -> void:
 		for id in ["rift_key", "chest_key"]:
 			caps_zero = caps_zero and UtilityBelt.bring_cap(id, tier) == 0
 	ok(caps_zero, "keys can't be brought in at any difficulty")
+	var deeper := true
+	for tier in Data.TIERS.size():
+		var td: Dictionary = Data.TIERS[tier]
+		deeper = deeper and int(td["depth"]) == tier + 1
+		if tier > 0:
+			deeper = deeper and td["mob"] > Data.TIERS[tier - 1]["mob"] and td["loot"] > Data.TIERS[tier - 1]["loot"]
+	ok(deeper, "each tier is one depth deeper, with tougher monsters and richer loot")
 	ok(not UtilityBelt.stock_ids().has("rift_key") and not UtilityBelt.stock_ids().has("chest_key")
 			and not HomeBelt.choices().has("rift_key"), "keys are not sold or picked at home")
 

@@ -352,15 +352,15 @@ func kin_title(kname: String, species_name: String) -> String:
 ## Expedition tiers: deeper islands are harder and richer, and in the Hollow your partner can be lost.
 const TIERS := [
 	{"name": "The Meadow", "desc": "Gentle islands. Your Boki are always safe here: lose your loot, never your Boki.",
-		"mob": 1.0, "loot": 1.0, "kin_lvl": [1, 3], "unlock": 0, "lives": 1,
+		"depth": 1, "mob": 1.0, "loot": 1.0, "kin_lvl": [1, 3], "unlock": 0, "lives": 1,
 		"biome": {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Color("8b6d52"), "deep": Color("3a3140"), "leaf": Color("5a9a4f")},
 		"sky": Color("10131f"), "ambient": Color("b9c4e6"), "sun": Color("fff1dc"), "clouds": [Color(0.06, 0.07, 0.13), Color(0.22, 0.24, 0.38)]},
 	{"name": "Dusk Isles", "desc": "Tougher monsters, more loot, rarer Boki. Your Boki is always safe here: it goes home with you if you fall.",
-		"mob": 1.45, "loot": 1.75, "kin_lvl": [2, 5], "unlock": 2, "lives": 1,
+		"depth": 2, "mob": 1.45, "loot": 1.75, "kin_lvl": [2, 5], "unlock": 2, "lives": 1,
 		"biome": {"top": Color("56688a"), "top2": Color("465576"), "side": Color("6d5a74"), "deep": Color("2a2440"), "leaf": Color("8a6fb8")},
 		"sky": Color("150f22"), "ambient": Color("c9b4e6"), "sun": Color("ffc9a8"), "clouds": [Color(0.09, 0.05, 0.14), Color(0.32, 0.2, 0.4)]},
 	{"name": "The Hollow", "desc": "Brutal and rich. If you fall your Boki drops dazed beside your deathbox and guards it. Get revived and run into it to pick it up, or a rival can scan it and take it (knock it out, then hold the interact key).",
-		"mob": 2.0, "loot": 2.75, "kin_lvl": [4, 8], "unlock": 5, "lives": 1,
+		"depth": 3, "mob": 2.0, "loot": 2.75, "kin_lvl": [4, 8], "unlock": 5, "lives": 1,
 		"biome": {"top": Color("4f6b5e"), "top2": Color("3d5650"), "side": Color("5a4a44"), "deep": Color("1e1a22"), "leaf": Color("c25a4a")},
 		"sky": Color("0d0b10"), "ambient": Color("d0a0a0"), "sun": Color("ffb090"), "clouds": [Color(0.07, 0.03, 0.04), Color(0.3, 0.12, 0.12)]},
 ]
