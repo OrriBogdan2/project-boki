@@ -339,7 +339,7 @@ func pick_seed(r: RandomNumberGenerator = null) -> String:
 	return CROPS.keys()[0]
 
 const KIN_NAMES := Names.KIN      # ~2,200 names: see scripts/core/names.gd
-const BOT_NAMES := Names.BOT      # ~2,000 handles
+const BOT_NAMES := Names.BOT      # ~180 gamer tags
 
 ## A kin's name until you give it one: its species' name, as in a field guide.
 func default_kin_name(species: String) -> String:
