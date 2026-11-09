@@ -7,7 +7,8 @@ extends RefCounted
 ## and the guest reports where its own game put it. Cinder's cloak pull, Grimble's reel, Motley's Trade,
 ## Sparkle's Skycall drag, Mossy's shield push; Kael's Warchain pulls Kael to the player (not the player).
 ## Then the hit path: a hazard striking on both games hurts the player once; a knock's wall stun, a burn's
-## length and a slow's strength reach the player's own game.
+## length and a slow's strength reach the player's own game. Last, a dunk on a gliding player spikes them out
+## of the air on their own game, with the landing stun a bot gets (GlideSpike).
 ## Lines: DISPNET ok|FAIL <what>; the guest prints DISPNET guest pid=<pid>.
 
 const GODOT := "/usr/local/bin/godot"
@@ -100,6 +101,7 @@ func _host() -> void:
 	await _zedran(G)
 	await _hazard(G, B)
 	await _knock_extras(G, B)
+	await _glide_spike(G, B)
 	_finish()
 
 func _finish() -> void:
@@ -286,6 +288,47 @@ func _knock_extras(G: Hunter, B: Hunter) -> void:
 		"hit: the burn's length and the slow's strength reach the player (4 s, 40%)",
 		"burn %.2f slow_k %.2f" % [_got("burn"), _got("slow_k")])
 
+## A dunk (Displace.spike at 16 m/s) on a glider 10 m up: the bot and the player are both spiked, fall and
+## land stunned for GlideSpike.land_stun; unspiked, a glider would still be in the air.
+func _glide_spike(G: Hunter, B: Hunter) -> void:
+	var P := m.player
+	var at := home + Vector3(4.0, 10.0, -3.0)
+	_fresh(B)
+	_glide(B, at)
+	await _run(0.2)
+	stun_on = B
+	stun_max = 0.0
+	m.displace.spike(B, -16.0, P)
+	await _run(1.6)
+	var bot_stun := stun_max
+	stun_on = null
+	ok(B.grounded and bot_stun >= GlideSpike.land_stun - 0.05, "glide spike: a dunk spikes a gliding bot",
+		"stun %.2f grounded %s" % [bot_stun, B.grounded])
+	B.teleport(home + Vector3(-6.0, 0, 9.0))
+	Net.lobby_emit("dn", {"c": "glide", "at": [at.x, at.y, at.z]})
+	var t := 0.0
+	while not G.gliding and t < 5.0:
+		await _run(0.1)
+		t += 0.1
+	ok(G.gliding, "glide spike: the host sees the player gliding")
+	m.displace.spike(G, -16.0, P)
+	await _run(1.8)
+	await _ask()
+	ok(_got("air") == 0.0 and absf(_got("stun_max") - bot_stun) < 0.15,
+		"glide spike: the dunk spikes the player out of the air on their own game, like the bot",
+		"player stun %.2f air %.0f, bot %.2f" % [_got("stun_max"), _got("air"), bot_stun])
+	await _place(G, home + PARK)
+
+## A body gliding at `at` with a cool glider and the glide held.
+static func _glide(T: Hunter, at: Vector3) -> void:
+	T.teleport(at)
+	T.grounded = false
+	T.gliding = true
+	T.inp["glide"] = true
+	T.glide_fuel = 1.0
+	T.glide_cd = 0.0
+	T.shot_down = false
+
 func _kit(arch: String) -> void:
 	var P := m.player
 	if P.arch != arch:
@@ -367,13 +410,18 @@ func _on_msg(topic: String, data, _from: String) -> void:
 				m.player.teleport(Vector3(a[0], a[1], a[2]))
 				_say()
 		"ask": _say()
+		"glide":
+			if m and m.player:
+				_fresh(m.player)
+				_glide(m.player, _v(data["at"]))
 		"strike": _strike(_v(data["at"]))
 
 func _say() -> void:
 	if m and m.player:
 		var P := m.player
 		Net.lobby_emit("dn_r", {
-			"pos": [P.pos.x, P.pos.y, P.pos.z], "hp": P.hp, "stun_max": stun_max, "burn": P.burn_t, "slow_k": P.slow_k})
+			"pos": [P.pos.x, P.pos.y, P.pos.z], "hp": P.hp, "stun_max": stun_max, "burn": P.burn_t, "slow_k": P.slow_k,
+			"air": 0.0 if P.grounded else 1.0})
 
 # ------------------------------------------------------------------ both
 func _connect() -> bool:

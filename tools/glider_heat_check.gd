@@ -1,7 +1,8 @@
 extends "res://tools/abyss_check.gd"
 ## --glider-heat-check (item 63): the glide input opens the glider at ANY heat (full, nearly spent, overheated, right
-## after an overheated one closed), an overheated glider lifts at half strength out of the abyss, and the climb from
-## deep down stays under the softened cap. Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
+## after an overheated one closed), an overheated glider lifts at half strength out of the abyss, the climb
+## from deep down stays under the softened cap, and each hit kind spikes a gliding dummy or not (decision
+## 0022). Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
 ## Fastest climb and time to the lip when the glider opens `dp` m under the lip with `fuel` heat left.
 func _climb(e: Dictionary, dp: float, fuel: float) -> Array:
@@ -112,7 +113,64 @@ func run(main: Node) -> void:
 	var cap_txt := "the climb from deep down stays under the new cap (%.1f m/s <= %.1f)" % [deep_peak, 26.0 * 0.7]
 	ok(deep_peak <= 26.0 * 0.7 + 0.3, cap_txt)
 	ok(deep_peak >= 12.0, "...and is still a real lift (%.1f m/s)" % deep_peak)
+	_spike_kinds()
 	m.queue_free()
 	await _home(main)
 	print("ACHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
+## A gliding dummy 12 m over the ground at this heat (1 = cool), the attacker gliding at 0.2 to see it cool.
+func _glider(o: Hunter, fuel: float) -> void:
+	o.teleport(marker + Vector3(0, 12.0, 0))
+	o.grounded = false
+	o.vel = Vector3(4.0, -1.0, 0)
+	o.gliding = true
+	o.inp["glide"] = true
+	o.glide_fuel = fuel
+	o.glide_cd = 0.0
+	o.stun_t = 0.0
+	o.shot_down = false
+	o.kb_t = -9.0
+	o.hp = o.max_hp
+	o.inv_t = 0.0
+	h.gliding = true
+	h.glide_fuel = 0.2
+
+## One hit of each kind on a gliding dummy (GlideSpike): heat and slam spike, CC alone does not.
+func _spike_kinds() -> void:
+	var o: Hunter = m.hunters[1]
+	var kinds := {
+		"a hit that fills the heat": [0.05, func(): o.hurt(30.0, h, {}), true],
+		"any hit on an overheated glider": [0.0, func(): o.hurt(1.0, h, {}), true],
+		"a slam (dunk) at full heat": [1.0, func(): m.displace.spike(o, -16.0, h), true],
+		"a hit on a cool glider": [1.0, func(): o.hurt(30.0, h, {}), false],
+		"a slam under slam_min": [1.0, func(): m.displace.spike(o, -0.5 * GlideSpike.slam_min, h), false],
+		"a stun": [1.0, func(): o.hurt(1.0, h, {"stun": 1.0}), false],
+		"a knock-up": [1.0, func(): o.impulse(Vector2.ZERO, 8.0), false],
+		"a big knockback": [1.0, func(): o.impulse(Vector2(20.0, 0.0), 2.0), false],
+		"a monster's hit on an overheated glider": [0.0, func(): o.hurt(5.0, null, {"src": "mob"}), false],
+	}
+	for what in kinds:
+		var row: Array = kinds[what]
+		_glider(o, float(row[0]))
+		(row[1] as Callable).call()
+		var want: bool = row[2]
+		ok(o.shot_down == want, "%s %s a glider" % [what, "spikes" if want else "does not spike"])
+		if want:
+			ok(not o.gliding and o.glide_fuel <= 0.001, "...the glider folds overheated")
+			ok(is_equal_approx(h.glide_fuel, 0.2 + GlideSpike.cool_by), "...and the spiker's glider cools")
+	h.gliding = false
+	# the fall after a slam and the landing stun
+	_glider(o, 1.0)
+	m.displace.spike(o, -16.0, h)
+	ok(o.vel.y <= -16.0, "a slam drives the spiked glider down at its own speed (%.1f m/s)" % o.vel.y)
+	var hp0 := o.hp
+	var t := 0.0
+	while not o.grounded and t < 4.0:
+		o.inp["glide"] = true
+		m.step(Match.DT)
+		t += Match.DT
+	ok(o.grounded and not o.gliding, "the spiked glider can't reopen on the way down (landed in %.2fs)" % t)
+	ok(o.stun_t >= GlideSpike.land_stun - Match.DT * 1.5, "it lands stunned (%.2fs left)" % o.stun_t)
+	ok(hp0 - o.hp >= GlideSpike.land_dmg - 0.01, "...and takes the landing damage (%.1f)" % (hp0 - o.hp))
+	o.inp["glide"] = false

@@ -23,6 +23,17 @@
 		"dive_cancel_h": 3.5,
 		"dive_timeout": 10.0
 	},
+	"glide_spike": {
+		"doc": "A spiked glider (scripts/match/glide_spike.gd, docs/decisions/0022). Spiked by heat (a player's hit that fills the glider's heat, or any player hit on an overheated one) [wiki Spike] or by a slam (a dunk driving it down at slam_min m/s or more, whatever its heat) [wiki Dunk; data SpikeSlamForceStrengthThreshold, value not decoded, ours est]. land_stun: the stun when a spiked glider lands over ground [wiki 0.7 s]. land_dmg: the additional damage then [wiki: 'additional damage', amount not stated, ours est]. air_stun: s stunned while it falls. fall_vy: m/s, the heat spike's plunge at least (SpikeSlamForceZ, value not decoded, ours est); a slam keeps its own speed. keep_hv: the share of horizontal speed the spike keeps. reopen_cd: s before the glider can open again. cool_by: the heat a gliding spiker's own glider sheds [wiki: spiking cools you; KINFALL 50 of 100].",
+		"land_stun": 0.7,
+		"land_dmg": 8.0,
+		"air_stun": 0.35,
+		"fall_vy": 6.0,
+		"keep_hv": 0.3,
+		"reopen_cd": 2.5,
+		"slam_min": 10.0,
+		"cool_by": 0.5
+	},
 	"default": {"speed": 4.55, "accel": 54.0},
 	"bulwark": {"speed": 4.85, "accel": 47.0},
 	"dredge": {"speed": 4.65, "accel": 47.0},

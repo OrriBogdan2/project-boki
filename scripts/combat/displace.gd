@@ -53,10 +53,13 @@ func knock(e: Ent, kb: Vector2, lift := -1.0) -> void:
 	else:
 		_send(["kb", e.nid, m._r(kb.x), m._r(kb.y), m._r(lift)])
 
-## Spiked down: it falls at least `vy` (a negative speed) fast.
-func spike(e: Ent, vy: float) -> void:
+## Spiked down: it falls at least `vy` (a negative speed) fast; a glider slammed hard enough is spiked
+## out of the air (GlideSpike.slam, on the game that owns the body) and `by` gets the credit here.
+func spike(e: Ent, vy: float, by: Ent) -> void:
+	if GlideSpike.spikes(e, vy):
+		GlideSpike.credit(by)
 	if not e.remote:
-		e.vel.y = minf(e.vel.y, vy)
+		GlideSpike.slam(e, vy)
 	else:
 		_send(["vy", e.nid, m._r(vy)])
 
@@ -308,7 +311,7 @@ func net_in(x: Array) -> void:
 	match kind:
 		"tp": if x.size() >= 6: body.teleport(Vector3(x[3], x[4], x[5]))
 		"kb": if x.size() >= 6: body.impulse(Vector2(x[3], x[4]), float(x[5]))
-		"vy": if x.size() >= 4: body.vel.y = minf(body.vel.y, float(x[3]))
+		"vy": if x.size() >= 4: GlideSpike.slam(body, float(x[3]))
 		"yank": if x.size() >= 8: m.verbs.yank(body, Vector3(x[3], x[4], x[5]), float(x[6]), float(x[7]))
 		"stop":
 			var rs := towing(body)

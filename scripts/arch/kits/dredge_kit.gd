@@ -589,7 +589,7 @@ func _slammed(f: Ent, stun: float, amt: float) -> void:
 	if rank("kin") >= 3 and over_abyss(f):
 		abyss_dunks += 1
 		f.hurt(amt * power("kin") * float(ed["abyss_k"]), h, {"src": "abil", "ab": "k1", "tags": ["anchor"]})
-	m.displace.spike(f, -16.0)
+	m.displace.spike(f, -16.0, h)
 	# ANCHORED says it all: no separate GROUNDED word over the stun
 	KitStatus.apply(f, "gnd", float(ed["gnd_t"]), 0.0, true, "anchored: no dash, jump or glide")
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
