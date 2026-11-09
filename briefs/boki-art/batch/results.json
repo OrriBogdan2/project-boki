@@ -65236,5 +65236,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_barostorm_r4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_mumblet_r4",
+    "name": "Mumblet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_mumblet_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_quivertoad_r4",
+    "name": "Quivertoad",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_quivertoad_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bonsolith_r4",
+    "name": "Bonsolith",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_bonsolith_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_quivertoad_r4",
+    "name": "Quivertoad",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_quivertoad_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chiptero_r4",
+    "name": "Chiptero",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_chiptero_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pinster_r4",
+    "name": "Pinster",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pinster_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bonsolith_r4",
+    "name": "Bonsolith",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_bonsolith_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pinster_r4",
+    "name": "Pinster",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pinster_r4_1.jpg",
+    "ok": true
   }
 ]
