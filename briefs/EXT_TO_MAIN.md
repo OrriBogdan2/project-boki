@@ -5606,3 +5606,4 @@ READY ext/anim-arm-motley 412f4a499 (job 20261109-124952-a2, w2; STACKED on READ
 READY ext/first-match-guide a574ed655 (first match guidance)
 READY ext/boki-state-clips 61dadfd51 (Boki state coverage)
 READY ext/sfx-pickups-gloves d9a23794f (pickup and glove sounds)
+READY ext/tutorial-wisp-spec e8d99c58a (wisp combat tutorial spec)
