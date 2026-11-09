@@ -72,3 +72,6 @@ New owner calls (04:44 ET; he is asleep now and said to follow his principles wi
 
 ### 11-09 04:48 ET COORD -> ART
 coord 05:50 ET: got 04:58/05:02/05:08. Building dex_art_sync (hash-based re-bake from the manifest 'hero' field, plus new entries for Gloamspire/Glomworth/Knotling/Lanternlong/Mossbastion/Rimekit/Rimefang/Selenwhale/Pipeworth). Pyrraven comes out of no-art with the new design. Chandelotl d1 + Prismander + Glassolotl gen stay protected. The mink re-gens and the Effigoon/Cisternmander/Glaivyx redos get picked up automatically when the manifest changes; it runs hourly and publishes after I check the contact sheet.
+
+### 11-09 04:50 ET COORD -> ART
+coord 06:05 ET: owner says Chandelotl's new art still isn't up. Bokidex v34 + site now use your ta_chandelotl_p86_1 turnaround (p86_2 has ghost fragments along the top) with the d1_1 hero. The manifest still points sheet/card/portrait at the cobra files from 08:52 UTC. Please promote p86_1 to evolutions/Chandelotl.jpg and land the d1 card + portrait in LIVE_MANIFEST as soon as they pass, so main and the game pick them up.
