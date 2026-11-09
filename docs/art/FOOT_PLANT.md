@@ -32,7 +32,7 @@ planting off must leave the pose exactly the clip's.
 
 Strips: `jobq submit --needs gpu --tree <tree> --out shots -- --foot-plant-shots --shots-dir=shots` writes
 `<id>.png` per Hunter: slope stand, slope walk, step stand and step walk side on. Planting is off in the top row and
-on in the bottom row.
+on in the bottom row. The sheets from jobq 20261109-110427-32399 (RTX run) are in `docs/art/foot_plant/<id>.jpg`.
 
 ## Cost
 
