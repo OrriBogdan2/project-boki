@@ -20,6 +20,8 @@ var out_path := ""
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
+var created := {}        # node name -> count, nodes that entered the tree from the fight on (BENCH created)
+var fought := false
 const HITCH_MS := 100.0
 var vp: RID
 
@@ -68,12 +70,13 @@ func _match() -> void:
 	_hook_hud(m)
 	main.get_tree().node_added.connect(func(n: Node):
 		var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
-		added[k] = int(added.get(k, 0)) + 1)
+		added[k] = int(added.get(k, 0)) + 1
+		if fought:
+			created[k] = int(created.get(k, 0)) + 1)
 	Match.prof_on = true
 	Match.prof.clear()
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
-	var fought := false
 	var P: Hunter = m.player
 	P.max_hp *= 20.0      # the fight must not end the run: "god" stops nothing once a rival stomps you
 	while is_instance_valid(m) and m.time < secs:
@@ -95,6 +98,11 @@ func _match() -> void:
 		added.clear()
 		last = now
 	_summary("match", fl)
+	var made := created.keys()
+	made.sort_custom(func(a, b): return created[a] > created[b])
+	var total := 0
+	for k in made: total += int(created[k])
+	print("BENCH created in the fight: %d nodes, %s" % [total, ", ".join(made.slice(0, 12).map(func(k): return "%s %d" % [k, created[k]]))])
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
 	var per := ks.slice(0, 10).map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / fl.size()])
