@@ -27,6 +27,7 @@ func run(main: Node) -> void:
 	_squad_and_launch()
 	_chat_and_voice()
 	await _screen(main)
+	await _start_here(main)
 	print("PREMATCH DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
@@ -122,6 +123,43 @@ func _screen(main: Node) -> void:
 	view._send_chat()
 	await main.get_tree().process_frame
 	ok(view.chat_log.get_child_count() == 1 and view.chat_in.text == "", "a sent chat line shows in the log")
+	view.pm.left = 0.0
+	view.set_process(false)
+	view.queue_free()
+
+## The pick screen's cards that carry a "Start here" line, in grid order (their Hunters' base names).
+func _tagged(view: Control) -> Array:
+	var out: Array = []
+	for card in view.grid.get_children():
+		var labels := card.find_children("*", "Label", true, false)
+		if labels.any(func(l): return l.text.begins_with("Start here")):
+			out.append(HeroTitle.base_name(String(card.get_meta("arch"))))
+	return out
+
+func _start_here(main: Node) -> void:
+	var d := Save.fresh()
+	d["name"] = "Tester"
+	Save.d = d
+	ok(ClassUnlock.choose_starters(["gunslinger"]), "a fresh save makes its Vex pick")
+	var view: Control = load("res://scripts/ui/prematch_view.gd").new()
+	view.setup(EXPEDITION.duplicate())
+	main.add_child(view)
+	await main.get_tree().process_frame
+	ok(view.pm.pick == "gunslinger", "a fresh save's cursor starts on Vex (%s)" % view.pm.pick)
+	var tags := _tagged(view)
+	ok(tags == ["Vex", "Kael", "Lace", "Cinder"], "a fresh save tags the four 'Start here' (%s)" % [tags])
+	ok(ClassUnlock.start_role("archer") == "High-ground sharpshooter" and ClassUnlock.start_role("mage") == "",
+		"each tag has a one-line role, and the rest have none")
+	view.queue_free()
+	d["matches"] = 2
+	ok(ClassUnlock.start_role("gunslinger") != "", "after 2 matches the tags stay")
+	d["matches"] = 3
+	view = load("res://scripts/ui/prematch_view.gd").new()
+	view.setup(EXPEDITION.duplicate())
+	main.add_child(view)
+	await main.get_tree().process_frame
+	tags = _tagged(view)
+	ok(tags.is_empty(), "a save with 3 matches shows no 'Start here' tags (%s)" % [tags])
 	view.pm.left = 0.0
 	view.set_process(false)
 	view.queue_free()

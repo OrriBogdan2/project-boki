@@ -185,6 +185,14 @@ static func fix(want: String, weight: String) -> String:
 			return String(a)
 	return ""
 
+# ---- "Start here": the four Hunters a new save is pointed at (rules "start_here"), until its first matches are played
+## The one-line role of a "Start here" Hunter, "" for any other Hunter or once the save has played enough matches.
+static func start_role(id: String) -> String:
+	var tag: Dictionary = rules().get("start_here", {})
+	if int(Save.d.get("matches", 0)) >= int(tag.get("until_matches", 0)):
+		return ""
+	return String((tag.get("roles", {}) as Dictionary).get(id, ""))
+
 # ---- counting: what one expedition adds
 ## The counts one finished expedition adds ({stat: n}): its result plus the feats HunterFeats recorded.
 static func match_counts(r: Dictionary) -> Dictionary:

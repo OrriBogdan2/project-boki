@@ -139,6 +139,9 @@ func _tile(ak: String) -> PanelContainer:
 	row.add_child(col)
 	col.add_child(UI.label(HunterViewer.display_name(ak), 18, Arch.color(ak) if open else UI.FAINT, UI.big))
 	col.add_child(UI.label(HunterViewer.stat_line(ak), 12, UI.MUTED))
+	var role := ClassUnlock.start_role(ak)
+	if role != "":
+		col.add_child(UI.label("Start here: " + role, 12, UI.GOLD, UI.semi))
 	if ak == pm.pick:
 		col.add_child(UI.label("Locked in" if pm.locked else "Your pick", 12, UI.GOOD, UI.semi))
 	elif not open:
