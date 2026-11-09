@@ -41,7 +41,9 @@
 	},
 	"land": {
 		"clip": "land",
-		"dur": 0.42,
+		"dur": 0.27,
+		"moving": 0.13,
+		"rate": 1.6,
 		"min_fall": 0.5
 	},
 	"kmoves": {

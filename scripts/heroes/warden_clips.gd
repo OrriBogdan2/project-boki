@@ -7,7 +7,7 @@ extends RefCounted
 ## clip can never drift from the hit it shows. States the data lists as "procedural" (ledges, stomps) blend back to the
 ## retargeted rig, and so does any Hero model played by something that feeds no state (galleries, portraits).
 ##
-## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
+## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a Blend2 of fall
 ## and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
 ## (Blend2: moves that own the body). The action itself is two seekable channels crossfaded, so one move hands to the
 ## next without a pop (item 32).
@@ -210,10 +210,14 @@ func _build() -> AnimationNodeBlendTree:
 	t.connect_node("stance_w", 0, "loco_rate")
 	t.connect_node("stance_w", 1, "stance")
 	var ai: Dictionary = d["air"]
-	var space := AnimationNodeBlendSpace1D.new()
-	space.add_blend_point(_anim(String(ai["fall"])), 0.0)
-	space.add_blend_point(_anim(String(ai["rise"])), 1.0)
-	t.add_node("air_pose", space)
+	# (the rise plays once per jump: seeked to its start at take-off, else it stays frozen on its last frame)
+	t.add_node("rise", _anim(String(ai["rise"])))
+	t.add_node("rise_seek", AnimationNodeTimeSeek.new())
+	t.connect_node("rise_seek", 0, "rise")
+	t.add_node("fall", _anim(String(ai["fall"])))
+	t.add_node("air_pose", AnimationNodeBlend2.new())
+	t.connect_node("air_pose", 0, "fall")
+	t.connect_node("air_pose", 1, "rise_seek")
 	t.add_node("glide", _anim(String(ai["glide"])))
 	t.add_node("glide_w", AnimationNodeBlend2.new())
 	t.connect_node("glide_w", 0, "air_pose")
@@ -330,8 +334,13 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": st["emote"], "t": float(s.get("emote_t", 0.0))}
 	land_t += dt
 	var ld: Dictionary = d.get("land", {})
-	if land_t < float(ld.get("dur", 0.0)) and bool(s.get("grounded", true)):
-		return {"clip": ld["clip"], "t": land_t}
+	# ("moving": how long the landing owns the body while he runs on, so the legs are back on the run before the
+	# standing absorb would end; "rate": the clip's speed, a quicker absorb from the same keys)
+	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	var moving := Vector2(vel.x, vel.z).length() >= STILL
+	var hold := float(ld.get("moving", ld.get("dur", 0.0))) if moving else float(ld.get("dur", 0.0))
+	if land_t < hold and bool(s.get("grounded", true)):
+		return {"clip": ld["clip"], "t": land_t * float(ld.get("rate", 1.0))}
 	var hit := float(s.get("hit_t", 99.0))
 	var hd: Dictionary = st.get("hit", {})
 	if hit < float(hd.get("dur", 0.0)):
@@ -436,8 +445,10 @@ func _loco(s: Dictionary, dt: float) -> void:
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
 	_p("air/blend_amount", air_w)
 	_p("glide_w/blend_amount", glide_w)
-	_p("air_pose/blend_position", rise_w)
+	_p("air_pose/blend_amount", rise_w)
 	if not grounded:
+		if not was_air:
+			_p("rise_seek/seek_request", 0.0)
 		air_t += dt
 	elif was_air:
 		if air_t >= float((d.get("land", {}) as Dictionary).get("min_fall", 0.0)):

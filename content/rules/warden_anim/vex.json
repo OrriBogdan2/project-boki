@@ -13,7 +13,7 @@
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dash_ex"},
-	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
+	"land": {"clip": "land", "dur": 0.27, "moving": 0.13, "rate": 1.5, "min_fall": 0.25},
 	"kmoves": {
 		"gunslinger_lmb": {"clip": "lmb", "upper": "moving"},
 		"gunslinger_rmb": {"clip": "rmb", "upper": "moving"},

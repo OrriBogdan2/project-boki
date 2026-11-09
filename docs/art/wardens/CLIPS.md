@@ -16,7 +16,9 @@ Hero live in `tools/art1/` (Kael is the pilot).
   don't collide.
 - `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds.
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
-- `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
+- `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne, owning the body for `dur` s standing and
+  `moving` s (default `dur`) while he runs on, played at `rate` times its speed (default 1). `--clip-check` measures the
+  plain jump through the clips (take-off, apex, dip, recovery: the JL rows); `--jump-land-shots` films it at the match camera.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
