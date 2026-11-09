@@ -21,7 +21,7 @@ Meeko keeps the squad on its feet: she heals with Hearthlight, carries downed fr
    cursor. Each ember **Kindles** a foe (up to 5): Kindle adds damage to your embers, and an ember into a
    Kindled foe winds Hearthlight back. Pause a second and the next ember is Empowered and flies further.
 2. **Press RMB** for the Burrseed: a 1s wind-up at half speed, then it flies at the cursor by itself, so flick your aim onto the target as it ends. The seed sticks to the first foe, a
-   violet disc shows the area under them, and 0.7s later it roots everyone in it.
+   leaf disc shows the area under them, and 0.7s later it roots everyone in it.
 3. **E** lights Hearthlight, a ring that heals the squad and flares at the end. Press E again to throw it
    to the cursor; it latches onto the first teammate it passes.
 4. **Shift** (Relay Step) is a short hop where you move. Pass through a teammate to get half a dash back.
@@ -82,7 +82,7 @@ What the in-game kit card (K) says.
 
 **Burrseed (RMB, 10.5s cooldown).**
 
-- *Tap:* Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled.
+- *Tap:* Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a leaf disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled.
 
 **Hearthlight (E, 11s cooldown).** A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.
 
@@ -105,7 +105,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | ember sparks over the foes she has Kindled, one per stack |
-| Armed / full | a foe at 5 Kindle burns bright; a stuck Burrseed shows its violet disc under them, filling, for everyone |
+| Armed / full | a foe at 5 Kindle burns bright; a stuck Burrseed shows its leaf disc under them, filling, for everyone |
 | Dash spent | dash pip dark |
 
 <!-- /gen:kit -->
