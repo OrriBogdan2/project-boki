@@ -46021,5 +46021,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_galleotter_gap_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_ringrove_r88",
+    "name": "Ringrove",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_ringrove_r88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_ringrove_r88",
+    "name": "Ringrove",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_ringrove_r88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_rimefang_gap",
+    "name": "Rimefang",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_rimefang_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glaivyx_p88",
+    "name": "Glaivyx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_glaivyx_p88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_rimink_p88",
+    "name": "Rimink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_rimink_p88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_prismink_p88",
+    "name": "Prismink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_prismink_p88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_rippmink_p88",
+    "name": "Rippmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_rippmink_p88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_flarmink_p88",
+    "name": "Flarmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_flarmink_p88_2.jpg",
+    "ok": true
   }
 ]
