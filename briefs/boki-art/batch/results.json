@@ -71200,5 +71200,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/rd_pagoguana_v2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "rd_bucketmander_v2",
+    "name": "Bucketmander (redesign concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd_bucketmander_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_pagoguana_v2",
+    "name": "Pagoguana (redesign concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd_pagoguana_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_crofthollow_v2",
+    "name": "Crofthollow (redesign concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd_crofthollow_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_crofthollow_v2",
+    "name": "Crofthollow (redesign concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd_crofthollow_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_crofthollow_v2",
+    "name": "Crofthollow (redesign concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd_crofthollow_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_pagoguana_v2",
+    "name": "Pagoguana (redesign concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd_pagoguana_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_crofthollow_v2",
+    "name": "Crofthollow (redesign concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd_crofthollow_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_pagoguanarear_v2",
+    "name": "Pagoguana (redesign concept rear)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd_pagoguanarear_v2_4.jpg",
+    "ok": true
   }
 ]
