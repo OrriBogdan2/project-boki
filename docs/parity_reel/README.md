@@ -45,5 +45,5 @@ Still differs (KIT_PARITY, docs/heroes/bulwark.md):
 - Passive: the Guard meter and Shield Slam are ours, not in the source (gap 15, owner question open). Wall-knock Stun is built.
 - E: matches (zone round the hammer, burst); cd 12 / 8. R: stun .5 s, cd 40 vs 50 (0.8x). Dash (Whirl 3.5 m, cd 8) matches.
 - RMB shield routing (Shift = bash) not settled `[?]`. Dash to LMB buffers (gap 9).
-By eye (footage 45 to 560 next to the reel): the source's Earthshatter is a tall cyan-outlined rectangle with a lightning crack and a stun marker; ours lays a lane of dark rocks inside an orange box, so the fissure reads as boulders, not a glowing crack. The source's Barrier Shield is a flat gold plate in front of him; ours is a pale green bubble round him. Our Mossy is 1.5x a medium Hunter (owner) so he is larger than the source's Oath on screen.
+By eye (footage 45 to 560 next to the reel): the source's Earthshatter is a tall cyan-outlined rectangle with a lightning crack and a stun marker; ours lays a lane of dark rocks inside an orange box, so the fissure reads as boulders, not a glowing crack. The source's Barrier Shield is a flat gold plate held in front of him; my sampled frames did not catch ours, so watch the RMB part. Our E is a pale green zone round the hammer. Our Mossy is 1.5x a medium Hunter (owner) so he is larger than the source's Oath on screen.
 
