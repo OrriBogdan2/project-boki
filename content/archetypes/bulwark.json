@@ -7,7 +7,7 @@
 	"weight": "heavy",
 	"color": "#8fd0ff",
 	"body": {
-		"size": 2.0, "bulk": 0.8,
+		"size": 1.8, "bulk": 0.8,
 		"build": 1.4,
 		"hit_r": 0.46,
 		"head": 0.3,
@@ -17,18 +17,18 @@
 		"neck": 0.0
 	},
 	"model_glow": {"core": "#1fe0cc", "edge": "#0f9a94", "compass": "#ffb347", "lure": "#8ff5e0", "strength": 1.5},
-	"plate_offset": 2.6,
+	"plate_offset": 2.35,
 	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",
 	"silhouette": "the frozen prow shield and the long ice-cased oar",
 	"card": {
 		"loop": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",
 		"role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",
 		"lmb": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you.",
-		"rmb": "Hold to raise your aegis and block shots from the front. With it up, Shift is a Shield Charge on its own cooldown.",
+		"rmb": "Hold to raise your aegis and block shots from the front. With it up, left click thrusts it to shove foes back and Shift is a Shield Charge on its own cooldown.",
 		"e": "A green light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst.",
-		"dash": "360 Smash: a short dash that ends in one spinning hit around you; with the aegis up, a Shield Charge (its own 6s cooldown).",
+		"dash": "360 Smash: a short dash that ends in one spinning hit around you that lunges you on; with the aegis up, a Shield Charge (its own 6s cooldown).",
 		"passive": "Blocking builds Guard (50 turns your Shield Charge into a Shield Slam); knocking a foe into a wall or another foe stuns it.",
-		"x": "Faultline (level 6): plant, slam, and the ground erupts down a long lane, throwing every foe on it up.",
+		"x": "Faultline (level 6): hop, slam, and the ground erupts down a long lane, throwing every foe on it up.",
 		"weapons": {
 			"tower_shield": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you."
 		}
@@ -76,10 +76,17 @@
 		"smash_arc": 180.0,
 		"smash_stun": 0.4,
 		"smash_rate": 0.61,
-		"carry": [
-			1.5,
-			1.8
-		],
+		"lunge": {
+			"d": [1.4, 2.4],
+			"spin_d": 1.6,
+			"t": 0.22,
+			"air_k": 0.55
+		},
+		"rope": {
+			"max_len": 14.0,
+			"max_t": 6.0,
+			"reel_speed": 30.0
+		},
 		"perfect": {
 			"window": 0.18,
 			"dist": 4.0,
@@ -103,7 +110,7 @@
 		"charge_speed": 18.0,
 		"charge_kb": 11.0,
 		"charge_dmg": 10.0,
-		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
+		"desc": "360 Smash: a hard 3.5m dash (0.17s) into one full spin of the hammer around you (2.2m: 24 damage, push 7) that lunges you 1.6m on. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
 		"short": 2.6,
 		"spin_r": 2.2
 	},
@@ -131,7 +138,17 @@
 			"slow": 0.6,
 			"push": 2.0,
 			"push_gap": 0.6,
-			"push_speed": 14.0
+			"push_speed": 14.0,
+			"boop": {
+				"cd": 0.55,
+				"wind": 0.07,
+				"snap": 0.06,
+				"settle": 0.17,
+				"thrust": 0.7,
+				"reach": 1.3,
+				"push": 2.8,
+				"push_speed": 18.0
+			}
 		},
 		"slam": {
 			"radius": 2.6,
@@ -190,9 +207,10 @@
 		"cooldown": 40.0,
 		"windup": 0.4,
 		"plant": 0.2,
+		"leap_h": 1.2,
 		"cells": 4,
 		"cell_len": 4.0,
-		"width": 4.5,
+		"width": 5.5,
 		"lead": 0.2,
 		"cell_t": 0.15,
 		"strike_dmg": 4.0,
@@ -205,7 +223,7 @@
 		"scar_w": 1.4,
 		"scar_slow": 0.2,
 		"refund": 8.0,
-		"desc": "Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%."
+		"desc": "Hop 1.2m up with the hammer high overhead and drive it down (0.4s, the 16m by 5.5m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%."
 	},
 	"order": [
 		"sec",

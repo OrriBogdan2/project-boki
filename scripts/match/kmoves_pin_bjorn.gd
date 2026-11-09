@@ -813,6 +813,12 @@ const MOVES := {
 		[0.6, {}]]},
 	# the Shield Slam (Guard 50): the 0.3 s tell, shield drawn in to the chest and the weight rocked back,
 	# then a full-body drive behind it
+	"bul_boop": {"keys": [
+		[0.0, {}],
+		[0.07, {"p": 0.12, "y": 0.15, "sq": -0.06, "lw": 1.0, "fl": Vector3(0.03, 0.1, -0.05)}],
+		[0.13, {"p": -0.35, "y": -0.12, "sq": 0.2, "lw": 1.0, "legs": [0.6, -0.5, -0.3, -0.2],
+			"fl": Vector3(0.0, 0.1, -0.5)}],
+		[0.36, {}]]},
 	"bul_slamshield": {"keys": [
 		[0.0, {}],
 		[

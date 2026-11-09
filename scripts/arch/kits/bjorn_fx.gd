@@ -42,6 +42,7 @@ const WAKE_EVERY := 0.06
 const BASH_HALF := 0.6
 const CHAIN_LINKS := 18
 const CHAIN_SAG := 0.5        # m at its deepest, once the hammer is far out
+var taut := false              # the rope is hauling the hammer home: drawn straight, no sag
 const WRIST := "Rig/Torso/ArmRPivot/Elbow/Hand"
 ## the whirled hammer: the 3D model's size over the one in the hand (it reads at the match camera; the procedural
 ## hammer is drawn big enough as it is), how far above the hand the circle runs (m), its tilt (rad, the head a
@@ -208,7 +209,7 @@ func _tick_chain() -> void:
 		var a := wrist.global_position
 		var b := hammer.global_position
 		var u := (i + 0.5) / chain.size()
-		var sag := Vector3.DOWN * CHAIN_SAG * minf(a.distance_to(b) * 0.1, 1.0) * sin(u * PI)
+		var sag := Vector3.DOWN * CHAIN_SAG * minf(a.distance_to(b) * 0.1, 1.0) * sin(u * PI) * float(not taut)
 		var at := a.lerp(b, u) + sag
 		var along := (b - a).normalized()
 		var up := Vector3.UP if absf(along.y) < 0.95 else Vector3.RIGHT
