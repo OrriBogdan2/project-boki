@@ -43305,5 +43305,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_anchorhorn_z1_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_crofthollow_z1",
+    "name": "Crofthollow (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_crofthollow_z1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_crofthollow_z1",
+    "name": "Crofthollow (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_crofthollow_z1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_crofthollow_z2",
+    "name": "Crofthollow (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_crofthollow_z2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_crofthollow_z1",
+    "name": "Crofthollow (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_crofthollow_z1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_crofthollow_z2",
+    "name": "Crofthollow (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_crofthollow_z2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_crofthollow_z1",
+    "name": "Crofthollow (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_crofthollow_z1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_crofthollow_z2",
+    "name": "Crofthollow (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_crofthollow_z2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongrowl_z2",
+    "name": "Gongrowl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gongrowl_z2_3.jpg",
+    "ok": true
   }
 ]
