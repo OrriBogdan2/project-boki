@@ -16,10 +16,11 @@ Code:
 | Coat marks | `shaders/toon.gdshader` (`mark_*` uniforms) |
 | Idle habits, girth | `scripts/match/kin_puppet.gd` |
 | Hitbox and stat trade-off | `scripts/match/kin.gd` `init_kin` |
+| The body layer: whose body it bumps | `scripts/match/kin.gd` `bumps` (read by `Match._separate`) |
 | Wild and bot seeds, where a Boki was caught | `scripts/match/match.gd` (`kin_seed`, `where_at`), `spawn_plan.gd` |
 | The About tab, Nesting Nook and Burrow lines | `scripts/ui/about_view.gd` (`AboutView`) |
 | Species base sizes | `content/kin/<id>.json` `"size": {"cm", "kg"}` |
-| Tests | `tools/unique_check.gd` (`--unique-check`), `tests/save_fixtures/v1_save.json` |
+| Tests | `tools/unique_check.gd` (`--unique-check`), `tests/save_fixtures/v1_save.json`, `tools/boki_noblock_check.gd` (`--boki-noblock-check`) |
 
 ## The record
 
@@ -123,6 +124,27 @@ serial are never inherited.
   options have `"normalize_size": true`. Then size changes neither stats nor the hitbox (looks stay).
   This is the hook for ranked play or lower tiers to neutralize size later: set the option when
   starting those matches.
+
+## Never in the way
+
+A Boki out beside its hunter (hopped out, thrown, or summoned out of its wisp) may not change its
+own team's movement, dash or control (DECISIONS 2026-11-06: Boki effects on the player's gameplay
+are removed or restricted by default). The rule lives in one place for every species, the body's
+layer in `Kin.bumps`:
+
+- **Bodies.** A Boki's body bumps rivals, mobs and other Boki, never a hunter on its own team.
+  `Match._separate` (the one place bodies push each other) skips a pair when either side says no.
+  So its owner and their teammates walk, dash, glide and land through it, it cannot shove them at a
+  ledge, and a bot never stalls or detours round a friendly Boki (the bot's unstick turns on a
+  stopped body, which a friendly Boki no longer causes). A rival still walks into it.
+- **Shots.** A team's own shots fly through its Boki and hit what is behind (`Match._shot_targets`
+  and `foes_of` list only the other teams' Boki); a rival's shots and melee still hit it. Aim lines
+  and hit scans never used bodies, so a friendly Boki blocks no aim.
+- **Wall kicks and mantles** read the terrain only; no body takes part.
+
+`--boki-noblock-check` proves it for a small, a medium and a large species: the owner walks, dashes,
+lands from a glide and fires through the Boki held in their path, ending exactly where they end with
+no Boki there; a teammate and a bot do the same; a rival is held back and a rival's shot lands.
 
 ## Showing it to the player
 
