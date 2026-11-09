@@ -17188,5 +17188,103 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_echolop_pe_w29_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_ermink_pe_w29",
+    "name": "Ermink (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_ermink_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ermink_pe_w29",
+    "name": "Ermink (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_ermink_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ermink_pe_w29",
+    "name": "Ermink (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ermink_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frigatee_pe_w29",
+    "name": "Frigatee (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_frigatee_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frigatee_pe_w29",
+    "name": "Frigatee (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_frigatee_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frigatee_pe_w29",
+    "name": "Frigatee (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_frigatee_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_e_w29",
+    "name": "Arcestrel",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/arcestrel_e_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx_e_w29",
+    "name": "Briarlynx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/briarlynx_e_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_r2_w29",
+    "name": "Anchorbill",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anchorbill_r2_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_e_w29",
+    "name": "Blossmink",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/blossmink_e_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_r2_w29",
+    "name": "Anchorbill",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/anchorbill_r2_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_e_w29",
+    "name": "Blossmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/blossmink_e_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_e_w29",
+    "name": "Arcestrel",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/arcestrel_e_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_e_w29",
+    "name": "Arcestrel",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/arcestrel_e_w29_2.jpg",
+    "ok": true
   }
 ]
