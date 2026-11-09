@@ -10762,5 +10762,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_glintmole_pe_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_glomwort_pe",
+    "name": "Glomwort (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glomwort_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glomwort_pe",
+    "name": "Glomwort (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glomwort_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_pe",
+    "name": "Gongibbon (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hivara_pe",
+    "name": "Hivara (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_hivara_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hivara_pe",
+    "name": "Hivara (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_hivara_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jarmit_pe",
+    "name": "Jarmit (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_jarmit_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jarmit_pe",
+    "name": "Jarmit (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_jarmit_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_pe",
+    "name": "Gongibbon (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_pe_2.jpg",
+    "ok": true
   }
 ]
