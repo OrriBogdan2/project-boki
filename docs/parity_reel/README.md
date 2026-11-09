@@ -80,3 +80,18 @@ Still differs (KIT_PARITY, docs/heroes/mage.md):
 - Not built: Lightning Strike launching Wisps (no wisps), Static detonation restoring mana (no mana).
 By eye (footage 20 to 380 next to the reel): the source's Eye of the Storm is a large amber ring with a glowing centre and the hunter in the sky; ours is a pink dome that fills about the whole arena at the match camera, so the size is similar but the look is a filled dome, not a ring. The source's Javelin is a thin yellow lance and Spear a white-yellow bolt with a spark; ours is hot pink on a thin line (our palette, on purpose). In the sampled frames the dash shows only a faint streak.
 
+## Tenzo the Stone Seer (`dolm`, source Breah / Tetra): [dolm.mp4](dolm.mp4)
+Still differs (KIT_PARITY gap 14, docs/heroes/dolm.md):
+- E: Rock wall, cd 12.5, but allies cannot hop it by jumping (the source's allies can; owner item 25 keeps only the caster climbing). Source hop and the Landslide dash are not copied.
+- Dash: Rock Hop, three hops, cd 12 (owner item 111) in place of Landslide (a dash that launches a rock); the air dash has no source.
+- R: 9 rocks with drag, cd 45, Slow data present; the source's Tetraform is a tap wall or a held drag of one wall with a Slow (owner item 15 says rocks only). Terrain does not last longer per rank (our R has no ranks).
+- LMB (boulder tap, punch hold), RMB (hold slam, glide slam), passive Shield: match. A flick-tech arc hit was removed in the source (not built).
+By eye (footage 110 to 660 next to the reel): the source's Tetraform raises one long orange spiked ridge in a line and its rocks burst in orange fire; in the reel the R part scatters about nine separate red-brown rocks over a wide area instead of one lane, and the punch shows a pale box with little impact. Boulder and slam impacts have far less fire and flash than the source's.
+
+## Motley the Void Jester (`ostra`, source Ostra / Void): [ostra.mp4](ostra.mp4)
+Still differs (KIT_PARITY, docs/heroes/ostra.md):
+- LMB: .6 s with a continuous charge to 1.4 s and every orb piercing (owner items 60); the source's idle next orb is stronger, terrain-stopped, with a Slow, and a firing-rate penalty card (not built, nothing to penalise at a fixed cadence).
+- RMB: wind-up .32 vs .2, cd 10 (owner item 40). E: bomb grows 6.5 s, peaks 3x vs 3.5x, fizzles at 10 s (ours); the source reactivates.
+- R: tell 1.0, 3.5 s, pull 12, cd 70 match; about a 1 s cast lock (owner). Dash: 1.8 s lob, drift 30%, swaps foes and allies: match. Floating passive `[?]`. The 40% slow on swapped foes is not built (no data).
+By eye (footage 50 to 480 next to the reel): the source's Black Hole is a deep violet whirlpool with a dark core and bright violet rim that grows when empowered; ours is a flat teal disc with a dark blue rim that lingers through the dash and glide parts, so it reads as a puddle rather than a vortex pulling in. The Unstable Anomaly bomb is a dark blue sphere in the source; the Swap lob is a small projectile with a purple trail. Our orbs are small purple dots with little trail.
+
