@@ -58,3 +58,8 @@ Only the final form of each line goes to 3D for now; the third-stage forms stay 
 
 ## Owner decision 2026-11-09: soul-linked Boki wisps
 In matches your Boki rides as a small critter-shaped wisp: carry passive always on, a summon button on a long cooldown, and the ult gives a longer summon or merge form. Downed Hunters drop their wisps, which can be stolen for the match only; the thief keeps a soul echo (Field Book unlock, better odds, a small mutation chance). Round wisp = Hunter, critter wisp = Boki. Full rules: DECISIONS.md, 2026-11-09.
+
+## Owner note 2026-11-08 22:17 ET: keep plenty of single-type Boki
+- Target about 45% single-type across the whole roster (now 29 of 124 existing, 49 of 77 new).
+- Patterns to use: some whole lines stay single-type (like a fire starter that stays pure fire); in other three-stage lines the baby and middle stay single and the second type arrives at the final; dual types are kept where the idea really spans two types.
+- Applied to ROSTER_200_NEW.md already. For the existing 124: move roughly 30 babies/middle forms (and a few whole lines) to single-type.

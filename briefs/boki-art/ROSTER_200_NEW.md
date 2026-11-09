@@ -61,6 +61,11 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 
 ---
 
+## Typing update (owner, 2026-11-08 22:17 ET): more single-type Boki
+- 10 whole lines now stay single-type (Lurklet, Cubbat, Tootle, Olmlet, Pocketpus, Narfoil, Pinster, Proofhop, Chiptero, Foldbat lines).
+- In 8 more three-stage lines the middle form stays single-type and the second type arrives at the final (Lensling, Bathilus, Mumblet, Pawnfry, Grainspin, Morelkin, Gravigrub, Polyshroom lines).
+- New species: 49 single, 28 dual (was 27 / 50). The summary table above still shows the old typing; the per-species headers below are current.
+
 # Three-stage lines
 
 ## 1. Lensling line: chameleon + brass telescope (egg-only)
@@ -77,7 +82,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** held telescope, tripod, stars or sparkle particles, upright pose.
 - **Archetype:** cute
 
-### Scopeleon (2 of 3) · Lunar, Prism
+### Scopeleon (2 of 3) · Lunar
 - **Concept:** a chameleon whose swivelling eyes are two brass spyglasses.
 - **Rejected ideas:** chameleon + periscope (too close to Torpecone); chameleon + kaleidoscope.
 - **Mix:** chameleon + extending spyglass
@@ -110,7 +115,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** chain, held bait, realistic fish, full-body glow.
 - **Archetype:** creepy
 
-### Snapler (2 of 3) · Shadow, Gravity
+### Snapler (2 of 3) · Shadow
 - **Concept:** a flat anglerfish that is a living bear trap.
 - **Rejected ideas:** flounder + mousetrap; anglerfish + jukebox.
 - **Mix:** flat anglerfish + bear trap
@@ -120,7 +125,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** chain, round body like Lurklet, ropes or wires, upright.
 - **Archetype:** tough
 
-### Maulangler (3 of 3) · Shadow, Gravity
+### Maulangler (3 of 3) · Shadow
 - **Concept:** a walking frogfish whose whole body snaps shut like a giant trap.
 - **Rejected ideas:** frogfish + Venus flytrap (too natural); gulper eel + rubbish-truck compactor.
 - **Mix:** walking frogfish + giant clamp trap
@@ -144,7 +149,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** numbers or text, casino props, held dice, a round body.
 - **Archetype:** cute
 
-### Pipwom (2 of 3) · Wild, Stone
+### Pipwom (2 of 3) · Wild
 - **Concept:** a wombat whose rump is a six-pip shield die.
 - **Rejected ideas:** wombat + bulldozer blade; wombat + bunker door (Vaultara clash).
 - **Mix:** burrowing wombat + bone die
@@ -154,7 +159,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** cube body like Cubbat, numbers, text, saddle look.
 - **Archetype:** tough
 
-### Critwom (3 of 3) · Wild, Stone
+### Critwom (3 of 3) · Wild
 - **Concept:** a glyptodont-sized wombat whose shell is a twenty-sided die.
 - **Rejected ideas:** wombat + roulette wheel (wheel trap); wombat + bowling ball (Gravadillo look).
 - **Mix:** glyptodont-like giant wombat + twenty-sided die
@@ -179,7 +184,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** propeller, periscope, held objects, thin tentacles.
 - **Archetype:** cute
 
-### Torpecone (2 of 3) · Gravity, Tide
+### Torpecone (2 of 3) · Gravity
 - **Concept:** an extinct straight-shelled nautiloid that is a living torpedo.
 - **Rejected ideas:** orthocone + traffic cone; orthocone + space rocket.
 - **Mix:** orthocone (extinct straight-shelled nautiloid) + torpedo
@@ -212,7 +217,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** wings, sound rings (it is silent), held tools.
 - **Archetype:** cute
 
-### Klaxada (2 of 3) · Swarm, Echo
+### Klaxada (2 of 3) · Swarm
 - **Concept:** a cicada whose abdomen is a klaxon horn.
 - **Rejected ideas:** cicada + stadium horn; cicada + boombox.
 - **Mix:** adult cicada + klaxon horn
@@ -246,7 +251,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** board, squares, text, held objects.
 - **Archetype:** cute
 
-### Gambitfin (2 of 3) · Titan, Wild
+### Gambitfin (2 of 3) · Wild
 - **Concept:** a seahorse that is a carved chess knight.
 - **Rejected ideas:** seahorse + jousting lance; seahorse + horseshoe.
 - **Mix:** seahorse + chess knight
@@ -280,7 +285,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** held trumpet, music notes, upright pose.
 - **Archetype:** cute
 
-### Gramofrill (2 of 3) · Echo, Wild
+### Gramofrill (2 of 3) · Echo
 - **Concept:** a frilled lizard whose frill is a gramophone horn.
 - **Rejected ideas:** frilled lizard + satellite dish; frilled lizard + lampshade.
 - **Mix:** frilled lizard + gramophone horn
@@ -290,7 +295,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a record player body, running upright on two legs, music notes.
 - **Archetype:** fast
 
-### Phonodrake (3 of 3) · Echo, Wyrm
+### Phonodrake (3 of 3) · Echo
 - **Concept:** a dragon whose crown is four gramophone horns.
 - **Rejected ideas:** frill dragon + radio mast; frill dragon + bandstand.
 - **Mix:** frill dragon + four-horn gramophone
@@ -314,7 +319,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** web strands, thin legs, realistic spider hair.
 - **Archetype:** cute
 
-### Sandwidow (2 of 3) · Stone, Shadow
+### Sandwidow (2 of 3) · Stone
 - **Concept:** a black widow whose red hourglass mark is a real glass hourglass.
 - **Rejected ideas:** black widow + chandelier (Snuffapi clash); tarantula + feather duster.
 - **Mix:** black widow + hourglass
@@ -348,7 +353,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** mushrooms on its back like a garden, realistic tapir.
 - **Archetype:** cute
 
-### Truffapir (2 of 3) · Spore, Wild
+### Truffapir (2 of 3) · Spore
 - **Concept:** a tapir that has become the truffle it was hunting.
 - **Rejected ideas:** tapir + gas mask (worn); pig-nosed turtle + truffle.
 - **Mix:** tapir + truffle and morel
@@ -382,7 +387,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a ball being pushed, legs, wings.
 - **Archetype:** cute
 
-### Orbeetle (2 of 3) · Gravity, Swarm
+### Orbeetle (2 of 3) · Gravity
 - **Concept:** a dung beetle whose rear end is a ringed planet.
 - **Rejected ideas:** dung beetle + bowling ball; dung beetle + football.
 - **Mix:** dung beetle + ringed planet
@@ -426,7 +431,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** teacup or vase shapes, realistic olm, glass.
 - **Archetype:** pretty
 
-### Glazolm (2 of 3) · Wyrm, Prism
+### Glazolm (2 of 3) · Wyrm
 - **Concept:** a salamander of crackle-glaze pottery mended with gold.
 - **Rejected ideas:** salamander + teapot (Teapotamus clash); newt + piggy bank.
 - **Mix:** salamander + crackle-glaze porcelain
@@ -436,7 +441,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** noodle body like Olmlet, painted patterns, glass.
 - **Archetype:** pretty
 
-### Kintsuwyrm (3 of 3) · Wyrm, Prism
+### Kintsuwyrm (3 of 3) · Wyrm
 - **Concept:** a dragon that was shattered and glued back together with gold.
 - **Rejected ideas:** dragon + willow-pattern plate; dragon + porcelain vase.
 - **Mix:** serpent dragon + kintsugi
@@ -461,7 +466,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** thin tentacles, rooted to a rock, a full mushroom cluster.
 - **Archetype:** creepy
 
-### Starcap (2 of 3) · Spore, Tempest
+### Starcap (2 of 3) · Spore
 - **Concept:** a baby jellyfish that is a spinning mushroom throwing star.
 - **Rejected ideas:** ephyra + frisbee; ephyra + ceiling fan.
 - **Mix:** ephyra + gilled mushroom wedges
@@ -547,7 +552,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a brand cross or logo, a held knife, open blades.
 - **Archetype:** cute
 
-### Bladypus (2 of 2) · Venom, Wild
+### Bladypus (2 of 2) · Venom
 - **Concept:** a platypus that is an open multi-tool.
 - **Rejected ideas:** platypus + garden trowel; platypus + cricket bat.
 - **Mix:** platypus + multi-tool
@@ -571,7 +576,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** hanging upside down, open wings, held fan.
 - **Archetype:** cute
 
-### Fanpire (2 of 2) · Echo, Tempest
+### Fanpire (2 of 2) · Echo
 - **Concept:** a flying fox whose wings are iron war fans.
 - **Rejected ideas:** bat + kite (Kitlet clash); bat + window blinds.
 - **Mix:** flying fox + war fan
@@ -595,7 +600,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** open wings, a held tool, feathers.
 - **Archetype:** cute
 
-### Pickadactyl (2 of 2) · Stone, Wyrm
+### Pickadactyl (2 of 2) · Stone
 - **Concept:** a pterosaur whose head is a double pickaxe.
 - **Rejected ideas:** pterosaur + hang glider (kite clash); pterosaur + ice axe.
 - **Mix:** pterosaur + double pickaxe
@@ -667,7 +672,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a held sword, a fencing mask worn, a long tusk.
 - **Archetype:** cute
 
-### Parrywhal (2 of 2) · Frost, Titan
+### Parrywhal (2 of 2) · Frost
 - **Concept:** a narwhal that is a fencing champion: epee tusk, bell-guard brow, parry fins.
 - **Rejected ideas:** narwhal + unicorn horn (cliche); narwhal + candy cane.
 - **Mix:** narwhal + fencing champion
@@ -738,7 +743,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a wheel, a glass cabinet, text or scores, a battery.
 - **Archetype:** cute
 
-### Tiltster (2 of 2) · Storm, Wild
+### Tiltster (2 of 2) · Storm
 - **Concept:** a hamster that is a whole pinball machine.
 - **Rejected ideas:** hamster + arcade claw machine; hamster + slot machine.
 - **Mix:** hamster + whole pinball machine
@@ -832,7 +837,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a bowl, a baker's hat, realistic insect hair, thin antennae.
 - **Archetype:** cute
 
-### Loafhopper (2 of 2) · Spore, Swarm
+### Loafhopper (2 of 2) · Spore
 - **Concept:** a katydid that is a scored sourdough loaf, crust spikes and all.
 - **Rejected ideas:** katydid + mouldy cheese; grasshopper + baguette (too thin).
 - **Mix:** katydid + scored sourdough loaf
