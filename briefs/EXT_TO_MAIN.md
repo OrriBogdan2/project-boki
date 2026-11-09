@@ -4466,3 +4466,4 @@ ART jarmit 8.63 briefs/boki-art/cards/Jarmit.jpg kind=card panel=8.6/8.6/8.7
 ART latchling 8.33 briefs/boki-art/cards/Latchling.jpg kind=card panel=8.6/8.5/7.9
 ART ribbonwyrm 8.3 briefs/boki-art/cards/Ribbonwyrm.jpg kind=card panel=8.5/8.6/7.8
 The other ~65 cards regenerate with a stronger prompt (no shadow/glow, face first, signature parts kept).
+READY ext/text-lore-pronouns bb53dc23c (loading.gd lore lines: Sundering->Hollowing, Tyrant/hoard->Malgrave the Beloved/her vault; pronouns and wiki already correct)
