@@ -481,3 +481,8 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - Owner: "i think ermink should be called minkee". Display name everywhere (game UI, lore, Bokidex, art prompts, gen names) is now **Minkee**.
 - Internal id stays `ermink` (files, gens, dex id) so nothing breaks; the evolutions (Flarmink, Rippmink, Blossmink, Voltmink, Rimink, Umbrink, Lunink, Prismink, Wyrmink) keep their names.
 - New art: name it 'Minkee' in gen-feed drops (alias minkee -> ermink exists). Any new code/data that adds this creature uses the name Minkee.
+
+## 2026-11-09 owner: art ORDER — hunters + enemy mobs perfect first, then 2D cast pass, then Boki 3D
+- Owner (11-09 ~10 PM EST): "first i want to get the hunters (and enemy mobs) perfect", then "a fable agent doing cel-shading and edits on the whole cast once its done - then we can do the 3d modeling".
+- Order: (1) the 12 hunters (v95 lane) and the 7 enemy mobs (skitter, spitter, brute, warden, bomber, sentinel, glimmer) are brought to final quality first; (2) once the 2D Boki art is complete, one Fable-judged cel-shade + edit pass over the whole Boki cast for consistency; (3) only then Boki 3D (Meshy recipe study and batch). Boki-to-3D work (Meshy pilot, "replace primitive Boki with Meshy") is HELD until step 3; don't start new Boki 3D jobs.
+- Animation: keep our Blender rig-contract clips; Meshy/Mixamo/Uthana clips only as tested candidates, not production defaults (coordinator test pending).
