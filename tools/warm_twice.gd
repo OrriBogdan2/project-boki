@@ -25,7 +25,8 @@ func run(main: Node) -> void:
 		print("WARM-TWICE launch %d rc=%d" % [pass_i + 1, rc])
 		if pass_i == 0:
 			for line in text.split("\n"):
-				if line.begins_with("LOAD") or line.begins_with("HITCH") or line.contains("warm-up ms"):
+				if line.begins_with("LOAD") or line.begins_with("HITCH") or line.begins_with("Quality:") \
+						or line.contains("warm-up ms") or line.contains("warm stamp"):
 					print("  first: " + line)
 		else:
 			print(text)

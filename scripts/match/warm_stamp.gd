@@ -25,8 +25,12 @@ static func warm_keys() -> Dictionary:
 		return {}
 	var d = JSON.parse_string(FileAccess.get_file_as_string(PATH))
 	if typeof(d) != TYPE_DICTIONARY or String(d.get("id", "")) != setup_id():
+		PerfLog.note("warm stamp: for another setup (%s, now %s)" % [str(d.get("parts", []) if d is Dictionary else []),
+				str(_setup_parts())])
 		return {}
 	if not trusted(int(d.get("files", 0)), int(d.get("unix", 0))):
+		PerfLog.note("warm stamp: caches lost it (shader cache %d files, stamp saw %d; pipeline cache %d, stamp %d)"
+				% [_cache_files(SHADER_CACHE), int(d.get("files", 0)), _newest_pipeline_cache(), int(d.get("unix", 0))])
 		return {}
 	var out := {}
 	for k in d.get("keys", []):
@@ -40,7 +44,7 @@ static func save(drawn: Dictionary) -> void:
 	var f := FileAccess.open(PATH, FileAccess.WRITE)
 	if f == null:
 		return
-	f.store_string(JSON.stringify({"id": setup_id(), "files": _cache_files(SHADER_CACHE),
+	f.store_string(JSON.stringify({"id": setup_id(), "parts": _setup_parts(), "files": _cache_files(SHADER_CACHE),
 			"unix": int(Time.get_unix_time_from_system()), "keys": drawn.keys()}))
 	f.close()
 
@@ -56,13 +60,16 @@ static func trusted(files: int, unix: int) -> bool:
 ## What a stamp is for: the engine and game build, the renderer and GPU, and the graphics settings
 ## that change which shaders a match compiles.
 static func setup_id() -> String:
+	return str(_setup_parts()).md5_text()
+
+static func _setup_parts() -> Array:
 	var parts: Array = [Engine.get_version_info().get("hash", ""), Net.VERSION,
 		RenderingServer.get_current_rendering_method(), _driver(), RenderingServer.get_video_adapter_name(),
 		RenderingServer.get_video_adapter_api_version()]
 	parts.append(Settings.quality())
 	for k in ["shadows", "msaa", "warden_models"]:
 		parts.append(str(Settings.get_v(k)))
-	return str(parts).md5_text()
+	return parts
 
 static func _driver() -> String:
 	return RenderingServer.get_current_rendering_driver_name()
