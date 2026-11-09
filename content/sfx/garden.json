@@ -1,0 +1,13 @@
+{
+ "group": "garden",
+ "name": "Garden minigames",
+ "script": "tools/gen_sfx_garden.py",
+ "sounds": {
+  "garden_start": "boki", "garden_lap": "ui", "garden_cheer": "ui", "garden_miss": "ui", "garden_finish": "boki",
+  "garden_crowd": "boki", "garden_strain": "loop", "garden_creak": "step", "garden_thud": "impact",
+  "garden_win": "boki", "garden_sulk": "boki"
+ },
+ "signature": [],
+ "replaces": [],
+ "loops": ["garden_strain"]
+}

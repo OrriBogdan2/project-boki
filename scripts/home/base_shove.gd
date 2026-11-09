@@ -16,6 +16,7 @@ const STUMP_R := 0.3                          # m, its radius
 const GAP := 0.55                             # m from the stump's middle to each pusher
 const SLIDE := 0.5                            # m the pair slides along the push at full balance
 const TILT := 0.5                             # rad the stump leans at full balance
+const CREAK_AT := 0.5                         # balance (0..1) at which the stump first creaks
 const REACH := 1.6                            # m from the stump to start a bout
 
 static func rules() -> Dictionary:
@@ -124,6 +125,7 @@ var pair: Array = []           # the home's kin entries: a, b
 var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
+var creaked := false           # the lean creak has played this bout
 
 func _init(home) -> void:
 	h = home
@@ -183,7 +185,8 @@ func use() -> void:
 	bar.open(h.root_ui, "Press %s once, with the marker in the gold, to shove" % Settings.key_cap("interact"))
 	bar.lbl.text = "Shove with %s" % run.recs[run.backed]["name"]
 	_place_pair()
-	Sfx.play("whoosh", null, -8.0)
+	creaked = false
+	Sfx.play("garden_start", stump.position, BaseRace.GARDEN_DB)
 
 ## A press: true when the bout took it.
 func input(event: InputEvent) -> bool:
@@ -197,6 +200,8 @@ func input(event: InputEvent) -> bool:
 	if run.can_shove():
 		var r := bar.press()
 		run.shove(r)
+		Sfx.play("garden_miss" if r == "miss" else "garden_cheer", stump.position, BaseRace.GARDEN_DB,
+				0.04, 1.2 if r == "great" else 1.0)
 		bar.close()
 		h._emote(pair[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 	return true
@@ -212,8 +217,17 @@ func tick(d: float) -> void:
 	if not run.shoved:
 		bar.step(d)
 	_place_pair()
+	_hear_strain()
 	if run.over():
 		_end(true)
+
+## The strain loop while they push (louder and higher the nearer the stump is to going), one creak as it first leans.
+func _hear_strain() -> void:
+	var lean := absf(run.balance)
+	Sfx.loop_hold("shove_strain", "garden_strain", stump.position, BaseRace.GARDEN_DB, 0.9 + 0.3 * lean)
+	if lean >= CREAK_AT and not creaked:
+		creaked = true
+		Sfx.play("garden_creak", stump.position, BaseRace.GARDEN_DB)
 
 ## The pair slide along the push and the stump leans toward whoever is losing.
 func _place_pair() -> void:
@@ -236,8 +250,12 @@ func _end(finished: bool) -> void:
 		k["t"] = 1.5
 	bar.close()
 	stump.rotation.z = 0.0
+	Sfx.loop_stop("shove_strain")
 	if finished:
+		if absf(run.balance) >= 1.0:
+			Sfx.play("garden_thud", stump.position, BaseRace.GARDEN_DB)
 		_card(res)
+		BaseRace.result_sounds(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()

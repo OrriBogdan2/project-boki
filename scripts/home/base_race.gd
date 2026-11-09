@@ -21,6 +21,8 @@ const JUMP_H := 0.6                          # m, the top of the jump's arc
 const SWIM_DIP := 0.15                       # m the runners sink in the water stretch
 const TRACK_W := 1.4                         # m, the track's width (four lanes)
 const REACH := 1.6                           # m from the post to start a race
+const GARDEN_DB := -6.0                      # dB: the garden sounds sit under the Boki voices
+const SULK_DELAY := 0.7                      # s after the win sting until the loser huffs
 const STRETCH_COL := {
 	"straight": Color("c9b48a"), "water": Color("4ab0ff"), "climb": Color("8a6a4a"), "jump": Color("f2c84a"),
 }
@@ -216,6 +218,7 @@ var runners: Array = []        # the home's kin entries, in run order
 var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
+var heard: Array = []          # per runner: the stretch last heard, plus the stretch count once home
 
 func _init(home) -> void:
 	h = home
@@ -322,7 +325,10 @@ func use() -> void:
 	bar.open(h.root_ui, "Press %s at each mark to cheer" % Settings.key_cap("interact"))
 	_bar_label("")
 	_place_runners()
-	Sfx.play("whoosh", null, -8.0)
+	heard = []
+	heard.resize(runners.size())
+	heard.fill(0)
+	Sfx.play("garden_start", start, GARDEN_DB)
 
 func _bar_label(last: String) -> void:
 	var who: String = run.recs[run.backed]["name"]
@@ -340,6 +346,8 @@ func input(event: InputEvent) -> bool:
 	if run.can_cheer():
 		var r := bar.press()
 		run.cheer(r)
+		Sfx.play("garden_miss" if r == "miss" else "garden_cheer", runners[run.backed]["pos"], GARDEN_DB,
+				0.04, 1.2 if r == "great" else 1.0)
 		h._emote(runners[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 		_bar_label("  " + {"great": "★", "good": "●", "miss": "✕"}[r])
 	return true
@@ -354,8 +362,24 @@ func tick(d: float) -> void:
 	run.step(d)
 	bar.step(d)
 	_place_runners()
+	_hear_laps()
 	if run.over():
 		_end(true)
+
+## A pat as a runner starts each stretch, a swish at the line, and the crowd for the first one home.
+func _hear_laps() -> void:
+	var stretches: int = run.ends.size()
+	for i in runners.size():
+		var mark: int = int(run.stretch[i]) + (stretches if float(run.done_t[i]) >= 0.0 else 0)
+		if mark == heard[i]:
+			continue
+		heard[i] = mark
+		if mark < stretches:
+			Sfx.play("garden_lap", runners[i]["pos"], GARDEN_DB)
+			continue
+		Sfx.play("garden_finish", runners[i]["pos"], GARDEN_DB)
+		if heard.filter(func(m): return m >= stretches).size() == 1:
+			Sfx.play("garden_crowd", runners[i]["pos"], GARDEN_DB)
 
 func _place_runners() -> void:
 	var st: Array = rules()["stretches"]
@@ -389,6 +413,7 @@ func _end(finished: bool) -> void:
 	bar.close()
 	if finished:
 		_card(res)
+		result_sounds(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()
@@ -407,6 +432,12 @@ func _card(res: Dictionary) -> void:
 		["%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], 14, UI.MUTED],
 		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]])
 	card_t = float(rules()["card_s"])
+
+## The win sting at the winner and, a beat later, the loser's huff. Shared with the Stump Shove.
+static func result_sounds(home, res: Dictionary) -> void:
+	Sfx.play("garden_win", home._kin_entry(res["win"])["pos"], GARDEN_DB)
+	var huff := func(): Sfx.play("garden_sulk", home._kin_entry(res["lose"])["pos"], GARDEN_DB)
+	home.get_tree().create_timer(SULK_DELAY).timeout.connect(huff)
 
 ## A minigame's result card at the top of the screen: rows of [text, size, colour]. Shared with the Stump Shove.
 static func result_card(home, rows: Array) -> Control:
