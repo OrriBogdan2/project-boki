@@ -5708,5 +5708,68 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_snuffapi_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_skateron",
+    "name": "Skateron (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zippelith",
+    "name": "Zippelith (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_zippelith_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_umbrink",
+    "name": "Umbrink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_umbrink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zippelith",
+    "name": "Zippelith (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_zippelith_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_wyrmink",
+    "name": "Wyrmink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_wyrmink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_wyrmink",
+    "name": "Wyrmink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_wyrmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_voltmink",
+    "name": "Voltmink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_voltmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_umbrathere",
+    "name": "Umbrathere (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_umbrathere_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_teapotamus",
+    "name": "Teapotamus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_teapotamus_1.jpg",
+    "ok": true
   }
 ]
