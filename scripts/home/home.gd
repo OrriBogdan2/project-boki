@@ -3063,8 +3063,8 @@ func _open_kin(rec: Dictionary) -> void:
 			c1.add_child(UI.para("What you feed it and how you raise it decides which way it grows.", 12, UI.FAINT))
 			var ln := Evo.lean(rec)
 			if String(ln[0]) != "":
-				var lean_t := "Its meals lean it %s: %d%%" % [Evo.AFF[ln[0]]["name"], int(100.0 * float(ln[1]))]
-				c1.add_child(UI.label(lean_t, UI.T_SMALL, Evo.AFF[ln[0]]["tint"]))
+				var lean_t := "Its meals lean it %s: %d%%" % [Lean.face(ln[0])["name"], int(100.0 * float(ln[1]))]
+				c1.add_child(UI.label(lean_t, UI.T_SMALL, Lean.face(ln[0])["tint"]))
 			var tot := 0.0
 			for af in Evo.AFF: tot += maxf(0.0, float(rec["aff"][af]))
 			c2.add_child(UI.section("Affinities", UI.FAINT.lightened(0.2)))
@@ -4282,9 +4282,9 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	var leaned := Evo.eat(rec, f)
 	if leaned != "":
 		_swap_kin_model(k)      # its colour shifts toward the lean on the spot
-		fx.burst(k["pos"] + Vector3(0, 0.5, 0), Evo.AFF[leaned]["tint"], 18, 2.4, 0.5)
+		fx.burst(k["pos"] + Vector3(0, 0.5, 0), Lean.face(leaned)["tint"], 18, 2.4, 0.5)
 		var pct := int(100.0 * float(rec["lean"][leaned]) / Evo.LEAN_FULL)
-		_toast("%s leans %s: its colour shifts (%d%%)" % [nm, Evo.AFF[leaned]["name"], pct])
+		_toast("%s leans %s: its colour shifts (%d%%)" % [nm, Lean.face(leaned)["name"], pct])
 	if res["love"]:
 		k["joy_t"] = 1.2
 		_emote(k, "♥")

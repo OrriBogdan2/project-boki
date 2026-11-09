@@ -43,6 +43,14 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## base_mode (`content/rules/base_mode.json`)
+
+The Boki base (briefs/design/GARDEN.md, a draft for owner approval). base_mode: true turns on what changes the current farm: foods lean a Boki by their type (content/rules/lean.json). Off by default; the old four-affinity meals stay as they are.
+
+| Setting | Value |
+|---|---|
+| base_mode | False |
+
 ## boki_lines (`content/rules/boki_lines.json`)
 
 What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words in one bubble (punctuation and symbols don't count); act_words = the most words in one action, which a young Boki says after its name; bubble_s = seconds a bubble stays up; cooldown_s = seconds a Boki waits between lines (a trigger marked direct answers something you did and skips the wait); no_repeat = how many of its own last lines a Boki never repeats; min_lines = the fewest general lines a trigger may have; grown_stage = the speech stage (Care.speech) from which a Boki says lines instead of its name. tones = how a young Boki says its name, by feeling ({A} first syllable, {a} lower, {b} second syllable, {F} full name, {f} lower, {U} upper; KinSpeak.fill). sounds = noises a tone may use besides the name. alias = old trigger names that share another's lines. triggers: feel (a tone), word (the one word a stage-1 Boki adds), acts (what it does), lines._ (anyone) and lines.<element> (extra lines for a Boki of that element, the species' type).
@@ -341,6 +349,19 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | auto_rate_per_aggression | 0.6 |
 | recall_cooldown | 1 |
 | swap_cooldown | 3 |
+
+## lean (`content/rules/lean.json`)
+
+Food lean by type (scripts/core/lean.gd, active when base_mode is on). types: the 18 Boki types (DECISIONS 2026-11-08 22:29): name, tint (the colour its meals lean a Boki to) and part (the grown part its lean earns at the next form, one of KinParts.EVO_PARTS; some types share a part, the tint tells them apart). Normal has no tint: plain food never leans. foods: every food (Data.CROPS and Care.FOODS) and its type.
+
+| Setting | Value |
+|---|---|
+| part_min | 0.3 |
+| part_min_doc | Lean strength (0..1, Evo.lean) a Boki needs at its next form to grow its lean's part: one meal is 0.375. |
+| marks | 3 |
+| marks_doc | Flecks in the lean's colour over the head at full lean (one at a first meal): the small mark that shows before any part. |
+| types | {"normal": {"name": "Normal"}, "fire": {"name": "Fire", "tint": "#f0663a", "part": "horns"}, "water": {"name": "Water", "tint": "#4a9af0", "part": "fins"}, "grass": {"name": "Grass", "tint": "#6cc050", "part": "crest"}, "spore": {"name": "Spore", "tint": "#d89a5a", "part": "spots"}, "electric": {"name": "Electric", "tint": "#f2d43a", "part": "tail_long"}, "ice": {"name": "Ice", "tint": "#9fe6f2", "part": "spikes"}, "rock": {"name": "Rock", "tint": "#9a8a70", "part": "plates"}, "psychic": {"name": "Psychic", "tint": "#f070a8", "part": "third_eye"}, "flying": {"name": "Flying", "tint": "#9ab4f0", "part": "wings"}, "dragon": {"name": "Dragon", "tint": "#4a5ad8", "part": "club"}, "dark": {"name": "Dark", "tint": "#6a5a80", "part": "brow"}, "poison": {"name": "Poison", "tint": "#a050d0", "part": "fangs"}, "bug": {"name": "Bug", "tint": "#98c038", "part": "antennae"}, "steel": {"name": "Steel", "tint": "#9aa8b8", "part": "shell"}, "fairy": {"name": "Fairy", "tint": "#ffb8e0", "part": "crest"}, "crystal": {"name": "Crystal", "tint": "#6ae0d0", "part": "spikes"}, "sound": {"name": "Sound", "tint": "#f0a040", "part": "fins"}} |
+| foods | {"emberberry": "fire", "tidebloom": "water", "sunroot": "grass", "mindmint": "psychic", "puffcorn": "flying", "glowcap": "spore", "starfruit": "fairy", "kibble": "normal", "sweetbun": "normal", "tonicbrew": "electric"} |
 
 ## level_growth (`content/rules/level_growth.json`)
 

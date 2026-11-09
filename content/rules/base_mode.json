@@ -1,0 +1,4 @@
+{
+	"desc": "The Boki base (briefs/design/GARDEN.md, a draft for owner approval). base_mode: true turns on what changes the current farm: foods lean a Boki by their type (content/rules/lean.json). Off by default; the old four-affinity meals stay as they are.",
+	"base_mode": false
+}
