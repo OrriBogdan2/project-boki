@@ -70276,5 +70276,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/style_druzemole_a_2.jpg",
     "ok": true
+  },
+  {
+    "id": "style_kitlet_a",
+    "name": "Kitlet (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_kitlet_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_arcestrel_a",
+    "name": "Arcestrel (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_arcestrel_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_lockatara_a",
+    "name": "Lockatara (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_lockatara_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_glazolm_a",
+    "name": "Glazolm (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_glazolm_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_spanglin_a",
+    "name": "Spanglin (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_spanglin_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_soakybara_a",
+    "name": "Soakybara (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_soakybara_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_zipling_a",
+    "name": "Zipling (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_zipling_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_druzemole_a",
+    "name": "Druzemole (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_druzemole_a_1.jpg",
+    "ok": true
   }
 ]
