@@ -21262,5 +21262,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/stance_anvilbrock_1.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_anvilbrock",
+    "name": "Anvilbrock (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_anvilbrock_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_skidlet",
+    "name": "Skidlet (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_skidlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_anvilbrock",
+    "name": "Anvilbrock (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_anvilbrock_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_bubblisk",
+    "name": "Bubblisk (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_bubblisk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_forgebrock",
+    "name": "Forgebrock (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_forgebrock_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_forgebrock",
+    "name": "Forgebrock (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_forgebrock_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_bubblisk",
+    "name": "Bubblisk (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_bubblisk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_forgebrock",
+    "name": "Forgebrock (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_forgebrock_2.jpg",
+    "ok": true
   }
 ]
