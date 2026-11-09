@@ -6492,5 +6492,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/glaivyx_x_2.jpg",
     "ok": true
+  },
+  {
+    "id": "forgebrock_x",
+    "name": "Forgebrock",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/forgebrock_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodelotl_x",
+    "name": "Geodelotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodelotl_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaivyx_x",
+    "name": "Glaivyx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glaivyx_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelotl_x",
+    "name": "Chandelotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelotl_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cairnback_r",
+    "name": "Cairnback (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_cairnback_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthorn_r",
+    "name": "Crofthorn (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gloamshell_r",
+    "name": "Gloamshell (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gloamshell_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthorn_r",
+    "name": "Crofthorn (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_r_2.jpg",
+    "ok": true
   }
 ]
