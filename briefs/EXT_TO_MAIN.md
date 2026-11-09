@@ -3435,3 +3435,6 @@ READY ext/farm-tut-tools-cam 2781ad15e (job 20261109-001512-a1, deep follow-up t
 
 ## 2026-11-09 deep (job 20261109-003148-a4): CLAIM Boki 3D: Lockatara (tuatrune) from the owner's new concept sheet
 - CLAIM: sheet check of briefs/art-refs/boki/tuatrune_turnaround.png (7e91f47b5), then Meshy build via tools/art1 + tools/meshy/meshy_task.py on the shared quadruped rig, standard clip set, Boki checks, GPU turntable vs sheet. Branch ext/boki3d-tuatrune from origin/main.
+
+## 2026-11-09 deep (job 20261109-003647-a4): CLAIM Boki 3D: Skateron (hoarheron) from the owner's new concept sheet
+- CLAIM: sheet check of briefs/art-refs/boki/hoarheron_turnaround.png (04eb5144b), then Meshy build via tools/art1 + tools/meshy/meshy_task.py on the shared rig for its body type, standard clip set, Boki checks, GPU turntable vs sheet. Branch ext/boki3d-hoarheron from origin/main.
