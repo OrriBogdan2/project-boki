@@ -224,6 +224,29 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **Abyss bounce** [est]: the lift reaches the lip at 4.5 m/s (was 3.5), floating ~1.6m over it.
 - **Feathering**: the glider no longer cools in the air, and a lift's first 0.3s heats like a level glide (was 0.4x). The slower gravity had made coasting between taps so cheap that feathering went 4.8x as far as holding; it is 2.0x now.
 
+## Abyss fall: a walk off the lip against the source (`--abyss-fall-check`, `--abyss-fall-clip`)
+
+Sources, in order: owner (DECISIONS: an overheated glider still lifts you out at half strength), the game data
+(`briefs/supervive-data/supervive_physics.md`, Abyss fall), the wiki, footage. The hero footage has no plain
+ledge drop (bjorn.md and juggernaut.md both list one as still needed), so the camera's size is ours.
+
+| | Source | Ours (measured) | Source of truth |
+|---|---|---|---|
+| Fall speed cap | 12 m/s at the lip easing to 10 m/s by 16.5 m under (AbyssFallSlow) | on the cap at 0.78 s (11.3 m/s at 4.5 m), 10.0 m/s at 16 m | [game data], unchanged |
+| Lip to the point of no return | 17.5 m (AbyssHeight) | 2.00 s | [game data], unchanged |
+| Control in the fall | AirControl 0.015 of the ground acceleration | a key held sideways from 0.3 s moves you 0.77 m by the end; held back toward the island you still drift 5.7 m out and are lost | [game data], unchanged |
+| Camera | "camera abyss zoom" named next to the band, value not decoded | the usual view to 1 m under the lip, then the view pulls out with depth over the same 1-16.5 m band, 30% further out at the bottom (x1.25 reached by the point of no return), eased at 3/s, never a pop; back to the usual view within 1.5 s of being lifted over the lip | ours [est]: `abyss_cam_zoom`, `abyss_cam_ease` in hunter_move.json, `CamRig.abyss_wide` |
+| Glider save | an overheated glider lifts at half strength (owner) | glide pressed 15 m under: a cool glider is back at the lip in 0.87 s, an overheated one in 1.75 s, lowest point 15.1 m | owner, unchanged (asserted here and in `--glider-heat-check`) |
+
+Before this pass the camera kept the same framing all the way down (it followed you down so you stayed the same
+size). Now the rim you need recedes a little as you sink, and comes back as the lift returns you; the match's own
+glide zoom (x1.25) still multiplies on top. Clips: `--abyss-fall-clip --shots-dir=<dir>` on a GPU (before/after
+sheets in docs/art/abyss_fall/).
+
+Seen on the way, not changed (core movement, needs its own decision): a key pressed within ~0.1 s of walking off
+the rim counts as a push into the ledge, the float takes you and ends by slinging you along the rim at ~5.7 m/s
+(over run speed). The check holds its keys from 0.3 s on to measure air control alone.
+
 ## Air limits: the drop and the glider during moves (`AirLimits`, `--air-limits-check`; items 162, 162b)
 - **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive. This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
