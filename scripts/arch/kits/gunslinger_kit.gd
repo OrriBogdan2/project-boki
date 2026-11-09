@@ -7,7 +7,7 @@ extends ArchKit
 ## damages and Dazes it ("rat" Rattled in code) on the spot.
 ## Otherwise it flies its 10.5 m and sticks where it meets a wall
 ## or the ground at the end: a cone shows back toward you for its fuse, then blasts, shoving
-## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +90% to a Dazed foe, in big
+## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +76.5% to a Dazed foe, in big
 ## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
 ## shooting. Longneedle: stand still while the line narrows, then a long beam through walls. A knock
 ## gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
@@ -156,7 +156,7 @@ func add_fever(n := 1) -> void:
 	res = minf(res_max(), res + float(n))
 	touch_res(float(res_def()["wait"]))
 
-## Dazed foes take +90% from the rifle: a crit-style big gold number, and the string's decay pauses.
+## Dazed foes take +76.5% from the rifle: a crit-style big gold number, and the string's decay pauses.
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	if t is Hunter or t is Mob:
 		if String(o.get("src", "")) == "shot" and not o.has("ab") and KitStatus.rattled(t):

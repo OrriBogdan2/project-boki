@@ -397,7 +397,7 @@ func _gunslinger() -> void:
 	ok("venator RMB: a direct hit hurts and Dazes", dmg(T) >= 12.0 and dazed, "took %.0f" % dmg(T))
 	ok("venator RMB: the hit fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
 	var base := K.outgoing(T, 10.0, {"src": "shot"})
-	ok("venator Dazed: rifle +90%", is_equal_approx(base, 19.0), "%.1f" % base)
+	ok("venator Dazed: rifle +76.5%", is_equal_approx(base, 17.65), "%.1f" % base)
 	# Longneedle: charge, then a piercing beam
 	fresh(T); KitStatus.clear_rattled(T); K.cd["e"] = 0.0; aim_at(P, T.pos)
 	P.ak.use_e()
@@ -405,7 +405,7 @@ func _gunslinger() -> void:
 	step(m, 0.5)
 	var early := dmg(T)
 	step(m, 0.6)
-	ok("venator E: needle fires after the charge, shaves its cooldown", early < 0.5 and dmg(T) >= 30.0 and float(K.cd["e"]) < 12.0 * 0.75, "early %.0f took %.0f cd %.1f" % [early, dmg(T), float(K.cd["e"])])
+	ok("venator E: needle fires after the charge, shaves its cooldown", early < 0.5 and dmg(T) >= 23.0 and float(K.cd["e"]) < 12.0 * 0.75, "early %.0f took %.0f cd %.1f" % [early, dmg(T), float(K.cd["e"])])
 	# Slipstep: tap skids, hold slides, early release refunds
 	P.teleport(home); P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1)
 	P.do_dash(); step(m, 0.6)      # the tap skid runs ~0.5s

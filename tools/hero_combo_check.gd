@@ -567,7 +567,7 @@ func _gunslinger() -> void:
 	var bd: Dictionary = K.rmb_def()["burr"]
 	T2.teleport(home + Vector3(30, 0, 0))
 	ok("Hired Gun: the display name", Arch.name_of("gunslinger") == "The Hired Gun")
-	# 1. LMB: to full range past the cursor, an ember tracer; Dazed = +90%, a gold crit number, no decay
+	# 1. LMB: to full range past the cursor, an ember tracer; Dazed = +76.5%, a gold crit number, no decay
 	P.teleport(home)
 	T.teleport(home + Vector3(30, 0, 8))
 	ac.step(m, 0.1)
@@ -581,7 +581,7 @@ func _gunslinger() -> void:
 	ok("LMB: each round is an ember tracer (a pooled rider)", VVFx.of(m).riders.size() >= 1)
 	KitStatus.apply(T, "rat", 3.0)
 	var o := {"src": "shot"}
-	ok("Dazed: the rifle does +90%", is_equal_approx(K.outgoing(T, 10.0, o), 19.0))
+	ok("Dazed: the rifle does +76.5%", is_equal_approx(K.outgoing(T, 10.0, o), 17.65))
 	ok("Dazed: big gold numbers (crit-style)", bool(o.get("crit", false)))
 	P.sus_n = 6
 	K.outgoing(T, 10.0, {"src": "shot"})
@@ -614,7 +614,7 @@ func _gunslinger() -> void:
 			K.direct_hits == 1 and ac.dmg(T) >= 20.0 and KitStatus.rattled(T) and K.rattles == 0 and K.burrs.is_empty(),
 			"took %.1f hits %d rattles %d burrs %d" % [ac.dmg(T), K.direct_hits, K.rattles, K.burrs.size()])
 	var rifle := {"src": "shot"}
-	ok("RMB direct hit: the Dazed foe takes the rifle's +90%", is_equal_approx(K.outgoing(T, 10.0, rifle), 19.0))
+	ok("RMB direct hit: the Dazed foe takes the rifle's +76.5%", is_equal_approx(K.outgoing(T, 10.0, rifle), 17.65))
 	# 3b. thrown with the foe off the lane: it lands at the lane's end on the ground, shows the cone, blasts
 	ac.fresh(T)
 	KitStatus.clear_rattled(T)
@@ -700,7 +700,7 @@ func _gunslinger() -> void:
 	ok("Longneedle: nothing before 0.6s", ac.dmg(T) < 0.5)
 	var px := P.pos.x
 	ac.step(m, 0.4)
-	ok("Longneedle: fires at 0.6s", ac.dmg(T) >= 30.0, "took %.0f" % ac.dmg(T))
+	ok("Longneedle: fires at 0.6s", ac.dmg(T) >= 23.0, "took %.0f" % ac.dmg(T))
 	ok("Longneedle: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
 	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
 			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
@@ -713,7 +713,7 @@ func _gunslinger() -> void:
 	var sk0 := K.skewers
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("Longneedle on a Dazed hunter: +20% and Skewered", K.skewers == sk0 + 1 and ac.dmg(T) >= 36.0 * 1.15)
+	ok("Longneedle on a Dazed hunter: +20% and Skewered", K.skewers == sk0 + 1 and ac.dmg(T) >= 24.0 * 1.15)
 	ac.fresh(T)
 	KitStatus.clear_rattled(T)
 	P.teleport(home)
@@ -723,7 +723,7 @@ func _gunslinger() -> void:
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("Longneedle passes through a wall", ac.dmg(T) >= 30.0)
+	ok("Longneedle passes through a wall", ac.dmg(T) >= 23.0)
 	for zz in [-1, 0, 1]: _unwall(m, home + Vector3(2.5, 0, zz))
 	K.cd["e"] = 0.0
 	ac.fresh(T)
@@ -842,7 +842,7 @@ func _gunslinger() -> void:
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("small: Longneedle hits everyone in its line (two)", ac.dmg(T) >= 30.0 and ac.dmg(T2) >= 30.0)
+	ok("small: Longneedle hits everyone in its line (two)", ac.dmg(T) >= 23.0 and ac.dmg(T2) >= 23.0)
 	var cd_two := float(K.cd["e"])
 	ok("small: Longneedle at rank 1 cuts its cooldown once however many it hits (20%)", cd_two > 7.7, "%.2f" % cd_two)
 	P.slot_lv["kin"] = 3
