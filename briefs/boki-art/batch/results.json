@@ -4700,5 +4700,82 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/briarlynx_3.jpg",
     "ok": true
+  },
+  {
+    "id": "bellowlet",
+    "name": "Bellowlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bellowlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing",
+    "name": "Lyrewing",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lyrewing_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "thistlynx",
+    "name": "Thistlynx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/thistlynx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_buckleron",
+    "name": "Buckleron (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_buckleron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anchorbill",
+    "name": "Anchorbill (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_anchorbill_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_arcestrel",
+    "name": "Arcestrel (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_arcestrel_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_buckleron",
+    "name": "Buckleron (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_buckleron_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_arcestrel",
+    "name": "Arcestrel (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_arcestrel_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary",
+    "name": "Bellowary (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anchorbill",
+    "name": "Anchorbill (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_anchorbill_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowlet",
+    "name": "Bellowlet",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bellowlet_3.jpg",
+    "ok": true
   }
 ]
