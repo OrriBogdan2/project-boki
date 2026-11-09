@@ -4777,5 +4777,89 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/bellowlet_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_bellowary",
+    "name": "Bellowary (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "furnacowary",
+    "name": "Furnacowary",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/furnacowary_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "furnacowary",
+    "name": "Furnacowary",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/furnacowary_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "furnacowary",
+    "name": "Furnacowary",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/furnacowary_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltmink_r",
+    "name": "Voltmink (owner redo)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltmink_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltmink_r",
+    "name": "Voltmink (owner redo)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltmink_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "teapotamus_r2b",
+    "name": "Teapotamus (redo, cuter, from old sheet)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/teapotamus_r2b_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_r",
+    "name": "Sporcupine (owner redo)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sporcupine_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "teapotamus_r2",
+    "name": "Teapotamus (redo, cuter)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/teapotamus_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "teapotamus_r2",
+    "name": "Teapotamus (redo, cuter)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/teapotamus_r2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_r",
+    "name": "Sporcupine (owner redo)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sporcupine_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_r",
+    "name": "Sporcupine (owner redo)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sporcupine_r_2.jpg",
+    "ok": true
   }
 ]
