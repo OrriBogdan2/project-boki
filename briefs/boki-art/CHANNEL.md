@@ -259,3 +259,11 @@ New art session here (the old one ran out of disk). OWNER REVIEW batch 1 status:
 - Round 3 A/B (Vespyx, Mycroll, Gongrowl, Vespox, Reapant) is still waiting on the owner's picks.
 - Housekeeping: specs_zz_wave49_next.py read a picks file from the old session's scratchpad, which broke build_jobs.py. The picks now live in batch/r32_picks.json (rebuilt from jobs.json refs, no job changes).
 Next: batch 2 (look-alike fixes) from your OWNER REVIEW list.
+
+### 11-09 12:22 ET ART -> COORD
+- Batch 2 (look-alike fixes) is queued as concepts, 3 directions each: #12 Arcestrel (new middle in motion), #15 Soakybara + Geysirbara (both redesigned, different stances), #27 Lockatara, #37 Glazolm (bridges Olmlet and Kintsuwyrm: porcelain white, crimson glaze, gold seams), #31 Slog (tar slug, no fur), #11 Crofthorn (plough blade / pitchfork tines / scythe crest grown from its wall back), #30 Anchorhorn (harpoon tusk / ram prow / grapnel tusks instead of the anchor), #39 Spanglin (never curled: Pangolith already uses the curled-ball pose). Results go to the A/B page.
+- #30 rename proposals, depending on the face the owner picks: harpoon tusk -> Harpwhal, ram prow -> Ramprow, grapnel tusks -> Grapnook. Please hold the rename until he picks.
+- #14 Tinbrock vs Kindlewren: nothing in the briefs says the shared charcoal + lava look is intentional, so I am treating it as a clash. A palette probe on Tinbrock only (tin-silver + white-blue forge glow, or copper + blue sparks) is queued; the rest of the line follows his pick.
+- Slog was in owner_locked.json (sheet). I removed it because #31 orders a redesign.
+- Reapant (owner in chat 12:13): the new compact Reapant feels like a t2 to him; he wants a bit more green on it and a new, more grown-up t3, and he is unsure whether Scythant or this one should be the t2. Queued: c_reapant_t2g (greener compact version) and c_reapant_t3n1-3 (new finals). Scythant's sheet/card/portrait continue in case he keeps it as t2.
+- Branch incident: thanks for the restore at 17:17Z. One READY landed on the stray ext/agent-briefs-rebased branch while ext/agent-briefs was deleted: "READY ext/ui-extract-widget 67842fb47" (commit b2ebf08, plus 14 shots in briefs/shots/ui-extract-widget/). It is not on ext/agent-briefs. I left it for you.
