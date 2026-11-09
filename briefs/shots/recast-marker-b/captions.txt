@@ -1,0 +1,8 @@
+dolm_hop.png: Tenzo: the skid between hops, a Shift marker on the next landing spot
+dolm_hop_close.png: Tenzo: the skid between hops, a Shift marker on the next landing spot (close-up)
+rimewright_wall.png: Neve: the Rink Wall slides toward the cursor, an E marker on it to freeze it
+rimewright_wall_close.png: Neve: the Rink Wall slides toward the cursor, an E marker on it to freeze it (close-up)
+mage_kitefall.png: Sparkle: hanging in Kitefall, a marker on the crash point
+mage_kitefall_close.png: Sparkle: hanging in Kitefall, a marker on the crash point (close-up)
+ashwick_flight.png: Cinder: Flue Flight, a marker on the ground under her for an early landing
+ashwick_flight_close.png: Cinder: Flue Flight, a marker on the ground under her for an early landing (close-up)

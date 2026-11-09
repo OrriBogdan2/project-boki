@@ -1,0 +1,28 @@
+{
+	"id": "spellstaff",
+	"name": "Spellstaff",
+	"classes": [
+		"medium"
+	],
+	"primary": {
+		"dmg": 9.5,
+		"rate": 0.55,
+		"speed": 26,
+		"mag": 12,
+		"reload": 1.4,
+		"kb": 1.6,
+		"spread": 0.0,
+		"range": 10.0,
+		"size": 0.26,
+		"color": "#9ad8ff",
+		"sfx": "zap",
+		"nth": [
+			4,
+			0.5
+		],
+		"fire_slow": 0.85,
+		"desc": "An orb bolt every 0.45s, 10m. Every 4th bolt hits 50% harder.",
+		"kick": 0.07
+	},
+	"utility": ""
+}

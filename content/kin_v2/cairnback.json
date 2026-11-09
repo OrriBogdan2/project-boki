@@ -1,0 +1,122 @@
+{
+	"grammar": 1,
+	"id": "cairnback",
+	"name": "Cairnback",
+	"animals": [
+		"Tortoise",
+		"Ibex"
+	],
+	"theme": "titan",
+	"flavor": "A tortoise with an ibex's sweeping horns, carrying a little rune-carved cairn on its shell. Hatched from the Stone Colossus's egg.",
+	"colors": {
+		"body": "#6a6f7a",
+		"belly": "#d8c59a",
+		"glow": "#ffd36a"
+	},
+	"look": {
+		"ears": "none",
+		"body": "cairnback",
+		"tail": "none",
+		"feet": "none",
+		"aura": "pebbles"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.5,
+		"mass": 1.6,
+		"gait": {
+			"hop_rate": 5.0,
+			"hop_height": 0.05,
+			"pace": 0.8
+		}
+	},
+	"stats": {
+		"kin_hp": 12,
+		"kin_damage": 5,
+		"kin_speed": 3
+	},
+	"personality": {
+		"bravery": 0.85,
+		"loyalty": 0.8,
+		"temper": 0.25,
+		"curiosity": 0.35
+	},
+	"ai": {
+		"aggression": 0.55,
+		"loyalty": 0.8,
+		"caution": 0.2,
+		"role": "tank"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Bedrock",
+		"passives": [
+			{
+				"stat": "damage_reduction",
+				"amount": 0.15
+			},
+			{
+				"stat": "knockback_resist",
+				"amount": 0.5
+			}
+		],
+		"mount": {
+			"speed": 0.85,
+			"jump": 0.9,
+			"turn": 0.6
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "push",
+				"strength": 8
+			}
+		]
+	},
+	"active": "boulder_heave",
+	"auto": "rock_guard",
+	"merge": "cairn_colossus",
+	"evolution": {
+		"root": "Cairn",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "ancient and calm, speaks slowly like grinding stone, fiercely protective",
+		"syllables": [
+			"Cairn",
+			"back"
+		]
+	},
+	"egg": {
+		"name": "Cairn Egg",
+		"temper": "Ancient",
+		"desc": "Heavy as a millstone and warm as a hearth, with gold runes that glow when you touch it. The Colossus guarded it.",
+		"play": "A wall of stone. Heaves boulders that quake and stun."
+	}
+}

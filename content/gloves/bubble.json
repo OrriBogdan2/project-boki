@@ -1,0 +1,27 @@
+{
+ "id": "bubble",
+ "name": "Mirror Glove",
+ "short": "Mirror",
+ "verb": "reflect",
+ "cd": 14,
+ "col": "8ad8ff",
+ "stats": {
+  "armor": 5
+ },
+ "icon": "brightshield",
+ "desc": "A 0.8s mirror bubble: every shot that reaches you flies back at whoever fired it, and a melee swing is parried.",
+ "bot": {
+  "when": "under_fire"
+ },
+ "effects": [
+  {
+   "type": "reflect",
+   "target": "self",
+   "radius": 1.8,
+   "time": 0.8,
+   "dmg_k": 1.2,
+   "riposte": 0.6,
+   "color": "8ad8ff"
+  }
+ ]
+}
