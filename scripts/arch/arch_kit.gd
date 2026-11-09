@@ -21,6 +21,7 @@ var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
+var recast_heard := {"slot": "", "left": 0.0, "recast_open": 0, "recast_tick": 0}   # RecastSound: the last window and the plays
 var r_t := 0.0                 # R's window left
 var bonded := false            # the R running now was bonded
 var dash_t := -1.0             # how long Shift has been held for a hold dash (-1: not holding)
@@ -118,6 +119,12 @@ func r_recast() -> bool: return false                # R pressed while it runs (
 func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
+## The open recast window, {} when none: {slot: e|x|dash|lmb, left: s until it closes (INF: it waits)}.
+## RecastSound reads it; the base reports E while it's up and e_recastable().
+func recast_window() -> Dictionary:
+	if e_t > 0.0 and e_recastable():
+		return {"slot": "e", "left": e_t}
+	return {}
 func gate_inputs() -> void: pass                    # a kit drops the presses it locks out
 func locks_glide() -> bool: return false            # a move AirLimits can't see from the shared state (a dive)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
@@ -196,6 +203,8 @@ func tick(dt: float) -> void:
 	_tick(dt)
 	_tells(dt)
 	_tick_charge(dt)
+	if h.is_local():
+		RecastSound.track(self)
 
 func held(which: String) -> bool:
 	match which:

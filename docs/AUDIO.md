@@ -45,3 +45,6 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
+
+## Recast cue sounds
+Every Hunter's recasts sound the same (DECISIONS 2026-11-08, two-step abilities): `RecastSound` (`scripts/arch/recast_sound.gd`) reads `ArchKit.recast_window()` (`{slot, left}`) each step for the local hunter only and plays `recast_open` as a window opens and `recast_tick` 0.5s before it closes (`tools/gen_sfx_ui.py`, at the ui loudness). They are UI sounds (no position, so only the caster hears them), pitched per slot (`RecastSound.PITCH`) so an E and an X window differ. A window that waits for you (Bulwark's hammer) never ticks. `--recast-sound-check` asserts one chime and one tick per window for every recast kit.

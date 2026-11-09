@@ -687,6 +687,9 @@ func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
 func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
 func ult_running() -> bool: return jet.running()
+## X again lands the flight early (it lands by itself when it runs out).
+func recast_window() -> Dictionary:
+	return {"slot": "x", "left": float(jet.flight["t"])} if jet.running() else {}
 ## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()

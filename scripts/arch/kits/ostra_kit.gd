@@ -74,6 +74,9 @@ func can_shoot() -> bool: return not well.locked and super.can_shoot()
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)
 func ready_label() -> String: return "SWOLLEN" if is_swollen() else ""
 func e_recastable() -> bool: return not seed.is_empty()
+## The recast opens once the seed may pop (a press inside min_recast is swallowed).
+func recast_window() -> Dictionary:
+	return super() if not seed.is_empty() and float(seed["t"]) >= float(e_def()["min_recast"]) else {}
 
 func _hand(up := 1.15) -> Vector3:
 	var d := h.aim_dir()

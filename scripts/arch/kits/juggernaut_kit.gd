@@ -926,6 +926,10 @@ func in_e() -> bool:
 func e_recastable() -> bool:
 	return warchain.hooked()
 
+## E again while the hook holds pulls you in.
+func recast_window() -> Dictionary:
+	return {"slot": "e", "left": warchain.tether_t} if warchain.hooked() else {}
+
 ## E: throw the chain, or pull yourself along it (JuggernautChain.press).
 func use_e() -> void:
 	if not slam_w.is_empty() and warchain.state == "ready":

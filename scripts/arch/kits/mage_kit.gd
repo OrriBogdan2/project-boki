@@ -83,6 +83,12 @@ func ult_running() -> bool:
 func ult_recast() -> bool:
 	return ult.recast()
 
+## X again in the hang brings her down at the cursor (she comes down by herself when the hover runs out).
+func recast_window() -> Dictionary:
+	if ult.phase() != MageUlt.AIR:
+		return {}
+	return {"slot": "x", "left": float(ult.data()["hover"]) - float(ult.leap["t"])}
+
 ## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
 ## a jump still do).
 func busy() -> bool:

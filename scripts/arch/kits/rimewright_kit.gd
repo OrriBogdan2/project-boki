@@ -856,6 +856,18 @@ func ulk() -> UltLook:
 func ult_running() -> bool:
 	return not rime.is_empty()
 
+## E again stops the sliding wall (it stops by itself at the end of its slide); X again in Rimelock's last
+## `late` seconds cracks it open early (any earlier X only breaks the shell, so that is no recast).
+func recast_window() -> Dictionary:
+	if e_recastable():
+		return {"slot": "e", "left": float(wall["slide_t"]) - float(wall["t"])}
+	if not rime.is_empty():
+		var xd := x_def()
+		var left := float(xd["hold"]) - float(rime["t"])
+		if left <= float(xd["late"]):
+			return {"slot": "x", "left": left}
+	return {}
+
 
 func cast_ult() -> bool: return HeroUlt.press(self, _start_rime)
 func has_ult() -> bool: return true
