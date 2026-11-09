@@ -31307,5 +31307,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_rippmink_full_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_rimink_full",
+    "name": "Rimink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_rimink_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rippmink_full",
+    "name": "Rippmink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rippmink_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_slog_full",
+    "name": "Slog (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_slog_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimink_full",
+    "name": "Rimink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rimink_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rippmink_full",
+    "name": "Rippmink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_rippmink_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_slog_full",
+    "name": "Slog (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_slog_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_slog_full",
+    "name": "Slog (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_slog_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sporcupine_full",
+    "name": "Sporcupine (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_sporcupine_full_1.jpg",
+    "ok": true
   }
 ]
