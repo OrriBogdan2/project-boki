@@ -96,10 +96,12 @@ func _match(main: Node) -> void:
 			all.append(cat)
 	for sz in SIZES:
 		fm._layout(sz)
-		var inside: bool = fm.rect.grow(-1.0).encloses(MapLegend.panel(fm, all.size()))
-		var box: Vector2 = MapLegend.panel(fm, all.size()).size
-		var small: bool = box.x <= fm.rect.size.x * 0.6 and box.y <= fm.rect.size.y * 0.4
-		ok(inside and small, "the full key (%d) sits inside the map in a corner at %dx%d" % [all.size(), sz.x, sz.y])
+		var pr: Rect2 = MapLegend.panel(fm, all.size())
+		var screen := Rect2(Vector2.ZERO, sz).grow(-1.0)
+		var squad := Rect2(Vector2(0, fm.rect.position.y), Vector2(fm.rect.position.x, fm.squad_h()))
+		var beside: bool = pr.end.x <= fm.rect.position.x and not pr.intersects(squad)
+		var corner: bool = fm.rect.grow(-1.0).encloses(pr) and pr.size.x <= fm.rect.size.x * 0.6 and pr.size.y <= fm.rect.size.y * 0.4
+		ok(screen.encloses(pr) and (beside or corner), "the full key (%d) sits %s at %dx%d" % [all.size(), "beside the map under the squad" if beside else "in the map's corner", sz.x, sz.y])
 	m.hud.c.draw.connect(func():
 		fm._layout(SIZES[0])
 		MapLegend.draw(fm, all)

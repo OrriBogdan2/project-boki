@@ -196,10 +196,10 @@ func draw(sz: Vector2) -> void:
 	_bounties(c, team)
 	_squad(c, team)
 	_legend(c, sz, team)
+	_side(c, sz)
 	if _key.is_empty():
 		_key = MapLegend.present(m)
 	MapLegend.draw(self, _key)
-	_side(c, sz)
 	_cursor(c)
 
 ## Shrines: a small pale-green obelisk, dimmed once someone has used it.
@@ -652,7 +652,7 @@ func _side(c: Control, sz: Vector2) -> void:
 	var x0 := rect.position.x - 22.0 - wv
 	var squad: Array = m.hunters.filter(func(x): return x.team == p.team)
 	var in_drop: bool = p.riding or p.dropping
-	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 48 + squad.size() * 44 + (118 if in_drop else 40)))
+	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, squad_h()))
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)
 	hud._text(r.position + Vector2(14, 26), "YOUR SQUAD", 16, GOLD, hud.big)
 	var y := r.position.y + 50.0
@@ -705,6 +705,14 @@ func _side(c: Control, sz: Vector2) -> void:
 			hud._text(Vector2(r.position.x + 14, y + 10), "or click a squadmate to make them leader", 11, MUTED)
 	else:
 		hud._text(Vector2(r.position.x + 14, y + 14), "Pings last %ds" % int(Match.SQUAD_PING_T), 11, MUTED)
+
+## The squad panel's height (left of the map); the map key sits under it when there is room.
+func squad_h() -> float:
+	var p: Hunter = m.player
+	if p == null:
+		return 0.0
+	var n := m.hunters.filter(func(x): return x.team == p.team).size()
+	return 48.0 + n * 44.0 + (118.0 if p.riding or p.dropping else 40.0)
 
 func _grid_ref(p: Vector3) -> String:
 	var cell := m.world.w / 8.0

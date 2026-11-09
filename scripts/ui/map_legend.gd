@@ -122,19 +122,31 @@ static func _at(pv: Vector2, k: float, offsets: Array) -> PackedVector2Array:
 	return out
 
 # ------------------------------------------------------------------ the panel
-## Where the key goes for n entries: the map's bottom-left corner, in columns of MAX_ROWS.
+## Where the key goes for n entries: under the squad panel left of the map (bottom-aligned with the
+## map) when that column has room, else the map's own bottom-left corner. Columns of up to MAX_ROWS.
 static func panel(fm: FullMap, n: int) -> Rect2:
-	var rows := mini(n, MAX_ROWS)
-	var cols := ceili(float(n) / float(maxi(rows, 1)))
-	var box := Vector2(cols * COL_W + PAD * 2.0 - 8.0, rows * ROW_H + PAD * 2.0 - 4.0)
-	return Rect2(Vector2(fm.rect.position.x + 10.0, fm.rect.end.y - 10.0 - box.y), box)
+	var wv := minf(FullMap.SIDE_W, fm.rect.position.x - 36.0)
+	if wv >= 150.0:
+		var cols := maxi(1, floori((wv - PAD * 2.0 + 8.0) / COL_W))
+		var box := _box(n, maxi(MAX_ROWS, ceili(float(n) / float(cols))))
+		var at := Vector2(fm.rect.position.x - 22.0 - wv, fm.rect.end.y - box.y)
+		if box.x <= wv and at.y >= fm.rect.position.y + fm.squad_h() + 10.0:
+			return Rect2(at, box)
+	var b := _box(n, MAX_ROWS)
+	return Rect2(Vector2(fm.rect.position.x + 10.0, fm.rect.end.y - 10.0 - b.y), b)
+
+## The panel size for n entries in columns of up to max_rows.
+static func _box(n: int, max_rows: int) -> Vector2:
+	var rows := clampi(n, 1, max_rows)
+	var cols := ceili(float(n) / float(rows))
+	return Vector2(cols * COL_W + PAD * 2.0 - 8.0, rows * ROW_H + PAD * 2.0 - 4.0)
 
 ## The key: one glyph and word per id, only what this match has.
 static func draw(fm: FullMap, ids: Array) -> void:
 	if ids.is_empty():
 		return
-	var rows := mini(ids.size(), MAX_ROWS)
 	var r := panel(fm, ids.size())
+	var rows := maxi(1, roundi((r.size.y - PAD * 2.0 + 4.0) / ROW_H))
 	fm.hud._rounded(r, PANEL, 8, Color(0.85, 0.8, 1.0, 0.25), 1)
 	for i in ids.size():
 		var at := r.position + Vector2(PAD, PAD + 1.0) + Vector2(floorf(i / float(rows)) * COL_W, (i % rows) * ROW_H)
