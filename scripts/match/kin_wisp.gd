@@ -12,6 +12,9 @@ extends RefCounted
 const SHOULDER_Y := 1.45      # m above the hunter's feet when their rig has no shoulder bone
 const ORBIT_R := 0.6          # m from the hunter's middle
 const ORBIT_HZ := 0.35        # laps per second: quick enough to read as alive, slow enough to read as a shape
+const THIEF_RING_D := 0.5     # m across: the ring a stolen wisp wears in its thief's side colour
+const THIEF_RING_TILT := 1.15 # rad it leans off flat, so it reads from above and from the side
+const THIEF_RING_SPIN := 2.0  # rad/s
 
 ## Do this match's own Boki ride as wisps? The match opts win (a bench or check sets them), then the
 ## setting. Never in the tutorial: it teaches the walking Boki's orders.
@@ -66,8 +69,6 @@ static func render(k: Kin) -> bool:
 	var o := k.owner_h
 	if not k.wisp or k.state != "shoulder" or o == null or o.model == null:
 		return false
-	if k.ring:
-		k.ring.visible = false
 	var sh := o.model.get_node_or_null("Rig/Torso/Shoulder") as Node3D
 	var y := sh.global_position.y if sh else o.position.y + SHOULDER_Y
 	var a: float = TAU * (k.m.time * ORBIT_HZ + float(k.model.get_meta("phase", 0.0)))
@@ -75,4 +76,16 @@ static func render(k: Kin) -> bool:
 	k.model.rotation.y = atan2(sin(a), -cos(a))
 	k.model.scale = Vector3.ONE
 	BokiWispLook.pose(k.model, k.m.time)
+	_thief_ring(k)
 	return true
+
+## A stolen wisp wears a thin ring in its thief's side colour round it (DECISIONS 2026-11-09, Stealing): carriers
+## are targets. Its own hunter's wisp has none: the ground ring under them already says whose it is.
+static func _thief_ring(k: Kin) -> void:
+	if k.ring == null:
+		return
+	k.ring.visible = KinSteal.stolen(k)
+	if k.ring.visible:
+		k.ring.global_position = k.global_position
+		k.ring.global_rotation = Vector3(THIEF_RING_TILT, k.m.time * THIEF_RING_SPIN, 0.0)
+		k.ring.scale = Vector3.ONE * THIEF_RING_D

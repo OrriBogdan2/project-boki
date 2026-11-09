@@ -84,6 +84,7 @@ func _run(m: Match, secs: float) -> void:
 	while t < secs:
 		m.step(DT)
 		for h in m.hunters: h.render(DT, 1.0)
+		for k in m.kins: k.render(DT, 1.0)
 		t += DT
 
 ## The Boki BokiMarks would tether, by the same rule it draws with (every Boki stood away from its Hunter).
