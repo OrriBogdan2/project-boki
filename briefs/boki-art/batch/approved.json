@@ -497,6 +497,81 @@
    "id": "stance_tinbrock",
    "pick": 1,
    "grade": 8.47
+  },
+  {
+   "id": "barrelmander_card",
+   "pick": 2,
+   "grade": 8.33
+  },
+  {
+   "id": "bathilus_card",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "cairnback_card",
+   "pick": 2,
+   "grade": 8.33
+  },
+  {
+   "id": "crofthorn_card",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "gilabacus_card",
+   "pick": 2,
+   "grade": 8.37
+  },
+  {
+   "id": "kindlewren_card",
+   "pick": 1,
+   "grade": 8.33
+  },
+  {
+   "id": "zipling_card",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "knotwyrm_card",
+   "pick": 2,
+   "grade": 8.4
+  },
+  {
+   "id": "mirrolin_card",
+   "pick": 2,
+   "grade": 8.6
+  },
+  {
+   "id": "mycroll_card",
+   "pick": 1,
+   "grade": 8.3
+  },
+  {
+   "id": "olmlet_card",
+   "pick": 1,
+   "grade": 8.63
+  },
+  {
+   "id": "proofhop_card",
+   "pick": 2,
+   "grade": 8.67
+  },
+  {
+   "id": "rampartoad_card",
+   "pick": 1,
+   "grade": 8.3
+  },
+  {
+   "id": "spirevark_card",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "zippelith_card",
+   "pick": 2,
+   "grade": 8.4
   }
  ],
  "rerolled": [

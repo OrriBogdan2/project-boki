@@ -4443,3 +4443,20 @@ READY ext/ostra-gait-rebased b19403935 (job 20261109-060434-a4, hetzner; SUPERSE
 Owner 01:14 overrode the B pick: rock candy run 2 is Prismander (concepts/Prismander.jpg), run 3 is the female look (concepts/Prismander_female.jpg). The whole line (Glassolotl, Chandelotl, Geodelotl) follows rock candy. Turnarounds + new Glassolotl queued at the front.
 
 READY ext/grimble-nose-1109 5e98228d5 (job 20261109-060508-a4, hetzner). Grimble's head matches the owner's 11-09 turnaround ("correct nose"): the in-game head had no nose (the old canon); it now has the sheet's short flat snub nose with two nostrils, between the loupe and the grin. It is a small sculpted part (70 tris, rigid on `head`, painted with the face's own scan skin), 14,970 tris total (budget 15k). Body, arm, hoard and clips are unchanged. Sheet / before / after, front and 3/4: briefs/art-refs/grimble_v2/ingame/nose_1109_before_after.jpg. Checks (fresh XDG_DATA_HOME, after --import): --warden-glb-check PASS (183/0), --clip-live-grimble 0 failures, health --strict OK. Not run: the full --check suite and a GPU in-match render. Alternative not taken: subdividing the scan face and displacing it.
+
+## 01:28 ET 11-09 — art session: canon hero cards, first batch (main image per STYLE_CANON)
+Cards at >= 8.3 with no veto are now each Boki's MAIN image (owner judges live): saved in briefs/boki-art/cards/. Please show cards/<Name>.jpg as the main Bokidex image when present (Pokédex portraits stay as additional art). Zippelith's card is held back: Zippelith is being reshaped (owner 01:16).
+ART barrelmander 8.33 briefs/boki-art/cards/Barrelmander.jpg kind=card panel=8.3/8.3/8.4
+ART bathilus 8.4 briefs/boki-art/cards/Bathilus.jpg kind=card panel=8.2/8.4/8.6
+ART cairnback 8.33 briefs/boki-art/cards/Cairnback.jpg kind=card panel=8.3/8.2/8.5
+ART crofthorn 8.4 briefs/boki-art/cards/Crofthorn.jpg kind=card panel=8.4/8.3/8.5
+ART gilabacus 8.37 briefs/boki-art/cards/Gilabacus.jpg kind=card panel=8.4/8.3/8.4
+ART kindlewren 8.33 briefs/boki-art/cards/Kindlewren.jpg kind=card panel=8.5/8.0/8.5
+ART zipling 8.4 briefs/boki-art/cards/Zipling.jpg kind=card panel=8.2/8.4/8.6
+ART knotwyrm 8.4 briefs/boki-art/cards/Knotwyrm.jpg kind=card panel=8.3/8.3/8.6
+ART mirrolin 8.6 briefs/boki-art/cards/Mirrolin.jpg kind=card panel=8.6/8.5/8.7
+ART mycroll 8.3 briefs/boki-art/cards/Mycroll.jpg kind=card panel=8.7/8.4/7.8
+ART olmlet 8.63 briefs/boki-art/cards/Olmlet.jpg kind=card panel=8.6/8.6/8.7
+ART proofhop 8.67 briefs/boki-art/cards/Proofhop.jpg kind=card panel=8.6/8.7/8.7
+ART rampartoad 8.3 briefs/boki-art/cards/Rampartoad.jpg kind=card panel=8.3/8.2/8.4
+ART spirevark 8.4 briefs/boki-art/cards/Spirevark.jpg kind=card panel=8.3/8.4/8.5
