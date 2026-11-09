@@ -4,11 +4,12 @@ extends RefCounted
 ##   1. at hatch (Care.breed, Care.hatch_rare), wild and captured (a seeded Save.new_kin): a sex each, half and half
 ##   2. a Boki keeps its sex through save and load; an old save's Boki get one written down
 ##   3. the female look: only for flagged species, and only when its art exists (else the base model)
-##   4. the card shows the icon, and a female Boki builds on the base model while no female art exists
+##   4. the card shows the icon; a female Boki builds on her female model when it exists, else the base one
 
 const N := 2000
-const SEX_FORMS := ["cindle", "puddlet", "burrlet", "zapple", "pebbit", "wisplet", "kestrike", "murmurling"]
-const NO_FORMS := ["gibbelle", "hoarheron", "cindowary"]
+## The in-game species whose lines have "sex_forms" in the art's LIVE_MANIFEST.json: Gongibbon, Kestrike,
+## Murmurling, Lunowl. The starters branch, so they keep one look (GAME_RULES_NOV8 section 6).
+const SEX_FORMS := ["gibbelle", "kestrike", "murmurling", "wisplet"]
 
 var fails := 0
 var n := 0
@@ -77,33 +78,40 @@ func _migrate() -> void:
 	ok(v1_ok, "a v1 save's Boki are given a sex too")
 
 func _looks() -> void:
-	var all_flagged := true
-	for sp in SEX_FORMS:
-		all_flagged = all_flagged and BokiSex.has_forms(sp)
-	var none_extra := true
-	for sp in NO_FORMS:
-		none_extra = none_extra and not BokiSex.has_forms(sp)
-	ok(all_flagged and none_extra, "female looks are flagged for the chosen species only")
+	var wrong: Array = Data.KIN.keys().filter(func(sp): return BokiSex.has_forms(sp) != (sp in SEX_FORMS))
+	ok(wrong.is_empty(), "female looks are flagged for exactly the manifest's species", str(wrong))
 	var female := _of_sex("kestrike", "f")
 	var male := _of_sex("kestrike", "m")
 	var base := "res://art/kin/kestrike/kestrike.glb"
 	ok(BokiSex.model_path("kestrike", male, base) == base, "a male Boki wears the base model")
-	var want := "res://art/kin/kestrike/kestrike_f.glb"
+	var want := BokiSex.female_path % ["kestrike", "kestrike"]
 	var got: String = BokiSex.model_path("kestrike", female, base)
 	var expect := want if ResourceLoader.exists(want) else base
 	ok(got == expect, "a female Boki wears the female model only if its art exists", got)
-	var plain: String = BokiSex.model_path("gibbelle", _of_sex("gibbelle", "f"), "x")
-	ok(plain == "x", "a species without female looks keeps its one model")
+	var starter: String = BokiSex.model_path("cindle", _of_sex("cindle", "f"), "x")
+	ok(starter == "x", "a species without female looks keeps its one model")
 	var bare: String = BokiSex.model_path("kestrike", {"species": "kestrike"}, base)
 	ok(bare == base, "a bare look-only record wears the base model")
 
+## Points the female art at models that exist (the base ones) so the whole route is seen to load it.
 func _icon_and_model() -> void:
 	var f := _of_sex("kestrike", "f")
 	var ic := UI.sex_icon(f, 12.0)
 	ok(ic != null and ic.tooltip_text == "Female", "the card's sex icon reads Female")
 	ic.free()
-	var mdl := Models.kin("kestrike", f)
-	ok(mdl.find_child("BokiRig", true, false) != null, "a female Boki of a flagged species builds")
+	var real := BokiSex.female_path
+	BokiSex.female_path = "res://art/kin/%s/%s.glb"
+	var lunowl := _of_sex("wisplet", "f")
+	var path := BokiSex.model_path("wisplet", lunowl, "base")
+	ok(path == "res://art/kin/wisplet/wisplet.glb", "a female Boki wears her species' female art once it lands", path)
+	var brother := BokiSex.model_path("wisplet", _of_sex("wisplet", "m"), "base")
+	ok(brother == "base", "her brother still wears the base model")
+	var mdl := Models.kin("wisplet", lunowl)
+	ok(mdl.find_child("BokiRig", true, false) != null, "she builds on that female model")
+	mdl.free()
+	BokiSex.female_path = real
+	mdl = Models.kin("kestrike", f)
+	ok(mdl.find_child("BokiRig", true, false) != null, "with no female art yet she builds on the base model")
 	mdl.free()
 
 func _of_sex(species: String, want: String) -> Dictionary:

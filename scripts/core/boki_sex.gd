@@ -1,10 +1,12 @@
 class_name BokiSex
 extends RefCounted
 ## Which model a Boki wears for its sex. Every Boki is male or female (Unique.sex, 50/50); only species
-## with "sex_forms": true in content/kin/<id>.json have a separate female look, art/kin/<id>/<id>_f.glb.
-## A species without it, or whose female art isn't made yet, wears its one model.
+## with "sex_forms": true in content/kin/<id>.json (the in-game lines flagged in the art's LIVE_MANIFEST)
+## have a female look, art/kin/<id>/<id>_f.glb. The base model is the male look; a species without
+## female looks, or whose female art isn't made yet (most babies), wears its one model.
 
-const FEMALE_PATH := "res://art/kin/%s/%s_f.glb"
+## Where a species' female model lives (species id twice); --boki-sex-check points it at a model that exists.
+static var female_path := "res://art/kin/%s/%s_f.glb"
 
 static func has_forms(species: String) -> bool:
 	return bool(Data.KIN.get(species, {}).get("sex_forms", false))
@@ -13,5 +15,5 @@ static func has_forms(species: String) -> bool:
 static func model_path(species: String, rec: Dictionary, base: String) -> String:
 	if not has_forms(species) or Unique.sex(rec) != "f":
 		return base
-	var female := FEMALE_PATH % [species, species]
+	var female := female_path % [species, species]
 	return female if ResourceLoader.exists(female) else base
