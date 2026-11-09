@@ -44845,5 +44845,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_rippmink_m1_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_rippmink_m3",
+    "name": "Rippmink (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_rippmink_m3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rippmink_m3",
+    "name": "Rippmink (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_rippmink_m3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimink_m1",
+    "name": "Rimink (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_rimink_m1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimink_m1",
+    "name": "Rimink (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_rimink_m1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimink_m1",
+    "name": "Rimink (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_rimink_m1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimink_m2",
+    "name": "Rimink (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_rimink_m2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimink_m1",
+    "name": "Rimink (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_rimink_m1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimink_m2",
+    "name": "Rimink (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_rimink_m2_2.jpg",
+    "ok": true
   }
 ]
