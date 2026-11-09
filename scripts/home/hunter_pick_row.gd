@@ -20,7 +20,7 @@ static func add(home: Node, parent: Control) -> String:
 	flow.add_theme_constant_override("v_separation", 6)
 	for a in Arch.ids():
 		var id: String = a
-		var b := UI.choice(Arch.name_of(id), id == cur, func(): _pick(home, id), 104)
+		var b := UI.choice(Arch.hunter_name(id), id == cur, func(): _pick(home, id), 104)
 		b.disabled = not ClassUnlock.is_open(id)
 		var locked := "Locked: %s\n" % ClassUnlock.requirement(id) if b.disabled else ""
 		b.tooltip_text = locked + ClassCard.kit_tip(id)

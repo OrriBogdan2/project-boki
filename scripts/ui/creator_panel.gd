@@ -109,7 +109,7 @@ func _view_row() -> HBoxContainer:
 		return row
 	var at := maxi(0, hunters.find(view))
 	var shown := String(hunters[at])
-	row.add_child(UI.choice(Arch.name_of(shown) if view != "" else "In a Relic", view != "",
+	row.add_child(UI.choice(Arch.hunter_name(shown) if view != "" else "In a Relic", view != "",
 		func(): show_view(shown)))
 	if view != "" and hunters.size() > 1:
 		row.add_child(UI.icon_button("next", func(): show_view(String(hunters[(at + 1) % hunters.size()])),

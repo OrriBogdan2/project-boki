@@ -88,7 +88,7 @@ static func _mastery_row(id: String, i: int, width: float) -> Control:
 ## A Hunter's kit in one tooltip: its name, then dash, passive, RMB, E and R.
 static func kit_tip(id: String) -> String:
 	var adf := Arch.def(id)
-	var names := [Arch.name_of(id)]
+	var names := [Arch.hunter_name(id)]
 	for slot in ["dash", "passive", "rmb", "e"]:
 		names.append(String(adf[slot]["name"]))
 	names.append(Settings.key_cap("ultimate"))

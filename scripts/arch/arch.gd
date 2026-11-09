@@ -48,6 +48,11 @@ static func name_of(id: String, mid := false) -> String:
 		return t
 	return ("the " if mid else "The ") + t
 
+## The Hunter's own name ("Tenzo") for the big label on select screens; the title when it has no name.
+static func hunter_name(id: String) -> String:
+	var n := String(def(id).get("base_name", ""))
+	return n if n != "" else name_of(id)
+
 ## The Hunter's display name, or "Hunter" for a body with no Hunter kit (dummies, old saves).
 static func label(id: String) -> String:
 	return name_of(id) if exists(id) else "Hunter"
