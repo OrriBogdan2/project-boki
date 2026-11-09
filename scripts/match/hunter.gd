@@ -249,7 +249,7 @@ var dodged := false        # F has to be let go between weapon swaps
 var lives := 1                # comes back this many times minus one before it's really out
 var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
 var ak: ArchKit = null        # the archetype's kit at run time
-var shot_range_k := 1.0       # the next shot's range (an idle gun's first ember: +40%)
+var shot_range_k := 1.0       # the next shot's range multiplier (1 unless a kit sets it)
 var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
 var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees and barriers don't stop you while > 0

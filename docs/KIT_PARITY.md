@@ -77,10 +77,10 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Ramp per hit; idle shot Empowered [D] | Cadence .4, Empowered +40% range (ours) | match; range bonus ours |
+| LMB | Ramp per hit; idle shot Empowered [D] | Cadence .4, Empowered = cue only (no range, no refund) | match; Empowered effect is not in the source, our rider removed |
 | RMB | Shot, delayed Root, 11.5 s [D] | Hop form, windup 1.0, cd 10.5 | differ `[?]` motion |
 | Q | none | glove | ours |
-| E | 2.5 s zone, burst, throw, attaches, 12 s [D] | 2.5 s, r 2.6, throw, cd 11, self_k .33 (ours) | match |
+| E | 2.5 s zone, burst, throw, attaches, 12 s [D] | 2.5 s, r 2.6, throw, cd 11, no self factor | match |
 | R | Channel on ally/Wisp; revive and pull; cancels on stun, knock, range; 60 s [D] | Tether 5 s, range 12.6, cd 46 | match in shape; 0.77x cd |
 | Dash | Ground 7 s, air 14 s, separate [D] | 7 s and 14 s, raw 4.2/.174 and 13.3/.95, air steer (owner) | match |
 | Passive | Carry Wisps; damage or stun drops, 4 s lockout [D] | Carry up to 2 + Carrier shield (ours) | differ: shield ours. Drop lockout built (lock 4 s); which hits drop not traced |

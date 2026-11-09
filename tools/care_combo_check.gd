@@ -778,6 +778,11 @@ func tender() -> void:
 			"+%.0f%%" % (ramp * 100.0))
 	# --- the idle crook: the next ember is Empowered (longer, its own bigger flick)
 	step(m, 1.3)
+	var res: Dictionary = Arch.def("tender")["resource"]
+	ok(
+			"mm LMB: Empowered adds nothing the source doesn't name (no range or refund rider)",
+			P.shot_range_k == 1.0 and not res.has("emp_range") and not res.has("emp_refund"),
+			"range_k %.2f" % P.shot_range_k)
 	var e0: int = K.stats["emp"]
 	P.ammo = int(P.wpn["mag"])
 	P.reload_t = 0.0
@@ -785,7 +790,7 @@ func tender() -> void:
 	step(m, 0.05)
 	P.inp["fire"] = false
 	ok(
-			"mm LMB: after a pause the next ember is Empowered (40% further, its own move)",
+			"mm LMB: after a pause the next ember is Empowered (its own move)",
 			K.stats["emp"] > e0 and K.anim_id == "mm_shot_emp", "emp %d anim %s" % [K.stats["emp"], K.anim_id])
 	step(m, 0.6)
 	# --- Burrseed (item 118): a press, a fixed wind-up, the throw by itself on the aim of that moment
@@ -876,6 +881,14 @@ func tender() -> void:
 	ok(
 			"mm E: lit on her, a 2.6 m ring (1.4 bh) and the raise-the-lantern move",
 			K.in_e() and absf(K.hearth_r() - 2.6) < 0.01 and K.anim_id == "mm_hearth" and K.lk().showing("hearth"))
+	# parity: the source gives no self-heal factor, so she is healed by the full tick (no self_k rider)
+	var ed: Dictionary = Arch.def("tender")["passive"]
+	P.hp = P.max_hp * 0.5
+	var hp0 := P.hp
+	K._pulse(P.pos, 2.0)
+	ok(
+			"mm E: the ring heals her for the full tick, no self-heal factor in the data",
+			not ed.has("self_k") and absf(P.hp - hp0 - 2.0 * K.heal_k()) < 0.01, "healed %.2f" % (P.hp - hp0))
 	var cur := P.pos + Vector3(6.0, 0, 0)
 	sc.aim_at(P, cur)
 	step(m, 0.2)

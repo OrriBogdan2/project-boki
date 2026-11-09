@@ -116,11 +116,11 @@ func _tender_support() -> void:
 	ok("Hearthlight: heals an ally in the ring", mid > h0 + 3.0, "%.1f -> %.1f" % [h0, mid])
 	step(m, 1.6)
 	ok("Hearthlight: flares at the end", not K.in_e() and A.hp > mid + 10.0, "-> %.1f" % A.hp)
-	# --- self heal is a third
+	# --- parity: no self-heal factor, she is healed like any ally (the source gives none)
 	P.hp = P.max_hp * 0.4; var p0 := P.hp; A.hp = A.max_hp
 	K.cd["e"] = 0.0
 	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false; step(m, 3.0)
-	ok("Hearthlight: heals you at a third", P.hp > p0 and (P.hp - p0) < 22.0, "+%.1f" % (P.hp - p0))
+	ok("Hearthlight: heals you in full, like an ally", (P.hp - p0) > 22.0, "+%.1f" % (P.hp - p0))
 	# --- a stun does not put it out (only the ultimate's channel breaks on a stun)
 	K.cd["e"] = 0.0
 	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false

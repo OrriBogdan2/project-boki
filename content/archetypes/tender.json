@@ -47,9 +47,7 @@
 		"dur": 4.0,
 		"per_stack": 0.72,
 		"refund": 0.2,
-		"emp_refund": 0.4,
 		"emp_idle": 1.0,
-		"emp_range": 1.4,
 		"falloff": 0.5,
 		"col": "#ffb347"
 	},
@@ -126,13 +124,12 @@
 		"every": 0.5,
 		"over": 10.0,
 		"burst": 22.0,
-		"self_k": 0.33,
 		"wisp_k": 5.0,
 		"reach": 9.0,
 		"toss_speed": 45.0,
 		"latch_r": 1.0,
 		"boost": 0.5,
-		"desc": "A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.",
+		"desc": "A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you like a teammate, and a downed teammate five times over.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"
