@@ -43,8 +43,8 @@ func tick(home: Node, dt: float) -> void:
 	home.cam.yaw_to += _turn_axis() * TURN_SPEED * dt
 	if step != Vector2.ZERO:
 		picked = -1
-		var move: Vector3 = Vector3(step.x, 0, step.y).rotated(Vector3.UP, home.cam.yaw) * PAN_SPEED * home.cam.zoom * dt
-		focus += move
+		var across: Vector3 = Vector3(step.x, 0, step.y).rotated(Vector3.UP, home.cam.yaw)
+		focus += across * PAN_SPEED * home.cam.zoom * dt
 	elif picked >= 0:
 		var at: Vector3 = home.kins[picked]["pos"]
 		focus = focus.lerp(at, 1.0 - exp(-FOLLOW_EASE * dt))
@@ -129,8 +129,8 @@ func _drawn(home: Node) -> void:
 ## A headless run has nothing to draw, so it saves a flat sky-coloured frame of the window size: the folder,
 ## the file name and latest() still work. Real runs never use it.
 func _placeholder(home: Node) -> Image:
-	var size := Vector2i(home.get_viewport().get_visible_rect().size)
-	var img := Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
+	var dims := Vector2i(home.get_viewport().get_visible_rect().size)
+	var img := Image.create(dims.x, dims.y, false, Image.FORMAT_RGB8)
 	img.fill(PLACEHOLDER_SKY)
 	return img
 

@@ -98,6 +98,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | M | Full map (click to ping) | `map` | yes |
 | P | Pass the drop lead | `pass_lead` | yes |
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |
+| F8 | Photo mode at home (hides the HUD, frees the camera) | `photo` | yes |
 | F9 | Recording: slow camera orbit | `record_orbit` | yes |
 | Z | Separate from the drop | `separate` | yes |
 

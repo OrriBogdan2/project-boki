@@ -18,11 +18,11 @@ func _frames(n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
 
-func _shot(name: String) -> void:
+func _shot(label: String) -> void:
 	if shots_dir == "":
 		return
 	await _frames(8)
-	main.get_viewport().get_texture().get_image().save_png(shots_dir.path_join("photo_%s.png" % name))
+	main.get_viewport().get_texture().get_image().save_png(shots_dir.path_join("photo_%s.png" % label))
 
 func _new_save() -> void:
 	var d := Save.fresh()
@@ -63,7 +63,8 @@ func run(m: Node) -> void:
 	for i in 120:
 		photo.tick(home, 0.05)
 	ok(photo.focus.distance_to(Vector3(spot.x, photo.focus.y, spot.z)) < 0.5, "the camera glides to the picked Boki")
-	ok(photo.caption_text(home) == "Mochi the %s" % Data.KIN["zapple"]["name"], "the caption: %s" % photo.caption_text(home))
+	var caption := photo.caption_text(home)
+	ok(caption == "Mochi the %s" % Data.KIN["zapple"]["name"], "the caption: %s" % caption)
 	await _shot("1_picked_no_caption")
 	photo.caption_on = true
 	photo.tick(home, 0.016)
@@ -72,7 +73,8 @@ func run(m: Node) -> void:
 	await _shot("2_picked_caption_orbit")
 	var path: String = await photo.take(home)
 	var img := Image.load_from_file(path) if path != "" else null
-	ok(img != null and not img.is_empty() and Vector2i(img.get_size()) == Vector2i(main.get_viewport().get_visible_rect().size),
+	var window := Vector2i(main.get_viewport().get_visible_rect().size)
+	ok(img != null and not img.is_empty() and Vector2i(img.get_size()) == window,
 		"Enter: a PNG of the view is saved (%s)" % path)
 	ok(HomePhoto.latest() == path, "latest() hands the saved photo back for the race post")
 	photo.toggle(home)
