@@ -62,6 +62,18 @@ Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json
 | nap_doc | s of a day nap (energy low or bored); at night a non-nocturnal Boki naps till dawn. |
 | tired_at | 25 |
 | tired_at_doc | energy need below which a Boki naps by day. |
+| dusk_sun | 0.35 |
+| dusk_sun_doc | the sun height (1 noon, 0 horizon, -1 midnight) under which the evening counts as dusk: day Boki head to their nap spots (about 27 s of a 300 s day, before night starts at -0.2). |
+| alone_gap | 4 |
+| alone_gap_doc | m a grumpy Boki (joy under 30) keeps from the others when it beds down for the night. |
+| night_play | 0.3 |
+| night_play_doc | added to a nocturnal Boki's chance to play tag or go to a toy at night. |
+| glow | {"energy": 0.7, "range": 3.5, "fade": 0.5} |
+| glow_doc | a nocturnal Boki's soft night light: omni energy, range in m, energy change per second when it fades in and out. |
+| wake_near | 3 |
+| wake_near_doc | m: a napping Boki wakes and comes to look when you walk up this close. |
+| wake_stay | 20 |
+| wake_stay_doc | s a woken Boki stays up before dusk or night puts it back to bed. |
 | near | 6 |
 | near_doc | m within which another Boki counts as close: a play mate, a rival to stare at, a pile to join. |
 | pile | 0.35 |

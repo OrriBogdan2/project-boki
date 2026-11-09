@@ -3,7 +3,9 @@ extends RefCounted
 ## Base life (briefs/design/GARDEN.md section 4), on only with farm_build.json base_mode: each farm Boki lives on
 ## its own through one explicit state machine (Fsm, briefs/STATE_MACHINES.md). It roams, eats at a feeder, naps
 ## (friends in a pile; night is nap time unless it is nocturnal, Work.NOCTURNAL), plays at a toy, plays tag with
-## another Boki, stares at a rival or comes to look at a newcomer. Tag and napping together build friendship,
+## another Boki, stares at a rival or comes to look at a newcomer. At dusk the day Boki walk to a nap spot (friends
+## to the one already lying down, a grumpy one off by itself); nocturnal ones stay up at night, play more and glow
+## softly; a napper wakes and comes over when you walk up to it. Tag and napping together build friendship,
 ## squabbles over a toy or clashing tempers build rivalry, kept as rec["bonds"] = {uid: -1..1}. Friends greet and
 ## nap in a pile; rivals stare and huff.
 ##
@@ -28,13 +30,15 @@ const CATCH := 0.8         # m: a tag lands this close
 const AT_TOY := 1.4        # m: a Boki this close to a toy is at it (two here share it or squabble)
 const GREET := 2.5         # m: friends this close greet each other
 const PILE_JOIN := 1.0     # m: close enough to a napping friend to lie down with it
-const PILE_WALK := 8.0     # s a Boki walks to a pile before it naps where it is
+const PILE_WALK := 20.0    # s a Boki walks to a pile or a quiet spot before it naps where it is
 const GRUMPY := 30.0       # joy need below which a Boki naps alone
 
 var h                      # the home (home.gd): kins, world, day_t, ppos, emotes
 var R: Dictionary          # content/rules/base_life.json
 var toys: Array = []       # Vector3: where the placed toys stand
-var night := false
+var night := false         # the farm's night (sun well below the horizon)
+var dusk := false          # the dusk before it: day Boki are already heading to bed
+var _me := {"pos": Vector3.ZERO}      # you, shaped like a Boki so a REACT can look at you
 var _acc := 0.0
 var _toy_t := 0.0
 var _seen := {}            # uid -> true: every Boki this base has met (a new uid is an arrival)
@@ -74,7 +78,9 @@ func machine(k: Dictionary) -> Fsm:
 		m.guard_from(S.NAP, S.ROAM, func() -> bool: return float(k.get("nap_t", 0.0)) <= 0.0)
 		m.on_enter(S.ROAM, func(_from: int) -> void: k["t"] = 0.0)
 		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: k.erase("life_it"))
-		m.on_exit(S.NAP, func(_to: int) -> void: k.erase("life_pile"))
+		m.on_exit(S.NAP, func(_to: int) -> void:
+			k.erase("life_pile")
+			k.erase("life_spot"))
 		k["life"] = m
 	return k["life"]
 
@@ -89,7 +95,10 @@ func step(d: float) -> void:
 	if _toy_t >= TOY_SCAN:
 		_toy_t = 0.0
 		find_toys()
-	night = sin((h.day_t - 0.25) * TAU) < -0.2      # the farm's own night test (home.gd _move_kin)
+	var sun := sin((h.day_t - 0.25) * TAU)
+	night = sun < -0.2      # the farm's own night test (home.gd _move_kin)
+	dusk = not night and h.day_t > 0.5 and sun < float(R["dusk_sun"])
+	_me["pos"] = h.ppos
 	for k in h.kins:
 		machine(k)       # every machine first: a newcomer looks for Boki that have one
 	for k in h.kins:
@@ -100,6 +109,7 @@ func step(d: float) -> void:
 			_seen[uid] = true
 	for k in h.kins:
 		_tick(k, dt)
+		_glow(k, dt)
 
 ## Separation scale for two Boki (home.gd _separate_kin): napping friends lie close in a pile.
 func pile(a: Dictionary, b: Dictionary) -> float:
@@ -148,11 +158,12 @@ func choose(k: Dictionary) -> void:
 		if bond(rec, o["rec"]) <= float(R["rival_at"]) and randf() < 0.3 + float(traits.get("temper", 0.5)) * 0.5:
 			_watch(k, o, "rival")
 			return
+	var up := float(R["night_play"]) if night and nocturnal(rec) else 0.0      # a night Boki is in a playful mood
 	var mate := _mate(k, near)
-	if not mate.is_empty() and (bored or randf() < float(pers.get("social", 0.22)) + bond(rec, mate["rec"]) * 0.5):
+	if not mate.is_empty() and (bored or randf() < float(pers.get("social", 0.22)) + bond(rec, mate["rec"]) * 0.5 + up):
 		_tag(k, mate)
 		return
-	if not toys.is_empty() and (bored or randf() < 0.2 + float(traits.get("curiosity", 0.5)) * 0.3):
+	if not toys.is_empty() and (bored or randf() < 0.2 + float(traits.get("curiosity", 0.5)) * 0.3 + up):
 		_play(k, toys[randi() % toys.size()])
 		return
 	if bored:
@@ -170,8 +181,10 @@ func _tick(k: Dictionary, dt: float) -> void:
 	if _taken(k):
 		return
 	m.tick(dt)
-	if not _awake(k) and not m.is_in(S.NAP):
-		_nap(k, "night")
+	k["woke_t"] = maxf(0.0, float(k.get("woke_t", 0.0)) - dt)
+	_wake_for_me(k, m)
+	if not _awake(k) and not m.is_in(S.NAP) and float(k["woke_t"]) <= 0.0:
+		_nap(k, "dusk" if dusk else "night")
 	elif float(k.get("nap_t", 0.0)) > 0.0 and not m.is_in(S.NAP):
 		m.go(S.NAP, "dozed")
 	match m.state:
@@ -193,11 +206,14 @@ func _tick(k: Dictionary, dt: float) -> void:
 
 func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 	var nap := float(k.get("nap_t", 0.0))
-	if k.has("life_pile") and nap <= 0.0:
-		var to: Dictionary = k["life_pile"]
-		k["goal"] = to["pos"]
-		if _dist(k, to) < PILE_JOIN or m.since >= PILE_WALK or not (to["life"] as Fsm).is_in(S.NAP):
+	if nap <= 0.0 and (k.has("life_pile") or k.has("life_spot")):
+		var pile: Dictionary = k.get("life_pile", {})
+		var to: Vector3 = pile["pos"] if not pile.is_empty() else k["life_spot"]
+		k["goal"] = to
+		if Vector2(to.x - k["pos"].x, to.z - k["pos"].z).length() < PILE_JOIN or m.since >= PILE_WALK \
+				or (not pile.is_empty() and not (pile["life"] as Fsm).is_in(S.NAP)):
 			k.erase("life_pile")
+			k.erase("life_spot")
 			_lie_down(k)
 		return
 	if nap <= 0.0:
@@ -263,11 +279,15 @@ func _nap(k: Dictionary, why: String) -> void:
 		return
 	k.erase("eat")
 	if Care.need(k["rec"], "joy") >= GRUMPY:
-		for o in _near(k, true):
-			if (o["life"] as Fsm).is_in(S.NAP) and bond(k["rec"], o["rec"]) >= float(R["friend_at"]) * 0.5:
-				k["life_pile"] = o       # walks over to a napping friend (or nearly one) first
-				k["t"] = PILE_WALK
-				return
+		var friend := _napping_friend(k, not _awake(k))
+		if not friend.is_empty():
+			k["life_pile"] = friend       # walks over to a napping friend (or nearly one) first
+			k["t"] = PILE_WALK
+			return
+	elif not _awake(k) and _gap(k, k["pos"]) < float(R["alone_gap"]):
+		k["life_spot"] = _alone_spot(k)       # a grumpy one beds down away from the rest
+		k["t"] = PILE_WALK
+		return
 	_lie_down(k)
 
 func _lie_down(k: Dictionary) -> void:
@@ -330,10 +350,82 @@ func _arrived(k: Dictionary) -> void:
 			o["t"] = float(o["life_for"])
 			h._emote(o, "!")
 
+## Dims in a soft light round a nocturnal Boki at night and fades it out by day.
+func _glow(k: Dictionary, dt: float) -> void:
+	if not nocturnal(k["rec"]):
+		return
+	var g: Dictionary = R["glow"]
+	var light: OmniLight3D = k.get("glow", null)
+	var want := float(g["energy"]) if night else 0.0
+	if light == null:
+		if want <= 0.0:
+			return
+		light = OmniLight3D.new()
+		light.omni_range = float(g["range"])
+		light.light_color = Data.KIN[String(k["rec"]["species"])].get("glow", Color("9fe8ff"))
+		light.position = Vector3(0, 0.5, 0)
+		light.light_energy = 0.0
+		(k["node"] as Node3D).add_child(light)
+		k["glow"] = light
+	light.light_energy = move_toward(light.light_energy, want, float(g["fade"]) * dt)
+
+## A sleeper you walk up to wakes, comes over to see you, and stays up a while before going back to bed.
+func _wake_for_me(k: Dictionary, m: Fsm) -> void:
+	var near: bool = Vector2(_me["pos"].x - k["pos"].x, _me["pos"].z - k["pos"].z).length() < float(R["wake_near"]) \
+		and h.world.island_of(_me["pos"].x, _me["pos"].z) == h.world.island_of(k["pos"].x, k["pos"].z)
+	var came: bool = near and not k.get("near_me", false)
+	k["near_me"] = near
+	if not came or not m.is_in(S.NAP) or float(k.get("nap_t", 0.0)) <= 0.0:
+		return
+	k["nap_t"] = 0.0
+	k["woke_t"] = float(R["wake_stay"])
+	m.go(S.ROAM, "you came")
+	if m.go(S.REACT, "you came"):
+		k["life_at"] = _me
+		k["life_for"] = float(R["max"]["react"])
+		k["t"] = float(k["life_for"])
+		h._emote(k, "!")
+
+## The best friend already napping (`far`: anywhere on the island, else within R.near).
+func _napping_friend(k: Dictionary, far: bool) -> Dictionary:
+	var best := {}
+	var top := float(R["friend_at"]) * 0.5
+	var here: int = h.world.island_of(k["pos"].x, k["pos"].z)
+	for o in h.kins:
+		if o == k or not o.has("life") or _taken(o) or not (o["life"] as Fsm).is_in(S.NAP) \
+				or h.world.island_of(o["pos"].x, o["pos"].z) != here or (not far and _dist(k, o) >= float(R["near"])):
+			continue
+		var b := bond(k["rec"], o["rec"])
+		if b >= top:
+			top = b
+			best = o
+	return best
+
+## Distance from `p` to the nearest other Boki on k's island.
+func _gap(k: Dictionary, p: Vector3) -> float:
+	var gap := INF
+	var here: int = h.world.island_of(k["pos"].x, k["pos"].z)
+	for o in h.kins:
+		if o != k and h.world.island_of(o["pos"].x, o["pos"].z) == here:
+			gap = minf(gap, Vector2(p.x - o["pos"].x, p.z - o["pos"].z).length())
+	return gap
+
+## The most out of the way of a few random spots on k's island.
+func _alone_spot(k: Dictionary) -> Vector3:
+	var here: int = maxi(h.world.island_of(k["pos"].x, k["pos"].z), 0)
+	var best: Vector3 = k["pos"]
+	var far := _gap(k, best)
+	for i in 6:
+		var p: Vector3 = h.world.random_ground(here)
+		if _gap(k, p) > far:
+			far = _gap(k, p)
+			best = p
+	return best
+
 # ------------------------------------------------------------------ helpers
-## Not asleep time: night is for napping, except for nocturnal Boki.
+## Not asleep time: dusk and night are for napping, except for nocturnal Boki.
 func _awake(k: Dictionary) -> bool:
-	return not night or nocturnal(k["rec"])
+	return not (night or dusk) or nocturnal(k["rec"])
 
 ## The farm's own drivers have this Boki (it was called, is held, works, bathes, is indoors or leaping).
 static func _taken(k: Dictionary) -> bool:

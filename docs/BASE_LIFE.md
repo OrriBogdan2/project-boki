@@ -16,7 +16,13 @@ check: `--base-life-check`.
   side raise it; a squabble (two hot tempers meeting at a toy or in tag, or a rival at the toy) lowers it. Friends
   (`friend_at`) greet with a heart and walk over to a napping friend to pile up; rivals (`rival_at`) stare and huff.
   Old saves get an empty map per Boki in the v11 -> v12 save migration (`Save._migrate_11_to_12`).
-- Night: every Boki naps till dawn except `Work.NOCTURNAL` species.
+- Dusk and night (GARDEN.md 4): from `dusk_sun` (about 27 s before night) every day Boki heads to bed, up to
+  `PILE_WALK` s: to the best friend already lying down, or, if grumpy (joy under 30), to a quiet spot `alone_gap`
+  m from the others. They sleep till dawn except `Work.NOCTURNAL` species (Wisplet, Zapple), which roam, play more
+  (`night_play`) and carry a soft omni light (`glow`) that fades with the day. Walking up to a sleeper (`wake_near`)
+  wakes it: it comes over to look (React) and stays up `wake_stay` s before going back to bed. Night is about 130 s
+  of the 300 s farm day (home.gd DAY_LEN), dusk 27 s; check `--garden-night-check` asserts every Boki's state by
+  time of day.
 - Readout: `BaseLife.readout()` (state, seconds in it, refusals, last transition, bonds per Boki, printed by the
   check). Each machine registers in `Fsm.live` as `boki:<name>`, so the F7 FsmReadout lists them once ext/fsm-m1
   lands.
