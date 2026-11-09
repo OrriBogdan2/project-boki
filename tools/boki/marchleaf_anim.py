@@ -185,5 +185,8 @@ CLIPS = {
     "mine": (1.0, True, crew(mine_mouth, 2, 0.01)),
 }
 import boki_react
-CLIPS.update(boki_react.react())
+# the workers share the mood: a hop on a win, a slow shuffle in a sulk, a quick trot behind a push
+_STEPS = {"win": (2, 0.02, False), "sulk": (2, 0.004, True), "push": (4, 0.01, True)}
+CLIPS.update({n: (sec, lp, crew(fn, *_STEPS[n][:2], loop=_STEPS[n][2]))
+              for n, (sec, lp, fn) in boki_react.react().items()})
 HIDE_AT = {"prop_berry": (0, 0.14, 0.4)}
