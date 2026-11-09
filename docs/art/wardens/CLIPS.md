@@ -19,7 +19,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
-- `states`: downed, reviving (a kneel loop), stomp, drink, dead, stun, emote, hit {front, back, dur}. `stomp` and `drink` are seeked by the state's 0..1 phase (a stomp clip is Life's `stomp_cycle`, 0.7 s, the heel down at 0.7 of it; a drink clip is `Hunter.DRINK_TIME`, 1.1 s, upper body only). tools/art1/actionkit.py shares the three actions; each Hero's clips file gives its ready pose, its free hand and the mouth. `--clip-check` asserts the lengths.
+- `states`: downed, reviving (a kneel loop), stomp, drink, dead, stun, emote, hit {front, back, dur}. `stomp` and `drink` are seeked by the state's 0..1 phase (a stomp clip is Life's `stomp_cycle`, 0.7 s, the heel down at 0.7 of it; a drink clip is `Hunter.DRINK_TIME`, 1.1 s, upper body only). tools/art1/actionkit.py shares the three actions; each Hero's clips file gives its ready pose, its free hand and the mouth. Kael v2 has no clips file of his own (his clips are the first Kael's, retargeted): tools/art1/kael_v2_clips.py keys his three on the v2 rig, his ready pose read off his v2 idle, and copies them onto kael.glb. `--clip-check` asserts the lengths.
 - `procedural`: state keys that hand back to the rig (ledges, mantles, bases; stomp and drink for a Hero with no clip). A kit move with no clip does too.
 
 ## The tree

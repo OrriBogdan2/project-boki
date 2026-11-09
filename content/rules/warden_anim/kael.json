@@ -1,5 +1,5 @@
 {
-	"doc": "Kael v2's clips (art/wardens/kael/kael.glb: the first Kael's 49 hand-keyed clips retargeted by tools/art1/kael_retarget.py) and which game state plays which (scripts/heroes/warden_clips.gd). One file per Hero, so ART-1 branches never touch shared code.",
+	"doc": "Kael v2's clips (art/wardens/kael/kael.glb: the first Kael's 49 hand-keyed clips retargeted by tools/art1/kael_retarget.py; stomp, drink and revive keyed on the v2 rig by tools/art1/kael_v2_clips.py) and which game state plays which (scripts/heroes/warden_clips.gd). One file per Hero, so ART-1 branches never touch shared code.",
 	"hide_while_chain": [
 		"spring_hangwarchain_0"
 	],
@@ -126,6 +126,8 @@
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
+		"stomp": "stomp",
+		"drink": "drink",
 		"dead": "death",
 		"dead_t": 1.5,
 		"stun": "stun",
@@ -201,9 +203,7 @@
 	"procedural": [
 		"ledge",
 		"mantle",
-		"stomp",
-		"base",
-		"drink"
+		"base"
 	],
 	"upper": [
 		"hips",
