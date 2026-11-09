@@ -41233,5 +41233,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/domeleon_card3_3.jpg",
     "ok": true
+  },
+  {
+    "id": "domeleon_card3",
+    "name": "Domeleon (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/domeleon_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "orbitle_card9",
+    "name": "Orbitle (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/orbitle_card9_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "dobsabre_card3",
+    "name": "Dobsabre (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dobsabre_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gravigrub_card3",
+    "name": "Gravigrub (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gravigrub_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "domeleon_card3",
+    "name": "Domeleon (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/domeleon_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "dobsabre_card3",
+    "name": "Dobsabre (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/dobsabre_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "dobsabre_card3",
+    "name": "Dobsabre (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dobsabre_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gravigrub_card3",
+    "name": "Gravigrub (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gravigrub_card3_3.jpg",
+    "ok": true
   }
 ]
