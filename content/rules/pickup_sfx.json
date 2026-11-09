@@ -1,0 +1,14 @@
+{
+ "_doc": "Which pickup sound an item plays (PickupSfx, briefs/SFX_AUDIT.md row 12). cues: category -> sound. gear_kind: the cue category for a piece of gear by Gear.slot_of (0 active glove, 1 passive glove, 2 armor, 3 boots), which comes from the 'slot' key in content/gear. valuable: every treasure. belt: every utility-belt item. kinds: the ground pickup kinds of Match._collect that are not belt items. Anything not listed plays 'generic'. --sfx-set-check asserts every category here has a sound file.",
+ "cues": {
+  "armor": "pickup_armor",
+  "weapon": "pickup_weapon",
+  "gem": "pickup_gem",
+  "consumable": "pickup_consumable",
+  "generic": "pickup_generic"
+ },
+ "gear_kind": ["weapon", "generic", "armor", "armor"],
+ "valuable": "gem",
+ "belt": "consumable",
+ "kinds": {"gem": "gem", "tonic": "consumable", "armor": "consumable"}
+}

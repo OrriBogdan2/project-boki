@@ -61,7 +61,7 @@ static func swap_held(m: Match, h: Hunter, b: Dictionary, held_i: int, mine_i: i
 	h.pack[mine_i] = held
 	Life._settle_box(b)
 	_told(m, h, "Swapped %s for %s" % [Loot.name_of(mine), Loot.name_of(held)], Loot.col_of(held))
-	m.sfx("pickup", h.pos, -2.0, 0.95)
+	m.sfx(PickupSfx.of(held), h.pos, -2.0, 0.95)
 	return true
 
 ## Hold window "Drop": your backpack thing i goes on the ground, the held box thing takes its slot.

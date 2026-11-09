@@ -1650,7 +1650,7 @@ func _take_gear(h: Hunter, wp: Dictionary, from_net := false) -> void:
 		var ba := randf() * TAU
 		spawn_gear(String(old["id"]), int(old["rar"]), Vector3(h.pos.x + cos(ba) * 0.9, h.ground(), h.pos.z + sin(ba) * 0.9))
 	var col: Color = Data.RARITY[clampi(int(wp["rar"]), 0, Data.RARITY.size() - 1)]["color"]
-	sfx("pickup", h.pos, 0.0, 0.9)
+	sfx(PickupSfx.of_gear(String(wp["gear"])), h.pos, 0.0, 0.9)
 	fx.ring(h.pos, 1.4, col, 0.35)
 	if h == player and hud:
 		hud.toast(Loot.name_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))) + "  ·  " + Loot.sub_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))), col)
@@ -3088,7 +3088,7 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 				sfx("unlock", null, -6.0, 1.2)
 		_: if UtilityBelt.is_item(String(p["kind"])): UtilityBelt.pickup(h, String(p["kind"]), int(p["v"]))
 	if h == player:
-		sfx("pickup", null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
+		sfx(PickupSfx.of_kind(String(p["kind"])), null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
 		if p["kind"] == "seed":
 			hud.toast("+%d %s seed" % [p["v"], Data.CROPS[p["key"]]["name"]], Data.CROPS[p["key"]]["color"])
 

@@ -438,6 +438,19 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | weights | {"brand_fire": 0.7, "brand_frost": 0.7, "brand_storm": 0.7, "brand_venom": 0.7, "brand_void": 0.7, "overcharge": 0.6, "remedy": 0.8} |
 | bot_want | {"default": 1.5, "brand_fire": 3.0, "brand_frost": 2.8, "brand_storm": 3.0, "brand_venom": 2.8, "brand_void": 2.6, "hotload": 2.6, "keen": 2.5, "quickfeed": 2.2, "toughskin": 2.4, "plating": 2.2, "secondwind": 2.0, "longreach": 1.8, "deepmag": 1.6, "quickhands": 1.7, "tinker_roll": 1.5, "magpie": 1.0, "scavenger": 1.0, "satchel": 0.8, "spyglass": 0.9, "overcharge": 1.2} |
 
+## pickup_sfx (`content/rules/pickup_sfx.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Which pickup sound an item plays (PickupSfx, briefs/SFX_AUDIT.md row 12). cues: category -> sound. gear_kind: the cue category for a piece of gear by Gear.slot_of (0 active glove, 1 passive glove, 2 armor, 3 boots), which comes from the 'slot' key in content/gear. valuable: every treasure. belt: every utility-belt item. kinds: the ground pickup kinds of Match._collect that are not belt items. Anything not listed plays 'generic'. --sfx-set-check asserts every category here has a sound file. |
+| cues | {"armor": "pickup_armor", "weapon": "pickup_weapon", "gem": "pickup_gem", "consumable": "pickup_consumable", "generic": "pickup_generic"} |
+| gear_kind | ["weapon", "generic", "armor", "armor"] |
+| valuable | gem |
+| belt | consumable |
+| kinds | {"gem": "gem", "tonic": "consumable", "armor": "consumable"} |
+
 ## portraits (`content/rules/portraits.json`)
 
 
