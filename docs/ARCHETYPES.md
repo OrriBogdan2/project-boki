@@ -216,8 +216,7 @@ The six kin today:
 ## 5. Merge vs R: resolving the conflict
 
 > **Superseded (docs/decisions/0001-boki-merge-and-commands.md):** R is the Merge for every class. The
-> options below are kept for the record; the class's own R stays reachable behind
-> `content/rules/boki_system.json` `class_ults` until the hero-port work folds it into the kits.
+> options below are kept for the record; the class R switch (`class_ults`) is removed.
 
 Today the merge **is** R (the bond ultimate, unlocking at run level 6). The new kit gives R to the
 archetype. Options:
@@ -1198,7 +1197,7 @@ theirs. Rather than drop the wiki's ultimates, each is folded into the kit where
   the rim ring and its blight are gone.
 
 `docs/heroes/thief.md` and `docs/heroes/juggernaut.md` carry the per-slot tables and the checks that
-assert each combination. The class-ultimate framework (`ArchKit.use_r`, `class_ults`) stays for the
+assert each combination. The class-ultimate framework (`ArchKit.use_r`) stays for the
 other four kits; a kit with no `"r"` in its JSON refuses the press.
 
 ## Hero rebuild: Sparkle (mage) and Vex (gunslinger), Nov 1

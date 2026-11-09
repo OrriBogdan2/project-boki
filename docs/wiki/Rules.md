@@ -61,8 +61,6 @@ The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, 
 
 | Setting | Value |
 |---|---|
-| class_ults | False |
-| class_ults_doc | false: the Merge key is the Merge for every class. true: it runs the class's own ultimate again (ArchKit.use_r), kept for the hero-port work to fold into kits. |
 | bond_from_ult | {"hit": 0.6, "knock": 0.7, "kill": 0.8} |
 | bond_from_ult_doc | Share of the bond bar a hero's own ultimate pays (KinBond.from_ult): the best event of one cast counts (a hit, a knock, a kill), never added per target. Fighting still fills the bar, so Merge is never locked behind the ult. |
 | g_hold_s | 0.35 |
