@@ -7675,5 +7675,124 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/relic_sparkle_1.jpg",
     "ok": true
+  },
+  {
+    "id": "relic_meeko",
+    "name": "Relic: Meeko",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_meeko_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_tenzo",
+    "name": "Relic: Tenzo",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_tenzo_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_sable",
+    "name": "Relic: Sable",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_sable_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_sparkle",
+    "name": "Relic: Sparkle",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_sparkle_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_sable",
+    "name": "Relic: Sable",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_sable_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_motley",
+    "name": "Relic: Motley",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_motley_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_albert",
+    "name": "Relic: Albert",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_albert_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_motley",
+    "name": "Relic: Motley",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_motley_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_albert",
+    "name": "Relic: Albert",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_albert_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx_e",
+    "name": "Briarlynx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/briarlynx_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_e",
+    "name": "Blossmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/blossmink_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx_e",
+    "name": "Briarlynx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/briarlynx_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelotl_e",
+    "name": "Chandelotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelotl_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_e",
+    "name": "Blossmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/blossmink_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelotl_e",
+    "name": "Chandelotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelotl_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelotl_e",
+    "name": "Chandelotl",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/chandelotl_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e",
+    "name": "Amanitusk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_2.jpg",
+    "ok": true
   }
 ]
