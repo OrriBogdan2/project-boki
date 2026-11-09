@@ -5,7 +5,8 @@ extends RefCounted
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
-## once and reused until it changes.
+## once and reused until it changes. Fight effects (FxPool): a flurry of rings, ghosts, bolts, beams and
+## telegraphs adds no node to the Fx and every mesh is hidden again once they end.
 
 var main: Node
 var fails := 0
@@ -26,6 +27,7 @@ func run(main_node: Node) -> void:
 	_far_bots()
 	_shadows()
 	await _plates()
+	await _fx_pools()
 	print("PERFTHROTTLE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -233,3 +235,29 @@ func _plates() -> void:
 	ok(is_same(a, b) and TextCache.shaped == n0, "the same label reuses its layout")
 	TextCache.line(f, "Wild Pebblit 2", 16)
 	ok(TextCache.shaped == n0 + 1, "changed text is laid out once")
+
+func _fx_pools() -> void:
+	var fx: Fx = m.fx
+	var kids := fx.get_child_count()
+	var out := [fx.ring_pool.live(), fx.ghost_pool.live(), fx.bolt_pool.live(), fx.beam_pool.live(),
+		fx.tele_pool.live()]
+	var tele: Array = []
+	for i in 3:
+		var at := Vector3(i, 0, 0)
+		fx.ring(at, 3.0, Color.WHITE)
+		fx.ghost(at, 0.0, Color.WHITE, 1.0)
+		fx.bolt(at, at + Vector3(4, 1, 0), Color.CYAN)
+		fx.beam(at, at + Vector3(5, 1, 0), Color.WHITE)
+		tele.append(fx.telegraph_rect(at, Vector2.RIGHT, 3.0, 1.0, Color.RED))
+	for t in tele:
+		fx.end_telegraph(t)
+	ok(fx.ring_pool.live() == int(out[0]) + 3 and fx.tele_pool.live() == int(out[4]),
+		"a flurry takes pooled meshes (3 more rings out, the telegraphs back)")
+	for i in 60:
+		fx._process(0.02)
+		await main.get_tree().process_frame
+	ok(fx.get_child_count() == kids, "a flurry of rings, ghosts, bolts, beams and telegraphs adds no node to the Fx")
+	var back: bool = fx.ring_pool.live() <= out[0] and fx.ghost_pool.live() <= out[1]
+	back = back and fx.bolt_pool.live() <= out[2] and fx.beam_pool.live() <= out[3]
+	ok(back,
+		"the flurry's ring, ghost, bolt and beam meshes are all back in their pools")

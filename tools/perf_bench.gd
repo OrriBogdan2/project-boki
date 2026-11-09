@@ -102,7 +102,8 @@ func _match() -> void:
 	made.sort_custom(func(a, b): return created[a] > created[b])
 	var total := 0
 	for k in made: total += int(created[k])
-	print("BENCH created in the fight: %d nodes, %s" % [total, ", ".join(made.slice(0, 12).map(func(k): return "%s %d" % [k, created[k]]))])
+	var top := made.slice(0, 12).map(func(k): return "%s %d" % [k, created[k]])
+	print("BENCH created in the fight: %d nodes, %s" % [total, ", ".join(top)])
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
 	var per := ks.slice(0, 10).map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / fl.size()])
