@@ -4,7 +4,7 @@ extends RefCounted
 ## on grass and on dark ground. <dir>/fe_<look>_<ground>.png is a strip per look: top row the enter (R pressed),
 ## bottom row the release and its afterglow, cropped round the hunter. Scores: docs/FUSION_EVENT.md.
 
-const SLOW := 0.3                          # Engine.time_scale while capturing
+var slow := 0.3                            # Engine.time_scale while capturing (--slow=: a software renderer needs ~0.05)
 const CROP := 440                          # px: the square cut round the hunter
 const ENTER_AT := [0.04, 0.25, 0.46, 0.6, 1.0]       # s after R (the form is live at 0.7)
 const RELEASE_AT := [0.1, 0.5, 1.5, 3.2, 5.0]        # s after the release (afterglow lasts 3, the rest 6)
@@ -31,6 +31,7 @@ func run(main_node: Node) -> void:
 	var only := PackedStringArray()
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
+		if String(a).begins_with("--slow="): slow = float(String(a).substr(7))
 		if String(a).begins_with("--only="): only = String(a).substr(7).split(",")
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
@@ -49,7 +50,7 @@ func _one(key: String, species: String, dir: String) -> void:
 		m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
+	await m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
 		"demo_kin": species, "weapon": "rifle", "cls": "medium"})
 	var fade = main.get("fade")
 	if fade != null: await fade.reveal(0.01)
@@ -92,10 +93,13 @@ func _enter(times: Array) -> Array:
 	P.kin.stow()
 	P.merge_cd = 0.0
 	P.ult = 1.0
+	P.slot_lv["ult"] = 1
 	m.cam.snap(P.pos)
 	await _frames(3)
-	KinMerge.press(P)
-	Engine.time_scale = SLOW
+	var pressed := KinMerge.press(P)
+	if not pressed:
+		push_error("fusion sheet: R did not fuse (plan %s)" % KinMerge.plan(P))
+	Engine.time_scale = slow
 	return await _grab(times)
 
 ## Fires the form's ultimate (the release) once live; grabs crops through the afterglow.
@@ -104,7 +108,7 @@ func _release(times: Array) -> Array:
 	Engine.time_scale = 4.0
 	while KinMerge.active(P) and String(P.merge_st.get("phase", "")) != "live":
 		await main.get_tree().process_frame
-	Engine.time_scale = SLOW
+	Engine.time_scale = slow
 	KinMerge.end(P, "ult")
 	return await _grab(times)
 
@@ -123,13 +127,14 @@ func _grab(times: Array) -> Array:
 
 func _crop() -> Image:
 	var img: Image = main.get_viewport().get_texture().get_image()
+	img.convert(Image.FORMAT_RGBA8)
 	var p := m.cam.unproject_position(m.player.pos + Vector3(0, 1.0, 0))
 	var x := clampi(int(p.x) - CROP / 2, 0, maxi(0, img.get_width() - CROP))
 	var y := clampi(int(p.y) - CROP / 2, 0, maxi(0, img.get_height() - CROP))
 	return img.get_region(Rect2i(x, y, CROP, CROP))
 
 func _strip(path: String, top: Array, bottom: Array) -> void:
-	var out := Image.create(CROP * ENTER_AT.size(), CROP * 2, false, Image.FORMAT_RGB8)
+	var out := Image.create(CROP * ENTER_AT.size(), CROP * 2, false, Image.FORMAT_RGBA8)
 	for i in top.size():
 		out.blit_rect(top[i], Rect2i(0, 0, CROP, CROP), Vector2i(i * CROP, 0))
 	for i in bottom.size():
