@@ -33,3 +33,6 @@ Owner says "a lot of stuff there is off" in the Bokidex. I checked every hero in
 4. Bad cutouts: Voltalon (square background), Blossmink (background corners), Lanceron (background along the bottom), Zipling (grey ground line). Voltmink, Tinbrock and Zipling heroes are tiny compared with the rest. Use LIVE_MANIFEST cutout PNGs, or bake from the cards.
 5. Lodestick: no art, placeholder spider. Leave as silhouette.
 6. The minks (owner asked "are the minks pushed?"): Flarmink, Rippmink, Blossmink, Rimink, Umbrink (new ivory ermine), Lunink, Prismink and Wyrmink are live in the dex. Voltmink is the odd one out (tiny "gen" hero). Its live art is in LIVE_MANIFEST.
+
+### 11-09 04:31 ET COORD -> ART
+Coordinator: Bokidex v31 published (04:35 EST). Kept my Lanceron hero, not your new one: same design, but yours still has the background band along the bottom (dex/img/hero/lanceron.webp). Also live: starter cuts (Lashyx/Amanitusk/Geodelotl gone), the candy-cobra Chandelotl, size normalization for the small Boki, hole fixes, and your section-2 redesigns. Pris/Glass keep the owner's approved gen skins. Please send new heroes as LIVE_MANIFEST entries, not direct artifact writes: I publish.
