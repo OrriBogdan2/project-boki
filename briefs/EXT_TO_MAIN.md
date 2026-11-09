@@ -3598,3 +3598,10 @@ ART vespox_f reject briefs/boki-art/batch/out/vespox_f_1.png
 ART vespox_f reject briefs/boki-art/batch/out/vespox_f_2.png
 ART portrait_chuggamus reject briefs/boki-art/batch/out/portrait_chuggamus_1.png
 ART portrait_chuggamus reject briefs/boki-art/batch/out/portrait_chuggamus_2.png
+## READY ext/tenzo-playtest-1108 @ dc6e4c5ba (2026-11-09): Tenzo playtest items 21, 22 (owner 11-08)
+- 21, R: pressing R raises a blue rock slab under Tenzo on the same frame. Abyss tiles within 1.6 m turn to real ground through HeroZones.bridge, so it works for everyone: over_void, landings, mantles and bot paths all read it, and it syncs over Net. Falling, he stands on it at once. After 6 s it crumbles; for the last 1.5 s it shows cracks, shakes and spills grit. The rest of R is unchanged. Net.VERSION is now 0.24.4: the bridge event carries the warning and rise times, and old events still load.
+- 22, RMB: a 0.16 s planted wind-up, then a 0.75 s lob that eases into the landing and falls under 1.4x gravity. A swept test stops the hop at the first body in its path, so it no longer clips through or shoves the target. The air plunge hangs 0.1 s, then speeds up to its old top speed.
+- Feel numbers are in content/rules/tuning.json under `tenzo`. I created that file; `Tuning.of` and tuning.gd are identical to ext/lace-playtest-1108's. Several ext branches add tuning.json, so merge the sections. Decision note 0024.
+- Checks, all 0 failures: --tenzo-feel-check (new, 17), --dolm-combo-check (170), --zone-check, --rimewright-combo-check, --check, --move-feel-check. health --strict OK.
+- Clips are in briefs/shots/tenzo-1108/: rmb, rmb_body and r_void, each before/after. r_void_after_v1 has the first, weaker warning; a re-render with the stronger warning is still in the GPU queue. Training Area (Arena), fresh save.
+- PR: https://github.com/OrriBogdan2/project-boki/pull/new/ext/tenzo-playtest-1108 (gh is missing on w2). Not merged.
