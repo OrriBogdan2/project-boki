@@ -30369,5 +30369,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_rosedart_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_hatstag",
+    "name": "Hatstag (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_hatstag_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chainipede",
+    "name": "Chainipede (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chainipede_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hatstag",
+    "name": "Hatstag (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_hatstag_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hatstag",
+    "name": "Hatstag (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_hatstag_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chainipede",
+    "name": "Chainipede (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chainipede_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chainipede",
+    "name": "Chainipede (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chainipede_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chainipede",
+    "name": "Chainipede (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chainipede_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anchorbill_full",
+    "name": "Anchorbill (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_anchorbill_full_1.jpg",
+    "ok": true
   }
 ]
