@@ -42,6 +42,7 @@ var dunks := 0
 var wall_stuns := 0
 var guard_punches := 0         # punches that launched a rock of ours and gave a Molten Guard stack
 var rocks_made := 0
+var row_heard_t := -1.0       # s (m.time): when a Stone Row's rise was last heard
 var sight_pings := 0
 var landslides := 0            # Rock Hop's last rocks that rolled on
 var leap_lands := 0            # Rock Hop chains that ended in a crash
@@ -666,19 +667,17 @@ func cast_e() -> bool:
 	for j in spots.size():
 		var p2: Vector3 = spots[j][0]
 		m.later(tell, func(): if is_instance_valid(h) and not KinMerge.active(h): _raise(p2, dir))
-	m.later(tell, _raise_feel)
 	net_ring(h.pos, 2.0, col_of(ed))
 	return true
 
+## One rock of the Stone Row rises; the row's rocks rise on the same step and the first to rise carries its sound.
 func _raise(p: Vector3, dir: Vector2) -> void:
 	if not _new_rock(p, dir):
 		return
 	m.fx.burst(p + Vector3(0, 0.2, 0), MOLTEN, 8, 4.0, 0.3, 8.0, 1.0)
-
-func _raise_feel() -> void:
-	if not is_instance_valid(h):
-		return
-	m.sfx("br_raise", h.pos, -1.0, 1.0)
+	if m.time != row_heard_t:
+		row_heard_t = m.time
+		m.sfx("br_raise", h.pos, -1.0, 1.0)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
