@@ -4766,3 +4766,19 @@ ART rattlebub 8.7 briefs/boki-art/cards/Rattlebub.jpg kind=card
 ART selenfin 8.6 briefs/boki-art/cards/Selenfin.jpg kind=card
 ART skateron 8.4 briefs/boki-art/cards/Skateron.jpg kind=card
 ART snuffapi 8.3 briefs/boki-art/cards/Snuffapi.jpg kind=card
+
+## 07:29Z — art session: hero cards (fast lane f7)
+ART chandelapi 8.5 briefs/boki-art/cards/Chandelapi.jpg kind=card
+ART dragonkite 8.5 briefs/boki-art/cards/Dragonkite.jpg kind=card
+ART eclipsowl 8.6 briefs/boki-art/cards/Eclipsowl.jpg kind=card
+ART forgebrock 8.6 briefs/boki-art/cards/Forgebrock.jpg kind=card
+ART glaivyx 8.5 briefs/boki-art/cards/Glaivyx.jpg kind=card
+ART glassolotl 8.5 briefs/boki-art/cards/Glassolotl.jpg kind=card
+ART gongrowl 8.4 briefs/boki-art/cards/Gongrowl.jpg kind=card
+ART kitlet 8.5 briefs/boki-art/cards/Kitlet.jpg kind=card
+ART lanceron 8.5 briefs/boki-art/cards/Lanceron.jpg kind=card
+ART lashyx 7.9 briefs/boki-art/batch/out/lashyx_card3_2.jpg kind=card status=owner-review
+ART puffamus 8.5 briefs/boki-art/cards/Puffamus.jpg kind=card
+ART seamwyrm 8.6 briefs/boki-art/cards/Seamwyrm.jpg kind=card
+ART sporcupine 8.3 briefs/boki-art/cards/Sporcupine.jpg kind=card
+ART stormit 8.4 briefs/boki-art/cards/Stormit.jpg kind=card
