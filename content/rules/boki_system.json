@@ -1,7 +1,5 @@
 {
 	"desc": "The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, follow, the downed Boki, the leashes. Distances in metres, times in seconds, hp as a share of max health.",
-	"class_ults": false,
-	"class_ults_doc": "false: the Merge key is the Merge for every class. true: it runs the class's own ultimate again (ArchKit.use_r), kept for the hero-port work to fold into kits.",
 	"bond_from_ult": {
 		"hit": 0.6,
 		"knock": 0.7,
