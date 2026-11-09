@@ -1805,8 +1805,6 @@ func heal(n: float) -> void:
 ## Drinking a tonic and repairing with an armor kit take a moment: you slow down, lower your gun and
 ## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).
 ## The belt and what each item does: UtilityBelt, UtilityUse.
-const DRINK_TIME := 1.1
-const KIT_TIME := 1.6
 var drink_t := 0.0
 var kit_t := 0.0
 var vuln_fx_t := 0.0            # paces the pulsing "vulnerable" tell while drinking or repairing
@@ -2069,7 +2067,7 @@ func _physics(dt: float) -> void:
 		_grapple(dt)
 		return
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
-	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * (0.45 if drink_t > 0.0 or kit_t > 0.0 else 1.0) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
+	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * UtilityUse.channel_move(self) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
 	spd *= KinDowned.carry_speed(self)
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
@@ -3051,7 +3049,7 @@ func _anim_state(stretch: float) -> void:
 	s["mantle"] = mk
 	s["stomp"] = (fmod(float(stomp["t"]), Life.R["stomp_cycle"]) / Life.R["stomp_cycle"]) if not stomp.is_empty() else -1.0
 	s["reload"] = (1.0 - reload_t / maxf(0.1, float(wpn["reload"]))) if reload_t > 0.0 and not wpn.get("melee", false) else -1.0
-	s["drink"] = (1.0 - drink_t / DRINK_TIME) if drink_t > 0.0 else -1.0
+	s["drink"] = (1.0 - drink_t / UtilityUse.channel("tonic", "time")) if drink_t > 0.0 else -1.0
 	s["recoil"] = recoil
 	s["flash"] = clampf(flash_t / 0.12, 0.0, 1.0)
 	s["fired"] = idle_fire
