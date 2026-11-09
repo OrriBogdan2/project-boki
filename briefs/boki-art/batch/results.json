@@ -3724,5 +3724,568 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/puffamus_r2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "mothlet_r",
+    "name": "Mothlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mothlet_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter_r",
+    "name": "Oarter",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/oarter_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_r",
+    "name": "Mothlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mothlet_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "oarter_r",
+    "name": "Oarter",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/oarter_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "ribbonwyrm_r2",
+    "name": "Ribbonwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_r2",
+    "name": "Puffamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/puffamus_r2_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "ribbonwyrm_r2",
+    "name": "Ribbonwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_r2_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "terrasloth_r",
+    "name": "Terrasloth",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/terrasloth_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ringrove_r3",
+    "name": "Ringrove",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ringrove_r3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_r",
+    "name": "Mothlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mothlet_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "oarter_r",
+    "name": "Oarter",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/oarter_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "ribbonwyrm_r2",
+    "name": "Ribbonwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_r2_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "puffamus_r2",
+    "name": "Puffamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/puffamus_r2_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "ringrove_r3",
+    "name": "Ringrove",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ringrove_r3_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "lanterloris_r",
+    "name": "Lanterloris",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanterloris_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "terrasloth_r",
+    "name": "Terrasloth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrasloth_r_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "geodemole",
+    "name": "Geodemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodemole_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "geodemole",
+    "name": "Geodemole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodemole_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "druzemole",
+    "name": "Druzemole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/druzemole_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "embrook",
+    "name": "Embrook",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/embrook_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "embrook",
+    "name": "Embrook",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/embrook_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "pyrraven",
+    "name": "Pyrraven",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pyrraven_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "druzemole",
+    "name": "Druzemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/druzemole_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "mothlet_r",
+    "name": "Mothlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mothlet_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "lanterloris_r",
+    "name": "Lanterloris",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanterloris_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "geodemole",
+    "name": "Geodemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodemole_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "puffamus_r2",
+    "name": "Puffamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/puffamus_r2_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "ribbonwyrm_r2",
+    "name": "Ribbonwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_r2_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "oarter_r",
+    "name": "Oarter",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/oarter_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "terrasloth_r",
+    "name": "Terrasloth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrasloth_r_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "ringrove_r3",
+    "name": "Ringrove",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ringrove_r3_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "geodemole",
+    "name": "Geodemole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodemole_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "druzemole",
+    "name": "Druzemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/druzemole_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "oarter_r",
+    "name": "Oarter",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/oarter_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "geodemole",
+    "name": "Geodemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodemole_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "lanterloris_r",
+    "name": "Lanterloris",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanterloris_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "oarter_r",
+    "name": "Oarter",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/oarter_r_3.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "ringrove_r3",
+    "name": "Ringrove",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ringrove_r3_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "ribbonwyrm_r2",
+    "name": "Ribbonwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_r2_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "puffamus_r2",
+    "name": "Puffamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/puffamus_r2_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "mothlet_r",
+    "name": "Mothlet",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mothlet_r_3.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "ribbonwyrm_r2",
+    "name": "Ribbonwyrm",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_r2_3.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "mothlet_r",
+    "name": "Mothlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mothlet_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "terrasloth_r",
+    "name": "Terrasloth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrasloth_r_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "ringrove_r3",
+    "name": "Ringrove",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ringrove_r3_3.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "geodemole",
+    "name": "Geodemole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodemole_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "druzemole",
+    "name": "Druzemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/druzemole_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "geodemole",
+    "name": "Geodemole",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/geodemole_3.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "oarter_r",
+    "name": "Oarter",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/oarter_r_3.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "oarter_r",
+    "name": "Oarter",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/oarter_r_1.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "mothlet_r",
+    "name": "Mothlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mothlet_r_1.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "lanterloris_r",
+    "name": "Lanterloris",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanterloris_r_1.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "geodemole",
+    "name": "Geodemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodemole_1.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "ribbonwyrm_r2",
+    "name": "Ribbonwyrm",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_r2_3.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "mothlet_r",
+    "name": "Mothlet",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mothlet_r_3.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "puffamus_r2",
+    "name": "Puffamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/puffamus_r2_1.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "terrasloth_r",
+    "name": "Terrasloth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrasloth_r_2.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "ribbonwyrm_r2",
+    "name": "Ribbonwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_r2_1.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "ringrove_r3",
+    "name": "Ringrove",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ringrove_r3_3.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "ringrove_r3",
+    "name": "Ringrove",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ringrove_r3_1.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "geodemole",
+    "name": "Geodemole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodemole_2.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "druzemole",
+    "name": "Druzemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/druzemole_1.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "druzemole",
+    "name": "Druzemole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/druzemole_2.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "geodemole",
+    "name": "Geodemole",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/geodemole_3.jpg",
+    "ok": false,
+    "error": "401 UNAUTHENTICATED. {'error': {'code': 401, 'message': 'API keys are not supported by this API. Expected OAuth2 access token or other authentication credentials that assert a principal. See https://cloud.google.com/docs/authentication', 'status': 'UNAUTHENTICATED', 'details': [{'@type': 'type.googl"
+  },
+  {
+    "id": "terrasloth_r",
+    "name": "Terrasloth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrasloth_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole",
+    "name": "Geodemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodemole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_r",
+    "name": "Mothlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mothlet_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ribbonwyrm_r2",
+    "name": "Ribbonwyrm",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_r2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ringrove_r3",
+    "name": "Ringrove",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ringrove_r3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ribbonwyrm_r2",
+    "name": "Ribbonwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_r",
+    "name": "Mothlet",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mothlet_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter_r",
+    "name": "Oarter",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/oarter_r_3.jpg",
+    "ok": true
   }
 ]
