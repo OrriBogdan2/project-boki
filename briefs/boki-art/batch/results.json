@@ -7577,5 +7577,103 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/relic_vex_2.jpg",
     "ok": true
+  },
+  {
+    "id": "relic_vex",
+    "name": "Relic: Vex",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_vex_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_kael",
+    "name": "Relic: Kael",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_kael_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_kael",
+    "name": "Relic: Kael",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_kael_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_cinder",
+    "name": "Relic: Cinder",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_cinder_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_cinder",
+    "name": "Relic: Cinder",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_cinder_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_meeko",
+    "name": "Relic: Meeko",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_meeko_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_lace",
+    "name": "Relic: Lace",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_lace_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_grimble",
+    "name": "Relic: Grimble",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_grimble_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_tenzo",
+    "name": "Relic: Tenzo",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_tenzo_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_neve",
+    "name": "Relic: Neve",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_neve_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_lace",
+    "name": "Relic: Lace",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_lace_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_grimble",
+    "name": "Relic: Grimble",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_grimble_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_neve",
+    "name": "Relic: Neve",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_neve_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_sparkle",
+    "name": "Relic: Sparkle",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_sparkle_1.jpg",
+    "ok": true
   }
 ]
