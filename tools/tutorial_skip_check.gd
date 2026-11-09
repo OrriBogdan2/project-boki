@@ -10,7 +10,8 @@ extends RefCounted
 ## Never touches the real save.
 
 const SAFE_PX := 8.0        # the Skip button keeps this far from every screen edge
-const MATCH_OPTS := {"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0}
+# seeded: an unseeded tutorial now and then left the scripted driver short of the extraction
+const MATCH_OPTS := {"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "seed": 4242}
 
 var bad := 0
 var main: Node
@@ -64,6 +65,9 @@ func _match_snap() -> Dictionary:
 func _match_run(skip_at: int) -> Dictionary:
 	Save.d = _kin_save()
 	ClassUnlock.choose_starters([ClassUnlock.starters()[0]])
+	TutorialDrive.last_step = -1
+	TutorialDrive.still_t = 0.0
+	TutorialDrive.last_pos = Vector3.INF
 	var m := Match.new()
 	main.add_child(m)
 	m.start(MATCH_OPTS)
