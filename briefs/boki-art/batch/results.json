@@ -63969,5 +63969,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_sandwidow_f_n_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_murmuron_f_n",
+    "name": "Murmuron (female form concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_murmuron_f_n_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sandwidow_f_n",
+    "name": "Sandwidow (female form concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_sandwidow_f_n_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_murmuron_f_n",
+    "name": "Murmuron (female form concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_murmuron_f_n_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sandwidow_f_n",
+    "name": "Sandwidow (female form concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_sandwidow_f_n_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lurklet_n1",
+    "name": "Lurklet (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lurklet_n1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_murmuron_f_n",
+    "name": "Murmuron (female form concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_murmuron_f_n_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_murmuron_f_n",
+    "name": "Murmuron (female form concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_murmuron_f_n_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lurklet_n1",
+    "name": "Lurklet (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_lurklet_n1_4.jpg",
+    "ok": true
   }
 ]
