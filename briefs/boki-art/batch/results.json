@@ -6548,5 +6548,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_crofthorn_r_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_geodelotl_r",
+    "name": "Geodelotl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_geodelotl_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_geodelotl_r",
+    "name": "Geodelotl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_geodelotl_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelotl_x",
+    "name": "Chandelotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelotl_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glomwort_r",
+    "name": "Glomwort (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glomwort_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hivara_r",
+    "name": "Hivara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_hivara_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glomwort_r",
+    "name": "Glomwort (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glomwort_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hivara_r",
+    "name": "Hivara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_hivara_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gloamshell_r",
+    "name": "Gloamshell (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gloamshell_r_2.jpg",
+    "ok": true
   }
 ]
