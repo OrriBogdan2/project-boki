@@ -23,7 +23,9 @@ var col: Color
 var watchers: Array = []     # kin dicts ("node") that turn to watch; the caller frees them with `done`
 var wash := StandardMaterial3D.new()
 var light := OmniLight3D.new()
-var base := Vector3.ONE      # the Boki's normal scale
+var base := Vector3.ONE      # the old form's scale
+var grown := Vector3.ONE     # the new form's scale (a hatchling grows to full size: evo_scale)
+var peak := Vector3.ONE      # the swollen silhouette at SWAP_AT
 var swapped := false
 var sparkled := 0
 var last_t := 0.0
@@ -63,6 +65,8 @@ static func play(host_: Node3D, fx_: Fx, old_: Node3D, fresh_: Node3D, col_: Col
 
 func start() -> void:
 	base = old.scale
+	grown = base / float(old.get_meta("evo_scale", 1.0)) * float(fresh.get_meta("evo_scale", 1.0))
+	peak = (base if base.x > grown.x else grown) * SWELL
 	wash.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	wash.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	wash.albedo_color = Color(col.lightened(0.25), 0.0)
@@ -85,12 +89,14 @@ func step(t: float) -> void:
 	var a := WASH_PEAK * rise * (1.0 - fall)
 	wash.albedo_color.a = a
 	light.light_energy = 1.6 * a
-	var s := lerpf(1.0, SWELL, rise) if t < SWAP_AT else lerpf(SWELL, 1.0, fall)
 	if t >= SWAP_AT and not swapped:
 		swapped = true
 		old.visible = false
 		fresh.visible = true
-	(fresh if swapped else old).scale = base * s
+	if swapped:
+		fresh.scale = peak.lerp(grown, fall)
+	else:
+		old.scale = base.lerp(peak, rise)
 	for i in SPARKLE_AT.size():
 		if sparkled == i and t >= SPARKLE_AT[i]:
 			sparkled += 1
@@ -98,6 +104,8 @@ func step(t: float) -> void:
 	var dt := maxf(0.0, t - last_t)
 	last_t = t
 	for k: Dictionary in watchers:
+		if not is_instance_valid(k["node"]):
+			continue    # a watcher left home (sold, released) mid-moment
 		var n: Node3D = k["node"]
 		var to := fresh.position - n.position
 		n.rotation.y = lerp_angle(n.rotation.y, atan2(-to.x, -to.z), minf(1.0, dt * WATCH_TURN))
@@ -106,7 +114,7 @@ func step(t: float) -> void:
 func finish() -> void:
 	step(LENGTH)
 	_set_wash(fresh, null)
-	fresh.scale = base
+	fresh.scale = grown
 	light.queue_free()
 	old.queue_free()
 
