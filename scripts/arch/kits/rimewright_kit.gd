@@ -106,7 +106,6 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return
 	add_chill(t)
 	if String(o.get("ab", "")) == "fan":
-		m.sfx("rimewright_dart_hit", t.pos, -5.0, 1.0)
 		var key := t.get_instance_id()
 		var e: Dictionary = fan_hits.get(key, {"n": 0, "left": 3.0, "t": t})
 		e["n"] = int(e["n"]) + 1

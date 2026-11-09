@@ -393,6 +393,7 @@ func _bolt() -> void:
 		sd["dmg"] = float(sd["dmg"]) * empowered_k()
 		sd["r"] = 0.3
 		x["kb"] = 3.0
+		x["heavy"] = true          # the empowered hit's own number, thud and hold (Juice.number, Feel.tier)
 		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 2.6, 0.55)
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
 		m.sfx("thief_flintlock_crack", h.pos, -1.0 if h.is_local() else -5.0, 1.0)

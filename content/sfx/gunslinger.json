@@ -3,6 +3,7 @@
  "name": "Vex",
  "script": "tools/gen_sfx_vex.py",
  "sounds": {
+  "gunslinger_hit": "heavy_impact",
   "vn_rifle": "fire",
   "gunslinger_spinup": "signature",
   "gunslinger_grenade_thunk": "signature",

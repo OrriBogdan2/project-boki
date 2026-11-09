@@ -29,8 +29,9 @@ const HIT := Color("fff4d6")              # your hits
 const HIT_ARMOR := Color("7ac8ff")        # your hits that landed on armour
 const CRIT := Color("ffd23f")             # critical hits
 const CRIT_ARMOR := Color("b0e4ff")
+const HEAVY := Color("ff8a3d")            # empowered hits (a wall pin, a primed bolt, a perfect swing)
+const KIN_HIT := Color("d6ccb4")          # your Boki's hits: dimmer than yours
 const HURT := Color("ff6a5a")             # damage you take
-const HURT_KIN := Color("ffa08a")         # damage your Boki takes
 const GOLD := Color("ffd27a")             # levels, points to spend
 const COOLING := Color("ff8f6b")          # a slot that isn't ready: its frame and short countdowns
 const KEY_BG := Color(0.04, 0.04, 0.06, 0.95)
@@ -161,11 +162,13 @@ static func ctext(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Col
 	var w := TextCache.width(font, s, font_size)
 	text(c, Vector2(p.x - w * 0.5, p.y), s, font_size, col, ol, font)
 
-## Floating damage number colour: by who was hit and how (Match picks, Fx draws).
-static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool) -> Color:
+## A damage number's colour for its look (Fx.NUM_*): the hits you take are red, your Boki's dimmer
+## than yours, then crit gold, empowered orange, armour blue.
+static func dmg_col(look: int, armor_hit: bool, on_you: bool, by_your_kin: bool) -> Color:
 	if on_you: return HURT
-	if on_your_kin: return HURT_KIN
-	if crit: return CRIT_ARMOR if armor_hit else CRIT
+	if by_your_kin: return KIN_HIT
+	if look == Fx.NUM_CRIT: return CRIT_ARMOR if armor_hit else CRIT
+	if look == Fx.NUM_HEAVY: return HEAVY
 	return HIT_ARMOR if armor_hit else HIT
 
 # style boxes are made once per look and reused (dozens of frames are drawn every frame)

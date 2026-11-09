@@ -740,7 +740,8 @@ func _slam(pin := Vector2.ZERO) -> void:
 	var from := h.pos
 	var paid := {}
 	var at := aim() if pin == Vector2.ZERO else h.pos + Vector3(pin.x, 0, pin.y) * float(sl["radius"])
-	run_own(stg, cx("rmb", "finishing_slam", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+	var o := {"no_floor": true, "hit_extra": {"heavy": true}}      # an empowered hit (Juice.number, Feel.tier)
+	o["on_foe"] = func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return
 		if not f.dead and f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
 			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["low_k"]) * power("sec"), h,
@@ -760,7 +761,8 @@ func _slam(pin := Vector2.ZERO) -> void:
 			sweet_spots += 1
 			payoff_fx(f.pos, "SWEET SPOT", res_col(), "pay_rage", dd, f)
 			vfx("slam_sweet", f.pos, dd)
-		slam_hit[f.get_instance_id()] = m.time}))
+		slam_hit[f.get_instance_id()] = m.time
+	run_own(stg, cx("rmb", "finishing_slam", at, o))
 	AimKit.hide(h, "slam")
 	vfx("slam_hit", h.pos, dd, {"r": float(sl["radius"])})
 

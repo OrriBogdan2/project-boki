@@ -260,7 +260,7 @@ func ghost(at: Vector3, yaw: float, col: Color, scl: float) -> void:
 	mi.scale = Vector3(1.0, 1.0, 1.3) * scl
 	ghosts.append({"node": mi, "t": 0.0, "col": col})
 
-func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void:
+func number(at: Vector3, v: float, col: Color, look: int, prefix := "") -> void:
 	if v < 0.5 or (prefix == "" and not Settings.get_v("damage_numbers")):
 		return
 	# rapid hits on the same target (a minigun, an SMG, pellets, a burn ticking) add up on one
@@ -273,15 +273,13 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 			n["hits"] = int(n["hits"]) + 1
 			var ln: Label3D = n["node"]
 			ln.text = prefix + str(int(round(float(n["val"]))))
-			if crit:
-				n["crit"] = true
+			if look >= int(n["look"]):
+				n["look"] = look
 				ln.modulate = col
-			elif not n.get("crit", false):
-				ln.modulate = col
-			_num_look(ln, bool(n.get("crit", false)))
-			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)))
+			_num_look(ln, int(n["look"]))
+			ln.font_size = _num_size(float(n["val"]), int(n["look"]))
 			ln.modulate.a = 1.0
-			ln.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
+			ln.scale = Vector3.ONE * NUM_POP[look]
 			return
 	var l: Label3D = num_pool.pop_front()
 	num_pool.append(l)
@@ -290,34 +288,42 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 			nums.erase(n); break
 	l.text = prefix + str(int(round(v)))
 	l.modulate = col
-	_num_look(l, crit)
-	l.font_size = _num_size(v, crit)
+	_num_look(l, look)
+	l.font_size = _num_size(v, look)
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
 	l.visible = true
-	l.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
-	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit})
+	l.scale = Vector3.ONE * NUM_POP[look]
+	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "look": look})
 
 ## How long a number keeps taking hits after the last one, and how long it lingers on the target.
 const MERGE_T := 0.45
 const STICK_T := 0.3
 
-const CRIT_POP := 1.7          # a crit lands this many times its size and settles
-const HIT_POP := 1.25          # ... and a normal hit this many
+## A damage number's look, quietest to loudest (Juice.number picks it): the hits you take and your Boki's,
+## your own, an empowered hit (o.heavy or a payoff: its own colour, a size up, a deep red outline), a crit.
+const NUM_SMALL := 0
+const NUM_PLAIN := 1
+const NUM_HEAVY := 2
+const NUM_CRIT := 3
+const NUM_POP := [1.15, 1.25, 1.5, 1.7]     # per look: it lands this many times its size and settles
+const NUM_STEP := [-6, 0, 5, 8]             # per look: font size added to the size by amount
+const NUM_EDGE := [14, 14, 18, 20]          # per look: outline width
 const NUM_POOL := 24           # floating numbers and words on screen at once (the oldest is reused)
 const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)     # every number's dark outline ...
-const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)    # ... a crit's is a hot ember brown, and thicker
+const HEAVY_OUTLINE := Color(0.34, 0.03, 0.02, 0.95)  # ... an empowered hit's a deep red, thicker
+const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)    # ... a crit's a hot ember brown, thickest
 
-## Outline per kind: crits get a thicker, warm outline so they read as a different thing, not just
-## a yellower number (pooled labels are reused, so every number sets this).
-func _num_look(l: Label3D, crit: bool) -> void:
-	l.outline_modulate = CRIT_OUTLINE if crit else NUM_OUTLINE
-	l.outline_size = 20 if crit else 14
+## Outline per look: crits and empowered hits get a thicker, warm outline so they read as a different
+## thing, not just another colour (pooled labels are reused, so every number sets this).
+func _num_look(l: Label3D, look: int) -> void:
+	l.outline_modulate = [NUM_OUTLINE, NUM_OUTLINE, HEAVY_OUTLINE, CRIT_OUTLINE][look]
+	l.outline_size = NUM_EDGE[look]
 
-## Bigger totals and crits read bigger, within a small range so numbers never cover the fight.
-func _num_size(v: float, crit: bool) -> int:
+## Bigger totals and louder looks read bigger, within a small range so numbers never cover the fight.
+func _num_size(v: float, look: int) -> int:
 	var k := clampf(log(maxf(v, 1.0)) / log(10.0) - 1.0, 0.0, 1.0)     # 10 -> 0, 100 -> 1
-	return int(lerpf(36.0, 46.0, k)) + (8 if crit else 0)
+	return int(lerpf(36.0, 46.0, k)) + NUM_STEP[look]
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
@@ -328,7 +334,7 @@ func word(at: Vector3, txt: String, col: Color, big := false) -> void:
 			nums.erase(n); break
 	l.text = txt
 	l.modulate = col
-	_num_look(l, false)
+	_num_look(l, NUM_PLAIN)
 	l.font_size = 46 if big else 34
 	l.global_position = _clear_spot(at)
 	l.visible = true

@@ -25,8 +25,12 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	n += ult.n + own.n + launch.n
-	fails += ult.fails + own.fails + launch.fails
+	var hits = load("res://tools/hit_feedback_check.gd").new()      # every Hunter's hit feedback (item 96.4)
+	hits.main = main_node
+	if both:
+		await hits.audit()
+	n += ult.n + own.n + launch.n + hits.n
+	fails += ult.fails + own.fails + launch.fails + hits.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 

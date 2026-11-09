@@ -144,7 +144,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	hp -= d
 	last_hit_by = by
 	flash_t = 0.12
-	freeze_t = 0.05 if d >= 10.0 else 0.03
+	freeze_t = maxf(freeze_t, 0.05 if d >= 10.0 else 0.03)      # (a small hit never cuts a heavy one's hold short)
 	squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
 		if "knock_steer" in self:
@@ -318,7 +318,7 @@ func tick_status(dt: float) -> void:
 		if not remote:
 			hp -= burn_dps * dt
 			if int(burn_t * 4.0) != int((burn_t + dt) * 4.0):
-				m.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), false)
+				m.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), Fx.NUM_PLAIN)
 			if hp <= 0.0:
 				_on_zero(burn_by, {"src": "burn"})
 

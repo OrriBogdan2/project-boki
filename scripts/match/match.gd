@@ -2184,12 +2184,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 			if lv >= 0:
 				_armor_up(credit)
 				if "--simtest" in OS.get_cmdline_user_args(): print("ARMOR %s -> %s" % [credit.pname, Hunter.ARMOR_TIERS[lv][0]])
-	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
-	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
-	# only numbers that involve you: other fights nearby don't spray digits over yours
-	if mine:
-		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit)
+	Juice.number(self, target, by, d, o, armor_hit)
 	# archetype passives feed on what happens (Marks, Chambers, Rage, Focus...)
 	if credit is Hunter and (credit as Hunter).ak and target != credit and not credit.remote:
 		(credit as Hunter).ak.note_hit(target)
@@ -2200,7 +2196,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if src != "burn":
 		var tier := Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
-		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08))
+		sfx("crit" if crit else HeroSfx.hit_sound(by), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08))
 		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and by and hud:
@@ -3403,7 +3399,6 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		if swing_hits.size() > 200:
 			swing_hits.clear()
 		fx.burst(at + Vector3(0, 0.3, 0), s["col"], 8, 3.5, 0.25, 4.0)
-		sfx("hit", at, -4.0, 0.8)
 	var crit := false
 	if e.stun_t > 0.0 and not x.get("mob", false):
 		dmg *= 1.5
@@ -3423,6 +3418,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		# the blade's sweet spot
 		dmg *= 1.0 + float(x["tip"][1])
 		fx.burst(at + Vector3(0, 0.4, 0), Color("fff6c0"), 10, 4.5, 0.3, 4.0)
+	var o := {"src": "shot", "crit": crit}
 	if x.has("pg"):
 		# a shotgun volley: the first slug on someone does a fixed share of the whole volley,
 		# the rest split what's left, so landing every slug still adds up to the full volley
@@ -3433,8 +3429,8 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 			pellet_hits.clear()
 		var total: float = dmg * float(x["pn"])
 		dmg = total * float(x["pf"]) if n == 0 else total * (1.0 - float(x["pf"])) / maxf(1.0, float(x["pn"]) - 1.0)
+		if n + 1 == ceili(float(x["pn"]) * Feel.POINT_BLANK): o["heavy"] = true
 	var dir: Vector2 = (s["vel"] as Vector2).normalized()
-	var o := {"src": "shot", "crit": crit}
 	if float(x.get("kb", 0.0)) > 0.0:
 		o["kb"] = dir * float(x["kb"])
 	if x.has("burn"): o["burn"] = x["burn"]
@@ -3446,7 +3442,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	if x.has("blight"): o["blight"] = x["blight"]
 	if x.has("wallstun"): o["wallstun"] = x["wallstun"]
 	if x.has("ab"): o["ab"] = x["ab"]
-	for kk in ["burn_for", "slow_k", "dr"]:
+	for kk in ["burn_for", "slow_k", "dr", "heavy"]:
 		if x.has(kk): o[kk] = x[kk]
 	if x.has("ride_dmg") and by:
 		# a kin's damage rider on your shots procs at most once a second on each target
