@@ -21430,5 +21430,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/stance_echolop_1.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_echolop",
+    "name": "Echolop (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_echolop_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_gongibbon",
+    "name": "Gongibbon (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_gongibbon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_gongibbon",
+    "name": "Gongibbon (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_gongibbon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_echolop",
+    "name": "Echolop (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_echolop_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_latchling",
+    "name": "Latchling (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_latchling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_gongibbon",
+    "name": "Gongibbon (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_gongibbon_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_latchling",
+    "name": "Latchling (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_latchling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_latchling",
+    "name": "Latchling (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_latchling_3.jpg",
+    "ok": true
   }
 ]
