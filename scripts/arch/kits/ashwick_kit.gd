@@ -234,7 +234,8 @@ func _tick(dt: float) -> void:
 	net_pulse(dt, not ignites.is_empty(), 1.3)
 
 ## The pilot flame in her palm, embers over a heavily charred foe, and the burn stage over each burning
-## foe: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b).
+## Boki: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b). A rival Hunter's burn
+## stage is the ComboMark tag over their plate instead (combo_read).
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
 	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
@@ -256,7 +257,7 @@ func _tick_tells(dt: float) -> void:
 	for key in ignites:
 		var e: Dictionary = ignites[key]
 		var f := e["e"] as Ent
-		if not is_instance_valid(f):
+		if not is_instance_valid(f) or f is Hunter:
 			continue
 		var lvl := int(e["lvl"])
 		var top := f.pos + Vector3(0, 3.7, 0)
@@ -273,6 +274,15 @@ func _tick_tells(dt: float) -> void:
 				"pipg%d" % key, "glow", top + Vector3(0, -0.05, 0), Color("ff4a1a"), Color("ff9a3a"),
 				0.75 + 0.08 * sin(m.time * 9.0)
 			)
+
+## The burn on `f`, for the ComboMark tag: Ablaze is 1 pip of 2, Flashover 2; the ring is the burn left.
+func combo_read(f: Ent) -> Dictionary:
+	var lvl := burning(f)
+	if lvl == 0:
+		return {}
+	var e: Dictionary = ignites[f.get_instance_id()]
+	return {"icon": "fireball", "n": lvl, "max": 2, "left": float(e["until"]) - m.time,
+			"total": float(rd()["ignite_t"])}
 
 ## Shown burn stage over a foe: 0, 1 (Ablaze, one pip) or 3 (Flashover, three pips) (tests).
 func pips_on(f: Ent) -> int:
@@ -485,6 +495,7 @@ func _cinder_hit(f: Ent) -> void:
 	if cur > 0:
 		var bonus := float(rdf["dmg"]) * power("sec") * (ignite_k(f) - 1.0)
 		f.hurt(bonus, h, {"src": "flame", "ab": "utility", "tags": ["flame"], "melee": false})
+		ComboMark.payoff(m, h, f)        # the Ignite payoff: bonus damage on a burning foe
 	# the impact: a red flash and an ember shower (sheet 0076-0079)
 	vfx("shot_hit", f.pos)
 	m.sfx("lw_bolt_hit", f.pos, -1.0, 1.0)

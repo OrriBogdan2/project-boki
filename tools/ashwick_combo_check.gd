@@ -27,6 +27,7 @@ func run(main_node: Node) -> void:
 	await _all()
 	await _lance_combos()
 	await _growth()
+	await load("res://tools/combo_mark_check.gd").new().run(ok, ak, "ashwick")
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
 	ok("item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s",
@@ -291,7 +292,8 @@ func _all() -> void:
 		"burning %d burn_t %.1f ignitions %d" % [K.burning(T), T.burn_t, K.ignitions]
 	)
 	ak.step(m, 0.02)
-	ok("burn stage: one flame pip over a foe Ablaze", K.pips_on(T) == 1, "pips %d" % K.pips_on(T))
+	ok("burn stage: a rival Ablaze gets the tag's 1 of 2 pips, no world pips", int(K.combo_read(T).get("n", 0)) == 1
+			and K.pips_on(T) == 0, "tag %s pips %d" % [K.combo_read(T), K.pips_on(T)])
 	ak.step(m, 2.6, aim_t)
 	ok(
 		"lance: kept on a burning foe it Flashes over (level 2)", K.burning(T) == 2 and K.upgrades >= 1,
@@ -299,8 +301,8 @@ func _all() -> void:
 	)
 	ak.step(m, 0.02)
 	ok(
-		"burn stage: three flame pips and a glow over a Flashover",
-		K.pips_on(T) == 3 and K.fx.shown("pipg%d" % T.get_instance_id()), "pips %d" % K.pips_on(T)
+		"burn stage: a rival in Flashover gets the tag's 2 of 2 pips, no world pips",
+		int(K.combo_read(T).get("n", 0)) == 2 and K.pips_on(T) == 0, "tag %s pips %d" % [K.combo_read(T), K.pips_on(T)]
 	)
 	# +25% on a burning foe (the burn's own ticks held off so only the hose counts)
 	reset.call()

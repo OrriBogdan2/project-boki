@@ -69,6 +69,15 @@ func add_kindle(t: Ent, n := 1) -> void:
 		vfx("kindled", t.pos)
 		m.sfx("tend_kindled", t.pos, -4.0, 1.0)
 		play_soft("mm_kindled")
+		ComboMark.payoff(m, h, t)        # the Kindle payoff: full stacks, every shot now hits harder
+
+## The Kindle on `t`, for the ComboMark tag: a pip per stack; the ring is the Kindle left.
+func combo_read(t: Ent) -> Dictionary:
+	var n := kindle_on(t)
+	if n == 0:
+		return {}
+	return {"icon": "burst", "n": n, "max": int(res_def().get("max", 5)),
+			"left": float(kind[t.get_instance_id()]["left"]), "total": float(res_def().get("dur", 4.0))}
 
 func best_kindle() -> int:
 	var b := 0

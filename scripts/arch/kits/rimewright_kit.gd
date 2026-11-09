@@ -78,6 +78,13 @@ func add_chill(t: Ent) -> void:
 	if fresh:
 		vfx("chill", t.pos)
 
+## The Chill on `t`, for the ComboMark tag (one state, no stacks); the ring is the Chill left.
+func combo_read(t: Ent) -> Dictionary:
+	if not chilled(t):
+		return {}
+	return {"icon": "frost", "n": 1, "max": 1, "left": float(chill[t.get_instance_id()]["left"]),
+			"total": float(d["passive"].get("chill_t", 4.0))}
+
 func fan_on(t: Ent) -> int:
 	if t == null or not is_instance_valid(t): return 0
 	return int((fan_hits.get(t.get_instance_id(), {}) as Dictionary).get("n", 0))
@@ -126,6 +133,8 @@ func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	splinter_log += 1
 	m.fx.word(at + Vector3(0, 2.7, 0), "SHATTER", res_col(), true)
 	m.sfx("rime_splinter", at, 0.0, 1.0)
+	if skip != null and is_instance_valid(skip):
+		ComboMark.payoff(m, h, skip)     # the Chill payoff: the Shattered foe flashes
 	lk().burst("spikes", at, {"r": SHATTER_R, "dur": 0.7})
 	vfx("shatter", at)
 	play_soft("tm_shatter")
