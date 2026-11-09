@@ -63,7 +63,8 @@
 	"kmoves": {
 		"bul_throw": {
 			"clip": "lmb_throw",
-			"upper": "moving"
+			"upper": "moving",
+			"air_legs": true
 		},
 		"bul_recall": {
 			"clip": "lmb_recall",
@@ -72,10 +73,12 @@
 		"bul_smash_wind": {
 			"clip": "lmb_hold",
 			"upper": "moving",
-			"hold_from": 0.2
+			"hold_from": 0.2,
+			"air_legs": true
 		},
 		"bul_smash": {
-			"clip": "lmb_slam"
+			"clip": "lmb_slam",
+			"air_legs": true
 		},
 		"bul_launch": {
 			"clip": "lmb_launch"
@@ -83,7 +86,8 @@
 		"bul_guard": {
 			"clip": "rmb_guard",
 			"upper": "moving",
-			"hold_from": 0.12
+			"hold_from": 0.12,
+			"air_legs": true
 		},
 		"bul_break": {
 			"clip": "guard_break",
@@ -114,7 +118,8 @@
 		},
 		"bul_mend": {
 			"clip": "e_mend",
-			"upper": "moving"
+			"upper": "moving",
+			"air_legs": true
 		},
 		"bul_ult_wind": {
 			"clip": "x_wind",

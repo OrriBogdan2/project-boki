@@ -44,6 +44,7 @@ var lib: AnimationLibrary
 var alt_on := false          # this play of a move takes its "alt" clip
 var alt_km := ""
 var alt_t := 0.0
+var air_cast := false        # this play of the move has been in the air ("air_legs")
 var cur := ""                # the clip on the live channel
 var chan := 0                # which channel is live, 0 or 1
 var xf := 0.0                # the crossfade between the channels (0: channel a)
@@ -300,6 +301,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 		if km != alt_km or tt < alt_t:
 			alt_on = not alt_on
+			air_cast = false
+		air_cast = air_cast or not bool(s.get("grounded", true))
 		alt_km = km
 		alt_t = tt
 		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
@@ -317,6 +320,10 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		if up is String:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			up = Vector2(vel.x, vel.z).length() >= STILL
+		# ("air_legs": a play that has been in the air keeps the fall legs under it, then the loco ones once he lands,
+		# to the move's end: no planted stance mid-air, no snap into it on the landing)
+		if bool(mv.get("air_legs", false)) and air_cast:
+			up = true
 		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
 				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
 	if km != "":

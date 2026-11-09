@@ -50,18 +50,22 @@
 	},
 	"kmoves": {
 		"jug_slash_r": {
-			"clip": "slash_r"
+			"clip": "slash_r",
+			"air_legs": true
 		},
 		"jug_slash_l": {
-			"clip": "slash_l"
+			"clip": "slash_l",
+			"air_legs": true
 		},
 		"jug_wave_wind": {
 			"clip": "wave_wind",
 			"hold_from": 0.5,
-			"fade": 0.2
+			"fade": 0.2,
+			"air_legs": true
 		},
 		"jug_wave": {
-			"clip": "wave"
+			"clip": "wave",
+			"air_legs": true
 		},
 		"jug_slam": {
 			"clip": "slam"
@@ -88,7 +92,8 @@
 			"clip": "exdash"
 		},
 		"jug_chain": {
-			"clip": "chain"
+			"clip": "chain",
+			"air_legs": true
 		},
 		"jug_reel": {
 			"clip": "reel",

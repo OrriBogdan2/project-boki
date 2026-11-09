@@ -21,11 +21,11 @@
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "float"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
-		"mm_shot_r": {"clip": "shot_r", "upper": "moving"}, "mm_shot_l": {"clip": "shot_l", "upper": "moving"}, "mm_shot_emp": {"clip": "shot_emp", "upper": "moving"},
-		"mm_seed_aim": {"clip": "seed_aim", "upper": "moving"}, "mm_seed": {"clip": "seed", "upper": "moving"},
-		"mm_hearth": {"clip": "hearth", "upper": "moving"}, "mm_toss": {"clip": "toss", "upper": "moving"},
+		"mm_shot_r": {"clip": "shot_r", "upper": "moving", "air_legs": true}, "mm_shot_l": {"clip": "shot_l", "upper": "moving", "air_legs": true}, "mm_shot_emp": {"clip": "shot_emp", "upper": "moving", "air_legs": true},
+		"mm_seed_aim": {"clip": "seed_aim", "upper": "moving", "air_legs": true}, "mm_seed": {"clip": "seed", "upper": "moving", "air_legs": true},
+		"mm_hearth": {"clip": "hearth", "upper": "moving", "air_legs": true}, "mm_toss": {"clip": "toss", "upper": "moving", "air_legs": true},
 		"mm_skip": {"clip": "skip", "heading": true}, "mm_float": {"clip": "float", "heading": true},
-		"mm_pickup": {"clip": "pickup"}, "mm_flare": {"clip": "flare", "upper": "moving"},
+		"mm_pickup": {"clip": "pickup"}, "mm_flare": {"clip": "flare", "upper": "moving", "air_legs": true},
 		"mm_tug": {"clip": "tug", "upper": true}, "mm_kindled": {"clip": "kindled", "upper": true},
 		"mm_call": {"clip": "call", "upper": true}, "mm_call_hold": {"clip": "call_hold", "hold_from": 0.0, "upper": true}, "mm_call_end": {"clip": "call_end", "upper": true},
 		"mf_xform": {"clip": "fusion"}

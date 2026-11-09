@@ -13,12 +13,12 @@
 	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "hop"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
-		"as_lance": {"clip": "lance", "hold_from": 0.34, "upper": "moving"},
-		"lw_stoke_lance": {"clip": "lance_stoke", "hold_from": 0.5, "upper": "moving"},
-		"as_lance_end": {"clip": "lance_end", "upper": "moving"},
-		"as_aim": {"clip": "aim", "hold_from": 0.12, "upper": "moving"}, "as_shot": {"clip": "shot", "upper": "moving"},
+		"as_lance": {"clip": "lance", "hold_from": 0.34, "upper": "moving", "air_legs": true},
+		"lw_stoke_lance": {"clip": "lance_stoke", "hold_from": 0.5, "upper": "moving", "air_legs": true},
+		"as_lance_end": {"clip": "lance_end", "upper": "moving", "air_legs": true},
+		"as_aim": {"clip": "aim", "hold_from": 0.12, "upper": "moving", "air_legs": true}, "as_shot": {"clip": "shot", "upper": "moving", "air_legs": true},
 		"as_leap": {"clip": "leap", "heading": true}, "lw_hop": {"clip": "hop"},
-		"as_cloak": {"clip": "cloak"}, "lw_stoke": {"clip": "stoke", "upper": true},
+		"as_cloak": {"clip": "cloak", "air_legs": true}, "lw_stoke": {"clip": "stoke", "upper": true},
 		"lw_jet": {"clip": "jet", "hold_from": 0.22}, "lw_land": {"clip": "jet_land"},
 		"lw_jump": {"clip": "jump"},
 		"mf_xform": {"clip": "fusion"}

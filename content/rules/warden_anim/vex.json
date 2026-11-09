@@ -15,13 +15,13 @@
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dash_ex"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
-		"gunslinger_lmb": {"clip": "lmb", "upper": "moving"},
-		"gunslinger_rmb": {"clip": "rmb", "upper": "moving"},
+		"gunslinger_lmb": {"clip": "lmb", "upper": "moving", "air_legs": true},
+		"gunslinger_rmb": {"clip": "rmb", "upper": "moving", "air_legs": true},
 		"gunslinger_dash": {"clip": "dash", "legs_heading": true},
 		"gunslinger_dash_ex": {"clip": "dash_ex"},
-		"gunslinger_e": {"clip": "e"},
+		"gunslinger_e": {"clip": "e", "air_legs": true},
 		"gunslinger_x": {"clip": "x"},
-		"gunslinger_knock": {"clip": "knock", "upper": "moving"},
+		"gunslinger_knock": {"clip": "knock", "upper": "moving", "air_legs": true},
 		"mf_xform": {"clip": "fusion"}
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},

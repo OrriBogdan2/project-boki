@@ -62,20 +62,24 @@
 		},
 		"dr_throw": {
 			"clip": "throw",
-			"upper": "moving"
+			"upper": "moving",
+			"air_legs": true
 		},
 		"dr_reel": {
 			"clip": "reel",
 			"hold_from": 0.18,
-			"upper": "moving"
+			"upper": "moving",
+			"air_legs": true
 		},
 		"dr_pullend": {
 			"clip": "pullend",
-			"upper": "moving"
+			"upper": "moving",
+			"air_legs": true
 		},
 		"dr_anchor": {
 			"clip": "anchor",
-			"upper": "moving"
+			"upper": "moving",
+			"air_legs": true
 		},
 		"dr_dive": {
 			"clip": "dive",
@@ -96,7 +100,8 @@
 		},
 		"dr_blast": {
 			"clip": "blast",
-			"upper": "moving"
+			"upper": "moving",
+			"air_legs": true
 		},
 		"dr_jump": {
 			"clip": "jump"
