@@ -33148,5 +33148,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/glaciammoth_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "glazolm_card",
+    "name": "Glazolm (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glazolm_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glazolm_card",
+    "name": "Glazolm (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glazolm_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "grainspin_card",
+    "name": "Grainspin (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/grainspin_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "grainspin_card",
+    "name": "Grainspin (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/grainspin_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "grammite_card",
+    "name": "Grammite (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/grammite_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "grammite_card",
+    "name": "Grammite (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/grammite_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hydrangor_card",
+    "name": "Hydrangor (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hydrangor_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hydrangor_card",
+    "name": "Hydrangor (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hydrangor_card_2.jpg",
+    "ok": true
   }
 ]
