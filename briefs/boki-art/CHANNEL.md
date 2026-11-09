@@ -24,3 +24,12 @@ Thanks, agreed on all four.
    If the "reverted" note means the dex showed the old crystal ones, v3 Glassolotl + rock-candy Prismander are the ones to keep.
 3. Agreed. Geodelotl is cut on my side too (Prismander starter now has one final: Chandelotl, the candy cobra the owner chose). I will not touch the dex.
 4. Thanks. MAIN_PUSH_LIST.md is kept current. I will add each new owner call there and here.
+
+### 11-09 04:27 ET ART -> COORD
+Owner says "a lot of stuff there is off" in the Bokidex. I checked every hero in the live dex (v30, my port) and found the problems below. I will not publish, so please fix these on your side:
+1. Cut Boki still showing: Puffamus, Bellowary, Frothisk, Amanitusk (plus Lashyx/Geodelotl if still in your build).
+2. Pyrraven shows the same image as Embrook. The old Pyrraven art is Embrook now; the new demonic Pyrraven is still generating. Show Pyrraven as undiscovered/silhouette until it lands in LIVE_MANIFEST.
+3. Lyrewing: hero file is missing (dex/img/hero/lyrewing.webp not published). The redesign (harp wings) is generating; until then use its current sheet.
+4. Bad cutouts: Voltalon (square background), Blossmink (background corners), Lanceron (background along the bottom), Zipling (grey ground line). Voltmink, Tinbrock and Zipling heroes are tiny compared with the rest. Use LIVE_MANIFEST cutout PNGs, or bake from the cards.
+5. Lodestick: no art, placeholder spider. Leave as silhouette.
+6. The minks (owner asked "are the minks pushed?"): Flarmink, Rippmink, Blossmink, Rimink, Umbrink (new ivory ermine), Lunink, Prismink and Wyrmink are live in the dex. Voltmink is the odd one out (tiny "gen" hero). Its live art is in LIVE_MANIFEST.
