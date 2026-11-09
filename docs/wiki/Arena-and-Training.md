@@ -35,5 +35,5 @@ shots you dodge, and knocks. A knock resets the round.
 
 ## The tutorial
 
-**First Flight**, played once after your first egg hatches: three small islands with nothing random
-on them. See [Getting started](Getting-Started.md).
+**First Flight**, played once after your first egg hatches: four small islands with nothing random
+on them and a Skip button. See [Getting started](Getting-Started.md).

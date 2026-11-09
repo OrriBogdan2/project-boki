@@ -24,13 +24,13 @@ const CARD_T := 1.5        # s the top banner stays up before it settles into th
 const NAG_T := 15.0        # s without progress before the pill pulses and the Boki says it once more
 const INTRO_T := 2.0       # s the first-time intro card stays up (any key closes it sooner)
 const DONE_T := 0.9        # s of the step-done sting
-const DASH_WAIT_T := 40.0  # s on the dash isle before the glide half starts without a dash seen
 const FAR_SCOUT := 38.0    # m: a target this far off gets "crouch to scout ahead"
 const MINT := Color(0.56, 0.89, 0.78)
 
 var m: Match
 var step := -1
-var leg := 0                 # the dash step's half: 0 dash to the isle, 1 glide on to the range
+var leg := 0                 # the gap step's half: 0 dash to the isle, 1 glide on to the range
+var falls := 0               # falls into the void in this step (two bring the plain help line)
 var intro := true            # the "Training run" card: the first time only, until a key or INTRO_T
 var intro_t := 0.0
 var text := ""               # this step's one line, on the banner and the pill
@@ -46,7 +46,6 @@ var nag_t := 0.0             # s the pill pulses (after a stall)
 var wait := 0.0
 var down_t := 0.0
 var kills := 0               # monsters you or your Boki beat
-var flag := false
 var moved := 0.0
 var stall_t := 0.0           # s since the last progress
 var best_d := 1e9            # closest you've been to this step's target
@@ -55,7 +54,6 @@ var label := ""
 var last_stop := Vector3.INF # where a fall puts you back
 var used0 := {}
 var throws0 := 0
-var hits := 0                # your weapon hits on a monster this step
 var recalled := false        # the Boki came back (it started out)
 var need_back := false
 var fight_n := 0
@@ -207,7 +205,6 @@ func _finish(sid: String) -> void:
 	_enter()
 
 func _sting() -> void:
-	flag = false
 	wait = 0.6
 	done_t = DONE_T
 	m.sfx("unlock", null, -9.0)
@@ -263,8 +260,8 @@ func _enter() -> void:
 	best_d = 1e9
 	got = 0
 	got_seen = 0
+	falls = 0
 	_refresh(p)
-	hits = 0
 	recalled = false
 	need_back = false
 	used0 = p.used.duplicate()
@@ -287,18 +284,25 @@ func _enter() -> void:
 			if p.chest_keys == 0:
 				KeyChest.give(p, 1)      # (the key is handed over: finding one is a hint now)
 			FirstTimeHint.mark("key")
+			_open_lift()      # (the chest can be skipped: the lift ends the course either way)
 			m.ping(stop("chest"), Color("dfe8f2"))
 			for mb in m.mobs:
 				if not mb.dead:
 					mb.dead = true
 					mb.visible = false
 		"extract":
+			_open_lift()
 			var o := outpost()
 			if not o.is_empty():
-				m.exits.open_now(o, p.team)      # (the uplink and its defence are hints now: the lift is open)
 				m.ping(o["pos"], ExitModels.UPLINK)
 	_words()
 	pell.begin(sid)
+
+## The lift is open from the chest on (the uplink and its defence are hints now).
+func _open_lift() -> void:
+	var o := outpost()
+	if not o.is_empty():
+		m.exits.open_now(o, m.player.team)
 
 ## Brings monsters in near the player for a step (only if none are left, unless topping up).
 func _foes(kinds: Array, top_up := false) -> void:
@@ -361,15 +365,13 @@ func _is_done(sid: String) -> bool:
 			return moved > 3.0 and near.call(2.2)
 		"dash":
 			if leg == 0:
-				flag = flag or p.roll_t > 0.0
-				if near.call(4.0) and (flag or t > DASH_WAIT_T):
+				if near.call(4.0):
 					_next_leg()
 				return false
-			flag = flag or p.gliding
-			return flag and near.call(5.0)
+			return near.call(5.0)
 		"shoot":
 			_keep_foe("skitter")
-			got = hits
+			got = kills
 			return got >= need
 		"sig":
 			_keep_foe("skitter")
@@ -377,7 +379,7 @@ func _is_done(sid: String) -> bool:
 			return got >= need
 		"throw":
 			_keep_foe("spitter")
-			return p.kin == null or p.kin.state == "downed" or _throw_done()
+			return p.kin == null or _throw_done()
 		"fight": return kills >= fight_n and not m.mobs.any(func(x): return not x.dead)
 		"chest": return m.chests.any(func(c): return c.get("tut", false) and c["open"])
 	return false      # (extract: the match ends when you step into the light)
@@ -514,8 +516,10 @@ func _words() -> void:
 	var sid := id()
 	var line := String(steps()[step][1])
 	var alt: Dictionary = Content.rules("tutorial")["alt"]
-	if sid == "dash" and leg == 1:
-		line = String(alt["glide"])
+	if sid == "move" and m.player.dropping:
+		line = String(alt["land"])
+	elif sid == "dash" and falls >= 2:
+		line = String(alt["gap_help"])
 	elif sid == "throw" and not recalled and (need_back or throw_recalls()):
 		line = String(alt["throw_back"])
 	elif sid == "throw" and need_back:
@@ -572,12 +576,9 @@ func card_up() -> bool:
 # ------------------------------------------------------------------ the fall, and the key press
 ## Where a fall into the void puts you back: the last stop you reached.
 func respawn() -> Vector3:
+	falls += 1
 	_refresh(m.player)          # (a fall is a retry: every move is ready for it)
 	return last_stop if last_stop != Vector3.INF else stop("land")
-
-## A weapon hit of yours on a monster (Match).
-func on_hit() -> void:
-	hits += 1
 
 ## The match waits: for the first-time intro card, or while Pell talks (TutorialGuide.TALK_MAX_S at most).
 func holding() -> bool:

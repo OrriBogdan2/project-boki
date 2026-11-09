@@ -1,13 +1,13 @@
 {
- "doc": "The first-match tutorial (scripts/match/tutorial.gd), short (owner, Nov 8): eight steps, one banner line each. steps: [id, the line]. %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for part of a step (the glide half of the dash step, the Boki starting out). labels: the marker's caption per course stop or step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down). cds: the share of its usual time every ability and dash cooldown takes here (0.25 = four times quicker); each is also ready again when a step starts, is retried or its action lands. need: how many times a step's action must land, shown as 1/3 on the pill. The moves and rules the cut steps taught are one-time hints now (content/rules/hints.json).",
+ "doc": "The first-match tutorial (scripts/match/tutorial.gd), short (owner, Nov 8): eight steps, one banner line each. steps: [id, the line]. %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for part of a step (steering the drop before the walk, the gap step after two falls, the Boki starting out). labels: the marker's caption per course stop or step. mob: how the tutorial's monsters differ from real ones (a little tougher and bigger, damage and attack tempo down; the first one dies to one magazine). cds: the share of its usual time every ability and dash cooldown takes here (0.25 = four times quicker); each is also ready again when a step starts, is retried or its action lands. need: how many times a step's action must land (shoot: monsters beaten, sig: casts), shown as 1/3 on the pill when more than one. The moves and rules the cut steps taught are one-time hints now (content/rules/hints.json).",
  "steps": [
   [
    "move",
-   "Land and walk to the glowing beam"
+   "Walk to the glowing beam"
   ],
   [
    "dash",
-   "Dash across the gap"
+   "Dash, then hold %G to glide"
   ],
   [
    "shoot",
@@ -31,22 +31,23 @@
   ],
   [
    "extract",
-   "Step into the light at the outpost"
+   "Step into the light to go home"
   ]
  ],
  "alt": {
-  "glide": "Jump, then hold %G to glide across",
+  "land": "Steer down to the meadow",
+  "gap_help": "Just jump and hold %G. The wind carries you.",
   "throw_back": "Tap %T to call %s back",
   "throw_send": "Tap %T again to send %s at the monster"
  },
  "need": {
-  "shoot": 3,
-  "sig": 2,
+  "shoot": 1,
+  "sig": 1,
   "throw": 2
  },
  "cds": 0.25,
  "mob": {
-  "hp": 5.0,
+  "hp": 1.6,
   "scale": 1.4,
   "dmg": 0.1,
   "windup": 1.8,

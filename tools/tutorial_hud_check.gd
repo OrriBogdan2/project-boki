@@ -97,8 +97,8 @@ func _course() -> void:
 				m.hud.toast("check %d" % last, Color.WHITE)
 				asked += 1
 			counters[tu.id()] = tu.progress_text()
-		if not texts.has(tu.stop_id()):
-			texts[tu.stop_id()] = tu.text      # (the dash step's glide leg has its own line)
+		if not texts.has(tu.id()):
+			texts[tu.id()] = tu.text
 		step_t += Match.DT
 		if tu.pell.talking():
 			talk_at = m.time if talk_at < 0.0 else talk_at
@@ -137,14 +137,29 @@ func _course() -> void:
 	ok(asked > 0 and shown_after > 0, "a toast fired during a banner waits and shows after it " + waited)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
-	ok(Tutorial.steps().size() == 8 and texts.size() == 9,
-		"8 steps, 9 banner lines with the glide leg (%s)" % str(texts.keys()))
+	ok(Tutorial.steps().size() == 8 and texts.size() == 8, "8 steps, 8 banner lines (%s)" % str(texts.keys()))
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
-	var counts_ok: bool = String(counters.get("shoot", "")) == "0/3" and String(counters.get("sig", "")) == "0/2"
-	ok(counts_ok, "the pill counts hits and casts (%s)" % str(counters))
+	var counts_ok: bool = String(counters.get("shoot", "")) == "" and String(counters.get("sig", "")) == ""
+	ok(counts_ok, "one kill and one cast need no counter (%s)" % str(counters))
+	_gap_help_and_downed(tu)
 	var tl := String(texts.get("throw", ""))
 	ok(tl.contains("call") or tl.contains("send"), "the Boki step says whether to call back or send ('%s')" % tl)
+
+## Two falls on the gap step bring the plain help line; a downed Boki never passes the Boki step.
+func _gap_help_and_downed(tu: Tutorial) -> void:
+	var ids := Tutorial.steps().map(func(st): return String(st[0]))
+	tu.step = ids.find("dash")
+	tu.falls = 2
+	tu._words()
+	ok(tu.text.begins_with("Just jump"), "two falls on the gap step show the plain help ('%s')" % tu.text)
+	tu.step = ids.find("throw")
+	tu.falls = 0
+	tu.recalled = false
+	tu.need_back = false
+	tu.throws0 = m.player.kin.st_throws
+	m.player.kin.state = "downed"
+	ok(not tu._is_done("throw"), "a downed Boki does not pass the Boki step")
 
 ## Frames where the hunter or the Boki sit under the banner (at the screen sizes it is built for).
 func _under_banner() -> int:
