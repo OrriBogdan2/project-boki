@@ -32476,5 +32476,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/wickapi_card3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_jarmit_stance",
+    "name": "Jarmit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_jarmit_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_frigatee_stance3",
+    "name": "Frigatee",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_frigatee_stance3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_echolop_stance",
+    "name": "Echolop",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_echolop_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_jarmit_stance",
+    "name": "Jarmit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_jarmit_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_anvilbrock_stance",
+    "name": "Anvilbrock",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_anvilbrock_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_frigatee_stance3",
+    "name": "Frigatee",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_frigatee_stance3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glassolotl_v3",
+    "name": "Glassolotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_glassolotl_v3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_eclipsowl_stance",
+    "name": "Eclipsowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_eclipsowl_stance_2.jpg",
+    "ok": true
   }
 ]
