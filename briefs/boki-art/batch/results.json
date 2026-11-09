@@ -46245,5 +46245,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/glaivyx_card88_2.jpg",
     "ok": true
+  },
+  {
+    "id": "glaivyx_card88",
+    "name": "Glaivyx (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glaivyx_card88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander_card88",
+    "name": "Cisternmander (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cisternmander_card88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaivyx_card88",
+    "name": "Glaivyx (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glaivyx_card88_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_card88",
+    "name": "Vespox (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vespox_card88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander_card88",
+    "name": "Cisternmander (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cisternmander_card88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander_card88",
+    "name": "Cisternmander (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/cisternmander_card88_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_card88",
+    "name": "Vespox (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vespox_card88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_card88",
+    "name": "Vespox (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/vespox_card88_3.jpg",
+    "ok": true
   }
 ]
