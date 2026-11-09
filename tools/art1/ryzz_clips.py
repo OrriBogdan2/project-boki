@@ -1,4 +1,4 @@
-"""ART-1 Ryzz's animation set (hand-keyed as targets, solved by posekit). Times match the kit: MOVES in scripts/match/kmoves_vv.gd and content/archetypes/mage.json.
+"""ART-1 Sparkle's animation set (hand-keyed as targets, solved by posekit). Times match the kit: MOVES in scripts/match/kmoves_vv.gd and content/archetypes/mage.json.
 Personality: cocky, light, all hip and wrist; hands-free: every attack is a finger gun with both thumbs up, she blows the smoke off after the good ones.
 Hands: G and LP are the wrists; BE/LBE are (index finger direction, thumb direction).
 Run: blender -b --python tools/art1/ryzz_clips.py -- <ryzz.blend> <out.glb> [clip,clip]"""
@@ -384,7 +384,7 @@ def rib_cage(p):
 
 
 def scale_keys(arm, clip, n):
-    """Bone scale channels the pose solver doesn't write: the gum, the rods' glow sleeves, the arcs' flicker; and each rod's fan."""
+    """Bone scale channels the pose solver doesn't write: the gum, the rods' glow sleeves; and each rod's fan."""
     pbs = arm.pose.bones
     for f in range(n):
         t = clip.dur * f / max(n - 1, 1)
@@ -406,18 +406,11 @@ def scale_keys(arm, clip, n):
             sg = (-1.5 + i) / 1.5
             r.rotation_quaternion = Quaternion((0, 0, 1), -0.3 * fan * sg) @ Quaternion((1, 0, 0), 0.0)
             r.keyframe_insert("rotation_quaternion", frame=f)
-        # the arcs: one of two shapes shows, swapped on an uneven beat; the frame number drives it so a seek can't freeze it on one
-        ph = (f // 2 + (f // 7)) % 2
         # the lids only exist while they close: open, they collapse into the head instead of poking through the eye corners
         for sd in "RL":
             k = 1.0 if P.get("lid" + sd, 0.12) > 0.3 else 0.02
             pbs["lid." + sd].scale = (k, k, k)
             pbs["lid." + sd].keyframe_insert("scale", frame=f)
-        for v in (0, 1):
-            on = 1.0 if v == ph else 0.0
-            s = max(on, 0.001)
-            pbs["arc.%d" % v].scale = (s, s, s)
-            pbs["arc.%d" % v].keyframe_insert("scale", frame=f)
 
 
 if __name__ == "__main__":
