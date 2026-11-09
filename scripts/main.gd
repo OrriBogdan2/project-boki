@@ -1555,7 +1555,7 @@ func _ability_check() -> void:
 	# 21. Every ability and active glove runs without errors (watch the log for SCRIPT ERROR)
 	r = _ac_setup(5.0); m = r[0]; P = r[1]; T = r[2]
 	var n := 0
-	for id in Content.ids("abilities"):
+	for id in Content.ids("hunter_abilities"):
 		var ad := Content.ability(id)
 		P.teleport(T.pos + Vector3(-5, 0, 0)); P.vel = Vector3.ZERO
 		P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
