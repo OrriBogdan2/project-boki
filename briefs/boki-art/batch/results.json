@@ -21654,5 +21654,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/marchleaf_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "mirrolin_card",
+    "name": "Mirrolin (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mirrolin_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mirrolin_card",
+    "name": "Mirrolin (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mirrolin_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_card",
+    "name": "Murmurling (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/murmurling_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mossgrade_card",
+    "name": "Mossgrade (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mossgrade_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mycroll_card",
+    "name": "Mycroll (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mycroll_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mossgrade_card",
+    "name": "Mossgrade (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mossgrade_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_card",
+    "name": "Murmurling (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/murmurling_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "nettlynx_card",
+    "name": "Nettlynx (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/nettlynx_card_1.jpg",
+    "ok": true
   }
 ]
