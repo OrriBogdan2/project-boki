@@ -1,5 +1,5 @@
 {
- "doc": "One-time hints (FirstTimeHint): a single line shown the first time a thing matters, then never again on that save (Save.d.tutorial.hints). They took over the tutorial steps that were cut (owner, Nov 8: shorter tutorials). {action} shows that action's key ({dash}, {crouch}, {interact}...), {rank} the rank-up keys, {boki} the active Boki's name. match: shown in a match by MatchHints; farm: on the farm by FarmHints. A save that had finished the old tutorials sees none of its part (the v11 -> v12 migration).",
+ "doc": "One-time hints (FirstTimeHint): a single line shown the first time a thing matters, then never again on that save (Save.d.tutorial.hints). They took over the tutorial steps that were cut (owner, Nov 8: shorter tutorials). {action} shows that action's key ({dash}, {crouch}, {interact}...), {rank} the rank-up keys, {boki} the active Boki's name. match: shown in a match by MatchHints; farm: on the farm by FarmHints. fight_quiet_s: no hint in the first seconds of a fight; one hint line on screen at a time (the next waits for the lane); sight_m: an outpost this close means no go-to-exit hint. A save that had finished the old tutorials sees none of its part (the v11 -> v12 migration).",
  "match": {
   "exdash": "Too far? Jump, then press {dash} in mid-air",
   "crouch": "Hold {crouch} to crouch and see farther",
@@ -26,11 +26,11 @@
   "pickup": "gear lies within a few metres",
   "orders": "your Boki is out fighting for the first time",
   "rank": "you have a skill point to spend",
-  "utility": "a monster is close and you have not used your other ability",
+  "utility": "a monster has been close for 2 s and you have not used your other ability",
   "key": "you pick up a chest key",
-  "uplink": "you walk near an idle outpost",
+  "uplink": "you walk near an outpost that can start",
   "defend": "an uplink of yours is charging",
-  "goexit": "a few minutes into a match with no outpost in sight",
+  "goexit": "a few minutes into a match with no outpost close",
   "stone": "the house is marked out and short of stone",
   "hammer": "the house is marked out",
   "task": "the house stands and no Boki has a job",
@@ -43,5 +43,7 @@
  "goexit_s": 150.0,
  "crouch_s": 40.0,
  "void_s": 0.35,
+ "sight_m": 40.0,
+ "fight_quiet_s": 2.0,
  "poll_s": 0.25
 }
