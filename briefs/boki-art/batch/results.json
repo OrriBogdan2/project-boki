@@ -35724,5 +35724,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_umbrink_pick_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_umbrink_pick",
+    "name": "Umbrink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_umbrink_pick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadmonite_card",
+    "name": "Dreadmonite (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dreadmonite_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadmonite_card",
+    "name": "Dreadmonite (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dreadmonite_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_umbrink_pick",
+    "name": "Umbrink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_umbrink_pick_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "gramofrill_card",
+    "name": "Gramofrill (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gramofrill_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "blastopuff_card",
+    "name": "Blastopuff (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/blastopuff_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "blastopuff_card",
+    "name": "Blastopuff (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/blastopuff_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gramofrill_card",
+    "name": "Gramofrill (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gramofrill_card_2.jpg",
+    "ok": true
   }
 ]
