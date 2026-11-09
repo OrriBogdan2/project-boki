@@ -35500,5 +35500,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/medushroom_card3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "kintsuwyrm_card3",
+    "name": "Kintsuwyrm (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/kintsuwyrm_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "sandwidow_card3",
+    "name": "Sandwidow (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sandwidow_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sandwidow_card3",
+    "name": "Sandwidow (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sandwidow_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "medushroom_card3",
+    "name": "Medushroom (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/medushroom_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "medushroom_card3",
+    "name": "Medushroom (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/medushroom_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "scopeleon_card3",
+    "name": "Scopeleon (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/scopeleon_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sandwidow_card3",
+    "name": "Sandwidow (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sandwidow_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "truffapir_card3",
+    "name": "Truffapir (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/truffapir_card3_2.jpg",
+    "ok": true
   }
 ]
