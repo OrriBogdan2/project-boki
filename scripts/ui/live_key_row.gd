@@ -16,7 +16,7 @@ static func make(fn: Callable, px := 12, col := Color(1, 1, 1, 0.78)) -> LiveKey
 	r.add_theme_constant_override("separation", 16)
 	return r
 
-func _ready() -> void:
+func _enter_tree() -> void:
 	Settings.changed.connect(_on_changed)
 	_rebuild()
 
