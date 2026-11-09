@@ -536,6 +536,21 @@ func _all() -> void:
 	)
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 4, hz + dz)] = lv
+	# --- owner rule (DECISIONS Kits): the Hand passes walls and cliffs, but a placed wall stops it
+	reset.call()
+	var wall_def := {"length": 8.0, "hp": 999.0, "time": 30.0, "block": "all"}
+	var wall: Dictionary = m.verbs.add_wall(T, home + Vector3(4.0, 0, 0), Vector2(-1, 0), wall_def, 1.0)
+	var dm0: float = ak.dmg(T)
+	var gw0 := K.grapples
+	ak.tap(m, P)
+	ak.step(m, 0.6)
+	ok(
+		"placed wall: stops the Abyssal Hand, no hook and no damage behind it",
+		K.pull.is_empty() and ak.dmg(T) <= dm0 and K.grapples == gw0,
+		"grapples +%d took %.1f" % [K.grapples - gw0, ak.dmg(T) - dm0]
+	)
+	m.verbs.walls.erase(wall)
+	if is_instance_valid(wall.get("node")): (wall["node"] as Node).queue_free()
 	# --- rocks: the hook flies over a rock and the foe is dragged over it
 	reset.call()
 	for dz in range(-1, 2):
