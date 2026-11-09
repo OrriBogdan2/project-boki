@@ -68,7 +68,8 @@ func run(main: Node) -> void:
 			await tree.process_frame
 		var c := 0
 		var sk := h.model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
-		var tall := maxf((sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "head")).origin).y - h.global_position.y, 0.8)
+		var head := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "head")).origin
+		var tall := maxf(head.y - h.global_position.y, 0.8)
 		var look := h.global_position + Vector3(0, CAM_HEIGHT * tall, 0)
 		var fwd := -h.model.global_transform.basis.z      # in front of the face, whichever way the model's front is
 		if h.model.global_transform.basis.z.dot(Vector3(sin(YAW), 0, cos(YAW))) > 0.0:
