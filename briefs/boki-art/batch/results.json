@@ -11042,5 +11042,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_pipewurm_pe_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_prismander_pe",
+    "name": "Prismander (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_prismander_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prowyak_pe",
+    "name": "Prowyak (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prismander_pe",
+    "name": "Prismander (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_prismander_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ribbonwyrm_pe",
+    "name": "Ribbonwyrm (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_ribbonwyrm_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rampartoad_pe",
+    "name": "Rampartoad (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rampartoad_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prowyak_pe",
+    "name": "Prowyak (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rampartoad_pe",
+    "name": "Rampartoad (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rampartoad_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ribbonwyrm_pe",
+    "name": "Ribbonwyrm (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ribbonwyrm_pe_2.jpg",
+    "ok": true
   }
 ]
