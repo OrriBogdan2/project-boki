@@ -10,6 +10,7 @@ from meshkit import Piece, catmull, norm, smooth, sweep
 
 F = np.float64
 SKIN, THREAD, BOW, BOW_HI, STEEL, STEEL_DK, PIN = "skin-doll", "cloth-thread", "leather-bow", "leather-bow_hi", "metal-needle", "metal-needle_dk", "metal-pin"
+GLOWT = "glow-thread"        # the lit red strings round her right hand (the glow slot: warden_look "glow")
 LID = "skin-lid"                  # the eyelids: porcelain in the eye's shadow, so a closed eye reads shut and not blank
 HEX = [(math.cos(t), math.sin(t)) for t in np.linspace(0, math.tau, 6, endpoint=False)]
 SQ = [(math.cos(t), math.sin(t)) for t in (0.8, 2.4, 3.9, 5.5)]
@@ -27,7 +28,7 @@ GRIP_R = 0.0172
 GRIP_Z = 0.1                         # the red grip wrap's half length
 ARROW_LEN = 0.78
 # the crossed back needles (model x, z): eye top, tip; y behind the hair
-NEEDLE_TOP, NEEDLE_TIP, NEEDLE_Y = (-0.243, 1.8), (0.358, 0.75), -0.185
+NEEDLE_TOP, NEEDLE_TIP, NEEDLE_Y = (-0.243, 1.926), (0.358, 0.876), -0.185   # (z on her rig: hips at 0.987)
 EYE_LEN, EYE_W = 0.19, 0.044         # the eye's loop, length and half width
 NEEDLE_WRAPS = ((0.17, 0.33), (0.49, 0.61), (0.905, 0.925))      # along the needle, 0 eye .. 1 tip
 LASH_S = 0.405                       # where the two cross
@@ -177,6 +178,24 @@ def strings():
         p = (a + d * s) * (sg, 1, 1)
         path = [p + (sg * 0.012 * math.sin(t * 2.4), -0.006 * t, -ln * t) for t in np.linspace(0, 1, 5)]
         out.append(sweep("string", THREAD, path, SQ, [0.0032, 0.003, 0.0028, 0.0025, 0.0014], side_hint=(1, 0, 0), room=0.0))
+    return out
+
+
+def hand_strings(J):
+    """The sheet's lit red strings round her raised right hand: three loose loops winding from the wrist round the palm and
+    fingers, two long tails curling past the fingertips. Rigid on hand.R, so they ride the hand through every clip."""
+    sx, wz = float(J["hand.R"][0]), float(J["hand.R"][2])
+    out = []
+    for k in range(3):
+        t = np.linspace(0, 1, 12)
+        ang = k * 2.1 + t * 7.0
+        r = 0.05 + 0.012 * np.sin(t * 6 + k)
+        path = np.stack([sx + r * np.cos(ang), r * np.sin(ang) * 0.8, wz + 0.04 - t * 0.2], axis=1)
+        out.append(sweep("hand_string", GLOWT, path, SQ, [0.0042] * 12, side_hint=(1, 0, 0), room=0.0, tip=False))
+    for sg, ln in ((1, 0.3), (-1, 0.24)):
+        t = np.linspace(0, 1, 8)
+        path = np.stack([sx + sg * (0.05 + 0.05 * np.sin(t * 3.2)), 0.03 * np.cos(t * 5) * t, wz - 0.1 - ln * t], axis=1)
+        out.append(sweep("hand_string", GLOWT, path, SQ, np.linspace(0.0042, 0.0016, 8), side_hint=(0, 1, 0), room=0.0))
     return out
 
 
