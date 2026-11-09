@@ -146,6 +146,11 @@ func play(on: bool) -> void:
 	if model:
 		vp.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE if on else SubViewport.UPDATE_ONCE
 
+## Starts the loop over from its first frame.
+func restart() -> void:
+	t = 0.0
+	_hit_i = 0
+
 ## Builds the clip's scene now (the playing clip does it on its own turn; checks call it to step a clip by hand).
 func build() -> void:
 	if model:

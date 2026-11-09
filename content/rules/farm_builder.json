@@ -45,10 +45,11 @@
 		"offer_wait": "No rush. I'll hold on to them.",
 		"offer_taken": "Good choice. Go on, put it on.",
 		"roles": {
-			"juggernaut": "Up close: a chained blade that hits hard.",
-			"tender": "Healer: her lantern keeps you and your Boki going.",
-			"ashwick": "Area: bottled fire that takes the ground."
+			"juggernaut": "Up close, hits hard",
+			"tender": "Keeps your squad alive",
+			"ashwick": "Burns an area"
 		},
+		"signature": {"juggernaut": "rmb", "ashwick": "rmb", "tender": "e"},
 		"build_menu": "Open the build menu",
 		"bye": "Bye",
 		"shows_doc": "A line's show: stall, house (the house or its spot), tree (the nearest tree), portal. Hob points at it and the camera looks for show_s seconds, then comes back."

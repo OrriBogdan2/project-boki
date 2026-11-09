@@ -2,8 +2,9 @@ class_name HobOffer
 extends RefCounted
 ## Hob's second-Mask offer (HobTalk shows it over the talk box): exactly the three Masks of the second pick
 ## (ClassUnlock.second_picks: Kael, Meeko, Cinder) side by side, each with its portrait, name and title and a
-## one-line role, and under them one ability clip of the Mask in focus (only that one plays: the cards are
-## painted portraits, so the pick never stalls). Hover or click a card to look at it; "Take" picks it,
+## plain one-line role, and under them a loop of the Mask in focus on the training dummy: its attack, its
+## signature ability ("signature" in the rules) and its dash, one clip after the other (only one plays: the
+## cards are painted portraits, so the pick never stalls). Hover or click a card to look at it; "Take" picks it,
 ## ClassUnlock.choose_second opens it, and HobTalk plays the short Mask moment. "Not now" lets it wait.
 
 const CARD_W := 230.0          # px
@@ -14,7 +15,9 @@ var chat: HobTalk
 var ids: Array = []
 var focus_i := 0
 var cards: Array = []          # PanelContainer per id
-var preview: Control           # holds the focused Mask's clip
+var preview: Control           # holds the focused Mask's clips
+var reel: Array = []           # the focused Mask's clips (attack, signature, dash); one shows at a time
+var reel_i := 0
 var take_button: Button
 var root: Control
 
@@ -92,13 +95,28 @@ func focus(i: int) -> void:
 			UI.set_card_border(cards[j], Color(edge, 0.25), 1)
 	for c in preview.get_children():
 		c.queue_free()
-	preview.add_child(AbilityClip.make(id, String(preview_slot(id)), CLIP))
+	reel.clear()
+	for slot in ["lmb", String((chat.rules()["signature"] as Dictionary).get(id, "rmb")), "dash"]:
+		var clip := AbilityClip.make(id, slot, CLIP)
+		preview.add_child(clip)
+		reel.append(clip)
+	var turn := Timer.new()
+	turn.wait_time = AbilityClip.LOOP_S
+	turn.timeout.connect(func(): show_clip(reel_i + 1))
+	preview.add_child(turn)
+	turn.start()
+	show_clip(0)
 	take_button.text = String(chat.rules()["offer_take"]).replace("{name}", HeroTitle.base_name(id))
 
-## The ability a Mask's preview shows: the first of its "clip" block's "preview", else its attack.
-static func preview_slot(hunter_id: String) -> String:
-	var own: Array = (Arch.def(hunter_id).get("clip", {}) as Dictionary).get("preview", [])
-	return String(own[0]) if not own.is_empty() else "lmb"
+## Shows the k-th clip of the reel from its start; the others wait (a clip not built yet keeps building).
+func show_clip(k: int) -> void:
+	reel_i = posmod(k, reel.size())
+	for j in reel.size():
+		var clip: AbilityClip = reel[j]
+		clip.visible = j == reel_i
+		if clip.model != null:
+			clip.play(j == reel_i)
+	(reel[reel_i] as AbilityClip).restart()
 
 ## Takes this Mask (once; anything not on offer is refused).
 func pick(id: String) -> void:

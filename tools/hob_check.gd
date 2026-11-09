@@ -12,7 +12,7 @@ extends RefCounted
 ##      her (and nothing else) and the short Mask moment plays; no reveal pops up after it
 ##   5. "Not now" keeps the offer; a save that already owns a second Mask is never offered one
 ## With --shots-dir=<dir> (a renderer): hob_1_calls_you_over, hob_2_camera_intro, hob_3_dialogue_box,
-## hob_4_points_at_stall, hob_5_offer_line, hob_6_three_masks, hob_7_mask_moment, hob_8_mask_name.
+## hob_4_points_at_stall, hob_5_offer_line, hob_6_three_masks, hob_6b_signature, hob_6c_dash, hob_7_mask_moment, hob_8_mask_name.
 
 const SECOND := ["juggernaut", "ashwick", "tender"]    # owner order, class_unlock.json second_picks
 
@@ -176,7 +176,14 @@ func _offer() -> void:
 	await _frames(2)
 	var clips := box.find_children("*", "AbilityClip", true, false).filter(
 			func(c): return not c.is_queued_for_deletion())
-	ok(clips.size() == 1 and (clips[0] as AbilityClip).id == "tender", "one clip plays: the Relic in focus (Meeko)")
+	var slots: Array = clips.map(func(c): return (c as AbilityClip).slot)
+	ok(slots == ["lmb", "e", "dash"] and clips.all(func(c): return (c as AbilityClip).id == "tender"),
+			"the Relic in focus (Meeko) loops its attack, healing ring and dash (%s)" % str(slots))
+	ok(clips.filter(func(c): return (c as AbilityClip).visible).size() == 1, "one clip shows at a time")
+	offer.show_clip(2)
+	ok((clips[2] as AbilityClip).visible and not (clips[0] as AbilityClip).visible and (clips[2] as AbilityClip).t == 0.0,
+			"the reel moves on to the dash, from its start")
+	offer.show_clip(0)
 	var marker_off: bool = not is_instance_valid(home.guide.marker) or not home.guide.marker.visible
 	ok(not home.guide.tracker.visible and marker_off and not home.guide.hint_box.visible
 			and hob.node.mark.modulate.a == 0.0, "the Goals card, the goal line and the world prompts step aside")
@@ -185,6 +192,10 @@ func _offer() -> void:
 	ok(screen.size == Vector2(1280, 720) and screen.encloses(pick_rect),
 			"the pick fits a 1280x720 screen (%s)" % pick_rect)
 	await _shot("hob_6_three_masks", 1.6)
+	offer.show_clip(1)
+	await _shot("hob_6b_signature", 1.2)
+	offer.show_clip(2)
+	await _shot("hob_6c_dash", 1.0)
 	offer.pick("tender")
 	ok(ClassUnlock.open_ids() == ["gunslinger", "tender"] and not ClassUnlock.second_pending(),
 			"taking Meeko opens her and nothing else (%s)" % str(ClassUnlock.open_ids()))
