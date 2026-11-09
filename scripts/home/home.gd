@@ -99,6 +99,7 @@ var rain: CPUParticles3D
 var raining := false
 var rain_k := 0.0
 var weather_t := 40.0
+var rain_next := randf() < 0.45     # what the coming weather turn brings, known ahead (FarmChatter's rain warnings)
 
 func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
@@ -969,7 +970,8 @@ func _update_sky(d: float) -> void:
 	var dusk := clampf(1.0 - absf(sun_h) * 3.0, 0.0, 1.0)
 	weather_t -= d
 	if weather_t <= 0.0:
-		raining = not raining and randf() < 0.45
+		raining = rain_next
+		rain_next = not raining and randf() < 0.45
 		weather_t = randf_range(50.0, 110.0) if raining else randf_range(70.0, 160.0)
 		rain.emitting = raining
 		Sfx.play_ambience("rain" if raining else "home")
@@ -4088,7 +4090,7 @@ func _care_tick(d: float) -> void:
 		for k in kins:
 			var rec: Dictionary = k["rec"]
 			var in_bed: bool = k.has("bed") and Vector2(k["pos"].x - k["bed"].x, k["pos"].z - k["bed"].z).length() < 0.6
-			Care.tick(rec, care_acc, float(k.get("nap_t", 0.0)) > 0.0 or (night and in_bed) or k.has("indoors"))
+			Care.tick(rec, care_acc, float(k.get("nap_t", 0.0)) > 0.0 or (night and in_bed) or k.has("indoors"), raining)
 		care_acc = 0.0
 		KinBondMoment.tick(self)      # a bond rank it just reached: a heart, a line and a card
 	if care_save > 20.0:
