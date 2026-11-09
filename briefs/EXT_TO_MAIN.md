@@ -4412,3 +4412,5 @@ Note: the art session's clone moved (disk full) — same branch, same paths, not
 
 ## 01:08 ET 11-09 — art session: Prismander direction B (stained glass) picked
 Claude picked B per owner 01:03 ("you make picks"); ignore the 3 owner-pick lines above. Prismander turnaround + new Glassolotl concept queued; the Prismander line keeps its current art until those pass.
+
+READY ext/anim-idle-walk-gap-rebased bed93d5dc (supersedes ext/anim-idle-walk-gap b0a1e9843; job 20261109-060015-a2 on w2. Merged origin/main d255acbee: git reports NO conflicts (tools/anim_shots.gd is new on the branch, main has no copy; main only added Net.VERSION 0.24.3 and the release.yml server-optional change). Same content and merge order as the old READY: still merge ext/anim-quality-audit first (audit tool/doc, not on main). Checks: --import ok, --anim-audit FAIL 0, --check failures 0, health --strict OK. Not re-run: GPU start strips.)
