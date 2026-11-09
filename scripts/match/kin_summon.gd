@@ -12,6 +12,7 @@ extends RefCounted
 
 const SHRINK_S := BokiWispPop.DURATION   # s: the fold back into the wisp
 const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
+const CHIRP_EVERY := Vector2(14.0, 26.0)   # s: how often a riding wisp chirps (min, max): a critter by ear
 
 var k: Kin
 var dur := 10.0       # s: this species' window
@@ -20,6 +21,7 @@ var left := 0.0       # s of the window left (0: a wisp, or shrinking)
 var shrink := 0.0     # s of the shrink back left
 var _folding := false # drawing: a fold pop has started for this shrink
 var cd := 0.0         # s until it can be summoned again
+var chirp_in := 8.0   # s until the riding wisp chirps again
 var cd_full := 1.0    # s: the cooldown now running (longer after a knock-down), for the HUD ring
 
 func _init(kin: Kin) -> void:
@@ -38,6 +40,10 @@ static func times(ks: KinSpec) -> Vector2:
 		var row: Dictionary = rules()["table"].get(String(ks.ai.get("role", "")), {})
 		cell = row.get(ks.size, cell)
 	return Vector2(float(cell[0]), float(cell[1]))
+
+## Its chirp in the wisp's voice and as it blooms: higher for a small body (tools/gen_sfx_wisps.py).
+static func chirp_name(ks: KinSpec) -> String:
+	return "wisp_chirp_" + (ks.size if ks else "small")
 
 ## Out as the full Boki (the shrink back included)?
 func out() -> bool:
@@ -90,7 +96,14 @@ func knocked() -> bool:
 
 ## The fixed step (own Boki only; a remote one reads the snapshot).
 func tick(dt: float) -> void:
+	if cd > 0.0 and cd <= dt:
+		k.m.sfx("wisp_ready", k.pos, -6.0)      # the cooldown is over: the wisp brightens (BokiWispLook.dim)
 	cd = maxf(0.0, cd - dt)
+	if k.wisp and not out():
+		chirp_in -= dt
+		if chirp_in <= 0.0:
+			chirp_in = randf_range(CHIRP_EVERY.x, CHIRP_EVERY.y)
+			k.m.sfx(chirp_name(k.ks), k.pos, -10.0, Unique.voice(k.rec))
 	var o := k.owner_h
 	if left > 0.0:
 		left -= dt
@@ -113,11 +126,14 @@ func tick(dt: float) -> void:
 func popped(to_wisp: bool) -> void:
 	if not to_wisp:
 		_pop(true, false)
-		k.m.sfx("kin_happy", k.pos, -6.0, Unique.voice(k.rec))
+		k.m.sfx("wisp_bloom", k.pos, -4.0)
+		k.m.sfx(chirp_name(k.ks), k.pos, -4.0, Unique.voice(k.rec))
 	elif _folding:
 		_drop_pop()
 	else:
 		_pop(false, true)
+	if to_wisp:
+		k.m.sfx("wisp_shrink", k.pos, -4.0)
 	_folding = false
 
 ## A BokiWispPop over the kin: its wisp home at the hunter's shoulder, the Boki's feet where the kin stands

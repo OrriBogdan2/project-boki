@@ -7,7 +7,9 @@
   "throw": "boki", "catch": "boki", "bond": "boki", "skill": "boki",
   "k_venom": "boki", "k_spore": "boki", "k_gravity": "boki", "k_prism": "boki", "k_lunar": "boki", "k_echo": "boki",
   "boki_downed": "boki", "boki_revive": "boki", "boki_eat": "boki", "boki_sleep": "boki", "boki_work": "boki",
-  "boki_fuse": "boki", "boki_unfuse": "boki"
+  "boki_fuse": "boki", "boki_unfuse": "boki",
+  "wisp_chirp_small": "boki", "wisp_chirp_medium": "boki", "wisp_chirp_large": "boki",
+  "wisp_bloom": "boki", "wisp_shrink": "boki", "wisp_ready": "boki", "wisp_grab": "boki"
  },
  "signature": [],
  "replaces": ["kin_happy", "kin_unsure", "kin_alert", "kinhit", "recall", "throw", "catch", "bond", "skill",
