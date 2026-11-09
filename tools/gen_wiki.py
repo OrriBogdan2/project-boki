@@ -424,7 +424,16 @@ def gen_boki():
     page("Boki-Species.md", "Boki species", body, ["content/kin_v2", "content/kin", "content/abilities_v2", "content/merges_v2", "content/evolution_v2"])
 
     # growth: evolution, mutations, bonds, stages, IVs, training
-    b = "## Evolution nodes\n\nEvery Boki has four paths (Fierce, Steadfast, Curious, Swift); some species have an extra node on one. Nodes are budget-neutral: they move points or trade one strength for another.\n\n"
+    ev = load_json(os.path.join(ROOT, "content", "rules", "evolve.json"))
+    nm = lambda i: KIN2.get(i, {}).get("name", i.title())
+    b = "## Evolution lines\n\nEach species evolves into the next at its own level, with an Ink used on it, or by trade; where a line branches, the leading affinity picks. A Boki never evolves into a species without a model: it waits and evolves once the art exists. Levels stop at %d.\n\n" % ev.get("cap", 100)
+    rows = []
+    for sid, ln in ev.get("lines", {}).items():
+        for o in ln.get("into", []):
+            how = (o["item"].replace("ink_", "").title() + " Ink") if o.get("item") else ("trade" if o.get("trade") else "level %s" % ln.get("level"))
+            rows.append([nm(sid), nm(o["id"]), how, o.get("path", "").title()])
+    b += table(["Boki", "Evolves into", "When", "Branch"], rows)
+    b += "\n\n## Evolution nodes\n\nEvery Boki has four paths (Fierce, Steadfast, Curious, Swift); some species have an extra node on one. Nodes are budget-neutral: they move points or trade one strength for another.\n\n"
     rows = []
     for nid, n in EVO.items():
         req = n.get("requires", {})
@@ -462,7 +471,7 @@ def gen_boki():
     if nat:
         b += "\n\n## Natures\n\nA Boki's nature comes from its two strongest traits.\n\n" + table(["Traits", "Nature"], [[k.replace("+", " + "), v] for k, v in nat.items()])
     page("Boki-Growth.md", "Boki growth: evolution, mutations, bonds and gifts", b,
-         ["content/evolution_v2", "content/mutations", "scripts/core/care.gd"])
+         ["content/rules/evolve.json", "content/evolution_v2", "content/mutations", "scripts/core/care.gd"])
 
 # ------------------------------------------------------------------ gear
 def gen_gear():
