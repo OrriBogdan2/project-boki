@@ -41065,5 +41065,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/thunderstrich_card9_3.jpg",
     "ok": true
+  },
+  {
+    "id": "mortarfly_card9",
+    "name": "Mortarfly (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mortarfly_card9_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "mortarfly_card9",
+    "name": "Mortarfly (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mortarfly_card9_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "thunderstrich_card9",
+    "name": "Thunderstrich (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/thunderstrich_card9_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pyrraven_card9",
+    "name": "Pyrraven (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pyrraven_card9_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "mortarfly_card9",
+    "name": "Mortarfly (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mortarfly_card9_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "thunderstrich_card9",
+    "name": "Thunderstrich (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/thunderstrich_card9_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "reapant_card9",
+    "name": "Reapant (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/reapant_card9_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gravitank_card9",
+    "name": "Gravitank (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gravitank_card9_3.jpg",
+    "ok": true
   }
 ]
