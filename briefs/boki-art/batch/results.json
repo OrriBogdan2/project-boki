@@ -9726,5 +9726,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_marchleaf_p_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_lunowl_p",
+    "name": "Lunowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lunowl_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kindlewren_p",
+    "name": "Kindlewren (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kindlewren_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_knotwyrm_p",
+    "name": "Knotwyrm (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_knotwyrm_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunowl_p",
+    "name": "Lunowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lunowl_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mossgrade_p",
+    "name": "Mossgrade (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_mossgrade_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipewurm_p",
+    "name": "Pipewurm (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pipewurm_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prowyak_p",
+    "name": "Prowyak (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mycroll_p",
+    "name": "Mycroll (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_mycroll_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prismander_p",
+    "name": "Prismander (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_prismander_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prismander_p",
+    "name": "Prismander (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_prismander_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_nettlynx_p",
+    "name": "Nettlynx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_nettlynx_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mycroll_p",
+    "name": "Mycroll (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_mycroll_p_2.jpg",
+    "ok": true
   }
 ]
