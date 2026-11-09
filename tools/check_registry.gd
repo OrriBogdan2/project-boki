@@ -181,6 +181,7 @@ const CHECKS := {
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],     # 2 games, relay
 	"--revive-net-check": ["res://tools/revive_net_check.gd", "revive_net_check", null],      # 2 games, relay, docs/decisions/0018
 	"--remote-anim-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", null],     # 2 games, relay
+	"--online-displace-check": ["res://tools/online_displace_check.gd", "online_displace_check", null],     # + a server, delay
 	"--breaker-proof-shots": ["res://tools/breaker_proof_shots.gd", "breaker_proof_shots", null],
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
 	"--dead-kmoves-check": ["res://tools/dead_kmoves_check.gd", "dead_kmoves_check", null],
