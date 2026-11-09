@@ -613,15 +613,11 @@ func _bjorn_abyss() -> void:
 	press_x(m, P)
 	step(m, 0.45)
 	var ud: BjornUlt = K.ult
-	var drawn := 0.0
-	var floating := true
-	for i in ud.cells.size():
-		var e := AimKit.entry(P, "x%d" % i)
-		if not e.is_empty():
-			drawn += float(e.get("len", 0.0))
-			var mid := (ud.cells[i] as Vector3) + Vector3(ud.dir.x, 0, ud.dir.y) * ud.cell_len() * 0.5
-			var at_height: bool = absf(float(e.get("y", -999.0)) - ud.origin.y) < 0.05
-			floating = floating and (at_height or W.ground_at(mid.x, mid.z) > World.VOID + 1.0)
+	var lane := AimKit.entry(P, "x")
+	var drawn := float(lane.get("len", 0.0))
+	var mid_lane := ud.origin + Vector3(ud.dir.x, 0, ud.dir.y) * ud.trail_len() * 0.5
+	var floating: bool = absf(float(lane.get("y", -999.0)) - ud.origin.y) < 0.05 \
+		or W.ground_at(mid_lane.x, mid_lane.z) > World.VOID + 1.0
 	var over := 0
 	for i in ud.cells.size():
 		var c: Vector3 = ud.cells[i]

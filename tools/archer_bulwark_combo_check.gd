@@ -821,6 +821,9 @@ func _bulwark_combos() -> void:
 		mid == 0.0 and K.spins == sp0 + 1 and dmg(T) >= 18.0 and dmg(T) <= 30.0,
 		"mid %.0f spins %d took %.0f" % [mid, K.spins - sp0, dmg(T)]
 	)
+	var spin_r := float(K.dash_def().get("spin_r", 2.2))
+	ok("combo bjorn: the spin ring is drawn out to the hit radius",
+		absf(K.fx.swirl_r - spin_r) < 0.01, "%.2f" % K.fx.swirl_r)
 	# the aegis: his own curved slab over the wall while raised
 	reset.call()
 	P.inp["sec_hold"] = true
