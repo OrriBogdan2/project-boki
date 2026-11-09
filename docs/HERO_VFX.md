@@ -51,6 +51,14 @@ the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_ha
 `Juice.armor_break` holds the cyan flash for `BREAK_FLASH_T` and sheds shards. No ring or burst (a ground ring means gameplay).
 The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only=armour`. Check: `--hero-vfx-check`.
 
+## Shields on the body (every source, not a recipe)
+`ShieldFx` (`scripts/match/shield_fx.gd`) is the one shell for every shield: the body's ink outline turns into a thin
+line in the side colour, thickest with the shield full and thinning in four steps as it runs down. A hit it takes
+flashes the shell with a few sparks on the side it came from (`ShieldFx.absorb`; no ground ring); the hit that breaks
+it holds the body flash and sheds shards in the side colour, the armour's break language without the armour's blue.
+Kits keep their own cast VFX (Cinder's Furnace Cloak swirl is hers); the shell is shared. Check: `--shield-check`.
+Reel: `--hero-vfx-reel --reel-only=shield`.
+
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`.

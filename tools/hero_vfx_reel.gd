@@ -13,7 +13,7 @@ extends "res://tools/combo51_shots.gd"
 const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
 	"dredge": ["hook"]}
-const GENERIC := ["lmb", "rmb", "dash", "e", "r", "armour"]
+const GENERIC := ["lmb", "rmb", "dash", "e", "r", "armour", "shield"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
@@ -168,6 +168,24 @@ func _part_armour() -> void:
 		_aim(T.pos)
 	await _go(2.4, hits, _sheet("armour", "armour hit, armour hit, the break, then a health hit",
 		[0.17, 0.22, 0.72, 0.77, 1.22, 1.3, 1.45, 1.92, 1.98]), 1.5)
+	await _go(GAP)
+
+## The shared shield shell on the dummy: it goes up, takes two hits (ripple), then a hit that breaks it, then health.
+func _part_shield() -> void:
+	await _reset(3.0)
+	var hits := func(t: float):
+		if _at(t, 0.1):
+			T.shield = 25.0
+			T.shield_t = 20.0
+		if _at(t, 0.7) or _at(t, 1.1):
+			T.hurt(8.0, P, {})
+		if _at(t, 1.6):
+			T.hurt(20.0, P, {})
+		if _at(t, 2.2):
+			T.hurt(10.0, P, {})
+		_aim(T.pos)
+	await _go(2.6, hits, _sheet("shield", "shield up, two hits on it, the break, then a health hit",
+		[0.07, 0.3, 0.72, 0.78, 1.12, 1.18, 1.62, 1.7, 1.85]), 1.5)
 	await _go(GAP)
 
 # ------------------------------------------------------------------ Kael

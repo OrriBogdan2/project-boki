@@ -3,7 +3,7 @@ extends RefCounted
 ## shield, an ally area, a Boki's Refraction and Mass Guard, the Bulwark's raised aegis, a Fuse release,
 ## the owner shield a Boki gives) is applied to a Hunter standing in front of a rival; after it settles
 ## every body mesh that was visible is still visible, the Hunter is still targetable and still seen by
-## the rival, and the shield rim (ShieldLook) is on. With --shots-dir=<dir> (run under xvfb with a
+## the rival, and the shield rim (ShieldFx) is on. With --shots-dir=<dir> (run under xvfb with a
 ## renderer) it also writes one crop per source. Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -73,17 +73,41 @@ func run(main: Node) -> void:
 		ok(hidden.is_empty() and P.model.visible, "%s: the body stays visible (hidden: %s)" % [src, hidden])
 		ok(P.targetable() and P.cloak_t <= 0.0, "%s: still targetable, never cloaked" % src)
 		ok(m.can_see(rival.team, P), "%s: the rival still sees the Hunter" % src)
-		ok(not ShieldLook.occludes(m, P), "%s: nothing opaque of the shield stands between camera and body" % src)
+		ok(not ShieldFx.occludes(m, P), "%s: nothing opaque of the shield stands between camera and body" % src)
 		if P.shield > 0.0:
-			ok(ShieldLook.shown(P), "%s: the shield rim is on" % src)
+			ok(ShieldFx.shown(P), "%s: the shield rim is on" % src)
 		await _shot(main, m, P, src)
 		_clear(m, P)
 	P.shield = 0.0
 	P.kin_shield = 0.0
 	await _settle(main, m, P, 0.2)
-	ok(not ShieldLook.shown(P), "no shield: the rim is off")
+	ok(not ShieldFx.shown(P), "no shield: the rim is off")
+	await _shell_language(main, m, P, rival)
 	print("SHIELDCHECK done, %d failures" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The shell's own language: it thins as the shield runs down, an absorbed hit ripples it (one ripple for a burst),
+## and the hit that breaks it cracks the body and sheds shards with no ring.
+func _shell_language(main: Node, m: Match, P: Hunter, rival: Hunter) -> void:
+	P.shield = 40.0
+	P.shield_t = 30.0
+	await _settle(main, m, P, 0.1)
+	ok(P.get_meta(ShieldFx.STEP) == ShieldFx.STEPS, "a full shield draws the full rim")
+	var flashes0: int = m.fx.flashes.size()
+	P.hurt(5.0, rival, {})
+	ok(m.fx.flashes.size() == flashes0 + 1 and P.shield < 40.0, "a hit the shield takes ripples the shell")
+	P.hurt(5.0, rival, {})
+	ok(m.fx.flashes.size() == flashes0 + 1, "a burst of hits is one ripple")
+	P.shield = 8.0
+	await _settle(main, m, P, 0.2)
+	ok(P.get_meta(ShieldFx.STEP) == 1, "a shield nearly spent draws the thinnest rim (%s of %s)" % [P.shield, P.get_meta(ShieldFx.PEAK)])
+	await _settle(main, m, P, 0.2)
+	var rings0: int = m.fx.rings.size()
+	P.flash_t = 0.0
+	P.hurt(30.0, rival, {})
+	await _settle(main, m, P, DT)
+	ok(P.shield <= 0.0 and not ShieldFx.shown(P), "a hit that breaks the shield takes the rim off")
+	ok(P.flash_t > Juice.SHELL_FLASH_T and m.fx.rings.size() == rings0, "the break cracks the body: flash held, no ring")
 
 func _settle(main: Node, m: Match, P: Hunter, secs: float) -> void:
 	var t := 0.0
