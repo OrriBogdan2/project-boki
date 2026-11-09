@@ -23418,5 +23418,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/stance_soakybara_w31_2.jpg",
     "ok": true
+  },
+  {
+    "id": "scythant_r_w31",
+    "name": "Scythant",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/scythant_r_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant_r_w31",
+    "name": "Scythant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/scythant_r_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant_r_w31",
+    "name": "Scythant",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/scythant_r_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant_r_w31",
+    "name": "Scythant",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/scythant_r_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w31",
+    "name": "Amanitusk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w31",
+    "name": "Amanitusk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w31",
+    "name": "Amanitusk",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w31",
+    "name": "Amanitusk",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w31_4.jpg",
+    "ok": true
   }
 ]
