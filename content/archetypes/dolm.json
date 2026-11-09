@@ -52,5 +52,13 @@
 	"rank3": {"sec": "slamming a foe or a rock gives a Molten Guard shield of 18, up to 4 stacks", "dash": "a second charge, and each hop goes a third further", "kin": "an extra row of rocks behind the first"},
 	"rank2": {"sec": "Rank 2: cooldown 11s -> 9.9s, damage +15%.", "dash": "Rank 2: recharge 12s -> 10.2s per charge.", "kin": "Rank 2: cooldown 12.5s -> 11.3s, rocks hit +15%."},
 	"rank_next": {"sec": "Rank 3: cooldown 11s -> 8.8s, damage +30%; slamming a foe or a rock gives a shield of 18, up to 4 stacks.", "kin": "Rank 3: cooldown 12.5s -> 10s; an extra row of rocks behind the first.", "dash": "Rank 3: recharge 12s -> 8.4s; a second charge, and each hop goes a third further."},
-	"tells": {"half": "stone pebbles orbit the shoulder, one per live rock", "full": "six stone pebbles spinning", "dash_spent": "a trail of rubble"}
+	"tells": {"half": "stone pebbles orbit the shoulder, one per live rock", "full": "six stone pebbles spinning", "dash_spent": "a trail of rubble"},
+	"src": {
+		"lmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] [O] (owner item 15 said rocks only) (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] [O] (owner item 111) (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
+	}
 }

@@ -41,5 +41,13 @@
 	"rank3": {"dash": "a shot dodged through the Rampage feeds your Rage", "sec": "+20% more damage on every Smash (+40% in all), and the Meteor Drop rests 2.4s less", "kin": "the cooldown is 37.5% shorter in all"},
 	"rank2": {"sec": "Rank 2: cooldown 2s -> 1.8s, damage +15%; +20% damage on every Smash.", "dash": "Rank 2: recharge 9s -> 7.6s per charge; a third charge.", "kin": "Rank 2: cooldown 9.5s -> 8.3s, damage +15%."},
 	"rank_next": {"sec": "Rank 3: cooldown 2s -> 1.6s, damage +30%; +40% damage on every Smash in all, and the Meteor Drop rests 2.4s less.", "kin": "Rank 3: cooldown 9.5s -> 5.9s, damage +30%.", "dash": "Rank 3: recharge 9s -> 6.3s; a shot dodged through the Rampage feeds your Rage."},
-	"tells": {"half": "red heat glowing through the pauldrons as Rage fills, steam from half", "full": "Enraged: a red shell, the hunter swells, a roar within 25m; a magenta strike lane while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards", "dash_spent": "dash pips dark"}
+	"tells": {"half": "red heat glowing through the pauldrons as Rage fills, steam from half", "full": "Enraged: a red shell, the hunter swells, a roar within 25m; a magenta strike lane while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards", "dash_spent": "dash pips dark"},
+	"src": {
+		"lmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] [O] ours (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
+	}
 }

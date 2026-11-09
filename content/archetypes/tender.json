@@ -189,5 +189,13 @@
 		"land_r": 0.9,
 		"self_when_solo": true,
 		"desc": "Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you."
+	},
+	"src": {
+		"lmb": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }

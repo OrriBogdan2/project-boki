@@ -34,5 +34,13 @@
 	"rank3": {"dash": "+4.3 damage; a hit gives +16% speed and a shield of 11.6% health for 2s", "sec": "a second charge", "kin": "+30% shield"},
 	"rank2": {"sec": "Rank 2: cooldown 7s -> 6.3s, damage +15%.", "dash": "Rank 2: recharge 9s -> 7.65s per charge.", "kin": "Rank 2: cooldown 10.5s -> 9.45s, damage and shield +15%."},
 	"rank_next": {"sec": "Rank 3: cooldown 7s -> 5.6s, damage +30%; a second charge.", "dash": "Rank 3: recharge 9s -> 6.3s, damage +30% and +4.3; a hit gives +16% speed and a shield of 11.6% health for 2s.", "kin": "Rank 3: cooldown 10.5s -> 8.4s, damage and shield +30%, and the shield +30% more."},
-	"tells": {"half": "embers drift off a foe at half Char; one flame over a foe Ablaze", "full": "three flames and a glow over a foe that Flashed over", "dash_spent": "dash pips dark"}
+	"tells": {"half": "embers drift off a foe at half Char; one flame over a foe Ablaze", "full": "three flames and a glow over a foe that Flashed over", "dash_spent": "dash pips dark"},
+	"src": {
+		"lmb": "[D] [F] (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] [F] [O] (owner item 11) (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] [F] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
+	}
 }

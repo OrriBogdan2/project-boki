@@ -181,5 +181,13 @@
 		"half": "a ring of teal motes closes around him",
 		"full": "the lantern burns white and his ribbons lift",
 		"dash_spent": "a pale ripple where he stood"
+	},
+	"src": {
+		"lmb": "[D] [O] (owner items 60, data overruled) (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] [O] (owner item 40) (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }

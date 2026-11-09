@@ -161,5 +161,13 @@
 		"half": "a lit Fever pip over the bar while the lifesteal runs",
 		"full": "the same lit pip and a heat shimmer",
 		"dash_spent": "an ember afterimage and faint skid streaks"
+	},
+	"src": {
+		"lmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] [F] [O] (owner, item 112) (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] [F] (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] [F] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[F] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }

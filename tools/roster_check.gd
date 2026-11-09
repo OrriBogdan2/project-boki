@@ -41,6 +41,7 @@ func run(main: Node) -> void:
 	ok(rideable >= RIDEABLE_MIN and rideable <= RIDEABLE_MAX, "rideables: %d (want %s)" % [rideable, want])
 	print("ROSTER sizes: small %d, medium %d, large %d, rideable %d" % [
 		sizes["small"], sizes["medium"], sizes["large"], rideable])
+	_src_notes()
 	print("ROSTER DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -55,3 +56,20 @@ func _mesh_count(n: Node) -> int:
 	for ch in n.get_children():
 		c += _mesh_count(ch)
 	return c
+
+## Every Hunter kit has a `src` note per ability (PARITY FIRST: [D] data, [F] footage, [O] owner, ours, [?] unknown).
+func _src_notes() -> void:
+	var dir := DirAccess.open("res://content/archetypes")
+	for f in dir.get_files():
+		if not f.ends_with(".json"):
+			continue
+		var d: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://content/archetypes/" + f))
+		var src: Dictionary = d.get("src", {}) if d is Dictionary else {}
+		var ours := 0
+		var unk := 0
+		for slot in ["lmb", "rmb", "e", "x", "dash", "passive"]:
+			var v := str(src.get(slot, ""))
+			ok(v != "", "%s: src note for %s" % [f, slot])
+			ours += 1 if " ours" in v else 0
+			unk += 1 if "[?]" in v else 0
+		print("ROSTER src %s: ours %d, [?] %d" % [f.get_basename(), ours, unk])

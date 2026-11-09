@@ -31,5 +31,13 @@
 	"rank3": {"dash": "pellet hits trim 0.25s off the barge recharge, and a dash resets the gun's spread", "sec": "hitting a foe takes half the cooldown off", "kin": "double damage on a foe over the abyss, and +0.2s stun"},
 	"rank2": {"sec": "Rank 2: cooldown 12s -> 10.8s.", "dash": "Rank 2: recharge 10s -> 8.5s per charge; the air pounce 12.5s -> 10.5s.", "kin": "Rank 2: cooldown 7s -> 6.3s, damage +15%, stun +0.1s."},
 	"rank_next": {"sec": "Rank 3: cooldown 12s -> 9.6s; hitting a foe takes half of it off.", "dash": "Rank 3: recharge 10s -> 7s, the air pounce 12.5s -> 8.5s; pellet hits trim 0.25s off the recharge, and a dash resets the gun's spread.", "kin": "Rank 3: cooldown 7s -> 5.6s, damage +30%, stun +0.2s; double damage on a foe over the abyss and +0.2s stun more."},
-	"tells": {"half": "brass glints along the shoulder drum from 5 stacks", "full": "10 stacks: a brass halo ring at the feet and a bell within 20m", "dash_spent": "dash pips dark"}
+	"tells": {"half": "brass glints along the shoulder drum from 5 stacks", "full": "10 stacks: a brass halo ring at the feet and a bell within 20m", "dash_spent": "dash pips dark"},
+	"src": {
+		"lmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
+	}
 }
