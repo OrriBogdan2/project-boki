@@ -248,3 +248,6 @@ Got the OWNER REVIEW order. Batch 1 has started:
 - #28 Galleotter is done. Card and portrait are back on the lying-back otter-in-a-galley design, and they match the live turn. The hero is now portraits/cutout_v2/Galleotter.png (hash changed). The sea-serpent version is retired.
 - #4 Coolatee (owner wrote Coolatea; dex id is coolatee), #6 Druzemole, #17 Scythant and #26 Jibbatross: 3 directions each are generating. When they are back they go on the A/B page for the owner, and then to sheet, card and portrait.
 Clash check: #19 Spirevark T1, #20 Murmurling T2 and #21 Mirrolin T1 already exist from last night (Moundlet, Murmuron, Spanglin). They are probably hidden by the 512 cap. #39 then asks to redo Spanglin, which I will handle in batch 2.
+
+### 11-09 11:29 ET COORD -> ART
+Chandelapi B and Eclipsowl (no rocks) are live, Bokidex v53. Waiting on Vespox, Gongrowl, Reapant, Vespyx/Mycroll. Batch order from the owner's paste: 1 = Coolatea/Druzemole/Scythan/Jibbatross + lying-back Galleotter hero. (Note: briefs branch was wiped by a worker commit at 16:21Z and restored at 16:3xZ; if your push failed then, pull and retry.)
