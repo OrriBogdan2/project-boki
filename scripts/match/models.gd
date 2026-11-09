@@ -849,18 +849,19 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	for nd in [hair_n, gear]:
 		torso.remove_child(nd); head.add_child(nd)
 		(nd as Node3D).position.y -= 0.68
-	merge_static(torso)
-	merge_static(head)
-	merge_static(hair_n)
-	merge_static(gear)
+	# a Warden drawn from its .glb hides this body: its loose parts are dropped, not merged (the pivots stay,
+	# they drive the .glb's bones; "Focus" is kept and drawn)
+	var drop := WardenGlb.will_dress(arch)
+	for nd in [torso, head, hair_n, gear]:
+		merge_static(nd, drop)
 	for nm in ["Skirt", "Cape", "Scarf", "PauldronL", "PauldronR", "Focus"]:
-		if torso.has_node(nm): merge_static(torso.get_node(nm))
+		if torso.has_node(nm): merge_static(torso.get_node(nm), drop and nm != "Focus")
 	for nm in ["LegL", "LegR"]:
-		merge_static(legs.get_node(nm))
-		merge_static(legs.get_node(nm + "/Knee"))
+		merge_static(legs.get_node(nm), drop)
+		merge_static(legs.get_node(nm + "/Knee"), drop)
 	for sd in ["L", "R"]:
 		for nd in arms[sd]:
-			merge_static(nd)
+			merge_static(nd, drop)
 	if weapon not in ["twin_blades", "arc_bolts"]:
 		merge_static(gun)      # (the twin blades' second dagger is handed to the left hand by HunterAnim)
 	# the race's proportions: head size, how broad the body is, overall height
@@ -1269,7 +1270,8 @@ static func vtoon_outlined() -> ShaderMaterial:
 
 ## Bakes a node's plain mesh parts into one mesh per look, so a detailed character costs a handful
 ## of draw calls. Named parts (Head, ArmR, Halo, ...) and anything with children stay separate.
-static func merge_static(node: Node3D) -> void:
+## `discard`: those parts are only freed (a body nothing will draw).
+static func merge_static(node: Node3D, discard := false) -> void:
 	var groups := {}
 	var drop: Array = []
 	for ch in node.get_children():
@@ -1278,6 +1280,9 @@ static func merge_static(node: Node3D) -> void:
 		var mi: MeshInstance3D = ch
 		var mat: Material = mi.material_override
 		if mat == null or mi.mesh == null:
+			continue
+		if discard:
+			drop.append(mi)
 			continue
 		var key := _mat_key(mat)
 		if not groups.has(key):

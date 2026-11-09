@@ -195,18 +195,11 @@ static func anchor(root: Node3D, anchor_name: String) -> Node3D:
 static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	root.set_meta("glb", false)
 	root.set_meta("rig_rest", WardenSkeleton.rig_rest(root))
-	if _measuring or not uses_model(arch):
+	if not will_dress(arch):
 		return
 	var rest := neutral_rest(arch)
-	var scene := _scene(arch)
-	var glb: Node3D = scene.instantiate() as Node3D if scene else null
+	var glb := _scene(arch).instantiate() as Node3D
 	var skel := skeleton(glb)
-	var bad: Array = WardenSkeleton.mismatches(skel, rest, extra_bones(arch)) if skel else ["no armature"]
-	if not bad.is_empty():
-		push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [path(arch), str(bad)])
-		if glb:
-			glb.free()
-		return
 	_hide_body(root)
 	glb.name = "Warden"
 	root.add_child(glb)
@@ -233,6 +226,25 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 	_smoke(root, look(art(arch)))
 	_bloom(root, glb, look(art(arch)))
+
+## Whether a build of this Warden is drawn from its .glb (Models.hunter then drops the procedural body's
+## loose parts instead of merging meshes nobody sees). The rig check runs once per model file.
+static func will_dress(arch: String) -> bool:
+	return not _measuring and uses_model(arch) and misfits(arch).is_empty()
+
+static var _misfits := {}      # .glb path -> the bones that don't fit the rig ([] when it fits)
+static func misfits(arch: String) -> Array:
+	var p := path(arch)
+	if not _misfits.has(p):
+		var scene := _scene(arch)
+		var glb: Node3D = scene.instantiate() as Node3D if scene else null
+		var skel := skeleton(glb)
+		_misfits[p] = WardenSkeleton.mismatches(skel, neutral_rest(arch), extra_bones(arch)) if skel else ["no armature"]
+		if glb:
+			glb.free()
+		if not (_misfits[p] as Array).is_empty():
+			push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [p, str(_misfits[p])])
+	return _misfits[p]
 
 ## Small pieces the match camera only sees as speckle (warden_look "far_hide": node names, Tarek's beads and fist
 ## shards) are drawn only up to FAR_HIDE_D from the camera; close-ups keep them.
