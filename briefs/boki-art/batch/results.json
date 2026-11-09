@@ -10706,5 +10706,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_effigeetle_pe_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_effigeetle_pe",
+    "name": "Effigeetle (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_effigeetle_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ermink_pe",
+    "name": "Ermink (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ermink_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glintmole_pe",
+    "name": "Glintmole (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glintmole_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frigatee_pe",
+    "name": "Frigatee (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_frigatee_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gloamshell_pe",
+    "name": "Gloamshell (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gloamshell_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frigatee_pe",
+    "name": "Frigatee (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_frigatee_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gloamshell_pe",
+    "name": "Gloamshell (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gloamshell_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glintmole_pe",
+    "name": "Glintmole (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glintmole_pe_1.jpg",
+    "ok": true
   }
 ]
