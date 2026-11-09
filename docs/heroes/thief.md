@@ -222,8 +222,8 @@ All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `-
 starts, lowered by 0.7 with no next bolt; the legs a stance), `thf_primed` (the empowered
 throw: both blades cocked behind the shoulders, driven out together at 0.04, a recoil onto the heels by 0.24, settled
 by 0.55), `thf_vault_r` /
-`thf_vault_l` (the ground Cartwheel inside the 0.48s dash: a 0.05s crouch with the arms swung up, a push-off
-with the crossbows tucked and the wings flaring, one aerial turn by 0.30, a landing crouch at 0.36, up by 0.48),
+`thf_vault_l` (the ground Cartwheel inside the 0.48s dash: a 0.05s crouch, the arms swinging up by 0.08 (they trail the body), a push-off
+with the crossbows tucked by 0.16 and the wings flaring, one aerial turn by 0.30, a landing crouch at 0.36, up by 0.48),
 `thf_vault_f` / `thf_vault_b` (the routine's tucked somersault, on the same beats), `thf_vault_twist` (its corkscrew;
 ThiefChain runs cartwheel, somersault, twist through a reset chain), `thf_exdash` (the air
 Cartwheel: a tucked flick, the star turned over by 0.34, then carried flat and stretched until she lands),
