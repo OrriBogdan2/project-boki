@@ -511,9 +511,9 @@ func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
 			if is_instance_valid(f) and not f.dead:
 				m.fx.burst(f.pos + Vector3(0, 0.4, 0), Color("c86a4a"), 4, 2.0 + k * 2.0, 0.35, 8.0, 0.8, Vector3(-dv.x, 0.6, -dv.y), 50.0))
 
-## s the hammer stays in his hand after the throw starts (sheet 0033-0034: about one frame of wind-up; with
-## the step it's queued on it leaves ~0.12 s after the press, as the arm comes through in bul_throw)
-const THROW_WIND := 0.08
+## s the hammer stays in his hand after the throw starts; with the step it's queued on (~0.04 s) it leaves
+## ~0.15 s after the press, as the arm comes through in bul_throw (its release key, 0.14 s; sheet 0033-0034)
+const THROW_WIND := 0.10
 
 func _throw() -> void:
 	play("bul_throw")
