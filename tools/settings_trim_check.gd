@@ -7,7 +7,8 @@ extends RefCounted
 const MAIN_KEYS := ["quality", "fullscreen", "ui_scale", "master"]
 ## Not rows on the settings tabs: version markers, the auto-detected preset, the per-hunter model switches
 ## (Video, one row per modelled hunter) and the bot level (Admin tools).
-const NOT_ROWS := ["keys", "keys_v", "keys2_v", "keys3_v", "keys4_v", "keys5_v", "keys6_v", "video_v", "quality_found", "warden_models", "bot_diff"]
+const NOT_ROWS := ["keys", "keys_v", "keys2_v", "keys3_v", "keys4_v", "keys5_v", "keys6_v", "video_v",
+		"quality_found", "warden_models", "bot_diff"]
 
 var bad := 0
 var tree: SceneTree
@@ -23,7 +24,8 @@ func _open(tab: String) -> void:
 	await tree.process_frame
 
 func _rows() -> Array:
-	return Overlay.root.find_children("*", "HBoxContainer", true, false).filter(func(r): return String(r.get_meta("setting", "")) != "")
+	var rows := Overlay.root.find_children("*", "HBoxContainer", true, false)
+	return rows.filter(func(r): return String(r.get_meta("setting", "")) != "")
 
 func _row_keys() -> Array:
 	return _rows().map(func(r): return String(r.get_meta("setting")))
@@ -86,8 +88,8 @@ func run(main: Node) -> void:
 	# the first page
 	ok(Overlay.SETTINGS_TABS[0] == "Main" and Overlay.tab == "Main", "settings open on Main")
 	await _open("Main")
-	ok(_row_keys() == MAIN_KEYS, "Main shows only quality, fullscreen, interface size and volume (%s)" % str(_row_keys()))
-	ok(_tab_names() == ["Main", "Controls", "More..."], "the tab bar is Main, Controls and More... (%s)" % str(_tab_names()))
+	ok(_row_keys() == MAIN_KEYS, "Main shows only quality, fullscreen, size, volume (%s)" % str(_row_keys()))
+	ok(_tab_names() == ["Main", "Controls", "More..."], "tab bar: Main, Controls, More... (%s)" % str(_tab_names()))
 	if shot != "":
 		tree.root.get_texture().get_image().save_png(shot + "/trim_main.png")
 	# Controls: the common binds first, the rest behind More keys...
@@ -98,8 +100,10 @@ func run(main: Node) -> void:
 		if b.text == "More keys...":
 			fold = b
 	ok(fold != null, "Controls has a More keys... button")
-	var seen: Array = _rows().filter(func(r): return r.is_visible_in_tree()).map(func(r): return String(r.get_meta("setting")))
-	ok(seen.has("bind:dash") and seen.has("bind:fire") and not seen.has("bind:ping"), "Moving and Fighting binds show, Squad and map ones wait")
+	var shown := _rows().filter(func(r): return r.is_visible_in_tree())
+	var seen: Array = shown.map(func(r): return String(r.get_meta("setting")))
+	var basics: bool = seen.has("bind:dash") and seen.has("bind:fire")
+	ok(basics and not seen.has("bind:ping"), "Moving and Fighting binds show, Squad and map wait")
 	if shot != "":
 		tree.root.get_texture().get_image().save_png(shot + "/trim_controls.png")
 	if fold != null:
@@ -152,7 +156,9 @@ func run(main: Node) -> void:
 	tree.root.add_child(later)
 	var lost: Array = []
 	for k in Settings.DEFAULTS:
-		if not String(k).ends_with("_v") and later.get_v(k) != Settings.get_v(k):      # (the _v markers are migration steps)
+		if String(k).ends_with("_v"):
+			continue          # migration step markers
+		if later.get_v(k) != Settings.get_v(k):
 			lost.append(k)
 	tree.root.remove_child(later)
 	later.free()

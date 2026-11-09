@@ -341,7 +341,8 @@ func _quality_options() -> Array:
 ## What most players change: picture quality, window, volume. Keys are the next tab.
 func _tab_main(v: VBoxContainer) -> void:
 	_group(v, "Picture")
-	_choice(v, "Graphics quality", "quality", _quality_options(), func(): _show_settings.call_deferred(), "Changes from your next expedition")
+	var redraw := func(): _show_settings.call_deferred()
+	_choice(v, "Graphics quality", "quality", _quality_options(), redraw, "From your next expedition")
 	_toggle(v, "Fullscreen", "fullscreen")
 	_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05, "Menus and the HUD")
 	_group(v, "Volume")
@@ -365,7 +366,7 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_reticle_rows(v)
 	_group(v, "Boki")
 	var talk := [["quiet", "Quiet"], ["normal", "Normal"], ["chatty", "Chatty"]]
-	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger and your health. Chatty: everything it notices")
+	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger. Chatty: all of it")
 	if admin_allowed():
 		_group(v, "Admin")
 		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 90 s lobby before each expedition. Off: plain loading")
@@ -375,8 +376,8 @@ const BASIC_KEY_GROUPS := 2       # Moving and Fighting; the other key groups wa
 
 func _tab_controls(v: VBoxContainer) -> void:
 	_group(v, "How keys behave")
-	_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
-	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: you dash the way you're moving, or toward the cursor when standing still")
+	_toggle(v, "Quick cast", "cast_on_press", "Fire on press. Off: hold to aim, release to cast")
+	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: dash the way you are moving")
 	_toggle(v, "Tap to sneak", "crouch_toggle", "Tap the sneak key to start and stop, instead of holding it")
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
@@ -462,7 +463,7 @@ func _tab_video(v: VBoxContainer) -> void:
 
 func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")
-	_toggle(v, "Show heights clearly", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
+	_toggle(v, "Show heights clearly", "depth_cues", "Shaded cliffs and a shadow under each hunter")
 	_group(v, "Comfort")
 	_slider(v, "Screen shake", "screen_shake", 0.0, 1.0, 0.05, "Only big hits on you shake the view; 0 turns it off")
 	_toggle(v, "Fewer flashes", "reduce_flashes", "Softer full-screen flashes when you're hit or level up")
@@ -471,7 +472,8 @@ func _tab_access(v: VBoxContainer) -> void:
 func _tab_demo(v: VBoxContainer) -> void:
 	_group(v, "Recording")
 	var rec_hint := "Clean HUD hides tips and debug text and smooths the camera. %s cycles it in a match, %s orbits the camera with No HUD"
-	var rec_row := _row(v, "Recording mode", rec_hint % [Settings.key_cap("record"), Settings.key_cap("record_orbit")], "rec_level")
+	var rec_keys := [Settings.key_cap("record"), Settings.key_cap("record_orbit")]
+	var rec_row := _row(v, "Recording mode", rec_hint % rec_keys, "rec_level")
 	var rec_ob := OptionButton.new()
 	rec_ob.custom_minimum_size.x = 280
 	rec_ob.size_flags_vertical = Control.SIZE_SHRINK_CENTER
