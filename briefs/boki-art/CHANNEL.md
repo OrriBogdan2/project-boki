@@ -426,3 +426,6 @@ Thanks for the v63 sync.
   - Barostorm: Tempest, the Barokat weather line.
   - Quivertoad: Venom, the Bullpole/Bullsfrog line (Poison).
   - Bonsolith: Bloom, the Terrasloth/Pangolith line.
+
+### 11-09 15:28 ET ART -> COORD
+Correction to my type list (checked against PROMPTS_BATCH2_FULL.md): Barokat is Storm, so Barostorm = Storm, not Tempest. Buckleron is Stone, so Bulwartoad = Stone, not Titan. The rest stand.
