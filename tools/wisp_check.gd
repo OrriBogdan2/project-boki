@@ -71,8 +71,8 @@ func _hero_cycle(arch_id: String) -> void:
 	var wisp := HunterWisp.node_of(p)
 	var spawned: bool = wisp != null and wisp.is_inside_tree() and wisp.get_parent() == p
 	ok(p.downed and spawned, tag + "downed: a Wisp spawns on the hunter")
-	ok(not p.model.visible, tag + "downed: the hero model is hidden")
 	_frames(0.4)
+	ok(not p.model.visible, tag + "downed: the hero model is hidden after the fall")
 	ok(HunterWisp.mode_of(p) == HunterWisp.ON, tag + "the pop-in ends and the Wisp idles")
 	ok(p.downed and not p.out, tag + "downed gameplay untouched: still downed, not out")
 	_frames(0.3, Vector3(0.08, 0, 0))
@@ -80,12 +80,11 @@ func _hero_cycle(arch_id: String) -> void:
 	ok((wisp.get_node("Tilt") as Node3D).basis != Basis.IDENTITY, tag + "a moving Wisp leans")
 	m.revive_hunter(p, null)
 	_frames(0.04)
-	var popping: bool = HunterWisp.mode_of(p) == HunterWisp.OUT
-	ok(not p.downed and p.model.visible and popping, tag + "revived: the hero is back, the pop-out plays")
-	ok(p.model.scale.y < base.y * 0.95, tag + "the hero starts small (%.2f of full)" % (p.model.scale.y / base.y))
+	var rising: bool = HunterWisp.mode_of(p) == HunterWisp.OUT
+	ok(not p.downed and p.model.visible and rising, tag + "revived: the hero is back, the rise plays")
 	_frames(0.5)
 	ok(HunterWisp.mode_of(p) == "" and HunterWisp.node_of(p) == null, tag + "the Wisp is gone after the pop-out")
-	ok(p.model.scale.is_equal_approx(base), tag + "the hero is back at full size")
+	ok(p.model.scale.is_equal_approx(base), tag + "the hero's size is untouched")
 
 func _bleed_out() -> void:
 	var p: Hunter = m.player
@@ -111,7 +110,7 @@ func _teammate() -> void:
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == p.team and x != p)[0]
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
 	m.knock(mate, foe, {})
-	_frames(0.3)
+	_frames(0.5)
 	ok(HunterWisp.node_of(mate) != null and not mate.model.visible, "a teammate's downed state shows their Wisp")
 	var teammates_downed: bool = mate.downed
 	m.revive_hunter(mate, null)
@@ -125,7 +124,7 @@ func _tutorial() -> void:
 	var base: Vector3 = p.model.scale
 	_frames(0.2)
 	m.knock(p, null, {})
-	_frames(0.3)
+	_frames(0.5)
 	ok(p.downed and HunterWisp.node_of(p) != null and not p.model.visible, "tutorial: downed shows the Wisp")
 	var waited := 0.0
 	while p.downed and waited < 10.0:       # the tutorial brings you back after about 3 s of its own time

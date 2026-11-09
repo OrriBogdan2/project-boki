@@ -22,6 +22,7 @@ const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-
 const FADE := 0.1            # s: one clip into the next, and into or out of an action
 const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
+const FALL_FADE := 0.05      # s: into the fall or the rise clip (quick: the down is a hit)
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
@@ -292,6 +293,10 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			return {"proc": true}
 	if bool(s.get("dead", false)) and st.has("dead"):
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
+	var fall := float(s.get("fall", -1.0))
+	var hit_clip := String((st.get("hit", {}) as Dictionary).get("front", ""))
+	if fall >= 0.0 and hit_clip != "":      # the fall to a Wisp and the rise back: the hit clip stretched over it
+		return {"clip": hit_clip, "t": fall * lib.get_animation(hit_clip).length, "fade": FALL_FADE}
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):

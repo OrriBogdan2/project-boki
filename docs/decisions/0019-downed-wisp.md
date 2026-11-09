@@ -17,8 +17,12 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
   hitbox and the revive UI are all as before. Only the picture changes. `Hunter._anim_state` now feeds
   `downed = false` to HunterAnim, so the hero never plays the crawl; the per-hero `downed` clips are no
   longer picked (the files stay).
-- Pop-in (0.25 s): flash, ring, puff, sound. Pop-out on revive (0.3 s): the Wisp brightens and the hero
-  scales from 0.6 to full with a small squash. Death or a bleed-out snuffs the Wisp with a spark burst.
+- Going down (2026-11-09, ext/anim-downed): the hero first plays a 0.35 s fall (its own `hit_f` clip from
+  `content/rules/warden_anim/<art>.json`, stretched over `pop_in.time`; fed to the clips as state `fall`),
+  the Wisp fades in over the last `pop_in.fade` s (0.12), then the hero hides and the Wisp puffs (ring,
+  sound). Revive: a 0.3 s rise (`pop_out.time`), the same clip backwards with the Wisp brightening away.
+  A hero with no clips file just stands through it. Death or a bleed-out snuffs the Wisp with a spark burst.
+  All of it follows `downed`/`out`, so remotes play it with no Net change; timers and speed are untouched.
 - The look is data: `content/rules/wisp_looks.json`, built by `WispLook` (scripts/match/wisp_look.gd)
   procedurally (glow-shader core, halo, eyes, motes, trail). The id is `Save.d["look"]["wisp"]`, the same
   pattern as glider skins; unknown ids give `default`.
