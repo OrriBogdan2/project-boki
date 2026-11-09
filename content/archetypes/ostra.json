@@ -53,7 +53,7 @@
 		"id": "swap",
 		"name": "Lantern Trade",
 		"icon": "shadowstep",
-		"col": "#b8f5ea",
+		"col": "#c65cff",
 		"cd": 9.5,
 		"reach": 12.0,
 		"time": 1.8,
@@ -61,11 +61,11 @@
 		"radius": 1.5,
 		"ally_shield": 26.0,
 		"ally_r": 3.0,
-		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 30% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.",
+		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 35% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.",
 		"lob": 4.5,
 		"aim_max": 1.5,
 		"keep_h": 3.0,
-		"fly_slow": 0.3
+		"fly_slow": 0.35
 	},
 	"rmb": {
 		"delivery": "projectile",
