@@ -15291,5 +15291,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/dragonkite_e_w28_3.jpg",
     "ok": true
+  },
+  {
+    "id": "embrook_r2_w28",
+    "name": "Embrook",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/embrook_r2_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "embrook_r2_w28",
+    "name": "Embrook",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/embrook_r2_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "frothisk_r_w28",
+    "name": "Frothisk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/frothisk_r_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "embrook_r2_w28",
+    "name": "Embrook",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/embrook_r2_w28_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "embrook_r2_w28",
+    "name": "Embrook",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/embrook_r2_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "frothisk_r_w28",
+    "name": "Frothisk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/frothisk_r_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole_e_w28",
+    "name": "Geodemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodemole_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frothisk_r_w28",
+    "name": "Frothisk",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/frothisk_r_w28_3.jpg",
+    "ok": true
   }
 ]
