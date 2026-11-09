@@ -10986,5 +10986,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_nettlynx_pe_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_nettlynx_pe",
+    "name": "Nettlynx (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_nettlynx_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_oarlet_pe",
+    "name": "Oarlet (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_oarlet_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_murmurling_pe",
+    "name": "Murmurling (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_murmurling_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_oarlet_pe",
+    "name": "Oarlet (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_oarlet_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_parasolth_pe",
+    "name": "Parasolth (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_parasolth_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_parasolth_pe",
+    "name": "Parasolth (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_parasolth_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipewurm_pe",
+    "name": "Pipewurm (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pipewurm_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipewurm_pe",
+    "name": "Pipewurm (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pipewurm_pe_2.jpg",
+    "ok": true
   }
 ]
