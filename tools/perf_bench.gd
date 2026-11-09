@@ -35,6 +35,13 @@ var match_p99 := 0.0
 var vp: RID
 
 func run(main_node: Node) -> void:
+	setup(main_node)
+	await _match()
+	await _farm()
+	_finish()
+
+## Reads the --bench-* arguments and sizes the window; --perf-budget-check shares it.
+func setup(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
@@ -56,8 +63,8 @@ func run(main_node: Node) -> void:
 	vp = main.get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(vp, true)
 	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,gpu_ms,draws,tris,objects,nodes")
-	await _match()
-	await _farm()
+
+func _finish() -> void:
 	var win := main.get_window()
 	print("BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [Settings.quality(),
 		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), win.size.x,
@@ -80,7 +87,7 @@ func _gate() -> int:
 		"PASS" if match_p99 <= cap else "FAIL", match_p99, cap, float(base[key]["p99"])])
 	return 0 if match_p99 <= cap else 1
 
-func _match() -> void:
+func _match() -> Array:
 	var o := Match.demo_opts()
 	o.merge({"teams": teams, "squad": squad, "total": teams * squad, "raid": "ash", "blight": true, "no_drop": true,
 		"god": true,
@@ -152,6 +159,7 @@ func _match() -> void:
 	Match.prof_on = false
 	if "--bench-ablate" in OS.get_cmdline_user_args():
 		await _ablate()
+	return fl
 
 ## --bench-ablate: what each script's _process and each engine node class's internal process costs, by
 ## turning it off for a few frames (process ms, against a fresh reference each time).

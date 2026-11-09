@@ -26,6 +26,7 @@ const CHECKS := {
 	"--bulwark-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--music-leave-check": ["res://tools/music_leave_check.gd", "music_leave_check", null],
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],      # item 94
+	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],      # draw calls, tris, shadow lights, frame ms
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],
 	"--anim-lod-check": ["res://tools/anim_lod_check.gd", "anim_lod_check", null],      # owner 11-08 expedition fps
 	"--hotpath-check": ["res://tools/hotpath_check.gd", "hotpath_check", null],        # owner 11-08 expedition fps

@@ -9,7 +9,7 @@ const DEFAULTS := {
 	# audio
 	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
 	# video
-	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 4, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
+	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
@@ -39,27 +39,39 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 ## detail for speed, Ultra pushes draw distance, shadows and level of detail further. A preset sets the
 ## plain settings (msaa, shadows) and these knobs, which the renderer and the world builder read through q():
 ##   px: tallest 3D render in pixels (0: native); a bigger window renders the 3D smaller and FSR scales it
-##   up (see _apply_render_scale), so a retina or 4K screen doesn't cost 2-4x the pixels  ·  lod: mesh LOD
-##   threshold (pixels of error allowed)  ·  grass: share of grass and flowers kept  ·  draw: draw distance
+##   up (see _apply_render_scale), so a retina or 4K screen doesn't cost 2-4x the pixels  ·  scale: the most
+##   of the window's size the 3D renders at (0.77 Low, 0.5 Very Low)  ·  fxaa: edge smoothing when MSAA is off
+##   ·  steps: physics catch-up steps a frame (Engine.max_physics_steps_per_frame)  ·  unlit: no lighting at all
+##   ·  lod: mesh LOD threshold (pixels of error allowed)  ·  grass: share of grass and flowers kept  ·  draw: draw distance
 ##   of scatter and props (x)  ·  shadow_k: shadow distance (x)  ·  splits: shadow cascades  ·  atlas: sun
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
 ##   occlusion and bloom  ·  clouds: drifting cloud layers  ·  shafts: light shafts  ·  fx: particle amount
 ##   (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)  ·
 ##   anim_lod: far and off-screen Hunters and Boki animate and shade cheaper (scripts/heroes/anim_lod.gd)
 const QUALITY := {
-	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540, "lod": 8.0, "grass": 0.15, "draw": 0.45,
+	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540,
+		"scale": 0.5, "fxaa": false, "steps": 2, "unlit": true,
+		"lod": 8.0, "grass": 0.15, "draw": 0.45,
 		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
 		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0, "anim_lod": true},
-	"low": {"name": "Low", "msaa": 0, "shadows": false, "px": 720, "lod": 4.0, "grass": 0.4, "draw": 0.6,
-		"shadow_k": 0.7, "splits": 1, "atlas": 2048, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
+	"low": {"name": "Low", "msaa": 0, "shadows": true, "px": 900,
+		"scale": 0.77, "fxaa": true, "steps": 2, "unlit": false,
+		"lod": 4.0, "grass": 0.4, "draw": 0.6,
+		"shadow_k": 0.45, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
 		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0, "anim_lod": true},
-	"medium": {"name": "Medium", "msaa": 2, "shadows": true, "px": 1080, "lod": 2.0, "grass": 0.7, "draw": 0.8,
-		"shadow_k": 0.8, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
+	"medium": {"name": "Medium", "msaa": 0, "shadows": true, "px": 1080,
+		"scale": 1.0, "fxaa": true, "steps": 4, "unlit": false,
+		"lod": 2.0, "grass": 0.7, "draw": 0.8,
+		"shadow_k": 0.6, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
 		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0, "anim_lod": true},
-	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0, "lod": 1.0, "grass": 1.0, "draw": 1.0,
+	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0,
+		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
+		"lod": 1.0, "grass": 1.0, "draw": 1.0,
 		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
 		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": true},
-	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0, "lod": 0.5, "grass": 1.0, "draw": 1.6,
+	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0,
+		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
+		"lod": 0.5, "grass": 1.0, "draw": 1.6,
 		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
 		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": false},
 }
@@ -293,6 +305,8 @@ func apply(k: String) -> void:
 		"msaa":
 			var m := int(v[k])
 			get_tree().root.msaa_3d = Viewport.MSAA_4X if m >= 4 else (Viewport.MSAA_2X if m >= 2 else Viewport.MSAA_DISABLED)
+			var fxaa: bool = m == 0 and bool(q("fxaa"))
+			get_tree().root.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if fxaa else Viewport.SCREEN_SPACE_AA_DISABLED
 		"shadows":
 			for n in get_tree().root.find_children("*", "DirectionalLight3D", true, false):
 				(n as DirectionalLight3D).shadow_enabled = bool(v[k]) and _casts(n as DirectionalLight3D)
@@ -380,7 +394,7 @@ func _apply_render_scale() -> void:
 	var root := get_tree().root
 	var px := int(q("px"))
 	var h := maxi(1, root.size.y)
-	root.scaling_3d_scale = clampf(float(px) / h, 0.25, 1.0) if px > 0 else 1.0
+	root.scaling_3d_scale = clampf(minf(float(px) / h if px > 0 else 1.0, float(q("scale"))), 0.25, 1.0)
 	var fsr := RenderingServer.get_current_rendering_method() != "gl_compatibility" and root.scaling_3d_scale < 0.999
 	root.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if fsr else Viewport.SCALING_3D_MODE_BILINEAR
 
@@ -408,6 +422,8 @@ func _apply_quality() -> void:
 	var root := get_tree().root
 	_apply_render_scale()
 	root.mesh_lod_threshold = float(Q["lod"])
+	root.debug_draw = Viewport.DEBUG_DRAW_UNSHADED if bool(Q["unlit"]) else Viewport.DEBUG_DRAW_DISABLED
+	Engine.max_physics_steps_per_frame = int(Q["steps"])
 	RenderingServer.directional_soft_shadow_filter_set_quality(int(Q["soft"]))
 	RenderingServer.directional_shadow_atlas_set_size(int(Q["atlas"]), true)
 	for n in root.find_children("*", "Light3D", true, false):
