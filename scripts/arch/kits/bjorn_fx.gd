@@ -1,24 +1,24 @@
 class_name BjornFx
 extends Node3D
 ## Breaker's own effects, every one pooled (built once when the kit starts). The coloured ones are layered
-## (KitShaders): an alpha-blended body in his gold, orange and red with the glow on top, so they keep their
-## colour on bright grass.
-## - the thrown hammer (tumbling, a gold-orange glow and trail), planted head-down in the ground under an
+## (KitShaders): an alpha-blended body in his palette (content/vfx/bulwark.json: deep gold, ivory, its hot white)
+## with the glow on top, so they keep their colour on bright grass. No orange or red: those are Cinder's and Kael's.
+## - the thrown hammer (tumbling, a gold glow and trail), planted head-down in the ground under an
 ##   upright gold beacon with rising chevrons
 ## - the held swing: the hammer whirled round him at arm's length, flat over his shoulder, with a
-##   gold-orange trail behind its head, a gold glint on the head from 0.6 s that grows; at full charge a short
+##   gold trail behind its head, a gold glint on the head from 0.6 s that grows; at full charge a short
 ##   ring-free flash on it, the glint burning white-hot while the perfect window is open. It never stops until
 ##   he lets go: the charge motion only, the damage comes on the release
-## - the slam's flaming 180 degree crescent in front, the 360 Smash's red-orange-gold spiral ring
+## - the slam's flaming 180 degree crescent in front, the 360 Smash's gold and ivory spiral ring
 ## - the dash's gold chevron wake (his own after-image)
 ## - his aegis: an ivory dome over the raised wall (HeroVfx "aegis", a shell), rising out of the ground, flashing on
 ##   a block or a push, cracking as it weakens (the verbs wall underneath keeps the blocking; its plain slab is
 ##   hidden), with a pulsing double chevron in front of it showing its push
 ## The aegis's moments, the Shield Slam, Mending Ground and Faultline are HeroVfx data (content/vfx/bulwark.json).
 
-const GOLD := Color("ffc94a")
-const EMBER := Color("ff8a2a")
-const STAR_GOLD := Color("ffd25a")
+const GOLD := Color("e8c96a")        # content/vfx/bulwark.json "deep": the body of his hammer looks
+const IVORY := Color("fff0b0")       # "main", his signature: the bright edge
+const STAR_GOLD := Color("fffbe6")   # "hot": glints and flashes
 ## s the full-charge flare shows (the sheet: one bright frame)
 const FLARE_T := 0.12
 ## s the slam's crescent stays at full strength, then s it burns away over
@@ -53,7 +53,7 @@ const ORBIT_IN := 0.3
 const ORBIT_OUT := 1.35
 const ORBIT_PAST := 1.25
 const ORBIT_ARC := 3.4
-const ORBIT_COL := Color(1.0, 0.56, 0.1)
+const ORBIT_COL := GOLD
 const ORBIT_POWER := 3.4
 const ORBIT_FAST := 1.4
 ## the planted hammer's size, and its lean off vertical (rad)
@@ -113,7 +113,7 @@ func _ready() -> void:
 	if not _own_hammer():
 		PinBjornWeapons.hammer(hammer, 1.25)
 	hammer_glow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", Color(GOLD, 0.9), true))
-	trail = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", Color(1.0, 0.62, 0.2), true))
+	trail = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", GOLD, true))
 	beacon = KitMeshes.inst(self, KitMeshes.pillar(0.22, 0.4, 5.0), KitShaders.mat("beam", GOLD, true))
 	glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", STAR_GOLD, true))
 	flare = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", STAR_GOLD, true))
@@ -122,16 +122,16 @@ func _ready() -> void:
 	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
 	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", ORBIT_COL, true))
 	var cres_mesh := KitMeshes.band(CRES_IN, CRES_OUT, -PI * 0.5, PI * 0.5, 40)
-	crescent = KitMeshes.inst(self, cres_mesh, KitShaders.mat("crescent", Color(1.0, 0.6, 0.12), true))
+	crescent = KitMeshes.inst(self, cres_mesh, KitShaders.mat("crescent", GOLD, true))
 	var swirl_mesh := KitMeshes.band(1.0, 2.4, 0.0, TAU, 48)
-	swirl = KitMeshes.inst(self, swirl_mesh, KitShaders.mat("swirl", Color("e8301a"), true))
-	KitShaders.param(swirl, "color2", Color("ffc93a"))
+	swirl = KitMeshes.inst(self, swirl_mesh, KitShaders.mat("swirl", GOLD, true))
+	KitShaders.param(swirl, "color2", IVORY)
 	KitShaders.param(swirl, "twist", 2.2)
 	KitShaders.param(swirl, "spin", 5.0)
 	var wake_mesh := KitMeshes.band(0.35, 0.8, -1.3, 1.3, 14)
 	for i in WAKE_POOL:
-		var wake := KitMeshes.inst(self, wake_mesh, KitShaders.mat("swirl", EMBER, true))
-		KitShaders.param(wake, "color2", GOLD)
+		var wake := KitMeshes.inst(self, wake_mesh, KitShaders.mat("swirl", GOLD, true))
+		KitShaders.param(wake, "color2", IVORY)
 		KitShaders.param(wake, "twist", 0.0)
 		wakes.append(wake)
 		wake_life.append(0.0)

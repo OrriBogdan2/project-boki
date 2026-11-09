@@ -433,13 +433,13 @@ func _hold_tell() -> void:
 	var rate: Array = lmb_def()["spin_turns"]
 	spin += TAU * lerpf(float(rate[0]), float(rate[1]), k) * Match.DT
 	fx.hold(lmb_t, k, launch.in_window(lmb_t), spin)
-	AimKit.charge(h, k, {"col": Color("ffc94a"), "col2": Color("fff1c0"), "flare": false})
+	AimKit.charge(h, k, {"col": BjornFx.GOLD, "col2": BjornFx.IVORY, "flare": false})
 	if floori(spin / TAU) > floori(was / TAU):
 		m.sfx("bjorn_spin", h.pos, -9.0 if h.is_local() else -13.0, lerpf(0.9, 1.25, k))
 	if k >= 0.99 and not flared:
 		flared = true
 		fx.full_flare()
-		AimKit.flare(h, {"col2": Color("fff1c0")})
+		AimKit.flare(h, {"col2": BjornFx.IVORY})
 		m.sfx("bjorn_glint", h.pos, -3.0 if h.is_local() else -8.0)
 		m.sfx("click", h.pos, -2.0 if h.is_local() else -9.0, 1.6)
 
@@ -529,7 +529,7 @@ func _throw() -> void:
 	h.swing_t = 0.18; h.swing_n += 1
 	m.sfx("bjorn_throw", h.pos, -2.0)
 	Oomph.on_fire(h, true)
-	net_bolt(at, at + Vector3(mace["dir"].x, 0, mace["dir"].y) * dist, Color("ffd27a"))
+	net_bolt(at, at + Vector3(mace["dir"].x, 0, mace["dir"].y) * dist, BjornFx.IVORY)
 	CombatBus.ability_used.emit(h, id + "_throw", "primary")
 
 func _recall() -> void:
@@ -786,7 +786,7 @@ func _spin_hit(wd: Vector2) -> void:
 	fx.smash_ring(h.pos)
 	m.fx.dust(h.pos, 10)
 	m.sfx("bjorn_whirl", h.pos, -2.0)
-	net_ring(h.pos, r, Color("ff7a3a"))
+	net_ring(h.pos, r, BjornFx.GOLD)
 
 # ------------------------------------------------------------------ E: Mending Ground
 ## Where the zone sits: round the hammer wherever it is (planted, flying out or back), else round him.
