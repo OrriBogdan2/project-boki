@@ -98,7 +98,7 @@ func _far_rocks(parent: Node3D, rng: RandomNumberGenerator) -> void:
 	var ctr := Vector2(W.w / 2.0, W.h / 2.0)
 	var rad := maxf(W.w, W.h) * 0.5
 	var n := int(clampf(rad * 0.35, 10, 40))
-	var mats := {}
+	var batches := {}      # "kind/style/shape" -> [kind, style, shape, transforms]
 	for k in n:
 		var a := TAU * k / n + rng.randf_range(-0.2, 0.2)
 		var d := rad * rng.randf_range(1.22, 1.7)
@@ -112,13 +112,35 @@ func _far_rocks(parent: Node3D, rng: RandomNumberGenerator) -> void:
 			isl.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			parent.add_child(isl)
 			for t in rng.randi_range(1, 3):
-				var tn := Flora.node("tree", style, rng.randi_range(0, Flora.VARIANTS - 1), rng.randf_range(0.9, 1.3))
+				var shape := rng.randi_range(0, Flora.VARIANTS - 1)
+				var scale_k := rng.randf_range(0.9, 1.3)
 				var ta := rng.randf() * TAU
-				tn.position = at + Vector3(cos(ta), 0, sin(ta)) * r * rng.randf_range(0.0, 0.5)
-				tn.rotation.y = rng.randf() * TAU
-				parent.add_child(tn)
+				var pos := at + Vector3(cos(ta), 0, sin(ta)) * r * rng.randf_range(0.0, 0.5)
+				var turn := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * scale_k)
+				_batch(batches, "tree", style, shape, Transform3D(turn, pos))
 		else:
-			var rn := Flora.node("rock", style, rng.randi_range(0, Flora.VARIANTS - 1), rng.randf_range(2.0, 5.0))
-			rn.position = at
-			rn.rotation = Vector3(rng.randf_range(-0.6, 0.6), rng.randf() * TAU, rng.randf_range(-0.6, 0.6))
-			parent.add_child(rn)
+			var shape := rng.randi_range(0, Flora.VARIANTS - 1)
+			var scale_k := rng.randf_range(2.0, 5.0)
+			var tilt := Vector3(rng.randf_range(-0.6, 0.6), rng.randf() * TAU, rng.randf_range(-0.6, 0.6))
+			_batch(batches, "rock", style, shape, Transform3D(Basis.from_euler(tilt).scaled(Vector3.ONE * scale_k), at))
+	for b in batches.values():
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = Flora.mesh(b[0], b[1], b[2])
+		mm.instance_count = b[3].size()
+		for k in b[3].size():
+			mm.set_instance_transform(k, b[3][k])
+		var mi := MultiMeshInstance3D.new()
+		mi.multimesh = mm
+		mi.material_override = Flora.material(b[0], b[0] == "rock")
+		# 6 m or more below the islands: nothing to shade
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mi.name = "Far_%s_%s_%d" % [b[0], b[1], b[2]]
+		parent.add_child(mi)
+
+## Queue one far prop; props of the same shape share a MultiMesh (one draw), however far apart.
+func _batch(batches: Dictionary, kind: String, style: String, shape: int, xf: Transform3D) -> void:
+	var key := "%s/%s/%d" % [kind, style, shape]
+	if not batches.has(key):
+		batches[key] = [kind, style, shape, []]
+	batches[key][3].append(xf)
