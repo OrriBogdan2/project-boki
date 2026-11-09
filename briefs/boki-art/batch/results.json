@@ -8725,5 +8725,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_grainspin_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_mumblet",
+    "name": "Mumblet (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_mumblet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle",
+    "name": "Tootle (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_tootle_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pawnfry",
+    "name": "Pawnfry (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pawnfry_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grainspin",
+    "name": "Grainspin (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_grainspin_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravigrub",
+    "name": "Gravigrub (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gravigrub_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_olmlet",
+    "name": "Olmlet (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_olmlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_olmlet",
+    "name": "Olmlet (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_olmlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_polyshroom",
+    "name": "Polyshroom (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_polyshroom_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_olmlet",
+    "name": "Olmlet (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_olmlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravigrub",
+    "name": "Gravigrub (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gravigrub_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravigrub",
+    "name": "Gravigrub (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gravigrub_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_morelkin",
+    "name": "Morelkin (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_morelkin_3.jpg",
+    "ok": true
   }
 ]
