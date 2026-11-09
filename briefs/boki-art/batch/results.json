@@ -38188,5 +38188,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_eclipsowl_e4_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_eclipsowl_e3",
+    "name": "Eclipsowl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_e3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_e4",
+    "name": "Eclipsowl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_e4_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_e5",
+    "name": "Eclipsowl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_e5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_e4",
+    "name": "Eclipsowl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_e4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_e4",
+    "name": "Eclipsowl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_e4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_e5",
+    "name": "Eclipsowl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_e5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_e5",
+    "name": "Eclipsowl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_e5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravitank_g1",
+    "name": "Gravitank (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g1_3.jpg",
+    "ok": true
   }
 ]
