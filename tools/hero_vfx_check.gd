@@ -28,6 +28,7 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
 			{"p": "drop", "n": 24}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
+		"rope": {"fx": [{"p": "chain", "at": "tip", "size": 0.2}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
 ## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
 const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
@@ -105,7 +106,8 @@ func _recipes(arch: String) -> void:
 			var lasts: bool = layer["p"] == "thread"      # (a needle's thread stays as long as the needle)
 			if (life > MAX_LIFE and not lasts) or flare_big or vortex_big:
 				over.append(mv)
-			if not (HeroVfx.MODES.has(layer["p"]) or HeroVfx.LOOKS.has(layer["p"]) or layer["p"] == "string"):
+			var hold_only: bool = layer["p"] in ["string", "chain"]
+			if not (HeroVfx.MODES.has(layer["p"]) or HeroVfx.LOOKS.has(layer["p"]) or hold_only):
 				flat_only.append(layer["p"])
 	ok(bad_sound.is_empty(), "%s: every sound in the data has a file %s" % [arch, bad_sound])
 	ok(bad_col.is_empty(), "%s: every colour is in the palette %s" % [arch, bad_col])
@@ -288,6 +290,18 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(way.distance_to(Vector3(0, 0, 1)) < 0.01, "a stream held along the aim turns with it (%s)" % way)
 	m.time += HeroVfx.HOLD_LINGER + 0.1
 	V._tick_holds()
+	_clear(V)
+	V.hold(P, "rope", 0.0, {"to": P.pos + Vector3(3, 1, 0)})
+	V.hold(P, "rope", 1.0, {"to": P.pos + Vector3(0, 1, 3)})
+	V._tick_holds()
+	var rope: MeshInstance3D = V.holds.values()[0]["layers"][0]["node"]
+	var tension: float = (rope.material_override as ShaderMaterial).get_shader_parameter("life")
+	var far_end := (rope.mesh as ImmediateMesh).get_aabb().end
+	ok(rope.visible and tension == 1.0 and far_end.z > P.pos.z + 2.5,
+			"a held chain runs to the kit's newest point at its tension (%.1f, %s)" % [tension, far_end])
+	m.time += HeroVfx.HOLD_LINGER + 0.1
+	V._tick_holds()
+	ok(not rope.visible, "and goes when the asks stop")
 	_clear(V)
 	var shot := Node3D.new()
 	m.add_child(shot)

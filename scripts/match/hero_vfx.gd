@@ -34,6 +34,10 @@ const SWEEP_INNER := 0.35      # the arc mesh's inner radius, as a share of its 
 const SCORCH_LIFT := 0.06       # m a ground look floats, clear of the ground mesh
 const PREWARM_LIFE := 30.0     # s a loading-screen stand-in particle lives (it must outlast the slowest loading frames)
 const SEED_MAX := 8.0          # a look's noise offset (small: the sine hash loses precision on big inputs)
+const CHAIN_MODE := 8          # the shader's M_CHAIN: a hold's chain, drawn on a mesh-trail node
+const CHAIN_SEG := 0.12        # m between a chain's strip points (its sway bends smoothly)
+const CHAIN_WAVES := 2.0       # waves of sway along a slack chain
+const CHAIN_SWAY_HZ := 16.0    # rad/s the slack sway travels
 
 static var _data := {}         # arch -> its content/vfx data ({} when the Hero has none yet)
 
@@ -465,6 +469,7 @@ func _ribbon(layer: Dictionary, h: Hunter, o: Dictionary) -> void:
 	var mi: MeshInstance3D = _take("ribbon", _surface_node.bind("ribbon"))
 	var mt: ShaderMaterial = mi.material_override
 	_paint(mt, layer, h)
+	mt.set_shader_parameter("mode", MODES["ribbon"])          # (the node may have drawn a chain last)
 	mi.global_transform = Transform3D.IDENTITY
 	(mi.mesh as ImmediateMesh).clear_surfaces()
 	ribbons.append({"node": mi, "mat": mt, "h": h, "anchor": String(layer.get("at", "chest")), "t": 0.0,
@@ -610,12 +615,14 @@ func shell(h: Hunter, move: String) -> MeshInstance3D:
 
 # ------------------------------------------------------------------ holds
 ## Something that lasts while the kit keeps asking, once per tick: a blade heating, a body burning. It follows its
-## anchors, and it stops by itself within HOLD_LINGER when the asks stop, whichever way the move ended.
+## anchors, and it stops by itself within HOLD_LINGER when the asks stop, whichever way the move ended. A "chain"
+## layer runs to `extra.to`, which the kit passes on every ask (the hook in flight).
 func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 	var key := "%d/%s" % [h.get_instance_id(), move]
 	if holds.has(key):
 		holds[key]["last"] = m.time
 		holds[key]["k"] = k
+		holds[key]["to"] = extra.get("to")
 		return
 	var rec := _rec(h, move)
 	var lod := lod_at(h.pos)
@@ -632,9 +639,10 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		if lod < 1.0 and bool(layer.get("near", false)):
 			continue
 		var kind := String(layer["p"])
-		if kind == "string":
+		if kind == "string" or kind == "chain":
 			if not _model_has(h, String(layer.get("skip_if", ""))):
-				layers.append({"node": _string_node(layer, h), "layer": layer, "n": 0})
+				var mode: int = CHAIN_MODE if kind == "chain" else MODES["ribbon"]
+				layers.append({"node": _strip_node(layer, h, mode), "layer": layer, "n": 0})
 			continue
 		var node: GPUParticles3D = _take(kind, _mote_node.bind(kind))
 		var n := _aim_emitter(node, kind, layer, h, _way(layer, aim), o, lod)
@@ -648,7 +656,7 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		node.emitting = true
 		live_n += n
 		layers.append({"node": node, "layer": layer, "n": n})
-	holds[key] = {"h": h, "last": m.time, "k": k, "layers": layers, "at": o.get("at")}
+	holds[key] = {"h": h, "last": m.time, "k": k, "layers": layers, "at": o.get("at"), "to": o.get("to")}
 
 func _tick_holds() -> void:
 	for key: String in holds.keys():
@@ -667,6 +675,8 @@ func _tick_holds() -> void:
 				node.global_position = _where(lay["layer"], hunter, base, aim)
 				_seat(node, node.global_position)
 				_reaim(node, lay["layer"], aim)
+			elif lay["layer"]["p"] == "chain":
+				_draw_chain(lay, hunter, e)
 			else:
 				_draw_string(lay, hunter)
 
@@ -696,10 +706,12 @@ func _end_hold(e: Dictionary) -> void:
 		else:
 			node.visible = false
 
-## A thin glowing line through named anchors (a bowstring): a mesh trail node drawn fresh from them each frame.
-func _string_node(layer: Dictionary, h: Hunter) -> Node3D:
+## A strip drawn fresh each frame on a mesh trail node: a thin glowing line through named anchors (a bowstring),
+## or a chain (CHAIN_MODE).
+func _strip_node(layer: Dictionary, h: Hunter, mode: int) -> Node3D:
 	var mi: MeshInstance3D = _take("ribbon", _surface_node.bind("ribbon"))
 	_paint(mi.material_override, layer, h)
+	(mi.material_override as ShaderMaterial).set_shader_parameter("mode", mode)
 	mi.global_transform = Transform3D.IDENTITY
 	return mi
 
@@ -721,6 +733,38 @@ func _draw_string(lay: Dictionary, h: Hunter) -> void:
 		mesh.surface_add_vertex(pts[i] + side)
 		mesh.surface_set_uv(Vector2(0.0, 1.0))
 		mesh.surface_add_vertex(pts[i] - side)
+	mesh.surface_end()
+
+## A chain from the layer's anchor to the hold's `to`, its links turned to the camera (UV.x counts links). The hold's
+## k is its tension: at 0 it hangs slack and sways, pinned at both ends; toward 1 it pulls straight and glows.
+func _draw_chain(lay: Dictionary, h: Hunter, e: Dictionary) -> void:
+	var mi := lay["node"] as MeshInstance3D
+	var mesh: ImmediateMesh = mi.mesh
+	mesh.clear_surfaces()
+	var cam := get_viewport().get_camera_3d()
+	if cam == null or not e["to"] is Vector3:
+		return
+	var layer: Dictionary = lay["layer"]
+	var a := anchor_pos(h, String(layer.get("at", "chest")))
+	var b: Vector3 = e["to"]
+	var span := a.distance_to(b)
+	if span < 0.05:
+		return
+	var k := clampf(float(e["k"]), 0.0, 1.0)
+	(mi.material_override as ShaderMaterial).set_shader_parameter("life", k)
+	var side := (b - a).cross(-cam.global_basis.z).normalized()
+	var half := float(layer.get("size", 0.2)) * 0.5
+	var links := span / float(layer.get("link", 0.25))
+	var sway := float(layer.get("slack", 0.3)) * (1.0 - k)
+	var n := maxi(2, int(span / CHAIN_SEG))
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+	for i in n + 1:
+		var f := float(i) / n
+		var p := a.lerp(b, f) + side * sin(f * TAU * CHAIN_WAVES - m.time * CHAIN_SWAY_HZ) * sway * sin(f * PI)
+		mesh.surface_set_uv(Vector2(f * links, 0.0))
+		mesh.surface_add_vertex(p + side * half)
+		mesh.surface_set_uv(Vector2(f * links, 1.0))
+		mesh.surface_add_vertex(p - side * half)
 	mesh.surface_end()
 
 ## True when the Hero's model has this node ("" is never there): a look can stand down for one built in.

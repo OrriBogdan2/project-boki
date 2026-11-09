@@ -10,17 +10,12 @@ extends RefCounted
 
 const MUZZLE := 0.9                 # m in front of his chest where the slugs leave his hands
 const RECOVER := 0.3                # s the slowed walk lasts after the last wave
-const WAVE_COL := [Color("ff9a14"), Color("8a4dff")]     # wave 1 saturated brass, wave 2 violet
-const WAVE_CORE := [Color("fff0c0"), Color("ffe0a0")]
-const WAVE_DARK := [Color("5a2e04"), Color("2a1260")]    # each slug's dark core
+const SLUG_COL := Color("fff0b0")    # the slugs in flight: pale coin gold (their trail is HeroVfx "slug")
 const WAVE_PITCH := [1.0, 0.82]
-## the fan on the ground: Dredge's brass, saturated so it can't read white on bright grass, and how strong
-## its fill and rim are over AimKit's defaults
-const FAN_COL := Color("f08c14")
+## the fan on the ground: coin gold (the signature), and how strong its fill and rim are over AimKit's defaults
+const FAN_COL := DredgeKit.ANCHOR_COL
+const FAN_HOT := Color("fff0b0")
 const FAN_ALPHA := 1.8
-## s each slug's look hangs at the fan edge fading. Like the source's orbs (f35-f38) the looks always fly the
-## whole fan, even when the slug itself stops on a foe up close, so the wave reads as a fan.
-const SLUG_HOLD := 0.35
 
 var k: DredgeKit
 var h: Hunter
@@ -110,18 +105,9 @@ func _charge_looks(kc: float) -> void:
 	var grow := 1.0 - pow(1.0 - kc, 2.0)
 	var reach := maxf(0.6, float(x["range"]) * grow)
 	AimKit.cone(h, "x_fan", {"dir": blast["dir"], "len": reach, "deg": float(x["fan_deg"]),
-		"fill": kc, "all": true, "col": FAN_COL, "col2": WAVE_COL[1], "alpha": FAN_ALPHA, "hot": 0.15 * kc})
-	if not k.tells_visible() or randf() > 0.5:
-		return
-	var hand_l := _hand(-1.0)
-	var hand_r := _hand(1.0)
-	m.fx.bolt(hand_l, hand_r + Vector3(0, randf_range(-0.2, 0.2), 0), Color(WAVE_COL[1], 0.9))
-	k.fx.orb((hand_l + hand_r) * 0.5, WAVE_COL[0], WAVE_CORE[0], 0.3 + 0.5 * kc, 0.08)
-
-func _hand(side: float) -> Vector3:
-	var d2: Vector2 = blast["dir"]
-	var f := Vector3(d2.x, 0, d2.y)
-	return h.pos + Vector3(0, 1.1, 0) + f * 0.5 + f.cross(Vector3.UP) * 0.3 * side
+		"fill": kc, "all": true, "col": FAN_COL, "col2": FAN_HOT, "alpha": FAN_ALPHA, "hot": 0.15 * kc})
+	if k.tells_visible():
+		HeroVfx.of(m).hold(h, "broadside_charge", kc, {"r": float(x["range"])})     # gold gathers in his fists
 
 ## One wave: six slugs fanned evenly across the locked fan, out to its edge.
 func _wave(i: int) -> void:
@@ -136,38 +122,31 @@ func _wave(i: int) -> void:
 	var speed := float(x["speed"])
 	var life := maxf(0.05, float(x["range"]) - MUZZLE) / speed
 	var dmg := float(x["dmg"]) * k.power("x")
-	var shown := k.tells_visible()
 	for j in n:
 		var ang := deg_to_rad(-fan * 0.5 + fan * float(j) / float(maxi(1, n - 1)))
 		var d := dir.rotated(ang)
-		if shown:
-			var edge := at + Vector3(d.x, 0, d.y) * speed * life
-			k.fx.volley(at, edge, WAVE_COL[i % 2], WAVE_DARK[i % 2], life, SLUG_HOLD)
-		var cb := func(_s: Dictionary, _at: Vector3, e: Ent, why: String) -> void: _slug_hit(i, e, why, dmg)
-		m.spawn_shot(h, at, d * speed, 0.0, life, float(x["size"]), WAVE_COL[i % 2], {"kx": cb})
+		var cb := func(_s: Dictionary, _at: Vector3, e: Ent, why: String) -> void: _slug_hit(e, why, dmg)
+		m.spawn_shot(h, at, d * speed, 0.0, life, float(x["size"]), SLUG_COL, {"kx": cb})
+		if k.tells_visible():
+			HeroVfx.of(m).trail(h, "slug", m.shots[-1]["node"])
 	_wave_fx(i, at, dir)
 
-func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
+func _slug_hit(e: Ent, why: String, dmg: float) -> void:
 	if e == null or not is_instance_valid(e) or e.dead or e.team == h.team or not (why in ["hit", "pass"]):
 		return
 	slug_hits += 1
-	last_wave_hits[wave] = int(last_wave_hits[wave]) + 1
+	last_wave_hits[-1] = int(last_wave_hits[-1]) + 1
 	e.hurt(dmg, h, {"src": "abil", "ab": "ult", "tags": ["ult", "slug"]})
 	KitStatus.apply(e, "blt", float(xd()["blt_t"]))
-	k.fx.orb(e.pos + Vector3(0, 1.0, 0), WAVE_COL[wave % 2], WAVE_CORE[wave % 2], 0.9, 0.1)
-	m.fx.burst(e.pos + Vector3(0, 0.6, 0), Color("b48aff"), 4, 2.0, 0.5, -4.0, 0.8, Vector3.UP, 20.0)
+	k.vfx("broadside_hit", e.pos)
 	HeroUlt.landed(k, e)
 
-## A wave goes: a brass sunburst at his fists, a crescent sweep across the fan, a heavy thump and a shove
-## of the camera back toward him.
+## A wave goes: a gold flash at his fists, a sweep across the fan with coins and sparks flying out, a heavy thump
+## and a shove of the camera back toward him.
 func _wave_fx(i: int, at: Vector3, dir: Vector2) -> void:
 	var x := xd()
-	k.fx.sunburst(at, 1.9, WAVE_COL[i % 2], WAVE_CORE[i % 2], 0.3, true)
-	k.fx.crescent(
-		h.pos + Vector3(0, 0.3, 0), dir, float(x["fan_deg"]), float(x["range"]), WAVE_COL[i % 2], WAVE_DARK[i % 2],
-		0.32
-	)
+	k.vfx("broadside_wave", at, dir, {"r": float(x["range"]), "flip": i % 2 == 1})
 	AimKit.cone(h, "x_fan", {"dir": dir, "len": float(x["range"]), "deg": float(x["fan_deg"]), "edges": true,
 		"all": true, "col": FAN_COL, "alpha": FAN_ALPHA, "dur": 0.25})
 	m.sfx("dr_blast", h.pos, 0.0, WAVE_PITCH[i % 2])
-	k.net_ring(at, float(x["range"]) * 0.5, WAVE_COL[i % 2])
+	k.net_ring(at, float(x["range"]) * 0.5, FAN_COL)
