@@ -44313,5 +44313,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_pipeworth_p83_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_rimekit_p83",
+    "name": "Rimekit (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rimekit_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_p83",
+    "name": "Rimeshrew (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_p83",
+    "name": "Rimeshrew (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_p83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_p83",
+    "name": "Rimeshrew (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimefang_p83",
+    "name": "Rimefang (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rimefang_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimefang_p83",
+    "name": "Rimefang (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rimefang_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimefang_p83",
+    "name": "Rimefang (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_rimefang_p83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenwhale_p83",
+    "name": "Selenwhale (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_selenwhale_p83_3.jpg",
+    "ok": true
   }
 ]
