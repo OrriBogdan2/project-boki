@@ -28,16 +28,16 @@ Each fallen Hunter's self is held in the object they were most bound to. Wearing
 | Hunter | Relic | Why this one | Status |
 |---|---|---|---|
 | Vex, the Hired Gun | Her first coin | The first coin she was ever paid. She flips it to pick her jobs. | locked |
+| Albert, the Barnacle Knight | The ship's compass | Set in his chest now. It led his refugees home across the ice. | locked |
+| Neve, the Snowglide | Her ice skates | The night she skated the festival crowd to safety. | locked |
 | Kael, the Unbroken | His broken chain | The shackle he tore out of the arena wall, bound to the demon blade. | locked |
 | Cinder, the Ashen Kiss | The empty vial of Wyrm's blood | She drank what she was told to distil. An ember still glows at the bottom of the vial. | proposed |
-| Meeko, the Dawnfox | A glass globe of sun and rain | It holds her little sun and her raincloud. The shelter's last fire, kept alive all night. | proposed |
 | Tenzo, the Stone Seer | A seeing-stone | One of the three stones that float around him. It is how he sees the world. | locked |
-| Lace, the Red Stitch | The stitched porcelain face | She sewed it from scraps of the Relics she once made. | locked |
-| Grimble, the Scrap King | His brass monocle | He priced every treasure in Malgrave's vault through it. | proposed |
-| Neve, the Snowglide | Her ice skates | The night she skated the festival crowd to safety. | locked |
 | Sparkle, the Storm Chaser | The lightning rod | From the top of the spire where Rink, the boy she loved, fell. The storm struck them both there. | locked |
-| Albert, the Barnacle Knight | The ship's compass | Set in his chest now. It led his refugees home across the ice. | locked |
+| Grimble, the Scrap King | His brass monocle | He priced every treasure in Malgrave's vault through it. | proposed |
+| Meeko, the Dawnfox | A glass globe of sun and rain | It holds her little sun and her raincloud. The shelter's last fire, kept alive all night. | proposed |
 | Sable, the Silver Thief | Her moth-wing knife | In her hand when she touched the Wyrmheart. | locked |
+| Lace, the Red Stitch | The stitched porcelain face | She sewed it from scraps of the Relics she once made. | locked |
 | Motley, the Void Jester | His jack-in-the-box | Malgrave sealed him in it and threw it into the Void. | locked |
 
 ### Banter pairs
