@@ -36,7 +36,7 @@ named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_
 | `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` | GPU particles: hot streaks, puffs, dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
 
 All layers: `at` (`here`, `h` the body, or an anchor), `y`, `fwd`, `delay`, `life`, `c` / `c2` / `c3` (palette keys: body,
-hot, char), `near` (dropped past LOD_NEAR). Sounds: `n`, `db`, `other` (extra dB for anyone but the player), `pitch`,
+hot, char), `near` (dropped past LOD_NEAR), `keep` (a particle layer that carries gameplay: see Budget). Sounds: `n`, `db`, `other` (extra dB for anyone but the player), `pitch`,
 `pitch_k`, `var`, `delay`, `at`, `when` / `unless`.
 
 ## FX anchors
@@ -46,10 +46,19 @@ the aim), with `hand` r / l between them for a point that rides a hand bone. So 
 the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_hand`, `anchor_feet` when present, Lace
 `anchor_nock`, `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`.
 
+## Gameplay particles (`keep`)
+A look that only exists as particles can still be a rule the player reads: a charge gathering at the nock, an aim,
+a stance, a heal, a rift's warning, a walkable ice bridge. Tag those layers `"keep": true`. Very Low, Low and Medium
+never thin or shorten a `keep` layer (the preset's `fx` and `fx_life` skip it), and the last `KEEP_RESERVE` of
+`MAX_LIVE` is theirs alone, so decor (smoke, sparks, petals) is what goes first when the cap is near. Distance LOD still
+applies. Tag sparingly: ground rings, telegraphs, cones and flashes are meshes and no preset touches them.
+`docs/LOWPRESET_READ.md` has the Very Low against High read of all 12 Hunters and what was tagged.
+
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`.
-- **Budget:** `MAX_LIVE` GPU particles alive in a match, `POOL` nodes per kind, the quality preset's `fx` thins particles,
+- **Budget:** `MAX_LIVE` GPU particles alive in a match, `POOL` nodes per kind, the quality preset's `fx` thins particles
+  and `fx_life` shortens them, except layers tagged `"keep": true` (see below),
   past `LOD_NEAR` the `near` layers drop and particles halve, past `LOD_FAR` nothing draws. No per-ability lights. Looks
   last at most 2.2 s, flares at most 4 m, swirls at most 4.5 m (checked).
 - **No stall on first cast:** `prewarm(at)` (called from `Match.warm_up`) holds up one node of every kind, particles

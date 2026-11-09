@@ -213,9 +213,11 @@ func _keep(V: HeroVfx, P: Hunter) -> void:
 			"Very Low: a keep layer holds its count and life, decor thins (%d, %d of 24)" % [decor, kept])
 	V.live_n = HeroVfx.MAX_LIVE - HeroVfx.KEEP_RESERVE
 	layer["keep"] = false
-	ok(V._aim_emitter(node, "ember", layer, P, Vector3.UP, {}, 1.0) == 0, "a full decor budget leaves the reserve alone")
+	var spared := V._aim_emitter(node, "ember", layer, P, Vector3.UP, {}, 1.0)
+	ok(spared == 0, "a full decor budget leaves the reserve alone")
 	layer["keep"] = true
-	ok(V._aim_emitter(node, "ember", layer, P, Vector3.UP, {}, 1.0) == 24, "...and a keep layer still gets its particles")
+	var got := V._aim_emitter(node, "ember", layer, P, Vector3.UP, {}, 1.0)
+	ok(got == 24, "...and a keep layer still gets its particles")
 	Settings.v["quality"] = was
 	node.free()
 	_clear(V)
