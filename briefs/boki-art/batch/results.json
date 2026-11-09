@@ -30593,5 +30593,103 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_kayak_full_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_kayak_full",
+    "name": "Kayak (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kayak_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lockatara_full",
+    "name": "Lockatara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lockatara_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lockatara_full",
+    "name": "Lockatara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lockatara_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kayak_full",
+    "name": "Kayak (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_kayak_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_foldbat_full",
+    "name": "Foldbat (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_foldbat_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_foldbat_full",
+    "name": "Foldbat (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_foldbat_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sloggoth_full",
+    "name": "Sloggoth (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_sloggoth_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mothlet_full",
+    "name": "Mothlet (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_mothlet_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lockatara_full",
+    "name": "Lockatara (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lockatara_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sloggoth_full",
+    "name": "Sloggoth (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_sloggoth_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_wickapi_full",
+    "name": "Wickapi (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_wickapi_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_arcestrel_full",
+    "name": "Arcestrel (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_arcestrel_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelapi_full",
+    "name": "Chandelapi (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_chandelapi_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_wickapi_full",
+    "name": "Wickapi (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_wickapi_full_3.jpg",
+    "ok": true
   }
 ]
