@@ -71676,5 +71676,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2a_ringrove_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2b_lockatara",
+    "name": "Lockatara (V2 pilot, route B: sheet + anchor)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2b_lockatara_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_ringrove",
+    "name": "Ringrove (V2 pilot, route A: card + anchor)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2a_ringrove_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_lockatara",
+    "name": "Lockatara (V2 pilot, route B: sheet + anchor)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2b_lockatara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_lockatara",
+    "name": "Lockatara (V2 pilot, route B: sheet + anchor)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2b_lockatara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_ringrove",
+    "name": "Ringrove (V2 pilot, route A: card + anchor)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2a_ringrove_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_ringrove",
+    "name": "Ringrove (V2 pilot, route B: sheet + anchor)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2b_ringrove_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_ringrove",
+    "name": "Ringrove (V2 pilot, route B: sheet + anchor)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2b_ringrove_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_lurklet",
+    "name": "Lurklet (V2 pilot, route B: sheet + anchor)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2b_lurklet_1.jpg",
+    "ok": true
   }
 ]
