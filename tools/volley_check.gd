@@ -137,7 +137,7 @@ func _machine() -> void:
 	var r := _match([a, b], 0, 3, "good")
 	var top := maxi(r.score[0], r.score[1])
 	ok(r.refused == 0 and r.state == BaseVolley.Run.S.DONE, "a match plays through with no refused move")
-	var ended := top >= int(BaseVolley.rules()["to_win"]) and r.score[r.winner()] == top
+	var ended: bool = top >= int(BaseVolley.rules()["to_win"]) and r.score[r.winner()] == top
 	ok(ended, "it ends at the target with the leader as winner (%d:%d)" % [r.score[0], r.score[1]])
 	ok(not r.go(BaseVolley.Run.S.SERVE) and r.refused == 1, "DONE goes nowhere: the move is refused and counted")
 
