@@ -24,6 +24,7 @@ static func draw(hud, p: Hunter, wr: Rect2) -> Rect2:
 	for i in Gloves.SLOTS:
 		_glove(hud, p, i, Rect2(Vector2(x0 + i * (BOX + GAP), y), Vector2(BOX, BOX)))
 	boki(hud, p, Rect2(Vector2(x0 + 2.0 * (BOX + GAP), y), Vector2(BOX, BOX)))
+	BokiHud.summon_ring(hud, p, Rect2(Vector2(x0 + 2.0 * (BOX + GAP), y), Vector2(BOX, BOX)))
 	return Rect2(Vector2(x0, y), Vector2(3.0 * BOX + 2.0 * GAP, BOX))
 
 static func rar_col(g: Dictionary) -> Color:
