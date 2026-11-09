@@ -64998,5 +64998,19 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/echolop_card103_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_cisternmander_px",
+    "name": "Cisternmander (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_cisternmander_px_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cisternmander_px",
+    "name": "Cisternmander (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_cisternmander_px_3.jpg",
+    "ok": true
   }
 ]
