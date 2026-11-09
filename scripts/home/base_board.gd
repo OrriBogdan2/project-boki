@@ -22,7 +22,7 @@ static func record(game: String, win: Dictionary) -> void:
 	rec["last"] = who
 	rec["wins"][who] = int(rec["wins"].get(who, 0)) + 1
 
-## "no games yet", or "best Pip, 3 wins  ·  last Rue".
+## "no games yet", or "best Pip, 3 wins · last Rue".
 static func summary(game: String) -> String:
 	var rec: Dictionary = Save.d["game_board"].get(game, {})
 	var wins: Dictionary = rec.get("wins", {})
