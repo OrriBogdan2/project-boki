@@ -6,6 +6,7 @@ extends RefCounted
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-brawl]: the ten-trio fight on the Hollow Crown instead (tools/perf_brawl.gd)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -36,8 +37,11 @@ func run(main_node: Node) -> void:
 	vp = main.get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(vp, true)
 	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,draws,tris,objects,nodes")
-	await _match()
-	await _farm()
+	if "--bench-brawl" in OS.get_cmdline_user_args():
+		await preload("res://tools/perf_brawl.gd").new().run(self, main, secs)
+	else:
+		await _match()
+		await _farm()
 	print("BENCH quality=%s renderer=%s adapter=%s" % [Settings.quality(),
 		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name()])
 	if out_path != "":
@@ -66,9 +70,7 @@ func _match() -> void:
 	sk.sort_custom(func(a, b): return steps[a] > steps[b])
 	print("BENCH match build (ms): " + ", ".join(sk.slice(0, 6).map(func(k): return "%s %.0f" % [k, steps[k]])))
 	_hook_hud(m)
-	main.get_tree().node_added.connect(func(n: Node):
-		var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
-		added[k] = int(added.get(k, 0)) + 1)
+	main.get_tree().node_added.connect(count_node)
 	Match.prof_on = true
 	Match.prof.clear()
 	var fl: Array = []
@@ -131,6 +133,14 @@ func _farm() -> void:
 		t += DT
 	_summary("farm", fl)
 	_meshes()
+
+func count_node(n: Node) -> void:
+	var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
+	added[k] = int(added.get(k, 0)) + 1
+
+## One frame's row in the CSV (the brawl's frames too).
+func add_row(part: String, i: int, wall: float, script_ms: float) -> void:
+	_frame(part, i, wall, script_ms)
 
 func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	var f := {"wall": wall, "script": script_ms, "proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
