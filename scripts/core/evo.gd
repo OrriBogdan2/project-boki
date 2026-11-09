@@ -18,6 +18,8 @@ const AFF := {
 		"why": "gets thrown around and moves fast", "food": "tidebloom", "parts": ["wings", "tail_long", "fins", "crest"]},
 }
 
+const FOOD_AFF := 6.0        # affinity points one meal of an affinity's food adds
+
 const ROOTS := {"cindle": "Cind", "puddlet": "Pud", "burrlet": "Burr", "zapple": "Zap", "pebbit": "Peb", "wisplet": "Wisp"}
 const SUFFIX := {
 	"fierce": ["fang", "claw", "maw", "rend", "fury"],
@@ -43,6 +45,14 @@ static func ensure(rec: Dictionary) -> void:
 static func add(rec: Dictionary, aff: String, n: float) -> void:
 	ensure(rec)
 	rec["aff"][aff] = float(rec["aff"].get(aff, 0.0)) + n
+
+## It ate food f: the affinity that food builds ("" for food with none), FOOD_AFF more of it.
+static func eat(rec: Dictionary, f: String) -> String:
+	for af in AFF:
+		if AFF[af]["food"] == f:
+			add(rec, af, FOOD_AFF)
+			return af
+	return ""
 
 ## The affinity that wins right now: what it's been doing plus its personality.
 static func leading(rec: Dictionary) -> String:

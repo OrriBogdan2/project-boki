@@ -3028,7 +3028,7 @@ func _open_kin(rec: Dictionary) -> void:
 			c2.add_child(UI.kv("Won't eat", Care.food_name(lk["hates"]) if known.has("hates") else "???", UI.INK if known.has("hates") else UI.FAINT))
 			c2.add_child(UI.kv("Favourite game", Care.PLAY_NAMES[lk["play"]] if known.has("play") else "???", UI.INK if known.has("play") else UI.FAINT))
 			c2.add_child(UI.para("Feed it, play with it and talk to it to find out more.", 12, UI.FAINT))
-			CareJournal.card(rec, c2)
+			JournalCard.add(rec, c2)
 			c2.add_child(UI.spacer(2))
 			WorkView.card_section(self, rec, c2, func(): _open_kin(rec))
 			var mem: Array = rec.get("memory", [])
@@ -4264,9 +4264,6 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	if res["full"] and not res["ok"]:
 		_say(k, BokiLines.say(rec, "full"))
 		return
-	if Data.CROPS.has(f):
-		for af in Evo.AFF:
-			if Evo.AFF[af]["food"] == f: Evo.add(rec, af, 6.0)
 	if res["love"]:
 		k["joy_t"] = 1.2
 		_emote(k, "♥")

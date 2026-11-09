@@ -350,11 +350,10 @@ static func feed(rec: Dictionary, f: String) -> Dictionary:
 		fill *= Unique.FAV_FILL       # its favourite food: a little more filling too
 		out["new"] = discover(rec, "food")
 	var was := need(rec, "food")
-	var lean_before: Dictionary = rec.get("lean", {}).duplicate()
 	change(rec, "food", fill)
 	change(rec, "joy", joy)
 	fed(rec)
-	CareJournal.fed(rec, f, lean_before)
+	CareJournal.fed(rec, f, Evo.eat(rec, f))
 	out["hungry"] = was < 35.0
 	return out
 
