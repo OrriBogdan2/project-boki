@@ -20814,5 +20814,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/stance_puffamus_1.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_chuggamus",
+    "name": "Chuggamus (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_chuggamus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_rippmink",
+    "name": "Rippmink (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_rippmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_chuggamus",
+    "name": "Chuggamus (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_chuggamus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_chuggamus",
+    "name": "Chuggamus (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_chuggamus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_kerchick",
+    "name": "Kerchick (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_kerchick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_kerchick",
+    "name": "Kerchick (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_kerchick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_skidlet",
+    "name": "Skidlet (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_skidlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_teapotamus",
+    "name": "Teapotamus (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_teapotamus_3.jpg",
+    "ok": true
   }
 ]
