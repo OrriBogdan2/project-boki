@@ -342,7 +342,7 @@ Finishing Slam and the Cinder Spin everywhere the player can read them (content,
 
 ## Starting a Boki merge
 
-Pressing R to Fuse drops everything the Juggernaut was holding or winding up, and none of it fires or is
+Pressing X to Fuse drops everything the Juggernaut was holding or winding up, and none of it fires or is
 left over when the merge ends: the Searing Wave charge (`lmb_t`, `lmb_buf`, `mel_hold`), the Finishing Slam's
 wind-up (`slam_w`), an armed Haul Slam (`haul`) and the held Smash (`rmb_down`, cleared by the merge itself), a Meteor Drop in its dive (`drop`), the Lunge's full flag (`lunge_full`) and a running Gilded Riposte
 (`riposte.st`, its guard or cleave; the gold glow hides).

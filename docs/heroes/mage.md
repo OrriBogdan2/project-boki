@@ -140,7 +140,7 @@ Charge orb: hovers 4s and adds Static to nobody (owner item 74). Walking over it
 ## Ultimate choice
 R is her own ultimate, Kitefall (owner decision, SERVER_UPDATE6): the source's Eye of the Storm, built from the
 reference sheet's "Ultimate (on R)" section. It was never folded into another slot during the kit pass, so no
-slot changes. Fuse is on R.
+slot changes. Fuse is on X.
 
 ## Engine notes
 - Kit `scripts/arch/kits/mage_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd` + `shaders/vv_fx.gdshader`;
