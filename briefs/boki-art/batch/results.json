@@ -24517,5 +24517,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/forgebrock_card2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "frothisk_card2",
+    "name": "Frothisk (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/frothisk_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frothisk_card2",
+    "name": "Frothisk (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/frothisk_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_card2",
+    "name": "Galleotter (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/galleotter_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geysirbara_card2",
+    "name": "Geysirbara (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geysirbara_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_card2",
+    "name": "Galleotter (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/galleotter_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glassolotl_card2",
+    "name": "Glassolotl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glassolotl_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glassolotl_card2",
+    "name": "Glassolotl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glassolotl_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geysirbara_card2",
+    "name": "Geysirbara (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geysirbara_card2_2.jpg",
+    "ok": true
   }
 ]
