@@ -10244,5 +10244,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/rimink_r_1.jpg",
     "ok": true
+  },
+  {
+    "id": "pyrraven_r2",
+    "name": "Pyrraven",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pyrraven_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_r",
+    "name": "Rimink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rimink_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_oarlet_p",
+    "name": "Oarlet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_oarlet_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pyrraven_r2",
+    "name": "Pyrraven",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pyrraven_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kitlet_p",
+    "name": "Kitlet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kitlet_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_oarlet_p",
+    "name": "Oarlet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_oarlet_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "reapant_r",
+    "name": "Reapant",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/reapant_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant_r",
+    "name": "Scythant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/scythant_r_1.jpg",
+    "ok": true
   }
 ]
