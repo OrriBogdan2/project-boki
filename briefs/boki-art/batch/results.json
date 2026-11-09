@@ -69541,5 +69541,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/style_mycroll_a_2.jpg",
     "ok": true
+  },
+  {
+    "id": "style_mycroll_c",
+    "name": "Mycroll (style test c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_mycroll_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_mycroll_a",
+    "name": "Mycroll (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_mycroll_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_mycroll_b",
+    "name": "Mycroll (style test b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_mycroll_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_vespyx_c",
+    "name": "Vespyx (style test c)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_vespyx_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_vespyx_c",
+    "name": "Vespyx (style test c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_vespyx_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_mycroll_b",
+    "name": "Mycroll (style test b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_mycroll_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_mycroll_c",
+    "name": "Mycroll (style test c)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_mycroll_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_chandelotl_c",
+    "name": "Chandelotl (style test c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_chandelotl_c_1.jpg",
+    "ok": true
   }
 ]
