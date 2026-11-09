@@ -29004,5 +29004,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/vaultara_card3_1.jpg",
     "ok": true
+  },
+  {
+    "id": "voltalon_card3",
+    "name": "Voltalon (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltalon_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card3",
+    "name": "Barokat (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/barokat_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card3",
+    "name": "Barokat (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/barokat_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card3",
+    "name": "Barokat (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/barokat_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_card3",
+    "name": "Bellowary (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowary_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_card3",
+    "name": "Bellowary (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bellowary_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_card3",
+    "name": "Bellowary (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bellowary_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "boltstrich_card3",
+    "name": "Boltstrich (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/boltstrich_card3_2.jpg",
+    "ok": true
   }
 ]
