@@ -49878,5 +49878,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_seamwyrm_p99_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_seamwyrm_p99",
+    "name": "Seamwyrm (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_seamwyrm_p99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_seamwyrm_p99",
+    "name": "Seamwyrm (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_seamwyrm_p99_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_voltalon_p99",
+    "name": "Voltalon (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_voltalon_p99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lodestaff_p99",
+    "name": "Lodestaff (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lodestaff_p99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lodestaff_p99",
+    "name": "Lodestaff (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lodestaff_p99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_voltalon_p99",
+    "name": "Voltalon (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_voltalon_p99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_voltalon_p99",
+    "name": "Voltalon (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_voltalon_p99_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lodestaff_p99",
+    "name": "Lodestaff (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lodestaff_p99_3.jpg",
+    "ok": true
   }
 ]
