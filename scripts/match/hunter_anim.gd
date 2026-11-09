@@ -296,6 +296,8 @@ var tl_x := 0.0
 var tl_xv := 0.0
 var torso_yaw_prev := 0.0
 var hip_y := 0.42              # the torso's rest height on the legs (longer legs set it higher: Models.hunter)
+var leg_k := 1.0               # x the walk phase: gait "leg_ref" (m, a hip height) over this body's, so longer legs step slower
+var wave := 0.0                # gait "wave": the hip swing's third harmonic, flattening the planted foot's pull-back
 
 func _init(m: Node3D) -> void:
 	model = m
@@ -331,6 +333,8 @@ func _init(m: Node3D) -> void:
 	st = (STANCE.get(cls, STANCE["medium"]) as Dictionary).duplicate()
 	var stance := String(m.get_meta("stance", arch))      # the Empty's own stance by sex (Unmasked)
 	st.merge(WardenStance.gait(stance), true)
+	wave = float(st.get("wave", 0.0))
+	leg_k = float(st.get("leg_ref", 0.0)) / (hip_y * absf(m.scale.y)) if st.has("leg_ref") else 1.0
 	ws = WardenStance.new(stance)
 	rng = int(m.get_meta("anim_seed", m.get_instance_id())) & 0x7fffffff
 	seed_ph = _rand() * TAU
@@ -684,7 +688,7 @@ func update(dt: float, s: Dictionary) -> void:
 	# ---------------------------------------------------------------- the walk phase and footsteps
 	var ph0 := ph
 	if moving:
-		ph += dt * spd * float(STRIDE.get(arch, 2.15 if cls != "heavy" else 1.95)) * float(st.get("cadence", 1.0))
+		ph += dt * spd * float(STRIDE.get(arch, 2.15 if cls != "heavy" else 1.95)) * _cadence() * leg_k
 		if int(floor(ph / PI)) != int(floor(ph0 / PI)) and KMovesStone.gait(arch) > 0.5:
 			stepped = true
 	# strafing and backpedalling: the legs turn toward where you're going; backwards they swing the other way
@@ -733,8 +737,8 @@ func update(dt: float, s: Dictionary) -> void:
 	var phr := ph + PI
 	var stride := float(st.get("stride", 0.62)) + 0.28 * minf(run_k, 1.3)
 	var r_leg := r1 * KMovesStone.gait(arch)      # how much the legs walk (a hoverer's barely do)
-	var hl := sin(phl) * stride * r_leg * back
-	var hr := sin(phr) * stride * r_leg * back
+	var hl := (sin(phl) + wave * sin(3.0 * phl)) * stride * r_leg * back
+	var hr := (sin(phr) + wave * sin(3.0 * phr)) * stride * r_leg * back
 	# the knee folds most while the leg swings through, a little at foot strike
 	var sw_l := maxf(0.0, cos(phl - 0.35 * back))
 	var sw_r := maxf(0.0, cos(phr - 0.35 * back))
@@ -1109,6 +1113,11 @@ func update(dt: float, s: Dictionary) -> void:
 ## weapon swing it starts plays step n of the weapon's SWINGS (one blade or the other, or both).
 const KMOVES := {
 }
+## The gait's "cadence": a number, or [walk, run] eased by how fast the legs run.
+func _cadence() -> float:
+	var c: Variant = st.get("cadence", 1.0)
+	return lerpf(float(c[0]), float(c[1]), minf(run_k, 1.0)) if c is Array else float(c)
+
 ## Stride rate (walk phase per metre) of heroes whose step differs from their class: quick, short steps
 ## (their hero sheets measure ~2.3-2.5 strides a second at a run).
 const STRIDE := {"archer": 2.9, "bulwark": 2.9}

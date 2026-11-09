@@ -1,9 +1,12 @@
 extends RefCounted
 ## --empty-shots --shots-dir=<dir>: review screenshots of the Empty creator (Male / Female, three heights,
 ## builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer). Add
-## --only=creator|viewer|mask|shroud|feet|farm to take one group (shroud: the creator from front, side and back,
+## --only=creator|viewer|mask|shroud|feet|gait|farm to take one group (shroud: the creator from front, side and back,
 ## the aura levels and shroud styles; feet: the soles at the shortest and tallest height, standing and walking;
 ## farm: the Empty at home from every side and above). The second Relic, from Hob: --hob-check --shots-dir=.
+
+const GAIT_FRAMES := 36      # frames (60 fps) of the gait strip: about one stride at the farm's full stick
+const GAIT_EVERY := 6        # frames between its shots
 
 const LOOKS := {
 	"creator_female": {"gender": 0},
@@ -41,6 +44,8 @@ func run(main_node: Node) -> void:
 		await _shroud(tree)
 	if only in ["", "feet"]:
 		await _feet(tree)
+	if only == "gait":      # (not in the default run: 36 shots)
+		await _gait(tree)
 	if only in ["", "farm"]:
 		await _farm(tree)
 	print("EMPTYSHOTS done in %s" % dir)
@@ -141,8 +146,8 @@ func _shroud(tree: SceneTree) -> void:
 	hx.queue_free()
 	await tree.process_frame
 
-## The soles on a floor at the shortest and tallest height, standing and mid-stride, close and low.
-func _feet(tree: SceneTree) -> void:
+## A lit floor with a camera: the stage the feet and gait shots stand on.
+func _stage(cam_pos: Vector3, look: Vector3, fov: float) -> Node3D:
 	_fresh()
 	var stage := Node3D.new()
 	main.add_child(stage)
@@ -158,11 +163,16 @@ func _feet(tree: SceneTree) -> void:
 	sun.rotation_degrees = Vector3(-50, -30, 0)
 	stage.add_child(sun)
 	var cam := Camera3D.new()
-	cam.fov = 30.0
+	cam.fov = fov
 	stage.add_child(cam)
-	cam.position = Vector3(0.3, 0.35, 3.2)
-	cam.look_at(Vector3(0.0, 0.25, 0.0))
+	cam.position = cam_pos
+	cam.look_at(look)
 	cam.make_current()
+	return stage
+
+## The soles on a floor at the shortest and tallest height, standing and mid-stride, close and low.
+func _feet(tree: SceneTree) -> void:
+	var stage := _stage(Vector3(0.3, 0.35, 3.2), Vector3(0.0, 0.25, 0.0), 30.0)
 	var models := []
 	var anims := []
 	for h in [0, 2]:
@@ -181,6 +191,28 @@ func _feet(tree: SceneTree) -> void:
 				(a as HunterAnim).update(1.0 / 60.0, {"fired": 99.0, "face": -PI * 0.5, "vel": vel})
 			await tree.process_frame
 		await _shot(tree, "feet_%s_short_tall" % ("idle" if step == 0 else "walking"), 0.0)
+	stage.queue_free()
+	await tree.process_frame
+
+## The gait strip: three builds (and heights, short to tall) running at the farm's full stick from the side, a shot
+## every GAIT_EVERY frames of a stride (docs/art/anim_audit/empty_gait.jpg is these tiles one above the other).
+func _gait(tree: SceneTree) -> void:
+	var stage := _stage(Vector3(0.0, 0.8, 5.6), Vector3(0.0, 0.8, 0.0), 30.0)
+	var anims := []
+	for b in 3:
+		var look := Unmasked.clean({"unmasked": true, "height": b, "build": b})
+		var m := Models.hunter("medium", Data.TEAM_COLORS[0], "", "", look)
+		m.get_node("Rig/Torso/Aim/Gun").free()
+		m.position = Vector3(-1.5 + 1.5 * b, 0, 0)
+		m.rotation.y = -PI * 0.5
+		stage.add_child(m)
+		anims.append(HunterAnim.new(m))
+	for i in GAIT_FRAMES + 60:
+		for a in anims:
+			(a as HunterAnim).update(1.0 / 60.0, {"fired": 99.0, "face": -PI * 0.5, "vel": Vector3(5.0, 0, 0)})
+		await tree.process_frame
+		if i >= 60 and (i - 60) % GAIT_EVERY == 0:
+			await _shot(tree, "gait_%02d" % (i - 60), 0.0)
 	stage.queue_free()
 	await tree.process_frame
 

@@ -1,5 +1,5 @@
 extends RefCounted
-## --anim-audit [--wardens=a,b] [--json=<file>]: how every Hunter's motion measures (docs/art/ANIM_QUALITY_AUDIT.md).
+## --anim-audit [--wardens=a,b ("empty": the player body, tools/empty_gait.gd)] [--json=<file>]: how every Hunter's motion measures (docs/art/ANIM_QUALITY_AUDIT.md).
 ## The gate: FAIL lines and exit code 1 (see MAX_SLIDE). No renderer needed. Per Hunter it poses the real model
 ## (WardenClips through Warden/Sync) and reads the bones:
 ##  - walk and run, live: the game's own locomotion hand-off at three speeds: foot slide against the ground while the
@@ -33,12 +33,21 @@ func run(main: Node) -> void:
 	holder = Node3D.new()
 	main.add_child(holder)
 	var ids: Array = Arch.ORDER.duplicate()
+	var empty := true
 	var json := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
+		if a.begins_with("--wardens="):
+			ids = Array(a.substr(10).split(",", false))
+			empty = "empty" in ids
+			ids.erase("empty")
 		if a.begins_with("--json="): json = a.substr(7)
 	for id in ids:
 		await _hero(main, String(id))
+	if empty:
+		var body = load("res://tools/empty_gait.gd").new()
+		await body.run(main, holder)
+		rows.merge(body.rows)
+		bad += body.bad
 	if json != "":
 		var f := FileAccess.open(json, FileAccess.WRITE)
 		f.store_string(JSON.stringify(rows, "\t"))
