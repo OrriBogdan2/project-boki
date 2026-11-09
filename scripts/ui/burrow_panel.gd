@@ -13,7 +13,7 @@ static var picked := ""
 
 static func open(h: Node, note := "") -> void:
 	KinBox.ensure()
-	var v: VBoxContainer = h._new_panel("Boki Burrow", 460)
+	var v: VBoxContainer = h._new_panel("Boki Burrow", 460, true)
 	v.add_theme_constant_override("separation", 8)
 	var out := KinBox.farm()
 	var asleep := KinBox.boxed()
