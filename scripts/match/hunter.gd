@@ -2882,6 +2882,7 @@ func gain_xp(x: float) -> void:
 			m.sfx("level_up", null, -2.0, 1.0)
 			if kin is Kin: BokiChatter.say(m, kin, "level_up")
 			level_ups += 1
+			RankChoice.on_level_up(m, self)
 	if not is_local():
 		_bot_spend()
 
@@ -2911,6 +2912,7 @@ func level_slot(slot: String) -> bool:
 	if is_local() and m and m.hud:
 		m.hud.ability_feedback({"sec": "sec", "dash": "dash", "kin": "k1", "ult": "r"}[slot], "cast")
 		m.sfx("unlock", null, -8.0, 1.0 + 0.1 * float(slot_lv[slot]))
+		RankChoice.on_rank(m, self, slot)
 	return true
 
 ## Bots (and anyone skipping the choice) spend points in a sensible order.

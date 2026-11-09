@@ -38,9 +38,10 @@ static func pips(H, r: Rect2, slot: String, lv: int, col: Color) -> void:
 static func plus(H, r: Rect2, id: String, slot: String, key: String) -> void:
 	var c: CanvasItem = H.c
 	var t: float = H.m.time
-	var pulse := 0.5 + 0.5 * sin(t * 5.0)
+	var strong := RankChoice.pulsing(H.m, H.m.player)      # the first level-up: a bigger, faster pulse
+	var pulse := 0.5 + 0.5 * sin(t * (9.0 if strong else 5.0))
 	var glow := Color(1.0, 0.82, 0.48, 0.35 + 0.5 * pulse)
-	H._rounded(r.grow(2.0 + pulse * 3.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 3, glow, 3)
+	H._rounded(r.grow(2.0 + pulse * (7.0 if strong else 3.0)), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 3, glow, 3)
 	if H.hover_id == id or t < _hint_until:
 		_hint(H, Vector2(r.get_center().x, r.position.y - 14.0), "ALT+" + key)
 	var cp := Vector2(r.end.x - 3.0, r.position.y + 3.0)

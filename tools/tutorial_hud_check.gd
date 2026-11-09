@@ -7,6 +7,8 @@ extends RefCounted
 ##      hunter and the Boki are never under the banner
 ##   3. the pill counter, the right click taught from its kit data, the Boki step by its state
 ##   4. the lookout: every course stop is climbable from the one before it with plain movement
+##   5. the rank choice: the first level-up of a profile names the live keys and pulses the slots for
+##      8 s, the first max rank names its bonus, both once; bots and the course never set them
 
 var bad := 0
 var m: Match
@@ -24,6 +26,7 @@ func run(mn: Node) -> void:
 	_lanes()
 	_course()
 	_reach()
+	_rank_choice()
 	print("TUTHUD DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -118,6 +121,9 @@ func _course() -> void:
 		ok(tu.rmb_has_hold() == hold, "the right click step follows the kit's hold variant " + why)
 		var line := String(texts.get("utility", ""))
 		ok(line.to_lower().contains("hold") == hold, "and its words say so ('%s')" % line)
+	var seen: Dictionary = Save.d["tutorial"]
+	var untouched: bool = not seen.has(RankChoice.FLAG_LEVEL) and not seen.has(RankChoice.FLAG_MAX)
+	ok(untouched, "the course's own rank step leaves the seen-once flags alone")
 	var tl := String(texts.get("throw", ""))
 	ok(tl.contains("call") or tl.contains("send"), "the Boki step says whether to call back or send ('%s')" % tl)
 
@@ -169,3 +175,59 @@ func _reach() -> void:
 	ok(worst <= jump_apex * 0.6, msg % [worst, jump_apex, worst_at])
 	var cr := tu.stop("crouch")
 	ok(cr.y <= jump_apex * 0.6, "the lookout top is %.2fm up, under 60%% of a jump (%.2fm)" % [cr.y, jump_apex])
+
+# ------------------------------------------------------------------ 5. the rank choice lines
+func _rank_choice() -> void:
+	Save.d["tutorial"].erase(RankChoice.FLAG_LEVEL)
+	Save.d["tutorial"].erase(RankChoice.FLAG_MAX)
+	var rm := Match.new()
+	main.add_child(rm)
+	rm.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true, "arch": "thief",
+			"cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
+	rm.set_process(false)
+	var P: Hunter = rm.player
+	for o in rm.hunters:
+		if o != P:
+			o.ctrl = "idle"
+			o.teleport(rm.world.spawns[-1])
+	P.ctrl = "local"
+	var seen: Dictionary = Save.d["tutorial"]
+	var bot: Hunter = rm.hunters.filter(func(x): return x != P)[0]
+	bot.gain_xp(float(Hunter.XP_TO[1]) + 1.0)
+	ok(not seen.has(RankChoice.FLAG_LEVEL), "a bot's level-up sets no flag")
+	rm.hud.msgs.clear()
+	P.gain_xp(float(Hunter.XP_TO[1]) - P.xp + 1.0)
+	var lines := _lines(rm, "Level up!")
+	var key := Settings.key_cap("secondary")
+	var keyed: bool = lines.size() == 1 and String(lines[0]).contains("Alt + ") and String(lines[0]).contains(key)
+	ok(keyed, "the first level-up shows the Alt line with the live keys (%s)" % str(lines))
+	ok(bool(seen.get(RankChoice.FLAG_LEVEL, false)), "and is stored as seen in the profile save")
+	ok(RankChoice.pulsing(rm, P), "the rankable slots pulse after it")
+	rm.time += RankChoice.PULSE_SECS + 0.5
+	ok(not RankChoice.pulsing(rm, P), "and stop after %.0f s" % RankChoice.PULSE_SECS)
+	rm.time -= RankChoice.PULSE_SECS
+	P.skill_pts -= 1
+	ok(not RankChoice.pulsing(rm, P), "or as soon as a point is spent")
+	rm.hud.msgs.clear()
+	P.gain_xp(float(Hunter.XP_TO[2]) - P.xp + 1.0)
+	ok(_lines(rm, "Level up!").is_empty(), "the second level-up shows no line")
+	P.skill_pts = 9
+	for s in ["sec", "dash"]:
+		P.slot_lv[s] = 1
+	rm.hud.msgs.clear()
+	P.level_slot("sec")
+	ok(not seen.has(RankChoice.FLAG_MAX) and rm.hud.msgs.texts().is_empty(), "rank 2 is no max, so no line")
+	P.level_slot("sec")
+	var want := String(Arch.next_ranks(P.arch, "sec", 2).back()[1])
+	var max_lines := _lines(rm, "Max rank!")
+	var named: bool = max_lines.size() == 1 and String(max_lines[0]).ends_with(want)
+	ok(named, "maxing an ability names the bonus it unlocked (%s)" % str(max_lines))
+	ok(bool(seen.get(RankChoice.FLAG_MAX, false)), "and is stored as seen in the profile save")
+	rm.hud.msgs.clear()
+	P.level_slot("dash")
+	P.level_slot("dash")
+	ok(_lines(rm, "Max rank!").is_empty(), "the next max shows no line")
+	rm.queue_free()
+
+func _lines(rm: Match, prefix: String) -> Array:
+	return rm.hud.msgs.texts().filter(func(x): return String(x).begins_with(prefix))
