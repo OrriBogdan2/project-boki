@@ -2280,5 +2280,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/boltstrich_1.png",
     "ok": true
+  },
+  {
+    "id": "mossgrade",
+    "name": "Mossgrade",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mossgrade_2.png",
+    "ok": true
+  },
+  {
+    "id": "lanterloris",
+    "name": "Lanterloris",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanterloris_2.png",
+    "ok": true
+  },
+  {
+    "id": "lanterloris",
+    "name": "Lanterloris",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanterloris_1.png",
+    "ok": true
+  },
+  {
+    "id": "selenfin",
+    "name": "Selenfin",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/selenfin_2.png",
+    "ok": true
+  },
+  {
+    "id": "terrasloth",
+    "name": "Terrasloth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrasloth_2.png",
+    "ok": true
+  },
+  {
+    "id": "selenfin",
+    "name": "Selenfin",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/selenfin_1.png",
+    "ok": true
+  },
+  {
+    "id": "terrasloth",
+    "name": "Terrasloth",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/terrasloth_1.png",
+    "ok": true
+  },
+  {
+    "id": "vespox_f",
+    "name": "Vespox (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vespox_f_1.png",
+    "ok": true
   }
 ]
