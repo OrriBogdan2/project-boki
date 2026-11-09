@@ -50781,5 +50781,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/selenwhale_cardy_3.jpg",
     "ok": true
+  },
+  {
+    "id": "glaciatee_cardy",
+    "name": "Glaciatee (hero card, planted)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glaciatee_cardy_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_dragonkite_ry",
+    "name": "Dragonkite",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_dragonkite_ry_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_dragonkite_ry",
+    "name": "Dragonkite",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_dragonkite_ry_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrathere_cardy",
+    "name": "Umbrathere (hero card, planted)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/umbrathere_cardy_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gloamspire_cardy",
+    "name": "Gloamspire (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gloamspire_cardy_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_cardy",
+    "name": "Selenwhale (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/selenwhale_cardy_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_terrarimit_ry",
+    "name": "Terrarimit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_terrarimit_ry_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gloamspire_cardy",
+    "name": "Gloamspire (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gloamspire_cardy_2.jpg",
+    "ok": true
   }
 ]
