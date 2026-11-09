@@ -120,7 +120,7 @@ def main():
                     print("   Google limit hit: switching to OpenRouter", flush=True)
                     use_or["on"] = True
                     continue
-                if "API_KEY_INVALID" in str(e) or "PERMISSION_DENIED" in str(e):
+                if "API_KEY_INVALID" in str(e) or "PERMISSION_DENIED" in str(e) or "UNAUTHENTICATED" in str(e):
                     print("\nSTOPPING: the API key was rejected. Set it again with: export GEMINI_API_KEY=\"your key\"", flush=True)
                     os._exit(2)
                 print(f"   {job['id']} run {run} attempt {attempt+1} failed: {entry['error']}", flush=True)
