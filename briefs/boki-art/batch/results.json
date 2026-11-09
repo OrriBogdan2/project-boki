@@ -46693,5 +46693,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_forgebrock_gap_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_furnacowary_gap",
+    "name": "Furnacowary (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_furnacowary_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_forgebrock_gap",
+    "name": "Forgebrock (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_forgebrock_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_furnacowary_gap",
+    "name": "Furnacowary (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_furnacowary_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_forgebrock_gap",
+    "name": "Forgebrock (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_forgebrock_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_furnacowary_gap",
+    "name": "Furnacowary (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_furnacowary_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dreadmonite_gap",
+    "name": "Dreadmonite (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_dreadmonite_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dreadmonite_gap",
+    "name": "Dreadmonite (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_dreadmonite_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_grammite_gap",
+    "name": "Grammite (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_grammite_gap_2.jpg",
+    "ok": true
   }
 ]
