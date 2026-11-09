@@ -32,6 +32,7 @@ const SLOW_MS := 33.0               # a frame over this counts as a hitch in the
 const BASELINE := "res://tools/perf_baseline.json"
 const P99_SLACK := 1.15             # the gate: match p99 may be at most 15% over the baseline
 var match_p99 := 0.0
+var peak_by := {}        # owner -> particles, at the frame with the most
 var vp: RID
 
 func run(main_node: Node) -> void:
@@ -42,13 +43,13 @@ func run(main_node: Node) -> void:
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
 		if a.begins_with("--bench-teams="): teams = int(a.substr(14))
 		if a.begins_with("--bench-squad="): squad = int(a.substr(14))
+		if a.begins_with("--bench-view="):
+			var wh: PackedStringArray = a.substr(13).split("x")
+			view = Vector2i(int(wh[0]), int(wh[1]))
 	stress = "--bench-stress" in OS.get_cmdline_user_args()
 	if stress:
 		teams = 10
 		squad = 3
-		if a.begins_with("--bench-view="):
-			var wh := a.substr(13).split("x")
-			view = Vector2i(int(wh[0]), int(wh[1]))
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -135,6 +136,8 @@ func _match() -> void:
 				m.time, wall, script_ms, Match.prof_top, Match.prof_top_us / 1000.0, fl[-1]["rcpu"],
 				added])
 		added.clear()
+		if fl.size() % 60 == 0:
+			_sample_particles()
 		last = now
 	_summary("match", fl)
 	if stress:
@@ -294,19 +297,17 @@ func _summary(part: String, fl: Array) -> void:
 		Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
 
 ## Particle systems still emitting (a GPU one simulates every frame even off screen), by owner name.
+## Keeps the busiest sample (the budget is about the worst moment, not the last frame).
+func _sample_particles() -> void:
+	var by := ParticleCount.by_owner(main.get_tree().root)
+	if ParticleCount.total(by) > ParticleCount.total(peak_by):
+		peak_by = by
+
 func _emitters() -> void:
-	var by := {}
-	for cls in ["GPUParticles3D", "CPUParticles3D"]:
-		for n in main.get_tree().root.find_children("*", cls, true, false):
-			if not n.get("emitting"):
-				continue
-			var up := String(n.get_parent().name).rstrip("0123456789@")
-			var key := "%s/%s" % [up, String(n.name).rstrip("0123456789@")]
-			by[key] = int(by.get(key, 0)) + 1
-	var ks := by.keys()
-	ks.sort_custom(func(a, b): return by[a] > by[b])
-	print("BENCH emitting particles (%d): %s" % [by.values().reduce(func(a, b): return a + b, 0),
-		", ".join(ks.slice(0, 10).map(func(k): return "%s %d" % [k, by[k]]))])
+	var ks := peak_by.keys()
+	ks.sort_custom(func(a, b): return peak_by[a] > peak_by[b])
+	print("BENCH particles drawn at the peak (%d): %s" % [ParticleCount.total(peak_by),
+		", ".join(ks.slice(0, 10).map(func(k): return "%s %d" % [k, peak_by[k]]))])
 
 func _count(cls: String) -> int:
 	return main.get_tree().root.find_children("*", cls, true, false).size()
