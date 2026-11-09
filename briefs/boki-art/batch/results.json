@@ -40673,5 +40673,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_knotwyrmling_e2_4.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_pyrraven_p79",
+    "name": "Pyrraven",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pyrraven_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_thunderstrich_p79",
+    "name": "Thunderstrich",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_thunderstrich_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lanceron_p79",
+    "name": "Lanceron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_lanceron_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_ringrove_p79",
+    "name": "Ringrove",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_ringrove_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lunowl_p79",
+    "name": "Lunowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lunowl_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lunowl_p79",
+    "name": "Lunowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_lunowl_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_mortarfly_p79",
+    "name": "Mortarfly",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_mortarfly_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glaivyx_p79",
+    "name": "Glaivyx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_glaivyx_p79_1.jpg",
+    "ok": true
   }
 ]
