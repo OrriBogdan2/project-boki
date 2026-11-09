@@ -12,7 +12,11 @@ scripted parts go in `tools/vfx_reel/<arch>.gd`, otherwise the generic set plays
   games as the `["fx", "hvfx", ...]` event, since they don't run the kit. Set `"net": false` on a recipe to keep it local.
 - `HeroVfx.of(m).hold(h, "move", k)`: something that lasts while the kit asks every tick (a blade heating). It follows its
   anchors and turns with the aim (a hose sweeping), and stops by itself when the asks stop, whichever way the move
-  ended. Particle layers only, and local.
+  ended. Particle layers only, and local. Passing `"at"` in `extra` each tick moves it (a zone following a hammer).
+- `HeroVfx.of(m).shell(h, "move")`: a lasting surface the kit shows, hides and places itself (the move's first layer, a
+  `skirt` or a `dome`; one per hunter, not pooled). Kael's guard shell, Albert's aegis.
+- `HeroVfx.pal(arch, "key")`: a palette colour for the kit's own telegraphs and areas (AimKit lanes, rings), so they
+  match its looks.
 - `HeroVfx.of(m).trail(h, "move", node)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
   is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges.
 - `run_own(stage, cx)` (ArchKit) in place of `run`: the stage's rules run, the shared cast language (AbilityFx, KinExec's rings,
@@ -34,6 +38,7 @@ named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_
 | `chain` | holds only: a chain of links from `at` to the kit's `to` (passed on every ask); the hold's `k` is its tension: 0 hangs slack and sways, 1 pulls straight and glows, with glints running toward the hand | `size` width, `link` m per link, `slack` m of sway |
 | `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor), or the kit's `o.to` (a Vector3; local only, other games use `len`) |
 | `vortex` | a ground disc spinning inward to a dark core (`c3`) | `size` radius, `spin` turns/s (negative: the other way), `grow` |
+| `dome` | a clear curved shield pane: a rim halo, a sheen where it turns from the eye, faint plates that crack dark with `life` (its wear), `shine` lights it | `size` radius, `arc` deg (centred ahead) |
 | `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` | GPU particles: hot streaks, puffs, dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
 
 All layers: `at` (`here`, `h` the body, or an anchor), `y`, `fwd`, `delay`, `life`, `c` / `c2` / `c3` (palette keys: body,

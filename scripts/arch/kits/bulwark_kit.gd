@@ -15,7 +15,7 @@ extends ArchKit
 ## - Passive, Guard: damage the aegis blocks becomes Guard; at 50 the Shield Charge ends in a Shield Slam.
 ##   Payoff, Crushed: any knock of his (the hammer thrown or called back, Crushing Blow, 360 Smash, Shield
 ##   Charge, Slam) that drives a foe into a wall stuns them (T4, pay_slam).
-## - E, Mending Ground: a green column comes down for 1 s, then a zone round the hammer (on you when the hammer
+## - E, Mending Ground: an ivory column comes down for 1 s, then a zone round the hammer (on you when the hammer
 ##   is in hand) heals a little every 0.5 s for 4 s and ends in a burst that also mends a raised aegis.
 ## - X, Faultline (level 6, BjornUlt): planted, a slam, and the ground erupts cell by cell down a lane.
 
@@ -616,8 +616,8 @@ func _catch(quiet := false) -> void:
 	if quiet:
 		return
 	m.sfx("bjorn_catch", h.pos, -6.0)
-	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("ffb04a"), 8, 2.5, 0.25)
-	m.fx.flash(h.pos + Vector3(0, 1.0, 0), Color("ffb04a"), 0.5, 0.06)
+	m.fx.burst(h.pos + Vector3(0, 1.0, 0), HeroVfx.pal(h.arch, "deep"), 8, 2.5, 0.25)
+	m.fx.flash(h.pos + Vector3(0, 1.0, 0), HeroVfx.pal(h.arch, "hot"), 0.5, 0.06)
 
 # ------------------------------------------------------------------ RMB: Shield (hold to block)
 ## The shield is a block, not a charge (the Crushing Blow on LMB is the Bulwark's charge).
@@ -697,7 +697,7 @@ func _shield_slam() -> void:
 	knock_until = m.time + 0.2
 	var stg := stage("rmb", {"delivery": {"type": "cone", "radius": float(sl["radius"]), "angle": float(sl["angle"])}, "effects": effs})
 	run(stg, cx("rmb", "shield_slam", aim(), {"no_floor": true, "hit_extra": {"heavy": true}}))
-	fx.bash(h.pos, dv, float(sl["radius"]), true)
+	vfx("shield_slam", h.pos, dv, {"r": float(sl["radius"])})
 	m.sfx("bjorn_bash", h.pos, -1.0, 0.85)
 
 func fire_ok_rmb() -> bool:
@@ -803,7 +803,7 @@ func cast_e() -> bool:
 	play("bul_mend")
 	mend = {"pos": at, "t": float(ed["delay"]), "r": r, "zone": -1.0, "tick": 0.0}
 	e_t = float(ed["delay"]) + float(ed["time"])
-	fx.purify(at, r, 0.0)
+	vfx("mend_call", at, null, {"r": r})
 	m.sfx("bjorn_purify", at, -2.0)
 	net_ring(at, r, Feel.cat_color("sustain"))
 	return true
@@ -817,18 +817,18 @@ func _tick_mend(dt: float) -> void:
 	if float(mend["zone"]) < 0.0:
 		mend["t"] = float(mend["t"]) - dt
 		var u := 1.0 - clampf(float(mend["t"]) / float(ed["delay"]), 0.0, 1.0)
-		fx.purify(mend["pos"], r, u)
-		AimKit.circle(h, "e", {"at": mend["pos"], "r": r, "fill": u, "ticks": true, "all": true, "col": BjornFx.GREEN})
+		AimKit.circle(h, "e", {"at": mend["pos"], "r": r, "fill": u, "ticks": true, "all": true,
+			"col": HeroVfx.pal(h.arch, "main")})
 		if float(mend["t"]) <= 0.0:
 			mend["zone"] = float(ed["time"])
 			mend["tick"] = float(ed["every"])
-			m.fx.ring(mend["pos"], r, BjornFx.GREEN, 0.4)
+			m.fx.ring(mend["pos"], r, HeroVfx.pal(h.arch, "main"), 0.4)
 		return
 	mend["zone"] = float(mend["zone"]) - dt
 	mend["tick"] = float(mend["tick"]) - dt
-	fx.purify_hold(mend["pos"], r)
+	HeroVfx.of(m).hold(h, "mend", 0.0, {"at": mend["pos"], "r": r})
 	AimKit.circle(h, "e", {"at": mend["pos"], "r": r, "fill": float(mend["zone"]) / float(ed["time"]), "all": true,
-		"col": BjornFx.GREEN})
+		"col": HeroVfx.pal(h.arch, "main")})
 	if float(mend["tick"]) <= 0.0:
 		mend["tick"] = float(mend["tick"]) + float(ed["every"])
 		_mend_tick()
@@ -862,7 +862,7 @@ func _mend_burst() -> void:
 		if o != h and o.downed:
 			o.revive = minf(0.95, o.revive + float(ed.get("revive", 0.35)))
 			kickstarts += 1
-			m.fx.burst(o.pos + Vector3(0, 0.8, 0), BjornFx.GREEN, 14, 3.0, 0.5, -3.0)
+			m.fx.burst(o.pos + Vector3(0, 0.8, 0), Feel.cat_color("sustain"), 14, 3.0, 0.5, -3.0)
 		elif not o.downed:
 			o.heal(heal)
 			m.fx.burst(o.pos + Vector3(0, 1.0, 0), Feel.cat_color("sustain"), 12, 2.5, 0.5, -3.0)
@@ -873,9 +873,8 @@ func _mend_burst() -> void:
 	if not infusion().is_empty():
 		var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": []})
 		run(stg, cx("e", "mending_ground", at, {"no_floor": true}))
-	fx.purify_burst(at, r)
-	m.fx.ring(at, r, BjornFx.GREEN, 0.45)
-	m.fx.burst(at + Vector3(0, 0.3, 0), BjornFx.GREEN, 24, 4.0, 0.8, -4.0, 1.2, Vector3.UP, 25.0)
+	vfx("mend_burst", at, null, {"r": r})
+	m.fx.ring(at, r, HeroVfx.pal(h.arch, "main"), 0.45)
 	m.sfx("bjorn_purify_burst", at, 0.0)
 	net_ring(at, r, Feel.cat_color("sustain"))
 

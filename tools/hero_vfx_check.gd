@@ -9,8 +9,8 @@ extends RefCounted
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
 const MAX_VORTEX := 4.5        # m radius, the largest ground swirl
-## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
-## data must answer.
+## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / shell(h, "move") / play(h, "move")
+## calls each Hero's data must answer.
 const KIT_FILES := {
 	"archer": ["archer_kit", "pin_"], "ashwick": ["ashwick_"], "bulwark": ["bulwark_kit", "bjorn_"],
 	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gunslinger": ["gunslinger_"],
@@ -24,14 +24,15 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 		"all": {"fx": [{"p": "sweep", "size": 2.0}, {"p": "scorch", "size": 2.0}, {"p": "skirt", "size": 1.5},
 			{"p": "flare", "size": 1.5, "near": true}, {"p": "ribbon", "at": "tip"}, {"p": "thread", "len": 2.0},
 			{"p": "bolt", "len": 4.0, "jag": 0.4},
-			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
+			{"p": "vortex", "size": 2.0}, {"p": "dome", "size": 2.0, "arc": 120}, {"p": "ember", "n": 40},
+			{"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
 			{"p": "drop", "n": 24}, {"p": "petal", "n": 16}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"rope": {"fx": [{"p": "chain", "at": "tip", "size": 0.2}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
 ## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
-const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
+const CALLED_ELSEWHERE := ["hurt", "downed", "string_idle", "string_draw", "fire_tap", "fire_arrow",
 	"fire_super", "fire_over", "fire_heavy", "fire_ult"]
 
 var bad := 0
@@ -66,7 +67,7 @@ func run(main: Node) -> void:
 ## The moves a Hero's kit asks for (from its scripts' source).
 func _called(arch: String) -> Dictionary:
 	var called := {}
-	var re := RegEx.create_from_string("(?:vfx\\(|(?:hold|trail)\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"")
+	var re := RegEx.create_from_string("(?:vfx\\(|(?:hold|trail|shell)\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"")
 	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
 		if f.ends_with(".gd") and (KIT_FILES.get(arch, []) as Array).any(func(pre): return f.begins_with(pre)):
 			for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)):

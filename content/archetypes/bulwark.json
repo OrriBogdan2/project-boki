@@ -25,7 +25,7 @@
 		"role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",
 		"lmb": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you.",
 		"rmb": "Hold to raise your aegis and block shots from the front. With it up, Shift is a Shield Charge on its own cooldown.",
-		"e": "A green light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst.",
+		"e": "A column of light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst.",
 		"dash": "360 Smash: a short dash that ends in one spinning hit around you; with the aegis up, a Shield Charge (its own 6s cooldown).",
 		"passive": "Blocking builds Guard (50 turns your Shield Charge into a Shield Slam); knocking a foe into a wall or another foe stuns it.",
 		"x": "Faultline (level 6): plant, slam, and the ground erupts down a long lane, throwing every foe on it up.",
@@ -142,7 +142,7 @@
 		},
 		"surf_heat": 1.25,
 		"variants": {
-			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
+			"hold": "Raise the aegis: a curved ivory dome with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
 			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.",
 			"air": "Shield Surf: hold to block from the front while gliding.",
 			"full": "Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50)."
@@ -171,7 +171,7 @@
 		"tick_heal": 2.0,
 		"heal": 18.0,
 		"shield": 60.0,
-		"desc": "A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.",
+		"desc": "A column of light comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.",
 		"sockets": {
 			"guard": "add",
 			"ctrl": "swap",

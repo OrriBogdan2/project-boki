@@ -712,10 +712,12 @@ func _bulwark_combos() -> void:
 	ok("bjorn: tap again calls it back", K.mace.is_empty())
 	K.cd["e"] = 0.0
 	aim_at(P, home + Vector3(-5.0, 0, 0))
+	var calls0 := int(HeroVfx.of(m).plays.get("mend_call", 0))
 	P.ak.use_e()
 	ok(
 		"bjorn E: with the hammer in hand it comes down on him, the column and circle shown",
-		Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length() < 0.5 and K.fx.column.visible,
+		Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length() < 0.5
+		and int(HeroVfx.of(m).plays.get("mend_call", 0)) == calls0 + 1,
 		"mend %s" % str(K.mend.get("pos"))
 	)
 	step(m, 0.1)
