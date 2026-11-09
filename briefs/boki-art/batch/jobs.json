@@ -21619,6 +21619,127 @@
     "prompt": "Draw one single character illustration of Aurostag, the creature shown from four sides in image 1. Image 1 is the design only: keep exactly the same creature, body plan, proportions, face, markings and signature parts, with nothing added or removed. Ignore how image 1 is painted, and do not copy its layout: draw the creature once. Its colours must not change: deep navy-blue body, a flowing aurora pattern in purple and teal on its body, teal-to-lilac crystal antlers, blue eyes. Its parts, counted: four legs, two antlers. Image 2 is the style guide only: match its line, flat shading, eye finish and amount of detail exactly, but never copy its creature, face, colours or pose. Pose: standing proud in profile, head turned toward the viewer, antlers spread, in a three-quarter view with both eyes showing. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is very heavy and bold, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. This creature is dark, and it must stay dark: its dark areas stay near black, as dark as in image 1. On the dark areas the second tone is a lighter one: one hard-edged lit shape on the upper left, a little lighter than the dark base, and the inner lines on dark areas are drawn in that lighter tone so they show. Keep a strong split between its dark, middle and light areas. Face: calm, level, half-lidded eyes with a coloured iris and one crisp white highlight; a long straight brow; a closed, composed mouth; quiet power. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. Effects: at most one small effect, attached to the body and drawn as flat hard-edged shapes. Anything that glows is simply the brightest flat colour on the creature with a lighter flat shape inside it; the air around the creature is empty. One construction cleanup is allowed, and nothing else about the design changes: the aurora is three flat colour ribbons that wrap round its body, with at most seven small flat four-point stars Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
   },
   {
+    "id": "rd2_barostorm_v2",
+    "name": "Barostorm (redesign concept, round 2)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barostorm.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Barostorm, a redesign of the creature shown from four sides in image 1. Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. New design: it walks low on all four legs like a ferret, belly close to the ground, long tail out behind. The same storm-cloud mane round its neck. A round barometer dial is drawn as a marking in the fur of its belly. Its gold grows as horn: two curved gold horns at its brow and a gold arrow-head spike at the tip of its tail. Its legs are plain cream fur with the same blue swirl markings. Every part of it grows out of its own body with a thick fused base, as if it was born that way. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes). View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "rd2_vaultara_v2",
+    "name": "Vaultara (redesign concept, round 2)",
+    "refs": [
+      "briefs/boki-art/evolutions/Vaultara.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Vaultara, a redesign of the creature shown from four sides in image 1. Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. New design: a tortoise-like creature whose shell IS a round vault door, with the wheel handle in the middle of the shell and the hinge as a ridge running along its spine. Its four legs are thick and covered in plain olive scaly skin with a few big simple scale plates, the same olive as its head. Its key-shaped tail grows from its body. Every part of it grows out of its own body with a thick fused base, as if it was born that way. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes). View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "rd2_barrelmander_v2",
+    "name": "Barrelmander (redesign concept, round 2)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Barrelmander, a redesign of the creature shown from four sides in image 1. Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. New design: a chunky dark brown salamander walking on four legs. Its back is a rounded cask shape made of its own thick skin, patterned with wooden stave lines, with two raised skin ridges running round it like barrel hoops. Two short stopper-shaped horns grow from the top of its back with one small spark between them. Every part of it grows out of its own body with a thick fused base, as if it was born that way. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes). View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "rd2_bucketmander_v2",
+    "name": "Bucketmander (redesign concept, round 2)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Bucketmander.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Bucketmander, a redesign of the creature shown from four sides in image 1. Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. New design: a round baby salamander with feathery gills, standing on two stubby legs with its little tail out behind. Its round lower body is shaped like a little bucket: its own skin patterned with wooden stave lines, with one raised skin ridge round its middle like a hoop. Short stubby arms. Every part of it grows out of its own body with a thick fused base, as if it was born that way. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes). View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "rd2_pagoguana_v2",
+    "name": "Pagoguana (redesign concept, round 2)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Pagoguana.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Pagoguana, a redesign of the creature shown from four sides in image 1. Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. New design: a dragon-iguana walking on all four legs, its body long and low and its tail planted behind it. Along its spine grow five stacked tiers of curved, roof-shaped dorsal plates, like the roofs of a pagoda, each tier one green scale plate with an upturned red edge, largest at the shoulders and smaller toward the tail. Every part of it grows out of its own body with a thick fused base, as if it was born that way. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes). View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "rd2_domeleon_v2",
+    "name": "Domeleon (redesign concept, round 2)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Domeleon.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Domeleon, a redesign of the creature shown from four sides in image 1. Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. New design: a chameleon whose head carries a big round bronze dome-shaped casque grown from its skull. One eye sits in a long bronze tube-shaped turret like a telescope, the other is a normal round eye. Its body is navy with pale crescent-moon spots; its tail curls into a bronze spiral. Nothing on its back but its own navy skin. Every part of it grows out of its own body with a thick fused base, as if it was born that way. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes). View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "rd2_stormit_v2",
+    "name": "Stormit (redesign concept, round 2)",
+    "refs": [
+      "briefs/boki-art/evolutions/Stormit.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Stormit, a redesign of the creature shown from four sides in image 1. Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. New design: a crab whose whole shell is a clear glass dome grown from its body, with a small lightning storm crackling inside the dome and its face on the front of the dome. Plain orange crab legs and two orange claws. The same small storm cloud floats just above the dome. Every part of it grows out of its own body with a thick fused base, as if it was born that way. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes). View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "rd2_siegephant_v2",
+    "name": "Siegephant (redesign concept, round 2)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Siegephant.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Siegephant, a redesign of the creature shown from four sides in image 1. Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. New design: a mammoth-like elephant standing on four thick legs with big round feet. A grey stone castle-tower crest rises from its head and shoulders, grown like a horn. Its mouth is a row of square teeth shaped like a portcullis. Its hide is brown with a few big plates, each with at most three rivet-like bumps. Its tail is thick and ends in a spiked bone knob shaped like a mace. Ivory tusks, yellow eyes. Every part of it grows out of its own body with a thick fused base, as if it was born that way. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes). View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "rd2_anvilbrock_v2",
+    "name": "Anvilbrock (redesign concept, round 2)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Anvilbrock.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Anvilbrock, a redesign of the creature shown from four sides in image 1. Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. New design: a stocky orange-brown badger walking on four legs. Its back rises into one grey iron anvil shape grown straight out of its spine, the anvil's base melting into its fur with no gap. Flat dark grey iron patches in its fur on its shoulders and legs, smooth and level with the fur. Blue sparks crackle on the anvil top. Plain furry paws with claws. Every part of it grows out of its own body with a thick fused base, as if it was born that way. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes). View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "rd2_forgebrock_v2",
+    "name": "Forgebrock (redesign concept, round 2)",
+    "refs": [
+      "briefs/boki-art/evolutions/Forgebrock.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Forgebrock, a redesign of the creature shown from four sides in image 1. Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. New design: a big orange-brown badger walking on four legs. Its back rises into one grey iron anvil shape grown straight out of its spine, the anvil's base melting into its fur with no gap, with orange furnace glow showing through cracks in the anvil and one short chimney horn on top. Flat dark grey iron patches in its fur on its shoulders and legs, smooth and level with the fur. Blue sparks crackle on the anvil. Plain furry paws with claws. Every part of it grows out of its own body with a thick fused base, as if it was born that way. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes). View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "rd2_chuggamus_v2",
+    "name": "Chuggamus (redesign concept, round 2)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Chuggamus.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Chuggamus, a redesign of the creature shown from four sides in image 1. Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. New design: a purple hippo standing on four thick piston-shaped legs with flat round feet. Its belly and sides are smooth copper hide shaped like a locomotive boiler. A copper smokestack-shaped horn grows on its snout, puffing a little steam. Its lower jaw is shaped like a cowcatcher grille, with a glowing firebox mouth and two ivory tusks. Every part of it grows out of its own body with a thick fused base, as if it was born that way. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes). View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
