@@ -21374,5 +21374,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/stance_nettlynx_1.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_nettlynx",
+    "name": "Nettlynx (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_nettlynx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_nettlynx",
+    "name": "Nettlynx (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_nettlynx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_lunowl",
+    "name": "Lunowl (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_lunowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_lunowl",
+    "name": "Lunowl (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_lunowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_lunowl",
+    "name": "Lunowl (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_lunowl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_eclipsowl",
+    "name": "Eclipsowl (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_eclipsowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_eclipsowl",
+    "name": "Eclipsowl (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_eclipsowl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_echolop",
+    "name": "Echolop (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_echolop_1.jpg",
+    "ok": true
   }
 ]
