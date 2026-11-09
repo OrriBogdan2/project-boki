@@ -633,6 +633,7 @@ func _draw_feed(sz: Vector2) -> void:
 
 func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
+	var hold := riding or MapDetail.holding()      # (MapDetail: what shows by default, what waits for a hold)
 	var s := 340.0 if riding else 196.0
 	var r := Rect2(Vector2(18, 18), Vector2(s, s))
 	mm_bottom = r.end.y
@@ -672,8 +673,9 @@ func _draw_minimap(sz: Vector2) -> void:
 	elif tex_view.size.x > 0.0 and tex_view.size.y > 0.0:
 		var dest := Rect2(inner.position + (tex_view.position - view.position) * k, tex_view.size * k)
 		c.draw_texture_rect_region(map_tex(), dest, map_region(tex_view))
-	_draw_map_labels(w, inner, view, k, riding)
-	if m.skytrain:
+	if MapDetail.shows("place", hold):
+		_draw_map_labels(w, inner, view, k, riding)
+	if m.skytrain and MapDetail.shows("train", hold):
 		_draw_map_train(inner, view, k)
 	# your view cone, faintly
 	if m.player and not riding:
@@ -690,28 +692,32 @@ func _draw_minimap(sz: Vector2) -> void:
 		for x in m.exits.list:
 			var pv: Vector2 = to_map.call(x.get("berth", x["pos"]))
 			var busy: bool = String(x["state"]) in ["called", "boarding", "charging", "open"]
+			if not MapDetail.shows("far_exit", hold, m.player != null and MapDetail.exit_matters(m, x)):
+				continue
 			if not on_map.call(pv, 4.0):
 				# off the map: an arrow for the loud ones (a called skiff, a charging uplink, an open lift)
 				if busy and x["kind"] != "hatch": _edge_arrow(inner, inner.get_center(), pv, Exits.color_of(x))
 				continue
-			_draw_exit_icon(pv, x, 1.0 if not riding else 0.8)
+			_draw_exit_icon(pv, x, MapDetail.ICON_R / 7.0)
 	if m.lairs:
-		_draw_map_lairs(inner, to_map, on_map, riding)
-	ReviveHud.minimap(self, inner, to_map, on_map)
+		_draw_map_lairs(inner, to_map, on_map, hold)
+	ReviveHud.minimap(self, inner, to_map, on_map, hold)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
 		for cnd in m.spawn_plan.cands:
 			if m.spawn_plan.state_for(cnd, m.player.team) != "active":
 				continue
+			if not MapDetail.shows("cache", hold, (cnd["known"] as Dictionary).has(m.player.team)):
+				continue
 			var cpv: Vector2 = to_map.call(cnd["pos"])
 			if on_map.call(cpv, 5.0):
 				var cdef: Dictionary = m.spawn_plan.cats.get(cnd["cat"], {})
-				full_map.marker(c, String(cdef.get("shape", "star")), cpv, 4.5 if riding else 4.0, cdef.get("col", Color.WHITE), "active")
-	if not m.ship.is_empty() and not m.ship.get("gone", false):
+				full_map.marker(c, String(cdef.get("shape", "star")), cpv, MapDetail.ICON_R / 1.35, cdef.get("col", Color.WHITE), "active")
+	if not m.ship.is_empty() and not m.ship.get("gone", false) and MapDetail.shows("ship", hold):
 		var sa: Vector2 = to_map.call(m.ship["a"]); var sb: Vector2 = to_map.call(m.ship["b"])
 		c.draw_line(sa, sb, Color(1, 1, 1, 0.35), 2.0, true)
-		c.draw_circle(to_map.call(m.ship_pos()), 5.0, GOLD)
-	if m.rolling:
+		c.draw_circle(to_map.call(m.ship_pos()), MapDetail.ICON_R, GOLD)
+	if m.rolling and MapDetail.shows("bounty", hold):
 		# the other drop waves' skyships (amber), and hunters with a bounty on them (seen by everyone)
 		for ws in m.ships:
 			if ws.get("gone", false) or ws.get("node") == null:
@@ -720,14 +726,14 @@ func _draw_minimap(sz: Vector2) -> void:
 			if on_map.call(wp, 3.0):
 				var wa: Vector2 = to_map.call(ws["a"]); var wb: Vector2 = to_map.call(ws["b"])
 				c.draw_line(wa, wb, Color(1.0, 0.72, 0.35, 0.3), 1.5, true)
-				c.draw_circle(wp, 4.5, Color("ffb64a"))
+				c.draw_circle(wp, MapDetail.ICON_R, Color("ffb64a"))
 			else:
 				_edge_arrow(inner, inner.get_center(), wp, Color("ffb64a"))
 		for h in m.hunters:
 			if m.player and h.team == m.player.team or not h.has_meta("bounty") or h.out or h.extracted:
 				continue
 			var bp: Vector2 = to_map.call(h.pos)
-			if on_map.call(bp, 3.0): bounty_marker(c, bp, 0.85)
+			if on_map.call(bp, 3.0): bounty_marker(c, bp, MapDetail.ICON_R / 6.5)
 			else: _edge_arrow(inner, inner.get_center(), bp, Color("ffb64a"))
 	if m.tut and m.tut.target != Vector3.INF:
 		var tv: Vector2 = to_map.call(m.tut.target)
@@ -741,10 +747,10 @@ func _draw_minimap(sz: Vector2) -> void:
 			if pg.has("by") or pg.has("kin"):
 				# a squad ping: a little pin in the pinger's colour
 				c.draw_colored_polygon(PackedVector2Array([pv, pv + Vector2(-4, -7), pv + Vector2(4, -7)]), pg["col"])
-				c.draw_circle(pv + Vector2(0, -9), 5.0, Color(0, 0, 0, 0.6))
-				c.draw_circle(pv + Vector2(0, -9), 4.0, pg["col"])
+				c.draw_circle(pv + Vector2(0, -9), MapDetail.ICON_R, Color(0, 0, 0, 0.6))
+				c.draw_circle(pv + Vector2(0, -9), MapDetail.ICON_R - 1.0, pg["col"])
 			else:
-				c.draw_circle(pv, 4.0, pg["col"])
+				c.draw_circle(pv, MapDetail.ICON_R - 1.0, pg["col"])
 		else: _edge_arrow(inner, inner.get_center(), pv, pg["col"])
 	# sound pings: rings that ripple out where you heard gunfire or a blast you can't see
 	for sp in m.sound_pings:
@@ -769,12 +775,12 @@ func _draw_minimap(sz: Vector2) -> void:
 			if m.truce.is_marked(h):
 				var ph := fmod(m.time * 1.5, 1.0)
 				if on_map.call(tv, 3.0):
-					c.draw_circle(tv, 4.0, BAD)
-					c.draw_arc(tv, 5.0 + ph * 8.0, 0, TAU, 20, Color(BAD, 1.0 - ph), 2.0, true)
+					c.draw_circle(tv, MapDetail.ICON_R - 1.0, BAD)
+					c.draw_arc(tv, MapDetail.ICON_R + ph * 8.0, 0, TAU, 20, Color(BAD, 1.0 - ph), 2.0, true)
 				else: _edge_arrow(inner, inner.get_center(), tv, BAD)
-			elif m.truce.allied(m.player.team, h.team) and not h.unseen and on_map.call(tv, 3.0):
-				c.draw_circle(tv, 4.5, Color(0, 0, 0, 0.6))
-				c.draw_circle(tv, 3.5, Color("f4f1e6"))
+			elif m.truce.allied(m.player.team, h.team) and not h.unseen and on_map.call(tv, 3.0) and MapDetail.shows("ally", hold):
+				c.draw_circle(tv, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
+				c.draw_circle(tv, MapDetail.ICON_R - 1.0, Color("f4f1e6"))
 	# your squad, with an arrow for anyone off the edge (a dead teammate shows at their deathbox)
 	for h in m.hunters:
 		if m.player == null or h.team != m.player.team:
@@ -792,13 +798,14 @@ func _draw_minimap(sz: Vector2) -> void:
 			var side := Vector2(-d.y, d.x)
 			c.draw_colored_polygon(PackedVector2Array([pv + d * 8.0, pv - d * 4.0 + side * 5.0, pv - d * 2.0, pv - d * 4.0 - side * 5.0]), col)
 		else:
-			c.draw_circle(pv, 4.5, Color(0, 0, 0, 0.6))
-			c.draw_circle(pv, 3.5, col)
+			c.draw_circle(pv, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
+			c.draw_circle(pv, MapDetail.ICON_R - 1.0, col)
 			_ctext(pv + Vector2(0, -7), h.pname.substr(0, 1), 11, col, big)
+	BokiHud.map_kin(c, m, to_map, on_map)
 	for dk in BokiHud.squad_downed(m):
 		var dv: Vector2 = to_map.call(dk.position)
 		if on_map.call(dv, 3.0):
-			BokiHud.map_dot(c, dv, dk, 5.0, m.time)
+			BokiHud.map_dot(c, dv, dk, MapDetail.ICON_R, m.time)
 		else:
 			_edge_arrow(inner, inner.get_center(), dv, Color(dk.sp.get("glow", dk.sp["color"])))
 
@@ -3103,8 +3110,10 @@ func _lair_icon(pv: Vector2, L: Dictionary, k := 1.0) -> void:
 			c.draw_circle(pv, 5.5 * k, Color(0.55, 0.58, 0.64, 0.9))
 			c.draw_polyline(PackedVector2Array([pv + Vector2(-3, 0) * k, pv + Vector2(-0.8, 2.6) * k, pv + Vector2(3.4, -2.6) * k]), dark, 2.0 * k)
 
-func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, overview: bool) -> void:
+func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, hold: bool) -> void:
 	for L in m.lairs.list:
+		if not MapDetail.shows("lair", hold, m.player != null and MapDetail.lair_matters(m, L)):
+			continue
 		var pv: Vector2 = to_map.call(L["c"])
 		# a fight you heard (or its boss falling): a big pulsing ring round the boss's icon
 		var al: bool = m.player != null and m.lairs.alerted(L, m.player)
@@ -3114,7 +3123,7 @@ func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, overview:
 				var ph := fmod(m.time * 1.2, 1.0)
 				c.draw_arc(pv, 9.0 + ph * 16.0, 0, TAU, 28, Color(acol, 1.0 - ph), 3.0, true)
 				c.draw_arc(pv, 10.0, 0, TAU, 24, Color(acol, 0.9), 2.0, true)
-			_lair_icon(pv, L, (1.0 if not overview else 0.9) * (1.3 if al else 1.0))
+			_lair_icon(pv, L, MapDetail.ICON_R / 8.0)
 		elif al:
 			_edge_arrow(inner, inner.get_center(), pv, acol)
 		elif L["state"] == "awake":
