@@ -3,6 +3,8 @@
  "name": "Kael",
  "script": "tools/gen_sfx_kael.py",
  "sounds": {
+  "juggernaut_hit": "heavy_impact",
+  "juggernaut_taken": "heavy_impact",
   "jug_slash": "fire",
   "juggernaut_blade_hiss": "signature",
   "jug_wave": "cast",

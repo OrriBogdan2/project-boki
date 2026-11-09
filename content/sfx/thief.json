@@ -3,6 +3,8 @@
  "name": "Sable",
  "script": "tools/gen_sfx_sable.py",
  "sounds": {
+  "thief_hit": "impact",
+  "thief_taken": "impact",
   "dj_bolt": "fire",
   "thief_flintlock_crack": "signature",
   "thief_cock": "cast",

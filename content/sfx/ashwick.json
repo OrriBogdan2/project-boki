@@ -3,6 +3,8 @@
  "name": "Cinder",
  "script": "tools/gen_sfx_cinder.py",
  "sounds": {
+  "ashwick_hit": "impact",
+  "ashwick_taken": "impact",
   "lw_pilot": "cast",
   "lw_roar": "fire",
   "ashwick_tank_hiss": "signature",

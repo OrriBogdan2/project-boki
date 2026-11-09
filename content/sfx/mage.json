@@ -3,6 +3,8 @@
  "name": "Sparkle",
  "script": "tools/gen_sfx_ryzz.py",
  "sounds": {
+  "mage_hit": "impact",
+  "mage_taken": "impact",
   "vv_bolt": "fire",
   "mage_zap": "signature",
   "mage_bubble_pop": "signature",

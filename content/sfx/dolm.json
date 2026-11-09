@@ -3,6 +3,8 @@
  "name": "Tenzo",
  "script": "tools/gen_sfx_tarek.py",
  "sounds": {
+  "dolm_hit": "impact",
+  "dolm_taken": "impact",
   "br_throw": "fire",
   "br_boulder_hit": "impact",
   "br_wind": "cast",

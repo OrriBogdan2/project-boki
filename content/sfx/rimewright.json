@@ -3,6 +3,8 @@
 	"name": "Neve",
 	"script": "tools/gen_sfx_claire.py",
 	"sounds": {
+		"rimewright_hit": "impact",
+		"rimewright_taken": "impact",
 		"rime_shard": "fire",
 		"rime_beam": "fire",
 		"rimewright_dart_hit": "impact",

@@ -3,6 +3,8 @@
  "name": "Meeko",
  "script": "tools/gen_sfx_pip.py",
  "sounds": {
+  "tender_hit": "impact",
+  "tender_taken": "impact",
   "tend_ember": "fire",
   "tend_ember_emp": "fire",
   "tend_kindled": "impact",

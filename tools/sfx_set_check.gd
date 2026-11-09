@@ -64,11 +64,11 @@ func _check_set(path: String) -> void:
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
-	var need := ["dash"] + VOICE
+	var need := ["dash", "hit", "taken"] + VOICE
 	for s in SURFACES:
 		need.append("step_" + s)
 	var missing := need.filter(func(k): return not sounds.has("%s_%s" % [arch, k]))
-	ok(missing.is_empty(), "%s: voice, dash and footsteps on every surface (missing %s)" % [arch, missing])
+	ok(missing.is_empty(), "%s: voice, dash, hit/taken and footsteps on every surface (missing %s)" % [arch, missing])
 	ok(sounds.values().has("fire") or sounds.values().has("heavy_fire"), "%s: a weapon fire sound" % arch)
 	var sig: Array = d.get("signature", [])
 	var sig_missing := sig.filter(func(s): return not sounds.has(s))
@@ -76,11 +76,13 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	var h := Hunter.new()
 	h.arch = arch
 	var picked := []
-	for kind in ["dash", "step_wood", "hurt"]:
+	for kind in ["dash", "step_wood", "hurt", "hit", "taken"]:
 		picked.append(HeroSfx.of(h, kind, kind))
 	h.free()
-	var want := [arch + "_dash", arch + "_step_wood", arch + "_hurt"]
+	var want := [arch + "_dash", arch + "_step_wood", arch + "_hurt", arch + "_hit", arch + "_taken"]
 	ok(picked == want, "%s: HeroSfx picks its own (%s)" % [arch, picked])
+	var short := ["hit", "taken"].filter(func(k): return _takes("%s_%s" % [arch, k]).size() < 3)
+	ok(short.is_empty(), "%s: hit and taken have 3+ takes, so a string of hits varies (short: %s)" % [arch, short])
 	_kit_names(arch, d.get("kit_files", []))
 
 ## 4. Every literal sound name the kit plays exists (a typo plays silence): <arch>_kit.gd plus the helper
@@ -130,9 +132,11 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 func _fallback() -> void:
 	var h := Hunter.new()
 	h.arch = "no_such_hunter"
-	var got := [HeroSfx.of(h, "dash", "dash"), HeroSfx.of(h, "hurt", "")]
+	var got := []
+	for kind in ["dash", "hurt", "hit", "taken"]:
+		got.append(HeroSfx.of(h, kind, kind if kind in ["dash", "hit"] else ""))
 	h.free()
-	ok(got == ["dash", ""], "no set: the shared dash, and no voice line (%s)" % [got])
+	ok(got == ["dash", "", "hit", ""], "no set: the shared dash and hit, no voice line or taken thump (%s)" % [got])
 
 func _takes(sname: String) -> Array:
 	var out := []

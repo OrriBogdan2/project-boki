@@ -2200,13 +2200,14 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if src != "burn":
 		var tier := Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
-		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08))
+		HeroSfx.hit_confirm(self, by, target, crit, armor_hit, o.has("ab"))
 		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and by and hud:
 		hud.hurt_from(by.pos)
 	if target == player:
 		sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)
+		if src != "burn": HeroSfx.hit_taken(self, by, o.has("ab"))
 		if hud: hud.hurt_flash(d)
 	Juice.hit(self, target, by, d, o, crit, armor_hit)
 
