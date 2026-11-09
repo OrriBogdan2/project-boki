@@ -921,6 +921,22 @@ func e_recastable() -> bool:
 	return warchain.hooked()
 
 ## E: throw the chain, or pull yourself along it (JuggernautChain.press).
+## RecastCue: E again while the hook holds pulls you in; the marker sits on what it bit.
+func recast_window() -> Dictionary:
+	if not warchain.hooked():
+		return {}
+	return RecastCue.window("e", warchain.tether_t, float(warchain.data()["time"]), warchain.anchor)
+
+## RecastCue's badge: a foe the Finishing Slam hit; a knock on them in time resets the Riposte.
+func combo_marks(out: Array) -> void:
+	super(out)
+	var reset_t := float(rmb_def()["slam"].get("reset_t", 2.0))
+	for key in slam_hit:
+		var f := instance_from_id(key) as Ent
+		var left: float = reset_t - (m.time - float(slam_hit[key]))
+		if f != null and not f.dead and left > 0.0:
+			out.append(RecastCue.mark(f, 0, left, reset_t, "SLAMMED", true))
+
 func use_e() -> void:
 	if not slam_w.is_empty() and warchain.state == "ready":
 		slam_w["pinned"] = true        # the cursor moved on to the throw: the Slam goes where it was started

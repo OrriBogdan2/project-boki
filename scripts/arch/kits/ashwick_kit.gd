@@ -171,6 +171,7 @@ func _flashover_fx(f: Ent) -> void:
 	m.sfx("crit", f.pos, -7.0, 0.85)
 	if h.is_local() and m.hud:
 		m.hud.flash(col, 0.12)
+	RecastCue.payoff(self, f)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
 ## The Flashover fist pump; mid-roar the hand stays on the foe and only the off arm and the body move.
@@ -687,6 +688,26 @@ func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
 func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
 func ult_running() -> bool: return jet.running()
+## RecastCue: X again lands the flight early, where you are (it lands by itself when it runs out).
+func recast_window() -> Dictionary:
+	if not jet.running():
+		return {}
+	var t := float(x_def()["time"])
+	return RecastCue.window("x", float(jet.flight["t"]), t, h.pos, true, true)
+
+## RecastCue's badge: Char on each foe; gold once it's Ablaze, where the next ignite is the Flashover.
+func combo_marks(out: Array) -> void:
+	super(out)
+	var ttl := float(rd()["expire"])
+	for key in chars:
+		var c: Dictionary = chars[key]
+		if not is_instance_valid(c["e"]) or (c["e"] as Ent).dead:
+			continue
+		var lvl := burning(c["e"])
+		var left: float = ttl - (m.time - float(c["t"]))
+		if left > 0.0 or lvl > 0:
+			var label := "ABLAZE" if lvl > 0 else "CHAR"
+			out.append(RecastCue.mark(c["e"], int(c["n"]), maxf(0.0, left), ttl, label, lvl == 1))
 ## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()
