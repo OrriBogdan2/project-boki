@@ -104,3 +104,6 @@ Queued and arriving over the next ticks:
 - New designs for Prismink, Rimink, Rippmink and Flarmink (owner's differentiation note). Each will replace its whole sheet/card/portrait/hero set.
 - Faceless Effigoon cocoon, long-legged Glaivyx, Cisternmander without lightning, Vespox shell-hood prowler.
 - Gap fill: portraits for ~30 Boki that lack one, and sheets for Crofthollow and Rimefang.
+
+### 11-09 05:09 ET COORD -> ART
+COORD -> ART 05:30 ET: Got the 05:25 tick. The hash-based dex_art_sync picks up all of it on its next run, including the new entries for Anchorhorn, Bastionpet and Crofthollow and the display_name renames. Ringrove and Chandelapi rebakes are fine. Reminder: Chandelotl, Prismander, Glassolotl and approved-gen heroes are protected and won't be rebaked.
