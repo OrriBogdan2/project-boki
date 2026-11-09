@@ -43109,5 +43109,33 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_pyrraven_o81_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_lanceron_o81",
+    "name": "Lanceron (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lanceron_o81_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pyrraven_o81",
+    "name": "Pyrraven (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pyrraven_o81_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pyrraven_o81",
+    "name": "Pyrraven (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_pyrraven_o81_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanceron_o81",
+    "name": "Lanceron (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lanceron_o81_2.jpg",
+    "ok": true
   }
 ]
