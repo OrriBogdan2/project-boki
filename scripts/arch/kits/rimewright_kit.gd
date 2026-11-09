@@ -27,6 +27,8 @@ var spear_aim := false         # RMB held: the landing ring and the raised spear
 var throw_t := -1.0            # s left of the push before the spear leaves her palms (-1: none)
 var zones: Array = []          # landed spears: {at, left, total, id}
 var zone_n := 0
+var slabs: Array = []          # the ice path's plates: {node, until, key}
+var slab_n := 0
 var splinter_log := 0          # Shatters fired (tests)
 var look: CareLook
 var stats := {      # counters for the checks
@@ -166,6 +168,7 @@ func _tick(dt: float) -> void:
 	_tick_wall_cast(dt)
 	_tick_wall(dt)
 	_tick_zones(dt)
+	_tick_slabs()
 	_tick_rime(dt)
 	_tick_trails(dt)
 	if h.is_local() and not busy():
@@ -517,6 +520,12 @@ func _tick_trails(dt: float) -> void:
 		HeroVfx.of(m).hold(h, "skate")
 		_lay_slabs(dt)
 
+## Each plate's end is its zone cue (AimKit.zone), so the path fades out the same way every zone does.
+func _tick_slabs() -> void:
+	slabs = slabs.filter(func(s): return float(s["until"]) > m.time)
+	for s in slabs:
+		AimKit.zone(h, s["key"], float(s["until"]) - m.time, s["node"])
+
 ## Plates of ice that form under her blades as she skates and fade behind her, each with a frost sheen
 ## where the blade bites.
 func _lay_slabs(dt: float) -> void:
@@ -527,7 +536,10 @@ func _lay_slabs(dt: float) -> void:
 	var span := randf_range(0.9, 1.3)
 	# laid just under the leading blade, so the newest plate is always under her feet
 	var under := h.position + Vector3(h.roll_dir.x, 0.0, h.roll_dir.y) * SLAB_LEAD
-	lk().burst("slab", under, {"r": span, "dur": SLAB_LIFE, "dir": h.roll_dir.rotated(randf_range(-0.25, 0.25))})
+	var tilt := h.roll_dir.rotated(randf_range(-0.25, 0.25))
+	var plate := lk().burst("slab", under, {"r": span, "dur": SLAB_LIFE, "dir": tilt})
+	slab_n += 1
+	slabs.append({"node": plate, "until": m.time + SLAB_LIFE, "key": "slab%d" % slab_n})
 	rinkrun["frost"] = int(rinkrun.get("frost", 0)) + 1
 	if int(rinkrun["frost"]) % FROST_EVERY == 0:
 		vfx("skate_frost", h.position, h.roll_dir)       # a frost patch that lingers, then melts
@@ -648,14 +660,14 @@ func _tick_zones(dt: float) -> void:
 		var at: Vector3 = z["at"]
 		var k := 1.0 - float(z["left"]) / maxf(0.01, float(z["total"]))
 		var key := "zone%d" % int(z["id"])
+		AimKit.circle(
+				h, key,
+				{"at": at, "r": float(ld["burst_r"]), "fill": k, "all": true, "dashed": true, "col": Color("bff7ef")})
 		lk().keep(
 				key, "zone", at,
 				{
 					"r": float(ld["zone_r"]), "col": Color("7fd8ff"), "rim": Color("e8ffff"), "fill": 0.8,
-					"sweep": k, "pattern": 2.0, "spin": m.time * 0.6, "a": 0.9})
-		AimKit.circle(
-				h, key,
-				{"at": at, "r": float(ld["burst_r"]), "fill": k, "all": true, "dashed": true, "col": Color("bff7ef")})
+					"sweep": k, "pattern": 2.0, "spin": m.time * 0.6, "a": 0.9 * AimKit.zone(h, key, float(z["left"]))})
 		for f in foes_in(at, float(ld["zone_r"])):
 			f.slow_k = maxf(f.slow_k if f.slow_t > 0.0 else 0.0, float(ld["zone_slow"]))
 			f.slow_t = maxf(f.slow_t, 0.2)
@@ -993,10 +1005,11 @@ func rime_slow_of(f: Ent) -> float:
 func _rime_look(at: Vector3, radius: float, k: float, dt: float) -> void:
 	var xd := x_def()
 	var snap := clampf(float(rime["t"]) / float(xd["snap_t"]), 0.0, 1.0)
-	ulk().keep("rink", "rink", at, {"r": radius * lerpf(0.25, 1.0, snap), "crack": k})
+	var rink := ulk().keep("rink", "rink", at, {"r": radius * lerpf(0.25, 1.0, snap), "crack": k})
 	var close_t := float(xd["carry_t"]) if not (rime["carry"] as Dictionary).is_empty() else BUD_CLOSE_T
 	ulk().keep("bud", "frostbud", h.pos, {"k": clampf(float(rime["t"]) / close_t, 0.0, 1.0)})
 	AimKit.circle(h, "x", {"at": at, "r": radius, "fill": k, "all": true, "col": col_of(xd), "hot": k})
+	AimKit.zone(h, "x", float(xd["hold"]) - float(rime["t"]), rink)
 	rime["creak"] = float(rime["creak"]) - dt
 	if float(rime["creak"]) <= 0.0:
 		rime["creak"] = lerpf(0.8, 0.35, k)

@@ -251,13 +251,15 @@ func _foes_in(i: int) -> Array:
 			out.append(f)
 	return out
 
-## The scar: foes standing on it are slowed; it flickers out over its last second.
+## The scar: foes standing on it are slowed; it ends with the shared zone cue (AimKit.zone).
 func _tick_scar(dt: float) -> void:
 	scar["t"] = float(scar["t"]) - dt
 	if float(scar["t"]) <= 0.0:
 		scar = {}
 		_scar.visible = false
+		AimKit.hide(h, "scar")
 		return
+	AimKit.zone(h, "scar", float(scar["t"]), _scar)
 	var x := xd()
 	var a: Vector3 = scar["a"]
 	var length := float(scar["len"])
@@ -304,8 +306,7 @@ func _process(delta_in: float) -> void:
 		_place_flat(_streak, Vector3(head.x, _trail_y(head) + 0.25, head.z), Vector2(2.4, 0.9))
 		_streak.visible = _streak_t > 0.0
 	if _scar.visible and not scar.is_empty():
-		var fade := clampf(float(scar["t"]), 0.0, 1.0)
-		KitShaders.param(_scar, "power", (1.0 + 0.35 * sin(Time.get_ticks_msec() * 0.012)) * fade)
+		KitShaders.param(_scar, "power", 1.0 + 0.35 * sin(Time.get_ticks_msec() * 0.012))
 
 ## Each cell's basalt spikes heave up out of the ground fast, hang, then sink back; the molten seam under
 ## them glows then cools.

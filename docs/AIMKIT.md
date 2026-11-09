@@ -1,6 +1,6 @@
 # AimKit: shared aiming and telegraphs for the hero kits
 
-Code: `scripts/match/aim/`. Check: `--aimkit-check` (tools/aimkit_check.gd). Screenshots:
+Code: `scripts/match/aim/`. Checks: `--aimkit-check` (tools/aimkit_check.gd), `--zone-expiry-check`. Screenshots:
 `--aimkit-check --shots-dir=<dir>` under xvfb (tools/aimkit_shots.gd writes one PNG per shape and
 cursor state plus `MANIFEST.txt`).
 
@@ -164,6 +164,16 @@ drag arrow.
 - `AimKit.entry(h, id)`: the resolved params, for example the arc radius the kit should cast at.
 - `AimKit.hide(h, id)`: drop one now.
 - `AimKit.clear(h)`: everything this hunter shows, cursor states included.
+
+### Zone expiry (every lingering ground zone)
+`AimKit.zone(h, id, left, node)` is called each step with the seconds a zone has left, after the shape under
+the same `id` (its rim) and/or with the zone's fill node (a mesh or a node holding meshes; it fades through
+`transparency`). In the last `AimShapes.EXPIRY_T` (0.5 s) the fill fades to nothing and the rim pulses twice
+(the same curve for every kit, `AimShapes.fill_k` / `rim_k` / `look_k`); before that the zone stays steady, so
+a kit must not fade its zone on its own. It returns the strength a look made of several nodes multiplies into
+its own alpha. A zone the kit stops calling is released after `KEEP`. Zones: Vex R fire zone, Cinder R trail,
+Lace E rain, Meeko E hearth, Albert E zone and R scar, Ostra R well, Neve R rink, spear zone and ice path,
+Sable R ring. Check: `--zone-expiry-check`.
 
 ## 3. Cursor states (local player only)
 ```gdscript

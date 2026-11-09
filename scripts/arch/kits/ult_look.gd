@@ -108,10 +108,9 @@ func _style(e: Dictionary, k: float) -> void:
 
 
 # ------------------------------------------------------------------ held looks
-func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
+func keep(key: String, kind: String, at: Vector3, p := {}) -> Node3D:
 	if not kind in ["tether", "rink", "frostbud"]:
-		super.keep(key, kind, at, p)
-		return
+		return super.keep(key, kind, at, p)
 	var e: Dictionary = held.get(key, {})
 	if e.is_empty() or String(e["kind"]) != kind or not is_instance_valid(e["n"]):
 		if not e.is_empty():
@@ -131,6 +130,7 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 			var grow := _out_back(clampf(float(p.get("k", 1.0)), 0.0, 1.0))
 			n.scale = Vector3(grow, maxf(0.05, grow), grow)
 			n.rotation.y = m.time * 0.3
+	return n
 
 
 func _place_tether(n: Node3D, from: Vector3, p: Dictionary) -> void:

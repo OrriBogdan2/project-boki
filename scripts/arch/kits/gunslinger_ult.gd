@@ -125,7 +125,7 @@ func _impact(s: Dictionary) -> void:
 	s["phase"] = BURN
 	s["t"] = 0.0
 	impacts += 1
-	_impact_fx(at, r)
+	s["disc"] = _impact_fx(at, r)
 	var dmg := float(xd["dmg"]) * power()
 	var n := 0
 	var centre := 0
@@ -143,19 +143,20 @@ func _impact(s: Dictionary) -> void:
 
 ## The impact: a white-hot flash column, an ember shock ring, a spray of embers, a boom, and the scorched
 ## patch with its burning rim that stays for the zone.
-func _impact_fx(at: Vector3, r: float) -> void:
+func _impact_fx(at: Vector3, r: float) -> Node3D:
 	var xd := data()
 	var fx := kit.fx()
 	fx.pillar(at, Color(GunslingerKit.HOT, 0.95), Color.WHITE, 10.0, r * 0.6, 0.3, true)
 	fx.ring(at, r * 1.3, GunslingerKit.EMBER, GunslingerKit.HOT, 0.45)
 	fx.ring(at, r * 0.7, GunslingerKit.HOT, GunslingerKit.EMBER, 0.3)
-	fx.disc(at, r, CHAR, GunslingerKit.EMBER, float(xd["zone_t"]), GunslingerKit.EMBER)
+	var disc := fx.disc(at, r, CHAR, GunslingerKit.EMBER, float(xd["zone_t"]), GunslingerKit.EMBER, true)
 	kit.m.fx.burst(at + Vector3(0, 0.5, 0), GunslingerKit.EMBER, 30, 9.0, 0.6, 6.0, 1.6)
 	kit.m.fx.flash(at + Vector3(0, 1.0, 0), GunslingerKit.HOT, 3.0, 0.14)
 	kit.net_ring(at, r, GunslingerKit.EMBER)
 	kit.m.sfx("vn_nuke_boom", at, 1.0)
 	kit.m.sfx("vn_nuke_burn", at, -6.0)
 	Shake.incoming_big(kit.m, at, 0.6, kit.h)
+	return disc
 
 ## The burning patch: every tick it hurts and slows everyone on it; its rim stays lit for everyone and flames
 ## flicker across it. Ticks pay no bond (only the impact does).
@@ -164,8 +165,8 @@ func _burn_tick(s: Dictionary, dt: float) -> void:
 	var at: Vector3 = s["at"]
 	var r := float(xd["radius"])
 	var rim := {"at": at, "r": r, "all": true, "col": GunslingerKit.EMBER, "col2": GunslingerKit.HOT, "lw": 0.08}
-	rim["alpha"] = 1.0 - 0.5 * float(s["t"]) / float(xd["zone_t"])
 	AimKit.circle(kit.h, "xz%d" % int(s["n"]), rim)
+	AimKit.zone(kit.h, "xz%d" % int(s["n"]), float(xd["zone_t"]) - float(s["t"]), s["disc"])
 	_flames(at, r, dt)
 	s["tick"] = float(s["tick"]) + dt
 	if float(s["tick"]) >= float(xd["tick"]):

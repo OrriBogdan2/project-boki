@@ -421,7 +421,7 @@ func _tick_rain(dt: float) -> void:
 	if rain.is_empty():
 		return
 	rain["t"] = float(rain["t"]) - dt
-	var k := clampf(float(rain["t"]) / 0.4, 0.0, 1.0) * clampf((float(rain["t0"]) - float(rain["t"])) / 0.25, 0.0, 1.0)
+	var k := AimKit.zone(h, "rain", float(rain["t"])) * clampf((float(rain["t0"]) - float(rain["t"])) / 0.25, 0.0, 1.0)
 	for p in panels:
 		(p as MeshInstance3D).material_override.set_shader_parameter("power", k)
 	glow.material_override.set_shader_parameter("life", k * 0.8)

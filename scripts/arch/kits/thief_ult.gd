@@ -108,6 +108,9 @@ func _draw_ring(d: Dictionary) -> void:
 			"all": true, "ticks": true, "fill": (0.3 + 0.1 * pulse) * gk, "alpha": 1.2 + 0.8 * pulse})
 	AimKit.circle(k.h, "ult_rim", {"self": true, "r": r * float(d["rim"]), "col": Color(RIM_COL, 0.7), "all": true,
 			"dashed": true, "alpha": 0.7})
+	var left := float(d["grow"]) + float(d["time"]) - float(st["t"])
+	AimKit.zone(k.h, "ult", left)
+	AimKit.zone(k.h, "ult_rim", left)
 
 ## The blades circling her while it runs (pooled looks, placed every step).
 func _orbit(d: Dictionary) -> void:

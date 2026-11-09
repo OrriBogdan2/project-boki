@@ -253,13 +253,14 @@ func ring(at: Vector3, r: float, col: Color, col2: Color, dur := 0.35) -> void:
 	_play(n, "ring", dur)
 
 ## A dark filled disc on the ground, radius r: a jagged crackling rim in `rim`, veins of col2 inside.
-## Returns the node, so a long one can be ended early with cut().
-func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE) -> Node3D:
+## Returns the node, so a long one can be ended early with cut(). `hold` keeps it at full strength for its
+## whole `dur` (a lingering zone: AimKit.zone fades its last stretch instead).
+func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE, hold := false) -> Node3D:
 	var n := _take("disc", func(): return _mi(_quad_mesh(), _mat(M_DISC)))
 	_look(n, col, col2, rim)
 	n.global_position = at + Vector3(0, 0.08, 0)
 	n.scale = Vector3(r, 1.0, r)
-	_play(n, "disc", dur)
+	_play(n, "disc", dur, {"hold": hold})
 	return n
 
 ## Ends a running one-shot now (it is hidden on the next frame and goes back to its pool).
@@ -594,7 +595,7 @@ func _tick_effect(e: Dictionary, delta: float) -> void:
 		em.albedo_color = Color(e["col"], float(e.get("a0", 0.75)) * (1.0 - u) * (1.0 - u) * _clear_of(e))
 		return
 	var mt := (n as MeshInstance3D).material_override as ShaderMaterial
-	mt.set_shader_parameter("life", u)
+	mt.set_shader_parameter("life", 0.0 if e.get("hold", false) else u)
 	match kind:
 		"pillar":
 			if bool(e.get("narrow", true)):

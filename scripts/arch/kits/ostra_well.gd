@@ -149,6 +149,7 @@ func _tick_open(dt: float) -> void:
 	var disc := KitLooks.of(k.m).hold_on("os_well", "well", k.m, center + Vector3(0, 0.04, 0), radius)
 	(disc.get_node("Spin") as Node3D).rotate_y(-dt * 2.4)
 	(disc.get_node("Core") as Node3D).visible = swollen
+	AimKit.zone(k.h, "well", left, disc)
 	tick_left -= dt
 	if tick_left <= 0.0:
 		tick_left += TICK
@@ -190,6 +191,7 @@ func _floor(p: Vector3) -> Vector3:
 ## It just stops: the disc folds in on itself, nothing bursts.
 func _close() -> void:
 	phase = ""
+	AimKit.hide(k.h, "well")
 	for rec in draws:
 		k.m.displace.stop(rec)
 	draws = []

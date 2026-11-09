@@ -540,11 +540,11 @@ func _tick_hearth(dt: float) -> void:
 	var tossed := bool(hearth.get("tossed", false))
 	# on her: a soft warm ring with a faint inside; thrown: a filled disc, warm amber in the middle shading
 	# to teal, a bright rim, its lantern floating over the middle
-	var gk := float(hearth["left"]) / maxf(0.01, float(ed["time"]))
+	var gk := AimKit.zone(h, "hearth", float(hearth["left"]))
 	var look_p := {"r": hearth_r(), "col": Color("ffd27a"), "rim": Color("ffb347"), "fill": 0.45, "pattern": 5.0,
-		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
+		"a": 0.85 * gk, "spin": m.time * 0.5, "lamp": tossed}
 	if tossed:
-		look_p.merge({"col": Color("ffd27a"), "rim": Color("3fd8d0"), "fill": 1.8, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
+		look_p.merge({"col": Color("ffd27a"), "rim": Color("3fd8d0"), "fill": 1.8, "a": 1.1 * gk}, true)
 	lk().keep("hearth", "hearth", c, look_p)
 	hearth["left"] = float(hearth["left"]) - dt
 	e_t = float(hearth["left"])

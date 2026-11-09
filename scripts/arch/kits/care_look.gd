@@ -364,7 +364,7 @@ func impact(kind: String, at: Vector3, s: Dictionary) -> void:
 
 # ------------------------------------------------------------------ timed one-offs
 ## A one-off look that plays out by itself. p: col, r (size), dur, ent (follow a body), dir (Vector2).
-func burst(kind: String, at: Vector3, p := {}) -> void:
+func burst(kind: String, at: Vector3, p := {}) -> Node3D:
 	var node_kind := "flare" if kind == "star" else kind
 	var n := _take(node_kind)
 	n.global_position = at
@@ -372,6 +372,7 @@ func burst(kind: String, at: Vector3, p := {}) -> void:
 	var e := {"n": n, "kind": node_kind, "fx": kind, "t": 0.0, "dur": float(p.get("dur", 0.4)), "at": at, "p": p}
 	_style(e, 0.0)
 	live.append(e)
+	return n
 
 func _tick_live(dt: float) -> void:
 	for e in live.duplicate():
@@ -432,7 +433,7 @@ func _style(e: Dictionary, k: float) -> void:
 			n.rotation = Vector3(0, atan2(-dv4.x, -dv4.y), 0)
 			var forms := lerpf(0.6, 1.0, clampf(k * 15.0, 0.0, 1.0))          # frozen in under the blade at once
 			n.scale = Vector3(r * forms, 1.0, r * forms)
-			_tint(n, Color.WHITE, 1.0 - smoothstep(0.3, 1.0, k))
+			_tint(n, Color.WHITE, 1.0)
 		_:
 			n.scale = Vector3.ONE * r
 			_tint(n, col, fade)
@@ -472,7 +473,8 @@ func _disc(n: Node3D, col: Color, rim: Color, a: float, pattern: float, sweep: f
 # ------------------------------------------------------------------ held looks
 ## A look that stays while the kit keeps calling it (by key). p: col, rim, r, fill, sweep, pattern,
 ## spin, a (strength), ent (sit under a body), and for "wall": a, b (Vector2 ends), y, hit (0..1).
-func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
+## Returns the held node (a zone hands it to AimKit.zone for its expiry cue).
+func keep(key: String, kind: String, at: Vector3, p := {}) -> Node3D:
 	var e: Dictionary = held.get(key, {})
 	if e.is_empty() or String(e["kind"]) != kind or not is_instance_valid(e["n"]):
 		if not e.is_empty(): _give(String(e["kind"]), e["n"])
@@ -510,6 +512,7 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 				sp.rotation.y = m.time * 2.6
 				sp.position.y = 0.9 + 0.08 * sin(m.time * 3.0)
 				sp.scale = Vector3.ONE / maxf(0.3, r) * 1.6
+	return n
 
 func drop(key: String) -> void:
 	var e: Dictionary = held.get(key, {})

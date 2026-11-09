@@ -7,6 +7,9 @@ extends RefCounted
 const FILL_A := 0.18      # the fill's alpha: readable over grass and sand, never a solid sheet
 const RIM_A := 0.7        # the rim's alpha
 const LW := 0.06          # m: the rim's line width
+const EXPIRY_T := 0.5     # s: a zone's last stretch, when its rim pulses twice and its fill fades out
+const EXPIRY_GLOW := 0.5  # a rim pulse's peak, as extra alpha over steady (relative)
+const EXPIRY_BLINK := 0.35  # a filled look's dip at each pulse (it has no separate rim to brighten)
 
 static func build(g: AimGeo, e: Dictionary) -> void:
 	g.at_height(float(e["y"]))
@@ -22,14 +25,35 @@ static func build(g: AimGeo, e: Dictionary) -> void:
 		"span": _span(g, e)
 		"star": g.star(e["at"], float(e["size"]), _hot(e, 1.0), float(e.get("rot", 0.0)))
 
+# ------------------------------------------------------------------ zone expiry
+## The shared expiry cue for every lingering zone (AimKit.zone): `left` is the seconds it has to go. Fill
+## strength 1 -> 0 over the last EXPIRY_T, steady before; rim strength 1, pulsing up twice in that stretch.
+static func fill_k(left: float) -> float:
+	return clampf(left / EXPIRY_T, 0.0, 1.0)
+
+## 0..1, twice over the last EXPIRY_T (0 before it).
+static func _pulse(left: float) -> float:
+	if left >= EXPIRY_T:
+		return 0.0
+	var s := sin(TAU * (1.0 - maxf(left, 0.0) / EXPIRY_T))
+	return s * s
+
+static func rim_k(left: float) -> float:
+	return 1.0 + EXPIRY_GLOW * _pulse(left)
+
+## A filled look's strength: the fill's fade, dipping at each pulse.
+static func look_k(left: float) -> float:
+	return fill_k(left) * (1.0 - EXPIRY_BLINK * _pulse(left))
+
 # ------------------------------------------------------------------ colours
 static func _fill(e: Dictionary, k := 1.0) -> Color:
 	var c: Color = e["col"]
-	return Color(c, FILL_A * k * float(e["alpha"]))
+	return Color(c, FILL_A * k * float(e["alpha"]) * (fill_k(e["left"]) if e.has("left") else 1.0))
 
 static func _rim(e: Dictionary, k := 1.0) -> Color:
 	var c: Color = (e["col"] as Color).lerp(Color.WHITE, 0.55 * float(e["hot"]))
-	return Color(c, minf(1.0, (RIM_A + 0.35 * float(e["hot"])) * k * float(e["alpha"])))
+	var pulse := rim_k(e["left"]) if e.has("left") else 1.0
+	return Color(c, minf(1.0, (RIM_A + 0.35 * float(e["hot"])) * k * float(e["alpha"]) * pulse))
 
 static func _hot(e: Dictionary, k := 1.0) -> Color:
 	var c: Color = (e["col2"] as Color).lerp(Color.WHITE, 0.4 + 0.4 * float(e["hot"]))

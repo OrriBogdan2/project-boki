@@ -19,7 +19,7 @@ var k: AshwickKit
 var h: Hunter
 var m: Node
 var flight := {}                # hold: the flight under way {t, dir, speed, last, set_v}
-var trail: Array = []           # carpet pieces: {a, b, until}
+var trail: Array = []           # carpet pieces: {a, b, until, node, key}
 var tick_acc := 0.0
 var laid := 0
 var last_roar := -9.0           # when the flight last roared from her heels and tail
@@ -213,9 +213,9 @@ func _lay(a: Vector3, b: Vector3) -> void:
 		void_skips += 1
 		return
 	var x := xd()
-	trail.append({"a": a, "b": b, "until": m.time + float(x["trail_t"])})
 	var along := (b - a).normalized()
-	k.fx.lava(a - along * OVERLAP, b, float(x["trail_w"]), float(x["trail_t"]))
+	var node := k.fx.lava(a - along * OVERLAP, b, float(x["trail_w"]), float(x["trail_t"]))
+	trail.append({"a": a, "b": b, "until": m.time + float(x["trail_t"]), "node": node, "key": "carpet%d" % laid})
 	laid += 1
 	if laid % NET_EVERY == 0:
 		# the last few pieces as one charred lane: other players' games see the carpet by it
@@ -227,6 +227,8 @@ func _lay(a: Vector3, b: Vector3) -> void:
 ## Every tick (0.3s): burn, slow and Char whoever stands in the carpet; the oldest pieces fade first.
 func _burn(dt: float) -> void:
 	trail = trail.filter(func(t): return float(t["until"]) > m.time)
+	for t in trail:
+		AimKit.zone(h, t["key"], float(t["until"]) - m.time, t["node"])
 	tick_acc += dt
 	var x := xd()
 	var every := float(x["tick"])

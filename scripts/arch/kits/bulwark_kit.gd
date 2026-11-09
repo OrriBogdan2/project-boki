@@ -829,6 +829,7 @@ func _tick_mend(dt: float) -> void:
 	fx.purify_hold(mend["pos"], r)
 	AimKit.circle(h, "e", {"at": mend["pos"], "r": r, "fill": float(mend["zone"]) / float(ed["time"]), "all": true,
 		"col": BjornFx.GREEN})
+	AimKit.zone(h, "e", float(mend["zone"]), fx.disc)
 	if float(mend["tick"]) <= 0.0:
 		mend["tick"] = float(mend["tick"]) + float(ed["every"])
 		_mend_tick()
@@ -873,6 +874,7 @@ func _mend_burst() -> void:
 	if not infusion().is_empty():
 		var stg := stage("e", {"delivery": {"type": "burst", "origin": "aim", "radius": r}, "effects": []})
 		run(stg, cx("e", "mending_ground", at, {"no_floor": true}))
+	AimKit.hide(h, "e")
 	fx.purify_burst(at, r)
 	m.fx.ring(at, r, BjornFx.GREEN, 0.45)
 	m.fx.burst(at + Vector3(0, 0.3, 0), BjornFx.GREEN, 24, 4.0, 0.8, -4.0, 1.2, Vector3.UP, 25.0)

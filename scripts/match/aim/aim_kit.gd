@@ -184,6 +184,24 @@ static func star(h: Hunter, id: String, p := {}) -> void:
 	e["size"] = float(p.get("size", 0.4)); e["rot"] = float(p.get("rot", PI * 0.25))
 	_put(h, id, e)
 
+# ------------------------------------------------------------------ zones
+## A lingering ground zone says when it ends, so the last AimShapes.EXPIRY_T seconds read the same for
+## every kit: the rim pulses twice and the fill fades out. Call it every step (like a shape) with the
+## seconds left, after the shape under the same `id` (that entry is the rim) and/or with the fill's pooled
+## node (it and its meshes are faded through their `transparency`; its owner keeps hiding it at the end as
+## before). Returns the strength a look made of several nodes (no single node to fade) multiplies into its
+## own alpha this step: 1 until the last stretch, then the fade with a dip at each pulse.
+static func zone(h: Hunter, id: String, left: float, node: Node3D = null) -> float:
+	if h != null and h.m != null and not blocked(h):
+		layer(h.m).zone(h, id, left, node)
+	return AimShapes.look_k(left)
+
+## Is this zone registered with the expiry cue? (tests)
+static func zoned(h: Hunter, id: String) -> bool:
+	if h == null or h.m == null or h.m.get_node_or_null("AimKit") == null:
+		return false
+	return layer(h.m).zones.has(AimDraw.key(h, id))
+
 # ------------------------------------------------------------------ control
 static func hide(h: Hunter, id: String) -> void:
 	if h != null and h.m != null:

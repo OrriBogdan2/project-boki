@@ -426,11 +426,12 @@ func wisp(at: Vector3, col: Color, col2: Color, scl: float, dur: float) -> void:
 	n.global_position = at + Vector3(0, scl * 0.9, 0)
 	_play(n, "wisp", col, col2, dur, Vector3.ONE * scl, n.material_override)
 
-## A molten strip from a to b on the ground (the rank-3 fire trail), lasting `dur`.
-func lava(a: Vector3, b: Vector3, width: float, dur: float) -> void:
+## A molten strip from a to b on the ground (the rank-3 fire trail), lasting `dur` at full strength (it is
+## a zone: AimKit.zone fades its last stretch). Returns the node (null when too short to lay).
+func lava(a: Vector3, b: Vector3, width: float, dur: float) -> Node3D:
 	var ln := Vector2(b.x - a.x, b.z - a.z).length()
 	if ln < 0.2:
-		return
+		return null
 	var n := _fx("lava", M_LAVA, _plane_mesh(), false)
 	n.global_position = (a + b) * 0.5 + Vector3(0, 0.07, 0)
 	n.rotation = Vector3(0, atan2(-(b.z - a.z), b.x - a.x), 0)
@@ -439,6 +440,8 @@ func lava(a: Vector3, b: Vector3, width: float, dur: float) -> void:
 	)
 	_param(n.material_override, "progress", ln)
 	e["keep_progress"] = true
+	e["hold"] = true
+	return n
 
 ## The Anchor Drop's giant anchor falling onto `at` over `fall` seconds (0: already down), planted for
 ## ANCHOR_HOLD, then fading. Returns its entry; the kit may move entry["at"] while it falls.
@@ -703,7 +706,7 @@ func _process(_delta: float) -> void:
 			"volley":
 				_pose_volley(e, n)
 			_:
-				_param(mt, "life", u)
+				_param(mt, "life", 0.0 if e.get("hold", false) else u)
 				if e.get("sweep", false): _param(mt, "progress", minf(1.0, u * 1.8))
 				if e.has("grow"): n.scale = (e["s0"] as Vector3) * (1.0 + float(e["grow"]) * u)
 		if u >= 1.0:
