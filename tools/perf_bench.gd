@@ -25,6 +25,13 @@ const HITCH_MS := 100.0
 var vp: RID
 
 func run(main_node: Node) -> void:
+	setup(main_node)
+	await _match()
+	await _farm()
+	_finish()
+
+## Reads the --bench-* arguments and sizes the window; --perf-budget-check shares it.
+func setup(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
@@ -40,8 +47,8 @@ func run(main_node: Node) -> void:
 	vp = main.get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(vp, true)
 	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,gpu_ms,draws,tris,objects,nodes")
-	await _match()
-	await _farm()
+
+func _finish() -> void:
 	var win := main.get_window()
 	print("BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [Settings.quality(),
 		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), win.size.x,
@@ -51,7 +58,7 @@ func run(main_node: Node) -> void:
 		if fa: fa.store_string("\n".join(rows) + "\n")
 	main.get_tree().quit()
 
-func _match() -> void:
+func _match() -> Array:
 	var o := Match.demo_opts()
 	o.merge({"teams": 3, "squad": 2, "total": 6, "raid": "ash", "blight": true, "no_drop": true, "god": true,
 		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
@@ -108,6 +115,7 @@ func _match() -> void:
 	print("BENCH match step sections (ms per frame): " + ", ".join(per))
 	_meshes()
 	Match.prof_on = false
+	return fl
 
 ## Two rivals and a monster pack around the player, so the last part of the run is a fight.
 func _bring_fight(m: Match) -> void:
