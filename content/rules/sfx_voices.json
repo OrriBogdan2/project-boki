@@ -1,0 +1,12 @@
+{
+ "_doc": "Voice limits for Sfx.play (docs/AUDIO.md). A sound belongs to the first class whose 'names' (exact) or 'has' (substring) match it, else the last class. 'priority': 0 is first. 'cap': most voices one sound may have at once. 'over': what a new voice of a sound at its cap does, 'steal' the oldest of that sound or 'drop'. When the whole pool is busy a new voice takes the oldest voice of equal or lower priority, or is dropped if all are higher. A priority-0 class is never dropped: it skips the repeat-gap and stack limits and always steals. 'duck' is the music and ambience dip when an enemy hunter casts an ult within 'range_m' of you.",
+ "duck": {"db": -4.0, "seconds": 1.0, "range_m": 30.0},
+ "classes": [
+  {"id": "cue", "priority": 0, "cap": 8, "over": "steal", "names": ["ult", "warn", "horn"], "has": ["_ult_"]},
+  {"id": "own", "priority": 1, "cap": 6, "over": "steal",
+   "names": ["hit", "crit", "kill", "knock", "knock_confirm", "hurt", "hit_heavy", "slash_hit", "armor_hit", "armor_break", "kinhit"],
+   "has": ["_hurt", "_down", "_death", "_taken", "_hit"]},
+  {"id": "step", "priority": 3, "cap": 3, "over": "drop", "names": [], "has": ["step"]},
+  {"id": "ability", "priority": 2, "cap": 5, "over": "steal", "names": [], "has": []}
+ ]
+}

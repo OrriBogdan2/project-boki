@@ -476,6 +476,16 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## sfx_voices (`content/rules/sfx_voices.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Voice limits for Sfx.play (docs/AUDIO.md). A sound belongs to the first class whose 'names' (exact) or 'has' (substring) match it, else the last class. 'priority': 0 is first. 'cap': most voices one sound may have at once. 'over': what a new voice of a sound at its cap does, 'steal' the oldest of that sound or 'drop'. When the whole pool is busy a new voice takes the oldest voice of equal or lower priority, or is dropped if all are higher. A priority-0 class is never dropped: it skips the repeat-gap and stack limits and always steals. 'duck' is the music and ambience dip when an enemy hunter casts an ult within 'range_m' of you. |
+| duck | {"db": -4.0, "seconds": 1.0, "range_m": 30.0} |
+| classes | [{"id": "cue", "priority": 0, "cap": 8, "over": "steal", "names": ["ult", "warn", "horn"], "has": ["_ult_"]}, {"id": "own", "priority": 1, "cap": 6, "over": "steal", "names": ["hit", "crit", "kill", "knock", "knock_confirm", "hurt", "hit_heavy", "slash_hit", "armor_hit", "armor_break", "kinhit"], "has": ["_hurt", "_down", "_death", "_taken", "_hit"]}, {"id": "step", "priority": 3, "cap": 3, "over": "drop", "names": [], "has": ["step"]}, {"id": "ability", "priority": 2, "cap": 5, "over": "steal", "names": [], "has": []}] |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 

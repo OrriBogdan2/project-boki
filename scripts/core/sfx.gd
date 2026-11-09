@@ -47,6 +47,12 @@ var listener := Vector3.ZERO   # set by the camera each frame
 var hear_range := 22.0
 var sound_reach := {}       # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
 var last_played := {}
+var voice_rules := {}       # content/rules/sfx_voices.json: voice classes (priority, cap) and the ult duck
+var _class_of := {}         # sound -> its voice class (see voice_class)
+var _vname: Array[String] = []   # per pool voice: the sound it plays,
+var _vprio: Array[int] = []      # its priority
+var _vseq: Array[int] = []       # and when it started (a counter, so the oldest is known within one frame)
+var _seq := 0
 var rng := RandomNumberGenerator.new()
 
 signal new_track(name: String)
@@ -56,7 +62,7 @@ var music_name := ""
 var amb: AudioStreamPlayer
 var amb_name := ""
 var music_bus := 0
-var _duck_fx: AudioEffectAmplify     # the Music bus's ducking stage (see duck)
+var _duck_fx: Array[AudioEffectAmplify] = []     # the Music and Ambience buses' ducking stages (see duck)
 var _duck_tw: Tween
 
 func _ready() -> void:
@@ -86,11 +92,16 @@ func _ready() -> void:
 		elif takes.size() > 1:
 			streams[n] = takes
 	_load_reach()
+	voice_rules = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_voices.json"))
 	for i in POOL:
 		var p := AudioStreamPlayer.new()
 		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
+		_vname.append("")
+		_vprio.append(0)
+		_vseq.append(0)
+	CombatBus.ability_used.connect(_on_ability_used)
 
 ## Heavy sounds that carry further than hear_range (a gatling you hear coming): each sound set lists them
 ## under "reach" (metres). Past FAR they still go through the muffled bus, so what carries is the low end.
@@ -142,8 +153,10 @@ func _setup_mix() -> void:
 	side.release_ms = 350.0
 	AudioServer.add_bus_effect(music_bus, side)
 	# the music ducks under big moments on its own bus, so it works for one track or for layers
-	_duck_fx = AudioEffectAmplify.new()
-	AudioServer.add_bus_effect(music_bus, _duck_fx)
+	for bn in ["Music", "Ambience"]:
+		var fx := AudioEffectAmplify.new()
+		AudioServer.add_bus_effect(AudioServer.get_bus_index(bn), fx)
+		_duck_fx.append(fx)
 	var mlim2 := AudioEffectHardLimiter.new()
 	mlim2.ceiling_db = -1.5
 	AudioServer.add_bus_effect(music_bus, mlim2)
@@ -221,17 +234,32 @@ func play_ambience(name: String) -> void:
 	amb.play()
 	create_tween().tween_property(amb, "volume_db", -14.0, 2.0)
 
-## Softens the music for a moment, e.g. under a big slow-motion beat (eased, never a sudden drop).
+## Softens the music and the ambience for a moment, e.g. under a big slow-motion beat or an enemy ult
+## (eased, never a sudden drop).
 func duck(seconds: float, depth_db := -8.0) -> void:
-	if _duck_fx == null:
+	if _duck_fx.is_empty():
 		return
 	if _duck_tw and _duck_tw.is_valid():
 		_duck_tw.kill()
 	var tw := create_tween()
 	_duck_tw = tw
-	tw.tween_property(_duck_fx, "volume_db", minf(depth_db, _duck_fx.volume_db), 0.18).set_trans(Tween.TRANS_SINE)
+	var to := minf(depth_db, _duck_fx[0].volume_db)
+	tw.tween_method(_set_duck, _duck_fx[0].volume_db, to, 0.18).set_trans(Tween.TRANS_SINE)
 	tw.tween_interval(seconds)
-	tw.tween_property(_duck_fx, "volume_db", 0.0, 0.8).set_trans(Tween.TRANS_SINE)
+	tw.tween_method(_set_duck, to, 0.0, 0.8).set_trans(Tween.TRANS_SINE)
+
+func _set_duck(db: float) -> void:
+	for fx in _duck_fx:
+		fx.volume_db = db
+
+## An enemy hunter's ultimate going off near you dips the music and ambience (sfx_voices.json "duck").
+func _on_ability_used(caster: Node, _id: String, slot: String) -> void:
+	if slot != "ult" or not (caster is Hunter) or (caster as Hunter).is_local():
+		return
+	var d: Dictionary = voice_rules["duck"]
+	var pos: Vector3 = (caster as Hunter).pos
+	if Vector2(pos.x - listener.x, pos.z - listener.z).length() <= float(d["range_m"]):
+		duck(float(d["seconds"]), float(d["db"]))
 
 # ------------------------------------------------------------------ layered music
 ## The expedition's score is four stems of one piece (tools/compose.py LAYERS), all playing in step;
@@ -372,45 +400,81 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
 
-## A free voice from the pool, so a new sound doesn't cut one that's still ringing (the oldest if all are busy).
-func _voice(pos) -> AudioStreamPlayer:
-	var p: AudioStreamPlayer = null
+## The voice class of a sound (priority, cap, what happens over the cap), from content/rules/sfx_voices.json.
+func voice_class(sname: String) -> Dictionary:
+	if not _class_of.has(sname):
+		var found: Dictionary = voice_rules["classes"][-1]
+		for c in voice_rules["classes"]:
+			if sname in c["names"] or (c["has"] as Array).any(func(h): return sname.contains(h)):
+				found = c
+				break
+		_class_of[sname] = found
+	return _class_of[sname]
+
+## A voice for a new sound, or null when it is dropped. A free one if the sound is under its cap; at the cap
+## the sound's oldest voice is taken (or the sound is dropped). With the pool full, the oldest voice of the
+## lowest priority at or under the new sound's own is taken, or the sound is dropped if every voice outranks it.
+func _voice(pos, sname := "", cls: Dictionary = {}) -> AudioStreamPlayer:
+	var prio: int = int(cls.get("priority", 2))     # (a ready-made stream has no class: ability priority)
+	var idle := -1
+	var same := 0
+	var oldest_same := -1
+	var victim := -1
 	for k in POOL:
-		var c := players[(next + k) % POOL]
-		if not c.playing:
-			p = c
-			next = (next + k + 1) % POOL
-			break
-	if p == null:
-		p = players[next]
-		next = (next + 1) % POOL
+		var i := (next + k) % POOL
+		if not players[i].playing:
+			if idle < 0:
+				idle = i
+			continue
+		if sname != "" and _vname[i] == sname:
+			same += 1
+			if oldest_same < 0 or _vseq[i] < _vseq[oldest_same]:
+				oldest_same = i
+		if _vprio[i] >= prio and (victim < 0 or _vprio[i] > _vprio[victim] or (_vprio[i] == _vprio[victim] and _vseq[i] < _vseq[victim])):
+			victim = i
+	var at := idle if idle >= 0 else victim
+	if same >= int(cls.get("cap", POOL)):
+		if cls["over"] == "drop":
+			return null
+		at = oldest_same
+	if at < 0:
+		return null
+	next = (at + 1) % POOL
+	_seq += 1
+	_vname[at] = sname
+	_vprio[at] = prio
+	_vseq[at] = _seq
 	var far := pos != null and Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
-	p.bus = "SFXFar" if far else "SFX"
-	return p
+	players[at].bus = "SFXFar" if far else "SFX"
+	return players[at]
 
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter.
-func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> void:
+func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> bool:
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
-		return
+		return false
+	var cls := voice_class(sname)
+	var cue: bool = int(cls["priority"]) == 0       # a cue is never dropped by the repeat limits
 	var now := Time.get_ticks_msec()
 	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, SfxKits.MIN_GAP.get(sname, 30)))
 	if sname.contains("step_"): gap = 25         # footsteps: several people can walk at once
-	if now - int(last_played.get(sname, -1000)) < gap:
-		return
+	if not cue and now - int(last_played.get(sname, -1000)) < gap:
+		return false
 	var v := vol_db + _distance_db(pos, float(sound_reach.get(sname, 0.0))) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
-		return
+		return false
 	var times: Array = recent.get(sname, [])
 	while not times.is_empty() and now - int(times[0]) > STACK_MS:
 		times.pop_front()
-	if times.size() >= STACK_MAX:
-		return
-	v -= STACK_DB * times.size()
+	if times.size() >= STACK_MAX and not cue:
+		return false
+	var p := _voice(pos, sname, cls)
+	if p == null:
+		return false
+	v -= STACK_DB * mini(times.size(), STACK_MAX)
 	times.append(now)
 	recent[sname] = times
 	last_played[sname] = now
-	var p := _voice(pos)
 	var st = streams[sname]
 	if st is Array:
 		# a different take from last time
@@ -424,6 +488,7 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	p.volume_db = v
 	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
 	p.play()
+	return true
 
 ## A pool voice is never reused while it plays, so a looping file sent through play() would sound
 ## forever, past the match and into the farm: owner item 103, the Boki rescue's revive_hum. One-shots
@@ -531,8 +596,10 @@ func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) 
 	var v := vol_db + _distance_db(pos)
 	if is_nan(v):
 		return
-	last_played[key] = now
 	var p := _voice(pos)
+	if p == null:
+		return
+	last_played[key] = now
 	p.stream = st
 	p.volume_db = v
 	p.pitch_scale = 1.0 + rng.randf_range(-pitch_var, pitch_var)
