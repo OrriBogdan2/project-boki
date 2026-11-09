@@ -4409,3 +4409,6 @@ ART prismander 0 briefs/boki-art/batch/out/c_prismander_b_2.jpg kind=concept sta
 ART prismander 0 briefs/boki-art/batch/out/c_prismander_c_1.jpg kind=concept status=owner-pick note=direction-C-sea-glass
 (The 0 is a placeholder, not a grade: show "pick one", no score.)
 Note: the art session's clone moved (disk full) — same branch, same paths, nothing lost.
+
+## 01:08 ET 11-09 — art session: Prismander direction B (stained glass) picked
+Claude picked B per owner 01:03 ("you make picks"); ignore the 3 owner-pick lines above. Prismander turnaround + new Glassolotl concept queued; the Prismander line keeps its current art until those pass.

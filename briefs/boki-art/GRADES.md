@@ -105,3 +105,7 @@ Auto-fail at batch stage: anything upright or person-like, any strap/belt/band/v
 Every stage of a line must stand differently (baby = round sit/bounce, middle = in motion, final = big planted stance; branch
 finals differ from each other). Same stance as another stage = capped at 7.9. Prompts now carry the ladder (REL in build_jobs.py),
 turnarounds keep the concept's stance instead of a neutral stand, and existing lines are audited and re-posed stage by stage.
+
+## Owner standing permissions (01:03 ET 11-09)
+- Disk: clear anything already stored elsewhere (pushed to GitHub / re-downloadable) without asking.
+- Choices between options (e.g. design directions): Claude picks, shows the options in chat, and the owner overrides if he disagrees.
