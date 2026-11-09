@@ -93,6 +93,49 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 | card_s | 6 |
 | card_s_doc | s the result card stays up. |
 
+## base_seek (`content/rules/base_seek.json`)
+
+Seek, the Boki base's third minigame (briefs/design/GARDEN.md section 5.3, scripts/home/base_seek.gd). Only with farm_build.json base_mode on. You hide a scented item anywhere on the base; two Boki hunt for it. Units: metres, seconds, probabilities 0-1, joy and trust are 0-100 points.
+
+| Setting | Value |
+|---|---|
+| speed | 1.6 |
+| speed_per_focus | 0.01 |
+| speed_doc | Walking speed in m/s with no Focus points; each trained Focus point adds this fraction (40 points walk 40% faster). |
+| sniff_s | 1.5 |
+| sniff_doc | Every sniff_s seconds a Boki stops and sniffs the air; it then picks a heading for the next sniff_s seconds. |
+| right | 0.35 |
+| right_per_focus | 0.006 |
+| curiosity_gain | 0.3 |
+| right_doc | Chance a sniff finds the right way: right + Focus points * right_per_focus + (curiosity - 0.5) * curiosity_gain (curiosity is the 0-1 trait, 0.5 when unset), kept within right_min..right_max. A wrong sniff sets off in a random direction. |
+| right_min | 0.05 |
+| right_max | 0.95 |
+| aim | 0.25 |
+| aim_doc | A right sniff points at the scent within +-aim radians. |
+| night_right | 0.2 |
+| night_themes | ["spore", "shadow"] |
+| night_doc | At night (HomeWork.is_night, the base's day clock) a Boki whose species theme is in night_themes, or whose species is in Work.NOCTURNAL, adds night_right to its chance of sniffing the right way. |
+| friend_share | 0.15 |
+| friend_doc | Friends (bond at or above base_race friend_at) hunt as a pair: when a friend's last sniff was right, a Boki's chance goes up by friend_share. |
+| rival_near | 1 |
+| rival_slow | 0.6 |
+| rival_doc | Rivals (bond at or below base_race rival_at) shoulder each other: within rival_near metres the slower one walks at rival_slow of its speed. |
+| find_r | 0.7 |
+| find_doc | A Boki that gets within find_r metres of the item has found it. |
+| min_hide | 4 |
+| min_hide_doc | The item must be hidden at least this many metres from where the Boki start. |
+| max_s | 60 |
+| max_doc | A hunt that nobody has finished by max_s seconds goes to whoever is nearer the item. |
+| energy | 8 |
+| win_joy | 12 |
+| win_trust | 3 |
+| lose_joy | -8 |
+| friend_sulk | 0.5 |
+| friend_sulk_doc | A friend who loses sulks only this fraction of lose_joy (and the pair grow closer, base_race friend_step). |
+| gems | 4 |
+| gems_doc | Gems to you when the hunt ends. |
+| card_s | 6 |
+
 ## base_shove (`content/rules/base_shove.json`)
 
 Stump Shove, the Boki base's second minigame (briefs/design/GARDEN.md section 5.2, scripts/home/base_shove.gd). Only with farm_build.json base_mode on. Two Boki push on a stump from opposite sides until one is shoved off balance; you back your partner and press once, timed on the training drill's bar. Units: seconds, stump balance -1..1 (a side wins at its own end), joy and trust are 0-100 points.
