@@ -2,7 +2,9 @@ extends RefCounted
 ## --raising-check: one Boki raised at home, never taken on an expedition, through farm days. Care
 ## builds trust once a farm day per kind (Care.care_day, content/rules/care.json care_day_s), so a
 ## stay-at-home Boki keeps growing closer; repeating the same care in one day adds no trust and no
-## duplicate memory; old saves drop the once-per-expedition stamps. Never touches the real save.
+## duplicate memory; old saves drop the once-per-expedition stamps. Fetch trains Speed. Meals lean
+## its colour on the spot (Evo.eat, Evo.lean) and the last few meals decide it. Never touches the
+## real save.
 
 var bad := 0
 var main: Node
@@ -59,6 +61,37 @@ func _fetch_trains(home, k: Dictionary) -> void:
 	ok(not k.has("fetch") and int(rec["stats"]["speed"]) == sp0 + 1,
 		"a worn-out Boki plays but doesn't learn (%d)" % int(rec["stats"]["speed"]))
 
+func _body_col(k: Dictionary) -> Color:
+	var mats: Array = (k["node"] as Node3D).get_meta("mats", [])
+	return (mats[0] as ShaderMaterial).get_shader_parameter("albedo")
+
+## Food is the quick lever: two Emberberries show on the model at once, and a run of another food
+## turns it the other way.
+func _meals_lean(home, k: Dictionary) -> void:
+	var rec: Dictionary = k["rec"]
+	rec["likes"]["hates"] = "puffcorn"
+	Save.d["crops"]["emberberry"] = 2
+	var c0 := _body_col(k)
+	var fierce: Color = Evo.AFF["fierce"]["tint"]
+	var aff0 := float(rec["aff"]["fierce"])
+	for meal in 2:
+		rec["needs"]["food"] = 30.0
+		home._care_feed(rec, "emberberry")
+		await main.get_tree().create_timer(1.6).timeout
+	var c1 := _body_col(k)
+	var ln := Evo.lean(rec)
+	ok(String(ln[0]) == "fierce" and float(rec["aff"]["fierce"]) == aff0 + 2.0 * Evo.FOOD_AFF,
+		"two Emberberries lean it Fierce (%.0f%%) and still grow the affinity" % (100.0 * float(ln[1])))
+	var d0 := Vector3(c0.r - fierce.r, c0.g - fierce.g, c0.b - fierce.b).length()
+	var d1 := Vector3(c1.r - fierce.r, c1.g - fierce.g, c1.b - fierce.b).length()
+	ok(d1 < d0 - 0.02, "and the model on the farm turns toward the Fierce colour at once (%.3f -> %.3f)" % [d0, d1])
+	for meal in 4:
+		Evo.eat(rec, "tidebloom")
+	ok(String(Evo.lean(rec)[0]) == "swift" and float(rec["lean"]["fierce"]) < 2.0 * Evo.FOOD_AFF,
+		"four Tideblooms later the last meals decide: it leans %s" % String(Evo.lean(rec)[0]))
+	ok(Evo.eat(rec, "kibble") == "" and String(Evo.lean(Save.new_kin("cindle"))[0]) == "",
+		"plain food leaves the lean alone, and a new Boki has none")
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -83,6 +116,7 @@ func run(m: Node) -> void:
 		"the next farm day petting builds trust again, no expedition needed (%.1f)" % float(rec["trust"]))
 	ok(pets == 1 and pets2 == 1, "the same care before the next expedition is one memory (%d, %d)" % [pets, pets2])
 	_fetch_trains(home, k)
+	await _meals_lean(home, k)
 	# a week of farm days with the usual care and no expeditions: it grows Close
 	for day in 7:
 		_next_day(rec)

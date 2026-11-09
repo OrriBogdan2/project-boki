@@ -85,7 +85,8 @@ sentences, and a grown, Devoted Boki talks freely.
 - **Evolution.** How you raise it decides what it grows into. It builds four affinities (Fierce,
   Steadfast, Curious, Swift) from what it eats, what it does in matches and its personality, and every
   4 levels takes a new form along the strongest one. Between forms it grows new body parts. There's
-  no cap.
+  no cap. Food shows at once: each Emberberry, Sunroot, Mindmint or Tidebloom leans its colour toward
+  that affinity's tint, and the last few meals decide which way (full after four in a row).
 - **IVs.** Five inborn gifts (Health, Power, Speed, Work, Bond) from 0 to 31, fixed for life. The
   difference is small on purpose: a perfect Boki is at most 10% ahead in a stat.
 

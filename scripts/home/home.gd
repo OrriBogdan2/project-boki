@@ -3059,6 +3059,10 @@ func _open_kin(rec: Dictionary) -> void:
 			c1.add_child(UI.label(String(Evo.AFF[lead]["name"]), UI.T_HEAD, Evo.AFF[lead]["tint"], UI.big))
 			c1.add_child(UI.label("New form at level %d  ·  mutation at %d" % [next_form, next_mut], UI.T_SMALL, UI.MUTED))
 			c1.add_child(UI.para("What you feed it and how you raise it decides which way it grows.", 12, UI.FAINT))
+			var ln := Evo.lean(rec)
+			if String(ln[0]) != "":
+				var lean_t := "Its meals lean it %s: %d%%" % [Evo.AFF[ln[0]]["name"], int(100.0 * float(ln[1]))]
+				c1.add_child(UI.label(lean_t, UI.T_SMALL, Evo.AFF[ln[0]]["tint"]))
 			var tot := 0.0
 			for af in Evo.AFF: tot += maxf(0.0, float(rec["aff"][af]))
 			c2.add_child(UI.section("Affinities", UI.FAINT.lightened(0.2)))
@@ -3552,18 +3556,7 @@ func _play_evolutions() -> void:
 		if not is_instance_valid(n):
 			building_now = false
 			return
-		var nn := Models.kin(rec["species"], rec)
-		nn.position = at
-		nn.rotation = n.rotation
-		var lbl: Label3D = k["emote"]
-		n.remove_child(lbl)
-		nn.add_child(lbl)
-		if k.has("say") and is_instance_valid(k["say"]):
-			n.remove_child(k["say"]); nn.add_child(k["say"])
-		k.erase("bubble")
-		add_child(nn)
-		n.queue_free()
-		k["node"] = nn
+		_swap_kin_model(k)
 		k["busy"] = false
 		k["t"] = 3.0
 		fx.burst(at + Vector3(0, 0.5, 0), tint, 36, 5.0, 0.8, 4.0, 1.3)
@@ -3577,6 +3570,22 @@ func _play_evolutions() -> void:
 		for e in evs:
 			v.add_child(UI.label(String(e.get("text", Evo.describe(e, rec))), 16, Evo.AFF[e["aff"]]["tint"]))
 		v.add_child(UI.label("How you raise it decides what it grows into next. Feed it, fight beside it, look after it.", 14, UI.MUTED)))
+
+## Rebuilds a kin's model from its record in place (a new form, a meal's lean), keeping its labels.
+func _swap_kin_model(k: Dictionary) -> void:
+	var n: Node3D = k["node"]
+	var nn := Models.kin(k["rec"]["species"], k["rec"])
+	nn.position = n.position
+	nn.rotation = n.rotation
+	var lbl: Label3D = k["emote"]
+	n.remove_child(lbl)
+	nn.add_child(lbl)
+	if k.has("say") and is_instance_valid(k["say"]):
+		n.remove_child(k["say"]); nn.add_child(k["say"])
+	k.erase("bubble")
+	add_child(nn)
+	n.queue_free()
+	k["node"] = nn
 
 # ---- buildings and bridges
 func _building_verb(b: String) -> String:
@@ -4265,9 +4274,12 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	if res["full"] and not res["ok"]:
 		_say(k, BokiLines.say(rec, "full"))
 		return
-	if Data.CROPS.has(f):
-		for af in Evo.AFF:
-			if Evo.AFF[af]["food"] == f: Evo.add(rec, af, 6.0)
+	var leaned := Evo.eat(rec, f)
+	if leaned != "":
+		_swap_kin_model(k)      # its colour shifts toward the lean on the spot
+		fx.burst(k["pos"] + Vector3(0, 0.5, 0), Evo.AFF[leaned]["tint"], 18, 2.4, 0.5)
+		var pct := int(100.0 * float(rec["lean"][leaned]) / Evo.LEAN_FULL)
+		_toast("%s leans %s: its colour shifts (%d%%)" % [nm, Evo.AFF[leaned]["name"], pct])
 	if res["love"]:
 		k["joy_t"] = 1.2
 		_emote(k, "♥")
@@ -5063,7 +5075,7 @@ func _open_feed(rec: Dictionary) -> void:
 		if n > 0:
 			var aff := ""
 			for af in Evo.AFF:
-				if Evo.AFF[af]["food"] == f: aff = "Grows it %s. " % String(Evo.AFF[af]["name"]).to_lower()
+				if Evo.AFF[af]["food"] == f: aff = "Leans it %s: its colour shifts. " % String(Evo.AFF[af]["name"]).to_lower()
 			row_for.call(f, n, aff + "Fills it up.")
 	if not any:
 		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))
