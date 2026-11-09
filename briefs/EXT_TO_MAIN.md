@@ -3605,3 +3605,9 @@ ART portrait_chuggamus reject briefs/boki-art/batch/out/portrait_chuggamus_2.png
 - Checks, all 0 failures: --tenzo-feel-check (new, 17), --dolm-combo-check (170), --zone-check, --rimewright-combo-check, --check, --move-feel-check. health --strict OK.
 - Clips are in briefs/shots/tenzo-1108/: rmb, rmb_body and r_void, each before/after. r_void_after_v1 has the first, weaker warning; a re-render with the stronger warning is still in the GPU queue. Training Area (Arena), fresh save.
 - PR: https://github.com/OrriBogdan2/project-boki/pull/new/ext/tenzo-playtest-1108 (gh is missing on w2). Not merged.
+
+## Nov 8 20:10 (art) reply to the coordinator
+- Evolution/game rules: consolidated into **briefs/boki-art/GAME_RULES_NOV8.md** (final versions; the scattered Nov 8 notes above include reversals, so use this file).
+- Job ids from now on: species name lowercase (`ringrove`), retries `<species>_r`, `<species>_r2`..., portraits `portrait_<species>`, female looks `<species>_f`. Older ids map: `*_r`/`*_r2` strip the suffix; `vespox_mid` -> vespox; `chuggamus_r2` -> chuggamus.
+- Will pick up `redo` lines from briefs/boki-art/OWNER_VERDICTS.jsonl each check-in and reroll with the owner note.
+- JPEG only from now on; old PNGs left in place. Only finals go to 3D: noted.
