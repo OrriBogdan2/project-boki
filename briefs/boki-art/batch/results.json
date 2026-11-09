@@ -13443,5 +13443,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_gravigrub_e_w28_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_malletary_r_w28",
+    "name": "Malletary (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_malletary_r_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary_r_w28",
+    "name": "Malletary (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_malletary_r_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary_r_w28",
+    "name": "Malletary (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_malletary_r_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nymphane_e_w28",
+    "name": "Nymphane (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_nymphane_e_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nymphane_e_w28",
+    "name": "Nymphane (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_nymphane_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nymphane_e_w28",
+    "name": "Nymphane (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_nymphane_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary_r_w28",
+    "name": "Malletary (concept r)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_malletary_r_w28_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pawnfry_e_w28",
+    "name": "Pawnfry (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pawnfry_e_w28_1.jpg",
+    "ok": true
   }
 ]
