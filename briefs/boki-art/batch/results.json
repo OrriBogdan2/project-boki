@@ -33204,5 +33204,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/hydrangor_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "lensling_card",
+    "name": "Lensling (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lensling_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lensling_card",
+    "name": "Lensling (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lensling_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "loafhopper_card",
+    "name": "Loafhopper (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/loafhopper_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "loafhopper_card",
+    "name": "Loafhopper (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/loafhopper_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lurklet_card",
+    "name": "Lurklet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lurklet_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lurklet_card",
+    "name": "Lurklet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lurklet_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "malletary_card",
+    "name": "Malletary (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/malletary_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "maracoil_card",
+    "name": "Maracoil (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/maracoil_card_2.jpg",
+    "ok": true
   }
 ]
