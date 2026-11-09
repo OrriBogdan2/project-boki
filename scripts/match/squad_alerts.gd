@@ -26,13 +26,14 @@ static func up(m: Match, h: Hunter) -> void:
 	m.set_meta(LAST_ON, false)
 	_cue(m, "squad_up")
 
-## Someone is out for good: a squadmate (you may be the last one left), or a rival squad's last member.
-static func out(m: Match, h: Hunter) -> void:
+## Someone is out for good: a squadmate (you may be the last one left), or a rival squad's last member
+## (`by` is who took them out; null falls back to whoever hit them last, e.g. a bleed-out).
+static func out(m: Match, h: Hunter, by: Ent = null) -> void:
 	if m.player == null:
 		return
 	if _mate(m, h):
 		_last_cue(m)
-	elif h.team != m.player.team and _wiped_by_us(m, h.team):
+	elif h.team != m.player.team and _wiped_by_us(m, h, by):
 		_cue(m, "squad_wipe")
 
 static func _mate(m: Match, h: Hunter) -> bool:
@@ -54,12 +55,11 @@ static func _last_cue(m: Match) -> bool:
 		m.set_meta(LAST_ON, true)
 	return true
 
-## Every member of `team` is out or extracted and one of them was last hit by someone on your side.
-static func _wiped_by_us(m: Match, team: int) -> bool:
-	var theirs := m.hunters.filter(func(x): return x.team == team)
-	if theirs.any(func(x): return not x.out and not x.extracted):
+## `h` was the last of its squad still in (the rest out or extracted) and your side took them out.
+static func _wiped_by_us(m: Match, h: Hunter, by: Ent) -> bool:
+	if m.hunters.any(func(x): return x.team == h.team and not x.out and not x.extracted):
 		return false
-	return theirs.any(func(x): return x.out and _team_of(x.last_hit_by) == m.player.team)
+	return _team_of(by if by else h.last_hit_by) == m.player.team
 
 static func _team_of(e: Ent) -> int:
 	if e is Kin and (e as Kin).owner_h:

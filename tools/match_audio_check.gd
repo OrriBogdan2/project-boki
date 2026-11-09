@@ -115,6 +115,16 @@ func _squad_cues(m: Match) -> void:
 	var last_rival: Array = [rivals[rivals.size() - 1]]
 	ok(_heard(func(): _take_out(m, last_rival)) == ["squad_wipe"], "your squad wipes a rival squad: the wipe cue, once")
 	_step(m, 1.6)
+	# online: the same rival squad again, its last member's "out" event names you as the killer (no local hit)
+	for r in rivals:
+		r.out = false
+		r.last_hit_by = null
+	for r in first:
+		m._net_ev(["out", r.nid, "", "check"], "")
+	_step(m, 1.6)
+	var net_wipe := func(): m._net_ev(["out", last_rival[0].nid, P.nid, "check"], "")
+	ok(_heard(net_wipe) == ["squad_wipe"], "online: the rival squad's last out event, by you: the wipe cue")
+	_step(m, 1.6)
 	for h in m.hunters:
 		h.downed = false
 

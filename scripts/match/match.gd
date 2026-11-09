@@ -2372,7 +2372,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		credit.kills += 1
 		DashReset.takedown(credit, h)
 	add_feed(out_text(HeroTitle.of_hunter(h), why))
-	SquadAlerts.out(self, h)
+	SquadAlerts.out(self, h, by)
 	if why != "abyss": Juice.kill(self, h, credit)
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
@@ -5835,7 +5835,7 @@ func _net_ev(x, from: String) -> void:
 					player.kills += 1
 					DashReset.takedown(player, who)
 				add_feed(out_text(who.pname, String(x[3])))
-				SquadAlerts.out(self, who)
+				SquadAlerts.out(self, who, by)
 				if who.kin:
 					who.kin.dead = true
 					who.kin.visible = false
