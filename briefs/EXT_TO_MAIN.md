@@ -5798,3 +5798,4 @@ READY ext/no-dash-bursts-audit-rebased 76cd0bbac (reposted by coord: worker post
 READY ext/sfx-belt-items 4a9e8d6d7 (reposted by coord: worker post lost 11-09 when ready-post was mis-installed)
 READY ext/sfx-extract-cues d8e785a5c (reposted by coord: worker post lost 11-09 when ready-post was mis-installed)
 READY ext/sfx-mix-pass 0591bb141 (reposted by coord: worker post lost 11-09 when ready-post was mis-installed)
+READY ext/sfx-mob-attacks ceb82b274 (reposted by coord: worker post lost 11-09 when ready-post was mis-installed)
