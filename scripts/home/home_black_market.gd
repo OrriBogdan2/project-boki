@@ -166,11 +166,11 @@ func _lost_card(L: Dictionary) -> Control:
 	var open_more := more.has(uid)
 	var row := UI.hbox(10)
 	row.add_child(UI.fill())
+	row.add_child(main_b)
 	row.add_child(UI.ghost("Less" if open_more else "More", func():
 		if open_more: more.erase(uid)
 		else: more[uid] = true
 		open(), 80))
-	row.add_child(main_b)
 	v.add_child(row)
 	if open_more:
 		v.add_child(_more_box(L, main_b, pay_first, rival_side))
