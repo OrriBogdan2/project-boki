@@ -595,7 +595,7 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Geodemole.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Geodemole.png",
   "hash": {
-   "sheet": "ea378848206a",
+   "sheet": "4cda53742b53",
    "card": "52c7fc9f238e",
    "portrait": "b09f1408cafa",
    "hero": "fbdbbdf3448e"
@@ -648,9 +648,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Glaciatee.png",
   "hash": {
    "sheet": "4c17dcba7478",
-   "card": "cb57d8312dd1",
+   "card": "2badf23c5529",
    "portrait": "c248183ae807",
-   "hero": "1cf33adfbc94"
+   "hero": "fa932e671656"
   }
  },
  "Glaivyx": {
@@ -1863,7 +1863,7 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Stormit.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Stormit.png",
   "hash": {
-   "sheet": "4ea0a18a0d71",
+   "sheet": "4d659b4c6793",
    "card": "734aa16806d3",
    "portrait": "aa9037dccce0",
    "hero": "f0b980771be4"
@@ -1902,7 +1902,7 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Terrarimit.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Terrarimit.png",
   "hash": {
-   "sheet": "856da1f0db9e",
+   "sheet": "4099c3019ab2",
    "card": "70aec7363286",
    "portrait": "364d3933a9b7",
    "hero": "cdcacd02a1ea"
@@ -2036,9 +2036,9 @@
   "display_name": "Ribbrella",
   "hash": {
    "sheet": "71d40a85b133",
-   "card": "35d968e99d2a",
+   "card": "a5a6fa8ffa94",
    "portrait": "96ce0adddbcf",
-   "hero": "af434f43b231"
+   "hero": "96e34be2a878"
   }
  },
  "Umbrink": {
@@ -2197,10 +2197,10 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Gloamspire.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Gloamspire.png",
   "hash": {
-   "sheet": "fd7d5126cd98",
-   "card": "363a825b8982",
-   "portrait": "1128720e77ac",
-   "hero": "d3e0fdf15d2d"
+   "sheet": "1f1997a3f2d2",
+   "card": "af2b7a376049",
+   "portrait": "89b111af2710",
+   "hero": "2c428bd1b7eb"
   }
  },
  "Glomworth": {
@@ -2292,7 +2292,7 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Selenwhale.png",
   "display_name": "Lunarca",
   "hash": {
-   "sheet": "51d1c1384559",
+   "sheet": "b4daba66f384",
    "card": "f2c348a6b0a1",
    "portrait": "20dfed1cffc6",
    "hero": "3ec1f34cec47"
