@@ -3499,5 +3499,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_cairnback_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_cairnback",
+    "name": "Cairnback (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_cairnback_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthorn",
+    "name": "Crofthorn (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthorn",
+    "name": "Crofthorn (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_geodelotl",
+    "name": "Geodelotl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_geodelotl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_geodelotl",
+    "name": "Geodelotl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_geodelotl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gloamshell",
+    "name": "Gloamshell (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gloamshell_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gloamshell",
+    "name": "Gloamshell (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gloamshell_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glomwort",
+    "name": "Glomwort (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glomwort_1.jpg",
+    "ok": true
   }
 ]
