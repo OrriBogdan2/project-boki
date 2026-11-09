@@ -34,6 +34,7 @@ var dash_v := Vector2.ZERO
 var dash_t := 0.0
 var dash_hit := {}
 var buried := false
+var heard_windup := false   # a client's last seen windup state, so the tell plays once as it starts
 var anim_kind := ""          # what the model is doing: slam, throw, roar, spit, dash, burrow
 var anim_k := 0.0
 var damage_by := {}          # team -> damage dealt, for credit
@@ -189,6 +190,9 @@ func sim(dt: float) -> void:
 	_tick_waves(dt)
 	if remote:
 		net_follow(dt)
+		if (st == "windup") != heard_windup:
+			heard_windup = st == "windup"
+			if heard_windup: _tell()
 		return
 	if dormant:
 		# asleep: breathing, healing back to full, waiting
@@ -294,7 +298,11 @@ func _attack_move(spd: float) -> Vector2:
 func _begin(name: String, length: float, anim := "") -> void:
 	atk = name; atk_t = 0.0; atk_end = length; steps = []
 	anim_kind = anim; anim_k = 0.0
-	m.sfx("boss_%s_tell" % mkind, pos)      # swells with the telegraph: dodge by ear
+	_tell()
+
+## This boss's own wind-up, swelling with the telegraph so it can be dodged by ear (clients: on the windup state).
+func _tell() -> void:
+	m.sfx("boss_%s_tell" % mkind, pos)
 
 func _at(t: float, f: Callable) -> void:
 	steps.append({"t": t, "f": f, "done": false})
@@ -651,8 +659,7 @@ func _phase_up(p: int) -> void:
 	m.fx.ring(pos, 6.0, col(), 0.5)
 	m.fx.burst(pos + Vector3(0, 1.5, 0), col(), 40, 8.0, 0.7, 2.0, 1.6)
 	Shake.incoming_big(m, pos, 0.7)
-	m.sfx("v_warden", pos, 4.0, 0.5)
-	m.sfx("boom", pos, 0.0, 0.5)
+	m.sfx("boss_slam", pos, 0.0, 0.8)      # the shove; _begin's tell is the roar
 	for f in foes_inside():
 		if flat_dist(f) < 5.5:
 			f.hurt(dmg(6.0), self, {"kb": dir_to(f) * 11.0, "lift": 4.0, "src": "mob"})

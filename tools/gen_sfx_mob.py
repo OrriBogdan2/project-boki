@@ -102,4 +102,16 @@ d = 0.4
 save('boss_spit', mix(splat(d, 400, 2000, 150), 0.6 * S.hiss(d, 1500, 5000, decay=0.2)), 'fire')
 d = 0.5
 save('boss_glob', mix(splat(d, 250, 1500, 110), 0.5 * kick(130, 50, d, decay=0.12)), 'impact')
+# ---- the Blight: ash and embers, lower and drier than their island cousins
+d = 0.3
+save('mob_bl_skitter_atk', mix(whoosh(d, 400, 1500), 0.6 * S.grains(d, 120, 600, 2600, fall=0.15)), 'fire')
+d = 0.2
+save('mob_bl_skitter_hit', mix(click(), 0.8 * crack(d, 700, 3000, 0.03), 0.5 * kick(220, 90, d, decay=0.06)), 'impact')
+d = 0.45
+save('mob_bl_warden_atk', mix(0.7 * S.hiss(d, 900, 4000, decay=0.25), 0.6 * sub(110, 55, d, 0.2), 0.3 * S.grains(d, 80, 1500, 5000, fall=0.3)), 'fire')
+d = 0.4
+save('mob_bl_warden_hit', mix(crack(d, 600, 3500, 0.04), 0.6 * S.hiss(d, 2000, 7000, decay=0.18), 0.4 * kick(180, 60, d, decay=0.1)), 'impact')
+d = 1.2
+save('mob_bl_shriek', mix(lpf(S.sweep(900, 2600, d, 'saw', 1.2), 6000) * shape(d, 0.05, 0.0, 0.9), 0.5 * bpf(noise(d), 1500, 5000) * env(N(d), 0.01, 0.6)), 'cast')
+
 print('wrote the mob and boss attack sounds')

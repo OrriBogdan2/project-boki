@@ -7,7 +7,7 @@ extends RefCounted
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   7. mobs and bosses: every kind that attacks has its own mob_<kind>_atk and _hit, each boss its _tell,
-##      and no sound played by mob.gd or boss.gd is a Boki cue (k_*), so a Boki rename cannot silence them
+##      and no sound played by mob.gd, boss.gd or blight.gd is a Boki cue (k_*), so a Boki rename cannot silence them
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ## Reads the files only; never touches the save.
@@ -107,7 +107,7 @@ func _kit_names(arch: String, extra: Array) -> void:
 func _check_mobs(sounds: Dictionary) -> void:
 	var gaps := []
 	for kind in Data.MOBS:
-		if kind.begins_with("bl_") or Data.BOSSES.has(kind) or Data.MOBS[kind]["attack"] == "none": continue
+		if Data.BOSSES.has(kind) or Data.MOBS[kind]["attack"] == "none": continue
 		for part in ["atk", "hit"]:
 			if not sounds.has("mob_%s_%s" % [kind, part]): gaps.append("mob_%s_%s" % [kind, part])
 	for kind in Data.BOSSES:
@@ -115,11 +115,11 @@ func _check_mobs(sounds: Dictionary) -> void:
 	ok(gaps.is_empty(), "every attacking mob has a cue and impact, every boss a wind-up tell (missing %s)" % [gaps])
 	var re := RegEx.create_from_string("sfx\\(\"([a-z0-9_]+)\"[,)]")
 	var borrowed := []
-	for f in ["mob.gd", "boss.gd"]:
+	for f in ["mob.gd", "boss.gd", "blight.gd"]:
 		for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/match/" + f)):
 			var sname := hit.get_string(1)
 			if sname.begins_with("k_") or not Sfx.ensure(sname): borrowed.append(sname)
-	ok(borrowed.is_empty(), "mob.gd and boss.gd play no k_ cue and only sounds that exist (%s)" % [borrowed])
+	ok(borrowed.is_empty(), "mob.gd, boss.gd and blight.gd play no k_ cue and only sounds that exist (%s)" % [borrowed])
 
 ## 6. Heavy sounds that carry, and held sounds that loop.
 func _reach_and_loops(group: String, d: Dictionary) -> void:

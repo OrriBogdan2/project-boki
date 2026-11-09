@@ -314,7 +314,10 @@ func _begin_attack() -> void:
 			tele = m.fx.telegraph_circle(atk_at, float(md.get("slam_r", 2.3)), Color("ff8a2a"))
 		"volley":
 			tele = m.fx.telegraph_rect(pos, atk_dir, 10.0, 1.1, Color("6ad8ff"))
-	# each kind has its own call as it winds up, instead of the same alarm for everyone
+	_call()
+
+## Each kind's own call as it winds up, instead of the same alarm for everyone: it starts with the telegraph.
+func _call() -> void:
 	m.sfx("v_" + mkind, pos, -9.0 if mkind != "warden" else -3.0, randf_range(0.9, 1.12))
 
 ## This kind's own sound for its attack: `atk` as it strikes, `hit` where it lands (docs/AUDIO.md, mob_<kind>_*).
@@ -538,9 +541,11 @@ func _net_telegraph() -> void:
 				"slam": tele = m.fx.telegraph_circle(pos + Vector3(atk_dir.x, 0, atk_dir.y) * 0.9, float(md.get("slam_r", 2.3)), Color("ff4a3a"))
 				"fuse": tele = m.fx.telegraph_circle(pos, float(md.get("slam_r", 2.3)), Color("ff8a2a"))
 				"volley": tele = m.fx.telegraph_rect(pos, atk_dir, 10.0, 1.1, Color("6ad8ff"))
+			if tele: _call()
 		elif md["attack"] in ["lunge", "spit", "volley"]:
 			m.fx.aim_telegraph(tele, pos, atk_dir)
 		if tele:
 			m.fx.telegraph_progress(tele, 1.0 - st_t / float(md["windup"]))
 	elif tele:
 		_cancel_tele()
+		_snd("atk", pos, -6.0)      # the host's strike, heard here as the windup ends

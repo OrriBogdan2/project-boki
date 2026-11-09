@@ -3140,7 +3140,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 	if net_on and not extra.get("cos", false) and not extra.get("melee", false) and not by.remote:
 		var kind := 1 if extra.get("mob", false) else 0
 		if extra.get("pierce_terrain", false): kind = 2      # the copy has to fly through walls too
-		net_event(["s", _r(at.x), _r(at.y), _r(at.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind])
+		net_event(["s", _r(at.x), _r(at.y), _r(at.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind, String(extra.get("snd", ""))])
 	if by is Hunter and not extra.get("melee", false):
 		fx.flash(at, col.lightened(0.4), 0.22, 0.05)
 		note_sound(by, at, "shot")
@@ -3378,6 +3378,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var x: Dictionary = s["x"]
 	if e is Hunter:
 		(e as Hunter).marker_hit()      # hit through the balloon / ring: it flashes, so the rule is learned
+	if e and x.has("snd"): sfx(x["snd"], at, -4.0)      # a mob's own landing sound (mob.gd), on every peer
 	if x.get("cos", false):
 		if x.get("boom", 0.0) > 0.0:
 			fx.ring(at, x["boom"], Color("ffb070"), 0.3)
@@ -3392,7 +3393,6 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	if e == null:
 		fx.burst(at, s["col"], 5, 2.0, 0.25, 6.0, 0.6)
 		return
-	if x.has("snd"): sfx(x["snd"], at, -4.0)      # a mob's own landing sound (mob.gd)
 	var by: Ent = s["by"]
 	var dmg: float = s["dmg"]
 	if x.has("swing"):
@@ -5800,6 +5800,7 @@ func _net_ev(x, from: String) -> void:
 			if float(x[9]) > 0.0: ex["boom"] = float(x[9])
 			if int(x[11]) == 1: ex["mob"] = true
 			if int(x[11]) == 2: ex["pierce_terrain"] = true
+			if String(x[12]) != "": ex["snd"] = String(x[12])
 			var fake := Ent.new(); fake.team = int(x[10]); fake.remote = true
 			spawn_shot(fake, Vector3(x[1], x[2], x[3]), Vector2(x[4], x[5]), 0.0, float(x[6]), float(x[7]), col, ex)
 			fake.free()
