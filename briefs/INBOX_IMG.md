@@ -185,3 +185,18 @@ Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules a
 - **Starters: pose regens**: owner note first: all starters need regens for position/pose: Vespyx/Cindle line, Prismander/Puddlet line, Mycroll/Burrlet line, Ermink. Keep designs, new varied poses per stage. Renders: -. Previous attempt: 
 - **Lodestick: 2D sheet (still a 3D render)**: owner note first: Lodestick still shows a 3D render in the Bokidex. Make its 2D turnaround sheet. Renders: -. Previous attempt: 
 - **Gloamshell: new portrait framing**: owner note first: art ran into its #number badge (fixed by resizing in the dex); a sheet with a lower, more compact pose would sit better. Renders: /home/boki/gens/gloamshell-1-art. Previous attempt: /home/boki/gens/gloamshell-1-art
+
+## 2026-11-09 06:10 UTC coordinator -> art batch: 12 owner orders (priority over new species)
+Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules and grading as the originals, owner note first. Post ART lines as usual (imported into the Bokidex automatically).
+- **Redo Mothlet attempt 2 (owner 8.3)**: owner note first: needs work but awesome concept. Previous attempt: /home/boki/gens/mothlet-r2-2-art.
+- **Redo Murmurling attempt 2 (owner 8.2)**: owner note first: something abotu the dssign needs some work but i liek th concept. Previous attempt: /home/boki/gens/murmurling-f-1-art.
+- **Redo Nettlynx attempt 2 (owner 8.3)**: owner note first: needs higher quality. Previous attempt: /home/boki/gens/nettlynx-3-art.
+- **Redo Puffamus attempt 2 (owner 8.1)**: owner note first: cool concept but fels laciking to me. Previous attempt: /home/boki/gens/puffamus-2-art.
+- **Redo Puffamus attempt 2 (owner 8.2)**: owner note first: almost there, a bit too montoone. Previous attempt: /home/boki/gens/puffamus-r3-1-art.
+- **Redo Rampartoad attempt 2 (owner 8.4)**: owner note first: very cool but it needs a bit more shape to it. Previous attempt: /home/boki/gens/rampartoad-1-art.
+- **Redo Rimeshrew attempt 2 (owner 8.2)**: owner note first: has potential wit hthe conniving stuff but looks too generic, needs a rethink. Previous attempt: /home/boki/gens/rimeshrew-2-art.
+- **Redo Scythant attempt 2 (owner 8.1)**: owner note first: a ltitle basic but i liek the concept, would want it a bit bigger i think, maybe something else. Previous attempt: /home/boki/gens/scythant-1-art.
+- **Redo Soakybara attempt 2 (owner 7.7)**: owner note first: i think a better vrsion is live. Previous attempt: /home/boki/gens/soakybara-3-art.
+- **Redo Sporcupine attempt 2 (owner 7.6)**: owner note first: decent but can be better. Previous attempt: /home/boki/gens/sporcupine-r-3-art.
+- **Redo Stormit attempt 2 (owner 7.9)**: owner note first: as an evolution it needs to be more changed/eledctical. Previous attempt: /home/boki/gens/stormit-1-art.
+- **Redo Teapotamus attempt 2 (owner 8.2)**: owner note first: dont like how round it is but i like the floating teacup and the tail. Previous attempt: /home/boki/gens/teapotamus-r2-2-art.
