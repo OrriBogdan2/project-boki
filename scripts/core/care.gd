@@ -17,13 +17,14 @@ const MATCH_COST := {"food": -26.0, "energy": -34.0, "clean": -30.0}
 
 ## Starving: hours a kin has spent with nothing in it (food at zero), real time, at home or away.
 ## Each stage keeps the ones before it. A meal takes 4 hours off; being fed (food over 20) undoes it
-## three times as fast as it built up. Feeders keep it from ever starting.
+## three times as fast as it built up. Feeders keep it from ever starting. "dead" only counts while
+## content/rules/care.json natural_death is on (off: neglect bottoms out at sick).
 const STARVE := {"weak": 6.0, "refuse": 18.0, "sick": 30.0, "dead": 72.0}
 const STARVE_INFO := {
 	"starving": ["Starving", "Hasn't eaten in a while. Feed it, or fill a feeder."],
 	"weak": ["Weak from hunger", "Slow, and weaker on expeditions. Losing trust in you."],
 	"refuse": ["Too weak to go out", "Won't come on expeditions until it's eaten."],
-	"sick": ["Sick from hunger", "Ill and miserable. It won't last much longer without food."],
+	"sick": ["Sick from hunger", "Ill and miserable. Feed it and it will slowly get better."],
 }
 
 const STATS := {
@@ -169,6 +170,7 @@ static func catch_up(rec: Dictionary) -> float:
 			nd[k] = maxf(float(nd[k]), minf(float(before[k]), floors[k]))
 		# the floor means it found enough to get by; one that was already empty starved the whole time
 		var st1 := st0 + gone if float(before["food"]) <= 0.5 else minf(float(rec.get("starve", 0.0)), st0)
+		st1 = minf(st1, starve_cap())
 		if st1 > 0.0: rec["starve"] = st1
 		else: rec.erase("starve")
 	rec["needs_t"] = Time.get_unix_time_from_system()
@@ -181,7 +183,7 @@ static func starve_h(rec: Dictionary) -> float:
 ## "" (fine), "starving", "weak", "refuse", "sick" or "dead".
 static func starve_stage(rec: Dictionary) -> String:
 	var h := starve_h(rec)
-	if h >= STARVE["dead"]: return "dead"
+	if h >= STARVE["dead"] and bool(Content.rules("care")["natural_death"]): return "dead"
 	if h >= STARVE["sick"]: return "sick"
 	if h >= STARVE["refuse"]: return "refuse"
 	if h >= STARVE["weak"]: return "weak"
@@ -198,11 +200,16 @@ static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0) -> void
 		if st / 3600.0 >= STARVE["weak"]:
 			# weak and still hungry: it trusts you a little less every few hours
 			rec["trust"] = clampf(float(rec.get("trust", 0.0)) - z / 10800.0, 0.0, 100.0)
-		st += z
+		st = minf(st + z, starve_cap())
 	elif need(rec, "food") > 20.0 and st > 0.0:
 		st = maxf(0.0, st - secs * 3.0)
 	if st > 0.0: rec["starve"] = st
 	else: rec.erase("starve")
+
+## The most the starve clock holds, in seconds. With natural_death off it stops at the "dead" mark, so
+## a Boki left alone for weeks still recovers with a few meals and a day of care.
+static func starve_cap() -> float:
+	return INF if bool(Content.rules("care")["natural_death"]) else STARVE["dead"] * 3600.0
 
 ## It just ate: a meal takes four hours off the starve clock.
 static func fed(rec: Dictionary) -> void:

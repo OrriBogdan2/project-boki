@@ -1,0 +1,4 @@
+{
+	"desc": "Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglect never kills (owner 2026-11-08): a Boki left unfed bottoms out at sick, then recovers with care. Other losses (expeditions, the Black Market) are unchanged.",
+	"natural_death": false
+}

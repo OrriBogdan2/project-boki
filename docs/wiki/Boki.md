@@ -72,7 +72,8 @@ sentences, and a grown, Devoted Boki talks freely.
 
 - **Needs.** Full, Energy, Happy and Clean drift down at home and drop after every expedition. A Boki
   in great shape fights better; a struggling one fights worse and refuses you more. A Boki left with
-  nothing to eat starves in stages (weak, too weak to go out, sick) and can die. Feeders prevent it.
+  nothing to eat starves in stages (weak, too weak to go out, sick) but never dies of neglect
+  (content/rules/care.json `natural_death`); regular meals bring it back. Feeders prevent it.
 - **Care.** Pet (F), play fetch (V), talk (T); the details card (C) has Feed, Brush, Bath, Nap, Train,
   Dress and Pair. Every Boki loves one food, refuses another and has a favourite pastime: you find
   out by trying, and the card remembers.

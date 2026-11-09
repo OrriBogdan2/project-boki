@@ -1124,8 +1124,8 @@ func _economy_check() -> void:
 	Save.d["feeders"] = []
 	Save.d["items"]["kibble"] = 0
 	var line: Array = []
-	var died_at := -1.0
-	for days in [0.5, 1.0, 2.0, 3.0, 4.0, 5.0]:
+	var died := false
+	for days in [0.5, 1.0, 2.0, 4.0, 14.0]:
 		var r2: Dictionary = rec.duplicate(true)
 		r2["uid"] = "starve%d" % int(days * 10)
 		r2["needs"] = {"food": 70.0, "energy": 80.0, "joy": 70.0, "clean": 75.0}
@@ -1134,10 +1134,14 @@ func _economy_check() -> void:
 		Save.d["roster"] = [r2]
 		var ev2 := Econ.catch_up_all()
 		var st := Care.starve_stage(r2) if not ev2.any(func(e): return e["kind"] == "died") else "dead"
-		if st == "dead" and died_at < 0.0: died_at = days
+		died = died or st == "dead"
 		line.append("%.1fd: %s (food %d, %.0fh starving, trust %d)" % [days, st if st != "" else "fine", int(Care.need(r2, "food")), Care.starve_h(r2), int(r2["trust"])])
 	print("ECON  starving timeline: " + "  |  ".join(line))
-	ok.call(died_at >= 3.0 and died_at <= 5.0, "unfed with no feeder, a kin dies after several days (day %.1f)" % died_at)
+	var sick: Dictionary = Save.d["roster"][0]
+	ok.call(not died and Care.starve_stage(sick) == "sick", "natural_death off: 14 days unfed is sick at worst, never dead (%s)" % Care.starve_stage(sick))
+	for meal in 12: Care.feed(sick, "kibble"); Care.feed(sick, "kibble"); Care.tick(sick, 1200.0)
+	ok.call(Care.starve_stage(sick) in ["", "weak", "refuse"], "four hours of regular meals bring it back from sick (%s, %.0fh)" % [Care.starve_stage(sick), Care.starve_h(sick)])
+	Econ.kin_dies(sick, "starved")      # graves still come from old saves and other losses
 	ok.call(Econ.graves().size() >= 1 and String(Econ.graves()[0]["cause"]) == "starved" and String(Econ.graves()[0]["name"]) == "Pip", "a grave with its name (%d graves, %d memories)" % [Econ.graves().size(), (Econ.graves()[0]["mem"] as Array).size() if Econ.graves().size() > 0 else 0])
 	# 6. the Soul Shrine brings one back, changed
 	var g: Dictionary = Econ.graves()[Econ.graves().size() - 1]
