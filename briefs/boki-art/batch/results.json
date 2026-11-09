@@ -49262,5 +49262,33 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_stance3_furnacowary_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance3_dreadnoyak",
+    "name": "Dreadnoyak (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_dreadnoyak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_dreadnoyak",
+    "name": "Dreadnoyak (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_dreadnoyak_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_dreadnoyak",
+    "name": "Dreadnoyak (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_dreadnoyak_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_furnacowary",
+    "name": "Furnacowary (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_furnacowary_1.jpg",
+    "ok": true
   }
 ]
