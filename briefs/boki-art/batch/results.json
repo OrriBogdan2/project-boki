@@ -32294,5 +32294,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/anchorbill_card3_3.jpg",
     "ok": true
+  },
+  {
+    "id": "anchorbill_card3",
+    "name": "Anchorbill (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anchorbill_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowlet_card3",
+    "name": "Bellowlet (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bellowlet_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowlet_card3",
+    "name": "Bellowlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowlet_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fizzlet_card3",
+    "name": "Fizzlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fizzlet_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowlet_card3",
+    "name": "Bellowlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bellowlet_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_card3",
+    "name": "Anchorbill (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anchorbill_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fizzlet_card3",
+    "name": "Fizzlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fizzlet_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kayak_card3",
+    "name": "Kayak (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kayak_card3_1.jpg",
+    "ok": true
   }
 ]
