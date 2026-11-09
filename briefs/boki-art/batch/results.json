@@ -30915,5 +30915,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_flarmink_full_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_flarmink_full",
+    "name": "Flarmink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_flarmink_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frothisk_full",
+    "name": "Frothisk (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_frothisk_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_forgebrock_full",
+    "name": "Forgebrock (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_forgebrock_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_flarmink_full",
+    "name": "Flarmink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_flarmink_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_forgebrock_full",
+    "name": "Forgebrock (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_forgebrock_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frothisk_full",
+    "name": "Frothisk (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_frothisk_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_full",
+    "name": "Eclipsowl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_forgebrock_full",
+    "name": "Forgebrock (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_forgebrock_full_3.jpg",
+    "ok": true
   }
 ]
