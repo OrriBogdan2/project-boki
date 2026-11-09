@@ -38818,5 +38818,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_canvastross_s2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_canvastross_s2",
+    "name": "Canvastross (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_canvastross_s2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_canvastross_s1",
+    "name": "Canvastross (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_canvastross_s1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_canvastross_s3",
+    "name": "Canvastross (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_canvastross_s3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_canvastross_s3",
+    "name": "Canvastross (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_canvastross_s3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_canvastross_s1",
+    "name": "Canvastross (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_canvastross_s1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_canvastross_s3",
+    "name": "Canvastross (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_canvastross_s3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_canvastross_s3",
+    "name": "Canvastross (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_canvastross_s3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_canvastross_s2",
+    "name": "Canvastross (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_canvastross_s2_3.jpg",
+    "ok": true
   }
 ]
