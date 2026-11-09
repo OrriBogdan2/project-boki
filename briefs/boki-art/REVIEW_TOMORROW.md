@@ -40,3 +40,11 @@ Rule (owner 04:48 ET): if unsure, still push the best pick, but save the alterna
 | Chandelapi | q1_1 regal okapi stag with a simple 3-candle antler crown (7.5) queued, under the bar | Fixes your "busy, should be majestic" note; the live one is the okapi-serpent | q2_2 7.4; live okapi-serpent; earlier m2_2 |
 | Reapant | fresh ninja-ant concepts w1-w3 (indigo/plum/black) generating | q1/q2 copied the old green leafy look | live card stays until one passes |
 | Line audit | 29 lines flagged against your rules (LINE_AUDIT.md); the 8 worst same-body finals are being redesigned (wave97) | My judgement of what breaks your rules | per-line directions in LINE_AUDIT.md |
+| Chuggamus | x1_4 locomotive hippo on piston wheels (8.4) queued | Line audit: final was the same boiler hippo | x2_1 8.0 |
+| Furnacowary | x1_1 squat forge-golem bird with furnace chest (8.1) queued | Your old note: Bellowary/Furnacowary looked the same | x2_4 7.6 |
+| Geysirbara | x1_2 capybara sunk into a terraced geyser-volcano (8.6) queued | Same-body final | x2_1 7.5 |
+| Seamwyrm | x1_2 unzipped horror serpent (8.7) queued | Final was Zippelith with horns | x2_4 8.4 (stitched dragon with needle tail) |
+| Voltalon | x1_2 stalking thunder raptor (8.2) queued | Final looked like Kestrike again | x2_4 7.2 |
+| Lodestaff (new final of Lodestick) | e2_1 tall dark mantis-like lodestone staff insect (8.2) queued | Planned evolution, now has art | e1_1 7.6 |
+| Reapant | live stays; best new ninja ant w2_2 (7.3) is plum with a scarf but stands like a person | Owner wanted taller/cooler ninja; this breaks the "no person-like pose" rule | c_reapant_w2_2 in batch/out |
+| Vaultara / Dreadnoyak / Forgebrock | live stays; audit redos scored 7.0-7.8 | not clearly better | x1/x2 in batch/out; more tries queued |

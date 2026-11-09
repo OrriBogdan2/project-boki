@@ -55,3 +55,4 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 42 | New evolutions picked (wave95) | Lodestick e1, Moatpole e2, Moundlet e1, Murmuron e2, Spanglin e1 -> sheet+card+portrait; alternatives in REVIEW_TOMORROW | GENERATING |
 | 43 | Overnight line audit vs owner rules | 29 lines flagged (LINE_AUDIT.md); 8 worst same-body finals redesigned first (wave97 x1-x2) | GENERATING |
 | 44 | Line audit batch 2 | wave98: Lanternmit, Stormit, Terrarimit, Sporcupine, Geodemole, Skateron, Dragonkite redesign concepts; stance jobs for redesigned Boki dropped | GENERATING |
+| 45 | Line-audit picks | wave99: Chuggamus, Furnacowary, Geysirbara, Seamwyrm, Voltalon, + new Lodestaff -> sheet/card/portrait | GENERATING |
