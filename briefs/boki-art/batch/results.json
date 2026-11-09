@@ -10930,5 +10930,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_lunowl_pe_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_marchleaf_pe",
+    "name": "Marchleaf (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mirrolin_pe",
+    "name": "Mirrolin (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_mirrolin_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_marchleaf_pe",
+    "name": "Marchleaf (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mirrolin_pe",
+    "name": "Mirrolin (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_mirrolin_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mossgrade_pe",
+    "name": "Mossgrade (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_mossgrade_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_murmurling_pe",
+    "name": "Murmurling (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_murmurling_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mossgrade_pe",
+    "name": "Mossgrade (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_mossgrade_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_nettlynx_pe",
+    "name": "Nettlynx (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_nettlynx_pe_1.jpg",
+    "ok": true
   }
 ]
