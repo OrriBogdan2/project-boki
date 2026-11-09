@@ -10,7 +10,7 @@ extends Node
 ## lunge for attacks, a wiggle of joy, a crouch before a jump and a stretch in the air.
 ##
 ## It reads a few metas on the kin root, all optional:
-##   "dazed" (bool) "happy" (bool) "pulse" (set to Time msec when an ability goes off)
+##   "dazed" (bool) "happy" (bool) "hit" (bool, being hit: a jolt) "pulse" (set to Time msec when an ability goes off)
 ##   "kstate": "" | "attack" (lunging) | "sleep" | "faint" (downed, lies as asleep) | "perch" (riding a shoulder)
 ##   "quirk" (Unique: its idle habit, played now and then while it stands still) "girth" (width)
 ##   "pose": body language in a match (KinCompanion): "growl" (low, ears back, tail up, shivering),
@@ -31,6 +31,7 @@ var sleep_k := 0.0
 var air := 0.0
 var happy_k := 0.0
 var perch_k := 0.0
+var hit_was := false    # the "hit" meta last frame: a hit on the kin itself jolts it like a flinch
 
 var root: Node3D
 var body: Node3D
@@ -252,10 +253,11 @@ func _process(dt: float) -> void:
 	rz += sin(t * 14.0) * 0.12 * happy_k
 	# body language in a match (KinCompanion)
 	var pose := String(root.get_meta("pose", ""))
-	if pose != pose_last:
-		if pose == "flinch":
-			sq_v += 3.0; ear_v -= 6.0
-		pose_last = pose
+	var hit: bool = root.get_meta("hit", false)
+	if (pose != pose_last and pose == "flinch") or (hit and not hit_was):
+		sq_v += 3.0; ear_v -= 6.0
+	pose_last = pose
+	hit_was = hit
 	var pt: Dictionary = POSE_T.get(pose, {})
 	for key in pz:
 		var base := 1.0 if key in ["sy", "sz"] else 0.0

@@ -297,7 +297,8 @@ func _pick_clip(dt: float) -> void:
 	if String(root.get_meta("kstate", "")) == "attack":
 		_start_shot("attack")
 	_shot_left -= dt
-	var hit: bool = root.get_meta("hit", false)
+	# its own hit, or its hunter's (KinCompanion's flinch pose)
+	var hit: bool = root.get_meta("hit", false) or String(root.get_meta("pose", "")) == "flinch"
 	if hit and not _hit_was:
 		_hit_left = HIT_WINDOW
 	_hit_was = hit

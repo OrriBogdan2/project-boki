@@ -49,6 +49,7 @@ func run(main: Node) -> void:
 		for st in STATES:
 			_state(id, st, STATES[st], k, rig)
 		k.queue_free()
+	await _primitive_hits(main)
 	if out != "":
 		await _sheet(main)
 	print("BOKISTATE DONE, failures: %d" % bad)
@@ -91,7 +92,7 @@ func _ask(k: Node3D, rig: BokiRig, spec: Dictionary) -> void:
 		k.set_meta(key, metas[key])
 
 func _reset(k: Node3D, rig: BokiRig) -> void:
-	for key in ["happy", "kstate", "kact", "kwork", "hit", "pulse"]:
+	for key in ["happy", "kstate", "kact", "kwork", "hit", "pulse", "pose"]:
 		k.remove_meta(key)
 	rig._speed = 0.0
 	rig._shot_left = 0.0
@@ -100,6 +101,29 @@ func _reset(k: Node3D, rig: BokiRig) -> void:
 	rig._hit_k = 0.0
 	rig._hit_was = false
 	rig.set_clip("idle", 0.0)
+
+## The primitive (KinPuppet) Boki: a hit on the kin itself jolts it (squash and ears), not only its hunter's.
+func _primitive_hits(main: Node) -> void:
+	var n := 0
+	for id in Data.KIN:
+		if id in Rig.SPECIES_LIST:
+			continue
+		var k := Models.kin(id)
+		main.add_child(k)
+		var pup: KinPuppet = null
+		for c in k.get_children():
+			if c is KinPuppet: pup = c
+		if pup == null or k.get_node("Body/Flex").has_node("BokiRig"):
+			k.queue_free()
+			continue
+		await main.get_tree().process_frame
+		var calm := absf(pup.sq_v) + absf(pup.ear_v)
+		k.set_meta("hit", true)
+		pup._process(STEP)
+		ok(absf(pup.sq_v) + absf(pup.ear_v) > calm + 1.0, "%s (puppet) jolts when hit" % id)
+		n += 1
+		k.queue_free()
+	ok(n > 0, "%d primitive species checked for the hit jolt" % n)
 
 ## Summed bone turn and shift off the rest pose at `at` seconds into the current clip.
 func _bones_off_rest(rig: BokiRig, at: float) -> float:
@@ -134,11 +158,13 @@ func _sheet(main: Node) -> void:
 	var vp := shots._stage(Vector2i(SHEET_PX, SHEET_PX))
 	var cam := Camera3D.new()
 	vp.add_child(cam)
+	cam.make_current()
 	cam.fov = 30.0
 	for row in Rig.SPECIES_LIST.size():
 		var id: String = Rig.SPECIES_LIST[row]
 		var k := Shots.rigged_kin(id)
 		vp.add_child(k)
+		await RenderingServer.frame_post_draw
 		k.rotation.y = PI * 0.8
 		var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 		rig.manual = true
@@ -154,7 +180,7 @@ func _sheet(main: Node) -> void:
 				rig._face_step(1.0 / 60.0)
 				await main.get_tree().process_frame
 			var tile := Rect2i(0, 0, SHEET_PX, SHEET_PX)
-			var shot := vp.get_texture().get_image()
+			var shot: Image = await shots._grab(vp)       # after a drawn frame, like the rig sheets
 			shot.convert(Image.FORMAT_RGBA8)
 			sheet.blit_rect(shot, tile, Vector2i(col, row) * SHEET_PX)
 		k.queue_free()

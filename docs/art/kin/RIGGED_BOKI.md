@@ -52,11 +52,11 @@ crossfade; the flinch eases in over 0.125 s). `--boki-state-check --shots-dir=<d
 | work (chop, mine, carry, tend) | garden | `kwork` | the work clip |
 | attack, ability | match | `kstate` attack, `pulse` | `attack`, `ability` |
 | perch | match | `kstate` perch | `idle` (the shoulder pose is on `Kin`) |
-| hit | match | `hit` (`Kin.flash_t`) | flinch layer on Flex over the running clip: rocks back, squats, sad face; eases in and out |
+| hit | match | `hit` (`Kin.flash_t`), or pose `flinch` (its hunter hit) | flinch layer on Flex over the running clip: rocks back, squats, sad face; eases in and out |
 | faint | match | `kstate` faint (downed) | `sleep` with the eyes shut, laid over by `Kin` |
 
 The 29 primitive species (`KinPuppet`): idle, walk, run, attack (`att_k`), nap and faint (`sleep_k`), perch (`perch_k`),
-play (`happy_k`), hit (pose flinch). They have no eat or pet pose beyond Home's chew squash and the joy wiggle.
+play (`happy_k`), hit (a squash-and-ears jolt on the "hit" meta, as on its hunter's flinch; checked per species). They have no eat or pet pose beyond Home's chew squash and the joy wiggle.
 
 Checks and review: `--boki-rig-check`; `--boki-rig-shots --shots-dir=<dir>`, then `tools/boki/review_gifs.sh <dir>`.
 
