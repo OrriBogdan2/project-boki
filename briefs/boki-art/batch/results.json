@@ -48198,5 +48198,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_moatpole_p95_1.jpg",
     "ok": true
+  },
+  {
+    "id": "moundlet_card95",
+    "name": "Moundlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/moundlet_card95_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmuron_card95",
+    "name": "Murmuron (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/murmuron_card95_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "moundlet_card95",
+    "name": "Moundlet (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/moundlet_card95_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "moatpole_card95",
+    "name": "Moatpole (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/moatpole_card95_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmuron_card95",
+    "name": "Murmuron (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/murmuron_card95_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmuron_card95",
+    "name": "Murmuron (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/murmuron_card95_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_moundlet_p95",
+    "name": "Moundlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_moundlet_p95_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lodestick_card95",
+    "name": "Lodestick (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lodestick_card95_1.jpg",
+    "ok": true
   }
 ]
