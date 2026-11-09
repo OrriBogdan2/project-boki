@@ -18,7 +18,7 @@
 		"walk_speed": 2.2, "run_speed": 4.55
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
-	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "float"},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
 		"mm_shot_r": {"clip": "shot_r", "upper": "moving"}, "mm_shot_l": {"clip": "shot_l", "upper": "moving"}, "mm_shot_emp": {"clip": "shot_emp", "upper": "moving"},
@@ -32,6 +32,6 @@
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["mm_shot_r", 0.3], ["mm_shot_l", 0.3], ["mm_shot_r", 0.3], ["mm_skip", 0.24], ["mm_shot_emp", 0.4], ["mm_seed_aim", 1.0], ["mm_seed", 0.4], ["mm_shot_l", 0.3], ["mm_hearth", 0.62], ["mm_toss", 0.4], ["mm_shot_r", 0.4], ["mm_pickup", 0.5], ["mm_shot_l", 0.42]],
-	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"procedural": ["ledge", "mantle", "stomp", "base", "drink", "dive_on"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "lid.L", "lid.R", "jaw", "ear.L", "ear.R", "wing.L", "wing.R"]
 }

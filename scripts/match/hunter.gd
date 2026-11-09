@@ -3117,6 +3117,7 @@ func _anim_state(stretch: float) -> void:
 	s["grounded"] = grounded and pad.is_empty()
 	s["gliding"] = gliding and not plunging()
 	s["diving"] = plunging()
+	s["plunge"] = glide_dive.on
 	s["rolling"] = roll_t > 0.0
 	s["dash_dir"] = roll_dir
 	s["dash_kind"] = _dash_anim_kind()

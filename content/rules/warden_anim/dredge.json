@@ -47,8 +47,7 @@
 	"air": {
 		"rise": "jump",
 		"fall": "fall",
-		"glide": "glide",
-		"dive": "pounce"
+		"glide": "glide"
 	},
 	"land": {
 		"clip": "land",
@@ -164,7 +163,8 @@
 		"mantle",
 		"stomp",
 		"base",
-		"drink"
+		"drink",
+		"dive_on"
 	],
 	"upper": [
 		"hips",

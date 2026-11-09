@@ -206,6 +206,7 @@ func run(main: Node) -> void:
 	_jump()
 	_glide()
 	_glide_dive()
+	_glide_dive_pose()
 	_dash_glide()
 	_dash_exit()
 	_plain_dash()
@@ -472,6 +473,28 @@ func _glide_high() -> void:
 # ---------------------------------------------------------------- glide dive
 ## Crouch held under the glider plunges: its fall speed and ramp, the keys at a quarter of their force,
 ## the cancel height, the timeout, and the speed a pull-out high up gives.
+## The dive pose: the live Hunter's state shows it within 0.1 s of the plunge starting, then each of the 12 on its own model.
+func _glide_dive_pose() -> void:
+	_reset(flat + Vector3(0, 60.0, 0), false)
+	P.inp["jump"] = true
+	var start := -1
+	var shown := -1
+	for i in 120:
+		P.inp["glide"] = true
+		P.inp["crouch"] = i >= 30
+		m.step(DT)
+		P.render(DT, 1.0)
+		if start < 0 and P.glide_dive.on:
+			start = i
+		if start >= 0 and shown < 0 and bool(P.anim_s.get("dive_on", false)):
+			shown = i
+	ok(start >= 0 and shown >= 0 and (shown - start) * DT <= 0.1, "dive_pose_live: plunge at frame %d, pose state at %d" % [start, shown])
+	var pose := load("res://tools/glide_dive_pose_check.gd").new()
+	var res: Array = pose.run(m)
+	for line in res[1]:
+		print("MFEEL ", line)
+	bad += int(res[0])
+
 func _glide_dive() -> void:
 	_reset(flat + Vector3(0, 60.0, 0), false)
 	P.inp["jump"] = true

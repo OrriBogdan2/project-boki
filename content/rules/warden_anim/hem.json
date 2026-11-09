@@ -10,7 +10,7 @@
 		"walk_speed": 2.2, "run_speed": 4.6
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
-	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive"},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
 		"arc_draw": {"clip": "draw", "hold_from": 1.15, "upper": true}, "arc_tap": {"clip": "tap", "upper": true}, "arc_loose": {"clip": "loose", "upper": true},
@@ -24,6 +24,6 @@
 		"mf_xform": {"clip": "fusion"}
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
-	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"procedural": ["ledge", "mantle", "stomp", "base", "drink", "dive_on"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "pauldron.L", "pauldron.R", "fing_a1.R", "fing_a2.R", "fing_b1.R", "fing_b2.R", "thumb1.R", "thumb2.R", "bow", "bow_t", "bow_b", "bow_s", "arrow", "brow.L", "brow.R", "lid.L", "lid.R"]
 }

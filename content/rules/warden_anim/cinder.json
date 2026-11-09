@@ -10,7 +10,7 @@
 		"walk_speed": 2.2, "run_speed": 4.6
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
-	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "hop"},
+	"air": {"rise": "rise", "fall": "fall", "glide": "glide"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
 		"as_lance": {"clip": "lance", "hold_from": 0.34, "upper": "moving"},
@@ -24,6 +24,6 @@
 		"mf_xform": {"clip": "fusion"}
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
-	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"procedural": ["ledge", "mantle", "stomp", "base", "drink", "dive_on"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "fingers.R", "thumb.R", "brow.L", "brow.R", "lid.L", "lid.R", "jaw"]
 }

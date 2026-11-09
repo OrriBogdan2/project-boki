@@ -10,7 +10,7 @@
 		"walk_speed": 2.2, "run_speed": 4.6
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
-	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "fall"},
+	"air": {"rise": "rise", "fall": "fall", "glide": "glide"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
 		"thf_lmb_r": {"clip": "lmb_r", "upper": "moving"}, "thf_lmb_l": {"clip": "lmb_l", "upper": "moving"}, "thf_primed": {"clip": "primed", "upper": "moving"},
@@ -23,6 +23,6 @@
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["thf_lmb_r", 0.45], ["thf_lmb_l", 0.45], ["thf_vault_r", 0.48], ["thf_primed", 0.3], ["thf_vault_f", 0.48], ["thf_lmb_r", 0.3], ["thf_vault_twist", 0.48], ["thf_bola", 0.75], ["thf_knife", 0.45], ["thf_encore", 0.4], ["thf_encore_dance", 1.6], ["thf_reset", 0.4]],
-	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"procedural": ["ledge", "mantle", "stomp", "base", "drink", "dive_on"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"]
 }

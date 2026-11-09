@@ -182,6 +182,7 @@ var run_k := 0.0
 var air_k := 0.0
 var glide_k := 0.0
 var dive_k := 0.0
+var plunge := GlideDivePose.new()      # the glider's dive: the tuck and the pull-out over the skydive pose
 var crouch_k := 0.0
 var down_k := 0.0
 var ledge_k := 0.0
@@ -326,6 +327,7 @@ func _init(m: Node3D) -> void:
 	focus = torso.get_node_or_null("Focus")
 	if focus: focus_base = focus.position
 	cls = String(m.get_meta("cls", "medium"))
+	plunge.cls = cls
 	race = String(m.get_meta("race", "human"))
 	arch = String(m.get_meta("arch", ""))
 	st = (STANCE.get(cls, STANCE["medium"]) as Dictionary).duplicate()
@@ -553,7 +555,10 @@ func update(dt: float, s: Dictionary) -> void:
 	var r1 := minf(run_k, 1.0)
 	air_k = _ease(air_k, 0.0 if grounded or gliding or diving else 1.0, 14.0, dt)
 	glide_k = _ease(glide_k, 1.0 if gliding and not diving else 0.0, 7.0, dt)
-	dive_k = _ease(dive_k, 1.0 if diving else 0.0, 6.0, dt)
+	var plunging: bool = s.get("plunge", false)
+	plunge.step(plunging, grounded, dt)
+	s["dive_on"] = plunge.on_rig()
+	dive_k = _ease(dive_k, 1.0 if diving else 0.0, plunge.rate(plunging), dt)
 	crouch_k = _ease(crouch_k, float(s.get("crouch", 0.0)), 12.0, dt)
 	down_k = _ease(down_k, 1.0 if downed else 0.0, 6.0 if downed else 4.0, dt)
 	var ledge: bool = s.get("ledge", false)
@@ -795,6 +800,13 @@ func update(dt: float, s: Dictionary) -> void:
 	# skydiving: legs bent back and spread
 	hl = lerpf(hl, -0.15, dive_k); kl = lerpf(kl, -1.1, dive_k); wl = lerpf(wl, -0.3, dive_k)
 	hr = lerpf(hr, -0.15, dive_k); kr = lerpf(kr, -1.1, dive_k); wr = lerpf(wr, 0.3, dive_k)
+	# the glider's dive: legs straight and together, swinging forward as he pulls out
+	hl = lerpf(hl, plunge.leg_h(), plunge.k)
+	hr = lerpf(hr, plunge.leg_h(), plunge.k)
+	kl = lerpf(kl, GlideDivePose.LEG_K, plunge.k)
+	kr = lerpf(kr, GlideDivePose.LEG_K, plunge.k)
+	wl = lerpf(wl, 0.0, plunge.k)
+	wr = lerpf(wr, 0.0, plunge.k)
 	# dodges
 	if dash_k > 0.01:
 		var dhl := 0.0; var dkl := 0.0; var dhr := 0.0; var dkr := 0.0
@@ -1003,7 +1015,7 @@ func update(dt: float, s: Dictionary) -> void:
 		rb = Basis(roll_ax, roll_ang) * rb
 		rpivot = Vector3(0, 0.4, 0)
 	if dive_k > 0.01:
-		rb = Basis(Vector3.RIGHT, -1.15 * dive_k) * rb
+		rb = Basis(Vector3.RIGHT, -1.15 * dive_k - plunge.tip()) * rb
 	if down_k > 0.01:
 		# going down: a stagger and a fall forward (or back, if the hit came from behind)
 		rb = Basis(Vector3.RIGHT, -1.38 * down_k) * Basis(Vector3.FORWARD, 0.12 * down_k * sin(crawl_ph * 0.5)) * rb
@@ -1559,6 +1571,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if dive_k > 0.01:
 		fl = fl.lerp(sh_l + Vector3(-0.32, 0.12, -0.22), dive_k)
 		fr = fr.lerp(sh_r + Vector3(0.32, 0.12, -0.22), dive_k)
+		fl = fl.lerp(sh_l + plunge.hand(-1.0), plunge.k)
+		fr = fr.lerp(sh_r + plunge.hand(1.0), plunge.k)
 	# ledge and mantle: reaching up, then pushing down on the lip
 	if ledge_k > 0.01:
 		var mk := float(s.get("mantle", -1.0))
