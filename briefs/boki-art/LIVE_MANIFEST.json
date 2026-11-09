@@ -701,7 +701,13 @@
   "card": "briefs/boki-art/cards/Mycroll.jpg",
   "portrait": "briefs/boki-art/portraits/light/Mycroll.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Mycroll.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Mycroll.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Mycroll.png",
+  "extra_angles": {
+   "tipped_over": {
+    "card": "briefs/boki-art/cards/Mycroll_tipped.jpg",
+    "portrait": "briefs/boki-art/portraits/light/Mycroll_tipped.jpg"
+   }
+  }
  },
  "Nettlynx": {
   "sheet": "briefs/boki-art/turnarounds/Nettlynx.jpg",
@@ -1124,7 +1130,13 @@
   "card": "briefs/boki-art/cards/Vespyx.jpg",
   "portrait": "briefs/boki-art/portraits/light/Vespyx.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Vespyx.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Vespyx.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Vespyx.png",
+  "extra_angles": {
+   "lying_down": {
+    "card": "briefs/boki-art/cards/Vespyx_lying.jpg",
+    "portrait": "briefs/boki-art/portraits/light/Vespyx_lying.jpg"
+   }
+  }
  },
  "Voltalon": {
   "sheet": "briefs/boki-art/evolutions/Voltalon.jpg",
