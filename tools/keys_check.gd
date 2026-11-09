@@ -570,5 +570,6 @@ func _controls_card() -> void:
 	Settings.rebind("jump", ev)
 	var after := _card_caps("archer")
 	var flat: Array = after.map(func(r): return r[1]).reduce(func(a, b): return a + b, [])
-	ok("a rebind shows at once", _caps_match(after) and flat.has("J") and flat.has("N") and not flat.has("E"), str(flat))
+	var shown := _caps_match(after) and flat.has("J") and flat.has("N") and not flat.has("E")
+	ok("a rebind shows at once", shown, str(flat))
 	Settings.reset_all()
