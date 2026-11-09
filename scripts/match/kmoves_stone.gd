@@ -497,12 +497,6 @@ const MOVES := {
 		],
 		[0.22, {"gp": 0.7, "p": 0.18, "y": 0.3, "lift": 0.1, "fr": Vector3(0.0, 0.35, -0.7), "rw": 1.0}],
 		[0.50, {}]]},
-	# item 136's RMB (the kit plays it on the press): eight cards dealt from the raised left hand by the right
-	"ostra_flurry": {"keys": [
-		[0.00, {}],
-		[0.05, {"p": -0.1, "fr": Vector3(0.2, 0.25, -0.5), "rw": 1.0, "fl": Vector3(-0.2, 0.25, -0.35), "hw": 1.0}],
-		[0.66, {"p": -0.1, "fr": Vector3(0.2, 0.25, -0.5), "rw": 1.0, "fl": Vector3(-0.2, 0.25, -0.35), "hw": 1.0}],
-		[0.90, {}]]},
 	# the Snap's wind-up (0.32s, it holds): she sinks and draws both hands in round the dark orb as it forms
 	# (0.12), then coils, rising and leaning far back with the orb cupped at the chest (0.30, loaded)
 	"ostra_snap_wind": {"hold": true, "keys": [
