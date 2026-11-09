@@ -126,6 +126,8 @@ static func on_event(m: Match, x: Array) -> void:
 		"scan_start", "scan_stop", "scan_done":
 			if e is Hunter:
 				Capture.on_net(m, e, String(x[1]), String(x[6]))
+		"wkill":
+			KinSummon.show_reveal(m, at, int(String(x[6])))
 		"wgrab", "wsum":
 			if e is Hunter:
 				KinSteal.on_net(m, e as Hunter, String(x[1]), String(x[6]))

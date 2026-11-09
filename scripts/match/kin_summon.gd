@@ -3,7 +3,9 @@ extends RefCounted
 ## The Boki summon (DECISIONS 2026-11-09, briefs/boki-art/WISP_DESIGN_OPEN.md Q1/Q3/Q5/Q7, decision 0039).
 ## With Boki riding as wisps (KinWisp) the Summon key bursts the wisp into the full Boki for its species'
 ## window: its normal AI (KinTactics, the orders on the Boki key, its own ability) on a short leash. Damage
-## never ends the window; being knocked down does: it turns straight back into a wisp with a longer cooldown.
+## never ends the window; killing the Boki does (decision 0044): it turns back into a wisp where it fell. Killed
+## by a rival hunter it flies home and shows its owner on their minimap for a moment, with a longer cooldown;
+## killed while its owner is downed it is a loose wisp there (KinSteal); killed by a monster it just goes home.
 ## At the end it shrinks back into the wisp, which stays dim until the cooldown is over. Summon again while
 ## it is out sends it back early (full cooldown). One summon at a time: one Boki per hunter in a match.
 ## Numbers: content/rules/boki_summon.json (the role x size table). HUD ring: BokiHud.summon_ring.
@@ -20,7 +22,10 @@ var left := 0.0       # s of the window left (0: a wisp, or shrinking)
 var shrink := 0.0     # s of the shrink back left
 var grow := 0.0       # s of the bloom left (drawing only)
 var cd := 0.0         # s until it can be summoned again
-var cd_full := 1.0    # s: the cooldown now running (longer after a knock-down), for the HUD ring
+var cd_full := 1.0    # s: the cooldown now running (longer after a rival's kill), for the HUD ring
+var fly := 0.0        # s of the flight home left after a kill (drawing only)
+var fly_len := 1.0    # s: that flight in all
+var fly_from := Vector3.ZERO  # where it was killed
 
 func _init(kin: Kin) -> void:
 	k = kin
@@ -84,19 +89,59 @@ func end() -> void:
 	left = 0.0
 	shrink = SHRINK_S
 
-## Knocked down while summoned (Kin.go_down): back into a wisp at once, the longer cooldown. True if it was out.
-func knocked() -> bool:
+## Killed while summoned (Kin.go_down, `by` is the killer): back into a wisp where it fell. True if it was out.
+## A rival hunter's kill costs the longer cooldown and shows its owner (reveal_s); a monster's or a fall's does not.
+func killed(by: Ent) -> bool:
 	if not out():
 		return false
-	k.m.fx.burst(k.pos + Vector3(0, 0.4, 0), k.sp["color"], 16, 3.0)
-	KinCommand.say(k.owner_h, "%s was knocked back into a wisp" % k.rec.get("name", "Your Boki"), Color("ffb0a0"))
-	_back(cd_base * float(rules()["knocked_cd_mult"]))
+	var at := k.pos
+	var o := k.owner_h
+	var foe := _rival_of(by)
+	k.m.fx.burst(at + Vector3(0, 0.4, 0), k.sp["color"], 16, 3.0)
+	KinCommand.say(o, "%s was killed and went back to a wisp" % k.rec.get("name", "Your Boki"), Color("ffb0a0"))
+	_back(cd_base * (float(rules()["killed_cd_mult"]) if foe else 1.0))
+	if KinSteal.stolen(k):
+		KinSteal.break_loose(k, at)          # a thief's stolen summon: loose again where it fell
+	elif foe and (o.downed or o.out):
+		KinSteal.break_loose(k, at)          # its owner is down: anyone may grab it
+	else:
+		k.back_home = true
+		fly_len = maxf(0.1, Vector2(at.x - o.pos.x, at.z - o.pos.z).length() / float(rules()["home_speed"]))
+		fly = fly_len
+		fly_from = at + Vector3(0, 0.6, 0)
+		if foe:
+			_reveal(o, foe.team)
 	return true
+
+## The rival hunter behind a kill (the hunter, or the hunter whose Boki it was), else null.
+func _rival_of(by: Ent) -> Hunter:
+	var h: Hunter = by as Hunter
+	if by is Kin:
+		h = (by as Kin).owner_h
+	if h and h.team != k.owner_h.team:
+		return h
+	return null
+
+## The owner shows for reveal_s: outlined for the killer's squad (Hunter.reveal_t rides the snapshot) and pinged
+## on their minimap, here and in the other games (kcmd "wkill").
+func _reveal(o: Hunter, team: int) -> void:
+	o.reveal_t = maxf(o.reveal_t, float(rules()["reveal_s"]))
+	show_reveal(k.m, o.pos, team)
+	KinNet.event(k.m, "wkill", o, Vector3.INF, str(team))
+
+## A minimap ping at `at` for the squad `team` (only their own game draws it).
+static func show_reveal(m: Match, at: Vector3, team: int) -> void:
+	if m.player == null or m.player.team != team:
+		return
+	m.sound_pings.append({"pos": at, "t": m.time, "kind": "wisp", "life": float(rules()["reveal_s"]), "key": "wk"})
+	if m.sound_pings.size() > 40:
+		m.sound_pings.pop_front()
 
 ## The fixed step (own Boki only; a remote one reads the snapshot).
 func tick(dt: float) -> void:
 	cd = maxf(0.0, cd - dt)
 	grow = maxf(0.0, grow - dt)
+	fly = maxf(0.0, fly - dt)
 	var o := k.owner_h
 	if left > 0.0:
 		left -= dt
@@ -134,6 +179,10 @@ func _back(cool: float) -> void:
 	KinWisp.set_wisp(k, true)
 	k.stow()
 	k.scale = Vector3.ONE
+
+## Where the wisp is drawn while it streaks home after a kill: from where it fell towards `target`.
+func streak(target: Vector3) -> Vector3:
+	return fly_from.lerp(target, 1.0 - fly / fly_len)
 
 ## Its size through the bloom and the shrink, and the wisp dim while it rests.
 func render() -> void:

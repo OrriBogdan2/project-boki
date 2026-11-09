@@ -308,9 +308,10 @@ func _summon() -> void:
 	ok(k.wisp and absf(s.cd - 60.0) < 0.2, "...full cooldown (%.1f s)" % s.cd)
 	s.cd = 0.0
 	KinSummon.press(p)
-	k.hurt(k.max_hp * 5.0, null)
+	var foe: Hunter = m.hunters.filter(func(x: Hunter): return x.team != p.team)[0]
+	k.hurt(k.max_hp * 5.0, foe)
 	ok(k.wisp and k.state == "shoulder" and absf(s.cd - 75.0) < 0.01,
-		"summon: knocked down, it turns back into a wisp, 75 s cooldown")
+		"summon: killed by a rival, it turns back into a wisp, 75 s cooldown")
 	s.cd = 0.0
 	KinSummon.press(p)
 	var other: Kin = m.kins.filter(func(x: Kin): return x.owner_h != null and x != k)[0]

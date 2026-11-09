@@ -72,6 +72,9 @@ static func render(k: Kin) -> bool:
 	var y := sh.global_position.y if sh else o.position.y + SHOULDER_Y
 	var a: float = TAU * (k.m.time * ORBIT_HZ + float(k.model.get_meta("phase", 0.0)))
 	k.global_position = Vector3(o.position.x + cos(a) * ORBIT_R, y, o.position.z + sin(a) * ORBIT_R)
+	if k.summon and k.summon.fly > 0.0:
+		k.global_position = k.summon.streak(k.global_position)
+		k.m.fx.burst(k.global_position, k.sp.get("glow", k.sp["color"]), 1, 0.4)
 	k.model.rotation.y = atan2(sin(a), -cos(a))
 	k.model.scale = Vector3.ONE
 	BokiWispLook.pose(k.model, k.m.time)
