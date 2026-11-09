@@ -53,6 +53,7 @@ func run(main: Node) -> void:
 	_anchors(V, P)
 	_lod(V, P)
 	_budget(V, P)
+	_keep(V, P)
 	await _holds(main, m, V, P)
 	_view(m, V, P)
 	_kit(m, V, P)
@@ -195,6 +196,28 @@ func _budget(V: HeroVfx, P: Hunter) -> void:
 	for i in 10:
 		V.play(P, "drop_hit", P.pos, Vector2.RIGHT, {"r": 2.6, "core": 1.2})
 	ok(V.made == made, "a warm pool makes no new nodes")
+	_clear(V)
+
+## Very Low thins decor and spares a "keep" layer (a zone, an aim, a charge): same count and life as at High, and the
+## last KEEP_RESERVE particles of the cap are theirs alone.
+func _keep(V: HeroVfx, P: Hunter) -> void:
+	var was := String(Settings.v["quality"])
+	var layer := {"p": "ember", "n": 24, "life": 0.5, "speed": 1.0}
+	var node: GPUParticles3D = V._mote_node("ember")
+	Settings.v["quality"] = "very_low"
+	_clear(V)
+	var decor := V._aim_emitter(node, "ember", layer, P, Vector3.UP, {}, 1.0)
+	layer["keep"] = true
+	var kept := V._aim_emitter(node, "ember", layer, P, Vector3.UP, {}, 1.0)
+	ok(kept == 24 and is_equal_approx(node.lifetime, 0.5) and decor < kept,
+			"Very Low: a keep layer holds its count and life, decor thins (%d, %d of 24)" % [decor, kept])
+	V.live_n = HeroVfx.MAX_LIVE - HeroVfx.KEEP_RESERVE
+	layer["keep"] = false
+	ok(V._aim_emitter(node, "ember", layer, P, Vector3.UP, {}, 1.0) == 0, "a full decor budget leaves the reserve alone")
+	layer["keep"] = true
+	ok(V._aim_emitter(node, "ember", layer, P, Vector3.UP, {}, 1.0) == 24, "...and a keep layer still gets its particles")
+	Settings.v["quality"] = was
+	node.free()
 	_clear(V)
 
 func _holds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:

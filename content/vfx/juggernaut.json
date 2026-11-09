@@ -17,8 +17,8 @@
 		"slash_tip": {"fx": [{"p": "flare", "y": 1.1, "size": 1.7, "life": 0.2, "c": "magenta", "c2": "hot"},
 				{"p": "ember", "y": 1.1, "way": "fwd", "n": 12, "speed": 8.0, "spread": 0.45, "grav": 9.0, "life": 0.35, "size": 0.05, "stretch": 0.06}]},
 
-		"wave_charge": {"fx": [{"p": "ember", "at": "blade_tip", "shape": "ball", "radius": 0.3, "way": "up", "n": 22, "speed": 1.4, "spread": 0.7, "grav": -1.5, "life": 0.5, "size": 0.05, "c": "red", "c2": "wave"},
-				{"p": "ember", "at": "blade_mid", "shape": "gather", "radius": 0.9, "n": 14, "speed": 2.2, "drag": 0.0, "curl": 0.3, "life": 0.4, "size": 0.04, "c": "wave", "near": true}]},
+		"wave_charge": {"fx": [{"p": "ember", "keep": true, "at": "blade_tip", "shape": "ball", "radius": 0.3, "way": "up", "n": 22, "speed": 1.4, "spread": 0.7, "grav": -1.5, "life": 0.5, "size": 0.05, "c": "red", "c2": "wave"},
+				{"p": "ember", "keep": true, "at": "blade_mid", "shape": "gather", "radius": 0.9, "n": 14, "speed": 2.2, "drag": 0.0, "curl": 0.3, "life": 0.4, "size": 0.04, "c": "wave", "near": true}]},
 		"wave_fire": {"sfx": [{"n": "jug_wave", "db": -2, "pitch": 1.0, "pitch_k": -0.15}, {"n": "cleave", "db": -1, "pitch": 0.7}, {"n": "ab_blast", "db": -5, "pitch": 1.2, "pitch_k": -0.3}],
 			"fx": [{"p": "sweep", "y": 0.7, "size": 2.8, "arc": 80, "life": 0.28, "c": "red", "c2": "wave"},
 				{"p": "scorch", "shape": "lane", "len": "len", "w": "w", "w_x": 0.8, "life": 1.3, "c": "red", "c2": "wave", "unless": "full"},
@@ -28,8 +28,8 @@
 
 		"slam_tell": {"sfx": [{"n": "jug_slam_wind", "db": -3}],
 			"fx": [{"p": "ribbon", "at": "blade_tip", "life": 0.55, "tail": 0.12, "size": 0.24, "c": "magenta", "c2": "hot"}]},
-		"slam_wind": {"fx": [{"p": "ember", "at": "blade_tip", "shape": "gather", "radius": 1.2, "n": 24, "speed": 3.2, "drag": 0.0, "curl": 0.2, "life": 0.36, "size": 0.05, "c": "magenta", "c2": "hot"},
-				{"p": "ember", "at": "feet", "shape": "disc", "radius": 0.8, "way": "up", "n": 10, "speed": 1.6, "spread": 0.3, "grav": -1.0, "life": 0.5, "size": 0.05, "near": true}]},
+		"slam_wind": {"fx": [{"p": "ember", "keep": true, "at": "blade_tip", "shape": "gather", "radius": 1.2, "n": 24, "speed": 3.2, "drag": 0.0, "curl": 0.2, "life": 0.36, "size": 0.05, "c": "magenta", "c2": "hot"},
+				{"p": "ember", "keep": true, "at": "feet", "shape": "disc", "radius": 0.8, "way": "up", "n": 10, "speed": 1.6, "spread": 0.3, "grav": -1.0, "life": 0.5, "size": 0.05, "near": true}]},
 		"slam_hit": {"sfx": [{"n": "jug_slam_hit", "db": -1}, {"n": "cleave", "db": -1, "pitch": 0.75}, {"n": "ab_slam", "db": -3, "pitch": 0.85}],
 			"fx": [{"p": "scorch", "shape": "cone", "size": "r", "arc": 70, "life": 1.5, "c": "magenta", "c2": "hot"},
 				{"p": "sweep", "y": 0.7, "size": "r", "arc": 74, "life": 0.3, "c": "magenta", "c2": "hot", "tilt": 14, "flip": true},
@@ -42,8 +42,8 @@
 				{"p": "skirt", "size": 1.5, "from": 0.3, "tall": 1.5, "life": 0.36, "c": "red", "c2": "hot"}]},
 
 		"lunge_wind": {"sfx": [{"n": "jug_charge", "db": -3}]},
-		"lunge_charge": {"fx": [{"p": "ember", "at": "blade_tip", "shape": "gather", "radius": 1.1, "n": 26, "speed": 3.0, "drag": 0.0, "curl": 0.2, "life": 0.36, "size": 0.05, "c": "red", "c2": "hot"},
-				{"p": "ember", "at": "feet", "shape": "disc", "radius": 0.7, "way": "back", "lift": 0.6, "n": 14, "speed": 3.0, "spread": 0.3, "grav": -0.5, "life": 0.4, "size": 0.05, "c": "red", "near": true}]},
+		"lunge_charge": {"fx": [{"p": "ember", "keep": true, "at": "blade_tip", "shape": "gather", "radius": 1.1, "n": 26, "speed": 3.0, "drag": 0.0, "curl": 0.2, "life": 0.36, "size": 0.05, "c": "red", "c2": "hot"},
+				{"p": "ember", "keep": true, "at": "feet", "shape": "disc", "radius": 0.7, "way": "back", "lift": 0.6, "n": 14, "speed": 3.0, "spread": 0.3, "grav": -0.5, "life": 0.4, "size": 0.05, "c": "red", "near": true}]},
 		"lunge_full": {"sfx": [{"n": "jug_full", "db": -2}],
 			"fx": [{"p": "flare", "at": "blade_tip", "size": 1.8, "life": 0.22, "c": "magenta", "c2": "hot"}]},
 		"lunge_perfect": {"sfx": [{"n": "jug_full", "db": -3, "pitch": 1.5}],
@@ -62,7 +62,7 @@
 				{"p": "ribbon", "at": "chest", "life": 0.4, "tail": 0.26, "size": 0.75, "c": "main", "c2": "gold_hot"}]},
 
 		"drop_tell": {"sfx": [{"n": "jug_drop", "db": -2, "pitch": 0.85}]},
-		"drop_gather": {"fx": [{"p": "ember", "at": "chest", "shape": "gather", "radius": 1.4, "n": 30, "speed": 5.0, "drag": 0.0, "curl": 0.2, "life": 0.26, "size": 0.06, "c": "pink", "c2": "hot"}]},
+		"drop_gather": {"fx": [{"p": "ember", "keep": true, "at": "chest", "shape": "gather", "radius": 1.4, "n": 30, "speed": 5.0, "drag": 0.0, "curl": 0.2, "life": 0.26, "size": 0.06, "c": "pink", "c2": "hot"}]},
 		"drop_dive": {"sfx": [{"n": "juggernaut_dash", "db": -3, "pitch": 0.7}],
 			"fx": [{"p": "ribbon", "at": "chest", "life": 0.42, "tail": 0.28, "size": 0.8, "c": "main", "c2": "hot"}]},
 		"drop_comet": {"fx": [{"p": "ember", "at": "chest", "radius": 0.5, "n": 34, "speed": 3.5, "spread": 0.8, "grav": -3.0, "life": 0.35, "size": 0.07},
@@ -87,7 +87,7 @@
 				{"p": "ember", "y": 0.3, "n": 26, "speed": 8.0, "spread": 0.7, "grav": 5.0, "life": 0.6, "size": 0.06, "c": "gold", "c2": "gold_hot"}]},
 
 		"dash_wind": {"sfx": [{"n": "jug_charge", "db": -8, "pitch": 1.4}],
-			"fx": [{"p": "ember", "at": "feet", "shape": "disc", "radius": 0.6, "way": "back", "lift": 0.5, "n": 12, "speed": 2.5, "spread": 0.3, "grav": -0.5, "life": 0.3, "size": 0.05}]},
+			"fx": [{"p": "ember", "keep": true, "at": "feet", "shape": "disc", "radius": 0.6, "way": "back", "lift": 0.5, "n": 12, "speed": 2.5, "spread": 0.3, "grav": -0.5, "life": 0.3, "size": 0.05}]},
 		"dash_go": {"sfx": [{"n": "juggernaut_dash", "db": -4}, {"n": "ab_whirr", "db": -4, "pitch": 0.7}],
 			"fx": [{"p": "scorch", "shape": "lane", "len": "len", "w": 1.1, "life": 0.8, "c": "main", "c2": "hot"},
 				{"p": "ribbon", "at": "chest", "life": 0.28, "tail": 0.24, "size": 0.7, "c": "main", "c2": "hot"}]},
@@ -108,7 +108,7 @@
 		"chain_taut": {"sfx": [{"n": "jug_taut", "db": -5, "pitch": 0.9}],
 			"fx": [{"p": "flare", "size": 1.0, "life": 0.16, "c": "main", "c2": "hot"}]},
 		"chain_tight": {"sfx": [{"n": "jug_taut", "db": -3, "pitch": 0.75}],
-			"fx": [{"p": "ember", "y": 1.0, "way": "fwd", "n": 10, "speed": 5.0, "spread": 0.6, "grav": 7.0, "life": 0.3, "size": 0.04}]},
+			"fx": [{"p": "ember", "keep": true, "y": 1.0, "way": "fwd", "n": 10, "speed": 5.0, "spread": 0.6, "grav": 7.0, "life": 0.3, "size": 0.04}]},
 		"chain_pull": {"sfx": [{"n": "jug_reel", "db": -3}],
 			"fx": [{"p": "smoke", "y": 0.1, "n": 7, "speed": 1.8, "spread": 0.8, "grav": -0.4, "life": 0.6, "size": 0.5, "radius": 0.5, "c": "iron"},
 				{"p": "flare", "y": 0.3, "size": 1.2, "life": 0.16, "c": "main", "c2": "hot"}]},
@@ -123,8 +123,8 @@
 			"fx": [{"p": "scorch", "at": "h", "size": 1.25, "life": 1.0, "c": "gold", "c2": "gold_hot", "c3": "gold_char"},
 				{"p": "flare", "at": "chest", "size": 2.0, "life": 0.2, "c": "gold", "c2": "gold_hot"}]},
 		"guard_shell": {"fx": [{"p": "skirt", "size": 0.8, "tall": 2.1, "life": 0.3, "gain": 0.5, "c": "gold", "c2": "gold_hot", "c3": "gold_char"}]},
-		"guard": {"fx": [{"p": "ember", "at": "feet", "shape": "disc", "radius": 0.85, "way": "up", "n": 26, "speed": 3.0, "spread": 0.1, "grav": -1.5, "life": 0.55, "size": 0.05, "c": "gold", "c2": "gold_hot"},
-				{"p": "ember", "at": "blade_tip", "shape": "gather", "radius": 0.9, "n": 14, "speed": 2.4, "drag": 0.0, "curl": 0.2, "life": 0.36, "size": 0.04, "c": "gold", "c2": "gold_hot", "near": true}]},
+		"guard": {"fx": [{"p": "ember", "keep": true, "at": "feet", "shape": "disc", "radius": 0.85, "way": "up", "n": 26, "speed": 3.0, "spread": 0.1, "grav": -1.5, "life": 0.55, "size": 0.05, "c": "gold", "c2": "gold_hot"},
+				{"p": "ember", "keep": true, "at": "blade_tip", "shape": "gather", "radius": 0.9, "n": 14, "speed": 2.4, "drag": 0.0, "curl": 0.2, "life": 0.36, "size": 0.04, "c": "gold", "c2": "gold_hot", "near": true}]},
 		"guard_block": {"sfx": [{"n": "jug_ting", "db": -3}],
 			"fx": [{"p": "flare", "size": 1.6, "life": 0.16, "c": "gold", "c2": "gold_hot"},
 				{"p": "ember", "way": "fwd", "n": 16, "speed": 9.0, "spread": 0.35, "life": 0.24, "size": 0.05, "grav": 6.0, "c": "gold", "c2": "gold_hot", "stretch": 0.05}]},
@@ -137,14 +137,14 @@
 				{"p": "ember", "y": 1.0, "way": "fwd", "n": 30, "speed": 10.0, "spread": 0.45, "grav": 6.0, "life": 0.5, "size": 0.07, "c": "gold", "c2": "gold_hot", "stretch": 0.05},
 				{"p": "smoke", "y": 0.9, "n": 8, "speed": 1.6, "spread": 0.9, "grav": -0.6, "life": 0.8, "size": 0.65, "radius": 0.4, "c": "gold", "c3": "gold_char", "near": true}]},
 		"riposte_heal": {"sfx": [{"n": "juggernaut_heal", "db": -6}],
-			"fx": [{"p": "ember", "at": "feet", "shape": "disc", "radius": 0.7, "way": "up", "n": 22, "speed": 4.0, "spread": 0.1, "grav": -2.0, "life": 0.6, "size": 0.05, "c": "heal", "c2": "gold_hot"}]},
+			"fx": [{"p": "ember", "keep": true, "at": "feet", "shape": "disc", "radius": 0.7, "way": "up", "n": 22, "speed": 4.0, "spread": 0.1, "grav": -2.0, "life": 0.6, "size": 0.05, "c": "heal", "c2": "gold_hot"}]},
 		"riposte_reset": {"sfx": [{"n": "unlock", "db": -4, "pitch": 1.4}]},
 
 		"enrage": {"sfx": [{"n": "juggernaut_enrage", "db": 0}],
 			"fx": [{"p": "flare", "at": "chest", "size": 3.0, "life": 0.3, "c": "red", "c2": "hot"},
 				{"p": "ember", "at": "chest", "n": 30, "speed": 6.0, "spread": 0.9, "grav": -2.0, "life": 0.6, "size": 0.07, "radius": 0.4, "c": "red"}]},
-		"enraged": {"fx": [{"p": "ember", "at": "chest", "radius": 0.55, "way": "up", "n": 40, "speed": 2.4, "spread": 0.3, "grav": -2.0, "life": 0.65, "size": 0.08, "c": "red", "c2": "hot"},
+		"enraged": {"fx": [{"p": "ember", "keep": true, "at": "chest", "radius": 0.55, "way": "up", "n": 40, "speed": 2.4, "spread": 0.3, "grav": -2.0, "life": 0.65, "size": 0.08, "c": "red", "c2": "hot"},
 				{"p": "smoke", "at": "chest", "radius": 0.3, "n": 3, "speed": 0.5, "spread": 0.6, "grav": -0.8, "life": 0.7, "size": 0.28, "c": "red", "near": true}]},
-		"heat": {"fx": [{"p": "ember", "at": "chest", "y": 0.35, "radius": 0.45, "way": "up", "n": 7, "n_k": 1.6, "speed": 1.2, "spread": 0.4, "grav": -1.5, "life": 0.5, "size": 0.04, "c": "red"}]}
+		"heat": {"fx": [{"p": "ember", "keep": true, "at": "chest", "y": 0.35, "radius": 0.45, "way": "up", "n": 7, "n_k": 1.6, "speed": 1.2, "spread": 0.4, "grav": -1.5, "life": 0.5, "size": 0.04, "c": "red"}]}
 	}
 }
