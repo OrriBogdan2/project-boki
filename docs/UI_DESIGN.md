@@ -4,6 +4,17 @@ How Kinfall's menus look and behave, and the helpers in `scripts/ui/ui.gd` that 
 in-match HUD (`scripts/ui/hud.gd`) has its own Supervive-style layout and isn't covered here; it
 shares the colours and fonts.
 
+**Look: "Void & Masks"** (spec: `briefs/UI_STYLE.md` on ext/agent-briefs, November 2026). Panels are
+deep violet with a rough torn outline, faint ink speckle and scratched runes in the border band, and a
+neon edge running teal (`NEON_A`) on the left to magenta (`NEON_B`) on the right. Panel titles sit on a
+nailed parchment tab (`title_tab()`). The one primary button is a magenta "ticket" with notched sides.
+Floating glass (`UI.glass`, `UI.GLASS`) is a brighter violet so it stays purple over grass; the hub bar
+and the Goals card also light the neon edge. Section headers are pink spaced caps (`UI.PINK`), state
+tags (`UI.tag`) are tilted rubber stamps, `UI.badge` is a jagged black badge, and a Boki's page shows a
+`VoidPortrait` (starfield, teal cracks). A new Boki's reveal card is the theme panel with its name on a
+parchment tab and its type as a stamp. `VoidSpecks` drift over the title's key art. The in-match HUD
+only takes the palette and edges and stays minimal.
+
 ## 1. Audit (October 2026, before this pass)
 
 What made the menus feel blocky, samey and hard to get through:
@@ -67,16 +78,18 @@ What made the menus feel blocky, samey and hard to get through:
 2. **Three type sizes.** `T_TITLE` 30 (Lilita One) for the panel title, `T_HEAD` 19 (Lilita One) for
    card and item names, `T_BODY` 15 (Rubik) for everything you read, `T_SMALL` 13 for secondary
    lines. Section eyebrows are `section()` (12, bold, spaced caps).
-3. **Fewer boxes, one frame.** Every box is a `UiFrame` (`scripts/ui/ui_frame.gd`): a soft drop shadow
-   and a tight contact shadow, a dark rim, the fill, light falling from the top with a lit bevel line,
-   and a shade along the bottom. Wells and tracks are the same frame reversed (`UiFrame.sunk`).
+3. **Fewer boxes, one frame.** Every box is a `UiFrame` (`scripts/ui/ui_frame.gd`). Panels, cards,
+   buttons, tiles, popups and tooltips use its subclass `UiTorn` (`scripts/ui/ui_torn.gd`): a torn
+   outline (`jag`), optional speckle and runes (`grain`), a teal-to-magenta neon edge (`glow`), the
+   `ticket` notches and parchment `nails`. Outlines are cached per rect, so a box costs no more per frame
+   than a plain one. Wells, tracks and pills stay plain `UiFrame` (`UiFrame.sunk`).
    Radii come from `R_PANEL` 18, `R_CARD` 12, `R_CTRL` 10, `R_SMALL` 6, `R_PILL`. Cards have no
    outline unless they are *selected*. Group with spacing and eyebrows before reaching for a card.
-4. **Three button tiers.** `primary()` (filled accent, dark text): the one thing the screen is for,
-   at most one per screen, usually in the footer. `button()` (outline): normal actions.
+4. **Three button tiers.** `primary()` (the magenta ticket, pink text): the one thing the screen is for,
+   at most one per screen, usually in the footer. `button()` (torn violet face, neon on hover): normal actions.
    `ghost()` (text only): rare or small actions. `danger()` (red outline) for things that can't be
    undone, always behind `confirm()`.
-5. **Colour roles.** `ACCENT` (amber) means "act here" and "selected". `GOLD` means gems and rewards.
+5. **Colour roles.** `ACCENT` (magenta) means "act here" and "selected". `GOLD` means gems and rewards.
    `GOOD` owned/ready/success, `BAD` danger/loss/locked, `TEAL` info and extraction. Item rarity uses
    `rarity_col(r)`. Never use ACCENT for decoration.
 6. **Same shell everywhere.** Title (+subtitle) top left, extras (chips, tags) and a close X top
@@ -88,9 +101,8 @@ What made the menus feel blocky, samey and hard to get through:
    tab you used, and the current choice highlighted.
 9. **Confirm only what can't be undone** (delete a save, leave a match, sell or salvage an Epic or
    Legendary, reset all settings). Everything else happens immediately.
-10. **Motion is short, and nothing grows.** Hover lights a button or card, never makes it bigger.
-    Raised buttons stand on a darker lip and sink onto it when pressed, the label moving with the face,
-    so the button's size never changes. Panels fade and rise in (140-220 ms), toasts drop in (240 ms).
+10. **Motion is short.** Hover lights the neon edge and grows a button by 3% around its centre
+    (`HOVER_GROW`, a draw scale, so layout never moves); pressing nudges the label down. Panels fade and rise in (140-220 ms), toasts drop in (240 ms).
     Modals blur the screen behind them (160 ms). Nothing bounces.
 11. **Icons next to labels** where they help scanning (hub, pause menu, footers, empty states), drawn
     with `draw_icon` so they stay crisp at any size.
@@ -115,6 +127,7 @@ script outside the style module builds its own `StyleBoxFlat`.
 
 ### Colours and sizes
 `INK MUTED FAINT BG SURFACE CARD RAISED RIM WELL LINE ACCENT ACCENT_HI GOOD BAD GOLD TEAL INFO DARK_INK`,
+`NIGHT NIGHT_HI` (violet-black fills for boxes over the world), `PARCHMENT`, `NEON_A NEON_B`,
 `R_PANEL R_CARD R_CTRL R_SMALL R_PILL`, `T_TITLE T_HEAD T_BODY T_SMALL T_CAPS`, `GAP GAP_BIG PAD`,
 `rarity_col(r)`. The in-match HUD's `HudStyle` uses the same INK and MUTED and the same two fonts. Fonts: `UI.big` (Lilita
 One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
@@ -123,7 +136,7 @@ One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
 - `title(text, size=34, col=INK)` - Lilita One, one line.
 - `label(text, size=16, col=INK, font=null)` - wraps only past 48 characters.
 - `para(text, size=T_SMALL, col=MUTED)` - always wraps.
-- `section(text, col)` - a spaced caps eyebrow over a group (pages keep it with what follows).
+- `section(text, col)` - a spaced caps eyebrow over a group (pages keep it with what follows). Pink by default; pass a colour only when it means something (GOOD, a temper), never a blend toward grey (--uipolish-check).
 - `kv(key, value, col)` - a muted key on the left, the value on the right.
 
 ### Buttons
@@ -147,6 +160,7 @@ One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
 - `set_card_border(card, col, w)` - only for the selected or the warning card.
 - `tile_card(on, cb, pad=12, col=ACCENT)` - a selectable card (hover, focus, click, Enter); add your
   content to it. For tiers, skins, items.
+- `title_tab()` - the nailed parchment tab a panel title sits on (the shell uses it).
 - `glass(pad, rad)` - dark glass for things over the world (prompts, hint rows, hover cards, hub).
 - `sheet(width)` - a plain panel without the shell.
 - `chip(icon, text, col, tip, size=14)` - a pill with an icon and a value (gems, scrap, counts).
