@@ -38,7 +38,8 @@
 	},
 	"passive": {
 		"name": "Swell",
-		"desc": "Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 9s, wrapped in a pink sphere: your seed grows larger and faster, Trade lands sooner, your Snap hits 44% harder. You float: lava, spore pods and other ground hazards pass you by."
+		"desc": "Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 9s, wrapped in a pink sphere: your seed grows larger and faster, Trade lands sooner, your Snap hits 44% harder. You float: lava, spore pods and other ground hazards pass you by.",
+		"float_tags": ["hazard", "lava", "spore", "toxic", "molten"]
 	},
 	"lmb": {
 		"idle": 1.4,

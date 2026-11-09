@@ -296,6 +296,7 @@ func _ostra() -> void:
 	)
 	# item 17: he drifts slowly while the lantern flies, keeps his height over the abyss
 	await _hover(m, P, T, home, K)
+	_float_parity(m, P, home, K)
 	_far_cast(m, P, home, K)
 	reset.call()
 	K.swollen_t = 5.0
@@ -429,7 +430,7 @@ func _ostra() -> void:
 	var h0 := P.hp
 	K.on_knock(T, true)
 	ok("data: a knock does not heal him", absf(P.hp - h0) < 0.01, "healed %.1f" % (P.hp - h0))
-	for tag in ["hazard", "lava", "spore", "toxic", "molten"]:
+	for tag in K.float_tags():
 		var hz0 := P.hp
 		P.hurt(10.0, null, {"src": "hazard", "tags": ["zone", tag], "burn": 2.0, "slow": 1.0})
 		ok("data: a %s hit passes him by" % tag, absf(P.hp - hz0) < 0.01 and P.slow_t <= 0.0 and P.burn_t <= 0.0)
@@ -731,6 +732,48 @@ func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 		for dz in range(-1, 2):
 			W.kind[W.idx(int(floor(gap.x)) + dx, int(floor(gap.z)) + dz)] = World.T_GROUND
 	step(m, 1.0)
+
+## The source's float is no footsteps and ground hazards that pass him by (data card; the wiki adds water and sand,
+## which no map has). It names no hover over small gaps, slower fall or softer landing, so a 1 m gap, a fall from a
+## tier and a landing behave as for everyone (and the hazard tags are the data's).
+func _float_parity(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
+	ok("data: no footsteps (his gait never steps)", KMovesStone.gait("ostra") < 0.5 and KMovesStone.gait("kael") >= 0.5)
+	var tags := K.float_tags()
+	ok("data: the float tags are the ground hazards", tags.size() == 5 and "lava" in tags and not "sky" in tags)
+	var W = m.world
+	var gx := int(floor(home.x)) - 4
+	var gz := int(floor(home.z)) + 3
+	var floor_y := P.ground()
+	for dx in range(-2, 3):
+		W.kind[W.idx(gx + dx, gz)] = World.T_GROUND
+	W.kind[W.idx(gx, gz)] = World.T_VOID
+	K._drop_holds()
+	P.teleport(Vector3(gx + 0.5, floor_y, gz + 0.5))
+	P.vel = Vector3.ZERO
+	P.grounded = true
+	var low := [P.pos.y]
+	step(m, 0.5, func(): low[0] = minf(low[0], P.pos.y))
+	ok(
+		"source: with a 1 m gap under him he falls, no hover over small gaps",
+		low[0] < floor_y - 0.3,
+		"low %.2f of %.2f" % [low[0], floor_y]
+	)
+	W.kind[W.idx(gx, gz)] = World.T_GROUND
+	P.teleport(home + Vector3(0, 3.0, 0))
+	P.vel = Vector3.ZERO
+	P.grounded = false
+	var fast := [0.0, 0.0]
+	step(m, 1.2, func():
+		fast[0] = minf(fast[0], P.vel.y)
+		if P.grounded and fast[1] <= 0.0:
+			fast[1] = P.squash)
+	var v_free := sqrt(2.0 * Hunter.H_GRAV * 3.0)
+	ok(
+		"source: a fall from 3 m is a normal fall (no slower)",
+		absf(-fast[0] - v_free) < v_free * 0.1,
+		"%.1f vs %.1f m/s" % [-fast[0], v_free]
+	)
+	ok("source: he lands with the shared landing squash, no softer", fast[1] > 0.07, "squash %.2f" % fast[1])
 
 ## Everyone in the landing circle goes back to where he stood, each keeping its place in the circle; a body
 ## another game owns is sent its move over Net (bots and online use the same path).

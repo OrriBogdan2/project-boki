@@ -15,7 +15,6 @@ const PAY := "COLLAPSE"
 const TEAL := Color("7fe0d0")
 const VOID_COL := Color("b06bff")
 const PINK := Color("ff4fd8")
-const GROUND_HAZARDS := ["hazard", "lava", "spore", "toxic", "molten"]
 const ORB_FULL_COL := Color("efd4ff")      # the orb's shot colour at full charge (what other games draw)
 const GLOW_COL := Color("8a3dff")          # the charge glow at his hand, starting...
 const GLOW_FULL_COL := Color("d070ff")     # ...and at full charge
@@ -104,10 +103,14 @@ func on_deal(t: Ent, dmg: float, _o: Dictionary) -> void:
 ## He floats: the ground hazards (lava vents and their pools, spore pods, puddles, the pit's pull) never
 ## touch him. A sky strike (the lightning rod) still does.
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
-	if not o.get("sky", false) and (o.get("tags", []) as Array).any(func(t): return t in GROUND_HAZARDS):
+	if not o.get("sky", false) and (o.get("tags", []) as Array).any(func(t): return t in float_tags()):
 		hazards_dodged += 1
 		return [0.0, o]
 	return [dmg, o]
+
+## The damage tags of ground hazards he floats over (passive.float_tags): the data's "avoids ground hazards".
+func float_tags() -> Array:
+	return (d["passive"] as Dictionary)["float_tags"]
 
 func hovering() -> bool:
 	return not swap.is_empty()
