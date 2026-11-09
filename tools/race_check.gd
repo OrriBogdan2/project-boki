@@ -7,7 +7,9 @@ extends RefCounted
 ##   4. a settled race: the winner's joy and trust go up, the loser's joy down, both remember it,
 ##      you get gems, the two grow apart (bonds)
 ##   5. on the base: no race post with base_mode off; with it on, a race runs to a result card
-##   6. the Training post drill still runs on the shared timing bar: three presses, then it ends
+##   6. the Training post on the base is a solo lap of the loop: perfect cheers add Speed (and a journal
+##      line), missed ones add none, a Boki at its cap or too tired does not start
+##   7. the Training post drill still runs on the shared timing bar: three presses, then it ends
 ## Never touches the real save.
 
 const RACES := 20
@@ -190,10 +192,58 @@ func _on_base() -> void:
 			race.tick(0.1)
 			t += 0.1
 		ok(race.run == null and is_instance_valid(race.card), "on: the race ends with a result card (%.1f s)" % t)
+		await _solo(home)
 	await _drill(home)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
+
+## One solo training lap: presses on every mark (perfect: the marker sits in the gold) or none.
+func _lap(home, perfect: bool) -> void:
+	var race: BaseRace = home.hrace
+	home._open_train(Save.active_kin())
+	if race.run == null:
+		return
+	var press := InputEventAction.new()
+	press.action = "interact"
+	press.pressed = true
+	var t := 0.0
+	while race.run != null and t < MAX_S:
+		if perfect and race.run.can_cheer():
+			race.bar.m = race.bar.zone
+			race.input(press)
+		race.tick(DT)
+		t += DT
+
+func _solo(home) -> void:
+	var rec := Save.active_kin()
+	rec["level"] = 5
+	rec["needs"]["energy"] = 90.0
+	rec["needs"]["food"] = 90.0
+	rec["needs"]["joy"] = 50.0
+	rec["stats"]["speed"] = 10
+	var perfect: int = int(BaseRace.rules()["train"]["great"]) * 3
+	await _lap(home, false)
+	ok(int(rec["stats"]["speed"]) == 10 and is_instance_valid(home.hrace.card),
+			"solo: a lap of missed cheers adds no Speed")
+	rec["needs"]["energy"] = 90.0
+	var mem: int = rec.get("memory", []).size()
+	await _lap(home, true)
+	ok(int(rec["stats"]["speed"]) == 10 + perfect,
+			"solo: three perfect cheers add %d Speed (now %d)" % [perfect, rec["stats"]["speed"]])
+	var mems: Array = rec["memory"]
+	ok(mems.size() == mem + 1 and mems[-1]["kind"] == "trained",
+			"solo: the lap is a journal line (\"%s\")" % mems[-1]["text"])
+	ok(float(rec["needs"]["energy"]) < 90.0, "solo: the lap costs energy")
+	rec["stats"]["speed"] = Care.stat_cap(rec)
+	await _lap(home, true)
+	ok(home.hrace.run == null and int(rec["stats"]["speed"]) == Care.stat_cap(rec),
+			"solo: at the level cap there is no lap")
+	rec["stats"]["speed"] = 10
+	rec["needs"]["energy"] = 5.0
+	await _lap(home, true)
+	ok(home.hrace.run == null and int(rec["stats"]["speed"]) == 10, "solo: a worn-out Boki does not start")
+	rec["needs"]["energy"] = 90.0
 
 func _drill(home) -> void:
 	if home.yard == null:

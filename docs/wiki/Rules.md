@@ -90,6 +90,8 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 | friend_step | 0.05 |
 | close_s | 0.6 |
 | result_doc | The last one home and the winner grow apart by rival_step; two non-rivals home within close_s of each other grow closer by friend_step. |
+| train | {"great": 2, "good": 1, "dojo": 1, "happy_at": 60.0, "happy_mult": 1.25, "min_food": 12.0, "food": 6.0, "joy_great": 4.0, "joy_else": -2.0} |
+| train_doc | The Training post's solo lap (base_race.gd solo): Speed points per cheer grade (a miss is 0), +dojo per cheer that was not a miss with a Dojo built, x happy_mult at joy >= happy_at; the Boki needs min_food Full to start and spends food and the race's energy; joy moves by joy_great with any great cheer, else joy_else. Capped by level (Care.stat_cap). |
 | card_s | 6 |
 | card_s_doc | s the result card stays up. |
 

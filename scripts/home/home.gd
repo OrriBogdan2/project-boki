@@ -5044,6 +5044,9 @@ func _open_feed(rec: Dictionary) -> void:
 		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))
 
 func _open_train(rec: Dictionary) -> void:
+	if hrace:
+		hrace.solo(rec)         # base_mode: training is a solo lap of the Dash
+		return
 	var v := _new_panel("Train %s" % rec["name"], 560)
 	v.add_child(UI.label("A short drill at the yard. Time your presses: gold is great, orange is good. Costs some energy and food; a happy Boki learns faster.", 14, UI.MUTED))
 	for s in Care.STATS:
