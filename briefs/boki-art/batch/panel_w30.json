@@ -1,0 +1,369 @@
+[
+{
+"id": "portrait_barokat_pe_w29",
+"pick": 3,
+"avg": 8.17,
+"seats": [
+8.2,
+8.0,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 3 turn the body 30 degrees and set background to flat #E8E8EE.",
+"EDIT: run 3, sink the dial into the belly fur as a grown glass belly window and give a curious head tilt.",
+"EDIT: run 3, add a slight body lean and head tilt so the pose has more movement."
+],
+"veto": []
+},
+{
+"id": "portrait_bellowary_pe_w29",
+"pick": 2,
+"avg": 7.6,
+"seats": [
+7.7,
+7.5,
+7.6
+],
+"decision": "new",
+"fixes": [
+"EDIT: on run 2 turn the head toward the viewer so both eyes show, add a head tilt, flat #E8E8EE background.",
+"New prompt from the redo sheet: bony casque grown from the skull, 3/4 body, head turned toward viewer with both eyes, no smoke.",
+"New portrait: stylised big-eyed Bellowary in a 3/4 head-tilt, bone casque grown from the skull, glowing bellows ribs, cheeky expression."
+],
+"veto": [
+"casque reads as a worn brass chimney/helmet"
+]
+},
+{
+"id": "portrait_boltstrich_pe_w29",
+"pick": 3,
+"avg": 7.47,
+"seats": [
+7.5,
+7.7,
+7.2
+],
+"decision": "new",
+"fixes": [
+"New prompt: stylised big-eyed storm-cloud ostrich with copper feather ridges grown from the skin, no wire rings, playful 3/4 stride, #E8E8EE.",
+"EDIT: run 3, replace the wire wraps with raised copper feather ridges growing from the skin.",
+"New portrait: stylised big-eyed ostrich, storm-cloud body, copper shown only as raised feather/scale markings grown in the skin, 3/4 view, no wire."
+],
+"veto": [
+"copper coils still wrap the neck and legs as wire rings (reads strapped/worn)"
+]
+},
+{
+"id": "portrait_canvastross_pe_w29",
+"pick": 3,
+"avg": 7.83,
+"seats": [
+7.4,
+8.4,
+7.7
+],
+"decision": "new",
+"fixes": [
+"New prompt: albatross whose canvas wings grow from bone arm spars (no metal rings), short frayed edges, 3/4 glide with head toward viewer, #E8E8EE.",
+"EDIT: run 3, blend the wing spars into the shoulder as bone with no metal joints.",
+"EDIT: run 3, shorten the trailing edge to a few short cream canvas tears and grow the wing frame as bone instead of riveted metal struts."
+],
+"veto": []
+},
+{
+"id": "portrait_crofthorn_pe_w29",
+"pick": 1,
+"avg": 8.17,
+"seats": [
+8.2,
+8.2,
+8.1
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 1 restore the gentle smile from the ref.",
+"EDIT: run 1, turn the chest a little more toward the viewer.",
+"EDIT: run 1, restore the ref's gentle smile and slight head tilt."
+],
+"veto": []
+},
+{
+"id": "portrait_ermink_pe_w29",
+"pick": 2,
+"avg": 7.4,
+"seats": [
+7.2,
+7.5,
+7.5
+],
+"decision": "new",
+"fixes": [
+"New prompt: Ermink on all fours in a low playful stoat crouch, head toward viewer, flat #E8E8EE background.",
+"New prompt: Ermink low on all fours in a playful stoat crouch, head turned toward viewer, small ink-brush tail, flat #E8E8EE, no ghost copies.",
+"EDIT: run 2 (or the run-1 pose), put it on all fours in a low playful stoat crouch, head toward the viewer, on flat #E8E8EE."
+],
+"veto": []
+},
+{
+"id": "portrait_frigatee_pe_w29",
+"pick": 2,
+"avg": 7.43,
+"seats": [
+7.0,
+7.7,
+7.6
+],
+"decision": "new",
+"fixes": [
+"New prompt: manatee in a gentle 3/4 swim with the face toward the viewer, flipper edges grown as copper-coloured skin, #E8E8EE.",
+"New prompt: same Frigatee swimming in a gentle 3/4 with head turned toward the viewer, both eyes visible, slight head tilt.",
+"New portrait from the sheet: gentle 3/4 view, body angled toward the viewer, head turned so both eyes show, a friendly tilt."
+],
+"veto": []
+},
+{
+"id": "portrait_gongibbon_pe_w29",
+"pick": 3,
+"avg": 7.53,
+"seats": [
+7.4,
+7.5,
+7.7
+],
+"decision": "new",
+"fixes": [
+"New prompt: stylised chibi gibbon with a gong grown as a chest plate of bronze skin, big glossy eyes, calm smug monk tilt.",
+"New prompt: stylised big-eyed gibbon whose chest is a grown bronze gong plate, calm smug monk face, slight head tilt, flat #E8E8EE.",
+"EDIT: run 3, give it bigger glossy eyes, a cocky half-smile and a clear head tilt toward the viewer."
+],
+"veto": []
+},
+{
+"id": "portrait_gravadillo_pe_w29",
+"pick": 2,
+"avg": 7.63,
+"seats": [
+7.2,
+8.0,
+7.7
+],
+"decision": "new",
+"fixes": [
+"New prompt: gravadillo in a clear 30-degree 3/4 with head toward viewer, no orbit ring or debris, #E8E8EE.",
+"EDIT: run 1, rotate to a clear 30-degree 3/4 with head toward viewer.",
+"EDIT: run 2, rotate the body to a 30-degree 3/4 with the head toward the viewer and add a confident face."
+],
+"veto": [
+"effect: purple gravity ring kept"
+]
+},
+{
+"id": "portrait_kerchick_pe_w29",
+"pick": 3,
+"avg": 8.2,
+"seats": [
+8.3,
+8.2,
+8.1
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 1 blend the canvas patches into the wing feathers so they read grown.",
+"EDIT: run 3, make the swirl pouch a grown feather patch with no ties.",
+"EDIT: run 3, add a waddle step or lean with a head tilt so the pose has attitude."
+],
+"veto": []
+},
+{
+"id": "portrait_lanterloris_pe_w29",
+"pick": 1,
+"avg": 7.8,
+"seats": [
+7.8,
+7.8,
+7.8
+],
+"decision": "new",
+"fixes": [
+"EDIT: on run 1 make the lantern ribs translucent skin panels that fade into the fur at neck, shoulders and hips.",
+"New prompt: lantern ribs grown as glowing red fur bands that fade into the fur at shoulders and hips, no hard edge.",
+"New portrait: grow the lantern as glowing paper-membrane ribs that emerge from the fur along the back, with no edge line at the shoulders or neck."
+],
+"veto": []
+},
+{
+"id": "portrait_marchleaf_pe_w29",
+"pick": 2,
+"avg": 8.23,
+"seats": [
+8.3,
+8.1,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 2 soften the brow into a curious look.",
+"EDIT: run 2, soften the brow into a curious tilt.",
+"EDIT: run 2, soften the brows into a curious look with bigger eye highlights."
+],
+"veto": []
+},
+{
+"id": "portrait_oarlet_pe_w29",
+"pick": 1,
+"avg": 7.77,
+"seats": [
+7.9,
+7.9,
+7.5
+],
+"decision": "new",
+"fixes": [
+"EDIT: on run 1 remove all water drips.",
+"EDIT: run 1, grow wood-grain markings from the hips into the tail blade and stylise the eyes bigger.",
+"New portrait: stylised big-eyed otter whose wood-grain fur flows into an oar-blade tail, playful 3/4 pose, no water drips."
+],
+"veto": [
+"effect: water drips added"
+]
+},
+{
+"id": "portrait_pipewurm_pe_w29",
+"pick": 1,
+"avg": 7.7,
+"seats": [
+7.3,
+7.8,
+8.0
+],
+"decision": "new",
+"fixes": [
+"New prompt: snout grown as a flared ribbed horn of bony skin (no rivets), no slime drool, 3/4 head toward viewer.",
+"EDIT: run 1, make the pipe flare out of the snout flesh with no seam and remove the green drip.",
+"EDIT: run 1, blend the flesh into the pipe rim so the snout reads grown, and reduce the green slime on the back."
+],
+"veto": []
+},
+{
+"id": "portrait_prowyak_pe_w29",
+"pick": 1,
+"avg": 7.87,
+"seats": [
+7.8,
+7.9,
+7.9
+],
+"decision": "new",
+"fixes": [
+"EDIT: on run 1 enlarge the eyes, keep the plate to the forehead and horns so the face shows.",
+"EDIT: run 1, narrow the plate into a ridge from the forehead between the horns so the full face shows.",
+"EDIT: run 1, stylise the face with bigger glossy eyes and a determined little smile."
+],
+"veto": []
+},
+{
+"id": "scythant_r_w29",
+"pick": 2,
+"avg": 7.67,
+"seats": [
+7.6,
+7.6,
+7.8
+],
+"decision": "new",
+"fixes": [
+"New prompt: chibi chunky leaf-mantis with an oversized bark head, thick stubby legs, one scythe raised, big glossy eyes and an open cheeky grin.",
+"New prompt: chunky stylised leaf-mantis with a big round bark head, thick stubby legs, one scythe raised high, cheeky grin, big glossy eyes.",
+"EDIT: run 2, thicken the legs and body into a chunky stylised mantis, raise one scythe in a cocky pose and restore the small leaf wings."
+],
+"veto": []
+},
+{
+"id": "seamwyrm_e2_w29",
+"pick": 2,
+"avg": 7.77,
+"seats": [
+7.7,
+7.8,
+7.8
+],
+"decision": "new",
+"fixes": [
+"EDIT: on run 2 redraw only view 3 as a strict 90-degree side profile, chest zipper edge-on, one eye visible.",
+"EDIT: run 1, replace view 3 with a flat side profile (one eye, body coils seen edge-on, head pointing left).",
+"EDIT: run 2, redraw only view 3 as a strict side profile (body and head at 90 degrees, one eye) and keep the teal glow."
+],
+"veto": []
+},
+{
+"id": "terrarimit_e_w29",
+"pick": 1,
+"avg": 7.5,
+"seats": [
+7.5,
+7.4,
+7.6
+],
+"decision": "new",
+"fixes": [
+"EDIT: on run 1 grow one oversized orange claw at the front and turn the dome into cracked glass plates forming the carapace, single row.",
+"New prompt: crab whose own carapace is split cracked glass plates with moss and ferns growing between them, one claw twice the size of the other, fills frame, one row of four views.",
+"New prompt: a crab whose own shell is split into cracked glass plates with plants growing between them, one claw twice the size of the other, orange joints, big stalk eyes."
+],
+"veto": [
+"hard-requirement fixes missing: dome still sits on top, no oversized claw"
+]
+},
+{
+"id": "terrasloth_r2_w29",
+"pick": 3,
+"avg": 7.47,
+"seats": [
+7.5,
+7.3,
+7.6
+],
+"decision": "new",
+"fixes": [
+"New prompt: chibi big-headed sloth with large readable glass-pane scales along a curled mossy back, stylised clumped fur, smug sleepy face.",
+"New prompt: chibi big-headed sloth whose curled back is a shell of large clear mossy glass-pane scales with sprouts inside, short tail, smug sleepy face.",
+"EDIT: run 3, enlarge the head about 30 percent with bigger glossy eyes and grow five or six large clear glass-pane scales along the spine."
+],
+"veto": []
+},
+{
+"id": "tidalisk_r_w29",
+"pick": 3,
+"avg": 8.1,
+"seats": [
+8.3,
+7.8,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 3 add a deeper accent colour (teal or pink) on the sail and tail bubbles to lift contrast.",
+"EDIT: run 3, put the front view low on all four legs and enlarge the eyes to big round glossy Bubblisk eyes.",
+"EDIT: run 3, give the face a cheeky open smile and lower the front view onto all fours like the side view."
+],
+"veto": []
+},
+{
+"id": "voltalon_r_w29",
+"pick": 1,
+"avg": 7.43,
+"seats": [
+7.4,
+7.5,
+7.4
+],
+"decision": "new",
+"fixes": [
+"New prompt: big stylised storm bird whose wings are spread anvil thunderclouds, low powerful wide stance, copper crest blades, bolt tail, big expressive eyes.",
+"New prompt: big storm bird in a low powerful crouch with wings spread wide as a flat-topped anvil thundercloud, copper crest blades, bolt tail, no collar.",
+"New prompt: big stylised storm bird whose spread wings are anvil thunderclouds, low wide stance, copper crest blades, bolt tail, big glossy eyes with a confident look."
+],
+"veto": []
+}
+]

@@ -4347,3 +4347,13 @@ READY ext/training-area-1108 7ad4602ac (PR #33; owner playtest 11-08 items 25+26
 DECISIONS (proposed, job 20261109-023110-a4): the name "Arena" is reserved for the future 4v4 team mode; the practice space is the "Training Area" in all player-facing text. Alternative not taken: keep "Arena" for practice and name the 4v4 mode something else.
 
 READY ext/farm-tut-tools-cam-rebased b6db84431 (job 20261109-051512-a1 on w2). Supersedes ext/farm-tut-tools-cam: same commits; origin/main d255acbee merged as already up to date, no conflict in content/rules/farm_tutorial.json. Checks 0 failures: --hob-check, --farm-tutorial-check, --farmbuild, --build-hold-check, --check; health --strict OK. Not merged.
+## 01:00 ET 11-09 — art session: round 29 results, group s10 (portraits)
+Fresh portraits from the sheets worked where edits failed: 2 pass (Kestrike, Knotwyrm), 6 owner review. Stuck after 3+ rounds and now concept-first with no parent image: Chimelop, Chandelapi, Bucketmander, Tootle.
+ART echolop 8.37 briefs/boki-art/batch/out/portrait_echolop_pe_w29_2.jpg kind=portrait status=owner-review panel=8.4/8.3/8.4
+ART glintmole 8.3 briefs/boki-art/batch/out/portrait_glintmole_pe_w29_3.jpg kind=portrait status=owner-review panel=8.3/8.3/8.3
+ART jarmit 8.57 briefs/boki-art/batch/out/portrait_jarmit_pe_w29_1.jpg kind=portrait status=owner-review panel=8.6/8.5/8.6
+ART kestrike 8.5 briefs/boki-art/portraits/light/Kestrike.jpg kind=portrait panel=8.6/8.4/8.5
+ART knotwyrm 8.53 briefs/boki-art/portraits/light/Knotwyrm.jpg kind=portrait panel=8.6/8.6/8.4
+ART mossgrade 8.43 briefs/boki-art/batch/out/portrait_mossgrade_pe_w29_1.jpg kind=portrait status=owner-review panel=8.5/8.6/8.2
+ART rimeshrew 8.47 briefs/boki-art/batch/out/portrait_rimeshrew_pe_w29_2.jpg kind=portrait status=owner-review panel=8.5/8.4/8.5
+ART soakybara 8.3 briefs/boki-art/batch/out/portrait_soakybara_p2_w29_3.jpg kind=portrait status=owner-review panel=8.1/8.3/8.5
