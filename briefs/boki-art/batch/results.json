@@ -46525,5 +46525,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_vespox_p88_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_vespox_p88",
+    "name": "Vespox (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_vespox_p88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cisternmander_p88",
+    "name": "Cisternmander (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_cisternmander_p88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bastionpet_r88",
+    "name": "Bastionpet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bastionpet_r88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vespox_p88",
+    "name": "Vespox (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_vespox_p88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bastionpet_r88",
+    "name": "Bastionpet (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_bastionpet_r88_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bastionpet_r88",
+    "name": "Bastionpet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bastionpet_r88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cisternmander_p88",
+    "name": "Cisternmander (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_cisternmander_p88_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bladypus_gap",
+    "name": "Bladypus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bladypus_gap_2.jpg",
+    "ok": true
   }
 ]
