@@ -53,7 +53,7 @@ static func _armory(body: Node3D) -> void:
 	for i in picks.size():
 		var gun := Node3D.new(); gun.position = Vector3(-0.32 + i * 0.32, 0.6, 0.05); gun.rotation = Vector3(PI / 2, 0, 0); gun.scale = Vector3.ONE * 1.1
 		rack.add_child(gun)
-		Models.gun_parts(gun, String(picks[i][0]), Models.toon(Color("4a4d5c")), Models.toon(Color("2b2a33")), Models.toon(Data.RARITY[int(picks[i][1])]["color"], true, 0.5))
+		Models.gun_parts(gun, String(picks[i][0]), Models.toon(Color("4a4d5c")), Models.toon(Color("2b2a33")), Models.toon(Palette.rarity(int(picks[i][1])), true, 0.5))
 	# a torch and barrels from the dungeon pack
 	var torch := _prop("dungeon/torch_lit", 0.9)
 	if torch:

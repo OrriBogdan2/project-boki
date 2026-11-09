@@ -196,7 +196,7 @@ func _stat_tile(icon: String, what: String, value: float, fmt: String, delay: fl
 	if fmt == "armor":
 		# the armor tier you finished on, in its own colour
 		var tier: Array = Hunter.ARMOR_TIERS[clampi(int(value), 0, Hunter.ARMOR_TIERS.size() - 1)]
-		num.text = String(tier[0]); num.add_theme_color_override("font_color", tier[1])
+		num.text = String(tier[0]); num.add_theme_color_override("font_color", Palette.rarity(int(value)))
 		return col
 	var show := func(x: float) -> void:
 		num.text = ("%d:%02d" % [int(x) / 60, int(x) % 60]) if fmt == "time" else str(int(round(x)))

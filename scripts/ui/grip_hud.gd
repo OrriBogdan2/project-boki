@@ -27,7 +27,7 @@ static func draw(hud, p: Hunter, wr: Rect2) -> Rect2:
 	return Rect2(Vector2(x0, y), Vector2(3.0 * BOX + 2.0 * GAP, BOX))
 
 static func rar_col(g: Dictionary) -> Color:
-	return Data.RARITY[clampi(int(g.get("rar", 0)), 0, Data.RARITY.size() - 1)]["color"]
+	return Palette.rarity(int(g.get("rar", 0)))
 
 static func _glove(hud, p: Hunter, i: int, r: Rect2) -> void:
 	var g := Gloves.worn(p, i)
@@ -84,7 +84,7 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 		hud.c.draw_arc(ctr, BOX * 0.5 + 5.0, 0, TAU, 36, Color(1.0, 0.85, 0.3, 0.9 * flash), 3.0, true)
 	if down:
 		hud.c.draw_style_box(HudStyle.box(Color(0.2, 0.2, 0.22, 0.55), HudStyle.SLOT_RAD, Color(0, 0, 0, 0), 0), r)
-		HudStyle.ctext(hud.c, ctr + Vector2(0, 5), "DOWN", 12, HudStyle.HURT)
+		HudStyle.ctext(hud.c, ctr + Vector2(0, 5), "DOWN", 12, Palette.col(Palette.HURT))
 	HudStyle.key_pill(hud.c, Vector2(ctr.x, r.end.y), key, HudStyle.MUTED if down else tc)
 
 ## The hover text for a glove box (hud ids "gear0", "gear1").

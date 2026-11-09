@@ -187,22 +187,23 @@ static func _draw_state(c: CanvasItem, r: Rect2, rad: int, state: String, hurt: 
 		low = 0.6 + 0.4 * pulse
 	if hurt > 0.02:
 		var a := snappedf(clampf(hurt, 0.0, 1.0), 0.125)
-		c.draw_style_box(HudStyle.box(Color(HudStyle.HURT, 0.4 * a), rad, Color(1, 0.92, 0.85, 0.8 * a), 2), r)
+		var tint := Color(Palette.col(Palette.HURT), 0.4 * a)
+		c.draw_style_box(HudStyle.box(tint, rad, Color(1, 0.92, 0.85, 0.8 * a), 2), r)
 	if low > 0.02:
 		var a := snappedf(clampf(low * (0.55 + 0.45 * pulse), 0.0, 1.0), 0.125)
-		c.draw_style_box(HudStyle.box(Color(0.6, 0.02, 0.0, 0.12 * a), rad, Color(HudStyle.FOE, a), 3), r)
+		c.draw_style_box(HudStyle.box(Color(0.6, 0.02, 0.0, 0.12 * a), rad, Color(Palette.col(Palette.FOE), a), 3), r)
 	if state == "dead":
 		var k := r.size.x * 0.22
 		var cross := [[r.position + Vector2(k, k), r.end - Vector2(k, k)],
 			[Vector2(r.end.x - k, r.position.y + k), Vector2(r.position.x + k, r.end.y - k)]]
 		for pair in cross:
 			c.draw_line(pair[0], pair[1], Color(0, 0, 0, 0.7), 9.0, true)
-			c.draw_line(pair[0], pair[1], HudStyle.FOE, 5.0, true)
+			c.draw_line(pair[0], pair[1], Palette.col(Palette.FOE), 5.0, true)
 	elif state == "out":
 		c.draw_style_box(HudStyle.box(Color(0.05, 0.15, 0.12, 0.5), rad, Color(0, 0, 0, 0), 0), r)
 		var tick := PackedVector2Array([r.position + r.size * Vector2(0.25, 0.52),
 			r.position + r.size * Vector2(0.43, 0.7), r.position + r.size * Vector2(0.76, 0.3)])
-		c.draw_polyline(tick, HudStyle.REVIVE, 5.0, true)
+		c.draw_polyline(tick, Palette.col(Palette.GOOD), 5.0, true)
 
 static func _grey_pixels(img: Image) -> void:
 	for y in img.get_height():

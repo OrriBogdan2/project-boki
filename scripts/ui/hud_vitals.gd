@@ -34,7 +34,7 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 	H.armor_lerp = move_toward(H.armor_lerp, af, dt * (0.5 if H.armor_lerp > af else 4.0))
 	H.hover_spots.append([Rect2(Vector2(x0, y0 - 20), Vector2(w, 52)), "vitals"])
 	# the numbers: health big, max small; armour and its tier on the right
-	var hp_col := HudStyle.hp_fill(HudStyle.SELF, frac, H.m.time)
+	var hp_col := HudStyle.hp_fill(Palette.col(Palette.YOU), frac, H.m.time)
 	var hp_txt := str(int(ceil(p.hp)))
 	HudStyle.text(c, Vector2(x0, y0 + 1), hp_txt, 26, HudStyle.INK if frac >= 0.3 else hp_col)
 	var hw := HudStyle.BIG.get_string_size(hp_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 26).x
@@ -69,7 +69,7 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 			c.draw_rect(Rect2(ar.position, Vector2(ar.size.x * af, ar.size.y)), p.armor_col())
 	# progress to the next armour tier: a hairline under the armour strip in the next tier's colour
 	if p.armor_tier < Hunter.ARMOR_TIERS.size() - 1:
-		var nxt: Color = Hunter.ARMOR_TIERS[p.armor_tier + 1][1]
+		var nxt: Color = Palette.rarity(p.armor_tier + 1)
 		c.draw_rect(Rect2(Vector2(x0, ar.end.y + 2), Vector2(w, 1)), Color(0, 0, 0, 0.35))
 		c.draw_rect(Rect2(Vector2(x0, ar.end.y + 2), Vector2(w * p.armor_frac(), 1)), Color(nxt, 0.9))
 	if p.ak and p.ak.has_meter():
@@ -82,11 +82,11 @@ static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
 	if not (grass or p.crouch):
 		return
 	var txt := "SPOTTED"
-	var fg: Color = HudStyle.HURT
+	var fg: Color = Palette.col(Palette.HURT)
 	var bg := Color(0.25, 0.06, 0.05, 0.85)
 	if p.reveal_t <= 0.0:
 		txt = "HIDDEN" if grass else "CROUCHED"
-		fg = Color("8fe0a0") if grass else Color("c9d2e0")
+		fg = Palette.col(Palette.GOOD) if grass else Color("c9d2e0")
 		bg = Color(0.05, 0.12, 0.06, 0.85) if grass else Color(0.08, 0.09, 0.12, 0.85)
 	var tw := HudStyle.BIG.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 	var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, sz.y - 104), Vector2(tw + 24, 20))

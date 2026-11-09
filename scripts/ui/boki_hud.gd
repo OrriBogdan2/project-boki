@@ -238,7 +238,7 @@ static func downed_label(H, k: Kin, sp: Vector2) -> void:
 		# the rescue: a ring closing round the Boki (a drop resets it)
 		var rc := sp + Vector2(0, 22)
 		H.c.draw_arc(rc, 20.0, 0.0, TAU, 40, Color(0, 0, 0, 0.45), 5.0, true)
-		H.c.draw_arc(rc, 20.0, -PI / 2, -PI / 2 + TAU * KinDowned.scoop_k(k), 40, H.GOOD if k.rescue_on else H.GOOD.darkened(0.3), 4.0, true)
+		H.c.draw_arc(rc, 20.0, -PI / 2, -PI / 2 + TAU * KinDowned.scoop_k(k), 40, H.good() if k.rescue_on else H.good().darkened(0.3), 4.0, true)
 
 ## The edge-of-screen arrow toward your downed Boki when it is off screen.
 static func downed_arrow(H, k: Kin, sz: Vector2) -> void:

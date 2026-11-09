@@ -2,7 +2,9 @@ extends RefCounted
 ## --clarity-shots --shots-dir=<dir>: the combat-clarity picture (run under xvfb with a renderer). A 2v2 at
 ## match zoom: you, a downed teammate whose Boki is beside them, two rivals and every Boki out. Writes
 ## <dir>/clarity_2v2.png (the whole screen) and <dir>/clarity_2v2_crop.png (the fight). Only uses the match's
-## own setup calls, so the same scene can be taken on an older build for a before/after.
+## own setup calls, so the same scene can be taken on an older build for a before/after. Then the same scene once
+## per colour filter (Palette) with a rival stunned, another burning and you on an Epic armour tier:
+## <dir>/clarity_<filter>.png and its _crop.
 
 const DT := 1.0 / 60.0
 const RUN_S := 1.6         # s the scene plays before the picture (the downed teammate's Boki reacts)
@@ -56,13 +58,27 @@ func run(main: Node) -> void:
 		await main.get_tree().process_frame
 		t += DT
 	await main.get_tree().process_frame
+	await _shoot(main, dir, "2v2", base)
+	var foes: Array = m.hunters.filter(func(h): return h.team != P.team)
+	(foes[0] as Hunter).stun_t = 30.0
+	(foes[1] as Hunter).burn_t = 30.0
+	P.armor_tier = 3
+	P.armor = P.max_armor
+	for f in Palette.MODES:
+		Settings.v["cvd_filter"] = f
+		await _shoot(main, dir, f, base)
+	print("CLARITYSHOTS ", dir)
+	main.get_tree().quit(0)
+
+## The whole screen and the crop around the fight, as clarity_<tag>.png and clarity_<tag>_crop.png.
+func _shoot(main: Node, dir: String, tag: String, base: Vector3) -> void:
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
 	var img := main.get_viewport().get_texture().get_image()
-	img.save_png(dir.path_join("clarity_2v2.png"))
+	img.save_png(dir.path_join("clarity_%s.png" % tag))
 	var vp := main.get_viewport()
 	var c := vp.get_camera_3d().unproject_position(base + Vector3(0, 0.5, 1.8)) * Vector2(img.get_size()) \
 		/ vp.get_visible_rect().size
 	var box := Rect2i(Vector2i(c) - Vector2i(520, 330), Vector2i(1040, 660))
 	var crop := img.get_region(box.intersection(Rect2i(Vector2i.ZERO, img.get_size())))
-	crop.save_png(dir.path_join("clarity_2v2_crop.png"))
-	print("CLARITYSHOTS ", dir)
-	main.get_tree().quit(0)
+	crop.save_png(dir.path_join("clarity_%s_crop.png" % tag))

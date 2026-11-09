@@ -12,7 +12,7 @@ static func drop(slot: int, col: Color, rar: int) -> Node3D:
 	var spin: Node3D = root.get_node("Spin")
 	for ch in spin.get_children():
 		ch.queue_free()
-	var rc: Color = Data.RARITY[clampi(rar, 0, Data.RARITY.size() - 1)]["color"]
+	var rc: Color = Palette.rarity(rar)
 	var body := Models.toon(col, true, 0.55)
 	var trim := Models.toon(rc, true, 0.8)
 	match slot:

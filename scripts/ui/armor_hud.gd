@@ -38,7 +38,7 @@ static func badge(hud, pr: Rect2, p: Hunter) -> void:
 static func _next_col(p: Hunter) -> Color:
 	if p.armor_tier >= Hunter.ARMOR_TIERS.size() - 1:
 		return p.armor_col()
-	return Hunter.ARMOR_TIERS[p.armor_tier + 1][1]
+	return Palette.rarity(p.armor_tier + 1)
 
 static func tip(p: Hunter) -> Array:
 	var out: Array = []
@@ -51,6 +51,6 @@ static func tip(p: Hunter) -> Array:
 		out.append(["Top level: %d armor." % int(p.max_armor), HudStyle.MUTED, 13])
 	else:
 		var nx: Array = Hunter.ARMOR_TIERS[p.armor_tier + 1]
-		out.append(["Next: %s  ·  %d of %d  ·  +%d%% plates" % [nx[0], int(p.armor_xp), int(nx[2]),
-				int(Hunter.ARMOR_TIER_BONUS * 100.0)], nx[1], 13])
+		out.append(["Next: %s  ·  %d of %d  ·  +%d%% plates" % [nx[0], int(p.armor_xp), int(nx[1]),
+				int(Hunter.ARMOR_TIER_BONUS * 100.0)], Palette.rarity(p.armor_tier + 1), 13])
 	return out

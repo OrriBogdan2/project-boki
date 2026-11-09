@@ -12,7 +12,6 @@ const PORTRAIT_PX := 30.0        # the teammate's face over their box
 const HEAD_RING_PX := 34.0       # the progress ring round the reviver (clear of their health plate)
 const HEAD_RING_UP := 0.9        # metres up: round the reviver's body
 const USED_COL := Color(0.6, 0.66, 0.64, 0.6)
-const GOOD := Color("8fe0a0")     # the Hud's revive green
 
 # ------------------------------------------------------------------ the world
 ## Labels over boxes and beacons, and the marker for every lit beacon.
@@ -54,12 +53,13 @@ static func _box_label(hud, b: Dictionary, bp: Vector2) -> void:
 ## Box revives in progress: a ring round the box and one round the reviver, with who and how far.
 static func revive_rings(hud) -> void:
 	var m: Match = hud.m
+	var good := Palette.col(Palette.GOOD)
 	for b in m.boxes:
 		if m.time - float(b.get("rev_at", -9.0)) > 0.15 or m.cam.is_position_behind(b["pos"]):
 			continue
 		var prog := clampf(float(b.get("rev_prog", 0.0)), 0.0, 1.0)
-		hud._ground_ring(b["pos"], 1.6, Color(GOOD, 0.3), 2.0)
-		hud._ground_ring(b["pos"], 1.6, Color(GOOD, 0.95), 5.0, prog)
+		hud._ground_ring(b["pos"], 1.6, Color(good, 0.3), 2.0)
+		hud._ground_ring(b["pos"], 1.6, Color(good, 0.95), 5.0, prog)
 		var o: Hunter = b["owner"]
 		var by = b.get("rev_by")
 		var who := "Someone"
@@ -67,7 +67,7 @@ static func revive_rings(hud) -> void:
 			who = (by as Hunter).pname
 			_head_ring(hud, by as Hunter, prog)
 		var bp := m.cam.unproject_position(b["pos"] + Vector3(0, 2.0, 0))
-		hud._ctext(bp, "%s bringing back %s  %d%%" % [who, o.pname, int(prog * 100.0)], 12, GOOD, hud.big)
+		hud._ctext(bp, "%s bringing back %s  %d%%" % [who, o.pname, int(prog * 100.0)], 12, good, hud.big)
 
 static func _head_ring(hud, h: Hunter, prog: float) -> void:
 	var m: Match = hud.m
@@ -76,8 +76,8 @@ static func _head_ring(hud, h: Hunter, prog: float) -> void:
 	var at := m.cam.unproject_position(h.pos + Vector3(0, HEAD_RING_UP, 0))
 	var c: Control = hud.c
 	c.draw_arc(at, HEAD_RING_PX + 2.5, 0, TAU, 40, Color(0, 0, 0, 0.5), 3.0, true)
-	c.draw_arc(at, HEAD_RING_PX, 0, TAU, 40, Color(GOOD, 0.3), 3.0, true)
-	c.draw_arc(at, HEAD_RING_PX, -PI * 0.5, -PI * 0.5 + TAU * prog, 40, GOOD, 4.0, true)
+	c.draw_arc(at, HEAD_RING_PX, 0, TAU, 40, Color(Palette.col(Palette.GOOD), 0.3), 3.0, true)
+	c.draw_arc(at, HEAD_RING_PX, -PI * 0.5, -PI * 0.5 + TAU * prog, 40, Palette.col(Palette.GOOD), 4.0, true)
 
 # ------------------------------------------------------------------ the maps
 ## Boxes and beacons on the minimap (inner: its rect; to_map: world -> map point; on_map: inside it).

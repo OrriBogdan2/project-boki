@@ -1739,7 +1739,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 ## A piece of gear lying on the ground: a glowing gem-like token with a light beam.
 static func gear_drop(col: Color, rar: int) -> Node3D:
 	var root := Node3D.new()
-	var rc: Color = Data.RARITY[clampi(rar, 0, Data.RARITY.size() - 1)]["color"]
+	var rc: Color = Palette.rarity(rar)
 	var spin := Node3D.new(); spin.name = "Spin"; spin.position = Vector3(0, 0.7, 0); root.add_child(spin)
 	var core := PrismMesh.new(); core.size = Vector3(0.38, 0.38, 0.38)
 	part(spin, core, toon(col, true, 0.6), Vector3(0, 0.1, 0))

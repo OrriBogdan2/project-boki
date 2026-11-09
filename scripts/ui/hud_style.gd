@@ -14,22 +14,15 @@ const INK := Color("f3eee2")              # main text
 const MUTED := Color("a9b0bf")            # secondary text, empty things
 const SHADE := Color(0.03, 0.03, 0.05, 0.86)    # frame backing behind bars and slots
 const SHADE_EDGE := Color(0.0, 0.0, 0.02, 0.95)  # segment gaps and outlines
-const SELF := Color("9be36e")             # your own health (leaf green)
-const ALLY := Color("63c7ff")             # your squad's health (sky blue)
-const FOE := Color("ff5a4a")              # rivals' health (coral red)
-const LOW := Color("ffa13c")              # health shifts toward this as it runs low (yours and allies')
 const DOWNED := Color("ffb36a")           # a downed hunter's bleed-out bar
 const STOMPED := Color("ff3a2a")          # ... while someone is finishing them
-const REVIVE := Color("8fe0a0")           # revive progress
 const ARMOR := Color("9fdcff")            # armour when the hunter has no tier colour
 const SHIELD := Color("eef8ff")           # shields: a pale fill past the end of health
 const CHIP := Color("fff1dc")             # the chunk just lost, before it drains
-const HEAL := Color("8ff0a0")             # healing numbers
 const HIT := Color("fff4d6")              # your hits
 const HIT_ARMOR := Color("7ac8ff")        # your hits that landed on armour
 const CRIT := Color("ffd23f")             # critical hits
 const CRIT_ARMOR := Color("b0e4ff")
-const HURT := Color("ff6a5a")             # damage you take
 const HURT_KIN := Color("ffa08a")         # damage your Boki takes
 const GOLD := Color("ffd27a")             # levels, points to spend
 const COOLING := Color("ff8f6b")          # a slot that isn't ready: its frame and short countdowns
@@ -58,16 +51,16 @@ const KEY_FS := 12             # key label size
 ## A hunter's health colour as seen by `viewer`: you, your squad, or a rival.
 static func role_col(viewer: Hunter, h: Hunter) -> Color:
 	if viewer == null or h == viewer:
-		return SELF
-	return ALLY if h.team == viewer.team else FOE
+		return Palette.col(Palette.YOU)
+	return Palette.col(Palette.ALLY if h.team == viewer.team else Palette.FOE)
 
 ## Health fill for a role at a fraction of max: yours and allies' warm toward LOW under half, and
 ## pulse under a third; rivals stay red (a low rival pulses brighter instead).
 static func hp_fill(role: Color, frac: float, time: float) -> Color:
 	var pulse := 0.5 + 0.5 * sin(time * 9.0)
-	if role == FOE:
+	if role == Palette.col(Palette.FOE):
 		return role.lerp(Color.WHITE, 0.25 * pulse) if frac < 0.3 else role
-	var col := role.lerp(LOW, clampf((0.55 - frac) / 0.3, 0.0, 1.0))
+	var col := role.lerp(Palette.col(Palette.LOW), clampf((0.55 - frac) / 0.3, 0.0, 1.0))
 	return col.lerp(Color.WHITE, 0.2 * pulse) if frac < 0.3 else col
 
 ## Health per segment for a pool this big (HP_PER_SEG, doubled until the count fits MAX_SEGS).
@@ -163,7 +156,7 @@ static func ctext(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Col
 
 ## Floating damage number colour: by who was hit and how (Match picks, Fx draws).
 static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool) -> Color:
-	if on_you: return HURT
+	if on_you: return Palette.col(Palette.HURT)
 	if on_your_kin: return HURT_KIN
 	if crit: return CRIT_ARMOR if armor_hit else CRIT
 	return HIT_ARMOR if armor_hit else HIT

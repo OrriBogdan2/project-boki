@@ -35,8 +35,9 @@ func run(main: Node) -> void:
 	ok(ally != null and foes.size() == 2, "a 2v2: one teammate, two rivals")
 	_run(m, 0.2)
 	# ---------------------------------------------------------------- 1. the colour rule
-	ok(SideColor.of(m, P) == SideColor.YOU and SideColor.of(m, ally) == SideColor.ALLY, "you and your ally")
-	ok(foes.all(func(f): return SideColor.of(m, f) == SideColor.FOE), "both rivals are the foe colour")
+	ok(SideColor.of(m, P) == Palette.col(Palette.YOU), "you")
+	ok(SideColor.of(m, ally) == Palette.col(Palette.ALLY), "your ally")
+	ok(foes.all(func(f): return SideColor.of(m, f) == Palette.col(Palette.FOE)), "both rivals are the foe colour")
 	ok(SideColor.of_team(P.team, (foes[0] as Hunter).team) != SideColor.of_team(P.team, P.team), "foe != ally")
 	for h in m.hunters:
 		var want := SideColor.of(m, h)

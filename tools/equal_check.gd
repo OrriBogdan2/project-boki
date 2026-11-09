@@ -475,7 +475,7 @@ func _gloves() -> void:
 	m._net_apply(R, snap)
 	var row := GripOverhead.row(R)
 	ok(String(row[0]["id"]) == "blink" and String(row[1]["id"]) == "barrier"
-			and row[0]["col"] == Data.RARITY[4]["color"],
+			and row[0]["col"] == Palette.rarity(4),
 			"a remote hunter's two gloves come over the net with their rarity (%s, %s)" % [row[0]["id"], row[1]["id"]])
 	ok(not row[0]["dim"] and row[1]["dim"] and R.ult >= 1.0,
 			"the glove on cooldown is dimmed, the ready one is not; the full bond comes too")

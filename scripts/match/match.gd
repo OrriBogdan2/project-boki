@@ -1649,7 +1649,7 @@ func _take_gear(h: Hunter, wp: Dictionary, from_net := false) -> void:
 	if not old.is_empty():
 		var ba := randf() * TAU
 		spawn_gear(String(old["id"]), int(old["rar"]), Vector3(h.pos.x + cos(ba) * 0.9, h.ground(), h.pos.z + sin(ba) * 0.9))
-	var col: Color = Data.RARITY[clampi(int(wp["rar"]), 0, Data.RARITY.size() - 1)]["color"]
+	var col: Color = Palette.rarity(int(wp["rar"]))
 	sfx("pickup", h.pos, 0.0, 0.9)
 	fx.ring(h.pos, 1.4, col, 0.35)
 	if h == player and hud:

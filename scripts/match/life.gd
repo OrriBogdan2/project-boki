@@ -295,7 +295,7 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 		var up := cur.is_empty() or Loot.value(Loot.gear(String(g["id"]), int(g["rar"]))) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"])))
 		out.append({"key": "gear", "i": i, "name": "%s%s" % [(String(r["name"]) + " ") if int(g["rar"]) > 1 else "", gd.get("name", g["id"])],
 			"sub": Gear.WORN_NAMES[slot] + "  ·  " + Gear.stat_text(String(g["id"]), int(g["rar"])),
-			"icon": Gear.icon_of(String(g["id"])), "col": r["color"], "upgrade": up})
+			"icon": Gear.icon_of(String(g["id"])), "col": Palette.rarity(int(g["rar"])), "upgrade": up})
 	var pack_row := Backpacks.box_row(h, b)
 	if not pack_row.is_empty():
 		out.append(pack_row)

@@ -51,7 +51,7 @@ static var semi: FontVariation       # Rubik at a heavier weight, for buttons an
 static var caps: FontVariation       # spaced-out bold, for section headers
 
 static func rarity_col(r: int) -> Color:
-	return Data.RARITY[clampi(r, 0, Data.RARITY.size() - 1)]["color"]
+	return Palette.rarity(r)
 
 ## The menus' Theme (built once by UiTheme).
 static func theme() -> Theme:

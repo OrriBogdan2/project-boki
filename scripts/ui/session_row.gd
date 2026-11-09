@@ -31,7 +31,7 @@ static func draw(hud, sr: Rect2) -> void:
 			col = amber.lerp(hud.MUTED, 0.45)
 		else:
 			line = "NO MORE DROPS  ·  GET OUT BY 30:00"
-			col = hud.BAD if Rolling.SESSION - st < 120.0 else hud.MUTED
+			col = hud.bad() if Rolling.SESSION - st < 120.0 else hud.MUTED
 	hud._text(sr.position + Vector2(10, 35), line, 11, col, big)
 	if m.player and m.player.has_meta("bounty") and not m.player.out:
 		var bt := "BOUNTY ON YOU"

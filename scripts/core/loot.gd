@@ -84,7 +84,7 @@ static func name_of(it: Dictionary) -> String:
 static func col_of(it: Dictionary) -> Color:
 	if String(it.get("t", "")) == "val":
 		return VALUABLES.get(String(it.get("id", "")), {}).get("col", Color("ffd36a"))
-	return Data.RARITY[rar_of(it)]["color"]
+	return Palette.rarity(rar_of(it))
 
 static func icon_of(it: Dictionary) -> String:
 	if String(it.get("t", "")) == "val":

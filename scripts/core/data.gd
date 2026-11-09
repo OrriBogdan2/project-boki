@@ -40,12 +40,13 @@ const WEAPONS := {
 ## Rarity tiers, Common to Legendary: the names and colours gear is sold, shown and sorted by
 ## (Gear.mult has the numbers; GearDrops has the odds). Weapons have no rarity: each hunter carries
 ## one fixed signature weapon and grows it with upgrades (WeaponUps).
+## Rarity tiers' names; their colours are Palette.RARITY.
 const RARITY := [
-	{"name": "Common", "color": Color("d6d2c8")},
-	{"name": "Fine", "color": Color("8fe0a0")},
-	{"name": "Rare", "color": Color("6ab8ff")},
-	{"name": "Epic", "color": Color("c08aff")},
-	{"name": "Legendary", "color": Color("ffb64a")},
+	{"name": "Common"},
+	{"name": "Fine"},
+	{"name": "Rare"},
+	{"name": "Epic"},
+	{"name": "Legendary"},
 ]
 
 ## Every weapon: the ones in content/weapons (the source of truth), plus any only defined here.

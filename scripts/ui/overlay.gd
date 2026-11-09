@@ -412,6 +412,11 @@ func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")
 	_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05, "Menus and the HUD, on top of fitting your window")
 	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
+	var filters: Array = []
+	for i in Palette.MODES.size():
+		filters.append([Palette.MODES[i], Palette.MODE_NAMES[i]])
+	var hint := "Allies, rivals, health, rarity and status icons in colours that stay apart. Abilities keep theirs"
+	_choice(v, "Colour filter", "cvd_filter", filters, Callable(), hint)
 	_group(v, "Comfort")
 	_slider(v, "Screen shake", "screen_shake", 0.0, 1.0, 0.05, "Only big hits on you shake the view; 0 turns it off")
 	_toggle(v, "Fewer flashes", "reduce_flashes", "Softer full-screen flashes when you're hit or level up")

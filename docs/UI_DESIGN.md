@@ -119,6 +119,11 @@ script outside the style module builds its own `StyleBoxFlat`.
 `rarity_col(r)`. The in-match HUD's `HudStyle` uses the same INK and MUTED and the same two fonts. Fonts: `UI.big` (Lilita
 One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
 
+### Colour filters (`scripts/ui/palette.gd`, class `Palette`)
+Colours that carry a meaning (you, ally, rival, low health, good news, damage, the five rarity tiers, the CC icons) are **roles** in `Palette`, each with four colours: Off (the game's look), Deuteranopia, Protanopia, Tritanopia (Settings > Accessibility > Colour filter, `cvd_filter`). Read them with `Palette.col(Palette.FOE)` / `Palette.rarity(tier)`; `HudStyle.role_col`, `SideColor` and `UI.rarity_col` already do. Never cache one in a `const`. Hunters' ability colours are never filtered. `--palette-check` simulates each filter (Machado 2009) and asserts the minimum contrast between you/ally/rival, good/damage, rarity tiers and CC icons; change a colour and it tells you if a pair collapsed. `--clarity-shots` takes the HUD once per filter.
+
+Still hard-coded (not yet roles; mostly warnings with a word or icon beside them): `hud.gd` has ~100 literals (reds `ffb0a0`, `ff9a8a`, `ff5a3a`, `ff2a1a`, `ff8a6a` for boss and enrage states, teal `8fe3c8` for extraction, `5fb6ff` for "ours"), `hud_vitals.gd` (`ff7a8a` hearts, `c9d2e0`), `capture_hud.gd` (`ffb08a`), `boki_hud.gd` (`ff7a6a`), `hud_style.gd` (`DOWNED`, `STOMPED`, `HURT_KIN`, `COOLING`, `CRIT`), `full_map.gd` (`BAD`), the menu tokens `UI.GOOD`/`UI.BAD`, and `Data.TEAM_COLORS` (the model accent and ring of each of the 20 teams; the in-fight rule is `SideColor`).
+
 ### Text
 - `title(text, size=34, col=INK)` - Lilita One, one line.
 - `label(text, size=16, col=INK, font=null)` - wraps only past 48 characters.

@@ -99,12 +99,12 @@ func _watch(h: Hunter, dt: float) -> Dictionary:
 ## What's happening to someone, as [icon, colour, word, seconds left (or -1)], worst first.
 static func statuses(e: Ent) -> Array:
 	var out: Array = []
-	if e.stun_t > 0.0: out.append(["concussion", Color("fff27a"), "STUNNED", -1.0])
-	if e.root_t > 0.0: out.append(["binding", Color("8fe0a0"), "ROOTED", -1.0])
-	if e.slow_t > 0.0: out.append(["snare", Color("9ae8ff"), "SLOWED", -1.0])
-	if e.burn_t > 0.0: out.append(["fireball", Color("ff9a5a"), "BURNING", -1.0])
+	if e.stun_t > 0.0: out.append(["concussion", Palette.col(Palette.STUN), "STUNNED", -1.0])
+	if e.root_t > 0.0: out.append(["binding", Palette.col(Palette.ROOT), "ROOTED", -1.0])
+	if e.slow_t > 0.0: out.append(["snare", Palette.col(Palette.SLOW), "SLOWED", -1.0])
+	if e.burn_t > 0.0: out.append(["fireball", Palette.col(Palette.BURN), "BURNING", -1.0])
 	var hunter := e as Hunter
-	if hunter and hunter.weak_t > 0.0: out.append(["swap", Color("ffb36a"), "WEAKENED", hunter.weak_t])
+	if hunter and hunter.weak_t > 0.0: out.append(["swap", Palette.col(Palette.WEAK), "WEAKENED", hunter.weak_t])
 	if hunter and hunter.shield > 0.0: out.append(["brightshield", Color("d8ecff"), "", -1.0])
 	if e.guard_t > 0.0: out.append(["anchor", Color("f2e6cf"), "", -1.0])
 	return out
@@ -151,7 +151,7 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	# the name, or what's being done to them (stunned, rooted ...) in its colour
 	var sts := statuses(h)
 	var word := ""
-	var word_col := Color("9ae8ff")
+	var word_col := Palette.col(Palette.SLOW)
 	for x in sts:
 		if String(x[2]) != "":
 			word = String(x[2])
@@ -190,14 +190,14 @@ func draw_self(H, sp: Vector2, p: Hunter) -> void:
 	var frac := clampf(p.hp / maxf(1.0, p.max_hp), 0.0, 1.0)
 	var ch := chip_of(p, frac, dt)
 	var fl := flash_of(p)
-	HudStyle.plate_frame(c, frame, Color(HudStyle.SELF, 0.5), fl)
+	HudStyle.plate_frame(c, frame, Color(Palette.col(Palette.YOU), 0.5), fl)
 	var hr := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, HudStyle.PLATE_HP_H))
-	var fill := HudStyle.hp_fill(HudStyle.SELF, frac, H.m.time)
+	var fill := HudStyle.hp_fill(Palette.col(Palette.YOU), frac, H.m.time)
 	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, fill, ch, shield_frac(p), fl * 0.6)
 	var has_ar := _armor(c, p, Rect2(Vector2(x0, hr.end.y + 1.0), Vector2(w, HudStyle.PLATE_AR_H)), s)
 	HudStyle.text(c, Vector2(frame.end.x + 5.0, hr.end.y + 1.0), str(int(ceil(p.hp))), 13, Color(1, 1, 1, 0.92))
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
-	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), p.lvl, HudStyle.SELF, pop)
+	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), p.lvl, Palette.col(Palette.YOU), pop)
 	var sts := statuses(p)
 	var word := ""
 	if not sts.is_empty():
@@ -274,7 +274,7 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 	HudStyle.seg_bar(c, br, h.down_hp, dmax, bcol, 0.0, 0.0, 0.0, HudStyle.HP_PER_SEG)
 	if h.revive > 0.0:
 		var rev_w := w * clampf(h.revive, 0.0, 1.0)
-		c.draw_rect(Rect2(br.position + Vector2(0, br.size.y - 4.0), Vector2(rev_w, 4.0)), HudStyle.REVIVE)
+		c.draw_rect(Rect2(br.position + Vector2(0, br.size.y - 4.0), Vector2(rev_w, 4.0)), Palette.col(Palette.GOOD))
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop)
 	var name_col := Color(role.lerp(Color.WHITE, 0.4), 0.9)
@@ -287,7 +287,7 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 		line = "STOMPED  ·  %s" % (sts[0] as Hunter).pname if not sts.is_empty() else "STOMPED"
 	elif h.revive > 0.0 and not revs.is_empty():
 		line = "%s reviving  %d%%" % [(revs[0] as Hunter).pname, int(h.revive * 100.0)]
-		lcol = HudStyle.REVIVE
+		lcol = Palette.col(Palette.GOOD)
 	HudStyle.ctext(c, Vector2(sp.x, frame.end.y + 13.0), line, 11, lcol, 3)
 	_burst(c, sp + Vector2(0, -26), float(s["burst"]), bcol)
 	shown[h.nid] = {"segs": HudStyle.seg_count(dmax), "armor": false, "shield": false, "downed": true,
