@@ -55,6 +55,15 @@ static func box_color(b: Dictionary) -> Color:
 		if box_value(b) >= int(t[0]): col = t[1]
 	return col
 
+## The rarity tier of the best piece of gear or valuable in a box (what its glow shows).
+static func box_rarity(b: Dictionary) -> int:
+	var best := 0
+	for g in b.get("gear", []):
+		best = maxi(best, int(g["rar"]))
+	for it in b.get("pack", []):
+		best = maxi(best, Loot.rar_of(it))
+	return best
+
 ## Is anyone on this team still in the fight (standing or a wisp)?
 static func team_alive(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted)
@@ -222,7 +231,7 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 		# nowhere to put it: the abyss keeps it
 		return b
 	trace(m, "box %s value %d at %s" % [h.pname, box_value(b), at.snapped(Vector3.ONE)])
-	var n := Models.deathbox(box_color(b))
+	var n := Models.deathbox(box_color(b), box_rarity(b))
 	n.position = at
 	m.add_child(n)
 	b["node"] = n
