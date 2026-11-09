@@ -13,6 +13,7 @@ const SLOT_ACTION := {"sec": "secondary", "dash": "dash", "kin": "signature", "u
 
 static var _pulse_until := 0.0
 static var _pulse_pts := 0
+static var _pulse_match := 0     # instance id of the match that started the pulse (m.time restarts per match)
 
 ## The first level-up: one banner line with the live keys, and the pulse starts.
 static func on_level_up(m: Match, p: Hunter) -> void:
@@ -26,6 +27,7 @@ static func on_level_up(m: Match, p: Hunter) -> void:
 	m.hud.msgs.push(line, HudStyle.GOLD, MsgLane.HIGH, 6.0)
 	_pulse_until = m.time + PULSE_SECS
 	_pulse_pts = p.skill_pts
+	_pulse_match = m.get_instance_id()
 	_mark(FLAG_LEVEL)
 
 ## A point went into `slot`: the first time a slot reaches its top rank, one line names what that unlocked.
@@ -40,7 +42,7 @@ static func on_rank(m: Match, p: Hunter, slot: String) -> void:
 
 ## True while the strong pulse should show: inside its window and the point still unspent.
 static func pulsing(m: Match, p: Hunter) -> bool:
-	return m.time < _pulse_until and p.skill_pts >= _pulse_pts
+	return m.get_instance_id() == _pulse_match and m.time < _pulse_until and p.skill_pts >= _pulse_pts
 
 static func _eligible(m: Match, flag: String) -> bool:
 	return m.hud != null and m.tut == null and m.arena == null and not Save.d["tutorial"].get(flag, false)

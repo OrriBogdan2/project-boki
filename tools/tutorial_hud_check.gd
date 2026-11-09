@@ -203,6 +203,9 @@ func _rank_choice() -> void:
 	ok(keyed, "the first level-up shows the Alt line with the live keys (%s)" % str(lines))
 	ok(bool(seen.get(RankChoice.FLAG_LEVEL, false)), "and is stored as seen in the profile save")
 	ok(RankChoice.pulsing(rm, P), "the rankable slots pulse after it")
+	var other := Match.new()      # the next match restarts its clock at 0: the pulse must not carry over
+	ok(not RankChoice.pulsing(other, P), "and only in the match that leveled up")
+	other.free()
 	rm.time += RankChoice.PULSE_SECS + 0.5
 	ok(not RankChoice.pulsing(rm, P), "and stop after %.0f s" % RankChoice.PULSE_SECS)
 	rm.time -= RankChoice.PULSE_SECS
