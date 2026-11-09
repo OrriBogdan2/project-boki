@@ -65231,87 +65231,10 @@
     "ok": true
   },
   {
-    "id": "ta_pocketpus_r4",
-    "name": "Pocketpus",
+    "id": "ta_barostorm_r4",
+    "name": "Barostorm",
     "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_pocketpus_r4_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_pinster_r4",
-    "name": "Pinster",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_pinster_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_narfoil_r4",
-    "name": "Narfoil",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_narfoil_r4_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_bullpole_r4",
-    "name": "Bullpole",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_bullpole_r4_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_pavonazar_r4",
-    "name": "Pavonazar",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_pavonazar_r4_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_narfoil_r4",
-    "name": "Narfoil",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_narfoil_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_pocketpus_r4",
-    "name": "Pocketpus",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_pocketpus_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_pavonazar_r4",
-    "name": "Pavonazar",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_pavonazar_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_scoopsy_r4",
-    "name": "Scoopsy",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_scoopsy_r4_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_chiptero_r4",
-    "name": "Chiptero",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_chiptero_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_pagodito_r4",
-    "name": "Pagodito",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_pagodito_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_gambitfin_r4",
-    "name": "Gambitfin",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_gambitfin_r4_1.jpg",
+    "file": "briefs/boki-art/batch/out/ta_barostorm_r4_2.jpg",
     "ok": true
   },
   {
@@ -65322,59 +65245,10 @@
     "ok": true
   },
   {
-    "id": "ta_barostorm_r4",
-    "name": "Barostorm",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_barostorm_r4_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_scoopsy_r4",
-    "name": "Scoopsy",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_scoopsy_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_bullpole_r4",
-    "name": "Bullpole",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_bullpole_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_mumblet_r4",
-    "name": "Mumblet",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_mumblet_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_pagodito_r4",
-    "name": "Pagodito",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_pagodito_r4_2.jpg",
-    "ok": true
-  },
-  {
     "id": "ta_quivertoad_r4",
     "name": "Quivertoad",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_quivertoad_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_bonsolith_r4",
-    "name": "Bonsolith",
     "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_bonsolith_r4_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_chiptero_r4",
-    "name": "Chiptero",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_chiptero_r4_2.jpg",
+    "file": "briefs/boki-art/batch/out/ta_quivertoad_r4_2.jpg",
     "ok": true
   },
   {
@@ -65387,8 +65261,15 @@
   {
     "id": "ta_quivertoad_r4",
     "name": "Quivertoad",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_quivertoad_r4_2.jpg",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_quivertoad_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chiptero_r4",
+    "name": "Chiptero",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_chiptero_r4_1.jpg",
     "ok": true
   },
   {
@@ -65399,10 +65280,150 @@
     "ok": true
   },
   {
+    "id": "ta_bonsolith_r4",
+    "name": "Bonsolith",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_bonsolith_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pinster_r4",
+    "name": "Pinster",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pinster_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pagodito_r4",
+    "name": "Pagodito",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pagodito_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chiptero_r4",
+    "name": "Chiptero",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_chiptero_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_narfoil_r4",
+    "name": "Narfoil",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_narfoil_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pagodito_r4",
+    "name": "Pagodito",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pagodito_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_narfoil_r4",
+    "name": "Narfoil",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_narfoil_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pavonazar_r4",
+    "name": "Pavonazar",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pavonazar_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_mumblet_r4",
+    "name": "Mumblet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_mumblet_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pavonazar_r4",
+    "name": "Pavonazar",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pavonazar_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pocketpus_r4",
+    "name": "Pocketpus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pocketpus_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bullpole_r4",
+    "name": "Bullpole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_bullpole_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pocketpus_r4",
+    "name": "Pocketpus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pocketpus_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bullpole_r4",
+    "name": "Bullpole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_bullpole_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_scoopsy_r4",
+    "name": "Scoopsy",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_scoopsy_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_scoopsy_r4",
+    "name": "Scoopsy",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_scoopsy_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_gambitfin_r4",
+    "name": "Gambitfin",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_gambitfin_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_fanpire_r4",
+    "name": "Fanpire",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_fanpire_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_rosedart_r4",
+    "name": "Rosedart",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_rosedart_r4_2.jpg",
+    "ok": true
+  },
+  {
     "id": "ta_hourachnid_r4",
     "name": "Hourachnid",
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_hourachnid_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_hourachnid_r4",
+    "name": "Hourachnid",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_hourachnid_r4_2.jpg",
     "ok": true
   },
   {
@@ -65422,71 +65443,8 @@
   {
     "id": "ta_rosedart_r4",
     "name": "Rosedart",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_rosedart_r4_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_fanpire_r4",
-    "name": "Fanpire",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_fanpire_r4_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_rosedart_r4",
-    "name": "Rosedart",
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_rosedart_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_scarabit_r4",
-    "name": "Scarabit",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_scarabit_r4_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_furnacowary_f_r4",
-    "name": "Furnacowary",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_furnacowary_f_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_hourachnid_r4",
-    "name": "Hourachnid",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_hourachnid_r4_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_chainipede_r4",
-    "name": "Chainipede",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_chainipede_r4_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_scarabit_r4",
-    "name": "Scarabit",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_scarabit_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_meteorab_r4",
-    "name": "Meteorab",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_meteorab_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "ta_chainipede_r4",
-    "name": "Chainipede",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_chainipede_r4_1.jpg",
     "ok": true
   },
   {
@@ -65497,10 +65455,59 @@
     "ok": true
   },
   {
-    "id": "ta_murmuron_f_r4",
-    "name": "Murmuron",
+    "id": "ta_furnacowary_f_r4",
+    "name": "Furnacowary",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_furnacowary_f_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chainipede_r4",
+    "name": "Chainipede",
     "run": 2,
-    "file": "briefs/boki-art/batch/out/ta_murmuron_f_r4_2.jpg",
+    "file": "briefs/boki-art/batch/out/ta_chainipede_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_meteorab_r4",
+    "name": "Meteorab",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_meteorab_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_eclipsowl_f_r4",
+    "name": "Eclipsowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_eclipsowl_f_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_scarabit_r4",
+    "name": "Scarabit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_scarabit_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chainipede_r4",
+    "name": "Chainipede",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_chainipede_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_scarabit_r4",
+    "name": "Scarabit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_scarabit_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_eclipsowl_f_r4",
+    "name": "Eclipsowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_eclipsowl_f_r4_2.jpg",
     "ok": true
   },
   {
@@ -65508,6 +65515,62 @@
     "name": "Furnacowary",
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_furnacowary_f_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_murmurling_f_r4",
+    "name": "Murmurling",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_murmurling_f_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_murmurling_f_r4",
+    "name": "Murmurling",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_murmurling_f_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_murmuron_f_r4",
+    "name": "Murmuron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_murmuron_f_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_sandwidow_f_r4",
+    "name": "Sandwidow",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_sandwidow_f_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_sandwidow_f_r4",
+    "name": "Sandwidow",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_sandwidow_f_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_forgebrock_r4",
+    "name": "Forgebrock",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_forgebrock_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_murmuron_f_r4",
+    "name": "Murmuron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_murmuron_f_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pipwom_n1",
+    "name": "Pipwom (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pipwom_n1_3.jpg",
     "ok": true
   }
 ]
