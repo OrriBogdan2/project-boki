@@ -11728,5 +11728,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_morelkin_r_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_morelkin_r",
+    "name": "Morelkin (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_morelkin_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_morelkin_r",
+    "name": "Morelkin (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_morelkin_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pavonazar_r",
+    "name": "Pavonazar (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pavonazar_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pavonazar_r",
+    "name": "Pavonazar (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pavonazar_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_cubbat",
+    "name": "Cubbat",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_cubbat_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_e",
+    "name": "Cetorgan (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pavonazar_r",
+    "name": "Pavonazar (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pavonazar_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pipwom",
+    "name": "Pipwom (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pipwom_2.jpg",
+    "ok": true
   }
 ]
