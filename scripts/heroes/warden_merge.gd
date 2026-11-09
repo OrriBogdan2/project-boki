@@ -3,6 +3,8 @@ extends RefCounted
 ## Fewer draw calls per Hunter: after WardenGlb._toon, the surfaces of one mesh whose toon materials came out
 ## identical (same shader, same parameters, same ink pass) are joined into one surface. The look is unchanged:
 ## the same material drew each of them. Surfaces a look animates by name stay apart (eyes, glow, card, void, flame).
+## Then the ink: the surfaces of a skinned body that wear the same ink shell (one shared outline material) lose it,
+## and one copy of the body made of those surfaces draws that shell instead: one draw for the line, not one a surface.
 
 ## Slots whose materials something else holds and changes at run time (WardenMood faces and lure, the cards).
 const KEEP_APART := ["eyes", "glow", "card", "void", "flame"]
@@ -25,6 +27,62 @@ static func merge_equal(glb: Node) -> void:
 		mi.mesh = _joined[key]
 		for gi in mats.size():
 			mi.set_surface_override_material(gi, mats[gi])
+
+## The ink copies of a Hunter's model (`model` the Hunter's root), whose material ShieldLook swaps for the rim.
+static func inks(model: Node) -> Array:
+	var glb := model.get_node_or_null("Warden")
+	return glb.get_meta("inks", []) if glb else []
+
+static func join_inks(glb: Node) -> void:
+	var made: Array = []
+	for node in glb.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		var mesh := mi.mesh as ArrayMesh
+		if mi.skin == null or mesh == null or mesh.get_blend_shape_count() > 0:
+			continue
+		for g in _ink_groups(mi):
+			if g.size() < 2:
+				continue
+			var ink: Material = mi.get_surface_override_material(g[0]).next_pass
+			for si in g:
+				mi.get_surface_override_material(si).next_pass = null
+			var key := "%d:ink%s" % [mesh.get_instance_id(), str(g)]
+			if not _joined.has(key):
+				_joined[key] = _join(mesh, [g])
+			var shell := MeshInstance3D.new()
+			shell.name = String(mi.name) + "_ink"       # (so a far_hide name pattern takes it with its body)
+			shell.mesh = _joined[key]
+			shell.skin = mi.skin
+			shell.material_override = ink
+			shell.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			shell.layers = mi.layers
+			mi.add_child(shell)
+			shell.skeleton = shell.get_path_to(mi.get_node(mi.skeleton))
+			made.append(shell)
+	glb.set_meta("inks", made)
+
+## Surface indices grouped by the shared ink shell they wear (a glow piece's own halo shell is never shared).
+static func _ink_groups(mi: MeshInstance3D) -> Array:
+	var out: Array = []
+	var shells: Array = []
+	for si in mi.mesh.get_surface_count():
+		var src := mi.mesh.surface_get_material(si)
+		var slot := String(src.resource_name).get_slice("-", 0) if src else ""
+		var mat := mi.get_surface_override_material(si)
+		var ink := mat.next_pass as ShaderMaterial if mat else null
+		if ink == null or ink.shader != Models.OUTLINE or slot in KEEP_APART:
+			continue
+		var home := -1
+		for gi in out.size():
+			if shells[gi] == ink and _compatible(mi.mesh, out[gi][0], si):
+				home = gi
+				break
+		if home < 0:
+			out.append([si])
+			shells.append(ink)
+		else:
+			out[home].append(si)
+	return out
 
 ## Surface indices grouped by equal material, in first-seen order.
 static func _groups(mi: MeshInstance3D) -> Array:

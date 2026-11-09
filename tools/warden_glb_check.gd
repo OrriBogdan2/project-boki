@@ -123,7 +123,7 @@ func _contract(a: String) -> void:
 	var tris := 0
 	var slots := {}
 	var unskinned := 0
-	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+	for mi in _body_meshes(m):
 		var mesh := (mi as MeshInstance3D).mesh
 		# (props on an orbit ride their bone unskinned: WardenGlb.Orbits turns them; so do companions WardenCompanions
 		# cut out of the body, Meeko's sun and cloud)
@@ -135,6 +135,7 @@ func _contract(a: String) -> void:
 			tris += mesh.surface_get_array_index_len(si) / 3
 			var src := mesh.surface_get_material(si)
 			slots[String(src.resource_name).get_slice("-", 0) if src else ""] = true
+	_ink_shells(m, a)
 	var unknown := slots.keys().filter(func(s): return not WardenGlb.SLOTS.has(s))
 	ok(unskinned == 0 and tris <= TRIS_MAX and slots.size() <= SLOT_MAX and unknown.is_empty(),
 			"%s: skinned (%d meshes not), %d triangles (at most %d), slots %s (at most %d, all toon slots)"
@@ -268,7 +269,7 @@ func _shading(a: String) -> void:
 	var textured := 0
 	var relief := 0
 	var no_relief := 0
-	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+	for mi in _body_meshes(m):
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
@@ -412,7 +413,7 @@ func _own_look(a: String) -> void:
 	var slots: Dictionary = own.get("slots", {})
 	var seen := 0
 	var wrong: Array = []
-	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+	for mi in _body_meshes(m):
 		var mesh := (mi as MeshInstance3D).mesh
 		for si in mesh.get_surface_count():
 			var src := mesh.surface_get_material(si)
@@ -639,3 +640,43 @@ func _own_motion(a: String, other: String) -> void:
 	o_sync.free()
 	m.free()
 	o.free()
+<<<<<<< HEAD
+=======
+
+## Settings > Video > Warden models: off builds the procedural model, on the .glb again.
+func _setting(a: String) -> void:
+	WardenGlb.set_model(a, false)
+	var off := _model(a)
+	var proc := not off.has_node("Warden") and (off.get_node("Rig/Torso/HeadPivot/Head") as Node3D).visible \
+			and not WardenGlb.uses_model(a)
+	off.free()
+	WardenGlb.set_model(a, true)
+	var on := _model(a)
+	var back := on.has_node("Warden") and WardenGlb.uses_model(a)
+	on.free()
+	ok(proc and back, "%s: the Warden models setting turns it procedural (%s) and back to its 3D model (%s)"
+			% [a, str(proc), str(back)])
+
+## The model's own meshes: not WardenMerge's ink shells, which draw the ink pass its surfaces gave up.
+func _body_meshes(m: Node) -> Array:
+	var shells := WardenMerge.inks(m)
+	return m.get_node("Warden").find_children("*", "MeshInstance3D", true, false).filter(
+			func(mi): return not mi in shells)
+
+## Each ink shell is its body's skinned copy on the outline shader, and no surface of that body still wears
+## the same ink as a pass (it would draw twice).
+func _ink_shells(m: Node, a: String) -> void:
+	var bad: Array = []
+	var shells := WardenMerge.inks(m)
+	for shell: MeshInstance3D in shells:
+		var body := shell.get_parent() as MeshInstance3D
+		var ink := shell.material_override as ShaderMaterial
+		var twice := range(body.mesh.get_surface_count()).any(
+				func(si): return body.get_active_material(si).next_pass == ink)
+		if ink == null or ink.shader != Models.OUTLINE or shell.skin != body.skin or twice \
+				or shell.get_node(shell.skeleton) != body.get_node(body.skeleton):
+			bad.append(shell.name)
+	ok(bad.is_empty(),
+			"%s: %d ink shells, each one draw for its body's line, skinned like it, ink not also a pass %s"
+			% [a, shells.size(), str(bad)])
+>>>>>>> 241ac41b49 (WardenMerge: one ink shell per Hunter body instead of an ink pass per surface (draws per 12 Hunters 197 -> 154))
