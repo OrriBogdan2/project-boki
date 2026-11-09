@@ -4460,3 +4460,9 @@ ART olmlet 8.63 briefs/boki-art/cards/Olmlet.jpg kind=card panel=8.6/8.6/8.7
 ART proofhop 8.67 briefs/boki-art/cards/Proofhop.jpg kind=card panel=8.6/8.7/8.7
 ART rampartoad 8.3 briefs/boki-art/cards/Rampartoad.jpg kind=card panel=8.3/8.2/8.4
 ART spirevark 8.4 briefs/boki-art/cards/Spirevark.jpg kind=card panel=8.3/8.4/8.5
+
+## 01:37 ET 11-09 — art session: hero cards batch 2
+ART jarmit 8.63 briefs/boki-art/cards/Jarmit.jpg kind=card panel=8.6/8.6/8.7
+ART latchling 8.33 briefs/boki-art/cards/Latchling.jpg kind=card panel=8.6/8.5/7.9
+ART ribbonwyrm 8.3 briefs/boki-art/cards/Ribbonwyrm.jpg kind=card panel=8.5/8.6/7.8
+The other ~65 cards regenerate with a stronger prompt (no shadow/glow, face first, signature parts kept).

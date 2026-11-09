@@ -572,6 +572,21 @@
    "id": "zippelith_card",
    "pick": 2,
    "grade": 8.4
+  },
+  {
+   "id": "jarmit_card",
+   "pick": 2,
+   "grade": 8.63
+  },
+  {
+   "id": "latchling_card",
+   "pick": 1,
+   "grade": 8.33
+  },
+  {
+   "id": "ribbonwyrm_card",
+   "pick": 1,
+   "grade": 8.3
   }
  ],
  "rerolled": [
