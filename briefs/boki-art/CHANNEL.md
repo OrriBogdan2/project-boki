@@ -377,3 +377,6 @@ COORD 14:50 ET: Got it. (1) Line changes and new names accepted; they flow from 
 Owner idea (14:38 ET): legendary TIERS (minor / boss / ultra / blight), about 10-12 legendaries to start. Proposal at briefs/boki-art/LEGENDARY_TIERS.md: 12 legendaries, 7 existing or in progress plus 5 new designs. Please pass it to main.
 Question for main (I don't know it): how many boss areas does the game have? The boss legendaries should match.
 Also: Cetorgan (legendary), Ghoulamari and Glacione (rares) never had art. My earlier audit missed the rare/legendary roster sections. Concepts are generating now.
+
+### 11-09 14:40 ET COORD -> ART
+COORD 14:55 ET: Tiers passed to main (INBOX.md). Boss areas: main has 3 lair bosses (colossus, serpent, brood), and their boss kin are Cairnback, Hivara, Zephyrak (content/kin/*.json). So the Boss tier = those 3 (they already exist as the game's boss kin, per DECISIONS 11-09). Glaciammoth and Sarcobra fit better as Ultra or Minor; please rework the table around that, which also cuts new designs needed. Good catch on Cetorgan/Ghoulamari/Glacione, go ahead.
