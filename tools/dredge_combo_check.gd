@@ -384,6 +384,11 @@ func _all() -> void:
 		"len %.1f deg %.0f" % [float(cone.get("len", 0.0)), float(cone.get("deg", 0.0))]
 	)
 	ok("gun: each shot rocks the body back (dr_shot)", K.anim_id == "dr_shot")
+	var slug_r := _slug_read(m)
+	ok(
+		"gun: a slug's disc reads as wide as its hit", slug_r.y > 0.0 and absf(slug_r.x - slug_r.y) < 0.01,
+		"disc %.3f m, hit %.3f m" % [slug_r.x, slug_r.y]
+	)
 	ak.step(m, 1.0)
 	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
 	P.ammo = int(P.wpn["mag"])
@@ -895,6 +900,14 @@ func _all() -> void:
 ## Parity pass (docs/heroes/dredge.md): the hold-to-fire gun against the footage (0040-0080): he walks between
 ## shots (at the shared firing walk), each volley is fanned on the cursor's direction at its shot, the slugs stop
 ## at 6.3 m whatever the cursor distance, and the recoil settles in ~0.2 s, inside the 0.5 s cycle.
+## A slug in flight: the radius its disc reads at (LDFx.DISC_EDGE of its head) and its hit radius (zero if none flies).
+func _slug_read(m: Match) -> Vector2:
+	for r: Dictionary in LDFx.of(m).riders:
+		if r["kind"] == "slug":
+			var head := (r["node"] as Node3D).get_node("Head") as Node3D
+			return Vector2(head.scale.x * LDFx.DISC_EDGE, float(r["sd"]["r"]))
+	return Vector2.ZERO
+
 func _parity_gun() -> void:
 	var r: Array = ak.setup("dredge", 9.0, "", false)
 	var m: Match = r[0]

@@ -39,6 +39,9 @@ const POOL_CAP := 24           # nodes per kind at most; past it the oldest is t
 const KEEP := 0.1              # s an immediate-style look stays without a refresh
 const FLAME_CAP := 32          # hose puffs drawn at most (the kit keeps about 15)
 const HANG_T := 0.3            # s a scattergun slug hangs as a dot at its stop line
+const DISC_EDGE := 0.85        # a dot's read edge (its cover at half) as a share of its quad's half-size
+const SLUG_HALO := 1.45        # a scattergun slug's dark rim, times its disc
+const SLUG_RIM := Color("3a2208")       # ... so it reads on bright grass and sand alike
 ## a Broadside slug's look (LDFx.volley): its dot (half width, m), the soft halo round it, the smear
 ## behind it in flight (m long and wide)
 const VOLLEY_HEAD := 0.34
@@ -543,15 +546,17 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			n.add_child(_rider_part("Head", col, col2, 0.62, 1.0))
 			tail_col = Color(Color("3a2a3a"), 0.7)
 		"slug":
-			n.add_child(_rider_part("Head", col, col2, 0.3, 1.0))
+			# a hard disc as wide as the slug's hit, a white-hot centre, in a dark rim
+			n.add_child(_rider_part("Halo", SLUG_RIM, SLUG_RIM, SLUG_HALO, 0.8))
+			n.add_child(_rider_part("Head", col, col2, 1.0, 1.0, M_DOT))
 	var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, tail_col))
 	tr.name = "Trail"
 	n.add_child(tr)
 	return n
 
 ## One camera-facing part of a projectile look; the head draws over the halo.
-func _rider_part(part: String, col: Color, col2: Color, scl: float, cover: float) -> MeshInstance3D:
-	var mi := _mi(_quad_mesh(), _mat(M_ORB, col, col2, true))
+func _rider_part(part: String, col: Color, col2: Color, scl: float, cover: float, mode := M_ORB) -> MeshInstance3D:
+	var mi := _mi(_quad_mesh(), _mat(mode, col, col2, true))
 	_param(mi.material_override, "strength", cover)
 	mi.name = part
 	mi.scale = Vector3.ONE * scl
@@ -559,7 +564,8 @@ func _rider_part(part: String, col: Color, col2: Color, scl: float, cover: float
 	return mi
 
 ## Rides a look on a shot (match.gd's shot dictionary) until it ends. The plain shot node is handed
-## back to the match's pool, so only this look shows. on_end(at, expired) runs when it ends.
+## back to the match's pool, so only this look shows. on_end(at, expired) runs when it ends. A slug's disc
+## reads exactly as wide as its hit (the shot's "r").
 func ride(
 	sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, width := 0.3, on_end := Callable()
 ) -> void:
@@ -569,6 +575,8 @@ func ride(
 		if c.name == "Head":
 			_param(mt, "color", col)
 			_param(mt, "color2", col2)
+		if kind == "slug" and c.name != "Trail":
+			c.scale = Vector3.ONE * float(sd["r"]) / DISC_EDGE * (SLUG_HALO if c.name == "Halo" else 1.0)
 		if c.name == "Trail":
 			_param(mt, "color", col)
 	var sn = sd.get("node")

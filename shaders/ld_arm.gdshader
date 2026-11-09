@@ -14,7 +14,7 @@ void fragment() {
 	vec3 flesh = mix(color.rgb, color.rgb * 0.3, vein * 0.8) * (0.7 + 0.5 * sin(UV.x * 7.0) * 0.5 + 0.25);
 	float ridge = (1.0 - smoothstep(0.04, 0.09, abs(UV.y - 0.25))) * step(0.3, fract(UV.x * 1.7));
 	float b = max(COLOR.a, ridge);
-	vec3 c = mix(flesh, color2.rgb, b) * lit + color.rgb * rim * 0.5;
+	vec3 c = mix(flesh, color2.rgb, b) * mix(lit, 1.0, b * 0.5) + color.rgb * rim * 0.5;   // the bone stays bright in shade
 	ALBEDO = c;
 	ALPHA = 1.0;
 }

@@ -27,9 +27,11 @@ const BONE := Color("e0d4c0")          # the bone hook, and the rim of the orbs 
 const BRASS := Color("e0a040")
 const BRASS_HOT := Color("fff0b0")
 const IRON := Color("3a3f48")
-const SLUG_COL := Color("ff4fa8")      # a hot pink streak in flight
-const SLUG_CORE := Color("ffd0ec")
-const SLUG_REST := Color("7a4aff")     # a slug hanging at its stop line: solid violet, dark core
+const SLUG_COL := Color("ffc832")      # coin gold, his ability colour: a slug's disc, glow and tracer in flight
+const SLUG_CORE := Color("fff4d0")     # the slug's white-hot centre
+const SLUG_REST := Color("e07a20")     # a slug hanging at its stop line: a deep brass dot, dark core
+const SLUG_TRACER := 1.1               # m, a slug's tracer at full speed (it shortens as the slug slows)
+const MUZZLE := 0.6                    # the muzzle flash's scale: white-hot, about 0.7 m across (sheet: 0.4 body heights)
 const ANCHOR_COL := LDFx.ANCHOR_RIM    # seafoam: the anchor's rim, its ring and its stun
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const ARM_THICK := 0.7                 # m, the stretched arm's girth at the shoulder end
@@ -214,8 +216,8 @@ func _drop_holds() -> void:
 		_end_pull(false)
 	broadside.drop()
 
-## The scattergun: each new volley rocks the body back, flashes the muzzle and dresses its slugs (pink
-## streaks that hang as violet dots where they stop). While firing, the spread's two edge lines lie on the
+## The scattergun: each new volley rocks the body back, flashes the muzzle and dresses its slugs (gold
+## discs as wide as their hit, dark-rimmed, with tracers, that hang as brass dots where they stop). While firing, the spread's two edge lines lie on the
 ## ground out to the slug range; idle, they fold into one aim line to the cursor (sheet gap 4).
 func _tick_gun() -> void:
 	if h.wid != "shotgun" or KinMerge.active(h):
@@ -243,7 +245,7 @@ func _dress_volley() -> void:
 	play("dr_shot")
 	var d2 := h.aim_dir()
 	var mz := h.pos + Vector3(d2.x, 0, d2.y) * 1.05 + Vector3(0, 1.0, 0)
-	fx.orb(mz, BRASS, BRASS_HOT, 0.75, 0.07)          # a brass muzzle flash, one frame
+	fx.orb(mz, BRASS_HOT, Color.WHITE, MUZZLE, 0.1)   # a white-hot muzzle flash, a blink
 	fx.sunburst(mz, 0.6, Color("ff8a3a"), BRASS_HOT, 0.08, true)
 	m.sfx("dr_shot", h.pos, -5.0 if h.is_local() else -8.0, 1.0)
 	if not tells_visible():
@@ -257,8 +259,9 @@ func _dress_volley() -> void:
 		seen += 1
 		if sd.get("by") != h or String((sd["x"] as Dictionary).get("pg", "")) != key:
 			continue
-		fx.ride(sd, "slug", SLUG_COL, SLUG_CORE, 0.9, 0.2, func(at: Vector3, expired: bool):
-			if expired: fx.dot(at, SLUG_REST, 0.26))
+		var r := float(sd["r"])
+		fx.ride(sd, "slug", SLUG_COL, SLUG_CORE, SLUG_TRACER, r * 2.0, func(at: Vector3, expired: bool):
+			if expired: fx.dot(at, SLUG_REST, r / LDFx.DISC_EDGE))
 
 func _tick_looks(dt: float) -> void:
 	if not tells_visible():
