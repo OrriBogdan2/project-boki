@@ -63,7 +63,7 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 | Empowered extras: Shred, Marks, haste end (LOW) | (a) / (b) / (c) | Shred is gone (f6bb27c3). Marks: back to 2 on the empowered hit, the owner's spec (MAIN_TO_EXT 03:20, "keep 2 Marks"; the feel pass had made it 1). The speed boost ending on the empowered shot is the wiki's Quickflip rule (Small mechanics), kept. Assert `dancer empowered bolt: a big hit, 2 Marks ...` |
 | Bola's slow on Grounded (LOW) | (b) | Removed by the audit: the data's Ground is no dash or jump, no slow. Back by the owner's override (item 53): 30% for the Ground's 1.5s. Assert `dancer Bola: one foe caught is Grounded and slowed 30%` |
 | Bola cooldown 0.54x the data, pair stun 0.9s (LOW) | (c) | 7s follows the footage card (6.7s); the 1.8s is how long the STUNNED word showed, not a measured stun. Owner pacing call |
-| Knife cooldown (LOW) | (c) | 15s is the footage card; the data's 28s base is level 1. Owner pacing call |
+| Knife cooldown (LOW) | (c) | 28s, the data's level 1 (1.0x; ext/cooldown-parity-verify: the tooltip's 20 s is @IV, after the -8 s upgrade). Owner pacing call |
 | LMB range 12m vs "850 uu" (LOW) | (c) | 850 uu isn't in briefs/supervive-data; the footage shows hits at about 7 bh (12.6m). Kept 12 |
 | Other Vault resets: Encore, knife at rank 3 (LOW) | (c) | Both are in the data (Fusillade, Farstep IV). DECISIONS' "reset only on an empowered hit" is about the empowered bolt hitting vs missing |
 | Encore edge bonus: ring rim vs platform edge (LOW) | (c) | Follows the footage's fine print (the ring's outer band) |

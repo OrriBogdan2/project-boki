@@ -21,7 +21,7 @@
 		"bola": {"cast": 0.4, "range": 7.0, "speed": 30.0, "dmg": 5.0, "ground": 1.5, "slow": 0.3, "after": 3.8, "after_r3": 1.0, "pair_dmg": 13.0, "pair_stun": 0.9, "bounces": 1, "lane_w": 1.4},
 		"variants": {"tap": "A 0.4s wind-up with the lane showing (you keep aiming), then the Bola flies 7m: 5 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and slowed 30%, and the Bola flies on 3.8m (a crate it breaks counts as that first catch). It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).", "air": "Thrown from the air the same way."},
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "mod": "add"}},
-	"e": {"delivery": "projectile", "name": "Shadow Knife", "short": "Knife", "icon": "shadowstep", "col": "#b07aff", "cooldown": 20.0, "range": 14.0, "speed": 40.0, "dmg": 8.0, "slow": 0.5, "slow_t": 2.5, "time": 6.0, "refund_wall": 0.25, "refund_foe": 0.5, "ghosts": 5,
+	"e": {"delivery": "projectile", "name": "Shadow Knife", "short": "Knife", "icon": "shadowstep", "col": "#b07aff", "cooldown": 28.0, "range": 14.0, "speed": 40.0, "dmg": 8.0, "slow": 0.5, "slow_t": 2.5, "time": 6.0, "refund_wall": 0.25, "refund_foe": 0.5, "ghosts": 5,
 		"desc": "Throw a dagger to your cursor (14m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press E again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add"}},
 	"x": {"name": "Encore", "short": "Encore", "icon": "dance", "col": "#ff8ac8", "cooldown": 50.0, "unlock": 6,

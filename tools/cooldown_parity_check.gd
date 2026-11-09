@@ -13,7 +13,7 @@ const SOURCE := [
 	["mage", "rmb", 10.0], ["mage", "e", 12.0], ["mage", "x", 60.0], ["mage", "dash", 9.0],
 	["rimewright", "rmb", 12.0], ["rimewright", "e", 20.0], ["rimewright", "x", 80.0],
 	["rimewright", "dash", 13.0],
-	["thief", "rmb", 13.0], ["thief", "e", 20.0], ["thief", "x", 50.0], ["thief", "dash", 5.0],
+	["thief", "rmb", 13.0], ["thief", "e", 28.0], ["thief", "x", 50.0], ["thief", "dash", 5.0],
 	["bulwark", "rmb", 6.0], ["bulwark", "x", 50.0], ["bulwark", "dash", 8.0],
 	["archer", "rmb", 16.0], ["archer", "e", 15.0], ["archer", "x", 60.0], ["archer", "dash", 9.5],
 	["dolm", "rmb", 11.0], ["dolm", "e", 12.5], ["dolm", "x", 45.0], ["dolm", "dash", 12.0],

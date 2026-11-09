@@ -1020,7 +1020,7 @@ func combos(a) -> void:
 	P.ak.use_e()
 	A.step(m, 0.35)
 	A.ok("combo dancer: Knife in a foe (Knife rank 3) = Vault reset + refund",
-			P.dashes >= 0.99 and float(TK.cd["e"]) < 10.0, "dashes %.2f e cd %.1f" % [P.dashes, float(TK.cd["e"])])
+			P.dashes >= 0.99 and float(TK.cd["e"]) < 14.0, "dashes %.2f e cd %.1f" % [P.dashes, float(TK.cd["e"])])
 	P.ak.use_e()
 	A.step(m, 0.05)
 	A.ok("combo dancer: Knife > E = step to them", P.flat_dist(T) < 1.8)
