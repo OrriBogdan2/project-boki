@@ -17902,5 +17902,82 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/portrait_gravadillo_pe_w29_4.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_jarmit_pe_w29",
+    "name": "Jarmit (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_jarmit_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jarmit_pe_w29",
+    "name": "Jarmit (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_jarmit_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jarmit_pe_w29",
+    "name": "Jarmit (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_jarmit_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_knotwyrm_pe_w29",
+    "name": "Knotwyrm (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_knotwyrm_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kestrike_pe_w29",
+    "name": "Kestrike (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kestrike_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kestrike_pe_w29",
+    "name": "Kestrike (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_kestrike_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jarmit_pe_w29",
+    "name": "Jarmit (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_jarmit_pe_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kestrike_pe_w29",
+    "name": "Kestrike (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_kestrike_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_knotwyrm_pe_w29",
+    "name": "Knotwyrm (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_knotwyrm_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanterloris_pe_w29",
+    "name": "Lanterloris (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lanterloris_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kerchick_pe_w29",
+    "name": "Kerchick (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_kerchick_pe_w29_4.jpg",
+    "ok": true
   }
 ]
