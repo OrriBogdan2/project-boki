@@ -3,7 +3,8 @@
 Everything is a felt-mallet pluck (a marimba or kalimba tine: a sine with a quiet 4x partial, a 2-3 ms
 fade-in, a short fall) in C major pentatonic, low-passed to stay round, with a small room behind it.
 Press = a short tap, hover = a tiny high tick, confirm = a rising pair, back = a falling pair, deny = a
-muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a wood tick.
+muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a wood tick; a recast opening
+= a bright rising fifth with a glint, its warning before it closes = a dry wood tick (RecastSound pitches both by slot).
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
 unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
 """
@@ -134,6 +135,19 @@ def charge(i):
     return finish(mix(low * 0.5, high * 0.2, pluck(NOTE['G5'], d, 0.4, 0.2) * 0.15 * u), 3000)
 
 
+# ---------------------------------------------------------------- recasts (RecastSound, every Hunter)
+def recast_open(i):
+    """A recast is open: a quick rising fifth and a small glint on top, short enough to sit under combat."""
+    glint = at(S.chime(NOTE['G6'], 0.3, 0.09, ((1.0, 0.6), (2.76, 0.15))) * 0.2, 0.05)
+    return finish(room(mix(pluck(NOTE['C6'], 0.18, 0.04), at(pluck(NOTE['G6'], 0.3, 0.07, 0.6), 0.05), glint), 0.4), 5200)
+
+
+def recast_tick(i):
+    """It is about to close: one dry, bright wood tick with a low knock under it."""
+    knock = 0.5 * pluck(NOTE['E5'], 0.06, 0.012, 0.2)
+    return finish(mix(pluck(NOTE['E6'], 0.07, 0.01, 0.8), knock), 5600)
+
+
 # ---------------------------------------------------------------- write
 def main():
     S.takes_cat('click', click, 3, 'ui')
@@ -150,6 +164,8 @@ def main():
     S.save_cat('level_up', level_up(0), 'ui')
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
+    S.save_cat('recast_open', recast_open(0), 'ui')
+    S.save_cat('recast_tick', recast_tick(0), 'ui')
 
 
 if __name__ == '__main__':
