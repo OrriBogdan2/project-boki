@@ -9565,5 +9565,82 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_gloamshell_p_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_glintmole_p",
+    "name": "Glintmole (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glintmole_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_effigeetle_p",
+    "name": "Effigeetle (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_effigeetle_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glintmole_p",
+    "name": "Glintmole (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glintmole_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glomwort_p",
+    "name": "Glomwort (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glomwort_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravadillo_p",
+    "name": "Gravadillo (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gravadillo_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_p",
+    "name": "Gongibbon (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kestrike_p",
+    "name": "Kestrike (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_kestrike_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hivara_p",
+    "name": "Hivara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_hivara_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kestrike_p",
+    "name": "Kestrike (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kestrike_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_p",
+    "name": "Gongibbon (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hivara_p",
+    "name": "Hivara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_hivara_p_1.jpg",
+    "ok": true
   }
 ]
