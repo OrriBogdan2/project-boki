@@ -18651,5 +18651,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_bucketmander_v_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_chandelapi_v",
+    "name": "Chandelapi (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_v_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_v",
+    "name": "Chandelapi (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_v_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_v",
+    "name": "Chimelop (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chimelop_v_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_v",
+    "name": "Chandelapi (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_v_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_v",
+    "name": "Tootle (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_tootle_v_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_v",
+    "name": "Tootle (concept r)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_tootle_v_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_v",
+    "name": "Tootle (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_tootle_v_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_v",
+    "name": "Tootle (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_tootle_v_1.jpg",
+    "ok": true
   }
 ]
