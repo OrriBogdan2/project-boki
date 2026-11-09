@@ -14,8 +14,7 @@ coils at both wrists and a copper rod mast flying a pennant. Palette: teal and h
 ## Scaling
 Source health is roughly 8 to 10 times ours (Light = 124 HP). Ratios kept against the basic attack:
 bolt 12 every 0.648s (item 116; about 18.5 dps, unchanged from before); Storm Rod 18 to 30 (1.5 to 2.5 bolts; the
-source is about 4, held lower because the rod also stuns and leaves an orb); Skycall 20 (source 2.5
-bolts, ours 1.7); Wirerun pass 10, doubled through a full-Static foe, plus a Blowout of 16 + 18% of
+source is about 4, held lower because the rod also stuns and leaves an orb); Skycall 21.6 (1.8 bolts, the source's 162 on Jolt 90, kit-parity lock); Wirerun pass 10, doubled through a full-Static foe, plus a Blowout of 16 + 18% of
 their health (about 5.7 bolts on a Light; the source detonation is about 9). Cooldowns follow the
 source ratio spear : Surge : javelin = 7 : 6.7 : 9.2, at our pace 8 : 8 : 10.5. Kitefall (the source's
 landing is 40 + 22%, seen at about 115, so about 1 bolt at our scale; it is held at 22, 1.8 bolts, because

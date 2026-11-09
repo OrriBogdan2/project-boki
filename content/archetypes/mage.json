@@ -112,11 +112,11 @@
 		"reach": 11.0,
 		"delay": 0.8,
 		"radius": 1.5,
-		"dmg": 20.0,
+		"dmg": 21.6,
 		"slide_dist": 3.4,
 		"slide_t": 1.1,
 		"grounded": 1.5,
-		"desc": "Press to drop a circle at your cursor (up to 11m); keep holding and drag the mouse to set the drag, let go to commit (up to 1s): toward you pulls them in, away throws them out (a tap: away from you). A pillar of light narrows over it for 0.8s, then lightning strikes: 20 damage, 1 Static, and everyone inside is slid along the ground about 3.4m that way (slow, easing out over about 1s) and Grounded for 1.5s (no dashing). Charge orbs it catches are flung about 6m the same way and become yours; one dragged toward you within 9m flies to you and gives Wirerun back.",
+		"desc": "Press to drop a circle at your cursor (up to 11m); keep holding and drag the mouse to set the drag, let go to commit (up to 1s): toward you pulls them in, away throws them out (a tap: away from you). A pillar of light narrows over it for 0.8s, then lightning strikes: 21.6 damage, 1 Static, and everyone inside is slid along the ground about 3.4m that way (slow, easing out over about 1s) and Grounded for 1.5s (no dashing). Charge orbs it catches are flung about 6m the same way and become yours; one dragged toward you within 9m flies to you and gives Wirerun back.",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",
