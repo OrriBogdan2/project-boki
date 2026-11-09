@@ -110,13 +110,24 @@ func _screens() -> void:
 	for c: Array in cases:
 		var sz := await _resize(c[0], c[1])
 		main.show_screen("prematch", {"teams": 10, "squad": 3, "tier": 0})
-		await main.get_tree().create_timer(0.8).timeout
+		await _faded_in(0.8)
 		await _judge("pick", c, SafeArea.groups_of(main.current, sz), sz, main.current)
 		main.show_screen("results", RESULT)
-		await main.get_tree().create_timer(1.0).timeout
+		await _faded_in(1.0)
 		await _judge("results", c, SafeArea.groups_of(main.current, sz), sz, main.current)
 
+## Waits at least `t` s, then until the screen-swap ink has swept fully out (a real GPU at 4K can take longer).
+func _faded_in(t: float) -> void:
+	await main.get_tree().create_timer(t).timeout
+	for i in 600:
+		if main.fade == null or (not main.fade.covered and main.fade.rect.color.a <= 0.0):
+			break
+		await _frames(1)
+
 func _farm() -> void:
+	if main.current:      # (_hb_home does not free the results screen: it would stay under the farm)
+		main.current.queue_free()
+		main.current = null
 	home = await main._hb_home()
 	for i in 600:
 		if home.root_ui != null and home.hub != null and home.player != null:
