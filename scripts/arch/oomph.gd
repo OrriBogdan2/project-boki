@@ -69,13 +69,13 @@ static func render_hit(h: Hunter, delta: float) -> void:
 # ------------------------------------------------------------------ how a shot looks
 ## The colour, size and halo of a shot as the local player sees it. What can hurt you stays the
 ## hottest thing on screen; your own shots are bright, solid bolts too (they used to be dim specks).
-static func shot_look(m: Node, by: Ent, col: Color, size: float) -> Array:
+static func shot_look(m: Node, by: Ent, col: Color, shot_size: float) -> Array:
 	if legacy:
 		var p0 = m.get("player")
-		if p0 and by.team != p0.team: return [Color(col.lerp(Color("ff5a3a"), 0.35), 1.0), size * 2.6, 0.0]
-		return [Color(col, 0.5), size * 1.7, 0.0]
+		if p0 and by.team != p0.team: return [Color(col.lerp(Color("ff5a3a"), 0.35), 1.0), shot_size * 2.6, 0.0]
+		return [Color(col, 0.5), shot_size * 1.7, 0.0]
 	var vis_col := col
-	var vis_size := size * 2.0
+	var vis_size := shot_size * 2.0
 	var halo := 0.28
 	var p = m.get("player")
 	if p and by.team != p.team:
