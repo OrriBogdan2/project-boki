@@ -20982,5 +20982,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/stance_galleotter_2.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_galleotter",
+    "name": "Galleotter (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_galleotter_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_kitlet",
+    "name": "Kitlet (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_kitlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_kitlet",
+    "name": "Kitlet (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_kitlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_bellowary",
+    "name": "Bellowary (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_bellowary_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_dribbara",
+    "name": "Dribbara (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_dribbara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_dribbara",
+    "name": "Dribbara (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_dribbara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_bellowary",
+    "name": "Bellowary (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_bellowary_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_bellowary",
+    "name": "Bellowary (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_bellowary_3.jpg",
+    "ok": true
   }
 ]
