@@ -42017,5 +42017,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_cisternmander_b1_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_cisternmander_b2",
+    "name": "Cisternmander (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_b2",
+    "name": "Cisternmander (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_b2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_b2",
+    "name": "Cisternmander (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_b2",
+    "name": "Cisternmander (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_b2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_b3",
+    "name": "Cisternmander (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_b3",
+    "name": "Cisternmander (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_b3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_b3",
+    "name": "Cisternmander (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_b3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_b3",
+    "name": "Cisternmander (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_b3_3.jpg",
+    "ok": true
   }
 ]
