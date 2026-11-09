@@ -29809,5 +29809,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_fawngus_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_bullsfrog",
+    "name": "Bullsfrog",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_bullsfrog_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bullsfrog",
+    "name": "Bullsfrog",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_bullsfrog_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_starcap",
+    "name": "Starcap",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_starcap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_fawngus",
+    "name": "Fawngus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_fawngus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_clinkpede",
+    "name": "Clinkpede",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_clinkpede_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bladypus",
+    "name": "Bladypus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_bladypus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_starcap",
+    "name": "Starcap",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_starcap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bladypus",
+    "name": "Bladypus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_bladypus_2.jpg",
+    "ok": true
   }
 ]
