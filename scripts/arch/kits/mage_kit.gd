@@ -18,6 +18,7 @@ const TEAL := Color("1fc6dc")        # the lightning's body: a saturated teal th
 const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
 const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
+const TAG_LIFT := 30.0               # px the overhead combo tag (ComboMark) moves up to clear the Static marker
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
 
 var sparks := {}               # foe id -> {e, n, t}
@@ -160,6 +161,13 @@ func add_spark(f: Ent, n := 1) -> void:
 		net_bolt(top, f.position, TEAL)
 	elif int(s["n"]) > was:
 		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(s["n"]))     # the zap climbs with each stack
+
+func combo_read(f: Ent) -> Dictionary:
+	var s = sparks.get(f.get_instance_id())
+	if s == null:
+		return {}
+	return {"icon": "shock", "n": int(s["n"]), "max": int(res_def()["max"]), "left": float(s["t"]),
+			"total": float(res_def()["dur"]), "lift": TAG_LIFT}
 
 func clear_sparks(f: Ent) -> void:
 	var key := f.get_instance_id()
@@ -507,6 +515,7 @@ func _blowout(f: Ent) -> void:
 	var dmg := (float(rd["blow_dmg"]) + float(rd["blow_pct"]) * f.max_hp) * power("dash")
 	clear_sparks(f)
 	blowouts += 1
+	ComboMark.payoff(m, h, f)
 	f.hurt(dmg, h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "blowout"], "payoff": true, "crit": true})
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
