@@ -1077,6 +1077,25 @@ func _bulwark_combos() -> void:
 		) < 0.01 and absf(heals[2] - 1.5) < 0.01,
 		"cds %s heals %s" % [str(ecds), str(heals)]
 	)
+	# upgrade parity (docs/heroes/bulwark.md): Spin Dash recharge -1.5 s a rank;
+	# the source gives none of the three slots a damage step
+	var recharge: Array = []
+	var pw: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["dash"] = rk
+		P.slot_lv["sec"] = rk
+		P.slot_lv["kin"] = rk
+		recharge.append(K.dash_def()["cd"] * K.dash_k())
+		pw.append([K.power("sec"), K.power("dash"), K.power("kin")])
+	ok(
+		"upgrade parity: Spin Dash recharge 8 / 6.5 / 5 s, no damage step on any slot",
+		absf(recharge[0] - 8.0) < 0.01 and absf(recharge[1] - 6.5) < 0.01
+		and absf(recharge[2] - 5.0) < 0.01 and absf(pw[2][0] - pw[0][0]) < 0.001
+		and absf(pw[2][1] - pw[0][1]) < 0.001 and absf(pw[2][2] - pw[0][2]) < 0.001,
+		"recharge %s power %s" % [str(recharge), str(pw)]
+	)
+	P.slot_lv["sec"] = 1
+	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
 	# small mechanics (wiki): a broken aegis isn't repaired by it; a downed teammate inside starts coming back
 	K.cd["e"] = 0.0
