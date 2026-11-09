@@ -39210,5 +39210,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_parasolth_p3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_parasolth_p3",
+    "name": "Parasolth (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_parasolth_p3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parasolth_p2",
+    "name": "Parasolth (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_parasolth_p2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parasolth_p3",
+    "name": "Parasolth (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_parasolth_p3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parasolth_p3",
+    "name": "Parasolth (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_parasolth_p3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parasolth_p4",
+    "name": "Parasolth (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_parasolth_p4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parasolth_p4",
+    "name": "Parasolth (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_parasolth_p4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parasolth_p4",
+    "name": "Parasolth (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_parasolth_p4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ribbonwyrm_w1",
+    "name": "Ribbonwyrm (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_ribbonwyrm_w1_2.jpg",
+    "ok": true
   }
 ]
