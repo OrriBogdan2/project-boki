@@ -69,6 +69,10 @@ func release() -> void:
 	if not finished and k < 1.0:
 		cancelled.emit(id)
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		release()       # alt-tab: the button's release may never arrive
+
 func _process(dt: float) -> void:
 	tick(minf(dt, 0.1))
 

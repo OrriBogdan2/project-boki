@@ -3863,6 +3863,10 @@ func on_menu_opened() -> void:
 	if not Overlay.closed.is_connected(_on_menu_closed):
 		Overlay.closed.connect(_on_menu_closed, CONNECT_ONE_SHOT)
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		FocusLoss.drop_hunter(self)       # alt-tab: no hold, walk or shot carries over
+
 func _on_menu_closed() -> void:
 	paused = false
 	if not over:

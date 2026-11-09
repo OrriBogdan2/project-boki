@@ -360,9 +360,12 @@ func _apply_quality() -> void:
 		if (n as WorldEnvironment).environment: _env_quality((n as WorldEnvironment).environment)
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and bool(v.get("mute_unfocused", false)):
-		AudioServer.set_bus_mute(0, true)
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		FocusLoss.release_input()       # alt-tab: nothing stays held
+		if bool(v.get("mute_unfocused", false)):
+			AudioServer.set_bus_mute(0, true)
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		FocusLoss.restore_cursor()
 		AudioServer.set_bus_mute(0, false)
 
 # ------------------------------------------------------------------ key bindings

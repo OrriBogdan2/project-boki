@@ -22,6 +22,10 @@ func _gui_input(e: InputEvent) -> void:
 		mouse_held = e.pressed
 		accept_event()
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		mouse_held = false       # alt-tab: the button's release may never arrive
+
 func _process(delta: float) -> void:
 	if done:
 		return
