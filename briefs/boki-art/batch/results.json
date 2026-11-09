@@ -70752,5 +70752,33 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_bulwartoad_t3n1_1.jpg",
     "ok": true
+  },
+  {
+    "id": "galleotter_edit_v2",
+    "name": "Galleotter (card edit: ship onto chest)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/galleotter_edit_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_edit_v2",
+    "name": "Galleotter (card edit: ship onto chest)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/galleotter_edit_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_edit_v2",
+    "name": "Galleotter (card edit: ship onto chest)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/galleotter_edit_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_edit_v2",
+    "name": "Galleotter (card edit: ship onto chest)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/galleotter_edit_v2_1.jpg",
+    "ok": true
   }
 ]
