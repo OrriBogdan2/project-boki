@@ -299,7 +299,8 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 		while t < float(st[1]):
 			s["kmove"] = st[0]
 			s["kmove_t"] = t
-			s["face"] = float(moves.get(st[0], {}).get("heading_off", 0.0))     # (a move that turns its side to the way he goes is fed that facing)
+			# (a move that turns its side to the way he goes is fed that facing)
+			s["face"] = float(moves.get(st[0], {}).get("heading_off", 0.0))
 			if st[0] == "":
 				s.erase("kmove")
 			sync.call("_process", DT)

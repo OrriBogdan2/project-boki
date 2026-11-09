@@ -107,9 +107,11 @@ func _dash(m: Match, h: Hunter, sync: Node, at: Array, dir: String, out: String)
 			continue
 		var fr := i / EVERY
 		var off := rad_to_deg(wrapf(h.face - atan2(-h.roll_dir.x, -h.roll_dir.y), -PI, PI))
+		var turn := rad_to_deg(cl.head_turn) if cl else 0.0
+		var clip := cl.cur if cl else "proc"
+		var move := h.ak.anim_id if h.ak else "-"
 		print("DASHDIR_SHOT %s f%02d roll=%.2f body_off_dash=%4.0f turn=%4.0f aims=%d kmove=%s clip=%s" % [dir, fr,
-			h.roll_t, off, rad_to_deg(cl.head_turn) if cl else 0.0, int(h.ak != null and h.ak.aims_in_dash()),
-			h.ak.anim_id if h.ak else "-", cl.cur if cl else "proc"])
+			h.roll_t, off, turn, int(h.ak != null and h.ak.aims_in_dash()), move, clip])
 		if out != "":
 			_aim(h)
 			await RenderingServer.frame_post_draw
