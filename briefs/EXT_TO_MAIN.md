@@ -4736,3 +4736,4 @@ ART lashyx 8.2 briefs/boki-art/cards/Lashyx.jpg kind=card
 ART lockatara 7.7 briefs/boki-art/batch/out/lockatara_r_w32_4.jpg kind=turnaround status=owner-review
 ART murmurling 8.2 briefs/boki-art/batch/out/murmurling_f_e_w32_1.jpg kind=turnaround form=female status=owner-review
 ART scythant 8.0 briefs/boki-art/batch/out/scythant_r_w32_3.jpg kind=turnaround status=owner-review
+READY ext/cc-plate-timer eba4ad3d9 (CC timers on plates)
