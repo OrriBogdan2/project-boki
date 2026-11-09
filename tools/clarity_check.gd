@@ -89,8 +89,8 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 	b.slow_t = 3.0
 	var sa := _icon(a, "concussion")
 	var sb := _icon(b, "snare")
-	var stun_ok := sa.size() == 1 and absf(float(sa[0][3]) - 2.0) < 0.01 and sa[0][2] == "STUNNED"
-	var slow_ok := sb.size() == 1 and absf(float(sb[0][3]) - 3.0) < 0.01 and sb[0][2] == "SLOWED"
+	var stun_ok: bool = sa.size() == 1 and absf(float(sa[0][3]) - 2.0) < 0.01 and sa[0][2] == "STUNNED"
+	var slow_ok: bool = sb.size() == 1 and absf(float(sb[0][3]) - 3.0) < 0.01 and sb[0][2] == "SLOWED"
 	ok(stun_ok, "stunned dummy: one STUNNED icon, 2.0 s left")
 	ok(slow_ok, "slowed dummy: one SLOWED icon, 3.0 s left")
 	_run(m, 1.0)
@@ -106,12 +106,22 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 	var g := float(_icon(a, "bolas")[0][3])
 	ok(g > 3.9 and g <= 4.0, "Ground shows its time left (%.2f s)" % g)
 	var daze := _icon(b, "burst")
-	var daze_ok := daze.size() == 1 and float(daze[0][3]) > 2.4 and HudPlate.statuses(b).size() == 2
+	var daze_ok: bool = daze.size() == 1 and float(daze[0][3]) > 2.4 and HudPlate.statuses(b).size() == 2
 	ok(daze_ok, "a remote body's Daze and Slow: two icons, Daze 2.5 s left")
 	a.stun_t = 0.0
 	a.root_t = 0.0
 	a.set_meta("gnd_until", 0.0)
 	ok(HudPlate.statuses(a).is_empty(), "all over: the row is gone")
+	var mob: Ent = null
+	for mb in m.mobs:
+		if not mb.dead: mob = mb
+	if mob == null:
+		mob = m.spawn_mob("skitter", a.pos + Vector3(4, 0, 0))
+	if mob:   # the monster plate draws the same row (hud._status_row)
+		mob.stun_t = 1.2
+		var ms := _icon(mob, "concussion")
+		ok(ms.size() == 1 and absf(float(ms[0][3]) - 1.2) < 0.01, "a stunned monster: STUNNED icon, 1.2 s left")
+		mob.stun_t = 0.0
 
 func _icon(e: Ent, icon: String) -> Array:
 	return HudPlate.statuses(e).filter(func(x): return x[0] == icon)
