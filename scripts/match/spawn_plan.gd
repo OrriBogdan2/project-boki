@@ -38,7 +38,8 @@ var spawners := {}             # cat id -> Callable(plan, cand) -> handle
 var takers := {}               # cat id -> Callable(cand) -> bool (is it spent?)
 var rolled := false
 var legend_cfg := {}           # this map's legendary chance and eligible list (Legendary.config)
-var legend := ""                # the legendary species this match rolled, or "" (Legendary.roll)
+var legend := ""               # the legendary species this match rolled, or "" (Legendary.roll)
+var legend_kin: Kin = null     # it, once it has turned up (Legendary.due)
 var _t := 0.0
 
 func _init(match_node: Match) -> void:
@@ -212,10 +213,6 @@ func spawn_all() -> void:
 				var fn: Callable = spawners.get(String(c["cat"]), Callable())
 				if fn.is_valid():
 					c["ref"] = fn.call(self, c)
-	if legend != "" and (not m.net_on or m.is_host):
-		var spot := Legendary.pick_spot(of("rare_kin"), m.hunters.map(func(h): return h.pos), m.seed_val)
-		if not spot.is_empty():
-			Legendary.spawn(m, legend, spot["pos"])
 
 func _spawn_rare(p: Vector3, r: RandomNumberGenerator) -> Kin:
 	# (the boss-egg species never turn up in the wild: Data.common_kin)
@@ -237,6 +234,8 @@ func tick(dt: float) -> void:
 	if _t > 0.0:
 		return
 	_t = 0.25
+	if Legendary.due(self):
+		legend_kin = Legendary.arrive(m, legend, of("rare_kin"))
 	for c in cands:
 		if not c["taken"] and c["active"]:
 			c["taken"] = _is_taken(c)

@@ -83,6 +83,8 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 | Item caches | 4 | Larkhollow, Highwatch, Duskmoor, Saltmere, Frostgate, Cinder Steps, Stormbreak, Thornwood, The Crown, Stormcrown Gaol |
 | Live boss lairs | 2 | Stormcrown Eyrie, The Sunken Forge, The Thornhive |
 
+**Legendary Boki:** a 20% chance per match that one of Cairnback, Hivara turns up, partway in, at a quiet Rare Boki spot.
+
 
 ## Skyreach
 
@@ -132,6 +134,8 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 | Vaults | 2 | Frostkeep, Bloomwild, Ember Quarry, Stormreach, Gullcrest |
 | Item caches | 4 | Skyport, Dawnrest, Ironfall, Fernway, Lantern Hollow, Gullcrest, Mossmere, Stillwater, Static Field, Ember Quarry |
 | Live boss lairs | 2 to 3 | The Sunken Forge, Stormcrown Eyrie, The Thornhive |
+
+**Legendary Boki:** a 20% chance per match that one of Zephyrak, Hivara, Cairnback turns up, partway in, at a quiet Rare Boki spot.
 
 
 ## First Flight

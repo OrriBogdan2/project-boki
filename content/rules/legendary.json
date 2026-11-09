@@ -1,7 +1,8 @@
 {
-	"_doc": "Legendary Boki (docs/decisions: DECISIONS 2026-11-09). Each match rolls once per map: with probability 'chance' one legendary appears, picked uniformly from the map's 'legendaries' list (content/maps/*.json, key 'legendary_spawn_chance' overrides 'chance'; maps without a list use 'roster').",
+	"_doc": "Legendary Boki (owner decision 2026-11-09, briefs/DECISIONS.md). Each match rolls once per map: with probability 'chance' one legendary appears, picked uniformly from the map's 'legendaries' list (content/maps/*.json, key 'legendary_spawn_chance' overrides 'chance'; maps without a list use 'roster'). It turns up delay_s seconds into the match (never at the start), at a Rare Boki point that isn't live, at least min_hunter_dist from every hunter. The roster also orders the Bokidex: legendaries sit last.",
 	"chance": 0.20,
 	"roster": ["cairnback", "hivara", "zephyrak"],
-	"min_start_dist": 40.0,
+	"delay_s": 90.0,
+	"min_hunter_dist": 40.0,
 	"level_bonus": 6
 }

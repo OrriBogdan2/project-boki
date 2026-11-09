@@ -35,9 +35,14 @@ static func type_name(t: String) -> String:
 static func type_col(t: String) -> Color:
 	return TYPES.get(t, {}).get("col", Color("a9b0bf"))
 
-## Its number in the Field Book: the order species are listed in (Data.KIN: the starters first).
+## The order species are listed in: Data.KIN (the starters first), the legendaries always last.
+static func order() -> Array:
+	var ids: Array = Data.KIN.keys()
+	return ids.filter(func(k): return not Legendary.is_legendary(k)) + ids.filter(Legendary.is_legendary)
+
+## Its number in the Field Book: where it sits in order().
 static func number(spk: String) -> int:
-	return Data.KIN.keys().find(spk) + 1
+	return order().find(spk) + 1
 
 static func num_text(spk: String) -> String:
 	return "#%03d" % number(spk)
@@ -78,7 +83,7 @@ static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	g.columns = 6
 	g.add_theme_constant_override("h_separation", 10); g.add_theme_constant_override("v_separation", 10)
 	v.add_child(g)
-	for spk in Data.KIN:
+	for spk in order():
 		g.add_child(tile(spk, tree, on_open))
 
 ## One numbered tile.

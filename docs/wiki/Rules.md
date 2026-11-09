@@ -332,6 +332,19 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | recall_cooldown | 1 |
 | swap_cooldown | 3 |
 
+## legendary (`content/rules/legendary.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Legendary Boki (owner decision 2026-11-09, briefs/DECISIONS.md). Each match rolls once per map: with probability 'chance' one legendary appears, picked uniformly from the map's 'legendaries' list (content/maps/*.json, key 'legendary_spawn_chance' overrides 'chance'; maps without a list use 'roster'). It turns up delay_s seconds into the match (never at the start), at a Rare Boki point that isn't live, at least min_hunter_dist from every hunter. The roster also orders the Bokidex: legendaries sit last. |
+| chance | 0.2 |
+| roster | ["cairnback", "hivara", "zephyrak"] |
+| delay_s | 90 |
+| min_hunter_dist | 40 |
+| level_bonus | 6 |
+
 ## level_growth (`content/rules/level_growth.json`)
 
 

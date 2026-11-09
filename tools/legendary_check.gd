@@ -4,7 +4,10 @@ extends RefCounted
 ##   2. over MATCHES seeded matches per map, the any-legendary rate is the chance +- TOL, at most one
 ##      per match (SpawnPlan.legend is one species), always from the map's list, all of them turn up
 ##   3. the map's legendary_spawn_chance overrides the default (0 never, 1 always)
-##   4. the spot is remote: never a live Rare Boki point, never within min_start_dist of a start
+##   4. the spot is remote: never a live Rare Boki point, never within min_hunter_dist of a hunter
+##   5. a live match: nothing at the start, exactly one legendary once delay_s has passed, at a
+##      Rare Boki point that isn't live
+##   6. the Bokidex lists the legendaries last
 
 const MATCHES := 2000
 const TOL := 0.03
@@ -26,6 +29,8 @@ func run(main: Node) -> void:
 	_rate({}, "generated map")
 	_override()
 	_spot()
+	await _live(main)
+	_dex()
 	print("LEGENDARY DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
 
@@ -72,7 +77,7 @@ func _spot() -> void:
 	for i in 6:
 		cands.append({"pos": Vector3(i * 30.0, 0, 0), "active": i < 3})
 	var starts := [Vector3(0, 0, 0)]
-	var near := float(Legendary.rules()["min_start_dist"])
+	var near := float(Legendary.rules()["min_hunter_dist"])
 	var bad := 0
 	for s in 200:
 		var c := Legendary.pick_spot(cands, starts, s)
@@ -81,3 +86,43 @@ func _spot() -> void:
 	ok("spot is a remote point that is not a live Rare Boki one", bad == 0)
 	var far_one := Legendary.pick_spot(cands.slice(0, 2), [Vector3(100, 0, 0)], 1)
 	ok("no point far enough: takes the farthest", far_one["pos"].x == 0.0)
+
+func _legendaries(m: Match) -> Array:
+	return m.kins.filter(func(k): return is_instance_valid(k) and k.has_meta("legendary"))
+
+func _live(main: Node) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.set_process(false)
+	var plan := m.spawn_plan
+	if plan.legend == "":
+		plan.legend = "hivara"      # this seed didn't roll one; the rate is checked above
+	var delay := float(Legendary.rules()["delay_s"])
+	for i in 30:
+		m.step(Match.DT)
+	ok("live match: no legendary at the start", _legendaries(m).is_empty(), "t=%.1f s" % m.time)
+	m.time = delay - 0.2
+	for i in 60:
+		m.step(Match.DT)
+	var found := _legendaries(m)
+	var one: bool = found.size() == 1 and found[0] == plan.legend_kin and plan.legend_kin.species == plan.legend
+	ok("live match: one %s once %.0f s have passed" % [plan.legend, delay], one, "%d found" % found.size())
+	if one:
+		var at: Vector3 = found[0].global_position
+		var spot_ok := plan.of("rare_kin").any(func(c): return not c["active"] and _flat(c["pos"], at) < 3.0)
+		ok("live match: it stands at a Rare Boki point that isn't live", spot_ok, str(at))
+	for i in 60:
+		m.step(Match.DT)
+	ok("live match: still just one a second later", _legendaries(m).size() == 1)
+	m.queue_free()
+	await main.get_tree().process_frame
+
+func _flat(a: Vector3, b: Vector3) -> float:
+	return Vector2(a.x - b.x, a.z - b.z).length()
+
+func _dex() -> void:
+	var order := DexView.order()
+	var roster: Array = Legendary.rules()["roster"]
+	var tail := order.slice(order.size() - roster.size())
+	ok("Bokidex lists the legendaries last", roster.all(func(sp): return tail.has(sp)), str(tail))
