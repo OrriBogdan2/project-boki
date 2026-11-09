@@ -5818,3 +5818,4 @@ READY ext/garden-integrated 58686d0b6 (the whole Boki garden on one branch: orig
 READY ext/hunter-revamp-pz fb240baa2 (P-Z hunters pip/ryzz/sable/tarek/vex at ~25k with baked 2048 PNG normals; old/new renders in docs/art/wardens/revamp)
 READY ext/tut-text-budget 326714a75 (--tutorial-text-check + shortened tutorial lines)
 READY ext/hunter-revamp-go 4efad09ea (G-O hunter revamp: Hem 25.1k, Kael 25.0k with 2048 baked normal maps, Ostra 24.7k densified; Warden budget 15k->26k in checks + RIG_CONTRACT/PIPELINE; warden checks pass)
+READY ext/warden-detail-pilot b73419fd9 (Hunter detail pilot on Vex and Cinder: report docs/art/wardens/DETAIL_PILOT.md with side-by-side sheets, normal map / 25k / 40k tiers, GPU numbers from --hunter-gpu-bench; recommends 40k + normal x0.6; shipped models unchanged, owner picks the tier)
