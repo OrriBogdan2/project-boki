@@ -48,3 +48,57 @@ A Boki without legs (Zephyrak) writes all its own clips: the body is a chain ben
 
 To add a species: copy `prismander*.py` to its own shapes, coat and clips, add it to `SPECS` (`build_boki.py`),
 `MODULES` (`build_fusion.py`), `BokiRig.FRAME` and `BokiFusion.SPECIES`.
+
+## Gait audit
+
+`godot --headless --path . -- --boki-anim-audit [--boki=a,b] [--json=<file>] [--old-rate]` drives every rigged Boki
+(`tools/boki_anim_audit.gd`) through the real locomotion: the root moves at 1.5 (a following walk), 2.4 (home wander),
+4.4 (home fetch) and 6.5 m/s (a match Boki), `BokiRig._process` reads its own speed and picks clip and rate, and the
+feet bones are read in the Kin's frame, hand-stepped at 30 Hz.
+
+- **Slide**: a foot is planted while it is low and moving backward; slide is how fast it moves against the ground, as a
+  share of the move speed (0 = planted, 100 = the foot skates with the body).
+- **Steps/s**: twice the foot cycles per second, at 2.4 m/s. **Seam**: largest pose jump from a clip's last frame to its
+  first (share of body height). **Pop**: the same jump on the switch idle to walk and walk to run.
+- **Gate**: slide over 25% fails, unless the legs already run at the cadence cap (`BokiRig.MAX_STEP_HZ`, from 80% of it
+  up): marked `*`, stride-limited. Flyers, serpents and blobs have no stepping legs: listed, not gated.
+- `--old-rate` plays the rate BokiRig had before `GAIT` (speed over 1.5 / 2.9 m/s, at most 1.6x): the before column.
+
+Cause: `RUN_STRIDE` 2.9 and `WALK_STRIDE` 1.5 assumed every clip plants its feet at those speeds. Measured at rate 1
+the clips plant theirs at 0.1-1.5 m/s. The fix is in the hand-off, not the rig: `BokiRig.GAIT` holds per species how
+fast the walk and run clips draw the planted foot back (m/s) and the clips' step rate; the clip rate is speed over
+that, capped at `MAX_STEP_HZ` (8 steps/s) so the legs never blur. `--boki-anim-audit` prints a `BOKIGAIT` row per
+species to paste back after a clip is re-keyed.
+
+**What is left**: at walk speeds the feet now mostly plant (cindle, puddlet, hivara under 30% at 1.5 m/s). At run
+speeds the clips' strides are too short for the cadence cap: every row at 4.4 and 6.5 m/s is stride-limited (`*`),
+slide stays 45-95%, and no rate alone fixes that. The gate passes those rows only through that exception. The next step is a stride gain (the run clips re-keyed with longer reach, or the legs
+scaled in the clip rate rule) per species, with this table as the gate. Slide in % of move speed, before → after:
+
+| Boki | 1.5 m/s | 2.4 m/s | 4.4 m/s | 6.5 m/s | steps/s | seam % | pop idle→walk / walk→run |
+|---|---|---|---|---|---|---|---|
+| burrlet | 72 → 35* | 73 → 57* | 76 → 71* | 82 → 81* | 7.9 | 0.40 | 0.09 / 0.26 |
+| cairnback | 83 → 49* | 84 → 68* | 78 → 71* | 85 → 80* | 7.9 | 0.18 | 0.05 / 0.10 |
+| cindle | 54 → 16 | 56 → 27* | 60 → 52* | 72 → 68* | 7.9 | 0.42 | 0.07 / 0.30 |
+| glintmole | 73 → 36* | 74 → 60* | 75 → 70* | 82 → 80* | 7.9 | 0.52 | 0.11 / 0.31 |
+| gloamshell | exempt: blob (snail) | | | | | | |
+| glomwort | exempt: blob | | | | | | |
+| hivara | 64 → 28* | 68 → 49* | 65 → 60* | 76 → 73* | 7.9 | 0.22 | 0.07 / 0.08 |
+| kestrike | exempt: flyer | | | | | | |
+| kindlewren | 81 → 78* | 83 → 86* | 91 → 93* | 93 → 95* | 6.7 | 0.43 | 0.08 / 0.24 |
+| lodestick | 85 → 43* | 85 → 62* | 81 → 74* | 86 → 82* | 8.8 | 0.35 | 0.13 / 0.04 |
+| marchleaf | 68 → 39* | 69 → 50* | 56 → 54* | 72 → 69* | 7.9 | 0.38 | 0.12 / 0.10 |
+| mossgrade | 93 → 64* | 93 → 78* | 83 → 82* | 87 → 88* | 7.3 | 0.24 | 0.09 / 0.05 |
+| nettlynx | 71 → 31* | 73 → 58* | 74 → 70* | 82 → 80* | 7.9 | 0.35 | 0.09 / 0.22 |
+| pebbit | 72 → 32* | 74 → 58* | 74 → 68* | 81 → 79* | 7.5 | 0.46 | 0.10 / 0.29 |
+| puddlet | 67 → 25 | 68 → 50* | 72 → 67* | 80 → 78* | 7.9 | 0.90 | 0.14 / 0.34 |
+| rimeshrew | 71 → 38* | 72 → 61* | 73 → 72* | 82 → 81* | 7.9 | 0.76 | 0.12 / 0.35 |
+| selenfin | exempt: flyer | | | | | | |
+| thrumbird | exempt: flyer | | | | | | |
+| wisplet | exempt: flyer | | | | | | |
+| zapple | 58 → 47* | 63 → 67* | 54 → 45* | 68 → 63* | 7.5 | 0.24 | 0.09 / 0.20 |
+| zephyrak | exempt: serpent | | | | | | |
+
+`*` stride-limited (legs at the step-rate cap). Side-view strips of the worst three (walk 2.4 m/s on top, run 6.5 m/s
+below, floor posts stand still), before and after: `docs/art/kin/boki_gait/<id>_before.png`, `<id>_after.png`
+(`--boki-anim-shots --shots-dir=<dir> --boki=<ids> --tag=<before|after> [--old-rate]`).

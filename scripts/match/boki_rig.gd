@@ -103,8 +103,29 @@ const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
 const WALK_SPEED := 0.5       # m/s: below this it stands
 const RUN_SPEED := 3.2        # m/s: from here it gallops
-const RUN_STRIDE := 2.9       # m/s the run clip covers at speed 1 (Vespyx: reach 1.3, pace 1.06)
-const WALK_STRIDE := 1.5
+## Per species [walk, steps/s, run, steps/s]: how fast the walk and the run clip's planted feet go back at rate 1
+## (m/s) and the steps they take a second (tools/boki_anim_audit.gd prints these rows). The clip rate is the move
+## speed over that, so a planted foot keeps pace with the ground, up to MAX_STEP_HZ.
+const GAIT := {
+	"burrlet": [0.43, 2.7, 0.71, 4.2],
+	"cairnback": [0.26, 2.1, 0.69, 3.5],
+	"cindle": [0.69, 2.7, 1.24, 4.2],
+	"glintmole": [0.41, 2.7, 0.79, 4.2],
+	"hivara": [0.56, 2.7, 1.15, 4.2],
+	"kestrike": [0.24, 2.9, 0.39, 4.2],
+	"kindlewren": [0.26, 6.7, 0.37, 8.3],
+	"lodestick": [0.23, 1.7, 0.58, 3.3],
+	"marchleaf": [0.47, 2.7, 1.51, 4.8],
+	"mossgrade": [0.11, 1.6, 0.57, 5.3],
+	"nettlynx": [0.44, 2.7, 0.78, 4.2],
+	"pebbit": [0.45, 2.7, 0.83, 4.2],
+	"puddlet": [0.50, 2.7, 0.93, 4.2],
+	"rimeshrew": [0.50, 3.1, 0.89, 5.0],
+	"wisplet": [0.36, 2.9, 0.45, 4.2],
+	"zapple": [0.66, 5.4, 1.52, 4.2],
+}
+const GAIT_NONE := [1.5, 2.7, 2.9, 4.2]    # no stepping legs (flyers, serpents, blobs): the rate only follows the speed
+const MAX_STEP_HZ := 8.0     # steps a second the legs are sped up to, however fast it moves
 const INK_WIDTH := 0.0011     # the outline per metre of camera distance
 const INK_FAR_THIN := 0.5
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
@@ -291,10 +312,10 @@ func _pick_clip(dt: float) -> void:
 	var want := _state_clip()
 	set_clip(want)
 	player.speed_scale = 1.0
-	if want == "run":
-		player.speed_scale = clampf(_speed / RUN_STRIDE, 0.7, 1.6)
-	elif want == "walk" or want == "carry":
-		player.speed_scale = clampf(_speed / WALK_STRIDE, 0.6, 1.6)
+	if want == "run" or want == "walk" or want == "carry":
+		var g: Array = GAIT.get(species, GAIT_NONE)
+		var i := 2 if want == "run" else 0
+		player.speed_scale = clampf(_speed / maxf(float(g[i]), 0.05), 0.6, maxf(MAX_STEP_HZ / float(g[i + 1]), 0.6))
 
 func _start_shot(which: String) -> void:
 	_shot = which
