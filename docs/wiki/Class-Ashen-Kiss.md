@@ -70,15 +70,15 @@ What the in-game kit card (K) says.
 
 **Flashover (passive).** Your fire builds Char on foes (it all falls off after 5s). At 31 Char the foe is Ablaze: 3s of burning for 2% of their health a second, one flame over their head. Fed again to full Char they Flash over: a fiercer burn (4%), three flames and a glow. Anything that stokes a foe already burning upgrades it. A burning foe takes 25% more from the stream and the cinder (40% once Flashed over), and the stream also takes 1.5% (2.5%) of their health a second. A knock heals you 16% of your health.
 
-**Soot Ram (dash, Shift, 9s cooldown).** A quick, short head-first dash (fastest at the start) the way you move that stops on the first foe: 16 damage, a heavy shove (you bounce back a little) and 17 Char (half a Flashover). Two charges. A knock restores one charge only. In the air it is a long, fast poof that launches you far and keeps your speed.
+**Soot Ram (dash, Shift, 9s cooldown).** A quick, short head-first dash (fastest at the start) the way you move that stops on the first foe: 20 damage, a heavy shove (you bounce back a little) and 17 Char (half a Flashover). Two charges. A knock restores one charge only. In the air it is a long, fast poof that launches you far and keeps your speed.
 
 **Cinder Shot (RMB, 7s cooldown).**
 
 - *Tap:* Hold to aim down a lane, release: a cinder that always flies its full 14m: 14 damage, a 30% slow for 1.5s, and it sets the foe Ablaze. On a foe that is already burning it hits 25% harder (40% on a Flashed-over one), upgrades the burn and spreads the burn to foes within 4m. A miss fizzles at the end of its flight.
 
-**Furnace Cloak (E, 10.5s cooldown).** On the press, a blast of heat round you (4.5m, the ring shows its edge): 7 damage, 16 Char and Anti-Heal for 3s, and foes in sight are dragged toward you (walls stop them). Hit anyone and you wear a swirling 3s shield of 6.4% health plus 5.1% per foe. A knock resets it.
+**Furnace Cloak (E, 10.5s cooldown).** On the press, a blast of heat round you (4.5m, the ring shows its edge): 10 damage, 16 Char and Anti-Heal for 3s, and foes in sight are dragged toward you (walls stop them). Hit anyone and you wear a swirling 3s shield of 6.4% health plus 5.1% per foe. A knock resets it.
 
-**Flue Flight (hunter ultimate, from level 6, 36s cooldown).** Lift off in a ring of embers and fly 1.8s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. The Cinder Shot and the Furnace Cloak work mid-flight, but the stream of fire does not (the key is ignored until you land), and a knockback (or Shift) speeds you up. The carpet never forms over the abyss. 36s.
+**Flue Flight (hunter ultimate, from level 6, 36s cooldown).** Lift off in a ring of embers and fly 1.8s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 31.6 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. The Cinder Shot and the Furnace Cloak work mid-flight, but the stream of fire does not (the key is ignored until you land), and a knockback (or Shift) speeds you up. The carpet never forms over the abyss. 36s.
 
 ### Ranks
 
