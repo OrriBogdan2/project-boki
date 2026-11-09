@@ -1,7 +1,9 @@
 extends RefCounted
-## --drop-feel-check: the opening drop (DropFeel). Prints PASS/FAIL lines.
-##   1. the player's Boki is never downed or killed in the first 10 s of a normal match or the tutorial
-##   2. steering ramps (no snapping), the dive is clearly faster than the glider, the flare slows the last metres
+## --drop-feel-check: the opening drop (DropFeel, docs/MOVEMENT_FEEL.md "The expedition drop against the source").
+##   1. the player's Boki is never downed or killed through the drop of a normal match or the tutorial
+##   2. parity: the glider steers with the glide's force toward its speed, a quarter of it in the dive [game data];
+##      the dive opens 3.5 m up and the canopy sinks at the source's high-glide pull; the landing is a low
+##      crouch you walk out of at once [footage]; the drop off the skyship lasts 18-22 s (owner)
 ##   3. the reticle: projected landing matches where you land, sits on the ground, hides on landing; red over the void
 var bad := 0
 var m: Match
@@ -74,28 +76,114 @@ func _arena(h: float) -> Hunter:
 	P.glide_k = 1.0
 	return P
 
-func _steering() -> void:
-	var P := _arena(60.0)
-	var prev := Vector2.ZERO
-	var snap := 0.0
-	var tmax := 0.0
-	for i in 40:
-		P.inp["move"] = Vector2(1, 0)
+## One measured value against its target, as --move-feel-check prints them.
+func row(key: String, v: float, lo: float, hi: float, unit: String, src: String) -> void:
+	var good := v >= lo and v <= hi
+	var tag := "PASS" if good else "FAIL"
+	print("DROP %s %s = %.2f %s target %.2f-%.2f (%s)" % [tag, key, v, unit, lo, hi, src])
+	if not good: bad += 1
+
+## Steps with `mv` held until the flat speed reaches 90% of the glide speed; the time it took, the peak
+## acceleration and the top speed seen over `steps`.
+func _push(P: Hunter, mv: Vector2, steps: int) -> Dictionary:
+	var prev := Vector2(P.vel.x, P.vel.z)
+	var out := {"t90": 9.0, "snap": 0.0, "top": 0.0}
+	for i in steps:
+		P.inp["move"] = mv
 		m.step(Match.DT)
 		var hv := Vector2(P.vel.x, P.vel.z)
-		snap = maxf(snap, hv.distance_to(prev) / Match.DT)
+		out["snap"] = maxf(out["snap"], hv.distance_to(prev) / Match.DT)
+		out["top"] = maxf(out["top"], hv.length())
+		if out["t90"] > 8.0 and hv.length() >= 0.9 * Hunter.GLIDE_SPEED: out["t90"] = (i + 1) * Match.DT
 		prev = hv
-		tmax = maxf(tmax, hv.length())
-	ok(snap <= DropFeel.DIVE_ACCEL + 1.0, "dive steering ramps (peak %.1f m/s^2)" % snap)
-	ok(tmax > Hunter.DROP_SPEED * 1.4 and tmax <= Hunter.DIVE_SPEED + 0.1, "the dive tops out at %.1f m/s" % tmax)
+	return out
+
+func _parity() -> void:
+	var quarter: float = Hunter.GLIDE_ACCEL * HunterMove.dive_steer
+	# the dive: a quarter of the glide's steering force, falling faster than the canopy
+	var P := _arena(60.0)
+	var d := _push(P, Vector2(1, 0), 120)
+	row("dive_steer_t", d["t90"], 0.9, 1.3, "s",
+			"[game data] GlideDiveXYForceMultiplier 0.25 x %.2f m/s^2" % Hunter.GLIDE_ACCEL)
+	ok(d["snap"] <= quarter + 1.0 and d["top"] <= Hunter.GLIDE_SPEED + 0.1,
+			"dive steering ramps (peak %.1f m/s^2, top %.1f m/s)" % [d["snap"], d["top"]])
+	ok(absf(-P.vel.y - Hunter.DIVE_FALL) < 0.1 and Hunter.DIVE_FALL > Hunter.DROP_FALL,
+			"the dive falls at %.1f m/s, faster than the canopy's %.1f" % [-P.vel.y, Hunter.DROP_FALL])
 	P.inp["move"] = Vector2.ZERO
 	m.step(Match.DT)
-	var left := Vector2(P.vel.x, P.vel.z).length()
-	ok(left > tmax - DropFeel.BRAKE * Match.DT * 1.5, "letting go decelerates, it does not stop dead")
-
-	var high := DropFeel.fall_vy(-13.0, 13.0, 7.0, 30.0, 0.1)
-	var low := DropFeel.fall_vy(-13.0, 13.0, 7.0, 1.0, 0.1)
+	var kept: bool = Vector2(P.vel.x, P.vel.z).length() > d["top"] - Hunter.GLIDE_ACCEL * Match.DT * 1.5
+	ok(kept, "letting go decelerates, it does not stop dead")
+	var open_h := -1.0
+	for i in 900:
+		m.step(Match.DT)
+		if not P.diving:
+			open_h = P.pos.y - P.ground()
+			break
+	row("deploy_h", open_h, 3.0, 3.6, "m", "[game data] GlideDiveCancelDistance 350 uu: the glide catches you")
+	# under the canopy: the glide's own force and speed, the high glide's sink
+	P = _arena(20.0)
+	P.diving = false
+	var g := _push(P, Vector2(0, 1), 60)
+	row("drop_glide_steer_t", g["t90"], 0.0, 0.35, "s", "[game data] GlideTargetXYForce 162,500 / 100 kg")
+	row("drop_glide_speed", g["top"], Hunter.GLIDE_SPEED * 0.9, Hunter.GLIDE_SPEED * 1.1, "m/s",
+			"[game data] MaxGlide 500 uu/s")
+	row("drop_sink", -P.vel.y, 3.4, 3.6, "m/s", "[game data] GlideDownwardForceMinZVelocity -350 uu/s")
+	# the landing: a low crouch, and you walk out of it the same step
+	P.inp["move"] = Vector2.ZERO
+	for i in 900:
+		m.step(Match.DT)
+		if P.grounded: break
+	ok(P.grounded, "the drop lands")
+	row("land_squash", P.squash, 0.3, 1.0, "", "[footage] a low crouch on every landing")
+	var moving_t := 9.0
+	for i in 12:
+		P.inp["move"] = Vector2(1, 0)
+		m.step(Match.DT)
+		if Vector2(P.vel.x, P.vel.z).length() > 1.0:
+			moving_t = (i + 1) * Match.DT
+			break
+	row("land_recover_t", moving_t, 0.0, 0.2, "s", "[footage] up and moving in ~0.15 s, no lockout")
+	var dur := _land_clip_durs()
+	row("land_clip_dur", dur["lo"], 0.3, 0.5, "s",
+			"[footage] every big move ends in a ~0.4-0.5 s low crouch (shortest clip)")
+	row("land_clip_dur", dur["hi"], 0.3, 0.5, "s", "[footage] the same (longest clip)")
+	var high := DropFeel.fall_vy(-Hunter.DIVE_FALL, Hunter.DIVE_FALL, Hunter.DIVE_VY_RATE, 30.0, 0.1)
+	var low := DropFeel.fall_vy(-Hunter.DIVE_FALL, Hunter.DIVE_FALL, Hunter.DIVE_VY_RATE, 1.0, 0.1)
 	ok(low > high + 1.0, "the flare slows the fall near the ground")
+
+## The shortest and longest landing clip in content/rules/warden_anim (the pose you land in, and for how long).
+func _land_clip_durs() -> Dictionary:
+	var out := {"lo": 9.0, "hi": 0.0}
+	for f in DirAccess.get_files_at("res://content/rules/warden_anim"):
+		if not f.ends_with(".json"): continue
+		var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/warden_anim/" + f))
+		if d == null or not d.has("land"): continue
+		var dur := float(d["land"].get("dur", 0.0))
+		out["lo"] = minf(out["lo"], dur)
+		out["hi"] = maxf(out["hi"], dur)
+	return out
+
+## Off the skyship to the ground in a normal match: how long, and how high the glider opens.
+func _timing() -> void:
+	_start({})
+	var P: Hunter = m.player
+	var t := -1.0
+	var open_h := -1.0
+	for i in 3000:
+		if m.skydrop != null and m.skydrop.planning:
+			m.step(Match.DT)
+			continue
+		if P.riding and t < 0.0:
+			m.ship_jump(P, true)
+			t = 0.0
+		m.step(Match.DT)
+		if t < 0.0: continue
+		t += Match.DT
+		if open_h < 0.0 and P.launch_at < 0.0:
+			open_h = P.pos.y      # (the islands sit near y 0; the ground under the ship may be void)
+		if not P.dropping: break
+	row("drop_open_y", open_h, 40.0, 70.0, "m up", "owner: a high start, a long readable glide down")
+	row("drop_time_s", t, 18.0, 22.0, "s", "owner: the skyship to the ground in 18-22 s")
 
 func _reticle() -> void:
 	var P := _arena(14.0)
@@ -135,16 +223,17 @@ func _reticle() -> void:
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
-	_steering()
+	_parity()
 	_reticle()
+	_timing()
 	for steer in [Vector2.ZERO, Vector2(1, 0)]:
 		_start({})
-		var why := _watch_boki(12.0, steer)
+		var why := _watch_boki(24.0, steer)
 		print("  normal steer=", steer, " ", why)
-		ok(why == "", "normal match, steer %s: your Boki rides with you and is untouched for 12 s" % str(steer))
+		ok(why == "", "normal match, steer %s: your Boki rides with you and is untouched for 24 s" % str(steer))
 	_start({"tutorial": true, "teams": 1, "length": 1500.0})
-	var tw := _watch_boki(12.0)
+	var tw := _watch_boki(24.0)
 	print("  tutorial ", tw)
-	ok(tw == "", "tutorial: your Boki rides with you and is untouched for 12 s")
+	ok(tw == "", "tutorial: your Boki rides with you and is untouched for 24 s")
 	print("DROP DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

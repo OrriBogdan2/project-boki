@@ -97,11 +97,11 @@ Nothing here comes from SUPERVIVE's files.
 | dive_swoop_speed (let go of Ctrl high up) | n/a | 15.0 m/s | 12–15 | [game data] swoop 2.5x, capped at GLIDE_MAX |
 | abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / 0.67 / 0.99 | <= 0.02 / >= 0.6 / >= 0.95 | owner: "really dark/red when going low" |
 | updraft_rise_t (to 8 m/s climb) | 0.333s | 0.233s | <= 0.3s | [est] powerful |
-| drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] punchy |
-| drop_dive_steer_t (90% of commanded) | 0.783s | 0.233s | <= 0.3s | [est] responsive |
+| drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] |
+| drop_dive_steer_t (90% of the glide speed, in the dive) | 0.783s | 1.117s | 0.9–1.3s | [game data] a quarter of the glide's force (GlideDiveXYForceMultiplier) |
 | drop_deploy_frames | 1 | 1 | <= 1 | |
-| drop_deploy_settle_t | 0.267s | 0.217s | <= 0.3s | [est] |
-| drop_glide_steer_t | 0.583s | 0.217s | <= 0.3s | [est] |
+| drop_deploy_settle_t | 0.267s | 0.200s | <= 0.3s | [est] |
+| drop_glide_steer_t | 0.583s | 0.283s | <= 0.35s | [game data] GlideTargetXYForce 162,500 / 100 kg toward MaxGlide 5 m/s |
 | drop_land_dead_frames / land_dead_frames | 1 / 1 | 1 / 1 | <= 1 | no dead time |
 | land_squash | 0.00 | 0.16 | >= 0.05 | landing reads |
 | e2e_input_frames (key to sim, via Match._process) | 1 | 1 | <= 1 | |
@@ -228,6 +228,30 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive. This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
+
+## The expedition drop against the source (`--drop-feel-check`; ext/drop-parity)
+
+Tags as in docs/KIT_PARITY.md: [D] game data (briefs/supervive-data/supervive_physics.md), [F] footage (briefs/hero-ref),
+[O] owner note, [est] ours. The hero-ref footage never shows the opening drop itself (it is cut from ability clips and
+the practice range), so the dive, the opening and the steering rest on the game data and the owner's item 163; the
+landing rows come from each Hunter's "Jump and landing" section. Measured with seed 4242, 60 Hz steps.
+
+| What | Source | Ours before | Ours now | Tag | Where |
+|---|---|---|---|---|---|
+| Dive fall speed | the glider's plunge 32.5 m/s at 35 m/s² [D]; the drop: a 2-3 s rocket lock, then a long readable glide from a high start, 18-22 s to the ground [O] | 13 m/s [est], ~12 s | 5.0 m/s for the launch and the tutorial's skydive: the lock ends 57 m up, the ground comes 19.4 s after the ship | [O] | `Hunter.DIVE_FALL` |
+| Dive steering | the keys keep 0.25 of the glide's force [D] | 45 m/s² toward 14 m/s (90% in 0.23 s) | 4.06 m/s² toward 5 m/s (90% in 1.12 s) | [D] | `DropFeel.steer`, `HunterMove.dive_steer` |
+| Glider opens: when | the lock's end at 2.5 s, or Separate after 1.5 s [O]; a plunge ends 3.5 m up and the glide catches you [D] | lock 2.5 s; by itself 8 m up [est] | lock 2.5 s (unchanged); by itself 3.5 m up (3.40 measured, one step late) | [O] [D] | `DropLaunch.LOCK_S`, `Hunter.DEPLOY_H` |
+| Glider opens: how | no number: GlideStartFallSpeedMin -0.85 and the exit -0.4 m/s are thresholds, not a catch | the fall checks to 1.6 m/s, settles to the sink in 0.2 s | the same | [est] | `Hunter.DEPLOY_POP`, `DROP_VY_RATE` |
+| Glide steering | GlideTargetXYForce 162,500 / 100 kg = 16.25 m/s² toward MaxGlide 5 m/s [D]; "slower, heavier, steering has inertia" [O] | 26 m/s² toward 8 m/s, a 30 m/s² brake | 16.25 m/s² toward 5.0 m/s (90% in 0.28 s); letting go brakes with the same force (the source's braking forces are locked) | [D] | `DropFeel.steer` on `Hunter.GLIDE_ACCEL` / `GLIDE_SPEED` |
+| Sink under the canopy | high over the ground the glider is pulled down at up to 3.5 m/s [D] | 4.2 m/s [est] | 3.5 m/s | [D] | `Hunter.DROP_FALL` |
+| Flare over the last metres | none known: under 8.5 m the source holds height and the landing is the player's | 2.2 m/s over the last 4 m | the same | [est] | `DropFeel.FLARE_*` |
+| Landing recovery | a plain landing is a low crouch ~0.1 s and up in ~0.05 s, no lockout (dancer); big moves end in a ~0.4-0.5 s low crouch (bjorn, juggernaut) [F] | no lockout; a `land_t` timer that nothing read | no lockout: moving 0.03 s after touchdown; the landing clip plays 0.36-0.42 s; `land_t` deleted | [F] | `warden_anim/*.json` "land" |
+| Landing pose | a low crouch; the deepest onto the knees (juggernaut); none for a hoverer (ostra) or Linwick's jetpack set-down [F] | squash 0.45 | the same: 0.45, a low crouch | [F] | `DropFeel.LAND_SQUASH` |
+
+Kept as built: the planning phase, the drop leader, the squad's rocket launch in formation (followers now cap against the
+leader's own speed, so the 14 m/s launch and the 5 m/s glide both hold the slots), and Separate only once the drop is
+made (ext/drop-solo-after). Open: Ostra's hover and Linwick's set-down have no crouch in the source; that is the warden
+clips' business, not the drop's.
 
 ## Not touched
 

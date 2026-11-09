@@ -62,16 +62,14 @@ const GLIDE_SPEED := 5.0       # [game data] MaxGlide 500 uu/s (item 163: "too f
 const GLIDE_TIME := 9.0        # (owner: "lasts too long, not punishing enough") was 14s of level glide before the heat ring turns hot
 const GLIDE_DRAG := 1.6         # speed lost per second while gliding (more when going fast)
 const GLIDE_MAX := 15.0
-# The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
-# itself near the ground (or earlier on jump) for a slower, floatier last stretch.
-const DIVE_FALL := 13.0        # [est] a punchy skydive (was 11)
-const DIVE_SPEED := 14.0       # m/s, top flat speed in the dive (DropFeel)
-const DROP_FALL := 4.2
-const DROP_SPEED := 8.0        # m/s, top flat speed under the open glider
-const DIVE_VY_RATE := 7.0      # the dive reaches its fall speed in ~0.3s (was 4)
-const DROP_VY_RATE := 9.0      # the canopy settles to its sink in ~0.2s after it opens (was 4)
-const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, then settles to DROP_FALL
-const DEPLOY_H := 8.0         # the glider opens by itself this high above the ground
+# The opening drop (ext/drop-parity): the squad's rocket launch (DropLaunch, item 163), then the glider as
+# SUPERVIVE's high glide: GLIDE_SPEED, GLIDE_ACCEL and the pull toward its height target (DropFeel).
+const DIVE_FALL := 5.0         # m/s the launch (and the tutorial's skydive) falls at: a 70 m start lands in 18-22 s (owner)
+const DROP_FALL := 3.5         # [game data] GlideDownwardForceMinZVelocity -350 uu/s: the sink high over the ground
+const DIVE_VY_RATE := 7.0      # [est] the fall reaches its speed in ~0.3s
+const DROP_VY_RATE := 9.0      # [est] the canopy settles to its sink in ~0.2s after it opens
+const DEPLOY_POP := -1.6       # [est] the canopy catching: your fall checks to this, then settles to DROP_FALL
+const DEPLOY_H := 3.5          # [game data] GlideDiveCancelDistance 350 uu: a dive ends and the glide catches you this high
 ## Armor, as in Supervive: it takes a flat share off every hit (ARMOR_DR) for as long as it has
 ## durability left; what gets through hurts your health and wears the durability down by the same
 ## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
@@ -200,7 +198,6 @@ var glide_lift := GlideLift.new()      # the abyss lift's spring and float, ledg
 var glide_dive := GlideDive.new()      # the glider's plunge while crouch is held under it
 var wslam_t := 0.0
 var wallstun := 0.0           # how long the next wall slam stuns (Haymaker makes it longer)
-var land_t := 0.0
 var ghost_t := 0.0
 var step_t := 0.0
 var gliding := false
@@ -1952,7 +1949,7 @@ func sim(dt: float) -> void:
 	tick_status(dt)
 	if grounded:
 		air_peak = pos.y
-	for k in ["base_cd", "weak_t", "dash_buf", "hit_heat_t", "ex_cd", "reveal_t", "inv_t", "fire_cd", "coyote", "jump_buf", "mantle_cd", "grap_cd", "sig_cd", "cloak_t", "haste_t", "fortify_t", "recoil", "muzzle_t", "regen_wait", "land_t", "glide_cd", "bless_t", "crit_t", "sick_t", "phase_t"]:
+	for k in ["base_cd", "weak_t", "dash_buf", "hit_heat_t", "ex_cd", "reveal_t", "inv_t", "fire_cd", "coyote", "jump_buf", "mantle_cd", "grap_cd", "sig_cd", "cloak_t", "haste_t", "fortify_t", "recoil", "muzzle_t", "regen_wait", "glide_cd", "bless_t", "crit_t", "sick_t", "phase_t"]:
 		set(k, maxf(0.0, get(k) - dt))
 	if shield_t > 0.0:
 		shield_t -= dt
@@ -2196,11 +2193,10 @@ func _physics(dt: float) -> void:
 		hv = glide_dive.steer(hv, mv * gs, gs, dt) if glide_dive.on else glide_steer(hv, mv * gs, gs, dt)
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
-			gs = DIVE_SPEED if diving else DROP_SPEED
 			if not DropLaunch.locked(self):
 				hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)     # (the launch flies its arc)
 			if drop_follow != null and m.skydrop:
-				hv = m.skydrop.follow_hv(self, gs)     # in formation: the leader steers
+				hv = m.skydrop.follow_hv(self)     # in formation: the leader steers
 		# wind roads carry you along (either way), updrafts lift you
 		in_current = false
 		if not dropping:
@@ -2405,7 +2401,6 @@ func _physics(dt: float) -> void:
 			if fv < -11.0 or cur > spd * 1.3:
 				m.fx.dust(pos, 6)
 				squash = 0.15
-				land_t = 0.2
 				m.sfx("land", pos, -10.0)
 			elif fv < -4.0 and not was_drop:
 				# (movefeel) every real landing reads: a brief squash by how fast you came down, a puff
@@ -2417,7 +2412,6 @@ func _physics(dt: float) -> void:
 				# a long drop lands hard: a thud, a puff of dust and a short stagger
 				m.fx.dust(pos, 12)
 				squash = 0.25
-				land_t = 0.32
 			if jump_buf > 0.0:
 				jump_buf = 0.0
 				vel.y = JUMP_V

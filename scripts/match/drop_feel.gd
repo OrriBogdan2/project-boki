@@ -1,22 +1,18 @@
 class_name DropFeel
 extends RefCounted
-## How the opening drop moves and lands: smooth steering toward the keys, a flare just above the
+## How the opening drop moves and lands: SUPERVIVE's glide force toward the keys, a flare just above the
 ## ground, and the landing's impact. DropReticle projects the same numbers to show where you'll land.
 
-const ACCEL := 26.0            # m/s^2, speeding up toward the keys under the glider (90% of top speed in ~0.28s)
-const DIVE_ACCEL := 45.0       # m/s^2, the same in the dive
-const BRAKE := 30.0            # m/s^2, slowing down or turning back (let go of the keys)
-const FLARE_H := 4.0           # m, the glider flares (slows the fall) this far above the ground
-const FLARE_FALL := 2.2        # m/s, the fall speed it flares down to
-const FLARE_RATE := 6.0        # 1/s, how quickly the flare takes hold
-const LAND_SQUASH := 0.45      # model squash on touchdown
+const FLARE_H := 4.0           # m, the glider flares (slows the fall) this far above the ground [est]
+const FLARE_FALL := 2.2        # m/s, the fall speed it flares down to [est]
+const FLARE_RATE := 6.0        # 1/s, how quickly the flare takes hold [est]
+const LAND_SQUASH := 0.45      # model squash on touchdown: a low crouch [footage]
 
-## The next flat velocity: it ramps toward `mv * top speed` (a no-key drift decelerates, never snaps).
+## The next flat velocity: the glide's force (Hunter.GLIDE_ACCEL) pulls it toward `mv * GLIDE_SPEED`, a quarter
+## of it in the dive (HunterMove.dive_steer). Letting go brakes with the same force [est]: it never snaps.
 static func steer(hv: Vector2, mv: Vector2, diving: bool, dt: float) -> Vector2:
-	var want := mv * (Hunter.DIVE_SPEED if diving else Hunter.DROP_SPEED)
-	var gain := DIVE_ACCEL if diving else ACCEL
-	var turning := hv.dot(want) < hv.length_squared() * 0.8      # slowing, reversing or letting go
-	return hv.move_toward(want, (BRAKE if turning else gain) * dt)
+	var force := Hunter.GLIDE_ACCEL * (HunterMove.dive_steer if diving else 1.0)
+	return hv.move_toward(mv * Hunter.GLIDE_SPEED, force * dt)
 
 ## The next fall speed: the glider's sink, and a flare over the last few metres.
 static func fall_vy(vy: float, sink: float, rate: float, above: float, dt: float) -> float:

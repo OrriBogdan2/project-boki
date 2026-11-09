@@ -278,12 +278,13 @@ func target_of(f: Hunter) -> Vector2:
 	var s: Vector2 = SLOTS[clampi(f.drop_slot, 0, SLOTS.size() - 1)]
 	return Vector2(l.pos.x, l.pos.z) + side * s.x - fwd * s.y
 
-## The glider's horizontal velocity for a follower: the leader's, plus whatever closes the gap to its slot.
-func follow_hv(f: Hunter, gs: float) -> Vector2:
+## The glider's horizontal velocity for a follower: the leader's, plus whatever closes the gap to its slot
+## (capped against the leader's own speed, so the launch's 14 m/s and the glide's 5 both keep the formation).
+func follow_hv(f: Hunter) -> Vector2:
 	var l: Hunter = f.drop_follow
+	var lv := Vector2(l.vel.x, l.vel.z)
 	var err := target_of(f) - Vector2(f.pos.x, f.pos.z)
-	# (movefeel) the leader now steers ~3x snappier, so followers close the gap harder (was 3.0)
-	return (Vector2(l.vel.x, l.vel.z) + err * FOLLOW_GAIN).limit_length(gs * 1.6 + 3.0)
+	return (lv + err * FOLLOW_GAIN).limit_length(lv.length() * 1.6 + 3.0)
 
 func follow_vy(f: Hunter) -> float:
 	var l: Hunter = f.drop_follow
