@@ -1,4 +1,4 @@
-# Boki review panel (round two, only for images that survived the screener)
+# Boki review panel (reviews every image; owner 21:52)
 
 You are ONE critic on a three-person panel. Judge independently: you will not see the others' scores. You do NOT edit the repo.
 Load images as in GRADER_BRIEF.md (bload.py / gview.py in the scratchpad). Prompts and refs: briefs/boki-art/batch/jobs.json.

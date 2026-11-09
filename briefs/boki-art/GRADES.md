@@ -74,3 +74,4 @@ Auto-fail at batch stage: anything upright or person-like, any strap/belt/band/v
 1. Screener (one grader, cheap): rejects the obvious fails (copies, upright, strapped props, ghost rows, look-alikes). Anything it scores 8.3+ moves on.
 2. Panel (three independent critics, see PANEL_BRIEF.md): A art director (craft, appeal, silhouette), B creature designer and roster keeper (idea through the body, fundamental evolutions, uniqueness), C player and production (would kids want it, memorable, buildable in 3D).
 3. Pass = no veto, every seat >= 8.0, average >= 8.5, two seats agree on the run. Panel splits go to the owner flagged, with each seat's note. Each seat is calibrated against owner verdicts over time.
+- Update (owner 21:52): the panel reviews EVERY image, not only screener survivors, and gives each a combined score (the three seats' average, with any veto noted). The owner reviews from those combined scores.
