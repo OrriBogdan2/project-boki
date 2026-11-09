@@ -21766,5 +21766,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/pipewurm_card_1.jpg",
     "ok": true
+  },
+  {
+    "id": "polyshroom_card",
+    "name": "Polyshroom (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/polyshroom_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "polyshroom_card",
+    "name": "Polyshroom (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/polyshroom_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "prismander_card",
+    "name": "Prismander (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/prismander_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "prismander_card",
+    "name": "Prismander (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/prismander_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "proofhop_card",
+    "name": "Proofhop (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/proofhop_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "proofhop_card",
+    "name": "Proofhop (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/proofhop_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "prowyak_card",
+    "name": "Prowyak (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/prowyak_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "prowyak_card",
+    "name": "Prowyak (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/prowyak_card_2.jpg",
+    "ok": true
   }
 ]
