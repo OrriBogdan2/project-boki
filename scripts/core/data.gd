@@ -213,13 +213,13 @@ func common_kin() -> Array:
 func is_rare(sp_id: String) -> bool:
 	return bool(KIN.get(sp_id, {}).get("rare", false))
 
-## What a species' egg is called ("Venom Egg"), from content/kin/<id>.json "egg".
+## What a species' egg is called ("Poison Egg"), from content/kin/<id>.json "egg".
 func egg_name(sp_id: String) -> String:
 	var sp: Dictionary = KIN.get(sp_id, {})
 	var e: Dictionary = sp.get("egg", {})
 	if e.has("name"):
 		return String(e["name"])
-	return "%s Egg" % String(sp.get("type", "Kin")).capitalize()
+	return "%s Egg" % KinTypes.name_of(String(sp.get("type", "Kin")))
 
 func egg_info(sp_id: String) -> Dictionary:
 	var sp: Dictionary = KIN.get(sp_id, {})

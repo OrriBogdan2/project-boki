@@ -132,7 +132,7 @@ func _shelter_card(c: Dictionary) -> Control:
 	var title := String(sp["name"])
 	if String(rec["name"]) != title: title = "%s  ·  %s" % [rec["name"], title]
 	info.add_child(UI.label(title, UI.T_BODY, UI.INK, UI.semi))
-	var kind := String(sp.get("type", "")).capitalize()
+	var kind := KinTypes.label(sp)
 	info.add_child(UI.label("Level %d  ·  %s" % [int(rec.get("level", 1)), kind], 12, UI.MUTED))
 	var giver := String(c.get("from", ""))
 	var story := "A stray"

@@ -32,7 +32,7 @@ static func parse(v: Variant, rep: GrammarReport) -> MergeSpec:
 	m.id = rep.ident(d, "id", "")
 	m.display_name = rep.text(d, "name", "", "", true)
 	m.flavor = rep.text(d, "flavor", "")
-	m.theme = rep.text(d, "theme", "", "none")
+	m.theme = KinTypes.canon(rep.text(d, "theme", "", "none"))
 	if not KinParts.THEMES.has(m.theme):
 		rep.err("theme", "unknown theme '%s' (themes are cosmetic: %s)" % [m.theme, ", ".join(KinParts.THEMES)])
 	m.duration = float(rep.param(d, "duration", KinParts.MERGE["duration"], ""))

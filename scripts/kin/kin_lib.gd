@@ -77,7 +77,7 @@ static func species(id: String) -> Dictionary:
 		return {}
 	var c: Dictionary = k.colors
 	var out := {
-		"name": k.display_name, "type": k.theme, "theme": k.theme,
+		"name": k.display_name, "type": k.theme, "type2": k.theme2, "theme": k.theme,
 		"color": Color(String(c.get("body", "#ffffff"))), "belly": Color(String(c.get("belly", "#ffffff"))),
 		"glow": Color(String(c.get("glow", c.get("body", "#ffffff")))),
 		"hp": k.stat("kin_hp"), "dmg": k.stat("kin_damage"), "speed": k.stat("kin_speed"), "range": k.reach,

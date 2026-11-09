@@ -80,7 +80,7 @@ static func decode_form(s: String) -> Dictionary:
 		return {}
 	if p[1] == "1" and p[0] != "" and not Content.merge_form(p[0]).is_empty():
 		return MergeForm.kit_form(p[0], float(p[13]))
-	return {"id": p[0], "kit": false, "name": p[2], "type": p[3], "color": Color.html(p[4]), "glow": Color.html(p[5]), "accent": Color.html(p[6]), "parts": Array(p[7].split(",", false)),
+	return {"id": p[0], "kit": false, "name": p[2], "type": KinTypes.canon(p[3]), "color": Color.html(p[4]), "glow": Color.html(p[5]), "accent": Color.html(p[6]), "parts": Array(p[7].split(",", false)),
 		"size": float(p[8]), "part_k": 1.3, "style": p[9], "word": p[10], "surge": p[11] == "1", "ring": float(p[12]), "dur": float(p[13]), "aug": {}, "haste": 0.0, "def": {}}
 
 ## Tell the other games something happened to this Boki or hunter (only for bodies this game owns).

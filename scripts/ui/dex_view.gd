@@ -11,29 +11,18 @@ extends RefCounted
 ## nothing here writes to it. Field notes, not a checklist (docs/POSITIONING.md): no completion
 ## percentage, no rarity colours.
 
-## Each type's badge colour and name (the glyphs are drawn by TypeIcon).
-const TYPES := {
-	"spore": {"name": "Spore", "col": Color("9ccf6a")},
-	"steel": {"name": "Steel", "col": Color("cbb48a")},
-	"poison": {"name": "Poison", "col": Color("b98cff")},
-	"bug": {"name": "Bug", "col": Color("f2c24a")},
-	"psychic": {"name": "Psychic", "col": Color("8f8cff")},
-	"crystal": {"name": "Crystal", "col": Color("ff9fd0")},
-	"fairy": {"name": "Fairy", "col": Color("cfdcff")},
-	"sound": {"name": "Sound", "col": Color("6fb6ff")},
-	"flying": {"name": "Flying", "col": Color("6fe0cf")},
-}
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0
 
+## A species' first type (KinTypes holds the 18 names and badge colours).
 static func type_of(spk: String) -> String:
 	return String(Data.KIN.get(spk, {}).get("type", ""))
 
 static func type_name(t: String) -> String:
-	return String(TYPES.get(t, {}).get("name", t.capitalize()))
+	return KinTypes.name_of(t)
 
 static func type_col(t: String) -> Color:
-	return TYPES.get(t, {}).get("col", Color("a9b0bf"))
+	return KinTypes.col_of(t)
 
 ## Its number in the Field Book: the order species are listed in (Data.KIN: the starters first).
 static func number(spk: String) -> int:
@@ -101,7 +90,8 @@ static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
 	nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nl)
 	if is_seen:
-		top.add_child(TypeIcon.new(type_of(spk), 16.0))
+		for t in KinTypes.of_species(Data.KIN.get(spk, {})):
+			top.add_child(TypeIcon.new(t, 16.0))
 	col.add_child(top)
 	var pic := CenterContainer.new()
 	pic.custom_minimum_size = Vector2(0, PORTRAIT + 4)
@@ -175,14 +165,13 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 	nrow.add_child(UI.title(String(sp["name"]), 26, UI.INK))
 	info.add_child(nrow)
 	var trow := UI.hbox(8)
-	var t := type_of(spk)
-	var tchip := PanelContainer.new()
-	var chip_box := UI.frame(Color(type_col(t), 0.14), UI.R_PILL, Color(0, 0, 0, 0), 0, 8, 3, 0.0)
-	tchip.add_theme_stylebox_override("panel", chip_box)
-	var th := UI.hbox(6); tchip.add_child(th)
-	th.add_child(TypeIcon.new(t, 18.0))
-	th.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
-	trow.add_child(tchip)
+	for t in KinTypes.of_species(sp):
+		var tchip := PanelContainer.new()
+		tchip.add_theme_stylebox_override("panel", UI.frame(Color(type_col(t), 0.14), UI.R_PILL, Color(0, 0, 0, 0), 0, 8, 3, 0.0))
+		var th := UI.hbox(6); tchip.add_child(th)
+		th.add_child(TypeIcon.new(t, 18.0))
+		th.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
+		trow.add_child(tchip)
 	trow.add_child(UI.tag("Caught" if is_caught else "Seen", UI.GOOD if is_caught else UI.MUTED))
 	info.add_child(trow)
 	var note := UI.para(_field_note(spk), UI.T_SMALL + 1, UI.INK)
@@ -349,15 +338,59 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.45, 0.0), P.call(0.45, 0.0), P.call(0.0, 0.55)]), ink)
 			ci.draw_line(P.call(-0.8, 0.8), P.call(0.8, 0.8), ink, w, true)
 		"crystal":       # a cut gem
-			ci.draw_colored_polygon(PackedVector2Array([P.call(0.0, -0.95), P.call(0.75, 0.0), P.call(0.0, 0.95), P.call(-0.75, 0.0)]), ink)
+			ci.draw_colored_polygon(PackedVector2Array([
+				P.call(0.0, -0.95), P.call(0.75, 0.0), P.call(0.0, 0.95),
+				P.call(-0.75, 0.0),
+			]), ink)
 		"fairy":       # a crescent
 			ci.draw_circle(P.call(0.0, 0.0), s * 0.82, ink)
 			ci.draw_circle(P.call(0.35, -0.25), s * 0.68, Color(col.darkened(0.15), alpha))
 		"sound":        # rings of sound
 			for k in 3:
 				ci.draw_arc(P.call(-0.55, 0.0), s * (0.35 + k * 0.42), -0.9, 0.9, 10, ink, w, true)
-		"flying":     # a bolt
-			ci.draw_colored_polygon(PackedVector2Array([P.call(0.25, -0.95), P.call(-0.55, 0.15), P.call(-0.05, 0.15), P.call(-0.3, 0.95), P.call(0.55, -0.2), P.call(0.05, -0.2)]), ink)
+		"electric":    # a bolt
+			ci.draw_colored_polygon(PackedVector2Array([
+				P.call(0.25, -0.95), P.call(-0.55, 0.15), P.call(-0.05, 0.15),
+				P.call(-0.3, 0.95), P.call(0.55, -0.2), P.call(0.05, -0.2),
+			]), ink)
+		"flying":      # a wing
+			ci.draw_colored_polygon(PackedVector2Array([
+				P.call(-0.9, 0.5), P.call(-0.2, -0.85), P.call(0.9, -0.5),
+				P.call(0.2, 0.0), P.call(0.55, 0.55), P.call(-0.1, 0.3),
+			]), ink)
+		"fire":        # a flame
+			ci.draw_colored_polygon(PackedVector2Array([
+				P.call(0.0, -0.95), P.call(0.55, -0.1), P.call(0.6, 0.45),
+				P.call(0.0, 0.9), P.call(-0.6, 0.45), P.call(-0.5, -0.1),
+				P.call(-0.15, 0.1),
+			]), ink)
+		"water":       # two waves
+			for k in 2:
+				ci.draw_arc(P.call(-0.45, 0.1 + k * 0.5 - 0.3), s * 0.45, PI, TAU, 8, ink, w, true)
+				ci.draw_arc(P.call(0.45, 0.1 + k * 0.5 - 0.3), s * 0.45, 0.0, PI, 8, ink, w, true)
+		"grass":       # a leaf
+			ci.draw_colored_polygon(PackedVector2Array([
+				P.call(-0.8, 0.8), P.call(-0.7, -0.2), P.call(0.0, -0.8),
+				P.call(0.8, -0.85), P.call(0.7, 0.0), P.call(0.0, 0.7),
+			]), ink)
+		"ice":         # a snowflake
+			for k in 3:
+				var a := PI * k / 3.0
+				ci.draw_line(P.call(cos(a) * 0.9, sin(a) * 0.9), P.call(-cos(a) * 0.9, -sin(a) * 0.9), ink, w, true)
+		"rock":        # a boulder
+			ci.draw_colored_polygon(PackedVector2Array([
+				P.call(-0.85, 0.5), P.call(-0.6, -0.4), P.call(-0.1, -0.8),
+				P.call(0.55, -0.55), P.call(0.9, 0.1), P.call(0.6, 0.7),
+				P.call(-0.3, 0.8),
+			]), ink)
+		"dark":        # a closed eye
+			ci.draw_arc(P.call(0.0, -0.3), s * 0.9, 0.35, PI - 0.35, 10, ink, w, true)
+			ci.draw_circle(P.call(0.0, 0.1), s * 0.3, ink)
+		"dragon":      # a horn
+			ci.draw_colored_polygon(PackedVector2Array([
+				P.call(-0.5, 0.85), P.call(-0.5, 0.0), P.call(0.0, -0.5),
+				P.call(0.6, -0.95), P.call(0.35, -0.2), P.call(0.5, 0.85),
+			]), ink)
 		_:
 			ci.draw_circle(c, s * 0.45, ink)
 

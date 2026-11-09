@@ -286,7 +286,8 @@ const PRESETS := {
 }
 
 ## Cosmetic themes: tint and particle flavour only. Never a rule.
-const THEMES := ["poison", "spore", "psychic", "crystal", "fairy", "sound", "fire", "ice", "electric", "rock", "grass", "dark", "steel", "bug", "flying", "none"]
+## The 18 Boki types (KinTypes.TYPES) plus "none".
+const THEMES := ["normal", "fire", "water", "grass", "spore", "electric", "ice", "rock", "psychic", "flying", "dragon", "dark", "poison", "bug", "steel", "fairy", "crystal", "sound", "none"]
 
 # ---- the kin: body, stats, carry ----
 const ROLES := ["bruiser", "tank", "skirmisher", "controller", "support", "trickster"]

@@ -34,7 +34,7 @@ static func parse(v: Variant, rep: GrammarReport) -> AbilitySpec:
 	a.display_name = rep.text(d, "name", "", "", true)
 	a.short = rep.text(d, "short", "", a.display_name)
 	a.flavor = rep.text(d, "flavor", "")
-	a.theme = rep.text(d, "theme", "", "none")
+	a.theme = KinTypes.canon(rep.text(d, "theme", "", "none"))
 	if not KinParts.THEMES.has(a.theme):
 		rep.err("theme", "unknown theme '%s' (themes are cosmetic: %s)" % [a.theme, ", ".join(KinParts.THEMES)])
 	a.tier = int(rep.number(d, "tier", "", 1, 3, 1, true))

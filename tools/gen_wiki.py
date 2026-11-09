@@ -371,6 +371,12 @@ def ability_line(aid):
     if a.get("range"): bits.append("range %sm" % num(a["range"]))
     return "**%s** (%s). %s" % (a["name"], ", ".join(bits), a.get("flavor", ""))
 
+BOKI_TYPES = ["normal", "fire", "water", "grass", "spore", "electric", "ice", "rock", "psychic", "flying", "dragon",
+              "dark", "poison", "bug", "steel", "fairy", "crystal", "sound"]   # same order as scripts/kin/kin_types.gd
+
+def types_of(k):
+    return [t for t in (k.get("theme", "?"), k.get("theme2")) if t]
+
 def gen_boki():
     stats_names = {"kin_hp": "Health", "kin_damage": "Damage", "kin_speed": "Speed", "owner_max_hp": "Your max health", "owner_shield": "Your shield"}
     bosses = gd_const("core/data.gd", "MOBS") or {}
@@ -381,14 +387,15 @@ def gen_boki():
     themes = {}
     rows = []
     for kid, k in KIN2.items():
-        themes.setdefault(k.get("theme", "?"), []).append(k["name"])
+        for t in types_of(k):
+            themes.setdefault(t, []).append(k["name"])
         src = "Starter egg" if kid in starters else ("Rare Egg from %s" % egg_of[kid] if kid in egg_of else "Wild, nest eggs")
-        rows.append(["[%s](#%s)" % (k["name"], slug(k["name"])), " + ".join(k.get("animals", [])), k.get("theme", "").title(), k["body"].get("size", ""), k["ai"].get("role", ""), src])
+        rows.append(["[%s](#%s)" % (k["name"], slug(k["name"])), " + ".join(k.get("animals", [])), " / ".join(t.title() for t in types_of(k)), k["body"].get("size", ""), k["ai"].get("role", ""), src])
     body = "Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its home file (`content/kin/<id>.json`). "
     body += "The id in brackets is the internal name the code and save files use.\n\n"
     body += table(["Boki", "Animals", "Type", "Size", "Fights as", "Where it comes from"], rows)
-    body += "\n\n## Types\n\nA Boki's type is its theme in the grammar: it colours its abilities and decides which tags its abilities carry into your class kit (see " + link("Boki") + "). Types in use:\n\n"
-    body += table(["Type", "Species"], [[t.title(), ", ".join(v)] for t, v in sorted(themes.items())])
+    body += "\n\n## Types\n\nA Boki's type is its theme in the grammar: it colours its abilities and decides which tags its abilities carry into your class kit (see " + link("Boki") + "). All 18 types (a species has one or two):\n\n"
+    body += table(["Type", "Species"], [[t.title(), ", ".join(themes.get(t, [])) or "none yet"] for t in BOKI_TYPES])
     for kid, k in KIN2.items():
         h = KIN1.get(kid, {})
         body += "\n\n## %s\n\n" % k["name"]
@@ -398,7 +405,7 @@ def gen_boki():
         ai = k.get("ai", {})
         work = h.get("work") or work_fb.get(kid, {})
         info = [
-            ["Type", k.get("theme", "").title()],
+            ["Type", " / ".join(t.title() for t in types_of(k))],
             ["Body", "%s, reach %s, mass %s%s" % (k["body"].get("size", ""), num(k["body"].get("reach", "")), num(k["body"].get("mass", "")), ("; about %s cm, %s kg on average" % (num(h["size"]["cm"]), num(h["size"]["kg"]))) if h.get("size") else "")],
             ["Stat points", ", ".join("%s %s" % (stats_names.get(s, s), num(v)) for s, v in st.items())],
             ["Personality", ", ".join("%s %s" % (t, num(v)) for t, v in pers.items())],

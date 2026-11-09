@@ -10,6 +10,7 @@ var id := ""
 var display_name := ""
 var animals: Array = []
 var theme := "none"
+var theme2 := ""      # the optional second type
 var flavor := ""
 var colors := {}             # body belly glow wing: hex
 var look := {}               # body ears tail feet aura: core model builder ids
@@ -36,7 +37,7 @@ var voice := {}
 var egg := {}
 var infusion := {}           # optional: what this kin lends archetype sockets (docs/ARCHETYPES.md §4.2); derived when absent
 
-const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "dodge_rider", "active", "auto", "merge", "evolution", "voice", "egg", "infusion"]
+const FIELDS := ["grammar", "id", "name", "animals", "theme", "theme2", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "dodge_rider", "active", "auto", "merge", "evolution", "voice", "egg", "infusion"]
 const REQUIRED := ["grammar", "id", "name", "animals", "colors", "look", "body", "stats", "personality", "ai", "carry", "active", "merge"]
 
 static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
@@ -50,9 +51,12 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 	k.id = rep.ident(d, "id", "")
 	k.display_name = rep.text(d, "name", "", "", true)
 	k.flavor = rep.text(d, "flavor", "")
-	k.theme = rep.text(d, "theme", "", "none")
+	k.theme = KinTypes.canon(rep.text(d, "theme", "", "none"))
 	if not KinParts.THEMES.has(k.theme):
 		rep.err("theme", "unknown theme '%s' (themes are cosmetic: %s)" % [k.theme, ", ".join(KinParts.THEMES)])
+	k.theme2 = KinTypes.canon(rep.text(d, "theme2", "", ""))
+	if k.theme2 != "" and (not KinTypes.TYPES.has(k.theme2) or k.theme2 == k.theme):
+		rep.err("theme2", "the second type must be a different Boki type, got '%s'" % k.theme2)
 	# based on one or two real animals
 	var an := rep.arr(d.get("animals", []), "animals")
 	if d.has("animals") and (an.size() < 1 or an.size() > 2):

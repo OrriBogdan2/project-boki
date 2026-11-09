@@ -4,7 +4,7 @@ extends Node3D
 ## comes out; then your first Relic drifts to you (MaskMoment) and you head into the tutorial together.
 
 ## The three starter eggs plus a mystery one. Names, tempers and blurbs come from each species'
-## "egg" block in content/kin/<id>.json, so every egg is named for its element (Venom Egg, ...).
+## "egg" block in content/kin/<id>.json, so every egg is named for its element (Poison Egg, ...).
 const STARTERS := ["cindle", "puddlet", "burrlet"]
 const MYSTERY := {"species": "mystery", "name": "Mystery Egg", "temper": "???", "desc": "Speckled, and strangely quiet. Nobody knows what's inside.",
 	"play": "Something that isn't any of the other three. You'll find out when it hatches."}

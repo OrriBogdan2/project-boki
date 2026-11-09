@@ -7,78 +7,81 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 
 | Boki | Animals | Type | Size | Fights as | Where it comes from |
 |---|---|---|---|---|---|
-| [Rampartoad](#rampartoad) | Cane toad + Castle rampart | Stone | medium | tank | Wild, nest eggs |
+| [Rampartoad](#rampartoad) | Cane toad + Castle rampart | Rock | medium | tank | Wild, nest eggs |
 | [Mycroll](#mycroll) | Hedgehog + Toadstool | Spore | small | controller | Starter egg |
-| [Zippelith](#zippelith) | Caecilian + Giant zipper | Shadow | medium | trickster | Wild, nest eggs |
-| [Cairnback](#cairnback) | Tortoise + Ibex | Titan | large | tank | Rare Egg from The Stone Colossus |
-| [Anchorbill](#anchorbill) | Hornbill + Ship's anchor | Gravity | medium | controller | Wild, nest eggs |
-| [Vespyx](#vespyx) | Fox + Scorpion | Venom | small | bruiser | Starter egg |
-| [Bellowary](#bellowary) | Cassowary + Forge bellows | Ember | large | bruiser | Wild, nest eggs |
-| [Snuffapi](#snuffapi) | Okapi + Brass candelabra | Shadow | large | trickster | Wild, nest eggs |
-| [Frigatee](#frigatee) | Manatee + Antique icebox | Frost | large | support | Wild, nest eggs |
-| [Gongibbon](#gongibbon) | Gibbon + Bronze temple bell | Echo | medium | controller | Wild, nest eggs |
-| [Prowyak](#prowyak) | Yak + Icebreaker prow | Frost | large | tank | Wild, nest eggs |
-| [Glintmole](#glintmole) | Star-nosed mole + Quartz geode | Stone | small | controller | Wild, nest eggs |
-| [Gloamshell](#gloamshell) | Garden snail + Smoked obsidian | Shadow | small | controller | Wild, nest eggs |
-| [Glomwort](#glomwort) | Slime mold + Puffball | Spore | small | controller | Wild, nest eggs |
-| [Effigeetle](#effigeetle) | Goliath beetle + Marble statue face | Stone | large | tank | Wild, nest eggs |
-| [Crofthorn](#crofthorn) | Highland cow + Stone cottage garden | Bloom | large | tank | Wild, nest eggs |
-| [Hivara](#hivara) | Honeybee + Praying mantis | Swarm | small | bruiser | Rare Egg from The Brood Mother |
-| [Skateron](#skateron) | Grey heron + Ice skates | Frost | medium | controller | Wild, nest eggs |
-| [Kestrike](#kestrike) | Kestrel + Copper lightning rod | Storm | small | skirmisher | Wild, nest eggs |
-| [Anvilbrock](#anvilbrock) | Honey badger + Blacksmith's anvil | Ember | medium | tank | Wild, nest eggs |
-| [Kindlewren](#kindlewren) | Wren + Ember coal | Ember | small | skirmisher | Wild, nest eggs |
-| [Soakybara](#soakybara) | Capybara + Hot-spring pool | Bloom | large | support | Wild, nest eggs |
-| [Buckleron](#buckleron) | Giant limpet + Riveted iron shield | Stone | large | tank | Wild, nest eggs |
-| [Lodestick](#lodestick) | Stick insect + Lodestone | Gravity | small | trickster | Wild, nest eggs |
-| [Marchleaf](#marchleaf) | Leafcutter ant + Leaf | Swarm | small | bruiser | Wild, nest eggs |
-| [Lanterloris](#lanterloris) | Slow loris + Paper lantern | Lunar | medium | support | Wild, nest eggs |
-| [Mossgrade](#mossgrade) | Tardigrade + Cushion moss | Bloom | small | support | Wild, nest eggs |
-| [Spirevark](#spirevark) | Aardvark + Termite clay spire | Swarm | large | tank | Wild, nest eggs |
-| [Murmurling](#murmurling) | Starling + Pan-pipes | Swarm | medium | skirmisher | Wild, nest eggs |
-| [Mirrolin](#mirrolin) | Pangolin + Disco ball | Prism | medium | tank | Wild, nest eggs |
-| [Nettlynx](#nettlynx) | Lynx kitten + Stinging nettle | Venom | small | bruiser | Wild, nest eggs |
-| [Boltstrich](#boltstrich) | Ostrich + Thunderhead and copper coil | Storm | large | skirmisher | Wild, nest eggs |
-| [Bubblisk](#bubblisk) | Basilisk lizard + Soap bubble | Prism | small | trickster | Wild, nest eggs |
-| [Terrasloth](#terrasloth) | Three-toed sloth + Glass greenhouse | Bloom | medium | support | Wild, nest eggs |
-| [Gravadillo](#gravadillo) | Armadillo + Rhino beetle | Gravity | large | tank | Wild, nest eggs |
-| [Prismander](#prismander) | Axolotl | Prism | small | support | Starter egg |
-| [Rimeshrew](#rimeshrew) | Shrew + Hoarfrost | Frost | small | skirmisher | Wild, nest eggs |
-| [Chuggamus](#chuggamus) | Hippopotamus + Steam locomotive | Ember | large | tank | Wild, nest eggs |
-| [Selenfin](#selenfin) | Hatchetfish + Moonstone | Lunar | small | support | Wild, nest eggs |
-| [Barokat](#barokat) | Meerkat + Brass barometer | Storm | medium | support | Wild, nest eggs |
-| [Barrelmander](#barrelmander) | Giant salamander + Wooden rain barrel | Storm | large | tank | Wild, nest eggs |
-| [Canvastross](#canvastross) | Albatross + Patched ship sails | Tempest | large | skirmisher | Wild, nest eggs |
+| [Zippelith](#zippelith) | Caecilian + Giant zipper | Dark | medium | trickster | Wild, nest eggs |
+| [Cairnback](#cairnback) | Tortoise + Ibex | Steel / Rock | large | tank | Rare Egg from The Stone Colossus |
+| [Anchorbill](#anchorbill) | Hornbill + Ship's anchor | Psychic | medium | controller | Wild, nest eggs |
+| [Vespyx](#vespyx) | Fox + Scorpion | Poison | small | bruiser | Starter egg |
+| [Bellowary](#bellowary) | Cassowary + Forge bellows | Fire | large | bruiser | Wild, nest eggs |
+| [Snuffapi](#snuffapi) | Okapi + Brass candelabra | Dark | large | trickster | Wild, nest eggs |
+| [Frigatee](#frigatee) | Manatee + Antique icebox | Ice | large | support | Wild, nest eggs |
+| [Gongibbon](#gongibbon) | Gibbon + Bronze temple bell | Sound | medium | controller | Wild, nest eggs |
+| [Prowyak](#prowyak) | Yak + Icebreaker prow | Ice | large | tank | Wild, nest eggs |
+| [Glintmole](#glintmole) | Star-nosed mole + Quartz geode | Rock | small | controller | Wild, nest eggs |
+| [Gloamshell](#gloamshell) | Garden snail + Smoked obsidian | Dark / Fairy | small | controller | Wild, nest eggs |
+| [Glomwort](#glomwort) | Slime mold + Puffball | Spore / Poison | small | controller | Wild, nest eggs |
+| [Effigeetle](#effigeetle) | Goliath beetle + Marble statue face | Rock | large | tank | Wild, nest eggs |
+| [Crofthorn](#crofthorn) | Highland cow + Stone cottage garden | Grass | large | tank | Wild, nest eggs |
+| [Hivara](#hivara) | Honeybee + Praying mantis | Bug / Steel | small | bruiser | Rare Egg from The Brood Mother |
+| [Skateron](#skateron) | Grey heron + Ice skates | Ice | medium | controller | Wild, nest eggs |
+| [Kestrike](#kestrike) | Kestrel + Copper lightning rod | Electric | small | skirmisher | Wild, nest eggs |
+| [Anvilbrock](#anvilbrock) | Honey badger + Blacksmith's anvil | Fire | medium | tank | Wild, nest eggs |
+| [Kindlewren](#kindlewren) | Wren + Ember coal | Fire | small | skirmisher | Wild, nest eggs |
+| [Soakybara](#soakybara) | Capybara + Hot-spring pool | Grass | large | support | Wild, nest eggs |
+| [Buckleron](#buckleron) | Giant limpet + Riveted iron shield | Rock | large | tank | Wild, nest eggs |
+| [Lodestick](#lodestick) | Stick insect + Lodestone | Psychic / Dark | small | trickster | Wild, nest eggs |
+| [Marchleaf](#marchleaf) | Leafcutter ant + Leaf | Bug | small | bruiser | Wild, nest eggs |
+| [Lanterloris](#lanterloris) | Slow loris + Paper lantern | Fairy | medium | support | Wild, nest eggs |
+| [Mossgrade](#mossgrade) | Tardigrade + Cushion moss | Grass / Steel | small | support | Wild, nest eggs |
+| [Spirevark](#spirevark) | Aardvark + Termite clay spire | Bug | large | tank | Wild, nest eggs |
+| [Murmurling](#murmurling) | Starling + Pan-pipes | Bug / Sound | medium | skirmisher | Wild, nest eggs |
+| [Mirrolin](#mirrolin) | Pangolin + Disco ball | Crystal | medium | tank | Wild, nest eggs |
+| [Nettlynx](#nettlynx) | Lynx kitten + Stinging nettle | Poison / Grass | small | bruiser | Wild, nest eggs |
+| [Boltstrich](#boltstrich) | Ostrich + Thunderhead and copper coil | Electric | large | skirmisher | Wild, nest eggs |
+| [Bubblisk](#bubblisk) | Basilisk lizard + Soap bubble | Crystal | small | trickster | Wild, nest eggs |
+| [Terrasloth](#terrasloth) | Three-toed sloth + Glass greenhouse | Grass | medium | support | Wild, nest eggs |
+| [Gravadillo](#gravadillo) | Armadillo + Rhino beetle | Psychic | large | tank | Wild, nest eggs |
+| [Prismander](#prismander) | Axolotl | Crystal | small | support | Starter egg |
+| [Rimeshrew](#rimeshrew) | Shrew + Hoarfrost | Ice | small | skirmisher | Wild, nest eggs |
+| [Chuggamus](#chuggamus) | Hippopotamus + Steam locomotive | Fire | large | tank | Wild, nest eggs |
+| [Selenfin](#selenfin) | Hatchetfish + Moonstone | Fairy / Water | small | support | Wild, nest eggs |
+| [Barokat](#barokat) | Meerkat + Brass barometer | Electric | medium | support | Wild, nest eggs |
+| [Barrelmander](#barrelmander) | Giant salamander + Wooden rain barrel | Electric | large | tank | Wild, nest eggs |
+| [Canvastross](#canvastross) | Albatross + Patched ship sails | Flying | large | skirmisher | Wild, nest eggs |
 | [Knotwyrm](#knotwyrm) | Slow worm + Knotted hemp rope | Spore | medium | controller | Wild, nest eggs |
-| [Thrumbird](#thrumbird) | Hummingbird + Tuning fork | Echo | small | support | Wild, nest eggs |
-| [Lockatara](#lockatara) | Tuatara + Iron padlock | Titan | medium | tank | Wild, nest eggs |
-| [Umbrathere](#umbrathere) | Giant ground sloth + Ragged black umbrella | Shadow | large | tank | Wild, nest eggs |
-| [Pipewurm](#pipewurm) | Velvet worm + Piping bag | Venom | medium | controller | Wild, nest eggs |
-| [Lunowl](#lunowl) | Owl + Luna moth | Lunar | small | trickster | Wild, nest eggs |
-| [Echolop](#echolop) | Hare + Bat | Echo | small | skirmisher | Wild, nest eggs |
-| [Zephyrak](#zephyrak) | Moray eel + Swift | Tempest | small | skirmisher | Rare Egg from Stormcoil, the Sky Serpent |
+| [Thrumbird](#thrumbird) | Hummingbird + Tuning fork | Sound | small | support | Wild, nest eggs |
+| [Lockatara](#lockatara) | Tuatara + Iron padlock | Steel | medium | tank | Wild, nest eggs |
+| [Umbrathere](#umbrathere) | Giant ground sloth + Ragged black umbrella | Dark / Flying | large | tank | Wild, nest eggs |
+| [Pipewurm](#pipewurm) | Velvet worm + Piping bag | Poison | medium | controller | Wild, nest eggs |
+| [Lunowl](#lunowl) | Owl + Luna moth | Fairy | small | trickster | Wild, nest eggs |
+| [Echolop](#echolop) | Hare + Bat | Sound | small | skirmisher | Wild, nest eggs |
+| [Zephyrak](#zephyrak) | Moray eel + Swift | Flying / Dragon | small | skirmisher | Rare Egg from Stormcoil, the Sky Serpent |
 
 ## Types
 
-A Boki's type is its theme in the grammar: it colours its abilities and decides which tags its abilities carry into your class kit (see [Boki](Boki.md)). Types in use:
+A Boki's type is its theme in the grammar: it colours its abilities and decides which tags its abilities carry into your class kit (see [Boki](Boki.md)). All 18 types (a species has one or two):
 
 | Type | Species |
 |---|---|
-| Bloom | Crofthorn, Soakybara, Mossgrade, Terrasloth |
-| Echo | Gongibbon, Thrumbird, Echolop |
-| Ember | Bellowary, Anvilbrock, Kindlewren, Chuggamus |
-| Frost | Frigatee, Prowyak, Skateron, Rimeshrew |
-| Gravity | Anchorbill, Lodestick, Gravadillo |
-| Lunar | Lanterloris, Selenfin, Lunowl |
-| Prism | Mirrolin, Bubblisk, Prismander |
-| Shadow | Zippelith, Snuffapi, Gloamshell, Umbrathere |
+| Normal | none yet |
+| Fire | Bellowary, Anvilbrock, Kindlewren, Chuggamus |
+| Water | Selenfin |
+| Grass | Crofthorn, Soakybara, Mossgrade, Nettlynx, Terrasloth |
 | Spore | Mycroll, Glomwort, Knotwyrm |
-| Stone | Rampartoad, Glintmole, Effigeetle, Buckleron |
-| Storm | Kestrike, Boltstrich, Barokat, Barrelmander |
-| Swarm | Hivara, Marchleaf, Spirevark, Murmurling |
-| Tempest | Canvastross, Zephyrak |
-| Titan | Cairnback, Lockatara |
-| Venom | Vespyx, Nettlynx, Pipewurm |
+| Electric | Kestrike, Boltstrich, Barokat, Barrelmander |
+| Ice | Frigatee, Prowyak, Skateron, Rimeshrew |
+| Rock | Rampartoad, Cairnback, Glintmole, Effigeetle, Buckleron |
+| Psychic | Anchorbill, Lodestick, Gravadillo |
+| Flying | Canvastross, Umbrathere, Zephyrak |
+| Dragon | Zephyrak |
+| Dark | Zippelith, Snuffapi, Gloamshell, Lodestick, Umbrathere |
+| Poison | Vespyx, Glomwort, Nettlynx, Pipewurm |
+| Bug | Hivara, Marchleaf, Spirevark, Murmurling |
+| Steel | Cairnback, Hivara, Mossgrade, Lockatara |
+| Fairy | Gloamshell, Lanterloris, Selenfin, Lunowl |
+| Crystal | Mirrolin, Bubblisk, Prismander |
+| Sound | Gongibbon, Murmurling, Thrumbird, Echolop |
 
 ## Rampartoad
 
@@ -86,7 +89,7 @@ _Cane toad + Castle rampart_ (`basaltoad`). A toad with a castle wall on its bac
 
 |  |  |
 |---|---|
-| Type | Stone |
+| Type | Rock |
 | Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
 | Stat points | Health 10, Damage 3, Speed 3, owner_armor 2, Your max health 2 |
 | Personality | bravery 0.7, loyalty 0.7, temper 0.2, curiosity 0.25 |
@@ -126,7 +129,7 @@ _Caecilian + Giant zipper_ (`caecilith`). A worm that unzips the ground: it dive
 
 |  |  |
 |---|---|
-| Type | Shadow |
+| Type | Dark |
 | Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
 | Stat points | Health 3, Damage 2, Speed 13, owner_move_speed 2 |
 | Personality | bravery 0.55, loyalty 0.45, temper 0.5, curiosity 0.85 |
@@ -146,7 +149,7 @@ _Tortoise + Ibex_ (`cairnback`). A tortoise with an ibex's sweeping horns, carry
 
 |  |  |
 |---|---|
-| Type | Titan |
+| Type | Steel / Rock |
 | Body | large, reach 1.5, mass 1.6; about 58 cm, 38 kg on average |
 | Stat points | Health 12, Damage 5, Speed 3 |
 | Personality | bravery 0.85, loyalty 0.8, temper 0.25, curiosity 0.35 |
@@ -167,7 +170,7 @@ _Hornbill + Ship's anchor_ (`casquebill`). A hornbill whose casque is a ship's a
 
 |  |  |
 |---|---|
-| Type | Gravity |
+| Type | Psychic |
 | Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
 | Stat points | Health 6, Damage 2, Speed 6, Your max health 3, Your shield 3 |
 | Personality | bravery 0.7, loyalty 0.7, temper 0.35, curiosity 0.4 |
@@ -187,14 +190,14 @@ _Fox + Scorpion_ (`cindle`). A sly fox with a scorpion's curled tail. Its sting 
 
 |  |  |
 |---|---|
-| Type | Venom |
+| Type | Poison |
 | Body | small, reach 1.3, mass 0.8; about 34 cm, 4.2 kg on average |
 | Stat points | Health 4, Damage 3, Speed 9, Your max health 2, owner_move_speed 2 |
 | Personality | bravery 0.75, loyalty 0.5, temper 0.7, curiosity 0.5 |
 | Fighting style | bruiser; aggression 0.8, loyalty 0.4, caution 0.25 |
 | Rides | shoulder (Toxin) |
 | Farm work | Ember 3, Forage 1, Mend 1 |
-| Egg | Venom Egg: A dark plum shell beaded with green droplets. It hisses when you lean close. Something bold is in here. |
+| Egg | Poison Egg: A dark plum shell beaded with green droplets. It hisses when you lean close. Something bold is in here. |
 
 - E ability: **Stinger Hook** (8s cooldown, range 8m). Vespyx lashes its tail 8m: the first foe it stings is dragged back to it, poisoned, blighted (healing halved) and stunned 0.3s.
 - Auto ability (it casts this on its own): **Stinger Dash** (9s cooldown, range 7m). On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
@@ -207,7 +210,7 @@ _Cassowary + Forge bellows_ (`cindowary`). A cassowary whose head crest is a lea
 
 |  |  |
 |---|---|
-| Type | Ember |
+| Type | Fire |
 | Body | large, reach 1.5, mass 1.5; about 70 cm, 60 kg on average |
 | Stat points | Health 9, Damage 5, Speed 5, Your max health 1 |
 | Personality | bravery 0.9, loyalty 0.75, temper 0.75, curiosity 0.3 |
@@ -227,7 +230,7 @@ _Okapi + Brass candelabra_ (`duskapi`). An okapi with a candelabra for horns; sn
 
 |  |  |
 |---|---|
-| Type | Shadow |
+| Type | Dark |
 | Body | large, reach 1.5, mass 1.5; about 70 cm, 60 kg on average |
 | Stat points | Health 7, Damage 2, Speed 9, owner_move_speed 2 |
 | Personality | bravery 0.4, loyalty 0.8, temper 0.3, curiosity 0.6 |
@@ -247,7 +250,7 @@ _Manatee + Antique icebox_ (`floenatee`). A manatee carrying an old icebox on it
 
 |  |  |
 |---|---|
-| Type | Frost |
+| Type | Ice |
 | Body | large, reach 1.6, mass 2; about 60 cm, 30 kg on average |
 | Stat points | Health 10, Damage 1, Speed 3, owner_regen 4, Your shield 2 |
 | Personality | bravery 0.5, loyalty 0.9, temper 0.05, curiosity 0.5 |
@@ -267,7 +270,7 @@ _Gibbon + Bronze temple bell_ (`gibbelle`). A gibbon whose belly is a temple bel
 
 |  |  |
 |---|---|
-| Type | Echo |
+| Type | Sound |
 | Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
 | Stat points | Health 6, Damage 2, Speed 6, Your max health 3, Your shield 3 |
 | Personality | bravery 0.65, loyalty 0.65, temper 0.5, curiosity 0.75 |
@@ -287,7 +290,7 @@ _Yak + Icebreaker prow_ (`glaciyak`). A yak with an icebreaker's iron prow for h
 
 |  |  |
 |---|---|
-| Type | Frost |
+| Type | Ice |
 | Body | large, reach 1.5, mass 1.5; about 70 cm, 60 kg on average |
 | Stat points | Health 11, Damage 4, Speed 4, owner_armor 1 |
 | Personality | bravery 0.75, loyalty 0.85, temper 0.2, curiosity 0.4 |
@@ -307,7 +310,7 @@ _Star-nosed mole + Quartz geode_ (`glintmole`). A star-nosed mole whose back is 
 
 |  |  |
 |---|---|
-| Type | Stone |
+| Type | Rock |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 2.5 kg on average |
 | Stat points | Health 6, Damage 2, Speed 6, Your max health 3, Your shield 3 |
 | Personality | bravery 0.35, loyalty 0.75, temper 0.3, curiosity 0.7 |
@@ -327,7 +330,7 @@ _Garden snail + Smoked obsidian_ (`gloamshell`). A snail whose shell is smoked o
 
 |  |  |
 |---|---|
-| Type | Shadow |
+| Type | Dark / Fairy |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 2.5 kg on average |
 | Stat points | Health 6, Damage 2, Speed 6, Your max health 3, Your shield 3 |
 | Personality | bravery 0.3, loyalty 0.6, temper 0.35, curiosity 0.55 |
@@ -347,7 +350,7 @@ _Slime mold + Puffball_ (`glomwort`). A yellow slime mold that creeps like a net
 
 |  |  |
 |---|---|
-| Type | Spore |
+| Type | Spore / Poison |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 2.5 kg on average |
 | Stat points | Health 6, Damage 2, Speed 6, Your max health 3, Your shield 3 |
 | Personality | bravery 0.5, loyalty 0.6, temper 0.25, curiosity 0.95 |
@@ -367,7 +370,7 @@ _Goliath beetle + Marble statue face_ (`goliathite`). A beetle the size of a car
 
 |  |  |
 |---|---|
-| Type | Stone |
+| Type | Rock |
 | Body | large, reach 1.6, mass 2; about 60 cm, 30 kg on average |
 | Stat points | Health 12, Damage 5, Speed 2, owner_armor 1 |
 | Personality | bravery 0.7, loyalty 0.85, temper 0.2, curiosity 0.45 |
@@ -387,7 +390,7 @@ _Highland cow + Stone cottage garden_ (`heatherhorn`). A highland cow with a wal
 
 |  |  |
 |---|---|
-| Type | Bloom |
+| Type | Grass |
 | Body | large, reach 1.5, mass 1.5; about 70 cm, 60 kg on average |
 | Stat points | Health 11, Damage 4, Speed 4, owner_armor 1 |
 | Personality | bravery 0.7, loyalty 0.85, temper 0.2, curiosity 0.35 |
@@ -407,7 +410,7 @@ _Honeybee + Praying mantis_ (`hivara`). A honeybee with a praying mantis's folde
 
 |  |  |
 |---|---|
-| Type | Swarm |
+| Type | Bug / Steel |
 | Body | small, reach 1.4, mass 0.8; about 44 cm, 2.6 kg on average |
 | Stat points | Health 6, Damage 4, Speed 10 |
 | Personality | bravery 0.7, loyalty 0.75, temper 0.55, curiosity 0.6 |
@@ -428,7 +431,7 @@ _Grey heron + Ice skates_ (`hoarheron`). A heron on ice skates with an ice-pick 
 
 |  |  |
 |---|---|
-| Type | Frost |
+| Type | Ice |
 | Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
 | Stat points | Health 6, Damage 2, Speed 6, Your max health 3, Your shield 3 |
 | Personality | bravery 0.6, loyalty 0.65, temper 0.3, curiosity 0.3 |
@@ -448,7 +451,7 @@ _Kestrel + Copper lightning rod_ (`kestrike`). A kestrel with a copper crest tha
 
 |  |  |
 |---|---|
-| Type | Storm |
+| Type | Electric |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 2.5 kg on average |
 | Stat points | Health 3, Damage 3, Speed 12, owner_move_speed 2 |
 | Personality | bravery 0.8, loyalty 0.6, temper 0.5, curiosity 0.45 |
@@ -468,7 +471,7 @@ _Honey badger + Blacksmith's anvil_ (`kilnbadger`). A honey badger with a red-ho
 
 |  |  |
 |---|---|
-| Type | Ember |
+| Type | Fire |
 | Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
 | Stat points | Health 10, Damage 3, Speed 3, owner_armor 2, Your max health 2 |
 | Personality | bravery 0.95, loyalty 0.75, temper 0.8, curiosity 0.4 |
@@ -488,7 +491,7 @@ _Wren + Ember coal_ (`kindlewren`). A cocky little wren that carries a live coal
 
 |  |  |
 |---|---|
-| Type | Ember |
+| Type | Fire |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 2.5 kg on average |
 | Stat points | Health 3, Damage 3, Speed 12, owner_move_speed 2 |
 | Personality | bravery 0.85, loyalty 0.5, temper 0.7, curiosity 0.6 |
@@ -508,7 +511,7 @@ _Capybara + Hot-spring pool_ (`lilybara`). A capybara with a hot spring on its b
 
 |  |  |
 |---|---|
-| Type | Bloom |
+| Type | Grass |
 | Body | large, reach 1.5, mass 1.5; about 70 cm, 60 kg on average |
 | Stat points | Health 9, Damage 1, Speed 4, owner_regen 4, Your shield 2 |
 | Personality | bravery 0.55, loyalty 0.85, temper 0.05, curiosity 0.55 |
@@ -528,7 +531,7 @@ _Giant limpet + Riveted iron shield_ (`limpetor`). A giant limpet whose shell is
 
 |  |  |
 |---|---|
-| Type | Stone |
+| Type | Rock |
 | Body | large, reach 1.6, mass 2; about 60 cm, 30 kg on average |
 | Stat points | Health 12, Damage 5, Speed 2, owner_armor 1 |
 | Personality | bravery 0.8, loyalty 0.75, temper 0.4, curiosity 0.15 |
@@ -548,7 +551,7 @@ _Stick insect + Lodestone_ (`lodestick`). A stick insect made of dark lodestone 
 
 |  |  |
 |---|---|
-| Type | Gravity |
+| Type | Psychic / Dark |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 2.5 kg on average |
 | Stat points | Health 3, Damage 2, Speed 13, owner_move_speed 2 |
 | Personality | bravery 0.45, loyalty 0.55, temper 0.2, curiosity 0.6 |
@@ -568,7 +571,7 @@ _Leafcutter ant + Leaf_ (`marchleaf`). A leafcutter ant hauling a leaf ten times
 
 |  |  |
 |---|---|
-| Type | Swarm |
+| Type | Bug |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 2.5 kg on average |
 | Stat points | Health 5, Damage 4, Speed 8, Your max health 3 |
 | Personality | bravery 0.75, loyalty 0.7, temper 0.5, curiosity 0.35 |
@@ -588,7 +591,7 @@ _Slow loris + Paper lantern_ (`moonloris`). A slow loris that is a paper lantern
 
 |  |  |
 |---|---|
-| Type | Lunar |
+| Type | Fairy |
 | Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
 | Stat points | Health 7, Damage 1, Speed 5, Your shield 3, owner_regen 4 |
 | Personality | bravery 0.3, loyalty 0.85, temper 0.2, curiosity 0.6 |
@@ -608,7 +611,7 @@ _Tardigrade + Cushion moss_ (`mossgrade`). A plump water bear wearing a cushion 
 
 |  |  |
 |---|---|
-| Type | Bloom |
+| Type | Grass / Steel |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 2.5 kg on average |
 | Stat points | Health 7, Damage 1, Speed 5, Your shield 3, owner_regen 4 |
 | Personality | bravery 0.5, loyalty 0.85, temper 0.1, curiosity 0.4 |
@@ -628,7 +631,7 @@ _Aardvark + Termite clay spire_ (`moundvark`). An aardvark with a termite cathed
 
 |  |  |
 |---|---|
-| Type | Swarm |
+| Type | Bug |
 | Body | large, reach 1.6, mass 2; about 60 cm, 30 kg on average |
 | Stat points | Health 12, Damage 5, Speed 2, owner_armor 1 |
 | Personality | bravery 0.6, loyalty 0.7, temper 0.3, curiosity 0.8 |
@@ -648,7 +651,7 @@ _Starling + Pan-pipes_ (`murmurling`). A starling with pan-pipes for a tail; eve
 
 |  |  |
 |---|---|
-| Type | Swarm |
+| Type | Bug / Sound |
 | Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
 | Stat points | Health 3, Damage 3, Speed 12, owner_move_speed 2 |
 | Personality | bravery 0.6, loyalty 0.6, temper 0.45, curiosity 0.8 |
@@ -668,7 +671,7 @@ _Pangolin + Disco ball_ (`nacrolin`). A pangolin covered in mirror tiles; curl i
 
 |  |  |
 |---|---|
-| Type | Prism |
+| Type | Crystal |
 | Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
 | Stat points | Health 10, Damage 3, Speed 3, owner_armor 2, Your max health 2 |
 | Personality | bravery 0.4, loyalty 0.8, temper 0.3, curiosity 0.45 |
@@ -688,7 +691,7 @@ _Lynx kitten + Stinging nettle_ (`nettlynx`). A lynx kitten whose ear tufts and 
 
 |  |  |
 |---|---|
-| Type | Venom |
+| Type | Poison / Grass |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 2.5 kg on average |
 | Stat points | Health 5, Damage 4, Speed 8, Your max health 3 |
 | Personality | bravery 0.8, loyalty 0.5, temper 0.75, curiosity 0.5 |
@@ -708,7 +711,7 @@ _Ostrich + Thunderhead and copper coil_ (`nimbostrich`). A thundercloud ostrich 
 
 |  |  |
 |---|---|
-| Type | Storm |
+| Type | Electric |
 | Body | large, reach 1.5, mass 1.5; about 70 cm, 60 kg on average |
 | Stat points | Health 8, Damage 3, Speed 7, owner_move_speed 2 |
 | Personality | bravery 0.55, loyalty 0.6, temper 0.6, curiosity 0.7 |
@@ -728,7 +731,7 @@ _Basilisk lizard + Soap bubble_ (`opalisk`). A lizard that blows a soap-bubble c
 
 |  |  |
 |---|---|
-| Type | Prism |
+| Type | Crystal |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 2.5 kg on average |
 | Stat points | Health 3, Damage 2, Speed 13, owner_move_speed 2 |
 | Personality | bravery 0.4, loyalty 0.5, temper 0.55, curiosity 0.8 |
@@ -748,7 +751,7 @@ _Three-toed sloth + Glass greenhouse_ (`orchisloth`). A sloth carrying a little 
 
 |  |  |
 |---|---|
-| Type | Bloom |
+| Type | Grass |
 | Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
 | Stat points | Health 7, Damage 1, Speed 5, Your shield 3, owner_regen 4 |
 | Personality | bravery 0.35, loyalty 0.9, temper 0.05, curiosity 0.5 |
@@ -768,14 +771,14 @@ _Armadillo + Rhino beetle_ (`pebbit`). An armadillo with a rhino beetle's horn. 
 
 |  |  |
 |---|---|
-| Type | Gravity |
+| Type | Psychic |
 | Body | large, reach 1.4, mass 1.4; about 30 cm, 7.5 kg on average |
 | Stat points | Health 12, Damage 5, Speed 2, owner_armor 1 |
 | Personality | bravery 0.9, loyalty 0.7, temper 0.3, curiosity 0.2 |
 | Fighting style | tank; aggression 0.55, loyalty 0.75, caution 0.15 |
 | Rides | mount (Anchor) |
 | Farm work | Stone 3, Timber 2, Haul 2 |
-| Egg | Gravity Egg: Far heavier than it looks. Loose pebbles roll toward it. Something steady is in here. |
+| Egg | Psychic Egg: Far heavier than it looks. Loose pebbles roll toward it. Something steady is in here. |
 
 - E ability: **Gravity Slam** (9s cooldown, range 7m). Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
 - Auto ability (it casts this on its own): **Mass Guard** (12s cooldown). When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
@@ -788,14 +791,14 @@ _Axolotl_ (`puddlet`). An axolotl whose frills grew into living crystal. It bend
 
 |  |  |
 |---|---|
-| Type | Prism |
+| Type | Crystal |
 | Body | small, reach 1.3, mass 0.8; about 26 cm, 2.1 kg on average |
 | Stat points | Health 7, Damage 1, Speed 5, Your shield 4, owner_regen 3 |
 | Personality | bravery 0.45, loyalty 0.85, temper 0.2, curiosity 0.6 |
 | Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
 | Rides | shoulder (Glimmer) |
 | Farm work | Tide 3, Mend 2, Bloom 1 |
-| Egg | Prism Egg: Pink and glassy. It throws little rainbows when it rocks. Something gentle is in here. |
+| Egg | Crystal Egg: Pink and glassy. It throws little rainbows when it rocks. Something gentle is in here. |
 
 - E ability: **Prism Wall** (10s cooldown, range 7m). Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
 - Auto ability (it casts this on its own): **Refraction** (12s cooldown). When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
@@ -808,7 +811,7 @@ _Shrew + Hoarfrost_ (`rimeshrew`). A tiny shrew with a frost-feathered coat that
 
 |  |  |
 |---|---|
-| Type | Frost |
+| Type | Ice |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 2.5 kg on average |
 | Stat points | Health 3, Damage 3, Speed 12, owner_move_speed 2 |
 | Personality | bravery 0.9, loyalty 0.5, temper 0.65, curiosity 0.75 |
@@ -828,7 +831,7 @@ _Hippopotamus + Steam locomotive_ (`scaldamus`). A hippo that is half steam engi
 
 |  |  |
 |---|---|
-| Type | Ember |
+| Type | Fire |
 | Body | large, reach 1.6, mass 2; about 60 cm, 30 kg on average |
 | Stat points | Health 12, Damage 5, Speed 2, owner_armor 1 |
 | Personality | bravery 0.85, loyalty 0.7, temper 0.6, curiosity 0.2 |
@@ -848,7 +851,7 @@ _Hatchetfish + Moonstone_ (`selenfin`). A silver hatchetfish that swims through 
 
 |  |  |
 |---|---|
-| Type | Lunar |
+| Type | Fairy / Water |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 2.5 kg on average |
 | Stat points | Health 7, Damage 1, Speed 5, Your shield 3, owner_regen 4 |
 | Personality | bravery 0.4, loyalty 0.8, temper 0.15, curiosity 0.5 |
@@ -868,7 +871,7 @@ _Meerkat + Brass barometer_ (`sentrikat`). A meerkat with a barometer in its bel
 
 |  |  |
 |---|---|
-| Type | Storm |
+| Type | Electric |
 | Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
 | Stat points | Health 7, Damage 1, Speed 5, Your shield 3, owner_regen 4 |
 | Personality | bravery 0.6, loyalty 0.8, temper 0.45, curiosity 0.7 |
@@ -888,7 +891,7 @@ _Giant salamander + Wooden rain barrel_ (`spatewader`). A giant salamander with 
 
 |  |  |
 |---|---|
-| Type | Storm |
+| Type | Electric |
 | Body | large, reach 1.6, mass 2; about 60 cm, 30 kg on average |
 | Stat points | Health 12, Damage 5, Speed 2, owner_armor 1 |
 | Personality | bravery 0.65, loyalty 0.75, temper 0.25, curiosity 0.4 |
@@ -908,7 +911,7 @@ _Albatross + Patched ship sails_ (`squalltross`). An albatross with patched ship
 
 |  |  |
 |---|---|
-| Type | Tempest |
+| Type | Flying |
 | Body | large, reach 1.6, mass 2; about 60 cm, 30 kg on average |
 | Stat points | Health 3, Damage 3, Speed 12, owner_move_speed 2 |
 | Personality | bravery 0.75, loyalty 0.55, temper 0.3, curiosity 0.8 |
@@ -948,7 +951,7 @@ _Hummingbird + Tuning fork_ (`thrumbird`). A hummingbird whose forked tail rings
 
 |  |  |
 |---|---|
-| Type | Echo |
+| Type | Sound |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 2.5 kg on average |
 | Stat points | Health 7, Damage 1, Speed 5, Your shield 3, owner_regen 4 |
 | Personality | bravery 0.55, loyalty 0.8, temper 0.3, curiosity 0.85 |
@@ -968,7 +971,7 @@ _Tuatara + Iron padlock_ (`tuatrune`). A lizard with a padlock shackle for a cre
 
 |  |  |
 |---|---|
-| Type | Titan |
+| Type | Steel |
 | Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
 | Stat points | Health 10, Damage 3, Speed 3, owner_armor 2, Your max health 2 |
 | Personality | bravery 0.75, loyalty 0.75, temper 0.2, curiosity 0.5 |
@@ -988,7 +991,7 @@ _Giant ground sloth + Ragged black umbrella_ (`umbrathere`). A giant ground slot
 
 |  |  |
 |---|---|
-| Type | Shadow |
+| Type | Dark / Flying |
 | Body | large, reach 1.6, mass 2; about 60 cm, 30 kg on average |
 | Stat points | Health 12, Damage 5, Speed 2, owner_armor 1 |
 | Personality | bravery 0.8, loyalty 0.85, temper 0.3, curiosity 0.35 |
@@ -1008,7 +1011,7 @@ _Velvet worm + Piping bag_ (`velvorm`). A velvet-cake worm with icing nozzles fo
 
 |  |  |
 |---|---|
-| Type | Venom |
+| Type | Poison |
 | Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
 | Stat points | Health 6, Damage 2, Speed 6, Your max health 3, Your shield 3 |
 | Personality | bravery 0.5, loyalty 0.7, temper 0.45, curiosity 0.6 |
@@ -1028,7 +1031,7 @@ _Owl + Luna moth_ (`wisplet`). A moonlit owl with soft moth wings. It flits on m
 
 |  |  |
 |---|---|
-| Type | Lunar |
+| Type | Fairy |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 1.4 kg on average |
 | Stat points | Health 2, Damage 1, Speed 15, owner_move_speed 2 |
 | Personality | bravery 0.35, loyalty 0.55, temper 0.5, curiosity 0.7 |
@@ -1048,14 +1051,14 @@ _Hare + Bat_ (`zapple`). A long-eared hare with bat wings. It hears everything c
 
 |  |  |
 |---|---|
-| Type | Echo |
+| Type | Sound |
 | Body | small, reach 1.3, mass 0.8; about 38 cm, 2.8 kg on average |
 | Stat points | Health 2, Damage 2, Speed 13, owner_move_speed 3 |
 | Personality | bravery 0.65, loyalty 0.4, temper 0.6, curiosity 0.9 |
 | Fighting style | skirmisher; aggression 0.65, loyalty 0.35, caution 0.35 |
 | Rides | shoulder (Tempo) |
 | Farm work | Spark 3, Haul 2, Forage 1 |
-| Egg | Echo Egg: Deep blue and humming. Tap it and it taps back. Something restless is in here. |
+| Egg | Sound Egg: Deep blue and humming. Tap it and it taps back. Something restless is in here. |
 
 - E ability: **Echo Chain** (7s cooldown, range 7m). A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
 - Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
@@ -1068,14 +1071,14 @@ _Moray eel + Swift_ (`zephyrak`). A little sky serpent: a moray eel's long body 
 
 |  |  |
 |---|---|
-| Type | Tempest |
+| Type | Flying / Dragon |
 | Body | small, reach 1.4, mass 0.8; about 42 cm, 3.2 kg on average |
 | Stat points | Health 4, Damage 3, Speed 13 |
 | Personality | bravery 0.8, loyalty 0.45, temper 0.65, curiosity 0.85 |
 | Fighting style | skirmisher; aggression 0.75, loyalty 0.4, caution 0.3 |
 | Rides | shoulder (Static) |
 | Farm work | Spark 4, Tide 2, Haul 2 |
-| Egg | Storm Egg: Light as a cloud and buzzing with static. Little sparks jump to your fingers. The Sky Serpent guarded it. |
+| Egg | Flying Egg: Light as a cloud and buzzing with static. Little sparks jump to your fingers. The Sky Serpent guarded it. |
 | Rare | Hatches from the Rare Egg Stormcoil, the Sky Serpent drops |
 
 - E ability: **Gale Lance** (8s cooldown, range 8m). Zephyrak spears 8m through the air, shocking everything it passes, then bursts in a ring of wind that throws foes back and arcs lightning to two more.

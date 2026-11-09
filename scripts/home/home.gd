@@ -2083,7 +2083,7 @@ func _update_hover() -> void:
 		nl.append("%s %s" % [n.capitalize(), "[color=#ff8a7a]%d%%[/color]" % int(v) if v < 35.0 else "%d%%" % int(v)])
 	var b: Array = Care.bond(rec)
 	var t := "[b][color=#%s]%s[/color][/b]\n" % [col.to_html(false), rec["name"]]
-	t += "[color=#9aa3b8]Lv %d %s  ·  %s  ·  %s bond[/color]\n" % [int(rec["level"]), Evo.form_name(rec), String(sp["type"]).capitalize(), b[1]]
+	t += "[color=#9aa3b8]Lv %d %s  ·  %s  ·  %s bond[/color]\n" % [int(rec["level"]), Evo.form_name(rec), KinTypes.label(sp), b[1]]
 	if Mutations.special(rec):
 		t += "[color=#fff0a0]%s[/color]\n" % ", ".join(Mutations.tags(rec))
 	t += "  ·  ".join(nl) + "\n"
@@ -2975,7 +2975,7 @@ func _open_kin(rec: Dictionary) -> void:
 	var v := _new_panel(("%s the %s%s" % [rec["name"], kpre, Evo.form_name(rec)]) if kpre != "" else Data.kin_title(String(rec["name"]), Evo.form_name(rec)), 820)
 	UI.hold(v, KIN_CARD_H)
 	UI.title_icon(v, UI.sex_icon(rec, 22.0))
-	UI.subtitle(v, "Level %d  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
+	UI.subtitle(v, "Level %d  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), KinTypes.label(sp), Care.stage_name(rec), Care.nature(rec)])
 	var hx := UI.head_extra(v)
 	if partner: hx.add_child(UI.tag("Partner", UI.ACCENT))
 	elif Match.TWO_KIN and rec["uid"] == Save.d.get("active2", ""): hx.add_child(UI.tag("Second", UI.TEAL))
@@ -4685,7 +4685,7 @@ func _nook_detail(rec: Dictionary, dv: VBoxContainer, egg_in: bool) -> void:
 	nrow.add_child(UI.title(String(rec["name"]), UI.T_HEAD + 3, col.lerp(UI.INK, 0.35)))
 	nrow.add_child(UI.sex_icon(rec, 16.0))
 	tv.add_child(nrow)
-	tv.add_child(UI.label("Level %d %s  ·  %s Boki" % [int(rec["level"]), Evo.form_name(rec), String(sp["type"]).capitalize()], UI.T_SMALL, UI.INK))
+	tv.add_child(UI.label("Level %d %s  ·  %s Boki" % [int(rec["level"]), Evo.form_name(rec), KinTypes.label(sp)], UI.T_SMALL, UI.INK))
 	var why := _can_pair(rec)
 	tv.add_child(UI.label("Ready to pair" if why == "" else why, 12, UI.GOOD if why == "" else UI.MUTED))
 	var mk := UI.hbox(4)

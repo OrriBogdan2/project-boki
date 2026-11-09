@@ -56,7 +56,7 @@ func kin_brief(k: Dictionary) -> String:
 		"Your voice: %s. Traits from 0 to 1: bravery %.2f, loyalty %.2f, temper %.2f, curiosity %.2f. " +
 		"Trust in your hunter: %d out of 100 (below 30 you are wary and a bit cold, above 70 you are warm and devoted). " +
 		"You are level %d and have been on %d expeditions, made it out of %d. " +
-		"What you remember, oldest first:\n%s") % [k["name"], sp["name"], sp["type"], sp["voice"], tr["bravery"], tr["loyalty"], tr["temper"], tr["curiosity"],
+		"What you remember, oldest first:\n%s") % [k["name"], sp["name"], KinTypes.label(sp), sp["voice"], tr["bravery"], tr["loyalty"], tr["temper"], tr["curiosity"],
 		int(k["trust"]), int(k["level"]), int(k.get("matches", 0)), int(k.get("wins", 0)), "\n".join(mem) if mem.size() > 0 else "- nothing yet, you are new here"] + "\n\n" + speech_rule(k) + "\n" + needs_note(k)
 
 ## How this kin is able to talk right now. Young kin only say their own name, like the creatures in

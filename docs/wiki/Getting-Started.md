@@ -18,7 +18,7 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
 
 1. **The story.** A short animated prologue about how Malgrave, the Wyrm in a queen's shape, broke Solmere. Hold Esc to skip it.
 2. **Your first egg.** Three starter eggs sit on a little island, plus a mystery egg:
-   the Venom Egg (Vespyx), the Prism Egg (Prismander), the Spore Egg (Mycroll), and a Mystery Egg
+   the Poison Egg (Vespyx), the Crystal Egg (Prismander), the Spore Egg (Mycroll), and a Mystery Egg
    that hides one of the other common species. Pick one, keep it warm until it hatches, and name it.
 3. **First Flight.** A short tutorial on three small islands: steer your landing, walk, dash, glide,
    long-dash in the air, shoot, use your E, have your Boki use its ability, throw your Boki at a
