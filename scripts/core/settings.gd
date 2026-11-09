@@ -172,6 +172,8 @@ const ACTIONS := [
 	["fire", "Weapon attack"], ["secondary", "Hunter ability"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; at home it plays fetch)"], ["signature", "Hunter utility"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
+	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
+	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["mate_look_1", "Look at teammate 1 (hold)"], ["mate_look_2", "Look at teammate 2 (hold)"],
 	["mate_look_3", "Look at teammate 3 (hold; 4-player squads)"],
@@ -595,7 +597,7 @@ func holders(code: String, except := "") -> Array:
 
 ## Actions that only run at home (the garden) and ones that only run in a match.
 const HOME_ONLY := ["play", "talk", "details", "build", "rotate", "store"]
-const MATCH_ONLY := ["gear2", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate"]
+const MATCH_ONLY := ["gear2", "summon", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate"]
 
 ## Pairs that share a key on purpose although they aren't a plain garden-vs-match pair (build-mode and
 ## training-only actions, the lobby's push to talk).
