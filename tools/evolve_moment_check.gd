@@ -58,8 +58,13 @@ func _make(stage: Dictionary, spk: String, watcher: bool) -> EvolveMoment:
 	var m := EvolveMoment.new()
 	m.host = stage["host"]
 	m.fx = stage["fx"]
-	m.old = Models.kin(spk, Save.new_kin(spk, "A"))
-	m.fresh = Models.kin(spk, Save.new_kin(spk, "B"))
+	# a real first evolution: the hatchling (small, evo_scale) grows its first form at level 4
+	var rec := Save.new_kin(spk, "A")
+	m.old = Models.kin(spk, rec)
+	var grown := rec.duplicate(true)
+	grown["level"] = 4
+	Evo.on_level(grown)
+	m.fresh = Models.kin(spk, grown)
 	m.col = DexView.type_col(DexView.type_of(spk))
 	m.host.add_child(m.old)
 	if watcher:
@@ -86,7 +91,7 @@ func _check(_main: Node, stage: Dictionary) -> void:
 		t += STEP
 		m.step(minf(t, EvolveMoment.LENGTH))
 		var cur: Node3D = m.fresh if m.swapped else m.old
-		peak = maxf(peak, cur.scale.x / m.base.x)
+		peak = maxf(peak, cur.scale.x / maxf(m.base.x, m.grown.x))
 		wash_peak = maxf(wash_peak, m.wash.albedo_color.a)
 		if m.swapped and swap_t < 0.0:
 			swap_t = t
@@ -99,13 +104,16 @@ func _check(_main: Node, stage: Dictionary) -> void:
 	ok(wash_peak >= 0.8 and wash_mid >= 0.8, "the type colour washes over it to %.2f" % wash_peak)
 	ok(absf(swap_t - swap_at) <= STEP + 0.01, "the new form takes over at the peak (%.2f s)" % swap_t)
 	ok(m.fresh.visible and not m.old.visible, "the new form is shown and the old one hidden")
-	var settled := absf(m.fresh.scale.x - m.base.x) < 0.01
+	var settled := absf(m.fresh.scale.x - m.grown.x) < 0.01
 	var played: bool = m.sparkled == EvolveMoment.SPARKLE_AT.size()
 	ok(m.wash.albedo_color.a < 0.01 and played and settled, "the glow is gone, sparkles played, size settled")
 	ok(fx.radial == radial, "no burst or ring (radial stays %d)" % radial)
 	var facing_after := absf(angle_difference(w.rotation.y, atan2(w.position.x, w.position.z)))
 	var turned := "(%.2f -> %.2f)" % [facing_before, facing_after]
 	ok(facing_before > 1.0 and facing_after < 0.15, "a Boki nearby turns to watch " + turned)
+	var ratio := m.grown.x / m.base.x
+	var want := float(m.fresh.get_meta("evo_scale", 1.0)) / float(m.old.get_meta("evo_scale", 1.0))
+	ok(ratio > 1.1 and absf(ratio - want) < 0.01, "the hatchling ends at its grown size, home's own scale (%.2fx), no snap" % ratio)
 	m.finish()
 	var gone: bool = m.light.is_queued_for_deletion() and m.old.is_queued_for_deletion()
 	ok(not _washed(m.fresh) and gone, "the wash and light come off, the old model goes")
@@ -159,4 +167,7 @@ func _shots(main: Node, stage: Dictionary) -> void:
 		sheet.save_png("%s/evolve_%s_%s.png" % [dir, type, spk])
 		print("SHOT evolve %s %s" % [type, spk])
 		m.finish()
+		m.fresh.queue_free()
+		for k in m.watchers:
+			(k["node"] as Node3D).queue_free()
 		await main.get_tree().process_frame
