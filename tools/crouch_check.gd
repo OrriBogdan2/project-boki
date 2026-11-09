@@ -19,7 +19,7 @@ const SPEED_K := 0.55      # Hunter: the walking speed crouched, of the archetyp
 const PLANT := 0.45        # of the crouch speed, at least: what a planted foot carries back (under it the sneak skates)
 const PLANTED := 0.012     # m: a foot this close to its lowest over the sneak counts as down
 const LATER := ["juggernaut"]    # Kael: landing after art1-integ
-const SKATES := ["tender"]  # Pip: her 0.16 m tiptoe stride skates even at the fastest rate (docs/DEBT.md, a longer clip)
+const SKATES := ["tender"]  # Pip: her 0.16 m tiptoe stride skates even at the top rate (docs/DEBT.md)
 
 var bad := 0
 var holder: Node3D
