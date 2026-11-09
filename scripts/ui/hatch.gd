@@ -3,11 +3,16 @@ extends Node3D
 ## Empty), then three eggs on a little island. Pick an egg, knock on the shell until it hatches, name what
 ## comes out; then your first Relic drifts to you (MaskMoment) and you head into the tutorial together.
 
-## The three starter eggs plus a mystery one. Names, tempers and blurbs come from each species'
-## "egg" block in content/kin/<id>.json, so every egg is named for its element (Venom Egg, ...).
+## The three starter eggs up front plus the black mystery egg in its basket at the back (MysteryEgg).
+## Names, tempers and blurbs come from each species' "egg" block in content/kin/<id>.json, so every
+## egg is named for its element (Venom Egg, ...).
 const STARTERS := ["cindle", "puddlet", "burrlet"]
-const MYSTERY := {"species": "mystery", "name": "Mystery Egg", "temper": "???", "desc": "Speckled, and strangely quiet. Nobody knows what's inside.",
-	"play": "Something that isn't any of the other three. You'll find out when it hatches."}
+const MYSTERY := {
+	"species": "mystery", "name": "Mystery Egg", "temper": "???",
+	"desc": "Black as a moonless night, tucked in an old basket at the back. Nobody knows what's inside.",
+	"play": "Almost anything from the wilds could be in there, even a rare one,"
+		+ " and it's more likely than most to hatch a little strange.",
+}
 
 static func starter_eggs() -> Array:
 	var out: Array = []
@@ -24,6 +29,7 @@ const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
 const CARD_BUTTON := "Choose your Boki"
 const CREATE_CAM := Vector3(0.05, 1.2, 4.75)     # m: the creator's fixed camera, the whole body in frame
 const CREATE_LOOK := Vector3(0.2, 0.98, 1.6)
+const MYSTERY_AT := Vector3(-2.75, 0, -2.55)     # m: the basket, at the back between the lantern post and the banner
 
 var cam: Camera3D
 var fx: Fx
@@ -44,7 +50,8 @@ var root_ui: Control
 var bottom: VBoxContainer
 var title: Label
 var cam_from := Vector3(0, 3.6, 6.4)
-var egg_defs: Array = []      # EGGS with the mystery egg's species decided
+var egg_defs: Array = []      # EGGS with the mystery egg's species (and its mutations) decided
+var mystery_found := false    # its card shows once you've hovered or picked the black egg
 var look: Dictionary = {}
 var preview: Node3D
 var look_at_t := Vector3(0, 0.25, 0.5)
@@ -73,26 +80,25 @@ func _ready() -> void:
 	cam.look_at(Vector3(0, 0.6, 0))
 	_build_set()
 	egg_defs = starter_eggs()
-	var others: Array = Data.common_kin().filter(func(k): return not k in ["cindle", "puddlet", "burrlet"])
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
 	for d in egg_defs:
 		if d["species"] == "mystery":
-			d["species"] = others[randi() % others.size()] if others.size() > 0 else "cindle"
+			d["species"] = MysteryEgg.roll_species(rng)
+			d["rec"] = {"mutations": MysteryEgg.roll_mutations(rng)}
 			d["mystery"] = true
 	for i in egg_defs.size():
 		var d: Dictionary = egg_defs[i]
-		var sp: Dictionary = Data.KIN[d["species"]]
 		var holder := Node3D.new()
-		var x := -2.55 + i * 1.7
-		holder.position = Vector3(x, 0, 0.2)
+		holder.position = MYSTERY_AT if d.get("mystery", false) else Vector3(-1.7 + i * 1.7, 0, 0.2)
 		add_child(holder)
-		var nest := Models.nest(); nest.scale = Vector3.ONE * 0.8
-		for ch in nest.get_children():
-			if ch is MeshInstance3D and (ch as MeshInstance3D).mesh is SphereMesh:
-				ch.visible = false
-		holder.add_child(nest)
-		var egg := EggHatch.new(d["species"], fx, 0.32, 0.42, 1.1)
+		var egg := EggHatch.new(d["species"], fx, 0.32, 0.42, 1.1, d.get("rec", {}))
 		if d.get("mystery", false):
-			egg.shell_col = Color("c4bcd6"); egg.spot_col = Color("6a5a8a")
+			holder.add_child(MysteryEgg.new())
+			MysteryEgg.hideout(self, MYSTERY_AT)
+			egg.shell_col = MysteryEgg.SHELL; egg.spot_col = MysteryEgg.SPOTS
+		else:
+			holder.add_child(_nest())
 		egg.hop_out = 0.35
 		egg.position = Vector3(0, 0.12, 0)
 		holder.add_child(egg)
@@ -118,6 +124,14 @@ func _ready() -> void:
 			_end_intro()
 			_pick(i); _pick(i)
 			auto_warm = true
+
+## A starter egg's nest, without the eggs it comes with.
+func _nest() -> Node3D:
+	var nest := Models.nest(); nest.scale = Vector3.ONE * 0.8
+	for ch in nest.get_children():
+		if ch is MeshInstance3D and (ch as MeshInstance3D).mesh is SphereMesh:
+			ch.visible = false
+	return nest
 
 ## The set for a new game: a carved stone dais floating at dusk, a rune circle glowing under your
 ## feet, a broken arch behind with the old world's heart-crystal turning inside it, lanterns and
@@ -488,6 +502,8 @@ func _show_pick() -> void:
 	for i in egg_defs.size():
 		var d: Dictionary = egg_defs[i]
 		var mystery: bool = d.get("mystery", false)
+		if mystery and not mystery_found:
+			continue
 		var card := UI.card(UI.CARD, 12, 14)
 		card.custom_minimum_size = Vector2(228, 0)
 		# every egg card the same size, with its button on the same line at the bottom
@@ -531,6 +547,7 @@ func _pick(i: int) -> void:
 		_start_hatch()
 		return
 	chosen = i
+	mystery_found = mystery_found or egg_defs[i].get("mystery", false)
 	Sfx.play("click")
 	_show_pick()
 
@@ -627,6 +644,9 @@ func _process(delta: float) -> void:
 		if hv != hover:
 			hover = hv
 			if hover >= 0: Sfx.play("hover", null, -12.0)
+			if hover >= 0 and egg_defs[hover].get("mystery", false) and not mystery_found:
+				mystery_found = true
+				_show_pick()
 		for i in eggs.size():
 			var hs := 1.12 if i == hover else 1.0
 			var hn: Node3D = eggs[i]["holder"]
@@ -653,7 +673,7 @@ func _process(delta: float) -> void:
 				stage = "reveal"
 				cam_to = Vector3(0, 2.2, 5.6)
 				# a closer look (its card, and turning it round), then naming
-				var rv := KinReveal.new(egg_defs[chosen]["species"])
+				var rv := KinReveal.new(egg_defs[chosen]["species"], egg_defs[chosen].get("rec", {}))
 				add_child(rv)
 				if top_box: top_box.visible = false      # (the reveal has its own title; this one showed through it)
 				rv.proceed.connect(func():
@@ -728,6 +748,8 @@ func _show_name() -> void:
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	var rec := Save.new_kin(sp_id, kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id))
 	rec["trust"] = 55.0
+	var muts: Array = egg_defs[chosen].get("rec", {}).get("mutations", []) if chosen >= 0 else []
+	if not muts.is_empty(): rec["mutations"] = muts
 	Save.remember(rec, "hatched", "hatched from an egg you chose")
 	rec["starter"] = true          # your first kin: it always stays on the farm with you
 	rec["got_t"] = Time.get_unix_time_from_system()
