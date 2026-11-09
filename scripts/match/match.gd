@@ -2883,10 +2883,8 @@ func _stagger_reward(mb: Mob, hunter: Hunter, ab: String) -> void:
 		hud.toast("Staggered %s!%s" % [mb.md["name"], ("  " + what) if what != "" else ""], Color("e0b0ff"))
 		train["_stagger"] = true
 
-## Someone's armor just shattered: a clear sound and burst so the attacker knows to push.
+## Someone's armor just shattered: a clear sound and the body cracking so the attacker knows to push.
 func on_armor_break(h: Hunter, by: Ent) -> void:
-	fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7ac8ff"), 22, 5.0, 0.5, 6.0, 1.0)
-	fx.ring(h.pos, 1.4, Color("7ac8ff"), 0.3)
 	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
 	Juice.armor_break(self, h, credit)
 	if credit == player and hud:

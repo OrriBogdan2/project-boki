@@ -56,6 +56,7 @@ func run(main: Node) -> void:
 	await _holds(main, m, V, P)
 	_view(m, V, P)
 	_kit(m, V, P)
+	_armour(m, P)
 	_net(m, V, P)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
@@ -218,6 +219,34 @@ func _view(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(is_equal_approx(V.view_k(ally), HeroVfx.ALLY_K), "an ally's effects sit at ALLY_K")
 	ok(is_equal_approx(V.view_k(foe), 1.0), "an enemy's effects at full")
 	ok(keep == m.player, "the viewer is unchanged")
+
+## One language for armour on every body: a hit on the shell flashes the body shell-coloured, a health hit white, the
+## break holds the flash and sheds shards with no ring or burst, and the HUD strip flashes as the armour empties.
+func _armour(m: Match, P: Hunter) -> void:
+	var at := P.pos + Vector3(-4, 0, 0)
+	var foe: Hunter = m.make_hunter("A", P.team + 1, "medium", "Foe", "idle", {}, at, {"arch": "none"})
+	foe.hurt(5.0, P, {})
+	ok(foe.armor > 0.5 and foe.shell_t > 0.0, "a hit on the armour flashes the body shell-coloured")
+	foe.tick_status(Juice.SHELL_FLASH_T + 0.01)
+	foe.armor = 0.0
+	foe.hurt(5.0, P, {})
+	ok(foe.shell_t <= 0.0 and foe.flash_t > 0.0, "a hit on health flashes white")
+	foe.armor = 1.0
+	foe.shell_t = 0.0
+	var radial0: int = m.fx.radial
+	var rings0: int = m.fx.rings.size()
+	foe.hurt(60.0, P, {})
+	var held := foe.shell_t > Juice.SHELL_FLASH_T and foe.flash_t > Juice.SHELL_FLASH_T
+	ok(foe.armor <= 0.0 and held, "the break holds the shell flash on the body")
+	ok(m.fx.radial == radial0 and m.fx.rings.size() == rings0, "no ring and no burst with it")
+	var plates := HudPlate.new()
+	plates._watch(foe, 0.016)
+	foe.armor = foe.max_armor
+	plates._watch(foe, 0.016)
+	foe.armor -= 5.0
+	plates._watch(foe, 0.016)
+	ok(plates.armor_flash_of(foe) > 0.5, "the armour strip flashes as it loses some")
+	foe.hp = 0.0
 
 ## The kit really goes through the shared helper, and with the own look the shared cast language stays out.
 func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:

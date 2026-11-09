@@ -12,6 +12,8 @@ extends RefCounted
 
 const HIT_COL := Color("fff0d2")
 const HURT_COL := Color("ff7a5c")       # hits on you read hotter
+const SHELL_FLASH_T := 0.12             # s a hit on armour keeps the body flash shell-coloured
+const BREAK_FLASH_T := 0.3              # s the body holds then fades its flash when the armour breaks
 const FAR := 24.0                       # beyond this from the player nothing is drawn for a hit
 
 ## Where on the target a hit from `by` lands (its near side, about chest high) and which way the
@@ -64,6 +66,11 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	var ability := o.has("ab") and src != "kin"
 	if ability: power = maxf(power, 1.3)       # an ability hit always lands big
 	m.fx.impact(at, dir, col, power, crit, armor)
+	# the body tells which it was: an armour hit flashes the shell's colour, a health hit white (a break keeps its own)
+	if armor:
+		target.shell_t = maxf(target.shell_t, SHELL_FLASH_T)
+	elif target.shell_t < SHELL_FLASH_T:
+		target.shell_t = 0.0
 	# the body flinches along the hit (Ent.flinch: drawn only, springs back); big things barely move
 	var heft := maxf(1.0, float(target.get("r")) * 1.6) if target.get("r") != null else 1.0
 	target.flinch = (target.flinch + dir * (0.05 + 0.045 * power) * (1.4 if crit else 1.0) / heft).limit_length(0.3)
@@ -125,14 +132,15 @@ static func kill(m: Match, h: Hunter, credit: Ent) -> void:
 		m.sfx("kill", null, -3.0)
 		if m.hud: m.hud.flash(Color(tc, 1.0), 0.14)
 
-## Armor broken (Match.on_armor_break): a burst of blue shards and a glassy crack, and a short
-## freeze for whoever broke it (Feel tier 3: 0.045s).
+## Armor broken (Match.on_armor_break): the body cracks (it holds the shell's flash for BREAK_FLASH_T, then fades)
+## and the shell falls off it in shards, with a glassy sound; no ring, no burst. A short freeze for whoever broke it
+## (Feel tier 3: 0.045s).
 static func armor_break(m: Match, h: Hunter, credit: Ent) -> void:
 	if m == null or m.fx == null:
 		return
-	var c := Vector3(h.pos.x, h.hit_y() + 1.0, h.pos.z)
-	m.fx.flash(c, Color("9ad8ff"), 0.8, 0.14)
-	m.fx.spark(c, Vector3.UP, Color("b8e6ff"), 20, 9.0, 100.0, 0.35, 16.0, 1.2)
+	h.shell_t = BREAK_FLASH_T
+	h.flash_t = maxf(h.flash_t, BREAK_FLASH_T)
+	m.fx.spark(Vector3(h.pos.x, h.hit_y() + 0.6, h.pos.z), Vector3.UP, Ent.SHELL_FLASH, 14, 3.0, 120.0, 0.5, 18.0, 1.3)
 	m.sfx("armor_break", h.pos, -1.0)
 	if credit == m.player and h != m.player:
 		m.freeze_frame(0.045)

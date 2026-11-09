@@ -21,6 +21,7 @@ var face := 0.0             # yaw the model looks toward
 var model: Node3D = null
 var mats: Array = []
 var flash_t := 0.0
+var shell_t := 0.0            # s the body flash stays armour-coloured (Juice sets it on an armour hit or break)
 var freeze_t := 0.0         # visual hit-pause
 var burn_t := 0.0
 var burn_dps := 0.0
@@ -143,7 +144,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		return 0.0
 	hp -= d
 	last_hit_by = by
-	flash_t = 0.12
+	flash_t = maxf(flash_t, 0.12)
 	freeze_t = 0.05 if d >= 10.0 else 0.03
 	squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
@@ -298,6 +299,7 @@ func slide(dt: float, guard := false) -> bool:
 
 func tick_status(dt: float) -> void:
 	if flash_t > 0.0: flash_t -= dt
+	if shell_t > 0.0: shell_t -= dt
 	if freeze_t > 0.0: freeze_t -= dt
 	if slow_t > 0.0:
 		slow_t -= dt
@@ -338,6 +340,8 @@ func net_follow(dt: float) -> void:
 ## Called every rendered frame. alpha blends between the last two simulation steps.
 var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
 var _flash_set := -1.0
+var _flash_shell := false
+const SHELL_FLASH := Color(0.62, 0.86, 1.0)     # the armour's flash on the body: the HUD's cyan strip
 var _flash_n := -1
 ## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
 ## springs back; during a hit's freeze the model holds where it was and shivers along that line.
@@ -357,8 +361,11 @@ func render(delta: float, alpha: float) -> void:
 	squash = maxf(0.0, squash - delta * 2.5)
 	var f := clampf(flash_t / 0.12, 0.0, 1.0)
 	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
-	if f != _flash_set or mats.size() != _flash_n:
+	var shell := shell_t > 0.0
+	if f != _flash_set or mats.size() != _flash_n or shell != _flash_shell:
 		_flash_set = f
 		_flash_n = mats.size()
+		_flash_shell = shell
 		for mt in mats:
 			mt.set_shader_parameter("flash", f)
+			mt.set_shader_parameter("flash_color", SHELL_FLASH if shell else Color.WHITE)

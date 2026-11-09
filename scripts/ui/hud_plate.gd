@@ -14,6 +14,7 @@ extends RefCounted
 const CHIP_HOLD := 0.4         # s the lost chunk stays after the last hit
 const CHIP_DRAIN := 1.6        # of the bar per second once it drains (plus an ease-out)
 const FLASH_T := 0.14          # s the frame flashes white when struck
+const ARMOR_FLASH_T := 0.2     # s the armour strip flashes white after it loses some
 const BREAK_T := 0.45          # s of the armour-break crack
 const BURST_T := 1.1           # s of the knock burst over someone who just went down
 const LVL_POP_T := 0.7        # s of the pulse on a plate's level badge when that hunter levels up
@@ -46,8 +47,8 @@ func tick(dt: float) -> void:
 func _state(e: Ent) -> Dictionary:
 	var s: Dictionary = st.get(e.nid, {})
 	if s.is_empty():
-		s = {"chip": 1.0, "hold": 0.0, "frac": -1.0, "armor": -1.0, "flash": 0.0, "brk": 0.0, "down": false,
-			"burst": 0.0, "lvl": -1, "lvl_pop": 0.0, "seen": now}
+		s = {"chip": 1.0, "hold": 0.0, "frac": -1.0, "armor": -1.0, "flash": 0.0, "aflash": 0.0,
+			"brk": 0.0, "down": false, "burst": 0.0, "lvl": -1, "lvl_pop": 0.0, "seen": now}
 		st[e.nid] = s
 	return s
 
@@ -78,12 +79,19 @@ func chip_of(e: Ent, frac: float, dt: float) -> float:
 func flash_of(e: Ent) -> float:
 	return clampf(float(_state(e)["flash"]) / FLASH_T, 0.0, 1.0)
 
+## 1 as the armour strip loses some (a hit on the shell), fading to 0 over ARMOR_FLASH_T.
+func armor_flash_of(e: Ent) -> float:
+	return clampf(float(_state(e)["aflash"]) / ARMOR_FLASH_T, 0.0, 1.0)
+
 ## Watches armour and the downed state for the crack and the knock burst.
 func _watch(h: Hunter, dt: float) -> Dictionary:
 	var s := _state(h)
 	var ar := h.armor
 	if float(s["armor"]) > 0.5 and ar <= 0.5 and h.max_armor > 0.5:
 		s["brk"] = BREAK_T
+	if ar < float(s["armor"]) - 0.01:
+		s["aflash"] = ARMOR_FLASH_T
+	s["aflash"] = maxf(0.0, float(s["aflash"]) - dt)
 	s["armor"] = ar
 	s["brk"] = maxf(0.0, float(s["brk"]) - dt)
 	if h.downed and not bool(s["down"]):
@@ -219,7 +227,7 @@ func _armor(c: CanvasItem, h: Hunter, r: Rect2, s: Dictionary) -> bool:
 	if h.max_armor <= 0.5:
 		return false
 	var col: Color = h.armor_col() if h.armor_tier > 0 or h.armor > 0.5 else HudStyle.ARMOR
-	HudStyle.strip(c, r, h.armor / h.max_armor, col)
+	HudStyle.strip(c, r, h.armor / h.max_armor, col.lerp(Color.WHITE, armor_flash_of(h)))
 	var b := float(s["brk"]) / BREAK_T
 	if b > 0.0:
 		var k := 1.0 - b
