@@ -489,5 +489,6 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 
 ## 2026-11-09 ~10:40 PM EST owner: approval gates + mob sheets + animation now
 - GATES (owner approves each step, nobody advances on their own): hunters -> mobs -> Boki. Boki are approved in BATCHES OF 30.
+- CLARIFIED 11-09 5:23 PM EST (owner, via art session): the gates are the 3D ORDER. The 2D Boki V2 restyle pass is NOT gated and runs now. Owner also approved the V2 style files (STYLE_CANON_V2, RERENDER_PROMPTS, REVIEW_CHECKLIST_V2, MARQUEE_HUMAN_PASS) and asked to redesign the whole s7 hold list as Fable suggests (concepts go to him first, with before/after text). No human artist.
 - Mobs get turnaround sheets in one consistent format for all mobs (docs/art/mobs/TURNAROUND_SPEC.md). Reference SUPERVIVE PvE creatures for readability/function only, never designs/names/art; extra or different archetypes welcome.
 - Animation: replaces the 11-09 "animation stays on rig-contract clips" line. Coordinator runs an animation-quality lane now (hunters first): AI auto-rig + motion pilots vs current clips, judged by Fable. Rig contract stays the integration target.
