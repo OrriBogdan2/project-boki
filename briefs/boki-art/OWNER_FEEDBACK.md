@@ -39,6 +39,6 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 ## 04:58 ET 11-09 tick
 - LIVE: Canvastross, Glintmole, Gloamspire, Glomworth, Gongibbon, Knotling, Lanternlong, Lyrewing, Mossbastion, Parasolth, Ribbonwyrm, Rimekit, Rimeshrew, Rimefang, Selenwhale, Tidalisk, Umbrathere (picks -> sheet+card+portrait); Pyrraven demonic t3 live; Lanceron k2 card+portrait live.
 - Bokidex heroes rebuilt from current cards (cutout_v2), sent to coordinator to publish (owner: "minks are the old ones").
-- Auto-picked (>=8.0) and queued sheet+card+portrait (wave86): Anchorhorn z1, Bastionpet z1, Briarlynx f3, Chandelapi f3, Cisternmander z1, Crofthollow z1, Eclipsowl d2, Effigoon f2, Glaivyx h3, Mortarfly x1, Ringrove y1, Thistlynx e2. Owner can swap.
+- Auto-picked (>=8.0) and queued sheet+card+portrait (wave86): Anchorhorn z1, Bastionpet z1, Briarlynx f3, Chandelapi f3, Crofthollow z1, Eclipsowl d2, Mortarfly x1, Ringrove y1, Thistlynx e2, Chandelotl d1_1. Pulled on eye check: Effigoon f2 (has a face), Cisternmander z1 (lightning), Glaivyx h3 (still scorpion, short legs).
 - Below bar, owner to look (no auto-queue): Galleotter g1/g2 7.8, Scythant n3 7.8, Glassolotl f2 7.7, Gongrowl z1 7.7, Reapant t3 7.6.
 - Retries queued: Canvastross/Rimefang/Lanceron sheets, Pipeworth card+portrait.

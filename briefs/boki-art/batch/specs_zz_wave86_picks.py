@@ -1,4 +1,5 @@
 # 04:55 ET 11-09 tick: top pick (>=8.0) of each new redesign/evolution direction -> sheet + card + portrait (owner can swap); retries for failed wave81/83 picks.
+# Pulled after eye check: Effigoon f2 (has a face; owner wants faceless cocoon), Cisternmander z1 (still lightning), Glaivyx h3 (still scorpion-heavy, short legs). Owner to choose.
 _O='briefs/boki-art/batch/out/'
 TA('Anchorhorn',_O+'c_anchorhorn_z1_2.jpg'); SPECS[-1]['id']='ta_anchorhorn_p86'
 SPECS.append({'id':'anchorhorn_card86','name':'Anchorhorn (hero card)','refs':[_O+'c_anchorhorn_z1_2.jpg',SRA],'runs':3,'aspect':'1:1','size':'2K','prompt':CARD('Anchorhorn','final','planted on the shore with its great anchor horn lowered')})
@@ -12,21 +13,12 @@ P('briarlynx_p86','Briarlynx',_O+'c_briarlynx_f3_3.jpg','planted in a low stalki
 TA('Chandelapi',_O+'c_chandelapi_f3_1.jpg'); SPECS[-1]['id']='ta_chandelapi_p86'
 SPECS.append({'id':'chandelapi_card86','name':'Chandelapi (hero card)','refs':[_O+'c_chandelapi_f3_1.jpg',SRA],'runs':3,'aspect':'1:1','size':'2K','prompt':CARD('Chandelapi','final','standing tall and calm, flames glowing softly')})
 P('chandelapi_p86','Chandelapi',_O+'c_chandelapi_f3_1.jpg','standing tall and calm, flames glowing softly')
-TA('Cisternmander',_O+'c_cisternmander_z1_3.jpg'); SPECS[-1]['id']='ta_cisternmander_p86'
-SPECS.append({'id':'cisternmander_card86','name':'Cisternmander (hero card)','refs':[_O+'c_cisternmander_z1_3.jpg',SRA],'runs':3,'aspect':'1:1','size':'2K','prompt':CARD('Cisternmander','final','planted and steady, water sloshing in its tank body')})
-P('cisternmander_p86','Cisternmander',_O+'c_cisternmander_z1_3.jpg','planted and steady, water sloshing in its tank body')
 TA('Crofthollow',_O+'c_crofthollow_z1_1.jpg'); SPECS[-1]['id']='ta_crofthollow_p86'
 SPECS.append({'id':'crofthollow_card86','name':'Crofthollow (hero card)','refs':[_O+'c_crofthollow_z1_1.jpg',SRA],'runs':3,'aspect':'1:1','size':'2K','prompt':CARD('Crofthollow','final','planted with its hollow crofter shell glowing warmly')})
 P('crofthollow_p86','Crofthollow',_O+'c_crofthollow_z1_1.jpg','planted with its hollow crofter shell glowing warmly')
 TA('Eclipsowl',_O+'c_eclipsowl_d2_2.jpg'); SPECS[-1]['id']='ta_eclipsowl_p86'
 SPECS.append({'id':'eclipsowl_card86','name':'Eclipsowl (hero card)','refs':[_O+'c_eclipsowl_d2_2.jpg',SRA],'runs':3,'aspect':'1:1','size':'2K','prompt':CARD('Eclipsowl','final','perched and looming, wings half-spread in darkness')})
 P('eclipsowl_p86','Eclipsowl',_O+'c_eclipsowl_d2_2.jpg','perched and looming, wings half-spread in darkness')
-TA('Effigoon',_O+'c_effigoon_f2_2.jpg'); SPECS[-1]['id']='ta_effigoon_p86'
-SPECS.append({'id':'effigoon_card86','name':'Effigoon (hero card)','refs':[_O+'c_effigoon_f2_2.jpg',SRA],'runs':3,'aspect':'1:1','size':'2K','prompt':CARD('Effigoon','mid','braced in its armoured cocoon, faceless and still')})
-P('effigoon_p86','Effigoon',_O+'c_effigoon_f2_2.jpg','braced in its armoured cocoon, faceless and still')
-TA('Glaivyx',_O+'c_glaivyx_h3_4.jpg'); SPECS[-1]['id']='ta_glaivyx_p86'
-SPECS.append({'id':'glaivyx_card86','name':'Glaivyx (hero card)','refs':[_O+'c_glaivyx_h3_4.jpg',SRA],'runs':3,'aspect':'1:1','size':'2K','prompt':CARD('Glaivyx','final','planted tall on long legs, blade tail raised')})
-P('glaivyx_p86','Glaivyx',_O+'c_glaivyx_h3_4.jpg','planted tall on long legs, blade tail raised')
 TA('Mortarfly',_O+'c_mortarfly_x1_2.jpg'); SPECS[-1]['id']='ta_mortarfly_p86'
 SPECS.append({'id':'mortarfly_card86','name':'Mortarfly (hero card)','refs':[_O+'c_mortarfly_x1_2.jpg',SRA],'runs':3,'aspect':'1:1','size':'2K','prompt':CARD('Mortarfly','final','hovering with artillery wings braced')})
 P('mortarfly_p86','Mortarfly',_O+'c_mortarfly_x1_2.jpg','hovering with artillery wings braced')
