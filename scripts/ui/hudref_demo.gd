@@ -115,7 +115,8 @@ static func _plates(m, P: Hunter) -> void:
 	m.knock(foes[4], P, {})                                              # downed
 
 static func _numbers_setup(m, P: Hunter) -> void:
-	var foes: Array = m.hunters.filter(func(x): return x != P)
+	# rivals only: your hits on allies draw nothing
+	var foes: Array = m.hunters.filter(func(x): return x.team != P.team)
 	for i in mini(4, foes.size()):
 		var h: Hunter = foes[i]
 		_stand(m, h, P.pos + Vector3((float(i) - 1.5) * 2.2, 0, 4.4))
