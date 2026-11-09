@@ -32,10 +32,12 @@ var stun_max := 0.0          # the longest stun seen on the watched body since i
 var stun_on: Ent = null
 var watch: Ent = null         # the first tow on this body, as the host's mirror of it (seen)
 var seen := {}
+var tag := "DISPNET"         # the prefix of every line (the remote-anim check reuses this host/guest harness)
+var guest_flag := "--displace-net-check=guest"
 
 func ok(cond: bool, what: String, info := "") -> void:
 	n += 1
-	print("DISPNET %s %s  %s" % ["ok  " if cond else "FAIL", what, info])
+	print("%s %s %s  %s" % [tag, "ok  " if cond else "FAIL", what, info])
 	if not cond: bad += 1
 
 func run(main_node: Node) -> void:
@@ -44,7 +46,7 @@ func run(main_node: Node) -> void:
 	Engine.max_fps = 60
 	var guest := false
 	for a in OS.get_cmdline_user_args():
-		if a == "--displace-net-check=guest": guest = true
+		if a == guest_flag: guest = true
 		if a.begins_with("--dn-port="): port = int(a.substr(10))
 	Net.message.connect(_on_msg)
 	if guest:
@@ -53,7 +55,8 @@ func run(main_node: Node) -> void:
 		await _host()
 
 # ------------------------------------------------------------------ the host
-func _host() -> void:
+## Brings up the relay, the guest game and both matches; the guest's hunter as the host sees it, or null.
+func _host_up() -> Hunter:
 	port = 7930 + OS.get_process_id() % 60
 	dir = ProjectSettings.globalize_path("user://displace_net")
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -62,8 +65,8 @@ func _host() -> void:
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
-	var cmd := "cd '%s' && %s --headless -- --displace-net-check=guest --dn-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), GODOT, port, dir.path_join("guest.log")]
+	var cmd := "cd '%s' && %s --headless -- %s --dn-port=%d > '%s' 2>&1" % [
+		ProjectSettings.globalize_path("res://"), GODOT, guest_flag, port, dir.path_join("guest.log")]
 	OS.create_process("/bin/sh", ["-c", cmd])
 	var other := ""
 	var t0 := Time.get_ticks_msec()
@@ -74,7 +77,7 @@ func _host() -> void:
 		_read_pid()
 	ok(other != "", "the guest joins the relay", other)
 	if other == "":
-		return _finish()
+		return null
 	var d := {"mid": "dn%d" % port, "seed": SEED, "host": Net.me, "teams": 2, "squad": 1, "tier": 0, "roster": [
 		{"peer": Net.me, "team": 0, "name": "Host", "cls": "medium", "weapon": "", "kin": {}},
 		{"peer": other, "team": 1, "name": "Guest", "cls": "medium", "weapon": "", "kin": {}}]}
@@ -86,6 +89,10 @@ func _host() -> void:
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + other, null)
 	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
+	return G
+
+func _host() -> void:
+	var G := await _host_up()
 	if G == null:
 		return _finish()
 	var B: Hunter = m.make_hunter("B", 1, "medium", "Bot", "idle", {}, home + Vector3(-6.0, 0, 9.0), {"arch": "none"})
@@ -108,7 +115,7 @@ func _finish() -> void:
 	_read_pid()
 	if guest_pid > 0 and OS.is_process_running(guest_pid):
 		OS.kill(guest_pid)
-	print("DISPNET DONE, %d checks, failures: %d" % [n, bad])
+	print("%s DONE, %d checks, failures: %d" % [tag, n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 func _read_pid() -> void:
@@ -118,7 +125,7 @@ func _read_pid() -> void:
 	if not FileAccess.file_exists(p):
 		return
 	for line in FileAccess.get_file_as_string(p).split("\n"):
-		if line.begins_with("DISPNET guest pid="):
+		if line.begins_with("%s guest pid=" % tag):
 			guest_pid = int(line.get_slice("=", 1))
 
 ## One ability, on the bot and then on the guest from the same spot: the guest's own game puts it where
@@ -337,9 +344,9 @@ func _got(k: String) -> float:
 
 # ------------------------------------------------------------------ the guest
 func _guest() -> void:
-	print("DISPNET guest pid=%d" % OS.get_process_id())
+	print("%s guest pid=%d" % [tag, OS.get_process_id()])
 	if not await _connect():
-		print("DISPNET guest: no relay")
+		print("%s guest: no relay" % tag)
 		main.get_tree().quit(1)
 		return
 	var t0 := Time.get_ticks_msec()
