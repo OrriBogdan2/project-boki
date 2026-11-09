@@ -138,6 +138,7 @@ func _start() -> void:
 		roster.append({"peer": id, "team": i / squad, "name": p.get("name", "Hunter"), "arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
 	var teams := maxi(int(ceil(float(ids.size()) / squad)), int(ceil(Data.MATCH_PLAYERS / float(squad))))
 	var d := {"mid": "%d" % (Time.get_ticks_msec() % 100000000), "seed": randi(), "host": Net.me, "roster": roster, "teams": mini(teams, 20), "squad": squad, "tier": int(opts.get("tier", 0))}
+	d["hot"] = HotZone.pick(WideLayout.pick({}, false, int(d["tier"])).get("islands", []), int(d["seed"]))
 	Net.lobby_emit("start", d)
 	_go(d)
 
@@ -151,4 +152,4 @@ func _on_msg(topic: String, data, _from: String) -> void:
 
 func _go(d: Dictionary) -> void:
 	Save.d["cls"] = opts.get("cls", Save.d.get("cls", "medium"))
-	Game.start_match({"net": d, "seed": int(d["seed"]), "teams": int(d["teams"]), "squad": int(d["squad"]), "tier": int(d.get("tier", 0))})
+	Game.start_match({"net": d, "seed": int(d["seed"]), "teams": int(d["teams"]), "squad": int(d["squad"]), "tier": int(d.get("tier", 0)), "hot": String(d.get("hot", ""))})

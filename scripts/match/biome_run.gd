@@ -562,9 +562,10 @@ func _tick_hazards(dt: float) -> void:
 func slot_lean_at(p: Vector3) -> Dictionary:
 	return _biome(p).get("loot", {}).get("slots", {})
 
-## Extra rarity steps for loot in this region (the Gloom pays better), plus the island's danger.
+## Extra rarity steps for loot in this region (the Gloom pays better), plus the island's danger and the hot zone.
 func rarity_bonus_at(p: Vector3) -> int:
-	return int(_biome(p).get("loot", {}).get("rarity_bonus", 0)) + (1 if _danger(p) >= 2 else 0)
+	return int(_biome(p).get("loot", {}).get("rarity_bonus", 0)) + (1 if _danger(p) >= 2 else 0) \
+			+ (m.hot.bonus_at(p) if m.hot else 0)
 
 ## The region's gear leanings (tags), for glove/gear tables that read them.
 func gear_tags_at(p: Vector3) -> Array:

@@ -171,6 +171,7 @@ func draw(sz: Vector2) -> void:
 	_shrines(c, kk)
 	var saved: Vector3 = hud.mm_circ
 	hud.mm_circ = Vector3.ZERO          # the shared map helpers clip to a rectangle here
+	if m.hot: m.hot.paint(hud, to_screen(m.hot.center()), m.hot.radius() * kk, true)
 	_labels(c, kk)
 	if m.skytrain:
 		hud._draw_map_train(rect, v, kk)

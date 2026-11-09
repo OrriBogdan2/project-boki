@@ -329,6 +329,17 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Fiv
 | fight_quiet_s | 2 |
 | poll_s | 0.25 |
 
+## hot_zone (`content/rules/hot_zone.json`)
+
+The hot drop zone (owner, Nov 7): each match picks one named area with better loot. Picked from the map's non-perch islands by seed, never the same one twice in a row in this game. Shown on the drop map and the minimap in one colour with a label.
+
+| Setting | Value |
+|---|---|
+| tier_up | 1 |
+| tier_up_doc | Rarity steps added to chest and monster loot inside the zone (on top of the region's own bonus). |
+| color | ff6a3d |
+| label | HOT ZONE |
+
 ## hunter_move (`content/rules/hunter_move.json`)
 
 
