@@ -13,7 +13,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "blender"))
 import hem_pieces as H
 from meshkit import smooth
-from paintkit import hexc
+from paintkit import hexc, clean_normal
 import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
@@ -21,6 +21,7 @@ SRC, RIG, OUT = a[0], a[1], a[2]
 WORK = os.path.dirname(os.path.abspath(OUT))
 ATLAS = 2048
 CARDS = 512
+NRM_CAGE, NRM_RAY = 0.005, 0.012     # m: the normal bake cage's extrusion, its ray's reach (detail pilot, Vex)
 UNIQ_W = 0.94                        # the scan's islands' share of the atlas width; the flat cells sit to its right
 CELL = {H.SKIN: "#ded3d1", H.LID: "#bfaab8", H.THREAD: "#7a1230", H.BOW: "#2b2129", H.BOW_HI: "#4a3a48", H.STEEL: "#b4b3bd", H.STEEL_DK: "#5d5b66",
         H.PIN: "#cfcdd5", "leather-vane": "#a5835c"}
@@ -155,6 +156,23 @@ bpy.context.view_layer.objects.active = ob
 bpy.ops.object.bake(type="EMIT", use_clear=True, margin=12)
 COL = np.array(atlas.pixels[:], np.float32).reshape(ATLAS, ATLAS, 4)[..., :3].copy()
 print("baked")
+
+# ---- the normal map: the scan's dense surface (under Meshy's normal texture) on the low mesh; the flat cells stay flat
+for mt in src.data.materials:
+    nt = mt.node_tree
+    surface = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL").inputs["Surface"]
+    nt.links.new(next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED").outputs[0], surface)
+nrm_bake = bpy.data.images.new("bake_normal", ATLAS, ATLAS)
+nrm_bake.colorspace_settings.name = "Non-Color"
+for mt in me.materials:
+    mt.node_tree.nodes.active.image = nrm_bake
+sc.cycles.samples = 16
+sc.render.bake.cage_extrusion, sc.render.bake.max_ray_distance = NRM_CAGE, NRM_RAY
+sc.render.bake.normal_space = "TANGENT"
+bpy.ops.object.bake(type="NORMAL", use_clear=True, margin=12)
+NRM = np.array(nrm_bake.pixels[:], np.float32).reshape(ATLAS, ATLAS, 4)[..., :3].copy()
+NRM[:, int(UNIQ_W * ATLAS):] = (0.5, 0.5, 1.0)
+print("normal baked, wrong hits flattened %.4f" % clean_normal(NRM))
 
 # ---- per face: its paint, its slot
 fuv = np.zeros((len(me.polygons), 2))
@@ -299,6 +317,8 @@ def save(img_name, arr, path, fmt="JPEG"):
 
 
 atlas_i = save("atlas", COL, os.path.join(WORK, "atlas.jpg"))
+normal_i = save("normal", NRM, os.path.join(WORK, "normal.png"), "PNG")      # lossless: JPEG bends a normal ~4 degrees
+normal_i.colorspace_settings.name = "Non-Color"
 
 
 # ---- the alpha cards
@@ -441,6 +461,12 @@ def dress(m_):
         pb.inputs["Roughness"].default_value = 0.7
         if mt.name == "card-hem":
             nt.links.new(t.outputs["Alpha"], pb.inputs["Alpha"])
+        elif mt.name.endswith("-hem"):
+            n_ = nt.nodes.new("ShaderNodeTexImage")
+            n_.image = normal_i
+            bump = nt.nodes.new("ShaderNodeNormalMap")
+            nt.links.new(n_.outputs[0], bump.inputs["Color"])
+            nt.links.new(bump.outputs[0], pb.inputs["Normal"])
 
 
 def ink(m_, room):

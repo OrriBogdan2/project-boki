@@ -1,8 +1,13 @@
 # Hem (archer; shown as Ravyl): import note, ART-1 rebuild for Ravel v2 (2026-11-07)
 
 `hem.glb`: one Meshy multi-view scan of `ravel_v2_turnaround.jpg` (brief: briefs/art-refs/ravel_v2/ on ext/agent-briefs) plus scripted parts, on the
-shared armature, the ids and file names kept. Raw files in ~/meshy/ravel_v2 (never in git). 14.4k triangles with the bow, one 2048 atlas (`hem_atlas.jpg`,
-the pieces on flat cells at its right edge) and a 512x256 RGBA card atlas (`hem_cards.png`). No normal map. Slots: skin, hair, cloth (corset), leather (skirt, belt, boots, bow), metal, card.
+shared armature, the ids and file names kept. Raw files in ~/meshy/ravel_v2 (never in git). 25.1k triangles with the bow (11-09 revamp; was 14.4k), one 2048 atlas (`hem_atlas.jpg`,
+the pieces on flat cells at its right edge) and a 512x256 RGBA card atlas (`hem_cards.png`). A 2048 tangent-space normal map (`hem_normal.png`, lossless: hem_clips exports images AUTO, so the glb keeps it PNG) is
+baked from the dense scan (Cycles selected-to-active, cage 0.005, ray 0.012; flat cells flattened, tilts over 65° clamped
+by paintkit.clean_normal) and wired through a NormalMap node on every `-hem` material. hem_source decimates by region:
+the face 4k, each hand 1.6k, the mask 1.6k, the rest to the remainder of 24.6k. Revamp (11-09): a fresh meshy-7.1 run
+(40 credits) came out with the arms closer to the body and less detail, so the earlier 901k scan stays the source; old vs
+new renders in docs/art/wardens/revamp/hem/. Slots: skin, hair, cloth (corset), leather (skirt, belt, boots, bow), metal, card.
 
 Scripted (tools/art1/hem_pieces.py): the closed bow hand, the bow (1.6 m), the two back needles (1.21 m, 0.67 of her height, as on the sheet) lashed in an X,
 severed strings, thread spools and pins on the belt, bun pins, the arrow, and her eyelids (`eyelids`: a shell per eye on `lid.R`/`lid.L`, pivot 13 mm under

@@ -13,10 +13,10 @@ from meshkit import smooth
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, RIG, OUT = a[0], a[1], a[2]
-LOW_TRIS = 12900
-FACE_TRIS = 2300
-HAND_TRIS = 900
-MASK_TRIS = 900                   # the shoulder mask keeps its face
+LOW_TRIS = 24600                  # at most (the 11-09 revamp: ~25k with the bow and arrow; face, hands, mask land under their caps)
+FACE_TRIS = 4000
+HAND_TRIS = 1600
+MASK_TRIS = 1600                  # the shoulder mask keeps its face
 SOLE = -0.951
 HEEL_Z = 0.015                    # the scan's boots keep a small heel: everything under the toe's sole is cut flat
 ANKLE = 0.1
