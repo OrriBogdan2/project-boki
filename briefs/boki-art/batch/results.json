@@ -5561,5 +5561,68 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_lashyx_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_kitlet",
+    "name": "Kitlet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kitlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prismander",
+    "name": "Prismander (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_prismander_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_puffamus",
+    "name": "Puffamus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_puffamus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mycroll",
+    "name": "Mycroll (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_mycroll_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skateron",
+    "name": "Skateron (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimink",
+    "name": "Rimink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rimink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mycroll",
+    "name": "Mycroll (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_mycroll_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rippmink",
+    "name": "Rippmink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rippmink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_puffamus",
+    "name": "Puffamus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_puffamus_2.jpg",
+    "ok": true
   }
 ]
