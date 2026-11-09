@@ -19981,5 +19981,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/lanternmit_e_w30_1.jpg",
     "ok": true
+  },
+  {
+    "id": "lanternmit_e_w30",
+    "name": "Lanternmit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanternmit_e_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternmit_e_w30",
+    "name": "Lanternmit",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lanternmit_e_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternmit_e_w30",
+    "name": "Lanternmit",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/lanternmit_e_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockatara_r_w30",
+    "name": "Lockatara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lockatara_r_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockatara_r_w30",
+    "name": "Lockatara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lockatara_r_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockatara_r_w30",
+    "name": "Lockatara",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lockatara_r_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_r_w30",
+    "name": "Lyrewing",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lyrewing_r_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_r_w30",
+    "name": "Lyrewing",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lyrewing_r_w30_1.jpg",
+    "ok": true
   }
 ]
