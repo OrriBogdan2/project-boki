@@ -70,6 +70,7 @@ func run(main: Node) -> void:
 	await _holds(main, m, V, P)
 	_view(m, V, P)
 	_kit(m, V, P)
+	_origins(P)
 	_net(m, V, P)
 	await _status_and_dash(main, m, P)
 	await _core_kinds(main, m, V, P)
@@ -247,6 +248,29 @@ func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(int(V.plays.get("slam_hit", 0)) == 1, "the Finishing Slam plays its recipe")
 	ok(m.fx.rings.size() == rings0, "no shared ring under it")
 	ok(not m.fx.own_look and Sfx.skip.is_empty(), "the own-look scope closes")
+
+## Shot origins (content/shot_origins.json): every measured muzzle sits on the body, turns with the aim, and a seated
+## round leaves from it at its own height, as fast as before and still ending where it would have.
+func _origins(P: Hunter) -> void:
+	var arch0 := P.arch
+	for arch: String in ["gunslinger", "archer", "mage", "thief", "dredge", "ashwick", "dolm"]:
+		for move: String in ["lmb", "rmb", "e", "throw"]:
+			for o: Array in ShotOrigin.data(arch, move).get("at", []):
+				var on := absf(float(o[0])) <= 0.8 and float(o[1]) > 0.0 and float(o[1]) <= 0.8
+				ok(on, "%s %s: origin %s on the body" % [arch, move, o])
+	P.arch = "thief"
+	var at := ShotOrigin.point(P, "lmb", 1, P.pos + Vector3(0, 0.9, 0))
+	var d := P.aim_dir()
+	var side := Vector2(at.x - P.pos.x, at.z - P.pos.z).dot(Vector2(-d.y, d.x))
+	ok(is_equal_approx(at.y, P.pos.y + 0.9) and side < -0.3,
+		"the left crossbow's round leaves on her left (%.2f m)" % side)
+	P.arch = arch0
+	var sd := {"pos": P.pos + Vector3(d.x * 0.6, 0.9, d.y * 0.6), "vel": d * 20.0, "life": 0.5, "x": {}}
+	var end: Vector2 = Vector2(sd["pos"].x, sd["pos"].z) + d * 10.0
+	ShotOrigin.seat(sd, at)
+	var lands: Vector2 = Vector2(at.x, at.z) + (sd["vel"] as Vector2) * float(sd["life"])
+	ok(sd["start"] == at and lands.distance_to(end) < 0.01 and is_equal_approx((sd["vel"] as Vector2).length(), 20.0),
+		"a seated round leaves the muzzle and lands where it would have")
 
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
 func _lisette(main: Node, V0: HeroVfx) -> void:

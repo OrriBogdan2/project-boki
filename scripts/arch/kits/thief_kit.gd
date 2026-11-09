@@ -20,7 +20,6 @@ extends ArchKit
 ## - E, Shadow Knife: a dagger to the cursor that sticks in the first foe (slows) or lands; recast to blink
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
-const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
 const BOLT_HEAD := Color("eadcff")    # the bolt's chakram: her violet run hot (content/vfx/thief.json "hot")
 const EMP_BLUE := Color("4ab8ff")  # the empowered shot's chakram
 const GLINT_EDGE := Color("2a1450")    # the dark violet edge round the hand glint
@@ -359,11 +358,10 @@ func _bolt() -> void:
 	if sd["by"] != h:
 		return
 	bolts += 1
-	hand = 1 - hand
+	hand = 1 - h.shot_n % 2        # (the hand ShotOrigin seats this round at: weapon_muzzle, then weapon_muzzle_l)
 	var d := h.aim_dir()
-	var right := Vector2(-d.y, d.x)
-	var off := right * HAND_OFF * (1.0 if hand == 1 else -1.0)
-	var start: Vector3 = (sd["pos"] as Vector3) + Vector3(off.x, 0, off.y)
+	var start := ShotOrigin.point(h, "lmb", h.shot_n, sd["pos"])
+	sd["seated"] = true
 	var rng := float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if emp else 1.0)
 	var to := AimMode.point(h, rng)
 	var v := Vector2(to.x - start.x, to.z - start.z)
@@ -384,7 +382,7 @@ func _bolt() -> void:
 	play("thf_primed" if emp else throw)
 	h.swing_n += 1
 	h.combo_i = 1 if hand == 1 else 2
-	var muzzle := start + Vector3(d.x, 0, d.y) * 0.1
+	var muzzle := ShotOrigin.flash(h, start + Vector3(d.x, 0, d.y) * 0.1)
 	if emp:
 		primed_t = 0.0
 		haste_t = 0.0
@@ -792,9 +790,11 @@ func _throw_knife() -> void:
 				_stick(f, f.pos),
 		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			if knife.is_empty() and e == null: _stick(null, ground(at) if _why == "wall" else land)}))
+	var throw_at := ShotOrigin.point(h, "e", 0, h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6))
 	if m.shots.size() > n0 and m.shots[-1]["by"] == h:
+		ShotOrigin.seat(m.shots[-1], Vector3(throw_at.x, (m.shots[-1]["pos"] as Vector3).y, throw_at.z))
 		fx().ride(m.shots[-1], "dagger", col_of(ed), BOLT_HEAD, 1.6, 0.26)
-	vfx("knife_throw", h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6))
+	vfx("knife_throw", throw_at)
 
 func _stick(f: Ent, at: Vector3) -> void:
 	var ed := e_def()

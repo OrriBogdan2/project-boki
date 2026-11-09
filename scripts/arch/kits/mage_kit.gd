@@ -14,8 +14,6 @@ const GLOW := Color("ffd6ee")        # the lightning's hot core: a near-white pi
 const COPPER := Color("e08a46")
 const DEEP_GOLD := Color("e0900a")   # the aim kit whitens its accent: this lands as a rich gold
 const PINK := Color("ff5ab4")        # the lightning's body: her signature pink (docs/VFX_QUALITY.md)
-const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
-const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun
 
@@ -34,7 +32,7 @@ var reset_dash_boost := false  # a reset armed the next Wirerun: further, charge
 var reset_boost_t := 0.0       # s left on it
 var slams := 0
 var orb_bursts := 0
-var lmb_n := 0                 # finger bolts fired (left, right, left...)
+var lmb_n := 0                 # finger bolts fired (right, left, right...)
 var last_shot := 0
 var last_dash_kind := ""
 var last_strike := {}          # tests: the last Skycall's {at, dir}
@@ -268,23 +266,12 @@ func _tick_lmb() -> void:
 	if sd.is_empty():
 		return
 	lmb_n += 1
-	var left := lmb_n % 2 == 1
-	var d := h.aim_dir()
-	# (from the fingertip of the hand that fires: the arm is still coming up, so where that fingertip will be. The round
-	# has already flown a tick from the old muzzle: it gets that time back, so her reach stays what it was)
-	var side := Vector3(-d.y, 0, d.x) * (-FINGER_SIDE if left else FINGER_SIDE)
-	var was_at: Vector3 = sd["pos"]
-	var p := Vector3(h.pos.x, was_at.y, h.pos.z) + side + Vector3(d.x, 0, d.y) * FINGER_AHEAD
-	var speed := (sd["vel"] as Vector2).length()
-	if speed > 0.1:
-		sd["life"] = float(sd["life"]) + Vector2(was_at.x - p.x, was_at.z - p.z).length() / speed
-	sd["pos"] = p
-	sd["prev"] = p
-	sd["start"] = p
+	# (ShotOrigin has seated the round at the fingertip of the hand that fires: right, then left)
+	var left := h.shot_n % 2 == 1
 	play("mage_lmb_l" if left else "mage_lmb_r")
 	var orb := sd.get("node") as Node3D
 	if orb != null and is_instance_valid(orb):
-		orb.global_position = p
+		orb.global_position = sd["pos"]
 		orb.visible = true
 		HeroVfx.of(m).trail(h, "lmb_trail", orb)
 	m.later(0.06, _fingertip.bind(left))     # the release key of the point

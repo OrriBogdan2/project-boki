@@ -237,7 +237,7 @@ func _tick_gun() -> void:
 func _dress_volley() -> void:
 	play("dr_shot")
 	var d2 := h.aim_dir()
-	var mz := h.pos + Vector3(d2.x, 0, d2.y) * 1.05 + Vector3(0, 1.0, 0)
+	var mz := ShotOrigin.flash(h, h.pos + Vector3(d2.x, 0, d2.y) * 1.05 + Vector3(0, 1.0, 0))
 	vfx("shot", mz, d2)
 	m.sfx("dr_shot", h.pos, -5.0 if h.is_local() else -8.0, 1.0)
 	if not tells_visible():

@@ -369,6 +369,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 	return true
 
 func _fist_at() -> Vector3:
+	var fist := WardenGlb.anchor(h.model, "anchor_fist_R") if h.model != null and h.model.is_inside_tree() else null
+	if fist != null:
+		return fist.global_position
 	var dir := h.aim_dir()
 	return h.pos + Vector3(dir.x * 0.35 - dir.y * 0.3, 1.05, dir.y * 0.35 + dir.x * 0.3)
 
@@ -394,7 +397,8 @@ func _boulder() -> void:
 	play("breah_throw")
 	var dir := h.aim_dir()
 	var spd := float(bd["speed"])
-	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + dir.y * 0.6)
+	var chest := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + dir.y * 0.6)
+	var start := ShotOrigin.point(h, "throw", 0, chest)      # (from her right fist)
 	var rng := AimMode.dist(h, float(bd["range"]), AimMode.MAX)
 	m.spawn_shot(
 		h, start, dir * spd, float(bd["dmg"]) * m.dmg_mult(h), rng / spd, float(bd["size"]), Color("9ad0ff"),
