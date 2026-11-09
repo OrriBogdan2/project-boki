@@ -28780,5 +28780,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/kitlet_card3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "lanceron_card3",
+    "name": "Lanceron (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanceron_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanceron_card3",
+    "name": "Lanceron (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lanceron_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanceron_card3",
+    "name": "Lanceron (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanceron_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_card3",
+    "name": "Puffamus (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/puffamus_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_card3",
+    "name": "Puffamus (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/puffamus_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lashyx_card3",
+    "name": "Lashyx (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lashyx_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lashyx_card3",
+    "name": "Lashyx (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lashyx_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_card3",
+    "name": "Puffamus (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/puffamus_card3_2.jpg",
+    "ok": true
   }
 ]
