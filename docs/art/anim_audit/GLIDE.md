@@ -4,7 +4,8 @@ All 12 Hunters, live training match, through one glide: open, hold, a quarter tu
 the glide catching again, the glider closing into a fall, a re-open and an air dash handed back to the glider.
 `--glide-shots --shots-dir=<dir>` (match camera angle zoomed on the Hunter, plus a side view; it prints these numbers
 each frame). Sheets, one row per Hunter, columns open, hold, turn (match), dive (side), dive (match), catch, fall,
-air dash, re-glide: [before](glide_before.jpg) (origin/main d255acbee), [after](glide_after.jpg).
+air dash, re-glide: [before](glide_before.jpg) (origin/main d255acbee, software GL on rpc1), [after](glide_after.jpg)
+(GPU, jobq 20261109-090126-16031; its numbers match the software run's to the degree).
 
 Numbers in the model's frame. Tilt: the hips-to-head line forward of upright (deg; past 90 the head is below the
 hips). Hands: both hands over the head (body heights). Feet: the knees behind the hips (body heights; + trails).
