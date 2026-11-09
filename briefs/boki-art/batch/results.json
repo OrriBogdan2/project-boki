@@ -20093,5 +20093,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/pyrraven_r2_w30_2.jpg",
     "ok": true
+  },
+  {
+    "id": "pyrraven_r2_w30",
+    "name": "Pyrraven",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pyrraven_r2_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_kael_w30",
+    "name": "Relic: Kael",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_kael_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_kael_w30",
+    "name": "Relic: Kael",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_kael_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_kael_w30",
+    "name": "Relic: Kael",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/relic_kael_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_lace_w30",
+    "name": "Relic: Lace",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/relic_lace_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_lace_w30",
+    "name": "Relic: Lace",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_lace_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_lace_w30",
+    "name": "Relic: Lace",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_lace_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_neve_w30",
+    "name": "Relic: Neve",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_neve_w30_1.jpg",
+    "ok": true
   }
 ]
