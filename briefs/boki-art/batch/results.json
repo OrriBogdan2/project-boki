@@ -22109,5 +22109,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_canvastross_pe_w30_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_crofthorn_pe_w30",
+    "name": "Crofthorn (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_pe_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_boltstrich_pe_w30",
+    "name": "Boltstrich (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_boltstrich_pe_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_boltstrich_pe_w30",
+    "name": "Boltstrich (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_boltstrich_pe_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ermink_pe_w30",
+    "name": "Ermink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_ermink_pe_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frigatee_pe_w30",
+    "name": "Frigatee (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_frigatee_pe_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frigatee_pe_w30",
+    "name": "Frigatee (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_frigatee_pe_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravadillo_pe_w30",
+    "name": "Gravadillo (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gravadillo_pe_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ermink_pe_w30",
+    "name": "Ermink (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_ermink_pe_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_pe_w30",
+    "name": "Gongibbon (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_pe_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravadillo_pe_w30",
+    "name": "Gravadillo (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gravadillo_pe_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ermink_pe_w30",
+    "name": "Ermink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_ermink_pe_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frigatee_pe_w30",
+    "name": "Frigatee (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_frigatee_pe_w30_3.jpg",
+    "ok": true
   }
 ]
