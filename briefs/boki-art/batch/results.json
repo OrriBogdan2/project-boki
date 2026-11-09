@@ -21150,5 +21150,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/stance_frigatee_2.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_frigatee",
+    "name": "Frigatee (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_frigatee_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_boltstrich",
+    "name": "Boltstrich (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_boltstrich_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_boltstrich",
+    "name": "Boltstrich (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_boltstrich_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_snuffapi",
+    "name": "Snuffapi (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_snuffapi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_snuffapi",
+    "name": "Snuffapi (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_snuffapi_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_snuffapi",
+    "name": "Snuffapi (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_snuffapi_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_chandelapi",
+    "name": "Chandelapi (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_chandelapi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_chandelapi",
+    "name": "Chandelapi (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_chandelapi_2.jpg",
+    "ok": true
   }
 ]
