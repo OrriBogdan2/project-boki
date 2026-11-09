@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. the data: every trigger has at least min_lines general lines; every line is at most max_words
 ##      words and one sentence; every action is at most act_words; every tone is a known feeling and
 ##      just the name; aliases point at real triggers
-##   2. the old banks are all covered: every KinVoice category and KinSpeak recall kind has a trigger
+##   2. every category a caller passes (Kin.bark, KinCompanion callouts, recall kinds) has a trigger
 ##   3. no Boki repeats a line within its last no_repeat lines, over PICKS picks of every trigger, for
 ##      every species grown (and three young), and over a mixed run of all triggers
 ##   4. the cooldown: a Boki that just spoke stays quiet until it ends, unless it's answering you
@@ -71,8 +71,8 @@ func _data() -> void:
 			and BokiLines.fits("Hmm... okay, fine.") and BokiLines.fits("That tickles! ♥"))
 
 # ------------------------------------------------------------------ 2. the old banks are covered
-## The categories the old banks had (KinVoice BASE and CALL, KinSpeak RECALL as back_<kind>): the
-## callers still pass these names, so each must have lines here before the old banks go.
+## The categories the callers pass (Kin.bark, the KinCompanion callouts, Home's recall as back_<kind>):
+## each must resolve to a trigger with lines.
 const OLD_NAMES := ["throw", "refuse", "hesitate", "ignore", "scared", "revive", "revive_low", "callout", "wild",
 	"kill", "owner_down", "caught", "extract", "behind", "hunter", "sniper", "pack", "boss", "egg", "loot", "exit",
 	"collapse", "low_hp", "tonic", "cover", "goad", "yelp", "relief", "boss_kill", "comfort", "back_carried_out",
@@ -80,7 +80,7 @@ const OLD_NAMES := ["throw", "refuse", "hesitate", "ignore", "scared", "revive",
 
 func _coverage() -> void:
 	var missing := OLD_NAMES.filter(func(cat): return BokiLines.trigger(String(cat)).is_empty())
-	ok("every old match category and recall kind has a trigger", missing.is_empty(), str(missing))
+	ok("every match category and recall kind a caller passes has a trigger", missing.is_empty(), str(missing))
 
 # ------------------------------------------------------------------ 3. no repeats
 func _no_repeat() -> void:
