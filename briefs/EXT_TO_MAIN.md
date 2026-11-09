@@ -4357,3 +4357,20 @@ ART knotwyrm 8.53 briefs/boki-art/portraits/light/Knotwyrm.jpg kind=portrait pan
 ART mossgrade 8.43 briefs/boki-art/batch/out/portrait_mossgrade_pe_w29_1.jpg kind=portrait status=owner-review panel=8.5/8.6/8.2
 ART rimeshrew 8.47 briefs/boki-art/batch/out/portrait_rimeshrew_pe_w29_2.jpg kind=portrait status=owner-review panel=8.5/8.4/8.5
 ART soakybara 8.3 briefs/boki-art/batch/out/portrait_soakybara_p2_w29_3.jpg kind=portrait status=owner-review panel=8.1/8.3/8.5
+
+## 01:06 ET 11-09 — art session: round 29 results, group s8 (new species)
+Pass: Narfoil concept; turnarounds for Gilabacus, Olmlet, Pawnfry, Polyshroom, Proofhop (new species now have full sheets). Owner review below. Next stages, portraits and hero cards for these are queued. Line sheets refreshed.
+ART bellowary 8.43 briefs/boki-art/batch/out/bellowary_f2_w29_3.jpg kind=turnaround status=owner-review panel=8.5/8.4/8.4
+ART bullpole 8.3 briefs/boki-art/batch/out/c_bullpole_e_w29_2.jpg kind=concept status=owner-review panel=8.2/8.2/8.5
+ART foldbat 8.4 briefs/boki-art/batch/out/c_foldbat_e_w29_2.jpg kind=concept status=owner-review panel=8.4/8.3/8.5
+ART glacione 8.37 briefs/boki-art/batch/out/c_glacione_r_w29_3.jpg kind=concept status=owner-review panel=8.3/8.4/8.4
+ART narfoil 8.53 briefs/boki-art/concepts/Narfoil.jpg kind=concept panel=8.5/8.6/8.5
+ART pinster 8.33 briefs/boki-art/batch/out/c_pinster_e_w29_2.jpg kind=concept status=owner-review panel=8.3/8.3/8.4
+ART rattlebub 8.37 briefs/boki-art/batch/out/c_rattlebub_e_w29_2.jpg kind=concept status=owner-review panel=8.3/8.2/8.6
+ART gilabacus 8.53 briefs/boki-art/turnarounds/Gilabacus.jpg kind=turnaround panel=8.5/8.6/8.5
+ART olmlet 8.57 briefs/boki-art/turnarounds/Olmlet.jpg kind=turnaround panel=8.6/8.5/8.6
+ART pavonazar 8.47 briefs/boki-art/batch/out/ta_pavonazar_1.jpg kind=turnaround status=owner-review panel=8.5/8.4/8.5
+ART pawnfry 8.5 briefs/boki-art/turnarounds/Pawnfry.jpg kind=turnaround panel=8.5/8.5/8.5
+ART pocketpus 8.43 briefs/boki-art/batch/out/ta_pocketpus_1.jpg kind=turnaround status=owner-review panel=8.4/8.5/8.4
+ART polyshroom 8.53 briefs/boki-art/turnarounds/Polyshroom.jpg kind=turnaround panel=8.4/8.6/8.6
+ART proofhop 8.5 briefs/boki-art/turnarounds/Proofhop.jpg kind=turnaround panel=8.4/8.5/8.6

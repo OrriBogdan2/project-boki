@@ -365,5 +365,265 @@
 "New prompt: big stylised storm bird whose spread wings are anvil thunderclouds, low wide stance, copper crest blades, bolt tail, big glossy eyes with a confident look."
 ],
 "veto": []
+},
+{
+"id": "c_cetorgan_e_w29",
+"pick": 3,
+"avg": 7.47,
+"seats": [
+7.4,
+7.6,
+7.4
+],
+"decision": "new",
+"fixes": [
+"New prompt: round stubby big-headed whale with a large calm eye, body about two thirds as long, organ pipes rising from the back",
+"New prompt: a stylised, big-headed regal whale whose whole back ridge and ribs are fused organ pipes rising from the skin in a grand arch, calm big eye, rounder short body.",
+"Stylised chunky big-headed whale with a large calm eye and short round body, the organ pipes growing out of its back skin and throat pleats"
+],
+"veto": []
+},
+{
+"id": "c_clinkpede_r_w29",
+"pick": 3,
+"avg": 7.9,
+"seats": [
+7.8,
+8.0,
+7.9
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 3, fill each chain link into a fat solid welded oval segment with only a shallow groove, eight links total",
+"EDIT: run 3, make the legs grow straight out of each fat link so the chain is the only body, no separate under-body.",
+"EDIT: run 3, make each link a fat solid welded steel segment (still link-shaped, no open holes) and keep the green gems"
+],
+"veto": []
+},
+{
+"id": "c_fawngus_r_w29",
+"pick": 2,
+"avg": 7.47,
+"seats": [
+7.3,
+7.8,
+7.3
+],
+"decision": "new",
+"fixes": [
+"New prompt: toy-like chunky fawn with a big head and short round legs, mushroom pegs swelling out of its white spots",
+"EDIT: run 3, enlarge the head by 25 percent, shorten and thicken the legs, and make each peg a soft knob swelling out of a white spot.",
+"Toy-like chunky fawn with a big head and short round legs whose white spots swell into small mushroom caps across flank and shoulders"
+],
+"veto": []
+},
+{
+"id": "c_glaciammoth_e_w29",
+"pick": 4,
+"avg": 7.67,
+"seats": [
+7.6,
+7.6,
+7.8
+],
+"decision": "new",
+"fixes": [
+"New prompt: colossal blocky stylised mammoth rearing its head high with one forefoot up on a rock, chunky fur clumps, giant clear permafrost plates",
+"New prompt: blocky stylised colossal mammoth rearing its head high, chunky simplified fur clumps, tiny ancient eyes, giant tusks, permafrost plates grown as its hide.",
+"Colossal blocky stylised mammoth, head reared high and one forefoot raised on a rock, chunky fur clumps, double tusks, big clear relic plates"
+],
+"veto": []
+},
+{
+"id": "c_grammite_r_w29",
+"pick": 2,
+"avg": 7.73,
+"seats": [
+7.6,
+7.7,
+7.9
+],
+"decision": "new",
+"fixes": [
+"New prompt: big-headed comic hellgrammite whose two mandibles are flat straight bronze dagger blades with a fuller groove and guard ridge, fused to the head",
+"New prompt: big-headed hellgrammite with insect mandibles that are flat bronze dagger blades (fuller groove, guard ridge) tapering from the head plates, insect face with small mean eyes, no tusks.",
+"EDIT: run 1, make the head bigger and the eyes larger and more comic, warmer amber gill tufts."
+],
+"veto": []
+},
+{
+"id": "c_gravigrub_e_w29",
+"pick": 3,
+"avg": 8.13,
+"seats": [
+8.3,
+7.7,
+8.4
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 3, enlarge the eyes and give a more characterful straining expression",
+"New prompt: a curled grub whose rear half IS a cratered moon (body segments flowing smoothly into the moon surface), no separate ball.",
+"EDIT: run 3, extend the cream lips a little further under the moon so only a belly disc shows."
+],
+"veto": []
+},
+{
+"id": "c_hydrangor_r_w29",
+"pick": 4,
+"avg": 8.0,
+"seats": [
+7.9,
+7.9,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 4, make the body much longer and heavier with thick arched necks and bigger leaf-plate spines",
+"EDIT: run 4, make the body much heavier and longer with thick arched necks, stout legs and big leaf-plate spines.",
+"EDIT: run 4, make the body much heavier and longer with thicker legs and arched necks."
+],
+"veto": []
+},
+{
+"id": "c_lurklet_e_w29",
+"pick": 4,
+"avg": 8.27,
+"seats": [
+8.2,
+8.2,
+8.4
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 4, tilt both brows up into a sheepish worried look and give the lure bulb a soft colour accent",
+"EDIT: run 4, make the jaw edges flat serrated steel plates continuing from the teeth into grey lip skin so the trap shape reads at thumbnail.",
+"Keep run 4."
+],
+"veto": []
+},
+{
+"id": "c_malletary_r_w29",
+"pick": 2,
+"avg": 7.2,
+"seats": [
+7.2,
+7.3,
+7.1
+],
+"decision": "new",
+"fixes": [
+"New prompt: chunky big-headed stylised secretary bird whose toes themselves swell into one fat grey-scale anvil foot each, no perpendicular hammer heads",
+"New prompt: stylised big-headed chunky secretary bird whose two whole feet are blunt anvil-shaped clubs of grey scale (no toes gripping anything), stomping pose.",
+"Stylised big-headed chunky secretary bird whose scaly toes themselves thicken into one blocky grey hammer-foot each, same scale texture fading to iron, no separate blocks"
+],
+"veto": [
+"feet read as separate dumbbell/hammer objects gripped by the toes; realistic bird",
+"feet read as held/attached dumbbell blocks; realistic bird"
+]
+},
+{
+"id": "c_morelkin_r_w29",
+"pick": 1,
+"avg": 8.13,
+"seats": [
+7.9,
+8.4,
+8.1
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 1, round the body and shorten the legs, enlarge the head and sleepy eyes, set tiny flush caps clearly in the stripes",
+"EDIT: run 3, round the body, shorten the legs and flatten the caps on the back outline.",
+"EDIT: run 1, round the body with shorter legs, enlarge the head and sleepy eyes, flatten the back caps."
+],
+"veto": []
+},
+{
+"id": "c_nymphane_e_w29",
+"pick": 1,
+"avg": 7.6,
+"seats": [
+7.4,
+7.8,
+7.6
+],
+"decision": "new",
+"fixes": [
+"New prompt: round stained-glass nymph with six short thick stubby legs and big domed eyes merged into the head",
+"EDIT: run 1, shorten all six legs by a third into thick stubby segments.",
+"Chunky stained-glass nymph with six short thick stubby legs and big domed eyes with no goggle rims"
+],
+"veto": []
+},
+{
+"id": "c_reelacine_e_w29",
+"pick": 1,
+"avg": 7.07,
+"seats": [
+6.8,
+7.3,
+7.1
+],
+"decision": "new",
+"fixes": [
+"New prompt: chunky stylised big-headed thylacine with short sturdy legs and a sly closed grin, film stripes in the hide, tail coiled into a stiff reel of its own hide",
+"New prompt: chunky toy-like big-headed thylacine with short sturdy legs, sly closed grin, film-frame stripes, tail curling into a thick disc of its own striped hide, no smoke.",
+"Chunky stylised big-headed thylacine with a sly closed grin, short legs, film stripes in the hide and a tail curling into a thick reel disc of its own striped hide"
+],
+"veto": [
+"realistic thylacine plus film-reel prop"
+]
+},
+{
+"id": "c_sarcobra_e_w29",
+"pick": 2,
+"avg": 7.57,
+"seats": [
+7.3,
+7.5,
+7.9
+],
+"decision": "new",
+"fixes": [
+"New prompt: the whole cobra hood is the coffin lid in profile with hieroglyphs carved flush in the scales, no separate plate, lapis as scale colour not bands",
+"New prompt: cobra whose open hood is itself the coffin lid in profile, scarab carved flush in the hood, lapis scales flowing down the neck with no band, no plate on the head.",
+"EDIT: run 4, flatten the lid plaque into the hood so the hood rim is the lid edge with the scarab carved flush."
+],
+"veto": []
+},
+{
+"id": "c_sundormouse_w29",
+"pick": 2,
+"avg": 8.27,
+"seats": [
+8.1,
+8.6,
+8.1
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 2, enlarge the head and eyes and push the soft-serve swirl into a bolder, cleaner spiral silhouette along the back",
+"EDIT: let the soft-serve swirl spiral down into the cone base so the tail grows out of the body with no seam.",
+"EDIT: make the legs shorter and chunkier with rounder paws and give the grumpy face bigger glossy eyes and puffier cheeks"
+],
+"veto": []
+},
+{
+"id": "c_torpecone_w29",
+"pick": 4,
+"avg": 8.13,
+"seats": [
+7.9,
+8.5,
+8.0
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 1, sweep the arms into a tight neat hub at the rear and make the face determined but cute with a smaller brow frown",
+"Keep run 4.",
+"EDIT: run 4, enlarge the porthole eye and give it a determined cute brow and small mouth."
+],
+"veto": []
 }
 ]

@@ -422,6 +422,31 @@
    "id": "relic_tenzo_w28",
    "pick": 1,
    "grade": 8.5
+  },
+  {
+   "id": "ta_gilabacus",
+   "pick": 2,
+   "grade": 8.53
+  },
+  {
+   "id": "ta_olmlet",
+   "pick": 2,
+   "grade": 8.57
+  },
+  {
+   "id": "ta_pawnfry",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "ta_polyshroom",
+   "pick": 1,
+   "grade": 8.53
+  },
+  {
+   "id": "ta_proofhop",
+   "pick": 1,
+   "grade": 8.5
   }
  ],
  "rerolled": [
@@ -1041,6 +1066,11 @@
    "id": "c_pavonazar_r_w28",
    "pick": 1,
    "grade": 8.6
+  },
+  {
+   "id": "c_narfoil_e_w29",
+   "pick": 3,
+   "grade": 8.53
   }
  ]
 }

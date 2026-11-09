@@ -1328,6 +1328,171 @@
     "size": "2K"
   },
   {
+    "id": "c_cetorgan_e_w30",
+    "name": "Cetorgan (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_cetorgan_e_w28_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, centred and filling about 85 percent of the square on a plain flat pale grey background, no effects, no shadows, no glow. Make all of these changes: run 1, enlarge the head and eye and shorten the body into a rounder stylised whale Also: enlarge the head and eye by about 25 percent and shorten the body into a rounder, regal shape Also: enlarge and round the head with a bigger calm eye and turn the throat pleats into a pipe row. The last attempt failed review. These panel fixes are hard requirements: round stubby big-headed whale with a large calm eye, body about two thirds as long, organ pipes rising from the back Also: a stylised, big-headed regal whale whose whole back ridge and ribs are fused organ pipes rising from the skin in a grand arch, calm big eye, rounder short body. Also: Stylised chunky big-headed whale with a large calm eye and short round body, the organ pipes growing out of its back skin and throat pleats",
+    "size": "2K"
+  },
+  {
+    "id": "c_clinkpede_r_w30",
+    "name": "Clinkpede (concept r)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_clinkpede_r_w29_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, centred and filling about 85 percent of the square on a plain flat pale grey background, no effects, no shadows, no glow. Make all of these changes: run 3, fill each chain link into a fat solid welded oval segment with only a shallow groove, eight links total Also: run 3, make the legs grow straight out of each fat link so the chain is the only body, no separate under-body. Also: run 3, make each link a fat solid welded steel segment (still link-shaped, no open holes) and keep the green gems",
+    "size": "2K"
+  },
+  {
+    "id": "c_fawngus_r_w30",
+    "name": "Fawngus (concept r)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_fawngus_r_w28_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, centred and filling about 85 percent of the square on a plain flat pale grey background, no effects, no shadows, no glow. Make all of these changes: run 1, make the head bigger and the body rounder and chunkier, and have the pegs swell out of the white spots rather than poke in Also: make the head bigger and the legs shorter and rounder, and move two caps from the back onto the flank and shoulder pegs Also: shorten the legs and enlarge the head for a toy-like fawn, and smooth the leg joints so there are no ring bands. The last attempt failed review. These panel fixes are hard requirements: toy-like chunky fawn with a big head and short round legs, mushroom pegs swelling out of its white spots Also: run 3, enlarge the head by 25 percent, shorten and thicken the legs, and make each peg a soft knob swelling out of a white spot. Also: Toy-like chunky fawn with a big head and short round legs whose white spots swell into small mushroom caps across flank and shoulders",
+    "size": "2K"
+  },
+  {
+    "id": "c_glaciammoth_e_w30",
+    "name": "Glaciammoth (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_glaciammoth_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: make it more colossal and stylised: a heavier raised head, one forefoot forward in a legendary stance, huge sweeping fossil-ivory tusks, longer frosted locks, larger clear permafrost plates with relics deep inside and a faint glow on the runes. The last attempt failed review. These panel fixes are hard requirements: a colossal legendary stance (head raised, one forefoot forward), huge sweeping ivory tusks, stylised blocky proportions, plates larger and clearer. Also: : raise the head with one forefoot forward in a heroic stance, make the tusks huge and sweeping and the face stylised with small ancient eyes. Also: rear the head up, one forefoot forward, double the tusk size and push stylisation (bigger head, simpler fur clumps). The last attempt failed review. These panel fixes are hard requirements: stylised colossal mammoth in a rearing heroic stance (head high, one forefoot raised), blocky simplified fur clumps, small ancient eyes, huge tusks, big clear permafrost plates Also: not an edit: colossal blocky stylised mammoth rearing its head with one forefoot forward on a rock, tusks twice as long sweeping up, with simple chunky fur clumps Also: colossal stylised mammoth rearing its head up, one forefoot forward, double-size sweeping ivory tusks, simple chunky fur clumps, big clear permafrost plates. The last attempt failed review. These panel fixes are hard requirements: colossal blocky stylised mammoth rearing its head high with one forefoot up on a rock, chunky fur clumps, giant clear permafrost plates Also: blocky stylised colossal mammoth rearing its head high, chunky simplified fur clumps, tiny ancient eyes, giant tusks, permafrost plates grown as its hide. Also: Colossal blocky stylised mammoth, head reared high and one forefoot raised on a rock, chunky fur clumps, double tusks, big clear relic plates",
+    "size": "2K"
+  },
+  {
+    "id": "c_grammite_r_w30",
+    "name": "Grammite (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a river larva with dagger jaws. Look: A chunky, short dobsonfly larva with an oversized head, two clearly blade-shaped curved bronze dagger jaws with a fuller groove and a guard-like ridge at the base, big mean-but-funny eyes, fluffy amber gill tufts as tassels down its sides, and no rings around its segments. Face: small mean eyes, mandibles open.. Colours: dark umber and amber; accent bronze edges.. Archetype: creepy. Avoid: wings, thin legs, hair., a realistic hellgrammite, bands around the segments The last attempt failed review. These panel fixes are hard requirements: remove the rings at the jaw base so the daggers grow straight out of the head plates, and flatten the body lower and longer. Also: long flat many-legged larva crawling low, the mandibles themselves curved bronze-edged dagger blades growing from the jaw with no rings or collars. Also: Long flat low larva crawling, dagger mandibles grown straight from the jaw with no rings, amber gill tufts per segment, small mean eyes The last attempt failed review. These panel fixes are hard requirements: chunky big-headed larva whose two mandibles are flat bronze dagger blades with a fuller groove and guard ridge, fused into the head plates with no collar Also: the mandibles taper straight out of the head plates as one bronze-edged chitin piece with no seam, ring, collar or socket at the base Also: stylised big-headed hellgrammite with comic mean eyes, two straight dagger-blade mandibles (fuller groove, guard ridge) grown from the head plates, chunky stub legs, amber gill tufts. The last attempt failed review. These panel fixes are hard requirements: big-headed comic hellgrammite whose two mandibles are flat straight bronze dagger blades with a fuller groove and guard ridge, fused to the head Also: big-headed hellgrammite with insect mandibles that are flat bronze dagger blades (fuller groove, guard ridge) tapering from the head plates, insect face with small mean eyes, no tusks. Also: run 1, make the head bigger and the eyes larger and more comic, warmer amber gill tufts.",
+    "size": "2K"
+  },
+  {
+    "id": "c_gravigrub_e_w30",
+    "name": "Gravigrub (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_gravigrub_e_w29_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, centred and filling about 85 percent of the square on a plain flat pale grey background, no effects, no shadows, no glow. Make all of these changes: run 3, enlarge the eyes and give a more characterful straining expression Also: a curled grub whose rear half IS a cratered moon (body segments flowing smoothly into the moon surface), no separate ball. Also: run 3, extend the cream lips a little further under the moon so only a belly disc shows.",
+    "size": "2K"
+  },
+  {
+    "id": "c_hydrangor_r_w30",
+    "name": "Hydrangor (concept r)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_hydrangor_r_w29_4.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, centred and filling about 85 percent of the square on a plain flat pale grey background, no effects, no shadows, no glow. Make all of these changes: run 4, make the body much longer and heavier with thick arched necks and bigger leaf-plate spines Also: run 4, make the body much heavier and longer with thick arched necks, stout legs and big leaf-plate spines. Also: run 4, make the body much heavier and longer with thicker legs and arched necks.",
+    "size": "2K"
+  },
+  {
+    "id": "c_lurklet_e_w30",
+    "name": "Lurklet (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_lurklet_e_w29_4.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, centred and filling about 85 percent of the square on a plain flat pale grey background, no effects, no shadows, no glow. Make all of these changes: run 4, tilt both brows up into a sheepish worried look and give the lure bulb a soft colour accent Also: run 4, make the jaw edges flat serrated steel plates continuing from the teeth into grey lip skin so the trap shape reads at thumbnail.",
+    "size": "2K"
+  },
+  {
+    "id": "c_malletary_r_w30",
+    "name": "Malletary (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a secretary bird that stomps with war-hammer feet. Look: A stylised big-headed secretary bird with a severe hooded face whose scaly shins thicken and flow straight into blocky iron hammer-head feet made from its own toes and heel (no handles), gold runes etched into the leg scales, in a stomping pose. Face: severe hooded eyes, a hooked frown.. Colours: dove grey and black; accent old gold.. Archetype: fast. Avoid: a quill pen, held weapons, a hornbill bill (Anchorbill), ink., handles, held hammers, gold bands or rings on the legs, a realistic bird The last attempt failed review. These panel fixes are hard requirements: the toes and heel themselves swell into one blocky iron hammer-head foot each, scales fading into metal, no handle, no bands, stylised big-headed bird. Also: stylise the secretary bird (big head, severe hooded face, quill crest) and make the hammer heads smaller and blockier as the toes themselves, gold runes etched in the scales. Also: stylised chunky big-headed secretary bird whose feet are wide blocky anvil-toes of the same grey scale as the shins, no separate heads, runes on the scales only. The last attempt failed review. These panel fixes are hard requirements: the feet held separate blocks or hammers and one run had a hood; the toes themselves must swell into blocky iron hammer-heads, nothing held, nothing worn The last attempt failed review. These panel fixes are hard requirements: chunky big-headed stylised secretary bird whose toes themselves swell into one fat grey-scale anvil foot each, no perpendicular hammer heads Also: stylised big-headed chunky secretary bird whose two whole feet are blunt anvil-shaped clubs of grey scale (no toes gripping anything), stomping pose. Also: Stylised big-headed chunky secretary bird whose scaly toes themselves thicken into one blocky grey hammer-foot each, same scale texture fading to iron, no separate blocks",
+    "size": "2K"
+  },
+  {
+    "id": "c_morelkin_r_w30",
+    "name": "Morelkin (concept r)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_morelkin_r_w29_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, centred and filling about 85 percent of the square on a plain flat pale grey background, no effects, no shadows, no glow. Make all of these changes: run 1, round the body and shorten the legs, enlarge the head and sleepy eyes, set tiny flush caps clearly in the stripes Also: run 3, round the body, shorten the legs and flatten the caps on the back outline. Also: run 1, round the body with shorter legs, enlarge the head and sleepy eyes, flatten the back caps.",
+    "size": "2K"
+  },
+  {
+    "id": "c_nymphane_e_w30",
+    "name": "Nymphane (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_nymphane_e_w28_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, centred and filling about 85 percent of the square on a plain flat pale grey background, no effects, no shadows, no glow. Make all of these changes: run 1, shorten the legs by a third and make them thick stubby segments Also: shorten all six legs by a third and thicken them Also: make the six legs short thick nubs and merge the eyes into the glass domes with no goggle rims. The last attempt failed review. These panel fixes are hard requirements: round stained-glass nymph with six short thick stubby legs and big domed eyes merged into the head Also: run 1, shorten all six legs by a third into thick stubby segments. Also: Chunky stained-glass nymph with six short thick stubby legs and big domed eyes with no goggle rims",
+    "size": "2K"
+  },
+  {
+    "id": "c_reelacine_e_w30",
+    "name": "Reelacine (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_reelacine_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: remove the film band at the neck so the film is only printed into the hide as the stripes, make the head bigger and more stylised with a wider jaw and chunkier sprocket holes, and make the spool tail stiffer and thicker. The last attempt failed review. These panel fixes are hard requirements: stylised big-headed thylacine, chunkier proportions, film printed in the stripes, a thick spool tail, mouth open with personality, not a realistic snarl. Also: a stylised big-headed thylacine with a calm, eerie face, film-strip stripes in the hide only, and a stiff spool-disc tail tip; no gaping jaw. Also: stylised big-headed thylacine with a sly closed-mouth grin, film stripes only printed in the hide, tail a stiff curled film reel, no rings. The last attempt failed review. These panel fixes are hard requirements: chunky stylised big-headed thylacine with a sly grin, film strips printed in the hide stripes, and a tail that coils into a stiff reel made of its own striped hide Also: chunky stylised big-headed thylacine, short sturdy legs, film stripes in the hide, tail ends in a stiff reel disc of the same hide, with no smoke Also: chunky stylised big-headed thylacine with a sly closed grin, film stripes printed in the hide, tail curling into a thick reel disc of its own hide, no smoke. The last attempt failed review. These panel fixes are hard requirements: chunky stylised big-headed thylacine with short sturdy legs and a sly closed grin, film stripes in the hide, tail coiled into a stiff reel of its own hide Also: chunky toy-like big-headed thylacine with short sturdy legs, sly closed grin, film-frame stripes, tail curling into a thick disc of its own striped hide, no smoke. Also: Chunky stylised big-headed thylacine with a sly closed grin, short legs, film stripes in the hide and a tail curling into a thick reel disc of its own striped hide",
+    "size": "2K"
+  },
+  {
+    "id": "c_sarcobra_e_w30",
+    "name": "Sarcobra (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_sarcobra_e_3.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, centred and filling about 85 percent of the square on a plain flat pale grey background, no effects, no shadows, no glow. Make all of these changes: merge the lid into the hood so the hood edge is the lid rim, no raised plaque. Also: make the whole hood the coffin lid in profile (lid edge = hood rim, eye slits in the lid), drop the separate plate. Also: blend the hood edge into skin scales along the neck on run 3 The last attempt failed review. These panel fixes are hard requirements: run 2, flatten the lid top into the hood scales so no step shows above the eyes Also: the whole hood is the coffin lid, its rim the hood edge with the scarab relief carved flush into it, and lapis scales run along the neck with no band Also: the whole cobra hood is the coffin lid in profile, its edge the lid rim, hieroglyphs carved into the hood scales, no separate plate or mask. The last attempt failed review. These panel fixes are hard requirements: the whole cobra hood is the coffin lid in profile with hieroglyphs carved flush in the scales, no separate plate, lapis as scale colour not bands Also: cobra whose open hood is itself the coffin lid in profile, scarab carved flush in the hood, lapis scales flowing down the neck with no band, no plate on the head. Also: run 4, flatten the lid plaque into the hood so the hood rim is the lid edge with the scarab carved flush.",
+    "size": "2K"
+  },
+  {
+    "id": "c_sundormouse_w30",
+    "name": "Sundormouse (concept)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_sundormouse_w29_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, centred and filling about 85 percent of the square on a plain flat pale grey background, no effects, no shadows, no glow. Make all of these changes: run 2, enlarge the head and eyes and push the soft-serve swirl into a bolder, cleaner spiral silhouette along the back Also: let the soft-serve swirl spiral down into the cone base so the tail grows out of the body with no seam. Also: make the legs shorter and chunkier with rounder paws and give the grumpy face bigger glossy eyes and puffier cheeks",
+    "size": "2K"
+  },
+  {
+    "id": "c_torpecone_w30",
+    "name": "Torpecone (concept)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_torpecone_w29_4.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, centred and filling about 85 percent of the square on a plain flat pale grey background, no effects, no shadows, no glow. Make all of these changes: run 1, sweep the arms into a tight neat hub at the rear and make the face determined but cute with a smaller brow frown Also: run 4, enlarge the porthole eye and give it a determined cute brow and small mouth.",
+    "size": "2K"
+  },
+  {
     "id": "c_chimelop_v",
     "name": "Chimelop (concept)",
     "refs": [
@@ -1372,6 +1537,132 @@
     "runs": 4,
     "aspect": "1:1",
     "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a baby frilled lizard tooting through a trumpet frill. Look: A round little baby frilled lizard sitting low on all fours, whose big neck frill is brass-coloured skin that curls forward around its face into one short flared bell shape, like the bell of a horn, framing its face from behind; its own face with puffed cheeks is fully visible in front, nothing in its mouth, a plain grooved cone tail. Face: puffed cheeks, eyes squeezed shut mid-toot.. Colours: sandy tan and brass; accent cream sound ridges.. Archetype: cute. Avoid: held trumpet, music notes, upright pose., a trumpet in its mouth, a horn held, a cone collar, a mask over the face, rings or bands",
+    "size": "2K"
+  },
+  {
+    "id": "ta_narfoil",
+    "name": "Narfoil",
+    "refs": [
+      "briefs/boki-art/concepts/Narfoil.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, standing or crawling naturally like an animal, neutral pose, plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "c_parrywhal",
+    "name": "Parrywhal (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/concepts/Narfoil.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a narwhal that is a fencing champion: epee tusk, bell-guard brow, parry fins. Look: A big, sleek-headed narwhal held in a lunge pose, its long straight tusk an ice-steel epee and the base of the tusk a broad domed bell-guard grown from its brow. Its front flippers are flat parry blades edged in ice crystal, and engraved gold rune plates band its body like a champion's armour. Face: cool, narrowed eyes, a superior little smile.. Colours: slate grey and ice blue; accent old gold runes.. Archetype: sleek. Avoid: a spiral drill tusk, a unicorn horn look, a human fencer pose, a held blade. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_bullpole",
+    "name": "Bullpole",
+    "refs": [
+      "briefs/boki-art/batch/out/c_bullpole_e_w29_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, standing or crawling naturally like an animal, neutral pose, plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "c_bullsfrog",
+    "name": "Bullsfrog (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_bullpole_e_w29_2.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a poison dart frog that is the whole game of darts. Look: A compact frog crouched low, with dartboard rings across its back and toe tips that are steel dart points. Its tongue is a barbed dart, and a dart flight crest stands on its head. Face: deadpan focus, one eye narrowed as if aiming.. Colours: scarlet and black; accent glossy green venom.. Archetype: fast. Avoid: numbers, a held dart, a toad body (Rampartoad), upright. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_foldbat",
+    "name": "Foldbat",
+    "refs": [
+      "briefs/boki-art/batch/out/c_foldbat_e_w29_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, standing or crawling naturally like an animal, neutral pose, plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "c_fanpire",
+    "name": "Fanpire (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_foldbat_e_w29_2.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a flying fox whose wings are iron war fans. Look: A flying fox in flight, its wings two big iron war fans with lacquered pleats and bladed edges. Its ears are small fans with ringing ridges, and swirl marks curl along the pleats. Face: narrowed eyes, a sharp grin showing long fangs.. Colours: black lacquer and plum; accent sky white swirls.. Archetype: sleek. Avoid: a closed stick body like Foldbat, thin membranes, a cape look. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_glacione",
+    "name": "Glacione",
+    "refs": [
+      "briefs/boki-art/batch/out/c_glacione_r_w29_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, standing or crawling naturally like an animal, neutral pose, plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_pinster",
+    "name": "Pinster",
+    "refs": [
+      "briefs/boki-art/batch/out/c_pinster_e_w29_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, standing or crawling naturally like an animal, neutral pose, plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "c_tiltster",
+    "name": "Tiltster (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_pinster_e_w29_2.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a hamster that is a whole pinball machine. Look: A big, stocky hamster crouched with its back slanted like a pinball table, bumper domes grown along its shoulders and hips and a ramp-ridge curving down its spine. Its front paws are two heavy flipper blades it swats with, and sparks crackle between the bumpers. Face: small fierce eyes, a buck-toothed snarl.. Colours: dark tan and chrome; accent yellow and cherry-red bumper caps.. Archetype: tough. Avoid: a cabinet on its back, legs like table legs, a glass top, round cheeks like Pinster. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_rattlebub",
+    "name": "Rattlebub",
+    "refs": [
+      "briefs/boki-art/batch/out/c_rattlebub_e_w29_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, standing or crawling naturally like an animal, neutral pose, plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "c_maracoil",
+    "name": "Maracoil (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_rattlebub_e_w29_2.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a rattlesnake that is a pair of maracas. Look: A long rattlesnake reared low into a striking coil, its tail ending in two big gourd maracas. Its scales are painted gourd bands, its broad head has hollow gourd-like cheeks, and its fangs drip green venom; sound rings ripple off the tail. Face: slitted eyes, a wide wicked grin.. Colours: sand yellow and dark teal; accent venom green.. Archetype: creepy. Avoid: a hood (Sarcobra), sombrero or costume cues, held objects. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose.",
     "size": "2K"
   },
   {
@@ -7923,6 +8214,18 @@
     "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Frigatee, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: a characterful grounded pose that is natural for this animal, head turned toward the viewer, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a young or middle form, so keep a big head and rounded body but a little more defined shapes and slightly longer limbs. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily."
   },
   {
+    "id": "gilabacus_card",
+    "name": "Gilabacus (hero card)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Gilabacus.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Gilabacus, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: a characterful grounded pose that is natural for this animal, head turned toward the viewer, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a young or middle form, so keep a big head and rounded body but a little more defined shapes and slightly longer limbs. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily."
+  },
+  {
     "id": "glintmole_card",
     "name": "Glintmole (hero card)",
     "refs": [
@@ -8127,6 +8430,30 @@
     "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Nettlynx, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: a characterful grounded pose that is natural for this animal, head turned toward the viewer, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a baby form, so keep it small, round and soft, with a clearly oversized head, big eyes and short stubby limbs. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily."
   },
   {
+    "id": "olmlet_card",
+    "name": "Olmlet (hero card)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Olmlet.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Olmlet, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: a characterful grounded pose that is natural for this animal, head turned toward the viewer, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a young or middle form, so keep a big head and rounded body but a little more defined shapes and slightly longer limbs. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily."
+  },
+  {
+    "id": "pawnfry_card",
+    "name": "Pawnfry (hero card)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Pawnfry.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Pawnfry, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: a characterful grounded pose that is natural for this animal, head turned toward the viewer, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a young or middle form, so keep a big head and rounded body but a little more defined shapes and slightly longer limbs. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily."
+  },
+  {
     "id": "pipewurm_card",
     "name": "Pipewurm (hero card)",
     "refs": [
@@ -8139,6 +8466,18 @@
     "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Pipewurm, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: a characterful grounded pose that is natural for this animal, head turned toward the viewer, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a young or middle form, so keep a big head and rounded body but a little more defined shapes and slightly longer limbs. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily."
   },
   {
+    "id": "polyshroom_card",
+    "name": "Polyshroom (hero card)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Polyshroom.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Polyshroom, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: a characterful grounded pose that is natural for this animal, head turned toward the viewer, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a young or middle form, so keep a big head and rounded body but a little more defined shapes and slightly longer limbs. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily."
+  },
+  {
     "id": "prismander_card",
     "name": "Prismander (hero card)",
     "refs": [
@@ -8149,6 +8488,18 @@
     "aspect": "1:1",
     "size": "2K",
     "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Prismander, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: a characterful grounded pose that is natural for this animal, head turned toward the viewer, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a baby form, so keep it small, round and soft, with a clearly oversized head, big eyes and short stubby limbs. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily."
+  },
+  {
+    "id": "proofhop_card",
+    "name": "Proofhop (hero card)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Proofhop.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Proofhop, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: a characterful grounded pose that is natural for this animal, head turned toward the viewer, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a young or middle form, so keep a big head and rounded body but a little more defined shapes and slightly longer limbs. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily."
   },
   {
     "id": "prowyak_card",
@@ -8469,6 +8820,83 @@
     "aspect": "1:1",
     "runs": 4,
     "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): its body turned about 30 degrees toward the viewer, head toward the viewer with both eyes visible, a characterful grounded pose. enlarge the eyes, keep the plate to the forehead and horns so the face shows. Also: run 1, narrow the plate into a ridge from the forehead between the horns so the full face shows. Also: run 1, stylise the face with bigger glossy eyes and a determined little smile.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_bathilus",
+    "name": "Bathilus (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Bathilus.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): its body turned about 30 degrees toward the viewer, head toward the viewer with both eyes visible, a characterful grounded pose. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_cubbat",
+    "name": "Cubbat (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Cubbat.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): its body turned about 30 degrees toward the viewer, head toward the viewer with both eyes visible, a characterful grounded pose. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_gilabacus",
+    "name": "Gilabacus (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Gilabacus.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): its body turned about 30 degrees toward the viewer, head toward the viewer with both eyes visible, a characterful grounded pose. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_olmlet",
+    "name": "Olmlet (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Olmlet.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): its body turned about 30 degrees toward the viewer, head toward the viewer with both eyes visible, a characterful grounded pose. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_pawnfry",
+    "name": "Pawnfry (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Pawnfry.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): its body turned about 30 degrees toward the viewer, head toward the viewer with both eyes visible, a characterful grounded pose. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_polyshroom",
+    "name": "Polyshroom (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Polyshroom.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): its body turned about 30 degrees toward the viewer, head toward the viewer with both eyes visible, a characterful grounded pose. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_proofhop",
+    "name": "Proofhop (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Proofhop.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): its body turned about 30 degrees toward the viewer, head toward the viewer with both eyes visible, a characterful grounded pose. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
     "size": "2K"
   },
   {
