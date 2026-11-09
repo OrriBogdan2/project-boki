@@ -113,7 +113,7 @@ static func apply_pick(h: Hunter) -> void:
 ## One of the four orders (the wheel, bots, tests). Returns false if it could not be given.
 static func order(h: Hunter, id: String) -> bool:
 	var k: Kin = h.kin
-	if k == null or h.downed or h.dropping or h.riding:
+	if k == null or k.owner_h != h or h.downed or h.dropping or h.riding:
 		return false
 	if k.resting():
 		say(h, resting_text(k), Color("a2a8bb"))
