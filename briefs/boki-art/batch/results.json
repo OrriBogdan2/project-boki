@@ -3660,5 +3660,69 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_vaultara_2.jpg",
     "ok": true
+  },
+  {
+    "id": "glassolotl_r2",
+    "name": "Glassolotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glassolotl_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "dribbara_r",
+    "name": "Dribbara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dribbara_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frigatee_r",
+    "name": "Frigatee",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/frigatee_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glassolotl_r2",
+    "name": "Glassolotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glassolotl_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frigatee_r",
+    "name": "Frigatee",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/frigatee_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanterloris_r",
+    "name": "Lanterloris",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanterloris_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "dribbara_r",
+    "name": "Dribbara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dribbara_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanterloris_r",
+    "name": "Lanterloris",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanterloris_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Q"
+  },
+  {
+    "id": "puffamus_r2",
+    "name": "Puffamus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/puffamus_r2_2.jpg",
+    "ok": true
   }
 ]
