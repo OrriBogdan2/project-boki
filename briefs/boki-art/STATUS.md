@@ -21,3 +21,8 @@ All picks are uploaded to the pack's cards and saved in turnarounds/. Batch 1 is
 7. Render: soft painted shading with a thin clean outline, matching style_refs.
 
 Batch 2 prompts: PROMPTS_BATCH2.md. Design fixes made: Skateron's skates, Boltstrich's boots, Frigatee's icebox, Barrelmander's barrel and Terrasloth's glasshouse are now body parts instead of worn or strapped gear.
+
+## Later (owner 00:24 ET 11-09): website drop-in splash / OG image
+After the Boki and relics are done: redo the website's drop-in splash, which is also the OG share image, as a new
+illustration of a few characters skydiving in. Pending: which heroes/Boki, aspect (OG is 1200x630), and whether
+it replaces the current splash everywhere.
