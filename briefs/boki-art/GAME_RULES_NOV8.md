@@ -92,11 +92,7 @@ In matches your Boki rides as a small critter-shaped wisp: carry passive always 
   - Dual single-stage rares
   - All branch finals
 
-### Applied 2026-11-09 (coordinator, owner order): standard type names
-Wild=Normal, Ember=Fire, Tide=Water, Bloom and Spore=Grass (merged), Storm=Electric, Frost=Ice, Stone=Rock, Gravity=Ground,
-Tempest=Flying, Wyrm=Dragon, Shadow=Dark, Venom=Poison, Swarm=Bug, Titan=Steel, Lunar=Ghost, Prism=Fairy, Echo=Psychic.
-17 types (no Fighting yet). Any old type name in older briefs means the new one above. Applied to ROSTER_100.html,
-ROSTER_200_NEW.md, roster.json and the Bokidex dex.json; game type table goes through a gated branch.
+### (superseded) coordinator's 03:29 UTC mapping, replaced by the owner's table below
 
 ## Owner decision 2026-11-08 22:29 ET: standard type names
 Rename every type to the plain, standard name (18 types):

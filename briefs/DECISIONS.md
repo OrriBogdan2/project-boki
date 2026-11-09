@@ -455,4 +455,4 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
   - **Stolen-wisp summon:** open whether a stolen wisp can be summoned at all, and for how long. Recommend.
   - **Carry-passive stacking, and PvP vs PvE rules:** no owner opinion. Design pass proposes them.
 
-- 2026-11-09 (owner): types use standard names (Normal, Fire, Water, Grass, Electric, Ice, Rock, Ground, Flying, Dragon, Dark, Poison, Bug, Steel, Ghost, Fairy, Psychic). Spore and Bloom merged into Grass. Mapping in boki-art/GAME_RULES_NOV8.md.
+- 2026-11-08 22:29 ET (owner): 18 types: Normal, Fire, Water, Grass, Spore, Electric, Ice, Rock, Psychic (was Gravity), Flying, Dragon, Dark, Poison, Bug, Steel, Fairy (was Lunar), Crystal (was Prism), Sound (was Echo). Table at the bottom of boki-art/GAME_RULES_NOV8.md.
