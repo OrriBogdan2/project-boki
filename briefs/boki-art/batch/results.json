@@ -40841,5 +40841,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_gravitank_p79_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_reapant_p79",
+    "name": "Reapant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_reapant_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_barokat_p79",
+    "name": "Barokat",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_barokat_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chandelapi_p79",
+    "name": "Chandelapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_chandelapi_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chandelapi_p79",
+    "name": "Chandelapi",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_chandelapi_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_reapant_p79",
+    "name": "Reapant",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_reapant_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_orbitle_p79",
+    "name": "Orbitle",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_orbitle_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_barokat_p79",
+    "name": "Barokat",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_barokat_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_orbitle_p79",
+    "name": "Orbitle",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_orbitle_p79_2.jpg",
+    "ok": true
   }
 ]
