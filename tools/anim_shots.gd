@@ -1,9 +1,12 @@
 extends "res://tools/clip_shots.gd"
 ## --anim-shots --shots-dir=<dir> [--wardens=a,b] [--frames=8] [--size=240]: every Hunter's walk, run, idle and two
-## attacks at the match camera (--close: a side view at hip height, to read the arms and feet), for the animation audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
+## attacks at the match camera (--close: a side view at hip height, to read the arms and feet; --fov=<deg> widens or
+## tightens it, a 2 m Hunter needs about 26), for the animation audit (docs/art/ANIM_QUALITY_AUDIT.md) and its
+## before/after strips.
 ## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
 ## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
-## forced).
+## forced). --react instead strips how he takes a hit (docs/art/REACT_AUDIT.md): hit_f and hit_b as the game hands
+## them off (f000 the hit frame, then one frame per DT), and the stun loop, the fall loop and the landing, keyed.
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
@@ -23,6 +26,7 @@ const ATTACKS := {
 }
 
 var posts: Array = []
+var react := false
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -30,7 +34,10 @@ func run(main: Node) -> void:
 	var ids: Array = Arch.ORDER.duplicate()
 	var frames := 8
 	var close := false
+	var close_fov := 14.0
 	for a in OS.get_cmdline_user_args():
+		if a == "--react": react = true
+		if a.begins_with("--fov="): close_fov = float(a.substr(6))
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
 		if a.begins_with("--frames="): frames = int(a.substr(9))
@@ -44,7 +51,7 @@ func run(main: Node) -> void:
 	cam.fov = 8.0
 	cam.position = Vector3(0, 21.0, 9.4)
 	if close:
-		cam.fov = 14.0
+		cam.fov = close_fov
 		cam.position = Vector3(0, 1.0, 12.0)
 	cam.look_at(Vector3(0, 0.8 if not close else 1.0, 0))
 	_posts()
@@ -86,6 +93,10 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 		model.queue_free()
 		return
 	model.rotation.y = SIDE_YAW
+	if react:
+		await _react(model, sync, clips, dir, frames)
+		model.queue_free()
+		return
 	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames)
 	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames)
 	var lc: Dictionary = clips.d["loco"]
@@ -94,6 +105,30 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	for i in 2:
 		await _keyed(model, sync, clips, dir.path_join("atk%d" % (i + 1)), String(atk[i]), frames)
 	model.queue_free()
+
+func _react(model: Node3D, sync: Node, clips: WardenClips, dir: String, frames: int) -> void:
+	var st: Dictionary = clips.d["states"]
+	var behind := Vector2(sin(SIDE_YAW), cos(SIDE_YAW))     # hit_dir runs from the attacker to him (hunter.gd)
+	await _hit(model, sync, dir.path_join("hit_f"), behind, frames)
+	await _hit(model, sync, dir.path_join("hit_b"), -behind, frames)
+	await _keyed(model, sync, clips, dir.path_join("stun"), String(st["stun"]), frames)
+	await _keyed(model, sync, clips, dir.path_join("fall"), String(clips.d["air"]["fall"]), frames)
+	await _keyed(model, sync, clips, dir.path_join("land"), String(clips.d["land"]["clip"]), frames)
+
+## The game's own hit hand-off while he stands: hit_t counts up from the hit, a frame every DT.
+func _hit(model: Node3D, sync: Node, dir: String, hit_dir: Vector2, frames: int) -> void:
+	DirAccess.make_dir_recursive_absolute(dir)
+	var s := {"vel": Vector3.ZERO, "face": SIDE_YAW, "grounded": true}
+	model.set_meta(WardenClips.STATE, s)
+	for k in int(WARM_S / DT):
+		sync.call("_process", DT)
+	for i in frames:
+		s["hit_t"] = i * DT
+		s["hit_dir"] = hit_dir
+		model.set_meta(WardenClips.STATE, s)
+		sync.call("_process", DT)
+		await _grab(dir.path_join("f%03d.png" % i))
+	model.set_meta(WardenClips.STATE, {})
 
 ## The game's own locomotion hand-off: the state carries the speed, WardenClips blends and scales the walk or run.
 func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int) -> void:
