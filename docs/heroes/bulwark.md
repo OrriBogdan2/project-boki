@@ -33,7 +33,7 @@ The 10 ranked rows of `briefs/hero-ref/bjorn.md` section 4, checked on main d255
 |---|---|---|---|
 | 1 | Throw lands at the cursor | closed | `_throw` stores `"to"` from `AimMode.dist(CURSOR)`, clamped to `throw_range` 9 m (584afbfb8); `bjorn aim: the hammer lands at the cursor (5m) and stays planted` |
 | 2 | Damage ratios | closed | throw 12 = recall 12, smash 36-66 (3x-5.5x), Shift 24 (2x), all in `bulwark.json` since 584afbfb8 |
-| 3 | Hold: no lunge, free turning, glint | closed, lunge kept by owner | turning asserted (`bjorn parity LMB: in the hold he turns with a cursor sweeping 1.25 turns a second`); glint from 0.6 s asserted (`bjorn LMB held: the glint shows from 0.6s`); the forward step stays by owner override (#30, #49: lunge and perfect launch) |
+| 3 | Hold: no lunge, free turning, glint | closed, lunge kept by owner | turning asserted in `tools/bjorn_launch_check.gd` (`bjorn parity LMB: in the hold he turns with a cursor sweeping 1.25 turns a second`); glint from 0.6 s asserted (`bjorn LMB held: the glint shows from 0.6s`); the forward step stays by owner override (#30, #49: lunge and perfect launch) |
 | 4 | Swing VFX | closed | a 180 degree flaming crescent, hammer swept from behind (`smash_arc` 180, `bjorn_fx`; 584afbfb8) |
 | 5 | Shift: short dash, one 360 spin | closed | `dash.whirl` 3.5 m, one `_strike` and one `smash_ring` on arrival; cooldown 8 s (game data over the card's 9.2 s) |
 | 6 | Planted hammer, beacon | closed | `lie_t` 0.0 (6c4789d94; stays until recalled; `bjorn: the planted hammer never comes back by itself`), upright gold beacon in `bjorn_fx` |
