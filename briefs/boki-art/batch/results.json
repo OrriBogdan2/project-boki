@@ -50207,5 +50207,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_dragonkite_pz_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_sporcupine_pz",
+    "name": "Sporcupine",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_sporcupine_pz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lanternmit_pz",
+    "name": "Lanternmit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_lanternmit_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_geodemole_pz",
+    "name": "Geodemole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_geodemole_pz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_reapant_pz",
+    "name": "Reapant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_reapant_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_terrarimit_pz",
+    "name": "Terrarimit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_terrarimit_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dragonkite_cardz",
+    "name": "Dragonkite (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dragonkite_cardz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_geodemole_pz",
+    "name": "Geodemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_geodemole_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_terrarimit_pz",
+    "name": "Terrarimit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_terrarimit_pz_2.jpg",
+    "ok": true
   }
 ]
