@@ -24,6 +24,7 @@ func audible() -> Dictionary:
 	var known := {}
 	for i in Sfx.music.size(): known[Sfx.music[i]] = "music[%d]" % i
 	known[Sfx.amb] = "amb"
+	known[Sfx.amb_out] = "amb"
 	for st in Sfx.layers: known[Sfx.layers[st]] = "layer:%s" % st
 	for nm in Sfx.amb_layers: known[Sfx.amb_layers[nm]["p"]] = "amb_layer:%s" % nm
 	for c in Sfx.get_children():

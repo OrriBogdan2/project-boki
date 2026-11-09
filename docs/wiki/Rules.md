@@ -43,6 +43,17 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## ambience (`content/rules/ambience.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Match ambience (scripts/match/music_dir.gd). beds: island biome -> the bed (audio/amb_<bed>.ogg) heard while standing on it; over the void or on a map with no biome the last bed keeps playing, and 'default' starts it. weather: raid condition (RaidLook) -> level 0..1 of the gust / rain layers on top. |
+| default | open |
+| beds | {"meadow": "open", "bloom": "open", "gloom": "crown", "frost": "cliff", "storm": "cliff", "ember": "ember"} |
+| weather | {"ash": {"gust": 1.0}, "fog": {"rain": 0.5, "gust": 0.2}, "dusk": {"gust": 0.25}, "night": {"gust": 0.15}} |
+
 ## boki_lines (`content/rules/boki_lines.json`)
 
 What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words in one bubble (punctuation and symbols don't count); act_words = the most words in one action, which a young Boki says after its name; bubble_s = seconds a bubble stays up; cooldown_s = seconds a Boki waits between lines (a trigger marked direct answers something you did and skips the wait); no_repeat = how many of its own last lines a Boki never repeats; min_lines = the fewest general lines a trigger may have; grown_stage = the speech stage (Care.speech) from which a Boki says lines instead of its name. tones = how a young Boki says its name, by feeling ({A} first syllable, {a} lower, {b} second syllable, {F} full name, {f} lower, {U} upper; KinSpeak.fill). sounds = noises a tone may use besides the name. alias = old trigger names that share another's lines. triggers: feel (a tone), word (the one word a stage-1 Boki adds), acts (what it does), lines._ (anyone) and lines.<element> (extra lines for a Boki of that element, the species' type).

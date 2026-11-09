@@ -53,7 +53,9 @@ signal new_track(name: String)
 var music: Array[AudioStreamPlayer] = []   # two players so tracks can crossfade
 var music_i := 0
 var music_name := ""
-var amb: AudioStreamPlayer
+var amb: AudioStreamPlayer        # the ambience bed now playing
+var amb_out: AudioStreamPlayer    # the one it replaced, fading out (so never more than two beds at once)
+var _amb_tw: Tween
 var amb_name := ""
 var music_bus := 0
 var _duck_fx: AudioEffectAmplify     # the Music bus's ducking stage (see duck)
@@ -71,8 +73,11 @@ func _ready() -> void:
 	for i in 2:
 		var mp := AudioStreamPlayer.new(); mp.bus = "Music"; mp.volume_db = -80.0
 		add_child(mp); music.append(mp)
-	amb = AudioStreamPlayer.new(); amb.bus = "Ambience"; amb.volume_db = -80.0
-	add_child(amb)
+	for i in 2:
+		var ap := AudioStreamPlayer.new(); ap.bus = "Ambience"; ap.volume_db = -80.0
+		add_child(ap)
+		if i == 0: amb = ap
+		else: amb_out = ap
 	for n in NAMES + VOICES + SfxKits.NAMES + VVSfx.NAMES:      # (VVSfx: Sparkle and Vex)
 		var takes: Array = []
 		var s = load("res://audio/%s.wav" % n) if ResourceLoader.exists("res://audio/%s.wav" % n) else null
@@ -153,7 +158,7 @@ func set_bus(bus_name: String, v: float) -> void:
 	if i >= 0:
 		AudioServer.set_bus_volume_db(i, linear_to_db(maxf(v, 0.0001)))
 
-## Starts loading tracks on a worker thread ("music_match", "amb_match"), e.g. while a loading
+## Starts loading tracks on a worker thread ("music_match", "amb_open"), e.g. while a loading
 ## screen comes up, so starting them later doesn't read and parse the file on the main thread.
 var _prefetched := {}
 func prefetch(names: Array) -> void:
@@ -207,19 +212,33 @@ func play_music(name: String, fade := 1.5) -> void:
 		nw.play()
 		tw.tween_property(nw, "volume_db", -9.0, fade).set_trans(Tween.TRANS_SINE)
 
-func play_ambience(name: String) -> void:
+const AMB_FADE := 2.0     # s: one bed crossfades into the next
+const AMB_DB := -14.0     # a bed at full
+
+## Crossfades to another bed (audio/amb_<name>.ogg), or to silence with "". The bed it replaces fades
+## out as the new one fades in; a third change inside the fade cuts the oldest. The extra layers
+## (abyss, ruins, weather) are cleared unless `keep_layers` (the match changing region).
+func play_ambience(name: String, keep_layers := false) -> void:
 	if name == amb_name:
 		return
-	if name != "match":
+	if not keep_layers:
 		clear_amb_layers()
 	amb_name = name
-	if name == "":
-		create_tween().tween_property(amb, "volume_db", -80.0, 1.0)
-		return
-	amb.stream = _loop_stream("res://audio/amb_%s.ogg" % name)
-	amb.volume_db = -40.0
-	amb.play()
-	create_tween().tween_property(amb, "volume_db", -14.0, 2.0)
+	if _amb_tw and _amb_tw.is_valid():
+		_amb_tw.kill()
+	var old := amb
+	amb = amb_out
+	amb_out = old
+	amb.stop()
+	var tw := create_tween().set_parallel(true)
+	_amb_tw = tw
+	tw.tween_property(amb_out, "volume_db", -80.0, AMB_FADE).set_trans(Tween.TRANS_SINE)
+	if name != "":
+		amb.stream = _loop_stream("res://audio/amb_%s.ogg" % name)
+		amb.volume_db = -40.0
+		amb.play()
+		tw.tween_property(amb, "volume_db", AMB_DB, AMB_FADE).set_trans(Tween.TRANS_SINE)
+	tw.chain().tween_callback(amb_out.stop)
 
 ## Softens the music for a moment, e.g. under a big slow-motion beat (eased, never a sudden drop).
 func duck(seconds: float, depth_db := -8.0) -> void:
@@ -269,9 +288,8 @@ func set_layers(want: Dictionary) -> void:
 		layer_want[st] = clampf(float(want[st]), 0.0, 1.0)
 
 ## A match leaving the tree (extract, death, quit, a rematch; Match._exit_tree): everything it started
-## stops. The layered score and the abyss / ruins beds fade out (the title asks for the "match" wind that
-## is already the current ambience, an early return, so it would never clear them), every keyed loop
-## stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left to the
+## stops. The layered score and the abyss / ruins / weather beds fade out (a rematch asks for the bed already
+## playing, an early return, so it would never clear them), every keyed loop stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left to the
 ## next screen's play_music / play_ambience, which crossfade them.
 func reset_scene_audio(fade := 1.2) -> void:
 	if not layers.is_empty():

@@ -1,0 +1,11 @@
+{
+  "_doc": "Match ambience (scripts/match/music_dir.gd). beds: island biome -> the bed (audio/amb_<bed>.ogg) heard while standing on it; over the void or on a map with no biome the last bed keeps playing, and 'default' starts it. weather: raid condition (RaidLook) -> level 0..1 of the gust / rain layers on top.",
+  "default": "open",
+  "beds": {"meadow": "open", "bloom": "open", "gloom": "crown", "frost": "cliff", "storm": "cliff", "ember": "ember"},
+  "weather": {
+    "ash": {"gust": 1.0},
+    "fog": {"rain": 0.5, "gust": 0.2},
+    "dusk": {"gust": 0.25},
+    "night": {"gust": 0.15}
+  }
+}

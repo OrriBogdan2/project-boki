@@ -185,10 +185,10 @@ def title_theme():
     return lowpass(T.buf, 7000)
 
 # ---------------------------------------------------------------- ambience
-def wind(seconds=12.0, dark=False):
+def wind(seconds=12.0):
     n = int(SR * seconds)
     x = rng.normal(0, 1, n)
-    x = lowpass(x, 500 if dark else 900)
+    x = lowpass(x, 900)
     t = np.arange(n) / SR
     swell = 0.6 + 0.4 * np.sin(2 * np.pi * t / seconds * 2) * np.sin(2 * np.pi * t / seconds * 3 + 1)
     x = x * swell
@@ -240,7 +240,6 @@ if __name__ == '__main__':
     write_ogg('music_match', match_theme(), 0.8)
     write_ogg('music_title', title_theme(), 0.75)
     write_ogg('amb_home', birds(), 0.6)
-    write_ogg('amb_match', wind(14.0, True), 0.6)
     write_ogg('amb_rain', rain(), 0.55)
     for i in range(3):
         wav_out('step%d' % i, footstep(i), 0.7)

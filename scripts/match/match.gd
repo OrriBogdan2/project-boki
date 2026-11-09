@@ -698,7 +698,6 @@ func _start(o: Dictionary) -> void:
 	_build_env()
 	music_dir = MusicDir.new()
 	music_dir.start(self)
-	Sfx.play_ambience("match")
 	world = World.new()
 	world.name = "World"
 	world.biome = T["biome"].duplicate()

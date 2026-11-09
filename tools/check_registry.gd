@@ -24,6 +24,7 @@ const CHECKS := {
 	"--ashwick-combo-check": ["res://tools/ashwick_combo_check.gd", "hero_check", null],
 	"--archer-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--bulwark-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
+	"--ambience-check": ["res://tools/ambience_check.gd", "ambience_check", null],      # match ambience beds
 	"--music-leave-check": ["res://tools/music_leave_check.gd", "music_leave_check", null],
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],      # item 94
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],

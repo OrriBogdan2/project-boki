@@ -50,7 +50,7 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_music("title")
 	Feedback.flush(self)                # a rating that could not be sent last time
-	Sfx.play_ambience("match")          # the wind
+	Sfx.play_ambience("title")
 	rng.seed = 2026
 	low = Settings.quality() == "low"
 	fx_k = float(Settings.q("fx"))

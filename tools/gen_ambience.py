@@ -1,5 +1,11 @@
 """Ambience beds for expeditions that fade in and out by where you are (MusicDir drives them):
 
+    amb_open    grass and bloom country: soft wind through leaves, crickets
+    amb_crown   the Crown's gloom: a hollow stone breath with a low two-note drone
+    amb_cliff   frost and storm highlands: thin high wind, gusting, fine ice hiss
+    amb_ember   the Cinder country: low furnace roar, crackle, heat shimmer
+    amb_title   the title screen: calm, a slow breath of air with a faint glassy shimmer
+    amb_gust    a layer the weather drives: big wind swells with grit (ash storm, dusk)
     amb_abyss   wind over the drop: a deep, slow howl with the odd hollow whistle in it
     amb_ruins   the old world's ruins: a low stone drone, creaks and settling rubble, far-off metal
 
@@ -98,6 +104,93 @@ def ruins(seconds=30.0):
     return loop(out)
 
 
+def open_country(seconds=24.0):
+    n = int(SR * (seconds + 2.0)); t = np.arange(n) / SR
+    chans = []
+    for c in range(2):
+        leaves = bpf(rng.standard_normal(n), 1400, 5200) * slow(n, 0.35, 0.05, 0.5) * slow(n, 1.3, 0.4, 1.0)
+        air = lpf(rng.standard_normal(n), 700) * slow(n, 0.1, 0.3, 1.0) * 1.2
+        chans.append(air + leaves * 0.9)
+    out = np.stack(chans, 1)
+    # crickets: bursts of a high pulsed tone, each one a little off in pitch, placed on one side
+    for _ in range(14):
+        s0 = rng.integers(0, n - SR * 3); m = int(SR * rng.uniform(1.5, 2.8)); tt = np.arange(m) / SR
+        f = rng.uniform(3600, 4600); rate = rng.uniform(26, 34)
+        chirp = np.sin(2 * np.pi * f * tt) * (np.sin(2 * np.pi * rate * tt) > 0.2) * np.sin(np.pi * tt / tt[-1]) ** 2 * 0.045
+        pan = rng.uniform(0.1, 0.9)
+        out[s0:s0 + m, 0] += chirp * (1 - pan); out[s0:s0 + m, 1] += chirp * pan
+    return loop(out)
+
+
+def crown(seconds=28.0):
+    n = int(SR * (seconds + 2.0)); t = np.arange(n) / SR
+    chans = []
+    for c in range(2):
+        breath = svf(rng.standard_normal(n), slow(n, 0.07, 140, 360), 9.0) * (0.25 + 0.75 * slow(n, 0.09, 0.0, 1.0) ** 2) * 0.5
+        floor_ = lpf(rng.standard_normal(n), 160) * 1.4
+        drone = (np.sin(2 * np.pi * (46.0 + 0.3 * c) * t) + 0.6 * np.sin(2 * np.pi * (69.0 - 0.4 * c) * t)) * 0.1 * slow(n, 0.06, 0.4, 1.0)
+        chans.append(breath + floor_ + drone)
+    return loop(np.stack(chans, 1))
+
+
+def cliff(seconds=26.0):
+    n = int(SR * (seconds + 2.0))
+    chans = []
+    for c in range(2):
+        gust = slow(n, 0.14, 0.15, 1.0) ** 1.5
+        thin = svf(rng.standard_normal(n), slow(n, 0.18, 900, 2300), 14.0) * gust * 0.55
+        mid = svf(rng.standard_normal(n), slow(n, 0.1, 350, 700), 6.0) * gust * 0.4
+        ice = hpf(rng.standard_normal(n), 6000) * slow(n, 0.3, 0.0, 1.0) ** 3 * 0.05
+        chans.append(thin + mid + ice)
+    return loop(np.stack(chans, 1))
+
+
+def ember(seconds=24.0):
+    n = int(SR * (seconds + 2.0))
+    out = np.zeros((n, 2))
+    for c in range(2):
+        roar = bpf(rng.standard_normal(n), 70, 380) * slow(n, 0.2, 0.4, 1.0) * 1.8
+        shimmer = bpf(rng.standard_normal(n), 3500, 7500) * slow(n, 0.5, 0.0, 1.0) ** 2 * 0.07
+        out[:, c] = roar + shimmer
+    # crackle: little pops of filtered noise, a few every second
+    for _ in range(int(seconds * 7)):
+        k = rng.integers(0, n - 800); L = rng.integers(60, 500)
+        pop = bpf(rng.standard_normal(L + 64), 1500, 6500)[64:] * np.exp(-np.arange(L) / (L / 4.0)) * rng.uniform(0.1, 0.5)
+        pan = rng.uniform(0.1, 0.9)
+        out[k:k + L, 0] += pop * (1 - pan); out[k:k + L, 1] += pop * pan
+    return loop(out)
+
+
+def title(seconds=30.0):
+    n = int(SR * (seconds + 2.0)); t = np.arange(n) / SR
+    out = np.zeros((n, 2))
+    for c in range(2):
+        air = lpf(rng.standard_normal(n), 520) * (0.4 + 0.6 * slow(n, 0.07, 0.0, 1.0)) * 1.5
+        hush = bpf(rng.standard_normal(n), 2000, 4200) * slow(n, 0.1, 0.0, 1.0) ** 2 * 0.1
+        out[:, c] = air + hush
+    # a faint glassy shimmer: three soft partials that swell and fade, a long way off
+    for _ in range(6):
+        s0 = rng.integers(0, n - SR * 6); m = int(SR * rng.uniform(4.0, 5.5)); tt = np.arange(m) / SR
+        f0 = rng.choice([392.0, 523.25, 587.33, 783.99]) * 2
+        g = sum(a * np.sin(2 * np.pi * f0 * r * tt + rng.uniform(0, 6)) for r, a in ((1.0, 1.0), (2.0, 0.35), (3.01, 0.15)))
+        g = g * np.sin(np.pi * tt / tt[-1]) ** 3 * 0.012
+        pan = rng.uniform(0.2, 0.8)
+        out[s0:s0 + m, 0] += g * (1 - pan); out[s0:s0 + m, 1] += g * pan
+    return loop(out)
+
+
+def gust(seconds=22.0):
+    n = int(SR * (seconds + 2.0))
+    chans = []
+    for c in range(2):
+        swell = np.clip(slow(n, 0.16, -0.5, 1.0), 0, 1) ** 2
+        body = svf(rng.standard_normal(n), 250 + 1100 * swell + slow(n, 0.4, 0, 200), 3.5) * swell * 0.9
+        roar = lpf(rng.standard_normal(n), 420) * swell * 0.8
+        grit = hpf(rng.standard_normal(n), 3000) * swell ** 3 * 0.09
+        chans.append(body + roar + grit)
+    return loop(np.stack(chans, 1))
+
+
 def write_ogg(name, x, gain=0.6):
     x = x / (np.max(np.abs(x)) or 1) * gain
     tmp = tempfile.NamedTemporaryFile(suffix='.wav', delete=False).name
@@ -113,3 +206,9 @@ def write_ogg(name, x, gain=0.6):
 if __name__ == '__main__':
     write_ogg('amb_abyss', abyss(), 0.6)
     write_ogg('amb_ruins', ruins(), 0.55)
+    write_ogg('amb_open', open_country(), 0.5)
+    write_ogg('amb_crown', crown(), 0.55)
+    write_ogg('amb_cliff', cliff(), 0.55)
+    write_ogg('amb_ember', ember(), 0.55)
+    write_ogg('amb_title', title(), 0.4)
+    write_ogg('amb_gust', gust(), 0.6)

@@ -14,15 +14,31 @@ var last_done := 0.0
 var started := false
 
 func start(m: Match) -> void:
+	Sfx.play_ambience(String(rules()["default"]), true)
 	if m.tier >= 2:
 		Sfx.play_music("hollow")
 		return
 	started = true
 	Sfx.play_layers("match", {"calm": 1.0, "drive": 0.0, "boss": 0.0, "extract": 0.0})
 
-## Ambience by place, every quarter second: wind howling up from the abyss as you near an edge (or
-## glide over it), the creak and grit of the old ruins among their walls, and now and then a
-## creature calling from somewhere out of sight.
+const RULES_PATH := "res://content/rules/ambience.json"
+static var _rules := {}
+
+## Which bed an island biome plays, and what level the weather puts on the gust / rain layers
+## (content/rules/ambience.json).
+static func rules() -> Dictionary:
+	if _rules.is_empty():
+		var parsed = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
+		_rules = parsed if parsed is Dictionary else {}
+	return _rules
+
+static func bed_for(biome: String) -> String:
+	return String(rules()["beds"].get(biome, rules()["default"]))
+
+## Ambience by place, every quarter second: the bed of the island you stand on (crossfaded over 2 s;
+## over the void the last one carries on), the weather's gust and rain on top, wind howling up from
+## the abyss as you near an edge (or glide over it), the creak and grit of the old ruins among their
+## walls, and now and then a creature calling from somewhere out of sight.
 var amb_t := 0.0
 var call_t := 12.0
 var rng := RandomNumberGenerator.new()
@@ -36,6 +52,12 @@ func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	var w: World = m.world
 	if w == null:
 		return
+	var biome := w.biome_at(p.pos.x, p.pos.z)
+	if biome != "":
+		Sfx.play_ambience(bed_for(biome), true)
+	var weather: Dictionary = rules()["weather"].get(m.raid, {})
+	for layer in ["gust", "rain"]:
+		Sfx.amb_layer(layer, float(weather.get(layer, 0.0)))
 	var voids := 0; var walls := 0; var n := 0
 	for r: float in [3.0, 6.0, 9.5]:
 		for k in 10:

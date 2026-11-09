@@ -2,6 +2,9 @@
 
 How the game's sound effects are made, named, levelled and played. Music and ambience are in `tools/compose.py` and `tools/gen_ambience.py`.
 
+## Ambience beds
+`tools/gen_ambience.py` writes streamed `.ogg` loops. The title screen plays `amb_title` (calm). In a match `MusicDir` plays the bed of the island you stand on (`content/rules/ambience.json`: meadow/bloom `open`, gloom `crown`, frost/storm `cliff`, ember `ember`), crossfaded over 2 s by `Sfx.play_ambience` (at most two beds sound at once; over the void the last bed carries on). On top: the weather's `gust` / `rain` layers (ash storm, fog, dusk, night) and the position layers `abyss` (edges) and `ruins` (walls). There is no swimmable water in a match, so no water bed. `--ambience-check` covers it.
+
 ## Making sounds
 - Sounds are **synthesised in code** (numpy/scipy, `pip install numpy scipy`), one script per group: `tools/gen_sfx_<group>.py` (e.g. `gen_sfx_vex.py`, `gen_sfx_boki.py`, `gen_sfx_ui.py`). Each one imports `tools/sfx_lib.py`, calls `S.reseed(<its own seed>)` and writes `audio/<name>.wav` (44.1 kHz mono 16-bit). Then `godot --headless --import`.
 - `sfx_lib.py` re-uses the primitives in `tools/sfx_combat.py` (filters, envelopes, kick, click, crack, sub, tail, reflections, ring, grains) and adds `voice()` (wordless grunts and cries through vowel formants), `chime()`, `creak()`, `fm()`, `sweep()`, `rattle()`, `hiss()`.

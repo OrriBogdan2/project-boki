@@ -55,7 +55,7 @@ Every sound effect is synthesized from scratch by `tools/gen_sfx.py`, `tools/gen
 (written to `audio/*.wav`; the combat layer, ability casts and impacts, and footsteps come from
 `tools/sfx_combat.py`, which `gen_sfx.py` runs last), and glider skins and the home whistle are made in code by
 `scripts/core/synth.gd`. Music and ambience are composed procedurally by `tools/gen_music.py` /
-`tools/compose.py` (the expedition's layered stems) and `tools/gen_ambience.py` (wind over the
+`tools/compose.py` (the expedition's layered stems) and `tools/gen_ambience.py` (the region beds open / crown / cliff / ember, the title bed, the gust layer, wind over the
 abyss, ruins). `tools/sfx_stats.py` measures the sound effects (peak, loudness, attack, onset, spectral
 centroid).
 abyss, ruins). No recorded or downloaded audio is used. `tools/sfx_stats.py` measures the
