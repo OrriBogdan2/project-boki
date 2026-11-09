@@ -17,7 +17,7 @@ func run_for(who: String) -> void:
 func _landing() -> Vector3:
 	return vs.T.position + Vector3(0, 0.6, 0)
 
-## Ryzz comes down just short of the target, so her landing pose and the knockback both read.
+## Sparkle comes down just short of the target, so her landing pose and the knockback both read.
 func _short() -> Vector3:
 	return vs.T.pos - Vector3(1.4, 0, 0)
 

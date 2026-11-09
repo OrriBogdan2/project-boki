@@ -59,7 +59,7 @@ func _skate_feel() -> void:
 	ok(
 			"tm Shift: she steers the skate into a curve (not a snap) with ice spraying off the edge",
 			K.rinkrunning() and turned > 60.0 and rad_to_deg(absf(Vector2(1, 0).angle_to(early))) < 40.0
-				and K.lk().live.filter(func(e): return String(e["kind"]) == "chip").size() >= 4,
+				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2,
 			"turned %.0f deg" % turned)
 	ok(
 			"tm Shift: LMB keeps firing (straight beams) the whole skate",
@@ -733,8 +733,8 @@ func tender() -> void:
 	var T: Hunter = r[3]
 	var K: TenderKit = P.ak
 	ok(
-			"mm: renamed Pip, kit sounds load",
-			Arch.name_of("tender") == "Little Lantern"
+			"mm: renamed Meeko, kit sounds load",
+			Arch.name_of("tender") == "The Dawnfox"
 			and Sfx.streams.has("tend_seed")
 			and Sfx.streams.has("tend_root")
 			and Sfx.streams.has("tend_hop"))
@@ -900,15 +900,16 @@ func tender() -> void:
 	P.inp["move"] = Vector2(1, 0)
 	P.dashes = P.max_dashes()
 	P.inp["dash"] = true
+	Sfx.listener = P.pos          # (the star trail draws only near the camera's focus)
 	step(m, 0.05)
 	P.inp["dash"] = false
-	var aft := K.lk().live.filter(func(e): return String(e["kind"]) == "mote").size()
+	var aft := (HeroVfx.of(m).holds.keys() as Array).filter(func(k): return String(k).ends_with("/dash_trail")).size()
 	step(m, 0.25)
 	P.inp["move"] = Vector2.ZERO
 	ok(
-			"mm Shift: Relay Step goes where you move (cursor elsewhere), its own hop and after-images",
+			"mm Shift: Relay Step goes where you move (cursor elsewhere), its own hop and a trail of stars",
 			P.pos.x - p0.x > 2.5 and absf(P.pos.z - p0.z) < 1.0 and aft >= 1,
-			"dx %.1f dz %.1f aft %d" % [P.pos.x - p0.x, P.pos.z - p0.z, aft])
+			"dx %.1f dz %.1f trail %d" % [P.pos.x - p0.x, P.pos.z - p0.z, aft])
 	ok(
 			"mm Shift: the hop is its own move (no shared roll under it)",
 			K.anim_id == "mm_skip" and K.dodge_anim() == "kit")
@@ -1255,7 +1256,7 @@ func burr_ranks() -> void:
 			"r1 %.2f r3 %.2f" % [wide1, wide3])
 	await _free(m)
 
-# ================================================================== Claire
+# ================================================================== Neve
 func rimewright() -> void:
 	var r: Array = sc.setup("rimewright", 6.0)
 	var m: Match = r[0]
@@ -1339,7 +1340,13 @@ func rimewright() -> void:
 	step(m, 0.5)
 	# --- Shatter on a knock (Chilled foe)
 	T.hp = 8.0
+	T.slow_t = 0.0
 	K.add_chill(T)
+	step(m, 0.1)
+	ok(
+			"tm passive: Chill is 4 s and shatter only, no slow of ours (the source has none)",
+			K.chilled(T) and float(Arch.def("rimewright")["passive"]["chill_t"]) == 4.0 and T.slow_t <= 0.0,
+			"slow_t %.2f" % T.slow_t)
 	T2.teleport(T.pos + Vector3(1.5, 0, 0))
 	T2.hp = T2.max_hp
 	step(m, 0.05)
@@ -1394,9 +1401,10 @@ func rimewright() -> void:
 	step(m, 0.15)
 	var skate_v := Vector2(P.vel.x, P.vel.z).length()
 	ok(
-			"tm Shift: full skating speed (dash.speed) within about 0.2 s, with a ribbon of ice chips",
+			"tm Shift: full skating speed (dash.speed) within about 0.2 s, laying a frost trail (ice plates, frost)",
 			absf(skate_v - float(K.dash_def()["speed"])) < 0.6
-				and K.lk().live.filter(func(e): return String(e["kind"]) == "chip").size() >= 4,
+				and K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size() >= 4
+				and int(HeroVfx.of(m).plays.get("skate_frost", 0)) >= 1,
 			"%.1f m/s" % skate_v)
 	step(m, 0.55)
 	ok("tm Shift: the stride move loops while skating (off the step she is on the air stride)",

@@ -205,7 +205,7 @@ func _all() -> void:
 	ok(
 		"linwick: heavy, Torch Lance, 2 ram charges",
 		P.wid == "flamethrower" and P.cls == "heavy" and P.max_dashes() >= 2.0
-			and Arch.name_of("ashwick") == "Mad Pyromancer",
+			and Arch.name_of("ashwick") == "The Ashen Kiss",
 		"%s %s %s" % [P.wid, P.cls, Arch.name_of("ashwick")]
 	)
 	# --- no fuel (the source's flamethrower has none, and nothing reloads): held past the old 8s tank, it still roars
@@ -472,6 +472,11 @@ func _all() -> void:
 	P.ak.on_dash(false)
 	var ram_move: String = K.anim_id
 	var feel: Dictionary = K.dash_feel()
+	ok(
+		"ram: the source's ~3.4 m in 0.33 s, as it is felt (no global scale on top)",
+		absf(P.roll_t - 0.33) < 0.005 and absf(P.roll_speed * P.roll_t - 3.4) < 0.05,
+		"%.2f m in %.2fs" % [P.roll_speed * P.roll_t, P.roll_t]
+	)
 	var ram_d: float = float(K.dash_def()["dist"]) * float(feel["dist"])
 	var ram_t: float = float(K.dash_def()["time"]) * float(feel["time"])
 	ak.step(m, ram_t * 0.3, count_rings)
@@ -501,6 +506,11 @@ func _all() -> void:
 	ak.aim_at(P, home + Vector3(12.0, 0, 0))
 	rings["seen"] = m.fx.rings.size()
 	P.ak.on_dash(true)
+	ok(
+		"air poof: 6.8 m in 0.28 s, scaled once (not twice)",
+		absf(P.roll_t - 0.28) < 0.005 and absf(P.roll_speed * P.roll_t - 6.8) < 0.1,
+		"%.2f m in %.2fs" % [P.roll_speed * P.roll_t, P.roll_t]
+	)
 	var poof_move: String = K.anim_id
 	var poof_t: float = float(K.dash_def()["air_time"]) * float(feel["time"])
 	ak.step(m, poof_t + 0.06, count_rings)
