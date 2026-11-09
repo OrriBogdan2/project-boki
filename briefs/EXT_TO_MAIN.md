@@ -4044,3 +4044,4 @@ ART rimink_x reject briefs/boki-art/batch/out/rimink_x_1.jpg grade=7.8
 ART pyrraven_r reject briefs/boki-art/batch/out/pyrraven_r_2.jpg grade=7.6
 ART reapant reject briefs/boki-art/batch/out/reapant_1.jpg grade=7.4
 ART scythant reject briefs/boki-art/batch/out/scythant_1.jpg grade=6.9
+ART vespyx 8.8 briefs/boki-art/turnarounds/Vespyx.jpg kind=sheet (from the owner-approved 2D shot)
