@@ -5331,3 +5331,4 @@ READY ext/revive-source-numbers 90d75a769 (source revive/stomp crowd curve 1/.75
 READY ext/revive-online c71a5e5fb (online deaths drop a deathbox; BoxRevive and beacons bring the dead back between games via box/brev/back/lost events, Net.VERSION 0.24.4; new --revive-net-check 2 games over relay 22/0; box-revive, revive, life, displace-net 0 failures, health --strict OK, gen_wiki --check OK; DEBT line removed; may clash with ext/revive-source-numbers in life.gd/DEATH_AND_REVIVE.md/Net.VERSION; worker rpc1)
 READY ext/anim-stomp-drink-1 f81646d8a (stomp, drink, revive-kneel clips for Vex, Lace, Cinder via tools/art1/actionkit.py; Kael left procedural: v2 rig has no clips script)
 READY ext/parity-interrupts-b 1d8cccab7 (interrupt rules B)
+READY ext/level-growth-parity 051b53e20 (WeaponPath level bonuses removed; HP/AP growth kept as the source's ~6%/level; per-level asserts in --level-hud-check)
