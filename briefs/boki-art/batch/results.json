@@ -36732,5 +36732,19 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_glaivyx_g10_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_vespox_recolor",
+    "name": "Vespox (portrait recolour)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_vespox_recolor_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vespox_recolor",
+    "name": "Vespox (portrait recolour)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_vespox_recolor_1.jpg",
+    "ok": true
   }
 ]
