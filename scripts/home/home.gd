@@ -3305,6 +3305,7 @@ func _open_expedition() -> void:
 		left.add_child(UI.spacer(2))
 		left.add_child(UI.section("Boki you bring"))
 		left.add_child(_kin_pick_row("Partner", ak, "active"))
+		left.add_child(UI.label(CareLink.line(ak), UI.T_SMALL, UI.MUTED))
 		if Match.TWO_KIN and Save.d["roster"].size() > 1:
 			left.add_child(_kin_pick_row("Second", Save.second_kin(), "active2"))
 		if float(ak["trust"]) < 30.0:

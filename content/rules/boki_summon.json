@@ -1,0 +1,5 @@
+{
+	"desc": "How a Boki's raising reaches a run's partner numbers (CareLink). The carry passive and the summoned (merged) form's passive numbers are scaled by its trained Care stats, inside a small cap. No new abilities.",
+	"max_bonus": 0.10,
+	"max_bonus_doc": "Largest multiplier gain (0.10 = +10%) at fully trained stats (each of Power, Guard, Speed, Focus at its level cap, Care.stat_cap). Matches the IV cap (Care.IV_BONUS): raising never beats birth by more than a little. 0 turns the match effect off and leaves the display only."
+}

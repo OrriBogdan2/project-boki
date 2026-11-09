@@ -113,7 +113,8 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bokisys-only="): only = a.substr(15)
-	for part in ["poll", "throw", "recall", "modes", "cast_c", "downed", "no_steal", "merge", "leap", "surge", "net"]:
+	for part in ["poll", "throw", "recall", "modes", "cast_c", "downed", "no_steal",
+			"merge", "care", "leap", "surge", "net"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.hit_landed.disconnect(_on_hit)
@@ -379,6 +380,34 @@ func _no_steal() -> void:
 	ok(not BokiHud.squad_downed(m).is_empty() and R.team != k.team, "(it is still yours)")
 
 # ------------------------------------------------------------------ 7. the Merge
+## The raising reaches a run only as a small capped scale (CareLink, boki_summon.json).
+func _care() -> void:
+	_fresh()
+	var P := m.player
+	var rec: Dictionary = P.kin.rec
+	Care.ensure(rec)
+	for s in Care.STATS: rec["stats"][s] = 0
+	ok(is_equal_approx(CareLink.mult(rec), 1.0), "an untrained Boki gives plain numbers (x1.0)")
+	for s in Care.STATS: rec["stats"][s] = Care.stat_cap(rec)
+	var cap := 1.0 + CareLink.max_bonus()
+	var top := CareLink.mult(rec)
+	ok(is_equal_approx(top, cap) and cap <= 1.1001, "a maxed Boki sits at the cap (x%.3f)" % top)
+	for s in Care.STATS: rec["stats"][s] = 9999
+	ok(CareLink.mult(rec) <= cap + 0.0001, "stats far over the level cap stay in the cap")
+	for s in Care.STATS: rec["stats"][s] = 0
+	var base := {}
+	P.kin.state = "shoulder"
+	P._refresh_kin_stats()
+	base = P._kst.duplicate()
+	for s in Care.STATS: rec["stats"][s] = Care.stat_cap(rec)
+	P._refresh_kin_stats()
+	var inside := true
+	for st in P._kst:
+		if float(P._kst[st]) > float(base.get(st, 0.0)) * cap + 0.0001: inside = false
+	ok(inside, "a maxed Boki's passives stay in the cap (%s -> %s)" % [base, P._kst])
+	var ln := CareLink.line(rec)
+	ok(ln.contains("Trust") and ln.contains("Power"), "one line: stats, element, trust: %s" % ln)
+
 func _merge() -> void:
 	_fresh()
 	var P := m.player

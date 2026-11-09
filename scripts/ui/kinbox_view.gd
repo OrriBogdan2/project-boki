@@ -430,6 +430,10 @@ func _build_detail() -> void:
 		var dt := Time.get_datetime_dict_from_unix_time(int(rec["got_t"]))
 		joined = "  ·  joined %d-%02d-%02d" % [dt["year"], dt["month"], dt["day"]]
 	detail.add_child(UI.label("Trust %d  ·  %s bond%s" % [int(rec.get("trust", 0)), bd[1], joined], 12, Color("ffb3c6")))
+	var cl_line := UI.label(CareLink.line(rec), 11, UI.MUTED)
+	cl_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	cl_line.custom_minimum_size.x = 280
+	detail.add_child(cl_line)
 	detail.add_child(WorkView.chips(rec, 18.0))
 	detail.add_child(IvView.mini(rec, 18.0))      # its IVs, with the numbers on hover
 	AboutView.block(rec, detail, true)            # its size, coat, eyes, habit, serial and origin

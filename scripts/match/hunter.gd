@@ -417,9 +417,10 @@ func _refresh_kin_stats() -> void:
 		for ps in KinMerge.passives(self):
 			out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
 		out["cooldown"] = float((merge_st.get("form", {}) as Dictionary).get("haste", 0.0))      # the form's faster ability cooldowns (MergeForm)
+	var care := CareLink.mult(k.rec) if k else 1.0      # its raising, a small capped scale (boki_summon.json)
 	for st in out:
 		var row: Array = KinParts.OWNER_STATS[st]
-		out[st] = clampf(float(out[st]), 0.0, float(row[3] if not merge_st.is_empty() else row[2]))
+		out[st] = clampf(float(out[st]) * care, 0.0, float(row[3] if not merge_st.is_empty() else row[2]))
 	_kst = out
 
 ## Owner bonuses from your kin's stat points, for the whole run (KinParts.STATS owner_*): max
