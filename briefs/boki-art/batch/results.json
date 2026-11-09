@@ -29746,5 +29746,68 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_glassolotl_v2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_glassolotl_v1",
+    "name": "Glassolotl (variant v1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_v1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_cetorgan",
+    "name": "Cetorgan",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_cetorgan_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_grainspin",
+    "name": "Grainspin",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_grainspin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_grainspin",
+    "name": "Grainspin",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_grainspin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lurklet",
+    "name": "Lurklet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lurklet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_hydrangor",
+    "name": "Hydrangor",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_hydrangor_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_clinkpede",
+    "name": "Clinkpede",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_clinkpede_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lurklet",
+    "name": "Lurklet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_lurklet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_fawngus",
+    "name": "Fawngus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_fawngus_1.jpg",
+    "ok": true
   }
 ]
