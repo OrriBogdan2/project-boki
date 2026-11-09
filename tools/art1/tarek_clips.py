@@ -358,7 +358,7 @@ if OUT_GLB != "-":
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.export_scene.gltf(filepath=OUT_GLB, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
                               export_animation_mode="NLA_TRACKS", export_skins=True, export_yup=True, export_materials="EXPORT",
-                              export_image_format="JPEG", export_jpeg_quality=93, export_extras=False, export_force_sampling=False,
+                              export_image_format="AUTO", export_jpeg_quality=93, export_extras=False, export_force_sampling=False,
                               export_frame_range=False, export_optimize_animation_size=False, export_def_bones=False, export_bake_animation=False)
     print("exported", os.path.getsize(OUT_GLB))
 print("clips", json.dumps(C.lengths))
