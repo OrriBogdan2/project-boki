@@ -719,9 +719,10 @@ func juggernaut(a) -> void:
 	A.step(m, 0.05)
 	A.ok("juggernaut E: a stun breaks the chain", K.warchain.state != "hooked" and float(K.cd["e"]) > 5.0)
 	var halves: Dictionary = DJFx.of(m).chains
+	var h0: Node3D = halves.get(wid + "s0", {}).get("node")
+	var h1: Node3D = halves.get(wid + "s1", {}).get("node")
 	A.ok("juggernaut E: the break shows two thick halves whipping back",
-			is_instance_valid(halves.get(wid + "s0", {}).get("node")) and is_instance_valid(halves.get(wid + "s1", {}).get("node"))
-			and (halves[wid + "s0"]["node"] as Node3D).visible and K.warchain.snap_t > 0.0, "snap_t %.2f" % K.warchain.snap_t)
+			h0 != null and h1 != null and h0.visible and K.warchain.snap_t > 0.0, "snap_t %.2f" % K.warchain.snap_t)
 	A.step(m, 0.4)
 	# ... or bites a wall and pulls you to it
 	var W = m.world
