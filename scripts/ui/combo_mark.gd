@@ -5,7 +5,7 @@ extends RefCounted
 ## the time left, and a pip per stack. It reads the kit's existing status timers (ArchKit.combo_marks), it
 ## keeps none. When the payoff lands, flash() puts a bright 2-frame burst on the foe (payoff_fx calls it).
 
-const MARK_UP := 3.1          # m over the foe's feet
+const MARK_UP := 4.2          # m over the foe's feet: above its name plate and health bar
 const MARK_R := 13.0          # px: the time ring's radius
 const PIP_R := 2.6            # px: one stack pip
 const FLASH_T := 0.034        # s: two frames at 60 fps
