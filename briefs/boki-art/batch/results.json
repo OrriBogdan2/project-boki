@@ -24573,5 +24573,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/geysirbara_card2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "gongrowl_card2",
+    "name": "Gongrowl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gongrowl_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kerchick_card2",
+    "name": "Kerchick (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kerchick_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_card2",
+    "name": "Gongrowl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gongrowl_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kerchick_card2",
+    "name": "Kerchick (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kerchick_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lashyx_card2",
+    "name": "Lashyx (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lashyx_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunink_card2",
+    "name": "Lunink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lunink_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lashyx_card2",
+    "name": "Lashyx (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lashyx_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarlet_card2",
+    "name": "Oarlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/oarlet_card2_2.jpg",
+    "ok": true
   }
 ]
