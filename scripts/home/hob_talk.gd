@@ -9,14 +9,15 @@ extends RefCounted
 ##     the pick of three (HobOffer); taking one plays the short Mask moment (MaskBeat)
 ##   - otherwise: blueprints he drew up (FarmBuilder), then the build menu or goodbye
 ## When a line is about something (a "show"), he points at it. The camera holds ONE framing for the whole
-## talk (a soft ease in at the start and out at the end); it only drifts toward a "show" that is too far to
-## be on screen. On the first arrival he waves and calls you over without moving the camera.
+## talk (a soft ease in at the start and out at the end); it only drifts (slowly, part way) toward a "show" that
+## is off screen. On the first arrival he waves and calls you over without moving the camera.
 
 const TALK := "Hob"            # Home.panel_open while you talk: you stand still and no prompt shows
 const FACE_K := 0.3            # how far the camera's focus moves from you toward him while you talk
-const SHOW_FAR_M := 9.0        # m from the talk framing past which a "show" is off screen and the camera drifts to it
-const SHOW_PAN_K := 0.5        # how far toward that far "show" it drifts (half way: it stays in view)
-const SHOW_EASE_S := 0.9       # s the drift to a far "show" takes, and the drift back
+const SHOW_PAN_K := 0.5        # how far toward an off-screen "show" it drifts (half way: it comes into view)
+const SHOW_EASE_S := 1.1       # s the drift to an off-screen "show" takes, and the drift back (slow)
+## Screen fractions a "show" counts as seen in (above the talk box).
+const SHOW_SAFE := Rect2(0.08, 0.08, 0.84, 0.6)
 
 var hob: FarmHob
 var box: TalkBox = null
@@ -24,6 +25,7 @@ var offer: HobOffer = null
 var intro_t := -1.0            # s into the first-arrival wave and call, -1 when none
 var show_t := -1.0             # s into a line's pointing at something, -1 when none
 var show_at := Vector3.INF
+var show_far := false          # the line's "show" is off screen (or under the talk box): the camera drifts to it
 
 func _init(owner_hob: FarmHob) -> void:
 	hob = owner_hob
@@ -132,8 +134,17 @@ func _on_line(_i: int, line: Dictionary) -> void:
 	var at: Vector3 = line.get("at", _where(String(line.get("show", ""))))
 	show_at = at
 	show_t = 0.0 if at.x != INF else -1.0
+	show_far = at.x != INF and not _on_screen(at)
 	hob.node.point_at = at
 	hob.node.pose = "point" if at.x != INF else String(line.get("pose", "talk"))
+
+## Is this spot in plain view right now (inside SHOW_SAFE, so not under the talk box)?
+func _on_screen(at: Vector3) -> bool:
+	var c3: Camera3D = hob.h.get_viewport().get_camera_3d()
+	if c3 == null or c3.is_position_behind(at):
+		return c3 == null
+	var screen: Vector2 = hob.h.get_viewport().get_visible_rect().size
+	return SHOW_SAFE.has_point(c3.unproject_position(at) / screen)
 
 ## Where a line's "show" is on this farm (INF when it isn't there).
 func _where(what: String) -> Vector3:
@@ -219,7 +230,7 @@ func frame(focus: Vector3) -> Vector3:
 		at = focus.lerp(Vector3(hob.node.position.x, focus.y, hob.node.position.z), FACE_K)
 	if show_t >= 0.0 and show_at.x != INF:
 		var there := Vector3(show_at.x, focus.y, show_at.z)
-		if there.distance_to(at) > SHOW_FAR_M:
+		if show_far:
 			var span := float(rules()["show_s"])
 			var k := smoothstep(0.0, SHOW_EASE_S, show_t) * (1.0 - smoothstep(span - SHOW_EASE_S, span, show_t))
 			at = at.lerp(there, k * SHOW_PAN_K)

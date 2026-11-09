@@ -5,8 +5,8 @@ extends RefCounted
 ##      meet him and the reminder line names him
 ##   2. the first arrival: he waves and calls out and the camera does not move
 ##   3. talking: the talk box with his portrait and name, one line at a time; you stand still; he points at the
-##      stall; the camera holds one framing for every line (no zoom or pan per line) and only drifts to a far
-##      "show"; after the last line he is met (no name tag) and chopping is next
+##      stall; the camera holds one framing for every line (no zoom or pan per line) and only drifts to an
+##      off-screen "show"; after the last line he is met (no name tag) and chopping is next
 ##   4. the second Mask: no second Mask on a fresh save after the first expedition; not offered before the house
 ##      is down, then a "!" and "By the way... I see you found a Vex Relic"; the pick shows exactly Kael, Cinder and
 ##      Meeko, each with portrait, name and title and a role, and one clip (the one in focus); taking Meeko opens
@@ -118,14 +118,15 @@ func _first_arrival() -> void:
 			"line by line; on the stall line he points at it")
 	await main.get_tree().create_timer(0.5).timeout
 	await _shot("hob_4_points_at_stall", 0.1)
-	ok(hob.chat.frame(home.ppos).is_equal_approx(talk_at) and is_equal_approx(home.cam.zoom_to, zoom0),
-			"the camera does not move for a stall he can point at from here")
-	hob.chat.show_at = home.ppos + Vector3(HobTalk.SHOW_FAR_M + 8.0, 0, 0)
+	ok(not hob.chat.show_far and hob.chat.frame(home.ppos).is_equal_approx(talk_at)
+			and is_equal_approx(home.cam.zoom_to, zoom0), "the camera does not move for a stall that is on screen")
+	var off: Vector3 = home.ppos + Vector3(60.0, 0, 0)      # (well off screen)
+	hob.chat._on_line(0, {"text": "", "at": off})
 	hob.chat.show_t = 1.2
 	var far_at: Vector3 = hob.chat.frame(home.ppos)
-	ok(far_at.x > talk_at.x + 2.0 and far_at.x < hob.chat.show_at.x - 4.0
+	ok(hob.chat.show_far and far_at.x > talk_at.x + 2.0 and far_at.x < off.x - 4.0
 			and is_equal_approx(home.cam.zoom_to, zoom0),
-			"only a far-off show drifts it, part of the way, with no zoom change")
+			"only an off-screen show drifts it, part of the way, with no zoom change")
 	hob.chat.show_t = -1.0
 	for i in intro.size() * 2:
 		if hob.chat.talking():

@@ -51,6 +51,6 @@
 		},
 		"build_menu": "Open the build menu",
 		"bye": "Bye",
-		"shows_doc": "A line's show: stall, house (the house or its spot), tree (the nearest tree), portal. Hob points at it for show_s seconds; the camera only drifts there (and back) when it is too far to be on screen."
+		"shows_doc": "A line's show: stall, house (the house or its spot), tree (the nearest tree), portal. Hob points at it for show_s seconds; the camera only drifts there (and back) when it is off screen or under the talk box (HobTalk.SHOW_SAFE)."
 	}
 }
