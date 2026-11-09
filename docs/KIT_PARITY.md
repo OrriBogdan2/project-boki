@@ -219,3 +219,51 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | Tarek (`dolm`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`) |
 
 Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
+
+## Cooldown start (when it starts, how charges come back)
+
+Sources: `supervive_kits.md` (tooltips: charges, "reactivate", "-x% CD on hit"), `docs/heroes/*.md` wiki rows, footage `vireo.md` (Surge: HUD shows 7 s while she still holds, so the cooldown starts on the press), `DASH_UI.md` (dash recharge is one charge at a time, the countdown restarts per charge). The sheets record no other cooldown overlay at 5 fps, so everything not listed below is "no evidence": ours stays the shared default.
+
+**Shared rules in ours (the default every row below is measured against).**
+- A cast starts its cooldown on the press that casts it: `ArchKit.use_e` (E), `HeroUlt.press` (X), `ArchKit.use_r` (R, at the fuse start), `Hunter.do_dash` / `ArchKit.spend_dash` (Shift). A recast, a channel or an end never moves it.
+- RMB charges (`ch_rmb`) and dash charges (`Hunter.dashes`, a float) recharge one at a time: one timer runs, a spent charge does not wait for another, a charge spent mid-recharge keeps the progress already made. No kit recharges all at once, none restarts a running timer.
+- A hold-and-release RMB spends at the release (`fire_rmb`), because its "cast" is the release in our kits.
+
+| Hunter | Slot | Source says | Ours | Verdict |
+|---|---|---|---|---|
+| Vex | RMB, E, X | tooltips only; E "hunter hit -20% CD" (running from the cast) | press; E cut on hit | match |
+| Vex | Shift | hold = longer dash on a longer CD | press, the hold takes 0.4 of a charge more at 0.18 s | match |
+| Zedran | RMB | air slam is its own 9 s slot | `spend_air`, own slot; lunge doubles if nothing is struck | match |
+| Zedran | E | wiki 07.01.25: starts on the pull or when the chain breaks, not the throw | `start_e_cd` on pull, break, miss, stun | match, asserted |
+| Zedran | Shift | 3 charges, one at a time (footage) | float charges, one at a time | match |
+| Hem | RMB | hold, release; no overlay | spends at the release | no evidence, see "Suggestions" |
+| Hem | E, X | X "next 3 shots" | press; X on the cast (`archer.md`) | match |
+| Cinder | RMB, E, X | "+1 charge" rank, no overlay | press at the release of the aim hold; charges one at a time | no evidence |
+| Cinder | Shift | 2 charges | one at a time | match |
+| Pip | RMB | plain shot in the source | owner item 118: 1 s wind-up, spends at the throw | owner note |
+| Pip | E | "reactivate to throw the zone" | press; the throw does not touch it | no evidence |
+| Pip | X, Shift, air dash | air dash own slot (14 s) | cast; two slots | match |
+| Tarek | LMB | patch 2.01/2.04: Quake Punch cooldown starts at cast, not on release | **was on the release, now on the press** | fixed, asserted |
+| Tarek | RMB | hold, release | spends at the release | no evidence, see "Suggestions" |
+| Tarek | Shift | Landslide: one dash, no chain in the source | Rock Hop (owner item 111): spent on the press, recharge waits for the chain's end (`breah_hop`) | owner design |
+| Grimble | RMB | -50% CD on an enemy hit (running from the cast) | press, half off on a hit | match |
+| Grimble | E, X | press | press | match |
+| Grimble | Shift | ground and air dash separate slots | `dash.air.cd` own slot | match |
+| Claire | RMB | 2 charges, 12 s | `ch_rmb` 2, one at a time | match |
+| Claire | E, X | "recast to freeze"; "reactivate to cancel" | press; recast/cancel do not touch it | no evidence |
+| Claire | Shift | wiki: early release refunds part | press, refund on early release | match |
+| Ostra | RMB, E, X | E "reactivate to detonate" | press at the plant; pop does not touch it | no evidence |
+| Bjorn | RMB | aegis raise 0.1 s; Shield Bash own 6 s | raise free; Shield Charge spends the RMB slot's charge on the press | match |
+| Bjorn | E, X, Shift | press | press; Spin Dash charges separate | match |
+| Ryzz | Shift | footage: Surge starts on the press | spent on the press, a cancel keeps it spent | match, asserted |
+| Ryzz | RMB, E, X | spear hold-release; X "reactivate" | RMB at the release; E, X press | no evidence |
+| Sable | E | "refund 25% CD on terrain, 50% on a foe" (so it runs from the throw) | press at the throw, refund on hit | match |
+| Sable | RMB, Shift, X | Quickflip reset on shot | press | match |
+
+**Fixed (1).** Tarek's LMB Quake Punch: the cooldown (`lmb.boulder.rate`, 0.6 s, the card's value) now starts when the hold starts and the punch's own `rate` 0.7 is gone, so a long hold leaves no pause after the release (was 0.7 s). The boulder tap and the bot use the same start. Asserted in `--dolm-combo-check` ("cooldown: the punch's cooldown starts on the press").
+
+**Suggestions, not built (parity first, evidence is by analogy).**
+- Hold-and-release RMBs (Hem Heartpiercer, Ryzz Voltaic Spear, Tarek Volcano Crusher) may start on the press like Surge (footage) and the Punch (patch): a shared `ArchKit` rule would spend at the hold's start. Not built: no overlay shows these three, and a spend on the press needs a refund rule for a cancelled hold.
+- Every multi-charge dash card reads "0.4 s between uses" (`DASH_UI.md` for Brall's 3 charges; `pin.md` reads a 0.4 s card next to a 9.5 s real cooldown). Ours has no such floor beyond the dash's own length (Rampage 0.17 s plus 0.07 s wind-up). Likely a global minimum gap; not built, it touches every dash.
+- Our air dash is a second cooldown slot for every Hunter (`h.ex_cd`), and it also fires when the ground charges are out; the tooltips give a separate air slot only to Pip and Grimble. That is the air-dash rule (owner item 183, `ext/airdash-rule-audit`); left to that branch.
+- Rock Hop's "nothing recharges during the chain" is ours; the source's Landslide recharges from the press.

@@ -594,6 +594,23 @@ func _breah() -> void:
 		"data: a punch with no rock of yours in the lane gives no shield",
 		K.guard_punches == gp0 and K.shield_stacks == 0 and P.shield < 0.5, "shield %.1f" % P.shield
 	)
+	# the Quake Punch cooldown starts on the press (patch 2.01), so a long hold leaves none after the release
+	reset.call()
+	T.teleport(home + Vector3(2.4, 0, 0))
+	aim_at(P, T.pos)
+	P.fire_cd = 0.0
+	var pun0 := K.punches
+	P.inp["fire"] = true
+	step(m, 0.05, func(): P.inp["fire"] = true)
+	var cd_on_press := P.fire_cd
+	step(m, 0.9, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	step(m, 0.05)
+	ok(
+		"cooldown: the punch's cooldown starts on the press, none left after a long hold",
+		cd_on_press > 0.4 and K.punches == pun0 + 1 and P.fire_cd <= 0.001,
+		"press %.2f after %.2f punches %d" % [cd_on_press, P.fire_cd, K.punches - pun0]
+	)
 	# ---- Rock Hop (item 111): the rocks, the chain, the crash, the rock rolling on
 	await _leap(m, P, T, home, K, reset)
 	# the base dash (in the air): her own heavy shove move
