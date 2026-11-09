@@ -12,6 +12,9 @@ extends RefCounted
 const SHOULDER_Y := 1.45      # m above the hunter's feet when their rig has no shoulder bone
 const ORBIT_R := 0.6          # m from the hunter's middle
 const ORBIT_HZ := 0.35        # laps per second: quick enough to read as alive, slow enough to read as a shape
+const SUMMON_KEY := KEY_F8    # debug builds: burst the own Boki out of its wisp, and again to fold it back
+
+static var _key_held := false
 
 ## Do this match's own Boki ride as wisps? The match opts win (a bench or check sets them), then the
 ## setting. Never in the tutorial: it teaches the walking Boki's orders.
@@ -30,6 +33,9 @@ static func set_wisp(k: Kin, on: bool) -> void:
 	if k.wisp == on:
 		return
 	k.wisp = on
+	var pop := k.get_node_or_null("Pop")
+	if pop:
+		pop.free()
 	k.remove_meta("xr")        # (the walking model's x-ray shell is set up again on the new model)
 	if k.model:
 		k.remove_child(k.model)       # (out of the tree now, so the new model keeps its name; set_model frees it)
@@ -50,6 +56,7 @@ static func ride(k: Kin) -> bool:
 		k.stow()
 	if k.state != "shoulder":
 		return false
+	_summon_key(k)
 	k.pos = k.owner_h.pos + Vector3(0, 1.5, 0)
 	k.prev = k.pos
 	return true
@@ -71,3 +78,32 @@ static func render(k: Kin) -> bool:
 	k.model.scale = Vector3.ONE
 	BokiWispLook.pose(k.model, k.m.time)
 	return true
+
+## Debug (F8 in a debug build): the player's own Boki bursts out of its wisp (BokiWispPop), and folds back on
+## the next press. It stands on the ground under its orbit spot; the summon itself waits on WISP_DESIGN_OPEN.md.
+static func _summon_key(k: Kin) -> void:
+	if not OS.is_debug_build() or k.remote or k.owner_h != k.m.player:
+		return
+	var down := Input.is_physical_key_pressed(SUMMON_KEY)
+	var pressed := down and not _key_held
+	_key_held = down
+	if not pressed:
+		return
+	var pop := k.get_node_or_null("Pop") as BokiWispPop
+	if pop == null:
+		pop = BokiWispPop.new(k.species, k.rec)
+		pop.name = "Pop"
+		pop.finished.connect(_summoned.bind(k))
+		k.add_child(pop)
+		k.model.visible = false
+	pop.stand = Vector3(0, k.owner_h.position.y - k.global_position.y, 0)
+	pop.rotation.y = k.model.rotation.y
+	pop.play(not pop.out)
+
+## The fold ended: the plain wisp takes over again.
+static func _summoned(out: bool, k: Kin) -> void:
+	if not out:
+		var pop := k.get_node("Pop")
+		k.remove_child(pop)
+		pop.queue_free()
+		k.model.visible = true

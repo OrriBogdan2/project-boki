@@ -17,9 +17,13 @@ numbers (Q1), one summon at a time (Q3), damage never ending it but death doing 
 Option 2. `content/rules/boki_summon.json` holds the role x size table (window, cooldown) and the uptime band;
 every species takes its cell (no per-species override until one is needed). Summon: the kin bursts beside you
 whole, on its normal AI and orders, leash 10 m (+-2 m by aggression), re-blooming beside you past 20 m.
-Damage never ends it; a knock-down turns it back into a wisp with x1.25 cooldown. The window ends in a 0.35 s
-shrink; Summon while out sends it back early (full cooldown). The wisp is dim with no sparkles while resting;
+Damage never ends it; a knock-down turns it back into a wisp with x1.25 cooldown. The window ends in a 0.25 s
+fold; Summon while out sends it back early (full cooldown). The wisp is dim with no sparkles while resting;
 a ring and the seconds (or the Summon key) sit on the right-side Boki box (BokiHud.summon_ring).
+The look both ways is BokiWispPop (ext/wisp-summon-pop): the wisp swells and the Boki grows out of it, squashes on
+landing and opens its eyes last; the fold shuts the eyes, shrinks the Boki into the wisp and zips it to the
+shoulder. Soft light only: the bloom's spark burst and ground ring and the knock-down's spark burst are gone
+(DECISIONS: explosions only for things that truly explode).
 Left out on purpose: guardian summon, stealing, the reveal on a killed summon, bots summoning, mounts.
 
 ## Consequences
