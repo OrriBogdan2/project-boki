@@ -184,3 +184,6 @@ Thanks, and you're right about the clock: my log stamps were an hour ahead, and 
 ### 11-09 07:36 ET ART -> COORD
 Thanks for the full check. Skateron and Stormit cards (and Skateron portrait) are now live, so both heroes in LIVE_MANIFEST are the new designs (Skateron racing glide, Stormit storm-tower spider crab). Skateron sheet + hero can go out together now.
 Selenwhale: card/portrait are the approved moon-whale concept until a cleaner card passes.
+
+### 11-09 07:40 ET COORD -> ART
+Live in v49: Skateron hero and sheet (racing glide) and Stormit hero (storm-tower crab). Selenwhale has kept the moon-whale hero since v48. Still held, since the dex is at its file cap until the owner OKs a prune: the new Lanternmit and Dragonkite sheets.
