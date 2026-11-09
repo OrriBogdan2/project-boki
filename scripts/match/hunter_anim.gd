@@ -830,7 +830,7 @@ func update(dt: float, s: Dictionary) -> void:
 		hl = lerpf(hl, 1.35, revive_k); kl = lerpf(kl, -1.45, revive_k)
 		hr = lerpf(hr, -0.15, revive_k); kr = lerpf(kr, -1.9, revive_k)
 	# holding interact: kneel, squat, brace or stand to it (see _act_legs)
-	if act_k > 0.01:
+	if act_k > 0.01 and act_kind != "carry" and act_kind != "pack":
 		var al := _act_legs()
 		hl = lerpf(hl, al.x, act_k); kl = lerpf(kl, al.y, act_k)
 		hr = lerpf(hr, al.z, act_k); kr = lerpf(kr, al.w, act_k)
@@ -1702,11 +1702,13 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 ##   loot     crouched over a deathbox, rummaging
 ##   rune     both palms on the stone
 ##   offer    down on one knee, both hands held out together at the chest (the prologue's relic)
+##   carry, pack   a Boki held against the chest, or on the back (home): both keep the walk cycle
 ##   chop, mine, build   a tool swing (HunterTool): the weapon put away, the tool in both hands (one for the hammer)
 const ACT_KNEEL := ["scan", "revive", "key", "loot", "offer"]
 func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 	var want := String(s.get("act", ""))
-	if not grounded or spd > 2.2 or s.get("downed", false) or float(s.get("stomp", -1.0)) >= 0.0:
+	var carrying := want == "carry" or want == "pack"
+	if not grounded or (spd > 2.2 and not carrying) or s.get("downed", false) or float(s.get("stomp", -1.0)) >= 0.0:
 		want = ""
 	if want != "" and want != act_kind:
 		act_kind = want
@@ -1753,6 +1755,7 @@ func _act_pitch() -> float:
 		"lever": return -0.15 - 0.15 * (0.5 - 0.5 * cos(act_t * 2.6))
 		"windup": return -0.15 * smoothstep(0.0, 0.6, act_t)
 		"beacon": return -0.12
+		"pack": return 0.22
 	return 0.0
 
 ## Where the hands go: [left hand, right hand, how much the right hand lets go of the weapon].
@@ -1796,6 +1799,10 @@ func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
 			return [sh_l + Vector3(0.12, -0.06, -0.42), sh_r + Vector3(-0.12, -0.06, -0.42), 1.0]
 		"offer":
 			return [sh_l + Vector3(0.1, -0.1, -0.36), sh_r + Vector3(-0.1, -0.1, -0.36), 1.0]
+		"carry":
+			return [sh_l + Vector3(0.12, -0.36, -0.34), sh_r + Vector3(-0.12, -0.36, -0.34), 1.0]
+		"pack":
+			return [sh_l + Vector3(0.1, -0.46, 0.14), sh_r + Vector3(-0.1, -0.46, 0.14), 1.0]
 	return [sh_l, sh_r, 0.0]
 
 ## A support hand that can't reach its grip slides back along the weapon toward the trigger hand.
