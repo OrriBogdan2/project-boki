@@ -18,6 +18,14 @@ var anim := 0.0
 var dmg_mult := 1.0
 var calm_t := 0.0
 var death_t := 0.0
+## The leash: a camp monster LEASH_M from its camp drops the fight, walks home at full speed paying
+## nobody any mind (homing) and is back to full health when it gets there.
+const AGGRO_M := 7.5         # m: an idle monster notices a Hunter this close
+const CHASE_M := 11.0        # m: a fighting monster switches to anyone this close to it
+const LEASH_M := 13.0        # m from its camp: past this it gives up the chase
+const HOME_M := 1.0          # m from its camp: home again, healed
+const HOME_T := 6.0          # s: the longest walk home (a void in the way); then it heals where it stands
+var homing := false
 ## Stagger, as in Supervive: elites and bosses open short "staggerable" windows (a purple ring),
 ## always while winding up a slam. Land an ability in one (not a regular shot) and it takes a big
 ## hit, is stunned for a few seconds, takes extra damage the whole time, and the ability that did
@@ -90,7 +98,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		var real: Ent = by
 		if by is Kin and by.state != "active" and by.owner_h:
 			real = by.owner_h
-		if tgt == null or randf() < 0.4:
+		if not homing and (tgt == null or randf() < 0.4):
 			tgt = real
 			if st == "idle":
 				st = "chase"
@@ -139,7 +147,7 @@ func _engaged_on(t: Ent) -> int:
 	return n
 
 func _find_target() -> Ent:
-	var best: Ent = null; var bd := 7.5 if st == "idle" else 11.0
+	var best: Ent = null; var bd := AGGRO_M if st == "idle" else CHASE_M
 	for h in m.hunters:
 		if not h.targetable() or m.demo_shielded(h):
 			continue
@@ -186,19 +194,14 @@ func sim(dt: float) -> void:
 	var wish := Vector2.ZERO
 	match st:
 		"idle":
-			if randf() < dt * 2.0:
-				tgt = _find_target()
-				if tgt:
-					st = "chase"
-			if wander == Vector3.INF or flat_dist(wander) < 0.4 or randf() < dt * 0.2:
-				var a := randf() * TAU
-				var q := camp + Vector3(cos(a), 0, sin(a)) * randf_range(0.5, 3.0)
-				if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
-					wander = q
-			if wander != Vector3.INF:
-				wish = dir_to(wander) * spd * 0.3
+			if homing:
+				wish = _walk_home(spd)
+			else:
+				wish = _idle_wander(dt, spd)
 		"chase":
-			if tgt == null or tgt.dead or not tgt.hittable() or (tgt is Hunter and not tgt.targetable()) or m.demo_shielded(tgt) or flat_dist(camp) > 13.0:
+			if flat_dist(camp) > LEASH_M and not md.get("flee", false):
+				_leash_home()
+			elif tgt == null or tgt.dead or not tgt.hittable() or (tgt is Hunter and not tgt.targetable()) or m.demo_shielded(tgt) or flat_dist(camp) > LEASH_M:
 				tgt = _find_target()
 				engaged = false
 				if tgt == null:
@@ -278,7 +281,7 @@ const NAP_M := 36.0          # m: anyone this close keeps it awake (beyond the m
 const NAP_CHECK := 0.5       # s between its looks around while asleep
 var _nap := 0.0
 func _napping(dt: float) -> bool:
-	if st != "idle" or not grounded or tgt != null or md.get("flee", false):
+	if st != "idle" or homing or not grounded or tgt != null or md.get("flee", false):
 		_nap = 0.0
 		return false
 	if _nap > 0.0:
@@ -292,6 +295,37 @@ func _napping(dt: float) -> bool:
 			return false
 	_nap = NAP_CHECK
 	return true
+
+## Looks around now and then, and ambles about its camp. Returns the wish velocity.
+func _idle_wander(dt: float, spd: float) -> Vector2:
+	if randf() < dt * 2.0:
+		tgt = _find_target()
+		if tgt:
+			st = "chase"
+	if wander == Vector3.INF or flat_dist(wander) < 0.4 or randf() < dt * 0.2:
+		var a := randf() * TAU
+		var q := camp + Vector3(cos(a), 0, sin(a)) * randf_range(0.5, 3.0)
+		if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
+			wander = q
+	if wander != Vector3.INF:
+		return dir_to(wander) * spd * 0.3
+	return Vector2.ZERO
+
+func _leash_home() -> void:
+	tgt = null
+	engaged = false
+	st = "idle"
+	wander = Vector3.INF
+	homing = true
+	st_t = HOME_T
+
+## Straight home at full speed; healed on arrival.
+func _walk_home(spd: float) -> Vector2:
+	if flat_dist(camp) < HOME_M or st_t <= 0.0:
+		homing = false
+		hp = max_hp
+		return Vector2.ZERO
+	return dir_to(camp) * spd
 
 func _begin_attack() -> void:
 	st = "windup"

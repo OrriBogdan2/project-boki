@@ -6,6 +6,7 @@ extends RefCounted
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-hunters=6] (in squads of 2)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -16,6 +17,7 @@ const MOBS := ["skitter", "brute", "spitter", "skitter", "bomber", "skitter"]
 var main: Node
 var secs := 60.0
 var farm_secs := 20.0
+var hunters := 6
 var out_path := ""
 var rows := PackedStringArray()
 var hud_us := 0
@@ -29,6 +31,7 @@ func run(main_node: Node) -> void:
 		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
+		if a.begins_with("--bench-hunters="): hunters = int(a.substr(16))
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = VIEW
@@ -47,7 +50,8 @@ func run(main_node: Node) -> void:
 
 func _match() -> void:
 	var o := Match.demo_opts()
-	o.merge({"teams": 3, "squad": 2, "total": 6, "raid": "ash", "blight": true, "no_drop": true, "god": true,
+	var teams := ceili(hunters / 2.0)
+	o.merge({"teams": teams, "squad": 2, "total": hunters, "raid": "ash", "blight": true, "no_drop": true, "god": true,
 		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
