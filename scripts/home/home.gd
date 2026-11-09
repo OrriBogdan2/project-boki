@@ -4417,14 +4417,7 @@ func _train_label() -> void:
 func _draw_train() -> void:
 	if train.is_empty() or not is_instance_valid(train_draw):
 		return
-	var w := train_draw.size.x
-	var h := train_draw.size.y
-	train_draw.draw_rect(Rect2(0, h * 0.3, w, h * 0.4), Color(1, 1, 1, 0.1))
-	var z: float = train["zone"]
-	train_draw.draw_rect(Rect2(w * (z - 0.16), h * 0.3, w * 0.32, h * 0.4), Color(UI.ACCENT, 0.45))
-	train_draw.draw_rect(Rect2(w * (z - 0.06), h * 0.2, w * 0.12, h * 0.6), UI.GOLD)
-	var mx := w * float(train["m"])
-	train_draw.draw_rect(Rect2(mx - 3, 0, 6, h), UI.INK)
+	TimingDrill.draw(train_draw, train)
 
 func _train_process(d: float) -> void:
 	if train.is_empty():
@@ -4434,17 +4427,13 @@ func _train_process(d: float) -> void:
 		if float(train["wait"]) <= 0.0 and int(train["round"]) >= 3:
 			_finish_training()
 		return
-	var m := float(train["m"]) + float(train["dir"]) * float(train["speed"]) * d
-	if m > 1.0: m = 2.0 - m; train["dir"] = -1.0
-	if m < 0.0: m = -m; train["dir"] = 1.0
-	train["m"] = m
+	TimingDrill.sweep(train, d)
 	if is_instance_valid(train_draw): train_draw.queue_redraw()
 
 func _train_hit() -> void:
 	if train.is_empty() or float(train["wait"]) > 0.0:
 		return
-	var off := absf(float(train["m"]) - float(train["zone"]))
-	var r := "great" if off < 0.06 else ("good" if off < 0.16 else "miss")
+	var r := TimingDrill.grade(train)
 	train["results"].append(r)
 	train["round"] = int(train["round"]) + 1
 	train["wait"] = 1.1
