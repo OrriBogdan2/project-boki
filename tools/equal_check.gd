@@ -67,7 +67,7 @@ func _start(tier: int, seed := 9001) -> Match:
 	return m
 
 func _look(P: Hunter) -> Dictionary:
-	return {"max_hp": P.max_hp, "max_armor": P.max_armor, "armor": P.armor, "base_armor": P.base_armor,
+	return {"max_hp": P.max_hp, "max_armor": P.max_armor, "armor": P.armor,
 		"tier": P.armor_tier, "perks": P.perks.duplicate(),
 		"glide": P.glide_max, "pack": P.pack_cap, "speed": P.base_speed,
 		"armor_gear": (P.gear[2] as Dictionary).is_empty(), "dashes": P.max_dashes(),
@@ -326,10 +326,11 @@ func _armor_levels() -> void:
 	ok(not ArmorHud.tip(P).is_empty() and String(ArmorHud.tip(P)[2][0]).begins_with("Next"),
 			"the HUD tip names the next level")
 	for i in 3: B.hurt(100.0, P, {"src": "shot"})
-	ok(P.armor_tier >= 1 and P.max_armor > base,
-			"enough damage levels your armor up: more plates (%.0f -> %.0f)" % [base, P.max_armor])
-	ok(is_equal_approx(P.max_armor, round(P.base_armor * (1.0 + Hunter.ARMOR_TIER_BONUS * P.armor_tier))),
-			"each level adds %d%% of the base armor" % int(Hunter.ARMOR_TIER_BONUS * 100.0))
+	ok(P.armor_tier >= 1 and float(Hunter.ARMOR_TIERS[P.armor_tier][3]) > float(Hunter.ARMOR_TIERS[0][3]),
+			"enough damage levels your armor up: it blocks more (tier %d)" % P.armor_tier)
+	var tier_dur := float(Hunter.ARMOR_TIERS[P.armor_tier][4]) - float(Hunter.ARMOR_TIERS[0][4])
+	ok(is_equal_approx(P.max_armor - base, tier_dur),
+			"its durability is the tier's (%.0f -> %.0f; --armour-check holds the numbers)" % [base, P.max_armor])
 	ok(B.armor_tier == 0, "the one who was hit does not level")
 	var xp0 := P.armor_xp
 	var mob: Mob = m.spawn_mob("skitter", P.pos + Vector3(3, 0, 0))
