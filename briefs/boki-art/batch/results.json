@@ -8403,5 +8403,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/geysirbara_r2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "gongibbon_f2",
+    "name": "Gongibbon (female)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gongibbon_f2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciatee_r",
+    "name": "Glaciatee",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glaciatee_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaivyx_r2",
+    "name": "Glaivyx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glaivyx_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop_e",
+    "name": "Howlop",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/howlop_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_r",
+    "name": "Jibbatross",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/jibbatross_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kestrike_f_e",
+    "name": "Kestrike (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kestrike_f_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_r",
+    "name": "Jibbatross",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/jibbatross_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kestrike_f_e",
+    "name": "Kestrike (female)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/kestrike_f_e_3.jpg",
+    "ok": true
   }
 ]
