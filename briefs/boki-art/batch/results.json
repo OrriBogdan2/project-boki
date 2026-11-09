@@ -50263,5 +50263,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_terrarimit_pz_2.jpg",
     "ok": true
+  },
+  {
+    "id": "dreadnoyak_cardz",
+    "name": "Dreadnoyak (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_cardz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dragonkite_cardz",
+    "name": "Dragonkite (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/dragonkite_cardz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadnoyak_cardz",
+    "name": "Dreadnoyak (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_cardz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole_cardz",
+    "name": "Geodemole (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodemole_cardz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole_cardz",
+    "name": "Geodemole (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/geodemole_cardz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadnoyak_cardz",
+    "name": "Dreadnoyak (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_cardz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole_cardz",
+    "name": "Geodemole (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodemole_cardz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternmit_cardz",
+    "name": "Lanternmit (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lanternmit_cardz_3.jpg",
+    "ok": true
   }
 ]
