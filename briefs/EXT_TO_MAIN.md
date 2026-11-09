@@ -5476,3 +5476,4 @@ READY ext/recast-buffer-expired 83bed4bc3 (E/X recast presses buffered 0.15s in 
 READY ext/anim-prop-handoff 98b984dd5 (thrown prop hand-off)
 READY ext/garden-base-mode 08480be92 (GARDEN.md 8 and 9.5: farm_build.json base_mode, default off; on = build tabs Buildings/Garden/Island only, no axe/pickaxe, no wild/station/haul jobs (plot, mend, incubator chores stay), no Exchange or Sell tab; home_trade.gd untouched, it sells no crops; tab still labelled Buildings until the Base cat exists; --farm-tutorial-check gains a base_mode section 0 fail, --farmbuild 0 fail, health --strict OK, gen_wiki --check OK; +52/-6, built on main)
 READY ext/remote-anim-check faf7ebfe3 (remote anim parity)
+READY ext/hero-docs-sync-b 03f75a8fd (docs/heroes mage, dredge, tender, thief, archer, ostra synced to data and kits)
