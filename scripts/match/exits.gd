@@ -377,6 +377,7 @@ func _tick_dock(x: Dictionary, dt: float) -> void:
 			x["t"] = float(x["t"]) - dt
 			_waves(x, dt)
 			var t := float(x["t"])
+			ExitSfx.countdown(m, x, berth, t)
 			if t < APPROACH_T:
 				# in sight: flying in from out over the abyss, settling onto the pier
 				var k := 1.0 - t / APPROACH_T
@@ -401,7 +402,8 @@ func _tick_dock(x: Dictionary, dt: float) -> void:
 					ab.append(h)
 			x["aboard"] = ab
 			var bt := float(x["t"])
-			WarnSfx.countdown(m, x, berth, bt)
+			ExitSfx.countdown(m, x, berth, bt)
+			ExitSfx.boarding(m, x)
 			if bt < 3.0 and bt + dt >= 3.0:
 				m.sfx("horn", berth, -4.0, 1.3)
 			if bt <= 0.0:
@@ -445,6 +447,7 @@ func _arrive(x: Dictionary) -> void:
 			m.hud.toast("The skiff is in! Get on its deck", ExitModels.DOCK)
 
 func _depart(x: Dictionary) -> void:
+	ExitSfx.depart(m, x)
 	var n := 0
 	for h in m.hunters:
 		if _live(h) and on_deck(x, h) and not h.remote:
@@ -613,7 +616,7 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 		"open":
 			x["t"] = float(x["t"]) - dt
 			var p: Vector3 = x["pos"]
-			WarnSfx.countdown(m, x, p, float(x["t"]))
+			ExitSfx.countdown(m, x, p, float(x["t"]))
 			for h in m.hunters:
 				if _live(h) and not h.remote and h.flat_dist(p) < LIFT_R and absf(h.pos.y - p.y) < 1.5:
 					m._extract(h, "uplink", x["name"])

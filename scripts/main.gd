@@ -2067,6 +2067,8 @@ func _extract_check() -> void:
 	P.teleport(d["pos"] + Vector3(0.3, 0, 0.3))
 	var t0 := m.time
 	var pings_before := m.pings.size()
+	ExitSfx.record = true
+	ExitSfx.heard.clear()
 	run.call(m, 2.5, func(): P.inp["interact"] = true)
 	P.inp["interact"] = false
 	var flare: bool = (d["node"] as Node3D).get_node("Beacon/Flare").visible
@@ -2090,8 +2092,12 @@ func _extract_check() -> void:
 	print("EXCHECK skiff: state=%s (boarding %.0fs) player %.1fm from the berth (y %.2f vs %.2f) downed=%s out=%s" % [d["state"], float(d["t"]), P.flat_dist(d["berth"]), P.pos.y, d["berth"].y, P.downed, P.out])
 	run.call(m, 1.0, calm.bind(m))
 	print("EXCHECK skiff: aboard=%s" % str((d["aboard"] as Array).map(func(x): return x.pname)))
+	P.teleport(d["berth"] + Vector3(6, 0, 0)); P.set_meta("pin", P.pos)      # step off the deck: boarding breaks
+	run.call(m, 0.2, calm.bind(m))
+	P.teleport(d["berth"]); P.set_meta("pin", P.pos)
 	while d["state"] == "boarding" and m.time - t0 < 100.0: run.call(m, Match.DT, calm.bind(m))
 	print("EXCHECK skiff: left. player extracted=%s how=%s where=%s  rival extracted=%s  mate (on the pier) extracted=%s" % [P.extracted, m.result.get("how", ""), m.result.get("where", ""), R.extracted, mate.extracted])
+	ok = ExitSfxCheck.verify(m, d["berth"], R) and ok
 	if not P.extracted or m.result.get("how", "") != "skiff" or not R.extracted or mate.extracted: ok = false; print("EXCHECK FAIL skiff boarding")
 	done.call(m)
 	await get_tree().process_frame

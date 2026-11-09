@@ -18,7 +18,8 @@ const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full s
 
 ## Sound -> the scripts that must play it (a sound that exists but is never played is silence).
 const WIRED := {
-	"warn_heartbeat": ["match/warn_sfx.gd"], "warn_tick": ["match/warn_sfx.gd"],
+	"warn_heartbeat": ["match/warn_sfx.gd"], "warn_tick": ["match/exit_sfx.gd"],
+	"board_hum": ["match/exit_sfx.gd"], "board_cancel": ["match/exit_sfx.gd"], "depart_sting": ["match/exit_sfx.gd"],
 	"blight_rumble": ["match/blight.gd", "match/blight_dir.gd"],
 	"boki_downed": ["match/kin_downed.gd", "match/kin_net.gd"],
 	"boki_revive": ["match/kin_downed.gd", "match/kin_net.gd"],
@@ -154,8 +155,8 @@ func _wired() -> void:
 			if not FileAccess.get_file_as_string("res://scripts/" + String(f)).contains('"%s"' % sname):
 				unplayed.append("%s not in %s" % [sname, f])
 	ok(unplayed.is_empty(), "%d warning and Boki sounds are wired %s" % [WIRED.size(), unplayed])
-	ok(WarnSfx.LOW_HP > 0.0 and WarnSfx.LOW_HP <= 0.3 and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x and WarnSfx.COUNT_S == 5,
-		"the heartbeat is under 30% health, quicker as health falls; the countdown is the last 5 s")
+	ok(WarnSfx.LOW_HP > 0.0 and WarnSfx.LOW_HP <= 0.3 and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x and ExitSfx.COUNT_S == 10,
+		"the heartbeat is under 30% health, quicker as health falls; the exit countdown is the last 10 s")
 	_warn_behaviour()
 
 ## The heartbeat starts under LOW_HP, and is silent when healed, downed or at full health.
