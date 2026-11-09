@@ -33092,5 +33092,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/bladypus_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "clinkpede_card",
+    "name": "Clinkpede (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/clinkpede_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "bullsfrog_card",
+    "name": "Bullsfrog (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bullsfrog_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "clinkpede_card",
+    "name": "Clinkpede (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/clinkpede_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bullsfrog_card",
+    "name": "Bullsfrog (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bullsfrog_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fawngus_card",
+    "name": "Fawngus (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fawngus_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciammoth_card",
+    "name": "Glaciammoth (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glaciammoth_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fawngus_card",
+    "name": "Fawngus (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fawngus_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciammoth_card",
+    "name": "Glaciammoth (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glaciammoth_card_2.jpg",
+    "ok": true
   }
 ]
