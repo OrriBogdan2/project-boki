@@ -10,8 +10,12 @@ const MAX_STEPS := 90
 const CROP := Vector2i(300, 220) # px round the screen centre, shown 2x
 const NAMES := ["armour", "body", "boki", "monster", "wall"]
 
+const AimkitShots := preload("res://tools/aimkit_shots.gd")
+
 var m: Match
 var main: Node
+var home := Vector3.ZERO
+var last: Ent                    # the previous target, moved out of the line of fire before the next
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -33,6 +37,7 @@ func run(main_node: Node) -> void:
 		await main.fade.reveal(0.01)
 	if m.hud:
 		m.hud.visible = false
+	home = AimkitShots.open_stretch(m.world, m.player.pos)
 	var crops: Array = []
 	for cls in NAMES:
 		crops.append(await _shot(cls))
@@ -53,6 +58,8 @@ func _step(n: int) -> void:
 
 func _target(cls: String, spot: Vector3) -> Vector3:
 	var P := m.player
+	if last != null:
+		last.teleport(home + Vector3(-30, 0, 30))
 	if cls == "wall":
 		m.verbs.add_wall(P, spot, Vector2(1, 0), {"length": 6.0, "block": "all", "hp": 9999.0, "time": 30.0}, 1.0)
 		return spot + Vector3(0, 1.0, 0)
@@ -60,6 +67,7 @@ func _target(cls: String, spot: Vector3) -> Vector3:
 		var mb := m.spawn_mob("sentinel", spot)
 		mb.hp = 1e6
 		mb.max_hp = 1e6
+		last = mb
 		await _step(2)
 		return mb.pos + Vector3(0, 0.8, 0)
 	var rec := {} if cls != "boki" else Save.new_kin("cindle", "Spare", 5)
@@ -67,6 +75,7 @@ func _target(cls: String, spot: Vector3) -> Vector3:
 	t.hp = 1e6
 	t.max_hp = 1e6
 	t.armor = 80.0 if cls == "armour" else 0.0
+	last = t
 	await _step(40)           # (a Boki walks to its owner's side first)
 	if cls == "boki":
 		return t.kin.pos + Vector3(0, 0.7, 0)
@@ -74,8 +83,10 @@ func _target(cls: String, spot: Vector3) -> Vector3:
 
 func _shot(cls: String) -> Image:
 	var P := m.player
-	var spot := P.pos + Vector3(RANGE, 0, 0)
-	var at: Vector3 = await _target(cls, spot)
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	var at: Vector3 = await _target(cls, home + Vector3(RANGE, 0, 0))
+	P.teleport(home)
 	P.inp["aim"] = at
 	P.inp["aim_y"] = at.y
 	P.face = atan2(-(at.x - P.pos.x), -(at.z - P.pos.z))
