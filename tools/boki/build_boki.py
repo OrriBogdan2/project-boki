@@ -41,7 +41,8 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "marchleaf": ("marchleaf", "marchleaf", "marchleaf_anim"),
          "mossgrade": ("mossgrade", "mossgrade", "mossgrade_anim"),
          "nettlynx": ("nettlynx", "nettlynx", "nettlynx_anim"),
-         "thrumbird": ("thrumbird", "thrumbird", "thrumbird_anim")}
+         "thrumbird": ("thrumbird", "thrumbird", "thrumbird_anim"),
+         "lilybara": ("soakybara", "soakybara", "soakybara_anim")}
 creature = paint = anim = None
 ATLAS_PX = 2048
 GROWN_K = 0.22         # most Boki show one or two grown parts; all of them hide in every tri count
@@ -102,9 +103,12 @@ class Piece:
 def mesh_pieces():
     out = []
     for name, (shape, h, tris) in creature.parts().items():
-        v, q = boki_sdf.mesh_shape(shape, h)
-        v, t = decimated(v, q, tris)
-        v = shape.project(v, steps=2)
+        if hasattr(shape, "mesh"):       # a body from a scanned model, already on its surface
+            v, t = shape.mesh(tris)
+        else:
+            v, q = boki_sdf.mesh_shape(shape, h)
+            v, t = decimated(v, q, tris)
+            v = shape.project(v, steps=2)
         slot = 2 if name in getattr(creature, "LIT_PIECES", ()) else 1 if name in creature.GLOW_PIECES else 0
         out.append(Piece(name, shape, v, t, slot))
         print("piece", name, len(v), len(t))
