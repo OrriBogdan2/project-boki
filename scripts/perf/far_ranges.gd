@@ -10,16 +10,16 @@ extends RefCounted
 const SMALL := 130.0         # m at High: grass, flowers, pebbles (x Settings q("draw"))
 const BUSH := 160.0          # m at High: tall grass and undergrowth (x q("draw"))
 const FADE := 10.0           # m a batch takes to dither out (or in)
-const FAR_CHUNK := 48        # tiles: the far cliff version batches over blocks this wide
+const FAR_CHUNK := 96        # tiles: the far cliff version batches over blocks this wide
 const MIN_LOD_TRIS := 240    # a mesh under this has nothing to simplify
 const BIG_CLASSES := ["tree", "rock", "cliff"]
 ## Per preset, in metres from the camera, 0 = never dropped. `near`: where cliffs swap to the far version.
 const BIG := {
 	"ultra": {"tree": 0.0, "rock": 0.0, "cliff": 0.0, "near": 220.0},
 	"high": {"tree": 0.0, "rock": 0.0, "cliff": 0.0, "near": 170.0},
-	"medium": {"tree": 200.0, "rock": 170.0, "cliff": 300.0, "near": 130.0},
-	"low": {"tree": 150.0, "rock": 130.0, "cliff": 230.0, "near": 100.0},
-	"very_low": {"tree": 110.0, "rock": 95.0, "cliff": 170.0, "near": 70.0},
+	"medium": {"tree": 175.0, "rock": 160.0, "cliff": 210.0, "near": 130.0},
+	"low": {"tree": 130.0, "rock": 115.0, "cliff": 150.0, "near": 100.0},
+	"very_low": {"tree": 100.0, "rock": 85.0, "cliff": 115.0, "near": 70.0},
 }
 
 ## The class of one scatter batch: its group's "far" hint ("tree", "rock" or "cliff"), or the name.

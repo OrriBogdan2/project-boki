@@ -40,8 +40,13 @@ func _preset(p: String, shots: String) -> void:
 	main.add_child(w)
 	w.generate_authored(World.load_layout(World.layout_for_tier(0)), 9)
 	await w.build_meshes()
+	var sv := SubViewport.new()      # the title screen owns the main viewport, so look through our own
+	sv.size = Vector2i(1280, 720)
+	sv.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	main.add_child(sv)
+	main.get_viewport().disable_3d = true
 	var cam := Camera3D.new()
-	main.add_child(cam)
+	sv.add_child(cam)
 	cam.current = true
 	var mid := Vector3(w.w * 0.5, 0, w.h * 0.5)
 	for view in VIEWS:
@@ -54,8 +59,9 @@ func _preset(p: String, shots: String) -> void:
 		print("PERF farview %s %s: draws %d, tris %.0fk" % [p, view,
 			rs.get_rendering_info(rs.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME), rs.get_rendering_info(rs.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME) / 1000.0])
 		if shots != "":
-			main.get_viewport().get_texture().get_image().save_png("%s/%s_%s.png" % [shots, p, view])
-	cam.free()
+			sv.get_texture().get_image().save_png("%s/%s_%s.png" % [shots, p, view])
+	main.get_viewport().disable_3d = false
+	sv.free()
 	if ResourceLoader.exists("res://scripts/perf/far_ranges.gd"):
 		_asserts(p, w)
 	w.free()
