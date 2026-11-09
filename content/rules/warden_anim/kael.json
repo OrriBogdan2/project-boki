@@ -198,9 +198,9 @@
 			0.8
 		]
 	],
+	"mantle": {"clip": "mantle", "rise": 0.421},
 	"procedural": [
 		"ledge",
-		"mantle",
 		"stomp",
 		"base",
 		"drink"

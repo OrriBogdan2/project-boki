@@ -22,6 +22,8 @@ const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-
 const FADE := 0.1            # s: one clip into the next, and into or out of an action
 const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
+const MANTLE_FADE := 0.05    # s: into a ledge rise (a low ledge is over in ~0.1 s)
+const MANTLE_DONE := 0.8     # a rise that got this far up the face went over the lip (its vault plays out)
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
@@ -59,6 +61,8 @@ var stance_w := 0.0
 var was_air := false
 var air_t := 0.0
 var land_t := 99.0
+var mantle_t := 99.0          # s since a ledge rise ended (the clip's vault plays on in real time)
+var mantle_seen := 0.0       # how far up the face the last rise got
 var hit_seen := 99.0
 var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
@@ -323,6 +327,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
+	var ma := _mantle(s, dt)
+	if not ma.is_empty():
+		return ma
 	if bool(s.get("reviving", false)) and st.has("reviving"):
 		return {"clip": st["reviving"], "t": -1.0}
 	if bool(s.get("stun", false)) and st.has("stun"):
@@ -340,6 +347,25 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		var dir: Vector2 = s.get("hit_dir", Vector2.ZERO)
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "upper": true}
+	return {}
+
+## The data's "mantle" ({clip, rise: the share of the clip the climb covers}): the climb's time is how far up the face
+## the hunter is, so the motion can't lag the body; once over the lip the rest of the clip (the vault, the landing)
+## runs in real time.
+func _mantle(s: Dictionary, dt: float) -> Dictionary:
+	var md: Dictionary = d.get("mantle", {})
+	if md.is_empty():
+		return {}
+	var length := lib.get_animation(String(md["clip"])).length - 0.001
+	var rise := float(s.get("mantle", -1.0))
+	if rise >= 0.0:
+		mantle_seen = rise
+		mantle_t = 0.0
+		return {"clip": md["clip"], "t": rise * length * float(md["rise"]), "fade": MANTLE_FADE}
+	if mantle_seen >= MANTLE_DONE and mantle_t < length * (1.0 - float(md["rise"])):
+		mantle_t += dt
+		return {"clip": md["clip"], "t": length * float(md["rise"]) + mantle_t, "fade": MANTLE_FADE}
+	mantle_seen = 0.0
 	return {}
 
 func step(dt: float) -> void:

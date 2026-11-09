@@ -17,6 +17,7 @@ sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, ang_dir as D, at, bake, eul, FPS
 import pip_sculpt as K
 import crouchkit
+import mantlekit
 from crouchkit import off
 
 A = K.ANKLE_Z
@@ -45,6 +46,15 @@ def C(name, dur, keys, loop=False, base=READY):
 
 
 END = {k: v for k, v in READY.items()}
+# the ledge climb (mantlekit): small and light: a scramble, ears flat and then flung up, a springy hop at the top with the wings fluttering, light on her toes
+MANTLE = {"az": A, "hx": SH, "dz": SZ - 1.072, "hands": {"LP": -1.0, "G": 1.0}, "w": 0.7, "nod": -0.04, "tail": 0.34, "extra": {
+    "reach": {"ear": -0.3, "brow": 0.5, "fing": 0.9, "wing": 0.3, "wfl": 0.16, "wb": 0.2},
+    "over": {"ear": -0.5, "brow": 0.7, "fing": 0.9, "wing": 0.25, "wfl": 0.14},
+    "step": {"ear": -0.2, "fing": 0.9, "wing": 0.2, "wfl": 0.12},
+    "up": {"ear": 0.4, "fing": 0.4, "wing": 0.3, "wfl": 0.14, "brow": -0.3},
+    "top": {"ear": 0.7, "wing": 0.45, "wfl": 0.2, "jaw": 0.3},
+    "pop": {"ear": 0.8, "wing": 0.5, "wfl": 0.24, "wb": 0.2, "brow": -0.6, "lid": -0.1, "jaw": 0.5, "skirt": 0.3},
+    "land": {"ear": 0.3, "wing": 0.1, "wfl": 0.06, "brow": -0.4, "jaw": 0.2, "skirt": 0.2}}}
 
 
 # ---- idle: the lantern held close, a slow breath; she checks the dark over her left shoulder, then her right, and takes a small breath of courage
@@ -210,6 +220,7 @@ def clips():
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sp, hd)))
 
+    out.append(mantlekit.clip(C, END, MANTLE))
     # Ember Cast, her lantern hand: pulled to the hip, the torso turned away; a straight push at the cursor on 0.08, the torso unwound past square
     r_w = {"pel": (0.0, -0.02, -0.05), "prt": (0.05, -0.28, 0), "tor": (0.08, -0.32, 0.03), "hed": (-0.08, 0.5, 0), "G": (SH + 0.08, -0.06, 0.76), "BE": be(),
            "LP": (-0.16, 0.26, 0.88), "Lh": (-1.2, 0.2, 0), "FL": (-0.12, 0.10, A), "FR": (0.13, -0.10, A), "brow": 0.4, "lid": -0.05, "ear": 0.15, "fing": 0.4, "skirt": 0.1}

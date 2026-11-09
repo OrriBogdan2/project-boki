@@ -11,6 +11,7 @@ const MAX_TRIS := 15000         # S1: weapon and shield included
 const GRIP_TOL := 0.03          # m: the weapon's bone stays this close to where the hand holds it
 const PREFIX := {"breaker": ["bulwark", "bul_"]}
 const SKIP := ["bul_smash_late"]
+const MANTLERS := ["gunslinger", "juggernaut", "ashwick", "tender"]    # Vex, Kael, Cinder, Meeko: their own ledge climb
 
 var bad := 0
 var holder: Node3D
@@ -27,6 +28,8 @@ func run(main: Node) -> void:
 	for art_name in PREFIX:
 		_hunter(String(art_name), String(PREFIX[art_name][0]), String(PREFIX[art_name][1]))
 	_companions()
+	for id in MANTLERS:
+		_mantle(String(id))
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -169,6 +172,45 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 
 ## Meeko's sun and raincloud (pip_v2 companions sheet): two atlas faces off her moods, all eight expressions reachable,
 ## the sun carrying her FX points.
+## A ledge rise plays the Hero's own climb clip: its time is how far up the face he is, the vault runs on in real time
+## after the lip, and the pose moves.
+func _mantle(id: String) -> void:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	holder.add_child(m)
+	var clips: WardenClips = (m.get_node("Warden/Sync") as WardenGlb.Sync).clips
+	var md: Dictionary = clips.d.get("mantle", {})
+	ok(clips.lib.has_animation(String(md.get("clip", ""))), "%s: a mantle clip is in the .glb" % id)
+	if md.is_empty():
+		m.free()
+		return
+	var length := clips.lib.get_animation(String(md["clip"])).length
+	var rise := float(md["rise"]) * length
+	var at := clips._pick({"mantle": 0.5}, DT)
+	var half := float(at.get("t", -1.0))
+	var on_time: bool = at.get("clip", "") == md["clip"] and absf(half - rise * 0.5) < 0.01
+	ok(on_time, "%s: halfway up the face is halfway through the climb (t %.3f of %.3f)" % [id, half, rise])
+	clips._pick({"mantle": 1.0}, DT)
+	var tail := 0.0
+	while clips._pick({"mantle": -1.0}, DT).get("clip", "") == md["clip"] and tail < 3.0:
+		tail += DT
+	var want := length - rise
+	ok(absf(tail - want) < 0.1, "%s: the vault after the lip lasts %.2f s of %.2f" % [id, tail, want])
+	ok(clips._pick({"mantle": -1.0}, DT).is_empty(), "%s: then the run takes over" % id)
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var an := HunterAnim.new(m)
+	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
+	var foot := WardenSkeleton.find(sk, "shin.R")
+	var st := {"vel": Vector3.ZERO, "face": 0.0, "grounded": false}
+	var lo := 0.0
+	var hi := 0.0
+	for k in [0.05, 0.3, 0.55, 0.8]:
+		_play(m, an, sync, st.merged({"mantle": k}), 12)
+		var p := sk.get_bone_global_pose(foot).origin
+		lo = minf(lo, p.y)
+		hi = maxf(hi, p.y)
+	ok(hi - lo > 0.15, "%s: the legs move through the climb (%.2f m)" % [id, hi - lo])
+	m.free()
+
 func _companions() -> void:
 	var m := Models.hunter(Arch.weight("tender"), Data.TEAM_COLORS[0], Arch.signature("tender"), "",
 			PlayerLook.neutral(), "tender")

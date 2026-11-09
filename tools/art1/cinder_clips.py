@@ -13,6 +13,7 @@ sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
 import cinder_pieces as K
 import crouchkit
+import mantlekit
 
 A_Z = K.ANKLE_Z
 
@@ -31,6 +32,14 @@ def C(name, dur, keys, loop=False, base=READY):
 
 
 END = {k: READY[k] for k in READY}
+# the ledge climb (mantlekit): both palms flat on the lip, grinning at it; over the top a puff of heel flame and the skirt flung up, a whoop at the landing
+OPEN = {"cast": 0.0, "castl": 0.0, "fing": 0.8, "fistl": 0.6, "jaw": 0.35, "brow": 0.5}
+MANTLE = {"az": A_Z, "hx": K.SH, "hands": {"LP": -1.0, "G": 1.0}, "w": 1.0, "nod": 0.05, "tail": 0.42, "extra": {
+    "reach": dict(OPEN, lid=0.3), "over": dict(OPEN, jaw=0.5), "step": dict(OPEN, jaw=0.6, jet=0.3),
+    "up": {"cast": 0.0, "castl": 0.0, "fing": 0.3, "jet": 0.4, "jaw": 0.7, "brow": -0.2},
+    "top": {"jet": 0.7, "skirt": 0.3, "jaw": 0.8, "brow": -0.5},
+    "pop": {"jet": 0.5, "skirt": 0.45, "jaw": 1.0, "brow": -0.7, "lid": 0.05, "G": (0.34, 0.04, 1.0), "LP": (-0.34, 0.04, 1.02)},
+    "land": {"jet": 0.0, "jaw": 1.0, "skirt": 0.2, "brow": -0.6}}}
 
 
 def idle(u):
@@ -139,6 +148,7 @@ def clips():
         T = 2 * stride / (share * sp)
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sk, hd, stride * (0.8 if tag in "lr" else 1.0), share, lift)))
+    out.append(mantlekit.clip(C, END, MANTLE))
     # LMB: the pilot's 0.2 s: the arm snaps out, palm first, feet set; then the roar throws her back a step and she leans in, teeth bared, the arm shaking
     braced = {"pel": (0.0, 0.03, -0.075), "prt": (0.04, -0.14, 0.0), "tor": (0.2, -0.3, 0.0), "hed": (-0.18, 0.42, 0.0), "brow": 0.55, "lid": 0.12, "jaw": 0.55, "fing": 0.05,
               "G": (0.16, 0.44, 1.2), "LP": (-0.28, -0.06, 0.98), "cast": 1.0, "castl": 0.5, "FL": (-0.11, 0.17, A_Z), "FR": (0.15, -0.17, A_Z), "FLy": 0.1, "FRy": -0.55}

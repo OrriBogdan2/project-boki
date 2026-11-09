@@ -2146,6 +2146,11 @@ func mantling() -> bool:
 	return not lfloat.is_empty() or (not pad.is_empty() and pad.has("face"))
 
 ## How far through the climbing part of a mantle you are (0 when not mantling), for the animation.
+## How far up the face a ledge rise is, 0 at the grab to 1 at the lip: the mantle clip's time (WardenClips "mantle").
+func _rise_k() -> float:
+	var y0 := float(lfloat.get("y0", pos.y))
+	return clampf((pos.y - y0) / maxf(0.05, float(lfloat["lip"]) + 0.12 - y0), 0.0, 1.0)
+
 func mantle_k() -> float:
 	if not lfloat.is_empty():
 		return 1.0
@@ -2694,7 +2699,7 @@ func _try_ledge_grab(dt: float) -> void:
 	var dir_in := Vector2(float(best["ex"]) - pos.x, float(best["ez"]) - pos.z)
 	if dir_in.length() < 0.01:
 		dir_in = mv
-	lfloat = {"lip": float(best["gz"]), "n": dir_in.normalized(), "t": 0.0, "g0": bool(inp.get("glide", false)),
+	lfloat = {"lip": float(best["gz"]), "y0": pos.y, "n": dir_in.normalized(), "t": 0.0, "g0": bool(inp.get("glide", false)),
 		"shove": (inp["move"] as Vector2).length() < 0.3,     # thrown into the side with no keys: it carries you over
 		"kb0": kb_t,                                          # (a fresh knock ends the rise; the one that threw you here doesn't)
 		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
@@ -3125,10 +3130,7 @@ func _anim_state(stretch: float) -> void:
 	s["dead"] = out
 	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["ledge"] = grap.size() > 0
-	var mk := -1.0
-	if pad.has("face"):
-		mk = clampf(float(pad["t"]) / maxf(0.01, float(pad["dur"])), 0.0, 1.0)
-	s["mantle"] = mk
+	s["mantle"] = _rise_k() if not lfloat.is_empty() else -1.0
 	s["stomp"] = (fmod(float(stomp["t"]), Life.R["stomp_cycle"]) / Life.R["stomp_cycle"]) if not stomp.is_empty() else -1.0
 	s["reload"] = (1.0 - reload_t / maxf(0.1, float(wpn["reload"]))) if reload_t > 0.0 and not wpn.get("melee", false) else -1.0
 	s["drink"] = (1.0 - drink_t / DRINK_TIME) if drink_t > 0.0 else -1.0

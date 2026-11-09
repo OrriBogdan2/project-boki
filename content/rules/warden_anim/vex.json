@@ -26,6 +26,7 @@
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["gunslinger_lmb", 0.25], ["gunslinger_lmb", 0.12], ["gunslinger_dash", 0.5], ["gunslinger_lmb", 0.25], ["gunslinger_rmb", 0.4], ["gunslinger_e", 1.0], ["gunslinger_knock", 0.5], ["gunslinger_x", 0.5]],
-	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"mantle": {"clip": "mantle", "rise": 0.513},
+	"procedural": ["ledge", "stomp", "base", "drink"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "launcher", "gatling", "coin"]
 }

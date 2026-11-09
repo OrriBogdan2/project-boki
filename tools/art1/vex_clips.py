@@ -12,6 +12,7 @@ sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
 import vex_cannon as VC, vex_arm as VA
 import crouchkit
+import mantlekit
 
 A_Z = 0.16
 SP = 0.0
@@ -147,6 +148,15 @@ KNEEL = dict(READY, **{
     "FR": (0.16, 0.32, A_Z), "FL": (-0.13, -0.34, A_Z + 0.07), "FRy": -0.2, "FLy": 0.3, "FRp": 0.05, "FLp": 0.75,
     "brow": 0.2, "lid": 0.15,
 })
+# the ledge climb (mantlekit): one hand on the lip, the cannon arm braced beside it, a racer's lazy lean over the top, a smirk at the landing
+MANTLE = {"az": A_Z, "hx": 0.18, "hands": {"LP": -1.0}, "w": 0.85, "nod": 0.02, "tail": 0.38, "extra": {
+    "reach": {"BE": aim(0, 35), "UA": (-6, 38), "fing": 0.9, "brow": 0.6, "lid": 0.1},
+    "over": {"BE": aim(0, -40), "UA": (-8, -22), "tor": (0.32, -0.28, 0.0), "fing": 0.9, "brow": 0.7},
+    "step": {"BE": aim(0, -62), "UA": (-10, -46), "tor": (0.24, -0.2, 0.0), "fing": 0.9},
+    "up": {"tor": (0.14, 0.1, 0.0), "fing": 0.3, "LP": (-0.3, -0.08, 1.0), "brow": 0.2},
+    "top": {"LP": (-0.3, -0.1, 1.04), "hed": (-0.08, 0.1, 0.03)},
+    "pop": {"hed": (-0.18, 0.2, 0.04), "brow": -0.3, "lid": 0.2, "LP": (-0.3, -0.12, 1.1)},
+    "land": {"brow": -0.3, "lid": 0.2, "LP": (-0.3, 0.1, 1.0)}}}
 PROWL = {"ankle": A_Z, "foot": 0.11, "width": 0.13, "stride": 0.32, "lift": 0.05, "toe": 0.26, "share": 0.6, "sway": 0.04, "bob": 0.016, "twist": 0.12, "T": 0.62, "toe_out": -0.24}
 
 
@@ -170,6 +180,7 @@ def clips():
     gl = dict(pel=(0, 0, 0.0), prt=(0.22, 0, 0), tor=(0.0, 0, 0), hed=(-0.2, 0, 0), LP=(-0.1, -0.06, 1.72), LQ=(-3.0, 0, 0), UA=(-10, 40), BE=aim(-6, 72), FL=(-0.09, -0.12, A_Z + 0.04), FR=(0.11, -0.24, A_Z + 0.1), FLp=-0.7, FRp=-0.9)
     out.append(C("glide", 1.0, [(0.0, gl), (0.5, dict(gl, FR=(0.11, -0.26, A_Z + 0.13))), (1.0, gl)], loop=True))
 
+    out.append(mantlekit.clip(C, READY, MANTLE))
     # ---- LMB: the gatling's rounds; keys from gunslinger_lmb: the kick at 0.025, back on the aim by 0.09, the next round at 0.12, she eases out by 0.55
     base = dict(BRACE, **ON_AIM)
     base.update(LP=(-0.26, 0.2, 0.98), LQ=(0.3, 0, 0), brow=0.5, lid=0.1)
