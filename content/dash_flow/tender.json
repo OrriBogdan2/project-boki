@@ -28,9 +28,9 @@
 	},
 	"hold": {
 		"rmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable. Data: Darkside Binding is a plain shot (briefs/supervive-data/supervive_kits.md:9). Footage: the aim is held steady, side-on, then released (frames f105-113, briefs/hero-ref/mooshmoosh.md:63, :386-388); no dash inside it, and the ground dash is never shown cleanly (briefs/hero-ref/mooshmoosh.md:340). Kept: the hold carries through (owner: every interaction chains)."},
+			"air": {"mode": "keep", "source": "Not determinable. The air dash is shown (briefs/hero-ref/mooshmoosh.md:346-366) with no aim held through it. Kept: the hold carries through (owner: every interaction chains)."},
+			"jump": {"mode": "keep", "source": "Not determinable. The release hop (briefs/hero-ref/mooshmoosh.md:388, f105-113) is a hop at the release, not a hold carried through a jump; no plain jump is shown (briefs/hero-ref/mooshmoosh.md:453). Kept: the hold carries through (owner: every interaction chains)."}
 		}
 	}
 }

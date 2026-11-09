@@ -29,9 +29,9 @@
 	},
 	"hold": {
 		"rmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable. The source spear is a tap, with no hold to carry (briefs/hero-ref/tamsin.md:18; briefs/supervive-data/supervive_kits.md:33); ours holds to aim. No spear cast inside the skate is shown. Kept: the hold carries through (owner: every interaction chains)."},
+			"air": {"mode": "keep", "source": "Not determinable. As on the ground; no air skate is shown (briefs/hero-ref/tamsin.md:294, :332). Kept: the hold carries through (owner: every interaction chains)."},
+			"jump": {"mode": "keep", "source": "Not determinable. The source spear is a tap (briefs/hero-ref/tamsin.md:18); no jump is shown (briefs/hero-ref/tamsin.md:297-298, :334). Kept: the hold carries through (owner: every interaction chains)."}
 		}
 	}
 }
