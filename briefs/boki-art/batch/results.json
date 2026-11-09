@@ -64585,5 +64585,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/prowyak_cardw_3.jpg",
     "ok": true
+  },
+  {
+    "id": "foldbat_cardz",
+    "name": "Foldbat (hero card edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/foldbat_cardz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kayak_card102",
+    "name": "Kayak (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kayak_card102_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "prowyak_cardz",
+    "name": "Prowyak (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/prowyak_cardz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "prowyak_cardw",
+    "name": "Prowyak (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/prowyak_cardw_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "foldbat_cardz",
+    "name": "Foldbat (hero card edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/foldbat_cardz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "prowyak_cardz",
+    "name": "Prowyak (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/prowyak_cardz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "prowyak_cardz",
+    "name": "Prowyak (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/prowyak_cardz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole_cardw",
+    "name": "Geodemole (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodemole_cardw_1.jpg",
+    "ok": true
   }
 ]
