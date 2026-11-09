@@ -2788,5 +2788,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/tidalisk_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_oarlet",
+    "name": "Oarlet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_oarlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anvilbrock",
+    "name": "Anvilbrock (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_anvilbrock_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anvilbrock",
+    "name": "Anvilbrock (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_anvilbrock_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_amanitusk",
+    "name": "Amanitusk (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_amanitusk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_blossmink",
+    "name": "Blossmink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_blossmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_amanitusk",
+    "name": "Amanitusk (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_amanitusk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_blossmink",
+    "name": "Blossmink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_blossmink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prismink",
+    "name": "Prismink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_prismink_1.jpg",
+    "ok": true
   }
 ]
