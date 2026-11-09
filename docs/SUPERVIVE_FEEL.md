@@ -10,15 +10,16 @@ The owner read these straight from the installed game (config files, curve table
 |---|---|---|---|
 | Gravity | -1470 uu/s² | -14.7 m/s² | **Yes**: `Hunter.H_GRAV`, one gravity up and down (match and home) |
 | Jump velocity | 750 uu/s | 7.5 m/s (~1.9 m jump, apex ~0.51 s) | Partly: 6.8 m/s (1.5 m, 0.9 s in the air), so jump + mantle stays under our 4-terrace walls (the wall kick tops those) |
-| Air control | 0.015 | almost no steering mid-jump | **Yes**: keys steer at 0.015x ground accel (`physics.air_control`), a jump keeps its run-up; ledge rises still steer crisply |
+| Air control | 0.015 | almost no steering mid-jump | **No, owner ruling 11-08**: strong WASD air control (`Loco.air_step`, `content/rules/tuning.json` air), decision 0022 |
 | Falling lateral friction | 0.375 | | **Yes**: `physics.air_friction`, a jump keeps its run-up |
 | Run speed per hunter | 445-485 uu/s | 4.45-4.85 m/s | **Yes**: `content/rules/hunter_move.json` |
 | Acceleration per hunter | 4700-5400 uu/s² | 47-54 m/s² | **Yes**: `HunterMove` (Oath, Kingpin 47; Tetra 50; others 54) |
-| Braking (no input) | 2220 uu/s², GroundFriction 1.0 (x2 braking factor) | 22.2 m/s², 2/s | **Yes**: `physics.brake`, `physics.ground_friction`: a let-go from a run stops in ~0.17 s, ~0.3 m. Speed over a run with no keys (a kit step, a knock) sheds at `Hunter.GROUND_SHED` first (kit distances) |
+| Braking (no input) | 2220 uu/s², GroundFriction 1.0 (x2 braking factor) | 22.2 m/s², 2/s | **Yes**: `physics.brake`, `physics.ground_friction`: a let-go from a run stops in ~0.17 s, ~0.3 m. Speed over a run (a kit step, a knock) sheds under the same brake, keys held or not, as UE does (`HunterMove.brake_rate`): a 10 m/s shove slides ~1.4 m (decision 0026) |
 | Dash end | no hard stop (DashCurves not decoded; three heroes fitted from footage, below) | | **Yes**: a dash hands over at no more than run speed (`physics.dash_exit_run`), then the walk, brake or air carry; Ghost, Brall and Myth slow through their fitted curve first |
 | Walkable floor | 50° | | n/a (heightmap) |
 | Walk off ledges | off | you need a jump or dash to leave a platform | No, on purpose: the owner wants walking off ledges allowed everywhere |
-| Mantle | pulls up ledges within 150 uu; Z speed cap 250 uu/s; mini-mantle launch 0.75 s at 0.6x forward speed, min 350 uu/s | 1.5 m, 2.5 m/s, min 3.5 m/s | Reach 1.5 m; topping out sends you onto the ledge at max(0.6x run speed, 3.5 m/s) (`physics.mantle_launch_*`) |
+| Mantle | pulls up ledges within 150 uu; Z speed cap 250 uu/s; mini-mantle launch 0.75 s at 0.6x forward speed, min 350 uu/s | 1.5 m, 2.5 m/s, min 3.5 m/s | **Yes**: reach 1.5 m; the rise is the suction (`HunterMove.rise_vy`: 175 m/s² while you rise slower than 2.5 m/s, so a jump's momentum carries you over); topping out sends you onto the ledge at max(0.6x run speed, 3.5 m/s) (`physics.mantle_launch_*`, decision 0026) |
+| Turn rate | RotationRate yaw 1280°/s | | **Yes**: `physics.turn_rate`, a fixed rate to the cursor (a 180 in 0.14 s), match and farm (decision 0026) |
 | Tall-ledge climb | Myth and Brall only | | **Yes**: Archer and Juggernaut (+0.9 m reach) |
 | Abyss | death 1750 uu below; fall speed capped 1200 easing to 1000 uu/s between 100 and 1650 uu down; mantling out of the abyss allowed | 17.5 m; 12 to 10 m/s between 1 and 16.5 m | **Yes**: `Hunter.ABYSS_EXTRA` (17.5 m), `HunterMove.fall_cap` (12 m/s anywhere, easing to 10 in the abyss): ~1.9 s from the lip to the point of no return |
 | Glide | height hold toward 850 uu; min Z -350 uu/s; start fall -85; swoop converts 2.5x falling speed to forward speed over 1.5 s | 8.5 m; -3.5 m/s | **Yes**: above 8.5 m the glider sinks at 3.5 m/s and the drop past its usual sink becomes speed (2.5x, fading over 1.5 s; `GlideLift.sink`) |
