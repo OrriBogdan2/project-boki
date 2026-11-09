@@ -9439,5 +9439,75 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_boltstrich_p_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_cairnback_p",
+    "name": "Cairnback (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_cairnback_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_boltstrich_p",
+    "name": "Boltstrich (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_boltstrich_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_echolop_p",
+    "name": "Echolop (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_echolop_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_canvastross_p",
+    "name": "Canvastross (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_vespyx",
+    "name": "Vespyx",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ta_vespyx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthorn_p",
+    "name": "Crofthorn (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chuggamus_p",
+    "name": "Chuggamus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_chuggamus_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_vespyx",
+    "name": "Vespyx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_vespyx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_vespyx",
+    "name": "Vespyx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_vespyx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cairnback_p",
+    "name": "Cairnback (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_cairnback_p_2.jpg",
+    "ok": true
   }
 ]
