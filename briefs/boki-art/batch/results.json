@@ -3611,5 +3611,54 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_terrarimit_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_terrarimit",
+    "name": "Terrarimit (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_terrarimit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rampartoad",
+    "name": "Rampartoad (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rampartoad_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rampartoad",
+    "name": "Rampartoad (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rampartoad_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thrumbird",
+    "name": "Thrumbird (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_thrumbird_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thrumbird",
+    "name": "Thrumbird (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_thrumbird_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vaultara",
+    "name": "Vaultara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_vaultara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vaultara",
+    "name": "Vaultara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_vaultara_2.jpg",
+    "ok": true
   }
 ]
