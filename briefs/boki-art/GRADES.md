@@ -64,3 +64,8 @@ Auto-fail at batch stage: anything upright or person-like, any strap/belt/band/v
 ## Uniqueness (owner, 2026-11-08 21:24 ET)
 - No Boki may feel like a copy of another unless it is its own evolution; evolutions must still be distinct enough to be interesting.
 - Every pass is checked against a contact sheet of the whole approved roster. Same base animal + same main idea (or same animal + silhouette + palette) as a Boki from another line = reject, naming the look-alike.
+
+## Evolutions must be fundamental changes (owner, 2026-11-08 21:48 ET)
+- A middle or final form that is the parent with things added, more of the same parts, a recolour, or the same body plan and pose is rejected (7.5 or lower), however polished.
+- Test: ignore colours and add-ons; if silhouette, proportions and body plan still match the parent, reject. A pass needs a new body plan or posture and its idea grown into something new. Babies must not be the parent shrunk down.
+- Evolution prompts (build_jobs REL) now demand this for every unstarted job.
