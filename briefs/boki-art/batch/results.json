@@ -11336,5 +11336,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_reelacine_e_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_reelacine_e",
+    "name": "Reelacine (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reelacine_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reelacine_e",
+    "name": "Reelacine (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_reelacine_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_e",
+    "name": "Tootle (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_tootle_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullpole_e",
+    "name": "Bullpole (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bullpole_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_foldbat_e",
+    "name": "Foldbat (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_foldbat_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullpole_e",
+    "name": "Bullpole (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bullpole_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullpole_e",
+    "name": "Bullpole (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bullpole_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_e",
+    "name": "Tootle (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_tootle_e_3.jpg",
+    "ok": true
   }
 ]
