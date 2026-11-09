@@ -240,3 +240,7 @@ Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules a
 - **Redo Blossmink attempt 2 (owner 8.3)**: owner note first: close but kind of basic still for the e volution- maybe more pink petals?. Previous attempt: /home/boki/gens/blossmink-2-art.
 - **Redo Briarlynx attempt 2 (owner 8.0)**: owner note first: lokos a little ai i nthe face, maybe become more of a lion. Previous attempt: /home/boki/gens/briarlynx-1-art.
 - **Redo Gongrowl attempt 2 (owner 8.4)**: owner note first: cute but not for a t2 / t3 - has to be bigger i think. Previous attempt: /home/boki/gens/gongrowl-1-art.
+
+## 2026-11-09 07:51 UTC coordinator -> art batch: 1 owner orders (priority over new species)
+Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules and grading as the originals, owner note first. Post ART lines as usual (imported into the Bokidex automatically).
+- **Redo Terrarimit attempt 2 (owner 8.2)**: owner note first: close, but if its a nevo it should be either bigger or wider than the previous. Previous attempt: /home/boki/gens/terrarimit-4-art.
