@@ -2168,5 +2168,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_stormit_2.png",
     "ok": true
+  },
+  {
+    "id": "geysirbara",
+    "name": "Geysirbara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geysirbara_1.png",
+    "ok": true
+  },
+  {
+    "id": "dribbara",
+    "name": "Dribbara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dribbara_1.png",
+    "ok": true
+  },
+  {
+    "id": "parasolth",
+    "name": "Parasolth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/parasolth_2.png",
+    "ok": true
+  },
+  {
+    "id": "geysirbara",
+    "name": "Geysirbara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geysirbara_2.png",
+    "ok": true
+  },
+  {
+    "id": "dribbara",
+    "name": "Dribbara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dribbara_2.png",
+    "ok": true
+  },
+  {
+    "id": "parasolth",
+    "name": "Parasolth",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/parasolth_1.png",
+    "ok": true
+  },
+  {
+    "id": "glintmole",
+    "name": "Glintmole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glintmole_1.png",
+    "ok": true
+  },
+  {
+    "id": "dragonkite",
+    "name": "Dragonkite",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dragonkite_2.png",
+    "ok": true
   }
 ]
