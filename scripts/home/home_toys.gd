@@ -144,6 +144,7 @@ func _arrive(k: Dictionary, t: Dictionary) -> void:
 		k["t"] = float(R["sulk_secs"])
 		return
 	p["phase"] = "play"
+	FarmTutorial.event("play")
 	var secs: Array = R["play_secs"]
 	p["t"] = randf_range(float(secs[0]), float(secs[1]))
 	if others.size() >= 1:
