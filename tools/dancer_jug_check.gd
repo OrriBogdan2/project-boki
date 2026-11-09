@@ -112,6 +112,15 @@ func thief(a) -> void:
 	A.ok("dancer passive: Marks have no cap (22 after 20 more), eight diamonds show",
 			K.marks_on(T) == 22 and K.res_text() == "22" and K.pip_count() == 8 and K.res_frac() == 1.0, K.res_text())
 	A.ok("dancer passive: 22 Marks make a bolt 3.2x", absf(K.outgoing(T, 10.0, {"src": "shot"}) - 32.0) < 0.01)
+	# source shape (data: Shiv +16 on a 160 bolt per Arcslinger hit, stacking; footage: flat steps, no cap in 8 hits).
+	# Duration and decay are in neither source: 4s refreshed is an assumption.
+	K.set_marks(T, 1)
+	var step1 := K.outgoing(T, 160.0, {"src": "shot"}) - 160.0
+	K.set_marks(T, 20)
+	var step20 := (K.outgoing(T, 160.0, {"src": "shot"}) - 160.0) / 20.0
+	A.ok("dancer passive: a flat +16 a stack on a 160 bolt (the data's), the 1st and the 20th alike, uncapped, 4s",
+			absf(step1 - 16.0) < 0.01 and absf(step20 - 16.0) < 0.01 and float(K.res_def()["dur"]) == 4.0,
+			"first %.1f twentieth %.1f" % [step1, step20])
 	# Vault ranks: empowered +20% at rank 2 and again at rank 3, the speed boost half again as big at rank 3
 	var vault_ranks: Array = []
 	for rk in [1, 2, 3]:
@@ -1016,11 +1025,14 @@ func combos(a) -> void:
 	T2.teleport(home + Vector3(0, 0, 9.0))
 	A.aim_at(P, T.pos)
 	P.dashes = 0.0
+	P.ex_cd = 5.0
 	TK.cd["e"] = 0.0
 	P.ak.use_e()
 	A.step(m, 0.35)
-	A.ok("combo dancer: Knife in a foe (Knife rank 3) = Vault reset + refund",
-			P.dashes >= 0.99 and float(TK.cd["e"]) < 10.0, "dashes %.2f e cd %.1f" % [P.dashes, float(TK.cd["e"])])
+	A.ok("combo dancer: Knife in a foe (Knife rank 3) = Vault reset (the long dash too) + refund",
+			P.dashes >= 0.99 and P.ex_cd <= 0.0 and float(TK.cd["e"]) < 10.0,
+			"dashes %.2f ex_cd %.1f e cd %.1f" % [P.dashes, P.ex_cd, float(TK.cd["e"])])
+	A.ok("combo dancer: a Knife in a foe adds no Mark (only bolts stack)", TK.marks_on(T) == 0, "%d" % TK.marks_on(T))
 	P.ak.use_e()
 	A.step(m, 0.05)
 	A.ok("combo dancer: Knife > E = step to them", P.flat_dist(T) < 1.8)
@@ -1037,8 +1049,8 @@ func combos(a) -> void:
 	TK.cd["rmb"] = 0.0
 	A.tap(m, P)
 	A.step(m, 0.9)
-	A.ok("combo dancer: Bola on two (rank 3) = pooled Marks",
-			TK.bola_pairs >= 1 and TK.marks_on(T) >= 4 and TK.marks_on(T) == TK.marks_on(T2),
+	A.ok("combo dancer: Bola on two (rank 3) = pooled Marks, the Bola adding none of its own",
+			TK.bola_pairs >= 1 and TK.marks_on(T) == 3 and TK.marks_on(T) == TK.marks_on(T2),
 			"T %d T2 %d" % [TK.marks_on(T), TK.marks_on(T2)])
 	A.ok("combo dancer: Bola > Grounded = no dash", KitStatus.grounded(T) and _dash_blocked(T))
 	A.step(m, 2.0)

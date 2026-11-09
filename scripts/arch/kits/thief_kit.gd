@@ -9,7 +9,7 @@ extends ArchKit
 ##   to 8 shown, no cap): each makes your bolts on them stronger. A knock or an assist heals you.
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
 ##   harder from the outer band, refreshing every Mark; the Vault comes back. The Boki Merge has its own key.
-## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (3.5x, 2 Marks,
+## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (2.34x, 2 Marks,
 ##   no Shred), shown by a gold glint in the throwing hand that flares as she lands, and landing it gives the
 ##   Vault back with no cap (the payoff: T4, pay_cashin, RESET at her hand); a chain runs a routine of flips and
 ##   keeps fast Shift presses (ThiefChain). No ring or burst on the dash itself.
@@ -557,16 +557,20 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return
 	add_mark(t, 1)
 
+## The Vault is back, every charge and the long dash too (an empowered hit, Encore, a Knife in a foe at rank 3).
+func vault_back() -> void:
+	h.dashes = h.max_dashes()
+	h.ex_cd = 0.0
+	DashReset.cue(h)
+
 ## The empowered bolt landed: two Marks (the owner's faster stacking), and the Vault comes back on the spot, from a
 ## jump too (its damage was on the bolt itself). Weight without a blast: a blue blade flash on them and the reset
 ## snap on her.
 func _primed_hit(t: Ent) -> void:
 	primed_hits += 1
 	add_mark(t, int(dash_def()["prime_marks"]), true)
-	h.dashes = h.max_dashes()
-	h.ex_cd = 0.0
+	vault_back()
 	chain.on_reset()
-	DashReset.cue(h)
 	_reset_fx(t)
 	m.later(0.06, func(): if is_instance_valid(h): play("thf_reset"))
 
@@ -723,13 +727,12 @@ func _end_bola(at: Vector3) -> void:
 	fx().unplace("bola%d" % h.get_instance_id())
 	m.fx.burst(at, col_of(rmb_def()), 5, 2.0, 0.25, 6.0, 0.6)
 
-## The Bola wraps its first foe: its stage (damage), Grounded and slowed, a Mark, the binding rings.
+## The Bola wraps its first foe: its stage (damage), Grounded and slowed, the binding rings.
 func _wrap(f: Ent) -> void:
 	var stg: StageSpec = bola["stg"]
 	KinExec.apply_foe(stg.effects, f, cx("rmb", "bola", f.pos, {"at": f.pos}), f.pos, stg)
 	if not is_instance_valid(f) or f.dead: return
 	KitStatus.apply(f, "gnd", _ground_t())
-	add_mark(f, 1, true)
 	wrapped[f.get_instance_id()] = [f, _ground_t()]
 	m.sfx("dj_bola_wrap", f.pos, -3.0, 1.0)
 
@@ -762,7 +765,6 @@ func _tangle(f, other: Ent) -> void:
 		t.hurt(float(bd["pair_dmg"]) * power("sec"), h,
 				{"src": "abil", "ab": "utility", "tags": ["utility", "bola"], "stun": float(bd["pair_stun"]),
 						"dr": true})
-	add_mark(other, 1, true)
 	if rank("sec") >= 3 and both.size() == 2:
 		var pool := marks_on(both[0]) + marks_on(both[1])
 		for t in both: set_marks(t, pool)
@@ -800,7 +802,6 @@ func _throw_knife() -> void:
 	run(stg, cx("e", "shadow_knife", aim(), {
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if knife.is_empty() and is_instance_valid(f) and not f.dead:
-				add_mark(f, 1, true)
 				_stick(f, f.pos),
 		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			if knife.is_empty() and e == null: _stick(null, ground(at) if _why == "wall" else land)}))
@@ -816,8 +817,7 @@ func _stick(f: Ent, at: Vector3) -> void:
 	if rank("kin") >= 3:
 		cd["e"] = float(cd["e"]) * (1.0 - float(ed["refund_foe"] if f else ed["refund_wall"]))
 	if f and rank("kin") >= 3:
-		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
-		DashReset.cue(h)
+		vault_back()                        # Shadow Knife rank 3: a knife in a foe gives the Vault back
 	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("ffcf5a"), 0.8, 0.2)
 	m.sfx("thief_knife_stick", at, -6.0, 1.0)
 	net_ring(at, 0.8, col_of(ed))

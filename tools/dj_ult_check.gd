@@ -49,6 +49,7 @@ func dancer(a) -> void:
 	A.aim_at(P, T.pos)
 	P.ult = 0.0
 	P.dashes = 0.0
+	P.ex_cd = 5.0
 	K.add_mark(T, 2, true)
 	var used0 := int(P.used.get("x", 0))
 	HunterKeys.ult_pressed(P)
@@ -60,6 +61,7 @@ func dancer(a) -> void:
 			U.running() and AimKit.shown(P, "ult") and bool(ring.get("all", false))
 			and float(ring.get("r", 0.0)) < float(d["reach"]) * 0.6 and P.dashes >= P.max_dashes() - 0.01,
 			"r %.2f dashes %.2f" % [float(ring.get("r", 0.0)), P.dashes])
+	A.ok("dancer X: Encore resets the Vault whole, the long dash too", P.ex_cd <= 0.0, "ex_cd %.1f" % P.ex_cd)
 	A.ok("dancer X: its cooldown runs from the cast (24s)", absf(float(K.cd["x"]) - float(d["cooldown"])) < 0.1,
 			"%.1f" % float(K.cd["x"]))
 	A.step(m, 0.36)

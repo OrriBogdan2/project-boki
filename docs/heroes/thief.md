@@ -65,9 +65,27 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 | Bola cooldown 0.54x the data, pair stun 0.9s (LOW) | (c) | 7s follows the footage card (6.7s); the 1.8s is how long the STUNNED word showed, not a measured stun. Owner pacing call |
 | Knife cooldown (LOW) | (c) | 15s is the footage card; the data's 28s base is level 1. Owner pacing call |
 | LMB range 12m vs "850 uu" (LOW) | (c) | 850 uu isn't in briefs/supervive-data; the footage shows hits at about 7 bh (12.6m). Kept 12 |
-| Other Vault resets: Encore, knife at rank 3 (LOW) | (c) | Both are in the data (Fusillade, Farstep IV). DECISIONS' "reset only on an empowered hit" is about the empowered bolt hitting vs missing |
+| Other Vault resets: Encore, knife at rank 3 (LOW) | (b) | Both are in the data (Fusillade, Farstep IV) and were built, but gave back the charges only. Now all three (empowered hit, Encore cast, Knife in a foe at rank 3) go through `ThiefKit.vault_back()`: every charge and the long dash, as the source's one Quickflip. DECISIONS' "reset only on an empowered hit" is about the empowered bolt hitting vs missing, so a miss still resets nothing. Asserts `dancer X: Encore resets the Vault whole, the long dash too`, `combo dancer: Knife in a foe (Knife rank 3) = Vault reset (the long dash too) + refund` |
 | Encore edge bonus: ring rim vs platform edge (LOW) | (c) | Follows the footage's fine print (the ring's outer band) |
 | Shift, passive, dash-flow rows (-) | (c) | Match (Shift per the feel pass) |
+
+## Passive parity (Marks and the Vault resets)
+
+[game data] Passive: +16 damage for each Arcslinger hit, stacking; Arcslinger applies 1 stack; the Bola's top rank
+combines two foes' stacks. [footage] 137, 172, 189, 206, 223, 241, 258, 275: flat steps of about +17, still climbing
+at the 8th, no stack counter; the cap and the decay were not seen (open question 4).
+
+| Part | Source | Ours now |
+|---|---|---|
+| Unit | flat per hit: +16 on a 160 bolt (10%); about +17 on 137 (12%) [D] [footage] | flat, 10% of the base bolt per Mark (16 on 160, the data's); `outgoing()` adds it to the plain-bolt part, never compounding. Asserted: the 1st and the 20th stack both add 16 on a 160 bolt |
+| Cap | none seen in 8 hits | none (eight diamonds drawn) |
+| Duration, decay | not in either source | 4s, refreshed by the next hit, all Marks on a target drop together: an assumption, `resource.dur` |
+| What stacks | an Arcslinger (LMB) hit, 1 stack | your bolts; the empowered hit adds 2 (the owner's spec, MAIN_TO_EXT 03:20). The Bola and the dagger no longer add a Mark (ours, not in the source); Encore's blades refresh them (wiki R) |
+| Heal | on a knock (+384, a green pillar) | 15% (25% with the shared heal) on a knock, 25% on an assist |
+
+Vault resets in the source: the empowered Quickflip hit, Fusillade (cast), Farstep at rank IV (dagger in an enemy).
+All three are built through `ThiefKit.vault_back()` (charges and the long dash). Ideas of ours, not built: a stack on
+each Encore blade, a Mark from the Bola.
 
 ## Parity pass (LMB first)
 
@@ -94,9 +112,9 @@ pass above.
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
 | LMB, Arc Bolts | hold | A spinning gold chakram from alternating hands every 0.45s, 34 m/s; it flies to the cursor (12m at most) and fizzles there in a blue-violet puff. A thin white aim line to the cursor with an arrow tick, gold while the next bolt is empowered | Arcslinger: the same, cursor-placed, 0.45s | Range 12m (the footage shows at least 7 bh); no magazine |
-| Passive, Marks | none | Every bolt that hits adds a Mark (no cap, 4s, refreshed; eight diamonds show): +10% bolt damage per Mark. A knock heals 15% on top of the shared 10% (25% in all) with a crimson star on the knocked and a green pillar on her | Malice: about +12% of a shot per consecutive hit, still climbing at 8; knock heal with a green pillar | Gold diamonds over the target keep the stack readable (ours) |
+| Passive, Marks | none | Every bolt that hits adds a Mark (no cap, 4s, refreshed; eight diamonds show): a flat +10% of the base bolt per Mark (the data's +16 on 160). Only your bolts add Marks (the empowered one 2); the Bola and the dagger add none. A knock heals 15% on top of the shared 10% (25% in all) with a crimson star on the knocked and a green pillar on her | Malice: about +12% of a shot per consecutive hit, still climbing at 8; knock heal with a green pillar | Gold diamonds over the target keep the stack readable (ours) |
 | Dash, Vault | Shift | A 4.5m sideways cartwheel in 0.48s (the source's measured one, off the global dash feel) the way you move: a burst that peaks near 0.15s and runs down into the hasted run, a cyan and lilac arc traced by hands and feet, cyan streaks behind; +18% speed for 2s at most; the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 2.34x (Marks add flat), 2 Marks; landing it gives the Vault back at once; rank 2: the bonus +20%, rank 3: +40% in all and the speed boost half again as big | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
-| RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.4m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded and slowed 30% for 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
+| RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.4m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5, the first foe Grounded and slowed 30% for 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
 | E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s) or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway; rank 3: sticking in a foe gives the Vault back | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
 | X, Encore | tap (level 6) | A violet ring grows round her from 2.3m to 5.4m (3 bh) over 0.4s, everyone sees it, then rides with her for 2s: she dances, and every 0.2s a blade leaves her hand at each foe inside (10 at most each): 4, and 6 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown. A blade landing on a rival hunter fills the bond (the best event of the cast counts) | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
 | Merge (its own key, `ultimate`) | tap | The Boki Merge | (n/a) | The Merge is the same for every hero |
