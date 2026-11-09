@@ -46,6 +46,11 @@ the aim), with `hand` r / l between them for a point that rides a hand bone. So 
 the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_hand`, `anchor_feet` when present, Lace
 `anchor_nock`, `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`.
 
+## Armour on the body (every Hunter and bot, not a recipe)
+`Juice.hit` flashes the body cyan (`Ent.SHELL_FLASH`) for a hit that lands on armour and white for one on health;
+`Juice.armor_break` holds the cyan flash for `BREAK_FLASH_T` and sheds shards. No ring or burst (a ground ring means gameplay).
+The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only=armour`. Check: `--hero-vfx-check`.
+
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`.
