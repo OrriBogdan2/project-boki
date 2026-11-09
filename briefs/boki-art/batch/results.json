@@ -47246,5 +47246,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_zipling_gap_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_moundlet_e3",
+    "name": "Moundlet (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_moundlet_e3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_moundlet_e1",
+    "name": "Moundlet (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_moundlet_e1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_moundlet_e1",
+    "name": "Moundlet (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_moundlet_e1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_moatpole_e3",
+    "name": "Moatpole (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_moatpole_e3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_moatpole_e3",
+    "name": "Moatpole (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_moatpole_e3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_moundlet_e2",
+    "name": "Moundlet (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_moundlet_e2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_moatpole_e2",
+    "name": "Moatpole (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_moatpole_e2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_moundlet_e2",
+    "name": "Moundlet (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_moundlet_e2_4.jpg",
+    "ok": true
   }
 ]
