@@ -69709,5 +69709,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/style_rimink_b_2.jpg",
     "ok": true
+  },
+  {
+    "id": "style_rimink_b",
+    "name": "Rimink (style test b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_rimink_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_glaciammoth_c",
+    "name": "Glaciammoth (style test c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_glaciammoth_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_rimink_a",
+    "name": "Rimink (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_rimink_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_glaciammoth_c",
+    "name": "Glaciammoth (style test c)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_glaciammoth_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_glaciammoth_b",
+    "name": "Glaciammoth (style test b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_glaciammoth_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_rimink_c",
+    "name": "Rimink (style test c)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_rimink_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_rimink_a",
+    "name": "Rimink (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_rimink_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipwom_r5",
+    "name": "Pipwom (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pipwom_r5_1.jpg",
+    "ok": true
   }
 ]
