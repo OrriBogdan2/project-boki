@@ -171,6 +171,8 @@ func pull() -> void:
 		_stop("stopped", false)
 		return
 	k.arm_haul()
+	if target != null:
+		ComboMark.payoff(k.m, h, target)
 	var at := _anchor_now()
 	var to := Vector2(at.x - h.pos.x, at.z - h.pos.z)
 	var dist := to.length()
