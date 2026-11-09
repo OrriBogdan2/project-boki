@@ -3710,3 +3710,26 @@ ART dribbara_r 8.5 briefs/boki-art/batch/out/dribbara_r_1.jpg
 ART frigatee_r 8.5 briefs/boki-art/batch/out/frigatee_r_1.jpg
 ART glassolotl_r2 8.5 briefs/boki-art/batch/out/glassolotl_r2_2.jpg
 ART lanterloris_r 8.5 briefs/boki-art/batch/out/lanterloris_r_2.jpg
+
+## 2026-11-09 feel (job 20261108-233849-a1, escalated from 20261108-215224-a1): READY perf-load-shaders-1108 (update, supersedes 41c2cead8)
+- READY ext/perf-load-shaders-1108 1cb9cca33 (GPU table measured at fa8e19d63, only check and DEBT text since; off origin/main, stacked on the earlier 6 commits, not merged). Loading and hitches only; no perf-expedition-1108 files touched.
+- New since 41c2cead8:
+  - build.hunters: every Warden's and common Boki's .glb are read on loader threads from `_start` in a match with rivals (`WardenGlb.fetch_for`, `BokiRig.fetch_common`). A .glb Warden drops its hidden procedural body's loose parts instead of merging them (`merge_static(..., discard)`, rig fit checked once per file: `WardenGlb.will_dress`). A skin's glider is merged once; each Hunter only paints its canopy (`Gliders.sheet/paint`).
+  - Warm-up: the second launch redrew every stand-in. The first launch's load benchmark steps auto quality down (rp1-0: medium -> low, shadows/MSAA off) after the stamp was written, so the stamp named another setup. It is now saved again for the new settings. WarmStamp logs why it rejects a stamp (`--perf-log`).
+  - hitch_check: cache files already on disk are no longer counted as compiles (the second launch showed 157 "compiles").
+  - New `--load-trim-check`.
+- rp1-0 RTX 4090, Forward+ Vulkan, `--warm-twice --hitch-check`. Main = origin/main d255acbee plus the bench tools only. Same pod, one run each, and the pod is slow (median frame 40-65 ms):
+
+| | main launch 1 | branch launch 1 | main launch 2 | branch launch 2 |
+|---|---|---|---|---|
+| loading | 36.7 s | 29.4 s | 28.5 s | 19.0 s |
+| build.hunters | 9517 ms | 2713 ms | 6508 ms | 2141 ms |
+| build.warm_up | 8987 ms | 8210 ms | 6786 ms | 741 ms (100/100 keys stamped) |
+| worst loading frame | 4453 ms | 3623 ms | 896 ms | 611 ms |
+| shader compiles ride/drop/land | 2/0/3 | 0/0/2 | 0/0/0 | 0/0/0 |
+| landing stall | 411 ms | 73 ms | 310 ms | 74 ms |
+| worst judged frame | 411 ms | 422 ms | 412 ms | 344 ms |
+
+- Headless on rpc1 (load avg ~95, noisy): loading 5.5 -> 4.1 s, build.hunters 2175 -> 734 ms.
+- Checks on fa8e19d63 + 1cb9cca33: --check 0 failures; --load-trim-check, --warden-glb-check PASS, --warden-rest-check 0, --warm-stamp-check 0; health --strict OK. --idle-shots GPU (ostra/juggernaut/mage, after the drop change): the models draw whole with no procedural leftovers.
+- NOT met / open: (1) Still no M5 number: every mac-Naruto-Founder job ends rc 126 because its godot-nf wrapper looks for GodotBG.app under the redirected HOME (/tmp/godot-home.*). This is infra. On Metal, WarmStamp is never trusted (no pipeline cache in 4.6), so a Mac redraws the warm-up on every launch. (2) The worst judged frames left are the hitch-check's 10-kind mob pack (Models.mob builds on spawn, ~100 ms CPU on the PC bench; templates are in DEBT) and the ride's sim catch-up (bots, +6 steps), which is perf-expedition-1108's. The 4090 pod's own median frame is above 50 ms, so it can't judge the 50 ms target. (3) A first launch is still ~8 s of warm-up on this pod.
