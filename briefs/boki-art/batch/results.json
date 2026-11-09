@@ -42829,5 +42829,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_briarlynx_f2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_effigoon_f2",
+    "name": "Effigoon (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_effigoon_f2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_f1",
+    "name": "Effigoon (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_effigoon_f1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_briarlynx_f3",
+    "name": "Briarlynx (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_briarlynx_f3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_briarlynx_f3",
+    "name": "Briarlynx (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_briarlynx_f3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_briarlynx_f3",
+    "name": "Briarlynx (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_briarlynx_f3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_f2",
+    "name": "Effigoon (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_effigoon_f2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_briarlynx_f3",
+    "name": "Briarlynx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_briarlynx_f3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_f2",
+    "name": "Effigoon (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_effigoon_f2_4.jpg",
+    "ok": true
   }
 ]
