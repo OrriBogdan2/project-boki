@@ -132,8 +132,9 @@ func _audit(a: String, sc: String) -> void:
 		var good := float(r["settle"]) <= SETTLE_MAX and int(r["swings"]) <= SWINGS_MAX and not cut and not still
 		var tag := "%s %s %s" % [WardenGlb.ART[a], sc, chain]
 		var trail := ((tips[c] as Array).back() as Vector3).distance_to(_rest_tip(sk, chains[c], m))
-		var line := "%s: peak %.3f m, settles in %.2f s, %d swings, overshoot %.0f%%, into the body %.3f m, trails %.3f m" \
-				% [tag, r["peak"], r["settle"], r["swings"], 100.0 * float(r["over"]), clip[c], trail]
+		var line := ("%s: peak %.3f m, settles in %.2f s, %d swings, overshoot %.0f%%, into the body %.3f m, "
+				+ "trails %.3f m") % [tag, r["peak"], r["settle"], r["swings"], 100.0 * float(r["over"]), clip[c],
+				trail]
 		if tag in OPEN:
 			ok(not good, "(open) " + line + ("" if not good else ": passes now, take it off OPEN"))
 		else:
