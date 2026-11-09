@@ -45,6 +45,7 @@ var text := ""               # this step's one line, on the banner and the pill
 var detail := ""             # and the plain-words line under it ("" for none)
 var key_cap := ""            # the key cap beside it ("" for none)
 var got := 0                 # times this step's action has landed (shown as got/need)
+var got_seen := 0            # got at the last cooldown reset
 var need := 0
 var t := 0.0                 # s in this step
 var card_t := 0.0            # s since the card (re)appeared
@@ -186,6 +187,10 @@ func update(dt: float) -> void:
 		m.hud.msgs.hold = card_up()      # messages wait while the banner is up
 	var sid := id()
 	var done := _is_done(sid, dt)
+	_quicken(p, dt)
+	if got != got_seen:
+		got_seen = got
+		_refresh(p)          # (each move that lands is ready again at once)
 	_point(sid)
 	_stall(dt)
 	_props()
@@ -216,6 +221,30 @@ func _finish(sid: String) -> void:
 	m.sfx("unlock", null, -9.0)
 	_enter()
 
+## Cooldowns run 1/rules.cds times faster here, so each move can be tried again and again while learning.
+func _quicken(p: Hunter, dt: float) -> void:
+	var extra: float = dt * (1.0 / float(Content.rules("tutorial")["cds"]) - 1.0)
+	p.dashes = minf(p.max_dashes(), p.dashes + extra / p.dash_regen())
+	p.ex_cd = maxf(0.0, p.ex_cd - extra)
+	p.sig_cd = maxf(0.0, p.sig_cd - extra)
+	for r in _runners(p):
+		r.tick(extra)
+
+## Every move is ready: on a new step, a retry (respawn) and each time the step's action lands.
+func _refresh(p: Hunter) -> void:
+	p.dashes = p.max_dashes()
+	p.ex_cd = 0.0
+	p.sig_cd = 0.0
+	for r in _runners(p):
+		r.reset()
+
+func _runners(p: Hunter) -> Array:
+	var out: Array = []
+	if p.runner: out.append(p.runner)
+	for k in [p.kin, p.kin2]:
+		if k: out.append((k as Kin).runner)
+	return out
+
 func _enter() -> void:
 	var p := m.player
 	var sid := id()
@@ -230,6 +259,8 @@ func _enter() -> void:
 	crouch_t = 0.0
 	taps = 0
 	got = 0
+	got_seen = 0
+	_refresh(p)
 	held = false
 	hits = 0
 	orders = 0
@@ -646,6 +677,7 @@ func card_up() -> bool:
 # ------------------------------------------------------------------ the fall, and the key press
 ## Where a fall into the void puts you back: the last stop you reached.
 func respawn() -> Vector3:
+	_refresh(m.player)          # (a fall is a retry: every move is ready for it)
 	return last_stop if last_stop != Vector3.INF else stop("land")
 
 ## A weapon hit of yours on a monster (Match).
