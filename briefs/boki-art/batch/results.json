@@ -34954,5 +34954,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/stance_thistlynx_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_reapant_n5",
+    "name": "Reapant (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_reapant_n5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_thunderstrich",
+    "name": "Thunderstrich (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_thunderstrich_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_reapant",
+    "name": "Reapant (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_reapant_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_n4",
+    "name": "Reapant (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_reapant_n4_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_reapant",
+    "name": "Reapant (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_reapant_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_thistlynx",
+    "name": "Thistlynx (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_thistlynx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_thistlynx",
+    "name": "Thistlynx (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_thistlynx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_reapant",
+    "name": "Reapant (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_reapant_1.jpg",
+    "ok": true
   }
 ]
