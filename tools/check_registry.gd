@@ -84,8 +84,8 @@ const CHECKS := {
 	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],
 	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],      # rigged Boki review sheets
-	"--evolve-moment-check": ["res://tools/evolve_moment_check.gd", "evolve_moment_check", "check"],      # the evolve moment at home
-	"--evolve-moment-shots": ["res://tools/evolve_moment_check.gd", "evolve_moment_check", "shots"],      # --shots-dir=<dir>
+	"--evolve-moment-check": ["res://tools/evolve_moment_check.gd", "evolve_moment_check", "check"],
+	"--evolve-moment-shots": ["res://tools/evolve_moment_check.gd", "evolve_moment_check", "shots"],
 	"--boki-rig-check": ["res://tools/boki_rig_check.gd", "boki_rig_check", null],      # rigged Boki
 	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
 	"--juggernaut-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "juggernaut"],
