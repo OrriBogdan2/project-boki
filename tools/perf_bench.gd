@@ -5,7 +5,8 @@ extends RefCounted
 ## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
-##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-secs=60] [--bench-total=6] [--bench-farm=20] [--bench-out=/path/frames.csv]
+##   [--quality=medium]
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -17,6 +18,7 @@ var main: Node
 var secs := 60.0
 var farm_secs := 20.0
 var out_path := ""
+var total := 6           # Hunters in the match, each with their Boki (--bench-total=30)
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -27,6 +29,7 @@ func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
+		if a.begins_with("--bench-total="): total = int(a.substr(14))
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
 	Save.no_write = true
@@ -47,7 +50,8 @@ func run(main_node: Node) -> void:
 
 func _match() -> void:
 	var o := Match.demo_opts()
-	o.merge({"teams": 3, "squad": 2, "total": 6, "raid": "ash", "blight": true, "no_drop": true, "god": true,
+	o.merge({"teams": total >> 1, "squad": 2, "total": total, "raid": "ash", "blight": true, "no_drop": true,
+		"god": true,
 		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
