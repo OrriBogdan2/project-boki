@@ -108,6 +108,8 @@ func _ready() -> void:
 		var fm := KitShaders.mat("flame", Color("5aa8ff"))
 		fm.set_shader_parameter("seed", float(i) * 1.7)
 		flames.append({"node": KitMeshes.inst(self, KitMeshes.quad(0.9, 1.3), fm), "foe": null})
+	aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(GREEN, 0.9)))
+	aura.material_override.set_shader_parameter("bands", 3.0)
 
 func _arrow_node() -> Node3D:
 	var n := Node3D.new()
@@ -528,13 +530,10 @@ func _tick_bursts(delta: float) -> void:
 		KitShaders.param(n, "power", 1.6 * (1.0 - u))
 
 # ------------------------------------------------------------------ Spirit Walk aura
-var aura: MeshInstance3D = null
+var aura: MeshInstance3D       # built with the pools above, hidden until she walks
 
 ## A soft green shell over her while she walks as a spirit (k 0 = off).
 func aura_on(k: float) -> void:
-	if aura == null:
-		aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(GREEN, 0.9)))
-		aura.material_override.set_shader_parameter("bands", 3.0)
 	aura.visible = k > 0.01
 	if aura.visible:
 		aura.global_position = h.position + Vector3(0, 0.9 * float(h.cdat.get("scale", 1.0)), 0)
