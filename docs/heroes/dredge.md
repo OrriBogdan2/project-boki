@@ -136,7 +136,7 @@ Built as its own ultimate on X (owner decision, SERVER_UPDATE6). It was never fo
 | The scattergun's accuracy drops sharply with each shot; a dash resets it only at rank 4 | built (a dash resets it at rank 3) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes (0040 vs 0112) |
 | Rank 4 dash: pellet hits cut the dash recharge, a dash resets the bloom | built at rank 3 | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | Backstab +50% | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
-| Bonus armour damage when fired without spread | not built (our armour rules differ) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
+| Bonus armour damage when fired without spread | built as extra armour wear: a volley fired at zero bloom wears armour 66% faster (`gun.armor_k`; the wiki's 66% to Armor). Our armour is a worn-down 20% cut, not a second health bar, so health damage is unchanged and the bonus never breaks it alone | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | The ult is one press that fires two waves 0.6s apart, 6 slugs a wave | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes (ult 0034, 0040) |
 | Every slug applies Anti-Heal | built (3s, as the cloak's) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes (green streaks) |
 | A fan grows on the ground over the 1.1s charge and is the exact hit area | built (AimKit cone, everyone sees it) | footage | yes (ult 0026, 0033) |

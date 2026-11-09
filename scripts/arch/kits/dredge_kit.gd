@@ -60,6 +60,8 @@ var stop_t := 0.0               # the barge under way; when it ends he stops, ke
 var next_barge := -9.0          # the short gap between barges in a run
 var shot_seen := 0              # the last weapon volley the kit dressed
 var shot_at := -9.0
+var tight_pg := ""              # the volley id fired at zero bloom: its slugs shred armor (content gun.armor_k)
+var armor_shreds := 0           # (tests) hits that shredded armor
 var stunned: Array = []         # foes the Anchor stunned: {e, until} (the spiral over them)
 var fx: LDFx
 var broadside: DredgeBlast      # X, Brass Broadside (its charge and waves are a hold: broadside.blast)
@@ -136,6 +138,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7fe08a"), 14, 2.5, 0.5, -2.0)
 
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
+	_shred_armor(t, dmg, o)
 	if String(o.get("ab", "")) == "ult":
 		return dmg               # the Broadside takes no back bonus (it keeps ult into merge under a one-shot)
 	if t is Hunter and ArchKit.behind(t, h):
@@ -145,6 +148,20 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 			m.fx.word(t.pos + Vector3(0, 2.2, 0), "BEHIND", res_col(), false)
 		return dmg * (1.0 + float(rd()["back_k"]))
 	return dmg
+
+## A slug from a zero-bloom volley wears the foe's armor faster (the source: +66% damage to armor). Our armor is
+## a worn-down damage cut, so the bonus is extra wear on it; health damage is unchanged. Never breaks it itself.
+func _shred_armor(t: Ent, dmg: float, o: Dictionary) -> void:
+	if not (t is Hunter) or tight_pg == "" or String(o.get("pg", "")) != tight_pg:
+		return
+	var ht := t as Hunter
+	if ht.armor <= 0.0:
+		return
+	var wear := dmg * (1.0 - Hunter.ARMOR_DR) * float(gun_def()["armor_k"])
+	ht.armor = maxf(0.01, ht.armor - wear)
+	armor_shreds += 1
+
+func gun_def() -> Dictionary: return d.get("gun", {})
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or String(o.get("src", "")) != "shot":
@@ -224,6 +241,9 @@ func _tick_gun() -> void:
 		shot_seen = h.shot_n
 		shot_at = m.time
 		volleys += 1
+		# the first shot after the bloom folded back leaves exactly one shot's worth of it
+		var tight: bool = h.wbloom <= float(h.wpn.get("bloom_deg", 0.0)) + 0.01
+		tight_pg = "%s_%d" % [h.nid, h.shot_n] if tight else ""
 		_dress_volley()
 	if not pull.is_empty() or h.downed:
 		return
