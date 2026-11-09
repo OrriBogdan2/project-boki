@@ -319,6 +319,26 @@
       "id": "zipling_r",
       "pick": 1,
       "grade": 8.5
+    },
+    {
+      "id": "dribbara_r",
+      "pick": 1,
+      "grade": 8.5
+    },
+    {
+      "id": "frigatee_r",
+      "pick": 1,
+      "grade": 8.5
+    },
+    {
+      "id": "glassolotl_r2",
+      "pick": 2,
+      "grade": 8.5
+    },
+    {
+      "id": "lanterloris_r",
+      "pick": 2,
+      "grade": 8.5
     }
   ],
   "rerolled": [
