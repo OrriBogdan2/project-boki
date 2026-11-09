@@ -44,8 +44,6 @@ static func _card(home: Node, id: String, cur: String) -> PanelContainer:
 	col.add_child(UI.label(role_of(id), UI.T_SMALL, UI.MUTED if open else UI.FAINT))
 	if not open:
 		card.tooltip_text = ClassUnlock.requirement(id)
-		card.focus_mode = Control.FOCUS_NONE
-		card.mouse_default_cursor_shape = Control.CURSOR_ARROW
 	return card
 
 ## The portrait; locked, it is grey with a lock on it.

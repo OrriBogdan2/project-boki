@@ -710,6 +710,10 @@ func _home(tree: SceneTree) -> void:
 	var tip_ok := locked_cards.all(func(c): return c.tooltip_text == ClassUnlock.requirement(c.get_meta("arch")))
 	ok(cards.size() == Arch.ids().size() and locked_cards.size() >= 1 and tip_ok and _no_weight(hm.panel_host),
 			"the expedition panel: one card per Hunter, locked ones say how to unlock, no weight tabs")
+	var inert := func(c: Control): return c.focus_mode == Control.FOCUS_NONE \
+			and c.gui_input.get_connections().is_empty()
+	ok(locked_cards.all(inert),
+			"a locked Hunter's card takes no focus and no click")
 	ok(_texts(hm.panel_host).all(func(t): return not String(t).contains("LMB") and not String(t).contains("RMB")),
 			"the expedition panel lists no abilities")
 	hm._close_panel()

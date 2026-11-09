@@ -1,7 +1,7 @@
 extends RefCounted
-## --expedition-shots=<dir>: the expedition panel (Hunter pick) on a fresh save (one Hunter open, the
-## rest locked) and on a save with every Hunter open. Run with a real renderer (xvfb-run, --resolution WxH);
-## writes expedition_fresh.png and expedition_all.png, prints "ESHOT <name>". Never touches the real save.
+## --expedition-shots=<dir> [--size=WxH]: the expedition panel (Hunter pick) on a fresh save (one Hunter
+## open, the rest locked) and on a save with every Hunter open. Run with a real renderer; --size resizes the
+## window. Writes <H>_fresh.png and <H>_all.png (H = window height), prints "ESHOT <name>". Never touches the real save.
 
 var main: Node
 var dir := ""
@@ -17,6 +17,9 @@ func run(m: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--expedition-shots="):
 			dir = String(a).substr(19)
+		if String(a).begins_with("--size="):
+			var wh := String(a).substr(7).split("x")
+			m.get_window().size = Vector2i(int(wh[0]), int(wh[1]))
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	var d := Save.fresh()
@@ -36,9 +39,10 @@ func run(m: Node) -> void:
 		await main.get_tree().process_frame
 	home._close_panel()
 	home._open_expedition()
-	await _shot("expedition_fresh")
+	var h := m.get_window().size.y
+	await _shot("%d_fresh" % h)
 	Save.d["classes"]["open"] = Arch.ids()
 	home._open_expedition()
-	await _shot("expedition_all")
+	await _shot("%d_all" % h)
 	print("ESHOT DONE")
 	main.get_tree().quit()
