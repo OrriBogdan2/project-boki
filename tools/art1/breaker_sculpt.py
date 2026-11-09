@@ -18,11 +18,13 @@ F = np.float32
 # labels
 WOOD, IRON, RIVET, BRASS, MOSS, BARN, GLASS = 1, 2, 3, 4, 5, 6, 7
 HULL_C = (0.0, 0.0, 0.53)
-HULL_R = (0.41, 0.39, 0.37)      # a full round hull, 1.1 wide to tall as the master sheet
-HELM_C = (0.0, 0.03, 0.84)
-HELM_R = (0.235, 0.205, 0.185)     # squat, wider than tall, sunk in the hull (breaker_head_squat)
-PORT_C = (0.0, 0.875)
-PORT_R = 0.115
+HULL_R = (0.34, 0.27, 0.37)       # the collar's hull: the scan's chest, slimmed to a bruiser's shoulders (breaker_scan.py hull_scale)
+HELM_C = (0.0, 0.03, 0.88)
+HELM_R = (0.235, 0.205, 0.21)      # a round dome sunk in the collar (mossy_v2_turnaround, 298 px/m at 1600 wide)
+PORT_C = (0.0, 0.905)
+PORT_R = 0.15                      # the big face porthole: two thirds of the dome's width
+HELM_TOP = HELM_C[2] + HELM_R[2]
+SIDE_PORT = (HELM_R[0] - 0.01, HELM_C[1] - 0.01, 0.91, 0.075)    # x, y, z, ring radius: the cyan grid ports each side
 PORT_Y = HELM_C[1] + HELM_R[1] - 0.012          # the porthole's glass
 MAST_TIP = (0.72, -0.17, 1.3)                 # where the fish's line hangs from
 FISH_AT = (0.72, -0.17, 1.02)
@@ -116,38 +118,37 @@ def straps(hl):
     return f
 
 
-def compass_field(hl):
-    c = onsurf(hl, [(0, 0.42, 0.646)], 0.0)[0]
-    n = hl.grad(np.array([c], F))[0]
-    f = Field(c - 0.12, c + 0.12, 0.0016)
-    f.add(cap(c - n * 0.02, c + n * 0.016, 0.092, 0.09), 0.003, IRON)
-    f.sub(cap(c + n * 0.022, c + n * 0.05, 0.072, 0.072), 0.003, BRASS)
-    for a in np.linspace(0, 6.28, 9)[:-1]:
-        u = np.array((math.cos(a), 0, math.sin(a)), F)
-        f.add(sph(tuple(c + u * 0.082 + n * 0.017), 0.006), 0.001, RIVET)
-    return f, c, n
+def compass_on(V, z=0.61):
+    """The compass's centre and normal on the scan's chest (V: its verts): where its own painted compass sits."""
+    band = lambda zz: V[(np.abs(V[:, 0]) < 0.05) & (np.abs(V[:, 2] - zz) < 0.03) & (V[:, 1] > 0), 1].max()
+    y, y0, y1 = band(z), band(z - 0.06), band(z + 0.06)
+    n = np.array((0.0, 1.0, -(y1 - y0) / 0.12), F)
+    return np.array((0.0, y, z), F), n / np.linalg.norm(n)
 
 
 def helmet():
-    """The brass helmet (proportions: breaker_head_squat; detail: breaker_head): a squat dome sunk in the hull, no neck, one big
-    porthole, a port each side, a band over the crown. Returns (dome field, collar field): the wide collar lies on the hull."""
+    """The brass helmet (mossy_v2_turnaround): a round dome sunk in the collar, no neck, one big face porthole, a cyan
+    grid port each side, a grille ring on the crown. Returns (dome field, collar field): the wide collar lies on the hull.
+    The glowing glass (side ports, crown grille) is helm_glass()."""
     c = np.array(HELM_C, F)
     rx, ry, rz = HELM_R
-    f = Field((-0.3, -0.24, 0.72), (0.3, 0.3, 1.06), 0.002)
+    f = Field((-0.3, -0.24, 0.72), (0.3, 0.32, 1.16), 0.002)
     f.add(ell(HELM_C, HELM_R), 0.0, BRASS)
-    f.add(box((0, c[1] - 0.02, c[2] + 0.03), (0.016, ry + 0.006, rz - 0.02), 0.012), 0.004, BRASS)
     pz = PORT_C[1]
     fy = PORT_Y
-    f.add(cap((0, fy - 0.03, pz), (0, fy + 0.018, pz), PORT_R, PORT_R * 0.95), 0.006, BRASS)
-    f.sub(cap((0, fy + 0.006, pz), (0, fy + 0.05, pz), PORT_R * 0.74, PORT_R * 0.74), 0.004, BRASS)
+    f.add(cyl((0, fy - 0.006, pz), "y", PORT_R, 0.024, 0.008), 0.006, BRASS)
+    f.sub(cyl((0, fy + 0.03, pz), "y", PORT_R * 0.74, 0.024), 0.004, BRASS)
+    sx, sy, sz, sr = SIDE_PORT
     for sd in (-1, 1):
-        q = np.array((sd * (rx - 0.01), c[1] - 0.01, pz + 0.01), F)
-        f.add(cap(q - (sd * 0.02, 0, 0), q + (sd * 0.022, 0, 0), 0.05, 0.046), 0.004, BRASS)
-        f.sub(sph(tuple(q + (sd * 0.04, 0, 0)), 0.032), 0.004, GLASS)
+        f.add(cyl((sd * (sx + 0.003), sy, sz), "x", sr, 0.023, 0.006), 0.004, BRASS)
+        f.sub(cyl((sd * (sx + 0.03), sy, sz), "x", sr * 0.72, 0.016), 0.003, GLASS)
+    # the crown grille: a short brass ring, hollow (its glass glows)
+    f.add(cyl((0, c[1], HELM_TOP + 0.0025), "z", 0.085, 0.0325, 0.008), 0.008, BRASS)
+    f.sub(cyl((0, c[1], HELM_TOP + 0.04), "z", 0.064, 0.028), 0.003, GLASS)
     f.d = np.maximum(f.d, 0.745 - f.grid()[2])
     cl = Field((-0.56, -0.48, 0.64), (0.56, 0.48, 0.86), 0.0035)
     x, y, z = cl.grid()
-    r = np.sqrt((x / 0.34) ** 2 + (y / 0.3) ** 2)
+    r = np.sqrt((x / 0.3) ** 2 + (y / 0.24) ** 2)
     # it lies on the hull, a dipped plate round the helmet
     hz = HULL_C[2] + HULL_R[2] * np.sqrt(np.maximum(1.0 - (x / HULL_R[0]) ** 2 - (y / HULL_R[1]) ** 2, 0.02))
     top = hz + 0.022
@@ -155,6 +156,17 @@ def helmet():
     cl.d = (d * 0.7).astype(F)
     cl.lab[:] = BRASS
     return f, cl
+
+
+def helm_glass():
+    """The cyan glass in the side ports and the crown grille: flat discs on a glow slot (no keyed brass: bright brass
+    would glow too)."""
+    sx, sy, sz, sr = SIDE_PORT
+    g = Field((-0.3, -0.12, 0.8), (0.3, 0.18, 1.14), 0.0016)
+    for sd in (-1, 1):
+        g.add(cyl((sd * (sx + 0.017), sy, sz), "x", sr * 0.72, 0.003, 0.001), 0.0, GLASS)
+    g.add(cyl((0, HELM_C[1], HELM_TOP + 0.016), "z", 0.064, 0.004, 0.001), 0.0, GLASS)
+    return g
 
 
 def arm(J, s):
