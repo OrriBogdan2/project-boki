@@ -1,0 +1,19 @@
+{
+	"id": "goliathite",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/goliathite.json.",
+	"size": {
+		"cm": 60,
+		"kg": 30.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
+	"shiny": {
+		"color": "#dbe6e9",
+		"belly": "#303a39",
+		"glow": "#6a99ff"
+	},
+	"work": {
+		"stone": 3,
+		"timber": 2,
+		"haul": 1
+	}
+}
