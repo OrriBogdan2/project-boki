@@ -1199,6 +1199,24 @@
    "still"
   ]
  ],
+ "sound_zones": [
+  {
+   "at": [
+    108,
+    108
+   ],
+   "r": 10,
+   "preset": "arch"
+  },
+  {
+   "at": [
+    108,
+    52
+   ],
+   "r": 8,
+   "preset": "room"
+  }
+ ],
  "pads": [
   [
    "heart",

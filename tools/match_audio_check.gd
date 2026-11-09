@@ -4,6 +4,8 @@ extends RefCounted
 ## fired through the one-shot pool (the old bug); the match ends mid-channel (extracted), the game goes
 ## back to the farm, and after the fades nothing the match started is still playing (Sfx.match_voices).
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel).
+## Sound zones (owner's reverb ask): the room send is on inside a zone and off outside, and every zone
+## the maps place names a real preset.
 
 var main: Node
 var fails := 0
@@ -49,6 +51,7 @@ func run(main_node: Node) -> void:
 	ok(once.is_empty(), "a one-shot of a looping file does not loop (%d looping pool voices)" % once.size())
 	Sfx.loop_start("boxhum_check", "revive_hum", P.pos)       # (as a deathbox revive does, keyed)
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
+	_check_zones(P.pos)
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -61,6 +64,7 @@ func run(main_node: Node) -> void:
 	ok(_on_farm(), "back on the farm (%s)" % main.current)
 	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
 	await main.get_tree().create_timer(SETTLE).timeout
+	ok(Sfx.room == "", "the match's sound zones are gone with it")
 	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -74,3 +78,33 @@ func _step(m: Match, secs: float) -> void:
 func _on_farm() -> bool:
 	var sc: Script = main.current.get_script() if is_instance_valid(main.current) else null
 	return sc != null and sc.resource_path.ends_with("home/home.gd")
+
+func _check_zones(at: Vector3) -> void:
+	var inside := at + Vector3(30, 0, 0)
+	Sfx.set_room_zones([{"at": [inside.x, inside.z], "r": 5, "preset": "arch"}])
+	Sfx.move_listener(at)
+	ok(Sfx.room == "" and _step_bus(at) == "SFX", "outside a zone the sound plays dry (%s)" % _step_bus(at))
+	Sfx.move_listener(inside)
+	var wet := _step_bus(inside)
+	ok(Sfx.room == "arch" and wet == String(Sfx.ROOM_BUS), "inside a zone it goes through the room send (%s)" % wet)
+	var bi := AudioServer.get_bus_index(Sfx.ROOM_BUS)
+	ok(AudioServer.is_bus_effect_enabled(bi, 0), "...and the send's reverb is on")
+	Sfx.move_listener(inside + Vector3(5.5, 0, 0))
+	ok(Sfx.room == "arch", "just past the edge it holds on (no flutter)")
+	Sfx.move_listener(at)
+	ok(Sfx.room == "" and _step_bus(at) == "SFX", "leaving the zone is dry again (%s)" % _step_bus(at))
+	ok(not AudioServer.is_bus_effect_enabled(bi, 0), "...and the send's reverb is off")
+	Sfx.move_listener(inside)
+	ok(Sfx.room == "arch" and Sfx._bus_for(null) == &"SFX", "a UI sound (no position) stays dry inside a zone")
+	Sfx.set_room_zones([])
+	for id in ["hollowcrown", "skyreach"]:
+		var zones: Array = World.load_layout(id).get("sound_zones", [])
+		var known := zones.all(func(z): return z["preset"] in Sfx.ROOMS)
+		ok(not zones.is_empty() and known, "%s places sound zones with known presets (%d)" % [id, zones.size()])
+
+## The bus a footstep at pos lands on.
+func _step_bus(pos: Vector3) -> String:
+	Sfx.last_played.erase("step0")
+	Sfx.recent.erase("step0")
+	Sfx.play("step0", pos, 0.0, 0.0)
+	return String(Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL].bus)
