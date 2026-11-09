@@ -14,12 +14,12 @@ const ORBIT_R := 0.6          # m from the hunter's middle
 const ORBIT_HZ := 0.35        # laps per second: quick enough to read as alive, slow enough to read as a shape
 
 ## Do this match's own Boki ride as wisps? The match opts win (a bench or check sets them), then the
-## setting. Never in the tutorial: it teaches the walking Boki's orders.
+## setting. Always in the tutorial: it teaches the summon (TutorialSummon).
 static func mode(m: Node) -> bool:
 	var o = m.get("opts")
-	if not o is Dictionary or m.get("tut") != null:
+	if not o is Dictionary:
 		return false
-	return bool((o as Dictionary).get("boki_wisps", Settings.get_v("boki_wisps")))
+	return m.get("tut") != null or bool((o as Dictionary).get("boki_wisps", Settings.get_v("boki_wisps")))
 
 ## Its model: the wisp look while a wisp, else the walking Boki.
 static func look(k: Kin) -> Node3D:

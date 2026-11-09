@@ -27,6 +27,8 @@ func _init(kin: Kin) -> void:
 	var t := times(kin.ks)
 	dur = t.x
 	cd_base = t.y
+	if kin.m.get("tut") != null:
+		cd_base *= float(Content.rules("tutorial")["summon_cd_mult"])      # (a quicker rest to learn it by)
 
 static func rules() -> Dictionary:
 	return Content.rules("boki_summon")
@@ -139,5 +141,7 @@ func render() -> void:
 	elif shrink > 0.0:
 		f = lerpf(BURST_FROM, 1.0, shrink / SHRINK_S)
 	k.scale = Vector3.ONE * f
+	if k.ring:      # the ring under it drains with the window
+		(k.ring.material_override as ShaderMaterial).set_shader_parameter("arc", left / dur if out() else 1.0)
 	if k.wisp and k.model:
 		BokiWispLook.dim(k.model, cd > 0.0)

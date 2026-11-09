@@ -74,7 +74,7 @@ func _start(lid: String, p: Hunter) -> void:
 		if row[0] == lid:
 			txt = String(row[1])
 	var who := String(p.kin.rec.get("name", "your Boki")) if p.kin else "your Boki"
-	line = TutorialText.fill(txt, p).replace("%s", who)
+	line = TutorialText.fill(txt.replace("%T", Settings.key_cap("throw")), p).replace("%s", who)
 
 func _left() -> float:
 	return (m.length - m.time) / m.length

@@ -97,7 +97,7 @@ func close() -> void:
 func _talk(p: Hunter) -> void:
 	var sid: String = tu.id()
 	var moods: Dictionary = Content.rules("tutorial").get("pell_moods", {})
-	var pages: Array = _lines(sid).map(func(x): return {"text": tu._fill(String(x)),
+	var pages: Array = _lines(sid).map(func(x): return {"text": tu.fill(String(x)),
 		"mood": String(moods.get(sid, "neutral"))})
 	state = "talk"
 	_held_t = 0.0
