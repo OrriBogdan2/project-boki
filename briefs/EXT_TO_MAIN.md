@@ -5737,3 +5737,4 @@ READY ext/feel-facing-turn d5333f969 (PARITY FIRST facing: the body turns onto t
 READY ext/<branch> <sha> (<what>)
 READY ext/feel-jump-forgive 6811e055c (jump forgiveness vs the source: coyote and jump buffer stay 0.12 s, source silent (bCanWalkOffLedges false, JumpCooldown/AirJumpPressDuration encrypted, 5 fps footage can't resolve); walk-off literal becomes Hunter.COYOTE; --move-feel-check pins coyote 7 and buffer 7 steps, new rows dash_jump_eaten 0 and jump_buffer_dash_frames 7, 0 failures; --dash-flow-check 0 fail, --air-limits-check 0 fail, health --strict OK, gen_wiki --check 47 unchanged; from main d255acbee, no stack; worker rpc1)
 READY ext/<branch> <sha> (<what>)
+READY ext/<branch> <sha> (<what>)
