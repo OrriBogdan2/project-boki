@@ -28,6 +28,15 @@ const STRETCH_COL := {
 static func rules() -> Dictionary:
 	return Content.rules("base_race")
 
+## Weeks since 1970 by the real clock.
+static func week_now() -> int:
+	return int(Time.get_unix_time_from_system() / float(rules()["week_s"]))
+
+## The twist for a week number (default this week): {id, name, note, mult?, wobble?}.
+static func twist(week := -1) -> Dictionary:
+	var list: Array = rules()["twists"]
+	return list[(week if week >= 0 else week_now()) % list.size()]
+
 static func lap() -> float:
 	var out := 0.0
 	for s in rules()["stretches"]:
@@ -50,13 +59,14 @@ static func winged(rec: Dictionary) -> bool:
 	return Data.KIN.get(String(rec.get("species", "")), {}).has("wing")
 
 ## Its pace on stretch i before the wobble and your cheers (m/s).
-static func stretch_pace(rec: Dictionary, i: int) -> float:
+static func stretch_pace(rec: Dictionary, i: int, tw := {}) -> float:
 	var R := rules()
 	var s: Dictionary = R["stretches"][i]
 	var speed := float(rec.get("stats", {}).get("speed", 0))
 	var mood: Array = R["mood"]
 	var p := float(R["pace"]) * float(s["mult"]) * (1.0 + speed * float(R["speed_per_point"]))
 	p *= lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
+	p *= float(tw.get("mult", {}).get(String(s["kind"]), 1.0))
 	var lean: Dictionary = rec.get("lean", {})
 	match String(s["kind"]):
 		"water":
@@ -68,11 +78,11 @@ static func stretch_pace(rec: Dictionary, i: int) -> float:
 	return p
 
 ## Seconds for one lap with no wobble and no cheers: the lowest is the favourite.
-static func expected_time(rec: Dictionary) -> float:
+static func expected_time(rec: Dictionary, tw := {}) -> float:
 	var out := 0.0
 	var st: Array = rules()["stretches"]
 	for i in st.size():
-		out += float(st[i]["len"]) / stretch_pace(rec, i)
+		out += float(st[i]["len"]) / stretch_pace(rec, i, tw)
 	return out
 
 ## The race itself: runners' distance along the lap, stepped in time.
@@ -81,6 +91,7 @@ class Run:
 	var recs: Array
 	var backed := 0                 # index in recs: the Boki you cheer for
 	var rng: RandomNumberGenerator
+	var tw: Dictionary              # this week's twist (may be empty)
 	var t := 0.0
 	var dist: Array = []            # m along the lap
 	var stretch: Array = []         # which stretch each one is on
@@ -92,8 +103,9 @@ class Run:
 	var cheer_mult := 1.0           # your last cheer, for the backed Boki's next stretch
 	var bumped := {}                # "i-j-stretch": rivals already bumped there
 
-	func _init(runners: Array, back: int, r: RandomNumberGenerator) -> void:
+	func _init(runners: Array, back: int, r: RandomNumberGenerator, twist := {}) -> void:
 		R = BaseRace.rules()
+		tw = twist
 		recs = runners
 		backed = back
 		rng = r
@@ -110,8 +122,8 @@ class Run:
 			_roll(i)
 
 	func _roll(i: int) -> void:
-		var w := float(R["wobble"])
-		var p := BaseRace.stretch_pace(recs[i], int(stretch[i])) * rng.randf_range(1.0 - w, 1.0 + w)
+		var w := float(tw.get("wobble", R["wobble"]))
+		var p := BaseRace.stretch_pace(recs[i], int(stretch[i]), tw) * rng.randf_range(1.0 - w, 1.0 + w)
 		if i == backed and int(stretch[i]) > 0:
 			p *= cheer_mult
 			cheer_mult = 1.0
@@ -210,6 +222,7 @@ static func settle(run: Run) -> Dictionary:
 # ------------------------------------------------------------------ on the base
 var h                          # the Home screen
 var post: Node3D = null
+var wall: Node3D = null        # the showcase wall (BaseShowcase), yours or the island you visit
 var start := Vector3.ZERO      # the loop's start line
 var run: Run = null
 var runners: Array = []        # the home's kin entries, in run order
@@ -222,14 +235,23 @@ func _init(home) -> void:
 
 ## The post and loop beside the Training post (none without one); called when fixtures move.
 func place() -> void:
-	if is_instance_valid(post):
-		post.queue_free()
+	for n in [post, wall]:
+		if is_instance_valid(n):
+			n.queue_free()
 	post = null
+	wall = null
 	if h.YARD_AT.x < -100.0:
+		return
+	var at: Vector3 = h.YARD_AT + POST_OFF
+	var visiting: bool = not h.visit.is_empty()
+	var src: Dictionary = h.visit if visiting else Save.d
+	wall = BaseShowcase.build(at + BaseShowcase.WALL_OFF, src.get("showcase", []))
+	h.add_child(wall)
+	if visiting:
 		return
 	post = Node3D.new()
 	post.name = "RacePost"
-	post.position = h.YARD_AT + POST_OFF
+	post.position = at
 	h.add_child(post)
 	start = post.position + LOOP_OFF
 	_post_model()
@@ -267,6 +289,13 @@ func _post_model() -> void:
 	flag.material_override = _mat(UI.ACCENT)
 	flag.position = Vector3(0.32, _ground(post.position) + 1.4, 0)
 	post.add_child(flag)
+	var sign_t := Label3D.new()
+	sign_t.text = "%s\n%s" % [twist()["name"], twist()["note"]]
+	sign_t.font_size = 28
+	sign_t.pixel_size = 0.004
+	sign_t.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	sign_t.position = Vector3(0.3, _ground(post.position) + 1.85, 0)
+	post.add_child(sign_t)
 
 func _mat(c: Color) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
@@ -288,7 +317,7 @@ func find(p2: Vector2) -> Dictionary:
 	return {"kind": "race"}
 
 func label() -> String:
-	return "Start a Dash (back %s)" % Save.active_kin().get("name", "your partner")
+	return "Start a Dash, %s (back %s)" % [twist()["name"], Save.active_kin().get("name", "your partner")]
 
 ## Up to 4 rested Boki out on the base, your partner first.
 func _entrants() -> Array:
@@ -316,7 +345,7 @@ func use() -> void:
 		k["busy"] = true
 		recs.append(k["rec"])
 	var back := maxi(0, recs.find(Save.active_kin()))
-	run = Run.new(recs, back, RandomNumberGenerator.new())
+	run = Run.new(recs, back, RandomNumberGenerator.new(), twist())
 	run.rng.randomize()
 	bar = TimingBar.new()
 	bar.open(h.root_ui, "Press %s at each mark to cheer" % Settings.key_cap("interact"))
@@ -388,12 +417,21 @@ func _end(finished: bool) -> void:
 		k["t"] = 1.5
 	bar.close()
 	if finished:
+		_pin(res["win"])
 		_card(res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()
 	run = null
 	runners = []
+
+## A win goes on the showcase wall with a snapshot of the winner.
+func _pin(win: Dictionary) -> void:
+	var node: Node3D = h._kin_entry(win)["node"]
+	BaseShowcase.add(win, run.tw, BaseShowcase.snap(h.get_viewport(), h.cam, node.global_position + Vector3(0, 0.5, 0)))
+	wall.queue_free()
+	wall = BaseShowcase.build(post.position + BaseShowcase.WALL_OFF, Save.d["showcase"])
+	h.add_child(wall)
 
 func _card(res: Dictionary) -> void:
 	if is_instance_valid(card):
@@ -407,6 +445,7 @@ func _card(res: Dictionary) -> void:
 	var win: Dictionary = res["win"]
 	var lose: Dictionary = res["lose"]
 	v.add_child(UI.label("%s wins the Dash!" % win["name"], 18, UI.ACCENT_HI))
+	v.add_child(UI.label("%s: pinned to the showcase wall" % run.tw.get("name", "Dash"), 14, UI.MUTED))
 	v.add_child(UI.label("%s is beaming (+joy, +trust)" % win["name"], 14))
 	v.add_child(UI.label("%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], 14, UI.MUTED))
 	var why := " for backing the winner" if res["backed_won"] else ""

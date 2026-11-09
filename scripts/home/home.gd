@@ -142,7 +142,7 @@ func _ready() -> void:
 		get_viewport().disable_3d = true
 		PerfLog.frame_drawn()
 	hecon = HomeEcon.new(self)
-	if FarmUnlocks.base_mode() and visit.is_empty(): hrace = BaseRace.new(self)
+	if FarmUnlocks.base_mode(): hrace = BaseRace.new(self)
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():

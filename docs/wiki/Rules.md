@@ -90,6 +90,9 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 | friend_step | 0.05 |
 | close_s | 0.6 |
 | result_doc | The last one home and the winner grow apart by rival_step; two non-rivals home within close_s of each other grow closer by friend_step. |
+| twists | [{"id": "sprint", "name": "Sprint week", "note": "Straights are quicker", "mult": {"straight": 1.3}}, {"id": "mud", "name": "Mud week", "note": "The climb is heavy going", "mult": {"climb": 0.8}}, {"id": "high_tide", "name": "High tide", "note": "The water runs deep and slow", "mult": {"water": 0.75}}, {"id": "gusty", "name": "Gusty week", "note": "Jumps carry further", "mult": {"jump": 1.3}}, {"id": "wild", "name": "Wild week", "note": "Anyone can win: wobble doubles", "wobble": 0.2}] |
+| twists_doc | This week's rule, picked by the real week number (unix days / 7) mod the list, no server. 'mult' multiplies everyone's pace on that stretch kind; 'wobble' replaces the usual wobble. |
+| week_s | 604800 |
 | card_s | 6 |
 | card_s_doc | s the result card stays up. |
 
