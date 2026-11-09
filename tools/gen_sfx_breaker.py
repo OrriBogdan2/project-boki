@@ -1,4 +1,4 @@
-"""Breaker the Sunken Bulwark (bulwark): every sound his kit plays, synthesised and levelled (docs/AUDIO.md).
+"""Breaker the Barnacle Knight (bulwark): every sound his kit plays, synthesised and levelled (docs/AUDIO.md).
 
     cd tools && python3 gen_sfx_breaker.py      (then: godot --headless --import)
 

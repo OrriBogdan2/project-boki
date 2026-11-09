@@ -61,6 +61,7 @@ jobs:
         run: |
           godot --headless --path . -- --check | tee check.log
           grep -q "failures: 0" check.log
+          python3 -m unittest discover -s server/matchmaker/tests
 
       - name: Export game
         run: |
@@ -73,6 +74,30 @@ jobs:
           (cd ../build/win && zip -qr "$GITHUB_WORKSPACE/dist/ProjectBoki-windows.zip" .)
           cp ../build/mac/ProjectBoki.zip dist/ProjectBoki-macos.zip
           (cd ../build/linux && zip -qr "$GITHUB_WORKSPACE/dist/ProjectBoki-linux.zip" .)
+
+      # The dedicated server: a build artifact only (S2 deploys it by hand with server/deploy/push.sh), never
+      # a release asset and never auto-deployed. The "Linux Server" preset is in export_presets.cfg.
+      # continue-on-error: the server build is optional; a missing "Linux Server" preset blocked the v0.24.3
+      # player release (2026-11-08). The player builds and the GitHub Release must never wait on it.
+      - name: Export Linux Server
+        continue-on-error: true
+        run: |
+          set -e
+          mkdir -p ../build/server
+          godot --headless --path . --export-release "Linux Server" ../build/server/ProjectBoki.x86_64
+          mkdir -p server-artifact/build
+          cp -r ../build/server/. server-artifact/build/
+          cp -r server/matchmaker server/deploy server/README.md server-artifact/
+          find server-artifact -name __pycache__ -type d -exec rm -rf {} +
+
+      - name: Upload the server artifact
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: ProjectBoki-linux-server-${{ steps.ver.outputs.tag }}
+          path: server-artifact
+          retention-days: 30
+          if-no-files-found: error
 
       - name: Export launcher
         env:

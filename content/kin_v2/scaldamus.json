@@ -1,0 +1,124 @@
+{
+	"grammar": 1,
+	"id": "scaldamus",
+	"name": "Chuggamus",
+	"animals": [
+		"Hippopotamus",
+		"Steam locomotive"
+	],
+	"theme": "ember",
+	"flavor": "A hippo that is half steam engine: smokestack ears, a boiler belly, a cowcatcher jaw, and it charges like a runaway train. Lazy until crossed, then unstoppable; yawns steam at you to say it likes you.",
+	"colors": {
+		"body": "#6a4a4a",
+		"belly": "#c89a8a",
+		"glow": "#ff6a2a"
+	},
+	"look": {
+		"ears": "flame",
+		"body": "boulder",
+		"tail": "stub",
+		"feet": "stumps",
+		"aura": "embers"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.6,
+		"mass": 2.0,
+		"gait": {
+			"hop_rate": 4.5,
+			"hop_height": 0.05,
+			"pace": 0.8
+		}
+	},
+	"stats": {
+		"kin_hp": 12,
+		"kin_damage": 5,
+		"kin_speed": 2,
+		"owner_armor": 1
+	},
+	"personality": {
+		"bravery": 0.85,
+		"loyalty": 0.7,
+		"temper": 0.6,
+		"curiosity": 0.2
+	},
+	"ai": {
+		"aggression": 0.55,
+		"loyalty": 0.8,
+		"caution": 0.2,
+		"role": "tank"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Mud Bath",
+		"passives": [
+			{
+				"stat": "damage_reduction",
+				"amount": 0.15
+			},
+			{
+				"stat": "knockback_resist",
+				"amount": 0.5
+			}
+		],
+		"mount": {
+			"speed": 0.9,
+			"jump": 0.85,
+			"turn": 0.55
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "damage",
+				"amount": 8,
+				"over": 3
+			}
+		]
+	},
+	"active": "slam",
+	"auto": "rock_guard",
+	"merge": "titan",
+	"evolution": {
+		"root": "Scald",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "lazy and booming",
+		"syllables": [
+			"Scald",
+			"amus"
+		]
+	},
+	"egg": {
+		"name": "Scaldamus Egg",
+		"temper": "Lazy",
+		"desc": "Something lazy is in here.",
+		"play": "Stands in front and soaks the hits."
+	}
+}

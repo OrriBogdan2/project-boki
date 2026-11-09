@@ -26,6 +26,7 @@ func run(main: Node) -> void:
 	main.add_child(holder)
 	for art_name in PREFIX:
 		_hunter(String(art_name), String(PREFIX[art_name][0]), String(PREFIX[art_name][1]))
+	_companions()
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -164,6 +165,27 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 		for si in mesh.get_surface_count():
 			tris += mesh.surface_get_array_index_len(si) / 3
 	ok(tris <= MAX_TRIS, "%s: %d triangles, the budget %d" % [art_name, tris, MAX_TRIS])
+	m.free()
+
+## Meeko's sun and raincloud (pip_v2 companions sheet): two atlas faces off her moods, all eight expressions reachable,
+## the sun carrying her FX points.
+func _companions() -> void:
+	var m := Models.hunter(Arch.weight("tender"), Data.TEAM_COLORS[0], Arch.signature("tender"), "",
+			PlayerLook.neutral(), "tender")
+	holder.add_child(m)
+	var md: WardenMood = (m.get_node("Warden/Sync") as WardenGlb.Sync).mood
+	ok(md != null and md.atlas.size() == 2 and md.face == null, "tender: the sun's and cloud's faces are on the atlas")
+	var seen := {}
+	for st in [{}, {"emote": "x"}, {"kmove": "mm_shot_r"}, {"kmove": "mm_tug"}, {"hit_t": 0.1}, {"downed": true}]:
+		m.set_meta(WardenClips.STATE, st)
+		md.step(0.5)
+		for a in md.atlas:
+			seen[int((a[0] as ShaderMaterial).get_shader_parameter("to_cell"))] = true
+	ok(seen.size() == 8, "tender: her moods reach all eight faces (%d)" % seen.size())
+	for a in ["weapon_muzzle", "anchor_hang_lantern", "anchor_lantern_top"]:
+		var at := WardenGlb.anchor(m, a)
+		var bone := (at.get_parent() as BoneAttachment3D).bone_name if at else ""
+		ok(bone == "pauldron.L", "tender: %s rides the sun" % a)
 	m.free()
 
 ## Item 137: the hammer on the sheet is 0.79 of his height (breaker_FINAL_sheet, breaker_weapons), neutral size both.
