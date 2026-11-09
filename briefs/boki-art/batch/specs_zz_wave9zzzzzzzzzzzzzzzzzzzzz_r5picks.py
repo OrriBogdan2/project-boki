@@ -61,3 +61,15 @@ for _n in ('Coolatee','Spanglin','Kitlet','Zipling','Lurklet','Shinobant','Locka
     SPECS.append({'id':f'style_{_n.lower()}_a','name':f'{_n} (style test a)','refs':[f'briefs/boki-art/cards/{_n}.jpg'],'runs':2,'aspect':'1:1','size':'2K',
       'prompt':("Redraw the creature in image 1 as a single character illustration. Keep the design exactly: the same creature, body, face, colours, markings, "
         "signature parts and pose. Change ONLY the rendering style to this: "+_STY['a']+" Plain flat pale grey background, no ground, no shadow, no text. One creature only, whole body in frame, centred.")})
+# Last Boki with no art (16:37 audit): Critwom (Pipwom's final), Sirencada (Klaxada's final), Chimelop (Echolop's 2nd branch final; every try last night failed).
+for _n,_p in (('Critwom','Pipwom'),('Sirencada','Klaxada')):
+    d=ROSTER200[_n]
+    SPECS.append({'id':'c_'+_n.lower()+'_gp','name':_n+' (concept)','refs':[f'briefs/boki-art/cards/{_p}.jpg',SRA],'runs':4,'aspect':'1:1',
+      'prompt':("Creature-collector monster concept art for a fantasy action game. "+REL['final']+" Image 1 is "+_p+", its earlier form; do not copy its pose. Image 2 is the style reference only; never copy its creatures. "
+        "ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no ground, no text, no effects. "
+        +CORE+LESSONS+"Concept: "+d['concept']+" Look: "+d['look']+" Face: "+d['face'].rstrip('.')+". Colours: "+d['cols'].rstrip('.')+". Archetype: "+d['arch'].rstrip('.')+". Avoid: "+d['avoid'].rstrip('.')+".")})
+for _k,(_b,_f) in enumerate([
+ ("A tall, graceful silver hare planted upright on long hind legs like a proud hare at full stretch, its huge ears grown into two flared silver bell-mouths, a bell-shaped fluffy tail, crystal-clear chime notes etched as silver rings along its limbs.","calm, proud violet eyes and a serene smile"),
+ ("A slender long-legged hare mid-leap, body arched, its ears swept back as long scalloped silver bell flares, a row of small bell-shaped tufts along its spine, moonlight shimmer on its fur.","bright, joyful eyes"),
+ ("A regal hare sitting tall like a statue, its ears forming a bell-tower crest of two tall silver bell shapes, chest fur like a bell's rim, elegant and still.","half-closed, wise eyes")],1):
+    VC(f'chimelop_n{_k}','Chimelop',f'briefs/boki-art/cards/Echolop.jpg','final',_b+" Full body, no ground. Clearly different from Howlop (the dark lunging bat-beast final of the same line): bright, graceful, silver. One clear idea, few parts.",_f,'pale lavender and silver, with a moonlight accent','hanging bells, clappers, dark bat wings like Howlop, sitting up like a person, held objects','echo','pretty')
