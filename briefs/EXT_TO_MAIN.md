@@ -5132,3 +5132,4 @@ READY ext/damage-ratio-audit a89a84bed (damage-ratio audit doc, 3 outliers fixed
 - Bubblisk line becomes 2 stages: Bubblisk > Tidalisk (new, very different final generating). Frothisk is CUT.
 - Knotwyrm gets a cute pre-evolution (Knotling, working name) instead of an evolution above it.
 - Selenfin evolution (Selenwhale, working name) generating.
+READY ext/kael-rmb-dash-turn 7568ec246 (Kael: a dash out of any Smash variant turns at most 35 degrees for 0.8s, parity patch 05.02.25; shared turn-limit helper with Grimble)
