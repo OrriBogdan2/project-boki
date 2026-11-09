@@ -25532,5 +25532,103 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_sloggoth_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_umbrink_n",
+    "name": "Umbrink (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_umbrink_n_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrink_n",
+    "name": "Umbrink (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_umbrink_n_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrink_n",
+    "name": "Umbrink (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_umbrink_n_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sloggoth",
+    "name": "Sloggoth (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_sloggoth_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "slog_card",
+    "name": "Slog (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/slog_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "slog_card",
+    "name": "Slog (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/slog_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glassolotl_a",
+    "name": "Glassolotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_glassolotl_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelotl_a",
+    "name": "Chandelotl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chandelotl_a_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelotl_a",
+    "name": "Chandelotl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chandelotl_a_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_prismander_a2",
+    "name": "Prismander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_prismander_a2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_prismander_a2",
+    "name": "Prismander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_prismander_a2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_prismander_a2",
+    "name": "Prismander",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/ta_prismander_a2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glassolotl_a",
+    "name": "Glassolotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_glassolotl_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_prismander_a2",
+    "name": "Prismander",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ta_prismander_a2_3.jpg",
+    "ok": true
   }
 ]
