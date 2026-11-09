@@ -8,6 +8,7 @@
 	],
 	"loco": {
 		"blend_rate": 7.5,
+		"stop_rate": 5,
 		"idle": "idle",
 		"stance": "stance",
 		"stance_after": 6.0,

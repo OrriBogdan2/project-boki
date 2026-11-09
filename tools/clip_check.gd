@@ -10,6 +10,7 @@ const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunsli
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
 	"ostra": "ostra", "juggernaut": "kael"}
 const DT := 1.0 / 30.0
+const AUDIT := preload("res://tools/anim_audit.gd")
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
@@ -108,6 +109,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
+	_stop_start(id, m, sync)
 	m.free()
 
 func _named(dd: Dictionary) -> Array:
@@ -324,3 +326,17 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 	for k in 12:
 		sync.call("_process", DT)
 	ok(clips.proc_w >= 1.0, "%s: a move with no clip hands back to the rig" % id)
+
+## The stop of the run, walk and crouch walk under the game's brake (docs/decisions/0020): as the loco blend hands
+## over to the idle a planted foot slides no more than the gait gate allows (tools/anim_audit.gd MAX_SLIDE), or than
+## that gait slides on its own when that is more (the walks the gait jobs left open). The starts are measured, not
+## gated: the idle's feet to the stride's is a pose gap no blend time closes (docs/DEBT.md).
+func _stop_start(id: String, m: Node3D, sync: Node) -> void:
+	if id in AUDIT.NO_LEGS:
+		return
+	var turns := AUDIT.new().stop_start(m, sync, WardenGlb.skeleton(m.get_node("Warden")), id)
+	for nm in AUDIT.SHOTS.turns(id):
+		var stop: Dictionary = turns["stop_" + String(nm)]
+		var limit := maxf(AUDIT.MAX_SLIDE, turns["steady_" + String(nm)]["share"])
+		ok(stop["share"] <= limit, "%s: stop from a %s, feet slide %d%% of the speed, %.2f m (limit %d%%)" % [id,
+				nm, round(100.0 * stop["share"]), stop["skate_m"], round(100.0 * limit)])

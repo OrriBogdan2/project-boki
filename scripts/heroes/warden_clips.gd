@@ -23,6 +23,8 @@ const FADE := 0.1            # s: one clip into the next, and into or out of an 
 const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
 const LOCO_RATE := 12.0      # 1/s: how fast the walk and run blend follows the move ("loco.blend_rate" per Hunter)
+const STOP_RATE := 8.0       # 1/s: how fast it falls back as he slows ("loco.stop_rate"): 80 % by 0.2 s, the 5 fps refs
+const WALK_RING := 0.45      # where the walk sits in the loco blend space (the idle at 0, the run at 1)
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
@@ -202,7 +204,7 @@ func _build() -> AnimationNodeBlendTree:
 	bs.add_blend_point(_anim(String(lc["idle"])), Vector2.ZERO)
 	var dirs := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
 	for k in dirs:
-		bs.add_blend_point(_anim(String(lc["walk"][k])), dirs[k] * 0.45)
+		bs.add_blend_point(_anim(String(lc["walk"][k])), dirs[k] * WALK_RING)
 		bs.add_blend_point(_anim(String(lc["run"][k])), dirs[k])
 	var t := AnimationNodeBlendTree.new()
 	t.add_node("loco", bs)
@@ -386,7 +388,8 @@ func step(dt: float) -> void:
 		_crouch(s, dt)
 	tree.advance(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
-	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
+	var stand_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - one_w) * (0.0 if _moving(s) else 1.0)
+	gait.apply(dt, loco_k, loco_k * (1.0 - up_w), stand_k)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
 	_out(dt)
@@ -430,11 +433,9 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var k := clampf(spd / run, 0.0, 1.0) if spd >= STILL else 0.0
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
-	var blend := float(lc.get("blend_rate", LOCO_RATE))
-	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * blend))
+	loco_pos = _ease(loco_pos, goal, float(lc.get("blend_rate", LOCO_RATE)), dt)
 	_p("loco/blend_position", loco_pos)
-	var rate := gait.plan(spd, lc)
-	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
+	_p("loco_rate/scale", gait.plan(spd, loco_pos.length(), lc))
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)
@@ -453,6 +454,12 @@ func _loco(s: Dictionary, dt: float) -> void:
 			land_t = 0.0
 		air_t = 0.0
 	was_air = not grounded
+
+## A blend position eased toward `goal`: at `rate` (1/s) as he speeds up, at "loco.stop_rate" as he slows to a stand.
+func _ease(pos: Vector2, goal: Vector2, rate: float, dt: float) -> Vector2:
+	if goal.length() < pos.length():
+		rate = float(d["loco"].get("stop_rate", STOP_RATE))
+	return pos.lerp(goal, 1.0 - exp(-dt * rate))
 
 ## The crouch layer: the dip plays as the state turns, the weight eases, the sneak ring follows the velocity.
 func _crouch(s: Dictionary, dt: float) -> void:
@@ -499,6 +506,6 @@ func _crouch(s: Dictionary, dt: float) -> void:
 	var speed := float(cr.get("speed", 2.4))
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
 	var pos := Vector2(dir.dot(rt), dir.dot(fw)) * clampf(spd / speed, 0.0, 1.0) if spd >= STILL else Vector2.ZERO
-	crouch_pos = crouch_pos.lerp(pos, 1.0 - exp(-dt * 12.0))
+	crouch_pos = _ease(crouch_pos, pos, LOCO_RATE, dt)
 	_p("crouch_loco/blend_position", crouch_pos)
-	_p("crouch_rate/scale", clampf(spd / speed, 0.7, 1.4) if spd >= STILL else 1.0)
+	_p("crouch_rate/scale", WardenGait.follow(spd, speed * crouch_pos.length(), minf(crouch_pos.length(), 1.0)))
