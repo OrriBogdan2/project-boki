@@ -133,8 +133,19 @@ func thief(a) -> void:
 	P.do_dash()
 	var wheel := K.anim_id
 	var pop := [0.0]           # an Array: a lambda can't assign a captured local
-	A.step(m, 0.55, func(): pop[0] = maxf(pop[0], K.glint_pop))
+	var trail := {"before": 0, "mid": 0, "after": 0}      # trail pieces laid before the turn, in it and after it
+	var laid := [K.spin.pieces]
+	A.step(m, 0.55, func():
+		pop[0] = maxf(pop[0], K.glint_pop)
+		var at: float = m.time - K.anim_at
+		var key := "after"
+		if at < ThiefSpin.TURN_FROM: key = "before"
+		elif at < ThiefSpin.TURN_TO: key = "mid"
+		trail[key] = int(trail[key]) + K.spin.pieces - int(laid[0])
+		laid[0] = K.spin.pieces)
 	P.inp["move"] = Vector2.ZERO
+	A.ok("dancer dash: the flip leaves a trail that follows the turn, none before it starts or after it ends",
+			trail["before"] == 0 and trail["mid"] >= 6 and trail["after"] == 0, str(trail))
 	A.ok("dancer dash (item 8): no ring on the cartwheel or its landing; the glint in the throwing hand flares",
 			_dancer_rings(m) == rings0 and pop[0] > 0.5 and K.glint != null and K.glint.visible
 			and K.glint.global_position.distance_to(K.hand_pos(K.hand == 0)) < 0.15,
