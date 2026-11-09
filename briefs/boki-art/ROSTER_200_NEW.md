@@ -1012,3 +1012,33 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Gravigrub branch:** uses the existing stat-branch rule (Power vs Guard) and the shared Bokidex entry rule.
 - **Male/female:** Grainspin line (Sandwidow, Hourachnid) and Pavonazar get `sex_forms: true`. This adds 3 extra sheets.
 - **Watch at grading:** Gambitfin and Checkmare (seahorse forms can drift upright; prompt "leaning forward, swimming"), Malletary (a bird on two legs is fine, but no person-like posture), Sarcobra (no human face on the hood), Bullsfrog (must not read as a toad).
+
+## 38. Slog line: ink-shadow blob (owner 01:32 11-09: the old Umbrink design becomes its own line; Umbrink is redone as a real Ink mink)
+- **Line:** Blotlet > Slog > Sloggoth · Dark · stage ladder: bounce > creep > tower
+
+### Blotlet (1 of 3) · Dark
+- **Concept:** a single living drop of glossy black ink.
+- **Mix:** ink droplet + shy blob.
+- **Look:** A round, wobbling teardrop of glossy black ink sitting up on its flat bottom, two tiny ink nubs for arms, a small curl of ink on top like a cowlick, leaving a little ink smudge where it sits. Bouncy and compact.
+- **Face:** two big glowing violet eyes and a small shy grin with tiny teeth.
+- **Colours:** ink black and deep purple, with a violet glow accent.
+- **Avoid:** a stoat, legs, a pool, tentacles, a ghost sheet, being scary.
+- **Archetype:** cute
+
+### Slog (2 of 3) · Dark
+- **Concept:** a spreading pool of living ink that creeps along the ground (the former Umbrink design, evolutions/Slog.jpg).
+- **Mix:** ink pool + grinning shadow.
+- **Look:** A glossy black ink pool creeping forward, only two glowing eyes, a wide sharp grin, a few grasping ink tendrils and a tuft rising out of it.
+- **Face:** two glowing violet eyes and a wide, sharp grin.
+- **Colours:** ink black and deep purple, with a violet glow accent.
+- **Avoid:** a stoat body, legs, standing upright.
+- **Archetype:** creepy
+
+### Sloggoth (3 of 3) · Dark, Psychic
+- **Concept:** the ink pool risen into a towering wave of shadow.
+- **Mix:** ink tidal wave + looming shadow beast.
+- **Look:** A huge mound of glossy black ink rearing up like a breaking wave, much taller than Slog, a crown of curling ink tendrils, several glowing violet eyes along its crest around one big wide grin, thick ink arms planted on the ground in front, ink dripping upward at the top edge. Big, planted, looming.
+- **Face:** one big wide sharp grin and several glowing violet eyes.
+- **Colours:** ink black and deep purple, with a violet glow and a faint silver accent.
+- **Avoid:** a stoat, a human shape, a ghost sheet, a skull, gore.
+- **Archetype:** majestic
