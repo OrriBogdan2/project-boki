@@ -12771,5 +12771,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/lockatara_r_w28_1.jpg",
     "ok": true
+  },
+  {
+    "id": "kestrike_f_e_w28",
+    "name": "Kestrike (female)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/kestrike_f_e_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockatara_r_w28",
+    "name": "Lockatara",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lockatara_r_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_r_w28",
+    "name": "Lyrewing",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lyrewing_r_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_pe_w28",
+    "name": "Barokat (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_pe_w28",
+    "name": "Barokat (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_pe_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_r_w28",
+    "name": "Lyrewing",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lyrewing_r_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_pe_w28",
+    "name": "Barokat (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_canvastross_pe_w28",
+    "name": "Canvastross (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_pe_w28_1.jpg",
+    "ok": true
   }
 ]
