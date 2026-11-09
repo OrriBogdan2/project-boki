@@ -45951,5 +45951,19 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_vespyx_p89_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_mycroll_p89",
+    "name": "Mycroll (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_mycroll_p89_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mycroll_p89",
+    "name": "Mycroll (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_mycroll_p89_2.jpg",
+    "ok": true
   }
 ]
