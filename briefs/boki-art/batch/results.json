@@ -35836,5 +35836,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_blastopuff_full_1.jpg",
     "ok": true
+  },
+  {
+    "id": "sandwidow_card",
+    "name": "Sandwidow (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sandwidow_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "scopeleon_card",
+    "name": "Scopeleon (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/scopeleon_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "truffapir_card",
+    "name": "Truffapir (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/truffapir_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "snapler_card",
+    "name": "Snapler (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/snapler_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "snapler_card",
+    "name": "Snapler (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/snapler_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "truffapir_card",
+    "name": "Truffapir (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/truffapir_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_blastopuff_full",
+    "name": "Blastopuff (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_blastopuff_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dreadmonite_full",
+    "name": "Dreadmonite (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_dreadmonite_full_3.jpg",
+    "ok": true
   }
 ]
