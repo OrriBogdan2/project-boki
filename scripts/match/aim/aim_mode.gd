@@ -74,7 +74,8 @@ static func ray_ground(world, ray: Array, y: float) -> Vector3:
 				var gq: float = world.ground_at(q.x, q.z)
 				if q.y > gq:
 					break
-				p = q; g = gq
+				p = q
+				g = gq
 			return Vector3(p.x, g, p.z)
 		t += RAY_STEP
 	return Vector3.INF

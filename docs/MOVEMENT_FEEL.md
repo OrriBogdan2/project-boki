@@ -229,6 +229,19 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
+## Aiming across terraces (`Match._mouse_aim`, `AimMode.ray_ground`, `--aimkit-check`)
+The source (top-down shooter, supervive_kits/physics [D]): shots travel at the shooter's height; ground casts snap to the surface under the cursor. Ours: with a foe under the cursor (52 px, within 3 tiers) the aim is that foe and shots climb or dip to its height (`aim_y`, at most `AIM_DY_MAX` 2.6 m, passing their own cliff); otherwise the aim is the ground under the cursor. Terraces are 0.8 m (one tier), the muzzle 0.95 m, the camera pitch 66 deg (1 m of height moves the cursor's ground 0.45 m). Before = the old cut at chest height nudged twice by the ground there; measured by the `tier_up` / `tier_down` shots of `--aimkit-check --shots-dir` on the tier-0 map, the rest computed.
+
+| Case | Skillshot (before -> now) | Ground cast (before -> now) |
+|---|---|---|
+| Same tier, open ground | flat, at your height (= source) | landed 0.42 m short of the cursor's ground (toward the camera) -> at it |
+| Foe one tier up on a ledge, cursor on them | climbs to them over their cliff and hits (ours, not the source's flat shot; kept) | at their feet on the ledge (= source) |
+| Foe one tier down, cursor on them | dips to them and hits (kept) | at their feet below (= source) |
+| No foe, cursor just past a lip | `aim_y` of the wrong tier past a lip facing the camera (0.00 instead of 0.80; one tier still clears the muzzle, two would fly into the face) -> the tier under the cursor | behind the lip you stand on: on the upper tier 0.80 m short (wrong tier) -> on the lower tier at the cursor (0.01 m) |
+| Cliff 4+ tiers away (past the old 3-tier cut) | flat into the cliff face (= source; `AIM_DY_MAX` keeps it) | cut at your chest: ~1.0 m past the cursor -> at the cursor |
+
+Fixed (worst case: a cast on the wrong tier): with no foe under the cursor the aim is the first ground the cursor's ray meets, `AimMode.ray_ground`, the walk Vireo's ult landing already did (moved there, so both share it). A ray striking a cliff face takes that cliff's top at its lip; ground hidden behind a lip is never picked; over the abyss the aim stays on your own height. Asserts: the 8 `tier:` checks in `--aimkit-check`.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.

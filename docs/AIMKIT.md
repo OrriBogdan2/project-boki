@@ -35,6 +35,7 @@ Helpers for kit-driven shots and placements:
 var d := AimMode.dist(h, 12.0)                  # cursor distance clamped to [1.5, 12]
 var d2 := AimMode.dist(h, 12.0, AimMode.MAX)    # 12
 var at := AimMode.point(h, 9.0)                 # the ground point at the cursor, clamped to 9 m
+var g := AimMode.ray_ground(world, ray, h.pos.y)  # the first ground a cursor ray meets (Match._mouse_aim)
 var md := AimMode.mode_of(h)                    # what the next shot will do (does not consume)
 m.spawn_shot(h, start, dir * spd, dmg, AimMode.dist(h, rng) / spd, size, col, extra)
 ```

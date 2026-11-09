@@ -2,9 +2,11 @@ extends RefCounted
 ## --aimkit-check: the shared aiming kit (docs/AIMKIT.md, scripts/match/aim/). The aim-mode math
 ## (cursor clamped to range vs always max range, the per-shot override through Hunter._emit_shot, the
 ## boom default kept), every telegraph shape shown, updated, expired and hidden, who sees what, the
-## membership tests, pooling (no node growth over 300 frames of every shape), the cursor states (charge
-## ring, full flare, perfect star) and the merge-start cleanup through ArchKit.drop_holds().
-## With --shots-dir=<dir>: one screenshot per telegraph and cursor state (aimkit_*.png).
+## membership tests, the cursor's ground at terrace lips and cliffs (AimMode.ray_ground), pooling (no node
+## growth over 300 frames of every shape), the cursor states (charge ring, full flare, perfect star) and the
+## merge-start cleanup through ArchKit.drop_holds().
+## With --shots-dir=<dir>: one screenshot per telegraph and cursor state (aimkit_*.png), and the cursor at
+## two terrace lips (aimkit_tier_*.png).
 
 var main: Node
 var fails := 0
@@ -31,6 +33,7 @@ func run(main_node: Node) -> void:
 	_shapes(m, P, T)
 	_seen(m, P, T)
 	_membership()
+	_tiers(m, P)
 	_pooling(m, P, T)
 	await _reticle(m, P)
 	_cleanup(m, P)
@@ -164,6 +167,54 @@ func _seen(m: Match, P: Hunter, T: Hunter) -> void:
 	AimKit.clear(T)
 	L.rebuild()
 	ok("clear: drops one hunter's set only", not AimKit.shown(T, "slam") and L.built == 0)
+
+## The cursor's ray at the game camera's 66 degree pitch, aimed so it first touches `at`.
+func _ray(at: Vector3) -> Array:
+	var d := Vector3(0, -sin(deg_to_rad(66.0)), -cos(deg_to_rad(66.0)))
+	return [at - d * 30.0, d]
+
+## The strip north of z0 (rows z < z0) raised or lowered to `lv` (data only: the check runs headless).
+func _terrace(m: Match, P: Hunter, z0: int, lv: int) -> void:
+	var W = m.world
+	var hx := int(floor(P.pos.x))
+	for z in range(z0 - 6, z0):
+		for x in range(hx - 4, hx + 5):
+			W.level[W.idx(x, z)] = lv
+
+## The cursor's ground at terraces: the first ground its ray meets, on that ground (the old cut at chest
+## height, nudged twice by the ground there, put a cast on the wrong tier behind a lip, gave the upper tier
+## the lower one's height just past a lip, and stopped looking more than 3 tiers away).
+func _tiers(m: Match, P: Hunter) -> void:
+	var W = m.world
+	var lv := int(round(P.pos.y / World.LEVEL))
+	var z0 := int(floor(P.pos.z)) - 2      # the lip: rows north of it are the other terrace
+	var y0 := lv * World.LEVEL
+	var x := P.pos.x + 0.3
+	var flat := Vector3(x, y0, P.pos.z - 1.0)
+	var g := AimMode.ray_ground(W, _ray(flat), P.pos.y)
+	ok("tier: flat ground is the ground point under the cursor", g.distance_to(flat) < 0.05, str(g - flat))
+	_terrace(m, P, z0, lv + 1)
+	var up := Vector3(x, y0 + World.LEVEL, z0 - 0.2)
+	g = AimMode.ray_ground(W, _ray(up), P.pos.y)
+	ok("tier: one up, just past the lip: the upper tier at the cursor", g.distance_to(up) < 0.05, str(g - up))
+	g = AimMode.ray_ground(W, _ray(Vector3(x, y0 + 0.4, z0)), P.pos.y)
+	var on_lip := absf(g.y - up.y) < 0.01 and absf(g.z - z0) < 0.1
+	ok("tier: on the cliff face: the top of that cliff, at its lip", on_lip, str(g))
+	_terrace(m, P, z0, lv - 1)
+	var down := Vector3(x, y0 - World.LEVEL, z0 - 0.6)
+	g = AimMode.ray_ground(W, _ray(down), P.pos.y)
+	ok("tier: one down, behind the lip you stand on: the lower tier", g.distance_to(down) < 0.05, str(g - down))
+	g = AimMode.ray_ground(W, _ray(Vector3(x, y0 - World.LEVEL, z0 - 0.1)), P.pos.y)
+	ok("tier: lower ground hidden by the lip: the lip you see", absf(g.y - y0) < 0.01 and g.z >= z0, str(g))
+	_terrace(m, P, z0, lv + 4)
+	var tall := Vector3(x, y0 + 4.0 * World.LEVEL, z0 - 1.0)
+	g = AimMode.ray_ground(W, _ray(tall), P.pos.y)
+	ok("tier: four up (past the old 3-tier cut): the top at the cursor", g.distance_to(tall) < 0.05, str(g - tall))
+	P.inp["aim"] = Vector3(g.x, P.pos.y + 0.95, g.z)
+	var at := AimMode.point(P, 12.0)
+	ok("tier: a ground cast there lands on that top", at.distance_to(tall) < 0.05, str(at - tall))
+	_terrace(m, P, z0, lv)
+	ok("tier: over the abyss: none", AimMode.ray_ground(W, _ray(Vector3(-50, 0, -50)), P.pos.y) == Vector3.INF)
 
 func _membership() -> void:
 	var o := Vector3.ZERO
