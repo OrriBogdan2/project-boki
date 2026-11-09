@@ -55,7 +55,7 @@ func run(m: Node) -> void:
 	_bond_all(shy, foes, -0.9)
 	_days([shy] + foes, 7)
 	ok(is_equal_approx(_brave(shy), 0.1), "three brave rivals do not pull (%.3f)" % _brave(shy))
-	ok(not shy.has("journal"), "no journal line when nothing moved")
+	ok(shy.get("journal", []).is_empty(), "no journal line when nothing moved")
 
 	var edge := _rec("zapple", "Fen", 0.32)
 	var pal := _rec("cindle", "Ash2", 0.9)

@@ -31,6 +31,7 @@ const AT_TOY := 1.4        # m: a Boki this close to a toy is at it (two here sh
 const GREET := 2.5         # m: friends this close greet each other
 const PILE_JOIN := 1.0     # m: close enough to a napping friend to lie down with it
 const PILE_WALK := 8.0     # s a Boki walks to a pile before it naps where it is
+const TOY_PLAY := -1.0      # life_for while home_toys.gd (k["play"]) runs the play, not this machine
 const GRUMPY := 30.0       # joy need below which a Boki naps alone
 
 var h                      # the home (home.gd): kins, world, day_t, ppos, emotes
@@ -72,7 +73,7 @@ func find_toys() -> void:
 func machine(k: Dictionary) -> Fsm:
 	if not k.has("life"):
 		var m := Fsm.new(PackedStringArray(NAMES), TABLE, S.ROAM, "boki:" + String(k["rec"]["name"]))
-		m.guard(S.PLAY, func(_from: int) -> bool: return not toys.is_empty())
+		m.guard(S.PLAY, func(_from: int) -> bool: return not toys.is_empty() or k.has("play"))
 		m.guard(S.PLAY_WITH, func(_from: int) -> bool: return _awake(k))
 		m.guard_from(S.NAP, S.ROAM, func() -> bool: return float(k.get("nap_t", 0.0)) <= 0.0)
 		m.on_enter(S.ROAM, func(_from: int) -> void: k["t"] = 0.0)
@@ -184,6 +185,8 @@ func _tick(k: Dictionary, dt: float) -> void:
 		_nap(k, "night")
 	elif float(k.get("nap_t", 0.0)) > 0.0 and not m.is_in(S.NAP):
 		m.go(S.NAP, "dozed")
+	if k.has("play") and m.is_in(S.ROAM) and m.go(S.PLAY, "toy"):
+		k["life_for"] = TOY_PLAY      # home_toys.gd has it at a toy: the machine says so and lets go when it does
 	match m.state:
 		S.ROAM, S.MENTOR:
 			if k.has("eat"):
@@ -221,6 +224,10 @@ func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 			add_bond(k["rec"], o["rec"], float(R["bond_nap"]) * dt * 0.5)      # each of the pair adds half
 
 func _play_tick(k: Dictionary, m: Fsm, dt: float) -> void:
+	if float(k["life_for"]) == TOY_PLAY:
+		if not k.has("play"):
+			m.go(S.ROAM, "played")
+		return
 	var toy: Vector3 = k["life_at"]
 	if Vector2(toy.x - k["pos"].x, toy.z - k["pos"].z).length() < AT_TOY:
 		k["hop"] = float(k.get("hop", 0.0)) + dt * 6.0      # bounces about at it

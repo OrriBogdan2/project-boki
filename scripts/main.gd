@@ -1141,8 +1141,12 @@ func _economy_check() -> void:
 		line.append("%.1fd: %s (food %d, %.0fh starving, trust %d)" % [days, st if st != "" else "fine", int(Care.need(r2, "food")), Care.starve_h(r2), int(r2["trust"])])
 	print("ECON  starving timeline: " + "  |  ".join(line))
 	var sick: Dictionary = Save.d["roster"][0]
-	ok.call(not died and Care.starve_stage(sick) == "sick", "natural_death off: 14 days unfed is sick at worst, never dead (%s)" % Care.starve_stage(sick))
-	for meal in 12: Care.feed(sick, "kibble"); Care.feed(sick, "kibble"); Care.tick(sick, 1200.0)
+	var stage := Care.starve_stage(sick)
+	ok.call(not died and stage == "sick", "natural_death off: 14 days unfed is sick at worst, never dead (%s)" % stage)
+	for meal in 12:
+		Care.feed(sick, "kibble")
+		Care.feed(sick, "kibble")
+		Care.tick(sick, 1200.0)
 	ok.call(Care.starve_stage(sick) in ["", "weak", "refuse"], "four hours of regular meals bring it back from sick (%s, %.0fh)" % [Care.starve_stage(sick), Care.starve_h(sick)])
 	Econ.kin_dies(sick, "starved")      # graves still come from old saves and other losses
 	ok.call(Econ.graves().size() >= 1 and String(Econ.graves()[0]["cause"]) == "starved" and String(Econ.graves()[0]["name"]) == "Pip", "a grave with its name (%d graves, %d memories)" % [Econ.graves().size(), (Econ.graves()[0]["mem"] as Array).size() if Econ.graves().size() > 0 else 0])

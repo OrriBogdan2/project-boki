@@ -20,6 +20,8 @@ check: `--base-life-check`.
 - Readout: `BaseLife.readout()` (state, seconds in it, refusals, last transition, bonds per Boki, printed by the
   check). Each machine registers in `Fsm.live` as `boki:<name>`, so the F7 FsmReadout lists them once ext/fsm-m1
   lands.
+- Toys at home_toys.gd (k["play"]): the machine mirrors them as Play (`TOY_PLAY`), so the history never says Roam while a Boki plays.
+- Soak: `--garden-soak` (tools/garden_soak.gd) lives six Boki 30 in-game days (friends, rivals, baby, retired elder, three toys, snack patch, Dash and Shove each third day, daily feeding) at 0.25 s steps without frames (about 10 s), fails on a stuck state, a need outside 0..100, a NaN or out-of-range trait, a bond outside -1..1, a toy held 60 s, the save over 2x, or an engine error, and writes every state change to user://garden_soak.json.
 - Toys: placed layout items whose id is in `toys` (today only the Training post; GARDEN.md 9.3 adds more).
 - Legacy (GARDEN.md section 3, `scripts/core/mentor.gd`): an Elder (stage 16) retires from its card ("Retire as
   mentor", one-line confirm, `scripts/home/mentor_card.gd`; needs the Soul Shrine, not your partner). `rec["mentor"]
