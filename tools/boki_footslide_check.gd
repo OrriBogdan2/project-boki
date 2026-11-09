@@ -1,26 +1,31 @@
 extends RefCounted
-## --boki-footslide-check: a rigged Boki's walk and run keep their planted foot under the ground it covers.
-## Each species is moved at SPEEDS (m/s) through the live rig; the foot speed is measured off the clip it picks
-## (planted paw, back along the body, at speed_scale 1), times the speed_scale it got, and compared with the speed.
-## Slip is the difference per stride. BokiRig.STRIDE must also match what the clips measure.
+## --boki-footslide-check: a rigged Boki's walk and run keep their feet still on the ground it covers.
+## Each species is moved at SPEEDS (m/s) through the live rig, unscaled and at the size roll's ends; for the clip
+## and speed_scale it picks, each foot's slide while it is down is measured off the clip and compared with the
+## ground the body covers in the same loop (the stride). BokiRig.STRIDE must also match what the clips measure.
 ## Prints PASS/FAIL lines.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Check := preload("res://tools/boki_rig_check.gd")
 const SPEEDS := [1.0, 3.0]
-const SLIP_MAX := 0.15        # of a stride: the planted foot may slide this far per step
+const SIZES := [1.0, 0.8, 1.25]       # the Boki's world scale: a size roll scales its stride too
+const SLIP_MAX := 0.15        # of a stride: how far a foot may slide on the ground per loop
 const STRIDE_TOL := 0.05      # BokiRig.STRIDE vs the measured clip, as a fraction
 const FEETLESS := 0.1         # m/s: a foot that sweeps less than this is not stepping (it floats, glides or is tucked)
 const GLIDE_STRIDE := [1.5, 2.9]      # what such a Boki keeps: BokiRig.STRIDE before it was measured
-## Ratchet: gaits (species x speed) too short a stride even at BokiRig.MAX_CADENCE (docs/DEBT.md).
-const MAX_SHORT := 13
+## Ratchet: gaits whose clip slides more than SLIP_MAX at any rate BokiRig picks (an uneven stance, or too short a
+## step even at BokiRig.MAX_CADENCE), with the most they may slide. Lower or drop a row when a clip is re-keyed.
+const OVER := {
+	"cindle run": 0.16, "rimeshrew run": 0.17, "wisplet walk": 0.17, "wisplet run": 0.16, "zapple walk": 0.24,
+	"zapple run": 0.28, "kestrike run": 0.18, "kindlewren run": 0.18, "lodestick walk": 0.25, "lodestick run": 0.31,
+	"mossgrade walk": 0.22,
+}
 const SAMPLES := 48           # poses per loop
-const PLANTED := 0.5          # the lowest this fraction of a foot's lift counts as planted
+const PLANTED := 0.5          # a foot in the lowest this fraction of its lift, moving back, is on the ground
 ## Bones that are not limbs when a Boki has no paws and its lowest limb stands in for a foot.
 const NOT_LIMB := ["root", "hips", "spine", "neck", "head"]
 
 var bad := 0
-var short_clips := 0
 
 func ok(cond: bool, what: String) -> void:
 	print("BOKIFOOT %s %s" % ["PASS" if cond else "FAIL", what])
@@ -30,7 +35,6 @@ func ok(cond: bool, what: String) -> void:
 func run(main: Node) -> void:
 	for id in Check.SPECIES_LIST:
 		await _species(main, id)
-	ok(short_clips <= MAX_SHORT, "%d gaits too short a stride at full cadence (ratchet %d)" % [short_clips, MAX_SHORT])
 	print("BOKIFOOT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -40,31 +44,42 @@ func _species(main: Node, id: String) -> void:
 	await main.get_tree().process_frame
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 	rig.manual = true
-	var stride: Array = BokiRig.STRIDE[id]
-	var measured := [foot_speed(rig, "walk"), foot_speed(rig, "run")]
+	var steps := {}
+	var measured: Array = []
+	for clip in ["walk", "run"]:
+		steps[clip] = contact_steps(rig, clip)
+		measured.append(stride(steps[clip], rig.player.get_animation(clip).length))
 	print("BOKIFOOT %s measured walk %.2f run %.2f m/s" % [id, measured[0], measured[1]])
 	if measured.min() < FEETLESS:
-		ok(stride == GLIDE_STRIDE, "%s has no stepping feet, so it keeps the shared stride" % id)
+		ok(BokiRig.STRIDE[id] == GLIDE_STRIDE, "%s has no stepping feet, so it keeps the shared stride" % id)
 		k.queue_free()
 		return
 	for i in 2:
-		var near: bool = absf(measured[i] - stride[i]) <= STRIDE_TOL * measured[i]
-		ok(near, "%s %s stride %.2f matches its clip" % [id, ["walk", "run"][i], stride[i]])
-	for v in SPEEDS:
-		rig._speed = v
-		rig._pick_clip(0.016)
-		var planted: float = measured[1 if rig.clip == "run" else 0] * rig.player.speed_scale
-		var slip := absf(v - planted) / planted
-		var cap := BokiRig.MAX_CADENCE * rig.player.get_animation(rig.clip).length
-		var short := slip >= SLIP_MAX and is_equal_approx(rig.player.speed_scale, cap)
-		var what := "%s at %.0f m/s (%s x%.2f)" % [id, v, rig.clip, rig.player.speed_scale]
-		var verdict := " (clip too short)" if short else ""
-		ok(slip < SLIP_MAX or short, "%s slips %.0f%% of a stride%s" % [what, slip * 100.0, verdict])
-		short_clips += int(short)
+		var near: bool = absf(measured[i] - BokiRig.STRIDE[id][i]) <= STRIDE_TOL * measured[i]
+		ok(near, "%s %s stride %.2f matches its clip" % [id, ["walk", "run"][i], BokiRig.STRIDE[id][i]])
+	for grown in SIZES:
+		k.scale = Vector3.ONE * grown
+		rig._keep_flex()
+		for v in SPEEDS:
+			_gait(rig, steps, id, grown, v)
 	k.queue_free()
 
-## m/s the planted foot moves back at speed 1 in `clip` (the median of the feet), from SAMPLES poses over its loop.
-static func foot_speed(rig: BokiRig, clip: String) -> float:
+## One species at one size and speed: the clip and rate the rig picks, and how far its feet slide at them.
+func _gait(rig: BokiRig, steps: Dictionary, id: String, grown: float, v: float) -> void:
+	rig._speed = v
+	rig._pick_clip(0.016)
+	var length := rig.player.get_animation(rig.clip).length
+	var sc := rig.player.speed_scale
+	var slid := slip(steps[rig.clip], length, v / grown, sc)
+	var limit: float = OVER.get("%s %s" % [id, rig.clip], SLIP_MAX)
+	var why := " (at full cadence)" if is_equal_approx(sc, BokiRig.MAX_CADENCE * length) else ""
+	var what := "%s x%.2f at %.0f m/s (%s x%.2f)" % [id, grown, v, rig.clip, sc]
+	ok(slid < limit, "%s slides %.0f%% of a stride%s, under %.0f%%" % [what, slid * 100.0, why, limit * 100.0])
+
+## Per foot, the back-along-the-body step (m, models face -Z) of each of SAMPLES even slices of `clip` at speed 1
+## while the foot is down (both ends in the lowest PLANTED of its lift, moving back), NAN while it is up or swinging
+## forward. The clips are swung from the hips, so a paw also passes low on its way forward.
+static func contact_steps(rig: BokiRig, clip: String) -> Array:
 	rig.set_clip(clip, 0.0)
 	var anim := rig.player.get_animation(clip)
 	var skel := rig.skeleton()
@@ -78,11 +93,48 @@ static func foot_speed(rig: BokiRig, clip: String) -> float:
 		for f in feet.size():
 			var at := skel.get_bone_global_pose(feet[f]).origin
 			paths[f].append(rig.model.to_local(skel.to_global(at)))
-	var speeds: Array = []
+	var steps: Array = []
 	for path in paths:
-		speeds.append(_planted_speed(path, anim.length / SAMPLES))
-	speeds.sort()
-	return speeds[speeds.size() / 2]
+		steps.append(_steps(path))
+	return steps
+
+static func _steps(path: Array) -> Array:
+	var lo := INF
+	var hi := -INF
+	for p: Vector3 in path:
+		lo = minf(lo, p.y)
+		hi = maxf(hi, p.y)
+	var limit := lo + PLANTED * (hi - lo) + 0.0005
+	var out: Array = []
+	for i in path.size():
+		var a: Vector3 = path[i]
+		var b: Vector3 = path[(i + 1) % path.size()]
+		out.append(b.z - a.z if a.y <= limit and b.y <= limit and b.z > a.z else NAN)
+	return out
+
+## m/s a foot on the ground moves back at speed 1, over every foot's contact (BokiRig.STRIDE).
+static func stride(steps: Array, length: float) -> float:
+	var sum := 0.0
+	var n := 0
+	for foot: Array in steps:
+		for dz: float in foot:
+			if not is_nan(dz):
+				sum += dz
+				n += 1
+	return sum / maxf(n, 1) / (length / SAMPLES)
+
+## The most any foot slides on the ground per loop, as a fraction of the ground covered per loop, when the body
+## moves at `v` m/s and the clip plays at `rate`. A foot down for half the loop at half the body's speed slides 25%.
+static func slip(steps: Array, length: float, v: float, rate: float) -> float:
+	var h := length / SAMPLES
+	var worst := 0.0
+	for foot: Array in steps:
+		var slid := 0.0
+		for dz: float in foot:
+			if not is_nan(dz):
+				slid += absf(h - dz * rate / v)
+		worst = maxf(worst, slid / length)
+	return worst
 
 ## The paws, or the lowest limb bones of a Boki without any.
 static func _feet(skel: Skeleton3D) -> Array:
@@ -99,21 +151,3 @@ static func _feet(skel: Skeleton3D) -> Array:
 	limbs.sort_custom(func(a: int, b: int) -> bool:
 		return skel.get_bone_global_rest(a).origin.y < skel.get_bone_global_rest(b).origin.y)
 	return limbs.slice(0, 2)
-
-## Mean speed (m/s) a foot moves back along the body (models face -Z) while it is in the lower half of its lift.
-static func _planted_speed(path: Array, dt: float) -> float:
-	var lo := INF
-	var hi := -INF
-	for p: Vector3 in path:
-		lo = minf(lo, p.y)
-		hi = maxf(hi, p.y)
-	var limit := lo + PLANTED * (hi - lo) + 0.0005
-	var sum := 0.0
-	var n := 0
-	for i in path.size():
-		var a: Vector3 = path[i]
-		var b: Vector3 = path[(i + 1) % path.size()]
-		if a.y <= limit and b.y <= limit and b.z > a.z:
-			sum += (b.z - a.z) / dt
-			n += 1
-	return sum / maxf(n, 1)

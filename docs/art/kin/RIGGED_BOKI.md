@@ -49,9 +49,12 @@ A Boki without legs (Zephyrak) writes all its own clips: the body is a chain ben
 To add a species: copy `prismander*.py` to its own shapes, coat and clips, add it to `SPECS` (`build_boki.py`),
 `MODULES` (`build_fusion.py`), `BokiRig.FRAME` and `BokiFusion.SPECIES`.
 
-Stride: `BokiRig.STRIDE[species]` is `[walk, run]`, the m/s a planted paw moves back along the body at `speed_scale` 1,
-measured off the clips (`boki_footslide_check.foot_speed`: the lower half of the lift, moving back). `_pick_clip` sets
-`speed_scale = speed / stride`, kept under `MAX_CADENCE` cycles/s; a Boki with no stepping feet (Zephyrak, Gloamshell,
-Selenfin, Glomwort, Thrumbird) keeps 1.5 / 2.9. A new or re-keyed species: run `--boki-footslide-check`, copy the
-printed "measured" numbers into `STRIDE`. `--boki-footslide-check` moves each at 1 and 3 m/s and asserts slip under 15%
-of a stride, except where the clip is too short even at full cadence (counted, ratcheted, see `docs/DEBT.md`).
+Stride: `BokiRig.STRIDE[species]` is `[walk, run]`, the m/s a paw on the ground moves back along the body at
+`speed_scale` 1 and model scale 1, measured off the clips (`boki_footslide_check.contact_steps`: low in its lift and
+moving back; the legs swing from the hips, so a paw also passes low on its way forward). `_pick_clip` sets
+`speed_scale = speed / (stride x the model's world scale)`, so a size roll's bigger Boki steps longer, kept under
+`MAX_CADENCE` cycles/s; a Boki with no stepping feet (Zephyrak, Gloamshell, Selenfin, Glomwort, Thrumbird) keeps
+1.5 / 2.9. A new or re-keyed species: run `--boki-footslide-check`, copy the printed "measured" numbers into `STRIDE`.
+The check moves each at 1 and 3 m/s, at scale 0.8, 1 and 1.25, and asserts each foot slides under 15% of the ground
+covered per loop, except the gaits in its `OVER` list (the clip's own slide, a ceiling that only comes down,
+`docs/DEBT.md`).
