@@ -70808,5 +70808,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/galleotter_edit_v2b_1.jpg",
     "ok": true
+  },
+  {
+    "id": "rd_forgebrock_v2",
+    "name": "Forgebrock (redesign concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd_forgebrock_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_furnacowary_v2",
+    "name": "Furnacowary (redesign concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd_furnacowary_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_furnacowary_v2",
+    "name": "Furnacowary (redesign concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd_furnacowary_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_gongrowl_v2",
+    "name": "Gongrowl (redesign concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd_gongrowl_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_gongrowl_v2",
+    "name": "Gongrowl (redesign concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd_gongrowl_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_gongrowl_v2",
+    "name": "Gongrowl (redesign concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd_gongrowl_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_barostorm_v2",
+    "name": "Barostorm (redesign concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd_barostorm_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_barostorm_v2",
+    "name": "Barostorm (redesign concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd_barostorm_v2_2.jpg",
+    "ok": true
   }
 ]
