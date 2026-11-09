@@ -44369,5 +44369,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_selenwhale_p83_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_selenwhale_p83",
+    "name": "Selenwhale (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_selenwhale_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tidalisk_p83",
+    "name": "Tidalisk (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_tidalisk_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tidalisk_p83",
+    "name": "Tidalisk (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_tidalisk_p83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenwhale_p83",
+    "name": "Selenwhale (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_selenwhale_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tidalisk_p83",
+    "name": "Tidalisk (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_tidalisk_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_umbrathere_p83",
+    "name": "Umbrathere (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_umbrathere_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_umbrathere_p83",
+    "name": "Umbrathere (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_umbrathere_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_umbrathere_p83",
+    "name": "Umbrathere (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_umbrathere_p83_3.jpg",
+    "ok": true
   }
 ]
