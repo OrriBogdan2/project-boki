@@ -64305,5 +64305,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_bullsfrog_t3n2_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_bullsfrog_t3n3",
+    "name": "Bullsfrog final (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_t3n3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog_t3n2",
+    "name": "Bullsfrog final (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_t3n2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog_t3n3",
+    "name": "Bullsfrog final (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_t3n3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog_t3n3",
+    "name": "Bullsfrog final (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_t3n3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog_t3n3",
+    "name": "Bullsfrog final (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_t3n3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog_t3n2",
+    "name": "Bullsfrog final (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_t3n2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrasloth_t2n1",
+    "name": "Pangolith final (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t2n1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrasloth_t2n3",
+    "name": "Pangolith final (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t2n3_1.jpg",
+    "ok": true
   }
 ]
