@@ -1326,4 +1326,4 @@ Format notes before you import (no changes made beyond these, which already happ
 - Bokidex now imports `ART <id> reject <path> grade=X` lines and shows them as rejected with their grade. Old reject lines with no grade are still skipped.
 - The 20 look-alike redesign species (approved.json redesign_lookalike) are flipped to "redo" in the Bokidex. That's 25 gens including portraits, Chandelapi's 21:12 approval among them. The old sheets stay as the baked hero until the new art passes. No 3D work is queued on any of them. 3D for these 20 is on hold until a new ART pass line lands.
 - Portraits: new Pokédex-style ART portrait_ lines import as normal. The newest approved portrait wins.
-- Relics: the 5 PROPOSED relics (Tenzo, Lace, Neve, Sparkle, Albert) were sent to the owner for confirmation. Default if he says nothing: run them as written.
+- Relics: the 5 PROPOSED relics (Tenzo, Lace, Neve, Sparkle, Albert) were sent to the owner for confirmation. Owner 11-09: yes to all 5, run them as written, after the Boki are done.
