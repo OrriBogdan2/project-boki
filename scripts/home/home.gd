@@ -3131,6 +3131,7 @@ func _open_kin(rec: Dictionary) -> void:
 			_toast("%s curled up in the Boki Burrow (%s)" % [rec["name"], KinBox.page_name(KinBox.page_of(rec))])
 			_open_kin(rec)))
 	fl.add_child(UI.ghost("Boki Burrow", func(): KinBoxView.sel = String(rec["uid"]); KinBoxView.page = KinBox.page_of(rec) if KinBox.is_boxed(rec) else KinBoxView.page; _open_burrow()))
+	MentorCard.add(self, fl, rec)
 	if rec.get("farmhand", false):
 		fl.add_child(UI.ghost("Stop farming", func():
 			rec.erase("farmhand")
@@ -4204,7 +4205,8 @@ func _care_step(k: Dictionary, d: float) -> void:
 
 ## Speed multiplier for a tired kin.
 func _care_speed(rec: Dictionary) -> float:
-	return (0.7 if Care.need(rec, "energy") < 25.0 else 1.0) * (0.7 if Care.starve_h(rec) >= Care.STARVE["weak"] else 1.0)
+	var tired := 0.7 if Care.need(rec, "energy") < 25.0 else 1.0
+	return tired * (0.7 if Care.starve_h(rec) >= Care.STARVE["weak"] else 1.0) * Mentor.pace(rec)
 
 # ---- care actions, from the kin's card; they play out in the world, not in a menu
 func _care_start(k: Dictionary) -> bool:
@@ -4800,6 +4802,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	var esp: String = rec["species"] if randf() < 0.5 else ok["species"]
 	Save.d["egg"] = {"a": rec["uid"], "b": ok["uid"], "sp": esp, "m": int(Save.d["matches"]) + 1, "t": Time.get_unix_time_from_system() + 600.0}
 	rec["bred_m"] = int(Save.d["matches"]); ok["bred_m"] = int(Save.d["matches"])
+	Save.d["egg"]["gift"] = Mentor.take_gift()      # a retired mentor's gift for this egg ({} if none)
 	Save.remember(rec, "egg", "had an egg with %s" % ok["name"], 2.0)
 	Save.remember(ok, "egg", "had an egg with %s" % rec["name"], 2.0)
 	Save.save_game()
@@ -4895,6 +4898,7 @@ func _hatch_nest_egg() -> void:
 		return
 	var rng := RandomNumberGenerator.new(); rng.randomize()
 	var baby := Care.hatch_rare(egg, rng) if rare else Care.breed(a, b, rng, _egg_species())
+	Mentor.apply(baby, egg.get("gift", {}))
 	Save.d["egg"] = {}
 	_hatch_play(baby, rare, String(egg.get("boss", "")), NEST_AT, nest.get_node("Shell") if is_instance_valid(nest) else null)
 
@@ -4975,6 +4979,8 @@ func _name_baby(baby: Dictionary) -> void:
 		v.add_child(UI.label("A rare %s%s%s, hatched from the egg %s guarded. %s nature." % ["shimmering " if baby.get("shimmer", false) else "", (rare_pre + " ") if rare_pre != "" else "", sp["name"], String(Data.MOBS.get(String(baby.get("from_boss", "")), {}).get("name", "a boss")), Care.nature(baby)], 15))
 	else:
 		v.add_child(UI.label("A %s%s%s, child of %s and %s. %s nature." % ["shimmering " if baby.get("shimmer", false) else "", (rare_pre + " ") if rare_pre != "" else "", sp["name"], baby["parents"][0], baby["parents"][1], Care.nature(baby)], 15))
+	if baby.has("gift"):
+		v.add_child(UI.label(Mentor.line(baby["gift"]), 15, UI.ACCENT_HI))
 	for mid in Mutations.of(baby):
 		var mr := UI.hbox(8)
 		var mtl := UI.label("%s: %s" % [Mutations.name_of(mid), Mutations.perk_text(mid)], 14, UI.INK)

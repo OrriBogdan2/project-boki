@@ -21,3 +21,11 @@ check: `--base-life-check`.
   check). Each machine registers in `Fsm.live` as `boki:<name>`, so the F7 FsmReadout lists them once ext/fsm-m1
   lands.
 - Toys: placed layout items whose id is in `toys` (today only the Training post; GARDEN.md 9.3 adds more).
+- Legacy (GARDEN.md section 3, `scripts/core/mentor.gd`): an Elder (stage 16) retires from its card ("Retire as
+  mentor", one-line confirm, `scripts/home/mentor_card.gd`; needs the Soul Shrine, not your partner). `rec["mentor"]
+  = {gifted}`. In `BaseLife` it is the MENTOR state: slow steps (`Mentor.PACE`, `mentor`/`mentor_radius` in the
+  rules) near the shrine, eating and napping with the rest, no jobs. At the next egg laid in the Nook
+  (`home.gd _make_egg`) the first mentor with a gift left gives ONE: a trait (the baby's pulled toward the
+  mentor's strongest), a habit (its quirk) or a memory line, kept on `egg["gift"]`, applied on hatching and shown
+  on the hatch card (`baby["gift"]`). Nothing resets; old saves lack the keys and need no migration.
+  `--mentor-check` covers it. Not done: a mentor can still be made your partner; only one gift per retirement.

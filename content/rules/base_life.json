@@ -28,6 +28,10 @@
 	"bond_nap_doc": "per second two Boki nap side by side.",
 	"bond_squabble": -0.16,
 	"bond_squabble_doc": "added when two Boki squabble over a toy or their tempers clash.",
+	"mentor": [6.0, 12.0],
+	"mentor_doc": "s between a retired mentor's slow steps near the Soul Shrine (Mentor, GARDEN.md section 3).",
+	"mentor_radius": 3.0,
+	"mentor_radius_doc": "m from the Soul Shrine a mentor strolls.",
 	"clash": 0.55,
 	"clash_doc": "the summed temper above 1.0 at which two Boki that meet may squabble; higher tempers squabble more."
 }

@@ -3,7 +3,8 @@ extends RefCounted
 ## Base life (briefs/design/GARDEN.md section 4), on only with farm_build.json base_mode: each farm Boki lives on
 ## its own through one explicit state machine (Fsm, briefs/STATE_MACHINES.md). It roams, eats at a feeder, naps
 ## (friends in a pile; night is nap time unless it is nocturnal, Work.NOCTURNAL), plays at a toy, plays tag with
-## another Boki, stares at a rival or comes to look at a newcomer. Tag and napping together build friendship,
+## another Boki, stares at a rival or comes to look at a newcomer. A retired mentor (Mentor) only strolls slowly
+## near the Soul Shrine (MENTOR), eats and naps, joining the piles. Tag and napping together build friendship,
 ## squabbles over a toy or clashing tempers build rivalry, kept as rec["bonds"] = {uid: -1..1}. Friends greet and
 ## nap in a pile; rivals stare and huff.
 ##
@@ -11,10 +12,11 @@ extends RefCounted
 ## them has a Boki, its machine waits. home.gd asks choose() when a free Boki's think timer runs out, after its
 ## care and job picks; step() moves every machine on at 10 Hz. Tuning: content/rules/base_life.json.
 
-enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT }
-const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React"]
+enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR }
+const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor"]
 const TABLE := {
-	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT],
+	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR],
+	S.MENTOR: [S.ROAM, S.EAT, S.NAP],
 	S.EAT: [S.ROAM, S.NAP],
 	S.NAP: [S.ROAM],
 	S.PLAY: [S.ROAM, S.NAP, S.WATCH, S.REACT],
@@ -125,7 +127,7 @@ func readout() -> String:
 ## A free roaming Boki whose think timer ran out picks what to do next (home.gd, after care and jobs).
 func choose(k: Dictionary) -> void:
 	var m := machine(k)
-	if not m.is_in(S.ROAM):
+	if not m.is_in(S.ROAM) and not m.is_in(S.MENTOR):
 		return
 	var rec: Dictionary = k["rec"]
 	var pers: Dictionary = k.get("pers", {})
@@ -137,6 +139,9 @@ func choose(k: Dictionary) -> void:
 		return
 	if not _awake(k) or Care.need(rec, "energy") < float(R["tired_at"]):
 		_nap(k, "tired")
+		return
+	if Mentor.is_mentor(rec):
+		_mentor(k)
 		return
 	var near := _near(k)
 	_greet(k, near)
@@ -175,7 +180,7 @@ func _tick(k: Dictionary, dt: float) -> void:
 	elif float(k.get("nap_t", 0.0)) > 0.0 and not m.is_in(S.NAP):
 		m.go(S.NAP, "dozed")
 	match m.state:
-		S.ROAM:
+		S.ROAM, S.MENTOR:
 			if k.has("eat"):
 				m.go(S.EAT, "feeder")
 		S.EAT:
@@ -276,6 +281,19 @@ func _lie_down(k: Dictionary) -> void:
 	k["z_t"] = 0.5
 	k["goal"] = k["pos"]
 	k["t"] = float(k["nap_t"])
+
+## A retired mentor: calm and slow, always near the Soul Shrine (anywhere on the farm if none is marked out).
+func _mentor(k: Dictionary) -> void:
+	var m := machine(k)
+	if not m.is_in(S.MENTOR) and not m.go(S.MENTOR, "retired"):
+		return
+	k["t"] = randf_range(R["mentor"][0], R["mentor"][1])
+	var shrine: Vector3 = h.lots["shrine"]["at"] if h.lots.has("shrine") else h.FAR
+	if shrine == h.FAR:
+		k["goal"] = h.world.random_ground(maxi(h.world.island_of(k["pos"].x, k["pos"].z), 0))
+		return
+	var r := float(R["mentor_radius"])
+	k["goal"] = h.world.free_spot_near(shrine + Vector3(randf_range(-r, r), 0, randf_range(-r, r)), [], 0.8)
 
 func _play(k: Dictionary, toy: Vector3) -> void:
 	if not machine(k).go(S.PLAY, "toy"):
