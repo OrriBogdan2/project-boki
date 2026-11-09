@@ -234,3 +234,14 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
 - The network protocol. Movement runs on the owning machine, and remote hunters still use `net_follow`.
 - Landing performance (branch `landhitch`).
+
+## Golden traces: nothing changes how a Hunter moves by accident
+
+`--feel-golden-check` (`tools/feel_golden_check.gd`) catches silent feel changes from any branch. Each of the 12 Hunters plays nine fixed input scripts on the real match step at 60 Hz, on a flat square with a 5-terrace wall to the east: run, stop, jump, dash tap, dash hold, wall kick, double-press glide, dive, crouch walk. Each script is 2.5 s. Position (relative to the start) and velocity are sampled every 0.1 s and stored in `content/rules/feel_golden.json`. The check replays the scripts and fails if any sample is more than 0.05 m or 0.1 m/s off. It is deterministic (fixed steps, fixed seed) and never touches the save.
+
+```
+XDG_DATA_HOME=<scratch> godot --headless --path . -- --feel-golden-check            # verify
+XDG_DATA_HOME=<scratch> godot --headless --path . -- --feel-golden-check --update   # rewrite the golden
+```
+
+When it fails: if the change was not meant to alter movement, fix the change. If the feel change is intended (a tuning pass, a new kit move), run with `--update` and commit the new `feel_golden.json` in the same commit, with the reason in the commit message ("feel golden: dash 10% shorter for Cinder, owner 11-09"). Update the targets above too if a measured row moved. A golden diff with no reason in the message is a review reject.
