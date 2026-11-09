@@ -1,6 +1,7 @@
 extends Node3D
 ## Every kin species side by side, glowing as they do when they're out in a fight. Open
-## tests/kin_gallery.tscn and press F6 to look at them (or to check a new kin you added in content/kin).
+## tests/kin_gallery.tscn and press F6 to look at them (or to check a new kin you added in content/kin),
+## or start the game with -- --kin-gallery (how GPU jobs run it).
 ## --kin-wisps: the Model Room's Boki wisps (BokiWispLook), each bouncing in front of its Boki, for the
 ## WISP_ROOM species; add --kin-shiny for their shiny colours. Use with --shot / --frames.
 
@@ -60,6 +61,12 @@ func _ready() -> void:
 			_add_wisp(String(ids[i]), rec, k)
 	_camera(close, ids.size() if show_wisps else 0)
 	set_process(show_wisps)
+
+## Started from Main by --kin-gallery (CheckRegistry): stands in for the title screen.
+func run(main: Node) -> void:
+	if main.get("fade") != null:
+		main.fade.reveal(0.01)
+	main.add_child(self)
 
 func _process(dt: float) -> void:
 	_clock += dt
