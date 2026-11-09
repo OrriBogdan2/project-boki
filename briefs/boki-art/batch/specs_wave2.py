@@ -37,3 +37,34 @@ V('tidalisk','Tidalisk',T+'Bubblisk.jpg','final',
  "A big, powerful basilisk dragon running across the water on its hind legs only when sprinting, here shown on all four, whose back crest is a curling breaking wave of glassy foam and bubbles, its body glossy and rainbow-sheened, its tail ending in a huge bubble-wand loop with a razor rim, and sharp crystal claws.",
  "fierce rainbow eyes and a wide, toothy grin","sea blue and pearly white, with a rainbow sheen accent",
  "standing upright like a person, a held bubble, fish fins",'prism','majestic')
+
+# --- after round 2 grading ---
+DIFF=" It must look clearly different from image 1 at a glance: a different size, a different silhouette and a more developed version of its object, never a copy of image 1."
+V('glassolotl_r','Glassolotl',T+'Prismander.jpg','mid',
+ "A sleek young axolotl twice as long as image 1, low on four longer legs, whose body is now mostly clear glass with a soft rainbow core glowing inside, with long swept-back prism gills like a crown of glass blades, a tall clear glass sail fin along its whole back, and a long glass-bladed tail."+DIFF,
+ "narrower, confident eyes with rainbow sparkles and a sly grin","clear glass and pale pink, with a rainbow accent",
+ "standing upright, wings, looking like image 1",'prism','sleek')
+V('chandelotl_r','Chandelotl',T+'Prismander.jpg','final',
+ "A large, graceful axolotl low on all four legs in every view, its gills grown into a tiered crown of glowing crystal arms with hanging crystal drops, all rooted in its head as part of its body, its long faceted glass body ending in a trailing veil tail of glass fins."+DIFF,
+ "serene, half-lidded eyes full of rainbow light and a calm smile","pale pink and clear glass, with a warm gold-light accent",
+ "standing upright, a chandelier sitting on its head, chains, candles",'prism','majestic')
+V('zipling_r','Zipling',T+'Zippelith.jpg','baby',
+ "A tiny, round, pudgy baby worm half the length of image 1, shaped like a little ball with a short stubby tail, with only three tiny gunmetal zipper teeth on its back and a little zipper-pull tag tail like a rattle, a faint violet glow at the seam."+DIFF,
+ "two huge round violet eyes and a small, wide, sneaky grin with no blush","glossy black and gunmetal, with a violet accent",
+ "blush, legs, looking like image 1, a long body",'shadow','cute')
+V('oarter','Oarter',E+'Oarlet.jpg','mid',
+ "A sleek young otter twice the size of image 1, on all four legs, its tail a full long oar blade of honey wood, a row of short wooden oar-spines down its back, and webbed paws with hooked claws."+DIFF,
+ "bright, cocky eyes and a toothy grin","warm brown and honey wood, with a river-blue accent",
+ "standing upright, a held oar, a boat",'tide','fast')
+V('galleotter','Galleotter',E+'Oarlet.jpg','final',
+ "A huge, powerful war-galley otter on all four legs, a row of long wooden oars grown along both its sides like a galley's oars, a heavy bronze ram grown on its brow, wooden hull-plank armour along its back, and a huge oar-blade tail."+DIFF,
+ "fierce, determined eyes and a commanding, tusky grin","dark wood brown and bronze, with a sea-blue accent",
+ "a ship, a sail, a mast, standing upright",'tide','tough')
+V('tinbrock','Tinbrock',T+'Anvilbrock.jpg','baby',
+ "A round little honey-badger cub with a small tin-cup snout, a thin glowing orange stripe down its back where the anvil top will form, and small blunt iron paw tips."+DIFF,
+ "small, grumpy, determined eyes and a tiny scowl","soot black and tin grey, with a hot orange accent",
+ "an anvil on its back, a held tool, standing upright",'ember','cute')
+V('forgebrock','Forgebrock',T+'Anvilbrock.jpg','final',
+ "A massive forge badger on four legs, its back a broad glowing forge with a furnace mouth on its chest and chimney vents on its shoulders, its forepaws huge sledgehammer heads, and riveted iron plates over shaggy black fur."+DIFF,
+ "furious, blazing eyes and a snarling, bared-teeth roar","soot black and dark iron, with a furnace-orange accent",
+ "a building, a held hammer, standing upright",'ember','tough')

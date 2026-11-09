@@ -35,6 +35,60 @@
       "pick": 1,
       "grade": 8.5,
       "note": "crater moon face, crescent brow, moth wings"
+    },
+    {
+      "id": "murmurling_r",
+      "pick": 1,
+      "grade": 8.5,
+      "note": "pipe tail fused, iridescent"
+    },
+    {
+      "id": "oarlet_r",
+      "pick": 1,
+      "grade": 8.5,
+      "note": "on all fours, paddle tail"
+    },
+    {
+      "id": "amanitusk_r",
+      "pick": 2,
+      "grade": 8.5,
+      "note": "tusked war-boar, toxic caps"
+    },
+    {
+      "id": "anvilbrock_r",
+      "pick": 1,
+      "grade": 8.5,
+      "note": "anvil body, hammer feet"
+    },
+    {
+      "id": "blossmink_r",
+      "pick": 2,
+      "grade": 8.5,
+      "note": "blossom ink plus line stance"
+    },
+    {
+      "id": "prismink_r",
+      "pick": 1,
+      "grade": 8.5,
+      "note": "rainbow swirl, glass tail"
+    },
+    {
+      "id": "skidlet",
+      "pick": 2,
+      "grade": 8.5,
+      "note": "wobbly chick on skates"
+    },
+    {
+      "id": "lanceron",
+      "pick": 1,
+      "grade": 9.0,
+      "note": "blade wings, ice lance"
+    },
+    {
+      "id": "seamwyrm",
+      "pick": 1,
+      "grade": 9.0,
+      "note": "zipper jaws, axe-tag tail"
     }
   ],
   "rerolled": [
@@ -55,6 +109,21 @@
       "grade": 7.5,
       "why": "wings stiff and vertical again, keel reads as a strap",
       "new": "canvastross_r2"
+    },
+    {
+      "id": "glassolotl",
+      "grade": 7.5,
+      "why": "copy of Prismander"
+    },
+    {
+      "id": "chandelotl",
+      "grade": 8.0,
+      "why": "upright / chandelier sits on head"
+    },
+    {
+      "id": "zipling",
+      "grade": 7.5,
+      "why": "copy of Zippelith, blush"
     }
   ],
   "sent_to_owner": []

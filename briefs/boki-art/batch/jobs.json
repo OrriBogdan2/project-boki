@@ -846,5 +846,181 @@
     "runs": 2,
     "aspect": "16:9",
     "size": "4K"
+  },
+  {
+    "id": "portrait_murmurling",
+    "name": "Murmurling (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Murmurling.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: mid-song with its pipe tail fanned and music notes rising. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_oarlet",
+    "name": "Oarlet (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Oarlet.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: paddling forward proudly with its paddle tail raised. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_amanitusk",
+    "name": "Amanitusk (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Amanitusk.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: charging head-down with toxic spores bursting from its caps. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_anvilbrock",
+    "name": "Anvilbrock (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Anvilbrock.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: braced to charge, hammer paws planted and stripe glowing. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_blossmink",
+    "name": "Blossmink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Blossmink.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: prancing with petals swirling off its leaf-brush tail. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_prismink",
+    "name": "Prismink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Prismink.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: bounding mid-air leaving a rainbow brushstroke behind it. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_skidlet",
+    "name": "Skidlet (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Skidlet.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: wobbling on one skate blade, wings out for balance. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_lanceron",
+    "name": "Lanceron (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Lanceron.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: striking forward with its ice-lance beak, blade wings flared. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_seamwyrm",
+    "name": "Seamwyrm (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Seamwyrm.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: rearing up with its zipper jaws wide open and glowing. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "glassolotl_r",
+    "name": "Glassolotl",
+    "refs": [
+      "briefs/boki-art/turnarounds/Prismander.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the middle form of the creature in image 1's family: the same species, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but bigger and older with its own new silhouette, and clearly not yet a final form. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A sleek young axolotl twice as long as image 1, low on four longer legs, whose body is now mostly clear glass with a soft rainbow core glowing inside, with long swept-back prism gills like a crown of glass blades, a tall clear glass sail fin along its whole back, and a long glass-bladed tail. It must look clearly different from image 1 at a glance: a different size, a different silhouette and a more developed version of its object, never a copy of image 1. Face: narrower, confident eyes with rainbow sparkles and a sly grin. Main colours: clear glass and pale pink, with a rainbow accent. Avoid: standing upright, wings, looking like image 1. Element: prism, shown clearly by glassy crystal facets that throw rainbow glints. Archetype: sleek: long smooth lines and a streamlined shape.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "chandelotl_r",
+    "name": "Chandelotl",
+    "refs": [
+      "briefs/boki-art/turnarounds/Prismander.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell at a glance they are related, but much bigger, stronger and more impressive, clearly a final form with its own new silhouette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A large, graceful axolotl low on all four legs in every view, its gills grown into a tiered crown of glowing crystal arms with hanging crystal drops, all rooted in its head as part of its body, its long faceted glass body ending in a trailing veil tail of glass fins. It must look clearly different from image 1 at a glance: a different size, a different silhouette and a more developed version of its object, never a copy of image 1. Face: serene, half-lidded eyes full of rainbow light and a calm smile. Main colours: pale pink and clear glass, with a warm gold-light accent. Avoid: standing upright, a chandelier sitting on its head, chains, candles. Element: prism, shown clearly by glassy crystal facets that throw rainbow glints. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "zipling_r",
+    "name": "Zipling",
+    "refs": [
+      "briefs/boki-art/turnarounds/Zippelith.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the baby first form that later grows up into the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but clearly a baby: much smaller, rounder and softer, with a bigger head, bigger eyes and short stubby limbs, and its object in a smaller, simpler, earlier form. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A tiny, round, pudgy baby worm half the length of image 1, shaped like a little ball with a short stubby tail, with only three tiny gunmetal zipper teeth on its back and a little zipper-pull tag tail like a rattle, a faint violet glow at the seam. It must look clearly different from image 1 at a glance: a different size, a different silhouette and a more developed version of its object, never a copy of image 1. Face: two huge round violet eyes and a small, wide, sneaky grin with no blush. Main colours: glossy black and gunmetal, with a violet accent. Avoid: blush, legs, looking like image 1, a long body. Element: shadow, shown clearly by inky black edges that fade into smoke, with a violet glow. Archetype: cute: round soft shapes, a big head and short limbs.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "oarter",
+    "name": "Oarter",
+    "refs": [
+      "briefs/boki-art/evolutions/Oarlet.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the middle form of the creature in image 1's family: the same species, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but bigger and older with its own new silhouette, and clearly not yet a final form. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A sleek young otter twice the size of image 1, on all four legs, its tail a full long oar blade of honey wood, a row of short wooden oar-spines down its back, and webbed paws with hooked claws. It must look clearly different from image 1 at a glance: a different size, a different silhouette and a more developed version of its object, never a copy of image 1. Face: bright, cocky eyes and a toothy grin. Main colours: warm brown and honey wood, with a river-blue accent. Avoid: standing upright, a held oar, a boat. Element: tide, shown clearly by water droplets, ripples and a sea-blue sheen. Archetype: fast: lean and forward-leaning, with swept-back shapes.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "galleotter",
+    "name": "Galleotter",
+    "refs": [
+      "briefs/boki-art/evolutions/Oarlet.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell at a glance they are related, but much bigger, stronger and more impressive, clearly a final form with its own new silhouette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A huge, powerful war-galley otter on all four legs, a row of long wooden oars grown along both its sides like a galley's oars, a heavy bronze ram grown on its brow, wooden hull-plank armour along its back, and a huge oar-blade tail. It must look clearly different from image 1 at a glance: a different size, a different silhouette and a more developed version of its object, never a copy of image 1. Face: fierce, determined eyes and a commanding, tusky grin. Main colours: dark wood brown and bronze, with a sea-blue accent. Avoid: a ship, a sail, a mast, standing upright. Element: tide, shown clearly by water droplets, ripples and a sea-blue sheen. Archetype: tough: blocky, wide and heavy, with a low stance.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "tinbrock",
+    "name": "Tinbrock",
+    "refs": [
+      "briefs/boki-art/turnarounds/Anvilbrock.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the baby first form that later grows up into the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but clearly a baby: much smaller, rounder and softer, with a bigger head, bigger eyes and short stubby limbs, and its object in a smaller, simpler, earlier form. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A round little honey-badger cub with a small tin-cup snout, a thin glowing orange stripe down its back where the anvil top will form, and small blunt iron paw tips. It must look clearly different from image 1 at a glance: a different size, a different silhouette and a more developed version of its object, never a copy of image 1. Face: small, grumpy, determined eyes and a tiny scowl. Main colours: soot black and tin grey, with a hot orange accent. Avoid: an anvil on its back, a held tool, standing upright. Element: ember, shown clearly by glowing orange-red ember cracks and a few rising sparks. Archetype: cute: round soft shapes, a big head and short limbs.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "forgebrock",
+    "name": "Forgebrock",
+    "refs": [
+      "briefs/boki-art/turnarounds/Anvilbrock.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell at a glance they are related, but much bigger, stronger and more impressive, clearly a final form with its own new silhouette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A massive forge badger on four legs, its back a broad glowing forge with a furnace mouth on its chest and chimney vents on its shoulders, its forepaws huge sledgehammer heads, and riveted iron plates over shaggy black fur. It must look clearly different from image 1 at a glance: a different size, a different silhouette and a more developed version of its object, never a copy of image 1. Face: furious, blazing eyes and a snarling, bared-teeth roar. Main colours: soot black and dark iron, with a furnace-orange accent. Avoid: a building, a held hammer, standing upright. Element: ember, shown clearly by glowing orange-red ember cracks and a few rising sparks. Archetype: tough: blocky, wide and heavy, with a low stance.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
   }
 ]
