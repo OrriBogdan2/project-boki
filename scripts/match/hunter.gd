@@ -2307,7 +2307,6 @@ func _physics(dt: float) -> void:
 	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else vel.z * -0.1
 	if step_up > 0.0 and mv.length() > 0.3:
 		# walking into a single terrace steps you up it smoothly, no hop
-		step_vis -= step_up - pos.y
 		pos.y = step_up
 		prev.y = pos.y
 		var fw := mv.normalized() * spd * dt
@@ -3048,7 +3047,7 @@ func add_stat(k: String, n := 1) -> void:
 	stats[k] = int(stats.get(k, 0)) + n
 var unseen := false           # hidden from the local player (in a bush, or behind a wall)
 
-var step_vis := 0.0            # eases the model up a terrace you just stepped onto
+var drawn_y := INF             # m: where StepSmooth draws the body (INF until it first draws)
 ## The sniper's aiming laser while it winds up, and the minigun's barrels spinning.
 var laser: MeshInstance3D
 func _render_weapon_fx(delta: float) -> void:
@@ -3213,9 +3212,7 @@ func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
 	if LOCAL_RENDER_LEAD and is_local() and freeze_t <= 0.0 and not remote:
 		position = render_pos(alpha)
-	if absf(step_vis) > 0.001:
-		position.y += step_vis
-		step_vis = lerpf(step_vis, 0.0, 1.0 - exp(-16.0 * delta))
+	StepSmooth.ease(self, delta)
 	visible = (not out or WardenClips.dying(self)) and not extracted and not riding and not unseen
 	if not model:
 		return
