@@ -29,7 +29,9 @@ func run(main: Node) -> void:
 			var r: float = img.get_pixel(x, z).r
 			var is_void: bool = w.kind[w.idx(x, z)] == World.T_VOID
 			if (r == 0.0) != is_void and not w.bridge.has(w.idx(x, z)): wrong += 1
-			var want_b := 1.0 if r == 0.0 else (0.5 if _touches(img, x, z) else 0.0)
+			var want_b := 0.0
+			if r == 0.0: want_b = 1.0
+			elif _touches(img, x, z): want_b = 0.5
 			if absf(img.get_pixel(x, z).b - want_b) > 0.01: wrong_b += 1
 			if is_void or w.kind[w.idx(x, z)] != World.T_GROUND: continue
 			for d in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
@@ -38,7 +40,7 @@ func run(main: Node) -> void:
 				if w.kind[j] == World.T_VOID: abyss_edges += 1
 				elif w.kind[j] == World.T_GROUND and w.level[w.idx(x, z)] > w.level[j]: lips += 1
 	ok(wrong == 0, "height texture is 0 exactly over the abyss (%d tiles disagree)" % wrong)
-	ok(wrong_b == 0, "abyss mark (b) is 1 on the abyss, 0.5 on ground touching it, 0 elsewhere (%d tiles disagree)" % wrong_b)
+	ok(wrong_b == 0, "abyss mark b: 1 abyss, 0.5 touching, 0 else (%d tiles off)" % wrong_b)
 	ok(abyss_edges >= MIN_EDGES, "%d ground tiles beside the abyss" % abyss_edges)
 	ok(lips >= MIN_EDGES, "%d terrace lip tiles over lower ground" % lips)
 	print("EDGEREAD_CHECK %s" % ("FAILED %d" % bad if bad > 0 else "PASSED"))

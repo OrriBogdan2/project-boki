@@ -24,6 +24,8 @@ const S_STONE := 6.0
 enum { E_TERRACE, E_LIP, E_SHEER, E_COAST }
 
 const PAD := 4
+const AROUND8 := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1),
+	Vector2i(1, 1), Vector2i(-1, 1), Vector2i(1, -1), Vector2i(-1, -1)]
 var W: Node
 var w := 0
 var h := 0
@@ -145,7 +147,7 @@ func height_texture() -> ImageTexture:
 			# abyss edge from a terrace lip by it (docs/EDGE_READ.md); the level in r can't, once filtered.
 			var vb := 1.0 if lv < 0 else 0.0
 			if lv >= 0:
-				for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 1), Vector2i(-1, 1), Vector2i(1, -1), Vector2i(-1, -1)]:
+				for d in AROUND8:
 					if v(x + d.x, z + d.y) < 0:   # PAD keeps the map border in range (void)
 						vb = 0.5
 						break
