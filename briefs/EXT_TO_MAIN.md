@@ -5481,3 +5481,4 @@ READY ext/stuck-integ-e28956f8 73b2cdcee (supersedes: ext/art1-kael-2 fd33d2045,
 READY ext/camp-parity b761adb77 (camp leash fix: stops at 13 m, walks home, heals; --camp-check; docs/CAMP_PARITY.md, no camp numbers in the source so none changed)
 READY ext/hero-docs-sync-a 40512360c (hero docs: per-slot tables synced to data for six heroes)
 READY ext/bot-kit-use-a 0d9d0a5b5 (bots use every kit slot: Kael perfect Lunge + chain pull, Mossy hammer recall + Shield Charge, Neve wall freeze, Lace/Mossy ultimates; --bot-kit-use check + docs/BOT_KIT_USE.md)
+READY ext/hero-docs-sync-b 03f75a8fd (mage/dredge/tender/thief/archer/ostra tables synced to data after parity wave)
