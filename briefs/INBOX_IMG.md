@@ -200,3 +200,13 @@ Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules a
 - **Redo Sporcupine attempt 2 (owner 7.6)**: owner note first: decent but can be better. Previous attempt: /home/boki/gens/sporcupine-r-3-art.
 - **Redo Stormit attempt 2 (owner 7.9)**: owner note first: as an evolution it needs to be more changed/eledctical. Previous attempt: /home/boki/gens/stormit-1-art.
 - **Redo Teapotamus attempt 2 (owner 8.2)**: owner note first: dont like how round it is but i like the floating teacup and the tail. Previous attempt: /home/boki/gens/teapotamus-r2-2-art.
+
+## ORDER 11-09 06:30 UTC (owner): COLOUR PASS across the whole Bokidex. Top priority after the 28 owner orders above.
+- Owner: "there's a lot of fixing of colour etc that still needs to be done."
+- Go through every dex entry with art. Compare each one's colours with its owner 2D sheet (briefs/art-refs) and its type colour. Flag:
+  - off-palette or washed-out colours
+  - a body that blends into itself (low contrast, like the Knotwyrm note)
+  - forms in one line that don't share a palette
+  - tints left over from 3D renders
+- First write briefs/COLOUR_AUDIT.md, one line per entry, worst first, giving the fix and the reason. Then regen the worst items in batches, using the usual gen-feed drop, so the owner can rate them.
+- Keep the design. Change colour and contrast only, unless an owner note says otherwise.
