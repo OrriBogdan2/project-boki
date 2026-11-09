@@ -395,6 +395,13 @@ func _boulder() -> void:
 	h.idle_fire = 0.0
 	boulders += 1
 	play("breah_throw")
+	m.later(float(bd["release"]), _boulder_fly)
+
+## The boulder leaves the hand on the clip's fling beat (`release`), toward the cursor as it is then.
+func _boulder_fly() -> void:
+	if not is_instance_valid(h) or h.dead or KinMerge.active(h):
+		return
+	var bd: Dictionary = lmb_def()["boulder"]
 	var dir := h.aim_dir()
 	var spd := float(bd["speed"])
 	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + dir.y * 0.6)
