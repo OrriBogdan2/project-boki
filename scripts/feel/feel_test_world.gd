@@ -17,7 +17,6 @@ func _ready() -> void:
 	_block(Vector3(-8, 1.25, -6), Vector3(6, 2.5, 4), Color(0.55, 0.5, 0.45))  # 2.5m ledge to mantle
 	for p: Vector3 in [Vector3(6, 1.5, -4), Vector3(10, 1.5, 4), Vector3(-12, 1.5, 6)]:
 		_block(p, Vector3(1.5, 3, 1.5), Color(0.45, 0.45, 0.5))
-	_jump_pad(Vector3(0, 0, -14))
 	_spawn_hunter()
 	_spawn_camera()
 	_build_hud()
@@ -64,30 +63,6 @@ func _block(center: Vector3, size: Vector3, color: Color) -> void:
 	mesh.mesh = bm
 	body.add_child(mesh)
 	add_child(body)
-
-
-func _jump_pad(at: Vector3) -> void:
-	var pad := JumpPad.new()
-	pad.position = at + Vector3(0, 0.3, 0)
-	var shape := CollisionShape3D.new()
-	var cyl := CylinderShape3D.new()
-	cyl.radius = 1.2
-	cyl.height = 0.6
-	shape.shape = cyl
-	pad.add_child(shape)
-	var mesh := MeshInstance3D.new()
-	var cm := CylinderMesh.new()
-	cm.top_radius = 1.2
-	cm.bottom_radius = 1.2
-	cm.height = 0.1
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.3, 0.8, 1.0)
-	mat.emission_enabled = true
-	mat.emission = Color(0.2, 0.6, 1.0)
-	cm.material = mat
-	mesh.mesh = cm
-	pad.add_child(mesh)
-	add_child(pad)
 
 
 func _spawn_hunter() -> void:

@@ -224,6 +224,17 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **Abyss bounce** [est]: the lift reaches the lip at 4.5 m/s (was 3.5), floating ~1.6m over it.
 - **Feathering**: the glider no longer cools in the air, and a lift's first 0.3s heats like a level glide (was 0.4x). The slower gravity had made coasting between taps so cheap that feathering went 4.8x as far as holding; it is 2.0x now.
 
+## Jump pads and updrafts (`PadFlight`, `--pad-check`; decision 0024)
+- **A pad is a throw, not a rail:** 17 m/s up [est] under the source's 14.7 m/s² (apex 9.8 m at 1.16 s), aimed
+  so the arc alone would come down on the pad's landing and clearing a higher landing's lip by 2 m. The keys
+  barely steer the rise (`air_control` 0.015, the data's value). Map pads and the pocket Spring pad share it.
+- **The glider opens by itself at the apex** (DECISIONS: the exception to "a held Space never opens the glider"),
+  keeps the launch's speed and steers as any glide. A hands-off glide (or a bot) is carried onto the landing and
+  folded over it, as a lair's escape updraft does; a fresh glide press makes it your own glide.
+- **Updrafts open the glider too:** falling into rising air with the glider shut opens it and holds the climb at
+  `updraft_vy` 9 m/s [est] (GlideUpdraftMinZVel: the data names it among the locked defaults, not its value).
+- Sources: no pad numbers in the data; the one footage pad take (Ghost's ult clip, f103) shows no arc. All [est].
+
 ## Air limits: the drop and the glider during moves (`AirLimits`, `--air-limits-check`; items 162, 162b)
 - **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive. This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.

@@ -31,16 +31,15 @@ Still unknown (encrypted C++ defaults): base glide speeds and gravity factor, gl
 | File | What it does |
 |---|---|
 | `scripts/feel/feel_config.gd` | Every tunable in one Resource. Save it as a `.tres` to give different weapons or kin their own feel. |
-| `scripts/feel/hunter_controller.gd` | CharacterBody3D. Covers WASD, jump, hold-to-glide with heat, abyss lift, feathering, the glider balloon, spiking, dash/ex-dash (or tap/hold), deep mantling, jump pads, cursor aim and the aim laser. |
+| `scripts/feel/hunter_controller.gd` | CharacterBody3D. Covers WASD, jump, hold-to-glide with heat, abyss lift, feathering, the glider balloon, spiking, dash/ex-dash (or tap/hold), deep mantling, cursor aim and the aim laser. |
 | `scripts/feel/top_down_camera.gd` | Fixed-angle camera with Supervive's 3 presets, zoom-out while gliding, and a purple screen tint that deepens the further you sink into the abyss. |
-| `scripts/feel/jump_pad.gd` | Launch pad that keeps your momentum. |
 | `scripts/feel/glide_zone.gd` | Wind rings (cool the glider + boost), jetstreams (no heat, faster), abyss storm clouds (more heat, slower). |
 | `scripts/combat/class_profile.gd`, `weapon_profile.gd`, `data/` | Light/medium/heavy classes and 9 guns/swords as data files. See KINFALL_CLASSES.md. |
 | `scripts/combat/weapon_user.gd`, `projectile.gd`, `training_dummy.gd` | Weapon firing (guns and swords), projectiles, and practice dummies. See WEAPON_FIRING_DATA.md. |
 | `tests/weapons_sim.gd` | Headless weapon check: `godot --headless --path . -s tests/weapons_sim.gd` |
 | `scripts/match/` + `data/rules/` | Downed (wisp), deathboxes, revives, revive beacons, team wipes, solo rules, kin hooks. See DEATH_AND_REVIVE.md. Test: `tests/life_sim.gd` |
 | `scripts/feel/kinfall_input.gd` | Registers default binds at runtime (`kf_*` actions). |
-| `scenes/feel_test.tscn` | Playground: islands over an abyss, a raised island to mantle onto, pillars, a jump pad and a debug HUD. |
+| `scenes/feel_test.tscn` | Playground: islands over an abyss, a raised island to mantle onto, pillars and a debug HUD. |
 | `tests/feel_sim.gd` | Headless check: `godot --headless --path . -s tests/feel_sim.gd` |
 
 ## Controls (Supervive defaults)
@@ -95,6 +94,6 @@ Videos studied: TheSixGame's full walkthrough (60fps), Ryan Lemur's Celeste guid
 ## Still estimates
 - Jump height: I didn't find a clean plain jump in any of the videos.
 - Dash distance per weapon.
-- Glider damage while overheated, spike plummet speed, and the jump pad's launch strength.
+- Glider damage while overheated and spike plummet speed. (The jump pad's launch is `PadFlight`, `pad_vy` in hunter_move.json: still [est].)
 
 Tune them in `feel_config.gd`, then rerun the sim.

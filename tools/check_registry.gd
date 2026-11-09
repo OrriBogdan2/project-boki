@@ -49,6 +49,7 @@ const CHECKS := {
 	"--ping-check": ["res://tools/ping_check.gd", "ping_check", null],
 	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],      # dash -> ability rows
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
+	"--pad-check": ["res://tools/pad_check.gd", "pad_check", null],      # jump pads and updrafts (PadFlight)
 	"--boki-dash-check": ["res://tools/boki_dash_check.gd", "boki_dash_check", null],      # item 185
 	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151

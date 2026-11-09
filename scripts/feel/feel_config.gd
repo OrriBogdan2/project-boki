@@ -81,7 +81,6 @@ enum DashInput { WASD_FALLBACK_TO_CURSOR, CURSOR, WASD }
 @export var mantle_max_upward_speed := 2.0 ## only mantle near apex or while falling
 
 @export_group("Jump pad")
-@export var jump_pad_dash_carry := 1.15   ## [wiki: dashing into a pad keeps momentum + small boost] [est]
 
 @export_group("Aim")
 @export var aim_plane_height := 0.0       ## aim is resolved on a plane at your feet

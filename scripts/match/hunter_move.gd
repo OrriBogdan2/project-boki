@@ -26,6 +26,9 @@ static var dive_accel: float = _phys["dive_accel"]
 static var dive_steer: float = _phys["dive_steer"]
 static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
+static var pad_vy: float = _phys["pad_vy"]
+static var pad_clear: float = _phys["pad_clear"]
+static var updraft_vy: float = _phys["updraft_vy"]
 
 static func _load() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
