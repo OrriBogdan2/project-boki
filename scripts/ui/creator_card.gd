@@ -104,7 +104,7 @@ func _preset_row() -> HFlowContainer:
 	fl.add_child(l)
 	for nm in PRESETS:
 		var preset_name: String = nm
-		fl.add_child(UI.button(preset_name, func(): _use_preset(preset_name)))
+		fl.add_child(UI.button(preset_name, func(): use_preset(preset_name)))
 	return fl
 
 func _name_row() -> HBoxContainer:
@@ -158,7 +158,7 @@ func _reroll(key: String, n: int) -> void:
 	Sfx.play("hover", null, -6.0)
 	_apply(next)
 
-func _use_preset(preset_name: String) -> void:
+func use_preset(preset_name: String) -> void:
 	var next := look.duplicate(true)
 	next.merge(PRESETS[preset_name], true)
 	_apply(next)

@@ -1,5 +1,5 @@
 extends RefCounted
-## --empty-shots --shots-dir=<dir>: review screenshots of the Empty creator (Male / Female, three heights,
+## --empty-shots --shots-dir=<dir> [--shot-size=1920x1080]: review screenshots of the Empty creator (Male / Female, three heights,
 ## builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer). Add
 ## --only=creator|first|viewer|mask|shroud|feet|farm to take one group (shroud: the creator from front, side and back,
 ## the aura levels and shroud styles; feet: the soles at the shortest and tallest height, standing and walking;
@@ -26,6 +26,9 @@ func run(main_node: Node) -> void:
 			dir = String(a).substr(12)
 		elif String(a).begins_with("--only="):
 			only = String(a).substr(7)
+		elif String(a).begins_with("--shot-size="):
+			var wh := String(a).substr(12).split("x")
+			main.get_tree().root.size = Vector2i(int(wh[0]), int(wh[1]))
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	var tree := main.get_tree()
@@ -80,6 +83,9 @@ func _first_screens(tree: SceneTree) -> void:
 	if not more.is_empty():
 		(more[0] as Button).pressed.emit()
 		await _shot(tree, "creator_more", 1.0)
+		hx.create_box.use_preset("Fierce")
+		hx.zoom = 1.0
+		await _shot(tree, "creator_face", 2.5)
 	hx.queue_free()
 	await tree.process_frame
 
