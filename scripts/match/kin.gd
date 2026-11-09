@@ -585,8 +585,13 @@ func sim(dt: float) -> void:
 		return
 	tick_status(dt)
 	var was_rest := rest_t > 0.0
-	for k in ["atk_cd", "bark_cd", "lunge_t", "throw_cd", "haste_t", "rest_t"]:
-		set(k, maxf(0.0, get(k) - dt))
+	# (direct lines, not set()/get() by name: 30 Boki tick these every step)
+	atk_cd = maxf(0.0, atk_cd - dt)
+	bark_cd = maxf(0.0, bark_cd - dt)
+	lunge_t = maxf(0.0, lunge_t - dt)
+	throw_cd = maxf(0.0, throw_cd - dt)
+	haste_t = maxf(0.0, haste_t - dt)
+	rest_t = maxf(0.0, rest_t - dt)
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
 		m.sfx("kin_happy", owner_h.pos, -8.0, Unique.voice(rec))
