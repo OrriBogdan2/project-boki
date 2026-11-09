@@ -52,6 +52,7 @@ var knife := {}                # the stuck Shadow Knife: {target, pos, dir} (+ w
 var bola_cast := {}            # the Bola winding up, lane showing: {t}
 var bola := {}                 # the Bola in flight: {pos, dir, left, first, bounces, stg}
 var encore: ThiefUlt           # X, the ultimate
+var spin: ThiefSpin            # the Vault flip's trail
 var chain: ThiefChain          # the Vault loop: its routine of flips, the Shift presses it keeps
 var wrapped := {}              # foe instance id -> [foe, time left]: the binding rings on the Grounded
 var glint: Node3D = null       # the empowered tell: a gold glint at the weapon hand
@@ -77,6 +78,7 @@ var landing_due := false       # an air cartwheel is over; she lands in a crouch
 func _setup() -> void:
 	res = 0.0
 	encore = ThiefUlt.new(self)
+	spin = ThiefSpin.new(self)
 	chain = ThiefChain.new(self)
 
 func fx() -> DJFx:
@@ -400,11 +402,11 @@ func _bolt() -> void:
 		sd["dmg"] = float(sd["dmg"]) * empowered_k()
 		sd["r"] = 0.3
 		x["kb"] = 3.0
-		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 2.6, 0.55)
+		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 3.4, 0.7)
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
 		m.sfx("thief_flintlock_crack", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
 	else:
-		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_GOLD, 0.9, 0.3)
+		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_GOLD, 1.8, 0.42)
 		fx().star(muzzle, BOLT_GOLD, 0.6, 0.1, BOLT_CORE)        # the gold muzzle star at the throwing hand
 	last_bolt_emp = emp
 
@@ -490,12 +492,13 @@ func play(move: String) -> void:
 		return
 	super.play(move)
 
-## Her own after-images on every dash: cyan streaks and a spinning cyan star where her hands were (not the
-## shared team-colour pill).
+## Her own after-images on every dash: cyan streaks along the ground, and the flip's spinning trail (ThiefSpin)
+## (not the shared team-colour pill).
 func own_dash_trail() -> bool:
 	return true
 
 func _tick_trail(dt: float) -> void:
+	spin.tick(GHOST, Color("e0fbff"))
 	if h.roll_t <= 0.0 or not tells_visible():
 		return
 	trail_t -= dt
@@ -504,18 +507,15 @@ func _tick_trail(dt: float) -> void:
 	trail_t = TRAIL_EVERY
 	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
 	fx().streak(h.pos + Vector3(0, 0.7, 0), dir, 1.3, 0.5, GHOST, Color("e0fbff"), 0.3)
-	fx().star(h.pos + Vector3(0, 1.0, 0), GHOST, 0.5, 0.22, Color("c9a0ff"))
 
-## After a Vault: the flip (the routine's, ThiefChain; from a jump the air one), the white arc its hands and feet
-## trace, the speed and, by its row, the next bolt empowered: the glint forms in the throwing hand and flares as
+## After a Vault: the flip (the routine's, ThiefChain; from a jump the air one), its spinning trail (ThiefSpin),
+## the speed and, by its row, the next bolt empowered: the glint forms in the throwing hand and flares as
 ## she lands.
 func _vaulted(air: bool, empower: bool) -> void:
 	var dd := dash_def()
 	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
 	play("thf_exdash" if air else chain.next_flip(dir))
 	var t := float(dd["time"])
-	_swoosh(dir)
-	m.later(t * 0.5, func(): if is_instance_valid(h): _swoosh(dir))
 	m.sfx("thief_dash", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
 	if not empower:
 		return
@@ -530,10 +530,6 @@ func _vaulted(air: bool, empower: bool) -> void:
 	if not was:
 		m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 		if h.is_local(): h._ab_feedback("dash", "ready")
-
-func _swoosh(dir: Vector2) -> void:
-	fx().crescent(h.pos + Vector3(0, 0.85, 0), dir, 300.0, 1.05, GHOST, AIM_LILAC, 0.3,
-			PI * 0.5)
 
 # ------------------------------------------------------------------ passive hooks
 ## Marks make your bolts on that target stronger: +10% of a bolt each, a flat add like the source's +16 a stack,

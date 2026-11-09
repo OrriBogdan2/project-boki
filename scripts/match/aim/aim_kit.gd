@@ -99,7 +99,8 @@ static func cone(h: Hunter, id: String, p := {}) -> void:
 
 ## A landing or area circle. p: at (the cursor point, clamped to `range`), range (1e9), self (true:
 ## around the hunter), r (1.35), fill (0..1 radial), ticks (4 cardinal), star (centre glint),
-## dashed, core (inner ring radius, m), pointer (a Vector2: a chevron on the rim pointing that way)
+## dashed, band (m: a thin ring of that width, its outer edge on r, instead of the disc),
+## core (inner ring radius, m), pointer (a Vector2: a chevron on the rim pointing that way)
 static func circle(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "circle", p)
 	_disc(h, e, p)
@@ -275,6 +276,7 @@ static func _disc(h: Hunter, e: Dictionary, p: Dictionary) -> void:
 	e["at"] = Vector2(at.x, at.z); e["y"] = AimMode.ground(h.m, at).y
 	e["r"] = float(p.get("r", 1.35)); e["fill"] = float(p.get("fill", -1.0))
 	e["ticks"] = bool(p.get("ticks", false)); e["star"] = bool(p.get("star", false)); e["dashed"] = bool(p.get("dashed", false))
+	e["band"] = float(p.get("band", 0.0))
 	var pd: Vector2 = p.get("pointer", Vector2.ZERO)
 	e["pointer"] = pd.normalized() if pd.length() > 0.01 else Vector2.ZERO
 

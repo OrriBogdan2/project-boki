@@ -63,9 +63,13 @@ func dancer(a) -> void:
 	A.ok("dancer X: its cooldown runs from the cast (24s)", absf(float(K.cd["x"]) - float(d["cooldown"])) < 0.1,
 			"%.1f" % float(K.cd["x"]))
 	A.step(m, 0.36)
-	A.ok("dancer X: the ring reaches 3 bh at 0.4s, with the outer band dashed; no blade before it",
-			absf(float(AimKit.entry(P, "ult")["r"]) - float(d["reach"])) < 0.15 and AimKit.shown(P, "ult_rim")
-			and U.blades == 0 and _owed(P) == 0.0, "r %.2f" % float(AimKit.entry(P, "ult")["r"]))
+	var thin: Dictionary = AimKit.entry(P, "ult")
+	A.ok("dancer X: the ring reaches 3 bh at 0.4s, with the outer band marked; no blade before it",
+			absf(float(thin["r"]) - float(d["reach"])) < 0.15 and AimKit.shown(P, "ult_rim")
+			and U.blades == 0 and _owed(P) == 0.0, "r %.2f" % float(thin["r"]))
+	A.ok("dancer X: the area is a thin ring (a band under 0.5m, no disc fill) whose outer edge is the blades' reach",
+			float(thin["band"]) > 0.0 and float(thin["band"]) < 0.5 and float(thin["fill"]) <= 0.0
+			and float(thin["r"]) == U.radius(), "band %.2f r %.3f radius %.3f" % [thin["band"], thin["r"], U.radius()])
 	var beat := {"at": [], "n": U.beat, "pulse": 0.0, "danced": true}
 	A.step(m, 1.9, func():
 		if U.beat > int(beat["n"]):
