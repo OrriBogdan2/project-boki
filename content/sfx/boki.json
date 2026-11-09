@@ -7,7 +7,12 @@
   "throw": "boki", "catch": "boki", "bond": "boki", "skill": "boki",
   "k_venom": "boki", "k_spore": "boki", "k_gravity": "boki", "k_prism": "boki", "k_lunar": "boki", "k_echo": "boki",
   "boki_downed": "boki", "boki_revive": "boki", "boki_eat": "boki", "boki_sleep": "boki", "boki_work": "boki",
-  "boki_fuse": "boki", "boki_unfuse": "boki"
+  "boki_fuse_normal": "boki", "boki_fuse_fire": "boki", "boki_fuse_water": "boki", "boki_fuse_grass": "boki",
+  "boki_fuse_spore": "boki", "boki_fuse_electric": "boki", "boki_fuse_ice": "boki", "boki_fuse_rock": "boki",
+  "boki_fuse_psychic": "boki", "boki_fuse_flying": "boki", "boki_fuse_dragon": "boki", "boki_fuse_dark": "boki",
+  "boki_fuse_poison": "boki", "boki_fuse_bug": "boki", "boki_fuse_steel": "boki", "boki_fuse_fairy": "boki",
+  "boki_fuse_crystal": "boki", "boki_fuse_sound": "boki", "boki_fuse_end": "boki", "boki_fuse_tired": "boki",
+  "boki_evolve": "boki"
  },
  "signature": [],
  "replaces": ["kin_happy", "kin_unsure", "kin_alert", "kinhit", "recall", "throw", "catch", "bond", "skill",

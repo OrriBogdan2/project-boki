@@ -8,6 +8,7 @@ extends RefCounted
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
+##   7. every Fusion type and form names a cue with a boki_fuse_<cue> sound; the end, tired and evolve cues exist
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -33,6 +34,7 @@ func run(main: Node) -> void:
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
 	_fallback()
+	_fusion_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -125,6 +127,23 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 		if absf(last - first) > SEAM_MAX or absf(last) < mid * 0.02:
 			rough.append("%s seam %.3f, end %.3f of %.3f" % [sname, absf(last - first), absf(last), mid])
 	ok(rough.is_empty(), "%s: %d loops repeat seamlessly %s" % [group, (d.get("loops", []) as Array).size(), rough])
+
+## 7. Every Fusion type and form names a cue that has its sound; the release, timeout and evolution cues exist.
+func _fusion_cues() -> void:
+	var cues := {}
+	for t in (MergeForm.data()["types"] as Dictionary).values():
+		cues[String(t["cue"])] = true
+	for f in DirAccess.get_files_at("res://content/merge_forms"):
+		cues[String(MergeForm.kit_form(f.get_basename())["cue"])] = true
+	var missing := []
+	for c in cues:
+		if not Sfx.ensure("boki_fuse_" + c):
+			missing.append(c)
+	for c in ["boki_fuse_end", "boki_fuse_tired", "boki_evolve"]:
+		if not Sfx.ensure(c):
+			missing.append(c)
+	ok(missing.is_empty() and cues.size() >= 16,
+		"%d Fusion cues and the end, tired, evolve sounds on file (missing %s)" % [cues.size(), missing])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:

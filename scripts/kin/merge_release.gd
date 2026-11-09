@@ -31,7 +31,6 @@ static func afterglow(h: Hunter) -> void:
 	h.m.fx.burst(h.pos + Vector3(0, 1.1, 0), col, 20, 4.0)
 	if h.is_local():
 		h.m.fx.word(h.pos + Vector3(0, 2.6, 0), "AFTERGLOW", col, true)
-		h.m.sfx("unlock", h.pos, -3.0, 1.35)
 
 ## Every step: counts the afterglow down and sparkles while it lasts.
 static func tick(h: Hunter, dt: float) -> void:

@@ -3541,7 +3541,7 @@ func _play_evolutions() -> void:
 	for e in evs:
 		if e["kind"] == "form": big = true
 	var tint: Color = Evo.AFF[evs[evs.size() - 1]["aff"]]["tint"]
-	Sfx.play("skill")
+	Sfx.play("boki_evolve")
 	music_hold = 25.0
 	Sfx.play_music("lullaby", 1.0)
 	var tw := create_tween()
