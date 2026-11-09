@@ -820,12 +820,19 @@ func _bot_idle(dt: float) -> void:
 	# squadmate hurt nearby: light the lantern; carrying under fire: run away from the nearest rival
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and hearth.is_empty() and not busy():
 		var need := 0.0
-		for o in CareUtil.mates(m, h, h.pos, float(e_def()["radius"]) - 0.6, true):
+		# (a hurt squadmate outside the ring gets the light thrown to them, below)
+		for o in CareUtil.mates(m, h, h.pos, float(e_def()["reach"]), true):
 			need += (o.max_hp - o.hp) if not o.downed else 40.0
 		if h.hp < h.max_hp * 0.6:
 			need += (h.max_hp - h.hp) * 0.33
 		if need > 30.0:
 			h.inp["sig"] = true
+	if e_t > 0.0 and e_recastable():
+		for o in CareUtil.mates(m, h, h.pos, float(e_def()["reach"])):
+			if h.flat_dist(o) > float(e_def()["radius"]) and o.hp < o.max_hp * 0.7:
+				h.inp["aim"] = o.pos + Vector3(0, 0.9, 0)       # E again: the light goes to them
+				h.inp["sig"] = true
+				break
 	var cs := carrying()
 	if cs.is_empty():
 		safe_t = 0.0

@@ -653,6 +653,8 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		return
 	if int(
 		h.slot_lv["dash"]
-	) > 0 and h.dashes >= 1.0 and swap.is_empty() and dist > 6.0 and dist < 11.0 and los and randf() < 0.15:
-		h.inp["aim"] = tgt.pos
+	) > 0 and h.dashes >= 1.0 and swap.is_empty() and dist > 6.0 and dist < 11.0 and los \
+			and (tgt.stun_t > 0.0 or randf() < 0.15):
+		# it lands swap_time() later: lead them
+		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * swap_time()
 		h.inp["dash"] = true
