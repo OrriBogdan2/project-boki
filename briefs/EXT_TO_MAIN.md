@@ -4634,3 +4634,4 @@ READY ext/anim-arm-sable a176bc764 (job 20261109-065000-a2, rpc1; merge after ex
 READY ext/loot-open-times a72d6028f (docs/LOOT_FEEL.md: measured loot tempo table; no loot source exists in briefs/footage, so no numbers changed)
 READY ext/arrival-declutter f0414bdea (arrival declutter)
 READY ext/creator-trim 532aad479 (creator trim)
+READY ext/anim-arm-sparkle 7348501f3 (Sparkle rmb cast: left arm hangs loose via free_arm data on ryzz.json, t_free 46% to 0, free travel 0.76 to 0.38; the right throwing arm still reads sideways 50% as the move itself; merge after ext/anim-quality-audit and ext/anim-free-arm-relax (both merged into the branch); --anim-audit mage FAIL 0, --mage-combo-check 129/0, --clip-check 0, health --strict OK, gen_wiki --check OK; before/after strips NOT yet rendered: gpu jobs 20261109-065932-29339 (before) and 20261109-070030-11849 (after) queued, output docs/art/anim_audit)
