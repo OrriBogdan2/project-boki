@@ -70556,5 +70556,33 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_chimelop_n2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_critwom_gp",
+    "name": "Critwom (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_critwom_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_n2",
+    "name": "Chimelop (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chimelop_n2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_critwom_gp",
+    "name": "Critwom (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_critwom_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_critwom_gp",
+    "name": "Critwom (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_critwom_gp_4.jpg",
+    "ok": true
   }
 ]
