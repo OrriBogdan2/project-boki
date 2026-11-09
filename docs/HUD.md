@@ -41,10 +41,22 @@ Rules of the look:
 Check: `--hudref-check` (segments follow max health, the chip holds then drains, armour and shield are
 drawn, the downed plate and status words show, cooldown text appears).
 
+## The inventory window (I)
+
+- `LoadoutPanel` (in `Hud._build_pack`): what you wear (two gloves with their keys Q and V, armor, boots), the four
+  utility slots with keys 1 to 4, your perks, then the backpack list. Every slot names its key.
+- Point at a thing for a hover card (`InvTip`, words in `InvText`). A piece of gear is compared with what you wear
+  in its slot (`GearCompare`): only the numbers that change, green when better and red when worse.
+- Swap by dragging a backpack piece onto a slot (or a glove onto the other glove), or point and press Enter to
+  wear it (a worn piece: take it off) and Delete to drop it on the ground. The Wear and Drop buttons stay.
+- Beside an open deathbox the window opens at the right edge with the box to its left, and gear rows in the box get
+  the same compare card. Charms and a perk-orb cap are not in the game yet, so the window shows what exists.
+- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`).
+
 ## Looting with a full inventory
 
 - Smart loot (`LootFull.smart`) takes only what fits and reports it: "Took 1 of 3, inventory full", "Inventory full, took nothing", or "Nothing here beats what you've got".
-- A box thing that doesn't fit (a backpack thing that isn't worth more than your worst, a full belt, keys, or capsule box) gets a red outline in the loot window. Clicking it moves nothing, plays a short rattle and, for a backpack thing, opens the hold window (`LootHold`) left of the box: your backpack, the clicked thing held in red, Swap (yours goes into the box) and Drop (yours goes on the ground). Belt, key and capsule rows only show "Belt full" / "Box full".
+- A box thing that doesn't fit (a backpack thing that isn't worth more than your worst, a full belt, keys, or capsule box) gets a red outline in the loot window. Clicking it moves nothing, plays a short rattle and, for a backpack thing, opens the hold window (`LootHold`) at the right edge, where your inventory was: your backpack, the clicked thing held in red, Swap (yours goes into the box) and Drop (yours goes on the ground). Belt, key and capsule rows only show "Belt full" / "Box full".
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
 

@@ -2546,10 +2546,12 @@ func open_loot(b: Dictionary) -> void:
 	Sfx.play("ui_open", null, -10.0)
 	_build_loot()
 	if loot_panel: UI.pop_in(loot_panel)
+	if pack_panel: UI.pop_in(pack_panel)
 
 func close_loot() -> void:
 	loot_open = null
 	_close_hold()
+	close_pack()
 	if loot_panel and is_instance_valid(loot_panel):
 		loot_panel.queue_free()
 	loot_panel = null
@@ -2576,19 +2578,33 @@ func open_hold(row: Dictionary) -> void:
 		return
 	var b: Dictionary = loot_open
 	var hi := int(row["i"])
+	close_pack()
 	var swap := func(mi: int): if LootFull.swap_held(m, m.player, b, hi, mi): _hold_done()
 	var drop := func(mi: int): if LootFull.drop_for_held(m, m.player, b, hi, mi): _hold_done()
-	loot_hold = LootHold.build(m.player, (b["pack"] as Array)[hi], swap, drop, _close_hold)
+	loot_hold = LootHold.build(m.player, (b["pack"] as Array)[hi], swap, drop, _dismiss_hold)
 	add_child(loot_hold)
 	UI.pop_in(loot_hold)
 	await get_tree().process_frame
 	if is_instance_valid(loot_hold) and loot_panel:
-		loot_hold.position = Vector2(maxf(8.0, loot_panel.position.x - loot_hold.size.x - 12.0), loot_panel.position.y)
+		var vs := loot_hold.get_viewport_rect().size
+		loot_hold.position = Vector2(vs.x - loot_hold.size.x - 16.0, loot_panel.position.y)    # where your inventory was
 
 func _close_hold() -> void:
 	if loot_hold and is_instance_valid(loot_hold):
 		loot_hold.queue_free()
 	loot_hold = null
+
+## The hold window's own close: your inventory comes back beside the box.
+func _dismiss_hold() -> void:
+	_close_hold()
+	if loot_open != null:
+		_open_pack_beside()
+
+## Your inventory at the right edge with the deathbox to its left, so you can compare as you take.
+func _open_pack_beside() -> void:
+	pack_sig = ""
+	_build_pack()
+	if pack_panel: UI.pop_in(pack_panel)
 
 func _hold_done() -> void:
 	if (loot_open as Dictionary).get("empty", false):
@@ -2616,6 +2632,8 @@ func _build_loot() -> void:
 	sb.shadow_color = Color(0, 0, 0, 0.5); sb.shadow_size = 18
 	pc.add_theme_stylebox_override("panel", sb)
 	var v := UI.vbox(6); pc.add_child(v)
+	var tip := InvTip.new(pc)
+	pc.add_child(tip)
 	var o: Hunter = b["owner"]
 	var head := UI.hbox(8); v.add_child(head)
 	head.add_child(Icons.Glyph.new("gem", bc, 18.0))
@@ -2671,6 +2689,9 @@ func _build_loot() -> void:
 			row.add_child(Icons.Glyph.new("gem", Color(GOLD, 0.8), 12.0))
 			row.add_child(vt)
 		var itc: Dictionary = it
+		var gear_it := InvText.box_gear(b, it)
+		if not gear_it.is_empty():
+			tip.attach(rp, func(): return InvText.compare(p, gear_it))
 		var verb := "Take"
 		if it["key"] == "gear": verb = "Swap"
 		elif not fit: verb = "Full"
@@ -2705,11 +2726,13 @@ func _build_loot() -> void:
 	pc.custom_minimum_size.x = 430
 	add_child(pc)
 	loot_panel = pc
-	# to the right of centre, clear of your hunter and the ability bar
+	if not pack_open():
+		_open_pack_beside()
+	# left of your inventory, which sits at the right edge
 	await get_tree().process_frame
 	if is_instance_valid(pc):
 		var vs := pc.get_viewport_rect().size
-		pc.position = Vector2(vs.x * 0.5 + 90.0, maxf(90.0, vs.y * 0.5 - pc.size.y * 0.5 - 40.0))
+		pc.position = Vector2(vs.x - 16.0 - LootHold.WIDTH - 12.0 - pc.size.x, maxf(90.0, vs.y * 0.5 - pc.size.y * 0.5 - 40.0))
 
 # ------------------------------------------------------------------ the backpack and the swap window
 ## The backpack (I): what you're carrying home, each with Equip (weapons and gloves go in your hands,
@@ -2777,6 +2800,7 @@ func _scroll_rows(v: VBoxContainer) -> Array:
 func _fit_panel(pc: PanelContainer, sc: ScrollContainer, rows: VBoxContainer) -> void:
 	pc.position = Vector2(-10000, 0)     # out of sight until it's sized
 	await get_tree().process_frame
+	await get_tree().process_frame      # wrapping labels settle their height one frame after they get a width
 	if not is_instance_valid(pc):
 		return
 	var vs := pc.get_viewport_rect().size
@@ -2858,47 +2882,29 @@ func close_pack() -> void:
 	pack_panel = null
 
 func _pack_state(p: Hunter) -> String:
-	return str(p.pack.map(func(it): return it.get("uid", ""))) + p.wid + p.welem + str(p.gear) + str(p.pack_cap) + str(p.caught.size())
+	var belt := str(p.belt.map(func(s): return [s.get("id", ""), s.get("n", 0)]))
+	return str(p.pack.map(func(it): return it.get("uid", ""))) + p.wid + p.welem + str(p.gear) + str(p.pack_cap) \
+		+ str(p.caught.size()) + belt + str(p.perks)
 
 func _build_pack() -> void:
 	if pack_panel and is_instance_valid(pack_panel):
 		pack_panel.queue_free()
 	var p: Hunter = m.player
 	pack_sig = _pack_state(p)
-	var pb := _item_panel("Backpack", INK, 470)
+	var pb := _item_panel("Inventory", INK, LootHold.WIDTH)
 	var pc: PanelContainer = pb[0]; var v: VBoxContainer = pb[1]; var head: HBoxContainer = pb[2]
 	head.add_child(_pack_chip(p))
 	var cl := UI.button("✕", func(): close_pack(), 36); cl.flat = true
 	head.add_child(cl)
-	v.add_child(UI.label("Wearing", 12, MUTED, UI.caps))
-	for g in p.gear:
-		if not (g as Dictionary).is_empty():
-			v.add_child(_item_row(Loot.gear(String(g["id"]), int(g["rar"])), []))
-	v.add_child(UI.label("Carrying home  ·  extract to keep it all", 12, MUTED, UI.caps))
-	var sl := _scroll_rows(v)
-	var rows: VBoxContainer = sl[1]
-	if p.pack.is_empty():
-		rows.add_child(UI.label("Nothing yet. Gear and treasure you pick up go here.", 13, MUTED))
-	for i in p.pack.size():
-		var idx := i
-		var it: Dictionary = p.pack[i]
-		var bts: Array = []
-		if String(it.get("t", "")) == "gear":
-			bts.append(["Wear", func(): Pack.use_from_pack(m, m.player, idx); _build_pack(), true])
-		bts.append(["Drop", func(): Pack.drop_from_pack(m, m.player, idx); _build_pack()])
-		rows.add_child(_item_row(it, bts))
-	for k in p.pack_cap - p.pack.size():
-		if k >= 3: break
-		var empty := UI.card(Color(1, 1, 1, 0.03), 6, 9)
-		empty.custom_minimum_size.y = 30
-		empty.add_child(UI.label("empty slot", 12, Color(MUTED, 0.6)))
-		rows.add_child(empty)
-	CaptureHud.pack_section(self, v, p, func(): _build_pack())       # the capsules in your box, with Release
-	var hint := UI.label("%s or Esc to close  ·  bigger backpacks at your armory" % Settings.key_cap("inventory"), 12, MUTED)
+	var sl := LoadoutPanel.fill(m, pc, v, func(): _build_pack())
+	if loot_open == null:
+		CaptureHud.pack_section(self, v, p, func(): _build_pack())       # the capsules in your box, with Release
+	var hint := UI.para(LoadoutPanel.HINT, 12)
+	hint.custom_minimum_size.x = LootHold.WIDTH - 28.0
 	v.add_child(hint)
 	add_child(pc)
 	pack_panel = pc
-	_fit_panel(pc, sl[0], rows)
+	_fit_panel(pc, sl[0], sl[1])
 
 ## Closes the windows when they stop making sense (you went down, walked off, or it's gone).
 func _pack_tick() -> void:
