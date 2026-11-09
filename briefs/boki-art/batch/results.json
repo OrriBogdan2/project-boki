@@ -7353,5 +7353,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/terrarimit_x_3.jpg",
     "ok": true
+  },
+  {
+    "id": "tinbrock_x",
+    "name": "Tinbrock",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/tinbrock_x_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "tinbrock_x",
+    "name": "Tinbrock",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tinbrock_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tinbrock_x",
+    "name": "Tinbrock",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tinbrock_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_x",
+    "name": "Amanitusk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/amanitusk_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lashyx_x",
+    "name": "Lashyx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lashyx_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_x",
+    "name": "Amanitusk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/amanitusk_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lashyx_x",
+    "name": "Lashyx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lashyx_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_x",
+    "name": "Seamwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/seamwyrm_x_1.jpg",
+    "ok": true
   }
 ]
