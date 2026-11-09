@@ -49,7 +49,7 @@ func teleport(e: Ent, p: Vector3) -> void:
 
 func knock(e: Ent, kb: Vector2, lift := -1.0) -> void:
 	if not e.remote:
-		e.impulse(kb, lift)
+		if not e.cc_proof(): e.impulse(kb, lift)
 	else:
 		_send(["kb", e.nid, m._r(kb.x), m._r(kb.y), m._r(lift)])
 
@@ -120,6 +120,8 @@ func tick(dt: float) -> void:
 func _step(rec: Dictionary, e: Ent, dt: float) -> String:
 	var p: Dictionary = rec["p"]
 	var mode := String(p["mode"])
+	if e.cc_proof():
+		return "proof"
 	if mode == "push" or mode == "slide":
 		if float(rec["left"]) < 0.0:
 			return "time"
@@ -307,7 +309,7 @@ func net_in(x: Array) -> void:
 		return
 	match kind:
 		"tp": if x.size() >= 6: body.teleport(Vector3(x[3], x[4], x[5]))
-		"kb": if x.size() >= 6: body.impulse(Vector2(x[3], x[4]), float(x[5]))
+		"kb": if x.size() >= 6: knock(body, Vector2(x[3], x[4]), float(x[5]))
 		"vy": if x.size() >= 4: body.vel.y = minf(body.vel.y, float(x[3]))
 		"yank": if x.size() >= 8: m.verbs.yank(body, Vector3(x[3], x[4], x[5]), float(x[6]), float(x[7]))
 		"stop":

@@ -103,6 +103,7 @@ func tick(dt: float) -> void:
 					if float(e.get("dmg", 0.0)) > 0.0:
 						f.hurt(float(e["dmg"]) * float(z["pw"]), by, o)
 					else:
+						if f.cc_proof(): continue
 						if o.has("slow"): f.slow_t = maxf(f.slow_t, float(o["slow"]))
 						if o.has("root"): f.root_t = maxf(f.root_t, float(o["root"]))
 			if float(e.get("heal", 0.0)) > 0.0:

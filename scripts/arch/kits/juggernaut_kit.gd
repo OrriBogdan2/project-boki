@@ -257,6 +257,10 @@ func _start_riposte() -> bool:
 	riposte.start()
 	return true
 
+## The Riposte's guard: invulnerable to everything but the abyss, pulls and knocks included.
+func cc_proof() -> bool:
+	return riposte.guarding()
+
 func ult_running() -> bool:
 	return riposte.running()
 

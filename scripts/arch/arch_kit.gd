@@ -208,6 +208,8 @@ func _r_end() -> void: pass
 
 ## A cast holds the caster still (no walking or jumping); aim_lock() is the facing it keeps (ZERO: free to turn).
 func cast_locked() -> bool: return false
+## True while the kit's move makes her invulnerable to pulls, knocks and slows too, not just damage.
+func cc_proof() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false

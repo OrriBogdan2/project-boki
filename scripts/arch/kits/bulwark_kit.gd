@@ -261,6 +261,10 @@ func _start_ult() -> bool:
 	_drop_holds()
 	return ult.cast()
 
+## The Shield Charge ("shield briefly Invulnerable"): no pull or slow takes hold while the invulnerable dash runs.
+func cc_proof() -> bool:
+	return front_t > 0.0 and h.inv_t > 0.0
+
 func ult_running() -> bool:
 	return ult.phase != ""
 

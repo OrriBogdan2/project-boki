@@ -101,6 +101,10 @@ func alive() -> bool:
 func hittable() -> bool:
 	return not dead
 
+## Invulnerable to being moved or slowed as well as hurt (a Hunter whose kit says so): pulls, knocks and zones skip it.
+func cc_proof() -> bool:
+	return false
+
 ## Generic damage. opts: kb (Vector2 impulse), lift, crit, src ("shot","kin","mob","boom","fall"), burn, slow, root
 func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if dead or dmg <= 0.0:

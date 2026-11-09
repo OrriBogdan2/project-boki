@@ -3,11 +3,11 @@ extends RefCounted
 ## Sparkle's ultimate, Kitefall (X). docs/heroes/mage.md has the numbers and the research notes.
 ##
 ## Press: a short crouch (a Shift or a jump in it combines: she launches from where it takes her), then she
-## launches straight up and hangs there invulnerable while a pink range ring and its dark interior show round
-## the take-off spot and the camera pulls back. Press again (X or the attack key) to come down as a bolt at the
-## cursor, clamped inside the ring; with no second press she comes down there by herself when the hover runs
-## out. The strike hurts, knocks back and adds Static to everyone round the landing spot, and pink lightning
-## crackles at her feet for a moment after.
+## launches straight up and hangs there, shots passing through her, while a pink range ring and its dark
+## interior show round the take-off spot and the camera pulls back. Press again (X or the attack key) to come down
+## as a bolt at the cursor, clamped inside the ring; with no second press she comes down there by herself when
+## the hover runs out. The strike hurts, knocks back and adds Static to everyone round the landing spot, and pink
+## lightning crackles at her feet for a moment after.
 
 const CROUCH := "crouch"
 const RISE := "rise"
@@ -160,14 +160,13 @@ func _hold_air(k: float) -> void:
 	h.vel = Vector3.ZERO
 	var y := lerpf(float(leap["base"]), float(leap["top"]), k) + 0.12 * sin(kit.m.time * 3.0) * k
 	h.pos = Vector3(from.x, y, from.z)
-	_untouchable(0.1)
+	_shots_pass(0.1)
 	if h.is_local() and kit.m.cam:
 		kit.m.cam.pull = maxf(kit.m.cam.pull, CAM_PULL * k)
 
-func _untouchable(secs: float) -> void:
-	var h := kit.h
-	h.inv_t = maxf(h.inv_t, secs)
-	h.phase_t = maxf(h.phase_t, secs)
+## Shots pass through her, nothing more: the data's Thunderstorm is "immune to projectiles".
+func _shots_pass(secs: float) -> void:
+	kit.h.phase_t = maxf(kit.h.phase_t, secs)
 
 ## She launches from where she is: a jump or a dash in the crouch moves the ring there (unless that is over the
 ## abyss), and the climb starts at her height, so nothing snaps.
@@ -191,7 +190,7 @@ func _take_off() -> void:
 	leap["disc"] = kit.fx().disc(from, r, MageKit.VIOLET.darkened(0.45), MageKit.PINK, hover, MageKit.PINK)
 	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.PINK, false)
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
-	_untouchable(0.2)
+	_shots_pass(0.2)
 
 # ------------------------------------------------------------------ aiming the landing
 ## The ground under the cursor: its ray walked down to the first ground it meets. Hanging 5 m up, inp["aim"] (the
@@ -284,7 +283,7 @@ func _fall_tick(u: float) -> void:
 	h.vel = Vector3.ZERO
 	h.inp["move"] = Vector2.ZERO
 	h.pos = a.lerp(b, u * u)
-	_untouchable(0.1)
+	_shots_pass(0.1)
 	if h.model:
 		h.model.visible = u < 0.3
 	if h.is_local() and kit.m.cam:

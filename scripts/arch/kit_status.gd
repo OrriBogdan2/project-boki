@@ -40,6 +40,8 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 			m.net_event(["kst", e.nid, kind, snappedf(secs, 0.01), snappedf(k, 0.01)])
 		_show(e, kind, secs)
 		return
+	if e.cc_proof():
+		return
 	match kind:
 		"gnd":
 			var was := grounded(e)

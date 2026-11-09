@@ -5,6 +5,8 @@ extends RefCounted
 ## cooldown, the level gate (no cast below 6), the bond paid only on a land, the small mechanics, the merge
 ## hold, and (combos) the burst cap: an ultimate followed straight by a merge never knocks a full-health hunter.
 
+const CC := preload("res://tools/cc_probe.gd")
+
 var A
 
 ## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
@@ -182,6 +184,9 @@ func zedran(a) -> void:
 	A.ok("juggernaut X small mechanic: the guard blocks every hit and its stun; blocks count (two at most)",
 			P.hp == hp0 and P.stun_t <= 0.0 and U.blocked == 3 and int(U.st["blocks"]) == 2,
 			"hp %.0f -> %.0f blocked %d" % [hp0, P.hp, U.blocked])
+	var took := CC.landed(m, P, T2)
+	A.ok("juggernaut X parity: the guard is Invulnerable, a pull, a knock and a slow take no hold either",
+			took == "" and K.cc_proof(), "took hold: " + took)
 	A.ok("juggernaut X: no bond before the strike lands (blocking pays nothing)", _owed(P) == 0.0)
 	A.step(m, 0.5)
 	var dealt_blocked := U.last_dealt

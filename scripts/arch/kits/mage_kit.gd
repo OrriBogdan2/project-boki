@@ -442,7 +442,7 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	var dd := dash_def()
 	var time := run_time(L)
 	var a := h.position + Vector3(0, 0.9, 0)
-	travel(L, time / float(dash_feel()["time"]), {"invuln": time + 0.05, "phase": 1.0, "dir": d})
+	travel(L, time / float(dash_feel()["time"]), {"invuln": 0.1, "dir": d})   # shots pass (phase_t below)
 	# momentum carries: the streak adds the drift you had
 	var v := d * (L / time) + drift
 	h.roll_dir = v.normalized()

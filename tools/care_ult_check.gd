@@ -4,6 +4,8 @@ extends RefCounted
 ## payoff, the cooldown, the small mechanics, the bond paid only when it lands, the merge-start drop,
 ## and (burst_cap) that the ult followed straight by a merge never knocks a full-health hunter.
 
+const CC := preload("res://tools/cc_probe.gd")
+
 var sc        # the SupportCheck running us (setup, step, ok, aim_at, down)
 
 
@@ -214,6 +216,8 @@ func rimewright() -> void:
 	P.inp["fire"] = false
 	ok("tm X: inside the shell she is invulnerable and rooted, and nothing fires", P.hp >= php - 0.01
 		and _moved(P, p0) < 0.2 and m.shots.size() == n_shots, "hp %.0f moved %.2f" % [P.hp - php, _moved(P, p0)])
+	ok("tm X parity: sealed in she is Invulnerable, a pull, a knock and a slow take no hold either",
+		CC.landed(m, P, T) == "" and K.cc_proof())
 	var slow1 := T.slow_k
 	var fill1 := float(AimKit.entry(P, "x").get("fill", 0.0))
 	step(m, 1.6)

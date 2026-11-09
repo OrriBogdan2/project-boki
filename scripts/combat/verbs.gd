@@ -269,6 +269,8 @@ func yank(ent: Ent, to: Vector3, dur: float, hop := 1.2) -> void:
 	if ent.remote:
 		m.displace.yank_remote(ent, to, dur, hop)      # its own game runs this same yank (Displace)
 		return
+	if ent.cc_proof():
+		return
 	if ent is Hunter:
 		var h := ent as Hunter
 		h.gliding = false

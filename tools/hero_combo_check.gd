@@ -175,7 +175,13 @@ func _mage() -> void:
 	ok("Wirerun held: your keys don't move you", _flat(P.pos, home) < 0.3, "moved %.2f" % _flat(P.pos, home))
 	P.inp["move"] = Vector2.ZERO
 	P.inp["dash_down"] = false
-	ac.step(m, 0.7)
+	ac.step(m, 0.15)       # past the plain dash's 0.1 s frame
+	var surge_hp := P.hp + P.armor + P.shield
+	P.hurt(30.0, T, {"src": "abil", "ab": "k1"})
+	ok("Wirerun parity: shots pass through the streak (wiki), a blow still lands, not Invulnerable",
+			K.run_t > 0.0 and P.phase_t > 0.0 and P.inv_t < 0.2 and P.hp + P.armor + P.shield < surge_hp,
+			"run %.2f phase %.2f inv %.2f" % [K.run_t, P.phase_t, P.inv_t])
+	ac.step(m, 0.55)
 	ok("Wirerun: a full hold streaks at least 12.5 m", _flat(P.pos, home) >= 12.5, "%.1f m" % _flat(P.pos, home))
 	var short_v := 7.5 / K.run_time(7.5)
 	var long_v := 13.0 / K.run_time(13.0)

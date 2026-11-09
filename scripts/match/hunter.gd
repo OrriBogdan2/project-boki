@@ -462,6 +462,9 @@ func mass() -> float:
 func hittable() -> bool:
 	return not dead and not out and not extracted and not riding
 
+func cc_proof() -> bool:
+	return ak != null and ak.cc_proof()
+
 func targetable() -> bool:
 	return hittable() and not downed and cloak_t <= 0.0 and not dropping
 
