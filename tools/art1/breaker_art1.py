@@ -1,4 +1,4 @@
-"""Breaker, the Sunken Bulwark (ART-1): the sculpt to a game mesh on the contract armature with a painted atlas, saved as a .blend for
+"""Breaker, the Barnacle Knight (ART-1): the sculpt to a game mesh on the contract armature with a painted atlas, saved as a .blend for
 tools/art1/breaker_anims.py, which keys the clips and exports the .glb:
   blender -b --factory-startup --python tools/art1/breaker_art1.py -- WORKDIR
 Shapes: breaker_sculpt.py; paint: breaker_paint.py. Budget: 20k triangles, weapon and shield included."""

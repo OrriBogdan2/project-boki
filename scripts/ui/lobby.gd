@@ -135,7 +135,7 @@ func _start() -> void:
 		var p: Dictionary = Net.peers.get(id, Net.my_presence)
 		if id == Net.me:
 			p = Net.my_presence
-		roster.append({"peer": id, "team": i / squad, "name": p.get("name", "Hunter"), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
+		roster.append({"peer": id, "team": i / squad, "name": p.get("name", "Hunter"), "arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
 	var teams := maxi(int(ceil(float(ids.size()) / squad)), int(ceil(Data.MATCH_PLAYERS / float(squad))))
 	var d := {"mid": "%d" % (Time.get_ticks_msec() % 100000000), "seed": randi(), "host": Net.me, "roster": roster, "teams": mini(teams, 20), "squad": squad, "tier": int(opts.get("tier", 0))}
 	Net.lobby_emit("start", d)
@@ -151,5 +151,4 @@ func _on_msg(topic: String, data, _from: String) -> void:
 
 func _go(d: Dictionary) -> void:
 	Save.d["cls"] = opts.get("cls", Save.d.get("cls", "medium"))
-	Game.last_tier = int(d.get("tier", 0))
-	Game.goto("match", {"net": d, "seed": int(d["seed"]), "teams": int(d["teams"]), "squad": int(d["squad"]), "tier": int(d.get("tier", 0))})
+	Game.start_match({"net": d, "seed": int(d["seed"]), "teams": int(d["teams"]), "squad": int(d["squad"]), "tier": int(d.get("tier", 0))})

@@ -3,12 +3,14 @@ extends RefCounted
 ## Kael's airborne Smash, the Meteor Drop (`rmb.drop` in content/archetypes/juggernaut.json; the source's air
 ## slam, briefs/hero-ref/juggernaut.md "Air Slam" and "Jump and landing": ~0.85s airborne, ~0.5s recovery).
 ## Press in the air: a short hang at the top while he gathers (the blade hauled overhead, a tuck and a half
-## flip) over a landing marker everyone sees at the clamped cursor, then a visible dive onto it with flame
-## streaks, a heavy landing (a crouch, a crack in the ground, a shock ring the size of the stun, dust and
-## debris, a shake and a deep boom), and a recovery rising from the crouch. Owned by JuggernautKit.
+## flip) as he slides over a landing marker everyone sees at the clamped cursor, then a straight vertical slam
+## down onto it with flame streaks, a heavy landing (a crouch, a crack in the ground, a shock ring the size of
+## the stun, dust and debris, a shake and a deep boom), and a recovery rising from the crouch. Owned by
+## JuggernautKit.
 
 const PURPLE := Color("b06aff")       # the landing marker (the damage area)
 const CORE := Color("ff5ad8")         # its centre ring: the stun area, and the shock ring on impact
+const CLOSE := 0.25                   # share of the dive that closes any gap to the spot left by an air dash
 
 var k: JuggernautKit
 var phase := ""                       # "" | hang | dive | recover
@@ -102,8 +104,9 @@ func tick(dt: float) -> void:
 				last_recover = t
 				phase = ""
 
-## The gather at the top: held in the air (a touch of lift), the marker filling. An air dash in it carries him
-## on (the gather keeps its time), and the dive comes down onto the marker from wherever it took him.
+## The gather at the top: held in the air (a touch of lift), sliding over the spot so the slam comes straight down,
+## the marker filling. An air dash in it carries him on (the gather keeps its time), and the dive closes what's left
+## at its very start.
 func _tick_hang(dt: float) -> void:
 	var h := k.h
 	var hang := float(data()["hang"])
@@ -111,6 +114,8 @@ func _tick_hang(dt: float) -> void:
 	HeroVfx.of(k.m).hold(h, "drop_gather", minf(t / hang, 1.0))
 	if h.roll_t > 0.0:
 		return
+	var over := clampf(dt / maxf(hang - t, dt), 0.0, 1.0)
+	h.teleport(Vector3(lerpf(h.pos.x, land.x, over), h.pos.y, lerpf(h.pos.z, land.z, over)))
 	h.vel = Vector3(0.0, 0.6 * (1.0 - t / hang) + Hunter.H_GRAV * dt, 0.0)
 	if t >= hang:
 		var dd := data()
@@ -122,11 +127,12 @@ func _tick_hang(dt: float) -> void:
 		dive_t = clampf(span / float(dd["dive_speed"]), float(dd["dive_t"][0]), float(dd["dive_t"][1]))
 		k.vfx("drop_dive", h.pos, Vector2(land.x - from.x, land.z - from.z).normalized())
 
-## The dive: down along a steepening curve onto the marker (seen all the way, not a teleport), flame streaks.
+## The dive: straight down onto the marker, accelerating (seen all the way, not a teleport), flame streaks rising
+## off him.
 func _tick_dive() -> void:
 	var h := k.h
 	var u := clampf(t / dive_t, 0.0, 1.0)
-	var e := u * u * (3.0 - 2.0 * u) * 0.35 + u * u * 0.65        # eased out of the hang, accelerating into the ground
+	var e := clampf(u / CLOSE, 0.0, 1.0)         # over the spot already, unless an air dash took him off it
 	var at := Vector3(lerpf(from.x, land.x, e), lerpf(from.y, land.y, u * u), lerpf(from.z, land.z, e))
 	h.vel = Vector3.ZERO
 	h.teleport(at)

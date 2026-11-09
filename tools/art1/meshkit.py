@@ -228,3 +228,71 @@ def smin(a, b, k):
 
 def smax(a, b, k):
     return -smin(-a, -b, k)
+
+
+def grid_faces(rows, cols, wrap=False):
+    f = []
+    for i in range(rows - 1):
+        for j in range(cols - (0 if wrap else 1)):
+            a = i * cols + j
+            b = i * cols + (j + 1) % cols
+            f.append([a, b, b + cols, a + cols])
+    return f
+
+
+RING = [(np.cos(t), np.sin(t)) for t in (0.5, 2.6, 4.7)]
+
+
+def link(centre, along, side, ln=0.040, wid=0.020, th=0.0058, uv=(0, 0, 1, 1)):
+    """One chain link: a stadium ring, 8 segments of a triangular wire."""
+    along, side = norm(along), norm(side)
+    nrm = np.cross(along, side)
+    pts = []
+    for t in np.linspace(0, 2 * np.pi, 6, endpoint=False):
+        cx, sx = np.cos(t), np.sin(t)
+        pts.append(along * (cx * (ln * 0.5 - wid * 0.1) + np.sign(cx) * 0.0) + side * sx * wid * 0.5)
+    v, f, uvs = [], [], []
+    n = len(pts)
+    for i in range(n):
+        o = norm(pts[i] * [1, 1, 1])
+        for a, b in RING:
+            v.append(centre + pts[i] + o * a * th + nrm * b * th)
+    for i in range(n):
+        for j in range(3):
+            aa = i * 3 + j
+            bb = i * 3 + (j + 1) % 3
+            cc = ((i + 1) % n) * 3 + (j + 1) % 3
+            dd = ((i + 1) % n) * 3 + j
+            f.append([aa, bb, cc, dd])
+            u0, v0, u1, v1 = uv
+            uu = u0 + (u1 - u0) * (j / 3.0)
+            uw = u0 + (u1 - u0) * ((j + 1) / 3.0)
+            vv = v0 + (v1 - v0) * (i / n)
+            vw = v0 + (v1 - v0) * ((i + 1) / n)
+            uvs.append([(uu, vv), (uw, vv), (uw, vw), (uu, vw)])
+    return v, f, uvs
+
+
+def chain_along(name, path, step=0.033, uv=(0, 0, 1, 1), ln=0.040, wid=0.021, th=0.0058, flip=0.0):
+    """Links along a path, every other one turned 90 degrees about the path."""
+    p = np.asarray(path, dtype=np.float64)
+    seg = np.linalg.norm(np.diff(p, axis=0), axis=1)
+    s = np.concatenate([[0], np.cumsum(seg)])
+    cnt = max(1, int(s[-1] / step))
+    v, f, uvs = [], [], []
+    t, side, nrm = frames(p, (0.3, 0.4, 0.9))
+    for i in range(cnt):
+        d = (i + 0.5) * step
+        k = np.searchsorted(s, d) - 1
+        k = int(np.clip(k, 0, len(p) - 2))
+        q = (d - s[k]) / max(seg[k], 1e-6)
+        c = p[k] * (1 - q) + p[k + 1] * q
+        a = t[k]
+        tw = (i % 2) * (np.pi / 2) + flip + (i * 0.17)
+        sd = side[k] * np.cos(tw) + nrm[k] * np.sin(tw)
+        vv, ff, uu = link(c, a, sd, ln=ln, wid=wid, th=th, uv=uv)
+        o = len(v)
+        v += vv
+        f += [[o + x for x in q2] for q2 in ff]
+        uvs += uu
+    return Piece(name, "metal-chain", v, f, uvs, room=0.15)

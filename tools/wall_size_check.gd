@@ -4,6 +4,7 @@ extends RefCounted
 ## ground (rock, tree, ruin, wall; touching tiles count, corners too) has BlockPrune.MIN_TILES or
 ## more tiles. That is 3: the shortest run that reads as a wall instead of a stump, and it still
 ## allows a 1x3 wall or an L. Prints every smaller piece it finds, with its map and tile coordinates.
+## Item 151: and no ground is sealed in by blockers (BlockPrune.pockets), so nobody can be trapped in it.
 
 var fails := 0
 var checks := 0
@@ -18,9 +19,13 @@ func verdict(label: String, world: World) -> void:
 	var small := small_pieces(world)
 	for group in small:
 		print("WALLSIZE %s: %d-tile piece at %s (%s)" % [label, group.size(), group, _what(world, group)])
-	var pass_it := small.is_empty()
+	var sealed := BlockPrune.pockets(world)
+	for group in sealed:
+		print("WALLSIZE %s: ground sealed in by blockers at %s" % [label, group])
+	var pass_it := small.is_empty() and sealed.is_empty()
 	var total := BlockPrune.pieces(world).size()
-	print("WALLSIZE %-26s %s  %d pieces, %d too small" % [label, "PASS" if pass_it else "FAIL", total, small.size()])
+	print("WALLSIZE %-26s %s  %d pieces, %d too small, %d sealed pockets" % [label, "PASS" if pass_it else "FAIL",
+		total, small.size(), sealed.size()])
 	if not pass_it:
 		fails += 1
 
