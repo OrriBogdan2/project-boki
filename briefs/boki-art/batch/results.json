@@ -9978,5 +9978,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_zephyrak_p_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_thrumbird_p",
+    "name": "Thrumbird (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_thrumbird_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_snuffapi_p",
+    "name": "Snuffapi (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_snuffapi_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_umbrathere_p",
+    "name": "Umbrathere (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_umbrathere_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zippelith_p",
+    "name": "Zippelith (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_zippelith_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kitlet_p",
+    "name": "Kitlet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_kitlet_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ermink_p",
+    "name": "Ermink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_ermink_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jarmit_p",
+    "name": "Jarmit (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_jarmit_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kerchick_p",
+    "name": "Kerchick (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kerchick_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kerchick_p",
+    "name": "Kerchick (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_kerchick_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glassolotl_p",
+    "name": "Glassolotl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glassolotl_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jarmit_p",
+    "name": "Jarmit (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_jarmit_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ermink_p",
+    "name": "Ermink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ermink_p_2.jpg",
+    "ok": true
   }
 ]
