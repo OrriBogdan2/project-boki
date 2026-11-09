@@ -37656,5 +37656,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_pyrraven_d4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_pyrraven_d3",
+    "name": "Pyrraven (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_pyrraven_d3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pyrraven_d5",
+    "name": "Pyrraven (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pyrraven_d5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pyrraven_d4",
+    "name": "Pyrraven (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_pyrraven_d4_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pyrraven_d5",
+    "name": "Pyrraven (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pyrraven_d5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pyrraven_d4",
+    "name": "Pyrraven (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pyrraven_d4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pyrraven_d5",
+    "name": "Pyrraven (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pyrraven_d5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pyrraven_d4",
+    "name": "Pyrraven (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pyrraven_d4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pyrraven_d6",
+    "name": "Pyrraven (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pyrraven_d6_2.jpg",
+    "ok": true
   }
 ]
