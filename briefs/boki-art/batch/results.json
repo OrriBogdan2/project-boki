@@ -13835,5 +13835,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_crofthorn_pe_w28_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_frigatee_pe_w28",
+    "name": "Frigatee (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_frigatee_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frigatee_pe_w28",
+    "name": "Frigatee (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_frigatee_pe_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frigatee_pe_w28",
+    "name": "Frigatee (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_frigatee_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_pe_w28",
+    "name": "Gongibbon (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_pe_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_pe_w28",
+    "name": "Gongibbon (portrait edit)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_pe_w28_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_pe_w28",
+    "name": "Gongibbon (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_pe_w28",
+    "name": "Gongibbon (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_knotwyrm_pe_w28",
+    "name": "Knotwyrm (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_knotwyrm_pe_w28_1.jpg",
+    "ok": true
   }
 ]
