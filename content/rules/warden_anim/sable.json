@@ -13,7 +13,7 @@
 	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "fall"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
-		"thf_lmb_r": {"clip": "lmb_r", "upper": "moving"}, "thf_lmb_l": {"clip": "lmb_l", "upper": "moving"}, "thf_primed": {"clip": "primed", "upper": "moving"},
+		"thf_lmb_r": {"clip": "lmb_r", "cut": 0.45, "upper": "moving"}, "thf_lmb_l": {"clip": "lmb_l", "cut": 0.45, "upper": "moving"}, "thf_primed": {"clip": "primed", "upper": "moving"},
 		"thf_vault_r": {"clip": "vault_r"}, "thf_vault_l": {"clip": "vault_l"}, "thf_vault_f": {"clip": "vault_f"}, "thf_vault_b": {"clip": "vault_b"}, "thf_vault_twist": {"clip": "vault_twist"},
 		"thf_exdash": {"clip": "exdash", "hold_from": 0.46}, "thf_land": {"clip": "land_v"},
 		"thf_bola": {"clip": "bola", "upper": "moving"}, "thf_knife": {"clip": "knife"}, "thf_arrive": {"clip": "arrive"},

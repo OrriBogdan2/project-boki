@@ -14,8 +14,8 @@
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
 		"arc_draw": {"clip": "draw", "hold_from": 1.15, "upper": true}, "arc_tap": {"clip": "tap", "upper": true}, "arc_loose": {"clip": "loose", "upper": true},
-		"arc_perfect": {"clip": "perfect", "upper": true}, "arc_super": {"clip": "super", "upper": true},
-		"arc_over": {"clip": "over", "hold_from": 0.08, "upper": true}, "arc_over_loose": {"clip": "over_loose", "upper": true},
+		"arc_perfect": {"clip": "perfect", "scale": 1.07, "upper": true}, "arc_super": {"clip": "super", "scale": 1.2, "upper": true},
+		"arc_over": {"clip": "over", "hold_from": 0.08, "upper": true}, "arc_over_loose": {"clip": "over_loose", "scale": 1.07, "upper": true},
 		"arc_heavy_wind": {"clip": "heavy_wind", "hold_from": 1.1}, "arc_heavy": {"clip": "heavy"},
 		"arc_hail": {"clip": "hail", "upper": true},
 		"pin_roll": {"clip": "roll"}, "pin_walk": {"clip": "spirit", "hold_from": 0.2, "upper": true}, "pin_flick": {"clip": "flick"},
