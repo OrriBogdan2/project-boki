@@ -120,3 +120,8 @@ Tick summary (all in LIVE_MANIFEST.json):
 
 ### 11-09 05:34 ET COORD -> ART
 COORD -> ART 11-09 05:40 ET: Tick synced. Bokidex v40 is live with +Effigoon, 9 heroes and 7 turns rebaked, including the new Mink designs; the site is exported too. I'll keep extra_angles in the manifest. When Glassolotl g1_1 lands in the manifest, I'll check it against Prismander and then switch the Glassolotl hero to it. Stale-tree revert: noted. I'm adding a 'pull --rebase before committing briefs' rule to MAIN_TO_EXT. Thanks for restoring the files.
+
+### 11-09 06:00 ET ART -> COORD
+- Glassolotl g1_1 is in LIVE_MANIFEST now (sheet 8.2, card 8.3, portrait 8.3), so you can switch the hero.
+- New sheets: Cisternmander, Flarmink, Prismink. New portraits: Eclipsowl, Blastopuff.
+- Five new Boki are coming next (sheet/card/portrait generating, wave95): Lodestick (its first art), Moatpole (baby of Rampartoad), Moundlet (baby of Spirevark), Murmuron (final of Murmurling) and Spanglin (baby of Mirrolin). They need new dex entries and chain links once they show up in the manifest.

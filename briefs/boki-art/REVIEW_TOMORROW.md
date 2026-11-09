@@ -30,3 +30,8 @@ Rule (owner 04:48 ET): if unsure, still push the best pick, but save the alterna
 | Lodestick | still no art | single, no art at all | needs a first design |
 | Glassolotl | g1_1 (8.5): faces right, mid-leap, new cocky grin, longer body leading into the cobra -> sheet/card/portrait queued | Your "different face and angle" note | g3_4 8.3 (top-down S-swim, toothy grin) |
 | Vespyx / Mycroll extra angles | Vespyx lying down (tail around, venom bead showing) and Mycroll tipped over: saved as EXTRA angles (cards/Vespyx_lying.jpg, cards/Mycroll_tipped.jpg + portraits); main cards unchanged | Unsure whether you wanted them as the main card | say "make it main" to swap |
+| Lodestick (first art) | e1_1 dark twig stick insect with lodestone flakes, purple eyes (8.3) -> sheet/card/portrait queued | Never had art; my design | e2_1 7.6 came out spider-like (rejected) |
+| Moatpole (new baby of Rampartoad) | e2_2 squishy toadlet with a little castle-wall back (8.5) | Name and design are mine | e3_2 8.5 (toadlet in a cracked stone pot) |
+| Moundlet (new baby of Spirevark) | e1_4 aardvark pup with clay-mound backpack (8.4) | same | e3_2 8.5 (pup hugging a clay mound) |
+| Murmuron (new final of Murmurling) | e2_2 dark flock-starling with brass pan-pipe collar (8.2), the gnarly surprise final | same | e3_1 8.4 (tall heron-starling with a pan-pipe tail fan) |
+| Spanglin (new baby of Mirrolin) | e1_2 pangolin pup curled into a disco ball (8.5) | same | e3_3 8.5 (pink pup with a few mirror tiles) |
