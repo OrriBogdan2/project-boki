@@ -68029,5 +68029,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_barostorm_r4_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_bulwartoad_r4",
+    "name": "Bulwartoad (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bulwartoad_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bulwartoad_r4",
+    "name": "Bulwartoad (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_bulwartoad_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barostorm_r4",
+    "name": "Barostorm (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barostorm_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_quivertoad_r4",
+    "name": "Quivertoad (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_quivertoad_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barostorm_r4",
+    "name": "Barostorm (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_barostorm_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bulwartoad_r4",
+    "name": "Bulwartoad (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bulwartoad_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_quivertoad_r4",
+    "name": "Quivertoad (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_quivertoad_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bonsolith_r4",
+    "name": "Bonsolith (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_bonsolith_r4_3.jpg",
+    "ok": true
   }
 ]
