@@ -14,6 +14,10 @@ Owner override (DECISIONS 'Cinder the Flame Queen'): no tank, no hose, no flamet
 
 `cinder.glb.import`: `generate_lods=false`, `force_disable_compression=true`, `remove_immutable_tracks=false`.
 
+**Revamp (owner 11-09):** 22.1k tris (face 4k, each hand 1.4k), plus a 2048 tangent-space normal map baked from the dense scan (cinder_finish.py; the built pieces stay flat). The fresh meshy-7.1 runs (rv_on/rv_off) lost to runA (rv_on spread an arm). Build with
+`CINDER_LOW_TRIS=24000 CINDER_FACE_TRIS=4000 CINDER_HAND_TRIS=1400` on the three commands above.
+`*_normal.png.import`: `compress/mode=2`, `compress/normal_map=1` (RG); the normal map shades at warden_look's `normal_k` (1.0). Before/after renders: docs/art/wardens/revamp/cinder/.
+
 From the scan: body, face, horns, shards. The scan welded her forearms to the hip plates: `part_arms` cuts that seam and closes both sides.
 Added: the spined tail (9 spring bones, `cinder_pieces.py`), hair cards with ember ends (a curtain as wide as her back, to her waist: the final turnaround), curved lizard horns swept back past her crown (`HORN_PTS`), orange eyes painted over the scan's dark sockets (`paint_eyes`), heel jets on `jet.*`
 (`flame-jet`, for Flue Flight). The seams are the emission map, white-yellow core to orange; `PipStars.pulse` brightens it while she casts.

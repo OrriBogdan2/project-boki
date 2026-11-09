@@ -34,7 +34,7 @@ const SLOT_MAX := 8
 const MOTION_BONES := ["hips", "thigh.L", "shin.L", "thigh.R", "shin.R", "upper_arm.L", "forearm.L", "upper_arm.R",
 	"forearm.R", "head"]
 const OWN_MOTION := 0.05       # rad: two Wardens' idle or run joint angles differ by more than this on average
-const TRIS_MAX := 15000         # the game budget (RIG_CONTRACT "Budget"): tools/blender/decimate_warden.py
+const TRIS_MAX := 25000         # the game budget (RIG_CONTRACT "Budget"): tools/blender/decimate_warden.py
 ## Over the budget until an art pass: Kael's mane (14.5k of hair cards) breaks when decimated, so it is kept whole.
 const TRIS_OVER := {"juggernaut": 24000}
 

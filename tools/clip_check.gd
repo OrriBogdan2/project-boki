@@ -5,7 +5,7 @@ extends RefCounted
 ## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop; the idle
 ## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md). Never touches the save.
 
-const TRI_BUDGET := 15000
+const TRI_BUDGET := 25000         # RIG_CONTRACT "Budget"
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
 	"ostra": "ostra", "juggernaut": "kael"}
