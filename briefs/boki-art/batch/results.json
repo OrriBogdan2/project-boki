@@ -36620,5 +36620,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_glaivyx_g9_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_ringrove_r6",
+    "name": "Ringrove (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_ringrove_r6_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_r5",
+    "name": "Ringrove (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_ringrove_r5_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g9",
+    "name": "Glaivyx (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g9_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_r6",
+    "name": "Ringrove (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_ringrove_r6_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_r6",
+    "name": "Ringrove (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_ringrove_r6_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g9",
+    "name": "Glaivyx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g9_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_r6",
+    "name": "Ringrove (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_ringrove_r6_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_card7",
+    "name": "Vespox (recolour)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vespox_card7_2.jpg",
+    "ok": true
   }
 ]
