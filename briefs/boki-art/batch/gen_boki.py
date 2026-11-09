@@ -22,7 +22,7 @@ def main():
     ap.add_argument("--push", action="store_true", help="git commit and push the new images")
     ap.add_argument("--only", default="", help="comma-separated job ids")
     ap.add_argument("--size", default=None, help="override size, e.g. 2K")
-    ap.add_argument("--parallel", type=int, default=4, help="images generated at the same time")
+    ap.add_argument("--parallel", type=int, default=8, help="images generated at the same time")
     ap.add_argument("--watch", action="store_true", help="keep running: pull new jobs every minute, generate, push")
     a = ap.parse_args()
     if not os.environ.get("GEMINI_API_KEY"):
