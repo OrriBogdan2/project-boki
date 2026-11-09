@@ -68,8 +68,7 @@ static func tick(m) -> void:
 		if hit and m.time >= HIT_AT and not m.has_meta("hudref_hit_done"):
 			m.set_meta("hudref_hit_done", true)
 			hit.hurt(46.0, P)
-			var left: Hunter = m.get_meta("hudref_wash", null)
-			if left: P.hurt(1.0, left)
+			if m.has_meta("hudref_wash"): P.hurt(1.0, m.get_meta("hudref_wash"))
 		var up: Hunter = m.get_meta("hudref_up", null)
 		if up and m.time >= UP_AT and not m.has_meta("hudref_up_done"):
 			m.set_meta("hudref_up_done", true)
