@@ -84,7 +84,7 @@ Per-kit dashes are the kits' own (content/archetypes/*.json `dash`); the source'
 |---|---|---|---|---|
 | Knockback | steerable; no values | no steering for clamp(0.1 + speed·0.02, 0.12, 0.35) s, then air control | [W]; `Hunter.impulse` | unknown |
 | Launch arcs | the same gravity | 14.7 m/s²; a straight lift caps at 9 m/s | [D] | match (gravity) / unknown (caps) |
-| Landing recovery | not documented | 1 step before a key acts; the landing pose is 0.2 s (0.32 s hard) and does not lock the keys | MFEEL `land_dead_frames` | unknown |
+| Landing recovery | not documented | 1 step before a key acts; the landing pose is 0.2 s (0.32 s hard) and does not lock the keys | MFEEL `land_<case>_move_lag` | unknown |
 | Hit-stop on movement | not documented | a time dip on a few impacts (`Match.freeze_frame`, 0.04–0.06 s); movement itself never pauses | [W] silent | unknown |
 
 ## 7. Slopes, ledges, walls, abyss
