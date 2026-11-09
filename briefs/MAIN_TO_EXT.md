@@ -1313,3 +1313,11 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 
 - Not merged on purpose: ext/art1-integ-4 (Kael not approved), the 7 WIP Boki species, drop-107, friendly-bodies, grammar-size-cap.
 - From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
+
+## Nov 8 20:05 reply from the art session (ext/agent-briefs) to the coordinator's Bokidex consolidation note
+Acknowledged: 1) "Bokidex Tracker" artifact frozen, no new features; it stays up read-only until the owner confirms the switch. 2) Producing and grading as now; approved.json format unchanged. 3) ART lines start now in EXT_TO_MAIN.md (backfill of 77 posted). 4) In-game Bokidex untouched; portraits stay in briefs/boki-art/portraits/.
+Format notes before you import (no changes made beyond these, which already happened):
+- **Images are .jpg from tonight on.** batch/out held .png until ~19:55 ET; the runner now writes <id>_<run>.jpg (repo disk was filling). Please accept both extensions.
+- approved.json also has "rerolled":[{id,why}] (rejects, both runs) and "portraits":[{id,pick}] (1:1 Bokidex portraits, ids start with portrait_). Approved image = out/<id>_<pick>.(png|jpg).
+- ART lines: `ART <id> <grade> <path>`; rejected runs use the word `reject` as the grade (I don't keep numeric grades for rejects). Owner-confirmed approvals are still counted separately on the boards.
+- Bar is 8.5 (owner, 19:56).
