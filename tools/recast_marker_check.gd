@@ -32,7 +32,8 @@ func _hero(arch: String, shot: bool) -> void:
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var K: ArchKit = P.ak
-	ok("%s: no marker before the recast" % arch, not K.recast_at().is_finite() and m.get_node_or_null("RecastMarker") == null)
+	var none := not K.recast_at().is_finite() and m.get_node_or_null("RecastMarker") == null
+	ok("%s: no marker before the recast" % arch, none)
 	_open(K, m, arch)
 	var mark := m.get_node_or_null("RecastMarker") as RecastMarker
 	ok("%s: marker on the object" % arch, K.recast_at().is_finite() and mark != null and mark.visible)
@@ -40,7 +41,8 @@ func _hero(arch: String, shot: bool) -> void:
 		return
 	var key := Settings.key_cap(K.recast_key())
 	ok("%s: shows the recast key %s" % [arch, key], mark.text == key and key != "?")
-	ok("%s: key sits over the object" % arch, mark.global_position.distance_to(K.recast_at() + Vector3(0, RecastMarker.CAP_UP, 0)) < 0.01)
+	var cap_at := K.recast_at() + Vector3(0, RecastMarker.CAP_UP, 0)
+	ok("%s: key sits over the object" % arch, mark.global_position.distance_to(cap_at) < 0.01)
 	var ring := AimKit.entry(P, "recast")
 	ok("%s: caster-only ring, no fill" % arch, not ring.is_empty() and not bool(ring["all"]) and ring["kind"] == "ring")
 	ok("%s: hero colour" % arch, (ring["col"] as Color).is_equal_approx(AimKit.hero_col(P)))
