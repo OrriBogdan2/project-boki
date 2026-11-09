@@ -504,6 +504,16 @@ func release(key: String) -> void:
 func holding(key: String) -> bool:
 	return held.has(key) and float(m.time) - float(held[key]["t"]) <= KEEP
 
+## Stun stars are the shared status look now (StatusLooks "stun"); a kit that still asks for a crown gets that,
+## A body this game owns shows it off its own stun timer (so it goes the frame the stun ends); only a body whose
+## timer lives elsewhere is told, for `secs`. Never a kit-drawn copy.
+func crown(e: Ent, secs: float) -> void:
+	if e != null and e.stun_t <= 0.0:
+		StatusLooks.of(m).put(e, "stun", secs)
+
+func crowned(e: Ent) -> bool:
+	return StatusLooks.of(m).showing(e, "stun")
+
 ## Tarek's heavy impacts (the slam, the leap's landing) at `at`, radius `r`, strength k 0..1: a molten
 ## starburst, rock chips flying out, a dust ring at the edge, and a dark red cracked crater left `secs`.
 func impact(at: Vector3, r: float, k: float, secs := 1.0) -> void:
