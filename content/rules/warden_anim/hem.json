@@ -24,6 +24,11 @@
 		"mf_xform": {"clip": "fusion"}
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
+	"climb": {
+		"doc": "A ledge rise plays the mantle clip by how far up the face he is: clip second `rise` is the hands on the lip, so the motion cannot lag the body (hunter.gd lfloat progress). A ledge float (dash off an edge) hangs `rise` s, then pulls up. The clip runs on to its end after the state, then the legs take over. The procedural list below stays the fallback for a model without the clips.",
+		"mantle": {"clip": "mantle", "rise": 0.28},
+		"ledge": {"clip": "ledge", "rise": 0.3}
+	},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "pauldron.L", "pauldron.R", "fing_a1.R", "fing_a2.R", "fing_b1.R", "fing_b2.R", "thumb1.R", "thumb2.R", "bow", "bow_t", "bow_b", "bow_s", "arrow", "brow.L", "brow.R", "lid.L", "lid.R"]
 }

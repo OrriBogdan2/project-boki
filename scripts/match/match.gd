@@ -4920,7 +4920,7 @@ func _update_training(dt: float) -> void:
 		"ult": (player.ak != null and float(player.ak.cd["r"]) > 0.0) or (was_ult and player.ult < 0.5),
 		"throw": player.kin != null and player.kin.st_throws > 0,
 		"tonic": player.tonics < int(train.get("_tonics", player.tonics)),
-		"ledge": player.grap.size() > 0 or player.mantle_k() > 0.0,
+		"ledge": player.grap.size() > 0 or player.mantling(),
 		"smash": train.get("_smash", false),
 		"stagger": train.get("_stagger", false),
 		"weapon": train.get("_weapon", false),

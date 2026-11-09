@@ -108,6 +108,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
+	await _climb(id, m, sync, clips, dd)
 	m.free()
 
 func _named(dd: Dictionary) -> Array:
@@ -124,11 +125,51 @@ func _named(dd: Dictionary) -> Array:
 		out.append_array([cr["idle"], cr["in"], cr["out"]])
 		out.append_array((cr["walk"] as Dictionary).values())
 	out.append_array((dd.get("air", {}) as Dictionary).values())
+	for cl in (dd.get("climb", {}) as Dictionary).values():
+		if cl is Dictionary:
+			out.append(cl["clip"])
 	for k in dd.get("states", {}):
 		var v = dd["states"][k]
 		if v is String:
 			out.append(v)
 	return out
+
+## The climb clips (data "climb"): a ledge rise plays the mantle clip by progress up the face, so the hands are over the
+## head at the start and on the lip (below the shoulder line) at `rise`; after the state it runs on to its end, then
+## hands back ({}); a ledge float hangs at `rise`; a move, the glider or death cuts it.
+func _climb(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	var cd: Dictionary = dd.get("climb", {})
+	if cd.is_empty():
+		return
+	var rise := float(cd["mantle"]["rise"])
+	var half: Dictionary = clips._climb({"mantle": 0.5}, DT)
+	ok(absf(float(half["t"]) - rise * 0.5) < DT, "%s: the mantle clip time follows the rise (%.2f s at half)" % [id, float(half["t"])])
+	var hand := m.get_node(String(WardenGlb.BONES["hand.R"])) as Node3D
+	var head := m.get_node(String(WardenGlb.BONES["head"])) as Node3D
+	var ys: Array = []
+	for t in [0.0, rise]:
+		clips.force = {"clip": String(cd["mantle"]["clip"]), "t": t}
+		for k in 8:
+			sync.call("_process", DT)
+		await holder.get_tree().process_frame
+		ys.append(hand.global_position.y - head.global_position.y)
+	clips.force = {}
+	ok(ys[0] > 0.0 and ys[1] < -0.1, "%s: hands reach over the head, then plant on the lip (%.2f then %.2f m from the head)" % [id, ys[0], ys[1]])
+	var len := clips.lib.get_animation(String(cd["mantle"]["clip"])).length
+	var t_end := rise
+	var after := {"mantle": -1.0, "grounded": true}
+	var n := 0
+	while not clips._climb(after, DT).is_empty() and n < 120:
+		n += 1
+		t_end += DT
+	ok(absf(t_end - len) < 3 * DT, "%s: the mantle clip runs on after the rise, %.2f s of %.2f s" % [id, t_end, len])
+	clips._climb({"mantle": 0.5}, DT)
+	ok(clips._climb({"mantle": -1.0, "kmove": "x"}, DT).is_empty(), "%s: a move cuts the climb tail" % id)
+	var hang := {}
+	for i in 30:
+		hang = clips._climb({"ledge": true}, DT)
+	ok(absf(float(hang["t"]) - float(cd["ledge"]["rise"])) < 0.001, "%s: a ledge float hangs the clip at %.2f s" % [id, float(hang["t"])])
+	clips._climb({"mantle": -1.0, "dead": true}, DT)
 
 ## A body on a spring (data "sway") lags a change of speed, leans away from it, and settles.
 func _sway(id: String, m: Node3D, sync: Node, dd: Dictionary) -> void:

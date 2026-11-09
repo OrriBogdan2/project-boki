@@ -25,6 +25,11 @@
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["tm_dart_r", 0.16], ["tm_dart_l", 0.16], ["tm_dart_r", 0.16], ["tm_dart_heavy", 0.18], ["tm_skate_go", 0.16], ["tm_skate", 0.56], ["tm_beam", 0.22], ["tm_skate", 0.56], ["tm_skate_stop", 0.5], ["tm_spear_aim", 0.4], ["tm_spear", 0.55], ["tm_wall", 0.7], ["tm_freeze", 0.42], ["tm_rime", 0.2], ["tm_rime_hold", 0.8], ["tm_rime_crash", 0.4]],
 	"still": ["rime", "rime_hold"],
+	"climb": {
+		"doc": "A ledge rise plays the mantle clip by how far up the face he is: clip second `rise` is the hands on the lip, so the motion cannot lag the body (hunter.gd lfloat progress). A ledge float (dash off an edge) hangs `rise` s, then pulls up. The clip runs on to its end after the state, then the legs take over. The procedural list below stays the fallback for a model without the clips.",
+		"mantle": {"clip": "mantle", "rise": 0.28},
+		"ledge": {"clip": "ledge", "rise": 0.3}
+	},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"]
 }

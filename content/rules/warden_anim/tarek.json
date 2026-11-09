@@ -119,6 +119,11 @@
 			"dur": 0.4
 		}
 	},
+	"climb": {
+		"doc": "A ledge rise plays the mantle clip by how far up the face he is: clip second `rise` is the hands on the lip, so the motion cannot lag the body (hunter.gd lfloat progress). A ledge float (dash off an edge) hangs `rise` s, then pulls up. The clip runs on to its end after the state, then the legs take over. The procedural list below stays the fallback for a model without the clips.",
+		"mantle": {"clip": "mantle", "rise": 0.28},
+		"ledge": {"clip": "ledge", "rise": 0.3}
+	},
 	"procedural": [
 		"ledge",
 		"mantle",

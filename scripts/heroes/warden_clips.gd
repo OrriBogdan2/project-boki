@@ -21,6 +21,7 @@ const STATE := "anim_state"
 const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
 const FADE := 0.1            # s: one clip into the next, and into or out of an action
 const FADE_LOCO := 0.16      # s: an action back to the legs
+const CLIMB_FADE := 0.06     # s: into the climb clips (a rise is over in well under a second)
 const AIR_FADE := 0.12
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
@@ -59,6 +60,9 @@ var stance_w := 0.0
 var was_air := false
 var air_t := 0.0
 var land_t := 99.0
+var climb_t := 0.0           # s since the ledge hang began (the "ledge" clip), or since the climb state ended
+var climb_was := ""          # "mantle" or "ledge" while the climb state runs; else the one that just ended
+var climb_live := false      # the state is still on
 var hit_seen := 99.0
 var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
@@ -288,6 +292,9 @@ func _p(nm: String, v: Variant) -> void:
 ## What the state asks for: {clip, t (s, or -1: it plays on its own), upper} or {}; {"proc": true}: back to the rig.
 func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var st: Dictionary = d.get("states", {})
+	var climb := _climb(s, dt)
+	if not climb.is_empty():
+		return climb
 	for k in d.get("procedural", []):
 		var v = s.get(k, null)
 		if (v is bool and v) or (v is float and v >= 0.0):
@@ -341,6 +348,40 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "upper": true}
 	return {}
+
+## The "climb" data ({mantle|ledge: {clip, rise}}): a ledge rise plays its clip by how far up the face he is, so the
+## hands meet the lip when the body does (rise: the clip second that is); a ledge float hangs there for `rise` s. When
+## the state ends the clip runs on in time to its last frame (the pull-up over the lip), unless a move, the glider or a
+## fall takes over. {} when the Hero has no such clip: the procedural pose plays.
+func _climb(s: Dictionary, dt: float) -> Dictionary:
+	var cd: Dictionary = d.get("climb", {})
+	var blocked := bool(s.get("dead", false)) or String(s.get("kmove", "")) != ""
+	var live := ""
+	if float(s.get("mantle", -1.0)) >= 0.0:
+		live = "mantle"
+	elif bool(s.get("ledge", false)):
+		live = "ledge"
+	if live != "" and cd.has(live) and not blocked:
+		if live != climb_was or not climb_live:
+			climb_t = 0.0
+		climb_was = live
+		climb_live = true
+		climb_t += dt
+		var rise := float((cd[live] as Dictionary)["rise"])
+		var tt := float(s.get("mantle", 0.0)) * rise if live == "mantle" else minf(climb_t, rise)
+		return {"clip": String((cd[live] as Dictionary)["clip"]), "t": tt, "fade": CLIMB_FADE}
+	if climb_live:
+		climb_live = false
+		climb_t = float((cd[climb_was] as Dictionary)["rise"]) if cd.has(climb_was) else 0.0
+	if climb_was == "" or not cd.has(climb_was) or bool(s.get("gliding", false)) or bool(s.get("diving", false)) or blocked:
+		climb_was = ""
+		return {}
+	climb_t += dt
+	var c: Dictionary = cd[climb_was]
+	if climb_t >= lib.get_animation(String(c["clip"])).length:
+		climb_was = ""
+		return {}
+	return {"clip": String(c["clip"]), "t": climb_t, "fade": CLIMB_FADE}
 
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
