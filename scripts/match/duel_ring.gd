@@ -21,6 +21,7 @@ func _build() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	layer = CanvasLayer.new()
 	layer.layer = 40
+	layer.set_meta("ring", self)  # the pad drops open()'s return; the layer keeps the ring alive
 	m.add_child(layer)
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

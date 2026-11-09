@@ -456,6 +456,18 @@ func _duel_ring(m: Match) -> void:
 	ring.close()
 	await main.get_tree().process_frame
 	ok("duel ring: Back gives the match back", not m.paused and not is_instance_valid(ring.layer))
+	# the pad drops open()'s return: the ring must outlive that and its Back button still work
+	var lay: CanvasLayer = DuelRing.open(m).layer
+	await main.get_tree().process_frame
+	var back: Button = null
+	for b in lay.find_children("*", "Button", true, false):
+		if b.name == "Close":
+			back = b
+	ok("duel ring: kept alive by its layer", lay.has_meta("ring") and back != null)
+	if back:
+		back.pressed.emit()
+	await main.get_tree().process_frame
+	ok("duel ring: Back works when open()'s return was dropped", not m.paused and not is_instance_valid(lay))
 
 func _texts(node: Node) -> Array:
 	var out: Array = []
