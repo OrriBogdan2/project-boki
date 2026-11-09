@@ -79,6 +79,7 @@ func _setup_input() -> void:
 	_key("throw", [KEY_G])                    # send your kin out to fight on its own, or recall it
 	for a in KinKeys.ids():
 		_key(a, [])      # Boki quick keys: unbound until picked
+	_key("summon", [KEY_C])                   # Boki wisps: your wisp out as the full Boki (KinSummon)
 	_key("ping", [], MOUSE_BUTTON_MIDDLE)     # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
 	_key("base", [KEY_B])                     # base to a teammate: a 3s channel (squads only)
 	_key("swap_kin", [])                      # one kin per expedition now; kept so old code paths compile

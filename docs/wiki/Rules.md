@@ -484,6 +484,21 @@ What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words
 | rain_joy | {"_doc": "joy gained (or lost) per minute at home while it rains", "effigeetle": -1.5, "frigatee": -1.0, "mycroll": 1.0, "barrelmander": 1.0} |
 | storm_sense | {"_doc": "seconds before rain starts that it starts warning about it", "kestrike": 25.0, "barokat": 25.0} |
 
+## boki_summon (`content/rules/boki_summon.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The Boki summon (KinSummon, decision 0039): [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band. |
+| table | {"bruiser": {"small": [8, 60], "medium": [10, 65], "large": [12, 70]}, "skirmisher": {"small": [7, 55], "medium": [9, 60], "large": [11, 65]}, "trickster": {"small": [8, 55], "medium": [10, 60], "large": [12, 65]}, "controller": {"small": [11, 65], "medium": [13, 70], "large": [15, 75]}, "tank": {"small": [14, 75], "medium": [16, 80], "large": [18, 85]}, "support": {"small": [16, 80], "medium": [18, 85], "large": [20, 90]}} |
+| fallback | [10, 60] |
+| uptime_band | [0.09, 0.2] |
+| knocked_cd_mult | 1.25 |
+| leash | 10 |
+| leash_swing | 2 |
+| rebloom_dist | 20 |
+
 ## boki_system (`content/rules/boki_system.json`)
 
 The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, follow, the downed Boki, the leashes. Distances in metres, times in seconds, hp as a share of max health.
