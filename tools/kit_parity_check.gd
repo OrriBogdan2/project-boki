@@ -5,12 +5,21 @@ extends RefCounted
 
 var bad := 0
 
-## The number at a dotted path ("rmb.slam.dmg") in a hero's JSON, or NAN when it is missing.
+## The number at a dotted path ("rmb.slam.dmg", "rmb.coil.dmg.0") in a hero's JSON, or NAN when it is
+## missing. A path starting "weapon." reads the hero's signature weapon file instead.
 func _num(hero: Dictionary, path: String) -> float:
 	var cur: Variant = hero
-	for key in path.split("."):
-		if not (cur is Dictionary) or not (cur as Dictionary).has(key): return NAN
-		cur = cur[key]
+	var keys := path.split(".")
+	if keys[0] == "weapon":
+		cur = Content._load("weapons", String(hero.get("signature", "")))
+		keys.remove_at(0)
+	for key in keys:
+		if cur is Array and key.is_valid_int() and int(key) < (cur as Array).size():
+			cur = cur[int(key)]
+		elif cur is Dictionary and (cur as Dictionary).has(key):
+			cur = cur[key]
+		else:
+			return NAN
 	return float(cur) if (cur is float or cur is int) else NAN
 
 func run(host: Node) -> void:
@@ -25,6 +34,7 @@ func run(host: Node) -> void:
 			label += "/" + String(r["per"])
 		var good := not is_nan(got) and absf(got - float(r["value"])) <= float(r["tol"]) + 1e-6
 		var verdict := "ok  " if good else "FAIL"
+		if r.has("owner"): label += " [owner: %s]" % r["owner"]
 		print("PARITY %s %s: %s, source %s +-%s (%s)" % [verdict, label, got, r["value"], r["tol"], r["evidence"]])
 		if not good: bad += 1
 	print("PARITY DONE, failures: %d" % bad)
