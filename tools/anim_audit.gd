@@ -18,7 +18,12 @@ const MAX_STEP := 0.045      # body heights: the most of the idle to walk gap on
 const PLANT_BAND := 0.3      # a foot is planted in the lowest 30 % of its own height range
 const T_ELEV := 1.05         # rad (60 deg): an arm raised this far from hanging...
 const SIDEWAYS := 1.0        # ...and pointing more sideways than forward is a T-pose
-const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
+const SHOTS := preload("res://tools/anim_shots.gd")
+const ATTACKS := SHOTS.ATTACKS
+const TURN_DT := 1.0 / 60.0  # s: a start or stop is judged at the game's frame rate
+const TURN_LEAD_S := 0.3     # s of the gait or the stand before it, sampled for the feet's lift range
+const TURN_S := 0.4          # s after the press or the let-go: the source is in its next pose by 0.2 s (5 fps refs)
+const PHASES := 8            # let-gos spread evenly over one stride cycle (each start follows its stop), averaged
 ## The gate (every Hunter whose clips move the legs): at full stick a planted foot slides at most this share of the
 ## speed, and the arms swing against their legs at least this much (-1: with, +1: against; reach-weighted).
 const MAX_SLIDE := 0.25
@@ -87,11 +92,16 @@ func _hero(main: Node, id: String) -> void:
 		if weapon == "":
 			weapon = row["attacks"][nm]["weapon_hand"]
 	row["weapon_hand"] = weapon
+	row["turns"] = stop_start(m, sync, sk, id)
 	rows[id] = row
 	var top: Dictionary = live[str(SPEEDS[2])]
 	print("AUDIT %-10s H %.2f run: slide %.2f m/s (%d%%) clip %.2f m/s arms %.2f bob %.1f cm peaks %d" % [id, hgt,
 			top["slide"], round(100.0 * top["slide"] / SPEEDS[2]), top["clip_speed"], top["counter"], top["bob_cm"],
 			top["peaks"]])
+	var turns := ""
+	for nm in row["turns"]:
+		turns += " %s %d%% %.2f m" % [nm, round(100.0 * row["turns"][nm]["share"]), row["turns"][nm]["skate_m"]]
+	print("TURNS %-10s%s" % [id, turns])
 	if row["pop"]["idle_walk_step"] > MAX_STEP:
 		print("FAIL %s: the loco blend shows %.3f body heights of the idle to walk gap in one frame (limit %.3f)" % [id,
 				row["pop"]["idle_walk_step"], MAX_STEP])
@@ -165,6 +175,82 @@ func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) 
 	var out := _slide(fr, s)
 	out.merge(_swing(fr))
 	return out
+
+## The start and stop of every gait of SHOTS.turns, the speed ramped as the game ramps it (SHOTS.turn_speed), with
+## the gait's foot slide (`_slide`) over the TURN_S after it: a planted foot's mean speed against the ground as a share
+## of the gait's speed ("share", the same MAX_SLIDE gate; a foot the blend drags once he stands counts too), and
+## "skate_m", how far one foot skates; both the mean of PHASES let-gos through the stride. "steady_<gait>": the same
+## share over the TURN_LEAD_S of the gait before each stop, what the gait slides on its own.
+func stop_start(m: Node3D, sync: Node, sk: Skeleton3D, id: String) -> Dictionary:
+	var out := {}
+	var gaits := SHOTS.turns(id)
+	var clips: WardenClips = sync.get("clips")
+	for nm in gaits:
+		var g: Dictionary = gaits[nm]
+		for key in ["stop_" + String(nm), "start_" + String(nm), "steady_" + String(nm)]:
+			out[key] = {"share": 0.0, "skate_m": 0.0}
+		var crouched := float(g["crouch"]) > 0.0
+		var ring: Dictionary = clips.d["crouch"]["walk"] if crouched else clips.d["loco"][String(nm)]
+		_hold(m, sync, float(g["mps"]), float(g["crouch"]), WARM_S / TURN_DT)
+		var rate := float(clips.tree.get("parameters/%s/scale" % ("crouch_rate" if crouched else "loco_rate")))
+		var cycle := clips.lib.get_animation(String(ring["f"])).length / maxf(rate, 0.1)
+		for i in PHASES:
+			for stop in [true, false]:
+				var lead := float(g["mps"]) if stop else 0.0
+				_hold(m, sync, lead, float(g["crouch"]), (WARM_S + i * cycle / PHASES) / TURN_DT)
+				var one := _turn(m, sync, sk, id, g, stop)
+				for key in one:
+					var row: Dictionary = out[key + "_" + String(nm)]
+					row["share"] += one[key]["share"] / PHASES
+					row["skate_m"] += one[key]["skate_m"] / PHASES
+	m.set_meta(WardenClips.STATE, {})
+	return out
+
+## One start or stop of gait `g` (SHOTS.turns), TURN_LEAD_S of what was before it and TURN_S after: {"start" or
+## "stop": its slide; "steady": the gait's before a stop}.
+func _turn(m: Node3D, sync: Node, sk: Skeleton3D, id: String, g: Dictionary, stop: bool) -> Dictionary:
+	var n_lead := int(TURN_LEAD_S / TURN_DT)
+	var sp := PackedFloat32Array()
+	sp.resize(n_lead)
+	sp.fill(float(g["mps"]) if stop else 0.0)
+	sp.append_array(SHOTS.turn_speed(id, float(g["mps"]), stop, int(TURN_S / TURN_DT), TURN_DT))
+	var fr: Array = []
+	for v in sp:
+		_hold(m, sync, v, float(g["crouch"]), 1)
+		fr.append(_read(sk))
+	if not stop:
+		return {"start": _turn_slide(fr, sp, n_lead, fr.size(), float(g["mps"]))}
+	return {"stop": _turn_slide(fr, sp, n_lead, fr.size(), float(g["mps"])),
+			"steady": _turn_slide(fr, sp, 1, n_lead, float(g["mps"]))}
+
+## `frames` steps of TURN_DT with the state at `mps` forward (facing -Z), crouched by `crouch`.
+func _hold(m: Node3D, sync: Node, mps: float, crouch: float, frames: float) -> void:
+	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -mps), "face": 0.0, "grounded": true, "crouch": crouch})
+	for k in int(frames):
+		sync.call("_process", TURN_DT)
+
+## Frames `from` to `to` of `fr`; the lift range is the whole of it.
+func _turn_slide(fr: Array, sp: PackedFloat32Array, from: int, to: int, mps: float) -> Dictionary:
+	var slide := 0.0
+	var n := 0
+	var skate := 0.0
+	for f in ["foot.L", "foot.R"]:
+		var lo := INF
+		var hi := -INF
+		for p in fr:
+			lo = minf(lo, (p[f] as Vector3).y)
+			hi = maxf(hi, (p[f] as Vector3).y)
+		var foot := 0.0
+		for i in range(maxi(from, 1), mini(to, fr.size() - 1)):
+			if (fr[i][f] as Vector3).y > lo + PLANT_BAND * maxf(hi - lo, 0.02):
+				continue
+			var v := ((fr[i + 1][f] as Vector3) - (fr[i - 1][f] as Vector3)) / (2.0 * TURN_DT)
+			var s := Vector2(v.x, sp[i] - v.z).length()     # (+Z: backward, the body goes -Z at sp)
+			slide += s
+			n += 1
+			foot += s * TURN_DT
+		skate = maxf(skate, foot)
+	return {"share": slide / maxi(n, 1) / mps, "skate_m": skate}
 
 ## Foot slide: while a foot is planted its speed against the ground is the speed minus how fast the clip pulls it back.
 func _slide(fr: Array, s: float) -> Dictionary:
