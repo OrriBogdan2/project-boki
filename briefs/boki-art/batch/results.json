@@ -42493,5 +42493,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_reapant_t3_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_reapant_t2",
+    "name": "Reapant (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_reapant_t2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_t3",
+    "name": "Reapant (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reapant_t3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_t3",
+    "name": "Reapant (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_reapant_t3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_t3",
+    "name": "Reapant (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_reapant_t3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_f1",
+    "name": "Effigoon (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_effigoon_f1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_f1",
+    "name": "Effigoon (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_effigoon_f1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_f1",
+    "name": "Effigoon (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_effigoon_f1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_f2",
+    "name": "Effigoon (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_effigoon_f2_2.jpg",
+    "ok": true
   }
 ]
