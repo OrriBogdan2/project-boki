@@ -15,3 +15,7 @@ for _s in SPECS:
         if 'stance2' in _i and _pb in _ls: DROP.add(_i)
         continue
     if _b in _ls: DROP.add(_i)
+# Intentionality audit 02:50 ET 11-09: these sheets were just redesigned/replaced (their stance-audit text describes the old
+# design), Chandelotl waits on the Glassolotl variant pick, lodestick_r2 is an old-wave leftover.
+DROP|={'portrait_stance3_'+n for n in ('arcestrel','briarlynx','galleotter','flarmink','chandelotl','glassolotl','prismander','zippelith')}
+DROP|={'portrait_chandelotl_full','lodestick_r2'}
