@@ -64634,5 +64634,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/prowyak_cardz_1.jpg",
     "ok": true
+  },
+  {
+    "id": "geodemole_cardw",
+    "name": "Geodemole (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/geodemole_cardw_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole_card101",
+    "name": "Geodemole (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/geodemole_card101_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole_card101",
+    "name": "Geodemole (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodemole_card101_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole_cardw",
+    "name": "Geodemole (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodemole_cardw_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_cardz",
+    "name": "Selenwhale (hero card edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/selenwhale_cardz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "foldbat_cardz",
+    "name": "Foldbat (hero card edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/foldbat_cardz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrasloth_cardz",
+    "name": "Terrasloth (hero card edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/terrasloth_cardz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_cardz",
+    "name": "Selenwhale (hero card edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/selenwhale_cardz_2.jpg",
+    "ok": true
   }
 ]
