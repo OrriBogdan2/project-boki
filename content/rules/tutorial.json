@@ -1,5 +1,5 @@
 {
- "doc": "The first-match tutorial (scripts/match/tutorial.gd), short (owner, Nov 8): eight steps, one banner line each. steps: [id, the line]. %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for part of a step (steering the drop before the walk, the gap step after two falls, the Boki starting out). labels: the marker's caption per course stop or step. mob: how the tutorial's monsters differ from real ones (a little tougher and bigger, damage and attack tempo down; the first one dies to one magazine). cds: the share of its usual time every ability and dash cooldown takes here (0.25 = four times quicker); each is also ready again when a step starts, is retried or its action lands. need: how many times a step's action must land (shoot: monsters beaten, sig: casts), shown as 1/3 on the pill when more than one. The moves and rules the cut steps taught are one-time hints now (content/rules/hints.json).",
+ "doc": "The first-match tutorial (scripts/match/tutorial.gd), short (owner, Nov 8): ten steps, one banner line each. steps: [id, the line]. %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for part of a step (steering the drop before the walk, the gap step after two falls, the Boki starting out). labels: the marker's caption per course stop or step. mob: how the tutorial's monsters differ from real ones (a little tougher and bigger, damage and attack tempo down; the first one dies to one magazine). cds: the share of its usual time every ability and dash cooldown takes here (0.25 = four times quicker); each is also ready again when a step starts, is retried or its action lands. need: how many times a step's action must land (shoot: monsters beaten, sig: casts), shown as 1/3 on the pill when more than one. rival: beats 7 and 8 (TutorialRival): the rival Hunter's name, how far off it lands (dist_m), its health share (hp; late_hp after late_s of fighting), its damage share (dmg), the slow-motion and camera nudge on its knock (slow_s, slow_k, shake), how far the loose Boki wisp floats from the Hunter Wisp (apart_m), the reach of the 'that's the Hunter' toast (warn_m) and of the grab (grab_m), the hold that grabs (hold_s), seconds until the downed rival is gone after the grab (gone_s), and the labels and lines. The moves and rules the cut steps taught are one-time hints now (content/rules/hints.json).",
  "steps": [
   [
    "move",
@@ -24,6 +24,14 @@
   [
    "fight",
    "Beat all the monsters"
+  ],
+  [
+   "rival",
+   "Knock down the rival Hunter"
+  ],
+  [
+   "grab",
+   "Round is a Hunter, critter a Boki"
   ],
   [
    "chest",
@@ -58,7 +66,9 @@
   "dash": "Dash across",
   "glide": "Glide here",
   "chest": "Chest",
-  "extract": "Lift"
+  "extract": "Lift",
+  "rival": "Rival",
+  "grab": "Boki"
  },
  "pell_doc": "Pell, the guide (TutorialGuide): one short line when it stops you at the start of a step (the same %keys as the steps; the box closes itself after a few seconds), and the portrait mood for steps that are not neutral.",
  "pell": {
@@ -85,10 +95,38 @@
   ],
   "extract": [
    "The lift is open. Step into the light!"
+  ],
+  "rival": [
+   "Other Hunters carry Boki lights too. Knock that one down!"
+  ],
+  "grab": [
+   "You can't take a Hunter. You can take a Boki. Hold %F on the critter light."
   ]
  },
  "pell_moods": {
   "fight": "warning",
-  "extract": "happy"
+  "extract": "happy",
+  "rival": "warning"
+ },
+ "rival": {
+  "name": "Rival",
+  "dist_m": 10.0,
+  "hp": 0.4,
+  "late_hp": 0.1,
+  "late_s": 30.0,
+  "dmg": 0.1,
+  "slow_s": 0.5,
+  "slow_k": 0.3,
+  "shake": 0.5,
+  "apart_m": 3.6,
+  "warn_m": 2.5,
+  "grab_m": 1.5,
+  "hold_s": 0.6,
+  "gone_s": 5.0,
+  "hunter_label": "Hunter: can't be taken",
+  "boki_label": "Boki: hold %F",
+  "hunter_toast": "That's the Hunter. Try the little critter.",
+  "grab_toast": "You carry a stolen Boki. It goes home when the match ends, and you keep its echo.",
+  "grab_bubble": "A new friend?"
  }
 }

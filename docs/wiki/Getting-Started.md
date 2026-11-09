@@ -22,7 +22,9 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
    that hides one of the other common species. Pick one, keep it warm until it hatches, and name it.
 3. **First Flight.** A short tutorial on four small islands, one line at a time: steer your landing and
    walk to the beam, dash and glide the gap, shoot a monster dead, use your E on a group, send your
-   Boki at a monster, beat the pack, open a chest, then step into the lift. Nothing is random and
+   Boki at a monster, beat the pack, then knock down a rival Hunter and learn the two glows (a
+   round one is a Hunter and can't be taken, a critter one is a Boki: hold interact to grab it), open a
+   chest and step into the lift. Nothing is random and
    nothing is lost if you fall (you go back to the last stop). A **Skip tutorial** button is on screen
    the whole time: pressing it ends the course as finished, and the one-time hints in your first real
    match cover what it would have shown (the chest key, the lift).

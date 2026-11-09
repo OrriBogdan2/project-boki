@@ -1,7 +1,7 @@
 class_name Tutorial
 extends RefCounted
 ## The first-match tutorial: a short scripted course on content/maps/tutorial.json (its "course" table
-## holds each stop), eight steps (decision 0023: what the cut steps taught is
+## holds each stop), ten steps (decision 0023: what the cut steps taught is
 ## MatchHints now). Match owns one of these as `tut` and calls update() every step.
 ## The steps, their words and the headless driver (TutorialDrive) live here and next door, not in Match.
 ## What the player sees is drawn by TutorialHud: a small banner at the top for each new step that
@@ -14,7 +14,7 @@ static func steps() -> Array:
 	return Content.rules("tutorial")["steps"]
 
 const KEYS := {"move": "move", "dash": "dash", "glide": "glide", "shoot": "fire", "sig": "signature",
-	"throw": "throw", "chest": "interact"}
+	"throw": "throw", "grab": "interact", "chest": "interact"}
 ## Which course stop a finished step leaves you at (a fall puts you back there).
 const STOP_AFTER := {"move": "move", "dash": "glide"}
 const PADS := ["dash", "glide"]      # course stops left from a glowing pad on one island, landed on the next
@@ -61,6 +61,7 @@ var _course: Dictionary = {}
 var _beams: Array = []
 var _pads: Array = []
 var pell: TutorialGuide
+var rival: TutorialRival       # beats 7 and 8: the rival Hunter, its wisps and the grab
 var skip_btn: Button = null    # the Skip button (TutorialHud.add_skip), once the Hud is there
 
 func _init(match_node: Match) -> void:
@@ -68,6 +69,7 @@ func _init(match_node: Match) -> void:
 	intro = not match_node.opts.get("tut_test", false) and not Save.d["tutorial"].get("tut_intro", false)
 	_course = World.load_layout("tutorial").get("course", {})
 	pell = TutorialGuide.new(self)
+	rival = TutorialRival.new(self)
 
 # ------------------------------------------------------------------ the course
 ## A course stop's ground position (INF when the stop isn't in the table). key: "at" or "pad".
@@ -181,6 +183,7 @@ func update(dt: float) -> void:
 	_point(sid)
 	_stall(dt)
 	_props()
+	rival.tick(dt)
 	pell.tick(dt)
 	if p.kin and p.kin.comp:
 		p.kin.comp.tut(stop_id(), goal(sid))
@@ -280,6 +283,8 @@ func _enter() -> void:
 			var left := _live_foes()      # (one may be left from the Boki step: it joins the fight)
 			_foes((["skitter", "spitter", "skitter"] as Array).slice(mini(left, 3)), true)
 			fight_n = _live_foes()
+		"rival":
+			rival.start()
 		"chest":
 			if p.chest_keys == 0:
 				KeyChest.give(p, 1)      # (the key is handed over: finding one is a hint now)
@@ -381,6 +386,8 @@ func _is_done(sid: String) -> bool:
 			_keep_foe("spitter")
 			return p.kin == null or _throw_done()
 		"fight": return kills >= fight_n and not m.mobs.any(func(x): return not x.dead)
+		"rival": return rival.knocked()
+		"grab": return rival.grabbed()
 		"chest": return m.chests.any(func(c): return c.get("tut", false) and c["open"])
 	return false      # (extract: the match ends when you step into the light)
 
@@ -424,6 +431,8 @@ func goal(sid: String) -> Vector3:
 					bd = m.player.flat_dist(mb)
 					best = mb
 			return best.pos if best else stop("yard")
+		"rival": return rival.hunter_at()
+		"grab": return rival.boki_at()
 		"chest":
 			for c in m.chests:
 				if c.get("tut", false):
@@ -449,7 +458,7 @@ func _point(sid: String) -> void:
 	var at := goal(sid)
 	if at == Vector3.INF or m.player.out:
 		return
-	var foe_step := sid in ["shoot", "sig", "throw", "fight"]
+	var foe_step := sid in ["shoot", "sig", "throw", "fight", "rival"]
 	if foe_step and Vector2(at.x - m.player.pos.x, at.z - m.player.pos.z).length() <= 6.0:
 		return
 	target = at
