@@ -72306,5 +72306,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/rd2_domeleonr3_v2_3.jpg",
     "ok": true
+  },
+  {
+    "id": "vespox_nopincer_portrait",
+    "name": "Vespox (no pincers, portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vespox_nopincer_portrait_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_nopincer_portrait",
+    "name": "Vespox (no pincers, portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vespox_nopincer_portrait_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaivyx_clean_v2pilot",
+    "name": "Glaivyx (no slime, v2pilot)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glaivyx_clean_v2pilot_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaivyx_clean_portrait",
+    "name": "Glaivyx (no slime, portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glaivyx_clean_portrait_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_nopincer_card",
+    "name": "Vespox (no pincers, card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vespox_nopincer_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaivyx_clean_portrait",
+    "name": "Glaivyx (no slime, portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glaivyx_clean_portrait_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaivyx_clean_v2pilot",
+    "name": "Glaivyx (no slime, v2pilot)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glaivyx_clean_v2pilot_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaivyx_clean_card",
+    "name": "Glaivyx (no slime, card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glaivyx_clean_card_3.jpg",
+    "ok": true
   }
 ]
