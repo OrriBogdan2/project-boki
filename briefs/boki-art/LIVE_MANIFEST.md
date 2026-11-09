@@ -173,3 +173,6 @@ Cut: Amanitusk, Bellowary, Frothisk, Lashyx, Puffamus. Renamed: Orbeetle -> Orbi
 | Zephyrak | ✓ | ✓ | ✓ |
 | Zipling | ✓ | ✓ | – |
 | Zippelith | ✓ | ✓ | ✓ |
+
+## Live Boki with no Bokidex entry yet (57)
+Bathilus, Bladypus, Blastopuff, Blotlet, Bullsfrog, Clinkpede, Cubbat, Dobsabre, Domeleon, Dreadmonite, Fawngus, Foldbat, Geodelotl, Gilabacus, Glaciammoth, Glazolm, Grainspin, Grammite, Gramofrill, Gravigrub, Gravitank, Hatstag, Hydrangor, Kintsuwyrm, Lensling, Loafhopper, Lurklet, Malletary, Maracoil, Maulangler, Medushroom, Morelkin, Morelossus, Mortarfly, Nymphane, Olmlet, Orbitle, Pawnfry, Pebblamb, Phonodrake, Polyshroom, Proofhop, Puffuse, Rattlebub, Reelacine, Ringrove, Sandwidow, Sarcobra, Scopeleon, Slog, Sloggoth, Snapler, Starcap, Sundormouse, Tootle, Torpecone, Truffapir
