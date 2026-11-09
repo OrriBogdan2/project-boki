@@ -69317,5 +69317,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/pagoguana_card108_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ghoulamari_card108",
+    "name": "Ghoulamari (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ghoulamari_card108_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tiltster_card108",
+    "name": "Tiltster (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/tiltster_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "cetorgan_card108",
+    "name": "Cetorgan (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/cetorgan_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pagoguana_card108",
+    "name": "Pagoguana (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pagoguana_card108_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pagoguana_card108",
+    "name": "Pagoguana (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pagoguana_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "cetorgan_card108",
+    "name": "Cetorgan (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cetorgan_card108_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "wayshell_card108",
+    "name": "Wayshell (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/wayshell_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "cetorgan_card108",
+    "name": "Cetorgan (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cetorgan_card108_1.jpg",
+    "ok": true
   }
 ]
