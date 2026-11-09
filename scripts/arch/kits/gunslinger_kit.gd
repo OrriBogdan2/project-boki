@@ -148,6 +148,10 @@ func teardown() -> void:
 func move_k() -> float:
 	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
 
+## The Longneedle's line is near-planted: it turns toward the cursor at "turn_deg_s" at most (cast to shot).
+func aim_lock() -> Vector2:
+	return needle.get("dir", Vector2.ZERO)
+
 ## The rifle can't fire while a dry drum refills (_tick_mag).
 func fire_ok() -> bool:
 	return not dry
@@ -569,7 +573,7 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 func cast_e() -> bool:
 	if not needle.is_empty(): return false
 	var ed := e_def()
-	needle = {"t": 0.0}
+	needle = {"t": 0.0, "dir": h.aim_dir()}
 	e_t = float(ed["charge"]) + 0.1
 	m.sfx("vn_ion_charge", h.pos, -3.0)
 	play("gunslinger_e")
@@ -597,6 +601,8 @@ func _tick_needle(dt: float) -> void:
 	if h.downed or h.stun_t > 0.0 or Hex.active(h):
 		_end_needle()
 		return
+	var dir := turn_lock(needle["dir"], float(ed["turn_deg_s"]), dt)
+	needle["dir"] = dir
 	var k := clampf(float(needle["t"]) / float(ed["charge"]), 0.0, 1.0)
 	# a bright wide line drawn full length at once, narrowing to a thin core as the cast completes
 	var wide := beam_width()
@@ -604,14 +610,14 @@ func _tick_needle(dt: float) -> void:
 	lane.merge({"col": EMBER, "col2": HOT})
 	AimKit.lane(h, "e", lane)
 	if h.is_local() and m.cam:
-		m.cam.cast_view(h.aim_dir(), float(ed["view_zoom"]), float(ed["range"]))     # (only the caster's camera)
+		m.cam.cast_view(dir, float(ed["view_zoom"]), float(ed["range"]))     # (only the caster's camera)
 	AimKit.charge(h, k, {"col": EMBER, "col2": HOT})
 	# an ember orb swells at the muzzle through the cast
 	if int(m.time * 20.0) != int((m.time - dt) * 20.0):
-		fx().star(_muzzle(h.aim_dir()), EMBER, HOT, 0.35 + 0.6 * k, 0.07)
+		fx().star(_muzzle(dir), EMBER, HOT, 0.35 + 0.6 * k, 0.07)
 	if float(needle["t"]) >= float(ed["charge"]) + 0.03:          # (a beat at full so the full tick plays)
 		_end_needle()
-		_fire_needle()
+		_fire_needle(dir)
 
 ## Where the Longneedle leaves the rifle: ahead of her at the barrel's height.
 func _muzzle(d: Vector2) -> Vector3:
@@ -629,9 +635,8 @@ func charge_now() -> Array:
 		return ["needle", clampf(float(needle["t"]) / float(e_def()["charge"]), 0.0, 1.0)]
 	return super.charge_now()
 
-func _fire_needle() -> void:
+func _fire_needle(d: Vector2) -> void:
 	var ed := e_def()
-	var d := h.aim_dir()
 	var a := _muzzle(d)
 	var L := float(ed["range"])
 	var b := a + Vector3(d.x, 0, d.y) * L
