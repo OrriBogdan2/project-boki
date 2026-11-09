@@ -1777,11 +1777,7 @@ func _update_gear_fx(dt: float) -> void:
 				continue
 			if h.flat_dist(gp["pos"]) < 0.8 and absf(h.pos.y - float(gp["pos"].y)) < 0.6 and float(gp["cd"].get(h.nid, -9.0)) < time:
 				gp["cd"][h.nid] = time + 1.0
-				var hv := Vector2(h.vel.x, h.vel.z)
-				var d: Vector2 = hv.normalized() if hv.length() > 0.5 else h.aim_dir()
-				h.vel = Vector3(d.x * maxf(hv.length(), 6.0), 17.0, d.y * maxf(hv.length(), 6.0))
-				h.grounded = false
-				h.glide_cd = 0.0
+				PadFlight.launch_up(h)
 				fx.burst(gp["pos"] + Vector3(0, 0.3, 0), Color("8ff0c8"), 16, 5.0, 0.4, -2.0)
 				sfx("jump", h.pos, -2.0, 0.8)
 	for sm in smokes.duplicate():
@@ -4513,11 +4509,12 @@ func _update_pads(dt: float) -> void:
 	for pd in world.pads:
 		pd["cd"] = maxf(0.0, pd["cd"] - dt)
 		for h in hunters:
-			if h.out or h.downed or h.fly_t > 0.0 or h.pad.size() > 0 or h.remote or h.vel.y > 0.5:
+			var in_flight: bool = h.fly_t > 0.0 or h.pad.size() > 0 or h.pad_flight.size() > 0 or h.vel.y > 0.5
+			if h.out or h.downed or h.remote or in_flight:
 				continue
 			var p: Vector3 = pd["pos"]
 			if Vector2(h.pos.x - p.x, h.pos.z - p.z).length() < 0.8 and h.pos.y - p.y < 0.4 and h.pos.y - p.y > -0.3:
-				h.pad_launch(pd["land"])
+				PadFlight.launch_to(h, pd["land"])
 				sfx("jump", h.pos, -2.0, 0.8)
 				fx.burst(h.pos + Vector3(0, 0.3, 0), Color("8fe3c8"), 16, 5.0, 0.5, 2.0)
 		for k in kins:

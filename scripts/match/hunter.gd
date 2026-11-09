@@ -112,7 +112,8 @@ var grap_cd := 0.0
 var grap: Dictionary = {}       # floating back up a ledge
 var push_t := 0.0
 var last_gy := 0.0             # ground height where you last stood
-var pad: Dictionary = {}        # jump-pad flight along a fixed arc
+var pad: Dictionary = {}        # a scripted arc: a ledge hop, or a leap onto higher ground (launch_to)
+var pad_flight: Dictionary = {}  # off a jump pad (PadFlight): {land, open}
 var kb_t := -9.0
 var sig_cd := 0.0
 var cloak_t := 0.0
@@ -806,7 +807,7 @@ func do_jump() -> void:
 		_deploy()
 		return
 	if pad.size() > 0:
-		# press jump mid-flight off a jump pad and the glider opens, keeping the launch's speed
+		# press jump mid-leap onto higher ground and the glider opens, keeping the leap's speed
 		if not pad.get("ledge", false) and float(pad["t"]) > 0.12 and can_glide():
 			pad = {}
 			vel.y = minf(vel.y, 2.0)
@@ -1029,8 +1030,8 @@ var hit_heat_t := 0.0           # a moment after being hit while gliding, the gl
 var ex_next := false
 var dash_is_ex := false
 ## Movement chains (Supervive): Shift during a glove rush cancels it into the dash; during a dash
-## or a ledge climb it's buffered and fires the moment that ends; off a jump pad (after the first
-## beat of the launch) it breaks the pad flight into a dash. Jump out of a ground dash keeps half
+## or a ledge climb it's buffered and fires the moment that ends; in a leap onto higher ground (after
+## its first beat) it breaks the leap into a dash. Jump out of a ground dash keeps half
 ## its speed. Dash in the air and keep holding glide and the glider opens again as the dash ends.
 ## B: base to a teammate (Supervive's recall-to-ally). A 3s channel where you stand still and can't
 ## attack; moving, attacking or taking any damage cancels it. Everyone sees the channel ring on you
@@ -1130,7 +1131,7 @@ func do_dash() -> void:
 	if roll_t > 0.0 and move_kind == "rush":
 		roll_t = 0.0            # a glove/ability rush cancels straight into the dash
 	elif pad.size() > 0 and not pad.get("ledge", false) and float(pad.get("t", 0.0)) > 0.12:
-		pad = {}                # break out of a jump pad's flight
+		pad = {}                # break out of a leap's arc
 	elif roll_t > 0.0 or grap.size() > 0 or pad.size() > 0:
 		dash_buf = DASH_BUFFER  # pressed a hair early: fire it as soon as this movement ends
 		return
@@ -2092,13 +2093,6 @@ func sim(dt: float) -> void:
 	if not (ak and ak.face_locked()):
 		face = lerp_angle(face, want, minf(1.0, dt * 20.0))
 
-func pad_launch(to: Vector3) -> void:
-	var d := Vector2(to.x - pos.x, to.z - pos.z).length()
-	pad = {"from": pos, "to": to, "t": 0.0, "dur": clampf(d / 12.0, 0.7, 1.5), "h": maxf(pos.y, to.y) - pos.y + 2.5 + d * 0.12}
-	roll_t = 0.0
-	grap = {}
-	grounded = false
-
 func _pad_fly(dt: float) -> void:
 	pad["t"] += dt
 	var k := clampf(pad["t"] / pad["dur"], 0.0, 1.0)
@@ -2215,7 +2209,7 @@ func _physics(dt: float) -> void:
 			var up: Dictionary = m.world.updraft_at(pos)
 			if not up.is_empty():
 				in_current = true
-				vel.y = move_toward(vel.y, 9.0, 45.0 * dt)     # (movefeel) grabs you harder (was 30: 0.33s to climb)
+				vel.y = move_toward(vel.y, HunterMove.updraft_vy, 45.0 * dt)     # (movefeel) grabs you in ~0.2 s
 	else:
 		# near-instant on the ground (and in a kit's hover); a jump keeps its run-up
 		if grounded or (ak != null and ak.hovering()):
@@ -2549,6 +2543,10 @@ func _update_glide(dt: float) -> void:
 	_auto_glide_held = inp.get("glide", false)
 	if auto_glide and (glide_press or downed or out or (grounded and air_t <= 0.0 and vel.y <= 0.0)):
 		auto_glide = false
+	PadFlight.step(self)             # off a jump pad: the glider opens at the apex
+	var glider_shut_in_air := not gliding and not auto_glide and not grounded and not dropping and can_glide()
+	if glider_shut_in_air and not m.world.updraft_at(pos).is_empty():
+		auto_glide = true            # rising air off an edge opens the glider by itself and carries you up (DECISIONS)
 	# an overheated glider scorches you while it stays open
 	if gliding and not dropping and glide_fuel <= 0.001 and not downed:
 		heat_burn += dt * max_hp * 0.035      # an overheated glider burns ~3.5% of your health a second (was a token 4/s)

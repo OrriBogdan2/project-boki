@@ -139,7 +139,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 ## scripts/feel/
 
 A stand-alone movement and camera lab (`--feel-lab`): `hunter_controller.gd`, `top_down_camera.gd`,
-`feel_config.gd` (tagged tunables), `feel_test_world.gd`, `jump_pad.gd`, `kinfall_input.gd`. The
+`feel_config.gd` (tagged tunables), `feel_test_world.gd`, `kinfall_input.gd`. The
 match's real movement is in `scripts/match/hunter.gd`.
 
 ## scripts/server/ and scripts/social/
