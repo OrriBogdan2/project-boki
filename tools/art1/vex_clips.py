@@ -12,6 +12,7 @@ sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
 import vex_cannon as VC, vex_arm as VA
 import crouchkit
+import gardenkit
 
 A_Z = 0.16
 SP = 0.0
@@ -154,9 +155,28 @@ def crouch_set():
     return crouchkit.quick(C, READY, KNEEL, PROWL, hands=("LP",), scan=0.26, dip_t=0.2)
 
 
+# ---- the garden (DECISIONS 2026-11-09): bored and cocky. The cannon rests on her knee through the pet and the snack; her one brass hand does the work, palm down for the head,
+# palm up for the snack, a chin-up smirk at the Boki; the cheer is the one time she gives it everything (cannon up, hop).
+PET_A = dict(KNEEL, pel=(0.02, 0.1, -0.44), prt=(0.2, 0.24, 0.03), tor=(0.3, -0.22, -0.03), hed=(-0.34, 0.18, 0.08), LP=(0.0, 0.86, 0.56), LQ=(1.3, 1.3, 0.0), fing=0.1, brow=0.35)
+GIVE = dict(KNEEL, pel=(0.02, 0.08, -0.4), prt=(0.14, 0.2, 0.03), tor=(0.2, -0.2, -0.03), hed=(-0.3, 0.14, 0.08), LP=(-0.04, 0.82, 0.38), LQ=(1.4, -1.4, 0.0), fing=0.0, brow=0.55)
+DIP = dict(READY, pel=(0.0, 0.0, -0.2), prt=(0.24, 0.0, 0.0), tor=(0.2, 0.0, 0.0), hed=(-0.3, 0.0, 0.0), LP=(-0.28, 0.16, 0.8), LQ=(0.6, 0.0, 0.0), fing=0.9,
+           FL=(-0.15, 0.13, A_Z), FR=(0.17, -0.12, A_Z), BE=aim(-6, -30), UA=(-18, -60))
+SPRING = dict(READY, pel=(0.0, 0.0, 0.06), prt=(-0.1, 0.0, 0.0), tor=(-0.1, 0.0, 0.0), hed=(-0.2, 0.0, 0.0), LP=(-0.3, 0.1, 1.7), LQ=(-3.0, 0.0, 0.0), fing=0.9,
+          FL=(-0.12, 0.08, A_Z + 0.09), FR=(0.14, -0.1, A_Z + 0.1), FLp=-0.5, FRp=-0.5, BE=aim(-4, 66), UA=(-10, 38), brow=0.7, lid=0.3)
+
+
+def garden_set():
+    P = {"kneel": KNEEL, "pet_a": PET_A, "pet_b": dict(PET_A, LP=(0.0, 0.7, 0.58), tor=(0.26, -0.22, -0.03)),
+         "give": GIVE, "give_in": dict(GIVE, LP=(-0.04, 0.72, 0.36), prt=(0.1, 0.2, 0.03)),
+         "dip": DIP, "up": SPRING, "peak": dict(SPRING, pel=(0.0, 0.0, 0.08), LP=(-0.3, 0.1, 1.76), BE=aim(-4, 70)),
+         "pump": dict(SPRING, pel=(0.0, 0.0, 0.0), FL=(-0.12, 0.08, A_Z), FR=(0.14, -0.1, A_Z), FLp=0.0, FRp=0.0, LP=(-0.3, 0.1, 1.6), BE=aim(-4, 62), hed=(-0.28, 0.1, 0.05))}
+    return gardenkit.clips(C, READY, P, {"lead": 0.08, "snap": 0.4})
+
+
 def clips():
     out = [FnClip("idle", 3.2, idle), FnClip("stance", 3.0, stance)]
     out += crouch_set()
+    out += garden_set()
     for nm, h in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
         out.append(named(gait(0.45, h, 0.86), "walk_" + nm))
         out.append(named(gait(1.0, h, 0.58), "run_" + nm))

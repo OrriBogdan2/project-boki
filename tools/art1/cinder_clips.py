@@ -13,6 +13,7 @@ sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
 import cinder_pieces as K
 import crouchkit
+import gardenkit
 
 A_Z = K.ANKLE_Z
 
@@ -132,9 +133,27 @@ def crouch_set():
     return crouchkit.quick(C, END, PILOT, CREEP, hands=("G", "LP"), scan=0.36)
 
 
+# ---- the garden (DECISIONS 2026-11-09): the best day of her life. She drops to the Boki in a giggling squat and does it fast (quick scratches with the LEFT hand, never the flame hand;
+# the right hand stays low and still, palm closed), holds the snack in a loose open palm, and the cheer is all of her: a hard dip, a big hop, both arms up, mouth open.
+SQUAT = dict(PILOT, pel=(0.03, 0.08, -0.30), prt=(0.34, -0.14, 0.05), tor=(0.28, 0.18, -0.05), hed=(-0.55, -0.10, 0.12), G=(0.2, 0.2, 0.62), cast=0.0, jaw=0.35, brow=-0.1, lid=0.04)
+PET_A = dict(SQUAT, LP=(-0.05, 0.62, 0.68), castl=0.0, fistl=0.0, fing=0.1)
+GIVE = dict(SQUAT, pel=(0.03, 0.08, -0.34), LP=(-0.1, 0.62, 0.56), castl=0.5, jaw=0.5)
+PEAK = dict(READY, pel=(0.022, 0.0, 0.07), prt=(-0.1, -0.14, 0.09), tor=(-0.1, 0.2, -0.1), hed=(0.2, -0.12, 0.12), G=(0.36, 0.05, 1.7), LP=(-0.36, 0.05, 1.7), cast=0.3, castl=0.3,
+            FL=(-0.085, 0.05, A_Z + 0.12), FR=(0.135, -0.05, A_Z + 0.14), FLp=0.7, FRp=0.7, jaw=0.9, brow=0.4, lid=0.0, skirt=0.5)
+
+
+def garden_set():
+    P = {"kneel": SQUAT, "pet_a": PET_A, "pet_b": dict(PET_A, LP=(-0.05, 0.5, 0.7), tor=(0.24, 0.18, -0.05)),
+         "give": GIVE, "give_in": dict(GIVE, LP=(-0.1, 0.54, 0.56)),
+         "dip": dict(SQUAT, pel=(0.03, 0.0, -0.3), G=(0.3, 0.1, 0.5), LP=(-0.3, 0.1, 0.5)), "up": dict(PEAK, G=(0.34, 0.1, 1.4), LP=(-0.34, 0.1, 1.4)),
+         "peak": PEAK, "pump": dict(PEAK, pel=(0.022, 0.0, 0.0), G=(0.38, 0.05, 1.58), LP=(-0.38, 0.05, 1.58), FL=(-0.085, 0.05, A_Z), FR=(0.135, -0.05, A_Z))}
+    return gardenkit.clips(C, READY, P, {"lead": 0.03, "snap": 1.0})
+
+
 def clips():
     out = [FnClip("idle", 3.6, idle), FnClip("stance", 4.0, stance)]
     out += crouch_set()
+    out += garden_set()
     for nm, sp, sk, stride, share, lift in (("walk", 2.2, 0.0, 0.42, 0.58, 0.075), ("run", 4.6, 1.0, 0.6, 0.37, 0.2)):
         T = 2 * stride / (share * sp)
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
