@@ -1187,7 +1187,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	var k: Kin = p.kin
 	var info := p.slot_info("sec")
 	var sr := Rect2(Vector2(x, y), Vector2(s, s))
-	_skill_slot("sec", "sec", sr, String(info["icon"]), Settings.key_cap("secondary"), info["col"], float(info["cd"]) / maxf(0.01, float(info["cd_max"])) if float(info["cd"]) > 0.0 else 0.0, float(info["cd"]), bool(info["ready"]), int(info["charges"]) if int(info["max_charges"]) > 1 else -1, int(info["max_charges"]) if int(info["max_charges"]) > 1 else 0)
+	_skill_slot("sec", "sec", sr, String(info["icon"]), Settings.key_cap("secondary"), info["col"], float(info["cd"]) / maxf(0.01, float(info["cd_max"])) if float(info["cd"]) > 0.0 else 0.0, float(info["cd"]), bool(info["ready"]), float(info.get("charge_f", info["charges"])) if int(info["max_charges"]) > 1 else -1.0, int(info["max_charges"]) if int(info["max_charges"]) > 1 else 0)
 	if info.get("full", false) and int(p.slot_lv["sec"]) > 0:
 		# the resource-full variant is ready (Cash In, Called Shot, Shield Slam...): a gold dot
 		c.draw_circle(sr.position + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
@@ -1236,7 +1236,7 @@ func r_lock_text(p: Hunter) -> String:
 	return "LV %d" % int(Hunter.ULT_AT[0])
 
 ## One ability in the row, aware of run levels (HudSlot.skill_slot).
-func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1, mx := 0) -> void:
+func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1.0, mx := 0) -> void:
 	HudSlot.skill_slot(self, slot, id, r, icon, key, col, cdf, cds, ready and not AirLimits.drop_locked(m.player), ch, mx)
 
 ## Your kin, perched on the top corner of your portrait: its face, a health ring and its state.

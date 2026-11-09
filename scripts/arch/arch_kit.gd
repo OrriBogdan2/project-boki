@@ -695,7 +695,7 @@ func slot_info(slot: String) -> Dictionary:
 				if (sd.get("variants", {}) as Dictionary).has(v):
 					lines.append("%s: %s" % [{"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "With E", "full": "Resource full"}[v], sd["variants"][v]])
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": "\n".join(lines),
-				"cd": float(cd["rmb"]) if ch_rmb < 1.0 else 0.0, "cd_max": float(sd.get("cooldown", 6.0)) * cd_k("sec"), "charges": int(floor(ch_rmb)), "max_charges": rmb_charges(),
+				"cd": float(cd["rmb"]) if ch_rmb < float(rmb_charges()) else 0.0, "cd_max": float(sd.get("cooldown", 6.0)) * cd_k("sec"), "charges": int(floor(ch_rmb)), "max_charges": rmb_charges(), "charge_f": rmb_charge_f(),
 				"verb": "rmb", "ready": ch_rmb >= 1.0 and fire_ok_rmb(), "variant": last_variant, "full": full_ready()}, true)
 		"k1", "e", "kin":
 			var sd := e_def()
@@ -716,6 +716,12 @@ func slot_info(slot: String) -> Dictionary:
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
 				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
+
+## The RMB's charges as a fraction: the whole ones plus how far the next one has recharged (the HUD's pip fill).
+func rmb_charge_f() -> float:
+	if ch_rmb >= float(rmb_charges()):
+		return ch_rmb
+	return ch_rmb + clampf(1.0 - float(cd["rmb"]) / maxf(0.01, float(rmb_def().get("cooldown", 6.0)) * cd_k("sec")), 0.0, 1.0)
 
 func e_recastable() -> bool: return false
 ## E fires on the key's press (a self-centred blast, e.on_press in data), never through the hold-to-aim preview.

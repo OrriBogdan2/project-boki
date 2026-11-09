@@ -12,6 +12,7 @@ const AIR_R := 4.5                      # px, the air-dash diamond's half-size
 const TICK_VOL := -15.0                 # dB of the charge-returned tick
 const TICK_PITCH := 1.9
 const TOP_CD_FS := 12                   # countdown size while a charge is ready and another recharges
+const AIR_CD_FS := 10                   # the air dash's countdown while airborne
 const AIR_COL := Color("bfe6ff")        # the long air dash, ready
 
 ## host instance id -> whole charges last frame (a rise is a charge returning)
@@ -23,14 +24,14 @@ static var shown := {}
 ## The numbers the slot draws: charges (fractional, the recharging one partly full), the cap, seconds per
 ## charge, and the air dash's cooldown left and full length (air_max 0 = this dash has no air dash).
 static func src(charges: float, cap: int, regen: float, air_cd: float, air_max: float, icon: String,
-		col: Color) -> Dictionary:
+		col: Color, airborne := false) -> Dictionary:
 	return {"charges": charges, "cap": cap, "regen": maxf(0.01, regen), "air_cd": air_cd, "air_max": air_max,
-		"icon": icon, "col": col}
+		"icon": icon, "col": col, "airborne": airborne}
 
 static func of_hunter(h: Hunter) -> Dictionary:
 	var di := h.slot_info("dash")
 	var air_max := air_cd_of(h) if h.ak == null or h.ak.has_long_dash() else 0.0
-	return src(h.dashes, int(h.max_dashes()), h.dash_regen(), h.ex_cd, air_max, String(di["icon"]), di["col"])
+	return src(h.dashes, int(h.max_dashes()), h.dash_regen(), h.ex_cd, air_max, String(di["icon"]), di["col"], not h.grounded)
 
 ## How long the air dash takes to come back for this hunter (the kit's dash.air.cd, else its class data).
 static func air_cd_of(h: Hunter) -> float:
@@ -81,6 +82,11 @@ static func draw(H, r: Rect2, s: Dictionary, audible := true) -> void:
 		var back := 1.0 - float(s["air_cd"]) / float(s["air_max"])
 		shown[hid]["air"] = clampf(back, 0.0, 1.0)
 		_air_mark(c, Vector2(r.end.x - 9.0, r.position.y + 9.0), back)
+		shown[hid]["air_text"] = ""
+		if bool(s["airborne"]) and float(s["air_cd"]) > 0.0:
+			var at := HudSlot.cd_text(float(s["air_cd"]))      # in the air the pounce's own timer is spelled out
+			HudStyle.ctext(c, Vector2(r.end.x - 9.0, r.position.y + 28.0), at, AIR_CD_FS, Color(AIR_COL, 0.95), 4)
+			shown[hid]["air_text"] = at
 
 ## The air dash: a diamond, bright once it is back, a growing fill while it recharges.
 static func _air_mark(c: CanvasItem, at: Vector2, ready_frac: float) -> void:
