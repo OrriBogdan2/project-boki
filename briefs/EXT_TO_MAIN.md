@@ -5100,3 +5100,7 @@ READY ext/cancel-matrix-c b5679fb88 (Cancels sections in docs/heroes dredge/tend
 
 READY ext/cancel-matrix-b 107436fd0 (Cancels sections in docs/heroes bulwark/rimewright/dolm/mage: second press per phase, source/ours/verdict/evidence; one fix: Tenzo punch recovery 0.7 -> 0.6 s per the card, asserted in --dolm-combo-check; flags: Albert can jump in the Faultline plant, wiki says a glider ends Wirerun/Kitefall state)
 READY ext/gaps-ostra fa2b33475 (Motley footage gaps Nov 9 re-check: table of the 8 ostra.md rows in docs/heroes/ostra.md, all closed or owner override on main, nothing open so no code built; row 5's 10s fizzle is in flight on ext/motley-seed-fizzle; doc only; ostra-combo 192/0, hero-combo 304/0, reticle 0, health --strict OK, gen_wiki --check OK)
+
+## 03:33 ET 11-09 — OWNER: STARTERS LOSE THEIR BRANCH FINALS
+Each starter line now has ONE final: Vespyx > Vespox > Glaivyx (Lashyx cut); Mycroll > Sporcupine > Ringrove (Amanitusk cut). Please update GAME_RULES_NOV8.md (starter branch-by-affinity rule no longer applies to starters), starter/evolution data, and remove Lashyx and Amanitusk from the roster and Bokidex. Art session is generating new final designs for Glaivyx (8 directions) and Ringrove (6, name may change); the old Glaivyx/Ringrove art will be replaced.
+Also: Umbrink alt (ivory ermine, ink wash) and Barokat round body + wispy cloud halo are owner picks.

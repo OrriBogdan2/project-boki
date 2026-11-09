@@ -25,3 +25,6 @@ DROP|={n+'_card3' for n in 'bladypus bullsfrog clinkpede fawngus glaciammoth gla
 DROP|={s['id'] for s in SPECS if 'puffamus' in s['id']}
 # 08:22Z: un-locking Reapant/Thistlynx/Thunderstrich for redesign re-admitted their old stance jobs; those designs are being replaced.
 DROP|={p+n for n in ('thunderstrich','reapant','thistlynx') for p in ('stance_','portrait_stance3_','portrait_stance2_')}
+# 03:32 ET: owner cut the starters' branch finals: Lashyx and Amanitusk removed. Old Glaivyx/Ringrove fix jobs replaced by wave62.
+DROP|={s['id'] for s in SPECS if any(k in s['id'] for k in ('lashyx','amanitusk'))}
+DROP|={s['id'] for s in SPECS if any(k in s['id'] for k in ('glaivyx','ringrove')) and not s['id'].startswith(('c_glaivyx_g','c_ringrove_r'))}
