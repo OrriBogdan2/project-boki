@@ -658,7 +658,7 @@ func _cloak_blast() -> void:
 	var ed := e_def()
 	blasts += 1
 	var hit := 0
-	var shield_k := float(ed["rank3_shield_k"]) if rank("kin") >= 3 else 1.0
+	var shield_k := rank_k("rank_shield", "kin", 1.0)
 	var r := float(ed["radius"])
 	vfx("cloak", null, null, {"r": r})        # no wider than the blast reaches
 	for f in foes_in(h.pos, r):
