@@ -200,6 +200,38 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | Carpet over the abyss | never forms | "abyss: the carpet never forms over the void" |
 | A Boki merge mid-lance or mid-flight | the hose and the flight drop, nothing fires or is laid | "merge hold: linwick's lance is dropped, no fire mid-merge"; "merge hold: linwick's flight is dropped, nothing more is laid" |
 
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
+d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
+line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both
+(ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
+and the attack key does nothing from a glide (`Hunter.can_fire`).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| LMB hose (held) | RMB | not shown | both: the bolt leaves and the hose keeps burning | unsettled | |
+| LMB hose | E | not shown | both: the cloak blasts and the hose keeps burning | unsettled | |
+| LMB hose | jump | not shown | the hose burns on through the jump | ours | content/dash_flow `hold.lmb` |
+| LMB hose | X | not shown | the flight starts; the hose goes out for the flight | unsettled | |
+| LMB released | walk | "a 0.35 second self-slow after letting go of the ability" | (a slow, not a cancel: see Small mechanics) | n/a | [W] patch 20.11.2024 |
+| RMB Cinder Shot | LMB, E | not shown | both | unsettled | |
+| E Furnace Cloak (the 0.2 s ring, then the blast) | any | not shown | the blast is on the press: everything goes at once | unsettled | [F] 0181-0182 |
+| X Flue Flight (1.8 s) | E | "Heat Shield (Q) and some Powers ... can be cast during Flight of the Firefox" | the cloak works, the flight goes on | match | [W]; `--ashwick-combo-check` (ult 66) |
+| X flight | X | "Reactivate to end the effect early" | lands at once | match | [W]; [D] |
+| X flight | RMB, gear, items | only Heat Shield and some Powers are named | dropped, not buffered (a soft "can't" tick); an RMB hold carried in is cancelled | match (by the wiki's list) | [W]; owner item 66 |
+| X flight | LMB | not shown | ignored (the "can't" tick); a hose under way goes out | unsettled | |
+| X flight | jump | not shown | leaps off, keeping the speed (ends the flight) | ours | content/dash_flow `into_jump.x` |
+| X flight | glide | not shown | shut (the lift-off closes a glider) | unsettled | |
+| Glide | LMB | not shown | ignored | unsettled | |
+| Glide | RMB, E, X | not shown | each goes | unsettled | |
+
+Fixes made: none (every source line above already matches).
+
 ## Animation moves
 Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`, sampled through `HunterAnim.km_sample`), timed
 to the sheet's beats: anticipation, release (with an overshoot key), follow-through, recovery.

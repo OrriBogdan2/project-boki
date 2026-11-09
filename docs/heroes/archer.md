@@ -149,6 +149,36 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 | Starpiercer then a merge on a full-health light hunter | Standing (burst cap) | same |
 | Draw, then Shift (the roll or the air flick) or a jump (item 51) | The draw carries through and charges on; let go mid-roll and it looses as the roll ends, let go in the air and she keeps her speed. The source shows nothing ending a draw on the roll, so it combines (content/dash_flow/archer.json) | `--archer-combo-check` (`pin early release: a dash keeps the draw...`, `pin item 51: ...`), `--dash-flow-check` |
 
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
+d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
+line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both
+(ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
+and the attack key does nothing from a glide (`Hunter.can_fire`).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| LMB draw (held) | RMB | not shown; one bow, and the Heavy Shot's "charge pose is like the LMB draw" | both: two draws run at once and each looses on its own release | **mismatch, not fixed**: one bow can't hold two arrows, but the source's answer (the press cancels the draw, is ignored, or waits) isn't shown. Flagged below | [F] 0264-0269, 0494 |
+| RMB held (Heavy Shot) | LMB | not shown | both, as above | **mismatch, not fixed** (same row) | |
+| LMB draw | E | not shown (Rain of Arrows is a tap with no reticle before the cast) | both: the wall goes up and the draw keeps charging | unsettled | [F] 0457, 0498 |
+| LMB draw, RMB held | jump | not shown | the draw carries through the jump | owner | item 51 (content/dash_flow `hold`) |
+| LMB draw | X | "a self-buff with no cast lock" | the draw is dropped with no arrow; a still-held LMB nocks the first empowered shot at once (0.3 s) | unsettled (the clip's cast at f33 isn't mid-draw) | [F] ult f33 |
+| RMB held | its own end | "Max hold duration after cast increased from 1.5 >>> 3.0 seconds" | 3.0 s, then it looses by itself | match (what the source does at 3 s isn't stated) | [W] |
+| E (instant) | any | instant: no wind-up, no lock | instant: everything goes at once | match | [F] 0457 |
+| X window (3 shots, 6 s) | LMB | "empowered arrows need no charge"; the clip still shows a 0.4-0.8 s draw | a press nocks for 0.3 s, then the beam | match (no charge; the nock length is a timing note) | [F] ult; thebackdash |
+| X window | walk, Spirit Walk | "she can walk between shots" | shots kept through Spirit Walk; she walks between them | match | [F] ult |
+| X window | RMB, E | not shown | both | unsettled | |
+| Glide | LMB | not shown | ignored | unsettled | |
+| Glide | RMB, E, X | not shown | each goes (the Heavy Shot always starts a draw) | unsettled | |
+
+Fixes made: none. The draw-plus-Heavy-Shot row is a clear fault against a one-bow source, but which way the
+source resolves it is not shown, so it waits for the owner or a frame (see the suggestion in the pass report).
+
 ## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
 |---|---|---|

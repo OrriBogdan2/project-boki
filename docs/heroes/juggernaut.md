@@ -283,6 +283,43 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 Assumption 7: the dash after an RMB turns freely; the pull keeps 35% of its speed as you arrive (the owner: "arrival keeps momentum").
 Also ours (no footage): the pull exits (Shift, a jump) and the 0.12s input buffer are ours; the footage shows none of them.
 
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
+d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
+line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both
+(ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
+and the attack key does nothing from a glide (`Hunter.can_fire`).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| RMB Finishing Slam, wind-up (0.6 s) | LMB | not shown | both: the slash goes at once (the wind-up doesn't hold the blade) | unsettled | [W] gives a 0.55 s cast time, nothing on presses in it |
+| Slam wind-up, Lunge, Meteor Drop and its 0.5 s recovery | RMB | not shown | waits: a press in the last 0.12 s goes when the move ends; earlier presses are ignored | unsettled | |
+| Slam wind-up | E | not shown | both: the hook flies, the Slam strikes the way it was started | owner | `jug 113.5` |
+| Slam wind-up | jump | not shown | both: a 0.8 m hop, the wind-up goes on | unsettled | |
+| Slam wind-up | X | not shown | both: the guard starts and the wind-up runs on under it | unsettled (flagged below) | |
+| RMB held (Lunge charge) | jump | not shown | the Lunge goes from the air along the aim | owner | interaction table |
+| RMB held | glide | not shown | shut | owner | `jug 113.2` |
+| RMB held, chain hooked | E | the source has only the spin in the pull | pull, then a Haul Slam on arrival | ours (flagged below) | [D] |
+| Lunge, Meteor Drop (active) | LMB | not shown | waits 0.12 s, then the slash | unsettled | |
+| Lunge end (wind-down) | glide | "winddown frames where Brall can't immediately enter a glider state" | shut for 0.35 s after the Lunge | match (the length is ours: the patch gives no number) | [W] patch 05.02.25 |
+| E Warchain, pulling | RMB | Scorching Spin "DURING Feysteel Chain pull" | Cinder Spin at once, the pull goes on | match | [D] |
+| E hooked | E | "reactivate to pull yourself to the target" | pulls | match | [D] |
+| X Gilded Riposte, guard and cleave (0.65 s) | jump | "Brall can no longer jump while using Volcanic Rebuke" | ignored until the cleave lands; in the recovery a jump goes at once | match | [W] hotfix 08.21.2024; content/dash_flow `into_jump.x` |
+| X guard and cleave | LMB, RMB | not shown | ignored (busy) | unsettled | [F] ult f33-f38 (planted) |
+| X guard and cleave | E | not shown | ignored, except a held chain hauls him in | owner | `jug 113.7` |
+| X guard and cleave | glide | not shown | shut; open in the last 0.35 s, which a glide ends | owner | `jug 113.2` |
+| LMB slash, recovery (about 0.32 s) | LMB | not shown | waits 0.25 s, then the next slash | unsettled | |
+| LMB slash recovery | RMB, E | not shown | both: the Slam or the hook goes at once | unsettled | |
+| LMB held (Searing Wave charge) | jump | not shown | the charge goes on through the jump | ours | content/dash_flow `hold.lmb` |
+| LMB held | RMB, E | not shown | both: the charge goes on | unsettled | |
+
+Fixes made: none (every source line above already matches).
+
 ## Combinations
 
 All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `--juggernaut-combo-check`
