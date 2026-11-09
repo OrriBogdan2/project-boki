@@ -1,5 +1,5 @@
 extends RefCounted
-## --kill-reset-check: the takedown refresh (DashReset, decision 0019). A hunter who knocks or kills an
+## --kill-reset-check: the takedown refresh (DashReset, decision 0022). A hunter who knocks or kills an
 ## enemy hunter has their dash and the long-dash cooldown back at once and heals 5% of max health (never
 ## past max); a teammate who hit the victim in the last 4 s refreshes too (no heal, the softer "assist"
 ## cue), a stale or idle teammate doesn't; a 2-charge dash gains exactly one charge; a hero whose dash

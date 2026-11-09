@@ -1,6 +1,6 @@
 class_name DashReset
 extends RefCounted
-## The takedown refresh (decision 0019): when an ENEMY hunter is knocked or killed, the hunter who gets
+## The takedown refresh (decision 0022): when an ENEMY hunter is knocked or killed, the hunter who gets
 ## credit and every teammate whose damage or crowd control landed on the victim in the last ASSIST_WINDOW
 ## get their dash (Shift) back: a one-charge dash refills, a multi-charge dash gains one charge, and the
 ## long-dash cooldown clears. Only the knocker heals a little. Mobs and bosses don't count, and a hero whose

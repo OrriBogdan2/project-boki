@@ -1,4 +1,4 @@
-# 0019: The knock dash refresh reaches assisters, multi-charge dashes get one charge
+# 0022: The knock dash refresh reaches assisters, multi-charge dashes get one charge
 
 - **Status:** accepted
 - **Date:** 2026-11-08

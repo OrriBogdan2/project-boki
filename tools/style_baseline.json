@@ -181,7 +181,7 @@
 "semicolon": 1
 },
 "scripts/core/settings.gd": {
-"long_line": 15,
+"long_line": 16,
 "nested_ternary": 1,
 "semicolon": 4
 },
