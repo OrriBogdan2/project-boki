@@ -35,7 +35,8 @@ drawn, the downed plate and status words show, cooldown text appears).
 
 ## Looting with a full inventory
 
-- Smart loot (`LootFull.smart`) takes only what fits and reports it: "Took 1 of 3, inventory full", "Inventory full, took nothing", or "Nothing here beats what you've got".
+- The box window rows (`LootHold.box_row`): name in its rarity colour, slot and effect on one line, a green "▲ better" or red "▼ worse" arrow for gear against what you wear (the tip says what you wear), worth for backpack things, then Take / Swap / Full. Take is a click; there is no per-row key. "Take best" (key from `Settings.key_cap("interact")`) is `LootFull.smart`. You can walk and aim with the window open; it closes beyond 2.4 m. Shots: `docs/ui_loot_panel/` (before/after at 1280x720 and 1920x1080, software-rendered).
+- Take best (`LootFull.smart`) takes only what fits and reports it: "Took 1 of 3, inventory full", "Inventory full, took nothing", or "Nothing here beats what you've got".
 - A box thing that doesn't fit (a backpack thing that isn't worth more than your worst, a full belt, keys, or capsule box) gets a red outline in the loot window. Clicking it moves nothing, plays a short rattle and, for a backpack thing, opens the hold window (`LootHold`) left of the box: your backpack, the clicked thing held in red, Swap (yours goes into the box) and Drop (yours goes on the ground). Belt, key and capsule rows only show "Belt full" / "Box full".
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
