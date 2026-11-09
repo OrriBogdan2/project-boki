@@ -9215,5 +9215,68 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_pavonazar_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_pavonazar",
+    "name": "Pavonazar (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pavonazar_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione",
+    "name": "Glacione (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glacione_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gilabacus",
+    "name": "Gilabacus (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gilabacus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sarcobra",
+    "name": "Sarcobra (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_sarcobra_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione",
+    "name": "Glacione (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glacione_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione",
+    "name": "Glacione (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glacione_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ghoulamari",
+    "name": "Ghoulamari (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sarcobra",
+    "name": "Sarcobra (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_sarcobra_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ghoulamari",
+    "name": "Ghoulamari (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_2.jpg",
+    "ok": true
   }
 ]
