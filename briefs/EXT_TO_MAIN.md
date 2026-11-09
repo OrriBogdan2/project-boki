@@ -5458,3 +5458,4 @@ NOTE (job 20261109-101641-a2, ext/perf-model-drawcalls): new --model-draws lists
 READY ext/split-kmoves-pin-bjorn 89302ce30 (split kmoves_pin_bjorn)
 READY ext/shadow-renames-arch 17737fb9f (shadow renames arch/heroes)
 READY ext/kit-parity-rows-a a39c3ec6b (83 sourced [D] rows for Vex, Albert, Neve, Kael, Cinder, Tenzo, built on main plus the kit-parity-lock commit cherry-picked since lock is not on main; check gains owner and cross-file paths; 29 rows FAIL on main by design, no kit fixed: cooldowns Vex RMB/Shift/E/R, Albert R, Neve RMB/E, Kael RMB/air slam/Shift/E/R, Cinder RMB/E/R; ratios Vex Dazed rifle 0.9 vs 0.765 and RMB/E/R tick, Albert bash/R strike/R AoE, Neve burst/R, Kael chain 1.0 vs 0.70, Cinder LMB/dash/E/R carpet)
+READY ext/drop-parity 8a7cbce24 (drop parity)
