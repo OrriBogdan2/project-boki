@@ -1164,10 +1164,10 @@ rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe
 ### Couldn't reproduce (or chose not to)
 
 - Mana: none of it (costs, refunds on hit, the Lunge's double cost) exists in our game.
-- Brall: climbing double-height walls; dodging shots building Blazing Spirit (his level-4 dash
+- Brall: climbing double-height walls is now **built** (`climb_tall` for Kael `juggernaut` and the Archer in `content/rules/hunter_move.json`). Still missing (see docs/KIT_PARITY.md, Kael): dodging shots building Blazing Spirit (his level-4 dash
   upgrade); Volcanic Rebuke sending a knocked hunter straight to the deathbox (ours resets but the
   knocked hunter goes down as usual); turn restriction when dashing out of a Smash.
-- Shiv: Farstep Dagger sticking to moving objects other than hunters and monsters; Bolas hitting
+- Shiv (Sable): the Bolas row is **owner-overridden** (30% slow, cd 7, owner item 53; see docs/KIT_PARITY.md Sable RMB), and the Dagger row matches (E: 14 m, 6 s, cd 15). Still missing (see docs/KIT_PARITY.md, Sable): Farstep Dagger sticking to moving objects other than hunters and monsters; Bolas hitting
   destructibles; whether the weaker Fusillade dashes empower (ours do).
 - The wiki gives no Malice stack cap or duration (ours: 5 and 4s) and no Blazing Spirit duration
   (ours: 6s Enraged). Online, Grounded, blight and Shred go through Net event `["kst", nid, kind,
@@ -1184,7 +1184,9 @@ for the SMG's rate), Primed +10, Bola 6 (+13 tangled), Jackpot 4.5 a knife (4 of
 the crash 24. A medium (145) falls to the Thief in about 4s of steady fire with two Primed hits, to the
 Juggernaut in about 4s with a sweet-spot slam (rank 3 adds the crash on top).
 
-### R removed: the ult choice (kits2-nor, Nov 2)
+### R removed: the ult choice (kits2-nor, Nov 2) — superseded
+
+> **Stale since the ult pass (server update 6):** Sable and Kael each have their own ultimate again (on X; see docs/heroes/thief.md and docs/heroes/juggernaut.md), and the Boki Merge has its own `ultimate` key. The text below is history; the R-to-Merge rule no longer holds for them (the Merge is the same for every hero, on its own key). Doomfall/Jackpot-as-Smash/Mark-trigger folds are only built where those hero docs still list them.
 
 Owner decision (Nov 1): R becomes the Boki Merge for every hero, so the Thief and Juggernaut lose
 theirs. Rather than drop the wiki's ultimates, each is folded into the kit where it already fits:
@@ -1208,7 +1210,7 @@ heroes under the same ids: **Sparkle** (id `mage`, now Light: Sparks, Wirerun, C
 (id `gunslinger`, Medium: Fever, Slipstep, Burr Charge, Longneedle). Neither has an R (the Boki Merge owns it).
 The old Mage and Gunslinger sections above are history. Per-slot tables, research notes and combinations:
 `docs/heroes/mage.md` and `docs/heroes/gunslinger.md`; combos are checked by `--mage-combo-check` and
-`--gunslinger-combo-check`. `Hex` (scripts/arch/hex.gd) is no longer used by a kit.
+`--gunslinger-combo-check`. No kit applies `Hex` (scripts/arch/hex.gd) any more; only its `Hex.active` checks remain (hunter.gd, arch_kit.gd, kit guards), so the status is effectively unused.
 
 ## Inspired by (per hero)
 
