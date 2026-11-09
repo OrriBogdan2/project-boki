@@ -6324,5 +6324,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/frothisk_x_1.jpg",
     "ok": true
+  },
+  {
+    "id": "tidalisk_x",
+    "name": "Tidalisk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tidalisk_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frothisk_x",
+    "name": "Frothisk",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/frothisk_x_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_x",
+    "name": "Blossmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/blossmink_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_x",
+    "name": "Blossmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/blossmink_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rippmink_x",
+    "name": "Rippmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rippmink_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rippmink_x",
+    "name": "Rippmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rippmink_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltmink_x",
+    "name": "Voltmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltmink_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "prismink_x",
+    "name": "Prismink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/prismink_x_2.jpg",
+    "ok": true
   }
 ]
