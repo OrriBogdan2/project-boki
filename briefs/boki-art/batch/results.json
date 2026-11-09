@@ -45783,5 +45783,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_vespox_v1_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_vespyx_p89",
+    "name": "Vespyx (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_vespyx_p89_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_g1",
+    "name": "Glassolotl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_g1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vespyx_p89",
+    "name": "Vespyx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_vespyx_p89_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_g1",
+    "name": "Glassolotl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_g1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_g2",
+    "name": "Glassolotl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_g2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespyx_card89",
+    "name": "Vespyx (hero card, lying down)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/vespyx_card89_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_g2",
+    "name": "Glassolotl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_g2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mycroll_p89",
+    "name": "Mycroll (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_mycroll_p89_1.jpg",
+    "ok": true
   }
 ]
