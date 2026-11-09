@@ -1,13 +1,14 @@
 extends RefCounted
 ## --occlusion-outline-check: your side (you, your teammate, your Boki) wears the cover outline and a rival
 ## never does; Low takes it off again. --occlusion-outline-shots --shots-dir=<dir> (needs a GPU renderer):
-## on the Hollow Crown, you and a teammate stand behind a cliff, two trees and a stone cover (ruin pillar,
-## wall or boulder) with a rival
+## on the Hollow Crown, you and a teammate stand behind a cliff, two trees and the stone covers it has
+## (ruin pillars, walls, boulders) with a rival
 ## beside you, once with the outline (<cover>_on.png) and once without it (<cover>_off.png), cropped round the pair.
 
 const DT := 1.0 / 60.0
 const SIDE := 0.9          # m: you and your teammate stand this far either side of the cover's line
 const BEHIND := 1.6         # m: how far past a tree they stand (the camera looks steeply down)
+const STONE_BEHIND := 0.9   # m: the same past a wall or boulder tile's centre (they stand lower)
 
 var main: Node
 var m: Match
@@ -75,8 +76,8 @@ func _shots() -> void:
 	var covers := {"cliff": _cliff_spot(off), "tree": _prop_spot(off, m.world.tree_spots)}
 	covers["tree2"] = _prop_spot(off, m.world.tree_spots.slice(m.world.tree_spots.size() / 2))
 	var stone := _stone_spots()
-	if not stone.is_empty():
-		covers[stone[0]] = _prop_spot(off, stone[1])
+	for k in stone:      # low stone covers: stand right behind them or they hide nothing
+		covers[k] = _prop_spot(off, stone[k], STONE_BEHIND)
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
 	var rival: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
 	for cover in covers:
@@ -132,17 +133,17 @@ func _cliff_spot(off: Vector3) -> Vector3:
 	return at
 
 ## Open ground BEHIND a prop, as the camera sees it.
-func _prop_spot(off: Vector3, spots: Array) -> Vector3:
-	var away := Vector3(-off.x, 0, -off.z).normalized() * BEHIND
+func _prop_spot(off: Vector3, spots: Array, behind := BEHIND) -> Vector3:
+	var away := Vector3(-off.x, 0, -off.z).normalized() * behind
 	for s in spots:
 		var g: Vector3 = m.world.free_spot_near((s as Vector3) + away, [], 1.0, 0.4, 1.5)
 		if g.distance_to((s as Vector3) + away) < 0.5 and absf(g.y - (s as Vector3).y) < 0.3:
 			return g
 	return m.world.random_ground()
 
-## A third, stone cover: ruin pillars if the map has any, else a wall run, else a hand-placed boulder.
-## [name, feet of those tiles] or [] when there are none.
-func _stone_spots() -> Array:
+## Stone covers: ruin pillars, wall runs and hand-placed boulders, each kind the map has.
+## {name: feet of those tiles}.
+func _stone_spots() -> Dictionary:
 	var w: World = m.world
 	var by := {"pillar": [], "wall": [], "boulder": []}
 	for i in w.kind.size():
@@ -157,12 +158,12 @@ func _stone_spots() -> Array:
 			by["wall"].append(foot)
 		elif w.props.get(i, "") == "rock":
 			by["boulder"].append(foot)
+	var out := {}
 	for k in by:
 		print("OCCLUSION %s tiles: %d" % [k, by[k].size()])
-	for k in ["pillar", "wall", "boulder"]:
 		if not by[k].is_empty():
-			return [k, by[k]]
-	return []
+			out[k] = by[k]
+	return out
 
 func _go(secs: float) -> void:
 	var t := 0.0
