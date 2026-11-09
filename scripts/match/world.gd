@@ -1638,6 +1638,7 @@ func _decorate() -> void:
 		var g: Dictionary = packed[key]
 		await _chunked(deco, g["items"], g["mesh"], g["mat"], String(g["label"]), bool(g["shadows"]), int(g.get("chunk", 16)))
 	await _stage("world.scatter_batches")
+	await Occluders.build(self, deco, packed)
 	# stone walls: coursed ruin masonry following each run (see ruin_walls.gd)
 	if not walls.is_empty():
 		wall_mat = ShaderMaterial.new()

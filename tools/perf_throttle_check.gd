@@ -25,6 +25,7 @@ func run(main_node: Node) -> void:
 	_mob_naps()
 	_far_bots()
 	_shadows()
+	await _occluders()
 	await _plates()
 	print("PERFTHROTTLE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -233,3 +234,45 @@ func _plates() -> void:
 	ok(is_same(a, b) and TextCache.shaped == n0, "the same label reuses its layout")
 	TextCache.line(f, "Wild Pebblit 2", 16)
 	ok(TextCache.shaped == n0 + 1, "changed text is laid out once")
+
+## Baked occluders (Occluders): on for Medium and up, off at Low; on a big map the boxes stay under the
+## ground and above the underside (so they never hide what shows), large rocks get a box inside them,
+## small rocks none, and a small map gets nothing.
+func _occluders() -> void:
+	var low: bool = Settings.QUALITY["low"]["occlusion"]
+	ok(not low and bool(Settings.QUALITY["medium"]["occlusion"]), "occlusion culling is off at Low, on at Medium")
+	var W := m.world
+	var holder := Node3D.new()
+	main.add_child(holder)
+	await Occluders.build(W, holder, {})
+	var oi := holder.get_node_or_null("Occluders") as OccluderInstance3D
+	ok(W.w < Occluders.MIN_MAP or oi != null, "a %d-tile map gets an occluder" % W.w)
+	if oi != null:
+		var arr := (oi.occluder as ArrayOccluder3D)
+		var verts := arr.vertices
+		var bad := 0
+		for p in verts:
+			# a corner on a tile border is judged by the highest ground of the four tiles around it
+			var g := -INF
+			for d in [Vector2(-0.01, -0.01), Vector2(0.01, -0.01), Vector2(-0.01, 0.01), Vector2(0.01, 0.01)]:
+				g = maxf(g, W.ground_at(p.x + d.x, p.z + d.y))
+			if p.y > g + 0.01: bad += 1
+		ok(bad == 0, "no occluder corner above the ground (%d boxes' %d corners)" % [verts.size() / 8, verts.size()])
+		ok(arr.indices.size() / 3 <= 24000, "%d occluder triangles stay under the budget" % (arr.indices.size() / 3))
+		var sunk := 0
+		for p in verts:
+			var ti := W.idx(clampi(int(p.x), 0, W.w - 1), clampi(int(p.z), 0, W.h - 1))
+			if W.kind[ti] != World.T_VOID and p.y < W.under[ti] - 0.01: sunk += 1
+		ok(sunk == 0, "no occluder corner below its island's underside")
+	holder.free()
+	var at := [Transform3D(Basis.IDENTITY, Vector3(5, 2, 5)), Color.WHITE]
+	var rock := {"k": {"mesh": Models.box(3.0, 3.0, 3.0), "label": "rock_a", "items": [at]},
+		"s": {"mesh": Models.box(1.0, 1.0, 1.0), "label": "rock_b", "items": [at]}}
+	var o := Occluders.new()
+	o._w = W
+	o._rocks(rock)
+	ok(o._verts.size() == 8, "a 3 m rock gets one box and a 1 m rock none (%d corners)" % o._verts.size())
+	var inside := true
+	for p in o._verts:
+		if absf(p.x - 5.0) > 1.5 or absf(p.y - 2.0) > 1.5 or absf(p.z - 5.0) > 1.5: inside = false
+	ok(inside, "the rock's box is inside its bounds")
