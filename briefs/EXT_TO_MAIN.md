@@ -5398,3 +5398,4 @@ ART umbrathere 8.5 briefs/boki-art/turnarounds/Umbrathere.jpg kind=turnaround (o
 ART umbrathere 8.6 briefs/boki-art/cards/Umbrathere.jpg kind=card (owner-picked design)
 READY ext/status-body-looks bfddc6570 (body looks for burning, Chill, slow, stun, root, Grounded, Daze, Static, Anti-Heal, resurrection sickness in one data-driven StatusLooks; replaces KitStatus Grounded/Daze nodes and KitLooks stun crown; scored on GPU strips over grass/light/dark in docs/STATUS_LOOKS.md; hero-vfx/clarity/perf-overlay/ostra/dolm/rimewright/dancer/mage checks 0 failed, health + wiki OK)
 READY ext/parity-cc-lockouts 123ec0cb8 (CC lockout table and fixes)
+READY ext/parity-iframes 583b7cfd4 (invulnerable windows to source)
