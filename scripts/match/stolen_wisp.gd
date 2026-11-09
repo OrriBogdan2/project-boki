@@ -158,6 +158,9 @@ func tick(dt: float) -> void:
 			position = _at
 			_float()
 		State.HELD:
+			if not is_instance_valid(thief):
+				scatter()
+				return
 			_follow(dt)
 			_float()
 			_marks(dt)
@@ -191,8 +194,10 @@ func _follow(dt: float) -> void:
 
 func _marks(dt: float) -> void:
 	_ring.rotation.y += RING_SPIN * dt
+	var body := model.get_node("Body") as Node3D
+	_ring.position = body.position      # the ring rides the bob, so it never hangs off an empty spot
 	var a := thief.position + Vector3(0, CHEST_Y, 0)
-	var b := global_position
+	var b := body.global_position
 	var ln := a.distance_to(b)
 	if ln < 0.05:
 		_tether.visible = false

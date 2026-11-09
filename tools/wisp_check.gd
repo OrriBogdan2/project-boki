@@ -318,7 +318,8 @@ func _stolen() -> void:
 	var torus := a._ring.mesh as TorusMesh
 	ok(torus.outer_radius - torus.inner_radius <= 0.03 and (a._tether.mesh as CylinderMesh).top_radius <= 0.02,
 			"...thin ring and thin tether")
-	ok(a.position.y - thief.position.y > 1.0 and absf(a._ring.global_position.y - a.global_position.y) < 0.01,
+	var ring_body_y := (a.model.get_node("Body") as Node3D).global_position.y
+	ok(a.position.y - thief.position.y > 1.0 and absf(a._ring.global_position.y - ring_body_y) < 0.01,
 			"...round the wisp, up at shoulder height, never on the ground")
 	ok(a.position.distance_to(b.position) > 0.5, "...two stolen wisps float apart")
 	var run := thief.position
@@ -327,7 +328,9 @@ func _stolen() -> void:
 		a.tick(1.0 / 60.0)
 	var chest := thief.position + Vector3(0, StolenWisp.CHEST_Y, 0)
 	var tl := a._tether.global_transform
-	ok(tl.basis.y.length() > 1.5 and tl.origin.distance_to((chest + a.global_position) * 0.5) < 0.05,
+	var held_body := (a.model.get_node("Body") as Node3D)
+	ok(a._ring.position == held_body.position, "...the ring rides the body's bob")
+	ok(tl.basis.y.length() > 1.5 and tl.origin.distance_to((chest + held_body.global_position) * 0.5) < 0.05,
 			"...a running thief drags the tether out (%.1f m)" % tl.basis.y.length())
 	ok(a.get_children().all(func(n): return not n is CPUParticles3D),
 			"...no particles of its own beyond the body's sparkles")
