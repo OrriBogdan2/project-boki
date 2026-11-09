@@ -46,7 +46,6 @@ static func _edge_v(fn: Callable, u0: float, u1: float, v0: float, v1: float) ->
 ## A hood round the head: b round the opening, a from the back of the skull to the face; `peak` pulls the crown
 ## up and back into a point, `flop` tips that point to one side.
 static func _hood(t: ShroudTailor, nm: String, mat: Material, radius: float, peak: float, flop := 0.0) -> void:
-	radius *= 0.95 if t.fem else 1.0       # her smaller head (Unmasked.race "head")
 	var fn := func(u: float, v: float) -> Vector3:
 		var b := u * TAU
 		var a := lerpf(0.06, 2.25, v)
@@ -70,12 +69,7 @@ static func _hood_down(t: ShroudTailor, nm: String, mat: Material, radius := 0.2
 	var ao := func(_u: float, v: float) -> float: return lerpf(0.8, 1.0, clampf(sin(v * TAU) * 0.5 + 0.5, 0.0, 1.0))
 	t.add("body", HeroKit.surf("shroud|hooddn|%s|%s" % [nm, t.tag], fn, 24, 8, ao, -1.0), {},
 		Transform3D(Basis.IDENTITY, Vector3(0, 0.655, 0)))
-	_collar(t, mat)
-
-## The cloth round the neck, at the body's neck girth (ShroudTailor.NECK).
-static func _collar(t: ShroudTailor, mat: Material, top := 0.1, bottom := 0.14, tall := 0.1) -> void:
-	var k := float(ShroudTailor.NECK[t.fem])
-	t.rigid(t.torso, Models.cyl(top * k, bottom * k, tall, 14), mat, Vector3(0, 0.63, 0))
+	t.rigid(t.torso, Models.cyl(0.1, 0.14, 0.1, 14), mat, Vector3(0, 0.63, 0))
 
 static func _hood_for(t: ShroudTailor, nm: String, up: bool, peak: float, flop := 0.0, tone := "body") -> void:
 	if up:
@@ -129,12 +123,11 @@ static func _lay(at: Vector3, dir: Vector3, th: float) -> Transform3D:
 static func _cloak(t: ShroudTailor, hood_up: bool) -> void:
 	var f := t.floor_y
 	var s := t.span
-	var flare := 0.24 if t.fem else 0.15        # a woman's shoulders are narrower and her hem wider
-	var yoke := 0.3 if t.fem else 0.2           # how far down it reaches full width: his square shoulders
+	var flare := 0.29 if t.fem else 0.15        # a woman's shoulders are narrower and her hem wider
 	var fn := func(u: float, v: float) -> Vector3:
 		var gap := 0.03 + 0.3 * v * v
 		var th := PI * 0.5 + (2.0 * u - 1.0) * (PI - gap)
-		var rr := lerpf(0.13, 0.385 * s, smoothstep(-0.04, yoke, v)) + flare * pow(v, 1.6)
+		var rr := lerpf(0.13, 0.385 * s, smoothstep(-0.04, 0.3, v)) + flare * pow(v, 1.6)
 		rr *= 1.0 + 0.07 * v * _fold(th, 7.0)
 		var train := 0.3 * maxf(sin(th), 0.0) * v * v * v
 		return Vector3(cos(th) * rr, lerpf(0.67, f + 0.02, v), sin(th) * rr * 0.94 + train)
@@ -144,7 +137,7 @@ static func _cloak(t: ShroudTailor, hood_up: bool) -> void:
 	t.band(_edge_v(fn, 0.985, 1.0, 0.1, 0.96), 1.1, LIMB)
 	t.band(_edge_v(fn, 0.0, 0.015, 0.1, 0.96), 1.1, LIMB)
 	_hood_for(t, "cloak", hood_up, 0.16)
-	_collar(t, t.m["body"])
+	t.rigid(t.torso, Models.cyl(0.1, 0.14, 0.1, 14), t.m["body"], Vector3(0, 0.63, 0))
 	t.add("trim", Models.sphere(0.035, 8), {}, Transform3D(Basis.IDENTITY, Vector3(0, 0.56, -0.2)))
 
 # ------------------------------------------------------------------------------------------------------ 1 Wrap
@@ -182,7 +175,7 @@ static func _wrap(t: ShroudTailor) -> void:
 		t.rigid(leg, _helix("thigh|" + t.tag, thigh, 0.05, -0.28, 3.4, 0.085), body)
 		var shin := func(k: float) -> float: return lerpf(0.074, 0.086, k)
 		t.rigid(t.c["knees"][sd], _helix("shin", shin, 0.03, -0.14, 2.0, 0.07), body)
-	_collar(t, body, 0.095, 0.13, 0.15)
+	t.rigid(torso, Models.cyl(0.095, 0.13, 0.15, 12), body, Vector3(0, 0.63, 0))
 	var brow := func(k: float) -> float: return sqrt(0.0538 - pow(lerpf(0.11, 0.02, k), 2.0)) + 0.004
 	t.rigid(torso, _helix("brow", brow, 0.11, 0.02, 2.0, 0.045), body, Vector3(0, 0.86, 0), Vector3(0.25, 0, 0))
 	var tails := [
@@ -367,7 +360,7 @@ static func _mantle(t: ShroudTailor) -> void:
 	t.add("alt", _shell(t, "mantletunic", tunic, 26, 4, 0.014, true), {"legs": 0.9})
 	t.rigid(t.torso, Models.cyl(0.24 * t.bw, 0.24 * t.bw, 0.045, 18), t.m["leather"], Vector3(0, 0.05, 0))
 	t.rigid(t.torso, Models.sphere(0.04, 8), t.m["trim"], Vector3(0.13, 0.57, -0.19))
-	_collar(t, t.m["body"])
+	t.rigid(t.torso, Models.cyl(0.1, 0.14, 0.1, 14), t.m["body"], Vector3(0, 0.63, 0))
 
 # ---------------------------------------------------------------------------------------------- 7 Shawl & Scarf
 ## The fat neck and the long tail: a huge rolled scarf as wide as the shoulders right under the head, one end hanging
@@ -443,7 +436,7 @@ static func _feathers(t: ShroudTailor, hood_up: bool) -> void:
 	if hood_up:
 		_hood(t, "feathers", t.m["alt"], 0.265, 0.07)
 	else:
-		_collar(t, t.m["alt"])
+		t.rigid(t.torso, Models.cyl(0.1, 0.14, 0.1, 14), t.m["alt"], Vector3(0, 0.63, 0))
 
 # ------------------------------------------------------------------------------------------------- 9 Patchwork
 ## The stepped sack: panels of two tones cut to different lengths, so the hem falls in square steps, long on one side

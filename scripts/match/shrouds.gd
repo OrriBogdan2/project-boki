@@ -69,10 +69,7 @@ static func dress(c: Dictionary, lk: Dictionary) -> void:
 	t.bulk = float(Unmasked.race(lk)["bulk"])
 	ShroudCuts.cut(t, int(set_["style"]), int(set_["hood"]) == 1)
 	ShroudExtras.trim(t, int(set_["trim"]))
-	var fit: Dictionary = STYLES[set_["style"]]["fit"].duplicate()
-	fit["chest"] *= lerpf(1.0, t.girth(0.38), 0.5)      # (in front: the cloth's depth takes half the figure)
-	fit["waist"] *= t.girth(float(fit["belt"]))           # (the cloth under it is cut to ShroudTailor.FIGURE)
-	ShroudExtras.accessory(t, int(set_["accessory"]), fit)
+	ShroudExtras.accessory(t, int(set_["accessory"]), STYLES[set_["style"]]["fit"])
 	t.finish()
 
 ## The finished model's rest pose, for the bones: Models.hunter calls it once the body is at its final proportions.
