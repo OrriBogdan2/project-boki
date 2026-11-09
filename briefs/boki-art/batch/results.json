@@ -65180,5 +65180,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_tinbrock_r4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_harvantis_r4",
+    "name": "Harvantis",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_harvantis_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bulwartoad_r4",
+    "name": "Bulwartoad",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_bulwartoad_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bulwartoad_r4",
+    "name": "Bulwartoad",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_bulwartoad_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lurklet_r4",
+    "name": "Lurklet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lurklet_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_harvantis_r4",
+    "name": "Harvantis",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_harvantis_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lurklet_r4",
+    "name": "Lurklet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_lurklet_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_barostorm_r4",
+    "name": "Barostorm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_barostorm_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_barostorm_r4",
+    "name": "Barostorm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_barostorm_r4_2.jpg",
+    "ok": true
   }
 ]
