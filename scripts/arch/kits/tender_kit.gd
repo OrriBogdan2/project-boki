@@ -27,6 +27,7 @@ var carry_t := 0.0
 var safe_t := 0.0
 var setdown_was := false        # the set-down key (crouch, never F: F is the Boki system's) was down last tick
 const SETDOWN := "crouch"      # the one place to change the set-down key (a Hunter.inp key)
+static var HEAL := HeroVfx.col("tender", "heal")      # the mend and pick green
 var look: CareLook             # pooled visuals (made on first use)
 var shot_seen := 0             # the hunter's shot counter at the last ember we dressed
 var seed_aim := false          # the Burrseed wind-up is running (item 118; a merge start drops it)
@@ -673,7 +674,7 @@ func _call_preview() -> void:
 	var xd := x_def()
 	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": leaf, "dashed": true, "alpha": 1.2})
 	AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": pale(), "lw": 0.1, "alpha": 1.8})
-	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": HeroVfx.col("tender", "heal"), "ticks": true, "alpha": 1.6})
+	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": HEAL, "ticks": true, "alpha": 1.6})
 	# a faint tether already strung from her raised hand onto them: this is who X will reach
 	ulk().keep("tether_aim", "tether", h.pos + Vector3(0, 1.3, 0), {"b": who.pos + Vector3(0, 1.0, 0), "a": 0.45})
 
@@ -771,7 +772,7 @@ func _call_look(who: Hunter, dt: float) -> void:
 	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": leaf, "all": true, "dashed": true})
 	AimKit.circle(h, "x_me", {"self": true, "r": 0.7, "col": pale(), "all": true})
 	if who != h:
-		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": HeroVfx.col("tender", "heal"), "all": true})
+		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": HEAL, "all": true})
 		var hand := CareUtil.hand_at(h, false)
 		ulk().keep("tether", "tether", hand, {"b": who.pos + Vector3(0, 1.1, 0)})
 	hearth_call["fx"] = float(hearth_call["fx"]) - dt
@@ -806,7 +807,7 @@ func _call_end(done: bool) -> void:
 	var at := who.pos if not rescue else h.pos
 	# a rescue has its own revive banner, and the bond word lands on her now: no third word there
 	if not rescue:
-		m.fx.word(at + Vector3(0, 2.7, 0), "MENDED", HeroVfx.col("tender", "heal"), true)
+		m.fx.word(at + Vector3(0, 2.7, 0), "MENDED", HEAL, true)
 	m.sfx("tend_arrive", at, 0.0, 1.0)
 	m.sfx("tender_cheer", h.pos, -3.0, 1.0)              # she cheers when her light mends someone
 	vfx("mended", at)

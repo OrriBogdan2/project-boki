@@ -22,7 +22,8 @@ extends ArchKit
 ##   Anti-Heal (DredgeBlast).
 
 static var BONE := HeroVfx.col("dredge", "bone")          # the bone hook
-static var WORD_COL := HeroVfx.col("dredge", "word")      # the grey of a hook's misses (MISS, SNAGGED, TOO HEAVY, WALLED)
+# the grey of a hook's misses (MISS, SNAGGED, TOO HEAVY, WALLED)
+static var WORD_COL := HeroVfx.col("dredge", "word")
 static var BRASS := HeroVfx.col("dredge", "brass")
 const IRON := Color("3a3f48")
 static var ANCHOR_COL := LDFx.ANCHOR_RIM    # coin gold: the anchor's rim and its telegraphs

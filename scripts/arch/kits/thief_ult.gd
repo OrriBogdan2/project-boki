@@ -10,7 +10,8 @@ extends RefCounted
 ## the cast counts, a hit, a knock or a kill), never the cast alone. Owned by ThiefKit (cast_ult, _tick,
 ## _drop_holds).
 
-static var RING_COL := HeroVfx.col("thief", "main")      # the ring and the blades: her signature violet (the source's is cyan)
+# the ring and the blades: her signature violet (the source's is cyan)
+static var RING_COL := HeroVfx.col("thief", "main")
 static var RIM_COL := HeroVfx.col("thief", "hot")       # the outer band, where blades hit harder: her violet run hot
 const BLADE_TIP := Color("ffffff")
 const BLADE_SPEED := 30.0              # m/s: the cosmetic blade's flight (the hit lands when it arrives)

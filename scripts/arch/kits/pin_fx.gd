@@ -31,7 +31,8 @@ const STAKE_T := 7.0           # s the stake a wall pin leaves in the wall stays
 ## the Heavy Shot's arrow is this many times a normal arrow (the Empowered bolt is 1.0): unmistakable
 const HEAVY_SCALE := 6.0
 const ULT_WIDTH := 0.6          # m: Starpiercer's arrow head and trail, its hit width (2 x the 0.3 shot radius)
-static var THREAD := HeroVfx.col("archer", "main")     # her signature orchid (archetypes/archer.json "color"): thread, trails, glows
+# her signature orchid (archetypes/archer.json "color"): thread, trails, glows
+static var THREAD := HeroVfx.col("archer", "main")
 static var PALE := HeroVfx.col("archer", "hot")       # the pale half of her orchid: heads and hot cores
 static var DEEP := HeroVfx.col("archer", "deep")       # the deep shade of her orchid: the overdrawn trail
 static var CUE := HeroVfx.col("archer", "cue")       # the perfect-release cue only (a timing signal: near-white orchid)

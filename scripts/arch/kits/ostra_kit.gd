@@ -15,12 +15,15 @@ const PAY := "COLLAPSE"
 static var TEAL := HeroVfx.col("ostra", "tide")
 static var VOID_COL := HeroVfx.col("ostra", "hot")
 static var PINK := HeroVfx.col("ostra", "swell")
-static var SEA := HeroVfx.col("ostra", "main")               # the signature: Snap, Brimseed and Nightwell (content/vfx/ostra.json)
+# the signature: Snap, Brimseed and Nightwell (content/vfx/ostra.json)
+static var SEA := HeroVfx.col("ostra", "main")
 static var DEEP := HeroVfx.col("ostra", "deep")              # their deep teal: the seed's and the dome's filling accent
 const GROUND_HAZARDS := ["hazard", "lava", "spore", "toxic", "molten"]
-static var ORB_FULL_COL := HeroVfx.col("ostra", "orb")      # the orb's shot colour at full charge (what other games draw)
+# the orb's shot colour at full charge (what other games draw)
+static var ORB_FULL_COL := HeroVfx.col("ostra", "orb")
 static var GLOW_COL := HeroVfx.col("ostra", "glow")          # the charge glow at his hand, starting...
 static var GLOW_FULL_COL := HeroVfx.col("ostra", "hot")     # ...and at full charge
+static var WHITE := HeroVfx.col("ostra", "white")
 const GLOW_SIZE := Vector2(0.4, 1.25)      # the glow's scale (a mote is 0.4m wide at 1), starting and at full
 
 var swollen_t := 0.0
@@ -165,10 +168,10 @@ func _reticle() -> void:
 	if not snap.is_empty() or (bool(h.inp.get("sec_hold", false)) and rmb_ready()):
 		AimKit.hide(h, "aim")
 		AimKit.lane(
-			h, "snap", {"len": float(sn["range"]), "width": float(sn["width"]), "rails": true, "col": HeroVfx.col("ostra", "white")}
+			h, "snap", {"len": float(sn["range"]), "width": float(sn["width"]), "rails": true, "col": WHITE}
 		)
 	else:
-		AimKit.line(h, "aim", {"col": HeroVfx.col("ostra", "white"), "alpha": 0.8})
+		AimKit.line(h, "aim", {"col": WHITE, "alpha": 0.8})
 
 ## The wait between shots charges the next orb: its damage, speed, size and colour follow the charge, and a
 ## full one also slows. Written into his live weapon (only when the charge moves), so bots and Net get it too.

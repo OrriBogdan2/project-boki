@@ -21,13 +21,16 @@ extends ArchKit
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
-static var BOLT_HEAD := HeroVfx.col("thief", "hot")    # the bolt's chakram: her violet run hot (content/vfx/thief.json "hot")
+# the bolt's chakram: her violet run hot (content/vfx/thief.json "hot")
+static var BOLT_HEAD := HeroVfx.col("thief", "hot")
 static var EMP_BLUE := HeroVfx.col("thief", "hot")  # the empowered shot's chakram: her violet run white-hot
 static var GLINT_EDGE := HeroVfx.col("thief", "glint")    # the dark violet edge round the hand glint
 static var GLINT_CORE := HeroVfx.col("thief", "hot")    # the glint's hot core
-static var GHOST := HeroVfx.col("thief", "ghost")     # the blink's afterimages and the dash's after-image streaks: pale violet
+# the blink's afterimages and the dash's after-image streaks: pale violet
+static var GHOST := HeroVfx.col("thief", "ghost")
 const KNOCK_STAR := Color("ff2a48")
-static var EMP_LINE := HeroVfx.col("thief", "hot")      # the aim line while the next bolt is empowered (white-hot violet)
+# the aim line while the next bolt is empowered (white-hot violet)
+static var EMP_LINE := HeroVfx.col("thief", "hot")
 static var AIM_LILAC := HeroVfx.col("thief", "aim")     # ... and otherwise
 static var BOLT_TAIL := HeroVfx.col("thief", "main")     # the bolt's short tail: her signature violet
 static var KNIFE_VIOLET := HeroVfx.col("thief", "knife")  # the dagger's arrival circle

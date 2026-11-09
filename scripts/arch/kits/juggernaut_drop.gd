@@ -9,7 +9,8 @@ extends RefCounted
 ## JuggernautKit.
 
 static var AREA := HeroVfx.col("juggernaut", "area")       # the landing marker (the damage area)
-static var CORE := HeroVfx.col("juggernaut", "core")         # its centre ring: the stun area, and the shock ring on impact
+# its centre ring: the stun area, and the shock ring on impact
+static var CORE := HeroVfx.col("juggernaut", "core")
 const CLOSE := 0.25                   # share of the dive that closes any gap to the spot left by an air dash
 
 var k: JuggernautKit
