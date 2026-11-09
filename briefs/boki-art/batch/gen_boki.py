@@ -25,8 +25,8 @@ def main():
     ap.add_argument("--parallel", type=int, default=12, help="images generated at the same time")
     ap.add_argument("--watch", action="store_true", help="keep running: pull new jobs every minute, generate, push")
     a = ap.parse_args()
-    if not os.environ.get("GEMINI_API_KEY"):
-        sys.exit("GEMINI_API_KEY is not set. Run: export GEMINI_API_KEY=\"your key\"")
+    if not os.environ.get("GEMINI_API_KEY") and not os.environ.get("OPENROUTER_API_KEY"):
+        sys.exit("No API key. Run: export GEMINI_API_KEY=\"your key\"  (or OPENROUTER_API_KEY)")
     try:
         from google import genai
         from google.genai import types
@@ -40,7 +40,10 @@ def main():
     if not has_size:
         print("WARNING: this google-genai is too old for 4K. Images will come out at the default size.")
         print("To fix: python3 -m pip install --upgrade 'google-genai>=1.50'  (needs Python 3.10+)\n")
-    client = genai.Client()
+    client = genai.Client() if os.environ.get("GEMINI_API_KEY") else None
+    use_or = {"on": os.environ.get("BOKI_PROVIDER") == "openrouter" or client is None}
+    if os.environ.get("OPENROUTER_API_KEY"):
+        print("OpenRouter key found: used " + ("for everything" if use_or["on"] else "when Google's daily limit is hit"))
     jobs = json.loads(JOBS.read_text())
     only = {s.strip() for s in a.only.split(",") if s.strip()}
     OUT.mkdir(exist_ok=True)
@@ -65,6 +68,13 @@ def main():
         entry = {"id": job["id"], "name": job.get("name"), "run": run, "file": str(dest.relative_to(ROOT))}
         for attempt in range(3):
             try:
+                if use_or["on"]:
+                    img = openrouter_image(job["prompt"], job.get("refs", []), job.get("aspect", "16:9"), a.size or job.get("size", "4K"))
+                    import io
+                    Image.open(io.BytesIO(img)).convert("RGB").save(dest, "JPEG", quality=92)
+                    entry["ok"] = True; entry.pop("error", None); entry["via"] = "openrouter"
+                    print(f"   saved {dest.name} (openrouter)", flush=True)
+                    break
                 resp = client.models.generate_content(
                     model=MODEL,
                     contents=[job["prompt"], *refs],
@@ -93,6 +103,10 @@ def main():
             except Exception as e:
                 entry["ok"] = False
                 entry["error"] = str(e)[:300]
+                if ("429" in str(e) or "RESOURCE_EXHAUSTED" in str(e)) and os.environ.get("OPENROUTER_API_KEY") and not use_or["on"]:
+                    print("   Google limit hit: switching to OpenRouter", flush=True)
+                    use_or["on"] = True
+                    continue
                 if "API_KEY_INVALID" in str(e) or "PERMISSION_DENIED" in str(e):
                     print("\nSTOPPING: the API key was rejected. Set it again with: export GEMINI_API_KEY=\"your key\"", flush=True)
                     os._exit(2)
@@ -124,6 +138,29 @@ def main():
         print("Pushed.")
     elif not made:
         print("Nothing new to generate.")
+
+def openrouter_image(prompt, ref_paths, aspect, size):
+    """Nano Banana Pro through OpenRouter (separate quota). Returns image bytes."""
+    import base64, urllib.request, io
+    from PIL import Image
+    refs = []
+    for r in ref_paths:
+        im = Image.open(ROOT / r).convert("RGB")
+        im.thumbnail((3072, 3072))
+        b = io.BytesIO(); im.save(b, "JPEG", quality=90)
+        refs.append({"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + base64.b64encode(b.getvalue()).decode()}})
+    body = {"model": os.environ.get("BOKI_OR_MODEL", "google/gemini-3-pro-image"), "prompt": prompt,
+            "resolution": size, "aspect_ratio": aspect, "n": 1}
+    if refs:
+        body["input_references"] = refs
+    req = urllib.request.Request("https://openrouter.ai/api/v1/images", data=json.dumps(body).encode(),
+          headers={"Authorization": "Bearer " + os.environ["OPENROUTER_API_KEY"], "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=300) as r:
+        out = json.loads(r.read())
+    d = (out.get("data") or [{}])[0]
+    if not d.get("b64_json"):
+        raise RuntimeError("openrouter: no image " + json.dumps(out)[:200])
+    return base64.b64decode(d["b64_json"])
 
 def watch():
     print("Watch mode: checking for new jobs every 60 s. Press Ctrl+C to stop.")
