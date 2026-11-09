@@ -2530,9 +2530,8 @@ func on_fell(e: Ent) -> void:
 	if e is Hunter:
 		if e.out:
 			return
-		sfx("fall", e.pos, 0.0)
-		# swallowed by the cloud sea a few metres under the islands: a whoosh, a puff, a quick fade
-		sfx("whoosh", e.pos, -3.0, 0.7)
+		AbyssSfx.fall_out(e)
+		# swallowed by the cloud sea a few metres under the islands: a puff and a quick fade
 		fx.burst(e.pos + Vector3(0, 0.8, 0), Color(0.92, 0.94, 1.0, 0.8), 18, 4.0, 0.6, -1.0, 1.2)
 		if e == player and hud:
 			hud.flash(Color(0.05, 0.04, 0.12), 0.6)
@@ -5559,6 +5558,7 @@ func _flags(h: Hunter) -> int:
 	if h.reveal_t > 0.0: f |= 4096
 	if h.crouch: f |= 8192
 	if h.diving: f |= 16384
+	if h.gliding and h.glide_fuel <= 0.001: f |= 1 << 19     # overheated (the strain loop, the purple marker)
 	# holding interact (an animation each): bit 2048, and which kind in bits 15-18
 	var hk := Hunter.HOLD_KINDS.find(h.holding())
 	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
@@ -5710,6 +5710,7 @@ func _net_apply(e: Ent, it: Array) -> void:
 			h.dropping = f & 512 != 0
 			h.riding = f & 1024 != 0
 			h.diving = f & 16384 != 0
+			h.glide_fuel = 0.0 if f & (1 << 19) != 0 else 1.0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
 			if f & 2048 != 0:
