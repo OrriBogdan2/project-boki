@@ -3735,6 +3735,9 @@ func _build_bridge_now(k: String) -> void:
 		_toast("%s is open" % Data.ISLES[k]["name"]))
 
 func _toast(txt: String) -> void:
+	if panel_open == "Welcome home":      # the Welcome card first: toasts stacked over its title
+		get_tree().create_timer(1.0).timeout.connect(_toast.bind(txt))
+		return
 	UI.toast(root_ui, txt, UI.GOLD, 100.0 + (52.0 if guide and guide.hint_visible() else 0.0))
 
 func _open_hall() -> void:
