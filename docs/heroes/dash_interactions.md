@@ -353,14 +353,14 @@ Every Hunter's air dash is its ground dash or a special one the source has, neve
 | Hero | Ground dash | Air dash | Verdict | Source |
 |---|---|---|---|---|
 | Ghost (gunslinger) | Slipstep (cd 8.5 s) | a tap in the air slides 2/3 of the ground Slipstep (`air_k`), the same charge and clip | special | venator.md: the air slide is shorter |
+| Oath (bulwark) | 360 Smash (cd 8.0 s) | with a charge: the same 360 Smash (`bul_whirl`, one charge); out of charges the class long dash | same | bjorn.md: one 360 Smash. Item 183 moved the generic long dash off the charged press |
+| Claire (rimewright) | Skate (cd 13.0 s) | the same Skate, the same charge and clip; the fall is eased while it runs (`air_fall`) | same | tamsin.md: one Skate |
 | Kael (juggernaut) | Rampage, 4.5 m in 0.17 s (cd 10.4 s) | with a charge: the same Rampage (`jug_dash`, one charge); in the Meteor Smash's gather it rides the drive with no wind-up, the gather pose kept; out of charges the class shoulder charge (`jug_exdash`) | same | juggernaut.md: one Rampage. Item 183 moved the generic long dash off the charged press |
 | Cinder (ashwick) | Soot Ram, 3.4 m in 0.33 s (cd 9.0 s) | air 8.0 m in 0.24 s (ground 3.4 m in 0.28 s) | skipped | parity 11 (queued) |
-| Elluna (tender) | Relay Step, 4.2 m in 0.174 s (cd 7.0 s) | its own air-dash slot (`air` block, about 3.8 times the ground step), its own cooldown | special | mooshmoosh.md and owner item 24 |
 | Tarek (dolm) | Rock Hop, 2.8 m in 0.26 s (cd 12.0 s) | with a charge: the same Rock Hop (`breah_hop`, one charge), held at the height it starts at: no landing, no rock; out of charges the class long dash (`breah_exdash`) | same | breah.md: one Landslide, no air variant. Item 183 moved the generic long dash off the charged press |
-| Hem (archer) | Spirit Walk (cd 9.5 s) | with a charge: the same Spirit Walk (`pin_roll`, one charge); out of charges the class long dash (flick and tumble, the `ex_cd` slot) | same | pin.md: one Spirit Walk, no air variant. Item 183 moved the generic long dash off the charged press |
-| Grimble (dredge) | Barge, 3.2 m in 0.16 s (cd 10.0 s) | `air_k` carry on the Barge | skipped | parity 13 (queued) |
-| Claire (rimewright) | Skate (cd 13.0 s) | the same Skate, the same charge and clip; the fall is eased while it runs (`air_fall`) | same | tamsin.md: one Skate |
 | Vex (mage) | Wirerun (cd 8.0 s) | the same Wirerun (7.5 to 13 m by rank, one charge, same clip) | same | vireo.md: one Wirerun, no air variant |
-| Oath (bulwark) | 360 Smash (cd 8.0 s) | with a charge: the same 360 Smash (`bul_whirl`, one charge); out of charges the class long dash | same | bjorn.md: one 360 Smash. Item 183 moved the generic long dash off the charged press |
+| Grimble (dredge) | Barge, 3.2 m in 0.16 s (cd 10.0 s) | `air_k` carry on the Barge | skipped | parity 13 (queued) |
+| Elluna (tender) | Relay Step, 4.2 m in 0.174 s (cd 7.0 s) | its own air-dash slot (`air` block, about 3.8 times the ground step), its own cooldown | special | mooshmoosh.md and owner item 24 |
 | Sable (thief) | Vault, 4.5 m in 0.48 s (cd 4.5 s) | 8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`) | special | dancer.md and owner items 7 / 129: the air dash is longer and slower |
+| Hem (archer) | Spirit Walk (cd 9.5 s) | with a charge: the same Spirit Walk (`pin_roll`, one charge); out of charges the class long dash (flick and tumble, the `ex_cd` slot) | same | pin.md: one Spirit Walk, no air variant. Item 183 moved the generic long dash off the charged press |
 | Void (ostra) | Lantern Trade (cd 9.5 s) | the same Lantern Trade (1.8 s), the same charge and clip | same | ostra.md: one Lantern Trade |
