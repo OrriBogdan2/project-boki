@@ -33,7 +33,7 @@ Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Cele
 | X | rooted and invulnerable 3.2-3.5s, then the crash [footage] | as the source, plus the owner's skate carry | unchanged | `tm X: ...` |
 
 ## Footage gaps, Nov 9 re-check
-The 10 ranked gaps of briefs/hero-ref/tamsin.md section 4, marked on main d255acbee. `--rimewright-combo-check` 90/0 on main. Open rows are in files the in-flight Neve branches change (rimewright_kit.gd, rimewright.json), so nothing was built.
+The 10 ranked gaps of briefs/hero-ref/tamsin.md section 4, marked on main d255acbee. `--rimewright-combo-check` 90/0 on main. The asked rows 3, 4, 5 and 10 were already closed on main and asserted by the existing `tm` rows; the one open row (6) is in rimewright_kit.gd/rimewright.json, which in-flight Neve branches change, so nothing was built.
 
 | # | Gap | Status on main | Evidence |
 |---|---|---|---|
@@ -44,11 +44,11 @@ The 10 ranked gaps of briefs/hero-ref/tamsin.md section 4, marked on main d255ac
 | 5 | Ice Wall spawn and growth | closed: 1.8 m block erupts 1 bh ahead, widens to 4.5 m while it slides, shoves foes, stops shots. Owner override: travel +50% (up to 16.2 m, 3.6 s) and it stands 4.5 s, not the footage's about 3 s | OWNER_REVIEW_1103 item 13; the "tm E" rows. The freeze recast is the wiki's. In flight, look only: ext/neve-lmb-celeste |
 | 6 | Darts while skating | open: straight beams (done), but normal damage; the footage shows 56 vs 35 (1.6x), the wiki says 2x, the tooltip data has no bonus. Removed in the data pass | "darts while skating are straight beams at normal damage". Fix is in rimewright_kit.gd and rimewright.json, both in flight |
 | 7 | Skate over edges | closed: the skate goes on over a ledge | "she skates on over a ledge" |
-| 8 | Cooldowns | skate closed (13 s, the data); open: wall 17 s vs 20 s (data) / 16.7 s (card), spear 10.2 s vs 12 s. Both are the data pass's 0.85x scaling, against the PARITY FIRST default of source cooldowns. Owner call | rimewright.json is in flight |
+| 8 | Cooldowns | skate closed (13 s, the data); in flight: wall 17 s and spear 10.2 s (the data pass's 0.85x) go to the source's 20 s and 12 s on ext/cooldown-parity-verify (READY, supersedes ext/parity-cooldowns) | rimewright.json on that branch, `--cooldown-parity-check` |
 | 9 | Aim line | closed: the thin aim line is always up (shared with every hunter, `Match.aim_line`) | "the thin aim line to the cursor is always up" |
 | 10 | Rink Wall cast tell | closed: a 0.2 s sparkle at her feet, the path shown to all, then the wall | "tm E: a 0.2 s tell first" |
 
-Suggestions, not built: restore the 1.6x skating dart damage (row 6) if the owner wants footage over the data; set wall 20 s and spear 12 s for strict parity (row 8).
+Suggestions, not built: restore the 1.6x skating dart damage (row 6) if the owner wants footage over the data.
 
 ## Audit (Nov 3 23:40)
 Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on main 200effce) against this branch. (a) done on the branch, (b) fixed now, (c) not applicable or disagree.
