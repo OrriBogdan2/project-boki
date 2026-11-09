@@ -26064,5 +26064,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_seaglass_koala_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_seaglass_lamb",
+    "name": "Sea-glass Boki (lamb)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_seaglass_lamb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_seaglass_lamb",
+    "name": "Sea-glass Boki (lamb)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_seaglass_lamb_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_howlop_v2",
+    "name": "Howlop (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_howlop_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_seaglass_redpanda",
+    "name": "Sea-glass Boki (redpanda)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_seaglass_redpanda_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_seaglass_redpanda",
+    "name": "Sea-glass Boki (redpanda)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_seaglass_redpanda_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_galleotter",
+    "name": "Galleotter (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_galleotter_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_latchling",
+    "name": "Latchling (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_latchling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_galleotter",
+    "name": "Galleotter (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_galleotter_2.jpg",
+    "ok": true
   }
 ]
