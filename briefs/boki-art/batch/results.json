@@ -65625,8 +65625,29 @@
   {
     "id": "ta_anvilbrock_r4",
     "name": "Anvilbrock",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/ta_anvilbrock_r4_3.jpg",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_anvilbrock_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_gq",
+    "name": "Cetorgan (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_gq_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tiltster_gp",
+    "name": "Tiltster (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_tiltster_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_gp",
+    "name": "Cetorgan (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_gp_4.jpg",
     "ok": true
   },
   {
@@ -65639,71 +65660,15 @@
   {
     "id": "c_parrywhal_gp",
     "name": "Parrywhal (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_cetorgan_gp",
-    "name": "Cetorgan (concept)",
     "run": 4,
-    "file": "briefs/boki-art/batch/out/c_cetorgan_gp_4.jpg",
+    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_4.jpg",
     "ok": true
   },
   {
-    "id": "c_pickadactyl_gp",
-    "name": "Pickadactyl (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_pickadactyl_gp_4.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_tiltster_gp",
-    "name": "Tiltster (concept)",
+    "id": "ta_anvilbrock_r4",
+    "name": "Anvilbrock",
     "run": 3,
-    "file": "briefs/boki-art/batch/out/c_tiltster_gp_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_cetorgan_gp",
-    "name": "Cetorgan (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_cetorgan_gp_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_pagoguana_gp",
-    "name": "Pagoguana (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_pagoguana_gp_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_cetorgan_gp",
-    "name": "Cetorgan (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_cetorgan_gp_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_pickadactyl_gp",
-    "name": "Pickadactyl (concept)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/c_pickadactyl_gp_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_cetorgan_gq",
-    "name": "Cetorgan (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_cetorgan_gq_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_parrywhal_gp",
-    "name": "Parrywhal (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_1.jpg",
+    "file": "briefs/boki-art/batch/out/ta_anvilbrock_r4_3.jpg",
     "ok": true
   },
   {
@@ -65716,8 +65681,29 @@
   {
     "id": "c_pagoguana_gp",
     "name": "Pagoguana (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_pagoguana_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tiltster_gp",
+    "name": "Tiltster (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_tiltster_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pagoguana_gp",
+    "name": "Pagoguana (concept)",
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_pagoguana_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pickadactyl_gp",
+    "name": "Pickadactyl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_pickadactyl_gp_4.jpg",
     "ok": true
   },
   {
@@ -65735,17 +65721,17 @@
     "ok": true
   },
   {
-    "id": "c_parrywhal_gp",
-    "name": "Parrywhal (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_4.jpg",
+    "id": "c_cetorgan_gp",
+    "name": "Cetorgan (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_gp_1.jpg",
     "ok": true
   },
   {
-    "id": "c_tiltster_gp",
-    "name": "Tiltster (concept)",
+    "id": "c_pagoguana_gp",
+    "name": "Pagoguana (concept)",
     "run": 1,
-    "file": "briefs/boki-art/batch/out/c_tiltster_gp_1.jpg",
+    "file": "briefs/boki-art/batch/out/c_pagoguana_gp_1.jpg",
     "ok": true
   },
   {
@@ -65756,6 +65742,48 @@
     "ok": true
   },
   {
+    "id": "c_pickadactyl_gp",
+    "name": "Pickadactyl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pickadactyl_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tiltster_gp",
+    "name": "Tiltster (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_tiltster_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parrywhal_gp",
+    "name": "Parrywhal (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_gq",
+    "name": "Cetorgan (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_gq_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_gp",
+    "name": "Cetorgan (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parrywhal_gp",
+    "name": "Parrywhal (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_2.jpg",
+    "ok": true
+  },
+  {
     "id": "c_parrywhal_gp",
     "name": "Parrywhal (concept)",
     "run": 3,
@@ -65763,31 +65791,10 @@
     "ok": true
   },
   {
-    "id": "ta_anvilbrock_r4",
-    "name": "Anvilbrock",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_anvilbrock_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_cetorgan_gq",
-    "name": "Cetorgan (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_cetorgan_gq_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_pagoguana_gp",
-    "name": "Pagoguana (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_pagoguana_gp_4.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_tiltster_gp",
-    "name": "Tiltster (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_tiltster_gp_4.jpg",
+    "id": "c_ghoulamari_gp",
+    "name": "Ghoulamari (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_gp_2.jpg",
     "ok": true
   },
   {
@@ -65798,10 +65805,10 @@
     "ok": true
   },
   {
-    "id": "c_ghoulamari_gq",
+    "id": "c_ghoulamari_gp",
     "name": "Ghoulamari (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_ghoulamari_gq_1.jpg",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_gp_4.jpg",
     "ok": true
   },
   {
@@ -65819,17 +65826,10 @@
     "ok": true
   },
   {
-    "id": "c_ghoulamari_gp",
+    "id": "c_ghoulamari_gq",
     "name": "Ghoulamari (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_ghoulamari_gp_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_ghoulamari_gp",
-    "name": "Ghoulamari (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_ghoulamari_gp_4.jpg",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_gq_1.jpg",
     "ok": true
   },
   {
@@ -65840,45 +65840,10 @@
     "ok": true
   },
   {
-    "id": "c_ghoulamari_gq",
-    "name": "Ghoulamari (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_ghoulamari_gq_4.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_glacione_gq",
-    "name": "Glacione (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_glacione_gq_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_ghoulamari_gq",
-    "name": "Ghoulamari (concept)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/c_ghoulamari_gq_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_glacione_gp",
-    "name": "Glacione (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_glacione_gp_1.jpg",
-    "ok": true
-  },
-  {
     "id": "c_glacione_gp",
     "name": "Glacione (concept)",
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_glacione_gp_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_glacione_gp",
-    "name": "Glacione (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_glacione_gp_4.jpg",
     "ok": true
   },
   {
@@ -65891,22 +65856,43 @@
   {
     "id": "c_glacione_gp",
     "name": "Glacione (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_glacione_gp_2.jpg",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glacione_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione_gp",
+    "name": "Glacione (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glacione_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ghoulamari_gq",
+    "name": "Ghoulamari (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_gq_3.jpg",
     "ok": true
   },
   {
     "id": "c_glacione_gq",
     "name": "Glacione (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_glacione_gq_4.jpg",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glacione_gq_1.jpg",
     "ok": true
   },
   {
-    "id": "c_druzemole_n2",
-    "name": "Druzemole (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_druzemole_n2_1.jpg",
+    "id": "c_ghoulamari_gq",
+    "name": "Ghoulamari (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_gq_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione_gp",
+    "name": "Glacione (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glacione_gp_2.jpg",
     "ok": true
   },
   {
@@ -65917,24 +65903,17 @@
     "ok": true
   },
   {
-    "id": "c_druzemole_n1",
-    "name": "Druzemole (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_druzemole_n1_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_druzemole_n1",
-    "name": "Druzemole (concept)",
+    "id": "c_glacione_gq",
+    "name": "Glacione (concept)",
     "run": 4,
-    "file": "briefs/boki-art/batch/out/c_druzemole_n1_4.jpg",
+    "file": "briefs/boki-art/batch/out/c_glacione_gq_4.jpg",
     "ok": true
   },
   {
-    "id": "c_druzemole_n2",
+    "id": "c_druzemole_n1",
     "name": "Druzemole (concept)",
     "run": 2,
-    "file": "briefs/boki-art/batch/out/c_druzemole_n2_2.jpg",
+    "file": "briefs/boki-art/batch/out/c_druzemole_n1_2.jpg",
     "ok": true
   },
   {
@@ -65947,8 +65926,8 @@
   {
     "id": "c_druzemole_n1",
     "name": "Druzemole (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_druzemole_n1_2.jpg",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_druzemole_n1_4.jpg",
     "ok": true
   },
   {
@@ -65959,10 +65938,24 @@
     "ok": true
   },
   {
-    "id": "c_druzemole_n3",
+    "id": "c_druzemole_n2",
+    "name": "Druzemole (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_druzemole_n2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_druzemole_n1",
+    "name": "Druzemole (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_druzemole_n1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_druzemole_n2",
     "name": "Druzemole (concept)",
     "run": 2,
-    "file": "briefs/boki-art/batch/out/c_druzemole_n3_2.jpg",
+    "file": "briefs/boki-art/batch/out/c_druzemole_n2_2.jpg",
     "ok": true
   },
   {
@@ -65970,13 +65963,6 @@
     "name": "Druzemole (concept)",
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_druzemole_n2_4.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_minor_n1",
-    "name": "New minor legendary (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_leg_minor_n1_2.jpg",
     "ok": true
   },
   {
@@ -65989,8 +65975,15 @@
   {
     "id": "c_leg_minor_n1",
     "name": "New minor legendary (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_leg_minor_n1_1.jpg",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_leg_minor_n1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_druzemole_n3",
+    "name": "Druzemole (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_druzemole_n3_2.jpg",
     "ok": true
   },
   {
@@ -65998,6 +65991,13 @@
     "name": "Druzemole (concept)",
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_druzemole_n3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_minor_n1",
+    "name": "New minor legendary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_leg_minor_n1_1.jpg",
     "ok": true
   },
   {
@@ -66015,24 +66015,17 @@
     "ok": true
   },
   {
-    "id": "c_leg_minor_n2",
-    "name": "New minor legendary (concept)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/c_leg_minor_n2_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_minor_n2",
-    "name": "New minor legendary (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_leg_minor_n2_1.jpg",
-    "ok": true
-  },
-  {
     "id": "c_leg_minor_n1",
     "name": "New minor legendary (concept)",
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_leg_minor_n1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_minor_n2",
+    "name": "New minor legendary (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_leg_minor_n2_2.jpg",
     "ok": true
   },
   {
@@ -66052,8 +66045,15 @@
   {
     "id": "c_leg_minor_n2",
     "name": "New minor legendary (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_leg_minor_n2_2.jpg",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_leg_minor_n2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_minor_n2",
+    "name": "New minor legendary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_leg_minor_n2_1.jpg",
     "ok": true
   },
   {
@@ -66066,8 +66066,8 @@
   {
     "id": "c_leg_boss_n1",
     "name": "New boss legendary (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_leg_boss_n1_4.jpg",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_leg_boss_n1_2.jpg",
     "ok": true
   }
 ]
