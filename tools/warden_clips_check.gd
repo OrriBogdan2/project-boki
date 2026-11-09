@@ -27,6 +27,7 @@ func run(main: Node) -> void:
 	for art_name in PREFIX:
 		_hunter(String(art_name), String(PREFIX[art_name][0]), String(PREFIX[art_name][1]))
 	_companions()
+	_finishers()
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -166,6 +167,41 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			tris += mesh.surface_get_array_index_len(si) / 3
 	ok(tris <= MAX_TRIS, "%s: %d triangles, the budget %d" % [art_name, tris, MAX_TRIS])
 	m.free()
+
+## The three shared actions (stomp, revive, drink): a Hunter with a clip for it plays it, timed to the game's clock;
+## one without keeps the procedural pose. Motley, Albert, Sparkle and Sable have all three.
+func _finishers() -> void:
+	for id in ["ostra", "bulwark", "mage", "thief"]:
+		var art_name := WardenGlb.art(id)
+		var cfg := WardenClips.data(art_name)
+		var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+		holder.add_child(m)
+		var clips: WardenClips = (m.get_node("Warden/Sync") as WardenGlb.Sync).clips
+		var lib: AnimationLibrary = clips.lib
+		var sts: Dictionary = cfg["states"]
+		var proc: Array = cfg.get("procedural", [])
+		for k in [["stomp", float(Life.R["stomp_cycle"])], ["drink", Hunter.DRINK_TIME]]:
+			var nm := String(sts.get(k[0], ""))
+			var has := nm != "" and lib.has_animation(nm)
+			ok(has and not k[0] in proc, "%s: a %s clip, off the procedural list" % [art_name, k[0]])
+			if has:
+				var secs := lib.get_animation(nm).length
+				var fits := absf(secs - float(k[1])) < 0.04
+				ok(fits, "%s: the %s clip is %.2f s (the game's %.2f)" % [art_name, k[0], secs, k[1]])
+		var rv := String(sts.get("reviving", ""))
+		var loops := lib.has_animation(rv) and lib.get_animation(rv).loop_mode == Animation.LOOP_LINEAR
+		ok(loops, "%s: the revive kneel loops" % art_name)
+		# the slam is on the beat: the stomp state's phase 0.7 is the clip's 0.49 s
+		m.set_meta(WardenClips.STATE, {"stomp": 0.7, "grounded": true})
+		var pick := clips._pick({"stomp": 0.7}, 0.0)
+		var hit := absf(float(pick.get("t", -1.0)) - 0.49) < 0.03
+		var is_stomp := String(pick.get("clip", "")) == String(sts["stomp"])
+		ok(is_stomp and hit, "%s: the stomp's hit is on the beat" % art_name)
+		var dk := clips._pick({"drink": 0.5}, 0.0)
+		var upper := bool(dk.get("upper", false))
+		var is_drink := String(dk.get("clip", "")) == String(sts["drink"])
+		ok(is_drink and upper, "%s: the drink is an upper-body clip" % art_name)
+		m.free()
 
 ## Meeko's sun and raincloud (pip_v2 companions sheet): two atlas faces off her moods, all eight expressions reachable,
 ## the sun carrying her FX points.

@@ -20,7 +20,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
-- `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
+- `states.stomp`, `states.drink` (shared actions, item: parity): the clip name; the clip is the game's phase 0..1 (Hunter state `stomp` = time in `Life.R.stomp_cycle`, `drink` = over `Hunter.DRINK_TIME`) laid over its length, so the stomp clip is 0.7 s with the slam at 0.49 s (the kit's hit at 0.7 of the cycle) and the drink clip is 1.1 s, an upper-body one (the legs keep walking). `states.reviving`'s clip is a loop. Motley, Albert, Sparkle and Sable have all three (`tools/art1/*_clips.py` `stomp`, `revive`, `drink`); a Hunter with no clip keeps the procedural pose.
+- `procedural`: state keys that hand back to the rig (ledges, mantles; `stomp` and `drink` for a Hunter with no clip). A kit move with no clip does too. `--anim-shots --warden=<id> --state=stomp|revive|drink --shots-dir=<dir>` renders the three (`--variant=proc` the rig's pose).
 
 ## The tree
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek

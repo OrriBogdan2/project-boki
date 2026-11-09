@@ -27,8 +27,8 @@
 		"ostra_empower": {"clip": "empower"},
 		"mf_xform": {"clip": "fuse"}
 	},
-	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.6, "stun": "stun", "emote": "emote", "hit": {"front": "hit", "back": "hit", "dur": 0.35}},
-	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"states": {"downed": "downed", "reviving": "revive", "stomp": "stomp", "drink": "drink", "dead": "death", "dead_t": 1.6, "stun": "stun", "emote": "emote", "hit": {"front": "hit", "back": "hit", "dur": 0.35}},
+	"procedural": ["ledge", "mantle", "base"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "pauldron.L", "pauldron.R", "x_fan", "x_jaw", "x_brow.L", "x_brow.R", "x_cheek.L", "x_cheek.R",
 		"x_fing1.L", "x_fing1b.L", "x_fing2.L", "x_fing2b.L", "x_fing3.L", "x_fing3b.L", "x_fing4.L", "x_fing4b.L", "x_thumb.L", "x_thumbb.L",
 		"x_fing1.R", "x_fing1b.R", "x_fing2.R", "x_fing2b.R", "x_fing3.R", "x_fing3b.R", "x_fing4.R", "x_fing4b.R", "x_thumb.R", "x_thumbb.R"]

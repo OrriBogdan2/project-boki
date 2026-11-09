@@ -4,8 +4,11 @@ extends RefCounted
 ## so the moves flow. Which state plays what is data, content/rules/warden_anim/<art>.json; no file: it
 ## stays on HunterAnim. HunterAnim still runs and stays the source of truth for the state (it hands its state over
 ## as the model's meta STATE), the kit keeps its timing: a keyed move's clip is seeked to the kit's own kmove_t, so a
-## clip can never drift from the hit it shows. States the data lists as "procedural" (ledges, stomps) blend back to the
-## retargeted rig, and so does any Hero model played by something that feeds no state (galleries, portraits).
+## clip can never drift from the hit it shows. The same for the data states "stomp" and "drink" (the clip is the state's
+## phase 0..1 laid over its length, so the slam lands on the game's beat; drink is an upper-body clip) and "reviving"
+## (a loop). States the data lists as "procedural" (ledges, and the stomp or drink of a Hunter with no clip) blend
+## back to the retargeted rig, and so does any Hero model played by something that feeds no state (galleries,
+## portraits).
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
 ## and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
@@ -183,7 +186,7 @@ func _is_loop(nm: String) -> bool:
 	var cr: Dictionary = d.get("crouch", {})
 	if cr.has("idle") and (nm == cr["idle"] or nm in (cr["walk"] as Dictionary).values()):
 		return true
-	return nm in ["fall", "glide", "stun", "downed"]
+	return nm in ["fall", "glide", "stun", "downed", d.get("states", {}).get("reviving")]
 
 func _anim(nm: String) -> AnimationNodeAnimation:
 	var n := AnimationNodeAnimation.new()
@@ -286,6 +289,11 @@ func _p(nm: String, v: Variant) -> void:
 ## What the state asks for: {clip, t (s, or -1: it plays on its own), upper} or {}; {"proc": true}: back to the rig.
 func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var st: Dictionary = d.get("states", {})
+	# (a timed state with its own clip, "stomp" or "drink": the phase 0..1 laid over the clip, the slam on the beat)
+	for k in ["stomp", "drink"]:
+		var ph := float(s.get(k, -1.0))
+		if ph >= 0.0 and st.has(k):
+			return {"clip": st[k], "t": ph * lib.get_animation(st[k]).length, "upper": k == "drink"}
 	for k in d.get("procedural", []):
 		var v = s.get(k, null)
 		if (v is bool and v) or (v is float and v >= 0.0):

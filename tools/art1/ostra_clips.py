@@ -137,6 +137,18 @@ def creep(box, shift):
     return {"len": 0.9, "loop": True, "base": dict(HUNCH, box=box, lift=(shift[0], shift[1], -0.34)), "add": wobble(0.9, 1.2, 1.2, 0.012), "keys": [(0.0, {}), (0.9, {})]}
 
 
+def pump(P, t):
+    """reviving: both hands press on his friend's chest, one then the other, the spring rocking with it"""
+    ph = t / 2.0 * TAU * 2
+    a, b = max(0.0, math.sin(ph)), max(0.0, -math.sin(ph))
+    for k, v in (("hR", a), ("hL", b)):
+        x, y, z = P[k]
+        P[k] = (x, y, z - 0.07 * v)
+    s0 = P["spine"]
+    P["spine"] = (s0[0] + 3.0 * math.sin(ph - 0.5), s0[1], s0[2])
+    P["wR"], P["wL"] = 0.35, 0.2
+
+
 CLIPS = {
     # ---------------------------------------------------------------- loco: the box goes first, tilting toward the way he moves; the body rides late
     "idle": {"len": 3.2, "base": STILL, "add": idle_add, "loop": True, "keys": [
@@ -312,7 +324,26 @@ CLIPS = {
     "downed": {"len": 3.0, "loop": True, "base": DOWN,
                "add": lambda P, t: P.update(wL=0.12 * max(0.0, math.sin(t / 3.0 * TAU * 2)), spine=(P["spine"][0] + 1.5 * math.sin(t / 3.0 * TAU), P["spine"][1], P["spine"][2])), "keys": [(0.0, {}), (3.0, {})]},
     "revive": {"len": 2.0, "loop": True, "base": dict(STILL, spine=(30.0, 0.0, 0.0), head=(-16.0, 0.0, 14.0), hR=(0.2, 0.42, 0.98), fR=(0.1, 0.65, -0.75), pR=(0.0, -0.75, -0.65), hL=(-0.2, 0.42, 0.98), fL=(-0.1, 0.65, -0.75), pL=(0.0, -0.75, -0.65),
-                                                  cL=0.4, cR=0.2, sL=1.0, sR=1.0, lift=(0.0, 0.1, -0.08), box=(5.0, 0.0)), "add": lambda P, t: P.update(wR=0.35, wL=0.2), "keys": [(0.0, {}), (2.0, {})]},
+                                                  cL=0.4, cR=0.2, sL=1.0, sR=1.0, lift=(0.0, 0.1, -0.08), box=(5.0, 0.0)), "add": pump, "keys": [(0.0, {}), (2.0, {})]},
+    # finishing a downed foe (Hunter.stomp: 0.7 s, the hit at 0.49 s): no feet, so the spring does it. Coil, spring up with both fists high, hang, drop the whole box on the beat, squash, settle
+    "stomp": {"len": 0.7, "base": STILL, "keys": [
+        (0.00, {}),
+        (0.14, {"lift": (0.0, 0.0, -0.22), "spine": (26.0, 0.0, 0.0), "head": (-18.0, 0.0, 6.0), "hR": (0.3, 0.12, 0.92), "hL": (-0.3, 0.1, 0.92), "brow": -1.0, "cheek": 0.8}, "out"),
+        (0.30, {"lift": (0.0, 0.0, 0.2), "spine": (-8.0, 0.0, 0.0), "head": (-24.0, 0.0, 0.0), "hR": (0.4, 0.06, 1.48), "hL": (-0.4, 0.06, 1.48), "jaw": 8.0, "cheek": 1.0, "box": (-4.0, 0.0)}, "out"),
+        (0.40, {"lift": (0.0, 0.0, 0.22), "box": (-6.0, 0.0)}),
+        (0.49, {"lift": (0.0, 0.0, -0.28), "spine": (32.0, 0.0, 0.0), "head": (-14.0, 0.0, 4.0), "hR": (0.3, 0.2, 0.9), "hL": (-0.3, 0.2, 0.9), "jaw": 2.0, "box": (8.0, 0.0), "smoke": 1.0, "brow": -1.0}, "snap"),
+        (0.58, {"lift": (0.0, 0.0, -0.2), "spine": (26.0, 0.0, 0.0), "smoke": 0.4}, "out"),
+        (0.70, dict(STILL, lift=(0.0, 0.0, 0.0), smoke=0.0, box=(0.0, 0.0), jaw=0.0)),
+    ]},
+    # the sip (1.1 s, upper body): the left hand brings the cup up to the grin, the head tips back, the cheeks puff, it comes down
+    "drink": {"len": 1.1, "base": STILL, "keys": [
+        (0.00, {}),
+        (0.22, {"hL": (-0.26, 0.26, 1.2), "fL": (-0.1, 0.4, 0.9), "pL": (0.2, -0.9, 0.3)}, "out"),
+        (0.42, {"hL": (-0.1, 0.3, 1.42), "fL": (0.0, -0.2, 1.0), "pL": (0.2, -0.9, 0.3), "head": (-32.0, 4.0, 8.0), "jaw": 10.0, "cheek": 1.0, "brow": -0.2}, "out"),
+        (0.62, {"head": (-42.0, 4.0, 8.0), "hL": (-0.1, 0.32, 1.46), "jaw": 2.0, "cheek": 0.2, "lid": 1.0}),
+        (0.80, {"head": (-30.0, 4.0, 8.0), "jaw": 8.0, "cheek": 1.0, "lid": 0.3}),
+        (1.10, dict(STILL)),
+    ]},
     # ---------------------------------------------------------------- one-shots
     "land": {"len": 0.4, "base": dict(STILL, spine=(24.0, 0.0, 0.0), head=(-20.0, 0.0, 6.0), hL=(-0.34, 0.08, 0.96), hR=(0.33, 0.14, 1.0), pld=(-10.0, -10.0), lift=(0.0, 0.0, -0.26), smoke=0.8), "keys": [
         (0.0, {}), (0.133, {"spine": (2.0, 0.0, 0.0), "lift": (0.0, 0.0, 0.06), "smoke": 0.0}, "out"), (0.267, {"lift": (0.0, 0.0, -0.03), "spine": (10.0, 0.0, 0.0)}), (0.4, dict(STILL, pld=(0.0, 0.0), lift=(0.0, 0.0, 0.0)))]},
