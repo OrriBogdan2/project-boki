@@ -25686,5 +25686,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_geodelotl_a_3.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_driftpup",
+    "name": "Driftpup",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_driftpup_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_fanpire",
+    "name": "Fanpire",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_fanpire_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_driftpup",
+    "name": "Driftpup",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_driftpup_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_driftpup",
+    "name": "Driftpup (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_driftpup_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_fanpire",
+    "name": "Fanpire",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_fanpire_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_driftpup",
+    "name": "Driftpup (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_driftpup_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_fawngus_n",
+    "name": "Fawngus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_fawngus_n_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_fawngus_n",
+    "name": "Fawngus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_fawngus_n_1.jpg",
+    "ok": true
   }
 ]
