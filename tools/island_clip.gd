@@ -101,10 +101,14 @@ func _clip(m: Match, h: Hunter, e: Dictionary, out: String) -> void:
 	var t := 0.0
 	var n := 0
 	var climbed := false
+	var landed := false
 	while t < CLIP_S:
 		for s in STEPS_PER_FRAME:
-			h.inp["move"] = -d
-			h.inp["glide"] = not h.mantling()
+			# Once up and standing on top, let go of the stick: the Training Area pad is only a
+			# few metres across, so holding on would walk the hunter off its far side.
+			landed = landed or (climbed and h.grounded and h.pos.y > float(e["top"]) - 0.9)
+			h.inp["move"] = Vector2.ZERO if landed else -d
+			h.inp["glide"] = not h.mantling() and not landed
 			h.inp["aim"] = h.pos + Vector3(-d.x * 4.0, 0.9, -d.y * 4.0)
 			m.step(Match.DT)
 			t += Match.DT
