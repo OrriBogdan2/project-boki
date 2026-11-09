@@ -68869,5 +68869,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/morelossus_card107_3.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_tiltster_r5",
+    "name": "Tiltster",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_tiltster_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_ghoulamari_r5",
+    "name": "Ghoulamari",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_ghoulamari_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_druzemole_r5",
+    "name": "Druzemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_druzemole_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_cetorgan_r5",
+    "name": "Cetorgan",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_cetorgan_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pipwom_r5",
+    "name": "Pipwom",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pipwom_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pickadactyl_r5",
+    "name": "Pickadactyl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pickadactyl_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pickadactyl_r5",
+    "name": "Pickadactyl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pickadactyl_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_ghoulamari_r5",
+    "name": "Ghoulamari",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_ghoulamari_r5_1.jpg",
+    "ok": true
   }
 ]
