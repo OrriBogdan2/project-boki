@@ -65572,5 +65572,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_pipwom_n1_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_pipwom_n1",
+    "name": "Pipwom (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_pipwom_n1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_forgebrock_r4",
+    "name": "Forgebrock",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ta_forgebrock_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pipwom_n1",
+    "name": "Pipwom (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pipwom_n1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_forgebrock_r4",
+    "name": "Forgebrock",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_forgebrock_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pipwom_n1",
+    "name": "Pipwom (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pipwom_n1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_klaxada_gp",
+    "name": "Klaxada (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_klaxada_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pipwom_n3",
+    "name": "Pipwom (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pipwom_n3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pipwom_n2",
+    "name": "Pipwom (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pipwom_n2_3.jpg",
+    "ok": true
   }
 ]
