@@ -71256,5 +71256,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/rd_pagoguanarear_v2_4.jpg",
     "ok": true
+  },
+  {
+    "id": "rd_pagoguana_v2",
+    "name": "Pagoguana (redesign concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd_pagoguana_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_domeleon_v2",
+    "name": "Domeleon (redesign concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd_domeleon_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_pagoguanarear_v2",
+    "name": "Pagoguana (redesign concept rear)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd_pagoguanarear_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_pagoguanarear_v2",
+    "name": "Pagoguana (redesign concept rear)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd_pagoguanarear_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_domeleon_v2",
+    "name": "Domeleon (redesign concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd_domeleon_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_pagoguanarear_v2",
+    "name": "Pagoguana (redesign concept rear)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd_pagoguanarear_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_domeleon_v2",
+    "name": "Domeleon (redesign concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd_domeleon_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_domeleon_v2",
+    "name": "Domeleon (redesign concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd_domeleon_v2_4.jpg",
+    "ok": true
   }
 ]
