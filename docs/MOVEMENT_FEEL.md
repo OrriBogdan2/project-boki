@@ -79,8 +79,9 @@ Nothing here comes from SUPERVIVE's files.
 | feather_toggle_frames (let go, press again) | 1 | 1 | <= 1 | no toggle penalty |
 | feather_m vs feather_hold_m (distance before overheating, over the abyss) | (no feathering) | 110.7m vs 90.1m | | |
 | feather_gain | n/a | 1.23x | >= 1.15x | [est] skilled taps beat holding when heat is the limit |
-| ledge_rise_t (1.6m wall, jump and push in: contact to over the top) | (scripted mantle) | 0.08s | <= 0.35s | [footage] ~0.8s from a full second deep |
-| rim climb, 2.5m under a rim over the void (`--mantle-check`) | 0.40–0.58s (scripted) | 0.55–0.63s | < 1.4s | [footage] ~0.8s |
+| ledge_rise_t (1.6m wall, jump and push in: contact to over the top) | (scripted mantle) | 0.33s (0.15s before the 11-09 suction) | <= 0.45s | [game data] jump-paced; suction cap 2.5 m/s (decision 0026) |
+| ledge_rise_vy_max (the fastest rise up that wall) | n/a | 5.6 m/s (14 before) | <= 7 m/s | [game data] the suction never outruns the jump |
+| rim climb, 2.5m under a rim over the void (`--mantle-check`) | 0.40–0.58s (scripted) | 0.87–0.97s | < 1.4s | [footage] ~0.8s |
 | ledge_rise_peak_m (no jump: height over the top) | n/a | 0.36m | >= 0.2m | [est] a small pop |
 | fling from a 1.35m rise (`--mantle-check`, 6 walls): none / early jump / timed jump | n/a | +0.38m & 1.25m on / +0.24m & 1.31m / +0.94m & 2.22m | timed beats both | [est] |
 | ledge_fling_timed_m (from a jump at a 1.6m wall) | n/a | 4.28m | >= 1.5m | [est] |

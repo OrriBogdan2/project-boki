@@ -434,8 +434,9 @@ func _punch(k: float) -> void:
 	play("breah_punch")
 	AimKit.hide(h, "punch")
 	var dir := h.aim_dir()
-	# the step: an impulse, not a roll (a punch is not a dash: it never blocks fire or reads as one)
-	var stepv := float(pd["step_v"]) * (float(pd["air_k"]) if not h.grounded else 1.0)
+	# the step: an impulse, not a roll (a punch is not a dash: it never blocks fire or reads as one), the speed
+	# that slides "step" metres ([footage] half a body height) under the ground brake
+	var stepv := HunterMove.slide_speed(float(pd["step"])) * (float(pd["air_k"]) if not h.grounded else 1.0)
 	h.vel.x = dir.x * stepv
 	h.vel.z = dir.y * stepv
 	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)

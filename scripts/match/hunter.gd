@@ -13,8 +13,6 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 const JUMP_V := 6.8
 const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
-const GROUND_SHED := 110.0       # m/s^2, no keys: speed over a run (kit step, knock) sheds this fast
-const GROUND_OVERSPEED := 30.0   # how fast dash or pad speed bleeds off on the ground
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by Loco.air_step)
 const AIR_DECEL := 9.0           # let go on a ledge rise and you mostly stop
 const AIR_OVERSPEED := 3.0       # but momentum above run speed (a dash, a pad) still carries
@@ -33,13 +31,12 @@ const ABYSS_BRAKE_DIST := 2.5    # ...that brakes near ground level (let go just
 const ABYSS_BRAKE := 60.0
 const ABYSS_LIP_VY := 4.5        # [est] m/s still rising as the lift reaches the lip: it bounces up past it
 const ABYSS_BRAKE_GAIN := 3.5    # (movefeel) rise speed per metre left in the brake zone (was 2: the last metre crawled)
-const MANTLE_REACH := 1.5        # near a jump's apex, ledges this far above you pop you up
+const MANTLE_REACH := 1.5        # [game data] MantleSuctionUpwardsForceHeightMax: a lip this far above you pulls you up
 const TALL_CLIMB_EXTRA := 0.9     # m: Archer and Juggernaut also climb double-high ledges ([game data] bCanWallJump)
 const MANTLE_REACH_ABYSS := 4.5  # below an island's lip over the abyss, its side catches you this far down (movefeel: was 3.5)
                                  # (a bit past the normal ledge reach); deeper you slide down the face
 const WALL_CATCH_REACH := 0.75   # (movefeel) over the abyss below a lip, a wall this far from your side catches you (elsewhere 0.4)
 const ABYSS_GLIDE_ROOM := 1.5    # a glider with heat left (lifting you out) gets this much more room
-const MANTLE_RISE := 14.0        # [footage] a deep mantle returns to the top in ~0.8s
 const EX_DASH_CD := 12.5         # the long dash: in the air, or with the short one on cooldown
 const SPIKE_STUN := 0.7         # [wiki] stun when a spiked glider hits the ground (docs/EXPEDITION_SPEC.md)
 const SPIKE_DMG := 8.0
@@ -86,7 +83,6 @@ var reload_t := 0.0
 var fire_cd := 0.0
 var dashes := 2.0
 var roll_t := 0.0
-var roll_total := 1.0            # s the current dash runs in all (its ease, Loco.dash_k)
 var roll_dir := Vector2.ZERO
 var inv_t := 0.0
 var coyote := 0.0
@@ -1126,8 +1122,7 @@ func dash_with(e: Dictionary) -> void:
 		roll_t = float(cdat.get("ex_time", roll_t * 1.45))
 		roll_speed = float(cdat.get("ex_dist", roll_speed * roll_t)) / roll_t
 		vel.y = maxf(vel.y, 0.0)
-	roll_t *= Loco.dash_time_k(arch)      # a hunter whose dash is slowed (tuning.json dash_ease) keeps its distance
-	roll_total = roll_t
+	roll_t /= Loco.dash_speed(arch)      # a hunter whose dash is slowed (tuning.json dash_speed) keeps its distance
 	inv_t = maxf(inv_t, float(e.get("invuln", 0.14)))
 	shove = {"hit": {}, "kb": float(e.get("shove_kb", 9.0)), "dmg": float(e.get("shove_dmg", 0.0)), "ws": float(e.get("wallstun", 0.0))} if e.get("shove", false) else {}
 	if float(e.get("phase", 0.0)) > 0.0:
@@ -1439,11 +1434,10 @@ func _lunge(dist: float) -> void:
 	var k := pow(0.75, lunge_n)
 	lunge_n += 1
 	lunge_at = m.time
-	# the speed that covers about dist before ground friction takes it back (it bleeds off slower
-	# while you're holding a direction)
+	# the speed that covers about dist before the ground brake takes it back (to a walk while you hold a direction)
 	var d2 := aim_dir()
 	var moving := (inp["move"] as Vector2).length() > 0.1
-	var want := sqrt(2.0 * (GROUND_OVERSPEED if moving else GROUND_SHED) * dist * k + (base_speed * base_speed if moving else 0.0))
+	var want := HunterMove.slide_speed(dist * k, base_speed if moving else 0.0)
 	var hv := Vector2(vel.x, vel.z)
 	var along := hv.dot(d2)
 	hv += d2 * (maxf(along, want) - along)
@@ -2003,7 +1997,7 @@ func sim(dt: float) -> void:
 	if roll_t > 0.0 and not (ak and ak.aims_in_dash()):
 		want = atan2(-roll_dir.x, -roll_dir.y)
 	if not (ak and ak.face_locked()):
-		face = lerp_angle(face, want, minf(1.0, dt * 20.0))
+		face = rotate_toward(face, want, HunterMove.turn_rate * dt)
 
 func pad_launch(to: Vector3) -> void:
 	var d := Vector2(to.x - pos.x, to.z - pos.z).length()
@@ -2081,7 +2075,7 @@ func _physics(dt: float) -> void:
 	var cur := hv.length()
 	if roll_t > 0.0:
 		roll_t -= dt
-		hv = Loco.dash_hv(roll_dir * roll_speed, arch, roll_t, roll_total)     # eased per hunter (tuning.json)
+		hv = Loco.dash_hv(roll_dir * roll_speed, arch)     # its speed per hunter (tuning.json)
 		if not shove.is_empty():
 			_shove_along()
 		if not dash_pass.is_empty():
@@ -2132,9 +2126,9 @@ func _physics(dt: float) -> void:
 		if grounded or (ak != null and ak.hovering()):
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
 			if (mv * spd).length() >= 0.001:
-				hv = Loco.accel_to(hv, mv * spd, ground_accel * grip, 0.0, GROUND_OVERSPEED * grip, dt)
+				hv = Loco.accel_to(hv, mv * spd, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
 			else:
-				hv = HunterMove.brake(hv, spd, grip, dt)
+				hv = HunterMove.brake(hv, grip, dt)
 		elif glide_off_t < FEATHER_KEEP and not dropping:
 			# (feathering) just after letting go of the glider you keep its speed and steering
 			var gsf := GLIDE_SPEED * (1.0 + gear_stat("glide_speed"))
@@ -2621,8 +2615,9 @@ func _try_ledge_grab(dt: float) -> void:
 		"kb0": kb_t,                                          # (a fresh knock ends the rise; the one that threw you here doesn't)
 		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
 		"v_in": carry_v,                                      # the speed you came in with comes over the top (item 185b)
-		"max_t": clampf((float(best["gz"]) - pos.y) / LRISE_SPEED, 0.1, 0.9) * (1.35 if downed else 1.0) + 0.3}
-	vel.y = maxf(vel.y, LRISE_MIN)
+		"max_t": HunterMove.rise_time(float(best["gz"]) - pos.y) * (1.35 if downed else 1.0) + 0.3}
+	if grounded:
+		vel.y = maxf(vel.y, LRISE_MIN)     # walking into it: under way at once
 	grounded = false
 	grap = {}
 	grap_cd = LEDGE_CD
@@ -2638,8 +2633,8 @@ func _try_ledge_grab(dt: float) -> void:
 ## Over the top you pop up a little toward wherever you're holding. Moving off the face, a dash, a
 ## fresh glide press, a stun or a knock end it. A jump during the rise flings you (_ledge_fling).
 const LRISE_PUSH := MantleCarry.APPROACH_DOT     # home.gd's ledge rise reads this (keys this far into the wall)
-const LRISE_SPEED := 14.0      # [footage] a deep mantle returns to the top in ~0.8s (was MANTLE_RISE)
-const LRISE_MIN := 4.0         # never slower than this near the top
+const LRISE_SPEED := 14.0      # [footage] the fastest rise from deep in the abyss (HunterMove.rise_vy)
+const LRISE_MIN := 4.0         # [est] up speed walking into a ledge starts its rise with
 const LRISE_POP := 2.6         # [est] up speed as you clear the lip with no jump (a ~0.25m pop)
 const LRISE_OFF := 0.9         # moved this far out from the face: you've let go
 const LRISE_WINDOW := 0.6      # [est] the fling window: the last this-many metres below the top (~0.12s)
@@ -2657,13 +2652,14 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 	# (a teleport; or you've slid along past the end of the face, so there's nothing beside you to rise up)
 	var drift := Vector2(pos.x, pos.z).distance_to(lf.get("last", Vector2(pos.x, pos.z))) > 1.5 or not _face_near(float(lf["lip"]))
 	lf["last"] = Vector2(pos.x, pos.z)
+	var on_top := grounded and pos.y >= float(lf["lip"]) - 0.05     # stepped onto the top before the pop: topped out
 	if off or drift or gliding or downed != bool(lf["downed"]) or out or roll_t > 0.0 or stun_t > 0.0 or kb_t > float(lf.get("kb0", kb_t)) \
-			or fly_t > 0.0 or grounded or dropping or float(lf["t"]) > float(lf["max_t"]) or (glide_now and not bool(lf["g0"])):
+			or fly_t > 0.0 or (grounded and not on_top) or dropping or float(lf["t"]) > float(lf["max_t"]) or (glide_now and not bool(lf["g0"])):
 		lfloat = {}
 		return false
 	var lip := maxf(float(lf["lip"]), m.world.ground_at(pos.x + n.x * (r + 0.3), pos.z + n.y * (r + 0.3)))     # (props raise the top)
 	var left := lip + 0.12 - pos.y
-	if left <= 0.0:
+	if left <= 0.0 or on_top:
 		# over the lip: a small pop, carried toward your keys
 		lfloat = {}
 		vel.y = LRISE_POP
@@ -2689,7 +2685,7 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 		if is_local():
 			m.sfx("click", pos, -8.0, 1.6)
 			m.fx.ring(pos + Vector3(0, 0.1, 0), 0.9, Color(1, 1, 1, 0.8), 0.18)
-	vel.y = clampf(left * 14.0, LRISE_MIN, LRISE_SPEED) * (0.75 if downed else 1.0)
+	vel.y = HunterMove.rise_vy(vel.y, left, 0.75 if downed else 1.0, LRISE_SPEED, dt)
 	return true
 
 ## Is there ground at the ledge's height within reach of your side (the face you're rising up)?
