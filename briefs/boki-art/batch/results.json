@@ -70696,5 +70696,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_bastionpet_t1n1_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_bulwartoad_t3n3",
+    "name": "Buckleron line final (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_bulwartoad_t3n3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bulwartoad_t3n3",
+    "name": "Buckleron line final (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bulwartoad_t3n3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bulwartoad_t3n2",
+    "name": "Buckleron line final (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bulwartoad_t3n2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bulwartoad_t3n2",
+    "name": "Buckleron line final (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_bulwartoad_t3n2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bastionpet_t1n3",
+    "name": "Bastionpet baby (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bastionpet_t1n3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bulwartoad_t3n2",
+    "name": "Buckleron line final (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bulwartoad_t3n2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bulwartoad_t3n1",
+    "name": "Buckleron line final (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bulwartoad_t3n1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bulwartoad_t3n1",
+    "name": "Buckleron line final (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bulwartoad_t3n1_1.jpg",
+    "ok": true
   }
 ]
