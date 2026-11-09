@@ -5,7 +5,7 @@ extends RefCounted
 ## buy a seed, sell a crop, meet Hob, head out.
 ## State is Save.d.tutorial.ft:
 ##   did      step id -> true for the steps done
-##   done / skipped   finished, or skipped (nothing is granted or taken away)
+##   done / skipped   finished, or skipped (no gems or items change hands; the tools are still handed over)
 ##   gift     the starter food was handed out
 ## Old saves never see it: the v8 migration marks them done, and so does tutorial.day1_done (the flag
 ## every test save and the new-game shortcuts already set).
@@ -185,8 +185,11 @@ static func finish() -> int:
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	return gems
 
-## Skipping: nothing granted or taken. (FarmGuide puts the house down as a site when none is.)
+## Skipping: no gems or items granted or taken, and the tools the steps would have handed over are handed over
+## (a skipper must not be worse off than a player who walked it). FarmGuide puts the house down as a site.
 static func skip() -> void:
+	for s in steps():
+		give_step_tool(String(s["id"]))
 	var st := state()
 	st["done"] = true
 	st["skipped"] = true
