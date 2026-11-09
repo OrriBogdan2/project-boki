@@ -4437,11 +4437,15 @@ func _separate() -> void:
 			var b: Ent = bodies[j]
 			if absf(a.pos.y - b.pos.y) > 1.0:
 				continue
+			# Hunters pass through each other as the source's do (hunter_move.json hunter_push 0)
+			var share := HunterMove.hunter_push if a is Hunter and b is Hunter else 1.0
+			if share <= 0.0:
+				continue
 			var d := Vector2(b.pos.x - a.pos.x, b.pos.z - a.pos.z)
 			var mind := a.r + b.r
 			var l := d.length()
 			if l < mind and l > 0.0001:
-				var push := d / l * (mind - l) * 0.5
+				var push := d / l * (mind - l) * 0.5 * share
 				var wa := 1.0 / a.mass(); var wb := 1.0 / b.mass()
 				var tot := wa + wb
 				var pa := -push * (wa / tot) * 2.0

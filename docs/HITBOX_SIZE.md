@@ -20,3 +20,17 @@ Changing a hero's hit radius is one line (`body.hit_r`). The creator's look slid
 | tender | Meeko | 0.85 | 0.340 | smallest (at the band's floor: item 108 shrank her model, not this) |
 
 Shots connect inside `hit_r + Match.HIT_SLACK (0.08) + the shot's radius`. `--hitbox-size-check` asserts the band, the drawn circle radius, and a shot just inside and outside the circle for the smallest and biggest.
+
+## Body contact (ext/parity-body-collision)
+
+Bodies are the same circles as the hitboxes. `Match._separate` pushes overlapping bodies apart once a step, mass-weighted (`Ent.mass()`: Hunters 1.0, Boki 0.8 x their giant scale, monsters 1 / 3 brute / 6 warden / 50 sentinel), never off an edge. The one pair that doesn't push is Hunter against Hunter: `hunter_move.json physics.hunter_push` is 0, so Hunters walk and dash through allies and foes alike.
+
+| Pair | Ours | Source [D data, F footage] |
+|---|---|---|
+| Hunter walking into a Hunter | passes through, no shove | no Hunter-to-Hunter collision: Joule's Surge "153 dmg to enemies passed through" [D]; Meeko's Relay Step tracked through an ally at 735.9 s and 745.1 s [F]; Kaiju Grasp reels the foe "to your feet" [F] |
+| A dash into a foe | passes through; the foe stays put | as above. A kit that stops on a body says so itself: Cinder's Soot Ram ends on the first foe [D], Kael's Lunge shoves |
+| Hunter walking into a Boki | held off its body, pushes it along (mass-weighted) | ours (no source): the owner's Boki designs body-block ("walks beside you, body-blocks a chase") |
+| Hunter walking into a monster | held off, pushes it; a sentinel barely moves | no source found in the data or footage; kept |
+| Source body | hit_r 0.34-0.46 (table above) | one capsule for every hero, radius 0.43 m, height 1.76 m, Mass 100 [D]; ours keeps the per-Warden band and 1.0 mass |
+
+`--hitbox-size-check` asserts the first three rows: two Hunters walking at each other cross with no sideways shove, a dash through a foe ends past it with the foe unmoved, and a Hunter walking into a dazed Boki never enters its circle and pushes it along.
