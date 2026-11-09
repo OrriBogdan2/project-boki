@@ -62401,5 +62401,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_soakybara_n2_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_arcestrel_n3",
+    "name": "Arcestrel (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_arcestrel_n3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_soakybara_n1",
+    "name": "Soakybara (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_soakybara_n1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_arcestrel_n1",
+    "name": "Arcestrel (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_arcestrel_n1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_arcestrel_n1",
+    "name": "Arcestrel (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_arcestrel_n1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_soakybara_n2",
+    "name": "Soakybara (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_soakybara_n2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_soakybara_n1",
+    "name": "Soakybara (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_soakybara_n1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_soakybara_n3",
+    "name": "Soakybara (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_soakybara_n3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_arcestrel_n3",
+    "name": "Arcestrel (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_arcestrel_n3_4.jpg",
+    "ok": true
   }
 ]
