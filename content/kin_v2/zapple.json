@@ -71,17 +71,6 @@
 			}
 		]
 	},
-	"dodge_rider": {
-		"name": "Echo Step",
-		"modifiers": [
-			{
-				"type": "repeat",
-				"count": 1,
-				"delay": 0.18,
-				"falloff": 0.55
-			}
-		]
-	},
 	"active": "chain_spark",
 	"auto": "echolocate",
 	"merge": "stormcoat",
