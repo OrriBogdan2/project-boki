@@ -45349,5 +45349,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ringrove_card86_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ringrove_card86",
+    "name": "Ringrove (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ringrove_card86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "thistlynx_card86",
+    "name": "Thistlynx (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/thistlynx_card86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "thistlynx_card86",
+    "name": "Thistlynx (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/thistlynx_card86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "thistlynx_card86",
+    "name": "Thistlynx (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/thistlynx_card86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ringrove_card86",
+    "name": "Ringrove (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ringrove_card86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pipeworth_card86",
+    "name": "Pipeworth (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pipeworth_card86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pipeworth_card86",
+    "name": "Pipeworth (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pipeworth_card86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipeworth_full",
+    "name": "Pipeworth (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pipeworth_full_1.jpg",
+    "ok": true
   }
 ]
