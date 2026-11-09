@@ -47799,5 +47799,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/glassolotl_card93_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_gongrowl_q1",
+    "name": "Gongrowl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gongrowl_q1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongrowl_q2",
+    "name": "Gongrowl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gongrowl_q2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongrowl_q2",
+    "name": "Gongrowl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_gongrowl_q2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_galleotter_q1",
+    "name": "Galleotter (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_galleotter_q1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongrowl_q2",
+    "name": "Gongrowl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gongrowl_q2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_q1",
+    "name": "Reapant (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_reapant_q1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongrowl_q1",
+    "name": "Gongrowl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gongrowl_q1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_q1",
+    "name": "Reapant (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_reapant_q1_1.jpg",
+    "ok": true
   }
 ]
