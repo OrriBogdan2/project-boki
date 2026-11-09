@@ -41569,5 +41569,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_gravitank_p79_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_reapant_p79",
+    "name": "Reapant (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_reapant_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravitank_p79",
+    "name": "Gravitank (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gravitank_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravitank_p79",
+    "name": "Gravitank (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gravitank_p79_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_effigoon_p79",
+    "name": "Effigoon (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_effigoon_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_effigoon_p79",
+    "name": "Effigoon (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_effigoon_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_effigoon_p79",
+    "name": "Effigoon (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_effigoon_p79_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mortarfly_p79",
+    "name": "Mortarfly (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_mortarfly_p79_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelapi_p79",
+    "name": "Chandelapi (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_chandelapi_p79_2.jpg",
+    "ok": true
   }
 ]
