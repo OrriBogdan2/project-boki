@@ -32812,5 +32812,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_hatstag_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_kintsuwyrm",
+    "name": "Kintsuwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_kintsuwyrm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_hatstag",
+    "name": "Hatstag",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_hatstag_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_medushroom",
+    "name": "Medushroom",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_medushroom_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_kintsuwyrm",
+    "name": "Kintsuwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_kintsuwyrm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_rosedart",
+    "name": "Rosedart",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_rosedart_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_medushroom",
+    "name": "Medushroom",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_medushroom_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_rosedart",
+    "name": "Rosedart",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_rosedart_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_scopeleon",
+    "name": "Scopeleon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_scopeleon_2.jpg",
+    "ok": true
   }
 ]
