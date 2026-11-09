@@ -1,5 +1,16 @@
 [
   {
+    "id": "ta_vespyx",
+    "name": "Vespyx",
+    "refs": [
+      "briefs/boki-art/style_refs/vespyx_2d_ref.png"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, standing or crawling naturally like an animal, neutral pose, plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
     "id": "sporcupine_r",
     "name": "Sporcupine (owner redo)",
     "refs": [
