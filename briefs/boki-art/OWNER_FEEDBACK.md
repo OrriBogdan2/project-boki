@@ -31,4 +31,5 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 26 | Terrasloth + Parasolth both sloths -> Terrasloth becomes another animal | 5 greenhouse directions on unused animals | GENERATING |
 | 27 | Lanceron too close to Skateron | 5 new final body plans (ice knight crane, heron-dragon, frost guardian, ice stork-rhino, winter knight) | GENERATING |
 | 28 | Effigeetle needs an evolution: defensive cocoon -> artillery butterfly, more mechanical each time | 4 cocoon + 5 artillery-butterfly directions (Effigoon / Mortarfly placeholders) | GENERATING |
+| 29 | Chandelapi too busy; majestic but not rigid or crowded | 4 simplified, flowing directions (few candles, no body filigree) | GENERATING |
 | 21 | 66 Bokidex items marked "redo" | Each has a newer attempt or is in this list; re-check every tick | ONGOING |
