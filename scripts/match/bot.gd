@@ -54,6 +54,8 @@ func tick(m: Match, h: Hunter, dt: float) -> void:
 		return
 	a["far_dt"] = 0.0
 	think(m, h, acc)
+	if m.time < float((a["diff"] as Dictionary).get("no_ult_s", 0.0)):
+		h.inp["ult"] = false      # BotRamp: a gentle bot holds its ultimate early on
 
 func think(m: Match, h: Hunter, dt: float) -> void:
 	var a := h.ai

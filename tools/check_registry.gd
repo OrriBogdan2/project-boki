@@ -113,6 +113,7 @@ const CHECKS := {
 	"--empty-shots": ["res://tools/empty_shots.gd", "empty_shots", null],      # the Empty creator + Relic moment shots
 	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],     # the Wardens' painted faces
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, boss fan, weapon path
+	"--bot-ramp-check": ["res://tools/bot_ramp_check.gd", "bot_ramp_check", null],      # gentler backfill bots for a new player
 	"--prematch-check": ["res://tools/prematch_check.gd", "prematch_check", null],      # the pre-match lobby
 	"--hero-title-check": ["res://tools/hero_title_check.gd", "hero_title_check", null],
 	"--mantle-clip": ["res://tools/mantle_clip.gd", "mantle_clip", null],

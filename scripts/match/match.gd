@@ -692,9 +692,10 @@ func _start(o: Dictionary) -> void:
 	tier = clampi(int(o.get("tier", 0)), 0, Data.TIERS.size() - 1)
 	T = Data.TIERS[tier]
 	bot_diff = String(o.get("bot_diff", Settings.get_v("bot_diff")))
-	if not Data.BOT_DIFF.has(bot_diff):
+	var forced := Data.BOT_DIFF.has(bot_diff)
+	if not forced:
 		bot_diff = Data.auto_bot_diff(tier, int(Save.d.get("extracts", 0)), o.get("tutorial", false) or o.get("training", false))
-	bot_cfg = Data.BOT_DIFF[bot_diff]
+	bot_cfg = Data.BOT_DIFF[bot_diff] if forced else BotRamp.cfg(Data.BOT_DIFF[bot_diff], BotRamp.matches_for(o))
 	_build_env()
 	music_dir = MusicDir.new()
 	music_dir.start(self)
