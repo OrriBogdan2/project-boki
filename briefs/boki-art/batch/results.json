@@ -18931,5 +18931,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/tinbrock_card_1.jpg",
     "ok": true
+  },
+  {
+    "id": "umbrink_card",
+    "name": "Umbrink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/umbrink_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrasloth_r2_w30",
+    "name": "Terrasloth",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/terrasloth_r2_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrink_card",
+    "name": "Umbrink (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/umbrink_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "wyrmink_card",
+    "name": "Wyrmink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/wyrmink_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltmink_card",
+    "name": "Voltmink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltmink_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltmink_card",
+    "name": "Voltmink (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltmink_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "zipling_card",
+    "name": "Zipling (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/zipling_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "zipling_card",
+    "name": "Zipling (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/zipling_card_1.jpg",
+    "ok": true
   }
 ]
