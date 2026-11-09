@@ -8,5 +8,5 @@ for _n,_id,_src,_stg,_pose in (('Barokat','b3','c_barokat_b3_1','mid','a round, 
     TA(_n,_O+_src+'.jpg'); SPECS[-1]['id']='ta_'+_l+'_'+_id; _P61.append('ta_'+_l+'_'+_id)
     SPECS.append({'id':_l+'_card6','name':_n+' (hero card)','refs':[_O+_src+'.jpg',SRA],'runs':3,'aspect':'1:1','size':'2K','prompt':CARD(_n,_stg,_pose)}); _P61.append(_l+'_card6')
     P(_l+'_'+_id,_n,_O+_src+'.jpg',_pose); _P61.append('portrait_'+_l+'_'+_id)
-DROP|={'ta_barokat_pick','barokat_card5','portrait_barokat_pick'}
+# (b2 pick jobs already ran; they are skipped at review instead of promoted)
 PRIORITY=_P61+PRIORITY
