@@ -17,6 +17,19 @@ const DASH_WAIT := 40           # steps: a dash with a wind-up shows up within t
 const WATCH := 120              # steps after the press that we watch for the ability
 const GLOVE := "barrier"        # Q: an active glove that stays where it's cast
 
+## The source's dash -> LMB / X rows (docs/heroes/dash_interactions.md): [hero, dash, slot, mode]. Silent source:
+## the press goes mid-dash; Zedran and Bjorn dash AS the attack (no slash or swing inside it:
+## buffer), and their ult plants them, as Cinder's flight takes over (cancel).
+const SOURCE_ROWS := [
+	["archer", "ground", "lmb", "fire"], ["archer", "air", "lmb", "fire"],
+	["mage", "ground", "lmb", "fire"], ["mage", "air", "lmb", "fire"],
+	["ashwick", "ground", "lmb", "fire"], ["ashwick", "air", "lmb", "fire"],
+	["dolm", "air", "lmb", "fire"],
+	["juggernaut", "ground", "lmb", "buffer"], ["juggernaut", "air", "lmb", "buffer"],
+	["bulwark", "ground", "lmb", "buffer"], ["bulwark", "air", "lmb", "buffer"],
+	["juggernaut", "ground", "x", "cancel"], ["bulwark", "ground", "x", "cancel"], ["ashwick", "ground", "x", "cancel"],
+]
+
 var bad := 0
 var skipped := 0
 var cast_n := {}                # CombatBus slot name -> casts by the hunter under test
@@ -30,6 +43,9 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	for r in SOURCE_ROWS:
+		var row := DashFlow.row_of(r[0], r[2], r[1] == "air")
+		ok(String(row["mode"]) == r[3], "%s %s dash -> %s is %s in the source" % [r[0], r[1], r[2], r[3]])
 	for hero in _heroes():
 		await check_hero(main, hero)
 	_print_exceptions()

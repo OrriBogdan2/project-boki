@@ -57,6 +57,11 @@ func _fresh(species := "cindle") -> Match:
 	if R:
 		R.ctrl = "idle"
 		R.teleport(Vector3(P.pos.x + 38.0, P.pos.y, P.pos.z + 18.0))
+		if R.kin:      # (its random Boki, e.g. a pouncing nettlynx, would shove the carrier: this check is about yours)
+			R.kin.dead = true
+			m.kins.erase(R.kin)
+			R.kin.queue_free()
+			R.kin = null
 	keep = []
 	for i in 40:
 		_clear_mobs()

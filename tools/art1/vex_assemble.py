@@ -1,5 +1,5 @@
 """ART-1 Vex, stage B: all pieces as Blender objects (P_*), flat coloured, and a four-view shape pass (workbench, fast). stage/pieces.blend, stage/shape_*.png
-Run: blender -b --factory-startup --python tools/art1/vex_assemble.py -- <source.blend> <out.blend> <png prefix>"""
+Run: blender -b --factory-startup --python tools/art1/vex_assemble.py -- <headed.blend> <out.blend> <png prefix>"""
 import sys, os
 import bpy
 import numpy as np
@@ -15,7 +15,7 @@ src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
 dg = bpy.context.evaluated_depsgraph_get()
 bvh_src = BVHTree.FromObject(src, dg)
 bvh_low = BVHTree.FromObject(low, dg)
-parts = VP.build(bvh_src, bvh_low)
+parts = VP.build(bvh_src, bvh_low, BVHTree.FromObject(bpy.data.objects["HeadSrc"], dg))
 COL = {"skin": (.86, .62, .55), "cloth": (.5, .75, .3), "leather": (.1, .1, .1), "metal": (.55, .55, .58), "brass": (.75, .58, .22), "hair": (.1, .55, .35), "eyes": (.9, .9, .9), "glow": (.3, 1, .3)}
 tot = {}
 for p in parts["pieces"]:
