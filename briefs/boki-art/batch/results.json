@@ -46749,5 +46749,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_grammite_gap_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_gap",
+    "name": "Gongrowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_grammite_gap",
+    "name": "Grammite (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_grammite_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_gap",
+    "name": "Gongrowl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glaciammoth_gap",
+    "name": "Glaciammoth (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_glaciammoth_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glaciammoth_gap",
+    "name": "Glaciammoth (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glaciammoth_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_gap",
+    "name": "Gongrowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glaciammoth_gap",
+    "name": "Glaciammoth (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glaciammoth_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gramofrill_gap",
+    "name": "Gramofrill (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gramofrill_gap_2.jpg",
+    "ok": true
   }
 ]
