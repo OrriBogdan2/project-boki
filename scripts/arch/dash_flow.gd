@@ -192,10 +192,12 @@ func _cancel(carry: bool) -> void:
 
 ## Presses made while stunned (every slot but Q, which a stun doesn't lock) or rooted (Shift) are held, aged from
 ## the press, so _release lets them go on the first free step within BUFFER_S or refuses them stale. True while
-## the hunter is locked (a held LMB is left alone: it fires on its own once free).
+## the hunter is locked (a held LMB is left alone: it fires on its own once free). A root of the hunter's own
+## making (a kit's cast lock like Neve's Rimelock, a stomp) isn't a lock: its owner decides what Shift does in it.
 func _hold_locked(fire_pressed: bool) -> bool:
 	var h := kit.h
-	if h.stun_t <= 0.0 and h.root_t <= 0.0:
+	var rooted := h.root_t > 0.0 and not kit.cast_locked() and h.stomp.is_empty()
+	if h.stun_t <= 0.0 and not rooted:
 		return false
 	if h.inp.get("dash", false):
 		h.inp["dash"] = false
@@ -223,7 +225,8 @@ func _release(dt: float) -> void:
 		if not (locked and slot in ["lmb", "dash"]):
 			_replay(slot)
 
-## What keeps a held press of `slot` waiting: anything that makes the kit busy, and for Shift a root too.
+## What keeps a held press of `slot` waiting: anything that makes the kit busy, and for Shift a root too (a
+## self-root wouldn't have held it; one that follows a stun lets the hold run out as usual).
 func _locked(slot: String) -> bool:
 	return kit.busy() or (slot == "dash" and kit.h.root_t > 0.0)
 
