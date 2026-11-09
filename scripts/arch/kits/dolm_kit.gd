@@ -118,7 +118,7 @@ func _new_rock(p: Vector3, dir: Vector2) -> bool:
 	rocks_made += 1
 	return true
 
-## A rock leaves the ground along `dir` and flies as a flaming boulder; where it ends it bursts.
+## A rock leaves the ground along `dir` and flies as a boulder with cobalt-lit cracks; where it ends it bursts.
 ## src: "punch" | "slam" | "dash".
 func launch(w: Dictionary, dir: Vector2, src: String) -> void:
 	var rd := rock_def()

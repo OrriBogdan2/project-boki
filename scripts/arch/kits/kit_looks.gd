@@ -30,6 +30,9 @@ const TRAIL_DT := 0.016       # s: a skinned shot leaves its trail every frame
 const ORB_CORE := [Color("3a0d5c"), Color("8a3fe0")]      # the orb's glass core, plain and at full charge
 const ORB_RIM := [Color("e070ff"), Color("ffeaff")]       # its rim, the same
 const ORB_HOT_K := 2.2        # how much the orb's white-hot core grows at full charge
+const ROCK_GLOW := Color("3a7cff")     # Tenzo's cobalt (content/vfx/dolm.json "main"): the cracks in his stone
+const ROCK_HOT := Color("9ad0ff")      # "hot": sparks off a flying rock
+const ROCK_DUST := Color(0.66, 0.7, 0.78, 0.85)     # "dust", the grey-blue stone dust
 const SHARD_GRAV := 22.0      # m/s2: rock chips fall a little faster than bodies (they read as heavy)
 const SIGIL_SEGS := 16        # arc segments in Ostra's rune sigil ring
 
@@ -53,6 +56,7 @@ static func rock_mat(heat: float, seed_v: float) -> ShaderMaterial:
 	var mt := ShaderMaterial.new()
 	mt.shader = ROCK_SH
 	mt.set_shader_parameter("heat", heat)
+	mt.set_shader_parameter("glow", ROCK_GLOW)
 	mt.set_shader_parameter("seed", seed_v)
 	return mt
 
@@ -149,7 +153,7 @@ func _build_footrock(n: Node3D) -> void:
 	Models.part(n, Models.box(0.5, 0.14, 1.0), Models.toon(RockLook.STONE_HI, true, 0.6), Vector3(0, -0.07, 0))
 	var top := Models.toon(RockLook.STONE_HI.lerp(RockLook.CAP, 0.4), true, 0.6)
 	Models.part(n, Models.box(0.42, 0.04, 0.86), top, Vector3(0, 0.01, 0))
-	Models.part(n, Models.box(0.3, 0.12, 0.7), Models.glow_mat(Color("ff7a2a")), Vector3(0, -0.17, 0))
+	Models.part(n, Models.box(0.3, 0.12, 0.7), Models.glow_mat(ROCK_GLOW), Vector3(0, -0.17, 0))
 
 ## Ostra's shots: dark glass with bright rims (the orb violet, the Snap spear sea teal), each with its own
 ## length and tail (the tail points back along the flight, -Z being forward after look_at).
@@ -321,15 +325,15 @@ func _trail(e: Dictionary, p: Vector3, back: Vector3) -> void:
 	var fx: Fx = m.fx
 	match String(e["kind"]):
 		"boulder":
-			fx.burst(p, Color(1.0, 0.5, 0.15, 0.8), 2, 1.0, 0.3, -1.0, 1.1, back, 25.0)
-			fx.spark(p, back, Color("ff9a3c"), 2, 2.5, 30.0, 0.25, 4.0, 0.8)
+			fx.burst(p, ROCK_DUST, 2, 1.0, 0.3, -1.0, 1.1, back, 25.0)
+			fx.spark(p, back, ROCK_HOT, 2, 2.5, 30.0, 0.25, 4.0, 0.8)
 		"rock":
-			fx.burst(p, Color(1.0, 0.42, 0.1, 0.85), 3, 1.5, 0.35, -1.0, 1.5, back, 30.0)
-			fx.spark(p, back + Vector3(0, 0.3, 0), Color("ffb347"), 4, 4.0, 40.0, 0.3, 2.0, 1.3)
+			fx.burst(p, ROCK_DUST, 3, 1.5, 0.35, -1.0, 1.5, back, 30.0)
+			fx.spark(p, back + Vector3(0, 0.3, 0), ROCK_HOT, 4, 4.0, 40.0, 0.3, 2.0, 1.3)
 		"dashrock":
 			var dust := Color(0.62, 0.48, 0.34, 0.85)
 			fx.burst(p - Vector3(0, 0.4, 0), dust, 3, 2.0, 0.4, 4.0, 1.4, back + Vector3.UP, 50.0)
-			fx.spark(p, back, Color("ff8a2c"), 2, 2.0, 30.0, 0.25, 4.0, 0.8)
+			fx.spark(p, back, ROCK_HOT, 2, 2.0, 30.0, 0.25, 4.0, 0.8)
 		"orb":
 			var k := float(e["k"])
 			var col := Color(0.9, 0.3 + 0.4 * k, 0.9, 0.7)

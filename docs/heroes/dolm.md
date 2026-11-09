@@ -21,7 +21,7 @@ Weight Medium (145 hp). Fixed weapon Rubble Fists (`content/weapons/rubble_fists
 with magma cracks (shaders/molten_rock.gdshader), knuckle studs and a hot core (scripts/match/hero_arms.gd); the gauntlets
 ride her hands (HunterAnim's "fist" hold), so every move's arm reach shows. Body (content "body"): 0.97 tall, 1.2 wide (big
 forearms and fists, a short wide read); the medium hitbox 0.40 is kept (the fists are not body). Palette ochre stone `#d9a35b`
-with molten orange `#ff7a2a`. Payoff word ROCKFALL. Kit: `scripts/arch/kits/dolm_kit.gd`, the slam in `breah_slam.gd`,
+with cobalt `#3a7cff` in the cracks and every effect (owner: Tenzo is blue). Payoff word ROCKFALL. Kit: `scripts/arch/kits/dolm_kit.gd`, the slam in `breah_slam.gd`,
 looks in `kit_looks.gd` and, for the slam, RMB charge, Rock Hop landings and Basalt Spine,
 `content/vfx/dolm.json` (HeroVfx, cobalt; docs/VFX_QUALITY.md), standing on rocks in `scripts/arch/stone_stand.gd`, moves in `scripts/match/kmoves_stone.gd`,
 sounds from `tools/gen_sfx_tarek.py` (names in `scripts/core/sfx_kits.gd`).

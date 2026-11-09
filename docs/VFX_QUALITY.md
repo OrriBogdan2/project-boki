@@ -86,7 +86,7 @@ Status = what the kit puts on a foe. "before → after" where this pass changed 
 | Lace (slice) | ok | ok | ok (`pin_fx`) | ok | ok | ok | stun miss → ok; Blight miss |
 | Cinder (slice) | ok | ok (body red-pink, as the hero doc specs) | ok (jets) | ok | ok | ok | Ablaze ok; slow miss |
 | Meeko | ok | ok | ok | ok | ok | ok | root miss |
-| Tenzo | ph → ok (punch) | ok | ph → ok (`dash_dust`) | ok; rock/boulder bursts ph → ok (`rock_burst`) | ok | ok | stun ok (kit crown → shared); Shred ph (ring + word) |
+| Tenzo | ph → ok (punch; the boulder, flying rocks, hop rocks and fists had molten-orange cracks and trails: now cobalt) | ok | ph → ok (`dash_dust`) | ok; rock/boulder bursts ph → ok (`rock_burst`) | ok | ok | stun ok (kit crown → shared); Shred ph (ring + word) |
 | Grimble | ok | ok | ok (`ld_fx` barge) | ok | ok | ok (slugs read small) | stun ok (kit spiral → shared); Grounded ok |
 | Neve | ok | ok | ph → ok (shared team pill over the skate removed) | ok | ok | ok | stun miss → ok; slow/root miss |
 | Motley | ph (violet, kept by the dash-feel lane) | ok | ph (violet puffs) | ok | ok | ok | stun ok (kit crown → shared); Disoriented ph |
