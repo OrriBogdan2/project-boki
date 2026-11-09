@@ -26,8 +26,10 @@ var _font: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 static func say(m: Match, kind: String, victim: Hunter, confirm := false) -> void:
 	if m == null or victim == null:
 		return
-	if confirm:
-		m.sfx("knock_confirm" if kind == "knock" else "kill", null, -6.0 if kind == "knock" else -3.0)
+	if confirm and kind == "knock":
+		m.sfx("knock_confirm", null, -6.0)
+	elif confirm:
+		m.sfx("kill", null, -3.0)
 	if m.hud == null:
 		return
 	var host: Node = m.hud
