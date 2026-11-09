@@ -10,6 +10,7 @@
 	"silhouette": "the huge stone left arm, the stone gauntlet and the three floating eye stones",
 	"model_glow": {"core": "#5ce6b8", "edge": "#2fc2b4"},
 	"card": {
+		"role_word": "Builder",
 		"role": "Brawler and builder: raises rocks to climb and hide behind, then punches them into the enemy.",
 		"loop": "Brawler and builder: raises rocks to climb and hide behind, then punches them into the enemy.",
 		"lmb": "Rubble Fists: tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies.",
