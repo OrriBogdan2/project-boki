@@ -67861,5 +67861,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_anchorhorn_r4_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_anchorhorn_r4",
+    "name": "Anchorhorn (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_anchorhorn_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthorn_r4",
+    "name": "Crofthorn (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_spanglin_r4",
+    "name": "Spanglin (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_spanglin_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anchorhorn_r4",
+    "name": "Anchorhorn (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_anchorhorn_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_shinobant_r4",
+    "name": "Shinobant (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_shinobant_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tinbrock_r4",
+    "name": "Tinbrock (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_tinbrock_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthorn_r4",
+    "name": "Crofthorn (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_spanglin_r4",
+    "name": "Spanglin (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_spanglin_r4_3.jpg",
+    "ok": true
   }
 ]
