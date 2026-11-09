@@ -32,7 +32,10 @@ func run(main: Node) -> void:
 		cam = Camera3D.new()
 		cam.fov = 40.0
 		m.add_child(cam)
-		cam.make_current()
+		if m.cam:
+			m.cam.set_process(false)
+		if m.hud:
+			m.hud.visible = false
 	var wl: Dictionary = _carve(5, 1)[0]
 	for id in Arch.ids():
 		var look := PlayerLook.neutral()
@@ -127,6 +130,7 @@ func _shot(face: Vector3, out: Vector3, nm: String) -> void:
 	var look := Vector3(face.x, h.pos.y + CAM_UP * 0.6, face.z) + out * 0.5
 	cam.global_position = look + along * CAM_SIDE + out * 1.2 + Vector3.UP * (CAM_UP * 0.4)
 	cam.look_at(look)
+	cam.make_current()
 	await main_node.get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	main_node.get_viewport().get_texture().get_image().save_png(shots.path_join(nm + ".png"))
