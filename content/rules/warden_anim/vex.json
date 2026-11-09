@@ -1,5 +1,5 @@
 {
-	"doc": "Vex's hand-keyed clips (art/wardens/vex/vex.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Her right arm IS the cannon: skinned to upper_arm.R and forearm.R, its barrels on gatling, the launcher on its own pivot bone.",
+	"doc": "Vex's hand-keyed clips (art/wardens/vex/vex.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Her right forearm IS the minigun (v2): rigid on forearm.R, its barrels on gatling; the launcher bone has no mesh, its FX points sit on its pivot at the drum's mouth.",
 	"skinned_weapon": true,
 	"extra_bones": {"lid.L": "head", "brow.L": "head", "brow.R": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R", "coin": "hand.L", "launcher": "forearm.R", "gatling": "forearm.R"},
 	"offset_bones": ["coin", "brow.L", "brow.R"],

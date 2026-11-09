@@ -1,4 +1,4 @@
-"""Breaker, the Sunken Bulwark (ART-1, final design): the shapes, as signed distance fields (sculpt_kit.py). A non-human
+"""Breaker, the Barnacle Knight (ART-1, final design): the shapes, as signed distance fields (sculpt_kit.py). A non-human
 sunken-ship construct: a round hull body, stubby legs, huge banded arms and fists, a small brass diving helmet, broken
 mast stumps, moss and barnacles. Every piece is rigid, on its own bone, so pieces simply overlap at the joints.
 Art: briefs/art-refs/breaker_FINAL_sheet, breaker_turnaround, breaker_weapons (shape only; the drum as big as the torso,

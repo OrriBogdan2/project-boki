@@ -18,10 +18,6 @@ const ACTION := [["idle", 0.5, "neutral"], ["run", 0.1, "cheer"], ["ability", 0.
 const EMOTES := [["idle", 0.5, "happy"], ["idle", 0.5, "sad"], ["idle", 0.5, "sleepy"], ["idle", 0.5, "angry"]]
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend"]
-## NEW designs (docs/boki/ROSTER_50.md on ext/boki-roster50), owner approval pending, are modelled but not in the
-## game's kin data yet: the review tools give them a copy of Mycroll's record with their own name and colours from
-## this file (the roster stub's).
-const STAND_IN := "res://art/kin/%s/stand_in.json"
 const GIF_FPS := 15
 const MATCH_PITCH := 66.0
 const MATCH_DIST := 23.0
@@ -85,13 +81,6 @@ func _stage(px_size: Vector2i, ground := true) -> SubViewport:
 
 ## A kin wearing its rigged model, whether or not Models.kin is wired to it yet.
 static func rigged_kin(id: String, rec := {}) -> Node3D:
-	if not Data.KIN.has(id):
-		var sp: Dictionary = Data.KIN["burrlet"].duplicate(true)
-		var own: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(STAND_IN % id))
-		sp["name"] = own["name"]
-		for slot in ["color", "belly", "glow"]:
-			sp[slot] = Color(own[slot])
-		Data.KIN[id] = sp
 	var k := Models.kin(id, rec)
 	var flex := k.get_node("Body/Flex") as Node3D
 	if flex.has_node("BokiRig"):
