@@ -121,7 +121,8 @@ static func _ink(own: ShaderMaterial, col: Color, step: int) -> ShaderMaterial:
 		var ink := own.duplicate() as ShaderMaterial
 		ink.set_shader_parameter("color", col)
 		var w: Variant = own.get_shader_parameter("width")
-		ink.set_shader_parameter("width", (float(w) if w != null else 0.00125) * lerpf(INK_WIDTH_MIN, INK_WIDTH_FULL, float(step) / STEPS))
+		var k := lerpf(INK_WIDTH_MIN, INK_WIDTH_FULL, float(step) / STEPS)
+		ink.set_shader_parameter("width", (float(w) if w != null else 0.00125) * k)
 		ink.set_shader_parameter("far_cut", 0.0)
 		ink.set_shader_parameter("far_thin", 0.0)
 		_inks[key] = ink
