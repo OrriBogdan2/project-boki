@@ -5,6 +5,7 @@ extends RefCounted
 ## (needs a renderer, so run it through jobq on a GPU) it also writes the review shots there.
 ## Never touches the real save.
 
+const SHOT_SETTLE_FRAMES := 90     # the camera eases in and the picked Boki wanders: let both settle
 const READY_FRAMES := 600      # a renderer builds the farm over several frames
 
 var bad := 0
@@ -23,7 +24,7 @@ func _frames(n: int) -> void:
 func _shot(label: String) -> void:
 	if shots_dir == "":
 		return
-	await _frames(8)
+	await _frames(SHOT_SETTLE_FRAMES)
 	main.get_viewport().get_texture().get_image().save_png(shots_dir.path_join("photo_%s.png" % label))
 
 func _new_save() -> void:
@@ -78,7 +79,9 @@ func run(m: Node) -> void:
 	await _frames(3)
 	var on_screen: Vector2 = home.cam.unproject_position(home.kins[1]["node"].global_position + Vector3(0, 0.5, 0))
 	var middle: Vector2 = main.get_viewport().get_visible_rect().size * 0.5
-	ok(on_screen.distance_to(middle) < middle.y * 0.5, "and it sits near the middle of the frame (%s, shown %s)" % [on_screen, home.kins[1]["node"].is_visible_in_tree()])
+	var shown: bool = home.kins[1]["node"].is_visible_in_tree()
+	var framed := on_screen.distance_to(middle) < middle.y * 0.5
+	ok(framed, "and it sits near the middle of the frame (%s, shown %s)" % [on_screen, shown])
 	var caption := photo.caption_text(home)
 	ok(caption == "Mochi the %s" % Data.KIN["zapple"]["name"], "the caption: %s" % caption)
 	await _shot("1_picked_no_caption")
