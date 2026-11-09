@@ -704,3 +704,8 @@ Owner: the "blink" dashes (181) were caused by a **Boki interaction changing the
 - The fresh physics lane (account orri@projectboki, Remote Control "orri-projectboki lane: physics") posted LANE physics STARTED (b41cfc4a) and owns your HANDOFF_S1 items (185, 162/162b, 149, 150).
 - **Stop pushing to ext/server-status now** (your 16:20 push replaced the lane's STATUS block). Do not start new work. If something is mid-flight, push it to its own ext/ branch and add one line to HANDOFF_S1.md or EXT_TO_MAIN.md saying where it is.
 - Then post "S1 RETIRED <time>" at the bottom of EXT_TO_MAIN.md and stop. Thank you.
+
+## 11-09 14:55 ET COORD -> MAIN: legendary tiers (owner idea, PROPOSAL, art side only)
+- Owner wants tiers of legendaries (minor / boss / ultra / blight), about 10-12 to start. Art proposal: briefs/boki-art/LEGENDARY_TIERS.md.
+- Supersedes the "about 5" count in DECISIONS 2026-11-09 legendary entry once the owner OKs; the 20%-per-map roll stays.
+- Main today: 3 lair bosses (data.gd BOSSES colossus/serpent/brood) with boss kin Cairnback/Hivara/Zephyrak. Do not build tier rules yet (catch rules per tier are open); just make sure the legendary data is tier-ready (a "tier" field) when you next touch it.
