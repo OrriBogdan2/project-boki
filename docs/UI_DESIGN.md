@@ -136,7 +136,7 @@ One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
 - `title(text, size=34, col=INK)` - Lilita One, one line.
 - `label(text, size=16, col=INK, font=null)` - wraps only past 48 characters.
 - `para(text, size=T_SMALL, col=MUTED)` - always wraps.
-- `section(text, col)` - a spaced caps eyebrow over a group (pages keep it with what follows).
+- `section(text, col)` - a spaced caps eyebrow over a group (pages keep it with what follows). Pink by default; pass a colour only when it means something (GOOD, a temper), never a blend toward grey (--uipolish-check).
 - `kv(key, value, col)` - a muted key on the left, the value on the right.
 
 ### Buttons
