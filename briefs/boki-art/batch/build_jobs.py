@@ -60,6 +60,6 @@ for s in SPECS:
     if s['id'] in have: continue
     s.setdefault('runs',2); s.setdefault('aspect','16:9'); s.setdefault('size','2K'); jobs.append(s)
 _pri=globals().get('PRIORITY',[])
-jobs.sort(key=lambda j: _pri.index(j['id']) if j['id'] in _pri else len(_pri))
+jobs.sort(key=lambda j: (_pri.index(j['id']) if j['id'] in _pri else len(_pri), 1 if j['id'].startswith('relic_') else 0))  # relics run after all Boki
 (HERE/'jobs.json').write_text(json.dumps(jobs,indent=2))
 print(len(jobs),'jobs')

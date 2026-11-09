@@ -3121,5 +3121,423 @@
     "runs": 2,
     "aspect": "16:9",
     "size": "2K"
+  },
+  {
+    "id": "portrait_anchorbill_r",
+    "name": "Anchorbill (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Anchorbill.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: glaring with its anchor beak lowered. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_arcestrel_r",
+    "name": "Arcestrel (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Arcestrel.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: diving with copper blade wings swept back. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_bellowary_r",
+    "name": "Bellowary (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Bellowary.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: strutting with smoke pouring from its chimney crest. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_buckleron_r",
+    "name": "Buckleron (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Buckleron.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: peeking grumpily from under its shield shell. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_canvastross_r",
+    "name": "Canvastross (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Canvastross.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: gliding with sail wings spread wide. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_chandelotl_r",
+    "name": "Chandelotl (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Chandelotl.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: gliding forward with its crystal crown glowing. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_dragonkite_r",
+    "name": "Dragonkite (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Dragonkite.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: soaring with kite wings spread and streamers flying. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_eclipsowl_r",
+    "name": "Eclipsowl (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Eclipsowl.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: wings spread like a cloak, eclipse face glowing. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_forgebrock_r",
+    "name": "Forgebrock (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Forgebrock.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: roaring with its furnace back blazing. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_frothisk_r",
+    "name": "Frothisk (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Frothisk.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: sprinting across water trailing foam. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_galleotter_r",
+    "name": "Galleotter (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Galleotter.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: charging forward, oars raised along its sides. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_geysirbara_r",
+    "name": "Geysirbara (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Geysirbara.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: relaxing as its geyser erupts. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_glintmole_r",
+    "name": "Glintmole (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Glintmole.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: sniffing with its quartz star nose sparkling. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_gravadillo_r",
+    "name": "Gravadillo (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Gravadillo.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: charging horn-first with rocks orbiting. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_kindlewren_r",
+    "name": "Kindlewren (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Kindlewren.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: scolding loudly, flame tail flicking. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_knotwyrm_r",
+    "name": "Knotwyrm (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Knotwyrm.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: coiled lazily in a loose knot. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_latchling_r",
+    "name": "Latchling (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Latchling.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: grumpily peering up, keyhole glowing. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_mossgrade_r",
+    "name": "Mossgrade (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Mossgrade.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: waddling forward happily. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_parasolth_r",
+    "name": "Parasolth (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Parasolth.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: curled up, peeking out from its bone ribs. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_pipewurm_r",
+    "name": "Pipewurm (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Pipewurm.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: squirting a line of glowing venom. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_prowyak_r",
+    "name": "Prowyak (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Prowyak.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: lowering its prow to charge. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_rimeshrew_r",
+    "name": "Rimeshrew (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Rimeshrew.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: scurrying with frost spikes bristling. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_selenfin_r",
+    "name": "Selenfin (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Selenfin.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: floating, glowing softly. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_tidalisk_r",
+    "name": "Tidalisk (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Tidalisk.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: roaring with its wave crest breaking. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_tinbrock_r",
+    "name": "Tinbrock (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Tinbrock.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: stomping forward with a tiny scowl. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_zipling_r",
+    "name": "Zipling (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Zipling.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: peeking out with a sneaky grin. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "relic_vex",
+    "name": "Relic: Vex",
+    "refs": [
+      "briefs/art-refs/vex_FINAL_sheet.png"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Image 1 is the hero this relic belongs to: use it only for colour palette and motifs. Do NOT draw the hero, any person or any part of a body. A relic sheet of ONE object, nothing else: on the left a big three-quarter view of it, and on the right, smaller, a straight front view, a straight side view and a close-up of its most worn detail, all the same object at the same design, neatly spaced in a clean layout. Flat neutral light grey background, soft rim light, no text, no labels, no logos, no hands, no people, no characters, no creatures. The object: A thick worn brass coin, crude eye stamped on its face, one nick on the rim, a short scratched bounty tally along its edge, shown mid-flip above a small dust puff, dull brass with teal tarnish. Stylized chunky game prop, hand-painted texture with soft painterly shading and a clean, fairly thin dark outline, toy-like proportions, worn and dug up from ruins (grime, small chips, faint cracks), one saturated hero colour plus a thin warm gold filigree accent, and a faint porcelain-white glow hint along its edges. ",
+    "size": "2K"
+  },
+  {
+    "id": "relic_kael",
+    "name": "Relic: Kael",
+    "refs": [
+      "briefs/art-refs/kael_FINAL_sheet.png"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Image 1 is the hero this relic belongs to: use it only for colour palette and motifs. Do NOT draw the hero, any person or any part of a body. A relic sheet of ONE object, nothing else: on the left a big three-quarter view of it, and on the right, smaller, a straight front view, a straight side view and a close-up of its most worn detail, all the same object at the same design, neatly spaced in a clean layout. Flat neutral light grey background, soft rim light, no text, no labels, no logos, no hands, no people, no characters, no creatures. The object: A pair of heavy rusted iron shackle cuffs joined by four chain links, the last link snapped open, flecks of wall mortar clinging, dark iron and rust. Stylized chunky game prop, hand-painted texture with soft painterly shading and a clean, fairly thin dark outline, toy-like proportions, worn and dug up from ruins (grime, small chips, faint cracks), one saturated hero colour plus a thin warm gold filigree accent, and a faint porcelain-white glow hint along its edges. ",
+    "size": "2K"
+  },
+  {
+    "id": "relic_cinder",
+    "name": "Relic: Cinder",
+    "refs": [
+      "briefs/art-refs/cinder_FINAL_sheet.png"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Image 1 is the hero this relic belongs to: use it only for colour palette and motifs. Do NOT draw the hero, any person or any part of a body. A relic sheet of ONE object, nothing else: on the left a big three-quarter view of it, and on the right, smaller, a straight front view, a straight side view and a close-up of its most worn detail, all the same object at the same design, neatly spaced in a clean layout. Flat neutral light grey background, soft rim light, no text, no labels, no logos, no hands, no people, no characters, no creatures. The object: An empty stoppered glass vial with dried dark blood residue streaks, a cracked lip and a cork stopper, a single bright red-orange ember glowing at the bottom only; smoked glass, black and red-orange. Stylized chunky game prop, hand-painted texture with soft painterly shading and a clean, fairly thin dark outline, toy-like proportions, worn and dug up from ruins (grime, small chips, faint cracks), one saturated hero colour plus a thin warm gold filigree accent, and a faint porcelain-white glow hint along its edges. ",
+    "size": "2K"
+  },
+  {
+    "id": "relic_meeko",
+    "name": "Relic: Meeko",
+    "refs": [
+      "briefs/art-refs/pip_FINAL_sheet.png"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Image 1 is the hero this relic belongs to: use it only for colour palette and motifs. Do NOT draw the hero, any person or any part of a body. A relic sheet of ONE object, nothing else: on the left a big three-quarter view of it, and on the right, smaller, a straight front view, a straight side view and a close-up of its most worn detail, all the same object at the same design, neatly spaced in a clean layout. Flat neutral light grey background, soft rim light, no text, no labels, no logos, no hands, no people, no characters, no creatures. The object: A palm-size glass globe on a small wooden base holding a tiny smiling sun and a puffy raincloud that drips a few raindrops, the sun glowing warmly inside; warm yellow and soft grey-blue. Stylized chunky game prop, hand-painted texture with soft painterly shading and a clean, fairly thin dark outline, toy-like proportions, worn and dug up from ruins (grime, small chips, faint cracks), one saturated hero colour plus a thin warm gold filigree accent, and a faint porcelain-white glow hint along its edges. ",
+    "size": "2K"
+  },
+  {
+    "id": "relic_tenzo",
+    "name": "Relic: Tenzo",
+    "refs": [
+      "briefs/art-refs/tarek_FINAL_sheet.png"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Image 1 is the hero this relic belongs to: use it only for colour palette and motifs. Do NOT draw the hero, any person or any part of a body. A relic sheet of ONE object, nothing else: on the left a big three-quarter view of it, and on the right, smaller, a straight front view, a straight side view and a close-up of its most worn detail, all the same object at the same design, neatly spaced in a clean layout. Flat neutral light grey background, soft rim light, no text, no labels, no logos, no hands, no people, no characters, no creatures. The object: A smooth slate river-stone with a carved open-eye ring, moss in the groove, a faint green glow in the eye ring; slate and green. Stylized chunky game prop, hand-painted texture with soft painterly shading and a clean, fairly thin dark outline, toy-like proportions, worn and dug up from ruins (grime, small chips, faint cracks), one saturated hero colour plus a thin warm gold filigree accent, and a faint porcelain-white glow hint along its edges. ",
+    "size": "2K"
+  },
+  {
+    "id": "relic_lace",
+    "name": "Relic: Lace",
+    "refs": [
+      "briefs/art-refs/hem_FINAL_sheet.png"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Image 1 is the hero this relic belongs to: use it only for colour palette and motifs. Do NOT draw the hero, any person or any part of a body. A relic sheet of ONE object, nothing else: on the left a big three-quarter view of it, and on the right, smaller, a straight front view, a straight side view and a close-up of its most worn detail, all the same object at the same design, neatly spaced in a clean layout. Flat neutral light grey background, soft rim light, no text, no labels, no logos, no hands, no people, no characters, no creatures. The object: A cracked white porcelain half-face mask with red thread stitched across the cracks and hollow eyes; white with red thread. Stylized chunky game prop, hand-painted texture with soft painterly shading and a clean, fairly thin dark outline, toy-like proportions, worn and dug up from ruins (grime, small chips, faint cracks), one saturated hero colour plus a thin warm gold filigree accent, and a faint porcelain-white glow hint along its edges. ",
+    "size": "2K"
+  },
+  {
+    "id": "relic_grimble",
+    "name": "Relic: Grimble",
+    "refs": [
+      "briefs/art-refs/grimble_FINAL_sheet.png"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Image 1 is the hero this relic belongs to: use it only for colour palette and motifs. Do NOT draw the hero, any person or any part of a body. A relic sheet of ONE object, nothing else: on the left a big three-quarter view of it, and on the right, smaller, a straight front view, a straight side view and a close-up of its most worn detail, all the same object at the same design, neatly spaced in a clean layout. Flat neutral light grey background, soft rim light, no text, no labels, no logos, no hands, no people, no characters, no creatures. The object: A thick brass monocle with a round pale-blue lens, a short chain and tiny loot-price tick marks engraved around the rim. Stylized chunky game prop, hand-painted texture with soft painterly shading and a clean, fairly thin dark outline, toy-like proportions, worn and dug up from ruins (grime, small chips, faint cracks), one saturated hero colour plus a thin warm gold filigree accent, and a faint porcelain-white glow hint along its edges. ",
+    "size": "2K"
+  },
+  {
+    "id": "relic_neve",
+    "name": "Relic: Neve",
+    "refs": [
+      "briefs/art-refs/claire_FINAL_sheet.png"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Image 1 is the hero this relic belongs to: use it only for colour palette and motifs. Do NOT draw the hero, any person or any part of a body. A relic sheet of ONE object, nothing else: on the left a big three-quarter view of it, and on the right, smaller, a straight front view, a straight side view and a close-up of its most worn detail, all the same object at the same design, neatly spaced in a clean layout. Flat neutral light grey background, soft rim light, no text, no labels, no logos, no hands, no people, no characters, no creatures. The object: A pair of old figure skates tied together by their laces, frosted blades with a faint frost shimmer, one lace frayed; pale ice-blue and tan leather. Stylized chunky game prop, hand-painted texture with soft painterly shading and a clean, fairly thin dark outline, toy-like proportions, worn and dug up from ruins (grime, small chips, faint cracks), one saturated hero colour plus a thin warm gold filigree accent, and a faint porcelain-white glow hint along its edges. ",
+    "size": "2K"
+  },
+  {
+    "id": "relic_sparkle",
+    "name": "Relic: Sparkle",
+    "refs": [
+      "briefs/art-refs/ryzz_FINAL_sheet.png"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Image 1 is the hero this relic belongs to: use it only for colour palette and motifs. Do NOT draw the hero, any person or any part of a body. A relic sheet of ONE object, nothing else: on the left a big three-quarter view of it, and on the right, smaller, a straight front view, a straight side view and a close-up of its most worn detail, all the same object at the same design, neatly spaced in a clean layout. Flat neutral light grey background, soft rim light, no text, no labels, no logos, no hands, no people, no characters, no creatures. The object: A short iron lightning rod from a spire top with an ornate finial, fused-glass scars and a scorch spiral where the bolt hit, a small electric-yellow arc on its tip only. Stylized chunky game prop, hand-painted texture with soft painterly shading and a clean, fairly thin dark outline, toy-like proportions, worn and dug up from ruins (grime, small chips, faint cracks), one saturated hero colour plus a thin warm gold filigree accent, and a faint porcelain-white glow hint along its edges. ",
+    "size": "2K"
+  },
+  {
+    "id": "relic_albert",
+    "name": "Relic: Albert",
+    "refs": [
+      "briefs/art-refs/mossy_v2/mossy_v2_master_sheet.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Image 1 is the hero this relic belongs to: use it only for colour palette and motifs. Do NOT draw the hero, any person or any part of a body. A relic sheet of ONE object, nothing else: on the left a big three-quarter view of it, and on the right, smaller, a straight front view, a straight side view and a close-up of its most worn detail, all the same object at the same design, neatly spaced in a clean layout. Flat neutral light grey background, soft rim light, no text, no labels, no logos, no hands, no people, no characters, no creatures. The object: A brass ship's compass with cracked glass, its needle fixed on one heading, barnacles crusting the case; brass and sea-green. Stylized chunky game prop, hand-painted texture with soft painterly shading and a clean, fairly thin dark outline, toy-like proportions, worn and dug up from ruins (grime, small chips, faint cracks), one saturated hero colour plus a thin warm gold filigree accent, and a faint porcelain-white glow hint along its edges. ",
+    "size": "2K"
+  },
+  {
+    "id": "relic_sable",
+    "name": "Relic: Sable",
+    "refs": [
+      "briefs/art-refs/sable_FINAL_sheet.png"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Image 1 is the hero this relic belongs to: use it only for colour palette and motifs. Do NOT draw the hero, any person or any part of a body. A relic sheet of ONE object, nothing else: on the left a big three-quarter view of it, and on the right, smaller, a straight front view, a straight side view and a close-up of its most worn detail, all the same object at the same design, neatly spaced in a clean layout. Flat neutral light grey background, soft rim light, no text, no labels, no logos, no hands, no people, no characters, no creatures. The object: A slim dagger whose blade is shaped like a moth wing with a dusty scale pattern and a hooked cross-guard; charcoal and muted lilac. Stylized chunky game prop, hand-painted texture with soft painterly shading and a clean, fairly thin dark outline, toy-like proportions, worn and dug up from ruins (grime, small chips, faint cracks), one saturated hero colour plus a thin warm gold filigree accent, and a faint porcelain-white glow hint along its edges. ",
+    "size": "2K"
+  },
+  {
+    "id": "relic_motley",
+    "name": "Relic: Motley",
+    "refs": [
+      "briefs/art-refs/motley_v2/motley_v2_master_sheet.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Image 1 is the hero this relic belongs to: use it only for colour palette and motifs. Do NOT draw the hero, any person or any part of a body. A relic sheet of ONE object, nothing else: on the left a big three-quarter view of it, and on the right, smaller, a straight front view, a straight side view and a close-up of its most worn detail, all the same object at the same design, neatly spaced in a clean layout. Flat neutral light grey background, soft rim light, no text, no labels, no logos, no hands, no people, no characters, no creatures. The object: A small faded-purple jack-in-the-box with a crank, its lid popped open and a painted jester head on a coiled spring, chipped gold paint. Stylized chunky game prop, hand-painted texture with soft painterly shading and a clean, fairly thin dark outline, toy-like proportions, worn and dug up from ruins (grime, small chips, faint cracks), one saturated hero colour plus a thin warm gold filigree accent, and a faint porcelain-white glow hint along its edges. ",
+    "size": "2K"
   }
 ]
