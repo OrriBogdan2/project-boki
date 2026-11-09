@@ -105,8 +105,8 @@ func run(m: Node) -> void:
 	var hc := _spot(hb, land + Vector3(0, 0, -8))
 	hb.cells = hc; hb._check_cells(); hb._draw_cells()
 	var green := hc.size() == 15 and hb.ghost_ok
-	for mi in hb.ghost_cells.get_children():
-		if mi is MeshInstance3D and ((mi as MeshInstance3D).material_override as StandardMaterial3D).albedo_color.g < 0.9: green = false
+	for mi in hb.ghost_cells.get_children():      # (the redraw frees the old cells at the end of the frame)
+		if mi is MeshInstance3D and not mi.is_queued_for_deletion() and ((mi as MeshInstance3D).material_override as StandardMaterial3D).albedo_color.g < 0.9: green = false
 	ok(green, "on open meadow it tints green")
 	var g0 := int(Save.d["gems"])
 	ok(hb.place_held() and int(Save.d["gems"]) == g0 and FarmSites.is_site(HomeLayout.of(Save.d)["deco"][-1]),
