@@ -38020,5 +38020,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_lunowl_m4_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_lunowl_m3",
+    "name": "Lunowl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lunowl_m4",
+    "name": "Lunowl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lunowl_m3",
+    "name": "Lunowl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lunowl_m2",
+    "name": "Lunowl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lunowl_m3",
+    "name": "Lunowl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lunowl_m4",
+    "name": "Lunowl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lunowl_m3",
+    "name": "Lunowl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lunowl_m3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_e1",
+    "name": "Eclipsowl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_e1_2.jpg",
+    "ok": true
   }
 ]
