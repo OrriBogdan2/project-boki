@@ -47,3 +47,11 @@ Still differs (KIT_PARITY, docs/heroes/bulwark.md):
 - RMB shield routing (Shift = bash) not settled `[?]`. Dash to LMB buffers (gap 9).
 By eye (footage 45 to 560 next to the reel): the source's Earthshatter is a tall cyan-outlined rectangle with a lightning crack and a stun marker; ours lays a lane of dark rocks inside an orange box, so the fissure reads as boulders, not a glowing crack. The source's Barrier Shield is a flat gold plate held in front of him; my sampled frames did not catch ours, so watch the RMB part. Our E is a pale green zone round the hammer. Our Mossy is 1.5x a medium Hunter (owner) so he is larger than the source's Oath on screen.
 
+## Lace the Red Stitch (`archer`, source Myth / Pin): [archer.mp4](archer.mp4)
+Still differs (KIT_PARITY gaps 5 to 8, docs/heroes/archer.md):
+- RMB Heavy Shot: wall payoff about 0.4x vs about 5x in the source (wall_dmg 12, floor .4, stun 1.2); a .5 s dead zone before the draw reads (ours); cd 16.
+- Dash: roll of about 3 m / .28 s; the source's Spirit Walk rolls to the cursor, then walks through terrain including raised walls. Ours walks rocks and barriers, not ledges (gap 8). Whether she can shoot in it is not in the footage.
+- Passive: the source is fog vision of injured foes plus a tall-ledge climb; ours is Hawk Sense 22 m and an invented Focus / Deadeye over the draw (gap 5, owner question). The double-wall climb is not built.
+- LMB (two-stage draw, perfect quick draw), E (cone, slow 35%, anti-heal), R (3 shots, cd 60): match. Dash to LMB buffers, 8 of 17 flow rows unsourced.
+By eye (footage 110 to 604 next to the reel): the source shows a big white burst at the impact of Impaling Shot, a dark blue ghost-world look with the glowing portal during Spirit Walk, and a wide green arc of arrows for Rain of Arrows. Ours reads as thin red thread lines and small needle hits at the match camera; the impact has far less weight than the source's burst and Spirit Walk has no phase look (the roll shows only as a trail).
+
