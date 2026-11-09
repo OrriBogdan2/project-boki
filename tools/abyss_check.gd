@@ -94,7 +94,9 @@ func _run(sec: float, drive: Callable) -> Dictionary:
 		if h.pos.distance_to(marker) < 0.01 and before.distance_to(marker) > 0.5:
 			r["fell"] = true; r["t"] = t
 			break
-		r["low"] = minf(float(r["low"]), h.pos.y)
+		if h.pos.y < float(r["low"]):
+			r["low"] = h.pos.y
+			r["low_at"] = h.pos
 		r["inside"] = maxf(float(r["inside"]), _inside(h))
 		if h.mantling():
 			r["mantled"] = true
@@ -184,7 +186,10 @@ func run(main: Node) -> void:
 	var r0 := _run(8.0, func(t):
 		h.inp["move"] = d0 if t < 0.3 else Vector2.ZERO
 		h.inp["dash"] = t < Match.DT * 1.5)
-	ok(r0["fell"] and _ref(Vector3(e0["ex"], e0["top"], e0["ez"])) - float(r0["low"]) < KILL_DEPTH + 1.0, "dashing off an edge: lost %.1fm below the lip (%.1fm below the lowest lip around) after %.2fs" % [float(e0["top"]) - float(r0["low"]), _ref(Vector3(e0["ex"], e0["top"], e0["ez"])) - float(r0["low"]), r0["t"]])
+	# the dash's speed carries on in the air (Loco.air_step), so measure under the lips where you fell, not the edge
+	var at0: Vector3 = r0.get("low_at", Vector3(e0["ex"], 0, e0["ez"]))
+	var ref0 := _ref(Vector3(at0.x, e0["top"], at0.z))
+	ok(r0["fell"] and ref0 - float(r0["low"]) < KILL_DEPTH + 1.0, "dashing off an edge: lost %.1fm below the lip (%.1fm below the lowest lip around) after %.2fs" % [float(e0["top"]) - float(r0["low"]), ref0 - float(r0["low"]), r0["t"]])
 	# walking (no dash, no jump) toward the edge takes a player over it: the edge doesn't hold you
 	var wgood := 0; var wn := 0; var bheld := 0
 	for e in edges.slice(0, 6):
