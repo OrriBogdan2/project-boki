@@ -25,13 +25,13 @@
 		"loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
 		"lmb": "Ice Dart: hold for a barrage of slow darts that curve onto the foe at your cursor; every fifth to seventh is a large one.",
 		"rmb": "Ice Spear: pushed out to the cursor, it hits and slows where it lands, then bursts 1.8s later.",
-		"e": "Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it.",
+		"e": "Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; {key:signature} again freezes it.",
 		"dash": "Skate: hold the dash key to skate where you move; your darts fly straight and thick.",
 		"passive": "Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them.",
 		"weapons": {
 			"hoar_fan": "Hold for a barrage of slow darts that curve onto the foe at your cursor, ending in three large ones."
 		},
-		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
+		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a {x.radius}m slowing rink; it cracks open at {x.hold}s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
 	},
 	"signature": "hoar_fan",
 	"resource": {
@@ -119,7 +119,7 @@
 		"slide": 4.5,
 		"time": 4.5,
 		"push": 5.0,
-		"desc": "A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.",
+		"desc": "A {e.tell}s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands {e.time}s in all. Press {key:signature} again while it slides to freeze it in place for 6s.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"
@@ -183,6 +183,6 @@
 		"slow_base": 0.15,
 		"slow_per_s": 0.12,
 		"slow_max": 0.55,
-		"desc": "Cast it: you are sealed in a frost shell, a frozen statue: invulnerable and rooted, your facing locked as you cast, and a 7.2m (4 body heights) rink snaps out round you. Cast from a skate, the statue slides on along your skate (about 6m at full speed, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
+		"desc": "Cast it: you are sealed in a frost shell, a frozen statue: invulnerable and rooted, your facing locked as you cast, and a {x.radius}m (4 body heights) rink snaps out round you. Cast from a skate, the statue slides on along your skate (about 6m at full speed, easing to a stop over 0.8s, no steering), then you are rooted; recast (or {key:dash}) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at {x.hold}s it cracks open: 40 damage and a {x.stun}s ice-block stun to every foe in the rink you can see. Recast in the last {x.stun}s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
 	}
 }

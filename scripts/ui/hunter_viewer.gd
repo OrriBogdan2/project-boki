@@ -55,15 +55,9 @@ static func slots_for(hunter_id: String) -> Array:
 	out.append("r")
 	return out
 
-## A slot's name, icon, colour and plain line (KitCard's, plus the X ultimate from its own data).
+## A slot's name, icon, colour and plain line (KitCard's, which has the X ultimate too).
 static func slot_info(hunter_id: String, slot: String) -> Dictionary:
-	if slot != "x":
-		return KitCard.slot_text(hunter_id, slot)
-	var d := Arch.def(hunter_id)
-	var xd: Dictionary = d.get("x", {})
-	return {"name": String(xd.get("name", "")), "icon": String(xd.get("icon", "burst")),
-			"col": Color(String(xd.get("col", "#ffffff"))), "tag": "", "line": String(d.get("card", {}).get("x",
-			xd.get("desc", "")))}
+	return KitCard.slot_text(hunter_id, slot)
 
 ## The key a slot is on, from the player's own bindings ("auto" for the passive).
 static func key_for(slot: String) -> String:

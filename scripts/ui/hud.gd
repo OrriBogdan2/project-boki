@@ -2156,7 +2156,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 			return out
 	var si := p.slot_info(id)
 	var r_name := "Ultimate (%s)" % Settings.key_cap("hunter_ult")
-	var slot_names := {"sec": "Right click", "k1": "Utility (E)", "r": r_name, "dash": "Dash"}
+	var slot_names := {"sec": "Right click", "k1": "Utility (%s)" % Settings.key_cap("signature"), "r": r_name, "dash": "Dash"}
 	var slot_name: String = slot_names[id]
 	var key: String = {"sec": "secondary", "k1": "signature", "r": "hunter_ult", "dash": "dash"}[id]
 	out.append([String(si["name"]), si["col"]])
@@ -2171,7 +2171,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 		out.append(["Unlocks at level %d, rank 2 at %d. " % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
 	if id == "sec":
 		var rd := p.ak.res_def()
-		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12])
+		out.append(["Passive: %s" % AbilityText.full(p.arch, "passive"), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12])
 	out.append(["Cooldown %s%s" % [_secs(float(si["cd_max"])), ("  ·  ready in %s" % _secs(float(si["cd"]))) if float(si["cd"]) > 0.0 else "  ·  ready"], MUTED, 13])
 	return out
 

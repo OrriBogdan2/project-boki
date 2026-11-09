@@ -277,7 +277,7 @@ func set_arch(a: String, w := "") -> void:
 	m.fx.ring(P.pos, 1.8, Arch.color(a), 0.4)
 	m.fx.burst(P.pos + Vector3(0, 1.0, 0), Arch.color(a), 18, 3.5, 0.5)
 	m.sfx("unlock", null, -6.0, 1.1)
-	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(a), String(Arch.def(a).get("card", {}).get("loop", ""))], Arch.color(a))
+	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(a), AbilityText.loop(a)], Arch.color(a))
 	if card_layer: _open_card()
 
 ## Bring another Boki (one of yours, or a loaner of any kind); "" for none.
@@ -501,10 +501,10 @@ func _fill_menu(v: VBoxContainer) -> void:
 	for a in Arch.ids():
 		var aa: String = a
 		var b := UI.choice(Arch.name_of(a), P.arch == a, func(): set_arch(aa); _fill_menu(v), 150)
-		b.tooltip_text = String(Arch.def(a).get("card", {}).get("loop", ""))
+		b.tooltip_text = AbilityText.loop(a)
 		ag.add_child(b)
 	left.add_child(ag)
-	var ll := UI.label(String(Arch.def(P.arch).get("card", {}).get("loop", "")), 13, Arch.color(P.arch))
+	var ll := UI.label(AbilityText.loop(P.arch), 13, Arch.color(P.arch))
 	ll.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	ll.custom_minimum_size = Vector2(460, 36)
 	left.add_child(ll)

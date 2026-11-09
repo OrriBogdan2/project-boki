@@ -51,7 +51,7 @@ func start() -> void:
 	st = {"phase": "guard", "t": 0.0, "dir": h.aim_dir(), "blocks": 0, "last_block": -9.0}
 	k.play("jug_guard")
 	_show_glow(true)
-	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(data()["short"]).to_upper(), GOLD, false)
+	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), AbilityText.short_name(k.id, "x").to_upper(), GOLD, false)
 	k.vfx("guard_tell")
 
 ## E on a held chain, planted in the guard or the cleave. In the guard the pull goes now; the cleave's own moment
