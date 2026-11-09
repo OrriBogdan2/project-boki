@@ -1317,5 +1317,12 @@
   "portrait": "briefs/boki-art/portraits/light/Spanglin.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Spanglin.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Spanglin.png"
+ },
+ "Lodestaff": {
+  "sheet": "briefs/boki-art/turnarounds/Lodestaff.jpg",
+  "card": "briefs/boki-art/cards/Lodestaff.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Lodestaff.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Lodestaff.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Lodestaff.png"
  }
 }
