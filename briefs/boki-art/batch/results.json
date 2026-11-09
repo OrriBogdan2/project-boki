@@ -29865,5 +29865,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_bladypus_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_glaciammoth",
+    "name": "Glaciammoth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_glaciammoth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_cetorgan",
+    "name": "Cetorgan",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_cetorgan_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lensling",
+    "name": "Lensling",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lensling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_puffuse",
+    "name": "Puffuse",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_puffuse_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_hydrangor",
+    "name": "Hydrangor",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_hydrangor_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_puffuse",
+    "name": "Puffuse",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_puffuse_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glaciammoth",
+    "name": "Glaciammoth",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_glaciammoth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lensling",
+    "name": "Lensling",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_lensling_1.jpg",
+    "ok": true
   }
 ]
