@@ -44,14 +44,16 @@ func run(m: Node) -> void:
 
 ## One built world: a node per entry in the data (want_w / want_u are the data's own counts).
 func _world(w: World, label: String, want_w: int, want_u: int) -> void:
-	ok(w.winds.size() == want_w and w.updrafts.size() == want_u, "%s: the world places all %d wind roads and %d updrafts" % [label, want_w, want_u])
+	var counts := w.winds.size() == want_w and w.updrafts.size() == want_u
+	ok(counts, "%s: the world places all %d wind roads and %d updrafts" % [label, want_w, want_u])
 	var hi := CurrentFx.new()
 	hi.build(w, 1.0)
 	var lo := CurrentFx.new()
 	lo.build(w, LOW_FX)
 	var roads := hi.get_children().filter(func(c): return c.name.begins_with("Road"))
 	var columns := hi.get_children().filter(func(c): return c.name.begins_with("Column"))
-	ok(roads.size() == want_w and columns.size() == want_u, "%s: %d road and %d column nodes" % [label, roads.size(), columns.size()])
+	var nodes := roads.size() == want_w and columns.size() == want_u
+	ok(nodes, "%s: %d road and %d column nodes" % [label, roads.size(), columns.size()])
 	var fewer := true
 	var placed := true
 	var capped := true
@@ -59,11 +61,13 @@ func _world(w: World, label: String, want_w: int, want_u: int) -> void:
 	for i in w.winds.size():
 		var road := hi.get_node("Road%d" % i) as Node3D
 		var wd: Dictionary = w.winds[i]
-		var len: float = (wd["b"] - wd["a"]).length()
-		placed = placed and road.position.is_equal_approx(wd["a"]) and (road.transform * Vector3(len, 0, 0)).is_equal_approx(wd["b"])
-		var hi_n := ((road.get_node("Streaks") as MultiMeshInstance3D).multimesh as MultiMesh).instance_count
-		var lo_n := ((lo.get_node("Road%d" % i).get_node("Streaks") as MultiMeshInstance3D).multimesh as MultiMesh).instance_count
-		fewer = fewer and lo_n <= hi_n and (lo_n < hi_n or hi_n == CurrentFx.MIN_STREAKS or hi_n == CurrentFx.MAX_STREAKS)
+		var span: float = (wd["b"] - wd["a"]).length()
+		var far_end: Vector3 = road.transform * Vector3(span, 0, 0)
+		placed = placed and road.position.is_equal_approx(wd["a"]) and far_end.is_equal_approx(wd["b"])
+		var hi_n := _streaks(hi, i)
+		var lo_n := _streaks(lo, i)
+		var at_limit := hi_n == CurrentFx.MIN_STREAKS or hi_n == CurrentFx.MAX_STREAKS
+		fewer = fewer and lo_n <= hi_n and (lo_n < hi_n or at_limit)
 		capped = capped and hi_n >= CurrentFx.MIN_STREAKS and hi_n <= CurrentFx.MAX_STREAKS
 		rings = rings and road.has_node("Ring0") and road.has_node("Ring1")
 		var mid: Vector3 = (wd["a"] + wd["b"]) * 0.5
@@ -79,6 +83,11 @@ func _world(w: World, label: String, want_w: int, want_u: int) -> void:
 	hi.free()
 	lo.free()
 
+## How many streak cards road i has.
+func _streaks(fx: CurrentFx, i: int) -> int:
+	var streaks := fx.get_node("Road%d" % i).get_node("Streaks") as MultiMeshInstance3D
+	return streaks.multimesh.instance_count
+
 # ---------------------------------------------------------------- shots
 func _shots(out: String) -> void:
 	DirAccess.make_dir_recursive_absolute(out)
@@ -87,13 +96,15 @@ func _shots(out: String) -> void:
 		await main.fade.reveal(0.01)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 1, "squad": 1, "tier": 0, "seed": 5, "no_drop": true, "god": true, "map": "skyreach", "length": 1e9})
+	await m.start({"teams": 1, "squad": 1, "tier": 0, "seed": 5, "no_drop": true, "god": true, "map": "skyreach",
+			"length": 1e9})
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
 	var p := m.player
 	var wd: Dictionary = m.world.winds[0]
-	var a: Vector3 = wd["a"]; var b: Vector3 = wd["b"]
+	var a: Vector3 = wd["a"]
+	var b: Vector3 = wd["b"]
 	var fwd := (b - a).normalized()
 	p.teleport(a - Vector3(0, 1.6, 0) - fwd * 4.0)
 	await _frames(m, p, false, a + fwd * 8.0, 30)
