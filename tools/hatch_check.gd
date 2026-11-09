@@ -139,6 +139,7 @@ func _creator_rows(tree: SceneTree) -> void:
 	for i in 4: await tree.process_frame
 	ok(shown.call() == Unmasked.ROWS and _find_button(hx.create_box, "More looks...") == null,
 		"it opens all %d rows and the button goes" % Unmasked.ROWS.size())
+	await _polish(tree, hx)
 	hx.queue_free()
 	await tree.process_frame
 	var menu = load("res://scripts/ui/hatch.gd").new()
@@ -148,6 +149,46 @@ func _creator_rows(tree: SceneTree) -> void:
 	ok(Unmasked.ROWS.all(func(r): return _texts(menu.create_box).has(r[1])), "the menu's creator has every row")
 	menu.queue_free()
 	await tree.process_frame
+
+## Dice, undo and redo, starter presets, and the wheel zoom.
+func _polish(tree: SceneTree, hx) -> void:
+	var card: CreatorCard = hx.create_box
+	var dice := _all(card, func(n): return n is Button and n.has_meta("die"))
+	ok(dice.size() == Unmasked.ROWS.size(), "every row has its own die (%d)" % dice.size())
+	var before: Dictionary = card.look.duplicate(true)
+	(dice[3] as Button).pressed.emit()
+	var key: String = Unmasked.ROWS[3][0]
+	var moved := Unmasked.ROWS.filter(func(r): return card.look[r[0]] != before[r[0]])
+	ok(moved.size() == 1 and moved[0][0] == key, "a die changes only its own row")
+	ok(hx.look[key] == card.look[key], "and the preview follows")
+	card.undo()
+	ok(card.look == before, "Undo puts the row back")
+	card.redo()
+	ok(card.look[key] != before[key], "Redo takes it forward again")
+	card.undo()
+	card.undo()
+	ok(card.look == before, "undo is one step: a second Undo does nothing")
+	var names := PackedStringArray(CreatorCard.PRESETS.keys())
+	ok(names.size() == 6 and names.all(func(nm): return _find_button(card, nm) != null), "6 starter presets in More")
+	var sex: int = card.look["gender"]
+	_find_button(card, names[2]).pressed.emit()
+	var want: Dictionary = CreatorCard.PRESETS[names[2]]
+	var same := want.keys().all(func(k): return card.look[k] == want[k])
+	ok(same and card.look["gender"] == sex, "a preset sets the look and keeps Sex")
+	ok(card.look == Unmasked.clean(card.look), "every preset value is in its list")
+	hx.zoom = 0.0
+	var wheel := InputEventMouseButton.new()
+	wheel.button_index = MOUSE_BUTTON_WHEEL_UP
+	wheel.pressed = true
+	for i in 8: hx._unhandled_input(wheel)
+	for i in 30: await tree.process_frame
+	ok(hx.zoom == 1.0 and hx.cam.position.z < CreatorCam.FAR_CAM.z - 1.0, "the wheel zooms in to the face")
+
+func _all(n: Node, pred: Callable) -> Array:
+	var out: Array = [n] if pred.call(n) else []
+	for ch in n.get_children():
+		out.append_array(_all(ch, pred))
+	return out
 
 func _find_button(n: Node, text: String) -> Button:
 	for b in n.find_children("*", "Button", true, false):

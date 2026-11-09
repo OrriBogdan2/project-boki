@@ -290,6 +290,10 @@ static func draw_icon(c: CanvasItem, id: String, at: Vector2, s: float, col: Col
 		"hammer":
 			c.draw_line(at + Vector2(-0.6, 0.75) * s, at + Vector2(0.25, -0.15) * s, col, w * 1.4, true)
 			c.draw_colored_polygon(PackedVector2Array([at + Vector2(-0.05, -0.75) * s, at + Vector2(0.75, 0.05) * s, at + Vector2(0.45, 0.35) * s, at + Vector2(-0.35, -0.45) * s]), col)
+		"die":
+			c.draw_rect(Rect2(at + Vector2(-0.75, -0.75) * s, Vector2(1.5, 1.5) * s), col, false, w)
+			for pip in [Vector2(-0.35, -0.35), Vector2(0, 0), Vector2(0.35, 0.35)]:
+				c.draw_circle(at + pip * s, 0.14 * s, col)
 		"eye":
 			c.draw_arc(at + Vector2(0, 0.55) * s, 0.95 * s, -PI * 0.78, -PI * 0.22, 14, col, w, true)
 			c.draw_arc(at + Vector2(0, -0.55) * s, 0.95 * s, PI * 0.22, PI * 0.78, 14, col, w, true)
