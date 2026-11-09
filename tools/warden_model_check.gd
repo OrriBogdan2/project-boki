@@ -37,8 +37,8 @@ const WARDENS := {
 	# (Grimble: the head at his old height, the hoard towers over it)
 	"dredge": {"hit_r": 0.452, "height": 1.48, "height_3d": 1.7, "width": [1.3, 2.4], "moves": "dr_"},
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
-	# (Pip: body size 0.68, item 108; ART-1 model: 0.66 with the ears, waist-high on the sheet's silhouette)
-	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.66, "width": [0.5, 1.5], "moves": "mm_"},
+	# (Pip: body size 0.68, item 108; v2 model: 0.76 with the ears, the locked design's taller ears)
+	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.76, "width": [0.5, 1.5], "moves": "mm_"},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured
