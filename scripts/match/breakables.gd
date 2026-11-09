@@ -166,8 +166,8 @@ func _drop_loot(at: Vector3, loot: Dictionary, by: Ent, from_net: bool) -> void:
 	var up := at + Vector3(0, 0.5, 0)
 	var scale_by := float(_m.T["loot"])
 	var gems: Array = loot["gems"]
-	for i in randi_range(int(gems[0]), int(gems[1])):
-		_m.drop("gem", up, maxi(1, int(round(float(loot["gem_base"]) * scale_by))))
+	var each := maxi(1, int(round(float(loot["gem_base"]) * scale_by)))
+	DropMerge.gems(_m, up, randi_range(int(gems[0]), int(gems[1])), each)
 	if loot.has("seed") and randf() < float(loot["seed"]):
 		_m.drop("seed", up, 1, Data.pick_seed())
 	if loot.has("tonic") and randf() < float(loot["tonic"]):

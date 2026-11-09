@@ -2601,7 +2601,6 @@ func _abyss_demo(mode: String) -> void:
 func S_dev_god() -> bool:
 	return bool(opts.get("god", false)) or bool(opts.get("tutorial", false)) or bool(opts.get("training", false)) or Game.god
 
-const BOSS_GEM_DROPS := 4     # a lair boss's gems come as this many big drops (same total)
 func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if net_on:
 		net_event(["mobdead", mb.nid, by.nid if by else ""])
@@ -2620,11 +2619,9 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	fx.burst(mb.pos + Vector3(0, 0.6, 0), mb.md["color"], 22, 5.0, 0.6)
 	Juice.mob_dead(self, mb, credit, big_mob)
 	if not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false):
-		# a lair boss pays its gems out as a few big ones (fewer drops, each worth having); the rest scatter small
+		# the gems come as one pile (DropMerge)
 		var gn := int(mb.md["gems"])
-		var big_n := BOSS_GEM_DROPS if mb is Boss else gn
-		for i in big_n:
-			drop("gem", mb.pos + Vector3(0, 0.6, 0), int(round(3 * float(T["loot"]) * float(gn) / float(big_n))))
+		DropMerge.gems(self, mb.pos + Vector3(0, 0.6, 0), gn, int(round(3 * float(T["loot"]))))
 		if mb.md.get("stag", false) and not (mb is Boss) and rng.randf() < 0.6:
 			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
 		# guards, the Warden, the Glimmerkin and the Blight drop gear and weapon tunings (content/rules/gear.json)
