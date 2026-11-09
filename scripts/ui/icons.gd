@@ -356,6 +356,11 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 			A.call(0.0, 0.0, 0.65, 0.0, TAU)
 			A.call(0.0, 0.0, 0.3, 0.0, TAU)
 			L.call([[0.0, 0.0], [0.5, -0.45]])
+		"frost":
+			for i in 3:
+				var a := TAU * i / 6.0
+				L.call([[cos(a) * 0.8, sin(a) * 0.8], [-cos(a) * 0.8, -sin(a) * 0.8]])
+			O.call(0.0, 0.0, 0.16)
 		"shock":
 			O.call(0.0, 0.0, 0.2)
 			for i in 6:

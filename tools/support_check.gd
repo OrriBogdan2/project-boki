@@ -87,14 +87,22 @@ func run(mn: Node, md := "all") -> void:
 	if mode in ["all", "tender"]:
 		await _tender_support()
 		await combos.tender()
+		await _combo_tag("tender")
 		await ults.tender()
 	if mode in ["all", "rimewright"]:
 		await _rime_support()
 		await combos.rimewright()
+		await _combo_tag("rimewright")
 		await ults.rimewright()
 		await ults.burst_cap()
 	print("SUPPORT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## The shared overhead combo tag checks (tools/combo_mark_check.gd) for this kit.
+func _combo_tag(arch: String) -> void:
+	var ac = load("res://tools/archetype_check.gd").new()
+	ac.main = main
+	await load("res://tools/combo_mark_check.gd").new().run(ok, ac, arch)
 
 func _free(m: Match) -> void:
 	m.queue_free()

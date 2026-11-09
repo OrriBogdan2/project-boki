@@ -1,5 +1,6 @@
 extends RefCounted
-## The overhead combo tag (scripts/ui/combo_mark.gd) for Sable's Marks, Vex's Daze and Sparkle's Static:
+## The overhead combo tag (scripts/ui/combo_mark.gd) for Sable's Marks, Vex's Daze, Sparkle's Static,
+## Cinder's Ignite (Ablaze/Flashover), Neve's Chill and Meeko's Kindle:
 ## it reads the kit's own status (ArchKit.combo_read), so it shows while the status runs, counts down, is
 ## gone when the status ends, belongs only to the hunter who applied it, and the payoff hit flashes the body.
 ## Run from each kit's combo check: `await load(...).new().run(ok, ac, "thief")`.
@@ -35,13 +36,19 @@ func run(ok: Callable, ac, arch: String) -> void:
 	ac.done(m)
 
 func _stacks(arch: String) -> int:
-	return 2 if arch == "mage" else 3
+	match arch:
+		"mage": return 2
+		"ashwick", "rimewright": return 1
+	return 3
 
 func apply(arch: String, K: ArchKit, T: Hunter) -> void:
 	match arch:
 		"thief": (K as ThiefKit).add_mark(T, 3, true)
 		"mage": (K as MageKit).add_spark(T, 2)
 		"gunslinger": (K as GunslingerKit).daze(T, 1.4)
+		"ashwick": (K as AshwickKit).stoke(T)
+		"rimewright": (K as RimewrightKit).add_chill(T)
+		"tender": (K as TenderKit).add_kindle(T, 3)
 
 ## The real payoff hit where one is one call away; Sparkle's Blowout is a Wirerun through a Live foe.
 func payoff(arch: String, P: Hunter, K: ArchKit, T: Hunter) -> void:
@@ -51,3 +58,6 @@ func payoff(arch: String, P: Hunter, K: ArchKit, T: Hunter) -> void:
 			T.hurt(10.0, P, {"src": "shot", "ab": ""})
 		"gunslinger": T.hurt(10.0, P, {"src": "shot"})
 		"mage": (K as MageKit)._blowout(T)
+		"ashwick": (K as AshwickKit)._cinder_hit(T)          # the bonus damage on a burning foe
+		"rimewright": (K as RimewrightKit).splinter(T.pos, 1.0, 2.0, T)     # the Shatter on a Chilled knock
+		"tender": (K as TenderKit).add_kindle(T, 2)          # to full Kindle
