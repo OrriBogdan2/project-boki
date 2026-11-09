@@ -155,7 +155,7 @@ def whirl_over(t, p):
 
 
 C.bake("lmb_hold", 0.2 + SPIN_T, [(0, CARRY), (0.2, merged(WIND, gr=(0.58, 0.0, 1.02), gd=(1, 0, 0.22), ga=(0, 0, 1))), (0.2 + SPIN_T, {})], over=whirl_over)
-# the release (0.5 s): up behind him, the impact at 0.08 (0.10 after breaker_retime.sh): the hull slams forward onto its toes, a shudder, then he hauls it up
+# the release (0.5 s): up behind him, the impact at 0.08 (kept by breaker_retime.sh, which evens out the arc before it): the hull slams forward onto its toes, a shudder, then he hauls it up
 UP = merged(WIND, OVER, rot=(9, 0, -8))
 IMP = dict(pos=(0, 0.1, -0.05), rot=(-24, 3, 8), hips=(-6, 0, 6), head=(12, 0, -6), gr=sp(-0.1, 0.44, -0.3), gd=(-0.12, 0.8, -0.58), ga=(0.05, 0.58, 0.8), er=(0.9, 0.2, -0.3),
            fr=(AX, -0.11, AZ + 0.02), fl=(-AX, 0.12, AZ), fra=-20.0, e="io")

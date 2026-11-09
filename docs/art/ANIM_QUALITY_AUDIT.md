@@ -93,7 +93,7 @@ posts scroll at the move speed).
 **Mossy (`bulwark`)**
 1. Cadence 5 steps/s on a 2 m giant (a shuffle); not changed.
 2. The left arm hung nearly still against the legs (counter +0.17, now +0.64). Slide only fell 25 % to 19 %: the nearest to the gate.
-3. lmb_throw and lmb_slam jumped the hand 0.5 and 0.64 body heights in one frame (fixed with `tools/art1/breaker_retime.sh`: 0.42 and 0.45; the throw's release stays at 0.12 s, the slam's impact lands at 0.10 s, not 0.08).
+3. lmb_throw and lmb_slam jumped the hand 0.5 and 0.64 body heights in one frame (fixed with `tools/art1/breaker_retime.sh`: 0.42 and 0.50, the travel now spread over 6 (throw) and 3 (slam) frames at 30 fps; the throw's release stays at 0.12 s and the slam's impact at 0.08 s).
 
 ![bulwark walk and run, before and after](anim_audit/bulwark.jpg)
 
