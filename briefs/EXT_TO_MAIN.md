@@ -3449,3 +3449,4 @@ READY ext/farm-tut-tools-cam 2781ad15e (job 20261109-001512-a1, deep follow-up t
 - CLAIM: sheet check of briefs/art-refs/boki/opalisk_turnaround.png (04eb5144b), then Meshy build via tools/art1 + tools/meshy/meshy_task.py on the shared biped rig, standard clip set, Boki checks, GPU turntable vs sheet. Branch ext/boki3d-opalisk from origin/main.
 - RESULT (job 20261109-003709-a4): sheet check FAILED (cloud ruff missing, floating cloud, weathervane tail + lightning bolts the entry rules out); redo posted in OWNER_REVIEW.md, no build. Claim released.
 - 2026-11-09 job 20261109-003637-a4: umbrathere sheet failed the check (no spine canopy, arms-up pose); redo posted in OWNER_REVIEW.md, no build. Claim released.
+- RESULT: sheet check failed (quadruped stance vs BIPED/long back legs; no brass tail ring); redo line posted to briefs/OWNER_REVIEW.md; no build. Claim released.
