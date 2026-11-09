@@ -5415,3 +5415,4 @@ READY ext/anim-stop-start 6e24c8d29 (stop/start after the source brake, all 12: 
 READY ext/anim-stomp-drink-3 bda7c2de7 (stomp, revive kneel and drink clips for Motley, Albert, Sparkle, Sable; procedural stays the fallback)
 READY ext/parity-glide-spike 6e73f9773 (glide spike rules)
 READY ext/parity-ability-pierce 76de01e1 (ability pierce rules)
+READY ext/parity-ability-elevation 27befb05e (ability height rules)
