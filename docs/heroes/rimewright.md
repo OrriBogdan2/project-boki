@@ -155,3 +155,12 @@ Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|heavy|shatter|payoff|sk
 - The wall is the shared `Verbs.add_wall` (blocking, the touch shove); the kit grows it, slides it, carries foes on its face and draws it.
 - Dash flow (item 32): the skate is her dash for `DashFlow` (`in_dash()`); `content/dash_flow/rimewright.json` says LMB fires from it as beams (`variant: beam`, read by `fires_in_dash` and the dart throw), RMB/E/Q/X fire, in the air too (item 62); the statue's slide out of a skate counts as the skate going on, so skate -> X is a "fire" with carry (item 64).
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.
+
+## Projectile table (parity pass: ability speeds B)
+
+Source: [F] footage (briefs/hero-ref, 5 fps, a frame is 0.2 s, 1 bh = 1.8 m), [D] game data, [O] owner. A row matches when our time over the full range is within 0.1 s of the source's. `Stops at cursor`: whether it ends where the cursor is.
+
+| Ability | Source | Ours | Verdict |
+|---|---|---|---|
+| RMB Ice Spear | [F] crosses about 5 bh (9 m) in 0.2 s or less (45 m/s+); lands at the cursor; owner: it emerges from her and the travel time grows with distance | 18 m/s, 12 m max (0.67 s); no arc; lands at the cursor (a foe in the way stops it) | kept slower on purpose [O] (DECISIONS: travel grows with distance, push not throw) |
+| E Rink Wall | [F] about 6 h (10.8 m) in 2.4 s, 2.5 h/s (4.5 m/s); slides to the cursor | 4.5 m/s, 4.5-16.2 m of travel (+50% [O]); stops at the cursor | matches (speed); the +50% reach is [O] |

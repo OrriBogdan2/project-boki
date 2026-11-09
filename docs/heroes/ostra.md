@@ -196,3 +196,13 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
   their own game) is drawn to the centre by a Displace "glide" tow.
 - Nightwell: `scripts/arch/kits/ostra_well.gd` (OstraWell); its looks are pooled KitLooks kinds `well_dome` and `well`. It
   adds no hold field (nothing to drop on a merge).
+
+## Projectile table (parity pass: ability speeds B)
+
+Source: [F] footage (briefs/hero-ref, 5 fps, a frame is 0.2 s, 1 bh = 1.8 m), [D] game data, [O] owner. A row matches when our time over the full range is within 0.1 s of the source's. `Stops at cursor`: whether it ends where the cursor is.
+
+| Ability | Source | Ours | Verdict |
+|---|---|---|---|
+| RMB Shard Snap | [F] a 1.5 h bundle crosses about 6 h (10.8 m) in 0.2 s (about 54 m/s); straight, to the first foe | 29.5 m/s, 13 m (0.44 s at max); straight, first foe | kept slower [O] (item 40: the cast is +40%, so it reads) |
+| Shift Lantern Trade | [F] a high lob to the cursor, 1.8 s (card 2 s; 1.25 s Swollen); stops at the cursor | 1.8 s (1.25 s Swollen), up to 12 m, 4.5 m peak; lands at the cursor | matches |
+| E Brimseed | [F] a small orb drops on the cursor spot | 9 m reach, drops in 0.25 s at the cursor | matches |

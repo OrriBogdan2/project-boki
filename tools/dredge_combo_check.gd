@@ -424,9 +424,14 @@ func _all() -> void:
 		"moved %.1f" % P.flat_dist(pos0)
 	)
 	var tw := 0.0
+	var reel_v := 0.0
 	while K.arrivals < 1 and tw < 3.0:
+		var before := T.pos
 		ak.step(m, 0.05)
 		tw += 0.05
+		reel_v = maxf(reel_v, T.pos.distance_to(before) / 0.05)
+	ok("reel: the foe comes in at about 9 m/s, 5 bh/s (footage 0124-0129)",
+		reel_v > 7.5 and reel_v < 9.6, "%.1f m/s" % reel_v)
 	ok(
 		"abyssal hand: foe arrives at your feet and does not land Grounded",
 		K.arrivals == 1 and K.pull.is_empty() and not KitStatus.grounded(T) and P.flat_dist(T) < 3.6,

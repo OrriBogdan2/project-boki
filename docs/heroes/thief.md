@@ -221,3 +221,12 @@ ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats 
   Sounds: `dj_encore` (the ring opening), `dj_encore_whirr` (the 2s it runs), `dj_encore_hit` (a blade landing).
 - The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on X it duplicated the
   ultimate, so the passive is back to the source's (Marks ramp the bolts, knocks heal).
+
+## Projectile table (parity pass: ability speeds B)
+
+Source: [F] footage (briefs/hero-ref, 5 fps, a frame is 0.2 s, 1 bh = 1.8 m), [D] game data, [O] owner. A row matches when our time over the full range is within 0.1 s of the source's. `Stops at cursor`: whether it ends where the cursor is.
+
+| Ability | Source | Ours | Verdict |
+|---|---|---|---|
+| RMB Bola | [F] about 30 bh/s (54 m/s); a 5.5-6 bh (10.8 m) lane; flies on past the first foe; bounces off a wall | **was 30 m/s** (0.36 s for the lane); now 54 m/s (0.2 s); 7 m + 3.8 m, bounces once | fixed; `dancer Bola speed` |
+| E Shadow Knife | [F] about 25 bh/s (45 m/s); lands at the cursor or end of range (9 bh seen) | 40 m/s, 14 m (0.35 s at max); lands at the cursor | matches (0.04 s) |

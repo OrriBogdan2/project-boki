@@ -137,7 +137,7 @@ func tick(dt: float) -> void:
 			_slam()
 		return
 	var x := xd()
-	var lead := float(x.get("lead", 0.2))
+	var lead := float(x.get("lead", 0.4))
 	var reached := mini(cells.size(), int(floor(t / maxf(0.01, lead) * cells.size())) + 1)
 	while struck < reached:
 		_strike(struck)
@@ -146,7 +146,7 @@ func tick(dt: float) -> void:
 	while erupted < mini(due, cells.size()):
 		_erupt(erupted)
 		erupted += 1
-	if erupted >= cells.size() and t > float(x.get("lead", 0.2)) + float(x.get("cell_t", 0.15)) * cells.size():
+	if erupted >= cells.size() and t > float(x.get("lead", 0.4)) + float(x.get("cell_t", 0.15)) * cells.size():
 		phase = ""
 		var length := cell_len() * cells.size()
 		scar = {"t": float(x.get("scar_t", 10.0)), "a": origin, "len": length, "fx": 0.0}
@@ -194,7 +194,7 @@ func _slam() -> void:
 	var c0 := _cell_mid(0)
 	_flood_t = 0.3
 	_place_flat(_flood, c0 + Vector3(0, 0.08, 0), Vector2(cell_len(), float(x.get("width", 4.0))))
-	_streak_t = float(x.get("cell_t", 0.15)) * cells.size() + float(x.get("lead", 0.2))
+	_streak_t = float(x.get("lead", 0.4))
 	k.m.fx.burst(c0 + Vector3(0, 0.4, 0), GOLD, 24, 7.0, 0.4, 3.0, 1.3)
 	k.m.fx.dust(c0, 14)
 	k.net_ring(c0, cell_len() * 0.6, GOLD)
@@ -297,7 +297,7 @@ func _process(delta_in: float) -> void:
 		KitShaders.param(_flood, "power", 2.0 * clampf(_flood_t / 0.3, 0.0, 1.0))
 	if _streak_t > 0.0:
 		_streak_t -= delta
-		var total := maxf(0.05, float(xd().get("cell_t", 0.15)) * cells.size() + float(xd().get("lead", 0.2)))
+		var total := maxf(0.05, float(xd().get("lead", 0.4)))
 		var u := 1.0 - clampf(_streak_t / total, 0.0, 1.0)
 		var length := cell_len() * cells.size()
 		var head := origin + Vector3(dir.x, 0, dir.y) * length * u

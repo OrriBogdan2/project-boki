@@ -265,11 +265,15 @@ func bjorn() -> void:
 	ok("bjorn ult small: planted, no throw or swing in the wind-up", K.mace.is_empty() and K.lmb_t < 0.0)
 	step(m, 0.3)
 	ok("bjorn ult anim: the slam (bul_ult_slam) at 0.4s", K.ult.slams == 1 and K.anim_id == "bul_ult_slam", K.anim_id)
-	step(m, 0.35)
+	var race := [-1.0]
+	step(m, 0.35, func(): race[0] = K.ult.t if race[0] < 0.0 and K.ult.struck >= K.ult.cells.size() else race[0])
+	ok("bjorn ult race: the head reaches the 4th cell (12 m) at 0.3 s, 40 m/s: the lane in 0.4 s (footage f31-f35)",
+		absf(race[0] - 0.3) < 0.04, "race %.2f s" % race[0])
+	step(m, 0.12)
 	var hit_t := T.stun_t > 0.0 and T.slow_t > 0.0
 	ok("bjorn ult: the racing fissure struck every foe on the lane before its cell erupts (data: stuns struck targets)",
 		K.ult.hit.size() >= 2, "struck %d" % K.ult.hit.size())
-	step(m, 0.3)
+	step(m, 0.45)
 	var want := (float(xd["dmg"]) + float(xd["strike_dmg"])) * ap
 	ok("bjorn ult payoff: each foe on the lane struck (stun) and thrown once (4 + 18, a heavy slow)",
 		hit_t and absf(dmg(T) - want) < want * 0.35 and dmg(T2) > want * 0.6,

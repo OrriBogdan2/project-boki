@@ -207,7 +207,10 @@ func thief(a) -> void:
 			AimKit.shown(P, "rmb") and absf(float(bl.get("len", 0.0)) - 10.8) < 0.1 and K.bola.is_empty()
 			and A.dmg(T) <= 0.0,
 			"len %.1f" % float(bl.get("len", 0.0)))
-	A.step(m, 0.6)
+	var fly := [0.0]
+	A.step(m, 0.6, func(): fly[0] += A.DT if not K.bola.is_empty() else 0.0)
+	A.ok("dancer Bola speed: about 30 bh/s (54 m/s), the whole flight under 0.2 s (footage 0102-0105)",
+			fly[0] > 0.05 and fly[0] < 0.2, "flight %.2f s" % fly[0])
 	A.ok("dancer RMB: Bola grounds the first, flies on, tangles two (stun)",
 			K.bola_pairs == 1 and KitStatus.grounded(T) and KitStatus.grounded(T2) and T.stun_t > 0.0
 			and T2.stun_t > 0.0 and A.dmg(T) >= 15.0,
