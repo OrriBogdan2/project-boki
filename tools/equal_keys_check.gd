@@ -54,6 +54,7 @@ func _match() -> void:
 	P.rift_keys = 0
 	BeltKeys.sync(P)
 	UtilityBelt.grant(P, "scanner", 1)
+	UtilityBelt.grant(P, "medkit", 1)      # (the four open slots: chest keys, smoke, scanner, medkit)
 	m.drop("key", P.pos + Vector3(0, 0.3, 0), 1, "", "", Vector3.ZERO)
 	var key_p: Dictionary = m.pickups[m.pickups.size() - 1]
 	key_p["t"] = 1.0
@@ -107,7 +108,7 @@ func _match() -> void:
 	bot.belt_free = {}
 	bot.rift_keys = 0
 	bot.chest_keys = 1
-	for id in ["tonic", "armor_kit", "smoke"]:
+	for id in ["tonic", "armor_kit", "smoke", "medkit", "stim"]:
 		UtilityBelt.grant(bot, id, 1)
 	BeltKeys.sync(bot)
 	m.drop("key", bot.pos + Vector3(0, 0.3, 0), 1, "", "", Vector3.ZERO)
