@@ -37376,5 +37376,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_lanceron_k2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_lanceron_k4",
+    "name": "Lanceron (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lanceron_k4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lanceron_k4",
+    "name": "Lanceron (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lanceron_k4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lanceron_k4",
+    "name": "Lanceron (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lanceron_k4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lanceron_k4",
+    "name": "Lanceron (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_lanceron_k4_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lanceron_k5",
+    "name": "Lanceron (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lanceron_k5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lanceron_k5",
+    "name": "Lanceron (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lanceron_k5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lanceron_k5",
+    "name": "Lanceron (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lanceron_k5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrasloth_t2",
+    "name": "Terrasloth (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t2_3.jpg",
+    "ok": true
   }
 ]
