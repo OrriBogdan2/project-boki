@@ -468,6 +468,20 @@ func dash_dir() -> Vector2:
 		return h.aim_dir()
 	return move.normalized()
 
+var turn_lock_until := -9.0    # a dash until then turns at most dash.lock_deg from where he faces
+
+## Starts the turn lock after a heavy move (the source's patch 05.02.25): for dash.lock_t s a dash can't turn far.
+func lock_turn() -> void:
+	turn_lock_until = m.time + float(dash_def()["lock_t"])
+
+## `dir` held to within dash.lock_deg of where he faces while the turn lock runs.
+func turn_limited(dir: Vector2) -> Vector2:
+	if m.time >= turn_lock_until:
+		return dir
+	var fwd := Vector2(-sin(h.face), -cos(h.face))
+	var lim := deg_to_rad(float(dash_def()["lock_deg"]))
+	return fwd.rotated(clampf(fwd.angle_to(dir), -lim, lim))
+
 static var _dash_feel := {}
 
 ## The global dash feel for this hunter (content/rules/dash_feel.json): {dist, time} multipliers.

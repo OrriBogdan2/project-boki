@@ -53,7 +53,6 @@ var scoop: Array = []           # wisps (downed hunters) the hook scooped up on 
 var wind := 0.0                 # hold: the Anchor's wind-up left
 var slam_dir := Vector2.ZERO    # where the slam lands, locked at the press (the telegraph is that exact cone)
 var dive := {}                  # hold: the air smash falling {h0, t}
-var lock_until := -9.0          # the barge can't turn much until then (just after the Anchor)
 var barge_t := 0.0              # the barge's trail is showing
 var trail_t := 0.0              # the next barge after-image
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
@@ -563,7 +562,7 @@ func _anchor() -> void:
 	if not h.grounded and not over_void and not h.gliding:
 		h.vel.y = -float(ed["dive"])          # a low air cast still drives you down (never over the abyss or a glider)
 	st["dive_vy"] = h.vel.y               # (tests) what the Anchor left your fall speed at
-	lock_until = m.time + float(dash_def()["lock_t"])
+	lock_turn()
 	net_ring(at, float(ed["radius"]) * 0.6, col_of(ed))
 
 ## The dust cloud a beat after the slam, over the area it hit.
@@ -677,7 +676,7 @@ func _quake(at: Vector3, fell: float) -> void:
 	play("dr_quake")
 	m.sfx("dr_quake", at, 0.0, 1.0)
 	Shake.incoming_big(m, at, 0.6, h)
-	lock_until = m.time + float(dash_def()["lock_t"])
+	lock_turn()
 	net_ring(at, r, col_of(ed))
 
 # ------------------------------------------------------------------ dash: Barge
@@ -688,14 +687,7 @@ func on_dash(use_ex: bool) -> bool:
 	if m.time < next_barge:
 		return true
 	var dd := dash_def()
-	var dir := dash_dir()
-	if m.time < lock_until:
-		# just after the Anchor the barge can't turn far from where you face
-		var fwd := Vector2(-sin(h.face), -cos(h.face))
-		var lim := deg_to_rad(float(dd["lock_deg"]))
-		var ang := fwd.angle_to(dir)
-		if absf(ang) > lim:
-			dir = fwd.rotated(clampf(ang, -lim, lim))
+	var dir := turn_limited(dash_dir())        # just after the Anchor the barge can't turn far from where you face
 	if use_ex and not h.grounded:
 		if not spend_dash(true): return true
 		_air_barge(dd, dir, _move_runs())

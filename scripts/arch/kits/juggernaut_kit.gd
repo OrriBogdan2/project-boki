@@ -179,6 +179,8 @@ func _tick(dt: float) -> void:
 	elif res_wait <= 0.0:
 		add_res(-float(rd.get("decay", 9.0)) * dt)
 	if lmb_buf > 0.0: lmb_buf -= dt
+	if _locked():
+		lock_turn()                  # the dash's turn lock runs from the Smash's end
 	if not slam_w.is_empty(): _tick_slam(dt)
 	if not lunge.is_empty(): _tick_lunge()
 	warchain.tick(dt)
@@ -466,14 +468,14 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex and not h.grounded:
 		if not spend_dash(true): return true
 		travel(float(h.cdat.get("ex_dist", 4.2)), float(h.cdat.get("ex_time", 0.21)),
-				{"invuln": 0.08, "trail": "dust"})
+				{"invuln": 0.08, "trail": "dust", "dir": turn_limited(dash_dir())})
 		if not meteor.running(): play("jug_exdash")     # an air dash: a hurled shoulder charge, knees tucked
 		return true
 	if not spend_dash(false):
 		return true
 	var dd := dash_def()
 	var wind := 0.0 if from_pull or from_slam else float(dd.get("windup", 0.15))
-	var dir := h.aim_dir() if from_slam else dash_dir()
+	var dir := turn_limited(h.aim_dir() if from_slam else dash_dir())     # just after a Smash it can't turn far
 	rampage_dir = dir
 	st["last_dash"] = "rampage"
 	h.glide_cd = maxf(h.glide_cd, wind + float(dd["time"]) + 0.35)    # its wind-down: no glider straight out
@@ -909,6 +911,7 @@ func _tick_tells() -> void:
 func _spin() -> void:
 	var sp: Dictionary = rmb_def()["spin"]
 	spins += 1
+	lock_turn()
 	play("jug_spin")
 	var stg := stage("rmb",
 			{"delivery": {"type": "burst", "origin": "caster", "radius": float(sp["radius"])},
