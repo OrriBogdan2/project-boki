@@ -46,7 +46,7 @@ func _results() -> void:
 	BaseBoard.record("race", a)
 	BaseBoard.record("race", a)
 	BaseBoard.record("race", b)
-	var line := "best Pip, 2 wins  ·  last winner Ash"
+	var line := "best Pip, 2 wins · last Ash"
 	ok(BaseBoard.summary("race") == line, "results: best is the most wins, last is the latest")
 	ok(BaseBoard.summary("seek") == "no games yet", "results: another game keeps its own record")
 

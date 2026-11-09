@@ -22,7 +22,7 @@ static func record(game: String, win: Dictionary) -> void:
 	rec["last"] = who
 	rec["wins"][who] = int(rec["wins"].get(who, 0)) + 1
 
-## "no games yet", or "best Pip, 3 wins  ·  last winner Rue".
+## "no games yet", or "best Pip, 3 wins  ·  last Rue".
 static func summary(game: String) -> String:
 	var rec: Dictionary = Save.d["game_board"].get(game, {})
 	var wins: Dictionary = rec.get("wins", {})
@@ -34,7 +34,7 @@ static func summary(game: String) -> String:
 			best = String(n)
 	var count := int(wins[best])
 	var unit := "win" if count == 1 else "wins"
-	return "best %s, %d %s  ·  last winner %s" % [best, count, unit, rec["last"]]
+	return "best %s, %d %s · last %s" % [best, count, unit, rec["last"]]
 
 var h                          # the Home screen
 var board: Node3D = null
