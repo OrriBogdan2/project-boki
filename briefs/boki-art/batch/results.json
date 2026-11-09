@@ -37152,5 +37152,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_effigoon_c4_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_effigoon_c3",
+    "name": "Effigoon (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_effigoon_c3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_c1",
+    "name": "Effigoon (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_effigoon_c1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_a1",
+    "name": "Mortarfly (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_a2",
+    "name": "Mortarfly (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_c1",
+    "name": "Effigoon (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_effigoon_c1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_c4",
+    "name": "Effigoon (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_effigoon_c4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_a1",
+    "name": "Mortarfly (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_c3",
+    "name": "Effigoon (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_effigoon_c3_2.jpg",
+    "ok": true
   }
 ]
