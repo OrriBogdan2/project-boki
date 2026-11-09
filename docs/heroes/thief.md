@@ -1,4 +1,4 @@
-# Silver Thief (base character Sable; archetype id `thief`, light)
+# Sable the Silver Thief (archetype id `thief`, light)
 
 Branch history: kits2 ported the kit from the source hero, kits2-nor (Nov 2) removed its R,
 ext/kitfix-dancer-juggernaut (Nov 2, server update 5) matched it to the gameplay footage and renamed the hero
