@@ -73,3 +73,17 @@ for _k,(_b,_f) in enumerate([
  ("A slender long-legged hare mid-leap, body arched, its ears swept back as long scalloped silver bell flares, a row of small bell-shaped tufts along its spine, moonlight shimmer on its fur.","bright, joyful eyes"),
  ("A regal hare sitting tall like a statue, its ears forming a bell-tower crest of two tall silver bell shapes, chest fur like a bell's rim, elegant and still.","half-closed, wise eyes")],1):
     VC(f'chimelop_n{_k}','Chimelop',f'briefs/boki-art/cards/Echolop.jpg','final',_b+" Full body, no ground. Clearly different from Howlop (the dark lunging bat-beast final of the same line): bright, graceful, silver. One clear idea, few parts.",_f,'pale lavender and silver, with a moonlight accent','hanging bells, clappers, dark bat wings like Howlop, sitting up like a person, held objects','echo','pretty')
+# Owner 16:37: Bastionpet is not related to the Buckleron toads. Line becomes Buckleron > Bulwartoad > (new toad final);
+# Bastionpet becomes its own line with a smaller T1 baby (owner: single stage OR a smaller T1; he picks).
+# Avoid Rampartoad (castle-wall toad), Vaultara (vault-door lizard), Siegephant (siege elephant).
+_NG=" Full body, no crop, no ground. One clear idea, few parts."
+for _k,(_b,_f) in enumerate([
+ ("A colossal armoured toad braced wide and planted, its whole back grown into a dome of overlapping riveted iron shield plates like a shield wall, each with a spike boss, a heavy jaw and thick warty legs.","small, stern eyes under a heavy brow and a grim frown"),
+ ("A huge horned toad built like an ankylosaur, rows of round spiked buckler plates down its back, a heavy club tail ending in a spiked shield boss, planted low and wide.","fierce, narrowed eyes and a jutting underbite"),
+ ("A giant toad reared up on its back legs like a looming bullfrog, its belly and throat grown into one huge round riveted buckler with a spike boss at the centre, iron-plated forearms raised.","furious bulging eyes and a wide croaking roar")],1):
+    VC(f'bulwartoad_t3n{_k}','Buckleron line final',f'briefs/boki-art/cards/Bulwartoad.jpg','final',_b+_NG,_f,'mossy green and dark iron, with a rust accent','castle walls, towers, battlements, a vault door, a crab body, held shields, straps','titan','tough')
+for _k,(_b,_f) in enumerate([
+ ("A tiny round baby crab with a little rusty iron shell dotted with rivets, stubby claws held up, short legs tucked under, sitting.","huge curious eyes on short stalks and a tiny smile"),
+ ("A small chubby crab pup bouncing on its legs, its shell a little riveted iron dome with one barnacle, oversized claws it can barely lift.","sparkly eyes and an open happy mouth"),
+ ("A palm-sized baby crab peeking out from under its rusty iron shell like a helmet, claws clasped, a few barnacles.","shy, big eyes")],1):
+    VC(f'bastionpet_t1n{_k}','Bastionpet baby',f'briefs/boki-art/cards/Bastionpet.jpg','baby',_b+_NG,_f,'rust brown and dark iron, with a sea-green accent','a hermit crab in a jar (Jarmit), a toad, held objects','titan','cute')

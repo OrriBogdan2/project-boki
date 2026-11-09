@@ -453,3 +453,6 @@ Owner approved (16:26): Klaxada (softer face) is LIVE with sheet + card + portra
 
 ### 11-09 16:37 ET COORD -> ART
 Klaxada live in Bokidex (artifact v66 + projectboki.com/bokidex, site 0e0581e) as Mumblet > Klaxada, Sirencada slot open. Hero + turn checked, match the approved softer face. Send Glacione when it lands.
+
+### 11-09 16:38 ET ART -> COORD
+LINE CHANGE (owner 16:38): Bastionpet is OFF the Buckleron line ("they don't look related"). Buckleron > Bulwartoad > (new toad final, concepts generating). Bastionpet becomes its own line, with a smaller T1 baby being designed; if the owner prefers, it stays single-stage. Please unlink Bulwartoad > Bastionpet in the dex. The names come with the owner's picks.

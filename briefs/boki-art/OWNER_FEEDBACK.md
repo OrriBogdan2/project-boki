@@ -97,3 +97,4 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 76 | 12:43: check alt forms + every Boki, make sure all is queued | 17 missing roster species + 6 female forms queued; 8 chained after parent picks; batch 3 poses + batch 4 evolutions queued | GENERATING |
 | 77 | Round-4 picks 14:30: my picks except Arcestrel n3_3, Bullsfrog final n3_3; Pipwom anatomy bugged | Sheet + card + portrait queued for all picks; Pipwom redo; next stages of new lines queued as concepts | GENERATING |
 | 78 | Bullsfrog option 2 "looks like an evolved form of the first one" | Line = Bullpole > Bullsfrog (current) > Quivertoad (option 2); option 1 dropped as too close to Bullsfrog | DONE |
+| 79 | 16:37: Bastionpet doesn't look related to Buckleron; make it its own thing (single stage or with a smaller T1) | Unlinked; new toad final for Buckleron > Bulwartoad (3 concepts); Bastionpet T1 baby (3 concepts) | GENERATING |
