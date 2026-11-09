@@ -36,6 +36,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--balloon-check` | The hit marker is the real hitbox, for every class, below a lip, gliding and mid-hop |
 | `--hold-check` | Hold animations keep their pose while refreshed, let go cleanly, and survive the network snapshot |
 | `--move-feel-check` | Movement, jump, glide, feathering, drop and camera timings match `docs/MOVEMENT_FEEL.md` |
+| `--fsm-check` | Every explicit state machine (`Fsm`) built from its table: names match the enum, every target a state, no self-edges, all reachable; guards, reasons and the log work |
 | `--mantle-check` | Ledges you mean to climb, you climb; ledges you don't, never grab you |
 | `--wallhug-check` | Pressed against an island's side from the abyss, you're caught instead of sinking |
 | `--abyss-check` | Islands are solid all the way down and the abyss is short: you catch ledges falling or knocked in |
