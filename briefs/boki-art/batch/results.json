@@ -45405,5 +45405,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_pipeworth_full_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_pipeworth_full",
+    "name": "Pipeworth (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pipeworth_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_rippmink",
+    "name": "Rippmink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_rippmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pipeworth_card86",
+    "name": "Pipeworth (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pipeworth_card86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipeworth_full",
+    "name": "Pipeworth (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_pipeworth_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anchorhorn_p86",
+    "name": "Anchorhorn (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_anchorhorn_p86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anchorhorn_p86",
+    "name": "Anchorhorn (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_anchorhorn_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelotl_card86",
+    "name": "Chandelotl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelotl_card86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelotl_card86",
+    "name": "Chandelotl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelotl_card86_1.jpg",
+    "ok": true
   }
 ]
