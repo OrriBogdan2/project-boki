@@ -212,6 +212,8 @@ static func has(kin_id: String) -> bool:
 ## Starts reading every common species' model on a loader thread (a match's start: bots' and wild Boki), so the
 ## builds take them ready instead of each species' first build reading its .glb on the main thread (~60 ms).
 static func fetch_common() -> void:
+	if not BackgroundWork.can_read_ahead():
+		return
 	for sp in Data.common_kin():
 		var p := PATH % [sp, sp]
 		if has(String(sp)) and not _scenes.has(p) \

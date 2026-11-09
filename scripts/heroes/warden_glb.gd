@@ -528,7 +528,7 @@ static func extra_skeleton(root: Node3D) -> Skeleton3D:
 ## Starts reading a Warden's .glb on a loader thread, so the build that needs it later doesn't wait on the disk.
 static func fetch(arch: String) -> void:
 	var p := path(arch)
-	if not uses_model(arch) or _scenes.has(p):
+	if not uses_model(arch) or _scenes.has(p) or not BackgroundWork.can_read_ahead():
 		return
 	if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 		BackgroundWork.request(p)
