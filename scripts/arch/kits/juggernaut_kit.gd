@@ -510,7 +510,7 @@ func _rampage(dir: Vector2) -> void:
 	rampage_wind = 0.0
 	travel(float(dd["dist"]), t,
 			{"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk,
-					"trail": "dust", "dir": dir})
+					"trail": "dust", "dir": dir, "curved": true})
 	vfx("dash_go", h.pos, dir, {"len": float(dd["dist"]) * float(dash_feel()["dist"])})
 	m.later(t * 0.85, func(): if is_instance_valid(h) and not h.downed: _tip())
 

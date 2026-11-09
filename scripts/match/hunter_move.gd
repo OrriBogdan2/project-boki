@@ -63,6 +63,16 @@ static func brake(hv: Vector2, run: float, grip: float, dt: float) -> Vector2:
 static func dash_exit(dash_v: Vector2, run: float) -> Vector2:
 	return dash_v.limit_length(run * dash_exit_run)
 
+## A dash's speed at u (0..1 through it) against its mean, on a piecewise-linear curve of [u, k] knots
+## (content/rules/dash_feel.json "curve": mean 1, so the dash still covers its distance).
+static func dash_k(curve: Array, u: float) -> float:
+	for i in curve.size() - 1:
+		var a: Array = curve[i]
+		var b: Array = curve[i + 1]
+		if u <= float(b[0]):
+			return lerpf(float(a[1]), float(b[1]), (u - float(a[0])) / maxf(0.001, float(b[0]) - float(a[0])))
+	return float(curve[-1][1])
+
 ## Metres a let-go at v0 m/s slides on flat ground under brake() (dv/dt = -friction*v - brake_decel):
 ## a kit step with a measured total takes this off its dash so the slide doesn't add to it.
 static func slide(v0: float) -> float:
