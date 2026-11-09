@@ -5430,3 +5430,4 @@ READY ext/strike-reach-heights 75a9a854e (job 20261109-091807-a3 on w2; strike r
 READY ext/docs-heroes-sweep 19fb5b69b (hero docs sweep)
 READY ext/anim-dash-directional 8f377ea56 (directional dash poses)
 READY ext/no-reload-path 94833fb55 (reload path deleted: reload_t, start_reload, 0.88 slow, roll reload, RELOADING HUD, reload pose + Mag drop, net flag bit 128, Boki 'cover' callout; 6 legacy guns lose mag/reload, only Vex's drum has ammo (supervive_kits.md:48); Net 0.24.4; net -162 lines; weapon/gunslinger-combo (incl. Vex parity)/kit-combo/weapon-clip pass, archetype 380/0, ashwick 119/0, perkorb 134/0, boki-lines 26/0, move-feel 0, health --strict OK, gen_wiki --check OK)
+READY ext/anim-prop-handoff 65a37c67b (thrown prop hand-off)
