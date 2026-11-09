@@ -63465,5 +63465,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_pinster_gp_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_pagodito_gp",
+    "name": "Pagodito (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pagodito_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pagodito_gp",
+    "name": "Pagodito (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pagodito_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pagodito_gp",
+    "name": "Pagodito (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pagodito_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pavonazar_gp",
+    "name": "Pavonazar (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pavonazar_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pagodito_gp",
+    "name": "Pagodito (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_pagodito_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pinster_gp",
+    "name": "Pinster (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pinster_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pinster_gp",
+    "name": "Pinster (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_pinster_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pavonazar_gp",
+    "name": "Pavonazar (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_pavonazar_gp_4.jpg",
+    "ok": true
   }
 ]
