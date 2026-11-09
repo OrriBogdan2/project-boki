@@ -567,16 +567,12 @@ func show_away() -> void:
 		_notice("Your Boki are starving", lines)
 
 func _notice(title: String, lines: Array) -> void:
-	if not h.is_inside_tree():
-		return
-	if h.panel_open != "" or h.building_now or not Save.d["tutorial"].get("home", false):
-		h.get_tree().create_timer(1.0).timeout.connect(_notice.bind(title, lines))
-		return
-	var v: VBoxContainer = h._new_panel(title, 560)
-	for l in lines:
-		var lb := UI.label(String(l), 15, UI.INK)
-		lb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		v.add_child(lb)
+	h.arrivals.add(func():
+		var v: VBoxContainer = h._new_panel(title, 560)
+		for l in lines:
+			var lb := UI.label(String(l), 15, UI.INK)
+			lb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			v.add_child(lb))
 
 ## Why your partner can't come out (starving too long), or "".
 func refuse_reason() -> String:

@@ -1,10 +1,10 @@
 class_name FarmGuide
 extends RefCounted
 ## The farm's guidance on screen (home.gd owns one): the Goals tracker in the top-right slot
-## (GoalTracker), and while the tutorial runs, one prompt in the world over what to do next and one
-## line reminding you of the current goal, with a Skip button (Hob explains each step face to face:
-## HobTalk). The rules are FarmTutorial; none of it shows when
-## visiting. Skipping puts the house down as a site if it isn't, so a skipper isn't stuck.
+## (GoalTracker, from the end of the tutorial on), and while the tutorial runs, one prompt in the world over
+## what to do next and one line reminding you of the current goal, with a Skip button (Hob explains each
+## step face to face: HobTalk). The rules are FarmTutorial; none of it shows when visiting. Skipping puts
+## the house down as a site if it isn't, so a skipper isn't stuck.
 
 var h
 var tracker: PanelContainer = null
@@ -37,8 +37,8 @@ func refresh() -> void:
 		return
 	if is_instance_valid(tracker):
 		tracker.queue_free()
-	tracker = GoalTracker.build()
-	sig = GoalTracker.signature()
+	tracker = null if FarmTutorial.active() else GoalTracker.build()
+	sig = _sig()
 	if tracker:
 		h.root_ui.add_child(tracker)
 		tracker.visible = not quiet
@@ -52,6 +52,17 @@ func set_quiet(on: bool) -> void:
 	for c in [tracker, hint_box, marker, crop_lbl]:
 		if is_instance_valid(c):
 			c.visible = not on
+
+## G: the Goals line opens into the whole list and back. False when there is no card (the tutorial runs).
+func toggle_goals() -> bool:
+	if not is_instance_valid(tracker):
+		return false
+	GoalTracker.all = not GoalTracker.all
+	refresh()
+	return true
+
+func _sig() -> String:
+	return "%s|%s" % [FarmTutorial.active(), GoalTracker.signature()]
 
 func tick(dt: float) -> void:
 	if not h.visit.is_empty():
@@ -92,7 +103,7 @@ func _poll() -> void:
 		h._toast(String(FarmTutorial.rules()["done_toast"]).replace("{gems}", gems))
 		Sfx.play("unlock", null, -6.0)
 		h._refresh_top()
-	if GoalTracker.signature() != sig:
+	if _sig() != sig:
 		refresh()
 	else:
 		_refresh_hint()
