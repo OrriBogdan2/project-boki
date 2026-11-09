@@ -4385,3 +4385,17 @@ ART wickapi 8.33 briefs/boki-art/batch/out/wickapi_r2_w29_2.jpg kind=turnaround 
 ART geysirbara 8.27 briefs/boki-art/review/geysirbara_r2_w29_1_row.jpg kind=turnaround status=owner-review panel=8.0/8.4/8.4 note=relaid-out-to-one-row
 ART lanceron 8.23 briefs/boki-art/review/lanceron_r_w29_1_row.jpg kind=turnaround status=owner-review panel=8.1/8.2/8.4 note=relaid-out-to-one-row
 READY ext/tender-gait-rebased cdeada2b2 (job 20261109-052620-a1 on rpc1; SUPERSEDES READY ext/tender-gait 4f9fd219f). Merge of origin/main into ext/tender-gait: no textual conflicts now (ANIM_QUALITY_AUDIT.md conflict gone, anim-quality-audit already in main); only release.yml and net.gd came from main. Same Meeko gait change (stride 2.0/1.9, arm_swing 0.7). Checks: --check 0 failures (after godot --import), health --strict OK, --anim-audit 12 Hunters FAIL 0.
+
+## 2026-11-09 deep (job 20261109-050509-a4): READY `ext/boki-caecilith-v3` @ 07cc5327a (Boki 3D: Zippelith / caecilith redo from the owner's notes; SUPERSEDES READY ext/boki-caecilith-v2)
+PR: https://github.com/OrriBogdan2/project-boki/pull/new/ext/boki-caecilith-v3
+- One commit on top of ext/boki-caecilith-v2, covering the owner's notes (gen caecilith-1109001057, 6.4):
+  - **Matte:** Meshy's glossy texture is repainted in the sheet's flat aubergine coat (#3a3040), keeping only soft shading for the ring grooves. A new per-species FRAME `"coat"` override (BokiRig `_material_for`) drops the in-game fresnel, rim, top light and sheen.
+  - **Colours:** zipper teeth and pull are dark grey (#4a4a52). The violet seam is kept.
+  - **Shape:** `reshape()` squashes the pointed crown (×0.9), grows the head 1.1× about the chin and thickens the neck 5%. The face, rig anchors and FRAME head/top/ear_tip follow it.
+  - **Crown:** the zipper stop on the crown is laid down onto the dome and painted as skin.
+- Checks:
+  - --boki-rig-check: 0 failures.
+  - health --strict: OK.
+  - GPU shots: jobq 20261109-053050-11287.
+- Gen: caecilith-1109053649 (redo-of caecilith-1109001057). Renders: the 4 matte views, a hero shot and the turntable.
+- Merge note: ext/boki3d-tuatrune moves the Meshy loader to `tools/boki/meshy_body.py`. When the two meet, carry `self.raw`, `reshape()` and `source()` over into it (or call reshape after the load).
