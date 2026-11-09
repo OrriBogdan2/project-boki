@@ -51397,5 +51397,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_gongrowl_pb_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_pb",
+    "name": "Eclipsowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_pb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_pb",
+    "name": "Eclipsowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_pb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_pb",
+    "name": "Eclipsowl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_pb_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_eclipsowl_pb",
+    "name": "Eclipsowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_eclipsowl_pb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_eclipsowl_pb",
+    "name": "Eclipsowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_eclipsowl_pb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_cardb",
+    "name": "Eclipsowl (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/eclipsowl_cardb_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_cardb",
+    "name": "Eclipsowl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eclipsowl_cardb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_cardb",
+    "name": "Eclipsowl (hero card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/eclipsowl_cardb_4.jpg",
+    "ok": true
   }
 ]
