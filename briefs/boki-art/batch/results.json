@@ -51313,5 +51313,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/xang_mycroll_back2_3.jpg",
     "ok": true
+  },
+  {
+    "id": "gongrowl_cardb",
+    "name": "Gongrowl (hero card, action)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_cardb",
+    "name": "Gongrowl (hero card, action)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardb_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_cardb",
+    "name": "Chandelapi (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelapi_cardb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_cardb",
+    "name": "Gongrowl (hero card, action)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_cardb",
+    "name": "Chandelapi (hero card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/chandelapi_cardb_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelapi_pb",
+    "name": "Chandelapi (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_chandelapi_pb_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelapi_pb",
+    "name": "Chandelapi (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_chandelapi_pb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_cardb",
+    "name": "Gongrowl (hero card, action)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardb_3.jpg",
+    "ok": true
   }
 ]
