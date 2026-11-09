@@ -208,6 +208,13 @@ func on_deck(x: Dictionary, h: Hunter) -> bool:
 	var b: Vector3 = x["berth"]
 	return h.flat_dist(b) < DECK_R and absf(h.pos.y - b.y) < 1.3
 
+## Seconds this hunter has stood on a skiff deck at its berth (the board beat of WardenBeats), or -1 when not aboard.
+func board_t(h: Hunter) -> float:
+	for x in list:
+		if x["state"] == "boarding" and h in (x["aboard"] as Array):
+			return BOARD_T - float(x["t"])
+	return -1.0
+
 func in_yard(x: Dictionary, h: Hunter) -> bool:
 	var c: Vector3 = x["pos"]
 	return h.flat_dist(c) < OUTPOST_R and absf(h.pos.y - c.y) < 1.6

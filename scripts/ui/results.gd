@@ -287,8 +287,8 @@ var kin_node: Node3D
 var won_k := false
 var t := 0.0
 
-## Behind the card: your hunter and kin on a little island, cheering if you made it out,
-## sitting it out if you didn't.
+## Behind the card: your hunter and kin on a little island, on their own win beat if you made it out,
+## on their lose beat if you didn't (WardenBeats).
 func _stage(r: Dictionary, s: Dictionary) -> void:
 	won_k = r.get("extracted", false)
 	var svc := SubViewportContainer.new(); svc.stretch = true
@@ -327,13 +327,7 @@ func _stage(r: Dictionary, s: Dictionary) -> void:
 func _process(dt: float) -> void:
 	t += dt
 	if h_anim:
-		var vy := 0.0
-		if won_k:
-			# a little victory hop every couple of seconds
-			var ph := fmod(t, 2.2)
-			hunter_node.position.y = maxf(0.0, sin(ph / 0.5 * PI)) * 0.35 if ph < 0.5 else 0.0
-			vy = cos(ph / 0.5 * PI) * 2.0 if ph < 0.5 else 0.0
-		h_anim.update(dt, {"grounded": hunter_node.position.y < 0.01, "vel": Vector3(0, vy, 0), "crouch": 0.0 if won_k else 0.7, "downed": false})
+		h_anim.update(dt, {"grounded": true, "vel": Vector3.ZERO, "beat": "win" if won_k else "lose", "beat_t": t})
 	if kin_node:
 		kin_node.get_node("Body").position.y = absf(sin(t * 5.0)) * 0.25
 

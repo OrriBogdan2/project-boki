@@ -27,5 +27,10 @@
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["gunslinger_lmb", 0.25], ["gunslinger_lmb", 0.12], ["gunslinger_dash", 0.5], ["gunslinger_lmb", 0.25], ["gunslinger_rmb", 0.4], ["gunslinger_e", 1.0], ["gunslinger_knock", 0.5], ["gunslinger_x", 0.5]],
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
-	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "launcher", "gatling", "coin"]
+	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "launcher", "gatling", "coin"],
+	"beats": {
+		"win": {"clip": "emote"},
+		"lose": {"clip": "downed"},
+		"board": {"pose": {"head": [10, 0, -8], "upper_arm.R": [0, 0, 35], "forearm.R": [0, 0, -80], "upper_arm.L": [-25, 0, -40], "forearm.L": [-125, 0, 0]}}
+	}
 }

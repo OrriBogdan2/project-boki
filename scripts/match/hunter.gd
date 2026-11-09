@@ -3178,6 +3178,8 @@ func _anim_state(stretch: float) -> void:
 	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["emote"] = em
 	s["emote_t"] = et
+	s["beat_t"] = m.exits.board_t(self) if m.exits else -1.0      # on a skiff deck: the Hero's board beat
+	s["beat"] = "board" if s["beat_t"] >= 0.0 else ""
 	if not grounded and not gliding and not downed:
 		s["air_h"] = clampf(pos.y - m.world.ground_at(pos.x, pos.z), 0.0, 30.0)
 	else:

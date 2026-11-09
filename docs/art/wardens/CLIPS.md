@@ -20,6 +20,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
+- `beats`: the result beats (`scripts/heroes/warden_beats.gd`), win / lose / board: `{clip}` (an existing clip: win is each Hunter's own emote, lose its downed clip) or `{pose: {bone: [pitch, yaw, roll]}}` degrees on hips, head and arms from the rig's rest (arm x- raises forward, right arm z+ and left arm z- go out; board is a pose in the Hunter's own manner). The state keys `beat` and `beat_t` play one: the results card (win/lose) and a skiff deck while boarding (`Exits.board_t`). `--clip-check` asserts all three are mapped. `--result-pose-shots` + `tools/result_pose_strip.py` shoot the strip of all twelve (docs/shots/result_poses.png).
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
 ## The tree
