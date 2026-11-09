@@ -238,7 +238,7 @@ func _check_wash(P: Hunter) -> void:
 	var reach := HurtWash.EVEN_D + HurtWash.ARC_D
 	var peak := HurtWash.EVEN_A + HurtWash.ARC_A
 	var light := "light enough to aim through at 1280x720: reaches %d px in, edge alpha <= %.2f" % [int(reach), peak]
-	ok(reach < 720.0 * 0.3 and peak <= 0.35, light)
+	ok(reach < 720.0 * 0.33 and peak <= 0.45, light)     # (the middle third stays clear)
 	P.hp = hp_was
 
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.

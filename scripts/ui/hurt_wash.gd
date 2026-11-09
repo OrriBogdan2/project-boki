@@ -5,11 +5,11 @@ extends RefCounted
 ## clear in the middle and faint at the edge, so aim lines and telegraphs read through it.
 
 const BELOW := 0.35        # share of max health: the wash shows under this
-const FLOOR := 0.35        # share of full strength it starts at, just under BELOW
-const EVEN_A := 0.12       # alpha at the screen edge all round, at zero health
-const EVEN_D := 80.0       # px: how far the even wash reaches in, at zero health
-const ARC_A := 0.18        # extra edge alpha on the struck side (a fresh hit, at zero health)
-const ARC_D := 110.0       # px: extra reach on the struck side
+const FLOOR := 0.5         # share of full strength it starts at, just under BELOW
+const EVEN_A := 0.15       # alpha at the screen edge all round, at zero health
+const EVEN_D := 90.0       # px: how far the even wash reaches in, at zero health
+const ARC_A := 0.27        # extra edge alpha on the struck side (a fresh hit, at zero health)
+const ARC_D := 130.0       # px: extra reach on the struck side
 const ARC_HALF := 0.9      # rad: half-width of the arc around a hit's direction
 const FADE := 1.0          # s: a hit's arc eases back to even over this
 const PULSE_HZ := 0.95     # pulses a second
