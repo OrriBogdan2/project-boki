@@ -12379,5 +12379,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_sundormouse_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_sundormouse",
+    "name": "Sundormouse (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_sundormouse_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sundormouse",
+    "name": "Sundormouse (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_sundormouse_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w28",
+    "name": "Amanitusk",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w28_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowlet_r_w28",
+    "name": "Bellowlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowlet_r_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_clinkpede_r_w28",
+    "name": "Clinkpede (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_clinkpede_r_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowlet_r_w28",
+    "name": "Bellowlet",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bellowlet_r_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "buckleron_r2_w28",
+    "name": "Buckleron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/buckleron_r2_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "buckleron_r2_w28",
+    "name": "Buckleron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/buckleron_r2_w28_2.jpg",
+    "ok": true
   }
 ]
