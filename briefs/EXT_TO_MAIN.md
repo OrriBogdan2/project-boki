@@ -4915,3 +4915,4 @@ ART pebblamb 8.6 briefs/boki-art/cards/Pebblamb.jpg kind=card
 ART sloggoth 8.5 briefs/boki-art/cards/Sloggoth.jpg kind=card
 ART teapotamus 8.4 briefs/boki-art/cards/Teapotamus.jpg kind=card
 ART zippelith 8.6 briefs/boki-art/cards/Zippelith.jpg kind=card
+READY ext/combo-marks-b c8fb5e193 (combo marks over foes for Cinder Ignite/Ablaze, Neve Chill, Meeko Kindle: new ComboMark HUD widget because ext/combo-marks-a is not on origin, so overlaps it; payoff 2-frame flash)
