@@ -4557,3 +4557,4 @@ ART ermink 8.57 briefs/boki-art/evolutions/Ermink.jpg kind=turnaround panel=8.6/
 ART geysirbara 8.3 briefs/boki-art/evolutions/Geysirbara.jpg kind=turnaround panel=8.5/8.1/8.3
 ART teapotamus 8.43 briefs/boki-art/evolutions/Teapotamus.jpg kind=turnaround panel=8.5/8.3/8.5
 READY ext/reset-cue 1dd752d4d (one ResetCue for all 17 condition resets: own = HUD slot flash + chest glint + one sound, teammate = silent glint; paths in content/rules/reset_cue.json; on READY ext/dash-refresh-assist-rebased 5ef12c32b, merge that first)
+READY ext/ult-ranks-spec 8bca23845 (decision 0022 ult ranks spec: source R tiers, design, per-hero build items)
