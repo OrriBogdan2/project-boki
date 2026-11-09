@@ -102,8 +102,12 @@ func _hold_run(ac: RefCounted, kit: String, input: String) -> Array:
 	P.fire_cd = 0.0
 	K.cd["e"] = 0.0
 	match input:
-		"rmb": P.inp["sec_hold"] = true; K.press_rmb()
-		"dash": P.inp["dash_down"] = true; P.do_dash()
+		"rmb":
+			P.inp["sec_hold"] = true
+			K.press_rmb()
+		"dash":
+			P.inp["dash_down"] = true
+			P.do_dash()
 		"e": K.use_e()
 	while t < HOLD_SECS:
 		P.inp["fire"] = input == "lmb"
@@ -128,7 +132,9 @@ func _holds(main: Node) -> void:
 		var res: Array = _hold_run(ac, row[0], row[2])
 		var tag := "%s %s" % [row[0], row[1]]
 		if row[3]:
-			ok(float(res[0]) >= 0.0 and float(res[0]) < 0.6 and bool(res[2]) and float(res[1]) >= 1.0 and bool(res[3]), "hold ring: %s fills from the start, never falls, flashes at full %s" % [tag, str(res)])
+			var starts: bool = float(res[0]) >= 0.0 and float(res[0]) < 0.6
+			var good: bool = starts and bool(res[2]) and float(res[1]) >= 1.0 and bool(res[3])
+			ok(good, "hold ring: %s fills from the start, never falls, flashes at full %s" % [tag, str(res)])
 		else:
 			ok(float(res[1]) < 0.0, "hold ring: %s draws no ring (an aim or raise hold) %s" % [tag, str(res)])
 		await main.get_tree().process_frame
