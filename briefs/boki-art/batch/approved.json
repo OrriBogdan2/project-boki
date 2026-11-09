@@ -719,6 +719,66 @@
    "id": "portrait_zephyrak",
    "pick": 1,
    "grade": 8.5
+  },
+  {
+   "id": "portrait_anvilbrock_p",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_barrelmander_p",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_bubblisk_p",
+   "pick": 1,
+   "grade": 8.53,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_chuggamus_p",
+   "pick": 2,
+   "grade": 8.5,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_glassolotl_p",
+   "pick": 1,
+   "grade": 8.6,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_jarmit_p",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_mycroll_p",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_skidlet_p",
+   "pick": 1,
+   "grade": 8.53,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_thrumbird_p",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_zippelith_p",
+   "pick": 1,
+   "grade": 8.5,
+   "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
   }
  ],
  "retired": [

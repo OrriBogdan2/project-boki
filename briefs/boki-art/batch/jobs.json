@@ -1332,6 +1332,501 @@
     "size": "2K"
   },
   {
+    "id": "portrait_barokat_pe",
+    "name": "Barokat (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_barokat_p_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: tuck the barometer dial against its belly so it reads as part of its body, not held.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_bellowary_pe",
+    "name": "Bellowary (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_bellowary_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: add the glowing ember tip to the brass beak nozzle, uncross the legs, and trim the smoke to a small wisp.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_boltstrich_pe",
+    "name": "Boltstrich (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_boltstrich_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: remove the loose sparks around the feet, keeping only the crackles inside the cloud body.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_cairnback_pe",
+    "name": "Cairnback (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_cairnback_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: lift one forefoot mid-step so the pose has more life.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_canvastross_pe",
+    "name": "Canvastross (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_canvastross_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: add the trailing blue ribbon streamers along the wings' trailing edge and pull the right wingtip inside the frame.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_crofthorn_pe",
+    "name": "Crofthorn (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_crofthorn_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: turn the head slightly more toward the viewer with a happier expression.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_echolop_pe",
+    "name": "Echolop (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_echolop_p_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: pull the right wingtip fully inside the frame.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_effigeetle_pe",
+    "name": "Effigeetle (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_effigeetle_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: turn the body a little more toward the viewer so both the marble face and the eye-head read clearly.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_ermink_pe",
+    "name": "Ermink (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_ermink_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: turn the head slightly off-camera with a cheeky grin and let the brush tail curl a little wider.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_frigatee_pe",
+    "name": "Frigatee (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_frigatee_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: give it a slightly happier, sleepier smile and keep the brass caps on its flippers and tail fluke.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_glintmole_pe",
+    "name": "Glintmole (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_glintmole_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: remove the tiny twinkle sparkles on the back crystals.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_gloamshell_pe",
+    "name": "Gloamshell (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_gloamshell_p_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: give the face a little more expression with eyes looking off to the side.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_glomwort_pe",
+    "name": "Glomwort (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_glomwort_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: replace the green drool with a faint purple-black drip and add purple-black gill lines under its puffball caps (Blight accent), keeping it cute.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_gongibbon_pe",
+    "name": "Gongibbon (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_gongibbon_p_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: loosen the shoulders, keep the hand off the tail mallet, and put the gold knuckle beads on the lowered fist.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_gravadillo_pe",
+    "name": "Gravadillo (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_gravadillo_p_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: turn the body more toward three-quarter and lift the head.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_hivara_pe",
+    "name": "Hivara (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_hivara_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: turn the head a touch toward the viewer with a sharper expression.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_jarmit_pe",
+    "name": "Jarmit (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_jarmit_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: turn the eyestalks and face slightly off to the side.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_kerchick_pe",
+    "name": "Kerchick (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_kerchick_p_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: turn the head a touch further from the camera and warm up the grumpy face slightly.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_kestrike_pe",
+    "name": "Kestrike (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_kestrike_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: remove the yellow electric outlines on the crest and tail rods.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_kindlewren_pe",
+    "name": "Kindlewren (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_kindlewren_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: remove the stray ember flecks and turn the head a touch more to three-quarter.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_kitlet_pe",
+    "name": "Kitlet (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_kitlet_p_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: give it a happy open-mouthed smile.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_knotwyrm_pe",
+    "name": "Knotwyrm (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_knotwyrm_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: give the face a bit more expression.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_lanterloris_pe",
+    "name": "Lanterloris (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_lanterloris_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: remove the bamboo twig in its paw and the glow halo around the tail lantern, and turn the body slightly more to three-quarter.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_lunowl_pe",
+    "name": "Lunowl (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_lunowl_p_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: remove the extra feathered owl wing so only the luna-moth wings remain, and turn the face a little further off-camera.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_marchleaf_pe",
+    "name": "Marchleaf (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_marchleaf_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: remove the floating leaf flecks, keep the translucent leaf wings, and turn the head away from a straight stare.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_mirrolin_pe",
+    "name": "Mirrolin (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_mirrolin_p_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: give the face a slightly cockier grin.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_mossgrade_pe",
+    "name": "Mossgrade (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_mossgrade_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: turn the snout toward the viewer, give the face a clear happy expression, and lift one stubby leg mid-step.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_murmurling_pe",
+    "name": "Murmurling (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_murmurling_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: turn the body from profile to three-quarter so the pipe tail fans toward the viewer, and keep the starry iridescence.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_nettlynx_pe",
+    "name": "Nettlynx (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_nettlynx_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: tone the tail glow down to flat colour, soften the drool, and turn the eyes off-camera.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_oarlet_pe",
+    "name": "Oarlet (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_oarlet_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: pull the paddle tail slightly in from the edge.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_parasolth_pe",
+    "name": "Parasolth (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_parasolth_p_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: fold the bone wings slightly closer to the body so the sloth head is the focal point.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_pipewurm_pe",
+    "name": "Pipewurm (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_pipewurm_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: give it a slightly bigger, cheekier smirk.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_prismander_pe",
+    "name": "Prismander (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_prismander_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: plant the feet on the ground and turn the head slightly more to the side.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_prowyak_pe",
+    "name": "Prowyak (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_prowyak_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: turn the head a bit toward the viewer so the face shows past the prow plate.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_rampartoad_pe",
+    "name": "Rampartoad (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_rampartoad_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: turn the head so the eyes look past the viewer, with a livelier raised brow.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_ribbonwyrm_pe",
+    "name": "Ribbonwyrm (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_ribbonwyrm_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: centre the creature in the square.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_rimeshrew_pe",
+    "name": "Rimeshrew (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_rimeshrew_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: give the face a slightly sharper, sly grin.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_ringrove_pe",
+    "name": "Ringrove (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_ringrove_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: raise the head and put one foreleg mid-step.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_skateron_pe",
+    "name": "Skateron (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_skateron_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: centre the creature and lower it slightly in the square.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_snuffapi_pe",
+    "name": "Snuffapi (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_snuffapi_p_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: turn the head a little toward the viewer, keeping the smoke mane and gold filigree.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_spirevark_pe",
+    "name": "Spirevark (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_spirevark_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: remove the flying termites and the orange glow around the base.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_umbrathere_pe",
+    "name": "Umbrathere (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_umbrathere_p_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: give the face a slightly more characterful sly smile.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_zephyrak_pe",
+    "name": "Zephyrak (portrait edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_zephyrak_p_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same design, colours and style, centred and filling about 85 percent of the square on the plain light background, with no effects. Only change this: turn it into a three-quarter S-coil with the head turned partly toward the viewer, centred.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_selenfin_p2",
+    "name": "Selenfin (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Selenfin.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): swimming in a three-quarter view with its body angled toward the viewer, both eyes partly visible, crescent fins flared mid-swish. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_soakybara_p2",
+    "name": "Soakybara (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Soakybara.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): settled into a relaxed three-quarter sit, head turned slightly toward the viewer with blissful closed eyes, no steam. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
     "id": "chuggamus_r2",
     "name": "Chuggamus",
     "refs": [
