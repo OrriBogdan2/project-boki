@@ -79,10 +79,21 @@ func _albert() -> void:
 	var P: Hunter = r[1]
 	var K: BulwarkKit = P.ak
 	A.aim_at(P, r[4] + Vector3(0, 0, -6.0))
+	var pose: Array = []           # [move, its age] on each step (the catch pose check below)
 	var rows := trace(m, 1.3,
-			func(): return [not bool(P.model.get_meta(WardenClips.WEAPON_OUT, false)), int(K.fx.hammer.visible)],
+			func():
+				pose.append([K.anim_id, m.time - K.anim_at])
+				return [not bool(P.model.get_meta(WardenClips.WEAPON_OUT, false)), int(K.fx.hammer.visible)],
 			func(t): P.inp["fire"] = t < 0.03 or (t > 0.6 and t < 0.65))
 	judge("Albert hammer", rows, 0.14, 0.0, true)
+	var at := -1
+	for i in range(1, rows.size()):
+		if bool(rows[i][1]) and not bool(rows[i - 1][1]):
+			at = i
+	var cp: Array = pose[at] if at >= 0 else ["", -1.0]
+	ok.call("Albert hammer: the catch step plays bul_recall at its catch key (%.2f s)" % BulwarkKit.RECALL_CATCH,
+			cp[0] == "bul_recall" and absf(float(cp[1]) - BulwarkKit.RECALL_CATCH) <= DT * 1.5,
+			"%s at %.3f s" % [cp[0], float(cp[1])])
 	m.queue_free()
 
 func _grimble() -> void:
