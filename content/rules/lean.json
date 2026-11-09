@@ -2,6 +2,8 @@
 	"desc": "Food lean by type (scripts/core/lean.gd, active when base_mode is on). types: the 18 Boki types (DECISIONS 2026-11-08 22:29): name, tint (the colour its meals lean a Boki to) and part (the grown part its lean earns at the next form, one of KinParts.EVO_PARTS; some types share a part, the tint tells them apart). Normal has no tint: plain food never leans. foods: every food (Data.CROPS and Care.FOODS) and its type.",
 	"part_min": 0.3,
 	"part_min_doc": "Lean strength (0..1, Evo.lean) a Boki needs at its next form to grow its lean's part: one meal is 0.375.",
+	"part_scale": 1.6,
+	"part_scale_doc": "Size of a part grown from meals on a rigged Boki, over an Evo part at the same level: the mesh parts are small and should read as the meal's.",
 	"marks": 3,
 	"marks_doc": "Flecks in the lean's colour over the head at full lean (one at a first meal): the small mark that shows before any part.",
 	"types": {

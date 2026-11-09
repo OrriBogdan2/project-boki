@@ -95,6 +95,8 @@ func _grown(muts: Array) -> void:
 	for m in muts:
 		var id := String(m["id"])
 		var k := 1.0 + (int(m["lv"]) - 1) * LEVEL_GROW
+		if (Lean.rules()["types"] as Dictionary).has(String(m.get("aff", ""))):
+			k *= float(Lean.rules()["part_scale"])     # a meal's part, sized to read over the species' own
 		if id == "tail_long":
 			_grow("tail1", 1.0 + 0.12 * k)
 		_show("part_" + id, k)

@@ -352,6 +352,8 @@ Food lean by type (scripts/core/lean.gd, active when base_mode is on). types: th
 |---|---|
 | part_min | 0.3 |
 | part_min_doc | Lean strength (0..1, Evo.lean) a Boki needs at its next form to grow its lean's part: one meal is 0.375. |
+| part_scale | 1.6 |
+| part_scale_doc | Size of a part grown from meals on a rigged Boki, over an Evo part at the same level: the mesh parts are small and should read as the meal's. |
 | marks | 3 |
 | marks_doc | Flecks in the lean's colour over the head at full lean (one at a first meal): the small mark that shows before any part. |
 | types | {"normal": {"name": "Normal"}, "fire": {"name": "Fire", "tint": "#f0663a", "part": "horns"}, "water": {"name": "Water", "tint": "#4a9af0", "part": "fins"}, "grass": {"name": "Grass", "tint": "#6cc050", "part": "crest"}, "spore": {"name": "Spore", "tint": "#d89a5a", "part": "spots"}, "electric": {"name": "Electric", "tint": "#f2d43a", "part": "spikes"}, "ice": {"name": "Ice", "tint": "#9fe6f2", "part": "crest"}, "rock": {"name": "Rock", "tint": "#9a8a70", "part": "plates"}, "psychic": {"name": "Psychic", "tint": "#f070a8", "part": "third_eye"}, "flying": {"name": "Flying", "tint": "#9ab4f0", "part": "wings"}, "dragon": {"name": "Dragon", "tint": "#4a5ad8", "part": "club"}, "dark": {"name": "Dark", "tint": "#6a5a80", "part": "brow"}, "poison": {"name": "Poison", "tint": "#a050d0", "part": "fangs"}, "bug": {"name": "Bug", "tint": "#98c038", "part": "antennae"}, "steel": {"name": "Steel", "tint": "#9aa8b8", "part": "shell"}, "fairy": {"name": "Fairy", "tint": "#ffb8e0", "part": "antennae"}, "crystal": {"name": "Crystal", "tint": "#6ae0d0", "part": "spikes"}, "sound": {"name": "Sound", "tint": "#f0a040", "part": "fins"}} |
