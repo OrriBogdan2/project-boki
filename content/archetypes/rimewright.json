@@ -44,7 +44,7 @@
 	},
 	"passive": {
 		"name": "Hoarfrost",
-		"desc": "Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.",
+		"desc": "Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m.",
 		"splinter_dmg": 37.0,
 		"splinter_r": 3.0,
 		"splinter_delay": 0.4,
