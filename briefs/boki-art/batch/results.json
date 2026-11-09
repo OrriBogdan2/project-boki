@@ -12008,5 +12008,82 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_glacione_r_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_olmlet_r",
+    "name": "Olmlet (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_olmlet_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_olmlet_r",
+    "name": "Olmlet (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_olmlet_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_olmlet_r",
+    "name": "Olmlet (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_olmlet_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "teapotamus_card",
+    "name": "Teapotamus (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/teapotamus_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelotl_card",
+    "name": "Chandelotl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelotl_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunowl_card",
+    "name": "Lunowl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lunowl_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespyx_card",
+    "name": "Vespyx (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vespyx_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaivyx_card",
+    "name": "Glaivyx (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glaivyx_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "skidlet_card",
+    "name": "Skidlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/skidlet_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "skidlet_card",
+    "name": "Skidlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/skidlet_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunowl_card",
+    "name": "Lunowl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lunowl_card_2.jpg",
+    "ok": true
   }
 ]
