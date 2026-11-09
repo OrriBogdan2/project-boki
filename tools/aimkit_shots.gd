@@ -64,12 +64,13 @@ func take(main_node: Node, out: String) -> void:
 		if x != P and x != T: x.teleport(home + Vector3(-30, 0, 30))
 	for s in SHOTS:
 		await _shot(String(s[0]), float(s[1]), float(s[2]), bool(s[3]), String(s[4]))
+	m.queue_free()
+	await main.get_tree().process_frame
+	await _tiers()
 	var f := FileAccess.open(dir.path_join("MANIFEST.txt"), FileAccess.WRITE)
 	for l in lines: f.store_line(l)
 	f.close()
 	print("AIMKIT shots: %d in %s" % [lines.size(), dir])
-	m.queue_free()
-	await main.get_tree().process_frame
 
 ## A real flat stretch of island (the check's strip is flattened in data only, so it draws as abyss):
 ## 16 x 7 tiles of plain ground on one level, away from the start.
@@ -155,3 +156,70 @@ func _shot(what: String, aim_d: float, lead: float, zoom: bool, caption: String)
 		crop.save_png(dir.path_join(zf))
 		lines.append("aimkit|%s|%s (3x crop round the cursor)" % [zf, caption])
 	AimKit.clear(P); AimKit.clear(T)
+
+## The cursor at terrace lips, on the regular tier-0 map (the arena is flat; its terraces are one tier).
+func _tiers() -> void:
+	m = Match.new()
+	main.add_child(m)
+	await m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.set_process(false)
+	P = m.player
+	if m.hud: m.hud.visible = false
+	for mb in m.mobs: mb.queue_free()
+	m.mobs.clear()
+	for x in m.hunters:
+		if x != P: x.teleport(Vector3(-50, 0, -50))
+	await _tier_shot("tier_up", 1, 0.2, "Cursor (cross) on the upper terrace 0.2 m past a lip that faces the camera")
+	await _tier_shot("tier_down", -1, 0.6, "Cursor (cross) on the lower terrace 0.6 m behind the lip you stand on")
+	m.queue_free()
+	await main.get_tree().process_frame
+
+## A lip across the camera's view: rows z..z+2 on level lv, rows z-2..z-1 on lv + k, 3 tiles wide, plain
+## ground. Returns [x, z, lv], or [] when the map has none.
+func _lip(k: int) -> Array:
+	var W = m.world
+	for z in range(8, W.h - 8):
+		for x in range(6, W.w - 6):
+			var lv: int = int(W.level[W.idx(x, z)])
+			var good := true
+			for dz in range(-2, 3):
+				for dx in range(-1, 2):
+					var i: int = W.idx(x + dx, z + dz)
+					var want := lv if dz >= 0 else lv + k
+					if W.kind[i] != World.T_GROUND or int(W.level[i]) != want or W.stairs.has(i) or W.walls.has(i) or W.props.has(i) or W.bridge.has(i):
+						good = false; break
+				if not good: break
+			if good: return [x, z, lv]
+	return []
+
+## The cursor put on the far terrace `past` m beyond a lip (Match._mouse_aim reads that screen point) and a
+## ground circle where a cast lands (AimMode.point). The red cross marks the cursor.
+func _tier_shot(what: String, k: int, past: float, caption: String) -> void:
+	var c := _lip(k)
+	if c.is_empty():
+		print("AIMKIT shots: no lip for %s" % what)
+		return
+	var x: int = c[0]; var z: int = c[1]; var lv: int = c[2]
+	P.teleport(Vector3(x + 0.5, lv * World.LEVEL, z + 2.5)); P.vel = Vector3.ZERO
+	var spot := Vector3(x + 0.5, (lv + k) * World.LEVEL, z - past)
+	var sp := Vector2.ZERO
+	for i in 8:
+		m.cam.snap(P.pos + Vector3(0, 0, -2.0))
+		sp = m.cam.unproject_position(spot)
+		P.inp["aim"] = m._mouse_aim(sp); P.inp["aim_y"] = m.aim_y
+		AimKit.circle(P, "a", {"at": AimMode.point(P, 12.0), "r": 0.5, "col": Color("f4f1e6")})
+		P.face = atan2(-(spot.x - P.pos.x), -(spot.z - P.pos.z))
+		for h in m.hunters: h.render(1.0 / 60.0, 1.0)
+		await main.get_tree().process_frame
+	var at := AimMode.point(P, 12.0)
+	var off := Vector2(at.x - spot.x, at.z - spot.z).length()
+	print("AIMKIT %s: cursor on %s, aim_y %.2f, cast lands %s (%.2f m off)" % [what, str(spot), m.aim_y, str(at.snapped(Vector3.ONE * 0.01)), off])
+	var img := main.get_viewport().get_texture().get_image()
+	if img == null:
+		return
+	img.fill_rect(Rect2i(int(sp.x) - 9, int(sp.y) - 1, 19, 3), Color.RED)
+	img.fill_rect(Rect2i(int(sp.x) - 1, int(sp.y) - 9, 3, 19), Color.RED)
+	var file := "aimkit_%s.png" % what
+	img.save_png(dir.path_join(file))
+	lines.append("aimkit|%s|%s: the cast lands at y %.2f (cursor's ground %.2f), %.2f m from it" % [file, caption, at.y, spot.y, off])
+	AimKit.clear(P)
