@@ -15,7 +15,8 @@ func run(main: Node) -> void:
 			dir = String(a).substr(12)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true, "demo_kin": "cindle"})
+	var opts := {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true, "demo_kin": "cindle"}
+	await m.start(opts)
 	if main.get("fade") != null:
 		await main.fade.reveal(0.01)
 	var P: Hunter = m.player
