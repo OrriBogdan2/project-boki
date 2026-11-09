@@ -333,7 +333,7 @@ func _dancer_dash_moves(K: ThiefKit) -> void:
 	var dd: Dictionary = Arch.def("thief")["dash"]
 	var feel_t := float(K.dash_feel()["time"])
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, KMovesStone.MOVES, MergeMoves.MOVES,
-			KMovesCare.MOVES, KMovesPinBjorn.MOVES]
+			KMovesCare.MOVES, KMovesPin.MOVES, KMovesBjorn.MOVES]
 	var own := true
 	for mv in ThiefKit.CARTWHEELS:
 		own = own and KMovesDJ.MOVES.has(mv) and others.all(func(t): return not (t as Dictionary).has(mv))

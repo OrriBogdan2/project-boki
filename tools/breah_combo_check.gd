@@ -912,7 +912,7 @@ func _air_dash_hold(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
 	var ids := ["breah_hop", "breah_exdash"]
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
-		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
+		KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]
 	ok(
 		"item 35: her ground and air dash moves are two distinct ids, hers alone (KMovesStone, no other table)",
 		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("breah_"))

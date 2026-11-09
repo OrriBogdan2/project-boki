@@ -149,7 +149,7 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 | Starpiercer then a merge on a full-health light hunter | Standing (burst cap) | same |
 | Draw, then Shift (the roll or the air flick) or a jump (item 51) | The draw carries through and charges on; let go mid-roll and it looses as the roll ends, let go in the air and she keeps her speed. The source shows nothing ending a draw on the roll, so it combines (content/dash_flow/archer.json) | `--archer-combo-check` (`pin early release: a dash keeps the draw...`, `pin item 51: ...`), `--dash-flow-check` |
 
-## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
+## Animations (KMovesPin ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
 |---|---|---|
 | LMB draw | `arc_draw` (held) | side-on to the cursor in 0.2 s, string hand to the chest, deeper by Empowered |

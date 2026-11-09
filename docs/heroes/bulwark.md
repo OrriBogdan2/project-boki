@@ -170,7 +170,7 @@ Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x t
 | A merge in the Faultline wind-up | No slam; a fissure already running finishes | same |
 | Faultline then a merge on a full-health light hunter | Standing (burst cap) | same |
 
-## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
+## Animations (KMovesBjorn ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
 |---|---|---|
 | LMB tap (throw) | `bul_throw` | cocked low and behind one frame (0.07 s), the overhand throw (0.14 s); the hammer leaves the hand ~0.12 s after the press, as the arm comes through |

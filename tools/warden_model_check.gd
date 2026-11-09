@@ -116,7 +116,7 @@ func _anim(id: String) -> void:
 	var rest := _pose(an, m, "", 0.0)
 	var still: Array = []
 	var moves: Array = []
-	for t in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
+	for t in [HunterAnim.KMOVES, KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
 			KMovesCare.MOVES, KMovesPair.MOVES]:
 		for mv in t:
 			if String(mv).begins_with(WARDENS[id]["moves"]): moves.append(mv)

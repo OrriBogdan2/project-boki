@@ -2,7 +2,7 @@ extends "res://tools/warden_shots.gd"
 ## --rig-shots --shots-dir=<dir> [--wardens=a,b]: one contact sheet per Hunter (sheet_<id>.png): idle, walk, run, a
 ## hit, the dash and the kit's moves at their middle, at the match camera (top) and close (below).
 
-const MOVE_TABLES_ := [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
+const MOVE_TABLES_ := [HunterAnim.KMOVES, KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
 	KMovesCare.MOVES, KMovesPair.MOVES]
 const PREFIX_ := {"bulwark": "bul_", "archer": "arc_", "gunslinger": "gunslinger_", "mage": "mage_", "thief": "thf_",
 	"dolm": "breah_", "ostra": "ostra_", "rimewright": "tm_", "ashwick": "as_", "juggernaut": "jug", "dredge": "dr_",
