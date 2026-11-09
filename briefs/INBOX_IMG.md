@@ -230,3 +230,7 @@ Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules a
 
 ## 2026-11-09 coordinator: Ermink -> Minkee (owner)
 Rename only: call the mystery-egg base creature **Minkee** in all new prompts, sheets and gen-feed drops (`--name 'Minkee'`). Design unchanged; id stays `ermink`. See DECISIONS.md.
+
+## 2026-11-09 07:39 UTC coordinator -> art batch: 1 owner orders (priority over new species)
+Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules and grading as the originals, owner note first. Post ART lines as usual (imported into the Bokidex automatically).
+- **Redo Glassolotl attempt 2 (owner 8.4)**: owner note first: almost there but needs to have a better pose or body ro something - the crystals arent good here.. Previous attempt: /home/boki/gens/glassolotl-2-art.
