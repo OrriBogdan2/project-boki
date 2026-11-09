@@ -41,8 +41,10 @@ func _front_screens() -> void:
 	Save.d["tutorial"] = {}
 	main.show_screen("hatch", {"create": true})
 	await _shot("05_creator", 2.5)
+	main.current.create_box.visible = false     # the real intro card comes before the creator
 	main.current.call("_show_card")
 	await _shot("04_hatch_card")
+	main.current.create_box.visible = true
 	main.current.call("_looks_good")
 	await _shot("06_welcome_modal", 7.0)
 	Save.d["tutorial"] = {"hatched": true, "intro": true}

@@ -3012,7 +3012,7 @@ func _open_kin(rec: Dictionary) -> void:
 		"Care":
 			var bd: Array = Care.bond(rec)
 			var nb: Array = Care.next_bond(rec)
-			c1.add_child(UI.section("Bond  ·  %s" % bd[1], col.lerp(UI.INK, 0.35)))
+			c1.add_child(UI.section("Bond  ·  %s" % bd[1]))
 			var lo := float(bd[0]); var hi := float(nb[0]) if nb.size() > 0 else 100.0
 			row.call(c1, "Trust", clampf((float(rec["trust"]) - lo) / maxf(1.0, hi - lo), 0.0, 1.0), Color("ffb3c6"), ("next: %s" % nb[1]) if nb.size() > 0 else "max")
 			c1.add_child(UI.para(String(bd[2]), 12, UI.MUTED))
