@@ -65012,5 +65012,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/geodemole_card103_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_arcestrel_r4",
+    "name": "Arcestrel",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_arcestrel_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glazolm_r4",
+    "name": "Glazolm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_glazolm_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lockatara_r4",
+    "name": "Lockatara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_lockatara_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_slog_r4",
+    "name": "Slog",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_slog_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_slog_r4",
+    "name": "Slog",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_slog_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_arcestrel_r4",
+    "name": "Arcestrel",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_arcestrel_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_spanglin_r4",
+    "name": "Spanglin",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_spanglin_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_shinobant_r4",
+    "name": "Shinobant",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_shinobant_r4_2.jpg",
+    "ok": true
   }
 ]
