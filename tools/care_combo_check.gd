@@ -1121,7 +1121,8 @@ func _dashes_cute() -> void:
 	var glide_cd := P.ex_cd
 	var air_move := K.anim_id
 	var peak := {"v": 0.0}
-	step(m, air_t + 0.05, func(): peak["v"] = maxf(float(peak["v"]), P.roll_speed))
+	# measured at the glide's end: what she carries out of it after is the shared air drag's (Loco, tuning.json)
+	step(m, air_t, func(): peak["v"] = maxf(float(peak["v"]), P.roll_speed))
 	var air_d := P.pos.x - a0.x
 	ok(
 			"mm dashes: the air glide is Elluna's: 13.3 m over 0.95 s, peaking 16.5-22 m/s",
