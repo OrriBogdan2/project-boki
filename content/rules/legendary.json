@@ -1,0 +1,7 @@
+{
+	"_doc": "Legendary Boki (docs/decisions: DECISIONS 2026-11-09). Each match rolls once per map: with probability 'chance' one legendary appears, picked uniformly from the map's 'legendaries' list (content/maps/*.json, key 'legendary_spawn_chance' overrides 'chance'; maps without a list use 'roster').",
+	"chance": 0.20,
+	"roster": ["cairnback", "hivara", "zephyrak"],
+	"min_start_dist": 40.0,
+	"level_bonus": 6
+}

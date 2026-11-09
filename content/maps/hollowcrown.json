@@ -3,6 +3,7 @@
  "name": "The Hollow Crown",
  "size": 216,
  "seed": 5150,
+ "legendaries": ["cairnback", "hivara"],
  "hand": true,
  "notes": "Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). A raised core (the Crown, its Throne and two boss Gaols), a ring of four regions each with one plateau reached by stairs, and four quiet outer isles with the exits. Nothing is placed by dice except what the match rolls: which spawn points, lairs and camps are live, loot, the Blight, weather.",
  "regions": [

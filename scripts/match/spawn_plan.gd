@@ -37,6 +37,8 @@ var cands: Array = []          # {id, cat, i, pos: Vector3, name, active, ref, t
 var spawners := {}             # cat id -> Callable(plan, cand) -> handle
 var takers := {}               # cat id -> Callable(cand) -> bool (is it spent?)
 var rolled := false
+var legend_cfg := {}           # this map's legendary chance and eligible list (Legendary.config)
+var legend := ""                # the legendary species this match rolled, or "" (Legendary.roll)
 var _t := 0.0
 
 func _init(match_node: Match) -> void:
@@ -84,6 +86,7 @@ func shown_cats() -> Array:
 ## Where the candidates are: the layout's own lists on an authored map, else derived from the islands.
 func build(layout: Dictionary) -> void:
 	cands.clear()
+	legend_cfg = Legendary.config(layout)
 	var sp: Dictionary = layout.get("spawn_points", {})
 	if not sp.is_empty():
 		for cat in sp:
@@ -180,6 +183,7 @@ func roll(seed_val: int) -> void:
 			var t = pool[i]; pool[i] = pool[j]; pool[j] = t
 		for i in n:
 			pool[i]["active"] = true
+	legend = Legendary.roll(seed_val, legend_cfg)
 	rolled = true
 
 ## Spawns what's live: vault chests, item caches, rare kin (host only, like all wild kin), and
@@ -208,6 +212,10 @@ func spawn_all() -> void:
 				var fn: Callable = spawners.get(String(c["cat"]), Callable())
 				if fn.is_valid():
 					c["ref"] = fn.call(self, c)
+	if legend != "" and (not m.net_on or m.is_host):
+		var spot := Legendary.pick_spot(of("rare_kin"), m.hunters.map(func(h): return h.pos), m.seed_val)
+		if not spot.is_empty():
+			Legendary.spawn(m, legend, spot["pos"])
 
 func _spawn_rare(p: Vector3, r: RandomNumberGenerator) -> Kin:
 	# (the boss-egg species never turn up in the wild: Data.common_kin)
