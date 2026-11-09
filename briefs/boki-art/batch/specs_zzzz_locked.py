@@ -6,7 +6,7 @@ _ls=[n.split('_')[0].lower() for n in _L['sheet']]; _lp=[n.lower() for n in _L['
 DROP=set()
 for _s in SPECS:
     _i=_s['id']
-    if _i.endswith(('_card','_card2','_card3')) or _i.startswith('ta_'): continue
+    if _rl.search(r'_card\d*$',_i) or _i.startswith('ta_'): continue
     _m=_rl.match(r'^(?:c_|stance2?_|portrait_stance2_)?([a-z]+)',_i.replace('portrait_stance2_','stance2_'))
     _b=_m.group(1) if _m else ''
     if _i.startswith('portrait_'):

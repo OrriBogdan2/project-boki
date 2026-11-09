@@ -17,3 +17,9 @@ for _i,_fx in _W['fix'].items():
     _s['prompt']=_s['prompt']+' Reviewer notes from the last round, apply them: '+' '.join(f.replace('EDIT:','').strip() for f in _fx)
     SPECS.append(_s); _P54.append(_s['id'])
 PRIORITY=_P54+PRIORITY
+# 4) Glassolotl's live card and Dex portrait still show the old crystal design: redo both from the rock-candy v3 pick.
+SPECS.append({'id':'glassolotl_card4','name':'Glassolotl (hero card)','refs':[_O+'c_glassolotl_v3_3.jpg',SRA],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':CARD('Glassolotl','mid','an in-motion pose, mid-stride with the striped rock-candy tail swinging, head turned toward the viewer')})
+_P54.append('glassolotl_card4')
+P('glassolotl_v3','Glassolotl',_O+'c_glassolotl_v3_3.jpg','a cheeky head-tilt toward the viewer with the crystal gills fanned'); _P54.append('portrait_glassolotl_v3')
+PRIORITY=['glassolotl_card4','portrait_glassolotl_v3']+PRIORITY
