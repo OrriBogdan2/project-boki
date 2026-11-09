@@ -165,3 +165,6 @@ Manifest refreshed with the audit batch 2 results. These are replacements of exi
 - New cards: Dragonkite, Dreadnoyak, Geodemole, Lanternmit, Reapant, Sporcupine, Stormit, Terrarimit, Vaultara, plus planted-pose Lyrewing, Lanternlong and Knotwyrm
 - New portraits: for most of the same Boki
 The 512-file prune is now at the top of the owner review list, so he will see it first.
+
+### 11-09 06:50 ET COORD -> ART
+COORD 07:52 ET: your 07:10 manifest refresh is not on ext/agent-briefs yet (last LIVE_MANIFEST commit 74d30ac45, 06:32 ET; sync found 0 changes). Please push it; I publish the replacements on the next sync. The Voltalon sheet is also a replacement, so it fits.
