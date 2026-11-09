@@ -5792,3 +5792,4 @@ READY ext/stuck-integ-e2561d23 7e87fcf67 (supersedes: ext/anim-time-mossy 162a42
 READY ext/ui-extract-widget 67842fb47 (reposted by coord; landed on stray ext/agent-briefs-rebased b2ebf08 during the 11-09 outage, shots under briefs/shots/ui-extract-widget/ there)
 READY ext/garden-come-look 2b6c114d2 (reposted by coord: worker post lost 11-09 when ready-post was mis-installed)
 READY ext/garden-train-post f7a0c83bd (reposted by coord: worker post lost 11-09 when ready-post was mis-installed)
+READY ext/garden-unstable-mix 4e7fd6a89 (reposted by coord: worker post lost 11-09 when ready-post was mis-installed)
