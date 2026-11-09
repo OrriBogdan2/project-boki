@@ -228,13 +228,14 @@ func _controls() -> void:
 
 func _data() -> void:
 	# rank previews: always the NEXT rank first (rank 2 at rank 1), then rank 3's special; every
-	# ability of every archetype has a concrete rank 2
+	# ability of every archetype has a concrete rank 2: a cooldown "a -> b" or a damage "+N%" (the source's
+	# upgrade numbers, rank_cd / rank_dmg: many are damage only)
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
 			if sl == "ult" and not Arch.def(a).has("r"): continue      # Sparkle and Vex have no R (Boki Merge owns it)
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
-			if not (r2.contains("->") and r2.length() > 20): rk_ok = false
+			if not (r2.begins_with("Rank 2: ") and (r2.contains("->") or r2.contains("%"))): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
 	var n1 := Arch.next_ranks("archer", "sec", 1); var n2 := Arch.next_ranks("archer", "sec", 2); var n3 := Arch.next_ranks("archer", "sec", 3)
 	ok("ranks: next rank first (2 at 1, 3 at 2, none at max)", n1.size() == 2 and n1[0][0] == "Rank 2" and n1[1][0] == "Rank 3" and n2.size() == 1 and n2[0][0] == "Rank 3" and n3.is_empty(), str(n1))
