@@ -40498,5 +40498,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_glomwort_f3_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_glomwort_f4",
+    "name": "Glomworth (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glomwort_f4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glomwort_f4",
+    "name": "Glomworth (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glomwort_f4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glomwort_f3",
+    "name": "Glomworth (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glomwort_f3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glomwort_f3",
+    "name": "Glomworth (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glomwort_f3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glomwort_f3",
+    "name": "Glomworth (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glomwort_f3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glomwort_f2",
+    "name": "Glomworth (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glomwort_f2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_frothisk",
+    "name": "Frothisk (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_frothisk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_frothisk",
+    "name": "Frothisk (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_frothisk_1.jpg",
+    "ok": true
   }
 ]
