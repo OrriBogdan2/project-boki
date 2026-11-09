@@ -36914,5 +36914,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_cisternmander_gb_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_bucketmander_gc",
+    "name": "Bucketmander (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bucketmander_gc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bucketmander_gc",
+    "name": "Bucketmander (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bucketmander_gc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bucketmander_gc",
+    "name": "Bucketmander (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bucketmander_gc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barrelmander_gc",
+    "name": "Barrelmander (gimmick C)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_barrelmander_gc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barrelmander_gc",
+    "name": "Barrelmander (gimmick C)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_barrelmander_gc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barrelmander_gc",
+    "name": "Barrelmander (gimmick C)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_barrelmander_gc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bucketmander_gc",
+    "name": "Bucketmander (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_bucketmander_gc_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_cisternmander",
+    "name": "Cisternmander (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_cisternmander_2.jpg",
+    "ok": true
   }
 ]
