@@ -26,14 +26,14 @@ Status: PROPOSAL. The art session wrote the art side; game rules (spawns, announ
 | Ultra | Cetorgan (pipe-organ sky whale) | concepts generating |
 | Ultra | Hydrangor (three-headed topiary hydra) | live |
 | Ultra | NEW ultra legendary | needs a design |
-| Blight | Blight form of an existing legendary (suggest Glaciammoth: blighted ice) | needs a design |
-| Blight | Blight form or a new Blight sovereign | needs a design |
+| Blight | NEW Blight legendary (a new creature, not a variant) | needs a design |
+| Blight | NEW Blight legendary (a new creature, not a variant) | needs a design |
 
 Reelacine, Malletary and Gilabacus stay ordinary rares (not legendary). That leaves 5 new designs to reach 12.
 
 ## Open questions
 1. How many boss areas does the game have? Not in the art briefs; main knows. Boss legendaries should match it (one per area).
-2. Blight legendaries: corrupted versions of existing legendaries (cheaper, strong story), or brand-new designs?
+2. ~~Blight legendaries: corrupted versions or new designs?~~ Owner 14:39 ET: new creatures, not Blight versions of existing legendaries.
 3. Do Pavonazar, Ghoulamari and Glacione move from rare to Minor legendary, or should Minor be all-new designs?
 4. Catch rules per tier (can bosses and ultras be caught, once per match, and so on): game design, owner and main.
 
