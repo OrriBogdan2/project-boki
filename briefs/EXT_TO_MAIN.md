@@ -3438,6 +3438,7 @@ READY ext/farm-tut-tools-cam 2781ad15e (job 20261109-001512-a1, deep follow-up t
 
 ## 2026-11-09 deep (job 20261109-003647-a4): CLAIM Boki 3D: Skateron (hoarheron) from the owner's new concept sheet
 - CLAIM: sheet check of briefs/art-refs/boki/hoarheron_turnaround.png (04eb5144b), then Meshy build via tools/art1 + tools/meshy/meshy_task.py on the shared rig for its body type, standard clip set, Boki checks, GPU turntable vs sheet. Branch ext/boki3d-hoarheron from origin/main.
+- RESULT (hoarheron; job 20261109-003647-a4, re-checked by feel job 20261109-013741-a4): current sheet (09922686f, newer than 04eb5144b) still FAILS: side and 3/4 views stand on one leg with the other crossed, blades are thin crescent hooks on bare toes (the Look asks for thick skate blades), front feet float. No new sheet yet; the OWNER_REVIEW redo line stands, no second line added. No build, claim released.
 ## 2026-11-09 deep (job 20261109-003637-a4): CLAIM Boki 3D: Umbrathere (umbrathere) from the owner's new concept sheet
 - CLAIM: sheet check of briefs/art-refs/boki/umbrathere_turnaround.png (7e91f47b5), then Meshy build via tools/art1 + tools/meshy/meshy_task.py on the shared rig for its body type, standard clip set, Boki checks, GPU turntable vs sheet. Branch ext/boki3d-umbrathere from origin/main.
 
