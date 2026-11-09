@@ -107,6 +107,12 @@ func hittable() -> bool:
 func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if dead or dmg <= 0.0:
 		return 0.0
+	var summon_k := KinSummon.out_k(by)       # a summoned Boki hits at its band's weight (burns too)
+	if summon_k != 1.0:
+		dmg *= summon_k
+		if opts.has("burn"):
+			opts = opts.duplicate()
+			opts["burn"] = float(opts["burn"]) * summon_k
 	# the Demo match: a fresh lander who hasn't started anything takes no damage (Match.demo_shielded)
 	if m is Match:
 		var mt := m as Match

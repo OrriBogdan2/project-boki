@@ -75,7 +75,7 @@ What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words
 
 | Setting | Value |
 |---|---|
-| _doc | The Boki summon (KinSummon, decision 0039): [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band. |
+| _doc | The Boki summon (KinSummon, decision 0039): [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band. band: what one window deals, as a share of a Hunter's LMB over the same seconds (decision 0042), aim: where each species is aimed inside it, the top for the shortest windows, the bottom for the longest; dmg_k: x each species' damage while summoned to land it there (--summon-band-check prints the fit); band_tol: how far a species may sit from its aim. |
 | table | {"bruiser": {"small": [8, 60], "medium": [10, 65], "large": [12, 70]}, "skirmisher": {"small": [7, 55], "medium": [9, 60], "large": [11, 65]}, "trickster": {"small": [8, 55], "medium": [10, 60], "large": [12, 65]}, "controller": {"small": [11, 65], "medium": [13, 70], "large": [15, 75]}, "tank": {"small": [14, 75], "medium": [16, 80], "large": [18, 85]}, "support": {"small": [16, 80], "medium": [18, 85], "large": [20, 90]}} |
 | fallback | [10, 60] |
 | uptime_band | [0.09, 0.2] |
@@ -85,6 +85,10 @@ What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words
 | rebloom_dist | 20 |
 | guardian | {"min_s": 8.0, "max_s": 15.0, "leash": 6.0, "damage_mult": 1.25, "pulse_s": 0.8} |
 | steal | {"_doc": "Stolen Boki wisps (KinSteal, decision 0041, WISP_DESIGN_OPEN.md Q6/Q8): loose_s = s a downed hunter's wisp floats loose; grab_r = m reach, grab_s = s holding interact; carry_max = stolen wisps one hunter carries; passive_k = share of each stolen carry passive; summon_k = share of its window for the one stolen summon, at least summon_min_s s.", "loose_s": 10.0, "grab_r": 2.0, "grab_s": 0.6, "carry_max": 2, "passive_k": 0.5, "summon_k": 0.5, "summon_min_s": 5.0} |
+| band | [0.25, 0.4] |
+| aim | [0.28, 0.37] |
+| band_tol | 0.06 |
+| dmg_k | {"basaltoad": 0.32, "burrlet": 0.42, "caecilith": 0.67, "cairnback": 0.27, "casquebill": 0.48, "cindle": 0.33, "cindowary": 0.28, "duskapi": 0.67, "floenatee": 0.72, "gibbelle": 0.4, "glaciyak": 0.38, "glintmole": 0.47, "gloamshell": 0.54, "glomwort": 0.42, "goliathite": 0.28, "heatherhorn": 0.24, "hivara": 0.29, "hoarheron": 0.38, "kestrike": 0.38, "kilnbadger": 0.41, "kindlewren": 0.35, "lilybara": 0.72, "limpetor": 0.28, "lodestick": 0.78, "marchleaf": 0.28, "moonloris": 0.66, "mossgrade": 0.8, "moundvark": 0.24, "murmurling": 0.34, "nacrolin": 0.61, "nettlynx": 0.31, "nimbostrich": 0.35, "opalisk": 0.76, "orchisloth": 0.78, "pebbit": 0.35, "puddlet": 0.8, "rimeshrew": 0.33, "scaldamus": 0.35, "selenfin": 0.79, "sentrikat": 0.39, "spatewader": 0.27, "squalltross": 0.49, "threadwyrm": 0.34, "thrumbird": 0.79, "tuatrune": 0.32, "umbrathere": 0.36, "velvorm": 0.27, "wisplet": 0.87, "zapple": 0.45, "zephyrak": 0.47} |
 
 ## boki_system (`content/rules/boki_system.json`)
 
