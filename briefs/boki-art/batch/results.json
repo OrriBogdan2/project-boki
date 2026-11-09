@@ -47358,5 +47358,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_moundlet_e2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_moatpole_e1",
+    "name": "Moatpole (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_moatpole_e1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_moundlet_e1",
+    "name": "Moundlet (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_moundlet_e1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_moundlet_e3",
+    "name": "Moundlet (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_moundlet_e3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_moatpole_e1",
+    "name": "Moatpole (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_moatpole_e1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_moatpole_e1",
+    "name": "Moatpole (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_moatpole_e1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_moatpole_e2",
+    "name": "Moatpole (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_moatpole_e2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_moundlet_e1",
+    "name": "Moundlet (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_moundlet_e1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_moatpole_e3",
+    "name": "Moatpole (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_moatpole_e3_1.jpg",
+    "ok": true
   }
 ]
