@@ -93,7 +93,7 @@ posts scroll at the move speed).
 **Mossy (`bulwark`)**
 1. Cadence 5 steps/s on a 2 m giant (a shuffle); not changed.
 2. The left arm hung nearly still against the legs (counter +0.17, now +0.64). Slide only fell 25 % to 19 %: the nearest to the gate.
-3. lmb_throw and lmb_slam jump the hand 0.5 to 0.64 body heights in one frame.
+3. lmb_throw and lmb_slam jumped the hand 0.5 and 0.64 body heights in one frame (fixed with `tools/art1/breaker_retime.sh`: 0.42 and 0.45; the throw's release stays at 0.12 s, the slam's impact lands at 0.10 s, not 0.08).
 
 ![bulwark walk and run, before and after](anim_audit/bulwark.jpg)
 
@@ -167,8 +167,7 @@ Split into backlog items per Hunter (role build):
 - `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
 - `rimewright`: a gait clip with a real stride (skate now).
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
-- Arm use in attacks: `ashwick`, `ostra`, `tender`, `dredge`, `mage`, `thief` (vault_r) hold an arm sideways; `bulwark`
-  and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
+- Arm use in attacks: `ashwick`, `ostra`, `tender`, `dredge`, `mage`, `thief` (vault_r) hold an arm sideways; `dolm` jumps a hand 0.4 to 0.67 body heights in one frame.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.
 - Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).
