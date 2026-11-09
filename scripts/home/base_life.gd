@@ -50,6 +50,17 @@ static func nocturnal(rec: Dictionary) -> bool:
 static func bond(a: Dictionary, b: Dictionary) -> float:
 	return float(a.get("bonds", {}).get(String(b["uid"]), 0.0))
 
+## How much `k` likes `o` for greeting and napping: the bond, plus a weight if `o` is a parent of the young `k`.
+static func regard(k: Dictionary, o: Dictionary, parent_weight: float) -> float:
+	return bond(k["rec"], o["rec"]) + (parent_weight if Parentage.is_parent_of(o["rec"], k["rec"]) else 0.0)
+
+## A young Boki's first greeting or nap with a parent goes in its journal, once (`what`: what it did).
+static func note_parent(k: Dictionary, o: Dictionary, what: String) -> void:
+	if not Parentage.is_parent_of(o["rec"], k["rec"]): return
+	for m in k["rec"]["memory"]:
+		if m["kind"] == "parent": return
+	Save.remember(k["rec"], "parent", "%s %s, its parent" % [what, o["rec"]["name"]], 0.5)
+
 ## Moves both Boki's bond with each other by `by`, kept in -1..1.
 static func add_bond(a: Dictionary, b: Dictionary, by: float) -> void:
 	for pair in [[a, b], [b, a]]:
@@ -263,11 +274,18 @@ func _nap(k: Dictionary, why: String) -> void:
 		return
 	k.erase("eat")
 	if Care.need(k["rec"], "joy") >= GRUMPY:
+		var best := {}
+		var top := float(R["friend_at"]) * 0.5
 		for o in _near(k, true):
-			if (o["life"] as Fsm).is_in(S.NAP) and bond(k["rec"], o["rec"]) >= float(R["friend_at"]) * 0.5:
-				k["life_pile"] = o       # walks over to a napping friend (or nearly one) first
-				k["t"] = PILE_WALK
-				return
+			var liking := regard(k, o, float(R["parent_weight"]))
+			if (o["life"] as Fsm).is_in(S.NAP) and liking >= top:
+				top = liking
+				best = o
+		if not best.is_empty():
+			k["life_pile"] = best       # walks over to the napping friend it likes most (a parent first) before it naps
+			k["t"] = PILE_WALK
+			note_parent(k, best, "napped beside")
+			return
 	_lie_down(k)
 
 func _lie_down(k: Dictionary) -> void:
@@ -365,10 +383,16 @@ func _mate(k: Dictionary, near: Array) -> Dictionary:
 	return best
 
 func _greet(k: Dictionary, near: Array) -> void:
+	var best := {}
+	var top := float(R["friend_at"])
 	for o in near:
-		if bond(k["rec"], o["rec"]) >= float(R["friend_at"]) and _dist(k, o) < GREET and randf() < 0.5:
-			h._emote(k, "♥")
-			return
+		var liking := regard(k, o, float(R["parent_weight"]))
+		if liking >= top and _dist(k, o) < GREET:
+			top = liking
+			best = o
+	if not best.is_empty() and randf() < 0.5:
+		h._emote(k, "♥")
+		note_parent(k, best, "said hello to")
 
 ## Two hot tempers that meet may squabble: the chance grows with how far their summed temper is over 1.0.
 func _clash(a: Dictionary, b: Dictionary) -> bool:

@@ -489,7 +489,7 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 		"gen": maxi(int((a.get("lineage", {}) as Dictionary).get("gen", 0)), int((b.get("lineage", {}) as Dictionary).get("gen", 0))) + 1}
 	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
 	ensure(baby)
-	_inherit_habits(baby, a, b, rng)
+	baby["gifts"] = Parentage.gifts(a, b, baby, _inherit_habits(baby, a, b, rng))
 	if unstable_mix(a, b): baby["needs"]["joy"] = UNSTABLE_JOY
 	var lean := stronger(a, b).get("lean", {}) as Dictionary
 	if not lean.is_empty():
@@ -516,7 +516,8 @@ static func unstable_mix(a: Dictionary, b: Dictionary) -> bool:
 	return absf(float(a["traits"].get("temper", 0.5)) - float(b["traits"].get("temper", 0.5))) >= TEMPER_CLASH
 
 ## One habit from each parent: the favourite food from one, the favourite play from the other.
-static func _inherit_habits(baby: Dictionary, a: Dictionary, b: Dictionary, rng: RandomNumberGenerator) -> void:
+## True if the food came from a.
+static func _inherit_habits(baby: Dictionary, a: Dictionary, b: Dictionary, rng: RandomNumberGenerator) -> bool:
 	ensure(a)
 	ensure(b)
 	var a_food := rng.randf() < 0.5
@@ -527,6 +528,7 @@ static func _inherit_habits(baby: Dictionary, a: Dictionary, b: Dictionary, rng:
 	if String(likes["hates"]) == food: likes["hates"] = likes["food"]
 	likes["food"] = food
 	likes["play"] = pp["likes"]["play"]
+	return a_food
 
 ## Rare Eggs no longer use the breeding nest: they hatch on the Incubator (scripts/core/incubator.gd).
 ## Kept for older callers: puts shelf eggs into free incubator cradles. True if any went in.
