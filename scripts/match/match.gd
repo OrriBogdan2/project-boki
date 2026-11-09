@@ -2171,6 +2171,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		credit = by.owner_h
 	if target is Hunter and target != credit:
 		(target as Hunter).dmg_taken += d
+		var rival: bool = credit is Hunter and credit.team != target.team and not target.remote
+		if rival and (target as Hunter).armor_gain(d) >= 0: _armor_up(target)     # taken counts too
 		if by is Blight: kstat["bl_dmg"] = float(kstat.get("bl_dmg", 0.0)) + d
 	if credit is Hunter and target != credit:
 		credit.dmg_done += d
@@ -3446,7 +3448,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	if x.has("blight"): o["blight"] = x["blight"]
 	if x.has("wallstun"): o["wallstun"] = x["wallstun"]
 	if x.has("ab"): o["ab"] = x["ab"]
-	for kk in ["burn_for", "slow_k", "dr"]:
+	for kk in ["burn_for", "slow_k", "dr", "armor_k"]:
 		if x.has(kk): o[kk] = x[kk]
 	if x.has("ride_dmg") and by:
 		# a kin's damage rider on your shots procs at most once a second on each target

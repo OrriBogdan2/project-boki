@@ -56,6 +56,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--truce-check` | Truce offers and answers, no targeting during a truce, betrayal breaks and marks, shared uplink yards |
 | `--duel-check` | The duel room: autopilot against the sparring bot through Hunter, behaviour, glove and difficulty changes |
 | `--blight-check` | The Blight's strength curve, Warden posts, the landing grace period, noise drawing Skitters, a level-1 hunter can win early |
+| `--armor-parity-check` | Armour matches the source per docs/ARMOUR_PARITY.md: reduction and durability by tier, the progress ratios, damage taken fills progress, no refill, revive on a broken Common piece, Grimble's no-bloom armour bonus |
 | `--raid-check` | Raid conditions roll fairly and repeatably, practice modes stay clear, sight shrinks, the armor kit key works |
 | `--bot-sanity-check` | Over seeded matches, no bot spins, spams jump or dash, or hangs in the air |
 | `--teammate-check` | Your Boki as a teammate: keeping close, callouts, caring, the tutorial guide |

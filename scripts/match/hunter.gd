@@ -72,12 +72,10 @@ const DIVE_VY_RATE := 7.0      # the dive reaches its fall speed in ~0.3s (was 4
 const DROP_VY_RATE := 9.0      # the canopy settles to its sink in ~0.2s after it opens (was 4)
 const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, then settles to DROP_FALL
 const DEPLOY_H := 8.0         # the glider opens by itself this high above the ground
-## Armor, as in Supervive: it takes a flat share off every hit (ARMOR_DR) for as long as it has
-## durability left; what gets through hurts your health and wears the durability down by the same
+## Armor (docs/ARMOUR_PARITY.md): while it has durability it takes its tier's share off every hit
+## (ARMOR_TIERS), then what gets through hurts your health and wears the durability by the same
 ## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
-const ARMOR_DR := 0.2
-const ARMOR_DUR := 2.2        # durability as a multiple of max health
-const ARMOR_WAIT := 4.0
+const ARMOR_DUR := 2.2        # Common durability as a multiple of max health
 const CONSUME_VULN := 1.2     # you take this much more damage while drinking, repairing or reviving a box
 
 var pname := "Hunter"
@@ -188,7 +186,6 @@ var muzzle_t := 0.0
 var regen_wait := 0.0
 var armor := 0.0
 var max_armor := 50.0
-var armor_wait := 0.0
 var bloom := 0.0              # extra spread from moving, jumping and dashing
 var crouch := false           # slower, steadier aim, and much harder to spot
 var crouch_k := 0.0
@@ -537,16 +534,16 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false)
 			return 0.0
 	regen_wait = 5.0
-	armor_wait = ARMOR_WAIT
 	if drink_t > 0.0 or kit_t > 0.0 or box_reviving():
 		d *= CONSUME_VULN
 		# drinking, repairing or reviving leaves you open: any real hit spills it (you keep the item)
 		if d >= 1.0 and opts.get("src", "") != "heat":
 			_interrupt_consume()
 	if armor > 0.0 and not shelled and opts.get("src", "") not in ["fall", "burn", "heat"]:
-		d *= 1.0 - ARMOR_DR
-		# your kin's armor stats make it wear more slowly
-		armor = maxf(0.0, armor - d * (1.0 - minf(0.6, owner_stat("armor") + kin_pt("owner_armor"))))
+		d *= 1.0 - float(ARMOR_TIERS[armor_tier][3])
+		# your kin's armor stats make it wear more slowly; armor_k = a hit's bonus damage to armor only
+		var wear := d * float(opts.get("armor_k", 1.0))
+		armor = maxf(0.0, armor - wear * (1.0 - minf(0.6, owner_stat("armor") + kin_pt("owner_armor"))))
 		if armor <= 0.0:
 			m.on_armor_break(self, by)
 	if gliding and d > 0.0:
@@ -1638,6 +1635,7 @@ func _emit_shot() -> void:
 		extra["boom"] = wpn["boom"]; extra["boom_kb"] = wpn["boom_kb"]
 	if crit_t > 0.0:
 		extra["crit"] = true
+	if wbloom <= 0.0 and wpn.has("clean_armor_k"): extra["armor_k"] = wpn["clean_armor_k"]   # a no-bloom shot
 	Loot.rider(self, extra, dmg)
 	_kin_riders(extra)
 	if pel > 1:
@@ -1977,7 +1975,6 @@ func sim(dt: float) -> void:
 	if grounded:
 		air_jumps = 0
 		air_dashed = false
-	armor_wait = maxf(0.0, armor_wait - dt)
 	# shots spread more while you move, jump or have just dashed, and settle when you stand still
 	if not remote:
 		crouch = bool(inp.get("crouch", false)) and grounded and not downed and roll_t <= 0.0 and not gliding and not dropping and not riding and charge.is_empty()
@@ -2955,12 +2952,14 @@ func _gate(key: String, slot: String, fb: String) -> void:
 			m.hud.toast("Locked  ·  earn a skill point to unlock it", Color("a2a8bb"))
 
 var base_armor := 50.0
-## Armor evolves through a run, like Supervive's: damage you deal to rival hunters fills it (monsters
-## count a third), and a knock adds a big chunk. Each tier adds plates on top of the base, and the new
-## plates arrive full. Tier colour shows on everyone's armor bar, so you can read how fed a rival is.
-const ARMOR_TIERS := [["Common", Color("dfe9f7"), 0.0], ["Uncommon", Color("7fe08a"), 220.0], ["Rare", Color("5fb6ff"), 560.0],
-	["Epic", Color("c27cff"), 1000.0], ["Legendary", Color("ffbf3a"), 1600.0]]
-const ARMOR_TIER_BONUS := 0.15     # of base armor per tier above Common
+## Armor evolves through a run, like the source's: damage you deal to and take from rival hunters
+## fills it (monsters count a third), and a knock adds a big chunk. A tier raises the reduction and,
+## at the top two, the durability; new plates arrive full. Tier colour shows on everyone's armor bar.
+## Rows: name, colour, progress to reach it (the source's 2k/3.6k/12k/20k x 0.11), damage reduction,
+## durability x the Common piece (source 2,500 / 2,500 / 2,500 / 3,000 / 3,500).
+const ARMOR_TIERS := [["Common", Color("dfe9f7"), 0.0, 0.20, 1.0], ["Uncommon", Color("7fe08a"), 220.0, 0.25, 1.0],
+	["Rare", Color("5fb6ff"), 396.0, 0.30, 1.0], ["Epic", Color("c27cff"), 1320.0, 0.35, 1.2],
+	["Legendary", Color("ffbf3a"), 2200.0, 0.35, 1.4]]
 const ARMOR_KNOCK_XP := 140.0
 var armor_xp := 0.0
 var armor_tier := 0
@@ -2993,7 +2992,7 @@ func armor_col() -> Color:
 	return ARMOR_TIERS[armor_tier][1]
 
 func refresh_gear() -> void:
-	max_armor = round(base_armor * (1.0 + ARMOR_TIER_BONUS * float(armor_tier))) + gear_stat("armor")
+	max_armor = round(base_armor * float(ARMOR_TIERS[armor_tier][4])) + gear_stat("armor")
 	armor = minf(armor, max_armor)
 	Gear.apply_worn(self)
 

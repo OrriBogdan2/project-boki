@@ -495,6 +495,9 @@ func _ready() -> void:
 	if "--blight-check" in args:
 		load("res://tools/blight_check.gd").new().run(self)      # the Blight: spawns, scaling, noise, early weakness
 		return
+	if "--armor-parity-check" in args:
+		load("res://tools/armor_parity_check.gd").new().run(self)    # docs/ARMOUR_PARITY.md rows
+		return
 	if "--raid-check" in args:
 		load("res://tools/raid_check.gd").new().run(self)        # raid conditions, sight, the armor kit key
 		return
