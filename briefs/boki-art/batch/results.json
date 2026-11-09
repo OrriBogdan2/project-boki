@@ -33708,5 +33708,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_puffuse_full_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_nymphane_full",
+    "name": "Nymphane (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_nymphane_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_nymphane_full",
+    "name": "Nymphane (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_nymphane_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_nymphane_full",
+    "name": "Nymphane (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_nymphane_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_puffuse_full",
+    "name": "Puffuse (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_puffuse_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_morelkin_full",
+    "name": "Morelkin (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_morelkin_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_puffuse_full",
+    "name": "Puffuse (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_puffuse_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_morelkin_full",
+    "name": "Morelkin (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_morelkin_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_reelacine_full",
+    "name": "Reelacine (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_reelacine_full_2.jpg",
+    "ok": true
   }
 ]
