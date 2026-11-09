@@ -15627,5 +15627,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_rampartoad_pe_w28_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_rampartoad_pe_w28",
+    "name": "Rampartoad (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rampartoad_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenfin_p2_w28",
+    "name": "Selenfin (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_selenfin_p2_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenfin_p2_w28",
+    "name": "Selenfin (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_selenfin_p2_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenfin_p2_w28",
+    "name": "Selenfin (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_selenfin_p2_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenfin_p2_w28",
+    "name": "Selenfin (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_selenfin_p2_w28_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_spirevark_pe_w28",
+    "name": "Spirevark (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_spirevark_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_spirevark_pe_w28",
+    "name": "Spirevark (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_spirevark_pe_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_spirevark_pe_w28",
+    "name": "Spirevark (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_spirevark_pe_w28_2.jpg",
+    "ok": true
   }
 ]
