@@ -133,7 +133,6 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	add_stack(1)
 	if mine and is_instance_valid(t):
 		h.heal(h.max_hp * float(rd()["heal_knock"]))
-		m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7fe08a"), 14, 2.5, 0.5, -2.0)
 
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	if String(o.get("ab", "")) == "ult":

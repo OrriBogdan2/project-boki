@@ -14,7 +14,7 @@ static func takedown(h: Hunter, victim: Hunter) -> void:
 		return
 	h.dashes = h.max_dashes()
 	h.ex_cd = 0.0
-	h.heal(h.max_hp * HEAL)
+	h.heal(h.max_hp * HEAL, true)       # quiet: its number, no green rise (nothing bursts on a reset)
 	cue(h, "takedown")
 
 ## The dash came back for `h` by some other means: play the cue and pop the Shift icon (local hunter only).

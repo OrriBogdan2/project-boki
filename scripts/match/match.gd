@@ -9,6 +9,7 @@ var opts := {}
 var world: World
 var skytrain: SkyTrain = null   # the loop train, on maps that have one
 var fx: Fx
+var heal_read: HealRead      # every heal and shield gain reads the same way
 var cam: CamRig
 var hud: Node = null
 var env: WorldEnvironment
@@ -725,6 +726,8 @@ func _start(o: Dictionary) -> void:
 	if DepthCues.k() > 0.0: add_child(DepthCues.new(self))
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
+	heal_read = HealRead.new(self)
+	add_child(heal_read)
 	brk = Breakables.new(self)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)
@@ -5175,9 +5178,9 @@ func _update_zones(dt: float) -> void:
 					if amt > 0.0:
 						for h in hunters:
 							if h.team == z["team"] and not h.remote and not h.downed and not h.out and h.flat_dist(c) < z["r"]:
-								h.hp = minf(h.max_hp, h.hp + amt)
+								h.heal(amt)
 								if h.kin and h.kin.state == "active" and h.kin.flat_dist(c) < z["r"]:
-									h.kin.hp = minf(h.kin.max_hp, h.kin.hp + amt)
+									Effects._heal(h.kin, amt)
 						if z["kind"] == "sanctuary":
 							fx.burst(c + Vector3(randf_range(-2, 2), 0.3, randf_range(-2, 2)), Color("9ee2a0"), 3, 1.5, 0.6, -2.0, 0.8)
 				"well":
@@ -5695,6 +5698,7 @@ func _net_apply(e: Ent, it: Array) -> void:
 		"h":
 			var h: Hunter = e
 			h.net_vel = Vector3(it[5], it[6], it[7])
+			heal_read.note(h)
 			h.face = it[8]; h.hp = it[9]; h.max_hp = it[10]
 			var f := int(it[11])
 			h.downed = f & 1 != 0
@@ -5717,6 +5721,7 @@ func _net_apply(e: Ent, it: Array) -> void:
 				if hk >= 0 and hk < Hunter.HOLD_KINDS.size(): h.set_hold(String(Hunter.HOLD_KINDS[hk]), 0.3)
 			h.down_hp = it[12]; h.revive = maxf(h.revive if h.revive > float(it[13]) and _rev_out.has(h.nid) else 0.0, float(it[13]))
 			h.shield = it[17]; h.extract_prog = it[18]
+			heal_read.synced(h)
 			h.kills = int(it[19]); h.knocks = int(it[20]); h.dmg_done = float(it[21])
 			if it.size() > 23:
 				h.armor = float(it[22]); h.max_armor = float(it[23])

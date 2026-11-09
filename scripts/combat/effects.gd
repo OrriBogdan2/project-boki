@@ -252,7 +252,9 @@ static func _heal(t: Node, n: float) -> void:
 	if t is Hunter:
 		(t as Hunter).heal(n)
 	elif t is Ent and not t.dead and t.hp > 0.0:
+		var before: float = t.hp
 		t.hp = minf(t.max_hp, t.hp + n)
+		t.m.heal_read.healed(t, t.hp - before)
 
 static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 	var m = _m(caster)
@@ -439,13 +441,11 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 		"heal":
 			for t in _targets(e, caster):
 				_heal(t, float(e.get("amount", 20.0)) * _heal_k(caster))
-				m.fx.burst(t.pos + Vector3(0, 1.0, 0), Color("8fe0a0"), 12, 2.5, 0.5, -3.0)
 		"shield":
 			for t in _targets(e, caster):
 				if "shield" in t:
-					t.shield = maxf(float(t.shield), float(e.get("amount", 40.0)) * _heal_k(caster))
+					m.heal_read.shield(t, float(e.get("amount", 40.0)) * _heal_k(caster))
 					if "shield_t" in t: t.shield_t = maxf(float(t.shield_t), float(e.get("time", 5.0)))
-				m.fx.ring(t.pos + Vector3(0, 0.1, 0), 1.0 if t is Hunter else 0.7, col, 0.4)
 			m.sfx("shield", caster.pos, -3.0)
 		"haste":
 			for t in _targets(e, caster):
@@ -623,7 +623,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				for t in who_l:
 					if float(e.get("heal", 0.0)) > 0.0: _heal(t, float(e["heal"]) * _heal_k(caster))
 					if float(e.get("shield", 0.0)) > 0.0 and "shield" in t:
-						t.shield = maxf(float(t.shield), float(e["shield"]) * _heal_k(caster))
+						m.heal_read.shield(t, float(e["shield"]) * _heal_k(caster))
 						if "shield_t" in t: t.shield_t = maxf(float(t.shield_t), float(e.get("time", 4.0)))
 					if float(e.get("haste", 0.0)) > 0.0 and "haste_t" in t: t.haste_t = maxf(float(t.haste_t), float(e["haste"]))
 					if e.get("cleanse", false) and t is Ent:

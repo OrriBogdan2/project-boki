@@ -3,7 +3,8 @@ extends RefCounted
 ## How a shield reads on a Hunter: one look for every source (abilities, ally areas,
 ## Boki moves, a Fuse release). The Hunter's own ink outline turns into a thicker line in their side colour
 ## (SideColor): a crisp shell that hugs the body, no bubble, nothing in front of it, no particles, no extra
-## draw calls (the outline pass is swapped, not added). The amount is on the nameplate as a pale bar past
+## draw calls (the outline pass is swapped, not added). A gain (HealRead.shield) flashes the shell white for
+## GAIN_S. The amount is on the nameplate as a pale bar past
 ## health (HudPlate). When a hit breaks the shield before it runs out it pops with one quick ring and flash.
 ## Materials only change when the shield goes up or down, never per frame.
 
@@ -11,6 +12,8 @@ const META := "shield_rim"       # on the Hunter: the colour shown, or absent wh
 const INK_WIDTH_K := 2.6        # the shield outline is this much wider than the model's own ink
 const POP_RING := 1.1            # m: radius of the break ring
 const POP_S := 0.22              # s: how long the break ring lasts
+const GAIN_META := "shield_gain_at"
+const GAIN_S := 0.18             # s: the shell shows white after a gain
 
 static var _inks := {}           # [the model's own ink material, colour] -> its shield version (shared)
 
@@ -18,6 +21,8 @@ static var _inks := {}           # [the model's own ink material, colour] -> its
 static func tick(h: Hunter) -> void:
 	var up := h.shield > 0.0 and not h.downed and not h.out
 	var col := SideColor.of(h.m, h).lerp(Color.WHITE, 0.25) if up else Color.BLACK
+	if up and h.m.time - float(h.get_meta(GAIN_META, -1.0)) < GAIN_S:
+		col = Color.WHITE
 	var shown_col: Color = h.get_meta(META, Color.BLACK)
 	var same_body := is_same(_rim_mats(h), h.mats)
 	if up == h.has_meta(META) and (not up or (shown_col == col and same_body)):
@@ -28,6 +33,10 @@ static func tick(h: Hunter) -> void:
 		_rim_off(h)
 		if h.shield_t > 0.0:
 			_pop(h)
+
+## `h`'s shield just grew: the shell flashes white (the next ticks swap the ink, then swap it back).
+static func gain(h: Hunter) -> void:
+	h.set_meta(GAIN_META, h.m.time)
 
 ## Whether the shield rim is on `h`.
 static func shown(h: Hunter) -> bool:

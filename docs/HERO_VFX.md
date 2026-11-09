@@ -56,3 +56,8 @@ the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_ha
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
   standard are docs/AUDIO.md's (content/sfx/<arch>.json); a recipe only says which to play and how loud.
+- **Heals and shields read one way (HealRead):** a kit never draws its own heal or shield-gain look. A heal goes through
+  `Hunter.heal` (or `Effects._heal` for a Boki), which gives the one healed a short green rise and a green `+N` that adds up
+  every heal inside 0.3 s; a shield goes on through `m.heal_read.shield(e, amount)`, which flashes the shield shell white
+  (`ShieldLook.gain`). Your squad's heals always show, a rival's only when big; a dash reset's heal shows its number only.
+  `--heal-read-check` fails on any line in scripts/ that raises health or a shield by hand.
