@@ -5416,3 +5416,4 @@ READY ext/anim-stomp-drink-3 bda7c2de7 (stomp, revive kneel and drink clips for 
 READY ext/parity-glide-spike 6e73f9773 (glide spike rules)
 READY ext/parity-ability-pierce 76de01e1 (ability pierce rules)
 READY ext/parity-ability-elevation 27befb05e (ability height rules)
+READY ext/docs-heroes-sweep 2b1df1854 (hero docs sweep)
