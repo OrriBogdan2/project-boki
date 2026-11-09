@@ -63409,5 +63409,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_narfoil_gp_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_narfoil_gp",
+    "name": "Narfoil (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_narfoil_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_narfoil_gp",
+    "name": "Narfoil (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_narfoil_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chiptero_gp",
+    "name": "Chiptero (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chiptero_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chiptero_gp",
+    "name": "Chiptero (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chiptero_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chiptero_gp",
+    "name": "Chiptero (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chiptero_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_narfoil_gp",
+    "name": "Narfoil (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_narfoil_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pinster_gp",
+    "name": "Pinster (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pinster_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pinster_gp",
+    "name": "Pinster (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pinster_gp_3.jpg",
+    "ok": true
   }
 ]
