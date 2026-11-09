@@ -183,7 +183,7 @@ func _head(L: Dictionary, rec: Dictionary, sp: Dictionary, rival_side: bool) -> 
 	pic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	top.add_child(pic)
 	var title := Data.kin_title(String(rec["name"]), String(sp["name"]))
-	var nm := UI.label("%s  ·  level %d" % [title, int(rec.get("level", 1))], 18, sp["color"], UI.big)
+	var nm := UI.label("%s  ·  level %d" % [title, int(rec.get("level", 1))], 18, UI.INK, UI.big)
 	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	nm.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	nm.clip_text = true
