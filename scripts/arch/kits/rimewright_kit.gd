@@ -75,6 +75,7 @@ func add_chill(t: Ent) -> void:
 	var key := t.get_instance_id()
 	var fresh := not chilled(t)
 	chill[key] = {"t": t, "left": float(d["passive"].get("chill_t", 4.0))}
+	if t.remote: KitStatus.apply(t, "chl", float(chill[key]["left"]), 1.0, true, "", h.nid)
 	if fresh:
 		vfx("chill", t.pos)
 
@@ -103,6 +104,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 				float(pd.get("splinter_delay", 0.4)),
 				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), t))
 		chill.erase(t.get_instance_id())
+		if t.remote: KitStatus.apply(t, "chl", 0.0, 0.0, true, "", h.nid)
 		return
 	add_chill(t)
 	if String(o.get("ab", "")) == "fan":

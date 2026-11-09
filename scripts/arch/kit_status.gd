@@ -7,11 +7,16 @@ extends RefCounted
 ##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder (no slow: the
 ##        source's Daze is only a damage window); stars over the head
 ##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a SLOWED word and a teal ring
+##   ign chl sta mrk  Ignite level (Cinder), Chill (Neve), Static (Sparkle), Marks (Sable): the caster's kit
+##        holds the stacks; the body's own game keeps a copy in meta "tag_<kind>" {n, until, by} and shows pips
 ## The game that owns the body runs the rules; the caster's game sends the Net event
-## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.
+## ["kst", nid, kind, seconds, k, caster nid] for a remote body (Net.VERSION 0.7.0; the caster nid and the
+## tag kinds from 0.24.5), every game shows it. A tag with k = 0 ends it (Chill spent by a Shatter).
 
 const GROUND_COL := Color("e0a03a")
 const RATTLE_COL := Color("ffb36a")
+const TAG_COL := {"ign": Color("ff8a2a"), "chl": Color("9fe0ff"), "sta": Color("ff7fd0"), "mrk": Color("ffd24a")}
+const TAG_TOP := 2.9           # m above the feet where the stack pips ring the body
 
 static func rattled(e: Ent) -> bool:
 	return e != null and is_instance_valid(e) and e.has_meta("rat_until") and e.m != null and float(e.m.time) < float(e.get_meta("rat_until"))
@@ -29,16 +34,19 @@ static func grounded(e: Ent) -> bool:
 ## Puts `kind` on `e` for `secs` (refreshes a running one). `send`: tell the other games when the
 ## body belongs to one of them. `toast`: the caster shows its own tell, so no overhead word, and the
 ## player's toast reads this instead (what Grounded takes away from a Dredge reeling, say).
-static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toast := "") -> void:
-	if e == null or not is_instance_valid(e) or e.dead or secs <= 0.0:
+static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toast := "", by := "") -> void:
+	if e == null or not is_instance_valid(e) or e.dead or (secs <= 0.0 and not (kind in TAG_COL and k == 0.0)):
 		return
 	var m: Node = e.m
 	if m == null:
 		return
 	if e.remote:
 		if send and m.get("net_on"):
-			m.net_event(["kst", e.nid, kind, snappedf(secs, 0.01), snappedf(k, 0.01)])
+			m.net_event(["kst", e.nid, kind, snappedf(secs, 0.01), snappedf(k, 0.01), by])
 		_show(e, kind, secs)
+		return
+	if kind in TAG_COL:
+		_tag(e, kind, secs, int(k), by)
 		return
 	match kind:
 		"gnd":
@@ -68,6 +76,8 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 ## What everyone sees: Grounded wraps cords round the legs for its length; Shred cracks a red ring.
 static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 	var m: Node = e.m
+	if kind in TAG_COL:
+		return
 	match kind:
 		"gnd":
 			var old := e.get_node_or_null("Grounded")
@@ -115,6 +125,37 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)
 			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)
 
+## Stack count `n` of a tag on `e`'s own game and the seconds it has left.
+static func tag_left(e: Ent, kind: String) -> float:
+	var t: Dictionary = e.get_meta("tag_" + kind, {})
+	return maxf(0.0, float(t.get("until", 0.0)) - float(e.m.time)) if int(t.get("n", 0)) > 0 else 0.0
+
+static func tag_n(e: Ent, kind: String) -> int:
+	return int((e.get_meta("tag_" + kind, {}) as Dictionary).get("n", 0)) if tag_left(e, kind) > 0.0 else 0
+
+## Keeps the stack on the body that owns it and rings `n` pips round it for its length.
+static func _tag(e: Ent, kind: String, secs: float, n: int, by: String) -> void:
+	var old := e.get_node_or_null("Tag_" + kind)
+	if old:
+		old.queue_free()
+		old.name = "TagGone_" + kind
+	if n <= 0:
+		e.remove_meta("tag_" + kind)
+		return
+	e.set_meta("tag_" + kind, {"n": n, "until": float(e.m.time) + secs, "by": by})
+	var ring := Node3D.new()
+	ring.name = "Tag_" + kind
+	var mat := Models.glow_mat(TAG_COL[kind])
+	for i in n:
+		var pip := MeshInstance3D.new()
+		pip.mesh = Models.crystal(0.07, 0.1, 4)
+		pip.material_override = mat
+		pip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		pip.position = Vector3((i - (n - 1) * 0.5) * 0.3, TAG_TOP, 0)
+		ring.add_child(pip)
+	e.add_child(ring)
+	e.m.later(secs, func(): if is_instance_valid(ring): ring.queue_free())
+
 ## A Net "kst" event: the body's own game runs the rule.
 static func from_net(m: Node, x: Array) -> void:
 	if x.size() < 4:
@@ -122,4 +163,6 @@ static func from_net(m: Node, x: Array) -> void:
 	var e: Ent = m.ents_by_id.get(String(x[1]), null)
 	if e == null:
 		return
-	apply(e, String(x[2]), float(x[3]), float(x[4]) if x.size() > 4 else 0.0, false)
+	var k := float(x[4]) if x.size() > 4 else 0.0
+	var by := String(x[5]) if x.size() > 5 else ""
+	apply(e, String(x[2]), float(x[3]), k, false, "", by)

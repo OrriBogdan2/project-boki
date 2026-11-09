@@ -135,6 +135,7 @@ func add_spark(f: Ent, n := 1) -> void:
 	s["n"] = mini(int(rd["max"]), was + n)
 	s["t"] = float(rd["dur"])
 	sparks[key] = s
+	if f.remote: KitStatus.apply(f, "sta", float(s["t"]), float(s["n"]), true, "", h.nid)
 	if int(s["n"]) >= int(rd["max"]) and was < int(rd["max"]):
 		# the 4th stack: a bolt drops out of the sky onto them
 		var top := f.position + Vector3(0, 9.0, 0)
@@ -154,6 +155,7 @@ func clear_sparks(f: Ent) -> void:
 	if sparks.has(key):
 		sparks.erase(key)
 		fx().unmark("vs%d" % key)
+		if f.remote: KitStatus.apply(f, "sta", 0.0, 0.0, true, "", h.nid)
 
 func _tick_sparks(dt: float) -> void:
 	var mx := int(res_def()["max"])
