@@ -203,16 +203,16 @@ func _fit_safe_area() -> void:
 func _unhandled_key_input(e: InputEvent) -> void:
 	if not e is InputEventKey or e.echo or chat_in.has_focus() or pm.locked:
 		return
-	if e.pressed and e.physical_keycode in [KEY_ENTER, KEY_KP_ENTER]:
+	if e.pressed and e.is_action("confirm"):
 		_show_chat_line(true)
 		get_viewport().set_input_as_handled()
-	elif e.physical_keycode == KEY_V and talk_btn.visible:
+	elif e.is_action("push_to_talk") and talk_btn.visible:
 		_talk(e.pressed)
 
-## Push-to-talk: the button (hold) or V. The transport is VoiceChat's; none ships yet.
+## Push-to-talk: the button (hold) or the push_to_talk key. The transport is VoiceChat's; none ships yet.
 func _talk(on: bool) -> void:
 	voice.set_talking(on)
-	talk_btn.text = "Speaking..." if on else "Hold to talk (V)"
+	talk_btn.text = "Speaking..." if on else "Hold to talk (%s)" % Settings.key_cap("push_to_talk")
 
 # ------------------------------------------------------------------ hunters and squad
 func _fill_hunters() -> void:

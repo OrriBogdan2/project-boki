@@ -158,6 +158,9 @@ const ACTIONS := [
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
 	["whistle", "Whistle at home: your partner comes, hold for the nearest Boki"], ["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
+	["undo", "Undo the last piece (build mode, with Ctrl)"], ["keep_placing", "Hold to keep placing (build mode)"],
+	["level_mod", "Hold with a slot key to level it"], ["kit_card", "Hunter kit card (hover a hunter)"],
+	["confirm", "Press the open panel's main button"], ["push_to_talk", "Push to talk (before a match)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 	["move_readout", "Movement readout (tuning)"],
 	["kin_summon", "Boki quick key: send out or call back (like tapping G)"],
@@ -522,7 +525,8 @@ func conflicts(ev: InputEvent, except := "") -> Array:
 	return out
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"]]
+const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"],
+		["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"]]
 func _shared_ok(a: String, b: String) -> bool:
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
