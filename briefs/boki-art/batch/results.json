@@ -17790,5 +17790,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/terrasloth_r2_w29_3.jpg",
     "ok": true
+  },
+  {
+    "id": "tidalisk_r_w29",
+    "name": "Tidalisk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tidalisk_r_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidalisk_r_w29",
+    "name": "Tidalisk",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/tidalisk_r_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_r_w29",
+    "name": "Voltalon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glintmole_pe_w29",
+    "name": "Glintmole (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glintmole_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glintmole_pe_w29",
+    "name": "Glintmole (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glintmole_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_r_w29",
+    "name": "Voltalon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_r_w29",
+    "name": "Voltalon",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_pe_w29",
+    "name": "Gongibbon (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_pe_w29_2.jpg",
+    "ok": true
   }
 ]
