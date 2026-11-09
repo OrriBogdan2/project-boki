@@ -161,9 +161,15 @@ func _tender_support() -> void:
 	ok("Relay Step rank 3: picking up a teammate refreshes the air dash", carried_again and P.ex_cd < 0.01, "ex_cd %.2f" % P.ex_cd)
 	P.stun_t = 0.5; step(m, 0.1)
 	ok("Carrier: a stun drops them and locks pickup", carried_again and not CareUtil.is_carried(A) and K.lock_t > 3.0, "again %s lock %.1f" % [str(carried_again), K.lock_t])
-	# --- a hit drops them too, and costs you no stun of your own
+	# --- a root keeps them (interrupt table: the data lists damage and a stun only)
 	P.stun_t = 0.0; K.lock_t = 0.0
 	A.teleport(P.pos + Vector3(0.4, 0, 0)); step(m, 0.1)
+	var carried_root := CareUtil.is_carried(A)
+	P.root_t = 0.5
+	step(m, 0.1)
+	ok("Carrier: a root does not drop them", carried_root and CareUtil.is_carried(A), "again %s" % str(carried_root))
+	P.root_t = 0.0
+	# --- a hit drops them too, and costs you no stun of your own
 	var carried_third := CareUtil.is_carried(A)
 	P.hurt(5.0, T, {}); step(m, 0.1)
 	ok("Carrier: a hit drops them with a 4s lock and no stun on you",

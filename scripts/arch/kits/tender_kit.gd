@@ -212,7 +212,7 @@ func _tick_carry(dt: float) -> void:
 	var cs := carrying()
 	if not cs.is_empty():
 		carry_t += dt
-		if h.stun_t > 0.0 or h.root_t > 0.0 or Hex.active(h):
+		if h.stun_t > 0.0 or Hex.active(h):          # a root keeps them (the data: damage or a stun drops them)
 			drop_all(true)
 			return
 		var down := bool(h.inp.get(SETDOWN, false))

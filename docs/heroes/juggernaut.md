@@ -347,3 +347,29 @@ left over when the merge ends: the Searing Wave charge (`lmb_t`, `lmb_buf`, `mel
 wind-up (`slam_w`), an armed Haul Slam (`haul`) and the held Smash (`rmb_down`, cleared by the merge itself), a Meteor Drop in its dive (`drop`), the Lunge's full flag (`lunge_full`) and a running Gilded Riposte
 (`riposte.st`, its guard or cleave; the gold glow hides).
 Scripted in `--kit-combo-check` as the `merge hold jug:` checks.
+
+## Interrupt rules (crowd control on holds, channels, tethers and recasts; Nov 9 parity pass A)
+Sources by precedence: [O] owner, [D] tooltip data (`briefs/supervive-data/supervive_kits.md`), [W] wiki as cited above,
+[F] footage (`briefs/hero-ref/`). [?] = none of them settles it; ours stays and nothing is guessed. Kinds: stun
+(`Ent.stun_t`), knock = a knockback (`Hunter.knock_t`, `Displace.knock`), root (`Ent.root_t`); "down" = knocked out
+(the source's "knocked"). Shared rules (all kits): `ArchKit.busy()` refuses every E press (recasts too) and a fresh X cast while stunned;
+a stun during an RMB hold lets go of it (`ArchKit.tick`, the move goes as if released); `Hunter.can_fire()` is false
+while stunned, a knock or a root never blocks it. Cooldowns are spent when the move starts.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| LMB Searing Wave (hold to charge) | stun | [?] Brall data and footage silent | the charge is dropped, no wave (unless a dash row keeps it) | [?] |
+| LMB Searing Wave | knock, root | [?] | ignored | [?] |
+| RMB Finishing Slam (0.6 s wind-up) | stun (and Hex, down) | [?] | cancelled, no strike, the cooldown stays spent (`_tick_slam`) | [?] |
+| RMB Finishing Slam | knock, root | [?] | ignored, the strike lands | [?] |
+| RMB Lunge (hold) | stun | [?] | the hold is let go: the Lunge goes (shared rule) | [?] |
+| RMB Lunge (hold) | knock, root | [?] | ignored, the charge goes on | [?] |
+| RMB air, Meteor Drop (hang, then dive) | stun (and down, merge) | [?] | in the air it stops, no slam, its cooldown stays spent (`JuggernautDrop.tick`) | [?] |
+| RMB air, Meteor Drop | knock, root | [?] | ignored | [?] |
+| Shift Rampage (crouch before the drive) | stun (and down) | [?] | no drive, the charge stays spent (`_tick_crouch`) | [?] |
+| E Warchain throw / hooked tether | stun | [W] a stun breaks it; the cooldown starts when it breaks | breaks (CHAIN BROKE), the cooldown starts (`JuggernautChain.snap`) | match |
+| E Warchain throw | root (and Grounded) | [W] no throw while rooted or Grounded | the press is refused | match |
+| E Warchain hooked tether | knock, root | [?] | the tether holds | [?] |
+| E recast, the pull | stun, root, knock (and down) | [?] | the pull stops where he is (`_tick_pull`, `pull`) | [?] |
+| X Gilded Riposte, the guard | stun, knock, root | [D] Volcanic Rebuke: Invulnerable | no damage and no crowd control | match |
+| X Gilded Riposte, the cleave | stun, knock, root | [?] | ignored, only going down ends it | [?] |

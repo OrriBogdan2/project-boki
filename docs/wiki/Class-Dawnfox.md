@@ -76,7 +76,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Carrier (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
+**Carrier (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
 
 **Relay Step (dash, Shift, 7s cooldown).** A quick skip about 3.6m where you move; in the air, a long floaty glide of about 13m (its own 14s cooldown).
 

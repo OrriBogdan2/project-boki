@@ -156,3 +156,21 @@ slot changes. The Boki Merge is on its own key.
 - Merge cleanup: `_drop_holds()` ends `needle` and `slide`. Cinderfall
   has no hold or channel (a tap, then the shell is out), so it adds nothing there.
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=gunslinger`.
+
+## Interrupt rules (crowd control on holds, channels, tethers and recasts; Nov 9 parity pass A)
+Sources by precedence: [O] owner, [D] tooltip data (`briefs/supervive-data/supervive_kits.md`), [W] wiki as cited above,
+[F] footage (`briefs/hero-ref/`). [?] = none of them settles it; ours stays and nothing is guessed. Kinds: stun
+(`Ent.stun_t`), knock = a knockback (`Hunter.knock_t`, `Displace.knock`), root (`Ent.root_t`); "down" = knocked out
+(the source's "knocked"). Shared rules (all kits): `ArchKit.busy()` refuses every E press (recasts too) and a fresh X cast while stunned;
+a stun during an RMB hold lets go of it (`ArchKit.tick`, the move goes as if released); `Hunter.can_fire()` is false
+while stunned, a knock or a root never blocks it. Cooldowns are spent when the move starts.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| LMB Quill Rifle (hold) | stun | [?] Ghost data and venator footage say nothing | stops while stunned, fires on if still held (`Hunter.can_fire`) | [?] |
+| LMB Quill Rifle (hold) | knock, root | [?] | ignored, it keeps firing | [?] |
+| Shift Slipstep (hold slide) | stun, root | [?] | the slide ends where she is, the charge stays spent (`_tick_slide`) | [?] |
+| Shift Slipstep (hold slide) | knock | [?] | not checked: the slide runs on, the push adds to it | [?] |
+| E Longneedle (0.6 s stand-still cast) | stun (and Hex, down) | [?] Arcane Railgun has no cast time in the data | cancelled, nothing fires, the cooldown stays spent (`_tick_needle`) | [?] |
+| E Longneedle | knock, root | [?] | ignored, the beam goes at the end | [?] |
+| X Cinderfall (shell, then a 1.6 s delay) | any | [?] Summon Napalm: delay only | the shell is already fired: nothing stops it | [?] |

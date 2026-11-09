@@ -206,3 +206,21 @@ snap is about half weight on screen; a 0.05 s FADE for `arc_tap`/`arc_loose`/`ar
 - Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground.
 
 ## Payoff
+
+## Interrupt rules (crowd control on holds, channels, tethers and recasts; Nov 9 parity pass A)
+Sources by precedence: [O] owner, [D] tooltip data (`briefs/supervive-data/supervive_kits.md`), [W] wiki as cited above,
+[F] footage (`briefs/hero-ref/`). [?] = none of them settles it; ours stays and nothing is guessed. Kinds: stun
+(`Ent.stun_t`), knock = a knockback (`Hunter.knock_t`, `Displace.knock`), root (`Ent.root_t`); "down" = knocked out
+(the source's "knocked"). Shared rules (all kits): `ArchKit.busy()` refuses every E press (recasts too) and a fresh X cast while stunned;
+a stun during an RMB hold lets go of it (`ArchKit.tick`, the move goes as if released); `Hunter.can_fire()` is false
+while stunned, a knock or a root never blocks it. Cooldowns are spent when the move starts.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| LMB bow draw (hold, release) | stun | [?] Myth data and pin footage silent | the draw is cancelled, no arrow (`Hunter._trigger_bow`) | [?] |
+| LMB bow draw | knock, root | [?] | ignored, the draw goes on | [?] |
+| RMB Heavy Shot (hold, release) | stun | [?] | the hold is let go: past 0.15 s the shot goes (shared rule) | [?] |
+| RMB Heavy Shot | knock, root | [?] | ignored | [?] |
+| Shift Spirit Walk (2.8 s) | damage | [W] taking damage ends it | ends ("hit", `on_take`) | match |
+| Shift Spirit Walk | stun, knock, root with no damage | [?] | not checked: it runs on | [?] |
+| X Virideth's window (3 shots, 6 s) | stun, knock, root | [?] | the window runs on; a stun only stops the shots while it lasts | [?] |

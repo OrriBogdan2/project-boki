@@ -243,3 +243,23 @@ The Furnace Cloak fires on the key's press: `e.on_press` in the data, read throu
 so E skips the hold-to-aim preview (there is nothing to aim).
 Holds dropped on a merge (`_drop_holds`): `hose` (the stream), `spool`, `was_held`, `after_t`, `flame_acc`, `bash`, `aiming`,
 and `jet.flight` (Flue Flight).
+
+## Interrupt rules (crowd control on holds, channels, tethers and recasts; Nov 9 parity pass A)
+Sources by precedence: [O] owner, [D] tooltip data (`briefs/supervive-data/supervive_kits.md`), [W] wiki as cited above,
+[F] footage (`briefs/hero-ref/`). [?] = none of them settles it; ours stays and nothing is guessed. Kinds: stun
+(`Ent.stun_t`), knock = a knockback (`Hunter.knock_t`, `Displace.knock`), root (`Ent.root_t`); "down" = knocked out
+(the source's "knocked"). Shared rules (all kits): `ArchKit.busy()` refuses every E press (recasts too) and a fresh X cast while stunned;
+a stun during an RMB hold lets go of it (`ArchKit.tick`, the move goes as if released); `Hunter.can_fire()` is false
+while stunned, a knock or a root never blocks it. Cooldowns are spent when the move starts.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| LMB Torch Lance (hold stream) | stun | [?] Felix data and linwick footage silent | the stream stops while stunned (`Hunter.can_fire`), then relights if still held | [?] |
+| LMB Torch Lance | knock, root | [?] | ignored | [?] |
+| RMB Cinder Shot (hold to aim, release) | stun | [?] | the hold is let go: the shot goes (shared rule) | [?] |
+| RMB Cinder Shot | knock, root | [?] | ignored | [?] |
+| Shift Soot Ram (dash to first foe) | stun, knock, root | [?] | not checked: the ram runs on | [?] |
+| X Flue Flight (1.8 s) | stun (and down, merge) | [?] the sheet: "whether he can be interrupted ... not found" | lands where he is, the cooldown stays spent (`AshwickJet._fly`) | [?] |
+| X Flue Flight | knock | [?] | adds to the flight's speed and bends it (`_take_boost`) | [?] |
+| X Flue Flight | root | [?] | ignored | [?] |
+| X recast | none | [F] reactivating ends the flight early | X again lands | match |

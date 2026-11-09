@@ -244,7 +244,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 - A body on the ridge's line is moved to its own side instead of leaving a gap (the source never shows one).
 - One cast's rocks deal at most 40 to any one hunter (Shred included): our burst rule (an ult straight into a merge must not
   kill a full-health light hunter), not a source number. Without it a full ridge punched down a lane does about 80+.
-- A stun, knock or merge while aiming cancels the cast and refunds it.
+- A stun, going down or a merge while aiming cancels the cast and refunds it (a knockback does not: see Interrupt rules).
 - Bond: the source sheet suggests 0.3 per slowed hunter and +0.15 per rock hit, capped at 0.8. The amounts are the main
   session's (KinBond.from_ult kinds hit/knock/kill, best event per cast), so a slowed hunter or a ridge rock hit inside 4s of
   the rise counts as a land of the matching kind.
@@ -304,3 +304,22 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
   each rock event carries its own direction, so the arc needs no new Net field (Net.VERSION unchanged).
 - Basalt Spine: `scripts/arch/kits/breah_spine.gd` (BreahSpine). Its hold field is `phase == "aim"`, cleared by
   `DolmKit._drop_holds()` through `spine.drop()`. Main sends only the X press, so BreahSpine._held() reads the local key (tests hold it with `inp["x_down"]`).
+
+## Interrupt rules (crowd control on holds, channels, tethers and recasts; Nov 9 parity pass A)
+Sources by precedence: [O] owner, [D] tooltip data (`briefs/supervive-data/supervive_kits.md`), [W] wiki as cited above,
+[F] footage (`briefs/hero-ref/`). [?] = none of them settles it; ours stays and nothing is guessed. Kinds: stun
+(`Ent.stun_t`), knock = a knockback (`Hunter.knock_t`, `Displace.knock`), root (`Ent.root_t`); "down" = knocked out
+(the source's "knocked"). Shared rules (all kits): `ArchKit.busy()` refuses every E press (recasts too) and a fresh X cast while stunned;
+a stun during an RMB hold lets go of it (`ArchKit.tick`, the move goes as if released); `Hunter.can_fire()` is false
+while stunned, a knock or a root never blocks it. Cooldowns are spent when the move starts.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| LMB Quake Fist (hold to punch) | stun | [?] Tetra data and breah footage silent | the hold is dropped, no punch (unless a dash row keeps it) | [?] |
+| LMB Quake Fist | knock, root | [?] | ignored | [?] |
+| RMB Quakefall (hold to 0.45 s) | stun | [?] | the hold is let go: the slam goes (shared rule) | [?] |
+| RMB Quakefall | knock, root | [?] | ignored | [?] |
+| RMB air dive | stun, knock, root | [?] | not checked: only going down ends it | [?] |
+| Shift Rock Hop | stun, knock, root | [?] | not checked: only going down or a glide ends it | [?] |
+| X Basalt Spine aim (hold and drag) | stun (and down, merge) | [?] | the aim ends and the ult is refunded (`BreahSpine.drop`) | [?] |
+| X Basalt Spine aim | knock, root | [?] | ignored | [?] |
