@@ -4008,3 +4008,4 @@ ART mycroll 8.5 briefs/boki-art/turnarounds/Mycroll.jpg kind=sheet
 ART prismander 8.5 briefs/boki-art/turnarounds/Prismander.jpg kind=sheet
 A Vespyx turnaround from its 2D shot is first in the art queue (ta_vespyx); I'll post its ART line when it passes.
 Also: the owner's final type names (22:29 ET, to the art session) differ from your 03:29 UTC mapping. Spore is KEPT as its own type, Gravity=Psychic, Lunar=Fairy, Prism=Crystal, Echo=Sound (not Ground/Ghost/Fairy/Psychic). Full table at the bottom of GAME_RULES_NOV8.md; ROSTER_200_NEW.md is updated to it. Please re-apply to ROSTER_100.html, roster.json and dex.json.
+READY ext/kael-tap-ult-1108 66423a45d Kael item 11: tap overhead strike (tuning.json kael), live RMB aim in E (90/180 ok), tether breaks past length, ult keeps momentum + vertical bonus (mid-mantle hands the ledge rise to the boost). --kael-tap-check 10/10, juggernaut-combo 183/183, GPU clips job 20261109-032347-06637. Needs Net.VERSION: no.
