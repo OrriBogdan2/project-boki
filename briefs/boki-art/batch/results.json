@@ -43585,5 +43585,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_rimekit_p83_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_rimekit_p83",
+    "name": "Rimekit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_rimekit_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_rimefang_p83",
+    "name": "Rimefang",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_rimefang_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_selenwhale_p83",
+    "name": "Selenwhale",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_selenwhale_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pipeworth_p83",
+    "name": "Pipeworth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pipeworth_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_mossbastion_p83",
+    "name": "Mossbastion",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_mossbastion_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_rimefang_p83",
+    "name": "Rimefang",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_rimefang_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_ribbonwyrm_p83",
+    "name": "Ribbonwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_ribbonwyrm_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_selenwhale_p83",
+    "name": "Selenwhale",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_selenwhale_p83_2.jpg",
+    "ok": true
   }
 ]
