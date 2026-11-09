@@ -454,7 +454,8 @@ func _tick_burrs(dt: float) -> void:
 			_direct_hit(b, victim, flat)
 			continue
 		var ledge: bool = m.world.ground_at(flat.x, flat.z) > float(b["g0"]) + 0.6
-		var walled: bool = m.world.is_block(flat.x, flat.z) or ledge or not Verbs.barrier_at(m.verbs.walls, flat, 0.15, h.team).is_empty()
+		var barrier := Verbs.barrier_at(m.verbs.walls, flat, 0.15, h.team)
+		var walled: bool = m.world.is_block(flat.x, flat.z) or ledge or not barrier.is_empty()
 		if walled:
 			_stick(b, p, true)
 		elif dist >= float(b["range"]):

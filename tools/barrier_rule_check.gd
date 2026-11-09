@@ -15,23 +15,25 @@ func rules(main_node: Node, kind: String) -> void:
 	var K: ArchKit = P.ak
 	var W: World = m.world
 	var tag := kind + ": "
-	var D: Hunter = m.make_hunter("D", T.team, "medium", "Near", "idle", {}, home + Vector3(3.0, 0, 0), {"arch": "none"})
+	var near := home + Vector3(3.0, 0, 0)
+	var D: Hunter = m.make_hunter("D", T.team, "medium", "Near", "idle", {}, near, {"arch": "none"})
 	D.max_hp = 10000.0
 	D.hp = D.max_hp
 	var wall := _raise(m, T, kind, home + Vector3(6.0, 0, 0))
 	var mid := Vector3(home.x + 6.0, home.y + 1.0, home.z)
-	ok(tag + "a barrier stops the other team's things and not its own",
+	ok(tag + "stops the other team's things, not its own",
 		not Verbs.barrier_at(m.verbs.walls, mid, 0.1, P.team).is_empty()
 		and Verbs.barrier_at(m.verbs.walls, mid, 0.1, T.team).is_empty())
-	ok(tag + "a body in front of it is pinned against it, one in the open is not",
+	ok(tag + "a body in front is pinned, one in the open is not",
 		K.terrain_behind(D, Vector2.RIGHT, 3.2) and not K.terrain_behind(D, Vector2.LEFT, 2.0))
-	# the Longneedle goes through terrain, not through a barrier: the foe behind it is untouched, the one in front is not
+	# the Longneedle goes through terrain, not a barrier: the foe behind it is untouched
 	aim_at(P, T.pos)
 	K.cd["e"] = 0.0
 	var hp0: float = wall["hp"]
 	K._fire_needle()
-	ok(tag + "the Longneedle is cut by it: the foe in front is hit, the one behind is not, the barrier takes the hit",
-		D.hp < D.max_hp and T.hp >= T.max_hp and float(wall["hp"]) < hp0, "D %.0f T %.0f wall %.0f" % [D.hp, T.hp, wall["hp"]])
+	var shot_ok: bool = D.hp < D.max_hp and T.hp >= T.max_hp and float(wall["hp"]) < hp0
+	ok(tag + "Longneedle cut by it: front foe hit, rear foe not, wall hit", shot_ok,
+		"D %.0f T %.0f wall %.0f" % [D.hp, T.hp, wall["hp"]])
 	# a Coin Blast sticks to it instead of flying through (the fuse is 0.9 s, so it is still there to read)
 	D.teleport(home + Vector3(-6.0, 0, 6.0))
 	K.burrs.clear()
@@ -39,16 +41,17 @@ func rules(main_node: Node, kind: String) -> void:
 	step(m, 0.5)
 	var b: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
 	var at: Vector3 = b.get("pos", Vector3.ZERO)
-	ok(tag + "a Coin Blast sticks to it as a wall hit, on this side of it",
-		not b.is_empty() and bool(b["wall"]) and float(b["fuse"]) > 0.0 and at.x < home.x + 6.0 and at.x > home.x + 3.0,
+	var stuck: bool = not b.is_empty() and bool(b["wall"]) and float(b["fuse"]) > 0.0
+	ok(tag + "Coin Blast sticks to it as a wall hit, this side", stuck and at.x < home.x + 6.0 and at.x > near.x,
 		"stuck at x %.1f" % (at.x - home.x))
 	# and the barrier is gone with it: nothing there stops anything
 	m.verbs._break_wall(wall)
-	ok(tag + "with the barrier gone it is open ground again",
-		Verbs.barrier_at(m.verbs.walls, mid, 0.1, P.team).is_empty() and not Verbs.is_wall_at(W, mid.x, mid.z, mid.y))
+	var open: bool = Verbs.barrier_at(m.verbs.walls, mid, 0.1, P.team).is_empty()
+	ok(tag + "with the barrier gone it is open ground", open and not Verbs.is_wall_at(W, mid.x, mid.z, mid.y))
 	await done(m)
 
 func _raise(m: Match, by: Hunter, kind: String, at: Vector3) -> Dictionary:
 	if kind == "rock":
 		return HeroZones.rock(m, by, at, Vector2.RIGHT, "chk", 3.2, 20.0, 400.0, false)
-	return m.verbs.add_wall(by, at, Vector2.RIGHT, {"length": 4.5, "hp": 400.0, "time": 20.0, "block": "enemy", "move": true}, 1.0)
+	var flags := {"length": 4.5, "hp": 400.0, "time": 20.0, "block": "enemy", "move": true}
+	return m.verbs.add_wall(by, at, Vector2.RIGHT, flags, 1.0)
