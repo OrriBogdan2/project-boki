@@ -373,7 +373,8 @@ func _climb(s: Dictionary, dt: float) -> Dictionary:
 	if climb_live:
 		climb_live = false
 		climb_t = float((cd[climb_was] as Dictionary)["rise"]) if cd.has(climb_was) else 0.0
-	if climb_was == "" or not cd.has(climb_was) or bool(s.get("gliding", false)) or bool(s.get("diving", false)) or blocked:
+	var cut: bool = blocked or bool(s.get("gliding", false)) or bool(s.get("diving", false))
+	if climb_was == "" or not cd.has(climb_was) or cut:
 		climb_was = ""
 		return {}
 	climb_t += dt

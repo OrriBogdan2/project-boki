@@ -143,7 +143,8 @@ func _climb(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionar
 		return
 	var rise := float(cd["mantle"]["rise"])
 	var half: Dictionary = clips._climb({"mantle": 0.5}, DT)
-	ok(absf(float(half["t"]) - rise * 0.5) < DT, "%s: the mantle clip time follows the rise (%.2f s at half)" % [id, float(half["t"])])
+	ok(absf(float(half["t"]) - rise * 0.5) < DT,
+			"%s: the mantle clip time follows the rise (%.2f s at half)" % [id, float(half["t"])])
 	var hand := m.get_node(String(WardenGlb.BONES["hand.R"])) as Node3D
 	var head := m.get_node(String(WardenGlb.BONES["head"])) as Node3D
 	var ys: Array = []
@@ -154,21 +155,24 @@ func _climb(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionar
 		await holder.get_tree().process_frame
 		ys.append(hand.global_position.y - head.global_position.y)
 	clips.force = {}
-	ok(ys[0] > 0.0 and ys[1] < -0.1, "%s: hands reach over the head, then plant on the lip (%.2f then %.2f m from the head)" % [id, ys[0], ys[1]])
-	var len := clips.lib.get_animation(String(cd["mantle"]["clip"])).length
+	ok(ys[0] > 0.0 and ys[1] < -0.1,
+			"%s: hands reach over the head, then plant on the lip (%.2f, %.2f m off the head)" % [id, ys[0], ys[1]])
+	var clip_len := clips.lib.get_animation(String(cd["mantle"]["clip"])).length
 	var t_end := rise
 	var after := {"mantle": -1.0, "grounded": true}
 	var n := 0
 	while not clips._climb(after, DT).is_empty() and n < 120:
 		n += 1
 		t_end += DT
-	ok(absf(t_end - len) < 3 * DT, "%s: the mantle clip runs on after the rise, %.2f s of %.2f s" % [id, t_end, len])
+	ok(absf(t_end - clip_len) < 3 * DT,
+			"%s: the mantle clip runs on after the rise, %.2f s of %.2f s" % [id, t_end, clip_len])
 	clips._climb({"mantle": 0.5}, DT)
 	ok(clips._climb({"mantle": -1.0, "kmove": "x"}, DT).is_empty(), "%s: a move cuts the climb tail" % id)
 	var hang := {}
 	for i in 30:
 		hang = clips._climb({"ledge": true}, DT)
-	ok(absf(float(hang["t"]) - float(cd["ledge"]["rise"])) < 0.001, "%s: a ledge float hangs the clip at %.2f s" % [id, float(hang["t"])])
+	ok(absf(float(hang["t"]) - float(cd["ledge"]["rise"])) < 0.001,
+			"%s: a ledge float hangs the clip at %.2f s" % [id, float(hang["t"])])
 	clips._climb({"mantle": -1.0, "dead": true}, DT)
 
 ## A body on a spring (data "sway") lags a change of speed, leans away from it, and settles.

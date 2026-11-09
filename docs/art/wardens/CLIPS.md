@@ -24,6 +24,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
+- `climb` (mantle, ledge): {clip, `rise`}. A ledge rise (Hunter `_rise_k`, 0 at the start of the face, 1 at the lip) seeks the mantle clip to progress x `rise` s, so the hands meet the lip when the body does; a ledge float (dash off an edge) hangs `rise` s; either then runs on to the clip's end unless a move, the glider or death takes over. Keyed with `tools/art1/glb_climb_clips.py` (no Blender). A model without the clips (or the key) plays the procedural pose.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
 ## The tree

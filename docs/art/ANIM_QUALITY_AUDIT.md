@@ -160,6 +160,18 @@ posts scroll at the move speed).
 
 ![thief walk and run, before and after](anim_audit/thief.jpg)
 
+## Climb clips (mantle and ledge pull-up)
+
+Lace (`archer`), Tenzo (`dolm`), Grimble (`dredge`) and Neve (`rimewright`) have a keyed `mantle` (reach, hands plant, vault, land,
+run on; 0.73 s) and `ledge` (hang, pull up; 0.9 s) clip, played by the ledge rise's progress up the face (data `climb`). The
+rise had no animation state at all before: `mantle` was only set by a scripted mantle nothing starts any more, so every
+Hunter showed its fall pose up a ledge; the procedural mantle pose now shows too, for the Hunters without clips. The clips are
+keyed by `tools/art1/glb_climb_clips.py` (hips, head and limb aims solved to the rig; Lace's bow rides her hand, Grimble's
+right arm is the hook, Neve's skates trail). The rig still has no Blender-baked hand shapes: hands keep the idle's. Strip
+(top to bottom Tenzo, Lace, Grimble, Neve; --clip-shots, yaw 90):
+
+![mantle clips](anim_audit/climb_mantle.jpg)
+
 ## What is left
 
 Split into backlog items per Hunter (role build):
