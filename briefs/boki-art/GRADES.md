@@ -69,3 +69,8 @@ Auto-fail at batch stage: anything upright or person-like, any strap/belt/band/v
 - A middle or final form that is the parent with things added, more of the same parts, a recolour, or the same body plan and pose is rejected (7.5 or lower), however polished.
 - Test: ignore colours and add-ons; if silhouette, proportions and body plan still match the parent, reject. A pass needs a new body plan or posture and its idea grown into something new. Babies must not be the parent shrunk down.
 - Evolution prompts (build_jobs REL) now demand this for every unstarted job.
+
+## Two-stage review with a three-critic panel (owner, 2026-11-08 21:50 ET)
+1. Screener (one grader, cheap): rejects the obvious fails (copies, upright, strapped props, ghost rows, look-alikes). Anything it scores 8.3+ moves on.
+2. Panel (three independent critics, see PANEL_BRIEF.md): A art director (craft, appeal, silhouette), B creature designer and roster keeper (idea through the body, fundamental evolutions, uniqueness), C player and production (would kids want it, memorable, buildable in 3D).
+3. Pass = no veto, every seat >= 8.0, average >= 8.5, two seats agree on the run. Panel splits go to the owner flagged, with each seat's note. Each seat is calibrated against owner verdicts over time.
