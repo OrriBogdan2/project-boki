@@ -27709,5 +27709,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/tidalisk_card2_w32_3.jpg",
     "ok": true
+  },
+  {
+    "id": "voltalon_r_w32",
+    "name": "Voltalon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_r_w32",
+    "name": "Voltalon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_r_w32",
+    "name": "Voltalon",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card2_w32",
+    "name": "Barokat (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/barokat_card2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card2_w32",
+    "name": "Barokat (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/barokat_card2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_e_w32",
+    "name": "Flarmink",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/flarmink_e_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card2_w32",
+    "name": "Barokat (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/barokat_card2_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_card2_w32",
+    "name": "Bellowary (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowary_card2_w32_1.jpg",
+    "ok": true
   }
 ]
