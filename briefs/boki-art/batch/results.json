@@ -11210,5 +11210,75 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_selenfin_p2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_soakybara_p2",
+    "name": "Soakybara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_soakybara_p2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_soakybara_p2",
+    "name": "Soakybara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_soakybara_p2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grainspin_e",
+    "name": "Grainspin (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_grainspin_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grainspin_e",
+    "name": "Grainspin (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_grainspin_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_narfoil_e",
+    "name": "Narfoil (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_narfoil_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pinster_e",
+    "name": "Pinster (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pinster_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_narfoil_e",
+    "name": "Narfoil (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_narfoil_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_narfoil_e",
+    "name": "Narfoil (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_narfoil_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bathilus",
+    "name": "Bathilus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_bathilus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grainspin_e",
+    "name": "Grainspin (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_grainspin_e_2.jpg",
+    "ok": true
   }
 ]
