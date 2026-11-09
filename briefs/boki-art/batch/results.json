@@ -11952,5 +11952,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_gravigrub_e_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_gravigrub_e",
+    "name": "Gravigrub (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gravigrub_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravigrub_e",
+    "name": "Gravigrub (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gravigrub_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ghoulamari_r",
+    "name": "Ghoulamari (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ghoulamari_r",
+    "name": "Ghoulamari (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ghoulamari_r",
+    "name": "Ghoulamari (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione_r",
+    "name": "Glacione (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glacione_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione_r",
+    "name": "Glacione (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glacione_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione_r",
+    "name": "Glacione (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glacione_r_3.jpg",
+    "ok": true
   }
 ]
