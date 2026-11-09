@@ -25,6 +25,7 @@ func _owed(P: Hunter) -> float:
 func run() -> void:
 	await _flight()
 	await _carpet()
+	await _ignite_ticks()
 	await _burst()
 
 ## Starts the flight toward `at` (cooldown cleared) and returns the jet.
@@ -161,6 +162,24 @@ func _carpet() -> void:
 		"dmg %.1f slow %.2f char %.0f" % [ak.dmg(T), T.slow_t, char_t]
 	)
 	ok("ult payoff: the slow is about 30%", absf(T.slow_k - 0.3) < 0.01, "slow_k %.2f" % T.slow_k)
+	# DoT parity (data: Flight of the Firefox 239.2 dmg/s against the flamethrower's 258): the carpet hits as hard as
+	# the hose, at the hose's tick, as separate hits
+	var cx := float(K.x_def()["trail_dps"])
+	ok("DoT parity: carpet dps = 239.2/258 of the hose (+-5%), ticking as fast as the hose",
+			absf(cx / float(K.lmbd()["dps"]) - 239.2 / 258.0) < 0.05
+			and absf(float(K.x_def()["tick"]) - float(K.lmbd()["tick"])) < 0.001,
+			"carpet %.1f hose %.1f tick %.2f" % [cx, float(K.lmbd()["dps"]), float(K.x_def()["tick"])])
+	var seen := {"hp": T.hp, "ticks": 0, "sum": 0.0}
+	var piece := cx * float(K.x_def()["tick"])
+	ak.step(m, 1.0, func():
+		var lost: float = float(seen["hp"]) - T.hp
+		if absf(lost - piece) < piece * 0.1:
+			seen["ticks"] = int(seen["ticks"]) + 1
+			seen["sum"] = float(seen["sum"]) + lost
+		seen["hp"] = T.hp)
+	ok("DoT parity: a second in the carpet is 10 ticks of dps x 0.1s, each its own hit",
+			int(seen["ticks"]) >= 9 and int(seen["ticks"]) <= 11,
+			"ticks %d of %.2f, total %.1f" % [int(seen["ticks"]), piece, float(seen["sum"])])
 	var sent := _owed(P)
 	ok(
 		"ult bond: burning a hunter pays once per cast through KinBond.from_ult (a hit: 0.6, two hunters still 0.6)",
@@ -206,7 +225,7 @@ func _carpet() -> void:
 	ok("ult 66: a press ticks softly once (denied), not once a frame", K.lmb_denied == denied0 + 1,
 			"denied %d" % (K.lmb_denied - denied0))
 	ak.step(m, 1.6, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
-	# Ablaze in about 2.4s of standing in it (4 Char every 0.3s)
+	# Ablaze in about 2.4s of standing in it (1.3 Char every 0.1s)
 	ak.fresh(T)
 	K.chars = {}
 	K.ignites = {}
@@ -222,6 +241,26 @@ func _carpet() -> void:
 	await _abyss(m, P, K, home, m.world)
 	await _knock_stun_merge(m, P, K, home)
 	await ak.done(m)
+
+## Ignite (footage: ticks about every 0.5 s): the burn lands as whole hits every 0.5s, each one its number.
+func _ignite_ticks() -> void:
+	var r: Array = ak.setup("ashwick", 16.0)
+	var m: Match = r[0]
+	var T: Hunter = r[2]
+	T.burn_t = 3.0
+	T.burn_dps = 10.0
+	T.burn_by = r[1]
+	var seen := {"hp": T.hp, "drops": 0, "first": -1.0}
+	var hp0 := T.hp
+	ak.step(m, 3.2, func():
+		if T.hp < float(seen["hp"]) - 0.01:
+			seen["drops"] = int(seen["drops"]) + 1
+			if float(seen["first"]) < 0.0:
+				seen["first"] = 3.0 - T.burn_t
+		seen["hp"] = T.hp)
+	ok("DoT parity: Ignite lands 6 whole ticks of dps x 0.5s over its 3s, first at 0.5s",
+			int(seen["drops"]) == 6 and absf(hp0 - T.hp - 30.0) < 0.2 and absf(float(seen["first"]) - 0.5) < 0.05,
+			"drops %d lost %.1f first %.2f" % [int(seen["drops"]), hp0 - T.hp, float(seen["first"])])
 
 ## The carpet never forms over the abyss; he flies on over it.
 func _abyss(m: Match, P: Hunter, K: AshwickKit, home: Vector3, W) -> void:
@@ -447,11 +486,13 @@ func _shift_and_jump(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 func _burst() -> void:
 	var res: Dictionary = await BURST.run(ak, "ashwick", 4.0, func(m: Match, P: Hunter, T: Hunter):
 		var home := P.pos
-		T.teleport(home + Vector3(5.0, 0, 0))
+		var side := Vector3(0, 0, 4.0)      # off the lane: on the 25 dps carpet the whole burst he would just burn down
+		T.teleport(home + Vector3(5.0, 0, 0) + side)
 		_cast(P, home + Vector3(16, 0, 0))
 		ak.step(m, 1.9, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 		var end_p: Vector3 = P.ak.jet.trail[-1]["b"] if not P.ak.jet.trail.is_empty() else P.pos
-		ak.step(m, 2.4, func(): T.teleport(end_p))
+		ak.step(m, 0.5, func(): T.teleport(end_p))          # half a second on the carpet, then out of it
+		T.teleport(end_p + side)
 		P.teleport(T.pos + Vector3(-2.0, 0, 0))
 		P.ak.cd["e"] = 0.0
 		P.ak.use_e()

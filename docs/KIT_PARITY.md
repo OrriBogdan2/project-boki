@@ -179,6 +179,27 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 | Passive | +16 per hit stacking; heal on knock [D] | Marks; empowered Shred (ours) | differ: Shred ours `[?]` |
 | Anim | Footage poses | 17 moves, all on `sable.glb` (47) | match on coverage |
 
+## Damage over time: tick parity (ext/parity-dot-ticks)
+
+One shared path: `Ent.tick_status` (Ignite and every other burn, whole hits every `BURN_EVERY` 0.5 s, the number shows the same hit) and `Fields` (zones). Each hit's number is the hit. Trust order O > D > wiki > F; ours scales the data by the hero's own anchor (hose, shell, orb) or by class HP.
+
+| Source | Data / footage | Ours | Verdict |
+|---|---|---|---|
+| Cinder Ignite (DoT) | D: "dealing damage Ignites"; F: ticks about every 0.5 s, two stages (24 / 47) | 2% then 4% of max HP a second for 3 s; was a hit every frame; now 6 whole hits at 0.5 s. A new Ignite refreshes the time and replaces the rate; burn ignores shields | fixed (tick); no data on shields |
+| Cinder Flue Flight carpet | D: 239.2 dmg/s + Slow (hose 258) | 25 a second against the hose's 27, 0.1 s ticks, a re-entry or a second cast does not double it (one hit per foe per tick); was 4.5 a second every 0.3 s | fixed |
+| Vex Cinderfall patch | D: 59 dmg/s for 3 s after a 203 impact; F: ticks 0.4-0.5 s | 3.5 every 0.5 s (24 impact); two shells each tick on their own; was 3 | fixed (small) |
+| Hem Hail Wall | D: 61 dmg/s + Slow + Anti-Heal on 1,100 HP | 3.4 every 0.5 s on 124 HP (same share); one wall at a time, a new one replaces it; was 5 | fixed |
+| Ostra Nightwell | D (card): 2.5 every 0.1 s for 3.5 s | 0.16 every 0.1 s (the same share of our 9 orb); one well | match |
+| Ostra seed (E) | D: upgrade IV, 250 dmg/s on overlap | 8.2 a second in 0.5 s hits (0.69 of the 12.5 blast, source 0.69 of 365) | match |
+| Claire Rimelock and Chill | D: slowing zone, Shatter stacks, then 155 and a stun; Chill has no damage | slow ramp, one hit at the end; Chill is a mark | no DoT in either |
+| Bjorn zone | D: Regen Field heals | heal ticks 0.5 s | heal only |
+| Ryzz Static | D: stacks, a burst on the dash | stacks, a burst | no DoT in either |
+| Grimble, Sable, Pip, Tarek zones | no damage zone in the source | none (Pip's are heals) | none |
+| Zedran wave burn | not in the source | 8 over 2 s | ours |
+| Items, gear | no burns in the source's items; ours: none | none | none |
+
+Tick numbers under 0.5 (Nightwell's 0.16) show no floating number: `Fx.number` drops hits under 0.5. Existing per-kit timers kept (Flue Flight, Cinderfall, Hail Wall, Nightwell): moving them onto `Fields` is a larger change.
+
 ## The 20 biggest feel gaps, ranked
 
 Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a few days, L a week or more. `owner` = needs an owner call before building.

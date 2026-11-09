@@ -322,6 +322,16 @@ func _archer_combos() -> void:
 		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and K.fx.panels[0].visible,
 		"on arc %.0f inside %.0f" % [dmg(T), dmg(T2)]
 	)
+	# DoT parity (data: Rain of Arrows 61 dmg/s on a 1,100 HP Myth; ours on 124 HP): whole ticks, every 0.5 s
+	var hail: Dictionary = K.e_def()
+	var share := float(hail["dmg"]) / float(hail["every"]) / float(Data.CLASSES["light"]["hp"])
+	var ticks: float = dmg(T) / float(hail["dmg"])
+	ok(
+		"pin E DoT parity: 6.1% of Myth's HP a second (61 of 1,100), 0.5 s ticks, whole hits",
+		absf(share - 61.0 / 1100.0) < 0.003 and float(hail["every"]) == 0.5
+		and absf(ticks - roundf(ticks)) < 0.01 and ticks > 2.9,
+		"share %.4f ticks %.2f" % [share, ticks]
+	)
 	# small mechanic (wiki): a Heavy Shot knocking a foe that burns in the wall Cremates it
 	var cr0 := K.cremations
 	K.ch_rmb = 2.0

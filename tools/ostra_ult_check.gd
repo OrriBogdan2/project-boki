@@ -141,6 +141,11 @@ func _catch_and_hold() -> void:
 	ok("ult bond: paid once per cast, never per tick", paid(P) == paid0)
 	var per := float(K.x_def()["tick_dmg"]) * K.power("x")
 	ok("ult payoff: small ticks every 0.1s (35 over 3.5s)", absf(dmg(T) - per * 35.0) < per * 2.0, "dmg %.2f" % dmg(T))
+	var orb := float(Content.weapon("tether_lantern").primary["dmg"])
+	ok("ult DoT parity: 2.5 every 0.1s on a 140 orb (the card), the same share of our 9 orb",
+			absf(float(K.x_def()["tick_dmg"]) / orb - 2.5 / 140.0) < 0.1 * 2.5 / 140.0
+			and float(K.x_def()["time"]) == 3.5,
+			"tick %.3f" % float(K.x_def()["tick_dmg"]))
 	step(m, 0.3)
 	ok("ult: the stun ends when it closes", not W.running() and T.stun_t <= 0.05, "stun %.2f" % T.stun_t)
 	await done(m)
