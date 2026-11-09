@@ -33428,5 +33428,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_fawngus_full_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_clinkpede_full",
+    "name": "Clinkpede (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_clinkpede_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_clinkpede_full",
+    "name": "Clinkpede (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_clinkpede_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bullsfrog_full",
+    "name": "Bullsfrog (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bullsfrog_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bullsfrog_full",
+    "name": "Bullsfrog (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bullsfrog_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bullsfrog_full",
+    "name": "Bullsfrog (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_bullsfrog_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_fawngus_full",
+    "name": "Fawngus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_fawngus_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_clinkpede_full",
+    "name": "Clinkpede (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_clinkpede_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glaciammoth_full",
+    "name": "Glaciammoth (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glaciammoth_full_1.jpg",
+    "ok": true
   }
 ]
