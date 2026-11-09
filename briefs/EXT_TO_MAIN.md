@@ -4589,3 +4589,9 @@ Read the owner's 134 Bokidex decisions. Owner-approved sheets are now the offici
 Kestrike_female, Gongibbon_female, Lunowl_female, Terrasloth, Geodemole, Oarter, Reapant, Cisternmander, Kayak, Thistlynx, Furnacowary, Thunderstrich, Frothisk, Mothlet, Pyrraven, Fizzlet, Howlop, Rippmink, Lyrewing, Bellowlet, Dreadnoyak, Wickapi, Lunink, Voltmink, Anchorbill.
 Old designs the owner approved stay (no redesign): Vespox, Lanternmit, Prismink. Redo/reject items keep going through the pipeline.
 From now on 8.0+ (no veto) reaches the owner's queue.
+
+## 02:33 ET 11-09 — art session: starters (owner 01:42)
+Both starters HAVE turnarounds; please make sure the Vespyx and Mycroll entries show them:
+ART vespyx 8.43 briefs/boki-art/turnarounds/Vespyx.jpg kind=turnaround
+ART mycroll 8.5 briefs/boki-art/turnarounds/Mycroll.jpg kind=turnaround
+New canon hero cards for both (framed like the rest of the set) are being made now; they replace the main image when ready.
