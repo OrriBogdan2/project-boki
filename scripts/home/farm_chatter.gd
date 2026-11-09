@@ -2,8 +2,9 @@ class_name FarmChatter
 extends RefCounted
 ## Boki at home talk about what's going on around them (BokiLines triggers): a crop ready or just
 ## watered beside them, the job they're doing or the building going up, rain, night, what they need,
-## a friend close by (the friend answers), and a new Boki arriving. Every few seconds one Boki near
-## you may speak up; Home._say keeps it to one voice at a time and BokiLines to a cooldown each.
+## a friend close by (the friend answers), and news (a new Boki, you back with loot: ComeLook).
+## Every few seconds one Boki near you may speak up; Home._say keeps it to one voice at a time and
+## BokiLines to a cooldown each.
 
 const LOOK_S := 2.5          # s between looks for something to talk about
 const SPEAK_CHANCE := 0.4    # share of looks where a Boki speaks up
@@ -19,6 +20,7 @@ static var _known := {}      # uid -> true: Boki that were already home (a new u
 
 ## Called every frame by Home: now and then, one Boki says something about what's around it.
 static func tick(h, d: float) -> void:
+	ComeLook.tick(h, d)
 	_look_t -= d
 	if _look_t > 0.0:
 		return
@@ -96,7 +98,7 @@ static func _answer_later(h, friend: Dictionary) -> void:
 			h.talk_cd = 0.0
 			h._say(friend, BokiLines.say(friend["rec"], "chat_reply"), 0.0, false))
 
-## A new Boki home (hatched, caught, bought): the closest other one welcomes it.
+## A new Boki home (hatched, caught, bought) or you back with loot: nearby Boki come to look (ComeLook).
 static func _welcome(h) -> void:
 	var first := _known.is_empty()
 	var arrived: Array = []
@@ -105,16 +107,13 @@ static func _welcome(h) -> void:
 		if not _known.has(uid):
 			_known[uid] = true
 			arrived.append(k)
+	ComeLook.loot_home(h)
 	if first or arrived.is_empty():
 		return
-	var new_at: Vector3 = arrived[0]["pos"]
-	var best: Dictionary = {}
-	var best_d := INF
-	for k in h.kins:
-		var dist := (k["pos"] as Vector3).distance_to(new_at)
-		if not arrived.has(k) and _idle(h, k) and dist < best_d:
-			best = k
-			best_d = dist
-	if not best.is_empty():
-		h.talk_cd = 0.0
-		h._say(best, BokiLines.say(best["rec"], "new_boki"), 0.0, false)
+	ComeLook.event(h, ComeLook.arrival_kind(arrived[0]["rec"]), arrived[0]["pos"], arrived[0])
+
+## One Boki reacts to the news with a line for its trigger; false while someone nearby is still talking.
+static func react(h, k: Dictionary, topic: String) -> bool:
+	h.talk_cd = 0.0
+	h._say(k, BokiLines.say(k["rec"], topic), 0.0, false)
+	return float(k.get("say_t", 0.0)) > 0.0

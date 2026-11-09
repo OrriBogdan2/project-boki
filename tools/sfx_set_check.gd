@@ -32,7 +32,7 @@ func run(main: Node) -> void:
 			_check_set("res://content/sfx/" + f)
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
-	_fallback()
+	_garden_names()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -125,6 +125,19 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 		if absf(last - first) > SEAM_MAX or absf(last) < mid * 0.02:
 			rough.append("%s seam %.3f, end %.3f of %.3f" % [sname, absf(last - first), absf(last), mid])
 	ok(rough.is_empty(), "%s: %d loops repeat seamlessly %s" % [group, (d.get("loops", []) as Array).size(), rough])
+
+## The garden minigames play literal garden_ names: a typo would play silence.
+func _garden_names() -> void:
+	var re := RegEx.create_from_string("\"(garden_[a-z0-9_]+)\"")
+	var seen := []
+	var silent := []
+	for f in ["base_race.gd", "base_shove.gd"]:
+		for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/home/" + f)):
+			seen.append(hit.get_string(1))
+			if not Sfx.ensure(hit.get_string(1)):
+				silent.append(hit.get_string(1))
+	var named := seen.size() >= 12 and silent.is_empty()
+	ok(named, "garden minigames: %d sound names, all exist (silent: %s)" % [seen.size(), silent])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:

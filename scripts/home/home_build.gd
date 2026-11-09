@@ -411,6 +411,8 @@ func _leaf() -> Color:
 func make_deco(e: Dictionary) -> Node3D:
 	if FarmSites.is_site(e):
 		return FarmModels.site(e)
+	if String(e["id"]) == SnackPatch.ID:
+		return SnackPatch.model(e)
 	var n := _make_base(e)
 	if FarmSites.is_upgrading(e): FarmModels.upgrade_frame(n, e)
 	return FarmModels.dress(n, e)
@@ -420,6 +422,8 @@ func _make_base(e: Dictionary) -> Node3D:
 	var rng := RandomNumberGenerator.new(); rng.seed = int(e.get("u", 1)) * 7919 + 13
 	var col := Color(String(e.get("c", HomeLayout.COLOURS[0])))
 	var n: Node3D = null
+	if HomeLayout.CATALOG.get(id, {}).has("toy"):
+		return FarmModels.toy(id)
 	if HomeLayout.CATALOG.get(id, {}).has("work"):
 		n = WorkModels.station(id, e, rng)       # a work station (scripts/home/work_models.gd)
 	if HomeLayout.CATALOG.get(id, {}).has("fixture"):
@@ -535,7 +539,7 @@ func _sync_deco() -> void:
 		(nodes[u] as Node3D).visible = not (held.get("kind", "") == "deco" and int(held.get("from", -1)) == int(u))
 
 func _sig(e: Dictionary) -> String:
-	return "%s|%d|%d|%d|%s|%s|%s" % [e["id"], int(e["x"]), int(e["z"]), int(e.get("r", 0)), str(e.get("c", "")), str(e.get("px", "")), str(e.get("sp", ""))] + FarmModels.sig(e)
+	return "%s|%d|%d|%d|%s|%s|%s" % [e["id"], int(e["x"]), int(e["z"]), int(e.get("r", 0)), str(e.get("c", "")), str(e.get("px", "")), str(e.get("sp", ""))] + FarmModels.sig(e) + SnackPatch.sig(e)
 
 ## Fences join up with the fence next to them: every post gets rails toward its neighbours.
 func _sync_fences() -> void:
@@ -1771,6 +1775,8 @@ func place_held() -> bool:
 		anchor = Vector2i(-999, -999)
 		if is_instance_valid(ghost_cells): ghost_cells.set_meta("sig", "")
 	apply(false)
+	if from < 0 and TOY_CATS.has(String(c["cat"])):
+		ComeLook.event(h, "toy", Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), {}, String(c["name"]).to_lower())
 	_done(Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), "Site marked out: hold %s to hammer, Boki help" % Settings.key_cap("interact") if not site.is_empty() else "")
 	if nodes.has(popped): FarmBuildUi.pop(nodes[popped])
 	return true
@@ -1946,7 +1952,7 @@ func _open_ui() -> void:
 func _tabs() -> Array:
 	var out: Array = []
 	if FarmUnlocks.base_mode():
-		return ["Buildings", "Garden", "Island"]
+		return ["Buildings", "Base", "Garden", "Island"]
 	for ct in HomeLayout.CATS:
 		if FarmBuilder.tab_shown(self, ct):
 			out.append(ct)
@@ -1987,6 +1993,8 @@ func _tab_items() -> Array:
 var make := {}                          # item -> [options]; options are Vector2i (feeder) or {x, z, r}
 var make_pick := {}
 var make_marks: Array = []
+## Catalog groups whose new pieces nearby Boki come to look at (ComeLook).
+const TOY_CATS := ["Furniture", "Statues"]
 const MAKE_ITEMS := [["feeder", "First feeder", "f2c84a"], ["workshop", "Workshop lot", "5ab0f0"], ["cottage", "Boki Cottage lot", "ff9ac8"]]
 
 func needs_making() -> bool:
@@ -2120,4 +2128,4 @@ func finish_make_home() -> void:
 	Save.save_game()
 	h._close_panel()
 	if not Save.d["tutorial"].get("home", false) and h.is_inside_tree():
-		h._open_welcome.call_deferred()
+		h.arrivals.add(h._open_welcome)

@@ -110,6 +110,9 @@ func _ready() -> void:
 				if String(a2).begins_with("--farm-seed="): fseed = int(String(a2).substr(12))
 			Save.no_write = true
 			Save.d = HomeGather.demo_save(a.substr(12) if a.length() > 12 else "empty", fseed)
+		if a == "--base-demo":      # a made-up base to show (GARDEN.md 9.8), never the real save
+			Save.no_write = true
+			Save.d = BaseDemo.save()
 		if a.begins_with("--test-kin="):
 			# test: a save with one kin "species:level:trust", ready to play at home
 			var tk := a.substr(11).split(":")
@@ -396,6 +399,12 @@ func _ready() -> void:
 		return
 	if "--iv-check" in args:
 		load("res://tools/iv_check.gd").new().run(self)      # kin IVs: rolls, backfill, breeding, Rare Eggs, caps
+		return
+	if "--nook-check" in args:
+		load("res://tools/nook_check.gd").new().run(self)      # Nesting Nook gate and breeding
+		return
+	if "--unstable-mix-check" in args:
+		load("res://tools/unstable_mix_check.gd").new().run(self)      # Nook unstable mixes: 20 clashing, 20 calm couples
 		return
 	if "--incubator-check" in args:
 		var icc = load("res://tools/incubator_check.gd").new()      # Rare Eggs on the Incubator by the Nook
@@ -1124,8 +1133,8 @@ func _economy_check() -> void:
 	Save.d["feeders"] = []
 	Save.d["items"]["kibble"] = 0
 	var line: Array = []
-	var died_at := -1.0
-	for days in [0.5, 1.0, 2.0, 3.0, 4.0, 5.0]:
+	var died := false
+	for days in [0.5, 1.0, 2.0, 4.0, 14.0]:
 		var r2: Dictionary = rec.duplicate(true)
 		r2["uid"] = "starve%d" % int(days * 10)
 		r2["needs"] = {"food": 70.0, "energy": 80.0, "joy": 70.0, "clean": 75.0}
@@ -1134,10 +1143,21 @@ func _economy_check() -> void:
 		Save.d["roster"] = [r2]
 		var ev2 := Econ.catch_up_all()
 		var st := Care.starve_stage(r2) if not ev2.any(func(e): return e["kind"] == "died") else "dead"
-		if st == "dead" and died_at < 0.0: died_at = days
+		died = died or st == "dead"
 		line.append("%.1fd: %s (food %d, %.0fh starving, trust %d)" % [days, st if st != "" else "fine", int(Care.need(r2, "food")), Care.starve_h(r2), int(r2["trust"])])
 	print("ECON  starving timeline: " + "  |  ".join(line))
-	ok.call(died_at >= 3.0 and died_at <= 5.0, "unfed with no feeder, a kin dies after several days (day %.1f)" % died_at)
+	var sick: Dictionary = Save.d["roster"][0]
+	var stage := Care.starve_stage(sick)
+	ok.call(not died and stage == "sick",
+		"natural_death off: 14 days unfed is sick at worst, never dead (%s)" % stage)
+	for meal in 12:
+		Care.feed(sick, "kibble")
+		Care.feed(sick, "kibble")
+		Care.tick(sick, 1200.0)
+	ok.call(Care.starve_stage(sick) in ["", "weak", "refuse"],
+		"four hours of regular meals bring it back from sick (%s, %.0fh)"
+		% [Care.starve_stage(sick), Care.starve_h(sick)])
+	Econ.kin_dies(sick, "starved")      # graves still come from old saves and other losses
 	ok.call(Econ.graves().size() >= 1 and String(Econ.graves()[0]["cause"]) == "starved" and String(Econ.graves()[0]["name"]) == "Pip", "a grave with its name (%d graves, %d memories)" % [Econ.graves().size(), (Econ.graves()[0]["mem"] as Array).size() if Econ.graves().size() > 0 else 0])
 	# 6. the Soul Shrine brings one back, changed
 	var g: Dictionary = Econ.graves()[Econ.graves().size() - 1]

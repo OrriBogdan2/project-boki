@@ -51,6 +51,8 @@ const CATALOG := {
 		"desc": "Drag a narrow channel of water across the ground. A crop patch within 2 tiles of any water waters itself."},
 	"water": {"name": "Pond water", "cat": "Paths", "gems": 6, "brush": "water", "block": true},
 	"flowers": {"name": "Flower bed", "cat": "Garden", "gems": 8},
+	"snack_patch": {"name": "Snack patch", "cat": "Garden", "gems": 0, "size": [2, 2], "max": 1,
+		"desc": "Grows four element snacks every few minutes. Walk over it to pick them. For feeding only."},
 	"bush": {"name": "Bush", "cat": "Garden", "gems": 10, "block": true},
 	"tree": {"name": "Leafy tree", "cat": "Garden", "gems": 20, "block": true},
 	"pine": {"name": "Pine tree", "cat": "Garden", "gems": 20, "block": true},
@@ -65,6 +67,17 @@ const CATALOG := {
 	"pillar": {"name": "Old pillar", "cat": "Statues", "gems": 40, "scrap": 2, "block": true},
 	"kin_statue": {"name": "Boki statue", "cat": "Statues", "gems": 120, "scrap": 6, "block": true},
 	"fountain": {"name": "Fountain", "cat": "Statues", "gems": 150, "scrap": 8, "size": [2, 2], "block": true},
+	# the Boki base's playthings (HomeToys, content/rules/toys.json); the Base tab shows only while base_mode is on
+	"toy_ball": {"name": "Play ball", "cat": "Base", "gems": 12, "toy": true,
+		"desc": "A ball to chase and nudge. Trains Speed. Boki share it."},
+	"toy_post": {"name": "Climbing post", "cat": "Base", "gems": 30, "block": true, "toy": true,
+		"desc": "Flying and Rock Boki love to climb it. Trains Power."},
+	"toy_tub": {"name": "Splash tub", "cat": "Base", "gems": 25, "block": true, "toy": true,
+		"desc": "Water and Ice Boki love a splash. Trains Focus."},
+	"toy_stone": {"name": "Warm stone", "cat": "Base", "gems": 20, "block": true, "toy": true,
+		"desc": "Fire Boki love to bask on it. Trains Guard."},
+	"toy_dig": {"name": "Dig patch", "cat": "Base", "gems": 18, "toy": true,
+		"desc": "Grass and Bug Boki love to dig, and now and then turn up a snack. Trains Focus."},
 	# work stations (Work, HomeWork): kin with the right element come and work them on their own.
 	# work: the element. wood / stone: building materials (Save.d["mats"]) on top of the gems.
 	"job_board": {"name": "Job Board", "cat": "Work", "gems": 30, "block": true, "work": "board",
@@ -234,6 +247,7 @@ static func ensure(d: Dictionary) -> Dictionary:
 			(L["b"] as Dictionary).erase(b)
 			continue
 		be["x"] = int(be.get("x", 0)); be["z"] = int(be.get("z", 0)); be["r"] = int(be.get("r", 0)) % 4
+	SnackPatch.grant(d)
 	return L
 
 static func of(d: Dictionary) -> Dictionary:
