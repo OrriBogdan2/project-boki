@@ -363,3 +363,8 @@ func _scarf(main: Node) -> void:
 	S.tick(1.0 / 60.0)
 	ok(w.tails.all(func(t: HeroScarf.Tail): return t.node.visible) and S.made == 2, "back on, the same meshes")
 	Settings.v["quality"] = was
+	S.prewarm(P.pos)
+	S.prewarm_end()
+	S.prewarm(P.pos)
+	ok(S.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
+	S.prewarm_end()

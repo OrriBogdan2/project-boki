@@ -53,7 +53,7 @@ wrap). `scripts/match/hero_scarf.gd` runs them for every Hero on the map: each t
 (`shaders/scarf_ribbon.gdshader`: `c` at the knot fading into `c2` toward a cut point). At rest a tail hangs `len` m down,
 a little `back` and out (`splay`); moving, the air's drag streams it back against the motion and it flutters harder the
 faster she goes. Keys: `at`, `gap`, `len`, `w` m wide, `back`, `splay`, `c`, `c2`. A wearer keeps its pair of meshes; a
-gone one's pair goes back to the pool. Off at the Low preset, past `LOD_FAR` and while the Hero is hidden.
+gone one's pair goes back to the pool, and one drawn while the match loads compiles the shader. Off at the Low preset, past `LOD_FAR` and while the Hero is hidden.
 
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes

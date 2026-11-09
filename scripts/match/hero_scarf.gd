@@ -30,6 +30,7 @@ var wearers: Array[Wearer] = []
 var made := 0                  # meshes made so far (tests: a returning wearer reuses its pool's)
 var _free: Array[MeshInstance3D] = []
 var _checked := {}             # hunter instance id -> the arch it was checked as
+var _warm: MeshInstance3D      # the one drawn while the match loads, so the shader compiles then
 
 ## One Hero wearing a scarf: its data, its two tails and how fast it moves.
 class Wearer:
@@ -75,6 +76,29 @@ func roots(w: Wearer) -> Array[Vector3]:
 	var gap := float(w.cfg.get("gap", 0.07))
 	return [anchor - right * gap, anchor + right * gap]
 
+## While the match loads (HeroVfx.prewarm): one small ribbon drawn at `at`, so no Hero's first sight compiles it.
+func prewarm(at: Vector3) -> void:
+	if _warm == null:
+		_warm = _node()
+	var mesh: ImmediateMesh = _warm.mesh
+	mesh.clear_surfaces()
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+	for i in 4:
+		var u := 1.0 if i >= 2 else 0.0
+		var v := float(i % 2)
+		mesh.surface_set_normal(Vector3.BACK)
+		mesh.surface_set_uv(Vector2(u, v))
+		mesh.surface_add_vertex(at + Vector3(0.1 * v, -0.1 * u, 0.0))
+	mesh.surface_end()
+	_warm.visible = true
+
+## The match is in: the warm-up ribbon goes back to the pool.
+func prewarm_end() -> void:
+	if _warm != null:
+		_warm.visible = false
+		_free.append(_warm)
+		_warm = null
+
 func _check(h: Hunter) -> void:
 	_checked[h.get_instance_id()] = h.arch
 	var cfg: Dictionary = HeroVfx.data(h.arch).get("scarf", {})
@@ -99,20 +123,22 @@ func _shown(h: Hunter) -> bool:
 		return false
 	return fx.lod_at(h.pos) > 0.0
 
+func _node() -> MeshInstance3D:
+	if not _free.is_empty():
+		return _free.pop_back()
+	var mi := MeshInstance3D.new()
+	mi.mesh = ImmediateMesh.new()
+	mi.material_override = ShaderMaterial.new()
+	(mi.material_override as ShaderMaterial).shader = SHADER
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.top_level = true
+	mi.extra_cull_margin = 4.0
+	fx.add_child(mi)
+	made += 1
+	return mi
+
 func _take(h: Hunter, cfg: Dictionary) -> MeshInstance3D:
-	var mi: MeshInstance3D
-	if _free.is_empty():
-		mi = MeshInstance3D.new()
-		mi.mesh = ImmediateMesh.new()
-		mi.material_override = ShaderMaterial.new()
-		(mi.material_override as ShaderMaterial).shader = SHADER
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mi.top_level = true
-		mi.extra_cull_margin = 4.0
-		fx.add_child(mi)
-		made += 1
-	else:
-		mi = _free.pop_back()
+	var mi := _node()
 	var mt: ShaderMaterial = mi.material_override
 	mt.set_shader_parameter("root_col", fx._pal(h, cfg.get("c"), "hot"))
 	mt.set_shader_parameter("tip_col", fx._pal(h, cfg.get("c2"), "main"))

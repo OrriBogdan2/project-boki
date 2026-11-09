@@ -367,6 +367,7 @@ func prewarm(at: Vector3) -> void:
 			_warming.append(_prewarm_node(kind))
 	for node: Node3D in _warming:
 		node.global_transform = Transform3D(Basis.IDENTITY, Vector3.ZERO if node.get_meta("strip", false) else at)
+	scarves.prewarm(at)
 
 func prewarm_end() -> void:
 	for node: Node3D in _warming:
@@ -374,6 +375,7 @@ func prewarm_end() -> void:
 		if node is GPUParticles3D:
 			(node as GPUParticles3D).emitting = false
 	_warming.clear()
+	scarves.prewarm_end()
 
 func _prewarm_node(kind: String) -> Node3D:
 	if not MODES.has(kind):
