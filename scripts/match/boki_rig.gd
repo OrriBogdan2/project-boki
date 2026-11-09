@@ -172,6 +172,7 @@ var _look_to := Vector2.ZERO
 var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
+var _flinch := KinFlinch.new()
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
@@ -216,6 +217,7 @@ func _ready() -> void:
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
+	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_copy_coat()
 	set_clip("idle")
 
@@ -249,17 +251,19 @@ func _process(dt: float) -> void:
 	player.active = seen
 	if not seen:
 		return
+	_flinch.update(root, dt)
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
 	_face_step(dt)
 
-## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll stays.
+## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
+## the jolt of a hit (KinFlinch) stay.
 func _keep_flex() -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	flex.rotation = Vector3.ZERO
-	flex.scale = Vector3(girth, 1.0, lerpf(1.0, girth, 0.5))
-	flex.position = Vector3(0, _flex_y, 0)
+	flex.rotation = _flinch.rot
+	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide)
+	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
 		body.rotation = Vector3.ZERO          # home's work poses swing Body: here the clip does the swinging
