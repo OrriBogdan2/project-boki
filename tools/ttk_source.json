@@ -1,0 +1,21 @@
+{
+	"about": "Source figures for docs/TTK.md and --ttk-check (tools/ttk_table.py). hp = Base HP at level 1 (supervive_physics.md, ext/agent-briefs briefs/supervive-data) [D]. lmb: dmg per press or round (supervive_kits.md) [D]; at15 = the kit text gives it at level 15, so it is scaled by avg HP L1/L15 (1285.4/2361.7, as DAMAGE_RATIOS.md does); every = seconds between hits, tagged D (data), F (footage, docs/WEAPON_FIRING_DATA.md) or card (KIT_PARITY source card); dps = a per-second figure the kit text gives directly. mode = the LMB mode that figure describes (the check measures that one; without it, the fastest). null = the source gives no number.",
+	"avg_hp_l1": 1285.4,
+	"avg_hp_l15": 2361.7,
+	"armour_dr": 0.2,
+	"order": ["gunslinger", "bulwark", "mage", "juggernaut", "archer", "rimewright", "dredge", "tender", "ashwick", "dolm", "ostra", "thief"],
+	"hunters": {
+		"gunslinger": {"why": "Cadence: ours 0.12 s a round against ~0.08 s [F, not D], and our sustain rule halves damage after round 10 (the wiki's fall-to-50% reading) with a 1 s refill gap after 30 rounds. Damage per hit is at parity for the first 10 rounds (51 = 3.97% of average HP, ours 6 = 3.9%). Not fixed: the cadence is not [D] and KIT_PARITY row LMB (Vex) calls it a match.", "name": "Vex", "src": "Ghost", "hp": 1225, "dmg": 51, "at15": false, "every": 0.08, "every_tag": "F", "note": "51/round, ~12.5 rounds/s, 30-round magazine"},
+		"bulwark": {"why": "Within 15% on damage and cadence; the flags are the defender HP share (light Hunters x0.80 die sooner than the source's flat 1290). Different weapon: our tap is a shield throw/bash, the source's an Oath hammer throw (owner call, KIT_PARITY).", "name": "Mossy", "src": "Oath", "hp": 1475, "mode": "tap", "dmg": 192, "at15": true, "every": 0.45, "every_tag": "card", "note": "hammer throw 192@15"},
+		"mage": {"why": "Cadence: ours 0.648 s against the source's 0.8 s [F, not D] and damage per hit x1.10. The owner kept 0.648 (KIT_PARITY Ryzz LMB, items 70 and 116). Light defenders (x0.80) add to the flags.", "name": "Ryzz", "src": "Joule", "hp": 1290, "dmg": 90, "at15": false, "every": 0.8, "every_tag": "F", "note": "Jolt 90"},
+		"juggernaut": {"why": "Measured with the press combo (the source's 43-damage figure) at 2.7 m: it cannot reach 8 m, the 8 m LMB is the hold fireblast. Cadence 0.34 s against ~0.2 s [F]; damage per hit 11 against 43 [D], x1.63 after the HP scale. The two roughly cancel (DPS share x0.87), so halving the damage to match the [D] number would make Kael slower, not closer. Not changed.", "name": "Kael", "src": "Brall", "hp": 1290, "mode": "tap", "dmg": 43, "at15": false, "every": 0.2, "every_tag": "F", "note": "Caldera press 43, swings ~0.2 s apart; hold = fireblast 107"},
+		"archer": {"name": "Ravyl", "src": "Myth", "hp": 1100, "dmg": null, "at15": false, "every": null, "every_tag": "", "note": "bow, no LMB number"},
+		"rimewright": {"name": "Nivi", "src": "Celeste", "hp": 1290, "dmg": null, "at15": false, "every": null, "every_tag": "", "note": "darts, no LMB number"},
+		"dredge": {"name": "Grimble", "src": "Kingpin", "hp": 1445, "dmg": null, "at15": false, "every": 0.9, "every_tag": "F", "note": "shotgun, no damage number (only a % ladder by slugs landed)"},
+		"tender": {"name": "Lumi", "src": "Elluna", "hp": 1290, "dmg": null, "at15": false, "every": null, "every_tag": "", "note": "no LMB number"},
+		"ashwick": {"why": "Our figure includes the Flashover rules (+25% on a burning foe, 1.5% max HP a second, 2% a second burn); the source's 258/s is the base stream, its Ignite bonus (a % of max HP) has no number in the data. The bare stream is 27/s = x0.87 of the source. Not fixed: no [D] number to match the bonus.", "name": "Cinder", "src": "Felix", "hp": 1290, "dps": 258, "dmg": null, "at15": false, "every": null, "every_tag": "D", "note": "flamethrower 258/s"},
+		"dolm": {"name": "Tarek", "src": "Tetra", "hp": 1290, "dmg": null, "at15": false, "every": null, "every_tag": "", "note": "kit text has no damage numbers"},
+		"ostra": {"name": "Motley", "src": "Void", "hp": 1150, "dmg": 263, "at15": true, "every": null, "every_tag": "", "note": "Gravity Orb 263@15, no cadence"},
+		"thief": {"name": "Sable", "src": "Shiv", "hp": 1290, "dmg": 160, "at15": true, "every": null, "every_tag": "", "note": "Arcslinger 160@15, no cadence"}
+	}
+}
