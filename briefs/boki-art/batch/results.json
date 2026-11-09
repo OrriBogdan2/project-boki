@@ -38468,5 +38468,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_chandelapi_m4_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_chandelapi_m3",
+    "name": "Chandelapi (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_m3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_m4",
+    "name": "Chandelapi (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_m4_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_m4",
+    "name": "Chandelapi (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_m4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_m4",
+    "name": "Chandelapi (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_m4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_card8",
+    "name": "Anchorbill (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anchorbill_card8_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_card8",
+    "name": "Anchorbill (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anchorbill_card8_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_card8",
+    "name": "Anchorbill (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/anchorbill_card8_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anchorbill_fix",
+    "name": "Anchorbill (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_anchorbill_fix_1.jpg",
+    "ok": true
   }
 ]
