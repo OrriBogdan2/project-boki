@@ -8,7 +8,8 @@ extends RefCounted
 ## retargeted rig, and so does any Hero model played by something that feeds no state (galleries, portraits).
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
-## and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
+## and rise, or the glide, or the dive: a plunge's own clip, data "air.dive", held at "dive_at" s when the clip is a
+## one-shot) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
 ## (Blend2: moves that own the body). The action itself is two seekable channels crossfaded, so one move hands to the
 ## next without a pop (item 32).
 ##
@@ -51,6 +52,8 @@ var act_w := 0.0             # how much the action owns the body
 var up_w := 0.0              # how much it owns the upper body only
 var air_w := 0.0
 var glide_w := 0.0
+var dive_w := 0.0
+var tilt: WardenAirTilt      # the whole body pitched and banked in the air
 var proc_w := 1.0            # how much of the procedural rig is shown
 var rise_w := 0.0
 var loco_pos := Vector2.ZERO
@@ -131,6 +134,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.root_node = tree.get_path_to(glb)
 	tree.add_animation_library("", lib)
 	tree.tree_root = _build()
+	tilt = WardenAirTilt.new(glb, sk, d["air"])
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
 	_setup_out()
@@ -183,7 +187,7 @@ func _is_loop(nm: String) -> bool:
 	var cr: Dictionary = d.get("crouch", {})
 	if cr.has("idle") and (nm == cr["idle"] or nm in (cr["walk"] as Dictionary).values()):
 		return true
-	return nm in ["fall", "glide", "stun", "downed"]
+	return nm in ["fall", "glide", "dive", "stun", "downed"]
 
 func _anim(nm: String) -> AnimationNodeAnimation:
 	var n := AnimationNodeAnimation.new()
@@ -215,9 +219,15 @@ func _build() -> AnimationNodeBlendTree:
 	space.add_blend_point(_anim(String(ai["rise"])), 1.0)
 	t.add_node("air_pose", space)
 	t.add_node("glide", _anim(String(ai["glide"])))
+	t.add_node("dive", _anim(String(ai.get("dive", ai["glide"]))))
+	t.add_node("dive_at", AnimationNodeTimeSeek.new())
+	t.connect_node("dive_at", 0, "dive")
+	t.add_node("dive_w", AnimationNodeBlend2.new())
+	t.connect_node("dive_w", 0, "glide")
+	t.connect_node("dive_w", 1, "dive_at")
 	t.add_node("glide_w", AnimationNodeBlend2.new())
 	t.connect_node("glide_w", 0, "air_pose")
-	t.connect_node("glide_w", 1, "glide")
+	t.connect_node("glide_w", 1, "dive_w")
 	t.add_node("air", AnimationNodeBlend2.new())
 	t.connect_node("air", 0, _build_crouch(t) if d.has("crouch") else "stance_w")
 	t.connect_node("air", 1, "glide_w")
@@ -382,6 +392,7 @@ func step(dt: float) -> void:
 	if d.has("crouch"):
 		_crouch(s, dt)
 	tree.advance(dt)
+	tilt.step(s, dt)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
 	_out(dt)
@@ -430,12 +441,16 @@ func _loco(s: Dictionary, dt: float) -> void:
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)
 	var grounded := bool(s.get("grounded", true))
-	var gliding := bool(s.get("gliding", false)) or bool(s.get("diving", false))
+	var diving := bool(s.get("diving", false))
 	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / AIR_FADE)
-	glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / AIR_FADE)
+	glide_w = move_toward(glide_w, 1.0 if diving or bool(s.get("gliding", false)) else 0.0, dt / AIR_FADE)
+	dive_w = move_toward(dive_w, 1.0 if diving else 0.0, dt / AIR_FADE)
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
 	_p("air/blend_amount", air_w)
 	_p("glide_w/blend_amount", glide_w)
+	_p("dive_w/blend_amount", dive_w)
+	if d["air"].has("dive_at"):
+		_p("dive_at/seek_request", float(d["air"]["dive_at"]))
 	_p("air_pose/blend_position", rise_w)
 	if not grounded:
 		air_t += dt

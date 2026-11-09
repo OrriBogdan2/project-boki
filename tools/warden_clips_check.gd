@@ -4,6 +4,8 @@ extends RefCounted
 ## clip is as long as the kit's move; the blend tree plays them (a move changes the pose, kit time drives it); the
 ## locomotion blends (a run moves the feet); the skinned weapon stays on its bone through every move and only one
 ## weapon is drawn; it hides when the kit takes it out of the hand and its FX anchors stay on it; the budget holds.
+## Every Hero with clips (WardenAirTilt): its dive clip is in the .glb, a plunge turns it head-down, a glider turn leans
+## it into the turn, and on the ground the .glb is back in its own place.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -27,6 +29,8 @@ func run(main: Node) -> void:
 	for art_name in PREFIX:
 		_hunter(String(art_name), String(PREFIX[art_name][0]), String(PREFIX[art_name][1]))
 	_companions()
+	for id in Arch.ORDER:
+		_air(String(id))
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -54,7 +58,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	want.append_array([lc["idle"], lc["stance"], cfg["land"]["clip"], cfg["weapon_out"]["clip"]])
 	want.append_array((lc["walk"] as Dictionary).values())
 	want.append_array((lc["run"] as Dictionary).values())
-	want.append_array([cfg["air"]["rise"], cfg["air"]["fall"], cfg["air"]["glide"]])
+	want.append_array([cfg["air"]["rise"], cfg["air"]["fall"], cfg["air"]["glide"], cfg["air"]["dive"]])
 	var sts: Dictionary = cfg["states"]
 	for k in sts:
 		if sts[k] is Dictionary:
@@ -244,6 +248,45 @@ func _whirl(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, st:
 	_play(m, an, sync, st, 12)
 	ok(worst < 0.6, "breaker: the kit's angle turns the skinned hammer (worst %.2f rad off)" % worst)
 	ok(reach <= 2.8, "breaker: the whirl's head stays inside the slam's reach (%.2f m of 2.8)" % reach)
+
+## The hips-to-head line in the model's frame: x its lean to the Hero's right, z behind, y up.
+func _spine(m: Node3D, sk: Skeleton3D) -> Vector3:
+	var inv := m.global_transform.affine_inverse() * sk.global_transform
+	var hips := inv * sk.get_bone_global_pose(WardenSkeleton.find(sk, "hips")).origin
+	return ((inv * sk.get_bone_global_pose(WardenSkeleton.find(sk, "head")).origin) - hips).normalized()
+
+func _air(id: String) -> void:
+	var art_name := WardenGlb.art(id)
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	holder.add_child(m)
+	var w := m.get_node_or_null("Warden")
+	var sync := w.get_node("Sync") as WardenGlb.Sync if w else null
+	if sync == null or sync.clips == null:
+		ok(false, "%s: plays its clips" % art_name)
+		m.free()
+		return
+	var sk := WardenGlb.skeleton(w)
+	var an := HunterAnim.new(m)
+	var dive := String(sync.clips.d["air"]["dive"])
+	ok(sync.clips.lib.has_animation(dive), "%s: the dive clip %s is in the .glb" % [art_name, dive])
+	var glide := {"vel": Vector3(0, -3.5, -9.0), "face": 0.0, "grounded": false, "gliding": true}
+	_play(m, an, sync, glide, 40)
+	var up := _spine(m, sk)
+	var plunge := {"vel": Vector3(0, -30.0, -6.0), "face": 0.0, "grounded": false, "diving": true}
+	_play(m, an, sync, plunge, 40)
+	var down := _spine(m, sk)
+	ok(down.y < 0.0 and down.z < 0.0, "%s: the dive goes head-down, head first (spine y %.2f z %.2f; gliding y %.2f)"
+			% [art_name, down.y, down.z, up.y])
+	var turn := glide.duplicate()
+	for i in 30:
+		turn["face"] = float(turn["face"]) + 5.0 * DT      # a left turn at 5 rad/s
+		_play(m, an, sync, turn, 1)
+	var lean := _spine(m, sk)
+	ok(lean.x < up.x - 0.15, "%s: a glider turn leans it into the turn (spine x %.2f, straight %.2f)" % [art_name,
+			lean.x, up.x])
+	_play(m, an, sync, {"vel": Vector3.ZERO, "face": float(turn["face"]), "grounded": true}, 60)
+	ok(w.transform.is_equal_approx(sync.clips.tilt.rest), "%s: on the ground the body is upright again" % art_name)
+	m.free()
 
 func _play(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
 	for i in n:

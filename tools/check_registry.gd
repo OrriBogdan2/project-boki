@@ -79,6 +79,7 @@ const CHECKS := {
 	"--motley-live-check": ["res://tools/motley_live_check.gd", "motley_live_check", null],      # the jack, live
 	"--motley-card-shots": ["res://tools/motley_card_shots.gd", "motley_card_shots", null],      # the card vs him
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
+	"--glide-shots": ["res://tools/glide_shots.gd", "glide_shots", null],      # glide, turn, dive, close, air dash (GPU)
 	"--idle-shots": ["res://tools/idle_shots.gd", "idle_shots", null],      # every Hunter standing still (IDLE_AUDIT)
 	"--lineup-shot": ["res://tools/lineup_shot.gd", "lineup_shot", null],      # all 12 Hunters in a row, true scale
 	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],

@@ -37,7 +37,9 @@
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "dive"
+		"dive": "dive",
+		"dive_tilt": 50.0,
+		"glide_tilt": 0.0
 	},
 	"land": {
 		"clip": "land",

@@ -14,7 +14,7 @@
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
 	"flow": [["ostra_swap_aim", 0.2], ["ostra_swap", 0.2], ["ostra_orb", 0.2], ["ostra_snap_wind", 0.2], ["ostra_snap", 0.2], ["ostra_seed", 0.2], ["ostra_pop", 0.2]],
-	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive"},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive", "dive_tilt": 12.0},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
 		"ostra_orb": {"clip": "orb", "alt": "orb_l", "upper": true}, "ostra_orb_hot": {"clip": "orb_hot", "upper": true},
