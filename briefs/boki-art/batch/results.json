@@ -12603,5 +12603,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_pocketpus_e_w28_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_rattlebub_e_w28",
+    "name": "Rattlebub (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_rattlebub_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rattlebub_e_w28",
+    "name": "Rattlebub (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_rattlebub_e_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rattlebub_e_w28",
+    "name": "Rattlebub (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_rattlebub_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_e_w28",
+    "name": "Tootle (concept edit)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_tootle_e_w28_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_e_w28",
+    "name": "Tootle (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_tootle_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_e_w28",
+    "name": "Tootle (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_tootle_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_e_w28",
+    "name": "Tootle (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_tootle_e_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "chimelop_r2_w28",
+    "name": "Chimelop",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chimelop_r2_w28_1.jpg",
+    "ok": true
   }
 ]
