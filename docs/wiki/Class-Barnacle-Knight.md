@@ -71,7 +71,7 @@ What the in-game kit card (K) says.
 | Passive: Crushed | Knocking a foe into a wall or another foe stuns it. |
 | Dash: 360 Smash | 360 Smash: a short dash that ends in one spinning hit around you; with the aegis up, a Shield Charge (its own 6s cooldown). |
 | LMB | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you. |
-| RMB: Aegis | Hold to raise your aegis and block shots from the front. With it up, Shift is a Shield Charge on its own cooldown. |
+| RMB: Aegis | Hold to raise your aegis: it blocks everything from the front on shield energy that regenerates. With it up, Shift is a Shield Charge on its own cooldown. |
 | E: Mending Ground | A green light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst. |
 | Hunter ultimate: Faultline | Faultline (level 6): plant, slam, and the ground erupts down a long lane, throwing every foe on it up. |
 | Weapon: War Hammer & Aegis | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you. |
@@ -84,7 +84,7 @@ What the in-game kit card (K) says.
 
 **Aegis (RMB, 6s cooldown).**
 
-- *Hold:* Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
+- *Hold:* Raise the aegis: a curved gold shield on 160 shield energy. Every blow it blocks drains it, and once it has been down 2s it regenerates 20 a second. It blocks everything from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
 - *Tap:* A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.
 - *In the air:* Shield Surf: hold to block from the front while gliding.
 

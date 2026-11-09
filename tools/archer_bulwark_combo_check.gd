@@ -858,6 +858,34 @@ func _bulwark_combos() -> void:
 		absf(T.pos.x - x0) < 0.2 and dmg(T) <= 0.0 and K.crushes == c0 and K.ch_rmb >= 1.0 and not K.d["rmb"].has("bash"),
 		"moved %.2f took %.0f crushes %d charges %.1f" % [T.pos.x - x0, dmg(T), K.crushes - c0, K.ch_rmb]
 	)
+	# the aegis runs on shield energy (data: Brightshield, "shield energy that regens/repairs"): a blocked
+	# blow drains it, and it regenerates once it has been down for the wait (2 s is ours: no source number)
+	step(m, 1.0)
+	reset.call()
+	K.shield_hp = K.shield_max()
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.3, func(): P.inp["sec_hold"] = true)
+	var energy_full := float(K.wall.get("hp", 0.0))
+	var hp_raised := P.hp
+	P.hurt(30.0, T, {"src": "melee", "melee": true})
+	var energy_hit := float(K.wall.get("hp", 0.0))
+	P.inp["sec_hold"] = false
+	step(m, 0.1)
+	ok(
+		"combo bulwark: a blocked blow drains the aegis's energy, not his health",
+		K.wall.is_empty() and energy_hit <= energy_full - 29.0 and P.hp == hp_raised
+				and K.shield_hp <= energy_hit + 0.5,
+		"energy %.0f -> %.0f hp %.0f -> %.0f" % [energy_full, energy_hit, hp_raised, P.hp]
+	)
+	step(m, K._shield_stat("wait") - 0.3)
+	var energy_waiting := K.shield_hp
+	step(m, 0.6)
+	ok(
+		"combo bulwark: the energy regenerates only after 2 s down (20/s)",
+		absf(energy_waiting - energy_hit) < 0.5 and K.shield_hp >= energy_waiting + 5.0,
+		"%.1f at %.1f s down, %.1f at %.1f s" % [energy_waiting, K.down_t - 0.6, K.shield_hp, K.down_t]
+	)
 	# Shield Charge into the wall: Crushed (a stun, no heal), on the RMB slot's own 6 s cooldown, no dash charge spent
 	step(m, 1.0)
 	reset.call()

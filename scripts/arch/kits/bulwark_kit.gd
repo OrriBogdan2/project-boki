@@ -9,7 +9,7 @@ extends ArchKit
 ##   on its head and a click open the perfect window, the whirl still going. Let go and it's a Crushing Blow: a
 ##   flaming 180 degree crescent in front that steps him forward with it; let go in the window and it's the
 ##   perfect swing, a leaping launch (BjornLaunch).
-## - RMB: hold to raise his aegis (its own HP, regenerates); letting go only lowers it.
+## - RMB: hold to raise his aegis (shield energy: blocked blows drain it, it regenerates once down 2 s); letting go only lowers it.
 ## - Dash: 360 Smash, a short dash that ends in one full spin hit around him; with the aegis raised it's
 ##   the Shield Charge (the Bash: invulnerable for its length, a heavier knock) on the RMB slot's own cooldown.
 ## - Passive, Crushed: any knock of his (the hammer thrown or called back, Crushing Blow, 360 Smash, Shield
@@ -19,7 +19,7 @@ extends ArchKit
 ## - X, Faultline (level 6, BjornUlt): planted, a slam, and the ground erupts cell by cell down a lane.
 
 var wall: Dictionary = {}      # the raised shield (a following verbs wall)
-var shield_hp := 160.0
+var shield_hp := 160.0          # the aegis's shield energy (Brightshield's, data: "regens/repairs")
 var down_t := 0.0              # seconds since it was lowered (regen after 2s)
 var lock_t := 0.0              # broken: locked out
 var front_t := 0.0             # the Shield Charge's front guard
@@ -63,7 +63,7 @@ func _setup() -> void:
 	self_nodes.append(ult)
 	launch = BjornLaunch.new(self)
 
-## The aegis grows by "hp_rank" of its base HP for every rank past the first (rank 2: +25%, rank 3: +50%).
+## The aegis's energy grows by "hp_rank" of its base for every rank past the first (rank 2: +25%, rank 3: +50%).
 func shield_max() -> float:
 	var sd: Dictionary = rmb_def()["shield"]
 	return float(sd["hp"]) * (1.0 + float(sd["hp_rank"]) * float(rank("sec") - 1))
