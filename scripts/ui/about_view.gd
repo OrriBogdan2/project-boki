@@ -262,8 +262,8 @@ static func block(rec: Dictionary, parent: Control, compact := false) -> void:
 		ol.custom_minimum_size.x = 260
 		parent.add_child(ol)
 		return
-	parent.add_child(UI.section("Who it is", UI.FAINT.lightened(0.2)))
+	parent.add_child(UI.section("Who it is"))
 	looks(rec, parent)
 	parent.add_child(UI.spacer(4))
-	parent.add_child(UI.section("Where it's from", UI.FAINT.lightened(0.2)))
+	parent.add_child(UI.section("Where it's from"))
 	history(rec, parent)

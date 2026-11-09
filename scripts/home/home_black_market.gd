@@ -109,7 +109,7 @@ func _rare_card(e: Dictionary) -> Control:
 	var hr := UI.hbox(10)
 	card.add_child(hr)
 	var col: Color = Data.KIN[BlackMarket.id_of(key)]["color"] if egg else Goods.col_of(key)
-	var b := UI.badge("egg" if egg else Goods.icon_of(key), col, 32.0, UI.R_CTRL)
+	var b := UI.badge("egg" if egg else Goods.icon_of(key), col, 32.0)
 	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hr.add_child(b)
 	var nv := UI.vbox(0)
