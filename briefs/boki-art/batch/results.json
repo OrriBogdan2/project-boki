@@ -45573,5 +45573,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_mortarfly_p86_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_mortarfly_p86",
+    "name": "Mortarfly (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_mortarfly_p86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_p86",
+    "name": "Eclipsowl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_p86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_p86",
+    "name": "Eclipsowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove_p86",
+    "name": "Ringrove (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mortarfly_p86",
+    "name": "Mortarfly (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_mortarfly_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthollow_p86",
+    "name": "Crofthollow (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_crofthollow_p86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_p86",
+    "name": "Eclipsowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thistlynx_p86",
+    "name": "Thistlynx (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_thistlynx_p86_3.jpg",
+    "ok": true
   }
 ]
