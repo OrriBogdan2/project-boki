@@ -1,7 +1,7 @@
-# Boki art live manifest (regenerated 05:44 UTC 11-09)
+# Boki art live manifest (regenerated 05:58 UTC 11-09)
 Card = main image, sheet = turnaround, portrait = Bokidex portrait. Bokidex hero = "hero" in LIVE_MANIFEST.json (portraits/cutout_v2, cut from the current card). Proposed new names in brackets (NAME_CHANGES.md). JSON: LIVE_MANIFEST.json.
 Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
-180 Boki, 178 with all three. Missing something: Crofthollow, Tinbrock
+185 Boki, 185 with all three. Missing something: 
 
 | Boki | Sheet | Card | Portrait |
 |---|---|---|---|
@@ -31,7 +31,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Chuggamus | ✓ | ✓ | ✓ |
 | Cisternmander (Vatmander) | ✓ | ✓ | ✓ |
 | Clinkpede | ✓ | ✓ | ✓ |
-| Crofthollow | – | ✓ | ✓ |
+| Crofthollow | ✓ | ✓ | ✓ |
 | Crofthorn | ✓ | ✓ | ✓ |
 | Cubbat | ✓ | ✓ | ✓ |
 | Dobsabre | ✓ | ✓ | ✓ |
@@ -96,6 +96,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Lensling | ✓ | ✓ | ✓ |
 | Loafhopper | ✓ | ✓ | ✓ |
 | Lockatara | ✓ | ✓ | ✓ |
+| Lodestick | ✓ | ✓ | ✓ |
 | Lunink | ✓ | ✓ | ✓ |
 | Lunowl | ✓ | ✓ | ✓ |
 | Lurklet | ✓ | ✓ | ✓ |
@@ -106,13 +107,16 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Maulangler | ✓ | ✓ | ✓ |
 | Medushroom | ✓ | ✓ | ✓ |
 | Mirrolin | ✓ | ✓ | ✓ |
+| Moatpole | ✓ | ✓ | ✓ |
 | Morelkin | ✓ | ✓ | ✓ |
 | Morelossus | ✓ | ✓ | ✓ |
 | Mortarfly | ✓ | ✓ | ✓ |
 | Mossbastion (Mosstodon) | ✓ | ✓ | ✓ |
 | Mossgrade | ✓ | ✓ | ✓ |
 | Mothlet | ✓ | ✓ | ✓ |
+| Moundlet | ✓ | ✓ | ✓ |
 | Murmurling | ✓ | ✓ | ✓ |
+| Murmuron | ✓ | ✓ | ✓ |
 | Mycroll | ✓ | ✓ | ✓ |
 | Nettlynx | ✓ | ✓ | ✓ |
 | Nymphane | ✓ | ✓ | ✓ |
@@ -157,6 +161,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Snapler | ✓ | ✓ | ✓ |
 | Snuffapi | ✓ | ✓ | ✓ |
 | Soakybara | ✓ | ✓ | ✓ |
+| Spanglin | ✓ | ✓ | ✓ |
 | Spirevark | ✓ | ✓ | ✓ |
 | Sporcupine | ✓ | ✓ | ✓ |
 | Starcap | ✓ | ✓ | ✓ |
@@ -169,7 +174,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Thrumbird | ✓ | ✓ | ✓ |
 | Thunderstrich (Thundrich) | ✓ | ✓ | ✓ |
 | Tidalisk | ✓ | ✓ | ✓ |
-| Tinbrock | ✓ | ✓ | – |
+| Tinbrock | ✓ | ✓ | ✓ |
 | Tootle | ✓ | ✓ | ✓ |
 | Torpecone | ✓ | ✓ | ✓ |
 | Truffapir | ✓ | ✓ | ✓ |

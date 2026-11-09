@@ -1072,7 +1072,7 @@
  "Tinbrock": {
   "sheet": "briefs/boki-art/evolutions/Tinbrock.jpg",
   "card": "briefs/boki-art/cards/Tinbrock.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Tinbrock.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Tinbrock.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Tinbrock.png"
  },
@@ -1266,7 +1266,8 @@
   "card": "briefs/boki-art/cards/Crofthollow.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Crofthollow.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Crofthollow.png",
-  "portrait": "briefs/boki-art/portraits/light/Crofthollow.jpg"
+  "portrait": "briefs/boki-art/portraits/light/Crofthollow.jpg",
+  "sheet": "briefs/boki-art/turnarounds/Crofthollow.jpg"
  },
  "Effigoon": {
   "sheet": "briefs/boki-art/turnarounds/Effigoon.jpg",
@@ -1281,5 +1282,40 @@
   "portrait": "briefs/boki-art/portraits/light/Pipeworth.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Pipeworth.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Pipeworth.png"
+ },
+ "Lodestick": {
+  "sheet": "briefs/boki-art/turnarounds/Lodestick.jpg",
+  "card": "briefs/boki-art/cards/Lodestick.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Lodestick.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Lodestick.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Lodestick.png"
+ },
+ "Moatpole": {
+  "sheet": "briefs/boki-art/turnarounds/Moatpole.jpg",
+  "card": "briefs/boki-art/cards/Moatpole.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Moatpole.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Moatpole.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Moatpole.png"
+ },
+ "Moundlet": {
+  "sheet": "briefs/boki-art/turnarounds/Moundlet.jpg",
+  "card": "briefs/boki-art/cards/Moundlet.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Moundlet.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Moundlet.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Moundlet.png"
+ },
+ "Murmuron": {
+  "sheet": "briefs/boki-art/turnarounds/Murmuron.jpg",
+  "card": "briefs/boki-art/cards/Murmuron.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Murmuron.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Murmuron.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Murmuron.png"
+ },
+ "Spanglin": {
+  "sheet": "briefs/boki-art/turnarounds/Spanglin.jpg",
+  "card": "briefs/boki-art/cards/Spanglin.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Spanglin.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Spanglin.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Spanglin.png"
  }
 }
