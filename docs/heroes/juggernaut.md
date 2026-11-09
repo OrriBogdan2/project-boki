@@ -47,7 +47,7 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 | RMB air, Meteor Drop | in the air | A purple disc under the cursor (5m at most) shows while it's ready. Press: a 0.2s hang (blade hauled overhead, knees tucked, one turn) sliding over a marker everyone sees (the 2.6m disc and the 1.2m stun core), a straight vertical slam down onto it with flame streaks (0.22 to 0.4s; owner 113.6), then the landing: a crouch onto the knees, cracks in the ground, a shock ring at the stun's edge, dust and debris, a shake and a deep boom; 18, slow 40%; the core +50% and stunned 0.8s. 0.5s recovery rising from the crouch (planted 0.2s; Shift or a jump moves him out of it at once). Its own 7.2s cooldown (4.8s at rank 3) | Air Slam: a disc at the cursor, ~0.85s airborne from the jump, ~0.5s recovery in a low crouch ([F] 412.0-413.9s) | As the source; press to impact 0.52s (the footage's apex to impact is ~0.55s) |
 | RMB in the pull | during E | Cinder Spin, Haul Slam, Chain Lunge (below) | Anti-Heal Spin | As before |
 | Dash, Rampage | Shift | 2 charges, a third at rank 2: a 0.07s dip, then 4.5m in 0.17s (x the global dash feel; owner 113.8: much shorter than the 0.15s + 0.3s it was), flat and stretched, and a low recovery with the blade dragging: 7 along it, the tip 14 and a big knock, orange flame streaks; rank 3: a shot dodged through it feeds Rage (+15) | Quick Dash: 3 charges, about 2 bh | As the source; sync62's slower heavy dash kept (0.3s) |
-| E, Warchain | tap, recast | 13m (9.5s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
+| E, Warchain | tap, recast | 13m (12.8s cooldown, 11.2s at rank 2, 8s at rank 3): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
 | X, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (an upward crescent in his gold, run hot at the edge, and a gold cloud): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our look (gold guard, upward gold cleave) replaces its red crescent |
 | Merge (its own key, `ultimate`) | tap | The Boki Merge | (n/a) | The Merge is the same for every hero |
 
@@ -141,7 +141,7 @@ The numbers live in `e` in content/archetypes/juggernaut.json; the code is `Jugg
 | Ready | E | Throwing: the hook flies toward the cursor (13 m) | [D] [F] |
 | Ready | E while rooted, Grounded, stunned or on cooldown | stays Ready, the deny buzz | [W] 05.02.25 |
 | Ready | E with the Lunge charging (RMB held) | Throwing; the charge is kept (release once hooked = Chain Lunge) | ours |
-| Throwing | hits a foe (hunter, monster or foe Boki) | Hooked to a foe: 8 damage, blighted while tethered (healing barely takes) | [D] [W] anti-heal |
+| Throwing | hits a foe (hunter, monster or foe Boki) | Hooked to a foe: 8 damage, no blight from the hook (the Cinder Spin blights; asserted "juggernaut E: Warchain hooks (no blight ...)") | [D] [W] |
 | Throwing | hits a wall or a block | Hooked to a wall | [D] |
 | Throwing | passes an ally or your own Boki | keeps flying (it only bites foes and walls) | [D] "enemies or walls" |
 | Throwing | reaches 13 m, or drops into the abyss | Missed: "MISS", the cooldown starts | [W] 07.01.25 |
@@ -262,7 +262,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | The Execution Slam aims freely during its cast, with a warning over the head | wiki patch 05.02.25 | yes (lane at 0157) | Built: free aim, and a strike lane everyone sees |
 | Execution: x1.5 under 35% | wiki patch 05.02.25 | yes (red outline 0154) | Built, plus the red outline while the Smash is ready |
 | The dash has wind-down frames: no glide straight out of it | wiki patch 05.02.25 | n/a | Built (kits2), asserted |
-| A knock restores one dash charge (not all) | wiki Shift | n/a | Built |
+| A knock restores the dash | wiki Shift | n/a | Built as the shared takedown rule: every charge and the cooldown, for every hero (`scripts/match/dash_reset.gd:15`) |
 | Flame Step's tip deals double | wiki Shift | yes (0401) | Built |
 | Obsidian Slam's centre ring stuns and deals +50% | wiki RMB | yes | Built |
 | The slam lands where you aim in the air | footage 0263, 0286 | yes | Built (5m reach), asserted |
@@ -347,3 +347,54 @@ left over when the merge ends: the Searing Wave charge (`lmb_t`, `lmb_buf`, `mel
 wind-up (`slam_w`), an armed Haul Slam (`haul`) and the held Smash (`rmb_down`, cleared by the merge itself), a Meteor Drop in its dive (`drop`), the Lunge's full flag (`lunge_full`) and a running Gilded Riposte
 (`riposte.st`, its guard or cleave; the gold glow hides).
 Scripted in `--kit-combo-check` as the `merge hold jug:` checks.
+
+## Parity verify, Nov 9
+
+Kael on origin/main d255acbee against the source (docs/KIT_PARITY.md Kael block, this sheet, hero-ref/juggernaut.md,
+supervive_kits.md, DECISIONS: owner notes win). Verdicts: **match**, **differ (owner)**, **regressed**, **open**.
+`kit` is scripts/arch/kits/juggernaut_kit.gd, `chain` juggernaut_chain.gd, `ult` juggernaut_ult.gd, `drop`
+juggernaut_drop.gd, `json` content/archetypes/juggernaut.json, `flow` content/dash_flow/juggernaut.json.
+`--juggernaut-combo-check` 183/0 and `--hero-combo-check` 304/0 on main. Many Kael branches are unmerged (kael-lunge-length,
+kael-rmb-dash-turn, kael-riposte-knock, kael-ult-reset-rebased-rebased, kael-tap-ult-1108, kael-chain-length, gaps-juggernaut):
+their files were left alone, so rows they touch are listed, not fixed.
+
+| Row | Verdict | Where | Note |
+|---|---|---|---|
+| Passive: damage fills Rage, Enraged | match | kit:195, json:19 | Empowered numbers are ours (the card gives none) |
+| Passive: knock heals, creep kill heals | match | kit:221, kit:204 | 20% of the knocked hunter's health |
+| Passive: a knock restores the dash | differ (owner) | scripts/match/dash_reset.gd:15 | shared takedown rule gives every charge, not one; the sheet row said one, corrected here |
+| LMB tap: 175 degree alternating slashes, 0.34s, tip 1.6x | match | kit:379, json:17 | [F] 180 degrees, 94 to 151 |
+| LMB hold: grows with the hold (damage, range, size), 36 m/s, ring tell | match | kit:413, kit:303, kit:364 | owner: hold scales; asserted "jug parity lmb hold" |
+| RMB tap: 0.6s Finishing Slam, lane, +50% under 35%, red outline | match | kit:732, kit:889, json:25 | |
+| RMB tap: a knock after a Slam hit readies X | match | kit:221 | [D] any knock |
+| RMB hold: held indefinitely, never auto-fires | match | kit:546 (base arch_kit.gd:111 is 9s) | owner; asserted "jug parity rmb" |
+| RMB hold: perfect release | differ (owner) | kit:583, kit:769, json:26 | +20% distance, cue and ring; no source equivalent |
+| RMB hold: lane, magenta at full, pose only while held | match | kit:551, kit:680 | |
+| RMB hold: Lunge length 4.5 to 7.5 m | open | json:26 | [F] about 5 m fixed; owner "fling far"; ext/kael-lunge-length (5.4 m) unmerged |
+| RMB hold: a miss doubles the cooldown | match | kit:787 | [W] |
+| RMB air: Meteor Drop at the cursor, own 7.2s slot, stun core | match | drop:62, drop:145, json:27 | 0.8x of the data's 9s |
+| RMB in the pull: Cinder Spin, blights | match | kit:909, json:29 | [D] |
+| E: throw 13 m, hooks foe or wall, no blight from the hook | match | chain:89, chain:115 | state-machine row said blighted: corrected |
+| E: tether stays attached while he moves, 5s | match | chain:254, json:34 | [F] 0305-0317, [O] |
+| E: tether extends to a max, held taut | differ (owner) | chain:277, json:34 | 24 m is ours: no data or footage length (ext/kael-chain-length marks it `[?]`) |
+| E: pull set by facing and movement (slingshot, swing, arc) | match | chain:194, chain:213, chain:354 | [O]; the source pull is an impulse ([W] 1900 uu/s), 22 m/s here |
+| E: recast pulls, cooldown starts on pull or break, stun breaks | match | chain:165, kit:942, chain:262 | cooldown 12.8s (0.8 x 16) |
+| E: Shift and jump exit the pull | open | chain:413, chain:417 | the source shows no exit; ours |
+| X: 0.65s invulnerable guard, planted | match | ult:95, ult:185 | [D] [F] |
+| X: strike, 80% heal, 36s | match | ult:132, json:37 | |
+| X: Riposte kill reset | open | ult:157 | `[?]`: [D] "killing a living enemy"; ours resets on a knock or kill of a hunter; ext/kael-ult-reset-rebased-rebased, kael-riposte-knock unmerged |
+| Dash: 2 charges (third at rank 2), 10.4s, tip hits twice | match | kit:455, kit:526, json:21 | |
+| Dash: length 4.5 m x 0.85 feel in 0.17s | open | json:21 | [F] 3.6 to 5.8 m; ext/kael-lunge-length sets 3.6 m in 0.2s |
+| Dash rows, ground: LMB buffer, RMB fire, E fire, X cancel, Q fire | match | flow:5, flow:9, flow:14, flow:18, flow:22 | each row carries its source; Q is ours |
+| Dash rows, air: LMB buffer, RMB cancel (Meteor Drop), E fire, X cancel, Q fire | match | flow:28, flow:32, flow:36, flow:40, flow:44 | air LMB and E have no source |
+| Into-dash: LMB fire, RMB fire (Slam Drive), X buffer | match | flow:51, flow:55, flow:64 | patch 05.02.25 turn limit not built: ext/kael-rmb-dash-turn unmerged (open) |
+| Into-dash: E cancels the pull | open | flow:59 | source silent |
+| Hold rows: LMB and RMB keep through dash and jump | match | flow:71, flow:84 | [O] |
+| Into-jump: X locked | match | flow:97 | planted guard |
+| Clips: 21 kmoves, locomotion and states map to kael.glb clips | match | content/rules/warden_anim/kael.json:51 | all 49 clips resolve; KIT_PARITY still says "missing" (stale doc) |
+| Rank text: Warchain and dash cooldown numbers | regressed | json:42, json:43 | text says 9.5 / 8.3 / 5.9s and 9s, real 12.8 / 11.2 / 8.0s and 10.4s; juggernaut.json is in flight (kael-lunge-length, kael-rmb-dash-turn), left for the next pass |
+
+Fixed on this branch (docs only; the code was right): the Warchain per-slot row (cooldown 12.8s, not 9.5s), the state-machine
+row (no blight from the hook, as `--juggernaut-combo-check` already asserts), and the dash-on-knock row. No code change, so no
+new assert: each is already covered ("juggernaut E: Warchain hooks (no blight ...)", "combo jug: RMB sweet spot > knock = ...
+a dash"). Not touched: the KIT_PARITY Kael block (three unmerged branches edit it).
