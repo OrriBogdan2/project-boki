@@ -93,9 +93,27 @@ const T := {
 	"drop_deploy_frames":      ["<=", 1.0, "frames", "press jump: glider opens the same step"],
 	"drop_deploy_settle_t":    ["<=", 0.30, "s", "[est] canopy catch to drop sink rate"],
 	"drop_glide_steer_t":      ["<=", 0.35, "s", "[game data] GlideTargetXYForce 162,500 / 100 kg: 90% of the glide speed"],
-	"drop_land_dead_frames":   ["<=", 1.0, "frames", "no input dead time on landing"],
-	"land_dead_frames":        ["<=", 1.0, "frames", "no input dead time on landing"],
 	"land_squash":             [">=", 0.05, "", "brief squash on a landing that reads"],
+	# landing recovery (all 12 hunters, worst case): the steps a touchdown adds before a key acts, against
+	# the same key standing still. The source acts at once: [footage] Moosh Moosh walks straight out of her
+	# touchdown (~0.1 s, no squash), Linwick casts the moment he lands, Venator takes a pad mid-cast;
+	# [game data] the movement component has no landing-recovery property. Nothing shows the drop's own landing.
+	"land_3m_move_lag":        ["<=", 0.0, "frames", "[footage] a short fall (9 m/s): moving at once"],
+	"land_3m_act_lag":         ["<=", 0.0, "frames", "[footage] dash, attack and RMB at once"],
+	"land_6m_move_lag":        ["<=", 0.0, "frames", "[footage] at the 12 m/s fall cap: moving at once"],
+	"land_6m_act_lag":         ["<=", 0.0, "frames", "[footage] dash, attack and RMB at once"],
+	"land_12m_move_lag":       ["<=", 0.0, "frames", "[footage] a skyfall-height drop: moving at once"],
+	"land_12m_act_lag":        ["<=", 0.0, "frames", "[footage] dash, attack and RMB at once"],
+	"land_20m_move_lag":       ["<=", 0.0, "frames", "[footage] a long drop: moving at once"],
+	"land_20m_act_lag":        ["<=", 0.0, "frames", "[footage] dash, attack and RMB at once"],
+	"land_dive_move_lag":      ["<=", 0.0, "frames", "[game data] GlideDiveCancelDistance: the glide catches you"],
+	"land_dive_act_lag":       ["<=", 0.0, "frames", "[game data] as above"],
+	"land_glide_move_lag":     ["<=", 0.0, "frames", "[footage] Moosh Moosh's glide touchdown: walks straight out"],
+	"land_glide_act_lag":      ["<=", 0.0, "frames", "[footage] Linwick casts the moment he lands"],
+	"land_pad_move_lag":       ["<=", 0.0, "frames", "[footage] Venator acts through a pad flight; landing unseen"],
+	"land_pad_act_lag":        ["<=", 0.0, "frames", "[footage] as above"],
+	"land_drop_move_lag":      ["<=", 0.0, "frames", "[est] the drop's landing has no footage: no lock, as elsewhere"],
+	"land_drop_act_lag":       ["<=", 0.0, "frames", "[est] as above"],
 	"e2e_input_frames":        ["<=", 1.0, "frames", "key press to sim velocity, same rendered frame"],
 	"e2e_render_frames":       ["<=", 1.0, "frames", "key press to the model moving on screen"],
 	"render_lag_m":            ["<=", 0.03, "m", "local player drawn where the sim is (no interpolation lag)"],
@@ -149,6 +167,8 @@ func _reset(p: Vector3, grounded := true) -> void:
 	P.vel = Vector3.ZERO
 	P.grounded = grounded
 	P.pad = {}; P.grap = {}; P.grap_cd = 0.0; P.roll_t = 0.0; P.knock_t = 0.0; P.fly_t = 0.0
+	P.pad_flight = {}
+	P.auto_glide = false
 	P.gliding = false; P.glide_fuel = 1.0; P.glide_cd = 0.0; P.dropping = false; P.diving = false
 	P.stun_t = 0.0; P.root_t = 0.0; P.kb_t = -9.0; P.mantle_cd = 0.0; P.shot_down = false; P.air_t = 0.0
 	P.coyote = 0.0; P.jump_buf = 0.0; P.reload_t = 0.0; P.ammo = int(P.wpn["mag"]); P.idle_fire = 0.0
@@ -163,8 +183,9 @@ func _reset(p: Vector3, grounded := true) -> void:
 ## the view's focus sits at 0.6x your height (cam.gd), so the framing numbers are calibrated near island level.
 ## The framing numbers also shift a little with the spot (the pose settles differently), so the spot the
 ## targets were calibrated on is tried first, and a map change can't move it.
+## `clear_up` metres of air above it free of wind roads and updrafts (a fall straight down lands clean).
 const CALIB_SPOT := Vector3(99.5, 1.6, 163.5)
-func _flat_spot(r: float) -> Vector3:
+func _flat_spot(r: float, clear_up := 0.0) -> Vector3:
 	for k in 4001:
 		var g: Vector3 = w.random_ground()
 		if k == 0:
@@ -178,6 +199,9 @@ func _flat_spot(r: float) -> Vector3:
 				var x: float = g.x + cos(a) * d; var z: float = g.z + sin(a) * d
 				if w.is_void(x, z) or w.is_block(x, z) or absf(w.ground_at(x, z) - g.y) > 0.01:
 					okk = false
+		for y in int(clear_up):
+			if not w.wind_at(g + Vector3(0, y, 0)).is_empty() or not w.updraft_at(g + Vector3(0, y, 0)).is_empty():
+				okk = false
 		if okk:
 			return Vector3(floor(g.x) + 0.5, g.y, floor(g.z) + 0.5)
 	return w.random_ground()
@@ -213,10 +237,10 @@ func run(main: Node) -> void:
 	_feather()
 	_ledge()
 	_drop()
-	_landing()
 	_camera()
 	_screen_scale()
 	_e2e()
+	_landing()          # last: it swaps P through every hunter
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -913,36 +937,117 @@ func _drop() -> void:
 		m.step(DT)
 		if tg < 0.0 and P.vel.z >= 0.9 * Hunter.GLIDE_SPEED: tg = (i + 1) * DT
 	rec("drop_glide_steer_t", tg if tg > 0.0 else 9.0)
-	# land and move off straight away
-	_reset(flat + Vector3(0, 3.0, 0), false)
-	P.dropping = true; P.diving = false; P.gliding = true
-	P.vel = Vector3(0, -Hunter.DROP_FALL, 0)
-	var landed := false
-	for i in 120:
-		m.step(DT)
-		if P.grounded: landed = true; break
-	var dead := 99
-	if landed:
-		P.inp["move"] = Vector2(-1, 0)
-		for i in 10:
-			m.step(DT)
-			if P.vel.x < -0.5: dead = i + 1; break
-	rec("drop_land_dead_frames", dead)
 
-# ---------------------------------------------------------------- normal landings
+# ---------------------------------------------------------------- landings: recovery after touchdown
+## Every hunter, every way down: a fall by height, the glider's dive, a glide's end, a jump pad and the
+## expedition drop. The step after touchdown a key is pressed and the steps until it acts are counted, less
+## the same key pressed standing still (so a kit's own attack shape doesn't count): movement, and the
+## worst of the dash, the attack and RMB. Prints one line per hunter: case move/dash/attack/rmb in steps.
+const LAND_CASES := ["3m", "6m", "12m", "20m", "dive", "glide", "pad", "drop"]
+const LAND_ACTS := ["move", "dash", "fire", "rmb"]
+var land_at := Vector3.ZERO     # the flat spot the landings fall onto, its air clear of wind
+
 func _landing() -> void:
-	_reset(flat + Vector3(0, 6.0, 0), false)
-	var sq := 0.0
-	for i in 120:
+	var cls0 := P.cls
+	var arch0 := P.arch
+	land_at = _flat_spot(6.5, 22.0)
+	print("MFEEL land spot %s" % str(land_at))
+	var worst := {}
+	for c in LAND_CASES: worst[c] = [0, 0]
+	for a in Arch.ids():
+		P.reclass(Arch.weight(a), a)
+		var still := []
+		for act in LAND_ACTS:
+			_touch_down("")
+			still.append(_acts_in(act))
+		var line := "MFEEL land %-10s still %d/%d/%d/%d" % [a, still[0], still[1], still[2], still[3]]
+		for c in LAND_CASES:
+			var f := []
+			for k in LAND_ACTS.size():
+				var sq := _touch_down(c)
+				if c == "6m" and k == 0 and a == Arch.ids()[0]: rec("land_squash", sq)
+				f.append(_acts_in(LAND_ACTS[k]) - still[k])
+			worst[c][0] = maxi(worst[c][0], f[0])
+			worst[c][1] = maxi(worst[c][1], maxi(f[1], maxi(f[2], f[3])))
+			line += "  %s %+d/%+d/%+d/%+d" % [c, f[0], f[1], f[2], f[3]]
+		print(line)
+	P.reclass(cls0, arch0)
+	for c in LAND_CASES:
+		rec("land_%s_move_lag" % c, worst[c][0])
+		rec("land_%s_act_lag" % c, worst[c][1])
+
+## Puts P in the air the way `c` names ("" = standing on the flat) and runs to the step it touches down.
+## Returns the squash that step.
+func _touch_down(c: String) -> float:
+	const H := {"": 0.0, "3m": 3.0, "6m": 6.0, "12m": 12.0, "20m": 20.0, "dive": 20.0,
+		"glide": 2.5, "pad": 0.0, "drop": 3.0}
+	var h: float = H[c]
+	_reset(land_at + Vector3(0, h, 0), h <= 0.0)
+	for o in m.hunters:                # the match keeps dropping bots in: nobody near enough to bump the fall
+		if o != P and not o.out:
+			o.ctrl = "idle"
+			o.teleport(Vector3(-500, 50, -500))
+			o.out = true
+	if P.kin: (P.kin as Kin).stow()    # nor a Boki under the fall (yours, or a wild one roaming by)
+	for k in m.kins:
+		if k != P.kin and Vector2(k.pos.x - land_at.x, k.pos.z - land_at.z).length() < 15.0:
+			k.pos = Vector3(-480, 50, -480)
+	for mb in m.mobs: mb.queue_free()
+	m.mobs.clear()
+	HeroVfx.of(m).ribbons.clear()      # a trail still following the old kit's node would read it after the free
+	P.set_arch(P.arch)      # a fresh kit: no mode, charge or cooldown carried from the last press
+	P.fire_cd = 0.0
+	P.warm_t = 0.0
+	P.mel_hold = 0.0
+	match c:
+		"": return 0.0
+		"dive":
+			P.gliding = true
+			P.inp["glide"] = true
+			P.inp["crouch"] = true
+		"glide":
+			P.gliding = true
+			P.inp["glide"] = true
+			P.vel = Vector3(Hunter.GLIDE_SPEED, 0, 0)
+		"drop":
+			P.dropping = true
+			P.gliding = true
+			P.vel = Vector3(0, -Hunter.DROP_FALL, 0)
+		"pad": PadFlight.launch_to(P, land_at + Vector3(6.0, 0, 0))
+	for i in 600:
 		m.step(DT)
-		if P.grounded: sq = P.squash; break
-	P.inp["move"] = Vector2(1, 0)
-	var dead := 99
-	for i in 10:
+		if P.grounded and P.pad_flight.is_empty():
+			break
+	_clear_inp()
+	return P.squash
+
+## Presses `act` (a tap for the dash, the attack and RMB) and counts the steps until it acts: a key's
+## velocity, the dash spent, a shot, swing, wind-up or melee hold started, or RMB accepted (99 = not within 1 s).
+func _acts_in(act: String) -> int:
+	var s0 := P.shot_n
+	var w0 := P.swing_n
+	var d0 := P.dashes
+	var t0: float = m.time
+	P.inp["aim"] = P.pos + Vector3(0, 0.9, 3.0)
+	var hit := 99
+	for i in 60:
+		match act:
+			"move": P.inp["move"] = Vector2(0, 1)
+			"dash": P.inp["dash"] = i == 0
+			"fire": P.inp["fire"] = i == 0
+			"rmb": P.inp["sec"] = i == 0
 		m.step(DT)
-		if P.vel.x > 0.5: dead = i + 1; break
-	rec("land_dead_frames", dead)
-	rec("land_squash", sq)
+		var done := false
+		match act:
+			"move": done = P.vel.z > 0.5
+			"dash": done = P.dashes < d0 or P.roll_t > 0.0 or (P.ak != null and P.ak.dash_press_at >= t0)
+			"fire": done = P.shot_n > s0 or P.swing_n > w0 or P.fire_cd > 0.0 or P.warm_t > 0.0 or P.mel_hold > 0.0
+			"rmb": done = P.ak != null and (P.ak.rmb_down or float(P.ak.cd["rmb"]) > 0.0)
+		if done:
+			hit = i + 1
+			break
+	_clear_inp()
+	return hit
 
 # ---------------------------------------------------------------- camera
 func _render_pos() -> Vector3:

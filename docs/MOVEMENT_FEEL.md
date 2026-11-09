@@ -102,7 +102,7 @@ Nothing here comes from SUPERVIVE's files.
 | drop_deploy_frames | 1 | 1 | <= 1 | |
 | drop_deploy_settle_t | 0.267s | 0.200s | <= 0.3s | [est] |
 | drop_glide_steer_t | 0.583s | 0.283s | <= 0.35s | [game data] GlideTargetXYForce 162,500 / 100 kg toward MaxGlide 5 m/s |
-| drop_land_dead_frames / land_dead_frames | 1 / 1 | 1 / 1 | <= 1 | no dead time |
+| land_<case>_move_lag / land_<case>_act_lag (8 ways down x 12 hunters) | 0 / 0 | 0 / 0 | <= 0 | [footage] the source acts at once (see "Landing recovery") |
 | land_squash | 0.00 | 0.16 | >= 0.05 | landing reads |
 | e2e_input_frames (key to sim, via Match._process) | 1 | 1 | <= 1 | |
 | e2e_render_frames (key to model moving) | 2 | 1 | <= 1 | no interpolation lag |
@@ -172,7 +172,7 @@ Other checks:
   - Dive fall 11 → 13 m/s, reached in about 0.3s.
   - Steering 3/4 → 10/11 per second.
   - Deploying checks your fall to -1.6 m/s, then settles to 4.2 m/s in about 0.2s. It comes with the glider sound, a ring and a small camera punch.
-- **Landing:** every landing faster than 4 m/s gets a brief squash, a puff and a soft thud, with no lockout. Jump buffering is time-based (0.12s from the ground at your fall speed).
+- **Landing:** every landing faster than 4 m/s gets a brief squash, a puff and a soft thud, with no lockout (measured for every hunter and every way down in "Landing recovery" below). Jump buffering is time-based (0.12s from the ground at your fall speed).
 - **Trees and rocks (`stuckfix`):**
   - Bodies collide with blocker tiles as true circles (`World.occupy`, `World.push_out_blocks`).
   - A move into a rock is pushed straight out and slides along it. Only the part of your speed going into it is dropped.
@@ -263,6 +263,28 @@ Kept as built: the planning phase, the drop leader, the squad's rocket launch in
 leader's own speed, so the 14 m/s launch and the 5 m/s glide both hold the slots), and Separate only once the drop is
 made (ext/drop-solo-after). Open: Ostra's hover and Linwick's set-down have no crouch in the source; that is the warden
 clips' business, not the drop's.
+
+## Landing recovery against the source (`--move-feel-check` land_* rows; ext/landing-recovery)
+
+Tags as above: [D] game data (briefs/supervive-data/supervive_physics.md), [F] footage (briefs/hero-ref, 5 fps
+sheets), [est] ours. Method: every hunter is put down each way (a straight fall from 3, 6, 12 and 20 m, the glider's
+dive from 20 m, a glide's end, a jump pad onto a 6 m landing, the expedition drop's canopy); the step after touchdown
+one key is pressed and the steps until it acts are counted, less the same key pressed standing still, so a kit's own
+attack shape (Brall's and Tetra's swing and Myth's loose land on the second step) doesn't count. The row is the worst of the 12.
+
+| Way down | Source | Ours (move / dash, attack, RMB) | Tag |
+|---|---|---|---|
+| Fall 3 m (9 m/s) and 6 m (the 12 m/s cap) | Moosh Moosh's touchdown is ~0.1 s with almost no squash and she walks straight out of it (mooshmoosh.md, glide-dash pose beats); Linwick's jetpack landing "has no big impact, he simply continues on foot" (linwick.md f39-f41). The movement component has no landing-recovery, landing-lag or input-lock property | 0 / 0 | [F] [D] |
+| Fall 12 m and 20 m | No long-fall footage; the same movement data. Our skyfall (8 m+ onto rivals) hits them, never the lander | 0 / 0 | [D] [est] |
+| Glider dive from 20 m | GlideDiveCancelDistance 350 uu: the glide catches you 3.5 m up, so you land from a glide | 0 / 0 | [D] |
+| Glide end | Moosh Moosh as above; Linwick fires Flame Shield "the moment he lands" (linwick.md f137) | 0 / 0 | [F] |
+| Jump pad | Venator takes a pad while his nuke falls and keeps acting (venator.md f103); the touchdown itself is not shown. No pad property in the data | 0 / 0 | [F] [est] |
+| Expedition drop | Not in the footage (ability clips and the practice range); ours keeps no lock. The 2 s of invulnerability on landing (Match.on_drop_landed) is ours and isn't a lock | 0 / 0 | [est] |
+
+Before this branch the shared landing wrote a `land_t` timer (0.2 s on a fast landing, 0.32 s past 17 m/s) that nothing
+read, so no lock existed either; ext/drop-parity deletes it and `hunter_move.json` gains no recovery entry. Two standing
+baselines are blind: Elluna's RMB isn't accepted standing still either (it wants a target) and Celeste's darts pace
+themselves inside her kit, so those two cells measure nothing and the other three keys carry their rows.
 
 ## Not touched
 
