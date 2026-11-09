@@ -165,9 +165,7 @@ static func _commit(verts: PackedVector3Array, norms: PackedVector3Array, uvs: P
 	arrs[Mesh.ARRAY_NORMAL] = norms
 	arrs[Mesh.ARRAY_TEX_UV] = uvs
 	arrs[Mesh.ARRAY_INDEX] = PackedInt32Array(idx)
-	var am := ArrayMesh.new()
-	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
-	return am
+	return MeshArrays.build([arrs])
 
 static var _lathes := {}
 
@@ -1308,18 +1306,14 @@ static func merge_static(node: Node3D, discard := false) -> void:
 			continue
 		var key := _mat_key(mat)
 		if not groups.has(key):
-			groups[key] = {"mat": mat, "st": SurfaceTool.new(), "n": 0}
-			(groups[key]["st"] as SurfaceTool).begin(Mesh.PRIMITIVE_TRIANGLES)
-		var st: SurfaceTool = groups[key]["st"]
-		var pm := _with_part_y(mi.mesh, mi.transform)
-		for si in pm.get_surface_count():
-			st.append_from(pm, si, mi.transform)
-		groups[key]["n"] = int(groups[key]["n"]) + 1
+			groups[key] = {"mat": mat, "parts": []}
+		for arrs in _part_y_surfaces(mi.mesh, mi.transform):
+			(groups[key]["parts"] as Array).append([arrs, mi.transform])
 		drop.append(mi)
 	for key in groups:
 		var g: Dictionary = groups[key]
 		var mi := MeshInstance3D.new()
-		mi.mesh = (g["st"] as SurfaceTool).commit()
+		mi.mesh = MeshArrays.merge(g["parts"])     # (no SurfaceTool: it reads every part back from the GPU)
 		mi.material_override = g["mat"]
 		ShadowPolicy.judge(mi)       # a merged clump of small parts is still small (item 94)
 		node.add_child(mi)
@@ -1330,18 +1324,22 @@ static func merge_static(node: Node3D, discard := false) -> void:
 ## A copy of a mesh whose UV2 holds the height range (bottom, top) the part spans once placed with
 ## xf, which the toon shader turns into the part's painted light-to-dark gradient and crease.
 static func _with_part_y(mesh: Mesh, xf := Transform3D.IDENTITY) -> ArrayMesh:
+	return MeshArrays.build(_part_y_surfaces(mesh, xf))
+
+## A mesh's surfaces as arrays with that height range in UV2 (and plain white colours when it has none).
+static func _part_y_surfaces(mesh: Mesh, xf: Transform3D) -> Array:
 	var ab := xf * mesh.get_aabb()
-	var am := ArrayMesh.new()
+	var out: Array = []
 	for si in mesh.get_surface_count():
-		var arrs := mesh.surface_get_arrays(si)
+		var arrs: Array = MeshArrays.of(mesh, si)
 		var n: int = (arrs[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
 		var uv2 := PackedVector2Array(); uv2.resize(n); uv2.fill(Vector2(ab.position.y, ab.end.y))
 		arrs[Mesh.ARRAY_TEX_UV2] = uv2
 		if arrs[Mesh.ARRAY_COLOR] == null:
 			var cw := PackedColorArray(); cw.resize(n); cw.fill(Color.WHITE)     # no baked occlusion: plain white
 			arrs[Mesh.ARRAY_COLOR] = cw
-		am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
-	return am
+		out.append(arrs)
+	return out
 
 static var _part_y_cache := {}
 ## Gives every toon-shaded part under `n` that isn't merged its own part range (in its own space).
