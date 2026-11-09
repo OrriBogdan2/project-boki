@@ -52,6 +52,16 @@ func _contents(rig: BokiRig) -> void:
 		ok(a != null and a.length > 0.1, "clip %s" % c)
 	for c in BokiRig.LOOPED:
 		ok(rig.player.get_animation(c).loop_mode == Animation.LOOP_LINEAR, "%s loops" % c)
+	for c in BokiSwing.WIND:
+		var a := rig.player.get_animation(c)
+		var src := rig.player.get_animation(BokiSwing.FROM[c])
+		var off := 0.0
+		for t in a.get_track_count():
+			if a.track_get_type(t) == Animation.TYPE_ROTATION_3D:
+				off = maxf(off, a.rotation_track_interpolate(t, BokiSwing.WIND[c]).angle_to(
+					src.rotation_track_interpolate(t, BokiSwing.release_of(src))))
+		ok(a.length <= 0.6 and a.loop_mode == Animation.LOOP_NONE, "%s is short (%.2f s) and plays once" % [c, a.length])
+		ok(off < 0.15, "%s: the keyed release (%.2f s of %.2f) is the pose at %.2f s (off %.3f rad)" % [c, BokiSwing.release_of(src), src.length, BokiSwing.WIND[c], off])
 	for s in SHAPES:
 		ok(rig.face.find_blend_shape_by_name(s) >= 0, "blend shape %s" % s)
 	var tris := 0
@@ -102,10 +112,16 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._speed = 0.0
 	k.set_meta("pulse", 123)
 	rig._pick_clip(0.016)
-	ok(rig.clip == "ability", "a cast pulse plays the ability")
+	ok(rig.clip == "cast", "a cast pulse plays the cast")
 	rig._shot_left = 0.0
 	rig._pick_clip(0.016)
 	ok(rig.clip == "idle", "and it goes back to idle")
+	k.set_meta("kstate", "attack")
+	rig._pick_clip(0.016)
+	ok(rig.clip == "lunge", "an attacking Boki plays the lunge")
+	k.set_meta("kstate", "")
+	rig._shot_left = 0.0
+	rig._pick_clip(0.016)
 	k.set_meta("face", "sad")
 	rig._face_step(1.0)
 	k.remove_meta("face")

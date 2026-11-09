@@ -4,6 +4,7 @@ extends RefCounted
 ##   2. Call back: the leap to your side hits what is on its path; only within the recall range
 ##   3. the Guard and Follow orders (the G wheel's picks; the wheel itself is in --boki-follow-check)
 ##   4. C: the Boki's own ability from where it stands (out), or through you (on the shoulder)
+##   4b. a rigged Boki's cast and bite wait for the release frame of their clip (BokiSwing), the cost is paid at once
 ##   5. a downed Boki: stays where it fell, no C / merge while down, the owner rescues it by touch,
 ##      else it comes round alone after 15-20s at low health; a fall into the abyss only has the timer
 ##   6. nobody steals or hurts a downed Boki while its owner is in the map
@@ -113,7 +114,7 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bokisys-only="): only = a.substr(15)
-	for part in ["poll", "throw", "recall", "modes", "cast_c", "downed", "no_steal", "merge", "leap", "surge", "net"]:
+	for part in ["poll", "throw", "recall", "modes", "cast_c", "wind_up", "downed", "no_steal", "merge", "leap", "surge", "net"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.hit_landed.disconnect(_on_hit)
@@ -228,6 +229,44 @@ func _cast_c() -> void:
 	var out := KinCommand.cast_c(P)
 	m.step(Match.DT)
 	ok(out and not k.runner.is_ready("k1") and k.state != "shoulder" and k.pos.distance_to(at) < 3.0, "the ability with the Boki out: cast from where it stands, it does not come back (state %s, moved %.1fm)" % [k.state, k.pos.distance_to(at)])
+
+# ------------------------------------------------------------------ 4b. the wind-up before the release frame
+func _wind_up() -> void:
+	_fresh()
+	var P := m.player
+	var k: Kin = P.kin
+	aim_at(P, P.pos + Vector3(8.0, 0, 0))
+	KinCommand.tap(P)
+	run_for(1.0)
+	ok(BokiRig.has(k.species), "setup: a rigged species (%s)" % k.species)
+	var skills := k.st_skills
+	aim_at(P, k.pos + Vector3(4.0, 0, 0))
+	ok(KinCommand.cast_c(P) and not k.runner.is_ready("k1"), "the cast is paid for at once")
+	ok(k.wind_do.is_valid() and k.st_skills == skills, "...and the skill is held in the wind-up (%.2f s)" % k.wind_t)
+	run_for(BokiSwing.CAST_WIND - 0.05)
+	ok(k.st_skills == skills, "...still held just before the release frame")
+	run_for(0.1)
+	ok(k.st_skills == skills + 1 and not k.wind_do.is_valid(), "...and let go on it")
+	_fresh()
+	P = m.player
+	k = P.kin
+	aim_at(P, P.pos + Vector3(8.0, 0, 0))
+	KinCommand.tap(P)
+	run_for(1.0)
+	var foe := mob_at("skitter", k.pos + Vector3(0.6, 0, 0))
+	k.target = foe
+	var bites := k.melee_n
+	var held := false
+	var landed := -1.0
+	var t := 0.0
+	while t < 1.0 and landed < 0.0:
+		run_for(Match.DT)
+		t += Match.DT
+		held = held or (k.wind_do.is_valid() and k.melee_n == bites)
+		if k.melee_n > bites:
+			landed = t
+	ok(held, "a bite is held in its wind-up")
+	ok(landed >= BokiSwing.LUNGE_WIND - 0.03 and landed <= BokiSwing.LUNGE_WIND + 0.1, "...and lands on the lunge's release frame (%.2f s)" % landed)
 
 # ------------------------------------------------------------------ 5. downed
 func _downed() -> void:
