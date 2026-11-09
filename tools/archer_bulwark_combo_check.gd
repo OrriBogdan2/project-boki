@@ -13,20 +13,23 @@ func run(main_node: Node) -> void:
 	ult.main = main_node
 	var own = load("res://tools/pin_bjorn_owner_check.gd").new()
 	own.main = main_node
+	var tall = load("res://tools/tall_climb_check.gd").new()
+	tall.main = main_node
 	var launch = load("res://tools/bjorn_launch_check.gd").new()
 	launch.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		await ult.pin()
 		await own.pin()
+		await tall.tall()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
 		await _growth()
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	n += ult.n + own.n + launch.n
-	fails += ult.fails + own.fails + launch.fails
+	n += ult.n + own.n + launch.n + tall.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
