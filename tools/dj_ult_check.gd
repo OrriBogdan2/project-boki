@@ -240,6 +240,23 @@ func zedran(a) -> void:
 	A.ok("juggernaut X small mechanic: knocking a hunter with it resets it; the bond counts the knock (0.7)",
 			T.downed and U.resets == 1 and float(K.cd["x"]) <= 0.0 and absf(knock_paid - 0.7) < 0.001,
 			"cd %.1f bond %.2f" % [float(K.cd["x"]), knock_paid])
+	# the source resets it only for a kill "with this attack": a knock just after the cleave doesn't count
+	A.step(m, 0.4)                     # (the last cast's recovery ends)
+	A.fresh(T)
+	T.downed = false
+	var resets0 := U.resets
+	T.teleport(home + Vector3(2.6, 0, 0))
+	P.teleport(home)
+	A.aim_at(P, T.pos)
+	K.cd["x"] = 0.0
+	HunterKeys.ult_pressed(P)
+	A.step(m, 0.9)
+	var hit_alive := U.last_dealt > 0.0 and not T.downed
+	T.hurt(T.hp + 50.0, P, {"src": "abil", "ab": "lmb"})
+	A.step(m, 0.1)
+	A.ok("juggernaut X: a knock outside the cleave (a follow-up hit) does not reset it",
+			hit_alive and T.downed and U.resets == resets0 and float(K.cd["x"]) > 15.0,
+			"cd %.1f resets %d" % [float(K.cd["x"]), U.resets - resets0])
 	A.ok("juggernaut X: its moves are keyed (guard, cleave)", ["jug_guard", "jug_riposte"]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	await A.done(m)

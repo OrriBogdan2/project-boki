@@ -241,7 +241,9 @@ ultimate (now the X cooldown).
 8. **Retaliation, hit during the guard:** the strike still comes at the end of the 0.65s (no early strike); each
    hit blocked adds 20% to it, two at most. The footage's dummy deals no damage, so this is ours.
 9. **The guard is committed:** no dash or other button cancels it; the strip follows the aim until the strike.
-10. **The reset** counts a knock (down) on a rival hunter with the cleave; monsters don't reset it.
+10. **The reset** counts a knock (down) on a rival hunter with the cleave; monsters don't reset it. The data
+    card says "Killing an enemy with this attack resets it": a full reset, only from the strike itself, so a
+    knock by a follow-up hit just after it does not reset it. Our knock stands for the source's kill.
 11. **Invulnerable means everything but the abyss:** a fall still counts; damage over time is blocked too.
 12. **The bond:** paid when the cleave lands on a rival hunter (a hit, a knock or a kill, the best of the cast) by
     `HeroUlt.landed`, which calls the main session's `KinBond.from_ult` once it exists; a miss or a monster pays nothing.
@@ -275,7 +277,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | The ult heals for a share of the damage dealt (80% on the newer card) | wiki R, in-game card | n/a | Built (80%); asserted |
 | No heal while anti-healed | wiki patch 08.21.2024 | n/a | Built through blight (healing barely takes); asserted |
 | No jumping during the ult | wiki patch 08.21.2024 | yes (planted f33-f38) | Built: planted, no jump; asserted |
-| Knocking a hunter with the ult resets it | wiki R, in-game card | yes (ult f99-f101) | Built; asserted |
+| Knocking a hunter with the ult resets it (full; the strike only, not a knock after it) | data card, wiki R | yes (ult f99-f101) | Built; asserted both ways |
 | A sweet-spot Execution Slam knock resets the ult | wiki RMB | n/a | Built (within 2s of the sweet spot); asserted |
 | No reset from monsters or wisps | wiki patch 22.01.25 | n/a | Built: hunters only |
 | He lunges about 1 bh into the strike | footage ult f39 | yes | Built (1.8m); asserted |
