@@ -48,3 +48,10 @@ The final form is set by which trained stat (Training post: Power, Guard, Speed)
 
 ## 8. 3D (coordinator, 20:07)
 Only the final form of each line goes to 3D for now; the third-stage forms stay 2D until Meshy credits allow.
+
+## Owner decision 2026-11-08 21:16 ET: branching finals share one Bokidex entry
+- The two finals of a branching line are alternate forms of one Bokidex entry, not separate entries.
+- Applies to all 4 branching lines: Mycroll (Amanitusk / Ringrove), Vespyx (Glaivyx / Lashyx), Prismander (Geodelotl / Chandelotl), Echolop (Howlop / Chimelop).
+- Each form keeps its own name, art, portrait and 3D model. The entry shows both forms (side by side or a toggle).
+- The entry counts as caught when either form is owned; owning both forms earns a small "both forms" star.
+- Bokidex entries drop by 4 (~120); the species and art count is unchanged.
