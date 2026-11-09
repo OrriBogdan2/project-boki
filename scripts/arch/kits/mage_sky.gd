@@ -29,7 +29,7 @@ func drag_dir(at: Vector3) -> Vector2:
 
 func cast() -> bool:
 	var ed := kit.e_def()
-	var at := AimMode.point(kit.h, float(ed["reach"]))
+	var at := AimMode.place(kit.h, float(ed["reach"]))
 	kit.strikes.append({"at": at, "t": float(ed["drag_max"]), "dir": default_dir(at), "phase": "flick"})
 	kit.fx().star(at + Vector3(0, 0.3, 0), MageKit.TEAL, MageKit.PINK, 0.8, 0.12)
 	kit.fx().disc(at, float(ed["radius"]), MageKit.VIOLET, MageKit.PINK, 0.2, MageKit.COPPER)
@@ -117,16 +117,22 @@ func _strike(s: Dictionary) -> void:
 	kit.run(stg, kit.cx("e", "skycall", at, {"at": at, "dir": dir}))
 	for f in kit.foes_in(at, float(ed["radius"])):
 		kit.add_spark(f, int(ed.get("stacks", 1)))
-		# every body inside is moved along the one committed vector, pinned there for a moment
-		var slide := {"mode": "slide", "dir": [dir.x, dir.y], "dur": float(ed["slide_t"])}
-		slide["dist"] = float(ed["slide_dist"])
-		kit.m.displace.tow(f, null, slide)
+		_slide(f, dir, ed)
 		if f is Hunter:
 			KitStatus.apply(f, "gnd", float(ed["grounded"]))
 		kit.fx().shackle(f, MageKit.TEAL, MageKit.PINK, float(ed["grounded"]))
+	for o in kit.m.hunters:       # rival Wisps (downed hunters) are launched too; no Static, no Grounded
+		if o.team != kit.h.team and o.downed and o.hittable() and not CareUtil.is_carried(o) \
+				and o.flat_dist(at) < float(ed["radius"]) + o.r and absf(o.pos.y - at.y) < 2.2:
+			_slide(o, dir, ed)
 	for mt in kit.motes.duplicate():
 		if (mt["pos"] as Vector3).distance_to(at) < float(ed["radius"]) + 0.6:
 			_fling_orb(mt, dir, ed)
+
+## Every body inside is moved along the one committed vector, pinned there for a moment (Displace tow: Net-safe).
+func _slide(f: Ent, dir: Vector2, ed: Dictionary) -> void:
+	var slide := {"mode": "slide", "dir": [dir.x, dir.y], "dur": float(ed["slide_t"]), "dist": float(ed["slide_dist"])}
+	kit.m.displace.tow(f, null, slide)
 
 func _strike_fx(at: Vector3, r: float) -> void:
 	var fx := kit.fx()

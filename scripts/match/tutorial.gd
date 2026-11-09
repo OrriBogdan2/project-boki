@@ -22,10 +22,11 @@ const KEYS := {"land": "move", "move": "move", "dash": "dash", "exdash": "dash",
 const STOP_AFTER := {"land": "land", "move": "move", "dash": "dash", "exdash": "exdash", "glide": "glide",
 	"crouch": "crouch", "pickup": "yard"}
 const GAP_STEPS := ["dash", "exdash", "glide"]      # leave from the glowing pad on one island, land on the next
+const FOE_STEPS := ["gkey", "shoot", "sig", "utility", "throw", "kin1", "fight"]     # the marker is the nearest monster
 const WALK_LEAD := ["move", "crouch", "pickup", "key", "chest", "goexit", "uplink", "extract"]
 
 const CARD_T := 1.5        # s the top banner stays up before it settles into the pill
-const NAG_T := 15.0        # s without progress before the pill pulses and the Boki says it once more
+const NAG_T := 8.0         # s without progress before the pill pulses and the Boki says it again
 const INTRO_T := 2.0       # s the first-time intro card stays up (any key closes it sooner)
 const SPOT_T := 5.0        # s the lookout shows the chest it spotted
 const DONE_T := 0.9        # s of the step-done sting
@@ -45,6 +46,7 @@ var text := ""               # this step's one line, on the banner and the pill
 var detail := ""             # and the plain-words line under it ("" for none)
 var key_cap := ""            # the key cap beside it ("" for none)
 var got := 0                 # times this step's action has landed (shown as got/need)
+var got_seen := 0            # got at the last cooldown reset
 var need := 0
 var t := 0.0                 # s in this step
 var card_t := 0.0            # s since the card (re)appeared
@@ -58,6 +60,7 @@ var kills := 0               # monsters you or your Boki beat
 var flag := false
 var moved := 0.0
 var stall_t := 0.0           # s since the last progress
+var stall_got := 0            # got at the last look: a hit or a cast is progress too
 var best_d := 1e9            # closest you've been to this step's target
 var target := Vector3.INF    # where the marker points (INF for none)
 var label := ""
@@ -186,6 +189,10 @@ func update(dt: float) -> void:
 		m.hud.msgs.hold = card_up()      # messages wait while the banner is up
 	var sid := id()
 	var done := _is_done(sid, dt)
+	_quicken(p, dt)
+	if got != got_seen:
+		got_seen = got
+		_refresh(p)          # (each move that lands is ready again at once)
 	_point(sid)
 	_stall(dt)
 	_props()
@@ -216,6 +223,30 @@ func _finish(sid: String) -> void:
 	m.sfx("unlock", null, -9.0)
 	_enter()
 
+## Cooldowns run 1/rules.cds times faster here, so each move can be tried again and again while learning.
+func _quicken(p: Hunter, dt: float) -> void:
+	var extra: float = dt * (1.0 / float(Content.rules("tutorial")["cds"]) - 1.0)
+	p.dashes = minf(p.max_dashes(), p.dashes + extra / p.dash_regen())
+	p.ex_cd = maxf(0.0, p.ex_cd - extra)
+	p.sig_cd = maxf(0.0, p.sig_cd - extra)
+	for r in _runners(p):
+		r.tick(extra)
+
+## Every move is ready: on a new step, a retry (respawn) and each time the step's action lands.
+func _refresh(p: Hunter) -> void:
+	p.dashes = p.max_dashes()
+	p.ex_cd = 0.0
+	p.sig_cd = 0.0
+	for r in _runners(p):
+		r.reset()
+
+func _runners(p: Hunter) -> Array:
+	var out: Array = []
+	if p.runner: out.append(p.runner)
+	for k in [p.kin, p.kin2]:
+		if k: out.append((k as Kin).runner)
+	return out
+
 func _enter() -> void:
 	var p := m.player
 	var sid := id()
@@ -226,10 +257,15 @@ func _enter() -> void:
 		m.hud.msgs.clear()
 		m.hud.msgs.hold = true
 	stall_t = 0.0
+	nag_t = 0.0
+	flash_t = 0.0
 	best_d = 1e9
 	crouch_t = 0.0
 	taps = 0
 	got = 0
+	got_seen = 0
+	stall_got = 0
+	_refresh(p)
 	held = false
 	hits = 0
 	orders = 0
@@ -374,7 +410,10 @@ func _is_done(sid: String, dt: float) -> bool:
 				flag = true      # (the level-up pop waits for the banner to settle, so the two never overlap)
 				_offer_rank()
 			return flag and (p.skill_pts == 0 or t >= RANK_WAIT_T)
-		"key": return p.chest_keys > 0 or t >= KEY_WAIT_T
+		"key":
+			if p.chest_keys == 0 and goal(sid) == Vector3.INF:
+				_spawn_key()      # (it fell off the edge: a new one, so the step never strands you)
+			return p.chest_keys > 0 or t >= KEY_WAIT_T
 		"shoot":
 			_keep_foe("skitter")
 			got = hits
@@ -472,7 +511,7 @@ func goal(sid: String) -> Vector3:
 		"pickup":
 			var wp := ground_item()
 			return wp["pos"] if not wp.is_empty() else stop("pickup")
-		"shoot", "sig", "utility", "throw", "kin1", "fight":
+		"gkey", "shoot", "sig", "utility", "throw", "kin1", "fight":
 			var best: Ent = null
 			var bd := 1e9
 			for mb in m.mobs:
@@ -501,16 +540,12 @@ func _lead_goal(sid: String) -> Vector3:
 		return goal(sid)
 	return Vector3.INF
 
-## The marker: from the first frame of a destination step to its last. A fight step only gets one
-## once the monsters are some way off.
+## The marker: from the first frame of a destination step to its last, monsters close by or not.
 func _point(sid: String) -> void:
 	target = Vector3.INF
 	label = ""
 	var at := goal(sid)
 	if at == Vector3.INF or m.player.out:
-		return
-	var foe_step := sid in ["shoot", "sig", "utility", "throw", "kin1", "fight"]
-	if foe_step and Vector2(at.x - m.player.pos.x, at.z - m.player.pos.z).length() <= 6.0:
 		return
 	target = at
 	label = String(Content.rules("tutorial")["labels"].get(sid, "Monster"))
@@ -519,7 +554,10 @@ func _point(sid: String) -> void:
 ## more. No card comes back and nothing pauses.
 func _stall(dt: float) -> void:
 	stall_t += dt
-	if target != Vector3.INF:
+	if got != stall_got:
+		stall_got = got
+		stall_t = 0.0
+	if target != Vector3.INF and id() not in FOE_STEPS:      # (a monster walking up to you is not progress)
 		var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()
 		if d < best_d - 1.0:
 			best_d = d
@@ -552,6 +590,10 @@ func _props() -> void:
 		var on: bool = pd["id"] == id()
 		(pd["disc"] as Node3D).scale = Vector3.ONE * (pulse if on else 1.0)
 		(pd["label"] as Node3D).visible = on
+
+## Beams standing in the world right now (--tutorial-idle-check).
+func beams_on() -> int:
+	return _beams.filter(func(b: MeshInstance3D): return b.visible).size()
 
 func _make_beam() -> MeshInstance3D:
 	var n := MeshInstance3D.new()
@@ -646,6 +688,7 @@ func card_up() -> bool:
 # ------------------------------------------------------------------ the fall, and the key press
 ## Where a fall into the void puts you back: the last stop you reached.
 func respawn() -> Vector3:
+	_refresh(m.player)          # (a fall is a retry: every move is ready for it)
 	return last_stop if last_stop != Vector3.INF else stop("land")
 
 ## A weapon hit of yours on a monster (Match).

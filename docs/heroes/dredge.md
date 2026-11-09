@@ -52,6 +52,32 @@ the rest are the existing asserts named in "Combinations".
 | Dash | all | [O] 23:40: short, fast, visible dashes in a row (not a blink) | 3.2 m in 0.16 s, a short gap between charges | matches the owner note |
 | X | all | [F] f22-f43: a 1.1 s charge behind a 105 degree fan, two waves 0.6 s apart; [O] item 36: a slow walk through it | as the source with the owner's walk | matches |
 
+## Footage gaps, Nov 9 re-check
+
+Every ranked row of the gap list (briefs/hero-ref/dredge.md section 4, 13 rows plus the sfx note) against main d255acbee. Status: closed (commit or code),
+open, in flight (unmerged branch), or owner override. Parity first (DECISIONS 2026-11-07): suggestions are marked as such, none of them built here.
+Nothing was built on this branch: the only row not closed is in flight, and every file it needs (`dredge_kit.gd`, `dredge.json`, `dredge_combo_check.gd`,
+`ld_fx.gd`) is changed by ext/anim-time-grimble, ext/scrapking-lmb or ext/grimble-hook-arm.
+
+| # | Gap | Status | Evidence |
+|---|---|---|---|
+| 1 | Grapnel stops at walls | closed | the arm pierces rocks, props and cliff faces (`"rocks": true`, b1aa67fe3, 788f46054); only a placed wall stops it. Asserts "rocks:", "cliff:" |
+| 2 | Cooldowns and fire rate | closed (data) | `shotgun.json` rate 0.5 (b1aa67fe3). Hand 12 s, Anchor 7 s, Barge 3 charges at 10 s keep the source's ratios (audit rows (c); owner 23:40 dash note). Suggestion: 11.7 and 6.7 are one tenth of a second off, an owner call |
+| 3 | Anchor stun and damage | closed | `dredge.json` e: stun 1.1, dmg 25 against a 14 volley (1.8x). Parity table above |
+| 4 | Shotgun cone in the world | closed | `DredgeKit._tick_gun` draws the two edge lines to the slug range while firing and folds to one aim line idle (b1aa67fe3). Assert "gun: the spread's edge lines lie on the ground out to the slug range", "gun: idle, the cone folds into one aim line" |
+| 5 | Who is Grounded during the reel | closed | the caster gets `KitStatus` "gnd" for the reel, the foe stays stunned and lands not Grounded (b1aa67fe3). Assert "reel: Grimble is Grounded while he reels, the foe is stunned" |
+| 6 | Anchor Drop forward hop | in flight | main has the 0.38 s wind-up and the lift on the toes only, no forward travel. ext/anim-time-grimble adds `hop` 1.8 m over 0.2 s from 0.14 s (`_hop` in `dredge_kit.gd`, `dredge.json` e) with its own check; merge that, build nothing here |
+| 7 | Anchor slam "giant fist" | open | the ground slam draws the filling cone, crescent, dust and stun spirals; the translucent falling anchor (`LDFx.anchor_drop`) is only used by the air smash. Not built: `dredge_kit.gd` and `ld_fx.gd` are in flight. Suggestion for after the merges: call `anchor_drop` onto the cone centre in `_anchor` |
+| 8 | Grapnel line | closed on main, polish in flight | the hook is his stretched arm now (DECISIONS v2), drawn through rocks (`ld_arm.gdshader` depth test off; 74006733e). ext/grimble-hook-arm adjusts the arm look in `ld_fx.gd` |
+| 9 | Grasp scoops wisps | closed | downed hunters the hook passes are reeled in (b1aa67fe3). Assert "wisp: a downed hunter the hook passes is scooped up with the catch" |
+| 10 | Barge start burst and scorch | owner override | DECISIONS "No bursts, rings or discs on dashes, landings or resets"; OWNER_REVIEW_1103 item 8 (no explosions on dashes). The barge keeps its turf clods and after-images |
+| 11 | Shotgun range and fan | closed | `shotgun.json` fan 30, bloom to 15, range 6.3 m (b1aa67fe3). Assert "parity gun: the slugs stop at 6.3 m with the cursor at 2 m" |
+| 12 | Slugs hang at the stop line | closed | slugs rest as violet dots for 0.26 s (`SLUG_REST`, `fx.dot(at, SLUG_REST, 0.26)`, b1aa67fe3) |
+| 13 | Shotgun recoil | closed | `dr_shot` (b1aa67fe3). Assert "gun: each shot rocks the body back (dr_shot)" |
+| 14 | sfx | n/a | no audio in the footage |
+
+ext/scrapking-lmb rewrites the gun (a `DredgeGun` spread whose edge lines follow it) and the hook in `dredge_kit.gd`; re-assert rows 4, 5, 9, 11, 12 and 13 after it merges.
+
 ## Audit (Nov 3 23:40)
 
 Every Grimble row of briefs/specs/kit-audit/cinder_dredge_moosh.md (it audited main 200effce): (a) already done on
@@ -110,14 +136,26 @@ Built as its own ultimate on X (owner decision, SERVER_UPDATE6). It was never fo
 | The scattergun's accuracy drops sharply with each shot; a dash resets it only at rank 4 | built (a dash resets it at rank 3) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes (0040 vs 0112) |
 | Rank 4 dash: pellet hits cut the dash recharge, a dash resets the bloom | built at rank 3 | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | Backstab +50% | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
-| Bonus armour damage when fired without spread | not built (our armour rules differ) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
+| Bonus armour damage when fired without spread | built as extra armour wear: a volley fired at zero bloom wears armour 66% faster (`gun.armor_k`; the wiki's 66% to Armor). Our armour is a worn-down 20% cut, not a second health bar, so health damage is unchanged and the bonus never breaks it alone | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | The ult is one press that fires two waves 0.6s apart, 6 slugs a wave | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes (ult 0034, 0040) |
 | Every slug applies Anti-Heal | built (3s, as the cloak's) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes (green streaks) |
 | A fan grows on the ground over the 1.1s charge and is the exact hit area | built (AimKit cone, everyone sees it) | footage | yes (ult 0026, 0033) |
 | He stands planted through the charge | replaced (owner item 36): a slow walk (30% charging, 20% firing) and the aim follows the cursor; still no gun, Abyssal Hand, Anchor or barge until it ends | footage | yes (ult 0022-0041) |
 | Up close every slug of both waves connects | built (slugs leave his fists, so at 1.6m all six hit) | footage | yes (ult 0034, 0040) |
 | Best after a stun (the reel or the slam covers the charge) | built (the reel combo is asserted) | [guide](https://deltiasgaming.com/?p=298298) | yes |
-| Explosive: more damage to destructibles | not built (we have no destructible cover) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
+| Explosive: more damage to destructibles | built: every slug breaks a crate or pot and lights a keg (props break in one hit, so "more damage" is moot); asserted `ult props` | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
+
+## Moving while casting (RMB and E)
+
+Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+
+| Move and phase | Source | Ours | Verdict |
+|---|---|---|---|
+| RMB wind-up and arm flight (0.4 s, f121-123) | Keeps moving; body planted, arm extends; the caster shows GROUNDED. Cursor line aimed | Walks at 20% (`rmb.fly_slow`, `CastHold`), height held, faces the cursor | walk speed not measured; owner item 31 default, kept |
+| RMB reel (about 1.0 s, f124-129) | Braced and side-on, turned toward the target (the cursor is elsewhere, 0147); GROUNDED; walking not tested | Shuffles at 20% (`fly_slow`), Grounded, only the barge works, faces the CURSOR | facing differs (source: toward the target); needs code, not data, so listed, not fixed |
+| RMB recovery | Not shown (turns back to the aim within 0.1 s) | Free the step the reel ends | matches |
+| E wind-up (0.38 s, f1 fist hauled back) | Fist back, shoulder turned; a 1 bh forward hop at f2 (owner item 33 removed the hop) | Walks at 70% (`move_k`: `wind > 0`), facing LOCKED to the press direction (the telegraph cone) | walk 70% has no source number; decision (b)+(c) in Audit keeps it |
+| E slam and recovery (to 0.8 s, f3-f5 crouch) | Crouched follow-through; movement not shown | Free at once after the slam (pose only), faces the cursor again | unmeasured: source recovery may root; no number to set |
 
 ## Assumptions
 Where the footage and the wiki are silent, we picked the most likely behaviour (the owner can correct these):
