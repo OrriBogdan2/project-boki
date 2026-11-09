@@ -52,8 +52,9 @@ func _hunter(id: String, dir: String, every: int) -> void:
 	for k in 30:
 		await tree.process_frame
 	var tall := 1.6 * absf(model.scale.y)
-	cam.position = Vector3(tall * 2.4, tall * 0.5, 0)
-	cam.look_at(Vector3(0, tall * 0.45, 0))
+	var aim := Vector3(0, tall * 0.3, -tall * 0.4)      # (a swimmer lies along -Z: look at the middle of it)
+	cam.position = aim + Vector3(tall * 3.2, tall * 0.1, 0)
+	cam.look_at(aim)
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	DirAccess.make_dir_recursive_absolute(dir)
