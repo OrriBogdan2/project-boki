@@ -88,7 +88,17 @@ func _lance_combos() -> void:
 	ok("lance audit: 10 s of roaring with no fuel to run out (no refill), at his full walk",
 			not reloaded and K.hose.emitted > late and late - em3 > 250 and slowest >= 0.999,
 			"puffs %d, reload %s, move_k %.2f" % [late - em3, reloaded, slowest])
+	# hold-pose audit: a lance let go in the middle of a ram takes its pose down with it
 	P.inp["fire"] = false
+	ak.step(m, 0.5)
+	P.dashes = P.max_dashes()
+	P.do_dash()
+	ak.step(m, 0.05, keep_fire)
+	var in_ram: bool = P.roll_t > 0.0
+	P.inp["fire"] = false
+	ak.step(m, 0.25)
+	ok("lance: let go mid-ram, the lance pose is gone 0.25s later (hold-pose audit)",
+			in_ram and K.anim_id != "as_lance", "in ram %s, move %s" % [in_ram, K.anim_id])
 	await ak.done(m)
 
 ## Soot Ram's hit on the first foe with the hunter at level `lvl`.
