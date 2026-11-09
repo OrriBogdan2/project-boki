@@ -296,9 +296,9 @@
   "display_name": "Vatmander",
   "hash": {
    "sheet": "a803d62f3a7a",
-   "card": "bce0146dfe6f",
+   "card": "265d6aadd9fa",
    "portrait": "c4aa4b533569",
-   "hero": "8cfde68fff68"
+   "hero": "d681610c424b"
   }
  },
  "Clinkpede": {
@@ -530,9 +530,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Foldbat.png",
   "hash": {
    "sheet": "f9d07cbd4c76",
-   "card": "e8ea0a0d9ab9",
+   "card": "949c48853d39",
    "portrait": "841219366231",
-   "hero": "bb921ab69243"
+   "hero": "7f321c782f81"
   }
  },
  "Forgebrock": {
@@ -752,9 +752,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Gongrowl.png",
   "hash": {
    "sheet": "5c63f212be66",
-   "card": "da5c7a4c158b",
+   "card": "f4ee3d5bb5d0",
    "portrait": "856d1b08ade8",
-   "hero": "6cd1eaa8ca9e"
+   "hero": "16ea5c8e883e"
   }
  },
  "Grainspin": {
@@ -909,9 +909,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Kayak.png",
   "hash": {
    "sheet": "427a15168e52",
-   "card": "8a37e376c80d",
+   "card": "f8f378a9c4c8",
    "portrait": "3afedb1720e0",
-   "hero": "07a5f8ba47ba"
+   "hero": "26d2b5a5738a"
   }
  },
  "Kerchick": {
@@ -1513,9 +1513,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Prowyak.png",
   "hash": {
    "sheet": "ff62270cf1b8",
-   "card": "16aac1878776",
+   "card": "1cf0c1d76710",
    "portrait": "e729fbb514ac",
-   "hero": "02443278b7a0"
+   "hero": "dcd9e26c1bae"
   }
  },
  "Puffuse": {
@@ -2107,9 +2107,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Voltalon.png",
   "hash": {
    "sheet": "f4b6a719da61",
-   "card": "aaa9ecbf5322",
+   "card": "d2dd0e7f0785",
    "portrait": "057e0ddc6fee",
-   "hero": "d47f0d67ea4f"
+   "hero": "b41bc516c547"
   }
  },
  "Voltmink": {
@@ -2478,6 +2478,17 @@
    "card": "c90a18d0d408",
    "portrait": "8d7153c2b97b",
    "hero": "1fb35a5ab890"
+  }
+ },
+ "Jibbatross": {
+  "card": "briefs/boki-art/cards/Jibbatross.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Jibbatross.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Jibbatross.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Jibbatross.png",
+  "hash": {
+   "card": "3803050e584b",
+   "portrait": "0eb829a665dd",
+   "hero": "c569acfe2804"
   }
  }
 }

@@ -333,3 +333,17 @@ synced: Coolatee, Druzemole, Scythant new heroes + turnarounds; Vespox, Gongrowl
 
 ### 11-09 13:39 ET COORD -> ART
 ack Shinobant (Marchleaf > Shinobant > Reapant), recorded. Lunarca: the dex bake is not the cause. Hero selenwhale.webp has 40 px of margin, but the source art itself stops in a hard straight line under the body (the tail of the bottom curve is missing). Your queued 'Lunarca full body with margin' card fixes it; I'll re-bake when it lands. Buckleron: if he picks a toad-family next stage, take Bastionpet off Buckleron's line as a standalone entry (keep the art, don't delete it); until then it stays filed as is. Batches 3/4 noted.
+
+### 11-09 14:18 ET ART -> COORD
+The runner is back (owner restarted it 13:52; it had stopped at 12:01 on an expired gcloud login). All 93 queued jobs landed. LIVE_MANIFEST is refreshed (hash changes); please sync:
+- New cards:
+  - Gongrowl: front-facing upright chest-beat (owner 12:30 ask). Portrait follows.
+  - Kayak: cuter, sitting like a puppy.
+  - Prowyak: mirrored, so it now faces the other way from Kayak (owner #8).
+  - Vatmander/Cisternmander: a broken barrel in its pond back (#25); sheet and portrait follow.
+  - Voltalon: rocks removed (#13).
+  - Foldbat: matte instead of shiny (#34).
+- NEW entry Jibbatross: card + portrait + hero are live. Its sheet is re-queued (both tries came out as two rows of four).
+- CORRECTION to my 13:3x note: Lunarca's card IS cut off at the bottom. My automatic crop scan misses pale-on-pale art. A full-body redraw is queued; keep the current hero until it lands.
+- Echolop and Geodemole pose redos kept the old pose, so stronger retries are queued.
+- All the batch 2 / Shinobant / Reapant / Scythant / batch 4 / missing-roster / female-form concepts are going onto the owner's A/B page now.
