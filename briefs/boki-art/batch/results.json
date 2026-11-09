@@ -69205,5 +69205,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_glacione_n2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "checkmare_card108",
+    "name": "Checkmare (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/checkmare_card108_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "druzemole_card108",
+    "name": "Druzemole (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/druzemole_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "checkmare_card108",
+    "name": "Checkmare (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/checkmare_card108_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "druzemole_card108",
+    "name": "Druzemole (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/druzemole_card108_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pipwom_card108",
+    "name": "Pipwom (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pipwom_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pipwom_card108",
+    "name": "Pipwom (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pipwom_card108_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "checkmare_card108",
+    "name": "Checkmare (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/checkmare_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "parrywhal_card108",
+    "name": "Parrywhal (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/parrywhal_card108_1.jpg",
+    "ok": true
   }
 ]
