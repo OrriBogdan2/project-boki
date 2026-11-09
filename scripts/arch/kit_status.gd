@@ -68,6 +68,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 ## What everyone sees: Grounded wraps cords round the legs for its length; Shred cracks a red ring.
 static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 	var m: Node = e.m
+	StatusSfx.play(e, kind)
 	match kind:
 		"gnd":
 			var old := e.get_node_or_null("Grounded")

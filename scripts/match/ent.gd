@@ -168,14 +168,17 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if opts.get("burn", 0.0) > 0.0:
 		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0))); burn_dps = maxf(burn_dps, float(opts["burn"])); burn_by = by
 	if opts.get("slow", 0.0) > 0.0:
+		if slow_t <= 0.0: StatusSfx.play(self, "slow")
 		var sk := float(opts.get("slow_k", 0.0))
 		slow_k = maxf(slow_k, sk) if slow_t > 0.0 else sk
 		slow_t = maxf(slow_t, float(opts["slow"]))
 	if opts.get("root", 0.0) > 0.0:
+		if root_t <= 0.0: StatusSfx.play(self, "root")
 		root_t = maxf(root_t, float(opts["root"]))
 	if opts.get("blight", 0.0) > 0.0:
 		blight_t = maxf(blight_t, float(opts["blight"]))
 	if opts.get("stun", 0.0) > 0.0:
+		if stun_t <= 0.0: StatusSfx.play(self, "stun")
 		stun_t = maxf(stun_t, float(opts["stun"]))
 		if use_dr: dr_stun = true
 	for st in ["stun", "root", "slow", "burn"]:

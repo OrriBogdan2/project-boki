@@ -1,0 +1,10 @@
+{
+ "group": "cc",
+ "name": "Crowd control",
+ "script": "tools/gen_sfx_cc.py",
+ "sounds": {
+  "cc_stun": "cast", "cc_root": "cast", "cc_slow": "cast", "cc_daze": "cast", "cc_thud": "impact"
+ },
+ "signature": [],
+ "replaces": []
+}
