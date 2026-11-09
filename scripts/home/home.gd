@@ -22,6 +22,7 @@ var player: Node3D
 var ppos := Vector3.ZERO
 var pvel := Vector3.ZERO
 var spawn := ""             # set when coming back out of a building: start at its door
+var play_hub := false       # opened from the title's "Play with your Boki": start on the minigame picker (MinigameHub)
 var py := 0.0               # height of a jump
 var farm_t := 0.0
 var pvy := 0.0
@@ -684,6 +685,8 @@ func _ready_rest() -> void:
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
 	if not visit.is_empty():
 		pass
+	elif play_hub:
+		MinigameHub.open(self)
 	elif hb.needs_making():
 		hb.open_make_home()
 	elif not Save.d["tutorial"].get("home", false):
