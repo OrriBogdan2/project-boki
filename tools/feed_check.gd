@@ -55,6 +55,7 @@ func _case(trough: bool) -> void:
 	var r := Exchange.post("buy", "kibble", 2, ask)
 	ok(r["ok"] and int(r["filled"]) == 2 and Econ.pantry("kibble") == 2, "%s: bought 2 kibble from the market" % tag)
 	home._open_feed(k)
+	await main.get_tree().process_frame      # the previous panel is only queue_freed: let it go first
 	var btns := _feed_buttons(home.panel_host)
 	ok(btns.size() == 1 and not _says_nothing(home.panel_host), "%s: the panel offers the kibble" % tag)
 	ok(home.hecon.refuse_reason() != "", "%s: too weak to go while starving" % tag)
