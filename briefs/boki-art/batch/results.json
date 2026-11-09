@@ -8809,5 +8809,89 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_morelkin_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_morelkin",
+    "name": "Morelkin (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_morelkin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_polyshroom",
+    "name": "Polyshroom (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_polyshroom_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_morelkin",
+    "name": "Morelkin (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_morelkin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_polyshroom",
+    "name": "Polyshroom (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_polyshroom_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pocketpus",
+    "name": "Pocketpus (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pocketpus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_foldbat",
+    "name": "Foldbat (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_foldbat_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pocketpus",
+    "name": "Pocketpus (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pocketpus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pocketpus",
+    "name": "Pocketpus (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pocketpus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_foldbat",
+    "name": "Foldbat (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_foldbat_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_puffuse",
+    "name": "Puffuse (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_puffuse_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nymphane",
+    "name": "Nymphane (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_nymphane_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nymphane",
+    "name": "Nymphane (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_nymphane_1.jpg",
+    "ok": true
   }
 ]
