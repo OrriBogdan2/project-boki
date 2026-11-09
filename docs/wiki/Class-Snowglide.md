@@ -83,9 +83,9 @@ What the in-game kit card (K) says.
 
 - *Tap:* Hold to see the landing ring at the cursor (up to 12m) as the spear forms between your palms; let go and you push it out. The spear drives out to the cursor (the further, the longer it takes) and lands there (or on a foe in the way): 18 damage and a short slow to foes within 1.2m, and a 2.2m slow zone (35% slower, Chill) for 1.8s, then it detonates: 60 damage in 2.7m and a brief encasing slow. 2 charges.
 
-**Rink Wall (E, 17s cooldown).** A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.
+**Rink Wall (E, 17s cooldown).** A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots (200 HP) and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.
 
-**Rimelock (hunter ultimate, from level 6, 80s cooldown).** Cast it: you are sealed in a frost shell, a frozen statue: invulnerable and rooted, your facing locked as you cast, and a 7.2m (4 body heights) rink snaps out round you. Cast from a skate, the statue slides on along your skate (about 6m at full speed, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
+**Rimelock (hunter ultimate, from level 6, 80s cooldown).** Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and an 8.3m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, about 6.3m, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
 
 ### Ranks
 
@@ -93,9 +93,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 10.2s -> 9.2s, damage +15%. | cooldown 10.2s -> 8.2s, damage +30%; the detonation hits 45% harder. |
-| Dash (Shift) | recharge 13s -> 11s. | recharge 13s -> 9.1s; a Skate over the Abyss lays ice underfoot that holds for 5s. |
-| E | cooldown 17s -> 15.3s, wall strength +15%. | cooldown 17s -> 13.6s, wall strength +30%; +40 wall strength. |
+| RMB | cooldown 10.2s -> 8.7s, damage +15%. | cooldown 10.2s -> 7.2s, damage +30%; the detonation hits 45% harder. |
+| Dash (Shift) | recharge 13s -> 11.5s. | recharge 13s -> 10s; a Skate over the Abyss lays ice underfoot that holds for 5s. |
+| E | cooldown 17s -> 14.9s. | cooldown 17s -> 12.8s; the wall is 40 points tougher. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
 

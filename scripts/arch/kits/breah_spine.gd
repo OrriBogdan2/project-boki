@@ -3,15 +3,15 @@ extends RefCounted
 ## Tarek's ultimate on X, Basalt Spine (HeroUlt): a ridge of rocks laid in a shallow arc round him. Tap X for
 ## a ridge centred at the cursor, across his aim, bowing away from him (its ends curve back toward him by
 ## `bend` degrees in all); hold X and drag the cursor to swing it round that centre, let go to cast. Everyone
-## then sees a 0.2s line of molten cracks, and the rocks erupt from the centre outward over 0.4s, slowing
+## then sees a 0.2s line of molten cracks, and the rocks erupt from the centre outward over 0.8s, slowing
 ## whoever stands beside them and shoving anyone on the line aside. They are ordinary rocks of his, one rock
 ## deep (block foes and their shots, stand on them, punch them into foes). Over the abyss the rocks are
 ## ground for as long as they stand (Ent.over_void reads StoneStand): the ridge is a walkway, and when the
 ## rocks crumble whoever stands on them falls. Bond: a hunter slowed by the rise, or hit by one of its
 ## rocks while the bond window is open, counts as a land (HeroUlt.landed).
 
-const CRACK_COL := Color("ff4a1f")
-const PREVIEW_COL := Color("f4ead8")
+const CRACK_COL := Color("3a7cff")
+const PREVIEW_COL := Color("d8ecff")
 const PUSH_PAD := 0.15                  # m past the rock's half thickness a body on the line is moved to
 const CRACK_LW := 0.16                  # m: the cracks are a heavy line, wider than an aim reticle
 const PUFF_GAP := 0.02                  # s between fire puffs walking along the cracks
@@ -48,7 +48,7 @@ func aiming() -> bool: return phase == "aim"
 func start() -> bool:
 	if running():
 		return false
-	center = AimMode.point(k.h, float(xd()["range"]))
+	center = AimMode.place(k.h, float(xd()["range"]))
 	press_aim = k.aim()
 	axis = _across_aim()
 	phase = "aim"
@@ -116,8 +116,8 @@ func _erupt() -> void:
 	k.m.sfx("br_spine", center, -1.0, 1.0)
 	for s in spots:
 		var p: Vector3 = s["at"]
-		k.m.fx.burst(p + Vector3(0, 0.2, 0), Color("ff7a2a"), 5, 3.0, 0.3, 4.0, 0.9)
-		k.m.fx.spark(p, Vector3.UP, Color("ffb347"), 3, 3.0, 30.0, 0.2, 2.0, 0.8)
+		k.m.fx.burst(p + Vector3(0, 0.2, 0), Color("3a7cff"), 5, 3.0, 0.3, 4.0, 0.9)
+		k.m.fx.spark(p, Vector3.UP, Color("9ad0ff"), 3, 3.0, 30.0, 0.2, 2.0, 0.8)
 	k.net_ring(center, 1.2, CRACK_COL)
 
 ## The ridge's line as an AimKit.span: the data's length and bend, bowing away from him.
@@ -171,7 +171,7 @@ func _tick_tell(dt: float) -> void:
 	var tell := float(xd()["tell"])
 	AimKit.span(k.h, "x_cracks", _span_p({"chevrons": 0, "col": CRACK_COL, "all": true, "lw": CRACK_LW, "alpha": 1.3}))
 	var puff: Dictionary = spots[int(phase_t / PUFF_GAP) % spots.size()]
-	k.m.fx.burst((puff["at"] as Vector3) + Vector3(0, 0.2, 0), Color("ff5a1f"), 6, 3.5, 0.35, 4.0, 1.2)
+	k.m.fx.burst((puff["at"] as Vector3) + Vector3(0, 0.2, 0), Color("3a7cff"), 6, 3.5, 0.35, 4.0, 1.2)
 	if phase_t >= tell:
 		AimKit.hide(k.h, "x_cracks")
 		phase = "up"
@@ -201,8 +201,8 @@ func _raise(p: Vector3, along: Vector2) -> void:
 	if first_rise_t < 0.0:
 		first_rise_t = m.time
 	last_rise_t = m.time
-	m.fx.burst(p + Vector3(0, 0.5, 0), Color("ff6a1f"), 10, 5.0, 0.35, 6.0, 1.1)
-	m.fx.flash(p + Vector3(0, 0.4, 0), Color("ffc070"), 0.8, 0.07)
+	m.fx.burst(p + Vector3(0, 0.5, 0), Color("3a7cff"), 10, 5.0, 0.35, 6.0, 1.1)
+	m.fx.flash(p + Vector3(0, 0.4, 0), Color("9ad0ff"), 0.8, 0.07)
 	for f in k.foes_in(p, float(xd()["slow_r"])):
 		var o := {"src": "abil", "ab": "x", "slow": float(xd()["slow_t"]), "slow_k": float(xd()["slow_k"])}
 		f.hurt(float(xd()["rise_dmg"]) * k.power("x"), k.h, o)

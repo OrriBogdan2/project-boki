@@ -32,14 +32,11 @@ const CRES_IN := 1.1
 const CRES_OUT := 2.9
 const CRES_Y := 0.45
 const SWIRL_T := 0.45
-const BASH_T := 0.2
 ## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
 ## many are pooled and how often one is left (s)
 const WAKE_T := 0.28
 const WAKE_POOL := 6
 const WAKE_EVERY := 0.06
-## the Bash's gold fan: half its angle (rad) and its reach scale over the Bash's radius
-const BASH_HALF := 0.6
 const CHAIN_LINKS := 18
 const CHAIN_SAG := 0.5        # m at its deepest, once the hammer is far out
 const WRIST := "Rig/Torso/ArmRPivot/Elbow/Hand"
@@ -92,8 +89,6 @@ var crescent: MeshInstance3D
 var cres_t := 0.0
 var swirl: MeshInstance3D
 var swirl_t := 0.0
-var bash_fan: MeshInstance3D
-var bash_t := 0.0
 var aegis: Node3D              # the plated wall
 var plate_mats: Array = []     # [plate, edge] materials (flash and crack)
 var aegis_hit := 0.0
@@ -147,11 +142,6 @@ func _ready() -> void:
 	KitShaders.param(swirl, "color2", Color("ffc93a"))
 	KitShaders.param(swirl, "twist", 2.2)
 	KitShaders.param(swirl, "spin", 5.0)
-	var fan_mesh := KitMeshes.band(0.35, 1.0, -BASH_HALF, BASH_HALF, 16)
-	bash_fan = KitMeshes.inst(self, fan_mesh, KitShaders.mat("swirl", GOLD, true))
-	KitShaders.param(bash_fan, "color2", Color("fff0b0"))
-	KitShaders.param(bash_fan, "twist", 0.0)
-	KitShaders.param(bash_fan, "spin", 0.0)
 	_build_aegis()
 	var wake_mesh := KitMeshes.band(0.35, 0.8, -1.3, 1.3, 14)
 	for i in WAKE_POOL:
@@ -418,19 +408,6 @@ func smash_ring(at: Vector3) -> void:
 	swirl.global_position = at + Vector3(0, 0.3, 0)
 	swirl_t = SWIRL_T
 
-## The Bash (or a Shield Slam): a gold fan of force in front of `at` toward `dir`, out to `reach`, and a
-## flash on the shield; the Shield Slam's burns hotter.
-func bash(at: Vector3, dir: Vector2, reach: float, slam_hit: bool) -> void:
-	bash_fan.visible = true
-	bash_fan.global_position = at + Vector3(0, 0.25, 0)
-	bash_fan.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
-	bash_fan.scale = Vector3.ONE * reach
-	KitShaders.param(bash_fan, "color", EMBER if slam_hit else GOLD)
-	bash_t = BASH_T
-	var shield_at := at + Vector3(dir.x * 0.9, 1.0, dir.y * 0.9)
-	h.m.fx.flash(shield_at, EMBER if slam_hit else GOLD, 1.1, 0.07)
-	h.m.fx.spark(shield_at, Vector3(dir.x, 0.1, dir.y), Color("ffd25a"), 10, 10.0, 40.0, 0.2, 6.0, 1.1)
-
 ## The dash's after-image: a gold chevron wake at his chest, pointing the way he faces (pooled, one every
 ## WAKE_EVERY s).
 func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
@@ -448,7 +425,7 @@ func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
 
 # ------------------------------------------------------------------ the aegis
 ## Follows the raised shield (the verbs wall dict): its node is hidden, ours drawn in its place.
-func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
+func aegis_show(w: Dictionary, hurt: float) -> void:
 	var nd: Node3D = w.get("node")
 	if nd and is_instance_valid(nd):
 		nd.visible = false
@@ -463,7 +440,7 @@ func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 	aegis.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
 	(plate_mats[0] as ShaderMaterial).set_shader_parameter("albedo", PLATE_COL.lerp(BROKEN_COL, hurt * 0.65))
 	(plate_mats[1] as ShaderMaterial).set_shader_parameter("albedo", PLATE_EDGE.lerp(BROKEN_COL, hurt * 0.65))
-	var glow := aegis_hit * 1.2 + (0.35 + 0.15 * sin(Time.get_ticks_msec() * 0.012) if armed else 0.0)
+	var glow := aegis_hit * 1.2
 	(plate_mats[0] as ShaderMaterial).set_shader_parameter("glow", glow)
 
 func aegis_hide() -> void:
@@ -602,10 +579,6 @@ func _tick_slam(delta: float) -> void:
 		crescent.global_position = _cres_at()
 		KitShaders.param(crescent, "life", clampf(cres_t / CRES_FADE, 0.0, 1.0))
 		crescent.visible = cres_t > 0.0
-	if bash_t > 0.0:
-		bash_t -= delta
-		KitShaders.param(bash_fan, "life", clampf(bash_t / BASH_T * 1.5, 0.0, 1.0))
-		bash_fan.visible = bash_t > 0.0
 	if swirl_t > 0.0:
 		swirl_t -= delta
 		var life := clampf(swirl_t / SWIRL_T, 0.0, 1.0)

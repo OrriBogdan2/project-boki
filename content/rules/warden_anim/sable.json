@@ -7,15 +7,15 @@
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
-		"walk_speed": 2.2, "run_speed": 4.6
+		"walk_speed": 2.2, "run_speed": 4.6, "stride": [1.5, 1.5], "foot_mps": [1.02, 3.18], "arm_swing": {"L": 0.5, "R": 0.5}
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
 	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "fall"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
 		"thf_lmb_r": {"clip": "lmb_r", "upper": "moving"}, "thf_lmb_l": {"clip": "lmb_l", "upper": "moving"}, "thf_primed": {"clip": "primed", "upper": "moving"},
-		"thf_vault_r": {"clip": "vault_r"}, "thf_vault_l": {"clip": "vault_l"}, "thf_vault_f": {"clip": "vault_f"}, "thf_vault_b": {"clip": "vault_b"}, "thf_vault_twist": {"clip": "vault_twist"},
-		"thf_exdash": {"clip": "exdash", "hold_from": 0.46}, "thf_land": {"clip": "land_v"},
+		"thf_vault_r": {"clip": "vault_r", "heading": true, "heading_off": 1.5708, "turn_max": 3.2}, "thf_vault_l": {"clip": "vault_l", "heading": true, "heading_off": -1.5708, "turn_max": 3.2}, "thf_vault_f": {"clip": "vault_f"}, "thf_vault_b": {"clip": "vault_b"}, "thf_vault_twist": {"clip": "vault_twist"},
+		"thf_exdash": {"clip": "exdash", "hold_from": 0.46, "heading": true, "turn_max": 3.2}, "thf_land": {"clip": "land_v"},
 		"thf_bola": {"clip": "bola", "upper": "moving"}, "thf_knife": {"clip": "knife"}, "thf_arrive": {"clip": "arrive"},
 		"thf_encore": {"clip": "encore"}, "thf_encore_dance": {"clip": "encore_dance", "hold_from": 0.0, "upper": "moving"},
 		"thf_reset": {"clip": "reset", "upper": "moving"}, "thf_flourish": {"clip": "flourish", "upper": "moving"},

@@ -4,7 +4,7 @@ extends ArchKit
 ## scaled to our health and TTK; only the names, art, sounds and on-screen text are ours. docs/heroes/thief.md.
 ##
 ## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies to the cursor (clamped
-##   to 12m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
+##   to 8.5m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
 ## - Passive, Marks: every bolt that hits stacks a Mark on the target (gold diamonds over their head, up
 ##   to 8 shown, no cap): each makes your bolts on them stronger. A knock or an assist heals you.
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
@@ -48,7 +48,7 @@ var primed_t := 0.0            # Vault empowered the next bolt
 var haste_t := 0.0             # Vault's burst of speed (ends on the empowered hit)
 var mark_gap := {}             # target id -> time of its last Mark from us
 var pips := {}                 # target instance id -> {node, t: Ent}: the Mark pips over their head
-var knife := {}                # the stuck Shadow Knife: {target, pos, dir}
+var knife := {}                # the stuck Shadow Knife: {target, pos, dir} (+ wall, u, s, dy, side: stuck in a barrier)
 var bola_cast := {}            # the Bola winding up, lane showing: {t}
 var bola := {}                 # the Bola in flight: {pos, dir, left, first, bounces, stg}
 var encore: ThiefUlt           # X, the ultimate
@@ -127,6 +127,13 @@ func add_mark(t: Ent, n := 1, force := false) -> void:
 	t.set_meta("marks_t", now)
 	_pip_pop(t, c)
 	_on_marks(t, had, c)
+
+func combo_read(t: Ent) -> Dictionary:
+	var n := marks_on(t)
+	if n <= 0:
+		return {}
+	return {"icon": "gem", "n": n, "max": pip_count(), "left": float((t.get_meta("marks") as Dictionary)[h.nid][1]),
+			"total": float(res_def()["dur"])}
 
 ## Filling the diamonds over the target chimes. Marks have no cap, so they keep climbing past it.
 func _on_marks(t: Ent, had: int, c: int) -> void:
@@ -459,7 +466,7 @@ func _tick_vault(dt: float) -> void:
 		if h.grounded and float(vault["t"]) > 0.12:
 			h.roll_t = 0.0
 		return
-	h.roll_speed = float(vault["speed"]) * _curve(VAULT_CURVE, u) / VAULT_MEAN
+	h.roll_speed = float(vault["speed"]) * HunterMove.dash_k(VAULT_CURVE, u) / VAULT_MEAN
 
 ## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
 ## a low crouch.
@@ -473,14 +480,6 @@ func _tick_landing() -> void:
 	landing_due = false
 	if anim_id == "thf_exdash":
 		play("thf_land")
-
-static func _curve(pts: Array, u: float) -> float:
-	for i in pts.size() - 1:
-		var a: Array = pts[i]
-		var b: Array = pts[i + 1]
-		if u <= float(b[0]):
-			return lerpf(float(a[1]), float(b[1]), (u - float(a[0])) / maxf(0.001, float(b[0]) - float(a[0])))
-	return float(pts[-1][1])
 
 ## A move another press starts mid-cartwheel (a bolt, the Bola, the dagger) waits out the flip: the ability
 ## goes off, the cartwheel isn't cut short.
@@ -562,6 +561,8 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## snap on her.
 func _primed_hit(t: Ent) -> void:
 	primed_hits += 1
+	if marks_on(t) > 0:
+		ComboMark.payoff(m, h, t)
 	add_mark(t, int(dash_def()["prime_marks"]), true)
 	h.dashes = h.max_dashes()
 	h.ex_cd = 0.0
@@ -584,6 +585,7 @@ func _reset_fx(t: Ent) -> void:
 	m.fx.word(at_hand + Vector3(0, 0.7, 0), "RESET", GHOST, false)
 	m.sfx("pay_cashin", at, -2.0, 1.0)
 	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
+	RecastCue.payoff(self, t)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
 ## A rival we hit was knocked (or we assisted): a heal, a crimson star on them, a green pillar on us.
@@ -782,6 +784,24 @@ func in_e() -> bool:
 func e_recastable() -> bool:
 	return not knife.is_empty()
 
+## RecastCue: the knife is the marker; it steps you there by itself when it runs out (no "EXPIRED").
+func recast_window() -> Dictionary:
+	var w := super()
+	if not w.is_empty():
+		w["at"] = knife.get("pos", h.pos)
+		w["auto"] = true
+	return w
+
+## RecastCue's badge: your Marks on each foe; gold while the empowered bolt is ready to cash them in.
+func combo_marks(out: Array) -> void:
+	super(out)
+	for f in m.foes_of(h.team):
+		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
+		var e: Array = mk.get(h.nid, [0, 0.0])
+		if int(e[0]) > 0 and float(e[1]) > 0.0:
+			var dur := float(res_def().get("dur", 4.0))
+			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, "MARKS", primed_t > 0.0))
+
 func cast_e() -> bool:
 	play("thf_knife")
 	m.later(0.12, func():               # spun into a side-arm throw, released on the key pose
@@ -803,15 +823,33 @@ func _throw_knife() -> void:
 				add_mark(f, 1, true)
 				_stick(f, f.pos),
 		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
-			if knife.is_empty() and e == null: _stick(null, ground(at) if _why == "wall" else land)}))
+			if knife.is_empty() and e == null: _stick_ground(at, _why == "wall", land)}))
 	if m.shots.size() > n0 and m.shots[-1]["by"] == h:
 		fx().ride(m.shots[-1], "dagger", col_of(ed), Color("ffcf5a"), 1.6, 0.26)
 	fx().star(h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6), Color("ffcf5a"), 0.7, 0.1)
 	m.sfx("dj_knife_throw", h.pos, -3.0, 1.0)
 
-func _stick(f: Ent, at: Vector3) -> void:
+## The shot ended with no foe: in the barrier that stopped it, else on the ground (at the wall, or where aimed).
+func _stick_ground(at: Vector3, hit_wall: bool, land: Vector3) -> void:
+	var w: Dictionary = m.verbs.stopper(at, h.team, 0.3) if hit_wall else {}
+	if w.is_empty():
+		_stick(null, ground(at) if hit_wall else land)
+		return
+	var a: Vector2 = w["a"]
+	var ab: Vector2 = (w["b"] as Vector2) - a
+	var p := Vector2(at.x, at.z)
+	var u := clampf((p - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
+	var out := _wall_out(w)
+	var me := Vector2(h.pos.x, h.pos.z) - (a + ab * u)
+	var side := signf(me.dot(out))
+	if side == 0.0: side = -signf(h.aim_dir().dot(out))
+	if side == 0.0: side = 1.0
+	_stick(null, at, {"wall": w, "u": u, "s": (p - a - ab * u).dot(out), "dy": at.y - float(w["y"]), "side": side})
+
+func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	var ed := e_def()
 	knife = {"target": f, "pos": at, "dir": h.aim_dir()}
+	knife.merge(on_wall)
 	e_t = float(ed["time"])
 	if rank("kin") >= 3:
 		cd["e"] = float(cd["e"]) * (1.0 - float(ed["refund_foe"] if f else ed["refund_wall"]))
@@ -832,12 +870,31 @@ func _tick_knife() -> void:
 		f = null
 	if f != null:
 		knife["pos"] = (f as Ent).pos
+	elif knife.has("wall"):
+		_ride_wall()
 	var at: Vector3 = knife["pos"]
 	var dv: Vector2 = knife["dir"]
-	if tells_visible() or f != null:
-		fx().place("knife%d" % h.get_instance_id(), "dagger", at + Vector3(0, 1.2 if f != null else 0.35, 0), dv * 0.01,
+	var up := 1.2 if f != null else 0.35
+	if knife.has("wall"): up = 0.0
+	if tells_visible() or f != null or knife.has("wall"):
+		fx().place("knife%d" % h.get_instance_id(), "dagger", at + Vector3(0, up, 0), dv * 0.01,
 				col_of(e_def()), Color("ffcf5a"), 0.2, 0.2)
 	AimKit.circle(h, "knife", {"at": at, "r": 1.6, "col": KNIFE_VIOLET, "ticks": true, "alpha": 1.0})
+
+## Out from a barrier's face (the way the Vector2 of its a -> b turns a quarter).
+func _wall_out(w: Dictionary) -> Vector2:
+	return ((w["b"] as Vector2) - (w["a"] as Vector2)).normalized().orthogonal()
+
+## It rides its barrier wherever it goes; when the barrier breaks or runs out the dagger lies under it.
+func _ride_wall() -> void:
+	var w: Dictionary = knife["wall"]
+	var a: Vector2 = w["a"]
+	if not m.verbs.walls.has(w):
+		knife.erase("wall")
+		knife["pos"] = ground(knife["pos"])
+		return
+	var q: Vector2 = a.lerp(w["b"], float(knife["u"])) + _wall_out(w) * float(knife["s"])
+	knife["pos"] = Vector3(q.x, float(w["y"]) + float(knife["dy"]), q.y)
 
 func e_recast() -> bool:
 	if knife.is_empty():
@@ -863,7 +920,9 @@ func _step_to_knife() -> void:
 		vault = {}
 	var f = k.get("target")
 	play("thf_arrive")
-	if f != null and is_instance_valid(f) and not (f as Ent).dead:
+	if k.has("wall") and m.verbs.walls.has(k["wall"]):
+		_step_beside(k)
+	elif f != null and is_instance_valid(f) and not (f as Ent).dead:
 		_shadow_step(f)
 	else:
 		var at: Vector3 = k["pos"]
@@ -871,6 +930,18 @@ func _step_to_knife() -> void:
 			return
 		_blink(ground(at))
 	last_e = "shadow_step"
+
+## Step to the knife in a barrier: right beside it on her own side (the far side if hers is shut), never inside.
+func _step_beside(k: Dictionary) -> void:
+	var w: Dictionary = k["wall"]
+	var c: Vector2 = (w["a"] as Vector2).lerp(w["b"], float(k["u"]))
+	var gap := float(w["th"]) + h.r + 0.35
+	for sd in [float(k["side"]), -float(k["side"])]:
+		var q: Vector2 = c + _wall_out(w) * sd * gap
+		var to := ground(Vector3(q.x, float(w["y"]), q.y))
+		if not m.world.is_void(to.x, to.z) and m.world.occupy(to.x, to.z, h.r, to.y, false) == 0.0:
+			_blink(to)
+			return
 
 ## Step to the knife in a foe: you appear right at them, on their far side.
 func _shadow_step(tgt: Ent) -> void:

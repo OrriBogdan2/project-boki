@@ -67,6 +67,7 @@ func _draw_panels() -> void:
 			hud._draw_kin_card(sz, p)
 			SafeArea.begin("squad")
 			hud._draw_squad(sz, p)
+			TeamBoki.draw(hud, p)
 			SafeArea.begin("perks")
 			hud._draw_perks(sz, p)
 	SafeArea.begin("")

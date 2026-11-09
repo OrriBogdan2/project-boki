@@ -49,6 +49,7 @@ func run(main_node: Node) -> void:
 	ok(once.is_empty(), "a one-shot of a looping file does not loop (%d looping pool voices)" % once.size())
 	Sfx.loop_start("boxhum_check", "revive_hum", P.pos)       # (as a deathbox revive does, keyed)
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
+	_ult_cues(m, P)
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -64,6 +65,30 @@ func run(main_node: Node) -> void:
 	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## An ultimate is heard before it is seen: a rival's cue carries 40 m (not 70) with the rival tag, yours has the
+## ally tag, all through the match's own pool voices (so the match leaving tears them down with the rest).
+func _ult_cues(m: Match, P: Hunter) -> void:
+	var rivals := m.hunters.filter(func(x): return x != P and x.team != P.team and x.ak != null)
+	ok(not rivals.is_empty(), "setup: a rival Hunter with a kit")
+	if rivals.is_empty():
+		return
+	var R: Hunter = rivals[0]
+	Sfx.listener = P.pos
+	R.pos = P.pos + Vector3(40, 0, 0)
+	Sfx.last_played.clear()
+	UltCue.cast(R.ak)
+	var heard := Sfx.last_played.has(R.arch + "_ult_cue") and Sfx.last_played.has("ult_tag_foe")
+	ok(heard and not Sfx.last_played.has("ult_tag_ally"),
+			"a rival's ultimate 40 m away is heard, with the rival tag (%s)" % [Sfx.last_played.keys()])
+	R.pos = P.pos + Vector3(70, 0, 0)
+	Sfx.last_played.clear()
+	UltCue.cast(R.ak)
+	ok(Sfx.last_played.is_empty(), "...and 70 m away it is out of earshot")
+	Sfx.last_played.clear()
+	UltCue.cast(P.ak)
+	heard = Sfx.last_played.has("ult_tag_ally") and Sfx.last_played.has(P.arch + "_ult_cue")
+	ok(heard, "your own team's cue has the ally tag")
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0

@@ -50,7 +50,7 @@ What the in-game kit card (K) says.
 
 **Swell (passive).** Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 9s, wrapped in a pink sphere: your seed grows larger and faster, Trade lands sooner, your Snap hits 44% harder. You float: lava, spore pods and other ground hazards pass you by.
 
-**Lantern Trade (dash, Shift, 9.5s cooldown).** Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 30% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.
+**Lantern Trade (dash, Shift, 9.5s cooldown).** Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 35% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.
 
 **Shard Snap (RMB, 10s cooldown).**
 
@@ -66,9 +66,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 10s -> 9s, damage +15%. | cooldown 10s -> 8s, damage +30%; you speed up 11% on the cast and 22% when it hits, for 2s. |
-| Dash (Shift) | recharge 9.5s -> 8.1s per charge. | recharge 9.5s -> 6.7s; allies beside you or at your landing get a 26 shield for 3s. |
-| E | cooldown 10s -> 9s, damage +15%. | cooldown 10s -> 8s; the growing seed burns foes inside for 8 a second. |
+| RMB | cooldown 10s -> 8.5s, damage +20%. | cooldown 10s -> 7s, damage +40%; you speed up 11% on the cast and 22% when it hits, for 2s. |
+| Dash (Shift) | recharge 9.5s -> 8s per charge. | recharge 9.5s -> 6.5s; allies beside you or at your landing get a 26 shield for 3s. |
+| E | damage +10%. | cooldown 10s -> 8s, damage +20%; the growing seed burns foes inside for 8 a second. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).
 

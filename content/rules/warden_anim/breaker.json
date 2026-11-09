@@ -47,7 +47,7 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.0,
-		"run_speed": 4.8
+		"run_speed": 4.8, "stride": [1.35, 1.55], "foot_mps": [3.1, 7.4], "arm_swing": {"L": 0.5}
 	},
 	"air": {
 		"rise": "jump",
@@ -63,6 +63,7 @@
 	"kmoves": {
 		"bul_throw": {
 			"clip": "lmb_throw",
+			"fade": 0.04,
 			"upper": "moving"
 		},
 		"bul_recall": {
@@ -75,7 +76,8 @@
 			"hold_from": 0.2
 		},
 		"bul_smash": {
-			"clip": "lmb_slam"
+			"clip": "lmb_slam",
+			"fade": 0.04
 		},
 		"bul_launch": {
 			"clip": "lmb_launch"
@@ -89,12 +91,9 @@
 			"clip": "guard_break",
 			"upper": true
 		},
-		"bul_armed": {
-			"clip": "guard_armed",
-			"upper": true
-		},
 		"bul_whirl": {
-			"clip": "shift_whirl"
+			"clip": "shift_whirl",
+			"fade": 0.04
 		},
 		"bul_charge": {
 			"clip": "shift_charge"
@@ -109,9 +108,6 @@
 			"clip": "crush",
 			"upper": true
 		},
-		"bul_slamshield": {
-			"clip": "shield_slam"
-		},
 		"bul_mend": {
 			"clip": "e_mend",
 			"upper": "moving"
@@ -121,7 +117,8 @@
 			"hold_from": 0.4
 		},
 		"bul_ult_slam": {
-			"clip": "x_slam"
+			"clip": "x_slam",
+			"fade": 0.04
 		},
 		"mf_xform": {
 			"clip": "fuse"
@@ -186,12 +183,10 @@
 			"bul_guard": "determined",
 			"bul_whirl": "angry",
 			"bul_charge": "determined",
-			"bul_slamshield": "angry",
 			"bul_mend": "happy",
 			"bul_ult_wind": "angry",
 			"bul_ult_slam": "angry",
-			"bul_break": "sad",
-			"bul_armed": "happy"
+			"bul_break": "sad"
 		}
 	},
 	"offset_bones": [

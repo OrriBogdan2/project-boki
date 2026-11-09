@@ -99,6 +99,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | P | Pass the drop lead | `pass_lead` | yes |
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |
 | F9 | Recording: slow camera orbit | `record_orbit` | yes |
+| F7 | Movement readout (tuning) | `move_readout` | yes |
 | Z | Separate from the drop | `separate` | yes |
 
 <!-- /gen:keys -->

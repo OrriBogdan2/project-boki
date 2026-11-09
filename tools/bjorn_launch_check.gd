@@ -645,6 +645,74 @@ func _audit() -> void:
 		not K.wall.is_empty() and front_ok, "hp %.0f -> %.0f wall %.0f -> %.0f" % [hp0, P.hp, w0,
 				float(K.wall.get("hp", 0.0))])
 	ok("bjorn audit: a blow from behind still lands on him", P.hp < hp0, "hp %.0f -> %.0f" % [hp0, P.hp])
+	_aegis_shots(m, P, T, T2, K)
+	_aegis_hooks(m, P, T, T2)
 	P.inp["sec_hold"] = false
 	step(m, 0.3)
 	await done(m)
+
+## A foe's shot is stopped by the raised aegis from the front (the wall takes it, he and the ally behind it
+## don't), and one fired from behind him lands on him (data: Brightshield blocks all damage from the front).
+func _aegis_shots(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: BulwarkKit) -> void:
+	var aim := Vector3(0, 1.0, 0)
+	var hp0 := P.hp
+	var w0 := float(K.wall.get("hp", 0.0))
+	m.spawn_shot(T, T.pos + aim, Vector2(-30.0, 0.0), 20.0, 1.0, 0.3, Color.WHITE, {"src": "abil"})
+	step(m, 0.4)
+	ok("bjorn audit: a shot from the front is stopped by the aegis (he takes none, it takes it)",
+		P.hp == hp0 and float(K.wall.get("hp", 0.0)) <= w0 - 19.0, "hp %.0f -> %.0f wall %.0f -> %.0f" % [hp0, P.hp, w0,
+				float(K.wall.get("hp", 0.0))])
+	hp0 = P.hp
+	m.spawn_shot(T2, T2.pos + aim, Vector2(30.0, 0.0), 20.0, 1.0, 0.3, Color.WHITE, {"src": "abil"})
+	step(m, 0.4)
+	ok("bjorn audit: a shot from behind lands on him", P.hp < hp0, "hp %.0f -> %.0f" % [hp0, P.hp])
+	var cc := {"src": "abil", "stun": 1.0, "slow": 1.0, "root": 1.0}
+	P.hurt(5.0, T, cc.duplicate())
+	ok("bjorn audit: a stun, slow and root riding a hit from the front are blocked with it",
+		P.stun_t == 0.0 and P.slow_t == 0.0 and P.root_t == 0.0,
+		"stun %.1f slow %.1f root %.1f" % [P.stun_t, P.slow_t, P.root_t])
+	P.hurt(5.0, T2, cc.duplicate())
+	ok("bjorn audit: the same from behind lands", P.stun_t > 0.0, "stun %.1f" % P.stun_t)
+	P.stun_t = 0.0
+	P.slow_t = 0.0
+	P.root_t = 0.0
+	P.cc_immune_t = 0.0
+
+## A hook is a pull and a pull is a shot: Kael's chain and Grimble's hand stop on the aegis from the front
+## (the chain doesn't anchor to it, the hand doesn't grab), and catch him from behind.
+func _hooker(m: Match, arch: String, at: Vector3) -> Hunter:
+	return m.make_hunter(arch, 5, Arch.weight(arch), arch, "idle", {}, at, {"arch": arch})
+
+func _aegis_hooks(m: Match, P: Hunter, T: Hunter, T2: Hunter) -> void:
+	var home := P.pos
+	T.teleport(home + Vector3(0, 0, 14.0))          # (the hooks mustn't find the idle dummies)
+	T2.teleport(home + Vector3(0, 0, -14.0))
+	var kael_h := _hooker(m, "juggernaut", home + Vector3(3.0, 0, 0))
+	var grim_h := _hooker(m, "dredge", home + Vector3(-30.0, 0, 6.0))
+	for t in [kael_h, grim_h]:
+		t.unlock_all()
+		t.lvl = 6
+	for i in 3: m.step(DT)
+	var kael: JuggernautKit = kael_h.ak
+	var grimble: DredgeKit = grim_h.ak
+	aim_at(kael_h, P.pos)
+	kael.warchain.press()
+	step(m, 0.6)
+	ok("bjorn audit: Kael's chain from the front stops on the aegis (no anchor, no pull)",
+		kael.warchain.state != "hooked" and kael.warchain.hooks == 0, "state %s" % kael.warchain.state)
+	kael_h.teleport(home + Vector3(0, 0, 20.0))
+	grim_h.teleport(home + Vector3(3.0, 0, 0))
+	aim_at(grim_h, P.pos)
+	grimble.fire_rmb({})
+	var thrown: bool = float(grimble.cd["rmb"]) > 0.0 or grimble.ch_rmb < 1.0
+	step(m, 0.8)
+	ok("bjorn audit: Grimble's hand from the front stops on the aegis (no grab)", thrown and grimble.grapples == 0,
+		"thrown %s grapples %d" % [thrown, grimble.grapples])
+	step(m, 1.0)
+	grim_h.teleport(home + Vector3(-3.0, 0, 0))
+	grimble.cd["rmb"] = 0.0
+	grimble.ch_rmb = 1.0
+	aim_at(grim_h, P.pos)
+	grimble.fire_rmb({})
+	step(m, 0.8)
+	ok("bjorn audit: Grimble's hand from behind catches him", grimble.grapples == 1, "grapples %d" % grimble.grapples)

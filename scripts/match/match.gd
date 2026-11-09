@@ -37,6 +37,7 @@ var meteors: Array = []     # {at, t, tele}
 var glimmer_done := false
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
+var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
 var exits: Exits = null     # the ways out: skiff docks, rift hatches, outpost uplinks (see Exits)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var truce: Truce = null     # emotes and truces between squads (see Truce)
@@ -55,7 +56,7 @@ var bubbles: Array = []     # {ent, text, t, cat}
 var interact := {}          # what F would do right now for the local player
 var paused := false
 var duel: Duel = null
-var arena: Arena = null   # the Arena (opts "arena") or the training area's practice tools
+var arena: Arena = null   # the Arena (opts "arena") or the Training Grounds's practice tools
 var shot_n := 0          # the duel room: you and one sparring bot (opts "duel")
 var slowmo := 0.0
 var slow_k := 0.35
@@ -123,7 +124,6 @@ var _finish_now := false
 var rolling: Rolling = null     # a rolling 30-minute session (opts "rolling"): waves, join-in-progress, late-joiner levels (scripts/match/rolling.gd)
 var sess_t0 := 0.0              # session time when this match's clock started (rolling: when your wave set off; else 0)
 var ships: Array = []           # the other drop waves' skyships (rolling sessions); `ship` is your own
-var _bot_names: Array = []
 func sess_time() -> float: return sess_t0 + time     # the session clock: seconds since the session began (the match clock unless you joined a rolling session part-way)
 func sess_len() -> float: return Rolling.SESSION if rolling else length     # the whole session (a rolling session: Rolling.SESSION)
 func at_sess(k: float) -> float: return k * sess_len() - sess_t0     # match time at a share of the session (negative if before you joined)
@@ -198,419 +198,10 @@ func _progress(label: String) -> void:
 	for k in STAGE_MS: tot += float(STAGE_MS[k])
 	_stage_cb.call(clampf(_stage_done_ms / tot, 0.0, 1.0), "map" if label == "build.generate" or label.begins_with("world.") else "spawn")
 
-## Under the loading screen: draws every material in the match once on tiny stand-ins (a batch a
-## frame, see _warm_batches), then the world once from far above (every island, prop, wall, cloud
-## layer and landmark in view), once close to the ground (grass, flowers, undergrowth) and once from
-## where the match starts, with one of each effect in front of the camera, then stand-ins for what
-## those views added (the effects), so the GPU compiles every shader before play instead of when the
-## drop first shows it. The last frames double as the
-## auto-quality benchmark (Settings.note_benchmark). progress(frac 0..1) as it goes.
+## Draws everything once behind the loading screen (WarmUp), so no shader compiles mid-play.
 func warm_up(progress := Callable()) -> void:
-	if DisplayServer.get_name() == "headless" or cam == null or world == null:
-		return
-	PerfLog.skip()
-	var keep := [cam.global_transform, cam.fov, cam.far]
-	var ctr := Vector3(world.w * 0.5, 0.0, world.h * 0.5)
-	var ground := ctr
-	if player and player.ai.has("land"): ground = player.ai["land"]
-	ground.y = world.ground_at(ground.x, ground.z) if not world.is_void(ground.x, ground.z) else 0.0
-	var views := [
-		[ctr + Vector3(0, maxf(world.w, world.h) * 1.05, maxf(world.w, world.h) * 0.4), ctr, 62.0, 900.0],
-		[ground + Vector3(0, 22.0, 11.0), ground, 40.0, 160.0],
-		[ground + Vector3(0, 60.0, 30.0), ground, 40.0, 300.0],
-	]
-	# the sight-cone texture the toon shaders read once you've landed: set now, not on landing
-	if not _vis_tex_done:
-		_vis_tex_done = true
-		RenderingServer.global_shader_parameter_set("vis_blocks", world.vis_texture())
-		RenderingServer.global_shader_parameter_set("vis_size", Vector2(world.w, world.h))
-	# every material in the match on every kind of geometry it's drawn with (hidden things too: aim
-	# line and ring, gliders, auras, weapon effects, pickups, damage numbers, particles), as tiny
-	# stand-ins just in front of the camera. The Compatibility renderer compiles a separate variant
-	# of a shader for an object lit by an omni light, by a spot light, by both and by neither, so
-	# the stand-ins are drawn once under each: the first muzzle flash after landing (an omni light
-	# on everything round you) and the sky train's headlight sweeping an island no longer stall.
-	# Done first and a batch at a time, so the views below find their shaders already built and no
-	# single frame takes every compile at once.
-	# a Boki makes its daze stars the first time it's dazed: one makes them now (hidden until then),
-	# so their material is among the stand-ins
-	for k in kins:
-		for pn in (k as Node).find_children("*", "Node", true, false):
-			if pn is KinPuppet and pn.get("stars") == null and pn.get("body") != null:
-				pn.call("_make_stars")
-				break
-		break
-	if player: player.warm_marker()      # and the hit-marker balloon over a Hunter
-	var seen := {}
-	var batch_cb := func(f: float) -> void:
-		if progress.is_valid(): progress.call(0.7 * f)
-	var aim_warm := _warm_aim_stand_in()      # (item 94c: the aim kit's one material draws only once somebody aims)
-	var batched: bool = await _warm_batches(batch_cb, seen)
-	if is_instance_valid(aim_warm): aim_warm.queue_free()
-	if not batched:
-		return
-	var shown: Array = []
-	for i in 3:
-		var sm: MeshInstance3D = shot_pool[i]
-		sm.visible = true
-		shown.append(sm)
-	for vi in views.size():
-		var v: Array = views[vi]
-		var at: Vector3 = v[1]
-		cam.global_transform = Transform3D(Basis.looking_at(at - (v[0] as Vector3), Vector3.UP), v[0])
-		cam.fov = v[2]; cam.far = v[3]
-		# one of each effect where the camera looks
-		fx.burst(at + Vector3(0, 1, 0), Color.WHITE, 6)
-		fx.ring(at, 1.5, Color.WHITE)
-		fx.flash(at + Vector3(0, 1, 0), Color.WHITE)
-		fx.spark(at + Vector3(0, 1, 0), Vector3.UP, Color.WHITE, 4)
-		fx.slash(at + Vector3(0, 0.8, 0), 0.0, 2.0, 1.6, Color.WHITE)
-		fx.beam(at + Vector3(0, 1, 0), at + Vector3(2, 1, 0), Color.WHITE)
-		HeroVfx.of(self).prewarm(at + Vector3(0, 1, 0))
-		var tg := fx.telegraph_circle(at, 1.5, Color(1, 0.3, 0.2))
-		# the muzzle flash light lights whatever stands near a shot: the lit variants compile now too
-		if muzzle_light:
-			muzzle_light.global_position = at + Vector3(0, 1.0, 0)
-			muzzle_light.light_energy = 0.05
-		for k in shown.size():
-			(shown[k] as MeshInstance3D).global_position = at + Vector3(k - 1.0, 1.0, 0)
-		# the ground views draw with the sight cone on, as play does after landing
-		RenderingServer.global_shader_parameter_set("vis_on", 0.0 if vi == 0 else 1.0)
-		RenderingServer.global_shader_parameter_set("vis_focus", at)
-		await get_tree().process_frame
-		await get_tree().process_frame
-		fx.end_telegraph(tg)
-		if not is_inside_tree():
-			return
-		if progress.is_valid(): progress.call(0.7 + 0.2 * (vi + 1) / views.size())
-	HeroVfx.of(self).prewarm_end()
-	# and the materials that only exist now (the effects just shown, the shots), the same way: a
-	# telegraph is held up for it (the views' own are gone by now)
-	var late_cb := func(f: float) -> void:
-		if progress.is_valid(): progress.call(0.9 + 0.1 * f)
-	var late_at := cam.global_position - cam.global_transform.basis.z * 6.0
-	var tg_late := fx.telegraph_circle(late_at, 1.5, Color(1, 0.3, 0.2))
-	# (and a still copy of a melee swoosh: the real one frees itself in a fifth of a second)
-	fx.slash(late_at, 0.0, 2.0, 1.6, Color.WHITE)
-	var swoosh: Node = null
-	if fx.get_child_count() > 0 and fx.get_child(fx.get_child_count() - 1) is MeshInstance3D:
-		swoosh = fx.get_child(fx.get_child_count() - 1).duplicate(0)
-		add_child(swoosh)
-		(swoosh as Node3D).global_position = late_at
-	batched = await _warm_batches(late_cb, seen)
-	if not batched:
-		return
-	fx.end_telegraph(tg_late)
-	if swoosh: swoosh.queue_free()
-	for sm in shown: (sm as MeshInstance3D).visible = false
-	if muzzle_light: muzzle_light.light_energy = 0.0
-	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
-	cam.global_transform = keep[0]; cam.fov = keep[1]; cam.far = keep[2]
-	PerfLog.mark("build.warm_up")
-	# the benchmark: a few frames of the opening view
-	var times: Array = []
-	var last := Time.get_ticks_usec()
-	for i in 8:
-		await get_tree().process_frame
-		var now := Time.get_ticks_usec()
-		if i >= 2: times.append((now - last) / 1000.0)
-		last = now
-	times.sort()
-	if not times.is_empty():
-		Settings.note_benchmark(float(times[times.size() / 2]))
-	await DashPace.rehearse(self)
-	PerfLog.skip()
+	await WarmUp.new(self).run(progress)
 
-## Stand-ins drawn in the first batch of warm_up; later batches grow while a batch's frames stay
-## cheap and shrink when one costs more than WARM_FRAME_MS over a plain frame (a first draw is
-## where a GPU compiles a shader). Only how many frames the warm-up takes depends on it.
-const WARM_BATCH := 8
-const WARM_FRAME_MS := 45.0
-
-## The stand-ins of warm_up, a batch a frame, each batch drawn once under each light setup.
-## False if the match went away meanwhile.
-## The aim kit (AimKit: every kit's aim lines, rings and the Hem draw's fill line and perfect circle) draws one
-## ImmediateMesh that is empty until a Hunter aims, so the scan below never sees its material and the first
-## aim after landing compiled its shader mid-play. A one-triangle mesh with the same material and vertex
-## format stands in for it for the warm-up.
-func _warm_aim_stand_in() -> MeshInstance3D:
-	var d := AimKit.layer(self)
-	if d == null or d.mat == null:
-		return null
-	var arr := []
-	arr.resize(Mesh.ARRAY_MAX)
-	arr[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3.ZERO, Vector3.RIGHT, Vector3.UP])
-	arr[Mesh.ARRAY_COLOR] = PackedColorArray([Color.WHITE, Color.WHITE, Color.WHITE])
-	var am := ArrayMesh.new()
-	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
-	am.surface_set_material(0, d.mat)
-	var mi := MeshInstance3D.new()
-	mi.mesh = am
-	mi.visible = false
-	add_child(mi)
-	return mi
-
-func _warm_batches(progress: Callable, seen: Dictionary) -> bool:
-	var list: Array = await _warm_sources(seen)
-	if not is_inside_tree():
-		return false
-	if list.is_empty():
-		return true
-	var basis := cam.global_transform.basis
-	var front := cam.global_position - basis.z * 6.0
-	var wl := _warm_lights()
-	# the camera sees only the stand-ins meanwhile (their own render layer): the lights, shadows and
-	# environment that pick a shader's variant are all still there, but each batch's frame no longer
-	# draws the whole map again
-	var keep_mask := cam.cull_mask
-	cam.cull_mask = WARM_LAYER
-	# (a camera culls lights by their layers too: every light joins the stand-ins' layer meanwhile,
-	# or they'd all draw unlit)
-	var lights := find_children("*", "Light3D", true, false)
-	var keep_layers: Array = []
-	for l in lights:
-		keep_layers.append((l as Light3D).layers)
-		(l as Light3D).layers |= WARM_LAYER
-	# what a frame costs with nothing new in it, to tell a batch's own cost from plain drawing
-	await get_tree().process_frame
-	var t0 := Time.get_ticks_usec()
-	await get_tree().process_frame
-	var plain := (Time.get_ticks_usec() - t0) / 1000.0
-	if not is_inside_tree():
-		return false
-	var n := WARM_BATCH
-	var i := 0
-	var batches := 0
-	while i < list.size():
-		var batch: Array = list.slice(i, mini(i + n, list.size()))
-		t0 = Time.get_ticks_usec()
-		var pxs: Array = []
-		var cols := int(ceil(sqrt(float(batch.size()))))
-		for k in batch.size():
-			if not is_instance_valid(batch[k]):
-				continue
-			var px := _warm_proxy(batch[k])
-			if px == null:
-				continue
-			add_child(px)
-			_warm_layer(px)
-			var gx := (float(k % cols) / maxf(1.0, cols - 1) - 0.5) * 2.4
-			var gy := (float(k / cols) / maxf(1.0, cols - 1) - 0.5) * 1.4
-			px.global_transform = Transform3D(basis.scaled(Vector3.ONE * 0.04), front + basis.x * gx + basis.y * gy)
-			pxs.append(px)
-		var worst := 0.0
-		# two frames under each light setup (with one, a variant or two still slips through to the
-		# ride: --hitch-check from a cold shader cache)
-		for setup in [[false, false], [true, false], [false, true], [true, true]]:
-			wl[0].visible = setup[0]; wl[1].visible = setup[1]
-			for _f in 2:
-				await get_tree().process_frame
-				if not is_inside_tree():
-					return false
-				var now := Time.get_ticks_usec()
-				worst = maxf(worst, (now - t0) / 1000.0)
-				t0 = now
-		batches += 1
-		for px in pxs: (px as Node).queue_free()
-		i += batch.size()
-		progress.call(float(i) / list.size())
-		var extra := worst - plain
-		if extra > WARM_FRAME_MS:
-			n = maxi(4, n / 2)
-		elif extra < WARM_FRAME_MS * 0.4:
-			n = mini(n * 2, 512)
-	await get_tree().process_frame
-	for li in lights.size():
-		if is_instance_valid(lights[li]): (lights[li] as Light3D).layers = keep_layers[li]
-	for l in wl: (l as Node).queue_free()
-	cam.cull_mask = keep_mask
-	PerfLog.note("warm-up: %d stand-ins in %d batches" % [list.size(), batches])
-	return is_inside_tree()
-
-## The render layer warm_up's stand-ins draw on (nothing else in the game uses it).
-const WARM_LAYER := 1 << 19
-func _warm_layer(px: Node) -> void:
-	if px is VisualInstance3D: (px as VisualInstance3D).layers = WARM_LAYER
-	for ch in px.get_children(): _warm_layer(ch)
-
-## One instance of each material and kind of geometry in the match (see _warm_key) not in seen yet,
-## for warm_up's stand-ins (adds them to seen). Walks the tree a slice at a time so the loading
-## screen keeps moving.
-func _warm_sources(seen: Dictionary) -> Array:
-	var list: Array = []
-	var stack: Array = [self]
-	var t0 := Time.get_ticks_usec()
-	while not stack.is_empty():
-		if Time.get_ticks_usec() - t0 > int(PerfLog.SLICE_MS * 1000.0):
-			await get_tree().process_frame
-			if not is_inside_tree():
-				return []
-			t0 = Time.get_ticks_usec()
-		var n = stack.pop_back()
-		if not is_instance_valid(n):
-			continue
-		for ch in (n as Node).get_children(): stack.append(ch)
-		if n is Skeleton3D:
-			# skinned meshes run a skinning shader of their own, first when one is drawn: a copy of
-			# one rig of each make (its meshes follow it, their skeleton path is relative)
-			var sk := "skel:" + ",".join(n.get_children().filter(func(c): return c is MeshInstance3D).map(func(c): return str((c as MeshInstance3D).mesh.get_instance_id() if (c as MeshInstance3D).mesh else 0)))
-			if not seen.has(sk) and seen.size() < 2000:
-				seen[sk] = true
-				list.append(n)
-			continue
-		if not (n is GeometryInstance3D):
-			continue
-		var key := _warm_key(n as GeometryInstance3D)
-		if key.is_empty() or seen.has(key):
-			continue
-		seen[key] = true
-		list.append(n)
-		if list.size() >= 900:
-			break
-	return list
-
-## What decides which shader variants an instance compiles: the kind of geometry and each surface's
-## shader (a StandardMaterial3D by the features its generated shader depends on). Empty: draws nothing.
-static func _warm_key(gi: GeometryInstance3D) -> String:
-	var kind := gi.get_class()
-	var mesh: Mesh = null
-	if gi is MeshInstance3D:
-		mesh = (gi as MeshInstance3D).mesh
-	elif gi is MultiMeshInstance3D:
-		var mm := (gi as MultiMeshInstance3D).multimesh
-		if mm == null: return ""
-		mesh = mm.mesh
-		kind += "%d%d%d" % [mm.transform_format, int(mm.use_colors), int(mm.use_custom_data)]
-	elif gi is CPUParticles3D:
-		mesh = (gi as CPUParticles3D).mesh
-	elif gi is Label3D or gi is Sprite3D:
-		var sb := gi as GeometryInstance3D
-		var parts: Array = [kind, sb.get("billboard"), sb.get("shaded"), sb.get("double_sided"), sb.get("no_depth_test"), sb.get("fixed_size"),
-			sb.get("alpha_cut"), sb.get("texture_filter"), sb.get("transparent"), sb.material_override]
-		return str(parts)
-	else:
-		return ""
-	if mesh == null or mesh.get_surface_count() == 0:
-		return ""
-	var mats: Array = []
-	if gi.material_override:
-		mats.append(_warm_mat_key(gi.material_override))
-	else:
-		for si in mesh.get_surface_count():
-			var mt: Material = (gi as MeshInstance3D).get_active_material(si) if gi is MeshInstance3D else mesh.surface_get_material(si)
-			mats.append(_warm_mat_key(mt))
-	if gi.material_overlay:
-		mats.append("+" + _warm_mat_key(gi.material_overlay))
-	return kind + ":" + ",".join(mats)
-
-static var _mat_keys := {}
-static func _warm_mat_key(mt: Material) -> String:
-	if mt == null:
-		return "default"
-	var id := mt.get_instance_id()
-	if _mat_keys.has(id):
-		return _mat_keys[id]
-	if _mat_keys.size() > 20000: _mat_keys.clear()
-	var s := ""
-	if mt is ShaderMaterial:
-		var sh: Shader = (mt as ShaderMaterial).shader
-		s = "sh%d" % (sh.get_instance_id() if sh else 0)
-	elif mt is BaseMaterial3D:
-		# the generated shader depends on its switches and modes and on which textures are set,
-		# not on colours and amounts
-		s = "std"
-		for pr in mt.get_property_list():
-			if not (int(pr["usage"]) & PROPERTY_USAGE_STORAGE):
-				continue
-			var t := int(pr["type"])
-			if t == TYPE_BOOL or t == TYPE_INT:
-				s += "%d" % int(mt.get(pr["name"]))
-			elif t == TYPE_OBJECT:
-				s += "1" if mt.get(pr["name"]) is Texture else "0"
-	else:
-		s = mt.get_class()
-	if mt.next_pass:
-		s += ">" + _warm_mat_key(mt.next_pass)
-	_mat_keys[id] = s
-	return s
-
-## A tiny copy of an instance that draws with the same shaders.
-func _warm_proxy(src: Node3D) -> Node3D:
-	if src is Skeleton3D:
-		var rig := src.duplicate(0) as Skeleton3D
-		for ch in rig.get_children():
-			if not (ch is MeshInstance3D): ch.free()
-			else:
-				(ch as MeshInstance3D).visibility_range_end = 0.0
-				(ch as MeshInstance3D).visible = true
-		rig.visible = true
-		return rig
-	var gsrc := src as GeometryInstance3D
-	var px: GeometryInstance3D = null
-	if src is MeshInstance3D:
-		var mi := src as MeshInstance3D
-		var p := MeshInstance3D.new()
-		p.mesh = mi.mesh
-		for si in mi.get_surface_override_material_count():
-			p.set_surface_override_material(si, mi.get_surface_override_material(si))
-		px = p
-	elif src is MultiMeshInstance3D:
-		var smm := (src as MultiMeshInstance3D).multimesh
-		var mm := MultiMesh.new()
-		mm.transform_format = smm.transform_format
-		mm.use_colors = smm.use_colors
-		mm.use_custom_data = smm.use_custom_data
-		mm.mesh = smm.mesh
-		mm.instance_count = 1
-		if mm.transform_format == MultiMesh.TRANSFORM_3D: mm.set_instance_transform(0, Transform3D())
-		else: mm.set_instance_transform_2d(0, Transform2D())
-		if mm.use_colors: mm.set_instance_color(0, Color.WHITE)
-		var p := MultiMeshInstance3D.new()
-		p.multimesh = mm
-		px = p
-	else:
-		# particles, labels, sprites: a copy with their own settings (a label shows every digit, so the
-		# glyphs damage numbers use are in the font's atlas before the first hit)
-		px = gsrc.duplicate(0) as GeometryInstance3D
-		for ch in px.get_children(): ch.free()
-		px.visible = true
-		if px is Label3D: (px as Label3D).text = "0123456789!"
-		if px is CPUParticles3D:
-			var cp := px as CPUParticles3D
-			cp.amount = mini(cp.amount, 4)
-			cp.local_coords = true
-			cp.one_shot = false
-			cp.emitting = true
-			cp.preprocess = maxf(cp.preprocess, 0.2)
-	if px == null:
-		return null
-	if not (src is CPUParticles3D or src is Label3D or src is Sprite3D):
-		px.material_override = gsrc.material_override
-		px.material_overlay = gsrc.material_overlay
-	px.cast_shadow = gsrc.cast_shadow
-	px.visibility_range_end = 0.0
-	px.visibility_range_begin = 0.0
-	return px
-
-## The lights a stand-in can be lit by in play: an omni like the muzzle flash and the lamps, and a
-## spot like the sky train's headlight, both covering the grid of stand-ins.
-func _warm_lights() -> Array:
-	var basis := cam.global_transform.basis
-	var front := cam.global_position - basis.z * 6.0
-	var o := OmniLight3D.new()
-	o.omni_range = 4.0
-	o.light_energy = 0.05
-	o.shadow_enabled = false
-	add_child(o)
-	o.global_position = front - basis.z * 0.5
-	var sp := SpotLight3D.new()
-	sp.spot_range = 14.0
-	sp.spot_angle = 35.0
-	sp.light_energy = 0.05
-	sp.shadow_enabled = false
-	add_child(sp)
-	sp.global_transform = Transform3D(basis, cam.global_position)
-	return [o, sp]
 
 ## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
 static var prof_on := false
@@ -678,7 +269,10 @@ func _start(o: Dictionary) -> void:
 	PerfLog.reset()
 	_stage_done_ms = 0.0
 	opts = o
+	WardenGlb.fetch_for(o)
+	if not ["tutorial", "duel", "arena"].any(func(k): return o.get(k, false)): BokiRig.fetch_common()
 	if o.get("tutorial", false): tut = Tutorial.new(self)
+	guide = FirstMatchGuide.for_match(self, o)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
 	seed(seed_val)
@@ -1103,8 +697,10 @@ func _spawn_hunters() -> void:
 		spots = world.spawns.duplicate()
 	if tut:
 		spots = [tut.stop("land")]
-	var names: Array = Data.BOT_NAMES.duplicate(); names.shuffle()
-	_bot_names = names
+	var taken: Array = [Save.d.get("name", "Hunter")]
+	for r in (opts["net"]["roster"] if net_on else []): taken.append(String(r["name"]))
+	for mt in opts.get("mates", []): taken.append(String(mt["name"]))
+	var names := Names.bot_pool(taken)       # one tag per bot, never the same twice in a match
 	if net_on:
 		_spawn_net_hunters(spots, names)
 		return
@@ -1179,6 +775,7 @@ func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 	if not held.is_empty():
 		bname = String(held["holder"])
 		brec = (held["rec"] as Dictionary).duplicate(true)
+		names.erase(bname)
 	var cls := Arch.weight(String(bk.get("arch", "")))
 	var own_kin := bot_kin_record() if rng.randf() < 0.6 else {}
 	var h := make_hunter(next_id("b"), t, cls, bname, "bot", brec, at, bk, own_kin)
@@ -1861,7 +1458,7 @@ func _update_rings(dt: float) -> void:
 	if player and not player.out and int(time * 4.0) % 4 == 0:
 		for rg in air_rings:
 			if player.pos.distance_to(rg["pos"]) < 9.0:
-				_tip("rings", "Glowing rings in the air between islands: jump off the edge, glide (hold %s) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
+				_tip("rings", "Glowing rings in the air between islands: jump off the edge, glide (press %s again and hold) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
 				break
 	for rg in air_rings:
 		# rings stand straight up facing along the route; they don't spin
@@ -1882,7 +1479,7 @@ func _update_rings(dt: float) -> void:
 			var d: Vector2 = hv.normalized() if hv.length() > 1.0 else rd
 			if absf(d.dot(rd)) > 0.5:
 				d = rd if d.dot(rd) > 0.0 else -rd    # line up with the ring
-			var spd := minf(maxf(hv.length(), Hunter.GLIDE_SPEED) + 4.0, Hunter.GLIDE_MAX)
+			var spd := minf(maxf(hv.length(), Hunter.GLIDE_SPEED) + 4.0, Loco.glide_max)
 			h.vel.x = d.x * spd; h.vel.z = d.y * spd
 			h.vel.y = maxf(h.vel.y, 2.0)
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.35)
@@ -2169,6 +1766,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
+	DashReset.note(target, credit)
 	if target is Hunter and target != credit:
 		(target as Hunter).dmg_taken += d
 		if by is Blight: kstat["bl_dmg"] = float(kstat.get("bl_dmg", 0.0)) + d
@@ -2242,12 +1840,12 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
 		credit.knocks += 1
-		# the knock reward: a dash back (all charges) and a small heal (DashReset), armor and XP
+		# the knock reward: a dash refresh for the knocker and assisters, a small heal (DashReset), armor and XP
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
 			credit.gain_xp(90.0)
-		add_feed("%s knocked %s" % [HeroTitle.of_hunter(credit), HeroTitle.of_hunter(h)])
+		add_feed("%s knocked %s" % [credit.pname, h.pname])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
 		if credit == player:
@@ -2255,7 +1853,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			if player.kin and player.kin.state != "downed":
 				BokiChatter.say(self, player.kin, "kill")
 	else:
-		add_feed("%s went down" % HeroTitle.of_hunter(h))
+		add_feed("%s went down" % h.pname)
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")
@@ -2359,6 +1957,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		_lose_life(h, by, why)
 		return
 	cancel_abilities(h)
+	if h.ak: h.ak.drop_holds()      # an out hunter's kit no longer ticks: a channel (Hearth Call) would hang on
 	h.out = true
 	h.downed = false
 	if net_on and not h.remote:
@@ -2369,11 +1968,12 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if credit is Hunter and credit != h and credit.team != h.team:
 		credit.kills += 1
 		DashReset.takedown(credit, h)
-	add_feed(out_text(HeroTitle.of_hunter(h), why))
+	add_feed(out_text(h.pname, why))
 	if why != "abyss": Juice.kill(self, h, credit)
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
-	var waiting := false
+	var waiting: bool = not h.remote and Life.team_alive(self, h.team) and not opts.get("training", false) \
+		and not opts.get("tutorial", false)
 	if net_on: KinTrack.drop_carried(self, h, h.pos)       # (offline, Life.drop_box does it at the box)
 	if not net_on and not h.remote:
 		# everything they carried goes into a deathbox where they fell. While a teammate is still
@@ -2382,7 +1982,6 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		h.lost_gems = h.gems
 		h.gems = 0; h.seeds = {}; h.caught = []
 		Life.kin_on_death(self, h, bx)
-		waiting = Life.team_alive(self, h.team) and not opts.get("training", false) and not opts.get("tutorial", false)
 		if not waiting:
 			Life.make_gone(self, h)
 	elif net_on and not is_host and not h.remote:
@@ -2400,7 +1999,8 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		h.gems = 0; h.seeds = {}; h.caught = []
 		# the kin they brought are left behind, dazed, for anyone to collect
 		_leave_kin(h)
-		h.gone = true
+		if waiting: Life.drop_box(self, h, why)       # the gems spilled above; the rest waits for a box revive
+		else: Life.make_gone(self, h)
 	if h == player:
 		if not waiting:
 			result = {"extracted": false, "why": why}
@@ -2601,7 +2201,6 @@ func _abyss_demo(mode: String) -> void:
 func S_dev_god() -> bool:
 	return bool(opts.get("god", false)) or bool(opts.get("tutorial", false)) or bool(opts.get("training", false)) or Game.god
 
-const BOSS_GEM_DROPS := 4     # a lair boss's gems come as this many big drops (same total)
 func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if net_on:
 		net_event(["mobdead", mb.nid, by.nid if by else ""])
@@ -2620,11 +2219,9 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	fx.burst(mb.pos + Vector3(0, 0.6, 0), mb.md["color"], 22, 5.0, 0.6)
 	Juice.mob_dead(self, mb, credit, big_mob)
 	if not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false):
-		# a lair boss pays its gems out as a few big ones (fewer drops, each worth having); the rest scatter small
+		# the gems come as one pile (DropMerge)
 		var gn := int(mb.md["gems"])
-		var big_n := BOSS_GEM_DROPS if mb is Boss else gn
-		for i in big_n:
-			drop("gem", mb.pos + Vector3(0, 0.6, 0), int(round(3 * float(T["loot"]) * float(gn) / float(big_n))))
+		DropMerge.gems(self, mb.pos + Vector3(0, 0.6, 0), gn, int(round(3 * float(T["loot"]))))
 		if mb.md.get("stag", false) and not (mb is Boss) and rng.randf() < 0.6:
 			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
 		# guards, the Warden, the Glimmerkin and the Blight drop gear and weapon tunings (content/rules/gear.json)
@@ -3434,7 +3031,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		var total: float = dmg * float(x["pn"])
 		dmg = total * float(x["pf"]) if n == 0 else total * (1.0 - float(x["pf"])) / maxf(1.0, float(x["pn"]) - 1.0)
 	var dir: Vector2 = (s["vel"] as Vector2).normalized()
-	var o := {"src": "shot", "crit": crit}
+	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", "")}      # pg: the volley id (a kit reads it)
 	if float(x.get("kb", 0.0)) > 0.0:
 		o["kb"] = dir * float(x["kb"])
 	if x.has("burn"): o["burn"] = x["burn"]
@@ -3771,9 +3368,10 @@ func _gather_input() -> void:
 		var pad := Input.get_connected_joypads().size() > 0 and (Input.is_joy_button_pressed(0, JOY_BUTTON_A) or Input.is_joy_button_pressed(0, JOY_BUTTON_X))
 		player.inp["interact"] = player.inp["interact"] or (player.inp["fire"] and not (hud and hud.mouse_on_ui())) or pad
 		player.inp["fire"] = false
-	# hold Space or Mouse 5 (Mouse 4 works too) in the air to glide; the mouse buttons never jump
+	# a second Space press (or Mouse 5/4) in the air, held, glides; Space held from the jump never does
+	player.inp["glide_press_only"] = true
 	player.inp["glide"] = (Input.is_action_pressed("jump") or Input.is_action_pressed("glide")) and not paused
-	player.inp["glide_btn"] = Input.is_action_pressed("glide") and not paused     # (movefeel) opens the glider with no tap/hold wait
+	player.inp["glide_btn"] = Input.is_action_pressed("glide") and not paused     # (movefeel) a fresh press opens the glider with no wait
 	player.inp["dash_down"] = Input.is_action_pressed("dash") and not paused     # hold-shaped dashes (Slide, Rampage)
 	var quick: bool = Settings.get_v("cast_on_press")
 	player.inp["sec_hold"] = Input.is_action_pressed("secondary") and not paused and not on_panel
@@ -4390,6 +3988,7 @@ func step(dt: float) -> void:
 	if opts.get("training", false) and duel == null:
 		_update_training(dt)
 	_update_rules(dt)
+	if guide: guide.tick(dt)
 	_prof("rest")
 	if net_on:
 		_net_rev_t -= dt
@@ -4442,7 +4041,8 @@ func _separate() -> void:
 			var l := d.length()
 			if l < mind and l > 0.0001:
 				var push := d / l * (mind - l) * 0.5
-				var wa := 1.0 / a.mass(); var wb := 1.0 / b.mass()
+				var own := b is Kin and (b as Kin).owner_h == a      # your own Boki steps aside, never shoves you
+				var wa := 0.0 if own else 1.0 / a.mass(); var wb := 1.0 / b.mass()
 				var tot := wa + wb
 				var pa := -push * (wa / tot) * 2.0
 				var pb := push * (wb / tot) * 2.0
@@ -4658,7 +4258,7 @@ func _update_interact(dt: float) -> void:
 				if h.flat_dist(b["pos"]) > 1.5 or absf(h.pos.y - float(b["pos"].y)) > 1.4:
 					continue
 				var o: Hunter = b["owner"]
-				if o.team == h.team and o != h and Life.soul_here(self, b) and not o.remote:
+				if o.team == h.team and o != h and Life.soul_here(self, b):
 					best = {"kind": "boxrev", "box": b, "label": BoxRevive.prompt(h, o), "col": Color("9ee2a0")}
 					break
 				if not b["empty"]:
@@ -4840,9 +4440,9 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 		PerkOrbs.drop(self, "shrine", sh["pos"], 0, h)      # one or two perk orbs by the shrine
 
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
-# ---- training area
+# ---- Training Grounds
 ## [id, what to do, the action whose key it uses ("" for none)]
-const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then hold Mouse 5 or Space in the air to glide", "jump"],
+const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press Space again in the air (or Mouse 5) and hold to glide", "jump"],
 	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
 	["secondary", "Use your right click", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
@@ -5409,7 +5009,7 @@ func _finish() -> void:
 			Overlay.closed.disconnect(_on_menu_closed)
 		Overlay.close()
 	if opts.get("training", false):
-		# nothing from the training area carries over
+		# nothing from the Training Grounds carries over
 		Game.goto("home")
 		return
 	var r := result.duplicate()
@@ -5631,7 +5231,7 @@ func _net_state(data: Array, from: String) -> void:
 			e = _net_make(it)
 			if e == null:
 				continue
-		_net_apply(e, it)
+		_net_apply(e, it, t_host)
 	if t_host >= 0.0 and from == Net.host and absf(t_host - time) > 0.5:
 		time = t_host
 
@@ -5688,13 +5288,15 @@ func _net_make(it: Array) -> Ent:
 			return mb
 	return null
 
-func _net_apply(e: Ent, it: Array) -> void:
+func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 	e.net_pos = Vector3(it[2], it[3], it[4])
 	e.net_t = time
 	match String(it[0]):
 		"h":
 			var h: Hunter = e
 			h.net_vel = Vector3(it[5], it[6], it[7])
+			if h.net_buf == null: h.net_buf = NetSmooth.new()
+			h.net_buf.push(t_owner if t_owner >= 0.0 else time, time, h.net_pos, h.net_vel)
 			h.face = it[8]; h.hp = it[9]; h.max_hp = it[10]
 			var f := int(it[11])
 			h.downed = f & 1 != 0
@@ -5808,6 +5410,7 @@ func _net_ev(x, from: String) -> void:
 				"bolt": fx.bolt(Vector3(x[2], x[3], x[4]), Vector3(x[5], x[6], x[7]), Color.html(String(x[8])))
 				"cone": fx.cone(Vector3(x[2], x[3], x[4]), Vector2(x[5], x[6]), 5.0, Color.html(String(x[7])))
 				"hvfx": HeroVfx.of(self).net_in(x)
+				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
@@ -5817,9 +5420,9 @@ func _net_ev(x, from: String) -> void:
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
+				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
 				if by == player:
 					player.knocks += 1
-					DashReset.takedown(player, who)
 					_reward_moment(who.pos)
 				_check_team(player.team if player else -9)
 		"out":
@@ -5827,9 +5430,9 @@ func _net_ev(x, from: String) -> void:
 			if who is Hunter and not who.out:
 				var by: Ent = ents_by_id.get(String(x[2]), null)
 				who.out = true
+				if by is Hunter: DashReset.takedown(by, who)
 				if by == player:
 					player.kills += 1
-					DashReset.takedown(player, who)
 				add_feed(out_text(who.pname, String(x[3])))
 				if who.kin:
 					who.kin.dead = true
@@ -5846,6 +5449,8 @@ func _net_ev(x, from: String) -> void:
 			if exits: exits.net_in(x)
 		"bcn":
 			Beacons.net_in(self, x)
+		"box", "brev", "back", "lost":
+			BoxRevive.net_in(self, x)
 		"emo":
 			var eh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if truce and eh: truce.emote(eh, String(x[2]), true)
@@ -6073,7 +5678,7 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
-	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  hold Space to glide")
+	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
 	if _tip_t > 14.0:
 		if player.ak:
 			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])

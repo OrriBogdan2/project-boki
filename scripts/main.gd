@@ -11,7 +11,7 @@ func _fades_on() -> bool:
 		return false
 	if _has_arg("--show-fade"):
 		return true
-	return not (_has_arg("--shot=") or _has_arg("--rolling-shot=") or _has_arg("--autoplay") or _has_arg("--simtest"))
+	return not (_has_arg("--shot=") or _has_arg("--art-view=") or _has_arg("--rolling-shot=") or _has_arg("--autoplay") or _has_arg("--simtest"))
 
 func _ready() -> void:
 	if "--relay" in OS.get_cmdline_user_args():
@@ -32,6 +32,8 @@ func _ready() -> void:
 	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--mage-combo-check" in args or "--gunslinger-combo-check" in args or "--zone-check" in args or "--dolm-combo-check" in args or "--ostra-combo-check" in args or "--hero-combo-check" in args or "--archer-combo-check" in args or "--bulwark-combo-check" in args or "--arena-check" in args or "--dredge-combo-check" in args or "--ashwick-combo-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=") or String(x).begins_with("--rolling-shot=")):
 		Save.no_write = true
 	var opts := {}
+	var demo := Demo.name_in(args)      # recording presets: a made-up save in memory, overlays hidden (docs/DEMO_PRESETS.md)
+	if demo != "": Demo.setup(demo)
 	for a in args:
 		if a.begins_with("--overlay="):
 			# test: open one of the overlay menus a moment after the screen appears
@@ -397,6 +399,9 @@ func _ready() -> void:
 	if "--iv-check" in args:
 		load("res://tools/iv_check.gd").new().run(self)      # kin IVs: rolls, backfill, breeding, Rare Eggs, caps
 		return
+	if "--nook-check" in args:
+		load("res://tools/nook_check.gd").new().run(self)      # Nesting Nook gate and breeding: friend gate, lean head start, habits
+		return
 	if "--incubator-check" in args:
 		var icc = load("res://tools/incubator_check.gd").new()      # Rare Eggs on the Incubator by the Nook
 		set_meta("incubator_check", icc)
@@ -668,6 +673,8 @@ func _ready() -> void:
 			get_tree().create_timer(0.5).timeout.connect(func():
 				current.dec.toggle()
 				current.dec.take("plant"))
+	elif demo != "":
+		Demo.open(self, demo, args)
 	elif town_arg != "":
 		show_screen("town", {"mode": town_arg, "gid": "test"})
 	elif "--visit-test" in args:
@@ -693,7 +700,7 @@ func _ready() -> void:
 		_open_arena("")
 	elif "--training" in args:
 		show_screen("match", {"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": "--no-drop" in args, "perk_demo": "--perk-demo" in args})
-	elif "--tutorial" in args:
+	elif "--tutorial" in args or "--tut-test" in args:
 		show_screen("match", {"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "tut_test": "--tut-test" in args})
 	elif args.is_empty() or "--title" in args:
 		show_screen("title", {})
@@ -704,14 +711,14 @@ func _ready() -> void:
 
 ## --arena=<archetype> (with --record for filming): straight into the arena with that archetype
 ## picked. The arena provides `static func arena_opts(pick: String) -> Dictionary` on Match; until it
-## does, this opens the training area instead and says so.
+## does, this opens the Training Grounds instead and says so.
 func _open_arena(pick: String) -> void:
 	Save.d["tutorial"]["home"] = true
 	var ms: Script = load("res://scripts/match/match.gd")
 	if ms.get_script_method_list().any(func(md): return String(md["name"]) == "arena_opts"):
 		show_screen("match", ms.call("arena_opts", pick))
 		return
-	push_warning("--arena=%s: no arena in this build (Match.arena_opts); opening the training area" % pick)
+	push_warning("--arena=%s: no arena in this build (Match.arena_opts); opening the Training Grounds" % pick)
 	show_screen("match", {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 
 ## Menu screens sit on their own layer so they fill the window.
@@ -1124,8 +1131,8 @@ func _economy_check() -> void:
 	Save.d["feeders"] = []
 	Save.d["items"]["kibble"] = 0
 	var line: Array = []
-	var died_at := -1.0
-	for days in [0.5, 1.0, 2.0, 3.0, 4.0, 5.0]:
+	var died := false
+	for days in [0.5, 1.0, 2.0, 4.0, 14.0]:
 		var r2: Dictionary = rec.duplicate(true)
 		r2["uid"] = "starve%d" % int(days * 10)
 		r2["needs"] = {"food": 70.0, "energy": 80.0, "joy": 70.0, "clean": 75.0}
@@ -1134,10 +1141,14 @@ func _economy_check() -> void:
 		Save.d["roster"] = [r2]
 		var ev2 := Econ.catch_up_all()
 		var st := Care.starve_stage(r2) if not ev2.any(func(e): return e["kind"] == "died") else "dead"
-		if st == "dead" and died_at < 0.0: died_at = days
+		died = died or st == "dead"
 		line.append("%.1fd: %s (food %d, %.0fh starving, trust %d)" % [days, st if st != "" else "fine", int(Care.need(r2, "food")), Care.starve_h(r2), int(r2["trust"])])
 	print("ECON  starving timeline: " + "  |  ".join(line))
-	ok.call(died_at >= 3.0 and died_at <= 5.0, "unfed with no feeder, a kin dies after several days (day %.1f)" % died_at)
+	var sick: Dictionary = Save.d["roster"][0]
+	ok.call(not died and Care.starve_stage(sick) == "sick", "natural_death off: 14 days unfed is sick at worst, never dead (%s)" % Care.starve_stage(sick))
+	for meal in 12: Care.feed(sick, "kibble"); Care.feed(sick, "kibble"); Care.tick(sick, 1200.0)
+	ok.call(Care.starve_stage(sick) in ["", "weak", "refuse"], "four hours of regular meals bring it back from sick (%s, %.0fh)" % [Care.starve_stage(sick), Care.starve_h(sick)])
+	Econ.kin_dies(sick, "starved")      # graves still come from old saves and other losses
 	ok.call(Econ.graves().size() >= 1 and String(Econ.graves()[0]["cause"]) == "starved" and String(Econ.graves()[0]["name"]) == "Pip", "a grave with its name (%d graves, %d memories)" % [Econ.graves().size(), (Econ.graves()[0]["mem"] as Array).size() if Econ.graves().size() > 0 else 0])
 	# 6. the Soul Shrine brings one back, changed
 	var g: Dictionary = Econ.graves()[Econ.graves().size() - 1]
@@ -1377,12 +1388,12 @@ func _ability_check() -> void:
 	_ac_run(m, 1.0, func(): T.inp["move"] = Vector2(-1, 0))
 	_ac("trap roots on step", before_root <= 0.0 and (T.root_t > 0.0 or T.hp < T.max_hp) and m.verbs.traps.is_empty(), "root %.2f, took %.0f" % [T.root_t, T.max_hp - T.hp])
 	m.queue_free(); await get_tree().process_frame
-	# 8. Moon Swap (kin E, performed from the shoulder): trade places
+	# 8. Moon Mark (kin E, performed from the shoulder): the foe is marked, you stay where you are
 	r = _ac_setup(6.0); m = r[0]; P = r[1]; T = r[2]
-	var pa := P.pos; var ta := T.pos
-	KinExec.cast(KinLib.ability("moon_swap"), KinExec.make_cx(m, P, null, P, T.pos, 1.0, "k1", "moon_swap"))
+	var pa := P.pos
+	KinExec.cast(KinLib.ability("moon_mark"), KinExec.make_cx(m, P, null, P, T.pos, 1.0, "k1", "moon_mark"))
 	_ac_run(m, 0.5)
-	_ac("swap trades places", P.flat_dist(ta) < 1.2 and T.flat_dist(pa) < 1.2, "player at %.1f from target's spot" % P.flat_dist(ta))
+	_ac("moon mark reveals and marks, you stay", P.flat_dist(pa) < 0.05 and T.vuln_t > 0.0 and T.reveal_t > 0.0, "player moved %.2f, vuln %.1f" % [P.flat_dist(pa), T.vuln_t])
 	m.queue_free(); await get_tree().process_frame
 	# 9. Fissure glove: the line throws the target up
 	r = _ac_setup(5.0); m = r[0]; P = r[1]; T = r[2]
@@ -1551,7 +1562,7 @@ func _ability_check() -> void:
 	# 21. Every ability and active glove runs without errors (watch the log for SCRIPT ERROR)
 	r = _ac_setup(5.0); m = r[0]; P = r[1]; T = r[2]
 	var n := 0
-	for id in Content.ids("abilities"):
+	for id in Content.ids("hunter_abilities"):
 		var ad := Content.ability(id)
 		P.teleport(T.pos + Vector3(-5, 0, 0)); P.vel = Vector3.ZERO
 		P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
@@ -1730,10 +1741,10 @@ func _grammar_runtime_check() -> void:
 	_grt("zapple auto Echolocate", T.reveal_t > 0.0 and P.crit_t > 0.0, "reveal %.1f crit %.1f" % [T.reveal_t, P.crit_t])
 	_grt_reset(T)
 	k = _grt_kin(m, P, "wisplet")
-	var pa := P.pos; var ta := T.pos
+	var pa := P.pos
 	k.use_ability("k1", T.pos)
 	_ac_run(m, 0.6)
-	_grt("wisplet E Moon Swap trades places", P.flat_dist(ta) < 1.2 and T.flat_dist(pa) < 1.2, "player %.1f from target's spot" % P.flat_dist(ta))
+	_grt("wisplet E Moon Mark marks the foe, you stay", P.flat_dist(pa) < 0.05 and T.vuln_t > 0.0 and T.reveal_t > 0.0, "player moved %.2f" % P.flat_dist(pa))
 	P.teleport(home); T.teleport(home + Vector3(6, 0, 0)); _grt_reset(T)
 	_ac_run(m, 0.2)
 	k.use_ability("k2", P.pos)
@@ -1873,11 +1884,11 @@ func _grammar_runtime_check() -> void:
 	var kb := P.vel.x
 	P.impulse(Vector2(8, 0))
 	var kbv := P.vel.x - kb
-	_grt("mount: rider, -15% damage, half knockback", P.mounted() and is_equal_approx(P.owner_stat("damage_reduction"), 0.15) and k.ride_height() > 0.2, "kb %.1f, ride %.2f" % [kbv, k.ride_height()])
+	_grt("big Boki on Return: at your side, -15% damage, half knockback", not P.mounted() and k.beside and is_equal_approx(P.owner_stat("damage_reduction"), 0.15), "kb %.1f, %.1f m away" % [kbv, P.flat_dist(k)])
 	P.vel = Vector3.ZERO
 	P.gliding = true
 	P._refresh_kin_stats()
-	_grt("mount curls up while you glide", not P.mounted() and P.owner_stat("damage_reduction") == 0.0, "")
+	_grt("big Boki curls up while you glide", not P.mounted() and P.owner_stat("damage_reduction") == 0.0, "")
 	P.gliding = false
 	P._refresh_kin_stats()
 	var dashes0 := P.max_dashes()
@@ -2347,8 +2358,8 @@ func _truce_check() -> void:
 	for k in 3000:
 		var g := m.world.random_ground()
 		var roomy := true
-		for dx in range(-8, 9, 2):
-			for dz in range(-4, 5, 2):
+		for dx in range(-8, 9):
+			for dz in range(-4, 5):
 				if m.world.is_void(g.x + dx, g.z + dz) or m.world.is_block(g.x + dx, g.z + dz) or absf(m.world.ground_at(g.x + dx, g.z + dz) - g.y) > 0.3: roomy = false
 		if roomy:
 			home = g; break
@@ -2399,6 +2410,9 @@ func _truce_check() -> void:
 	if answered == "no answer": ok = false; print("TCHECK FAIL no answer")
 	if not T.allied(0, 1):
 		print("TCHECK (making the truce by hand for the rest of the check)")
+		for h in m.hunters: h.ctrl = "idle"      # (a swing already under way would land on the new partner and break the truce)
+		run.call(1.0)
+		for h in m.hunters: h.ctrl = "bot"
 		T.make(0, 1)
 	for h in m.hunters: h.ai.erase("betray_at"); h.ai.erase("betray")
 	run.call(3.0)

@@ -136,7 +136,7 @@ static func arc_wall(h: Hunter, id: String, p := {}) -> void:
 static func swap(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "swap", p)
 	var a: Vector3 = p.get("a", h.pos)
-	var b: Vector3 = p.get("b", AimMode.point(h, float(p.get("range", 1e9))))
+	var b: Vector3 = p.get("b", AimMode.place(h, float(p.get("range", 1e9))))
 	e["a"] = Vector2(a.x, a.z); e["b"] = Vector2(b.x, b.z); e["y"] = AimMode.ground(h.m, a).y
 	e["r"] = float(p.get("r", 1.35)); e["fill"] = float(p.get("fill", -1.0))
 	_put(h, id, e)
@@ -166,7 +166,7 @@ static func line(h: Hunter, id: String, p := {}) -> void:
 ## line turns end to end, 0 = straight) and bow (unit normal the middle bulges toward)
 static func span(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "span", p)
-	var at: Vector3 = p.get("at", AimMode.point(h, float(p.get("range", 1e9))))
+	var at: Vector3 = p.get("at", AimMode.place(h, float(p.get("range", 1e9))))
 	e["at"] = Vector2(at.x, at.z); e["y"] = AimMode.ground(h.m, at).y
 	var ad := h.aim_dir()
 	var d: Vector2 = p.get("dir", Vector2(-ad.y, ad.x))
@@ -271,7 +271,7 @@ static func _disc(h: Hunter, e: Dictionary, p: Dictionary) -> void:
 	var at: Vector3
 	if p.has("at"): at = p["at"]
 	elif bool(p.get("self", false)): at = h.pos
-	else: at = AimMode.point(h, float(p.get("range", 1e9)))
+	else: at = AimMode.place(h, float(p.get("range", 1e9)))
 	e["at"] = Vector2(at.x, at.z); e["y"] = AimMode.ground(h.m, at).y
 	e["r"] = float(p.get("r", 1.35)); e["fill"] = float(p.get("fill", -1.0))
 	e["ticks"] = bool(p.get("ticks", false)); e["star"] = bool(p.get("star", false)); e["dashed"] = bool(p.get("dashed", false))

@@ -5,7 +5,7 @@
 	"gender": "male",
 	"personality": "Malgrave's court jester. He laughed the night the Hunters were sealed, so Malgrave sealed him in a toy box and threw it into the Void. He came back as a jack-in-the-box: a jester on a brass spring, rising from a hovering box.\nHe steals his victims' laughter, his bells ring only when he swaps, and he belongs to no one.",
 	"weight": "medium",
-	"color": "#7fe0d0",
+	"color": "#2ee6c0",
 	"fantasy": "The Void Jester who never touches the ground. Pulls the fight to him, then lets it fall in.",
 	"silhouette": "a floating jester in a three-tailed cap, his smoky tail trailing below",
 	"card": {
@@ -54,7 +54,7 @@
 		"id": "swap",
 		"name": "Lantern Trade",
 		"icon": "shadowstep",
-		"col": "#b8f5ea",
+		"col": "#c65cff",
 		"cd": 9.5,
 		"reach": 12.0,
 		"time": 1.8,
@@ -62,11 +62,11 @@
 		"radius": 1.5,
 		"ally_shield": 26.0,
 		"ally_r": 3.0,
-		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 30% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.",
+		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 35% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.",
 		"lob": 4.5,
 		"aim_max": 1.5,
 		"keep_h": 3.0,
-		"fly_slow": 0.3
+		"fly_slow": 0.35
 	},
 	"rmb": {
 		"delivery": "projectile",
@@ -163,21 +163,11 @@
 		"dash",
 		"gear"
 	],
-	"rank3": {
-		"sec": "+20% damage, and a burst of speed when you cast and when it hits",
-		"dash": "allies beside you when you leave, or where you land, get a shield",
-		"kin": "the seed burns foes inside while it grows (8 a second)"
-	},
-	"rank2": {
-		"sec": "Rank 2: cooldown 10s -> 9s, damage +15%.",
-		"dash": "Rank 2: recharge 9.5s -> 8.1s per charge.",
-		"kin": "Rank 2: cooldown 10s -> 9s, damage +15%."
-	},
-	"rank_next": {
-		"sec": "Rank 3: cooldown 10s -> 8s, damage +30%; you speed up 11% on the cast and 22% when it hits, for 2s.",
-		"kin": "Rank 3: cooldown 10s -> 8s; the growing seed burns foes inside for 8 a second.",
-		"dash": "Rank 3: recharge 9.5s -> 6.7s; allies beside you or at your landing get a 26 shield for 3s."
-	},
+	"rank_cd": {"sec": [1, 0.85, 0.7], "dash": [1, 0.8421, 0.6842], "kin": [1, 1, 0.8]},
+	"rank_dmg": {"sec": [1, 1.2, 1.4], "dash": [1, 1, 1], "kin": [1, 1.1, 1.2]},
+	"rank3": {"sec": "a burst of speed when you cast and when it hits", "dash": "allies beside you when you leave, or where you land, get a shield", "kin": "the seed burns foes inside while it grows (8 a second)"},
+	"rank2": {"sec": "Rank 2: cooldown 10s -> 8.5s, damage +20%.", "dash": "Rank 2: recharge 9.5s -> 8s per charge.", "kin": "Rank 2: damage +10%."},
+	"rank_next": {"sec": "Rank 3: cooldown 10s -> 7s, damage +40%; you speed up 11% on the cast and 22% when it hits, for 2s.", "kin": "Rank 3: cooldown 10s -> 8s, damage +20%; the growing seed burns foes inside for 8 a second.", "dash": "Rank 3: recharge 9.5s -> 6.5s; allies beside you or at your landing get a 26 shield for 3s."},
 	"tells": {
 		"half": "a ring of teal motes closes around him",
 		"full": "the lantern burns white and his ribbons lift",

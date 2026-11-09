@@ -7,9 +7,9 @@
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
-		"walk_speed": 2.2, "run_speed": 4.6
+		"walk_speed": 2.2, "run_speed": 4.6, "stride": [1.5, 1.5], "foot_mps": [1.18, 3.72], "arm_swing": {"L": 0.2, "R": 0.5}
 	},
-	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.27},
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
@@ -18,7 +18,7 @@
 		"arc_over": {"clip": "over", "hold_from": 0.08, "upper": true}, "arc_over_loose": {"clip": "over_loose", "upper": true},
 		"arc_heavy_wind": {"clip": "heavy_wind", "hold_from": 1.1}, "arc_heavy": {"clip": "heavy"},
 		"arc_hail": {"clip": "hail", "upper": true},
-		"pin_roll": {"clip": "roll"}, "pin_walk": {"clip": "spirit", "hold_from": 0.2, "upper": true}, "pin_flick": {"clip": "flick"},
+		"pin_roll": {"clip": "roll", "heading": true, "turn_max": 3.2}, "pin_walk": {"clip": "spirit", "hold_from": 0.2, "upper": true}, "pin_flick": {"clip": "flick", "heading": true, "turn_max": 3.2},
 		"pin_ult_cast": {"clip": "ult_cast", "upper": true}, "pin_ult_nock": {"clip": "ult_nock", "hold_from": 0.3, "upper": true},
 		"pin_ult_loose": {"clip": "ult_loose", "upper": true}, "pin_ult_final": {"clip": "ult_final", "upper": true},
 		"mf_xform": {"clip": "fusion"}

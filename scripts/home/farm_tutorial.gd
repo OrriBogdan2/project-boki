@@ -121,6 +121,10 @@ static func hint_text(id: String) -> String:
 	txt = txt.replace("{house_cost}", FarmSites.cost_text(FarmSites.build_cost("house")))
 	return txt.replace("{interact}", Settings.key_cap("interact")).replace("{details}", Settings.key_cap("details"))
 
+## What the spotlight lights for this step's current stage: {"hub": bar button id, "world": true}, or {}.
+static func spot(id: String) -> Dictionary:
+	return (step_def(id).get("spot", {}) as Dictionary).get(stage(id), {})
+
 static func world_text(id: String) -> String:
 	var s := step_def(id)
 	return "" if s.is_empty() else String((s["world"] as Dictionary).get(stage(id), ""))

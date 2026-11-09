@@ -48,7 +48,7 @@ func _build(who: String, face: Control) -> void:
 	var center := CenterContainer.new()
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(center)
-	panel = UI.card(Color(0.06, 0.055, 0.09, 0.95), 14)
+	panel = UI.card(Color(UI.NIGHT, 0.95), 14)
 	UI.set_card_border(panel, Color(UI.GOLD, 0.55), 2)
 	panel.custom_minimum_size.x = WIDTH
 	panel.gui_input.connect(func(ev): if _is_click(ev): advance())

@@ -1,9 +1,10 @@
 class_name FarmChatter
 extends RefCounted
 ## Boki at home talk about what's going on around them (BokiLines triggers): a crop ready or just
-## watered beside them, the job they're doing or the building going up, rain, night, what they need,
-## a friend close by (the friend answers), and a new Boki arriving. Every few seconds one Boki near
-## you may speak up; Home._say keeps it to one voice at a time and BokiLines to a cooldown each.
+## watered beside them, the job they're doing or the building going up, rain (or rain coming, for a
+## kind that senses it), night, what they need, a friend close by (the friend answers), and a new
+## Boki arriving. Every few seconds one Boki near you may speak up; Home._say keeps it to one voice
+## at a time and BokiLines to a cooldown each.
 
 const LOOK_S := 2.5          # s between looks for something to talk about
 const SPEAK_CHANCE := 0.4    # share of looks where a Boki speaks up
@@ -16,6 +17,7 @@ const REPLY_GAP_S := 0.3     # s between one Boki's bubble ending and its friend
 
 static var _look_t := 0.0
 static var _known := {}      # uid -> true: Boki that were already home (a new uid is an arrival)
+static var _warned := false  # a rain-sensing Boki already warned about the coming rain
 
 ## Called every frame by Home: now and then, one Boki says something about what's around it.
 static func tick(h, d: float) -> void:
@@ -27,6 +29,8 @@ static func tick(h, d: float) -> void:
 		return
 	_welcome(h)
 	var idle := (h.kins as Array).filter(func(k): return _idle(h, k))
+	if _rain_warning(h, idle):
+		return
 	if idle.is_empty() or randf() > SPEAK_CHANCE:
 		return
 	var k: Dictionary = idle.pick_random()
@@ -40,6 +44,20 @@ static func tick(h, d: float) -> void:
 	h._say(k, BokiLines.say(k["rec"], topic), 0.0, false)
 	if topic == "chat" and float(k.get("say_t", 0.0)) > 0.0:
 		_answer_later(h, friend)
+
+## A Boki that senses rain (BokiQuirks.storm_sense_s) warns you once before each rain. True if it spoke.
+static func _rain_warning(h, idle: Array) -> bool:
+	if h.raining or not h.rain_next:
+		_warned = false
+		return false
+	if _warned:
+		return false
+	for k in idle:
+		if float(h.weather_t) < BokiQuirks.storm_sense_s(String(k["rec"]["species"])):
+			_warned = true
+			h._say(k, BokiLines.say(k["rec"], "rain_soon"), 0.0, false)
+			return true
+	return false
 
 ## What's going on around it that it could talk about (none: it stays quiet).
 static func _triggers(h, k: Dictionary) -> Array:

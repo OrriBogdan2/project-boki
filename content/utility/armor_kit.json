@@ -13,5 +13,10 @@
   4
  ],
  "price": 40,
- "desc": "Repairs your armor to full. You are open while you repair."
+ "desc": "Repairs your armor to full. You are open while you repair.",
+ "channel": {
+  "time": 1.6,
+  "move": 0.45,
+  "src": "none: the wiki only says a short cast. Ours, kept until footage gives numbers. See docs/CONSUMABLES.md"
+ }
 }

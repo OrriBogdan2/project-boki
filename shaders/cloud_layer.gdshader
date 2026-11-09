@@ -7,6 +7,7 @@ uniform vec4 lit : source_color = vec4(0.62, 0.66, 0.9, 1.0);
 uniform vec4 shade : source_color = vec4(0.16, 0.18, 0.32, 1.0);
 uniform vec4 rim : source_color = vec4(1.0, 0.82, 0.66, 1.0);
 uniform vec4 haze : source_color = vec4(0.2, 0.22, 0.38, 1.0);
+uniform float abyss_dim = 1.0;   // below 1 darkens the abyss so it reads as far below the lit ground (DepthCues)
 uniform vec2 sun_xz = vec2(0.6, -0.8);
 uniform float scale = 0.05;
 uniform float speed = 0.015;
@@ -36,6 +37,6 @@ void fragment() {
 	col += rim.rgb * edge * litk * 0.35;
 	float dist = length(wpos.xz - CAMERA_POSITION_WORLD.xz);
 	col = mix(col, haze.rgb, smoothstep(40.0, 260.0, dist) * 0.7);
-	ALBEDO = col;
+	ALBEDO = col * abyss_dim;
 	ALPHA = dens * alpha * (1.0 - smoothstep(180.0, 420.0, dist));
 }
