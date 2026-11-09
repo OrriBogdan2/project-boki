@@ -17286,5 +17286,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/arcestrel_e_w29_2.jpg",
     "ok": true
+  },
+  {
+    "id": "arcestrel_e_w29",
+    "name": "Arcestrel",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/arcestrel_e_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_e_w29",
+    "name": "Blossmink",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/blossmink_e_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_e_w29",
+    "name": "Blossmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/blossmink_e_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_r2_w29",
+    "name": "Anchorbill",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anchorbill_r2_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx_e_w29",
+    "name": "Briarlynx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/briarlynx_e_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx_e_w29",
+    "name": "Briarlynx",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/briarlynx_e_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "coolatee_r_w29",
+    "name": "Coolatee",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/coolatee_r_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_e_w29",
+    "name": "Flarmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/flarmink_e_w29_1.jpg",
+    "ok": true
   }
 ]
