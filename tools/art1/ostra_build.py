@@ -3,7 +3,7 @@ Builds every piece (ostra_parts.py, ostra_mask.py), paints it (ostra_paint.py), 
 brows, lids, the orb's bone and the spring chains, and saves the .blend that ostra_anim.py keys and exports."""
 import json, os, subprocess, sys
 import numpy as np
-import bpy
+import bmesh, bpy
 from mathutils import Matrix, Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -96,6 +96,31 @@ def make_part_object(name, parts, atlases, material, flat=False):
     me.polygons.foreach_set("use_smooth", [not flat] * len(me.polygons))
     set_weights(ob, W)
     return ob
+
+
+DENSE = {"Body": 15000, "Ruff": 3400, "Brass": 3000, "Wisp": 2200}     # tris after densify (the 11-09 revamp: ~25k in all, was 14.3k)
+
+
+def densify(ob, budget):
+    """one Catmull-Clark level (hard edges past 35 degrees and the open rims creased, so the box stays a box and the parts keep
+    meeting) and a collapse back down to budget: the round forms gain curvature where the flat ones give their triangles back"""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    cr = bm.edges.layers.float.get("crease_edge") or bm.edges.layers.float.new("crease_edge")
+    for e in bm.edges:
+        if e.is_boundary or (len(e.link_faces) == 2 and e.calc_face_angle(0.0) > np.radians(35)):
+            e[cr] = 1.0
+    bm.to_mesh(ob.data)
+    bm.free()
+    sub = ob.modifiers.new("sub", "SUBSURF")
+    sub.levels = 1
+    sub.uv_smooth = "PRESERVE_BOUNDARIES"
+    bpy.context.view_layer.objects.active = ob
+    bpy.ops.object.modifier_apply(modifier="sub")
+    n = sum(len(p.vertices) - 2 for p in ob.data.polygons)
+    dec = ob.modifiers.new("dec", "DECIMATE")
+    dec.ratio = min(1.0, budget / n)
+    bpy.ops.object.modifier_apply(modifier="dec")
 
 
 def image(name, arr, path, fmt="JPEG"):
@@ -303,6 +328,8 @@ def main():
         nm, mn, im = names[g]
         mats[g] = material(mn, im, normal=im_nrm if g in ("cloth", "cloth-ruff", "metal") else None)
         obs.append(make_part_object(nm, ps, at, mats[g]))
+        if nm in DENSE:
+            densify(obs[-1], DENSE[nm])
     # the face: its corners are already the face texture's
     fp = groups["leather-face"][0]
     class Same:

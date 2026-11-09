@@ -4,7 +4,7 @@
 v2 (2026-11-07) follows briefs/art-refs/motley_v2 (motley_v2_turnaround, motley_v2_master_sheet; the older motley_turnaround is retired): the
 sheet's painted palette (magenta-violet and plum doublet, lilac ruff and gloves, muted bronze spring, mauve box with spades front and back and
 diamonds on the sides), a near-cube box, no crank mesh, the head and hat at 0.87 of v1 (`HEAD_K`; the sheet's is smaller, kept larger so the grin
-reads at the match camera and he keeps the line-up height), the ruff at 0.85, longer tails, one column of buttons, a broader flat void ribbon. He has no legs and hovers (the clips). Under the 15k budget, 6 materials, 36 hand-keyed clips at 30 fps.
+reads at the match camera and he keeps the line-up height), the ruff at 0.85, longer tails, one column of buttons, a broader flat void ribbon. He has no legs and hovers (the clips). 24.7k triangles (budget 26k; was 14.3k), 6 materials, 36 hand-keyed clips at 30 fps.
 
     blender -b --factory-startup --python tools/art1/ostra_build.py            # ~/art1/motley/ostra.blend (OSTRA_WORK moves it)
     blender -b ~/art1/motley/ostra.blend --python tools/art1/ostra_anim.py -- all --export art/wardens/ostra/ostra.glb
@@ -14,6 +14,11 @@ reads at the match camera and he keeps the line-up height), the ruff at 0.85, lo
   `x_void` (the void tail goes into the box with him), `x_smoke` (the smoke wound on the spring, scaled to nothing in every still). `hips` sits at the
   top of the spring: the spring is a blend of x_box and hips, so moving the hips compresses it. Clips key the hips' position and scale (`offset_bones`):
   a scale of 0.02 with the lid shut is "down in the box" (the arrive, the emote, the death).
+- **Densify (11-09 revamp, ostra_build `DENSE`):** Ostra is procedural (no Meshy scan, so no dense bake), so the
+  rounded parts get the triangles: Body 15k, Ruff 3.4k, Brass 3k, Wisp 2.2k. Each is creased on its boundary and
+  on edges sharper than 35°, subdivided once (UVs keep their boundaries) and decimated to its budget, so the box
+  stays crisp and the hat horns, ruff and wisp round off. Cards, Fan, Face and Lining are untouched. Old vs new
+  renders: docs/art/wardens/revamp/ostra/.
 - **Normal map:** `ostra_normal.jpg`, made from the paint's own relief (`ostra_paint.normal_map`): plank gaps, grain, folds, pleats. hero_toon `use_nrm`, `normal_k` per slot in warden_look.json.
 - **Face:** an emissive texture on a dished plane inside the hood (`tools/art1/ostra_mask.py`, to briefs/art-refs/ostra_head.png), tipped up 16 degrees for the match camera; `x_jaw`,
   `x_brow.*`, `x_cheek.*` bend the grin and slits.
