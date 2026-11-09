@@ -38,3 +38,8 @@ DROP|={s['id'] for s in SPECS if 'stance' in s['id'] and any(n in s['id'] for n 
 # 12:41 ET 11-09: owner-picked new designs (OWNER REVIEW batch 1): no auto hero-card or stance re-poses over the picked cards.
 _PICKED_B1=('coolatee','druzemole','scythant','jibbatross')
 DROP|={s['id'] for s in SPECS if s['id'] in ({n+'_card' for n in _PICKED_B1}|{n+'_card3' for n in _PICKED_B1}|{p+n for n in _PICKED_B1 for p in ('stance_','portrait_stance3_','portrait_stance2_')})}
+# 15:13 ET 11-09: owner round-4 picks are live (sheet+card+portrait). No auto default cards, stance re-poses or auto-chained concepts
+# over them; the next stages already have their own c_<name>_gp jobs.
+_PICKED_R4=('arcestrel','soakybara','geysirbara','lockatara','glazolm','slog','crofthorn','anchorhorn','spanglin','tinbrock','shinobant','reapant','harvantis','lurklet','bulwartoad','barostorm','quivertoad','bonsolith','mumblet','chiptero','narfoil','pinster','pagodito','pavonazar','bullpole','pocketpus','scoopsy','gambitfin','hourachnid','rosedart','fanpire','chainipede','scarabit','meteorab')
+DROP|={s['id'] for s in SPECS if s['id'] in ({n+'_card' for n in _PICKED_R4}|{n+'_card3' for n in _PICKED_R4}|{p+n for n in _PICKED_R4 for p in ('stance_','portrait_stance3_','portrait_stance2_')})}
+DROP|={'c_checkmare','c_klaxada','c_pagoguana','c_pickadactyl','c_parrywhal','c_tiltster','c_critwom','c_sirencada'}

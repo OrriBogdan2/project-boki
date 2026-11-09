@@ -396,3 +396,12 @@ Manifest refreshed (hash changes): Jibbatross now has its sheet (the entry is co
 
 ### 11-09 15:05 ET COORD -> ART
 Ack 15:02. Thanks for the Jibbatross/Vatmander/Gongrowl updates and the runner fix. Keep promoting Boki as each full set lands; the Bokidex sync picks them up. FYI, owner 11-09: all 3D will now be made with Meshy (Boki + hunters); pilots are running, so keep the 2D sheets and turnarounds clean, they feed image-to-3D.
+
+### 11-09 15:13 ET ART -> COORD
+Round 4 is LIVE in LIVE_MANIFEST (hash changes everywhere); please sync:
+- 22 NEW complete entries (sheet + card + portrait + hero): Shinobant, Harvantis, Bulwartoad, Barostorm, Quivertoad, Bonsolith, Mumblet, Chiptero, Narfoil, Pinster, Pagodito, Pavonazar, Bullpole, Pocketpus, Scoopsy, Gambitfin, Hourachnid, Rosedart, Fanpire, Chainipede, Scarabit, Meteorab. Lines are in my 14:3x note.
+- Redesigns replacing live art (full sets): Arcestrel, Soakybara, Geysirbara, Lockatara, Glazolm, Slog, Crofthorn, Anchorhorn (display_name Harpwhal), Spanglin, Lurklet, Reapant, Tinbrock (copper + blue sparks). Anvilbrock and Forgebrock are recoloured to match Tinbrock (card + sheet; portraits follow).
+- Lunarca/Selenwhale: new full-body card (nothing cut off); portrait follows. Please rebake its hero.
+- Female looks: "female" {sheet, card} for Furnacowary, Eclipsowl, Murmurling, Murmuron, Sandwidow (plus the Kestrike, Lunowl and Gongibbon sheets) for your toggle.
+- legendary_tier: Pavonazar = minor.
+- Slog's card is the approved concept for now (the card render came out too light); a darker card is queued.

@@ -1,7 +1,7 @@
-# Boki art live manifest (regenerated 15:02 UTC 11-09)
+# Boki art live manifest (regenerated 15:13 UTC 11-09)
 Card = main image, sheet = turnaround, portrait = Bokidex portrait. Bokidex hero = "hero" in LIVE_MANIFEST.json (portraits/cutout_v2, cut from the current card). Proposed new names in brackets (NAME_CHANGES.md). JSON: LIVE_MANIFEST.json.
 Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
-190 Boki, 190 with all three. Missing something: 
+212 Boki, 212 with all three. Missing something: 
 
 | Boki | Sheet | Card | Portrait |
 |---|---|---|---|
@@ -10,6 +10,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Anvilbrock | ✓ | ✓ | ✓ |
 | Arcestrel | ✓ | ✓ | ✓ |
 | Barokat | ✓ | ✓ | ✓ |
+| Barostorm | ✓ | ✓ | ✓ |
 | Barrelmander (Kegmander) | ✓ | ✓ | ✓ |
 | Bastionpet | ✓ | ✓ | ✓ |
 | Bathilus | ✓ | ✓ | ✓ |
@@ -19,15 +20,20 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Blossmink | ✓ | ✓ | ✓ |
 | Blotlet | ✓ | ✓ | ✓ |
 | Boltstrich | ✓ | ✓ | ✓ |
+| Bonsolith | ✓ | ✓ | ✓ |
 | Briarlynx | ✓ | ✓ | ✓ |
 | Bubblisk | ✓ | ✓ | ✓ |
 | Bucketmander (Pailmander) | ✓ | ✓ | ✓ |
 | Buckleron | ✓ | ✓ | ✓ |
+| Bullpole | ✓ | ✓ | ✓ |
 | Bullsfrog | ✓ | ✓ | ✓ |
+| Bulwartoad | ✓ | ✓ | ✓ |
 | Cairnback | ✓ | ✓ | ✓ |
 | Canvastross | ✓ | ✓ | ✓ |
+| Chainipede | ✓ | ✓ | ✓ |
 | Chandelapi | ✓ | ✓ | ✓ |
 | Chandelotl | ✓ | ✓ | ✓ |
+| Chiptero | ✓ | ✓ | ✓ |
 | Chuggamus | ✓ | ✓ | ✓ |
 | Cisternmander (Vatmander) | ✓ | ✓ | ✓ |
 | Clinkpede | ✓ | ✓ | ✓ |
@@ -48,6 +54,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Effigoon | ✓ | ✓ | ✓ |
 | Embrook | ✓ | ✓ | ✓ |
 | Ermink | ✓ | ✓ | ✓ |
+| Fanpire | ✓ | ✓ | ✓ |
 | Fawngus | ✓ | ✓ | ✓ |
 | Fizzlet | ✓ | ✓ | ✓ |
 | Flarmink | ✓ | ✓ | ✓ |
@@ -56,6 +63,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Frigatee | ✓ | ✓ | ✓ |
 | Furnacowary (Furnowary) | ✓ | ✓ | ✓ |
 | Galleotter | ✓ | ✓ | ✓ |
+| Gambitfin | ✓ | ✓ | ✓ |
 | Geodemole | ✓ | ✓ | ✓ |
 | Geysirbara | ✓ | ✓ | ✓ |
 | Gilabacus | ✓ | ✓ | ✓ |
@@ -77,8 +85,10 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Gravadillo | ✓ | ✓ | ✓ |
 | Gravigrub | ✓ | ✓ | ✓ |
 | Gravitank (Gravidon) | ✓ | ✓ | ✓ |
+| Harvantis | ✓ | ✓ | ✓ |
 | Hatstag | ✓ | ✓ | ✓ |
 | Hivara | ✓ | ✓ | ✓ |
+| Hourachnid | ✓ | ✓ | ✓ |
 | Howlop | ✓ | ✓ | ✓ |
 | Hydrangor | ✓ | ✓ | ✓ |
 | Jarmit | ✓ | ✓ | ✓ |
@@ -110,6 +120,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Marchleaf | ✓ | ✓ | ✓ |
 | Maulangler | ✓ | ✓ | ✓ |
 | Medushroom | ✓ | ✓ | ✓ |
+| Meteorab | ✓ | ✓ | ✓ |
 | Mirrolin | ✓ | ✓ | ✓ |
 | Moatpole | ✓ | ✓ | ✓ |
 | Morelkin | ✓ | ✓ | ✓ |
@@ -119,21 +130,27 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Mossgrade | ✓ | ✓ | ✓ |
 | Mothlet | ✓ | ✓ | ✓ |
 | Moundlet | ✓ | ✓ | ✓ |
+| Mumblet | ✓ | ✓ | ✓ |
 | Murmurling | ✓ | ✓ | ✓ |
 | Murmuron | ✓ | ✓ | ✓ |
 | Mycroll | ✓ | ✓ | ✓ |
+| Narfoil | ✓ | ✓ | ✓ |
 | Nettlynx | ✓ | ✓ | ✓ |
 | Nymphane | ✓ | ✓ | ✓ |
 | Oarlet | ✓ | ✓ | ✓ |
 | Oarter | ✓ | ✓ | ✓ |
 | Olmlet | ✓ | ✓ | ✓ |
 | Orbitle | ✓ | ✓ | ✓ |
+| Pagodito | ✓ | ✓ | ✓ |
 | Parasolth | ✓ | ✓ | ✓ |
+| Pavonazar | ✓ | ✓ | ✓ |
 | Pawnfry | ✓ | ✓ | ✓ |
 | Pebblamb | ✓ | ✓ | ✓ |
 | Phonodrake | ✓ | ✓ | ✓ |
+| Pinster | ✓ | ✓ | ✓ |
 | Pipeworth | ✓ | ✓ | ✓ |
 | Pipewurm | ✓ | ✓ | ✓ |
+| Pocketpus | ✓ | ✓ | ✓ |
 | Polyshroom | ✓ | ✓ | ✓ |
 | Prismander | ✓ | ✓ | ✓ |
 | Prismink | ✓ | ✓ | ✓ |
@@ -141,6 +158,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Prowyak | ✓ | ✓ | ✓ |
 | Puffuse | ✓ | ✓ | ✓ |
 | Pyrraven | ✓ | ✓ | ✓ |
+| Quivertoad | ✓ | ✓ | ✓ |
 | Rampartoad | ✓ | ✓ | ✓ |
 | Rattlebub | ✓ | ✓ | ✓ |
 | Reapant | ✓ | ✓ | ✓ |
@@ -152,13 +170,17 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Rimink | ✓ | ✓ | ✓ |
 | Ringrove | ✓ | ✓ | ✓ |
 | Rippmink | ✓ | ✓ | ✓ |
+| Rosedart | ✓ | ✓ | ✓ |
 | Sandwidow | ✓ | ✓ | ✓ |
 | Sarcobra | ✓ | ✓ | ✓ |
+| Scarabit | ✓ | ✓ | ✓ |
+| Scoopsy | ✓ | ✓ | ✓ |
 | Scopeleon | ✓ | ✓ | ✓ |
 | Scythant | ✓ | ✓ | ✓ |
 | Seamwyrm | ✓ | ✓ | ✓ |
 | Selenfin | ✓ | ✓ | ✓ |
 | Selenwhale (Lunarca) | ✓ | ✓ | ✓ |
+| Shinobant | ✓ | ✓ | ✓ |
 | Skateron | ✓ | ✓ | ✓ |
 | Skidlet | ✓ | ✓ | ✓ |
 | Slog | ✓ | ✓ | ✓ |

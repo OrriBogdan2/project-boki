@@ -69,3 +69,10 @@ SPECS.append({'id':'selenwhale_card106','name':'Lunarca / Selenwhale (hero card)
   'prompt':CARD('Selenwhale','final','swimming HORIZONTALLY from left to right through the air, its whole long body level across the image, drawn small so the cratered head on the right and both tail flukes on the left are fully inside the frame, flippers visible')+" Nothing may touch or be cut off at any edge. The body must not run off the bottom of the image."})
 # Eclipsowl female sheet came back as two rows of four (both runs).
 TA('Eclipsowl','briefs/boki-art/batch/out/c_eclipsowl_f_n_4.jpg'); SPECS[-1]['id']='ta_eclipsowl_f_r5'; SPECS[-1]['prompt']+=' Exactly ONE single row of four views side by side, never two rows, never eight views. Plain background only, no ground.'
+# Follow-ups after promoting round 4: Slog card came out light lilac (sheet is glossy purple-black), Anvilbrock/Forgebrock portraits
+# still show the old lava colours, Lunarca portrait follows the new full-body card.
+SPECS.append({'id':'slog_card106','name':'Slog (hero card)','refs':['briefs/boki-art/batch/out/c_slog_n1_1.jpg',SRA],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':CARD('Slog','mid','oozing forward with its three eye-stalks up and curious')+" Colour: glossy purple-black tar exactly like image 1, never light lilac or pastel purple."})
+for _n,_d in (('Anvilbrock','turnarounds'),('Forgebrock','evolutions')):
+    P(f'{_n.lower()}_r5',_n,f'briefs/boki-art/{_d}/{_n}.jpg','a characterful planted pose showing its copper fur, iron plates and blue-white spark cracks')
+P('selenwhale_r5','Selenwhale',_C+'Selenwhale.jpg','swimming horizontally through the air, the whole long body fully in frame')
