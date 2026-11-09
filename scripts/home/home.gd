@@ -3370,7 +3370,9 @@ func _open_expedition() -> void:
 	var fl := UI.footer_left(v)
 	fl.add_child(UI.ghost("Training Area", _start_training, 0, "jump"))
 	fl.add_child(UI.ghost("Duel room", _start_duel, 0, "knock"))
-	if Net.available():
+	if OnlineSession.configured():
+		fl.add_child(UI.ghost("Play online", func(): Game.goto("online", {"mode": "trio"}), 0, "bond"))
+	elif Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
 	start_b.grab_focus.call_deferred()

@@ -14,6 +14,9 @@ func _fades_on() -> bool:
 	return not (_has_arg("--shot=") or _has_arg("--rolling-shot=") or _has_arg("--autoplay") or _has_arg("--simtest"))
 
 func _ready() -> void:
+	if "--server" in OS.get_cmdline_user_args() or "--version" in OS.get_cmdline_user_args():
+		add_child(DedicatedServer.new())      # one matchmade match, no local player; --version alone (scripts/core/dedicated_server.gd)
+		return
 	if "--relay" in OS.get_cmdline_user_args():
 		# dedicated relay server for desktop online play (scripts/server/relay.gd): no screens, no audio
 		var relay := RelayServer.new()
@@ -813,6 +816,10 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			current = _layer(scr)
 			scr.show_result(opts)
 			Match.prefetch([HOME_SCRIPT])     # where you're most likely going next
+		"online":
+			var scr_o = load("res://scripts/ui/online.gd").new()      # matchmade play (scripts/core/online_session.gd)
+			scr_o.setup(opts)
+			current = _layer(scr_o)
 		"lobby":
 			var L = load("res://scripts/ui/lobby.gd")
 			var scr = L.new()

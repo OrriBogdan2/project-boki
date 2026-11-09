@@ -4,6 +4,8 @@ extends Node
 ## Owners send compact snapshots; anyone who hits something they don't own sends the hit to its owner.
 ## On desktop the same messages go through the Project Boki relay server instead (net_enet.gd,
 ## scripts/server/relay.gd). The launcher passes `-- --server=host:port --token=<discord token>`.
+## Matchmade play (scripts/core/online_session.gd) connects the same way to a dedicated match
+## server, presenting the matchmaker's one-time token.
 
 const VERSION := "0.24.3"        # online play only matches players on the same version; bump on network changes (0.13.0: gear wdrop carries kind/rarity/id, 0.14.0: the "carry" and "zone" events, 0.15.0: the kin snapshot carries its rest seconds; merge augments, 0.16.0: the kit move id rides the hunter snapshot; perk orbs "odrop"/"otake", 0.17.0: a merge release lands the Boki beside you pumped with a 6s rest instead of draining it on your shoulder, and the hunter gets an afterglow, 0.18.0: Boki loss: the "guard" event (a guarding Boki's uid and record), "caught" carries the owner, "gdrop", kcmd "unbond"; a carried Boki rides its carrier's position, 0.19.0: the host re-sends live perk orbs on join; the run level on the hunter snapshot; chest-key carrier flags and the Shrubling state on the monster snapshot, 0.19.1: ext/equal-loadout's GripNet fields, 0.20.0: revive beacons run online with the "bcn" event, 0.21.0: a squad ping ("sping") carries its kind, 0.22.0: the first GitHub Release for the launcher, Nov 5; 0.23.0+: one release per merge batch; 0.24.0: the READY-queue merge of Nov 6, 0.24.1: still title backdrop, 0.25.0: the pre-match lobby: its "pick" and "chat" topics, the roster carries each hunter's arch)
 
@@ -27,23 +29,47 @@ var _msg_cb = null
 var _peers_cb = null
 var started := false
 var enet: NetEnet = null      # desktop connection to the relay
-var server_addr := ""         # "host:port" of the relay (desktop)
-var token := ""               # Discord access token from the launcher
+var server_addr := ""         # "host:port" of the relay (desktop) or the match server we're on
+var relay_addr := ""          # the relay the launcher named (BOKI_SERVER / --server=): "Play with friends"
+var token := ""               # Discord access token from the launcher, or the matchmaker's one-time token
 var deny_reason := ""         # why the server refused us, for the lobby to show
+var deny_code := ""           # the refusal's code: "version", "bad_token", "full" (OnlineSession)
+var deny_version := ""        # on "version": the version the server runs
 
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--server="): server_addr = a.substr(9)
+		if a.begins_with("--server="): relay_addr = a.substr(9)
 		if a.begins_with("--token="): token = a.substr(8)
-	if server_addr == "":
-		server_addr = OS.get_environment("BOKI_SERVER")
+	if relay_addr == "":
+		relay_addr = OS.get_environment("BOKI_SERVER")
+	server_addr = relay_addr
 
 ## Online play is possible here: the browser room, or a relay server on desktop.
 func available() -> bool:
 	return Bridge.net_available() or native_available()
 
 func native_available() -> bool:
-	return not OS.has_feature("web") and server_addr != ""
+	return not OS.has_feature("web") and relay_addr != ""
+
+## Opens a fresh desktop connection to `addr` ("host:port"), presenting `tok` in the hello.
+func connect_to(addr: String, tok: String) -> void:
+	leave()
+	server_addr = addr
+	token = tok
+	_start_native()
+
+## Drops the desktop connection, so the next start or connect_to begins clean.
+func leave() -> void:
+	if enet:
+		enet.close()
+		enet.queue_free()
+		enet = null
+	mode = ""
+	started = false
+	peers.clear()
+	deny_reason = ""
+	deny_code = ""
+	server_addr = relay_addr
 
 func online() -> bool:
 	return in_match and mode != ""
@@ -110,6 +136,8 @@ func _on_enet(d: Dictionary) -> void:
 			peers_changed.emit()
 		"deny":
 			deny_reason = String(d.get("why", "The server refused the connection."))
+			deny_code = String(d.get("reason", ""))
+			deny_version = String(d.get("ver", ""))
 			peers_changed.emit()
 		"peers":
 			_on_js_peers([JSON.stringify(d)])
@@ -125,8 +153,8 @@ func _on_enet_closed(why: String) -> void:
 	if enet:
 		enet.queue_free()
 		enet = null
-	if in_match and m and is_instance_valid(m) and m.has_method("net_lost"):
-		m.net_lost()
+	if in_match and m is Match and is_instance_valid(m):
+		(m as Match).net_lost()
 	peers_changed.emit()
 
 func _on_js_peers(args) -> void:

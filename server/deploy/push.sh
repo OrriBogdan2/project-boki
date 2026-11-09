@@ -52,7 +52,7 @@ if [ -n "$BUILD" ]; then
 fi
 
 echo "== install"
-run "${SSH[@]}" bash /opt/boki/upload/install.sh --region "$REGION" --public-host "$HOST"
+run "${SSH[@]}" bash /opt/boki/upload/install.sh --region "$REGION" --public-host "$HOST" ${PORTS:+--ports "$PORTS"}      # PORTS=7777-7781 push.sh ... sizes the match slots
 
 echo "== health"
 run curl -fsS --max-time 10 "http://$HOST:8080/health"

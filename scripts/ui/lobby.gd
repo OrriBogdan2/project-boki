@@ -71,15 +71,11 @@ func _refresh_modes() -> void:
 		mode_btns[k].theme_type_variation = "SegOn" if k == mode else "Seg"
 
 func _announce() -> void:
-	var k := Save.active_kin()
-	var arch := ClassUnlock.online_arch(Arch.of_save())      # (Settings > Demo > All masks open is offline only)
-	var cls: String = opts.get("cls", Data.class_of_save())
-	var weapon: String = Save.d.get("weapon", "")
-	if arch != Arch.of_save():
-		cls = Arch.weight(arch)
-		weapon = Arch.signature(arch)
-	Net.set_presence({"name": Save.d.get("name", "Hunter"), "cls": cls, "weapon": weapon, "arch": arch, "ready": is_ready, "lobby": 1,
-		"kin": {"species": k.get("species", "cindle"), "level": int(k.get("level", 1)), "name": k.get("name", "Boki"), "traits": k.get("traits", {}), "trust": float(k.get("trust", 50))}})
+	var p := OnlineSession.presence()
+	p["cls"] = opts.get("cls", p["cls"])
+	p["ready"] = is_ready
+	p["lobby"] = 1
+	Net.set_presence(p)
 
 func _toggle_ready() -> void:
 	is_ready = not is_ready

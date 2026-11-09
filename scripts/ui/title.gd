@@ -487,6 +487,8 @@ func _build_ui() -> void:
 		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
 		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
+	if OnlineSession.configured():
+		items.append(["Play online", func(): Game.goto("online", {}), "bond"])
 	if Net.available():
 		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
 	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])

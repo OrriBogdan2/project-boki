@@ -5383,6 +5383,16 @@ func spectating() -> Hunter:
 			return x
 	return null
 
+## Online: the match server called the result (OnlineSession) or the line to it dropped (Net).
+func net_over(won: bool, why := "server") -> void:
+	if over or result.get("ending", false) or player == null:
+		return
+	result = {"extracted": won, "why": why}
+	_end_soon(1.0)
+
+func net_lost() -> void:
+	net_over(false, "lost")
+
 ## Leave while dead and waiting on your team.
 func give_up() -> void:
 	if player and player.out and not result.get("ending", false):

@@ -160,6 +160,9 @@ const CHECKS := {
 	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],      # also --shots-dir=
 	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],      # Hob in person, the second Mask; --shots-dir=
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
+	"--server-check": ["res://tools/server_check.gd", "server_check", null],      # a match server, players, refusals
+	"--server-e2e-check": ["res://tools/server_e2e_check.gd", "server_e2e_check", null],      # matchmaker + server
+	"--join-": ["res://tools/join_client.gd", "join_client", null],      # a headless player for the server checks
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
