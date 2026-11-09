@@ -64886,5 +64886,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/geodemole_card103_4.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_jibbatross_px",
+    "name": "Jibbatross",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_jibbatross_px_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_voltalon_f_n2",
+    "name": "Voltalon (female form concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_voltalon_f_n2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_py",
+    "name": "Gongrowl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_py_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_py",
+    "name": "Gongrowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_py_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole_card103",
+    "name": "Geodemole (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodemole_card103_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_card101",
+    "name": "Lunarca / Selenwhale (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/selenwhale_card101_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "echolop_card103",
+    "name": "Echolop (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/echolop_card103_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "echolop_card103",
+    "name": "Echolop (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/echolop_card103_3.jpg",
+    "ok": true
   }
 ]
