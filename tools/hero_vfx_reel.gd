@@ -1,7 +1,8 @@
 extends "res://tools/combo51_shots.gd"
 ## --hero-vfx-reel --shots-dir=<dir> [--reel-hero=<arch>] [--reel-only=<part>] [--reel-generic]: a Hero's whole
 ## ability set played through in a live Arena match at the match camera, for the approval gate. One PNG sheet per
-## ability (a grid of crops round the action, <dir>/<hero>_<part>.png) and REEL_MARK lines with the frame each part starts on.
+## ability (a grid of crops round the action, <dir>/<hero>_<part>.png) and REEL_MARK lines with the frame each part
+## starts on.
 ## A Hero with a script of its own (tools/vfx_reel/<arch>.gd, extending this one: parts() and `_part_<name>` funcs)
 ## plays its scripted parts; Kael and Lisette's are below; any other plays the generic set (LMB, RMB, Shift, E, R,
 ## with E and R pressed a second time for a recast marker). --reel-generic plays the generic set for any Hero, so
