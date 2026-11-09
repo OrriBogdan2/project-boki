@@ -17132,5 +17132,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/lyrewing_r_w29_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_canvastross_pe_w29",
+    "name": "Canvastross (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_pe_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_r_w29",
+    "name": "Lyrewing",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lyrewing_r_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthorn_pe_w29",
+    "name": "Crofthorn (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_echolop_pe_w29",
+    "name": "Echolop (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_echolop_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthorn_pe_w29",
+    "name": "Crofthorn (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthorn_pe_w29",
+    "name": "Crofthorn (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_echolop_pe_w29",
+    "name": "Echolop (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_echolop_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_echolop_pe_w29",
+    "name": "Echolop (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_echolop_pe_w29_3.jpg",
+    "ok": true
   }
 ]
