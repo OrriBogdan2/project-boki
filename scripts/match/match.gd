@@ -4826,11 +4826,14 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 	var n: Node3D = sh["node"]
 	n.get_node("Crystal").visible = false
 	n.get_node("Ring").visible = false
-	sfx("heal", sh["pos"], 0.0, 1.2)
 	fx.burst(sh["pos"] + Vector3(0, 1.6, 0), Color("8fe3c8"), 30, 5.0, 0.8, -2.0)
 	fx.ring(sh["pos"], 4.0, Color("8fe3c8"), 0.5)
+	if not h or h.remote:
+		sfx("heal_chime", sh["pos"], HealSfx.HEAL_DB.y, HealSfx.HEAL_PITCH.y)   # someone else's shrine: its chime there
 	if h and not h.remote:
+		var gain: float = h.max_hp - h.hp
 		h.hp = h.max_hp
+		HealSfx.heal(h, maxf(gain, HealSfx.HEAL_FULL))   # the shrine always rings full, even at full hp
 		h.bless_t = 20.0
 		if h.kin and not h.kin.dead:
 			h.kin.hp = h.kin.max_hp
@@ -5174,7 +5177,9 @@ func _update_zones(dt: float) -> void:
 					if amt > 0.0:
 						for h in hunters:
 							if h.team == z["team"] and not h.remote and not h.downed and not h.out and h.flat_dist(c) < z["r"]:
+								var was: float = h.hp
 								h.hp = minf(h.max_hp, h.hp + amt)
+								if h.hp > was: HealSfx.heal(h, h.hp - was)   # merged into one chime per 0.3 s
 								if h.kin and h.kin.state == "active" and h.kin.flat_dist(c) < z["r"]:
 									h.kin.hp = minf(h.kin.max_hp, h.kin.hp + amt)
 						if z["kind"] == "sanctuary":
