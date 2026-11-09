@@ -228,3 +228,13 @@ Holds dropped on a merge (`_drop_holds`): `wind`, `dive`, `flying`, `hook_sd`, `
 and `broadside.blast` (Brass Broadside's charge and waves).
 Dash flow (item 32): `content/dash_flow/dredge.json`; LMB waits for the lunge's end, the rest fire from it; Shift barges at once out of everything (item 51): out of the slam's wind-up the raised fist rides the barge and slams where it arrives, out of the air smash the pounce goes and the smash drops from where it ends, out of the Broadside the charge and waves follow him. Only a jump is refused from the hook's throw to the end of the reel (owner item 31, the source's Grounded while reeling: `into_jump.rmb`).
 The slugs are ordinary shots (`Match.spawn_shot` with a `kx` callback for the hit). No new sync shape.
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Abyssal Hand (Grasp) | Data: pierces terrain, pulls in the first target hit, enemy or ally. Footage briefs/hero-ref/dredge.md:25, :168: the first enemy, through a rock pillar. | Flies over rocks, props and cliffs; stops on the first foe or ally (hunter, Boki or monster) and reels it in; placed walls still stop it (placed-walls job). Matches (`abyssal hand: hooks the first foe`). |
+| X Brass Broadside (Kaiju Blast) | Data: two waves of slugs, anti-heal. Footage dredge.md:263: two fans of 6 orbs; whether an orb passes a foe is not shown. | Not determinable: each of the 12 slugs stops on the first foe (hunter, Boki or monster), passes allies, stops on walls. Kept. |
+| Shift Barge (Brute Dash) | Data and footage: a dash that hits nobody. | Hits nobody. Matches. |

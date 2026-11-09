@@ -219,3 +219,12 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | Tarek (`dolm`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`) |
 
 Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
+
+## Ability shot and lane rules (job ext/parity-ability-pierce)
+
+PARITY FIRST (owner decision 2026-11-07): for every ability projectile and lane (not LMB) of the 12 kits, the source says what it stops on; where it is silent, ours stays. The per-ability tables are the last section of each `docs/heroes/<id>.md`. The rules every shot shares (`Match._update_shots`, `_shot_targets`, `foes_of`):
+
+- A shot stops on the first enemy hunter, enemy Boki or monster it touches, and passes allied hunters and Boki. It stops on terrain, rocks, domes and breakable props (which it smashes). A `pierce` shot (a `hitset`) hits each thing once and flies on; a `pierce_break` shot (only Starpiercer) also flies on through props. A lob sails over everyone and everything and lands where it was aimed.
+- An instant lane (Longneedle, Faultline, Wirerun) goes through `Match.foes_of(team)`: enemy hunters that are not downed, enemy Boki that are not wild, and monsters.
+- Placed walls (Tenzo's rocks, Neve's ice) are the placed-walls job's: what they block is not restated.
+- Audit result: every row already matched the data and footage or is source-silent (kept) except Starpiercer on breakable props, now fixed (`pin ult prop`, `--archer-combo-check`).

@@ -3,10 +3,10 @@ extends Node3D
 ## Hem's ultimate on X, Starpiercer (docs/heroes/archer.md; hero sheet pin.md "Ultimate"). A tap with no
 ## cast lock empowers her next shots ("shots", 3) for "window" seconds. While empowered the bow needs no
 ## draw: each LMB press nocks for "nock" s (the bow glows, the cursor ring fills), then looses a big
-## arrow that flies "speed" m/s (the source's beam crosses its 18 m in about 0.2 s), pierces every foe out
-## to "range" (1.5x her Empowered range), knocks back and strips "shred" armor. The last arrow hits harder
-## and finishes a hunter it leaves under "execute" of their health. She can walk, roll and Spirit Walk
-## between shots. The window ends after the last arrow or on time.
+## arrow that flies "speed" m/s (the source's beam crosses its 18 m in about 0.2 s), pierces every foe and
+## smashes breakable props without stopping, out to "range" (1.5x her Empowered range), knocks back and
+## strips "shred" armor. The last arrow hits harder and finishes a hunter it leaves under "execute" of
+## their health. She can walk, roll and Spirit Walk between shots. The window ends after the last arrow or on time.
 ##
 ## Telegraphs (AimKit, own player): the arrow's lane out to its range and a ticked crosshair ring at her
 ## feet while empowered, the cursor ring filling through each nock. Everyone sees three pips over her
@@ -126,8 +126,8 @@ func _loose() -> void:
 	var dmg: float = base * k.m.dmg_mult(h) * LevelGrowth.ap(h)
 	var start := h.pos + Vector3(dir.x * 0.6, 0.95 * float(h.cdat.get("scale", 1.0)), dir.y * 0.6)
 	var arrow := {"last": last}
-	var extra := {"src": "abil", "ab": "ultimate", "pierce": true, "hitset": {}, "kb": float(x.get("kb", 4.0)),
-		"tracer": 0.0,
+	var extra := {"src": "abil", "ab": "ultimate", "pierce": true, "pierce_break": true, "hitset": {},
+		"kb": float(x.get("kb", 4.0)), "tracer": 0.0,
 		"kx": func(_s: Dictionary, _at: Vector3, e: Ent, _why: String): _hit(e, arrow)}
 	k.m.spawn_shot(h, start, dir * spd, dmg, rng / spd, 0.3, RED, extra)
 	k.vfx("ult_beam", Vector3(start.x, h.pos.y, start.z), dir, {"last": last})

@@ -153,3 +153,13 @@ slot changes. R reloads and the Boki Merge is on its own key (T by default).
 - Merge cleanup: `_drop_holds()` ends `wire` (refunded), `rmb_down`/`rmb_t` and the rod prop, any
   Skycall in `strikes` still in its `"flick"` phase, and Kitefall's `ult.leap` (she drops at the take-off).
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=mage` (tools/vv_shots.gd).
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Storm Rod (Voltaic Spear) | Data: a spear, damage and knockback on the first enemy hit. Footage briefs/hero-ref/vireo.md:27: flies to max range and stops on the first enemy hit. | Stops on the first foe (hunter, Boki or monster), passes allies, ends on walls. Matches. |
+| E Skycall (Lightning Strike) | Data: a strike at the target location. | Hits the cursor point, over walls and bodies; no shot. Matches. |
+| Shift Wirerun (Surge) | Data: 153 to enemies passed through. | Hits every foe it passes (two in a line), passes allies. Matches (`Wirerun hits every foe it passes`). |

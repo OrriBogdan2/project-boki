@@ -155,3 +155,13 @@ Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|heavy|shatter|payoff|sk
 - The wall is the shared `Verbs.add_wall` (blocking, the touch shove); the kit grows it, slides it, carries foes on its face and draws it.
 - Dash flow (item 32): the skate is her dash for `DashFlow` (`in_dash()`); `content/dash_flow/rimewright.json` says LMB fires from it as beams (`variant: beam`, read by `fires_in_dash` and the dart throw), RMB/E/Q/X fire, in the air too (item 62); the statue's slide out of a skate counts as the skate going on, so skate -> X is a "fire" with carry (item 64).
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Ice Spear (Cryo Spear) | Data and footage briefs/hero-ref/tamsin.md:51: lands at the cursor, then a slow zone and a delayed blast. Whether a foe in the path stops it is not shown. | Not determinable: flies to the cursor, lands early on the first foe (hunter, Boki or monster) or wall, passes allies. Kept. |
+| E Rink Wall (Frozen Barricade) | Data and footage: a sliding wall that blocks shots and shoves foes. | Placed wall: see the placed-walls job. |
+| X Rimelock (Chilling Finale) | Data: a zone round her. | An area round her; no shot. Matches. |

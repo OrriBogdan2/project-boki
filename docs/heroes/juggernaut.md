@@ -347,3 +347,14 @@ left over when the merge ends: the Searing Wave charge (`lmb_t`, `lmb_buf`, `mel
 wind-up (`slam_w`), an armed Haul Slam (`haul`) and the held Smash (`rmb_down`, cleared by the merge itself), a Meteor Drop in its dive (`drop`), the Lunge's full flag (`lunge_full`) and a running Gilded Riposte
 (`riposte.st`, its guard or cleave; the gold glow hides).
 Scripted in `--kit-combo-check` as the `merge hold jug:` checks.
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB tap Smash (Execution Slam) | Data: 130 in front, edge hits more. Footage: a short strike lane ahead. | A 4 m lane strike that hits every foe in it (hunters, Boki, monsters), passes allies. An area in front, not a shot. Matches. |
+| RMB hold Lunge (Fiery Lunge) | Data: charge and release a dash attack. Footage briefs/hero-ref/juggernaut.md:64: 'stops at the target' with a white burst. | Flings him into the first foe and stops there; nothing behind it is hit; a miss doubles the cooldown. Matches (`the charged Lunge into the first foe`). |
+| E Warchain (Feysteel Chain) | Data: a tether that attaches to enemies or walls. Footage juggernaut.md:96: a skillshot, about 7 bh. | The hook stops on the first foe (hunter, Boki or monster) or a wall and holds there; it passes allies. Matches. |
+| Shift Rampage (Flame Step) | Data: a dash attack in the facing direction. Footage (0387, 0401): one hit on the dummy; whether it stops or passes is not shown. | Not determinable: it shoves the foes it meets and the tip hits at its end. Kept. |

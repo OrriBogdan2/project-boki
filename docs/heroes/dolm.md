@@ -304,3 +304,13 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
   each rock event carries its own direction, so the arc needs no new Net field (Net.VERSION unchanged).
 - Basalt Spine: `scripts/arch/kits/breah_spine.gd` (BreahSpine). Its hold field is `phase == "aim"`, cleared by
   `DolmKit._drop_holds()` through `spine.drop()`. Main sends only the X press, so BreahSpine._held() reads the local key (tests hold it with `inp["x_down"]`).
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| Launched rocks (Rock Hop end, punch, slam) | Footage briefs/hero-ref/breah.md:92: one punch launches every rock in the lane along the aim, and each explodes on the target; the dash rock rolls on and bursts. Data: 160 and slow. | Each rock flies on the aim and bursts on the first foe (hunter, Boki or monster) or wall, splashing the foes beside it; allies are passed. Matches. |
+| RMB Quakefall (Volcano Crusher) | Data and footage: a slam on the ground ahead. | An area slam; no shot. Matches. |
+| E Stone Row, X Basalt Spine | Data and footage: placed rock walls that block bodies and shots. | Placed walls: see the placed-walls job. |

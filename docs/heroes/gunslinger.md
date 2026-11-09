@@ -156,3 +156,13 @@ slot changes. The Boki Merge is on its own key.
 - Merge cleanup: `_drop_holds()` ends `needle` and `slide`. Cinderfall
   has no hold or channel (a tap, then the shell is out), so it adds nothing there.
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=gunslinger`.
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Burr Charge | Data: sticky grenade. Footage briefs/hero-ref/venator.md:63: it sticks to the first enemy or a wall; the lane is fixed, not the cursor. | Stops on the first foe (hunter, Boki or monster: direct hit, Daze, no cone), passes allies, sticks to a wall or the lane's end (cone back at her). Matches. |
+| E Longneedle (Ion Cannon) | Data (briefs/supervive-data/supervive_kits.md, Railgun): a long beam that pierces terrain, and each hunter hit cuts its cooldown (so it hits several). Footage venator.md:103: crosses a chasm and an island; several targets not shown (:226). Wiki: every target. | An instant lane that hits every foe on it (hunters, Boki, monsters), ignores walls and terrain, passes allies. Matches (`Longneedle passes through a wall`). |
+| X Cinderfall | Data: a shell fired up that lands on the cursor. | A lobbed shell: it sails over everyone and walls and lands at the cursor. Matches. |

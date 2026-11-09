@@ -196,3 +196,13 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
   their own game) is drawn to the centre by a Displace "glide" tow.
 - Nightwell: `scripts/arch/kits/ostra_well.gd` (OstraWell); its looks are pooled KitLooks kinds `well_dome` and `well`. It
   adds no hold field (nothing to drop on a merge).
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Shard Snap (Void Snap) | Data: a cluster of shards that stun. Footage briefs/hero-ref/ostra.md:66: crosses about 6 h in 0.2 s; one dummy only, so pierce is not shown. | Not determinable: stops on the first foe (hunter, Boki or monster), passes allies, ends on walls. Kept. |
+| Shift Lantern Trade (Swap) | Data: a lobbed projectile that swaps you and all units at its landing. Footage ostra.md:74: it lands at the cursor. | A lob: it sails over foes, allies and walls and lands at the cursor; foes, allies and Boki there swap. Matches. |
+| E Brimseed, X Nightwell | Data: a bomb and a vortex placed at the cursor. | Placed on the ground at the cursor; no shot. Matches. |

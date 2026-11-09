@@ -243,3 +243,13 @@ The Furnace Cloak fires on the key's press: `e.on_press` in the data, read throu
 so E skips the hold-to-aim preview (there is nothing to aim).
 Holds dropped on a merge (`_drop_holds`): `hose` (the stream), `spool`, `was_held`, `after_t`, `flame_acc`, `bash`, `aiming`,
 and `jet.flight` (Flue Flight).
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Cinder Shot (Embry Bolt) | Data: a fire bolt, damage and slow. Footage briefs/hero-ref/linwick.md:62: on a hit it stops at the first enemy. | Stops on the first foe (hunter, Boki or monster), passes allies, stops on walls. Matches. |
+| E Furnace Cloak (Heat Shield) | Data: a spin that pulls in nearby enemies. | A blast round him that drags foes in sight (walls stop them). No shot. Matches. |
+| Shift Soot Ram (Flame Skull Bash) | Footage linwick.md:77: the dash stops on the first enemy ('impact'), he does not pass through. | Stops on the first foe with the impact. Matches (`ram: stops on the first foe`). |

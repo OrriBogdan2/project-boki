@@ -3214,8 +3214,9 @@ func _update_shots(dt: float) -> void:
 			if not bh.is_empty():
 				if not s["x"].get("cos", false) and not s["x"].has("boom") and not s["x"].get("mob", false):
 					brk.hit(bh, s["by"])
-				_shot_end(s, p, null)
-				hit = true; break
+				if not sx.get("pierce_break", false):       # (Starpiercer smashes props and flies on)
+					_shot_end(s, p, null)
+					hit = true; break
 			for e in _shot_targets(s):
 				if Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < e.r + s["r"] + HIT_SLACK and (shot_height_ok(e, p.y) or shot_from_above_ok(s, e, p.y)):
 					if sx.has("hitset"):

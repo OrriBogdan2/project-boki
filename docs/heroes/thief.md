@@ -221,3 +221,13 @@ ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats 
   Sounds: `dj_encore` (the ring opening), `dj_encore_whirr` (the 2s it runs), `dj_encore_hit` (a blade landing).
 - The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on X it duplicated the
   ultimate, so the passive is back to the source's (Marks ramp the bolts, knocks heal).
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Bola (Trickshot) | Footage briefs/hero-ref/dancer.md:26, :99: grounds the first target, flies on, a second target makes both stunned, bounces off terrain. Wiki: flies on past a destructible. | Grounds the first foe (hunter, Boki or monster), flies on and tangles a second; passes allies; bounces off a wall; a crate counts as a catch. Matches (`dancer RMB: Bola grounds the first, flies on, tangles two`). |
+| E Shadow Knife (Phantom Dagger) | Footage dancer.md:28: sticks in the first enemy (and slows it) or lands at the end of its path. | Sticks in the first foe, passes allies, lands on a wall or at its range. Matches. |
+| X Encore (Death Blossom) | Footage: a ring round her, blades at each foe inside. | A ring; no shot. Matches. |

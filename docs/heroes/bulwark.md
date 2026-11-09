@@ -200,3 +200,13 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>`.
 
 ## Payoff
 CRUSHED: stun, heal, T4 hitstop and shake, own sound, `bul_crush`.
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| X Faultline (Abyssalbreaker) | Data: a fissure that stuns the targets it strikes, then erupts. Footage: not shown. Terrain: not shown. | A 16 m lane that strikes every foe on it (hunters, Boki, monsters), passes allies and walls (not determinable, kept). |
+| E Mending Ground (Regen Field) | Data: a healing zone at the hammer. | A zone; no shot. Matches. |
+| Shift 360 Smash / Shield Charge (Spin Dash, Shield Bash) | Data: a dash with a knock round you; the bash knocks enemies back. Pass or stop on a foe: not shown. | Not determinable: the Smash is a swing round him, the Charge shoves the foes in front of it. Kept. |

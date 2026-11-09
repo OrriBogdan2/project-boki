@@ -74,7 +74,7 @@ Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (
 - The spirit orb lasts 4 s and gives anyone who touches it (ally or foe) one 2.8 s Spirit Walk; they get no roll and no snap-back.
 - Cremation is +10 damage and a longer burn on a foe knocked by the Heavy Shot while it stands in her burning Hail Wall.
 - Not built: the double-wall climb (no heightmap equivalent) and Hail Wall damaging wisps (our downed hunters take no ability damage).
-- Starpiercer: the beam is stopped by walls and terrain (the source pierces "destructibles"; ours has no destructible walls on the shot line), and a breakable prop ends it.
+- Starpiercer: the beam is stopped by walls and terrain (terrain is not shown in the source), and it smashes breakable props and flies on (the source pierces destructibles; ability pierce rules pass, `pin ult prop`).
 - Starpiercer: the cooldown starts on the cast; unused shots are lost when the 6 s run out; a merge ends the window.
 - Starpiercer: each beam nocks for 0.5 s (the footage shows a 0.4-0.8 s draw; the fine print says no charge) and the next nock waits 1.0 s: 1.5 s a shot like the footage (f48/f63/f78), all three inside the 6 s window.
 - Starpiercer's execute is "finish a hunter left under 12% of max health" (the card's "execution damage" isn't defined anywhere we found).
@@ -206,3 +206,13 @@ snap is about half weight on screen; a 0.05 s FADE for `arc_tap`/`arc_loose`/`ar
 - Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground.
 
 ## Payoff
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Heavy Shot (Heartpiercer) | Data: an arrow that knocks back; a foe that hits terrain is stunned. Footage briefs/hero-ref/pin.md:95: it hits the first target. | Stops on the first foe (hunter, Boki or monster), passes allies, stops on terrain (the wall pin). Matches (`the Heavy Shot stops on the first foe`). |
+| E Hail Wall (Rain of Arrows) | Data and footage (pin.md:127): an arc of falling arrows at the cursor distance that hurts what stands in it. | An area at the cursor: no body or wall between her and it stops it. Matches. |
+| X Starpiercer (Primal Forces) | Data and card (pin.md:251): the shots pierce enemies and have 'destruction damage'; the audit note above says the source pierces destructibles. Footage (f48): long piercing beams. Terrain: not shown. | Pierces every foe (hunters, Boki, monsters), passes allies, smashes breakable props (crates, pots, kegs) and flies on (FIXED here: a prop used to end it; asserted `pin ult prop` in `--archer-combo-check`). Stops on walls and terrain: not determinable, kept. |
