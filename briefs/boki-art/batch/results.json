@@ -49710,5 +49710,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/chuggamus_card99_3.jpg",
     "ok": true
+  },
+  {
+    "id": "furnacowary_card99",
+    "name": "Furnacowary (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/furnacowary_card99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_card99",
+    "name": "Seamwyrm (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/seamwyrm_card99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_card99",
+    "name": "Seamwyrm (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/seamwyrm_card99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geysirbara_card99",
+    "name": "Geysirbara (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geysirbara_card99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "furnacowary_card99",
+    "name": "Furnacowary (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/furnacowary_card99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chuggamus_p99",
+    "name": "Chuggamus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_chuggamus_p99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geysirbara_card99",
+    "name": "Geysirbara (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/geysirbara_card99_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "furnacowary_card99",
+    "name": "Furnacowary (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/furnacowary_card99_3.jpg",
+    "ok": true
   }
 ]
