@@ -9,8 +9,14 @@
   "boki_downed": "boki", "boki_revive": "boki", "boki_eat": "boki", "boki_sleep": "boki", "boki_work": "boki",
   "boki_fuse": "boki", "boki_unfuse": "boki",
   "wisp_chirp_small": "boki", "wisp_chirp_medium": "boki", "wisp_chirp_large": "boki",
-  "wisp_bloom": "boki", "wisp_shrink": "boki", "wisp_ready": "boki", "wisp_grab": "boki"
+  "wisp_ready": "boki", "wisp_grab": "boki",
+  "summon_burst_small": "boki", "summon_burst_medium": "boki", "summon_burst_large": "boki",
+  "summon_end_small": "boki", "summon_end_medium": "boki", "summon_end_large": "boki",
+  "summon_killed_small": "boki", "summon_killed_medium": "boki", "summon_killed_large": "boki"
  },
+ "reach": {"summon_burst_small": 35, "summon_burst_medium": 35, "summon_burst_large": 35,
+  "summon_end_small": 35, "summon_end_medium": 35, "summon_end_large": 35,
+  "summon_killed_small": 35, "summon_killed_medium": 35, "summon_killed_large": 35},
  "signature": [],
  "replaces": ["kin_happy", "kin_unsure", "kin_alert", "kinhit", "recall", "throw", "catch", "bond", "skill",
   "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo"]
