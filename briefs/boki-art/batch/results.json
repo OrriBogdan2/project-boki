@@ -45517,5 +45517,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_briarlynx_p86_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_chandelapi_p86",
+    "name": "Chandelapi (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_chandelapi_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_briarlynx_p86",
+    "name": "Briarlynx (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_briarlynx_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_briarlynx_p86",
+    "name": "Briarlynx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_briarlynx_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelapi_p86",
+    "name": "Chandelapi (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_chandelapi_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelapi_p86",
+    "name": "Chandelapi (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_chandelapi_p86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthollow_p86",
+    "name": "Crofthollow (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_crofthollow_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthollow_p86",
+    "name": "Crofthollow (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_crofthollow_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mortarfly_p86",
+    "name": "Mortarfly (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_mortarfly_p86_1.jpg",
+    "ok": true
   }
 ]
