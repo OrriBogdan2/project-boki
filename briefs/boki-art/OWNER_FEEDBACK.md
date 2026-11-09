@@ -72,3 +72,12 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 57 | Reapant: a bit cooler and more humanoid, between the two | 3 blends of w4 (insect) and w2 (upright ninja) | GENERATING |
 | 58 | All other A picks approved (Moatpole, Spanglin, Moundlet, Cisternmander, Glassolotl, Ringrove, Murmuron, Seamwyrm, Prismink, Galleotter, Chuggamus, Rimink, Lodestaff, Eclipsowl, Rippmink) | Kept | DONE |
 | 59 | 10:50 ET: Eclipsowl pick needs the live card's wings | New card/portrait/sheet: live body + wings, the concept's fiercer face, no rock base | GENERATING |
+
+## 11:14 ET 11-09: owner round-2 picks
+| 60 | Vespyx lying: option 2 design, but it needs the head tuft and a sharp tail tip with the venom orb (no pincer) | Redo from option 2 + main card | GENERATING |
+| 61 | Mycroll: fallen over on its side at a similar angle to the original, not upside down | Redo: fallen on its side, same camera angle, a bit panicked | GENERATING |
+| 62 | Chandelapi: owner unsure, "you decide" | Card 4 (planted standing, 8.5) + sheet + portrait from design B are live | DONE |
+| 63 | Gongrowl: card 1, but facing the camera more and more upright | Redo card + portrait | GENERATING |
+| 64 | Eclipsowl: agree with the chosen one | Card 2 (live wings, fierce face, no rock) + sheet + portrait are live | DONE |
+| 65 | Vespox: push the jagged frill (v6) | Sheet + card + portrait from v6_1 | GENERATING |
+| 66 | Reapant: mid-stride is cool but too human; less tall, closer up, more Boki-like | 3 compact versions of w7 | GENERATING |

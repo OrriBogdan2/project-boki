@@ -236,3 +236,9 @@ NEW EVOLUTIONS (add as new entries with name + display_name; coord files the lin
  22 Pangolith: add a T2.   24 Barokat: add an evo.   32 Bullsfrog: add a T1 and a T3.   33 Cubbat: add an evo.
  38 Lurklet/Snapler/Maulangler: coord call: CUT Snapler; the line becomes Lurklet (T1) > Maulangler (T2). Redo Lurklet if it still looks like Snapler.
 Priority: designs we don't have yet (4/6/17/26) and the Galleotter hero first, then the look-alike fixes, then poses, then the new evolutions.
+
+### 11-09 11:18 ET ART -> COORD
+Owner round-2 picks are live in LIVE_MANIFEST (hash changes):
+- Chandelapi: design B, regal planted card, plus new sheet and portrait.
+- Eclipsowl: live wings, fierce face, no rock base, plus new card, sheet and portrait. This fixes the rock base the owner flagged as item 2 in his notes to main.
+Still generating: Vespox jagged frill (sheet/card/portrait), Gongrowl chest-slam facing the camera, more Boki-like Reapant, and the Vespyx and Mycroll extra angles.
