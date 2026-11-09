@@ -1,7 +1,7 @@
 class_name KnockCallout
 extends Control
 ## The big moment when YOU knock or eliminate a rival (hero-ref/HUD.md 5): "KNOCKED <name>" or
-## "ELIMINATED <name>" above the crosshair for about a second. Quick knocks stack as lines, the
+## "ELIMINATED <name>" just under your hunter for about a second. Quick knocks stack as lines, the
 ## oldest going first. Transient only, nothing stays on screen. The sound is Juice's own
 ## knock_confirm / kill; this adds none. One lives on the HUD (`of`), made on the first call.
 
@@ -10,7 +10,8 @@ const POP := 0.12           # s a new line takes to settle from POP_SCALE to 1
 const POP_SCALE := 1.3
 const FADE_OUT := 0.25      # s
 const MAX_LINES := 3        # knocks on screen at once; a fourth pushes the oldest off
-const TOP := 0.3            # of the screen height: where the first line sits (under the message lane)
+const TOP := 0.6            # of the screen height: the first line's baseline, just under your hunter (the
+                            # ally alerts and message lane fill the top centre; the bottom HUD starts near 0.78)
 const WORD_PX := 0.045      # of the screen height: the KNOCKED / ELIMINATED word
 const NAME_PX := 0.032      # of the screen height: the name
 const GAP := 0.012          # of the screen height: between two lines

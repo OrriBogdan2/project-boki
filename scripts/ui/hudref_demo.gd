@@ -64,7 +64,7 @@ static func tick(m) -> void:
 		_busy(m, P)
 	if mode == "callout" and m.time >= CALLOUT_AT and not m.has_meta("hudref_callout"):
 		m.set_meta("hudref_callout", true)
-		var foes: Array = m.hunters.filter(func(x): return x != P)
+		var foes: Array = m.hunters.filter(func(x): return x.team != P.team)
 		m.knock(foes[0], P, {})
 		m.knock(foes[1], P, {})
 		m.eliminate(foes[2], P, "shot", true)

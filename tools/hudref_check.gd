@@ -209,6 +209,9 @@ func _check_callout(m: Match, P: Hunter, hud) -> void:
 		callout.push("KNOCKED", "N%d" % i, KnockCallout.KNOCK_COL)
 	var last: Array = callout.lines.map(func(e): return e["name"])
 	ok(last == ["N1", "N2", "N3"], "a fourth line pushes the oldest off (%s)" % str(last))
+	var low := KnockCallout.TOP + (KnockCallout.WORD_PX + KnockCallout.GAP) * (KnockCallout.MAX_LINES - 1)
+	ok(KnockCallout.TOP - KnockCallout.WORD_PX > 0.5 and low < 0.75,
+		"the stack sits under the centre, clear of the lane and bottom HUD (%.2f..%.2f)" % [KnockCallout.TOP, low])
 
 func _callout_of(hud) -> KnockCallout:
 	for ch in hud.get_children():
