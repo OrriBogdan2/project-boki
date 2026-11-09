@@ -64466,5 +64466,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/kayak_card102_1.jpg",
     "ok": true
+  },
+  {
+    "id": "gongrowl_cardy",
+    "name": "Gongrowl (hero card, chest beat)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardy_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_cardc",
+    "name": "Jibbatross (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/jibbatross_cardc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_cardy",
+    "name": "Gongrowl (hero card, chest beat)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardy_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_cardx",
+    "name": "Gongrowl (hero card, chest beat)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrasloth_t2n3",
+    "name": "Pangolith final (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t2n3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kayak_card101",
+    "name": "Kayak (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/kayak_card101_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_cardx",
+    "name": "Gongrowl (hero card, chest beat)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "echolop_cardw",
+    "name": "Echolop (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/echolop_cardw_3.jpg",
+    "ok": true
   }
 ]
