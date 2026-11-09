@@ -10132,5 +10132,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/mothlet_r3_1.jpg",
     "ok": true
+  },
+  {
+    "id": "lyrewing_r",
+    "name": "Lyrewing",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lyrewing_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter_e",
+    "name": "Oarter",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/oarter_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunowl_f_e",
+    "name": "Lunowl (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lunowl_f_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_r",
+    "name": "Lyrewing",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lyrewing_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rippmink_e",
+    "name": "Rippmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rippmink_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_e",
+    "name": "Seamwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/seamwyrm_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_e",
+    "name": "Seamwyrm",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/seamwyrm_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_r3",
+    "name": "Mothlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mothlet_r3_2.jpg",
+    "ok": true
   }
 ]
