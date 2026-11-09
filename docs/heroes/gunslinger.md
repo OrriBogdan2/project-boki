@@ -52,7 +52,7 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 | Dash -> E (LOW) | (c) | Kept "fire" (item 51); the footage's braced stand is the plain cast |
 | Passive, E numbers, X (-) | (c) | Match the data |
 | She/her in the shown text (LOW) | (b) | `gunslinger.json` fantasy ("her rifle"), this page and the kit comments |
-| Stale `dash_spent` tell (LOW) | (b) | "an ember afterimage and faint skid streaks" |
+| Stale `dash_spent` tell (LOW) | (b) | "the shared DashTrail after-images, no skid streaks" |
 
 ## Parity pass (LMB first)
 

@@ -208,11 +208,6 @@ func _build(kind: String) -> Node3D:
 				s2.basis = Basis(Quaternion(Vector3.UP, Vector3(cos(a6) * 0.35, 1.0, sin(a6) * 0.35).normalized()))
 		"frost":
 			_off(Models.part(n, Models.capsule(0.42, 1.5), orb_mat(Color("2fb0e0", 0.55)), Vector3(0, 0.8, 0)))
-		"slab":
-			# a plate of ice laid under her blades
-			_off(Models.part(
-					n, Models.box(1.0, 0.05, 0.7), ice_mat(Color("bff7ef"), 0.7, 0.35, Color("e8ffff")),
-					Vector3(0, 0.04, 0)))
 		"wall":
 			_build_wall(n)
 	root.add_child(n)
@@ -427,12 +422,6 @@ func _style(e: Dictionary, k: float) -> void:
 			n.scale = Vector3.ONE * lerpf(
 					0.4, 1.0, _out_back(clampf(k * 6.0, 0.0, 1.0))) * (1.0 - 0.3 * smoothstep(0.8, 1.0, k))
 			_tint(n, col, 1.0 - smoothstep(0.8, 1.0, k))
-		"slab":
-			var dv4: Vector2 = p.get("dir", Vector2(0, -1))
-			n.rotation = Vector3(0, atan2(-dv4.x, -dv4.y), 0)
-			var forms := lerpf(0.6, 1.0, clampf(k * 15.0, 0.0, 1.0))          # frozen in under the blade at once
-			n.scale = Vector3(r * forms, 1.0, r * forms)
-			_tint(n, Color.WHITE, 1.0 - smoothstep(0.3, 1.0, k))
 		_:
 			n.scale = Vector3.ONE * r
 			_tint(n, col, fade)

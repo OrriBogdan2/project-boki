@@ -143,7 +143,7 @@ func _tick_look(dt: float) -> void:
 					{
 						"r": 0.55 + 0.12 * n, "col": Color("9a6aff").lerp(Color("ffb347"), float(n) / 5.0),
 						"a": 0.35 + 0.13 * n, "fill": 0.8, "pattern": 0.0})
-	_tick_dash_look(dt)
+	_tick_glide(dt)
 	lk().tick(dt)
 	if ult_look != null:
 		ult_look.tick(dt)
@@ -172,15 +172,6 @@ func _dress_ember(s: Dictionary) -> void:
 		if not is_instance_valid(h) or look == null:
 			return
 		vfx("cast", CareUtil.hand_at(h, right), d2, {"k": big - 1.0}))
-
-## Her dashes leave a faint trail of stars (not the shared after-image), and the air dash glides.
-func _tick_dash_look(dt: float) -> void:
-	_tick_glide(dt)
-	if h.roll_t > 0.0 and h.move_kind == "dash":
-		HeroVfx.of(m).hold(h, "dash_trail")
-
-## Her own dash look (motes, puffs and the moves): no shared after-image pill, burst or ring.
-func own_dash_trail() -> bool: return true
 
 ## The kit's moves are the whole dash pose (mm_skip, mm_float): no shared roll under them.
 func dodge_anim() -> String: return "kit"

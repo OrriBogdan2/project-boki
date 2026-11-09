@@ -244,11 +244,6 @@ func charge_color() -> Color:
 func charge_orb() -> bool:
 	return false
 
-## His dash after-image: a gold chevron wake instead of the shared ghost.
-func dash_afterimage() -> bool:
-	fx.afterimage(h.position, h.face, float(h.cdat.get("scale", 1.0)))
-	return true
-
 ## Behind the raised shield you can't swing or throw.
 func fire_ok() -> bool:
 	return wall.is_empty() and not ult.planted()

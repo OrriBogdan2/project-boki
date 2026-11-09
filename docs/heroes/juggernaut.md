@@ -227,7 +227,7 @@ ultimate (now the X cooldown).
   hit radius 0.428 (`body.hit_r`, docs/HITBOX_SIZE.md).
 - Nameplate height 2.75 m (`body.plate`, `Arch.plate_y`).
 - Rampage: a 0.07 s dip (planted), then 4.5 m in 0.17 s, then a short low recovery (owner 113.8)
-  (keys end at 0.9 s). Its after-images are his own orange flame streaks.
+  (keys end at 0.9 s). Its after-images are the shared DashTrail.
 - The Enraged look is embers and dark drips on his body; no ground disc or light under him.
 
 ## Assumptions (where the footage is silent; easy to change in content/archetypes/juggernaut.json)

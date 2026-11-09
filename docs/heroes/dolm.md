@@ -237,7 +237,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 - Body, plain jumps, idle (not in the footage, built from her character): a short, wide brawler (0.97 tall, 1.2 wide) who
   stomps (a small dip on each step, no bounce), carries both fists low and forward when running and standing, breathes
   slowly (1.6), and lands every jump with the shared heavy squash. Her air dash (the class long dash) is a heavy shove with
-  a dust and ember after-image instead of the shared pill.
+  the shared DashTrail.
 - Basalt Spine: the drag sets the ridge along the line from its centre to the cursor (the footage shows the preview pivoting
   as the cursor swings, not which axis it follows).
 - Basalt Spine rocks stand 7s (the footage shows at least 5-6s); the slow is 35% for 1s ("brief"), carried by a 1-damage hit.
@@ -278,7 +278,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
   shoulder down behind the rock, fists forward): `breah_exdash`, a gather (0.03), a shoulder-first barge with the lead
   fist low and the legs trailing (0.08-0.18), a brace with the knees up (0.23 = the dash's 0.2s x the dash feel).
 - No blasts or rings on either: the leap's start is a dust kick as the rock heaves up, its landing a dust crash (the hit
-  area is the landing circle everyone sees through the flight); the air dash leaves only her dust after-image.
+  area is the landing circle everyone sees through the flight); the air dash leaves only the shared DashTrail.
 - Asserted: `item 35: her ground and air dash moves are two distinct ids...`, `...each dash move ends with its dash`,
   `...her air dash plays breah_exdash as the whole pose`, `...her ground/air dash draws no ground ring and no blast`.
   Strips: /home/boki/shots-s2/breah/review/breah_dash_ground_strip.png, breah_dash_air_strip.png.

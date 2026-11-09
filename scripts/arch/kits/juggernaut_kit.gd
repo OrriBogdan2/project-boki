@@ -162,7 +162,6 @@ func _tick_look(dt: float) -> void:
 
 func _tick(dt: float) -> void:
 	_tick_look(dt)
-	_tick_trail()
 	if rampage_wind > 0.0: _tick_crouch(dt)
 	var rd := res_def()
 	if enraged_t > 0.0:
@@ -511,16 +510,8 @@ func _rampage(dir: Vector2) -> void:
 	travel(float(dd["dist"]), t,
 			{"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk,
 					"trail": "dust", "dir": dir})
-	vfx("dash_go", h.pos, dir, {"len": float(dd["dist"]) * float(dash_feel()["dist"])})
+	vfx("dash_go", h.pos, dir)
 	m.later(t * 0.85, func(): if is_instance_valid(h) and not h.downed: _tip())
-
-## His own after-images on a dash: orange flame streaks along the ground behind him, not the shared pill.
-func own_dash_trail() -> bool:
-	return true
-
-func _tick_trail() -> void:
-	if h.roll_t > 0.0 and h.roll_speed >= 1.0 and tells_visible():
-		HeroVfx.of(m).hold(h, "dash_drive")
 
 ## The tip of the Rampage: the sweet spot, a short arc at the end of the dash.
 func _tip() -> void:

@@ -600,7 +600,7 @@ func _venator_owner1103() -> void:
 	P.inp["move"] = Vector2(0, -1)
 	P.inp["dash_down"] = true
 	P.do_dash()
-	var start_cap := "owner1103: Slipstep start, no rings or disc: ember after-image, dust, faint skid streaks"
+	var start_cap := "owner1103: Slipstep start, no rings or disc: dust and the shared after-image trail"
 	var start := [[0.03, "full", "owner1103_slide_start", start_cap]]
 	start.append([0.15, "full", "owner1103_slide_mid", "owner1103: Slipstep a moment in, no rings"])
 	await _go(0.4, func(_t: float): P.inp["move"] = Vector2(0, -1), start)

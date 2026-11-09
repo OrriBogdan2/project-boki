@@ -34,12 +34,6 @@
 			{"p": "smoke", "y": 0.15, "n": 3, "way": "back", "speed": 0.8, "spread": 0.6, "life": 0.6, "size": 0.25,
 				"c": "smoke", "c3": "lilac", "near": true}
 		]},
-		"dash_trail": {"fx": [
-			{"p": "star", "at": "chest", "n": 22, "way": "back", "lift": 0.2, "speed": 0.8, "spread": 0.6, "grav": -0.3,
-				"drag": 1.5, "curl": 1.2, "life": 0.8, "size": 0.18, "c": "main", "c2": "hot"},
-			{"p": "star", "at": "chest", "n": 8, "way": "back", "speed": 0.5, "spread": 0.8, "grav": -0.2, "life": 0.8,
-				"size": 0.09, "c": "pink", "c2": "hot", "near": true}
-		]},
 		"seed_aim": {"fx": [
 			{"p": "star", "at": "lantern", "n": 10, "shape": "gather", "radius": 0.6, "speed": 2.0, "life": 0.3,
 				"size": 0.08, "c": "lilac", "c2": "hot"}

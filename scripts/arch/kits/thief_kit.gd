@@ -39,7 +39,6 @@ const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the s
 ## that peaks near 0.15s and runs down into the hasted run by the landing (the sheet's measured curve).
 const VAULT_CURVE := [[0.0, 0.4], [0.3, 1.9], [1.0, 0.55]]
 const VAULT_MEAN := 1.2025         # the mean of VAULT_CURVE, so the distance stays the data's
-const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
 const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
 const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
 const CARTWHEELS := ["thf_vault_r", "thf_vault_l", "thf_vault_f", "thf_vault_b", "thf_vault_twist", "thf_exdash"]
@@ -71,7 +70,6 @@ var last_bolt_end := Vector3.ZERO
 var last_bolt_emp := false
 var blinks := 0
 var vault := {}                # the Cartwheel running: {t, dur, speed, air}
-var trail_t := 0.0
 var landing_due := false       # an air cartwheel is over; she lands in a crouch when she touches down
 
 func _setup() -> void:
@@ -255,7 +253,6 @@ func _tick(dt: float) -> void:
 	_tick_vault(dt)
 	chain.tick(dt)
 	_tick_landing()
-	_tick_trail(dt)
 	_tick_wrapped(dt)
 	_tick_knife()
 	_tick_glint(dt)
@@ -490,22 +487,6 @@ func play(move: String) -> void:
 	if encore.running() and move in ThiefUlt.DANCED_OVER:
 		return
 	super.play(move)
-
-## Her own after-images on every dash: cyan streaks and a spinning cyan star where her hands were (not the
-## shared team-colour pill).
-func own_dash_trail() -> bool:
-	return true
-
-func _tick_trail(dt: float) -> void:
-	if h.roll_t <= 0.0 or not tells_visible():
-		return
-	trail_t -= dt
-	if trail_t > 0.0:
-		return
-	trail_t = TRAIL_EVERY
-	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
-	fx().streak(h.pos + Vector3(0, 0.7, 0), dir, 1.3, 0.5, GHOST, Color("e0fbff"), 0.3)
-	fx().star(h.pos + Vector3(0, 1.0, 0), GHOST, 0.5, 0.22, Color("c9a0ff"))
 
 ## After a Vault: the flip (the routine's, ThiefChain; from a jump the air one), the white arc its hands and feet
 ## trace, the speed and, by its row, the next bolt empowered: the glint forms in the throwing hand and flares as

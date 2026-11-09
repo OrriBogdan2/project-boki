@@ -229,6 +229,14 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
+## Dash trail (`DashTrail`, `--dash-trail-check`)
+One after-image for every Hunter's dash and barge, in the source's read: a short streak that is gone by the dash end.
+`DashTrail.tick` (called from `Hunter.render`) lays a see-through copy of the body (`VVFx.echo`) every 0.05 s while
+`roll_t > 0`, in the Hunter's own colour (`Arch.color`), fading in 0.2 s. Dashes spawn no ring, disc, burst or ground
+mark (DECISIONS "Movement and combat feel"); the check asserts it for all 12 Hunters, on the ground and in the air, and
+that no copy is left 0.3 s after the dash. The moves that are areas keep their marks: Ostra's Trade circle, Tenzo's
+rocks, Mossy's 360 Smash, and the hold-to-charge tell before Sparkle's and Tenzo's air dashes.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.

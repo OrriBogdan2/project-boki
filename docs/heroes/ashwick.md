@@ -153,8 +153,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
   keeps half its speed after it.
 - Not in the footage, built from his character:
   a plain jump is a quick crouch and a springy tuck, landing on a light squash (`lw_land`); the idle fidgets are a restless
-  bounce, a bob and a check of the nozzle. His dashes leave ember puffs that burn out behind him instead of the shared pill, burst and ring
-  (`own_dash_trail`), and his ram and poof moves are the whole dash pose (`dodge_anim` "kit": no shared heavy charge pose
+  bounce, a bob and a check of the nozzle. His dashes leave the shared DashTrail (docs/MOVEMENT_FEEL.md), no burst or ring, and his ram and poof moves are the whole dash pose (`dodge_anim` "kit": no shared heavy charge pose
   under them; owner review item 35).
 
 ## Combinations (all scripted in `--ashwick-combo-check`)
@@ -219,7 +218,7 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
   soot hold on bright grass, `ld_fx_glow.gdshader` adds only the hot cores): the hose as pooled fire puffs (an orange body with a
   deep red band and a sooty rim, a white-hot core near the nozzle), the big cyan pilot, the Cinder Shot fireball (red-pink body,
   yellow core, violet halo, dark smoke tail; a red jagged flash, red orb and embers on hit, a violet fizzle ring on a miss), the
-  flat flame skull with long ember tails on the ram and ember-puff after-images, the jagged 14-ray sunburst and cracked scorch of
+  flat flame skull on the ram, the jagged 14-ray sunburst and cracked scorch of
   the cloak, the deep orange two-ring fire shield, the molten carpet with charred edges, and the flame pips over burning foes.
 - Weapon: none (the procedural `HeroGearPair.flamer` is only the stand-in until her rebuilt model lands).
 - Sounds (`tools/gen_sfx_cinder.py`, set `content/sfx/ashwick.json`, docs/AUDIO.md): the lance's pilot and roar (`lw_pilot`,

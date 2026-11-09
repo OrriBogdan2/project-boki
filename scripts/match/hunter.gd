@@ -1227,10 +1227,6 @@ func dash_with(e: Dictionary) -> void:
 		ammo = mini(mag, ammo + int(ceil(mag * float(e["reload"]))))
 		if ammo >= mag: reload_t = 0.0
 	match String(e.get("trail", "")):
-		"ghost":
-			for i in 3:
-				m.later(roll_t * float(i) / 3.0, func():
-					if is_instance_valid(self) and m: m.fx.ghost(position, face, Color("d8c8ff"), float(cdat["scale"])))
 		"roll":
 			m.fx.dust(pos, 6)
 		"dust":
@@ -1242,8 +1238,7 @@ func dash_with(e: Dictionary) -> void:
 	fly_t = 0.0
 	if wpn.get("bloom_dash_reset", false): wbloom = 0.0
 	m.sfx(HeroSfx.of(self, "dash", "dash"), pos, -4.0, 0.8 if not shove.is_empty() else 1.0)
-	if not (ak and ak.own_dash_trail()):
-		m.fx.dash_trail(self)          # the shared puff and ring; a kit with its own trail draws no ring
+	m.fx.dash_trail(self)              # the shared dust puff (the after-images are DashTrail's)
 
 ## A grammar dash you perform (or a kit's dash that hits): what you dash through gets its effects.
 func _pass_along() -> void:
@@ -3272,14 +3267,8 @@ func render(delta: float, alpha: float) -> void:
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)
-	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
-	if roll_t > 0.0:
-		ghost_t -= delta
-		if ghost_t <= 0.0 and model.visible and not (ak and ak.own_dash_trail()):
-			ghost_t = 0.028
-			if ak == null or not ak.dash_afterimage():
-				m.fx.ghost(position, face, tc, float(cdat["scale"]))
-	elif gliding:
+	DashTrail.tick(self, delta)
+	if gliding and roll_t <= 0.0:
 		wind_t -= delta
 		# (movefeel) carrying a dash's momentum: a dense streak trail and afterimages until it bleeds off
 		var boosted := boost_fx_t > 0.0 and spd > GLIDE_SPEED * 1.25 and not dropping

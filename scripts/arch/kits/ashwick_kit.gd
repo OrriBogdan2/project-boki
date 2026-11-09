@@ -601,9 +601,6 @@ func _ram_looks(dir: Vector2) -> void:
 			Color("ffe08a"), 1.6, atan2(-dir.x, -dir.y)
 		)
 		skull.rotate_object_local(Vector3.RIGHT, SKULL_TILT)
-	HeroVfx.of(m).hold(h, "ram_trail")
-
-func own_dash_trail() -> bool: return true
 
 ## His ram and poof moves are the whole dash pose (as_leap, lw_hop): no shared heavy charge under them.
 func dodge_anim() -> String: return "kit"

@@ -86,11 +86,6 @@ func charge_now() -> Array:
 func charge_orb() -> bool:
 	return false
 
-## Her dash after-image: green fletch streaks instead of the shared ghost.
-func dash_afterimage() -> bool:
-	fx.afterimage(h.position, h.face, float(h.cdat.get("scale", 1.0)))
-	return true
-
 ## X: Starpiercer, the next shots empowered.
 func cast_ult() -> bool: return HeroUlt.press(self, ult.cast)
 func has_ult() -> bool: return true

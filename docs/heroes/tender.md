@@ -119,7 +119,7 @@ Asserted in `--tender-combo-check` ("mm dashes: Elluna's cooldowns ...", "mm das
 | Hearth Call: the aim telegraph (ring, line) on a teammate under the cursor, X to tether; heals while she walks; pulls a downed teammate home and stands them up | `_call_preview`, `cast_ult`, `_tick_call`, `_call_home` | the "mm X" rows |
 | Hearth Call + Hearthlight thrown on the arrival spot (the sheet's pairing) | both run at once | "mm X: other abilities still cast during the channel" |
 | Hearth Call pays the bond only on a completed tether or a rescue | `_call_end` -> `KinBond.from_ult` | "mm X: no bond is paid for the cast alone", "... pays the bond as a hit", "a rescue pays ... (kill)", "it breaks ... and pays nothing" |
-| Ground skip, then the air glide: Elluna's distances and timings, each its own move, no ring or burst | `on_dash`, `_start_glide`, `own_dash_trail`, `dodge_anim`, KMovesCare `mm_skip` / `mm_float` | "mm dashes: the ground hop is Elluna's ..."; "... the air glide is Elluna's ..."; "... 3-4x the hop's distance and about 5x its time"; "mm dashes: each plays its own move, never the shared roll"; "mm dashes: each move covers its dash and settles soon after (ground 0.16-0.25 s)"; "mm dashes: no other kit plays her dash moves"; "mm dashes: no ring or burst on her hop or glide (two tiny dust puffs, soft motes)" |
+| Ground skip, then the air glide: Elluna's distances and timings, each its own move, no ring or burst | `on_dash`, `_start_glide`, `dodge_anim`, KMovesCare `mm_skip` / `mm_float` | "mm dashes: the ground hop is Elluna's ..."; "... the air glide is Elluna's ..."; "... 3-4x the hop's distance and about 5x its time"; "mm dashes: each plays its own move, never the shared roll"; "mm dashes: each move covers its dash and settles soon after (ground 0.16-0.25 s)"; "mm dashes: no other kit plays her dash moves"; "mm dashes: no ring or burst on her hop or glide (two tiny dust puffs, soft motes)" |
 | Hearthlight runs out: the last heal blooms, no blast | `_hearth_end`, `_bloom` | "mm E: the light's last heal blooms (heals, no ring, blast or shake; a quiet chime)" |
 | A merge start ends Hearth Call (no pull, no bond; `hearth_call`) | `_drop_holds`, `ArchKit.drop_holds` | "mm merge: drop_holds ends Hearth Call" |
 
@@ -144,7 +144,7 @@ The moves live in `scripts/match/kmoves_care.gd` (`KMovesCare.MOVES`, read by `H
 | X channel (f26-f73) | `mm_call_hold` (hold) | 0 / 0.3 | one hand held high over the tether; the legs keep walking |
 | X end (f74-f77) | `mm_call_end` | 0.07 sweep down, 0.14 arms open, 0.3 | the raised hand swept down to her side (the pull home), open on the arrival burst |
 
-Her dashes leave a few soft ember motes (CareLook "mote") instead of the shared after-image pill, burst and ring (`own_dash_trail`), and her moves are the whole dash pose (`dodge_anim` "kit": no shared roll under them).
+Her dashes leave the shared DashTrail (no burst or ring), and her moves are the whole dash pose (`dodge_anim` "kit": no shared roll under them).
 
 Strips: `--arena=thief --arena-demo=care_tender_<lmb|emp|rmb|e|dash|air|airsteer|carry|payoff|walk|pose|ultaim|ultkey|ult> --arena-shot=<dir>/x.png [--care-close]` (scripts/match/care_demo.gd) saves each key moment at its moment and a strip of 4-6 frames cropped round her, at the gameplay camera or (with `--care-close`) a low close-up.
 

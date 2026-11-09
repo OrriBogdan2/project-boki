@@ -10,7 +10,7 @@ extends Node3D
 ##   ring-free flash on it, the glint burning white-hot while the perfect window is open. It never stops until
 ##   he lets go: the charge motion only, the damage comes on the release
 ## - the slam's flaming 180 degree crescent in front, the 360 Smash's red-orange-gold spiral ring
-## - the Bash's gold fan of force, the dash's gold chevron wake (his own after-image)
+## - the Bash's gold fan of force
 ## - his aegis: a wall of forged plates (two rows, riveted, ribbed, a rim and a hammer boss) leaning out
 ##   toward the camera, rising out of the ground in a puff of dust, flashing on a block, darkening as it
 ##   weakens and breaking into chunks (the verbs wall underneath keeps the blocking; its plain slab is
@@ -33,11 +33,6 @@ const CRES_OUT := 2.9
 const CRES_Y := 0.45
 const SWIRL_T := 0.45
 const BASH_T := 0.2
-## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
-## many are pooled and how often one is left (s)
-const WAKE_T := 0.28
-const WAKE_POOL := 6
-const WAKE_EVERY := 0.06
 ## the Bash's gold fan: half its angle (rad) and its reach scale over the Bash's radius
 const BASH_HALF := 0.6
 const CHAIN_LINKS := 18
@@ -99,10 +94,6 @@ var plate_mats: Array = []     # [plate, edge] materials (flash and crack)
 var aegis_hit := 0.0
 var rise_t := 0.0
 var push_flash := 0.0
-var wakes: Array[MeshInstance3D] = []
-var wake_life: Array[float] = []
-var wake_next := 0
-var wake_at := -1.0
 var column: MeshInstance3D
 var disc: MeshInstance3D
 var disc_t := 0.0
@@ -153,13 +144,6 @@ func _ready() -> void:
 	KitShaders.param(bash_fan, "twist", 0.0)
 	KitShaders.param(bash_fan, "spin", 0.0)
 	_build_aegis()
-	var wake_mesh := KitMeshes.band(0.35, 0.8, -1.3, 1.3, 14)
-	for i in WAKE_POOL:
-		var wake := KitMeshes.inst(self, wake_mesh, KitShaders.mat("swirl", EMBER, true))
-		KitShaders.param(wake, "color2", GOLD)
-		KitShaders.param(wake, "twist", 0.0)
-		wakes.append(wake)
-		wake_life.append(0.0)
 	column = KitMeshes.inst(self, KitMeshes.pillar(0.9, 1.4, 9.0), KitShaders.mat("beam", GREEN))
 	column.material_override.set_shader_parameter("speed", -1.2)
 	disc = KitMeshes.inst(self, KitMeshes.band(0.2, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GREEN))
@@ -431,21 +415,6 @@ func bash(at: Vector3, dir: Vector2, reach: float, slam_hit: bool) -> void:
 	h.m.fx.flash(shield_at, EMBER if slam_hit else GOLD, 1.1, 0.07)
 	h.m.fx.spark(shield_at, Vector3(dir.x, 0.1, dir.y), Color("ffd25a"), 10, 10.0, 40.0, 0.2, 6.0, 1.1)
 
-## The dash's after-image: a gold chevron wake at his chest, pointing the way he faces (pooled, one every
-## WAKE_EVERY s).
-func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
-	var now := float(h.m.time)
-	if now - wake_at < WAKE_EVERY and now >= wake_at:
-		return
-	wake_at = now
-	var wake := wakes[wake_next]
-	wake_life[wake_next] = WAKE_T
-	wake_next = (wake_next + 1) % WAKE_POOL
-	wake.visible = true
-	wake.global_position = at + Vector3(0, 1.0 * body_scale, 0)
-	wake.rotation = Vector3(0, yaw, 0)
-	wake.scale = Vector3.ONE * body_scale
-
 # ------------------------------------------------------------------ the aegis
 ## Follows the raised shield (the verbs wall dict): its node is hidden, ours drawn in its place.
 func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
@@ -562,17 +531,6 @@ func _process(_delta: float) -> void:
 		disc.visible = disc_t > 0.0
 	if beacon.visible:
 		_stand_beacon()
-	_tick_wakes(delta)
-
-func _tick_wakes(delta: float) -> void:
-	for i in WAKE_POOL:
-		if wake_life[i] <= 0.0:
-			continue
-		wake_life[i] -= delta
-		var life := clampf(wake_life[i] / WAKE_T, 0.0, 1.0)
-		KitShaders.param(wakes[i], "life", life)
-		wakes[i].scale = Vector3.ONE * wakes[i].scale.x * (1.0 + delta * 1.5)
-		wakes[i].visible = wake_life[i] > 0.0
 
 func _tick_hold(delta: float) -> void:
 	var pv := _pivot()

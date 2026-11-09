@@ -552,7 +552,6 @@ func on_dash(use_ex: bool) -> bool:
 	hop.start()
 	return true
 
-## Her dash after-image: a puff of quarry dust and a few embers, not the shared pill.
 ## Her own hand tell (the molten fists) replaces the shared white charge orb.
 func charge_orb() -> bool:
 	return false
@@ -582,11 +581,6 @@ func dash_left() -> float:
 ## Her dash moves (breah_hop, breah_skate, breah_exdash) are the whole dash pose: no shared roll under them.
 func dodge_anim() -> String:
 	return "kit"
-
-func dash_afterimage() -> bool:
-	m.fx.burst(h.pos + Vector3(0, 0.5, 0), Color(0.62, 0.48, 0.34, 0.8), 3, 1.2, 0.4, -1.0, 1.6)
-	m.fx.burst(h.pos + Vector3(0, 0.9, 0), MOLTEN, 1, 1.5, 0.3, 2.0, 0.8)
-	return true
 
 # ------------------------------------------------------------------ RMB: Quakefall (BreahSlam)
 func rmb_charge_full() -> float:

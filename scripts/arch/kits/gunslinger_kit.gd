@@ -19,13 +19,6 @@ const BRONZE := Color("b9732f")
 const SMOKE := Color("d9c2a8")       # the Longneedle's recoil smoke ring: warm, not white
 const SCRAPE := Color("6b4a2e")      # the slide's dust scrape under her
 const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
-const SKID_LEN := 2.2                # m, the faint streaks at a slide's start
-const SKID_SPREAD := 0.28            # m off the path's centre line
-const SKID_WIDTH := 0.1
-const SKID_SECONDS := 0.45
-const ECHO_GAP := 0.05               # s between her after-images on a slide or the air dash
-const ECHO_ALPHA := 0.35             # see-through, so the trail never covers her live body
-const ECHO_BACK := 0.35              # m behind her along her travel: the echoes trail, not overlap
 const PIP_LIFT := 0.9                # m up the screen the Fever pips sit, clear of her cap and face
 const TUBE_UP := 0.16                # m above the gun's muzzle: the launcher tube, on a model without its empties
 const TUBE_FIRE := "launcher_fire"   # fixed on the cannon at the bell's firing spot: the charge leaves from here
@@ -52,7 +45,6 @@ var last_cone := {}            # tests: {at, dir, wall}
 var last_shot := 0
 var puffs := 0                 # tests: launcher puffs
 var last_puff := Vector3.ZERO  # tests: where the last one went off
-var echo_t := 0.0
 var refill_part := 0.0         # rounds the resting drum has part-refilled
 var dry := false               # the drum ran dry: no round until it is full again
 var round_at := -9.0           # match time of her last rifle round (the firing brackets)
@@ -97,12 +89,8 @@ func _tick(dt: float) -> void:
 	_tick_lmb()
 	_tick_mag(dt)
 	_tick_brackets()
-	_tick_echo(dt)
 	_tick_trail()
 	self_pips(int(res_def()["max"]), int(floor(res + 0.01)), false, dt, PIP_LIFT, 0.65)
-
-func own_dash_trail() -> bool:
-	return true
 
 func dodge_anim() -> String:
 	return "slide" if not slide.is_empty() else ""      # Slipstep: the kit move is the whole pose (no roll)
@@ -121,21 +109,6 @@ func _tick_trail() -> void:
 	var hand: Node3D = h.anim.hand_l if String(tr[0]) == "l" else h.anim.hand_r
 	if hand != null:
 		fx().trail("vn%d" % h.get_instance_id(), hand.global_position, EMBER, HOT, 0.24)
-
-## Her after-image colour: a deeper ember, so the trail reads apart from her warm live body.
-static func echo_col() -> Color:
-	return EMBER.lerp(DEEP, 0.5)
-
-## Her own after-images on Slipstep and the air dash: her silhouette in ember, cooling to deep red.
-func _tick_echo(dt: float) -> void:
-	if h.roll_t <= 0.0 and slide.is_empty():
-		echo_t = 0.0
-		return
-	echo_t -= dt
-	if echo_t > 0.0:
-		return
-	echo_t = ECHO_GAP
-	fx().echo(h, echo_col(), 0.4, ECHO_ALPHA, ECHO_BACK)
 
 func teardown() -> void:
 	super.teardown()
@@ -255,7 +228,6 @@ func on_dash(use_ex: bool) -> bool:
 		travel(ad, air_t, {"invuln": float(dd["invuln"])})
 		slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0, "air": true, "len_t": air_t}
 		play("gunslinger_dash")
-		fx().echo(h, echo_col(), 0.5, ECHO_ALPHA, ECHO_BACK)
 		m.sfx("vn_slide", h.pos, -4.0, 1.2)
 		last_dash_kind = "air_slide"
 		return true
@@ -264,7 +236,6 @@ func on_dash(use_ex: bool) -> bool:
 			return true
 		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.08})
 		play("gunslinger_dash_ex")
-		fx().echo(h, echo_col(), 0.45, ECHO_ALPHA, ECHO_BACK)
 		last_dash_kind = "air"
 		return true
 	if not spend_dash(false):
@@ -273,22 +244,10 @@ func on_dash(use_ex: bool) -> bool:
 	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"])})
 	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0}
 	play("gunslinger_dash")
-	# where it began: her ember after-image standing there (0.6 s), dust, and two faint skid streaks.
-	# No rings or discs: those mean damage or an area in this game
-	fx().echo(h, echo_col(), 0.6, ECHO_ALPHA, ECHO_BACK)
-	_skid_streaks(start, h.roll_dir)
+	# dust where it began: no rings, discs or ground marks, those mean damage or an area in this game
 	m.fx.dust(h.pos, 10)
 	m.sfx("vn_slide", h.pos, -4.0)
 	return true
-
-## Two short, low-contrast scrape lines on the ground along the first stretch of the slide.
-func _skid_streaks(from: Vector3, dir: Vector2) -> void:
-	var along := Vector3(dir.x, 0.0, dir.y)
-	var side := Vector3(-dir.y, 0.0, dir.x) * SKID_SPREAD
-	var low := Vector3(0.0, 0.05, 0.0)
-	for sign_k in [-1.0, 1.0]:
-		var begin: Vector3 = ground(from) + low + side * sign_k
-		fx().smear(begin, begin + along * SKID_LEN, SCRAPE, SCRAPE.lightened(0.2), SKID_WIDTH, SKID_SECONDS)
 
 func _slide_end() -> void:
 	h.roll_t = 0.0
@@ -322,7 +281,7 @@ func _tick_slide(dt: float) -> void:
 	slide["fx"] = float(slide["fx"]) - dt
 	if float(slide["fx"]) <= 0.0:
 		slide["fx"] = 0.06
-		m.fx.dust(h.pos, 2)            # (the after-images and the scrape are _tick_echo's)
+		m.fx.dust(h.pos, 2)            # (the after-images are DashTrail's)
 	if not bool(slide["held"]):
 		if bool(slide.get("air", false)):
 			if t >= float(slide["len_t"]):

@@ -18,7 +18,7 @@ var darts: Array = []          # homing shards in flight: {s: Dictionary, side: 
 var dart_n := 0                # darts thrown (alternates the bow side and the hand)
 var seq_next := 0.0            # when the next dart may leave
 var burst_i := 0               # darts so far in this hold: after wpn.burst plain ones come wpn.heavy.n large ones
-var rinkrun := {}              # the running Skate: {t, dir, loop, slab}
+var rinkrun := {}              # the running Skate: {t, dir, loop}
 var ice_t := 0.0               # s until the rank-3 Skate may lay its next span of ice
 var wall := {}                 # the Rink Wall: {w, dir, sliding, t, slide_t, hp0, hit}
 var carried := {}              # foe id -> its Displace tow: bodies the sliding Rink Wall carries
@@ -37,10 +37,6 @@ var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
 var glide_held := false        # the glide key was down last step (Rimelock refuses each new press once)
 var ult_look: UltLook
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
-const SLAB_GAP := 0.06         # s between ice plates under the skate
-const FROST_EVERY := 3         # ice plates between two frost patches left on the ground behind her
-const SLAB_LEAD := 0.5         # m ahead of her middle a plate forms (under the leading blade)
-const SLAB_LIFE := 3.0         # s a plate stays before it fades (the owner's "a few seconds")
 const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 body heights)
 const PUSH_T := 0.1           # s from letting go of RMB to the release: both palms drive forward (tm_spear)
 const SPEAR_ARC := 0.25        # m the driven spear's low flight bows above the line from her palms to the ground
@@ -167,7 +163,7 @@ func _tick(dt: float) -> void:
 	_tick_wall(dt)
 	_tick_zones(dt)
 	_tick_rime(dt)
-	_tick_trails(dt)
+	_tick_trails()
 	if h.is_local() and not busy():
 		AimKit.line(h, "aim", {"alpha": 0.7, "col": Color("e8ffff")})     # the thin aim line to the cursor, always up
 	lk().tick(dt)
@@ -369,7 +365,7 @@ func on_dash(_use_ex: bool) -> bool:
 func _begin_skate() -> void:
 	h.dashes -= 1.0
 	var dir := dash_dir()
-	rinkrun = {"t": 0.0, "dir": dir.normalized(), "loop": 0.16, "slab": 0.0, "air": not h.grounded}
+	rinkrun = {"t": 0.0, "dir": dir.normalized(), "loop": 0.16, "air": not h.grounded}
 	h.gliding = false          # a press while gliding folds the glider: the skate takes over
 	if not h.grounded:
 		h.vel.y = -float(dash_def().get("air_fall", 1.5))
@@ -508,29 +504,10 @@ func _edge_spray(dir: Vector2, turn_rate: float, dt: float) -> void:
 	var outside := Vector2(dir.y, -dir.x) * signf(turn_rate)
 	vfx("skate_carve", h.pos + Vector3(outside.x * 0.3, 0.0, outside.y * 0.3), outside)
 
-## The skate's frost trail: ice chips and snow drifting off her blades (content/vfx "skate", held while she
-## skates) and the ice plates under them; her own trail replaces the shared after-image pill.
-func _tick_trails(dt: float) -> void:
-	if h.roll_t > 0.0:
-		h.ghost_t = 0.3
+## The skate's ice chips and snow drifting off her blades (content/vfx "skate", held while she skates).
+func _tick_trails() -> void:
 	if not rinkrun.is_empty():
 		HeroVfx.of(m).hold(h, "skate")
-		_lay_slabs(dt)
-
-## Plates of ice that form under her blades as she skates and fade behind her, each with a frost sheen
-## where the blade bites.
-func _lay_slabs(dt: float) -> void:
-	rinkrun["slab"] = float(rinkrun.get("slab", 0.0)) - dt
-	if float(rinkrun["slab"]) > 0.0:
-		return
-	rinkrun["slab"] = SLAB_GAP
-	var span := randf_range(0.9, 1.3)
-	# laid just under the leading blade, so the newest plate is always under her feet
-	var under := h.position + Vector3(h.roll_dir.x, 0.0, h.roll_dir.y) * SLAB_LEAD
-	lk().burst("slab", under, {"r": span, "dur": SLAB_LIFE, "dir": h.roll_dir.rotated(randf_range(-0.25, 0.25))})
-	rinkrun["frost"] = int(rinkrun.get("frost", 0)) + 1
-	if int(rinkrun["frost"]) % FROST_EVERY == 0:
-		vfx("skate_frost", h.position, h.roll_dir)       # a frost patch that lingers, then melts
 
 # ------------------------------------------------------------------ RMB: Ice Spear
 func rmb_charge_full() -> float: return 0.0

@@ -21,11 +21,6 @@ const ARROWS := 10
 const SPENT := 8
 const STREAKS := 26
 const FLAMES := 4
-## her dash after-image: green fletch streaks left at hip, chest and shoulder height, how long each lasts
-## (s), how many are pooled and how often a set is left (s)
-const WISP_T := 0.26
-const WISPS := 12
-const WISP_EVERY := 0.05
 const SPENT_T := 4.0           # s a spent arrow stays in the ground
 const STAKE_T := 7.0           # s the stake a wall pin leaves in the wall stays
 ## the Heavy Shot's arrow is this many times a normal arrow (the Empowered bolt is 1.0): unmistakable
@@ -53,9 +48,6 @@ var posts: Array = []
 var glow: MeshInstance3D
 var streaks: Array = []        # {node, t, from, to}
 var flames: Array = []         # {node, foe}
-var wisps: Array = []          # {node, t}
-var wisp_next := 0
-var wisp_at := -1.0
 var tint: ColorRect = null
 var tint_k := 0.0
 var tint_want := 0.0
@@ -101,9 +93,6 @@ func _ready() -> void:
 	for i in STREAKS:
 		var streak_node := KitMeshes.inst(self, KitMeshes.quad(0.07, 1.3), KitShaders.mat("streak", SILVER))
 		streaks.append({"node": streak_node, "t": 0.0})
-	for i in WISPS:
-		var wisp := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", GREEN, true))
-		wisps.append({"node": wisp, "t": 0.0})
 	for i in FLAMES:
 		var fm := KitShaders.mat("flame", Color("5aa8ff"))
 		fm.set_shader_parameter("seed", float(i) * 1.7)
@@ -320,23 +309,6 @@ func stake(at: Vector3, dir: Vector2) -> void:
 	staked += 1
 	star(at, 1.6, GOLD, 0.2, 0.0, PI * 0.25, 2.2)
 
-## Her dash after-image: three green fletch streaks at hip, chest and shoulder height, lying along the way
-## she faces and fading behind her (pooled, a set every WISP_EVERY s).
-func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
-	var now := float(h.m.time)
-	if now - wisp_at < WISP_EVERY and now >= wisp_at:
-		return
-	wisp_at = now
-	for lift in [0.55, 1.0, 1.4]:
-		var w: Dictionary = wisps[wisp_next]
-		wisp_next = (wisp_next + 1) % WISPS
-		var n: MeshInstance3D = w["node"]
-		n.visible = true
-		n.global_position = at + Vector3(0, lift * body_scale, 0)
-		n.rotation = Vector3(-PI * 0.5, yaw + PI * 0.5, 0)
-		n.scale = Vector3(1.3, 0.16, 1.0) * body_scale
-		w["t"] = WISP_T
-
 ## Hail Wall's cast: green arrows streaking up out of the bow, lobbed toward `dir`.
 func lob(at: Vector3, dir: Vector2) -> void:
 	var launched := 0
@@ -351,15 +323,6 @@ func lob(at: Vector3, dir: Vector2) -> void:
 		launched += 1
 		if launched >= 5:
 			return
-
-func _tick_wisps(delta: float) -> void:
-	for w in wisps:
-		if float(w["t"]) <= 0.0:
-			continue
-		w["t"] = float(w["t"]) - delta
-		var n: MeshInstance3D = w["node"]
-		KitShaders.param(n, "power", 1.6 * clampf(float(w["t"]) / WISP_T, 0.0, 1.0))
-		n.visible = float(w["t"]) > 0.0
 
 # ------------------------------------------------------------------ Rain of Arrows
 ## Shows the wall for `t` s: an arc of `deg` round `center` at `radius`, facing `dir`.
@@ -500,7 +463,6 @@ func _process(_delta: float) -> void:
 		n.scale = Vector3.ONE * float(s["size"]) * (0.6 + 0.6 * sin(minf(u * 2.2, 1.0) * PI * 0.5))
 		KitShaders.param(n, "power", float(s.get("pow", 1.6)) * (1.0 - u * u))
 	_tick_bursts(delta)
-	_tick_wisps(delta)
 	for c in spent:
 		if float(c["t"]) > 0.0:
 			c["t"] = float(c["t"]) - delta

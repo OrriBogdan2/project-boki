@@ -55,7 +55,6 @@ var slam_dir := Vector2.ZERO    # where the slam lands, locked at the press (the
 var dive := {}                  # hold: the air smash falling {h0, t}
 var lock_until := -9.0          # the barge can't turn much until then (just after the Anchor)
 var barge_t := 0.0              # the barge's trail is showing
-var trail_t := 0.0              # the next barge after-image
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
 var next_barge := -9.0          # the short gap between barges in a run
 var shot_seen := 0              # the last weapon volley the kit dressed
@@ -269,7 +268,6 @@ func _tick_looks(dt: float) -> void:
 		fx.place("chain%d" % id, "chain", h.pos + Vector3(0, 0.08, 0), BRASS, IRON, 0.95, m.time * 0.6)
 	if barge_t > 0.0:
 		barge_t -= dt
-		_barge_trail(dt)
 	for s in stunned.duplicate():
 		var f = s["e"]
 		if not is_instance_valid(f) or (f as Ent).dead or m.time > float(s["until"]):
@@ -711,7 +709,6 @@ func on_dash(use_ex: bool) -> bool:
 		m.sfx("dredge_junk_clatter", h.pos, -6.0, 1.0)      # the hoard on his back rattles
 	if rank("dash") >= 3:
 		h.wbloom = 0.0                # rank 3: a dash resets the gun's bloom
-	_clawed_turf(dir)
 	barge_t = h.roll_t
 	stop_t = h.roll_t + 0.02
 	next_barge = m.time + h.roll_t + float(dd["gap"])
@@ -746,25 +743,6 @@ func _tick_stop(dt: float) -> void:
 	var flat := Vector2(h.vel.x, h.vel.z).limit_length(STOP_CARRY)
 	h.vel.x = flat.x
 	h.vel.z = flat.y
-
-## Dredge's own barge after-images: dark iron shoves with a brass rim, dropped behind him as he lumbers.
-func _barge_trail(dt: float) -> void:
-	trail_t -= dt
-	if trail_t > 0.0:
-		return
-	trail_t = 0.045
-	var d2 := h.aim_dir()
-	fx.puff(h.pos + Vector3(0, 0.9, 0) - Vector3(d2.x, 0, d2.y) * 0.5, LDFx.M_ORB, BRASS, IRON, 0.9, 0.3)
-
-func own_dash_trail() -> bool: return true
-
-## Clods of turf his hands tear up as he hauls himself off, thrown back behind him (no burst: a dash never
-## explodes).
-func _clawed_turf(dir: Vector2) -> void:
-	if not h.grounded:
-		return
-	var at := h.pos + Vector3(dir.x * 0.6, 0.15, dir.y * 0.6)
-	m.fx.burst(at, Color("6a5236"), 10, 4.0, 0.35, 12.0, 1.0, Vector3(-dir.x, 0.5, -dir.y), 35.0)
 
 # ------------------------------------------------------------------ X: Brass Broadside
 ## Only from a free stance: not mid-reel, mid-Anchor or mid-dive.

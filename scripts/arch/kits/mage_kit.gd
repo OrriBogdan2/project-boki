@@ -18,7 +18,6 @@ const TEAL := Color("1fc6dc")        # the lightning's body: a saturated teal th
 const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
 const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
-const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
 
 var sparks := {}               # foe id -> {e, n, t}
 var wire := {}                 # Wirerun held: {t, y, air, end}
@@ -38,7 +37,6 @@ var last_shot := 0
 var last_dash_kind := ""
 var last_strike := {}          # tests: the last Skycall's {at, dir}
 var last_push := 0.0           # tests: how hard the last rod knocked
-var echo_t := 0.0
 var ult: MageUlt               # Kitefall, her ultimate on X
 var sky: MageSky               # Skycall (E) and the orbs it flings
 var gum                        # the bubble she blows and pops (mage_gum.gd)
@@ -181,7 +179,6 @@ func _tick(dt: float) -> void:
 		reset_boost_t -= dt
 		reset_dash_boost = reset_boost_t > 0.0
 	ult.tick(dt)
-	_tick_echo(dt)
 	_tick_trail()
 	_tick_motes(dt)
 	sky.tick(dt)
@@ -196,9 +193,6 @@ func _tick(dt: float) -> void:
 		rod.visible = false
 	net_pulse(dt, full_ready())
 
-func own_dash_trail() -> bool:
-	return true
-
 ## Moves whose hand leaves a teal swoosh: [hand, from s, to s].
 const TRAILS := {"mage_lmb_l": ["l", 0.0, 0.12], "mage_lmb_r": ["r", 0.0, 0.12], "mage_e": ["l", 0.0, 0.34],
 	"mage_e_snap": ["l", 0.0, 0.12], "mage_live": ["l", 0.0, 0.12], "mage_rmb": ["r", 0.0, 0.2]}
@@ -211,17 +205,6 @@ func _tick_trail() -> void:
 	var hand: Node3D = h.anim.hand_l if String(tr[0]) == "l" else h.anim.hand_r
 	if hand != null:
 		fx().trail("vt%d" % h.get_instance_id(), hand.global_position, TEAL, PINK, 0.24)
-
-## Her own after-images on the air dash and the Wirerun streak: her silhouette in teal (pink on the streak).
-func _tick_echo(dt: float) -> void:
-	if h.roll_t <= 0.0 and run_t <= 0.0:
-		echo_t = 0.0
-		return
-	echo_t -= dt
-	if echo_t > 0.0:
-		return
-	echo_t = ECHO_GAP
-	fx().echo(h, PINK.lerp(TEAL, 0.35) if run_t > 0.0 else TEAL, 0.3)
 
 func teardown() -> void:
 	super.teardown()
@@ -461,7 +444,7 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	if h.model: h.model.visible = false
 	m.later(time, _arrive)
 
-## The streak itself: the body is hidden behind her own pink-teal after-images (_tick_echo); orbs crossed burst.
+## The streak itself: the body is hidden behind her after-images (DashTrail); orbs crossed burst.
 func _tick_run(dt: float) -> void:
 	run_t -= dt
 	if h.model:

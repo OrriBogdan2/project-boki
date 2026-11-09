@@ -95,7 +95,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 ## Body and movement (hero sheet: Body, scale and movement feel)
 - About 1.15 of a medium tall to the top of the head (`--warden-model-check`) and ~1.6 wide with the coat and fur (`body.build` 1.18 over the heavy build); the hit radius is 0.46 (1.15 x standard, `body.hit_r`, docs/HITBOX_SIZE.md), so the wider model isn't an easier target. The Warden model (concept sheet, `scripts/heroes/warden_bulwark.gd`: the drowned ferryman, the prow shield and ice-cased oar in `PinBjornWeapons`) has a small head on a big body: `body.head` 0.75, `body.neck` 0.08, `body.size` 1.02.
 - Runs pitched far forward (~0.32 rad at a full run), the shield shoulder leading, shoulders square; quick steps at `spd*2.9` (HunterAnim.STRIDE), as fast as the lights.
-- His dash after-image is his own: a gold chevron wake at chest height (BjornFx.afterimage), not the shared ghost.
+- His dash after-image is the shared DashTrail.
 - Nameplate at 2.6 m (`plate_offset` in the archetype JSON, read by `HudPlate.plate_offset(h)`).
 
 ## Small mechanics (fine print; source, footage, ours)

@@ -141,8 +141,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - Body and movement (hero-ref "Body, scale and movement feel"): a heavy's height, 1.3x as broad across the chest and shoulders;
   slower, longer, planted steps (0.9x the step rate, stride 0.7).
 - Not in the footage, built from his character: a plain jump is a deep heave off planted feet with the arms out, landing on a
-  heavy squash (`dr_land`); the idle fidgets are a shoulder roll, a neck crack and a stretch. His barge leaves dark iron
-  after-images with a brass rim instead of the shared pill.
+  heavy squash (`dr_land`); the idle fidgets are a shoulder roll, a neck crack and a stretch. His barge leaves the shared DashTrail.
 
 ## Combinations (all scripted in `--dredge-combo-check`)
 | Do this | You get | Asserted by (check line) |
@@ -203,8 +202,7 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
   flash; the stretched bone-hook arm (purple flesh swelling on each haul, a bone hook at its end, sludge drips, snapping back), drawn through rocks; the brass
   and iron chain ring at his feet while he reels; the ground slam's seafoam telegraph cone filling under his raised, glowing
   brass fist, then cracked ground under the fist and across the area; a seafoam crescent sweep, the dust cloud and seafoam stun spirals; the chain landing ring, brass sunburst and
-  scorch of the air smash (he rides the anchor down); clods of turf torn up where the lunge sets off, iron and brass
-  after-images along it.
+  scorch of the air smash (he rides the anchor down); the shared DashTrail along the lunge.
 - Weapon: `HeroGearPair.scattergun`: a fat iron barrel with a flared brass bell, a rope-wrapped pump, a slug drum, a glowing seam.
 - Sounds (`tools/gen_sfx_grimble.py`, set `content/sfx/dredge.json`, docs/AUDIO.md): the junk blunderbuss `dr_shot` (three
   takes), the gaff hook on its chain (`dr_throw`, `dr_grab`, the winch ratchet `dr_reel`), the scrap fist (`dr_anchor_wind`,

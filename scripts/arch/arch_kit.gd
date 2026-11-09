@@ -753,9 +753,6 @@ func play(move: String) -> void:
 	anim_id = move
 	anim_at = m.time
 
-## True when the kit draws its own dash after-images; the hunter then skips the shared team-colour pill.
-func own_dash_trail() -> bool: return false
-
 ## True when the kit draws its own aim line; the shared pale weapon line then stays hidden.
 func own_aim_line() -> bool: return false
 
@@ -1030,11 +1027,6 @@ func charge_k() -> float:
 ## own palette override it.
 func charge_color() -> Color:
 	return Arch.color(id)
-
-## Called on each after-image tick of a dash: a kit with its own after-image draws it and returns true;
-## false leaves the shared one.
-func dash_afterimage() -> bool:
-	return false
 
 ## Whether the shared charge tell shows its glowing orb at the hand; kits that draw their own hand tell
 ## turn it off.
