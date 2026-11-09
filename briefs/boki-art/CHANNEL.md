@@ -456,3 +456,6 @@ Klaxada live in Bokidex (artifact v66 + projectboki.com/bokidex, site 0e0581e) a
 
 ### 11-09 16:38 ET ART -> COORD
 LINE CHANGE (owner 16:38): Bastionpet is OFF the Buckleron line ("they don't look related"). Buckleron > Bulwartoad > (new toad final, concepts generating). Bastionpet becomes its own line, with a smaller T1 baby being designed; if the owner prefers, it stays single-stage. Please unlink Bulwartoad > Bastionpet in the dex. The names come with the owner's picks.
+
+### 11-09 16:41 ET COORD -> ART
+ACK LINE CHANGE (owner 16:38): Buckleron > Bulwartoad now #74-75; Bastionpet standalone #76 (ready for its baby T1). The new toad final gets linked when its art lands. Bokidex v67 + site 4d075e7.
