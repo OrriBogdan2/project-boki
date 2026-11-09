@@ -2773,6 +2773,426 @@
     "size": "2K"
   },
   {
+    "id": "ta_lurklet",
+    "name": "Lurklet",
+    "refs": [
+      "briefs/boki-art/batch/out/c_lurklet_e_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_hydrangor",
+    "name": "Hydrangor",
+    "refs": [
+      "briefs/boki-art/batch/out/c_hydrangor_n_w32_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_grainspin",
+    "name": "Grainspin",
+    "refs": [
+      "briefs/boki-art/batch/out/c_grainspin_e_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_lensling",
+    "name": "Lensling",
+    "refs": [
+      "briefs/boki-art/batch/out/c_lensling_e_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_puffuse",
+    "name": "Puffuse",
+    "refs": [
+      "briefs/boki-art/batch/out/c_puffuse_e_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_starcap",
+    "name": "Starcap",
+    "refs": [
+      "briefs/boki-art/batch/out/c_starcap_4.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_fawngus",
+    "name": "Fawngus",
+    "refs": [
+      "briefs/boki-art/batch/out/c_fawngus_n_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_bladypus",
+    "name": "Bladypus",
+    "refs": [
+      "briefs/boki-art/batch/out/c_bladypus_w32_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_bullsfrog",
+    "name": "Bullsfrog",
+    "refs": [
+      "briefs/boki-art/batch/out/c_bullsfrog_w32_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_cetorgan",
+    "name": "Cetorgan",
+    "refs": [
+      "briefs/boki-art/batch/out/c_cetorgan_e_w32_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_clinkpede",
+    "name": "Clinkpede",
+    "refs": [
+      "briefs/boki-art/batch/out/c_clinkpede_n_w32_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_glaciammoth",
+    "name": "Glaciammoth",
+    "refs": [
+      "briefs/boki-art/batch/out/c_glaciammoth_n_w32_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_glazolm",
+    "name": "Glazolm",
+    "refs": [
+      "briefs/boki-art/batch/out/c_glazolm_w32_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_grammite",
+    "name": "Grammite",
+    "refs": [
+      "briefs/boki-art/batch/out/c_grammite_n_w32_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_loafhopper",
+    "name": "Loafhopper",
+    "refs": [
+      "briefs/boki-art/batch/out/c_loafhopper_w32_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_malletary",
+    "name": "Malletary",
+    "refs": [
+      "briefs/boki-art/batch/out/c_malletary_n_w32_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_maracoil",
+    "name": "Maracoil",
+    "refs": [
+      "briefs/boki-art/batch/out/c_maracoil_w32_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_morelkin",
+    "name": "Morelkin",
+    "refs": [
+      "briefs/boki-art/batch/out/c_morelkin_n_w32_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_nymphane",
+    "name": "Nymphane",
+    "refs": [
+      "briefs/boki-art/batch/out/c_nymphane_n_w32_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_reelacine",
+    "name": "Reelacine",
+    "refs": [
+      "briefs/boki-art/batch/out/c_reelacine_n_w32_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_sarcobra",
+    "name": "Sarcobra",
+    "refs": [
+      "briefs/boki-art/batch/out/c_sarcobra_n_w32_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_sundormouse",
+    "name": "Sundormouse",
+    "refs": [
+      "briefs/boki-art/batch/out/c_sundormouse_w32_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_tootle",
+    "name": "Tootle",
+    "refs": [
+      "briefs/boki-art/batch/out/c_tootle_n_w32_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_torpecone",
+    "name": "Torpecone",
+    "refs": [
+      "briefs/boki-art/batch/out/c_torpecone_n_w32_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "c_scopeleon",
+    "name": "Scopeleon (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_lensling_e_2.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a chameleon whose swivelling eyes are two brass spyglasses. Look: A long, flat-sided branch-walker stretched forward on four clamp-shaped gripping feet, body narrow and leaf-thin. Both eyes are now long jointed brass telescope barrels that swivel separately, and the tail is a segmented sliding spyglass that extends and collapses. The lenses at the eye tips throw small rainbow glints. Face: two telescope eyes pointing different ways, a thin smug sideways grin.. Colours: deep navy and brass; accent rainbow lens glints.. Archetype: sleek. Avoid: straps or harness, lenses floating, a copy of Lensling's spiral pose, upright. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose, and a clearly different stance from image 2 (owner rule: every stage of a line stands differently).",
+    "size": "2K"
+  },
+  {
+    "id": "c_snapler",
+    "name": "Snapler (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_lurklet_e_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a flat anglerfish that is a living bear trap. Look: A flat, wide bottom-lurker lying low like a pancake, its whole head a sprung iron jaw trap with interlocking saw teeth and coil-spring hinges at the corners of the mouth. Its pectoral fins are hinged iron trap arms it walks on, and the lure is a dangling iron pressure plate on a thick stalk. Inky edges smoke into violet. Face: heavy-lidded patient eyes on top of the head, a flat grumpy mouth line.. Colours: dark iron and deep violet; accent rust on the teeth.. Archetype: tough. Avoid: chain, round body like Lurklet, ropes or wires, upright. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose, and a clearly different stance from image 2 (owner rule: every stage of a line stands differently).",
+    "size": "2K"
+  },
+  {
+    "id": "c_dreadmonite",
+    "name": "Dreadmonite (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_torpecone_n_w32_3.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a giant ammonite that is a battleship. Look: A colossal ammonite crawling low on a mass of thick tentacle arms, its shell re-coiled into a huge ridged iron spiral with deck-plate ribs like a battleship hull. Two pairs of short cannon-barrel ribs jut from the spiral's sides, and a foam-crested wave curl breaks over its brow. Face: heavy-lidded admiral stare, stern down-turned mouth among the arms.. Colours: dark iron and deep sea blue; accent foam white.. Archetype: majestic. Avoid: flags, deck buildings, a straight shell, floating parts. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose, and a clearly different stance from image 2 (owner rule: every stage of a line stands differently).",
+    "size": "2K"
+  },
+  {
+    "id": "c_gramofrill",
+    "name": "Gramofrill (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_tootle_n_w32_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a frilled lizard whose frill is a gramophone horn. Look: A lean, long-legged lizard sprinting low on all fours, its frill spread into one huge flared gramophone horn bell facing forward and ribbed with sound ridges. A crank-knob ridge grows on its throat, and the long whip tail is marked with record-groove spirals. Face: wide startled eyes, mouth wide open in a shout.. Colours: dusty tan and burnished brass; accent black groove rings.. Archetype: fast. Avoid: a record player body, running upright on two legs, music notes. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose, and a clearly different stance from image 2 (owner rule: every stage of a line stands differently).",
+    "size": "2K"
+  },
+  {
+    "id": "c_sandwidow",
+    "name": "Sandwidow (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_grainspin_e_3.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a black widow whose red hourglass mark is a real glass hourglass. Look: A long-legged, glossy-black widow standing high on chunky tapered legs, its abdomen a tall glass hourglass with gold sand flowing through the waist. Sandstone bands ring each leg joint, and its edges fade into inky smoke. Face: calm, half-lidded front eyes, cold and patient.. Colours: gloss black and gold sand; accent red sand (female) or pale bands (male).. Archetype: sleek. Avoid: thin web lines, a round bulb like Grainspin, a clock face. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose, and a clearly different stance from image 2 (owner rule: every stage of a line stands differently).",
+    "size": "2K"
+  },
+  {
+    "id": "c_truffapir",
+    "name": "Truffapir (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_morelkin_n_w32_3.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a tapir that has become the truffle it was hunting. Look: A stocky truffle-hunter carrying its head low, its long trunk-snout a wrinkled, honeycomb-pitted morel and its hide the knobbly dark skin of a truffle. Short pitted tusks curve from the snout base. Face: tiny eager eyes, nose first, greedy.. Colours: truffle black and morel tan; accent teal puffs.. Archetype: tough. Avoid: stripes like Morelkin, caps on the back, upright. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose, and a clearly different stance from image 2 (owner rule: every stage of a line stands differently). If this is a Spore-type creature: keep it appealing, and use the Blight palette only as a small accent (purple-black gills or vein lines, a faint purple inner glow in its spores, a few small bone-spur quills); never green slime, never gross or rotting.",
+    "size": "2K"
+  },
+  {
+    "id": "c_kintsuwyrm",
+    "name": "Kintsuwyrm (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_glazolm_w32_2.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a dragon that was shattered and glued back together with gold. Look: A big serpentine dragon on four short clawed legs, its ceramic plates broken and rejoined with thick gold seams. A ridge of jagged porcelain shards runs along its spine, its gills have become a crown of glazed fins, and its tail ends in a broken porcelain blade. Face: calm closed eyes, small gold-edged fangs.. Colours: porcelain white and deep crimson; accent heavy gold seams.. Archetype: pretty. Avoid: wings, pottery shapes, glow, a long-legged stance like Glazolm. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose, and a clearly different stance from image 2 (owner rule: every stage of a line stands differently).",
+    "size": "2K"
+  },
+  {
+    "id": "c_medushroom",
+    "name": "Medushroom (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_starcap_4.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a jellyfish whose bell is a toadstool cap. Look: A large floating bell that is a domed, spotted mushroom cap, hovering above the ground. Under it hang thick ruffled gill-curtains instead of tentacles and four fat stinging arms tipped with glossy green venom. Face: under the cap rim, heavy-lidded calm eyes and a tiny mouth.. Colours: dusky violet and cream spots; accent toxic green.. Archetype: pretty. Avoid: thin tentacles, a red-and-white fly agaric (Amanitusk), a star shape. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose, and a clearly different stance from image 2 (owner rule: every stage of a line stands differently). If this is a Spore-type creature: keep it appealing, and use the Blight palette only as a small accent (purple-black gills or vein lines, a faint purple inner glow in its spores, a few small bone-spur quills); never green slime, never gross or rotting.",
+    "size": "2K"
+  },
+  {
+    "id": "c_blastopuff",
+    "name": "Blastopuff (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_puffuse_e_2.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a spiny puffer that has hardened into a grenade. Look: A big oval puffer whose hide is segmented iron like a grenade, studded with short iron spines. A curved lever-shaped dorsal fin arches over its back, its fuse has become a crackling crest, and its big beak teeth are bared. Face: a manic wide grin, one eye twitching larger than the other.. Colours: dark olive iron and yellow; accent spark white.. Archetype: tough. Avoid: a pin ring, a perfect sphere like Puffuse, flames. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose, and a clearly different stance from image 2 (owner rule: every stage of a line stands differently).",
+    "size": "2K"
+  },
+  {
+    "id": "c_rosedart",
+    "name": "Rosedart (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_nymphane_n_w32_3.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a dragonfly whose wings are a cathedral rose window. Look: A long-bodied dragonfly with four broad wings made of stained-glass panes in lead frames, arranged like the petals of a rose window. Its tail tapers into a glass lance, and rainbow light glints through the panes. Face: huge faceted eyes, an aloof tilt.. Colours: deep rose and lead grey; accent rainbow glints.. Archetype: pretty. Avoid: thin veined wings, a building, a crawling body like Nymphane. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose, and a clearly different stance from image 2 (owner rule: every stage of a line stands differently).",
+    "size": "2K"
+  },
+  {
+    "id": "c_chainipede",
+    "name": "Chainipede (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_clinkpede_n_w32_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a centipede that is a living chainsaw chain. Look: A long centipede moving in a looping S, its many segments saw-chain links with hooked cutting teeth along both sides. Its fangs are huge saw-blade hooks dripping green venom, and every leg is a small repeated steel tooth. Face: flat cold eyes, no expression at all.. Colours: dark steel and venom green; accent amber joints.. Archetype: creepy. Avoid: a motor body, a guide bar, wheels, rearing upright. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose, and a clearly different stance from image 2 (owner rule: every stage of a line stands differently).",
+    "size": "2K"
+  },
+  {
+    "id": "c_hatstag",
+    "name": "Hatstag (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_fawngus_n_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: an Irish elk whose antlers are a hat stand hung with mushroom caps. Look: A giant elk whose huge spreading antlers are a turned-wood hat stand, every tine ending in a hook that has grown a mushroom cap: bowler-round, flat, peaked. Moss grows through its shaggy neck, and turned-wood ridges run down its legs into polished hooves. Face: calm, heavy-lidded, a butler's dignity.. Colours: dark walnut and moss green; accent cream caps and teal spores.. Archetype: majestic. Avoid: real cloth hats, coats hanging, shelf fungus (Ringrove), a cow body (Crofthorn). Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose, and a clearly different stance from image 2 (owner rule: every stage of a line stands differently). If this is a Spore-type creature: keep it appealing, and use the Blight palette only as a small accent (purple-black gills or vein lines, a faint purple inner glow in its spores, a few small bone-spur quills); never green slime, never gross or rotting.",
+    "size": "2K"
+  },
+  {
+    "id": "c_dobsabre",
+    "name": "Dobsabre (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_grammite_n_w32_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a dobsonfly whose jaws are crossed cavalry sabres. Look: A winged dobsonfly with enormous crossed sabre mandibles longer than its head, its four wings covered in dragon scale plates. Small horns crown its head, and a ridge of spines runs down its abdomen. Face: cold narrow eyes, a sneer between the blades.. Colours: deep crimson and bronze; accent old gold.. Archetype: sleek. Avoid: a flat larva body, held swords, thin wing veins. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose, and a clearly different stance from image 2 (owner rule: every stage of a line stands differently).",
+    "size": "2K"
+  },
+  {
     "id": "c_lensling",
     "name": "Lensling (concept)",
     "refs": [
@@ -13137,6 +13557,864 @@
     "aspect": "1:1",
     "runs": 3,
     "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): its body turned about 30 degrees toward the viewer, head toward the viewer with both eyes visible, a characterful grounded pose. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_anchorbill_full",
+    "name": "Anchorbill (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Anchorbill.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_bellowlet_full",
+    "name": "Bellowlet (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Bellowlet.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_blotlet_full",
+    "name": "Blotlet (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Blotlet.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_briarlynx_full",
+    "name": "Briarlynx (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Briarlynx.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_buckleron_full",
+    "name": "Buckleron (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Buckleron.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_fizzlet_full",
+    "name": "Fizzlet (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Fizzlet.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_foldbat_full",
+    "name": "Foldbat (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Foldbat.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_kayak_full",
+    "name": "Kayak (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Kayak.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_lockatara_full",
+    "name": "Lockatara (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Lockatara.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_mothlet_full",
+    "name": "Mothlet (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Mothlet.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_pebblamb_full",
+    "name": "Pebblamb (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Pebblamb.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_rattlebub_full",
+    "name": "Rattlebub (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Rattlebub.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_sloggoth_full",
+    "name": "Sloggoth (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Sloggoth.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_terrasloth_full",
+    "name": "Terrasloth (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Terrasloth.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_wickapi_full",
+    "name": "Wickapi (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Wickapi.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_arcestrel_full",
+    "name": "Arcestrel (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Arcestrel.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_chandelapi_full",
+    "name": "Chandelapi (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Chandelapi.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_chandelotl_full",
+    "name": "Chandelotl (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Chandelotl.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_cisternmander_full",
+    "name": "Cisternmander (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Cisternmander.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_dragonkite_full",
+    "name": "Dragonkite (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Dragonkite.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_dreadnoyak_full",
+    "name": "Dreadnoyak (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Dreadnoyak.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_dribbara_full",
+    "name": "Dribbara (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Dribbara.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_eclipsowl_full",
+    "name": "Eclipsowl (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Eclipsowl.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_flarmink_full",
+    "name": "Flarmink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Flarmink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_forgebrock_full",
+    "name": "Forgebrock (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Forgebrock.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_frothisk_full",
+    "name": "Frothisk (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Frothisk.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_furnacowary_full",
+    "name": "Furnacowary (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Furnacowary.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_galleotter_full",
+    "name": "Galleotter (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Galleotter.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_geodemole_full",
+    "name": "Geodemole (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Geodemole.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_geysirbara_full",
+    "name": "Geysirbara (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Geysirbara.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_glaivyx_full",
+    "name": "Glaivyx (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Glaivyx.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_gongrowl_full",
+    "name": "Gongrowl (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Gongrowl.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_howlop_full",
+    "name": "Howlop (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Howlop.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_lashyx_full",
+    "name": "Lashyx (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Lashyx.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_latchling_full",
+    "name": "Latchling (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Latchling.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_lunink_full",
+    "name": "Lunink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Lunink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_lyrewing_full",
+    "name": "Lyrewing (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Lyrewing.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_oarter_full",
+    "name": "Oarter (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Oarter.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_puffamus_full",
+    "name": "Puffamus (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Puffamus.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_pyrraven_full",
+    "name": "Pyrraven (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Pyrraven.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_reapant_full",
+    "name": "Reapant (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Reapant.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_rimink_full",
+    "name": "Rimink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Rimink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_rippmink_full",
+    "name": "Rippmink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Rippmink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_slog_full",
+    "name": "Slog (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Slog.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_sporcupine_full",
+    "name": "Sporcupine (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Sporcupine.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_teapotamus_full",
+    "name": "Teapotamus (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Teapotamus.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_thistlynx_full",
+    "name": "Thistlynx (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Thistlynx.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_thunderstrich_full",
+    "name": "Thunderstrich (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Thunderstrich.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_tidalisk_full",
+    "name": "Tidalisk (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Tidalisk.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_voltmink_full",
+    "name": "Voltmink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Voltmink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_wyrmink_full",
+    "name": "Wyrmink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Wyrmink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_zipling_full",
+    "name": "Zipling (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Zipling.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_flarmink",
+    "name": "Flarmink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Flarmink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Rears high on hind legs mid-lunge, forepaws clawing the air, back arched, flame tail flung straight up behind like a torch. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_rimink",
+    "name": "Rimink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Rimink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Proud looming stance on a raised forepaw: one front leg lifted, chest out, head held high, ice tail swept high behind. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_glaivyx",
+    "name": "Glaivyx (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Glaivyx.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Rears up on hind legs, blade-forelimbs raised wide overhead, head thrown back, stinger tail lashing forward past its side. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_lashyx",
+    "name": "Lashyx (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Lashyx.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Braced wide and low, forelegs splayed with claws dug in, head lowered snarling, whip tail cocked high and forward over the head mid-strike. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_prismander",
+    "name": "Prismander (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Prismander.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Sits up on its haunches, forelegs straight and close, head tilted up, gills fanned, tail curled to one side. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_glassolotl",
+    "name": "Glassolotl (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Glassolotl.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Low gliding swim-stride: body horizontal and close to the ground, legs mid-paddle, head forward, fin-tail rippling behind. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_chandelotl",
+    "name": "Chandelotl (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Chandelotl.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Rears up with forelegs lifted off the ground, chest high, crystal gills flared wide like a chandelier, tail braced behind. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_chuggamus",
+    "name": "Chuggamus (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Chuggamus.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Braced wide like a locomotive: legs splayed, head lowered with tusks forward, stack belching a tall column of steam. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_skidlet",
+    "name": "Skidlet (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Skidlet.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Squats down on its belly with skate feet poking out in front, wings folded, head bobbing up. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_skateron",
+    "name": "Skateron (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Skateron.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Gliding skate stride: body horizontal, neck stretched forward, one leg pushing back, wings swept back. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_zippelith",
+    "name": "Zippelith (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Zippelith.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Inching forward low: body arched in an inchworm hump, head low and forward, zipper seam visible along the arched back. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_glintmole",
+    "name": "Glintmole (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Glintmole.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Sits plump on its rump with big claws resting on its belly, snout star tilted up. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_galleotter",
+    "name": "Galleotter (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Galleotter.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Rears up on hind legs and tail like a tripod, forepaws raised, oar fins spread wide, head roaring. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_kitlet",
+    "name": "Kitlet (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Kitlet.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Tucked into a bobbing ball, wings folded close, tail curled around its body, head peeking up. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_umbrathere",
+    "name": "Umbrathere (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Umbrathere.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Looming crouch on all fours on hooked knuckle-claws, long arms planted wide, wing membranes stretched up like an open umbrella, head low. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_frigatee",
+    "name": "Frigatee (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Frigatee.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Gliding swim: body arched in a curve, fore-flippers swept back, tail flukes lifted. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_barrelmander",
+    "name": "Barrelmander (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Low waddle stride: legs mid-step, body slung low, head forward, storm cloud trailing. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_anvilbrock",
+    "name": "Anvilbrock (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Anvilbrock.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Low trundling charge: legs mid-stride, head down, anvil leading. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_forgebrock",
+    "name": "Forgebrock (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Forgebrock.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Rears up on hind legs bear-like, forepaws raised, stacks belching, chest furnace glowing. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_arcestrel",
+    "name": "Arcestrel (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Arcestrel.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Stooping dive: wings swept back, talons forward, head down. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_briarlynx",
+    "name": "Briarlynx (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Briarlynx.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Braced wide and snarling, forelegs splayed, head low, thorny mane bristling. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_lunowl",
+    "name": "Lunowl (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Lunowl.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Gliding with moth wings spread, body tilted forward, talons tucked. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_eclipsowl",
+    "name": "Eclipsowl (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Eclipsowl.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Looming mantle: wings spread wide high, standing on talons, ear tufts raised. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_echolop",
+    "name": "Echolop (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Echolop.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Sits upright on haunches, ears up, wings folded. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_gongibbon",
+    "name": "Gongibbon (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Gongibbon.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Squats sitting with knees up, hands drumming on chest gong, mallet tail curled over. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_jarmit",
+    "name": "Jarmit (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Jarmit.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Tucked into jar, only eyes and claws peeking, sitting low. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
     "size": "2K"
   },
   {
