@@ -50655,5 +50655,19 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_vaultara_pz_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_vaultara_pz",
+    "name": "Vaultara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_vaultara_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vaultara_pz",
+    "name": "Vaultara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_vaultara_pz_2.jpg",
+    "ok": true
   }
 ]
