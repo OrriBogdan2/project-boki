@@ -29,7 +29,7 @@ func _build(kind: String) -> Node3D:
 			_build_bud(n)
 		"pillar":
 			var col := Models.cyl(1.0, 1.0, 1.0, 16)
-			_off(Models.part(n, col, glow_mat(Color("8ae6ff", 0.6), 1.0), Vector3(0, 0.5, 0)))
+			_off(Models.part(n, col, glow_mat(Color("8ae6ff", 0.8), 1.0), Vector3(0, 0.5, 0)))
 			_off(Models.part(n, col, glow_mat(Color("f4ffff", 1.0), 1.0), Vector3(0, 0.5, 0), Vector3(0.4, 1, 0.4)))
 		"lances":
 			_build_lances(n)
@@ -118,6 +118,7 @@ func _style(e: Dictionary, k: float) -> void:
 			var reach := float(p.get("r", 1.0))
 			var out := 1.0 - pow(1.0 - clampf(k * 1.6, 0.0, 1.0), 3.0)
 			var grow := clampf(k * 8.0, 0.0, 1.0)
+			n.scale = Vector3.ONE
 			for c in n.get_children():
 				var mi := c as MeshInstance3D
 				if mi == null: continue

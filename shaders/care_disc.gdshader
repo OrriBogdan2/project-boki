@@ -34,7 +34,7 @@ float sigil(vec2 uv, float r, float a) {
 		float jag = sin(r * 23.0 + a * 3.0) * 0.06 + sin(r * 41.0) * 0.03;
 		float spokes = smoothstep(0.93, 1.0, abs(cos((a + jag) * 5.5)));
 		float forks = smoothstep(0.95, 1.0, abs(cos((a - jag * 2.0) * 11.0))) * step(0.45, r);
-		float rings = smoothstep(0.035, 0.0, abs(fract(r * 3.2 + jag) - 0.5) - 0.47) * step(0.4, abs(sin(a * 7.0 + r * 9.0)));
+		float rings = smoothstep(0.03, 0.0, abs(fract(r * 3.2 + jag) - 0.5)) * step(0.4, abs(sin(a * 7.0 + r * 9.0)));
 		return (spokes + forks * 0.7 + rings * 0.6) * (0.25 + 1.6 * crack) * step(0.12, r);
 	}
 	// thorns: little triangles on an inner ring
