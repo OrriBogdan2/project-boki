@@ -12883,5 +12883,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_jarmit_pe_w28_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_glomwort_pe_w28",
+    "name": "Glomwort (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_glomwort_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glomwort_pe_w28",
+    "name": "Glomwort (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glomwort_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jarmit_pe_w28",
+    "name": "Jarmit (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_jarmit_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jarmit_pe_w28",
+    "name": "Jarmit (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_jarmit_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kitlet_pe_w28",
+    "name": "Kitlet (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_kitlet_pe_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kitlet_pe_w28",
+    "name": "Kitlet (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_kitlet_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kitlet_pe_w28",
+    "name": "Kitlet (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kitlet_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_marchleaf_pe_w28",
+    "name": "Marchleaf (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_pe_w28_2.jpg",
+    "ok": true
   }
 ]
