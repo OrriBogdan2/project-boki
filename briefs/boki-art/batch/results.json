@@ -11448,5 +11448,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_nymphane_e_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_lensling_e",
+    "name": "Lensling (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lensling_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nymphane_e",
+    "name": "Nymphane (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_nymphane_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nymphane_e",
+    "name": "Nymphane (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_nymphane_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pocketpus_e",
+    "name": "Pocketpus (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pocketpus_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pocketpus_e",
+    "name": "Pocketpus (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pocketpus_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_puffuse_e",
+    "name": "Puffuse (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_puffuse_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_puffuse_e",
+    "name": "Puffuse (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_puffuse_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pocketpus_e",
+    "name": "Pocketpus (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pocketpus_e_3.jpg",
+    "ok": true
   }
 ]
