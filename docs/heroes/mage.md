@@ -49,6 +49,36 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/vireo.md a
 | Shift Surge | hold crouch, a streak at a constant ~32 m/s (ours: 40 m/s, owner item 70), an arrival burst [footage] | Wirerun: the same; **the arrival ring and spark spray and the press flash are gone** (owner: no rings or bursts on dashes; the hits are along the way), a dust puff instead | owner rule over footage |
 | X Eye of the Storm | launch, hang, reactivate to crash at the cursor [footage] | Kitefall: the same | matches |
 
+## Footage gaps, Nov 9 re-check
+The ranked gap list of briefs/hero-ref/vireo.md (section 5, rows 1 to 17) against main d255acbee. Status: closed (code or
+check on main), open, in flight (unmerged branch), owner override (briefs/DECISIONS.md, owner items). Nothing was built in
+this pass: `mage_kit.gd`, `mage_sky.gd`, `mage_ult.gd`, `content/archetypes/mage.json` and `tools/hero_combo_check.gd` are changed
+by in-flight Sparkle branches (ext/sparkle-dash-feel, ext/vfx-mage, ext/anim-time-sparkle, ext/trial-ryzz-116, ext/sparkle-e-verify),
+so any edit here would conflict. Suggestions for after they merge are in the last column.
+
+| # | Gap | Status | Where / suggestion |
+|---|---|---|---|
+| 1 | Orbs drop on every spear hit, at once | closed | `_coil_hit()` drops one at the impact after `mote_t` 0.05 on any foe, dummies too; check "an orb at the impact the moment it hits". Orbs are pickups that give Wirerun back (owner items 71, 74) |
+| 2 | Surge cooldown starts on press | closed | `on_dash()` spends the charge on the press (22ceca1e1), `_end_wire(false)` keeps it spent on a cut; check "Wirerun: the cooldown starts on the press" (dashes 1.00 to 0.00) |
+| 3 | LMB line and bolt to max range, arrow tick | closed | `coilcaster.json` `"aim": "max"`, 13 m past the cursor; check "LMB: aim line to full range past a near cursor" |
+| 4 | LMB cadence, ammo, pierce | owner override (cadence), closed (rest) | 0.648 s not 0.8 s (owner items 70, 116); mag 99; no pierce (audit 0ea0810, asserted) |
+| 5 | RMB is a held, summoned spear | closed | `mage_rmb_hold` and `mage_rmb`, rod in hand, body flash at full (`rmb_hold_tick`); checks "the rod is in the hand", "full at 1s: the body flash" |
+| 6 | RMB fixed max-range lane | closed | `_coil()` reads one fixed `range` 13 m (charge only scales damage and push), lane `width` 0.3 with rails (22ceca1e1); check "a fixed 13m double-rail lane (no growth)" 13.0 / 13.0 |
+| 7 | Surge end marker | closed | `_tick_wire()`: end circle `end_r` 2.25 m (4.5 m across, about 2.5 bh) with ticks and star, rails lane 0.35 wide; check "rails lane and the ticked end ring show". Lane length changes to 7 to 11 m in ext/sparkle-dash-feel (owner 11-08) |
+| 8 | Surge look | partly closed, owner override, open | sky bolt on the press and the lightning body (model hidden, pink-teal after-images, invulnerable) are in `on_dash()` and `_run()`. The arrival ring and burst are an owner override (DECISIONS: no bursts, rings or discs on dashes; 6d0546330). Open: no INVULNERABLE word on release (Kitefall prints one, `mage_ult.gd:192`). Suggestion: one `m.fx.word` at the release, readability only |
+| 9 | E: place, then pick the direction | closed | hold, drag, release (audit); checks "Skycall held 0.6s ... still dragging", "the release commits the drag" |
+| 10 | E delay, stacks, Grounded | closed, one owner call | delay 0.8, Grounded 1.5 s in `mage.json` `e`; 1 Static follows the game data, the footage info panel says 2 (audit; ext/sparkle-e-verify notes it). Owner call: keep 1 |
+| 11 | Cooldown ratios | closed | spear 8 : Surge 8 : E 10.5 (data, scaling section); ext/sparkle-e-verify asserts E : rod = 9.2 : 7 |
+| 12 | E telegraph: dark disc, rim, descending pillar | closed on main, in flight (look) | `MageSky._commit()`: violet disc with copper rim plus a pillar that narrows over the 0.8 s (`fx.pillar`, `mage_sky.gd:85`), ticked rim with chevron, committed arrow. ext/vfx-mage re-builds the look as HeroVfx data. No check asserts the pillar: add one after that merge |
+| 13 | Static display, sky bolt at 4 | closed | `add_spark()` drops a bolt from 9 m onto them with a LIVE word on the 4th stack |
+| 14 | LMB alternating hands | closed | `mage_lmb_l` / `mage_lmb_r` (parity f99f03c7); check "alternating hands, each a quick fling" |
+| 15 | Spear knockback size | open (numbers) | the combo check measures 2.79 m on open ground (check "knocked about 1 body height" only asserts 0.8 to 3.0), the source is about 1 bh = 1.8 m and `mage.json` text promises "about 1.8m". Suggestion: `rmb.coil.push` [6, 9] to about [4, 6] and tighten the check to 1.4 to 2.2 m. In flight files, so not done |
+| 16 | Sfx | nothing to copy | no audio in the footage |
+| 17 | R (ult relocate) | owner override | X is Kitefall, R is the Boki Merge (SERVER_UPDATE6; "Ultimate choice" below) |
+
+Open after this check: row 8 (INVULNERABLE word) and row 15 (knockback size), both small, both blocked on the in-flight branches
+above; rows 10 (Static count) and 4 (cadence) are owner calls already recorded.
+
 ## Audit (Nov 3 23:40)
 Rows of briefs/specs/kit-audit/vex_vireo_sable.md. (a) done on this branch, (b) fixed now, (c) not applied, with the
 reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (data) ...`).
