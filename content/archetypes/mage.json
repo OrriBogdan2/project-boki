@@ -129,7 +129,7 @@
 		"pull_reach": 9.0,
 		"stacks": 1
 	},
-	"x": {
+	"x": {"per_rank": {"dmg": [11, 0], "cooldown": [-5, -5]}, 
 		"name": "Kitefall",
 		"short": "Fall",
 		"icon": "quake",
@@ -166,12 +166,12 @@
 		"kin": "cooldown 3s shorter",
 		"dash": "the run's own hit deals double"
 	},
-	"rank2": {
+	"rank2": {"ult": "Rank 2: Kitefall cooldown 42s -> 37s, damage 22 -> 33. The Merge lasts 30% longer.", 
 		"sec": "Rank 2: cooldown 8s -> 7.2s, damage +15%.",
 		"dash": "Rank 2: recharge 8s -> 7.2s.",
 		"kin": "Rank 2: cooldown 10.5s -> 9.5s, damage +15%."
 	},
-	"rank_next": {
+	"rank_next": {"ult": "Rank 3: Kitefall cooldown 42s -> 32s, damage 22 -> 33.", 
 		"sec": "Rank 3: cooldown 8s -> 6.4s, damage +30%; +50% damage on top.",
 		"kin": "Rank 3: cooldown 10.5s -> 5.4s (3s off), damage +30%.",
 		"dash": "Rank 3: recharge 8s -> 6.4s; the run's own hit deals double."

@@ -159,7 +159,7 @@ and asserted in `--dancer-combo-check` / `--kit-combo-check`.
 | Every ult shot refreshes all stacks | wiki R | n/a | Built; asserted |
 | LMB keeps firing during the ult, and she moves freely with the ring attached | wiki R, gamerblurb | yes (ult f41-f47) | Built; asserted |
 | The ult resets Cartwheel (the wiki: dashes while active) | in-game card, wiki R | yes (0193) | Built as the Vault back on the cast; asserted |
-| The ult's numbers grow with rank (rank 2: damage, cooldown) | wiki R levels | n/a | Not built: the X ultimates have no ranks (HeroUlt); its damage grows with level through ability power |
+| The ult's numbers grow with rank (rank 2: damage, cooldown) | wiki R levels, source R tiers | n/a | Built (0022): R ranks 2 and 3 each +10% damage and -2.5s (the source's -5s scaled to our 24s); asserted by --ult-rank-check |
 | A knock or assist heals 25% | wiki passive | yes (0063) | Built; asserted |
 
 ## Combinations

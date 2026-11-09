@@ -97,6 +97,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 10.5s -> 9.5s, damage +15%. | cooldown 10.5s -> 8.4s, damage +30%; the roots last 0.3s longer and the burst is twice as wide. |
 | Dash (Shift) | recharge 7s -> 6s per charge. | recharge 7s -> 4.9s; picking up a teammate refreshes your long air dash. |
 | E | cooldown 11s -> 9.9s, healing +15%. | cooldown 11s -> 8.8s, healing +30%; the thrown light's healing boost is 100% instead of 50%. |
+| R (ultimate) | Hearth Call cooldown 46s -> 41.4s. The Merge lasts 30% longer. | Hearth Call cooldown 46s -> 36.8s. |
 
 **Suggested level-up order** (what bots follow): E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > Glove (Q).
 

@@ -102,6 +102,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | shield HP +25% (160 -> 200), damage +15%. | shield HP +50% (240), damage +30%; regen 20 -> 30 per second, back up in 1.4s and 2s when broken. |
 | Dash (Shift) | recharge 8s -> 6.8s per charge; the Shield Charge cooldown 6s -> 4.5s. | recharge 8s -> 5.6s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it. |
 | E | healing +25% (burst 18 -> 22), damage +15%. | cooldown 12s -> 8s, healing +50% in all. |
+| R (ultimate) | Faultline cooldown 40s -> 36s, first-strike damage 4 -> 4.8, damage 18 -> 21.6. The Merge lasts 30% longer. | Faultline cooldown 40s -> 32s, first-strike damage 4 -> 5.6, damage 18 -> 25.2. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > Glove (Q).
 

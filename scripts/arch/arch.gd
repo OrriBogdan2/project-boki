@@ -95,10 +95,10 @@ static func next_ranks(id: String, slot: String, cur: int) -> Array:
 	var r2: Dictionary = d.get("rank2", {})
 	var r3: Dictionary = d.get("rank_next", {})
 	var out: Array = []
-	var mx := 2 if slot == "ult" else 3
+	var mx := int(Hunter.SLOT_MAX.get(slot, 3))
 	if cur < mx and cur <= 1 and r2.has(slot):
 		out.append(["Rank 2", String(r2[slot]).trim_prefix("Rank 2: ").trim_prefix("Rank 2 (level 9): ")])
-	if slot != "ult" and cur < 3 and r3.has(slot):
+	if cur < 3 and r3.has(slot):
 		out.append(["Rank 3", String(r3[slot]).trim_prefix("Rank 3: ")])
 	return out
 

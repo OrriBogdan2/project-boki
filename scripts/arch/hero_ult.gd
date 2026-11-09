@@ -30,8 +30,24 @@ static func press(k: ArchKit, start: Callable) -> bool:
 static func ready(k: ArchKit) -> bool:
 	return not k.x_def().is_empty() and k.h.lvl >= int(Hunter.ULT_AT[0]) and float(k.cd["x"]) <= 0.0
 
+## Seconds the ult rests. A kit without x.per_rank takes the shared 10% step per R rank instead.
 static func cooldown(k: ArchKit) -> float:
-	return float(k.x_def().get("cooldown", 30.0))
+	var xd := k.x_def()
+	var base := float(xd.get("cooldown", 30.0))
+	return base if xd.has("per_rank") else base * k.h.rank_cd_k("ult")
+
+## The ult's data at R rank `r`: x.per_rank holds, per key, what ranks 2 and 3 each add in the key's own
+## unit (the source's R tiers, docs/decisions/0022-ult-ranks.md), e.g. {"cooldown": [-5, -5], "time": [2.5, 2.5]}.
+static func ranked(xd: Dictionary, r: int) -> Dictionary:
+	var per: Dictionary = xd.get("per_rank", {})
+	if r <= 1 or per.is_empty():
+		return xd
+	var out := xd.duplicate()
+	for key in per:
+		var steps: Array = per[key]
+		for i in mini(r - 1, steps.size()):
+			out[key] = float(out[key]) + float(steps[i])
+	return out
 
 ## The id of the cast in flight ("" before the first).
 static func cast_id(k: ArchKit) -> String:
@@ -56,7 +72,7 @@ static func slot_info(k: ArchKit) -> Dictionary:
 	return {
 		"name": String(xd.get("name", "")), "short": String(xd.get("short", "")), "icon": String(xd.get("icon", "")),
 		"col": k.col_of(xd), "desc": String(xd.get("desc", "")), "cd": cd_left, "cd_max": cooldown(k),
-		"charges": 1 if cd_left <= 0.0 else 0, "max_charges": 1, "verb": "x", "level": 1,
+		"charges": 1 if cd_left <= 0.0 else 0, "max_charges": 1, "verb": "x", "level": k.rank("ult"),
 		"ready": cd_left <= 0.0 and k.h.lvl >= unlock and not KinMerge.active(k.h),
 		"locked": k.h.lvl < unlock, "unlock": unlock,
 		"up": k.ult_running(),

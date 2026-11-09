@@ -134,7 +134,7 @@
 		"tell_k": 0.68,
 		"hold_full": 10.0
 	},
-	"x": {
+	"x": {"per_rank": {"cooldown": [-5, -5]}, 
 		"name": "Nightwell",
 		"short": "Well",
 		"icon": "blaze_mantle",
@@ -167,12 +167,12 @@
 		"dash": "allies beside you when you leave, or where you land, get a shield",
 		"kin": "the seed burns foes inside while it grows (8 a second)"
 	},
-	"rank2": {
+	"rank2": {"ult": "Rank 2: Nightwell cooldown 70s -> 65s. The Merge lasts 30% longer.", 
 		"sec": "Rank 2: cooldown 10s -> 9s, damage +15%.",
 		"dash": "Rank 2: recharge 9.5s -> 8.1s per charge.",
 		"kin": "Rank 2: cooldown 10s -> 9s, damage +15%."
 	},
-	"rank_next": {
+	"rank_next": {"ult": "Rank 3: Nightwell cooldown 70s -> 60s.", 
 		"sec": "Rank 3: cooldown 10s -> 8s, damage +30%; you speed up 11% on the cast and 22% when it hits, for 2s.",
 		"kin": "Rank 3: cooldown 10s -> 8s; the growing seed burns foes inside for 8 a second.",
 		"dash": "Rank 3: recharge 9.5s -> 6.7s; allies beside you or at your landing get a 26 shield for 3s."

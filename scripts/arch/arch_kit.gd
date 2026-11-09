@@ -2,7 +2,7 @@ class_name ArchKit
 extends RefCounted
 ## One hunter's archetype kit at run time (docs/ARCHETYPES.md): the dash shape, the passive and
 ## its resource, the RMB router (tap / hold / airborne / during E / during R / resource full),
-## E, R (level 6, rank 2 at 9) and the Bonded R (bond full: the kin merges 0.2s after the ult's
+## E, R (level 6, rank 2 at 9, rank 3 at 10) and the Bonded R (bond full: the kin merges 0.2s after the ult's
 ## cast). Each archetype is a subclass (scripts/arch/kits/); this base holds the timers, the input
 ## router, the kin's infusion of the sockets, telegraphs and the shared helpers.
 ##
@@ -15,6 +15,8 @@ var d: Dictionary = {}
 var res := 0.0                 # the passive's resource (Marks live on targets instead)
 var res_wait := 0.0            # seconds left before it decays out of a fight
 var full_was := false
+var _x_rank := 0               # the R rank _x_ranked was built for (x_def)
+var _x_ranked: Dictionary = {}
 var cd := {"rmb": 0.0, "e": 0.0, "r": 0.0, "x": 0.0}
 var ch_rmb := 1.0              # RMB charges
 var rmb_down := false          # RMB held since its press
@@ -67,7 +69,14 @@ const OWN_LOOK_SKIP := ["boom", "ping", "whoosh", "throw"]     # KinExec's deliv
 func rmb_def() -> Dictionary: return d.get("rmb", {})
 func e_def() -> Dictionary: return d.get("e", {})
 func r_def() -> Dictionary: return d.get("r", {})
-func x_def() -> Dictionary: return d.get("x", {})          # the hero ultimate on X (HeroUlt)
+## The hero ultimate on X (HeroUlt) at the hunter's R rank (its x.per_rank steps added; rebuilt on a new rank).
+func x_def() -> Dictionary:
+	var r := h.ability_level("ult")
+	if r != _x_rank:
+		_x_rank = r
+		_x_ranked = HeroUlt.ranked(d.get("x", {}), r)
+	return _x_ranked
+
 func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})

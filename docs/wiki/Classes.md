@@ -142,7 +142,7 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 
 ### Run levels
 
-Every expedition starts at level 1 with one skill point and every ability locked. Each level gives a point. Ranks per slot: RMB 3, Dash (Shift) 3, E 3, R (ultimate) 2. The ultimate opens at level 6 (rank 2 at 9).
+Every expedition starts at level 1 with one skill point and every ability locked. Each level gives a point. Ranks per slot: RMB 3, Dash (Shift) 3, E 3, R (ultimate) 3. The ultimate opens at level 6 (rank 2 at 9, rank 3 at 10).
 
 | Level | Total XP |  |
 |---|---|---|
@@ -155,6 +155,6 @@ Every expedition starts at level 1 with one skill point and every ability locked
 | 7 | 870 |  |
 | 8 | 1120 |  |
 | 9 | 1400 | R rank 2 |
-| 10 | 1710 |  |
+| 10 | 1710 | R rank 3 |
 
 <!-- /gen:classes -->

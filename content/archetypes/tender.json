@@ -158,12 +158,12 @@
 		"dash": "picking up a teammate refreshes your long air dash",
 		"kin": "the thrown light's healing boost is 100% instead of 50%"
 	},
-	"rank2": {
+	"rank2": {"ult": "Rank 2: Hearth Call cooldown 46s -> 41.4s. The Merge lasts 30% longer.", 
 		"sec": "Rank 2: cooldown 10.5s -> 9.5s, damage +15%.",
 		"dash": "Rank 2: recharge 7s -> 6s per charge.",
 		"kin": "Rank 2: cooldown 11s -> 9.9s, healing +15%."
 	},
-	"rank_next": {
+	"rank_next": {"ult": "Rank 3: Hearth Call cooldown 46s -> 36.8s.", 
 		"sec": "Rank 3: cooldown 10.5s -> 8.4s, damage +30%; the roots last 0.3s longer and the burst is twice as wide.",
 		"kin": "Rank 3: cooldown 11s -> 8.8s, healing +30%; the thrown light's healing boost is 100% instead of 50%.",
 		"dash": "Rank 3: recharge 7s -> 4.9s; picking up a teammate refreshes your long air dash."

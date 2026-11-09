@@ -150,12 +150,12 @@
 		"dash": "a Skate over the Abyss lays ice underfoot that holds for 5s",
 		"kin": "the wall is 40 points tougher"
 	},
-	"rank2": {
+	"rank2": {"ult": "Rank 2: Rimelock cooldown 80s -> 70s, damage 40 -> 56. The Merge lasts 30% longer.", 
 		"sec": "Rank 2: cooldown 10.2s -> 9.2s, damage +15%.",
 		"dash": "Rank 2: recharge 13s -> 11s.",
 		"kin": "Rank 2: cooldown 17s -> 15.3s, wall strength +15%."
 	},
-	"rank_next": {
+	"rank_next": {"ult": "Rank 3: Rimelock cooldown 80s -> 60s, damage 40 -> 56.", 
 		"sec": "Rank 3: cooldown 10.2s -> 8.2s, damage +30%; the detonation hits 45% harder.",
 		"dash": "Rank 3: recharge 13s -> 9.1s; a Skate over the Abyss lays ice underfoot that holds for 5s.",
 		"kin": "Rank 3: cooldown 17s -> 13.6s, wall strength +30%; +40 wall strength."
@@ -165,7 +165,7 @@
 		"full": "at 8 darts the foe Shatters in ice spikes; a landed spear shows its slow zone and fill to everyone",
 		"dash_spent": "skate blades dark, dash pip dark"
 	},
-	"x": {
+	"x": {"per_rank": {"dmg": [16, 0], "cooldown": [-10, -10]}, 
 		"name": "Rimelock",
 		"short": "Rime",
 		"icon": "quake",

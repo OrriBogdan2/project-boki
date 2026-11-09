@@ -124,7 +124,7 @@
 		"deg": 120.0,
 		"cremate": 10.0
 	},
-	"x": {
+	"x": {"per_rank": {"dmg": [1.8, 1.8], "final_dmg": [2.5, 2.5], "cooldown": [-5, -5]}, 
 		"name": "Starpiercer",
 		"short": "Starpierce",
 		"icon": "skypierce",
@@ -160,12 +160,12 @@
 		"dash": "Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading) and allies near you walk with you",
 		"kin": "the Hail Wall is 30% wider"
 	},
-	"rank2": {
+	"rank2": {"ult": "Rank 2: Starpiercer cooldown 60s -> 55s, damage 18 -> 19.8, last-shot damage 25 -> 27.5. The Merge lasts 30% longer.", 
 		"sec": "Rank 2: cooldown 16s -> 13s, damage +15%.",
 		"dash": "Rank 2: recharge 9.5s -> 8.1s per charge.",
 		"kin": "Rank 2: cooldown 15s -> 12.8s, damage +15%."
 	},
-	"rank_next": {
+	"rank_next": {"ult": "Rank 3: Starpiercer cooldown 60s -> 50s, damage 18 -> 21.6, last-shot damage 25 -> 30.", 
 		"sec": "Rank 3: cooldown 16s -> 10s, damage +30%; flies 3m farther and a wall stun gives a dash charge.",
 		"kin": "Rank 3: cooldown 9s -> 7.2s, damage +30%; the Hail Wall is 30% wider.",
 		"dash": "Rank 3: recharge 6s -> 4.2s; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too."

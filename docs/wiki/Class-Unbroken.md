@@ -104,6 +104,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 2s -> 1.8s, damage +15%; +20% damage on every Smash. | cooldown 2s -> 1.6s, damage +30%; +40% damage on every Smash in all, and the Meteor Drop rests 2.4s less. |
 | Dash (Shift) | recharge 9s -> 7.6s per charge; a third charge. | recharge 9s -> 6.3s; a shot dodged through the Rampage feeds your Rage. |
 | E | cooldown 9.5s -> 8.3s, damage +15%. | cooldown 9.5s -> 5.9s, damage +30%. |
+| R (ultimate) | Gilded Riposte cooldown 36s -> 32s, damage 43 -> 73. The Merge lasts 30% longer. | Gilded Riposte cooldown 36s -> 28s, damage 43 -> 103. |
 
 **Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 

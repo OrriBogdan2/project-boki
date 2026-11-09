@@ -26,13 +26,13 @@
 	"e": {"delivery": "burst", "name": "Furnace Cloak", "short": "Cloak", "icon": "shield", "col": "#ff7a30", "cooldown": 10.5, "on_press": true, "radius": 4.5, "dmg": 7.0, "pull_speed": 14.0, "gap": 1.3, "char": 16.0, "blt_t": 3.0, "shield_base": 0.064, "shield_each": 0.051, "shield_t": 3.0, "rank3_shield_k": 1.3,
 		"desc": "On the press, a blast of heat round you (4.5m, the ring shows its edge): 7 damage, 16 Char and Anti-Heal for 3s, and foes in sight are dragged toward you (walls stop them). Hit anyone and you wear a swirling 3s shield of 6.4% health plus 5.1% per foe. A knock resets it.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add", "mod": "add"}},
-	"x": {"name": "Flue Flight", "short": "Flight", "icon": "updraft", "col": "#ff7a2a", "unlock": 6, "cooldown": 36.0,
+	"x": {"per_rank": {"cooldown": [-12, 0], "trail_dps": [0, 1.125]}, "name": "Flue Flight", "short": "Flight", "icon": "updraft", "col": "#ff7a2a", "unlock": 6, "cooldown": 36.0,
 		"time": 1.8, "speed": 12.6, "turn_deg": 120.0, "hover": 0.45, "burst_r": 2.2, "boost_k": 0.8, "boost_max": 10.0,
 		"trail_t": 5.2, "trail_w": 1.8, "trail_dps": 4.5, "tick": 0.3, "char": 4.0, "slow": 0.3, "slow_for": 0.5,
 		"desc": "Lift off in a ring of embers and fly 1.8s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. The Cinder Shot and the Furnace Cloak work mid-flight, but the stream of fire does not (the key is ignored until you land), and a knockback (or Shift) speeds you up. The carpet never forms over the abyss. 36s."},
 	"order": ["sec", "dash", "kin", "sec", "dash", "kin", "sec", "dash", "kin", "gear"],
 	"rank3": {"dash": "+4.3 damage; a hit gives +16% speed and a shield of 11.6% health for 2s", "sec": "a second charge", "kin": "+30% shield"},
-	"rank2": {"sec": "Rank 2: cooldown 7s -> 6.3s, damage +15%.", "dash": "Rank 2: recharge 9s -> 7.65s per charge.", "kin": "Rank 2: cooldown 10.5s -> 9.45s, damage and shield +15%."},
-	"rank_next": {"sec": "Rank 3: cooldown 7s -> 5.6s, damage +30%; a second charge.", "dash": "Rank 3: recharge 9s -> 6.3s, damage +30% and +4.3; a hit gives +16% speed and a shield of 11.6% health for 2s.", "kin": "Rank 3: cooldown 10.5s -> 8.4s, damage and shield +30%, and the shield +30% more."},
+	"rank2": {"ult": "Rank 2: Flue Flight cooldown 36s -> 24s. The Merge lasts 30% longer.", "sec": "Rank 2: cooldown 7s -> 6.3s, damage +15%.", "dash": "Rank 2: recharge 9s -> 7.65s per charge.", "kin": "Rank 2: cooldown 10.5s -> 9.45s, damage and shield +15%."},
+	"rank_next": {"ult": "Rank 3: Flue Flight cooldown 36s -> 24s, trail damage 4.5 -> 5.62.", "sec": "Rank 3: cooldown 7s -> 5.6s, damage +30%; a second charge.", "dash": "Rank 3: recharge 9s -> 6.3s, damage +30% and +4.3; a hit gives +16% speed and a shield of 11.6% health for 2s.", "kin": "Rank 3: cooldown 10.5s -> 8.4s, damage and shield +30%, and the shield +30% more."},
 	"tells": {"half": "embers drift off a foe at half Char; one flame over a foe Ablaze", "full": "three flames and a glow over a foe that Flashed over", "dash_spent": "dash pips dark"}
 }

@@ -90,6 +90,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 6.5s -> 5.9s, damage +15%. | cooldown 6.5s -> 5.2s; resets when you knock a hunter. |
 | Dash (Shift) | recharge 8.5s -> 7.7s. | recharge 8.5s -> 6.8s; +25% speed for 2s when a slide ends. |
 | E | cooldown 11.5s -> 10.4s, damage +20%. | cooldown 11.5s -> 9.2s, damage +40%; every hunter hit takes 30% off the cooldown. |
+| R (ultimate) | Cinderfall cooldown 42s -> 38s, damage 24 -> 28.8, fire damage 3 -> 3.6. The Merge lasts 30% longer. | Cinderfall cooldown 42s -> 34s, damage 24 -> 33.6, fire damage 3 -> 4.2. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E.
 

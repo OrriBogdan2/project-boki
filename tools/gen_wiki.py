@@ -290,12 +290,13 @@ def gen_classes():
     unlock += table(["Hunter", "Goal", "Target", "Reward"], m_rows)
     lv = []
     for i, t in enumerate(xp):
-        lv.append([str(i + 1), num(t), "R unlocks" if (i + 1) in ult_at[:1] else ("R rank 2" if (i + 1) in ult_at[1:] else "")])
+        lv.append([str(i + 1), num(t), "R unlocks" if (i + 1) in ult_at[:1] else ("R rank %d" % (ult_at.index(i + 1) + 1) if (i + 1) in ult_at else "")])
     body = "### All %d Hunters\n\n" % len(rows) + table(["Hunter", "Health / dashes", "Weapons", "Passive", "Dash", "RMB", "E", "R"], rows)
     body += "\n\n" + unlock
     body += "\n\n### Run levels\n\nEvery expedition starts at level 1 with one skill point and every ability locked. "
-    body += "Each level gives a point. Ranks per slot: %s. The ultimate opens at level %s (rank 2 at %s).\n\n" % (
-        ", ".join("%s %s" % (SLOT_NAMES.get(k, k), v) for k, v in slot_max.items()), num(ult_at[0]) if ult_at else "?", num(ult_at[1]) if len(ult_at) > 1 else "?")
+    body += "Each level gives a point. Ranks per slot: %s. The ultimate opens at level %s (%s).\n\n" % (
+        ", ".join("%s %s" % (SLOT_NAMES.get(k, k), v) for k, v in slot_max.items()), num(ult_at[0]) if ult_at else "?",
+        ", ".join("rank %d at %s" % (i + 2, num(v)) for i, v in enumerate(ult_at[1:])))
     body += table(["Level", "Total XP", ""], lv)
     block("Classes.md", "classes", body)
 
@@ -347,7 +348,7 @@ def gen_classes():
         b.append("### Ranks\n\nRank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.\n")
         rk = []
         for s in ("sec", "dash", "kin", "ult"):
-            if s == "ult" and "r" not in d: continue
+            if s == "ult" and "x" not in d: continue
             r2 = d.get("rank2", {}).get(s, "")
             r3 = d.get("rank_next", {}).get(s, "") or ("Rank 3: " + d["rank3"][s] if s in d.get("rank3", {}) and s != "ult" else "")
             if r2 or r3:

@@ -69,6 +69,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 10s -> 9s, damage +15%. | cooldown 10s -> 8s, damage +30%; you speed up 11% on the cast and 22% when it hits, for 2s. |
 | Dash (Shift) | recharge 9.5s -> 8.1s per charge. | recharge 9.5s -> 6.7s; allies beside you or at your landing get a 26 shield for 3s. |
 | E | cooldown 10s -> 9s, damage +15%. | cooldown 10s -> 8s; the growing seed burns foes inside for 8 a second. |
+| R (ultimate) | Nightwell cooldown 70s -> 65s. The Merge lasts 30% longer. | Nightwell cooldown 70s -> 60s. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).
 

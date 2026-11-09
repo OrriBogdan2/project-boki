@@ -181,7 +181,7 @@
 		},
 		"revive": 0.35
 	},
-	"x": {
+	"x": {"per_rank": {"strike_dmg": [0.8, 0.8], "dmg": [3.6, 3.6], "cooldown": [-4, -4]}, 
 		"name": "Faultline",
 		"short": "Fault",
 		"icon": "quake",
@@ -222,12 +222,12 @@
 		"dash": "the 360 Smash refunds the Shield Charge when it hits",
 		"kin": "Mending Ground's cooldown drops to 8s and it heals 50% more in all"
 	},
-	"rank2": {
+	"rank2": {"ult": "Rank 2: Faultline cooldown 40s -> 36s, first-strike damage 4 -> 4.8, damage 18 -> 21.6. The Merge lasts 30% longer.", 
 		"sec": "Rank 2: shield HP +25% (160 -> 200), damage +15%.",
 		"dash": "Rank 2: recharge 8s -> 6.8s per charge; the Shield Charge cooldown 6s -> 4.5s.",
 		"kin": "Rank 2: healing +25% (burst 18 -> 22), damage +15%."
 	},
-	"rank_next": {
+	"rank_next": {"ult": "Rank 3: Faultline cooldown 40s -> 32s, first-strike damage 4 -> 5.6, damage 18 -> 25.2.", 
 		"sec": "Rank 3: shield HP +50% (240), damage +30%; regen 20 -> 30 per second, back up in 1.4s and 2s when broken.",
 		"kin": "Rank 3: cooldown 12s -> 8s, healing +50% in all.",
 		"dash": "Rank 3: recharge 8s -> 5.6s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it."
