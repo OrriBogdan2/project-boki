@@ -23,7 +23,7 @@ Sheets, portraits and generated images are NOT checked out: read any of them wit
 5. `briefs/boki-art/CHANNEL.md` (latest entries) and `OWNER_FEEDBACK.md` (end): the owner's recent calls.
 
 ## Owner's style pick
-OWNER STYLE PICK: (fill in from the owner's round-6 answer, e.g. "a for all six"; if blank, follow the research recommendation: a's flat rendering + b's tapered hue-shifted line + c's detail budget, keeping the current eyes and face quality.)
+OWNER STYLE PICK (16:32 ET 11-09): style a, flat cel-shaded, as the base for everything. Exception: he says it does NOT work on Gongrowl. My read: flat cel exposes Gongrowl's design problems rather than being the wrong style. It is a semi-realistic gorilla wearing strapped-on armour (chest plate, shoulder straps, cuffs), and the dark fur flattens to one muddy mid-grey with little value contrast. So: (1) give rules for big, dark or furry finals (keep a clear dark/light value split, clumped fur shapes instead of flat fill, a heavier silhouette line); (2) list Gongrowl, and any Boki with the same strapped-armour problem, for a construction redesign (gong grown into the chest, no straps, Boki proportions with a bigger head) BEFORE their style re-render; (3) put Gongrowl on the human-pass list.
 
 ## Hard constraints
 - Approved designs do not change: same creature, body plan, colours, signature parts. Only the rendering, line, face treatment and construction cleanup change.
