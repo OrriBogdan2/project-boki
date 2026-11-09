@@ -4722,3 +4722,4 @@ ART puffamus 8.5 briefs/boki-art/cards/Puffamus.jpg kind=card
 ART sporcupine 7.8 briefs/boki-art/batch/out/sporcupine_card2_w32_1.jpg kind=card status=owner-review
 ART terrarimit 7.9 briefs/boki-art/batch/out/terrarimit_e_w32_4.jpg kind=turnaround status=owner-review
 ART voltalon 7.8 briefs/boki-art/batch/out/voltalon_r_w32_2.jpg kind=turnaround status=owner-review
+READY ext/ability-bar-charges 82671deed (ability bar charges and slots)
