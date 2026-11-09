@@ -10,7 +10,7 @@ Where testers speed through, stall at, skip or quit the match tutorial and the f
 - Hooks: `Tutorial` (enter, finish, stall reminder, tick), `FarmTutorial.mark/skip`, `FarmGuide` (current step and hint stage).
   The match tutorial has no skip on main; when one lands it calls `TutFunnel.skip("match")`.
 - Stored in `user://feedback.json` (`Feedback.funnel`, this version only) and sent as `funnel` with the rate card's
-  answer. The server (`mm/feedback.py`) validates it (numbers and `done`/`skip` only, no free text) and keeps it in `feedback.jsonl`.
+  answer when the answer still fits the server's 2 KB (a long non-ASCII note leaves it off). The server (`mm/feedback.py`) validates it (numbers and `done`/`skip` only, no free text) and keeps it in `feedback.jsonl`.
   It reaches us only when a tester sends the card. No names, ids or dates are added.
 - `python3 tools/tut_funnel.py <folder>` reads `*.json`/`*.jsonl` (feedback.jsonl, a tester's feedback.json) and prints, per step:
   reached, done, skip, quit, median seconds, median idle, average hints.

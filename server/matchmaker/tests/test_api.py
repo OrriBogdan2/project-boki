@@ -60,6 +60,10 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(self.call("POST", "/feedback", dict(base, funnel=fun)), (200, {"ok": True}))
         with open(self.fb, encoding="utf-8") as f:
             self.assertEqual(json.loads(f.read().splitlines()[-1])["funnel"], fun)
+        floats = {"match": {"land": [0.0, 4.0, 1.0, 0.0, "done"]}}      # how the game's queue sends whole numbers
+        self.assertEqual(self.call("POST", "/feedback", dict(base, funnel=floats)), (200, {"ok": True}))
+        with open(self.fb, encoding="utf-8") as f:
+            self.assertEqual(json.loads(f.read().splitlines()[-1])["funnel"], {"match": {"land": [0, 4, 1, 0, "done"]}})
         for broken in ({"match": {"land": [0, 4, 1, 0, "bye"]}}, {"match": {"land": [0, 4, 1]}},
                        {"match": {"land": [0, 4.5, 1, 0, ""]}}, {"match": {"x" * 30: [0, 1, 0, 0, ""]}}):
             self.assertEqual(self.call("POST", "/feedback", dict(base, funnel=broken))[0], 400)

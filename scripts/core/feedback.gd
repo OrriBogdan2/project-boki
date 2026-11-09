@@ -66,8 +66,11 @@ static func submit(host: Node, scores: Dictionary, note: String) -> void:
 	var who := "%s (%s)" % [Save.d.get("name", "Hunter"), Save.d.get("profile", {}).get("id", "?")]
 	var body := {"version": Net.VERSION, "player": who.left(64), "scores": scores,
 			"note": note.left(NOTE_MAX), "minutes_played": snappedf(minutes(), 0.1)}
-	var funnel := TutFunnel.payload()
-	if not funnel.is_empty():
+	var funnel: Dictionary = TutFunnel.payload()
+	# Only while the answer stays under the server's 2 KB, measured as flush() sends it (re-read from the file,
+	# so whole numbers go out as 4.0): a long note keeps the answer and drops the funnel.
+	var sent := JSON.stringify(JSON.parse_string(JSON.stringify(body.merged({"funnel": funnel}))))
+	if not funnel.is_empty() and sent.to_utf8_buffer().size() < 2048:
 		body["funnel"] = funnel
 	st["queue"].append(body)
 	_save(st)

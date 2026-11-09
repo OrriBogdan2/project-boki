@@ -83,10 +83,10 @@ static func hint(track: String) -> void:
 ## The step is finished (it may never have been the current one: the farm can find it already done).
 static func leave(track: String, sid: String) -> void:
 	var rec := _rec(track, sid)
-	if String(rec[END]) == "":
+	if String(rec[END]) == "":      # (the match calls this every frame after extraction: write once)
 		rec[OUT] = float(_clock.get(track, 0.0))
 		rec[END] = "done"
-	save()
+		save()
 
 ## The tester skipped the tutorial: the step they were on ends as "skip".
 static func skip(track: String) -> void:
@@ -96,7 +96,7 @@ static func skip(track: String) -> void:
 		if String(rec[END]) == "":
 			rec[OUT] = float(_clock.get(track, 0.0))
 			rec[END] = "skip"
-	save()
+			save()
 
 ## Time passes in the current step. `active` is whether the tester is touching keys or the mouse.
 static func tick(track: String, dt: float, active := _input_active()) -> void:

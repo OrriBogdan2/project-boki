@@ -110,9 +110,16 @@ func _delivery() -> void:
 	Feedback.submit(host, {"combat": 7, "boki": 9, "onboarding": 4, "look": 10}, "")
 	var b: Dictionary = sent[0]
 	ok(b.has("funnel") and b["funnel"].has("match"), "the answer carries the funnel")
-	ok(JSON.stringify(b).length() < 4096, "and fits the server's 4 KB limit (%d bytes)" % JSON.stringify(b).length())
+	var bytes := JSON.stringify(b).to_utf8_buffer().size()
+	ok(bytes < 2048, "and fits the server's 2 KB limit (%d bytes)" % bytes)
 	ok(b.keys().all(func(k): return k in ["version", "player", "scores", "note", "minutes_played", "funnel"]),
 			"nothing else is added to what the card already sent")
+	for i in 30:      # (more farm steps than there are, so the funnel no longer fits beside a full note)
+		TutFunnel.enter("farm", "step_%d" % i)
+	Feedback.submit(host, {"combat": 7, "boki": 9, "onboarding": 4, "look": 10}, "ü".repeat(Feedback.NOTE_MAX))
+	ok(sent.size() == 2 and not sent[1].has("funnel") and JSON.stringify(sent[1]).to_utf8_buffer().size() < 2048,
+			"a long note keeps the answer under 2 KB and leaves the funnel off")
+	host.queue_free()
 	var dir := ProjectSettings.globalize_path("user://funnel_check_dir")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var quitter: Dictionary = b.duplicate(true)

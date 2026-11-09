@@ -4,7 +4,7 @@ import os
 import threading
 import time
 
-MAX_FEEDBACK = 4096   # bytes of request body (the tutorial funnel is about 1.5 KB of it)
+MAX_FEEDBACK = 2048   # bytes of request body
 MAX_STEPS = 40        # steps per tutorial track in the funnel
 ENDS = ("", "done", "skip")
 SCORE_KEYS = ("combat", "boki", "onboarding", "look")
@@ -44,7 +44,9 @@ def _funnel_problem(fun) -> str:
         for sid, r in steps.items():
             if not isinstance(sid, str) or not 0 < len(sid) <= 24 or not isinstance(r, list) or len(r) != 5:
                 return "funnel"
-            if any(isinstance(n, bool) or not isinstance(n, int) or not -1 <= n <= 10_000_000 for n in r[:4]):
+            # (the game re-reads its queue from JSON, so whole numbers can arrive as 4.0)
+            if any(isinstance(n, bool) or not isinstance(n, (int, float)) or n != int(n) or not -1 <= n <= 10_000_000
+                   for n in r[:4]):
                 return "funnel"
             if r[4] not in ENDS:
                 return "funnel"
@@ -56,7 +58,8 @@ def store(path: str, body: dict) -> None:
     rec = {"received": int(time.time()), "version": body["version"], "player": body["player"],
            "scores": body["scores"], "note": body.get("note", ""), "minutes_played": body["minutes_played"]}
     if body.get("funnel"):
-        rec["funnel"] = body["funnel"]
+        rec["funnel"] = {t: {sid: [int(n) for n in r[:4]] + [r[4]] for sid, r in steps.items()}
+                         for t, steps in body["funnel"].items()}
     with _lock:
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         with open(path, "a", encoding="utf-8") as f:
