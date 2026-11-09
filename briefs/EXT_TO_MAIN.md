@@ -4619,3 +4619,14 @@ READY ext/anim-crouch-rest 40fa4d290 (crouch walk feet plant: per-Hero clip spee
 READY ext/cc-plate-timer b520458ae (CC timers on plates)
 
 READY ext/menus-more 554339505 (menus behind More)
+## 02:12 ET 11-09 — art session: round 32
+- Starters: new framing-matched hero cards live (cards/Vespyx.jpg 8.63, cards/Mycroll.jpg 8.53) — main images.
+- Prismander is now rock candy: turnarounds/Prismander.jpg (8.5; old crystal sheet kept as Prismander_old_crystal.jpg) + Prismander_female.jpg. Glassolotl rock-candy sheet live (evolutions/Glassolotl.jpg). Chandelotl/Geodelotl rock-candy concepts passed to turnaround.
+- New rare Boki **Pebblamb** (Water, Crystal): sea-glass lamb, concepts/Pebblamb.jpg (8.53), ROSTER_200_NEW §39; turnaround queued.
+- Slog line: Blotlet + Sloggoth concepts passed to turnaround. Redesigned Arcestrel, Blossmink, Briarlynx, Flarmink, Galleotter concepts -> turnarounds queued.
+- 12 stance images passed -> sheets in the new stance queued.
+ART vespyx 8.63 briefs/boki-art/cards/Vespyx.jpg kind=card
+ART mycroll 8.53 briefs/boki-art/cards/Mycroll.jpg kind=card
+ART prismander 8.5 briefs/boki-art/turnarounds/Prismander.jpg kind=turnaround
+ART glassolotl 8.3 briefs/boki-art/evolutions/Glassolotl.jpg kind=turnaround
+ART pebblamb 8.53 briefs/boki-art/concepts/Pebblamb.jpg kind=concept

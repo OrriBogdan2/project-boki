@@ -1,5 +1,247 @@
 [
   {
+    "id": "ta_pebblamb",
+    "name": "Pebblamb",
+    "refs": [
+      "briefs/boki-art/concepts/Pebblamb.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_chandelotl_a",
+    "name": "Chandelotl",
+    "refs": [
+      "briefs/boki-art/batch/out/c_chandelotl_a_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_geodelotl_a",
+    "name": "Geodelotl",
+    "refs": [
+      "briefs/boki-art/batch/out/c_geodelotl_a_4.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_blotlet",
+    "name": "Blotlet",
+    "refs": [
+      "briefs/boki-art/batch/out/c_blotlet_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_sloggoth",
+    "name": "Sloggoth",
+    "refs": [
+      "briefs/boki-art/batch/out/c_sloggoth_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_arcestrel_v2",
+    "name": "Arcestrel",
+    "refs": [
+      "briefs/boki-art/batch/out/c_arcestrel_v2_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_blossmink_v2",
+    "name": "Blossmink",
+    "refs": [
+      "briefs/boki-art/batch/out/c_blossmink_v2_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_briarlynx_v2",
+    "name": "Briarlynx",
+    "refs": [
+      "briefs/boki-art/batch/out/c_briarlynx_v2_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_flarmink_v2",
+    "name": "Flarmink",
+    "refs": [
+      "briefs/boki-art/batch/out/c_flarmink_v2_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_galleotter_v2",
+    "name": "Galleotter",
+    "refs": [
+      "briefs/boki-art/batch/out/c_galleotter_v2_4.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_bellowary_stance",
+    "name": "Bellowary",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_stance2_bellowary_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_boltstrich_stance",
+    "name": "Boltstrich",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_stance2_boltstrich_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_chandelapi_stance",
+    "name": "Chandelapi",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_stance2_chandelapi_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_frigatee_stance",
+    "name": "Frigatee",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_stance2_frigatee_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_latchling_stance",
+    "name": "Latchling",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_stance2_latchling_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_lockatara_stance",
+    "name": "Lockatara",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_stance2_lockatara_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_prowyak_stance",
+    "name": "Prowyak",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_stance2_prowyak_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_puffamus_stance",
+    "name": "Puffamus",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_stance2_puffamus_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_ringrove_stance",
+    "name": "Ringrove",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_stance2_ringrove_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_snuffapi_stance",
+    "name": "Snuffapi",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_stance2_snuffapi_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_soakybara_stance",
+    "name": "Soakybara",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_stance2_soakybara_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_sporcupine_stance",
+    "name": "Sporcupine",
+    "refs": [
+      "briefs/boki-art/batch/out/portrait_stance2_sporcupine_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
     "id": "ta_prismander_a2",
     "name": "Prismander",
     "refs": [
@@ -2887,6 +3129,17 @@
     "runs": 3,
     "aspect": "1:1",
     "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a hydra whose heads are hydrangea blooms. Look: A three-headed hydra on four thick legs, each head a round cluster of hydrangea petals with a fanged dragon jaw beneath. Petal-shaped scales cover its body, and leaf-plate spines run down its back to a heavy tail. Face: three different moods: one sleepy, one snarling, one curious.. Colours: hydrangea blue-violet and leaf green; accent old gold horns.. Archetype: majestic. Avoid: thin necks, a bouquet, more than three heads.",
+    "size": "2K"
+  },
+  {
+    "id": "c_pebblamb",
+    "name": "Pebblamb (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a lamb whose curly fleece is tide-worn sea-glass pebbles. Look: A fluffy baby lamb on short stubby legs, its whole curly fleece made of round frosted sea-glass pebbles of different sizes, little rounded sea-glass hooves and ear tips. Face: big, sleepy-happy eyes and a soft little smile.. Colours: frosted seafoam green and pale aqua, with a cobalt blue pebble accent.. Archetype: cute. Avoid: an axolotl, sharp crystals, shells, sand, a bottle.",
     "size": "2K"
   },
   {

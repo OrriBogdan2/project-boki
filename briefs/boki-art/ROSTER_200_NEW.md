@@ -1044,3 +1044,11 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Archetype:** majestic
 
 ## 39. Sea-glass Boki (rare) · Water, Crystal — owner 01:36: NOT an otter or ray; a non-aquatic animal made of sea glass. Lamb / koala / red panda concepts in progress; name follows the pick.
+### Pebblamb (rare) · Water, Crystal (Claude's pick 02:10 from lamb/koala/red panda/slug; owner 01:36 wanted a non-aquatic animal)
+- **Concept:** a lamb whose curly fleece is tide-worn sea-glass pebbles.
+- **Mix:** baby lamb + frosted sea glass.
+- **Look:** A fluffy baby lamb on short stubby legs, its whole curly fleece made of round frosted sea-glass pebbles of different sizes, little rounded sea-glass hooves and ear tips.
+- **Face:** big, sleepy-happy eyes and a soft little smile.
+- **Colours:** frosted seafoam green and pale aqua, with a cobalt blue pebble accent.
+- **Avoid:** an axolotl, sharp crystals, shells, sand, a bottle.
+- **Archetype:** cute
