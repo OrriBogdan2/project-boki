@@ -1768,6 +1768,8 @@ func _draw_drop_prompt(sz: Vector2, p: Hunter) -> void:
 
 ## Squad pings out in the world: a marker over each with how far it is.
 func _draw_squad_pings(p: Hunter) -> void:
+	if PingInput.wheel_open(p):
+		WheelView.draw(self, p.inp["ping_wheel"], PingInput.KINDS, m.mate_col(p), PingInput.HINTS)
 	for pg in m.pings:
 		if not pg.has("by") or int(pg.get("team", -1)) != p.team:
 			continue

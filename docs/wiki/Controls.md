@@ -75,7 +75,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | V | Glove 2 (in a match; V plays fetch at home) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
 | G | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
-| Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too) | `ping` | yes |
+| Middle mouse | Ping for your squad: tap for a spot, hold for the wheel (on the map too) | `ping` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift | Hunter dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |

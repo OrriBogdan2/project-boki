@@ -185,39 +185,11 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 		wheel(H, p)
 	return x + 42.0
 
-## The flick wheel, drawn round where the mouse was when you started holding G. Four wedges with a label and a
-## hint each, popped open with an ease-out-back, the one under your flick lit, your current order marked.
+## The order wheel (WheelView), drawn where the mouse was when you started holding G, with your current order marked.
 static func wheel(H, p: Hunter) -> void:
 	var w: Dictionary = p.inp["wheel"]
-	var o: Vector2 = w["o"]
-	var pop := KinWheel.pop(p)
-	var rin := 26.0 * pop
-	var rout := float(KinWheel.rules()["radius_px"]) * pop
-	var k: Kin = p.kin
-	var kc := Color(k.sp["color"])
 	var hints := {"chase": "stick to a foe", "guard": "hold this spot", "return": "back on you", "follow": "at your side"}
-	for i in KinWheel.SEGMENTS.size():
-		var sg: Dictionary = KinWheel.SEGMENTS[i]
-		var a: float = (sg["dir"] as Vector2).angle()
-		var pts := PackedVector2Array()
-		for j in 11:
-			var t := a - PI / 4.0 + 0.04 + (PI / 2.0 - 0.08) * float(j) / 10.0
-			pts.append(o + Vector2(cos(t), sin(t)) * rout)
-		for j in range(10, -1, -1):
-			var t := a - PI / 4.0 + 0.04 + (PI / 2.0 - 0.08) * float(j) / 10.0
-			pts.append(o + Vector2(cos(t), sin(t)) * rin)
-		var lit := int(w["sel"]) == i
-		H.c.draw_colored_polygon(pts, Color(kc, 0.62) if lit else Color(0.03, 0.04, 0.07, 0.72))
-		var mid := o + (sg["dir"] as Vector2) * (rin + rout) * 0.5
-		var is_now: bool = String(sg["id"]) == k.cmd
-		H._ctext(mid + Vector2(0, -2), String(sg["label"]).to_upper(), 15, Color.WHITE if lit else Color(H.INK, 0.92), H.big)
-		H._ctext(mid + Vector2(0, 12), String(hints[sg["id"]]), 10, Color(H.INK, 0.85 if lit else 0.55), H.big)
-		if is_now:
-			H.c.draw_circle(mid + Vector2(0, -20), 3.0, kc)
-	H.c.draw_circle(o, rin - 4.0, Color(0.03, 0.04, 0.07, 0.8))
-	var sel := int(w["sel"])
-	if sel >= 0:
-		H.c.draw_line(o, o + (KinWheel.SEGMENTS[sel]["dir"] as Vector2) * (rin - 6.0), kc, 3.0, true)
+	WheelView.draw(H, w, KinWheel.SEGMENTS, Color(p.kin.sp["color"]), hints, p.kin.cmd)
 
 ## A downed Boki of your squad, in the world: its name and the seconds until it comes round, the scoop
 ## bar, and an arrow at the screen edge when it is off screen. `sp` is its screen spot.

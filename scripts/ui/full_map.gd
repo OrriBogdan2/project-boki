@@ -701,7 +701,7 @@ func _side(c: Control, sz: Vector2) -> void:
 		if i_lead and squad.size() > 1:
 			hud._text(Vector2(r.position.x + 14, y + 10), "or click a squadmate to make them leader", 11, MUTED)
 	else:
-		hud._text(Vector2(r.position.x + 14, y + 14), "Pings last %ds" % int(Match.SQUAD_PING_T), 11, MUTED)
+		hud._text(Vector2(r.position.x + 14, y + 14), "Pings last %ds" % int(PingInput.LIFE_S), 11, MUTED)
 
 func _grid_ref(p: Vector3) -> String:
 	var cell := m.world.w / 8.0

@@ -167,9 +167,9 @@ func _tick_acks() -> void:
 func _ping_of(h: Hunter) -> Vector3:
 	if h == null:
 		return Vector3.INF
-	for p in m.pings:
-		if p.get("by") == h:
-			return p["pos"]
+	for i in range(m.pings.size() - 1, -1, -1):
+		if m.pings[i].get("by") == h:
+			return m.pings[i]["pos"]
 	return Vector3.INF
 
 func _human_ping(team: int) -> Vector3:

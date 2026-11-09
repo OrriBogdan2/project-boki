@@ -2076,9 +2076,9 @@ func mate_col(h: Hunter) -> Color:
 		if x.team == h.team: i += 1
 	return MATE_COLS[i % MATE_COLS.size()]
 
-const SQUAD_PING_T := 45.0
-## A squad ping: one per hunter (a new one moves it), seen by their squad on the map, the minimap and
-## as a marker in the world; it lasts a while or until its owner takes it down. `kind`: "", "enemy" or "loot".
+## A squad ping (PingInput.KINDS): a hunter keeps at most PingInput.MAX_PER_PLAYER (a new one retires the
+## oldest), seen by their squad on the map, the minimap and as a marker in the world; it fades after a few
+## seconds or when its owner takes it down. Squad bots answer a "go here" ping from their leader.
 func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "") -> void:
 	if h == null:
 		return
@@ -2086,9 +2086,9 @@ func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "") -> void:
 		p.y = world.ground_at(p.x, p.z)
 	else:
 		p.y = 0.0
-	unping(h, true)
+	PingInput.make_room(self, h)
 	pings.append({"pos": p, "col": PingInput.color(self, h, kind), "t": 0.0, "by": h, "team": h.team,
-		"life": SQUAD_PING_T, "kind": kind})
+		"life": PingInput.life(self), "kind": kind})
 	if player and h.team == player.team:
 		sfx("ping", null, -6.0, 1.15)
 	if net_on and not from_net:
@@ -2096,9 +2096,7 @@ func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "") -> void:
 	if skydrop:
 		skydrop.on_ping(h, p)
 	if not from_net:
-		for b in hunters:
-			if b != h and b.team == h.team and b.ctrl == "bot" and not b.remote and not b.out:
-				b.ai["ping_goal"] = {"pos": p, "until": time + 30.0, "by": h}
+		PingInput.call_bots(self, h, p, kind)
 
 func unping(h: Hunter, quiet := false, from_net := false) -> void:
 	for pg in pings.duplicate():
@@ -2110,9 +2108,10 @@ func unping(h: Hunter, quiet := false, from_net := false) -> void:
 	if not quiet and net_on and not from_net:
 		net_event(["unping", h.nid])
 
+## The newest ping the local player has up, or {}.
 func my_ping() -> Dictionary:
-	for pg in pings:
-		if player and pg.get("by") == player: return pg
+	for i in range(pings.size() - 1, -1, -1):
+		if player and pings[i].get("by") == player: return pings[i]
 	return {}
 
 func kin_bark(k: Kin, txt: String, cat: String, life := 0.0) -> void:
@@ -5856,11 +5855,11 @@ func _net_ev(x, from: String) -> void:
 				kk.comp.heard(String(x[2]), Vector3(float(x[3]), float(x[4]), float(x[5])))
 		"sping":
 			var ph: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
-			if ph:
+			if ph and player and ph.team == player.team:        # a squad's ping stays in the squad
 				squad_ping(ph, Vector3(x[2], x[3], x[4]), true, String(x[5]) if x.size() > 5 else "")
 		"unping":
 			var uh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
-			if uh: unping(uh, true, true)
+			if uh and player and uh.team == player.team: unping(uh, true, true)
 		"lead":
 			var lh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			var lt: Hunter = ents_by_id.get(String(x[2]), null) as Hunter

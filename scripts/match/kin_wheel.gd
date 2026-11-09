@@ -19,14 +19,14 @@ static func rules() -> Dictionary:
 static func is_open(h: Hunter) -> bool:
 	return h.inp.has("wheel")
 
-## Which segment a flick of `delta` screen pixels points at (-1 inside the dead zone).
-static func pick(delta: Vector2) -> int:
+## Which of `segments` (default: the orders) a flick of `delta` screen pixels points at (-1 inside the dead zone).
+static func pick(delta: Vector2, segments: Array = SEGMENTS) -> int:
 	if delta.length() < float(rules()["deadzone_px"]):
 		return -1
 	var best := 0
 	var bd := -2.0
-	for i in SEGMENTS.size():
-		var d := delta.normalized().dot(SEGMENTS[i]["dir"] as Vector2)
+	for i in segments.size():
+		var d := delta.normalized().dot(segments[i]["dir"] as Vector2)
 		if d > bd:
 			bd = d; best = i
 	return best
@@ -39,9 +39,9 @@ static func update(h: Hunter, mouse: Vector2, dt: float) -> void:
 	w["t"] = float(w["t"]) + dt
 	w["sel"] = pick(mouse - (w["o"] as Vector2))
 
-## 0..1 with an ease-out-back pop: how far open the drawn wheel is.
-static func pop(h: Hunter) -> float:
-	var x := clampf(float((h.inp.get("wheel", {}) as Dictionary).get("t", 0.0)) / float(rules()["pop_s"]), 0.0, 1.0)
+## 0..1 with an ease-out-back pop: how far open a wheel drawn `open_s` seconds ago is.
+static func pop(open_s: float) -> float:
+	var x := clampf(open_s / float(rules()["pop_s"]), 0.0, 1.0)
 	var c := 1.70158
 	return 1.0 + (c + 1.0) * pow(x - 1.0, 3.0) + c * pow(x - 1.0, 2.0)
 
