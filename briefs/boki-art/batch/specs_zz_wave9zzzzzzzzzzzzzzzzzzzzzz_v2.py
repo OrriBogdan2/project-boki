@@ -131,3 +131,12 @@ _RD2('Forgebrock',"a big orange-brown badger walking on four legs. Its back rise
 _RD2('Chuggamus',"a purple hippo standing on four thick piston-shaped legs with flat round feet. Its belly and sides are smooth copper hide shaped like a locomotive boiler. A copper smokestack-shaped horn grows on its snout, puffing a little steam. Its lower jaw is shaped like a cowcatcher grille, with a glowing firebox mouth and two ivory tusks.")
 # Gongrowl round 1 still reads as a bronze breastplate and keeps the small head: round 2 from the sheet too.
 _RD2('Gongrowl',"a gorilla with Boki proportions: a big round head (about a quarter of its height) with a short bronze crest growing from its skull, broad shoulders and long arms. In the middle of its chest the skin itself is a round bronze gong, set into the chest like a breastbone, with dark fur all round its edge and nothing round its shoulders or back. Bronze knuckles grown from its fists. Near-black fur with a lighter grey lit shape on its shoulders. It faces the viewer, roaring, pounding the gong in its chest with one fist. Keep its curled tail.")
+
+# 17:35 ET 11-09 pilot finding: the anchor creature bleeds in when the Boki is close to it in shape: Coolatee route A drew Vespyx's
+# purple body behind the seal (3 of 3), Glassolotl drew Chandelotl's striped tail (A1, A2, B2). Retry route A with a one-creature lock.
+_ONE=("Image 2 shows a different creature, used only as a style guide: draw no part of it anywhere, no body, tail, limbs, stripes or crystals from it. "
+      "The image contains exactly one creature, the one from image 1, and nothing behind or beside it. ")
+for _n,_st,_ar,_dk,_fu,_sh,_po,_co,_ct,_fx in _PILOT:
+    if _n in ('Coolatee','Glassolotl'):
+        SPECS.append({'id':'v2a2_'+_n.lower(),'name':_n+' (V2 pilot, route A + one-creature lock)','refs':[_C+_n+'.jpg',SRV2%_ar],'runs':3,'aspect':'1:1','size':'2K',
+                      'prompt':RS_CARD(_n,_st,_ar,_co,_ct,_dk,_fu,_fx).replace("Change ONLY how it is drawn. ","Change ONLY how it is drawn. "+_ONE)})
