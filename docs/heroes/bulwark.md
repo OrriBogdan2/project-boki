@@ -26,6 +26,24 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 | E, X, passive | see the per-slot table | matched in the earlier passes | unchanged |
 | Camera | - | a directional camera nudge on the swing | removed (item 50: no self-caused camera motion) |
 
+## Footage gaps, Nov 9 re-check
+The 10 ranked rows of `briefs/hero-ref/bjorn.md` section 4, checked on main d255acbee (read in the code, not from old notes). Nothing built: every open piece is in `bulwark_kit.gd`, `bjorn_fx.gd`, `bulwark.json` or `archer_bulwark_combo_check.gd`, which unmerged branches for Albert change (`ext/parity-bulwark-guardcut`, `ext/albert-parity-verify`, `ext/albert-size-boop`, `ext/mossy-shield-bash`, `ext/mossy-dash-refund`, `ext/vfx-bulwark`).
+
+| # | Gap | Status on main | Evidence |
+|---|---|---|---|
+| 1 | Throw lands at the cursor | closed | `_throw` stores `"to"` from `AimMode.dist(CURSOR)`, clamped to `throw_range` 9 m (584afbfb8); `bjorn aim: the hammer lands at the cursor (5m) and stays planted` |
+| 2 | Damage ratios | closed | throw 12 = recall 12, smash 36-66 (3x-5.5x), Shift 24 (2x), all in `bulwark.json` since 584afbfb8 |
+| 3 | Hold: no lunge, free turning, glint | closed, lunge kept by owner | turning asserted (`bjorn parity LMB: in the hold he turns with a cursor sweeping 1.25 turns a second`); glint from 0.6 s asserted (`bjorn LMB held: the glint shows from 0.6s`); the forward step stays by owner override (#30, #49: lunge and perfect launch) |
+| 4 | Swing VFX | closed | a 180 degree flaming crescent, hammer swept from behind (`smash_arc` 180, `bjorn_fx`; 584afbfb8) |
+| 5 | Shift: short dash, one 360 spin | closed | `dash.whirl` 3.5 m, one `_strike` and one `smash_ring` on arrival; cooldown 8 s (game data over the card's 9.2 s) |
+| 6 | Planted hammer, beacon | closed | `lie_t` 0.0 (6c4789d94; stays until recalled; `bjorn: the planted hammer never comes back by itself`), upright gold beacon in `bjorn_fx` |
+| 7 | E with the hammer in hand lands on him | closed | `_zone_anchor` returns `h.pos` when no hammer is out (584afbfb8, the lasting zone 6c4789d94); `bjorn E: with the hammer in hand it comes down on him, the column and circle shown`, and the zone follows a recalled hammer |
+| 8 | Shield look: curved pale-gold slab, sparks on block | partly closed; the rest in flight | curved plate wall, gold sparks on block, plate chunks and "SHIELD BROKEN" on break are built. Open: ours is a 4.2 m chord (the source's slab is about 2.2 body heights wide) in amber `c9953a`, not pale gold. `ext/vfx-bulwark` replaces the plate wall with a dome and `ext/parity-bulwark-guardcut` edits the same file, so left alone. Owner sync61 asked for a shield unique to him |
+| 9 | Bash on RMB release | open by choice (our extension) | the source has it as an augment; ours bashes on every release, documented. `ext/mossy-shield-bash` and `ext/mossy-dash-refund` change it |
+| 10 | Passive heal | closed | no Crush heal on main (Crushed is a 0.5 s stun and 8 damage); the footage shows only the stun |
+
+Suggestions, not built (parity first): if the owner wants row 8 to match, narrow the wall to about 2.4 m and use a paler gold, after `ext/vfx-bulwark` lands; row 9 stays our extension unless the owner calls it.
+
 ## Audit (Nov 3 23:40)
 Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on main 200effce). (a) already done on this branch, (b) fixed now, (c) not applied, with the reason.
 | Row | Sev | Verdict | Where / why |
