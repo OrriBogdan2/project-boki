@@ -172,6 +172,23 @@ Each target applies **quality** parity only. The attitude comes from the line qu
     unhurried shift of hip to hip.
 - **Note:** her model still carries the removed flamethrower. Author the hands empty now (the stuck arm is wrong either
   way), and the rework lands cleanly when the v2 model replaces it.
+- **Done (ext/idle-ashwick, 2026-11-08):** tools/art1/cinder_clips.py `idle`/`stance`, 6 s each, rebaked into cinder.glb.
+  - Idle: weight in her left hip, pelvis rolled and dropped (soft knees), the chest countering 4 frames behind and the
+    head 8 behind, the hands 10 behind the chest. The left hand rests at the collarbone. The right lies palm up at her hip
+    and rolls the flame (3 wrist rolls a loop). At u 0.40-0.72 the left hand opens in front of her chest and turns to
+    her, she tips her head to it and smiles, then the hand settles back with an overshoot and the hips resettle.
+  - Stance: on the idle's feet (the right heel settles as the weight comes over), both palms up at hip height, one
+    held shift left-right-left, the head scanning behind it.
+  - Breath: a new leaf `x_breath` under hips (scale, 2 breaths a loop, a quicker in-breath), skinned to the rib cage by
+    a smooth share of the hips weight; `extra_bones` in warden_anim/cinder.json.
+  - Every curve is whole cycles of the loop or a bump that is zero at the seam: `--clip-check` seam 0.0x the limit.
+  - Left open: the tail's sweep (its spring chain hangs off `root`, so it follows the hips but can't be keyed). The
+    magma cracks' brightening is now PipStars.pulse (v2 model). The v2 body (empty hands, no fins) is rebased in
+    (ext/idle-ashwick-rebased): both hands are placed by free turns (`RH`/`LH` palm normal + fingers, read by
+    cinder_clips.py `CastSolver`) instead of the old gun fist; the hair flicker/toss (`fin`) is gone with the fins.
+    Frames on the v2 body: [idle f008](idle/cinder_after_v2_idle_f008.png), [stance f003](idle/cinder_after_v2_stance_f003.png).
+  - Strips (front, f000 to f012 every 1 s, idle then stance): [before](idle/cinder_before.png),
+    [after](idle/cinder_after.png).
 
 ### 5. Sparkle the Storm Chaser (`mage`, art `ryzz`)
 
