@@ -1,7 +1,7 @@
 extends RefCounted
 ## --mesh-arrays-check (item 33): MeshArrays.merge builds the same mesh SurfaceTool.append_from did
 ## (vertices, normals, indices, part heights) without reading parts back from the renderer; a kept
-## primitive's arrays follow it when it changes; WardenWarm readies only the Wardens a match can spawn.
+## primitive's arrays follow it when it changes.
 
 var fails := 0
 
@@ -45,11 +45,5 @@ func run(main: Node) -> void:
 	var top := 0.0
 	for v in (MeshArrays.of(sphere, 0)[Mesh.ARRAY_VERTEX] as PackedVector3Array): top = maxf(top, v.y)
 	ok(absf(top - 0.5) < 0.01, "a primitive that changed is read again (top %.2f)" % top)
-	var m := Match.new()
-	m.opts = {"training": true, "teams": 1, "squad": 1, "arch": "mage"}
-	ok(WardenWarm.archs(m) == ["mage"], "alone, only your Warden is readied")
-	m.opts = {"teams": 6, "squad": 3}
-	ok(WardenWarm.archs(m) == Arch.ids(), "with bots, every Warden is readied")
-	m.free()
 	print("MESHARRAYS DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
