@@ -19,6 +19,7 @@ const DT := 1.0 / 60.0
 var bad := 0
 var m: Match
 var main: Node
+var start_pos := Vector3.ZERO   # the player's spawn: each hero cycle starts here (its drift would reach the abyss)
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -54,6 +55,7 @@ func _start(opts: Dictionary) -> void:
 	for h in m.hunters:
 		h.ctrl = "idle"      # the player too: a crawling bot would hide the Wisp settling
 		h.inp["move"] = Vector2.ZERO
+	start_pos = m.player.pos
 
 func _frames(secs: float, drift := Vector3.ZERO) -> void:
 	var t := 0.0
@@ -70,6 +72,7 @@ func _frames(secs: float, drift := Vector3.ZERO) -> void:
 func _hero_cycle(arch_id: String) -> void:
 	var p: Hunter = m.player
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
+	p.teleport(start_pos)
 	p.reclass(Arch.weight(arch_id), arch_id)
 	p.hp = p.max_hp
 	var tag := "[%s] " % arch_id
@@ -265,6 +268,14 @@ func _summon_data() -> void:
 	ok(bad_ids.is_empty(), "summon: every species has a role x size window in the uptime band %s" % [bad_ids])
 	ok(KinSummon.times(KinLib.kin("cindle")) == Vector2(8, 60), "summon: Cindle (small bruiser) is out 8 s, rests 60 s")
 
+## A spot on solid ground dist m from here (the first of 8 directions that is not over the abyss).
+func _ground_away(from: Vector3, dist: float) -> Vector3:
+	for i in 8:
+		var to := from + Vector3(dist, 0, 0).rotated(Vector3.UP, i * TAU / 8.0)
+		if not m.world.is_void(to.x, to.z):
+			return Vector3(to.x, m.world.ground_at(to.x, to.z), to.z)
+	return from + Vector3(dist, 0, 0)
+
 ## The summon itself, on the player's Cindle with Boki wisps on.
 func _summon() -> void:
 	_start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true, "demo_kin": "cindle",
@@ -290,8 +301,7 @@ func _summon() -> void:
 	k.hurt(k.max_hp * 0.6, null)
 	_frames(0.2)
 	ok(s.left > 0.0 and not k.wisp, "...damage does not end it")
-	p.pos += Vector3(30, 0, 0)
-	p.prev = p.pos
+	p.teleport(_ground_away(p.pos, 30.0))
 	_frames(0.1)
 	ok(k.flat_dist(p) < 6.0 and s.out(), "...left 30 m behind it re-blooms beside you")
 	_frames(8.0 + KinSummon.SHRINK_S)

@@ -1,6 +1,6 @@
 extends RefCounted
-## --wisp-steal-check: stolen Boki wisps (KinSteal, decision 0041), with Boki wisps on. A downed hunter's wisp
-## breaks loose and floats; holding interact beside it grabs it (the prompt shows the key cap); the thief gets its
+## --wisp-steal-check: stolen Boki wisps (KinSteal, decision 0041), with Boki wisps on. A ready summon guards
+## its downed hunter first (0040); with the summon resting, a downed hunter's wisp breaks loose and floats; holding interact beside it grabs it (the prompt shows the key cap); the thief gets its
 ## carry passive at half strength (clamped) and the owner loses it; one stolen summon at half the window; at most
 ## two stolen wisps ("Hands full"); a thief going down scatters them; the owner takes theirs back once revived; an
 ## ungrabbed wisp goes home and stays; match end sends every stolen wisp home with a soul echo in the Field Book;
@@ -65,6 +65,16 @@ func _steal() -> void:
 		if ps["stat"] == stat:
 			amount += float(ps["amount"])
 	var mine := p.owner_stat(stat)
+	m.knock(f, p, {})
+	_frames(0.1)
+	ok(fk.summon.guardian and not fk.wisp and not KinSteal.loose(fk),
+		"guardian first: a ready summon comes out to guard its downed hunter (0040), no wisp breaks loose")
+	m.revive_hunter(f, null)
+	fk.summon.end()
+	_frames(KinSummon.SHRINK_S + 0.1)
+	ok(fk.wisp and fk.summon.cd > 0.0, "...then back in the wisp, its summon resting")
+	for h: Hunter in [f2, mate]:
+		h.kin.summon.cd = 60.0      # resting: a ready summon would guard its hunter instead of breaking loose
 	var fell := f.pos
 	m.knock(f, p, {})
 	_frames(0.1)

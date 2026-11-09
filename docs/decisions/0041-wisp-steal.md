@@ -27,5 +27,7 @@ loose rule, bots grabbing, echo hatch odds, extraction bonus, HUD icons (ext/ui-
 - Net.VERSION 0.31.0 (ext/soul-link-integ, with the wisp, summon and guardian fields): kin snapshot 29-31 = loose s,
   carrier id, stolen summon used (KinNet.STEAL_AT; 28 is 0040's guardian flag); kcmd "wgrab"/"wsum" ask the Boki's
   own game.
+- With 0040: a down with the summon ready brings the guardian out (no loose wisp); with it resting the wisp breaks
+  loose (KinGuardian.on_down runs first; KinSteal.ride only takes a wisp at the shoulder).
 - Numbering: ext/combat-summon-band also wrote a 0041 (0041-summon-band.md); it becomes 0042 when it lands (T2).
 - match.gd +3 (interact, match end), hunter.gd +2. `--wisp-steal-check` covers it.
