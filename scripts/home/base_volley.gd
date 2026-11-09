@@ -165,6 +165,7 @@ static func settle(run: Run) -> Dictionary:
 	Care.change(lose, "joy", float(R["lose_joy"]))
 	var wp: int = run.score[run.winner()]
 	var lp: int = run.score[1 - run.winner()]
+	MinigameHub.record("volley", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "volley", "beat %s %d to %d at Spark Volley" % [lose["name"], wp, lp], float(R["win_trust"]))
 	Save.remember(lose, "volley", "lost Spark Volley to %s, %d to %d" % [win["name"], lp, wp])
 	var backed_won: bool = run.recs[run.backed] == win

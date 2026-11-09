@@ -197,6 +197,7 @@ static func settle(run: Run) -> Dictionary:
 		Care.change(rec, "energy", -float(R["energy"]))
 	Care.change(win, "joy", float(R["win_joy"]))
 	Care.change(lose, "joy", float(R["lose_joy"]))
+	MinigameHub.record("race", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "race", "won the Dash ahead of %s" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "race", "came last in the Dash, behind %s" % win["name"])
 	nudge_bond(win, lose, -float(R["rival_step"]))

@@ -136,6 +136,7 @@ static func settle(hunt: Hunt) -> Dictionary:
 		Care.change(rec, "energy", -float(R["energy"]))
 	Care.change(win, "joy", float(R["win_joy"]))
 	Care.change(lose, "joy", float(R["lose_joy"]) * (float(R["friend_sulk"]) if friends else 1.0))
+	MinigameHub.record("seek", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "seek", "sniffed out the scent before %s" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "seek", "lost the Seek to %s" % win["name"])
 	var step := float(BaseRace.rules()["friend_step"]) if friends else -float(BaseRace.rules()["rival_step"])
