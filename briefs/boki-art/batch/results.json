@@ -26519,5 +26519,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/lyrewing_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "thunderstrich_card",
+    "name": "Thunderstrich (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/thunderstrich_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowlet_card",
+    "name": "Bellowlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bellowlet_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "thistlynx_card",
+    "name": "Thistlynx (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/thistlynx_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fizzlet_card",
+    "name": "Fizzlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fizzlet_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowlet_card",
+    "name": "Bellowlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowlet_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "thistlynx_card",
+    "name": "Thistlynx (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/thistlynx_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "reapant_card",
+    "name": "Reapant (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/reapant_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "thunderstrich_card",
+    "name": "Thunderstrich (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/thunderstrich_card_2.jpg",
+    "ok": true
   }
 ]
