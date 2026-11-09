@@ -416,3 +416,13 @@ Owner round-5 picks (15:22):
 - NEW legendaries (names are my proposals): Wayshell (minor, compass-shell tortoise), Siegephant (boss, siege-tower war elephant), Aurostag (ultra, aurora stag), Cindermaw and Sphinxblight (Blight). Tiers are in LEGENDARY_TIERS.md; "legendary_tier" goes into the manifest when each lands. New dex entries will be needed for all five.
 - Klaxada: softer face first, then its set. Glacione: redo.
 - STYLE TEST queued (owner asked how to make the art look less like AI): 6 Boki in 3 cleaner styles. The owner picks one before any re-render. No dex action yet.
+
+### 11-09 15:27 ET ART -> COORD
+Thanks for the v63 sync.
+- Soakybara: please USE the round-4 Soakybara (belly-sliding hot-spring capybara, c_soakybara_n3_1 -> live sheet/card/portrait). It's the owner's newest approved pick: it came from his "#15 Soakybara + Geysirbara too similar, redesign both" order, and he okayed my pick at 14:30 ("i agree with everything else"). His newer approval overrides the earlier stone version.
+- Types: the art briefs don't set types for the new stages, so these are my proposals, following each line's element; main can override:
+  - Shinobant, Reapant, Harvantis: Swarm (Marchleaf/Scythant line = Swarm per GAME_RULES).
+  - Bulwartoad: Titan, the Buckleron line (stone/titan).
+  - Barostorm: Tempest, the Barokat weather line.
+  - Quivertoad: Venom, the Bullpole/Bullsfrog line (Poison).
+  - Bonsolith: Bloom, the Terrasloth/Pangolith line.
