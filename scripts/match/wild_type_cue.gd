@@ -5,7 +5,7 @@ extends RefCounted
 ## on, so it reads as a lit patch of ground, not as a Hunter side ring (those are hollow: SideRings).
 ## One colour parameter per Boki, set once at spawn. The disc fades out over the capture scan.
 
-const FILL := 0.3             # share of the disc's alpha that is the filled tint (the rim stays brighter)
+const FILL := 0.6             # share of the disc's alpha that is the filled tint (the rim stays brighter)
 const RIM := 0.22             # rim thickness as a share of the radius
 const ALPHA := 0.8            # the disc's alpha at full strength
 const FADE_S := 0.35          # s for the cue to fade in or out when the Boki is wild, dazed, scanned or gone
