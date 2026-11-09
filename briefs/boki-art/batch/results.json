@@ -14451,5 +14451,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/coolatee_r_w28_2.jpg",
     "ok": true
+  },
+  {
+    "id": "coolatee_r_w28",
+    "name": "Coolatee",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/coolatee_r_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_r2_w28",
+    "name": "Chandelapi",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/chandelapi_r2_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_r2_w28",
+    "name": "Chandelapi",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/chandelapi_r2_w28_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_e_w28",
+    "name": "Eclipsowl",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/eclipsowl_e_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_e_w28",
+    "name": "Eclipsowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/eclipsowl_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_e_w28",
+    "name": "Eclipsowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eclipsowl_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "coolatee_r_w28",
+    "name": "Coolatee",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/coolatee_r_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodelotl_e_w28",
+    "name": "Geodelotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodelotl_e_w28_1.jpg",
+    "ok": true
   }
 ]
