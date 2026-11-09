@@ -45013,5 +45013,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_prismink_m2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_prismink_m3",
+    "name": "Prismink (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_prismink_m3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_prismink_m3",
+    "name": "Prismink (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_prismink_m3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_g1",
+    "name": "Effigoon (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_effigoon_g1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_g1",
+    "name": "Effigoon (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_effigoon_g1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_g1",
+    "name": "Effigoon (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_effigoon_g1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_g1",
+    "name": "Effigoon (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_effigoon_g1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_g2",
+    "name": "Effigoon (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_effigoon_g2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_g2",
+    "name": "Effigoon (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_effigoon_g2_4.jpg",
+    "ok": true
   }
 ]
