@@ -5,7 +5,7 @@ A Hero's ability looks and sounds are data: `content/vfx/<arch>.json`, played by
 moment in its kit, and sounds. Check: `--hero-vfx-check` (every data file against its kit, plus the shared runtime). Tuning a
 palette: `--hero-vfx-gallery --shots-dir=<dir> [--reel-hero=<arch>]` plays every move side by side (no Hero: one of every
 layer kind). Approval sheets and the reel: `--hero-vfx-reel` (the tool's header has the movie-writer command); a Hero's
-scripted parts go in `tools/vfx_reel/<arch>.gd`, otherwise the generic set plays.
+scripted parts go in `tools/vfx_reel/<arch>.gd`, otherwise the generic set plays. `--reel-parity` plays one fixed set for any Hunter with the key on screen (`tools/vfx_reel/parity.gd`; its clips are in docs/parity_reel).
 
 ## From a kit
 - `vfx("move", at, dir, {...})` (ArchKit): a moment. Sounds and layers come from the recipe; online it goes to other
