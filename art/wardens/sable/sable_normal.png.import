@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bqsw0m67r7ft2"
-path="res://.godot/imported/sable_normal.jpg-acc5711bd2ad6060e1d410758bfd94cf.ctex"
+uid="uid://dph5hg2wk55op"
+path="res://.godot/imported/sable_normal.png-e747b236a8b69d82087cd60c11b22aee.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "0f773f7af35ac976be726f33cead5287"
+"md5": "79515ef3ddf926c233d8a7d23eea1120"
 }
 
 [deps]
 
-source_file="res://art/wardens/sable/sable_normal.jpg"
-dest_files=["res://.godot/imported/sable_normal.jpg-acc5711bd2ad6060e1d410758bfd94cf.ctex"]
+source_file="res://art/wardens/sable/sable_normal.png"
+dest_files=["res://.godot/imported/sable_normal.png-e747b236a8b69d82087cd60c11b22aee.ctex"]
 
 [params]
 
