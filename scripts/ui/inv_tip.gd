@@ -41,17 +41,10 @@ func _show(ctrl: Control, lines: Array) -> void:
 	_owner_ctrl = ctrl
 	var col: Color = lines[0][1]
 	var pc := PanelContainer.new()
-	pc.theme = UI.theme()
 	pc.top_level = true
 	pc.z_index = 50
 	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.05, 0.06, 0.09, 0.96)
-	sb.set_corner_radius_all(12)
-	sb.border_color = Color(col, 0.7)
-	sb.set_border_width_all(2)
-	sb.set_content_margin_all(12)
-	pc.add_theme_stylebox_override("panel", sb)
+	pc.add_theme_stylebox_override("panel", UI.frame(Color(0.05, 0.06, 0.09, 0.96), 12, Color(col, 0.7), 2, 12, 12))
 	pc.custom_minimum_size.x = WIDTH
 	var v := UI.vbox(3)
 	pc.add_child(v)

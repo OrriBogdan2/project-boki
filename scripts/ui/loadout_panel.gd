@@ -86,13 +86,9 @@ func _belt_tile(k: int) -> PanelContainer:
 ## A slot: the key it answers to and what it is, then the icon and the name of what is in it.
 func _tile(key: String, slot_name: String, icon: String, col: Color, item_name: String) -> PanelContainer:
 	var t := PanelContainer.new()
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(col, 0.1 if icon != "" else 0.04)
-	sb.set_corner_radius_all(9)
-	sb.border_color = Color(col, 0.65 if icon != "" else 0.3)
-	sb.set_border_width_all(2)
-	sb.set_content_margin_all(5)
-	t.add_theme_stylebox_override("panel", sb)
+	var filled := icon != ""
+	t.add_theme_stylebox_override("panel", UI.frame(Color(col, 0.1 if filled else 0.04), 9,
+			Color(col, 0.65 if filled else 0.3), 2, 5, 5))
 	t.custom_minimum_size = Vector2(10.0, TILE_H)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	t.mouse_filter = Control.MOUSE_FILTER_STOP

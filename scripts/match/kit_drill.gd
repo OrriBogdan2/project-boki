@@ -156,12 +156,7 @@ func build_ui() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 4
 	add_child(layer)
-	_panel = PanelContainer.new()
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.04, 0.05, 0.08, 0.9)
-	sb.set_corner_radius_all(14)
-	sb.set_content_margin_all(10)
-	_panel.add_theme_stylebox_override("panel", sb)
+	_panel = UI.glass(10, 14)
 	_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 24)
 	_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	layer.add_child(_panel)
