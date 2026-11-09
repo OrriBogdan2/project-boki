@@ -4467,3 +4467,15 @@ ART latchling 8.33 briefs/boki-art/cards/Latchling.jpg kind=card panel=8.6/8.5/7
 ART ribbonwyrm 8.3 briefs/boki-art/cards/Ribbonwyrm.jpg kind=card panel=8.5/8.6/7.8
 The other ~65 cards regenerate with a stronger prompt (no shadow/glow, face first, signature parts kept).
 READY ext/text-lore-pronouns bb53dc23c (loading.gd lore lines: Sundering->Hollowing, Tyrant/hoard->Malgrave the Beloved/her vault; pronouns and wiki already correct)
+READY ext/albert-size-boop 3d7539d7b (job 20261109-023056-a4, PR #32, do not merge from the ext side). Albert (bulwark), owner 11-08:
+- Size 2.0 -> 1.8 (0.9x). hit_r is kept at 0.46 for fairness, and the aegis wall is sized off it. The nameplate is now 2.35. NOTE: ext/body-hitbox-parity sets Breaker hit_r 0.50, so pick one.
+- Boop: with RMB up, LMB thrusts the aegis 0.7 m in 0.3 s and shoves foes 2.8 m. It does no damage. New bul_boop clip and sfx.
+- R Faultline: lane 4.5 -> 5.5 m (+22%, hitbox and telegraph together). The plant is now a 1.2 m hop and a slam at 0.42 s with a ring, debris, shake and bjorn_ult_quake.
+- Thrown hammer: the rope stays, and it reels home past 14 m or after 6 s.
+- Swing lunge (decision 0022-breaker-swing-lunge; the number collides with other ext branches, so renumber at merge). Crushing Blow lunges 1.47 m at part charge and 2.40 m at full, 2.98 m running (it stacks with run speed). In the air it lunges 1.38 m and leaves at run speed. The 360 Smash lunges after its spin. With show_fps full, a readout shows the distance.
+- Checks:
+  - --bulwark-combo-check 164/0, including the new tools/albert_feel_check.gd
+  - --warden-model-check PASS, --warden-glb-check PASS (both were fixed on this branch)
+  - health --strict OK
+- suite-fast (cut short by /tmp filling up): every red flag was re-run by hand against main d255acbee. No new reds. --title/--train/--work/--warden-glb (the 'bool' SCRIPT ERROR) and --displace-net (burn/slow) fail the same on main. The displace-net hazard miss was a flake: two re-runs were clean.
+- GPU before/after clip (jobs 20261109-030444-32295 before, -03955 after): briefs/shots/albert-size-boop/albert_before_after.mp4 (side by side: swing standing and running, 360 Smash, boop, R, rope). Stills: swing_cmp.jpg, r_cmp.jpg, boop_after_sheet.png.
