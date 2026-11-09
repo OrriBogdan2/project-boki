@@ -22,9 +22,17 @@ Option 1. `Life.crowd(n)` scales both the wisp revive (teammates) and the stand-
 the repeat penalty: the source shows none. Not settled, so the old values stay: revive time 4 s ([wiki] "a few
 seconds"), radius 1.6 m, revive HP 25% (the wiki page has a placeholder "X%"), stomp ×2.5 and ×0.4, kin revive 8 s.
 "2 HP per tick" can't become seconds without the tick length and the wisp's revive-bar size, which aren't in the data.
-The footage (/home/claude/svvid) isn't on the worker that did this, so no revive or stomp has been timed yet. Recall
-4 s has nothing to match here: we have no recall. Beacons: sickness 12 s / −25% stays [patch 1.0]. The wiki says
-13 s and patch notes say 6 s for the channel; ours stays 4 s (owner, 101b).
+The footage (/home/claude/svvid) is on neither worker that took this (hetzner only; rpc1 has no copy, no yt-dlp and no
+links), so no revive or stomp has been timed yet: owner task, on hetzner, across several sheets. Recall 4 s has nothing
+to match here: we have no recall. Beacons: sickness 12 s / −25% stays [patch 1.0]. The wiki says 13 s and patch notes
+say 6 s for the channel; ours stays 4 s (owner, 101b).
+
+A second pass over the wiki, the Steam notes and two guides (2026-11-09) found no base revive or stomp seconds
+anywhere: every source says "a few seconds" or leaves a placeholder (wiki Reviving: revive HP "X%", deathbox "Y s, Z%").
+What it did settle: wisp bleed-out 30 → 15 s (Cosmic Winter Jubilee pt2, ours 15 [patch] already); the only revive-speed
+numbers are items, not base rules (Guardian Archangel +15% wisp revive, cut to 7.5% in 2.04; Nyx's stomp gives 4 s of
+Glitch Mode), so none apply to Life.R. One source rule we don't have: a finished execution "fully restore[s] your health
+and mana" (wiki Reviving); ours heals 5% on the knock. Not built here (balance, owner call): listed for the report.
 
 ## Consequences
 life.gd (R["crowd"], `crowd()`), box_revive.gd (`time_for()` takes no Hunter now), revive.json loses
