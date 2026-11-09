@@ -172,6 +172,38 @@ func _tender_support() -> void:
 	ok("Carrier: a hit drops them with a 4s lock and no stun on you",
 		carried_third and not CareUtil.is_carried(A) and K.lock_t > 3.0 and P.stun_t <= 0.0,
 		"lock %.1f stun %.2f" % [K.lock_t, P.stun_t])
+	# --- the drop set: a stun or any damage; a root or a hex holds; 4s no re-pick
+	P.stun_t = 0.0
+	K.lock_t = 0.0
+	A.down_hp = 60.0
+	A.teleport(P.pos + Vector3(0.4, 0, 0))
+	step(m, 0.1)
+	var held := CareUtil.is_carried(A)
+	P.root_t = 0.5
+	Hex.apply(P, 0.5, false)
+	step(m, 0.1)
+	ok("Carrier: a root and a hex hold them", held and CareUtil.is_carried(A))
+	P.root_t = 0.0
+	P.hurt(10.0, T, {"src": "primary"})
+	step(m, 0.1)
+	var lock0 := K.lock_t
+	ok("Carrier: a rival's hit drops them, 4s lock, no stun on you",
+		held and not CareUtil.is_carried(A) and lock0 > 3.8 and P.stun_t <= 0.0, "lock %.2f" % lock0)
+	A.teleport(P.pos + Vector3(0.4, 0, 0))
+	var locked := true
+	for i in 8:
+		A.down_hp = 60.0
+		A.revive = 0.0       # standing beside a Wisp revives it on its own: keep it a Wisp for the lock test
+		step(m, 0.5)
+		if i < 7:
+			locked = locked and A.downed and not CareUtil.is_carried(A)
+	ok("Carrier: no re-pick for 4s after a drop, then they can be scooped up",
+		locked and CareUtil.is_carried(A), "lock %.2f" % K.lock_t)
+	P.hurt(10.0, null, {"src": "mob"})
+	step(m, 0.1)
+	ok("Carrier: damage from any source drops them",
+		not CareUtil.is_carried(A) and K.lock_t > 3.8)
+	K.lock_t = 0.0
 	# --- rank 3 flare: the revive went back to Hearth Call (X); the flare tops the bleed-out bar up instead
 	P.stun_t = 0.0
 	P.slot_lv["kin"] = 3
