@@ -22746,5 +22746,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_sundormouse_w31_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_bullsfrog_w31",
+    "name": "Bullsfrog (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog_w31",
+    "name": "Bullsfrog (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog_w31",
+    "name": "Bullsfrog (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_fanpire_w31",
+    "name": "Fanpire (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_fanpire_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_fanpire_w31",
+    "name": "Fanpire (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_fanpire_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_fanpire_w31",
+    "name": "Fanpire (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_fanpire_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_fanpire_w31",
+    "name": "Fanpire (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_fanpire_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_maracoil_w31",
+    "name": "Maracoil (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_maracoil_w31_2.jpg",
+    "ok": true
   }
 ]
