@@ -11560,5 +11560,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_fawngus_r_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_fawngus_r",
+    "name": "Fawngus (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_fawngus_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_fawngus_r",
+    "name": "Fawngus (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_fawngus_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gilabacus_r",
+    "name": "Gilabacus (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gilabacus_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gilabacus_r",
+    "name": "Gilabacus (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gilabacus_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hydrangor_r",
+    "name": "Hydrangor (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_hydrangor_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gilabacus_r",
+    "name": "Gilabacus (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gilabacus_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary_r",
+    "name": "Malletary (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_malletary_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hydrangor_r",
+    "name": "Hydrangor (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_hydrangor_r_2.jpg",
+    "ok": true
   }
 ]
