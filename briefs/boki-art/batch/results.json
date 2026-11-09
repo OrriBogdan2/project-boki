@@ -43865,5 +43865,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/pipeworth_card83_3.jpg",
     "ok": true
+  },
+  {
+    "id": "pipeworth_card83",
+    "name": "Pipeworth (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pipeworth_card83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "parasolth_card83",
+    "name": "Parasolth (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/parasolth_card83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ribbonwyrm_card83",
+    "name": "Ribbonwyrm (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_card83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "parasolth_card83",
+    "name": "Parasolth (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/parasolth_card83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "parasolth_card83",
+    "name": "Parasolth (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/parasolth_card83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ribbonwyrm_card83",
+    "name": "Ribbonwyrm (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_card83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimekit_card83",
+    "name": "Rimekit (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rimekit_card83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pipeworth_card83",
+    "name": "Pipeworth (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pipeworth_card83_1.jpg",
+    "ok": true
   }
 ]
