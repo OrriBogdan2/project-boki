@@ -18,6 +18,7 @@ var started := false
 ## A game that only notes it was started.
 class Stub extends RefCounted:
 	var main_check
+	var post: Node3D = null
 	func use() -> void:
 		main_check.started = true
 
@@ -45,10 +46,11 @@ func _registry() -> void:
 	var seen := {}
 	var good := true
 	for g in MinigameHub.rules()["games"]:
-		var filled := [g["name"], g["member"], g["rule"]].all(func(t): return String(t) != "")
+		var filled := [g["name"], g["member"], g["node"], g["rule"]].all(func(t): return String(t) != "")
 		good = good and filled and not seen.has(g["id"])
 		seen[g["id"]] = true
-	ok(good and seen.size() == 4, "registry: four games, each with an id, name, member and rule (%s)" % [seen.keys()])
+	var what := "registry: four games, each with an id, name, member, node and rule (%s)" % [seen.keys()]
+	ok(good and seen.size() == 4, what)
 
 func _results() -> void:
 	ok(MinigameHub.summary("race") == "No games yet", "results: nothing played reads 'No games yet'")
@@ -112,10 +114,13 @@ func _picker() -> void:
 	stub.main_check = self
 	var fake := FakeHome.new()
 	fake.hrace = stub
+	ok(MinigameHub.listed(fake).is_empty(), "list: a game whose post isn't placed is not listed")
+	stub.post = Node3D.new()
 	var shown := MinigameHub.listed(fake)
 	var only: bool = shown.size() == 1 and shown[0]["id"] == "race" and shown[0]["game"] == stub
 	ok(only, "list: a game the home holds is listed, the rest are not")
 	MinigameHub.open(home)
 	MinigameHub.start(home, shown[0])
 	ok(started and home.panel_open == "", "start: the picker closes and the game's use() runs")
+	stub.post.free()
 	fake.free()

@@ -428,8 +428,8 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 
 | Setting | Value |
 |---|---|
-| _doc | The garden minigames the title's 'Play with your Boki' picker can list (MinigameHub). member = the Home variable holding the game (unset on a base that doesn't have it, so it is not listed); rule = the one line shown under the name. Each game exposes use(). |
-| games | [{"id": "race", "name": "The Dash", "member": "hrace", "rule": "Cheer your Boki on with three timed presses; the fastest one home wins."}, {"id": "shove", "name": "Stump Shove", "member": "hshove", "rule": "Two Boki push a stump; Power against Guard decides who tips it."}, {"id": "seek", "name": "Seek", "member": "hseek", "rule": "Sniff the scent basket, then follow your Boki's nose to the hidden find."}, {"id": "volley", "name": "Spark Volley", "member": "hvolley", "rule": "Bat a spark across the log; Speed and Focus win the point."}] |
+| _doc | The garden minigames the title's 'Play with your Boki' picker can list (MinigameHub). member = the Home variable holding the game (unset on a base that doesn't have it, so it is not listed); node = the game's fixture on it (post, stump, basket, log), placed only beside a Training post, so a game without one is not listed either; rule = the one line shown under the name. Each game exposes use(). |
+| games | [{"id": "race", "name": "The Dash", "member": "hrace", "node": "post", "rule": "Cheer your Boki on with three timed presses; the fastest one home wins."}, {"id": "shove", "name": "Stump Shove", "member": "hshove", "node": "stump", "rule": "Two Boki push a stump; Power against Guard decides who tips it."}, {"id": "seek", "name": "Seek", "member": "hseek", "node": "basket", "rule": "Sniff the scent basket, then follow your Boki's nose to the hidden find."}, {"id": "volley", "name": "Spark Volley", "member": "hvolley", "node": "log_node", "rule": "Bat a spark across the log; Speed and Focus win the point."}] |
 
 ## perk_orbs (`content/rules/perk_orbs.json`)
 
