@@ -6,7 +6,7 @@
 - [Classes](Classes.md)
   - [The Hired Gun](Class-Hired-Gun.md)
   - [The Unbroken](Class-Unbroken.md)
-  - [The Flame Queen](Class-Flame-Queen.md)
+  - [The Ashen Kiss](Class-Ashen-Kiss.md)
   - [The Dawnfox](Class-Dawnfox.md)
   - [The Stone Seer](Class-Stone-Seer.md)
   - [The Red Stitch](Class-Red-Stitch.md)

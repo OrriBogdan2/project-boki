@@ -1,8 +1,7 @@
-"""ART-1 Sparkle: the rebuilt pieces as data (head and face, hair, pigtails, hands, the lightning rig, chain, gum).
+"""ART-1 Sparkle: the rebuilt pieces as data (head and face, hair, pigtails, hands, the lightning rig, gum).
 Blender frame: Z up, she faces +Y, her right hand is +X. Budget: 15k tris with the scan body. See /home/boki/shots-s2/art1/STYLE_NOTES.md."""
 import numpy as np
-from meshkit import (Piece, catmull, norm, smooth, sweep, sd_ell, sd_cap, smin, smax, rot_about, frames)
-from kael_pieces import chain_along, grid_faces
+from meshkit import (Piece, catmull, norm, smooth, sweep, sd_ell, sd_cap, smin, smax, rot_about, frames, grid_faces)
 
 SH = 0.1299                      # the rig's shoulder (body.shoulder 0.85)
 SHOULDER_Z, ELBOW_Z, HAND_Z = 1.319, 1.109, 0.874
@@ -12,7 +11,6 @@ HS = 0.97                        # the sheet's head, a touch bigger for the matc
 C = np.array([0.0, 0.012, 1.602])
 EYE = np.array([0.0395, 0.0595, 0.005])
 EYE_R = 0.0265
-WINK = 1.0                       # +1: her right eye (the sheet) carries the bolt and the wink
 HEX6 = [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 6, endpoint=False)]
 HEX5 = [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 5, endpoint=False)]
 SQ = [(-1, -1), (1, -1), (1, 1), (-1, 1)]
@@ -23,8 +21,8 @@ LENS = [(-1, 0), (-0.45, 0.38), (0.45, 0.38), (1, 0), (0.45, -0.3), (-0.45, -0.3
 HAIR_R = (0.76, 0.42, 1.0, 1.0)      # across: 4 strips; up: blue -> pink
 COPPER_R = (0.76, 0.33, 0.875, 0.41)
 GLOWC_R = (0.88, 0.33, 1.0, 0.41)    # neon pink
-GLOWW_R = (0.88, 0.24, 1.0, 0.32)    # wire peach
-BLACK_R = (0.76, 0.24, 0.875, 0.32)  # dark gunmetal: rod collars
+TIE_R = (0.88, 0.24, 1.0, 0.32)      # hair-tie crimson
+BLACK_R = (0.76, 0.24, 0.875, 0.32)  # black rubber: the cables
 
 
 def hl(p):
@@ -222,7 +220,7 @@ def lock(name, pts, w0, rings=8, peak=0.3, root=0.6, uv=(0.0, 0.0, 0.25, 1.0), h
     return p
 
 
-TIE = np.array([0.0755, -0.012, 0.074])   # head-local, x mirrored
+TIE = np.array([0.072, -0.022, 0.088])    # head-local, x mirrored: high on the crown's sides (v2)
 
 
 def tie_at(s):
@@ -242,36 +240,28 @@ def fringe():
 
 
 def pigtail(s):
-    """Two big soft masses that spring up and out of the tie, the outer one rolling over and falling; pink flicks at the crown of the
-    arc; two S-curl tails to the collarbone. Everything in tie-relative metres, her right side; x mirrored for the left."""
+    """v2: a high tie, a full mass that puffs out and falls in loose waves past the shoulder, blue at the root, pink from
+    the middle down; two wavy tails curl off its end. Tie-relative metres, her right side; x mirrored for the left."""
     sd = "R" if s > 0 else "L"
     T0 = tie_at(s)
-    K = 1.16                                         # a touch bigger than the sheet: this is the match-camera read
     def W(pts):
-        return T0 + np.array(pts) * K * [s, 1, 1]
+        return T0 + np.array(pts) * [s, 1, 1]
     out = []
     hint_f = np.array([0.0, 1.0, 0.25])
-    main = [(0, 0, 0), (0.05, -0.012, 0.05), (0.125, -0.02, 0.062), (0.185, -0.028, -0.005), (0.19, -0.03, -0.095), (0.15, -0.03, -0.175)]
-    M_ = dict(root=0.42, peak=0.5, thick=0.95, tip=0.006)
-    out.append(lock("pigA" + sd, W(main), 0.098, rings=11, uv=(0.0, 0.0, 0.25, 0.46), hint=hint_f, **M_))
-    out.append(lock("pigB" + sd, W([(0, -0.002, 0.005), (0.04, -0.045, 0.066), (0.11, -0.068, 0.088), (0.168, -0.078, 0.022), (0.175, -0.085, -0.08)]), 0.082, rings=10,
-                    uv=(0.25, 0.0, 0.5, 0.46), hint=np.array([0.2, 1.0, 0.3]), **M_))
-    out.append(lock("pigC" + sd, W([(0, 0.004, 0.0), (0.04, 0.03, 0.04), (0.10, 0.04, 0.034), (0.145, 0.042, -0.04), (0.135, 0.042, -0.125)]), 0.074, rings=10,
-                    uv=(0.5, 0.0, 0.75, 0.46), hint=hint_f, **M_))
-    F_ = dict(root=0.7, peak=0.4, thick=0.7, tip=0.003)
-    out.append(lock("pigF0" + sd, W([(0.03, -0.012, 0.045), (0.066, -0.014, 0.105), (0.062, -0.018, 0.165), (0.038, -0.022, 0.208)]), 0.042, rings=7,
-                    uv=(0.75, 0.26, 1.0, 1.0), hint=hint_f, **F_))
-    out.append(lock("pigF1" + sd, W([(0.09, -0.032, 0.066), (0.16, -0.04, 0.098), (0.218, -0.042, 0.09), (0.262, -0.046, 0.054)]), 0.04, rings=7,
-                    uv=(0.0, 0.26, 0.25, 1.0), hint=hint_f, **F_))
-    out.append(lock("pigF2" + sd, W([(0.15, -0.032, 0.02), (0.218, -0.04, -0.008), (0.268, -0.046, -0.052), (0.288, -0.05, -0.098)]), 0.038, rings=7,
-                    uv=(0.25, 0.26, 0.5, 1.0), hint=hint_f, **F_))
-    # the S-curl tails, pink through their outer half, side by side so they never cross
+    main = [(0, 0, 0), (0.045, -0.012, 0.03), (0.1, -0.025, 0.015), (0.135, -0.035, -0.05), (0.145, -0.04, -0.14), (0.13, -0.04, -0.23),
+            (0.15, -0.035, -0.31), (0.135, -0.03, -0.38)]
+    M_ = dict(root=0.45, peak=0.42, thick=0.9, tip=0.006)
+    out.append(lock("pigA" + sd, W(main), 0.096, rings=13, uv=(0.0, 0.0, 0.25, 0.8), hint=hint_f, **M_))
+    out.append(lock("pigB" + sd, W([(0, -0.006, 0.0), (0.04, -0.045, 0.035), (0.095, -0.065, 0.01), (0.125, -0.07, -0.07), (0.12, -0.065, -0.17),
+                                    (0.105, -0.06, -0.26)]), 0.078, rings=11, uv=(0.25, 0.0, 0.5, 0.66), hint=np.array([0.2, 1.0, 0.3]), **M_))
+    out.append(lock("pigC" + sd, W([(0, 0.006, 0.0), (0.04, 0.025, 0.028), (0.095, 0.03, 0.0), (0.12, 0.028, -0.08), (0.125, 0.02, -0.18),
+                                    (0.11, 0.015, -0.27)]), 0.07, rings=11, uv=(0.5, 0.0, 0.75, 0.66), hint=hint_f, **M_))
     T_ = dict(root=0.85, peak=0.34, thick=0.72, tip=0.004)
-    out.append(lock("pigS0" + sd, W([(0.18, -0.03, -0.09), (0.222, -0.03, -0.16), (0.19, -0.032, -0.22), (0.224, -0.034, -0.28), (0.196, -0.036, -0.335), (0.178, -0.038, -0.365)]), 0.052, rings=11,
-                    uv=(0.5, 0.2, 0.75, 1.0), hint=hint_f, **T_))
-    out.append(lock("pigS1" + sd, W([(0.115, -0.03, -0.11), (0.138, -0.03, -0.17), (0.106, -0.03, -0.225), (0.136, -0.03, -0.28), (0.116, -0.03, -0.32)]), 0.044, rings=10,
-                    uv=(0.75, 0.2, 1.0, 1.0), hint=hint_f, **T_))
-    chain = catmull(W(main + [(0.17, -0.032, -0.26)]), CHAIN_BONES + 1)
+    out.append(lock("pigS0" + sd, W([(0.15, -0.04, -0.2), (0.175, -0.04, -0.27), (0.15, -0.04, -0.33), (0.18, -0.04, -0.39), (0.165, -0.04, -0.44)]),
+                    0.048, rings=11, uv=(0.75, 0.35, 1.0, 1.0), hint=hint_f, **T_))
+    out.append(lock("pigS1" + sd, W([(0.1, -0.03, -0.22), (0.12, -0.03, -0.28), (0.095, -0.03, -0.34), (0.115, -0.03, -0.4)]),
+                    0.04, rings=10, uv=(0.0, 0.35, 0.25, 1.0), hint=hint_f, **T_))
+    chain = catmull(W(main + [(0.15, -0.035, -0.44)]), CHAIN_BONES + 1)
     names = ["spring_pig%s_%d" % (sd, i) for i in range(CHAIN_BONES)]
     for p in out:
         along_chain(p, chain, names)
@@ -310,7 +300,7 @@ def along_chain(p, pts, names, root="head", still=0.02):
 
 
 def tie_band(s):
-    """The copper coil at the pigtail's root."""
+    """The crimson tie at the pigtail's root."""
     sd = "R" if s > 0 else "L"
     c = tie_at(s)
     d = norm(np.array([s * 0.74, -0.03, 0.67]))
@@ -318,9 +308,9 @@ def tie_band(s):
     v = norm(np.cross(u, d))
     out = []
     r = 0.031 * HS
-    for k, off in enumerate((-0.012, 0.0, 0.012)):
+    for k, off in enumerate((-0.007, 0.007)):
         ring = [c + d * off + (u * np.cos(t) + v * np.sin(t)) * r * (1.05 if k == 1 else 1.0) for t in np.linspace(0, 2 * np.pi, 9)]
-        q = sweep("tie%d%s" % (k, sd), "metal-ryzz", ring, HEX5[:4] if False else SQ, np.full(9, 0.0068), side_hint=d, uv_rect=COPPER_R)
+        q = sweep("tie%d%s" % (k, sd), "cloth-ryzz", ring, SQ, np.full(9, 0.0085), side_hint=d, uv_rect=TIE_R)
         out.append(q.rigid("head"))
     return out
 
@@ -401,9 +391,7 @@ def hand(s):
 
 # ------------------------------------------------------------------ the lightning rig
 # rod bases on the plate's top edge -> tips: (x, y, z). Fanned wide and leaned back so all four tips read from above.
-PLATE_Y = -0.150                      # set from the scan in ryzz_assemble (back of the jacket)
-RODS = [((-0.083, -0.15, 1.385), (-0.355, -0.30, 1.785)), ((-0.030, -0.155, 1.405), (-0.150, -0.36, 1.945)),
-        ((0.030, -0.155, 1.405), (0.150, -0.36, 1.945)), ((0.083, -0.15, 1.385), (0.355, -0.30, 1.785))]
+RODS = []                             # set by ryzz_finish from the pack
 ROD_R = 0.0108
 
 
@@ -412,16 +400,16 @@ def rod(i):
     a, b = np.array(RODS[i][0]), np.array(RODS[i][1])
     d = norm(b - a)
     L = np.linalg.norm(b - a)
-    sk = np.array([(0.0, 0.5), (0.02, 1.0), (0.14, 1.0), (0.15, 1.5), (0.19, 1.5), (0.20, 1.0), (0.255, 0.85), (0.27, 0.42)])  # (m along, radius / 0.03)
+    sk = np.array([(0.0, 1.1), (0.012, 1.3), (0.065, 1.3), (0.075, 0.95), (0.095, 0.8), (0.105, 0.42)])  # (m along, radius / 0.0185): the v2 socket on the pack
     pts = np.array([a + d * s_ for s_, _ in sk])
     sock = sweep("sock%d" % i, "metal-ryzz", pts, HEX6, sk[:, 1] * 0.0185, side_hint=np.array([1.0, 0, 0]), uv_rect=COPPER_R, tip=False)
-    shaft_t = np.array([0.24, 0.30, L - 0.12, L - 0.10, L - 0.09, L])
+    shaft_t = np.array([0.08, 0.12, L - 0.12, L - 0.10, L - 0.09, L])
     shaft_r = np.array([1.0, 1.0, 1.0, 1.9, 1.7, 0.06]) * ROD_R
     sh = sweep("rod%d" % i, "metal-ryzz", np.array([a + d * s_ for s_ in shaft_t]), HEX6, shaft_r, side_hint=np.array([1.0, 0, 0]), uv_rect=COPPER_R)
     sock.rigid("rod.%d" % i)
     sh.rigid("rod.%d" % i)
     # a thin glow sleeve lives inside the shaft; its bone flares it out past the copper when the rods light (Kitefall)
-    gl_t = np.linspace(0.30, L - 0.02, 4)
+    gl_t = np.linspace(0.12, L - 0.02, 4)
     gl = sweep("rodglow%d" % i, "glow-ryzz", np.array([a + d * s_ for s_ in gl_t]), TRI, np.full(4, ROD_R * 0.45), side_hint=np.array([1.0, 0, 0]), uv_rect=GLOWC_R, room=0.0)
     gl.rigid("rodlit.%d" % i)
     return [sock, sh, gl], a, b, d
@@ -433,7 +421,7 @@ def strip(name, mat, pts, w, th, uv=None, hint=None, room=1.0):
     return p
 
 
-def wire(name, path, w=0.0052, mat="glow-wire", uv=GLOWW_R):
+def wire(name, path, w=0.0075, mat="leather-ryzz", uv=BLACK_R):
     return sweep(name, mat, path, TRI, np.full(len(path), w), side_hint=np.array([0.3, 0.5, 0.8]), uv_rect=uv, room=0.0)
 
 

@@ -23,8 +23,6 @@ const CLIP := Vector2(200, 112)      # px: each ability clip beside the Hunter
 static func maybe_show(home: Node) -> ClassReveal:
 	if home == null or not home.is_inside_tree():
 		return null
-	if MaskOffer.offer(home):
-		return null
 	var waiting := ClassUnlock.pending_reveal()
 	if waiting.is_empty():
 		announce_fresh(home)
@@ -35,7 +33,7 @@ static func maybe_show(home: Node) -> ClassReveal:
 		return null
 	return show_for(home, String(waiting[0]))
 
-## "Hem and Kael are open now" once the starters have opened (after the first expedition): a toast as soon
+## "Vex and Kael are open now" once the starters have opened (after the first expedition): a toast as soon
 ## as no panel (the welcome, make-home) covers the farm.
 static func announce_fresh(home: Node) -> void:
 	if not (ClassUnlock.state().get("fresh", []) as Array).is_empty():
@@ -111,7 +109,10 @@ func _ready() -> void:
 	clips.add_theme_constant_override("v_separation", 8)
 	for slot in HunterViewer.CLIP_SLOTS:
 		if slot in HunterViewer.slots_for(id):
-			clips.add_child(AbilityClip.make(id, slot, CLIP))
+			var clip := AbilityClip.make(id, slot, CLIP)
+			clip.playing = clips.get_child_count() == 0      # (the first plays; the mouse moves the focus)
+			clip.mouse_entered.connect(func(): for c in clips.get_children(): (c as AbilityClip).play(c == clip))
+			clips.add_child(clip)
 	right.add_child(clips)
 	var btns := UI.hbox(12)
 	btns.alignment = BoxContainer.ALIGNMENT_CENTER

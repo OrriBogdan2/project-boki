@@ -11,7 +11,7 @@
 		"free_tools": true,
 		"market_gems": true
 	},
-	"options_doc": "tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: holding the interact key near a site hammers (hold it: a hammer beat every HunterTool.TOOLS.hammer.period seconds), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and meet-Hob can come in any order (false: strictly in the listed order). skippable: shows a Skip button (the owner says the farm tutorial cannot be skipped on a new save). free_tools: a step with gives_tool hands that tool over (the axe, the pickaxe); the Market still sells them later. market_gems: the buy step tops the gems up to one seed's price so nobody gets stuck.",
+	"options_doc": "tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: holding the interact key near a site hammers (hold it: a hammer beat every HunterTool.TOOLS.hammer.period seconds), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and the rest can come in any order (meeting Hob comes first: he calls you over) (false: strictly in the listed order). skippable: shows a Skip button (the owner says the farm tutorial cannot be skipped on a new save). free_tools: a step with gives_tool hands that tool over (the axe, the pickaxe); the Market still sells them later. market_gems: the buy step tops the gems up to one seed's price so nobody gets stuck.",
 	"house_spot": {
 		"from": "landing",
 		"x": 0.0,
@@ -24,7 +24,9 @@
 	"steps": [
 		{
 			"id": "axe",
-			"needs": [],
+			"needs": [
+				"hob"
+			],
 			"title": "Get an axe",
 			"hints": {
 				"go": "Here, take this axe. Trees give wood, and wood builds things."
@@ -180,15 +182,13 @@
 		},
 		{
 			"id": "hob",
-			"needs": [
-				"house"
-			],
+			"needs": [],
 			"title": "Meet the builder",
 			"hints": {
-				"go": "Come and say hello: press {interact}. I'll show you what you can build."
+				"go": "Hob is calling you over at the market stall: walk up and press {interact}."
 			},
 			"world": {
-				"go": "Hob the builder"
+				"go": "Talk to Hob"
 			}
 		},
 		{
@@ -196,7 +196,7 @@
 			"needs_all": true,
 			"title": "Head out",
 			"hints": {
-				"go": "This Relic is the mask of a fallen Hero. Put it on and you fight as that Hunter. Press {interact} at the portal to start your first expedition."
+				"go": "This Relic is the mask of a fallen Hunter. Put it on, and their soul becomes yours. Press {interact} at the portal to start your first expedition."
 			},
 			"world": {
 				"go": "Portal"
@@ -218,10 +218,9 @@
 		"per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."
 	},
 	"tool_toasts": {
-		"axe": "Someone left a spare axe by the house.",
+		"axe": "Hob hands you an axe.",
 		"pickaxe": "And a pickaxe for the rocks, too."
 	},
 	"gems_toast": "Hob gives you %d gems to buy seeds",
-	"voice": "Hob",
 	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect)."
 }

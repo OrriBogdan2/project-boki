@@ -11,7 +11,7 @@ R is your Boki's Merge.
 |---|---|
 | Class title | the Snowglide |
 | Base character | Neve, female |
-| Personality | A graceful ice skater who glides where others walk and leaves frost behind her. Elegant and playful, with a cold edge when crossed. |
+| Personality | The star show-skater of the winter canal festival. The night the ice broke she skated the festival crowd to safety, and the frost took her. She glides on the skates that saved them and fights with a candy-cane spear from the festival. |
 
 <!-- /gen:profile -->
 
@@ -55,7 +55,7 @@ R is your Boki's Merge.
 | Body | 124 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Hoar Fan (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them. |
-| Silhouette | a bunny-eared fur hood with curled ice horns, a long candy-striped ice spear, on glowing blade skates |
+| Silhouette | tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates |
 | Resource | Chill (max 8) |
 
 ### Kit card

@@ -3,7 +3,7 @@
 	"title": "Snowglide",
 	"base_name": "Neve",
 	"gender": "female",
-	"personality": "A graceful ice skater who glides where others walk and leaves frost behind her.\nElegant and playful, with a cold edge when crossed.",
+	"personality": "The star show-skater of the winter canal festival. The night the ice broke she skated the festival crowd to safety, and the frost took her.\nShe glides on the skates that saved them and fights with a candy-cane spear from the festival.",
 	"role": "Rimewright",
 	"weight": "light",
 	"body": {
@@ -19,7 +19,7 @@
 	"model_glow": {"core": "#d9f7ff", "edge": "#7fd2ff", "strength": 2.2},
 	"color": "#5fd6c4",
 	"fantasy": "A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them.",
-	"silhouette": "a bunny-eared fur hood with curled ice horns, a long candy-striped ice spear, on glowing blade skates",
+	"silhouette": "tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates",
 	"card": {
 		"role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
 		"loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",

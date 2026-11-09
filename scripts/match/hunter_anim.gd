@@ -383,10 +383,6 @@ func _setup_weapon(w: String) -> void:
 	if gun == null:
 		return
 	gun_scl = gun.scale.x
-	var held := gun.get_node_or_null(WardenGlb.WEAPON)
-	if held and held.has_meta(WardenGlb.GRIP_L) and not held.is_queued_for_deletion():
-		hd = hd.duplicate()
-		hd["gl"] = held.get_meta(WardenGlb.GRIP_L)
 	spin = gun.find_child(WardenGlb.WEAPON_SPIN, true, false) as Node3D
 	for ch in gun.get_children():
 		if ch.name == "Mag":

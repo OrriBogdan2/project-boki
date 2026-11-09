@@ -1,11 +1,14 @@
 class_name HunterMove
 extends RefCounted
-## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the air, fall, glide, dive
-## and mantle tunables every hunter shares, from content/rules/hunter_move.json ([game data]: SUPERVIVE's
-## movement settings, uu converted to metres).
+## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the ground stop, dash exit, air,
+## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
+## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
 
 static var _rules: Dictionary = _load()
 static var _phys: Dictionary = _rules["physics"]
+static var brake_decel: float = _phys["brake"]
+static var ground_friction: float = _phys["ground_friction"]
+static var dash_exit_run: float = _phys["dash_exit_run"]
 static var air_control: float = _phys["air_control"]
 static var air_friction: float = _phys["air_friction"]
 static var fall_max: float = _phys["fall_cap"]
@@ -45,6 +48,28 @@ static func apply(h: Hunter) -> void:
 ## True when this hunter can mantle a double-high ledge (Archer and Juggernaut).
 static func climbs_tall(h: Hunter) -> bool:
 	return bool(of(h.arch).get("climb_tall", false))
+
+## Ground speed after a step with no keys: UE's walking brake, ground_friction (share of the speed per
+## second) plus a constant brake_decel, so a let-go from a run slides ~0.3 m. Speed over `run` (a kit
+## step, a knock) first sheds at Hunter.GROUND_SHED. grip < 1 on ice.
+static func brake(hv: Vector2, run: float, grip: float, dt: float) -> Vector2:
+	var s := hv.length()
+	if s > run + 0.05:
+		return hv * (maxf(run, s - Hunter.GROUND_SHED * grip * dt) / s)
+	return (hv * maxf(0.0, 1.0 - ground_friction * grip * dt)).move_toward(Vector2.ZERO, brake_decel * grip * dt)
+
+## Velocity a dash leaves you with: no hard stop, it hands over at dash_exit_run of run speed (never
+## faster than the dash), and the walk, brake or air carry takes it from there.
+static func dash_exit(dash_v: Vector2, run: float) -> Vector2:
+	return dash_v.limit_length(run * dash_exit_run)
+
+## Metres a let-go at v0 m/s slides on flat ground under brake() (dv/dt = -friction*v - brake_decel):
+## a kit step with a measured total takes this off its dash so the slide doesn't add to it.
+static func slide(v0: float) -> float:
+	var k := ground_friction
+	if k <= 0.0:
+		return v0 * v0 / (2.0 * brake_decel)
+	return v0 / k - brake_decel / (k * k) * log(1.0 + k * v0 / brake_decel)
 
 ## Horizontal speed after a step in the air: your keys steer at air_control of your ground
 ## acceleration and what you carry bleeds off at air_friction, so a jump keeps its run-up. Above

@@ -5,7 +5,8 @@ extends "res://tools/breah_shots.gd"
 ## <dir>/captions.txt gets "file: caption" per file.
 ## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Sparkle, Tarek: the audit's strips) or Kael's
 ## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS), Cinder's
-## "item66" (LMB held through Flue Flight), or "acc" (Kael's accuracy points as frame runs, acc_<name>_<n>).
+## "item66" (LMB held through Flue Flight) or "queen" (LMB from her hands, Flue Flight's fire), or "acc" (Kael's
+## accuracy points as frame runs, acc_<name>_<n>).
 
 const LONG := 30                # m of flat ground the chain strips need, east of the spot
 const LONG_PARTS := ["chain", "acc"]   # parts shot on an expedition map instead of the Arena
@@ -359,6 +360,36 @@ func _ashwick_item66() -> void:
 		[0.6, 0.8, 1.5, 2.4, 2.56, 2.95]
 	)
 	await _go(3.1, held, marks)
+
+## Cinder, the Ashen Kiss (--combo51-part=queen): the LMB stream from her hands, and Flue Flight
+## with fire from her heels
+## and tail (briefs DECISIONS "Cinder the Flame Queen", retitled the Ashen Kiss).
+func _ashwick_queen() -> void:
+	var K: AshwickKit = P.ak
+	P.lvl = 6
+	await _reset(6.0)
+	var held := func(t: float):
+		P.inp["fire"] = t < 1.2
+		P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
+	var hmarks := _strip(
+		"queen_lmb_hands_strip",
+		"Cinder the Ashen Kiss: standing; LMB, the fire starts at her hand; the stream building; full stream;"
+			+ " the stream roaring; let go; the last embers",
+		[0.1, 0.35, 0.6, 0.9, 1.25, 1.5]
+	)
+	await _go(1.6, held, hmarks)
+	await _reset(14.0)
+	var lift := func(t: float):
+		if _at(t, 0.1):
+			K.cd["x"] = 0.0
+			HunterKeys.ult_pressed(P)
+	var umarks := _strip(
+		"queen_flue_flight_strip",
+		"Cinder the Ashen Kiss, Flue Flight: standing; X, the lift-off, fire from her heels and tail; rising;"
+			+ " flying; flying on; the landing",
+		[0.05, 0.3, 0.6, 1.0, 1.6, 2.4]
+	)
+	await _go(2.6, lift, umarks)
 
 ## Kael's Warchain, as whole views (the chain is longer than a strip crop): it pays out as he backs away and
 ## holds taut at 24 m; backing away then pulling slingshots him in; a strafe held in the pull curves him in beside.

@@ -487,8 +487,9 @@ func _smash() -> void:
 	var heavier := 1.0 if perfect else 0.0
 	m.sfx("bjorn_slam", h.pos, lerpf(-4.0, 0.0, k) + 2.0 * heavier, lerpf(1.1, 0.85, k) - 0.1 * heavier)
 
-## The normal swing's step: "carry" m (more with the charge) over CARRY_T, on the ground only, then a short
-## wind-down before the glider can open. Let go in the air or in a dash, the swing rides the move he's in.
+## The normal swing's step: "carry" m in all (more with the charge; the dash over CARRY_T plus its exit
+## slide), on the ground only, then a short wind-down before the glider can open. Let go in the air or in
+## a dash, the swing rides the move he's in.
 func _carry(dv: Vector2, k: float) -> void:
 	play("bul_smash")
 	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
@@ -496,6 +497,7 @@ func _carry(dv: Vector2, k: float) -> void:
 		return
 	var cr: Array = lmb_def().get("carry", [1.5, 1.8])
 	var carry := lerpf(float(cr[0]), float(cr[1]), k)
+	carry -= HunterMove.slide(minf(carry / CARRY_T, h.base_speed * HunterMove.dash_exit_run))
 	h.dash_with({"type": "dash", "speed": carry / CARRY_T, "time": CARRY_T, "invuln": 0.0, "dir": dv, "trail": "dust"})
 	step_until = m.time + CARRY_T
 
