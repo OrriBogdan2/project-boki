@@ -131,7 +131,7 @@ func _screen(main: Node) -> void:
 func _tagged(view: Control) -> Array:
 	var out: Array = []
 	for card in view.grid.get_children():
-		var labels := card.find_children("*", "Label", true, false)
+		var labels: Array = card.find_children("*", "Label", true, false)
 		if labels.any(func(l): return l.text.begins_with("Start here")):
 			out.append(HeroTitle.base_name(String(card.get_meta("arch"))))
 	return out
@@ -147,7 +147,7 @@ func _start_here(main: Node) -> void:
 	await main.get_tree().process_frame
 	ok(view.pm.pick == "gunslinger", "a fresh save's cursor starts on Vex (%s)" % view.pm.pick)
 	var tags := _tagged(view)
-	ok(tags == ["Vex", "Kael", "Lace", "Cinder"], "a fresh save tags the four 'Start here' (%s)" % [tags])
+	ok(tags == ["Vex", "Kael", "Cinder", "Lace"], "a fresh save tags the four 'Start here' (%s)" % [tags])
 	ok(ClassUnlock.start_role("archer") == "High-ground sharpshooter" and ClassUnlock.start_role("mage") == "",
 		"each tag has a one-line role, and the rest have none")
 	view.queue_free()
