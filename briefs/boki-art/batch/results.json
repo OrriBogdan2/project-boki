@@ -23194,5 +23194,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/stance_frigatee_w31_1.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_frigatee_w31",
+    "name": "Frigatee (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_frigatee_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_frigatee_w31",
+    "name": "Frigatee (new stance)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/stance_frigatee_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_frigatee_w31",
+    "name": "Frigatee (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_frigatee_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_galleotter_w31",
+    "name": "Galleotter (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_galleotter_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_galleotter_w31",
+    "name": "Galleotter (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_galleotter_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_boltstrich_w31",
+    "name": "Boltstrich (new stance)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/stance_boltstrich_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_galleotter_w31",
+    "name": "Galleotter (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_galleotter_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_galleotter_w31",
+    "name": "Galleotter (new stance)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/stance_galleotter_w31_4.jpg",
+    "ok": true
   }
 ]
