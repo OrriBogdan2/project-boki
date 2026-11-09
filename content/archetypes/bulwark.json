@@ -44,13 +44,13 @@
 		"wait": 3.0,
 		"slam": 50.0,
 		"crush_reach": 1.5,
-		"crush_stun": 0.5,
+		"crush_stun": 1.0,
 		"crush_dmg": 8.0,
 		"col": "#fff1b8"
 	},
 	"passive": {
 		"name": "Guard",
-		"desc": "Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage)."
+		"desc": "Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 1.0 (8 damage)."
 	},
 	"lmb": {
 		"tap": 0.2,
