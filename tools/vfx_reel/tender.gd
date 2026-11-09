@@ -50,17 +50,18 @@ func _part_e() -> void:
 	await _go(GAP)
 
 func _part_r() -> void:
-	await _reset(4.0)
+	await _reset(6.0, 1.5)
 	P.hp = P.max_hp * 0.5
-	var ally: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, P.pos, {"arch": "none"})
-	ally.teleport(P.pos + Vector3(6.0, 0, 1.5))
+	# the dummy stands in as her teammate, so the tether has an ally to arc to (a new body spawned here drops off the stage)
+	var foe_team := T.team
+	T.team = P.team
+	T.hp = T.max_hp * 0.5
 	var cast := func(t: float):
 		if _at(t, 0.1):
 			P.ak.cd["x"] = 0.0
 			P.ak.cast_ult()
-		_aim(ally.pos)
+		_aim(T.pos)
 	await _go(2.8, cast, _sheet("r", "R, Hearth Call: the arc of light to the ally, the heals rising as stars",
-		[0.15, 0.3, 0.5, 0.8, 1.1, 1.5, 1.9, 2.3, 2.7], func(): return (P.pos + ally.pos) * 0.5), 1.0)
-	ally.queue_free()
-	m.hunters.erase(ally)
+		[0.15, 0.3, 0.5, 0.8, 1.1, 1.5, 1.9, 2.3, 2.7], func(): return (P.pos + T.pos) * 0.5), 1.0)
+	T.team = foe_team
 	await _go(GAP)
