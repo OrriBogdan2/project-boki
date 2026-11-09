@@ -405,6 +405,22 @@ func _mage() -> void:
 	ok("Skycall without a flick: thrown away from you, within 3.9 m",
 			T.pos.x > tx0 + 2.5 and T.pos.x < tx0 + 3.9, "%.1f" % (T.pos.x - tx0))
 	ok("Skycall: flings a rival's orb, now yours", K.motes.size() >= 1 and K.motes[0]["owner"] == P)
+	# a rival Wisp (downed hunter) is launched along the strike too, with no Static and no Grounded
+	ac.fresh(T)
+	K.sparks.clear()
+	K.motes.clear()
+	P.teleport(home)
+	T.teleport(home + Vector3(5, 0, 0))
+	m.knock(T, P, {})
+	ac.step(m, 0.1)
+	ac.aim_at(P, T.pos)
+	K.cd["e"] = 0.0
+	tx0 = T.pos.x
+	P.ak.use_e()
+	ac.step(m, 2.2)
+	ok("Skycall launches a rival Wisp (no Static, no Grounded)",
+			T.pos.x > tx0 + 2.5 and K.spark_n(T) == 0 and not KitStatus.grounded(T), "%.1f" % (T.pos.x - tx0))
+	m.revive_hunter(T, null)
 	# 9c. dash -> ability (content/dash_flow/mage.json): a bolt tapped inside Wirerun
 	# is buffered and goes off at its end, E starts mid-dash, nothing is dropped
 	ac.fresh(T)
