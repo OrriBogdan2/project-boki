@@ -77,7 +77,7 @@ func _dash(main: Node, m: Match, hero: String, ev: String) -> void:
 	h.inp["dash_down"] = true
 	m.step(Match.DT)
 	h.inp["dash"] = false
-	h.inp["dash_down"] = false          # a tap: holding Shift is a charge tell (Sparkle) or a skate (Neve), not the dash
+	h.inp["dash_down"] = false     # a tap: holding Shift is a charge tell (Sparkle) or a skate (Neve)
 	var ran := false
 	var rolled := false
 	var trail := 0
@@ -109,5 +109,6 @@ func _dash(main: Node, m: Match, hero: String, ev: String) -> void:
 	ok(ran, "%s: the dash never ran" % tag)
 	ok(not rolled or trail > 0, "%s: no after-image while it ran" % tag)
 	ok(_echoes(m) == 0, "%s: the trail is still there %.1f s after the dash" % [tag, AFTER_S])
-	ok(area or added == 0, "%s: the dash left %d decal(s) on the ground: %s" % [tag, added, ", ".join(new_ids.map(func(id): return _what(instance_from_id(id)))) ])
+	var named := ", ".join(new_ids.map(func(id): return _what(instance_from_id(id))))
+	ok(area or added == 0, "%s: the dash left %d decal(s) on the ground: %s" % [tag, added, named])
 	ok(area or bursts == 0, "%s: the dash spawned %d ring(s) or burst(s)" % [tag, bursts])

@@ -25,9 +25,11 @@ func run(main: Node) -> void:
 		var strip := await _strip(main, hero)
 		strip.save_png(dir.path_join("dash_%s.png" % hero))
 		strips.append(strip)
-	var sheet := Image.create(strips[0].get_width(), strips[0].get_height() * strips.size(), false, strips[0].get_format())
+	var w: int = strips[0].get_width()
+	var hh: int = strips[0].get_height()
+	var sheet := Image.create(w, hh * strips.size(), false, strips[0].get_format())
 	for i in strips.size():
-		sheet.blit_rect(strips[i], Rect2i(Vector2i.ZERO, strips[i].get_size()), Vector2i(0, i * strips[0].get_height()))
+		sheet.blit_rect(strips[i], Rect2i(Vector2i.ZERO, strips[i].get_size()), Vector2i(0, i * hh))
 	sheet.save_png(dir.path_join("dash_all.png"))
 	print("DASHSHOTS %d strips in %s" % [strips.size(), dir])
 	main.get_tree().quit(0)
@@ -62,15 +64,17 @@ func _strip(main: Node, hero: String) -> Image:
 			frames.append(_crop(main, h))
 	m.queue_free()
 	await main.get_tree().process_frame
-	var out := Image.create(int(CROP.x * ZOOM) * frames.size(), int(CROP.y * ZOOM), false, (frames[0] as Image).get_format())
+	var fw := int(CROP.x * ZOOM)
+	var out := Image.create(fw * frames.size(), int(CROP.y * ZOOM), false, (frames[0] as Image).get_format())
 	for i in frames.size():
-		out.blit_rect(frames[i], Rect2i(Vector2i.ZERO, (frames[i] as Image).get_size()), Vector2i(i * int(CROP.x * ZOOM), 0))
+		out.blit_rect(frames[i], Rect2i(Vector2i.ZERO, (frames[i] as Image).get_size()), Vector2i(i * fw, 0))
 	return out
 
 func _crop(main: Node, h: Hunter) -> Image:
 	var img := main.get_viewport().get_texture().get_image()
 	var c := main.get_viewport().get_camera_3d().unproject_position(h.position + Vector3(0, 0.9, 0))
-	var rg := Rect2i(Vector2i(int(c.x) - CROP.x / 2, int(c.y) - CROP.y / 2), CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
+	var corner := Vector2i(int(c.x) - CROP.x / 2, int(c.y) - CROP.y / 2)
+	var rg := Rect2i(corner, CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 	var crop := img.get_region(rg)
 	crop.resize(int(CROP.x * ZOOM), int(CROP.y * ZOOM), Image.INTERPOLATE_BILINEAR)
 	return crop
