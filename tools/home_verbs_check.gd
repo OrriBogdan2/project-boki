@@ -69,7 +69,7 @@ func _rig() -> void:
 			seen["back_r"] = maxf(seen["back_r"], h[1].z - rest[1].z)
 			seen["up"] = maxf(seen["up"], minf(h[0].y, h[1].y) - rest[1].y))
 		ok(seen["act"], "%s: the body takes the move" % verb)
-				var bob: float = seen["hi"] - seen["lo"]
+		var bob: float = seen["hi"] - seen["lo"]
 		match verb:
 			"feed":
 				ok(seen["fwd_l"] < -LIFT and seen["fwd_r"] < -LIFT, "feed: both hands held out in front")
