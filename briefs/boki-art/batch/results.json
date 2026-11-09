@@ -23082,5 +23082,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/stance_voltmink_w31_3.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_voltmink_w31",
+    "name": "Voltmink (new stance)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/stance_voltmink_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_bellowary_w31",
+    "name": "Bellowary (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_bellowary_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_bellowary_w31",
+    "name": "Bellowary (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_bellowary_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_boltstrich_w31",
+    "name": "Boltstrich (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_boltstrich_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_bellowary_w31",
+    "name": "Bellowary (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_bellowary_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_bellowary_w31",
+    "name": "Bellowary (new stance)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/stance_bellowary_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_chandelapi_w31",
+    "name": "Chandelapi (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_chandelapi_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_boltstrich_w31",
+    "name": "Boltstrich (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_boltstrich_w31_2.jpg",
+    "ok": true
   }
 ]
