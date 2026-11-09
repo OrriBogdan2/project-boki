@@ -2675,7 +2675,7 @@ func _build_loot() -> void:
 	var hint := UI.label("Click a row to take or swap it", 12, MUTED)
 	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	foot.add_child(hint)
-	pc.custom_minimum_size.x = 430
+	pc.custom_minimum_size.x = 490
 	add_child(pc)
 	loot_panel = pc
 	# to the right of centre, clear of your hunter and the ability bar

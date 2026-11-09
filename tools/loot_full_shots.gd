@@ -1,5 +1,5 @@
 extends RefCounted
-## --loot-full-shots --shots-dir=<dir>: screenshots of looting with a full backpack (run under xvfb with a
+## --loot-full-shots --shots-dir=<dir> [--size=WxH]: screenshots of looting with a full backpack (run under xvfb with a
 ## renderer). 1: a deathbox beside the hold window (your backpack, the clicked thing held in red, Swap and
 ## Drop). 2: the same box right after a swap. 3: a ground item's swap window with the red full outline.
 ## 4: a deathbox with gear (rarity names, better/worse arrows). <dir>/captions.txt gets "file: caption" per file.
@@ -15,6 +15,9 @@ func run(main_node: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		elif String(a).begins_with("--size="):
+			var wh := String(a).substr(7).split("x")
+			main.get_tree().root.size = Vector2i(int(wh[0]), int(wh[1]))
 	DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
