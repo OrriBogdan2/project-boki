@@ -43,7 +43,7 @@ func _solo_run() -> void:
 		m.step(Match.DT)
 		t += Match.DT
 	ok(is_instance_valid(m.player) and m.hunters.size() == Data.MATCH_PLAYERS, "solo: 30 s on, everyone still in the list")
-	ok(m.result.is_empty() and not m.player.out, "solo: still in the match, nothing ended it (result %s, hp %.0f, out %s)" % [m.result, m.player.hp, m.player.out])
+	ok(m.result.is_empty() and not m.player.out, "solo: still in the match, nothing ended it (%s)" % [m.result])
 
 func _rolling() -> void:
 	for mode in ["solo", "trio"]:
@@ -51,6 +51,25 @@ func _rolling() -> void:
 		var sz := 1 if mode == "solo" else 3
 		ok(m.rolling != null and m.rolling.size == sz, "rolling %s: waves of squads of %d" % [mode, sz])
 		for i in 20: m.step(Match.DT)
+
+## The panel itself: two tabs, Trios lit by default, a click on Solo saves the pick and lights it.
+func _panel() -> void:
+	Save.d.erase("exp_mode")
+	Game.goto("home")
+	for i in 8: await main.get_tree().process_frame
+	var home = main.current
+	home._open_expedition()
+	await main.get_tree().process_frame
+	var tabs = home.find_children("*", "Button", true, false).filter(func(b): return String(b.get_meta("tab", "")) in ["Solo", "Trios"])
+	ok(tabs.size() == 2, "the panel has the Solo and Trios tabs")
+	for b in tabs:
+		var nm: String = b.get_meta("tab")
+		ok(b.tooltip_text == ExpMode.TEXT["solo" if nm == "Solo" else "trio"], "%s tab: tooltip says what it is" % nm)
+		ok((b.theme_type_variation == "SegOn") == (nm == "Trios"), "%s tab: lit only for the pick" % nm)
+	for b in tabs:
+		if b.get_meta("tab") == "Solo": b.pressed.emit()
+	ok(ExpMode.is_solo(), "pressing Solo saves the pick (exp_mode)")
+	await main.get_tree().process_frame
 
 func run(mn: Node) -> void:
 	main = mn
@@ -60,5 +79,6 @@ func run(mn: Node) -> void:
 	_counts("solo", 20, 1)
 	_solo_run()
 	_rolling()
+	await _panel()
 	print("SOLODROP DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
