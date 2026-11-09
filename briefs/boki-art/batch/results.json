@@ -6072,5 +6072,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_vespox_r_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_ribbonwyrm",
+    "name": "Ribbonwyrm (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ribbonwyrm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter_r2",
+    "name": "Oarter",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/oarter_r2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ribbonwyrm_4k",
+    "name": "Ribbonwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_4k_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ringrove_4k",
+    "name": "Ringrove",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ringrove_4k_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bubblisk_r",
+    "name": "Bubblisk (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bubblisk_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stormit_r",
+    "name": "Stormit (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stormit_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anvilbrock_r",
+    "name": "Anvilbrock (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_anvilbrock_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunowl_r",
+    "name": "Lunowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lunowl_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_oarlet_r",
+    "name": "Oarlet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_oarlet_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_amanitusk_r",
+    "name": "Amanitusk (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_amanitusk_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_murmurling_r",
+    "name": "Murmurling (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_murmurling_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_murmurling_r",
+    "name": "Murmurling (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_murmurling_r_1.jpg",
+    "ok": true
   }
 ]
