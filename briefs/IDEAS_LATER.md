@@ -12,3 +12,7 @@ Blighted areas have Blight sludge on the ground that hurts to step on, unless yo
 (Spore) Boki. Water and Ice Boki also help (wash or freeze it; e.g. reduced damage or a path), other types may get
 partial counters. Ties to: Spore = Blight's corrupted type; soul-linked Boki/wisp idea. Needs a design pass (damage per
 second, how counters stack, visual read) before a build job.
+Generalize (owner, 2026-11-09): every biome can have its own ground hazard (fire/lava fields, etc.) countered by
+carrying a Boki of the matching or opposing type. Loadout idea: if we later let hunters bring 2 Boki, they work like
+perks. Example: 5 perk slots, 2 of them filled by Boki, so which Boki to bring becomes a strategic pre-match choice
+(hazard immunity vs combat value).
