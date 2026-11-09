@@ -605,10 +605,6 @@ func fire_rmb(c: Dictionary) -> void:
 	else:
 		_coil(k)
 
-## Rank 3 of the Storm Rod: its throw hits harder (rmb.rank3_mult).
-func rod_rank_k() -> float:
-	return float(rmb_def()["rank3_mult"]) if rank("sec") >= 3 else 1.0
-
 ## Rank 3 of Wirerun: the run's own hit hits harder; the Blowout is the passive's and does not grow (dash.rank3_mult).
 func run_rank_k() -> float:
 	return float(dash_def()["rank3_mult"]) if rank("dash") >= 3 else 1.0
@@ -620,7 +616,6 @@ func _coil(k: float) -> void:
 	var rng := float(cd_["range"])                       # a fixed lane: the charge never changes the range
 	var push := lerpf(float(cd_["push"][0]), float(cd_["push"][1]), k)
 	last_push = push
-	dmg *= rod_rank_k()
 	var delivery := {"type": "projectile", "speed": float(cd_["speed"]), "range": rng, "size": 0.22}
 	var effects := [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}]
 	var stg := stage("rmb", {"delivery": delivery, "effects": effects})

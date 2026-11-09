@@ -2,6 +2,17 @@
 
 Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Barnacle Knight; the id, files and save keys stay `bulwark`. The minigun ability that was also called "Bulwark" (content/abilities/bulwark.json) is now Bracewall.
 
+## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
+Source: Oath, `Upg:` lines. Ranks come from `rank_cd` / `rank_dmg` and the kit's own shield, cooldown and heal numbers; the
+shared damage step is gone (the source gives none of these slots any). The ultimate takes no upgrade in our kit (the
+source's R: +20% damage, -5s, twice), so it is not changed. Rank 3 also sends both dashes 1m further (ours, not the source's; kept).
+
+| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
+|---|---|---|---|
+| RMB Brightshield | +25% max-HP scaling; faster repair and regen; +25% | shield 200 / 240, regen 30, wait 1.4s, lock 2s at 3; damage +15% / +30% | same shield and repair numbers; no damage step |
+| Shift Spin Dash / Shield Bash | -1.5s both x2; tier IV: a dash hit refunds Shield Bash | recharge 6.8s / 5.6s (shared -15%); Shield Charge 4.5s / 3s; refund at 3 | recharge 6.5s / 5s; Shield Charge 4.5s / 3s; refund at 3; no damage step |
+| E Mending Ground | +25% heal; -4s; +25% heal | heal +25% / +50%, cooldown 12s / 8s, damage +15% / +30% | heal +25% / +50%, cooldown 12s / 8s; no damage step |
+
 ## Research summary
 Sources (gameplay only; notes in our own words, nothing of the source ships):
 - The hero sheet `briefs/hero-ref/bjorn.md`, written from 5 fps gameplay footage (one frame = 0.2 s). Its ranked gap list drove this pass.
@@ -43,7 +54,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | RMB: rises after 0.2 s | MED | (a) | 0.1 s (e625aa8e); `bjorn parity RMB: the aegis is up 0.1 s into the hold` |
 | RMB: does it block front melee? | MED | (b) | Yes now: any hit from a foe in its 140 degree arc lands on the aegis (its HP, Guard), as the data's "blocks all damage from the front"; damage over time and blows from behind still land. `bjorn audit: the raised aegis takes a melee blow from the front`, `a blow from behind still lands on him` |
 | Shield Charge: whole-body invulnerable | LOW | (c) | Data: "shield briefly Invulnerable" during the bash; the shield is in front of the body for the whole dash, so the whole-body window is the same in practice. Kept |
-| Shift: cooldown 9 vs data 8 | LOW | (b) | `dash.cd` 8 (ranks 6.8 / 5.6) |
+| Shift: cooldown 9 vs data 8 | LOW | (b) | `dash.cd` 8 (ranks 6.5 / 5) |
 | Shift: start burst | MED | (b) | Removed (DECISIONS: no bursts on dashes); the gameplay spin ring (2.2 m, its true hit radius) stays |
 | Air dash (lumber): gold bursts | MED | (b) | Removed; the dust stays |
 | Shield Charge: armed ring on the dash | MED | (b) | Removed (a ring on a dash); the armed flash stays |
@@ -137,7 +148,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | Dash refund | missing | rank 3: a 360 Smash that hits a foe refunds the Shield Charge | the data's fourth upgrade lands on our last rank |
 | Shield upgrades | rank 3 +60 HP | rank 2 +25% HP (200), rank 3 +50% HP (240), regen 20 -> 30 per second, the post-break lock 3 -> 2 s, the wait 2 -> 1.4 s | +25% per rank from the data; the repair numbers are ours (the data says "faster") |
 
-Rank paths that do not fit our system: the Spin Dash's own cooldown still uses the shared -15% a rank (9 -> 7.65 -> 6.3 s, the data's -1.5 s a rank would be 7.5 -> 6) because the dash recharge is shared code (Hunter.dash_regen); the data's four tiers fold into our three (III and IV share our rank 3); the shared +15% damage a rank applies to the Crush and Slam where the data names no damage upgrade; the data's -1.5 s Shield Bash is on the dash rank here, as the data lists it under the Shift upgrades. Skipped: R (Abyssalbreaker) is the Faultline on X, untouched; the Guard meter stays as our own loop (the data has no such meter, but the Shield Slam payoff depends on it).
+Rank paths that do not fit our system: the data's four tiers fold into our three (III and IV share our rank 3); the upgrade table at the top lists the numbers per rank.
 
 ## Scaling
 Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x the throw, the source's 3x and 5.6x); 360 Smash 24 (2x the throw); Slam 18; Crushed 8 + stun 0.5; Mending Ground 2 per 0.5 s for 4 s + a burst of 18; Faultline 4 strike + 18 eruption (40 s cooldown, about 3.6x the 360 Smash as in the source). Numbers follow the source's ratios, not its values.
