@@ -671,6 +671,12 @@ INTO_MOVE_MODE = {"fire": "the move goes at once, the ability keeps running", "c
 HOLD_MODE = {"keep": "the hold carries through and lets go there", "cancel": "the move ends the hold"}
 HOLD_MOVES = [("ground", "a ground dash"), ("air", "an air dash"), ("jump", "a jump"), ("mantle", "a mantle")]
 
+def _src(row):
+    """The Source cell of a row. `[?]` marks a row that exists but no source or footage settles (docs/KIT_PARITY.md
+    item 20): no source field, or one that says "Not determinable". A pair with no row stays empty."""
+    src = (row or {}).get("source", "")
+    return "[?] " + src if row and (not src or src.startswith("Not determinable")) else src
+
 def _combo_ours(row, modes, default):
     """A combo row (docs/decisions/0015-combo-flow.md): its mode, and the reason when it's an exception (a mode
     that doesn't combine: anything but the default, or a cancel that moves you out at once)."""
@@ -684,18 +690,18 @@ def _combo_rows(hero, f):
     rows = []
     for slot, label in DASH_SLOTS:
         row = f.get("jump", {}).get(slot, {})
-        rows.append([hero, "jump -> %s" % label, row.get("source", ""), _combo_ours(row, JUMP_MODE, "fire")])
+        rows.append([hero, "jump -> %s" % label, _src(row), _combo_ours(row, JUMP_MODE, "fire")])
     for slot, label in DASH_SLOTS:
         row = f.get("into_jump", {}).get(slot, {})
-        rows.append([hero, "%s -> jump" % label, row.get("source", ""), _combo_ours(row, INTO_MOVE_MODE, "fire")])
+        rows.append([hero, "%s -> jump" % label, _src(row), _combo_ours(row, INTO_MOVE_MODE, "fire")])
         air = f.get("into_dash", {}).get(slot, {}).get("air")
         if air:
-            rows.append([hero, "%s -> air dash" % label, air.get("source", ""), _combo_ours(air, INTO_MOVE_MODE, "fire")])
+            rows.append([hero, "%s -> air dash" % label, _src(air), _combo_ours(air, INTO_MOVE_MODE, "fire")])
     for slot, label in DASH_SLOTS:
         held = f.get("hold", {}).get(slot)
         for move, name in HOLD_MOVES if held is not None else []:
             if move in held:
-                rows.append([hero, "hold %s through %s" % (label, name), held[move].get("source", ""),
+                rows.append([hero, "hold %s through %s" % (label, name), _src(held[move]),
                              _combo_ours(held[move], HOLD_MODE, "keep")])
     return rows
 
@@ -715,7 +721,7 @@ def gen_dash_flow():
     rows = []
     for aid in ARCH_ORDER:
         f = flows.get(aid, {})
-        hero = ARCH.get(aid, {}).get("name", aid)
+        hero = "%s (%s)" % (ARCH[aid]["base_name"], aid) if aid in ARCH else aid
         for kind in ("ground", "air"):
             given = f.get("dash", {}).get(kind, {})
             for slot, label in DASH_SLOTS:
@@ -723,18 +729,20 @@ def gen_dash_flow():
                 ours = _dash_ours(row, DASH_MODE)
                 if kind in f.get("kit_owns", []):
                     ours = "the kit's own dash state: not routed yet"
-                rows.append([hero, "%s dash -> %s" % (kind, label), row.get("source", ""), ours])
+                rows.append([hero, "%s dash -> %s" % (kind, label), _src(row), ours])
         for slot, label in DASH_SLOTS:
             row = f.get("into_dash", {}).get(slot)
             ours = _dash_ours(row, INTO_DASH_MODE) if row else "the kit's own handling (no row yet)"
-            rows.append([hero, "%s -> dash" % label, (row or {}).get("source", ""), ours])
+            rows.append([hero, "%s -> dash" % label, _src(row), ours])
         rows += _combo_rows(hero, f)
     body = ("One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlow` "
             "(`scripts/arch/dash_flow.gd`, docs/decisions/0010-dash-ability-flow.md). A dash pair with no row buffers the "
             "press to the dash's end. \"Source\" is what the source hero does; \"Ours\" is what the game does now.\n\n"
             "The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions/0015-combo-flow.md): every "
             "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
-            "with no hold row keeps through every move.\n\n")
+            "with no hold row keeps through every move.\n\n"
+            "`[?]` in Source marks a row that exists but that no source or footage settles (no source, or \"Not "
+            "determinable\"): it runs as the kit's default and is not guessed (docs/KIT_PARITY.md, item 20).\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
