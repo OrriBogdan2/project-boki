@@ -48,6 +48,8 @@ static func attach(p: Practice) -> void:
 ## Every slot's step for a Hunter: {slot, action, key, line, how ("", "again" or "hold")}.
 static func steps(hunter_id: String) -> Array:
 	var out := []
+	if not Arch.exists(hunter_id):
+		return out      # no Hunter picked yet ("" before the pick): nothing to drill until one is
 	for slot in SLOTS:
 		var action: String = ACTIONS[slot]
 		out.append({"slot": slot, "action": action, "key": Settings.key_cap(action),
@@ -192,6 +194,7 @@ func _label(parent: Node, col: Color, px: int) -> Label:
 func _show() -> void:
 	if _panel == null:
 		return
+	_panel.visible = not plan.is_empty()
 	if step >= plan.size():
 		_key.text = ""
 		_line.text = "That's the kit. Try it all on the dummies."
