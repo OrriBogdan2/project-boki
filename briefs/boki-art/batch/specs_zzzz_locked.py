@@ -47,3 +47,6 @@ DROP|={'c_checkmare','c_klaxada','c_pagoguana','c_pickadactyl','c_parrywhal','c_
 _PICKED_R5=('druzemole','pipwom','checkmare','pickadactyl','parrywhal','tiltster','pagoguana','cetorgan','ghoulamari','wayshell','siegephant','aurostag','cindermaw','sphinxblight','klaxada','glacione')
 DROP|={s['id'] for s in SPECS if s['id'] in ({n+'_card' for n in _PICKED_R5}|{n+'_card3' for n in _PICKED_R5}|{p+n for n in _PICKED_R5 for p in ('stance_','portrait_stance3_','portrait_stance2_')})}
 DROP|={'glacione_card','glacione_card3','klaxada_card','klaxada_card3'}
+
+# 17:29 ET 11-09: the V2 pilot jobs for Glaivyx and Ringrove are wanted (owner approved the V2 pilot 17:23); keep them out of the old glaivyx/ringrove drop.
+DROP-={'v2a_glaivyx','v2b_glaivyx','v2a_ringrove','v2b_ringrove'}

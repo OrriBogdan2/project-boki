@@ -48,3 +48,63 @@ _RD('Domeleon',"a riveted dome and a telescope carried on its back","the dome is
 _RD('Stormit',"a crab carrying a glass case, with spring legs","the case is its own see-through shell; plain crab legs")
 _RD('Maulangler',"a bolted trap jaw, a strap band and a hanging chain","the trap is its own toothed jaw with a knuckle joint at the hinge; the hook grows out of the end of its lure stalk; no chain, no strap")
 _RD('Snapler',"a bolted trap jaw, a strap band and a hanging chain","the trap is its own toothed jaw with a knuckle joint at the hinge; the hook grows out of the end of its lure stalk; no chain, no strap")
+
+# 17:29 ET 11-09: V2 PILOT, 12 Boki x both routes (RERENDER_PROMPTS s1/s1b). Interim anchors (no artist, owner 17:23) saved at
+# style_refs/v2/anchor_<arch>.png from the s6 style-a runs; creepy and majestic darkened in post. Best pilot runs of the 6 anchor
+# Boki become the final anchors. Route A = card + anchor, route B = sheet + anchor + pose in words. 3 runs each.
+exec(open(HERE/'style_v2.py').read())
+_C='briefs/boki-art/cards/'
+_PILOT=[ # name, stage, arch, dark, furry, sheet, pose, cols, counts, fix
+ ('Vespyx','baby','cute',False,True,'evolutions/Vespyx.jpg',"sitting curled up, its tail arched up over its back with the venom bead above its head",
+  "plum-purple fur, pale lilac chest, muzzle and inner ears, darker plum ear tips and paws, a dark plum segmented tail, one lime-green venom bead, lime-green eyes",
+  "four legs, two ears, one tail with the same number of segments as image 1, ending in one venom bead",
+  "the tail segments are plain matte chitin with one shade each; only the venom bead has a highlight"),
+ ('Coolatee','baby','cute',False,False,'turnarounds/Coolatee.jpg',"lying on its belly with its head up and front flippers out, happy open mouth",
+  "creamy white body, pale ice-blue crystals on its back, green eyes, dark grey nose","two front flippers, two hind flippers, one cluster of ice crystals on its back",''),
+ ('Chandelotl','final','pretty',False,False,'evolutions/Chandelotl.jpg',"raised up like a cobra with its crystal hood spread and its striped tail coiled beside it",
+  "pink axolotl body, red, pale pink and mint-green candy stripes on the tail, red and green chevrons down the chest, pink-red feathery gills, a pale ice-blue crystal hood, brown-pink eyes",
+  "four legs, six feathery gills (three each side), one crystal hood, one crystal crown",
+  "its face is round-eyed with a small closed mouth (the hero card's face, not narrow eyes or a grin); the chest chevrons and tail stripes wrap round the body like rings"),
+ ('Glassolotl','mid','pretty',False,False,'evolutions/Glassolotl.jpg',"mid-leap facing right, legs stretched and body arched, cocky open grin",
+  "pale pink see-through body, red and mint-green stripes along its body, pink-red gills, pale crystal shards, dark eyes, rainbow colours on its tail fin only",
+  "four legs, six feathery gills, one tail fin",
+  "the rainbow sits only on the tail fin, as three flat pastel bands; the jelly body is a flat pale pink with a lighter flat inner shape"),
+ ('Rimink','final','sleek',False,True,'evolutions/Rimink.jpg',"standing tall in a long elegant curve, head raised and turned toward the viewer",
+  "white fur, a navy-black stripe down its chest and a navy-black tail tip, pale ice-blue crystals along its back and legs, dark blue eyes",
+  "four legs ending in ice hooves, one long tail with a navy brush tip, about 12 crystals along its back",
+  "the tail brush grows from the tail through a fur ruff (no metal ring)"),
+ ('Glaivyx','final','sleek',False,True,'evolutions/Glaivyx.jpg',"standing four-square facing the viewer, its tail blade raised high over its back",
+  "dark plum-purple fur, a lime-green curved tail blade, lime-green back spikes and a few drips, green eyes",
+  "four legs, one tail ending in one curved blade, one row of green spikes along its back, two ears",
+  "the blade grows from the tail bone with a fur ruff at the join; no gems scattered on its flank"),
+ ('Lockatara','mid','tough',False,False,'evolutions/Lockatara.jpg',"low prowling crouch, head forward, key-shaped tail curled up behind",
+  "olive-green scaly body, grey-steel back spikes and key tail tip, a brass dial on its shoulder, a brass keyhole plate on its brow, green eyes",
+  "four legs, one tail ending in one key bit, one row of spikes along its back, one dial, one keyhole",
+  "where the key meets the tail is a fused collar of the same grey metal; the dial runes are simple notches; scales as a few big patches"),
+ ('Ringrove','final','tough',False,True,'turnarounds/Ringrove.jpg',"planted with its ringed bark back towering",
+  "brown fur and bark, moss-green back, mint-green mushroom caps with purple undersides, small cream horns, teal-grey eyes",
+  "four legs, mushroom caps in three big tiers on its back, two small horns",
+  "group the small mushroom caps into three big tiers; the bear muzzle is simplified to match its body"),
+ ('Lurklet','baby','cute',True,False,'evolutions/Lurklet.jpg',"sitting, smiling, its lure bulb glowing above its head",
+  "near-black purple body, a lilac lure bulb on a stalk, lilac rings round its belly, big purple eyes, a lilac wispy tail tip",
+  "two arms, two legs, one lure stalk with one bulb, one tail",''),
+ ('Cindermaw','final','creepy',True,True,'evolutions/Cindermaw.jpg',"stalking forward with its skull head low and grinning",
+  "dark purple hyena body (near black), a bone-white skull head and bone spurs, a black sludge mane, a hot-pink and white rib furnace on its flank, a few purple vein lines",
+  "four legs, one skull head, open ribs on one flank, one row of spurs along its spine",
+  "the eye sockets hold small pinpoint lights, with no blush on the skull; three or four vein lines from the ribs"),
+ ('Sarcobra','final','majestic',True,False,'turnarounds/Sarcobra.jpg',"rearing up from its coils with its hood spread and both wings raised high",
+  "near-black coils with a dark belly, a gold hood and gold wings with blue-purple feather tips, a blue-purple stripe on its head, golden-yellow eyes",
+  "one snake body in coils, one hood, two wings with three rows of big feathers each","the gold is base, one shade and one flat band"),
+ ('Aurostag','final','majestic',True,False,'turnarounds/Aurostag.jpg',"standing proud in profile, head turned toward the viewer, antlers spread",
+  "deep navy-blue body, a flowing aurora pattern in purple and teal on its body, teal-to-lilac crystal antlers, blue eyes",
+  "four legs, two antlers","the aurora is three flat colour ribbons that wrap round its body, with at most seven small flat four-point stars"),
+]
+import json as _json
+_LM=_json.load(open(HERE.parent/'LIVE_MANIFEST.json'))
+for _n,_st,_ar,_dk,_fu,_sh,_po,_co,_ct,_fx in _PILOT:
+    _sh=_LM[_n]['sheet']  # live sheet path wins over the guess in the table
+    _anc=SRV2%('sleek' if _ar=='fast' else _ar)
+    SPECS.append({'id':'v2a_'+_n.lower(),'name':_n+' (V2 pilot, route A: card + anchor)','refs':[_C+_n+'.jpg',_anc],'runs':3,'aspect':'1:1','size':'2K',
+                  'prompt':RS_CARD(_n,_st,_ar,_co,_ct,_dk,_fu,_fx)})
+    SPECS.append({'id':'v2b_'+_n.lower(),'name':_n+' (V2 pilot, route B: sheet + anchor)','refs':[_sh,_anc],'runs':3,'aspect':'1:1','size':'2K',
+                  'prompt':RS_CARD_B(_n,_st,_ar,_co,_ct,_po,_dk,_fu,_fx)})
