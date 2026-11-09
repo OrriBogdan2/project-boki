@@ -116,6 +116,25 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 2 (audited on 
 | Swollen, then Nightwell | the bigger 5.1m well | `ult Swollen: ...` |
 | Nightwell, then the merge | the target lives (burst cap) | `ult burst: the well, merge and its ultimate leave a full-health light hunter standing` |
 
+## Footage gaps, Nov 9 re-check
+The 8 ranked rows of briefs/hero-ref/ostra.md section 4, marked on main d255acbee (`--ostra-combo-check` names the assert).
+
+| # | Gap | Status | Where |
+|---|---|---|---|
+| 1 | LMB rhythm | closed (spam penalty not built on purpose: a fixed 0.6s cadence cannot be beaten, so nothing to penalise) | f44adba48, f55930d50 (items 60, 75): smooth charge, full slows; `lmb parity`, `item 60`, `charge` |
+| 2 | Permanent aim line, the Snap's double line | closed | 773e1aba4: `OstraKit._reticle` (line with arrowhead; two rails while RMB is held or winding up; the Swap's landing circle); `reticle: the thin aim line ...`, `rmb aim: ... two rails`, `dash aim: ... the landing at the cursor` |
+| 3 | Swap timing and markers | closed | `dash.time` 1.8s, `time_swollen` 1.25s, `lob` 4.5m; `AimKit.swap` rings at both ends and the sigil that fills; `dash: the lob takes about 1.8s`, `dash: a high lob` (peak 4m+), `dash: let go = ... both ends shown to all` |
+| 4 | Snap shape and stun | closed | 648436a60 (item 40): 0.32s wind-up, one bundle, stun `[0.8, 1.8]`; `item 40`, `rmb` rows |
+| 5 | Bomb growth and damage curve | closed | grow 6.5s, 3.5x (5b9a528d2), `min_recast` 0.3s, light column from 68%, implosion pop; `e: ...` rows. In flight: ext/motley-seed-fizzle 9f521695a drops the 10s fizzle (the source lists no expiry) |
+| 6 | Empowered aura | closed | `OstraKit.add_swell`: pink sphere (`os_aura`), vortex disc, pink flash; `swollen_t` 9s; `passive: full Swell = Swollen for 9s, wrapped in the pink sphere` |
+| 7 | Bomb cast is a lob | closed | `e.drop` 0.25s, the `os_drop` mote; `e: a small orb drops from his hand onto the spot` |
+| 8 | Black Hole | closed / owner override | Nightwell on X (392bcdcc7, 59010b314); the 1.0s cast lock, then free, is owner item 16 (OWNER_REVIEW_1103) and DECISIONS (Ostra ult); `ult open`, `lock`, `release` |
+
+Nothing is open in the ranked list, so no code was changed. In flight, not touched: ext/motley-seed-fizzle (row 5 fizzle),
+ext/anim-time-motley-rebased, ext/ostra-gait-rebased, ext/vfx-quality-motley and ext/vfx-ostra-abilities (VFX look),
+ext/recast-marker-a (a world ring on the seed). Suggestions, not built: assert that the Swap's flight marker fills from 0 to 1
+(the sigil) and that the aim line ends at the cursor; both sit in `tools/ostra_combo_check.gd`, which two of those branches edit.
+
 ## Data pass (SERVER_UPDATE7, owner's tooltip data)
 Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 9.5, full orb 353 -> +34%, Swollen Snap 399 ->
 +44%, the seed 365 -> 12.5, its damage over time 250 a second -> 8.2. Durations and cooldowns match directly: Snap 10s, Trade
