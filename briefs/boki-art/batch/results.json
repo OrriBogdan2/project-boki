@@ -4287,5 +4287,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/oarter_r_3.jpg",
     "ok": true
+  },
+  {
+    "id": "ringrove_r3",
+    "name": "Ringrove",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ringrove_r3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter_r",
+    "name": "Oarter",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/oarter_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_r2",
+    "name": "Puffamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/puffamus_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanterloris_r",
+    "name": "Lanterloris",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanterloris_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole",
+    "name": "Geodemole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodemole_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "druzemole",
+    "name": "Druzemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/druzemole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "embrook",
+    "name": "Embrook",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/embrook_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "druzemole",
+    "name": "Druzemole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/druzemole_2.jpg",
+    "ok": true
   }
 ]
