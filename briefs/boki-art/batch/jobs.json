@@ -1,5 +1,41 @@
 [
   {
+    "id": "c_glassolotl_f1",
+    "name": "Glassolotl (new face and pose)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_glassolotl_v3_3.jpg",
+      "briefs/boki-art/turnarounds/Prismander.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Creature-collector concept art, soft hand-painted style exactly like image 1. Keep the creature in image 1 exactly the same design (rock-candy body, crystal gills, candy stripes, crystal tail tip, colours) but give it a slightly older, more confident face: narrower almond eyes with a sly half-lidded look, a small closed-mouth smirk instead of the open grin, a slightly longer snout; posed mid-stride in a low prowl with its head turned back over its shoulder toward the viewer and the tail curving up behind it. It must clearly NOT have the same round-eyed open-mouth face or the same three-quarter standing angle as image 2 (its baby form). ONE creature, full body, centred, plain flat pale grey background, no shadow, no text."
+  },
+  {
+    "id": "c_glassolotl_f2",
+    "name": "Glassolotl (new face and pose)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_glassolotl_v3_3.jpg",
+      "briefs/boki-art/turnarounds/Prismander.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Creature-collector concept art, soft hand-painted style exactly like image 1. Keep the creature in image 1 exactly the same design (rock-candy body, crystal gills, candy stripes, crystal tail tip, colours) but give it a cheeky older face: one eye winking, a lopsided grin showing one small tooth, slightly longer snout and sharper gill tips; caught mid-leap with front paws reaching forward and the body stretched long, seen from a lower side angle. It must clearly NOT have the same round-eyed open-mouth face or the same three-quarter standing angle as image 2 (its baby form). ONE creature, full body, centred, plain flat pale grey background, no shadow, no text."
+  },
+  {
+    "id": "c_glassolotl_f3",
+    "name": "Glassolotl (new face and pose)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_glassolotl_v3_3.jpg",
+      "briefs/boki-art/turnarounds/Prismander.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Creature-collector concept art, soft hand-painted style exactly like image 1. Keep the creature in image 1 exactly the same design (rock-candy body, crystal gills, candy stripes, crystal tail tip, colours) but give it a focused, determined face: brows angled, eyes narrowed and looking ahead, mouth set; posed side-on in a sleek swimming glide with legs tucked and the long tail streaming behind, head slightly raised. It must clearly NOT have the same round-eyed open-mouth face or the same three-quarter standing angle as image 2 (its baby form). ONE creature, full body, centred, plain flat pale grey background, no shadow, no text."
+  },
+  {
     "id": "c_anchorhorn_z1",
     "name": "Anchorhorn (concept)",
     "refs": [
