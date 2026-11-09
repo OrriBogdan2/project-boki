@@ -1,7 +1,7 @@
 class_name HobOffer
 extends RefCounted
 ## Hob's second-Mask offer (HobTalk shows it over the talk box): exactly the three Masks of the second pick
-## (ClassUnlock.second_picks: Kael, Pip, Cinder) side by side, each with its portrait, name and title and a
+## (ClassUnlock.second_picks: Kael, Meeko, Cinder) side by side, each with its portrait, name and title and a
 ## one-line role, and under them one ability clip of the Mask in focus (only that one plays: the cards are
 ## painted portraits, so the pick never stalls). Hover or click a card to look at it; "Take" picks it,
 ## ClassUnlock.choose_second opens it, and HobTalk plays the short Mask moment. "Not now" lets it wait.
@@ -46,7 +46,7 @@ func build() -> Control:
 	btns.add_child(take_button)
 	v.add_child(btns)
 	root = v
-	take_button.call_deferred("grab_focus")      # (Enter takes the Mask in focus)
+	take_button.call_deferred("grab_focus")      # (Enter takes the Relic in focus)
 	for id in ids:
 		WardenGlb.fetch(String(id))      # (their models, read off the main thread before a clip needs one)
 	focus(0)

@@ -115,7 +115,7 @@ func _first_time() -> void:
 	ok(beat.black.color.a == 0.0 and beat._ripple != null, "the snap back: the world again, a ripple of light")
 	await tree.create_timer(0.7).timeout
 	var named: Node = beat.name_box
-	ok(named != null and _texts(named).has("Vex, the Hired Gun"), "her name and title on screen")
+	ok(named != null and _texts(named).has(HunterViewer.display_name("gunslinger")), "her name and title on screen")
 	await _shot(tree, "mask_beat_5_reveal")
 	while got[0] == null and Time.get_ticks_msec() - t0 < 30000:
 		await tree.process_frame

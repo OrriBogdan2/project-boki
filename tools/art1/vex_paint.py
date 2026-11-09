@@ -1,4 +1,4 @@
-"""ART-1 Vex v2: the texel-space paint of the rebuilt pieces (see kael_paint.py): arrays of texels in, sRGB out."""
+"""ART-1 Vex v2: the texel-space paint of the rebuilt pieces (see paintkit.py): arrays of texels in, sRGB out."""
 import os, sys
 import numpy as np
 from meshkit import smooth

@@ -256,7 +256,7 @@ r3c recipe). Pieces Meshy can't give cleanly are scripted (tools/meshy/hard_part
   its ends to the hands and thighs and a raised hand drags the pigtails up into a bunch.
 - `anchors` [{name, slot, side, z_min, bone}]: an anchor at the centre of one slot's faces on one side (her glowing
   irises), for warden_look.json `halos`.
-- `tools/meshy/face_touch.py` (spec art/wardens/src/claire_face_touch.json): the face sheet softened before its
+- `tools/meshy/face_touch.py` (spec: Claire v1's claire_face_touch.json, in git history before the v2 rebuild): the face sheet softened before its
   projection (blush toward the skin, freckles deepened, eyes magnified with a soft lens and their iris lifted).
 - hard_parts: `wings.scale`, `horns.slot`/`root`/`tipcol`/`crest`, `spear.blade_w`/`blade_t`/`shaft_r`/`pale`.
 
@@ -491,6 +491,41 @@ Breaker total: 6 tasks, 116 credits (the body's two attempts used).
 | Vex v2 body | 22:38 | 01a1b2f3-0ba1-76e8-9810-46951086bee6 | meshy-7.1 | the 3 edited views + the same as texture refs; A-pose, defaults | 40 | **Kept** |
 | Vex v2 head | 22:45 | 01a1b2f3-b897-7037-ac35-70264cddd250 | meshy-7.1 | the 4 head views, no pose | 40 | **Kept** |
 
+### Cinder v2 (Flame Queen, titled the Ashen Kiss), 2026-11-07 (balance 1322 before; 76 credits)
+| Task | Id | Model | Credits | Result |
+|---|---|---|---:|---|
+| edit front / side / back / 3-4 | 01a1b628-26fa-714e / 26b8-73d2 / 26e2-7241 / 26ef-728a | nano-banana-pro | 36 | No tank, hose, goggles: kept |
+| scan | 01a1b62a-16b7-739b-81ce-e1fee79ab44c | multi-image-to-3d | 40 | Kept |
+
+The scan welded her forearm shards to her hip plates (read as wings once the arms moved):
+`cinder_source.py part_arms` cuts every face joining an arm to the body under the armpit and caps both sides. Raw files in
+`~/meshy/cinder_v2`, rebuilt by `build.sh` there from `tools/art1/cinder_*.py`.
+A tail near the floor: `Springs.FLOOR_UP` holds joints up from the *posed* root, so leave the stance's root drop as well.
+The scan's horns came out as short wedges (cat ears from the front): `cinder_finish.py tuck_horns` presses them to the crown and
+`cinder_pieces.py horns` sweeps the sheet's curved horns over them, rigid on the head, painted in their own strip under the atlas's flat
+cells. The tail's molten cracks (the side view) are a seeded random walk painted into the tail strip of both the atlas and the emit map.
+
+### Sable v2 (owner redesign: moth antennae, one braid, plunging coat, wing tails, twin flintlocks), 2026-11-07 (121 credits; balance 1170 -> 1049)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Sable v2 edits, first try | ~14:30 | (try1, ~/meshy/sable_v2/try1) | nano-banana-pro (image-to-image) | 3 views of the turnaround; the gem and chains also removed | 27 | Dropped: invented a wider opening; the gem and three chains stay in the scan from here on |
+| Sable v2 edit front | 14:34 | 01a1b66e-9287-7247-820c-3cb60762a99a | nano-banana-pro | sable_v2_turnaround crop; antennae, braid, wings, tails, knives, pistols out; gem and chains kept | 9 | Kept |
+| Sable v2 edit 3/4 | 14:34 | 01a1b66e-9293-749d-89e1-c126284bec19 | nano-banana-pro | as front | 9 | Kept |
+| Sable v2 edit side | 14:34 | 01a1b66e-92a8-727f-8336-3dc8448791fa | nano-banana-pro | as front, coat closed in this view | 9 | Dropped: bare midriff, long hem; fixed by side 2 |
+| Sable v2 edit back | 14:32 | 01a1b66d-47b6-76ee-9168-f9d98fcbcd53 | nano-banana-pro | as front, back seams stay | 9 | Dropped: pale discs by the knees; fixed by back 2 |
+| Sable v2 edit side 2 | 14:35 | 01a1b66f-5b51-75e4-8215-732eb9128fc4 | nano-banana-pro | on side: jacket to the belt, midriff covered | 9 | Kept |
+| Sable v2 edit back 2 | 14:34 | 01a1b66e-928a-763c-8972-3c9e1c11c2ba | nano-banana-pro | on back: the discs out | 9 | Kept |
+| Sable v2 A | 14:35 | 01a1b66f-cbed-7121-adf1-b345e7c627b9 | meshy-7.1 | edited front, 3/4, side, back (+ texture refs), geometry 2k, meshy-7 texture 8k, PBR, no remesh, enhancement off; 328,169 verts | 40 | Kept |
+
+Prompts: art/wardens/src/sable_recipe.json. Build: tools/art1/sable_build.sh. Lessons: keep what must hold its place (the gem, the chains) in the scan and rebuild only what has to move. Previews lie close up: a 5x render of the mouth found the scan's stitches in three layers (paint, normal bake, the low mesh's folded crease) and only smoothing the mesh cleared them.
+
+### Kael v2 (owner redesign, briefs/art-refs/kael_v2/), 2026-11-07 (116 credits; balance 1778 before, 1662 after)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Kael v2 edits | 2026-11-07 00:33 | 01a1b36d-182c-749f-b0db-41b44d264551, 01a1b36d-183e-75bb-acc0-8b6a8b417638, 01a1b36d-1822-74e4-89ef-7c74be9c5e26, 01a1b36d-1824-7200-bc4a-793f3e037c46 | nano-banana-pro (image-to-image) | turnaround front, 3/4, left side, back (1:1): both wrist chains and the long sash tails out, nothing else | 36 | Kept |
+| Kael v2 body A | 00:34 | 01a1b36d-e2f4-72b0-8e19-805ca49be6e4 | meshy-7.1 | the 4 edited views + the same as texture refs; A-pose | 40 | Not used: the A-pose opened his fists and gloved the cursed hand black |
+| Kael v2 body B | 00:40 | 01a1b373-056a-72b0-823c-e82f2d1dd908 | meshy-7.1 | the same, no pose (`--pose ""`) | 40 | **Kept**: fists, the bare crimson hand, the scarf over the mouth |
+
 ### Ryzz v2 (owner redesign, briefs/art-refs/ryzz_v2/), 2026-11-07 (76 credits; balance 1662 before, 1586 after)
 | Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
 |---|---|---|---|---|---|---|
@@ -514,6 +549,18 @@ from the pelvis as v1's skirt did; the thighs under it stay (the jacket is open 
 Grimble v2 notes: one body scan replaces v1's body, head and hoard scans. grimble_source.py fits it (the limbs keep the scan's spread,
 the rig's joint heights; past a bone's ends the scan's own scale). The hoard, bells, lanterns, blunderbuss and junk ball are v1's sculpt;
 the loupe is scripted; the face's squint, teeth and gums and the glowing veins are paint fixes (grimble_paint.scan_face, vein_key).
+
+### Claire v2 (owner redesign: rabbit ears, braid, puff tail), 2026-11-07 (85 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Claire v2 edit front | 13:02 | 01a1b61a-8f75-7116-b432-5496b1cabe44 | nano-banana-pro (image-to-image) | nivi_v2_turnaround crop; ears, braid, scarf ends, tail and blades out, skirt opaque | 9 | Kept |
+| Claire v2 edit 3/4 | 13:02 | 01a1b61a-8f6e-751a-8ac5-5ea408b53214 | nano-banana-pro | as front, 3/4 view | 9 | Dropped: redone |
+| Claire v2 edit 3/4 b | 13:03 | 01a1b61b-63af-7744-9912-974dcd66e6eb | nano-banana-pro | the 3/4 again | 9 | Kept |
+| Claire v2 edit side | 13:02 | 01a1b61a-8f85-7599-8580-5d05d1ce9c55 | nano-banana-pro | as front, right side | 9 | Kept |
+| Claire v2 edit back | 13:02 | 01a1b61a-8f67-738a-b5d9-5bf863cb4f67 | nano-banana-pro | as front, back | 9 | Kept |
+| Claire v2 A | 13:04 | 01a1b61c-3d74-7213-95c7-5b709948ce1d | meshy multi-image | front, 3/4, side, back edits; ultra, HD texture | 40 | Kept: ART-1 (tools/art1/claire_build.sh), 13.6k tris |
+
+Claire v2 total: 6 tasks, 85 credits. Prompts in art/wardens/src/claire_recipe.json; built pieces (ears, braid, tail, spear) in art/wardens/claire/IMPORT.md.
 
 ## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
 No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.

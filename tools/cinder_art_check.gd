@@ -1,12 +1,14 @@
 extends RefCounted
 ## --cinder-art-check: Cinder's model (ART-1) against her kit, through the real match code and render path.
-## Cinder's fire against her kit, through the real match code and render path: the pilot and the stream leave her
-## casting hand (palm) through the idle hold and the stream, its rules still start where they did (the kit's NOZZLE);
-## in Flue Flight the fire bursts from both heels and the tail and no stream runs; the hair is on the flame shader.
-## Never touches the save.
+## The fire leaves her casting palm (no weapon; the left palm has its own point) through the idle hold and
+## the stream, and that palm is really held out, while its rules still start where they did (the kit's NOZZLE);
+## her magma cracks brighten while it runs and fall back after; in Flue Flight the fire bursts from both heels
+## (their flames stretched by the clip) and the tail, no stream runs and the hand is free; the fire surfaces are
+## on the flame shader. Never touches the save.
 
 const DT := 1.0 / 60.0
-const NEAR := 0.04              # m: FX to her palm
+const NEAR := 0.04              # m: FX to the palm
+const REACH_MIN := 0.3          # m: the braced palm ahead of her feet
 
 var A
 var bad := 0
@@ -24,6 +26,13 @@ func _frame(m: Match, h: Hunter) -> void:
 		sync.set_process(false)
 		sync.call("_process", DT)
 
+## The emission of her magma crack layer now.
+func _emit(h: Hunter) -> float:
+	for x in h.model.get_meta("mats", []):
+		if x is ShaderMaterial and (x as ShaderMaterial).get_shader_parameter("use_emit") == true:
+			return float((x as ShaderMaterial).get_shader_parameter("emit"))
+	return 0.0
+
 func _clips(h: Hunter) -> WardenClips:
 	return h.model.get_node("Warden/Sync").get("clips") as WardenClips
 
@@ -38,6 +47,14 @@ func run(main: Node) -> void:
 	var kit: AshwickKit = P.ak
 	for f in 12:
 		_frame(m, P)
+	var mz := WardenGlb.anchor(P.model, "weapon_muzzle")
+	ok(mz != null, "the casting hand has its fire point")
+	var ml := WardenGlb.anchor(P.model, "weapon_muzzle_l")
+	var at_l := ml.get_parent() as BoneAttachment3D if ml else null
+	var mirrored := mz != null and ml != null and absf(ml.position.length() - mz.position.length()) < 0.01
+	var on_left := at_l != null and at_l.bone_name.ends_with("hand.L")
+	ok(on_left and mirrored, "the left palm has its fire point, mirroring the right palm's")
+	ok(WardenGlb.anchor(P.model, "anchor_tail_tip") != null, "the tail tip has its flame point")
 	var fire := 0
 	for mat in P.model.find_children("*", "MeshInstance3D", true, false):
 		var mesh: Mesh = (mat as MeshInstance3D).mesh
@@ -47,8 +64,9 @@ func run(main: Node) -> void:
 			var sm := (mat as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
 			if sm and sm.shader == WardenGlb.FLAME:
 				fire += 1
-	ok(fire >= 3, "hair is on the flame shader (%d surfaces)" % fire)
-	ok(kit.tip().distance_to(_palm(P)) < NEAR, "at rest the pilot sits in her casting hand")
+	ok(fire >= 1, "the heel jets are on the flame shader (%d surfaces)" % fire)
+	var gm := P.model.get_node("Rig/Torso/Aim/Gun/Muzzle") as Node3D
+	ok(kit.tip().distance_to(gm.global_position) < NEAR, "at rest the fire point sits on her palm")
 	T.teleport(P.pos + Vector3(0, 0, 40.0))
 	A.aim_at(P, P.pos + Vector3(0, 0, 6.0))
 	var worst := 0.0
@@ -57,11 +75,14 @@ func run(main: Node) -> void:
 	var right_sum := 0.0
 	var n := 0
 	var held_w := 0.0
+	var emit0 := _emit(P)
+	var emit_hot := 0.0
 	for f in 60:
 		P.inp["fire"] = true
 		_frame(m, P)
 		held_w = maxf(held_w, _clips(P).up_w + _clips(P).act_w)
-		worst = maxf(worst, kit.tip().distance_to(_palm(P)))
+		emit_hot = maxf(emit_hot, _emit(P))
+		worst = maxf(worst, kit.tip().distance_to(gm.global_position))
 		if f > 30:
 			var loc := P.model.to_local(kit.tip()) * P.model.scale     # (the camera's lean out of it)
 			fwd_sum += -loc.z
@@ -74,16 +95,25 @@ func run(main: Node) -> void:
 		nearest = minf(nearest, ((pt["p"] as Vector3) - kit.tip()).length())
 	ok(nearest < 0.5, "the drawn stream starts at her palm (nearest puff %.2f m)" % nearest)
 	P.inp["fire"] = false
-	ok(held_w >= 1.0, "held LMB plays the stream clip (%.2f)" % held_w)
+	ok(held_w >= 1.0, "held LMB plays the casting clip (%.2f)" % held_w)
 	ok(worst < NEAR, "through the stream the FX stay on her palm (worst %.3f m)" % worst)
-	print("CINDERART palm: fwd %.3f up %.3f right %.3f" % [fwd_sum / n, up_sum / n, right_sum / n])
+	ok(emit_hot > emit0 + 1.0, "the magma cracks brighten while she casts (%.1f to %.1f)" % [emit0, emit_hot])
+	var reach := fwd_sum / maxf(1.0, float(n))
+	print("CINDERART braced palm: fwd %.3f up %.3f right %.3f" % [reach, up_sum / n, right_sum / n])
+	ok(reach > REACH_MIN, "the braced palm reaches %.2f m ahead" % reach)
 	ok(kit.hose.emitted > 0, "the stream ran (%d puffs)" % kit.hose.emitted)
-	for f in 40:
+	for f in 60:
 		_frame(m, P)
+	await main.get_tree().create_timer(AshwickKit.CRACKS_FADE + 0.2).timeout
+	ok(_emit(P) < emit0 + 0.2, "the cracks fall back after (%.1f)" % _emit(P))
 	var jet := kit.jet
 	ok(jet.start(), "Flue Flight lifts off")
+	var spread := 0.0
 	var heels_low := true
 	var tail_behind := true
+	var tail_d := 9.0
+	var jet_y := 0.0
+	var stowed := true
 	var puffs := kit.hose.emitted
 	var fr := 0
 	while jet.running() and fr < 200:
@@ -92,15 +122,24 @@ func run(main: Node) -> void:
 		if fr < 30:
 			continue
 		var hv := HeroVfx.of(m)
+		var heels := [hv.anchor_pos(P, "heel_l"), hv.anchor_pos(P, "heel_r")]
 		var fwd := Vector3(P.aim_dir().x, 0, P.aim_dir().y)
-		for side in ["heel_l", "heel_r"]:
-			heels_low = heels_low and hv.anchor_pos(P, side).y - P.pos.y < 0.3
-		tail_behind = tail_behind and (hv.anchor_pos(P, "tail") - P.pos).dot(fwd) < -0.2
-	ok(heels_low, "the lift burns from both heels (content/vfx anchors heel_l/heel_r at her feet)")
-	ok(tail_behind, "the tail's fire burns behind her")
+		for q in heels:
+			heels_low = heels_low and (q as Vector3).y - P.pos.y < 0.3
+		spread = maxf(spread, (heels[0] as Vector3).distance_to(heels[1]))
+		tail_d = minf(tail_d, -(hv.anchor_pos(P, "tail") - P.pos).dot(fwd))
+		tail_behind = tail_behind and (hv.anchor_pos(P, "tail") - P.pos).dot(fwd) < -0.1   # (v2 tail curls)
+		var sk := P.model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+		var bi := sk.find_bone("jet.0")
+		jet_y = maxf(jet_y, sk.get_bone_pose_scale(bi).y)
+		if kit.nozzle().distance_to(P.pos + fwd * 1.0) < 0.2:
+			stowed = false
+	ok(spread > 0.06, "two jets, one on each heel (%.2f m apart)" % spread)
+	ok(heels_low, "the lift burns from her heels (at her feet)")
+	ok(tail_behind, "the tail's fire burns behind her (at least %.2f m)" % tail_d)
+	ok(jet_y > 2.0, "the clip stretches the heels' flames in flight (x%.1f)" % jet_y)
 	ok(kit.hose.emitted == puffs, "no stream of fire runs in flight")
+	ok(stowed, "the fire is off her hand in flight")
 	print("CINDERART_DONE fails=%d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-func _palm(P: Hunter) -> Vector3:
-	return P.anim.hand_r.global_position + Vector3(P.aim_dir().x, 0, P.aim_dir().y) * AshwickKit.PALM_AHEAD

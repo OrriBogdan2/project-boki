@@ -1,4 +1,4 @@
-# Barnacle Knight
+# The Barnacle Knight
 
 A heavy hammer-and-shield fighter. Blocks with his aegis to build Guard, then slams people into walls
 and into each other. Plants his hammer where the fight is and heals the squad there.
@@ -9,7 +9,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 |  |  |
 |---|---|
 | Class title | the Barnacle Knight |
-| Base character | Mossy, male |
+| Base character | Albert, male |
 | Personality | A ferryman who carried refugees across the ice the night of the Hollowing and sank his own ship so they could reach shore. The sea remade him: his hull became his armour, his brass diving helmet never comes off, and the ship's compass is set in his chest, with the sea's cyan light glowing between the hull planks. He doesn't remember his old name, only the children's faces. The teddy bear belonged to the last child he saved. |
 
 <!-- /gen:profile -->

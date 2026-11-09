@@ -13,6 +13,7 @@ const NET_EVERY := 3            # carpet pieces between two rings sent to other 
 const STEER_LEAD := 1.0         # m the heading lane runs past where the flight will end
 const LAVA_DY := 1.6            # m above the carpet a body still stands in it
 const FOOTING := 0.05           # s: the low flight counts as footing for a jump (Hunter.coyote) while it runs
+const ROAR_EVERY := 0.45        # s between the roars of the heel and tail fire
 
 var k: AshwickKit
 var h: Hunter
@@ -21,6 +22,7 @@ var flight := {}                # hold: the flight under way {t, dir, speed, las
 var trail: Array = []           # carpet pieces: {a, b, until}
 var tick_acc := 0.0
 var laid := 0
+var last_roar := -9.0           # when the flight last roared from her heels and tail
 var flights := 0                # (tests)
 var locked := 0                 # (tests) presses the flight swallowed
 var landings := 0
@@ -261,14 +263,18 @@ func _lava_at(f: Ent):
 	return null
 
 # ------------------------------------------------------------------ looks
-## A red-orange wall of flame about 1.2 bh round her feet, a scorch, embers and the roar of the heel and tail fire
+## A red-orange wall of flame about 1.2 bh round her feet, a scorch, embers and the roar of the heel jets
 ## (content/vfx "liftoff").
 func _liftoff_fx() -> void:
 	k.vfx("liftoff", k.ground(h.pos), null, {"r": float(xd()["burst_r"])})
 	m.sfx("lw_jet", h.pos, -1.0, 1.0)
 
-## The flight's lift: fire bursting from her heels and her tail, blown down behind her, and its smoke
-## (content/vfx "jets", held while she flies; owner 2026-11-07, no tank).
+## The flight's lift: fire bursting from both heels and her tail, blown back and down, and its smoke
+## (content/vfx "jets": the heel_l/heel_r/tail anchors are where it burns), with a roar now and then.
 func _jet_fx() -> void:
-	if k.tells_visible():
-		HeroVfx.of(m).hold(h, "jets")
+	if not k.tells_visible():
+		return
+	HeroVfx.of(m).hold(h, "jets")
+	if m.time - last_roar >= ROAR_EVERY:
+		last_roar = m.time
+		m.sfx("lw_jet", h.pos, -6.0, 1.1)

@@ -8,11 +8,6 @@ func press_at(P: Hunter, at: Vector3) -> void:
 	P.inp["fire"] = true
 	aim_at(P, at)
 
-## Holds LMB on `at` with Focus kept empty (no full-Focus draw).
-func press_dry(P: Hunter, K: ArcherKit, at: Vector3) -> void:
-	K.res = 0.0
-	press_at(P, at)
-
 ## Holds RMB with the cursor on `at`.
 func rmb_at(P: Hunter, at: Vector3) -> void:
 	P.inp["sec_hold"] = true
@@ -85,7 +80,7 @@ func no_vee(m: Match) -> bool:
 func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var clean := true
 	ready_bow(P)
-	var aim := press_dry.bind(P, K, T.pos)
+	var aim := press_at.bind(P, T.pos)
 	for i in 100:
 		aim.call()
 		m.step(DT)
@@ -169,7 +164,6 @@ func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void
 	var t := 0.0
 	while t < 5.0:
 		aim.call()
-		K.res = 0.0
 		m.step(DT)
 		t += DT
 		early += arrows(m, P)
@@ -181,29 +175,8 @@ func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void
 	ok("pin early release: letting go looses exactly one arrow (an overdrawn one)",
 		arrows(m, P) == 1 and K.draw.last_kind == "over", "arrows %d kind %s" % [arrows(m, P), K.draw.last_kind])
 	step(m, 1.0)
-	# audit (Nov 3): a full Focus no longer skips the draw: the stages run as always and it is spent on the arrow
-	ready_bow(P)
-	K.res = K.res_max()
-	early = 0
-	t = 0.0
-	while t < 0.8:
-		aim.call()
-		m.step(DT)
-		t += DT
-		early += arrows(m, P)
-	ok("pin early release: with full Focus the draw still runs its stages (no instant Supercharged)",
-		early == 0 and P.draw_t > 0.6 and P.draw_t < 1.0 and K.full_ready(),
-		"arrows %d draw_t %.2f" % [early, P.draw_t])
-	P.inp["fire"] = false
-	m.step(DT)
-	m.step(DT)
-	ok("pin early release: the arrow spends the Focus (an Empowered one, armed for a Deadeye)",
-		arrows(m, P) == 1 and K.draw.last_kind == "arrow" and K.res < 10.0 and K.loosed > 0.0,
-		"arrows %d kind %s focus %.0f" % [arrows(m, P), K.draw.last_kind, K.res])
-	step(m, 1.0)
 	# a cooldown running mid-draw never looses it
 	ready_bow(P)
-	K.res = 0.0
 	step(m, 0.3, aim)
 	P.fire_cd = 0.4
 	early = 0
@@ -219,7 +192,7 @@ func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void
 	P.inp["fire"] = false
 	step(m, 1.0)
 	ready_bow(P)
-	var dry := press_dry.bind(P, K, T.pos)
+	var dry := press_at.bind(P, T.pos)
 	step(m, 0.3, dry)
 	var drawn := P.draw_t
 	P.dashes = P.max_dashes()
@@ -241,9 +214,8 @@ func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void
 ## #5: the readout sits on the aim line.
 func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	ready_bow(P)
-	K.res = 0.0
 	T.teleport(P.pos + Vector3(7.0, 0, 3.0))
-	var aim := press_dry.bind(P, K, T.pos)
+	var aim := press_at.bind(P, T.pos)
 	step(m, 0.3, aim)
 	var d := P.aim_dir()
 	var s := K.draw.stage_t()
@@ -340,8 +312,7 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 ## #5: the nock on the press, and one steady pull with no pose pop.
 func _pin_draw_pose(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	ready_bow(P)
-	K.res = 0.0
-	var aim := press_dry.bind(P, K, T.pos)
+	var aim := press_at.bind(P, T.pos)
 	step(m, 0.06, aim)
 	var nock := HunterAnim.km_sample("arc_draw", 0.05)
 	ok("pin draw: the arrow nocks within 0.05 s of the press (arc_draw, the string hand on the string)",
@@ -394,7 +365,6 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	T.teleport(home + Vector3(7.0, 0, 0))
 	K.ch_rmb = 2.0
 	K.cd["rmb"] = 0.0
-	K.res = 0.0
 	_wall_at(m, T.pos, lv, 2)
 	aim_at(P, T.pos)
 	var kicks0 := K.heavy_kicks
@@ -707,7 +677,6 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		and ["ground", "air", "jump"].all(func(mv): return DashFlow.hold_row_of("archer", "lmb", mv)["mode"] == "keep"))
 	step(m, 1.5)
 	ready_bow(P)
-	K.res = 0.0
 	P.dashes = P.max_dashes()
 	aim_at(P, T.pos)
 	var loosed0 := K.draw.loosed_at

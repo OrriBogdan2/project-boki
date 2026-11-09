@@ -7,14 +7,14 @@ extends RefCounted
 ##   3. talking: the talk box with his portrait and name, one line at a time; you stand still; he points at the
 ##      stall and the camera looks there; after the last line he is met (no name tag) and the axe is next
 ##   4. the second Mask: no second Mask on a fresh save after the first expedition; not offered before the house
-##      is down, then a "!" and "By the way... I see you found a Vex Mask"; the pick shows exactly Kael, Pip and
-##      Cinder, each with portrait, name and title and a role, and one clip (the one in focus); taking Pip opens
+##      is down, then a "!" and "By the way... I see you found a Vex Relic"; the pick shows exactly Kael, Cinder and
+##      Meeko, each with portrait, name and title and a role, and one clip (the one in focus); taking Meeko opens
 ##      her (and nothing else) and the short Mask moment plays; no reveal pops up after it
 ##   5. "Not now" keeps the offer; a save that already owns a second Mask is never offered one
 ## With --shots-dir=<dir> (a renderer): hob_1_calls_you_over, hob_2_camera_intro, hob_3_dialogue_box,
 ## hob_4_points_at_stall, hob_5_offer_line, hob_6_three_masks, hob_7_mask_moment, hob_8_mask_name.
 
-const SECOND := ["juggernaut", "tender", "ashwick"]
+const SECOND := ["juggernaut", "ashwick", "tender"]    # owner order, class_unlock.json second_picks
 
 var main: Node
 var bad := 0
@@ -147,7 +147,7 @@ func _offer() -> void:
 	hob.talk()
 	await _frames(2)
 	var box: TalkBox = hob.chat.box
-	ok(box.text.text == "By the way... I see you found a Vex Mask.", "\"%s\"" % box.text.text)
+	ok(box.text.text == "By the way... I see you found a Vex Relic.", "\"%s\"" % box.text.text)
 	box.advance()
 	box.advance()
 	await _frames(2)
@@ -160,7 +160,7 @@ func _offer() -> void:
 	var cards: Array = box.find_children("*", "PanelContainer", true, false).filter(
 			func(c): return c.has_meta("mask_card"))
 	var ids: Array = cards.map(func(c): return String(c.get_meta("mask_card")))
-	ok(offer != null and ids == SECOND, "the offer shows exactly Kael, Pip and Cinder (%s)" % str(ids))
+	ok(offer != null and ids == SECOND, "the offer shows exactly Kael, Cinder and Meeko (%s)" % str(ids))
 	var full := true
 	var roles := true
 	for c in cards:
@@ -172,11 +172,11 @@ func _offer() -> void:
 		roles = roles and not role.is_empty() and String((role[0] as Label).text).length() > 10
 	ok(full, "each with its portrait, name and title")
 	ok(roles, "and a one-line role")
-	offer.focus(1)
+	offer.focus(2)
 	await _frames(2)
 	var clips := box.find_children("*", "AbilityClip", true, false).filter(
 			func(c): return not c.is_queued_for_deletion())
-	ok(clips.size() == 1 and (clips[0] as AbilityClip).id == "tender", "one clip plays: the Mask in focus (Pip)")
+	ok(clips.size() == 1 and (clips[0] as AbilityClip).id == "tender", "one clip plays: the Relic in focus (Meeko)")
 	var marker_off: bool = not is_instance_valid(home.guide.marker) or not home.guide.marker.visible
 	ok(not home.guide.tracker.visible and marker_off and not home.guide.hint_box.visible
 			and hob.node.mark.modulate.a == 0.0, "the Goals card, the goal line and the world prompts step aside")
@@ -187,7 +187,7 @@ func _offer() -> void:
 	await _shot("hob_6_three_masks", 1.6)
 	offer.pick("tender")
 	ok(ClassUnlock.open_ids() == ["gunslinger", "tender"] and not ClassUnlock.second_pending(),
-			"taking Pip opens her and nothing else (%s)" % str(ClassUnlock.open_ids()))
+			"taking Meeko opens her and nothing else (%s)" % str(ClassUnlock.open_ids()))
 	box.advance()
 	box.advance()
 	await _frames(3)

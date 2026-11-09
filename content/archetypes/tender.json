@@ -4,6 +4,11 @@
 	"base_name": "Meeko",
 	"gender": "female",
 	"personality": "A fox-kit who kept the hearth of a Boki shelter alive through the night everything broke. The fire grew into a tiny sun that follows her, and a shy raincloud, the storm that tried to drown the hearth, came along too.\nShe heals through the two of them, and keeps them safe in a little glass globe.",
+	"barks": {
+		"dark": ["It's so dark in here... stay close, okay?", "I'm not scared. My knees just shake sometimes.", "Don't look at the shadows. Look at me."],
+		"brave": ["I've got you. Hold on to me.", "Dark or not, I'm coming!", "Nobody gets left in the dark. Not while I'm here."],
+		"magic": ["Shine for us, okay? Just a little.", "Oh, you're scared too? Then we're brave together.", "I used to be so small. Look at me now!"]
+	},
 	"role": "Tender",
 	"weight": "medium",
 	"plate_offset": 1.85,
@@ -27,7 +32,7 @@
 		"rmb": "Burrseed: a 1s wind-up, then the seed flies at the cursor; it sticks to a foe and roots them 0.7s later.",
 		"e": "Hearthlight: a healing ring on you; press again to throw it to the cursor.",
 		"dash": "Relay Step: a quick hop where you move; in the air, a long floaty glide.",
-		"passive": "Carrier: run into a downed teammate to carry up to 2 behind a shield.",
+		"passive": "Carrier: run into a downed teammate to carry up to 2; a hit or a stun drops them.",
 		"weapons": {
 			"lantern_crook": "Hold to push embers from alternating hands that fly past the cursor; each hit on a foe adds Kindle."
 		},
@@ -50,9 +55,7 @@
 	},
 	"passive": {
 		"name": "Carrier",
-		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Carrier shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If the shield breaks (too much damage) or you're stunned, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
-		"shield": 40.0,
-		"shield_lv": 6.0,
+		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
 		"max": 2,
 		"pick_r": 1.1,
 		"pick_speed": 0.6,

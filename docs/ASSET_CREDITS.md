@@ -61,11 +61,9 @@ centroid).
 abyss, ruins). No recorded or downloaded audio is used. `tools/sfx_stats.py` measures the
 sound effects (peak, loudness, attack, onset, spectral centroid).
 
-The rigged Boki (`art/kin/cindle/`, `puddlet/`, `burrlet/`, `zephyrak/`, `pebbit/`, `cairnback/`, `wisplet/`, `zapple/`, `hivara/`) are ours: built by script in Blender
-(`tools/boki/`). Their concepts are our own image-gen (Meshy image-to-image, not shipped). No outside asset is used.
 Hob Brackenridge, the farm's builder (`scripts/home/hob_model.gd`), is our own model built from shapes in
 code; his dialogue portrait is rendered from it at runtime. No outside character model is used yet (see
 docs/DEBT.md for the planned CC0 swap).
 
-The rigged Boki (`art/kin/cindle/`, `puddlet/`, `burrlet/`) are ours: built by script in Blender (`tools/boki/`). Their
-concepts are our own image-gen (Meshy image-to-image, not shipped). No outside asset is used.
+The rigged Boki (`art/kin/cindle/`, `puddlet/`, `burrlet/`, `zephyrak/`, `pebbit/`, `cairnback/`, `wisplet/`, `zapple/`, `hivara/`) are ours: built by script in Blender
+(`tools/boki/`). Their concepts are our own image-gen (Meshy image-to-image, not shipped). No outside asset is used.

@@ -63,7 +63,8 @@ func _trace(m: Match, home: Vector3, slot: String, kin_ref: Kin, species: String
 	if hunter.kin:
 		kin_ref.species = species
 		kin_ref.ks = KinLib.kin(species)
-		kin_ref.teleport(home + Vector3(-1.5, 0, 1.0))
+	# far off in every trial, bonded or not, so its body never bumps the hero (a rider acts from anywhere)
+	kin_ref.teleport(home + Vector3(-60, 0, -60))
 	hunter.apply_kin_bonus()
 	hunter.teleport(home)
 	hunter.vel = Vector3.ZERO
@@ -71,6 +72,10 @@ func _trace(m: Match, home: Vector3, slot: String, kin_ref: Kin, species: String
 	hunter.inp["aim"] = home + Vector3(8, 0.9, 0)
 	for i in 40:
 		m.step(Match.DT)
+	# training keeps spawning monsters: one on his spot stops the Lunge on its first step (a flaky baseline)
+	for mob in m.mobs:
+		mob.queue_free()
+	m.mobs.clear()
 	hunter.teleport(home)
 	hunter.vel = Vector3.ZERO
 	hunter.dashes = hunter.max_dashes()
@@ -92,6 +97,7 @@ func _trace(m: Match, home: Vector3, slot: String, kin_ref: Kin, species: String
 		if i == held and slot == "rmb":
 			hunter.inp["sec"] = false
 			hunter.inp["sec_hold"] = false
+		kin_ref.teleport(home + Vector3(-60, 0, -60))      # held off: its leash would warp it back into him
 		m.step(Match.DT)
 		out.append({"x": hunter.pos.x - home.x, "z": hunter.pos.z - home.z, "move": hunter.ak.anim_id,
 			"roll": hunter.roll_t > 0.0, "inv": hunter.inv_t > 0.0})

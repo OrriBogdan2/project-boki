@@ -217,9 +217,12 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 		"passive":
 			var rd: Dictionary = d.get("resource", {})
 			out.merge({"name": String(d["passive"]["name"]), "icon": String({"thief": "satchel", "archer": "scanner", "mage": "blaze_mantle", "gunslinger": "barrage", "juggernaut": "haymaker", "bulwark": "fortify"}.get(a, "burst")), "col": Color(String(rd.get("col", "#ffffff"))),
-				"tag": "no key · builds as you fight", "line": String(cd.get("passive", ""))}, true)
+				"tag": "no key · always on" if String(rd.get("kind", "")) == "none" else "no key · builds as you fight", "line": String(cd.get("passive", ""))}, true)
 			var tl: Dictionary = d.get("tells", {})
-			out["detail"] = [["", String(d["passive"]["desc"])], ["What enemies see", "%s; full: %s." % [String(tl.get("half", "")), String(tl.get("full", ""))]]]
+			out["detail"] = [["", String(d["passive"]["desc"])]]
+			if tl.has("half"):
+				var seen := "%s; full: %s." % [String(tl["half"]), String(tl.get("full", ""))]
+				out["detail"].append(["What enemies see", seen])
 			if d.has("jackpot"):
 				out["detail"].append([String(d["jackpot"]["name"]), String(d["jackpot"]["desc"])])
 		"lmb":

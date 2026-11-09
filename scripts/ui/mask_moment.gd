@@ -22,7 +22,7 @@ const BOKI_INTRO := Vector3(-1.25, 0.0, 1.45)     # your Boki at your side while
 const DRIFT_S := 3.4                             # s the Relic takes to reach you
 const DIM := 0.45                                # x the island's lights while the Relic comes
 const CLIP := Vector2(250, 140)                  # px: each ability clip in the intro
-const TEXT := "This Relic is the mask of a fallen Hero. Put it on, and you fight as that Hunter."
+const TEXT := "This Relic is the mask of a fallen Hunter. Put it on, and their soul becomes yours."
 const BUTTON := "Put on the Relic"
 const GO := "Into the portal"
 

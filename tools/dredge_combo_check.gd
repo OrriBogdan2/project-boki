@@ -411,7 +411,7 @@ func _all() -> void:
 		KitStatus.grounded(P) and T.stun_t > 0.0 and K.fx.shown("chain%d" % P.get_instance_id()),
 		"gnd %s stun %.2f" % [KitStatus.grounded(P), T.stun_t]
 	)
-	ok("reel: the braided rope is drawn (through rocks)", K.fx.rope_shown("rope%d" % P.get_instance_id()))
+	ok("reel: the stretched arm is drawn (through rocks)", K.fx.arm_shown("arm%d" % P.get_instance_id()))
 	# --- during the reel: RMB, E and the gun are locked, the barge works
 	var ch0 := K.ch_rmb
 	K.ch_rmb = 1.0
@@ -768,6 +768,11 @@ func _all() -> void:
 	P.ex_cd = 0.0
 	ak.aim_at(P, home + Vector3(9.0, 0, 0))
 	P.ak.on_dash(true)
+	ok(
+		"barge: the air pounce is 3.2 m x 1.35 x the dash feel once (3.7 m), same time as the ground",
+		absf(P.roll_t - dash_t) < 0.005 and absf(P.roll_speed * P.roll_t - one * 1.35) < 0.05,
+		"%.2f m in %.2fs, ground %.2f m in %.2fs" % [P.roll_speed * P.roll_t, P.roll_t, one, dash_t]
+	)
 	ak.step(m, dash_t + 0.02)
 	var air_quick := P.pos.x - home.x
 	ak.step(m, 0.3)

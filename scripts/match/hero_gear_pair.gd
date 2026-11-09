@@ -242,7 +242,7 @@ static func _ashwick(c: Dictionary) -> void:
 static func _undersuit(c: Dictionary) -> void:
 	HeroGear._undersuit(c)
 
-## The Flame Queen carries no weapon: the fire comes from her hands (docs/heroes/ashwick.md), so there is no gun
+## Cinder carries no weapon: the fire comes from her hands (docs/heroes/ashwick.md), so there is no gun
 ## to build (no barrel, canister or hose). The weapon id stays "flamethrower" for the kit and its stats.
 static func flamer(_gun: Node3D, _m_gun: Material, _m_dark: Material, _m_acc: Material) -> void:
 	pass

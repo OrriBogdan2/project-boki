@@ -63,11 +63,11 @@ func _shot_reach(m: Match, P: Hunter) -> float:
 	return -1.0
 
 ## Draws the bow for `t` seconds (aim kept on `at`), then lets go; returns how far the arrow will fly.
-func _loose_after(m: Match, P: Hunter, K: ArcherKit, t: float, at: Vector3) -> float:
+func _loose_after(m: Match, P: Hunter, t: float, at: Vector3) -> float:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
 	P.reload_t = 0.0
-	step(m, t, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, at))
+	step(m, t, func(): P.inp["fire"] = true; aim_at(P, at))
 	P.inp["fire"] = false
 	m.step(DT)
 	m.step(DT)
@@ -92,9 +92,9 @@ func _archer_combos() -> void:
 		"%.2f %.2f %.2f" % [s1, s2, K.draw.over_t()]
 	)
 	# the draw: its pose, the filling line, the resting aim line
-	step(m, 0.2, func(): K.res = 0.0; aim_at(P, T.pos))
+	step(m, 0.2, func(): aim_at(P, T.pos))
 	ok("pin reticle: a faint aim line to the cursor at rest", AimKit.shown(P, "draw_rest"))
-	step(m, 0.3, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	step(m, 0.3, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	var ve := AimKit.entry(P, "draw")
 	ok("pin anim: drawing holds arc_draw", K.anim_id == "arc_draw", K.anim_id)
 	var fe := AimKit.entry(P, "draw_fill")
@@ -111,7 +111,7 @@ func _archer_combos() -> void:
 		float(AimKit.reticle(P).get("charge", 0.0)) < 0.0 and not K.fx.bow_glint.visible,
 		str(AimKit.reticle(P))
 	)
-	step(m, 1.08, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	step(m, 1.08, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	var le := AimKit.entry(P, "draw")
 	ok(
 		"pin reticle: Supercharged = one thick line out to max range (16m), the foe under it ringed",
@@ -137,7 +137,7 @@ func _archer_combos() -> void:
 	T.teleport(home + Vector3(0, 0, 9.0))
 	T2.teleport(home + Vector3(0, 0, -9.0))
 	var cur := home + Vector3(6.0, 0, 0)
-	var e1 := _loose_after(m, P, K, 0.85, cur)
+	var e1 := _loose_after(m, P, 0.85, cur)
 	ok(
 		"pin aim: an Empowered arrow lands at the cursor (6m)",
 		absf(e1 - 6.0) < 0.9 and K.draw.last_kind == "arrow",
@@ -151,14 +151,14 @@ func _archer_combos() -> void:
 		K.fx.planted > pl0,
 		"planted %d" % (K.fx.planted - pl0)
 	)
-	var e2 := _loose_after(m, P, K, 1.3, cur)
+	var e2 := _loose_after(m, P, 1.3, cur)
 	ok(
 		"pin aim: a Supercharged arrow flies past the cursor to 16m",
 		e2 >= 15.0 and K.draw.last_kind == "super",
 		"reach %.1f kind %s" % [e2, K.draw.last_kind]
 	)
 	step(m, 0.6)
-	var e3 := _loose_after(m, P, K, 0.2, home + Vector3(4.0, 0, 0))
+	var e3 := _loose_after(m, P, 0.2, home + Vector3(4.0, 0, 0))
 	ok(
 		"pin aim: a tap shot lands at the cursor (4m)",
 		absf(e3 - 4.0) < 0.9 and K.draw.last_kind == "tap",
@@ -174,13 +174,13 @@ func _archer_combos() -> void:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
 	P.reload_t = 0.0
-	step(m, 1.8, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	step(m, 1.8, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok("pin anim: overdrawn, the draw arm shakes (arc_over)", K.anim_id == "arc_over", K.anim_id)
 	var oe := AimKit.entry(P, "draw")
 	ok("pin reticle: overdrawn dims the line to a thin pale one and drops the circle",
 		float(oe.get("alpha", 1.0)) < 0.6 and float(oe.get("lw", 1.0)) < 0.05 and not AimKit.shown(P, "draw_mark"),
 		"alpha %s lw %s" % [str(oe.get("alpha")), str(oe.get("lw"))])
-	_loose_after(m, P, K, 0.05, T.pos)
+	_loose_after(m, P, 0.05, T.pos)
 	ok("pin anim: an overdrawn release droops (arc_over_loose)", K.anim_id == "arc_over_loose", K.anim_id)
 	step(m, 0.4)
 	ok(
@@ -191,7 +191,7 @@ func _archer_combos() -> void:
 	# perfect release at stage 1: the burst at the bow, no extra damage, and the next draw reaches Empowered 1.6x faster
 	fresh(T)
 	var pf0 := K.perfects
-	_loose_after(m, P, K, 0.63, T.pos)
+	_loose_after(m, P, 0.63, T.pos)
 	ok("pin anim: a perfect release plays arc_perfect", K.anim_id == "arc_perfect", K.anim_id)
 	step(m, 0.4)
 	ok(
@@ -202,7 +202,7 @@ func _archer_combos() -> void:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
 	P.reload_t = 0.0
-	step(m, 0.42, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	step(m, 0.42, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok(
 		"combo pin: perfect > the next draw reaches Empowered in ~0.38s",
 		P.draw_t >= s1 and K.draw.quick_used,
@@ -213,22 +213,20 @@ func _archer_combos() -> void:
 		absf(K.move_k() * 0.7 - 0.85) < 0.01,
 		"move_k %.2f" % K.move_k()
 	)
-	step(m, 0.25, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
+	step(m, 0.25, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	P.inp["fire"] = false
 	step(m, 0.6)
 	ok("pin: a draw without a perfect is back to normal speed", not K.draw.quick, "quick %s" % K.draw.quick)
 	T.teleport(home + Vector3(7.0, 0, 0))
 	T2.teleport(home + Vector3(9.0, 0, 0))
-	# Heavy Shot into a wall: wall hit + 1.2s stun, fills Focus; then the next shot is a Deadeye
+	# Heavy Shot into a wall: wall hit + 1.2s stun; the next arrow is a plain one
 	fresh(T)
 	K.ch_rmb = 2.0
 	K.cd["rmb"] = 0.0
-	K.res = 0.0
 	var wall_pos := T.pos
 	_wall_at(m, T.pos, lv, 2)
 	aim_at(P, T.pos)
 	var pn0 := K.pins
-	var de0 := K.deadeyes
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.6, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos))
@@ -237,6 +235,11 @@ func _archer_combos() -> void:
 		"pin RMB held: the gold V and a gold bar from the bow",
 		not AimKit.shown(P, "rmb_v") and AimKit.shown(P, "rmb_bar") and K.anim_id == "arc_heavy_wind",
 		"v %s bar %s anim %s" % [AimKit.shown(P, "rmb_v"), AimKit.shown(P, "rmb_bar"), K.anim_id]
+	)
+	ok(
+		"pin anim: the Heavy Shot's draw clip runs on the hold's clock (its full-draw key 1.1 lands with full 1.1)",
+		absf((m.time - K.anim_at) - K.rmb_t) < 0.02,
+		"clip %.2f hold %.2f" % [m.time - K.anim_at, K.rmb_t]
 	)
 	step(m, 0.55, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos))
 	var bar1 := float(AimKit.entry(P, "rmb_bar").get("len", 0.0))
@@ -270,7 +273,6 @@ func _archer_combos() -> void:
 		float(K.rmb_def()["hold"]) <= 0.15 and K.rmb_charge_full() > 1.0,
 		"hold %.2f" % float(K.rmb_def()["hold"])
 	)
-	ok("combo archer: wall pin fills Focus", K.full_ready())
 	var dd0 := dmg(T)
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
@@ -280,18 +282,17 @@ func _archer_combos() -> void:
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok(
-		"combo archer: wall pin > shot = Deadeye",
-		K.deadeyes == de0 + 1 and dmg(T) - dd0 >= 18.0,
-		"deadeyes %d dealt %.0f" % [K.deadeyes - de0, dmg(T) - dd0]
+		"combo archer: wall pin > shot is a plain arrow (Focus and Deadeye are cut, not in the source)",
+		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0 and K.anim_id != "pin_deadeye"
+			and not K.has_meter() and K.res == 0.0,
+		"dealt %.0f anim %s res %.0f" % [dmg(T) - dd0, K.anim_id, K.res]
 	)
-	ok("pin anim: the Deadeye payoff plays pin_deadeye", K.anim_id == "pin_deadeye", K.anim_id)
 	# rank 3 (data: Heartpiercer IV): a wall stun gives a dash charge
 	P.slot_lv["sec"] = 3
 	fresh(T)
 	T.teleport(wall_pos)
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
-	K.res = 0.0
 	P.dashes = 0.0
 	aim_at(P, T.pos)
 	hold(m, P, 1.2)
@@ -305,7 +306,6 @@ func _archer_combos() -> void:
 	fresh(T)
 	fresh(T2)
 	K.cd["e"] = 0.0
-	K.res = 0.0
 	P.teleport(home)
 	aim_at(P, home + Vector3(5.0, 0, 0))
 	T.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(45.0)))
@@ -319,7 +319,7 @@ func _archer_combos() -> void:
 		str(AimKit.entry(P, "e").get("radius"))
 	)
 	ok("archer anim: Hail Wall plays arc_hail", K.anim_id == "arc_hail", K.anim_id)
-	step(m, 1.6, func(): K.res = 0.0)
+	step(m, 1.6)
 	ok(
 		"pin E: a foe on the arc 45 degrees off the aim burns, one inside it does not",
 		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and K.fx.panels[0].visible,
@@ -331,7 +331,7 @@ func _archer_combos() -> void:
 	K.cd["rmb"] = 0.0
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	step(m, 0.7, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos); K.res = 0.0)
+	step(m, 0.7, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos))
 	P.inp["sec_hold"] = false
 	m.step(DT)
 	step(m, 0.3)
@@ -343,7 +343,6 @@ func _archer_combos() -> void:
 	step(m, 3.5)
 	# the Heavy Shot is hold only (data: Heartpiercer): one charge, 16 s, a tap looses nothing and costs nothing
 	fresh(T)
-	K.res = 0.0
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	P.teleport(home)
@@ -419,6 +418,13 @@ func _archer_combos() -> void:
 	P.do_dash()
 	step(m, 0.1)
 	ok("pin anim: Spirit Walk's roll plays pin_roll", K.anim_id == "pin_roll", K.anim_id)
+	var roll_t0 := K.anim_at
+	step(m, 0.18, func(): P.inp["move"] = Vector2(1, 0))
+	ok(
+		"pin anim: the roll hands to the crouched walk as the travel ends (roll_t 0.24, footage: no landing beat)",
+		K.anim_id == "pin_walk" and absf(K.anim_at - roll_t0 - 0.24) < 0.03,
+		"%s at +%.2f" % [K.anim_id, K.anim_at - roll_t0]
+	)
 	var in0 := K.spirit.passed
 	var mk := [0.0]
 	step(m, 1.2, func():
@@ -452,13 +458,12 @@ func _archer_combos() -> void:
 		P.pos.x > bx + 1.3 and K.spirit.passed > in0,
 		"x %.1f (rock at %d) inside %d" % [P.pos.x, bx, K.spirit.passed - in0]
 	)
-	# ...and ending inside it puts her back where she went in, for 30 Focus
+	# ...and ending inside it puts her back where she went in (no cost: there is no Focus)
 	K.spirit.end("time")
 	step(m, 0.5)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	P.dashes = P.max_dashes()
-	K.res = 80.0
 	P.inp["move"] = Vector2(1, 0)
 	P.do_dash()
 	step(m, 0.25, func(): P.inp["move"] = Vector2.ZERO)
@@ -466,12 +471,11 @@ func _archer_combos() -> void:
 	P.inp["move"] = Vector2.ZERO
 	step(m, 0.05)
 	var sn0 := K.spirit.snap_backs
-	var f0 := K.res
 	K.spirit.end("time")
 	ok(
-		"combo pin: Spirit Walk ending inside a rock = back to the entry, Focus spent",
-		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx and K.res <= f0 - 29.0,
-		"x %.1f (rock %d, entry %.1f) focus %.0f -> %.0f" % [P.pos.x, bx, K.spirit.entry.x, f0, K.res]
+		"combo pin: Spirit Walk ending inside a rock = back to the entry",
+		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx,
+		"x %.1f (rock %d, entry %.1f)" % [P.pos.x, bx, K.spirit.entry.x]
 	)
 	# Phase Walk crosses a raised-platform wall (data, supervive_kits.md:78): a wall two terraces high and
 	# two tiles thick, west of her, that a plain walk stops at; she walks through at her own floor
@@ -580,7 +584,6 @@ func _archer_combos() -> void:
 	P.vel = Vector3(0, -2, 0)
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
-	K.res = 0.0
 	P.ak.press_rmb()
 	ok("archer RMB air: the press starts a draw, no Plunge", K.rmb_down and P.vel.y < 5.0, "vy %.1f" % P.vel.y)
 	K.rmb_down = false
@@ -590,7 +593,6 @@ func _archer_combos() -> void:
 	fresh(T)
 	K.ch_rmb = 2.0
 	K.cd["rmb"] = 0.0
-	K.res = 0.0
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 3)
 	P.reload_t = 0.0
@@ -618,7 +620,6 @@ func _archer_combos() -> void:
 	K = P.ak
 	K.ch_rmb = 2.0
 	K.cd["rmb"] = 0.0
-	K.res = 0.0
 	aim_at(P, T.pos)
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()

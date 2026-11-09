@@ -14,14 +14,12 @@ const GLIDE_CATCH := 60.0        # the canopy brakes a terminal fall to its sink
 const JUMP_V := 6.8
 const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
-const GROUND_DECEL := 22.2       # [game data] BrakingDecelerationWalking 2220 uu/s^2 (item 150)
-const GROUND_FRICTION := 2.0     # [game data] GroundFriction 1.0 x braking factor 2: a let-go stops in ~0.38 m
-const GROUND_SHED := 110.0       # no keys: speed over a run (a dash, a step, a knock) sheds this fast (kit distances)
+const GROUND_SHED := 110.0       # m/s^2, no keys: speed over a run (kit step, knock) sheds this fast
 const GROUND_OVERSPEED := 30.0   # how fast dash or pad speed bleeds off on the ground
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by HunterMove.air_steer)
 const AIR_DECEL := 9.0           # let go on a ledge rise and you mostly stop
 const AIR_OVERSPEED := 3.0       # but momentum above run speed (a dash, a pad) still carries
-const GLIDE_ACCEL := 26.0        # up to cruise speed (6.5) in ~0.25s (was 10)
+const GLIDE_ACCEL := 16.25       # [game data] GlideTargetXYForce 162,500 / UE's 100 kg: a force, so steering has inertia
 const GLIDE_DECEL := 1.4         # let go of the keys and the glider drifts on, a long soft coast
 const GLIDE_OVERSPEED := 1.1     # extra glide momentum bleeds off slowly: a dash into a glide carries for seconds
 const GLIDE_TURN := 420.0        # deg/s the glider turns at cruise speed (90 degrees in ~0.2s); wider arcs when fast
@@ -51,8 +49,6 @@ const WALL_CATCH_REACH := 0.75   # (movefeel) over the abyss below a lip, a wall
 const ABYSS_GLIDE_ROOM := 1.5    # a glider with heat left (lifting you out) gets this much more room
 const MANTLE_RISE := 14.0        # [footage] a deep mantle returns to the top in ~0.8s
 const EX_DASH_CD := 12.5         # the long dash: in the air, or with the short one on cooldown
-const DASH_CARRY_GROUND := 0.15   # (was 0.35) out of a dash you stop almost dead: snappy, no slide
-const DASH_CARRY_AIR := 0.3      # (was 0.75, which slid you ~15m+ in the air)
 const SPIKE_STUN := 0.7         # [wiki] stun when a spiked glider hits the ground (docs/EXPEDITION_SPEC.md)
 const SPIKE_DMG := 8.0
 const DASH_SPEED := 19.0      # m/s: the base dash (owner: 23 felt too fast); 19 x 0.19s = 3.6m
@@ -62,8 +58,7 @@ const LEDGE_REACH := 2.8
 const LEDGE_CD := 0.45
 const FLOAT_SPEED := 12.0
 const GLIDE_FALL := 1.7
-const GLIDE_SPEED := 6.5       # (movefeel, owner: "feels weaker than SUPERVIVE") between [footage] ~5-5.5 and
-                               # [spec] eyeball 7-10 m/s, leaning to the stronger glide; was 5.0
+const GLIDE_SPEED := 5.0       # [game data] MaxGlide 500 uu/s (item 163: "too fast and controllable"; was 6.5)
 const GLIDE_TIME := 9.0        # (owner: "lasts too long, not punishing enough") was 14s of level glide before the heat ring turns hot
 const GLIDE_DRAG := 1.6         # speed lost per second while gliding (more when going fast)
 const GLIDE_MAX := 15.0
@@ -107,6 +102,9 @@ var coyote := 0.0
 var jump_buf := 0.0
 var fly_t := 0.0
 var mantle_cd := 0.0
+var carry_v := 0.0             # m/s: how fast you were just going (MantleCarry, item 185b)
+var carry_dir := Vector2.ZERO
+var carry_mini := {}           # a mantle's held speed just after the lip (MantleCarry)
 ## The ledge rise (SUPERVIVE's ledge float): {lip, n (into the wall), t, max_t, at, face (start
 ## point), g0 (glide held when it began), downed, win (timing window opened)}. See _ledge_rise.
 var lfloat := {}
@@ -245,11 +243,13 @@ var pack_cap := 6
 var backpack := 0              # the backpack tier worn (Backpacks): 0 is the Pouch everyone has
 var swap_hold := false
 var dash_at := -9.0           # when the last dash started, for perfect dodges
+var jump_at := -9.0           # when you last jumped off the ground (AirLimits: a move from before it is over)
+var launch_at := -1.0         # when the skyship launch started (DropLaunch), -1 once it is over
 var dodged := false        # F has to be let go between weapon swaps
 var lives := 1                # comes back this many times minus one before it's really out
 var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
 var ak: ArchKit = null        # the archetype's kit at run time
-var shot_range_k := 1.0       # the next shot's range (a full Focus: +20%)
+var shot_range_k := 1.0       # the next shot's range (an idle gun's first ember: +40%)
 var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
 var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees, barriers and terrain don't stop you while > 0
@@ -820,6 +820,7 @@ func do_jump() -> void:
 		glide_handoff(roll_dir, roll_speed)         # (movefeel) dash, jump, glide carries the dash
 	if grounded or coyote > 0.0:
 		vel.y = JUMP_V * (float((kin as Kin).ks.mount.get("jump", 1.0)) if mounted() else 1.0)
+		jump_at = m.time
 		grounded = false
 		coyote = 0.0
 		m.sfx("jump", pos, -6.0)
@@ -853,14 +854,10 @@ static func glide_fall(_speed: float) -> float:
 ## over it (a dash, a pad, a knockback) bleed the extra off slowly while still steering. With no keys:
 ## speed over `run` sheds at `shed`, then `friction` (a share of the speed per second) and a constant `decel`
 ## brake the walk, as UE does.
-static func accel2(cur: Vector2, wish: Vector2, accel: float, decel: float, over_decel: float, dt: float,
-		friction := 0.0, shed := 0.0, run := 0.0) -> Vector2:
+static func accel2(cur: Vector2, wish: Vector2, accel: float, decel: float, over_decel: float, dt: float) -> Vector2:
 	var mx := wish.length()
 	if mx < 0.001:
-		var cs0 := cur.length()
-		if shed > 0.0 and cs0 > run + 0.05:
-			return cur * (maxf(run, cs0 - shed * dt) / cs0)
-		return (cur * maxf(0.0, 1.0 - friction * dt)).move_toward(Vector2.ZERO, decel * dt)
+		return cur.move_toward(Vector2.ZERO, decel * dt)
 	var cs := cur.length()
 	if cs > mx:
 		var wd := wish / mx
@@ -884,7 +881,9 @@ static func glide_steer(hv: Vector2, wish: Vector2, gs: float, dt: float) -> Vec
 	if ws < 0.05:
 		# let go: drift on; anything above cruise bleeds a little faster
 		return hv.move_toward(Vector2.ZERO, (GLIDE_DECEL + (GLIDE_OVERSPEED if s > gs else 0.0)) * dt)
-	if s < 0.3:
+	if s <= gs + 0.05:
+		# at or under cruise, the glide force pulls you toward where you steer: turns and reversals take time
+		# (item 163, SUPERVIVE's GlideTargetXYForce), never a snap
 		return hv.move_toward(wish, GLIDE_ACCEL * dt)
 	var d := hv / s
 	var wd := wish / ws
@@ -929,7 +928,8 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float
 
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down and not (ak != null and ak.no_glide())
+		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down \
+		and not (ak != null and ak.no_glide()) and not AirLimits.glide_locked(self)
 
 func _open_glider() -> void:
 	gliding = true
@@ -1142,6 +1142,7 @@ func do_dash() -> void:
 		m.blight.noise(pos, "dash", self)     # a dash is loud enough for the Blight nearby
 	if ak:
 		# the archetype's dash shape: it spends its own charge (or the long air dash) itself
+		ak.dash_press_at = m.time      # its moves from here are the dash's (AirLimits)
 		ak.on_dash(use_ex)
 		return
 	if use_ex:
@@ -1427,10 +1428,6 @@ func fire() -> void:
 		m.sfx("cloak", pos, -8.0)
 	idle_fire = 0.0
 	reveal_t = maxf(reveal_t, 1.2)
-	if float(wpn.get("warmup", 0.0)) > 0.0 and ak and ak.has_method("take_focus_shot") and ak.take_focus_shot():
-		shot_range_k = 1.2          # a full Focus: aimed at once, further
-		_release()
-		return
 	if float(wpn.get("warmup", 0.0)) > 0.0:
 		# the sniper winds up with its laser showing, then fires
 		warm_t = float(wpn["warmup"])
@@ -1533,7 +1530,7 @@ func _lunge(dist: float) -> void:
 	# while you're holding a direction)
 	var d2 := aim_dir()
 	var moving := (inp["move"] as Vector2).length() > 0.1
-	var want := sqrt(2.0 * (GROUND_OVERSPEED if moving else GROUND_DECEL) * dist * k + (base_speed * base_speed if moving else 0.0))
+	var want := sqrt(2.0 * (GROUND_OVERSPEED if moving else GROUND_SHED) * dist * k + (base_speed * base_speed if moving else 0.0))
 	var hv := Vector2(vel.x, vel.z)
 	var along := hv.dot(d2)
 	hv += d2 * (maxf(along, want) - along)
@@ -2018,17 +2015,13 @@ func sim(dt: float) -> void:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
+	AirLimits.gate_drop(self)        # the opening drop: steering only (item 162)
 	KinDowned.commit(self)           # carrying your Boki: Shift or interact puts it down; no jump, glide or firing
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
 	# gloves need no point: Gloves
 	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
 		_gate(gk[0], gk[1], gk[2])
-	if dropping and not grounded and ctrl != "bot":
-		for bk in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "gear1", "gear2"]:
-			if inp.get(bk, false):
-				_break_drop()
-				break
 	if not downed and not dropping and not out:
 		gain_xp(dt * 1.2)       # a slow trickle, so a careful run still levels
 	_tick_base(dt)
@@ -2183,8 +2176,7 @@ func _physics(dt: float) -> void:
 		if not dash_pass.is_empty():
 			_pass_along()
 		if roll_t <= 0.0:
-			# out of a dash you keep some of its speed: a little on the ground, most in the air
-			hv = roll_dir * roll_speed * (DASH_CARRY_GROUND if grounded else DASH_CARRY_AIR)
+			hv = HunterMove.dash_exit(roll_dir * roll_speed, spd)     # no hard stop: the run carries on
 			glide_handoff(roll_dir, roll_speed)     # (movefeel) open the glider now and it keeps the burst
 			_last_burst = {}
 	elif fly_t > 0.0:
@@ -2205,7 +2197,8 @@ func _physics(dt: float) -> void:
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
 			gs = DIVE_SPEED if diving else DROP_SPEED
-			hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)
+			if not DropLaunch.locked(self):
+				hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)     # (the launch flies its arc)
 			if drop_follow != null and m.skydrop:
 				hv = m.skydrop.follow_hv(self, gs)     # in formation: the leader steers
 		# wind roads carry you along (either way), updrafts lift you
@@ -2224,11 +2217,13 @@ func _physics(dt: float) -> void:
 				in_current = true
 				vel.y = move_toward(vel.y, 9.0, 45.0 * dt)     # (movefeel) grabs you harder (was 30: 0.33s to climb)
 	else:
-		# near-instant on the ground; in the air you steer well but momentum carries
-		if grounded:
+		# near-instant on the ground (and in a kit's hover); a jump keeps its run-up
+		if grounded or (ak != null and ak.hovering()):
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
-			hv = accel2(hv, mv * spd, ground_accel * grip, GROUND_DECEL * grip, GROUND_OVERSPEED * grip, dt,
-					GROUND_FRICTION * grip, GROUND_SHED * grip, spd)
+			if (mv * spd).length() >= 0.001:
+				hv = accel2(hv, mv * spd, ground_accel * grip, 0.0, GROUND_OVERSPEED * grip, dt)
+			else:
+				hv = HunterMove.brake(hv, spd, grip, dt)
 		elif glide_off_t < FEATHER_KEEP and not dropping:
 			# (feathering) just after letting go of the glider you keep its speed and steering
 			var gsf := GLIDE_SPEED * (1.0 + gear_stat("glide_speed"))
@@ -2237,6 +2232,7 @@ func _physics(dt: float) -> void:
 			hv = accel2(hv, mv * spd, AIR_ACCEL, AIR_DECEL, AIR_OVERSPEED, dt)
 		else:
 			hv = HunterMove.air_steer(self, hv, mv * spd, dt)     # [game data] low air control: a jump keeps its run-up
+	hv = MantleCarry.step(self, hv, dt)
 	vel.x = hv.x; vel.z = hv.y
 	update_lip()
 	wall_moves.carry(self, mv, dt)
@@ -2503,25 +2499,10 @@ func _deploy() -> void:
 	m.sfx("glide", pos, -2.0)
 	_glider_sfx("open")
 
-## The opening drop ends early when you press an ability, gear or a heal mid-air: the glider folds
-## and you fall free with the speed you had, so you can dive, pull up and drink or cast on the way
-## down. You lose the drop's protection (you can be hit from then on) and land like any other fall.
-func _break_drop() -> void:
-	if not dropping or grounded:
-		return
-	dropping = false
-	diving = false
-	gliding = false
-	glide_fuel = 1.0
-	glide_cd = 0.25
-	_glider_sfx("close")
-
-## Using a heal in the air: out of the drop if you were in it, and the glider folds (it can't be
-## held while you drink; holding glide again opens it after a beat and spills what's left).
+## Using a heal in the air: the glider folds (it can't be held while you drink; holding glide again
+## opens it after a beat and spills what's left). The opening drop never gets here (AirLimits).
 func _fold_for_action() -> void:
-	if dropping:
-		_break_drop()
-	elif gliding:
+	if gliding and not dropping:
 		gliding = false
 		glide_cd = maxf(glide_cd, 0.4)
 		_glider_sfx("close")
@@ -2542,6 +2523,7 @@ var air_t := 0.0                # time since you left the ground
 func _update_glide(dt: float) -> void:
 	air_t = 0.0 if grounded else air_t + dt
 	glide_lift.tick(self, dt)
+	DropLaunch.tick(self)            # the squad launch over: break off, the glider opens (item 163)
 	glide_dive.tick(self, dt)
 	if dropping:
 		# the opening drop: the glider stays open until you land, or until you sink below the islands
@@ -2595,7 +2577,8 @@ func _update_glide(dt: float) -> void:
 			glide_fuel = maxf(0.0, glide_fuel - dt * hk / (glide_max * (1.0 + gear_stat("heat"))))
 		if not dropping:
 			stats["glide_t"] = float(stats.get("glide_t", 0.0)) + dt
-	elif want and can and air_t >= (0.0 if inp.get("glide_btn", false) else GLIDE_ENGAGE) and not gliding:
+	elif want and can and air_t >= (0.0 if inp.get("glide_btn", false) else GLIDE_ENGAGE) \
+			and not AirLimits.glide_locked(self):
 		# hold Space in the air and the glider opens a beat after you leave the ground (the glide
 		# button opens it at once: there's no tap-to-jump to tell apart)
 		gliding = true
@@ -2643,9 +2626,12 @@ func _try_ledge_grab(dt: float) -> void:
 		# (or, over the abyss, thrown into its side: the shove counts as the push)
 		if mv.length() < 0.3:
 			var shoved := over_void() or gliding or glide_off_t < FEATHER_KEEP     # thrown or glided into the face
-			if not shoved or wall_hit_v.length() < 2.0:
+			if shoved and wall_hit_v.length() >= 2.0:
+				mv = wall_hit_v.normalized()
+			elif carry_v >= MantleCarry.PUSH_SPEED:
+				mv = MantleCarry.heading(self, mv)       # flying in with momentum is a push (item 185b)
+			else:
 				return
-			mv = wall_hit_v.normalized()
 		reach = r + 0.4
 	var void_here := over_void()
 	if not grounded and mv.length() > 0.3:
@@ -2684,9 +2670,13 @@ func _try_ledge_grab(dt: float) -> void:
 				continue
 			# (movefeel) over the abyss below a lip, steering mostly along a wall still counts as pushing
 			# into it (up to ~78 degrees off straight in): SUPERVIVE rarely lets a wall-hugger sink under
-			# an island. Elsewhere the ledge rise wants a real push (LRISE_PUSH, ~60 degrees)
-			if not grounded and (toward.length() > 0.01 and toward.normalized().dot(mv.normalized()) < (0.2 if void_here and last_gy - pos.y > 0.3 else LRISE_PUSH)):
-				continue
+			# an island. Elsewhere the ledge rise wants keys or momentum into it, up to ~60 degrees off (MantleCarry)
+			if not grounded and toward.length() > 0.01:
+				if void_here and last_gy - pos.y > 0.3:
+					if toward.normalized().dot(mv.normalized()) < 0.2:
+						continue
+				elif not MantleCarry.pushing(self, toward, mv):
+					continue
 			if not grounded and not void_here:
 				# off the void, only a wall you're heading into and that rises above where you last stood:
 				# hopping down a terrace must not float you back up it
@@ -2710,6 +2700,7 @@ func _try_ledge_grab(dt: float) -> void:
 		"shove": (inp["move"] as Vector2).length() < 0.3,     # thrown into the side with no keys: it carries you over
 		"kb0": kb_t,                                          # (a fresh knock ends the rise; the one that threw you here doesn't)
 		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
+		"v_in": carry_v,                                      # the speed you came in with comes over the top (item 185b)
 		"max_t": clampf((float(best["gz"]) - pos.y) / LRISE_SPEED, 0.1, 0.9) * (1.35 if downed else 1.0) + 0.3}
 	vel.y = maxf(vel.y, LRISE_MIN)
 	grounded = false
@@ -2726,10 +2717,10 @@ func _try_ledge_grab(dt: float) -> void:
 ## and the wall itself (World.occupy) is all that holds you to the face while you push into it.
 ## Over the top you pop up a little toward wherever you're holding. Moving off the face, a dash, a
 ## fresh glide press, a stun or a knock end it. A jump during the rise flings you (_ledge_fling).
+const LRISE_PUSH := MantleCarry.APPROACH_DOT     # home.gd's ledge rise reads this (keys this far into the wall)
 const LRISE_SPEED := 14.0      # [footage] a deep mantle returns to the top in ~0.8s (was MANTLE_RISE)
 const LRISE_MIN := 4.0         # never slower than this near the top
 const LRISE_POP := 2.6         # [est] up speed as you clear the lip with no jump (a ~0.25m pop)
-const LRISE_PUSH := 0.5        # keys at least this far into the wall (dot, ~60 degrees) to start a rise
 const LRISE_OFF := 0.9         # moved this far out from the face: you've let go
 const LRISE_WINDOW := 0.6      # [est] the fling window: the last this-many metres below the top (~0.12s)
 const FLING_HEIGHT := 0.9     # [est] a fling timed in the window peaks this high over the top...
@@ -2768,6 +2759,7 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 			var short := HunterMove.mantle_launch(base_speed) - hv.dot(n)
 			if short > 0.0:
 				hv += n * short
+		hv = MantleCarry.exit(self, hv, n, mv, float(lf.get("v_in", 0.0)))
 		vel.x = hv.x; vel.z = hv.y
 		mantle_cd = 0.3
 		return true
@@ -2794,6 +2786,10 @@ func _face_near(lip: float) -> bool:
 			if Vector2(ex - pos.x, ez - pos.z).length() <= rr:
 				return true
 	return false
+
+func teleport(p: Vector3) -> void:
+	super(p)
+	MantleCarry.forget(self)
 
 ## A jump during a ledge rise: in the window near the top, a strong fling (higher, faster, a whoosh);
 ## earlier, a weaker one. Either way toward the keys you hold (or up and onto the ledge with none).

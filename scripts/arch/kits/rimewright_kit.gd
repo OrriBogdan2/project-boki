@@ -148,10 +148,6 @@ func _tick(dt: float) -> void:
 		if float(e["left"]) <= 0.0 or t == null or t.dead:
 			chill.erase(key)
 			continue
-		var ck := float(d["passive"].get("chill_slow", 0.15))
-		if t.slow_t <= 0.0:
-			t.slow_k = ck
-		t.slow_t = maxf(t.slow_t, 0.25)
 	for key in fan_hits.keys():
 		var e2: Dictionary = fan_hits[key]
 		e2["left"] = float(e2["left"]) - dt
@@ -490,9 +486,11 @@ func _rinkrun_end(into_rime := false) -> void:
 		h.vel.z *= 0.3
 	else:
 		# ended in the air: she keeps the skate's speed the way any air dash does, then the normal fall / glide
-		h.vel.x = h.roll_dir.x * h.roll_speed * Hunter.DASH_CARRY_AIR
-		h.vel.z = h.roll_dir.y * h.roll_speed * Hunter.DASH_CARRY_AIR
+		var keep := HunterMove.dash_exit(h.roll_dir * h.roll_speed, h.base_speed)
+		h.vel.x = keep.x
+		h.vel.z = keep.y
 	play("tm_skate_stop")
+	dash_press_at = m.time           # the stop is the skate's own move: it never holds the glider shut (AirLimits)
 	m.sfx("rime_stop", h.pos, -4.0, 1.0)
 	vfx("skate_stop", null, h.roll_dir)          # a spray of ice off the braced blades, thrown on ahead
 

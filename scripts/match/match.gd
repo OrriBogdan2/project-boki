@@ -1226,7 +1226,9 @@ func _start_drop(h: Hunter, at: Vector3) -> void:
 	h.ai["land"] = at
 
 # ---- the skyship
-const SHIP_Y := 40.0
+const SHIP_Y := 70.0      # item 163: a high start, a long readable glide down
+const RIDE_CAM_DIST := 44.0  # m back from the ship on the ride: the whole ship in frame (item 163)
+const LAUNCH_CAM_DIST := 26.0  # m back from the squad in the launch
 const SHIP_SPEED := 11.0
 var big := false
 var ship := {}
@@ -1294,13 +1296,13 @@ func ship_jump(h: Hunter, force := false) -> void:
 	h.gliding = true
 	h.glide_k = 1.0
 	h.grounded = false
-	h.vel = hs["dir"] * 3.0
+	DropLaunch.start(h, hs["dir"])      # the squad's rocket launch (item 163)
 	if h == player:
 		sfx("whoosh", null, -2.0)
 		if hud and not force:
-			hud.toast("Steer with %s%s%s%s  ·  %s opens your glider early" % [Settings.key_cap("up"), Settings.key_cap("left"), Settings.key_cap("down"), Settings.key_cap("right"), Settings.key_cap("jump")], Color("cfeaff"))
+			hud.toast("Launch!  ·  your glider opens in a moment, then steer your own way down", Color("cfeaff"))
 		elif hud:
-			hud.toast("Gliding in formation  ·  %s to break away" % Settings.key_cap("separate"), Color("cfeaff"))
+			hud.toast("Launching with your squad  ·  %s to break away early" % Settings.key_cap("separate"), Color("cfeaff"))
 	if skydrop and skydrop.is_lead(h):
 		skydrop.on_lead_jump(h)
 
@@ -3648,12 +3650,22 @@ func _process(delta: float) -> void:
 		cam.yaw_to = atan2(-sd.x, -sd.z)
 		cam.chase_to = 1.0
 		cam.top_to = 0.0
-		cam.zoom_to = 56.0 / cam.dist
+		cam.zoom_to = RIDE_CAM_DIST / cam.dist
 		if time < 0.5:
 			# boarding: start already behind the ship rather than swinging through it
 			cam.chase = 1.0; cam.yaw = cam.yaw_to; cam.zoom = cam.zoom_to
-		var fp := ship_pos_of(ps) + sd * 27.0
-		cam.follow(Vector3(fp.x, (SHIP_Y - 11.0) / 0.6, fp.z), delta, false)
+		# item 163: the whole ship in frame (hull, balloon, props) with the squad aboard (follow aims ~4 m under)
+		var fp := ship_pos_of(ps) + sd * 3.0
+		cam.follow(Vector3(fp.x, ship_pos_of(ps).y + 7.0, fp.z), delta, false)
+	elif player and DropLaunch.locked(player):
+		# the launch: chasing the squad down its heading, the ship receding overhead (item 163)
+		var hd := Vector2(player.vel.x, player.vel.z)
+		if hd.length() > 0.5:
+			cam.yaw_to = atan2(-hd.x, -hd.y)
+		cam.chase_to = 1.0
+		cam.top_to = 0.0
+		cam.zoom_to = LAUNCH_CAM_DIST / cam.dist
+		cam.follow(player.pos + Vector3(0, 4.0, 0), delta, false)
 	elif player and not player.out and not player.downed:
 		cam.chase_to = 0.0
 		cam.yaw_to = 0.0
@@ -5798,6 +5810,7 @@ func _net_ev(x, from: String) -> void:
 				"bolt": fx.bolt(Vector3(x[2], x[3], x[4]), Vector3(x[5], x[6], x[7]), Color.html(String(x[8])))
 				"cone": fx.cone(Vector3(x[2], x[3], x[4]), Vector2(x[5], x[6]), 5.0, Color.html(String(x[7])))
 				"hvfx": HeroVfx.of(self).net_in(x)
+				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.downed:

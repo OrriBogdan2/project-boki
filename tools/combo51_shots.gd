@@ -5,8 +5,8 @@ extends "res://tools/breah_shots.gd"
 ## <dir>/captions.txt gets "file: caption" per file.
 ## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Sparkle, Tarek: the audit's strips) or Kael's
 ## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS), Cinder's
-## "item66" (LMB held through Flue Flight) or "queen" (the Flame Queen: LMB from her hands, Flue Flight's fire),
-## or "acc" (Kael's accuracy points as frame runs, acc_<name>_<n>).
+## "item66" (LMB held through Flue Flight) or "queen" (LMB from her hands, Flue Flight's fire), or "acc" (Kael's
+## accuracy points as frame runs, acc_<name>_<n>).
 
 const LONG := 30                # m of flat ground the chain strips need, east of the spot
 const LONG_PARTS := ["chain", "acc"]   # parts shot on an expedition map instead of the Arena
@@ -36,7 +36,7 @@ func _archer() -> void:
 	var K: ArcherKit = P.ak
 	await _reset(9.0)
 	var hold := func(t: float):
-		K.res = 0.0              # (no Focus: a full Focus is drawn at once)
+		K.res = 0.0              # (keep the resource empty)
 		P.inp["fire"] = t < 1.0
 		if t >= 0.4 and t < 0.4 + DT:
 			P.do_dash()
@@ -361,8 +361,9 @@ func _ashwick_item66() -> void:
 	)
 	await _go(3.1, held, marks)
 
-## Cinder, Flame Queen (--combo51-part=queen): the LMB stream from her hands, and Flue Flight with fire from her heels
-## and tail (briefs DECISIONS "Cinder the Flame Queen").
+## Cinder, the Ashen Kiss (--combo51-part=queen): the LMB stream from her hands, and Flue Flight
+## with fire from her heels
+## and tail (briefs DECISIONS "Cinder the Flame Queen", retitled the Ashen Kiss).
 func _ashwick_queen() -> void:
 	var K: AshwickKit = P.ak
 	P.lvl = 6
@@ -372,7 +373,7 @@ func _ashwick_queen() -> void:
 		P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
 	var hmarks := _strip(
 		"queen_lmb_hands_strip",
-		"Cinder the Flame Queen: standing; LMB, the fire starts at her hand; the stream building; full stream;"
+		"Cinder the Ashen Kiss: standing; LMB, the fire starts at her hand; the stream building; full stream;"
 			+ " the stream roaring; let go; the last embers",
 		[0.1, 0.35, 0.6, 0.9, 1.25, 1.5]
 	)
@@ -384,7 +385,7 @@ func _ashwick_queen() -> void:
 			HunterKeys.ult_pressed(P)
 	var umarks := _strip(
 		"queen_flue_flight_strip",
-		"Cinder the Flame Queen, Flue Flight: standing; X, the lift-off, fire from her heels and tail; rising;"
+		"Cinder the Ashen Kiss, Flue Flight: standing; X, the lift-off, fire from her heels and tail; rising;"
 			+ " flying; flying on; the landing",
 		[0.05, 0.3, 0.6, 1.0, 1.6, 2.4]
 	)

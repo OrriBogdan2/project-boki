@@ -33,13 +33,15 @@ const RAM_IMPACT_KEY := 0.36
 const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull_speed, stopping gap m away)
 const TONGUE_EVERY := 2                # flame ticks between two tongues licking off the stream
 const LICK_EVERY := 3                  # flame ticks between two scorches where the stream's end licks the ground
-const CLOAK_POSE_T := 0.25            # s the Furnace Cloak flare holds the flamer up off the aim (as_cloak)
+const CLOAK_POSE_T := 0.25            # s the Furnace Cloak flare holds her hand up off the aim (as_cloak)
+const CRACKS_PEAK := 4.0               # her magma cracks' emission while the fire runs (rest: the toon's 2.2)
+const CRACKS_FADE := 0.5               # s back to rest when it stops
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
-# where the stream starts for the rules, from her feet in the aim pose: fwd, up, right (m)
-const NOZZLE := Vector3(1.3, 0.9, 0.15)
-const NOZZLE_REACH := 2.6                # m: a hand further off than this isn't posed yet: use NOZZLE
-const PALM_AHEAD := 0.12                 # m the fire leaves ahead of the wrist, off the palm
+const NOZZLE := Vector3(1.3, 0.9, 0.15)  # where the rules start the fire, from the feet: fwd, up, right (m)
+const NOZZLE_REACH := 2.6                # m: a palm further off than this isn't posed yet: use NOZZLE
+# m the fire leaves ahead of the wrist, off the palm (a model without a palm point)
+const PALM_AHEAD := 0.12
 
 var chars := {}                 # foe id -> {e, n, t}
 var ignites := {}               # foe id -> {e, lvl, until}
@@ -55,6 +57,7 @@ var ember_t := 0.0
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
+var nozzle_at: Node3D           # the Gun's Muzzle, kept on her casting palm by the model (Sync.apply_blade)
 var lmb_key_was := false         # the LMB key last step: only a press in the flight ticks, not a hold carried in
 var lmb_denied := 0              # (tests) presses refused during Flue Flight
 var jet: AshwickJet             # X, Flue Flight (its flight is a hold: jet.flight)
@@ -90,21 +93,24 @@ func _fwd() -> Vector3:
 	var d2 := h.aim_dir()
 	return Vector3(d2.x, 0.0, d2.y)
 
-## Where the stream starts for the rules: a fixed offset from her feet in the aim pose (--cinder-art-check),
+## Where the stream starts for the rules: a fixed offset from her feet in the aim pose (ahead of her braced palm),
 ## so the stream's reach never depends on the camera's lean of the model.
 func nozzle() -> Vector3:
 	var f := _fwd()
 	return h.pos + f * NOZZLE.x + f.cross(Vector3.UP) * NOZZLE.z + Vector3(0, NOZZLE.y, 0)
 
-## Where the fire leaves her, for what's drawn: her casting (right) hand, a palm's width ahead of the wrist.
-## No posed hand yet: nozzle().
+## Her casting palm, for what's drawn: the Gun's Muzzle when the model puts it on the palm (weapon_muzzle),
+## else a palm's width ahead of her right wrist. No posed hand yet: nozzle().
 func tip() -> Vector3:
-	var hand: Node3D = h.anim.hand_r if h.anim != null else null
-	if hand != null and hand.is_inside_tree():
-		var at := hand.global_position + _fwd() * PALM_AHEAD
-		if at.distance_to(h.pos) < NOZZLE_REACH:
-			return at
-	return nozzle()
+	if nozzle_at == null or not is_instance_valid(nozzle_at):
+		var skinned: bool = h.model != null and WardenGlb.anchor(h.model, "weapon_muzzle") != null
+		nozzle_at = h.model.get_node_or_null("Rig/Torso/Aim/Gun/Muzzle") if skinned else null
+	var at := Vector3.INF
+	if nozzle_at != null and nozzle_at.is_inside_tree():
+		at = nozzle_at.global_position
+	elif h.anim != null and h.anim.hand_r != null and h.anim.hand_r.is_inside_tree():
+		at = h.anim.hand_r.global_position + _fwd() * PALM_AHEAD
+	return at if at.distance_to(h.pos) < NOZZLE_REACH else nozzle()
 
 # ------------------------------------------------------------------ Char and Flashover
 func char_of(f: Ent) -> float:
@@ -358,6 +364,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var tick := float(ld["tick"])
 	while flame_acc >= tick:
 		flame_acc -= tick
+		PipStars.pulse(h, CRACKS_PEAK, CRACKS_FADE)
 		_flame_tick(tick)
 	return true
 
@@ -541,7 +548,7 @@ func _poof(dd: Dictionary, dir: Vector2) -> void:
 	var feel := dash_feel()
 	var air_t := float(dd["air_time"]) * float(feel["time"])
 	var air_dist := float(dd["air_dist"]) * float(feel["dist"])
-	travel(air_dist, air_t, {"invuln": 0.08, "trail": "", "dir": dir})
+	travel(float(dd["air_dist"]), float(dd["air_time"]), {"invuln": 0.08, "trail": "", "dir": dir})
 	h.roll_t = air_t
 	h.roll_speed = air_dist / air_t
 	play("lw_hop")

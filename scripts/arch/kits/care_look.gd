@@ -186,18 +186,6 @@ func _build(kind: String) -> Node3D:
 					_off(Models.part(
 							cr, Models.crystal(0.06, 0.3, 4), ice_mat(Color("bff7ef"), 0.8, 0.3),
 							Vector3(cos(a4) * 0.32, -0.2, sin(a4) * 0.32), Vector3.ONE, Vector3(0, 0, 0.5)))
-		"mote":
-			# Pip's dash: an ember mote with a short warm streak behind it
-			_off(Models.part(n, Models.sphere(0.07, 8), orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO))
-			_off(Models.part(n, Models.sphere(0.14, 8), orb_mat(Color("ff8a3c", 0.4)), Vector3.ZERO))
-			_tail(n, 0.08, 0.7, Color("ffb347", 0.8))
-		"dome":
-			_off(Models.part(
-					n, Models.sphere(1.0, 16), Models.glow_mat(Color("dffcff", 0.5)), Vector3.ZERO,
-					Vector3(1, 0.7, 1)))
-			_off(Models.part(
-					n, Models.sphere(0.94, 16), ice_mat(Color("bff7ef"), 0.25, 0.2), Vector3.ZERO,
-					Vector3(1, 0.7, 1)))
 		"spikes":
 			# Shatter: a starburst of ice spikes thrown up round the foe
 			for i in 12:
