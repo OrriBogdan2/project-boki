@@ -58,7 +58,7 @@ func run(main: Node) -> void:
 		await main.get_tree().process_frame
 		t += DT
 	await main.get_tree().process_frame
-	await _shoot(main, dir, "2v2", base)
+	await _shoot(main, m, dir, "2v2", base)
 	var foes: Array = m.hunters.filter(func(h): return h.team != P.team)
 	(foes[0] as Hunter).stun_t = 30.0
 	(foes[1] as Hunter).burn_t = 30.0
@@ -66,12 +66,13 @@ func run(main: Node) -> void:
 	P.armor = P.max_armor
 	for f in Palette.MODES:
 		Settings.v["cvd_filter"] = f
-		await _shoot(main, dir, f, base)
+		await _shoot(main, m, dir, f, base)
 	print("CLARITYSHOTS ", dir)
 	main.get_tree().quit(0)
 
 ## The whole screen and the crop around the fight, as clarity_<tag>.png and clarity_<tag>_crop.png.
-func _shoot(main: Node, dir: String, tag: String, base: Vector3) -> void:
+func _shoot(main: Node, m: Match, dir: String, tag: String, base: Vector3) -> void:
+	for h in m.hunters: h.render(DT, 1.0)      # rings repaint in this filter's colours
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	var img := main.get_viewport().get_texture().get_image()
