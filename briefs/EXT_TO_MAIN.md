@@ -4632,3 +4632,4 @@ ART glassolotl 8.3 briefs/boki-art/evolutions/Glassolotl.jpg kind=turnaround
 ART pebblamb 8.53 briefs/boki-art/concepts/Pebblamb.jpg kind=concept
 READY ext/anim-arm-sable a176bc764 (job 20261109-065000-a2, rpc1; merge after ext/anim-quality-audit; contains ext/anim-free-arm-relax and ext/anim-time-sable-rebased merged in. Sable vault_r/vault_l: free arm hangs via data free_arm, the other pistol arm keeps the star; vault_r free arm 1.45 -> 0.0 body heights and 0% sideways, any-arm sideways 58% -> 17%, hips-frame audit reading; no Blender here so the glb is not re-keyed. Checks: --anim-audit 12 FAIL 0, --dancer-combo-check 132/0, --clip-check 0, health --strict OK, gen_wiki --check OK. Strip: docs/art/anim_audit/thief_vault.jpg)
 READY ext/loot-open-times a72d6028f (docs/LOOT_FEEL.md: measured loot tempo table; no loot source exists in briefs/footage, so no numbers changed)
+READY ext/arrival-declutter f0414bdea (arrival declutter)
