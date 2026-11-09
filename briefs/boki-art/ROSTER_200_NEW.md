@@ -35,18 +35,18 @@ Every look line is written to drop into the standard sheet prompt (BOKI_50_DESIG
 | 17 | Chiptero > Pickadactyl | 2 | Stone / Stone, Wyrm | y | |
 | 18 | Bullpole > Bullsfrog | 2 | Venom / Venom, Wild | y | |
 | 19 | Rattlebub > Maracoil | 2 | Echo / Echo, Venom | y | |
-| 20 | Narwhirl > Drillwhal | 2 | Frost / Frost, Titan | y | |
+| 20 | Narfoil > Parrywhal | 2 | Frost / Frost, Titan | y | |
 | 21 | Scoopsy > Sundormouse | 2 | Frost / Frost, Wild | y | |
 | 22 | Clinkpede > Chainipede | 2 | Venom / Venom, Swarm | n | |
-| 23 | Ampster > Dynamster | 2 | Storm / Storm, Wild | y | |
-| 24 | Fawngus > Shroomoose | 2 | Spore / Spore, Bloom | n | |
+| 23 | Pinster > Tiltster | 2 | Storm / Storm, Wild | y | |
+| 24 | Fawngus > Hatstag | 2 | Spore / Spore, Bloom | n | |
 | 25 | Pagodito > Pagoguana | 2 | Wyrm / Wyrm, Stone | y | |
 | 26 | Grammite > Dobsabre | 2 | Swarm / Wyrm, Swarm | y | |
-| 27 | Moldhop > Cordydid | 2 | Spore / Spore, Swarm | n | |
+| 27 | Proofhop > Loafhopper | 2 | Spore / Spore, Swarm | n | |
 | 28 | Reelacine (rare) | 1 | Shadow, Wild | n | |
 | 29 | Pavonazar (rare) | 1 | Lunar, Prism | y | male/female looks |
 | 30 | Malletary (rare) | 1 | Wild, Titan | y | |
-| 31 | Ghoulamari (rare) | 1 | Spore, Lunar | y | |
+| 31 | Ghoulamari (rare) | 1 | Lunar, Shadow | y | |
 | 32 | Glacione (rare) | 1 | Frost, Lunar | y | |
 | 33 | Gilabacus (rare) | 1 | Venom, Lunar | y | |
 | 34 | Sarcobra (legendary) | 1 | Wyrm, Shadow | n | |
@@ -67,6 +67,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** spots and marks far targets; the final aims its telescope crest like a cannon.
 
 ### Lensling (1 of 3) · Lunar
+- **Concept:** a baby chameleon curled up like a rolled star chart, peering through one brass lens eye.
+- **Rejected ideas:** gecko + magnifying glass; chameleon + paint swatch book.
 - **Mix:** chameleon + telescope lens
 - **Look:** A bean-shaped baby chameleon lying low on all fours, its tail curled into a tight flat spiral like a rolled star chart. One eye is an oversized stubby brass lens tube, the other a small normal eye; brass ring bands repeat on its toes and tail tip. Pale silver crescent spots dot its back.
 - **Face:** one huge squinting lens eye, one small eye half shut, mouth pursed in concentration.
@@ -75,6 +77,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Scopeleon (2 of 3) · Lunar, Prism
+- **Concept:** a chameleon whose swivelling eyes are two brass spyglasses.
+- **Rejected ideas:** chameleon + periscope (too close to Torpecone); chameleon + kaleidoscope.
 - **Mix:** chameleon + extending spyglass
 - **Look:** A long, flat-sided branch-walker stretched forward on four clamp-shaped gripping feet, body narrow and leaf-thin. Both eyes are now long jointed brass telescope barrels that swivel separately, and the tail is a segmented sliding spyglass that extends and collapses. The lenses at the eye tips throw small rainbow glints.
 - **Face:** two telescope eyes pointing different ways, a thin smug sideways grin.
@@ -83,6 +87,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** sleek
 
 ### Domeleon (3 of 3) · Lunar, Prism
+- **Concept:** a giant chameleon that is a living observatory, its crest a great telescope.
+- **Rejected ideas:** iguana + planetarium projector; chameleon + lighthouse (lamp clash with Lanterloris).
 - **Mix:** chameleon + observatory telescope
 - **Look:** A huge, heavy, low chameleon whose back and flanks are a riveted brass observatory dome split down the middle. Out of the split its casque has grown into one great cannon-like telescope barrel that aims forward over its head; legs are thick pillars ending in splayed three-toed clamp feet, and the tail coils into a heavy brass spiral on the ground. Silver crescent markings circle the dome.
 - **Face:** ancient half-lidded stargazer stare, one eye magnified huge behind a lens.
@@ -94,6 +100,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** sets itself as a trap: an ambush that snaps shut on whoever steps close.
 
 ### Lurklet (1 of 3) · Shadow
+- **Concept:** an anglerfish fry whose mouth is a tiny sprung trap.
+- **Rejected ideas:** anglerfish + street lamp (lamp clash); anglerfish + fishing reel.
 - **Mix:** anglerfish fry + spring trap
 - **Look:** A tiny round black fry that is almost all mouth; its jaw is a little steel spring trap with saw-tooth edges propped wide open. A stubby stalk on its forehead ends in a round trigger-plate lure with a faint violet glow, and it waddles on two stubby fin-feet. Smoky black fin edges.
 - **Face:** tiny bead eyes high on its head, a huge toothy nervous grin.
@@ -102,6 +110,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Snapler (2 of 3) · Shadow, Gravity
+- **Concept:** a flat anglerfish that is a living bear trap.
+- **Rejected ideas:** flounder + mousetrap; anglerfish + jukebox.
 - **Mix:** flat anglerfish + bear trap
 - **Look:** A flat, wide bottom-lurker lying low like a pancake, its whole head a sprung iron jaw trap with interlocking saw teeth and coil-spring hinges at the corners of the mouth. Its pectoral fins are hinged iron trap arms it walks on, and the lure is a dangling iron pressure plate on a thick stalk. Inky edges smoke into violet.
 - **Face:** heavy-lidded patient eyes on top of the head, a flat grumpy mouth line.
@@ -110,6 +120,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** tough
 
 ### Maulangler (3 of 3) · Shadow, Gravity
+- **Concept:** a walking frogfish whose whole body snaps shut like a giant trap.
+- **Rejected ideas:** frogfish + Venus flytrap (too natural); gulper eel + rubbish-truck compactor.
 - **Mix:** walking frogfish + giant clamp trap
 - **Look:** A big hunched angler that walks on four thick hand-like fin-legs. Its entire body is one giant trap that splits sideways along a seam from snout to tail, both halves rimmed with iron fangs and braced by spring-coil ribs. The lure has grown into a heavy hooked iron bait-plate over its head; its tail is a short spiked iron fluke.
 - **Face:** tiny calm eyes on top, an unsettling smile that runs the whole length of the body seam.
@@ -122,6 +134,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** wombats block burrows with their rump; this line rolls for luck crits and shields with its dice rump.
 
 ### Cubbat (1 of 3) · Wild
+- **Concept:** a wombat joey that is a fuzzy die.
+- **Rejected ideas:** wombat + sugar cube; quokka + puzzle cube.
 - **Mix:** wombat joey + die
 - **Look:** A joey that is almost a perfect fuzzy cube with rounded corners, a short stubby leg at each bottom corner. One big black pip sits on its flat rump and smaller pips on its cheeks. Plain brown fur, no effects.
 - **Face:** tiny sleepy eyes, a broad button nose, a content little smile.
@@ -130,6 +144,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Pipwom (2 of 3) · Wild, Stone
+- **Concept:** a wombat whose rump is a six-pip shield die.
+- **Rejected ideas:** wombat + bulldozer blade; wombat + bunker door (Vaultara clash).
 - **Mix:** burrowing wombat + bone die
 - **Look:** A wedge-shaped burrower, front end low and hunched with big spade claws, rising to a huge flat square rump plate of carved ivory-stone with six pips, used as a shield. The same ivory material caps its brow, claw tips and a line of pip dots down its spine.
 - **Face:** stubborn squint, jutting lower jaw, small ears flat back.
@@ -138,6 +154,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** tough
 
 ### Critwom (3 of 3) · Wild, Stone
+- **Concept:** a glyptodont-sized wombat whose shell is a twenty-sided die.
+- **Rejected ideas:** wombat + roulette wheel (wheel trap); wombat + bowling ball (Gravadillo look).
 - **Mix:** glyptodont-like giant wombat + twenty-sided die
 - **Look:** A giant, low armoured wombat whose whole back is a domed twenty-faced ivory die shell, like an extinct glyptodont, each triangular face marked with pips and every corner grown into a short blunt spike. Legs are short pillars with ivory spade nails, and the tail is a stubby club with one pip. It tucks into the shell to roll.
 - **Face:** battle-scarred calm, one eye smaller than the other, a knowing smirk.
@@ -151,6 +169,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Fundamental changes:** the line evolves through deep time: coiled nautilus, straight-shelled orthocone, giant ammonite.
 
 ### Bathilus (1 of 3) · Gravity
+- **Concept:** a nautilus that is a tiny bathysphere.
+- **Rejected ideas:** nautilus + pocket watch; nautilus + spiral staircase.
 - **Mix:** nautilus + bathysphere
 - **Look:** A small round nautilus whose coiled shell is a riveted iron bathysphere with one round porthole where its eye peers out. A short skirt of fat stubby tentacles bobs beneath it. Rust-orange tiger stripes follow the coil.
 - **Face:** one big round eye behind porthole glass, wide-eyed wonder.
@@ -159,6 +179,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Torpecone (2 of 3) · Gravity, Tide
+- **Concept:** an extinct straight-shelled nautiloid that is a living torpedo.
+- **Rejected ideas:** orthocone + traffic cone; orthocone + space rocket.
 - **Mix:** orthocone (extinct straight-shelled nautiloid) + torpedo
 - **Look:** The coil has straightened into a long, pointed, riveted iron cone like a torpedo hull, with stubby fins grown at the tip and a short chunky periscope horn on top. It swims head-first, its thick arms swept back into a tight bundle like a propeller hub; foam-white wave curls run along the stripes.
 - **Face:** narrow focused eyes, a determined set mouth.
@@ -167,6 +189,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** fast
 
 ### Dreadmonite (3 of 3) · Gravity, Tide
+- **Concept:** a giant ammonite that is a battleship.
+- **Rejected ideas:** ammonite + grandfather-clock gears; ammonite + carousel (wheel trap).
 - **Mix:** giant ammonite + dreadnought battleship
 - **Look:** A colossal ammonite crawling low on a mass of thick tentacle arms, its shell re-coiled into a huge ridged iron spiral with deck-plate ribs like a battleship hull. Two pairs of short cannon-barrel ribs jut from the spiral's sides, and a foam-crested wave curl breaks over its brow.
 - **Face:** heavy-lidded admiral stare, stern down-turned mouth among the arms.
@@ -178,6 +202,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** a silent digger that grows into a living siren: stun waves and a rising wail ultimate.
 
 ### Mumblet (1 of 3) · Swarm
+- **Concept:** a cicada nymph with a speaker-grille back that has not made a sound yet.
+- **Rejected ideas:** cicada nymph + alarm clock; mole cricket + megaphone.
 - **Mix:** cicada nymph + speaker grille
 - **Look:** A fat, curled underground nymph with two huge shovel forelegs and a stubby body; its back plates are perforated like a little speaker grille in amber honeycomb holes. It crawls low, head down.
 - **Face:** eyes shut tight, mouth pursed, shy and silent.
@@ -186,6 +212,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Klaxada (2 of 3) · Swarm, Echo
+- **Concept:** a cicada whose abdomen is a klaxon horn.
+- **Rejected ideas:** cicada + stadium horn; cicada + boombox.
 - **Mix:** adult cicada + klaxon horn
 - **Look:** A lean adult cicada perched level on six legs, its abdomen a flared klaxon horn bell that opens backwards. Its wings are swept-back riveted amber grille plates, and sound-ring ridges band its body.
 - **Face:** wide bulging eyes, mouth open mid-shout.
@@ -194,6 +222,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** sleek
 
 ### Sirencada (3 of 3) · Echo, Swarm
+- **Concept:** a giant cicada that is a living air-raid siren.
+- **Rejected ideas:** cicada + jet engine; cicada + foghorn.
 - **Mix:** giant cicada + air-raid siren
 - **Look:** A huge, heavy-bodied cicada whose whole thorax is a slotted siren drum, its four wings fused into thick rotor vanes around it. Its head has become a wide horn mouth and its legs are thick and barbed; ridged sound rings repeat down the abdomen.
 - **Face:** blank red compound eyes, an unnerving calm.
@@ -206,6 +236,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** "promotion": the line moves from pawn to knight to queen, gaining range at each stage.
 
 ### Pawnfry (1 of 3) · Wild
+- **Concept:** a seahorse fry that is a chess pawn.
+- **Rejected ideas:** seahorse + rocking horse; seahorse + carousel horse.
 - **Mix:** seahorse fry + pawn
 - **Look:** A tiny round seahorse fry shaped like a chess pawn: a ball head on a short neck and a tail curled into a round weighted base that it bobs on. Its body is polished lacquered wood grain, with stubby back fins.
 - **Face:** big round earnest eyes, a brave little frown.
@@ -214,6 +246,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Gambitfin (2 of 3) · Titan, Wild
+- **Concept:** a seahorse that is a carved chess knight.
+- **Rejected ideas:** seahorse + jousting lance; seahorse + horseshoe.
 - **Mix:** seahorse + chess knight
 - **Look:** A sturdy seahorse leaning forward as it swims, grown into a carved knight: horse-like head, a ridged carved fin-mane, a heavy round pedestal formed by its curled tail. Old gold rune bands ring its neck and base like heavy armour plates.
 - **Face:** proud flared nostrils, a haughty side-eye.
@@ -222,6 +256,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** tough
 
 ### Checkmare (3 of 3) · Wyrm, Titan
+- **Concept:** a leafy sea dragon that has been promoted to chess queen.
+- **Rejected ideas:** sea dragon + stage-show headdress (worn); leafy sea dragon + bonsai.
 - **Mix:** leafy sea dragon + chess queen
 - **Look:** A long, level-swimming leafy sea dragon, body ribbed in carved ebony and ivory plates. Its leafy fronds have grown into a crown of carved queen-piece spikes along the back and head, its tube snout ends in a lance point, and the tail tapers into a spike; small dragon horns and a spine ridge in old gold.
 - **Face:** regal narrow eyes, calm and cold.
@@ -234,6 +270,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** a sound cone that knocks enemies back; the final blasts in four directions.
 
 ### Tootle (1 of 3) · Echo
+- **Concept:** a baby frilled lizard tooting through a trumpet frill.
+- **Rejected ideas:** frilled lizard + umbrella (Umbrathere clash); gecko + party blower.
 - **Mix:** baby frilled lizard + small trumpet
 - **Look:** A round little lizard sitting low on all fours, its neck frill folded into a small brass trumpet bell that it lifts to toot. Its tail is a short cone with a groove spiral.
 - **Face:** puffed cheeks, eyes squeezed shut mid-toot.
@@ -242,6 +280,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Gramofrill (2 of 3) · Echo, Wild
+- **Concept:** a frilled lizard whose frill is a gramophone horn.
+- **Rejected ideas:** frilled lizard + satellite dish; frilled lizard + lampshade.
 - **Mix:** frilled lizard + gramophone horn
 - **Look:** A lean, long-legged lizard sprinting low on all fours, its frill spread into one huge flared gramophone horn bell facing forward and ribbed with sound ridges. A crank-knob ridge grows on its throat, and the long whip tail is marked with record-groove spirals.
 - **Face:** wide startled eyes, mouth wide open in a shout.
@@ -250,6 +290,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** fast
 
 ### Phonodrake (3 of 3) · Echo, Wyrm
+- **Concept:** a dragon whose crown is four gramophone horns.
+- **Rejected ideas:** frill dragon + radio mast; frill dragon + bandstand.
 - **Mix:** frill dragon + four-horn gramophone
 - **Look:** A heavy, low dragon with a ridge of spines, its frill split into four brass horn bells fanning around its head like a crown. Its back scales are record-groove plates spiralling out from the spine, and small horns curl back from its brow.
 - **Face:** deep-set fierce eyes, jaws open in a roar.
@@ -262,6 +304,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Male/female looks (through Sandwidow and Hourachnid; Grainspin the same):** like the real widow, the female is bigger, heavier and glossy black with red sand; the male is slimmer and smaller, tan with pale bands, with a smaller hourglass.
 
 ### Grainspin (1 of 3) · Stone
+- **Concept:** a spiderling with a sand-timer belly.
+- **Rejected ideas:** spiderling + snow globe; spiderling + kitchen egg timer.
 - **Mix:** spiderling + sand bulb
 - **Look:** A round, sand-coloured spiderling on eight short stubby legs, its abdomen a small glass bulb half full of sand. Sandstone nubs tip its legs.
 - **Face:** eight tiny eyes in two rows, the two big front ones timid and watery.
@@ -270,6 +314,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Sandwidow (2 of 3) · Stone, Shadow
+- **Concept:** a black widow whose red hourglass mark is a real glass hourglass.
+- **Rejected ideas:** black widow + chandelier (Snuffapi clash); tarantula + feather duster.
 - **Mix:** black widow + hourglass
 - **Look:** A long-legged, glossy-black widow standing high on chunky tapered legs, its abdomen a tall glass hourglass with gold sand flowing through the waist. Sandstone bands ring each leg joint, and its edges fade into inky smoke.
 - **Face:** calm, half-lidded front eyes, cold and patient.
@@ -278,6 +324,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** sleek
 
 ### Hourachnid (3 of 3) · Stone, Lunar
+- **Concept:** a giant spider that is a toppled hourglass half buried in a desert.
+- **Rejected ideas:** trapdoor spider + sandcastle (Rampartoad clash); widow + metronome.
 - **Mix:** giant trapdoor-squat spider + toppled hourglass
 - **Look:** A huge, squat spider half sunk in sand, its body a giant hourglass lying on its side, the two glass bulbs forming head and abdomen with sand shifting between them. Its fangs are sharp glass shards, its legs are thick sandstone pillars, and silver crescent marks circle the bulbs.
 - **Face:** eight moon-silver eyes, unsettling patience.
@@ -290,6 +338,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** snuffles out hidden loot; spore clouds from its snout.
 
 ### Morelkin (1 of 3) · Spore
+- **Concept:** a tapir calf whose baby stripes are rows of tiny mushrooms.
+- **Rejected ideas:** tapir + vacuum-cleaner hose; tapir + garden hose.
 - **Mix:** tapir calf + button mushrooms
 - **Look:** A tapir calf on stubby legs whose baby stripes are rows of tiny mushroom caps, its short wiggly snout a little morel cap. Soft teal spore puffs drift from its nose.
 - **Face:** sleepy drooping eyes, snout mid-wiggle.
@@ -298,6 +348,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Truffapir (2 of 3) · Spore, Wild
+- **Concept:** a tapir that has become the truffle it was hunting.
+- **Rejected ideas:** tapir + gas mask (worn); pig-nosed turtle + truffle.
 - **Mix:** tapir + truffle and morel
 - **Look:** A stocky truffle-hunter carrying its head low, its long trunk-snout a wrinkled, honeycomb-pitted morel and its hide the knobbly dark skin of a truffle. Short pitted tusks curve from the snout base.
 - **Face:** tiny eager eyes, nose first, greedy.
@@ -306,6 +358,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** tough
 
 ### Morelossus (3 of 3) · Spore, Titan
+- **Concept:** a prehistoric giant tapir whose spine has grown into a ridge of morel towers.
+- **Rejected ideas:** tapir + steam calliope; tapir + termite city (Spirevark clash).
 - **Mix:** giant prehistoric tapir + morel towers
 - **Look:** A giant, long-legged beast standing high on pillar legs that are thick pitted stalks, its spine rising into a ridge of tall pitted morel cones that grow into armour plates down its flanks. Its long trunk swings down to the ground and ends in a heavy pitted club; gold rune lines are etched into the pits.
 - **Face:** slow, wise, drowsy eyes, a gentle frown.
@@ -318,6 +372,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** gravity wells: pulls enemies in and orbits pebbles as shields or shrapnel.
 
 ### Gravigrub (1 of 3) · Gravity
+- **Concept:** a grub curled around its own little moon.
+- **Rejected ideas:** grub + glass marble; grub + gumball machine.
 - **Mix:** curled grub + moon
 - **Look:** A C-shaped grub curled around its own belly, which is a smooth dark-iron moon ball with craters. Two small pebbles orbit it.
 - **Face:** round surprised eyes, a tiny open mouth.
@@ -326,6 +382,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Orbeetle (2 of 3) · Gravity, Swarm
+- **Concept:** a dung beetle whose rear end is a ringed planet.
+- **Rejected ideas:** dung beetle + bowling ball; dung beetle + football.
 - **Mix:** dung beetle + ringed planet
 - **Look:** A dung beetle walking head-first, its rounded abdomen a heavy iron planet circled by a thick fused ring. Its hind legs are long and braced, its head is a broad shovel, and amber honeycomb marks line its legs; pebbles orbit its ring.
 - **Face:** narrow stubborn eyes, a set jaw.
@@ -334,6 +392,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** tough
 
 ### Scarabit (3 of 3, Guard form) · Gravity, Lunar
+- **Concept:** a scarab that has opened into a living orrery.
+- **Rejected ideas:** scarab + armillary sundial; scarab + merry-go-round.
 - **Mix:** giant scarab + orrery
 - **Look:** A huge, broad scarab whose wing cases have opened into concentric orrery rings that circle its whole body like a shield, with moon pebbles locked in orbit along them. Its legs are thick and planted wide, and silver crescent marks glow on the rings.
 - **Face:** serene, half-closed eyes, a calm astronomer's frown.
@@ -342,6 +402,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** majestic
 
 ### Meteorab (3 of 3, Power form) · Gravity, Stone
+- **Concept:** a beetle that is a falling meteorite with a horn.
+- **Rejected ideas:** beetle + wrecking ball; beetle + cannonball.
 - **Mix:** battering-ram scarab + meteorite
 - **Look:** A low, wide battering-ram beetle whose planet has cracked into a jagged meteorite-iron hide, and whose head has grown a huge blunt meteor horn. Debris pebbles orbit close around it, and rough rock plates cover its legs.
 - **Face:** small furious eyes, gritted mandibles.
@@ -354,6 +416,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** folklore says olms are baby dragons; this line breaks and mends: it heals itself by "gilding" its cracks.
 
 ### Olmlet (1 of 3) · Wyrm
+- **Concept:** the cave folklore 'baby dragon', made of mended porcelain.
+- **Rejected ideas:** olm + candle wax; olm + bubblegum.
 - **Mix:** baby olm + glazed porcelain
 - **Look:** A pink-white noodle of a baby olm with four tiny legs and a glossy glaze sheen, its frilly gills like small porcelain petals. A faint gold hairline crack runs down its spine.
 - **Face:** blind, two faint grey dot eyes, a serene little smile.
@@ -362,6 +426,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Glazolm (2 of 3) · Wyrm, Prism
+- **Concept:** a salamander of crackle-glaze pottery mended with gold.
+- **Rejected ideas:** salamander + teapot (Teapotamus clash); newt + piggy bank.
 - **Mix:** salamander + crackle-glaze porcelain
 - **Look:** An elongated salamander raised high on long legs, its hide crackle-glazed porcelain with gold kintsugi seams along every crack. Its gills fan into scalloped porcelain plates around its head, and two stub horns are coming in; the glaze throws small rainbow glints.
 - **Face:** milky blind eyes, a gentle tilted head.
@@ -370,6 +436,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** pretty
 
 ### Kintsuwyrm (3 of 3) · Wyrm, Prism
+- **Concept:** a dragon that was shattered and glued back together with gold.
+- **Rejected ideas:** dragon + willow-pattern plate; dragon + porcelain vase.
 - **Mix:** serpent dragon + kintsugi
 - **Look:** A big serpentine dragon on four short clawed legs, its ceramic plates broken and rejoined with thick gold seams. A ridge of jagged porcelain shards runs along its spine, its gills have become a crown of glazed fins, and its tail ends in a broken porcelain blade.
 - **Face:** calm closed eyes, small gold-edged fangs.
@@ -383,6 +451,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** spore stings; the ephyra spins and glides; the medusa floats over the battle.
 
 ### Polyshroom (1 of 3) · Spore
+- **Concept:** a jellyfish polyp that is a walking button mushroom.
+- **Rejected ideas:** polyp + lollipop; sea anemone + toadstool.
 - **Mix:** jellyfish polyp + stalked mushroom
 - **Look:** A short stalked mushroom-polyp that scoots on a round foot like a snail, with a tiny cap and a ring of fat stubby tentacles around the cap rim. Teal spore puffs drift up.
 - **Face:** two small eyes on the stalk, drowsy.
@@ -391,6 +461,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** creepy
 
 ### Starcap (2 of 3) · Spore, Tempest
+- **Concept:** a baby jellyfish that is a spinning mushroom throwing star.
+- **Rejected ideas:** ephyra + frisbee; ephyra + ceiling fan.
 - **Mix:** ephyra + gilled mushroom wedges
 - **Look:** A flat, eight-armed star-shaped disc, each arm a gilled mushroom wedge, which spins and glides through the air like a thrown star. Swirl marks spin on its top face, and short ruffled gills line its underside.
 - **Face:** in the centre of the disc, a gleeful wide grin.
@@ -399,6 +471,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** fast
 
 ### Medushroom (3 of 3) · Spore, Venom
+- **Concept:** a jellyfish whose bell is a toadstool cap.
+- **Rejected ideas:** jellyfish + parachute; jellyfish + hot-air balloon.
 - **Mix:** medusa jellyfish + toadstool
 - **Look:** A large floating bell that is a domed, spotted mushroom cap, hovering above the ground. Under it hang thick ruffled gill-curtains instead of tentacles and four fat stinging arms tipped with glossy green venom.
 - **Face:** under the cap rim, heavy-lidded calm eyes and a tiny mouth.
@@ -415,6 +489,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** inflates and explodes into a stun burst, then regrows its fuse.
 
 ### Puffuse (1 of 2) · Storm
+- **Concept:** a pufferfish that is a cartoon bomb.
+- **Rejected ideas:** puffer + naval mine (too close to Dreadmonite); puffer + chestnut burr.
 - **Mix:** puffer + round bomb
 - **Look:** A perfectly round iron-black pufferfish with rivet dots and short stubby fins, hovering just above the ground. Its tail is a fuse wick spitting yellow electric sparks, and zig-zag spark lines crackle along its seams.
 - **Face:** wide panicky eyes, a tiny beak mouth.
@@ -423,6 +499,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Blastopuff (2 of 2) · Storm, Gravity
+- **Concept:** a spiny puffer that has hardened into a grenade.
+- **Rejected ideas:** puffer + morning-star mace (Mirrolin clash); puffer + cactus.
 - **Mix:** spiny puffer + iron grenade
 - **Look:** A big oval puffer whose hide is segmented iron like a grenade, studded with short iron spines. A curved lever-shaped dorsal fin arches over its back, its fuse has become a crackling crest, and its big beak teeth are bared.
 - **Face:** a manic wide grin, one eye twitching larger than the other.
@@ -435,6 +513,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** the nymph's shooting mask jaw grabs; the adult throws coloured light beams through its wings.
 
 ### Nymphane (1 of 2) · Swarm
+- **Concept:** a dragonfly nymph armoured in bead-glass windows.
+- **Rejected ideas:** nymph + diving suit (worn); caddisfly larva + mosaic (reads as worn).
 - **Mix:** dragonfly nymph + bead glass
 - **Look:** A squat six-legged nymph crawling low, its body plated in thick bead-glass panes with dark lead seams in a honeycomb pattern. Its hinged mask jaw folds under its chin and shoots out to grab.
 - **Face:** big bulging eyes, a greedy grin.
@@ -443,6 +523,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** creepy
 
 ### Rosedart (2 of 2) · Swarm, Prism
+- **Concept:** a dragonfly whose wings are a cathedral rose window.
+- **Rejected ideas:** dragonfly + helicopter rotor; damselfly + javelin.
 - **Mix:** dragonfly + rose window
 - **Look:** A long-bodied dragonfly with four broad wings made of stained-glass panes in lead frames, arranged like the petals of a rose window. Its tail tapers into a glass lance, and rainbow light glints through the panes.
 - **Face:** huge faceted eyes, an aloof tilt.
@@ -455,6 +537,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** the platypus is an egg-laying mammal with venom spurs; this line flicks out blades.
 
 ### Pocketpus (1 of 2) · Venom
+- **Concept:** a platypus whose bill is a folded pocket knife.
+- **Rejected ideas:** platypus + duck decoy; platypus + flip phone.
 - **Mix:** platypus + closed folding knife
 - **Look:** A fat little platypus whose bill is a closed folding knife with rounded tips, its body the red lacquered handle with steel rivet spots. Small steel spurs on its ankles shine with green venom.
 - **Face:** proud tiny eyes, a cheeky smile.
@@ -463,8 +547,10 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Bladypus (2 of 2) · Venom, Wild
+- **Concept:** a platypus that is an open multi-tool.
+- **Rejected ideas:** platypus + garden trowel; platypus + cricket bat.
 - **Mix:** platypus + multi-tool
-- **Look:** A sleek, long platypus whose bill has flicked open into a long steel blade, whose tail is a flat cleaver blade, and whose back carries a fin-like row of unfolded tools (saw, hook, corkscrew) grown from its spine. Its ankle spurs drip glossy green venom.
+- **Look:** A sleek, long platypus whose bill has flicked open into a long steel blade, whose tail is a flat cleaver blade, and whose back carries a fin-like row of unfolded tools (saw, hook, can-opener) grown from its spine. Its ankle spurs drip glossy green venom.
 - **Face:** narrow eyes, a sly sideways grin.
 - **Colours:** red lacquer and bright steel; accent venom green.
 - **Avoid:** a logo, a handle shape like Pocketpus, held tools.
@@ -475,6 +561,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** folded it is a shield; opened, its wing fans throw cutting gusts and sound.
 
 ### Foldbat (1 of 2) · Echo
+- **Concept:** a bat pup folded up like a closed fan.
+- **Rejected ideas:** bat pup + umbrella (Umbrathere clash); bat + folding deck chair.
 - **Mix:** bat pup + closed folding fan
 - **Look:** A bat pup crawling on its wrists with its wings folded tight into a closed fan shape, its body a narrow pleated stick silhouette. Huge round ears with ridged sound rings rise above.
 - **Face:** sleepy big eyes, a tiny fang poking out.
@@ -483,6 +571,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Fanpire (2 of 2) · Echo, Tempest
+- **Concept:** a flying fox whose wings are iron war fans.
+- **Rejected ideas:** bat + kite (Kitlet clash); bat + window blinds.
 - **Mix:** flying fox + war fan
 - **Look:** A flying fox in flight, its wings two big iron war fans with lacquered pleats and bladed edges. Its ears are small fans with ringing ridges, and swirl marks curl along the pleats.
 - **Face:** narrowed eyes, a sharp grin showing long fangs.
@@ -495,6 +585,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** mines ore nodes and dives in to strike.
 
 ### Chiptero (1 of 2) · Stone
+- **Concept:** a pterosaur hatchling knapped out of flint.
+- **Rejected ideas:** pterosaur + arrowhead; pterosaur + hand axe.
 - **Mix:** pterosaur hatchling + flint
 - **Look:** A pterosaur hatchling that cannot fly yet, waddling on four limbs with its wings folded, its head crest a small blunt pick nub. Flint-chip plates cover its back.
 - **Face:** wide hungry beak, eager eyes.
@@ -503,6 +595,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Pickadactyl (2 of 2) · Stone, Wyrm
+- **Concept:** a pterosaur whose head is a double pickaxe.
+- **Rejected ideas:** pterosaur + hang glider (kite clash); pterosaur + ice axe.
 - **Mix:** pterosaur + double pickaxe
 - **Look:** A big pterosaur in flight, its crest and beak fused into a double-headed iron pickaxe. Its wing claws are pick points, the leading edges of its wings are rock-plated, and a ridge of dragon spines runs down its back.
 - **Face:** fierce narrow eyes, a down-turned scowl.
@@ -515,6 +609,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** marks a target, then hits it with a barbed dart tongue.
 
 ### Bullpole (1 of 2) · Venom
+- **Concept:** a tadpole with a dart-flight tail.
+- **Rejected ideas:** tadpole + archery arrow; tadpole + shuttlecock (Glacione uses it).
 - **Mix:** tadpole + dart
 - **Look:** A fat tadpole with bullseye rings on its round body and a tail fin shaped like a dart's flight. Glossy toxic sheen.
 - **Face:** determined little eyes, a pursed mouth.
@@ -523,6 +619,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Bullsfrog (2 of 2) · Venom, Wild
+- **Concept:** a poison dart frog that is the whole game of darts.
+- **Rejected ideas:** frog + archery target; tree frog + bowling pin.
 - **Mix:** dart frog + dartboard and darts
 - **Look:** A compact frog crouched low, with dartboard rings across its back and toe tips that are steel dart points. Its tongue is a barbed dart, and a dart flight crest stands on its head.
 - **Face:** deadpan focus, one eye narrowed as if aiming.
@@ -535,6 +633,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** a rattle that confuses and taunts, then a venom strike.
 
 ### Rattlebub (1 of 2) · Echo
+- **Concept:** a baby rattlesnake with a maraca tail.
+- **Rejected ideas:** snake + baby's rattle toy; snake + tambourine.
 - **Mix:** snakelet + maraca
 - **Look:** A chubby, short snake whose tail ends in a round painted gourd maraca bulb. Dotted bands line its body.
 - **Face:** mischievous half-moon eyes, tongue out.
@@ -543,6 +643,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Maracoil (2 of 2) · Echo, Venom
+- **Concept:** a rattlesnake that is a pair of maracas.
+- **Rejected ideas:** rattlesnake + snare drum; cobra + flute (snake-charmer cliche).
 - **Mix:** rattlesnake + twin maracas
 - **Look:** A long rattlesnake reared low into a striking coil, its tail ending in two big gourd maracas. Its scales are painted gourd bands, its broad head has hollow gourd-like cheeks, and its fangs drip green venom; sound rings ripple off the tail.
 - **Face:** slitted eyes, a wide wicked grin.
@@ -550,31 +652,37 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Avoid:** a hood (Sarcobra), sombrero or costume cues, held objects.
 - **Archetype:** creepy
 
-## 20. Narwhirl line: narwhal + ice auger (egg-only)
-**Egg:** pale blue shell with one spiral ridge twisting from tip to base.
-**Ability link:** drills through ice and armour; the final bores through cover.
+## 20. Narfoil line: narwhal + fencing (egg-only)
+**Egg:** pale blue shell with a round bell-guard dome at the tip.
+**Ability link:** a duelist: lunge, parry (blocks one hit), riposte.
 
-### Narwhirl (1 of 2) · Frost
-- **Mix:** narwhal calf + auger bit
-- **Look:** A round narwhal calf whose short tusk is a stubby spiral auger bit. Frost patches and small ice crystals tip its flippers.
-- **Face:** cheerful squinting eyes, a wide smile.
+### Narfoil (1 of 2) · Frost
+- **Concept:** a narwhal calf whose tusk is a fencing foil.
+- **Rejected ideas:** narwhal + ice auger (too obvious); narwhal + barber's pole.
+- **Mix:** narwhal calf + fencing foil
+- **Look:** A round narwhal calf whose short tusk is a blunt practice foil with a frosted button tip. A small domed bell-guard of pale ice is grown round the tusk base, and frosted tips edge its flippers.
+- **Face:** eager squinting eyes, tongue poking out in concentration.
 - **Colours:** pale grey and ice blue; accent frost white.
-- **Avoid:** a long tusk, a held drill, a seal face.
+- **Avoid:** a held sword, a fencing mask worn, a long tusk.
 - **Archetype:** cute
 
-### Drillwhal (2 of 2) · Frost, Titan
-- **Mix:** narwhal + ice auger and crampons
-- **Look:** A big, heavy narwhal with a long spiral ice-auger tusk and flippers grown into toothed crampon blades. A ridge of ice crystals runs along its back, and engraved gold rune plates band its body.
-- **Face:** small hard eyes, a set jaw.
+### Parrywhal (2 of 2) · Frost, Titan
+- **Concept:** a narwhal that is a fencing champion: epee tusk, bell-guard brow, parry fins.
+- **Rejected ideas:** narwhal + unicorn horn (cliche); narwhal + candy cane.
+- **Mix:** narwhal + fencing champion
+- **Look:** A big, sleek-headed narwhal held in a lunge pose, its long straight tusk an ice-steel epee and the base of the tusk a broad domed bell-guard grown from its brow. Its front flippers are flat parry blades edged in ice crystal, and engraved gold rune plates band its body like a champion's armour.
+- **Face:** cool, narrowed eyes, a superior little smile.
 - **Colours:** slate grey and ice blue; accent old gold runes.
-- **Avoid:** motor parts, a round calf body, a unicorn horn look.
-- **Archetype:** tough
+- **Avoid:** a spiral drill tusk, a unicorn horn look, a human fencer pose, a held blade.
+- **Archetype:** sleek
 
 ## 21. Scoopsy line: dormouse + ice cream (egg-only)
 **Egg:** cream shell flecked with pastel sprinkles and a frosty tip.
 **Ability link:** a sleepy healer that gives out cooling "brain-freeze" slows.
 
 ### Scoopsy (1 of 2) · Frost
+- **Concept:** a dormouse curled up as a scoop of ice cream.
+- **Rejected ideas:** dormouse + snow globe (Terrarimit clash); dormouse + pillow.
 - **Mix:** dormouse + scoop of ice cream
 - **Look:** A dormouse curled asleep into a ball that is a round scoop of vanilla ice cream, its fur soft and swirled with frosted tips. A short wafer-patterned tail wraps round it.
 - **Face:** fast asleep, rosy nose, a blissful smile.
@@ -583,6 +691,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Sundormouse (2 of 2) · Frost, Wild
+- **Concept:** a dormouse that is a soft-serve with a waffle-cone spike tail.
+- **Rejected ideas:** dormouse + ice lolly; dormouse + sleeping bag (worn).
 - **Mix:** dormouse + soft-serve and waffle cone
 - **Look:** A long-bodied dormouse awake and running low on all fours, its body a swirled soft-serve spiral with frosted crystal tips. Its tail has become a long, pointed waffle cone used as a spike, and its claws are cone-crisp brown.
 - **Face:** wide-awake, grumpy, puffed cheeks.
@@ -594,6 +704,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** a looping charge that saws through anything in its path.
 
 ### Clinkpede (1 of 2) · Venom
+- **Concept:** a short centipede made of chunky chain links.
+- **Rejected ideas:** centipede + toy train (Chuggamus clash); millipede + zipper (Zippelith clash).
 - **Mix:** short centipede + chain links
 - **Look:** A short, stubby centipede of eight segments, each a chunky steel chain link with one small tooth. Little glossy green venom fangs.
 - **Face:** small beady eyes, a curious tilt.
@@ -602,6 +714,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Chainipede (2 of 2) · Venom, Swarm
+- **Concept:** a centipede that is a living chainsaw chain.
+- **Rejected ideas:** centipede + bicycle chain (wheel trap); centipede + conveyor belt.
 - **Mix:** giant centipede + chainsaw chain
 - **Look:** A long centipede moving in a looping S, its many segments saw-chain links with hooked cutting teeth along both sides. Its fangs are huge saw-blade hooks dripping green venom, and every leg is a small repeated steel tooth.
 - **Face:** flat cold eyes, no expression at all.
@@ -609,43 +723,51 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Avoid:** a motor body, a guide bar, wheels, rearing upright.
 - **Archetype:** creepy
 
-## 23. Ampster line: hamster + battery cell (egg-only)
-**Egg:** shell banded like a battery cell with a copper nub on top.
-**Ability link:** stores charge in its cheeks and dumps it as a shock.
+## 23. Pinster line: hamster + pinball machine (egg-only)
+**Egg:** chrome-silver shell like a pinball, with a spark-striped band.
+**Ability link:** enemies bounce off its bumpers for chain shocks; the final "tilts" to stun everyone nearby.
 
-### Ampster (1 of 2) · Storm
-- **Mix:** hamster + battery cells
-- **Look:** A round hamster sitting on all fours, its cheeks puffed into two fat battery cells with copper nubs, crackling yellow sparks. Zig-zag stripes run down its back.
+### Pinster (1 of 2) · Storm
+- **Concept:** a hamster whose stuffed cheeks are pinball bumpers.
+- **Rejected ideas:** hamster + battery (too obvious for Storm); hamster + wheel dynamo (wheel trap).
+- **Mix:** hamster + pinball bumpers
+- **Look:** A round hamster sitting on all fours, its stuffed cheeks two domed pinball bumpers ringed in crackling yellow light. Its tail is a stubby flipper paddle and its eyes shine like chrome ball bearings; zig-zag stripes run down its back.
 - **Face:** greedy delighted eyes, overstuffed cheeks.
-- **Colours:** golden tan and copper; accent yellow sparks.
-- **Avoid:** wires, a wheel, text or plus signs.
+- **Colours:** golden tan and chrome; accent yellow sparks.
+- **Avoid:** a wheel, a glass cabinet, text or scores, a battery.
 - **Archetype:** cute
 
-### Dynamster (2 of 2) · Storm, Wild
-- **Mix:** hamster + heavy battery
-- **Look:** A big, stocky hamster with its back segmented into stacked cell blocks, copper terminal horns at its shoulders and copper front teeth. Its cheeks are flattened capacitor pouches that crackle with sparks.
-- **Face:** small fierce eyes, buck-toothed snarl.
-- **Colours:** dark tan and copper; accent yellow sparks.
-- **Avoid:** cables, a wheel, round cheeks like Ampster.
+### Tiltster (2 of 2) · Storm, Wild
+- **Concept:** a hamster that is a whole pinball machine.
+- **Rejected ideas:** hamster + arcade claw machine; hamster + slot machine.
+- **Mix:** hamster + whole pinball machine
+- **Look:** A big, stocky hamster crouched with its back slanted like a pinball table, bumper domes grown along its shoulders and hips and a ramp-ridge curving down its spine. Its front paws are two heavy flipper blades it swats with, and sparks crackle between the bumpers.
+- **Face:** small fierce eyes, a buck-toothed snarl.
+- **Colours:** dark tan and chrome; accent yellow and cherry-red bumper caps.
+- **Avoid:** a cabinet on its back, legs like table legs, a glass top, round cheeks like Pinster.
 - **Archetype:** tough
 
-## 24. Fawngus line: Irish elk + coral fungus (found: misty bogs and old forests)
-**Ability link:** a bog-dweller that seeds healing spore rings; the final's antlers burst spores on a charge.
+## 24. Fawngus line: Irish elk + hat stand of mushroom caps (found: misty bogs and old forests)
+**Ability link:** hangs a mushroom "cap" on each ally as a spore shield; the final throws them like discs.
 
 ### Fawngus (1 of 2) · Spore
-- **Mix:** fawn + button mushrooms
-- **Look:** A spindly fawn on long wobbly legs whose back spots are tiny button mushrooms. Two little coral-fungus nubs sprout where antlers will be.
+- **Concept:** a fawn whose spots are tiny hat pegs, each wearing a mushroom cap.
+- **Rejected ideas:** fawn + coral fungus (too obvious); fawn + pincushion.
+- **Mix:** fawn + hat pegs with mushroom caps
+- **Look:** A spindly fawn on long wobbly legs whose back spots are little wooden pegs, each wearing a tiny mushroom cap grown from it. Two peg nubs sprout where antlers will be, and teal spore puffs drift up.
 - **Face:** big wet eyes, an anxious ear-flick.
 - **Colours:** fawn brown and cream; accent teal spore glow.
-- **Avoid:** antlers, a garden on its back.
+- **Avoid:** antlers, a garden on its back, hats worn.
 - **Archetype:** cute
 
-### Shroomoose (2 of 2) · Spore, Bloom
-- **Mix:** giant Irish elk (extinct) + coral fungus
-- **Look:** A giant elk with huge branching antlers of coral fungus spreading wide, their tips shedding teal spores. Moss grows through its shaggy neck fur, and pale coral-fungus ridges run down its spine and legs into its hooves.
-- **Face:** calm, heavy-lidded, ancient.
-- **Colours:** moss green and coral cream; accent teal spores.
-- **Avoid:** shelf fungus (Ringrove), flowers, a cow body (Crofthorn).
+### Hatstag (2 of 2) · Spore, Bloom
+- **Concept:** an Irish elk whose antlers are a hat stand hung with mushroom caps.
+- **Rejected ideas:** Irish elk + coral-fungus antlers (too obvious for Spore); elk + chandelier (Chandelapi clash).
+- **Mix:** giant Irish elk (extinct) + hat stand
+- **Look:** A giant elk whose huge spreading antlers are a turned-wood hat stand, every tine ending in a hook that has grown a mushroom cap: bowler-round, flat, peaked. Moss grows through its shaggy neck, and turned-wood ridges run down its legs into polished hooves.
+- **Face:** calm, heavy-lidded, a butler's dignity.
+- **Colours:** dark walnut and moss green; accent cream caps and teal spores.
+- **Avoid:** real cloth hats, coats hanging, shelf fungus (Ringrove), a cow body (Crofthorn).
 - **Archetype:** majestic
 
 ## 25. Pagodito line: marine iguana + pagoda (egg-only)
@@ -653,6 +775,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** a guardian that roots in place and throws up a sheltering roof shield.
 
 ### Pagodito (1 of 2) · Wyrm
+- **Concept:** a baby iguana with one temple-roof eave for a crest.
+- **Rejected ideas:** iguana + paper lantern (Lanterloris clash); iguana + bonsai.
 - **Mix:** baby iguana + one pagoda eave
 - **Look:** A squat baby iguana whose crest is a single tiny curled roof eave, its scales laid like clay roof tiles. Stub horns and short spines.
 - **Face:** grumpy old-man frown, droopy eyelids.
@@ -661,6 +785,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** cute
 
 ### Pagoguana (2 of 2) · Wyrm, Stone
+- **Concept:** a marine iguana whose crest is a five-tier pagoda.
+- **Rejected ideas:** iguana + stone staircase; iguana + city skyline.
 - **Mix:** marine iguana + tiered pagoda
 - **Look:** A long iguana whose dorsal crest has grown into five tiers of upturned pagoda eaves that curl up like dragon spines, running from its neck down to the tail tip. Tiled stone scale armour covers its body, and curved horns sweep back from its head.
 - **Face:** calm, narrowed eyes, faint smile, a temple guardian.
@@ -673,6 +799,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 **Ability link:** a scissor-strike with crossed mandibles.
 
 ### Grammite (1 of 2) · Swarm
+- **Concept:** a river larva with dagger jaws.
+- **Rejected ideas:** larva + garden shears; hellgrammite + pliers.
 - **Mix:** hellgrammite larva + curved daggers
 - **Look:** A long, flat, many-legged larva crawling low, its pincer jaws two short curved daggers. Chunky gill tufts line its sides in repeated amber segments.
 - **Face:** small mean eyes, mandibles open.
@@ -681,6 +809,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** creepy
 
 ### Dobsabre (2 of 2) · Wyrm, Swarm
+- **Concept:** a dobsonfly whose jaws are crossed cavalry sabres.
+- **Rejected ideas:** dobsonfly + hedge trimmer; dobsonfly + bolt cutters.
 - **Mix:** dobsonfly + crossed sabres
 - **Look:** A winged dobsonfly with enormous crossed sabre mandibles longer than its head, its four wings covered in dragon scale plates. Small horns crown its head, and a ridge of spines runs down its abdomen.
 - **Face:** cold narrow eyes, a sneer between the blades.
@@ -688,30 +818,36 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Avoid:** a flat larva body, held swords, thin wing veins.
 - **Archetype:** sleek
 
-## 27. Moldhop line: katydid + cordyceps fungus (found: damp, dark forests)
-**Ability link:** spreads a "puppet" spore that briefly turns enemies against each other.
+## 27. Proofhop line: katydid + sourdough bread (found: warm kitchens' cellars and damp mills)
+**Ability link:** it "proves": grows bigger and tougher the longer a fight lasts, then bursts in a yeast-spore cloud.
 
-### Moldhop (1 of 2) · Spore
-- **Mix:** katydid nymph + one fungus stalk
-- **Look:** A small leaf-green katydid nymph with chunky hopping legs and a single fuzzy fungus stalk sprouting from its head like a crooked antenna. Teal spore puffs drift from the tip.
-- **Face:** big round eyes, slightly glazed, a vacant smile.
-- **Colours:** leaf green and pale teal; accent cream fuzz.
-- **Avoid:** realistic insect detail, thin antennae.
-- **Archetype:** creepy
+### Proofhop (1 of 2) · Spore
+- **Concept:** a katydid nymph that is a ball of rising dough.
+- **Rejected ideas:** katydid + cordyceps fungus (too obvious for Spore); katydid + violin.
+- **Mix:** katydid nymph + ball of rising dough
+- **Look:** A small katydid nymph whose plump body is a soft ball of rising dough, dusted with flour and dotted with yeast bubbles. Chunky hopping legs and stubby dough-knob antennae; teal yeast spore puffs drift off it.
+- **Face:** big round sleepy eyes, puffy cheeks.
+- **Colours:** dough cream and leaf green; accent teal spores.
+- **Avoid:** a bowl, a baker's hat, realistic insect hair, thin antennae.
+- **Archetype:** cute
 
-### Cordydid (2 of 2) · Spore, Swarm
-- **Mix:** katydid + cordyceps
-- **Look:** A big katydid overgrown with fungus, stalks bursting out of every joint as spear-like spikes. Its wings are ragged leaves of mycelium, and amber honeycomb mould patches its legs.
-- **Face:** glazed teal eyes, a slack, puppet-like jaw.
-- **Colours:** dead-leaf brown and pale teal; accent amber.
-- **Avoid:** gore, thin threads, a nymph body like Moldhop.
-- **Archetype:** creepy
+### Loafhopper (2 of 2) · Spore, Swarm
+- **Concept:** a katydid that is a scored sourdough loaf, crust spikes and all.
+- **Rejected ideas:** katydid + mouldy cheese; grasshopper + baguette (too thin).
+- **Mix:** katydid + scored sourdough loaf
+- **Look:** A big katydid whose body is a baked sourdough loaf, its crust scored into sharp flared ridges that stand up like a row of crust spikes. Its leaf wings are crisp crust plates, and amber honeycomb crumb shows where its legs bend; teal spores puff from the scores.
+- **Face:** smug half-lidded eyes, a crusty grin.
+- **Colours:** golden-brown crust and leaf green; accent amber crumb and teal spores.
+- **Avoid:** a bread tin, a basket, a round dough body like Proofhop, slices.
+- **Archetype:** tough
 
 ---
 
 # Rares (single stage)
 
 ## 28. Reelacine (rare) · Shadow, Wild (found: at dusk on old moors, rarely)
+- **Concept:** the last thylacine, living on as old black-and-white film.
+- **Rejected ideas:** thylacine + barcode; thylacine + jail cage.
 - **Mix:** thylacine (extinct) + film reel; the last thylacine was filmed in black and white.
 - **Look:** A lean, stiff-tailed thylacine trotting low, its back stripes dark film-strip bands with chunky sprocket holes. Its tail is a stiff tapering film spool, and its outline flickers into inky smoke at the edges.
 - **Face:** wide gaping jaw yawn, haunted pale eyes.
@@ -721,6 +857,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Ability link:** a "rewind" dash that leaves a flickering after-image.
 
 ## 29. Pavonazar (rare) · Lunar, Prism (egg-only). Special rule: male/female looks
+- **Concept:** a peacock whose eye-spots are glass evil-eye charms.
+- **Rejected ideas:** peacock + slot machine; peacock + kaleidoscope.
 - **Egg:** deep blue glass shell with one white-and-blue eye bead.
 - **Mix:** peacock + glass evil-eye beads
 - **Look:** A peacock walking low with its train swept out behind, every eye-spot a round glass evil-eye bead that blinks. Its crest is three glass bead stalks, and the beads catch rainbow glints and soft silver light.
@@ -732,6 +870,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Ability link:** "watched": marks every enemy in sight at once.
 
 ## 30. Malletary (rare) · Wild, Titan (egg-only)
+- **Concept:** a secretary bird that stomps with war-hammer feet.
+- **Rejected ideas:** secretary bird + quill pen (ink clash with Ermink); shoebill + executioner axe (Anchorbill clash).
 - **Egg:** long pale shell with dark hammer-head-shaped bands.
 - **Mix:** secretary bird + war hammers
 - **Look:** A tall, long-legged secretary bird striding forward, its feet two heavy iron war-hammer heads it stomps with. Its crest quills are short spike-tipped quills, and gold rune bands ring its long legs like greaves grown from the scales.
@@ -741,27 +881,33 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** fast
 - **Ability link:** a stomp combo that hits harder each kick.
 
-## 31. Ghoulamari (rare) · Spore, Lunar (egg-only)
-- **Egg:** dark red shell with faint teal glowing gill lines.
-- **Mix:** vampire squid + ghost fungus
-- **Look:** A vampire squid drifting with its webbed arms spread into a cloak, the webbing a sheet of glowing gill fungus. Its arm spines are short mushroom stalks, and its fins are two shelf caps.
-- **Face:** huge blue-silver eyes, a deadpan stare.
-- **Colours:** deep wine red and black; accent teal and moon-silver glow.
-- **Avoid:** a cape worn, thin tentacles, a vampire costume.
+## 31. Ghoulamari (rare) · Lunar, Shadow (egg-only)
+- **Concept:** a vampire squid that is a fortune-teller's crystal ball.
+- **Rejected ideas:** vampire squid + ghost fungus (too obvious); vampire squid + opera cloak (worn).
+- **Egg:** dark red shell with a clear round window and silver mist swirling behind it.
+- **Mix:** vampire squid + fortune-teller's crystal ball
+- **Look:** A vampire squid drifting with its webbed arms spread wide, its mantle a clear crystal ball where silver mist swirls round its floating eyes. The arm webbing is deep red with a fringe of silver crescent marks, and its edges fade into inky smoke.
+- **Face:** huge silver eyes inside the ball, a knowing deadpan stare.
+- **Colours:** deep wine red and black; accent moon-silver mist.
+- **Avoid:** a table or stand, cards, a cape worn, thin tentacles.
 - **Archetype:** creepy
-- **Ability link:** turns inside out into a spore shield.
+- **Ability link:** "foresees" the next attack and dodges it once per fight.
 
 ## 32. Glacione (rare) · Frost, Lunar (egg-only)
-- **Egg:** clear ice shell with a snowflake frozen in its centre.
-- **Mix:** sea angel (clione) + snowflake
-- **Look:** A small translucent sea angel hovering, its two wing-lobes six-pointed ice snowflake crystals. Frosted tips ring its body, and a pale silver crescent glows in its core.
-- **Face:** tiny, sweet, closed eyes; opens a hidden fanged mouth to strike.
+- **Concept:** a sea angel that is a frosty shuttlecock.
+- **Rejected ideas:** sea angel + snowflake (too obvious for Frost); sea angel + music-box dancer (person-like).
+- **Egg:** clear ice shell with one frost-feather pattern inside.
+- **Mix:** sea angel (clione) + badminton shuttlecock
+- **Look:** A small sea angel shaped like a shuttlecock: a round cork-like head and a flared skirt of frosted feather-lobes behind it, its two wing-lobes the leading feathers. Frosted crystal tips edge every lobe, and a pale silver crescent glows in its core.
+- **Face:** tiny, sweet closed eyes; it opens a hidden fanged mouth to strike.
 - **Colours:** ice blue and clear white; accent silver.
-- **Avoid:** human angel shape, halo, wings like a bird.
+- **Avoid:** a racket, a human angel shape, a halo, snowflakes.
 - **Archetype:** pretty
-- **Ability link:** cute until it attacks: a frost bite burst.
+- **Ability link:** "smash": flips and dive-bombs a target, then floats back up.
 
 ## 33. Gilabacus (rare) · Venom, Lunar (egg-only)
+- **Concept:** a Gila monster whose beaded hide is an abacus.
+- **Rejected ideas:** Gila monster + bead curtain; Gila monster + bead necklace (worn).
 - **Egg:** orange-and-black shell beaded in rows like an abacus.
 - **Mix:** Gila monster + abacus
 - **Look:** A heavy, slow Gila monster crawling low, its beaded hide laid out as rows of abacus beads on rod-ridges down its back and tail. The beads slide along as it moves, and its jaws drip glossy green venom; pale silver crescent bands mark the rods.
@@ -776,6 +922,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 # Legendaries (single stage, boss and event only, no egg)
 
 ## 34. Sarcobra · Wyrm, Shadow
+- **Concept:** a cobra whose hood is a royal sarcophagus lid.
+- **Rejected ideas:** cobra + snake-charmer basket; cobra + pharaoh headdress (worn).
 - **Mix:** Egyptian cobra + golden sarcophagus
 - **Look:** A giant cobra rearing in a low S, its hood a golden sarcophagus lid carved with scarab and wing motifs. Its body bands are carved coffin panels in lapis and gold, and long glossy fangs drop below its jaw; inky smoke trails from the hood edges.
 - **Face:** kohl-rimmed slit eyes, a cold royal stare.
@@ -784,14 +932,19 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** majestic
 
 ## 35. Glaciammoth · Frost, Titan
-- **Mix:** woolly mammoth + glacier
-- **Look:** A colossal mammoth whose hide is cracked glacier ice, its woolly fur frozen into long icicle locks. Its tusks are huge curved ice sabres, a jagged glacier ridge rises along its spine, and gold runes are carved into its ice plates.
+- **Concept:** a woolly mammoth that is a living permafrost time capsule.
+- **Rejected ideas:** mammoth + glacier (too obvious); mammoth + bobsled (blade clash with Skateron).
+- **Mix:** woolly mammoth + permafrost time capsule
+- **Look:** A colossal mammoth whose hide is thick plates of clear permafrost with ancient things frozen inside: amber drops, fern fossils, spiral shells, old carved runestones. Its woolly fur is frozen into long frosted locks, its tusks are huge curved fossil-ivory sabres, and gold runes are carved into the plate edges.
 - **Face:** small ancient eyes deep in frost, a slow tired calm.
-- **Colours:** glacier blue and dark umber fur; accent old gold runes.
-- **Avoid:** a howdah, riders, an icebreaker prow (Prowyak), snowflakes floating.
+- **Colours:** frost blue and dark umber fur; accent old gold runes and amber.
+- **Avoid:** human bones or bodies frozen inside, a howdah, riders, an icebreaker prow (Prowyak).
 - **Archetype:** majestic
+- **Ability link:** each time it is "thawed" (damaged) it frees a relic buff for its team.
 
 ## 36. Cetorgan · Echo, Lunar
+- **Concept:** a blue whale that is a cathedral pipe organ.
+- **Rejected ideas:** whale + submarine (Bathilus clash); whale + airship.
 - **Mix:** blue whale + cathedral pipe organ
 - **Look:** A vast blue whale swimming through the air, its baleen a row of organ pipes and its throat pleats ridged pipes running along its belly. Its blowhole is a fan of tall pipes, and silver crescent markings run down its flanks.
 - **Face:** small kind eyes, a deep slow smile.
@@ -800,6 +953,8 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Archetype:** majestic
 
 ## 37. Hydrangor · Bloom, Wyrm
+- **Concept:** a hydra whose heads are hydrangea blooms.
+- **Rejected ideas:** hydra + candelabra (Snuffapi clash); hydra + garden hose.
 - **Mix:** three-headed hydra + hydrangea flowers
 - **Look:** A three-headed hydra on four thick legs, each head a round cluster of hydrangea petals with a fanged dragon jaw beneath. Petal-shaped scales cover its body, and leaf-plate spines run down its back to a heavy tail.
 - **Face:** three different moods: one sleepy, one snarling, one curious.

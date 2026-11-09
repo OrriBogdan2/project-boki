@@ -3933,3 +3933,17 @@ ART embrook_r reject briefs/boki-art/batch/out/embrook_r_3.jpg grade=7.4
 ART fizzlet_e reject briefs/boki-art/batch/out/fizzlet_e_1.jpg grade=8.3
 
 READY ext/idle-tender-rebased 8cec53574 (job 20261109-030333-a1; supersedes ext/idle-tender be19bd8bf: Meeko the Dawnfox idle+stance rework on current main. pip.glb = the branch glb re-run through main's pip_companions.py (sun+raincloud, faces atlas byte-identical); pip.json keeps main's doc/blade/mood + x_breath in extra_bones; warden_glb.gd keeps main's own_rest + flipped-chain code with the branch's shown-scale; posekit.py merged clean. Checks: --pip-live-check 0 failures, --clip-check 0 failures, --check 0 failures, health --strict OK. The lantern mesh is gone on main, so the hidden-lantern key is harmless on the invisible chain)
+ART kestrike_f reject briefs/boki-art/batch/out/kestrike_f_2.jpg grade=8.4
+ART lanternmit_x reject briefs/boki-art/batch/out/lanternmit_x_3.jpg grade=8.3
+ART lashyx_x reject briefs/boki-art/batch/out/lashyx_x_2.jpg grade=8.1
+ART kayak_r reject briefs/boki-art/batch/out/kayak_r_3.jpg grade=6.9
+ART lanceron_x reject briefs/boki-art/batch/out/lanceron_x_2.jpg grade=6.8
+ART lockatara_x reject briefs/boki-art/batch/out/lockatara_x_1.jpg grade=7.2
+ART lunink_x reject briefs/boki-art/batch/out/lunink_x_2.jpg grade=7.4
+ART geysirbara_x reject briefs/boki-art/batch/out/geysirbara_x_2.jpg grade=7.7
+ART glaciatee reject briefs/boki-art/batch/out/glaciatee_1.jpg grade=7.2
+ART glaivyx_x reject briefs/boki-art/batch/out/glaivyx_x_1.jpg grade=7.3
+ART gongibbon_f reject briefs/boki-art/batch/out/gongibbon_f_1.jpg grade=7.0
+ART gongrowl_x reject briefs/boki-art/batch/out/gongrowl_x_1.jpg grade=7.3
+ART howlop_r reject briefs/boki-art/batch/out/howlop_r_1.jpg grade=8.1
+ART jibbatross reject briefs/boki-art/batch/out/jibbatross_1.jpg grade=7.4
