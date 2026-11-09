@@ -5819,3 +5819,4 @@ READY ext/hunter-revamp-pz fb240baa2 (P-Z hunters pip/ryzz/sable/tarek/vex at ~2
 READY ext/tut-text-budget 326714a75 (--tutorial-text-check + shortened tutorial lines)
 READY ext/hunter-revamp-go 4efad09ea (G-O hunter revamp: Hem 25.1k, Kael 25.0k with 2048 baked normal maps, Ostra 24.7k densified; Warden budget 15k->26k in checks + RIG_CONTRACT/PIPELINE; warden checks pass)
 READY ext/warden-detail-pilot b73419fd9 (Hunter detail pilot on Vex and Cinder: report docs/art/wardens/DETAIL_PILOT.md with side-by-side sheets, normal map / 25k / 40k tiers, GPU numbers from --hunter-gpu-bench; recommends 40k + normal x0.6; shipped models unchanged, owner picks the tier)
+READY ext/tut-try-relic 0a05c817e (second-Relic pick: a Try button on each Kael/Cinder/Meeko card opens the Training Grounds as that Hunter for 60 s, then Hob's same card again, nothing spent; --hob-check 0 fail with the new try stage, --class-unlock-check 145/0, health --strict OK, gen_wiki --check OK)
