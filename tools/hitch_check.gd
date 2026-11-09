@@ -106,6 +106,7 @@ func _ready() -> void:
 	if home_only:
 		_home_check()
 		return
+	_cache_count()      # what an earlier launch left in the cache is not this run's compiles
 	# "probe" keeps the loading screen and the warm-up, as a real expedition has them
 	Game.main.show_screen("match", {"teams": 6, "squad": squad, "tier": 0, "seed": seed_v, "autoplay": true, "probe": true, "god": true, "plan_t": 3.0})
 
