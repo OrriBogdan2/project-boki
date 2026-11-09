@@ -26,6 +26,7 @@ func run(main_node: Node) -> void:
 	_far_bots()
 	_shadows()
 	_spawn_sight()
+	_number_sizes()
 	await _plates()
 	print("PERFTHROTTLE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -56,6 +57,23 @@ func _spawn_sight() -> void:
 		sp.tick(Match.DT)
 		t += Match.DT
 	ok((c["known"] as Dictionary).has(m.player.team), "the spot underfoot is known within %.2f s" % t)
+
+## Damage numbers grow with the hit by pixel size, never by font size (a new font size rasterizes glyphs).
+func _number_sizes() -> void:
+	var at := m.player.pos + Vector3(0, 1.5, 0)
+	m.fx.number(at, 5.0, Color.WHITE, false)
+	m.fx.number(at + Vector3(4, 0, 0), 900.0, Color.YELLOW, true)
+	m.fx.word(at + Vector3(-4, 0, 0), "COMBO", Color.WHITE, true)
+	var sizes := {}
+	var outlines := {}
+	for l in m.fx.num_pool:
+		sizes[l.font_size] = true
+		outlines[l.outline_size] = true
+	ok(sizes.keys() == [Fx.NUM_FONT] and outlines.size() <= 2, "numbers keep one font size %s, outlines %s" % [
+		sizes.keys(), outlines.keys()])
+	var small: Label3D = m.fx.nums[-3]["node"]
+	var big: Label3D = m.fx.nums[-2]["node"]
+	ok(big.pixel_size > small.pixel_size * 1.3, "a big crit is drawn bigger (%.4f vs %.4f)" % [big.pixel_size, small.pixel_size])
 
 func _mob_naps() -> void:
 	var mb: Mob = null
