@@ -56,6 +56,7 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 | Row (sev) | Verdict | Where / why |
 |---|---|---|
 | E input: hold, drag, release (HIGH) | (b) | held E keeps the drag open (up to 1 s), the release commits; a tap drags away (asserted: still dragging at 0.6 s, the release starts the countdown) |
+| E numbers re-measured (KIT_PARITY) | (a) | countdown 0.8 s = 4 frames at 5 fps (briefs/hero-ref/vireo.md, E: Lightning Javelin, 0186 to 0190); 1 Static and 12 s from briefs/supervive-data/supervive_kits.md (Joule E). The source states no drag window ("hold and drag before release"; the footage shows the commit one frame after placing), so the 1 s cap is ours; asserted: held with no release it commits at 1 s. Enemies see the all-player rim circle from the placement and the pillar for the 0.8 s. Open: the footage info panel says the javelin adds 2 Static (kept at the data's 1), and the cooldown is 10.5 at our 8 : 8 : 10.5 pace (data 12 / 10 / 9) |
 | Wirerun arrival ring (HIGH) | (a) | 6d054633 (and the press flash) |
 | Blowout ground ring (MED) | (b) | removed; the copper pillars stay |
 | Other cosmetic rings; strike rings bigger than the hit (MED) | (b) | rod summon, Live and take-off rings removed; Skycall's ring at its 1.5 m radius (was 2.3), Kitefall's at its 2.7 m (the 1.45x ring removed), the landing marker at the radius |
