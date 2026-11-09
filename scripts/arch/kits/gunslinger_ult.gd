@@ -41,7 +41,7 @@ func cast() -> bool:
 	if not kit.needle.is_empty():
 		return false
 	var xd := data()
-	var at := AimMode.point(h, float(xd["range"]))
+	var at := AimMode.place(h, float(xd["range"]))
 	casts += 1
 	var shell := {"at": at, "t": 0.0, "phase": FALL, "node": _take_node(), "tick": 0.0}
 	shell["n"] = casts

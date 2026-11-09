@@ -588,17 +588,6 @@ func run_own(st_: StageSpec, c: Dictionary) -> void:
 func aim() -> Vector3:
 	return h.inp.get("aim", h.pos)
 
-## The aim point clamped to a reach, on the ground.
-func aim_at(reach: float) -> Vector3:
-	var a := aim()
-	var dv := Vector2(a.x - h.pos.x, a.z - h.pos.z)
-	if dv.length() > reach:
-		dv = dv.normalized() * reach
-	var p := Vector3(h.pos.x + dv.x, h.pos.y, h.pos.z + dv.y)
-	var g: float = m.world.ground_at(p.x, p.z)
-	if g > World.VOID + 1.0: p.y = g
-	return p
-
 func foes_in(at: Vector3, r: float, dy := 2.2) -> Array:
 	var out: Array = []
 	for f in m.foes_of(h.team):
