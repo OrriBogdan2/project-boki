@@ -686,6 +686,9 @@ func juggernaut(a) -> void:
 			K.warchain.hooked() and K.warchain.target == T and T.blight_t <= 0.0 and A.dmg(T) >= 7.0
 			and float(K.cd["e"]) <= 0.0,
 			"blight %.1f cd %.1f" % [T.blight_t, float(K.cd["e"])])
+	var wid := "war%d" % P.get_instance_id()
+	A.ok("juggernaut E: the hooked foe wears the marker ring (shown whoever looks)",
+			(DJFx.of(m).chains.get(wid + "ring", {}).get("node") as Node3D).visible)
 	P.ak.use_e()
 	A.step(m, 0.08)
 	A.ok("juggernaut E recast: the pull starts the cooldown",
@@ -715,6 +718,10 @@ func juggernaut(a) -> void:
 	P.stun_t = 0.3
 	A.step(m, 0.05)
 	A.ok("juggernaut E: a stun breaks the chain", K.warchain.state != "hooked" and float(K.cd["e"]) > 5.0)
+	var halves: Dictionary = DJFx.of(m).chains
+	A.ok("juggernaut E: the break shows two thick halves whipping back",
+			is_instance_valid(halves.get(wid + "s0", {}).get("node")) and is_instance_valid(halves.get(wid + "s1", {}).get("node"))
+			and (halves[wid + "s0"]["node"] as Node3D).visible and K.warchain.snap_t > 0.0, "snap_t %.2f" % K.warchain.snap_t)
 	A.step(m, 0.4)
 	# ... or bites a wall and pulls you to it
 	var W = m.world

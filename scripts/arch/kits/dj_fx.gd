@@ -468,7 +468,7 @@ func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Co
 	if side.length() < 0.01: side = Vector3.RIGHT
 	side = side.normalized()
 	var n := maxi(8, int(length / 0.08))
-	var links := length / 0.2        # a bright and a dark link every 20 cm
+	var links := length / maxf(0.2, width * 1.2)     # a bright and a dark link per ~1.2 widths (thick rope, not dots)
 	im2.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 	for i in n + 1:
 		var k := float(i) / n
