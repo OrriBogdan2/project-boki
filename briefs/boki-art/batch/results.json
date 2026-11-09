@@ -9642,5 +9642,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_hivara_p_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_gloamshell_p",
+    "name": "Gloamshell (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gloamshell_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravadillo_p",
+    "name": "Gravadillo (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gravadillo_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kindlewren_p",
+    "name": "Kindlewren (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_kindlewren_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glomwort_p",
+    "name": "Glomwort (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glomwort_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mirrolin_p",
+    "name": "Mirrolin (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_mirrolin_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanterloris_p",
+    "name": "Lanterloris (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lanterloris_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_marchleaf_p",
+    "name": "Marchleaf (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_knotwyrm_p",
+    "name": "Knotwyrm (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_knotwyrm_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanterloris_p",
+    "name": "Lanterloris (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lanterloris_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mirrolin_p",
+    "name": "Mirrolin (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_mirrolin_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mossgrade_p",
+    "name": "Mossgrade (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_mossgrade_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_marchleaf_p",
+    "name": "Marchleaf (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_p_1.jpg",
+    "ok": true
   }
 ]
