@@ -3428,3 +3428,6 @@ READY ext/farm-tut-tools-cam 2781ad15e (job 20261109-001512-a1, deep follow-up t
 ## 2026-11-09 deep (job 20261109-003111-a4): CLAIM Boki 3D: Chuggamus (scaldamus) from the owner's new concept sheet
 - CLAIM: sheet check of briefs/art-refs/boki/scaldamus_turnaround.png, then Meshy build via tools/art1 + tools/meshy/meshy_task.py on the shared rig for its body type, standard clip set, Boki checks, GPU turntable vs sheet. Branch ext/boki3d-scaldamus from origin/main.
 - (job 20261109-003042-a4) nacrolin: sheet check FAILED (no 3/4 view, back spikes vs 'No spikes'); not built, redo posted in OWNER_REVIEW.md. Claim released.
+
+## 2026-11-09 deep (job 20261109-003133-a4): CLAIM Boki 3D: Canvastross (squalltross) from the owner's new concept sheet
+- CLAIM: sheet check of briefs/art-refs/boki/squalltross_turnaround.png (7e91f47b5), then Meshy build via tools/art1 + tools/meshy/meshy_task.py on the shared rig for its body type, standard clip set, Boki checks, GPU turntable vs sheet. Branch ext/boki3d-squalltross from origin/main.
