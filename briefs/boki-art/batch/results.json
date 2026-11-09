@@ -49486,5 +49486,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_dragonkite_x1_3.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_chuggamus_p99",
+    "name": "Chuggamus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_chuggamus_p99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_voltalon_p99",
+    "name": "Voltalon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_voltalon_p99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lodestaff_p99",
+    "name": "Lodestaff",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_lodestaff_p99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_seamwyrm_p99",
+    "name": "Seamwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_seamwyrm_p99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chuggamus_p99",
+    "name": "Chuggamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_chuggamus_p99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vaultara_x3",
+    "name": "Vaultara (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_vaultara_x3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_seamwyrm_p99",
+    "name": "Seamwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_seamwyrm_p99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_furnacowary_p99",
+    "name": "Furnacowary",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_furnacowary_p99_2.jpg",
+    "ok": true
   }
 ]
