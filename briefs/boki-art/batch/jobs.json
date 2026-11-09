@@ -1,5 +1,110 @@
 [
   {
+    "id": "c_bucketmander_ga",
+    "name": "Bucketmander (concept)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the baby first form that later grows up into the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but clearly a baby: much smaller, rounder and softer, with a bigger head, bigger eyes and short stubby limbs, and its object in a smaller, simpler, earlier form. It must not be image 1 shrunk down: a different, simpler body shape of its own.  Stance (owner rule: every stage of a line stands differently): as a baby it sits or bounces in a round, compact, playful stance, never the same stance as the grown forms.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A small chubby salamander larva with feathery gills whose body is a little wooden bucket of staves with one iron hoop, and its gimmick is hydro power: a little wooden paddle water-wheel grown into its tail that spins and throws small sparks. One clear idea, few parts. Face: tiny beady eyes and a big lazy grin. Main colours: wood brown and slate grey, with an electric-yellow accent. Avoid: a cloud, a storm cloud, rain, lightning bolts in the air, a separate object it carries, a building, a ladder, standing upright, a busy design. Element: storm, shown clearly by crackling electric-yellow sparks and small lightning arcs. Archetype: cute: round soft shapes, a big head and short limbs.",
+    "size": "2K"
+  },
+  {
+    "id": "c_barrelmander_ga",
+    "name": "Barrelmander (gimmick A)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Creature-collector monster concept art, soft hand-painted style exactly like image 1. This is Barrelmander from image 1: keep its face, wooden barrel body, iron-or-copper hoops, salamander legs and tail and colours, but REMOVE the storm cloud and lightning above it completely, and give it a new gimmick: hydro power: a big wooden paddle water-wheel built into its tail and copper turbine fins along its sides, crackling with sparks. ONE creature only, full body, gentle three-quarter view, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no cloud, no rain."
+  },
+  {
+    "id": "c_cisternmander_ga",
+    "name": "Cisternmander (concept)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A giant, towering salamander, a real step up from image 1 (not the same barrel body made longer): a tall, broad body built like a big wooden water tank on thick planted legs, a huge heavy head and a broad flat tail, and its gimmick is hydro power: a huge water-wheel tail and a dam-like plank collar of copper turbines, water churning and sparking through it. One clear idea, few parts. Face: small, calm yellow eyes and a wide, slow grin. Main colours: wood brown and slate grey, with copper and an electric-yellow accent. Avoid: a cloud, a storm cloud, rain, lightning bolts in the air, a separate object it carries, a building, a ladder, standing upright, a busy design. Element: storm, shown clearly by crackling electric-yellow sparks and small lightning arcs. Archetype: tough: blocky, wide and heavy, with a low stance.",
+    "size": "2K"
+  },
+  {
+    "id": "c_bucketmander_gb",
+    "name": "Bucketmander (concept)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the baby first form that later grows up into the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but clearly a baby: much smaller, rounder and softer, with a bigger head, bigger eyes and short stubby limbs, and its object in a smaller, simpler, earlier form. It must not be image 1 shrunk down: a different, simpler body shape of its own.  Stance (owner rule: every stage of a line stands differently): as a baby it sits or bounces in a round, compact, playful stance, never the same stance as the grown forms.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A small chubby salamander larva with feathery gills whose body is a little wooden bucket of staves with one iron hoop, and its gimmick is a battery: copper and zinc terminal nubs on top of its barrel body with a tiny spark jumping between them. One clear idea, few parts. Face: tiny beady eyes and a big lazy grin. Main colours: wood brown and slate grey, with an electric-yellow accent. Avoid: a cloud, a storm cloud, rain, lightning bolts in the air, a separate object it carries, a building, a ladder, standing upright, a busy design. Element: storm, shown clearly by crackling electric-yellow sparks and small lightning arcs. Archetype: cute: round soft shapes, a big head and short limbs.",
+    "size": "2K"
+  },
+  {
+    "id": "c_barrelmander_gb",
+    "name": "Barrelmander (gimmick B)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Creature-collector monster concept art, soft hand-painted style exactly like image 1. This is Barrelmander from image 1: keep its face, wooden barrel body, iron-or-copper hoops, salamander legs and tail and colours, but REMOVE the storm cloud and lightning above it completely, and give it a new gimmick: a battery: its barrel body is a wet-cell battery with two big copper terminal posts on its back joined by an arcing spark, copper wire bands instead of iron hoops. ONE creature only, full body, gentle three-quarter view, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no cloud, no rain."
+  },
+  {
+    "id": "c_cisternmander_gb",
+    "name": "Cisternmander (concept)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A giant, towering salamander, a real step up from image 1 (not the same barrel body made longer): a tall, broad body built like a big wooden water tank on thick planted legs, a huge heavy head and a broad flat tail, and its gimmick is a giant battery: its body is a huge wooden storage tank cell with a tall copper coil tower on its back crackling with a contained arc, copper wire bands. One clear idea, few parts. Face: small, calm yellow eyes and a wide, slow grin. Main colours: wood brown and slate grey, with copper and an electric-yellow accent. Avoid: a cloud, a storm cloud, rain, lightning bolts in the air, a separate object it carries, a building, a ladder, standing upright, a busy design. Element: storm, shown clearly by crackling electric-yellow sparks and small lightning arcs. Archetype: tough: blocky, wide and heavy, with a low stance.",
+    "size": "2K"
+  },
+  {
+    "id": "c_bucketmander_gc",
+    "name": "Bucketmander (concept)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the baby first form that later grows up into the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but clearly a baby: much smaller, rounder and softer, with a bigger head, bigger eyes and short stubby limbs, and its object in a smaller, simpler, earlier form. It must not be image 1 shrunk down: a different, simpler body shape of its own.  Stance (owner rule: every stage of a line stands differently): as a baby it sits or bounces in a round, compact, playful stance, never the same stance as the grown forms.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A small chubby salamander larva with feathery gills whose body is a little wooden bucket of staves with one iron hoop, and its gimmick is a spigot: a little brass tap on its side that drips glowing charged water. One clear idea, few parts. Face: tiny beady eyes and a big lazy grin. Main colours: wood brown and slate grey, with an electric-yellow accent. Avoid: a cloud, a storm cloud, rain, lightning bolts in the air, a separate object it carries, a building, a ladder, standing upright, a busy design. Element: storm, shown clearly by crackling electric-yellow sparks and small lightning arcs. Archetype: cute: round soft shapes, a big head and short limbs.",
+    "size": "2K"
+  },
+  {
+    "id": "c_barrelmander_gc",
+    "name": "Barrelmander (gimmick C)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Creature-collector monster concept art, soft hand-painted style exactly like image 1. This is Barrelmander from image 1: keep its face, wooden barrel body, iron-or-copper hoops, salamander legs and tail and colours, but REMOVE the storm cloud and lightning above it completely, and give it a new gimmick: spigots: brass taps and copper pipes on its barrel body, one tap spraying an arc of glowing charged water. ONE creature only, full body, gentle three-quarter view, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no cloud, no rain."
+  },
+  {
+    "id": "c_cisternmander_gc",
+    "name": "Cisternmander (concept)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A giant, towering salamander, a real step up from image 1 (not the same barrel body made longer): a tall, broad body built like a big wooden water tank on thick planted legs, a huge heavy head and a broad flat tail, and its gimmick is a pump house: a big brass pump handle-crest on its back and copper pipes along its body, spraying jets of glowing charged water from its taps. One clear idea, few parts. Face: small, calm yellow eyes and a wide, slow grin. Main colours: wood brown and slate grey, with copper and an electric-yellow accent. Avoid: a cloud, a storm cloud, rain, lightning bolts in the air, a separate object it carries, a building, a ladder, standing upright, a busy design. Element: storm, shown clearly by crackling electric-yellow sparks and small lightning arcs. Archetype: tough: blocky, wide and heavy, with a low stance.",
+    "size": "2K"
+  },
+  {
     "id": "ta_vespox_recolor",
     "name": "Vespox (recolour)",
     "refs": [
@@ -8098,6 +8203,17 @@
     "size": "2K"
   },
   {
+    "id": "stance_cisternmander",
+    "name": "Cisternmander (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Cisternmander.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Braced wide on splayed legs, head raised, cistern back tilted forward, storm cloud rumbling high. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
     "id": "stance_tinbrock",
     "name": "Tinbrock (new stance)",
     "refs": [
@@ -15582,6 +15698,17 @@
     "aspect": "1:1",
     "runs": 3,
     "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Low waddle stride: legs mid-step, body slung low, head forward, storm cloud trailing. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_cisternmander",
+    "name": "Cisternmander (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Cisternmander.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Braced wide on splayed legs, head raised, cistern back tilted forward, storm cloud rumbling high. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
     "size": "2K"
   },
   {
