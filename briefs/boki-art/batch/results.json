@@ -8172,5 +8172,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/teapotamus_4k_1.jpg",
     "ok": true
+  },
+  {
+    "id": "forgebrock_r",
+    "name": "Forgebrock",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/forgebrock_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "frothisk_r",
+    "name": "Frothisk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/frothisk_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frothisk_r",
+    "name": "Frothisk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/frothisk_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "dragonkite_e",
+    "name": "Dragonkite",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dragonkite_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dragonkite_e",
+    "name": "Dragonkite",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dragonkite_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "frothisk_r",
+    "name": "Frothisk",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/frothisk_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_r",
+    "name": "Galleotter",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/galleotter_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_r",
+    "name": "Galleotter",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/galleotter_r_2.jpg",
+    "ok": true
   }
 ]
