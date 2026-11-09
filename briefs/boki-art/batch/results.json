@@ -11154,5 +11154,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_snuffapi_pe_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_spirevark_pe",
+    "name": "Spirevark (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_spirevark_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_spirevark_pe",
+    "name": "Spirevark (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_spirevark_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_umbrathere_pe",
+    "name": "Umbrathere (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_umbrathere_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zephyrak_pe",
+    "name": "Zephyrak (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_zephyrak_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_umbrathere_pe",
+    "name": "Umbrathere (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_umbrathere_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zephyrak_pe",
+    "name": "Zephyrak (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_zephyrak_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenfin_p2",
+    "name": "Selenfin (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_selenfin_p2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenfin_p2",
+    "name": "Selenfin (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_selenfin_p2_2.jpg",
+    "ok": true
   }
 ]
