@@ -16,5 +16,10 @@ Rebuild (Blender under ulimit -v 12000000; raw files in ~/meshy/tarek_v2):
     blender -b --factory-startup --python tools/art1/tarek_scan.py -- ~/meshy/tarek_v2/fit.blend WORK
     blender -b WORK/tarek.blend --python tools/art1/tarek_clips.py -- WORK/tarek_anims.blend art/wardens/tarek/tarek.glb
 
+Without Blender, the lmb_punch/lmb_throw hand re-time (ext/anim-hand-tenzo) is re-applied to a glb baked from the OLD key times
+(punch 0.05/0.12, throw 0.07/0.13/0.24). A bake from the current tarek_clips.py already has it, so do not run these on it:
+    python3 tools/art1/glb_retime.py art/wardens/tarek/tarek.glb lmb_punch 0:0,0.11:0.05,0.16:0.12
+    python3 tools/art1/glb_retime.py art/wardens/tarek/tarek.glb lmb_throw 0:0,0.05:0.07,0.15:0.13,0.26:0.24
+
 tarek_clipcheck.py measures arms into the chest across the clips. In game: --clip-shots (--true-cam, --ground=<hex>), --clip-check,
 --rig-standard-check. Kit FX read `weapon_muzzle`, `anchor_wrist_R`, `anchor_fist_L/R`, `anchor_gauntlet_L/R`, `anchor_stones_<i>`.
