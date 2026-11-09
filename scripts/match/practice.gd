@@ -2,7 +2,8 @@ class_name Practice
 extends Node
 ## What every practice area shares (the Training Grounds, the tutorial, the Arena and the Duel room;
 ## never a real match): a bottom bar like the farm's hub (Hero, the area's own menu, Leave), J for
-## the hero picker (PracticeHero), and the mouse wheel zooming the camera. One node under the Match,
+## the hero picker (PracticeHero), the mouse wheel zooming the camera, and where there are dummies the parity bench
+## (ParityBench). One node under the Match,
 ## attached by Match.start with a single call.
 
 const NAME := "Practice"
@@ -15,6 +16,7 @@ const ZOOM_MAX := 1.6          # furthest
 var m: Match
 var bar: PanelContainer = null
 var bar_btns := {}             # id -> Button
+var bench: ParityBench = null  # the parity bench panel (the areas with dummies)
 var picker: CanvasLayer = null # the hero picker, while open
 var picker_page := ""          # "heroes" | "kit"
 var hover_arch := ""           # the card under the mouse (K opens its kit)
@@ -35,6 +37,7 @@ static func attach(match_node: Match) -> Practice:
 	p.process_mode = Node.PROCESS_MODE_ALWAYS      # J and Esc work while a menu has the game paused
 	p.m = match_node
 	match_node.add_child(p)
+	p.bench = ParityBench.attach(match_node)
 	p._build_bar()
 	return p
 
@@ -46,6 +49,8 @@ func items() -> Array:
 		out.append(["menu", "Loadout", "bag", func(): if not m.paused: m.arena.open_menu(), "L"])
 	elif m.duel:
 		out.append(["menu", "Duel", "gear", func(): if not m.paused: m.duel.open_menu(), "B"])
+	if bench:
+		out.append(["bench", "Bench", "gear", func(): bench.toggle(), ""])
 	out.append(["leave", "Leave", "back", func(): leave(m, true), ""])
 	return out
 
