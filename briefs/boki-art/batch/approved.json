@@ -452,6 +452,51 @@
    "id": "relic_sparkle_w29",
    "pick": 4,
    "grade": 8.53
+  },
+  {
+   "id": "stance_kerchick",
+   "pick": 2,
+   "grade": 8.3
+  },
+  {
+   "id": "stance_mycroll",
+   "pick": 3,
+   "grade": 8.5
+  },
+  {
+   "id": "stance_vespyx",
+   "pick": 3,
+   "grade": 8.43
+  },
+  {
+   "id": "ta_foldbat",
+   "pick": 2,
+   "grade": 8.6
+  },
+  {
+   "id": "ta_rattlebub",
+   "pick": 1,
+   "grade": 8.6
+  },
+  {
+   "id": "stance_bubblisk",
+   "pick": 3,
+   "grade": 8.67
+  },
+  {
+   "id": "stance_nettlynx",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "stance_oarlet",
+   "pick": 1,
+   "grade": 8.47
+  },
+  {
+   "id": "stance_tinbrock",
+   "pick": 1,
+   "grade": 8.47
   }
  ],
  "rerolled": [

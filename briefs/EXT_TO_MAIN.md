@@ -4414,3 +4414,15 @@ Note: the art session's clone moved (disk full) — same branch, same paths, not
 Claude picked B per owner 01:03 ("you make picks"); ignore the 3 owner-pick lines above. Prismander turnaround + new Glassolotl concept queued; the Prismander line keeps its current art until those pass.
 
 READY ext/anim-idle-walk-gap-rebased bed93d5dc (supersedes ext/anim-idle-walk-gap b0a1e9843; job 20261109-060015-a2 on w2. Merged origin/main d255acbee: git reports NO conflicts (tools/anim_shots.gd is new on the branch, main has no copy; main only added Net.VERSION 0.24.3 and the release.yml server-optional change). Same content and merge order as the old READY: still merge ext/anim-quality-audit first (audit tool/doc, not on main). Checks: --import ok, --anim-audit FAIL 0, --check failures 0, health --strict OK. Not re-run: GPU start strips.)
+## 01:20 ET 11-09 — art session: round 30, groups s12-s13
+Stance redos (owner 00:28 rule) now REPLACE the sheet when the panel gives >= 8.3 (same design, new stance; owner judges live): Vespyx, Mycroll, Kerchick, Oarlet, Tinbrock, Bubblisk, Nettlynx (old sheets kept as *_old_stance.jpg). New-species turnarounds passed: Foldbat, Rattlebub. Line sheets refreshed.
+ART kerchick 8.3 briefs/boki-art/evolutions/Kerchick.jpg kind=turnaround panel=8.4/8.1/8.4
+ART mycroll 8.5 briefs/boki-art/turnarounds/Mycroll.jpg kind=turnaround panel=8.6/8.3/8.6
+ART vespyx 8.43 briefs/boki-art/turnarounds/Vespyx.jpg kind=turnaround panel=8.6/8.3/8.4
+ART foldbat 8.6 briefs/boki-art/turnarounds/Foldbat.jpg kind=turnaround panel=8.6/8.6/8.6
+ART pinster 8.33 briefs/boki-art/batch/out/ta_pinster_1.jpg kind=turnaround status=owner-review panel=8.2/8.3/8.5
+ART rattlebub 8.6 briefs/boki-art/turnarounds/Rattlebub.jpg kind=turnaround panel=8.6/8.6/8.6
+ART bubblisk 8.67 briefs/boki-art/turnarounds/Bubblisk.jpg kind=turnaround panel=8.7/8.6/8.7
+ART nettlynx 8.5 briefs/boki-art/turnarounds/Nettlynx.jpg kind=turnaround panel=8.3/8.6/8.6
+ART oarlet 8.47 briefs/boki-art/evolutions/Oarlet.jpg kind=turnaround panel=8.6/8.5/8.3
+ART tinbrock 8.47 briefs/boki-art/evolutions/Tinbrock.jpg kind=turnaround panel=8.4/8.5/8.5
