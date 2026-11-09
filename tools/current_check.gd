@@ -112,7 +112,7 @@ func _shots(out: String) -> void:
 	var mid := a.lerp(b, 0.4)
 	p.teleport(mid)
 	p.vel = fwd * 14.0
-	await _frames(m, p, true, mid + fwd * 6.0, 40)
+	await _frames(m, p, true, mid + fwd * 2.0, 24)
 	_save(main, out, "road_glide")
 	var u: Dictionary = m.world.updrafts[0]
 	var c: Vector3 = u["pos"]
@@ -120,9 +120,9 @@ func _shots(out: String) -> void:
 	await _frames(m, p, false, c + Vector3(0, 4, 0), 30)
 	_save(main, out, "updraft_ground")
 	p.teleport(Vector3(c.x, c.y + 3.0, c.z))
-	await _frames(m, p, true, c + Vector3(0, 3, 0), 40)
+	await _frames(m, p, true, c + Vector3(0, 4, 0), 22)
 	_save(main, out, "updraft_ride")
-	print("CURRENT riding: in_current %s" % p.in_current)
+	ok(p.in_current, "the player rides the updraft in the shot")
 	m.queue_free()
 
 ## Runs frames with the player gliding (or not) and the camera on a spot.

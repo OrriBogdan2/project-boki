@@ -19,6 +19,6 @@ void fragment() {
 	float ends = smoothstep(0.05, 0.55, UV.y) * (1.0 - smoothstep(0.7, 1.0, UV.y));
 	ALBEDO = color.rgb;
 	// a soft body (clearer at the middle of the silhouette than at its edge) under the streaks
-	float body = 0.12 * pow(1.0 - rim, 2.0);
+	float body = 0.2 * pow(1.0 - rim, 2.0);
 	ALPHA = color.a * ends * (streak * (0.8 + 0.8 * boost) + pow(rim, 4.0) * 0.1 + body * (1.0 + 3.0 * boost));
 }
