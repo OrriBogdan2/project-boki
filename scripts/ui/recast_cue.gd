@@ -47,7 +47,8 @@ static func draw(H, p: Hunter) -> void:
 	shown = "%s AGAIN" % key
 	var tw := HudStyle.BIG.get_string_size(shown, HORIZONTAL_ALIGNMENT_LEFT, -1, TEXT_SIZE).x + 16.0
 	var tp := Vector2(r.get_center().x, r.position.y - TEXT_RISE)
-	H._rounded(Rect2(tp + Vector2(-tw * 0.5, -TEXT_SIZE - 2.0), Vector2(tw, TEXT_SIZE + 8.0)), HudStyle.KEY_BG, 7, glow, 2)
+	var pill := Rect2(tp + Vector2(-tw * 0.5, -TEXT_SIZE - 2.0), Vector2(tw, TEXT_SIZE + 8.0))
+	H._rounded(pill, HudStyle.KEY_BG, 7, glow, 2)
 	HudStyle.ctext(c, tp, shown, TEXT_SIZE, col.lerp(Color.WHITE, 0.35 + 0.3 * pulse), 3)
 
 ## The slot's screen rect, as the bar placed it (hover_spots); "primary" has no slot, so a tile floats over RMB's.
