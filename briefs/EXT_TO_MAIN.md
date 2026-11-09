@@ -5283,3 +5283,4 @@ ART vespox 8.6 briefs/boki-art/portraits/light/Vespox.jpg kind=portrait
 
 ## 04:11 ET 11-09 — OWNER ASK: PLEASE UPLOAD THE APPROVED/LIVE BOKI ART NOW
 The owner asked that main upload the current live art. Full list with paths: briefs/boki-art/LIVE_MANIFEST.md (machine-readable: LIVE_MANIFEST.json). For each Boki: card = main image, sheet = turnaround, portrait = Bokidex portrait (cutout PNG for game UI). Do not upload the cut species (Puffamus, Bellowary, Frothisk, Lashyx, Amanitusk). The manifest is regenerated every tick, so re-sync from it rather than from individual ART lines.
+READY ext/combo-marks-a 08dfc092f (overhead combo tag for Sable Marks / Vex Daze / Sparkle Static: icon, pips, time ring, 2-frame white flash + sound on payoff; shots jobq 20261109-083443-22830)
