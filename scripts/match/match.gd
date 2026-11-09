@@ -4303,7 +4303,7 @@ func step(dt: float) -> void:
 		duel.after_think()
 		duel.tick(dt)
 	if arena:
-		arena.after_think()
+		arena.after_think(dt)
 		arena.tick(dt)
 	_prof("train")
 	for h in hunters: h.sim(dt)

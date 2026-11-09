@@ -1,0 +1,10 @@
+{
+	"doc": "Practice-dummy movement in the Training Area [our design, for parity testing of skillshots against targets that move like players]. Modes: still, strafe, dodge. strafe_share: share of the dummy's own run speed it strafes at (1 = run speed). leg_min / leg_max: seconds of one strafe leg, drawn at random. dash_min / dash_max: seconds between dodge dashes (Dodge = strafe plus a normal dash through Hunter.do_dash). pen_r: metres from its mark the dummy stays within; it turns back at the edge and a dash only goes where the whole dash fits.",
+	"modes": ["still", "strafe", "dodge"],
+	"strafe_share": 1.0,
+	"leg_min": 0.6,
+	"leg_max": 1.4,
+	"dash_min": 4.0,
+	"dash_max": 6.0,
+	"pen_r": 3.0
+}

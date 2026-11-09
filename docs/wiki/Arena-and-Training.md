@@ -25,6 +25,9 @@ Signs on posts name each area and each piece of the lane.
 
 - **Dummies** are real hunters, so Marks, wall slams and every ability work on them. Each shows damage per
   second, last hit and total over its head, and heals up when left alone.
+- **The dummy station** (a sign by the first dummy, **F** within two metres) switches that dummy between Still, Strafe
+  (side to side at run speed, random 0.6-1.4 s legs) and Dodge (strafe plus a dash every 4-6 s), for testing skillshots
+  against targets that move like players. It stays in its pen. Tuning: `content/rules/dummy_move.json`.
 - **A sparring bot** you switch between Off, Idle, Moving and Fighting (**N**), with any Hunter.
 - **Backspace** resets. **O** turns cooldowns off (dash, RMB, E, R and the glove). **U** unlocks the ultimate.
 - **2-9** swap to the first eight Hunters on the spot. **L** opens the loadout (Hunter, weapon, Boki, gloves,

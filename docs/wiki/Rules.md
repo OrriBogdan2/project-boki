@@ -170,6 +170,21 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save wears Vex first (`s
 | thief | {"dist": 1.0, "time": 1.0} |
 | ashwick | {"dist": 1.0, "time": 1.0} |
 
+## dummy_move (`content/rules/dummy_move.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Practice-dummy movement in the Training Area [our design, for parity testing of skillshots against targets that move like players]. Modes: still, strafe, dodge. strafe_share: share of the dummy's own run speed it strafes at (1 = run speed). leg_min / leg_max: seconds of one strafe leg, drawn at random. dash_min / dash_max: seconds between dodge dashes (Dodge = strafe plus a normal dash through Hunter.do_dash). pen_r: metres from its mark the dummy stays within; it turns back at the edge and a dash only goes where the whole dash fits. |
+| modes | ["still", "strafe", "dodge"] |
+| strafe_share | 1 |
+| leg_min | 0.6 |
+| leg_max | 1.4 |
+| dash_min | 4 |
+| dash_max | 6 |
+| pen_r | 3 |
+
 ## equal (`content/rules/equal.json`)
 
 

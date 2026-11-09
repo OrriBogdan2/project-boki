@@ -22,6 +22,7 @@ func step(m: Match, secs: float) -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	await _arena()
+	await _dummy_modes()
 	await _breaker_whirl()
 	await _cards()
 	await _loadout()
@@ -99,6 +100,83 @@ func _breaker_whirl() -> void:
 		P.inp["fire"] = false
 		m.queue_free()
 		await main.get_tree().process_frame
+
+## The station dummy in each mode for 25 s (you stand at your start): Still stays put; Strafe runs side to side at its
+## run speed and turns in 0.6-1.4 s legs; Dodge strafes and dashes every 4-6 s; both stay in the pen.
+func _dummy_modes() -> void:
+	var m := Match.new()
+	main.add_child(m)
+	await m.start(Match.arena_opts("thief"))
+	m.set_process(false)
+	var A: Arena = m.arena
+	var mv: DummyMove = A.dummies[0]["mv"]
+	var sign_still := func() -> bool: return A.station_label.text.begins_with("DUMMY: STILL")
+	ok("dummy station: Still to start, the sign says so", mv.mode == "still" and sign_still.call())
+	for want in ["still", "strafe", "dodge"]:
+		A.reset()
+		step(m, 0.5)
+		_dummy_mode_asserts(m, want)
+		A.cycle_dummy()
+	ok("dummy station: F cycles Still, Strafe, Dodge, then Still", mv.mode == "still" and sign_still.call())
+	A.teardown()
+	m.queue_free()
+	await main.get_tree().process_frame
+
+## Watches the station dummy for 25 s in its current mode and asserts what that mode promises.
+func _dummy_mode_asserts(m: Match, want: String) -> void:
+	var D: Hunter = m.arena.dummies[0]["h"]
+	var mark: Vector3 = m.arena.dummies[0]["at"]
+	var pen := float(DummyMove.rules["pen_r"])
+	var path := 0.0
+	var far := 0.0
+	var top := 0.0
+	var dashes := 0
+	var turns := 0
+	var first_dash := -1.0
+	var last_dash := 0.0
+	var min_gap := 99.0
+	var side_v := 0.0
+	var last := D.pos
+	var was_roll := false
+	var t := 0.0
+	while t < 25.0:
+		m.step(DT)
+		t += DT
+		var vel := (D.pos - last) / DT
+		path += D.pos.distance_to(last)
+		last = D.pos
+		far = maxf(far, Vector2(D.pos.x - mark.x, D.pos.z - mark.z).length())
+		if D.roll_t <= 0.0:
+			top = maxf(top, Vector2(vel.x, vel.z).length())
+		elif not was_roll:
+			dashes += 1
+			if first_dash < 0.0:
+				first_dash = t
+			else:
+				min_gap = minf(min_gap, t - last_dash)
+			last_dash = t
+		was_roll = D.roll_t > 0.0
+		if absf(vel.x) > 1.0 and signf(vel.x) != side_v:
+			turns += 1 if side_v != 0.0 else 0
+			side_v = signf(vel.x)
+	var info := "path %.1f m, top %.2f (run %.2f), %d turns, %d dashes (first %.1fs), far %.2f m" % [
+		path, top, D.base_speed, turns, dashes, first_dash, far]
+	var tag := "dummy " + want
+	var moves := path > 40.0 and top > D.base_speed * 0.9 and top < D.base_speed * 1.1
+	var in_pen := far <= pen + 0.8
+	var dash_min := float(DummyMove.rules["dash_min"])
+	var dash_max := float(DummyMove.rules["dash_max"])
+	var dash_gap_ok := first_dash >= dash_min - 0.5 and first_dash <= dash_max + 2.0 and min_gap >= dash_min - 0.1
+	match want:
+		"still":
+			ok(tag + ": stands still", path < 0.5 and dashes == 0, info)
+		"strafe":
+			ok(tag + ": side to side at run speed, short legs", moves and turns >= 12 and turns <= 45, info)
+			ok(tag + ": stays in its pen, never dashes", in_pen and dashes == 0, info)
+		"dodge":
+			ok(tag + ": strafes and dashes every 4-6 s", moves and dashes >= 3 and dashes <= 7 and dash_gap_ok,
+				info)
+			ok(tag + ": stays in its pen", in_pen, info)
 
 func _arena() -> void:
 	var m := Match.new()

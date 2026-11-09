@@ -7,7 +7,7 @@ extends RefCounted
 ##
 ## What it gives you:
 ## - practice dummies (real hunters, so Marks, carries, wall slams and every ability work on them):
-##   one that stands and watches you, one that strafes, a heavy one by a pillar to slam into; each
+##   one that stands and watches you (its station sign, F, switches it Still / Strafe / Dodge), one that strafes, a heavy one by a pillar to slam into; each
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
 ## - a reset (Backspace; X is the hero ultimate), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
@@ -24,6 +24,8 @@ const TEAM := 7
 ## the pillar; on the Range three still ones at 10, 20 and 35 m from its gate (x = 43), for falloff and aim.
 const WING := Vector3(26.0, 0, 52.0)        # the Practice Wing (training.json): crates, gear rack, duel pad, mobs
 const WING_R := 7.5
+const STATION := Vector3(20.2, 0, 28.0)      # the dummy station's sign (map tiles), by the first dummy; F there cycles its mode
+const STATION_R := 2.2                       # m: how close you stand to use it
 
 ## Where the match puts the player while it builds the wing's crates, gear rack and duel pad (setup moves them on).
 static func wing_spot(w: World) -> Vector3:
@@ -42,7 +44,8 @@ const SPOTS := [["still", Vector3(23.5, 0, 26.5), "light", "Dummy"],
 var m: Match
 var layout := "arena"          # (one layout since 11-08: the separate "practice" training island is retired)
 var home := Vector3.ZERO       # where you start (and reset to)
-var dummies: Array = []        # {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet}
+var dummies: Array = []        # {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet, mv: DummyMove}
+var station_label: Label3D = null
 var bot: Hunter = null
 var bot_mode := "off"
 var bot_arch := "gunslinger"
@@ -118,7 +121,7 @@ func _spawn_dummies() -> void:
 		lb.position = Vector3(0, 3.4, 0)
 		D.add_child(lb)
 		dummies.append({"h": D, "kind": sp[0], "name": String(sp[3]).to_upper(), "at": at, "label": lb, "hits": [],
-			"total": 0.0, "last": 0.0, "quiet": 0.0})
+			"total": 0.0, "last": 0.0, "quiet": 0.0, "mv": DummyMove.new("strafe" if sp[0] == "strafe" else "still")})
 
 func _on_hit(by, t, d, _tags) -> void:
 	var credit = by
@@ -148,7 +151,7 @@ static func dps_of(hits: Array, now: float, win := 4.0) -> float:
 
 ## Runs right after the bots think (Match.step): dummies watch you, the strafer strafes, the bot
 ## mode trims what the sparring bot may do; heals, revives and cooldowns-off.
-func after_think() -> void:
+func after_think(dt: float) -> void:
 	var P: Hunter = m.player
 	if P == null:
 		return
@@ -156,19 +159,18 @@ func after_think() -> void:
 		var D: Hunter = dm["h"]
 		if not is_instance_valid(D):
 			continue
-		# the still and heavy dummies face your start (so you can get behind them: Thief Marks); the
-		# strafer watches you
-		D.inp["aim"] = (P.pos if dm["kind"] == "strafe" else home) + Vector3(0, 0.9, 0)
-		var mv := Vector2.ZERO
-		var at: Vector3 = dm["at"]
-		if dm["kind"] == "strafe":
-			mv = Vector2(sin(m.time * 1.3), 0.0)
-		var off := Vector2(at.x - D.pos.x, at.z - D.pos.z)
-		if off.length() > (2.4 if dm["kind"] == "strafe" else 0.6) and float(dm["quiet"]) > 1.2:
-			mv = off.normalized()       # walk back to its mark once you stop hitting it
-		D.inp["move"] = mv
 		for k in ["fire", "dash", "jump", "sig", "sec", "ult", "gear1", "gear2", "throw"]:
 			D.inp[k] = false
+		# a still or heavy dummy faces your start (so you can get behind them: Thief Marks); a mover watches you
+		var mover: DummyMove = dm["mv"]
+		var watch: Vector3 = home if mover.mode == "still" else P.pos
+		D.inp["aim"] = watch + Vector3(0, 0.9, 0)
+		var at: Vector3 = dm["at"]
+		var mv := mover.step(D, at, watch, dt, m.rng)
+		var off := Vector2(at.x - D.pos.x, at.z - D.pos.z)
+		if mover.mode == "still" and off.length() > 0.6 and float(dm["quiet"]) > 1.2:
+			mv = off.normalized()       # walk back to its mark once you stop hitting it
+		D.inp["move"] = mv
 	if bot and is_instance_valid(bot):
 		match bot_mode:
 			"idle":
@@ -232,6 +234,8 @@ func tick(dt: float) -> void:
 			P.remove_meta("arena_down")
 			m.revive_hunter(P, null)
 			P.hp = P.max_hp
+	if Input.is_action_just_pressed("interact") and not m.paused and not P.downed and P.flat_dist(_arena_point(STATION)) < STATION_R:
+		cycle_dummy()
 	_update_ui()
 	ArenaDemo.tick(self, dt)      # (screenshot tooling only, --arena-demo)
 
@@ -409,14 +413,24 @@ func _update_ui() -> void:
 	if meter.text != lines:
 		meter.text = lines
 
+## F at the dummy station: the first dummy goes Still, Strafe, Dodge in turn.
+func cycle_dummy() -> void:
+	(dummies[0]["mv"] as DummyMove).cycle()
+	_show_station()
+
+func _show_station() -> void:
+	station_label.text = "DUMMY: %s\nF  ·  next mode" % String((dummies[0]["mv"] as DummyMove).mode).to_upper()
+
 ## The signs: by your start, where the kit card and the loadout are; along the Movement Lane, what each piece is for.
 func _sign() -> void:
 	var keys := "K  ·  KIT CARD\nL  ·  LOADOUT (Hunter, Boki, 2 gloves)\nBACKSPACE  ·  RESET"
 	_sign_at(keys, home + Vector3(-3.2, 0, 1.2))
 	for sg in SIGNS:
 		_sign_at(String(sg[0]), _arena_point(sg[1]))
+	station_label = _sign_at("", _arena_point(STATION))
+	_show_station()
 
-func _sign_at(text: String, foot: Vector3) -> void:
+func _sign_at(text: String, foot: Vector3) -> Label3D:
 	var lb := Label3D.new()
 	lb.text = text
 	lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -432,6 +446,7 @@ func _sign_at(text: String, foot: Vector3) -> void:
 	post.material_override = Models.toon(Color("7a5a3a"))
 	post.position = foot + Vector3(0, 0.8, 0)
 	m.add_child(post)
+	return lb
 
 func _open_card() -> void:
 	_close_card()
