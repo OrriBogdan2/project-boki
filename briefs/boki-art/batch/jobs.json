@@ -3917,6 +3917,281 @@
     "size": "2K"
   },
   {
+    "id": "anchorbill_r2_w29",
+    "name": "Anchorbill",
+    "refs": [
+      "briefs/boki-art/batch/out/anchorbill_r2_w28_4.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: fuse the anchor shank into the bill so the flukes are the bill tip with feathers growing over its base, then lay out four views in one row. Also: run 4, blend the shank into the brow with feathers overlapping its base, then relay as four equal views in one row Also: run 4 into four equal views in one row and drop the floating rocks and the shadow.",
+    "size": "2K"
+  },
+  {
+    "id": "arcestrel_e_w29",
+    "name": "Arcestrel",
+    "refs": [
+      "briefs/boki-art/batch/out/arcestrel_e_3.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: a compact diving kestrel with a big head and fierce grin in a readable three-quarter glide, copper feather-vanes grown smooth from the wing (no banded joints), on all views. Also: merge the copper fins into the flight feathers (no ring bands, copper veins running from the wing bones into the fins). Also: Re-pose in a neutral perched three-quarter stance with the bigger cartoon face from run 3 The last attempt failed review. These panel fixes are hard requirements: compact big-headed kestrel perched in 3/4, copper feather-vanes grown smoothly from the wing bones with copper veins, fierce grin, same in all four views. Also: compact big-headed kestrel in a three-quarter glide, copper feather-vanes grown from the wing bones, fierce grin, same pose in all views Also: compact big-headed kestrel, fierce grin, copper fin-vanes grown from the wing bones, same three-quarter glide in all views.",
+    "size": "2K"
+  },
+  {
+    "id": "blossmink_e_w29",
+    "name": "Blossmink",
+    "refs": [
+      "briefs/boki-art/batch/out/blossmink_x_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: put the front view on all four legs like the side view, give it Ermink's ivory-and-ink face mask and belly, grow the blossoms out of moss clusters instead of loose petals, and add black ink-tipped claws and a hint of fang. Do not add anything else. The last attempt failed review. These panel fixes are hard requirements: put the front and back views on all four legs, low like the side view, and tighten the moss into a few clean clump shapes. Also: put the front and back views low on all four legs like the side view and lengthen the body so it reads as a mink. Also: redraw front and three-quarter views standing on all four legs exactly like the side view. The last attempt failed review. These panel fixes are hard requirements: long low mink lounging flat like a mossy log on all fours in every view, Ermink mask, a few clean moss clumps with blossoms, ink claws. Also: a long, low lounging mink stretched like a mossy log on all fours in every view, blossoms growing from moss clumps, Ermink face mask Also: long low mossy mink lounging flat like a fallen log, with blossoms along the spine.",
+    "size": "2K"
+  },
+  {
+    "id": "briarlynx_e_w29",
+    "name": "Briarlynx",
+    "refs": [
+      "briefs/boki-art/batch/out/briarlynx_e_w28_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: turn the ears into big serrated briar-leaf ears with black tufts and thin the thorn count by half. Also: run 3, add big serrated briar-leaf ears with black tufts and green leaf tips along the thorns Also: replace the ears with big serrated briar-leaf ears with black tufts and enlarge the eyes.",
+    "size": "2K"
+  },
+  {
+    "id": "coolatee_r_w29",
+    "name": "Coolatee",
+    "refs": [
+      "briefs/boki-art/batch/out/coolatee_r_w28_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: sink the shell patch into the back fur (no rim over the head), curl the body into a bean and scale it up to fill the row. Also: run 2, scale the creature up to fill the row and curl it into a bean shape so it differs from Frigatee Also: curled bean-shaped seal calf, a few frost crystals growing from the shoulders, no lid or rim, bigger in frame.",
+    "size": "2K"
+  },
+  {
+    "id": "flarmink_e_w29",
+    "name": "Flarmink",
+    "refs": [
+      "briefs/boki-art/batch/out/flarmink_e_w28_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: lay the flame tail long and low straight behind in every view and lower the front and back views into a crouch. Also: run 2, lay the flame tail straight back and low behind the body in every view and stretch the body into a racing lean Also: lay the flame tail flat and long behind the body and remove the faded duplicate legs.",
+    "size": "2K"
+  },
+  {
+    "id": "glaciatee_r_w29",
+    "name": "Glaciatee",
+    "refs": [
+      "briefs/boki-art/batch/out/glaciatee_r_w28_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: remove the remaining mist wisps and set the background to flat #E8E8EE. Also: run 3, sink the door further so ice frost overlaps its rim and drop the leftover mist wisps Also: lighten the background to pale grey and let the ice overlap the door rim a bit more.",
+    "size": "2K"
+  },
+  {
+    "id": "glaivyx_r2_w29",
+    "name": "Glaivyx",
+    "refs": [
+      "briefs/boki-art/batch/out/glaivyx_r2_w28_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: re-lay run 2 as four views in one row on pale grey. Also: run 3 in one row and blend the shell plates into the fur at the neck Also: run 3 into one row on pale grey.",
+    "size": "2K"
+  },
+  {
+    "id": "howlop_e_w29",
+    "name": "Howlop",
+    "refs": [
+      "briefs/boki-art/batch/out/howlop_r_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: lower the body into a flat stalking crouch with the head thrust forward, bring back the hare: a rounder muzzle with a split hare lip and buck-tooth incisors in front of the sabre fangs and a fluffy cottontail tuft at the base of the whip tail, and make the sound rings thinner and behind the head. Do not add anything else. The last attempt failed review. These panel fixes are hard requirements: a low stalking hare-bodied creature with a round hare muzzle, buck teeth over sabre fangs, big bat ears, fluffy cottontail, stylised and chunkier. Also: : drop the body into a low flat crouch with head forward and add buck-tooth incisors in front of the fangs. Also: low stalking crouch, round hare muzzle with buck teeth before small sabres, cottontail, warmer palette. The last attempt failed review. These panel fixes are hard requirements: stylised chunky hare in a flat stalking crouch, round hare muzzle with buck teeth over small sabres, big bat ears, thin sound rings behind the head, warmer palette. Also: New edit: drop the body into a flat stalking crouch with the head forward, round hare muzzle, rings thin and only behind the ears, warmer palette Also: chunky low-crouched hare, big round head and muzzle, buck teeth over small sabres, bat ears, sound ridges inside the ears instead of floating rings.",
+    "size": "2K"
+  },
+  {
+    "id": "jibbatross_r_w29",
+    "name": "Jibbatross",
+    "refs": [
+      "briefs/boki-art/turnarounds/Canvastross.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A lean, forward-leaning albatross mid-stride, its wings half-folded and swept back like furled jib sails with the canvas grown as feather membrane between dark wooden wing bones, long wind-streamer tail feathers (not ribbons), hooked iron tips on its beak and wing joints. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Its body plan, silhouette and pose must be fundamentally different from image 1, not image 1 with parts added. Face: droopy gold eyes in dark patches and a cocky young-deckhand scowl. Main colours: white and canvas cream, with an iron-grey accent. Avoid: stiff vertical wings, ribbons tied through grommets, a saddle, ropes, a mast. Element: tempest, shown clearly by wind-swept streamers and sky-blue swirl markings. Archetype: fast: lean and forward-leaning, with swept-back shapes. The last attempt failed review. These panel fixes are hard requirements: long, low, forward-swept gliding albatross with sail wings swept back, big hooked beak and cocky face. Also: lean albatross mid-stride, body horizontal, wings swept back and furled tight like jib sails along the body. Also: forward-leaning running albatross with wings swept back flat like furled jibs, no raised wings The last attempt failed review. These panel fixes are hard requirements: big stylised albatross final with an oversized head and cocky scowl, sail wings swept back as feather membrane, iron hooks, bold heavier silhouette that clearly outscales Canvastross. Also: a big, long, low forward-swept gliding albatross much larger than Canvastross, sail canvas grown as wing membrane, huge hooked iron-tipped beak, wind-swirl markings, one row Also: stylised big-headed albatross whose wing feathers are the jib sail itself, with no separate spars or clamps.",
+    "size": "2K"
+  },
+  {
+    "id": "lanceron_r_w29",
+    "name": "Lanceron",
+    "refs": [
+      "briefs/boki-art/batch/out/lanceron_r_w28_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: lay out four views in one row, lengthen the neck and enlarge the head with a proud thin smile. Also: run 2, lengthen the neck into a heron S-curve and relay as one row of four Also: lengthen the neck into a heron S-curve, then relayout into one row.",
+    "size": "2K"
+  },
+  {
+    "id": "lanternmit_e_w29",
+    "name": "Lanternmit",
+    "refs": [
+      "briefs/boki-art/batch/out/lanternmit_e_3.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: shorten and thicken the legs into stubby crab legs and enlarge the face again. Also: make the eye stalks and smug face 1.5x bigger and remove the glow halo. Also: enlarge the eyes and smile further and shorten the legs a little The last attempt failed review. These panel fixes are hard requirements: shorten the legs into stubby crab legs and make the eye stalks and smug face 1.5x bigger. Also: run 3, shorten and thicken the legs into stubby crab legs and make the eye stalks and smile 1.5x bigger Also: shorten the legs into stubby crab legs and make the eye stalks and smile 1.5x bigger.",
+    "size": "2K"
+  },
+  {
+    "id": "mothlet_r3_w29",
+    "name": "Mothlet",
+    "refs": [
+      "briefs/boki-art/batch/out/mothlet_r3_w28_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: add a small crescent moon dot on the forehead, mint tint to the wing buds and two tiny tail-streamer nubs. Also: run 2, remove the glow halo and shorten the tail streamers to small nubs Also: add a small moon dot on the forehead and feathery moth antennae-tufts with a faint luna-green tint.",
+    "size": "2K"
+  },
+  {
+    "id": "murmurling_f_e_w29",
+    "name": "Murmurling (female)",
+    "refs": [
+      "briefs/boki-art/batch/out/murmurling_f_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make the pipe tail slimmer and shorter like thin bamboo pipes, remove the floating music notes and sound arcs, and add a little starry iridescence back into the plumage. Do not add anything else. The last attempt failed review. These panel fixes are hard requirements: stylised round bird with a bigger head whose tail feathers are hollow reed quills, not separate pipes. Also: grow the pipes from the tail quills as slim bamboo-thin hollow feathers and stylise the body rounder. Also: grow slim pipe quills as the tail feathers themselves on a stylised round bird The last attempt failed review. These panel fixes are hard requirements: round stylised bird with a big head whose own tail feathers are slim hollow reed quills, starry plumage, open singing beak. Also: run 2, round the body with a bigger head and grow each pipe from a tail-feather quill base Also: round chubby big-headed songbird whose tail feathers taper into hollow reed quills.",
+    "size": "2K"
+  },
+  {
+    "id": "pyrraven_r2_w29",
+    "name": "Pyrraven",
+    "refs": [
+      "briefs/boki-art/turnarounds/Kindlewren.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A squat, barrel-chested raven three times the size of image 1 with an oversized head and a huge heavy coal-block beak, its folded wings ending in three long black-glass charcoal blades glowing at the edges that frame its body, an ember-cracked chest and a short crown of embers. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Its body plan, silhouette and pose must be fundamentally different from image 1, not image 1 with parts added. Face: fierce, smug, blazing eyes and a commanding sneer. Main colours: charcoal black and ember orange, with a white-hot accent. Avoid: a realistic raven, flame hair, a phoenix, fire everywhere. Element: ember, shown clearly by glowing orange-red ember cracks and a few rising sparks. Archetype: majestic: big and upright, with crown-like features and calm power. The last attempt failed review. These panel fixes are hard requirements: tall, long-necked ember raven with huge spread cinder wings and a crown crest, new upright-perched silhouette, stylised head. Also: squat barrel raven with an oversized head and a huge blocky coal beak, wings folded into three big black-glass blades framing the body. Also: a huge crouched raven with wings spread as charcoal blade fans and a massive coal-block beak, not a standing songbird The last attempt failed review. These panel fixes are hard requirements: squat barrel raven with an oversized head and huge blocky coal beak, folded wings as three black-glass charcoal blades, ember-cracked chest, short ember crown. Also: squat barrel-chested raven with an oversized head and a huge coal-block beak, wings folded into three black-glass blades framing the body, ember-cracked chest, no flame crest Also: crouch the raven forward with the wings spread as charcoal blade fans.",
+    "size": "2K"
+  },
+  {
+    "id": "relic_kael_w29",
+    "name": "Relic: Kael",
+    "refs": [
+      "briefs/boki-art/batch/out/relic_kael_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: show both cuffs joined by four links in the big 3/4 view. Also: two heavy cuffs joined by exactly four chunky links with the last link snapped open, shown the same in every view, mortar flecks clinging. Also: Show two cuffs joined by four links, last link snapped, identical in every view The last attempt failed review. These panel fixes are hard requirements: redraw the big 3/4 view as two cuffs joined by exactly four chunky links, the last snapped open, matching the small views. Also: Redraw the big 3/4 view as two heavy cuffs joined by exactly four chunky links with the last link snapped, matching the small views Also: redraw the big 3/4 view as two cuffs joined by exactly four links with the last one snapped, matching the small views.",
+    "size": "2K"
+  },
+  {
+    "id": "relic_lace_w29",
+    "name": "Relic: Lace",
+    "refs": [
+      "briefs/boki-art/batch/out/relic_lace_w28_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: a half-face porcelain mask (one eye, cheek and brow) cut down the middle, red stitches, identical in all views, painterly thin-outline finish. Also: Relay run 3 as the relic layout: big 3/4 view left, front, side and stitch close-up right Also: cut the second view to the same half-face as the first and back views.",
+    "size": "2K"
+  },
+  {
+    "id": "relic_neve_w29",
+    "name": "Relic: Neve",
+    "refs": [
+      "briefs/boki-art/batch/out/relic_neve_w28_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: add a little more wear (chips, cracked blade tip) to keep the dug-up feel. Also: Relay run 2 in the relic layout (big 3/4 view plus front, side and scuffed-toe close-up) Also: two skates tied together by their laces, one lace frayed, big 3/4 view plus front, side and close-up.",
+    "size": "2K"
+  },
+  {
+    "id": "relic_sparkle_w29",
+    "name": "Relic: Sparkle",
+    "refs": [
+      "briefs/art-refs/ryzz_FINAL_sheet.png"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "prompt": "Image 1 is the hero this relic belongs to: use it only for colour palette and motifs. Do NOT draw the hero, any person or any part of a body. A relic sheet of ONE object, nothing else: on the left a big three-quarter view of it, and on the right, smaller, a straight front view, a straight side view and a close-up of its most worn detail, all the same object at the same design, neatly spaced in a clean layout. Flat neutral light grey background, soft rim light, no text, no labels, no logos, no hands, no people, no characters, no creatures. The object: A short iron lightning rod from a spire top with an ornate finial, fused-glass scars and a scorch spiral where the bolt hit, a small electric-yellow arc on its tip only. Stylized chunky game prop, hand-painted texture with soft painterly shading and a clean, fairly thin dark outline, toy-like proportions, worn and dug up from ruins (grime, small chips, faint cracks), one saturated hero colour plus a thin warm gold filigree accent, and a faint porcelain-white glow hint along its edges.  The last attempt failed review. These panel fixes are hard requirements: move the small yellow arc to the finial tip and make the rod shorter and chunkier. Also: move the small yellow arc to the spire tip and pull the close-up fully inside the frame. Also: thicken the rod, enlarge the scorch spiral and fit the close-up inside the frame The last attempt failed review. These panel fixes are hard requirements: pull the close-up fully inside the frame and enlarge the scorch spiral. Also: run 4, make the finial a taller ornate spire point and add a few glassy fused scars around the spiral Also: turn the body to dark scorched iron, keeping gold only as thin filigree and pink as an accent.",
+    "size": "2K"
+  },
+  {
+    "id": "scythant_r_w29",
+    "name": "Scythant",
+    "refs": [
+      "briefs/boki-art/batch/out/scythant_r_w28_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: chunkier stylised leaf-mantis with a big readable bark head, curious grin, thick legs and a characterful raised-scythe pose. Also: run 2, give the bark head a curious, fierce face with bigger glowing eyes and a visible mandible grin Also: give the bark head bigger glossy eyes and a curious, cheeky expression.",
+    "size": "2K"
+  },
+  {
+    "id": "seamwyrm_e2_w29",
+    "name": "Seamwyrm",
+    "refs": [
+      "briefs/boki-art/batch/out/seamwyrm_e2_w28_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: replace the third view with a true side profile of the same pose. Also: run 1, redraw the third view as a strict side profile of the body and head Also: redraw the third view as a strict side profile with one eye visible.",
+    "size": "2K"
+  },
+  {
+    "id": "terrarimit_e_w29",
+    "name": "Terrarimit",
+    "refs": [
+      "briefs/boki-art/batch/out/terrarimit_x_3.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make the creature bigger in the frame, enlarge its stalk eyes and give it a wider, kind face, add one big orange crab claw in front and orange leg joints like its family, make the garden grow out of a cracked glass carapace (shards as plates) instead of a dome on top, and remove the cheek blush. Do not add anything else. The last attempt failed review. These panel fixes are hard requirements: garden growing from a cracked glass carapace, one big orange claw, creature filling the frame. Also: make it fill the frame, add one big orange claw in front and turn the dome into cracked glass carapace plates. Also: scale the creature up to fill the frame and enlarge the eyes and front claw The last attempt failed review. These panel fixes are hard requirements: crab filling the frame whose carapace is cracked glass plates with the garden growing between them, one oversized orange claw, big stalk eyes. Also: New edit: replace the dome with cracked glass carapace shards grown as plates from the shell with plants between them, one oversized orange claw, creature filling the frame Also: enlarge one front claw to about twice the other and scale the views up.",
+    "size": "2K"
+  },
+  {
+    "id": "terrasloth_r2_w29",
+    "name": "Terrasloth",
+    "refs": [
+      "briefs/boki-art/batch/out/terrasloth_r2_w28_4.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: lay out four views in one row and make the glass panes bigger and more readable along the spine. Also: chibi big-headed sloth, no long tail, a curled back of mossy glass-pane scales with tiny sprouts, smug sleepy face, one row Also: run 4 into one row and enlarge the head slightly.",
+    "size": "2K"
+  },
+  {
+    "id": "tidalisk_r_w29",
+    "name": "Tidalisk",
+    "refs": [
+      "briefs/boki-art/batch/out/tidalisk_r_w28_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: re-lay as one row of four views, front view low on all fours, give it big round Bubblisk eyes and bubble cheek frills. Also: run 2 into one row of four views (front, 3/4, side, back) Also: run 2 as four views (front, 3/4, side, back) in one row.",
+    "size": "2K"
+  },
+  {
+    "id": "voltalon_r_w29",
+    "name": "Voltalon",
+    "refs": [
+      "briefs/boki-art/batch/out/voltalon_r_w28_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: big stylised storm bird whose wings are a spread anvil thundercloud, low powerful stance, copper crest blades, bolt tail. Also: Redo as a bigger storm-cloud bird in a wide wings-spread anvil-cloud stance with a bolt tail, copper crest blades, low powerful pose Also: scale the body up and widen the cloud mane into the wings so the back view has no collar.",
+    "size": "2K"
+  },
+  {
     "id": "relic_vex",
     "name": "Relic: Vex",
     "refs": [

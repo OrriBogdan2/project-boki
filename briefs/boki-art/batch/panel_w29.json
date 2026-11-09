@@ -1038,5 +1038,441 @@
 "EDIT: on run 2, enlarge the head slightly with Thrumbird's eyes and a proud smirk."
 ],
 "veto": []
+},
+{
+"id": "anchorbill_r2_w28",
+"pick": 4,
+"avg": 8.2,
+"seats": [
+8.0,
+8.2,
+8.4
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 4 fuse the anchor shank into the bill so the flukes are the bill tip with feathers growing over its base, then lay out four views in one row.",
+"EDIT: run 4, blend the shank into the brow with feathers overlapping its base, then relay as four equal views in one row",
+"Relayout run 4 into four equal views in one row and drop the floating rocks and the shadow."
+],
+"veto": []
+},
+{
+"id": "arcestrel_e_w28",
+"pick": 3,
+"avg": 7.63,
+"seats": [
+7.4,
+7.7,
+7.8
+],
+"decision": "new",
+"fixes": [
+"New prompt: compact big-headed kestrel perched in 3/4, copper feather-vanes grown smoothly from the wing bones with copper veins, fierce grin, same in all four views.",
+"New prompt: compact big-headed kestrel in a three-quarter glide, copper feather-vanes grown from the wing bones, fierce grin, same pose in all views",
+"New prompt: compact big-headed kestrel, fierce grin, copper fin-vanes grown from the wing bones, same three-quarter glide in all views."
+],
+"veto": [
+"realistic bird: copper feather-vanes (signature) removed"
+]
+},
+{
+"id": "blossmink_e_w28",
+"pick": 3,
+"avg": 7.73,
+"seats": [
+7.5,
+7.6,
+8.1
+],
+"decision": "new",
+"fixes": [
+"New prompt: long low mink lounging flat like a mossy log on all fours in every view, Ermink mask, a few clean moss clumps with blossoms, ink claws.",
+"New prompt: a long, low lounging mink stretched like a mossy log on all fours in every view, blossoms growing from moss clumps, Ermink face mask",
+"New prompt: long low mossy mink lounging flat like a fallen log, with blossoms along the spine."
+],
+"veto": [
+"front and 3/4 views still sit upright like a bear",
+"front and back views still sit on haunches, not low on all fours"
+]
+},
+{
+"id": "briarlynx_e_w28",
+"pick": 3,
+"avg": 8.1,
+"seats": [
+8.0,
+8.1,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 1 turn the ears into big serrated briar-leaf ears with black tufts and thin the thorn count by half.",
+"EDIT: run 3, add big serrated briar-leaf ears with black tufts and green leaf tips along the thorns",
+"EDIT: on run 3 replace the ears with big serrated briar-leaf ears with black tufts and enlarge the eyes."
+],
+"veto": []
+},
+{
+"id": "coolatee_r_w28",
+"pick": 2,
+"avg": 7.93,
+"seats": [
+8.0,
+8.0,
+7.8
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 2 sink the shell patch into the back fur (no rim over the head), curl the body into a bean and scale it up to fill the row.",
+"EDIT: run 2, scale the creature up to fill the row and curl it into a bean shape so it differs from Frigatee",
+"New prompt: curled bean-shaped seal calf, a few frost crystals growing from the shoulders, no lid or rim, bigger in frame."
+],
+"veto": [
+"brass-rimmed lid sits on the head like a worn cap"
+]
+},
+{
+"id": "flarmink_e_w28",
+"pick": 2,
+"avg": 8.03,
+"seats": [
+8.0,
+8.1,
+8.0
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 2 lay the flame tail long and low straight behind in every view and lower the front and back views into a crouch.",
+"EDIT: run 2, lay the flame tail straight back and low behind the body in every view and stretch the body into a racing lean",
+"EDIT: on run 2 lay the flame tail flat and long behind the body and remove the faded duplicate legs."
+],
+"veto": []
+},
+{
+"id": "glaciatee_r_w28",
+"pick": 1,
+"avg": 8.2,
+"seats": [
+8.4,
+7.8,
+8.4
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 1 remove the remaining mist wisps and set the background to flat #E8E8EE.",
+"EDIT: run 3, sink the door further so ice frost overlaps its rim and drop the leftover mist wisps",
+"EDIT: on run 1 lighten the background to pale grey and let the ice overlap the door rim a bit more."
+],
+"veto": []
+},
+{
+"id": "glaivyx_r2_w28",
+"pick": 3,
+"avg": 8.23,
+"seats": [
+7.8,
+8.3,
+8.6
+],
+"decision": "edit",
+"fixes": [
+"EDIT: re-lay run 2 as four views in one row on pale grey.",
+"Relayout run 3 in one row and blend the shell plates into the fur at the neck",
+"Relayout run 3 into one row on pale grey."
+],
+"veto": []
+},
+{
+"id": "howlop_e_w28",
+"pick": 1,
+"avg": 7.5,
+"seats": [
+7.3,
+7.6,
+7.6
+],
+"decision": "new",
+"fixes": [
+"New prompt: stylised chunky hare in a flat stalking crouch, round hare muzzle with buck teeth over small sabres, big bat ears, thin sound rings behind the head, warmer palette.",
+"New edit: drop the body into a flat stalking crouch with the head forward, round hare muzzle, rings thin and only behind the ears, warmer palette",
+"New prompt: chunky low-crouched hare, big round head and muzzle, buck teeth over small sabres, bat ears, sound ridges inside the ears instead of floating rings."
+],
+"veto": []
+},
+{
+"id": "jibbatross_r_w28",
+"pick": 4,
+"avg": 7.67,
+"seats": [
+7.6,
+7.8,
+7.6
+],
+"decision": "new",
+"fixes": [
+"New prompt: big stylised albatross final with an oversized head and cocky scowl, sail wings swept back as feather membrane, iron hooks, bold heavier silhouette that clearly outscales Canvastross.",
+"New prompt: a big, long, low forward-swept gliding albatross much larger than Canvastross, sail canvas grown as wing membrane, huge hooked iron-tipped beak, wind-swirl markings, one row",
+"New prompt: stylised big-headed albatross whose wing feathers are the jib sail itself, with no separate spars or clamps."
+],
+"veto": [
+"final form not clearly bigger or more impressive than Canvastross"
+]
+},
+{
+"id": "lanceron_r_w28",
+"pick": 2,
+"avg": 8.1,
+"seats": [
+8.0,
+8.0,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 2 lay out four views in one row, lengthen the neck and enlarge the head with a proud thin smile.",
+"EDIT: run 2, lengthen the neck into a heron S-curve and relay as one row of four",
+"EDIT: on run 2 lengthen the neck into a heron S-curve, then relayout into one row."
+],
+"veto": []
+},
+{
+"id": "lanternmit_e_w28",
+"pick": 3,
+"avg": 7.77,
+"seats": [
+7.8,
+7.7,
+7.8
+],
+"decision": "new",
+"fixes": [
+"EDIT: on run 3 shorten the legs into stubby crab legs and make the eye stalks and smug face 1.5x bigger.",
+"EDIT: run 3, shorten and thicken the legs into stubby crab legs and make the eye stalks and smile 1.5x bigger",
+"EDIT: on run 3 shorten the legs into stubby crab legs and make the eye stalks and smile 1.5x bigger."
+],
+"veto": []
+},
+{
+"id": "mothlet_r3_w28",
+"pick": 1,
+"avg": 8.17,
+"seats": [
+8.2,
+8.0,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 1 add a small crescent moon dot on the forehead, mint tint to the wing buds and two tiny tail-streamer nubs.",
+"EDIT: run 2, remove the glow halo and shorten the tail streamers to small nubs",
+"EDIT: on run 1 add a small moon dot on the forehead and feathery moth antennae-tufts with a faint luna-green tint."
+],
+"veto": []
+},
+{
+"id": "murmurling_f_e_w28",
+"pick": 2,
+"avg": 7.83,
+"seats": [
+7.8,
+8.0,
+7.7
+],
+"decision": "new",
+"fixes": [
+"New prompt: round stylised bird with a big head whose own tail feathers are slim hollow reed quills, starry plumage, open singing beak.",
+"EDIT: run 2, round the body with a bigger head and grow each pipe from a tail-feather quill base",
+"New prompt: round chubby big-headed songbird whose tail feathers taper into hollow reed quills."
+],
+"veto": []
+},
+{
+"id": "pyrraven_r2_w28",
+"pick": 1,
+"avg": 7.83,
+"seats": [
+7.7,
+7.8,
+8.0
+],
+"decision": "new",
+"fixes": [
+"New prompt: squat barrel raven with an oversized head and huge blocky coal beak, folded wings as three black-glass charcoal blades, ember-cracked chest, short ember crown.",
+"New prompt: squat barrel-chested raven with an oversized head and a huge coal-block beak, wings folded into three black-glass blades framing the body, ember-cracked chest, no flame crest",
+"EDIT: on run 3 crouch the raven forward with the wings spread as charcoal blade fans."
+],
+"veto": []
+},
+{
+"id": "relic_kael_w28",
+"pick": 3,
+"avg": 7.8,
+"seats": [
+7.8,
+7.8,
+7.8
+],
+"decision": "new",
+"fixes": [
+"EDIT: on run 3 redraw the big 3/4 view as two cuffs joined by exactly four chunky links, the last snapped open, matching the small views.",
+"Redraw the big 3/4 view as two heavy cuffs joined by exactly four chunky links with the last link snapped, matching the small views",
+"EDIT: redraw the big 3/4 view as two cuffs joined by exactly four links with the last one snapped, matching the small views."
+],
+"veto": []
+},
+{
+"id": "relic_lace_w28",
+"pick": 3,
+"avg": 8.0,
+"seats": [
+7.8,
+8.3,
+7.9
+],
+"decision": "edit",
+"fixes": [
+"New prompt: a half-face porcelain mask (one eye, cheek and brow) cut down the middle, red stitches, identical in all views, painterly thin-outline finish.",
+"Relay run 3 as the relic layout: big 3/4 view left, front, side and stitch close-up right",
+"EDIT: on run 3 cut the second view to the same half-face as the first and back views."
+],
+"veto": []
+},
+{
+"id": "relic_neve_w28",
+"pick": 1,
+"avg": 8.17,
+"seats": [
+8.4,
+8.2,
+7.9
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 1 add a little more wear (chips, cracked blade tip) to keep the dug-up feel.",
+"Relay run 2 in the relic layout (big 3/4 view plus front, side and scuffed-toe close-up)",
+"New prompt: two skates tied together by their laces, one lace frayed, big 3/4 view plus front, side and close-up."
+],
+"veto": []
+},
+{
+"id": "relic_sparkle_w28",
+"pick": 2,
+"avg": 7.8,
+"seats": [
+8.2,
+7.4,
+7.8
+],
+"decision": "new",
+"fixes": [
+"EDIT: on run 2 pull the close-up fully inside the frame and enlarge the scorch spiral.",
+"EDIT: run 4, make the finial a taller ornate spire point and add a few glassy fused scars around the spiral",
+"EDIT: on run 3 turn the body to dark scorched iron, keeping gold only as thin filigree and pink as an accent."
+],
+"veto": []
+},
+{
+"id": "scythant_r_w28",
+"pick": 2,
+"avg": 8.1,
+"seats": [
+7.8,
+8.2,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"New prompt: chunkier stylised leaf-mantis with a big readable bark head, curious grin, thick legs and a characterful raised-scythe pose.",
+"EDIT: run 2, give the bark head a curious, fierce face with bigger glowing eyes and a visible mandible grin",
+"EDIT: on run 2 give the bark head bigger glossy eyes and a curious, cheeky expression."
+],
+"veto": []
+},
+{
+"id": "seamwyrm_e2_w28",
+"pick": 3,
+"avg": 8.1,
+"seats": [
+8.2,
+7.9,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 3 replace the third view with a true side profile of the same pose.",
+"EDIT: run 1, redraw the third view as a strict side profile of the body and head",
+"EDIT: on run 3 redraw the third view as a strict side profile with one eye visible."
+],
+"veto": []
+},
+{
+"id": "terrarimit_e_w28",
+"pick": 2,
+"avg": 7.8,
+"seats": [
+7.6,
+7.6,
+8.2
+],
+"decision": "new",
+"fixes": [
+"New prompt: crab filling the frame whose carapace is cracked glass plates with the garden growing between them, one oversized orange claw, big stalk eyes.",
+"New edit: replace the dome with cracked glass carapace shards grown as plates from the shell with plants between them, one oversized orange claw, creature filling the frame",
+"EDIT: on run 2 enlarge one front claw to about twice the other and scale the views up."
+],
+"veto": [
+"terrarium dome still sits on top of the back as a separate object"
+]
+},
+{
+"id": "terrasloth_r2_w28",
+"pick": 4,
+"avg": 8.17,
+"seats": [
+8.3,
+7.9,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 4 lay out four views in one row and make the glass panes bigger and more readable along the spine.",
+"New prompt: chibi big-headed sloth, no long tail, a curled back of mossy glass-pane scales with tiny sprouts, smug sleepy face, one row",
+"Relayout run 4 into one row and enlarge the head slightly."
+],
+"veto": []
+},
+{
+"id": "tidalisk_r_w28",
+"pick": 2,
+"avg": 8.23,
+"seats": [
+7.9,
+8.4,
+8.4
+],
+"decision": "edit",
+"fixes": [
+"EDIT: on run 3 re-lay as one row of four views, front view low on all fours, give it big round Bubblisk eyes and bubble cheek frills.",
+"Relayout run 2 into one row of four views (front, 3/4, side, back)",
+"Relayout run 2 as four views (front, 3/4, side, back) in one row."
+],
+"veto": []
+},
+{
+"id": "voltalon_r_w28",
+"pick": 3,
+"avg": 8.03,
+"seats": [
+7.9,
+8.0,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"New prompt: big stylised storm bird whose wings are a spread anvil thundercloud, low powerful stance, copper crest blades, bolt tail.",
+"Redo as a bigger storm-cloud bird in a wide wings-spread anvil-cloud stance with a bolt tail, copper crest blades, low powerful pose",
+"EDIT: on run 3 scale the body up and widen the cloud mane into the wings so the back view has no collar."
+],
+"veto": []
 }
 ]

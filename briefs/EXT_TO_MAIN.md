@@ -4326,3 +4326,19 @@ ART barokat - briefs/boki-art/batch/out/portrait_barokat_r2b_1.jpg kind=portrait
 ART barokat - briefs/boki-art/batch/out/portrait_barokat_r2a_2.jpg kind=portrait status=owner-review
 ART barokat - briefs/boki-art/batch/out/portrait_barokat_r2c_2.jpg kind=portrait status=owner-review
 ART barokat - briefs/boki-art/batch/out/portrait_barokat_r2d_2.jpg kind=portrait status=owner-review
+## 00:35 ET 11-09 — art session: round 28 results, group s6 (evolution sheets + relics)
+Pass: Tenzo relic. Owner review below. Sheets that only failed on layout (2x2) are relaid into one row by script (briefs/boki-art/review/*_row.jpg) — same art, no regeneration. Edits/new prompts for the rest are in round 29.
+ART druzemole 8.33 briefs/boki-art/batch/out/druzemole_e_w28_3.jpg kind=turnaround status=owner-review panel=8.2/8.4/8.4
+ART eclipsowl 8.33 briefs/boki-art/batch/out/eclipsowl_e_w28_1.jpg kind=turnaround status=owner-review panel=8.3/8.3/8.4
+ART geodelotl 8.33 briefs/boki-art/review/geodelotl_e_w28_2_row.jpg kind=turnaround status=owner-review panel=8.2/8.4/8.4
+ART lunink 8.37 briefs/boki-art/review/lunink_r_w28_1_row.jpg kind=turnaround status=owner-review panel=8.3/8.3/8.5
+ART puffamus 8.43 briefs/boki-art/batch/out/puffamus_e_w28_1.jpg kind=turnaround status=owner-review panel=8.5/8.4/8.4
+ART relic cinder briefs/boki-art/batch/out/relic_cinder_w28_1.jpg grade 8.43/10 status=owner-review
+ART relic grimble briefs/boki-art/batch/out/relic_grimble_w28_1.jpg grade 8.43/10 status=owner-review
+ART relic tenzo briefs/boki-art/relics/Tenzo.jpg grade 8.5/10
+ART stormit 8.3 briefs/boki-art/review/stormit_r2_w28_1_row.jpg kind=turnaround status=owner-review panel=8.2/8.3/8.4
+ART thistlynx 8.3 briefs/boki-art/batch/out/thistlynx_r_w28_1.jpg kind=turnaround status=owner-review panel=8.3/8.3/8.3
+ART tinbrock 8.37 briefs/boki-art/batch/out/tinbrock_e_w28_3.jpg kind=turnaround status=owner-review panel=8.2/8.4/8.5
+ART voltmink 8.3 briefs/boki-art/review/voltmink_r2_w28_1_row.jpg kind=turnaround status=owner-review panel=8.3/8.3/8.3
+ART tidalisk 8.23 briefs/boki-art/review/tidalisk_r_w28_2_row.jpg kind=turnaround status=owner-review panel=7.9/8.4/8.4 note=relaid-out-to-one-row
+ART glaivyx 8.23 briefs/boki-art/review/glaivyx_r2_w28_3_row.jpg kind=turnaround status=owner-review panel=7.8/8.3/8.6 note=relaid-out-to-one-row
