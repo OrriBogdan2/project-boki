@@ -30537,5 +30537,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_fizzlet_full_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_fizzlet_full",
+    "name": "Fizzlet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_fizzlet_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_fizzlet_full",
+    "name": "Fizzlet (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_fizzlet_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_foldbat_full",
+    "name": "Foldbat (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_foldbat_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_briarlynx_full",
+    "name": "Briarlynx (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_briarlynx_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_buckleron_full",
+    "name": "Buckleron (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_buckleron_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_buckleron_full",
+    "name": "Buckleron (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_buckleron_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_buckleron_full",
+    "name": "Buckleron (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_buckleron_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kayak_full",
+    "name": "Kayak (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_kayak_full_1.jpg",
+    "ok": true
   }
 ]
