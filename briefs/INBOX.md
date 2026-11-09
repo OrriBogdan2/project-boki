@@ -709,3 +709,4 @@ Owner: the "blink" dashes (181) were caused by a **Boki interaction changing the
 - Owner wants tiers of legendaries (minor / boss / ultra / blight), about 10-12 to start. Art proposal: briefs/boki-art/LEGENDARY_TIERS.md.
 - Supersedes the "about 5" count in DECISIONS 2026-11-09 legendary entry once the owner OKs; the 20%-per-map roll stays.
 - Main today: 3 lair bosses (data.gd BOSSES colossus/serpent/brood) with boss kin Cairnback/Hivara/Zephyrak. Do not build tier rules yet (catch rules per tier are open); just make sure the legendary data is tier-ready (a "tier" field) when you next touch it.
+- 11-09 14:46 ET owner: Pavonazar, Ghoulamari, Glacione are MINOR legendaries. LIVE_MANIFEST now has "legendary_tier" per legendary; read tiers from there.
