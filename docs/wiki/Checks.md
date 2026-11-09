@@ -78,6 +78,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--speak-test` | Prints how Boki talk at each stage |
 | `--simtest [--seed=N]` | A whole match on autopilot, printed; must end without script errors |
 | `--hitch-check` *(window)* | A seeded expedition through loading, drop and landing; fails on a stalled frame or a late shader compile |
+| `--first-cast-check` *(GPU for drawn frames)* | Each Hunter in a fresh Training Area match (loaded with `warm_up`): LMB, RMB, E, R, dash and Q once, then twice more; fails when a first press costs 8 ms over its repeat and the median frame, and names the pipelines and nodes it made. `=gunslinger,mage` runs just those |
 | `--load-check` *(window)* | The same, stopping at the reveal to judge the loading screen |
 
 ## Tooling flags

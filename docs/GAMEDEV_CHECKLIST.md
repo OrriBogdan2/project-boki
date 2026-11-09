@@ -25,7 +25,7 @@ Use this list whenever a request is planned or reviewed. For each feature, ask w
 - [ ] **Fixed timestep:** simulation runs at a fixed step, and rendering interpolates between states. Never put gameplay in `_process` with a variable dt.
 
 ## Performance (16.7 ms per frame at 60 fps)
-- [ ] **Frame budget:** measure before optimising (`--hitch-check`, `--load-check`, profiler sections) and fix the biggest cost first.
+- [ ] **Frame budget:** measure before optimising (`--hitch-check`, `--load-check`, `--first-cast-check`, profiler sections) and fix the biggest cost first.
 - [ ] **Draw calls:** MultiMesh or instancing for flora, rocks and props. Merge static meshes that share a material.
 - [ ] **Spatial partitioning:** a uniform grid or buckets for broad-phase queries (targets, pickups, separation). Never all-pairs loops over hunters, mobs and Boki.
 - [ ] **Time slicing:** spread expensive AI thinking (bot decisions, target picks) across frames in buckets, while movement still runs every step.
