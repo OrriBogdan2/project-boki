@@ -382,16 +382,16 @@ func _kit_from_weapon() -> void:
 	runner.set_slot("utility", Content.ability(wd.utility) if wd and wd.utility != "" else null)
 
 # ------------------------------------------------------------------ your kin's stats on you
-## Your kin riding with you, settled in: its carry passives are on. A mount curls up on your back
-## while you glide (you can't glide riding it), and its passives are off for that time.
+## Your kin with you on the Return order, settled in: its carry passives are on. A big Boki curls up on
+## your back while you glide, and its passives are off for that time.
 func kin_carry_on() -> bool:
 	if kin == null or not (kin as Kin).carried():
 		return false
 	return not ((kin as Kin).carry_style() == "mount" and gliding)
 
-## Riding your mount right now (on the ground or jumping, not gliding).
+## Riding the giant Fusion form right now (a Boki on the Return order guards at your side, never under you).
 func mounted() -> bool:
-	return kin_carry_on() and (kin as Kin).carry_style() == "mount"
+	return kin_carry_on() and not (kin as Kin).giant.is_empty()
 
 ## An owner stat (KinParts.OWNER_STATS) from your kin: its carry passives while it rides with you,
 ## plus the merge's passives while merged, capped at the carry or merge maximum. Refreshed every step (_refresh_kin_stats).
@@ -790,7 +790,6 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 func do_jump() -> void:
 	if downed or stun_t > 0.0 or grap.size() > 0 or out or KitStatus.grounded(self) or (ak and ak.cast_locked()):
 		return
-	KinFollow.on_jump(self)         # riding a mount: you come off it into the jump
 	if not lfloat.is_empty():
 		_ledge_fling()
 		return
