@@ -2083,7 +2083,7 @@ func _physics(dt: float) -> void:
 	var cur := hv.length()
 	if roll_t > 0.0:
 		roll_t -= dt
-		hv = roll_dir * roll_speed * Loco.dash_k(arch, 1.0 - roll_t / maxf(roll_total, roll_t))     # eased per hunter (tuning.json)
+		hv = Loco.dash_hv(roll_dir * roll_speed, arch, roll_t, roll_total)     # eased per hunter (tuning.json)
 		if not shove.is_empty():
 			_shove_along()
 		if not dash_pass.is_empty():

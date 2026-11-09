@@ -110,6 +110,7 @@ func _match_items() -> void:
 			"items 4/8 (%s): a press 2 steps into an air dash glides that step at its speed (%.2f -> %.2f)"
 			% [h.arch if h.arch != "" else "default", r[0], r[1]])
 	h.set_arch("")
+	_every_shift()
 	var fsm := Loco.machine()
 	ok(not fsm.go(Loco.S.GLIDING) and fsm.refused == 1 and fsm.is_in(Loco.S.GROUNDED),
 		"FSM: no glide straight off the ground")
@@ -127,6 +128,36 @@ func _match_items() -> void:
 		m.step(Match.DT)
 		t += Match.DT
 	ok(t <= 0.2, "item 6: falling backward, holding W carries you forward in %.2fs" % t)
+
+## Item 4 for every Hunter's own Shift: a fresh glide press 2 steps into an air Shift opens the glider that step,
+## and 0.1 s later the glide still carries the speed it started with (no stop when the kit's dash winds down).
+## A Shift whose kit keeps it (its own move, not a plain dash) is FLAGGED, not silently excepted.
+func _every_shift() -> void:
+	var cls0 := h.cls
+	for arch in Arch.ORDER:
+		h.reclass(Arch.weight(arch), arch)
+		_air_at(6.0, Vector3(0, Hunter.JUMP_V, 0))      # rising, high up (no wall in reach): any kit air Shift goes
+		h.dashes = h.max_dashes()
+		h.inp["move"] = Vector2(1, 0)
+		h.inp["dash"] = true
+		m.step(Match.DT)
+		m.step(Match.DT)
+		var fired := h.roll_t > 0.0 or (h.ak != null and h.ak.in_dash())
+		var r := _press_glide()
+		for i in 6: m.step(Match.DT)
+		var later := Vector2(h.vel.x, h.vel.z).length()
+		h.inp["move"] = Vector2.ZERO
+		h.inp["glide"] = false
+		if not fired:
+			print("ACHECK note item 4 (%s): no Shift move running 2 steps after the press: nothing to cancel" % arch)
+		elif not r[2]:
+			print("ACHECK FLAG item 4 (%s): Shift in the air at %.1f m/s is the kit's own move (%s): no glide cancel"
+				% [arch, r[0], h.move_kind])
+		else:
+			ok(absf(r[1] - r[0]) < 0.1 and later >= minf(r[0], Hunter.GLIDE_SPEED) * 0.75,
+				"item 4 (%s): Shift then a glide press: glides that step, h-speed %.2f -> %.2f, %.2f after 0.1s"
+				% [arch, r[0], r[1], later])
+	h.reclass(cls0, "")
 
 ## The same keys in the air at home and in a match (a fresh save's hero both places): vx every 0.1s holding D
 ## from a 3 m/s backward drift, and the step a fresh glide press opens the glider.
@@ -162,6 +193,17 @@ func _parity(main: Node) -> void:
 		await main.get_tree().process_frame
 	Input.action_release("glide")
 	_press(Vector2.ZERO)
+	# the same Shift dash (Lace's eased one) at home and in a match: the same speed every 0.05 s
+	Save.d["arch"] = "archer"
+	hm.gliding = false
+	hm.py = hm._ground_h(hm.ppos.x, hm.ppos.z) + 6.0
+	hm.pvy = 0.0
+	hm.start_dash(Vector2(1, 0), 16.0, 0.3)
+	var farm_dash := []
+	for i in 30:
+		hm._move_player(DT)
+		if i % 3 == 2: farm_dash.append(hm.pvel.x)
+	Save.d["arch"] = arch
 	hm.queue_free()
 	h.set_arch(arch)
 	_air_at(6.0, Vector3(-3, 0, 0))
@@ -175,15 +217,34 @@ func _parity(main: Node) -> void:
 		m.step(Match.DT)
 		if h.gliding and game_open < 0: game_open = i
 		if i % 6 == 5: game.append(h.vel.x)
-	var same := farm.size() == game.size()
-	for i in mini(farm.size(), game.size()):
-		same = same and absf(float(farm[i]) - float(game[i])) < 0.05
-	var fmt := func(a: Array) -> String: return " ".join(a.map(func(x): return "%.2f" % x))
+	h.reclass(Arch.weight("archer"), "archer")
+	_air_at(6.0, Vector3.ZERO)
+	h.inp["move"] = Vector2.ZERO
+	h.inp["glide"] = false
+	h.inp["glide_btn"] = false
+	h.dash_with({"speed": 16.0, "time": 0.3, "dir": Vector2(1, 0)})
+	var game_dash := []
+	for i in 30:
+		m.step(Match.DT)
+		if i % 3 == 2: game_dash.append(h.vel.x)
+	h.set_arch(arch)
+	ok(_same(farm_dash, game_dash), "farm = Training Area: Lace's dash vx every 0.05s (farm %s | match %s)"
+		% [_fmt(farm_dash), _fmt(game_dash)])
+	var same := _same(farm, game)
 	ok(same,
 		"farm = Training Area: air vx every 0.1s holding D from a 3 m/s backward drift (farm %s | match %s)"
-		% [fmt.call(farm), fmt.call(game)])
+		% [_fmt(farm), _fmt(game)])
 	ok(farm_open == 18 and game_open == 18,
 		"farm = Training Area: a fresh glide press opens it that step (farm %d, match %d)" % [farm_open, game_open])
+
+func _same(a: Array, b: Array) -> bool:
+	var same := a.size() == b.size()
+	for i in mini(a.size(), b.size()):
+		same = same and absf(float(a[i]) - float(b[i])) < 0.05
+	return same
+
+func _fmt(a: Array) -> String:
+	return " ".join(a.map(func(x): return "%.2f" % x))
 
 func run(main: Node) -> void:
 	_numbers()

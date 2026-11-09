@@ -92,6 +92,11 @@ static func dash_k(arch: String, u: float) -> float:
 static func dash_time_k(arch: String) -> float:
 	return 1.0 / float(T["dash_ease"].get(arch, {}).get("speed", 1.0))
 
+## A dash's velocity with `left` of its `total` s to go: `v` (its direction x its flat speed) through the hunter's
+## ease. The farm avatar and a match hunter both dash through this, so a Shift feels the same everywhere.
+static func dash_hv(v: Vector2, arch: String, left: float, total: float) -> Vector2:
+	return v * dash_k(arch, 1.0 - left / maxf(total, left))
+
 ## Momentum-preserving ground acceleration: under the wanted speed, move toward it; over it (a dash, a pad, a
 ## knock) bleed the extra at `over` while still steering, and steering back against it brakes properly.
 static func accel_to(cur: Vector2, wish: Vector2, accel: float, decel: float, over: float, dt: float) -> Vector2:
