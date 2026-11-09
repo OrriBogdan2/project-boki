@@ -43,3 +43,7 @@ check: `--base-life-check`.
   (`BaseLife.regard`), so a parent it fell out with still loses. The first time goes in its journal (kind "parent").
   The hatch card (home.gd `_name_baby`, base_mode only) lists the gifts in words; `egg_hatch.gd` stays quiet.
   Check: `--baby-parents-check`.
+- Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
+  toy's `clip` (toys.json: nudge, climb, splash) at a toy, whether it came to it from Play here or from HomeToys' own
+  pick. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
+  poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
