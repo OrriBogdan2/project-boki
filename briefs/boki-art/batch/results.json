@@ -27149,5 +27149,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/arcestrel_e_w32_1.jpg",
     "ok": true
+  },
+  {
+    "id": "arcestrel_e_w32",
+    "name": "Arcestrel",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/arcestrel_e_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_e_w32",
+    "name": "Arcestrel",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/arcestrel_e_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_e_w32",
+    "name": "Arcestrel",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/arcestrel_e_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_e_w32",
+    "name": "Blossmink",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/blossmink_e_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_e_w32",
+    "name": "Blossmink",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/blossmink_e_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_e_w32",
+    "name": "Blossmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/blossmink_e_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_e_w32",
+    "name": "Blossmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/blossmink_e_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx_e_w32",
+    "name": "Briarlynx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/briarlynx_e_w32_1.jpg",
+    "ok": true
   }
 ]
