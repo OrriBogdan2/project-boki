@@ -99,9 +99,10 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	# the knock or the kill on a Chilled foe: they Shatter a beat later
 	if t.hp <= 0.0 and chilled(t) and (t is Hunter or t is Mob):
 		var at := t.pos
+		var tid := t.get_instance_id()      # (a lambda that captured the foe errors if it is freed by then)
 		m.later(
 				float(pd.get("splinter_delay", 0.4)),
-				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), t))
+				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), instance_from_id(tid) as Ent))
 		chill.erase(t.get_instance_id())
 		return
 	add_chill(t)
@@ -119,7 +120,9 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 			lk().burst("shell", t.pos, {"dur": SHELL_T + 0.05, "ent": t})
 			m.sfx("rimewright_chime", t.pos, -3.0, 1.0)
 			var at := t.pos
-			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), float(pd["splinter_r"]) * 0.8, t))
+			var tid := t.get_instance_id()
+			var fan_r := float(pd["splinter_r"]) * 0.8
+			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), fan_r, instance_from_id(tid) as Ent))
 
 ## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:

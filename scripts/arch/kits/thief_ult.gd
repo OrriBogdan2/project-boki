@@ -156,7 +156,8 @@ func _blade(f: Ent, rim: bool, right: bool) -> void:
 	k.m.spawn_shot(h, from, dv.normalized() * BLADE_SPEED, 0.0, dist / BLADE_SPEED, 0.08, RING_COL, {"cos": true})
 	if k.m.shots.size() > n0:
 		k.fx().ride(k.m.shots[-1], "blade", RIM_COL if rim else RING_COL, HIT_COL, 0.9, 0.22)
-	k.m.later(dist / BLADE_SPEED, func(): _hit(f, rim))
+	var fid := f.get_instance_id()      # (a lambda that captured a foe freed by then errors when it runs)
+	k.m.later(dist / BLADE_SPEED, func(): _hit(instance_from_id(fid) as Ent, rim))
 
 ## A blade arrives: its damage (more from the outer band, which also blights), a red flash, Marks refreshed,
 ## and the bond for a rival hunter.
