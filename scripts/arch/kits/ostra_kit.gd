@@ -154,6 +154,10 @@ func _tick(dt: float) -> void:
 	well.tick(dt)
 	_reticle()
 
+## His own line and the Snap's rails replace the shared weapon line (it ran on to 14 m past the cursor).
+func own_aim_line() -> bool:
+	return true
+
 ## His reticle: the thin line to the cursor, all the time; the Snap's two rails while it winds up or
 ## while RMB is held.
 func _reticle() -> void:

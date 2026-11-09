@@ -90,7 +90,10 @@ func _archer_combos() -> void:
 	)
 	# the draw: its pose, the filling line, the resting aim line
 	step(m, 0.2, func(): aim_at(P, T.pos))
-	ok("pin reticle: a faint aim line to the cursor at rest", AimKit.shown(P, "draw_rest"))
+	ok(
+		"pin reticle: a faint aim line to the cursor at rest, in place of the shared weapon line",
+		AimKit.shown(P, "draw_rest") and P.ak.own_aim_line()
+	)
 	step(m, 0.3, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	var ve := AimKit.entry(P, "draw")
 	ok("pin anim: drawing holds arc_draw", K.anim_id == "arc_draw", K.anim_id)
@@ -681,6 +684,19 @@ func _bulwark_combos() -> void:
 		fresh(T)
 		T.teleport(home + Vector3(2.2, 0, 0))
 		aim_at(P, T.pos)
+	# his aim line runs out to where a tap lands the hammer (the cursor, clamped 2.5-9 m), not to the 2.4 m swing
+	reset.call()
+	var spans: Array = []
+	for d in [1.0, 5.0, 20.0]:
+		aim_at(P, home + Vector3(-d, 0, 0))
+		step(m, 0.05)
+		var ln := AimKit.entry(P, "aim")
+		spans.append((ln["to"] as Vector2).distance_to(ln["from"]) if not ln.is_empty() else -1.0)
+	ok(
+		"bjorn aim: the line ends where the hammer lands (2.5 / 5 / 9 m), the shared weapon line hidden",
+		K.own_aim_line() and absf(spans[0] - 2.5) < 0.2 and absf(spans[1] - 5.0) < 0.2 and absf(spans[2] - 9.0) < 0.2,
+		"spans %s" % str(spans)
+	)
 	# the throw lands at the cursor (5m, past the dummy), clamped to 9m when the cursor is far
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 6.0))
@@ -694,7 +710,7 @@ func _bulwark_combos() -> void:
 		"bjorn aim: the hammer lands at the cursor (5m) and stays planted",
 		K.throws == thr0 + 1 and String(
 			K.mace.get("st", "")
-		) == "ground" and absf(K.throw_d - 5.0) < 0.7 and K.fx.beacon.visible,
+		) == "ground" and absf(K.throw_d - 5.0) < 0.7 and K.fx.beacon.visible and not AimKit.shown(P, "aim"),
 		"throws %d st %s d %.1f beacon %s" % [K.throws - thr0, str(K.mace.get("st")), K.throw_d, K.fx.beacon.visible]
 	)
 	step(m, 7.0)

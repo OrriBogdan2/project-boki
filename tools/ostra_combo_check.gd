@@ -62,8 +62,8 @@ func _ostra() -> void:
 	# ---- the reticle: a thin line to the cursor all the time
 	reset.call()
 	ok(
-		"reticle: the thin aim line to the cursor shows the whole time",
-		AimKit.shown(P, "aim") and bool(AimKit.entry(P, "aim").get("arrow", false))
+		"reticle: the thin aim line to the cursor shows the whole time, in place of the shared weapon line",
+		AimKit.shown(P, "aim") and bool(AimKit.entry(P, "aim").get("arrow", false)) and P.ak.own_aim_line()
 	)
 	# ---- Swell
 	K.on_deal(T, 10.0, {})

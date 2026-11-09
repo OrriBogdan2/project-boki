@@ -1266,7 +1266,9 @@ func rimewright() -> void:
 			"tm: kit sounds load",
 			Sfx.streams.has("rime_shard") and Sfx.streams.has("rime_wall_tell") and Sfx.streams.has("rime_zone"))
 	step(m, 0.05)
-	ok("tm: the thin aim line to the cursor is always up", AimKit.shown(P, "aim"))
+	ok(
+			"tm: the thin aim line to the cursor is always up, the shared one hidden",
+			AimKit.shown(P, "aim") and K.own_aim_line())
 	# --- a steady stream (no pause) of slow darts that bow out and home, 4 plain then 3 large
 	var times: Array = []
 	var dmgs: Array = []

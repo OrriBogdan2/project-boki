@@ -82,6 +82,10 @@ func charge_now() -> Array:
 	var cn := super.charge_now()
 	return ["", -1.0] if h.is_local() and String(cn[0]) == "draw" else cn
 
+## The bow's rest and draw lines (PinDraw) replace the shared weapon line.
+func own_aim_line() -> bool:
+	return h.wpn.has("draw")
+
 ## Her bow hand carries its own tell (PinFx's fletch glint), so the shared charge orb stays off.
 func charge_orb() -> bool:
 	return false
