@@ -41793,5 +41793,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_gravigrub_full_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_gravigrub_full",
+    "name": "Gravigrub (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gravigrub_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dobsabre_full",
+    "name": "Dobsabre (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_dobsabre_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravigrub_full",
+    "name": "Gravigrub (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gravigrub_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dobsabre_full",
+    "name": "Dobsabre (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_dobsabre_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_domeleon_full",
+    "name": "Domeleon (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_domeleon_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_domeleon_full",
+    "name": "Domeleon (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_domeleon_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_domeleon_full",
+    "name": "Domeleon (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_domeleon_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_maulangler_full",
+    "name": "Maulangler (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_maulangler_full_2.jpg",
+    "ok": true
   }
 ]
