@@ -76,6 +76,8 @@ static func _stand(m, h: Hunter, at: Vector3) -> void:
 	for i in 8:
 		if not m.world.in_bush(g.x, g.z): break       # (in grass they'd be hidden, plate and all)
 		g = m.world.free_spot_near(at + Vector3(0, 0, 1.2 * float(i + 1)), [], 0.6, 0.5, 3.0)
+	if m.world.is_void(g.x, g.z):                         # (near an edge: look further out, not into the void)
+		g = m.world.free_spot_near(at, [], 0.6, 0.5, 12.0)
 	h.teleport(Vector3(g.x, m.world.ground_at(g.x, g.z), g.z))
 	h.ctrl = "idle"
 	h.vel = Vector3.ZERO
