@@ -223,9 +223,10 @@ func open_pause(where: String) -> void:
 	var practice: Practice = Practice.of(psc) if psc is Match else null
 	if practice:
 		item.call("Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
-	if where != "match":
+	var replaying := TutReplay.active()
+	if where != "match" and not replaying:
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
-	if where == "home" and Game.main:
+	if where == "home" and Game.main and not replaying:
 		item.call("Training area", "jump", func():
 			close()
 			Game.main.screen_node()._start_training())
@@ -233,15 +234,21 @@ func open_pause(where: String) -> void:
 		if tab == "Controls": tab = "Gameplay"
 		open_settings())
 	item.call("Controls", "dash", func(): tab = "Controls"; open_settings())
-	if where != "match":
+	if where != "match" and not replaying:
 		item.call("Save files", "satchel", open_saves)
 	# the rarely used ones: quiet text links in a row
 	var minor := HFlowContainer.new()
 	minor.add_theme_constant_override("h_separation", 4); minor.add_theme_constant_override("v_separation", 2)
-	if where == "home":
+	if where == "home" and not replaying:
 		minor.add_child(UI.ghost("Change your look", func():
 			close()
 			Game.goto("hatch", {"create": true})))
+		minor.add_child(UI.ghost("Replay match tutorial", func():
+			close()
+			TutReplay.match_tutorial()))
+		minor.add_child(UI.ghost("Replay garden tutorial", func():
+			close()
+			TutReplay.garden_tutorial()))
 	var scr = Game.main.screen_node() if Game.main else null
 	if scr and scr.has_method("unstick"):
 		minor.add_child(UI.ghost("I'm stuck", func():
@@ -251,6 +258,7 @@ func open_pause(where: String) -> void:
 	if admin_allowed():
 		minor.add_child(UI.ghost("Admin tools  (F1)", open_admin))
 	if minor.get_child_count() > 0:
+		v.add_child(UI.label("More", UI.T_SMALL, UI.MUTED))
 		v.add_child(minor)
 	v.add_child(UI.spacer(2))
 	if where == "match":
@@ -265,6 +273,10 @@ func open_pause(where: String) -> void:
 			var lb: Button = item.call("Leave match", "back", func():
 				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
 			lb.tooltip_text = "You lose what you carry"
+	elif replaying:
+		item.call("Leave the tutorial", "back", func():
+			close()
+			TutReplay.leave())
 	else:
 		item.call("Save and go to the main menu", "home", func():
 			Save.save_game()

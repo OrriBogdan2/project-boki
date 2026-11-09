@@ -5408,6 +5408,9 @@ func _finish() -> void:
 		if Overlay.closed.is_connected(_on_menu_closed):
 			Overlay.closed.disconnect(_on_menu_closed)
 		Overlay.close()
+	if opts.get("replay", false):
+		TutReplay.leave()      # (a replayed tutorial: the real save comes back as it was)
+		return
 	if opts.get("training", false):
 		# nothing from the training area carries over
 		Game.goto("home")

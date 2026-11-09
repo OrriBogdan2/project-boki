@@ -87,7 +87,9 @@ func _poll() -> void:
 				h._toast(String(FarmTutorial.rules()["gems_toast"]) % gave)
 				h._refresh_top()
 	var st := FarmTutorial.state()
-	if bool(st["done"]) and not was_done and not bool(st["skipped"]):
+	if TutReplay.active() and bool(st["done"]):
+		TutReplay.farm_done(h)
+	elif bool(st["done"]) and not was_done and not bool(st["skipped"]):
 		var gems := str(int(FarmTutorial.option("end_gems")))
 		h._toast(String(FarmTutorial.rules()["done_toast"]).replace("{gems}", gems))
 		Sfx.play("unlock", null, -6.0)

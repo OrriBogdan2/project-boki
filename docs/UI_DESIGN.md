@@ -47,6 +47,12 @@ What made the menus feel blocky, samey and hard to get through:
   had an inline "Really delete?" swap or no confirmation at all, while harmless toggles rebuilt the
   whole panel.
 
+**Replaying a tutorial.** The farm's Esc menu has "Replay match tutorial" and "Replay garden tutorial"
+under More. `TutReplay` runs the same tutorial drivers on a throwaway copy of the save with saving off,
+then puts the real save back untouched and lands on the farm (`--tut-replay-check` compares the save
+file and the live save before and after). The garden replay starts a new farm with your Hunter and
+active Boki; "Leave the tutorial" in the Esc menu ends either one early.
+
 **Things didn't fit.**
 - The Esc menu at home had ten full-size buttons and split into "Page 1 of 2", so Save files and
   Quit were on a second page behind Next.
