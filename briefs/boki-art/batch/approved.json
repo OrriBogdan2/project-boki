@@ -351,6 +351,17 @@
    "pick": 1,
    "grade": 8.6,
    "note": "majestic fungal tortoise, spear-quill palisade; relaid 5->4 views -> turnarounds/Ringrove.jpg"
+  },
+  {
+   "id": "teapotamus_r2b",
+   "pick": 3,
+   "grade": 8.5,
+   "panel": {
+    "A": 8.5,
+    "B": 8.5,
+    "C": 8.6
+   },
+   "note": "owner redo (was 7.1): kettle IS the body; relaid -> evolutions/Teapotamus.jpg (old kept as Teapotamus_old_7.1.jpg)"
   }
  ],
  "rerolled": [

@@ -659,6 +659,84 @@
     "size": "2K"
   },
   {
+    "id": "sporcupine_r2",
+    "name": "Sporcupine",
+    "refs": [
+      "briefs/boki-art/turnarounds/Mycroll.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the middle form of the creature in image 1's family, bigger and older, and clearly not yet a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A long, low porcupine with brown quilled flanks, a long snout and a tail, whose back quills fuse into one ridged mint-and-cream mushroom cap growing out of its shoulders and coming down to its elbows; the cap's rim breaks into quill points so cap and quills are one thing, the whole back outline a low rounded hump no taller than its ears, gills visible under the rim. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Shown on all four legs in every view, body horizontal like a real animal, never rearing or sitting up like a person. Its body plan, silhouette and pose must be fundamentally different from image 1, not image 1 with parts added. Face: sleepy, stubborn eyes and a small grumpy pout. Main colours: earthy brown and mint, with a pale cream cap accent. Avoid: tall mushroom stalks, a smooth shell, a turtle body, blush, a hat. Element: spore, shown clearly by drifting pale spore puffs and softly glowing spots. Archetype: tough: blocky, wide and heavy, with a low stance.",
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "stormit_r2",
+    "name": "Stormit",
+    "refs": [
+      "briefs/boki-art/evolutions/Jarmit.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the middle form of the creature in image 1's family, bigger and older, and clearly not yet a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A low, fast, forward-leaning hermit crab on all its walking legs, whose body has grown into a long glass tesla-coil abdomen trailing behind it, copper coils grown into its shell and legs, sparks jumping between the coils, keeping the orange crab shell, big stalk eyes and a cheeky face at the front, one oversized claw glowing like a capacitor. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Its body plan, silhouette and pose must be fundamentally different from image 1, not image 1 with parts added. Face: wide, jittery eyes on stalks and a nervous, cheeky grin. Main colours: orange crab shell and glass green, with a copper and electric-yellow accent. Avoid: standing on one claw, an object with a face, a bottle it sits in, coils wrapped like bands. Element: storm, shown clearly by crackling electric-yellow sparks and small lightning arcs. Archetype: fast: lean and forward-leaning, with swept-back shapes.",
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "terrarimit_e",
+    "name": "Terrarimit",
+    "refs": [
+      "briefs/boki-art/batch/out/terrarimit_x_3.jpg"
+    ],
+    "runs": 3,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make the creature bigger in the frame, enlarge its stalk eyes and give it a wider, kind face, add one big orange crab claw in front and orange leg joints like its family, make the garden grow out of a cracked glass carapace (shards as plates) instead of a dome on top, and remove the cheek blush. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "terrasloth_r2",
+    "name": "Terrasloth",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/style_refs/boki_style_ref_v3.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game: an endearing but dangerous creature built from one clear idea, a real animal fused with an object so that the object is part of its body. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Do not copy image 1's creatures, faces or colours. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. Image 2 is a style guide only: match the finish, line weight, shading and colour treatment of the creatures in image 2 exactly, but never copy their designs, faces or colours. A round, stylised chibi sloth with a big head, short chubby limbs and a curled spine, crawling slowly on all fours, whose back fur turns into small glass panes held between white rib-like frame bones that are its own skeleton, moss and tiny vines growing out of the panes into its fur, and oversized curved sickle claws. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Shown on all four legs in every view, body horizontal like a real animal, never rearing or sitting up like a person. Face: sleepy, smug half-closed eyes and a slow, contented smile. Main colours: moss green and soft brown, with a glass-white accent. Avoid: a house, a greenhouse sitting on its back, frames on its head or belly, a realistic sloth. Element: bloom, shown clearly by living leaves, petals or moss growing from its body, fresh green. Archetype: cute: round soft shapes, a big head and short limbs.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "voltmink_r2",
+    "name": "Voltmink",
+    "refs": [
+      "briefs/boki-art/evolutions/Ermink.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A long, low, stretched-out stoat on all four legs in every view in a loose, lounging stride with its head level, its brush tail grown into a long ink-black streak ending in a lightning-fork brush tip as its biggest shape, Ermink's cream belly and ink-black markings, swept-back bolt-shaped ears, yellow storm streaks in brush strokes along its spine and a few slow yellow sparks only. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Its body plan, pose and silhouette must be clearly different from image 1 and from every other Ink form, not a recolour of image 1. Face: half-lidded, confident yellow eyes and a small, self-assured smirk. Main colours: storm grey and cream, with ink-black markings and an electric-yellow accent. Avoid: standing upright, sitting on its haunches, cat ears, a cat face, spikes on its back, crackling bolts everywhere. Element: storm, shown clearly by crackling electric-yellow sparks and small lightning arcs. Archetype: sleek: long smooth lines and a streamlined shape.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_teapotamus",
+    "name": "Teapotamus (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Teapotamus.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: in a lively three-quarter pose that shows off its signature part. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "teapotamus_4k",
+    "name": "Teapotamus",
+    "refs": [
+      "briefs/boki-art/evolutions/Teapotamus.jpg"
+    ],
+    "runs": 1,
+    "size": "4K",
+    "prompt": "Re-render image 1 at full quality: keep it exactly the same, the same creature, design, colours, every detail, the same views in the same layout and the same plain background. Only increase the sharpness and finish. Do not change, add or remove anything.",
+    "aspect": "16:9"
+  },
+  {
     "id": "chuggamus_r2",
     "name": "Chuggamus",
     "refs": [
@@ -3029,17 +3107,6 @@
     "name": "Sporcupine (portrait)",
     "refs": [
       "briefs/boki-art/evolutions/Sporcupine.jpg"
-    ],
-    "aspect": "1:1",
-    "runs": 2,
-    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: in a lively three-quarter pose that shows off its signature part. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
-    "size": "2K"
-  },
-  {
-    "id": "portrait_teapotamus",
-    "name": "Teapotamus (portrait)",
-    "refs": [
-      "briefs/boki-art/evolutions/Teapotamus.jpg"
     ],
     "aspect": "1:1",
     "runs": 2,

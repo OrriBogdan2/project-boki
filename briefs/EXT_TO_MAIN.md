@@ -3892,3 +3892,28 @@ READY ext/heal-knock-source-rebased 44f88a2c9 (supersedes ext/heal-knock-source;
 READY ext/telegraph-audit-b-rebased d42fe2ce6 (supersedes ext/telegraph-audit-b 20810cf25: origin/main merged in; conflicts in archer.md, rimewright_kit.gd, pin_bjorn_ult_check.gd resolved keeping main's vfx recipes and the cut Focus/Deadeye, the branch's hit-radius spikes, no cosmetic rings and drawn==hit asserts; --check, --archer/bulwark/dolm/dredge/rimewright-combo-check, --support-check failures 0, health --strict ok)
 READY ext/telegraph-audit-a-rebased 8a9015033 (supersedes ext/telegraph-audit-a; origin/main merged, 4 kit conflicts resolved on main's vfx data: Cinder cloak scorch full r and lift-off scorch removed in content/vfx/ashwick.json, Kael slam drawn as the 70 deg cone keeping main's pinned dir, Meeko keeps main's seed_burst/mended vfx. ashwick/juggernaut/tender/gunslinger combo checks 0 failures, --check 0, health --strict ok)
 READY ext/telegraph-audit-c-rebased 32742080e (supersedes ext/telegraph-audit-c 498b60d09: origin/main merged in; mage_kit/mage_ult conflicts resolved keeping main's PINK palette plus the branch's drawn==hit sizes; mage, bulwark, dancer, juggernaut, archer, ostra combo checks + --check + health --strict green)
+ART teapotamus 8.5 briefs/boki-art/evolutions/Teapotamus.jpg panel=8.5/8.5/8.6
+ART sporcupine_r reject briefs/boki-art/batch/out/sporcupine_r_1.jpg grade=7.6
+ART sporcupine_r reject briefs/boki-art/batch/out/sporcupine_r_2.jpg grade=7.6
+ART sporcupine_r reject briefs/boki-art/batch/out/sporcupine_r_3.jpg grade=7.6
+ART sporcupine_x reject briefs/boki-art/batch/out/sporcupine_x_3.jpg grade=7.1
+ART stormit_x reject briefs/boki-art/batch/out/stormit_x_3.jpg grade=7.2
+ART teapotamus_r2 reject briefs/boki-art/batch/out/teapotamus_r2_2.jpg grade=7.8
+ART terrarimit_x reject briefs/boki-art/batch/out/terrarimit_x_3.jpg grade=7.9
+ART terrasloth_r reject briefs/boki-art/batch/out/terrasloth_r_1.jpg grade=7.2
+ART voltmink_r reject briefs/boki-art/batch/out/voltmink_r_3.jpg grade=7.7
+ART voltmink_x reject briefs/boki-art/batch/out/voltmink_x_2.jpg grade=7.4
+ART amanitusk_x reject briefs/boki-art/batch/out/amanitusk_x_2.jpg grade=7.6
+ART anchorbill_x reject briefs/boki-art/batch/out/anchorbill_x_1.jpg grade=6.7
+ART arcestrel_x reject briefs/boki-art/batch/out/arcestrel_x_3.jpg grade=7.8
+ART bellowary_f reject briefs/boki-art/batch/out/bellowary_f_2.jpg grade=7.0
+ART bellowlet reject briefs/boki-art/batch/out/bellowlet_3.jpg grade=7.6
+ART blossmink_x reject briefs/boki-art/batch/out/blossmink_x_1.jpg grade=7.8
+ART briarlynx reject briefs/boki-art/batch/out/briarlynx_2.jpg grade=8.0
+ART bucketmander reject briefs/boki-art/batch/out/bucketmander_2.jpg grade=6.9
+ART buckleron_x reject briefs/boki-art/batch/out/buckleron_x_2.jpg grade=7.0
+ART chandelapi_x reject briefs/boki-art/batch/out/chandelapi_x_1.jpg grade=6.9
+ART chandelotl_x reject briefs/boki-art/batch/out/chandelotl_x_1.jpg grade=8.0
+ART chimelop_r reject briefs/boki-art/batch/out/chimelop_r_2.jpg grade=6.9
+ART cisternmander_r reject briefs/boki-art/batch/out/cisternmander_r_1.jpg grade=7.6
+ART coolatee reject briefs/boki-art/batch/out/coolatee_3.jpg grade=4.5
