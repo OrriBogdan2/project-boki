@@ -91,6 +91,7 @@
   ]
  ],
  "detail": {
+  "crouch": "Crouched, you see further, monsters notice you later and your aim steadies, but you walk slower.",
   "gkey": "%T is your Boki button. Tap it to send %s at a monster. Tap again to call it back. Hold it to give orders.",
   "rank": "Every level gives you a skill point (see the gold + by your level). Press %R to rank up %N. Your ultimate unlocks at level %U.",
   "sig": "%X",

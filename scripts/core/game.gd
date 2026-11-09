@@ -75,7 +75,7 @@ func _setup_input() -> void:
 	_key("util4", [KEY_4])                    # utility belt slot 4
 	_key("gear1", [KEY_Q])                    # glove 1 (Q)
 	_key("gear2", [KEY_V])                    # glove 2 (V; in a match only, so it shares V with "play" at home)
-	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
+	_key("crouch", [KEY_CTRL])                # sneak: see further, harder to spot, steadier aim, slower
 	_key("throw", [KEY_G])                    # send your kin out to fight on its own, or recall it
 	_key("ping", [], MOUSE_BUTTON_MIDDLE)     # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
 	_key("base", [KEY_B])                     # base to a teammate: a 3s channel (squads only)

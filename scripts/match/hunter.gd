@@ -189,8 +189,7 @@ var regen_wait := 0.0
 var armor := 0.0
 var max_armor := 50.0
 var armor_wait := 0.0
-var bloom := 0.0              # extra spread from moving, jumping and dashing
-var crouch := false           # slower, steadier aim, and much harder to spot
+var crouch := false           # slower, steadier aim, sees further and is much harder to spot
 var crouch_k := 0.0
 var reveal_t := 0.0           # seen through bushes and around walls for a moment after firing or getting hit
 var wall_touch_t := 0.0       # touching a wall in the air: a jump kicks off it
@@ -1601,6 +1600,7 @@ func _emit_shot() -> void:
 	var pel := int(wpn.get("pellets", 1))
 	if pel <= 1:
 		spread += deg_to_rad(wbloom)
+	if crouch: spread *= HunterMove.crouch_sway      # crouched, the sway narrows
 	var a: float = atan2(dir.y, dir.x) + spread * 0.45 * float(SWAY[shot_n % SWAY.size()])
 	var shot_y := pos.y + 0.95 * float(cdat["scale"])
 	var start := Vector3(pos.x + cos(a) * 0.6, shot_y, pos.z + sin(a) * 0.6)
@@ -1978,14 +1978,8 @@ func sim(dt: float) -> void:
 		air_jumps = 0
 		air_dashed = false
 	armor_wait = maxf(0.0, armor_wait - dt)
-	# shots spread more while you move, jump or have just dashed, and settle when you stand still
 	if not remote:
 		crouch = bool(inp.get("crouch", false)) and grounded and not downed and roll_t <= 0.0 and not gliding and not dropping and not riding and charge.is_empty()
-	var want_bloom := -0.3 if crouch else 0.0
-	if not grounded: want_bloom = 1.0
-	elif Vector2(vel.x, vel.z).length() > 1.5 and not crouch: want_bloom = 0.45
-	if roll_t > 0.0: want_bloom = 1.4
-	bloom = lerpf(bloom, want_bloom, 1.0 - exp(-(10.0 if want_bloom > bloom else 4.0) * dt))
 	if remote:
 		net_follow(dt)
 		return

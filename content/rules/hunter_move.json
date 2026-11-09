@@ -23,6 +23,7 @@
 		"dive_cancel_h": 3.5,
 		"dive_timeout": 10.0
 	},
+	"crouch": {"doc": "What crouching (sneak, held on the ground) changes, besides the slower walk and the wider sight (Hunter and Match) [owner rule: the source has no crouch rule to match]. sway: the share of a gun's aim sway left while crouched (its fixed shot-to-shot pattern narrows). notice: the share of an idle monster's notice radius (7.5 m, Mob) a crouched Hunter has to be inside before it is spotted.", "sway": 0.5, "notice": 0.6},
 	"default": {"speed": 4.55, "accel": 54.0},
 	"bulwark": {"speed": 4.85, "accel": 47.0},
 	"dredge": {"speed": 4.65, "accel": 47.0},

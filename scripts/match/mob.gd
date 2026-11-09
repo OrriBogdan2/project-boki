@@ -138,14 +138,21 @@ func _engaged_on(t: Ent) -> int:
 			n += 1
 	return n
 
+const NOTICE_M := 7.5        # m: an idle monster notices a Hunter this close (crouched: less, HunterMove.crouch_notice)
+const KEEP_M := 11.0         # m: a chasing monster switches to anyone this close
+
 func _find_target() -> Ent:
-	var best: Ent = null; var bd := 7.5 if st == "idle" else 11.0
+	var idle := st == "idle"
+	var best: Ent = null
+	var bd := NOTICE_M if idle else KEEP_M
 	for h in m.hunters:
 		if not h.targetable() or m.demo_shielded(h):
 			continue
 		var d := flat_dist(h)
 		if d > 2.6 and h.reveal_t <= 0.0 and (m.world.in_bush(h.pos.x, h.pos.z) or m.in_smoke(h.pos)):
 			continue        # hiding in the grass
+		if idle and h.crouch and h.reveal_t <= 0.0 and d > NOTICE_M * HunterMove.crouch_notice:
+			continue        # crouched (and not firing): noticed only closer in, content/rules/hunter_move.json
 		if d < bd and absf(h.pos.y - pos.y) < 2.5:
 			bd = d; best = h
 	for k in m.kins:

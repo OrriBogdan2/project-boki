@@ -229,6 +229,13 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
+## Crouch: what the tutorial promises (`--crouch-check`)
+The tutorial's crouch line says you see further, monsters notice you later, your aim steadies and you walk slower.
+These are owner rules: the source has no crouch rule to match. Walk 0.55x run speed (`Hunter`). Sight 1.25x
+(`Match.sees`, the view cone and a camera pulled back to 1.45x). Gun sway x`crouch.sway` 0.5 and an idle monster's
+7.5 m notice radius x`crouch.notice` 0.6 (`content/rules/hunter_move.json`, `Mob._find_target`; firing gives you
+away as usual). The crouch poses are `--crouch-anim-check`.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
