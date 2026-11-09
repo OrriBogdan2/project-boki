@@ -29116,5 +29116,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/canvastross_card3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "chuggamus_card3",
+    "name": "Chuggamus (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chuggamus_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chuggamus_card3",
+    "name": "Chuggamus (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chuggamus_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chuggamus_card3",
+    "name": "Chuggamus (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/chuggamus_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "foldbat_card3",
+    "name": "Foldbat (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/foldbat_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "foldbat_card3",
+    "name": "Foldbat (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/foldbat_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frigatee_card3",
+    "name": "Frigatee (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/frigatee_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "frigatee_card3",
+    "name": "Frigatee (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/frigatee_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frigatee_card3",
+    "name": "Frigatee (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/frigatee_card3_3.jpg",
+    "ok": true
   }
 ]
