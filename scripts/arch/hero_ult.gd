@@ -37,16 +37,25 @@ static func cooldown(k: ArchKit) -> float:
 static func cast_id(k: ArchKit) -> String:
 	return String(k.st.get("ult_cast", ""))
 
-## The ult connected with `target`: an enemy hunter it hit, knocked or killed fills the Boki bond.
-static func landed(k: ArchKit, target: Ent) -> void:
+## The ult connected with `target`: an enemy hunter it hit, knocked or killed fills the Boki bond. Returns
+## what it was ("hit", "knock" or "kill"; "" for a monster, a wisp or a teammate) so a kit whose ult
+## resets on a takedown (Retaliation) reads the same answer.
+static func landed(k: ArchKit, target: Ent) -> String:
 	if not (target is Hunter) or target.team == k.h.team or cast_id(k) == "":
-		return
+		return ""
 	var kind := "hit"
 	if target.dead:
 		kind = "kill"
 	elif (target as Hunter).downed:
 		kind = "knock"
 	KinBond.from_ult(k.h, kind, cast_id(k))
+	return kind
+
+## The ult is ready again at once (its cooldown cleared, the cue on the X tile).
+static func reset(k: ArchKit) -> void:
+	k.cd["x"] = 0.0
+	if k.h.is_local():
+		k.h._ab_feedback("x", "ready")
 
 ## The ult's slot data in the keys Hunter.slot_info uses (for a HUD tile that shows its cooldown).
 static func slot_info(k: ArchKit) -> Dictionary:

@@ -233,11 +233,10 @@ func on_knock(t: Hunter, mine: bool) -> void:
 func _reset_riposte() -> void:
 	if float(cd["x"]) <= 0.0 or h.lvl < int(Hunter.ULT_AT[0]):
 		return
-	cd["x"] = 0.0
+	HeroUlt.reset(self)
 	slam_resets += 1
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), "RIPOSTE READY", col_of(x_def()), true)      # no ring on a reset
 	m.sfx("ab_ready", h.pos, -2.0, 0.8)
-	if h.is_local(): h._ab_feedback("x", "ready")
 
 # ------------------------------------------------------------------ X: Gilded Riposte (JuggernautUlt)
 ## X (main's HunterKeys gate: level 6; HeroUlt.press: its own cooldown in cd["x"], the cast id).
