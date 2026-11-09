@@ -18497,5 +18497,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/latchling_card_1.jpg",
     "ok": true
+  },
+  {
+    "id": "gongrowl_card",
+    "name": "Gongrowl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gongrowl_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kitlet_card",
+    "name": "Kitlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kitlet_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kerchick_card",
+    "name": "Kerchick (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kerchick_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "jarmit_card",
+    "name": "Jarmit (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/jarmit_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ribbonwyrm_card",
+    "name": "Ribbonwyrm (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarlet_card",
+    "name": "Oarlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/oarlet_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ribbonwyrm_card",
+    "name": "Ribbonwyrm (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarlet_card",
+    "name": "Oarlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/oarlet_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_card",
+    "name": "Puffamus (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/puffamus_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "parasolth_card",
+    "name": "Parasolth (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/parasolth_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunink_card",
+    "name": "Lunink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lunink_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunink_card",
+    "name": "Lunink (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lunink_card_2.jpg",
+    "ok": true
   }
 ]
