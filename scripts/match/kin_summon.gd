@@ -12,6 +12,7 @@ extends RefCounted
 const BURST_S := 0.3      # s: the bloom from wisp to full size
 const SHRINK_S := 0.35    # s: the shrink back into the wisp
 const BURST_FROM := 0.3   # its size at the start of the bloom and the end of the shrink (x its own)
+const READY_FLASH_S := 1.5  # s: the Boki box says READY after the cooldown ends (once), then just shows the key
 
 var k: Kin
 var dur := 10.0       # s: this species' window
@@ -21,6 +22,7 @@ var shrink := 0.0     # s of the shrink back left
 var grow := 0.0       # s of the bloom left (drawing only)
 var cd := 0.0         # s until it can be summoned again
 var cd_full := 1.0    # s: the cooldown now running (longer after a knock-down), for the HUD ring
+var ready_flash := 0.0  # s of the READY flash left on the HUD (starts when the cooldown ends)
 
 func _init(kin: Kin) -> void:
 	k = kin
@@ -91,7 +93,10 @@ func knocked() -> bool:
 
 ## The fixed step (own Boki only; a remote one reads the snapshot).
 func tick(dt: float) -> void:
+	if cd > 0.0 and cd <= dt:
+		ready_flash = READY_FLASH_S
 	cd = maxf(0.0, cd - dt)
+	ready_flash = maxf(0.0, ready_flash - dt)
 	grow = maxf(0.0, grow - dt)
 	var o := k.owner_h
 	if left > 0.0:
