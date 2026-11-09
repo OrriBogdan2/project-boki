@@ -5403,3 +5403,4 @@ READY ext/edge-knock-parity 0286f0cf (bots no longer held at the rim by a shove;
 READY ext/parity-ability-speeds-b 1398826f9 (ability projectile speeds B)
 READY ext/parity-aegis-block e17eaf4bc (aegis block rules)
 READY ext/hold-pose-audit 54d5cb169 (hold-pose audit of all 12 Hunters: new --hold-pose-check drives tap, short, dash-buffered, late, glide and held-into-dash/air presses per slot; one real case, Cinder's Torch Lance pose stayed up 2.5 s after the key was let go in a dash, fixed in ashwick_kit.gd + assert in --ashwick-combo-check; the other 11 clean, rest are timed ults/dashes listed in NOT_HELD; hold, clip, warden-clips, dash-flow 0 fail, hero-combo 304/0, ashwick-combo 120/0, health --strict OK, gen_wiki --check OK)
+READY ext/parity-passives-b 278596890 (passive numbers B)
