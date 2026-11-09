@@ -8571,5 +8571,75 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/lunink_r_1.jpg",
     "ok": true
+  },
+  {
+    "id": "lockatara_r",
+    "name": "Lockatara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lockatara_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kayak_r2",
+    "name": "Kayak",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/kayak_r2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cubbat",
+    "name": "Cubbat (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_cubbat_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bathilus",
+    "name": "Bathilus (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bathilus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lurklet",
+    "name": "Lurklet (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lurklet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lurklet",
+    "name": "Lurklet (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lurklet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lensling",
+    "name": "Lensling (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lensling_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lensling",
+    "name": "Lensling (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lensling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bathilus",
+    "name": "Bathilus (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bathilus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cubbat",
+    "name": "Cubbat (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cubbat_2.jpg",
+    "ok": true
   }
 ]
