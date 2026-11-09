@@ -389,6 +389,28 @@ func _mage() -> void:
 			and Displace.slide_speed(sl_d, sl_t, sl_t) == 0.0 and Displace.slide_speed(sl_d, sl_t, 0.0) < 8.0,
 			"%.2f" % Displace.slide_speed(sl_d, sl_t, 0.0))
 	ok("Skycall: the strike direction is the flick", (K.last_strike.get("dir", Vector2.ZERO) as Vector2).x < -0.9)
+	# source rows (briefs/hero-ref/vireo.md "E: Lightning Javelin": 0.8 s = 4 frames at 5 fps; briefs/supervive-data/
+	# supervive_kits.md Joule E: 12 s, 1 Static; cooldown kept at our 8 : 8 : 10.5 pace, E / rod = 9.2 / 7)
+	var rod_cd := float(K.rmb_def()["cooldown"])
+	ok("Skycall data: 0.8 s countdown, 1 Static, 11 m reach, cooldown 10.5 at the source's E : rod ratio",
+			absf(float(e_d["delay"]) - 0.8) < 0.001 and int(e_d["stacks"]) == 1
+			and absf(float(e_d["reach"]) - 11.0) < 0.001 and absf(float(e_d["cooldown"]) - 10.5) < 0.001
+			and absf(float(e_d["cooldown"]) / rod_cd - 9.2 / 7.0) < 0.05,
+			"%s / %s" % [e_d["cooldown"], rod_cd])
+	# the drag window is ours (the source states none): held with no release, it commits at drag_max, then 0.8 s
+	K.cd["e"] = 0.0
+	P.teleport(home)
+	ac.aim_at(P, home + Vector3(0, 0, -8.0))
+	P.inp["e_down"] = true
+	P.ak.use_e()
+	ac.step(m, float(e_d["drag_max"]) - 0.1)
+	var held_open: bool = String(K.strikes[0]["phase"]) == "flick"
+	ac.step(m, 0.2)
+	ok("Skycall held with no release: open until 1 s (drag_max), then the countdown starts on its own",
+			held_open and String(K.strikes[0]["phase"]) == "count" and absf(float(K.strikes[0]["t"]) - 0.7) < 0.15,
+			str(K.strikes[0]["t"]))
+	P.inp["e_down"] = false
+	ac.step(m, 1.0)
 	# no flick: thrown away from you; it steals a rival's orb
 	ac.fresh(T)
 	K.sparks.clear()
