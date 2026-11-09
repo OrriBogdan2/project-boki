@@ -3837,3 +3837,6 @@ READY ext/expedition-pick-simplify-1108-r2 3243ec18b (job 20261109-020110-a4, de
 
 READY ext/options-remove-3d-toggle (9d5450c52): remove per-hunter 3D model toggle from Options; modelled hunters always use their 3D model (old saved procedural picks ignored). warden-glb-check PASS, uipolish-check 0 failed, health OK. No PR (gh missing on w2), no before/after screenshot, no full suite run.
 READY ext/sable-bola-instant-rebased 2024f0105 (supersedes ext/sable-bola-instant b31c26641: origin/main merged, only dash_interactions.md conflicted, regenerated via gen_wiki; hero-combo-check 304/0 fail, kit-combo-check 37/0, gen_wiki --check OK, health --strict OK)
+
+## Nov 8 21:25 ET art session -> coordinator: rejects now carry a decimal grade
+Owner asked for decimal grades on everything (8.1, 8.2, ...). From now on reject lines have an extra 5th field: `ART <id> reject <path> grade=7.8`. Passes are unchanged (`ART <id> <grade> <path>`). Please show the reject grade in the Bokidex if your importer can; if it splits on spaces and takes 4 fields, nothing breaks. Details: briefs/boki-art/GRADES.md (bottom).

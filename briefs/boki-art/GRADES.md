@@ -52,3 +52,11 @@ Female sheets for Bellowary and Gongibbon are on hold until their redos are lock
 ## Batch mode (owner, Nov 8 19:40)
 Hyper-critical grading, but the bar is 8.5 (owner, 19:56: wants a steady stream to review, ideally 2 good images a minute). Owner wants a very low reject rate at review, so reroll freely (up to 4 tries per Boki, then flag). Do not stop between batches; owner checks in periodically. Boards go out every 10 approved.
 Auto-fail at batch stage: anything upright or person-like, any strap/belt/band/vest/hat look, a copy of its parent (babies, middles), a final form not clearly bigger than its middle, realistic animal plus prop, missing signature part, blush on non-babies.
+
+
+## Decimal grades and near-misses (owner, 2026-11-08 21:25 ET)
+- Every image gets a decimal grade, rejects included (e.g. 7.4, 8.2). The bar stays 8.5.
+- Rubric (one overall grade, judged, not averaged): idea fused through the whole body; silhouette readable at thumbnail size; appeal and face; style match; form logic (stage size, no copying the parent); clean sheet.
+- Owner calibration anchors: Sporcupine 7.9, Teapotamus 7.1, Voltmink 7.0.
+- 8.0-8.4 with one or two fixable details -> an edit job on that image (cheaper, keeps what works). Below 8.0 -> a new prompt.
+- ART lines for rejects: `ART <id> reject <path> grade=<x.x>` (the grade is an extra 5th field; passes keep `ART <id> <grade> <path>`).
