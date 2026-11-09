@@ -8,7 +8,7 @@
 		"root": {"look": "stakes", "col": "#9a6aff", "dark": "#2e1a5a", "y": 0.0, "size": 1.0, "pace": 1.0,
 			"why": "Meeko's root (her violet): thorns driven into the ground round the feet"},
 		"gnd": {"look": "cords", "col": "#e0a03a", "dark": "#5a3a10", "y": 0.0, "size": 1.0, "pace": 1.0,
-			"why": "Grounded (the Bola, Warchain reel): cords wound round the legs"},
+			"why": "Grounded (the Bola, Warchain reel): cords wound round the legs and a down arrow stamping over the head"},
 		"slow": {"look": "anklets", "col": "#b8a8ff", "dark": "#2a2460", "y": 0.0, "size": 1.0, "pace": 1.0,
 			"why": "any slow: weighted rings sliding down the legs to the ground"},
 		"chill": {"look": "frost", "col": "#7fd0ff", "dark": "#2f6ac0", "hot": "#effcff", "y": 0.0, "size": 1.0, "pace": 1.0,

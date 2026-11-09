@@ -349,6 +349,8 @@ func _statuses(m: Match, P: Hunter) -> void:
 		var parts := rig.find_children("*", "MeshInstance3D", true, false).size() if rig else 0
 		ok(up and not L.showing(P, st), "status %s: its look comes up on that body only" % st)
 		ok(parts > 0 and parts <= RIG_PARTS, "status %s: %d meshes (at most %d)" % [st, parts, RIG_PARTS])
+		if st == "gnd":
+			ok(rig.find_child("Arrow", true, false) != null, "status gnd: a down arrow over the head")
 		looks[String(rules[st]["look"])] = true
 		_set_status(m, F, st, false)
 		ok(not L.showing(F, st), "status %s: the look goes when it ends" % st)

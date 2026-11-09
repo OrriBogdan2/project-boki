@@ -9,7 +9,7 @@ Combo marks and two-hit combo states are the overhead tags' (the 11-08 recast/ma
 | stun | stars on a dark disc | over the head | fast spin | yellow |
 | Daze | ring of crystals | high over the head | wobble | orange (Vex) |
 | root | thorns and a ring | ground at the feet | ring pulses | violet (Meeko) |
-| Grounded | cords | round the legs | counter-turning | amber (Bola) |
+| Grounded | cords and a down arrow | round the legs, arrow over the head | counter-turning, arrow stamps | amber (Bola) |
 | slow | rings | shins to the ground | slide down and spread | lavender |
 | Chill | ice shell, crystals | whole body | still | ice blue (Neve) |
 | burning | flame tongues | up the body | flicker | orange/yellow (Cinder) |
