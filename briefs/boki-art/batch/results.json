@@ -32070,5 +32070,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/cisternmander_card3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "howlop_card3",
+    "name": "Howlop (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/howlop_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternmit_card3",
+    "name": "Lanternmit (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanternmit_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternmit_card3",
+    "name": "Lanternmit (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanternmit_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_card3",
+    "name": "Lyrewing (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lyrewing_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_card3",
+    "name": "Lyrewing (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lyrewing_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternmit_card3",
+    "name": "Lanternmit (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lanternmit_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_card3",
+    "name": "Lyrewing (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lyrewing_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter_card3",
+    "name": "Oarter (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/oarter_card3_1.jpg",
+    "ok": true
   }
 ]
