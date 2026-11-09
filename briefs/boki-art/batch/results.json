@@ -8284,5 +8284,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/druzemole_e_2.jpg",
     "ok": true
+  },
+  {
+    "id": "druzemole_e",
+    "name": "Druzemole",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/druzemole_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_e",
+    "name": "Eclipsowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eclipsowl_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_e",
+    "name": "Eclipsowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/eclipsowl_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadnoyak_r2",
+    "name": "Dreadnoyak",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadnoyak_r2",
+    "name": "Dreadnoyak",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "embrook_r2",
+    "name": "Embrook",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/embrook_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "embrook_r2",
+    "name": "Embrook",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/embrook_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_e",
+    "name": "Eclipsowl",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/eclipsowl_e_3.jpg",
+    "ok": true
   }
 ]
