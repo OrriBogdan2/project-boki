@@ -48,3 +48,4 @@ Rule (owner 04:48 ET): if unsure, still push the best pick, but save the alterna
 | Lodestaff (new final of Lodestick) | e2_1 tall dark mantis-like lodestone staff insect (8.2) queued | Planned evolution, now has art | e1_1 7.6 |
 | Reapant | live stays; best new ninja ant w2_2 (7.3) is plum with a scarf but stands like a person | Owner wanted taller/cooler ninja; this breaks the "no person-like pose" rule | c_reapant_w2_2 in batch/out |
 | Vaultara / Dreadnoyak / Forgebrock | live stays; audit redos scored 7.0-7.8 | not clearly better | x1/x2 in batch/out; more tries queued |
+| Galleotter | Bokidex keeps your earlier approved gen hero (coordinator rule); the new sea-serpent card/portrait are filed in the repo | Which do you want as Galleotter? | say 'use the serpent' to switch |
