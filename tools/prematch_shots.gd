@@ -17,6 +17,13 @@ func outside(node: Node, area: Rect2) -> Array:
 
 func run(main: Node) -> void:
 	Save.no_write = true
+	var classes := ClassUnlock.fresh()      # a new player: Vex open, the rest shut
+	classes["picks"] = ["gunslinger"]
+	classes["open"] = ["gunslinger"]
+	Save.d = Save.fresh()
+	Save.d["arch"] = "gunslinger"
+	Save.d["name"] = "Ember"
+	Save.d["classes"] = classes
 	var dir := "prematch_shots"
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):

@@ -16,7 +16,7 @@ var talk_btn: Button
 
 const COLUMNS := 4          # Hunter cards per row
 const CARD_MIN_W := 200.0   # px, a card's least width (portrait, name, role word)
-const LOG_H := 130.0        # px, the chat log once the first line has come in
+const LOG_H := 84.0         # px, the most the chat log grows to (it scrolls past that)
 
 ## A small padlock for a shut Hunter: a body and a shackle.
 class Padlock extends Control:
@@ -78,7 +78,6 @@ func _ready() -> void:
 ## The chat: one "Enter to chat" line; the log shows from the first message, the input while you type.
 func _build_chat(root: Control) -> void:
 	chat_scroll = ScrollContainer.new()
-	chat_scroll.custom_minimum_size = Vector2(0, LOG_H)
 	chat_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	chat_scroll.visible = false
 	root.add_child(chat_scroll)
@@ -167,7 +166,7 @@ func _tile(ak: String) -> PanelContainer:
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_child(col)
-	col.add_child(UI.label(Arch.name_of(ak), 20, Arch.color(ak) if open else UI.FAINT, UI.big))
+	col.add_child(UI.label(HeroTitle.base_name(ak), 20, Arch.color(ak) if open else UI.FAINT, UI.big))
 	var role := String(Arch.def(ak)["card"]["role_word"])
 	if ak == pm.pick and pm.locked:
 		col.add_child(UI.label(role + "  ·  locked in", 13, UI.GOOD))
@@ -213,6 +212,7 @@ func _add_chat(who: String, text: String, col: Color) -> void:
 	chat_log.add_child(l)
 	chat_scroll.visible = true
 	await get_tree().process_frame
+	chat_scroll.custom_minimum_size.y = minf(chat_log.get_combined_minimum_size().y, LOG_H)
 	chat_scroll.scroll_vertical = int(chat_scroll.get_v_scroll_bar().max_value)
 
 func _send_chat() -> void:

@@ -147,7 +147,7 @@ func _declutter(view: Control) -> void:
 		var shut := not ClassUnlock.is_open(ak)
 		open += 0 if shut else 1
 		var quest := "Locked: " + ClassUnlock.requirement(ak)
-		var plain: bool = texts.size() == 2 and texts[0] == Arch.name_of(ak) and texts[1].begins_with(role)
+		var plain: bool = texts.size() == 2 and texts[0] == HeroTitle.base_name(ak) and texts[1].begins_with(role)
 		var tip: String = card.tooltip_text
 		var tip_ok := tip.contains("health") and (not shut or tip.begins_with(quest))
 		shut_ok = shut_ok and plain and lock == shut and tip_ok
