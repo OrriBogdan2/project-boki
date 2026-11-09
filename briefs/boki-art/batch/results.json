@@ -12281,5 +12281,103 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_sporcupine_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_forgebrock",
+    "name": "Forgebrock (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_forgebrock_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_forgebrock",
+    "name": "Forgebrock (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_forgebrock_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_forgebrock",
+    "name": "Forgebrock (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_forgebrock_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_meeko_r",
+    "name": "Relic: Meeko",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_meeko_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_forgebrock",
+    "name": "Forgebrock (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_forgebrock_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_meeko_r",
+    "name": "Relic: Meeko",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_meeko_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w28",
+    "name": "Amanitusk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w28",
+    "name": "Amanitusk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_scoopsy",
+    "name": "Scoopsy",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_scoopsy_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w28",
+    "name": "Amanitusk",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_scoopsy",
+    "name": "Scoopsy",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_scoopsy_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sundormouse",
+    "name": "Sundormouse (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_sundormouse_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowlet_r_w28",
+    "name": "Bellowlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bellowlet_r_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sundormouse",
+    "name": "Sundormouse (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_sundormouse_2.jpg",
+    "ok": true
   }
 ]
