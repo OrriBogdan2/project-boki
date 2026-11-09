@@ -55,6 +55,13 @@ func run(main_node: Node) -> void:
 	var box := Rect2i(Vector2i(c) - Vector2i(520, 330), Vector2i(1040, 660))
 	var crop := img.get_region(box.intersection(Rect2i(Vector2i.ZERO, img.get_size())))
 	crop.save_png(dir.path_join("summon_side_crop.png"))
+	var cam := vp.get_camera_3d()
+	for k in m.kins:
+		var o: Hunter = k.owner_h
+		print("SUMMONSIDE kin %s owner %s team %s ring %s at %s" % [k.rec.get("name", "?"), o.name if o else "wild",
+			o.team if o else -1, SideRings.shown(k.ring).to_html(false), Vector2i(cam.unproject_position(k.global_position))])
+	for h in m.hunters:
+		print("SUMMONSIDE hunter %s team %d at %s" % [h.name, h.team, Vector2i(cam.unproject_position(h.global_position))])
 	print("SUMMONSIDESHOTS ", dir)
 	main.get_tree().quit(0)
 
