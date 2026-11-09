@@ -21,7 +21,7 @@ const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 ## speed, and the arms swing against their legs at least this much (-1: with, +1: against; reach-weighted).
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
-const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
+const NO_LEGS := ["ostra", "rimewright"]     # ostra hovers (a backlog item); rimewright skates, and a glide slides
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
 var bad := 0

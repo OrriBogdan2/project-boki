@@ -92,59 +92,63 @@ def stance(u):
     return p
 
 
-def gait(speed_k, heading, stroke, period_lift):
-    """She skates: one long edge while the other blade pushes out and back, then they trade. speed_k 0 walk .. 1 run. heading (deg, + left of facing)."""
+# the stroke (one leg's cycle, a phase 0..1): a long edge under her, the push out and back to a straight leg, the blade lifted and drawn in
+GLIDE_END, PUSH_END = 0.45, 0.74
+FWD, BACK, OUT = 0.35, 0.7, 0.45     # x stroke: where the blade sets down, how far back and how far out the push ends
+
+
+def gait(speed_k, heading, stroke, lift):
+    """She skates, push and glide: one blade runs a long edge under her while the other drives out and back to a straight
+    leg, then lifts and is drawn in beside the first; the weight rides over the gliding blade and each arm swings against
+    its own leg. speed_k 0 walk .. 1 run. heading (deg, + left of facing)."""
     d = Vector((-math.sin(math.radians(heading)), math.cos(math.radians(heading)), 0))
-    sd = Vector((d.y, -d.x, 0))                  # the push's side: to the right of the heading
     back = max(0.0, -d.y)
     fwd = max(0.0, d.y)
     lat = abs(d.x)
 
     def foot(ph, sx):
         ph = ph % 1.0
-        base = Vector((sx * FX, 0, A_Z))
-        if ph < 0.56:          # the glide: in under her, out in front
-            k = ph / 0.56
-            y = stroke * (0.5 - 0.75 * k)
-            out = 0.0
-            z, yaw = 0.0, 0.0
-        elif ph < 0.84:        # the push: out to the side and behind
-            k = (ph - 0.56) / 0.28
-            y = stroke * (-0.25 - 0.55 * k)
-            out = 0.11 * stroke / 0.3 * math.sin(k * math.pi * 0.5)
-            z, yaw = 0.0, 0.5
-        else:                  # the recover: skimming back in
-            k = (ph - 0.84) / 0.16
+        z, yaw = 0.0, 0.1
+        if ph < GLIDE_END:
+            k = ph / GLIDE_END
+            y, out = FWD - (FWD + 0.1) * k, 0.0
+        elif ph < PUSH_END:
+            k = (ph - GLIDE_END) / (PUSH_END - GLIDE_END)
+            y = -0.1 - (BACK - 0.1) * (0.6 * k + 0.4 * k * k)
+            out, yaw = OUT * math.sin(k * math.pi * 0.5), 0.1 + 0.45 * k
+        else:
+            k = (ph - PUSH_END) / (1.0 - PUSH_END)
             sm = k * k * (3 - 2 * k)
-            y = stroke * (-0.8 + 1.3 * sm)
-            out = 0.11 * stroke / 0.3 * (1 - sm)
-            z, yaw = period_lift * math.sin(k * math.pi), 0.5 * (1 - sm)
-        return base + d * y + Vector((sx, 0, 0)) * out + Vector((0, 0, z)), yaw
+            y = -BACK + (BACK + FWD) * sm
+            out = OUT * (1 - min(1.0, 1.6 * k)) ** 2
+            z, yaw = lift * math.sin(k * math.pi), 0.1 + 0.45 * (1 - sm)
+        return Vector((sx * FX, 0, A_Z)) + d * (stroke * y) + Vector((sx * stroke * out, 0, z)), yaw
 
     def fn(u):
         p = dict(READY)
+        w = speed_k
         rp, ry = foot(u, 1.0)
         lp, ly = foot(u + 0.5, -1.0)
         p["FR"], p["FL"] = tuple(rp), tuple(lp)
         hy = math.radians(heading) * 0.55
-        p["FRy"], p["FLy"] = -ry - 0.05 + hy, ly + 0.05 + hy
+        p["FRy"], p["FLy"] = -ry + hy, ly + hy
         p["FRp"], p["FLp"] = 0.0, 0.0
-        c1 = math.cos(u * 2 * math.pi)                 # + over the left blade.. - over the right
+        sway = math.cos((u - 0.25) * 2 * math.pi)       # + over the right blade .. - over the left
+        arm = math.cos((u - 0.1) * 2 * math.pi)         # + the left leg's push: the left hand forward and across
         s2 = math.sin(u * 4 * math.pi + 0.4)
-        p["pel"] = (-0.03 * c1 + (0.02 * d.x), -0.02 * back + 0.03 * speed_k * fwd, -0.035 - 0.05 * speed_k + 0.008 * s2)
-        lean = (0.07 + 0.2 * speed_k) * fwd - 0.05 * back
-        p["prt"] = (lean * 0.55, 0.05 * c1, 0.05 * c1 + 0.1 * d.x * lat)
-        p["tor"] = (lean * 0.55 + 0.012 * s2, -0.09 * c1, -0.03 * c1 + 0.05 * d.x)
-        p["hed"] = (-lean * 0.7 + 0.06, 0.06 * c1 + 0.03, 0.03 * c1)
-        w = speed_k
+        lean = (0.12 + 0.24 * w) * fwd - 0.05 * back
+        p["pel"] = (0.04 * sway + 0.02 * d.x, -0.02 * back + 0.03 * w * fwd, -0.06 - 0.06 * w + 0.01 * s2)
+        p["prt"] = (lean * 0.55, 0.06 * sway, 0.04 * sway + 0.1 * d.x * lat)
+        p["tor"] = (lean * 0.55, -0.12 * arm, -0.03 * sway + 0.05 * d.x)
+        p["hed"] = (-lean * 0.8 + 0.06, 0.1 * arm + 0.03, 0.02 * sway)
         low, rd = LOWS["G"], READY["G"]
-        p["G"] = (rd[0] + (low[0] - rd[0]) * w, rd[1] + (low[1] - rd[1]) * w + 0.03 * c1 * (1 - w) * 0.5, low[2] + (rd[2] - low[2]) * (1 - w) + 0.012 * s2)
+        p["G"] = (rd[0] + (low[0] - rd[0]) * w + 0.02 * arm, rd[1] + (low[1] - rd[1]) * w - 0.05 * arm, low[2] + (rd[2] - low[2]) * (1 - w) + 0.012 * s2)
         p["BE"] = frame_of(tuple(Vector(D(2, 84)).lerp(Vector(D(5, 14 + 3 * s2)), w).normalized()), tuple(Vector((-0.35, -0.9, -0.1)).lerp(Vector((-0.3, -0.5, 0.8)), w).normalized()))
-        # the left arm carried out, floating with the stroke
-        p["LP"] = (-0.31 - 0.06 * w, 0.08 + 0.06 * w - 0.08 * c1 * (0.5 + 0.5 * w), 0.99 + 0.07 * w + 0.03 * max(0.0, c1))
+        a = 0.6 + 0.4 * w
+        p["LP"] = (-0.34 - 0.03 * w + 0.09 * a * arm, 0.1 + 0.04 * w + 0.16 * a * arm, 1.02 + 0.05 * w + 0.04 * a * max(0.0, arm))
         p["LH"] = (0.2 * w, 0, 0.1)
         p["fing"] = 0.1
-        p["skirt"] = 0.25 * c1 * (0.4 + 0.6 * w)
+        p["skirt"] = 0.3 * sway * (0.4 + 0.6 * w)
         p["skirtz"] = 0.3 * math.sin(u * 2 * math.pi + 0.8) * (0.4 + 0.6 * w)
         p["brow"], p["lid"], p["smile"] = -0.1, 0.12, 0.5 + 0.3 * w
         return p
@@ -168,7 +172,7 @@ def crouch_set():
 def clips():
     out = [FnClip("idle", 4.2, idle), FnClip("stance", 4.0, stance)]
     out += crouch_set()
-    for nm, sk, stroke, lift, T in (("walk", 0.0, 0.26, 0.012, 1.5), ("run", 1.0, 0.42, 0.03, 1.0)):
+    for nm, sk, stroke, lift, T in (("walk", 0.0, 0.28, 0.05, 2.0), ("run", 1.0, 0.4, 0.09, 1.5)):
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sk, hd, stroke * (0.8 if tag in "lr" else 1.0), lift)))
 

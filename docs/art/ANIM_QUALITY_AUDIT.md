@@ -21,7 +21,7 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   camera, 8 frames each. The walk and run use the live hand-off seen from the side with floor posts that scroll at the
   move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
-  counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
+  counter under 0.3 on a Hunter with legs, fails. `ostra` (no stepping legs) and `rimewright` (she skates: a glide is a sliding foot) are exempt, and
   are listed below as open.
 
 ## What is wrong with all of them
@@ -47,7 +47,7 @@ body (not in the air, a crouch, or a move that owns the body):
   shoulder-to-hand pitch follows minus the same side's thigh, around the arm's running mean. A static arm gets a swing
   too. It is off while an upper-body move owns the arm.
 - The numbers are per Hunter in content/rules/warden_anim/*.json, measured by `--anim-audit`, with the sweep that chose
-  the `stride` gains. `ostra` and `rimewright` keep their clips (no leg motion to stretch).
+  the `stride` gains. `ostra` and `rimewright` have no stride to stretch.
 - The glbs are not re-baked (other art jobs are in flight on them), so this is a runtime layer. When an art job re-keys
   a gait, re-run `--anim-audit` and re-tune that Hunter's three keys.
 
@@ -67,7 +67,7 @@ speed in m/s against 4.65. Bob (cm of hip) and cadence are as after.
 | `juggernaut` | 53 → 25 | 27 → 12 | 3.4 → 4.5 | -0.65 → +0.84 | 16 | 3.3 |
 | `mage` | 59 → 19 | 42 → 9 | 2.7 → 4.8 | +0.95 → +0.89 | 7 | 4.2 |
 | `ostra` | 100 → 100 | 100 → 100 | 0.0 → 0.0 | +0.00 → -0.00 | 4 | 0.0 |
-| `rimewright` | 93 → 87 | 90 → 82 | 0.4 → 0.8 | -0.39 → +0.97 | 1 | 1.7 |
+| `rimewright` | 93 → 93 | 90 → 94 | 0.4 → 0.3 | -0.39 → +0.85 | 1.7 | 1.7 |
 | `tender` | 76 → 39 | 62 → 17 | 1.8 → 3.9 | -0.82 → +0.39 | 5 | 6.7 |
 | `thief` | 73 → 39 | 60 → 17 | 1.8 → 4.3 | -0.96 → +0.82 | 5 | 4.2 |
 
@@ -140,8 +140,14 @@ posts scroll at the move speed).
 ![ostra walk and run, before and after](anim_audit/ostra.jpg)
 
 **Neve (`rimewright`)**
-1. Legs do not step: she skates (clip foot speed 0.4 m/s against 4.65 m/s, slide 90 %). Runtime stride 1.6 to 2.4 now takes it to 0.8 m/s (slide 82 %). A skater's glide never plants a foot, so the slide gate stays off for her: the real fix is a re-keyed push-and-glide clip.
-2. Arms barely moved in a gait (reach 0.14 and 0.01). The free left arm now counter-swings (counter +0.97); the right hand holds the spear and stays.
+1. Legs did not step: she slid on still blades (clip foot speed 0.4 m/s against 4.65 m/s, slide 90 %). Re-keyed as a
+   skater's push and glide (`gait` in tools/art1/claire_clips.py): one blade runs a long edge under her while the other
+   drives out and back to a straight leg, lifts and is drawn in; the hips ride over the gliding blade, knees bent. A
+   glide moves with her, so slide stays near 94 % and clip speed is 0.16 (walk) and 0.3 (run) m/s by design; her
+   cadence is keyed (walk 2.0 s, run 1.5 s a cycle), not set from `foot_mps`, which would hold her at the 1.4x rate
+   limit. She gets no `stride` or `foot_mps` keys.
+2. Arms barely moved in a gait (reach 0.14 and 0.01). Now keyed: the free left hand swings 0.28 against its leg, the spear
+   hand 0.09 (counter +0.85), so she needs no runtime `arm_swing`.
 3. Nothing else is wrong: loop seams and the idle gap (0.06) are clean.
 
 ![rimewright walk and run, before and after](anim_audit/rimewright.jpg)
@@ -165,7 +171,6 @@ posts scroll at the move speed).
 Split into backlog items per Hunter (role build):
 
 - `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
-- `rimewright`: a re-keyed push-and-glide gait in tools/art1/claire_clips.py (`gait`): needs Blender and the claire source blend, which only hetzner has. Then re-run `--anim-audit` and re-tune her `stride` and `foot_mps` (now a runtime stopgap).
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `ashwick`, `ostra`, `tender`, `dredge`, `mage`, `thief` (vault_r) hold an arm sideways; `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
