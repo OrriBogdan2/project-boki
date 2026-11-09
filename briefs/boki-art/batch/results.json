@@ -15683,5 +15683,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_spirevark_pe_w28_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_zephyrak_pe_w28",
+    "name": "Zephyrak (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_zephyrak_pe_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zephyrak_pe_w28",
+    "name": "Zephyrak (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_zephyrak_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zephyrak_pe_w28",
+    "name": "Zephyrak (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_zephyrak_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "reapant_r_w28",
+    "name": "Reapant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/reapant_r_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "reapant_r_w28",
+    "name": "Reapant",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/reapant_r_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "reapant_r_w28",
+    "name": "Reapant",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/reapant_r_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rippmink_e_w28",
+    "name": "Rippmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rippmink_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rippmink_e_w28",
+    "name": "Rippmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rippmink_e_w28_1.jpg",
+    "ok": true
   }
 ]
