@@ -34226,5 +34226,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_chandelotl_d10_4.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_vespyx_flat",
+    "name": "Vespyx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_vespyx_flat_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_vespyx_flat",
+    "name": "Vespyx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_vespyx_flat_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrink_u2",
+    "name": "Umbrink (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_umbrink_u2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_vespyx_flat",
+    "name": "Vespyx",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/ta_vespyx_flat_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrink_u3",
+    "name": "Umbrink (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_umbrink_u3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrink_u1",
+    "name": "Umbrink (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_umbrink_u1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrink_u1",
+    "name": "Umbrink (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_umbrink_u1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrink_u2",
+    "name": "Umbrink (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_umbrink_u2_2.jpg",
+    "ok": true
   }
 ]
