@@ -6780,6 +6780,365 @@
     "size": "2K"
   },
   {
+    "id": "ta_anchorhorn_p86",
+    "name": "Anchorhorn",
+    "refs": [
+      "briefs/boki-art/batch/out/c_anchorhorn_z1_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_bastionpet_p86",
+    "name": "Bastionpet",
+    "refs": [
+      "briefs/boki-art/batch/out/c_bastionpet_z1_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_briarlynx_p86",
+    "name": "Briarlynx",
+    "refs": [
+      "briefs/boki-art/batch/out/c_briarlynx_f3_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_chandelapi_p86",
+    "name": "Chandelapi",
+    "refs": [
+      "briefs/boki-art/batch/out/c_chandelapi_f3_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_crofthollow_p86",
+    "name": "Crofthollow",
+    "refs": [
+      "briefs/boki-art/batch/out/c_crofthollow_z1_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_eclipsowl_p86",
+    "name": "Eclipsowl",
+    "refs": [
+      "briefs/boki-art/batch/out/c_eclipsowl_d2_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_mortarfly_p86",
+    "name": "Mortarfly",
+    "refs": [
+      "briefs/boki-art/batch/out/c_mortarfly_x1_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_ringrove_p86",
+    "name": "Ringrove",
+    "refs": [
+      "briefs/boki-art/batch/out/c_ringrove_y1_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_thistlynx_p86",
+    "name": "Thistlynx",
+    "refs": [
+      "briefs/boki-art/batch/out/c_thistlynx_e2_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_canvastross_r86",
+    "name": "Canvastross",
+    "refs": [
+      "briefs/boki-art/batch/out/c_canvastross_s2_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_rimefang_r86",
+    "name": "Rimefang",
+    "refs": [
+      "briefs/boki-art/batch/out/c_rimefang_f2_4.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_lanceron_r86",
+    "name": "Lanceron",
+    "refs": [
+      "briefs/boki-art/batch/out/c_lanceron_k2_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "ta_chandelotl_p86",
+    "name": "Chandelotl",
+    "refs": [
+      "briefs/boki-art/batch/out/c_chandelotl_d1_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "c_flarmink_m1",
+    "name": "Flarmink (concept)",
+    "refs": [
+      "briefs/boki-art/cards/Flarmink.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A long, low, sinuous stoat whose fur darkens to cracked cooling-lava plates toward the rump, with a flared ember ruff around the neck like a lion's collar. Family tie to its baby Ermink (an ivory ermine with an ink-brush tail): keep the ink-brush tail tip, but the body shape, posture and silhouette must be clearly its own and unlike any other mink form. One clear idea, few parts. Face: fierce, confident eyes and a sly grin. Main colours: charcoal black and ember orange, with a molten-yellow accent. Avoid: other mink shapes, the old design, held objects, effects, text. Element: ember, shown clearly by glowing orange-red ember cracks and a few rising sparks. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "size": "2K"
+  },
+  {
+    "id": "c_flarmink_m2",
+    "name": "Flarmink (concept)",
+    "refs": [
+      "briefs/boki-art/cards/Flarmink.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A compact, puffed-up stoat with a huge bonfire tail curled up over its back like a squirrel, its body ash-grey and soot-smudged. Family tie to its baby Ermink (an ivory ermine with an ink-brush tail): keep the ink-brush tail tip, but the body shape, posture and silhouette must be clearly its own and unlike any other mink form. One clear idea, few parts. Face: bright, cheeky eyes and a mischievous smirk. Main colours: ash grey and flame orange, with a cream belly. Avoid: other mink shapes, the old design, held objects, effects, text. Element: ember, shown clearly by glowing orange-red ember cracks and a few rising sparks. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "size": "2K"
+  },
+  {
+    "id": "c_flarmink_m3",
+    "name": "Flarmink (concept)",
+    "refs": [
+      "briefs/boki-art/cards/Flarmink.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A lean, long-legged hunting stoat with tall matchstick-tipped ears that glow at the tips and a slim tail whose ink-brush tip paints a ribbon of flame. Family tie to its baby Ermink (an ivory ermine with an ink-brush tail): keep the ink-brush tail tip, but the body shape, posture and silhouette must be clearly its own and unlike any other mink form. One clear idea, few parts. Face: sharp, focused eyes and a determined look. Main colours: cream and scarlet, with a black ink accent. Avoid: other mink shapes, the old design, held objects, effects, text. Element: ember, shown clearly by glowing orange-red ember cracks and a few rising sparks. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "size": "2K"
+  },
+  {
+    "id": "c_rippmink_m1",
+    "name": "Rippmink (concept)",
+    "refs": [
+      "briefs/boki-art/cards/Rippmink.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A sleek otter-shaped sea stoat with webbed paws, a smooth wave-shaped fin crest running down its back, and a tail that curls into a breaking wave. Family tie to its baby Ermink (an ivory ermine with an ink-brush tail): keep the ink-brush tail tip, but the body shape, posture and silhouette must be clearly its own and unlike any other mink form. One clear idea, few parts. Face: calm, playful eyes and an easy smile. Main colours: deep teal and seafoam, with a white belly. Avoid: other mink shapes, the old design, held objects, effects, text. Element: tide, shown clearly by water droplets, ripples and a sea-blue sheen. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "size": "2K"
+  },
+  {
+    "id": "c_rippmink_m2",
+    "name": "Rippmink (concept)",
+    "refs": [
+      "briefs/boki-art/cards/Rippmink.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A long serpentine eel-like mink with four small flipper paws, a ribbon-fin tail and a glossy wet coat, swimming pose. Family tie to its baby Ermink (an ivory ermine with an ink-brush tail): keep the ink-brush tail tip, but the body shape, posture and silhouette must be clearly its own and unlike any other mink form. One clear idea, few parts. Face: gentle, curious eyes and a tiny smile. Main colours: ocean blue and pale aqua, with a pearl accent. Avoid: other mink shapes, the old design, held objects, effects, text. Element: tide, shown clearly by water droplets, ripples and a sea-blue sheen. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "size": "2K"
+  },
+  {
+    "id": "c_rippmink_m3",
+    "name": "Rippmink (concept)",
+    "refs": [
+      "briefs/boki-art/cards/Rippmink.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A round, floaty stoat with a fluffy rain-cloud coat that drips droplets and a tail ending in a big ink-blue water-drop brush. Family tie to its baby Ermink (an ivory ermine with an ink-brush tail): keep the ink-brush tail tip, but the body shape, posture and silhouette must be clearly its own and unlike any other mink form. One clear idea, few parts. Face: sleepy, content eyes and a soft smile. Main colours: slate blue and cloud white, with an ink-blue accent. Avoid: other mink shapes, the old design, held objects, effects, text. Element: tide, shown clearly by water droplets, ripples and a sea-blue sheen. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "size": "2K"
+  },
+  {
+    "id": "c_rimink_m1",
+    "name": "Rimink (concept)",
+    "refs": [
+      "briefs/boki-art/cards/Rimink.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A shaggy, heavy-coated snow weasel with a thick frosted ruff, a long icicle-fringed tail and big snowshoe paws, low and sturdy like a wolverine. Family tie to its baby Ermink (an ivory ermine with an ink-brush tail): keep the ink-brush tail tip, but the body shape, posture and silhouette must be clearly its own and unlike any other mink form. One clear idea, few parts. Face: stern, steady eyes and a frosty huff. Main colours: snow white and glacier blue, with a slate accent. Avoid: other mink shapes, the old design, held objects, effects, text. Element: frost, shown clearly by translucent ice-blue crystals and a faint cold mist. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "size": "2K"
+  },
+  {
+    "id": "c_rimink_m2",
+    "name": "Rimink (concept)",
+    "refs": [
+      "briefs/boki-art/cards/Rimink.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A round, fluffy arctic stoat curled like a snowball, with snowflake-crystal ears and a frost-crusted tail wrapped around itself. Family tie to its baby Ermink (an ivory ermine with an ink-brush tail): keep the ink-brush tail tip, but the body shape, posture and silhouette must be clearly its own and unlike any other mink form. One clear idea, few parts. Face: big, sparkly eyes and a shy smile. Main colours: pure white and pale ice blue, with a silver accent. Avoid: other mink shapes, the old design, held objects, effects, text. Element: frost, shown clearly by translucent ice-blue crystals and a faint cold mist. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "size": "2K"
+  },
+  {
+    "id": "c_rimink_m3",
+    "name": "Rimink (concept)",
+    "refs": [
+      "briefs/boki-art/cards/Rimink.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A tall, elegant, long-legged stoat that walks on frozen tiptoes, with a mane of ice shards along the spine and a tail that freezes into a calligraphy icicle. Family tie to its baby Ermink (an ivory ermine with an ink-brush tail): keep the ink-brush tail tip, but the body shape, posture and silhouette must be clearly its own and unlike any other mink form. One clear idea, few parts. Face: cool, aloof eyes and a poised look. Main colours: ice blue and white, with a deep navy ink accent. Avoid: other mink shapes, the old design, held objects, effects, text. Element: frost, shown clearly by translucent ice-blue crystals and a faint cold mist. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "size": "2K"
+  },
+  {
+    "id": "c_prismink_m1",
+    "name": "Prismink (concept)",
+    "refs": [
+      "briefs/boki-art/cards/Prismink.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A stoat whose body is partly translucent faceted crystal like cut glass, catching rainbow light inside, with a crystal-shard tail. Family tie to its baby Ermink (an ivory ermine with an ink-brush tail): keep the ink-brush tail tip, but the body shape, posture and silhouette must be clearly its own and unlike any other mink form. One clear idea, few parts. Face: bright, wondering eyes and a delighted smile. Main colours: clear crystal and white, with soft rainbow glints. Avoid: other mink shapes, the old design, held objects, effects, text. Element: prism, shown clearly by glassy crystal facets that throw rainbow glints. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "size": "2K"
+  },
+  {
+    "id": "c_prismink_m2",
+    "name": "Prismink (concept)",
+    "refs": [
+      "briefs/boki-art/cards/Prismink.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A sleek stoat with a tall crystal prism sail fin along its back that splits light into a rainbow, its fur pearly white. Family tie to its baby Ermink (an ivory ermine with an ink-brush tail): keep the ink-brush tail tip, but the body shape, posture and silhouette must be clearly its own and unlike any other mink form. One clear idea, few parts. Face: proud, dazzling eyes and a confident smile. Main colours: pearl white and lilac, with rainbow refractions. Avoid: other mink shapes, the old design, held objects, effects, text. Element: prism, shown clearly by glassy crystal facets that throw rainbow glints. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "size": "2K"
+  },
+  {
+    "id": "c_prismink_m3",
+    "name": "Prismink (concept)",
+    "refs": [
+      "briefs/boki-art/cards/Prismink.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A fluffy stoat with a big gem-studded mane of coloured crystal points around its head and neck, like a crystal lion cub. Family tie to its baby Ermink (an ivory ermine with an ink-brush tail): keep the ink-brush tail tip, but the body shape, posture and silhouette must be clearly its own and unlike any other mink form. One clear idea, few parts. Face: playful, gleaming eyes and a toothy grin. Main colours: white and amethyst, with gem-coloured accents. Avoid: other mink shapes, the old design, held objects, effects, text. Element: prism, shown clearly by glassy crystal facets that throw rainbow glints. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "size": "2K"
+  },
+  {
+    "id": "c_effigoon_g1",
+    "name": "Effigoon (concept)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_effigoon_f1_1.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the middle form of the creature in image 1's family, bigger and older, and clearly not yet a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a middle form it is caught in motion, a low prowl, stride, dash, glide or coil, never the same stance as the baby or the final. Surprise rule (owner): the evolution should take an unexpected but related turn in character and mood, not just grow; for example a very cute baby becomes a slightly scrappier, grubbier or odder middle form that is still cute.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A thick, completely FACELESS armoured cocoon: a smooth riveted pupa casing with no eyes, no mouth and no face of any kind, half-mechanical with brass seams and small vents, resting upright on a short stubby base. It reads as a defensive living capsule. Face: no face at all (sealed, featureless front). Main colours: ivory and brass, with a dark iron accent. Avoid: any face, eyes, mouth, a lion, legs, a snake. Element: titan, shown clearly by massive, heavy armour and a powerful, grounded build. Archetype: tough: blocky, wide and heavy, with a low stance.",
+    "size": "2K"
+  },
+  {
+    "id": "c_effigoon_g2",
+    "name": "Effigoon (concept)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_effigoon_f1_1.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the middle form of the creature in image 1's family, bigger and older, and clearly not yet a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a middle form it is caught in motion, a low prowl, stride, dash, glide or coil, never the same stance as the baby or the final. Surprise rule (owner): the evolution should take an unexpected but related turn in character and mood, not just grow; for example a very cute baby becomes a slightly scrappier, grubbier or odder middle form that is still cute.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A FACELESS segmented mechanical chrysalis hanging from a thick silk-and-cable stalk, its shell made of overlapping armour plates like a closed bud, a faint glow seeping from the seams; no face, no eyes, no mouth. Face: no face at all (sealed shell). Main colours: bone white and bronze, with a warm amber glow. Avoid: any face, eyes, mouth, limbs, an animal. Element: titan, shown clearly by massive, heavy armour and a powerful, grounded build. Archetype: tough: blocky, wide and heavy, with a low stance.",
+    "size": "2K"
+  },
+  {
+    "id": "c_cisternmander_y1",
+    "name": "Cisternmander (concept)",
+    "refs": [
+      "briefs/boki-art/cards/Barrelmander.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A huge, heavy salamander whose whole back is a grown stone cistern brimming with water, a waterfall spout pouring from a spout-shaped crest on its head, thick pillar legs and a broad paddle tail. No lightning, no clouds, no electricity. Face: calm, heavy-lidded eyes and a broad grin. Main colours: mossy stone grey and water blue, with a brass accent. Avoid: lightning, storm clouds, sparks, a barrel, held objects. Element: tide, shown clearly by water droplets, ripples and a sea-blue sheen. Archetype: tough: blocky, wide and heavy, with a low stance.",
+    "size": "2K"
+  },
+  {
+    "id": "c_cisternmander_y2",
+    "name": "Cisternmander (concept)",
+    "refs": [
+      "briefs/boki-art/cards/Barrelmander.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A massive salamander with a moss-covered water-tower body, lily pads and reeds growing from the pooled water on its back, droplets running down its flanks, a wide frog-like mouth and a thick tail. No lightning, no clouds, no electricity. Face: sleepy, wise eyes and a contented smile. Main colours: mossy green and stone grey, with a pond-blue accent. Avoid: lightning, storm clouds, sparks, a barrel, held objects. Element: tide, shown clearly by water droplets, ripples and a sea-blue sheen. Archetype: tough: blocky, wide and heavy, with a low stance.",
+    "size": "2K"
+  },
+  {
+    "id": "c_glaivyx_h4",
+    "name": "Glaivyx (concept)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_glaivyx_g8_2.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). A tall, lean, long-legged fox with very long slender legs and a long body, standing high like a maned wolf, with a single elegant curved blade-like tail held high (a fox tail ending in a sleek glaive edge, not a segmented scorpion tail). Face: sharp, clever eyes and a sly fox grin. Main colours: plum purple and lilac, with an acid-green accent. Avoid: a scorpion tail, segmented tail, stingers, short legs, a dog. Element: venom, shown clearly by dripping lime-green venom and a toxic glossy shine. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "size": "2K"
+  },
+  {
+    "id": "c_glaivyx_h5",
+    "name": "Glaivyx (concept)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_glaivyx_g8_2.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette.  Stance (owner rule: every stage of a line stands differently): as a final form it is big and planted in a commanding stance, rearing, looming, towering or braced wide, never the same stance as the earlier forms. Surprise rule (owner): the final should land somewhere unexpected but clearly related, a bold change in character and mood (cute baby to a tough, gnarly, imposing or strange final), never just the middle form made bigger.Image 2 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). An elegant, long-legged fox with a long neck and long body, tall slender legs, big fox ears, and a long plume tail whose tip hardens into a curved venom-green crescent blade; it reads as fox first, weapon second. Face: cunning, narrow eyes and a confident smirk. Main colours: plum and cream, with an acid-green accent. Avoid: a scorpion, segmented tail, crab legs, short legs, a dog. Element: venom, shown clearly by dripping lime-green venom and a toxic glossy shine. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "size": "2K"
+  },
+  {
     "id": "canvastross_card83",
     "name": "Canvastross (hero card)",
     "refs": [
@@ -14307,6 +14666,138 @@
     "size": "2K"
   },
   {
+    "id": "anchorhorn_card86",
+    "name": "Anchorhorn (hero card)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_anchorhorn_z1_2.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Anchorhorn, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: planted on the shore with its great anchor horn lowered, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a final form, so keep it more defined, bigger and more powerful, with a proportionally smaller head, bolder shapes, longer limbs and a stronger stance, but still cute and appealing, never realistic. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily.Most important (critics' top notes on the first 80 cards): absolutely NO shadow of any kind under or behind it, NO glow or halo around it; the face is the focal point, big, glossy, expressive and full of personality; keep every signature part of image 1 exactly (tail, wings, horns, markings), nothing changed or dropped; the creature is big in the frame. "
+  },
+  {
+    "id": "bastionpet_card86",
+    "name": "Bastionpet (hero card)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_bastionpet_z1_2.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Bastionpet, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: planted firm with its armoured shell braced, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a final form, so keep it more defined, bigger and more powerful, with a proportionally smaller head, bolder shapes, longer limbs and a stronger stance, but still cute and appealing, never realistic. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily.Most important (critics' top notes on the first 80 cards): absolutely NO shadow of any kind under or behind it, NO glow or halo around it; the face is the focal point, big, glossy, expressive and full of personality; keep every signature part of image 1 exactly (tail, wings, horns, markings), nothing changed or dropped; the creature is big in the frame. "
+  },
+  {
+    "id": "briarlynx_card86",
+    "name": "Briarlynx (hero card)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_briarlynx_f3_3.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Briarlynx, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: planted in a low stalking crouch, thorns bristling, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a final form, so keep it more defined, bigger and more powerful, with a proportionally smaller head, bolder shapes, longer limbs and a stronger stance, but still cute and appealing, never realistic. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily.Most important (critics' top notes on the first 80 cards): absolutely NO shadow of any kind under or behind it, NO glow or halo around it; the face is the focal point, big, glossy, expressive and full of personality; keep every signature part of image 1 exactly (tail, wings, horns, markings), nothing changed or dropped; the creature is big in the frame. "
+  },
+  {
+    "id": "chandelapi_card86",
+    "name": "Chandelapi (hero card)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_chandelapi_f3_1.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Chandelapi, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: standing tall and calm, flames glowing softly, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a final form, so keep it more defined, bigger and more powerful, with a proportionally smaller head, bolder shapes, longer limbs and a stronger stance, but still cute and appealing, never realistic. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily.Most important (critics' top notes on the first 80 cards): absolutely NO shadow of any kind under or behind it, NO glow or halo around it; the face is the focal point, big, glossy, expressive and full of personality; keep every signature part of image 1 exactly (tail, wings, horns, markings), nothing changed or dropped; the creature is big in the frame. "
+  },
+  {
+    "id": "crofthollow_card86",
+    "name": "Crofthollow (hero card)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_crofthollow_z1_1.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Crofthollow, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: planted with its hollow crofter shell glowing warmly, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a final form, so keep it more defined, bigger and more powerful, with a proportionally smaller head, bolder shapes, longer limbs and a stronger stance, but still cute and appealing, never realistic. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily.Most important (critics' top notes on the first 80 cards): absolutely NO shadow of any kind under or behind it, NO glow or halo around it; the face is the focal point, big, glossy, expressive and full of personality; keep every signature part of image 1 exactly (tail, wings, horns, markings), nothing changed or dropped; the creature is big in the frame. "
+  },
+  {
+    "id": "eclipsowl_card86",
+    "name": "Eclipsowl (hero card)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_eclipsowl_d2_2.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Eclipsowl, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: perched and looming, wings half-spread in darkness, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a final form, so keep it more defined, bigger and more powerful, with a proportionally smaller head, bolder shapes, longer limbs and a stronger stance, but still cute and appealing, never realistic. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily.Most important (critics' top notes on the first 80 cards): absolutely NO shadow of any kind under or behind it, NO glow or halo around it; the face is the focal point, big, glossy, expressive and full of personality; keep every signature part of image 1 exactly (tail, wings, horns, markings), nothing changed or dropped; the creature is big in the frame. "
+  },
+  {
+    "id": "mortarfly_card86",
+    "name": "Mortarfly (hero card)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_mortarfly_x1_2.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Mortarfly, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: hovering with artillery wings braced, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a final form, so keep it more defined, bigger and more powerful, with a proportionally smaller head, bolder shapes, longer limbs and a stronger stance, but still cute and appealing, never realistic. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily.Most important (critics' top notes on the first 80 cards): absolutely NO shadow of any kind under or behind it, NO glow or halo around it; the face is the focal point, big, glossy, expressive and full of personality; keep every signature part of image 1 exactly (tail, wings, horns, markings), nothing changed or dropped; the creature is big in the frame. "
+  },
+  {
+    "id": "ringrove_card86",
+    "name": "Ringrove (hero card)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_ringrove_y1_2.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Ringrove, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: planted with its ringed bark back towering, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a final form, so keep it more defined, bigger and more powerful, with a proportionally smaller head, bolder shapes, longer limbs and a stronger stance, but still cute and appealing, never realistic. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily.Most important (critics' top notes on the first 80 cards): absolutely NO shadow of any kind under or behind it, NO glow or halo around it; the face is the focal point, big, glossy, expressive and full of personality; keep every signature part of image 1 exactly (tail, wings, horns, markings), nothing changed or dropped; the creature is big in the frame. "
+  },
+  {
+    "id": "thistlynx_card86",
+    "name": "Thistlynx (hero card)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_thistlynx_e2_2.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Thistlynx, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: mid-pounce with thistle fur flared, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a young or middle form, so keep a big head and rounded body but a little more defined shapes and slightly longer limbs. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily.Most important (critics' top notes on the first 80 cards): absolutely NO shadow of any kind under or behind it, NO glow or halo around it; the face is the focal point, big, glossy, expressive and full of personality; keep every signature part of image 1 exactly (tail, wings, horns, markings), nothing changed or dropped; the creature is big in the frame. "
+  },
+  {
+    "id": "pipeworth_card86",
+    "name": "Pipeworth (hero card)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_pipeworth_e2_1.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Pipeworth, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: piping a looping line of glowing venom icing, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a final form, so keep it more defined, bigger and more powerful, with a proportionally smaller head, bolder shapes, longer limbs and a stronger stance, but still cute and appealing, never realistic. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily.Most important (critics' top notes on the first 80 cards): absolutely NO shadow of any kind under or behind it, NO glow or halo around it; the face is the focal point, big, glossy, expressive and full of personality; keep every signature part of image 1 exactly (tail, wings, horns, markings), nothing changed or dropped; the creature is big in the frame. "
+  },
+  {
+    "id": "chandelotl_card86",
+    "name": "Chandelotl (hero card)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_chandelotl_d1_1.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Chandelotl, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: planted proudly on four legs with its rainbow sugar-glass sail raised, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a final form, so keep it more defined, bigger and more powerful, with a proportionally smaller head, bolder shapes, longer limbs and a stronger stance, but still cute and appealing, never realistic. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily.Most important (critics' top notes on the first 80 cards): absolutely NO shadow of any kind under or behind it, NO glow or halo around it; the face is the focal point, big, glossy, expressive and full of personality; keep every signature part of image 1 exactly (tail, wings, horns, markings), nothing changed or dropped; the creature is big in the frame. "
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
@@ -18605,6 +19096,17 @@
     "size": "2K"
   },
   {
+    "id": "portrait_pipeworth_full",
+    "name": "Pipeworth (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Pipeworth.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
     "id": "portrait_reelacine_full",
     "name": "Reelacine (portrait)",
     "refs": [
@@ -18726,17 +19228,6 @@
     "size": "2K"
   },
   {
-    "id": "portrait_lyrewing_full",
-    "name": "Lyrewing (portrait)",
-    "refs": [
-      "briefs/boki-art/evolutions/Lyrewing.jpg"
-    ],
-    "aspect": "1:1",
-    "runs": 3,
-    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
-    "size": "2K"
-  },
-  {
     "id": "portrait_puffamus_full",
     "name": "Puffamus (portrait)",
     "refs": [
@@ -18778,6 +19269,17 @@
     "aspect": "1:1",
     "runs": 3,
     "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stance3_rippmink",
+    "name": "Rippmink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Rippmink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Braced wide on all fours with chest low and head thrust forward, wave tail cresting up and over its back like a breaking wave. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
     "size": "2K"
   },
   {
@@ -21260,6 +21762,138 @@
     "aspect": "1:1",
     "size": "2K",
     "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Teapotamus, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: standing on all four short legs, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a young or middle form, so keep a big head and rounded body but a little more defined shapes and slightly longer limbs. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily."
+  },
+  {
+    "id": "portrait_anchorhorn_p86",
+    "name": "Anchorhorn (portrait)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_anchorhorn_z1_2.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): planted on the shore with its great anchor horn lowered. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_bastionpet_p86",
+    "name": "Bastionpet (portrait)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_bastionpet_z1_2.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): planted firm with its armoured shell braced. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_briarlynx_p86",
+    "name": "Briarlynx (portrait)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_briarlynx_f3_3.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): planted in a low stalking crouch, thorns bristling. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_chandelapi_p86",
+    "name": "Chandelapi (portrait)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_chandelapi_f3_1.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): standing tall and calm, flames glowing softly. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_crofthollow_p86",
+    "name": "Crofthollow (portrait)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_crofthollow_z1_1.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): planted with its hollow crofter shell glowing warmly. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_eclipsowl_p86",
+    "name": "Eclipsowl (portrait)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_eclipsowl_d2_2.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): perched and looming, wings half-spread in darkness. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_mortarfly_p86",
+    "name": "Mortarfly (portrait)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_mortarfly_x1_2.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): hovering with artillery wings braced. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_ringrove_p86",
+    "name": "Ringrove (portrait)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_ringrove_y1_2.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): planted with its ringed bark back towering. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_thistlynx_p86",
+    "name": "Thistlynx (portrait)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_thistlynx_e2_2.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): mid-pounce with thistle fur flared. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_pipeworth_r86",
+    "name": "Pipeworth (portrait)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_pipeworth_e2_1.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): piping a looping line of glowing venom icing. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_chandelotl_p86",
+    "name": "Chandelotl (portrait)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_chandelotl_d1_1.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): planted proudly on four legs with its rainbow sugar-glass sail raised. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_lyrewing_full",
+    "name": "Lyrewing (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Lyrewing.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 3,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): a characterful, natural pose that shows off its signature feature, body turned about 30 degrees toward the viewer, head toward the viewer. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
   },
   {
     "id": "reapant_card3",
