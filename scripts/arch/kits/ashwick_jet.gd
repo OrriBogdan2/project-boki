@@ -187,7 +187,7 @@ func _leap() -> void:
 	flight = {}
 	leaps += 1
 	h.roll_t = 0.0
-	var keep := dir * speed * Hunter.DASH_JUMP_CARRY
+	var keep := dir * speed * Loco.dash_jump_keep
 	h.vel.x = keep.x
 	h.vel.z = keep.y
 	AimKit.hide(h, "x_steer")
