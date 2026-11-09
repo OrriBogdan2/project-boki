@@ -63,7 +63,7 @@ func quality() -> String:
 	var found := String(v.get("quality_found", ""))
 	return found if QUALITY.has(found) else detect_quality()
 
-## Settings > Video > Frame rate: "" hidden, "fps" the rate alone, "full" the performance overlay
+## Settings > Video > Show frame rate: "" hidden, "fps" the rate alone, "full" the performance overlay
 ## (show_fps was a toggle before, so a saved true is the plain rate).
 func fps_mode() -> String:
 	match int(v.get("show_fps", 0)):

@@ -1,5 +1,5 @@
 extends RefCounted
-## --perf-overlay-check: Settings > Video > Frame rate. "Performance overlay" shows the frame rate, frame time
+## --perf-overlay-check: Settings > Video > Show frame rate. "Performance overlay" shows the frame rate, frame time
 ## and 1% low, draw calls and triangles, and the match step's costliest sections (and switches their timing on);
 ## "Frame rate" is the rate alone; "Hidden" hides it and switches the timing off again.
 

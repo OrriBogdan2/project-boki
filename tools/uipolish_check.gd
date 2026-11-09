@@ -74,7 +74,7 @@ func _settings_read(src: Dictionary) -> void:
 		if _uses(src, String(k)).is_empty():
 			unread.append(k)
 	ok("every setting is read somewhere", unread.is_empty(), str(unread))
-	var tabs := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Accessibility", "Demo"]
+	var tabs := ["Main", "Controls", "Gameplay", "Camera", "Audio", "Video", "Accessibility", "Demo"]
 	ok("the settings menu shows the new tabs", Overlay.SETTINGS_TABS == tabs)
 
 func _removed(src: Dictionary) -> void:
