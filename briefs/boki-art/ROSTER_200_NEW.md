@@ -3,12 +3,13 @@
 Grows the roster from 124 (ROSTER_100.html, array `G`) to **201**. Design pass only: no art, no game data yet.
 
 How this set was built:
+- **Owner note (concept pass):** every species was brainstormed with at least three animal + idea mixes, and the most surprising one that still reads in one sentence was kept. Ideas pair far-apart worlds (games, sports, buildings, machines, food processes, household objects, occupations, myths), and obvious pairings were dropped: no ice drill on a narwhal, no battery on a Storm hamster, no plain fungus on a Spore elk or katydid, no glacier on the ice mammoth. Each entry has a **Concept** one-liner and the two **Rejected ideas**.
 - **Rules followed:** BOKI_DESIGN_RULES.md (one idea grown through the whole body, shadow test, two colours plus an accent, own face, born-with weapon, clearly an animal on all fours), GRADES.md (uniqueness against the whole roster; every evolution a new body plan, only face, eyes and palette carry over), GAME_RULES_NOV8.md (1 or 2 types, 3 stages default, at most one special rule per line).
 - **Shape:** 12 three-stage lines (one of them branches, so 37 species), 15 two-stage lines (30), 6 rares and 4 legendaries (single stage) = **77 species in 37 lines**.
-- **Eggs:** **25 lines are egg-only** (hatched, never found in the wild). Each has a one-line egg look that hints at what is inside. The 8 found lines and Reelacine list where they turn up. Legendaries come from bosses and events, not eggs.
+- **Eggs:** **25 lines are egg-only** (hatched, never found in the wild). Each has a one-line egg look that hints at what is inside. The 7 found lines and Reelacine list where they turn up. Legendaries come from bosses and events, not eggs.
 - **Special rules (kept rare):** 1 branching final (Gravigrub line, stat-picked like the existing four), 2 male/female lines (Grainspin line, Pavonazar), both based on real sex differences. No line has both.
-- **Types:** weighted to the types the roster is thin on. New type slots: Wild 12, Spore 11, Wyrm 11, Echo 10, Swarm 9, Gravity 10, Lunar 10, Stone 9, Venom 9, Frost 7, Storm 4, Prism 6, Titan 8, Shadow 5, Bloom 2, Tempest 2, Tide 4, Ember 0. Roster totals afterwards range from 14 (Spore, Echo, Frost... see the table at the end) to 35 (Tide), down from a 4 to 31 spread.
-- **Base animals:** none reuse a roster animal. Skipped on purpose: stoats, otters, ratites, sloths, lorises, toads, capybaras, axolotls, black corvids. Spread: insects and arachnids 9, deep-sea and sea life 9, reptiles 8, amphibians 2 (olm, dart frog), rodents 2, marsupials 3, mammals 6, birds 2, extinct animals 5, mythic 1.
+- **Types:** weighted to the types the roster was thin on. New type slots: Wild 13, Wyrm 11, Lunar 10, Gravity 10, Swarm 10, Echo 10, Spore 10, Stone 9, Venom 9, Shadow 7, Prism 6, Titan 6, Frost 6, Storm 4, Tide 2, Tempest 2, Bloom 2, Ember 0. Afterwards every type has 16 to 22 species except Tide (33); before this pass the spread was 4 to 31.
+- **Base animals:** none reuse a roster animal. Skipped on purpose: stoats, otters, ratites, sloths, lorises, toads, capybaras, axolotls, black corvids. Spread across 37 lines: insects and arachnids 7, sea and deep-sea life 9, reptiles 6, amphibians 2 (olm, dart frog), rodents 2, marsupials and monotremes 3 (wombat, thylacine, platypus), other mammals 2 (tapir, fruit bat), birds 2, extinct animals 4 (pterosaur, Irish elk, woolly mammoth, plus the ammonite forms), mythic 1 (hydra).
 
 Every look line is written to drop into the standard sheet prompt (BOKI_50_DESIGNS.md shared rules: four-view turnaround, flat light, pale grey background, hand-painted style). Every species stands, crawls, swims or flies like an animal in every view; none stand or pose like a person.
 
@@ -56,7 +57,7 @@ Every look line is written to drop into the standard sheet prompt (BOKI_50_DESIG
 
 Egg-only: 25 lines (rows 1, 3, 4, 6, 7, 9, 11, 12, 13 to 21, 23, 25, 26, 29 to 33).
 
-Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creepy 10, majestic 10. Babies lean cute by nature; every line's final is something else.
+Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy 10, majestic 12. Babies lean cute by nature; every line's final is something else.
 
 ---
 
@@ -107,7 +108,7 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Face:** tiny bead eyes high on its head, a huge toothy nervous grin.
 - **Colours:** ink black and steel grey; accent violet lure glow.
 - **Avoid:** chain, held bait, realistic fish, full-body glow.
-- **Archetype:** cute
+- **Archetype:** creepy
 
 ### Snapler (2 of 3) · Shadow, Gravity
 - **Concept:** a flat anglerfish that is a living bear trap.
@@ -423,7 +424,7 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Face:** blind, two faint grey dot eyes, a serene little smile.
 - **Colours:** porcelain white and blush pink; accent gold crack.
 - **Avoid:** teacup or vase shapes, realistic olm, glass.
-- **Archetype:** cute
+- **Archetype:** pretty
 
 ### Glazolm (2 of 3) · Wyrm, Prism
 - **Concept:** a salamander of crackle-glaze pottery mended with gold.
@@ -443,7 +444,7 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Face:** calm closed eyes, small gold-edged fangs.
 - **Colours:** porcelain white and deep crimson; accent heavy gold seams.
 - **Avoid:** wings, pottery shapes, glow, a long-legged stance like Glazolm.
-- **Archetype:** majestic
+- **Archetype:** pretty
 
 ## 12. Polyshroom line: jellyfish + mushroom (egg-only)
 **Egg:** soft domed shell speckled like a mushroom cap, with teal glow spots.
@@ -616,7 +617,7 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Face:** determined little eyes, a pursed mouth.
 - **Colours:** scarlet and black; accent toxic green.
 - **Avoid:** legs, a dartboard frame, numbers.
-- **Archetype:** cute
+- **Archetype:** fast
 
 ### Bullsfrog (2 of 2) · Venom, Wild
 - **Concept:** a poison dart frog that is the whole game of darts.
@@ -758,7 +759,7 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Face:** big wet eyes, an anxious ear-flick.
 - **Colours:** fawn brown and cream; accent teal spore glow.
 - **Avoid:** antlers, a garden on its back, hats worn.
-- **Archetype:** cute
+- **Archetype:** pretty
 
 ### Hatstag (2 of 2) · Spore, Bloom
 - **Concept:** an Irish elk whose antlers are a hat stand hung with mushroom caps.
@@ -782,7 +783,7 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 - **Face:** grumpy old-man frown, droopy eyelids.
 - **Colours:** slate green and terracotta; accent old gold.
 - **Avoid:** tiers, a building, bells.
-- **Archetype:** cute
+- **Archetype:** tough
 
 ### Pagoguana (2 of 2) · Wyrm, Stone
 - **Concept:** a marine iguana whose crest is a five-tier pagoda.
@@ -968,24 +969,24 @@ Archetype spread of the 77: cute 17, tough 14, sleek 10, fast 8, pretty 8, creep
 
 | Type | Now | New | Total |
 |---|---|---|---|
-| Tide | 31 | 4 | 35 |
+| Tide | 31 | 2 | 33 |
 | Tempest | 20 | 2 | 22 |
 | Ember | 18 | 0 | 18 |
-| Shadow | 15 | 5 | 20 |
+| Shadow | 15 | 7 | 22 |
 | Bloom | 15 | 2 | 17 |
-| Titan | 14 | 8 | 22 |
+| Titan | 14 | 6 | 20 |
 | Prism | 13 | 6 | 19 |
 | Storm | 12 | 4 | 16 |
-| Frost | 11 | 7 | 18 |
+| Frost | 11 | 6 | 17 |
 | Venom | 10 | 9 | 19 |
 | Stone | 10 | 9 | 19 |
 | Lunar | 9 | 10 | 19 |
 | Gravity | 8 | 10 | 18 |
-| Swarm | 8 | 9 | 17 |
+| Swarm | 8 | 10 | 18 |
 | Echo | 8 | 10 | 18 |
 | Wyrm | 7 | 11 | 18 |
-| Spore | 6 | 11 | 17 |
-| Wild | 4 | 12 | 16 |
+| Spore | 6 | 10 | 16 |
+| Wild | 4 | 13 | 17 |
 
 ## Notes for main and art
 - **Egg-only flag:** 25 lines need an `egg_only` flag so they never spawn wild; all other lines can still breed normally.
