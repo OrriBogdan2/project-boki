@@ -42,6 +42,8 @@ func run(main: Node, mode: String = "check") -> void:
 		if a.begins_with("--shots-dir="):
 			out = a.substr(12)
 	if mode == "shots":
+		if main.get("fade") != null:
+			main.fade.reveal(0.01)      # (the boot splash would cover the frame)
 		_stage()
 		DirAccess.make_dir_recursive_absolute(out)
 	for id in Arch.ids():
