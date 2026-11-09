@@ -138,6 +138,8 @@ func lmb_override(_held: bool, _dt: float) -> bool: return false
 ## The kit's own pace times the R fuse's plant (you stand and gather while it winds up).
 func pace() -> float: return move_k() * (0.35 if not fuse.is_empty() else 1.0)
 func can_shoot() -> bool: return fire_ok() and fuse.is_empty()
+## The combo state this kit has put on foes, for ComboMark: [{"at", "icon", "n", "max", "frac", "col"}] (frac: time left).
+func combo_marks() -> Array: return []
 func res_text() -> String: return "%d" % int(round(res))
 func res_frac() -> float: return clampf(res / maxf(1.0, res_max()), 0.0, 1.0)
 func bot_use(_tgt: Ent, _dist: float, _los: bool) -> void: pass
@@ -913,7 +915,7 @@ func armed_fx(word: String, slot := "sec") -> void:
 	net_ring(h.pos, 1.5, rc)
 
 ## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): the named word, a double ring, a
-## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
+## burst and a flash (plus ComboMark's 2-frame burst), the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
 ## flash for whoever landed it; everyone online gets a ring and a column. The hitstop comes from the
 ## hit itself (payoff: true is tier 4).
 func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null) -> void:
@@ -925,6 +927,7 @@ func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector
 	if snd != "": m.sfx(snd, at, 0.0, 1.0)
 	m.sfx("crit", at, -7.0, 0.85)
 	if h.is_local():
+		ComboMark.flash(m, at)
 		if m.hud: m.hud.flash(col, 0.12)
 	net_ring(at, 2.4, col)
 	net_bolt(at + Vector3(0, 0.2, 0), at + Vector3(0, 3.6, 0), col)

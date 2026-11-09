@@ -33,6 +33,12 @@ Rules of the look:
 Check: `--hudref-check` (segments follow max health, the chip holds then drains, armour and shield are
 drawn, the downed plate and status words show, cooldown text appears).
 
+## Combo marks over foes
+- `ComboMark` (`scripts/ui/combo_mark.gd`, drawn from `Hud._draw_wisp_rings`) shows your own combo state over each foe that carries it: icon, a ring that drains with the time left, a pip per stack, in the ability's colour. Only the applier sees it.
+- A kit feeds it from its existing status timers in `ArchKit.combo_marks()`: Cinder's Ignite (level 1-2 of 2), Neve's Chill, Meeko's Kindle (1-5). No new state.
+- The payoff (`ArchKit.payoff_fx`: Cinder Shot on a burning foe, Neve's Shatter, Meeko's full Kindle) adds a bright 2-frame burst (`ComboMark.flash`) on top of the word, sound and HUD flash.
+- Checks: `--ashwick-combo-check`, `--tender-combo-check`, `--rimewright-combo-check` (show, clear and flash rows).
+
 ## Looting with a full inventory
 
 - Smart loot (`LootFull.smart`) takes only what fits and reports it: "Took 1 of 3, inventory full", "Inventory full, took nothing", or "Nothing here beats what you've got".

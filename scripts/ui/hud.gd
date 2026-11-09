@@ -2940,6 +2940,7 @@ func _draw_wisp_rings() -> void:
 	var p: Hunter = m.player
 	DownedMarks.draw(c, m)
 	BokiMarks.draw(c, m)
+	if p and p.ak: ComboMark.draw(c, m)
 	# you, standing on an enemy wisp
 	if p and not p.out and p.has_meta("standing_on") and m.time - float(p.get_meta("standing_at", -9.0)) < 0.15:
 		var o2 = p.get_meta("standing_on")

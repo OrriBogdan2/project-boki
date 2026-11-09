@@ -6,7 +6,8 @@ extends "res://tools/breah_shots.gd"
 ## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Sparkle, Tarek: the audit's strips) or Kael's
 ## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS), Cinder's
 ## "item66" (LMB held through Flue Flight) or "queen" (LMB from her hands, Flue Flight's fire), or "acc" (Kael's
-## accuracy points as frame runs, acc_<name>_<n>).
+## accuracy points as frame runs, acc_<name>_<n>), or "marks" for ashwick|rimewright|tender (Cinder, Neve, Meeko:
+## ComboMark over the foe, and the payoff's 2-frame flash).
 
 const LONG := 30                # m of flat ground the chain strips need, east of the spot
 const LONG_PARTS := ["chain", "acc"]   # parts shot on an expedition map instead of the Arena
@@ -207,6 +208,48 @@ func _run_flat(W, x: int, z: int) -> bool:
 ## The step at `when` s into a _go (t steps by DT, so an exact float window can be skipped).
 func _at(t: float, when: float) -> bool:
 	return absf(t - when) < DT * 0.5
+
+## A full frame at `t` s with the foe in frame.
+func _mark_shot(t: float, file: String, caption: String) -> Array:
+	return [t, "full", file, caption, Callable(self, "_on_target")]
+
+## The payoff at `when` s: ComboMark's burst shows on the frame taken a step later.
+func _flash_at(t: float, when: float, word: String) -> void:
+	if _at(t, when):
+		P.ak.payoff_fx(T.pos, word, P.ak.res_col(), "")
+
+## Cinder's Ignite levels over the foe (Ablaze, then Flashover), then the payoff flash.
+func _ashwick_marks() -> void:
+	await _reset(6.0)
+	var lance := func(t: float):
+		P.inp["fire"] = t < 4.2
+		_flash_at(t, 4.3, "SPREAD")
+	await _go(4.5, lance, [
+		_mark_shot(1.5, "marks_ablaze", "Cinder: Ablaze, level 1 of 2 over the foe, the ring is the burn left"),
+		_mark_shot(4.1, "marks_flashover", "Cinder: Flashover, level 2 of 2"),
+		_mark_shot(4.33, "marks_payoff", "Cinder: the payoff's 2-frame flash on a burning foe")])
+
+## Neve's Chill over the foe, then the Shatter's flash.
+func _rimewright_marks() -> void:
+	await _reset(6.0)
+	var chill := func(t: float):
+		if _at(t, 0.1):
+			P.ak.add_chill(T)
+		_flash_at(t, 1.0, "SHATTER")
+	await _go(1.2, chill, [
+		_mark_shot(0.5, "marks_chill", "Neve: Chill over the foe, the ring is the Chill left"),
+		_mark_shot(1.03, "marks_payoff", "Neve: the Shatter's 2-frame flash")])
+
+## Meeko's Kindle stacks over the foe, then the full-Kindle flash.
+func _tender_marks() -> void:
+	await _reset(6.0)
+	var embers := func(t: float):
+		P.inp["fire"] = t < 1.8
+		_flash_at(t, 2.0, "KINDLED")
+	await _go(2.2, embers, [
+		_mark_shot(0.8, "marks_kindle_few", "Meeko: Kindle stacks as pips over the foe"),
+		_mark_shot(1.75, "marks_kindle_more", "Meeko: more stacks, the ring is the Kindle left"),
+		_mark_shot(2.03, "marks_payoff", "Meeko: the full-Kindle 2-frame flash")])
 
 ## Kael: the Searing Wave held through the Rampage; the Slam Drive; an air dash in the Meteor Drop's hang.
 func _juggernaut() -> void:

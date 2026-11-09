@@ -65,10 +65,19 @@ func add_kindle(t: Ent, n := 1) -> void:
 	e["t"] = t
 	kind[key] = e
 	if int(e["n"]) >= int(res_def().get("max", 5)) and had < int(res_def().get("max", 5)):
-		m.fx.word(t.pos + Vector3(0, 2.5, 0), "KINDLED", res_col(), true)
+		payoff_fx(t.pos, "KINDLED", res_col(), "tend_kindled", h.dir_to(t), t)
 		vfx("kindled", t.pos)
-		m.sfx("tend_kindled", t.pos, -4.0, 1.0)
 		play_soft("mm_kindled")
+
+## Kindled foes, for ComboMark: a pip per stack, the ring is the Kindle left.
+func combo_marks() -> Array:
+	var out: Array = []
+	for key in kind:
+		var e: Dictionary = kind[key]
+		out.append({
+			"at": (e["t"] as Ent).pos, "icon": "burst", "n": kindle_on(e["t"]), "max": int(res_def().get("max", 5)),
+			"col": res_col(), "frac": float(e["left"]) / float(res_def().get("dur", 4.0))})
+	return out
 
 func best_kindle() -> int:
 	var b := 0

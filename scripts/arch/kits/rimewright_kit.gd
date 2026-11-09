@@ -78,6 +78,16 @@ func add_chill(t: Ent) -> void:
 	if fresh:
 		vfx("chill", t.pos)
 
+## Chilled foes, for ComboMark; the ring is the Chill left.
+func combo_marks() -> Array:
+	var out: Array = []
+	for key in chill:
+		var e: Dictionary = chill[key]
+		out.append({
+			"at": (e["t"] as Ent).pos, "icon": "frost", "n": 1, "max": 1, "col": res_col(),
+			"frac": float(e["left"]) / float(d["passive"].get("chill_t", 4.0))})
+	return out
+
 func fan_on(t: Ent) -> int:
 	if t == null or not is_instance_valid(t): return 0
 	return int((fan_hits.get(t.get_instance_id(), {}) as Dictionary).get("n", 0))
@@ -124,8 +134,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	splinter_log += 1
-	m.fx.word(at + Vector3(0, 2.7, 0), "SHATTER", res_col(), true)
-	m.sfx("rime_splinter", at, 0.0, 1.0)
+	payoff_fx(at, "SHATTER", res_col(), "rime_splinter")
 	lk().burst("spikes", at, {"r": SHATTER_R, "dur": 0.7})
 	vfx("shatter", at)
 	play_soft("tm_shatter")

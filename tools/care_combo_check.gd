@@ -761,12 +761,19 @@ func tender() -> void:
 	P.inp["fire"] = true
 	step(m, 0.3)
 	var made0: int = K.lk().made
+	var flash_k: float = ComboMark.flash_t
 	step(m, 1.8)
 	P.inp["fire"] = false
 	var shown_glow: bool = K.lk().showing("kin%d" % T.get_instance_id())
 	ok(
 			"mm passive: embers Kindle the foe and a foot glow grows on them", K.kindle_on(T) >= 3 and shown_glow,
 			"kindle %d" % K.kindle_on(T))
+	var kmk: Array = K.combo_marks()
+	ok(
+			"combo mark: Kindle shows a pip per stack with time left, over the foe",
+			kmk.size() == 1 and kmk[0]["n"] == K.kindle_on(T) and kmk[0]["max"] == 5 and kmk[0]["frac"] > 0.0
+			and kmk[0]["at"] == T.pos, "marks %s" % str(kmk))
+	ok("combo mark: five stacks (Kindled) flash", K.kindle_on(T) < 5 or ComboMark.flash_t > flash_k)
 	ok("mm passive: an ember into a Kindled foe winds Hearthlight back", K.cd["e"] < 7.0, "e %.2f" % K.cd["e"])
 	ok(
 			"mm LMB: looks are pooled (no new nodes per ember)", K.lk().made - made0 <= 3,
@@ -776,6 +783,9 @@ func tender() -> void:
 	ok(
 			"mm passive: Kindle ramps embers about +45% at 5 stacks", ramp > 0.38 and ramp < 0.52,
 			"+%.0f%%" % (ramp * 100.0))
+	(K.kind[T.get_instance_id()] as Dictionary)["left"] = 0.0
+	step(m, 0.1)
+	ok("combo mark: Kindle clears when it fades", K.combo_marks().is_empty(), "marks %d" % K.combo_marks().size())
 	# --- the idle crook: the next ember is Empowered (longer, its own bigger flick)
 	step(m, 1.3)
 	var e0: int = K.stats["emp"]
@@ -1341,6 +1351,10 @@ func rimewright() -> void:
 	T.slow_t = 0.0
 	K.add_chill(T)
 	step(m, 0.1)
+	var cmk: Array = K.combo_marks()
+	ok(
+			"combo mark: Chill shows over the foe with its time ring",
+			cmk.any(func(e): return e["at"] == T.pos and e["frac"] > 0.9 and e["icon"] == "frost"))
 	ok(
 			"tm passive: Chill is 4 s and shatter only, no slow of ours (the source has none)",
 			K.chilled(T) and float(Arch.def("rimewright")["passive"]["chill_t"]) == 4.0 and T.slow_t <= 0.0,
@@ -1349,6 +1363,7 @@ func rimewright() -> void:
 	T2.hp = T2.max_hp
 	step(m, 0.05)
 	var s1 := K.splinter_log
+	var flash_s: float = ComboMark.flash_t
 	var hh := T2.hp
 	sc.aim_at(P, T.pos)
 	P.inp["fire"] = true
@@ -1358,6 +1373,9 @@ func rimewright() -> void:
 	ok(
 			"tm passive: knocking a Chilled foe Shatters them after a beat",
 			T.downed and K.splinter_log > s1 and T2.hp < hh, "downed %s" % str(T.downed))
+	ok(
+			"combo mark: the Shatter flashes and the Chill mark is gone",
+			ComboMark.flash_t > flash_s and not K.combo_marks().any(func(e): return e["at"] == T.pos))
 	await _free(m)
 	# --- Skate: darts fly straight and thick at normal damage; she carries on over a ledge; the stride move loops
 	r = sc.setup("rimewright", 6.0)

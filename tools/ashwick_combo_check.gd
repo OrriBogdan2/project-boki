@@ -291,17 +291,19 @@ func _all() -> void:
 		"burning %d burn_t %.1f ignitions %d" % [K.burning(T), T.burn_t, K.ignitions]
 	)
 	ak.step(m, 0.02)
-	ok("burn stage: one flame pip over a foe Ablaze", K.pips_on(T) == 1, "pips %d" % K.pips_on(T))
+	var mk: Array = K.combo_marks()
+	ok(
+		"combo mark: Ablaze shows level 1 of 2 with burn time left, over the foe only",
+		mk.size() == 1 and mk[0]["n"] == 1 and mk[0]["max"] == 2 and mk[0]["frac"] > 0.0 and mk[0]["frac"] <= 1.0
+		and mk[0]["at"] == T.pos, "marks %s" % str(mk)
+	)
 	ak.step(m, 2.6, aim_t)
 	ok(
 		"lance: kept on a burning foe it Flashes over (level 2)", K.burning(T) == 2 and K.upgrades >= 1,
 		"burning %d upgrades %d char %.1f" % [K.burning(T), K.upgrades, K.char_of(T)]
 	)
 	ak.step(m, 0.02)
-	ok(
-		"burn stage: three flame pips and a glow over a Flashover",
-		K.pips_on(T) == 3 and K.fx.shown("pipg%d" % T.get_instance_id()), "pips %d" % K.pips_on(T)
-	)
+	ok("combo mark: Flashover shows level 2 of 2", K.combo_marks()[0]["n"] == 2, "marks %s" % str(K.combo_marks()))
 	# +25% on a burning foe (the burn's own ticks held off so only the hose counts)
 	reset.call()
 	ak.step(m, 0.8, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); K.chars = {})
@@ -411,6 +413,7 @@ func _all() -> void:
 	)
 	var cinder_cold: float = ak.dmg(T)
 	ak.step(m, 7.0)
+	ok("combo mark: clears when the burn runs out", K.combo_marks().is_empty(), "marks %d" % K.combo_marks().size())
 	reset.call()
 	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 1, "until": m.time + 99.0}
 	K.cd["rmb"] = 0.0
@@ -427,9 +430,11 @@ func _all() -> void:
 	K.ch_rmb = 1.0
 	K.stoke(T)
 	var sp0: int = K.spreads
+	var flash0: float = ComboMark.flash_t
 	ak.aim_at(P, T.pos)
 	ak.tap(m, P)
 	ak.step(m, 0.8)
+	ok("combo mark: the Cinder Shot payoff on a burning foe flashes", ComboMark.flash_t > flash0)
 	ok(
 		"combo: lance burn > Cinder Shot = upgrade + spread",
 		K.burning(T) == 2 and K.burning(T2) >= 1 and K.spreads == sp0 + 1, "T %d T2 %d" % [K.burning(T), K.burning(T2)]

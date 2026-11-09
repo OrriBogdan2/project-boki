@@ -22,7 +22,6 @@ const FLAME_CYAN := Color("6fe8ff")    # the pilot flame: a cool spark in her pa
 const BOLT_COL := Color("ff4a6a")      # Cinder Shot's red-pink body
 const BOLT_CORE := Color("ffe070")
 const SKULL_COL := Color("ff6a2a")
-const PIP_COL := Color("ff9a3a")
 const PILOT_CORE := Color("c8f8ff")
 const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange that holds on yellow grass
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
@@ -233,8 +232,7 @@ func _tick(dt: float) -> void:
 		tell = "half"
 	net_pulse(dt, not ignites.is_empty(), 1.3)
 
-## The pilot flame in her palm, embers over a heavily charred foe, and the burn stage over each burning
-## foe: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b).
+## The pilot flame in her palm and embers over a heavily charred foe (the burn stage is ComboMark's).
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
 	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
@@ -251,36 +249,16 @@ func _tick_tells(dt: float) -> void:
 			var e: Dictionary = chars[key]
 			if float(e["n"]) >= 15.0 and vis:
 				vfx("char_drift", (e["e"] as Ent).pos)
-	if not vis:
-		return
+
+## Burning foes, for ComboMark: Ablaze is level 1 of 2, Flashover level 2; the ring is the burn left.
+func combo_marks() -> Array:
+	var out: Array = []
 	for key in ignites:
 		var e: Dictionary = ignites[key]
-		var f := e["e"] as Ent
-		if not is_instance_valid(f):
-			continue
-		var lvl := int(e["lvl"])
-		var top := f.pos + Vector3(0, 3.7, 0)
-		var n := 1 if lvl < 2 else 3
-		for i in n:
-			var rise := 0.06 if n == 3 and i == 1 else 0.0       # the middle of three pips sits a little higher
-			var off := Vector3((i - (n - 1) * 0.5) * 0.6, rise, 0)
-			fx.place(
-				"pip%d_%d" % [key, i], "pip", top + off, PIP_COL if lvl < 2 else Color("ff5a2a"), Color("fff0a0"),
-				0.4 if lvl < 2 else 0.44
-			)
-		if lvl >= 2:
-			fx.place(
-				"pipg%d" % key, "glow", top + Vector3(0, -0.05, 0), Color("ff4a1a"), Color("ff9a3a"),
-				0.75 + 0.08 * sin(m.time * 9.0)
-			)
-
-## Shown burn stage over a foe: 0, 1 (Ablaze, one pip) or 3 (Flashover, three pips) (tests).
-func pips_on(f: Ent) -> int:
-	var key := f.get_instance_id()
-	var n := 0
-	for i in 3:
-		if fx.shown("pip%d_%d" % [key, i]): n += 1
-	return n
+		out.append({
+			"at": (e["e"] as Ent).pos, "icon": "fireball", "n": int(e["lvl"]), "max": 2, "col": res_col(),
+			"frac": (float(e["until"]) - m.time) / float(rd()["ignite_t"])})
+	return out
 
 ## A Boki merge ends the hose, a bash mid-flight and the Cinder Shot lane, with nothing fired.
 func _drop_holds() -> void:
@@ -498,7 +476,7 @@ func _cinder_hit(f: Ent) -> void:
 			if o != f and is_instance_valid(o) and not o.dead and sees_from(f.pos, o):
 				_ignite(o, cur, burning(o))
 				vfx("shot_spread", f.pos, null, {"to": o.pos + Vector3(0, 1.0, 0)})
-		m.fx.word(f.pos + Vector3(0, 2.5, 0), "SPREAD", col_of(rdf), true)
+		payoff_fx(f.pos, "SPREAD", col_of(rdf), "", h.dir_to(f), f)
 	else:
 		stoke(f)
 
