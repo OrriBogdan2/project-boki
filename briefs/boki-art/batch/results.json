@@ -47085,5 +47085,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_slog_gap_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_scopeleon_gap",
+    "name": "Scopeleon (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_scopeleon_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_scopeleon_gap",
+    "name": "Scopeleon (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_scopeleon_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_snapler_gap",
+    "name": "Snapler (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_snapler_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_snapler_gap",
+    "name": "Snapler (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_snapler_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_slog_gap",
+    "name": "Slog (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_slog_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_slog_gap",
+    "name": "Slog (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_slog_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_scopeleon_gap",
+    "name": "Scopeleon (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_scopeleon_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_starcap_gap",
+    "name": "Starcap (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_starcap_gap_3.jpg",
+    "ok": true
   }
 ]
