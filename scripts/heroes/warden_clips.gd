@@ -314,7 +314,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			tt = from + fmod(tt - from, maxf(length - from, 0.01)) if length > from + 0.02 else length - 0.001
 		# ("upper": true, or "moving": the legs keep walking only while he walks)
 		var up = mv.get("upper", false)
-		if up is String:
+		if planted(s):
+			up = true      # rooted: the legs stay on the standing layer, only the body plays the move
+		elif up is String:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			up = Vector2(vel.x, vel.z).length() >= STILL
 		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
@@ -408,9 +410,14 @@ func _turn_to_heading(s: Dictionary, on: bool, legs_only: bool, dt: float) -> vo
 		var hb := WardenSkeleton.find(skel, "hips")
 		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
 
+## Rooted (a Root or a stuck cast), the feet stay planted whatever the velocity still says; Rimelock's statue
+## (the "statue" state) is a full freeze and keeps its own clips.
+static func planted(s: Dictionary) -> bool:
+	return bool(s.get("rooted", false)) and not bool(s.get("statue", false))
+
 func _loco(s: Dictionary, dt: float) -> void:
 	var lc: Dictionary = d["loco"]
-	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	var vel: Vector3 = Vector3.ZERO if planted(s) else s.get("vel", Vector3.ZERO)
 	var flat := Vector2(vel.x, vel.z)
 	var spd := flat.length()
 	var face := float(s.get("face", 0.0))
