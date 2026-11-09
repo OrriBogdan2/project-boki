@@ -615,6 +615,14 @@ authors see what the game will do.
 | telegraph floor | core table, not data | 5.3 | fairness for community kin |
 | `windup` | read-only, computed | — | shown in the generated rules text (Phase 4) |
 
+### 5.x Online: a press on the frame a slot lights
+Each game owns its own hunter's cooldowns; the relay (`--relay`) only forwards, so there is no second clock
+that could run behind the one the HUD shows. `--cooldown-net-check` (`tools/cooldown_net_check.gd`) proves it:
+a relay process, this game joined through `tools/udp_delay.py` at 100 ms +- 20 ms each way, and every Hunter
+presses LMB, RMB, E, R and dash on the first step each slot shows ready: 0 refusals (2026-11-09). What did read
+as a dropped press there was a stun from a training bot or Boki landing just before the press, which is a real
+refusal; the check parks them and fails if anything stuns the player during a press.
+
 ---
 
 ## 6. Open questions
