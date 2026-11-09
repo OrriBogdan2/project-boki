@@ -296,7 +296,7 @@ var tl_x := 0.0
 var tl_xv := 0.0
 var torso_yaw_prev := 0.0
 var hip_y := 0.42              # the torso's rest height on the legs (longer legs set it higher: Models.hunter)
-var leg_k := 1.0               # x the walk phase: gait "leg_ref" (m, a hip height) over this body's, so longer legs step slower
+var leg_k := 1.0               # x the walk phase: gait "leg_ref" (hip height, m) over this body's: long legs step less
 var wave := 0.0                # gait "wave": the hip swing's third harmonic, flattening the planted foot's pull-back
 
 func _init(m: Node3D) -> void:

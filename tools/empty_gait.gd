@@ -17,8 +17,8 @@ const MAX_SLIDE := 0.25              # of the run speed (the Hunters' gate)
 const MAX_POP_CM := 8.0              # cm: the biggest one-frame jump while turning on the spot
 const MAX_IDLE_CM := 2.0             # cm: the planted feet's creep while standing
 const PLANT_Y := 0.03                # m: a foot is planted while its lowest boot point is this near the floor...
-const PLANT_V := 0.3                 # m/s: ...and is going back against the body (a foot at rest or swinging forward is not)
-## Look rows measured: [height, build]; the three heights at an average build, and the three builds at an average height.
+const PLANT_V := 0.3                 # m/s: ...and is going back against the body (not at rest or swinging forward)
+## Look rows measured: [height, build]: the three heights at an average build, the three builds at an average height.
 const BODIES := [[0, 1], [1, 1], [2, 1], [1, 0], [1, 2], [0, 0], [2, 2]]
 
 var bad := 0
@@ -46,20 +46,23 @@ func _body(main: Node, holder: Node3D, h: int, b: int) -> void:
 	row["idle"] = _idle(m, an)
 	rows[id] = row
 	var top: Dictionary = live[str(SPEEDS[2])]
-	print("AUDIT %-12s leg %.2f m run: slide %.2f m/s (%d%%) steps %.1f/s | walk slide %d%% steps %.1f/s | turn pop %.1f cm | idle creep %.1f cm" % [
+	var walk: Dictionary = live[str(SPEEDS[0])]
+	print("AUDIT %-12s leg %.2f m run: slide %.2f m/s (%d%%) steps %.1f/s | walk slide %d%% steps %.1f/s | " % [
 			id, row["leg_m"], top["slide"], round(100.0 * top["slide"] / SPEEDS[2]), top["steps_hz"],
-			round(100.0 * live[str(SPEEDS[0])]["slide"] / SPEEDS[0]), live[str(SPEEDS[0])]["steps_hz"],
-			row["turn"]["pop_cm"], row["idle"]["creep_cm"]])
+			round(100.0 * walk["slide"] / SPEEDS[0]), walk["steps_hz"]]
+			+ "turn pop %.1f cm | idle creep %.1f cm" % [row["turn"]["pop_cm"], row["idle"]["creep_cm"]])
 	_gate(id, row)
 	m.free()
 
 func _gate(id: String, row: Dictionary) -> void:
 	var share: float = row["live"][str(SPEEDS[2])]["slide"] / SPEEDS[2]
 	if share > MAX_SLIDE:
-		print("FAIL %s: feet slide %d%% of the run speed (limit %d%%)" % [id, round(100.0 * share), round(100.0 * MAX_SLIDE)])
+		print("FAIL %s: feet slide %d%% of the run speed (limit %d%%)" % [
+				id, round(100.0 * share), round(100.0 * MAX_SLIDE)])
 		bad += 1
 	if row["turn"]["pop_cm"] > MAX_POP_CM:
-		print("FAIL %s: a turn on the spot jumps %.1f cm in one frame (limit %.0f)" % [id, row["turn"]["pop_cm"], MAX_POP_CM])
+		print("FAIL %s: a turn on the spot jumps %.1f cm in one frame (limit %.0f)" % [
+				id, row["turn"]["pop_cm"], MAX_POP_CM])
 		bad += 1
 	if row["idle"]["creep_cm"] > MAX_IDLE_CM:
 		print("FAIL %s: planted feet creep %.1f cm standing (limit %.0f)" % [id, row["idle"]["creep_cm"], MAX_IDLE_CM])

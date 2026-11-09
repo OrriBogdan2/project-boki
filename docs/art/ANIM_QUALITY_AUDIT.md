@@ -172,3 +172,31 @@ Split into backlog items per Hunter (role build):
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.
 - Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).
+
+## The Empty (the player body on the farm)
+
+The farm's player is the Empty: the Models.hunter rig that HunterAnim walks by hand (no clips), at the creator's height
+and build. `--anim-audit` ends with 7 Empty rows (`tools/empty_gait.gd`; `--wardens=empty` runs only them): the three
+heights at an average build and the three builds at an average height, plus short/slight and tall/sturdy. Per body:
+foot slide at 2.2, 3.4 and 5.0 m/s (the farm's full stick), steps/s from the walk phase, the biggest one-frame jump
+turning on the spot at 6 rad/s, and how far the planted feet creep standing. The gate: run slide 25 % (the Hunters'),
+a turn pop of at most 8 cm a frame, idle creep of at most 2 cm.
+
+- **What counts as planted.** Not the Hunters' lowest 30 % of the foot's height: the swing of this rig keeps the toe
+  skimming the floor (FootPlant puts the lowest sole on it), so that test counts the swing pass. A foot is planted
+  here while its lowest boot point is within 3 cm of the floor and going back faster than 0.3 m/s.
+- **Before** (stride 0.62 + 0.28 run, 2.15 rad of phase a metre, plain sine hips): run slide 44 to 59 %, walk 67 to
+  77 %, every body FAILs.
+- **Data, in `warden_stance.json` empty_f / empty_m `gait`** (HunterAnim reads them): `stride` 1.05 rad hip swing;
+  `cadence` [2.3, 0.88], x the 2.15 rad/m, eased from walk to run (quick short steps walking, long ones running);
+  `leg_ref` 0.42 m: the walk phase is multiplied by `leg_ref` over the body's hip height, so the cadence follows the
+  leg (short 3.8 steps/s, average 3.5, tall 3.1 at the run: the stance foot speed is the same for every height);
+  `wave` -0.11: a third harmonic on the hip swing, which flattens the planted foot's pull-back (a pure sine cannot
+  get under about 35 % slide however it is tuned).
+- **After:** run slide 21 to 24 % on all seven bodies, jog 19 to 26 %, walk 26 to 41 % (reported, not gated: the legs'
+  swing still ramps with speed over 5.5 m/s, so a walk keeps 60 % of the idle legs; the slim builds are worst).
+  Turn pop 2.0 to 3.4 cm a frame (the foot-shuffle), idle creep 0.0 cm.
+- Strip: `docs/art/anim_audit/empty_gait.jpg` (short/slight, average, tall/sturdy running at 5 m/s, a stride in six
+  shots; `--empty-shots --only=gait`, GPU).
+- Not done (ideas, not parity): the swing foot is toe-down and only 3 to 5 cm off the floor, a foot flip or a higher
+  knee lift would read better; the walk's amplitude ramp (r1 = speed / 5.5) wants a walk-weighted blend.

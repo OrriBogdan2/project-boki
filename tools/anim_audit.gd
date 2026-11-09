@@ -1,5 +1,5 @@
 extends RefCounted
-## --anim-audit [--wardens=a,b ("empty": the player body, tools/empty_gait.gd)] [--json=<file>]: how every Hunter's motion measures (docs/art/ANIM_QUALITY_AUDIT.md).
+## --anim-audit [--wardens=a,b] [--json=<file>]: how every Hunter's motion measures (docs/art/ANIM_QUALITY_AUDIT.md).
 ## The gate: FAIL lines and exit code 1 (see MAX_SLIDE). No renderer needed. Per Hunter it poses the real model
 ## (WardenClips through Warden/Sync) and reads the bones:
 ##  - walk and run, live: the game's own locomotion hand-off at three speeds: foot slide against the ground while the
@@ -7,6 +7,7 @@ extends RefCounted
 ##    the arms reach;
 ##  - the loop seam of walk_f, run_f and the idle, and the pop from the idle into the walk and the walk into the run;
 ##  - the two attacks of anim_shots.gd: the weapon hand's travel and how long an arm stands out sideways.
+## Then the Empty, the player body (tools/empty_gait.gd); --wardens=empty runs only it.
 ## Prints one line per Hunter and writes every number to --json.
 
 const DT := 1.0 / 30.0
