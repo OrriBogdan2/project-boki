@@ -7962,5 +7962,103 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/coolatee_r_3.jpg",
     "ok": true
+  },
+  {
+    "id": "anchorbill_r2",
+    "name": "Anchorbill",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anchorbill_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_r2",
+    "name": "Anchorbill",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anchorbill_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_r2",
+    "name": "Anchorbill",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/anchorbill_r2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_f2",
+    "name": "Bellowary (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowary_f2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_f2",
+    "name": "Bellowary (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bellowary_f2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_f2",
+    "name": "Bellowary (female)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bellowary_f2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrarimit_e",
+    "name": "Terrarimit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrarimit_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrarimit_e",
+    "name": "Terrarimit",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/terrarimit_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrarimit_e",
+    "name": "Terrarimit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/terrarimit_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_r2",
+    "name": "Sporcupine",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sporcupine_r2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrasloth_r2",
+    "name": "Terrasloth",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/terrasloth_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stormit_r2",
+    "name": "Stormit",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stormit_r2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stormit_r2",
+    "name": "Stormit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stormit_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stormit_r2",
+    "name": "Stormit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stormit_r2_2.jpg",
+    "ok": true
   }
 ]
