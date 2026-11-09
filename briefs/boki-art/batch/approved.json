@@ -767,6 +767,16 @@
    "id": "stance_teapotamus_w31",
    "pick": 2,
    "grade": 8.43
+  },
+  {
+   "id": "ta_prismander_female",
+   "pick": 1,
+   "grade": 8.53
+  },
+  {
+   "id": "zippelith_fix",
+   "pick": 3,
+   "grade": 8.47
   }
  ],
  "rerolled": [

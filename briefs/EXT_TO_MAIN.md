@@ -4558,3 +4558,15 @@ ART geysirbara 8.3 briefs/boki-art/evolutions/Geysirbara.jpg kind=turnaround pan
 ART teapotamus 8.43 briefs/boki-art/evolutions/Teapotamus.jpg kind=turnaround panel=8.5/8.3/8.5
 READY ext/reset-cue 1dd752d4d (one ResetCue for all 17 condition resets: own = HUD slot flash + chest glint + one sound, teammate = silent glint; paths in content/rules/reset_cue.json; on READY ext/dash-refresh-assist-rebased 5ef12c32b, merge that first)
 READY ext/ult-ranks-spec 8bca23845 (decision 0022 ult ranks spec: source R tiers, design, per-hero build items)
+
+## 02:16 ET 11-09 — art session: round 31 group s18 (concepts)
+Zippelith reshaped sheet live (owner 01:16). Prismander female (rock candy) sheet passed: turnarounds/Prismander_female.jpg; the male rock-candy sheet is being redone (old crystal sheet stays until then). New Boki Driftpup (sea-glass otter pup, Water/Crystal, ROSTER_200_NEW §39).
+ART bucketmander 8.4 briefs/boki-art/batch/out/c_bucketmander_w31_3.jpg kind=concept status=owner-review panel=8.4/8.3/8.5
+ART fanpire 8.4 briefs/boki-art/batch/out/c_fanpire_w31_4.jpg kind=concept status=owner-review panel=8.4/8.3/8.5
+ART fawngus 8.33 briefs/boki-art/batch/out/c_fawngus_n_1.jpg kind=concept status=owner-review panel=8.5/8.1/8.4
+ART glassolotl 8.33 briefs/boki-art/batch/out/c_glassolotl_a_2.jpg kind=concept status=owner-review panel=8.3/8.3/8.4
+ART bullpole 8.3 briefs/boki-art/batch/out/ta_bullpole_w31_1.jpg kind=turnaround status=owner-review panel=8.3/8.3/8.3
+ART glacione 8.3 briefs/boki-art/batch/out/ta_glacione_w31_2.jpg kind=turnaround status=owner-review panel=8.3/8.3/8.3
+ART prismander 8.53 briefs/boki-art/turnarounds/Prismander_female.jpg kind=turnaround form=female panel=8.6/8.5/8.5
+ART zippelith 8.47 briefs/boki-art/turnarounds/Zippelith.jpg kind=turnaround panel=8.5/8.4/8.5
+ART driftpup 8.47 briefs/boki-art/concepts/Driftpup.jpg kind=concept
