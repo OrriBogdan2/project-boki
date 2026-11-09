@@ -63353,5 +63353,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_jibbatross_pc_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_jibbatross_pc",
+    "name": "Jibbatross",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_jibbatross_pc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_scythant_t3n3",
+    "name": "Scythant route t3 (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_scythant_t3n3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mumblet_gp",
+    "name": "Mumblet (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_mumblet_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mumblet_gp",
+    "name": "Mumblet (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_mumblet_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_scythant_t3n1",
+    "name": "Scythant route t3 (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_scythant_t3n1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mumblet_gp",
+    "name": "Mumblet (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_mumblet_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chiptero_gp",
+    "name": "Chiptero (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chiptero_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_narfoil_gp",
+    "name": "Narfoil (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_narfoil_gp_3.jpg",
+    "ok": true
   }
 ]
