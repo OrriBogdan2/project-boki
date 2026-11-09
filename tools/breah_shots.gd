@@ -5,7 +5,7 @@ extends "res://tools/vv_shots.gd"
 
 const GRID_CROP := Vector2i(280, 200)    # px round the hero per strip frame (scaled 1.5x)
 const GRID_COLS := 3
-const PARTS := ["rmb", "rocks", "dash", "spine", "climb", "glide"]
+const PARTS := ["rmb", "rocks", "dash", "spine", "climb", "glide", "impacts"]
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -132,6 +132,35 @@ func _breah_rocks() -> void:
 		if w.get("rock", false): w["t"] = 0.0
 	await _go(0.6, Callable(), strip)
 	Engine.time_scale = 1.0
+
+## What each hit looks like when it lands, on a foe: the boulder, the held punch, the slam.
+func _breah_impacts() -> void:
+	await _reset(7.0)
+	_aim(T.pos)
+	P.inp["fire"] = true
+	var tap := func(t: float): P.inp["fire"] = t < 0.1
+	await _go(0.9, tap, _strip(
+		"impact_boulder_strip",
+		"Boulder (LMB tap) landing on a foe: the throw, the flight, the hit frame, the burst fading",
+		[0.1, 0.3, 0.38, 0.42, 0.5, 0.65]
+	))
+	await _reset(3.0)
+	_aim(T.pos)
+	var hold := func(t: float): P.inp["fire"] = t < 0.95
+	await _go(1.4, hold, _strip(
+		"impact_punch_strip",
+		"Punch (LMB held to full) landing on a foe: the wind-up, the release, the hit frame, the spray fading",
+		[0.8, 0.98, 1.02, 1.06, 1.14, 1.3]
+	))
+	await _reset(2.2)
+	_aim(T.pos)
+	P.inp["sec_hold"] = false
+	P.ak.press_rmb()
+	await _go(0.6, Callable(), _strip(
+		"impact_slam_strip",
+		"Slam (RMB tap) beside a foe: the instant slam, the starburst, the shock and chips fading",
+		[0.02, 0.06, 0.1, 0.16, 0.26, 0.45]
+	))
 
 func _focused(marks: Array, focus: Callable) -> Array:
 	for mk in marks:
