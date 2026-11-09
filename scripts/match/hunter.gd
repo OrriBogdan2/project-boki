@@ -11,7 +11,7 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # m/s: [game data] JumpZVelocity is 7.5 (1.9m up); ours stops ~1.5m up so jump + mantle still tops
 # out under four terraces (the wall kick's job) on our 0.8m terraces
 const JUMP_V := 6.8
-const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
+const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
 const GROUND_SHED := 110.0       # m/s^2, no keys: speed over a run (kit step, knock) sheds this fast
 const GROUND_OVERSPEED := 30.0   # how fast dash or pad speed bleeds off on the ground
@@ -270,7 +270,9 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	perk = ""
 	pname = name_txt
 	ctrl = control
-	if control != "local":
+	if control == "local":
+		loco = Loco.machine("loco")      # the F7 readout lists the local player's machines
+	else:
 		bot_look = PlayerLook.random()
 	max_hp = cdat["hp"]; hp = max_hp
 	max_armor = round(max_hp * ARMOR_DUR); armor = max_armor; base_armor = max_armor

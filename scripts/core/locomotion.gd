@@ -2,7 +2,7 @@ class_name Loco
 extends RefCounted
 ## ONE movement model for the farm avatar (Home) and every match hunter (Hunter, the Training Area too): ground,
 ## air and glide steps, the dash ease, and the locomotion state machine both own (docs/decisions/0022). Numbers
-## come from content/rules/tuning.json, re-read live while the movement readout is open (MoveReadout).
+## come from content/rules/tuning.json, re-read live while the F7 readout is open (FsmReadout).
 
 enum S {GROUNDED, AIRBORNE, GLIDING, DASHING, MANTLING, KNOCKED, STUNNED}
 const NAMES: PackedStringArray = ["Grounded", "Airborne", "Gliding", "Dashing", "Mantling", "Knocked", "Stunned"]
@@ -74,9 +74,9 @@ static func poll() -> void:
 	if FileAccess.get_modified_time(PATH) != _mtime:
 		load_tuning()
 
-## A fresh locomotion state machine for one mover.
-static func machine() -> Fsm:
-	return Fsm.new(NAMES, TABLE, S.GROUNDED)
+## A fresh locomotion state machine for one mover; the local player's is labelled "loco" (Fsm.live, the F7 readout).
+static func machine(label := "") -> Fsm:
+	return Fsm.new(NAMES, TABLE, S.GROUNDED, label)
 
 ## The most speed this hunter carries from Shift into a glide before carry_drag bites (m/s).
 static func glide_carry(arch: String) -> float:
@@ -165,7 +165,7 @@ static func glide_step(hv: Vector2, wish: Vector2, gs: float, carry: float, dt: 
 	return d.rotated(clampf(ang, -rate * dt, rate * dt)) * s
 
 # ---------------------------------------------------------------- the movement readout's numbers
-## The local mover writes these each step (no allocation); MoveReadout shows them.
+## The local mover writes these each step (no allocation); FsmReadout shows them.
 static var r_hs := 0.0           # horizontal speed, m/s
 static var r_vs := 0.0           # vertical speed, m/s
 static var r_cap := 0.0          # the speed the current state steers up to (run speed, glide cruise), m/s
