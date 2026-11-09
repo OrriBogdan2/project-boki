@@ -2,10 +2,10 @@ class_name PinSpirit
 extends RefCounted
 ## Hem's Shift, Spirit Walk (hero sheet pin.md): a quick dodge roll the plain-dash way (ArchKit.dash_dir: the
 ## move direction, the aim when standing still or with the cursor setting), then "time" s walking as a
-## spirit: rocks, trees, pillars, barriers and raised terrain don't stop her (Hunter.spirit_t; the data's
-## Phase Walk rolls "through a pillar and the raised-platform wall"). Damage ends it. If it ends while she
-## is inside something she is put back where she last stood clear. While she is inside something her own
-## screen goes dark blue.
+## spirit: rocks, trees, pillars, barriers and raised terrain don't stop her; she climbs a ledge face and
+## drops off the far side (Hunter.spirit_t; data: Phase Walk rolls through the raised wall).
+## Damage ends it. If it ends while she is inside a rock or barrier she is put back where she last stood clear;
+## in a ledge she is set on top of it. While she is inside something her own screen goes dark blue.
 
 var k: ArcherKit
 var h: Hunter
@@ -105,9 +105,11 @@ func tick_orbs(dt: float) -> void:
 		else:
 			x.spirit_t = float(g[1])
 
-func blocked_here() -> bool:
+## terrain: a ledge face still above her feet counts (the walk dims her screen); at the end it does not,
+## she is set on top of it instead (end).
+func blocked_here(terrain := true) -> bool:
 	var w: World = k.m.world
-	if w.is_block(h.pos.x, h.pos.z) or w.ground_at(h.pos.x, h.pos.z) > h.pos.y + World.STEP:
+	if w.is_block(h.pos.x, h.pos.z) or (terrain and w.ground_at(h.pos.x, h.pos.z) > h.pos.y + World.STEP):
 		return true
 	return not w.dyn_walls.is_empty() and Verbs.wall_blocks(w.dyn_walls, h.pos.x, h.pos.z, h.r * 0.6, h.pos.y) > 0.0
 
@@ -141,7 +143,12 @@ func end(why: String) -> void:
 	h.spirit_t = 0.0
 	k.fx.aura_on(0.0)
 	k.fx.tint_to(0.0)
-	if blocked_here():
+	var top: float = k.m.world.ground_at(h.pos.x, h.pos.z)
+	if top > h.pos.y + World.STEP and not blocked_here(false):
+		h.pos.y = top      # ended mid-climb in a ledge: she stands on top of it, never inside terrain
+		h.vel.y = 0.0
+		h.grounded = true
+	if blocked_here(false):
 		snap_backs += 1
 		h.teleport(entry)
 		h.vel = Vector3.ZERO
