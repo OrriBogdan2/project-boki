@@ -101,6 +101,16 @@ func run(main: Node) -> void:
 	var info := InteractPick.cand({"kind": "exit", "x": {}, "label": "This dock has closed"}, g, "dock", "")
 	ok(pk.pick(p, [info, cs[1]], null, false, 10.0)["kind"] == "chest", "pick(): an info line comes last")
 	ok(pk.pick(p, [info], null, false, 20.0)["kind"] == "exit", "pick(): an info line alone still shows")
+	# standing between two near-equal targets: a small step does not swap them, a real one does
+	var ca := {"kind": "chest", "label": "A %s" % key}
+	var cb := {"kind": "chest", "label": "B %s" % key}
+	var pm := InteractPick.new()
+	var two := func(da: float, db: float) -> Array:
+		var a := InteractPick.cand(ca, g + Vector3(da, 0, 0), "a", "A")
+		return [a, InteractPick.cand(cb, g + Vector3(0, 0, db), "b", "B")]
+	ok(is_same(pm.pick(p, two.call(0.9, 1.0), null, false, 40.0), ca), "pick(): nearest the body first")
+	ok(is_same(pm.pick(p, two.call(1.0, 0.85), null, false, 45.0), ca), "pick(): 0.15 m nearer is not enough")
+	ok(is_same(pm.pick(p, two.call(1.2, 0.6), null, false, 50.0), cb), "pick(): a clearly nearer one does")
 	ok(pk.pick(p, [], null, false, 30.0).is_empty(), "pick(): nothing in reach, nothing shown")
 	print("INTERACT-PICK-CHECK: %s" % ("PASS" if bad == 0 else "%d FAIL" % bad))
 	Save.no_write = false

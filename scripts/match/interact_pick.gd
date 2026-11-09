@@ -4,12 +4,14 @@ extends RefCounted
 ##  1. Reviving a teammate comes first (their wisp or their deathbox).
 ##  2. Otherwise a target the cursor is on (within CURSOR_R of it): the one nearest the cursor.
 ##  3. Otherwise the target nearest the body. Prompts that only inform (a closed dock) come last.
-## The pick sticks for HYST_S, and for as long as interact is held, so the prompt does not flicker
+## The pick sticks for HYST_S, while it is within MARGIN of the best in the same tier, and for as
+## long as interact is held, so the prompt does not flicker
 ## and a hold never changes target halfway. Match._update_interact asks for the candidates
 ## (gather, plus the wisp ones it adds with cand) and then for the pick. Never touches saves or Net.
 
 const CURSOR_R := 2.5      # m: the cursor counts as "on" a target this close to it
 const HYST_S := 0.25       # s: a pick holds this long before a better one may replace it
+const MARGIN := 0.35       # m: in the same tier a challenger must be this much nearer to take over
 const TIER_STEP := 100.0   # keeps tiers apart in rank(); larger than any distance used
 
 var _held := {}            # hunter nid -> {id, t}: the last pick and when it was made
@@ -92,8 +94,11 @@ func pick(h: Hunter, cands: Array, cursor: Variant, want: bool, now: float) -> D
 			win = c
 	var prev: Variant = _held.get(h.nid)
 	if prev != null and not is_same(prev["id"], win["id"]) and not win["rev"]:
+		var wr := _rank(h, win, cursor)
 		for c in cands:
-			var holds: bool = want or now - float(prev["t"]) < HYST_S
+			var cr := _rank(h, c, cursor)
+			var close: bool = floorf(cr / TIER_STEP) == floorf(wr / TIER_STEP) and cr - wr < MARGIN
+			var holds: bool = want or now - float(prev["t"]) < HYST_S or close
 			if is_same(c["id"], prev["id"]) and not c["rev"] and (not _info(c) or _info(win)) and holds:
 				return c["it"]
 	if prev == null or not is_same(prev["id"], win["id"]):
