@@ -77,7 +77,8 @@ sentences, and a grown, Devoted Boki talks freely.
 - **Care.** Pet (F), play fetch (V), talk (T); the details card (C) has Feed, Brush, Bath, Nap, Train,
   Dress and Pair. Every Boki loves one food, refuses another and has a favourite pastime: you find
   out by trying, and the card remembers. Each kind of care builds a little trust once a farm day
-  (5 minutes), so a Boki raised only at home still grows close.
+  (5 minutes), so a Boki raised only at home still grows close. Reaching a new bond rank is a
+  moment: it hops to you with a heart and a line, and a card says what the rank brings.
 - **Training.** Power, Guard, Speed and Focus, trained at the Training post with a three-round timing
   drill. A happy Boki learns faster; a tired one won't train. Play is practice too: a finished game
   of fetch trains a point of Speed while it still has the energy.
