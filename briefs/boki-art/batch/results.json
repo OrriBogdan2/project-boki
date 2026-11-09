@@ -2844,5 +2844,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_prismink_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_skidlet",
+    "name": "Skidlet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_skidlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_seamwyrm",
+    "name": "Seamwyrm (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_seamwyrm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prismink",
+    "name": "Prismink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_prismink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanceron",
+    "name": "Lanceron (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lanceron_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skidlet",
+    "name": "Skidlet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_skidlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanceron",
+    "name": "Lanceron (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lanceron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glassolotl_r",
+    "name": "Glassolotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glassolotl_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glassolotl_r",
+    "name": "Glassolotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glassolotl_r_2.jpg",
+    "ok": true
   }
 ]
