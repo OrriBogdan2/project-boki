@@ -24965,5 +24965,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/gloamshell_card2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "glomwort_card2",
+    "name": "Glomwort (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glomwort_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glomwort_card2",
+    "name": "Glomwort (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glomwort_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gravadillo_card2",
+    "name": "Gravadillo (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gravadillo_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gravadillo_card2",
+    "name": "Gravadillo (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gravadillo_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hivara_card2",
+    "name": "Hivara (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hivara_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hivara_card2",
+    "name": "Hivara (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hivara_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kestrike_card2",
+    "name": "Kestrike (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kestrike_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kestrike_card2",
+    "name": "Kestrike (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kestrike_card2_2.jpg",
+    "ok": true
   }
 ]
