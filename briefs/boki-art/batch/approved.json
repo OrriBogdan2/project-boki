@@ -351,6 +351,12 @@
    "pick": 1,
    "grade": 8.6,
    "note": "majestic fungal tortoise, spear-quill palisade; relaid 5->4 views -> turnarounds/Ringrove.jpg"
+  },
+  {
+   "id": "chandelapi",
+   "pick": 3,
+   "grade": 8.5,
+   "note": "brass candelabra vines grown through the whole okapi -> evolutions/Chandelapi.jpg"
   }
  ],
  "rerolled": [
@@ -510,6 +516,42 @@
   {
    "id": "oarter_r",
    "why": "copies Oarlet, chubby -> oarter_r2"
+  },
+  {
+   "id": "fizzlet",
+   "why": "B close (8.4): copper ankle cuffs read worn -> edit fizzlet_e"
+  },
+  {
+   "id": "chimelop",
+   "why": "copies Echolop, hanging bells -> chimelop_r"
+  },
+  {
+   "id": "cisternmander",
+   "why": "bucket worn on back / copies Barrelmander -> cisternmander_r"
+  },
+  {
+   "id": "dreadnoyak",
+   "why": "copies Prowyak, ghost rows -> dreadnoyak_r"
+  },
+  {
+   "id": "howlop",
+   "why": "copies Echolop -> howlop_r"
+  },
+  {
+   "id": "kayak",
+   "why": "ghost duplicate row, dark helmet prow -> kayak_r"
+  },
+  {
+   "id": "thunderstrich",
+   "why": "copies Boltstrich, neck rings -> thunderstrich_r"
+  },
+  {
+   "id": "wickapi",
+   "why": "realistic okapi + candle prop -> wickapi_r"
+  },
+  {
+   "id": "puffamus_r2",
+   "why": "strapped iron band, top-hat pipe -> puffamus_r3"
   }
  ],
  "sent_to_owner": [],
