@@ -153,25 +153,6 @@ func muzzle(at: Vector3, dir2: Vector2, col: Color, power := 1.0) -> void:
 	if power >= 1.8:
 		burst(at + d * 0.35, Color(0.78, 0.76, 0.74, 0.35), int(3 * power), 1.2, 0.5, -0.6, 1.6, d, 30.0)
 
-## A hit landing: a flash where it struck, sparks thrown out the far side along the shot, a few
-## kicked back toward the shooter; crits flash gold and wider, armor sheds blue shards.
-## power: 0..3 from the damage.
-func impact(at: Vector3, dir: Vector3, col: Color, power := 1.0, crit := false, armor := false) -> void:
-	var fcol := col
-	if crit: fcol = Color("ffd23f")
-	elif armor: fcol = Color("8fd4ff")
-	var sz := (0.34 + 0.17 * power) * (1.45 if crit else 1.0)
-	flash(at, fcol, sz, 0.07 + 0.02 * power + (0.04 if crit else 0.0))
-	var dd := dir.normalized() if dir.length() > 0.01 else Vector3.UP
-	dd = (dd + Vector3(0, 0.35, 0)).normalized()
-	spark(at, dd, fcol.lerp(Color.WHITE, 0.3), int(5 + 4 * power) + (6 if crit else 0), 7.0 + 3.0 * power, 38.0 + (25.0 if crit else 0.0), 0.2 + 0.04 * power, 12.0, 1.0 + 0.2 * power)
-	if power >= 1.0 or crit:
-		spark(at, (-dd + Vector3(0, 0.9, 0)).normalized(), fcol, int(2 + 2 * power), 4.0 + 1.5 * power, 70.0, 0.18, 14.0, 0.8)
-	if armor:
-		burst(at, Color("9ad8ff"), int(4 + 3 * power), 4.5, 0.35, 14.0, 0.8, dd, 70.0)
-	if crit:
-		ring(at + Vector3(0, -0.6, 0), 1.1 + 0.25 * power, Color(1.0, 0.85, 0.3, 0.85), 0.2)
-
 ## A straight bolt of light from a to b that flares and fades (a rail shot, a beam ability): a soft
 ## camera-facing ribbon (shaders/light_shaft.gdshader) with a white-hot core line inside it.
 var _beam_sh: Shader

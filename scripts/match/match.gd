@@ -3334,6 +3334,7 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 	# data-driven abilities: effects that go off where the shot ends, on what it hit, or on the wall
 	# that stopped it
 	var fxx: Dictionary = s["x"]
+	if why == "wall": Juice.wall(self, at, float(s["dmg"]))
 	if fxx.get("kx") is Callable and not fxx.get("cos", false):
 		# a kin grammar shot (KinExec): it applies its own effects and followups
 		(fxx["kx"] as Callable).call(s, at, e, why if not (e != null and fxx.has("hitset")) else "end")
