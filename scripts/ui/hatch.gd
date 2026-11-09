@@ -49,6 +49,7 @@ var look: Dictionary = {}
 var preview: Node3D
 var look_at_t := Vector3(0, 0.25, 0.5)
 var edit_only := false
+var more_looks := false       # the creator shows every row (always, when opened from the menu)
 var create_box: Control
 var sub_lbl: Label        # opened from the menu just to change how you look
 var top_box: VBoxContainer    # the title and its line: centred, or over the preview while you make yourself
@@ -389,7 +390,7 @@ func _show_create() -> void:
 	if create_box: create_box.queue_free()
 	_rebuild_preview()
 	for e in eggs: (e["holder"] as Node3D).visible = false
-	if sub_lbl: sub_lbl.text = "You are one of the Empty. Drag (or hold A / D) to turn round."
+	if sub_lbl: sub_lbl.text = "This is you. Drag (or hold A / D) to turn round."
 	_top_over(0.73)       # over you, clear of the tall creator card on the left
 	cam_to = CREATE_CAM          # fixed, so a change of height or build shows as one
 	look_at_t = CREATE_LOOK
@@ -397,9 +398,12 @@ func _show_create() -> void:
 	card.custom_minimum_size = Vector2(500, 0)
 	create_box = card
 	var v := UI.vbox(8); card.add_child(v)
+	var all_rows := more_looks or edit_only
 	for r in Unmasked.ROWS.size():
 		var row: Array = Unmasked.ROWS[r]
-		if r == 0 or r == Unmasked.HOLLOW_ROW:
+		if not all_rows and not r in Unmasked.FIRST_ROWS:
+			continue
+		if all_rows and (r == 0 or r == Unmasked.HOLLOW_ROW):
 			v.add_child(UI.label("Body" if r == 0 else "The hollow", 12, UI.ACCENT, UI.caps))
 		var key: String = row[0]
 		var opts: Array = row[2]
@@ -424,6 +428,10 @@ func _show_create() -> void:
 			hr.add_child(val)
 		hr.add_child(UI.icon_button("next", func(): _step_look(key, 1, opts.size()), "Next", 12.0))
 		v.add_child(hr)
+	if not all_rows:
+		v.add_child(UI.ghost("More looks...", func():
+			more_looks = true
+			_show_create()))
 	var nr := UI.hbox(8)
 	var nl := UI.label("Your name", UI.T_BODY, UI.MUTED); nl.custom_minimum_size.x = 120
 	nr.add_child(nl)

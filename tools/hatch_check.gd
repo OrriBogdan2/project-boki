@@ -113,11 +113,49 @@ func run(m: Node) -> void:
 	while not named["go"] and Time.get_ticks_msec() - t0 < 3000:
 		await tree.process_frame
 	ok(named["go"], "Name it hands over to naming")
+	await _creator_rows(tree)
 	await _first_mask(tree)
 	print("HATCH CHECK DONE, failures: %d" % bad)
 	tree.quit()
 
-# ---------------------------------------------------------------- 3. the first Relic
+# ---------------------------------------------------------------- 3. the creator
+## A new player sees Sex, Shroud colour and Glow; "More looks..." opens the other rows; the menu's creator has them all.
+func _creator_rows(tree: SceneTree) -> void:
+	Save.d = Save.fresh()
+	Save.d["tutorial"] = {"intro": true}
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	main.add_child(hx)
+	for i in 4: await tree.process_frame
+	ok(hx.stage == "create", "a new game opens the creator (stage %s)" % hx.stage)
+	var shown := func(): return Unmasked.ROWS.filter(func(r): return _texts(hx.create_box).has(r[1]))
+	var first: Array = Unmasked.FIRST_ROWS.map(func(r): return Unmasked.ROWS[r])
+	ok(shown.call() == first and first.size() == 3, "first it shows 3 rows: body, colour, glow")
+	var more := _find_button(hx.create_box, "More looks...")
+	ok(more != null, "with a More looks... button")
+	if more == null:
+		hx.queue_free()
+		return
+	more.pressed.emit()
+	for i in 4: await tree.process_frame
+	ok(shown.call() == Unmasked.ROWS and _find_button(hx.create_box, "More looks...") == null,
+		"it opens all %d rows and the button goes" % Unmasked.ROWS.size())
+	hx.queue_free()
+	await tree.process_frame
+	var menu = load("res://scripts/ui/hatch.gd").new()
+	menu.edit_only = true
+	main.add_child(menu)
+	for i in 4: await tree.process_frame
+	ok(Unmasked.ROWS.all(func(r): return _texts(menu.create_box).has(r[1])), "the menu's creator has every row")
+	menu.queue_free()
+	await tree.process_frame
+
+func _find_button(n: Node, text: String) -> Button:
+	for b in n.find_children("*", "Button", true, false):
+		if (b as Button).text == text:
+			return b
+	return null
+
+# ---------------------------------------------------------------- 4. the first Relic
 func _first_mask(tree: SceneTree) -> void:
 	tree.root.size = Vector2i(1280, 720)      # (the smallest screen we lay out for; 1920x1080 scales to it)
 	Save.d = Save.fresh()
