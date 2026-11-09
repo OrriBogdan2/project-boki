@@ -69485,5 +69485,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/style_vespyx_a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "style_vespyx_a",
+    "name": "Vespyx (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_vespyx_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_vespyx_b",
+    "name": "Vespyx (style test b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_vespyx_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_f_card108",
+    "name": "Voltalon female (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltalon_f_card108_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_f_card108",
+    "name": "Voltalon female (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltalon_f_card108_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sphinxblight_card108",
+    "name": "Sphinxblight (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sphinxblight_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_f_card108",
+    "name": "Voltalon female (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/voltalon_f_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_vespyx_b",
+    "name": "Vespyx (style test b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_vespyx_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_mycroll_a",
+    "name": "Mycroll (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_mycroll_a_2.jpg",
+    "ok": true
   }
 ]
