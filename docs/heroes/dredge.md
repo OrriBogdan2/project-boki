@@ -52,6 +52,32 @@ the rest are the existing asserts named in "Combinations".
 | Dash | all | [O] 23:40: short, fast, visible dashes in a row (not a blink) | 3.2 m in 0.16 s, a short gap between charges | matches the owner note |
 | X | all | [F] f22-f43: a 1.1 s charge behind a 105 degree fan, two waves 0.6 s apart; [O] item 36: a slow walk through it | as the source with the owner's walk | matches |
 
+## Footage gaps, Nov 9 re-check
+
+Every ranked row of the gap list (briefs/hero-ref/dredge.md section 4, 13 rows plus the sfx note) against main d255acbee. Status: closed (commit or code),
+open, in flight (unmerged branch), or owner override. Parity first (DECISIONS 2026-11-07): suggestions are marked as such, none of them built here.
+Nothing was built on this branch: the only row not closed is in flight, and every file it needs (`dredge_kit.gd`, `dredge.json`, `dredge_combo_check.gd`,
+`ld_fx.gd`) is changed by ext/anim-time-grimble, ext/scrapking-lmb or ext/grimble-hook-arm.
+
+| # | Gap | Status | Evidence |
+|---|---|---|---|
+| 1 | Grapnel stops at walls | closed | the arm pierces rocks, props and cliff faces (`"rocks": true`, b1aa67fe3, 788f46054); only a placed wall stops it. Asserts "rocks:", "cliff:" |
+| 2 | Cooldowns and fire rate | closed (data) | `shotgun.json` rate 0.5 (b1aa67fe3). Hand 12 s, Anchor 7 s, Barge 3 charges at 10 s keep the source's ratios (audit rows (c); owner 23:40 dash note). Suggestion: 11.7 and 6.7 are one tenth of a second off, an owner call |
+| 3 | Anchor stun and damage | closed | `dredge.json` e: stun 1.1, dmg 25 against a 14 volley (1.8x). Parity table above |
+| 4 | Shotgun cone in the world | closed | `DredgeKit._tick_gun` draws the two edge lines to the slug range while firing and folds to one aim line idle (b1aa67fe3). Assert "gun: the spread's edge lines lie on the ground out to the slug range", "gun: idle, the cone folds into one aim line" |
+| 5 | Who is Grounded during the reel | closed | the caster gets `KitStatus` "gnd" for the reel, the foe stays stunned and lands not Grounded (b1aa67fe3). Assert "reel: Grimble is Grounded while he reels, the foe is stunned" |
+| 6 | Anchor Drop forward hop | in flight | main has the 0.38 s wind-up and the lift on the toes only, no forward travel. ext/anim-time-grimble adds `hop` 1.8 m over 0.2 s from 0.14 s (`_hop` in `dredge_kit.gd`, `dredge.json` e) with its own check; merge that, build nothing here |
+| 7 | Anchor slam "giant fist" | open | the ground slam draws the filling cone, crescent, dust and stun spirals; the translucent falling anchor (`LDFx.anchor_drop`) is only used by the air smash. Not built: `dredge_kit.gd` and `ld_fx.gd` are in flight. Suggestion for after the merges: call `anchor_drop` onto the cone centre in `_anchor` |
+| 8 | Grapnel line | closed on main, polish in flight | the hook is his stretched arm now (DECISIONS v2), drawn through rocks (`ld_arm.gdshader` depth test off; 74006733e). ext/grimble-hook-arm adjusts the arm look in `ld_fx.gd` |
+| 9 | Grasp scoops wisps | closed | downed hunters the hook passes are reeled in (b1aa67fe3). Assert "wisp: a downed hunter the hook passes is scooped up with the catch" |
+| 10 | Barge start burst and scorch | owner override | DECISIONS "No bursts, rings or discs on dashes, landings or resets"; OWNER_REVIEW_1103 item 8 (no explosions on dashes). The barge keeps its turf clods and after-images |
+| 11 | Shotgun range and fan | closed | `shotgun.json` fan 30, bloom to 15, range 6.3 m (b1aa67fe3). Assert "parity gun: the slugs stop at 6.3 m with the cursor at 2 m" |
+| 12 | Slugs hang at the stop line | closed | slugs rest as violet dots for 0.26 s (`SLUG_REST`, `fx.dot(at, SLUG_REST, 0.26)`, b1aa67fe3) |
+| 13 | Shotgun recoil | closed | `dr_shot` (b1aa67fe3). Assert "gun: each shot rocks the body back (dr_shot)" |
+| 14 | sfx | n/a | no audio in the footage |
+
+ext/scrapking-lmb rewrites the gun (a `DredgeGun` spread whose edge lines follow it) and the hook in `dredge_kit.gd`; re-assert rows 4, 5, 9, 11, 12 and 13 after it merges.
+
 ## Audit (Nov 3 23:40)
 
 Every Grimble row of briefs/specs/kit-audit/cinder_dredge_moosh.md (it audited main 200effce): (a) already done on
