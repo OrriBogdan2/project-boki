@@ -29,6 +29,30 @@ func toys() -> Array:
 			out.append({"u": int(e["u"]), "id": String(e["id"]), "pos": HomeLayout.deco_center(e)})
 	return out
 
+## Sets the clip a rigged Boki plays for what it is doing (kact: munch at a feeder, a toy's clip at a toy); true
+## when this Boki has a rig, which poses its own body.
+func _act(k: Dictionary, n: Node3D) -> bool:
+	var act := ""
+	var eat: Variant = k.get("eat")
+	var play: Variant = k.get("play")
+	var id := String(k.get("life_toy", ""))
+	if eat is Dictionary and eat["phase"] == "eat":
+		act = "munch"
+	elif play is Dictionary and play["phase"] == "play":
+		id = String(_toy(int(play["u"])).get("id", ""))
+	if act == "" and id != "":
+		act = String(rules()["toys"].get(id, {}).get("clip", ""))
+	if id != "" and not k.has("play") and k.get("life_at") is Vector3:
+		var at: Vector3 = k["life_at"]
+		n.rotation.y = atan2(-(at.x - k["pos"].x), -(at.z - k["pos"].z))
+	if act != "" or n.has_meta("kact_home"):
+		n.set_meta("kact", act)
+		if act != "":
+			n.set_meta("kact_home", true)
+		else:
+			n.remove_meta("kact_home")
+	return n.has_node("Body/Flex/BokiRig")
+
 func _toy(u: int) -> Dictionary:
 	for t in toys():
 		if int(t["u"]) == u:
@@ -183,6 +207,7 @@ func _ball(u: int) -> Node3D:
 ## wiggle comes from joy_t in step). A squabble leaves a short growl.
 func pose(k: Dictionary, n: Node3D, d: float) -> void:
 	var body := n.get_node_or_null("Body") as Node3D
+	var rigged := _act(k, n)
 	if float(k.get("huff_t", 0.0)) > 0.0:
 		k["huff_t"] = float(k["huff_t"]) - d
 		n.set_meta("pose", "growl" if float(k["huff_t"]) > 0.0 else "")
@@ -197,20 +222,23 @@ func pose(k: Dictionary, n: Node3D, d: float) -> void:
 	match String(t["id"]):
 		"toy_ball":
 			var hop := absf(sin(s * 6.0))
-			body.position.y = hop * 0.3
-			body.rotation.x = -0.25 * sin(s * 3.0)
+			if not rigged:
+				body.position.y = hop * 0.3
+				body.rotation.x = -0.25 * sin(s * 3.0)
 			n.set_meta("pose", "nudge")
 			var ball := _ball(int(t["u"]))
 			if ball:
 				ball.position = Vector3(sin(s * 3.0) * 0.4, BALL_R + absf(sin(s * 6.0 + 1.0)) * 0.3, cos(s * 3.0) * 0.4)
 		"toy_post":
 			var climb := 0.5 - 0.5 * cos(fposmod(s * 0.9, TAU))
-			body.position.y = climb * 0.9
-			body.position.z = -0.35
-			body.rotation.x = -0.5
+			if not rigged:
+				body.position.y = climb * 0.9
+				body.position.z = -0.35
+				body.rotation.x = -0.5
 			n.set_meta("pose", "alert" if climb > 0.8 else "")
 		"toy_tub":
-			body.position.y = 0.08 + absf(sin(s * 9.0)) * 0.12
-			body.rotation.z = sin(s * 12.0) * 0.2
+			if not rigged:
+				body.position.y = 0.08 + absf(sin(s * 9.0)) * 0.12
+				body.rotation.z = sin(s * 12.0) * 0.2
 			if randf() < d * 5.0:
 				h.fx.burst(tp + Vector3(0, 0.5, 0), Color("8fd0ff"), 5, 2.0, 0.4)

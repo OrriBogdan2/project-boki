@@ -34,6 +34,7 @@ const GRUMPY := 30.0       # joy need below which a Boki naps alone
 var h                      # the home (home.gd): kins, world, day_t, ppos, emotes
 var R: Dictionary          # content/rules/base_life.json
 var toys: Array = []       # Vector3: where the placed toys stand
+var toy_ids: Array = []    # and the id of each (toys.json)
 var night := false
 var _acc := 0.0
 var _toy_t := 0.0
@@ -61,9 +62,11 @@ static func add_bond(a: Dictionary, b: Dictionary, by: float) -> void:
 
 func find_toys() -> void:
 	toys.clear()
+	toy_ids.clear()
 	for e in HomeLayout.of(Save.d).get("deco", []):
 		if (R["toys"] as Array).has(String(e.get("id", ""))) and not FarmSites.is_site(e):
 			toys.append(HomeLayout.deco_center(e))
+			toy_ids.append(String(e["id"]))
 
 ## The Boki's machine (made the first time the base sees it).
 func machine(k: Dictionary) -> Fsm:
@@ -75,6 +78,7 @@ func machine(k: Dictionary) -> Fsm:
 		m.on_enter(S.ROAM, func(_from: int) -> void: k["t"] = 0.0)
 		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: k.erase("life_it"))
 		m.on_exit(S.NAP, func(_to: int) -> void: k.erase("life_pile"))
+		m.on_exit(S.PLAY, func(_to: int) -> void: k.erase("life_toy"))
 		k["life"] = m
 	return k["life"]
 
@@ -214,6 +218,7 @@ func _play_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 	var toy: Vector3 = k["life_at"]
 	if Vector2(toy.x - k["pos"].x, toy.z - k["pos"].z).length() < AT_TOY:
 		k["hop"] = float(k.get("hop", 0.0)) + dt * 6.0      # bounces about at it
+		k["life_toy"] = toy_ids[maxi(0, toys.find(toy))]      # and HomeToys.pose plays its clip
 		if randf() < 0.1:
 			k["goal"] = toy + Vector3(randf_range(-1.0, 1.0), 0, randf_range(-1.0, 1.0))
 	if m.since >= float(k["life_for"]) or m.since >= float(R["max"]["play"]):

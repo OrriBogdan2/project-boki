@@ -21,3 +21,7 @@ check: `--base-life-check`.
   check). Each machine registers in `Fsm.live` as `boki:<name>`, so the F7 FsmReadout lists them once ext/fsm-m1
   lands.
 - Toys: placed layout items whose id is in `toys` (today only the Training post; GARDEN.md 9.3 adds more).
+- Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
+  toy's `clip` (toys.json: nudge, climb, splash) at a toy, whether it came to it from Play here or from HomeToys' own
+  pick. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
+  poses its own body, so the Body squash and toy bounce stay for the primitive ones only.

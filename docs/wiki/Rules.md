@@ -517,7 +517,7 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 
 ## toys (`content/rules/toys.json`)
 
-The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base_mode is on). A Boki at home with a joy below joy_below picks a toy on its own, walks to it, plays play_secs and gains one point of the toy's stat (Care.add_stat, capped by level as today) and joy. Units: seconds, tiles, 0..1 trait values, joy points.
+The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base_mode is on). A Boki at home with a joy below joy_below picks a toy on its own, walks to it, plays play_secs and gains one point of the toy's stat (Care.add_stat, capped by level as today) and joy. Each toy has the clip a rigged Boki plays at it (BokiHomeClips, set as the kact meta). Units: seconds, tiles, 0..1 trait values, joy points.
 
 | Setting | Value |
 |---|---|
@@ -534,7 +534,7 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | trait_weight | 1 |
 | join_weight | 2.5 |
 | join_weight_doc | A toy someone is already playing with is this many times likelier, so a second Boki tends to join in. |
-| toys | {"toy_ball": {"stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "prism", "frost"], "doc": "splashed by Water and Ice leans (species themes prism, frost today)"}} |
+| toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "prism", "frost"], "doc": "splashed by Water and Ice leans (species themes prism, frost today)"}} |
 
 ## tutorial (`content/rules/tutorial.json`)
 

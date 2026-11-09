@@ -117,7 +117,7 @@ const FACE_LOD_BIAS := 1000.0
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
-const OWN_BODY := ["chop", "mine", "carry", "tend"]
+const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
@@ -139,6 +139,9 @@ const CLIP_FACE := {
 	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
 	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
+	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
+	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
+	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
@@ -164,6 +167,7 @@ var _speed := 0.0
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
+var _asleep := false
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
@@ -213,6 +217,7 @@ func _ready() -> void:
 	_rng.seed = hash(get_instance_id())
 	_blink_t = _rng.randf_range(0.8, 3.5)
 	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	BokiHomeClips.install(species, player, skeleton())
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
@@ -288,6 +293,11 @@ func _pick_clip(dt: float) -> void:
 	if String(root.get_meta("kstate", "")) == "attack":
 		_start_shot("attack")
 	_shot_left -= dt
+	var asleep := String(root.get_meta("kstate", "")) == "sleep"
+	if asleep != _asleep:
+		_asleep = asleep
+		if _speed < WALK_SPEED:
+			_start_shot("settle" if asleep else "wake")
 	var want := _state_clip()
 	set_clip(want)
 	player.speed_scale = 1.0
@@ -302,7 +312,7 @@ func _start_shot(which: String) -> void:
 
 func _state_clip() -> String:
 	if String(root.get_meta("kstate", "")) == "sleep":
-		return "sleep"
+		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
 		return work

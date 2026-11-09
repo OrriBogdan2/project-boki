@@ -271,7 +271,7 @@ func feed_step(k: Dictionary, d: float) -> bool:
 			k["goal"] = pos
 			e["t"] = float(e["t"]) - d
 			var body: Node3D = (k["node"] as Node3D).get_node_or_null("Body")
-			if body:
+			if body and not body.has_node("Flex/BokiRig"):
 				var q := absf(sin(float(e["t"]) * 9.0))
 				body.scale = Vector3(1.0 + q * 0.08, 1.0 - q * 0.1, 1.0 + q * 0.08)
 			if randf() < d * 3.0 and Econ.fill(f) > 0:
