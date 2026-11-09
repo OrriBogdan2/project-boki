@@ -239,11 +239,14 @@ static func misfits(arch: String) -> Array:
 		var scene := _scene(arch)
 		var glb: Node3D = scene.instantiate() as Node3D if scene else null
 		var skel := skeleton(glb)
-		_misfits[p] = WardenSkeleton.mismatches(skel, neutral_rest(arch), extra_bones(arch)) if skel else ["no armature"]
+		var bad: Array = ["no armature"]
+		if skel:
+			bad = WardenSkeleton.mismatches(skel, neutral_rest(arch), extra_bones(arch))
+		_misfits[p] = bad
 		if glb:
 			glb.free()
-		if not (_misfits[p] as Array).is_empty():
-			push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [p, str(_misfits[p])])
+		if not bad.is_empty():
+			push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [p, str(bad)])
 	return _misfits[p]
 
 ## Small pieces the match camera only sees as speckle (warden_look "far_hide": node names, Tarek's beads and fist
