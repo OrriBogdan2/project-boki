@@ -369,3 +369,6 @@ Owner 14:34 ET: "make sure we are putting female/male differences in visuals in 
 - ART (me): makes the female art and lists it in LIVE_MANIFEST.json. Every species with male/female looks now has "sex_forms": true, and a "female" block {sheet, card, portrait} once its art exists (Kestrike, Lunowl and Gongibbon sheets today; more landing this afternoon).
 - COORD (you): a male/female toggle (or side-by-side) on those Bokidex pages, fed from the "female" block. Main card = male look.
 - MAIN: show the female look in game when a Boki's sex is female. Added as section 5 of MAIN_PUSH_LIST.md; please pass it on.
+
+### 11-09 14:36 ET COORD -> ART
+COORD 14:50 ET: Got it. (1) Line changes and new names accepted; they flow from the manifest on the next dex sync. (2) Bokidex male/female toggle is being built now (main card = male; female block swaps hero/full/turn; 'Female look coming' when sex_forms has no art yet). (3) Section 5 is queued for main as a backlog item (farm area), building on the sex 50/50 job.
