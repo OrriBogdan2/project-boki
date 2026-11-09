@@ -3958,3 +3958,21 @@ READY ext/idle-ashwick-rebased e557cd71e (SUPERSEDES ext/idle-ashwick eeb4f3ae4,
 
 ## 2026-11-09 deep (job 20261109-031522-a3): CLAIM game-rules-nov8
 - CLAIM: GAME_RULES_NOV8.md sections 1-7 + 20:18 one-rule-per-line update, data and logic only. Built on top of the unmerged READY ext/roster-109 (7df70bd85) and ext/evolution-rules-1108 (4bd4a4cf5), adding: training-stat branching finals + lean hint, Ink use, sex (50/50, saved, bred, shown) + sex_forms, renames, one-rule-per-line data test. Branch ext/game-rules-nov8.
+
+## 2026-11-09 deep (job 20261109-024528-a4): READY ext/boki-agency de278d0d1
+READY ext/boki-agency de278d0d1 (job 20261109-024528-a4, rpc1). Owner 11-08 "lunowl teleported me again" = go-ahead for OWNER_REVIEW 184b + DECISIONS 2026-11-06, plus the 11-08 Boki guard position. Branched off main d255acbee. PR not opened: no gh on rpc1 (https://github.com/OrriBogdan2/project-boki/pull/new/ext/boki-agency). Not merged. Audit: docs/BOKI_AGENCY_AUDIT.md; decision 0022.
+
+| Ability / system | Offending effect | Replacement |
+|---|---|---|
+| Moon Swap (E: Lunowl, Moonloris, Caecilith, Opalisk, Lodestick, Duskapi) | foe trades places with YOU (teleport, ends glide) | **Moon Mark**: 4 dmg, stun 0.4 s, foe revealed + takes +15% damage for 4 s; `signature swap` removed from the grammar |
+| Stinger Dash / Gale Lance / Gravity Slam, cast with the Boki on you | the HUNTER did the 7-8 m dash / leap | the Boki jumps off and does it itself (same numbers); a Fusion form's own moves stay (your commanded form) |
+| Return order, big Boki (16 `mount` species) | you stood on it; slower run/jump; jump threw you off | guards at your side (below); carried bonuses kept; only the giant Fusion form is still ridden (owner call, DEBT) |
+| Your own Boki's body | the body push shoved you when it walked into you | your Boki steps aside (Match._separate, 2 lines) |
+| dodge_rider parser + KinText.rider (data already gone, item 129) | dead path that could bring dash riders back | deleted; the field is now a grammar error |
+| Kept | Moonlift (abyss rescue, whitelisted), walls, buffs/shields, foe-only CC, Fusion pulses (all on foes), stat passives | n/a |
+
+- Guard spot: Boki with body.mass > follow.shoulder_max_mass (1.2) on Return stand guard_side_m 1.7 m to the side, square to your facing. They keep that flank as you move and take the other one when it is blocked. They never come closer than guard_min_m 1.2 m and their feet are never below yours (they hop with your jumps). While you glide or cross a gap they curl up on your back. Small and medium Boki still ride the shoulder or pack.
+- FENCE: KinFence (grammar). Any Boki dash/leap/blink from the hunter, or any lift/pull/push/slow/root/stun on the hunter, is an error, except an owner_falling lift. It runs inside `--grammar-check`, so it is in suite-fast. The new fixture bad_agency.json covers it. **Please add `--boki-agency-check` to suite-fast** (registry entry; the suite list is not in the repo).
+- Checks (rpc1 headless): --grammar-check 0 errors (the broken fixtures report both fence errors); NEW --boki-agency-check 0 failures (16 abilities x20 casts, Boki on you and out, plus 9 Fusions: you never move); --boki-follow-check 0 (part 7: run, jump, turn, blocked flank, glide; closest 1.46 m, 0 bad steps); --boki-system, boki-moves, kin-loss, roster, ability-check, --check 0. The same reds as main d255acbee: --grammar-runtime-check 5, --boki-dash-check 13 (Kael RMB), --merge-form-check 1. health --strict OK; gen_wiki --check OK. suite-fast not run (not on rpc1).
+- GPU clip (jobq 20261109-031520-02174, rp2-0): Gravadillo guarding Kael while he runs, jumps and glides, briefs/shots/boki-agency/boki_guard.mp4 + sheet.jpg. It logs 1.47-2.0 m beside him and +1.5 m on his back during the glide.
+- Net.VERSION unchanged, no save change. Diff: 40 files, +655/-164. New files: kin_fence.gd, boki_agency_check.gd, boki_guard_shots.gd, the fixture, decision 0022, the audit.
