@@ -3447,3 +3447,4 @@ READY ext/farm-tut-tools-cam 2781ad15e (job 20261109-001512-a1, deep follow-up t
 
 ## 2026-11-09 deep (job 20261109-003659-a4): CLAIM Boki 3D: Bubblisk (opalisk) from the owner's new concept sheet
 - CLAIM: sheet check of briefs/art-refs/boki/opalisk_turnaround.png (04eb5144b), then Meshy build via tools/art1 + tools/meshy/meshy_task.py on the shared biped rig, standard clip set, Boki checks, GPU turntable vs sheet. Branch ext/boki3d-opalisk from origin/main.
+- RESULT (job 20261109-003709-a4): sheet check FAILED (cloud ruff missing, floating cloud, weathervane tail + lightning bolts the entry rules out); redo posted in OWNER_REVIEW.md, no build. Claim released.
