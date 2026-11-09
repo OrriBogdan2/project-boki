@@ -422,6 +422,22 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | shell_base | {"light": 80, "medium": 110, "heavy": 150} |
 | shell_note | hp of the shell every merge gives on top of your own health (docs/decisions/0003): by weight class; a form multiplies it with `shell_k` in its file. Damage hits the shell first; when it breaks the merge ends and the ultimate is lost. |
 
+## move_sfx (`content/rules/move_sfx.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | A Hunter's movement sounds (MoveSfx, docs/AUDIO.md). step_reach_m: how far another Hunter's footsteps carry (a landing, a dash and the glider carry the usual 22 m). Weight: a Hunter taller than ref_height_m sounds lower (pitch_per_m) and louder (db_per_m) on its footsteps and landings, clamped to pitch_min..pitch_max and +-db_max. height_m: Kael 2.05 and Neve 1.56 from the owner; the rest are the height chart (tools/warden_model_check.gd) x 1.6 m. |
+| step_reach_m | 14 |
+| ref_height_m | 1.6 |
+| pitch_per_m | 0.25 |
+| db_per_m | 6 |
+| pitch_min | 0.8 |
+| pitch_max | 1.2 |
+| db_max | 4 |
+| height_m | {"juggernaut": 2.05, "rimewright": 1.56, "bulwark": 2.4, "dredge": 2.37, "ostra": 1.89, "ashwick": 1.86, "gunslinger": 1.74, "dolm": 1.74, "mage": 1.73, "archer": 1.71, "thief": 1.57, "tender": 0.96} |
+
 ## perk_orbs (`content/rules/perk_orbs.json`)
 
 

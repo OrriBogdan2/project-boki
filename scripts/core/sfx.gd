@@ -36,12 +36,17 @@ const BLAST_PEAK_DB := -6.0
 ## Distance falloff: full volume within NEAR metres, then a gentle roll-off; muffled beyond FAR.
 const NEAR := 3.5
 const FAR := 9.0
+## A positional one-shot plays from a 3D voice placed where it happens, so the camera pans it: you hear which
+## side a footstep or a landing is on. Its level stays this file's own falloff (_distance_db), so Godot's
+## attenuation and distance low-pass are off. PAN: how hard it pans (x the project's 3d_panning_strength, 0.5).
+const PAN := 2.0
 var skip: Array = []      # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
 var last_take := {}
 var recent := {}          # sound -> start times (ms) still inside the stacking window
 
 var streams := {}
-var players: Array[AudioStreamPlayer] = []
+var players: Array[AudioStreamPlayer] = []      # the one-shot voices with no position (UI)
+var spots: Array[AudioStreamPlayer3D] = []      # ...and the placed ones
 var next := 0
 var listener := Vector3.ZERO   # set by the camera each frame
 var hear_range := 22.0
@@ -91,6 +96,13 @@ func _ready() -> void:
 		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
+		var s := AudioStreamPlayer3D.new()
+		s.attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED
+		s.attenuation_filter_db = 0.0
+		s.max_db = 6.0
+		s.panning_strength = PAN
+		add_child(s)
+		spots.append(s)
 
 ## Heavy sounds that carry further than hear_range (a gatling you hear coming): each sound set lists them
 ## under "reach" (metres). Past FAR they still go through the muffled bus, so what carries is the low end.
@@ -281,7 +293,7 @@ func reset_scene_audio(fade := 1.2) -> void:
 		clear_amb_layers(fade)
 	for key in loops.keys():
 		loop_stop(key)
-	for p in players:
+	for p in voices():
 		p.stop()
 
 ## How many players that never end on their own are still sounding (a looping pool voice, keyed loops,
@@ -289,7 +301,7 @@ func reset_scene_audio(fade := 1.2) -> void:
 ## (--match-audio-check). A pool one-shot ends by itself, so a farm footstep doesn't count.
 func match_voices() -> int:
 	var n := 0
-	for p in players:
+	for p in voices():
 		if p.playing and loops_forever(p.stream):
 			n += 1
 	for key in loops:
@@ -372,25 +384,40 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
 
-## A free voice from the pool, so a new sound doesn't cut one that's still ringing (the oldest if all are busy).
-func _voice(pos) -> AudioStreamPlayer:
-	var p: AudioStreamPlayer = null
-	for k in POOL:
-		var c := players[(next + k) % POOL]
-		if not c.playing:
-			p = c
-			next = (next + k + 1) % POOL
-			break
-	if p == null:
-		p = players[next]
-		next = (next + 1) % POOL
-	var far := pos != null and Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
+## Every one-shot voice, plain and placed.
+func voices() -> Array:
+	var all: Array = []
+	all.append_array(players)
+	all.append_array(spots)
+	return all
+
+## Starts `st` on a free voice (a new sound doesn't cut one that's still ringing; the oldest if all are
+## busy): a placed one at pos, so it pans, when there's a position and a camera to hear it from.
+func _start(st: AudioStream, pos, vol_db: float, pitch: float) -> void:
+	var placed: bool = pos != null and get_viewport().get_camera_3d() != null
+	var p = spots[_free(spots)] if placed else players[_free(players)]   # the same fields on both kinds
+	if placed:
+		(p as AudioStreamPlayer3D).position = pos
+	var far: bool = pos != null and Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
 	p.bus = "SFXFar" if far else "SFX"
-	return p
+	p.stream = st
+	p.volume_db = vol_db
+	p.pitch_scale = pitch
+	p.play()
+
+func _free(pool: Array) -> int:
+	for k in POOL:
+		var i := (next + k) % POOL
+		if not pool[i].playing:
+			next = (i + 1) % POOL
+			return i
+	var oldest := next
+	next = (next + 1) % POOL
+	return oldest
 
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
-## burst of the same sound is capped and stacked quieter.
-func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> void:
+## burst of the same sound is capped and stacked quieter. reach > 0: metres it carries, in place of the usual.
+func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0, reach := 0.0) -> void:
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
 		return
 	var now := Time.get_ticks_msec()
@@ -398,7 +425,8 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	if sname.contains("step_"): gap = 25         # footsteps: several people can walk at once
 	if now - int(last_played.get(sname, -1000)) < gap:
 		return
-	var v := vol_db + _distance_db(pos, float(sound_reach.get(sname, 0.0))) + (BLAST_DB if sname in BLAST else 0.0)
+	var carry := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
+	var v := vol_db + _distance_db(pos, carry) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
 		return
 	var times: Array = recent.get(sname, [])
@@ -410,7 +438,6 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	times.append(now)
 	recent[sname] = times
 	last_played[sname] = now
-	var p := _voice(pos)
 	var st = streams[sname]
 	if st is Array:
 		# a different take from last time
@@ -420,10 +447,7 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 			i = (i + 1) % arr.size()
 		last_take[sname] = i
 		st = arr[i]
-	p.stream = _once(st)
-	p.volume_db = v
-	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
-	p.play()
+	_start(_once(st), pos, v, pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var)))
 
 ## A pool voice is never reused while it plays, so a looping file sent through play() would sound
 ## forever, past the match and into the farm: owner item 103, the Boki rescue's revive_hum. One-shots
@@ -532,11 +556,7 @@ func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) 
 	if is_nan(v):
 		return
 	last_played[key] = now
-	var p := _voice(pos)
-	p.stream = st
-	p.volume_db = v
-	p.pitch_scale = 1.0 + rng.randf_range(-pitch_var, pitch_var)
-	p.play()
+	_start(st, pos, v, 1.0 + rng.randf_range(-pitch_var, pitch_var))
 
 ## A kit sound not in NAMES (each hero branch adds its own, e.g. pin_* and bjorn_*): loaded from
 ## audio/<name>.wav (and its takes <name>_1..4.wav) the first time it plays, so new kit sounds need no

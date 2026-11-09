@@ -2123,7 +2123,7 @@ func _pad_fly(dt: float) -> void:
 		pad = {}
 		squash = 0.12 if ledge else 0.3
 		m.fx.dust(pos, 3 if ledge else 8)
-		m.sfx("land", pos, -12.0 if ledge else -8.0)
+		MoveSfx.land(self, -12.0 if ledge else -8.0)
 
 ## Where a mantle has you at progress k (0..1): up the face with an ease-out (a quick pull that
 ## slows near the top), then over the lip with a small hop and an ease-in-out onto the top. The
@@ -2406,13 +2406,13 @@ func _physics(dt: float) -> void:
 				m.fx.dust(pos, 6)
 				squash = 0.15
 				land_t = 0.2
-				m.sfx("land", pos, -10.0)
+				MoveSfx.land(self, -10.0)
 			elif fv < -4.0 and not was_drop:
 				# (movefeel) every real landing reads: a brief squash by how fast you came down, a puff
 				# and a soft thud; no lockout, you keep moving the same step
 				squash = maxf(squash, clampf(-fv / 60.0, 0.07, 0.16))
 				m.fx.dust(pos, 2 if fv > -8.0 else 4)
-				m.sfx("land", pos, (-16.0 if fv > -8.0 else -12.0) + (0.0 if is_local() else -6.0))
+				MoveSfx.land(self, (-16.0 if fv > -8.0 else -12.0) + (0.0 if is_local() else -6.0))
 			if fv < -17.0:
 				# a long drop lands hard: a thud, a puff of dust and a short stagger
 				m.fx.dust(pos, 12)
@@ -3295,7 +3295,7 @@ func render(delta: float, alpha: float) -> void:
 		if step_t <= 0.0:
 			step_t = 0.32
 			m.fx.dust(pos, 2)
-			Juice.footstep(self)
+			MoveSfx.footstep(self)
 	# (the rig's squash, the skydive and lying downed are posed by HunterAnim)
 	glide_k = move_toward(glide_k, 1.0 if gliding and not plunging() else 0.0, delta * (7.0 if gliding else 9.0))
 	var gl: Node3D = torso.get_node("Glider")
