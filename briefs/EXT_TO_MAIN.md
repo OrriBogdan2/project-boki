@@ -3330,3 +3330,15 @@ in the hatch/reveal and is saved on the record. New --mystery-egg-check (registe
 **Screenshot request (GPU):** jobq 20261108-235417-17835 = `jobq submit --needs gpu --tree <tree> --out shots -- --empty-shots --only=eggs --shots-dir=shots`
 (hatch_eggs.png: the pick with the basket at the back; hatch_mystery_picked.png: the black egg picked, its card shown). Placement was chosen by camera
 math only, not seen yet: if the basket reads too hidden or too obvious, nudge MYSTERY_AT in scripts/ui/hatch.gd. Not merged to main.
+
+## 2026-11-09 demo (job 20261108-231224-a1, deep): READY demo-record-ready-1109
+READY ext/demo-record-ready-1109 70960e039 (off origin/main d255acbee only: the ext/mc candidate 0b14043cd still has --warden-model-check / --clip-check reds, so it was left out).
+Record mode: the existing Settings > Demo "Recording mode" (F10, --record) now also forces v-sync and a 60 fps cap (Record.frame_cap/vsync via Settings.apply) and gives the player's cap back when off; it already hid debug/FPS/tips/dev toasts. There is no "More" menu, so everything lives in Settings > Demo (alternative: a new tab).
+3 paths (Settings > Demo > Quick start, or --demo=expedition|farm|hatch; a made-up save held in memory, never written, real save back on the title):
+- Expedition (busy): Demo match, 20 seats, bots only in showcase Hunters (Kael/Lace/Neve/Meeko/Cinder/Vex), you = Kael, Lace as squad lead. No tutorial, no lobby.
+- Farm (grown): 6 Boki at level 13 (3 forms each), every building, every isle bridged.
+- Hatch: new game past the intro card, straight to the creator, then the eggs.
+GPU (jobq 22864 rp1-1, 1280x720 record on): expedition ready 28.5 s, 15 fps; farm 3.0 s, 55 fps; hatch 0.5 s, 60 fps. --perf-bench (pc-MRROBOTO RTX 4070 SUPER, medium): match avg 42.7 ms (~23 fps, p99 92.6 ms, CPU-bound: script 22.7 ms, build.hunters 3.5 s); farm 7.7 ms (~130 fps).
+BIG blocker, not fixed: the expedition misses <10 s (14 s headless, 28.5 s rp1-1) and 60 fps; it is the Demo match's own world + 20-hunter build cost. Workaround: start capture after the loading screen; cut the load. Ugly on camera: stacked bot nameplates over the airship at drop (jobq/done/20261108-233534-22864/out/demo_expedition_b.png); the farm shows a "Goals: Fly through 10 air rings" panel (demo_farm_b.png). Hatch is clean (demo_hatch_b.png).
+5 best moments: 1 Kael, Comet Drop slam (drop_comet), onto The Crown plaza. 2 Lace, Spirit Walk into the ult beam, off the Highwatch cliffs. 3 Neve, skate carve + ice bridge, across Frostgate gaps. 4 Cinder, flame lance + Flashover, then jet liftoff, on Cinder Steps. 5 Meeko, Hearth bloom healing the squad, at the Thornhive lair. (Bonus: the egg crack on the hatch dais.)
+Checks: new --demo-quick-check (registered) 21 checks, 1 fail (expedition load time, above); health --strict OK. Full suite not run (usage). Not merged to main.
