@@ -80,3 +80,9 @@ Auto-fail at batch stage: anything upright or person-like, any strap/belt/band/v
 - Portraits: centred, filling ~85% of the square, interesting characteristic pose with attitude (never a stiff side-on stand), plain light background, no effects. Every saved portrait goes through batch/recrop.py (centres the creature and scales it to fill 88%).
 - Sheets with small views are re-laid out before saving.
 - "Fine but forgettable" scores in the 7s: designs must be genuinely cool and unique.
+
+## Concept-first pipeline (owner OK, 2026-11-08 22:14 ET)
+- New species (ROSTER_200_NEW.md) start as one square concept image each (`c_<name>`), judged by the panel on design alone.
+- Approved concepts get a turnaround sheet made from the concept (`ta_<name>`), judged only on matching the concept and a clean single row.
+- Families go top-down: a later stage is only generated once the earlier stage's concept passes, using it as image 2.
+- Concept prompts are short (core + lessons + the roster entry) instead of the stacked sheet rules.
