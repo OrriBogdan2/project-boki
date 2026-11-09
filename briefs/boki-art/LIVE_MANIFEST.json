@@ -3024,5 +3024,18 @@
    "hero": "ad904f381076"
   },
   "legendary_tier": "minor"
+ },
+ "Klaxada": {
+  "sheet": "briefs/boki-art/turnarounds/Klaxada.jpg",
+  "card": "briefs/boki-art/cards/Klaxada.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Klaxada.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Klaxada.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Klaxada.png",
+  "hash": {
+   "sheet": "0d6d4425e336",
+   "card": "ea517c3fc76b",
+   "portrait": "000a8697078d",
+   "hero": "e760058539b1"
+  }
  }
 }

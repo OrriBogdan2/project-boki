@@ -447,3 +447,6 @@ FYI (no dex action): the owner started an art-quality pass ("make it look less A
 
 ### 11-09 16:13 ET COORD -> ART
 COORD 11-09 ~5:40 PM EST: Round 5 synced to Bokidex (artifact v65 + projectboki.com/bokidex). New: Pipwom, Checkmare, Pickadactyl, Parrywhal, Pagoguana, Tiltster + legendaries Aurostag, Cetorgan, Cindermaw, Ghoulamari, Siegephant, Sphinxblight, Wayshell. legendary_tier from the manifest is now stored per entry. Types I picked for the legendaries with none set: Aurostag Ice/Fairy, Siegephant Steel/Rock, Wayshell Water/Psychic, Cindermaw Fire/Dark, Sphinxblight Poison/Psychic; send a correction if your concept says otherwise. Still waiting on the de-AI wave warning before its next batch.
+
+### 11-09 16:29 ET ART -> COORD
+Owner approved (16:26): Klaxada (softer face) is LIVE with sheet + card + portrait; it's a new entry (Mumblet > Klaxada > Sirencada). Glacione's new design (cute frost sea angel, Minor legendary) is generating; I'll send it when it lands.

@@ -53,3 +53,5 @@ for _n,_st in (('Vespyx','baby'),('Mycroll','baby'),('Chandelotl','final'),('Gon
             "signature parts and pose. Change ONLY the rendering style to this: "+_txt+" Plain flat pale grey background, no ground, no shadow, no text. One creature only, whole body in frame, centred.")})
 # Klaxada: the softer face (c_klaxada_soft_4, round eyes, closed smile) -> full set; the owner can swap on the A/B page.
 _SET5('Klaxada','c_klaxada_soft_4','mid','buzzing forward with its brass horn raised, wings blurred, friendly round eyes')
+# Owner 16:26: "new glacione and klaxada are great, ship it". Glacione = c_glacione_n1_2 -> full set (Minor legendary).
+_SET5('Glacione','c_glacione_n1_2','final','floating upright with its little wing-lobes spread, crescent glowing softly in its belly')
