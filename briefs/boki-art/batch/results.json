@@ -71508,5 +71508,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2b_coolatee_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2a_glassolotl",
+    "name": "Glassolotl (V2 pilot, route A: card + anchor)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2a_glassolotl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_glassolotl",
+    "name": "Glassolotl (V2 pilot, route B: sheet + anchor)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2b_glassolotl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_glassolotl",
+    "name": "Glassolotl (V2 pilot, route A: card + anchor)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2a_glassolotl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_chandelotl",
+    "name": "Chandelotl (V2 pilot, route B: sheet + anchor)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2b_chandelotl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_chandelotl",
+    "name": "Chandelotl (V2 pilot, route B: sheet + anchor)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2b_chandelotl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_coolatee",
+    "name": "Coolatee (V2 pilot, route A: card + anchor)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2a_coolatee_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_coolatee",
+    "name": "Coolatee (V2 pilot, route B: sheet + anchor)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2b_coolatee_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_chandelotl",
+    "name": "Chandelotl (V2 pilot, route B: sheet + anchor)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2b_chandelotl_1.jpg",
+    "ok": true
   }
 ]
