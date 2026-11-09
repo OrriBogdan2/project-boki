@@ -3,8 +3,8 @@
 	"perf": {
 		"bot_replan_s": 0.1,
 		"boki_retarget_s": 0.2,
-		"hero_anim_near_m": 48.0,
-		"hero_anim_far_every": 2,
-		"hero_anim_off_every": 4
+		"actor_far_m": {"very_low": 0.0, "low": 36.0, "medium": 48.0, "high": 56.0},
+		"anim_far_every": 2,
+		"anim_off_every": 10
 	}
 }

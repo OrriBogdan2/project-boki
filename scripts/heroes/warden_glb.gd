@@ -964,16 +964,14 @@ class Sync extends Node:
 			WardenGlb._skinned_weapon(root)
 			WardenGlb._hide_shield(root)
 
-	var _lod_n := randi() % 12       # (staggered: rigs on the same rate don't all update on one frame)
-	var _skip_dt := 0.0
+	var lod: AnimLod.Gate
 
 	func _process(dt: float) -> void:
-		_lod_n += 1
-		if _lod_n % AnimLod.every(root.global_position, get_viewport()) != 0:
-			_skip_dt += dt
+		if lod == null:
+			lod = AnimLod.Gate.new(root)
+		dt = lod.step(root.global_position, get_viewport(), dt)
+		if dt == 0.0:
 			return
-		dt += _skip_dt
-		_skip_dt = 0.0
 		_keep_one_weapon()
 		if clips:
 			_play(dt)

@@ -172,6 +172,9 @@ var _look_to := Vector2.ZERO
 var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
+var lod: AnimLod.Gate
+var _ink_pass: ShaderMaterial         # the coat's ink outline pass
+var _ink_on: Material                 # the pass it hangs from (the coat, or its marks)
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
@@ -213,6 +216,7 @@ func _ready() -> void:
 	_rng.seed = hash(get_instance_id())
 	_blink_t = _rng.randf_range(0.8, 3.5)
 	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL     # advanced by AnimLod
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
@@ -243,16 +247,28 @@ func seek(at: float) -> void:
 		face.set_blend_shape_value(int(_shapes[s]), float(_now[s]))
 
 func _process(dt: float) -> void:
-	if manual or dt <= 0.0:
+	if dt <= 0.0:
+		return
+	if manual:
+		player.advance(dt)
 		return
 	var seen := root.is_visible_in_tree()
 	player.active = seen
 	if not seen:
 		return
 	_keep_flex()
+	if lod == null:
+		lod = AnimLod.Gate.new(flex)
+	var was_near := lod.near
+	dt = lod.step(root.global_position, get_viewport(), dt)
+	if lod.near != was_near and _ink_on:
+		_ink_on.next_pass = _ink_pass if lod.near else null       # far or off screen: no ink outline pass
+	if dt == 0.0:
+		return
 	_track_speed(dt)
 	_pick_clip(dt)
 	_face_step(dt)
+	player.advance(dt)
 
 ## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll stays.
 func _keep_flex() -> void:
@@ -397,7 +413,9 @@ func _material_for(src: Material, c: Dictionary, mats: Array) -> Material:
 	m.set_shader_parameter("rim_color", (c["body"] as ShaderMaterial).get_shader_parameter("rim_color"))
 	if id == "boki_coat":
 		_coat = m
-		m.next_pass = _ink()
+		_ink_pass = _ink()
+		_ink_on = m
+		m.next_pass = _ink_pass
 	mats.append(m)
 	return m
 
@@ -457,6 +475,7 @@ func _copy_coat() -> void:
 		marks.set_shader_parameter(k, body.get_shader_parameter(k))
 	marks.next_pass = _coat.next_pass
 	_coat.next_pass = marks
+	_ink_on = marks
 
 ## How far a colour has moved from the species' own (white: not at all), to multiply a painted atlas with.
 static func _tint(now: Color, base: Color) -> Color:
