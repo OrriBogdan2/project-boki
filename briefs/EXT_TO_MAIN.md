@@ -3931,3 +3931,5 @@ ART druzemole_r reject briefs/boki-art/batch/out/druzemole_r_2.jpg grade=8.2
 ART eclipsowl_x reject briefs/boki-art/batch/out/eclipsowl_x_2.jpg grade=8.1
 ART embrook_r reject briefs/boki-art/batch/out/embrook_r_3.jpg grade=7.4
 ART fizzlet_e reject briefs/boki-art/batch/out/fizzlet_e_1.jpg grade=8.3
+
+READY ext/idle-tender-rebased 8cec53574 (job 20261109-030333-a1; supersedes ext/idle-tender be19bd8bf: Meeko the Dawnfox idle+stance rework on current main. pip.glb = the branch glb re-run through main's pip_companions.py (sun+raincloud, faces atlas byte-identical); pip.json keeps main's doc/blade/mood + x_breath in extra_bones; warden_glb.gd keeps main's own_rest + flipped-chain code with the branch's shown-scale; posekit.py merged clean. Checks: --pip-live-check 0 failures, --clip-check 0 failures, --check 0 failures, health --strict OK. The lantern mesh is gone on main, so the hidden-lantern key is harmless on the invisible chain)
