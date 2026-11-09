@@ -6793,5 +6793,82 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/wickapi_r_1.jpg",
     "ok": true
+  },
+  {
+    "id": "thunderstrich_r",
+    "name": "Thunderstrich",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/thunderstrich_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "thunderstrich_r",
+    "name": "Thunderstrich",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/thunderstrich_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "wickapi_r",
+    "name": "Wickapi",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/wickapi_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_r",
+    "name": "Bellowary (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fizzlet_e",
+    "name": "Fizzlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fizzlet_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_arcestrel_r",
+    "name": "Arcestrel (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_arcestrel_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anchorbill_r",
+    "name": "Anchorbill (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_anchorbill_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_arcestrel_r",
+    "name": "Arcestrel (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_arcestrel_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anchorbill_r",
+    "name": "Anchorbill (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_anchorbill_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander_r",
+    "name": "Cisternmander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cisternmander_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chimelop_r",
+    "name": "Chimelop",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chimelop_r_2.jpg",
+    "ok": true
   }
 ]
