@@ -130,7 +130,7 @@
 				{"p": "ember", "way": "fwd", "n": 16, "speed": 9.0, "spread": 0.35, "life": 0.24, "size": 0.05, "grav": 6.0, "c": "gold", "c2": "gold_hot", "stretch": 0.05}]},
 		"riposte_go": {"sfx": [{"n": "jug_riposte", "db": -1}],
 			"fx": [{"p": "ribbon", "at": "blade_tip", "life": 0.2, "tail": 0.12, "size": 0.3, "c": "gold", "c2": "gold_hot", "c3": "gold_char"}]},
-		"riposte_land": {"fx": [{"p": "sweep", "at": "here", "fwd": "len", "fwd_x": 0.55, "y": 1.0, "size": "len", "size_x": 0.62, "arc": 150, "life": 0.34, "c": "gold", "c2": "gold_hot", "tilt": 18},
+		"riposte_land": {"fx": [{"p": "sweep", "at": "here", "fwd": "len", "fwd_x": 0.7, "y": 1.0, "size": "len", "size_x": 0.3, "arc": 150, "life": 0.34, "c": "gold", "c2": "gold_hot", "tilt": 18},
 				{"p": "scorch", "shape": "lane", "len": "len", "w": "w", "life": 1.6, "c": "gold", "c2": "gold_hot", "c3": "gold_char"},
 				{"p": "ember", "shape": "line", "len": "len", "radius": 0.6, "y": 0.2, "way": "along", "n": 36, "speed": 3.2, "spread": 0.3, "grav": -2.2, "life": 1.0, "burst": 0.55, "size": 0.06, "c": "gold", "c2": "gold_hot"}]},
 		"riposte_hit": {"fx": [{"p": "flare", "y": 1.2, "size": 3.4, "life": 0.3, "c": "gold", "c2": "gold_hot"},
