@@ -33,7 +33,7 @@ func start() -> void:
 	var dir := k.dash_dir()
 	var roll := float(dd.get("roll", 3.5))
 	var rt := float(dd.get("roll_t", 0.24))
-	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll"})
+	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll", "curved": true})
 	k.play("pin_roll")
 	t = walk_time() + rt
 	total = t
