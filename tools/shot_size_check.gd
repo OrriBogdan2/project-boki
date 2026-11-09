@@ -1,9 +1,11 @@
 extends RefCounted
 ## --shot-size-check: every Hunter's LMB projectile keeps a readable core at the default camera distance.
-## Fires each of the 12 kits' primary at a dummy, then reads the shot's beacon (ShotFloor: hot core and
-## side-coded rim) as a drawn radius and converts it to screen pixels at 720p and 1080p, against
-## ShotFloor.MIN_CORE_PX (1.5x that at 1080p). Also asserts the beacon is visual only (the shot's hit radius is
-## the same before and after it is drawn) and that a foe's rim reads differently from a friend's.
+## Fires each of the 12 kits' primary at a dummy, then reads the radius of the shot's visual floor
+## (ShotFloor's hot core inside a side-coded rim) and converts it to screen pixels at 720p and 1080p
+## with the default camera, at the farthest a shot can be in view, against ShotFloor.MIN_CORE_PX (1.5x at
+## 1080p); tools/shot_size_shots.gd measures it on rendered frames. Also asserts the beacon is visual only
+## (the shot's hit radius is the same before and after it is drawn) and that a foe's rim reads differently
+## from a friend's.
 ## Prints SHOTSIZE PASS/FAIL and a DONE line.
 
 var main: Node
@@ -23,9 +25,9 @@ func ok(name_: String, cond: bool, info := "") -> void:
 	print("SHOTSIZE %-44s %s  %s" % [name_, "PASS" if cond else "FAIL", info])
 	if not cond: fails += 1
 
-## On-screen pixels across `radius` metres at a view `dist` away, a screen `h_px` tall, vertical `fov` degrees.
-static func px_across(radius: float, dist: float, fov: float, h_px: float) -> float:
-	return radius * 2.0 * h_px * 0.5 / (dist * tan(deg_to_rad(fov) * 0.5))
+## On-screen pixels across `radius` metres at the farthest point in the default view, a screen `h_px` tall.
+static func px_across(radius: float, h_px: float) -> float:
+	return radius * 2.0 * ShotFloor.px_per_m(ShotFloor.far_depth(), h_px)
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -68,12 +70,11 @@ func _hero(ac: RefCounted, arch: String) -> void:
 	ok(tag + " has a beacon on the shot", beacon != null)
 	if beacon != null:
 		var r_core: float = (beacon.mesh as SphereMesh).radius
-		var st: Dictionary = CamRig.STYLES["supervive"]
-		var d := float(st["dist"])
-		var fov := float(st["fov"])
-		var p720 := px_across(r_core, d, fov, 720.0)
-		var p1080 := px_across(r_core, d, fov, 1080.0)
-		ok(tag + " core >= floor at 720p", p720 >= ShotFloor.MIN_CORE_PX - 0.01, "%.1f px" % p720)
+		var p720 := px_across(r_core, 720.0)
+		var p1080 := px_across(r_core, 1080.0)
+		var own := px_across(float(found.get("vr", 0.0)), 720.0)      # its sphere's radius (0 under a kit skin)
+		var info := "%.1f px (own sphere %.1f)" % [p720, own]
+		ok(tag + " core >= floor at 720p", p720 >= ShotFloor.MIN_CORE_PX - 0.01, info)
 		ok(tag + " core >= floor at 1080p", p1080 >= ShotFloor.MIN_CORE_PX * 1.5 - 0.01, "%.1f px" % p1080)
 		var rim_mat := ShotFloor.rim_mat(beacon)
 		var rim_mine: Color = rim_mat.get_shader_parameter("color")      # (the player's own shot: a friend's)

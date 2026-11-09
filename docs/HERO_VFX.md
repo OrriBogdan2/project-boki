@@ -59,7 +59,10 @@ the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_ha
 
 ## Shot floor (LMB projectiles)
 Every LMB projectile (not a swing, decoy, mob shot or ability, which have their own tells) carries `ShotFloor`'s
-beacon: a hot white core at least `MIN_CORE_PX` (6 px) across at 720p at the default camera distance, inside a
-side-coded rim (foe's shots red-orange, your side's cool and softer), drawn over particles (render priority). The shot keeps
-its own look and Hunter ability colour. It is visual only: the hit radius `s["r"]` is never touched. `--shot-size-check`
-reads each kit's beacon radius in pixels at 720p and 1080p; `--shot-size-shots --shots-dir=<dir> --res=720|1080` shoots them.
+beacon: a hot white core at least `MIN_CORE_PX` (6 px) across at 720p (9 px at 1080p) with the default camera, sized
+at the farthest a shot can be in view (the floor under the top edge, `ShotFloor.far_depth`), inside a side-coded rim
+(foe's shots red-orange, your side's cool and softer), drawn over particles (render priority) on its own render layer
+(`ShotFloor.LAYER`). The shot keeps its own look and Hunter ability colour. It is visual only: the hit radius
+`s["r"]` is never touched. `--shot-size-check` reads each kit's core radius in pixels at 720p and 1080p and asserts
+the hit radius is unchanged; `--shot-size-shots --shots-dir=<dir> --res=720|1080` (GPU) renders each kit's shot at
+exactly that size and measures its own look, the core and the rim in pixels across the flight line.
