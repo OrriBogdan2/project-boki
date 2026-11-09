@@ -4,7 +4,8 @@ extends RefCounted
 ## anchors fall back from the model's node to the Gun to the body; pools and live particles stay capped; distance
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
-## a held stream turns with the aim, a projectile trail follows its node and ends with it.
+## a held stream turns with the aim, a projectile trail follows its node and ends with it. Last, every Hunter's
+## dash has its own look and a stun shows the shared StunMark.
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
@@ -16,6 +17,11 @@ const KIT_FILES := {
 	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gunslinger": ["gunslinger_"],
 	"juggernaut": ["juggernaut_"], "mage": ["mage_"], "ostra": ["ostra_"], "rimewright": ["rimewright_", "care_look"],
 	"tender": ["tender_"], "thief": ["thief_"]}
+## The bar's scale rule (docs/VFX_QUALITY.md): an ultimate's hit reads bigger than the basic attack's.
+## [arch, LMB hit, ult hit] for the Hunters whose two hits are both data.
+const HIT_SCALE := [["gunslinger", "shot_hit", "x_impact"], ["archer", "arrow_hit", "ult_hit"],
+	["mage", "lmb_hit", "x_strike"], ["rimewright", "dart_hit", "rime_crash"], ["thief", "bolt_hit", "encore_hit"],
+	["dolm", "punch", "spine_rise"]]
 ## The synthetic recipes the runtime parts play: one layer of every kind.
 const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008", "smoke": "#404040"},
 	"anchors": {"palm": {"bone": "hand.R", "off": [0.0, 0.05, 0.0], "body": [0.3, 1.0, 0.2]},
@@ -47,6 +53,12 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
+	_hit_scale()
+	var broken: Array = []
+	for sh: Shader in [HeroVfx.SURFACE, HeroVfx.MOTES, HeroVfx.MOTE, StunMark.SPIRAL, StunMark.SPIRAL_GLOW]:
+		if sh.get_shader_uniform_list().is_empty():          # (a shader that fails to compile lists no uniforms)
+			broken.append(sh.resource_path)
+	ok(broken.is_empty(), "every shared look's shader compiles %s" % [broken])
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
 	var P: Hunter = m.player
@@ -59,6 +71,7 @@ func run(main: Node) -> void:
 	_view(m, V, P)
 	_kit(m, V, P)
 	_net(m, V, P)
+	await _status_and_dash(main, m, P)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
@@ -328,3 +341,64 @@ func _net(m: Match, V: HeroVfx, P: Hunter) -> void:
 	m.ents_by_id[P.nid] = P
 	V.net_in(["fx", "hvfx", P.nid, "spin", P.pos.x, P.pos.y, P.pos.z, 1.0, 0.0, 0.0, 0.0, 2.6])
 	ok(int(V.plays.get("spin", 0)) == 1, "a move arrives from another game")
+
+## Every Hunter's dash draws its own look: none falls back to the shared team-colour pill (fx.ghost, a new node
+## per tick). A stun shows StunMark over the head while it lasts, on Hunters and monsters, from a fixed pool.
+func _status_and_dash(main: Node, m: Match, P: Hunter) -> void:
+	var bodies: Array[Hunter] = []
+	var pill: Array = []
+	for arch: String in HeroVfx.heroes():
+		var at := P.pos + Vector3(2.0 * bodies.size() - 12.0, 0, 4.0)
+		var H: Hunter = m.make_hunter("D" + arch, P.team + 1, Arch.weight(arch), arch, "idle", {}, at, {"arch": arch})
+		bodies.append(H)
+		var ghosts0: int = m.fx.ghosts.size()
+		H.roll_t = 0.3
+		for i in 6:
+			H.render(0.03, 1.0)
+		H.roll_t = 0.0
+		if m.fx.ghosts.size() != ghosts0:
+			pill.append(arch)
+	ok(pill.is_empty(), "every Hunter's dash draws its own look, not the shared pill %s" % [pill])
+	var S := StunMark.of(m)
+	var T: Hunter = bodies[0]
+	T.stun_t = 1.0
+	T.render(0.016, 1.0)
+	await main.get_tree().process_frame
+	ok(S.on(T) and not S.on(P), "a stunned Hunter shows the stun mark, the others don't")
+	var top: float = S.marks[S.whose.find(T)].global_position.y - T.global_position.y
+	ok(absf(top - (HudPlate.plate_offset(T) - StunMark.UNDER_PLATE)) < 0.01, "it sits over the head, under the plate")
+	T.stun_t = 0.0
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	ok(not S.on(T), "the stun ends: the mark goes")
+	var nodes0 := S.get_child_count()
+	for H in bodies:
+		H.stun_t = 1.0
+		H.render(0.016, 1.0)
+	var shown := S.marks.filter(func(n: Node3D) -> bool: return n.visible).size()
+	ok(shown == StunMark.POOL and S.get_child_count() == nodes0,
+		"%d stunned bodies share the %d marks, no new nodes" % [bodies.size(), StunMark.POOL])
+	for H in bodies:
+		H.stun_t = 0.0
+	var V := HeroVfx.of(m)
+	for key: String in V.holds.keys():
+		V._end_hold(V.holds[key])
+	V.holds.clear()          # (the dashes' own holds; the runtime parts below read the first hold)
+	_clear(V)
+
+func _hit_scale() -> void:
+	var small: Array = []
+	for row: Array in HIT_SCALE:
+		var moves: Dictionary = HeroVfx.data(row[0]).get("moves", {})
+		if _widest(moves.get(row[1], {})) >= _widest(moves.get(row[2], {})):
+			small.append(row[0])
+	ok(small.is_empty(), "every ultimate's hit reads bigger than the LMB's %s" % [small])
+
+## The widest shape a recipe always draws (flares, sweeps, skirts, scorches, swirls; not a `when` variant).
+func _widest(recipe: Dictionary) -> float:
+	var w := 0.0
+	for layer: Dictionary in recipe.get("fx", []):
+		var sized: bool = layer.get("size") is float or layer.get("size") is int
+		if layer["p"] in ["flare", "sweep", "skirt", "scorch", "vortex"] and sized and not layer.has("when"):
+			w = maxf(w, float(layer["size"]))
+	return w

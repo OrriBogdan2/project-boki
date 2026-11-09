@@ -353,6 +353,9 @@ func aims_in_dash() -> bool:
 ## No class long dash: Shift is only ever the skate (the HUD shows no long-dash segment for her).
 func has_long_dash() -> bool: return false
 
+## The skate's frost, carve and spray are her dash look: no shared team-colour pill over them.
+func own_dash_trail() -> bool: return true
+
 ## Shift is the skate and nothing else, on the ground or in the air (item 62: pressed in the air, jumping,
 ## falling or gliding, it starts at once); with no charge it is refused.
 func on_dash(_use_ex: bool) -> bool:

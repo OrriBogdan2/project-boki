@@ -168,7 +168,7 @@ func _breah() -> void:
 		"lmb: a merge ends the hold with no punch", K.punches == punches0 and K.lmb_t < 0.0 and P.mel_hold == 0.0,
 		"punches %d -> %d" % [punches0, K.punches]
 	)
-	# punch into a wall: stunned, stars over the head
+	# punch into a wall: stunned
 	reset.call()
 	var W: World = m.world
 	var bx := int(floor(home.x)) + 4
@@ -181,8 +181,8 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok(
-		"combo: punch into a wall = stun, with stars over the head",
-		K.wall_stuns >= 1 and T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
+		"combo: punch into a wall = stun (its mark is StunMark's, --hero-vfx-check)",
+		K.wall_stuns >= 1 and T.stun_t > 0.0,
 		"wall stuns %d stun %.2f" % [K.wall_stuns, T.stun_t]
 	)
 	W.kind[W.idx(bx, bz)] = World.T_GROUND
@@ -399,7 +399,7 @@ func _breah() -> void:
 		m.verbs.walls.size() == walls0 and rocks(m).is_empty(), "walls %d -> %d" % [walls0, m.verbs.walls.size()]
 	)
 	ok(
-		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
+		"rmb: a full charge in the centre stuns", T.stun_t > 0.0,
 		"stun %.2f" % T.stun_t
 	)
 	var slams_looked := int(HeroVfx.of(m).plays.get("slam", 0))

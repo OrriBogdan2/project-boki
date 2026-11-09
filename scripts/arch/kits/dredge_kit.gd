@@ -25,8 +25,7 @@ const BONE := Color("e0d4c0")          # the bone hook
 const WORD_COL := Color("c0b0a0")      # the grey of a hook's misses (MISS, SNAGGED, TOO HEAVY, WALLED)
 const BRASS := Color("e0a040")
 const IRON := Color("3a3f48")
-const ANCHOR_COL := LDFx.ANCHOR_RIM    # coin gold: the anchor's rim, its telegraphs and its stun
-const STUN_DARK := Color("5a3a08")     # the stun spiral's dark band
+const ANCHOR_COL := LDFx.ANCHOR_RIM    # coin gold: the anchor's rim and its telegraphs
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the chain yanks taut on each
 const SNAP_T := 0.14                   # s the chain takes to snap back to his hand after a miss or the reel
@@ -57,7 +56,6 @@ var stop_t := 0.0               # the barge under way; when it ends he stops, ke
 var next_barge := -9.0          # the short gap between barges in a run
 var shot_seen := 0              # the last weapon volley the kit dressed
 var shot_at := -9.0
-var stunned: Array = []         # foes the Anchor stunned: {e, until} (the spiral over them)
 var fx: LDFx
 var broadside: DredgeBlast      # X, Brass Broadside (its charge and waves are a hold: broadside.blast)
 var grapples := 0               # (tests) foes reeled in
@@ -265,15 +263,6 @@ func _tick_looks(dt: float) -> void:
 	if barge_t > 0.0:
 		barge_t -= dt
 		_barge_trail(dt)
-	for s in stunned.duplicate():
-		var f = s["e"]
-		if not is_instance_valid(f) or (f as Ent).dead or m.time > float(s["until"]):
-			stunned.erase(s)
-			continue
-		fx.place(
-			"spiral%d" % (f as Ent).get_instance_id(), "spiral", (f as Ent).pos + Vector3(0, 2.4, 0), ANCHOR_COL,
-			STUN_DARK, 0.6
-		)
 
 ## Grimble's 3D model: a hit knocks coins off the hoard. While the chain is out the model's hook shrinks into his
 ## wrist (hide_while_chain), so the one hook on screen is the chain's end.
@@ -540,7 +529,7 @@ func _anchor() -> void:
 	var stun := _stun_t()
 	var stg := stage("e", {"delivery": {"type": "cone", "radius": float(ed["radius"]), "angle": float(ed["angle"])},
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
-	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt)
+	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, amt)
 	var aim_pt := h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"])
 	run(stg, cx("e", "anchor_drop", aim_pt, {"no_floor": true, "on_foe": on_foe}))
 	var at := ground(h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"]) * 0.5)
@@ -571,7 +560,7 @@ func _stun_t() -> float:
 func over_abyss(f: Ent) -> bool:
 	return m.world.ground_at(f.pos.x, f.pos.z) <= World.VOID + 1.0
 
-func _slammed(f: Ent, stun: float, amt: float) -> void:
+func _slammed(f: Ent, amt: float) -> void:
 	var ed := e_def()
 	if not is_instance_valid(f) or f.dead: return
 	if rank("kin") >= 3 and over_abyss(f):
@@ -581,7 +570,6 @@ func _slammed(f: Ent, stun: float, amt: float) -> void:
 	# ANCHORED says it all: no separate GROUNDED word over the stun
 	KitStatus.apply(f, "gnd", float(ed["gnd_t"]), 0.0, true, "anchored: no dash, jump or glide")
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
-	stunned.append({"e": f, "until": m.time + stun})
 	m.fx.word(f.pos + Vector3(0, 2.3, 0), "ANCHORED", col_of(ed), false)
 
 ## In the air: smash straight down, the anchor falling with you; the landing ring shows where you'll hit.
@@ -653,7 +641,7 @@ func _quake(at: Vector3, fell: float) -> void:
 	var r := float(ed["quake_r"])
 	var stg := stage("e", {"delivery": {"type": "burst", "radius": r},
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
-	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt)
+	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, amt)
 	run(stg, cx("e", "anchor_drop", at, {"at_fixed": at, "no_floor": true, "on_foe": on_foe}))
 	var d2 := h.aim_dir()
 	fx.anchor_drop(at + Vector3(d2.x, 0, d2.y) * 0.6, 0.0, 1.0)

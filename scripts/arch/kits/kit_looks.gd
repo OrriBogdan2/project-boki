@@ -14,8 +14,7 @@ extends Node3D
 ##   orb        Motley's Gravity Orb: a violet glass teardrop with a magenta tail; skin_orb grows and
 ##              brightens it with its charge
 ##   spear      Shard Snap: a long bundle of near-black crystal prisms with sea-teal rims
-## Lingering: aura (Ostra's Swollen sphere), crown (stun stars over a head), burst and crater (Tarek's slam:
-## a molten starburst, then a dark red cracked crater), shard (a rock chip flying off an impact), column (the
+## Lingering: aura (Ostra's Swollen sphere), shard (a rock chip flying off an impact), column (the
 ## grown seed's light), mote (a coloured glow at a hand: Tarek's fists, Ostra's charge), dark (the Snap's
 ## black wind-up orb), star (the Trade's lobbed star-orb).
 ## Colour and darkness are alpha-blended (shade_mat, the void glass); only small hot cores add light, so
@@ -99,10 +98,6 @@ func _build(kind: String) -> Node3D:
 				n, Models.sphere(1.25, 20), glass_mat(Color("7a1a68"), Color("ff4fd8"), 0.6, 0.12), Vector3(0, 1.0, 0)
 			)
 			Models.part(n, Models.cyl(1.3, 1.3, 0.03, 28), shade_mat(Color(0.75, 0.12, 0.6, 0.45)), Vector3(0, 0.05, 0))
-		"crown":
-			_build_crown(n)
-		"burst", "crater":
-			_build_impact(n, kind)
 		"shard":
 			Models.part(n, lump(0.13), rock_mat(0.7, vis_rng.randf() * 10.0), Vector3.ZERO, Vector3(1.0, 0.7, 1.3))
 		"column":
@@ -188,49 +183,6 @@ func _tail(n: Node3D, w: float, len_: float, col: Color) -> void:
 	var mat := shade_mat(col)
 	mat.render_priority = -1      # always under the shot's glass
 	Models.part(n, Models.cyl(0.0, w, len_, 10), mat, Vector3(0, 0, len_ * 0.5), Vector3.ONE, Vector3(PI * 0.5, 0, 0))
-
-func _build_crown(n: Node3D) -> void:
-	var c := Node3D.new()
-	c.name = "Spin"
-	n.add_child(c)
-	for i in 3:
-		var a2 := TAU * i / 3.0
-		Models.part(
-			c, Models.box(0.16, 0.16, 0.05), Models.glow_mat(Color("fff27a")),
-			Vector3(cos(a2) * 0.38, 0.0, sin(a2) * 0.38), Vector3.ONE, Vector3(0, a2, PI * 0.25)
-		)
-	Models.part(n, Models.cyl(0.42, 0.42, 0.02, 20), shade_mat(Color(1.0, 0.85, 0.2, 0.4)), Vector3.ZERO)
-
-## Tarek's slam, radius 1: a molten starburst of rays (burst), or the dark red crater it leaves with radial
-## cracks and ember flecks (crater). Both alpha-blended, in her molten colours.
-func _build_impact(n: Node3D, kind: String) -> void:
-	if kind == "burst":
-		Models.part(n, Models.cyl(0.42, 0.42, 0.02, 20), shade_mat(Color(1.0, 0.82, 0.3, 0.85)), Vector3(0, 0.06, 0))
-		for i in 12:
-			var a := TAU * i / 12.0 + vis_rng.randf() * 0.2
-			var long_ray := i % 2 == 0
-			var len_ := (0.7 if long_ray else 0.45) + vis_rng.randf() * 0.3
-			var col := Color(1.0, 0.48, 0.12, 0.9) if long_ray else Color(1.0, 0.78, 0.25, 0.9)
-			Models.part(
-				n, PrismMesh.new(), shade_mat(col), Vector3(cos(a), 0.05, sin(a)) * (0.3 + len_ * 0.5),
-				Vector3(0.16, len_, 0.02), Vector3(-PI * 0.5, -a - PI * 0.5, 0)
-			)
-		return
-	Models.part(n, Models.cyl(1.0, 1.0, 0.02, 24), shade_mat(Color(0.3, 0.05, 0.02, 0.78)), Vector3(0, 0.03, 0))
-	Models.part(n, Models.cyl(0.55, 0.55, 0.02, 20), shade_mat(Color(0.12, 0.03, 0.02, 0.85)), Vector3(0, 0.04, 0))
-	for i in 8:
-		var a3 := TAU * i / 8.0 + vis_rng.randf() * 0.3
-		var len3 := 0.55 + vis_rng.randf() * 0.4
-		Models.part(
-			n, Models.box(0.05, 0.015, len3), shade_mat(Color(1.0, 0.45, 0.1, 0.95)),
-			Vector3(cos(a3), 0.05, sin(a3)) * (0.35 + len3 * 0.5), Vector3.ONE, Vector3(0, -a3 + PI * 0.5, 0)
-		)
-	for i in 10:
-		var a4 := vis_rng.randf() * TAU
-		Models.part(
-			n, Models.box(0.06, 0.03, 0.06), shade_mat(Color(1.0, 0.72, 0.25, 1.0)),
-			Vector3(cos(a4), 0.06, sin(a4)) * (0.3 + vis_rng.randf() * 0.65)
-		)
 
 ## Ostra's rune sigil, radius 1: a ring of sixteen arc segments that light one by one as it fills, a
 ## hexagram inscribed in it that brightens, and six glyph ticks outside. Alpha-blended in one colour.
@@ -411,8 +363,7 @@ func _process(delta: float) -> void:
 	for e2 in timed.duplicate():
 		e2["t"] = float(e2["t"]) + delta
 		var u := float(e2["t"]) / maxf(0.01, float(e2["dur"]))
-		var ent2 = e2.get("ent")
-		if u >= 1.0 or (bool(e2.get("follows", false)) and not is_instance_valid(ent2)):
+		if u >= 1.0:
 			timed.erase(e2)
 			_give(String(e2["kind"]), e2["n"])
 			continue
@@ -454,18 +405,6 @@ func _tick_skins(delta: float) -> void:
 func _tick_timed(e2: Dictionary, u: float, delta: float) -> void:
 	var n2: Node3D = e2["n"]
 	match String(e2["kind"]):
-		"crown":
-			var ent2: Ent = e2["ent"]
-			n2.global_position = ent2.pos + Vector3(0, 2.15 if ent2 is Hunter else 1.5, 0)
-			(n2.get_node("Spin") as Node3D).rotate_y(delta * 6.5)
-			if ent2.stun_t <= 0.0 and float(e2["t"]) > 0.2:
-				e2["t"] = e2["dur"]
-		"burst":
-			var r := float(e2["r"]) * (0.55 + 0.45 * minf(1.0, u * 3.0))
-			n2.scale = Vector3(r, 1.0, r)
-			_fade(n2, 1.0 - smoothstep(0.35, 1.0, u))
-		"crater":
-			_fade(n2, 1.0 - smoothstep(0.6, 1.0, u))
 		"shard":
 			var v: Vector3 = e2["vel"]
 			v.y -= SHARD_GRAV * delta
@@ -476,28 +415,6 @@ func _tick_timed(e2: Dictionary, u: float, delta: float) -> void:
 				e2["t"] = e2["dur"]
 		"column":
 			n2.scale = Vector3(1.0, clampf(u * 4.0, 0.1, 1.0), 1.0)
-
-## Every alpha-blended material of a pooled look at `k` of its built alpha (cached on the node at build).
-func _fade(n: Node3D, k: float) -> void:
-	if not n.has_meta("fade"):
-		var mats: Array = []
-		for mi in n.find_children("*", "MeshInstance3D", true, false):
-			var mat := (mi as MeshInstance3D).material_override as StandardMaterial3D
-			if mat != null:
-				mats.append([mat, mat.albedo_color.a])
-		n.set_meta("fade", mats)
-	for pair in n.get_meta("fade"):
-		var mat2: StandardMaterial3D = pair[0]
-		mat2.albedo_color.a = float(pair[1]) * k
-
-func _timed(kind: String, at: Vector3, r: float, secs: float) -> Node3D:
-	var n := _take(kind)
-	n.global_position = at
-	n.scale = Vector3(r, 1.0, r)
-	n.rotation.y = vis_rng.randf() * TAU
-	_fade(n, 1.0)
-	timed.append({"n": n, "kind": kind, "t": 0.0, "dur": secs, "ent": null, "r": r})
-	return n
 
 # ------------------------------------------------------------------ lingering effects
 ## A refreshed effect held on an entity (call every step while it should show). key: unique per use.
@@ -526,26 +443,6 @@ func release(key: String) -> void:
 func holding(key: String) -> bool:
 	return held.has(key) and float(m.time) - float(held[key]["t"]) <= KEEP
 
-## Stun stars circling over a head until the stun ends (or `secs`).
-func crown(e: Ent, secs: float) -> void:
-	for t in timed:
-		if t["kind"] == "crown" and is_instance_valid(t["ent"]) and t["ent"] == e:
-			t["dur"] = maxf(float(t["dur"]), float(t["t"]) + secs)
-			return
-	timed.append({"n": _take("crown"), "kind": "crown", "t": 0.0, "dur": secs, "ent": e, "follows": true})
-
-func crowned(e: Ent) -> bool:
-	return timed.any(func(t): return t["kind"] == "crown" and is_instance_valid(t["ent"]) and t["ent"] == e)
-
-## Tarek's heavy impacts (the slam, the leap's landing) at `at`, radius `r`, strength k 0..1: a molten
-## starburst, rock chips flying out, a dust ring at the edge, and a dark red cracked crater left `secs`.
-func impact(at: Vector3, r: float, k: float, secs := 1.0) -> void:
-	_timed("burst", at, r * 0.7, 0.32)
-	_timed("crater", at, r * 0.5, secs)
-	chips(at, int(5 + 6 * k), k)
-	m.fx.ring(at, r, Color(0.62, 0.47, 0.32, 0.95), 0.42)
-	m.fx.burst(at + Vector3(0, 0.25, 0), Color(0.66, 0.52, 0.38, 0.9), int(14 + 12 * k), 6.0, 0.5, 5.0, 1.8)
-
 ## Rock chips thrown out from `at`.
 func chips(at: Vector3, count: int, k: float) -> void:
 	for i in count:
@@ -555,7 +452,7 @@ func chips(at: Vector3, count: int, k: float) -> void:
 		chip.global_position = at + Vector3(cos(a) * 0.4, 0.3, sin(a) * 0.4)
 		chip.scale = Vector3.ONE * (0.8 + vis_rng.randf() * 0.8)
 		var vel := Vector3(cos(a) * out, 5.0 + vis_rng.randf() * 4.0, sin(a) * out)
-		timed.append({"n": chip, "kind": "shard", "t": 0.0, "dur": 1.2, "ent": null, "vel": vel, "floor": at.y})
+		timed.append({"n": chip, "kind": "shard", "t": 0.0, "dur": 1.2, "vel": vel, "floor": at.y})
 
 ## Ostra's rune sigil at `at` (radius `r`), its ring lit to `fill` 0..1 in `col` (refresh every step).
 func sigil(key: String, ent: Node3D, at: Vector3, r: float, fill: float, col: Color) -> void:
@@ -579,7 +476,7 @@ func implode(at: Vector3, col: Color) -> void:
 func column(at: Vector3, secs: float) -> Node3D:
 	var n := _take("column")
 	n.global_position = at
-	timed.append({"n": n, "kind": "column", "t": 0.0, "dur": secs, "ent": null})
+	timed.append({"n": n, "kind": "column", "t": 0.0, "dur": secs})
 	return n
 
 func end_column(n: Node3D) -> void:

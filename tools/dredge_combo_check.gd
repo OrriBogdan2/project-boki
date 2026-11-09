@@ -457,7 +457,6 @@ func _all() -> void:
 		K.anchors == 1 and ak.dmg(T) - hp0 >= 20.0 and KitStatus.grounded(T) and T.stun_t > 0.8,
 		"anchors %d took %.0f stun %.2f" % [K.anchors, ak.dmg(T) - hp0, T.stun_t]
 	)
-	ok("anchor: the stunned foe shows a stun spiral", K.fx.shown("spiral%d" % T.get_instance_id()))
 	ok("anchor: E cooldown set", float(K.cd["e"]) > 5.0)
 	# --- Barge right after the Anchor can't turn
 	reset.call()

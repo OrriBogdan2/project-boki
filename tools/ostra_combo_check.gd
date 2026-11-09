@@ -190,7 +190,7 @@ func _ostra() -> void:
 	tap(m, P)
 	step(m, 0.5, func(): s_near[0] = maxf(s_near[0], T.stun_t))
 	var d_near := dmg(T)
-	ok("rmb: the stun shows on the dummy (stars over its head)", s_near[0] > 0.0 and KitLooks.of(m).crowned(T))
+	ok("rmb: the Snap stuns the dummy (its mark is StunMark's, --hero-vfx-check)", s_near[0] > 0.0)
 	reset.call()
 	T.teleport(home + Vector3(11.5, 0, 0))
 	aim_at(P, T.pos)

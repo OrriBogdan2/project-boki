@@ -7,7 +7,7 @@ extends Node3D
 ## - flame(id, parts)      the Torch Lance hose: pooled camera-facing puffs the kit simulates (immediate style)
 ## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Cinder Shot)
 ## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "chain",
-##                         "pip", "spiral", "pilot", "anchor", "glow", "hook" (the bone hook); stop calling
+##                         "pip", "pilot", "anchor", "glow", "hook" (the bone hook); stop calling
 ##                         and they hide
 ## - one-shots: wave, lava, orb, anchor_drop, puff, wisp
 ##
@@ -27,7 +27,7 @@ const M_LAVA := 5
 const M_SWIRL := 7
 const M_LINKS := 8
 const M_PIP := 9
-const M_SPIRAL := 10
+const M_SPIRAL := 10           # the stun spiral (StunMark draws it with this shader)
 const M_WAVE := 11
 const M_SMOKE := 13
 const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
@@ -373,7 +373,6 @@ func _build_place(kind: String, col: Color, col2: Color) -> Node3D:
 		"swirl": return _mi(_plane_mesh(), _mat(M_SWIRL, col, col2))
 		"chain": return _mi(_plane_mesh(), _mat(M_LINKS, col, col2))
 		"pip": return _mi(_quad_mesh(), _mat(M_PIP, col, col2, true))
-		"spiral": return _mi(_quad_mesh(), _mat(M_SPIRAL, col, col2, true))
 		"pilot", "glow": return _mi(_quad_mesh(), _mat(M_ORB, col, col2, true))
 		"anchor": return _anchor_node()
 		"hook": return _hook_node(col)

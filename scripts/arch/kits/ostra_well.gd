@@ -173,7 +173,6 @@ func _tick_catch(left: float) -> void:
 
 ## A caught body is drawn to the centre (Displace: online, its own game draws it in), held there until it closes.
 func _on_catch(f: Ent) -> void:
-	KitLooks.of(k.m).crown(f, float(xd()["time"]))
 	var c := _floor(center)
 	draws.append(k.m.displace.tow(f, null, {
 		"mode": "glide", "to": [c.x, c.y, c.z], "spd": float(xd()["pull"]), "gap": HOLD_R, "hold": true,

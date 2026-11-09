@@ -63,6 +63,10 @@ the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_ha
   instead of sinking, and every particle fades out over its last 0.15 m above the ground (a soft particle by height, so
   it works on gl_compatibility too). The ground is the one under the emitter, so a spark that flies off a terrace edge
   lands on the upper terrace's height.
+- **Status marks are shared, not a kit's:** a stun shows `StunMark` (`scripts/match/stun_mark.gd`: a spiral and three
+  stars over the head, in the plate's STUNNED yellow) on any stunned Hunter or monster for as long as `stun_t` lasts, from
+  a fixed pool of 8; a kit draws no stun look of its own (checked in `--hero-vfx-check`, with every Hunter's dash drawing
+  its own look rather than the shared team-colour pill).
 - **No stall on first cast:** `prewarm(at)` (called from `Match.warm_up`) holds up one node of every kind, particles
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness

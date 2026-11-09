@@ -267,6 +267,7 @@ func warm_up(progress := Callable()) -> void:
 		fx.slash(at + Vector3(0, 0.8, 0), 0.0, 2.0, 1.6, Color.WHITE)
 		fx.beam(at + Vector3(0, 1, 0), at + Vector3(2, 1, 0), Color.WHITE)
 		HeroVfx.of(self).prewarm(at + Vector3(0, 1, 0))
+		StunMark.of(self).prewarm(at + Vector3(0, 2, 0))
 		var tg := fx.telegraph_circle(at, 1.5, Color(1, 0.3, 0.2))
 		# the muzzle flash light lights whatever stands near a shot: the lit variants compile now too
 		if muzzle_light:

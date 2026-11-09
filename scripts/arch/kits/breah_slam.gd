@@ -208,7 +208,6 @@ func slam(c: float, at_feet: bool) -> void:
 			m.fx.word(f.pos + Vector3(0, 2.0, 0), "DUNKED", Color("9ad0ff"), true)
 			m.fx.beam(f.pos, f.pos + Vector3(0, 6.0, 0), Color("d8ecff"), 0.5, 0.3)
 		f.hurt(d2, h, o)
-		if in_core: KitLooks.of(m).crown(f, float(o["stun"]))
 		if air:
 			m.displace.spike(f, -22.0)      # spiked down (after the hit, which would lift it)
 		gained = true

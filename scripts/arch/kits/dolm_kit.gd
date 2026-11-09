@@ -154,11 +154,8 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		return
 	x["burst_done"] = true
 	var blast := float(rd["blast"])
-	m.fx.ring(at, blast, Color("3a7cff"), 0.3)
-	m.fx.ring(at, blast * 0.55, Color("d8ecff"), 0.18)
-	m.fx.burst(at + Vector3(0, 0.4, 0), Color(0.23, 0.49, 1.0, 0.9), 22, 6.0, 0.5, 8.0, 1.2)
-	KitLooks.of(m).impact(AimMode.ground(m, at), blast * 0.8, 0.4, 0.6)
-	m.fx.flash(at + Vector3(0, 0.6, 0), Color("9ad0ff"), 0.7, 0.08)
+	m.fx.ring(at, blast, COBALT, 0.3)          # its true reach
+	vfx("rock_burst", AimMode.ground(m, at), Vector2.ZERO, {"r": blast})
 	m.sfx("br_burst", at, -3.0, 1.0)
 	net_ring(at, blast, Color("3a7cff"))
 	var slow_t := float(rd["slow_t"]) if src != "dash" else float(dash_def()["slow_t"])
@@ -408,14 +405,13 @@ func _boulder() -> void:
 	m.fx.spark(start, Vector3(dir.x, 0.2, dir.y), COBALT, 6, 5.0, 25.0, 0.18, 2.0, 0.8)
 	Juice.shot(h, start, dir)
 
-## The boulder bursts where it ends: a small fireball with a red ring on the ground, splashing the
+## The boulder bursts where it ends: a cobalt burst of rock with its splash ring on the ground, splashing the
 ## foes beside the one it hit.
 func _boulder_end(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var bd: Dictionary = lmb_def()["boulder"]
 	var g := AimMode.ground(m, at)
-	m.fx.ring(g, float(bd["splash"]), Color("3a7cff"), 0.28)
-	m.fx.burst(at, Color(0.23, 0.49, 1.0, 0.9), 12, 4.0, 0.3, 4.0, 1.1)
-	m.fx.flash(at, Color("9ad0ff"), 0.5, 0.06)
+	m.fx.ring(g, float(bd["splash"]), COBALT, 0.28)          # its true splash
+	vfx("rock_burst", g, Vector2.ZERO, {"r": float(bd["splash"])})
 	m.sfx("br_boulder_hit", at, -4.0, 1.0)
 	for f in foes_in(at, float(bd["splash"])):
 		if f == e: continue
@@ -468,25 +464,14 @@ func _punch(k: float) -> void:
 		var hp0: float = f.hp
 		f.hurt(dmg, h, o)
 		landed += 1
-		_punch_impact(f.pos, dir, k)
+		vfx("punch", f.pos, dir, {"k": k})      # the blow lands: a cobalt flash, spray and grit, bigger held longer
 		if terrain_behind(f, dir, 1.6):
 			wall_stuns += 1
 			if not (f is Hunter):
 				f.hurt(2.0, h, {"src": "abil", "ab": "lmb", "stun": float(pd["wall_stun"])})
 			m.fx.word(f.pos + Vector3(0, 2.0, 0), "WALLED", Color("9ad0ff"), false)
-			KitLooks.of(m).crown(f, float(pd["wall_stun"]))
 	if landed == 0:
-		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
-
-## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a ring of dust,
-## a molten spray thrown on along the punch and a hot chip burst, bigger the longer she held.
-func _punch_impact(at: Vector3, dir: Vector2, k: float) -> void:
-	var fwd := Vector3(dir.x, 0.25, dir.y)
-	m.fx.ring(at, 1.0 + 0.6 * k, Color(0.56, 0.61, 0.72, 0.95), 0.3)
-	m.fx.burst(at + Vector3(0, 0.5, 0), Color(0.23, 0.49, 1.0, 0.9), int(8 + 10 * k), 5.0, 0.35, 6.0, 1.3, fwd, 60.0)
-	m.fx.burst(at + Vector3(0, 0.2, 0), Color(0.56, 0.61, 0.72, 0.9), int(6 + 6 * k), 3.0, 0.45, 3.0, 1.6)
-	m.fx.spark(at + Vector3(0, 0.6, 0), fwd, Color("9ad0ff"), int(6 + 6 * k), 8.0, 50.0, 0.25, 8.0, 1.1)
-	m.fx.flash(at + Vector3(0, 0.7, 0), Color("9ad0ff"), 0.5 + 0.3 * k, 0.07)
+		vfx("punch", h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, {"k": k})
 
 ## Every rock of her team the punch reaches, nearest first: the ones in the lane, then any lined up
 ## further along the aim with no gap wider than `sweep_gap` (punching along a Stone Row sweeps it).
@@ -582,9 +567,9 @@ func dash_left() -> float:
 func dodge_anim() -> String:
 	return "kit"
 
+## Her dash after-image: stone dust and grit kicked up at her feet, with cobalt sparks (dolm.json "dash_dust").
 func dash_afterimage() -> bool:
-	m.fx.burst(h.pos + Vector3(0, 0.5, 0), Color(0.56, 0.61, 0.72, 0.8), 3, 1.2, 0.4, -1.0, 1.6)
-	m.fx.burst(h.pos + Vector3(0, 0.9, 0), COBALT, 1, 1.5, 0.3, 2.0, 0.8)
+	HeroVfx.of(m).hold(h, "dash_dust")
 	return true
 
 # ------------------------------------------------------------------ RMB: Quakefall (BreahSlam)

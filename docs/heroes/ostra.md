@@ -189,7 +189,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 | X | `ostra_well` (wind-up, held), `ostra_well_snap` (held while it pulls), `ostra_well_end` | `anim_os_well` (`--strip-w=760` shows the dome and the well beside him) |
 
 ## Engine notes
-- Kit `scripts/arch/kits/ostra_kit.gd`; looks `kit_looks.gd` (pooled skins, aura, stun crown, column); the seed's drum in
+- Kit `scripts/arch/kits/ostra_kit.gd`; looks `kit_looks.gd` (pooled skins, aura, column; a stun shows the shared StunMark); the seed's drum in
   HeroZones.seed_visual (shaders/void_glass.gdshader). Every shot goes through spawn_shot.
 - Net: the seed travels as `["zone", ...]` events; Trade's moves go through Displace (`["disp", "tp", ...]`, decision 0016).
   Nightwell runs on the caster's game like the seed's pop: hits carry the stun, and every caught body (a player online on
