@@ -300,12 +300,12 @@ static func _habitat(spk: String) -> String:
 		out += " Last seen at %s." % ", ".join(sighted.slice(-2))      # (logged on sight, newest last)
 	return out
 
-## A look-only record wearing a found form (from its name: the root plus an affinity's suffix).
+## A look-only record wearing a found form (an old save's form name: the root plus an affinity's suffix).
 static func _form_rec(spk: String, fname: String) -> Dictionary:
 	var rec := {"species": spk, "level": 5, "uid": "dex|%s|%s" % [spk, fname]}
-	var root := String(Evo.ROOTS.get(spk, "Kin"))
-	for aff in Evo.SUFFIX:
-		var sfx: Array = Evo.SUFFIX[aff]
+	var root := String(Evo.V11_ROOTS.get(spk, "Kin"))
+	for aff in Evo.V11_SUFFIX:
+		var sfx: Array = Evo.V11_SUFFIX[aff]
 		for i in sfx.size():
 			if fname == root + String(sfx[i]) or fname.begins_with(root + String(sfx[i]) + " "):
 				var fs: Array = []
