@@ -77,10 +77,7 @@ jobs:
 
       # The dedicated server: a build artifact only (S2 deploys it by hand with server/deploy/push.sh), never
       # a release asset and never auto-deployed. The "Linux Server" preset is in export_presets.cfg.
-      # continue-on-error: the server build is optional; a missing "Linux Server" preset blocked the v0.24.3
-      # player release (2026-11-08). The player builds and the GitHub Release must never wait on it.
       - name: Export Linux Server
-        continue-on-error: true
         run: |
           set -e
           mkdir -p ../build/server
@@ -91,7 +88,6 @@ jobs:
           find server-artifact -name __pycache__ -type d -exec rm -rf {} +
 
       - name: Upload the server artifact
-        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: ProjectBoki-linux-server-${{ steps.ver.outputs.tag }}
