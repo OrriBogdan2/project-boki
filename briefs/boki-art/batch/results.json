@@ -35388,5 +35388,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/sporcupine_card5_2.jpg",
     "ok": true
+  },
+  {
+    "id": "teapotamus_card5",
+    "name": "Teapotamus (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/teapotamus_card5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "blastopuff_card3",
+    "name": "Blastopuff (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/blastopuff_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrink_card5",
+    "name": "Umbrink (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/umbrink_card5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "blastopuff_card3",
+    "name": "Blastopuff (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/blastopuff_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "blastopuff_card3",
+    "name": "Blastopuff (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/blastopuff_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadmonite_card3",
+    "name": "Dreadmonite (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dreadmonite_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadmonite_card3",
+    "name": "Dreadmonite (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dreadmonite_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gramofrill_card3",
+    "name": "Gramofrill (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gramofrill_card3_1.jpg",
+    "ok": true
   }
 ]
