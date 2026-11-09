@@ -4319,3 +4319,10 @@ Same locked design (turnaround), new charging sprint pose: low forward lean, nec
 ART bellowary - briefs/boki-art/batch/out/portrait_bellowary_oomph_3.jpg kind=portrait status=owner-review
 ART bellowary - briefs/boki-art/batch/out/portrait_bellowary_oomphe_2.jpg kind=portrait status=owner-review
 ART bellowary - briefs/boki-art/batch/out/portrait_bellowary_oomph_1.jpg kind=portrait status=owner-review
+
+## 05:00 ET 11-09 — READY: Barokat portrait redo (owner 7.1: remove cloud, new head, more colour/contrast, better tail)
+Edit of portraits/Barokat.jpg (same face, trumpet ears, belly barometer): rain cloud removed, saturated saffron fur against clean cream-white belly/muzzle, storm-blue stripes, verdigris brass. Four head ideas, each paired with a new tail: (b) lightning-bolt fur crest + brass coil-spring tail with glowing bead, (a) brass weather vane + zig-zag striped tail, (c) brass anemometer + finned vane tail, (d) glowing lightning-rod bulb + striped curl tail with bulb. Jobs portrait_barokat_r2a..d, 2 runs each. Rating feed: gen barokat-1109045518 (redo of barokat-1-art). My pick: r2b_1. Winner replaces portraits/Barokat.jpg once the owner passes it.
+ART barokat - briefs/boki-art/batch/out/portrait_barokat_r2b_1.jpg kind=portrait status=owner-review
+ART barokat - briefs/boki-art/batch/out/portrait_barokat_r2a_2.jpg kind=portrait status=owner-review
+ART barokat - briefs/boki-art/batch/out/portrait_barokat_r2c_2.jpg kind=portrait status=owner-review
+ART barokat - briefs/boki-art/batch/out/portrait_barokat_r2d_2.jpg kind=portrait status=owner-review
