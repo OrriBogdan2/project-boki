@@ -562,6 +562,18 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | join_weight | 2.5 |
 | join_weight_doc | A toy someone is already playing with is this many times likelier, so a second Boki tends to join in. |
 | toys | {"toy_ball": {"stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "prism", "frost"], "doc": "splashed by Water and Ice leans (species themes prism, frost today)"}} |
+## snack_patch (`content/rules/snack_patch.json`)
+
+The garden's one snack patch (scripts/home/snack_patch.gd, base_mode only; GARDEN.md section 10 question 1). It grows one of each snack in snacks every grow_secs and you pick them up by walking over it. They go to the pantry (Save.d crops) to feed the element-lean foods; the patch is never sold and has no seed, shop or water chore.
+
+| Setting | Value |
+|---|---|
+| snacks | ["emberberry", "tidebloom", "sunroot", "puffcorn"] |
+| snacks_doc | Four Data.CROPS foods, one per lean element (lean.json foods): Fire, Water, Grass, Flying. Each one is yielded once per ripening. |
+| grow_secs | 480 |
+| grow_secs_doc | Seconds from put down (or from the last pick) until it is ripe; it keeps ripening while you are away, but only one batch waits at a time. |
+| reach | 0.35 |
+| reach_doc | Tiles beyond the patch's edge from which your feet pick the snacks. |
 
 ## tutorial (`content/rules/tutorial.json`)
 

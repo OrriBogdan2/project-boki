@@ -411,6 +411,8 @@ func _leaf() -> Color:
 func make_deco(e: Dictionary) -> Node3D:
 	if FarmSites.is_site(e):
 		return FarmModels.site(e)
+	if String(e["id"]) == SnackPatch.ID:
+		return SnackPatch.model(e)
 	var n := _make_base(e)
 	if FarmSites.is_upgrading(e): FarmModels.upgrade_frame(n, e)
 	return FarmModels.dress(n, e)
@@ -537,7 +539,7 @@ func _sync_deco() -> void:
 		(nodes[u] as Node3D).visible = not (held.get("kind", "") == "deco" and int(held.get("from", -1)) == int(u))
 
 func _sig(e: Dictionary) -> String:
-	return "%s|%d|%d|%d|%s|%s|%s" % [e["id"], int(e["x"]), int(e["z"]), int(e.get("r", 0)), str(e.get("c", "")), str(e.get("px", "")), str(e.get("sp", ""))] + FarmModels.sig(e)
+	return "%s|%d|%d|%d|%s|%s|%s" % [e["id"], int(e["x"]), int(e["z"]), int(e.get("r", 0)), str(e.get("c", "")), str(e.get("px", "")), str(e.get("sp", ""))] + FarmModels.sig(e) + SnackPatch.sig(e)
 
 ## Fences join up with the fence next to them: every post gets rails toward its neighbours.
 func _sync_fences() -> void:
