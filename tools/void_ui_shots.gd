@@ -1,10 +1,11 @@
 extends RefCounted
 ## --void-ui-shots=<dir>: one screenshot of every menu screen restyled in the "Void & Masks" pass
 ## (UI_STYLE.md on ext/agent-briefs), for the before/after grid in the PR: the title, save slots,
-## settings, the pause menu, the hatch card, the creator, the welcome box, the farm (Goals tracker and
-## hub bar), the Job Board, the Kin Burrow, a Boki's page (its care card), the Market, the Black
-## Market and the build menu. Run with a real renderer (xvfb-run, --rendering-driver opengl3,
-## --resolution WxH). Never touches the real save. Writes <name>.png and prints "VSHOT <name>".
+## settings, the pause menu, the creator and its prompt, the egg pick, a new Boki's reveal card, the
+## welcome box, the farm (Goals tracker and hub bar), the Job Board, the Kin Burrow, a Boki's page
+## (its care card), the Market, the Black Market and the build menu. Run with a real renderer
+## (xvfb-run, --rendering-driver opengl3, --resolution WxH). Never touches the real save. Writes
+## <name>.png and prints "VSHOT <name>".
 
 var main: Node
 var dir := ""
@@ -42,11 +43,18 @@ func _front_screens() -> void:
 	main.show_screen("hatch", {"create": true})
 	await _shot("05_creator", 2.5)
 	main.current.call("_show_card")
-	await _shot("04_hatch_card")
+	await _shot("04_creator_prompt")
+	main.current.call("_show_pick")
+	await _shot("04b_egg_pick")
 	main.current.call("_looks_good")
 	await _shot("06_welcome_modal", 7.0)
 	Save.d["tutorial"] = {"hatched": true, "intro": true}
 	main.current.queue_free()
+	var holder := Node3D.new()
+	main.add_child(holder)
+	holder.add_child(KinReveal.new("cindle", Save.new_kin("cindle", "", 4242)))
+	await _shot("04c_boki_reveal", 6.0)
+	holder.queue_free()
 
 func _farm_screens() -> void:
 	var home = await main._hb_home()
