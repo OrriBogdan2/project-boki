@@ -51,12 +51,12 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
 | LMB | Hold to charge, release; perfect speeds next draw [D,F] | PinDraw two stages, reticle, stops at cursor, cadence .5, perfect → quick draw | match |
-| RMB | Hold, release, knock, wall stun up to 173 extra on 35 [D] | Hold .5 dead zone (ours), wall_dmg 12, floor .4, stun 1.2, cd 16 | **differ**: payoff ~0.4x vs ~5x (gap 6) |
+| RMB | Hold, release, knock, wall stun up to 173 extra on 35 [D] | Guard .15 s, wall hit 4.94x the shot (full pin 178), stun 1.2, cd 16, 1 charge | match (verified Nov 9; gaps 6, 7 closed, docs/heroes/archer.md) |
 | Q | none | glove | ours |
 | E | Cone of arrows, slow, anti-heal, 15 s [D] | Tell .35, 4.4 s, slow 35%, curved wall, cd 15 | match |
 | R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .3, cd 60 | match |
-| Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | 3.5 m/.24 s raw → ~3 m/.28 s, walks rocks and barriers, **not ledges** | differ (gap 8) |
-| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open |
+| Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | 3.5 m/.24 s raw → ~3 m/.28 s, walks rocks and barriers, **not ledges** | differ (gap 8: READY `ext/lace-phasewalk-verify` 728a6c834) |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; Focus/Deadeye cut (owner 11-07) | owner; ledge climb differs |
 | Anim | Footage poses | 18 moves, all on `hem.glb` (48) | match on coverage |
 | Flow | Silent on shooting in the walk [F] | Dash→LMB buffers; 8 of 17 rows unsourced | gap 9 |
 
@@ -189,10 +189,10 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 2 | Stopping is a hard stop for all 12: brake 110 vs 22.2 m/s² | Move brake to source, retune | content/rules/hunter_move.json, scripts/match/hunter.gd | M |
 | 3 | Air control 0.3 vs 0.015, 20x source | Lower it; keep owner-asked steer rows | hunter_move.json, hunter_move.gd | M |
 | 4 | Dashes stop dead: keep 15%/30% vs carry; global ×.85/×1.15 | Raise carry; drop scale where kit numbers already match | hunter.gd, content/rules/dash_feel.json | M |
-| 5 | Hem's invented Focus/Deadeye sits over the draw | Remove, or owner keeps it | archer_kit.gd, archer.json | M, owner |
-| 6 | Hem's Heavy Shot wall payoff ~0.4x vs ~5x | Raise wall_dmg, drop .4 floor | archer.json | S |
-| 7 | Hem's RMB .5 s dead zone before the draw reads | Match the footage start | archer.json, pin_needle.gd | S |
-| 8 | Hem's Phase Walk stops at raised walls | Passable ledge faces | pin_spirit.gd, map height | L |
+| 5 | ~~Hem's invented Focus/Deadeye~~ cut (owner 11-07) | done | archer_kit.gd, archer.json | closed |
+| 6 | ~~Hem's Heavy Shot wall payoff~~ now 4.94x | done | archer.json | closed |
+| 7 | ~~Hem's RMB .5 s dead zone~~ now a .15 s guard | done | archer.json | closed |
+| 8 | Hem's Phase Walk stops at raised walls | Merge `ext/lace-phasewalk-verify` 728a6c834 | pin_spirit.gd, hunter.gd, world.gd | S to merge |
 | 9 | Dash→LMB buffers on 6 kits (Hem, Bjorn, Zedran, Cinder, Ryzz, Tarek air), and Zedran, Bjorn and Cinder keep `cancel` rows; item 51 says combine | Flip rows to `fire`, source them | content/dash_flow/*.json | S |
 | 10 | Cooldown pace is uneven: 0.48x to 1.0x of data | One rule per kit | content/archetypes/*.json | S, owner |
 | 11 | Cinder's dash is short: ground felt 2.9 m vs 3.4 m; his and Grimble's air dashes apply feel twice (likely bug) | Exempt or raise ground; scale air once (Zedran already undoes it, `juggernaut_kit.gd:826`) | ashwick_kit.gd:521, dredge_kit.gd:684, ashwick.json | S |
