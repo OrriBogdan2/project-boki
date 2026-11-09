@@ -25301,5 +25301,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/zephyrak_card2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "dragonkite_card2",
+    "name": "Dragonkite (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dragonkite_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dragonkite_card2",
+    "name": "Dragonkite (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dragonkite_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_card2",
+    "name": "Flarmink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/flarmink_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_card2",
+    "name": "Flarmink (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/flarmink_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongibbon_card2",
+    "name": "Gongibbon (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gongibbon_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kitlet_card2",
+    "name": "Kitlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kitlet_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kitlet_card2",
+    "name": "Kitlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kitlet_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pipewurm_card2",
+    "name": "Pipewurm (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pipewurm_card2_2.jpg",
+    "ok": true
   }
 ]
