@@ -14115,5 +14115,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/seamwyrm_e2_w28_3.jpg",
     "ok": true
+  },
+  {
+    "id": "terrasloth_r2_w28",
+    "name": "Terrasloth",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/terrasloth_r2_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrasloth_r2_w28",
+    "name": "Terrasloth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrasloth_r2_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrasloth_r2_w28",
+    "name": "Terrasloth",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/terrasloth_r2_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "tinbrock_e_w28",
+    "name": "Tinbrock",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/tinbrock_e_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "tinbrock_e_w28",
+    "name": "Tinbrock",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tinbrock_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tinbrock_e_w28",
+    "name": "Tinbrock",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tinbrock_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrasloth_r2_w28",
+    "name": "Terrasloth",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/terrasloth_r2_w28_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltmink_r2_w28",
+    "name": "Voltmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltmink_r2_w28_2.jpg",
+    "ok": true
   }
 ]
