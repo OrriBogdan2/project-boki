@@ -1,6 +1,6 @@
 # Round 32 results (02:10 ET 11-09): turnarounds for concepts at pass/owner tier, sheets from the passing square stance images.
 import json as _j49
-_pk=_j49.load(open('/tmp/claude-0/-home-claude/8d7770c0-fbec-571e-85de-44fde799926f/scratchpad/r32_picks.json'))
+_pk=_j49.load(open(HERE/'r32_picks.json'))
 _O='briefs/boki-art/batch/out/'
 _P49=[]
 TA('Pebblamb','briefs/boki-art/concepts/Pebblamb.jpg'); SPECS[-1]['prompt']+=' Only change: give it bigger, brighter, more lively glossy eyes and a happier smile than image 1.'; _P49.append('ta_pebblamb')
