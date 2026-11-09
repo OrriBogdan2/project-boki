@@ -193,7 +193,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 	# the forms you've found, as small portraits
 	var forms: Array = e.get("forms", [])
 	var fl := UI.vbox(4)
-	fl.add_child(UI.section("Forms found", UI.FAINT.lightened(0.2)))
+	fl.add_child(UI.section("Forms found"))
 	var fr := UI.hbox(8)
 	var shown: Array = [String(sp["name"])] + forms.slice(0, 5)
 	for fname in shown:
@@ -226,7 +226,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 	var mine: Array = (Save.d.get("roster", []) as Array).filter(func(r): return String(r.get("species", "")) == spk)
 	if not mine.is_empty():
 		var ml := UI.vbox(4)
-		ml.add_child(UI.section("Yours", UI.FAINT.lightened(0.2)))
+		ml.add_child(UI.section("Yours"))
 		var mr := HFlowContainer.new()
 		mr.add_theme_constant_override("h_separation", 8); mr.add_theme_constant_override("v_separation", 6)
 		for r in mine.slice(0, 8):
