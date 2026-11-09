@@ -38,3 +38,4 @@ func run(main: Node) -> void:
 		await RenderingServer.frame_post_draw
 		tree.root.get_texture().get_image().save_png(out.path_join("clip/f%03d.png" % f))
 	print("DUMMY_MOVE_SHOTS_DONE")
+	tree.quit()
