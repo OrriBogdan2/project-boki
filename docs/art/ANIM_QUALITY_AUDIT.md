@@ -109,6 +109,7 @@ posts scroll at the move speed).
 
 **Grimble (`dredge`)**
 1. Hip bob 17 cm at a run (12 % of his height); damped by `loco.bob` to 10 cm (7 %).
+   Rows: walk before, walk after, run before, run after: ![dredge hip bob](anim_audit/bob_dredge.jpg)
 2. Idle to walk first-pose gap 0.45 body heights, the largest of the roster.
 3. The throw sends the free arm 1.4 body heights and holds an arm sideways for 67 %; slide 28 % to 12 % (fixed).
 
@@ -124,6 +125,7 @@ posts scroll at the move speed).
 **Kael (`juggernaut`)**
 1. Feet slid 27 % at a run, 53 % at a walk (fixed: 12 %, 25 %); the left arm paced with its leg (counter -0.65, fixed to +0.84).
 2. Hip bob 16 cm at a run (10 % of his height); damped by `loco.bob` to 9 cm (6 %).
+   Rows as above: ![juggernaut hip bob](anim_audit/bob_juggernaut.jpg)
 3. The slam flings the free arm 1.7 body heights and holds an arm out for 29 to 46 %.
 
 ![juggernaut walk and run, before and after](anim_audit/juggernaut.jpg)
