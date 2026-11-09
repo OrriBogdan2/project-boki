@@ -21100,6 +21100,237 @@
     "prompt": "Edit image 1. Keep the same otter, face, colours, pose on its back, tail prow, oars, style and plain pale grey background. Change only where the ship sits: Take the mast and sail away from its hips and hind legs entirely. The ship deck becomes SHORTER and sits only on its chest and upper belly, from just under its chin down to its waist, held between its front paws. The single mast stands straight up out of the middle of that deck, at the centre of its chest, with the same sail. The oars stick out from the sides of that shorter deck. Below the waist there is no wood at all: its lower belly, hips and both hind legs are plain soft brown fur, clearly visible. Only one mast. Do not add anything else."
   },
   {
+    "id": "rd_gongrowl_v2",
+    "name": "Gongrowl (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Gongrowl.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Gongrowl, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: it wears a chest plate on straps, a shoulder strap, wrist cuffs and a back disc, and it is a semi-realistic gorilla with a small head. Change it like this: the gong is a round bronze disc grown into its chest like a breastbone plate, and the same bronze shows again in its knuckles and a crest on its skull; no straps, cuffs or back disc. Make its head bigger, about 22% of its height. Its fur is near black with one lighter lit shape on the upper left; the bronze is the lightest value. It faces the viewer, pounding its chest gong with one fist. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_anvilbrock_v2",
+    "name": "Anvilbrock (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Anvilbrock.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Anvilbrock, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: bolted plates on its shoulders and legs, and an anvil sitting on its back. Change it like this: its back is one grown anvil slab rising out of its spine; the plates become patches of dark iron hide with no rivets and no raised edges. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_forgebrock_v2",
+    "name": "Forgebrock (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Forgebrock.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Forgebrock, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: bolted plates on its shoulders and legs, and an anvil and furnace sitting on its back. Change it like this: its back is one grown anvil slab rising out of its spine, with the furnace glow showing through cracks in that slab; the plates become patches of dark iron hide with no rivets and no raised edges. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_barostorm_v2",
+    "name": "Barostorm (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Barostorm.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Barostorm, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: it stands upright like a person and wears bracers, greaves and a crown. Change it like this: a low, four-legged stance; the gold becomes horn growing at its brow and its tail tip; the barometer dial becomes a round marking on its belly. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_furnacowary_v2",
+    "name": "Furnacowary (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Furnacowary.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Furnacowary, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: banded furnace armour and anvil-shaped feet. Change it like this: the firebox is its own open ribcage, the ribs its own dark bone with the fire glowing between them; the chimney is its casque on top of its head; plain bird feet with thick claws. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_vaultara_v2",
+    "name": "Vaultara (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Vaultara.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Vaultara, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a vault door plus riveted leg armour with gold trim. Change it like this: the vault door is its own shell, with the hinge as a ridge along its spine; its legs get thick plain scale plates, no armour, no rivets, no trim. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_prowyak_v2",
+    "name": "Prowyak (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Prowyak.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Prowyak, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a riveted steel plate bolted over its face. Change it like this: the ship's prow is its own keeled skull boss, a bony ridge growing from its forehead between the horns, in the same steel colour. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_bastionpet_v2",
+    "name": "Bastionpet (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Bastionpet.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Bastionpet, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: riveted bands around its claws and legs. Change it like this: those bands become raised ridges of its own shell, fused to it, with no rivets. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_siegephant_v2",
+    "name": "Siegephant (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Siegephant.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Siegephant, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a tower, a face mask, wheels as well as feet, a chain and mace tail, and rivets on every plate. Change it like this: legs only, no wheels; the tower is a crest grown from its head and back; the portcullis is its own row of teeth; the tail is a thick tail ending in a mace-shaped knob, no chain; at most 3 rivet bumps per plate. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_chuggamus_v2",
+    "name": "Chuggamus (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Chuggamus.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Chuggamus, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a hippo wearing a locomotive: wheels as well as legs, and a riveted boiler shell. Change it like this: the boiler belly is its own copper hide; the smokestack is a horn on its snout; four thick piston-shaped legs and no wheels; the cowcatcher is its lower jaw. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_tiltster_v2",
+    "name": "Tiltster (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Tiltster.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Tiltster, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a hamster inside a pinball machine with chrome arms and leg frames. Change it like this: the pinball table is its own flat back shell; the bumpers are round knobs growing from that shell; the flippers are its own front paws; no frame, no chrome legs. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_canvastross_v2",
+    "name": "Canvastross (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Canvastross.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Canvastross, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a bird wearing a ship's hull, masts and rigging. Change it like this: the hull is its own keeled chest; the sails are its wings; the mast is one tall crest feather; no ropes or rigging. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_barrelmander_v2",
+    "name": "Barrelmander (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Barrelmander.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Barrelmander, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a salamander wearing a hooped barrel. Change it like this: the cask is its own back, patterned like wooden staves; the hoops are ridges of its own skin. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_bucketmander_v2",
+    "name": "Bucketmander (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Bucketmander.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Bucketmander, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a salamander sitting inside a bucket. Change it like this: the bucket is its own rounded back and belly, patterned like wooden staves, with the hoops as ridges of its own skin; it stands on its own legs, not inside anything. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_crofthollow_v2",
+    "name": "Crofthollow (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Crofthollow.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Crofthollow, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a cottage with walls, a window and chimney smoke sitting on a yak. Change it like this: its hump is shaped like a thatched roof made of its own fur, with one chimney-shaped horn; no walls, window or smoke. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_pagoguana_v2",
+    "name": "Pagoguana (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Pagoguana.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Pagoguana, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a pagoda building on its back, and it stands upright. Change it like this: the pagoda tiers are stacked plates growing along its spine; it stands on all four legs with its tail planted. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_pagoguanarear_v2",
+    "name": "Pagoguana (redesign concept rear)",
+    "refs": [
+      "briefs/boki-art/cards/Pagoguana.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Pagoguana, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a pagoda building on its back. Change it like this: the pagoda tiers are stacked plates growing along its spine. Keep its rearing stance from image 1 (the owner liked it standing up), but rearing like an animal on its hind legs with its tail planted, not standing like a person. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_domeleon_v2",
+    "name": "Domeleon (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Domeleon.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Domeleon, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a riveted dome and a telescope carried on its back. Change it like this: the dome is its own casque on its head; the telescope is one tube-shaped turret eye, like a chameleon's eye. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_stormit_v2",
+    "name": "Stormit (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Stormit.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Stormit, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a crab carrying a glass case, with spring legs. Change it like this: the case is its own see-through shell; plain crab legs. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_maulangler_v2",
+    "name": "Maulangler (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Maulangler.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Maulangler, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a bolted trap jaw, a strap band and a hanging chain. Change it like this: the trap is its own toothed jaw with a knuckle joint at the hinge; the hook grows out of the end of its lure stalk; no chain, no strap. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
+    "id": "rd_snapler_v2",
+    "name": "Snapler (redesign concept)",
+    "refs": [
+      "briefs/boki-art/cards/Snapler.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Snapler, a REDESIGN of the creature in image 1. Keep from image 1: the same animal, the same colours and where they sit, the same eyes and face, the same core idea and signature parts, the same life stage and size, and the same rendering style, so the only change is how its body is built. The problem with image 1: a bolted trap jaw, a strap band and a hanging chain. Change it like this: the trap is its own toothed jaw with a knuckle joint at the hinge; the hook grows out of the end of its lure stalk; no chain, no strap. Every part grows out of its body with a thick fused base, as if it was born with it: nothing strapped, belted, banded, buckled, bolted, riveted on, worn, carried, held or sat on. One way of moving only: legs, no wheels. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes), never standing upright like a person. View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no glow, no text."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
