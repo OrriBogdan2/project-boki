@@ -55,3 +55,9 @@ for _n,_st in (('Vespyx','baby'),('Mycroll','baby'),('Chandelotl','final'),('Gon
 _SET5('Klaxada','c_klaxada_soft_4','mid','buzzing forward with its brass horn raised, wings blurred, friendly round eyes')
 # Owner 16:26: "new glacione and klaxada are great, ship it". Glacione = c_glacione_n1_2 -> full set (Minor legendary).
 _SET5('Glacione','c_glacione_n1_2','final','floating upright with its little wing-lobes spread, crescent glowing softly in its belly')
+# Owner 16:33: "expand the style to 20 of them so we can see it holds up". Style a (flat cel) on 20 varied Boki, same prompt as the first test.
+for _n in ('Coolatee','Spanglin','Kitlet','Zipling','Lurklet','Shinobant','Lockatara','Glazolm','Arcestrel','Soakybara',
+           'Druzemole','Seamwyrm','Chuggamus','Quivertoad','Maulangler','Sarcobra','Hydrangor','Aurostag','Cindermaw','Siegephant'):
+    SPECS.append({'id':f'style_{_n.lower()}_a','name':f'{_n} (style test a)','refs':[f'briefs/boki-art/cards/{_n}.jpg'],'runs':2,'aspect':'1:1','size':'2K',
+      'prompt':("Redraw the creature in image 1 as a single character illustration. Keep the design exactly: the same creature, body, face, colours, markings, "
+        "signature parts and pose. Change ONLY the rendering style to this: "+_STY['a']+" Plain flat pale grey background, no ground, no shadow, no text. One creature only, whole body in frame, centred.")})
