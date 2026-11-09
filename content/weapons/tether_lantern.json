@@ -13,10 +13,10 @@
 		"spread": 0.0,
 		"range": 14.0,
 		"size": 0.28,
-		"color": "#c070ff",
+		"color": "#2ee6c0",
 		"sfx": "os_orb",
 		"fire_slow": 0.9,
-		"desc": "A quick violet orb every 0.6s, flying its full 14m. Every orb passes through walls. The longer you wait between shots (up to 1.4s) the bigger, brighter, faster and harder the next one; a full orb also slows.",
+		"desc": "A quick teal orb every 0.6s, flying its full 14m. Every orb passes through walls. The longer you wait between shots (up to 1.4s) the bigger, brighter, faster and harder the next one; a full orb also slows.",
 		"kick": 0.06,
 		"shot_x": {"pierce_terrain": true},
 		"aim": "max"

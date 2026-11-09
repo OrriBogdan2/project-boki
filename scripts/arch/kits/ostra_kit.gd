@@ -18,9 +18,9 @@ const PINK := Color("ff4fd8")
 const SEA := Color("2ee6c0")               # the signature: Snap, Brimseed and Nightwell (content/vfx/ostra.json)
 const DEEP := Color("0b5a50")              # their deep teal: the seed's and the dome's filling accent
 const GROUND_HAZARDS := ["hazard", "lava", "spore", "toxic", "molten"]
-const ORB_FULL_COL := Color("efd4ff")      # the orb's shot colour at full charge (what other games draw)
-const GLOW_COL := Color("8a3dff")          # the charge glow at his hand, starting...
-const GLOW_FULL_COL := Color("d070ff")     # ...and at full charge
+const ORB_FULL_COL := Color("b8fff0")      # the orb's shot colour at full charge (what other games draw)
+const GLOW_COL := Color("0b9c85")          # the charge glow at his hand, starting...
+const GLOW_FULL_COL := Color("2ee6c0")     # ...and at full charge
 const GLOW_SIZE := Vector2(0.4, 1.25)      # the glow's scale (a mote is 0.4m wide at 1), starting and at full
 
 var swollen_t := 0.0
@@ -209,12 +209,17 @@ func _set_charge(k: float) -> void:
 			full_chimes += 1
 			m.sfx("os_prime", h.pos, -12.0, 1.0)      # the soft chime at full
 			m.fx.flash(hand_pos(true), GLOW_FULL_COL, 0.45, 0.08)
+	shot_x["kx"] = _orb_end.bind(k)
 	orb_wpn["shot_x"] = shot_x
 	orb_wpn["dmg"] = float(base_wpn["dmg"]) * (1.0 + float(ld["prime_dmg"]) * k)
 	orb_wpn["speed"] = float(base_wpn["speed"]) * lerpf(1.0, float(ld["prime_speed"]), k)
 	orb_wpn["size"] = float(base_wpn["size"]) * orb_size_k(k)
 	orb_wpn["color"] = Color(base_wpn["color"]).lerp(ORB_FULL_COL, k)
 	charge = k
+
+## An orb ended (on a foe, a wall or its full range): the teal flare and shards, bigger the fuller it was.
+func _orb_end(s: Dictionary, at: Vector3, _e: Ent, _why: String, k: float) -> void:
+	vfx("orb_hit", at, (s["vel"] as Vector2).normalized(), {"k": k})
 
 ## The orb's size at charge k, as a share of the plain orb's.
 func orb_size_k(k: float) -> float:
@@ -232,7 +237,7 @@ func _orb_fired() -> void:
 	if full:
 		settled_shots += 1
 		m.sfx("os_orb_hot", h.pos, -4.0, 1.0)      # (the plain orb's sound is the weapon's own)
-		m.fx.burst(_hand(), Color(0.8, 0.6, 1.0, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
+		m.fx.burst(_hand(), Color(0.18, 0.9, 0.75, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
 
 ## A seed now waits for its recast, so a kit swapped out (practice, the Arena) takes its seed with it.
 func teardown() -> void:

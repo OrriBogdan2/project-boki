@@ -18,7 +18,7 @@ Weight Medium (145 hp), floats: body 0.9 (content "body"), hovering about 0.3m o
 +-0.03m bob at 0.6 Hz, legs at a tenth of a step (no step cycle, no footsteps), the hem trailing. The hover is visual
 only: his hitbox and ring stay on the ground, so it never dodges low shots. Fixed weapon Tether Lantern (`content/weapons/tether_lantern.json`): a pale crook with a curled
 hook, a brass-caged lantern with a teal flame round a void-glass core, two violet shards beside it (hero_arms.gd). Palette
-pearl and sea teal `#7fe0d0`, with void violet `#b06bff` for what he throws and pink `#ff4fd8` for Swollen. Payoff COLLAPSE.
+pearl and sea teal `#7fe0d0`, with sea teal `#2ee6c0` over a void core for what he throws and pink `#ff4fd8` for Swollen. Payoff COLLAPSE.
 
 ## Concept note: the eerie jester (item 18, before any modelling)
 Our own design, written before modelling; nothing below is modelled yet. He is male (owner, item 39: the Void Jester).

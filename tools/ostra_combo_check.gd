@@ -100,9 +100,11 @@ func _ostra() -> void:
 	var orb: Array = m.shots.filter(func(s): return s["by"] == P)
 	var olen := float(orb[0]["life0"]) * (orb[0]["vel"] as Vector2).length() if not orb.is_empty() else 0.0
 	ok("lmb: a plain orb flies past the cursor to full range (14m)", olen > 12.0, "%.1f m" % olen)
-	ok("lmb: the orb is his own violet teardrop (skin)", KitLooks.of(m).skins_live("orb") >= 1)
+	ok("lmb: the orb is his own teal teardrop (skin)", KitLooks.of(m).skins_live("orb") >= 1)
+	var hits0 := int(HeroVfx.of(m).plays.get("orb_hit", 0))
 	step(m, 1.0)
 	ok("lmb: ...and hits a foe well past the cursor", dmg(T) > 5.0, "took %.1f" % dmg(T))
+	ok("lmb: the hit plays his teal orb_hit", int(HeroVfx.of(m).plays.get("orb_hit", 0)) > hits0)
 	reset.call()
 	step(m, 1.6)
 	ok(
