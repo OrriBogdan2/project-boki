@@ -176,8 +176,9 @@ func t(k: String) -> float:
 func is_wild() -> bool:
 	return owner_h == null
 
+const HITTABLE_STATES := ["active", "flying", "returning", "reviving", "wild"]     # (a const: hittable runs hundreds of times a step)
 func hittable() -> bool:
-	return not dead and state in ["active", "flying", "returning", "reviving", "wild"] and not (state == "flying" and fly.get("leap", false))
+	return not dead and state in HITTABLE_STATES and not (state == "flying" and fly.get("leap", false))
 
 func mass() -> float:
 	var g := float(giant.get("scale", 1.0)) if not giant.is_empty() else 1.0
@@ -590,8 +591,13 @@ func sim(dt: float) -> void:
 		return
 	tick_status(dt)
 	var was_rest := rest_t > 0.0
-	for k in ["atk_cd", "bark_cd", "lunge_t", "throw_cd", "haste_t", "rest_t"]:
-		set(k, maxf(0.0, get(k) - dt))
+	# (direct lines, not set()/get() by name: 30 Boki tick these every step)
+	atk_cd = maxf(0.0, atk_cd - dt)
+	bark_cd = maxf(0.0, bark_cd - dt)
+	lunge_t = maxf(0.0, lunge_t - dt)
+	throw_cd = maxf(0.0, throw_cd - dt)
+	haste_t = maxf(0.0, haste_t - dt)
+	rest_t = maxf(0.0, rest_t - dt)
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
 		m.sfx("kin_happy", owner_h.pos, -8.0, Unique.voice(rec))

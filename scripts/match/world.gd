@@ -67,10 +67,12 @@ func inb(x: int, z: int) -> bool:
 
 # ------------------------------------------------------------------ queries
 func ground_at(x: float, z: float) -> float:
-	var ix := int(floor(x)); var iz := int(floor(z))
-	if not inb(ix, iz):
+	# (inb and idx written out: this runs a few thousand times a frame, and each call costs as much as the work)
+	var ix := int(floor(x))
+	var iz := int(floor(z))
+	if ix < 0 or iz < 0 or ix >= w or iz >= h:
 		return VOID
-	var i := idx(ix, iz)
+	var i := iz * w + ix
 	if kind[i] == T_VOID:
 		return VOID
 	if stairs.has(i):
@@ -85,8 +87,9 @@ func is_void(x: float, z: float) -> bool:
 	return ground_at(x, z) <= VOID + 1.0
 
 func is_block(x: float, z: float) -> bool:
-	var ix := int(floor(x)); var iz := int(floor(z))
-	return inb(ix, iz) and kind[idx(ix, iz)] == T_BLOCK
+	var ix := int(floor(x))
+	var iz := int(floor(z))
+	return ix >= 0 and iz >= 0 and ix < w and iz < h and kind[iz * w + ix] == T_BLOCK
 
 func island_of(x: float, z: float) -> int:
 	var ix := int(floor(x)); var iz := int(floor(z))
@@ -165,7 +168,16 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	# It used to read as open air, so bodies under the lip slid in under ground-level islands.)
 	var hit := false
 	for o in OCC_RING:
-		var g := ground_at(x + o.x * r, z + o.y * r)
+		# ground_at by hand (the sample is on a flat tile nearly always; stairs take the full read)
+		var sx := x + o.x * r
+		var sz := z + o.y * r
+		var ix := int(floor(sx))
+		var iz := int(floor(sz))
+		var g := VOID
+		if ix >= 0 and iz >= 0 and ix < w and iz < h:
+			var i := iz * w + ix
+			if kind[i] != T_VOID:
+				g = ground_at(sx, sz) if stairs.has(i) else level[i] * LEVEL
 		if g > y + STEP:
 			worst = maxf(worst, g)
 			hit = true
@@ -235,12 +247,22 @@ func push_out_blocks(x: float, z: float, r: float, y: float) -> Vector2:
 func los(a: Vector3, b: Vector3, y: float) -> bool:
 	var d := Vector2(b.x - a.x, b.z - a.z)
 	var n := int(d.length() / 0.4) + 1
-	for i in range(1, n):
-		var t := float(i) / n
-		var px := a.x + d.x * t; var pz := a.z + d.y * t
-		if is_block(px, pz) and ground_at(px, pz) + BLOCK_H > y:
+	for s in range(1, n):
+		var t := float(s) / n
+		var px := a.x + d.x * t
+		var pz := a.z + d.y * t
+		# one tile read per sample instead of is_block plus two ground_at calls
+		var ix := int(floor(px))
+		var iz := int(floor(pz))
+		if ix < 0 or iz < 0 or ix >= w or iz >= h:
+			continue
+		var i := iz * w + ix
+		if kind[i] == T_VOID:
+			continue
+		var g := ground_at(px, pz) if stairs.has(i) else level[i] * LEVEL
+		if kind[i] == T_BLOCK and g + BLOCK_H > y:
 			return false
-		if ground_at(px, pz) > y + 0.2:
+		if g > y + 0.2:
 			return false
 	for wl in dyn_walls:
 		if not Verbs.blocks_sight(wl): continue

@@ -1929,6 +1929,9 @@ func launch_to(target: Vector3, t: float) -> void:
 	roll_t = 0.0
 
 # ------------------------------------------------------------------ simulation
+const GATES := [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]  # _gate: input, slot, feedback
+const GEAR_KEYS := ["gear1", "gear2"]       # the two gear slots' inputs (consts: no strings built per step)
+
 func sim(dt: float) -> void:
 	Hex.tick(self, dt)
 	prev = pos
@@ -1952,8 +1955,7 @@ func sim(dt: float) -> void:
 	tick_status(dt)
 	if grounded:
 		air_peak = pos.y
-	for k in ["base_cd", "weak_t", "dash_buf", "hit_heat_t", "ex_cd", "reveal_t", "inv_t", "fire_cd", "coyote", "jump_buf", "mantle_cd", "grap_cd", "sig_cd", "cloak_t", "haste_t", "fortify_t", "recoil", "muzzle_t", "regen_wait", "land_t", "glide_cd", "bless_t", "crit_t", "sick_t", "phase_t"]:
-		set(k, maxf(0.0, get(k) - dt))
+	HunterTimers.tick(self, dt)
 	if shield_t > 0.0:
 		shield_t -= dt
 		if shield_t <= 0.0: shield = 0.0
@@ -2020,7 +2022,7 @@ func sim(dt: float) -> void:
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
 	# gloves need no point: Gloves
-	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
+	for gk in GATES:
 		_gate(gk[0], gk[1], gk[2])
 	if not downed and not dropping and not out:
 		gain_xp(dt * 1.2)       # a slow trickle, so a careful run still levels
@@ -2033,15 +2035,15 @@ func sim(dt: float) -> void:
 		dash_buf = 0.0
 		do_dash()
 	if inp["jump"]: do_jump()
-	if runner:
-		runner.rate = 1.0 + gear_stat("cdr")
-		runner.tick(dt)
 	var cdr := gear_stat("cdr")
+	if runner:
+		runner.rate = 1.0 + cdr
+		runner.tick(dt)
 	if cdr > 0.0:
 		sig_cd = maxf(0.0, sig_cd - dt * cdr)
 	for gi in 2:
 		gear_cd[gi] = maxf(0.0, float(gear_cd[gi]) - dt)
-		if inp.get("gear%d" % (gi + 1), false):
+		if inp.get(GEAR_KEYS[gi], false):
 			if Hex.active(self) or (ak and ak.cast_locked()):
 				_ab_feedback("gear%d" % gi, "deny")
 			elif (gear[gi] as Dictionary).is_empty() or float(gear_cd[gi]) > 0.0 or not Gear.active(String(gear[gi].get("id", ""))):

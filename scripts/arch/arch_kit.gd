@@ -159,7 +159,7 @@ func tick(dt: float) -> void:
 	if not h.wpn.get("ammo", true):
 		h.ammo = int(h.wpn["mag"])        # a weapon with no ammo (Data.weapon_stats): nothing ever runs dry
 	var rate := 1.0 + h.gear_stat("cdr")
-	for k in cd.keys():
+	for k in cd:      # (the dictionary itself, not keys(): no array built per step)
 		cd[k] = maxf(0.0, float(cd[k]) - dt * rate)
 		if cd_off and not (k == "r" and not fuse.is_empty()): cd[k] = 0.0
 	if cd_off:
@@ -171,7 +171,7 @@ func tick(dt: float) -> void:
 		ch_rmb = minf(mx, ch_rmb + 1.0)
 		if ch_rmb < mx:
 			cd["rmb"] = float(rmb_def().get("cooldown", 6.0)) * cd_k("sec")
-	for k in bot_hold.keys():
+	for k in bot_hold:
 		bot_hold[k] = maxf(0.0, float(bot_hold[k]) - dt)
 	if rmb_down:
 		if held("rmb") and not h.downed and h.stun_t <= 0.0:

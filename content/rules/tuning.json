@@ -5,6 +5,7 @@
 		"boki_retarget_s": 0.2,
 		"actor_far_m": {"very_low": 0.0, "low": 36.0, "medium": 48.0, "high": 56.0},
 		"anim_far_every": 2,
-		"anim_off_every": 10
+		"anim_off_every": 10,
+		"bot_belt_s": 0.1
 	}
 }
