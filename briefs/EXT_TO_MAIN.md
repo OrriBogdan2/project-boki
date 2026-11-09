@@ -5327,3 +5327,4 @@ READY ext/dead-kmoves eb4ac2578 (--dead-kmoves-check; cut dead ostra_flurry mapp
 READY ext/telegraph-one-system f24474927 (ArchKit fuse + charge ring on AimKit, tele_circle/tele_lane deleted, -32 net lines in arch_kit; Fx.telegraph_* kept: non-kit users remain, DEBT updated)
 READY ext/air-cast-a c5f1e3899 (In the air tables for Vex, Kael, Lace, Cinder, Meeko, Tenzo; --air-limits-check asserts them; no gameplay change; six combo checks 0 failures, air-limits 0, health --strict OK, gen_wiki --check OK)
 READY ext/anim-stomp-drink-2 197cb1d63 (stomp, drink and revive-kneel clips for Meeko, Tenzo, Grimble and Neve, mapped in warden_anim; the rig stays the fallback)
+READY ext/revive-source-numbers 90d75a769 (source revive/stomp crowd curve 1/.75/.58/.47 per Hunter on a wisp, box revive repeat penalty dropped, decision 0022; life/revive/box-revive/wisp checks, health --strict, gen_wiki --check pass)
