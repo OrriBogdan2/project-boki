@@ -27205,5 +27205,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/briarlynx_e_w32_1.jpg",
     "ok": true
+  },
+  {
+    "id": "briarlynx_e_w32",
+    "name": "Briarlynx",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/briarlynx_e_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx_e_w32",
+    "name": "Briarlynx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/briarlynx_e_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx_e_w32",
+    "name": "Briarlynx",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/briarlynx_e_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "buckleron_r2_w32",
+    "name": "Buckleron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/buckleron_r2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "buckleron_r2_w32",
+    "name": "Buckleron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/buckleron_r2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "buckleron_r2_w32",
+    "name": "Buckleron",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/buckleron_r2_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_e_w32",
+    "name": "Flarmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/flarmink_e_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_e_w32",
+    "name": "Flarmink",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/flarmink_e_w32_3.jpg",
+    "ok": true
   }
 ]
