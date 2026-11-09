@@ -43,6 +43,7 @@ var eye_base: Array[Vector3] = []
 var t := 0.0
 var blink_t := 2.0
 var blink_k := 0.0
+var lids := 0.0        # eyes held shut, 0..1 (BokiWispPop: eyes open last, close first)
 var y_prev := 0.0
 var vy := 0.0
 var vy_prev := 0.0
@@ -294,6 +295,7 @@ func _process(dt: float) -> void:
 		shut = 1.0
 	elif happy:
 		shut = maxf(shut, 0.45)
+	shut = maxf(shut, lids)
 	for i in eyes.size():
 		var b := eye_base[i]
 		eyes[i].scale = Vector3(b.x * (1.0 + shut * 0.15), b.y * maxf(0.08, 1.0 - shut), b.z)
