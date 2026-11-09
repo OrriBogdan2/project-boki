@@ -64473,5 +64473,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/gongrowl_cardy_4.jpg",
     "ok": true
+  },
+  {
+    "id": "gongrowl_cardy",
+    "name": "Gongrowl (hero card, chest beat)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardy_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_cardc",
+    "name": "Jibbatross (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/jibbatross_cardc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "echolop_cardz",
+    "name": "Echolop (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/echolop_cardz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_cardc",
+    "name": "Jibbatross (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/jibbatross_cardc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_cardc",
+    "name": "Jibbatross (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/jibbatross_cardc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "echolop_cardz",
+    "name": "Echolop (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/echolop_cardz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_cardy",
+    "name": "Gongrowl (hero card, chest beat)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardy_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kayak_card102",
+    "name": "Kayak (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kayak_card102_1.jpg",
+    "ok": true
   }
 ]
