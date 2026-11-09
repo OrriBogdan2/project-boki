@@ -403,7 +403,7 @@ func _tick_rain(dt: float) -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if HeroUlt.ready(self) and los and dist > 4.0 and dist < 14.0:
+	if HeroUlt.ready(self) and tgt is Hunter and los and dist < float(x_def()["range"]) - 2.0 and randf() < 0.3:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		HunterKeys.ult_pressed(h)
 		return
