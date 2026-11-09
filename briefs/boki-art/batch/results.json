@@ -34338,5 +34338,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_umbrink_u1_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_teapotamus_t2",
+    "name": "Teapotamus (owner note redo)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_teapotamus_t2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_teapotamus_t2",
+    "name": "Teapotamus (owner note redo)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_teapotamus_t2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_teapotamus_t2",
+    "name": "Teapotamus (owner note redo)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_teapotamus_t2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sporcupine_s2",
+    "name": "Sporcupine (owner note redo)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_sporcupine_s2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barokat_b2",
+    "name": "Barokat (body redo)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_barokat_b2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sporcupine_s1",
+    "name": "Sporcupine (owner note redo)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_sporcupine_s1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sporcupine_s1",
+    "name": "Sporcupine (owner note redo)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_sporcupine_s1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_teapotamus_t1",
+    "name": "Teapotamus (owner note redo)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_teapotamus_t1_1.jpg",
+    "ok": true
   }
 ]
