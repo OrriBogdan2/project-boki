@@ -3,7 +3,8 @@ extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
 ## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever
-## the body does.
+## the body does. A match hit ("hit" meta) is a flinch layer on Flex over whatever clip runs; a downed Boki
+## (kstate "faint") lies in the sleep clip with its eyes shut.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
@@ -118,6 +119,10 @@ const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
 const OWN_BODY := ["chop", "mine", "carry", "tend"]
+const HIT_WINDOW := 0.15      # s a hit keeps the flinch asked for
+const HIT_RATE := 8.0         # 1/s the flinch eases in and out at (in within 0.13 s, never a pop)
+const HIT_LEAN := 0.3         # rad it rocks back at full flinch
+const HIT_SQUASH := 0.12      # how much shorter and wider it squats at full flinch
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
@@ -164,6 +169,9 @@ var _speed := 0.0
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
+var _hit_left := 0.0           # s of the flinch still asked for
+var _hit_k := 0.0              # the flinch layer, 0..1
+var _hit_was := false
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
@@ -257,8 +265,9 @@ func _process(dt: float) -> void:
 ## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll stays.
 func _keep_flex() -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	flex.rotation = Vector3.ZERO
-	flex.scale = Vector3(girth, 1.0, lerpf(1.0, girth, 0.5))
+	var squat := _hit_k * HIT_SQUASH
+	flex.rotation = Vector3(_hit_k * HIT_LEAN, 0.0, 0.0)
+	flex.scale = Vector3(girth * (1.0 + squat * 0.5), 1.0 - squat, lerpf(1.0, girth, 0.5) * (1.0 + squat * 0.5))
 	flex.position = Vector3(0, _flex_y, 0)
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
@@ -288,6 +297,12 @@ func _pick_clip(dt: float) -> void:
 	if String(root.get_meta("kstate", "")) == "attack":
 		_start_shot("attack")
 	_shot_left -= dt
+	var hit: bool = root.get_meta("hit", false)
+	if hit and not _hit_was:
+		_hit_left = HIT_WINDOW
+	_hit_was = hit
+	_hit_left -= dt
+	_hit_k = move_toward(_hit_k, 1.0 if _hit_left > 0.0 else 0.0, HIT_RATE * dt)
 	var want := _state_clip()
 	set_clip(want)
 	player.speed_scale = 1.0
@@ -301,7 +316,7 @@ func _start_shot(which: String) -> void:
 	_shot_left = player.get_animation(which).length
 
 func _state_clip() -> String:
-	if String(root.get_meta("kstate", "")) == "sleep":
+	if String(root.get_meta("kstate", "")) in ["sleep", "faint"]:
 		return "sleep"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
@@ -321,6 +336,10 @@ func _clip_face() -> String:
 	var over := String(root.get_meta("face", ""))
 	if over != "":
 		return over
+	if String(root.get_meta("kstate", "")) == "faint":
+		return "asleep"
+	if _hit_k > 0.3:
+		return "sad"
 	if root.get_meta("dazed", false):
 		return "sad"
 	var cf: Variant = CLIP_FACE.get(clip, "")

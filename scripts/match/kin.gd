@@ -1083,7 +1083,8 @@ func render(delta: float, alpha: float) -> void:
 		body.position.y = sin(m.time * 6.0) * 0.04
 		body.rotation.x = 0.0
 		return
-	model.set_meta("kstate", "perch" if state == "shoulder" else ("attack" if lunge_t > 0.0 else ""))
+	model.set_meta("kstate", _puppet_state())
+	model.set_meta("hit", flash_t > 0.0)
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else ""
 	if state == "reviving" and comp and pose_now == "":
@@ -1146,6 +1147,14 @@ func render(delta: float, alpha: float) -> void:
 	_render_demo()
 	Capture.dissolve(self)
 	KinDowned.scoop_pose(self)
+
+## The "kstate" meta the puppets read (KinPuppet, BokiRig).
+func _puppet_state() -> String:
+	if state == "shoulder":
+		return "perch"
+	if state == "downed":
+		return "faint"
+	return "attack" if lunge_t > 0.0 else ""
 
 ## A little show-and-tell for the tutorial: a dash, a jump, a hop (KinCompanion.demo).
 func _render_demo() -> void:
