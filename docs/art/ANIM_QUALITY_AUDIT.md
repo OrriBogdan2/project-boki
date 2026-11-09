@@ -61,7 +61,7 @@ speed in m/s against 4.65. Bob (cm of hip) and cadence are as after.
 |---|---|---|---|---|---|---|
 | `archer` | 65 → 29 | 46 → 13 | 2.5 → 4.7 | -0.95 → +0.87 | 5 | 3.3 |
 | `ashwick` | 6 → 5 | 18 → 12 | 5.1 → 4.6 | -0.93 → +0.80 | 9 | 2.5 |
-| `bulwark` | 22 → 16 | 25 → 11 | 4.0 → 4.6 | +0.17 → +0.80 | 4 | 3.5 |
+| `bulwark` | 22 → 16 | 25 → 11 | 4.0 → 4.6 | +0.17 → +0.68 | 4 | 3.5 |
 | `dolm` | 54 → 25 | 38 → 18 | 3.1 → 5.5 | -0.86 → +0.72 | 4 | 3.3 |
 | `dredge` | 42 → 30 | 28 → 12 | 3.9 → 4.5 | +0.92 → +0.91 | 17 | 2.5 |
 | `gunslinger` | 50 → 21 | 25 → 13 | 3.6 → 4.5 | +0.90 → +0.90 | 7 | 3.3 |
@@ -96,8 +96,9 @@ posts scroll at the move speed).
    (`foot_mps` [3.1, 7.4] plays the clips at rate 0.65), a heavy planted stride: the thighs stretch 1.35 / 1.55 so the
    slower clip still covers the ground (run slide 15 % to 11 %, walk 16 %). The body of 1.5 medium Hunters keeps the
    game's 4.85 m/s; only the legs read heavier.
-2. The left arm hung nearly still against the legs (counter +0.17, now +0.80): the shield arm swings 0.5, the hammer arm
-   keeps its carry and sways 0.2 against its leg, so the hammer head rocks with the stride instead of riding level.
+2. The left arm hung nearly still against the legs (counter +0.17, now +0.68): the shield arm swings 0.5. The hammer arm
+   keeps its authored carry: a 0.2 sway (tried, counter +0.80) swung the chained head back past his heels at floor level,
+   a dragged flail, so the hammer rides low in front as keyed.
 3. lmb_throw and lmb_slam jump the hand 0.5 to 0.64 body heights in one frame.
 4. Open: at a jog (3.4 m/s, between the walk and run rings) the walk and run clips blend out of phase and the feet
    slide 80 %; the gate reads the run only, and Albert's game speed sits at the run ring.
