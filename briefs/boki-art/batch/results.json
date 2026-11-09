@@ -31363,5 +31363,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_sporcupine_full_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_teapotamus_full",
+    "name": "Teapotamus (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_teapotamus_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sporcupine_full",
+    "name": "Sporcupine (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_sporcupine_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thistlynx_full",
+    "name": "Thistlynx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_thistlynx_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sporcupine_full",
+    "name": "Sporcupine (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_sporcupine_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thistlynx_full",
+    "name": "Thistlynx (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_thistlynx_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_teapotamus_full",
+    "name": "Teapotamus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_teapotamus_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_teapotamus_full",
+    "name": "Teapotamus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_teapotamus_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thistlynx_full",
+    "name": "Thistlynx (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_thistlynx_full_3.jpg",
+    "ok": true
   }
 ]
